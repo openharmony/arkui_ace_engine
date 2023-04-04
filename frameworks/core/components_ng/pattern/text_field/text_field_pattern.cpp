@@ -205,7 +205,6 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     parentGlobalOffset_ = textFieldLayoutAlgorithm->GetParentGlobalOffset();
     UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
     auto textRectNotNeedToChange = UpdateCaretPosition();
-    caretUpdateType_ = CaretUpdateType::NONE;
     UpdateCaretInfoToController();
     if (needToRefreshSelectOverlay_) {
         ProcessOverlay();
@@ -233,6 +232,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     SetHandlerOnMoveDone();
     CheckScrollable();
     UpdateScrollBarOffset();
+    caretUpdateType_ = CaretUpdateType::NONE;
     return true;
 }
 
@@ -857,7 +857,7 @@ void TextFieldPattern::HandleFocusEvent()
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto globalOffset = GetHost()->GetPaintRectOffset() - context->GetRootRect().GetOffset();
-    UpdateTextFieldManager(Offset(globalOffset.GetX(), globalOffset.GetY() + frameRect_.Height()), frameRect_.Height());
+    UpdateTextFieldManager(Offset(globalOffset.GetX(), globalOffset.GetY()), frameRect_.Height());
     if (caretUpdateType_ != CaretUpdateType::PRESSED) {
         needToRequestKeyboardInner_ = true;
         caretUpdateType_ = CaretUpdateType::EVENT;
@@ -1383,7 +1383,7 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
     CHECK_NULL_VOID(context);
     auto globalOffset = host->GetPaintRectOffset() - context->GetRootRect().GetOffset();
     // emulate clicking bottom of the textField
-    UpdateTextFieldManager(Offset(globalOffset.GetX(), globalOffset.GetY() + frameRect_.Height()), frameRect_.Height());
+    UpdateTextFieldManager(Offset(globalOffset.GetX(), globalOffset.GetY()), frameRect_.Height());
     auto focusHub = host->GetOrCreateFocusHub();
 
     if (IsSearchParentNode()) {
@@ -1729,7 +1729,7 @@ void TextFieldPattern::ShowSelectOverlay(
         selectInfo.rightClickOffset = pattern->GetRightClickOffset();
         selectInfo.singleLineHeight = pattern->PreferredLineHeight();
         selectInfo.menuInfo.showCopy = !pattern->GetEditingValue().text.empty() && pattern->AllowCopy();
-        selectInfo.menuInfo.showCut = !pattern->GetEditingValue().text.empty();
+        selectInfo.menuInfo.showCut = selectInfo.menuInfo.showCopy && !pattern->GetEditingValue().text.empty();
         selectInfo.menuInfo.showCopyAll = !pattern->GetEditingValue().text.empty();
         selectInfo.menuInfo.showPaste = hasData;
         selectInfo.menuInfo.menuIsShow = !pattern->GetEditingValue().text.empty() || hasData;
@@ -1786,7 +1786,8 @@ bool TextFieldPattern::AllowCopy()
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
-    return layoutProperty->GetCopyOptionsValue(CopyOptions::Distributed) != CopyOptions::None;
+    return layoutProperty->GetCopyOptionsValue(CopyOptions::Distributed) != CopyOptions::None &&
+           layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) != TextInputType::VISIBLE_PASSWORD;
 }
 
 void TextFieldPattern::OnDetachFromFrameNode(FrameNode* /*node*/)

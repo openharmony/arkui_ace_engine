@@ -41,6 +41,11 @@ bool TextFieldAccessibilityProperty::IsMultiLine() const
     return false;
 }
 
+bool TextFieldAccessibilityProperty::IsSelected() const
+{
+    return false;
+}
+
 int32_t TextFieldAccessibilityProperty::GetTextSelectionStart() const
 {
     return 0;
@@ -72,6 +77,11 @@ std::string TextFieldAccessibilityProperty::GetErrorText() const
 }
 
 bool TextFieldAccessibilityProperty::GetContentInvalid() const
+{
+    return false;
+}
+
+bool TextFieldAccessibilityProperty::IsScrollable() const
 {
     return false;
 }

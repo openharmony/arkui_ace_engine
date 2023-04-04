@@ -148,11 +148,6 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
         titleEventHub->AddClickEvent(onClick);
         acceptNode = monthDaysNode;
     }
-
-    auto dateLayoutProperty = dateNode->GetLayoutProperty();
-    CHECK_NULL_RETURN(dateLayoutProperty, nullptr);
-    dateLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(NG::CalcLength(Dimension(1,
-        DimensionUnit::PERCENT)), std::nullopt));
     dateNode->MarkModifyDone();
 
     ViewStackProcessor::GetInstance()->Finish();
@@ -186,10 +181,6 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
         gesturHub->AddClickEvent(onClick);
     }
     contentRow->AddChild(CreateDividerNode(dateNode), 1);
-    auto contentRowLayoutProperty = contentRow->GetLayoutProperty();
-    CHECK_NULL_RETURN(contentRowLayoutProperty, nullptr);
-    contentRowLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(NG::CalcLength(Dimension(1,
-        DimensionUnit::PERCENT)), std::nullopt));
     contentRow->MountToParent(contentColumn);
     dialogNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return dialogNode;
@@ -477,6 +468,7 @@ void DatePickerDialogView::CreateNormalDateNode(const RefPtr<FrameNode>& dateNod
         yearColumnNode->MountToParent(stackYearNode);
         auto layoutProperty = stackYearNode->GetLayoutProperty<LayoutProperty>();
         layoutProperty->UpdateAlignment(Alignment::CENTER);
+        layoutProperty->UpdateLayoutWeight(1);
         stackYearNode->MountToParent(dateNode);
     }
     {
@@ -486,6 +478,7 @@ void DatePickerDialogView::CreateNormalDateNode(const RefPtr<FrameNode>& dateNod
         monthColumnNode->MountToParent(stackMonthNode);
         auto layoutProperty = stackMonthNode->GetLayoutProperty<LayoutProperty>();
         layoutProperty->UpdateAlignment(Alignment::CENTER);
+        layoutProperty->UpdateLayoutWeight(1);
         stackMonthNode->MountToParent(dateNode);
     }
     {
@@ -495,6 +488,7 @@ void DatePickerDialogView::CreateNormalDateNode(const RefPtr<FrameNode>& dateNod
         dayColumnNode->MountToParent(stackDayNode);
         auto layoutProperty = stackDayNode->GetLayoutProperty<LayoutProperty>();
         layoutProperty->UpdateAlignment(Alignment::CENTER);
+        layoutProperty->UpdateLayoutWeight(1);
         stackDayNode->MountToParent(dateNode);
     }
 }
@@ -519,6 +513,7 @@ void DatePickerDialogView::CreateSingleDateNode(const RefPtr<FrameNode>& dateNod
         monthDaysColumnNode->MountToParent(stackMonthNode);
         auto layoutProperty = stackMonthNode->GetLayoutProperty<LayoutProperty>();
         layoutProperty->UpdateAlignment(Alignment::CENTER);
+        layoutProperty->UpdateLayoutWeight(1);
         stackMonthNode->MountToParent(dateNode);
     }
 

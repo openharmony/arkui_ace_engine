@@ -565,7 +565,7 @@ void OverlayManager::ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPt
         LOGW("menuNode already appended");
     } else {
         menu->MountToParent(rootNode);
-        rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+        rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
         ShowMenuAnimation(menu);
         menu->MarkModifyDone();

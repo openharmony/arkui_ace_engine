@@ -1379,11 +1379,30 @@ HWTEST_F(GridPatternTestNg, GridAccessibilityTest001, TestSize.Level1)
     EXPECT_TRUE(accessibility->IsScrollable());
     EXPECT_FALSE(accessibility->IsEditable());
     EXPECT_EQ(accessibility->GetBeginIndex(), 0);
+    EXPECT_EQ(accessibility->GetCurrentIndex(), 0);
     EXPECT_EQ(accessibility->GetEndIndex(), itemCount - 1);
     EXPECT_EQ(accessibility->GetCollectionItemCounts(), itemCount);
+
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->multiSelectable_ = true;
     AceCollectionInfo info = accessibility->GetCollectionInfo();
     EXPECT_EQ(info.rows, 2);
     EXPECT_EQ(info.columns, 4);
+    EXPECT_EQ(info.selectMode, 1);
+
+    pattern->gridLayoutInfo_.reachStart_ = false;
+    pattern->gridLayoutInfo_.reachEnd_ = false;
+
+    accessibility->ResetSupportAction();
+    std::unordered_set<AceAction> supportAceActions = accessibility->GetSupportAction();
+    uint64_t actions = 0, exptectActions = 0;
+    exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
+    exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
+    for (auto action : supportAceActions) {
+        actions |= 1UL << static_cast<uint32_t>(action);
+    }
+    EXPECT_EQ(actions, exptectActions);
 }
 
 /**
@@ -1414,6 +1433,7 @@ HWTEST_F(GridPatternTestNg, GridAccessibilityTest002, TestSize.Level1)
     AceCollectionInfo info = accessibility->GetCollectionInfo();
     EXPECT_EQ(info.rows, 0);
     EXPECT_EQ(info.columns, 0);
+    EXPECT_EQ(info.selectMode, 0);
 }
 
 /**
@@ -1461,6 +1481,17 @@ HWTEST_F(GridPatternTestNg, GridAccessibilityTest003, TestSize.Level1)
     EXPECT_EQ(info.column, 1);
     EXPECT_EQ(info.rowSpan, 1);
     EXPECT_EQ(info.columnSpan, 1);
+    EXPECT_FALSE(info.heading);
+
+    itemAccessibility->ResetSupportAction();
+    std::unordered_set<AceAction> supportAceActions = itemAccessibility->GetSupportAction();
+    uint64_t actions = 0, exptectActions = 0;
+    exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SELECT);
+    exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_CLEAR_SELECTION);
+    for (auto action : supportAceActions) {
+        actions |= 1UL << static_cast<uint32_t>(action);
+    }
+    EXPECT_EQ(actions, exptectActions);
 }
 
 /**
@@ -1839,6 +1870,85 @@ HWTEST_F(GridPatternTestNg, GridSelectTest005, TestSize.Level1)
     info.SetAction(MouseAction::HOVER); // Trigger other MouseAction.
     pattern->HandleMouseEventWithoutKeyboard(info);
     EXPECT_TRUE(secondItemPattern->IsSelected());
+}
+
+/**
+ * @tc.name: GridSelectTest006
+ * @tc.desc: Test mouse right button click on selected item
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridPatternTestNg, GridSelectTest006, TestSize.Level1)
+{
+    constexpr int32_t itemCount = 8;
+    const Offset LEFT_TOP = Offset(90.f, 50.f);
+    const Offset LEFT_BOTTOM = Offset(90.f, 150.f);
+    const Offset RIGHT_TOP = Offset(270.f, 50.f);
+    const Offset RIGHT_BOTTOM = Offset(270.f, 150.f);
+
+    /**
+     * @tc.steps: step1. Create grid, Set 4 columns and SetMultiSelectable.
+     */
+    GridModelNG gridModel;
+    RefPtr<ScrollControllerBase> positionController = gridModel.CreatePositionController();
+    RefPtr<ScrollProxy> scrollBarProxy = gridModel.CreateScrollBarProxy();
+    gridModel.Create(positionController, scrollBarProxy);
+    gridModel.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    gridModel.SetMultiSelectable(true);
+    CreateGridItem(itemCount);
+
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step3. RunMeasureAndLayout and set MouseButton::LEFT_BUTTON.
+     */
+    RunMeasureAndLayout(frameNode);
+    MouseInfo info;
+    info.SetButton(MouseButton::LEFT_BUTTON);
+
+    /**
+     * @tc.steps: step4. Select (0, 0) - (284, 100) zone.
+     * @tc.expected: The 1st, 2nd, 5th, 6th items are selected.
+     */
+    info.SetAction(MouseAction::PRESS);
+    info.SetLocalLocation(Offset(0.f, 0.f));
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    info.SetAction(MouseAction::MOVE);
+    info.SetLocalLocation(Offset(180.f, 100.f));
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    RefPtr<GridItemPattern> firstItemPattern = GetItemPattern(frameNode, 0);
+    EXPECT_TRUE(firstItemPattern->IsSelected());
+    RefPtr<GridItemPattern> secondItemPattern = GetItemPattern(frameNode, 1);
+    EXPECT_TRUE(secondItemPattern->IsSelected());
+    RefPtr<GridItemPattern> fifthItemPattern = GetItemPattern(frameNode, 4);
+    EXPECT_TRUE(fifthItemPattern->IsSelected());
+    RefPtr<GridItemPattern> sixthItemPattern = GetItemPattern(frameNode, 5);
+    EXPECT_TRUE(sixthItemPattern->IsSelected());
+
+    /**
+     * @tc.steps: step5. Right click on (150.f, 50.f), in selected zone.
+     * @tc.expected: The 1st item is still selected.
+     */
+    info.SetButton(MouseButton::RIGHT_BUTTON);
+    info.SetAction(MouseAction::PRESS);
+    info.SetLocalLocation(Offset(150.f, 50.f));
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    EXPECT_TRUE(firstItemPattern->IsSelected());
+
+    /**
+     * @tc.steps: step6. Left click on (280.f, 100.f), out of selected zone.
+     * @tc.expected: The 1st item is not selected.
+     */
+    info.SetButton(MouseButton::LEFT_BUTTON);
+    info.SetLocalLocation(Offset(280.f, 100.f));
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    EXPECT_FALSE(firstItemPattern->IsSelected());
 }
 
 /**

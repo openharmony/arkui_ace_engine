@@ -104,6 +104,8 @@ void JSSwiper::JSBind(BindingTarget globalObj)
     JSClass<JSSwiper>::StaticMethod("effectMode", &JSSwiper::SetEffectMode);
     JSClass<JSSwiper>::StaticMethod("displayCount", &JSSwiper::SetDisplayCount);
     JSClass<JSSwiper>::StaticMethod("itemSpace", &JSSwiper::SetItemSpace);
+    JSClass<JSSwiper>::StaticMethod("prevMargin", &JSSwiper::SetPreviousMargin);
+    JSClass<JSSwiper>::StaticMethod("nextMargin", &JSSwiper::SetNextMargin);
     JSClass<JSSwiper>::StaticMethod("cachedCount", &JSSwiper::SetCachedCount);
     JSClass<JSSwiper>::StaticMethod("curve", &JSSwiper::SetCurve);
     JSClass<JSSwiper>::StaticMethod("onChange", &JSSwiper::SetOnChange);
@@ -488,6 +490,42 @@ void JSSwiper::SetItemSpace(const JSCallbackInfo& info)
     }
 
     SwiperModel::GetInstance()->SetItemSpace(value);
+}
+
+void JSSwiper::SetPreviousMargin(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
+
+    Dimension value;
+    if (!ParseJsDimensionVp(info[0], value)) {
+        return;
+    }
+
+    if (LessNotEqual(value.Value(), 0.0)) {
+        value.SetValue(0.0);
+    }
+    SwiperModel::GetInstance()->SetPreviousMargin(value);
+}
+
+void JSSwiper::SetNextMargin(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
+
+    Dimension value;
+    if (!ParseJsDimensionVp(info[0], value)) {
+        return;
+    }
+
+    if (LessNotEqual(value.Value(), 0.0)) {
+        value.SetValue(0.0);
+    }
+    SwiperModel::GetInstance()->SetNextMargin(value);
 }
 
 void JSSwiper::SetDisplayMode(int32_t index)

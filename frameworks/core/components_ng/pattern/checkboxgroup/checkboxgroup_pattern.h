@@ -20,6 +20,7 @@
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_accessibility_property.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_event_hub.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_layout_algorithm.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_modifier.h"
@@ -70,6 +71,11 @@ public:
         paintMethod->SetHotZoneOffset(hotZoneOffset_);
         paintMethod->SetHotZoneSize(hotZoneSize_);
         return paintMethod;
+    }
+
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        return MakeRefPtr<CheckBoxGroupAccessibilityProperty>();
     }
 
     bool OnDirtyLayoutWrapperSwap(

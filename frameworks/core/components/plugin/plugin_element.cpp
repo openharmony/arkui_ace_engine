@@ -252,6 +252,7 @@ void PluginElement::RunPluginContainer()
     PluginManager::GetInstance().AddPluginSubContainer(pluginSubContainerId_, pluginSubContainer_);
     PluginManager::GetInstance().AddPluginParentContainer(pluginSubContainerId_, parentContainerId);
     pluginSubContainer_->SetInstanceId(pluginSubContainerId_);
+    pluginSubContainer_->SetPluginWindowId(GetElementId());
     pluginSubContainer_->Initialize();
     pluginSubContainer_->SetPluginComponent(component_);
 

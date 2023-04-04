@@ -45,4 +45,6 @@ AceCollectionInfo GridAccessibilityProperty::GetCollectionInfo() const
 {
     return AceCollectionInfo();
 }
+
+void GridAccessibilityProperty::SetSpecificSupportAction() {}
 } // namespace OHOS::Ace::NG

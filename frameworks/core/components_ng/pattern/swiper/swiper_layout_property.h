@@ -50,6 +50,8 @@ public:
         value->propTop_ = CloneTop();
         value->propRight_ = CloneRight();
         value->propBottom_ = CloneBottom();
+        value->propPrevMargin_ = ClonePrevMargin();
+        value->propNextMargin_ = CloneNextMargin();
         return value;
     }
 
@@ -68,6 +70,8 @@ public:
         ResetTop();
         ResetRight();
         ResetBottom();
+        ResetPrevMargin();
+        ResetNextMargin();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -82,6 +86,8 @@ public:
                                      ? "SwiperDisplayMode.AutoLinear"
                                      : "SwiperDisplayMode.Stretch");
         json->Put("displayCount", propDisplayCount_.value_or(1));
+        json->Put("prevMargin", propItemSpace_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
+        json->Put("nextMargin", propItemSpace_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
     }
 
     void UpdateIndexWithoutMeasure(int32_t index)
@@ -103,6 +109,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Top, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Right, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Bottom, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PrevMargin, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NextMargin, Dimension, PROPERTY_UPDATE_MEASURE);
 };
 } // namespace OHOS::Ace::NG
 

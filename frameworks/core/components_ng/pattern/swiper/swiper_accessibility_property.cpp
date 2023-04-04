@@ -86,7 +86,6 @@ int32_t SwiperAccessibilityProperty::GetCollectionItemCounts() const
 
 void SwiperAccessibilityProperty::SetSpecificSupportAction()
 {
-    AddSupportAction(AceAction::ACTION_SELECT);
     auto frameNode = host_.Upgrade();
     CHECK_NULL_VOID(frameNode);
     auto swiperPaintProperty = frameNode->GetPaintProperty<SwiperPaintProperty>();
@@ -105,5 +104,8 @@ void SwiperAccessibilityProperty::SetSpecificSupportAction()
             AddSupportAction(AceAction::ACTION_SCROLL_BACKWARD);
         }
     }
+
+    AddSupportAction(AceAction::ACTION_SELECT);
+    AddSupportAction(AceAction::ACTION_CLEAR_SELECTION);
 }
 } // namespace OHOS::Ace::NG

@@ -213,4 +213,13 @@ void SwiperModelNG::SetMainSwiperSizeWidth() {}
 
 void SwiperModelNG::SetMainSwiperSizeHeight() {}
 
+void SwiperModelNG::SetPreviousMargin(const Dimension& prevMargin)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, PrevMargin, prevMargin);
+}
+
+void SwiperModelNG::SetNextMargin(const Dimension& nextMargin)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, NextMargin, nextMargin);
+}
 } // namespace OHOS::Ace::NG

@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
 #include "core/components_ng/pattern/text_picker/textpicker_layout_property.h"
 #include "core/components_ng/pattern/text_picker/toss_animation_controller.h"
+#include "core/components_ng/property/calc_length.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
@@ -94,6 +95,8 @@ void TextPickerPattern::OnModifyDone()
     });
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto calcLength = NG::CalcLength(Dimension(1.0, DimensionUnit::PERCENT));
+    host->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(calcLength, calcLength));
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID_NOLOG(focusHub);
     InitOnKeyEvent(focusHub);

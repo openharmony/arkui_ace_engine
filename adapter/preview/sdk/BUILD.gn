@@ -44,118 +44,37 @@ action("get_system_resource") {
 
 # Triggered only when the SDK is compiled
 if (is_standard_system) {
-  # Avoid conditional judgment branches caused by dynamic library suffixes.
-  if (use_mac) {
-    dylib_suffix = ".dylib"
-  } else if (use_mingw_win) {
-    dylib_suffix = ".dll"
-  } else if (use_linux) {
-    dylib_suffix = ".so"
-  }
+  import("sharedlib_config.gni")
 
-  ohos_copy("copy_ets_utils_container_library") {
-    container_names = [
-      "arraylist",
-      "deque",
-      "queue",
-      "vector",
-      "linkedlist",
-      "list",
-      "stack",
-      "struct",
-      "treemap",
-      "treeset",
-      "hashmap",
-      "hashset",
-      "lightweightmap",
-      "lightweightset",
-      "plainarray",
-    ]
-    deps = []
-    sources = []
-    out_path = get_label_info(
-            "//commonlibrary/ets_utils/js_util_module/container:container_packages",
-            "root_out_dir")
-    deps += [
-      "//commonlibrary/ets_utils/js_util_module/container:container_packages",
-    ]
-    foreach(item, container_names) {
-      sources +=
-          [ "${out_path}/commonlibrary/ets_utils/lib${item}${dylib_suffix}" ]
-    }
-
-    outputs = [ target_out_dir +
-                "/previewer/common/bin/module/util/{{source_file_part}}" ]
-    module_source_dir = target_out_dir + "/previewer/common/bin/module/util/"
-    module_install_name = ""
-  }
-
-  # All dynamic libraries to be copied to the path "/previewer/common/bin/module/",
-  # which are called by the napi framework, can be added to this script.
-  ohos_copy("copy_napi_modules_shared_library") {
-    deps = []
-    sources = []
-    out_path = get_label_info(
-            "//base/hiviewdfx/hilog/interfaces/js/kits/napi:libhilognapi",
-            "root_out_dir")
-    deps += [ "//base/hiviewdfx/hilog/interfaces/js/kits/napi:libhilognapi" ]
-    sources += [ "${out_path}/hiviewdfx/hilog_native/libhilog${dylib_suffix}" ]
-
-    out_path = get_label_info(
-            "//commonlibrary/ets_utils/js_api_module/buffer:buffer_packages",
-            "root_out_dir")
-    deps += [ "//commonlibrary/ets_utils/js_api_module/buffer:buffer_packages" ]
-    sources +=
-        [ "${out_path}/commonlibrary/ets_utils/libbuffer${dylib_suffix}" ]
-
-    foreach(module, common_napi_libs) {
-      module_path_names = []
-      module_path_names = string_split(module, "/")
-      prefix_dir = module_path_names[0]
-
-      module_path = prefix_dir
-      if (prefix_dir != module) {
-        module_path = module_path_names[1]
+  foreach(module, napi_modules) {
+    ohos_copy("copy_napi_${module.prefix}libs") {
+      deps = []
+      sources = []
+      foreach(shard_lib, module.shard_libs) {
+        subsystem_name = shard_lib.subsystem_name
+        part_name = shard_lib.part_name
+        deps += [ shard_lib.label ]
+        out_path = get_label_info(shard_lib.label, "root_out_dir")
+        lib_names = []
+        if (defined(shard_lib.lib_names)) {
+          lib_names += shard_lib.lib_names
+        } else {
+          cur_lib = get_label_info(shard_lib.label, "name")
+          lib_names += [ string_replace(cur_lib, "lib", "", 1) ]
+        }
+        foreach(lib_name, lib_names) {
+          sources += [ "${out_path}/${subsystem_name}/${part_name}/lib${lib_name}${dylib_suffix}" ]
+        }
       }
 
-      module_name = string_replace(module_path, "_", "")
-      out_path = get_label_info("$ace_root/interfaces/napi/kits:${module_name}",
-                                "root_out_dir")
-      deps += [ "$ace_root/interfaces/napi/kits:${module_name}" ]
-      sources +=
-          [ "${out_path}/arkui/ace_engine/lib${module_name}${dylib_suffix}" ]
-    }
-
-    outputs =
-        [ target_out_dir + "/previewer/common/bin/module/{{source_file_part}}" ]
-    module_source_dir = target_out_dir + "/previewer/common/bin/module/"
-    module_install_name = ""
-  }
-
-  if (use_mac || use_mingw_win) {
-    ohos_copy("copy_distributeddata_library") {
-      out_path = get_label_info(
-              "//foundation/distributeddatamgr/kv_store/kvstoremock/interfaces/jskits/distributeddata:distributeddata",
-              "root_out_dir")
-      deps = [ "//foundation/distributeddatamgr/kv_store/kvstoremock/interfaces/jskits/distributeddata:distributeddata" ]
-      sources = [ "${out_path}/distributeddatamgr/kv_store/libdistributeddata${dylib_suffix}" ]
-
-      outputs = [ target_out_dir +
-                  "/previewer/common/bin/module/data/{{source_file_part}}" ]
-      module_source_dir = target_out_dir + "/previewer/common/bin/module/data/"
-      module_install_name = ""
-    }
-
-    ohos_copy("copy_distributedkvstore_library") {
-      out_path = get_label_info(
-              "//foundation/distributeddatamgr/kv_store/kvstoremock/interfaces/jskits/distributedkvstore:distributedkvstore",
-              "root_out_dir")
-      deps = [ "//foundation/distributeddatamgr/kv_store/kvstoremock/interfaces/jskits/distributedkvstore:distributedkvstore" ]
-      sources = [ "${out_path}/distributeddatamgr/kv_store/libdistributedkvstore${dylib_suffix}" ]
-
-      outputs = [ target_out_dir +
-                  "/previewer/common/bin/module/data/{{source_file_part}}" ]
-      module_source_dir = target_out_dir + "/previewer/common/bin/module/data/"
+      # Set the output directory for all dynamic libraries.
+      if (module.prefix == "") {
+        module_source_dir = "${target_out_dir}/previewer/common/bin/module/"
+      } else {
+        module_source_dir =
+            "${target_out_dir}/previewer/common/bin/module/${module.prefix}/"
+      }
+      outputs = [ "${module_source_dir}{{source_file_part}}" ]
       module_install_name = ""
     }
   }
@@ -164,241 +83,51 @@ if (is_standard_system) {
   # which are related to the previewer, can be added to this script.
   ohos_copy("copy_preview_shared_library") {
     deps = []
-    sources = []
+    foreach(module, napi_modules) {
+      deps += [ ":copy_napi_${module.prefix}libs" ]
+    }
 
     # The dynamic library here is used for local testing of the previewer.
     if (enable_glfw_window) {
       deps += [ "$ace_root/adapter/preview/entrance/samples:previewer_demo" ]
     }
 
-    # Add some resources
-    # Add ohos fonts
-    sources += [
+    sources = [
       "//base/global/system_resources/fonts",
       "//foundation/arkui/ace_engine/adapter/preview/sdk/fontconfig.json",
-    ]
-
-    # Add the dynamic library with the same name on the mac and windows system here.
-    if (use_mac || use_mingw_win) {
-      # Add dynamic library "native_preferences"
-      native_preferences_path = get_label_info(
-              "//foundation/distributeddatamgr/preferences/interfaces/inner_api:native_preferences",
-              "root_out_dir")
-      deps += [ "//foundation/distributeddatamgr/preferences/interfaces/inner_api:native_preferences" ]
-      sources += [ "${native_preferences_path}/distributeddatamgr/preferences/libnative_preferences${dylib_suffix}" ]
-
-      # Add dynamic library "native_rdb"
-      native_rdb_path = get_label_info(
-              "//foundation/distributeddatamgr/relational_store/interfaces/inner_api/rdb:native_rdb",
-              "root_out_dir")
-      deps += [ "//foundation/distributeddatamgr/relational_store/interfaces/inner_api/rdb:native_rdb" ]
-      sources += [ "${native_rdb_path}/distributeddatamgr/relational_store/libnative_rdb${dylib_suffix}" ]
-
-      # Add dynamic library "sqlite"
-      sqlite_path =
-          get_label_info("//third_party/sqlite:sqlite_sdk", "root_out_dir")
-      deps += [ "//third_party/sqlite:sqlite_sdk" ]
-      sources += [ "${sqlite_path}/common/common/libsqlite_sdk${dylib_suffix}" ]
-
-      # Add dynamic library "libcrypto_restool"
-      libcrypto_path = get_label_info("//third_party/openssl:libcrypto_restool",
-                                      "root_out_dir")
-      deps += [ "//third_party/openssl:libcrypto_restool" ]
-      sources +=
-          [ "${libcrypto_path}/security/huks/libcrypto_restool${dylib_suffix}" ]
-    }
-
-    # Add dynamic library "hilog"
-    if (use_mac) {
-      hilog_path = get_label_info(
-              "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog_mac",
-              "root_out_dir")
-      deps +=
-          [ "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog_mac" ]
-      sources +=
-          [ "${hilog_path}/hiviewdfx/hilog_native/libhilog_mac${dylib_suffix}" ]
-    } else if (use_mingw_win) {
-      hilog_path = get_label_info(
-              "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog_windows",
-              "root_out_dir")
-      deps += [
-        "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog_windows",
-      ]
-      sources += [
-        "${hilog_path}/hiviewdfx/hilog_native/libhilog_windows${dylib_suffix}",
-      ]
-    } else if (use_linux) {
-      hilog_path = get_label_info(
-              "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog_linux",
-              "root_out_dir")
-      deps += [
-        "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog_linux",
-      ]
-      sources += [
-        "${hilog_path}/hiviewdfx/hilog_native/libhilog_linux${dylib_suffix}",
-      ]
-    }
-
-    # Add dynamic library "libcurl_shared"
-    curl_path = get_label_info("//third_party/curl:curl_shared", "root_out_dir")
-    deps += [ "//third_party/curl:curl_shared" ]
-    sources += [ curl_path + "/thirdparty/curl/libcurl_shared${dylib_suffix}" ]
-
-    # Add dynamic library "libnghttp2_shared"
-    nghttp2_path = get_label_info("//third_party/nghttp2/lib:libnghttp2_shared",
-                                  "root_out_dir")
-    deps += [ "//third_party/nghttp2/lib:libnghttp2_shared" ]
-    sources +=
-        [ nghttp2_path +
-          "/thirdparty/thirdparty_nghttp2/libnghttp2_shared${dylib_suffix}" ]
-
-    # Add dynamic library "libssl_shared"
-    openssl_path =
-        get_label_info("//third_party/openssl:libssl_shared", "root_out_dir")
-    deps += [ "//third_party/openssl:libssl_shared" ]
-    sources += [ openssl_path +
-                 "/developtools/profiler/libssl_openssl${dylib_suffix}" ]
-
-    # Add dynamic library "libcrypto_shared"
-    crypto_path =
-        get_label_info("//third_party/openssl:libcrypto_shared", "root_out_dir")
-    deps += [ "//third_party/openssl:libcrypto_shared" ]
-    sources +=
-        [ "${crypto_path}/security/huks/libcrypto_openssl${dylib_suffix}" ]
-
-    if (use_mac || use_mingw_win) {
-      # add kvfdb
-      out_path = get_label_info(
-              "//foundation/distributeddatamgr/kv_store/kvstoremock/interfaces/innerkits/distributeddata:distributeddata_inner_mock",
-              "root_out_dir")
-      deps += [ "//foundation/distributeddatamgr/kv_store/kvstoremock/interfaces/innerkits/distributeddata:distributeddata_inner_mock" ]
-      sources += [ "${out_path}/distributeddatamgr/kv_store/libdistributeddata_inner_mock${dylib_suffix}" ]
-      out_path = get_label_info(
-              "//foundation/distributeddatamgr/kv_store/kvstoremock/distributeddb:distributeddb_mock",
-              "root_out_dir")
-      deps += [ "//foundation/distributeddatamgr/kv_store/kvstoremock/distributeddb:distributeddb_mock" ]
-      sources += [ "${out_path}/distributeddatamgr/kv_store/libdistributeddb_mock${dylib_suffix}" ]
-
-      #add shared_libz
-      out_path =
-          get_label_info("//third_party/zlib:shared_libz", "root_out_dir")
-      deps += [ "//third_party/zlib:shared_libz" ]
-      sources += [ "${out_path}/thirdparty/zlib/libshared_libz${dylib_suffix}" ]
-    }
-
-    # Add dynamic library "libsec_shared"
-    sec_path =
-        get_label_info("//third_party/bounds_checking_function:libsec_shared",
-                       "root_out_dir")
-    deps += [ "//third_party/bounds_checking_function:libsec_shared" ]
-    sources +=
-        [ sec_path +
-          "/thirdparty/bounds_checking_function/libsec_shared${dylib_suffix}" ]
-
-    # Add napi framework-related dynamic libraries
-    ace_napi_path =
-        get_label_info("//foundation/arkui/napi:ace_napi", "root_out_dir")
-    uv_path = get_label_info("//third_party/libuv:uv", "root_out_dir")
-    icu_path =
-        get_label_info("//third_party/icu/icu4c:shared_icuuc", "root_out_dir")
-    cjson_path = get_label_info("//third_party/cJSON:cjson", "root_out_dir")
-    deps += [
-      "$ace_napi:ace_napi",
-      "//third_party/cJSON:cjson",
-      "//third_party/icu/icu4c:shared_icui18n",
-      "//third_party/icu/icu4c:shared_icuuc",
-      "//third_party/libuv:uv",
-    ]
-    sources += [
-      "$ace_napi_path/arkui/napi/libace_napi${dylib_suffix}",
-      "$cjson_path/thirdparty/cjson/libcjson${dylib_suffix}",
-      "$icu_path/thirdparty/icu/libhmicui18n${dylib_suffix}",
-      "$icu_path/thirdparty/icu/libhmicuuc${dylib_suffix}",
-      "$uv_path/thirdparty/libuv/libuv${dylib_suffix}",
-    ]
-
-    rosen_path = get_label_info(
-            "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-            "root_out_dir")
-    deps += [
-      "//foundation/graphic/graphic_2d/rosen/modules/glfw_render_context:libglfw_render_context",
-      "//foundation/graphic/graphic_2d/rosen/modules/render_service_base:librender_service_base",
-      "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-      "//third_party/flutter/build/skia:skia_shared",
-      "//third_party/flutter/glfw:glfw",
-    ]
-
-    sources += [
-      "${rosen_path}/graphic/graphic_standard/libglfw${dylib_suffix}",
-      "${rosen_path}/graphic/graphic_standard/libglfw_render_context${dylib_suffix}",
-      "${rosen_path}/graphic/graphic_standard/librender_service_base${dylib_suffix}",
-      "${rosen_path}/graphic/graphic_standard/librender_service_client${dylib_suffix}",
-      "${rosen_path}/thirdparty/flutter/libskia_shared${dylib_suffix}",
-    ]
-
-    # Add ark engine-related dynamic libraries
-    ark_js_path = get_label_info("//arkcompiler/ets_runtime:libark_jsruntime",
-                                 "root_out_dir")
-    deps += [
-      "$ace_napi:ace_napi_ark",
-      "//arkcompiler/ets_runtime:libark_jsruntime",
-    ]
-    sources += [
-      "$ace_napi_path/arkui/napi/libace_napi_ark${dylib_suffix}",
-      "$ark_js_path/arkcompiler/ets_runtime/libark_jsruntime${dylib_suffix}",
       "//third_party/icu/ohos_icu4j/data/icudt69l.dat",
     ]
 
-    # Add dynamic libraries with different names on mac and windows systems here.
-    if (use_mac) {
-      ace_engine_path =
-          get_label_info("$ace_root/adapter/preview/build::libace_engine_mac",
-                         "root_out_dir") +
-          "/common/common/libace_engine_mac${dylib_suffix}"
-
-      resource_manager_path = get_label_info(
-                                  "//base/global/resource_management/frameworks/resmgr:global_resmgr_mac",
-                                  "root_out_dir") + "/global/resource_management/libglobal_resmgr_mac${dylib_suffix}"
-      deps += [
-        "$ace_root/adapter/preview/build:libace_engine_mac",
-        "//base/global/resource_management/frameworks/resmgr:global_resmgr_mac",
-      ]
-    } else if (use_mingw_win) {
-      ace_engine_path =
-          get_label_info(
-              "$ace_root/adapter/preview/build::libace_engine_windows",
-              "root_out_dir") +
-          "/common/common/libace_engine_windows${dylib_suffix}"
-      resource_manager_path = get_label_info(
-                                  "//base/global/resource_management/frameworks/resmgr:global_resmgr_win",
-                                  "root_out_dir") + "/global/resource_management/libglobal_resmgr_win${dylib_suffix}"
-      deps += [
-        "$ace_root/adapter/preview/build:libace_engine_windows",
-        "//base/global/resource_management/frameworks/resmgr:global_resmgr_win",
-      ]
-    } else if (use_linux) {
-      ace_engine_path =
-          get_label_info("$ace_root/adapter/preview/build::libace_engine_linux",
-                         "root_out_dir") +
-          "/common/common/libace_engine_linux${dylib_suffix}"
-      resource_manager_path = get_label_info(
-                                  "//base/global/resource_management/frameworks/resmgr:global_resmgr_linux",
-                                  "root_out_dir") + "/global/resource_management/libglobal_resmgr_linux${dylib_suffix}"
-      deps += [
-        "$ace_root/adapter/preview/build:libace_engine_linux",
-        "//base/global/resource_management/frameworks/resmgr:global_resmgr_linux",
-      ]
+    foreach(item, common_bin) {
+      subsystem_name = item.subsystem_name
+      part_name = item.part_name
+      deps += [ item.label ]
+      out_path = get_label_info(item.label, "root_out_dir")
+      lib_names = []
+      if (defined(item.lib_names)) {
+        lib_names += item.lib_names
+      } else {
+        lib_names +=
+            [ string_replace(get_label_info(item.label, "name"), "lib", "", 1) ]
+      }
+      foreach(lib_name, lib_names) {
+        sources += [ "${out_path}/${subsystem_name}/${part_name}/lib${lib_name}${dylib_suffix}" ]
+      }
     }
-
-    sources += [
-      ace_engine_path,
-      resource_manager_path,
-    ]
 
     # Set the output directory for all dynamic libraries.
     outputs = [ target_out_dir + "/previewer/common/bin/{{source_file_part}}" ]
     module_source_dir = target_out_dir + "/previewer/common/bin/"
     module_install_name = ""
+  }
+
+  if (use_mingw_win) {
+    ohos_copy("copy_preview_curl_cacert") {
+      sources = [ "//third_party/curl/cacert.pem" ]
+      outputs = [ target_out_dir + "/previewer/resources/cacert.pem" ]
+      module_source_dir = target_out_dir + "/previewer/resources"
+      module_install_name = ""
+    }
   }
 
   ohos_copy("copy_system_resource_standard") {
@@ -409,57 +138,6 @@ if (is_standard_system) {
     outputs = [ target_out_dir + "/previewer/common/{{source_file_part}}" ]
     module_source_dir = target_out_dir + "/previewer/common"
     module_install_name = ""
-  }
-
-  if (use_mac || use_mingw_win) {
-    ohos_copy("copy_distributeddatamgr_library") {
-      #preferences
-      out_path = get_label_info(
-              "//foundation/distributeddatamgr/preferences/frameworks/js/napi:preferences",
-              "root_out_dir")
-      deps = [ "//foundation/distributeddatamgr/preferences/frameworks/js/napi/preferences:preferences" ]
-      sources = [ "${out_path}/distributeddatamgr/preferences/libpreferences${dylib_suffix}" ]
-
-      #rdb
-      out_path = get_label_info(
-              "//foundation/distributeddatamgr/relational_store/frameworks/js/napi/rdb:rdb",
-              "root_out_dir")
-      deps += [ "//foundation/distributeddatamgr/relational_store/frameworks/js/napi/rdb:rdb" ]
-      sources += [
-        "${out_path}/distributeddatamgr/relational_store/librdb${dylib_suffix}",
-      ]
-
-      outputs = [ target_out_dir +
-                  "/previewer/common/bin/module/data/{{source_file_part}}" ]
-      module_source_dir = target_out_dir + "/previewer/common/bin/module/data/"
-      module_install_name = ""
-    }
-  }
-
-  if (use_mac || use_mingw_win) {
-    ohos_copy("copy_communication_library") {
-      #http
-      out_path = get_label_info(
-              "//foundation/communication/netstack/frameworks/js/napi/http:http",
-              "root_out_dir")
-      deps =
-          [ "//foundation/communication/netstack/frameworks/js/napi/http:http" ]
-      sources = [ "${out_path}/communication/netstack/libhttp${dylib_suffix}" ]
-
-      outputs = [ target_out_dir +
-                  "/previewer/common/bin/module/net/{{source_file_part}}" ]
-      module_source_dir = target_out_dir + "/previewer/common/bin/module/net/"
-      module_install_name = ""
-    }
-  }
-
-  if (use_mingw_win) {
-    ohos_copy("copy_preview_curl_cacert") {
-      sources = [ "//third_party/curl/cacert.pem" ]
-      outputs = [ target_out_dir + "/previewer/resources/cacert.pem" ]
-      module_source_dir = target_out_dir + "/previewer/resources"
-      module_install_name = ""
-    }
   }
 } else {
   ohos_copy("copy_system_resource") {

@@ -230,7 +230,7 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
 #endif
 
     LocalScope scope(std::static_pointer_cast<ArkJSRuntime>(runtime_)->GetEcmaVm());
-    if (!isModulePreloaded_ || !usingSharedRuntime_ || IsPlugin()) {
+    if (!isModulePreloaded_ || !usingSharedRuntime_) {
         InitGlobalObjectTemplate();
     }
 
@@ -239,7 +239,7 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
         LOGI("InitJsEnv SharedRuntime has initialized, skip...");
     } else {
         InitGroupJsBridge();
-        if (!isModulePreloaded_ || !usingSharedRuntime_ || IsPlugin() || isUnique_) { // ArtTsCard
+        if (!isModulePreloaded_ || !usingSharedRuntime_ || isUnique_) { // ArtTsCard
             InitConsoleModule();
             InitAceModule();
             InitJsExportsUtilObject();
@@ -797,7 +797,7 @@ void JsiDeclarativeEngine::Destroy()
 
     engineInstance_->GetDelegate()->RemoveTaskObserver();
     engineInstance_->DestroyAllRootViewHandle();
-    if (isUnique_) {
+    if (isUnique_ || engineInstance_->IsPlugin()) {
         RunFullGarbageCollection();
     }
 
