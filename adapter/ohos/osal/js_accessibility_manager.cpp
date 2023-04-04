@@ -696,14 +696,10 @@ static void UpdateAccessibilityElementInfo(const RefPtr<NG::FrameNode>& node, Ac
     }
     nodeInfo.SetHint(accessibilityProperty->GetHintText());
     nodeInfo.SetTextLengthLimit(accessibilityProperty->GetTextLengthLimit());
-    nodeInfo.SetCheckable(accessibilityProperty->IsCheckable());
     nodeInfo.SetChecked(accessibilityProperty->IsChecked());
     nodeInfo.SetSelected(accessibilityProperty->IsSelected());
     nodeInfo.SetPassword(accessibilityProperty->IsPassword());
-    nodeInfo.SetScrollable(accessibilityProperty->IsScrollable());
-    nodeInfo.SetEditable(accessibilityProperty->IsEditable());
     nodeInfo.SetPluraLineSupported(accessibilityProperty->IsMultiLine());
-    nodeInfo.SetDeletable(accessibilityProperty->IsDeletable());
     nodeInfo.SetHinting(accessibilityProperty->IsHint());
     nodeInfo.SetCurrentIndex(accessibilityProperty->GetCurrentIndex());
     nodeInfo.SetBeginIndex(accessibilityProperty->GetBeginIndex());
@@ -728,12 +724,18 @@ static void UpdateAccessibilityElementInfo(const RefPtr<NG::FrameNode>& node, Ac
     GridItemInfo gridItemInfo(row, rowSpan, column, columnSpan, heading, nodeInfo.IsSelected());
     nodeInfo.SetGridItem(gridItemInfo);
 
-    UpdateSupportAction(node, nodeInfo);
-    accessibilityProperty->ResetSupportAction();
-    auto supportAceActions = accessibilityProperty->GetSupportAction();
-    for (auto it = supportAceActions.begin(); it != supportAceActions.end(); ++it) {
-        AccessibleAction action(ConvertAceAction(*it), "ace");
-        nodeInfo.AddAction(action);
+    if (nodeInfo.IsEnabled()) {
+        nodeInfo.SetCheckable(accessibilityProperty->IsCheckable());
+        nodeInfo.SetScrollable(accessibilityProperty->IsScrollable());
+        nodeInfo.SetEditable(accessibilityProperty->IsEditable());
+        nodeInfo.SetDeletable(accessibilityProperty->IsDeletable());
+        UpdateSupportAction(node, nodeInfo);
+        accessibilityProperty->ResetSupportAction();
+        auto supportAceActions = accessibilityProperty->GetSupportAction();
+        for (auto it = supportAceActions.begin(); it != supportAceActions.end(); ++it) {
+            AccessibleAction action(ConvertAceAction(*it), "ace");
+            nodeInfo.AddAction(action);
+        }
     }
 }
 
@@ -757,7 +759,6 @@ void UpdateAccessibilityElementInfo(const RefPtr<NG::FrameNode>& node, const Com
     nodeInfo.SetComponentType(node->GetTag());
 
     nodeInfo.SetEnabled(node->GetFocusHub() ? node->GetFocusHub()->IsEnabled() : true);
-    nodeInfo.SetFocusable(node->GetFocusHub() ? node->GetFocusHub()->IsFocusable() : false);
     nodeInfo.SetFocused(node->GetFocusHub() ? node->GetFocusHub()->IsCurrentFocus() : false);
     nodeInfo.SetAccessibilityFocus(node->GetRenderContext()->GetAccessibilityFocus().value_or(false));
     nodeInfo.SetInspectorKey(node->GetInspectorId().value_or(""));
@@ -776,8 +777,10 @@ void UpdateAccessibilityElementInfo(const RefPtr<NG::FrameNode>& node, const Com
     nodeInfo.SetPagePath(commonProperty.pagePath);
     nodeInfo.SetBundleName(AceApplicationInfo::GetInstance().GetPackageName());
 
-    nodeInfo.SetPopupSupported(IsPopupSupported(ngPipeline, node->GetId()));
-
+    if (nodeInfo.IsEnabled()) {
+        nodeInfo.SetFocusable(node->GetFocusHub() ? node->GetFocusHub()->IsFocusable() : false);
+        nodeInfo.SetPopupSupported(IsPopupSupported(ngPipeline, node->GetId()));
+    }
     nodeInfo.SetComponentResourceId(node->GetInspectorId().value_or(""));
     UpdateAccessibilityElementInfo(node, nodeInfo);
 }
