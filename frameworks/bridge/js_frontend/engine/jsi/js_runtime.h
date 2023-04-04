@@ -49,8 +49,7 @@ public:
     virtual bool EvaluateJsCode(
         const uint8_t* buffer, int32_t size, const std::string& filePath = "", bool needUpdate = false) = 0;
 
-    virtual bool ExecuteJsBin([[maybe_unused]] const std::string &fileName,
-        const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr)
+    virtual bool ExecuteJsBin([[maybe_unused]] const std::string &fileName)
     {
         return true;
     }
@@ -73,8 +72,7 @@ public:
     virtual shared_ptr<JsValue> NewNativePointer(void *ptr) = 0;
     virtual void ThrowError(const std::string& msg, int32_t code) = 0;
     virtual void RegisterUncaughtExceptionHandler(UncaughtExceptionCallback callback) = 0;
-    virtual void HandleUncaughtException(
-        const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr) = 0;
+    virtual void HandleUncaughtException() = 0;
     virtual bool HasPendingException() = 0;
     virtual void ExecutePendingJob() = 0;
     virtual void DumpHeapSnapshot(bool isPrivate) {}

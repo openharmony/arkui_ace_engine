@@ -82,18 +82,7 @@ void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<Ta
     ViewStackProcessor::GetInstance()->Push(tabsNode);
 
     SetTabBarPosition(barPosition);
-    if (!hasTabBarNode) {
-        auto tabsFrameNode = AceType::DynamicCast<FrameNode>(tabsNode);
-        CHECK_NULL_VOID(tabsFrameNode);
-        auto tabsLayoutProperty = tabsFrameNode->GetLayoutProperty<TabsLayoutProperty>();
-        tabsLayoutProperty->UpdateIndex(index);
-        return;
-    }
-    auto tabsLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
-    auto preIndex = tabsLayoutProperty->GetIndexValue(0);
-    if (index != preIndex) {
-        SetIndex(index);
-    }
+    SetIndex(index);
 }
 
 void TabsModelNG::SetTabBarPosition(BarPosition tabBarPosition)
@@ -182,11 +171,6 @@ void TabsModelNG::SetIndex(int32_t index)
     tabBarLayoutProperty->UpdateIndicator(index);
     tabBarPattern->UpdateTextColor(index);
     swiperLayoutProperty->UpdateIndex(index);
-    auto tabsFrameNode = AceType::DynamicCast<FrameNode>(tabsNode);
-    CHECK_NULL_VOID(tabsFrameNode);
-    auto tabsLayoutProperty = tabsFrameNode->GetLayoutProperty<TabsLayoutProperty>();
-    tabsLayoutProperty->UpdateIndex(index);
-    swiperNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void TabsModelNG::SetScrollable(bool scrollable)
@@ -259,30 +243,12 @@ void TabsModelNG::Pop()
 {
     auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(tabsNode);
-    auto tabsFrameNode = AceType::DynamicCast<FrameNode>(tabsNode);
-    CHECK_NULL_VOID(tabsFrameNode);
-    auto tabsLayoutProperty = tabsFrameNode->GetLayoutProperty<TabsLayoutProperty>();
-    auto index = tabsLayoutProperty->GetIndexValue(0);
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildren().front());
     CHECK_NULL_VOID(tabBarNode);
-    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
-    CHECK_NULL_VOID(tabBarPattern);
-    auto tabBarLayoutProperty = GetTabBarLayoutProperty();
-    CHECK_NULL_VOID(tabBarLayoutProperty);
-    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildren().back());
-    CHECK_NULL_VOID(swiperNode);
-    auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
-    CHECK_NULL_VOID(swiperLayoutProperty);
-    auto tabContentNum = swiperNode->TotalChildCount();
-    if (index > tabContentNum - 1 || index < 0) {
-        index = 0;
-    }
-    tabBarLayoutProperty->UpdateIndicator(index);
-    tabBarPattern->UpdateTextColor(index);
-    swiperLayoutProperty->UpdateIndex(index);
-
     tabBarNode->MarkModifyDone();
 
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildren().back());
+    CHECK_NULL_VOID(swiperNode);
     swiperNode->MarkModifyDone();
 
     ViewStackProcessor::GetInstance()->PopContainer();

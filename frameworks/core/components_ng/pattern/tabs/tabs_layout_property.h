@@ -41,7 +41,6 @@ public:
         value->propTabBarMode_ = CloneTabBarMode();
         value->propBarWidth_ = CloneBarWidth();
         value->propBarHeight_ = CloneBarHeight();
-        value->propIndex_ = CloneIndex();
         return value;
     }
 
@@ -53,7 +52,6 @@ public:
         ResetTabBarMode();
         ResetBarWidth();
         ResetBarHeight();
-        ResetIndex();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -70,7 +68,6 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TabBarMode, TabBarMode, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BarWidth, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BarHeight, Dimension, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Index, int32_t, PROPERTY_UPDATE_NORMAL);
 };
 
 } // namespace OHOS::Ace::NG
