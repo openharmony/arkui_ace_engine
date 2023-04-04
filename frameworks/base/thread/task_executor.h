@@ -154,6 +154,26 @@ public:
      *
      * @param task Task which need execution.
      * @param type FrontendType of task, used to specify the thread.
+     * @param timeoutMs Timeout in milliseconds before task execution.
+     * @return Returns 'true' whether task has been executed.
+     */
+    bool PostSyncTaskTimeout(const Task& task, TaskType type, uint32_t timeoutMs) const
+    {
+        if (!task || type == TaskType::BACKGROUND) {
+            return false;
+        } else if (WillRunOnCurrentThread(type)) {
+            task();
+            return true;
+        }
+        return PostTaskAndWait(CancelableTask(std::move(task)), type, std::chrono::milliseconds(timeoutMs));
+    }
+
+    /**
+     * Post a task to the specified thread and wait until finished executing.
+     * Never allow to post a background synchronous task.
+     *
+     * @param task Task which need execution.
+     * @param type FrontendType of task, used to specify the thread.
      * @return Returns 'true' whether task has been executed.
      */
     bool PostSyncTask(const Task& task, TaskType type) const
@@ -223,17 +243,17 @@ protected:
 #endif
 
 private:
-    bool PostTaskAndWait(CancelableTask&& task, TaskType type) const
+    bool PostTaskAndWait(CancelableTask&& task, TaskType type, std::chrono::milliseconds timeoutMs = 0ms) const
     {
 #ifdef ACE_DEBUG
         bool result = false;
         if (OnPreSyncTask(type)) {
-            result = OnPostTask(Task(task), type, 0) && task.WaitUntilComplete();
+            result = OnPostTask(Task(task), type, 0) && task.WaitUntilComplete(timeoutMs);
             OnPostSyncTask();
         }
         return result;
 #else
-        return OnPostTask(Task(task), type, 0) && task.WaitUntilComplete();
+        return OnPostTask(Task(task), type, 0) && task.WaitUntilComplete(timeoutMs);
 #endif
     }
 };
