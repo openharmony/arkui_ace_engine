@@ -453,7 +453,7 @@ std::string JsiBaseUtils::TranslateBySourceMap(const std::string& stackStr, cons
         std::string sourceInfo;
         auto iter = sourceMaps.find(key);
         if (iter != sourceMaps.end()) {
-            sourceInfo = GetSourceInfo(line, column, iter->second, appMap, isAppPage, data);
+            sourceInfo = GetSourceInfo(line, column, iter->second, appMap, isAppPage, data, false);
         }
         if (sourceInfo.empty()) {
             break;
@@ -505,7 +505,8 @@ void JsiBaseUtils::GetPosInfo(const std::string& temp, int32_t start, std::strin
 }
 
 std::string JsiBaseUtils::GetSourceInfo(const std::string& line, const std::string& column,
-    const RefPtr<RevSourceMap>& pageMap, const RefPtr<RevSourceMap>& appMap, bool isAppPage, const AceType* data)
+    const RefPtr<RevSourceMap>& pageMap, const RefPtr<RevSourceMap>& appMap, bool isAppPage, const AceType* data,
+    const bool isBundle)
 {
     int32_t offSet = GetLineOffset(data);
     std::string sourceInfo;
@@ -519,7 +520,7 @@ std::string JsiBaseUtils::GetSourceInfo(const std::string& line, const std::stri
         return "";
     }
 
-    std::string sources = GetRelativePath(mapInfo.sources);
+    std::string sources = isBundle ? GetRelativePath(mapInfo.sources) : mapInfo.sources;
     sourceInfo = "(" + sources + ":" + std::to_string(mapInfo.row) + ":" + std::to_string(mapInfo.col) + ")";
     return sourceInfo;
 }
