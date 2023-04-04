@@ -33,6 +33,11 @@
 #include "core/components_ng/gestures/recognizers/parallel_recognizer.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
 
+#ifdef ENABLE_DRAG_FRAMEWORK
+namespace OHOS::UDMF {
+class UnifiedData;
+}
+#endif
 namespace OHOS::Ace::NG {
 #ifdef ENABLE_DRAG_FRAMEWORK
 const double PIXELMAP_WIDTH_RATE = -0.5;
@@ -339,6 +344,7 @@ public:
     {
         return pixelMap_;
     }
+#ifdef ENABLE_DRAG_FRAMEWORK
     int32_t SetDragData(std::shared_ptr<UDMF::UnifiedData>& unifiedData, std::string& udKey);
 #endif // ENABLE_DRAG_FRAMEWORK
     void InitDragDropEvent();

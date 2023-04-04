@@ -25,6 +25,12 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
 
+#ifdef ENABLE_DRAG_FRAMEWORK
+namespace OHOS::UDMF {
+class UnifiedData;
+}
+#endif
+
 namespace OHOS::Ace::NG {
 
 class ACE_EXPORT DragDropManager : public virtual AceType {
