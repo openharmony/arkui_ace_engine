@@ -63,18 +63,6 @@ DataAbilityHelperStandard::DataAbilityHelperStandard(const std::shared_ptr<OHOS:
 {
     if (useStageModel) {
         runtimeContext_ = runtimeContext;
-#if !defined(PREVIEW)
-        dataAbilityThumbnailQueryImpl_ = [runtimeContextWp = runtimeContext_](
-                                             const std::string& uri) -> std::unique_ptr<Media::PixelMap> {
-            ThumbnailNapiEntry thumbnailNapiEntry = GetThumbnailNapiEntry();
-            CHECK_NULL_RETURN(thumbnailNapiEntry, nullptr);
-            auto runtimeContextSptr = runtimeContextWp.lock();
-            CHECK_NULL_RETURN(runtimeContextSptr, nullptr);
-            void* resPtr = thumbnailNapiEntry(uri.c_str(), &runtimeContextSptr);
-            CHECK_NULL_RETURN(resPtr, nullptr);
-            return std::unique_ptr<Media::PixelMap>(reinterpret_cast<Media::PixelMap*>(resPtr));
-        };
-#endif
     } else {
         context_ = context;
     }
@@ -82,10 +70,15 @@ DataAbilityHelperStandard::DataAbilityHelperStandard(const std::shared_ptr<OHOS:
 
 void* DataAbilityHelperStandard::QueryThumbnailResFromDataAbility(const std::string& uri)
 {
-    CHECK_NULL_RETURN(dataAbilityThumbnailQueryImpl_, nullptr);
-    pixmap_ = dataAbilityThumbnailQueryImpl_(uri);
-    CHECK_NULL_RETURN(pixmap_, nullptr);
-    return reinterpret_cast<void*>(&pixmap_);
+#ifdef PREVIEW
+    return nullptr;
+#else
+    ThumbnailNapiEntry thumbnailNapiEntry = GetThumbnailNapiEntry();
+    CHECK_NULL_RETURN(thumbnailNapiEntry, nullptr);
+    auto runtimeContextSptr = runtimeContext_.lock();
+    CHECK_NULL_RETURN(runtimeContextSptr, nullptr);
+    return thumbnailNapiEntry(uri.c_str(), &runtimeContextSptr);
+#endif
 }
 
 int32_t DataAbilityHelperStandard::OpenFile(const std::string& uriStr, const std::string& mode)
@@ -104,18 +97,17 @@ int32_t DataAbilityHelperStandard::OpenFile(const std::string& uriStr, const std
 
 int32_t DataAbilityHelperStandard::OpenFileWithDataAbility(const std::string& uriStr, const std::string& mode)
 {
-    Uri uri = Uri(uriStr);
-    uri_ = std::make_shared<Uri>(uriStr);
+    std::shared_ptr<OHOS::Uri> uri = std::make_shared<Uri>(uriStr);
     if (!dataAbilityHelper_) {
         if (useStageModel_) {
-            dataAbilityHelper_ = AppExecFwk::DataAbilityHelper::Creator(runtimeContext_.lock(), uri_, false);
+            dataAbilityHelper_ = AppExecFwk::DataAbilityHelper::Creator(runtimeContext_.lock(), uri, false);
         } else {
-            dataAbilityHelper_ = AppExecFwk::DataAbilityHelper::Creator(context_.lock(), uri_);
+            dataAbilityHelper_ = AppExecFwk::DataAbilityHelper::Creator(context_.lock(), uri);
         }
     }
 
     CHECK_NULL_RETURN(dataAbilityHelper_, -1);
-    return dataAbilityHelper_->OpenFile(uri, mode);
+    return dataAbilityHelper_->OpenFile(*uri, mode);
 }
 
 int32_t DataAbilityHelperStandard::OpenFileWithDataShare(const std::string& uriStr, const std::string& mode)
