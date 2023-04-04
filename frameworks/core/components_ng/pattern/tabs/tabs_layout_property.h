@@ -67,14 +67,14 @@ public:
                                      ? "BarPosition.Start"
                                      : "BarPosition.End");
         if (propDivider_.has_value()) {
-            auto divider = JsonUtil::Create(false);
+            auto divider = JsonUtil::Create(true);
             divider->Put("strokeWidth", propDivider_.value().strokeWidth.ToString().c_str());
             divider->Put("startMargin", propDivider_.value().startMargin.ToString().c_str());
             divider->Put("endMargin", propDivider_.value().endMargin.ToString().c_str());
             divider->Put("color", propDivider_.value().color.ColorToString().c_str());
             json->Put("divider", divider);
         } else {
-            auto divider = JsonUtil::Create(false);
+            auto divider = JsonUtil::Create(true);
             json->Put("divider", divider);
         }
     }
