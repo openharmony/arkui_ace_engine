@@ -925,7 +925,7 @@ void ClearAccessibilityFocus(const RefPtr<NG::FrameNode>& root, int32_t focusNod
 {
     auto oldFocusNode = GetInspectorById(root, focusNodeId);
     CHECK_NULL_VOID_NOLOG(oldFocusNode);
-    oldFocusNode->GetRenderContext()->UpdateAccessibilityFocus(false);
+    oldFocusNode->GetRenderContext()->OnAccessibilityFocusUpdate(false);
 }
 
 inline string GetSupportAction(const std::unordered_set<AceAction>& supportAceActions)
@@ -1052,7 +1052,7 @@ bool JsAccessibilityManager::UnsubscribeToastObserver()
     return true;
 }
 
-bool JsAccessibilityManager::SubscribeStateObserver(const int eventType)
+bool JsAccessibilityManager::SubscribeStateObserver(int eventType)
 {
     LOGD("SubscribeStateObserver");
     if (!stateObserver_) {
@@ -1068,7 +1068,7 @@ bool JsAccessibilityManager::SubscribeStateObserver(const int eventType)
     return ret == RET_OK;
 }
 
-bool JsAccessibilityManager::UnsubscribeStateObserver(const int eventType)
+bool JsAccessibilityManager::UnsubscribeStateObserver(int eventType)
 {
     LOGI("UnsubscribeStateObserver");
     CHECK_NULL_RETURN_NOLOG(stateObserver_, false);
@@ -2036,7 +2036,7 @@ bool JsAccessibilityManager::ExecuteActionNG(int32_t elementId, ActionType actio
                 return result;
             }
             Framework::ClearAccessibilityFocus(ngPipeline->GetRootElement(), currentFocusNodeId_);
-            frameNode->GetRenderContext()->UpdateAccessibilityFocus(true);
+            frameNode->GetRenderContext()->OnAccessibilityFocusUpdate(true);
             currentFocusNodeId_ = frameNode->GetAccessibilityId();
             result = true;
             break;
@@ -2045,7 +2045,7 @@ bool JsAccessibilityManager::ExecuteActionNG(int32_t elementId, ActionType actio
             if (elementId != currentFocusNodeId_) {
                 return result;
             }
-            frameNode->GetRenderContext()->UpdateAccessibilityFocus(false);
+            frameNode->GetRenderContext()->OnAccessibilityFocusUpdate(false);
             currentFocusNodeId_ = -1;
             result = true;
             break;
@@ -2123,7 +2123,7 @@ void JsAccessibilityManager::Register(bool state)
     isReg_ = state;
 }
 
-int JsAccessibilityManager::RegisterInteractionOperation(const int windowId)
+int JsAccessibilityManager::RegisterInteractionOperation(int windowId)
 {
     LOGI("RegisterInteractionOperation windowId:%{public}d", windowId);
     if (IsRegister()) {

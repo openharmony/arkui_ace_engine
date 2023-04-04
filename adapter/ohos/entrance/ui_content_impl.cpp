@@ -1377,7 +1377,7 @@ bool UIContentImpl::ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::Pointer
 
 bool UIContentImpl::ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& touchEvent)
 {
-    LOGI("UIContentImpl: OnKeyUp called,touchEvent info: keyCode is %{private}d,"
+    LOGD("UIContentImpl: OnKeyUp called,touchEvent info: keyCode is %{private}d,"
          "keyAction is %{public}d, keyActionTime is %{public}" PRId64,
         touchEvent->GetKeyCode(), touchEvent->GetKeyAction(), touchEvent->GetActionTime());
     auto container = AceEngine::Get().GetContainer(instanceId_);
@@ -1388,13 +1388,13 @@ bool UIContentImpl::ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& 
 
 bool UIContentImpl::ProcessAxisEvent(const std::shared_ptr<OHOS::MMI::AxisEvent>& axisEvent)
 {
-    LOGI("UIContentImpl ProcessAxisEvent");
+    LOGD("UIContentImpl ProcessAxisEvent");
     return false;
 }
 
 bool UIContentImpl::ProcessVsyncEvent(uint64_t timeStampNanos)
 {
-    LOGI("UIContentImpl ProcessVsyncEvent");
+    LOGD("UIContentImpl ProcessVsyncEvent");
     return false;
 }
 

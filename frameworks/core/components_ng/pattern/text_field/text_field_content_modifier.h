@@ -43,6 +43,7 @@ public:
     void SetContentOffset(OffsetF& value);
     void SetContentSize(SizeF& value);
     void SetTextValue(std::string& value);
+    void SetPlaceholderValue(std::string&& value);
     void SetTextRectY(const float value);
     void SetTextObscured(bool value);
     void SetTextRectX(const float value);
@@ -70,6 +71,7 @@ private:
     RefPtr<PropertyOffsetF> contentOffset_;
     RefPtr<PropertySizeF> contentSize_;
     RefPtr<PropertyString> textValue_;
+    RefPtr<PropertyString> placeholderValue_;
     RefPtr<PropertyBool> textObscured_;
     RefPtr<PropertyInt> textAlign_;
 

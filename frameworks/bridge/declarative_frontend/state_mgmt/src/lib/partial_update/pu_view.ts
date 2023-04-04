@@ -312,30 +312,28 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
   // implements IMultiPropertiesChangeSubscriber
   viewPropertyHasChanged(varName: PropertyInfo, dependentElmtIds: Set<number>): void {
-    stateMgmtTrace.scopedTrace(() => {
-      stateMgmtConsole.debug(`${this.constructor.name}: viewPropertyHasChanged property '${varName}'. View needs ${dependentElmtIds.size ? 'update' : 'no update'}.`);
-      this.syncInstanceId();
+    stateMgmtConsole.debug(`${this.constructor.name}: viewPropertyHasChanged property '${varName}'. View needs ${dependentElmtIds.size ? 'update' : 'no update'}.`);
+    this.syncInstanceId();
 
-      if (dependentElmtIds.size && !this.isFirstRender()) {
-        if (!this.dirtDescendantElementIds_.size) {
-          // mark Composedelement dirty when first elmtIds are added
-          // do not need to do this every time
-          this.markNeedUpdate();
-        }
-        stateMgmtConsole.debug(`${this.constructor.name}: viewPropertyHasChanged property '${varName}': elmtIds affected by value change [${Array.from(dependentElmtIds).toString()}].`)
-        const union: Set<number> = new Set<number>([...this.dirtDescendantElementIds_, ...dependentElmtIds]);
-        this.dirtDescendantElementIds_ = union;
-        stateMgmtConsole.debug(`${this.constructor.name}: viewPropertyHasChanged property '${varName}': all elmtIds need update [${Array.from(this.dirtDescendantElementIds_).toString()}].`)
+    if (dependentElmtIds.size && !this.isFirstRender()) {
+      if (!this.dirtDescendantElementIds_.size) {
+        // mark Composedelement dirty when first elmtIds are added
+        // do not need to do this every time
+        this.markNeedUpdate();
       }
+      stateMgmtConsole.debug(`${this.constructor.name}: viewPropertyHasChanged property '${varName}': elmtIds affected by value change [${Array.from(dependentElmtIds).toString()}].`)
+      const union: Set<number> = new Set<number>([...this.dirtDescendantElementIds_, ...dependentElmtIds]);
+      this.dirtDescendantElementIds_ = union;
+      stateMgmtConsole.debug(`${this.constructor.name}: viewPropertyHasChanged property '${varName}': all elmtIds need update [${Array.from(this.dirtDescendantElementIds_).toString()}].`)
+    }
 
-      let cb = this.watchedProps.get(varName)
-      if (cb) {
-        stateMgmtConsole.debug(`   .. calling @Watch function`);
-        cb.call(this, varName);
-      }
+    let cb = this.watchedProps.get(varName)
+    if (cb) {
+      stateMgmtConsole.debug(`   .. calling @Watch function`);
+      cb.call(this, varName);
+    }
 
-      this.restoreInstanceId();
-    }, "ViewPU.viewPropertyHasChanged", this.constructor.name, varName, dependentElmtIds.size);
+    this.restoreInstanceId();
   }
 
   /**
@@ -408,25 +406,26 @@ abstract class ViewPU extends NativeViewPartialUpdate
    *
    */
   public updateDirtyElements() {
-    do {
-        stateMgmtConsole.debug(`View ${this.constructor.name} elmtId ${this.id__()}:  updateDirtyElements: sorted dirty elmtIds: ${JSON.stringify(Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber))}, starting ....`);
+    if (this.dirtDescendantElementIds_.size == 0) {
+      stateMgmtConsole.debug(`No dirty elements for ${this.constructor.name}`);
+      return;
+    }
 
-        // request list of all (gloabbly) deleteelmtIds;
-        let deletedElmtIds: number[] = [];
-        this.getDeletedElemtIds(deletedElmtIds);
+    stateMgmtConsole.debug(`View ${this.constructor.name} elmtId ${this.id__()}:  updateDirtyElements: sorted dirty elmtIds: ${JSON.stringify(Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber))}, starting ....`);
 
-        // see which elmtIds are managed by this View
-        // and clean up all book keeping for them
-        this.purgeDeletedElmtIds(deletedElmtIds);
+    // request list of all (gloabbly) deleteelmtIds;
+    let deletedElmtIds: number[] = [];
+    this.getDeletedElemtIds(deletedElmtIds);
 
-        // process all elmtIds marked as needing update in ascending order.
-        // ascending order ensures parent nodes will be updated before their children
-        // prior cleanup ensure no already deleted Elements have their update func executed
-        Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber).forEach(elmtId => {
-            this.UpdateElement(elmtId);
-            this.dirtDescendantElementIds_.delete(elmtId);
-        });
-    } while(this.dirtDescendantElementIds_.size);
+    // see which elmtIds are managed by this View
+    // and clean up all book keeping for them
+    this.purgeDeletedElmtIds(deletedElmtIds);
+
+    // process all elmtIds marked as needing update in ascending order.
+    // ascending order ensures parent nodes will be updated before their children
+    // prior cleanup ensure no already deleted Elements have their update func executed
+    Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber).forEach(elmtId => this.UpdateElement(elmtId));
+    this.dirtDescendantElementIds_.clear();
   }
 
   //  given a list elementIds removes these from state variables dependency list and from elmtId -> updateFunc map
@@ -512,15 +511,8 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
     if (idGenFunc === undefined) {
       stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: providing default id gen function `);
+      idGenFunc = (item: any, index : number) => `${index}__${JSON.stringify(item)}`;
       idGenFuncUsesIndex = true;
-      // catch possible error caused by Stringify and re-throw an Error with a meaningful (!) error message
-      idGenFunc = (item: any, index : number) => {
-        try {
-          return `${index}__${JSON.stringify(item)}`;
-        } catch(e) {
-          throw new Error (`${this.constructor.name}[${this.id__()}]: ForEach id ${elmtId}: use of default id generator function not possble on provided data structure. Need to specify id generator function (ForEach 3rd parameter).`)
-        }
-      }
     }
 
     let diffIndexArray = []; // New indexes compared to old one.

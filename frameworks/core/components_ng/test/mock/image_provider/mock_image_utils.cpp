@@ -18,7 +18,7 @@
 
 #include "core/components_ng/image_provider/image_utils.h"
 namespace OHOS::Ace {
-std::vector<std::thread> threads = std::vector<std::thread>();
+std::vector<std::thread> g_threads;
 
 namespace NG {
 void ImageUtils::PostToUI(std::function<void()>&& task)
@@ -28,7 +28,7 @@ void ImageUtils::PostToUI(std::function<void()>&& task)
 
 void ImageUtils::PostToBg(std::function<void()>&& task)
 {
-    threads.emplace_back(task);
+    g_threads.emplace_back(std::thread(task));
 }
 } // namespace NG
 } // namespace OHOS::Ace

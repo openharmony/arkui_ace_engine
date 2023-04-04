@@ -77,10 +77,11 @@ public:
     void BlendBorderColor(const Color& color) override;
 
     // Paint focus state by component's setting. It will paint along the paintRect
-    void PaintFocusState(const RoundRect& paintRect, const Color& paintColor, const Dimension& paintWidth) override;
+    void PaintFocusState(const RoundRect& paintRect, const Color& paintColor, const Dimension& paintWidth,
+        bool isAccessibilityFocus = false) override;
     // Paint focus state by component's setting. It will paint along the frameRect(padding: focusPaddingVp)
     void PaintFocusState(const RoundRect& paintRect, const Dimension& focusPaddingVp, const Color& paintColor,
-        const Dimension& paintWidth) override;
+        const Dimension& paintWidth, bool isAccessibilityFocus = false) override;
     // Paint focus state by default. It will paint along the component rect(padding: focusPaddingVp)
     void PaintFocusState(
         const Dimension& focusPaddingVp, const Color& paintColor, const Dimension& paintWidth) override;
@@ -184,6 +185,10 @@ public:
 
     void PaintAccessibilityFocus() override;
 
+    virtual void ClearAccessibilityFocus() override;
+
+    void OnAccessibilityFocusUpdate(bool isAccessibilityFocus) override;
+
     void OnMouseSelectUpdate(bool isSelected, const Color& fillColor, const Color& strokeColor) override;
     void UpdateMouseSelectWithRect(const RectF& rect, const Color& fillColor, const Color& strokeColor) override;
 
@@ -207,6 +212,7 @@ public:
     void MarkDrivenRender(bool flag) override;
     void MarkDrivenRenderItemIndex(int32_t index) override;
     void MarkDrivenRenderFramePaintState(bool flag) override;
+    RefPtr<PixelMap> GetThumbnailPixelMap() override;
 
 private:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
@@ -259,8 +265,6 @@ private:
 
     void OnOverlayTextUpdate(const OverlayOptions& overlay) override;
     void OnMotionPathUpdate(const MotionPathOption& motionPath) override;
-
-    void OnAccessibilityFocusUpdate(bool isAccessibilityFocus) override;
 
     void ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
 
@@ -346,6 +350,7 @@ private:
     std::shared_ptr<MouseSelectModifier> mouseSelectModifier_;
     std::shared_ptr<MoonProgressModifier> moonProgressModifier_;
     std::shared_ptr<FocusStateModifier> focusStateModifier_;
+    std::shared_ptr<FocusStateModifier> accessibilityFocusStateModifier_;
     std::optional<TransformMatrixModifier> transformMatrixModifier_;
     std::shared_ptr<Rosen::RSProperty<Rosen::Vector2f>> pivotProperty_;
     std::unique_ptr<SharedTransitionModifier> sharedTransitionModifier_;

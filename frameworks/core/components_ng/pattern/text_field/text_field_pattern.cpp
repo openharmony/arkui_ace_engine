@@ -454,11 +454,6 @@ void TextFieldPattern::UpdateCaretOffsetByEvent()
     if (!InSelectMode()) {
         UpdateSelection(textEditingValue_.caretPosition);
     }
-    // set caret and text rect to basic padding if caret is at position 0 or text not exists
-    if (textEditingValue_.caretPosition == 0) {
-        SetCaretOffsetForEmptyTextOrPositionZero();
-        return;
-    }
     UpdateCaretRectByPosition(textEditingValue_.caretPosition);
 }
 
@@ -1318,7 +1313,7 @@ void TextFieldPattern::HandleTouchUp()
         LOGI("TextFieldPattern::HandleTouchUp of mouse");
         isMousePressed_ = false;
     }
-    if (enableTouchAndHoverEffect_) {
+    if (enableTouchAndHoverEffect_ && !HasStateStyle(UI_STATE_PRESSED)) {
         auto renderContext = GetHost()->GetRenderContext();
         if (isOnHover_) {
             AnimatePressAndHover(renderContext, HOVER_ANIMATION_OPACITY);
@@ -2026,6 +2021,7 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
     if (info.GetLocalLocation().GetX() > (frameRect_.Width() - imageRect_.Width() - GetIconRightOffset()) &&
         NeedShowPasswordIcon()) {
         pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
+        return;
     } else {
         pipeline->ChangeMouseStyle(frameId, MouseFormat::TEXT_CURSOR);
     }
@@ -2781,12 +2777,12 @@ void TextFieldPattern::InitSurfacePositionChangedCallback()
 void TextFieldPattern::DeleteBackward(int32_t length)
 {
     LOGI("Handle DeleteBackward %{public}d characters", length);
-    if (textEditingValue_.caretPosition <= 0) {
-        LOGW("Caret position at the beginning , cannot DeleteBackward");
-        return;
-    }
     if (InSelectMode()) {
         Delete(textSelector_.GetStart(), textSelector_.GetEnd());
+        return;
+    }
+    if (textEditingValue_.caretPosition <= 0) {
+        LOGW("Caret position at the beginning , cannot DeleteBackward");
         return;
     }
     auto start = std::max(textEditingValue_.caretPosition - length, 0);
@@ -2810,12 +2806,12 @@ void TextFieldPattern::DeleteBackward(int32_t length)
 void TextFieldPattern::DeleteForward(int32_t length)
 {
     LOGI("Handle DeleteForward %{public}d characters", length);
-    if (textEditingValue_.caretPosition >= static_cast<int32_t>(textEditingValue_.GetWideText().length())) {
-        LOGW("Caret position at the end , cannot DeleteForward");
-        return;
-    }
     if (InSelectMode()) {
         Delete(textSelector_.GetStart(), textSelector_.GetEnd());
+        return;
+    }
+    if (textEditingValue_.caretPosition >= static_cast<int32_t>(textEditingValue_.GetWideText().length())) {
+        LOGW("Caret position at the end , cannot DeleteForward");
         return;
     }
     textEditingValue_.text = textEditingValue_.GetValueBeforePosition(textEditingValue_.caretPosition) +

@@ -320,7 +320,7 @@ const RefPtr<PixelMap>& ImageSourceInfo::GetPixmap() const
     return pixmap_;
 }
 
-bool ImageSourceInfo::IsSupportCache() const
+bool ImageSourceInfo::SupportObjCache() const
 {
     if (IsPixmap()) {
         return false;

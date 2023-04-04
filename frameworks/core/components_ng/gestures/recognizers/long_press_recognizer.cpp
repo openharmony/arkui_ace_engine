@@ -21,23 +21,11 @@
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
 #include "core/event/ace_events.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#ifdef ENABLE_DRAG_FRAMEWORK
 #include "core/components_ng/event/gesture_event_hub.h"
-#include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/render_context.h"
-#include "render_service_client/core/transaction/rs_interfaces.h"
-#endif // ENABLE_DRAG_FRAMEWORK
 
 namespace OHOS::Ace::NG {
-#ifdef ENABLE_DRAG_FRAMEWORK
-using namespace OHOS::Rosen;
-#endif // ENABLE_DRAG_FRAMEWORK
 namespace {
-#ifdef ENABLE_DRAG_FRAMEWORK
-std::shared_ptr<Media::PixelMap> g_pixelMap {};
-std::mutex g_mutex;
-std::condition_variable thumbnailGet;
-#endif // ENABLE_DRAG_FRAMEWORK
 constexpr double MAX_THRESHOLD = 15.0;
 constexpr int32_t MAX_FINGERS = 10;
 } // namespace
@@ -68,41 +56,20 @@ void LongPressRecognizer::OnRejected()
     refereeState_ = RefereeState::FAIL;
 }
 
-#ifdef ENABLE_DRAG_FRAMEWORK
-class DrawDragThumbnailCallback : public SurfaceCaptureCallback {
-public:
-    void OnSurfaceCapture(std::shared_ptr<Media::PixelMap> pixelMap) override
-    {
-        if (pixelMap == nullptr) {
-            LOGE("%{public}s: failed to get pixelmap, return nullptr", __func__);
-            return;
-        }
-        std::unique_lock<std::mutex> lock(g_mutex);
-        g_pixelMap = pixelMap;
-        thumbnailGet.notify_all();
-        LOGI("Get pixelmap success");
-    }
-};
-
-void LongPressRecognizer::GetThumbnailPixelMap()
+void LongPressRecognizer::SetThumbnailPixelMap()
 {
-    auto gestureHub = gestureHub_.Upgrade();
-    CHECK_NULL_VOID(gestureHub);
-    auto frameNode = gestureHub->GetFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto context = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(context);
-    auto rosenRenderContext = AceType::DynamicCast<RosenRenderContext>(context);
-    CHECK_NULL_VOID(rosenRenderContext);
-    auto rsNode = rosenRenderContext->GetRSNode();
-    CHECK_NULL_VOID(rsNode);
-
-    std::shared_ptr<DrawDragThumbnailCallback> drawDragThumbnailCallback =
-        std::make_shared<DrawDragThumbnailCallback>();
-    RSInterfaces::GetInstance().TakeSurfaceCaptureForUI(rsNode, drawDragThumbnailCallback, 1, 1);
-    std::unique_lock<std::mutex> lock(g_mutex);
-    thumbnailGet.wait(lock);
-    gestureHub->SetPixelMap(g_pixelMap);
+    if (refereeState_ == RefereeState::DETECTING) {
+        auto gestureHub = gestureHub_.Upgrade();
+        CHECK_NULL_VOID(gestureHub);
+        auto frameNode = gestureHub->GetFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto context = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        auto pixelMap = context->GetThumbnailPixelMap();
+        gestureHub->SetPixelMap(pixelMap);
+    } else {
+        LOGW("the state is not detecting for accept long press gesture");
+    }
 }
 
 void LongPressRecognizer::ThumbnailTimer(int32_t time)
@@ -113,7 +80,7 @@ void LongPressRecognizer::ThumbnailTimer(int32_t time)
     auto&& callback = [weakPtr = AceType::WeakClaim(this)]() {
         auto refPtr = weakPtr.Upgrade();
         if (refPtr) {
-            refPtr->GetThumbnailPixelMap();
+            refPtr->SetThumbnailPixelMap();
         } else {
             LOGI("fail to get thumbnail pixelMap due to context is nullptr");
         }
@@ -122,7 +89,6 @@ void LongPressRecognizer::ThumbnailTimer(int32_t time)
     auto taskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
     taskExecutor.PostDelayedTask(thumbnailTimer_, time);
 }
-#endif // ENABLE_DRAG_FRAMEWORK
 
 void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
@@ -163,9 +129,8 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
             DeadlineTimer(curDuration, false);
         }
     }
-#ifdef ENABLE_DRAG_FRAMEWORK
+
     ThumbnailTimer(thumbnailDeadline);
-#endif // ENABLE_DRAG_FRAMEWORK
 }
 
 void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& /*event*/)
@@ -333,11 +298,4 @@ bool LongPressRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recog
 
     return true;
 }
-
-#ifdef ENABLE_DRAG_FRAMEWORK
-void LongPressRecognizer::SetGestureHub(WeakPtr<GestureEventHub> gestureHub)
-{
-    gestureHub_ = gestureHub;
-}
-#endif // ENABLE_DRAG_FRAMEWORK
 } // namespace OHOS::Ace::NG

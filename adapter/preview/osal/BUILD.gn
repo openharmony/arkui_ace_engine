@@ -51,6 +51,7 @@ template("ace_osal_preview_source_set") {
       "exception_handler.cpp",
       "fetch_manager.cpp",
       "frame_report.cpp",
+      "image_source_preview.cpp",
       "mouse_style_ohos.cpp",
       "pixel_map_preview.cpp",
       "response_data.cpp",

@@ -166,13 +166,12 @@ void ImageModelNG::SetDraggable(bool draggable)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetDraggable(draggable);
-
-    if (draggable) {
+    if (draggable && !pattern->IsDraggable()) {
         auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
         gestureHub->InitDragDropEvent();
     }
+    pattern->SetDraggable(draggable);
 }
 
 void ImageModelNG::SetOnDragStart(OnDragStartFunc&& onDragStart)

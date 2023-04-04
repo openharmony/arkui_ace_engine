@@ -955,7 +955,7 @@ void JSViewAbstract::JsOpacity(const JSCallbackInfo& info)
     }
 
     if ((LessNotEqual(opacity, 0.0)) || opacity > 1) {
-        LOGW("set opacity to %{public}f, over range, set to default opacity", opacity);
+        LOGD("set opacity to %{public}f, over range, set to default opacity", opacity);
         opacity = 1.0;
     }
 
@@ -2767,7 +2767,7 @@ bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, Dimension& re
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     JSRef<JSVal> resId = jsObj->GetProperty("id");
     if (!resId->IsNumber()) {
-        LOGW("resId is not number");
+        LOGD("resId is not number");
         return false;
     }
     auto themeConstants = GetThemeConstants(jsObj);
@@ -3030,7 +3030,7 @@ bool JSViewAbstract::ParseJsFontFamilies(const JSRef<JSVal>& jsValue, std::vecto
 bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::string& result)
 {
     if (!jsValue->IsString() && !jsValue->IsObject()) {
-        LOGE("arg is not String or Object.");
+        LOGD("arg is not String or Object.");
         return false;
     }
 
@@ -3043,13 +3043,13 @@ bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::string& res
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     JSRef<JSVal> type = jsObj->GetProperty("type");
     if (!type->IsNumber()) {
-        LOGW("type is not number");
+        LOGD("type is not number");
         return false;
     }
 
     JSRef<JSVal> resId = jsObj->GetProperty("id");
     if (!resId->IsNumber()) {
-        LOGW("resId is not number");
+        LOGD("resId is not number");
         return false;
     }
 
@@ -3173,7 +3173,7 @@ bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& resu
         LOGE("JSImage::Create ParseJsMedia type is wrong");
         return false;
     }
-    LOGI("input value is not string or number, using PixelMap");
+    LOGD("input value is not string or number, using PixelMap");
     return false;
 }
 
@@ -4395,7 +4395,7 @@ void JSViewAbstract::JsOpacityPassThrough(const JSCallbackInfo& info)
     }
 
     if ((LessNotEqual(opacity, 0.0)) || opacity > 1) {
-        LOGW("set opacity to %{public}f, over range, set to default opacity", opacity);
+        LOGD("set opacity to %{public}f, over range, set to default opacity", opacity);
         opacity = 1.0;
     }
 

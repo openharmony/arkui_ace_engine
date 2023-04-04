@@ -24,6 +24,7 @@
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/flex/flex_layout_algorithm.h"
 #include "core/components_ng/pattern/flex/flex_layout_styles.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 
@@ -98,6 +99,9 @@ private:
 
     void AddExtraSpaceToStartPosition(OffsetF& startPosition, float extraSpace, bool onMainAxis) const;
     void AddPaddingToStartPosition(OffsetF& startPosition) const;
+    void GetFlexItemProperties(const ContentInfo& content, FlexItemProperties& flexItemProperties);
+    void CalcFlexGrowLayout(
+        const RefPtr<LayoutWrapper>& itemWrapper, const FlexItemProperties& flexItemProperties, float remainSpace);
 
     WrapDirection direction_ = WrapDirection::VERTICAL;
     WrapAlignment alignment_ = WrapAlignment::START;
@@ -123,6 +127,7 @@ private:
 
     float mainLengthLimit_ = 0.0f;
     float crossLengthLimit_ = 0.0f;
+    float currentMainLength_ = 0.0f;
     std::list<RefPtr<LayoutWrapper>> outOfLayoutChildren_;
 
     ACE_DISALLOW_COPY_AND_MOVE(WrapLayoutAlgorithm);

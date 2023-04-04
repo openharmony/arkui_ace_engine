@@ -15,6 +15,7 @@
 
 #include "form_renderer.h"
 
+#include "base/utils/utils.h"
 #include "configuration.h"
 #include "form_constants.h"
 #include "form_renderer_hilog.h"
@@ -310,10 +311,14 @@ void FormRenderer::AttachUIContent(const OHOS::AppExecFwk::FormJsInfo& formJsInf
         HILOG_ERROR("rsSurfaceNode is nullptr.");
         return;
     }
-    uiContent_->SetFormWidth(width_);
-    uiContent_->SetFormHeight(height_);
-    uiContent_->OnFormSurfaceChange(width_, height_);
-    rsSurfaceNode->SetBounds(0.0f, 0.0f, width_, height_);
+    if (!NearEqual(width_, uiContent_->GetFormWidth()) ||
+        !NearEqual(height_, uiContent_->GetFormHeight())) {
+        uiContent_->SetFormWidth(width_);
+        uiContent_->SetFormHeight(height_);
+        uiContent_->OnFormSurfaceChange(width_, height_);
+        rsSurfaceNode->SetBounds(0.0f, 0.0f, width_, height_);
+    }
+    uiContent_->Foreground();
 }
 }  // namespace Ace
 }  // namespace OHOS

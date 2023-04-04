@@ -13,17 +13,17 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_ADAPTER_PREVIEW_OSAL_IMAGE_SOURCE_PREVIEW_H
-#define FOUNDATION_ACE_ADAPTER_PREVIEW_OSAL_IMAGE_SOURCE_PREVIEW_H
+#include "image_source_preview.h"
 
-#include "base/image/image_source.h"
-
+#include "frameworks/base/image/image_source.h"
 namespace OHOS::Ace {
-class ImageSourcePreview : public ImageSource {
-    DECLARE_ACE_TYPE(ImageSourcePreview, ImageSource)
+RefPtr<ImageSource> ImageSource::Create(int32_t /* fd */)
+{
+    return nullptr;
+}
 
-public:
-    std::string GetProperty(const std::string& key) override;
-};
+std::string ImageSourcePreview::GetProperty(const std::string& /* key */)
+{
+    return "";
+}
 } // namespace OHOS::Ace
-#endif // FOUNDATION_ACE_ADAPTER_PREVIEW_OSAL_IMAGE_SOURCE_PREVIEW_H

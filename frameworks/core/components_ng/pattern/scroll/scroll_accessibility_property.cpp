@@ -31,4 +31,20 @@ bool ScrollAccessibilityProperty::IsScrollable() const
     }
     return false;
 }
+
+void ScrollAccessibilityProperty::SetSpecificSupportAction()
+{
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto scrollPattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(scrollPattern);
+    if (IsScrollable()) {
+        if (!scrollPattern->IsAtTop()) {
+            AddSupportAction(AceAction::ACTION_SCROLL_BACKWARD);
+        }
+        if (!scrollPattern->IsAtBottom()) {
+            AddSupportAction(AceAction::ACTION_SCROLL_FORWARD);
+        }
+    }
+}
 } // namespace OHOS::Ace::NG

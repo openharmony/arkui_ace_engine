@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_ADAPTER_PREVIEW_OSAL_IMAGE_SOURCE_PREVIEW_H
-#define FOUNDATION_ACE_ADAPTER_PREVIEW_OSAL_IMAGE_SOURCE_PREVIEW_H
-
-#include "base/image/image_source.h"
-
-namespace OHOS::Ace {
-class ImageSourcePreview : public ImageSource {
-    DECLARE_ACE_TYPE(ImageSourcePreview, ImageSource)
-
-public:
-    std::string GetProperty(const std::string& key) override;
-};
-} // namespace OHOS::Ace
-#endif // FOUNDATION_ACE_ADAPTER_PREVIEW_OSAL_IMAGE_SOURCE_PREVIEW_H
+class stateMgmtConsole {
+    public static log (...args : any) : void {
+        console.log(...args);
+    }
+    public static debug(...args : any) : void {
+        console.debug(...args);
+    }
+    public static info (...args : any) : void {
+        console.info(...args);
+    }
+    public static warn (...args : any) : void  {
+        console.warn(...args);
+    }
+    public static error (...args : any) : void {
+        console.error(...args);
+    }
+}
