@@ -84,6 +84,15 @@ bool TextFieldAccessibilityProperty::IsMultiLine() const
     return textFieldPattern->IsTextArea();
 }
 
+bool TextFieldAccessibilityProperty::IsSelected() const
+{
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(textFieldPattern, false);
+    return textFieldPattern->GetTextSelector().IsValid();
+}
+
 int32_t TextFieldAccessibilityProperty::GetTextSelectionStart() const
 {
     auto frameNode = host_.Upgrade();
@@ -147,9 +156,33 @@ bool TextFieldAccessibilityProperty::GetContentInvalid() const
     return !errorText_.empty();
 }
 
+bool TextFieldAccessibilityProperty::IsScrollable() const
+{
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(textFieldPattern, false);
+    return textFieldPattern->IsScrollable();
+}
+
 void TextFieldAccessibilityProperty::SetSpecificSupportAction()
 {
-    AddSupportAction(AceAction::ACTION_COPY);
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(textFieldPattern);
+    if (textFieldPattern->AllowCopy()) {
+        AddSupportAction(AceAction::ACTION_COPY);
+    }
+    if (IsScrollable()) {
+        if (!textFieldPattern->IsAtTop()) {
+            AddSupportAction(AceAction::ACTION_SCROLL_BACKWARD);
+        }
+        if (!textFieldPattern->IsAtBottom()) {
+            AddSupportAction(AceAction::ACTION_SCROLL_FORWARD);
+        }
+    }
+
     AddSupportAction(AceAction::ACTION_PASTE);
     AddSupportAction(AceAction::ACTION_CUT);
     AddSupportAction(AceAction::ACTION_SELECT);

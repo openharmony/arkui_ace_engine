@@ -54,6 +54,9 @@ const int32_t CARET_POSITION_1 = 10;
 const int32_t CARET_POSITION_2 = 12;
 const int32_t DELETE_LENGTH_1 = 1;
 const int32_t CARET_POSITION = 0;
+constexpr int32_t TEXT_SELECTION_ERR = -1;
+constexpr int32_t TEXT_SELECTION_START = 0;
+constexpr int32_t TEXT_SELECTION_END = 10;
 const Dimension CURSOR_WIDTH_SIZE = 10.0_vp;
 const Dimension DEFAULT_FONT_SIZE { 14, DimensionUnit::PX };
 const SizeF CONTENT_SIZE = SizeF(400.0, 500.0);
@@ -74,6 +77,9 @@ constexpr float TEXT_RECT_Y_LARGE = 50.0f;
 const std::string EMPTY_TEXT_VALUE;
 const std::string TEXT_EDITING_VALUE("textEditingValue");
 const std::string PLACEHOLDER("DEFAULT PLACEHOLDER");
+const std::string PLACE_HOLDER_TEXT("Placeholdertext");
+const std::string TEXT_CONTENT("Textvalue");
+const std::string DEFAULT_PASSWORD = "******";
 } // namespace
 class TextFieldPatternTestNg : public testing::Test {
 public:
@@ -2096,5 +2102,350 @@ HWTEST_F(TextFieldPatternTestNg, OnScrollCallback003, TestSize.Level1)
      */
     ret = textFieldPattern->OnScrollCallback(offset, source);
     EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: TextFieldAccessibilityPropertyGetTextLengthLimit001
+ * @tc.desc: Test GetTextLengthLimit of textfield.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextFieldAccessibilityPropertyGetTextLengthLimit001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXTINPUT_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+
+    auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+
+    auto textFieldAccessibilityProperty = frameNode->GetAccessibilityProperty<TextFieldAccessibilityProperty>();
+    ASSERT_NE(textFieldAccessibilityProperty, nullptr);
+
+    EXPECT_EQ(textFieldAccessibilityProperty->GetTextLengthLimit(), Infinity<uint32_t>());
+
+    uint32_t length = 32;
+    EXPECT_FALSE(textFieldLayoutProperty->HasMaxLength());
+    textFieldLayoutProperty->UpdateMaxLength(length);
+    EXPECT_TRUE(textFieldLayoutProperty->HasMaxLength());
+    EXPECT_EQ(textFieldAccessibilityProperty->GetTextLengthLimit(), length);
+}
+
+/**
+ * @tc.name: TextFieldAccessibilityPropertyIsPassword001
+ * @tc.desc: Test IsPassword of textfield.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextFieldAccessibilityPropertyIsPassword001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXTINPUT_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+
+    auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+
+    auto textFieldAccessibilityProperty = frameNode->GetAccessibilityProperty<TextFieldAccessibilityProperty>();
+    ASSERT_NE(textFieldAccessibilityProperty, nullptr);
+
+    EXPECT_FALSE(textFieldAccessibilityProperty->IsPassword());
+
+    EXPECT_FALSE(textFieldLayoutProperty->HasTextInputType());
+    textFieldLayoutProperty->UpdateTextInputType(TextInputType::VISIBLE_PASSWORD);
+    EXPECT_TRUE(textFieldLayoutProperty->HasTextInputType());
+    EXPECT_TRUE(textFieldAccessibilityProperty->IsPassword());
+}
+
+/**
+ * @tc.name: TextFieldAccessibilityPropertyGetTextInputType001
+ * @tc.desc: Test GetTextInputType of textfield.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextFieldAccessibilityPropertyGetTextInputType001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXTINPUT_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+
+    auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+
+    auto textFieldAccessibilityProperty = frameNode->GetAccessibilityProperty<TextFieldAccessibilityProperty>();
+    ASSERT_NE(textFieldAccessibilityProperty, nullptr);
+
+    EXPECT_EQ(textFieldAccessibilityProperty->GetTextInputType(), AceTextCategory::INPUT_TYPE_DEFAULT);
+
+    textFieldLayoutProperty->UpdateTextInputType(TextInputType::BEGIN);
+    EXPECT_EQ(textFieldAccessibilityProperty->GetTextInputType(), AceTextCategory::INPUT_TYPE_DEFAULT);
+
+    textFieldLayoutProperty->UpdateTextInputType(TextInputType::UNSPECIFIED);
+    EXPECT_EQ(textFieldAccessibilityProperty->GetTextInputType(), AceTextCategory::INPUT_TYPE_DEFAULT);
+
+    textFieldLayoutProperty->UpdateTextInputType(TextInputType::TEXT);
+    EXPECT_EQ(textFieldAccessibilityProperty->GetTextInputType(), AceTextCategory::INPUT_TYPE_TEXT);
+
+    textFieldLayoutProperty->UpdateTextInputType(TextInputType::MULTILINE);
+    EXPECT_EQ(textFieldAccessibilityProperty->GetTextInputType(), AceTextCategory::INPUT_TYPE_DEFAULT);
+
+    textFieldLayoutProperty->UpdateTextInputType(TextInputType::NUMBER);
+    EXPECT_EQ(textFieldAccessibilityProperty->GetTextInputType(), AceTextCategory::INPUT_TYPE_NUMBER);
+
+    textFieldLayoutProperty->UpdateTextInputType(TextInputType::PHONE);
+    EXPECT_EQ(textFieldAccessibilityProperty->GetTextInputType(), AceTextCategory::INPUT_TYPE_DEFAULT);
+
+    textFieldLayoutProperty->UpdateTextInputType(TextInputType::DATETIME);
+    EXPECT_EQ(textFieldAccessibilityProperty->GetTextInputType(), AceTextCategory::INPUT_TYPE_DATE);
+
+    textFieldLayoutProperty->UpdateTextInputType(TextInputType::EMAIL_ADDRESS);
+    EXPECT_EQ(textFieldAccessibilityProperty->GetTextInputType(), AceTextCategory::INPUT_TYPE_EMAIL);
+
+    textFieldLayoutProperty->UpdateTextInputType(TextInputType::URL);
+    EXPECT_EQ(textFieldAccessibilityProperty->GetTextInputType(), AceTextCategory::INPUT_TYPE_DEFAULT);
+
+    textFieldLayoutProperty->UpdateTextInputType(TextInputType::VISIBLE_PASSWORD);
+    EXPECT_EQ(textFieldAccessibilityProperty->GetTextInputType(), AceTextCategory::INPUT_TYPE_PASSWORD);
+
+    textFieldLayoutProperty->UpdateTextInputType(TextInputType::END);
+    EXPECT_EQ(textFieldAccessibilityProperty->GetTextInputType(), AceTextCategory::INPUT_TYPE_PASSWORD);
+}
+
+/**
+ * @tc.name: TextFieldAccessibilityPropertyIsEditable001
+ * @tc.desc: Test IsEditable of textfield.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextFieldAccessibilityPropertyIsEditable001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXTINPUT_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+
+    auto textFieldAccessibilityProperty = frameNode->GetAccessibilityProperty<TextFieldAccessibilityProperty>();
+    ASSERT_NE(textFieldAccessibilityProperty, nullptr);
+
+    EXPECT_TRUE(textFieldAccessibilityProperty->IsEditable());
+}
+
+/**
+ * @tc.name: TextFieldAccessibilityPropertyIsMultiLine001
+ * @tc.desc: Test IsMultiLine of textfield.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextFieldAccessibilityPropertyIsMultiLine001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXTINPUT_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+
+    auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+
+    auto textFieldAccessibilityProperty = frameNode->GetAccessibilityProperty<TextFieldAccessibilityProperty>();
+    ASSERT_NE(textFieldAccessibilityProperty, nullptr);
+
+    EXPECT_TRUE(textFieldAccessibilityProperty->IsMultiLine());
+
+    textFieldLayoutProperty->UpdateMaxLines(1);
+    EXPECT_FALSE(textFieldAccessibilityProperty->IsMultiLine());
+}
+
+/**
+ * @tc.name: TextFieldAccessibilityPropertyGetTextSelection001
+ * @tc.desc: Test GetTextSelection Start and End of textfield.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextFieldAccessibilityPropertyGetTextSelection001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXTINPUT_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+
+    auto textFieldAccessibilityProperty = frameNode->GetAccessibilityProperty<TextFieldAccessibilityProperty>();
+    ASSERT_NE(textFieldAccessibilityProperty, nullptr);
+
+    EXPECT_FALSE(textFieldAccessibilityProperty->IsSelected());
+    EXPECT_EQ(textFieldAccessibilityProperty->GetTextSelectionStart(), TEXT_SELECTION_ERR);
+    EXPECT_EQ(textFieldAccessibilityProperty->GetTextSelectionEnd(), TEXT_SELECTION_ERR);
+
+    textFieldPattern->textSelector_.Update(TEXT_SELECTION_START, TEXT_SELECTION_END);
+    EXPECT_TRUE(textFieldAccessibilityProperty->IsSelected());
+    EXPECT_EQ(textFieldAccessibilityProperty->GetTextSelectionStart(), TEXT_SELECTION_START);
+    EXPECT_EQ(textFieldAccessibilityProperty->GetTextSelectionEnd(), TEXT_SELECTION_END);
+}
+
+/**
+ * @tc.name: TextFieldAccessibilityPropertyGetText001
+ * @tc.desc: Test GetText of textfield.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextFieldAccessibilityPropertyGetText001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXTINPUT_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+
+    auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+
+    auto textFieldAccessibilityProperty = frameNode->GetAccessibilityProperty<TextFieldAccessibilityProperty>();
+    ASSERT_NE(textFieldAccessibilityProperty, nullptr);
+
+    EXPECT_EQ(textFieldAccessibilityProperty->GetText(), EMPTY_TEXT_VALUE);
+
+    textFieldLayoutProperty->UpdateValue(TEXT_CONTENT);
+    EXPECT_EQ(textFieldAccessibilityProperty->GetText(), TEXT_CONTENT);
+
+    textFieldLayoutProperty->UpdateTextInputType(TextInputType::VISIBLE_PASSWORD);
+    EXPECT_EQ(textFieldAccessibilityProperty->GetText(), DEFAULT_PASSWORD);
+}
+
+/**
+ * @tc.name: TextFieldAccessibilityPropertyIsHint001
+ * @tc.desc: Test IsHint of textfield.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextFieldAccessibilityPropertyIsHint001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXTINPUT_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+
+    auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+
+    auto textFieldAccessibilityProperty = frameNode->GetAccessibilityProperty<TextFieldAccessibilityProperty>();
+    ASSERT_NE(textFieldAccessibilityProperty, nullptr);
+
+    EXPECT_FALSE(textFieldAccessibilityProperty->IsHint());
+
+    textFieldLayoutProperty->UpdatePlaceholder(PLACE_HOLDER_TEXT);
+    EXPECT_TRUE(textFieldAccessibilityProperty->IsHint());
+
+    textFieldLayoutProperty->UpdateValue(TEXT_CONTENT);
+    EXPECT_FALSE(textFieldAccessibilityProperty->IsHint());
+}
+
+/**
+ * @tc.name: TextFieldAccessibilityPropertyGetHintText001
+ * @tc.desc: Test GetHintText of textfield.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextFieldAccessibilityPropertyGetHintText001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXTINPUT_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+
+    auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+
+    auto textFieldAccessibilityProperty = frameNode->GetAccessibilityProperty<TextFieldAccessibilityProperty>();
+    ASSERT_NE(textFieldAccessibilityProperty, nullptr);
+
+    EXPECT_EQ(textFieldAccessibilityProperty->GetHintText(), EMPTY_TEXT_VALUE);
+
+    textFieldLayoutProperty->UpdatePlaceholder(PLACE_HOLDER_TEXT);
+    EXPECT_EQ(textFieldAccessibilityProperty->GetHintText(), PLACE_HOLDER_TEXT);
+}
+
+/**
+ * @tc.name: TextFieldAccessibilityPropertyGetErrorText001
+ * @tc.desc: Test GetErrorText of textfield.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextFieldAccessibilityPropertyGetErrorText001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXTINPUT_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+
+    auto textFieldAccessibilityProperty = frameNode->GetAccessibilityProperty<TextFieldAccessibilityProperty>();
+    ASSERT_NE(textFieldAccessibilityProperty, nullptr);
+
+    EXPECT_EQ(textFieldAccessibilityProperty->GetErrorText(), EMPTY_TEXT_VALUE);
+
+    textFieldAccessibilityProperty->SetErrorText(TEXT_CONTENT);
+    EXPECT_EQ(textFieldAccessibilityProperty->GetErrorText(), TEXT_CONTENT);
+}
+
+/**
+ * @tc.name: TextFieldAccessibilityPropertyGetContentInvalid001
+ * @tc.desc: Test GetContentInvalid of textfield.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextFieldAccessibilityPropertyGetContentInvalid001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXTINPUT_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+
+    auto textFieldAccessibilityProperty = frameNode->GetAccessibilityProperty<TextFieldAccessibilityProperty>();
+    ASSERT_NE(textFieldAccessibilityProperty, nullptr);
+
+    EXPECT_FALSE(textFieldAccessibilityProperty->GetContentInvalid());
+
+    textFieldAccessibilityProperty->SetErrorText(TEXT_CONTENT);
+    EXPECT_TRUE(textFieldAccessibilityProperty->GetContentInvalid());
+}
+
+/**
+ * @tc.name: TextFieldAccessibilityPropertyIsScrollable001
+ * @tc.desc: Test IsScrollable of textfield.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextFieldAccessibilityPropertyIsScrollable001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXTINPUT_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+
+    auto textFieldAccessibilityProperty = frameNode->GetAccessibilityProperty<TextFieldAccessibilityProperty>();
+    ASSERT_NE(textFieldAccessibilityProperty, nullptr);
+
+    EXPECT_TRUE(textFieldAccessibilityProperty->IsScrollable());
+
+    textFieldPattern->scrollable_ = false;
+    EXPECT_FALSE(textFieldAccessibilityProperty->IsScrollable());
+}
+
+/**
+ * @tc.name: TextFieldAccessibilityPropertyGetSupportAction001
+ * @tc.desc: Test GetSupportAction of textfield.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextFieldAccessibilityPropertyGetSupportAction001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXTINPUT_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+
+    auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+
+    auto textFieldAccessibilityProperty = frameNode->GetAccessibilityProperty<TextFieldAccessibilityProperty>();
+    ASSERT_NE(textFieldAccessibilityProperty, nullptr);
+
+    textFieldLayoutProperty->UpdateCopyOptions(CopyOptions::InApp);
+    textFieldAccessibilityProperty->ResetSupportAction();
+    std::unordered_set<AceAction> supportAceActions = textFieldAccessibilityProperty->GetSupportAction();
+    uint64_t actions = 0, expectActions = 0;
+    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_COPY);
+    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_PASTE);
+    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_CUT);
+    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SELECT);
+    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SET_SELECTION);
+    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_CLEAR_SELECTION);
+    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SET_TEXT);
+    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_NEXT_AT_MOVEMENT_GRANULARITY);
+    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY);
+    for (auto action : supportAceActions) {
+        actions |= 1UL << static_cast<uint32_t>(action);
+    }
+    EXPECT_EQ(actions, expectActions);
 }
 } // namespace OHOS::Ace::NG

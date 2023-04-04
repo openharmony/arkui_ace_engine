@@ -40,6 +40,8 @@ public:
 
     bool IsMultiLine() const override;
 
+    bool IsSelected() const override;
+
     int32_t GetTextSelectionStart() const override;
 
     int32_t GetTextSelectionEnd() const override;
@@ -58,6 +60,8 @@ public:
     std::string GetErrorText() const override;
 
     bool GetContentInvalid() const override;
+
+    bool IsScrollable() const override;
 
 protected:
     void SetSpecificSupportAction() override;
