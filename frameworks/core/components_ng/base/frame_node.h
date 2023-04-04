@@ -326,6 +326,21 @@ public:
         exclusiveEventForChild_ = exclusiveEventForChild;
     }
 
+    void SetDraggable(bool draggable)
+    {
+        draggable_ = draggable;
+        userSet_ = true;
+    }
+
+    bool IsDraggable() const
+    {
+        return draggable_;
+    }
+
+    bool IsUserSet() const
+    {
+        return userSet_;
+    }
 
 private:
     void MarkNeedRender(bool isRenderBoundary);
@@ -409,6 +424,9 @@ private:
     bool isInternal_ = false;
 
     std::string nodeName_;
+
+    bool draggable_ = false;
+    bool userSet_ = false;
 
     friend class RosenRenderContext;
     friend class RenderContext;

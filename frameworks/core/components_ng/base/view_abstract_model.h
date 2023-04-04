@@ -179,6 +179,7 @@ public:
     virtual void SetOnFocusMove(std::function<void(int32_t)>&& onFocusMoveCallback) = 0;
     virtual void SetOnFocus(OnFocusFunc&& onFocusCallback) = 0;
     virtual void SetOnBlur(OnBlurFunc&& onBlurCallback) = 0;
+    virtual void SetDraggable(bool draggable) = 0;
     virtual void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) = 0;
     virtual void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) = 0;
     virtual void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) = 0;

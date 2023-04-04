@@ -562,6 +562,11 @@ public:
         ViewAbstract::SetOnBlur(std::move(onBlurCallback));
     }
 
+    void SetDraggable(bool draggable) override
+    {
+        ViewAbstract::SetDraggable(draggable);
+    }
+
     void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override
     {
         auto dragStart = [dragStartFunc = std::move(onDragStart)](const RefPtr<OHOS::Ace::DragEvent>& event,
