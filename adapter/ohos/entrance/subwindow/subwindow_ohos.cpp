@@ -848,25 +848,12 @@ void SubwindowOhos::HideFilter()
     CHECK_NULL_VOID(parentAceContainer);
     auto parentPipeline = DynamicCast<NG::PipelineContext>(parentAceContainer->GetPipelineContext());
     CHECK_NULL_VOID(parentPipeline);
-    auto rootNode = parentPipeline->GetRootElement();
-    CHECK_NULL_VOID(rootNode);
-    auto childNode = AceType::DynamicCast<NG::FrameNode>(rootNode->GetFirstChild());
-    CHECK_NULL_VOID(childNode);
     auto manager = parentPipeline->GetOverlayManager();
     CHECK_NULL_VOID(manager);
-    if (manager->hasFilter) {
-        auto children = childNode->GetChildren();
-        rootNode->RemoveChild(childNode);
-        for (auto& child: children) {
-            childNode->RemoveChild(child);
-            child->MountToParent(rootNode);
-        }
-        manager->hasFilter = false;
-        rootNode->MarkDirtyNode(NG::PROPERTY_UPDATE_BY_CHILD_REQUEST);
-    }
+    manager->RemoveFilter();
 }
 
-void SubwindowOhos::HidePixelMap()
+void SubwindowOhos::HidePixelMap(bool startDrag, double localX, double localY)
 {
     auto parentAceContainer = Platform::AceContainer::GetContainer(parentContainerId_);
     CHECK_NULL_VOID(parentAceContainer);
@@ -874,7 +861,7 @@ void SubwindowOhos::HidePixelMap()
     CHECK_NULL_VOID(parentPipeline);
     auto manager = parentPipeline->GetOverlayManager();
     CHECK_NULL_VOID(manager);
-    manager->RemovePixelMap();
+    manager->RemovePixelMapAnimation(startDrag, localX, localY);
 }
 #endif // ENABLE_DRAG_FRAMEWORK
 } // namespace OHOS::Ace

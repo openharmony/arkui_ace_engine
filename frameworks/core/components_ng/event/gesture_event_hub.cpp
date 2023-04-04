@@ -37,6 +37,7 @@
 namespace OHOS::Ace::NG {
 #ifdef ENABLE_DRAG_FRAMEWORK
 using namespace Msdp::DeviceStatus;
+constexpr float PIXELMAP_DRAG_SCALE = 0.8f;
 #endif // ENABLE_DRAG_FRAMEWORK
 constexpr const char* HIT_TEST_MODE[] = {
     "HitTestMode.Default",
@@ -341,12 +342,23 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
 {
     auto eventHub = eventHub_.Upgrade();
     CHECK_NULL_VOID(eventHub);
-
-    if (!eventHub->HasOnDragStart()) {
-        LOGE("HandleOnDragStart: there is no onDragStart function.");
-        return;
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    if (frameNode->IsDraggable()) {
+        if (!eventHub->HasOnDragStart()) {
+            LOGE("Default support for drag and drop, but there is no onDragStart function.");
+            return;
+        }
+    } else {
+        if (frameNode->IsUserSet()) {
+            LOGE("User settings cannot be dragged");
+            return;
+        }
+        if (!eventHub->HasOnDragStart()) {
+            LOGE("The default does not support drag and drop, and there is no onDragStart function.");
+            return;
+        }
     }
-
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
 
@@ -369,14 +381,22 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
 
 #ifdef ENABLE_DRAG_FRAMEWORK
     std::shared_ptr<Media::PixelMap> pixelMap = pixelMap_->GetPixelMapSharedPtr();
-    uint32_t width = pixelMap_->GetWidth();
-    uint32_t height = pixelMap_->GetHeight();
+    if (pixelMap->GetWidth() > Msdp::DeviceStatus::MAX_PIXEL_MAP_WIDTH ||
+        pixelMap->GetHeight() > Msdp::DeviceStatus::MAX_PIXEL_MAP_HEIGHT) {
+            float scaleWidth = static_cast<float>(Msdp::DeviceStatus::MAX_PIXEL_MAP_WIDTH) / pixelMap->GetWidth();
+            float scaleHeight = static_cast<float>(Msdp::DeviceStatus::MAX_PIXEL_MAP_HEIGHT) / pixelMap->GetHeight();
+            float scale = std::min(scaleWidth, scaleHeight);
+            pixelMap->scale(scale, scale);
+    } else {
+        pixelMap->scale(PIXELMAP_DRAG_SCALE, PIXELMAP_DRAG_SCALE);
+    }
+    uint32_t width = pixelMap->GetWidth();
+    uint32_t height = pixelMap->GetHeight();
     DragData dragData {{pixelMap, width * PIXELMAP_WIDTH_RATE, height * PIXELMAP_HEIGHT_RATE}, {}, udKey,
         static_cast<int32_t>(info.GetSourceDevice()), 1, info.GetPointerId(), info.GetScreenLocation().GetX(),
-        info.GetScreenLocation().GetY(), info.GetDeviceId(), false };
+        info.GetScreenLocation().GetY(), info.GetDeviceId(), true};
     auto callback = [](const DragNotifyMsg& notifyMessage) {};
-    int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData, callback);
-    InteractionManager::GetInstance()->SetDragWindowVisible(true);
+    int32_t ret = Msdp::DeviceStatus::InteractionManager::GetInstance()->StartDrag(dragData, callback);
     if (ret != 0) {
         LOGE("InteractionManager: drag start error");
         return;

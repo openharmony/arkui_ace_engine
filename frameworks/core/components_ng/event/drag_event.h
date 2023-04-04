@@ -96,9 +96,11 @@ public:
 #ifdef ENABLE_DRAG_FRAMEWORK
     void SetFilter(const RefPtr<DragEventActuator>& actuator);
     void BindClickEvent(const RefPtr<DragEventActuator>& actuator, const RefPtr<FrameNode>& columnNode);
-    void SetPixelMap(const RefPtr<DragEventActuator>& actuator, const Offset& screenLocation);
+    void SetPixelMap(const RefPtr<DragEventActuator>& actuator, const Offset& localLocation);
     void HideFilter(const RefPtr<DragEventActuator>& actuator);
-    void HidePixelMap();
+    void HidePixelMap(bool startDrag = false, double localX = 0, double localY = 0);
+    void ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode);
+    bool GetIsBindOverlayValue(const RefPtr<DragEventActuator>& actuator);
 #endif // ENABLE_DRAG_FRAMEWORK
     PanDirection GetDirection() const
     {
