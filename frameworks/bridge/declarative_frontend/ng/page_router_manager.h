@@ -31,8 +31,7 @@
 
 namespace OHOS::Ace::NG {
 
-using LoadPageCallback = std::function<bool(const std::string&,
-    const std::function<void(const std::string&, int32_t)>&)>;
+using LoadPageCallback = std::function<bool(const std::string&)>;
 using LoadCardCallback = std::function<bool(const std::string&, int64_t cardId)>;
 
 enum class RouterMode {
@@ -165,8 +164,7 @@ private:
 
     // page operations
     void LoadPage(int32_t pageId, const RouterPageInfo& target, const std::string& params, bool isRestore = false,
-        bool needHideLast = true, bool needTransition = true,
-        const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr);
+        bool needHideLast = true, bool needTransition = true);
     void MovePageToFront(int32_t index, const RefPtr<FrameNode>& pageNode, const std::string& params, bool needHideLast,
         bool forceShowCurrent = false, bool needTransition = true);
     void PopPage(const std::string& params, bool needShowNext, bool needTransition);

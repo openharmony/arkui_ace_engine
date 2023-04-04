@@ -113,8 +113,7 @@ void SlidingPanelPattern::Update()
     auto mode = layoutProperty->GetPanelMode() == PanelMode::AUTO
                     ? PanelMode::FULL
                     : layoutProperty->GetPanelMode().value_or(PanelMode::HALF);
-    auto isShow = layoutProperty->GetIsShowValue(true);
-    if (mode_.value() != mode && isShow_.has_value() && isShow_.value() == isShow) {
+    if (mode_.value() != mode) {
         mode_ = mode;
         CheckPanelModeAndType();
         AnimateTo(defaultBlankHeights_[mode_.value_or(PanelMode::HALF)], mode_.value_or(PanelMode::HALF));
@@ -191,8 +190,9 @@ void SlidingPanelPattern::FirstLayout()
         return;
     }
     auto rootHeight = PipelineContext::GetCurrentRootHeight();
+    auto paintRectOffset = host->GetPaintRectOffset().GetY();
     CheckPanelModeAndType();
-    currentOffset_ = rootHeight;
+    currentOffset_ = rootHeight - paintRectOffset;
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     isShow_ = false;
 }
@@ -222,7 +222,8 @@ void SlidingPanelPattern::IsShowChanged(bool isShow)
     }
     isShow_ = false;
     auto rootHeight = PipelineContext::GetCurrentRootHeight();
-    AnimateTo(rootHeight, mode_.value_or(PanelMode::HALF));
+    auto paintRectOffset = host->GetPaintRectOffset().GetY();
+    AnimateTo(rootHeight - paintRectOffset, mode_.value_or(PanelMode::HALF));
     if (hasDragBar) {
         auto dragBar = GetDragBarNode();
         CHECK_NULL_VOID(dragBar);

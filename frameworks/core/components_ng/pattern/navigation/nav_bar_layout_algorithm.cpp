@@ -47,16 +47,6 @@ float MeasureTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& ho
         titleBarWrapper->Measure(constraint);
         return 0.0f;
     }
-    auto titleBarFrameNode = AceType::DynamicCast<FrameNode>(titleBarNode);
-    CHECK_NULL_RETURN(titleBarFrameNode, 0.0f);
-    auto titleBarLayoutProperty = titleBarFrameNode->GetLayoutProperty<TitleBarLayoutProperty>();
-    CHECK_NULL_RETURN(titleBarLayoutProperty, 0.0f);
-    if (titleBarLayoutProperty->HasTitleHeight()) {
-        constraint.selfIdealSize.SetHeight(
-            static_cast<float>(titleBarLayoutProperty->GetTitleHeightValue().ConvertToPx()));
-        titleBarWrapper->Measure(constraint);
-        return titleBarLayoutProperty->GetTitleHeight()->ConvertToPx();
-    }
 
     // MINI 模式
     if (navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI) {

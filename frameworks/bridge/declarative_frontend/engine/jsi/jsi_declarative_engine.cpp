@@ -1187,13 +1187,12 @@ void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
     }
 }
 
-bool JsiDeclarativeEngine::LoadJsWithModule(const std::string& urlName,
-    const std::function<void(const std::string&, int32_t)>& errorCallback)
+bool JsiDeclarativeEngine::LoadJsWithModule(const std::string& urlName)
 {
     auto runtime = engineInstance_->GetJsRuntime();
     auto vm = const_cast<EcmaVM*>(std::static_pointer_cast<ArkJSRuntime>(runtime)->GetEcmaVm());
     if (!JSNApi::IsBundle(vm)) {
-        if (!runtime->ExecuteJsBin(urlName, errorCallback)) {
+        if (!runtime->ExecuteJsBin(urlName)) {
             LOGE("ExecuteJsBin %{private}s failed.", urlName.c_str());
         }
         return true;
@@ -1220,8 +1219,7 @@ bool JsiDeclarativeEngine::LoadFaAppSource()
 }
 
 // Load the js file of the page in NG structure..
-bool JsiDeclarativeEngine::LoadPageSource(const std::string& url,
-    const std::function<void(const std::string&, int32_t)>& errorCallback)
+bool JsiDeclarativeEngine::LoadPageSource(const std::string& url)
 {
     ACE_SCOPED_TRACE("JsiDeclarativeEngine::LoadPageSource");
     LOGI("JsiDeclarativeEngine LoadJs %{private}s page", url.c_str());
@@ -1240,7 +1238,7 @@ bool JsiDeclarativeEngine::LoadPageSource(const std::string& url,
     }
 
 #if !defined(PREVIEW)
-    if (LoadJsWithModule(urlName.value(), errorCallback)) {
+    if (LoadJsWithModule(urlName.value())) {
         return true;
     }
 #else

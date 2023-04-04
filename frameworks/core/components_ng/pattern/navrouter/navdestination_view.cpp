@@ -191,8 +191,6 @@ void NavDestinationView::SetTitle(const std::string& title)
         }
         // update title content only without changing node
         titleProperty->UpdateContent(title);
-        titleNode->MarkModifyDone();
-        titleNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         navDestinationNode->UpdateTitleNodeOperation(ChildNodeOperation::NONE);
         return;
     } while (false);

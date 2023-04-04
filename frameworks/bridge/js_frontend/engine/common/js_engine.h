@@ -95,8 +95,7 @@ public:
     }
 
     // Load the je file of the page in NG structure..
-    virtual bool LoadPageSource(const std::string& /*url*/,
-        const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr)
+    virtual bool LoadPageSource(const std::string& /*url*/)
     {
         return false;
     }

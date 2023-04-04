@@ -90,13 +90,12 @@ void DeclarativeFrontendNG::SetAssetManager(const RefPtr<AssetManager>& assetMan
 void DeclarativeFrontendNG::InitializeDelegate(const RefPtr<TaskExecutor>& taskExecutor)
 {
     auto pageRouterManager = AceType::MakeRefPtr<NG::PageRouterManager>();
-    auto loadPageCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](const std::string& url,
-        const std::function<void(const std::string&, int32_t)>& errorCallback) {
+    auto loadPageCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](const std::string& url) {
         auto jsEngine = weakEngine.Upgrade();
         if (!jsEngine) {
             return false;
         }
-        return jsEngine->LoadPageSource(url, errorCallback);
+        return jsEngine->LoadPageSource(url);
     };
     pageRouterManager->SetLoadJsCallback(std::move(loadPageCallback));
 
