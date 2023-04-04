@@ -586,6 +586,11 @@ public:
         ViewAbstract::SetOnDragEnter(std::move(onDragEnter));
     }
 
+    void SetOnDragEnd(OnNewDragFunc&& onDragEnd) override
+    {
+        ViewAbstract::SetOnDragEnd(std::move(onDragEnd));
+    }
+
     void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) override
     {
         ViewAbstract::SetOnDragLeave(std::move(onDragLeave));

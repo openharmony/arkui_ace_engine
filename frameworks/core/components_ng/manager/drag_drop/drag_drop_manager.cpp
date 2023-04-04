@@ -28,6 +28,9 @@
 #ifdef ENABLE_DRAG_FRAMEWORK
 #include "base/geometry/rect.h"
 #include "base/msdp/device_status/interfaces/innerkits/interaction/include/interaction_manager.h"
+#include "unified_data.h"
+#include "udmf_client.h"
+#include "unified_types.h"
 #endif // ENABLE_DRAG_FRAMEWORK
 
 namespace OHOS::Ace::NG {
@@ -330,10 +333,20 @@ void DragDropManager::OnDragEnd(float globalX, float globalY, const std::string&
         auto extraParams = eventHub->GetDragExtraParams(extraInfo, Point(globalX, globalY), DragEventType::DROP);
 #ifdef ENABLE_DRAG_FRAMEWORK
         InteractionManager::GetInstance()->SetDragWindowVisible(false);
+        std::string udKey;
+        InteractionManager::GetInstance()->GetUdKey(udKey);
+        if (udKey.empty()) {
+            LOGE("OnDragEnd InteractionManager GetUdkey is null");
+        }
+        std::shared_ptr<UDMF::UnifiedData> unifiedData = nullptr;
+        int32_t ret = GetDragData(udKey, unifiedData);
+        if (ret == 0) {
+            event->SetData(unifiedData);
+        }
 #endif // ENABLE_DRAG_FRAMEWORK
         eventHub->FireOnDrop(event, extraParams);
 #ifdef ENABLE_DRAG_FRAMEWORK
-        InteractionManager::GetInstance()->StopDrag(DragResult::DRAG_SUCCESS, true);
+        InteractionManager::GetInstance()->StopDrag(DragResult::DRAG_SUCCESS, event->IsUseCustomAnimation());
 #endif // ENABLE_DRAG_FRAMEWORK
         break;
     }
@@ -656,6 +669,19 @@ RefPtr<DragDropProxy> DragDropManager::CreateFrameworkDragDropProxy()
     isDragged_ = true;
     currentId_ = ++g_proxyId;
     return MakeRefPtr<DragDropProxy>(currentId_);
+}
+int32_t DragDropManager::GetDragData(const std::string& udKey, std::shared_ptr<UDMF::UnifiedData>& unifiedData)
+{
+    auto udmfClient = UDMF::UdmfClient::GetInstance();
+    UDMF::UnifiedData udData;
+    UDMF::QueryOption queryOption;
+    queryOption.key = udKey;
+    int ret = udmfClient.GetData(queryOption, udData);
+    if (ret != 0) {
+        LOGE("OnDragEnd UDMF GetData failed: %{public}d", ret);
+    }
+    unifiedData = std::make_shared<UDMF::UnifiedData>(udData);
+    return ret;
 }
 #endif // ENABLE_DRAG_FRAMEWORK
 } // namespace OHOS::Ace::NG

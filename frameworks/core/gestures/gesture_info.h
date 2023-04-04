@@ -33,6 +33,14 @@
 #include "core/gestures/velocity.h"
 #include "core/gestures/velocity_tracker.h"
 
+#ifdef ENABLE_DRAG_FRAMEWORK
+#include "base/geometry/rect.h"
+namespace OHOS::UDMF {
+class UnifiedData;
+struct Summary;
+}
+#endif
+
 namespace OHOS::Ace {
 
 constexpr int32_t DEFAULT_PAN_FINGER = 1;
@@ -232,6 +240,16 @@ private:
     std::string plainText_;
 };
 
+#ifdef ENABLE_DRAG_FRAMEWORK
+enum class DragRet {
+    DRAG_SUCCESS = 0,
+    DRAG_FAIL,
+    DRAG_CANCEL,
+    ENABLE_DROP,
+    DISABLE_DROP,
+};
+#endif
+
 class DragEvent : public AceType {
     DECLARE_ACE_TYPE(DragEvent, AceType)
 
@@ -289,12 +307,51 @@ public:
         return pixelMap_;
     }
 
+#ifdef ENABLE_DRAG_FRAMEWORK
+    void SetData(std::shared_ptr<UDMF::UnifiedData>& unifiedData);
+
+    std::shared_ptr<UDMF::UnifiedData>& GetData();
+
+    void SetSummary(std::shared_ptr<UDMF::Summary>& summary);
+
+    std::shared_ptr<UDMF::Summary>& GetSummary();
+
+    void SetResult(DragRet dragRet);
+
+    DragRet GetResult();
+
+    void SetPreviewRect(Rect previewRect);
+
+    Rect GetPreviewRect();
+
+    void UseCustomAnimation(bool useCustomAnimation);
+
+    bool IsUseCustomAnimation();
+
+    void SetDragInfo(std::shared_ptr<UDMF::UnifiedData>& dragInfo);
+
+    std::shared_ptr<UDMF::UnifiedData>& GetDragInfo();
+
+    void SetCopy(bool copy);
+
+    bool IsCopy();
+#endif
+
 private:
     RefPtr<PasteData> pasteData_;
     double x_ = 0.0;
     double y_ = 0.0;
     std::string description_;
     RefPtr<PixelMap> pixelMap_;
+#ifdef ENABLE_DRAG_FRAMEWORK
+    std::shared_ptr<UDMF::UnifiedData> unifiedData_;
+    std::shared_ptr<UDMF::Summary> summary_;
+    DragRet dragRet_;
+    Rect previewRect_;
+    bool useCustomAnimation_ = false;
+    std::shared_ptr<UDMF::UnifiedData> dragInfo_;
+    bool copy_ = true;
+#endif
 };
 
 struct FingerInfo {

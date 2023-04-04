@@ -25,6 +25,12 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
 
+#ifdef ENABLE_DRAG_FRAMEWORK
+namespace OHOS::UDMF {
+class UnifiedData;
+}
+#endif
+
 namespace OHOS::Ace::NG {
 
 class ACE_EXPORT DragDropManager : public virtual AceType {
@@ -74,6 +80,7 @@ public:
     void DestroyDragWindow();
 #ifdef ENABLE_DRAG_FRAMEWORK
     RefPtr<DragDropProxy> CreateFrameworkDragDropProxy();
+    int32_t GetDragData(const std::string& udKey, std::shared_ptr<UDMF::UnifiedData>& unifiedData);
     void UpdatePixelMapPosition(int32_t globalX, int32_t globalY);
 #endif // ENABLE_DRAG_FRAMEWORK
 

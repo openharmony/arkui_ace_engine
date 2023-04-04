@@ -30,6 +30,9 @@
 
 #ifdef ENABLE_DRAG_FRAMEWORK
 #include "base/msdp/device_status/interfaces/innerkits/interaction/include/interaction_manager.h"
+#include "unified_data.h"
+#include "udmf_client.h"
+#include "unified_types.h"
 #endif // ENABLE_DRAG_FRAMEWORK
 namespace OHOS::Ace::NG {
 #ifdef ENABLE_DRAG_FRAMEWORK
@@ -364,6 +367,11 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     event->SetY(pipeline->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetY(), DimensionUnit::PX)));
     auto extraParams = eventHub->GetDragExtraParams(std::string(), info.GetGlobalPoint(), DragEventType::START);
     auto dragDropInfo = (eventHub->GetOnDragStart())(event, extraParams);
+#ifdef ENABLE_DRAG_FRAMEWORK
+    std::string udKey;
+    auto unifiedData = event->GetData();
+    SetDragData(unifiedData, udKey);
+#endif // ENABLE_DRAG_FRAMEWORK
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
 
@@ -384,7 +392,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     }
     uint32_t width = pixelMap->GetWidth();
     uint32_t height = pixelMap->GetHeight();
-    DragData dragData {{pixelMap, width * PIXELMAP_WIDTH_RATE, height * PIXELMAP_HEIGHT_RATE}, {}, "",
+    DragData dragData {{pixelMap, width * PIXELMAP_WIDTH_RATE, height * PIXELMAP_HEIGHT_RATE}, {}, udKey,
         static_cast<int32_t>(info.GetSourceDevice()), 1, info.GetPointerId(), info.GetScreenLocation().GetX(),
         info.GetScreenLocation().GetY(), info.GetDeviceId(), true};
     auto callback = [](const DragNotifyMsg& notifyMessage) {};
@@ -565,6 +573,23 @@ bool GestureEventHub::KeyBoardShortCutClick(const KeyEvent& event, const WeakPtr
     return true;
 }
 
+#ifdef ENABLE_DRAG_FRAMEWORK
+int32_t GestureEventHub::SetDragData(std::shared_ptr<UDMF::UnifiedData>& unifiedData, std::string& udKey)
+{
+    if (unifiedData == nullptr) {
+        LOGE("HandleOnDragStart: SetDragData unifiedData is null");
+        return -1;
+    }
+    auto udmfClient = UDMF::UdmfClient::GetInstance();
+    UDMF::CustomOption udCustomOption;
+    udCustomOption.intention = UDMF::Intention::UD_INTENTION_DRAG;
+    int32_t ret = udmfClient.SetData(udCustomOption, *unifiedData, udKey);
+    if (ret != 0) {
+        LOGE("HandleOnDragStart: UDMF Setdata failed:%{public}d", ret);
+    }
+    return ret;
+}
+#endif
 bool GestureEventHub::IsAccessibilityClickable()
 {
     bool ret = IsClickable();

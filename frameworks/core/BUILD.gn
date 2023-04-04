@@ -439,6 +439,7 @@ template("ace_core_source_set") {
       deps += [ "$ace_root/frameworks/core/image/apng:ace_core_apng_$platform" ]
     }
 
+    external_deps = []
     if (defined(config.form_components_support) &&
         config.form_components_support) {
       if (!use_mingw_win && !use_mac && !use_linux) {
@@ -447,8 +448,13 @@ template("ace_core_source_set") {
           "$ace_root/frameworks/core/components/form:ace_core_components_form_$platform",
           "$ace_root/frameworks/core/components_ng/pattern/form:ace_core_components_form_pattern_ng_$platform",
         ]
-        external_deps = [ "form_fwk:form_manager" ]
+        external_deps += [ "form_fwk:form_manager" ]
       }
+    }
+
+    if (defined(config.enable_drag_framework) && config.enable_drag_framework) {
+      sources += [ "gestures/gesture_info.cpp" ]
+      external_deps += [ "udmf:udmf_client" ]
     }
 
     if (defined(config.remote_window_support) && config.remote_window_support) {
@@ -743,6 +749,11 @@ template("ace_core_ng_source_set") {
 
     defines += uicast_configs.uicast_defines
     sources += uicast_configs.uicast_core_sources
+
+    if (defined(config.enable_drag_framework) && config.enable_drag_framework) {
+      sources += [ "gestures/gesture_info.cpp" ]
+      external_deps = [ "udmf:udmf_client" ]
+    }
 
     if (defined(config.build_container_scope_lib) &&
         config.build_container_scope_lib) {

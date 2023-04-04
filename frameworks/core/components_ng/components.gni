@@ -118,6 +118,11 @@ template("build_component_ng") {
         include_dirs += [
           "//base/msdp/device_status/interfaces/innerkits/interaction/include",
         ]
+        if (defined(external_deps)) {
+          external_deps += [ "udmf:udmf_client" ]
+        } else {
+          external_deps = [ "udmf:udmf_client" ]
+        }
       }
 
       if (defined(config.model_component_support) &&
