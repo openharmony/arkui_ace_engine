@@ -47,12 +47,22 @@
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline/pipeline_context.h"
 
+#ifdef ENABLE_DRAG_FRAMEWORK
+#include "base/msdp/device_status/interfaces/innerkits/interaction/include/interaction_manager.h"
+#endif // ENABLE_DRAG_FRAMEWORK
+
 namespace OHOS::Ace::NG {
 namespace {
 // should be moved to theme.
 constexpr int32_t TOAST_ANIMATION_DURATION = 100;
 constexpr int32_t MENU_ANIMATION_DURATION = 150;
 constexpr float TOAST_ANIMATION_POSITION = 15.0f;
+#ifdef ENABLE_DRAG_FRAMEWORK
+constexpr float PIXELMAP_ANIMATION_WIDTH_RATE = 0.5f;
+constexpr float PIXELMAP_ANIMATION_HEIGHT_RATE = 0.2f;
+constexpr float PIXELMAP_DRAG_SCALE = 0.8f;
+constexpr int32_t PIXELMAP_ANIMATION_DURATION = 300;
+#endif // ENABLE_DRAG_FRAMEWORK
 
 // dialog animation params
 const RefPtr<Curve> SHOW_SCALE_ANIMATION_CURVE = AceType::MakeRefPtr<CubicCurve>(0.38f, 1.33f, 0.6f, 1.0f);
@@ -410,7 +420,7 @@ void OverlayManager::UpdatePopupNode(int32_t targetId, const PopupInfo& popupInf
         popupInfo.popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
         rootNode->RemoveChild(popupMap_[targetId].popupNode);
 #ifdef ENABLE_DRAG_FRAMEWORK
-        RemovePixelMap();
+        RemovePixelMapAnimation(false, 0, 0);
         RemoveFilter();
 #endif // ENABLE_DRAG_FRAMEWORK
     } else {
@@ -929,9 +939,6 @@ void OverlayManager::BindContentCover(bool isShow, std::function<void(const std:
 #ifdef ENABLE_DRAG_FRAMEWORK
 void OverlayManager::MountToRootNode(const RefPtr<FrameNode>& columnNode)
 {
-    if (hasPixelMap) {
-        return;
-    }
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
     auto parent = rootNode->GetParent();
@@ -943,12 +950,12 @@ void OverlayManager::MountToRootNode(const RefPtr<FrameNode>& columnNode)
     columnNode->OnMountToParentDone();
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
     columnNodeWeak_ = columnNode;
-    hasPixelMap = true;
+    hasPixelMap_ = true;
 }
 
 void OverlayManager::RemovePixelMap()
 {
-    if (!hasPixelMap) {
+    if (!hasPixelMap_) {
         return;
     }
     auto rootNode = rootNodeWeak_.Upgrade();
@@ -959,27 +966,105 @@ void OverlayManager::RemovePixelMap()
         parent = parent->GetParent();
     }
     rootNode->RemoveChild(columnNodeWeak_.Upgrade());
+    rootNode->RebuildRenderContextTree();
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
-    hasPixelMap = false;
+    hasPixelMap_ = false;
+}
+
+void OverlayManager::RemovePixelMapAnimation(bool startDrag, double localX, double localY)
+{
+    if (!hasPixelMap_) {
+        return;
+    }
+    auto columnNode = columnNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(columnNode);
+    auto imageNode = AceType::DynamicCast<FrameNode>(columnNode->GetFirstChild());
+    CHECK_NULL_VOID(imageNode);
+    auto imageContext = imageNode->GetRenderContext();
+    CHECK_NULL_VOID(imageContext);
+    auto hub = columnNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(hub);
+    RefPtr<PixelMap> pixelMap = hub->GetPixelMap();
+    CHECK_NULL_VOID(pixelMap);
+    float scale = PIXELMAP_DRAG_SCALE;
+    UpdatePixelMapScale(scale);
+    auto width = pixelMap->GetWidth();
+    auto height = pixelMap->GetHeight();
+
+    AnimationOption option;
+    option.SetDuration(PIXELMAP_ANIMATION_DURATION);
+    option.SetCurve(Curves::SHARP);
+    option.SetOnFinishEvent([this, id = Container::CurrentId()] {
+        ContainerScope scope(id);
+        Msdp::DeviceStatus::InteractionManager::GetInstance()->SetDragWindowVisible(true);
+        RemovePixelMap();
+    });
+    auto shadow = imageContext->GetBackShadow();
+    if (!shadow.has_value()) {
+        shadow = Shadow::CreateShadow(ShadowStyle::None);
+    }
+    imageContext->UpdateBackShadow(shadow.value());
+
+    AnimationUtils::Animate(
+        option,
+        [imageContext, shadow, startDrag, localX, localY, width, height, scale]() mutable {
+            auto color = shadow->GetColor();
+            auto newColor = Color::FromARGB(1, color.GetRed(), color.GetGreen(), color.GetBlue());
+            if (startDrag) {
+                imageContext->UpdatePosition(OffsetT<Dimension>(
+                    Dimension(localX - width * scale * PIXELMAP_ANIMATION_WIDTH_RATE),
+                    Dimension(localY - height * scale * PIXELMAP_ANIMATION_HEIGHT_RATE)));
+                imageContext->UpdateTransformScale({ scale, scale });
+                imageContext->OnModifyDone();
+            } else {
+                shadow->SetColor(newColor);
+                imageContext->UpdateBackShadow(shadow.value());
+                imageContext->UpdateTransformScale({ 1.0, 1.0 });
+            }
+        },
+        option.GetOnFinishEvent());
+}
+
+void OverlayManager::UpdatePixelMapScale(float& scale)
+{
+    auto columnNode = columnNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(columnNode);
+    auto hub = columnNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(hub);
+    RefPtr<PixelMap> pixelMap = hub->GetPixelMap();
+    CHECK_NULL_VOID(pixelMap);
+    if (pixelMap->GetWidth() > Msdp::DeviceStatus::MAX_PIXEL_MAP_WIDTH ||
+        pixelMap->GetHeight() > Msdp::DeviceStatus::MAX_PIXEL_MAP_HEIGHT) {
+            float scaleWidth = static_cast<float>(Msdp::DeviceStatus::MAX_PIXEL_MAP_WIDTH) / pixelMap->GetWidth();
+            float scaleHeight = static_cast<float>(Msdp::DeviceStatus::MAX_PIXEL_MAP_HEIGHT) / pixelMap->GetHeight();
+            scale = std::min(scaleWidth, scaleHeight);
+    }
 }
 
 void OverlayManager::RemoveFilter()
 {
-    if (!hasFilter) {
+    if (!hasFilter_) {
         return;
     }
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
+    auto parent = rootNode->GetParent();
+    while (parent) {
+        rootNode = AceType::DynamicCast<FrameNode>(parent);
+        parent = parent->GetParent();
+    }
     auto childNode = AceType::DynamicCast<NG::FrameNode>(rootNode->GetFirstChild());
     CHECK_NULL_VOID(childNode);
     auto children = childNode->GetChildren();
     rootNode->RemoveChild(childNode);
+    int32_t slot = 0;
     for (auto& child: children) {
         childNode->RemoveChild(child);
-        child->MountToParent(rootNode);
+        child->MountToParent(rootNode, slot);
+        slot++;
     }
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
-    hasFilter = false;
+    hasFilter_ = false;
 }
 #endif // ENABLE_DRAG_FRAMEWORK
 } // namespace OHOS::Ace::NG

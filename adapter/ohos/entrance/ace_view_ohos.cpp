@@ -108,7 +108,7 @@ void AceViewOhos::DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MM
         } else {
             LOGD("ProcessMouseEvent");
 #ifdef ENABLE_DRAG_FRAMEWORK
-            ProcessDragEvent(pointerEvent);
+            view->ProcessDragEvent(pointerEvent);
 #endif // ENABLE_DRAG_FRAMEWORK
             view->ProcessMouseEvent(pointerEvent);
         }
@@ -116,7 +116,7 @@ void AceViewOhos::DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MM
         // touch event
         LOGD("ProcessTouchEvent");
 #ifdef ENABLE_DRAG_FRAMEWORK
-        ProcessDragEvent(pointerEvent);
+        view->ProcessDragEvent(pointerEvent);
 #endif // ENABLE_DRAG_FRAMEWORK
         view->ProcessTouchEvent(pointerEvent);
     }
@@ -207,7 +207,7 @@ void AceViewOhos::ProcessDragEvent(const std::shared_ptr<MMI::PointerEvent>& poi
     switch (orgAction) {
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_MOVE: {
             action = DragEventAction::DRAG_EVENT_MOVE;
-            ProcessDragEvent(pointerItem.GetDisplayX(), pointerItem.GetDisplayY(), action);
+            ProcessDragEvent(pointerItem.GetWindowX(), pointerItem.GetWindowY(), action);
             break;
         }
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP: {

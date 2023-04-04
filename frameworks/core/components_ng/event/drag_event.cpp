@@ -24,6 +24,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #ifdef ENABLE_DRAG_FRAMEWORK
 #include "base/subwindow/subwindow_manager.h"
+#include "core/animation/animation_pub.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -38,7 +39,9 @@ constexpr int32_t PAN_FINGER = 1;
 constexpr double PAN_DISTANCE = 5.0;
 constexpr int32_t LONG_PRESS_DURATION = 500;
 #ifdef ENABLE_DRAG_FRAMEWORK
-constexpr float FILTER_RADIUS = 1000;
+constexpr float FILTER_RADIUS = 100.0f;
+constexpr float PIXELMAP_ANIMATION_SCALE = 1.1f;
+constexpr int32_t PIXELMAP_ANIMATION_DURATION = 300;
 #endif // ENABLE_DRAG_FRAMEWORK
 } // namespace
 
@@ -66,7 +69,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
 #ifdef ENABLE_DRAG_FRAMEWORK
-        HidePixelMap();
+        HidePixelMap(true, info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY());
         HideFilter(actuator);
         SubwindowManager::GetInstance()->HideMenuNG();
 #endif // ENABLE_DRAG_FRAMEWORK
@@ -116,10 +119,19 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         }
     };
     panRecognizer_->SetOnActionEnd(actionEnd);
-
+#ifdef ENABLE_DRAG_FRAMEWORK
+    auto actionCancel = [weak = WeakClaim(this), this]() {
+#else
     auto actionCancel = [weak = WeakClaim(this)]() {
+#endif // ENABLE_DRAG_FRAMEWORK
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
+#ifdef ENABLE_DRAG_FRAMEWORK
+        if (!GetIsBindOverlayValue(actuator)) {
+            HidePixelMap();
+            HideFilter(actuator);
+        }
+#endif // ENABLE_DRAG_FRAMEWORK
         CHECK_NULL_VOID(actuator->userCallback_);
         auto userActionCancel = actuator->userCallback_->GetActionCancelEventFunc();
         if (userActionCancel) {
@@ -169,7 +181,7 @@ void DragEventActuator::SetFilter(const RefPtr<DragEventActuator>& actuator)
     CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(manager);
-    if (!manager->hasFilter) {
+    if (!manager->GetHasFilter()) {
         // insert columnNode to rootNode
         auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             AceType::MakeRefPtr<LinearLayoutPattern>(true));
@@ -180,9 +192,8 @@ void DragEventActuator::SetFilter(const RefPtr<DragEventActuator>& actuator)
         }
         columnNode->MountToParent(parent);
         columnNode->OnMountToParentDone();
-        columnNodeWeak_ = columnNode;
         BindClickEvent(actuator, columnNode);
-        manager->hasFilter = true;
+        manager->SetHasFilter(true);
         parent->MarkDirtyNode(NG::PROPERTY_UPDATE_BY_CHILD_REQUEST);
         // set filter
         bool isBindOverlayValue = frameNode->GetLayoutProperty()->GetIsBindOverlayValue(false);
@@ -212,18 +223,31 @@ void DragEventActuator::BindClickEvent(const RefPtr<DragEventActuator>& actuator
     columnGestureHub->AddClickEvent(clickListener);
 }
 
-void DragEventActuator::SetPixelMap(const RefPtr<DragEventActuator>& actuator, const Offset& screenLocation)
+void DragEventActuator::SetPixelMap(const RefPtr<DragEventActuator>& actuator, const Offset& localLocation)
 {
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto manager = pipelineContext->GetOverlayManager();
+    CHECK_NULL_VOID(manager);
+    if (manager->GetHasPixelMap()) {
+        return;
+    }
     auto gestureHub = actuator->gestureEventHub_.Upgrade();
     CHECK_NULL_VOID(gestureHub);
     auto frameNode = gestureHub->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
+    auto pixelMapGeometryNode = frameNode->GetGeometryNode();
+    CHECK_NULL_VOID(pixelMapGeometryNode);
     RefPtr<PixelMap> pixelMap = gestureHub->GetPixelMap();
     auto width = pixelMap->GetWidth();
     auto height = pixelMap->GetHeight();
-    auto offsetX = screenLocation.GetX() - width / 2;
-    auto offsetY = screenLocation.GetY() - height / 2;
-    // craete ImageNode
+    auto offsetX = pixelMapGeometryNode->GetFrameOffset().GetX();
+    auto offsetY = pixelMapGeometryNode->GetFrameOffset().GetY();
+    if (offsetX == 0 && offsetY == 0) {
+        offsetX = localLocation.GetX() - width / 2;
+        offsetY = localLocation.GetY() - height / 2;
+    }
+    // craete imageNode
     auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<ImagePattern>(); });
     auto props = imageNode->GetLayoutProperty<ImageLayoutProperty>();
@@ -233,54 +257,73 @@ void DragEventActuator::SetPixelMap(const RefPtr<DragEventActuator>& actuator, c
     auto imageContext = imageNode->GetRenderContext();
     CHECK_NULL_VOID(imageContext);
     imageContext->UpdateOffset(OffsetT<Dimension>(Dimension(offsetX), Dimension(offsetY)));
-    // create ColumnNode
+    // create columnNode
     auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     columnNode->AddChild(imageNode);
+    BindClickEvent(actuator, columnNode);
+    auto hub = columnNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(hub);
+    hub->SetPixelMap(gestureHub->GetPixelMap());
     // mount to rootNode
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto manager = pipelineContext->GetOverlayManager();
-    CHECK_NULL_VOID(manager);
     manager->MountToRootNode(columnNode);
     imageNode->MarkModifyDone();
+    ShowPixelMapAnimation(imageNode);
 }
 
 void DragEventActuator::HideFilter(const RefPtr<DragEventActuator>& actuator)
 {
-    auto gestureHub = actuator->gestureEventHub_.Upgrade();
-    CHECK_NULL_VOID(gestureHub);
-    auto frameNode = gestureHub->GetFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto parent = frameNode->GetParent();
-    CHECK_NULL_VOID(parent);
-    while (parent->GetDepth() != 1) {
-        parent = parent->GetParent();
-    }
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(manager);
-    if (manager->hasFilter) {
-        auto columnNode = columnNodeWeak_.Upgrade();
-        auto children = columnNode->GetChildren();
-        parent->RemoveChild(columnNode);
-        for (auto& child: children) {
-            columnNode->RemoveChild(child);
-            child->MountToParent(parent);
-        }
-        manager->hasFilter = false;
-        parent->MarkDirtyNode(NG::PROPERTY_UPDATE_BY_CHILD_REQUEST);
-    }
+    manager->RemoveFilter();
 }
 
-void DragEventActuator::HidePixelMap()
+void DragEventActuator::HidePixelMap(bool startDrag, double localX, double localY)
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(manager);
-    manager->RemovePixelMap();
+    manager->RemovePixelMapAnimation(startDrag, localX, localY);
+}
+
+void DragEventActuator::ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode)
+{
+    auto imageContext = imageNode->GetRenderContext();
+    CHECK_NULL_VOID(imageContext);
+    // pixel map animation
+    AnimationOption option;
+    option.SetDuration(PIXELMAP_ANIMATION_DURATION);
+    option.SetCurve(Curves::SHARP);
+    imageContext->UpdateTransformScale( { 1, 1 } );
+    auto shadow = imageContext->GetBackShadow();
+    if (!shadow.has_value()) {
+        shadow = Shadow::CreateShadow(ShadowStyle::None);
+    }
+    imageContext->UpdateBackShadow(shadow.value());
+
+    AnimationUtils::Animate(
+        option,
+        [imageContext, shadow]() mutable {
+            auto color = shadow->GetColor();
+            auto newColor = Color::FromARGB(1, color.GetRed(), color.GetGreen(), color.GetBlue());
+            shadow->SetColor(newColor);
+            imageContext->UpdateBackShadow(shadow.value());
+            imageContext->UpdateTransformScale({ PIXELMAP_ANIMATION_SCALE, PIXELMAP_ANIMATION_SCALE });
+        },
+        option.GetOnFinishEvent());
+}
+
+bool DragEventActuator::GetIsBindOverlayValue(const RefPtr<DragEventActuator>& actuator)
+{
+    auto gestureHub = actuator->gestureEventHub_.Upgrade();
+    CHECK_NULL_RETURN(gestureHub, true);
+    auto frameNode = gestureHub->GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, true);
+    bool isBindOverlayValue = frameNode->GetLayoutProperty()->GetIsBindOverlayValue(false);
+    return isBindOverlayValue;
 }
 #endif // ENABLE_DRAG_FRAMEWORK
 } // namespace OHOS::Ace::NG

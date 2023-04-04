@@ -127,7 +127,7 @@ private:
 
 #ifdef ENABLE_DRAG_FRAMEWORK
     void HideFilter();
-    void HidePixelMap();
+    void HidePixelMap(bool startDrag = false, double localX = 0, double localY = 0);
 #endif // ENABLE_DRAG_FRAMEWORK
     static int32_t id_;
     int32_t windowId_ = 0;
