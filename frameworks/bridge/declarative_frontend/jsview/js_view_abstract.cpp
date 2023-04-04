@@ -4471,7 +4471,7 @@ void JSViewAbstract::JsBindContentCover(const JSCallbackInfo& info)
     bool isShow = false;
     DoubleBindCallback callback = nullptr;
     if (info[0]->IsBoolean()) {
-        isShow = info[1]->ToBoolean();
+        isShow = info[0]->ToBoolean();
     } else if (info[0]->IsObject()) {
         JSRef<JSObject> callbackObj = JSRef<JSObject>::Cast(info[0]);
         callback = ParseDoubleBindCallback(info, callbackObj);
