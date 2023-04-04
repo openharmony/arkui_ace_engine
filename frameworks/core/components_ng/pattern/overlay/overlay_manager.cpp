@@ -39,6 +39,7 @@
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
+#include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_picker/textpicker_dialog_view.h"
@@ -59,6 +60,40 @@ constexpr float TOAST_ANIMATION_POSITION = 15.0f;
 // dialog animation params
 const RefPtr<Curve> SHOW_SCALE_ANIMATION_CURVE = AceType::MakeRefPtr<CubicCurve>(0.38f, 1.33f, 0.6f, 1.0f);
 
+void OnDialogCloseEvent(const RefPtr<UINode>& root, const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_VOID(root && node);
+    auto dialogPattern = node->GetPattern<DialogPattern>();
+    CHECK_NULL_VOID(dialogPattern);
+    auto option = dialogPattern->GetCloseAnimation().value_or(AnimationOption());
+    auto onFinish = option.GetOnFinishEvent();
+
+    auto dialogLayoutProp = dialogPattern->GetLayoutProperty<DialogLayoutProperty>();
+    bool isShowInSubWindow = false;
+    if (dialogLayoutProp) {
+        isShowInSubWindow = dialogLayoutProp->GetShowInSubWindowValue(false);
+    }
+    if (onFinish != nullptr) {
+        onFinish();
+    }
+
+    root->RemoveChild(node);
+    root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    auto lastChild = AceType::DynamicCast<FrameNode>(root->GetLastChild());
+    if (lastChild) {
+        auto pattern = lastChild->GetPattern();
+        if (!AceType::InstanceOf<StagePattern>(pattern)) {
+            LOGI("root has other overlay children.");
+            return;
+        }
+    }
+
+    auto container = Container::Current();
+    CHECK_NULL_VOID_NOLOG(container);
+    if (container->IsDialogContainer() || (container->IsSubContainer() && isShowInSubWindow)) {
+        SubwindowManager::GetInstance()->HideSubWindowNG();
+    }
+}
 } // namespace
 
 void OverlayManager::OpenDialogAnimation(const RefPtr<FrameNode>& node)
@@ -71,7 +106,7 @@ void OverlayManager::OpenDialogAnimation(const RefPtr<FrameNode>& node)
     auto root = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(root && node);
     node->MountToParent(root);
-    root->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
     AnimationOption option;
     // default opacity animation params
@@ -129,25 +164,26 @@ void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
     option = dialogPattern->GetCloseAnimation().value_or(option);
     auto onFinish = option.GetOnFinishEvent();
 
-    option.SetOnFinishEvent(
-        [rootWk = rootNodeWeak_, nodeWk = WeakClaim(RawPtr(node)), id = Container::CurrentId(), onFinish] {
-            ContainerScope scope(id);
-            auto root = rootWk.Upgrade();
-            auto node = nodeWk.Upgrade();
-            CHECK_NULL_VOID(root && node);
-            if (onFinish != nullptr) {
-                onFinish();
-            }
+    auto dialogLayoutProp = dialogPattern->GetLayoutProperty<DialogLayoutProperty>();
+    bool isShowInSubWindow = false;
+    if (dialogLayoutProp) {
+        isShowInSubWindow = dialogLayoutProp->GetShowInSubWindowValue(false);
+    }
 
-            root->RemoveChild(node);
-            root->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    option.SetOnFinishEvent([rootWk = rootNodeWeak_, nodeWk = WeakClaim(RawPtr(node)), id = Container::CurrentId()] {
+        ContainerScope scope(id);
+        auto root = rootWk.Upgrade();
+        auto node = nodeWk.Upgrade();
+        CHECK_NULL_VOID(root && node);
 
-            auto pipeline = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            auto overlayManager = pipeline->GetOverlayManager();
-            CHECK_NULL_VOID(overlayManager);
-            overlayManager->BlurOverlayNode();
-        });
+        OnDialogCloseEvent(root, node);
+
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto overlayManager = pipeline->GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+        overlayManager->BlurOverlayNode();
+    });
     auto ctx = node->GetRenderContext();
     CHECK_NULL_VOID(ctx);
     ctx->OpacityAnimation(option, theme->GetOpacityEnd(), theme->GetOpacityStart());
@@ -329,6 +365,14 @@ void OverlayManager::PopToast(int32_t toastId)
                 rootNode->RemoveChild(toastUnderPop);
                 overlayManager->toastMap_.erase(toastId);
                 rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+
+                auto container = Container::Current();
+                CHECK_NULL_VOID_NOLOG(container);
+                if (container->IsDialogContainer() ||
+                    (container->IsSubContainer() && rootNode->GetChildren().empty())) {
+                    // hide window when toast show in subwindow.
+                    SubwindowManager::GetInstance()->HideSubWindowNG();
+                }
             },
             TaskExecutor::TaskType::UI);
     });
@@ -680,8 +724,8 @@ bool OverlayManager::RemoveOverlay()
     RemoveIndexerPopup();
     auto childrenSize = rootNode->GetChildren().size();
     if (rootNode->GetChildren().size() > 1) {
-        // stage node is at index 0, remove overlay at index 1
-        auto overlay = DynamicCast<FrameNode>(rootNode->GetChildAtIndex(1));
+        // stage node is at index 0, remove overlay at last
+        auto overlay = DynamicCast<FrameNode>(rootNode->GetLastChild());
         CHECK_NULL_RETURN(overlay, false);
         // close dialog with animation
         auto pattern = overlay->GetPattern();
@@ -703,12 +747,61 @@ bool OverlayManager::RemoveOverlay()
             }
             return false;
         }
-        rootNode->RemoveChildAtIndex(1);
+        rootNode->RemoveChild(overlay);
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
         LOGI("overlay removed successfully");
         return true;
     }
     return false;
+}
+
+bool OverlayManager::RemoveOverlayInSubwindow()
+{
+    LOGI("OverlayManager::RemoveOverlayInSubwindow");
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_RETURN(rootNode, false);
+    if (rootNode->GetChildren().empty()) {
+        LOGI("No overlay in this subwindow.");
+        return false;
+    }
+
+    // remove the overlay node just mounted in subwindow
+    auto overlay = DynamicCast<FrameNode>(rootNode->GetLastChild());
+    CHECK_NULL_RETURN(overlay, false);
+    // close dialog with animation
+    auto pattern = overlay->GetPattern();
+    if (AceType::InstanceOf<DialogPattern>(pattern)) {
+        CloseDialog(overlay);
+        return true;
+    }
+    if (AceType::InstanceOf<BubblePattern>(pattern)) {
+        overlay->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
+        for (const auto& popup : popupMap_) {
+            auto targetId = popup.first;
+            auto popupInfo = popup.second;
+            if (overlay == popupInfo.popupNode) {
+                popupMap_.erase(targetId);
+                rootNode->RemoveChild(overlay);
+                rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+                if (rootNode->GetChildren().empty()) {
+                    SubwindowManager::GetInstance()->HideSubWindowNG();
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+    if (AceType::InstanceOf<MenuWrapperPattern>(pattern)) {
+        HideMenuInSubWindow();
+        return true;
+    }
+    rootNode->RemoveChild(overlay);
+    rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    if (rootNode->GetChildren().empty()) {
+        SubwindowManager::GetInstance()->HideSubWindowNG();
+    }
+    LOGI("overlay removed successfully");
+    return true;
 }
 
 void OverlayManager::FocusOverlayNode(const RefPtr<FrameNode>& overlayNode, bool isInSubWindow)

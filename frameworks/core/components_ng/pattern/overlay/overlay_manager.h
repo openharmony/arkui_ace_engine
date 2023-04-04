@@ -77,7 +77,7 @@ public:
 
     // customNode only used by customDialog, pass in nullptr if not customDialog
     RefPtr<FrameNode> ShowDialog(
-        const DialogProperties& dialogProps, const RefPtr<UINode>& customNode, bool isRightToLeft);
+        const DialogProperties& dialogProps, const RefPtr<UINode>& customNode, bool isRightToLeft = false);
     void ShowDateDialog(const DialogProperties& dialogProps, std::map<std::string, PickerDate> datePickerProperty,
         bool isLunar, std::map<std::string, NG::DialogEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
@@ -95,6 +95,7 @@ public:
      *   @return    true if popup was removed, false if no overlay exists
      */
     bool RemoveOverlay();
+    bool RemoveOverlayInSubwindow();
 
     void RegisterOnHideMenu(std::function<void()> callback)
     {

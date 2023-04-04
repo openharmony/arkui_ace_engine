@@ -398,9 +398,6 @@ void PipelineContext::SetupSubRootElement()
     window_->SetRootFrameNode(rootNode_);
     rootNode_->AttachToMainTree();
 
-    auto stageNode = FrameNode::CreateFrameNode(
-        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<StagePattern>());
-    rootNode_->AddChild(stageNode);
 #ifdef ENABLE_ROSEN_BACKEND
     if (!IsJsCard()) {
         auto rsWindow = static_cast<RosenWindow*>(GetWindow());
@@ -412,7 +409,8 @@ void PipelineContext::SetupSubRootElement()
         }
     }
 #endif
-    stageManager_ = MakeRefPtr<StageManager>(stageNode);
+    // the subwindow for overlay not need stage
+    stageManager_ = MakeRefPtr<StageManager>(nullptr);
     overlayManager_ = MakeRefPtr<OverlayManager>(rootNode_);
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);

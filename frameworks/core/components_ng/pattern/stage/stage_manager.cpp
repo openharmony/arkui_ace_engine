@@ -113,6 +113,7 @@ void StageManager::StartTransition(const RefPtr<FrameNode>& srcPage, const RefPt
 
 StageManager::StageManager(const RefPtr<FrameNode>& stage) : stageNode_(stage)
 {
+    CHECK_NULL_VOID(stageNode_);
     stagePattern_ = DynamicCast<StagePattern>(stageNode_->GetPattern());
 }
 

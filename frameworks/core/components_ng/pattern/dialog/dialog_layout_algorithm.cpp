@@ -82,7 +82,7 @@ void DialogLayoutAlgorithm::ComputeInnerLayoutParam(LayoutConstraintF& innerLayo
     } else {
         columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::DIALOG);
     }
-    columnInfo->GetParent()->BuildColumnWidth();
+    columnInfo->GetParent()->BuildColumnWidth(maxSize.Width());
     auto width = GetMaxWidthBasedOnGridType(columnInfo, gridSizeType, SystemProperties::GetDeviceType());
     if (SystemProperties::GetDeviceType() == DeviceType::WATCH) {
         innerLayout.minSize = SizeF(width, 0.0);
@@ -109,8 +109,8 @@ void DialogLayoutAlgorithm::ComputeInnerLayoutParam(LayoutConstraintF& innerLayo
 double DialogLayoutAlgorithm::GetMaxWidthBasedOnGridType(
     const RefPtr<GridColumnInfo>& info, GridSizeType type, DeviceType deviceType)
 {
-    if (gridCount_ > 0) {
-        return info->GetWidth(std::min(gridCount_, GridSystemManager::GetInstance().GetCurrentGridInfo().maxColumns));
+    if (gridCount_ >= 0) {
+        return info->GetWidth(std::min(gridCount_, info->GetParent()->GetColumns()));
     }
 
     if (deviceType == DeviceType::WATCH) {

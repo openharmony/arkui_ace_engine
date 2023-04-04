@@ -19,6 +19,8 @@
 #include <regex>
 #include <string>
 
+#include "uicast_interface/uicast_context_impl.h"
+
 #include "base/i18n/localization.h"
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
@@ -27,8 +29,8 @@
 #include "base/resource/ace_res_config.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/thread/background_task_executor.h"
-#include "base/utils/utils.h"
 #include "base/utils/measure_util.h"
+#include "base/utils/utils.h"
 #include "bridge/common/manifest/manifest_parser.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/ng/page_router_manager.h"
@@ -40,11 +42,11 @@
 #include "core/common/thread_checker.h"
 #include "core/components/dialog/dialog_component.h"
 #include "core/components/toast/toast_component.h"
+#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/common/ace_engine.h"
-#include "uicast_interface/uicast_context_impl.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -70,19 +72,12 @@ const char STYLES_FOLDER[] = "styles/";
 const char I18N_FILE_SUFFIX[] = "/properties/string.json";
 
 // helper function to run OverlayManager task
-// ensures that the task runs in main window instead of subWindow
+// ensures that the task runs in subwindow instead of main Window
 void MainWindowOverlay(std::function<void(RefPtr<NG::OverlayManager>)>&& task)
 {
     auto currentId = Container::CurrentId();
-    if (Container::Current()->IsSubContainer()) {
-        currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
-    }
     ContainerScope scope(currentId);
-    auto container = AceEngine::Get().GetContainer(currentId);
-    CHECK_NULL_VOID(container);
-    auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    auto context = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
     context->GetTaskExecutor()->PostTask(
@@ -1364,8 +1359,10 @@ void FrontendDelegateDeclarative::ShowToast(const std::string& message, int32_t 
     int32_t durationTime = std::clamp(duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
     bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (Container::IsCurrentUseNewPipeline()) {
-        auto task = [durationTime, message, bottom, isRightToLeft](const RefPtr<NG::OverlayManager>& overlayManager) {
+        auto task = [durationTime, message, bottom, isRightToLeft, containerId = Container::CurrentId()](
+                        const RefPtr<NG::OverlayManager>& overlayManager) {
             CHECK_NULL_VOID(overlayManager);
+            ContainerScope scope(containerId);
             LOGI("Begin to show toast message %{public}s, duration is %{public}d", message.c_str(), durationTime);
             overlayManager->ShowToast(message, durationTime, bottom, isRightToLeft);
         };
@@ -1392,16 +1389,16 @@ void FrontendDelegateDeclarative::ShowDialogInner(DialogProperties& dialogProper
     if (Container::IsCurrentUseNewPipeline()) {
         LOGI("Dialog IsCurrentUseNewPipeline.");
         dialogProperties.onSuccess = std::move(callback);
-        auto context = DynamicCast<NG::PipelineContext>(pipelineContext);
-        auto overlayManager = context ? context->GetOverlayManager() : nullptr;
-        taskExecutor_->PostTask(
-            [dialogProperties, weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
-                auto overlayManager = weak.Upgrade();
-                CHECK_NULL_VOID(overlayManager);
-                overlayManager->ShowDialog(
-                    dialogProperties, nullptr, AceApplicationInfo::GetInstance().IsRightToLeft());
-            },
-            TaskExecutor::TaskType::UI);
+        dialogProperties.onCancel = [callback, taskExecutor = taskExecutor_] {
+            taskExecutor->PostTask([callback]() { callback(CALLBACK_ERRORCODE_CANCEL, CALLBACK_DATACODE_ZERO); },
+                TaskExecutor::TaskType::JS);
+        };
+        auto task = [dialogProperties](const RefPtr<NG::OverlayManager>& overlayManager) {
+            CHECK_NULL_VOID(overlayManager);
+            LOGI("Begin to show dialog ");
+            overlayManager->ShowDialog(dialogProperties, nullptr, AceApplicationInfo::GetInstance().IsRightToLeft());
+        };
+        MainWindowOverlay(std::move(task));
         return;
     }
     std::unordered_map<std::string, EventMarker> callbackMarkers;
@@ -1481,6 +1478,10 @@ void FrontendDelegateDeclarative::ShowActionMenuInner(DialogProperties& dialogPr
     if (Container::IsCurrentUseNewPipeline()) {
         LOGI("Dialog IsCurrentUseNewPipeline.");
         dialogProperties.onSuccess = std::move(callback);
+        dialogProperties.onCancel = [callback, taskExecutor = taskExecutor_] {
+            taskExecutor->PostTask([callback]() { callback(CALLBACK_ERRORCODE_CANCEL, CALLBACK_DATACODE_ZERO); },
+                TaskExecutor::TaskType::JS);
+        };
         auto context = DynamicCast<NG::PipelineContext>(pipelineContextHolder_.Get());
         auto overlayManager = context ? context->GetOverlayManager() : nullptr;
         taskExecutor_->PostTask(

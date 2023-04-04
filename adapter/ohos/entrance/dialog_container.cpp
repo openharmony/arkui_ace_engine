@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,8 @@
 #if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
 #include "adapter/ohos/entrance/ace_rosen_sync_task.h"
 #endif
+#include "flutter/lib/ui/ui_dart_state.h"
+
 #include "adapter/ohos/entrance/flutter_ace_view.h"
 #include "base/log/frame_report.h"
 #include "base/log/log.h"
@@ -31,14 +33,12 @@
 #include "core/components/theme/theme_manager_impl.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "flutter/lib/ui/ui_dart_state.h"
+#include "frameworks/base/subwindow/subwindow_manager.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/declarative_frontend.h"
-#include <functional>
 
 namespace OHOS::Ace::Platform {
-DialogContainer::DialogContainer(int32_t instanceId, FrontendType type)
-    : instanceId_(instanceId), type_(type)
+DialogContainer::DialogContainer(int32_t instanceId, FrontendType type) : instanceId_(instanceId), type_(type)
 {
     auto flutterTaskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
     flutterTaskExecutor->InitPlatformThread(true);
@@ -52,7 +52,7 @@ void DialogContainer::InitializeTouchEventCallback()
 {
     ACE_DCHECK(aceView_ && taskExecutor_ && pipelineContext_);
     auto&& touchEventCallback = [context = pipelineContext_, id = instanceId_](
-        const TouchEvent& event, const std::function<void()>& markProcess) {
+                                    const TouchEvent& event, const std::function<void()>& markProcess) {
         ContainerScope scope(id);
         context->GetTaskExecutor()->PostTask(
             [context, event, markProcess, id]() {
@@ -70,7 +70,7 @@ void DialogContainer::InitializeMouseEventCallback()
 {
     ACE_DCHECK(aceView_ && taskExecutor_ && pipelineContext_);
     auto&& mouseEventCallback = [context = pipelineContext_, id = instanceId_](
-        const MouseEvent& event, const std::function<void()>& markProcess) {
+                                    const MouseEvent& event, const std::function<void()>& markProcess) {
         ContainerScope scope(id);
         context->GetTaskExecutor()->PostTask(
             [context, event, markProcess, id]() {
@@ -87,7 +87,7 @@ void DialogContainer::InitializeAxisEventCallback()
 {
     ACE_DCHECK(aceView_ && taskExecutor_ && pipelineContext_);
     auto&& axisEventCallback = [context = pipelineContext_, id = instanceId_](
-        const AxisEvent& event, const std::function<void()>& markProcess) {
+                                   const AxisEvent& event, const std::function<void()>& markProcess) {
         ContainerScope scope(id);
         context->GetTaskExecutor()->PostTask(
             [context, event, markProcess, id]() {
@@ -130,7 +130,7 @@ void DialogContainer::InitializeViewChangeCallback()
 {
     ACE_DCHECK(aceView_ && taskExecutor_ && pipelineContext_);
     auto&& viewChangeCallback = [context = pipelineContext_, id = instanceId_](
-        int32_t width, int32_t height, WindowSizeChangeReason type) {
+                                    int32_t width, int32_t height, WindowSizeChangeReason type) {
         ContainerScope scope(id);
         ACE_SCOPED_TRACE("ViewChangeCallback(%d, %d)", width, height);
         context->GetTaskExecutor()->PostTask(
@@ -156,7 +156,7 @@ void DialogContainer::InitializeSystemBarHeightChangeCallback()
 {
     ACE_DCHECK(aceView_ && taskExecutor_ && pipelineContext_);
     auto&& systemBarHeightChangeCallback = [context = pipelineContext_, id = instanceId_](
-        double statusBar, double navigationBar) {
+                                               double statusBar, double navigationBar) {
         ContainerScope scope(id);
         ACE_SCOPED_TRACE("SystemBarHeightChangeCallback(%lf, %lf)", statusBar, navigationBar);
         context->GetTaskExecutor()->PostTask(
@@ -181,7 +181,7 @@ void DialogContainer::InitializeDragEventCallback()
 {
     ACE_DCHECK(aceView_ && taskExecutor_ && pipelineContext_);
     auto&& dragEventCallback = [context = pipelineContext_, id = instanceId_](
-        int32_t x, int32_t y, const DragEventAction& action) {
+                                   int32_t x, int32_t y, const DragEventAction& action) {
         ContainerScope scope(id);
         context->GetTaskExecutor()->PostTask(
             [context, x, y, action]() { context->OnDragEvent(x, y, action); }, TaskExecutor::TaskType::UI);
@@ -214,6 +214,7 @@ RefPtr<DialogContainer> DialogContainer::GetContainer(int32_t instanceId)
 
 void DialogContainer::DestroyContainer(int32_t instanceId, const std::function<void()>& destroyCallback)
 {
+    LOGI("DialogContainer::DestroyContainer begin %{public}d", instanceId);
     auto container = AceEngine::Get().GetContainer(instanceId);
     CHECK_NULL_VOID(container);
     container->Destroy();
@@ -224,17 +225,19 @@ void DialogContainer::DestroyContainer(int32_t instanceId, const std::function<v
     container->DestroyView(); // Stop all threads(ui,gpu,io) for current ability.
     taskExecutor->PostTask(
         [instanceId, destroyCallback] {
-            LOGI("Remove on Platform thread...");
+            LOGI("DialogContainer::DestroyContainer Remove on Platform thread...");
             EngineHelper::RemoveEngine(instanceId);
             AceEngine::Get().RemoveContainer(instanceId);
             CHECK_NULL_VOID_NOLOG(destroyCallback);
             destroyCallback();
         },
         TaskExecutor::TaskType::PLATFORM);
+    LOGI("DialogContainer::DestroyContainer end");
 }
 
 void DialogContainer::Destroy()
 {
+    LOGI("DialogContainer::Destroy begin");
     ContainerScope scope(instanceId_);
     if (pipelineContext_ && taskExecutor_) {
         // 1. Destroy Pipeline on UI thread.
@@ -244,7 +247,7 @@ void DialogContainer::Destroy()
             context->Destroy();
         } else {
             taskExecutor_->PostTask([context]() { context->Destroy(); }, TaskExecutor::TaskType::UI);
-        }      
+        }
         // 2. Destroy Frontend on JS thread.
         RefPtr<Frontend> frontend;
         frontend_.Swap(frontend);
@@ -252,7 +255,8 @@ void DialogContainer::Destroy()
             frontend->UpdateState(Frontend::State::ON_DESTROY);
             frontend->Destroy();
         } else {
-            taskExecutor_->PostTask([frontend]() {
+            taskExecutor_->PostTask(
+                [frontend]() {
                     frontend->UpdateState(Frontend::State::ON_DESTROY);
                     frontend->Destroy();
                 },
@@ -261,10 +265,12 @@ void DialogContainer::Destroy()
     }
     resRegister_.Reset();
     assetManager_.Reset();
+    LOGI("DialogContainer::Destroy end");
 }
 
 void DialogContainer::DestroyView()
 {
+    LOGI("DialogContainer::DestroyView begin");
     ContainerScope scope(instanceId_);
     CHECK_NULL_VOID_NOLOG(aceView_);
     auto* flutterAceView = static_cast<FlutterAceView*>(aceView_);
@@ -272,38 +278,45 @@ void DialogContainer::DestroyView()
         flutterAceView->DecRefCount();
     }
     aceView_ = nullptr;
+    LOGI("DialogContainer::DestroyView end");
 }
 
-void DialogContainer::SetView(AceView* view, double density, int32_t width, int32_t height,
-    sptr<OHOS::Rosen::Window>& rsWindow)
+void DialogContainer::SetView(
+    AceView* view, double density, int32_t width, int32_t height, sptr<OHOS::Rosen::Window>& rsWindow)
 {
     CHECK_NULL_VOID(view);
     auto container = AceType::DynamicCast<DialogContainer>(AceEngine::Get().GetContainer(view->GetInstanceId()));
     CHECK_NULL_VOID(container);
+#ifdef ENABLE_ROSEN_BACKEND
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
 
-    std::unique_ptr<Window> window =
-        std::make_unique<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
+    std::unique_ptr<Window> window = std::make_unique<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
+#else
+    auto platformWindow = PlatformWindow::Create(view);
+    CHECK_NULL_VOID(platformWindow);
+    std::unique_ptr<Window> window = std::make_unique<Window>(std::move(platformWindow));
+#endif
     container->AttachView(std::move(window), view, density, width, height, rsWindow->GetWindowId());
 }
 
 void DialogContainer::SetViewNew(
     AceView* view, double density, int32_t width, int32_t height, sptr<OHOS::Rosen::Window>& rsWindow)
 {
+#ifdef ENABLE_ROSEN_BACKEND
     CHECK_NULL_VOID(view);
     auto container = AceType::DynamicCast<DialogContainer>(AceEngine::Get().GetContainer(view->GetInstanceId()));
     CHECK_NULL_VOID(container);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
 
-    std::unique_ptr<Window> window =
-        std::make_unique<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
+    std::unique_ptr<Window> window = std::make_unique<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
     container->AttachView(std::move(window), view, density, width, height, rsWindow->GetWindowId());
+#endif
 }
 
-void DialogContainer::AttachView(std::unique_ptr<Window> window, AceView* view, double density, int32_t width,
-    int32_t height, uint32_t windowId)
+void DialogContainer::AttachView(
+    std::unique_ptr<Window> window, AceView* view, double density, int32_t width, int32_t height, uint32_t windowId)
 {
     aceView_ = view;
     auto instanceId = aceView_->GetInstanceId();
@@ -318,6 +331,12 @@ void DialogContainer::AttachView(std::unique_ptr<Window> window, AceView* view, 
     // For DECLARATIVE_JS frontend display UI in JS thread temporarily.
     flutterTaskExecutor->InitJsThread(false);
     InitializeFrontend();
+
+    auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(instanceId);
+    if (parentContainerId == -1) {
+        SetUseNewPipeline();
+    }
+
     InitPipelineContext(std::move(window), instanceId, density, width, height, windowId);
     InitializeCallback();
 
@@ -343,17 +362,15 @@ void DialogContainer::AttachView(std::unique_ptr<Window> window, AceView* view, 
     // Only MainWindow instance will be registered to watch dog.
     frontend_->AttachPipelineContext(pipelineContext_);
 #if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
-    auto context = AceType::DynamicCast<PipelineContext>(pipelineContext_);
-    CHECK_NULL_VOID(context);
-    context->SetPostRTTaskCallBack([](std::function<void()>&& task) {
+    pipelineContext_->SetPostRTTaskCallBack([](std::function<void()>&& task) {
         auto syncTask = std::make_shared<AceRosenSyncTask>(std::move(task));
         Rosen::RSTransactionProxy::GetInstance()->ExecuteSynchronousTask(syncTask);
     });
 #endif
 }
 
-void DialogContainer::InitPipelineContext(std::unique_ptr<Window> window, int32_t instanceId,
-    double density, int32_t width, int32_t height, uint32_t windowId)
+void DialogContainer::InitPipelineContext(std::unique_ptr<Window> window, int32_t instanceId, double density,
+    int32_t width, int32_t height, uint32_t windowId)
 {
     if (useNewPipeline_) {
         LOGI("New pipeline version creating...");
@@ -367,11 +384,9 @@ void DialogContainer::InitPipelineContext(std::unique_ptr<Window> window, int32_
     pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<TextFieldManager>());
     pipelineContext_->SetIsRightToLeft(AceApplicationInfo::GetInstance().IsRightToLeft());
     pipelineContext_->SetWindowId(windowId);
-    auto pipelineContext = AceType::DynamicCast<PipelineContext>(pipelineContext_);
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->SetWindowModal(windowModal_);
-    pipelineContext->SetDrawDelegate(aceView_->GetDrawDelegate());
-    pipelineContext->SetIsSubPipeline(true);
+    pipelineContext_->SetWindowModal(windowModal_);
+    pipelineContext_->SetDrawDelegate(aceView_->GetDrawDelegate());
+    pipelineContext_->SetIsSubPipeline(true);
 }
 
 void DialogContainer::InitializeFrontend()
@@ -426,8 +441,8 @@ sptr<OHOS::Rosen::Window> DialogContainer::GetUIWindowInner() const
     return uiWindow_;
 }
 
-void DialogContainer::ShowToast(int32_t instanceId, const std::string& message, int32_t duration,
-    const std::string& bottom)
+void DialogContainer::ShowToast(
+    int32_t instanceId, const std::string& message, int32_t duration, const std::string& bottom)
 {
     LOGI("DialogContainer::ShowToast begin");
     auto container = AceType::DynamicCast<DialogContainer>(AceEngine::Get().GetContainer(instanceId));
@@ -436,7 +451,7 @@ void DialogContainer::ShowToast(int32_t instanceId, const std::string& message, 
     CHECK_NULL_VOID(frontend);
     auto delegate = frontend->GetDelegate();
     CHECK_NULL_VOID(delegate);
-    delegate->SetToastStopListenerCallback([instanceId = instanceId] () {
+    delegate->SetToastStopListenerCallback([instanceId = instanceId]() {
         LOGI("DialogContainer::ShowToast HideWindow instanceId = %{public}d", instanceId);
         if (ContainerScope::CurrentId() >= 0) {
             DialogContainer::HideWindow(instanceId);
@@ -459,11 +474,11 @@ void DialogContainer::ShowDialog(int32_t instanceId, const std::string& title, c
     CHECK_NULL_VOID(delegate);
     delegate->ShowDialog(
         title, message, buttons, autoCancel, std::move(callback), callbacks, [instanceId = instanceId](bool isShow) {
-        LOGI("DialogContainer::ShowDialog HideWindow instanceId = %{public}d", instanceId);
-        if (!isShow) {
-            DialogContainer::HideWindow(instanceId);
-        }
-    });
+            LOGI("DialogContainer::ShowDialog HideWindow instanceId = %{public}d", instanceId);
+            if (!isShow) {
+                DialogContainer::HideWindow(instanceId);
+            }
+        });
     LOGI("DialogContainer::ShowDialog end");
 }
 

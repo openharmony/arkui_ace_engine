@@ -264,7 +264,7 @@ double RenderDialogTween::GetMaxWidthBasedOnGridType(
     const RefPtr<GridColumnInfo>& info, GridSizeType type, DeviceType deviceType)
 {
     if (gridCount_ > 0) {
-        return info->GetWidth(std::min(gridCount_, GridSystemManager::GetInstance().GetCurrentGridInfo().maxColumns));
+        return info->GetWidth(std::min(gridCount_, info->GetParent()->GetColumns()));
     }
 
     if (deviceType == DeviceType::WATCH) {
@@ -353,7 +353,7 @@ void RenderDialogTween::ComputeInnerLayoutParam(LayoutParam& innerLayout)
     } else {
         columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::DIALOG);
     }
-    columnInfo->GetParent()->BuildColumnWidth();
+    columnInfo->GetParent()->BuildColumnWidth(maxSize.Width());
     auto width = GetMaxWidthBasedOnGridType(columnInfo, gridSizeType, SystemProperties::GetDeviceType());
     if (!isLimit_) {
         innerLayout.SetMinSize(Size(0.0, 0.0));

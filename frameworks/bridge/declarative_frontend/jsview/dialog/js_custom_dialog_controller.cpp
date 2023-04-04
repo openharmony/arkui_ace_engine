@@ -19,6 +19,7 @@
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
@@ -143,6 +144,16 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
         AnimationOption closeAnimation;
         if (ParseAnimation(execContext, closeAnimationValue, closeAnimation)) {
             instance->dialogProperties_.closeAnimation = closeAnimation;
+        }
+
+        auto showInSubWindowValue = constructorArg->GetProperty("showInSubWindow");
+        if (showInSubWindowValue->IsBoolean()) {
+#if defined(PREVIEW)
+            LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Perform this operation on the "
+                 "emulator or a real device instead.");
+#else
+            instance->dialogProperties_.isShowInSubWindow = showInSubWindowValue->ToBoolean();
+#endif
         }
 
         info.SetReturnValue(instance);
@@ -389,7 +400,14 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
                 this->isShown_ = isShown;
             }
         };
-        dialog_ = overlayManager->ShowDialog(dialogProperties_, customNode, false);
+
+        WeakPtr<NG::FrameNode> dialog;
+        if (dialogProperties_.isShowInSubWindow) {
+            dialog = SubwindowManager::GetInstance()->ShowDialogNG(dialogProperties_, customNode);
+        } else {
+            dialog = overlayManager->ShowDialog(dialogProperties_, customNode, false);
+        }
+        dialogs_.emplace_back(dialog);
         return;
     }
 
@@ -423,7 +441,20 @@ void JSCustomDialogController::JsCloseDialog(const JSCallbackInfo& info)
     }
 
     if (Container::IsCurrentUseNewPipeline()) {
-        auto dialog = dialog_.Upgrade();
+        RefPtr<NG::FrameNode> dialog;
+        while (!dialogs_.empty()) {
+            dialog = dialogs_.back().Upgrade();
+            if (dialog) {
+                // get the dialog not removed currently
+                break;
+            }
+            dialogs_.pop_back();
+        }
+
+        if (dialogs_.empty()) {
+            LOGW("dialogs are empty");
+            return;
+        }
         if (!dialog) {
             LOGW("dialog is null");
             return;
@@ -431,7 +462,7 @@ void JSCustomDialogController::JsCloseDialog(const JSCallbackInfo& info)
         auto container = Container::Current();
         auto currentId = Container::CurrentId();
         CHECK_NULL_VOID(container);
-        if (container->IsSubContainer()) {
+        if (container->IsSubContainer() && !dialogProperties_.isShowInSubWindow) {
             currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
             container = AceEngine::Get().GetContainer(currentId);
         }
@@ -443,6 +474,7 @@ void JSCustomDialogController::JsCloseDialog(const JSCallbackInfo& info)
         auto overlayManager = context->GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
         overlayManager->CloseDialog(dialog);
+        dialogs_.pop_back();
         return;
     }
     CloseDialog();
@@ -490,8 +522,7 @@ bool JSCustomDialogController::ParseAnimation(
     std::function<void()> onFinishEvent;
     if (onFinish->IsFunction()) {
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onFinish));
-        onFinishEvent = [execCtx = execContext, func = std::move(jsFunc), id = Container::CurrentId()]() {
-            ContainerScope scope(id);
+        onFinishEvent = [execCtx = execContext, func = std::move(jsFunc)]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("CustomDialog.onFinish");
             func->Execute();
