@@ -36,6 +36,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension INDICATOR_PADDING = 8.0_vp;
 constexpr uint32_t INDICATOR_HAS_CHILD = 2;
+constexpr int32_t PRESTRAIN_CHILD_COUNT = 2;
 } // namespace
 
 void SwiperLayoutAlgorithm::AddToItemRange(int32_t index)
@@ -83,13 +84,33 @@ void SwiperLayoutAlgorithm::InitInActiveItems(float translateLength)
 
     std::set<int32_t> activeItems;
     auto firstIndex = currentIndex_;
+    if (Positive(static_cast<double>(prevMargin_))) {
+        if (Positive(currentIndex_)) {
+            firstIndex = currentIndex_ - 1;
+        } else if (isLoop_ && NearZero(currentIndex_)) {
+            firstIndex = totalCount_ - 1;
+        }
+    }
+
     if (!NearZero(currentOffset_) && Positive(translateLength)) {
         auto loadItems = std::abs(static_cast<int32_t>(floorf(currentOffset_ / translateLength)));
         firstIndex = Positive(currentOffset_) ? (firstIndex - loadItems - 1) : (firstIndex + loadItems - 1);
         firstIndex = ClampIndex(firstIndex);
     }
 
-    auto displayCount = NearZero(currentOffset_) ? displayCount_ : displayCount_ + 1;
+    int32_t displayCount = 0;
+    if (NearZero(currentOffset_)) {
+        if (Positive(prevMargin_) && Positive(nextMargin_)) {
+            displayCount = displayCount_ + PRESTRAIN_CHILD_COUNT;
+        } else if (NonPositive(prevMargin_) && NonPositive(nextMargin_)) {
+            displayCount = displayCount_;
+        } else {
+            displayCount = displayCount_ + 1;
+        }
+    } else {
+        displayCount = displayCount_ + 1;
+    }
+
     for (int32_t i = 0; i <= displayCount; i++) {
         activeItems.insert(ClampIndex(firstIndex + i));
     }
@@ -218,13 +239,13 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto padding = swiperLayoutProperty->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, idealSize);
 
-    InitItemRange(layoutWrapper);
-
     // Measure children.
     auto layoutConstraint = SwiperUtils::CreateChildConstraint(swiperLayoutProperty, idealSize);
+    prevMargin_ = static_cast<float>(swiperLayoutProperty->GetPrevMarginValue(0.0_px).ConvertToPx());
+    nextMargin_ = static_cast<float>(swiperLayoutProperty->GetNextMarginValue(0.0_px).ConvertToPx());
     auto crossSize = 0.0f;
     auto mainSize = 0.0f;
-
+    InitItemRange(layoutWrapper);
     auto itemCount = static_cast<int32_t>(itemRange_.size());
     if (isLoop_ && itemCount < totalCount_) {
         LoopMeasure(layoutWrapper, layoutConstraint, axis, crossSize, mainSize);
@@ -523,9 +544,15 @@ void SwiperLayoutAlgorithm::LayoutItems(
     auto bottomPadding = padding.bottom.value_or(0.0f);
     OffsetF paddingOffset = { padding.left.value_or(0.0f), padding.top.value_or(0.0f) };
     auto displayCount = swiperLayoutProperty->GetDisplayCount().value_or(1);
+    auto prevMarginMontage = Positive(prevMargin_) ? prevMargin_ + itemSpace : 0.0f;
+    OffsetF prevMarginOffset = axis == Axis::HORIZONTAL ? OffsetF(prevMarginMontage, 0.0f)
+                                                        : OffsetF(0.0f, prevMarginMontage);
 
     OffsetF preOffset =
         (axis == Axis::HORIZONTAL ? OffsetF(-itemSpace + currentOffset_, 0) : OffsetF(0, -itemSpace + currentOffset_));
+    if (Positive(prevMargin_) || Positive(nextMargin_)) {
+        displayCount++;
+    }
     int32_t displayIndex = 0;
     for (const auto& index : preItems) {
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index);
@@ -535,7 +562,7 @@ void SwiperLayoutAlgorithm::LayoutItems(
         auto geometryNode = wrapper->GetGeometryNode();
         preOffset -=
             (axis == Axis::HORIZONTAL ? OffsetF(maxChildSize_.Width(), 0) : OffsetF(0, maxChildSize_.Height()));
-        geometryNode->SetMarginFrameOffset(preOffset + paddingOffset);
+        geometryNode->SetMarginFrameOffset(preOffset + paddingOffset + prevMarginOffset);
         wrapper->Layout();
         preOffset -= (axis == Axis::HORIZONTAL ? OffsetF(itemSpace, 0) : OffsetF(0, itemSpace));
         displayIndex++;
@@ -553,11 +580,10 @@ void SwiperLayoutAlgorithm::LayoutItems(
             continue;
         }
         auto geometryNode = wrapper->GetGeometryNode();
-        geometryNode->SetMarginFrameOffset(nextOffset + paddingOffset);
+        geometryNode->SetMarginFrameOffset(nextOffset + paddingOffset + prevMarginOffset);
         wrapper->Layout();
         nextOffset += (axis == Axis::HORIZONTAL ? OffsetF(maxChildSize_.Width() + itemSpace, 0)
                                                 : OffsetF(0, maxChildSize_.Height() + itemSpace));
-
         displayIndex++;
         if (displayIndex == displayCount) {
             nextOffset += (axis == Axis::HORIZONTAL ? OffsetF(currentOffset_ == 0 ? rightPadding : 0, 0)

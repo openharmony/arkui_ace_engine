@@ -62,4 +62,17 @@ std::string SelectAccessibilityProperty::GetText() const
     CHECK_NULL_RETURN(selectPattern, "");
     return selectPattern->GetValue();
 }
+
+int32_t SelectAccessibilityProperty::GetCollectionItemCounts() const
+{
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_RETURN(frameNode, -1);
+    auto selectPattern = frameNode->GetPattern<SelectPattern>();
+    CHECK_NULL_RETURN(selectPattern, -1);
+    auto options = selectPattern->GetOptions();
+    if (options.empty()) {
+        return -1;
+    }
+    return options.size();
+}
 } // namespace OHOS::Ace::NG

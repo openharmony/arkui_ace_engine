@@ -35,4 +35,6 @@ int32_t ListAccessibilityProperty::GetCollectionItemCounts() const
 {
     return -1;
 }
+
+void ListAccessibilityProperty::SetSpecificSupportAction() {}
 } // namespace OHOS::Ace::NG

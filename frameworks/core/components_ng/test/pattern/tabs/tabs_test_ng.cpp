@@ -52,6 +52,13 @@ namespace {
 constexpr float FIRST_ITEM_WIDTH = 100.0f;
 constexpr float FIRST_ITEM_HEIGHT = 50.0f;
 const SizeF FIRST_ITEM_SIZE(FIRST_ITEM_WIDTH, FIRST_ITEM_HEIGHT);
+const double DEFAULT_OFFSET = -1.0f;
+const int DEFAULT_ITEMCOUNT = 1;
+const int DEFAULT_INDEX = -1;
+const int BEGIN_INDEX = 0;
+const int CURRENT_INDEX = 0;
+const int END_INDEX = 0;
+const OffsetF CURRENT_OFFSET(1.0f, 1.0f);
 } // namespace
 
 class TabsTestNg : public testing::Test {
@@ -1693,5 +1700,158 @@ HWTEST_F(TabsTestNg, TabBarPaintMethodPaintGradient001, TestSize.Level1)
     ASSERT_NE(drawFunction, nullptr);
     drawFunction(rsCanvas);
     EXPECT_FALSE(paintMethod->gradientRegions_[0]);
+}
+
+/**
+ * @tc.name: TabBarAccessibilityPropertyTestNg001
+ * @tc.desc: Test the ItemCount property of TabBar.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarAccessibilityPropertyTestNg001, TestSize.Level1)
+{
+    auto controller = AceType::MakeRefPtr<SwiperController>();
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto tabBarNode = FrameNode::GetOrCreateFrameNode(
+        V2::TAB_BAR_ETS_TAG, nodeId, [controller]() { return AceType::MakeRefPtr<TabBarPattern>(controller); });
+    ASSERT_NE(tabBarNode, nullptr);
+    auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
+    ASSERT_NE(tabBarLayoutProperty, nullptr);
+
+    auto columnNode =
+        FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    columnNode->MountToParent(tabBarNode);
+
+    auto accessibilityProperty = tabBarNode->GetAccessibilityProperty<TabBarAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetCollectionItemCounts(), DEFAULT_ITEMCOUNT);
+}
+
+/**
+ * @tc.name: TabBarAccessibilityPropertyTestNg002
+ * @tc.desc: Test the IsScrollable property of TabBar.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarAccessibilityPropertyTestNg002, TestSize.Level1)
+{
+    auto controller = AceType::MakeRefPtr<SwiperController>();
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto tabBarNode = FrameNode::GetOrCreateFrameNode(
+        V2::TAB_BAR_ETS_TAG, nodeId, [controller]() { return AceType::MakeRefPtr<TabBarPattern>(controller); });
+    ASSERT_NE(tabBarNode, nullptr);
+    auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
+    ASSERT_NE(tabBarLayoutProperty, nullptr);
+
+    tabBarLayoutProperty->UpdateTabBarMode(TabBarMode::SCROLLABLE);
+    auto accessibilityProperty = tabBarNode->GetAccessibilityProperty<TabBarAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_FALSE(accessibilityProperty->IsScrollable());
+
+    auto columnNode1 =
+        FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ASSERT_NE(columnNode1, nullptr);
+    columnNode1->MountToParent(tabBarNode);
+
+    auto columnNode2 =
+        FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ASSERT_NE(columnNode2, nullptr);
+    columnNode2->MountToParent(tabBarNode);
+    EXPECT_TRUE(accessibilityProperty->IsScrollable());
+
+    tabBarLayoutProperty->UpdateTabBarMode(TabBarMode::FIXED);
+    EXPECT_FALSE(accessibilityProperty->IsScrollable());
+
+    tabBarLayoutProperty->UpdateTabBarMode(TabBarMode::FIXED_START);
+    EXPECT_FALSE(accessibilityProperty->IsScrollable());
+}
+
+/**
+ * @tc.name: TabsAccessibilityPropertyTestNg003
+ * @tc.desc: Test the index properties of tabbar.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarAccessibilityPropertyTestNg003, TestSize.Level1)
+{
+    auto controller = AceType::MakeRefPtr<SwiperController>();
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto tabBarNode = FrameNode::GetOrCreateFrameNode(
+        V2::TAB_BAR_ETS_TAG, nodeId, [controller]() { return AceType::MakeRefPtr<TabBarPattern>(controller); });
+    ASSERT_NE(tabBarNode, nullptr);
+
+    auto tabBarAccessibilityProperty = tabBarNode->GetAccessibilityProperty<TabBarAccessibilityProperty>();
+    ASSERT_NE(tabBarAccessibilityProperty, nullptr);
+
+    EXPECT_EQ(tabBarAccessibilityProperty->GetBeginIndex(), DEFAULT_INDEX);
+    EXPECT_EQ(tabBarAccessibilityProperty->GetCurrentIndex(), DEFAULT_INDEX);
+    EXPECT_EQ(tabBarAccessibilityProperty->GetEndIndex(), DEFAULT_INDEX);
+
+    auto columnNode =
+        FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ASSERT_NE(columnNode, nullptr);
+    columnNode->MountToParent(tabBarNode);
+
+    auto pattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetIndicator(CURRENT_INDEX);
+
+    EXPECT_EQ(tabBarAccessibilityProperty->GetBeginIndex(), BEGIN_INDEX);
+    EXPECT_EQ(tabBarAccessibilityProperty->GetCurrentIndex(), CURRENT_INDEX);
+    EXPECT_EQ(tabBarAccessibilityProperty->GetEndIndex(), END_INDEX);
+}
+
+/**
+ * @tc.name: TabsAccessibilityPropertyTestNg004
+ * @tc.desc: Test the SupportActions property of tabbar.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabsAccessibilityPropertyTestNg004, TestSize.Level1)
+{
+    auto controller = AceType::MakeRefPtr<SwiperController>();
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto tabBarNode = FrameNode::GetOrCreateFrameNode(
+        V2::TAB_BAR_ETS_TAG, nodeId, [controller]() { return AceType::MakeRefPtr<TabBarPattern>(controller); });
+    ASSERT_NE(tabBarNode, nullptr);
+
+    RefPtr<GeometryNode> geometryNode_ = Ace::Referenced::MakeRefPtr<GeometryNode>();
+    tabBarNode->SetGeometryNode(geometryNode_);
+    auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
+    ASSERT_NE(tabBarLayoutProperty, nullptr);
+    tabBarLayoutProperty->UpdateTabBarMode(TabBarMode::SCROLLABLE);
+
+    auto columnNode1 =
+        FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ASSERT_NE(columnNode1, nullptr);
+    columnNode1->MountToParent(tabBarNode);
+
+    auto columnNode2 =
+        FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ASSERT_NE(columnNode2, nullptr);
+    columnNode2->MountToParent(tabBarNode);
+
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+    tabBarPattern->currentOffset_ = DEFAULT_OFFSET;
+    tabBarPattern->tabItemOffsets_.emplace_back(CURRENT_OFFSET);
+
+    auto accessibilityProperty = tabBarNode->GetAccessibilityProperty<TabBarAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    accessibilityProperty->ResetSupportAction();
+    std::unordered_set<AceAction> supportAceActions = accessibilityProperty->GetSupportAction();
+    uint64_t actions = 0, exptectActions = 0;
+    exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
+    exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
+    for (auto action : supportAceActions) {
+        actions |= 1UL << static_cast<uint32_t>(action);
+    }
+    EXPECT_EQ(actions, exptectActions);
 }
 } // namespace OHOS::Ace::NG

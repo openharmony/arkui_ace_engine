@@ -123,6 +123,11 @@ public:
         }
     }
 
+    void SetPluginWindowId(const int32_t pluginWindowId)
+    {
+        pluginWindowId_ = pluginWindowId;
+    }
+
 private:
     void SetPluginComponentTheme(const std::string& path, const RefPtr<AssetManager>& flutterAssetManager);
     void SetActionEventHandler();
@@ -137,6 +142,7 @@ private:
     RefPtr<AssetManager> assetManager_;
 
     int32_t instanceId_ = 0;
+    int32_t pluginWindowId_ = -1;
 
     bool allowUpdate_ = true;
 

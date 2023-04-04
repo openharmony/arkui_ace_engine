@@ -56,6 +56,9 @@ constexpr float DEFAULT_ROOT_WIDTH = 480.f;
 constexpr float DEFAULT_ITEM_MAIN_LENGTH = 100.f;
 constexpr Dimension DEFAULT_ITEM_CROSS_LENGTH = Dimension(1.0, DimensionUnit::PERCENT);
 constexpr float DEFAULT_HEADER_MAIN_LENGTH = 50.f;
+constexpr float LIST_ITEM_WIDTH = 10.0f;
+constexpr float LIST_ITEM_HEIGHT = 30.0f;
+constexpr int32_t LIST_ITEM_NUMBER = 10;
 } // namespace
 
 class ListTestNg : public testing::Test {
@@ -1717,14 +1720,35 @@ HWTEST_F(ListTestNg, ListAccessibilityTest001, TestSize.Level1)
     RunMeasureAndLayout();
 
     /**
-     * @tc.steps: step2. Run accessibility func.
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto accessibility = frameNode->GetAccessibilityProperty<ListAccessibilityProperty>();
+    ASSERT_NE(accessibility, nullptr);
+    RunMeasureAndLayout();
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    pattern->startIndex_ = 1;
+
+    /**
+     * @tc.steps: step3. Run accessibility func.
      * @tc.expected: Verify return value.
      */
-    auto accessibility = frameNode_->GetAccessibilityProperty<ListAccessibilityProperty>();
     EXPECT_TRUE(accessibility->IsScrollable());
-    EXPECT_EQ(accessibility->GetBeginIndex(), 0);
+    EXPECT_EQ(accessibility->GetBeginIndex(), 1);
+    EXPECT_EQ(accessibility->GetCurrentIndex(), 1);
     EXPECT_EQ(accessibility->GetEndIndex(), 7);
     EXPECT_EQ(accessibility->GetCollectionItemCounts(), itemCount);
+    accessibility->ResetSupportAction();
+    std::unordered_set<AceAction> supportAceActions = accessibility->GetSupportAction();
+    uint64_t actions = 0, exptectActions = 0;
+    exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
+    exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
+    for (auto action : supportAceActions) {
+        actions |= 1UL << static_cast<uint32_t>(action);
+    }
+    EXPECT_EQ(actions, exptectActions);
 }
 
 /**
@@ -1752,6 +1776,16 @@ HWTEST_F(ListTestNg, ListAccessibilityTest002, TestSize.Level1)
     auto itemAccessibility = itemFrameNode->GetAccessibilityProperty<ListItemAccessibilityProperty>();
     ASSERT_NE(itemAccessibility, nullptr);
     EXPECT_FALSE(itemAccessibility->IsSelected());
+
+    itemAccessibility->ResetSupportAction();
+    std::unordered_set<AceAction> supportAceActions = itemAccessibility->GetSupportAction();
+    uint64_t actions = 0, exptectActions = 0;
+    exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SELECT);
+    exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_CLEAR_SELECTION);
+    for (auto action : supportAceActions) {
+        actions |= 1UL << static_cast<uint32_t>(action);
+    }
+    EXPECT_EQ(actions, exptectActions);
 }
 
 /**
@@ -1942,5 +1976,105 @@ HWTEST_F(ListTestNg, ListPositionControllerTest002, TestSize.Level1)
     EXPECT_EQ(pattern_->barOffset_, 0);
     // GetScrollDirection
     EXPECT_EQ(positionController->GetScrollDirection(), Axis::VERTICAL);
+}
+
+/**
+ * @tc.name: ListItemGroupAccessibilityPropertyTest001
+ * @tc.desc: Test the GetBeginIndex and GetEndIndex function of ListItemGroupAccessibilityProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListItemGroupAccessibilityPropertyTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create listItemGroup frameNode and get listItemGroupAccessibilityProperty.
+     * @tc.expected: step1. get listItemGroupAccessibilityProperty success.
+     */
+    ListItemGroupModelNG listItemGroupModelNG;
+    listItemGroupModelNG.Create();
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    ASSERT_NE(element, nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto accessibility = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibility, nullptr);
+
+    /**
+     * @tc.steps: step2. get the beginIndex and endIndex of listItemGroupAccessibilityProperty.
+     * @tc.expected: step2. the beginIndex and endIndex of listItemGroupAccessibilityProperty properties equals default
+     * value.
+     */
+    EXPECT_EQ(accessibility->GetBeginIndex(), -1);
+    EXPECT_EQ(accessibility->GetEndIndex(), -1);
+
+    /**
+     * @tc.steps: step3. get listItemGroupPattern and set the listItemGroupPattern itemPosition_ property.
+     * @tc.steps: step4. get the beginIndex and endIndex of listItemGroupAccessibilityProperty.
+     * @tc.expected: step4. the beginIndex and endIndex of listItemGroupAccessibilityProperty properties equals expected
+     * value.
+     */
+    auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
+    ASSERT_NE(pattern, nullptr);
+    for (int i = 0; i <= LIST_ITEM_NUMBER; i++) {
+        pattern->itemPosition_[i] = { LIST_ITEM_WIDTH, LIST_ITEM_HEIGHT * i };
+    }
+    EXPECT_EQ(accessibility->GetBeginIndex(), 0);
+    EXPECT_EQ(accessibility->GetEndIndex(), LIST_ITEM_NUMBER);
+}
+
+/**
+ * @tc.name: ListItemGroupAccessibilityPropertyTest002
+ * @tc.desc: Test the GetCollectionItemCounts function of ListItemGroupAccessibilityProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListItemGroupAccessibilityPropertyTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create listItemGroup frameNode and get listItemGroupAccessibilityProperty.
+     * @tc.expected: step1. get listItemGroupAccessibilityProperty success.
+     */
+    ListItemGroupModelNG listItemGroupModelNG;
+    listItemGroupModelNG.Create();
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    ASSERT_NE(element, nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto accessibility = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibility, nullptr);
+
+    /**
+     * @tc.steps: step2. get collectionItemCounts of listItemGroupAccessibilityProperty.
+     * @tc.expected: step2. the collectionItemCounts of listItemGroupAccessibilityProperty properties equals default
+     * value.
+     */
+    EXPECT_EQ(accessibility->GetCollectionItemCounts(), 0);
+
+    /**
+     * @tc.steps: step3. set totalItemCount_ of ListItemGroupLayoutAlgorithm
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<LayoutWrapper> layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, layoutProperty);
+    ASSERT_NE(layoutWrapper, nullptr);
+    RefPtr<ListItemGroupLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<ListItemGroupLayoutAlgorithm>(0, 0, 0);
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    layoutAlgorithm->totalItemCount_ = LIST_ITEM_NUMBER;
+    auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm);
+    layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
+    DirtySwapConfig config;
+    auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
+    ASSERT_NE(pattern, nullptr);
+    config.skipMeasure = false;
+    config.skipLayout = false;
+    bool result = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_FALSE(result);
+
+    /**
+     * @tc.steps: step4. get collectionItemCounts of listItemGroupAccessibilityProperty.
+     * @tc.expected: step4. the collectionItemCounts of listItemGroupAccessibilityProperty properties equals expected
+     * value.
+     */
+    EXPECT_EQ(accessibility->GetCollectionItemCounts(), LIST_ITEM_NUMBER);
 }
 } // namespace OHOS::Ace::NG

@@ -512,6 +512,8 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
     UpdateFontColor(
         textProperty, menuProperty, fontColor, isLabel ? theme->GetSecondaryFontColor() : theme->GetMenuFontColor());
     textProperty->UpdateContent(content);
+    textProperty->UpdateMaxLines(1);
+    textProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     node->MountToParent(row, isLabel ? 0 : DEFAULT_NODE_SLOT);
     node->MarkModifyDone();
     node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);

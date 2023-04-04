@@ -215,4 +215,11 @@ foreach(item, _adapters) {
   }
 }
 
-print(ace_platforms)
+current_platform = {
+}
+foreach(item, ace_platforms) {
+  if ((use_mingw_win && item.name == "windows") ||
+      (use_mac && item.name == "mac") || (use_linux && item.name == "linux")) {
+    current_platform = item
+  }
+}

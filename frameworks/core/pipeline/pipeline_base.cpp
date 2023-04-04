@@ -510,7 +510,7 @@ void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount)
     CHECK_RUN_ON(UI);
     ACE_SCOPED_TRACE("OnVsyncEvent now:%" PRIu64 "", nanoTimestamp);
 
-    for (auto& callback : formVsyncCallbacks_) {
+    for (auto& callback : subWindowVsyncCallbacks_) {
         callback.second(nanoTimestamp, frameCount);
     }
 
@@ -588,10 +588,10 @@ void PipelineBase::SendEventToAccessibility(const AccessibilityEvent& accessibil
     accessibilityManager->SendAccessibilityAsyncEvent(accessibilityEvent);
 }
 
-void PipelineBase::SetFormVsyncCallback(AceVsyncCallback&& callback, int32_t formWindowId)
+void PipelineBase::SetSubWindowVsyncCallback(AceVsyncCallback&& callback, int32_t subWindowId)
 {
     if (callback) {
-        formVsyncCallbacks_.try_emplace(formWindowId, std::move(callback));
+        subWindowVsyncCallbacks_.try_emplace(subWindowId, std::move(callback));
     }
 }
 
@@ -634,9 +634,9 @@ void PipelineBase::RemoveEtsCardTouchEventCallback(int32_t ponitId)
     etsCardTouchEventCallback_.erase(iter);
 }
 
-void PipelineBase::RemoveFormVsyncCallback(int32_t formWindowId)
+void PipelineBase::RemoveSubWindowVsyncCallback(int32_t subWindowId)
 {
-    formVsyncCallbacks_.erase(formWindowId);
+    subWindowVsyncCallbacks_.erase(subWindowId);
 }
 
 void PipelineBase::Destroy()

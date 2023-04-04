@@ -40,7 +40,8 @@ void GridAdaptiveLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                     : Axis::VERTICAL;
     auto idealSize =
         CreateIdealSize(gridLayoutProperty->GetLayoutConstraint().value(), axis, MeasureType::MATCH_CONTENT);
-    MinusPaddingToSize(gridLayoutProperty->CreatePaddingAndBorder(), idealSize);
+    auto padding = gridLayoutProperty->CreatePaddingAndBorder();
+    MinusPaddingToSize(padding, idealSize);
 
     auto firstChildWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(firstChildWrapper);
@@ -93,6 +94,7 @@ void GridAdaptiveLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     idealSize.UpdateIllegalSizeWithCheck(
         OptionalSizeF(columnCount * gridCellSize_.Width() + (columnCount - 1) * columnsGap,
             rowCount * gridCellSize_.Height() + (rowCount - 1) * rowsGap));
+    AddPaddingToSize(padding, idealSize);
     layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize.ConvertToSizeT());
 
     // Create child constraint.

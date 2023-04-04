@@ -56,11 +56,17 @@ AceCollectionItemInfo GridItemAccessibilityProperty::GetCollectionItemInfo() con
     aceCollectionItemInfo.column = gridItemPattern->GetCrossIndex();
     aceCollectionItemInfo.rowSpan = gridItemLayoutProperty->GetMainSpan(gridAxis);
     aceCollectionItemInfo.columnSpan = gridItemLayoutProperty->GetCrossSpan(gridAxis);
+
+    auto gridAccessibilityProperty = gridNode->GetAccessibilityProperty<GridAccessibilityProperty>();
+    if (aceCollectionItemInfo.columnSpan == gridAccessibilityProperty->GetCollectionInfo().columns) {
+        aceCollectionItemInfo.heading = true;
+    }
     return aceCollectionItemInfo;
 }
 
 void GridItemAccessibilityProperty::SetSpecificSupportAction()
 {
     AddSupportAction(AceAction::ACTION_SELECT);
+    AddSupportAction(AceAction::ACTION_CLEAR_SELECTION);
 }
 } // namespace OHOS::Ace::NG

@@ -61,18 +61,18 @@ int32_t TextAccessibilityProperty::GetTextSelectionEnd() const
 
 void TextAccessibilityProperty::SetSpecificSupportAction()
 {
-    AddSupportAction(AceAction::ACTION_COPY);
-    AddSupportAction(AceAction::ACTION_NEXT_AT_MOVEMENT_GRANULARITY);
-    AddSupportAction(AceAction::ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY);
-
     auto frameNode = host_.Upgrade();
     CHECK_NULL_VOID(frameNode);
     auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     if (textLayoutProperty->GetCopyOptionValue(CopyOptions::None) != CopyOptions::None) {
+        AddSupportAction(AceAction::ACTION_COPY);
         AddSupportAction(AceAction::ACTION_SELECT);
         AddSupportAction(AceAction::ACTION_SET_SELECTION);
         AddSupportAction(AceAction::ACTION_CLEAR_SELECTION);
     }
+
+    AddSupportAction(AceAction::ACTION_NEXT_AT_MOVEMENT_GRANULARITY);
+    AddSupportAction(AceAction::ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY);
 }
 } // namespace OHOS::Ace::NG

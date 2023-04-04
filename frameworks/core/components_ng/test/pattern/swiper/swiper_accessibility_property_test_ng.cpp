@@ -40,17 +40,14 @@ public:
     static void TearDownTestCase() {};
     void SetUp() override;
     void TearDown() override;
-    bool InitSwiperTestNg();
+    void InitSwiperTestNg();
     RefPtr<FrameNode> frameNode_;
     RefPtr<SwiperPattern> swiperPattern_;
     RefPtr<SwiperLayoutProperty> swiperLayoutProperty_;
     RefPtr<SwiperAccessibilityProperty> swiperAccessibilityProperty_;
 };
 
-void SwiperAccessibilityPropertyTestNg::SetUp()
-{
-    ASSERT_TRUE(InitSwiperTestNg());
-}
+void SwiperAccessibilityPropertyTestNg::SetUp() {}
 
 void SwiperAccessibilityPropertyTestNg::TearDown()
 {
@@ -60,23 +57,21 @@ void SwiperAccessibilityPropertyTestNg::TearDown()
     swiperAccessibilityProperty_ = nullptr;
 }
 
-bool SwiperAccessibilityPropertyTestNg::InitSwiperTestNg()
+void SwiperAccessibilityPropertyTestNg::InitSwiperTestNg()
 {
     frameNode_ = FrameNode::GetOrCreateFrameNode(V2::SWIPER_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
         []() { return AceType::MakeRefPtr<SwiperPattern>(); });
-    CHECK_NULL_RETURN(frameNode_, false);
+    ASSERT_NE(frameNode_, nullptr);
     swiperPattern_ = frameNode_->GetPattern<SwiperPattern>();
-    CHECK_NULL_RETURN(swiperPattern_, false);
+    ASSERT_NE(swiperPattern_, nullptr);
 
     swiperLayoutProperty_ = frameNode_->GetLayoutProperty<SwiperLayoutProperty>();
-    CHECK_NULL_RETURN(swiperLayoutProperty_, false);
+    ASSERT_NE(swiperLayoutProperty_, nullptr);
 
     swiperAccessibilityProperty_ = frameNode_->GetAccessibilityProperty<SwiperAccessibilityProperty>();
-    CHECK_NULL_RETURN(swiperAccessibilityProperty_, false);
+    ASSERT_NE(swiperAccessibilityProperty_, nullptr);
 
     swiperLayoutProperty_->UpdateShowIndicator(false);
-
-    return true;
 }
 
 /**
@@ -86,6 +81,8 @@ bool SwiperAccessibilityPropertyTestNg::InitSwiperTestNg()
  */
 HWTEST_F(SwiperAccessibilityPropertyTestNg, SwiperAccessibilityPropertyGetCurrentIndex001, TestSize.Level1)
 {
+    InitSwiperTestNg();
+
     EXPECT_EQ(swiperAccessibilityProperty_->GetCurrentIndex(), SWIPER_ERROR);
 
     RefPtr<FrameNode> indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
@@ -103,6 +100,8 @@ HWTEST_F(SwiperAccessibilityPropertyTestNg, SwiperAccessibilityPropertyGetCurren
  */
 HWTEST_F(SwiperAccessibilityPropertyTestNg, SwiperAccessibilityPropertyGetBeginIndex001, TestSize.Level1)
 {
+    InitSwiperTestNg();
+
     EXPECT_EQ(swiperAccessibilityProperty_->GetBeginIndex(), SWIPER_ERROR);
 
     RefPtr<FrameNode> indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
@@ -120,6 +119,8 @@ HWTEST_F(SwiperAccessibilityPropertyTestNg, SwiperAccessibilityPropertyGetBeginI
  */
 HWTEST_F(SwiperAccessibilityPropertyTestNg, SwiperAccessibilityPropertyGetEndIndex001, TestSize.Level1)
 {
+    InitSwiperTestNg();
+
     EXPECT_EQ(swiperAccessibilityProperty_->GetEndIndex(), SWIPER_ERROR);
 
     RefPtr<FrameNode> indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
@@ -137,6 +138,8 @@ HWTEST_F(SwiperAccessibilityPropertyTestNg, SwiperAccessibilityPropertyGetEndInd
  */
 HWTEST_F(SwiperAccessibilityPropertyTestNg, SwiperAccessibilityPropertyGetAccessibilityValue001, TestSize.Level1)
 {
+    InitSwiperTestNg();
+
     EXPECT_TRUE(swiperAccessibilityProperty_->HasRange());
     AccessibilityValue result = swiperAccessibilityProperty_->GetAccessibilityValue();
     EXPECT_EQ(result.min, 0);
@@ -165,6 +168,8 @@ HWTEST_F(SwiperAccessibilityPropertyTestNg, SwiperAccessibilityPropertyGetAccess
  */
 HWTEST_F(SwiperAccessibilityPropertyTestNg, SwiperAccessibilityPropertyIsScrollable001, TestSize.Level1)
 {
+    InitSwiperTestNg();
+
     auto swiperPaintProperty = frameNode_->GetPaintProperty<SwiperPaintProperty>();
     ASSERT_NE(swiperPaintProperty, nullptr);
     swiperPaintProperty->UpdateLoop(false);
@@ -188,6 +193,8 @@ HWTEST_F(SwiperAccessibilityPropertyTestNg, SwiperAccessibilityPropertyIsScrolla
  */
 HWTEST_F(SwiperAccessibilityPropertyTestNg, SwiperAccessibilityPropertyGetCollectionItemCounts001, TestSize.Level1)
 {
+    InitSwiperTestNg();
+
     EXPECT_EQ(swiperAccessibilityProperty_->GetCollectionItemCounts(), 0);
 
     for (int index = 0; index <= INDEX_NUM; index++) {
@@ -208,6 +215,8 @@ HWTEST_F(SwiperAccessibilityPropertyTestNg, SwiperAccessibilityPropertyGetCollec
  */
 HWTEST_F(SwiperAccessibilityPropertyTestNg, SwiperAccessibilityPropertyGetSupportAction001, TestSize.Level1)
 {
+    InitSwiperTestNg();
+
     auto swiperPaintProperty = frameNode_->GetPaintProperty<SwiperPaintProperty>();
     ASSERT_NE(swiperPaintProperty, nullptr);
     swiperPaintProperty->UpdateLoop(false);
@@ -226,6 +235,7 @@ HWTEST_F(SwiperAccessibilityPropertyTestNg, SwiperAccessibilityPropertyGetSuppor
     expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
     expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
     expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SELECT);
+    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_CLEAR_SELECTION);
     for (auto action : supportAceActions) {
         actions |= 1UL << static_cast<uint32_t>(action);
     }

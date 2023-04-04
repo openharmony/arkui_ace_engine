@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,8 +22,10 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/gestures/recognizers/click_recognizer.h"
 #include "core/components_ng/gestures/recognizers/exclusive_recognizer.h"
 #include "core/components_ng/gestures/recognizers/parallel_recognizer.h"
+#include "core/components_ng/gestures/recognizers/long_press_recognizer.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 #ifdef ENABLE_DRAG_FRAMEWORK
@@ -568,4 +570,25 @@ int32_t GestureEventHub::SetDragData(std::shared_ptr<UDMF::UnifiedData>& unified
     return ret;
 }
 #endif
+bool GestureEventHub::IsAccessibilityClickable()
+{
+    bool ret = IsClickable();
+    for (auto gestureRecognizer : gestureHierarchy_) {
+        if (AceType::DynamicCast<ClickRecognizer>(gestureRecognizer)) {
+            return true;
+        }
+    }
+    return ret;
+}
+
+bool GestureEventHub::IsAccessibilityLongClickable()
+{
+    bool ret = IsLongClickable();
+    for (auto gestureRecognizer : gestureHierarchy_) {
+        if (AceType::DynamicCast<LongPressRecognizer>(gestureRecognizer)) {
+            return true;
+        }
+    }
+    return ret;
+}
 } // namespace OHOS::Ace::NG

@@ -120,6 +120,8 @@ private:
     float currentOffset_ = 0.0f;
     int32_t totalCount_ = 0;
     int32_t displayCount_ = 0;
+    float prevMargin_ = 0.0f;
+    float nextMargin_ = 0.0f;
     std::set<int32_t> itemRange_;
     std::set<int32_t> preItemRange_;
     std::vector<int32_t> inActiveItems_;

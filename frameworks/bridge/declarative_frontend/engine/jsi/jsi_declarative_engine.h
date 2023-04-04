@@ -173,7 +173,7 @@ public:
 // ArkTsCard start
     static void PreloadAceModuleCard(void* runtime);
 // ArkTsCard end
-
+    static bool IsPlugin();
 private:
     void InitGlobalObjectTemplate();
     void InitConsoleModule();  // add Console object to global
@@ -183,7 +183,6 @@ private:
     void InitJsNativeModuleObject();
     void InitJsContextModuleObject();
     void InitGroupJsBridge();
-    static bool IsPlugin();
     static shared_ptr<JsRuntime> InnerGetCurrentRuntime();
 
     std::unordered_map<int32_t, panda::Global<panda::ObjectRef>> rootViewMap_;

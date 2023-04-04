@@ -74,6 +74,8 @@ RefPtr<FrameNode> OptionView::CreateText(const std::string& value, const RefPtr<
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
 
+    textProperty->UpdateMaxLines(1);
+    textProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     textProperty->UpdateFontSize(theme->GetMenuFontSize());
     textProperty->UpdateFontWeight(FontWeight::REGULAR);
     textProperty->UpdateTextColor(theme->GetMenuFontColor());

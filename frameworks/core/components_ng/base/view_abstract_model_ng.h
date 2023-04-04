@@ -107,7 +107,7 @@ public:
         ViewAbstract::SetBackgroundBlurStyle(bgBlurStyle);
     }
 
-    void SetSphericalEffect(float radio) override
+    void SetSphericalEffect(double radio) override
     {
         ViewAbstract::SetSphericalEffect(radio);
     }
@@ -115,7 +115,7 @@ public:
     {
         ViewAbstract::SetPixelStretchEffect(option);
     }
-    void SetLightUpEffect(float radio) override
+    void SetLightUpEffect(double radio) override
     {
         ViewAbstract::SetLightUpEffect(radio);
     }

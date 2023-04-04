@@ -784,9 +784,9 @@ public:
         uiExtensionCallback_ = std::move(callback);
     }
 
-    void SetFormVsyncCallback(AceVsyncCallback&& callback, int32_t formWindowId);
+    void SetSubWindowVsyncCallback(AceVsyncCallback&& callback, int32_t subWindowId);
 
-    void RemoveFormVsyncCallback(int32_t formWindowId);
+    void RemoveSubWindowVsyncCallback(int32_t subWindowId);
 
 protected:
     void TryCallNextFrameLayoutCallback()
@@ -823,7 +823,7 @@ protected:
 
     bool isJsPlugin_ = false;
 
-    std::unordered_map<int32_t, AceVsyncCallback> formVsyncCallbacks_;
+    std::unordered_map<int32_t, AceVsyncCallback> subWindowVsyncCallbacks_;
     int32_t minPlatformVersion_ = 0;
     int32_t windowId_ = 0;
     int32_t appLabelId_ = 0;
