@@ -518,12 +518,12 @@ bool RadioPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     auto geometryNode = dirty->GetGeometryNode();
     offset_ = geometryNode->GetContentOffset();
     size_ = geometryNode->GetContentSize();
-
-    if (isFirstAddhotZoneRect_) {
-        AddHotZoneRect();
-        isFirstAddhotZoneRect_ = false;
-    } else {
-        RemoveLastHotZoneRect();
+    
+    auto offset = geometryNode->GetContentOffset();
+    auto size = geometryNode->GetContentSize();
+    if (offset != offset_ || size != size_) {
+        offset_ = offset;
+        size_ = size;
         AddHotZoneRect();
     }
 
@@ -533,8 +533,8 @@ bool RadioPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
 // Set the default hot zone for the component.
 void RadioPattern::AddHotZoneRect()
 {
-    hotZoneOffset_.SetX(-hotZoneHorizontalPadding_.ConvertToPx());
-    hotZoneOffset_.SetY(-hotZoneVerticalPadding_.ConvertToPx());
+    hotZoneOffset_.SetX(offset_.GetX() - hotZoneHorizontalPadding_.ConvertToPx());
+    hotZoneOffset_.SetY(offset_.GetY() - hotZoneVerticalPadding_.ConvertToPx());
     hotZoneSize_.SetWidth(size_.Width() + 2 * hotZoneHorizontalPadding_.ConvertToPx());
     hotZoneSize_.SetHeight(size_.Height() + 2 * hotZoneVerticalPadding_.ConvertToPx());
     DimensionRect hotZoneRegion;
