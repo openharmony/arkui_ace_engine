@@ -74,6 +74,7 @@ public:
     void DestroyDragWindow();
 #ifdef ENABLE_DRAG_FRAMEWORK
     RefPtr<DragDropProxy> CreateFrameworkDragDropProxy();
+    void UpdatePixelMapPosition(int32_t globalX, int32_t globalY);
 #endif // ENABLE_DRAG_FRAMEWORK
 
     bool CheckDragDropProxy(int64_t id) const;

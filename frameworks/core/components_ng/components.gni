@@ -113,6 +113,7 @@ template("build_component_ng") {
           config.enable_drag_framework) {
         deps += [
           "//base/msdp/device_status/interfaces/innerkits:devicestatus_client",
+          "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
         ]
         include_dirs += [
           "//base/msdp/device_status/interfaces/innerkits/interaction/include",
