@@ -40,16 +40,13 @@ public:
     static void TearDownTestCase() {};
     void SetUp() override;
     void TearDown() override;
-    bool InitMenuItemTestNg();
+    void InitMenuItemTestNg();
     RefPtr<FrameNode> frameNode_;
     RefPtr<MenuItemPattern> menuItemPattern_;
     RefPtr<MenuItemAccessibilityProperty> menuItemAccessibilityProperty_;
 };
 
-void MenuItemAccessibilityPropertyTestNg::SetUp()
-{
-    ASSERT_TRUE(InitMenuItemTestNg());
-}
+void MenuItemAccessibilityPropertyTestNg::SetUp() {}
 
 void MenuItemAccessibilityPropertyTestNg::TearDown()
 {
@@ -58,18 +55,17 @@ void MenuItemAccessibilityPropertyTestNg::TearDown()
     menuItemAccessibilityProperty_ = nullptr;
 }
 
-bool MenuItemAccessibilityPropertyTestNg::InitMenuItemTestNg()
+void MenuItemAccessibilityPropertyTestNg::InitMenuItemTestNg()
 {
     frameNode_ = FrameNode::GetOrCreateFrameNode(V2::MENU_ITEM_ETS_TAG,
         ViewStackProcessor::GetInstance()->ClaimNodeId(), []() { return AceType::MakeRefPtr<MenuItemPattern>(); });
-    CHECK_NULL_RETURN(frameNode_, false);
+    ASSERT_NE(frameNode_, nullptr);
 
     menuItemPattern_ = frameNode_->GetPattern<MenuItemPattern>();
-    CHECK_NULL_RETURN(menuItemPattern_, false);
+    ASSERT_NE(menuItemPattern_, nullptr);
 
     menuItemAccessibilityProperty_ = frameNode_->GetAccessibilityProperty<MenuItemAccessibilityProperty>();
-    CHECK_NULL_RETURN(menuItemAccessibilityProperty_, false);
-    return true;
+    ASSERT_NE(menuItemAccessibilityProperty_, nullptr);
 }
 
 /**
@@ -79,6 +75,8 @@ bool MenuItemAccessibilityPropertyTestNg::InitMenuItemTestNg()
  */
 HWTEST_F(MenuItemAccessibilityPropertyTestNg, MenuItemAccessibilityPropertyGetText001, TestSize.Level1)
 {
+    InitMenuItemTestNg();
+
     EXPECT_EQ(menuItemAccessibilityProperty_->GetText(), EMPTY_TEXT);
 
     auto menuItemLayoutProperty = frameNode_->GetLayoutProperty<MenuItemLayoutProperty>();
@@ -95,6 +93,8 @@ HWTEST_F(MenuItemAccessibilityPropertyTestNg, MenuItemAccessibilityPropertyGetTe
  */
 HWTEST_F(MenuItemAccessibilityPropertyTestNg, MenuItemAccessibilityPropertyIsSelected001, TestSize.Level1)
 {
+    InitMenuItemTestNg();
+
     EXPECT_FALSE(menuItemAccessibilityProperty_->IsSelected());
 
     menuItemPattern_->SetSelected(true);
@@ -108,10 +108,13 @@ HWTEST_F(MenuItemAccessibilityPropertyTestNg, MenuItemAccessibilityPropertyIsSel
  */
 HWTEST_F(MenuItemAccessibilityPropertyTestNg, MenuItemAccessibilityPropertyGetSupportAction001, TestSize.Level1)
 {
+    InitMenuItemTestNg();
+
     menuItemAccessibilityProperty_->ResetSupportAction();
     std::unordered_set<AceAction> supportAceActions = menuItemAccessibilityProperty_->GetSupportAction();
     uint64_t actions = 0, expectActions = 0;
     expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SELECT);
+    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_CLEAR_SELECTION);
     for (auto action : supportAceActions) {
         actions |= 1UL << static_cast<uint32_t>(action);
     }
