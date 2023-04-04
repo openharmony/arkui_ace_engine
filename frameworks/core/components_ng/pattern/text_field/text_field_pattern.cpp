@@ -882,9 +882,14 @@ void TextFieldPattern::HandleSetSelection(int32_t start, int32_t end)
     UpdateSelection(start, end);
     textEditingValue_.caretPosition =
         std::clamp(end, 0, static_cast<int32_t>(textEditingValue_.GetWideText().length()));
-    selectionMode_ = SelectionMode::SELECT;
+    selectionMode_ = start == end ? SelectionMode::NONE : SelectionMode::SELECT;
     caretUpdateType_ = CaretUpdateType::EVENT;
     GetTextRectsInRange(textSelector_.GetStart(), textSelector_.GetEnd(), textBoxes_);
+    if (start == end) {
+        CreateSingleHandle();
+    } else {
+        CreateHandles();
+    }
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
 
