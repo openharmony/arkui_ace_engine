@@ -49,10 +49,13 @@ foreach(module, common_napi_libs) {
 }
 
 group("napi_group") {
-  deps = common_targets
-
-  deps += [
-    "$ace_root/interfaces/napi/kits/drawabledescriptor:drawabledescriptor",
-    "$ace_root/interfaces/napi/kits/plugincomponent:plugincomponent",
-  ]
+  if (use_mac || use_mingw_win || use_linux) {
+    public_deps = common_targets
+  } else {
+    deps = common_targets
+    deps += [
+      "$ace_root/interfaces/napi/kits/drawabledescriptor:drawabledescriptor",
+      "$ace_root/interfaces/napi/kits/plugincomponent:plugincomponent",
+    ]
+  }
 }
