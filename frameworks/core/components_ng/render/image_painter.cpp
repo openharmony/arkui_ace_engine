@@ -286,6 +286,62 @@ OffsetF ImagePainter::CalculateBgImagePosition(const SizeF& boxPaintSize_, const
     return offset;
 }
 
+namespace {
+float CalculateBgWidth(const SizeF& boxPaintSize_, const SizeF& srcSize, const BackgroundImageSize& bgImageSize)
+{
+    float width = 0.0f;
+    float paintAspectRatio = boxPaintSize_.Width() / boxPaintSize_.Height();
+    float srcAspectRatio = srcSize.Width() / srcSize.Height();
+    auto bgImageSizeTypeX = bgImageSize.GetSizeTypeX();
+    switch (bgImageSizeTypeX) {
+        case BackgroundImageSizeType::COVER:
+            width = paintAspectRatio >= srcAspectRatio ? boxPaintSize_.Width()
+                                                       : srcSize.Width() * (boxPaintSize_.Height() / srcSize.Height());
+            break;
+        case BackgroundImageSizeType::CONTAIN:
+            width = paintAspectRatio >= srcAspectRatio ? srcSize.Width() * (boxPaintSize_.Height() / srcSize.Height())
+                                                       : boxPaintSize_.Width();
+            break;
+        case BackgroundImageSizeType::LENGTH:
+            width = bgImageSize.GetSizeValueX();
+            break;
+        case BackgroundImageSizeType::PERCENT:
+            width = boxPaintSize_.Width() * bgImageSize.GetSizeValueX() / PERCENT_TRANSLATE;
+            break;
+        default:
+            break;
+    }
+    return width;
+}
+
+float CalculateBgHeight(const SizeF& boxPaintSize_, const SizeF& srcSize, const BackgroundImageSize& bgImageSize)
+{
+    float height = 0.0f;
+    float paintAspectRatio = boxPaintSize_.Width() / boxPaintSize_.Height();
+    float srcAspectRatio = srcSize.Width() / srcSize.Height();
+    auto bgImageSizeTypeY = bgImageSize.GetSizeTypeY();
+    switch (bgImageSizeTypeY) {
+        case BackgroundImageSizeType::COVER:
+            height = paintAspectRatio >= srcAspectRatio ? srcSize.Height() * (boxPaintSize_.Width() / srcSize.Width())
+                                                        : boxPaintSize_.Height();
+            break;
+        case BackgroundImageSizeType::CONTAIN:
+            height = paintAspectRatio >= srcAspectRatio ? boxPaintSize_.Height()
+                                                        : srcSize.Height() * (boxPaintSize_.Width() / srcSize.Width());
+            break;
+        case BackgroundImageSizeType::LENGTH:
+            height = bgImageSize.GetSizeValueY();
+            break;
+        case BackgroundImageSizeType::PERCENT:
+            height = boxPaintSize_.Height() * bgImageSize.GetSizeValueY() / PERCENT_TRANSLATE;
+            break;
+        default:
+            break;
+    }
+    return height;
+}
+} // namespace
+
 SizeF ImagePainter::CalculateBgImageSize(
     const SizeF& boxPaintSize_, const SizeF& srcSize, const std::optional<BackgroundImageSize>& bgImageSizeOpt)
 {
@@ -294,53 +350,10 @@ SizeF ImagePainter::CalculateBgImageSize(
         NearZero(boxPaintSize_.Width()) || NearZero(boxPaintSize_.Height())) {
         return sizeRet;
     }
-    float renderSizeX = 0.0;
-    float renderSizeY = 0.0;
-    float srcAspectRatio = srcSize.Width() / srcSize.Height();
-    float paintAspectRatio = boxPaintSize_.Width() / boxPaintSize_.Height();
     auto bgImageSize = bgImageSizeOpt.value();
-    auto bgImageSizeTypeX = bgImageSize.GetSizeTypeX();
-    switch (bgImageSizeTypeX) {
-        case BackgroundImageSizeType::COVER:
-            renderSizeX = paintAspectRatio >= srcAspectRatio
-                              ? boxPaintSize_.Width()
-                              : srcSize.Width() * (boxPaintSize_.Height() / srcSize.Height());
-            break;
-        case BackgroundImageSizeType::CONTAIN:
-            renderSizeX = paintAspectRatio >= srcAspectRatio
-                              ? srcSize.Width() * (boxPaintSize_.Height() / srcSize.Height())
-                              : boxPaintSize_.Width();
-            break;
-        case BackgroundImageSizeType::LENGTH:
-            renderSizeX = bgImageSize.GetSizeValueX();
-            break;
-        case BackgroundImageSizeType::PERCENT:
-            renderSizeX = boxPaintSize_.Width() * bgImageSize.GetSizeValueX() / PERCENT_TRANSLATE;
-            break;
-        default:
-            break;
-    }
-    auto bgImageSizeTypeY = bgImageSize.GetSizeTypeY();
-    switch (bgImageSizeTypeY) {
-        case BackgroundImageSizeType::COVER:
-            renderSizeY = paintAspectRatio >= srcAspectRatio
-                              ? srcSize.Height() * (boxPaintSize_.Width() / srcSize.Width())
-                              : boxPaintSize_.Height();
-            break;
-        case BackgroundImageSizeType::CONTAIN:
-            renderSizeY = paintAspectRatio >= srcAspectRatio
-                              ? boxPaintSize_.Height()
-                              : srcSize.Height() * (boxPaintSize_.Width() / srcSize.Width());
-            break;
-        case BackgroundImageSizeType::LENGTH:
-            renderSizeY = bgImageSize.GetSizeValueY();
-            break;
-        case BackgroundImageSizeType::PERCENT:
-            renderSizeY = boxPaintSize_.Height() * bgImageSize.GetSizeValueY() / PERCENT_TRANSLATE;
-            break;
-        default:
-            break;
-    }
+    float renderSizeX = CalculateBgWidth(boxPaintSize_, srcSize, bgImageSize);
+    float renderSizeY = CalculateBgHeight(boxPaintSize_, srcSize, bgImageSize);
+
     if (bgImageSize.GetSizeTypeX() == BackgroundImageSizeType::AUTO &&
         bgImageSize.GetSizeTypeY() == BackgroundImageSizeType::AUTO) {
         renderSizeX = srcSize.Width();
@@ -349,6 +362,14 @@ SizeF ImagePainter::CalculateBgImageSize(
         renderSizeX = srcSize.Width() * (renderSizeY / srcSize.Height());
     } else if (bgImageSize.GetSizeTypeY() == BackgroundImageSizeType::AUTO) {
         renderSizeY = srcSize.Height() * (renderSizeX / srcSize.Width());
+    }
+    // fit image ratio if width or height is not set
+    float srcRatio = srcSize.Width() / srcSize.Height();
+    CHECK_NULL_RETURN(srcRatio > 0, sizeRet);
+    if (renderSizeX <= 0) {
+        renderSizeX = renderSizeY * srcRatio;
+    } else if (renderSizeY <= 0) {
+        renderSizeY = renderSizeX / srcRatio;
     }
     sizeRet.SetWidth(renderSizeX);
     sizeRet.SetHeight(renderSizeY);
