@@ -200,7 +200,13 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
     }
 
-    textGeometryNode->SetMarginFrameOffset(textOffset - geometryNode->GetFrameOffset());
+    auto borderWidth = layoutProperty->GetBadgeBorderWidthValue(badgeTheme->GetBadgeBorderWidth());
+    OffsetF borderOffset(borderWidth.ConvertToPx(), borderWidth.ConvertToPx());
+
+    textGeometryNode->SetMarginFrameOffset(textOffset - geometryNode->GetFrameOffset() - borderOffset);
+    auto textFrameSize = textGeometryNode->GetFrameSize();
+    textFrameSize += SizeF(borderWidth.ConvertToPx() * 2, borderWidth.ConvertToPx() * 2);
+    textGeometryNode->SetFrameSize(textFrameSize);
     textWrapper->Layout();
 
     auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(childrenSize - 2);
