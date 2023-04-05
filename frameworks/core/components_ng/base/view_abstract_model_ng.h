@@ -689,7 +689,7 @@ public:
         ViewAbstract::SetHitTestMode(hitTestMode);
     }
 
-    void SetKeyboardShortcut(const std::string& value, const std::vector<CtrlKey>& keys,
+    void SetKeyboardShortcut(const std::string& value, const std::vector<ModifierKey>& keys,
         std::function<void()>&& onKeyboardShortcutAction) override
     {
         ViewAbstract::SetKeyboardShortcut(value, keys, std::move(onKeyboardShortcutAction));
