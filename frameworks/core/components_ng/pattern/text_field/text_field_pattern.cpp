@@ -3323,6 +3323,16 @@ bool TextFieldPattern::HasStateStyle(UIState state) const
     return hub->HasStateStyle(state);
 }
 
+double TextFieldPattern::GetScrollBarWidth()
+{
+    auto scrollBar = GetScrollBar();
+    double scrollBarWidth = 0.0;
+    if (scrollBar) {
+        scrollBarWidth = scrollBar->GetBarRect().Width();
+    }
+    return scrollBarWidth;
+}
+
 void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     json->Put("placeholder", GetPlaceHolder().c_str());
