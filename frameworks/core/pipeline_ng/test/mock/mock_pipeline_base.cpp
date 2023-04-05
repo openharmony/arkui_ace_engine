@@ -105,6 +105,13 @@ void PipelineContext::OnSurfaceDensityChanged(double density) {}
 
 void PipelineContext::SetRootRect(double width, double height, double offset) {}
 
+void PipelineContext::SetGetViewSafeAreaImpl(std::function<SafeAreaEdgeInserts()>&& callback) {}
+
+SafeAreaEdgeInserts PipelineContext::GetCurrentViewSafeArea() const
+{
+    return {};
+}
+
 void PipelineContext::FlushBuild() {}
 
 void PipelineContext::NotifyMemoryLevel(int32_t level) {}
