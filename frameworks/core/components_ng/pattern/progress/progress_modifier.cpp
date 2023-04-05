@@ -169,29 +169,31 @@ void ProgressModifier::PaintLinear(RSCanvas& canvas, const OffsetF& offset, cons
     if (contentSize.Width() >= contentSize.Height()) {
         double dateLength = contentSize.Width() * value_->Get() / maxValue_->Get();
         canvas.AttachBrush(brush);
+        auto offsetY = offset.GetY() + (contentSize.Height() - strokeWidth_->Get()) / INT32_TWO;
         canvas.DrawRoundRect(
-            { { offset.GetX(), offset.GetY(), contentSize.Width() + offset.GetX(),
-                                   strokeWidth_->Get() + offset.GetY() },
+            { { offset.GetX(), offsetY, contentSize.Width() + offset.GetX(),
+                                   strokeWidth_->Get() + offsetY },
             radius, radius });
         brush.SetColor(ToRSColor((color_->Get())));
         canvas.AttachBrush(brush);
         if (!NearEqual(dateLength, 0.0)) {
             canvas.DrawRoundRect(
-                { { offset.GetX(), offset.GetY(), dateLength + offset.GetX(), strokeWidth_->Get() + offset.GetY() },
+                { { offset.GetX(), offsetY, dateLength + offset.GetX(), strokeWidth_->Get() + offsetY },
                     radius, radius });
         }
     } else {
         double dateLength = contentSize.Height() * value_->Get() / maxValue_->Get();
         canvas.AttachBrush(brush);
+        auto offsetX = offset.GetX() + (contentSize.Width() - strokeWidth_->Get()) / INT32_TWO;
         canvas.DrawRoundRect(
-            { { offset.GetX(), offset.GetY(), strokeWidth_->Get() + offset.GetX(),
+            { { offsetX, offset.GetY(), strokeWidth_->Get() + offsetX,
                                    contentSize.Height() + offset.GetY() },
             radius, radius });
         brush.SetColor(ToRSColor((color_->Get())));
         canvas.AttachBrush(brush);
         if (!NearEqual(dateLength, 0.0)) {
             canvas.DrawRoundRect(
-                { { offset.GetX(), offset.GetY(), strokeWidth_->Get() + offset.GetX(), dateLength + offset.GetY() },
+                { { offsetX, offset.GetY(), strokeWidth_->Get() + offsetX, dateLength + offset.GetY() },
                     radius, radius });
         }
     }
