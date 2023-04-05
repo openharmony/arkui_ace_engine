@@ -45,7 +45,7 @@ constexpr float CENTER_BEZIER_CURVE_DAMPING = 1.0f;
 void SwiperIndicatorModifier::onDraw(DrawingContext& context)
 {
     ContentProperty contentProperty;
-    contentProperty.backgroundColor = backgroundColor_->Get();
+    contentProperty.backgroundColor = backgroundColor_->Get().ToColor();
     contentProperty.vectorBlackPointCenterX = vectorBlackPointCenterX_->Get();
     contentProperty.longPointLeftCenterX = longPointLeftCenterX_->Get();
     contentProperty.longPointRightCenterX = longPointRightCenterX_->Get();
