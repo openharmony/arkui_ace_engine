@@ -36,6 +36,11 @@ FormRendererGroup::FormRendererGroup(
     const std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime)
     : context_(context), runtime_(runtime) {}
 
+FormRendererGroup::~FormRendererGroup()
+{
+    DeleteForm();
+}
+
 void FormRendererGroup::AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
 {
     auto compId = want.GetStringParam(FORM_RENDERER_COMP_ID);
