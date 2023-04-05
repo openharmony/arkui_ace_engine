@@ -300,16 +300,21 @@ void ProgressModifier::PaintMoon(RSCanvas& canvas, const OffsetF& offset, const 
     }
 }
 
-void ProgressModifier::PaintCapsule(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const
+void ProgressModifier::PaintCapsule(RSCanvas& canvas, const OffsetF& contentOffset, const SizeF& contentSize) const
 {
     static int32_t totalDegree = 1;
-    auto capsuleSize = contentSize;
-    double radiusBig = std::min((capsuleSize.Width() - capsuleBorderWidth_.ConvertToPx()) / INT32_TWO,
-        (capsuleSize.Height() - capsuleBorderWidth_.ConvertToPx()) / INT32_TWO);
+    auto offset = contentOffset;
+    // when component height is greater than strokeWidth, progress will be centerd
+    offset.SetY(offset.GetY() + (contentSize.Height() - strokeWidth_->Get()) / INT32_TWO);
+    // strokeWidth includes capsuleBorder
+    auto capsuleBigSize = SizeF(contentSize.Width(), strokeWidth_->Get());
+    double radiusBig = std::min((capsuleBigSize.Width() - capsuleBorderWidth_.ConvertToPx()) / INT32_TWO,
+        (capsuleBigSize.Height() - capsuleBorderWidth_.ConvertToPx()) / INT32_TWO);
     double offsetXBig = offset.GetX() + capsuleBorderWidth_.ConvertToPx() / INT32_TWO;
     double offsetYBig = offset.GetY() + capsuleBorderWidth_.ConvertToPx() / INT32_TWO;
-    capsuleSize.SetWidth(contentSize.Width() - capsuleBorderWidth_.ConvertToPx() * INT32_TWO);
-    capsuleSize.SetHeight(contentSize.Height() - capsuleBorderWidth_.ConvertToPx() * INT32_TWO);
+    // without capsuleBorder
+    auto capsuleSize = SizeF(capsuleBigSize.Width() - capsuleBorderWidth_.ConvertToPx() * INT32_TWO,
+        capsuleBigSize.Height() - capsuleBorderWidth_.ConvertToPx() * INT32_TWO);
     double radius = std::min(capsuleSize.Width() / INT32_TWO, capsuleSize.Height() / INT32_TWO);
     double offsetX = offset.GetX() + capsuleBorderWidth_.ConvertToPx();
     double offsetY = offset.GetY() + capsuleBorderWidth_.ConvertToPx();
@@ -324,10 +329,11 @@ void ProgressModifier::PaintCapsule(RSCanvas& canvas, const OffsetF& offset, con
     pen.SetColor(ToRSColor(borderColor_->Get()));
     canvas.AttachPen(pen);
     canvas.DrawRoundRect(
-        { { offsetXBig, offsetYBig, contentSize.Width() - capsuleBorderWidth_.ConvertToPx() + offsetXBig,
-              contentSize.Height() - capsuleBorderWidth_.ConvertToPx() + offsetYBig },
+        { { offsetXBig, offsetYBig, capsuleBigSize.Width() - capsuleBorderWidth_.ConvertToPx() + offsetXBig,
+              capsuleBigSize.Height() - capsuleBorderWidth_.ConvertToPx() + offsetYBig },
             radiusBig, radiusBig });
     canvas.DetachPen();
+    // without capsuleBorder
     RSPath path;
     canvas.AttachBrush(brush);
     canvas.DrawRoundRect(
@@ -358,16 +364,22 @@ void ProgressModifier::PaintCapsule(RSCanvas& canvas, const OffsetF& offset, con
     canvas.Restore();
 }
 
-void ProgressModifier::PaintVerticalCapsule(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const
+void ProgressModifier::PaintVerticalCapsule(
+    RSCanvas& canvas, const OffsetF& contentOffset, const SizeF& contentSize) const
 {
     static int32_t totalDegree = 1;
-    SizeF capsuleSize = contentSize;
-    double radiusBig = std::min((capsuleSize.Width() - capsuleBorderWidth_.ConvertToPx()) / INT32_TWO,
-        (capsuleSize.Height() - capsuleBorderWidth_.ConvertToPx()) / INT32_TWO);
+    // when component width is greater than strokeWidth, progress will be centerd
+    auto offset = contentOffset;
+    offset.SetX(offset.GetX() + (contentSize.Width() - strokeWidth_->Get()) / INT32_TWO);
+    // strokeWidth includes capsuleBorder
+    SizeF capsuleBigSize = SizeF(strokeWidth_->Get(), contentSize.Height());
+    double radiusBig = std::min((capsuleBigSize.Width() - capsuleBorderWidth_.ConvertToPx()) / INT32_TWO,
+        (capsuleBigSize.Height() - capsuleBorderWidth_.ConvertToPx()) / INT32_TWO);
     double offsetXBig = offset.GetX() + capsuleBorderWidth_.ConvertToPx() / INT32_TWO;
     double offsetYBig = offset.GetY() + capsuleBorderWidth_.ConvertToPx() / INT32_TWO;
-    capsuleSize.SetWidth(contentSize.Width() - capsuleBorderWidth_.ConvertToPx() * INT32_TWO);
-    capsuleSize.SetHeight(contentSize.Height() - capsuleBorderWidth_.ConvertToPx() * INT32_TWO);
+    // without capsuleBorder
+    auto capsuleSize = SizeF(capsuleBigSize.Width() - capsuleBorderWidth_.ConvertToPx() * INT32_TWO,
+        capsuleBigSize.Height() - capsuleBorderWidth_.ConvertToPx() * INT32_TWO);
     double radius = std::min(capsuleSize.Width() / INT32_TWO, capsuleSize.Height() / INT32_TWO);
     double offsetX = offset.GetX() + capsuleBorderWidth_.ConvertToPx();
     double offsetY = offset.GetY() + capsuleBorderWidth_.ConvertToPx();
@@ -380,10 +392,11 @@ void ProgressModifier::PaintVerticalCapsule(RSCanvas& canvas, const OffsetF& off
     pen.SetColor(ToRSColor(borderColor_->Get()));
     canvas.AttachPen(pen);
     canvas.DrawRoundRect(
-        { { offsetXBig, offsetYBig, contentSize.Width() - capsuleBorderWidth_.ConvertToPx() + offsetXBig,
-              contentSize.Height() - capsuleBorderWidth_.ConvertToPx() + offsetYBig },
+        { { offsetXBig, offsetYBig, capsuleBigSize.Width() - capsuleBorderWidth_.ConvertToPx() + offsetXBig,
+              capsuleBigSize.Height() - capsuleBorderWidth_.ConvertToPx() + offsetYBig },
             radiusBig, radiusBig });
     canvas.DetachPen();
+    // without capsuleBorder
     brush.SetAlpha(true);
     brush.SetColor(ToRSColor(bgColor_->Get()));
     RSPath path;

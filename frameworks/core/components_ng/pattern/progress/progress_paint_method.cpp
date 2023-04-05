@@ -50,6 +50,7 @@ void ProgressPaintMethod::CalculateStrokeWidth(const SizeF& contentSize)
         case ProgressType::LINEAR:
         case ProgressType::CAPSULE:
             strokeWidth_ = std::min(strokeWidth_, length);
+            strokeWidth_ = std::max(strokeWidth_, static_cast<float>(capsuleBorderWidth_.ConvertToPx()) / HALF);
             break;
         case ProgressType::MOON:
         case ProgressType::RING:
