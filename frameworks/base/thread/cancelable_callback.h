@@ -136,10 +136,12 @@ bool CancelableCallback<void(V...)>::WaitUntilComplete(std::chrono::milliseconds
         case READY:
         case RUNNING: {
             std::shared_future<int32_t> future(impl->future_);
-            impl.Reset();
-            if (timeoutMs != 0ms && std::future_status::ready != future.wait_for(timeoutMs)) {
-                Cancel(false);
+            if (timeoutMs != 0ms && std::future_status::timeout == future.wait_for(timeoutMs)) {
+                CancelableCallback avatar(*this);
+                avatar.impl_ = impl;
+                avatar.Cancel(true);
             }
+            impl.Reset();
             return future.get() == COMPLETED;
         }
         case COMPLETED:
