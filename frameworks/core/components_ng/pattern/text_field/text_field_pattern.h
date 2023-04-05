@@ -557,6 +557,8 @@ public:
         return textFieldContentModifier_;
     }
 
+    double GetScrollBarWidth();
+
     // xts
     std::string TextInputTypeToString() const;
     std::string TextInputActionToString() const;
