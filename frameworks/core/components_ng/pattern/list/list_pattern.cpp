@@ -361,6 +361,9 @@ bool ListPattern::OnScrollCallback(float offset, int32_t source)
         FireOnScrollStart();
         return true;
     }
+    if (animator_ && !animator_->IsStopped()) {
+        return false;
+    }
     auto scrollBar = GetScrollBar();
     if (scrollBar && scrollBar->IsDriving()) {
         offset = scrollBar->CalcPatternOffset(offset);

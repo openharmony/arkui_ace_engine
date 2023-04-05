@@ -170,6 +170,9 @@ bool ScrollPattern::OnScrollCallback(float offset, int32_t source)
         if (GetAxis() == Axis::NONE) {
             return false;
         }
+        if (animator_ && !animator_->IsStopped()) {
+            return false;
+        }
         auto adjustOffset = static_cast<float>(offset);
         auto scrollBar = GetScrollBar();
         if (scrollBar && scrollBar->IsDriving()) {
