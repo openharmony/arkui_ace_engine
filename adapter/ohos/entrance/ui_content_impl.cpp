@@ -1446,11 +1446,14 @@ void UIContentImpl::DumpInfo(const std::vector<std::string>& params, std::vector
     CHECK_NULL_VOID(pipelineContext);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostSyncTask(
+    auto ret = taskExecutor->PostSyncTaskTimeout(
         [&]() {
             pipelineContext->DumpInfo(params, info);
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, 1500); // timeout 1.5s
+    if (!ret) {
+        LOGE("DumpInfo failed");
+    }
 }
 
 void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDialog)
