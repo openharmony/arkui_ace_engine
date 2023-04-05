@@ -130,10 +130,11 @@ struct DialogProperties {
     std::function<void(int32_t, int32_t)> onSuccess;        // NG prompt success callback
     DialogAlignment alignment = DialogAlignment::DEFAULT;   // Alignment of dialog.
     DimensionOffset offset;                                 // Offset which base on alignment of Dialog.
-    int32_t gridCount = 0;
+    int32_t gridCount = -1;
     std::optional<Color> maskColor;
     std::optional<AnimationOption> openAnimation;
     std::optional<AnimationOption> closeAnimation;
+    bool isShowInSubWindow = false;
 
     // These ids is used for AlertDialog of declarative.
     EventMarker primaryId;   // first button's callback.
