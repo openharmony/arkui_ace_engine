@@ -31,10 +31,11 @@ template("napi_prompt_static") {
     sources = [ "js_prompt.cpp" ]
 
     deps = []
-    if (!is_cross_platform_build) {
+    if (platform != "" && is_cross_platform_build) {
+      deps += [ "//plugins/libs/napi:napi_$platform" ]
+    } else {
       deps += [ "//foundation/arkui/napi/:ace_napi" ]
     }
-
     if (defined(config.libace_target)) {
       deps += [ config.libace_target ]
     }

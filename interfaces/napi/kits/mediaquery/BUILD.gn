@@ -31,7 +31,9 @@ template("napi_mediaquery_static") {
     sources = [ "js_media_query.cpp" ]
 
     deps = []
-    if (!is_cross_platform_build) {
+    if (platform != "" && is_cross_platform_build) {
+      deps += [ "//plugins/libs/napi:napi_$platform" ]
+    } else {
       deps += [ "//foundation/arkui/napi/:ace_napi" ]
     }
 
@@ -48,6 +50,7 @@ foreach(item, ace_platforms) {
   napi_mediaquery_static("mediaquery_static_" + item.name) {
     defines = []
     cflags_cc = []
+    platform = item.name
     config = {
     }
 

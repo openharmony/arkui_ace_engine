@@ -30,7 +30,9 @@ template("napi_grid_static") {
     sources = [ "js_grid.cpp" ]
 
     deps = []
-    if (!is_cross_platform_build) {
+    if (platform != "" && is_cross_platform_build) {
+      deps += [ "//plugins/libs/napi:napi_$platform" ]
+    } else {
       deps += [ "//foundation/arkui/napi/:ace_napi" ]
     }
 
@@ -47,6 +49,7 @@ foreach(item, ace_platforms) {
   napi_grid_static("grid_static_" + item.name) {
     defines = []
     cflags_cc = []
+    platform = item.name
     config = {
     }
 

@@ -32,7 +32,9 @@ template("napi_router_static") {
     sources = [ "js_router.cpp" ]
 
     deps = [ "//third_party/libuv:uv" ]
-    if (!is_cross_platform_build) {
+    if (platform != "" && is_cross_platform_build) {
+      deps += [ "//plugins/libs/napi:napi_$platform" ]
+    } else {
       deps += [ "//foundation/arkui/napi/:ace_napi" ]
     }
 
