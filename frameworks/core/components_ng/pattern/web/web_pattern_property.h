@@ -38,6 +38,8 @@ struct WebPatternProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(CacheMode, WebCacheMode);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(DarkMode, WebDarkMode);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ForceDarkAccess, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(AudioResumeInterval, int32_t);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(AudioExclusive, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(OverviewModeAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FileFromUrlAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(DatabaseAccessEnabled, bool);

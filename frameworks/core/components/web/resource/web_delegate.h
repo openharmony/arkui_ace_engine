@@ -407,6 +407,8 @@ public:
     void UpdateDarkMode(const WebDarkMode& mode);
     void UpdateDarkModeAuto(RefPtr<WebDelegate> delegate, std::shared_ptr<OHOS::NWeb::NWebPreference> setting);
     void UpdateForceDarkAccess(const bool& access);
+    void UpdateAudioResumeInterval(const int32_t& resumeInterval);
+    void UpdateAudioExclusive(const bool& audioExclusive);
     void UpdateOverviewModeEnabled(const bool& isOverviewModeAccessEnabled);
     void UpdateFileFromUrlEnabled(const bool& isFileFromUrlAccessEnabled);
     void UpdateDatabaseEnabled(const bool& isDatabaseAccessEnabled);
