@@ -3185,12 +3185,15 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
     }
     setWrapperValue(value) {
         let rawValue = ObservedObject.GetRawObject(value);
+        let copy;
         if (rawValue instanceof Array) {
-            this.wrappedValue_ = ObservedObject.createNew([...rawValue], this);
+            copy = ObservedObject.createNew([...rawValue], this);
         }
         else {
-            this.wrappedValue_ = ObservedObject.createNew(Object.assign({}, rawValue), this);
+            copy = ObservedObject.createNew(Object.assign({}, rawValue), this);
         }
+        Object.setPrototypeOf(copy, Object.getPrototypeOf(rawValue));
+        this.wrappedValue_ = copy;
     }
 }
 /*
