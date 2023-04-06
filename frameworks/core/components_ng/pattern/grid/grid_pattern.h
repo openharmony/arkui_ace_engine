@@ -183,6 +183,7 @@ private:
 
     OffsetF mouseStartOffset_;
     OffsetF mouseEndOffset_;
+    OffsetF mousePressOffset_;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridPattern);
 };
