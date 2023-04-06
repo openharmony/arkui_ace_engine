@@ -102,24 +102,23 @@ void RectModelNG::SetBottomRightRadius(const Radius& bottomRightRadius)
     ACE_UPDATE_PAINT_PROPERTY(RectPaintProperty, BottomRightRadius, bottomRightRadius);
 }
 
-template<class T>
 void RectModelNG::SetCallbackRadius(
-    const RefPtr<T>& component, const Dimension& radiusX, const Dimension& radiusY, int32_t index)
+    const RefPtr<ShapeRect>& rect, const Dimension& radiusX, const Dimension& radiusY, int32_t index)
 {
-    CHECK_NULL_VOID_NOLOG(component);
-    Radius newRadius = Radius(Dimension(radiusX), Dimension(radiusY));
+    CHECK_NULL_VOID_NOLOG(rect);
+    auto newRadius = Ace::Radius(Dimension(radiusX), Dimension(radiusY));
     switch (index) {
         case TOP_LEFT_RADIUS:
-            component->SetTopLeftRadius(newRadius);
+            rect->SetTopLeftRadius(newRadius);
             break;
         case TOP_RIGHT_RADIUS:
-            component->SetTopRightRadius(newRadius);
+            rect->SetTopRightRadius(newRadius);
             break;
         case BOTTOM_RIGHT_RADIUS:
-            component->SetBottomRightRadius(newRadius);
+            rect->SetBottomRightRadius(newRadius);
             break;
         case BOTTOM_LEFT_RADIUS:
-            component->SetBottomLeftRadius(newRadius);
+            rect->SetBottomLeftRadius(newRadius);
             break;
         default:
             break;

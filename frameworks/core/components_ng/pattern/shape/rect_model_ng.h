@@ -28,9 +28,12 @@ public:
     void SetRadiusWidth(const Dimension& value) override;
     void SetRadiusHeight(const Dimension& value) override;
     void SetRadiusValue(const Dimension& radiusX, const Dimension& radiusY, int32_t index) override;
-    template<class T>
+
     void SetCallbackRadius(
-        const RefPtr<T>& component, const Dimension& radiusX, const Dimension& radiusY, int32_t index);
+        const RefPtr<ShapeRect>& component, const Dimension& radiusX, const Dimension& radiusY, int32_t index) override;
+    void SetCallbackRadius(const RefPtr<ShapeComponent>& component, const Dimension& radiusX, const Dimension& radiusY,
+        int32_t index) override
+    {}
 
 private:
     static void SetTopLeftRadius(const Radius& topLeftRadius);
