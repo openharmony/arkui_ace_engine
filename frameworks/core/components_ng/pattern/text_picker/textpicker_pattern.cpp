@@ -43,6 +43,8 @@ void TextPickerPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToFrame(true);
+    auto calcLength = NG::CalcLength(Dimension(1.0, DimensionUnit::PERCENT));
+    host->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(calcLength, calcLength));
 }
 
 bool TextPickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -95,8 +97,6 @@ void TextPickerPattern::OnModifyDone()
     });
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto calcLength = NG::CalcLength(Dimension(1.0, DimensionUnit::PERCENT));
-    host->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(calcLength, calcLength));
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID_NOLOG(focusHub);
     InitOnKeyEvent(focusHub);
