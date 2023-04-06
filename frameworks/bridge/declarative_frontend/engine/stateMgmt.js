@@ -236,7 +236,15 @@ class LocalStorage extends NativeLocalStorage {
             stateMgmtConsole.warn(`${this.constructor.name}: link: no property ${propName} error.`);
             return undefined;
         }
-        let linkResult = p.createLink(linkUser, propName);
+        let linkResult;
+        if (ViewStackProcessor.UsesNewPipeline()) {
+            linkResult = (p instanceof ObservedPropertySimple)
+                ? new SynchedPropertySimpleTwoWayPU(p, linkUser, propName)
+                : new SynchedPropertyObjectTwoWayPU(p, linkUser, propName);
+        }
+        else {
+            linkResult = p.createLink(linkUser, propName);
+        }
         linkResult.setInfo(subscribersName);
         return linkResult;
     }
@@ -279,7 +287,15 @@ class LocalStorage extends NativeLocalStorage {
             stateMgmtConsole.warn(`${this.constructor.name}: prop: no property ${propName} error.`);
             return undefined;
         }
-        let propResult = p.createProp(propUser, propName);
+        let propResult;
+        if (ViewStackProcessor.UsesNewPipeline()) {
+            propResult = (p instanceof ObservedPropertySimple)
+                ? new SynchedPropertySimpleOneWayPU(p, propUser, propName)
+                : new SynchedPropertyObjectOneWayPU(p, propUser, propName);
+        }
+        else {
+            propResult = p.createProp(propUser, propName);
+        }
         propResult.setInfo(subscribersName);
         return propResult;
     }
@@ -362,7 +378,8 @@ class LocalStorage extends NativeLocalStorage {
             var p = this.storage_.get(propName);
             p.aboutToBeDeleted();
         }
-        
+        this.storage_.clear();
+
         return true;
     }
     /**
@@ -1495,6 +1512,14 @@ class stateMgmtConsole {
     }
     static error(...args) {
         aceConsole.error(...args);
+    }
+}
+class stateMgmtTrace {
+    static scopedTrace(codeBlock, arg1, ...args) {
+        aceTrace.begin(arg1, ...args);
+        let result = codeBlock();
+        aceTrace.end();
+        return result;
     }
 }
 /*
@@ -3751,25 +3776,27 @@ class ViewPU extends NativeViewPartialUpdate {
     }
     // implements IMultiPropertiesChangeSubscriber
     viewPropertyHasChanged(varName, dependentElmtIds) {
-        
-        this.syncInstanceId();
-        if (dependentElmtIds.size && !this.isFirstRender()) {
-            if (!this.dirtDescendantElementIds_.size) {
-                // mark Composedelement dirty when first elmtIds are added
-                // do not need to do this every time
-                this.markNeedUpdate();
+        stateMgmtTrace.scopedTrace(() => {
+            
+            this.syncInstanceId();
+            if (dependentElmtIds.size && !this.isFirstRender()) {
+                if (!this.dirtDescendantElementIds_.size) {
+                    // mark Composedelement dirty when first elmtIds are added
+                    // do not need to do this every time
+                    this.markNeedUpdate();
+                }
+                
+                const union = new Set([...this.dirtDescendantElementIds_, ...dependentElmtIds]);
+                this.dirtDescendantElementIds_ = union;
+                
             }
-            
-            const union = new Set([...this.dirtDescendantElementIds_, ...dependentElmtIds]);
-            this.dirtDescendantElementIds_ = union;
-            
-        }
-        let cb = this.watchedProps.get(varName);
-        if (cb) {
-            
-            cb.call(this, varName);
-        }
-        this.restoreInstanceId();
+            let cb = this.watchedProps.get(varName);
+            if (cb) {
+                
+                cb.call(this, varName);
+            }
+            this.restoreInstanceId();
+        }, "ViewPU.viewPropertyHasChanged", this.constructor.name, varName, dependentElmtIds.size);
     }
     /**
      * Function to be called from the constructor of the sub component
@@ -3833,22 +3860,22 @@ class ViewPU extends NativeViewPartialUpdate {
      *
      */
     updateDirtyElements() {
-        if (this.dirtDescendantElementIds_.size == 0) {
+        do {
             
-            return;
-        }
-        
-        // request list of all (gloabbly) deleteelmtIds;
-        let deletedElmtIds = [];
-        this.getDeletedElemtIds(deletedElmtIds);
-        // see which elmtIds are managed by this View
-        // and clean up all book keeping for them
-        this.purgeDeletedElmtIds(deletedElmtIds);
-        // process all elmtIds marked as needing update in ascending order.
-        // ascending order ensures parent nodes will be updated before their children
-        // prior cleanup ensure no already deleted Elements have their update func executed
-        Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber).forEach(elmtId => this.UpdateElement(elmtId));
-        this.dirtDescendantElementIds_.clear();
+            // request list of all (gloabbly) deleteelmtIds;
+            let deletedElmtIds = [];
+            this.getDeletedElemtIds(deletedElmtIds);
+            // see which elmtIds are managed by this View
+            // and clean up all book keeping for them
+            this.purgeDeletedElmtIds(deletedElmtIds);
+            // process all elmtIds marked as needing update in ascending order.
+            // ascending order ensures parent nodes will be updated before their children
+            // prior cleanup ensure no already deleted Elements have their update func executed
+            Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber).forEach(elmtId => {
+                this.UpdateElement(elmtId);
+                this.dirtDescendantElementIds_.delete(elmtId);
+            });
+        } while (this.dirtDescendantElementIds_.size);
     }
     //  given a list elementIds removes these from state variables dependency list and from elmtId -> updateFunc map
     purgeDeletedElmtIds(rmElmtIds) {
@@ -3913,8 +3940,16 @@ class ViewPU extends NativeViewPartialUpdate {
         }
         if (idGenFunc === undefined) {
             
-            idGenFunc = (item, index) => `${index}__${JSON.stringify(item)}`;
             idGenFuncUsesIndex = true;
+            // catch possible error caused by Stringify and re-throw an Error with a meaningful (!) error message
+            idGenFunc = (item, index) => {
+                try {
+                    return `${index}__${JSON.stringify(item)}`;
+                }
+                catch (e) {
+                    throw new Error(`${this.constructor.name}[${this.id__()}]: ForEach id ${elmtId}: use of default id generator function not possble on provided data structure. Need to specify id generator function (ForEach 3rd parameter).`);
+                }
+            };
         }
         let diffIndexArray = []; // New indexes compared to old one.
         let newIdArray = [];
