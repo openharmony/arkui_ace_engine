@@ -600,18 +600,9 @@ template("declarative_js_engine_ng") {
     external_deps = []
     if (is_cross_platform_build) {
       configs += [ "$ark_ets_path:ark_jsruntime_public_config" ]
-      if (defined(config.build_for_ios) && config.build_for_ios) {
-        deps += [ "$ark_ets_path:libark_jsruntime_static" ]
-      } else {
-        deps += [ "$ark_ets_path:libark_jsruntime" ]
-      }
+      deps += [ "$ark_ets_path:libark_jsruntime_static" ]
     } else {
-      if (defined(config.build_for_ios) && config.build_for_ios) {
-        # static library for ios platform
-        external_deps += [ "ets_runtime:libark_jsruntime_static" ]
-      } else {
-        external_deps += [ "ets_runtime:libark_jsruntime" ]
-      }
+      external_deps += [ "ets_runtime:libark_jsruntime" ]
     }
 
     defines += uicast_configs.uicast_defines
