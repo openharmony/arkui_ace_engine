@@ -56,7 +56,8 @@ const double DEFAULT_OFFSET = -1.0f;
 const int DEFAULT_ITEMCOUNT = 1;
 const int DEFAULT_INDEX = -1;
 const int BEGIN_INDEX = 0;
-const int CURRENT_INDEX = 0;
+const int DEFAULT_CURRENT_INDEX = 0;
+const int CURRENT_INDEX = 1;
 const int END_INDEX = 0;
 const OffsetF CURRENT_OFFSET(1.0f, 1.0f);
 } // namespace
@@ -1787,7 +1788,7 @@ HWTEST_F(TabsTestNg, TabBarAccessibilityPropertyTestNg003, TestSize.Level1)
     ASSERT_NE(tabBarAccessibilityProperty, nullptr);
 
     EXPECT_EQ(tabBarAccessibilityProperty->GetBeginIndex(), DEFAULT_INDEX);
-    EXPECT_EQ(tabBarAccessibilityProperty->GetCurrentIndex(), DEFAULT_INDEX);
+    EXPECT_EQ(tabBarAccessibilityProperty->GetCurrentIndex(), DEFAULT_CURRENT_INDEX);
     EXPECT_EQ(tabBarAccessibilityProperty->GetEndIndex(), DEFAULT_INDEX);
 
     auto columnNode =
