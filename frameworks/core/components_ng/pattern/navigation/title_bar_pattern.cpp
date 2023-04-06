@@ -79,8 +79,10 @@ void MountTitle(const RefPtr<TitleBarNode>& hostNode)
     auto titleNode = AceType::DynamicCast<FrameNode>(hostNode->GetTitle());
     CHECK_NULL_VOID(titleNode);
     auto titleLayoutProperty = titleNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(titleLayoutProperty);
-    titleNode->MarkModifyDone();
+    if (!titleLayoutProperty) {
+        titleNode->MarkModifyDone();
+        return;
+    }
 
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
