@@ -19,6 +19,7 @@
 
 #include "frameworks/base/log/log_wrapper.h"
 #include "frameworks/base/utils/system_properties.h"
+#include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
 #include "frameworks/core/common/connect_server_manager.h"
 
@@ -147,12 +148,13 @@ bool ArkJSRuntime::EvaluateJsCode(const uint8_t* buffer, int32_t size, const std
     return ret;
 }
 
-bool ArkJSRuntime::ExecuteJsBin(const std::string& fileName)
+bool ArkJSRuntime::ExecuteJsBin(const std::string& fileName,
+    const std::function<void(const std::string&, int32_t)>& errorCallback)
 {
     JSExecutionScope executionScope(vm_);
     LocalScope scope(vm_);
     bool ret = JSNApi::Execute(vm_, fileName, PANDA_MAIN_FUNCTION);
-    HandleUncaughtException();
+    HandleUncaughtException(errorCallback);
     return ret;
 }
 
@@ -266,7 +268,8 @@ bool ArkJSRuntime::HasPendingException()
     return JSNApi::HasPendingException(vm_);
 }
 
-void ArkJSRuntime::HandleUncaughtException()
+void ArkJSRuntime::HandleUncaughtException(
+    const std::function<void(const std::string&, int32_t)>& errorCallback)
 {
     if (uncaughtErrorHandler_ == nullptr) {
         LOGE("uncaughtErrorHandler is null.");
@@ -274,6 +277,11 @@ void ArkJSRuntime::HandleUncaughtException()
     }
 
     Local<ObjectRef> exception = JSNApi::GetAndClearUncaughtException(vm_);
+    if (!exception.IsEmpty() && !exception->IsHole() && errorCallback != nullptr) {
+        errorCallback("The uri of router is not exist.", Framework::ERROR_CODE_URI_ERROR);
+        return;
+    }
+
     if (!exception.IsEmpty() && !exception->IsHole()) {
         LOGI("HandleUncaughtException catch exception.");
         shared_ptr<JsValue> errorPtr =

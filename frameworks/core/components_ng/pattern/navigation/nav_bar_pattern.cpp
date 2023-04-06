@@ -24,6 +24,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
@@ -77,6 +78,13 @@ void BuildTitle(const RefPtr<NavBarNode>& navBarNode, const RefPtr<TitleBarNode>
 
 void BuildSubtitle(const RefPtr<NavBarNode>& navBarNode, const RefPtr<TitleBarNode>& titleBarNode)
 {
+    if (!navBarNode->GetSubtitle() && titleBarNode->GetSubtitle()) {
+        auto subtitleNode = titleBarNode->GetSubtitle();
+        titleBarNode->SetSubtitle(nullptr);
+        titleBarNode->RemoveChild(subtitleNode);
+        titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        return;
+    }
     CHECK_NULL_VOID_NOLOG(navBarNode->GetSubtitle());
     if (navBarNode->GetSubtitleNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::NONE) {
         return;

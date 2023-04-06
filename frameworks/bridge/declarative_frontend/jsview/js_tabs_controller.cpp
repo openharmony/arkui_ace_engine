@@ -59,7 +59,7 @@ RefPtr<TabController> JSTabsController::CreateController()
 void JSTabsController::ChangeIndex(int32_t index)
 {
     if (swiperController_) {
-        swiperController_->SwipeToWithoutAnimation(index);
+        swiperController_->SwipeTo(index);
     }
 
     if (controller_) {
