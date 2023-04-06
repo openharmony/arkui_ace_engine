@@ -785,10 +785,22 @@ void ListPattern::SetChainAnimation(bool enable)
         if (chainAnimationOptions_.has_value()) {
             float maxSpace = chainAnimationOptions_.value().maxSpace.ConvertToPx();
             float minSpace = chainAnimationOptions_.value().minSpace.ConvertToPx();
+            if (GreatNotEqual(minSpace, maxSpace)) {
+                minSpace = space;
+                maxSpace = space;
+            }
             chainAnimation_ =
                 AceType::MakeRefPtr<ChainAnimation>(space, maxSpace, minSpace, springProperty_);
-            chainAnimation_->SetConductivity(chainAnimationOptions_.value().conductivity);
-            chainAnimation_->SetIntensity(chainAnimationOptions_.value().intensity);
+            auto conductivity = chainAnimationOptions_.value().conductivity;
+            if (LessNotEqual(conductivity, 0) || GreatNotEqual(conductivity, 1)) {
+                conductivity = ChainAnimation::DEFAULT_CONDUCTIVITY;
+            }
+            chainAnimation_->SetConductivity(conductivity);
+            auto intensity = chainAnimationOptions_.value().intensity;
+            if (LessNotEqual(intensity, 0) || GreatNotEqual(intensity, 1)) {
+                intensity = ChainAnimation::DEFAULT_INTENSITY;
+            }
+            chainAnimation_->SetIntensity(intensity);
             auto effect = chainAnimationOptions_.value().edgeEffect;
             chainAnimation_->SetEdgeEffect(effect == 1 ? ChainEdgeEffect::STRETCH : ChainEdgeEffect::DEFAULT);
         } else {
@@ -812,9 +824,21 @@ void ListPattern::SetChainAnimationOptions(const ChainAnimationOptions& options)
         auto space = listLayoutProperty->GetSpace().value_or(CHAIN_INTERVAL_DEFAULT).ConvertToPx();
         float maxSpace = options.maxSpace.ConvertToPx();
         float minSpace = options.minSpace.ConvertToPx();
+        if (GreatNotEqual(minSpace, maxSpace)) {
+            minSpace = space;
+            maxSpace = space;
+        }
         chainAnimation_->SetSpace(space, maxSpace, minSpace);
-        chainAnimation_->SetConductivity(options.conductivity);
-        chainAnimation_->SetIntensity(options.intensity);
+        auto conductivity = chainAnimationOptions_.value().conductivity;
+        if (LessNotEqual(conductivity, 0) || GreatNotEqual(conductivity, 1)) {
+            conductivity = ChainAnimation::DEFAULT_CONDUCTIVITY;
+        }
+        chainAnimation_->SetConductivity(conductivity);
+        auto intensity = chainAnimationOptions_.value().intensity;
+        if (LessNotEqual(intensity, 0) || GreatNotEqual(intensity, 1)) {
+            intensity = ChainAnimation::DEFAULT_INTENSITY;
+        }
+        chainAnimation_->SetIntensity(intensity);
         auto effect = options.edgeEffect;
         chainAnimation_->SetEdgeEffect(effect == 1 ? ChainEdgeEffect::STRETCH : ChainEdgeEffect::DEFAULT);
     }
