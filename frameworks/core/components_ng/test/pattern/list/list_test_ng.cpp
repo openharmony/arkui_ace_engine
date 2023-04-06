@@ -54,8 +54,8 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr float DEFAULT_ROOT_HEIGHT = 800.f;
 constexpr float DEFAULT_ROOT_WIDTH = 480.f;
+constexpr float DEFAULT_ROOT_HEIGHT = 800.f;
 constexpr float DEFAULT_ITEM_MAIN_LENGTH = 100.f;
 constexpr Dimension DEFAULT_ITEM_CROSS_LENGTH = Dimension(1.0, DimensionUnit::PERCENT);
 constexpr float DEFAULT_HEADER_MAIN_LENGTH = 50.f;
@@ -1401,75 +1401,75 @@ HWTEST_F(ListTestNg, ListItemGroupLayoutTest002, TestSize.Level1)
 
 /**
  * @tc.name: ListEventTest001
- * @tc.desc: Verify onScroll, onScrollIndex, onReachStart, onReachEnd callback
+ * @tc.desc: Test scroll callback
  * @tc.type: FUNC
  */
 HWTEST_F(ListTestNg, ListEventTest001, TestSize.Level1)
 {
     ListModelNG listModelNG;
     listModelNG.Create();
-    bool isScrollEventCalled = false;
-    bool isScrollIndexEventCalled = false;
-    bool isReachStartEventCalled = false;
-    bool isReachEndEventCalled = false;
-    auto scrollEvent = [&isScrollEventCalled](Dimension, ScrollState) { isScrollEventCalled = true; };
-    auto scrollIndexEvent = [&isScrollIndexEventCalled](int32_t, int32_t) { isScrollIndexEventCalled = true; };
-    auto reachStartEvent = [&isReachStartEventCalled]() { isReachStartEventCalled = true; };
-    auto reachEndEvent = [&isReachEndEventCalled]() { isReachEndEventCalled = true; };
-    listModelNG.SetOnScroll(scrollEvent);
-    listModelNG.SetOnScrollIndex(scrollIndexEvent);
-    listModelNG.SetOnReachStart(reachStartEvent);
-    listModelNG.SetOnReachEnd(reachEndEvent);
+    bool isScrollCalled = false;
+    bool isScrollIndexCalled = false;
+    bool isReachStartCalled = false;
+    bool isReachEndCalled = false;
+    auto scroll = [&isScrollCalled](Dimension, ScrollState) { isScrollCalled = true; };
+    auto scrollIndex = [&isScrollIndexCalled](int32_t, int32_t) { isScrollIndexCalled = true; };
+    auto reachStart = [&isReachStartCalled]() { isReachStartCalled = true; };
+    auto reachEnd = [&isReachEndCalled]() { isReachEndCalled = true; };
+    listModelNG.SetOnScroll(scroll);
+    listModelNG.SetOnScrollIndex(scrollIndex);
+    listModelNG.SetOnReachStart(reachStart);
+    listModelNG.SetOnReachEnd(reachEnd);
     CreateListItem(10);
     GetListInstance();
     RunMeasureAndLayout();
 
     /**
-     * @tc.steps: step1. Scroll 100px, RunMeasureAndLayout and check onScroll, onScrollIndex called.
-     * @tc.expected: The onScroll, onScrollIndex callback is called.
+     * @tc.steps: step1. Scroll up 100px.
+     * @tc.expected: Callback is called.
      */
     pattern_->UpdateCurrentOffset(-100.f, SCROLL_FROM_UPDATE);
     RunMeasureAndLayout();
-    EXPECT_TRUE(isScrollEventCalled);
-    EXPECT_TRUE(isScrollIndexEventCalled);
+    EXPECT_TRUE(isScrollCalled);
+    EXPECT_TRUE(isScrollIndexCalled);
 
     /**
-     * @tc.steps: step2. Scroll back 100px, change ScrollState and RunMeasureAndLayout.
-     * @tc.expected: The onScroll, onReachStart callback is called.
+     * @tc.steps: step2. Scroll dwon 100px.
+     * @tc.expected: Callback is called.
      */
-    isScrollEventCalled = false;
+    isScrollCalled = false;
     pattern_->UpdateCurrentOffset(100.f, SCROLL_FROM_ANIMATION);
     RunMeasureAndLayout();
-    EXPECT_TRUE(isScrollEventCalled);
-    EXPECT_TRUE(isReachStartEventCalled);
+    EXPECT_TRUE(isScrollCalled);
+    EXPECT_TRUE(isReachStartCalled);
 
     /**
-     * @tc.steps: step3. Scroll 100px, change ScrollState and RunMeasureAndLayout.
-     * @tc.expected: The onScroll callback is called.
+     * @tc.steps: step3. Scroll up 100px.
+     * @tc.expected: Callback is called.
      */
-    isScrollEventCalled = false;
+    isScrollCalled = false;
     pattern_->UpdateCurrentOffset(-100.f, SCROLL_FROM_ANIMATION_SPRING);
     RunMeasureAndLayout();
-    EXPECT_TRUE(isScrollEventCalled);
+    EXPECT_TRUE(isScrollCalled);
 
     /**
-     * @tc.steps: step4. Scroll 100px, change ScrollState and RunMeasureAndLayout.
-     * @tc.expected: The onScroll callback is called.
+     * @tc.steps: step3. Scroll down 100px.
+     * @tc.expected: Callback is called.
      */
-    isScrollEventCalled = false;
+    isScrollCalled = false;
     pattern_->UpdateCurrentOffset(100.f, SCROLL_FROM_NONE);
     RunMeasureAndLayout();
-    EXPECT_TRUE(isScrollEventCalled);
+    EXPECT_TRUE(isScrollCalled);
 
     /**
-     * @tc.steps: step5. Scroll 100px, change ScrollState and RunMeasureAndLayout.
-     * @tc.expected: The onReachEnd callback is called.
+     * @tc.steps: step3. Scroll up 200px.
+     * @tc.expected: Callback is called.
      */
     pattern_->UpdateCurrentOffset(100.f, SCROLL_FROM_UPDATE);
     RunMeasureAndLayout();
     pattern_->UpdateCurrentOffset(-200.f, SCROLL_FROM_UPDATE);
     RunMeasureAndLayout();
-    EXPECT_TRUE(isReachEndEventCalled);
+    EXPECT_TRUE(isReachEndCalled);
 }
 
 /**
@@ -1481,12 +1481,12 @@ HWTEST_F(ListTestNg, ListEventTest002, TestSize.Level1)
 {
     ListModelNG listModelNG;
     listModelNG.Create();
-    bool isScrollStartEventCalled = false;
-    bool isScrollStopEventCalled = false;
-    auto scrollStartEvent = [&isScrollStartEventCalled]() { isScrollStartEventCalled = true; };
-    auto scrollStopEvent = [&isScrollStopEventCalled]() { isScrollStopEventCalled = true; };
-    listModelNG.SetOnScrollStart(scrollStartEvent);
-    listModelNG.SetOnScrollStop(scrollStopEvent);
+    bool isScrollStartCalled = false;
+    bool isScrollStopCalled = false;
+    auto scrollStart = [&isScrollStartCalled]() { isScrollStartCalled = true; };
+    auto scrollStop = [&isScrollStopCalled]() { isScrollStopCalled = true; };
+    listModelNG.SetOnScrollStart(scrollStart);
+    listModelNG.SetOnScrollStop(scrollStop);
     GetListInstance();
     RunMeasureAndLayout();
 
@@ -1495,11 +1495,11 @@ HWTEST_F(ListTestNg, ListEventTest002, TestSize.Level1)
      * @tc.expected: The callback is called.
      */
     pattern_->OnScrollCallback(100.f, SCROLL_FROM_START);
-    EXPECT_TRUE(isScrollStartEventCalled);
+    EXPECT_TRUE(isScrollStartCalled);
 
     pattern_->OnScrollEndCallback();
     RunMeasureAndLayout();
-    EXPECT_TRUE(isScrollStopEventCalled);
+    EXPECT_TRUE(isScrollStopCalled);
 }
 
 /**
@@ -1512,13 +1512,13 @@ HWTEST_F(ListTestNg, ListEventTest003, TestSize.Level1)
     ListModelNG listModelNG;
     listModelNG.Create();
     CreateListItem(10);
-    bool isItemDragStartEventCalled = false;
-    auto itemDragStartEvent = [&isItemDragStartEventCalled](const ItemDragInfo&, int32_t) {
-        isItemDragStartEventCalled = true;
+    bool isItemDragStartCalled = false;
+    auto itemDragStart = [&isItemDragStartCalled](const ItemDragInfo&, int32_t) {
+        isItemDragStartCalled = true;
         auto dragItem = AceType::MakeRefPtr<FrameNode>("test", 0, AceType::MakeRefPtr<Pattern>());
         return dragItem;
     };
-    listModelNG.SetOnItemDragStart(itemDragStartEvent);
+    listModelNG.SetOnItemDragStart(itemDragStart);
     listModelNG.SetOnItemDragEnter([](const ItemDragInfo&) {});
     listModelNG.SetOnItemDragLeave([](const ItemDragInfo&, int32_t) {});
     listModelNG.SetOnItemDragMove([](const ItemDragInfo&, int32_t, int32_t) {});
@@ -1534,7 +1534,7 @@ HWTEST_F(ListTestNg, ListEventTest003, TestSize.Level1)
     Point globalPoint = Point(200.f, 150.f); // Point at the second item.
     info.SetGlobalPoint(globalPoint);
     eventHub_->HandleOnItemDragStart(info);
-    EXPECT_TRUE(isItemDragStartEventCalled);
+    EXPECT_TRUE(isItemDragStartCalled);
     EXPECT_EQ(eventHub_->draggedIndex_, 1);
     EXPECT_NE(eventHub_->dragDropProxy_, nullptr);
 
@@ -2316,5 +2316,6 @@ HWTEST_F(ListTestNg, ListOtherTest002, TestSize.Level1)
     ASSERT_NE(scrollableEvent, nullptr);
     EXPECT_NE(scrollableEvent->GetScrollBeginCallback(), nullptr);
     EXPECT_NE(scrollableEvent->GetScrollFrameBeginCallback(), nullptr);
+    RunMeasureAndLayout();
 }
 } // namespace OHOS::Ace::NG
