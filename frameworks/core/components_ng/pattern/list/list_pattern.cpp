@@ -109,8 +109,12 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     }
     auto finalOffset = listLayoutAlgorithm->GetCurrentOffset();
     spaceWidth_ = listLayoutAlgorithm->GetSpaceWidth();
-    lastOffset_ = currentOffset_;
-    currentOffset_ = currentOffset_ - finalOffset;
+    if (listLayoutAlgorithm->GetStartIndex() == 0) {
+        estimateOffset_ = 0;
+        currentOffset_ = listLayoutAlgorithm->GetStartPosition();
+    } else {
+        currentOffset_ = currentOffset_ - finalOffset;
+    }
     currentDelta_ = 0.0f;
     float prevStartOffset = startMainPos_;
     float prevEndOffset = endMainPos_ - contentMainSize_;
