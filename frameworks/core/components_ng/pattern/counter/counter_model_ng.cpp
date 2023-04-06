@@ -109,6 +109,50 @@ RefPtr<FrameNode> CounterModelNG::CreateContentNodeChild(int32_t contentId, cons
     return contentNode;
 }
 
+void CounterModelNG::SetEnableDec(bool enableDec)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto frameNode = stack->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto subId = frameNode->GetPattern<CounterPattern>()->GetSubId();
+    auto subNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(frameNode->GetChildIndexById(subId)));
+    CHECK_NULL_VOID(subNode);
+    auto eventHub = subNode->GetEventHub<ButtonEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetEnabled(enableDec);
+    if (!eventHub->IsEnabled()) {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto counterTheme = pipeline->GetTheme<CounterTheme>();
+        CHECK_NULL_VOID(counterTheme);
+        subNode->GetRenderContext()->UpdateOpacity(counterTheme->GetAlphaDisabled());
+    } else {
+        subNode->GetRenderContext()->UpdateOpacity(1.0);
+    }
+}
+
+void CounterModelNG::SetEnableInc(bool enableInc)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto frameNode = stack->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto addId = frameNode->GetPattern<CounterPattern>()->GetAddId();
+    auto addNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(frameNode->GetChildIndexById(addId)));
+    CHECK_NULL_VOID(addNode);
+    auto eventHub = addNode->GetEventHub<ButtonEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetEnabled(enableInc);
+    if (!eventHub->IsEnabled()) {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto counterTheme = pipeline->GetTheme<CounterTheme>();
+        CHECK_NULL_VOID(counterTheme);
+        addNode->GetRenderContext()->UpdateOpacity(counterTheme->GetAlphaDisabled());
+    } else {
+        addNode->GetRenderContext()->UpdateOpacity(1.0);
+    }
+}
+
 void CounterModelNG::SetOnInc(CounterEventFunc&& onInc)
 {
     CHECK_NULL_VOID(onInc);

@@ -32,9 +32,11 @@ public:
     void SetControlWidth(const Dimension& value) override;
     void SetStateChange(bool value) override;
     void SetBackgroundColor(const Color& value) override;
+    void SetEnableDec(bool enableDec) override;
+    void SetEnableInc(bool enableInc) override;
 
 private:
-    static RefPtr<FrameNode> CreateButtonChild(
+    RefPtr<FrameNode> CreateButtonChild(
         int32_t id, const std::string& symbol, const RefPtr<CounterTheme>& counterTheme);
     static RefPtr<FrameNode> CreateContentNodeChild(int32_t contentId, const RefPtr<CounterTheme>& counterTheme);
 };

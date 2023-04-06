@@ -26,7 +26,9 @@
 #include "core/components_ng/property/border_property.h"
 
 namespace OHOS::Ace {
-
+namespace {
+constexpr double BUTTON_ALPHA_DISABLED = 0.4;
+} // namespace
 class CounterTheme : public virtual Theme {
     DECLARE_ACE_TYPE(CounterTheme, Theme);
 
@@ -47,6 +49,14 @@ public:
             theme->contentTextStyle_.SetFontSize(themeConstants->GetDimension(THEME_COUNTER_TITLE_FONTSIZE));
             theme->contentTextStyle_.SetTextColor(themeConstants->GetColor(THEME_COUNTER_FONTCOLOR));
             theme->backgroundColor_ = themeConstants->GetColor(THEME_COUNTER_BACKGROUND_COLOR);
+            auto themeStyle = themeConstants->GetThemeStyle();
+            if (!themeStyle) {
+                return theme;
+            }
+            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_COUNTER, nullptr);
+            if (pattern) {
+                theme->alphaDisabled_ = pattern->GetAttr<double>("button_alpha_disabled", BUTTON_ALPHA_DISABLED);
+            }
             return theme;
         }
     };
@@ -56,6 +66,11 @@ public:
     const TextStyle& GetContentTextStyle() const
     {
         return contentTextStyle_;
+    }
+
+    double GetAlphaDisabled() const
+    {
+        return alphaDisabled_;
     }
 
     const Color& GetBackGroundColor() const
@@ -110,6 +125,7 @@ private:
     Dimension width_ = 100.0_vp;
     Dimension controlWidth_ = 32.0_vp;
     Dimension contentWidth_ = 36.0_vp;
+    double alphaDisabled_ = 0.4;
     NG::BorderRadiusProperty borderRadius_ = { 4.0_vp, 4.0_vp, 4.0_vp, 4.0_vp };
     NG::BorderWidthProperty borderWidth_ = { 1.0_vp, 1.0_vp, 1.0_vp, 1.0_vp };
     NG::BorderColorProperty borderColor_ = { Color::GRAY, Color::GRAY, Color::GRAY, Color::GRAY };
