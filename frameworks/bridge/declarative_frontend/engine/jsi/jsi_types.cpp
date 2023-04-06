@@ -122,6 +122,30 @@ bool JsiValue::ToBoolean() const
     return GetHandle()->BooleaValue();
 }
 
+JsiRef<JsiValue> JsiValue::Undefined()
+{
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+    return JsiRef<JsiValue>::Make(panda::JSValueRef::Undefined(runtime->GetEcmaVm()));
+}
+
+JsiRef<JsiValue> JsiValue::Null()
+{
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+    return JsiRef<JsiValue>::Make(panda::JSValueRef::Null(runtime->GetEcmaVm()));
+}
+
+JsiRef<JsiValue> JsiValue::True()
+{
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+    return JsiRef<JsiValue>::Make(panda::JSValueRef::True(runtime->GetEcmaVm()));
+}
+
+JsiRef<JsiValue> JsiValue::False()
+{
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+    return JsiRef<JsiValue>::Make(panda::JSValueRef::False(runtime->GetEcmaVm()));
+}
+
 // -----------------------
 // Implementation of JsiArray
 // -----------------------
