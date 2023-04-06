@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/geometry_node.h"
 
+#include <string>
 #include <utility>
 
 #include "core/components_ng/layout/layout_wrapper.h"
@@ -47,6 +48,20 @@ RefPtr<GeometryNode> GeometryNode::Clone() const
     node->parentGlobalOffset_ = parentGlobalOffset_;
     node->parentLayoutConstraint_ = parentLayoutConstraint_;
     return node;
+}
+
+void GeometryNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+#if defined(PREVIEW)
+    auto frameSize = frame_.rect_.GetSize();
+    json->Put("width", std::to_string(frameSize.Width()).c_str());
+    json->Put("height", std::to_string(frameSize.Height()).c_str());
+
+    auto jsonSize = JsonUtil::Create(true);
+    jsonSize->Put("width", std::to_string(frameSize.Width()).c_str());
+    jsonSize->Put("height", std::to_string(frameSize.Height()).c_str());
+    json->Put("size", jsonSize);
+#endif
 }
 
 } // namespace OHOS::Ace::NG
