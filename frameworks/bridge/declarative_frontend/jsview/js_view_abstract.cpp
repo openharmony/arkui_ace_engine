@@ -1201,6 +1201,10 @@ void JSViewAbstract::JsWidth(const JSCallbackInfo& info)
 bool JSViewAbstract::JsWidth(const JSRef<JSVal>& jsValue)
 {
     Dimension value;
+    if (jsValue->IsUndefined()) {
+        ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
+        return true;
+    }
     if (!ParseJsDimensionVp(jsValue, value)) {
         return false;
     }
@@ -1226,6 +1230,10 @@ void JSViewAbstract::JsHeight(const JSCallbackInfo& info)
 bool JSViewAbstract::JsHeight(const JSRef<JSVal>& jsValue)
 {
     Dimension value;
+    if (jsValue->IsUndefined()) {
+        ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
+        return true;
+    }
     if (!ParseJsDimensionVp(jsValue, value)) {
         return false;
     }
