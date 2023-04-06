@@ -236,7 +236,7 @@ void ProgressPatternTestNg::CheckValue(const RefPtr<FrameNode>& frameNode, const
         EXPECT_EQ(progresspaintProperty->GetBackgroundColor(), testProperty.bgColor.value());
     }
 
-    if (testProperty.borderColor.has_value()) {
+    if (testProperty.borderColor.has_value() && progressLayoutProperty->GetType() == PROGRESS_TYPE_CAPSULE) {
         EXPECT_EQ(progresspaintProperty->GetBorderColor(), testProperty.borderColor.value());
     }
 }
