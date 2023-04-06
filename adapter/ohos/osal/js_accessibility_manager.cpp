@@ -990,7 +990,7 @@ static void DumpSupportActionNG(const AccessibilityElementInfo& nodeInfo)
     DumpLog::GetInstance().AddDesc(
         "support action instructions: use command to make application components perform corresponding action");
     DumpLog::GetInstance().AddDesc(
-        "use support action command: aa dump -i [AbilityRecord] -c -inspector [AccessiblityId] [AceAction]");
+        "use support action command: aa dump -i [AbilityRecord] -c -inspector [AccessibilityId] [AceAction]");
     std::string actionForDump;
     for (const auto& action : nodeInfo.GetActionList()) {
         if (!actionForDump.empty()) {
@@ -1014,7 +1014,7 @@ inline void DumpContentListNG(const AccessibilityElementInfo& nodeInfo)
         }
         contents.append(content);
     }
-    DumpLog::GetInstance().AddDesc("contentList list: ", contents);
+    DumpLog::GetInstance().AddDesc("content list: ", contents);
 }
 
 static void DumpAccessibilityPropertyNG(const AccessibilityElementInfo& nodeInfo)
@@ -1051,7 +1051,7 @@ static void DumpAccessibilityPropertyNG(const AccessibilityElementInfo& nodeInfo
     DumpLog::GetInstance().AddDesc("end index: ", nodeInfo.GetEndIndex());
     DumpLog::GetInstance().AddDesc("collection item counts: ", nodeInfo.GetItemCounts());
     DumpLog::GetInstance().AddDesc("editable: ", BoolToString(nodeInfo.IsEditable()));
-    DumpLog::GetInstance().AddDesc("isEssential: ", BoolToString(nodeInfo.IsEssential()));
+    DumpLog::GetInstance().AddDesc("is essential: ", BoolToString(nodeInfo.IsEssential()));
     DumpLog::GetInstance().AddDesc("deletable: ", nodeInfo.IsDeletable());
     DumpLog::GetInstance().AddDesc("live region: ", nodeInfo.GetLiveRegion());
     DumpLog::GetInstance().AddDesc("content description: ", nodeInfo.GetDescriptionInfo());
@@ -1108,13 +1108,13 @@ static void DumpCommonPropertyNG(const AccessibilityElementInfo& nodeInfo)
     DumpLog::GetInstance().AddDesc("bundle name: ", nodeInfo.GetBundleName());
     DumpLog::GetInstance().AddDesc("page id: " + std::to_string(nodeInfo.GetPageId()));
     DumpLog::GetInstance().AddDesc("page path: ", nodeInfo.GetPagePath());
-    DumpLog::GetInstance().AddDesc("is vlild element: ", BoolToString(nodeInfo.IsValidElement()));
+    DumpLog::GetInstance().AddDesc("is valid element: ", BoolToString(nodeInfo.IsValidElement()));
     DumpLog::GetInstance().AddDesc("js component id: ", nodeInfo.GetInspectorKey());
     DumpLog::GetInstance().AddDesc("resource name: ", nodeInfo.GetComponentResourceId());
 
     DumpLog::GetInstance().AddDesc("clickable: ", BoolToString(nodeInfo.IsClickable()));
     DumpLog::GetInstance().AddDesc("long clickable: ", BoolToString(nodeInfo.IsLongClickable()));
-    DumpLog::GetInstance().AddDesc("popupSupported: ", BoolToString(nodeInfo.IsPopupSupported()));
+    DumpLog::GetInstance().AddDesc("popup supported: ", BoolToString(nodeInfo.IsPopupSupported()));
 }
 } // namespace
 
