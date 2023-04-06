@@ -212,6 +212,8 @@ struct MeasureProperty {
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const
     {
+        // this may affect XTS, check later.
+#if !defined(PREVIEW)
         std::string width =
             selfIdealSize.has_value()
                 ? (selfIdealSize.value().Width().has_value() ? selfIdealSize.value().Width().value().ToString() : "-")
@@ -227,6 +229,7 @@ struct MeasureProperty {
         jsonSize->Put("width", width.c_str());
         jsonSize->Put("height", height.c_str());
         json->Put("size", jsonSize);
+#endif
 
         auto jsonConstraintSize = JsonUtil::Create(true);
         jsonConstraintSize->Put("minWidth",
