@@ -239,7 +239,7 @@ FrameInfo* PipelineContext::GetCurrentFrameInfo(uint64_t recvTime, uint64_t time
 void PipelineContext::DumpPipelineInfo() const {}
 
 void PipelineContext::AddVisibleAreaChangeNode(
-    const RefPtr<FrameNode>& node, double ratio, const VisibleRatioCallback& callback)
+    const RefPtr<FrameNode>& node, double ratio, const VisibleRatioCallback& callback, bool isUserCallback)
 {}
 void PipelineContext::RemoveVisibleAreaChangeNode(int32_t nodeId) {}
 
