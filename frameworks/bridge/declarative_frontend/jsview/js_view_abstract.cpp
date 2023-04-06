@@ -1773,10 +1773,6 @@ void JSViewAbstract::JsGeometryTransition(const JSCallbackInfo& info)
     }
     // id
     auto id = info[0]->ToString();
-    if (id.empty()) {
-        LOGE("JsGeometryTransition: id is empty.");
-        return;
-    }
     ViewAbstractModel::GetInstance()->SetGeometryTransition(id);
 }
 
