@@ -44,10 +44,16 @@ void HostWindowPattern::InitContent()
     CHECK_NULL_VOID(context);
     context->SetRSNode(surfaceNode);
 
-    if (session_->GetSessionState() == Rosen::SessionState::STATE_BACKGROUND) {
+    LOGI("Session state is %{public}u.", session_->GetSessionState());
+    if (session_->GetSessionState() == Rosen::SessionState::STATE_DISCONNECT) {
+        CreateStartingNode();
+    } else if (session_->GetSessionState() == Rosen::SessionState::STATE_BACKGROUND) {
         CreateSnapshotNode();
     } else {
-        CreateStartingNode();
+        LOGW("Unexpected session state: %{public}u.", session_->GetSessionState());
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->AddChild(contentNode_);
     }
 }
 
@@ -101,24 +107,16 @@ void HostWindowPattern::CreateSnapshotNode()
 
 void HostWindowPattern::BufferAvailableCallback()
 {
-    auto uiTask = [this]() {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-
-        host->RemoveChild(startingNode_);
-        startingNode_.Reset();
-
-        contentNode_->SetActive(true);
-        contentNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-
-        host->AddChild(contentNode_);
-        host->RebuildRenderContextTree();
-    };
-
     ContainerScope scope(instanceId_);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->PostAsyncEvent(std::move(uiTask), TaskExecutor::TaskType::UI);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    host->RemoveChild(startingNode_);
+    startingNode_.Reset();
+
+    host->AddChild(contentNode_);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void HostWindowPattern::OnAttachToFrameNode()

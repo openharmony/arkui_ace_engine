@@ -29,7 +29,7 @@ public:
 private:
     bool HasStartingPage() override
     {
-        return false;
+        return true;
     }
 
     void RegisterLifecycleListener();
