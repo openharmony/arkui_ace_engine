@@ -186,10 +186,9 @@ public:
             // unregister node from old geometry transition
             geometryTransition_->Update(host_, nullptr);
             // register node into new geometry transition
-            auto geometryTransition = ElementRegister::GetInstance()->GetOrCreateGeometryTransition(id, host_);
-            if (geometryTransition != nullptr && geometryTransition->Update(nullptr, host_)) {
-                geometryTransition_ = geometryTransition;
-            }
+            geometryTransition_ = ElementRegister::GetInstance()->GetOrCreateGeometryTransition(id, host_);
+            CHECK_NULL_VOID(geometryTransition_);
+            geometryTransition_->Update(nullptr, host_);
         } else {
             geometryTransition_ = ElementRegister::GetInstance()->GetOrCreateGeometryTransition(id, host_);
             CHECK_NULL_VOID(geometryTransition_);
