@@ -105,6 +105,7 @@ void JSPersistent::Get(const JSCallbackInfo& args)
     auto executor = container->GetTaskExecutor();
     std::string value = StorageProxy::GetInstance()->GetStorage(executor)->GetString(key);
     if (value.empty()) {
+        args.SetReturnValue(JSVal::Undefined());
         return;
     }
     JSRef<JSObject> obj = JSRef<JSObject>::New();
