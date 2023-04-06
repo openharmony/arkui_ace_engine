@@ -103,7 +103,6 @@ public:
     void HandleOnItemDragUpdate(const GestureEvent& info);
     void HandleOnItemDragEnd(const GestureEvent& info);
     void HandleOnItemDragCancel();
-    RefPtr<FrameNode> FindGridItemByPosition(float x, float y);
     int32_t GetGridItemIndex(const RefPtr<FrameNode>& frameNode);
     bool CheckPostionInGrid(float x, float y);
     int32_t GetInsertPosition(float x, float y);

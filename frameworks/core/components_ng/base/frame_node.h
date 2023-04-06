@@ -350,6 +350,8 @@ public:
         return userSet_;
     }
 
+    RefPtr<FrameNode> FindChildByPosition(float x, float y);
+
 private:
     void MarkNeedRender(bool isRenderBoundary);
     bool IsNeedRequestParentMeasure() const;

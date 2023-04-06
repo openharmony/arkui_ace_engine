@@ -978,6 +978,30 @@ void ListPattern::SetSwiperItem(WeakPtr<ListItemPattern> swiperItem)
     }
 }
 
+int32_t ListPattern::GetItemIndexByPosition(float xOffset, float yOffset)
+{
+    auto host = GetHost();
+    auto globalOffset = host->GetTransformRelativeOffset();
+    float relativeX = xOffset - globalOffset.GetX();
+    float relativeY = yOffset - globalOffset.GetY();
+    float mainOffset = GetAxis() == Axis::VERTICAL ? relativeY : relativeX;
+    float crossOffset = GetAxis() == Axis::VERTICAL ? relativeX : relativeY;
+    float crossSize = GetCrossAxisSize(GetContentSize(), GetAxis());
+    int32_t lanesOffset = 0;
+    if (lanes_ > 1) {
+        lanesOffset = static_cast<int32_t>(crossOffset / (crossSize / lanes_));
+    }
+    for (auto & pos : itemPosition_) {
+        if (mainOffset <= pos.second.endPos + spaceWidth_ / 2) { /* 2:half */
+            return std::min(pos.first + lanesOffset, maxListItemIndex_ + 1);
+        }
+    }
+    if (!itemPosition_.empty()) {
+        return itemPosition_.rbegin()->first + 1;
+    }
+    return 0;
+}
+
 void ListPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     json->Put("multiSelectable", multiSelectable_);
