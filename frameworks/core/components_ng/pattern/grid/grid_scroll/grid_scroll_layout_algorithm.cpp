@@ -251,9 +251,8 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
         gridLayoutInfo_.gridMatrix_.clear();
         gridLayoutInfo_.endIndex_ = -1;
         gridLayoutInfo_.endMainLineIndex_ = 0;
-        gridLayoutInfo_.reachEnd_ = false;
-        gridLayoutInfo_.reachStart_ = false;
-        gridLayoutInfo_.offsetEnd_ = false;
+        gridLayoutInfo_.ResetPositionFlags();
+
         int32_t currentItemIndex = gridLayoutInfo_.startIndex_;
         auto firstItem = GetStartingItem(layoutWrapper, currentItemIndex);
         gridLayoutInfo_.startIndex_ = firstItem;
@@ -269,6 +268,13 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
         }
         gridLayoutInfo_.startMainLineIndex_ = currentMainLineIndex_;
         gridLayoutInfo_.UpdateStartIndexByStartLine();
+        // FillNewLineBackward sometimes make startIndex_ > currentItemIndex
+        while (gridLayoutInfo_.startIndex_ > currentItemIndex &&
+               gridLayoutInfo_.gridMatrix_.find(gridLayoutInfo_.startMainLineIndex_) !=
+                   gridLayoutInfo_.gridMatrix_.end()) {
+            gridLayoutInfo_.startMainLineIndex_--;
+            gridLayoutInfo_.UpdateStartIndexByStartLine();
+        }
         LOGI("data reload end, startIndex_:%{public}d, startMainLineIndex_:%{public}d", gridLayoutInfo_.startIndex_,
             gridLayoutInfo_.startMainLineIndex_);
     }
