@@ -98,6 +98,7 @@ void JSCircle::JSBind(BindingTarget globalObj)
     JSClass<JSCircle>::CustomMethod("size", &JSShapeAbstract::ObjectSize);
     JSClass<JSCircle>::CustomMethod("offset", &JSShapeAbstract::ObjectOffset);
     JSClass<JSCircle>::CustomMethod("fill", &JSShapeAbstract::ObjectFill);
+    JSClass<JSCircle>::CustomMethod("position", &JSShapeAbstract::ObjectPosition);
 
     JSClass<JSCircle>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSCircle>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
