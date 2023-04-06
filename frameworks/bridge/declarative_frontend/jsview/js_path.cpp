@@ -107,6 +107,7 @@ void JSPath::JSBind(BindingTarget globalObj)
     JSClass<JSPath>::CustomMethod("commands", &JSPath::ObjectCommands);
     JSClass<JSPath>::CustomMethod("offset", &JSShapeAbstract::ObjectOffset);
     JSClass<JSPath>::CustomMethod("fill", &JSShapeAbstract::ObjectFill);
+    JSClass<JSPath>::CustomMethod("position", &JSShapeAbstract::ObjectPosition);
 
     JSClass<JSPath>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSPath>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
