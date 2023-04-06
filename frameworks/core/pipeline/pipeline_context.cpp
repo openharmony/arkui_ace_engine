@@ -2355,6 +2355,9 @@ void PipelineContext::SetRootSizeWithWidthHeight(int32_t width, int32_t height, 
         rootNode->MarkNeedRender();
         focusAnimationManager_->SetAvailableRect(paintRect);
     }
+    if (IsJsPlugin() || IsJsCard()) {
+        return;
+    }
     ScreenSystemManager::GetInstance().SetWindowInfo(rootWidth_, density_, dipScale_);
     ScreenSystemManager::GetInstance().OnSurfaceChanged(width);
 }
