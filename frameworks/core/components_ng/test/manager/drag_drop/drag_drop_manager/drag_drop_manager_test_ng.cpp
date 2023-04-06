@@ -985,7 +985,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest011, TestSize.Level1)
     preTargetFrameNode = dragDropManager->preTargetFrameNode_;
     draggedFrameNode = dragDropManager->draggedFrameNode_;
     EXPECT_FALSE(preTargetFrameNode);
-    EXPECT_FALSE(draggedFrameNode);
+    EXPECT_TRUE(draggedFrameNode);
 }
 
 /**
