@@ -50,6 +50,22 @@
           "HarmonyOS-Sans-Digit": 0
         }
       ]
+    },
+    {
+      "family": "Noto Sans KR",
+      "alias": [
+        {
+          "Noto-Sans-KR": 0
+        }
+      ]
+    },
+    {
+      "family": "Noto Sans JP",
+      "alias": [
+        {
+          "Noto-Sans-JP": 0
+        }
+      ]
     }
   ],
   "fallback": [
