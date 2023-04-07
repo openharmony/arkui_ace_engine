@@ -183,6 +183,7 @@ public:
     void SetProgressMask(const RefPtr<NG::ProgressMaskProperty>& progress) override {}
     void SetForegroundColor(const Color& color) override {}
     void SetForegroundColorStrategy(const ForegroundColorStrategy& strategy) override {}
+    void SetAllowDrop(std::set<std::string> allowDrop) override {}
 };
 
 } // namespace OHOS::Ace::Framework

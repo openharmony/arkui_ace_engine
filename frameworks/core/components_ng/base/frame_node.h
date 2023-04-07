@@ -350,6 +350,16 @@ public:
         return userSet_;
     }
 
+    void SetAllowDrop(std::set<std::string> allowDrop)
+    {
+        allowDrop_ = allowDrop;
+    }
+
+    std::set<std::string> GetAllowDrop()
+    {
+        return allowDrop_;
+    }
+
 private:
     void MarkNeedRender(bool isRenderBoundary);
     bool IsNeedRequestParentMeasure() const;
@@ -415,6 +425,7 @@ private:
 
     std::unique_ptr<RectF> lastFrameRect_;
     std::unique_ptr<OffsetF> lastParentOffsetToWindow_;
+    std::set<std::string> allowDrop_;
 
     bool needSyncRenderTree_ = false;
 

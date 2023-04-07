@@ -269,6 +269,24 @@ bool DragDropManager::CheckDragDropProxy(int64_t id) const
     return currentId_ == id;
 }
 
+#ifdef ENABLE_DRAG_FRAMEWORK
+void DragDropManager::UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode)
+{
+    auto dragFrameNodeAllowDrop = dragFrameNode->GetAllowDrop();
+    if (dragFrameNodeAllowDrop.empty()) {
+        InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::DEFAULT);
+        return;
+    }
+    for (auto it : summaryMap_) {
+        if (dragFrameNodeAllowDrop.find(it.first) == dragFrameNodeAllowDrop.end()) {
+            InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::FORBIDDEN);
+            return;
+        }
+    }
+    InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::COPY);
+}
+#endif // ENABLE_DRAG_FRAMEWORK
+
 void DragDropManager::OnDragStart(float globalX, float globalY, const RefPtr<FrameNode>& frameNode)
 {
     CHECK_NULL_VOID(frameNode);
@@ -350,7 +368,37 @@ void DragDropManager::OnDragEnd(float globalX, float globalY, const std::string&
 #endif // ENABLE_DRAG_FRAMEWORK
         break;
     }
+#ifdef ENABLE_DRAG_FRAMEWORK
+    summaryMap_.clear();
+#endif // ENABLE_DRAG_FRAMEWORK
 }
+
+#ifdef ENABLE_DRAG_FRAMEWORK
+void DragDropManager::RequireSummary()
+{
+    std::string udKey;
+    InteractionManager::GetInstance()->GetUdKey(udKey);
+    if (udKey.empty()) {
+        LOGE("OnDragStart: InteractionManager GetUdKey is null");
+    }
+
+    auto udmfClient = UDMF::UdmfClient::GetInstance();
+    udKey_ = udKey;
+    UDMF::Summary summary;
+    UDMF::QueryOption queryOption;
+    queryOption.key = udKey_;
+    int32_t ret = udmfClient.GetSummary(queryOption, summary);
+    if (ret != 0) {
+        LOGE("OnDragStart: UDMF GetSummary failed: %{public}d", ret);
+    }
+    summaryMap_ = summary.summary;
+}
+
+void DragDropManager::ClearSummary()
+{
+    summaryMap_.clear();
+}
+#endif // ENABLE_DRAG_FRAMEWORK
 
 void DragDropManager::OnTextDragEnd(float globalX, float globalY, const std::string& extraInfo)
 {
@@ -401,6 +449,16 @@ void DragDropManager::FireOnDragEvent(
         default:
             break;
     }
+
+#ifdef ENABLE_DRAG_FRAMEWORK
+    if (event->GetResult() == DragRet::ENABLE_DROP) {
+        InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::MOVE);
+    } else if (event->GetResult() == DragRet::DISABLE_DROP) {
+        InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::FORBIDDEN);
+    } else {
+        UpdateDragAllowDrop(frameNode);
+    }
+#endif // ENABLE_DRAG_FRAMEWORK
 }
 
 void DragDropManager::OnItemDragStart(float globalX, float globalY, const RefPtr<FrameNode>& frameNode)

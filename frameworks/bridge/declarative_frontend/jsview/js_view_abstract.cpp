@@ -4673,6 +4673,24 @@ void JSViewAbstract::JSBind()
     JSClass<JSViewAbstract>::StaticMethod("onVisibleAreaChange", &JSViewAbstract::JsOnVisibleAreaChange);
     JSClass<JSViewAbstract>::StaticMethod("hitTestBehavior", &JSViewAbstract::JsHitTestBehavior);
     JSClass<JSViewAbstract>::StaticMethod("keyboardShortcut", &JSViewAbstract::JsKeyboardShortcut);
+    JSClass<JSViewAbstract>::StaticMethod("allowDrop", &JSViewAbstract::JsAllowDrop);
+}
+void JSViewAbstract::JsAllowDrop(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsArray()) {
+        LOGE("JsAllowDrop: The param type is invalid.");
+        return;
+    }
+
+    auto allowDropArray = JSRef<JSArray>::Cast(info[0]);
+    std::set<std::string> allowDropSet;
+    allowDropSet.clear();
+    std::string allowDrop;
+    for (size_t i = 0; i < allowDropArray->Length(); i++) {
+        allowDrop = allowDropArray->GetValueAt(i)->ToString();
+        allowDropSet.insert(allowDrop);
+    }
+    ViewAbstractModel::GetInstance()->SetAllowDrop(allowDropSet);
 }
 
 void JSViewAbstract::JsAlignRules(const JSCallbackInfo& info)

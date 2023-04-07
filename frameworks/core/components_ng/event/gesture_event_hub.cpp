@@ -375,19 +375,24 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     event->SetY(pipeline->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetY(), DimensionUnit::PX)));
     auto extraParams = eventHub->GetDragExtraParams(std::string(), info.GetGlobalPoint(), DragEventType::START);
     auto dragDropInfo = (eventHub->GetOnDragStart())(event, extraParams);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    if (dragDropProxy_) {
+        dragDropProxy_ = nullptr;
+    }
 #ifdef ENABLE_DRAG_FRAMEWORK
     std::string udKey;
     auto unifiedData = event->GetData();
     SetDragData(unifiedData, udKey);
-#endif // ENABLE_DRAG_FRAMEWORK
-    auto dragDropManager = pipeline->GetDragDropManager();
-    CHECK_NULL_VOID(dragDropManager);
-
-    if (dragDropProxy_) {
-        dragDropProxy_ = nullptr;
+    auto udmfClient = UDMF::UdmfClient::GetInstance();
+    UDMF::Summary summary;
+    UDMF::QueryOption queryOption;
+    queryOption.key = udKey;
+    int32_t ret = udmfClient.GetSummary(queryOption, summary);
+    if (ret != 0) {
+        LOGE("HandleOnDragStart: UDMF GetSummary failed, ret %{public}d", ret);
     }
-
-#ifdef ENABLE_DRAG_FRAMEWORK
+    dragDropManager->SetSummaryMap(summary.summary);
     std::shared_ptr<Media::PixelMap> pixelMap = pixelMap_->GetPixelMapSharedPtr();
     if (pixelMap->GetWidth() > Msdp::DeviceStatus::MAX_PIXEL_MAP_WIDTH ||
         pixelMap->GetHeight() > Msdp::DeviceStatus::MAX_PIXEL_MAP_HEIGHT) {
@@ -404,7 +409,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
         static_cast<int32_t>(info.GetSourceDevice()), 1, info.GetPointerId(), info.GetScreenLocation().GetX(),
         info.GetScreenLocation().GetY(), info.GetDeviceId(), true};
     auto callback = [](const DragNotifyMsg& notifyMessage) {};
-    int32_t ret = Msdp::DeviceStatus::InteractionManager::GetInstance()->StartDrag(dragData, callback);
+    ret = Msdp::DeviceStatus::InteractionManager::GetInstance()->StartDrag(dragData, callback);
     if (ret != 0) {
         LOGE("InteractionManager: drag start error");
         return;

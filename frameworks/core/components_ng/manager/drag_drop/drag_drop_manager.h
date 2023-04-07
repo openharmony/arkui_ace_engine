@@ -79,6 +79,13 @@ public:
     void RestoreClipboardData();
     void DestroyDragWindow();
 #ifdef ENABLE_DRAG_FRAMEWORK
+    void UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode);
+    void RequireSummary();
+    void ClearSummary();
+    void SetSummaryMap(std::map<std::string, int64_t> summaryMap)
+    {
+        summaryMap_ = summaryMap;
+    }
     RefPtr<DragDropProxy> CreateFrameworkDragDropProxy();
     int32_t GetDragData(const std::string& udKey, std::shared_ptr<UDMF::UnifiedData>& unifiedData);
     void UpdatePixelMapPosition(int32_t globalX, int32_t globalY);
