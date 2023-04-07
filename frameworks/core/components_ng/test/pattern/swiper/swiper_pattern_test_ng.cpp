@@ -19,10 +19,12 @@
 #define protected public
 #include "core/animation/animator.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/swiper/swiper_model_ng.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_utils.h"
+#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -134,6 +136,25 @@ HWTEST_F(SwiperPatternTestNg, SwiperEvent002, TestSize.Level1)
     auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
     pattern->InitPanEvent(gestureEventHub);
     EXPECT_EQ(pattern->direction_, Axis::HORIZONTAL);
+    pattern->touchEvent_ = nullptr;
+    pattern->InitTouchEvent(gestureEventHub);
+    TouchEventFunc callback = [](TouchEventInfo& info) {};
+    pattern->touchEvent_ = AceType::MakeRefPtr<TouchEventImpl>(std::move(callback));
+    pattern->InitTouchEvent(gestureEventHub);
+    EXPECT_TRUE(pattern->touchEvent_);
+
+    EXPECT_TRUE(pattern->panEvent_);
+    GestureEvent gestureEvent = GestureEvent();
+    gestureEvent.inputEventType_ = InputEventType::AXIS;
+    pattern->panEvent_->actionStart_(gestureEvent);
+    gestureEvent.inputEventType_ = InputEventType::TOUCH_SCREEN;
+    CommonFunc func = []() {};
+    pattern->swiperController_->SetTabBarFinishCallback(func);
+    pattern->panEvent_->actionStart_(gestureEvent);
+    pattern->swiperController_->SetRemoveSwiperEventCallback(func);
+    pattern->panEvent_->actionStart_(gestureEvent);
+    EXPECT_TRUE(pattern->swiperController_->tabBarFinishCallback_);
+    EXPECT_TRUE(pattern->swiperController_->removeSwiperEventCallback_);
 }
 
 /**
@@ -369,5 +390,98 @@ HWTEST_F(SwiperPatternTestNg, SwiperUtilsTest008, TestSize.Level1)
     OptionalSizeF setSize = OptionalSize(SizeF(SWIPER_IDEAL_WIDTH, SWIPER_IDEAL_HEIGHT));
     auto result = SwiperUtils::CreateChildConstraint(swiperLayoutProperty, setSize);
     EXPECT_EQ(result.parentIdealSize, setSize);
+}
+
+/**
+ * @tc.name: SwiperInit001
+ * @tc.desc: InitIndicator
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, SwiperInit001, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto swiperNode =
+        FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    stack->Push(swiperNode);
+    auto indicatorNode =
+        FrameNode::GetOrCreateFrameNode("Indicator", 0, []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    swiperNode->children_.clear();
+    swiperNode->AddChild(indicatorNode);
+    pattern->InitIndicator();
+    EXPECT_EQ(swiperNode->children_.size(), 2);
+    swiperNode->children_.clear();
+    indicatorNode = FrameNode::GetOrCreateFrameNode(
+        "SwiperIndicator", 0, []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    swiperNode->AddChild(indicatorNode);
+    pattern->InitIndicator();
+    EXPECT_EQ(swiperNode->children_.size(), 1);
+}
+
+/**
+ * @tc.name: SwiperInit002
+ * @tc.desc: InitOnKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, SwiperInit002, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto swiperNode =
+        FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    stack->Push(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    RefPtr<EventHub> eventHub = AceType::MakeRefPtr<EventHub>();
+    RefPtr<FocusHub> focusHub = AceType::MakeRefPtr<FocusHub>(eventHub, FocusType::DISABLE, false);
+    pattern->InitOnKeyEvent(focusHub);
+    KeyEvent event = KeyEvent();
+    event.action = KeyAction::DOWN;
+    EXPECT_FALSE(focusHub->onKeyEventInternal_(event));
+}
+
+/**
+ * @tc.name: SwiperFunc001
+ * @tc.desc: OnKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, SwiperFunc001, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto swiperNode =
+        FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    stack->Push(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    KeyEvent event = KeyEvent();
+    event.action = KeyAction::CLICK;
+    EXPECT_FALSE(pattern->OnKeyEvent(event));
+    event.action = KeyAction::DOWN;
+    EXPECT_FALSE(pattern->OnKeyEvent(event));
+    event.code = KeyCode::KEY_DPAD_LEFT;
+    EXPECT_TRUE(pattern->OnKeyEvent(event));
+    event.code = KeyCode::KEY_DPAD_RIGHT;
+    EXPECT_TRUE(pattern->OnKeyEvent(event));
+}
+
+/**
+ * @tc.name: SwiperFunc002
+ * @tc.desc: OnKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, SwiperFunc002, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto swiperNode =
+        FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    stack->Push(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    bool isVisible = false;
+    pattern->OnVisibleChange(isVisible);
+    pattern->isInit_ = false;
+    pattern->OnWindowHide();
+    pattern->OnVisibleChange(isVisible);
+    EXPECT_FALSE(pattern->isVisible_);
+    isVisible = true;
+    pattern->OnWindowShow();
+    pattern->OnVisibleChange(isVisible);
+    EXPECT_TRUE(pattern->isVisible_);
 }
 } // namespace OHOS::Ace::NG
