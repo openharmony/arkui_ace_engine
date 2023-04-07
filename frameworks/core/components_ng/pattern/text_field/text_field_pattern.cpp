@@ -828,6 +828,8 @@ void TextFieldPattern::HandleSetSelection(int32_t start, int32_t end)
     LOGI("HandleSetSelection %{public}d, %{public}d", start, end);
     UpdateSelection(start, end);
     textEditingValue_.caretPosition = end;
+    selectionMode_ = SelectionMode::SELECT;
+    caretUpdateType_ = CaretUpdateType::EVENT;
     GetTextRectsInRange(textSelector_.GetStart(), textSelector_.GetEnd(), textBoxes_);
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
