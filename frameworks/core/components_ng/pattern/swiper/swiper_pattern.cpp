@@ -767,6 +767,7 @@ void SwiperPattern::HandleDragStart()
 {
     StopTranslateAnimation();
     StopSpringAnimation();
+    StopAutoPlay();
 
     const auto& tabBarFinishCallback = swiperController_->GetTabBarFinishCallback();
     if (tabBarFinishCallback) {
@@ -905,6 +906,7 @@ void SwiperPattern::PlayTranslateAnimation(float startPos, float endPos, int32_t
 
     // If animation is still running, stop it before play new animation.
     StopTranslateAnimation();
+    StopAutoPlay();
 
     auto translate = AceType::MakeRefPtr<CurveAnimation<double>>(startPos, endPos, curve);
     auto weak = AceType::WeakClaim(this);
