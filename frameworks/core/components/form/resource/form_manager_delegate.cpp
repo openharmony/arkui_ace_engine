@@ -395,7 +395,7 @@ void FormManagerDelegate::OnActionEventHandle(const std::string& action)
     }
 }
 
-bool FormManagerDelegate::ParseAction(const std::string &action, AAFwk::Want &want)
+bool FormManagerDelegate::ParseAction(const std::string &action, const std::string& type, AAFwk::Want &want)
 {
     auto eventAction = JsonUtil::ParseJsonString(action);
     auto bundleName = eventAction->GetValue("bundleName");
@@ -405,6 +405,14 @@ bool FormManagerDelegate::ParseAction(const std::string &action, AAFwk::Want &wa
     auto ability = abilityName->GetString();
     LOGI("bundle:%{public}s ability:%{public}s, params:%{public}s", bundle.c_str(), ability.c_str(),
         params->ToString().c_str());
+
+    if (type == "message") {
+        params->Put("params", params);
+        params->Put("action", type.c_str());
+        want.SetParam(OHOS::AppExecFwk::Constants::PARAM_MESSAGE_KEY, params->ToString());
+        return true;
+    }
+
     if (bundle.empty()) {
         bundle = wantCache_.GetElement().GetBundleName();
     }
@@ -430,6 +438,7 @@ bool FormManagerDelegate::ParseAction(const std::string &action, AAFwk::Want &wa
             child = child->GetNext();
         }
     }
+    want.SetParam("params", params->ToString());
     return true;
 }
 
@@ -499,7 +508,7 @@ void FormManagerDelegate::OnActionEvent(const std::string& action)
 #ifdef OHOS_STANDARD_SYSTEM
     if (type == "router") {
         AAFwk::Want want;
-        if (!ParseAction(action, want)) {
+        if (!ParseAction(action, type, want)) {
             LOGE("Failed to parse want");
         } else {
             CHECK_NULL_VOID(formUtils_);
@@ -512,7 +521,7 @@ void FormManagerDelegate::OnActionEvent(const std::string& action)
         return;
     } else if (type == "call") {
         AAFwk::Want want;
-        if (!ParseAction(action, want)) {
+        if (!ParseAction(action, type, want)) {
             LOGE("Failed to parse want");
         } else {
             CHECK_NULL_VOID(formUtils_);
@@ -526,8 +535,11 @@ void FormManagerDelegate::OnActionEvent(const std::string& action)
     }
 
     AAFwk::Want want;
+    if (!ParseAction(action, type, want)) {
+        LOGE("Failed to parse message action.");
+        return;
+    }
     want.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_IDENTITY_KEY, (int64_t)runningCardId_);
-    want.SetParam(OHOS::AppExecFwk::Constants::PARAM_MESSAGE_KEY, action);
     if (AppExecFwk::FormMgr::GetRecoverStatus() == OHOS::AppExecFwk::Constants::IN_RECOVERING) {
         LOGE("form is in recover status, can't do action on form.");
         return;
