@@ -38,6 +38,9 @@ public:
     void ExitFullScreen(const RefPtr<FrameNode>& frameNode);
     bool OnBackPressed();
 
+    void RequestFullScreenForWeb(const RefPtr<FrameNode>& frameNode);
+    void ExitFullScreenForWeb(const RefPtr<FrameNode>& frameNode);
+
 private:
     WeakPtr<FrameNode> rootNodeWeak_;
     std::unordered_map<int32_t, std::pair<WeakPtr<UINode>, int32_t>> originalParent_;
