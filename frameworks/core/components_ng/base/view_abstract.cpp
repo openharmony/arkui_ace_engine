@@ -1311,7 +1311,7 @@ void ViewAbstract::SetForegroundColorStrategy(const ForegroundColorStrategy& str
 }
 
 void ViewAbstract::SetKeyboardShortcut(
-    const std::string& value, const std::vector<ModifierKey>& keys, std::function<void()>&& onKeyboardShortcutAction)
+    const std::string& value, const std::vector<CtrlKey>& keys, std::function<void()>&& onKeyboardShortcutAction)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
