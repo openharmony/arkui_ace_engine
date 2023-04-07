@@ -413,9 +413,16 @@ void RosenRenderContext::OnTransformMatrixUpdate(const Matrix4& matrix)
     RequestNextFrame();
 }
 
+const int degree90 = 90;
+const int degree180 = 180;
+const int degree135 = 135;
+const int degree45 = 45;
+
 RectF RosenRenderContext::GetPaintRectWithTransform()
 {
     RectF rect;
+
+    const float pi = 3.14159265;
     CHECK_NULL_RETURN(rsNode_, rect);
     rect = GetPaintRectWithoutTransform();
     auto translate = rsNode_->GetStagingProperties().GetTranslate();
@@ -431,6 +438,25 @@ RectF RosenRenderContext::GetPaintRectWithTransform()
     auto oldSize = rect.GetSize();
     auto newSize = SizeF(oldSize.Width() * scale[0], oldSize.Height() * scale[1]);
     rect.SetSize(newSize);
+    // calculate rotate
+    int degree = rsNode_->GetStagingProperties().GetRotation();
+
+    if ((abs(degree) % degree180 > degree45) && (abs(degree) % degree180 < degree135)) {
+        degree = degree90;
+        OffsetF leftCornerRotate(0, 0);
+        OffsetF leftCorner(-1 * oldSize.Width() * scale[0] / 2, -1 * oldSize.Height() * scale[1] / 2);
+        leftCornerRotate.SetX(leftCorner.GetX() * cos(degree * pi / degree180) * -1 -
+                              leftCorner.GetY() * sin(degree * pi / degree180) * -1);
+        leftCornerRotate.SetY(leftCorner.GetX() * sin(degree * pi / degree180) * -1 +
+                              leftCorner.GetY() * cos(degree * pi / degree180) * -1);
+        OffsetF screenRotate(rect.GetX() + leftCornerRotate.GetX() - leftCorner.GetX(),
+            rect.GetY() + oldSize.Height() * scale[1] - leftCornerRotate.GetY() + leftCorner.GetY());
+        rect.SetOffset(screenRotate);
+        if (abs(degree) % degree180 != 0) {
+            newSize = SizeF(oldSize.Height() * scale[1], oldSize.Width() * scale[0]);
+            rect.SetSize(newSize);
+        }
+    }
     return rect;
 }
 
