@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LIST_LIST_PAINT_METHOD_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LIST_LIST_PAINT_METHOD_H
 
+#include "core/components_ng/pattern/list/list_content_modifier.h"
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
@@ -50,6 +51,13 @@ public:
     CanvasDrawFunction GetForegroundDrawFunction(PaintWrapper* paintWrapper) override;
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
 
+    RefPtr<Modifier> GetContentModifier(PaintWrapper* paintWrapper) override
+    {
+        return listContentModifier_;
+    }
+
+    void UpdateContentModifier(PaintWrapper* paintWrapper) override;
+
     static void PaintDivider(const DividerInfo& dividerInfo, const PositionMap& itemPosition, RSCanvas& canvas);
 
     void PaintDivider(PaintWrapper* paintWrapper, RSCanvas& canvas);
@@ -71,6 +79,11 @@ public:
         totalItemCount_ = totalItemCount;
     }
 
+    void SetContentModifier(const RefPtr<ListContentModifier>& modify)
+    {
+        listContentModifier_ = modify;
+    }
+
 private:
     V2::ItemDivider divider_;
     bool vertical_ = false;
@@ -78,6 +91,8 @@ private:
     int32_t totalItemCount_;
     float space_;
     PositionMap itemPosition_;
+
+    RefPtr<ListContentModifier> listContentModifier_;
 
     WeakPtr<ScrollBar> scrollBar_;
     WeakPtr<ScrollEdgeEffect> edgeEffect_;

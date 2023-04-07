@@ -78,12 +78,6 @@ void ListPaintMethod::PaintDivider(PaintWrapper* paintWrapper, RSCanvas& canvas)
     const auto& geometryNode = paintWrapper->GetGeometryNode();
     auto frameSize = geometryNode->GetPaddingSize();
     OffsetF paddingOffset = geometryNode->GetPaddingOffset() - geometryNode->GetFrameOffset();
-    auto renderContext = paintWrapper->GetRenderContext();
-    if (!renderContext || renderContext->GetClipEdge().value_or(true)) {
-        auto clipRect = RSRect(paddingOffset.GetX(), paddingOffset.GetY(), frameSize.Width() + paddingOffset.GetX(),
-                    paddingOffset.GetY() + frameSize.Height());
-        canvas.ClipRect(clipRect, RSClipOp::INTERSECT);
-    }
 
     if (!divider_.strokeWidth.IsValid() || totalItemCount_ <= 0) {
         return;
@@ -142,5 +136,18 @@ CanvasDrawFunction ListPaintMethod::GetContentDrawFunction(PaintWrapper* paintWr
         painter->PaintDivider(paintWrapper, canvas);
     };
     return paintFunc;
+}
+
+void ListPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
+{
+    CHECK_NULL_VOID(listContentModifier_);
+    const auto& geometryNode = paintWrapper->GetGeometryNode();
+    auto clipSize = geometryNode->GetPaddingSize();
+    OffsetF clipOffset = geometryNode->GetPaddingOffset() - geometryNode->GetFrameOffset();
+    auto renderContext = paintWrapper->GetRenderContext();
+    bool clip = !renderContext || renderContext->GetClipEdge().value_or(true);
+    listContentModifier_->SetClipOffset(clipOffset);
+    listContentModifier_->SetClipSize(clipSize);
+    listContentModifier_->SetClip(clip);
 }
 } // namespace OHOS::Ace::NG

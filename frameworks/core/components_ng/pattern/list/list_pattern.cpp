@@ -145,6 +145,27 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     return true;
 }
 
+RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
+{
+    auto listLayoutProperty = GetHost()->GetLayoutProperty<ListLayoutProperty>();
+    V2::ItemDivider itemDivider;
+    auto divider = listLayoutProperty->GetDivider().value_or(itemDivider);
+    auto axis = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
+    auto drawVertical = (axis == Axis::HORIZONTAL);
+    auto paint = MakeRefPtr<ListPaintMethod>(divider, drawVertical, lanes_, spaceWidth_, itemPosition_);
+    paint->SetScrollBar(AceType::WeakClaim(AceType::RawPtr(GetScrollBar())));
+    paint->SetTotalItemCount(maxListItemIndex_ + 1);
+    auto scrollEffect = GetScrollEdgeEffect();
+    if (scrollEffect && scrollEffect->IsFadeEffect()) {
+        paint->SetEdgeEffect(scrollEffect);
+    }
+    if (!listContentModifier_) {
+        listContentModifier_ = AceType::MakeRefPtr<ListContentModifier>();
+    }
+    paint->SetContentModifier(listContentModifier_);
+    return paint;
+}
+
 void ListPattern::ProcessEvent(
     bool indexChanged, float finalOffset, bool isJump, float prevStartOffset, float prevEndOffset)
 {
