@@ -128,10 +128,12 @@ void PipelineContext::FlushFocus() {}
 
 void PipelineContext::FlushAnimation(uint64_t nanoTimestamp) {}
 
-void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight) {}
+void PipelineContext::OnVirtualKeyboardHeightChange(
+    float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+{}
 
 void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSizeChangeReason type,
-    const std::shared_ptr<Rosen::RSTransaction> rsTransaction)
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {}
 
 void PipelineContext::OnSurfacePositionChanged(int32_t posX, int32_t posY) {}

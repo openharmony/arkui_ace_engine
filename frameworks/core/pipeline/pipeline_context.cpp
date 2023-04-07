@@ -2074,37 +2074,64 @@ void PipelineContext::OnIdle(int64_t deadline)
     FlushPageUpdateTasks();
 }
 
-void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight)
+void PipelineContext::OnVirtualKeyboardHeightChange(
+    float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     CHECK_RUN_ON(UI);
-    double positionY = 0;
-    if (textFieldManager_) {
-        positionY = textFieldManager_->GetClickPosition().GetY();
+    ACE_FUNCTION_TRACE();
+#ifdef ENABLE_ROSEN_BACKEND
+    if (rsTransaction) {
+        rsTransaction->Begin();
     }
-    keyboardHeight = keyboardHeight / viewScale_;
-    auto height = height_ / viewScale_;
-    double offsetFix = (height - positionY) > 100.0 ? keyboardHeight - (height - positionY) / 2.0 : keyboardHeight;
-    LOGI("OnVirtualKeyboardAreaChange positionY:%{public}f safeArea:%{public}f offsetFix:%{public}f", positionY,
-        (height - keyboardHeight), offsetFix);
-    if (NearZero(keyboardHeight)) {
-        if (textFieldManager_ && AceType::InstanceOf<TextFieldManager>(textFieldManager_)) {
-            auto textFieldManager = AceType::DynamicCast<TextFieldManager>(textFieldManager_);
-            if (textFieldManager->ResetSlidingPanelParentHeight()) {
-                return;
-            }
+#endif
+
+    auto func = [this, keyboardHeight]() {
+        double positionY = 0;
+        if (textFieldManager_) {
+            positionY = textFieldManager_->GetClickPosition().GetY();
         }
-        SetRootSizeWithWidthHeight(width_, height_, 0);
-        rootOffset_.SetY(0.0);
-    } else if (positionY > (height - keyboardHeight) && offsetFix > 0.0) {
-        if (textFieldManager_ && AceType::InstanceOf<TextFieldManager>(textFieldManager_)) {
-            auto textFieldManager = AceType::DynamicCast<TextFieldManager>(textFieldManager_);
-            if (textFieldManager->UpdatePanelForVirtualKeyboard(-offsetFix, height)) {
-                return;
+        auto newKeyboardHeight = keyboardHeight / viewScale_;
+        auto height = height_ / viewScale_;
+        double offsetFix =
+            (height - positionY) > 100.0 ? newKeyboardHeight - (height - positionY) / 2.0 : newKeyboardHeight;
+        LOGI("OnVirtualKeyboardAreaChange positionY:%{public}f safeArea:%{public}f offsetFix:%{public}f", positionY,
+            (height - newKeyboardHeight), offsetFix);
+        if (NearZero(newKeyboardHeight)) {
+            if (textFieldManager_ && AceType::InstanceOf<TextFieldManager>(textFieldManager_)) {
+                auto textFieldManager = AceType::DynamicCast<TextFieldManager>(textFieldManager_);
+                if (textFieldManager->ResetSlidingPanelParentHeight()) {
+                    return;
+                }
             }
+            SetRootSizeWithWidthHeight(width_, height_, 0);
+            rootOffset_.SetY(0.0);
+        } else if (positionY > (height - newKeyboardHeight) && offsetFix > 0.0) {
+            if (textFieldManager_ && AceType::InstanceOf<TextFieldManager>(textFieldManager_)) {
+                auto textFieldManager = AceType::DynamicCast<TextFieldManager>(textFieldManager_);
+                if (textFieldManager->UpdatePanelForVirtualKeyboard(-offsetFix, height)) {
+                    return;
+                }
+            }
+            SetRootSizeWithWidthHeight(width_, height_, -offsetFix);
+            rootOffset_.SetY(-offsetFix);
         }
-        SetRootSizeWithWidthHeight(width_, height_, -offsetFix);
-        rootOffset_.SetY(-offsetFix);
+    };
+
+    AnimationOption option;
+    NearZero(keyboardHeight) ? option.SetDuration(keyboardAnimationConfig_.durationOut_)
+                             : option.SetDuration(keyboardAnimationConfig_.durationIn_);
+    auto curve = MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.2f, 1.0f); // animation curve: cubic [0.2, 0.0, 0.2, 1.0]
+    if (rsTransaction) {
+        Animate(option, curve, func);
+    } else {
+        func();
     }
+
+#ifdef ENABLE_ROSEN_BACKEND
+    if (rsTransaction) {
+        rsTransaction->Commit();
+    }
+#endif
 }
 
 void PipelineContext::FlushPipelineImmediately()
@@ -2119,7 +2146,7 @@ void PipelineContext::FlushPipelineImmediately()
 }
 
 void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
-    const std::shared_ptr<Rosen::RSTransaction> rsTransaction)
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     static const bool IsWindowSizeAnimationEnabled = SystemProperties::IsWindowSizeAnimationEnabled();
     if (!rootElement_ || !rootElement_->GetRenderNode() || !IsWindowSizeAnimationEnabled) {
@@ -2199,7 +2226,7 @@ void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, Win
 }
 
 void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSizeChangeReason type,
-    const std::shared_ptr<Rosen::RSTransaction> rsTransaction)
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     CHECK_RUN_ON(UI);
     LOGD("PipelineContext: OnSurfaceChanged start.");

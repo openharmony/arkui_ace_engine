@@ -463,7 +463,7 @@ const RefPtr<FullScreenManager>& PipelineContext::GetFullScreenManager()
 }
 
 void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSizeChangeReason type,
-    const std::shared_ptr<Rosen::RSTransaction> rsTransaction)
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     CHECK_RUN_ON(UI);
     LOGD("PipelineContext: OnSurfaceChanged start.");
@@ -511,7 +511,7 @@ void PipelineContext::OnSurfacePositionChanged(int32_t posX, int32_t posY)
 }
 
 void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
-    const std::shared_ptr<Rosen::RSTransaction> rsTransaction)
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     static const bool IsWindowSizeAnimationEnabled = SystemProperties::IsWindowSizeAnimationEnabled();
     if (!IsWindowSizeAnimationEnabled) {
@@ -638,33 +638,58 @@ SafeAreaEdgeInserts PipelineContext::GetCurrentViewSafeArea() const
     return {};
 }
 
-void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight)
+void PipelineContext::OnVirtualKeyboardHeightChange(
+    float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     CHECK_RUN_ON(UI);
-    float positionY = 0;
-    auto manager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
-    float height = 0.0f;
-    if (manager) {
-        height = manager->GetHeight();
-        positionY = static_cast<float>(manager->GetClickPosition().GetY());
+    ACE_FUNCTION_TRACE();
+#ifdef ENABLE_ROSEN_BACKEND
+    if (rsTransaction) {
+        rsTransaction->Begin();
     }
-    SizeF rootSize { static_cast<float>(rootWidth_), static_cast<float>(rootHeight_) };
-    float offsetFix = (rootSize.Height() - positionY) > 100.0 ? keyboardHeight - (rootSize.Height() - positionY) / 2.0
-                                                              : keyboardHeight;
-    LOGI("OnVirtualKeyboardAreaChange positionY:%{public}f safeArea:%{public}f offsetFix:%{public}f, "
-         "keyboardHeight %{public}f",
-        positionY, (rootSize.Height() - keyboardHeight), offsetFix, keyboardHeight);
-    if (NearZero(keyboardHeight)) {
-        SetRootRect(rootSize.Width(), rootSize.Height(), 0);
-    } else if (LessOrEqual(rootSize.Height() - positionY - height, height)) {
-        SetRootRect(rootSize.Width(), rootSize.Height(), -keyboardHeight);
-    } else if (positionY + height > (rootSize.Height() - keyboardHeight) && offsetFix > 0.0) {
-        SetRootRect(rootSize.Width(), rootSize.Height(), -offsetFix);
-    } else if ((positionY + height > rootSize.Height() - keyboardHeight &&
-                   positionY < rootSize.Height() - keyboardHeight && height < keyboardHeight / 2.0f) &&
-               NearZero(rootNode_->GetGeometryNode()->GetFrameOffset().GetY())) {
-        SetRootRect(rootSize.Width(), rootSize.Height(), -height - offsetFix / 2.0f);
+#endif
+
+    auto func = [this, keyboardHeight]() {
+        float positionY = 0.0f;
+        auto manager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
+        float height = 0.0f;
+        if (manager) {
+            height = manager->GetHeight();
+            positionY = static_cast<float>(manager->GetClickPosition().GetY());
+        }
+        SizeF rootSize { static_cast<float>(rootWidth_), static_cast<float>(rootHeight_) };
+        float offsetFix = (rootSize.Height() - positionY) > 100.0
+                              ? keyboardHeight - (rootSize.Height() - positionY) / 2.0
+                              : keyboardHeight;
+        LOGI("OnVirtualKeyboardAreaChange positionY:%{public}f safeArea:%{public}f offsetFix:%{public}f, "
+             "keyboardHeight %{public}f",
+            positionY, (rootSize.Height() - keyboardHeight), offsetFix, keyboardHeight);
+        if (NearZero(keyboardHeight)) {
+            SetRootRect(rootSize.Width(), rootSize.Height(), 0);
+        } else if (positionY > (rootSize.Height() - keyboardHeight) && offsetFix > 0.0) {
+            SetRootRect(rootSize.Width(), rootSize.Height(), -offsetFix);
+        } else if ((positionY + height > rootSize.Height() - keyboardHeight &&
+                       positionY < rootSize.Height() - keyboardHeight && height < keyboardHeight / 2.0f) &&
+                   NearZero(rootNode_->GetGeometryNode()->GetFrameOffset().GetY())) {
+            SetRootRect(rootSize.Width(), rootSize.Height(), -height - offsetFix / 2.0f);
+        }
+    };
+
+    AnimationOption option;
+    NearZero(keyboardHeight) ? option.SetDuration(keyboardAnimationConfig_.durationOut_)
+                             : option.SetDuration(keyboardAnimationConfig_.durationIn_);
+    auto curve = MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.2f, 1.0f); // animation curve: cubic [0.2, 0.0, 0.2, 1.0]
+    if (rsTransaction) {
+        Animate(option, curve, func);
+    } else {
+        func();
     }
+
+#ifdef ENABLE_ROSEN_BACKEND
+    if (rsTransaction) {
+        rsTransaction->Commit();
+    }
+#endif
 }
 
 bool PipelineContext::OnBackPressed()

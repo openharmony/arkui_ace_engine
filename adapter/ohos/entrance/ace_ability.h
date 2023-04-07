@@ -40,7 +40,8 @@ public:
     void OnDrag(int32_t x, int32_t y, OHOS::Rosen::DragEvent event) override;
 
     // override Rosen::IOccupiedAreaChangeListener virtual callback function
-    void OnSizeChange(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info) override;
+    void OnSizeChange(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info,
+        const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr) override;
 
     // override Rosen::IAceAbilityHandler virtual callback function
     void SetBackgroundColor(uint32_t color) override;
@@ -48,7 +49,7 @@ public:
 
     // override Rosen::IWindowChangeListener virtual callback function
     void OnSizeChange(OHOS::Rosen::Rect rect, OHOS::Rosen::WindowSizeChangeReason reason,
-        const std::shared_ptr<OHOS::Rosen::RSTransaction> rsTransaction = nullptr) override;
+        const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr) override;
     void OnModeChange(OHOS::Rosen::WindowMode mode, bool hasDeco = true) override;
 
     // override Rosen::IInputEventConsumer virtual callback function
@@ -88,11 +89,12 @@ public:
 
     // handle window Rosen::IWindowChangeListener
     void OnSizeChange(const OHOS::Rosen::Rect& rect, OHOS::Rosen::WindowSizeChangeReason reason,
-        const std::shared_ptr<OHOS::Rosen::RSTransaction> rsTransaction = nullptr);
+        const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr);
     void OnModeChange(OHOS::Rosen::WindowMode mode, bool hasDeco = true);
 
     // handle window Rosen::IOccupiedAreaChangeListener
-    void OnSizeChange(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info);
+    void OnSizeChange(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info,
+        const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr);
 
     // handle window Rosen::IInputEventConsumer
     bool OnInputEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;
