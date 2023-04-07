@@ -53,4 +53,19 @@ void HyperlinkModelNG::SetTextStyle(const RefPtr<FrameNode>& hyperlinkNode, cons
     hyperlinkNode->MarkModifyDone();
     hyperlinkNode->MarkDirtyNode();
 }
+
+void HyperlinkModelNG::SetDraggable(bool draggable)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<HyperlinkPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (draggable && !pattern->IsDraggable()) {
+        auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        gestureHub->InitDragDropEvent();
+    }
+    pattern->SetDraggable(draggable);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetDraggable(draggable);
+}
 } // namespace OHOS::Ace::NG

@@ -39,6 +39,7 @@ group("pattern_unittest") {
     "grid_col:grid_col_pattern_test_ng",
     "grid_container:grid_container_pattern_test_ng",
     "grid_row:grid_row_pattern_test_ng",
+    "hyperlink:hyperlink_test_ng",
     "image:image_test_ng",
     "image_animator:image_animator_pattern_test",
     "indexer:indexer_test_ng",

@@ -18,6 +18,20 @@
 namespace OHOS::Ace::NG {
 void HyperlinkPattern::OnAttachToFrameNode() {}
 
+void HyperlinkPattern::EnableDrag()
+{
+    auto dragStart = [](const RefPtr<OHOS::Ace::DragEvent>& /* event */,
+                        const std::string& /* extraParams */) -> DragDropInfo {
+        DragDropInfo info;
+        info.extraInfo = "hyperlink drag";
+
+        return info;
+    };
+    auto eventHub = GetHost()->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDragStart(std::move(dragStart));
+}
+
 void HyperlinkPattern::OnModifyDone()
 {
     TextPattern::OnModifyDone();
@@ -33,6 +47,10 @@ void HyperlinkPattern::OnModifyDone()
     auto inputHub = hub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
     InitInputEvent(inputHub);
+
+    if (draggable_) {
+        EnableDrag();
+    }
 }
 
 void HyperlinkPattern::LinkToAddress()

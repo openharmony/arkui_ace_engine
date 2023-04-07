@@ -25,6 +25,7 @@ public:
     void Create(const std::string& address, const std::string& content) override;
     void Pop() override {};
     void SetColor(const Color& value) override;
+    void SetDraggable(bool draggable) override;
 
 private:
     void SetTextStyle(const RefPtr<FrameNode>& textNode, const std::string& content);
