@@ -69,6 +69,13 @@ public:
     // native implementation for js function: aceTrace.end()
     static shared_ptr<JsValue> JsTraceEnd(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
         const std::vector<shared_ptr<JsValue>>& argv, int32_t argc);
+    static void GetStageSourceMap(const AceType* data,
+        std::unordered_map<std::string, RefPtr<RevSourceMap>>& sourceMaps);
+    static std::string TranslateStack(const std::string& stackStr, const std::string& pageUrl,
+        const RefPtr<RevSourceMap>& pageMap, const RefPtr<RevSourceMap>& appMap, const AceType* data = nullptr);
+    static std::string TranslateBySourceMap(const std::string& stackStr, const std::string& pageUrl,
+        const std::unordered_map<std::string, RefPtr<RevSourceMap>>& sourceMaps, const RefPtr<RevSourceMap>& appMap,
+        const AceType* data = nullptr);
 
 private:
     static std::string GenerateErrorMsg(
@@ -79,11 +86,6 @@ private:
     static std::string GetSourceCodeInfo(
         std::shared_ptr<JsRuntime> runtime, const shared_ptr<JsValue>& errorFunc, ErrorPos pos);
     static std::string TranslateRawStack(const std::string& rawStackStr);
-    static std::string TranslateStack(const std::string& stackStr, const std::string& pageUrl,
-        const RefPtr<RevSourceMap>& pageMap, const RefPtr<RevSourceMap>& appMap, const AceType* data = nullptr);
-    static std::string TranslateBySourceMap(const std::string& stackStr, const std::string& pageUrl,
-        const std::unordered_map<std::string, RefPtr<RevSourceMap>>& sourceMaps, const RefPtr<RevSourceMap>& appMap,
-        const AceType* data = nullptr);
     static void ExtractEachInfo(const std::string& tempStack, std::vector<std::string>& res);
     static void GetPosInfo(const std::string& temp, int32_t start, std::string& line, std::string& column);
     static std::string GetSourceInfo(const std::string& line, const std::string& column,
@@ -93,8 +95,6 @@ private:
 
     // native aceTraceObject
     static std::unique_ptr<AceScopedTrace> aceScopedTrace_;
-    static void GetStageSourceMap(const AceType* data,
-        std::unordered_map<std::string, RefPtr<RevSourceMap>>& sourceMaps);
 };
 } // namespace OHOS::Ace::Framework
 

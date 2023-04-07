@@ -364,6 +364,7 @@ private:
         std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult, int32_t touchId);
 
     void UpdateGestureHierarchy();
+    bool IsAllowedDrag(RefPtr<EventHub> eventHub);
 
     // old path.
     void UpdateExternalNGGestureRecognizer();

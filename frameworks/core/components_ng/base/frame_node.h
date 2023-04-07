@@ -113,7 +113,15 @@ public:
     void SetOnAreaChangeCallback(OnAreaChangedFunc&& callback);
     void TriggerOnAreaChangeCallback();
 
-    void TriggerVisibleAreaChangeCallback(std::list<VisibleCallbackInfo>& callbackInfoList);
+    void AddVisibleAreaUserCallback(double ratio, const VisibleCallbackInfo& callback)
+    {
+        visibleAreaUserCallbacks_[ratio] = callback;
+    }
+    void AddVisibleAreaInnerCallback(double ratio, const VisibleCallbackInfo& callback)
+    {
+        visibleAreaInnerCallbacks_[ratio] = callback;
+    }
+    void TriggerVisibleAreaChangeCallback(bool forceDisappear = false);
 
     const RefPtr<GeometryNode>& GetGeometryNode() const
     {
@@ -376,7 +384,8 @@ private:
     std::vector<RectF> GetResponseRegionList(const RectF& rect);
     bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const;
 
-    void ProcessAllVisibleCallback(std::list<VisibleCallbackInfo>& callbackInfoList, double currentVisibleRatio);
+    void ProcessAllVisibleCallback(
+        std::unordered_map<double, VisibleCallbackInfo>& visibleAreaCallbacks, double currentVisibleRatio);
     void OnVisibleAreaChangeCallback(VisibleCallbackInfo& callbackInfo, bool visibleType, double currentVisibleRatio);
     double CalculateCurrentVisibleRatio(const RectF& visibleRect, const RectF& renderRect);
 
@@ -394,6 +403,8 @@ private:
     RefPtr<GeometryNode> geometryNode_ = MakeRefPtr<GeometryNode>();
 
     std::list<std::function<void()>> destroyCallbacks_;
+    std::unordered_map<double, VisibleCallbackInfo> visibleAreaUserCallbacks_;
+    std::unordered_map<double, VisibleCallbackInfo> visibleAreaInnerCallbacks_;
 
     RefPtr<AccessibilityProperty> accessibilityProperty_;
     RefPtr<LayoutProperty> layoutProperty_;

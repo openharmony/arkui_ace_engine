@@ -621,6 +621,20 @@ void WebView::SetAudioStateChangedId(OnWebAsyncFunc&& audioStateChanged)
     webEventHub->SetOnAudioStateChangedEvent(std::move(audioStateChanged));
 }
 
+void WebView::SetAudioResumeInterval(int32_t resumeInterval)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateAudioResumeInterval(resumeInterval);
+}
+
+void WebView::SetAudioExclusive(bool audioExclusive)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateAudioExclusive(audioExclusive);
+}
+
 void WebView::SetFirstContentfulPaintId(OnWebAsyncFunc&& firstContentfulPaintId)
 {
     auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();

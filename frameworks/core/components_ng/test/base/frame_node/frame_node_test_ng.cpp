@@ -415,9 +415,9 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg0014, TestSize.Level1)
      * @tc.steps: step1. build a object to TriggerVisibleAreaChangeCallback
      * @tc.expected: step1. expect The function is run ok.
      */
-    std::list<VisibleCallbackInfo> visibleCallbackInfo;
-
-    FRAME_NODE2->TriggerVisibleAreaChangeCallback(visibleCallbackInfo);
+    VisibleCallbackInfo callbackInfo;
+    FRAME_NODE2->AddVisibleAreaUserCallback(0.0f, callbackInfo);
+    FRAME_NODE2->TriggerVisibleAreaChangeCallback();
 
     /**
      * @tc.steps: step1. callback SetParent
@@ -425,18 +425,18 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg0014, TestSize.Level1)
      */
     auto parentNode = AceType::MakeRefPtr<FrameNode>("test", -1, AceType::MakeRefPtr<Pattern>(), false);
     FRAME_NODE2->SetParent(FRAME_NODE3);
-    FRAME_NODE2->TriggerVisibleAreaChangeCallback(visibleCallbackInfo);
+    FRAME_NODE2->TriggerVisibleAreaChangeCallback();
     auto parent = FRAME_NODE2->GetParent();
     EXPECT_EQ(parent, 1);
 
     auto parentNode1 = FrameNode::CreateFrameNode("parent", 2, AceType::MakeRefPtr<Pattern>());
     RefPtr<FrameNode> frameNodes[3] = { parentNode1, nullptr, nullptr };
-    FRAME_NODE2->TriggerVisibleAreaChangeCallback(visibleCallbackInfo);
+    FRAME_NODE2->TriggerVisibleAreaChangeCallback();
     auto parent1 = FRAME_NODE2->GetParent();
     EXPECT_EQ(parent1, 1);
 
     FRAME_NODE2->lastVisibleRatio_ = 1.0;
-    FRAME_NODE2->TriggerVisibleAreaChangeCallback(visibleCallbackInfo);
+    FRAME_NODE2->TriggerVisibleAreaChangeCallback();
 }
 
 /**

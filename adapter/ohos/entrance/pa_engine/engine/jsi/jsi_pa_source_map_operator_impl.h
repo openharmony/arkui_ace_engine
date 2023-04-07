@@ -15,13 +15,14 @@
 #ifndef FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_PA_ENGINE_ENGINE_JSI_JSI_PA_SOURCE_MAP_OPERATOR_H
 #define FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_PA_ENGINE_ENGINE_JSI_JSI_PA_SOURCE_MAP_OPERATOR_H
 
-#include "js_runtime.h"
+#include "frameworks/bridge/js_frontend/engine/jsi/js_runtime.h"
 #include "source_map_operator.h"
 
 namespace OHOS::Ace {
+using namespace OHOS::Ace::Framework;
 class JsiPaSourceMapOperatorImpl : public JsEnv::SourceMapOperatorImpl {
 public:
-    JsiPaSourceMapOperatorImpl(std::shared_ptr<JsRuntime> runtime) : rumtime_(runtime) {}
+    explicit JsiPaSourceMapOperatorImpl(std::shared_ptr<JsRuntime> runtime) : runtime_(runtime) {}
 
     ~JsiPaSourceMapOperatorImpl() = default;
 

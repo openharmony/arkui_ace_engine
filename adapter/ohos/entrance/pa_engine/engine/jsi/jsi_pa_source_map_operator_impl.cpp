@@ -15,6 +15,13 @@
 
 #include "jsi_pa_source_map_operator_impl.h"
 
+#include "base/memory/ace_type.h"
+#include "bridge/common/utils/source_map.h"
+#include "core/common/container.h"
+#include "ecmascript/napi/include/jsnapi.h"
+#include "frameworks/bridge/js_frontend/engine/jsi/ark_js_runtime.h"
+#include "frameworks/bridge/js_frontend/engine/jsi/jsi_base_utils.h"
+
 namespace OHOS::Ace {
 std::string JsiPaSourceMapOperatorImpl::TranslateBySourceMap(const std::string& rawStack)
 {
@@ -42,7 +49,7 @@ std::string JsiPaSourceMapOperatorImpl::TranslateBySourceMap(const std::string& 
             pageUrl = runningPage->GetUrl();
             appMap = runningPage->GetAppMap();
             if (!JSNApi::IsBundle(vm)) {
-                GetStageSourceMap(data, sourceMaps);
+                JsiBaseUtils::GetStageSourceMap(data, sourceMaps);
             } else {
                 pageMap = runningPage->GetPageMap();
             }
@@ -52,9 +59,9 @@ std::string JsiPaSourceMapOperatorImpl::TranslateBySourceMap(const std::string& 
     std::string showStack;
     if (pageMap || appMap || !sourceMaps.empty()) {
         if (!JSNApi::IsBundle(vm)) {
-            showStack = TranslateBySourceMap(rawStack, pageUrl, sourceMaps, appMap, data);
+            showStack = JsiBaseUtils::TranslateBySourceMap(rawStack, pageUrl, sourceMaps, appMap, data);
         } else {
-            showStack = TranslateStack(rawStack, pageUrl, pageMap, appMap, data);
+            showStack = JsiBaseUtils::TranslateStack(rawStack, pageUrl, pageMap, appMap, data);
         }
     }
 

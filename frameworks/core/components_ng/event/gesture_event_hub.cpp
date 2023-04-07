@@ -338,26 +338,34 @@ void GestureEventHub::InitDragDropEvent()
     SetDragEvent(dragEvent, { PanDirection::ALL }, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
 }
 
-void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
+bool GestureEventHub::IsAllowedDrag(RefPtr<EventHub> eventHub)
 {
-    auto eventHub = eventHub_.Upgrade();
-    CHECK_NULL_VOID(eventHub);
     auto frameNode = GetFrameNode();
-    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_RETURN(frameNode, false);
     if (frameNode->IsDraggable()) {
         if (!eventHub->HasOnDragStart()) {
             LOGE("Default support for drag and drop, but there is no onDragStart function.");
-            return;
+            return false;
         }
     } else {
         if (frameNode->IsUserSet()) {
             LOGE("User settings cannot be dragged");
-            return;
+            return false;
         }
         if (!eventHub->HasOnDragStart()) {
             LOGE("The default does not support drag and drop, and there is no onDragStart function.");
-            return;
+            return false;
         }
+    }
+    return true;
+}
+
+void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
+{
+    auto eventHub = eventHub_.Upgrade();
+    CHECK_NULL_VOID(eventHub);
+    if (!IsAllowedDrag(eventHub)) {
+        return;
     }
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);

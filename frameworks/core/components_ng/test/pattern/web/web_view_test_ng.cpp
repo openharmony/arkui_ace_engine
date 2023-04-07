@@ -208,6 +208,8 @@ HWTEST_F(WebViewTestNg, SetWindowNewEvent004, TestSize.Level1)
     WebView::SetDarkMode(WebDarkMode::On);
     WebView::SetForceDarkAccess(true);
     WebView::SetAllowWindowOpenMethod(true);
+    WebView::SetAudioResumeInterval(0);
+    WebView::SetAudioExclusive(true);
 #endif
 }
 } // namespace OHOS::Ace::NG
