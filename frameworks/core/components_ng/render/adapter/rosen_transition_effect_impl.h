@@ -22,11 +22,13 @@
 #include "core/components_ng/render/adapter/rosen_transition_effect.h"
 
 namespace OHOS::Ace::NG {
-// Identity transition effect, do noting and execute immediately.
+// Identity transition effect, do nothing and execute immediately.
 class RosenIdentityTransitionEffect final : public RosenTransitionEffect {
 public:
     RosenIdentityTransitionEffect();
     ~RosenIdentityTransitionEffect() override = default;
+
+    // Identity transition effect ignores external animation option.
     void SetAnimationOption(const std::shared_ptr<AnimationOption>& option) override {}
 
 private:
@@ -84,6 +86,7 @@ public:
     RosenPivotTransitionEffect() = default;
     RosenPivotTransitionEffect(const Dimension& centerX, const Dimension& centerY);
     ~RosenPivotTransitionEffect() override = default;
+
     void SetPivot(Dimension centerX, Dimension centerY);
 
 private:
@@ -134,6 +137,7 @@ private:
 using InternalTranslateEffect = PropertyTransitionEffectTemplate<Rosen::RSTranslateModifier, Rosen::Vector2f>;
 template<>
 InternalTranslateEffect::PropertyTransitionEffectTemplate();
+
 // Translate effect that accepts Dimension.
 class RosenTranslateTransitionEffect final : public InternalTranslateEffect {
 public:
@@ -141,6 +145,7 @@ public:
     ~RosenTranslateTransitionEffect() override = default;
 
     void SetTranslateEffect(const TranslateOptions& option);
+
 private:
     void OnUpdateTransitionContext(
         const RefPtr<RosenRenderContext>& context, const RectF& selfRect, const SizeF& viewSize) override;
@@ -156,6 +161,7 @@ public:
     ~RosenMoveTransitionEffect() override = default;
 
     void SetMoveEffect(TransitionEdge edge);
+
 private:
     void OnUpdateTransitionContext(
         const RefPtr<RosenRenderContext>& context, const RectF& selfRect, const SizeF& viewSize) override;
@@ -247,6 +253,7 @@ public:
     ~RosenRotation3DTransitionEffect() override = default;
 
     void SetRotateEffect(const RotateOptions& options);
+
 private:
     DECLARE_ACE_TYPE(RosenRotation3DTransitionEffect, RosenCompositeTransitionEffect);
     ACE_DISALLOW_COPY_AND_MOVE(RosenRotation3DTransitionEffect);
@@ -263,6 +270,7 @@ public:
     ~RosenScaleTransitionEffect() override = default;
 
     void SetScaleEffect(const ScaleOptions& options);
+
 private:
     DECLARE_ACE_TYPE(RosenScaleTransitionEffect, RosenCompositeTransitionEffect);
     ACE_DISALLOW_COPY_AND_MOVE(RosenScaleTransitionEffect);

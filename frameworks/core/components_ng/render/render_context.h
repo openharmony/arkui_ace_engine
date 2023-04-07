@@ -390,7 +390,7 @@ protected:
     virtual void OnClipEdgeUpdate(bool isClip) {}
     virtual void OnClipMaskUpdate(const RefPtr<BasicShape>& basicShape) {}
 
-    virtual void OnProgressMaskUpdate(const RefPtr<ProgressMaskProperty>& prgress) {}
+    virtual void OnProgressMaskUpdate(const RefPtr<ProgressMaskProperty>& progress) {}
 
     virtual void OnLinearGradientUpdate(const NG::Gradient& value) {}
     virtual void OnSweepGradientUpdate(const NG::Gradient& value) {}

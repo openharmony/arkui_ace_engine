@@ -70,10 +70,10 @@ public:
 
     int32_t TotalChildCount() const;
 
-    // Returns index in the flattern tree structure
+    // Returns index in the flatten tree structure
     // of the node with given id and type
     // Returns std::pair with
-    // boolean first - inidication of node is found
+    // boolean first - indication of node is found
     // int32_t second - index of the node
     std::pair<bool, int32_t> GetChildFlatIndex(int32_t id);
 
@@ -308,9 +308,9 @@ public:
         return childrenUpdatedFrom_;
     }
 
-    // helper functions for managing disappearing children
+    // utility function for adding child to disappearingChildren_
     void AddDisappearingChild(const RefPtr<UINode>& child, uint32_t index = UINT32_MAX);
-    // return true if successfully removed
+    // utility function for removing child from disappearingChildren_, return true if child is removed
     bool RemoveDisappearingChild(const RefPtr<UINode>& child);
     // return if we are in parent's disappearing children
     bool IsDisappearing() const
@@ -380,8 +380,8 @@ protected:
     virtual void DumpInfo() {}
 
     // Mount to the main tree to display.
-    virtual void OnAttachToMainTree(bool recursive);
-    virtual void OnDetachFromMainTree(bool recursive);
+    virtual void OnAttachToMainTree(bool recursive = false);
+    virtual void OnDetachFromMainTree(bool recursive = false);
 
     bool isRemoving_ = false;
     // return value: return true if node has disappearing transition

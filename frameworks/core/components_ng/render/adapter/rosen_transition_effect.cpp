@@ -37,6 +37,7 @@ void RosenTransitionEffect::Detach(const RefPtr<RosenRenderContext>& context)
     }
 }
 
+// Updates the transition context
 void RosenTransitionEffect::UpdateTransitionContext(
     const RefPtr<RosenRenderContext>& context, const RectF& selfRect, const SizeF& viewSize)
 {
@@ -46,6 +47,7 @@ void RosenTransitionEffect::UpdateTransitionContext(
     }
 }
 
+// Disappears with animation option if activeTransition is true
 void RosenTransitionEffect::Disappear(bool activeTransition)
 {
     ApplyAnimationOption(
@@ -58,6 +60,7 @@ void RosenTransitionEffect::Disappear(bool activeTransition)
         activeTransition);
 }
 
+// Appears with animation option
 void RosenTransitionEffect::Appear()
 {
     ApplyAnimationOption([this]() {
@@ -68,6 +71,7 @@ void RosenTransitionEffect::Appear()
     });
 }
 
+// Combines with another effect
 void RosenTransitionEffect::CombineWith(const RefPtr<RosenTransitionEffect>& effect)
 {
     chainedEffect_ = effect;
@@ -78,17 +82,19 @@ void RosenTransitionEffect::SetAnimationOption(const std::shared_ptr<AnimationOp
     animationOption_ = option;
 }
 
+// Applies the animation option if needed
 void RosenTransitionEffect::ApplyAnimationOption(const std::function<void()>& func, bool withAnimation)
 {
-    // no animation option or animation disabled, just call func directly
+    // If there is no animation option or animation is disabled, just call func directly
     if (withAnimation == false || animationOption_ == nullptr) {
         func();
         return;
     }
-    // update animation option and reuse the finish callback (the callback in animationOption will be ignored)
+    // Update animation option and reuse the finish callback (the callback in animationOption will be ignored)
     AnimationUtils::AnimateWithCurrentCallback(*animationOption_, [&func]() { func(); });
 }
 
+// Converts ChainedTransitionEffect to RosenTransitionEffect
 RefPtr<RosenTransitionEffect> RosenTransitionEffect::ConvertToRosenTransitionEffect(
     const RefPtr<NG::ChainedTransitionEffect>& effect)
 {
@@ -123,7 +129,7 @@ RefPtr<RosenTransitionEffect> RosenTransitionEffect::ConvertToRosenTransitionEff
             case ChainedTransitionEffectType::SCALE: {
                 auto scaleEffect = AceType::DynamicCast<ChainedScaleEffect>(nowEffect);
                 const auto& scaleOption = scaleEffect->GetEffect();
-                // scale z is not considered
+                // Scale z is not considered
                 nowRSEffect = AceType::MakeRefPtr<RosenScaleTransitionEffect>(scaleOption);
                 break;
             }
@@ -158,6 +164,7 @@ RefPtr<RosenTransitionEffect> RosenTransitionEffect::ConvertToRosenTransitionEff
     return res;
 }
 
+// Update RosenTransitionEffect in place, return false if structure is not matched
 bool RosenTransitionEffect::UpdateRosenTransitionEffect(
     const RefPtr<RosenTransitionEffect>& rosenEffect, const RefPtr<ChainedTransitionEffect>& chainedEffect)
 {
@@ -240,12 +247,12 @@ bool RosenTransitionEffect::UpdateRosenTransitionEffect(
                 }
                 auto asymmetricEffect = AceType::DynamicCast<ChainedAsymmetricEffect>(nowEffect);
                 if (!UpdateRosenTransitionEffect(
-                        rosenAsymmetricEffect->GetTransitionInEffect(), asymmetricEffect->GetAppearEffect())) {
+                    rosenAsymmetricEffect->GetTransitionInEffect(), asymmetricEffect->GetAppearEffect())) {
                     LOGW("asymmetricEffect update transitionIn failed");
                     return false;
                 }
                 if (!UpdateRosenTransitionEffect(
-                        rosenAsymmetricEffect->GetTransitionOutEffect(), asymmetricEffect->GetDisappearEffect())) {
+                    rosenAsymmetricEffect->GetTransitionOutEffect(), asymmetricEffect->GetDisappearEffect())) {
                     LOGW("asymmetricEffect update transitionOut failed");
                     return false;
                 }
@@ -257,7 +264,7 @@ bool RosenTransitionEffect::UpdateRosenTransitionEffect(
             }
         }
         nowRSEffect->SetAnimationOption(nowEffect->GetAnimationOption());
-        nowRSEffect = nowRSEffect->GetNext();
+        nowRSEffect = nowRSEffect->chainedEffect_;
         nowEffect = nowEffect->GetNext();
     }
     // All effects are updated correctly
@@ -268,7 +275,7 @@ bool RosenTransitionEffect::UpdateRosenTransitionEffect(
 static const auto identityOption = std::make_shared<AnimationOption>();
 RosenIdentityTransitionEffect::RosenIdentityTransitionEffect() : RosenTransitionEffect()
 {
-    // Set animation option. And disable other options by overriding SetAnimationOption().
+    // Identity transition effect comes with default identity animation option.
     RosenTransitionEffect::SetAnimationOption(identityOption);
 }
 

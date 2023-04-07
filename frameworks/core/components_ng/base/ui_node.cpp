@@ -264,8 +264,8 @@ void UINode::AttachToMainTree(bool recursive)
     }
     onMainTree_ = true;
     OnAttachToMainTree(recursive);
-    // if recursive = false, recursively call AttachToMainTree(false) for all children until we reach First FrameNode.
-    bool isRecursive = recursive ? true : AceType::InstanceOf<FrameNode>(this);
+    // if recursive = false, recursively call AttachToMainTree(false), until we reach the first FrameNode.
+    bool isRecursive = recursive || AceType::InstanceOf<FrameNode>(this);
     for (const auto& child : children_) {
         child->AttachToMainTree(isRecursive);
     }
@@ -278,8 +278,8 @@ void UINode::DetachFromMainTree(bool recursive)
     }
     onMainTree_ = false;
     OnDetachFromMainTree(recursive);
-    // if recursive = false, recursively call DetachFromMainTree(false) for all children until we reach First FrameNode.
-    bool isRecursive = recursive ? true : AceType::InstanceOf<FrameNode>(this);
+    // if recursive = false, recursively call DetachFromMainTree(false), until we reach the first FrameNode.
+    bool isRecursive = recursive || AceType::InstanceOf<FrameNode>(this);
     for (const auto& child : children_) {
         child->DetachFromMainTree(isRecursive);
     }
@@ -630,10 +630,11 @@ bool UINode::RemoveDisappearingChild(const RefPtr<UINode>& child)
 void UINode::OnGenerateOneDepthVisibleFrameWithTransition(
     std::list<RefPtr<FrameNode>>& visibleList, uint32_t index)
 {
+    // populating with visible children
     for (const auto& child : children_) {
         child->OnGenerateOneDepthVisibleFrameWithTransition(visibleList);
     }
-    // disappearing children
+    // inserting disappearing children
     for (const auto& [child, index] : disappearingChildren_) {
         child->OnGenerateOneDepthVisibleFrameWithTransition(visibleList, index);
     }

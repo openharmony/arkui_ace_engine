@@ -70,6 +70,7 @@ RefPtr<PixelMap> g_pixelMap {};
 std::mutex g_mutex;
 std::condition_variable thumbnailGet;
 } // namespace
+
 float RosenRenderContext::ConvertDimensionToScaleBySize(const Dimension& dimension, float size)
 {
     if (dimension.Unit() == DimensionUnit::PERCENT) {
@@ -1781,7 +1782,7 @@ void RosenRenderContext::OnClipMaskUpdate(const RefPtr<BasicShape>& /*basicShape
     RequestNextFrame();
 }
 
-void RosenRenderContext::OnProgressMaskUpdate(const RefPtr<ProgressMaskProperty>& prgress)
+void RosenRenderContext::OnProgressMaskUpdate(const RefPtr<ProgressMaskProperty>&)
 {
     PaintProgressMask();
     CHECK_NULL_VOID(rsNode_);
@@ -2098,8 +2099,7 @@ void RosenRenderContext::UpdateChainedTransition(const RefPtr<NG::ChainedTransit
 {
     if (transitionEffect_) {
         // use effect to update rosenTransitionEffect activeValue
-        auto result = RosenTransitionEffect::UpdateRosenTransitionEffect(transitionEffect_, effect);
-        if (result) {
+        if (RosenTransitionEffect::UpdateRosenTransitionEffect(transitionEffect_, effect)) {
             return;
         }
         LOGW("transition effect struct changed");
@@ -2151,11 +2151,11 @@ void RosenRenderContext::NotifyTransition(bool isTransitionIn)
         // The finish callback function will perform all the necessary cleanup work.
         // Important Note on timing:
         // 1. If any transition animations are created, the finish callback function will only be called when ALL
-        // animations have finished. This is accomplished by sharing the same shared_ptr<AnimationFinishCallback> among
-        // all animations.
-        // 2. If no transition animations are created, the finish callback function will be called IMMEDIATELY. This is
-        // accomplished by setting the last param (timing sensitive) to false, which avoids creating an empty 'timer'
-        // animation.
+        //    animations have finished. This is accomplished by sharing the same shared_ptr<AnimationFinishCallback>
+        //    among all animations.
+        // 2. If no transition animations are created, the finish callback function will be called IMMEDIATELY. This
+        //    is accomplished by setting the last param (timing sensitive) to false, which avoids creating an empty
+        //    'timer' animation.
         AnimationUtils::AnimateWithCurrentOptions(
             [this]() {
                 transitionEffect_->Disappear();
@@ -2190,7 +2190,7 @@ void RosenRenderContext::OnTransitionOutFinish()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    // if the node is not disappearing (re-appear?), return.
+    // if the node is not disappearing (reappear?), return.
     if (!host->IsDisappearing()) {
         LOGD("RosenTransitionEffect: node is not disappearing, skip");
         return;

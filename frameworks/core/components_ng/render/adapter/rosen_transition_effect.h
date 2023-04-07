@@ -27,6 +27,7 @@ namespace OHOS::Ace::NG {
 class RosenRenderContext;
 
 // Base class for transition effect, providing basic functions for transition effect.
+// Implementations of transition effect should inherit from this class, see rosen_transition_effect_impl.h for details.
 class RosenTransitionEffect : public AceType {
 public:
     RosenTransitionEffect() = default;
@@ -44,10 +45,6 @@ public:
     // Chain with another transition effect, the chained effect will be applied after this effect.
     void CombineWith(const RefPtr<RosenTransitionEffect>& effect);
     virtual void SetAnimationOption(const std::shared_ptr<AnimationOption>& option);
-    const RefPtr<RosenTransitionEffect>& GetNext()
-    {
-        return chainedEffect_;
-    }
 
     static RefPtr<RosenTransitionEffect> ConvertToRosenTransitionEffect(const RefPtr<ChainedTransitionEffect>& effect);
     static bool UpdateRosenTransitionEffect(

@@ -187,7 +187,7 @@ public:
 
     void PaintAccessibilityFocus() override;
 
-    virtual void ClearAccessibilityFocus() override;
+    void ClearAccessibilityFocus() override;
 
     void OnAccessibilityFocusUpdate(bool isAccessibilityFocus) override;
 
