@@ -199,6 +199,7 @@ void EventReport::JsEventReport(int32_t eventType, const std::string& jsonStr)
 void EventReport::JsErrReport(
     const std::string& packageName, const std::string& reason, const std::string& summary)
 {
+    LOGI("CYY JsErrReport packageName: %{public}s", packageName.c_str());
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, EVENT_NAME_JS_ERROR,
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
         EVENT_KEY_PACKAGE_NAME, packageName,

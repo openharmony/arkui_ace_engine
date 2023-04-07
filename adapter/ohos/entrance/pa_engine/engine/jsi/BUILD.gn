@@ -79,6 +79,7 @@ template("js_pa_engine_ark") {
       "eventhandler:libeventhandler",
       "form_fwk:form_manager",
       "hiviewdfx_hilog_native:libhilog",
+      "hisysevent_native:libhisysevent",
       "ipc:ipc_core",
       "ipc:ipc_napi_common",
       "napi:ace_napi",
@@ -97,6 +98,7 @@ template("js_pa_engine_ark") {
       "$ace_root/frameworks/bridge/js_frontend/engine/jsi/jsi_base_utils.cpp",
       "jsi_pa_engine.cpp",
       "jsi_pa_engine_loader.cpp",
+      "jsi_pa_source_map_operator_impl.cpp",
     ]
 
     defines += [ "PA_SUPPORT" ]
