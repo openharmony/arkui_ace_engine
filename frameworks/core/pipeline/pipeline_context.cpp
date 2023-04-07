@@ -711,14 +711,26 @@ void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
     isFlushingAnimation_ = true;
 
     ProcessPreFlush();
-    if (scheduleTasks_.empty()) {
+    bool isScheduleTasksEmpty;
+    {
+        LOGI("scheduleTasks size");
+        std::lock_guard lck(scheduleTasksMutex_);
+        isScheduleTasksEmpty = scheduleTasks_.empty();
+    }
+    if (isScheduleTasksEmpty) {
         isFlushingAnimation_ = false;
         if (FrameReport::GetInstance().GetEnable()) {
             FrameReport::GetInstance().EndFlushAnimation();
         }
         return;
     }
-    decltype(scheduleTasks_) temp(std::move(scheduleTasks_));
+    decltype(scheduleTasks_) temp;
+    {
+        LOGI("scheduleTasks swap");
+        std::lock_guard lck(scheduleTasksMutex_);
+        scheduleTasks_.swap(temp);
+    }
+
     for (const auto& scheduleTask : temp) {
         scheduleTask.second->OnFrame(nanoTimestamp);
     }
@@ -1547,7 +1559,11 @@ void PipelineContext::AddPostFlushListener(const RefPtr<FlushEvent>& listener)
 uint32_t PipelineContext::AddScheduleTask(const RefPtr<ScheduleTask>& task)
 {
     CHECK_RUN_ON(UI);
-    scheduleTasks_.try_emplace(++nextScheduleTaskId_, task);
+    {
+        LOGI("scheduleTasks add ++%{public}u", nextScheduleTaskId_);
+        std::lock_guard lck(scheduleTasksMutex_);
+        scheduleTasks_.try_emplace(++nextScheduleTaskId_, task);
+    }
     window_->RequestFrame();
     return nextScheduleTaskId_;
 }
@@ -1572,7 +1588,11 @@ void PipelineContext::RemoveRequestedRotationNode(const WeakPtr<RenderNode>& ren
 void PipelineContext::RemoveScheduleTask(uint32_t id)
 {
     CHECK_RUN_ON(UI);
-    scheduleTasks_.erase(id);
+    {
+        LOGI("scheduleTasks remove %{public}u", id);
+        std::lock_guard lck(scheduleTasksMutex_);
+        scheduleTasks_.erase(id);
+    }
 }
 
 RefPtr<RenderNode> PipelineContext::DragTestAll(const TouchEvent& point)

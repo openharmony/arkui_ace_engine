@@ -862,6 +862,7 @@ private:
 
     Rect dirtyRect_;
     uint32_t nextScheduleTaskId_ = 0;
+    std::mutex scheduleTasksMutex_;
     std::unordered_map<uint32_t, RefPtr<ScheduleTask>> scheduleTasks_;
     std::unordered_map<ComposeId, std::list<RefPtr<ComposedElement>>> composedElementMap_;
     std::set<WeakPtr<Element>, NodeCompareWeak<WeakPtr<Element>>> dirtyElements_;
