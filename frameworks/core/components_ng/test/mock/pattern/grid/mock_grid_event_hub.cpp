@@ -16,11 +16,6 @@
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
 
 namespace OHOS::Ace::NG {
-RefPtr<FrameNode> GridEventHub::FindGridItemByPosition(float /* x */, float /* y */)
-{
-    return nullptr;
-}
-
 bool GridEventHub::CheckPostionInGrid(float x, float y)
 {
     return false;

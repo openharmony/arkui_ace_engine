@@ -203,6 +203,7 @@ public:
 
     void SetSwiperItem(WeakPtr<ListItemPattern> swiperItem);
 
+    int32_t GetItemIndexByPosition(float xOffset, float yOffset);
 private:
     void OnScrollEndCallback() override;
 

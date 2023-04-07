@@ -227,7 +227,7 @@ public:
     void HandleOnItemDragUpdate(const GestureEvent& info);
     void HandleOnItemDragEnd(const GestureEvent& info);
     void HandleOnItemDragCancel();
-    int32_t GetListItemIndexByPosition(float x, float y);
+    int32_t GetListItemIndexByPosition(float x, float y, bool strict = false);
 private:
     Axis GetDirection() const;
 

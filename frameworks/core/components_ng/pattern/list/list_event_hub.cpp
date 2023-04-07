@@ -63,7 +63,7 @@ void ListEventHub::HandleOnItemDragStart(const GestureEvent& info)
     auto globalX = static_cast<float>(info.GetGlobalPoint().GetX());
     auto globalY = static_cast<float>(info.GetGlobalPoint().GetY());
 
-    draggedIndex_ = GetListItemIndexByPosition(globalX, globalY);
+    draggedIndex_ = GetListItemIndexByPosition(globalX, globalY, true);
     OHOS::Ace::ItemDragInfo itemDragInfo;
     itemDragInfo.SetX(pipeline->ConvertPxToVp(Dimension(globalX, DimensionUnit::PX)));
     itemDragInfo.SetY(pipeline->ConvertPxToVp(Dimension(globalY, DimensionUnit::PX)));
@@ -101,37 +101,21 @@ void ListEventHub::HandleOnItemDragCancel()
     draggedIndex_ = 0;
 }
 
-Axis ListEventHub::GetDirection() const
-{
-    auto host = GetFrameNode();
-    CHECK_NULL_RETURN(host, Axis::VERTICAL);
-    auto layoutProperty = host->GetLayoutProperty<ListLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, Axis::VERTICAL);
-    return layoutProperty->GetListDirection().value_or(Axis::VERTICAL);
-}
-
-int32_t ListEventHub::GetListItemIndexByPosition(float x, float y)
+int32_t ListEventHub::GetListItemIndexByPosition(float x, float y, bool strict)
 {
     auto listNode = GetFrameNode();
     CHECK_NULL_RETURN(listNode, 0);
-    auto geometryNode = listNode->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, 0);
-    auto globalOffset = listNode->GetOffsetRelativeToWindow();
-    float offsetX = x - globalOffset.GetX();
-    float offsetY = y - globalOffset.GetY();
-    float mainOffset = GetDirection() == Axis::VERTICAL ? offsetY : offsetX;
-    
+
+    if (strict) {
+        auto itemFrameNode = listNode->FindChildByPosition(x, y);
+        CHECK_NULL_RETURN(itemFrameNode, -1);
+        RefPtr<ListItemPattern> itemPattern = itemFrameNode->GetPattern<ListItemPattern>();
+        CHECK_NULL_RETURN(itemPattern, -1);
+        return itemPattern->GetIndexInList();
+    }
+
     auto listPattern = listNode->GetPattern<ListPattern>();
     CHECK_NULL_RETURN(listPattern, 0);
-    auto itemPosition = listPattern->GetItemPosition();
-    for (auto & pos : itemPosition) {
-        if (mainOffset <= pos.second.endPos) {
-            return pos.first;
-        }
-    }
-    if (!itemPosition.empty()) {
-        return itemPosition.rbegin()->first + 1;
-    }
-    return 0;
+    return listPattern->GetItemIndexByPosition(x, y);
 }
 } // namespace OHOS::Ace::NG
