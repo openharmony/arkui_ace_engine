@@ -20,6 +20,9 @@ template("napi_font_static") {
   ohos_source_set(target_name) {
     defines += invoker.defines
     cflags_cc += invoker.cflags_cc
+    if (is_mac) {
+      cflags_cc += [ "-O0" ]
+    }
 
     include_dirs = [
       "//foundation/arkui",
