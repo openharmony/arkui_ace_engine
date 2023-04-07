@@ -377,7 +377,9 @@ void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType t
     CHECK_NULL_VOID(pagePattern);
     auto layoutProperty = pageNode->GetLayoutProperty();
     auto pipeline = PipelineBase::GetCurrentContext();
-    if (pipeline && !pipeline->GetIgnoreViewSafeArea() && layoutProperty) {
+    const static int32_t PLATFORM_VERSION_TEN = 10;
+    if (pipeline && pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN && !pipeline->GetIgnoreViewSafeArea() &&
+        layoutProperty) {
         layoutProperty->SetSafeArea(pipeline->GetCurrentViewSafeArea());
     }
     pagePattern->OnShow();
