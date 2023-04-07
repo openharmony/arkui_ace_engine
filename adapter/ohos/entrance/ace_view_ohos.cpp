@@ -212,7 +212,7 @@ void AceViewOhos::ProcessDragEvent(const std::shared_ptr<MMI::PointerEvent>& poi
         }
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP: {
             action = DragEventAction::DRAG_EVENT_END;
-            ProcessDragEvent(pointerItem.GetDisplayX(), pointerItem.GetDisplayY(), action);
+            ProcessDragEvent(pointerItem.GetWindowX(), pointerItem.GetWindowY(), action);
             break;
         }
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW: {

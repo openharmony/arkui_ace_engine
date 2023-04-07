@@ -120,6 +120,29 @@ RefPtr<FrameNode> FrameNode::CreateFrameNode(
     return frameNode;
 }
 
+void FrameNode::ProcessOffscreenNode(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_VOID(node);
+    node->UpdateLayoutPropertyFlag();
+    auto layoutWrapper = node->CreateLayoutWrapper();
+    CHECK_NULL_VOID(layoutWrapper);
+    layoutWrapper->SetActive();
+    layoutWrapper->SetRootMeasureNode();
+    layoutWrapper->WillLayout();
+    layoutWrapper->Measure(node->GetLayoutConstraint());
+    layoutWrapper->Layout();
+    layoutWrapper->MountToHostOnMainThread();
+    layoutWrapper->DidLayout(layoutWrapper);
+    auto paintProperty = node->GetPaintProperty<PaintProperty>();
+    auto wrapper = node->CreatePaintWrapper();
+    CHECK_NULL_VOID(wrapper);
+    wrapper->FlushRender();
+    paintProperty->CleanDirty();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->FlushMessages();
+}
+
 void FrameNode::InitializePatternAndContext()
 {
     eventHub_->AttachHost(WeakClaim(this));

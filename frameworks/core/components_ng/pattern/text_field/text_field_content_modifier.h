@@ -46,6 +46,7 @@ public:
     void SetPlaceholderValue(std::string&& value);
     void SetTextRectY(const float value);
     void SetTextObscured(bool value);
+    void ChangeDragStatus();
     void SetTextRectX(const float value);
     void SetTextAlign(const TextAlign value);
     bool NeedMeasureUpdate(PropertyChangeFlag& flag);
@@ -73,6 +74,7 @@ private:
     RefPtr<PropertyString> textValue_;
     RefPtr<PropertyString> placeholderValue_;
     RefPtr<PropertyBool> textObscured_;
+    RefPtr<PropertyBool> dragStatus_;
     RefPtr<PropertyInt> textAlign_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldContentModifier);

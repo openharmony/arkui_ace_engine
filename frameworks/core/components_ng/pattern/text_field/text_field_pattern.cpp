@@ -44,6 +44,7 @@
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/pattern/search/search_event_hub.h"
 #include "core/components_ng/pattern/search/search_pattern.h"
+#include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_controller.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_algorithm.h"
@@ -62,6 +63,10 @@
 #if defined(ENABLE_STANDARD_INPUT)
 #include "core/components_ng/pattern/text_field/on_text_changed_listener_impl.h"
 #endif
+#endif
+#ifdef ENABLE_DRAG_FRAMEWORK
+#include "text.h"
+#include "unified_data.h"
 #endif
 
 namespace OHOS::Ace::NG {
@@ -199,6 +204,9 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     auto paragraph = textFieldLayoutAlgorithm->GetParagraph();
     if (paragraph) {
         paragraph_ = paragraph;
+    }
+    if (!IsDragging()) {
+        dragParagraph_ = paragraph_;
     }
     textRect_ = textFieldLayoutAlgorithm->GetTextRect();
     imageRect_ = textFieldLayoutAlgorithm->GetImageRect();
@@ -835,7 +843,7 @@ int32_t TextFieldPattern::ConvertTouchOffsetToCaretPosition(const Offset& localO
 {
     CHECK_NULL_RETURN(paragraph_, 0);
     return static_cast<int32_t>(
-        paragraph_->GetGlyphPositionAtCoordinateWithCluster(localOffset.GetX(), localOffset.GetY()).pos_);
+        paragraph_->GetGlyphPositionAtCoordinate(localOffset.GetX(), localOffset.GetY()).pos_);
 }
 
 bool TextFieldPattern::DisplayPlaceHolder()
@@ -1380,6 +1388,165 @@ void TextFieldPattern::AnimatePressAndHover(RefPtr<RenderContext>& renderContext
     AnimationUtils::Animate(option, [renderContext, endBlendColor]() { renderContext->BlendBgColor(endBlendColor); });
 }
 
+#ifdef ENABLE_DRAG_FRAMEWORK
+std::function<void(Offset)> TextFieldPattern::GetThumbnailCallback()
+{
+    auto callback = [frameNode = GetHost()](Offset point) {
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<TextFieldPattern>();
+        CHECK_NULL_VOID(pattern);
+        if (pattern->BetweenSelectedPosition(point)) {
+            TextDragPattern::CreateDragNode(frameNode);
+            FrameNode::ProcessOffscreenNode(pattern->GetDragNode());
+        }
+        auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        gestureHub->SetPixelMap(nullptr);
+    };
+    return callback;
+}
+
+void TextFieldPattern::InitDragDropEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gestureHub = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->InitDragDropEvent();
+    gestureHub->SetTextFieldDraggable(true);
+    auto callback = GetThumbnailCallback();
+    gestureHub->SetThumbnailCallback(std::move(callback));
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto onDragStart =
+        [weakPtr = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& event,
+                                    const std::string& extraParams) -> NG::DragDropInfo {
+        NG::DragDropInfo itemInfo;
+        auto pattern = weakPtr.Upgrade();
+        CHECK_NULL_RETURN(pattern, itemInfo);
+        auto host = pattern->GetHost();
+        CHECK_NULL_RETURN(host, itemInfo);
+        auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+        CHECK_NULL_RETURN(layoutProperty, itemInfo);
+        pattern-> dragStatus_ = DragStatus::DRAGGING;
+        pattern->textFieldContentModifier_->ChangeDragStatus();
+        pattern->selectionMode_ = SelectionMode::NONE;
+        pattern->dragTextStart_ = std::min(pattern->textSelector_.GetStart(), pattern->textSelector_.GetEnd());
+        pattern->dragTextEnd_ = std::max(pattern->textSelector_.GetStart(), pattern->textSelector_.GetEnd());
+        auto textEditingValue = pattern->GetEditingValue();
+        std::string beforeStr = textEditingValue.GetValueBeforePosition(pattern->dragTextStart_);
+        std::string selectedStr = textEditingValue.GetSelectedText(pattern->dragTextStart_, pattern->dragTextEnd_);
+        std::string afterStr = textEditingValue.GetValueAfterPosition(pattern->dragTextEnd_);
+        pattern->dragContents_ = {beforeStr, selectedStr, afterStr};
+        itemInfo.extraInfo = selectedStr;
+        UDMF::UDVariant udmfValue(selectedStr);
+        UDMF::UDDetails udmfDetails = {{"value", udmfValue}};
+        auto record = std::make_shared<UDMF::Text>(udmfDetails);
+        auto unifiedData = std::make_shared<UDMF::UnifiedData>();
+        unifiedData->AddRecord(record);
+        event->SetData(unifiedData);
+        host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF :
+            PROPERTY_UPDATE_MEASURE);
+        return itemInfo;
+    };
+    if (!eventHub->HasOnDragStart()) {
+        eventHub->SetOnDragStart(std::move(onDragStart));
+    }
+
+    auto onDragEnter =
+        [weakPtr = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
+        auto pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (pattern->dragStatus_ == DragStatus::ON_DROP) {
+            pattern->dragStatus_ = DragStatus::NONE;
+        }
+    };
+    eventHub->SetOnDragEnter(std::move(onDragEnter));
+
+    auto onDragMove =
+        [weakPtr = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
+        auto pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto touchX = Dimension(event->GetX(), DimensionUnit::VP).ConvertToPx();
+        auto touchY = Dimension(event->GetY(), DimensionUnit::VP).ConvertToPx();
+        Offset offset = Offset(touchX, touchY) - Offset(pattern->textRect_.GetX(), pattern->textRect_.GetY()) -
+            Offset(pattern->parentGlobalOffset_.GetX(), pattern->parentGlobalOffset_.GetY());
+        auto position = pattern->ConvertTouchOffsetToCaretPosition(offset);
+        if (pattern->textEditingValue_.caretPosition == position) {
+            return;
+        }
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto focusHub = host->GetOrCreateFocusHub();
+        if (pattern->IsSearchParentNode()) {
+            auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
+            focusHub = parentFrameNode->GetOrCreateFocusHub();
+        }
+        focusHub->RequestFocusImmediately();
+        pattern->SetCaretPosition(position);
+    };
+    eventHub->SetOnDragMove(std::move(onDragMove));
+
+    auto onDragLeave =
+    [weakPtr = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
+        auto pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->StopTwinkling();
+    };
+    eventHub->SetOnDragLeave(std::move(onDragLeave));
+
+    auto onDrop =
+    [weakPtr = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
+        auto pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (extraParams.empty()) {
+            pattern->dragStatus_ = DragStatus::ON_DROP;
+            pattern->textFieldContentModifier_->ChangeDragStatus();
+            auto host = pattern->GetHost();
+            CHECK_NULL_VOID(host);
+            auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+            CHECK_NULL_VOID(layoutProperty);
+            host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ?
+                PROPERTY_UPDATE_MEASURE_SELF : PROPERTY_UPDATE_MEASURE);
+            return;
+        }
+        auto data = event->GetData();
+        CHECK_NULL_VOID(data);
+        auto records = data->GetRecords();
+        std::string str = "";
+        if (records.size() == 1 && records[0]->GetType() == UDMF::UDType::TEXT) {
+            UDMF::Text *text = reinterpret_cast<UDMF::Text *>(records[0].get());
+            UDMF::UDDetails udmfDetails = text->GetDetails();
+            auto value = udmfDetails.find("value");
+            if (value != udmfDetails.end()) {
+                str = std::get<std::string>(value->second);
+            }
+        }
+        if (pattern->dragStatus_ == DragStatus::NONE) {
+            pattern->InsertValue(str);
+        } else {
+            auto current = pattern->textEditingValue_.caretPosition;
+            float dragTextStart = pattern->dragTextStart_;
+            float dragTextEnd = pattern->dragTextEnd_;
+            if (current < dragTextStart) {
+                pattern->textEditingValue_.text =
+                    pattern->textEditingValue_.GetValueBeforePosition(dragTextStart) +
+                    pattern->textEditingValue_.GetValueAfterPosition(dragTextEnd);
+                pattern->InsertValue(str);
+            } else if (current > dragTextEnd) {
+                pattern->textEditingValue_.text =
+                    pattern->textEditingValue_.GetValueBeforePosition(dragTextStart) +
+                    pattern->textEditingValue_.GetValueAfterPosition(dragTextEnd);
+                pattern->textEditingValue_.caretPosition = current - (dragTextEnd - dragTextStart);
+                pattern->InsertValue(str);
+            }
+            pattern->dragStatus_ = DragStatus::NONE;
+        }
+    };
+    eventHub->SetOnDrop(std::move(onDrop));
+}
+#endif
+
 void TextFieldPattern::InitTouchEvent()
 {
     CHECK_NULL_VOID_NOLOG(!touchListener_);
@@ -1541,6 +1708,12 @@ void TextFieldPattern::OnModifyDone()
     InitFocusEvent();
     InitMouseEvent();
     InitTouchEvent();
+#ifdef ENABLE_DRAG_FRAMEWORK
+    if (layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) != TextInputType::VISIBLE_PASSWORD) {
+        InitDragDropEvent();
+        AddDragFrameNodeToManager(host);
+    }
+#endif // ENABLE_DRAG_FRAMEWORK
     ProcessPasswordIcon();
     context->AddOnAreaChangeNode(host->GetId());
     if (!clipboard_ && context) {
@@ -1660,6 +1833,9 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     lastTouchOffset_ = info.GetLocalLocation();
+    if (BetweenSelectedPosition(info.GetGlobalLocation())) {
+        return;
+    }
     caretUpdateType_ = isMousePressed_ ? CaretUpdateType::PRESSED : CaretUpdateType::LONG_PRESSED;
     selectionMode_ = SelectionMode::SELECT;
     isSingleHandle_ = false;
