@@ -1273,6 +1273,8 @@ void UIContentImpl::ReloadForm()
     auto flutterAssetManager = AceType::DynamicCast<FlutterAssetManager>(container->GetAssetManager());
     flutterAssetManager->ReloadProvider();
     Platform::AceContainer::ClearEngineCache(instanceId_);
+    Platform::AceContainer::RunPage(instanceId_, Platform::AceContainer::GetContainer(instanceId_)->GeneratePageId(),
+        startUrl_, "");
 }
 
 void UIContentImpl::Focus()
