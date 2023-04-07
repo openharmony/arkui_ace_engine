@@ -1131,7 +1131,7 @@ void WebPattern::RequestFullScreen()
     CHECK_NULL_VOID(host);
     auto fullScreenManager = context->GetFullScreenManager();
     CHECK_NULL_VOID(fullScreenManager);
-    fullScreenManager->RequestFullScreen(host);
+    fullScreenManager->RequestFullScreenForWeb(host);
 }
 
 void WebPattern::ExitFullScreen()
@@ -1142,7 +1142,7 @@ void WebPattern::ExitFullScreen()
     CHECK_NULL_VOID(host);
     auto fullScreenManager = context->GetFullScreenManager();
     CHECK_NULL_VOID(fullScreenManager);
-    fullScreenManager->ExitFullScreen(host);
+    fullScreenManager->ExitFullScreenForWeb(host);
 }
 
 bool WebPattern::IsTouchHandleValid(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> handle)
