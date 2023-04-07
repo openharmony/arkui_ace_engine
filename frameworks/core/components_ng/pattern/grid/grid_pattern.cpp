@@ -140,12 +140,6 @@ void GridPattern::InitMouseEvent()
 void GridPattern::HandleMouseEventWithoutKeyboard(const MouseInfo& info)
 {
     if (info.GetButton() != MouseButton::LEFT_BUTTON) {
-        auto mouseOffsetX = static_cast<float>(info.GetLocalLocation().GetX());
-        auto mouseOffsetY = static_cast<float>(info.GetLocalLocation().GetY());
-        auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
-        if (!selectedZone.IsInRegion(PointF(mouseOffsetX, mouseOffsetY))) {
-            ClearMultiSelect();
-        }
         return;
     }
 
@@ -156,19 +150,20 @@ void GridPattern::HandleMouseEventWithoutKeyboard(const MouseInfo& info)
     if (manager->IsDragged()) {
         return;
     }
+
     auto mouseOffsetX = static_cast<float>(info.GetLocalLocation().GetX());
     auto mouseOffsetY = static_cast<float>(info.GetLocalLocation().GetY());
-
     if (info.GetAction() == MouseAction::PRESS) {
-        auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
-        if (!selectedZone.IsInRegion(PointF(mouseOffsetX, mouseOffsetY))) {
-            ClearMultiSelect();
-            mouseStartOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
-            mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
-        }
+        ClearMultiSelect();
+        mouseStartOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
+        mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
         mousePressOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
+        mousePressed_ = true;
         // do not select when click
     } else if (info.GetAction() == MouseAction::MOVE) {
+        if (!mousePressed_) {
+            return;
+        }
         const static double FRAME_SELECTION_DISTANCE =
             pipeline->NormalizeToPx(Dimension(DEFAULT_PAN_DISTANCE, DimensionUnit::VP));
         auto delta = OffsetF(mouseOffsetX, mouseOffsetY) - mousePressOffset_;
@@ -180,6 +175,7 @@ void GridPattern::HandleMouseEventWithoutKeyboard(const MouseInfo& info)
     } else if (info.GetAction() == MouseAction::RELEASE) {
         mouseStartOffset_.Reset();
         mouseEndOffset_.Reset();
+        mousePressed_ = false;
         ClearSelectedZone();
     }
 }
