@@ -60,6 +60,28 @@ void FormPattern::OnAttachToFrameNode()
     externalRenderContext_ = RenderContext::Create();
     externalRenderContext_->InitContext(false, "Form_" + std::to_string(host->GetId()) + "_Remote_Surface", true);
     InitFormManagerDelegate();
+    auto eventHub = host->GetEventHub<FormEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnCache([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto subContainer = pattern->GetSubContainer();
+        CHECK_NULL_VOID(subContainer);
+        auto uiTaskExecutor =
+            SingleTaskExecutor::Make(host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        auto id = subContainer->GetRunningCardId();
+        FormManager::GetInstance().AddSubContainer(id, subContainer);
+        uiTaskExecutor.PostDelayedTask(
+            [id, nodeId = subContainer->GetNodeId()] {
+                auto cachedubContainer = FormManager::GetInstance().GetSubContainer(id);
+                if (cachedubContainer != nullptr && cachedubContainer->GetNodeId() == nodeId) {
+                    FormManager::GetInstance().RemoveSubContainer(id);
+                }
+            },
+            DELAY_TIME_FOR_FORM_SUBCONTAINER_CACHE);
+    });
 }
 
 void FormPattern::OnRebuildFrame()
@@ -357,30 +379,6 @@ void FormPattern::CreateCardContainer()
         pattern->isLoaded_ = true;
     });
 
-    auto eventhHub = host->GetEventHub<FormEventHub>();
-    CHECK_NULL_VOID(eventhHub);
-    eventhHub->SetOnOnCache([weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        auto host = pattern->GetHost();
-        CHECK_NULL_VOID(host);
-        auto subContainer = pattern->GetSubContainer();
-        CHECK_NULL_VOID(subContainer);
-        auto uiTaskExecutor =
-            SingleTaskExecutor::Make(host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-        auto id = subContainer->GetRunningCardId();
-        FormManager::GetInstance().AddSubContainer(id, subContainer);
-        uiTaskExecutor.PostDelayedTask(
-            [id, nodeId = subContainer->GetNodeId()] {
-                auto cachedubContainer = FormManager::GetInstance().GetSubContainer(id);
-                if (cachedubContainer != nullptr && cachedubContainer->GetNodeId() == nodeId) {
-                    FormManager::GetInstance().RemoveSubContainer(id);
-                    cachedubContainer->Destroy();
-                    cachedubContainer.Reset();
-                }
-            },
-            DELAY_TIME_FOR_FORM_SUBCONTAINER_CACHE);
-    });
     if (hasContainer) {
         subContainer_->RunSameCard();
     }
@@ -555,14 +553,11 @@ void FormPattern::DispatchPointerEvent(
 
 void FormPattern::RemoveSubContainer()
 {
-    if (subContainer_) {
-        auto id = subContainer_->GetRunningCardId();
-        auto cachedubContainer = FormManager::GetInstance().GetSubContainer(id);
-        if (cachedubContainer != nullptr && cachedubContainer->GetNodeId() == subContainer_->GetNodeId()) {
-            FormManager::GetInstance().RemoveSubContainer(id);
-        }
-        subContainer_->Destroy();
-        subContainer_.Reset();
+    auto host = GetHost();
+    auto eventHub = host->GetEventHub<FormEventHub>();
+    if (eventHub) {
+        eventHub->FireOnCache();
     }
+    subContainer_.Reset();
 }
 } // namespace OHOS::Ace::NG
