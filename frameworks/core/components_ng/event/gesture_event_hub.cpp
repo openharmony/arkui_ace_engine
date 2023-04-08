@@ -574,7 +574,7 @@ bool GestureEventHub::KeyBoardShortCutClick(const KeyEvent& event, const WeakPtr
     target.area.SetOffset(DimensionOffset(offset));
     target.area.SetHeight(Dimension(size.Height()));
     target.area.SetWidth(Dimension(size.Width()));
-    target.origin = DimensionOffset(geometryNode->GetParentGlobalOffset());
+    target.origin = DimensionOffset(host->GetOffsetRelativeToWindow() - offset);
     info.SetTarget(target);
     click(info);
     return true;

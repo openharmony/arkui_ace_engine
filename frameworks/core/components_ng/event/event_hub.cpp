@@ -68,7 +68,7 @@ GetEventTargetImpl EventHub::CreateGetEventTargetImpl() const
         eventTarget.area.SetOffset(DimensionOffset(offset));
         eventTarget.area.SetHeight(Dimension(size.Height()));
         eventTarget.area.SetWidth(Dimension(size.Width()));
-        eventTarget.origin = DimensionOffset(geometryNode->GetParentGlobalOffset());
+        eventTarget.origin = DimensionOffset(host->GetOffsetRelativeToWindow() - offset);
         return eventTarget;
     };
     return impl;
