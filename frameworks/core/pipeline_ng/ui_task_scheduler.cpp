@@ -57,9 +57,6 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
 {
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACE();
-    if (FrameReport::GetInstance().GetEnable()) {
-        FrameReport::GetInstance().BeginFlushRender();
-    }
     auto dirtyLayoutNodes = std::move(dirtyLayoutNodes_);
     std::vector<RefPtr<FrameNode>> orderedNodes;
     bool hasNormalNode = false;
