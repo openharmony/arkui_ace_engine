@@ -62,9 +62,10 @@ void ContentModifierAdapter::Draw(RSDrawingContext& context) const
     // use dummy deleter avoid delete the SkCanvas by shared_ptr, its owned by context
     std::shared_ptr<SkCanvas> skCanvas { context.canvas, [](SkCanvas*) {} };
     RSCanvas canvas(&skCanvas);
-    CHECK_NULL_VOID_NOLOG(modifier_);
+    auto modifier = modifier_.Upgrade();
+    CHECK_NULL_VOID_NOLOG(modifier);
     DrawingContext context_ = { canvas, context.width, context.height };
-    modifier_->onDraw(context_);
+    modifier->onDraw(context_);
 }
 
 #define CONVERT_PROP(prop, srcType, propType)                                                 \
@@ -103,8 +104,9 @@ inline std::shared_ptr<RSPropertyBase> ConvertToRSProperty(const RefPtr<Property
 
 void ContentModifierAdapter::AttachProperties()
 {
-    if (!attachedProperties_.size() && modifier_) {
-        for (const auto& property : modifier_->GetAttachedProperties()) {
+    auto modifier = modifier_.Upgrade();
+    if (!attachedProperties_.size() && modifier) {
+        for (const auto& property : modifier->GetAttachedProperties()) {
             auto rsProperty = ConvertToRSProperty(property);
             AttachProperty(rsProperty);
             attachedProperties_.emplace_back(rsProperty);
@@ -117,15 +119,17 @@ void OverlayModifierAdapter::Draw(RSDrawingContext& context) const
     // use dummy deleter avoid delete the SkCanvas by shared_ptr, its owned by context
     std::shared_ptr<SkCanvas> skCanvas { context.canvas, [](SkCanvas*) {} };
     RSCanvas canvas(&skCanvas);
-    CHECK_NULL_VOID_NOLOG(modifier_);
+    auto modifier = modifier_.Upgrade();
+    CHECK_NULL_VOID_NOLOG(modifier);
     DrawingContext context_ = { canvas, context.width, context.height };
-    modifier_->onDraw(context_);
+    modifier->onDraw(context_);
 }
 
 void OverlayModifierAdapter::AttachProperties()
 {
-    if (attachedProperties_.empty() && modifier_) {
-        for (const auto& property : modifier_->GetAttachedProperties()) {
+    auto modifier = modifier_.Upgrade();
+    if (attachedProperties_.empty() && modifier) {
+        for (const auto& property : modifier->GetAttachedProperties()) {
             auto rsProperty = ConvertToRSProperty(property);
             AttachProperty(rsProperty);
             attachedProperties_.emplace_back(rsProperty);
