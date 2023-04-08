@@ -403,7 +403,30 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     DragData dragData {{pixelMap, width * PIXELMAP_WIDTH_RATE, height * PIXELMAP_HEIGHT_RATE}, {}, udKey,
         static_cast<int32_t>(info.GetSourceDevice()), 1, info.GetPointerId(), info.GetScreenLocation().GetX(),
         info.GetScreenLocation().GetY(), info.GetDeviceId(), true};
-    auto callback = [](const DragNotifyMsg& notifyMessage) {};
+    auto taskScheduler = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(taskScheduler);
+    RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    auto callback = [eventHub, dragEvent, taskScheduler](const DragNotifyMsg& notifyMessage) {
+        DragRet result = DragRet::DRAG_FAIL;
+        switch (notifyMessage.result) {
+            case DragResult::DRAG_SUCCESS:
+                result = DragRet::DRAG_SUCCESS;
+                break;
+            case DragResult::DRAG_FAIL:
+                result = DragRet::DRAG_FAIL;
+                break;
+            default:
+                break;
+        }
+        dragEvent->SetResult(result);
+        taskScheduler->PostTask(
+            [eventHub, dragEvent]() {
+                if (eventHub->HasOnDragEnd()) {
+                    (eventHub->GetOnDragEnd())(dragEvent);
+                }
+            },
+            TaskExecutor::TaskType::UI);
+    };
     int32_t ret = Msdp::DeviceStatus::InteractionManager::GetInstance()->StartDrag(dragData, callback);
     if (ret != 0) {
         LOGE("InteractionManager: drag start error");

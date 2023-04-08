@@ -30,6 +30,12 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
+#ifdef ENABLE_DRAG_FRAMEWORK
+#include "image.h"
+#include "unified_data.h"
+#include "unified_record.h"
+#endif
+
 namespace OHOS::Ace::NG {
 
 DataReadyNotifyTask ImagePattern::CreateDataReadyCallback()
@@ -431,7 +437,7 @@ void ImagePattern::EnableDrag()
     CHECK_NULL_VOID(host);
     auto size = host->GetGeometryNode()->GetContentSize();
     auto dragStart = [imageWk = WeakClaim(RawPtr(image_)), ctxWk = WeakClaim(RawPtr(loadingCtx_)), size](
-                         const RefPtr<OHOS::Ace::DragEvent>& /*event*/,
+                         const RefPtr<OHOS::Ace::DragEvent>& event,
                          const std::string& /*extraParams*/) -> DragDropInfo {
         DragDropInfo info;
         auto image = imageWk.Upgrade();
@@ -441,7 +447,17 @@ void ImagePattern::EnableDrag()
 #if !defined(ACE_UNITTEST)
         AceEngineExt::GetInstance().DragStartExt();
 #endif
-
+#ifdef ENABLE_DRAG_FRAMEWORK
+        if (ctx->GetSourceInfo().IsPixmap()) {
+            LOGI("ImagePattern default dragStart image source is pixelmap");
+        } else {
+            std::shared_ptr<UDMF::UDMF::UnifiedRecord> record =
+                std::make_shared<UDMF::Image>(ctx->GetSourceInfo().GetSrc());
+            auto unifiedData = std::make_shared<UDMF::UnifiedData>();
+            unifiedData->AddRecord(record);
+            event->SetData(unifiedData);
+        }
+#endif
         info.extraInfo = "image drag";
         info.pixelMap = image->GetPixelMap();
         if (info.pixelMap) {

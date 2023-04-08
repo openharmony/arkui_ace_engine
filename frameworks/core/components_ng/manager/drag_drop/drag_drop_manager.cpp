@@ -343,6 +343,10 @@ void DragDropManager::OnDragEnd(float globalX, float globalY, const std::string&
         if (ret == 0) {
             event->SetData(unifiedData);
         }
+        int x, y, width, height;
+        InteractionManager::GetInstance()->GetShadowOffset(x, y, width, height);
+        Rect rect(x, y, width, height);
+        event->SetPreviewRect(rect);
 #endif // ENABLE_DRAG_FRAMEWORK
         eventHub->FireOnDrop(event, extraParams);
 #ifdef ENABLE_DRAG_FRAMEWORK
