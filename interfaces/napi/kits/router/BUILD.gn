@@ -34,17 +34,17 @@ template("napi_router_static") {
 
     sources = [ "js_router.cpp" ]
 
-    deps = [ "//third_party/libuv:uv" ]
+    deps = []
     if (platform != "" && is_cross_platform_build) {
-      deps += [ "//plugins/libs/napi:napi_$platform" ]
+      deps += [
+        "//plugins/libs/napi:napi_$platform",
+        "//plugins/libs/uv:uv_$platform",
+      ]
     } else {
-      deps += [ "//foundation/arkui/napi/:ace_napi" ]
-    }
-
-    # Use static libuv for cross build
-    if (is_cross_platform_build) {
-      deps -= [ "//third_party/libuv:uv" ]
-      deps += [ "//third_party/libuv:uv_static" ]
+      deps += [
+        "//foundation/arkui/napi/:ace_napi",
+        "//third_party/libuv:uv",
+      ]
     }
 
     if (defined(config.libace_target)) {
