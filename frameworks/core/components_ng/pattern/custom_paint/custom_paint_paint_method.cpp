@@ -16,10 +16,12 @@
 #include "core/components_ng/pattern/custom_paint/custom_paint_paint_method.h"
 
 #include <cmath>
+#include <unistd.h>
 
 #include "drawing/engine_adapter/skia_adapter/skia_canvas.h"
 #include "include/core/SkCanvas.h"
 #include "include/core/SkColor.h"
+#include "include/core/SkShader.h"
 #include "third_party/bounds_checking_function/include/securec.h"
 #include "third_party/skia/include/core/SkBlendMode.h"
 #include "third_party/skia/include/core/SkCanvas.h"
@@ -40,6 +42,7 @@
 #include "core/components/calendar/rosen_render_calendar.h"
 #include "core/components/common/painter/flutter_decoration_painter.h"
 #include "core/components/common/painter/rosen_decoration_painter.h"
+#include "core/components/common/properties/decoration.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/image/flutter_image_cache.h"
 #include "core/image/image_cache.h"
@@ -50,6 +53,8 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr double HALF_CIRCLE_ANGLE = 180.0;
 constexpr double FULL_CIRCLE_ANGLE = 360.0;
+constexpr double CONIC_START_ANGLE = 0.0;
+constexpr double CONIC_END_ANGLE = 359.9;
 
 const LinearEnumMapNode<CompositeOperation, SkBlendMode> SK_BLEND_MODE_TABLE[] = {
     { CompositeOperation::SOURCE_OVER, SkBlendMode::kSrcOver },
@@ -93,6 +98,46 @@ void CustomPaintPaintMethod::UpdateLineDash(SkPaint& paint)
     }
 }
 
+sk_sp<SkShader> CustomPaintPaintMethod::MakeConicGradient(SkPaint& paint, const Ace::Gradient& gradient)
+{
+    sk_sp<SkShader> skShader = nullptr;
+    if (gradient.GetType() == Ace::GradientType::CONIC) {
+        if (!gradient.GetConicGradient().centerX.has_value() ||
+            !gradient.GetConicGradient().centerY.has_value() ||
+            !gradient.GetConicGradient().startAngle.has_value()) {
+            return skShader;
+        }
+        SkMatrix matrix = SkMatrix::I();
+        SkScalar centerX = SkDoubleToScalar(gradient.GetConicGradient().centerX->Value());
+        SkScalar centerY = SkDoubleToScalar(gradient.GetConicGradient().centerY->Value());
+        auto gradientColors = gradient.GetColors();
+        std::stable_sort(gradientColors.begin(), gradientColors.end(),
+            [](auto& colorA, auto& colorB) { return colorA.GetDimension() < colorB.GetDimension(); });
+        uint32_t colorsSize = gradientColors.size();
+        SkColor colors[gradientColors.size()];
+        float pos[gradientColors.size()];
+        double angle = gradient.GetConicGradient().startAngle->Value() / M_PI * 180.0;
+        SkScalar startAngle = SkDoubleToScalar(angle);
+        matrix.preRotate(startAngle, centerX, centerY);
+        for (uint32_t i = 0; i < colorsSize; ++i) {
+            const auto& gradientColor = gradientColors[i];
+            colors[i] = gradientColor.GetColor().GetValue();
+            pos[i] = gradientColor.GetDimension().Value();
+        }
+#ifdef USE_SYSTEM_SKIA
+    auto mode = SkShader::kClamp_TileMode;
+#else
+    auto mode = SkTileMode::kClamp;
+#endif
+        skShader = SkGradientShader::MakeSweep(centerX, centerY,
+                                               colors, pos, colorsSize, mode,
+                                               SkDoubleToScalar(CONIC_START_ANGLE),
+                                               SkDoubleToScalar(CONIC_END_ANGLE),
+                                               0, &matrix);
+    }
+    return skShader;
+}
+
 void CustomPaintPaintMethod::UpdatePaintShader(const OffsetF& offset, SkPaint& paint, const Ace::Gradient& gradient)
 {
     SkPoint beginPoint = SkPoint::Make(SkDoubleToScalar(gradient.GetBeginOffset().GetX() + offset.GetX()),
@@ -119,6 +164,8 @@ void CustomPaintPaintMethod::UpdatePaintShader(const OffsetF& offset, SkPaint& p
     sk_sp<SkShader> skShader = nullptr;
     if (gradient.GetType() == Ace::GradientType::LINEAR) {
         skShader = SkGradientShader::MakeLinear(pts, colors, pos, gradientColors.size(), mode);
+    } else if (gradient.GetType() == Ace::GradientType::CONIC) {
+        skShader = MakeConicGradient(paint, gradient);
     } else {
         if (gradient.GetInnerRadius() <= 0.0 && beginPoint == endPoint) {
             skShader = SkGradientShader::MakeRadial(
