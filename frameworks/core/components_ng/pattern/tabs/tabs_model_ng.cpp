@@ -282,8 +282,10 @@ void TabsModelNG::Pop()
     swiperLayoutProperty->UpdateIndex(index);
 
     tabBarNode->MarkModifyDone();
+    tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 
     swiperNode->MarkModifyDone();
+    swiperNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
     ViewStackProcessor::GetInstance()->PopContainer();
 }
