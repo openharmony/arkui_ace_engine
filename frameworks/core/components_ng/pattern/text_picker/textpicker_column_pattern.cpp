@@ -20,6 +20,7 @@
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/utils.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/picker/picker_theme.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -274,6 +275,7 @@ void TextPickerColumnPattern::FlushCurrentOptions()
             continue;
         }
         textLayoutProperty->UpdateContent(optionValue);
+        textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
         textNode->GetRenderContext()->SetClipToFrame(true);
         textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         textNode->MarkModifyDone();

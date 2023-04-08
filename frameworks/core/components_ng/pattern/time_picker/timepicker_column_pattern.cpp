@@ -20,6 +20,7 @@
 #include <list>
 
 #include "base/utils/utils.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/picker/picker_base_component.h"
 #include "core/components_ng/layout/layout_wrapper.h"
@@ -247,6 +248,7 @@ void TimePickerColumnPattern::FlushCurrentOptions()
         }
         auto optionValue = timePickerRowPattern->GetAllOptions(host)[optionIndex];
         textLayoutProperty->UpdateContent(optionValue);
+        textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
         textNode->MarkDirtyNode();
         textNode->MarkModifyDone();
     }

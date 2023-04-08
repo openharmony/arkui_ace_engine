@@ -67,42 +67,23 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
         return std::nullopt;
     }
 
-    bool skipMeasure = false;
-    if (paragraph_) {
-        // remeasure case, check text length and layout constrain.
-        auto width = contentConstraint.selfIdealSize.Width() ? contentConstraint.selfIdealSize.Width().value()
-                                                             : contentConstraint.maxSize.Width();
-        auto lineCount = paragraph_->GetLineCount();
-        if (lineCount == 1) {
-            if (LessOrEqual(GetTextWidth(), width) && !paragraph_->DidExceedMaxLines()) {
-                skipMeasure = true;
-            }
-        } else {
-            skipMeasure = NearEqual(GetTextWidth(), width);
+    TextStyle textStyle = CreateTextStyleUsingTheme(
+        textLayoutProperty->GetFontStyle(), textLayoutProperty->GetTextLineStyle(), pipeline->GetTheme<TextTheme>());
+    if (!textStyle.GetAdaptTextSize()) {
+        if (!CreateParagraphAndLayout(textStyle, textLayoutProperty->GetContent().value_or(""), contentConstraint)) {
+            return std::nullopt;
+        }
+    } else {
+        if (!AdaptMinTextSize(textStyle, textLayoutProperty->GetContent().value_or(""), contentConstraint, pipeline)) {
+            return std::nullopt;
         }
     }
-
-    if (!skipMeasure) {
-        TextStyle textStyle = CreateTextStyleUsingTheme(textLayoutProperty->GetFontStyle(),
-            textLayoutProperty->GetTextLineStyle(), pipeline->GetTheme<TextTheme>());
-        if (!textStyle.GetAdaptTextSize()) {
-            if (!CreateParagraphAndLayout(
-                    textStyle, textLayoutProperty->GetContent().value_or(""), contentConstraint)) {
-                return std::nullopt;
-            }
-        } else {
-            if (!AdaptMinTextSize(
-                    textStyle, textLayoutProperty->GetContent().value_or(""), contentConstraint, pipeline)) {
-                return std::nullopt;
-            }
-        }
-        if (!contentConstraint.selfIdealSize.Width()) {
-            float paragraphNewWidth = std::min(GetTextWidth(), paragraph_->GetMaxWidth());
-            paragraphNewWidth =
-                std::clamp(paragraphNewWidth, contentConstraint.minSize.Width(), contentConstraint.maxSize.Width());
-            if (!NearEqual(paragraphNewWidth, paragraph_->GetMaxWidth())) {
-                paragraph_->Layout(std::ceil(paragraphNewWidth));
-            }
+    if (!contentConstraint.selfIdealSize.Width()) {
+        float paragraphNewWidth = std::min(GetTextWidth(), paragraph_->GetMaxWidth());
+        paragraphNewWidth =
+            std::clamp(paragraphNewWidth, contentConstraint.minSize.Width(), contentConstraint.maxSize.Width());
+        if (!NearEqual(paragraphNewWidth, paragraph_->GetMaxWidth())) {
+            paragraph_->Layout(std::ceil(paragraphNewWidth));
         }
     }
 
