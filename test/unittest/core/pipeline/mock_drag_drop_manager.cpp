@@ -86,6 +86,12 @@ void DragDropManager::FireOnItemDragEvent(const RefPtr<FrameNode>& frameNode, Dr
     const OHOS::Ace::ItemDragInfo& itemDragInfo, DragEventType type, int32_t draggedIndex, int32_t insertIndex)
 {}
 
+bool DragDropManager::FireOnItemDropEvent(const RefPtr<FrameNode>& frameNode, DragType dragType,
+    const OHOS::Ace::ItemDragInfo& itemDragInfo, int32_t draggedIndex, int32_t insertIndex, bool isSuccess)
+{
+    return true;
+}
+
 void DragDropManager::AddDataToClipboard(const std::string& extraInfo) {}
 
 void DragDropManager::GetExtraInfoFromClipboard(std::string& extraInfo) {}

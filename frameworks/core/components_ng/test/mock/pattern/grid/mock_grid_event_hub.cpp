@@ -45,11 +45,13 @@ void GridEventHub::FireOnItemDragLeave(const ItemDragInfo& dragInfo, int32_t ite
     }
 }
 
-void GridEventHub::FireOnItemDrop(const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex, bool isSuccess)
+bool GridEventHub::FireOnItemDrop(const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex, bool isSuccess)
 {
     if (onItemDrop_) {
         onItemDrop_(dragInfo, itemIndex, insertIndex, isSuccess);
+        return true;
     }
+    return false;
 }
 
 void GridEventHub::FireOnItemDragMove(const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex) const
