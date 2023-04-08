@@ -15,6 +15,7 @@
 
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
+#include "base/log/frame_report.h"
 #include "base/memory/referenced.h"
 #include "base/thread/background_task_executor.h"
 #include "base/thread/cancelable_callback.h"
@@ -47,6 +48,9 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
 {
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACE();
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().BeginFlushRender();
+    }
     auto dirtyLayoutNodes = std::move(dirtyLayoutNodes_);
     // Priority task creation
     for (auto&& pageNodes : dirtyLayoutNodes) {
@@ -73,6 +77,9 @@ void UITaskScheduler::FlushRenderTask(bool forceUseMainThread)
 {
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACE();
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().BeginFlushRender();
+    }
     auto dirtyRenderNodes = std::move(dirtyRenderNodes_);
     // Priority task creation
     for (auto&& pageNodes : dirtyRenderNodes) {
