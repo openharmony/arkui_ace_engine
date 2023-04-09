@@ -479,13 +479,12 @@ void DragDropManager::OnItemDragEnd(float globalX, float globalY, int32_t dragge
         int32_t insertIndex = GetItemIndex(dragFrameNode, dragType, globalX, globalY);
         // drag and drop on the same grid
         if (dragFrameNode == draggedGridFrameNode_) {
-            FireOnItemDragEvent(dragFrameNode, dragType, itemDragInfo, DragEventType::DROP, draggedIndex, insertIndex);
+            FireOnItemDropEvent(dragFrameNode, dragType, itemDragInfo, draggedIndex, insertIndex, true);
         } else {
             // drag and drop on different grid
-            FireOnItemDragEvent(dragFrameNode, dragType, itemDragInfo, DragEventType::DROP, -1, insertIndex);
+            bool isSuccess = FireOnItemDropEvent(dragFrameNode, dragType, itemDragInfo, -1, insertIndex, true);
             if (draggedGridFrameNode_) {
-                FireOnItemDragEvent(
-                    draggedGridFrameNode_, dragType, itemDragInfo, DragEventType::DROP, draggedIndex, -1);
+                FireOnItemDropEvent(draggedGridFrameNode_, dragType, itemDragInfo, draggedIndex, -1, isSuccess);
             }
         }
     }
@@ -516,9 +515,6 @@ void DragDropManager::FireOnItemDragEvent(const RefPtr<FrameNode>& frameNode, Dr
             case DragEventType::LEAVE:
                 eventHub->FireOnItemDragLeave(itemDragInfo, draggedIndex);
                 break;
-            case DragEventType::DROP:
-                eventHub->FireOnItemDrop(itemDragInfo, draggedIndex, insertIndex, true);
-                break;
             default:
                 break;
         }
@@ -535,13 +531,25 @@ void DragDropManager::FireOnItemDragEvent(const RefPtr<FrameNode>& frameNode, Dr
             case DragEventType::LEAVE:
                 eventHub->FireOnItemDragLeave(itemDragInfo, draggedIndex);
                 break;
-            case DragEventType::DROP:
-                eventHub->FireOnItemDrop(itemDragInfo, draggedIndex, insertIndex, true);
-                break;
             default:
                 break;
         }
     }
+}
+
+bool DragDropManager::FireOnItemDropEvent(const RefPtr<FrameNode>& frameNode, DragType dragType,
+    const OHOS::Ace::ItemDragInfo& itemDragInfo, int32_t draggedIndex, int32_t insertIndex, bool isSuccess)
+{
+    if (dragType == DragType::GRID) {
+        auto eventHub = frameNode->GetEventHub<GridEventHub>();
+        CHECK_NULL_RETURN(eventHub, false);
+        return eventHub->FireOnItemDrop(itemDragInfo, draggedIndex, insertIndex, isSuccess);
+    } else if (dragType == DragType::LIST) {
+        auto eventHub = frameNode->GetEventHub<ListEventHub>();
+        CHECK_NULL_RETURN(eventHub, false);
+        return eventHub->FireOnItemDrop(itemDragInfo, draggedIndex, insertIndex, isSuccess);
+    }
+    return false;
 }
 
 int32_t DragDropManager::GetItemIndex(

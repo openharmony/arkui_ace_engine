@@ -202,11 +202,16 @@ public:
         }
     }
 
-    void FireOnItemDrop(const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex, bool isSuccess) const
+    bool FireOnItemDrop(const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex, bool isSuccess) const
     {
         if (onItemDropEvent_) {
+            if (onItemMoveEvent_ && itemIndex >= 0 && insertIndex >= 0) {
+                isSuccess = onItemMoveEvent_(itemIndex, insertIndex);
+            }
             onItemDropEvent_(dragInfo, itemIndex, insertIndex, isSuccess);
+            return true;
         }
+        return false;
     }
 
     std::string GetDragExtraParams(const std::string& extraInfo, const Point& point, DragEventType drag) override
