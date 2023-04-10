@@ -277,7 +277,7 @@ void DragDropManager::UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode
         InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::DEFAULT);
         return;
     }
-    for (auto it : summaryMap_) {
+    for (const auto& it : summaryMap_) {
         if (dragFrameNodeAllowDrop.find(it.first) == dragFrameNodeAllowDrop.end()) {
             InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::FORBIDDEN);
             return;
@@ -365,7 +365,7 @@ void DragDropManager::RequireSummary()
     std::string udKey;
     InteractionManager::GetInstance()->GetUdKey(udKey);
     if (udKey.empty()) {
-        LOGE("OnDragStart: InteractionManager GetUdKey is null");
+        LOGW("OnDragStart: InteractionManager GetUdKey is null");
     }
 
     auto udmfClient = UDMF::UdmfClient::GetInstance();
@@ -375,7 +375,7 @@ void DragDropManager::RequireSummary()
     queryOption.key = udKey_;
     int32_t ret = udmfClient.GetSummary(queryOption, summary);
     if (ret != 0) {
-        LOGE("OnDragStart: UDMF GetSummary failed: %{public}d", ret);
+        LOGW("OnDragStart: UDMF GetSummary failed: %{public}d", ret);
     }
     summaryMap_ = summary.summary;
 }
@@ -438,7 +438,7 @@ void DragDropManager::FireOnDragEvent(
 
 #ifdef ENABLE_DRAG_FRAMEWORK
     if (event->GetResult() == DragRet::ENABLE_DROP) {
-        InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::MOVE);
+        InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::COPY);
     } else if (event->GetResult() == DragRet::DISABLE_DROP) {
         InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::FORBIDDEN);
     } else {
