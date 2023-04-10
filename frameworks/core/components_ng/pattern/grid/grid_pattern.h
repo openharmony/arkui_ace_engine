@@ -138,8 +138,15 @@ public:
 
     bool IsAtBottom() const override
     {
-        return gridLayoutInfo_.reachEnd_;
+        return gridLayoutInfo_.offsetEnd_;
     }
+
+    void SetScrollState(int32_t scrollState)
+    {
+        scrollState_ = scrollState;
+    }
+
+    bool OutBoundaryCallback() override;
 
     void SetPositionController(const RefPtr<ScrollController>& controller);
 
@@ -160,6 +167,13 @@ public:
     void UpdateRectOfDraggedInItem(int32_t insertIndex);
 
 private:
+    float GetMainGap();
+    float GetAllDelta();
+    void CheckRestartSpring();
+    void CheckScrollable();
+    bool IsOutOfBoundary();
+    void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
+    SizeF GetContentSize() const;
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;
     float GetMainContentSize() const;
@@ -194,6 +208,8 @@ private:
     bool supportAnimation_ = false;
     bool isConfigScrollable_ = false;
     bool isMouseEventInit_ = false;
+    bool scrollable_ = true;
+    int32_t scrollState_ = SCROLL_FROM_NONE;
     bool mousePressed_ = false;
 
     OffsetF mouseStartOffset_;

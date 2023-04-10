@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_GRID_PAINT_METHOD_H
 
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
+#include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 #include "core/components_ng/render/node_paint_method.h"
 
 namespace OHOS::Ace::NG {
@@ -27,10 +28,16 @@ public:
 
     ~GridPaintMethod() override = default;
 
-    CanvasDrawFunction GetForegroundDrawFunction(PaintWrapper* /* paintWrapper */) override;
+    CanvasDrawFunction GetForegroundDrawFunction(PaintWrapper* paintWrapper) override;
+    void PaintEdgeEffect(PaintWrapper* paintWrapper, RSCanvas& canvas);
+    void SetEdgeEffect(WeakPtr<ScrollEdgeEffect>&& edgeEffect)
+    {
+        edgeEffect_ = edgeEffect;
+    }
 
 private:
     WeakPtr<ScrollBar> scrollBar_;
+    WeakPtr<ScrollEdgeEffect> edgeEffect_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_GRID_PAINT_METHOD_H

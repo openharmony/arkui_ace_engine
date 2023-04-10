@@ -62,4 +62,11 @@ RefPtr<PaintProperty> GridPattern::CreatePaintProperty()
 {
     return MakeRefPtr<ScrollablePaintProperty>();
 }
+
+bool GridPattern::OutBoundaryCallback()
+{
+    return false;
+}
+
+void GridPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) {}
 } // namespace OHOS::Ace::NG
