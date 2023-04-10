@@ -205,20 +205,16 @@ void ToastComponent::Show(const RefPtr<PipelineContext>& context, const std::str
     }
 
     WeakPtr<StackElement> weak = stackElement;
-    context->GetTaskExecutor()->PostDelayedTask([weak, toastId, tween, stopCallback = stopCallback_] {
+    context->GetTaskExecutor()->PostDelayedTask(
+        [weak, toastId, stopCallback = stopCallback_] {
             auto ref = weak.Upgrade();
             if (ref == nullptr) {
                 return;
             }
             ref->PopToastComponent(toastId);
-            auto animator = tween->GetAnimator();
-            if (animator && stopCallback) {
-                animator->AddStopListener([stopCallback] () {
-                    LOGI("Animator stop callback.");
-                    if (stopCallback) {
-                        stopCallback();
-                    }
-                });
+            if (stopCallback) {
+                LOGI("Animator stop callback.");
+                stopCallback();
             }
         },
         TaskExecutor::TaskType::UI, duration);
