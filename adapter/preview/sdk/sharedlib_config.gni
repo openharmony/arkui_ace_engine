@@ -1,0 +1,250 @@
+# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+import("//foundation/arkui/ace_engine/adapter/preview/build/config.gni")
+
+# Avoid conditional judgment branches caused by dynamic library suffixes.
+if (use_mac) {
+  dylib_suffix = ".dylib"
+  label_res =
+      "//base/global/resource_management/frameworks/resmgr:global_resmgr_mac"
+  label_hilog =
+      "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog_mac"
+  label_ace =
+      "//foundation/arkui/ace_engine/adapter/preview/build:libace_engine_mac"
+} else if (use_mingw_win) {
+  dylib_suffix = ".dll"
+  label_res =
+      "//base/global/resource_management/frameworks/resmgr:global_resmgr_win"
+  label_hilog =
+      "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog_windows"
+  label_ace = "//foundation/arkui/ace_engine/adapter/preview/build:libace_engine_windows"
+} else if (use_linux) {
+  dylib_suffix = ".so"
+  label_res =
+      "//base/global/resource_management/frameworks/resmgr:global_resmgr_linux"
+  label_hilog =
+      "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog_linux"
+  label_ace =
+      "//foundation/arkui/ace_engine/adapter/preview/build:libace_engine_linux"
+}
+
+common_bin = [
+  {
+    label = "//third_party/curl:curl_shared"
+    subsystem_name = "thirdparty"
+    part_name = "curl"
+  },
+  {
+    label = "//third_party/nghttp2/lib:libnghttp2_shared"
+    subsystem_name = "thirdparty"
+    part_name = "thirdparty_nghttp2"
+  },
+  {
+    label = "//third_party/bounds_checking_function:libsec_shared"
+    subsystem_name = "thirdparty"
+    part_name = "bounds_checking_function"
+  },
+  {
+    label = "//foundation/arkui/napi:ace_napi"
+    subsystem_name = "arkui"
+    part_name = "napi"
+  },
+  {
+    label = "//third_party/cJSON:cjson"
+    subsystem_name = "thirdparty"
+    part_name = "cjson"
+  },
+  {
+    label = "//third_party/icu/icu4c:shared_icui18n"
+    subsystem_name = "thirdparty"
+    part_name = "icu"
+    lib_names = [ "hmicui18n" ]
+  },
+  {
+    label = "//third_party/icu/icu4c:shared_icuuc"
+    subsystem_name = "thirdparty"
+    part_name = "icu"
+    lib_names = [ "hmicuuc" ]
+  },
+  {
+    label = "//third_party/libuv:uv"
+    subsystem_name = "thirdparty"
+    part_name = "libuv"
+  },
+  {
+    label = "//foundation/graphic/graphic_2d/rosen/modules/glfw_render_context:libglfw_render_context"
+    subsystem_name = "graphic"
+    part_name = "graphic_standard"
+  },
+  {
+    label = "//foundation/graphic/graphic_2d/rosen/modules/render_service_base:librender_service_base"
+    subsystem_name = "graphic"
+    part_name = "graphic_standard"
+  },
+  {
+    label = "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client"
+    subsystem_name = "graphic"
+    part_name = "graphic_standard"
+  },
+  {
+    label = "//third_party/flutter/glfw:glfw"
+    subsystem_name = "graphic"
+    part_name = "graphic_standard"
+  },
+  {
+    label = "//third_party/flutter/build/skia:skia_shared"
+    subsystem_name = "thirdparty"
+    part_name = "flutter"
+  },
+  {
+    label = "//foundation/arkui/napi:ace_napi_ark"
+    subsystem_name = "arkui"
+    part_name = "napi"
+  },
+  {
+    label = "//arkcompiler/ets_runtime:libark_jsruntime"
+    subsystem_name = "arkcompiler"
+    part_name = "ets_runtime"
+  },
+  {
+    label = "//third_party/openssl:libssl_shared"
+    subsystem_name = "developtools"
+    part_name = "profiler"
+    lib_names = [ "ssl_openssl" ]
+  },
+  {
+    label = "//third_party/openssl:libcrypto_shared"
+    subsystem_name = "security"
+    part_name = "huks"
+    lib_names = [ "crypto_openssl" ]
+  },
+  {
+    label = label_res
+    subsystem_name = "global"
+    part_name = "resource_management"
+  },
+  {
+    label = label_hilog
+    subsystem_name = "hiviewdfx"
+    part_name = "hilog_native"
+  },
+  {
+    label = label_ace
+    subsystem_name = "arkui"
+    part_name = "ace_engine"
+  },
+]
+
+napi_modules = [
+  {
+    prefix = ""
+    shard_libs = [
+      {
+        label = "//base/hiviewdfx/hilog/interfaces/js/kits/napi:libhilognapi"
+        subsystem_name = "hiviewdfx"
+        part_name = "hilog_native"
+        lib_names = [ "hilog" ]
+      },
+      {
+        label = "//foundation/arkui/ace_engine/interfaces/napi/kits:napi_group"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [
+          "configuration",
+          "device",
+          "grid",
+          "measure",
+          "mediaquery",
+          "prompt",
+          "promptaction",
+          "router",
+          "animator",
+        ]
+      },
+    ]
+  },
+]
+if (use_mac || use_mingw_win) {
+  common_bin += [
+    {
+      label = "//foundation/distributeddatamgr/preferences/interfaces/inner_api:native_preferences"
+      subsystem_name = "distributeddatamgr"
+      part_name = "preferences"
+    },
+    {
+      label = "//foundation/distributeddatamgr/relational_store/interfaces/inner_api/rdb:native_rdb"
+      subsystem_name = "distributeddatamgr"
+      part_name = "relational_store"
+    },
+    {
+      label = "//third_party/sqlite:sqlite_sdk"
+      subsystem_name = "common"
+      part_name = "common"
+    },
+    {
+      label = "//third_party/openssl:libcrypto_restool"
+      subsystem_name = "security"
+      part_name = "huks"
+    },
+    {
+      label = "//foundation/distributeddatamgr/kv_store/kvstoremock/interfaces/innerkits/distributeddata:distributeddata_inner_mock"
+      subsystem_name = "distributeddatamgr"
+      part_name = "kv_store"
+    },
+    {
+      label = "//foundation/distributeddatamgr/kv_store/kvstoremock/distributeddb:distributeddb_mock"
+      subsystem_name = "distributeddatamgr"
+      part_name = "kv_store"
+    },
+    {
+      label = "//third_party/zlib:shared_libz"
+      subsystem_name = "thirdparty"
+      part_name = "zlib"
+      lib_names = [ "shared_libz" ]
+    },
+  ]
+
+  napi_modules += [
+    {
+      prefix = "data"
+      shard_libs = [
+        {
+          label = "//foundation/distributeddatamgr/preferences/frameworks/js/napi/preferences:preferences"
+          subsystem_name = "distributeddatamgr"
+          part_name = "preferences"
+        },
+        {
+          label = "//foundation/distributeddatamgr/relational_store/frameworks/js/napi/rdb:rdb"
+          subsystem_name = "distributeddatamgr"
+          part_name = "relational_store"
+        },
+        {
+          label = "//foundation/distributeddatamgr/kv_store/kvstoremock/interfaces/jskits/distributeddata:distributeddata"
+          subsystem_name = "distributeddatamgr"
+          part_name = "kv_store"
+        },
+      ]
+    },
+    {
+      prefix = "net"
+      shard_libs = [
+        {
+          label =
+              "//foundation/communication/netstack/frameworks/js/napi/http:http"
+          subsystem_name = "communication"
+          part_name = "netstack"
+        },
+      ]
+    },
+  ]
+}

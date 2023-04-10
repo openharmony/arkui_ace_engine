@@ -13,48 +13,22 @@
 
 import("preview_common.gni")
 
-# js engine common configs
-js_engines = []
-js_pa_support = false
-use_build_in_js_engine = true
-
-ark_engine = {
-  engine_name = "ark"
-  engine_path = "jsi"
-  engine_defines = [ "USE_ARK_ENGINE" ]
-}
-js_engines += [ ark_engine ]
-build_for_preview = true
-
 # windows platform defines and configs
 defines += [
   "WINDOWS_PLATFORM",
   "_USE_MATH_DEFINES",
   "NOGDI",
-  "UNICODE",
   "U_CHARSET_IS_UTF8=1",
   "SK_BUILD_FOR_WIN",
   "SK_BUILD_FONT_MGR_FOR_PREVIEW_WIN",
 ]
 
-cflags_cc = [
-  "-std=c++17",
+cflags_cc += [
   "-DWINVER=0x0601",
   "-Wno-inconsistent-dllimport",
   "-Wno-macro-redefined",
   "-Wno-missing-braces",
-  "-Wno-thread-safety-attributes",
-  "-Wno-thread-safety-analysis",
-  "-Wno-ignored-attributes",
-  "-Wno-unknown-pragmas",
   "-Wno-used-but-marked-unused",
-]
-
-platform_deps = [
-  "//foundation/arkui/ace_engine/adapter/preview/entrance:ace_preview_entrance_windows",
-  "//foundation/arkui/ace_engine/adapter/preview/external:preview_external_source_windows",
-  "//foundation/arkui/ace_engine/adapter/preview/inspector:ace_inspector_windows",
-  "//foundation/arkui/ace_engine/adapter/preview/osal:ace_osal_windows",
 ]
 
 libace_target =
