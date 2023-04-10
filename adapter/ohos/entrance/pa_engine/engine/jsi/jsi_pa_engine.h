@@ -143,7 +143,6 @@ private:
         const shared_ptr<JsValue>& func, std::vector<shared_ptr<JsValue>>& argv, const CallingInfo& callingInfo);
     shared_ptr<JsValue> NativeValueToJsValue(NativeValue* nativeValue);
     shared_ptr<JsValue> WantToJsValue(const OHOS::AAFwk::Want& want);
-    
     void StartService();
     void StartData();
     void StartForm(const OHOS::AAFwk::Want& want);

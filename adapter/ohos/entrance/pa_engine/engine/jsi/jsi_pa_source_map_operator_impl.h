@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #ifndef FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_PA_ENGINE_ENGINE_JSI_JSI_PA_SOURCE_MAP_OPERATOR_H
 #define FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_PA_ENGINE_ENGINE_JSI_JSI_PA_SOURCE_MAP_OPERATOR_H
 
@@ -29,7 +30,7 @@ public:
     std::string TranslateBySourceMap(const std::string& rawStack) override;
 
 private:
-    std::shared_ptr<JsRuntime> runtime_ = nullptr;
+    std::shared_ptr<JsRuntime> runtime_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_PA_ENGINE_ENGINE_JSI_JSI_PA_SOURCE_MAP_OPERATOR_H

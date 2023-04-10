@@ -18,25 +18,24 @@
 #include <dlfcn.h>
 
 #include "form_provider_info.h"
+#include "hisysevent.h"
 #include "js_backend_timer_module.h"
+#include "js_environment.h"
 #include "napi/native_node_api.h"
 #include "napi_common_ability.h"
 #include "napi_common_want.h"
 #include "napi_remote_object.h"
+#include "source_map_operator.h"
 
+#include "adapter/ohos/entrance/pa_engine/engine/jsi/jsi_pa_source_map_operator_impl.h"
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
+#include "base/log/exception_handler.h"
 #include "base/log/log.h"
 #include "base/utils/utils.h"
-#include "base/log/event_report.h"
-#include "base/log/exception_handler.h"
 #include "frameworks/bridge/js_frontend/engine/common/runtime_constants.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_base_utils.h"
-#include "hisysevent.h"
-#include "js_environment.h"
-#include "jsi_pa_source_map_operator_impl.h"
-#include "source_map_operator.h"
 
 extern const char _binary_paMgmt_abc_start[];
 extern const char _binary_paMgmt_abc_end[];
@@ -701,12 +700,11 @@ shared_ptr<JsValue> JsiPaEngine::CallFunc(const shared_ptr<JsValue>& func, const
 
     std::vector<NativeValue*> nativeArgv;
     int32_t length = 0;
-
     for (auto item : argv) {
         auto value = std::static_pointer_cast<ArkJSValue>(item);
-        auto arkJSValue = ArkNativeEngine::ArkValueToNativeValue(static_cast<ArkNativeEngine*>(nativeEngine),
+        auto nativeValue = ArkNativeEngine::ArkValueToNativeValue(static_cast<ArkNativeEngine*>(nativeEngine),
             value->GetValue(arkJSRuntime));
-        nativeArgv.emplace_back(arkJSValue);
+        nativeArgv.emplace_back(nativeValue);
         length++;
     }
 
@@ -760,7 +758,7 @@ shared_ptr<JsValue> JsiPaEngine::CallFuncWithDefaultThis(
 
     auto arkJSThis = std::static_pointer_cast<ArkJSValue>(thisObject);
     if (arkJSThis->IsUndefined(runtime)) {
-        LOGE("JsiPaEngine CallFunc return value is und efined!");
+        LOGE("JsiPaEngine CallFunc return value is undefined!");
         return runtime->NewUndefined();
     }
 
@@ -772,7 +770,6 @@ shared_ptr<JsValue> JsiPaEngine::CallFuncWithDefaultThis(
 
     std::vector<NativeValue*> nativeArgv;
     int32_t length = 0;
-
     for (auto item : argv) {
         auto value = std::static_pointer_cast<ArkJSValue>(item);
         auto nativeVal = ArkNativeEngine::ArkValueToNativeValue(static_cast<ArkNativeEngine*>(nativeEngine),
@@ -834,9 +831,9 @@ shared_ptr<JsValue> JsiPaEngine::CallFunc(
 
     for (auto item : argv) {
         auto value = std::static_pointer_cast<ArkJSValue>(item);
-        auto arkJSValue = ArkNativeEngine::ArkValueToNativeValue(static_cast<ArkNativeEngine*>(nativeEngine),
+        auto nativeValue = ArkNativeEngine::ArkValueToNativeValue(static_cast<ArkNativeEngine*>(nativeEngine),
             value->GetValue(arkJSRuntime));
-        nativeArgv.emplace_back(arkJSValue);
+        nativeArgv.emplace_back(nativeValue);
         length++;
     }
 
@@ -889,12 +886,11 @@ shared_ptr<JsValue> JsiPaEngine::CallAsyncFunc(
 
     std::vector<NativeValue*> nativeArgv;
     int32_t length = 0;
-
     for (auto item : argv) {
         auto value = std::static_pointer_cast<ArkJSValue>(item);
-        auto arkJSValue = ArkNativeEngine::ArkValueToNativeValue(static_cast<ArkNativeEngine*>(nativeEngine),
+        auto nativeValue = ArkNativeEngine::ArkValueToNativeValue(static_cast<ArkNativeEngine*>(nativeEngine),
             value->GetValue(arkJSRuntime));
-        nativeArgv.emplace_back(arkJSValue);
+        nativeArgv.emplace_back(nativeValue);
         length++;
     }
 
