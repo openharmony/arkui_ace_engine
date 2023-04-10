@@ -90,6 +90,7 @@ using ScrollBeginCallback = std::function<ScrollInfo(Dimension, Dimension)>;
 using ScrollFrameBeginCallback = std::function<ScrollFrameResult(Dimension, ScrollState)>;
 using DragEndForRefreshCallback = std::function<void()>;
 using DragCancelRefreshCallback = std::function<void()>;
+using MouseLeftButtonScroll = std::function<bool()>;
 
 class Scrollable : public TouchEventTarget, public RelatedChild {
     DECLARE_ACE_TYPE(Scrollable, TouchEventTarget);
@@ -263,6 +264,19 @@ public:
         return dragCancelCallback_;
     }
 
+    void SetMouseLeftButtonScroll(const MouseLeftButtonScroll& mouseLeftButtonScroll)
+    {
+        mouseLeftButtonScroll_ = mouseLeftButtonScroll;
+    }
+
+    bool NeedMouseLeftButtonScroll() const
+    {
+        if (mouseLeftButtonScroll_) {
+            return mouseLeftButtonScroll_();
+        }
+        return true;
+    }
+
     void SetWatchFixCallback(const WatchFixCallback& watchFixCallback)
     {
         watchFixCallback_ = watchFixCallback;
@@ -368,6 +382,7 @@ private:
     ScrollFrameBeginCallback scrollFrameBeginCallback_;
     DragEndForRefreshCallback dragEndCallback_;
     DragCancelRefreshCallback dragCancelCallback_;
+    MouseLeftButtonScroll mouseLeftButtonScroll_;
     Axis axis_;
     RefPtr<PanRecognizer> panRecognizer_;
 

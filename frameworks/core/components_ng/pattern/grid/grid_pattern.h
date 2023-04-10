@@ -194,6 +194,7 @@ private:
     bool supportAnimation_ = false;
     bool isConfigScrollable_ = false;
     bool isMouseEventInit_ = false;
+    bool mousePressed_ = false;
 
     OffsetF mouseStartOffset_;
     OffsetF mouseEndOffset_;
