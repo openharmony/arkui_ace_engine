@@ -46,6 +46,7 @@ void FindGridRowParent(RefPtr<RenderNode>& nodePtr)
 const std::unordered_map<std::string, std::function<std::string(const GridColComposedElement&)>> CREATE_JSON_MAP {
     { "span", [](const GridColComposedElement& inspector) { return inspector.GetGridColSpan(); } },
     { "offset", [](const GridColComposedElement& inspector) { return inspector.GetGridColOffset(); } },
+    { "gridColOffset", [](const GridColComposedElement& inspector) { return inspector.GetGridColOffset(); } },
     { "order", [](const GridColComposedElement& inspector) { return inspector.GetGridColOffset(); } }
 };
 
@@ -58,6 +59,8 @@ void GridColComposedElement::Dump()
         std::string("span: ").append(GetGridColSpan()));
     DumpLog::GetInstance().AddDesc(
         std::string("offset: ").append(GetGridColOffset()));
+    DumpLog::GetInstance().AddDesc(
+        std::string("gridColOffset: ").append(GetGridColOffset()));
     DumpLog::GetInstance().AddDesc(
         std::string("order: ").append(GetGridColOrder()));
 }
