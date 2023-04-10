@@ -600,7 +600,7 @@ public:
     {
         ViewAbstract::SetOnDragMove(std::move(onDragMove));
     }
-    void SetAllowDrop(std::set<std::string> allowDrop) override
+    void SetAllowDrop(const std::set<std::string> allowDrop) override
     {
         ViewAbstract::SetAllowDrop(allowDrop);
     }
