@@ -2117,12 +2117,9 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
         }
     };
 
-    AnimationOption option;
-    NearZero(keyboardHeight) ? option.SetDuration(keyboardAnimationConfig_.durationOut_)
-                             : option.SetDuration(keyboardAnimationConfig_.durationIn_);
-    auto curve = MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.2f, 1.0f); // animation curve: cubic [0.2, 0.0, 0.2, 1.0]
+    AnimationOption option = AnimationUtil::CreateKeyboardAnimationOption(keyboardAnimationConfig_, keyboardHeight);
     if (rsTransaction) {
-        Animate(option, curve, func);
+        Animate(option, option.GetCurve(), func);
     } else {
         func();
     }
