@@ -183,6 +183,7 @@ template("declarative_js_engine") {
       "jsview/js_if_else.cpp",
       "jsview/js_image.cpp",
       "jsview/js_image_animator.cpp",
+      "jsview/js_image_span.cpp",
       "jsview/js_indexer.cpp",
       "jsview/js_interactable_view.cpp",
       "jsview/js_lazy_foreach.cpp",

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,6 +48,7 @@ public:
     virtual void PushStyle(const TextStyle& style) = 0;
     virtual void PopStyle() = 0;
     virtual void AddText(const std::u16string& text) = 0;
+    virtual int32_t AddPlaceholder(const PlaceholderRun& span) = 0;
     virtual void Build() = 0;
     virtual void Reset() = 0;
 
@@ -63,8 +64,10 @@ public:
     virtual float GetAlphabeticBaseline() = 0;
     virtual int32_t GetHandlePositionForClick(const Offset& offset) = 0;
     virtual void GetRectsForRange(int32_t start, int32_t end, std::vector<Rect>& selectedRects) = 0;
+    virtual void GetRectsForPlaceholders(std::vector<Rect>& selectedRects) = 0;
     virtual bool ComputeOffsetForCaretDownstream(int32_t extent, CaretMetrics& result) = 0;
     virtual bool ComputeOffsetForCaretUpstream(int32_t extent, CaretMetrics& result) = 0;
+    virtual void SetIndents(const std::vector<float>& indents) = 0;
 
     // interfaces for painting
     virtual void Paint(const RSCanvas& canvas, float x, float y) = 0;

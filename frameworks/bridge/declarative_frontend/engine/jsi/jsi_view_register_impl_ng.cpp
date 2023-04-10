@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,6 +40,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_grid_item.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_if_else.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_image.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_image_span.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_lazy_foreach.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_list.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_list_item.h"
@@ -182,6 +183,7 @@ void JsBindViews(BindingTarget globalObj)
     JSGrid::JSBind(globalObj);
     JSGridItem::JSBind(globalObj);
     JSSwiper::JSBind(globalObj);
+    JSImageSpan::JSBind(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework
