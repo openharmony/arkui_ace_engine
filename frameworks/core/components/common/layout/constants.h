@@ -577,7 +577,7 @@ enum class TabBarStyle {
     BOTTOMTABBATSTYLE,
 };
 
-enum class ModifierKey {
+enum class CtrlKey {
     CTRL = 0,
     SHIFT = 1,
     ALT = 2,

@@ -25,8 +25,5 @@ CanvasDrawFunction ListPaintMethod::GetForegroundDrawFunction(PaintWrapper* /* p
     return nullptr;
 }
 
-CanvasDrawFunction ListPaintMethod::GetContentDrawFunction(PaintWrapper* /* paintWrapper */)
-{
-    return nullptr;
-}
+void ListPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper) {}
 } // namespace OHOS::Ace::NG

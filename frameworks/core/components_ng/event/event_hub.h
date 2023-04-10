@@ -228,6 +228,11 @@ public:
         return onDragEnd_;
     }
 
+    bool HasOnDragEnd() const
+    {
+        return static_cast<bool>(onDragEnd_);
+    }
+
     void FireOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
     {
         if (onDrop_) {

@@ -62,7 +62,7 @@ public:
     void AttachProperties();
 
 private:
-    RefPtr<ContentModifier> modifier_;
+    WeakPtr<ContentModifier> modifier_;
     std::vector<std::shared_ptr<RSPropertyBase>> attachedProperties_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ContentModifierAdapter);
@@ -84,7 +84,7 @@ public:
     void AttachProperties();
 
 private:
-    RefPtr<OverlayModifier> modifier_;
+    WeakPtr<OverlayModifier> modifier_;
     std::vector<std::shared_ptr<RSPropertyBase>> attachedProperties_;
 
     ACE_DISALLOW_COPY_AND_MOVE(OverlayModifierAdapter);

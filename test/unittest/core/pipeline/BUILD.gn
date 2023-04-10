@@ -21,6 +21,7 @@ ohos_unittest("pipeline_context_test_ng") {
     # animation
     "$ace_root/frameworks/core/animation/animatable_data.cpp",
     "$ace_root/frameworks/core/animation/animatable_properties.cpp",
+    "$ace_root/frameworks/core/animation/animation_util.cpp",
     "$ace_root/frameworks/core/animation/anticipate_curve.cpp",
     "$ace_root/frameworks/core/animation/cubic_curve.cpp",
     "$ace_root/frameworks/core/animation/curves.cpp",

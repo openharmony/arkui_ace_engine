@@ -167,7 +167,9 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
 
     BorderRadiusProperty radius;
-    radius.SetRadius(Dimension(badgeCircleRadius));
+    auto borderWidth = layoutProperty->GetBadgeBorderWidthValue(badgeTheme->GetBadgeBorderWidth());
+    OffsetF borderOffset(borderWidth.ConvertToPx(), borderWidth.ConvertToPx());
+    radius.SetRadius(Dimension(badgeCircleRadius + borderWidth.ConvertToPx()));
     auto textFrameNode = textWrapper->GetHostNode();
     CHECK_NULL_VOID(textFrameNode);
     auto textRenderContext = textFrameNode->GetRenderContext();
@@ -199,9 +201,6 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             textOffset = OffsetF(offset.GetX(), offset.GetY() + textOffset.GetY());
         }
     }
-
-    auto borderWidth = layoutProperty->GetBadgeBorderWidthValue(badgeTheme->GetBadgeBorderWidth());
-    OffsetF borderOffset(borderWidth.ConvertToPx(), borderWidth.ConvertToPx());
 
     textGeometryNode->SetMarginFrameOffset(textOffset - geometryNode->GetFrameOffset() - borderOffset);
     auto textFrameSize = textGeometryNode->GetFrameSize();

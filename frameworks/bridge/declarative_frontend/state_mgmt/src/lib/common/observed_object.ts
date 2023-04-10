@@ -39,25 +39,27 @@ interface Type<T> extends Function {
 *   obsObj = Observed(ClassA)(params to ClassA constructor)
 *
 * Note this works only for classes, not for ClassA[]
-* Also does not work for classes with genetics it seems
 * In that case use factory function
 *   obsObj = ObservedObject.createNew<ClassA[]>([])
 */
 
-function Observed<C extends Object>(target: Type<C>): any {
-  var original = target;
-  // the new constructor behaviour
-  var f: any = function (...args: any[]) {
-    stateMgmtConsole.debug(`New ${original.name}, gets wrapped inside ObservableObject proxy.`);
-    return ObservedObject.createNew(new original(...args), undefined);
-//    return new ObservedObject<C>(new original(...args), undefined);
-  };
-
-  Object.setPrototypeOf(f, Object.getPrototypeOf(original));
-  // return new constructor (will override original)
-  return f;
-}
-
+const Observed: (obj) => any = function () {
+    return function Observed(target: any): any {
+      const IS_PROXIED = Symbol('___is_proxied___');
+      stateMgmtConsole.debug(`@Observed: define ${target.name} extended`);
+      const Observed = class extends target {
+        constructor(...args) {
+          super(...args);
+          let isProxied = this.IS_PROXIED;
+          Object.defineProperty(this, IS_PROXIED, {value: true});
+          return isProxied
+            ? this 
+            : ObservedObject.createNew(this, null);
+        }
+      };
+      return Observed;
+    }
+}()
 
 class SubscribableHandler {
   static IS_OBSERVED_OBJECT = Symbol("_____is_observed_object__");

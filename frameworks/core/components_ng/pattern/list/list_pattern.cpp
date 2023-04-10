@@ -145,6 +145,28 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     return true;
 }
 
+RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
+{
+    auto listLayoutProperty = GetHost()->GetLayoutProperty<ListLayoutProperty>();
+    V2::ItemDivider itemDivider;
+    auto divider = listLayoutProperty->GetDivider().value_or(itemDivider);
+    auto axis = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
+    auto drawVertical = (axis == Axis::HORIZONTAL);
+    auto paint = MakeRefPtr<ListPaintMethod>(divider, drawVertical, lanes_, spaceWidth_);
+    paint->SetScrollBar(AceType::WeakClaim(AceType::RawPtr(GetScrollBar())));
+    paint->SetTotalItemCount(maxListItemIndex_ + 1);
+    auto scrollEffect = GetScrollEdgeEffect();
+    if (scrollEffect && scrollEffect->IsFadeEffect()) {
+        paint->SetEdgeEffect(scrollEffect);
+    }
+    if (!listContentModifier_) {
+        listContentModifier_ = AceType::MakeRefPtr<ListContentModifier>();
+    }
+    listContentModifier_->SetItemsPosition(itemPosition_);
+    paint->SetContentModifier(listContentModifier_);
+    return paint;
+}
+
 void ListPattern::ProcessEvent(
     bool indexChanged, float finalOffset, bool isJump, float prevStartOffset, float prevEndOffset)
 {
@@ -1000,6 +1022,30 @@ void ListPattern::SetSwiperItem(WeakPtr<ListItemPattern> swiperItem)
         }
         swiperItem_ = std::move(swiperItem);
     }
+}
+
+int32_t ListPattern::GetItemIndexByPosition(float xOffset, float yOffset)
+{
+    auto host = GetHost();
+    auto globalOffset = host->GetTransformRelativeOffset();
+    float relativeX = xOffset - globalOffset.GetX();
+    float relativeY = yOffset - globalOffset.GetY();
+    float mainOffset = GetAxis() == Axis::VERTICAL ? relativeY : relativeX;
+    float crossOffset = GetAxis() == Axis::VERTICAL ? relativeX : relativeY;
+    float crossSize = GetCrossAxisSize(GetContentSize(), GetAxis());
+    int32_t lanesOffset = 0;
+    if (lanes_ > 1) {
+        lanesOffset = static_cast<int32_t>(crossOffset / (crossSize / lanes_));
+    }
+    for (auto & pos : itemPosition_) {
+        if (mainOffset <= pos.second.endPos + spaceWidth_ / 2) { /* 2:half */
+            return std::min(pos.first + lanesOffset, maxListItemIndex_ + 1);
+        }
+    }
+    if (!itemPosition_.empty()) {
+        return itemPosition_.rbegin()->first + 1;
+    }
+    return 0;
 }
 
 void ListPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const

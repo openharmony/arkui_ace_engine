@@ -226,10 +226,13 @@ void CalendarPaintMethod::SetDayTextStyle(
         lunarTextStyle.color_ = day.markLunarDay ? RSColor(markLunarColor_.GetRed(), markLunarColor_.GetGreen(),
             markLunarColor_.GetBlue(), WEEKEND_TRANSPARENT) : nonCurrentMonthLunarColor_;
     } else {
-        dateTextStyle.color_ = IsToday(day) ? focusedDayColor_ : IsOffDay(day) ? weekendDayColor_ : dayColor_;
+        dateTextStyle.color_ = (IsToday(day) && day.focused) ? focusedDayColor_
+                               : IsOffDay(day)               ? weekendDayColor_
+                                                             : dayColor_;
         lunarTextStyle.color_ =
-            IsToday(day) ? focusedLunarColor_
-                         : (day.markLunarDay ? markLunarColor_ : (IsOffDay(day) ? weekendLunarColor_ : lunarColor_));
+            (IsToday(day) && day.focused)
+                ? focusedLunarColor_
+                : (day.markLunarDay ? markLunarColor_ : (IsOffDay(day) ? weekendLunarColor_ : lunarColor_));
     }
 }
 
@@ -393,8 +396,8 @@ void CalendarPaintMethod::SetCalendarTheme(const RefPtr<CalendarPaintProperty>& 
                              : paintProperty->GetDailyFiveRowSpaceValue({}).ConvertToPx();
 
     dailySixRowSpace_ = paintProperty->GetDailySixRowSpaceValue({}).ConvertToPx() <= 0
-                             ? theme->GetCalendarTheme().dailySixRowSpace.ConvertToPx()
-                             : paintProperty->GetDailySixRowSpaceValue({}).ConvertToPx();
+                            ? theme->GetCalendarTheme().dailySixRowSpace.ConvertToPx()
+                            : paintProperty->GetDailySixRowSpaceValue({}).ConvertToPx();
 
     gregorianCalendarHeight_ = paintProperty->GetGregorianCalendarHeightValue({}).ConvertToPx() <= 0
                                    ? theme->GetCalendarTheme().gregorianCalendarHeight.ConvertToPx()

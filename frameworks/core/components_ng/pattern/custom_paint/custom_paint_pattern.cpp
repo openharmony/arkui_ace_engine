@@ -46,8 +46,10 @@ bool CustomPaintPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     auto customPaintEventHub = GetEventHub<CustomPaintEventHub>();
     CHECK_NULL_RETURN(customPaintEventHub, false);
 
-    if (config.frameOffsetChange || config.contentOffsetChange || config.contentSizeChange) {
+    if (config.contentSizeChange || config.frameSizeChange) {
         isCanvasInit_ = false;
+    } else if (config.frameOffsetChange || config.contentOffsetChange) {
+        isCanvasInit_ = true;
     }
 
     if (!isCanvasInit_) {

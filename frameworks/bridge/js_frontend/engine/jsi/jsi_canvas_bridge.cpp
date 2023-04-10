@@ -377,6 +377,13 @@ void JsiCanvasBridge::HandleJsContext(const shared_ptr<JsRuntime>& runtime, Node
 void JsiCanvasBridge::HandleWebglContext(const shared_ptr<JsRuntime>& runtime,
     NodeId id, const std::string& args, CanvasRenderContextBase*& canvasRenderContext)
 {
+#ifdef PREVIEW
+    LOGW("[Engine Log] Unable to use Webgl in the previewer. Perform this operation on the "
+    "emulator or a real device instead.");
+    renderContext_ = runtime->NewUndefined();
+    return;
+#endif
+
     LOGD("JsiCanvasBridge::HandleWebglContext");
     auto engine = static_cast<JsiEngineInstance*>(runtime->GetEmbedderData());
     if (!engine) {

@@ -110,7 +110,7 @@ private:
     void OnFormAcquired(const std::string& param);
     void OnFormUpdate(const std::string& param);
     void OnFormError(const std::string& param);
-    bool ParseAction(const std::string& action, AAFwk::Want& want);
+    bool ParseAction(const std::string& action, const std::string& type, AAFwk::Want& want);
 
     onFormAcquiredCallbackForJava onFormAcquiredCallbackForJava_;
     OnFormUpdateCallbackForJava onFormUpdateCallbackForJava_;
