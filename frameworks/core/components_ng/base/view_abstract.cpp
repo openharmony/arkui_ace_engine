@@ -762,6 +762,8 @@ void ViewAbstract::SetAllowDrop(const std::set<std::string> allowDrop)
     CHECK_NULL_VOID(frameNode);
     if (!allowDrop.empty()) {
         frameNode->SetAllowDrop(allowDrop);
+    } else {
+        return;
     }
 }
 
