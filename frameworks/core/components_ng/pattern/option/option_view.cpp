@@ -122,7 +122,7 @@ RefPtr<FrameNode> OptionView::CreateSelectOption(const std::string& value, const
         CHECK_NULL_RETURN(pipeline, nullptr);
         auto theme = pipeline->GetTheme<SelectTheme>();
         CHECK_NULL_RETURN(theme, nullptr);
-        props->UpdateCalcMaxSize(
+        props->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(theme->GetIconSideLength()), CalcLength(theme->GetIconSideLength())));
         props->UpdateAlignment(Alignment::CENTER_LEFT);
 
