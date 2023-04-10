@@ -29,4 +29,6 @@ CanvasDrawFunction ListPaintMethod::GetContentDrawFunction(PaintWrapper* /* pain
 {
     return nullptr;
 }
+
+void ListPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper) {}
 } // namespace OHOS::Ace::NG
