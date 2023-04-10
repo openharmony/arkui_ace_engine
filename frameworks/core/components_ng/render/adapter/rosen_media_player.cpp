@@ -122,25 +122,38 @@ bool RosenMediaPlayer::SetSource(const std::string& src)
     }
 
     int32_t fd = -1;
+    bool useFd = false;
+    if (!SetMediaSource(videoSrc, fd, useFd)) {
+        LOGE("Video media player set media source failed.");
+        return false;
+    }
 
-    if (SetMediaSource(videoSrc, fd) && fd >= 0) {
-        // get size of file.
+    if (!useFd) {
+        // For example "http://url" or "/relative path".
+        LOGI("Source without fd, just return true.");
+        return true;
+    }
+    if (fd >= 0) {
+        // Get size of file.
         struct stat statBuf {};
         auto statRes = fstat(fd, &statBuf);
         if (statRes != 0) {
-            LOGE("get stat fail");
+            LOGE("Video media player get stat failed.");
             close(fd);
             return false;
         }
         auto size = statBuf.st_size;
         if (mediaPlayer_->SetSource(fd, 0, size) != 0) {
-            LOGE("Player SetSource failed");
+            LOGE("Video media player etSource failed");
             close(fd);
             return false;
         }
         close(fd);
+        return true;
+    } else {
+        LOGE("Video source fd is invalid.");
+        return false;
     }
-    return true;
 }
 
 // Interim programme
@@ -248,22 +261,24 @@ bool RosenMediaPlayer::GetResourceId(const std::string& path, uint32_t& resId)
     return false;
 }
 
-bool RosenMediaPlayer::SetMediaSource(std::string& filePath, int32_t& fd)
+bool RosenMediaPlayer::SetMediaSource(std::string& filePath, int32_t& fd, bool& useFd)
 {
     if (StringUtils::StartWith(filePath, "dataability://") || StringUtils::StartWith(filePath, "datashare://")) {
         // dataability:// or datashare://
         auto pipeline = PipelineBase::GetCurrentContext();
         auto dataProvider = AceType::DynamicCast<DataProviderManagerStandard>(pipeline->GetDataProviderManager());
         fd = dataProvider->GetDataProviderFile(filePath, "r");
+        useFd = true;
     } else if (StringUtils::StartWith(filePath, "file://")) {
         filePath = GetAssetAbsolutePath(filePath.substr(FILE_PREFIX_LENGTH));
         fd = open(filePath.c_str(), O_RDONLY);
+        useFd = true;
     } else if (StringUtils::StartWith(filePath, "resource:///")) {
         // file path: resources/base/media/xxx.xx --> resource:///xxx.xx
-        MediaPlay(filePath);
+        return MediaPlay(filePath);
     } else if (StringUtils::StartWith(filePath, "resource://RAWFILE")) {
         // file path: resource/rawfile/xxx.xx --> resource://rawfile/xxx.xx
-        RawFilePlay(filePath);
+        return RawFilePlay(filePath);
     } else if (StringUtils::StartWith(filePath, "http")) {
         // http or https
         if (mediaPlayer_->SetSource(filePath) != 0) {
@@ -271,11 +286,11 @@ bool RosenMediaPlayer::SetMediaSource(std::string& filePath, int32_t& fd)
             return false;
         }
     } else {
-        // relative path
+        // All of other urls, think of it as relative path.
         if (StringUtils::StartWith(filePath, "/")) {
             filePath = filePath.substr(1);
         }
-        RelativePathPlay(filePath);
+        return RelativePathPlay(filePath);
     }
     return true;
 }
