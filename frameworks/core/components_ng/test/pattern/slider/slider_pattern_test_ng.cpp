@@ -391,7 +391,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTestNg005, TestSize.Level1)
     /**
      * @tc.cases: case3. when TouchType is UP.
      */
-    info.touches_.front().touchType_ = TouchType::UP;
+    info.changedTouches_.front().touchType_ = TouchType::UP;
     sliderPattern->HandleTouchEvent(info);
     EXPECT_EQ(sliderPattern->hotFlag_, false);
     sliderPattern->HandleTouchEvent(info);
