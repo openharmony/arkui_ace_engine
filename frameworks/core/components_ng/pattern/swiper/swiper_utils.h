@@ -119,6 +119,7 @@ public:
         }
     }
 
+private:
     static bool CheckMarginPropertyExceed(
         const RefPtr<SwiperLayoutProperty>& property, float childCalcIdealLength)
     {
