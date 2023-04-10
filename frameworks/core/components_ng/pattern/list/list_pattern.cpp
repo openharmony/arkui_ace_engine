@@ -152,7 +152,7 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
     auto divider = listLayoutProperty->GetDivider().value_or(itemDivider);
     auto axis = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
     auto drawVertical = (axis == Axis::HORIZONTAL);
-    auto paint = MakeRefPtr<ListPaintMethod>(divider, drawVertical, lanes_, spaceWidth_, itemPosition_);
+    auto paint = MakeRefPtr<ListPaintMethod>(divider, drawVertical, lanes_, spaceWidth_);
     paint->SetScrollBar(AceType::WeakClaim(AceType::RawPtr(GetScrollBar())));
     paint->SetTotalItemCount(maxListItemIndex_ + 1);
     auto scrollEffect = GetScrollEdgeEffect();
@@ -162,6 +162,7 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
     if (!listContentModifier_) {
         listContentModifier_ = AceType::MakeRefPtr<ListContentModifier>();
     }
+    listContentModifier_->SetItemsPosition(itemPosition_);
     paint->SetContentModifier(listContentModifier_);
     return paint;
 }

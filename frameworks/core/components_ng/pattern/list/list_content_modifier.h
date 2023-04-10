@@ -19,14 +19,30 @@
 #include "base/memory/ace_type.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/modifier.h"
+#include "core/components_ng/pattern/list/list_layout_algorithm.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
+struct DividerInfo {
+    float constrainStrokeWidth;
+    float crossSize;
+    float startMargin;
+    float endMargin;
+    float space;
+    float mainPadding;
+    float crossPadding;
+    bool isVertical;
+    int32_t lanes;
+    int32_t totalItemCount;
+    Color color;
+};
+
 class ListContentModifier : public ContentModifier {
     DECLARE_ACE_TYPE(ListContentModifier, ContentModifier);
 public:
+    using PositionMap = ListLayoutAlgorithm::PositionMap;
     ListContentModifier();
     ~ListContentModifier() override = default;
     void onDraw(DrawingContext& context) override;
@@ -46,10 +62,39 @@ public:
         clip_->Set(clip);
     }
 
+    void SetDividerInfo(DividerInfo&& dividerInfo)
+    {
+        dividerInfo_ = dividerInfo;
+    }
+
+    void ResetDividerInfo()
+    {
+        if (dividerInfo_.has_value()) {
+            dividerInfo_.reset();
+            FlushDivider();
+        }
+    }
+
+    void SetItemsPosition(const PositionMap& positionMap)
+    {
+        itemPosition_ = positionMap;
+    }
+
+    static void PaintDivider(const DividerInfo& dividerInfo, const PositionMap& itemPosition, RSCanvas& canvas);
+
+    void FlushDivider()
+    {
+        flushDivider_->Set(!flushDivider_->Get());
+    }
+
 private:
     RefPtr<AnimatablePropertyOffsetF> clipOffset_;
     RefPtr<AnimatablePropertySizeF> clipSize_;
     RefPtr<PropertyBool> clip_;
+
+    std::optional<DividerInfo> dividerInfo_;
+    PositionMap itemPosition_;
+    RefPtr<PropertyBool> flushDivider_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ListContentModifier);
 };

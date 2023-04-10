@@ -19,86 +19,6 @@
 #include "core/components_ng/render/divider_painter.h"
 
 namespace OHOS::Ace::NG {
-void ListPaintMethod::PaintDivider(const DividerInfo& dividerInfo, const PositionMap& itemPosition, RSCanvas& canvas)
-{
-    float laneLen = dividerInfo.crossSize / dividerInfo.lanes - dividerInfo.startMargin - dividerInfo.endMargin;
-    float crossLen = dividerInfo.crossSize - dividerInfo.startMargin - dividerInfo.endMargin;
-    DividerPainter dividerPainter(dividerInfo.constrainStrokeWidth, crossLen,
-        dividerInfo.isVertical, dividerInfo.color, LineCap::SQUARE);
-
-    int32_t lanes = dividerInfo.lanes;
-    int32_t laneIdx = 0;
-    bool lastIsItemGroup = false;
-    bool isFirstItem = (itemPosition.begin()->first == 0);
-    std::list<int32_t> lastLineIndex;
-
-    for (const auto& child : itemPosition) {
-        if (!isFirstItem) {
-            float divOffset = (dividerInfo.space + dividerInfo.constrainStrokeWidth) / 2; /* 2 half */
-            float mainPos = child.second.startPos - divOffset + dividerInfo.mainPadding;
-            float crossPos = dividerInfo.startMargin + dividerInfo.crossPadding;
-            if (lanes > 1 && !lastIsItemGroup && !child.second.isGroup) {
-                crossPos += laneIdx * dividerInfo.crossSize / dividerInfo.lanes;
-                dividerPainter.SetDividerLength(laneLen);
-            } else {
-                dividerPainter.SetDividerLength(crossLen);
-            }
-            OffsetF offset = dividerInfo.isVertical ? OffsetF(mainPos, crossPos) : OffsetF(crossPos, mainPos);
-            dividerPainter.DrawLine(canvas, offset);
-        }
-        if (laneIdx == 0 || child.second.isGroup) {
-            lastLineIndex.clear();
-        }
-        lastLineIndex.emplace_back(child.first);
-        lastIsItemGroup = child.second.isGroup;
-        laneIdx = (lanes <= 1 || (laneIdx + 1) >= lanes || child.second.isGroup) ? 0 : laneIdx + 1;
-        isFirstItem = isFirstItem ? laneIdx > 0 : false;
-    }
-    if (!lastLineIndex.empty() && *lastLineIndex.rbegin() < dividerInfo.totalItemCount - 1) {
-        int32_t laneIdx = 0;
-        for (auto index : lastLineIndex) {
-            float divOffset = (dividerInfo.space - dividerInfo.constrainStrokeWidth) / 2; /* 2 half */
-            float mainPos = itemPosition.at(index).endPos + divOffset + dividerInfo.mainPadding;
-            float crossPos = dividerInfo.startMargin + dividerInfo.crossPadding;
-            if (lanes > 1 && !itemPosition.at(index).isGroup) {
-                crossPos += laneIdx * dividerInfo.crossSize / dividerInfo.lanes;
-                dividerPainter.SetDividerLength(laneLen);
-            } else {
-                dividerPainter.SetDividerLength(crossLen);
-            }
-            OffsetF offset = dividerInfo.isVertical ? OffsetF(mainPos, crossPos) : OffsetF(crossPos, mainPos);
-            dividerPainter.DrawLine(canvas, offset);
-            laneIdx++;
-        }
-    }
-}
-
-void ListPaintMethod::PaintDivider(PaintWrapper* paintWrapper, RSCanvas& canvas)
-{
-    const auto& geometryNode = paintWrapper->GetGeometryNode();
-    auto frameSize = geometryNode->GetPaddingSize();
-    OffsetF paddingOffset = geometryNode->GetPaddingOffset() - geometryNode->GetFrameOffset();
-
-    if (!divider_.strokeWidth.IsValid() || totalItemCount_ <= 0) {
-        return;
-    }
-    Axis axis = vertical_ ? Axis::HORIZONTAL : Axis::VERTICAL;
-    DividerInfo dividerInfo = {
-        .constrainStrokeWidth = divider_.strokeWidth.ConvertToPx(),
-        .crossSize = vertical_ ? frameSize.Height() : frameSize.Width(),
-        .startMargin = divider_.startMargin.ConvertToPx(),
-        .endMargin = divider_.endMargin.ConvertToPx(),
-        .space = space_,
-        .mainPadding = paddingOffset.GetMainOffset(axis),
-        .crossPadding = paddingOffset.GetCrossOffset(axis),
-        .isVertical = vertical_,
-        .lanes = lanes_ > 1 ? lanes_ : 1,
-        .totalItemCount = totalItemCount_,
-        .color = divider_.color
-    };
-    PaintDivider(dividerInfo, itemPosition_, canvas);
-}
-
 void ListPaintMethod::PaintScrollBar(RSCanvas& canvas)
 {
     auto scrollBar = scrollBar_.Upgrade();
@@ -128,26 +48,37 @@ CanvasDrawFunction ListPaintMethod::GetForegroundDrawFunction(PaintWrapper* pain
     return paintFunc;
 }
 
-CanvasDrawFunction ListPaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
-{
-    auto paintFunc = [weak = WeakClaim(this), paintWrapper](RSCanvas& canvas) {
-        auto painter = weak.Upgrade();
-        CHECK_NULL_VOID(painter);
-        painter->PaintDivider(paintWrapper, canvas);
-    };
-    return paintFunc;
-}
-
 void ListPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 {
     CHECK_NULL_VOID(listContentModifier_);
     const auto& geometryNode = paintWrapper->GetGeometryNode();
-    auto clipSize = geometryNode->GetPaddingSize();
-    OffsetF clipOffset = geometryNode->GetPaddingOffset() - geometryNode->GetFrameOffset();
+    auto frameSize = geometryNode->GetPaddingSize();
+    OffsetF paddingOffset = geometryNode->GetPaddingOffset() - geometryNode->GetFrameOffset();
     auto renderContext = paintWrapper->GetRenderContext();
     bool clip = !renderContext || renderContext->GetClipEdge().value_or(true);
-    listContentModifier_->SetClipOffset(clipOffset);
-    listContentModifier_->SetClipSize(clipSize);
+    listContentModifier_->SetClipOffset(paddingOffset);
+    listContentModifier_->SetClipSize(frameSize);
     listContentModifier_->SetClip(clip);
+
+    if (!divider_.strokeWidth.IsValid() || totalItemCount_ <= 0) {
+        listContentModifier_->ResetDividerInfo();
+        return;
+    }
+    Axis axis = vertical_ ? Axis::HORIZONTAL : Axis::VERTICAL;
+    DividerInfo dividerInfo = {
+        .constrainStrokeWidth = divider_.strokeWidth.ConvertToPx(),
+        .crossSize = vertical_ ? frameSize.Height() : frameSize.Width(),
+        .startMargin = divider_.startMargin.ConvertToPx(),
+        .endMargin = divider_.endMargin.ConvertToPx(),
+        .space = space_,
+        .mainPadding = paddingOffset.GetMainOffset(axis),
+        .crossPadding = paddingOffset.GetCrossOffset(axis),
+        .isVertical = vertical_,
+        .lanes = lanes_ > 1 ? lanes_ : 1,
+        .totalItemCount = totalItemCount_,
+        .color = divider_.color
+    };
+    listContentModifier_->SetDividerInfo(std::move(dividerInfo));
+    listContentModifier_->FlushDivider();
 }
 } // namespace OHOS::Ace::NG
