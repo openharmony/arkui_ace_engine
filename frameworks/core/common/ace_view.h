@@ -62,7 +62,7 @@ public:
     virtual void RegisterCardViewAccessibilityParamsCallback(CardViewAccessibilityParamsCallback&& callback) = 0;
 
     using ViewChangeCallback = std::function<void(int32_t width, int32_t height,
-        WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction> rsTransaction)>;
+        WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)>;
     virtual void RegisterViewChangeCallback(ViewChangeCallback&& callback) = 0;
 
     using ViewPositionChangeCallback = std::function<void(int32_t posX, int32_t posY)>;

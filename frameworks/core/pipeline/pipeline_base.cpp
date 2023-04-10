@@ -544,13 +544,17 @@ void PipelineBase::RemoveTouchPipeline(const WeakPtr<PipelineBase>& context)
     }
 }
 
-void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea)
+void PipelineBase::OnVirtualKeyboardAreaChange(
+    Rect keyboardArea, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
+    if (windowManager_ && windowManager_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
+        return;
+    }
     double keyboardHeight = keyboardArea.Height();
     if (NotifyVirtualKeyBoard(rootWidth_, rootHeight_, keyboardHeight)) {
         return;
     }
-    OnVirtualKeyboardHeightChange(keyboardHeight);
+    OnVirtualKeyboardHeightChange(keyboardHeight, rsTransaction);
 }
 
 void PipelineBase::SetGetWindowRectImpl(std::function<Rect()>&& callback)

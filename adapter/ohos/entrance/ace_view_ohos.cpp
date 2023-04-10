@@ -68,7 +68,7 @@ void AceViewOhos::SurfaceCreated(AceViewOhos* view, OHOS::sptr<OHOS::Rosen::Wind
 }
 
 void AceViewOhos::SurfaceChanged(AceViewOhos* view, int32_t width, int32_t height, int32_t orientation,
-    WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction> rsTransaction)
+    WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     CHECK_NULL_VOID(view);
 

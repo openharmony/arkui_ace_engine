@@ -377,7 +377,7 @@ void AceContainer::InitializeCallback()
     aceView_->RegisterCardViewAccessibilityParamsCallback(cardViewParamsCallback);
 
     auto&& viewChangeCallback = [weak, id = instanceId_](int32_t width, int32_t height,
-        WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction> rsTransaction) {
+        WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) {
         ContainerScope scope(id);
         auto context = weak.Upgrade();
         if (context == nullptr) {
