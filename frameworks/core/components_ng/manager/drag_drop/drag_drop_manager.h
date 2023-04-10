@@ -76,7 +76,7 @@ public:
     void UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode);
     void RequireSummary();
     void ClearSummary();
-    void SetSummaryMap(std::map<std::string, int64_t> summaryMap)
+    void SetSummaryMap(const std::map<std::string, int64_t> summaryMap)
     {
         summaryMap_ = summaryMap;
     }
