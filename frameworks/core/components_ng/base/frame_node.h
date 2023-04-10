@@ -350,12 +350,12 @@ public:
         return userSet_;
     }
 
-    void SetAllowDrop(std::set<std::string> allowDrop)
+    void SetAllowDrop(const std::set<std::string> allowDrop)
     {
         allowDrop_ = allowDrop;
     }
 
-    std::set<std::string> GetAllowDrop()
+    const std::set<std::string> GetAllowDrop()
     {
         return allowDrop_;
     }
