@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -80,6 +80,17 @@ void TxtParagraph::AddText(const std::u16string& text)
     }
     text_ = text;
     builder_->AddText(text);
+}
+
+int32_t TxtParagraph::AddPlaceholder(const PlaceholderRun& span)
+{
+    if (!builder_) {
+        CreateBuilder();
+    }
+    txt::PlaceholderRun txtSpan;
+    Constants::ConvertPlaceholderRun(span, txtSpan);
+    builder_->AddPlaceholder(txtSpan);
+    return ++placeHolderIndex_;
 }
 
 void TxtParagraph::Build()
@@ -255,6 +266,7 @@ bool TxtParagraph::ComputeOffsetForCaretDownstream(int32_t extent, CaretMetrics&
 
 void TxtParagraph::GetRectsForRange(int32_t start, int32_t end, std::vector<Rect>& selectedRects)
 {
+    CHECK_NULL_VOID(paragraph_);
     const auto& boxes = paragraph_->GetRectsForRange(
         start, end, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
     if (boxes.empty()) {
@@ -264,6 +276,26 @@ void TxtParagraph::GetRectsForRange(int32_t start, int32_t end, std::vector<Rect
         auto selectionRect = Constants::ConvertSkRect(box.rect);
         selectedRects.emplace_back(selectionRect);
     }
+}
+
+void TxtParagraph::GetRectsForPlaceholders(std::vector<Rect>& selectedRects)
+{
+    CHECK_NULL_VOID(paragraph_);
+    const auto& boxes = paragraph_->GetRectsForPlaceholders();
+    if (boxes.empty()) {
+        return;
+    }
+    for (const auto& box : boxes) {
+        auto selectionRect = Constants::ConvertSkRect(box.rect);
+        selectedRects.emplace_back(selectionRect);
+    }
+}
+
+void TxtParagraph::SetIndents(const std::vector<float>& indents)
+{
+    auto* paragraphTxt = static_cast<txt::ParagraphTxt*>(paragraph_.get());
+    CHECK_NULL_VOID(paragraphTxt);
+    paragraphTxt->SetIndents(indents);
 }
 
 } // namespace OHOS::Ace::NG

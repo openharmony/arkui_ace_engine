@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -204,6 +204,19 @@ void JSText::SetMaxLines(const JSCallbackInfo& info)
         ParseJsInt32(info[0], value);
     }
     TextModel::GetInstance()->SetMaxLines(value);
+}
+
+void JSText::SetTextIndent(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    Dimension value;
+    if (!ParseJsDimensionFp(info[0], value)) {
+        return;
+    }
+    TextModel::GetInstance()->SetTextIndent(value);
 }
 
 void JSText::SetFontStyle(int32_t value)
@@ -551,6 +564,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("fontSize", &JSText::SetFontSize, opt);
     JSClass<JSText>::StaticMethod("fontWeight", &JSText::SetFontWeight, opt);
     JSClass<JSText>::StaticMethod("maxLines", &JSText::SetMaxLines, opt);
+    JSClass<JSText>::StaticMethod("textIndent", &JSText::SetTextIndent);
     JSClass<JSText>::StaticMethod("textOverflow", &JSText::SetTextOverflow, opt);
     JSClass<JSText>::StaticMethod("fontStyle", &JSText::SetFontStyle, opt);
     JSClass<JSText>::StaticMethod("align", &JSText::SetAlign, opt);

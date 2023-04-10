@@ -52,6 +52,7 @@ public:
         value->propSyncMode_ = CloneSyncMode();
         value->propCopyOptions_ = CloneCopyOptions();
         value->propImageSizeStyle_ = CloneImageSizeStyle();
+        value->propVerticalAlign_ = CloneVerticalAlign();
         return value;
     }
 
@@ -64,6 +65,7 @@ public:
         ResetSyncMode();
         ResetCopyOptions();
         ResetImageSizeStyle();
+        ResetVerticalAlign();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -73,10 +75,14 @@ public:
             "ImageFit.Auto", "ImageFit.FitHeight", "ImageFit.None", "ImageFit.ScaleDown" };
         static const char* COPYOPTIONSVALUE[] = { "CopyOptions.None", "CopyOptions.InApp", "CopyOptions.Local",
             "CopyOptions.Distributed" };
+        static const char* VERTICALALIGNVALUE[] = { "VerticalAlign.NONE", "VerticalAlign.TOP", "VerticalAlign.CENTER",
+            "VerticalAlign.BOTTOM", "CopyOptions.BASELINE", "VerticalAlign.NONE" };
         json->Put("alt", propAlt_.value_or(ImageSourceInfo("")).GetSrc().c_str());
         json->Put("objectFit", OBJECTFITVALUE[static_cast<int32_t>(propImageFit_.value_or(ImageFit::COVER))]);
         json->Put("syncLoad", propSyncMode_.value_or(false) ? "true" : "false");
         json->Put("copyOption", COPYOPTIONSVALUE[static_cast<int32_t>(propCopyOptions_.value_or(CopyOptions::None))]);
+        json->Put("verticalAlign",
+            VERTICALALIGNVALUE[static_cast<int32_t>(propVerticalAlign_.value_or(VerticalAlign::BOTTOM))]);
         std::string src;
         if (propImageSourceInfo_.has_value()) {
             src = propImageSourceInfo_->GetSrc();
@@ -101,6 +107,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ImageSizeStyle, AutoResize, bool, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ImageSizeStyle, SourceSize, SizeF, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ImageSizeStyle, FitOriginalSize, bool, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(VerticalAlign, VerticalAlign, PROPERTY_UPDATE_MEASURE);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(ImageLayoutProperty);

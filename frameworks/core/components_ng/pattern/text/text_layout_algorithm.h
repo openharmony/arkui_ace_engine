@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,6 +50,8 @@ public:
     std::optional<SizeF> MeasureContent(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
 
+    void Layout(LayoutWrapper* layoutWrapper) override;
+
     const RefPtr<Paragraph>& GetParagraph();
 
     std::list<RefPtr<SpanItem>>&& GetSpanItemChildren();
@@ -57,29 +59,36 @@ public:
     float GetBaselineOffset() const;
 
     std::optional<TextStyle> GetTextStyle() const;
+    void ApplyIndents(const TextStyle& textStyle, double width);
 
 private:
-    bool CreateParagraph(const TextStyle& textStyle, std::string content);
-    bool CreateParagraphAndLayout(
-        const TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint);
+    bool CreateParagraph(const TextStyle& textStyle, std::string content, LayoutWrapper* layoutWrapper);
+    bool CreateParagraphAndLayout(const TextStyle& textStyle, const std::string& content,
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     bool AdaptMinTextSize(TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint,
-        const RefPtr<PipelineContext>& pipeline);
+        const RefPtr<PipelineContext>& pipeline, LayoutWrapper* layoutWrapper);
     bool DidExceedMaxLines(const SizeF& maxSize);
     static TextDirection GetTextDirection(const std::string& content);
     float GetTextWidth() const;
     SizeF GetMaxMeasureSize(const LayoutConstraintF& contentConstraint) const;
     bool BuildParagraph(TextStyle& textStyle, const RefPtr<TextLayoutProperty>& layoutProperty,
-        const LayoutConstraintF& contentConstraint, const RefPtr<PipelineContext>& pipeline);
+        const LayoutConstraintF& contentConstraint, const RefPtr<PipelineContext>& pipeline,
+        LayoutWrapper* layoutWrapper);
     bool BuildParagraphAdaptUseMinFontSize(TextStyle& textStyle, const RefPtr<TextLayoutProperty>& layoutProperty,
-        const LayoutConstraintF& contentConstraint, const RefPtr<PipelineContext>& pipeline);
+        const LayoutConstraintF& contentConstraint, const RefPtr<PipelineContext>& pipeline,
+        LayoutWrapper* layoutWrapper);
     bool BuildParagraphAdaptUseLayoutConstraint(TextStyle& textStyle, const RefPtr<TextLayoutProperty>& layoutProperty,
-        const LayoutConstraintF& contentConstraint, const RefPtr<PipelineContext>& pipeline);
+        const LayoutConstraintF& contentConstraint, const RefPtr<PipelineContext>& pipeline,
+        LayoutWrapper* layoutWrapper);
     std::optional<SizeF> BuildTextRaceParagraph(TextStyle& textStyle, const RefPtr<TextLayoutProperty>& layoutProperty,
-        const LayoutConstraintF& contentConstraint, const RefPtr<PipelineContext>& pipeline);
+        const LayoutConstraintF& contentConstraint, const RefPtr<PipelineContext>& pipeline,
+        LayoutWrapper* layoutWrapper);
     void SetPropertyToModifier(const RefPtr<TextLayoutProperty>& layoutProperty, RefPtr<TextContentModifier> modifier);
     bool AdaptMaxTextSize(TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint,
-        const RefPtr<PipelineContext>& pipeline);
+        const RefPtr<PipelineContext>& pipeline, LayoutWrapper* layoutWrapper);
     void UpdateTextColorIfForeground(const RefPtr<FrameNode>& frameNode, TextStyle& textStyle);
+    void UpdateParagraph(LayoutWrapper* layoutWrapper);
+    OffsetF GetContentOffset(LayoutWrapper* layoutWrapper) const;
 
     std::list<RefPtr<SpanItem>> spanItemChildren_;
     RefPtr<Paragraph> paragraph_;

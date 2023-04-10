@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -88,6 +88,11 @@ void TextModelNG::SetTextOverflow(Ace::TextOverflow value)
 void TextModelNG::SetMaxLines(uint32_t value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, MaxLines, value);
+}
+
+void TextModelNG::SetTextIndent(const Dimension& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextIndent, value);
 }
 
 void TextModelNG::SetLineHeight(const Dimension& value)
