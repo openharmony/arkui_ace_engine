@@ -390,7 +390,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     queryOption.key = udKey;
     int32_t ret = udmfClient.GetSummary(queryOption, summary);
     if (ret != 0) {
-        LOGE("HandleOnDragStart: UDMF GetSummary failed, ret %{public}d", ret);
+        LOGW("HandleOnDragStart: UDMF GetSummary failed, ret %{public}d", ret);
     }
     dragDropManager->SetSummaryMap(summary.summary);
     std::shared_ptr<Media::PixelMap> pixelMap = pixelMap_->GetPixelMapSharedPtr();
