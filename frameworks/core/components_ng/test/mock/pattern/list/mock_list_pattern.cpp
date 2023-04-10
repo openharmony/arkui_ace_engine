@@ -21,6 +21,11 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
     return nullptr;
 }
 
+RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
+{
+    return nullptr;
+}
+
 void ListPattern::OnModifyDone() {}
 
 void ListPattern::OnAttachToFrameNode() {}

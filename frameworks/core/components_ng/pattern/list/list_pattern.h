@@ -19,6 +19,7 @@
 #include "core/animation/chain_animation.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/list/list_accessibility_property.h"
+#include "core/components_ng/pattern/list/list_content_modifier.h"
 #include "core/components_ng/pattern/list/list_event_hub.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
@@ -49,22 +50,7 @@ public:
     ListPattern() = default;
     ~ListPattern() override = default;
 
-    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
-    {
-        auto listLayoutProperty = GetHost()->GetLayoutProperty<ListLayoutProperty>();
-        V2::ItemDivider itemDivider;
-        auto divider = listLayoutProperty->GetDivider().value_or(itemDivider);
-        auto axis = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
-        auto drawVertical = (axis == Axis::HORIZONTAL);
-        auto paint = MakeRefPtr<ListPaintMethod>(divider, drawVertical, lanes_, spaceWidth_, itemPosition_);
-        paint->SetScrollBar(AceType::WeakClaim(AceType::RawPtr(GetScrollBar())));
-        paint->SetTotalItemCount(maxListItemIndex_ + 1);
-        auto scrollEffect = GetScrollEdgeEffect();
-        if (scrollEffect && scrollEffect->IsFadeEffect()) {
-            paint->SetEdgeEffect(scrollEffect);
-        }
-        return paint;
-    }
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
     bool IsAtomicNode() const override
     {
@@ -238,6 +224,8 @@ private:
     void MultiSelectWithoutKeyboard(const RectF& selectedZone);
 
     void DrivenRender(const RefPtr<LayoutWrapper>& layoutWrapper);
+
+    RefPtr<ListContentModifier> listContentModifier_;
 
     RefPtr<Animator> animator_;
     RefPtr<ListPositionController> positionController_;

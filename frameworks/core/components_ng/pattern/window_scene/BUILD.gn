@@ -43,6 +43,7 @@ build_component_ng("window_scene") {
     ]
 
     external_deps = [
+      "common_event_service:cesfwk_innerkits",
       "eventhandler:libeventhandler",
       "input:libmmi-client",
       "ipc:ipc_core",
