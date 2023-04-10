@@ -17,6 +17,7 @@
 
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/flex/flex_layout_property.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
@@ -32,9 +33,17 @@ void SelectLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // Measure child row to get row height and width.
     auto rowWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(rowWrapper);
-    rowWrapper->Measure(childConstraint);
+    auto spinnerSize = MeasureAndGetSize(rowWrapper->GetOrCreateChildByIndex(1), childConstraint);
+    auto rowProps = DynamicCast<FlexLayoutProperty>(rowWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(rowProps);
+    auto space = static_cast<float>(rowProps->GetSpaceValue(Dimension()).ConvertToPx());
+    childConstraint.maxSize.MinusWidth(spinnerSize.Width() + space);
+    auto textSize = MeasureAndGetSize(rowWrapper->GetOrCreateChildByIndex(0), childConstraint);
+
     auto rowGeometry = rowWrapper->GetGeometryNode();
     CHECK_NULL_VOID(rowGeometry);
+    rowGeometry->SetFrameSize(
+        SizeF(textSize.Width() + space + spinnerSize.Width(), std::max(textSize.Height(), spinnerSize.Height())));
     auto rowWidth = rowGeometry->GetMarginFrameSize().Width();
     auto rowHeight = rowGeometry->GetMarginFrameSize().Height();
 
@@ -57,5 +66,15 @@ void SelectLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     } else {
         geometryNode->SetFrameSize(SizeF(selectWidth, selectHeight));
     }
+}
+
+SizeF SelectLayoutAlgorithm::MeasureAndGetSize(
+    const RefPtr<LayoutWrapper>& childLayoutWrapper, const LayoutConstraintF& constraint)
+{
+    CHECK_NULL_RETURN(childLayoutWrapper, SizeF());
+    childLayoutWrapper->Measure(constraint);
+    auto geometry = childLayoutWrapper->GetGeometryNode();
+    CHECK_NULL_RETURN(geometry, SizeF());
+    return geometry->GetMarginFrameSize();
 }
 } // namespace OHOS::Ace::NG
