@@ -37,6 +37,9 @@
 namespace OHOS::UDMF {
 class UnifiedData;
 }
+namespace OHOS::Msdp::DeviceStatus {
+struct DragNotifyMsg;
+}
 #endif
 namespace OHOS::Ace::NG {
 #ifdef ENABLE_DRAG_FRAMEWORK
@@ -103,6 +106,10 @@ struct DragDropInfo {
     std::string extraInfo;
 };
 
+#ifdef ENABLE_DRAG_FRAMEWORK
+using DragNotifyMsg = Msdp::DeviceStatus::DragNotifyMsg;
+using OnDragCallback = std::function<void(const DragNotifyMsg&)>;
+#endif
 class EventHub;
 
 // The gesture event hub is mainly used to handle common gesture events.
@@ -349,6 +356,7 @@ public:
     }
 #ifdef ENABLE_DRAG_FRAMEWORK
     int32_t SetDragData(std::shared_ptr<UDMF::UnifiedData>& unifiedData, std::string& udKey);
+    OnDragCallback GetDragCallback();
 #endif // ENABLE_DRAG_FRAMEWORK
     void InitDragDropEvent();
     void HandleOnDragStart(const GestureEvent& info);

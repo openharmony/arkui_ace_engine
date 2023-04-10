@@ -345,7 +345,7 @@ void DragDropManager::OnDragEnd(float globalX, float globalY, const std::string&
         }
         int x, y, width, height;
         InteractionManager::GetInstance()->GetShadowOffset(x, y, width, height);
-        Rect rect(x, y, width, height);
+        Rect rect(globalX + x, globalY + y, width, height);
         event->SetPreviewRect(rect);
 #endif // ENABLE_DRAG_FRAMEWORK
         eventHub->FireOnDrop(event, extraParams);
@@ -682,7 +682,7 @@ int32_t DragDropManager::GetDragData(const std::string& udKey, std::shared_ptr<U
     queryOption.key = udKey;
     int ret = udmfClient.GetData(queryOption, udData);
     if (ret != 0) {
-        LOGE("OnDragEnd UDMF GetData failed: %{public}d", ret);
+        LOGE("GetDragData UDMF GetData failed: %{public}d", ret);
     }
     unifiedData = std::make_shared<UDMF::UnifiedData>(udData);
     return ret;

@@ -451,8 +451,7 @@ void ImagePattern::EnableDrag()
         if (ctx->GetSourceInfo().IsPixmap()) {
             LOGI("ImagePattern default dragStart image source is pixelmap");
         } else {
-            std::shared_ptr<UDMF::UDMF::UnifiedRecord> record =
-                std::make_shared<UDMF::Image>(ctx->GetSourceInfo().GetSrc());
+            std::shared_ptr<UDMF::UnifiedRecord> record = std::make_shared<UDMF::Image>(ctx->GetSourceInfo().GetSrc());
             auto unifiedData = std::make_shared<UDMF::UnifiedData>();
             unifiedData->AddRecord(record);
             event->SetData(unifiedData);

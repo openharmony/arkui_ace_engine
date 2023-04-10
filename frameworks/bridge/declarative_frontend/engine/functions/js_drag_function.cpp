@@ -117,7 +117,7 @@ public:
         JSClass<JsDragEvent>::CustomMethod("setResult", &JsDragEvent::SetResult);
         JSClass<JsDragEvent>::CustomMethod("getResult", &JsDragEvent::GetResult);
         JSClass<JsDragEvent>::CustomMethod("getPreviewRect", &JsDragEvent::GetPreviewRect);
-        JSClass<JsDragEvent>::CustomMethod("useCustomDropAnimation", &JsDragEvent::UseDropCustomDropAnimation);
+        JSClass<JsDragEvent>::CustomMethod("useCustomDropAnimation", &JsDragEvent::UseCustomDropAnimation);
         JSClass<JsDragEvent>::CustomMethod("setDragInfo", &JsDragEvent::SetDragInfo);
         JSClass<JsDragEvent>::CustomMethod("getDragInfo", &JsDragEvent::GetDragInfo);
         JSClass<JsDragEvent>::CustomMethod("copy", &JsDragEvent::Copy);
@@ -239,7 +239,7 @@ public:
         args.SetReturnValue(previewRect);
     }
 
-    void UseDropCustomDropAnimation(const JSCallbackInfo& args)
+    void UseCustomDropAnimation(const JSCallbackInfo& args)
     {
         if (args[0]->IsBoolean()) {
             dragEvent_->UseCustomAnimation(args[0]->ToBoolean());
@@ -319,10 +319,10 @@ private:
     JSRef<JSObject> CreateRectangle(const Rect& info)
     {
         JSRef<JSObject> rectObj = JSRef<JSObject>::New();
-        rectObj->SetProperty<double>("x", info.Left());
-        rectObj->SetProperty<double>("y", info.Top());
-        rectObj->SetProperty<double>("width", info.Width());
-        rectObj->SetProperty<double>("height", info.Height());
+        rectObj->SetProperty<double>("x", SystemProperties::Px2Vp(info.Left()));
+        rectObj->SetProperty<double>("y", SystemProperties::Px2Vp(info.Top()));
+        rectObj->SetProperty<double>("width", SystemProperties::Px2Vp(info.Width()));
+        rectObj->SetProperty<double>("height", SystemProperties::Px2Vp(info.Height()));
         return rectObj;
     }
 #endif
