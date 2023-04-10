@@ -737,8 +737,8 @@ void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj
                 auto clickCallback = [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc)](
                                          GestureEvent& info) {
                     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                    ACE_SCORING_EVENT("primaryButton.action");
-                    LOGI("Call primary click");
+                    ACE_SCORING_EVENT("secondaryButton.action");
+                    LOGI("Call secondary click");
                     func->Execute(info);
                 };
                 properties.action = AceType::MakeRefPtr<NG::ClickEvent>(clickCallback);
@@ -801,6 +801,12 @@ void ParseCustomPopupParam(
         } else {
             LOGI("Empty popup.");
         }
+    }
+
+    auto maskColorValue = popupObj->GetProperty("maskColor");
+    Color maskColor;
+    if (JSViewAbstract::ParseJsColor(maskColorValue, maskColor)) {
+        popupParam->SetMaskColor(maskColor);
     }
 
     auto maskValue = popupObj->GetProperty("mask");
@@ -949,7 +955,7 @@ void JSViewAbstract::JsOpacity(const JSCallbackInfo& info)
     }
 
     if ((LessNotEqual(opacity, 0.0)) || opacity > 1) {
-        LOGW("set opacity to %{public}f, over range, set to default opacity", opacity);
+        LOGD("set opacity to %{public}f, over range, set to default opacity", opacity);
         opacity = 1.0;
     }
 
@@ -1195,6 +1201,10 @@ void JSViewAbstract::JsWidth(const JSCallbackInfo& info)
 bool JSViewAbstract::JsWidth(const JSRef<JSVal>& jsValue)
 {
     Dimension value;
+    if (jsValue->IsUndefined()) {
+        ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
+        return true;
+    }
     if (!ParseJsDimensionVp(jsValue, value)) {
         return false;
     }
@@ -1220,6 +1230,10 @@ void JSViewAbstract::JsHeight(const JSCallbackInfo& info)
 bool JSViewAbstract::JsHeight(const JSRef<JSVal>& jsValue)
 {
     Dimension value;
+    if (jsValue->IsUndefined()) {
+        ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
+        return true;
+    }
     if (!ParseJsDimensionVp(jsValue, value)) {
         return false;
     }
@@ -1759,10 +1773,6 @@ void JSViewAbstract::JsGeometryTransition(const JSCallbackInfo& info)
     }
     // id
     auto id = info[0]->ToString();
-    if (id.empty()) {
-        LOGE("JsGeometryTransition: id is empty.");
-        return;
-    }
     ViewAbstractModel::GetInstance()->SetGeometryTransition(id);
 }
 
@@ -1864,8 +1874,8 @@ void JSViewAbstract::JsSphericalEffect(const JSCallbackInfo& info)
         LOGE("The arg is not a number");
         return;
     }
-    auto radio = info[0]->ToNumber<float>();
-    ViewAbstractModel::GetInstance()->SetSphericalEffect(std::clamp(radio, 0.0f, 1.0f));
+    auto radio = info[0]->ToNumber<double>();
+    ViewAbstractModel::GetInstance()->SetSphericalEffect(std::clamp(radio, 0.0, 1.0));
 }
 
 void JSViewAbstract::JsPixelStretchEffect(const JSCallbackInfo& info)
@@ -1881,28 +1891,41 @@ void JSViewAbstract::JsPixelStretchEffect(const JSCallbackInfo& info)
     }
     auto jsObject = JSRef<JSObject>::Cast(info[0]);
     Dimension left;
-    if (!ParseJsDimensionVp(jsObject->GetProperty("left"), left)) {
-        return;
-    }
+    ParseJsDimensionVp(jsObject->GetProperty("left"), left);
     Dimension right;
-    if (!ParseJsDimensionVp(jsObject->GetProperty("right"), right)) {
-        return;
-    }
+    ParseJsDimensionVp(jsObject->GetProperty("right"), right);
     Dimension top;
-    if (!ParseJsDimensionVp(jsObject->GetProperty("top"), top)) {
-        return;
-    }
+    ParseJsDimensionVp(jsObject->GetProperty("top"), top);
     Dimension bottom;
-    if (!ParseJsDimensionVp(jsObject->GetProperty("bottom"), bottom)) {
-        return;
-    }
+    ParseJsDimensionVp(jsObject->GetProperty("bottom"), bottom);
+
     PixStretchEffectOption option;
-    if ((left.IsNonNegative() && right.IsNonNegative() && top.IsNonNegative() && bottom.IsNonNegative()) ||
-        (left.IsNonPositive() && right.IsNonPositive() && top.IsNonPositive() && bottom.IsNonPositive())) {
+    bool illegalInput = false;
+    if (left.Unit() == DimensionUnit::PERCENT || right.Unit() == DimensionUnit::PERCENT ||
+        top.Unit() == DimensionUnit::PERCENT || bottom.Unit() == DimensionUnit::PERCENT) {
+        if ((NearEqual(left.Value(), 0.0) || left.Unit() == DimensionUnit::PERCENT) &&
+            (NearEqual(top.Value(), 0.0) || top.Unit() == DimensionUnit::PERCENT) &&
+            (NearEqual(right.Value(), 0.0) || right.Unit() == DimensionUnit::PERCENT) &&
+            (NearEqual(bottom.Value(), 0.0) || bottom.Unit() == DimensionUnit::PERCENT)) {
+            left.SetUnit(DimensionUnit::PERCENT);
+            top.SetUnit(DimensionUnit::PERCENT);
+            right.SetUnit(DimensionUnit::PERCENT);
+            bottom.SetUnit(DimensionUnit::PERCENT);
+        } else {
+            illegalInput = true;
+        }
+    }
+    if ((left.IsNonNegative() && top.IsNonNegative() && right.IsNonNegative() && bottom.IsNonNegative()) ||
+        (left.IsNonPositive() && top.IsNonPositive() && right.IsNonPositive() && bottom.IsNonPositive())) {
         option.left = left;
-        option.right = right;
         option.top = top;
+        option.right = right;
         option.bottom = bottom;
+    } else {
+        illegalInput = true;
+    }
+    if (illegalInput) {
+        option.ResetValue();
     }
     ViewAbstractModel::GetInstance()->SetPixelStretchEffect(option);
 }
@@ -1917,8 +1940,8 @@ void JSViewAbstract::JsLightUpEffect(const JSCallbackInfo& info)
         LOGE("The arg is wrong,it is supposed to be a number!");
         return;
     }
-    auto radio = info[0]->ToNumber<float>();
-    ViewAbstractModel::GetInstance()->SetLightUpEffect(std::clamp(radio, 0.0f, 1.0f));
+    auto radio = info[0]->ToNumber<double>();
+    ViewAbstractModel::GetInstance()->SetLightUpEffect(std::clamp(radio, 0.0, 1.0));
 }
 
 void JSViewAbstract::JsBackgroundImageSize(const JSCallbackInfo& info)
@@ -2748,7 +2771,7 @@ bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, Dimension& re
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     JSRef<JSVal> resId = jsObj->GetProperty("id");
     if (!resId->IsNumber()) {
-        LOGW("resId is not number");
+        LOGD("resId is not number");
         return false;
     }
     auto themeConstants = GetThemeConstants(jsObj);
@@ -3011,7 +3034,7 @@ bool JSViewAbstract::ParseJsFontFamilies(const JSRef<JSVal>& jsValue, std::vecto
 bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::string& result)
 {
     if (!jsValue->IsString() && !jsValue->IsObject()) {
-        LOGE("arg is not String or Object.");
+        LOGD("arg is not String or Object.");
         return false;
     }
 
@@ -3024,13 +3047,13 @@ bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::string& res
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     JSRef<JSVal> type = jsObj->GetProperty("type");
     if (!type->IsNumber()) {
-        LOGW("type is not number");
+        LOGD("type is not number");
         return false;
     }
 
     JSRef<JSVal> resId = jsObj->GetProperty("id");
     if (!resId->IsNumber()) {
-        LOGW("resId is not number");
+        LOGD("resId is not number");
         return false;
     }
 
@@ -3154,7 +3177,7 @@ bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& resu
         LOGE("JSImage::Create ParseJsMedia type is wrong");
         return false;
     }
-    LOGI("input value is not string or number, using PixelMap");
+    LOGD("input value is not string or number, using PixelMap");
     return false;
 }
 
@@ -3539,6 +3562,11 @@ void JSViewAbstract::Pop()
     ViewStackModel::GetInstance()->Pop();
 }
 
+void JSViewAbstract::JsSetDraggable(bool draggable)
+{
+    ViewAbstractModel::GetInstance()->SetDraggable(draggable);
+}
+
 void JSViewAbstract::JsOnDragStart(const JSCallbackInfo& info)
 {
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::FUNCTION };
@@ -3622,6 +3650,24 @@ void JSViewAbstract::JsOnDragEnter(const JSCallbackInfo& info)
     };
 
     ViewAbstractModel::GetInstance()->SetOnDragEnter(std::move(onDragEnter));
+}
+
+void JSViewAbstract::JsOnDragEnd(const JSCallbackInfo& info)
+{
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::FUNCTION };
+    if (!CheckJSCallbackInfo("JsOnDragEnd", info, checkList)) {
+        return;
+    }
+    RefPtr<JsDragFunction> jsOnDragEndFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+
+    auto onDragEnd = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEndFunc)](
+                           const RefPtr<OHOS::Ace::DragEvent>& info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onDragEnd");
+        func->Execute(info);
+    };
+
+    ViewAbstractModel::GetInstance()->SetOnDragEnd(std::move(onDragEnd));
 }
 
 void JSViewAbstract::JsOnDragMove(const JSCallbackInfo& info)
@@ -4177,31 +4223,30 @@ void JSViewAbstract::JsMask(const JSCallbackInfo& info)
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> typeParam = paramObject->GetProperty("type");
-    if (!typeParam->IsNull()) {
-        if (typeParam->IsString() && typeParam->ToString() == "ProgressMask") {
-            auto progressMask = AceType::MakeRefPtr<NG::ProgressMaskProperty>();
-            JSRef<JSVal> jValue = paramObject->GetProperty("value");
-            auto value = jValue->IsNumber() ? jValue->ToNumber<float>() : 0.0f;
-            if (value < 0.0f) {
-                value = 0.0f;
-            }
-            progressMask->SetValue(value);
-            JSRef<JSVal> jTotal = paramObject->GetProperty("total");
-            auto total = jTotal->IsNumber() ? jTotal->ToNumber<float>() : DEFAULT_PROGRESS_TOTAL;
-            if (total < 0.0f) {
-                total = DEFAULT_PROGRESS_TOTAL;
-            }
-            progressMask->SetMaxValue(total);
-            JSRef<JSVal> jColor = paramObject->GetProperty("color");
-            Color colorVal;
-            if (ParseJsColor(jColor, colorVal)) {
-                progressMask->SetColor(colorVal);
-            } else {
-                RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
-                progressMask->SetColor(theme->GetMaskColor());
-            }
-            ViewAbstractModel::GetInstance()->SetProgressMask(progressMask);
+    if (!typeParam->IsNull() && !typeParam->IsUndefined() && typeParam->IsString() &&
+        typeParam->ToString() == "ProgressMask") {
+        auto progressMask = AceType::MakeRefPtr<NG::ProgressMaskProperty>();
+        JSRef<JSVal> jValue = paramObject->GetProperty("value");
+        auto value = jValue->IsNumber() ? jValue->ToNumber<float>() : 0.0f;
+        if (value < 0.0f) {
+            value = 0.0f;
         }
+        progressMask->SetValue(value);
+        JSRef<JSVal> jTotal = paramObject->GetProperty("total");
+        auto total = jTotal->IsNumber() ? jTotal->ToNumber<float>() : DEFAULT_PROGRESS_TOTAL;
+        if (total < 0.0f) {
+            total = DEFAULT_PROGRESS_TOTAL;
+        }
+        progressMask->SetMaxValue(total);
+        JSRef<JSVal> jColor = paramObject->GetProperty("color");
+        Color colorVal;
+        if (ParseJsColor(jColor, colorVal)) {
+            progressMask->SetColor(colorVal);
+        } else {
+            RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
+            progressMask->SetColor(theme->GetMaskColor());
+        }
+        ViewAbstractModel::GetInstance()->SetProgressMask(progressMask);
     } else {
         JSShapeAbstract* maskShape = JSRef<JSObject>::Cast(info[0])->Unwrap<JSShapeAbstract>();
         if (maskShape == nullptr) {
@@ -4359,7 +4404,7 @@ void JSViewAbstract::JsOpacityPassThrough(const JSCallbackInfo& info)
     }
 
     if ((LessNotEqual(opacity, 0.0)) || opacity > 1) {
-        LOGW("set opacity to %{public}f, over range, set to default opacity", opacity);
+        LOGD("set opacity to %{public}f, over range, set to default opacity", opacity);
         opacity = 1.0;
     }
 
@@ -4453,7 +4498,7 @@ void JSViewAbstract::JsBindContentCover(const JSCallbackInfo& info)
     bool isShow = false;
     DoubleBindCallback callback = nullptr;
     if (info[0]->IsBoolean()) {
-        isShow = info[1]->ToBoolean();
+        isShow = info[0]->ToBoolean();
     } else if (info[0]->IsObject()) {
         JSRef<JSObject> callbackObj = JSRef<JSObject>::Cast(info[0]);
         callback = ParseDoubleBindCallback(info, callbackObj);
@@ -4571,11 +4616,13 @@ void JSViewAbstract::JSBind()
     JSClass<JSViewAbstract>::StaticMethod("bindMenu", &JSViewAbstract::JsBindMenu);
     JSClass<JSViewAbstract>::StaticMethod("bindContextMenu", &JSViewAbstract::JsBindContextMenu);
     JSClass<JSViewAbstract>::StaticMethod("bindContentCover", &JSViewAbstract::JsBindContentCover);
+    JSClass<JSViewAbstract>::StaticMethod("draggable", &JSViewAbstract::JsSetDraggable);
     JSClass<JSViewAbstract>::StaticMethod("onDragStart", &JSViewAbstract::JsOnDragStart);
     JSClass<JSViewAbstract>::StaticMethod("onDragEnter", &JSViewAbstract::JsOnDragEnter);
     JSClass<JSViewAbstract>::StaticMethod("onDragMove", &JSViewAbstract::JsOnDragMove);
     JSClass<JSViewAbstract>::StaticMethod("onDragLeave", &JSViewAbstract::JsOnDragLeave);
     JSClass<JSViewAbstract>::StaticMethod("onDrop", &JSViewAbstract::JsOnDrop);
+    JSClass<JSViewAbstract>::StaticMethod("onDragEnd", &JSViewAbstract::JsOnDragEnd);
 
     JSClass<JSViewAbstract>::StaticMethod("linearGradient", &JSViewAbstract::JsLinearGradient);
     JSClass<JSViewAbstract>::StaticMethod("sweepGradient", &JSViewAbstract::JsSweepGradient);
@@ -5183,16 +5230,30 @@ void JSViewAbstract::JsForegroundColor(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsKeyboardShortcut(const JSCallbackInfo& info)
 {
-    if (info.Length() != 2) {
-        LOGE("JsKeyboardShortcut: The arg is wrong, it is supposed to have 2 arguments");
+    // KeyboardShortcut only allows 2 or 3 params.
+    if (info.Length() < 2 || info.Length() > 3) {
+        LOGE("JsKeyboardShortcut: The arg is wrong, it is supposed to have 2 or 3 arguments");
         return;
     }
-    if (!info[0]->IsString() || !info[1]->IsArray()) {
+    if ((!info[0]->IsString() && !info[0]->IsNumber()) || !info[1]->IsArray()) {
         LOGE("JsKeyboardShortcut: The param type is invalid.");
-        ViewAbstractModel::GetInstance()->SetKeyboardShortcut("", std::vector<CtrlKey>());
+        ViewAbstractModel::GetInstance()->SetKeyboardShortcut("", std::vector<CtrlKey>(), nullptr);
         return;
     }
-    std::string value = info[0]->ToString();
+
+    std::string value;
+    if (info[0]->IsString()) {
+        value = info[0]->ToString();
+        if (value.empty() || value.size() > 1) {
+            LOGE("KeyboardShortcut value arg is wrong, return");
+            ViewAbstractModel::GetInstance()->SetKeyboardShortcut("", std::vector<CtrlKey>(), nullptr);
+            return;
+        }
+    } else {
+        FunctionKey functionkey = static_cast<FunctionKey>(info[0]->ToNumber<int32_t>());
+        value = GetFunctionKeyName(functionkey);
+    }
+
     auto keysArray = JSRef<JSArray>::Cast(info[1]);
     size_t size = keysArray->Length();
     std::vector<CtrlKey> keys(size);
@@ -5203,7 +5264,19 @@ void JSViewAbstract::JsKeyboardShortcut(const JSCallbackInfo& info)
             keys.emplace_back(static_cast<CtrlKey>(key->ToNumber<int32_t>()));
         }
     }
-    ViewAbstractModel::GetInstance()->SetKeyboardShortcut(value, keys);
+
+    // KeyboardShortcut allows 3 params, the third param is function callback.
+    if (info.Length() == 3 && info[2]->IsFunction()) {
+        RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[2]));
+        auto onKeyboardShortcutAction = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("onKeyboardShortcutAction");
+            func->ExecuteJS();
+        };
+        ViewAbstractModel::GetInstance()->SetKeyboardShortcut(value, keys, std::move(onKeyboardShortcutAction));
+        return;
+    }
+    ViewAbstractModel::GetInstance()->SetKeyboardShortcut(value, keys, nullptr);
 }
 
 } // namespace OHOS::Ace::Framework

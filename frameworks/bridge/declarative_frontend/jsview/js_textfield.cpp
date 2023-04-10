@@ -270,7 +270,10 @@ void JSTextField::SetPlaceholderFont(const JSCallbackInfo& info)
         font.fontSize = Dimension(-1);
     } else {
         Dimension size;
-        if (!ParseJsDimensionFp(fontSize, size) || size.Unit() == DimensionUnit::PERCENT) {
+        if (fontSize->IsString()) {
+            auto result = StringUtils::StringToDimensionWithThemeValue(fontSize->ToString(), true, Dimension(-1));
+            font.fontSize = result;
+        } else if (!ParseJsDimensionFp(fontSize, size) || size.Unit() == DimensionUnit::PERCENT) {
             font.fontSize = Dimension(-1);
             LOGW("Parse to dimension FP failed.");
         } else {
@@ -364,7 +367,7 @@ void JSTextField::SetCaretStyle(const JSCallbackInfo& info)
     }
     CaretStyle caretStyle;
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    auto caretWidth = paramObject->GetProperty("caretWidth");
+    auto caretWidth = paramObject->GetProperty("width");
 
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -467,6 +470,11 @@ void JSTextField::SetFontSize(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetFontSize(fontSize);
 }
 
+void JSTextField::RequestKeyboardOnFocus(bool needToRequest)
+{
+    TextFieldModel::GetInstance()->RequestKeyboardOnFocus(needToRequest);
+}
+
 void JSTextField::SetFontWeight(const std::string& value)
 {
     TextFieldModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(value));
@@ -540,7 +548,7 @@ void JSTextField::SetInputFilter(const JSCallbackInfo& info)
         LOGI("Parse inputFilter failed");
         return;
     }
-    if (info[1]->IsFunction()) {
+    if (info.Length() > 1 && info[1]->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsClipboardFunction>(JSRef<JSFunc>::Cast(info[1]));
         auto resultId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -655,17 +663,26 @@ void JSTextField::JsWidth(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetWidth(value);
 }
 
+bool CheckIsIllegalString(const std::string& value)
+{
+    if (value.empty()) {
+        return true;
+    }
+    errno = 0;
+    char* pEnd = nullptr;
+    std::strtod(value.c_str(), &pEnd);
+    return (pEnd == value.c_str() || errno == ERANGE);
+}
+
 void JSTextField::JsPadding(const JSCallbackInfo& info)
 {
     if (Container::IsCurrentUseNewPipeline()) {
-        if (info[0]->IsUndefined()) {
-            auto pipeline = PipelineBase::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
-            CHECK_NULL_VOID_NOLOG(theme);
-            auto textFieldPadding = theme->GetPadding();
-            ViewAbstractModel::GetInstance()->SetPaddings(
-                textFieldPadding.Top(), textFieldPadding.Bottom(), textFieldPadding.Left(), textFieldPadding.Right());
+        if (info[0]->IsUndefined() || (info[0]->IsString() && CheckIsIllegalString(info[0]->ToString()))) {
+            return;
+        };
+        Dimension length;
+        ParseJsDimensionVp(info[0], length);
+        if (length.IsNegative()) {
             return;
         }
         JSViewAbstract::JsPadding(info);

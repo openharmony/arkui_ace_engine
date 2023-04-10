@@ -38,6 +38,8 @@ constexpr int32_t SOURCES_VAL = 1;
 constexpr int32_t BEFORE_ROW = 2;
 constexpr int32_t BEFORE_COLUMN = 3;
 constexpr int32_t NAMES_VAL = 4;
+constexpr int32_t P0S_SPACE_LENGTH = 20;
+constexpr int32_t SPACE_LEN = 26;
 
 MappingInfo RevSourceMap::Find(int32_t row, int32_t col)
 {
@@ -62,6 +64,11 @@ MappingInfo RevSourceMap::Find(int32_t row, int32_t col)
             res = mid;
             left = mid + 1;
         }
+    }
+    int32_t sourcesSize = static_cast<int32_t>(sources_.size());
+    if (afterPos_[res].sourcesVal < 0 || afterPos_[res].sourcesVal >= sourcesSize) {
+        LOGE("sourcesVal invalid");
+        return MappingInfo {};
     }
     std::string sources = sources_[afterPos_[res].sourcesVal];
     auto pos = sources.find(WEBPACK);
@@ -255,6 +262,11 @@ void RevSourceMap::MergeInit(const std::string& sourceMap,
         }
     }
 
+    if (curMapData->mappings_.empty()) {
+        LOGE("MergeInit decode sourcemap fail, mapping: %{public}s", sourceMap.c_str());
+        return;
+    }
+
     // transform to vector for mapping easily
     curMapData->mappings_ = HandleMappings(curMapData->mappings_[0]);
 
@@ -381,9 +393,9 @@ bool RevSourceMap::VlqRevCode(const std::string& vStr, std::vector<int32_t>& ans
         if (continuation) {
             shift += VLQ_BASE_SHIFT;
         } else {
-            bool isNegate = result & 1;
+            bool isOdd = result & 1;
             result >>= 1;
-            ans.push_back(isNegate ? -result : result);
+            ans.push_back(isOdd ? -result : result);
             result = 0;
             shift = 0;
         }
@@ -395,4 +407,32 @@ bool RevSourceMap::VlqRevCode(const std::string& vStr, std::vector<int32_t>& ans
     return true;
 };
 
+void RevSourceMap::StageModeSourceMapSplit(const std::string& sourceMap,
+    std::unordered_map<std::string, RefPtr<RevSourceMap>>& sourceMaps)
+{
+    std::size_t leftBracket = 0;
+    std::size_t rightBracket = 0;
+    std::string value;
+    std::string key;
+    while ((leftBracket = sourceMap.find(": {", rightBracket)) != std::string::npos) {
+        rightBracket = sourceMap.find("}", leftBracket);
+        if (rightBracket == std::string::npos) {
+            return;
+        }
+        value = sourceMap.substr(leftBracket, rightBracket);
+        std::size_t  sources = value.find("\"sources\": [");
+        if (sources == std::string::npos) {
+            continue;
+        }
+        std::size_t  names = value.find("],");
+        if (names == std::string::npos) {
+            continue;
+        }
+        // Intercept the sourcemap file path as the key
+        key = value.substr(sources + P0S_SPACE_LENGTH, names - sources - SPACE_LEN);
+        RefPtr<RevSourceMap> curMapData = MakeRefPtr<RevSourceMap>();
+        MergeInit(value, curMapData);
+        sourceMaps.emplace(key, curMapData);
+    }
+}
 } // namespace OHOS::Ace::Framework

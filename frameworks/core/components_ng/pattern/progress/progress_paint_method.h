@@ -33,7 +33,7 @@
 #include "core/components_ng/pattern/progress/progress_modifier.h"
 
 namespace OHOS::Ace::NG {
-constexpr double DEFAULT_BORDER_WIDTH = 1.0;
+constexpr Dimension DEFAULT_BORDER_WIDTH = 1.0_vp;
 
 class ACE_EXPORT ProgressPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(ProgressPaintMethod, NodePaintMethod)
@@ -44,7 +44,6 @@ public:
           progressModifier_(progressModifier)
     {
         progressModifier_->SetProgressType(progressType_);
-        progressModifier_->SetStrokeWidth(strokeWidth_);
     }
     ~ProgressPaintMethod() override = default;
 
@@ -60,17 +59,18 @@ public:
         GetThemeDate();
         auto paintProperty = DynamicCast<ProgressPaintProperty>(paintWrapper->GetPaintProperty());
         CHECK_NULL_VOID(paintProperty);
-        auto offset = paintWrapper->GetContentOffset();
         color_ = paintProperty->GetColor().value_or(color_);
         bgColor_ = paintProperty->GetBackgroundColor().value_or(bgColor_);
         borderColor_ = paintProperty->GetBorderColor().value_or(borderColor_);
         maxValue_ = paintProperty->GetMaxValue().value_or(maxValue_);
         value_ = paintProperty->GetValue().value_or(value_);
         scaleCount_ = paintProperty->GetScaleCount().value_or(scaleCount_);
-
-        progressModifier_->SetBorderWidth(capsuleBorderWidth_);
-        progressModifier_->SetOffset(offset);
+        scaleWidth_ = paintProperty->GetScaleWidth().value_or(Dimension(scaleWidth_)).ConvertToPx();
+        progressModifier_->SetContentOffset(paintWrapper->GetContentOffset());
+        progressModifier_->SetContentSize(paintWrapper->GetContentSize());
+        CalculateStrokeWidth(paintWrapper->GetContentSize());
         progressModifier_->SetStrokeWidth(strokeWidth_);
+        progressModifier_->SetBorderWidth(capsuleBorderWidth_);
         progressModifier_->SetColor(LinearColor(color_));
         progressModifier_->SetBackgroundColor(LinearColor(bgColor_));
         progressModifier_->SetBorderColor(LinearColor(borderColor_));
@@ -82,17 +82,17 @@ public:
     }
 
     void GetThemeDate();
-
+    void CalculateStrokeWidth(const SizeF& contentSize);
 private:
     Color color_ = Color::BLUE;
     Color bgColor_ = Color::GRAY;
     Color borderColor_ = Color::GRAY;
-    float strokeWidth_ = 2.0f;
-    float scaleWidth_ = 10.0f;
-    int32_t scaleCount_ = 100;
+    float strokeWidth_ = 0.0f;
+    float scaleWidth_ = 0.0f;
+    int32_t scaleCount_ = 0;
     float maxValue_ = 100.0f;
     float value_ = 0.0f;
-    Dimension capsuleBorderWidth_ = Dimension(DEFAULT_BORDER_WIDTH,  DimensionUnit::VP);
+    Dimension capsuleBorderWidth_ = DEFAULT_BORDER_WIDTH;
 
     ProgressType progressType_ = ProgressType::LINEAR;
     RefPtr<ProgressModifier> progressModifier_;

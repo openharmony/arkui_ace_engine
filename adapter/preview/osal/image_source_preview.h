@@ -19,18 +19,11 @@
 #include "base/image/image_source.h"
 
 namespace OHOS::Ace {
-RefPtr<ImageSource> ImageSource::Create(int32_t fd)
-{
-    return nullptr;
-}
 class ImageSourcePreview : public ImageSource {
     DECLARE_ACE_TYPE(ImageSourcePreview, ImageSource)
 
 public:
-    std::string GetProperty(const std::string& /* key */) override
-    {
-        return "";
-    }
+    std::string GetProperty(const std::string& key) override;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_ADAPTER_PREVIEW_OSAL_IMAGE_SOURCE_PREVIEW_H

@@ -125,10 +125,17 @@ private:
     void JumpTo(const RefPtr<FrameNode>& preFrameNode, const RefPtr<FrameNode>& curFrameNode,
         const RefPtr<FrameNode>& nextFrameNode, const RefPtr<FrameNode>& swiperFrameNode);
     void FlushFocus(ObtainedMonth& obtainedMonth);
+    void JumpTo(ObtainedMonth& obtainedMonth);
 
     RefPtr<CalendarControllerNg> calendarControllerNg_;
     CalendarDay calendarDay_;
+    
+    // Used to mark the jump action destination.
+    // eg. 2023-1-1
     int32_t goToCalendarDay_;
+    int32_t goToCalendarMonth_;
+    int32_t goToCalendarYear_;
+    
     ObtainedMonth currentMonth_;
     ObtainedMonth preMonth_;
     ObtainedMonth nextMonth_;

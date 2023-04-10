@@ -20,6 +20,7 @@
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_accessibility_property.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_event_hub.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_layout_algorithm.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_modifier.h"
@@ -72,19 +73,17 @@ public:
         return paintMethod;
     }
 
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        return MakeRefPtr<CheckBoxGroupAccessibilityProperty>();
+    }
+
     bool OnDirtyLayoutWrapperSwap(
         const RefPtr<LayoutWrapper>& dirty, bool /*skipMeasure*/, bool /*skipLayout*/) override
     {
         auto geometryNode = dirty->GetGeometryNode();
         offset_ = geometryNode->GetContentOffset();
         size_ = geometryNode->GetContentSize();
-        if (isFirstAddhotZoneRect_) {
-            AddHotZoneRect();
-            isFirstAddhotZoneRect_ = false;
-        } else {
-            RemoveLastHotZoneRect();
-            AddHotZoneRect();
-        }
         return true;
     }
 
@@ -181,7 +180,6 @@ private:
     SizeF size_;
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
-    bool isFirstAddhotZoneRect_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(CheckBoxGroupPattern);
 };

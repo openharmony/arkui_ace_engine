@@ -38,7 +38,8 @@ namespace {
 constexpr float HALF = 0.5;
 constexpr Dimension ARROW_WIDTH = 32.0_vp;
 constexpr Dimension ARROW_HEIGHT = 8.0_vp;
-constexpr float MAX_STEPS = 100.0f;
+constexpr float SLIDER_MIN = .0f;
+constexpr float SLIDER_MAX = 100.0f;
 } // namespace
 
 void SliderPattern::OnModifyDone()
@@ -62,7 +63,7 @@ void SliderPattern::OnModifyDone()
     float min = sliderPaintProperty->GetMin().value_or(0.0f);
     float max = sliderPaintProperty->GetMax().value_or(100.0f);
     float step = sliderPaintProperty->GetStep().value_or(1.0f);
-    CancelExceptionValue(min, max);
+    CancelExceptionValue(min, max, step);
     valueRatio_ = (value_ - min) / (max - min);
     stepRatio_ = step / (max - min);
     UpdateBlock();
@@ -75,16 +76,23 @@ void SliderPattern::OnModifyDone()
     InitOnKeyEvent(focusHub);
 }
 
-void SliderPattern::CancelExceptionValue(float& min, float& max)
+void SliderPattern::CancelExceptionValue(float& min, float& max, float& step)
 {
     auto sliderPaintProperty = GetPaintProperty<SliderPaintProperty>();
     CHECK_NULL_VOID(sliderPaintProperty);
-    if (NearEqual(min, max)) {
-        max = min + MAX_STEPS;
+    if (GreatOrEqual(min, max)) {
+        min = SLIDER_MIN;
+        max = SLIDER_MAX;
+        sliderPaintProperty->UpdateMin(min);
         sliderPaintProperty->UpdateMax(max);
+    }
+    if (LessOrEqual(step, 0.0) || step > max - min) {
+        step = 1;
+        sliderPaintProperty->UpdateStep(step);
     }
     if (value_ < min || value_ > max) {
         value_ = std::clamp(value_, min, max);
+        sliderPaintProperty->UpdateValue(value_);
         FireChangeEvent(SliderChangeMode::End);
     }
 }
@@ -117,8 +125,8 @@ bool SliderPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     CHECK_NULL_RETURN(pipeline, false);
     auto theme = pipeline->GetTheme<SliderTheme>();
     CHECK_NULL_RETURN(theme, false);
-    Dimension hotBlockShadowWidth = sliderLayoutProperty->GetSliderMode().value_or(SliderModel::SliderMode::OUTSET) ==
-                                            SliderModel::SliderMode::OUTSET
+    auto sliderMode = sliderLayoutProperty->GetSliderMode().value_or(SliderModel::SliderMode::OUTSET);
+    Dimension hotBlockShadowWidth = sliderMode == SliderModel::SliderMode::OUTSET
                                         ? theme->GetOutsetHotBlockShadowWidth()
                                         : theme->GetInsetHotBlockShadowWidth();
 
@@ -126,12 +134,16 @@ bool SliderPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     auto blockLength = direction == Axis::HORIZONTAL ? blockSize_.Width() : blockSize_.Height();
 
     hotBlockShadowWidth_ = static_cast<float>(hotBlockShadowWidth.ConvertToPx());
-    borderBlank_ = std::max(trackThickness_, blockLength + hotBlockShadowWidth_ / HALF);
+    if (sliderMode == SliderModel::SliderMode::OUTSET) {
+        borderBlank_ = std::max(trackThickness_, blockLength + hotBlockShadowWidth_ / HALF);
+    } else {
+        borderBlank_ = trackThickness_ + hotBlockShadowWidth_ / HALF;
+    }
+    // slider track length
     sliderLength_ = length >= borderBlank_ ? length - borderBlank_ : 1;
     borderBlank_ = (length - sliderLength_) * HALF;
-
     auto children = dirty->GetAllChildrenWithBuild();
-    if (children.size() != 0) {
+    if (!children.empty()) {
         CHECK_NULL_RETURN(imageFrameNode_, true);
         auto child = children.front();
         auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
@@ -172,12 +184,14 @@ void SliderPattern::HandleTouchEvent(const TouchEventInfo& info)
         }
         mousePressedFlag_ = true;
         FireChangeEvent(SliderChangeMode::Begin);
+        OpenTranslateAnimation();
     } else if (touchType == TouchType::UP) {
         hotFlag_ = false;
         if (bubbleFlag_) {
             bubbleFlag_ = false;
         }
         mousePressedFlag_ = false;
+        CloseTranslateAnimation();
     }
     UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -364,6 +378,7 @@ void SliderPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         CHECK_NULL_VOID_NOLOG(pattern);
         pattern->HandlingGestureEvent(info);
         pattern->FireChangeEvent(SliderChangeMode::Moving);
+        pattern->CloseTranslateAnimation();
     };
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& /*info*/) {
         auto pattern = weak.Upgrade();
@@ -422,7 +437,9 @@ void SliderPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 void SliderPattern::GetOutsetInnerFocusPaintRect(RoundRect& paintRect)
 {
     UpdateCircleCenterOffset();
-    auto contentOffset = GetHost()->GetGeometryNode()->GetContent()->GetRect().GetOffset();
+    const auto& content = GetHost()->GetGeometryNode()->GetContent();
+    CHECK_NULL_VOID(content);
+    auto contentOffset = content->GetRect().GetOffset();
     auto theme = PipelineBase::GetCurrentContext()->GetTheme<SliderTheme>();
     auto appTheme = PipelineBase::GetCurrentContext()->GetTheme<AppTheme>();
     auto paintWidth = appTheme->GetFocusWidthVp();
@@ -466,8 +483,10 @@ void SliderPattern::GetInsetInnerFocusPaintRect(RoundRect& paintRect)
     auto frameSize = GetHostFrameSize();
     CHECK_NULL_VOID(frameSize);
     auto theme = PipelineBase::GetCurrentContext()->GetTheme<SliderTheme>();
+    CHECK_NULL_VOID(theme);
     auto focusSideDistance = theme->GetFocusSideDistance();
     auto appTheme = PipelineBase::GetCurrentContext()->GetTheme<AppTheme>();
+    CHECK_NULL_VOID(appTheme);
     auto paintWidth = appTheme->GetFocusWidthVp();
     auto focusDistance = paintWidth * HALF + focusSideDistance;
     float offsetX = 0;
@@ -783,5 +802,24 @@ void SliderPattern::UpdateBlock()
             imageFrameNode_ = nullptr;
         }
     }
+}
+
+void SliderPattern::LayoutImageNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+}
+
+void SliderPattern::OpenTranslateAnimation()
+{
+    CHECK_NULL_VOID(sliderContentModifier_);
+    sliderContentModifier_->SetAnimated();
+}
+
+void SliderPattern::CloseTranslateAnimation()
+{
+    CHECK_NULL_VOID(sliderContentModifier_);
+    sliderContentModifier_->SetNotAnimated();
 }
 } // namespace OHOS::Ace::NG

@@ -146,17 +146,9 @@ template("declarative_js_engine_ark") {
     # add for cross_platfrom_build temporarily, shall be removed after external_deps is supported
     if (is_cross_platform_build) {
       configs += [ "$ark_ets_path:ark_jsruntime_public_config" ]
-      if (use_ios) {
-        deps += [ "$ark_ets_path:libark_jsruntime_static" ]
-      } else {
-        deps += [ "$ark_ets_path:libark_jsruntime" ]
-      }
+      deps += [ "$ark_ets_path:libark_jsruntime_static" ]
     } else {
-      if (!use_ios) {
-        external_deps += [ "ets_runtime:libark_jsruntime" ]
-      } else {
-        external_deps += [ "ets_runtime:libark_jsruntime_static" ]
-      }
+      external_deps += [ "ets_runtime:libark_jsruntime" ]
     }
 
     deps = []

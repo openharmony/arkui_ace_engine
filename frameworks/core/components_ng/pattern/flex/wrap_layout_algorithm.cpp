@@ -43,6 +43,7 @@ void WrapLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF());
         return;
     }
+    outOfLayoutChildren_.clear();
     auto flexProp = AceType::DynamicCast<FlexLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(flexProp);
     direction_ = flexProp->GetWrapDirection().value_or(WrapDirection::HORIZONTAL);
@@ -82,6 +83,10 @@ void WrapLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             continue;
         }
         item->Measure(childLayoutConstraint);
+        if (item->IsOutOfLayout()) {
+            outOfLayoutChildren_.emplace_back(item);
+            continue;
+        }
         // can place current child at current row
         if (mainLengthLimit_ >= currentMainLength + GetItemMainAxisLength(item->GetGeometryNode())) {
             currentMainLength += GetItemMainAxisLength(item->GetGeometryNode());
@@ -516,8 +521,15 @@ void WrapLayoutAlgorithm::LayoutContent(const ContentInfo& content, const Offset
     OffsetF contentStartPosition(position.GetX(), position.GetY());
     OffsetF spaceBetweenItemsOnMainAxis;
     CalcItemMainAxisStartAndSpaceBetween(contentStartPosition, spaceBetweenItemsOnMainAxis, content);
+
+    FlexItemProperties flexItemProperties;
+    GetFlexItemProperties(content, flexItemProperties);
+    float remainSpace = mainLengthLimit_ - currentMainLength_;
     for (const auto& itemWrapper : content.itemList) {
         auto item = itemWrapper->GetGeometryNode();
+        if (GreatNotEqual(remainSpace, 0.0f)) {
+            CalcFlexGrowLayout(itemWrapper, flexItemProperties, remainSpace);
+        }
         // calc start position and between space
         auto itemMainAxisOffset = isHorizontal_ ? contentStartPosition.GetX() : contentStartPosition.GetY();
         if (isReverse_) {
@@ -539,6 +551,59 @@ void WrapLayoutAlgorithm::LayoutContent(const ContentInfo& content, const Offset
         }
         itemWrapper->GetGeometryNode()->SetMarginFrameOffset(offset);
         LOGD("Node %{public}s offset %{public}s", itemWrapper->GetHostTag().c_str(), offset.ToString().c_str());
+    }
+}
+
+void WrapLayoutAlgorithm::GetFlexItemProperties(const ContentInfo& content, FlexItemProperties& flexItemProperties)
+{
+    auto spacing = static_cast<float>(spacing_.ConvertToPx());
+    currentMainLength_ = 0.0f;
+    for (const auto& itemWrapper : content.itemList) {
+        if (!itemWrapper) {
+            continue;
+        }
+        currentMainLength_ += GetItemMainAxisLength(itemWrapper->GetGeometryNode()) + spacing;
+        auto layoutProperty = itemWrapper->GetLayoutProperty();
+        if (!layoutProperty) {
+            continue;
+        }
+        const auto& flexItemProperty = layoutProperty->GetFlexItemProperty();
+        if (!flexItemProperty) {
+            continue;
+        }
+        auto flexGrow = flexItemProperty->GetFlexGrow().value_or(0.0f);
+        if (GreatNotEqual(flexGrow, 0.0f)) {
+            flexItemProperties.totalGrow += flexGrow;
+        }
+    }
+}
+
+void WrapLayoutAlgorithm::CalcFlexGrowLayout(
+    const RefPtr<LayoutWrapper>& itemWrapper, const FlexItemProperties& flexItemProperties, float remainSpace)
+{
+    CHECK_NULL_VOID(itemWrapper);
+    auto layoutProperty = itemWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto& flexItemProperty = layoutProperty->GetFlexItemProperty();
+    CHECK_NULL_VOID(flexItemProperty);
+    auto layoutConstraint = layoutProperty->GetLayoutConstraint();
+    if (!layoutConstraint.has_value()) {
+        return;
+    }
+
+    auto layoutConstraintValue = layoutConstraint.value();
+    float itemFlex = flexItemProperty->GetFlexGrow().value_or(0.0f);
+    if (GreatNotEqual(itemFlex, 0.0f) && GreatNotEqual(remainSpace, 0.0f) &&
+        GreatNotEqual(flexItemProperties.totalGrow, 0.0f)) {
+        float flexSize = itemFlex * remainSpace / flexItemProperties.totalGrow;
+        flexSize += GetItemMainAxisLength(itemWrapper->GetGeometryNode());
+        OptionalSizeF& selfIdealSize = layoutConstraintValue.selfIdealSize;
+        if (direction_ == WrapDirection::HORIZONTAL || direction_ == WrapDirection::HORIZONTAL_REVERSE) {
+            selfIdealSize.SetWidth(flexSize);
+        } else {
+            selfIdealSize.SetHeight(flexSize);
+        }
+        itemWrapper->Measure(layoutConstraintValue);
     }
 }
 

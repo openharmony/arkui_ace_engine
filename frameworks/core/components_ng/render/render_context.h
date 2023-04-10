@@ -107,10 +107,12 @@ public:
     virtual void BlendBorderColor(const Color& color) {}
 
     // Paint focus state by component's setting. It will paint along the paintRect
-    virtual void PaintFocusState(const RoundRect& paintRect, const Color& paintColor, const Dimension& paintWidth) {}
+    virtual void PaintFocusState(const RoundRect& paintRect, const Color& paintColor, const Dimension& paintWidth,
+        bool isAccessibilityFocus = false)
+    {}
     // Paint focus state by component's setting. It will paint along the frameRect(padding: focusPaddingVp)
     virtual void PaintFocusState(const RoundRect& paintRect, const Dimension& focusPaddingVp, const Color& paintColor,
-        const Dimension& paintWidth)
+        const Dimension& paintWidth, bool isAccessibilityFocus = false)
     {}
     // Paint focus state by default. It will paint along the component rect(padding: focusPaddingVp)
     virtual void PaintFocusState(const Dimension& focusPaddingVp, const Color& paintColor, const Dimension& paintWidth)
@@ -157,6 +159,7 @@ public:
 
     virtual void SetSharedTranslate(float xTranslate, float yTranslate) {}
     virtual void ResetSharedTranslate() {}
+    virtual void ResetPageTransitionEffect() {}
 
     virtual void AddChild(const RefPtr<RenderContext>& renderContext, int index) {}
     virtual void SetBounds(float positionX, float positionY, float width, float height) {}
@@ -168,7 +171,7 @@ public:
     virtual void OpacityAnimation(const AnimationOption& option, double begin, double end) {}
     virtual void ScaleAnimation(const AnimationOption& option, double begin, double end) {}
 
-    virtual void OnTransformTranslateUpdate(const Vector3F& value) {}
+    virtual void OnTransformTranslateUpdate(const TranslateOptions& value) {}
     virtual void OnTransformScaleUpdate(const VectorF& value) {}
     virtual void OnTransformCenterUpdate(const DimensionOffset& value) {}
     virtual void OnOffsetUpdate(const OffsetT<Dimension>& value) {}
@@ -231,6 +234,10 @@ public:
 
     virtual void PaintAccessibilityFocus() {};
 
+    virtual void ClearAccessibilityFocus() {};
+
+    virtual void OnAccessibilityFocusUpdate(bool isAccessibilityFocus) {};
+
     virtual void OnMouseSelectUpdate(bool isSelected, const Color& fillColor, const Color& strokeColor) {}
     virtual void UpdateMouseSelectWithRect(const RectF& rect, const Color& fillColor, const Color& strokeColor) {}
 
@@ -238,12 +245,16 @@ public:
     virtual void OnZIndexUpdate(int32_t value) {}
 
     virtual void OnBackgroundColorUpdate(const Color& value) {}
-    virtual void OnSphericalEffectUpdate(float radio) {}
+    virtual void OnSphericalEffectUpdate(double radio) {}
     virtual void OnPixelStretchEffectUpdate(const PixStretchEffectOption& option) {}
-    virtual void OnLightUpEffectUpdate(float radio) {}
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(SphericalEffect, float);
+    virtual void OnLightUpEffectUpdate(double radio) {}
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(SphericalEffect, double);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PixelStretchEffect, PixStretchEffectOption);
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(LightUpEffect, float);
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(LightUpEffect, double);
+    virtual RefPtr<PixelMap> GetThumbnailPixelMap()
+    {
+        return nullptr;
+    }
     // transform matrix
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TransformMatrix, Matrix4);
 
@@ -251,7 +262,7 @@ public:
     ACE_DEFINE_PROPERTY_GROUP(Transform, TransformProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Transform, TransformScale, VectorF);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Transform, TransformCenter, DimensionOffset);
-    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Transform, TransformTranslate, Vector3F);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Transform, TransformTranslate, TranslateOptions);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Transform, TransformRotate, Vector4F);
 
     // Background
@@ -292,6 +303,7 @@ public:
     // BorderRadius.
     ACE_DEFINE_PROPERTY_GROUP(Border, BorderProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, BorderRadius, BorderRadiusProperty);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, BorderWidth, BorderWidthProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, BorderColor, BorderColorProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, BorderStyle, BorderStyleProperty);
 
@@ -356,6 +368,7 @@ protected:
     virtual void OnHasBorderImageRepeatUpdate(bool tag) {}
     virtual void OnBorderImageGradientUpdate(const Gradient& gradient) {}
 
+    virtual void OnBorderWidthUpdate(const BorderWidthProperty& value) {}
     virtual void OnBorderRadiusUpdate(const BorderRadiusProperty& value) {}
     virtual void OnBorderColorUpdate(const BorderColorProperty& value) {}
     virtual void OnBorderStyleUpdate(const BorderStyleProperty& value) {}
@@ -389,7 +402,6 @@ protected:
 
     virtual void OnOverlayTextUpdate(const OverlayOptions& overlay) {}
     virtual void OnMotionPathUpdate(const MotionPathOption& motionPath) {}
-    virtual void OnAccessibilityFocusUpdate(bool isAccessibilityFocus) {}
 
 private:
     std::function<void()> requestFrame_;

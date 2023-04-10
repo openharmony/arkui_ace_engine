@@ -49,12 +49,6 @@ void ImageModelNG::Create(const std::string& src, bool noPixMap, RefPtr<PixelMap
         V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
     stack->Push(frameNode);
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, createSourceInfoFunc());
-    // register image frame node to pipeline context to receive memory level notification and window state change
-    // notification
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->AddNodesToNotifyMemoryLevel(nodeId);
-    pipeline->AddWindowStateChangedCallback(nodeId);
 }
 
 void ImageModelNG::SetAlt(const std::string& src)
@@ -71,9 +65,9 @@ void ImageModelNG::SetBackBorder()
 
 void ImageModelNG::SetBlur(double blur) {}
 
-void ImageModelNG::SetImageFit(int32_t value)
+void ImageModelNG::SetImageFit(ImageFit value)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageFit, static_cast<ImageFit>(value));
+    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageFit, value);
 }
 
 void ImageModelNG::SetMatchTextDirection(bool value)
@@ -166,13 +160,15 @@ void ImageModelNG::SetDraggable(bool draggable)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetDraggable(draggable);
-
-    if (draggable) {
+    if (draggable && !pattern->IsDraggable()) {
         auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
         gestureHub->InitDragDropEvent();
     }
+    pattern->SetDraggable(draggable);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetDraggable(draggable);
 }
 
 void ImageModelNG::SetOnDragStart(OnDragStartFunc&& onDragStart)

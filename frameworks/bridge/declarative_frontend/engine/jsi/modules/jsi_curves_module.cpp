@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -109,6 +109,26 @@ bool CreateSpringCurve(const shared_ptr<JsRuntime>& runtime, const shared_ptr<Js
     }
 }
 
+bool CreateInterpolatingSpring(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc, RefPtr<Curve>& curve)
+{
+    if (argc != 4) {
+        LOGE("interpolating Spring: the number of parameters is illegal");
+        return false;
+    }
+    float velocity = static_cast<float>(argv[0]->ToDouble(runtime));
+    float mass = static_cast<float>(argv[1]->ToDouble(runtime));
+    float stiffness = static_cast<float>(argv[2]->ToDouble(runtime));
+    float damping = static_cast<float>(argv[3]->ToDouble(runtime));
+    if (mass >= 0 && stiffness >= 0 && damping >= 0) {
+        curve = AceType::MakeRefPtr<InterpolatingSpring>(velocity, mass, stiffness, damping);
+        return true;
+    } else {
+        LOGE("interpolating Spring: the value of the parameters are illegal");
+        return false;
+    }
+}
+
 bool CreateCubicCurve(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc, RefPtr<Curve>& curve)
 {
@@ -199,6 +219,8 @@ shared_ptr<JsValue> ParseCurves(const shared_ptr<JsRuntime>& runtime, const shar
     bool curveCreated;
     if (curveString == CURVES_SPRING || curveString == SPRING_CURVE) {
         curveCreated = CreateSpringCurve(runtime, thisObj, argv, argc, curve);
+    } else if (curveString == INTERPOLATING_SPRING) {
+        curveCreated = CreateInterpolatingSpring(runtime, thisObj, argv, argc, curve);
     } else if (curveString == CURVES_CUBIC_BEZIER || curveString == CUBIC_BEZIER_CURVE) {
         curveCreated = CreateCubicCurve(runtime, thisObj, argv, argc, curve);
     } else if (curveString == CURVES_STEPS || curveString == STEPS_CURVE) {
@@ -258,6 +280,13 @@ shared_ptr<JsValue> SpringCurve(const shared_ptr<JsRuntime>& runtime, const shar
     return ParseCurves(runtime, thisObj, argv, argc, curveString);
 }
 
+shared_ptr<JsValue> InterpolatingSpringCurve(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    std::string curveString(INTERPOLATING_SPRING);
+    return ParseCurves(runtime, thisObj, argv, argc, curveString);
+}
+
 shared_ptr<JsValue> CurvesSteps(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
@@ -294,6 +323,7 @@ void InitCurvesModule(const shared_ptr<JsRuntime>& runtime, shared_ptr<JsValue>&
     moduleObj->SetProperty(runtime, CUBIC_BEZIER_CURVE, runtime->NewFunction(BezierCurve));
     moduleObj->SetProperty(runtime, CURVES_SPRING, runtime->NewFunction(CurvesSpring));
     moduleObj->SetProperty(runtime, SPRING_CURVE, runtime->NewFunction(SpringCurve));
+    moduleObj->SetProperty(runtime, INTERPOLATING_SPRING, runtime->NewFunction(InterpolatingSpringCurve));
     moduleObj->SetProperty(runtime, CURVES_STEPS, runtime->NewFunction(CurvesSteps));
     moduleObj->SetProperty(runtime, STEPS_CURVE, runtime->NewFunction(StepsCurve));
     moduleObj->SetProperty(runtime, SPRING_MOTION, runtime->NewFunction(SpringMotionCurve));

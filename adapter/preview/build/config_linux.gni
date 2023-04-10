@@ -13,40 +13,11 @@
 
 import("preview_common.gni")
 
-# js engine common configs
-js_engines = []
-js_pa_support = false
-use_build_in_js_engine = true
-
-ark_engine = {
-  engine_name = "ark"
-  engine_path = "jsi"
-  engine_defines = [ "USE_ARK_ENGINE" ]
-}
-js_engines += [ ark_engine ]
-build_for_preview = true
-
 # linux platform defines and configs
 defines += [
   "LINUX_PLATFORM",
-  "UNICODE",
   "GPU_DISABLED",
   "SK_BUILD_FONT_MGR_FOR_PREVIEW_LINUX",
-]
-
-cflags_cc = [
-  "-std=c++17",
-  "-Wno-thread-safety-attributes",
-  "-Wno-thread-safety-analysis",
-  "-Wno-ignored-attributes",
-  "-Wno-unknown-pragmas",
-]
-
-platform_deps = [
-  "//foundation/arkui/ace_engine/adapter/preview/entrance:ace_preview_entrance_linux",
-  "//foundation/arkui/ace_engine/adapter/preview/external:preview_external_source_linux",
-  "//foundation/arkui/ace_engine/adapter/preview/inspector:ace_inspector_linux",
-  "//foundation/arkui/ace_engine/adapter/preview/osal:ace_osal_linux",
 ]
 
 libace_target =

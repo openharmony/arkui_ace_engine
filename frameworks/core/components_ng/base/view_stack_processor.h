@@ -78,6 +78,15 @@
         cast##target->Reset##name();                                            \
     } while (false)
 
+#define ACE_RESET_RENDER_CONTEXT(target, name)                                  \
+    do {                                                                        \
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode(); \
+        CHECK_NULL_VOID(frameNode);                                             \
+        auto cast##target = frameNode->GetRenderContext();                      \
+        CHECK_NULL_VOID(cast##target);                                          \
+        cast##target->Reset##name();                                            \
+    } while (false)
+
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ViewStackProcessor final {
 public:

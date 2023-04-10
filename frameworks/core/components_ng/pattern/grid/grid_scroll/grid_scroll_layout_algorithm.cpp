@@ -251,9 +251,8 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
         gridLayoutInfo_.gridMatrix_.clear();
         gridLayoutInfo_.endIndex_ = -1;
         gridLayoutInfo_.endMainLineIndex_ = 0;
-        gridLayoutInfo_.reachEnd_ = false;
-        gridLayoutInfo_.reachStart_ = false;
-        gridLayoutInfo_.offsetEnd_ = false;
+        gridLayoutInfo_.ResetPositionFlags();
+
         int32_t currentItemIndex = gridLayoutInfo_.startIndex_;
         auto firstItem = GetStartingItem(layoutWrapper, currentItemIndex);
         gridLayoutInfo_.startIndex_ = firstItem;
@@ -269,6 +268,13 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
         }
         gridLayoutInfo_.startMainLineIndex_ = currentMainLineIndex_;
         gridLayoutInfo_.UpdateStartIndexByStartLine();
+        // FillNewLineBackward sometimes make startIndex_ > currentItemIndex
+        while (gridLayoutInfo_.startIndex_ > currentItemIndex &&
+               gridLayoutInfo_.gridMatrix_.find(gridLayoutInfo_.startMainLineIndex_) !=
+                   gridLayoutInfo_.gridMatrix_.end()) {
+            gridLayoutInfo_.startMainLineIndex_--;
+            gridLayoutInfo_.UpdateStartIndexByStartLine();
+        }
         LOGI("data reload end, startIndex_:%{public}d, startMainLineIndex_:%{public}d", gridLayoutInfo_.startIndex_,
             gridLayoutInfo_.startMainLineIndex_);
     }
@@ -374,7 +380,7 @@ void GridScrollLayoutAlgorithm::FillBlankAtEnd(
         nextMain == gridLayoutInfo_.gridMatrix_.end()) {
         auto currentIndex = gridLayoutInfo_.endIndex_ + 1;
         float secondLineHeight = -1.0f;
-        for (uint32_t i = mainIter->second.rbegin()->first; i < crossCount_; i++) {
+        for (uint32_t i = (mainIter->second.empty() ? 0 : mainIter->second.rbegin()->first); i < crossCount_; i++) {
             // Step1. Get wrapper of [GridItem]
             auto itemWrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex);
             if (!itemWrapper) {
@@ -446,7 +452,7 @@ void GridScrollLayoutAlgorithm::GetTargetIndexInfoWithBenchMark(
             auto gridSpan = layoutProperty->GetCrossSpan(gridLayoutInfo_.axis_);
             if (crossGridReserve >= gridSpan) {
                 crossGridReserve -= gridSpan;
-            } else if (gridLayoutInfo_.crossCount_ >= static_cast<uint32_t>(gridSpan)) {
+            } else if (gridLayoutInfo_.crossCount_ >= gridSpan) {
                 ++mainStartIndex;
                 headOfMainStartLine = currentIndex;
                 crossGridReserve = gridLayoutInfo_.crossCount_ - gridSpan;
@@ -958,6 +964,9 @@ int32_t GridScrollLayoutAlgorithm::MeasureChild(const SizeF& frameSize, int32_t 
     int32_t itemColStart = childLayoutProperty->GetColumnStart().value_or(-1);
     int32_t itemRowSpan = std::max(childLayoutProperty->GetRowEnd().value_or(-1) - itemRowStart + 1, 1);
     int32_t itemColSpan = std::max(childLayoutProperty->GetColumnEnd().value_or(-1) - itemColStart + 1, 1);
+    if (itemRowSpan > 1 || itemColSpan > 1) {
+        gridLayoutInfo_.hasBigItem_ = true;
+    }
     auto mainStart = axis_ == Axis::VERTICAL ? itemRowStart : itemColStart;
     auto crossStart = axis_ == Axis::VERTICAL ? itemColStart : itemRowStart;
     auto mainSpan = axis_ == Axis::VERTICAL ? itemRowSpan : itemColSpan;
@@ -1005,6 +1014,9 @@ int32_t GridScrollLayoutAlgorithm::MeasureChildPlaced(const SizeF& frameSize, in
     int32_t itemColStart = childLayoutProperty->GetColumnStart().value_or(-1);
     int32_t itemRowSpan = std::max(childLayoutProperty->GetRowEnd().value_or(-1) - itemRowStart + 1, 1);
     int32_t itemColSpan = std::max(childLayoutProperty->GetColumnEnd().value_or(-1) - itemColStart + 1, 1);
+    if (itemRowSpan > 1 || itemColSpan > 1) {
+        gridLayoutInfo_.hasBigItem_ = true;
+    }
     auto crossSpan = axis_ == Axis::VERTICAL ? itemColSpan : itemRowSpan;
     if (static_cast<uint32_t>(crossStart + crossSpan) > crossCount_) {
         LOGE("cross not enough");
@@ -1081,21 +1093,36 @@ int32_t GridScrollLayoutAlgorithm::GetStartingItem(LayoutWrapper* layoutWrapper,
     currentIndex =
         currentIndex < layoutWrapper->GetTotalChildCount() ? currentIndex : layoutWrapper->GetTotalChildCount() - 1;
     auto index = currentIndex;
-    while (index > 0) {
-        // Step1. Get wrapper of [GridItem]
-        auto childLayoutWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
-        if (!childLayoutWrapper) {
-            LOGE("GridItem wrapper of index %{public}u null", index);
-            break;
+    if (gridLayoutInfo_.hasBigItem_) {
+        while (index > 0) {
+            auto childLayoutWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+            if (!childLayoutWrapper) {
+                LOGE("GridItem wrapper of index %{public}u null", index);
+                break;
+            }
+            auto childLayoutProperty = DynamicCast<GridItemLayoutProperty>(childLayoutWrapper->GetLayoutProperty());
+            CHECK_NULL_RETURN(childLayoutProperty, 0);
+            auto crossIndex = childLayoutProperty->GetCustomCrossIndex(axis_);
+            if (crossIndex == 0) {
+                firstIndex = index;
+                break;
+            }
+            --index;
         }
-        auto childLayoutProperty = DynamicCast<GridItemLayoutProperty>(childLayoutWrapper->GetLayoutProperty());
-        CHECK_NULL_RETURN(childLayoutProperty, 0);
-        auto crossIndex = childLayoutProperty->GetCustomCrossIndex(axis_);
-        if (crossIndex == 0) {
-            firstIndex = index;
-            break;
+    } else {
+        while (index > 0) {
+            // need to obtain the item node in order and by step one
+            auto childLayoutWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+            if (!childLayoutWrapper) {
+                LOGE("GridItem wrapper of index %{public}u null", index);
+                break;
+            }
+            if (index % gridLayoutInfo_.crossCount_ == 0) {
+                firstIndex = index;
+                break;
+            }
+            --index;
         }
-        --index;
     }
     return firstIndex;
 }

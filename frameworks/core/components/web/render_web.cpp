@@ -50,13 +50,25 @@ const LinearEnumMapNode<OHOS::NWeb::CursorType, MouseFormat> g_cursorTypeMap[] =
     { OHOS::NWeb::CursorType::CT_NORTHWESTSOUTHEASTRESIZE, MouseFormat::NORTH_WEST_SOUTH_EAST },
     { OHOS::NWeb::CursorType::CT_COLUMNRESIZE, MouseFormat::RESIZE_LEFT_RIGHT },
     { OHOS::NWeb::CursorType::CT_ROWRESIZE, MouseFormat::RESIZE_UP_DOWN },
+    { OHOS::NWeb::CursorType::CT_MIDDLEPANNING, MouseFormat::MIDDLE_BTN_NORTH_SOUTH_WEST_EAST },
+    { OHOS::NWeb::CursorType::CT_EASTPANNING, MouseFormat::MIDDLE_BTN_EAST },
+    { OHOS::NWeb::CursorType::CT_NORTHPANNING, MouseFormat::MIDDLE_BTN_NORTH },
+    { OHOS::NWeb::CursorType::CT_NORTHEASTPANNING, MouseFormat::MIDDLE_BTN_NORTH_EAST },
+    { OHOS::NWeb::CursorType::CT_NORTHWESTPANNING, MouseFormat::MIDDLE_BTN_NORTH_WEST },
+    { OHOS::NWeb::CursorType::CT_SOUTHPANNING, MouseFormat::MIDDLE_BTN_SOUTH },
+    { OHOS::NWeb::CursorType::CT_SOUTHEASTPANNING, MouseFormat::MIDDLE_BTN_SOUTH_EAST },
+    { OHOS::NWeb::CursorType::CT_SOUTHWESTPANNING, MouseFormat::MIDDLE_BTN_SOUTH_WEST },
+    { OHOS::NWeb::CursorType::CT_WESTPANNING, MouseFormat::MIDDLE_BTN_WEST },
     { OHOS::NWeb::CursorType::CT_MOVE, MouseFormat::CURSOR_MOVE },
     { OHOS::NWeb::CursorType::CT_NODROP, MouseFormat::CURSOR_FORBID },
     { OHOS::NWeb::CursorType::CT_COPY, MouseFormat::CURSOR_COPY },
     { OHOS::NWeb::CursorType::CT_NOTALLOWED, MouseFormat::CURSOR_FORBID },
     { OHOS::NWeb::CursorType::CT_ZOOMIN, MouseFormat::ZOOM_IN },
     { OHOS::NWeb::CursorType::CT_ZOOMOUT, MouseFormat::ZOOM_OUT },
+    { OHOS::NWeb::CursorType::CT_GRAB, MouseFormat::HAND_OPEN },
     { OHOS::NWeb::CursorType::CT_GRABBING, MouseFormat::HAND_GRABBING },
+    { OHOS::NWeb::CursorType::CT_MIDDLE_PANNING_VERTICAL, MouseFormat::MIDDLE_BTN_NORTH_SOUTH },
+    { OHOS::NWeb::CursorType::CT_MIDDLE_PANNING_HORIZONTAL, MouseFormat::MIDDLE_BTN_NORTH_SOUTH_WEST_EAST },
 };
 } // namespace
 
@@ -487,7 +499,7 @@ void RenderWeb::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
             touchPoint.y -= GetGlobalOffset().GetY() + offsetFix_;
         }
         touchOffset = Offset(touchPoint.x, touchPoint.y);
-        delegate_->HandleTouchDown(touchPoint.id, touchPoint.x, touchPoint.y);
+        delegate_->HandleTouchDown(touchPoint.id, touchPoint.x, touchPoint.y, fromOverlay);
     }
     // clear the recording position, for not move content when virtual keyboard popup when web get focused.
     auto context = GetContext().Upgrade();
@@ -512,7 +524,7 @@ void RenderWeb::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
             touchPoint.x -= GetGlobalOffset().GetX();
             touchPoint.y -= GetGlobalOffset().GetY() + offsetFix_;
         }
-        delegate_->HandleTouchUp(touchPoint.id, touchPoint.x, touchPoint.y);
+        delegate_->HandleTouchUp(touchPoint.id, touchPoint.x, touchPoint.y, fromOverlay);
     }
     if (web_ && !touchInfos.empty()) {
         web_->RequestFocus();
@@ -539,7 +551,7 @@ void RenderWeb::HandleTouchMove(const TouchEventInfo& info, bool fromOverlay)
             touchPoint.x -= GetGlobalOffset().GetX();
             touchPoint.y -= GetGlobalOffset().GetY() + offsetFix_;
         }
-        delegate_->HandleTouchMove(touchPoint.id, touchPoint.x, touchPoint.y);
+        delegate_->HandleTouchMove(touchPoint.id, touchPoint.x, touchPoint.y, fromOverlay);
     }
 }
 

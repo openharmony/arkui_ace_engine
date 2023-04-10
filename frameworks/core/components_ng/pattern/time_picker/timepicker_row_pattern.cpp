@@ -109,7 +109,7 @@ void TimePickerRowPattern::OnModifyDone()
     if (HasTitleNode()) {
         auto textTitleNode = FrameNode::GetOrCreateFrameNode(
             V2::TEXT_ETS_TAG, GetTitleId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
-        auto str = PickerDate::Current();
+        auto str = GetDialogTitleDate();
         CHECK_NULL_VOID(textTitleNode);
         auto textLayoutProperty = textTitleNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);

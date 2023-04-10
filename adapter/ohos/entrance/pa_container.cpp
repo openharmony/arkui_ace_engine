@@ -94,7 +94,6 @@ void PaContainer::CreateContainer(int32_t instanceId, BackendType type, void* pa
     auto back = aceContainer->GetBackend();
     CHECK_NULL_VOID_NOLOG(back);
     back->UpdateState(Backend::State::ON_CREATE);
-    back->SetJsMessageDispatcher(aceContainer);
 }
 
 bool PaContainer::RunPa(int32_t instanceId, const std::string& content, const OHOS::AAFwk::Want& want)
@@ -511,16 +510,5 @@ std::shared_ptr<AppExecFwk::PacMap> PaContainer::Call(int32_t instanceId, const 
     CHECK_NULL_RETURN_NOLOG(back, ret);
     ret = back->Call(uri, method, arg, pacMap);
     return ret;
-}
-
-void PaContainer::DumpHeapSnapshot(bool isPrivate)
-{
-    taskExecutor_->PostTask(
-        [isPrivate, backend = WeakPtr<Backend>(backend_)] {
-            auto sp = backend.Upgrade();
-            CHECK_NULL_VOID_NOLOG(sp);
-            sp->DumpHeapSnapshot(isPrivate);
-        },
-        TaskExecutor::TaskType::JS);
 }
 } // namespace OHOS::Ace::Platform

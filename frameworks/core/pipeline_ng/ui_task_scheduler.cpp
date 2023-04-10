@@ -15,6 +15,7 @@
 
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
+#include "base/log/frame_report.h"
 #include "base/memory/referenced.h"
 #include "base/thread/background_task_executor.h"
 #include "base/thread/cancelable_callback.h"
@@ -56,6 +57,9 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
 {
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACE();
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().BeginFlushRender();
+    }
     auto dirtyLayoutNodes = std::move(dirtyLayoutNodes_);
     std::vector<RefPtr<FrameNode>> orderedNodes;
     bool hasNormalNode = false;
@@ -83,7 +87,8 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
     // Priority task creation
     uint64_t time = 0;
     for (auto& node : orderedNodes) {
-        if (!node) {
+        // need to check the node is destroying or not before CreateLayoutTask
+        if (!node || node->IsInDestroying()) {
             continue;
         }
         time = GetSysTimestamp();
@@ -106,6 +111,9 @@ void UITaskScheduler::FlushRenderTask(bool forceUseMainThread)
 {
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACE();
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().BeginFlushRender();
+    }
     auto dirtyRenderNodes = std::move(dirtyRenderNodes_);
     // Priority task creation
     uint64_t time = 0;
@@ -181,6 +189,9 @@ void UITaskScheduler::FlushTask()
     if (NeedAdditionalLayout()) {
         FlushLayoutTask();
     }
+    if (!afterLayoutTasks_.empty()) {
+        FlushAfterLayoutTask();
+    }
     ElementRegister::GetInstance()->ClearPendingRemoveNodes();
     FlushRenderTask();
 }
@@ -212,6 +223,21 @@ bool UITaskScheduler::isEmpty()
         return true;
     }
     return false;
+}
+
+void UITaskScheduler::AddAfterLayoutTask(std::function<void()>&& task)
+{
+    afterLayoutTasks_.emplace_back(std::move(task));
+}
+
+void UITaskScheduler::FlushAfterLayoutTask()
+{
+    decltype(afterLayoutTasks_) tasks(std::move(afterLayoutTasks_));
+    for (const auto& task : tasks) {
+        if (task) {
+            task();
+        }
+    }
 }
 
 } // namespace OHOS::Ace::NG

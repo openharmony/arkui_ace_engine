@@ -586,7 +586,6 @@ void CheckBoxGroupPattern::UpdateModifierParam(CheckBoxGroupModifier::Parameters
             paintParameters.checkMarkPaintSize = paintProperty->GetCheckBoxGroupCheckMarkSizeValue().ConvertToPx();
         } else {
             paintParameters.checkMarkPaintSize = contentSize.Width();
-            paintProperty->UpdateCheckBoxGroupCheckMarkSize(Dimension(contentSize.Width()));
         }
     }
     if (paintProperty->HasCheckBoxGroupCheckMarkWidth()) {

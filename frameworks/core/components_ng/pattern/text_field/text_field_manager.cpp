@@ -19,6 +19,20 @@
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 
 namespace OHOS::Ace::NG {
+const RefPtr<KeyEventHandler>& TextFieldManagerNG::GetKeyEventHandler()
+{
+    if (!keyEventHandler_) {
+        keyEventHandler_ = AceType::MakeRefPtr<KeyEventHandler>();
+    }
+    return keyEventHandler_;
+}
+
+void TextFieldManagerNG::ClearOnFocusTextField()
+{
+    onFocusTextField_ = nullptr;
+    CHECK_NULL_VOID(keyEventHandler_);
+    keyEventHandler_->ClearClient();
+}
 
 bool TextFieldManagerNG::OnBackPressed()
 {

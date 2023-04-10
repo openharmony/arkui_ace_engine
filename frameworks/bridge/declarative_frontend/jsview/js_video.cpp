@@ -19,6 +19,9 @@
 #include "bridge/declarative_frontend/jsview/js_video_controller.h"
 #include "bridge/declarative_frontend/jsview/models/video_model_impl.h"
 #include "core/components_ng/pattern/video/video_model_ng.h"
+#ifdef SUPPORT_JSSTACK
+#include "xpower_event_jsvm.h"
+#endif
 
 namespace OHOS::Ace {
 
@@ -74,7 +77,7 @@ void JSVideo::Create(const JSCallbackInfo& info)
 
     // Parse the rate, if it is invalid, set it as 1.0.
     double currentProgressRate = 1.0;
-    if (ParseJsDouble(currentProgressRateValue, currentProgressRate)) {
+    if (!ParseJsDouble(currentProgressRateValue, currentProgressRate)) {
         LOGW("Video parse currentProgressRate failed.");
     }
     VideoModel::GetInstance()->SetProgressRate(currentProgressRate);
@@ -101,6 +104,9 @@ void JSVideo::JsMuted(const JSCallbackInfo& info)
     bool muted = false;
     if (info[0]->IsBoolean()) {
         muted = info[0]->ToBoolean();
+#ifdef SUPPORT_JSSTACK
+        HiviewDFX::ReportXPowerJsStackSysEvent(info.GetVm(), "VOLUME_CHANGE", "SRC=Video");
+#endif
     }
     VideoModel::GetInstance()->SetMuted(muted);
 }
@@ -110,6 +116,9 @@ void JSVideo::JsAutoPlay(const JSCallbackInfo& info)
     bool autoPlay = false;
     if (info[0]->IsBoolean()) {
         autoPlay = info[0]->ToBoolean();
+#ifdef SUPPORT_JSSTACK
+        HiviewDFX::ReportXPowerJsStackSysEvent(info.GetVm(), "STREAM_CHANGE", "SRC=Video");
+#endif
     }
     VideoModel::GetInstance()->SetAutoPlay(autoPlay);
 }
@@ -150,6 +159,10 @@ void JSVideo::JsObjectFit(const JSCallbackInfo& info)
 
 void JSVideo::JsOnStart(const JSCallbackInfo& args)
 {
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 argument.");
+        return;
+    }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
     auto onStart = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);

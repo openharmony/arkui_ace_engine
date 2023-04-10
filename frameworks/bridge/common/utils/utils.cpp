@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,6 +30,7 @@ const size_t STEPS_PARAMS_SIZE = 2;
 const size_t CUBIC_PARAMS_SIZE = 4;
 const size_t SPRING_PARAMS_SIZE = 4;
 constexpr size_t RESPONSIVE_SPRING_MOTION_PARAMS_SIZE = 3;
+constexpr size_t INTERPOLATING_SPRING_PARAMS_SIZE = 4;
 
 static const std::unordered_set<std::string> HORIZON_SET = {
     DOM_BACKGROUND_IMAGE_POSITION_LEFT,
@@ -97,6 +98,19 @@ RefPtr<Curve> SpringCurveCreator(const std::vector<std::string>& params)
     double stiffness = StringToDouble(params.at(2));
     double damping = StringToDouble(params.at(3));
     return AceType::MakeRefPtr<SpringCurve>(velocity, mass, stiffness, damping);
+}
+
+RefPtr<Curve> InterpolatingSpringCreator(const std::vector<std::string>& params)
+{
+    if (params.size() != INTERPOLATING_SPRING_PARAMS_SIZE) {
+        LOGE("interpolating spring accept 4 parameters");
+        return nullptr;
+    }
+    double velocity = StringToDouble(params.at(0));
+    double mass = StringToDouble(params.at(1));
+    double stiffness = StringToDouble(params.at(2));
+    double damping = StringToDouble(params.at(3));
+    return AceType::MakeRefPtr<InterpolatingSpring>(velocity, mass, stiffness, damping);
 }
 
 RefPtr<Curve> SpringMotionCreator(const std::vector<std::string>& params)
@@ -284,6 +298,7 @@ RefPtr<Curve> CreateCustomCurve(const std::string& aniTimFunc)
     }
     static const LinearMapNode<CustomCurveCreator> customCurveMap[] = {
         { DOM_ANIMATION_TIMING_FUNCTION_CUBIC_BEZIER, CubicCurveCreator },
+        { DOM_ANIMATION_TIMING_FUNCTION_INTERPOLATING_SPRING, InterpolatingSpringCreator },
         { DOM_ANIMATION_TIMING_FUNCTION_RESPONSIVE_SPRING_MOTION, ResponsiveSpringMotionCreator },
         { DOM_ANIMATION_TIMING_FUNCTION_SPRING, SpringCurveCreator },
         { DOM_ANIMATION_TIMING_FUNCTION_SPRING_MOTION, SpringMotionCreator },

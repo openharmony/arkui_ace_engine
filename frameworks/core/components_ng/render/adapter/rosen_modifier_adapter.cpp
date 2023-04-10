@@ -62,9 +62,10 @@ void ContentModifierAdapter::Draw(RSDrawingContext& context) const
     // use dummy deleter avoid delete the SkCanvas by shared_ptr, its owned by context
     std::shared_ptr<SkCanvas> skCanvas { context.canvas, [](SkCanvas*) {} };
     RSCanvas canvas(&skCanvas);
-    CHECK_NULL_VOID_NOLOG(modifier_);
+    auto modifier = modifier_.Upgrade();
+    CHECK_NULL_VOID_NOLOG(modifier);
     DrawingContext context_ = { canvas, context.width, context.height };
-    modifier_->onDraw(context_);
+    modifier->onDraw(context_);
 }
 
 #define CONVERT_PROP(prop, srcType, propType)                                                 \
@@ -94,6 +95,7 @@ inline std::shared_ptr<RSPropertyBase> ConvertToRSProperty(const RefPtr<Property
     CONVERT_PROP(property, PropertyInt, int32_t);
     CONVERT_PROP(property, PropertyFloat, float);
     CONVERT_PROP(property, PropertyString, std::string);
+    CONVERT_PROP(property, PropertyColor, Color);
     CONVERT_ANIMATABLE_PROP(property, AnimatablePropertyOffsetF, OffsetF);
     CONVERT_ANIMATABLE_PROP(property, AnimatablePropertyFloat, float);
     CONVERT_ANIMATABLE_PROP(property, AnimatablePropertyColor, LinearColor);
@@ -106,8 +108,9 @@ inline std::shared_ptr<RSPropertyBase> ConvertToRSProperty(const RefPtr<Property
 
 void ContentModifierAdapter::AttachProperties()
 {
-    if (!attachedProperties_.size() && modifier_) {
-        for (const auto& property : modifier_->GetAttachedProperties()) {
+    auto modifier = modifier_.Upgrade();
+    if (!attachedProperties_.size() && modifier) {
+        for (const auto& property : modifier->GetAttachedProperties()) {
             auto rsProperty = ConvertToRSProperty(property);
             AttachProperty(rsProperty);
             attachedProperties_.emplace_back(rsProperty);
@@ -120,15 +123,17 @@ void OverlayModifierAdapter::Draw(RSDrawingContext& context) const
     // use dummy deleter avoid delete the SkCanvas by shared_ptr, its owned by context
     std::shared_ptr<SkCanvas> skCanvas { context.canvas, [](SkCanvas*) {} };
     RSCanvas canvas(&skCanvas);
-    CHECK_NULL_VOID_NOLOG(modifier_);
+    auto modifier = modifier_.Upgrade();
+    CHECK_NULL_VOID_NOLOG(modifier);
     DrawingContext context_ = { canvas, context.width, context.height };
-    modifier_->onDraw(context_);
+    modifier->onDraw(context_);
 }
 
 void OverlayModifierAdapter::AttachProperties()
 {
-    if (attachedProperties_.empty() && modifier_) {
-        for (const auto& property : modifier_->GetAttachedProperties()) {
+    auto modifier = modifier_.Upgrade();
+    if (attachedProperties_.empty() && modifier) {
+        for (const auto& property : modifier->GetAttachedProperties()) {
             auto rsProperty = ConvertToRSProperty(property);
             AttachProperty(rsProperty);
             attachedProperties_.emplace_back(rsProperty);

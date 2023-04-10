@@ -124,6 +124,7 @@ enum class AceAction : uint32_t {
     ACTION_SCROLL_FORWARD,
     ACTION_SCROLL_BACKWARD,
     ACTION_FOCUS,
+    ACTION_CLEAR_FOCUS,
     ACTION_ACCESSIBILITY_FOCUS,
     ACTION_CLEAR_ACCESSIBILITY_FOCUS,
     ACTION_NEXT_AT_MOVEMENT_GRANULARITY,
@@ -156,9 +157,11 @@ enum class AceTextCategory {
 struct AceCollectionInfo {
     int32_t rows = 0;
     int32_t columns = 0;
+    int32_t selectMode = 0;
 };
 
 struct AceCollectionItemInfo {
+    bool heading = false;
     int32_t row = 0;
     int32_t column = 0;
     int32_t rowSpan = 0;

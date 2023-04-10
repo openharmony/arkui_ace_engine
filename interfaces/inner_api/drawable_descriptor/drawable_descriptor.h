@@ -28,13 +28,11 @@
 
 #include <optional>
 #include <string>
+
+#include "resource_manager.h"
+#include "image_converter.h"
 #include "base/memory/ace_type.h"
 #include "foundation/arkui/ace_engine/interfaces/inner_api/form_render/include/form_renderer_hilog.h"
-#include "image_source.h"
-#include "foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include/draw/color.h"
-#include "foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include/image/bitmap.h"
-#include "pixel_map.h"
-#include "resource_manager.h"
 
 namespace OHOS::Ace::Napi {
 
@@ -48,7 +46,7 @@ public:
 
 private:
     bool GetPixelMapFromBuffer();
-    
+
     std::unique_ptr<uint8_t[]> jsonBuf_;
     size_t len_ = 0;
     std::optional<std::shared_ptr<Media::PixelMap>> pixelMap_;
@@ -66,18 +64,11 @@ public:
     std::shared_ptr<Media::PixelMap> GetPixelMap() override;
 
 private:
+    friend class ImageConverter;
     std::unique_ptr<Media::ImageSource> CreateImageSource(const char* item, uint32_t& errorCode);
     bool GetPixelMapFromJsonBuf(bool isBackground);
     bool GetDefaultMask();
     bool GetMaskByName(const std::string& name);
-    static Rosen::Drawing::ColorType PixelFormatToColorType(Media::PixelFormat pixelFormat);
-    static Rosen::Drawing::AlphaType AlphaTypeToRSAlphaType(Media::AlphaType alphaType);
-    static Media::PixelFormat ColorTypeToPixelFormat(Rosen::Drawing::ColorType colorType);
-    static Media::AlphaType RSAlphaTypeToAlphaType(Rosen::Drawing::AlphaType alphaType);
-
-    static std::shared_ptr<Rosen::Drawing::Bitmap> PixelMapToBitMap(const std::shared_ptr<Media::PixelMap>& pixelMap);
-    std::shared_ptr<Media::PixelMap> BitMapToPixelMap(
-        const std::shared_ptr<Rosen::Drawing::Bitmap>& bitMap, Media::InitializationOptions& opts);
     bool CreatePixelMap();
 
     std::unique_ptr<uint8_t[]> jsonBuf_;
@@ -92,12 +83,17 @@ private:
 class DrawableDescriptorFactory {
 public:
     static std::unique_ptr<DrawableDescriptor> Create(
-        int32_t id, std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr, uint32_t density)
+        int32_t id, std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr,
+        Global::Resource::RState &state, uint32_t density)
     {
         std::string type;
         size_t len;
         std::unique_ptr<uint8_t[]> jsonBuf;
-        resourceMgr->GetDrawableInfoById(id, type, len, jsonBuf, density);
+        state = resourceMgr->GetDrawableInfoById(id, type, len, jsonBuf, density);
+        if (state != Global::Resource::SUCCESS) {
+            HILOG_ERROR("Failed to get drawable info from resmgr");
+            return nullptr;
+        }
         if (type == "json") {
             HILOG_DEBUG("Create LayeredDrawableDescriptor object");
             return std::make_unique<LayeredDrawableDescriptor>(std::move(jsonBuf), len, resourceMgr);
@@ -111,12 +107,17 @@ public:
     }
 
     static std::unique_ptr<DrawableDescriptor> Create(
-        const char* name, std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr, uint32_t density)
+        const char* name, std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr,
+        Global::Resource::RState &state, uint32_t density)
     {
         std::string type;
         size_t len;
         std::unique_ptr<uint8_t[]> jsonBuf;
-        resourceMgr->GetDrawableInfoByName(name, type, len, jsonBuf, density);
+        state = resourceMgr->GetDrawableInfoByName(name, type, len, jsonBuf, density);
+        if (state != Global::Resource::SUCCESS) {
+            HILOG_ERROR("Failed to get drawable info from resmgr");
+            return nullptr;
+        }
         if (type == "json") {
             HILOG_DEBUG("Create LayeredDrawableDescriptor object");
             return std::make_unique<LayeredDrawableDescriptor>(std::move(jsonBuf), len, resourceMgr);

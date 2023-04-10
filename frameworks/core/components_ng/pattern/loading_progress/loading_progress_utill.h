@@ -54,8 +54,11 @@ public:
     {
         auto base = CalculateBase(diameter);
         auto index = static_cast<uint32_t>(base);
-        if (index < SIZE) {
+        if (index < SIZE - 1) {
             return RING_STROKE_WIDTH[index].ConvertToPx();
+        }
+        if (index == SIZE - 1) {
+            return GetMostStrokeWidth(diameter);
         }
         return RING_STROKE_WIDTH[DEFAULT_INDEX].ConvertToPx();
     }
@@ -64,10 +67,28 @@ public:
     {
         auto base = CalculateBase(diameter);
         auto index = static_cast<uint32_t>(base);
-        if (index < SIZE) {
+        if (index < SIZE - 1) {
             return COMET_RADIUS[index].ConvertToPx();
         }
+        if (index == SIZE - 1) {
+            return GetMostCometRadius(diameter);
+        }
         return COMET_RADIUS[DEFAULT_INDEX].ConvertToPx();
+    }
+
+    static float GetMostStrokeWidth(float diameter)
+    {
+        auto index_76 = static_cast<uint32_t>(LoadingProgressBase::BASE76);
+        auto strokeWidth_76 =
+            RING_STROKE_WIDTH[index_76].ConvertToPx() / (MODE_76.ConvertToPx() / MODE_40.ConvertToPx());
+        return strokeWidth_76 * (diameter / MODE_40.ConvertToPx());
+    }
+
+    static float GetMostCometRadius(float diameter)
+    {
+        auto index_76 = static_cast<uint32_t>(LoadingProgressBase::BASE76);
+        auto cometRadius_76 = COMET_RADIUS[index_76].ConvertToPx() / (MODE_76.ConvertToPx() / MODE_40.ConvertToPx());
+        return cometRadius_76 * (diameter / MODE_40.ConvertToPx());
     }
 
 private:
@@ -88,5 +109,4 @@ private:
     }
 };
 } // namespace OHOS::Ace::NG
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LOADING_PROGRESS_LOADING_PROGRESS_UTILLL_H

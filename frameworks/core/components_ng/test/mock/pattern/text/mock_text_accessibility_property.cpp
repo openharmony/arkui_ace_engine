@@ -20,4 +20,21 @@ std::string TextAccessibilityProperty::GetText() const
 {
     return "";
 }
+
+bool TextAccessibilityProperty::IsSelected() const
+{
+    return false;
+}
+
+int32_t TextAccessibilityProperty::GetTextSelectionStart() const
+{
+    return -1;
+}
+
+int32_t TextAccessibilityProperty::GetTextSelectionEnd() const
+{
+    return -1;
+}
+
+void TextAccessibilityProperty::SetSpecificSupportAction() {}
 } // namespace OHOS::Ace::NG

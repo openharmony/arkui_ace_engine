@@ -154,7 +154,12 @@ void RosenRenderImage::InitializeCallbacks()
 
 void RosenRenderImage::ImageObjReady(const RefPtr<ImageObject>& imageObj)
 {
+    if (!Container::Current()) {
+        LOGW("container::current is null");
+        return;
+    }
     LOGD("image obj ready info : %{public}s", sourceInfo_.ToString().c_str());
+    CHECK_NULL_VOID(imageObj);
     imageObj_ = imageObj;
     auto imageSize = imageObj_->GetImageSize();
     bool canStartUploadImageObj = !autoResize_ && (imageObj_->GetFrameCount() == 1);
@@ -222,6 +227,7 @@ void RosenRenderImage::ImageDataPaintSuccess(const RefPtr<NG::CanvasImage>& imag
     int32_t dstWidth = static_cast<int32_t>(previousResizeTarget_.Width() + precision);
     int32_t dstHeight = static_cast<int32_t>(previousResizeTarget_.Height() + precision);
     bool isTargetSource = ((dstWidth == image->GetWidth()) && (dstHeight == image->GetHeight()));
+    CHECK_NULL_VOID(imageObj_);
     if (!isTargetSource && (imageObj_->GetFrameCount() <= 1) && !background_) {
         LOGW("The size of returned image is not as expected, rejecting it. imageSrc: %{private}s,"
              "expected: [%{private}d x %{private}d], get [%{private}d x %{private}d]",
@@ -250,6 +256,7 @@ void RosenRenderImage::ImageDataPaintSuccess(const RefPtr<NG::CanvasImage>& imag
         imageObj_->ClearData();
     }
     CacheImageObject();
+    contentChanged_ = true;
 }
 
 void RosenRenderImage::CacheImageObject()
@@ -571,6 +578,13 @@ RefPtr<ImageObject> RosenRenderImage::QueryCacheSvgImageObject()
 
 void RosenRenderImage::Paint(RenderContext& context, const Offset& offset)
 {
+    if (contentChanged_) {
+        auto rsNode = static_cast<RosenRenderContext*>(&context)->GetRSNode();
+        if (rsNode) {
+            rsNode->MarkContentChanged(true);
+        }
+        contentChanged_ = false;
+    }
     if (imageObj_ && imageObj_->IsSvg() && !useSkiaSvg_ && !directPaint_) {
         DrawSVGImageCustom(context, offset);
         return;

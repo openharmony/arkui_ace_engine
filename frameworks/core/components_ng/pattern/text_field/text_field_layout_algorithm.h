@@ -29,6 +29,9 @@
 #include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
+
+constexpr Dimension SCROLL_BAR_LEFT_WIDTH = 2.0_vp;
+
 class TextFieldContentModifier;
 
 class ACE_EXPORT TextFieldLayoutAlgorithm : public LayoutAlgorithm {
@@ -92,7 +95,7 @@ public:
         const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle, bool isDisabled);
 
 private:
-    void CreateParagraph(const TextStyle& textStyle, std::string content, bool needObscureText);
+    void CreateParagraph(const TextStyle& textStyle, std::string content, bool needObscureText, bool disableTextAlign);
     bool CreateParagraphAndLayout(
         const TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint);
     bool AdaptMinTextSize(TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint,

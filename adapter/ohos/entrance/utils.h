@@ -27,7 +27,7 @@ std::string GetStringFromFile(const std::string& packagePathStr, const std::stri
 std::string GetStringFromHap(const std::string& hapPath, const std::string& fileName);
 
 RefPtr<FlutterAssetProvider> CreateAssetProvider(const std::string& packagePath,
-    const std::vector<std::string>& assetBasePaths);
+    const std::vector<std::string>& assetBasePaths, bool useCache = true);
 
 inline const std::string GenerateFullPath(const std::string& prePath, const std::string& postPath)
 {

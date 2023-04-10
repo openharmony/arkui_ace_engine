@@ -21,6 +21,7 @@
 #include <list>
 #include <utility>
 
+#include "base/geometry/ng/rect_t.h"
 #include "base/log/frame_info.h"
 #include "base/memory/referenced.h"
 #include "core/common/frontend.h"
@@ -37,7 +38,7 @@
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT PipelineContext final : public PipelineBase {
+class ACE_EXPORT PipelineContext : public PipelineBase {
     DECLARE_ACE_TYPE(NG::PipelineContext, PipelineBase);
 
 public:
@@ -127,7 +128,8 @@ public:
 
     void HandleOnAreaChangeEvent();
 
-    void AddVisibleAreaChangeNode(const RefPtr<FrameNode>& node, double ratio, const VisibleRatioCallback& callback);
+    void AddVisibleAreaChangeNode(
+        const RefPtr<FrameNode>& node, double ratio, const VisibleRatioCallback& callback, bool isUserCallback = true);
     void RemoveVisibleAreaChangeNode(int32_t nodeId);
 
     void HandleVisibleAreaChangeEvent();
@@ -148,8 +150,8 @@ public:
 
     void SetAppIcon(const RefPtr<PixelMap>& icon) override;
 
-    void OnSurfaceChanged(
-        int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED,
+    void OnSurfaceChanged(int32_t width, int32_t height,
+        WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED,
         const std::shared_ptr<Rosen::RSTransaction> rsTransaction = nullptr) override;
 
     void OnSurfacePositionChanged(int32_t posX, int32_t posY) override;
@@ -179,9 +181,15 @@ public:
 
     void AddPredictTask(PredictTask&& task);
 
+    void AddAfterLayoutTask(std::function<void()>&& task);
+
     void FlushDirtyNodeUpdate();
 
     void SetRootRect(double width, double height, double offset) override;
+
+    void SetGetViewSafeAreaImpl(std::function<SafeAreaEdgeInserts()>&& callback) override;
+
+    SafeAreaEdgeInserts GetCurrentViewSafeArea() const override;
 
     const RefPtr<FullScreenManager>& GetFullScreenManager();
 
@@ -342,6 +350,8 @@ private:
 
     void DumpPipelineInfo() const;
 
+    void RegisterRootEvent();
+
     FrameInfo* GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp);
 
     template<typename T>
@@ -385,7 +395,7 @@ private:
     SurfacePositionChangedCallbackMap surfacePositionChangedCallbackMap_;
 
     std::unordered_set<int32_t> onAreaChangeNodeIds_;
-    std::unordered_map<int32_t, std::list<VisibleCallbackInfo>> visibleAreaChangeNodes_;
+    std::unordered_set<int32_t> onVisibleAreaChangeNodeIds_;
 
     RefPtr<StageManager> stageManager_;
     RefPtr<OverlayManager> overlayManager_;

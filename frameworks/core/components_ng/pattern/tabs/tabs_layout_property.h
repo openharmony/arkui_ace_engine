@@ -43,6 +43,7 @@ public:
         value->propDivider_ = CloneDivider();
         value->propBarWidth_ = CloneBarWidth();
         value->propBarHeight_ = CloneBarHeight();
+        value->propIndex_ = CloneIndex();
         return value;
     }
 
@@ -55,6 +56,7 @@ public:
         ResetDivider();
         ResetBarWidth();
         ResetBarHeight();
+        ResetIndex();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -65,14 +67,14 @@ public:
                                      ? "BarPosition.Start"
                                      : "BarPosition.End");
         if (propDivider_.has_value()) {
-            auto divider = JsonUtil::Create(false);
+            auto divider = JsonUtil::Create(true);
             divider->Put("strokeWidth", propDivider_.value().strokeWidth.ToString().c_str());
             divider->Put("startMargin", propDivider_.value().startMargin.ToString().c_str());
             divider->Put("endMargin", propDivider_.value().endMargin.ToString().c_str());
             divider->Put("color", propDivider_.value().color.ColorToString().c_str());
             json->Put("divider", divider);
         } else {
-            auto divider = JsonUtil::Create(false);
+            auto divider = JsonUtil::Create(true);
             json->Put("divider", divider);
         }
     }
@@ -83,6 +85,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Divider, TabsItemDivider, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BarWidth, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BarHeight, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Index, int32_t, PROPERTY_UPDATE_NORMAL);
 };
 
 } // namespace OHOS::Ace::NG

@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll/scroll_event_hub.h"
+#include "core/components_ng/pattern/scroll_bar/scroll_bar_accessibility_property.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_layout_algorithm.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_layout_property.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
@@ -48,6 +49,11 @@ public:
         return MakeRefPtr<ScrollBarLayoutProperty>();
     }
 
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        return MakeRefPtr<ScrollBarAccessibilityProperty>();
+    }
+
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         auto layoutAlgorithm = MakeRefPtr<ScrollBarLayoutAlgorithm>(currentOffset_);
@@ -59,20 +65,14 @@ public:
         return MakeRefPtr<ScrollEventHub>();
     }
 
-    void SetCurrentPosition(float currentOffset)
-    {
-        currentOffset = std::clamp(currentOffset, 0.0f, scrollableDistance_);
-        if (currentOffset_ == currentOffset || scrollableDistance_ <= 0.0f) {
-            return;
-        }
-        currentOffset_ = currentOffset;
-        auto host = GetHost();
-        host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-    }
-
     float GetCurrentPosition() const
     {
         return currentOffset_;
+    }
+
+    void SetCurrentPosition(float currentOffset)
+    {
+        currentOffset_ = currentOffset;
     }
 
     Axis GetAxis() const
@@ -93,6 +93,26 @@ public:
     const DisplayMode& GetDisplayMode() const
     {
         return displayMode_;
+    }
+
+    float GetControlDistance() const
+    {
+        return controlDistance_;
+    }
+
+    void SetControlDistance(float controlDistance)
+    {
+        controlDistance_ = controlDistance;
+    }
+
+    float GetScrollOffset() const
+    {
+        return scrollOffset_;
+    }
+
+    void SetScrollOffset(float scrollOffset)
+    {
+        scrollOffset_ = scrollOffset;
     }
 
     bool IsAtTop() const;
@@ -118,6 +138,8 @@ private:
     float currentOffset_ = 0.0f;
     float lastOffset_ = 0.0f;
     float scrollableDistance_ = 0.0f;
+    float controlDistance_ = 0.0f;
+    float scrollOffset_ = 0.0f;
 };
 
 } // namespace OHOS::Ace::NG

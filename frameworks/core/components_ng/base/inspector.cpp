@@ -40,6 +40,7 @@ const char INSPECTOR_CHILDREN[] = "$children";
 const uint32_t LONG_PRESS_DELAY = 1000;
 const std::unordered_set<std::string> trustList { V2::SPAN_ETS_TAG, V2::JS_IF_ELSE_ETS_TAG, V2::JS_SYNTAX_ITEM_ETS_TAG,
     V2::NAVBAR_CONTENT_ETS_TAG, V2::SWIPER_ETS_TAG, V2::TOOL_BAR_ETS_TAG };
+RectF deviceRect;
 
 RefPtr<UINode> GetInspectorByKey(const RefPtr<FrameNode>& root, const std::string& key)
 {
@@ -121,8 +122,11 @@ void GetSpanInspector(
     jsonNode->Put(INSPECTOR_ATTRS, jsonObject);
     jsonNode->Put(INSPECTOR_TYPE, parent->GetTag().c_str());
     jsonNode->Put(INSPECTOR_ID, parent->GetId());
-    RectF rect = node->GetRenderContext()->GetPaintRectWithTransform();
-    rect.SetOffset(node->GetTransformRelativeOffset());
+    RectF rect = node->GetTransformRectRelativeToWindow();
+    rect = rect.Constrain(deviceRect);
+    if (rect.IsEmpty()) {
+        rect.SetRect(0, 0, 0, 0);
+    }
     auto strRec = std::to_string(rect.Left())
                       .append(",")
                       .append(std::to_string(rect.Top()))
@@ -152,8 +156,11 @@ void GetInspectorChildren(
         RectF rect;
         isActive = isActive && node->IsActive();
         if (isActive) {
-            rect = node->GetRenderContext()->GetPaintRectWithTransform();
-            rect.SetOffset(node->GetTransformRelativeOffset());
+            rect = node->GetTransformRectRelativeToWindow();
+        }
+        rect = rect.Constrain(deviceRect);
+        if (rect.IsEmpty()) {
+            rect.SetRect(0, 0, 0, 0);
         }
         auto strRec = std::to_string(rect.Left())
                           .append(",")
@@ -222,9 +229,7 @@ void GetSpanInspector(
     jsonNode->Put(INSPECTOR_ATTRS, jsonObject);
     jsonNode->Put(INSPECTOR_TYPE, parent->GetTag().c_str());
     jsonNode->Put(INSPECTOR_ID, parent->GetId());
-    auto ctx = node->GetRenderContext();
-    RectF rect = node->GetRenderContext()->GetPaintRectWithTransform();
-    rect.SetOffset(node->GetTransformRelativeOffset());
+    RectF rect = node->GetTransformRectRelativeToWindow();
     jsonNode->Put(INSPECTOR_RECT, rect.ToBounds().c_str());
     jsonNodeArray->Put(jsonNode);
 }
@@ -246,8 +251,7 @@ void GetInspectorChildren(
     RectF rect;
     isActive = isActive && node->IsActive();
     if (isActive) {
-        rect = node->GetRenderContext()->GetPaintRectWithTransform();
-        rect.SetOffset(node->GetTransformRelativeOffset());
+        rect = node->GetTransformRectRelativeToWindow();
     }
 
     jsonNode->Put(INSPECTOR_RECT, rect.ToBounds().c_str());
@@ -310,8 +314,7 @@ std::string Inspector::GetInspectorNodeByKey(const std::string& key)
     jsonNode->Put(INSPECTOR_ID, inspectorElement->GetId());
     auto frameNode = AceType::DynamicCast<FrameNode>(inspectorElement);
     if (frameNode) {
-        auto rect = frameNode->GetRenderContext()->GetPaintRectWithTransform();
-        rect.SetOffset(frameNode->GetTransformRelativeOffset());
+        auto rect = frameNode->GetTransformRectRelativeToWindow();
         jsonNode->Put(INSPECTOR_RECT, rect.ToBounds().c_str());
     }
     auto jsonAttrs = JsonUtil::Create(true);
@@ -331,6 +334,7 @@ std::string Inspector::GetInspector(bool isLayoutInspector)
     auto scale = context->GetViewScale();
     auto rootHeight = context->GetRootHeight();
     auto rootWidth = context->GetRootWidth();
+    deviceRect.SetRect(0, 0, rootWidth * scale, rootHeight * scale);
     jsonRoot->Put(INSPECTOR_WIDTH, std::to_string(rootWidth * scale).c_str());
     jsonRoot->Put(INSPECTOR_HEIGHT, std::to_string(rootHeight * scale).c_str());
     jsonRoot->Put(INSPECTOR_RESOLUTION, std::to_string(SystemProperties::GetResolution()).c_str());

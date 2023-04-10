@@ -99,7 +99,7 @@ public:
 
     void UpdateLayoutConstraint(const MeasureProperty& calcLayoutConstraint);
 
-    RefPtr<LayoutWrapper> CreateLayoutWrapper(bool forceMeasure = false, bool forceLayout = false);
+    RefPtr<LayoutWrapper> CreateLayoutWrapper(bool forceMeasure = false, bool forceLayout = false) override;
 
     RefPtr<LayoutWrapper> UpdateLayoutWrapper(
         RefPtr<LayoutWrapper> layoutWrapper, bool forceMeasure = false, bool forceLayout = false);
@@ -113,7 +113,15 @@ public:
     void SetOnAreaChangeCallback(OnAreaChangedFunc&& callback);
     void TriggerOnAreaChangeCallback();
 
-    void TriggerVisibleAreaChangeCallback(std::list<VisibleCallbackInfo>& callbackInfoList);
+    void AddVisibleAreaUserCallback(double ratio, const VisibleCallbackInfo& callback)
+    {
+        visibleAreaUserCallbacks_[ratio] = callback;
+    }
+    void AddVisibleAreaInnerCallback(double ratio, const VisibleCallbackInfo& callback)
+    {
+        visibleAreaInnerCallbacks_[ratio] = callback;
+    }
+    void TriggerVisibleAreaChangeCallback(bool forceDisappear = false);
 
     const RefPtr<GeometryNode>& GetGeometryNode() const
     {
@@ -202,22 +210,7 @@ public:
     HitTestResult AxisTest(
         const PointF& globalPoint, const PointF& parentLocalPoint, AxisTestResult& onAxisResult) override;
 
-    void AnimateHoverEffect(bool isHovered) const
-    {
-        auto renderContext = GetRenderContext();
-        if (!renderContext) {
-            return;
-        }
-        HoverEffectType animationType = HoverEffectType::UNKNOWN;
-        if (eventHub_->GetInputEventHub()) {
-            animationType = eventHub_->GetInputEventHub()->GetHoverEffect();
-        }
-        if (animationType == HoverEffectType::SCALE) {
-            renderContext->AnimateHoverEffectScale(isHovered);
-        } else if (animationType == HoverEffectType::BOARD) {
-            renderContext->AnimateHoverEffectBoard(isHovered);
-        }
-    }
+    void AnimateHoverEffect(bool isHovered) const;
 
     bool IsAtomicNode() const override;
 
@@ -265,7 +258,11 @@ public:
 
     OffsetF GetTransformRelativeOffset() const;
 
+    RectF GetTransformRectRelativeToWindow() const;
+
     OffsetF GetPaintRectOffset(bool excludeSelf = false) const;
+
+    OffsetF GetPaintRectOffsetToPage() const;
 
     void AdjustGridOffset();
 
@@ -321,6 +318,40 @@ public:
 
     bool OnRemoveFromParent() override;
 
+    // The function is only used for fast preview.
+    void FastPreviewUpdateChildDone() override
+    {
+        OnMountToParentDone();
+    }
+
+    bool IsExclusiveEventForChild() const
+    {
+        return exclusiveEventForChild_;
+    }
+
+    void SetExclusiveEventForChild(bool exclusiveEventForChild)
+    {
+        exclusiveEventForChild_ = exclusiveEventForChild;
+    }
+
+    void SetDraggable(bool draggable)
+    {
+        draggable_ = draggable;
+        userSet_ = true;
+    }
+
+    bool IsDraggable() const
+    {
+        return draggable_;
+    }
+
+    bool IsUserSet() const
+    {
+        return userSet_;
+    }
+
+    RefPtr<FrameNode> FindChildByPosition(float x, float y);
+
 private:
     void MarkNeedRender(bool isRenderBoundary);
     bool IsNeedRequestParentMeasure() const;
@@ -355,7 +386,8 @@ private:
     std::vector<RectF> GetResponseRegionList(const RectF& rect);
     bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const;
 
-    void ProcessAllVisibleCallback(std::list<VisibleCallbackInfo>& callbackInfoList, double currentVisibleRatio);
+    void ProcessAllVisibleCallback(
+        std::unordered_map<double, VisibleCallbackInfo>& visibleAreaCallbacks, double currentVisibleRatio);
     void OnVisibleAreaChangeCallback(VisibleCallbackInfo& callbackInfo, bool visibleType, double currentVisibleRatio);
     double CalculateCurrentVisibleRatio(const RectF& visibleRect, const RectF& renderRect);
 
@@ -373,6 +405,8 @@ private:
     RefPtr<GeometryNode> geometryNode_ = MakeRefPtr<GeometryNode>();
 
     std::list<std::function<void()>> destroyCallbacks_;
+    std::unordered_map<double, VisibleCallbackInfo> visibleAreaUserCallbacks_;
+    std::unordered_map<double, VisibleCallbackInfo> visibleAreaInnerCallbacks_;
 
     RefPtr<AccessibilityProperty> accessibilityProperty_;
     RefPtr<LayoutProperty> layoutProperty_;
@@ -391,6 +425,8 @@ private:
     bool isMeasureBoundary_ = false;
     bool hasPendingRequest_ = false;
 
+    // for container, this flag controls only the last child in touch area is consuming event.
+    bool exclusiveEventForChild_ = false;
     bool isActive_ = false;
     bool isResponseRegion_ = false;
 
@@ -401,6 +437,9 @@ private:
     bool isInternal_ = false;
 
     std::string nodeName_;
+
+    bool draggable_ = false;
+    bool userSet_ = false;
 
     friend class RosenRenderContext;
     friend class RenderContext;

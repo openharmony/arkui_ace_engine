@@ -33,7 +33,7 @@ public:
         LOGD("Destroy: JsDragFunction");
     };
     void Execute() override;
-    void Execute(const RefPtr<DragEvent>& info);
+    JSRef<JSVal> Execute(const RefPtr<DragEvent>& info);
     JSRef<JSVal> ItemDragStartExecute(const ItemDragInfo& info, int32_t itemIndex);
     void ItemDragEnterExecute(const ItemDragInfo& info);
     void ItemDragMoveExecute(const ItemDragInfo& info, int32_t itemIndex, int32_t insertIndex);

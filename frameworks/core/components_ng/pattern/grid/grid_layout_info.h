@@ -88,7 +88,7 @@ struct GridLayoutInfo {
     int32_t endMainLineIndex_ = 0;
 
     int32_t jumpIndex_ = -1;
-    uint32_t crossCount_ = 0;
+    int32_t crossCount_ = 0;
     int32_t childrenCount_ = 0;
 
     bool reachEnd_ = false;
@@ -104,6 +104,9 @@ struct GridLayoutInfo {
 
     // rect of grid item dragged in
     RectF currentRect_;
+
+    // Grid has GridItem whose columnEnd - columnStart > 0
+    bool hasBigItem_;
 
 private:
     int32_t GetItemIndexByPosition(int32_t position);

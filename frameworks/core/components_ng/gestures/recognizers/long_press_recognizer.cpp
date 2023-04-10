@@ -21,17 +21,17 @@
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
 #include "core/event/ace_events.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/render/render_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
-
 constexpr double MAX_THRESHOLD = 15.0;
 constexpr int32_t MAX_FINGERS = 10;
 } // namespace
 
 void LongPressRecognizer::OnAccepted()
 {
-    LOGD("%{public}p long press gesture has been accepted!", this);
     refereeState_ = RefereeState::SUCCEED;
     if (onLongPress_ && !touchPoints_.empty()) {
         TouchEvent trackPoint = touchPoints_.begin()->second;
@@ -53,8 +53,41 @@ void LongPressRecognizer::OnAccepted()
 
 void LongPressRecognizer::OnRejected()
 {
-    LOGD("%{public}p long press gesture has been rejected!", this);
     refereeState_ = RefereeState::FAIL;
+}
+
+void LongPressRecognizer::SetThumbnailPixelMap()
+{
+    if (refereeState_ == RefereeState::DETECTING) {
+        auto gestureHub = gestureHub_.Upgrade();
+        CHECK_NULL_VOID(gestureHub);
+        auto frameNode = gestureHub->GetFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto context = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        auto pixelMap = context->GetThumbnailPixelMap();
+        gestureHub->SetPixelMap(pixelMap);
+    } else {
+        LOGW("the state is not detecting for accept long press gesture");
+    }
+}
+
+void LongPressRecognizer::ThumbnailTimer(int32_t time)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+
+    auto&& callback = [weakPtr = AceType::WeakClaim(this)]() {
+        auto refPtr = weakPtr.Upgrade();
+        if (refPtr) {
+            refPtr->SetThumbnailPixelMap();
+        } else {
+            LOGI("fail to get thumbnail pixelMap due to context is nullptr");
+        }
+    };
+    thumbnailTimer_.Reset(callback);
+    auto taskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    taskExecutor.PostDelayedTask(thumbnailTimer_, time);
 }
 
 void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
@@ -96,6 +129,8 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
             DeadlineTimer(curDuration, false);
         }
     }
+
+    ThumbnailTimer(thumbnailDeadline);
 }
 
 void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& /*event*/)

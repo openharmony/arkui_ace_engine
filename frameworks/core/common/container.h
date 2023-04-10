@@ -294,6 +294,12 @@ public:
         return false;
     }
 
+    static bool IsForeground()
+    {
+        auto container = Current();
+        return container ? container->state_ == Frontend::State::ON_SHOW : false;
+    }
+
 protected:
     std::chrono::time_point<std::chrono::high_resolution_clock> createTime_;
     bool firstUpdateData_ = true;

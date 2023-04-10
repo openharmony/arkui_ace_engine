@@ -28,7 +28,6 @@
 #include "core/components_ng/pattern/progress/progress_pattern.h"
 
 namespace OHOS::Ace::NG {
-
 void ProgressPaintMethod::GetThemeDate()
 {
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -43,5 +42,26 @@ void ProgressPaintMethod::GetThemeDate()
     capsuleBorderWidth_ = progressTheme->GetBorderWidth();
 }
 
-
+void ProgressPaintMethod::CalculateStrokeWidth(const SizeF& contentSize)
+{
+    auto length = std::min(contentSize.Width(), contentSize.Height());
+    constexpr float HALF = 0.5;
+    switch (progressType_) {
+        case ProgressType::LINEAR:
+        case ProgressType::CAPSULE:
+            strokeWidth_ = std::min(strokeWidth_, length);
+            strokeWidth_ = std::max(strokeWidth_, static_cast<float>(capsuleBorderWidth_.ConvertToPx()) / HALF);
+            break;
+        case ProgressType::MOON:
+        case ProgressType::RING:
+        case ProgressType::SCALE:
+            if (strokeWidth_ >= length * HALF) {
+                LOGI("strokeWidth is lager than radius,  auto set strokeWidth as half of radius");
+                strokeWidth_ = length * HALF * HALF;
+            }
+            break;
+        default:
+            break;
+    }
+}
 } // namespace OHOS::Ace::NG

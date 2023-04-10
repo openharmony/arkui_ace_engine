@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,8 +28,7 @@ namespace OHOS::Ace::NG {
 
 inline RefPtr<NavigationBarTheme> NavigationGetTheme()
 {
-    // get theme
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     auto theme = pipeline->GetTheme<NavigationBarTheme>();
     return theme;
 }
@@ -78,7 +77,6 @@ constexpr Color DIVIDER_COLOR = Color(0x08000000);
 // navigation content
 constexpr Dimension SINGLE_LINE_TITLEBAR_HEIGHT = 56.0_vp;
 constexpr Dimension DOUBLE_LINE_TITLEBAR_HEIGHT = 82.0_vp;
-constexpr Color CONTENT_COLOR = Color(0x00000000);
 
 // navBar
 constexpr Dimension FULL_SINGLE_LINE_TITLEBAR_HEIGHT = 112.0_vp;

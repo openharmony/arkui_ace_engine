@@ -66,11 +66,11 @@ void DataPanelPropertyTestNg::GradientColorSet(std::vector<Gradient>& valueColor
 {
     Gradient gradient;
     GradientColor gradientColorStart;
-    gradientColorStart.SetColor(Color(0x00000000));
+    gradientColorStart.SetLinearColor(LinearColor::WHITE);
     gradientColorStart.SetDimension(Dimension(0.0));
     gradient.AddColor(gradientColorStart);
     GradientColor gradientColorEnd;
-    gradientColorEnd.SetColor(Color(0x000000FF));
+    gradientColorEnd.SetLinearColor(LinearColor::BLACK);
     gradientColorEnd.SetDimension(Dimension(1.0));
     gradient.AddColor(gradientColorEnd);
     for (int i = 0; i < length; i++) {
@@ -503,11 +503,11 @@ HWTEST_F(DataPanelPropertyTestNg, DataPanelPaintPropertyTest008, TestSize.Level1
     dataPanelModelNG.Create(VALUES, MAX, TYPE_CYCLE);
     Gradient gradient;
     GradientColor gradientColorStart;
-    gradientColorStart.SetColor(Color(0x00000000));
+    gradientColorStart.SetLinearColor(LinearColor::WHITE);
     gradientColorStart.SetDimension(Dimension(0.0));
     gradient.AddColor(gradientColorStart);
     GradientColor gradientColorEnd;
-    gradientColorEnd.SetColor(Color(0x00000000));
+    gradientColorEnd.SetLinearColor(LinearColor::BLACK);
     gradientColorEnd.SetDimension(Dimension(1.0));
     gradient.AddColor(gradientColorEnd);
     std::vector<Gradient> valueColors;

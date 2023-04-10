@@ -17,7 +17,11 @@
 
 #include <array>
 
+#include "base/log/dump_log.h"
 #include "base/utils/utils.h"
+#if !defined(ACE_UNITTEST)
+#include "core/common/ace_engine_ext.h"
+#endif
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/image/image_paint_method.h"
@@ -117,9 +121,8 @@ void ImagePattern::RegisterVisibleAreaChange()
     };
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    // reset visibleAreaChangeNode
-    pipeline->RemoveVisibleAreaChangeNode(host->GetId());
-    pipeline->AddVisibleAreaChangeNode(host, 0.0f, callback);
+    // add visibleAreaChangeNode(inner callback)
+    pipeline->AddVisibleAreaChangeNode(host, 0.0f, callback, false);
 }
 
 void ImagePattern::OnImageLoadSuccess()
@@ -350,9 +353,6 @@ void ImagePattern::UpdateInternalResource(ImageSourceInfo& sourceInfo)
 void ImagePattern::OnNotifyMemoryLevel(int32_t level)
 {
     LOGI("Receive Memory level notification, level: %{public}d", level);
-    // level = 0: MEMORY_LEVEL_MODERATE;
-    // level = 1: MEMORY_LEVEL_LOW;
-    // level = 2: MEMORY_LEVEL_CRITICAL;
     // TODO: do different data cleaning operation according to level
     // when image component is [onShow], do not clean image data
     // TODO: use [isActive_] to determine image data management
@@ -414,6 +414,13 @@ void ImagePattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToBounds(false);
+
+    // register image frame node to pipeline context to receive memory level notification and window state change
+    // notification
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddNodesToNotifyMemoryLevel(host->GetId());
+    pipeline->AddWindowStateChangedCallback(host->GetId());
 }
 
 void ImagePattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -423,7 +430,6 @@ void ImagePattern::OnDetachFromFrameNode(FrameNode* frameNode)
     CHECK_NULL_VOID_NOLOG(pipeline);
     pipeline->RemoveWindowStateChangedCallback(id);
     pipeline->RemoveNodesToNotifyMemoryLevel(id);
-    pipeline->RemoveVisibleAreaChangeNode(id);
 }
 
 void ImagePattern::EnableDrag()
@@ -438,6 +444,10 @@ void ImagePattern::EnableDrag()
         auto image = imageWk.Upgrade();
         auto ctx = ctxWk.Upgrade();
         CHECK_NULL_RETURN(image && ctx, info);
+
+#if !defined(ACE_UNITTEST)
+        AceEngineExt::GetInstance().DragStartExt();
+#endif
 
         info.extraInfo = "image drag";
         info.pixelMap = image->GetPixelMap();
@@ -496,4 +506,12 @@ void ImagePattern::UpdateFillColorIfForegroundColor()
     }
 }
 
+void ImagePattern::DumpInfo()
+{
+    auto layoutProp = GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(layoutProp);
+    if (layoutProp->GetImageSourceInfo().has_value()) {
+        DumpLog::GetInstance().AddDesc(std::string("src: ").append(layoutProp->GetImageSourceInfo()->ToString()));
+    }
+}
 } // namespace OHOS::Ace::NG

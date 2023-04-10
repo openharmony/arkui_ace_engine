@@ -25,6 +25,12 @@
 
 namespace OHOS::Ace::NG {
 
+namespace {
+
+constexpr int32_t DEFAULT_WEEKS = 5;
+
+} // namespace
+
 void CalendarMonthPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
@@ -106,6 +112,11 @@ int32_t CalendarMonthPattern::JudgeArea(const Offset& offset)
     auto dailyFiveRowSpace = paintProperty->GetDailyFiveRowSpaceValue({}).ConvertToPx() <= 0
                                  ? theme->GetCalendarTheme().dailyFiveRowSpace.ConvertToPx()
                                  : paintProperty->GetDailyFiveRowSpaceValue({}).ConvertToPx();
+    auto dailySixRowSpace = paintProperty->GetDailySixRowSpaceValue({}).ConvertToPx() <= 0
+                                ? theme->GetCalendarTheme().dailySixRowSpace.ConvertToPx()
+                                : paintProperty->GetDailySixRowSpaceValue({}).ConvertToPx();
+    auto rows = (static_cast<int32_t>(obtainedMonth_.days.size()) / columnsOfData);
+    auto rowSpace = rows == DEFAULT_WEEKS ? dailyFiveRowSpace : dailySixRowSpace;
     auto browHeight = weekHeight + topPadding + weekAndDayRowSpace;
     auto maxHeight = host->GetGeometryNode()->GetFrameSize().Height();
     auto maxWidth = host->GetGeometryNode()->GetFrameSize().Width();
@@ -114,9 +125,8 @@ int32_t CalendarMonthPattern::JudgeArea(const Offset& offset)
         return -1;
     }
     auto height = offset.GetY() - browHeight;
-    int32_t y = height < (dayHeight + dailyFiveRowSpace / 2)
-                    ? 0
-                    : (height - dayHeight - dailyFiveRowSpace / 2) / (dayHeight + dailyFiveRowSpace) + 1;
+    int32_t y =
+        height < (dayHeight + rowSpace / 2) ? 0 : (height - dayHeight - rowSpace / 2) / (dayHeight + rowSpace) + 1;
     int32_t x = offset.GetX() < (dayWidth + colSpace / 2)
                     ? 0
                     : (offset.GetX() - dayWidth - colSpace / 2) / (dayWidth + colSpace) + 1;

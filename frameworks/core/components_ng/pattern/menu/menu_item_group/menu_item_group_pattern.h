@@ -19,6 +19,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_accessibility_property.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_paint_method.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_paint_property.h"
@@ -36,6 +37,11 @@ public:
     bool IsAtomicNode() const override
     {
         return false;
+    }
+
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        return MakeRefPtr<MenuItemGroupAccessibilityProperty>();
     }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
@@ -67,6 +73,8 @@ public:
     }
 
     RefPtr<FrameNode> GetMenu();
+
+    std::string GetHeaderContent();
 
 protected:
     void OnMountToParentDone() override;

@@ -170,7 +170,7 @@ void IndexerPattern::OnHover(bool isHover)
 void IndexerPattern::OnChildHover(int32_t index, bool isHover)
 {
     childHoverIndex_ = isHover ? index : -1;
-    ApplyIndexChanged(childHoverIndex_ >= 0);
+    ApplyIndexChanged(childHoverIndex_ >= 0 && childHoverIndex_ < itemCount_);
 }
 
 void IndexerPattern::InitInputEvent()
@@ -249,6 +249,8 @@ void IndexerPattern::MoveIndexByOffset(const Offset& offset)
         return;
     }
     childPressIndex_ = nextSelectIndex;
+    selected_ = nextSelectIndex;
+    lastSelected_ = nextSelectIndex;
     if (isHover_ && childPressIndex_ >= 0) {
         IndexerPressInAnimation();
     }
@@ -280,10 +282,10 @@ bool IndexerPattern::KeyIndexByStep(int32_t step)
         return false;
     }
     childFocusIndex_ = nextSected;
-    auto refreshBubble = false;
-    if (nextSected >= 0) {
+    auto refreshBubble = nextSected >= 0 && nextSected < itemCount_;
+    if (refreshBubble) {
         selected_ = nextSected;
-        refreshBubble = true;
+        lastSelected_ = nextSected;
     }
     childPressIndex_ = -1;
     childHoverIndex_ = -1;
@@ -518,9 +520,9 @@ void IndexerPattern::SetPositionOfPopupNode(RefPtr<FrameNode>& customNode)
     }
     auto alignMent = layoutProperty->GetAlignStyle().value_or(NG::AlignStyle::RIGHT);
     auto userDefinePositionX =
-        layoutProperty->GetPopupPositionX().value_or(Dimension(NG::BUBBLE_POSITION_X, DimensionUnit::VP).ConvertToPx());
+        layoutProperty->GetPopupPositionX().value_or(Dimension(NG::BUBBLE_POSITION_X, DimensionUnit::VP)).ConvertToPx();
     auto userDefinePositionY =
-        layoutProperty->GetPopupPositionY().value_or(Dimension(NG::BUBBLE_POSITION_Y, DimensionUnit::VP).ConvertToPx());
+        layoutProperty->GetPopupPositionY().value_or(Dimension(NG::BUBBLE_POSITION_Y, DimensionUnit::VP)).ConvertToPx();
     auto zeroPositionX = host->GetOffsetRelativeToWindow().GetX() + indexerWidth / 2;
     auto zeroPosiitonY = host->GetOffsetRelativeToWindow().GetY();
     auto renderContext = customNode->GetRenderContext();

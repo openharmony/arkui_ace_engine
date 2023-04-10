@@ -36,24 +36,18 @@ RefPtr<SkiaSvgDom> SkiaSvgDom::CreateSkiaSvgDom(SkStream& svgStream, const std::
         skColor.color = svgFillColor.value().GetValue();
         skColor.valid = 1;
     }
-#ifdef NG_BUILD
-        // NG not support svg yet
-        sk_sp<SkSVGDOM> skiaDom = nullptr;
-#else
-        auto skiaDom = SkSVGDOM::MakeFromStream(svgStream, skColor.value);
-#endif
-        return AceType::MakeRefPtr<SkiaSvgDom>(skiaDom);
+    auto skiaDom = SkSVGDOM::MakeFromStream(svgStream, skColor.value);
+    return AceType::MakeRefPtr<SkiaSvgDom>(skiaDom);
 }
 
 void SkiaSvgDom::DrawImage(
-    RSCanvas& canvas, const ImageFit&  /*imageFit*/, const Size& layout, const std::optional<Color>&  /*color*/)
+    RSCanvas& canvas, const ImageFit& /*imageFit*/, const Size& layout, const std::optional<Color>& /*color*/)
 {
-#ifndef NG_BUILD
     CHECK_NULL_VOID(skiaDom_);
     auto rsCanvas = canvas.GetImpl<Rosen::Drawing::SkiaCanvas>();
     CHECK_NULL_VOID(rsCanvas);
-    auto *skCanvas = rsCanvas->ExportSkCanvas();
-    //TODO:use graphics_2d to paint SVG
+    auto* skCanvas = rsCanvas->ExportSkCanvas();
+    // TODO:use graphics_2d to paint SVG
     auto svgContainerSize = SizeF(layout.Width(), layout.Height());
     if (svgContainerSize.IsNegative()) {
         // when layout size is invalid, try the container size of svg
@@ -62,13 +56,12 @@ void SkiaSvgDom::DrawImage(
         }
         svgContainerSize = GetContainerSize();
     }
-    //TODO:svg ObjectFit
+    // TODO:svg ObjectFit
     double width = svgContainerSize.Width();
     double height = svgContainerSize.Height();
     SetContainerSize(svgContainerSize);
     skCanvas->clipRect({ 0, 0, width, height }, SkClipOp::kIntersect, true);
     Render(skCanvas);
-#endif
 }
 
 const sk_sp<SkSVGDOM>& SkiaSvgDom::GetSkiaSvgDom() const
@@ -78,25 +71,17 @@ const sk_sp<SkSVGDOM>& SkiaSvgDom::GetSkiaSvgDom() const
 
 void SkiaSvgDom::Render(SkCanvas* skCanvas)
 {
-#ifndef NG_BUILD
     skiaDom_->render(skCanvas);
-#endif
 }
 
 SizeF SkiaSvgDom::GetContainerSize() const
 {
-#ifdef NG_BUILD
-    return {};
-#else
     return SizeF(skiaDom_->containerSize().width(), skiaDom_->containerSize().height());
-#endif
 }
 
 void SkiaSvgDom::SetContainerSize(const SizeF& containerSize)
 {
-#ifndef NG_BUILD
-    skiaDom_->setContainerSize({containerSize.Width(), containerSize.Height()});
-#endif
+    skiaDom_->setContainerSize({ containerSize.Width(), containerSize.Height() });
 }
 
 } // namespace OHOS::Ace::NG

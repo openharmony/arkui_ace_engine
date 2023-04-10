@@ -112,6 +112,8 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         UpdateListItemConstraint(axis, contentIdealSize, childLayoutConstraint);
         MeasureList(layoutWrapper, childLayoutConstraint, axis);
     } else {
+        itemPosition_.clear();
+        layoutWrapper->RemoveAllChildInRenderTree();
         LOGI("child size is empty");
     }
 
@@ -125,7 +127,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     layoutWrapper->GetGeometryNode()->SetFrameSize(contentIdealSize.ConvertToSizeT());
 
     // set list cache info.
-    layoutWrapper->SetCacheCount(listLayoutProperty->GetCachedCountValue(1) * GetLanes());
+    SetCacheCount(layoutWrapper, listLayoutProperty->GetCachedCountValue(1));
 
     LOGD("new start index is %{public}d, new end index is %{public}d, offset is %{public}f, mainSize is %{public}f",
         GetStartIndex(), GetEndIndex(), currentOffset_, contentMainSize_);
@@ -210,7 +212,7 @@ void ListLayoutAlgorithm::MeasureList(
             if (jumpIndex_.value() > 0 && GreatNotEqual(GetStartPosition(), startMainPos_)) {
                 LayoutBackward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value() - 1, GetStartPosition());
             }
-        } else if (scrollIndexAlignment_ == ScrollIndexAlignment::ALIGN_BUTTON) {
+        } else if (scrollIndexAlignment_ == ScrollIndexAlignment::ALIGN_BOTTOM) {
             jumpIndex_ = GetLanesFloor(layoutWrapper, jumpIndex_.value()) + GetLanes() - 1;
             LayoutBackward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value(), endMainPos_);
             if (jumpIndex_.value() < totalItemCount_ - 1 && LessNotEqual(GetEndPosition(), endMainPos_)) {
@@ -229,6 +231,9 @@ void ListLayoutAlgorithm::MeasureList(
                 LayoutBackward(layoutWrapper, layoutConstraint, axis, GetStartIndex() - 1, GetStartPosition());
             }
         } else {
+            if (overScrollFeature_ && !overScrollTop && !NearZero(prevContentMainSize_)) {
+                endPos += contentMainSize_ - prevContentMainSize_;
+            }
             LayoutBackward(layoutWrapper, layoutConstraint, axis, endIndex, endPos);
             if (GetEndIndex() < (totalItemCount_ - 1) && LessNotEqual(GetEndPosition(), endMainPos_)) {
                 LayoutForward(layoutWrapper, layoutConstraint, axis, GetEndIndex() + 1, GetEndPosition());
@@ -314,6 +319,7 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const Layo
         return;
     }
 
+    currentEndPos += chainOffset;
     // adjust offset.
     if (LessNotEqual(currentEndPos, endMainPos_) && !itemPosition_.empty()) {
         auto firstItemTop = itemPosition_.begin()->second.startPos;
@@ -379,14 +385,11 @@ void ListLayoutAlgorithm::LayoutBackward(
         chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(currentIndex) : 0.0f;
     } while (GreatNotEqual(currentStartPos + chainOffset, startMainPos));
 
-    if (overScrollFeature_ && canOverScroll_) {
-        LOGD("during over scroll, just return in LayoutBackward");
-        return;
-    }
-
+    currentStartPos += chainOffset;
     // adjust offset. If edgeEffect is SPRING, jump adjust to allow list scroll through boundary
     if (GreatNotEqual(currentStartPos, startMainPos_)) {
-        if (!canOverScroll_ || jumpIndex_.has_value()) {
+        bool overBottom = LessNotEqual(GetEndPosition(), endMainPos_);
+        if (!canOverScroll_ || overBottom || jumpIndex_.has_value()) {
             currentOffset_ = currentStartPos;
             if (!mainSizeIsDefined_ && GetEndIndex() == totalItemCount_ - 1) {
                 auto itemTotalSize = GetEndPosition() - currentStartPos;
@@ -395,6 +398,11 @@ void ListLayoutAlgorithm::LayoutBackward(
         }
         endMainPos_ = currentStartPos + contentMainSize_;
         startMainPos_ = currentStartPos;
+    }
+
+    if (overScrollFeature_) {
+        LOGD("during over scroll, just return in LayoutBackward");
+        return;
     }
 
     // Mark inactive in wrapper.
@@ -517,6 +525,11 @@ void ListLayoutAlgorithm::OnSurfaceChanged(LayoutWrapper* layoutWrapper)
         currentDelta_ -= static_cast<float>(offset);
         LOGI("update offset on virtual keyboard height change, %{public}f", offset);
     }
+}
+
+void ListLayoutAlgorithm::SetCacheCount(LayoutWrapper* layoutWrapper, int32_t cachedCount)
+{
+    layoutWrapper->SetCacheCount(cachedCount);
 }
 
 void ListLayoutAlgorithm::SetListItemGroupParam(const RefPtr<LayoutWrapper>& layoutWrapper, float referencePos,

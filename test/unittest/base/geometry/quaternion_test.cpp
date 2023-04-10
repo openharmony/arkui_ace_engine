@@ -13,9 +13,10 @@
  * limitations under the License.
  */
 
+#include <cmath>
+
 #include "gtest/gtest.h"
 
-#include <cmath>
 #include "base/geometry/quaternion.h"
 
 using namespace testing;
@@ -26,35 +27,9 @@ namespace {
 const double NUM_D1 = 1.0;
 const double NUM_D2 = 0.2;
 const double NUM_D3 = std::sin(std::acos(0.8)) / 3;
-}
+} // namespace
 
-class QuaternionTest : public testing::Test {
-public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
-    void SetUp();
-    void TearDown();
-};
-
-void QuaternionTest::SetUpTestCase()
-{
-    GTEST_LOG_(INFO) << "QuaternionTest SetUpTestCase";
-}
-
-void QuaternionTest::TearDownTestCase()
-{
-    GTEST_LOG_(INFO) << "QuaternionTest TearDownTestCase";
-}
-
-void QuaternionTest::SetUp()
-{
-    GTEST_LOG_(INFO) << "QuaternionTest SetUp";
-}
-
-void QuaternionTest::TearDown()
-{
-    GTEST_LOG_(INFO) << "QuaternionTest TearDown";
-}
+class QuaternionTest : public testing::Test {};
 
 /**
  * @tc.name: QuaternionTest001

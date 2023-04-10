@@ -31,7 +31,7 @@
 #define FML_EMBEDDER_ONLY
 #endif
 #include "flutter/fml/message_loop.h"
-#ifdef OHOS_STANDARD_SYSTEM
+#if defined(OHOS_STANDARD_SYSTEM) || defined(ANDROID_PLATFORM)
 #include "flutter/shell/platform/ohos/platform_task_runner.h"
 #endif
 
@@ -44,7 +44,6 @@
 
 namespace OHOS::Ace {
 namespace {
-
 constexpr int32_t GPU_THREAD_PRIORITY = -10;
 constexpr int32_t UI_THREAD_PRIORITY = -15;
 
@@ -133,13 +132,24 @@ FlutterTaskExecutor::~FlutterTaskExecutor()
         platformRunner_, [rawPtr] { std::unique_ptr<fml::Thread> jsThread(rawPtr); }, 0);
 }
 
-void FlutterTaskExecutor::InitPlatformThread(bool useCurrentEventRunner)
+void FlutterTaskExecutor::InitPlatformThread(bool useCurrentEventRunner, bool isStageModel)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     platformRunner_ = flutter::PlatformTaskRunner::CurrentTaskRunner(useCurrentEventRunner);
 #else
+#ifdef ANDROID_PLATFORM
+    if (isStageModel) {
+        LOGI("using eventhandler as platform thread in stage model.");
+        platformRunner_ = flutter::PlatformTaskRunner::CurrentTaskRunner(useCurrentEventRunner);
+    } else {
+        LOGI("using messageLoop as platform thread in fa model.");
+        fml::MessageLoop::EnsureInitializedForCurrentThread();
+        platformRunner_ = fml::MessageLoop::GetCurrent().GetTaskRunner();
+    }
+#else
     fml::MessageLoop::EnsureInitializedForCurrentThread();
     platformRunner_ = fml::MessageLoop::GetCurrent().GetTaskRunner();
+#endif
 #endif
 
     FillTaskTypeTable(TaskType::PLATFORM);
@@ -363,5 +373,4 @@ void FlutterTaskExecutor::FillTaskTypeTable(const WeakPtr<FlutterTaskExecutor>& 
         taskExecutor->FillTaskTypeTable(type);
     }
 }
-
 } // namespace OHOS::Ace

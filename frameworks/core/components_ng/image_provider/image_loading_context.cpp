@@ -30,6 +30,10 @@ ImageLoadingContext::ImageLoadingContext(const ImageSourceInfo& src, LoadNotifie
     : src_(src), notifiers_(std::move(loadNotifier)), syncLoad_(syncLoad)
 {
     stateManager_ = MakeRefPtr<ImageStateManager>(WeakClaim(this));
+    // pixmap src is ready to draw
+    if (src_.GetSrcType() == SrcType::PIXMAP) {
+        syncLoad_ = true;
+    }
 }
 
 ImageLoadingContext::~ImageLoadingContext()
@@ -139,7 +143,7 @@ void ImageLoadingContext::OnMakeCanvasImage()
         SuccessCallback(image);
         return;
     }
-    LOGI("CanvasImage cache miss, start MakeCanvasImage: %{public}s", imageObj_->GetSourceInfo().ToString().c_str());
+    LOGI("start MakeCanvasImage: %{public}s", imageObj_->GetSourceInfo().ToString().c_str());
     // step4: [MakeCanvasImage] according to [resizeTarget]
     canvasKey_ = ImageUtils::GenerateImageKey(src_, resizeTarget);
     imageObj_->MakeCanvasImage(Claim(this), resizeTarget, GetSourceSize().has_value(), syncLoad_);
@@ -160,7 +164,7 @@ void ImageLoadingContext::SuccessCallback(const RefPtr<CanvasImage>& canvasImage
 
 void ImageLoadingContext::FailCallback(const std::string& errorMsg)
 {
-    LOGI("Image LoadFail, source = %{private}s, reason: %{public}s", src_.ToString().c_str(), errorMsg.c_str());
+    LOGD("Image LoadFail, source = %{private}s, reason: %{public}s", src_.ToString().c_str(), errorMsg.c_str());
     stateManager_->HandleCommand(ImageLoadingCommand::LOAD_FAIL);
 }
 

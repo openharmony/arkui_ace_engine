@@ -68,8 +68,8 @@ HWTEST_F(MenuLayoutAlgorithmTestNg, MenuLayoutAlgorithmTestNg001, TestSize.Level
     RefPtr<MenuLayoutAlgorithm> menuLayoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
     SizeF size(50, 100);
     SizeF size_f(100, 200);
-    float clickPosition = 50.0;
-    menuLayoutAlgorithm->screenSize_ = size_f;
+    float clickPosition = 50.0f;
+    menuLayoutAlgorithm->wrapperSize_ = size_f;
     auto result = menuLayoutAlgorithm->HorizontalLayout(size, clickPosition);
     EXPECT_EQ(result, clickPosition);
 }
@@ -84,10 +84,10 @@ HWTEST_F(MenuLayoutAlgorithmTestNg, MenuLayoutAlgorithmTestNg002, TestSize.Level
     RefPtr<MenuLayoutAlgorithm> menuLayoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
     SizeF size(50, 100);
     SizeF size_f(100, 200);
-    float clickPosition = 60.0;
-    menuLayoutAlgorithm->screenSize_ = size_f;
+    float clickPosition = 60.0f;
+    menuLayoutAlgorithm->wrapperSize_ = size_f;
     auto result = menuLayoutAlgorithm->HorizontalLayout(size, clickPosition);
-    EXPECT_EQ(result, clickPosition - size.Width());
+    EXPECT_EQ(result, size_f.Width() - size.Width());
 }
 
 /**
@@ -100,10 +100,10 @@ HWTEST_F(MenuLayoutAlgorithmTestNg, MenuLayoutAlgorithmTestNg003, TestSize.Level
     RefPtr<MenuLayoutAlgorithm> menuLayoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
     SizeF size(70, 100);
     SizeF size_f(100, 200);
-    float clickPosition = 60.0;
-    menuLayoutAlgorithm->screenSize_ = size_f;
+    float clickPosition = 60.0f;
+    menuLayoutAlgorithm->wrapperSize_ = size_f;
     auto result = menuLayoutAlgorithm->HorizontalLayout(size, clickPosition);
-    EXPECT_EQ(result, menuLayoutAlgorithm->screenSize_.Width() - size.Width());
+    EXPECT_EQ(result, menuLayoutAlgorithm->wrapperSize_.Width() - size.Width());
 }
 
 /**
@@ -116,8 +116,8 @@ HWTEST_F(MenuLayoutAlgorithmTestNg, MenuLayoutAlgorithmTestNg004, TestSize.Level
     RefPtr<MenuLayoutAlgorithm> menuLayoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
     SizeF size(100, 100);
     SizeF size_f(100, 200);
-    float clickPosition = 60.0;
-    menuLayoutAlgorithm->screenSize_ = size_f;
+    float clickPosition = 60.0f;
+    menuLayoutAlgorithm->wrapperSize_ = size_f;
     auto result = menuLayoutAlgorithm->HorizontalLayout(size, clickPosition);
     EXPECT_EQ(result, 0.0);
 }
@@ -132,8 +132,8 @@ HWTEST_F(MenuLayoutAlgorithmTestNg, MenuLayoutAlgorithmTestNg005, TestSize.Level
     RefPtr<MenuLayoutAlgorithm> menuLayoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
     SizeF size(100, 100);
     SizeF size_f(100, 200);
-    float clickPosition = 100.0;
-    menuLayoutAlgorithm->screenSize_ = size_f;
+    float clickPosition = 100.0f;
+    menuLayoutAlgorithm->wrapperSize_ = size_f;
     auto result = menuLayoutAlgorithm->VerticalLayout(size, clickPosition);
     EXPECT_EQ(result, clickPosition);
 }
@@ -147,11 +147,10 @@ HWTEST_F(MenuLayoutAlgorithmTestNg, MenuLayoutAlgorithmTestNg006, TestSize.Level
 {
     RefPtr<MenuLayoutAlgorithm> menuLayoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
     SizeF size(100, 100);
-    SizeF size_f(100, 200);
-    float clickPosition = 150.0;
-    menuLayoutAlgorithm->screenSize_ = size_f;
+    float clickPosition = 150.0f;
+    menuLayoutAlgorithm->topSpace_ = 200.0f;
     auto result = menuLayoutAlgorithm->VerticalLayout(size, clickPosition);
-    EXPECT_EQ(result, clickPosition - size.Height());
+    EXPECT_EQ(result, menuLayoutAlgorithm->topSpace_ - size.Height());
 }
 
 /**
@@ -164,10 +163,10 @@ HWTEST_F(MenuLayoutAlgorithmTestNg, MenuLayoutAlgorithmTestNg007, TestSize.Level
     RefPtr<MenuLayoutAlgorithm> menuLayoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
     SizeF size(100, 150);
     SizeF size_f(100, 200);
-    float clickPosition = 100.0;
-    menuLayoutAlgorithm->screenSize_ = size_f;
+    float clickPosition = 100.0f;
+    menuLayoutAlgorithm->wrapperSize_ = size_f;
     auto result = menuLayoutAlgorithm->VerticalLayout(size, clickPosition);
-    EXPECT_EQ(result, menuLayoutAlgorithm->screenSize_.Height() - size.Height());
+    EXPECT_EQ(result, menuLayoutAlgorithm->wrapperSize_.Height() - size.Height());
 }
 
 /**
@@ -180,8 +179,8 @@ HWTEST_F(MenuLayoutAlgorithmTestNg, MenuLayoutAlgorithmTestNg008, TestSize.Level
     RefPtr<MenuLayoutAlgorithm> menuLayoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
     SizeF size(100, 200);
     SizeF size_f(100, 200);
-    float clickPosition = 100.0;
-    menuLayoutAlgorithm->screenSize_ = size_f;
+    float clickPosition = 100.0f;
+    menuLayoutAlgorithm->wrapperSize_ = size_f;
     auto result = menuLayoutAlgorithm->VerticalLayout(size, clickPosition);
     EXPECT_EQ(result, 0.0);
 }
@@ -209,7 +208,7 @@ HWTEST_F(MenuLayoutAlgorithmTestNg, MenuLayoutAlgorithmTestNg009, TestSize.Level
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     LayoutWrapper* layoutWrapper = new LayoutWrapper(frameNode, geometryNode, frameNode->GetLayoutProperty());
     menuLayoutAlgorithm->Initialize(layoutWrapper);
-    EXPECT_EQ(menuLayoutAlgorithm->screenSize_.Width(), 0);
+    EXPECT_EQ(menuLayoutAlgorithm->wrapperSize_.Width(), 0);
     delete layoutWrapper;
     layoutWrapper = nullptr;
 }
@@ -285,7 +284,7 @@ HWTEST_F(MenuLayoutAlgorithmTestNg, MenuLayoutAlgorithmTestNg011, TestSize.Level
     layoutAlgorithm->Measure(&layoutWrapper);
     EXPECT_EQ(layoutAlgorithm->position_, OffsetF());
     EXPECT_EQ(layoutAlgorithm->positionOffset_, OffsetF());
-    EXPECT_EQ(layoutAlgorithm->screenSize_, SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
     layoutAlgorithm->Layout(&layoutWrapper);
     EXPECT_EQ(geometryNode->GetMarginFrameOffset(), OffsetF(0.0f, 0.0f));
 }
@@ -329,7 +328,7 @@ HWTEST_F(MenuLayoutAlgorithmTestNg, MenuLayoutAlgorithmTestNg012, TestSize.Level
     layoutAlgorithm->Measure(&layoutWrapper);
     EXPECT_EQ(layoutAlgorithm->position_, OffsetF());
     EXPECT_EQ(layoutAlgorithm->positionOffset_, OffsetF(POSITION_OFFSET, POSITION_OFFSET));
-    EXPECT_EQ(layoutAlgorithm->screenSize_, SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
     layoutAlgorithm->Layout(&layoutWrapper);
     EXPECT_EQ(geometryNode->GetMarginFrameOffset(), OffsetF(POSITION_OFFSET, POSITION_OFFSET));
 }

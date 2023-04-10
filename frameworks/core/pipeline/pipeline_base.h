@@ -62,6 +62,7 @@ class ManagerInterface;
 enum class FrontendType;
 using SharePanelCallback = std::function<void(const std::string& bundleName, const std::string& abilityName)>;
 using AceVsyncCallback = std::function<void(uint64_t, uint32_t)>;
+using EtsCardTouchEventCallback = std::function<void(const TouchEvent&)>;
 class ACE_EXPORT PipelineBase : public AceType {
     DECLARE_ACE_TYPE(PipelineBase, AceType);
 
@@ -97,6 +98,8 @@ public:
     bool CloseImplicitAnimation();
 
     void ForceLayoutForImplicitAnimation();
+
+    void ForceRenderForImplicitAnimation();
 
     // add schedule task and return the unique mark id.
     virtual uint32_t AddScheduleTask(const RefPtr<ScheduleTask>& task) = 0;
@@ -690,6 +693,10 @@ public:
 
     Rect GetCurrentWindowRect() const;
 
+    virtual void SetGetViewSafeAreaImpl(std::function<SafeAreaEdgeInserts()>&& callback) = 0;
+
+    virtual SafeAreaEdgeInserts GetCurrentViewSafeArea() const = 0;
+
     void SetPluginOffset(const Offset& offset)
     {
         pluginOffset_ = offset;
@@ -770,19 +777,50 @@ public:
         parentPipeline_ = pipeline;
     }
 
-    void AddEtsCardTouchEventCallback(const std::function<void(const TouchEvent&)>&& callback)
-    {
-        etsCardTouchEventCallback_ = std::move(callback);
-    }
+    void AddEtsCardTouchEventCallback(int32_t ponitId, EtsCardTouchEventCallback&& callback);
+
+    void HandleEtsCardTouchEvent(const TouchEvent& point);
+
+    void RemoveEtsCardTouchEventCallback(int32_t ponitId);
 
     void AddUIExtensionCallback(std::function<void(const TouchEvent&)>&& callback)
     {
         uiExtensionCallback_ = std::move(callback);
     }
 
-    void SetFormVsyncCallback(AceVsyncCallback&& callback, int32_t formWindowId);
+    void SetSubWindowVsyncCallback(AceVsyncCallback&& callback, int32_t subWindowId);
 
-    void RemoveFormVsyncCallback(int32_t formWindowId);
+    void RemoveSubWindowVsyncCallback(int32_t subWindowId);
+
+    void SetIsLayoutFullScreen(bool isLayoutFullScreen)
+    {
+        isLayoutFullScreen_ = isLayoutFullScreen;
+    }
+
+    bool GetIsLayoutFullScreen() const
+    {
+        return isLayoutFullScreen_;
+    }
+
+    void SetIsAppWindow(bool isAppWindow)
+    {
+        isAppWindow_ = isAppWindow;
+    }
+
+    bool GetIsAppWindow() const
+    {
+        return isAppWindow_;
+    }
+
+    void SetIgnoreViewSafeArea(bool ignoreViewSafeArea)
+    {
+        ignoreViewSafeArea_ = ignoreViewSafeArea;
+    }
+
+    bool GetIgnoreViewSafeArea() const
+    {
+        return ignoreViewSafeArea_;
+    }
 
 protected:
     void TryCallNextFrameLayoutCallback()
@@ -814,12 +852,15 @@ protected:
     bool isFormRender_ = false;
     bool isRightToLeft_ = false;
     bool isFullWindow_ = false;
+    bool isLayoutFullScreen_ = false;
+    bool isAppWindow_ = true;
+    bool ignoreViewSafeArea_ = false;
     bool installationFree_ = false;
     bool isSubPipeline_ = false;
 
     bool isJsPlugin_ = false;
 
-    std::unordered_map<int32_t, AceVsyncCallback> formVsyncCallbacks_;
+    std::unordered_map<int32_t, AceVsyncCallback> subWindowVsyncCallbacks_;
     int32_t minPlatformVersion_ = 0;
     int32_t windowId_ = 0;
     int32_t appLabelId_ = 0;
@@ -839,6 +880,7 @@ protected:
 
     std::unique_ptr<DrawDelegate> drawDelegate_;
     std::stack<bool> pendingImplicitLayout_;
+    std::stack<bool> pendingImplicitRender_;
     std::shared_ptr<Window> window_;
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<AssetManager> assetManager_;
@@ -865,7 +907,7 @@ protected:
     WeakPtr<PipelineBase> parentPipeline_;
 
     std::vector<WeakPtr<PipelineBase>> touchPluginPipelineContext_;
-    std::function<void(const TouchEvent&)> etsCardTouchEventCallback_;
+    std::unordered_map<int32_t, EtsCardTouchEventCallback> etsCardTouchEventCallback_;
     std::function<void(const TouchEvent&)> uiExtensionCallback_;
 
     RefPtr<Clipboard> clipboard_;

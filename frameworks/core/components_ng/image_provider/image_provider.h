@@ -103,6 +103,7 @@ private:
 
     static RefPtr<ImageObject> BuildImageObject(const ImageSourceInfo& src, const RefPtr<ImageData>& data);
 
+    static RefPtr<ImageObject> QueryThumbnailCache(const ImageSourceInfo& src);
     static void CacheCanvasImage(const RefPtr<CanvasImage>& canvasImage, const std::string& key);
 
     // helper function to create image object from ImageSourceInfo
@@ -112,12 +113,13 @@ private:
      *
      *    @param imageObjWp           weakPtr of imageObj, contains image data
      *    @param renderTaskHolder     passed in to create SkiaGPUObject
+     *    @return                     true if MakeCanvasImage was successful
      */
-    static void MakeCanvasImageHelper(
+    static bool MakeCanvasImageHelper(
         const WeakPtr<ImageObject>& imageObjWp, const SizeF& targetSize, bool forceResize, bool sync = false);
 
-    static void UploadImageToGPUForRender(const RefPtr<CanvasImage>& canvasImage,
-        std::function<void(RefPtr<CanvasImage>)>&& callback, const std::string& key, const SizeF& resizeTarget,
+    // upload image texture to GPU and compress
+    static bool TryCompress(const RefPtr<CanvasImage>& canvasImage, const std::string& key, const SizeF& resizeTarget,
         const RefPtr<ImageData>& data, bool syncLoad);
 
     // helper functions to end task and callback to LoadingContexts

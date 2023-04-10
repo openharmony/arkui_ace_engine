@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -300,7 +300,22 @@ bool TextLayoutAlgorithm::BuildParagraphAdaptUseMinFontSize(TextStyle& textStyle
     const RefPtr<TextLayoutProperty>& layoutProperty, const LayoutConstraintF& contentConstraint,
     const RefPtr<PipelineContext>& pipeline)
 {
-    return AdaptMaxTextSize(textStyle, layoutProperty->GetContent().value_or(""), contentConstraint, pipeline);
+    if (!AdaptMaxTextSize(textStyle, layoutProperty->GetContent().value_or(""), contentConstraint, pipeline)) {
+        return false;
+    }
+
+    // Confirmed specification: The width of the text paragraph covers the width of the component, so this code is
+    // generally not allowed to be modified
+    if (!contentConstraint.selfIdealSize.Width()) {
+        float paragraphNewWidth = std::min(GetTextWidth(), paragraph_->GetMaxWidth());
+        paragraphNewWidth =
+            std::clamp(paragraphNewWidth, contentConstraint.minSize.Width(), contentConstraint.maxSize.Width());
+        if (!NearEqual(paragraphNewWidth, paragraph_->GetMaxWidth())) {
+            paragraph_->Layout(std::ceil(paragraphNewWidth));
+        }
+    }
+
+    return true;
 }
 
 bool TextLayoutAlgorithm::BuildParagraphAdaptUseLayoutConstraint(TextStyle& textStyle,
@@ -494,7 +509,11 @@ std::optional<TextStyle> TextLayoutAlgorithm::GetTextStyle() const
 void TextLayoutAlgorithm::UpdateTextColorIfForeground(const RefPtr<FrameNode>& frameNode, TextStyle& textStyle)
 {
     auto renderContext = frameNode->GetRenderContext();
-    if (renderContext->HasForegroundColor() || renderContext->HasForegroundColorStrategy()) {
+    if (renderContext->HasForegroundColor()) {
+        if (renderContext->GetForegroundColorValue().GetValue() != textStyle.GetTextColor().GetValue()) {
+            textStyle.SetTextColor(Color::FOREGROUND);
+        }
+    } else if (renderContext->HasForegroundColorStrategy()) {
         textStyle.SetTextColor(Color::FOREGROUND);
     }
 }

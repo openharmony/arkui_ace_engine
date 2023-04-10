@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,9 @@
 #include <string>
 
 #include "gtest/gtest.h"
+#include "core/components/calendar/calendar_data_adapter.h"
+#include "core/pipeline/base/element_register.h"
+#include "core/pipeline_ng/ui_task_scheduler.h"
 
 #define private public
 #define protected public
@@ -32,6 +35,8 @@
 #include "core/components_ng/pattern/calendar/calendar_paint_property.h"
 #include "core/components_ng/pattern/calendar/calendar_pattern.h"
 #include "core/components_ng/pattern/calendar/calendar_view.h"
+#include "core/components_ng/pattern/swiper/swiper_layout_property.h"
+#include "core/components_ng/pattern/swiper/swiper_paint_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 using namespace testing;
@@ -41,6 +46,23 @@ struct TestProperty {};
 namespace {
 const Color COLOR_VALUE = Color(0xffbbffff);
 const Dimension SIZE_VALUE = 1.2_px;
+
+const int32_t DAY_VALUE = 1;
+const int32_t MONTH_VALUE = 1;
+const int32_t YEAR_VALUE = 1;
+const int32_t INDEX_VALUE = 1;
+const int32_t JUMP_YEAR = 2023;
+const int32_t JUMP_MONTH = 3;
+const int32_t JUMP_DAY_FIRST = 3;
+const int32_t JUMP_DAY_SECOND = 13;
+const int32_t JUMP_DAY_THIRD = 23;
+
+const int32_t FIRST_DAY_INDEX_VALUE = 1;
+const std::string LUNAR_MONTH_VALUE = "五月";
+const std::string LUNAR_DAY_VALUE = "初五";
+const std::string DAY_MARK = "MARK";
+const std::string DAY_MARK_VALUE = "MARK_VALUE";
+const std::string OFF_DAYS_VALUE = "OFF_DAYS";
 } // namespace
 
 class CalendarPatternTestNg : public testing::Test {
@@ -226,5 +248,179 @@ HWTEST_F(CalendarPatternTestNg, CalendarViewTest001, TestSize.Level1)
     EXPECT_EQ(calendarPaintProperty->GetWorkStateWidthValue(1.0_px), SIZE_VALUE);
     EXPECT_EQ(calendarPaintProperty->GetWorkStateHorizontalMovingDistanceValue(1.0_px), SIZE_VALUE);
     EXPECT_EQ(calendarPaintProperty->GetWorkStateVerticalMovingDistanceValue(1.0_px), SIZE_VALUE);
+}
+
+HWTEST_F(CalendarPatternTestNg, CalendarViewTest002, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    RefPtr<CalendarPattern> initPattern = AceType::MakeRefPtr<CalendarPattern>();
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode("testNode", 1, initPattern);
+    stack->Push(frameNode);
+    ObtainedMonth obtainedMonth;
+    obtainedMonth.year = YEAR_VALUE;
+    obtainedMonth.month = MONTH_VALUE;
+    obtainedMonth.firstDayIndex = FIRST_DAY_INDEX_VALUE;
+    CalendarView::SetCurrentData(obtainedMonth);
+    CalendarView::SetPreData(obtainedMonth);
+    CalendarView::SetNextData(obtainedMonth);
+
+    CalendarDay calendarDay;
+    calendarDay.index = INDEX_VALUE;
+    calendarDay.day = DAY_VALUE;
+    calendarDay.weekend = true;
+    calendarDay.today = false;
+    calendarDay.focused = false;
+    calendarDay.touched = true;
+    calendarDay.isFirstOfLunar = false;
+    calendarDay.hasSchedule = true;
+    calendarDay.markLunarDay = false;
+    calendarDay.lunarMonth = LUNAR_MONTH_VALUE;
+    calendarDay.lunarDay = LUNAR_DAY_VALUE;
+    calendarDay.dayMark = DAY_MARK;
+    calendarDay.dayMarkValue = DAY_MARK_VALUE;
+    CalendarMonth calendarMonth;
+    calendarMonth.year = YEAR_VALUE;
+    calendarMonth.month = MONTH_VALUE;
+    calendarDay.month = calendarMonth;
+    CalendarView::SetCalendarDay(calendarDay);
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNode()->GetPattern<CalendarPattern>();
+
+    EXPECT_EQ(pattern->GetCurrentMonthData().year, YEAR_VALUE);
+    EXPECT_EQ(pattern->GetCurrentMonthData().month, MONTH_VALUE);
+    EXPECT_EQ(pattern->GetCurrentMonthData().firstDayIndex, FIRST_DAY_INDEX_VALUE);
+    EXPECT_EQ(pattern->GetPreMonthData().year, YEAR_VALUE);
+    EXPECT_EQ(pattern->GetPreMonthData().month, MONTH_VALUE);
+    EXPECT_EQ(pattern->GetPreMonthData().firstDayIndex, FIRST_DAY_INDEX_VALUE);
+    EXPECT_EQ(pattern->GetNextMonthData().year, YEAR_VALUE);
+    EXPECT_EQ(pattern->GetNextMonthData().month, MONTH_VALUE);
+    EXPECT_EQ(pattern->GetNextMonthData().firstDayIndex, FIRST_DAY_INDEX_VALUE);
+
+    EXPECT_EQ(pattern->GetCalendarDay().index, INDEX_VALUE);
+    EXPECT_EQ(pattern->GetCalendarDay().day, DAY_VALUE);
+    EXPECT_TRUE(pattern->GetCalendarDay().weekend);
+    EXPECT_FALSE(pattern->GetCalendarDay().today);
+    EXPECT_FALSE(pattern->GetCalendarDay().focused);
+    EXPECT_TRUE(pattern->GetCalendarDay().touched);
+    EXPECT_FALSE(pattern->GetCalendarDay().isFirstOfLunar);
+    EXPECT_TRUE(pattern->GetCalendarDay().hasSchedule);
+    EXPECT_FALSE(pattern->GetCalendarDay().markLunarDay);
+    EXPECT_EQ(pattern->GetCalendarDay().lunarMonth, LUNAR_MONTH_VALUE);
+    EXPECT_EQ(pattern->GetCalendarDay().lunarDay, LUNAR_DAY_VALUE);
+    EXPECT_EQ(pattern->GetCalendarDay().dayMark, DAY_MARK);
+    EXPECT_EQ(pattern->GetCalendarDay().dayMarkValue, DAY_MARK_VALUE);
+    EXPECT_EQ(pattern->GetCalendarDay().month.year, YEAR_VALUE);
+    EXPECT_EQ(pattern->GetCalendarDay().month.month, MONTH_VALUE);
+}
+
+HWTEST_F(CalendarPatternTestNg, CalendarViewTest003, TestSize.Level1)
+{
+    CalendarData calendarData;
+    CalendarView::Create(calendarData);
+    CalendarView::SetShowLunar(false);
+    CalendarView::SetShowHoliday(false);
+    CalendarView::SetNeedSlide(true);
+    CalendarView::SetStartOfWeek(Week::Sun);
+    CalendarView::SetOffDays(OFF_DAYS_VALUE);
+    CalendarView::SetDirection(Axis::HORIZONTAL);
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto swiperNode = stack->GetMainFrameNode()->GetFirstChild();
+    auto swiperFrameNode = AceType::DynamicCast<FrameNode>(swiperNode);
+    auto swiperPaintProperty = swiperFrameNode->GetPaintProperty<SwiperPaintProperty>();
+    auto swiperLayoutProperty = swiperFrameNode->GetLayoutProperty<SwiperLayoutProperty>();
+    auto calendarFrameNode = AceType::DynamicCast<FrameNode>(swiperNode->GetFirstChild());
+    auto calendarPaintProperty = calendarFrameNode->GetPaintProperty<CalendarPaintProperty>();
+
+    EXPECT_FALSE(calendarPaintProperty->GetShowLunarValue());
+    EXPECT_FALSE(calendarPaintProperty->GetShowHolidayValue());
+    EXPECT_FALSE(swiperPaintProperty->GetDisableSwipeValue());
+    EXPECT_EQ(calendarPaintProperty->GetStartOfWeekValue(), Week::Sun);
+    EXPECT_EQ(calendarPaintProperty->GetOffDaysValue(), OFF_DAYS_VALUE);
+    EXPECT_EQ(swiperLayoutProperty->GetDirectionValue(), Axis::HORIZONTAL);
+}
+
+/**
+ * @tc.name: CalendarTest004
+ * @tc.desc: Create calendar, and invoke its JumpTo function to calculate the date.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPatternTestNg, CalendarTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Calendar
+     * @tc.expected: step1. Create Calendar successfully.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    RefPtr<CalendarPattern> calendar = AceType::MakeRefPtr<CalendarPattern>();
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode("testNode", 1, calendar);
+    stack->Push(frameNode);
+    ObtainedMonth obtainedMonth;
+    obtainedMonth.year = JUMP_YEAR;
+    obtainedMonth.month = JUMP_MONTH;
+    obtainedMonth.firstDayIndex = FIRST_DAY_INDEX_VALUE;
+
+    // Add 31 days.
+    std::vector<CalendarDay> days;
+    for (int32_t i = 0; i < 31; i++) {
+        CalendarDay day;
+        day.index = i;
+        day.month.year = JUMP_YEAR;
+        day.month.month = JUMP_MONTH;
+        day.day = i + 1;
+        if (i == 1) {
+            day.focused = true;
+        }
+        days.emplace_back(std::move(day));
+    }
+    obtainedMonth.days = days;
+    CalendarView::SetCurrentData(obtainedMonth);
+    CalendarView::SetPreData(obtainedMonth);
+    CalendarView::SetNextData(obtainedMonth);
+
+    CalendarDay calendarDay;
+    calendarDay.index = INDEX_VALUE;
+    calendarDay.day = DAY_VALUE;
+    calendarDay.today = false;
+    calendarDay.focused = true;
+    calendarDay.touched = true;
+
+    /**
+     * @tc.steps: step2. Jump to destination from 1 to 3.
+     * @tc.expected: step2. Jumped successfully, the focused changed from 1 to 3.
+     */
+    CalendarMonth calendarMonth;
+    calendarMonth.year = JUMP_YEAR;
+    calendarMonth.month = JUMP_MONTH;
+    calendarDay.month = calendarMonth;
+    CalendarView::SetCalendarDay(calendarDay);
+
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNode()->GetPattern<CalendarPattern>();
+    pattern->FireGoToRequestData(JUMP_YEAR, JUMP_MONTH, JUMP_DAY_FIRST);
+    pattern->JumpTo(pattern->currentMonth_);
+    EXPECT_EQ(pattern->currentMonth_.days[JUMP_DAY_FIRST - 1].focused, true);
+
+    /**
+     * @tc.steps: step3. Jump to destination from 3 to 13.
+     * @tc.expected: step3. Jumped successfully, the focused changed from 3 to 13.
+     */
+    pattern->FireGoToRequestData(JUMP_YEAR, JUMP_MONTH, JUMP_DAY_SECOND);
+    pattern->JumpTo(pattern->currentMonth_);
+    EXPECT_EQ(pattern->currentMonth_.days[JUMP_DAY_SECOND - 1].focused, true);
+
+    /**
+     * @tc.steps: step4. Jump to destination from 13 to 23.
+     * @tc.expected: step4. Jumped successfully, the focused changed from 13 to 23.
+     */
+    pattern->FireGoToRequestData(JUMP_YEAR, JUMP_MONTH, JUMP_DAY_THIRD);
+    pattern->JumpTo(pattern->currentMonth_);
+    EXPECT_EQ(pattern->currentMonth_.days[JUMP_DAY_THIRD - 1].focused, true);
+
+    /**
+     * @tc.steps: step5. Jump to destination from 23 to 3.
+     * @tc.expected: step5. Jumped successfully, the focused changed from 23 to 3.
+     */
+    pattern->FireGoToRequestData(JUMP_YEAR, JUMP_MONTH, JUMP_DAY_FIRST);
+    pattern->JumpTo(pattern->currentMonth_);
+    EXPECT_EQ(pattern->currentMonth_.days[JUMP_DAY_FIRST - 1].focused, true);
 }
 } // namespace OHOS::Ace::NG

@@ -61,10 +61,13 @@ void RecognizerGroup::AddChildren(const std::list<RefPtr<NGGestureRecognizer>>& 
     }
 }
 
-RefereeState RecognizerGroup::CheckStates()
+RefereeState RecognizerGroup::CheckStates(size_t touchId)
 {
     int count = 0;
     for (auto& recognizer : recognizers_) {
+        if (AceType::InstanceOf<MultiFingersRecognizer>(recognizer) && !recognizer->CheckTouchId(touchId)) {
+            continue;
+        }
         if (!AceType::InstanceOf<RecognizerGroup>(recognizer)) {
             if (recognizer->GetRefereeState() != RefereeState::SUCCEED_BLOCKED &&
                 recognizer->GetRefereeState() != RefereeState::SUCCEED &&
@@ -77,7 +80,7 @@ RefereeState RecognizerGroup::CheckStates()
         }
         auto group = AceType::DynamicCast<RecognizerGroup>(recognizer);
         if (group) {
-            auto state = group->CheckStates();
+            auto state = group->CheckStates(touchId);
             if (state == RefereeState::PENDING) {
                 count++;
                 break;

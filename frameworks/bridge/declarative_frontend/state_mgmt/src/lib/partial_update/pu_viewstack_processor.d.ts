@@ -70,4 +70,11 @@ declare class ViewStackProcessor {
    * JS signatire: MakeUniqueId() : number
   */
   public static MakeUniqueId(): number;
+
+  /**
+   * return true if the current Container uses PartialUpdate code path
+   * see Container class foundation/arkui/ace_engine/frameworks/core/common/container.h
+   * calls UsesNewPipeline static function
+   */
+  public static UsesNewPipeline();
 }

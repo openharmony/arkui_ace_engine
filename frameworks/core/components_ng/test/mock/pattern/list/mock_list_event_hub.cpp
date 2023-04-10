@@ -16,7 +16,7 @@
 #include "core/components_ng/pattern/list/list_event_hub.h"
 
 namespace OHOS::Ace::NG {
-int32_t ListEventHub::GetListItemIndexByPosition(float /* x */, float /* y */)
+int32_t ListEventHub::GetListItemIndexByPosition(float /* x */, float /* y */, bool /* strict */)
 {
     return 0;
 }

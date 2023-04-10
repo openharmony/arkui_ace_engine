@@ -96,17 +96,21 @@ void ToggleModelImpl::Create(NG::ToggleType toggleType, bool isOn)
         box->SetHeight(toggleTheme->GetHeight().Value(), toggleTheme->GetHeight().Unit());
     }
 }
-void ToggleModelImpl::SetSelectedColor(const Color& selectedColor)
+void ToggleModelImpl::SetSelectedColor(const std::optional<Color>& selectedColor)
 {
+    if (!selectedColor.has_value()) {
+        return;
+    }
+    Color color = selectedColor.value();
     auto mainComponent = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto toggle = AceType::DynamicCast<ToggleComponent>(mainComponent);
     if (toggle) {
-        toggle->SetCheckedColor(selectedColor);
+        toggle->SetCheckedColor(color);
         return;
     }
     auto checkable = AceType::DynamicCast<CheckableComponent>(mainComponent);
     if (checkable) {
-        checkable->SetActiveColor(selectedColor);
+        checkable->SetActiveColor(color);
         return;
     }
 }

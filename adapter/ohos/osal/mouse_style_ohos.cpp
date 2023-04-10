@@ -48,6 +48,7 @@ bool MouseStyleOhos::SetPointerStyle(int32_t windowId, MouseFormat pointerStyle)
         { MouseFormat::CURSOR_COPY, MMI::CURSOR_COPY },
         { MouseFormat::CURSOR_FORBID, MMI::CURSOR_FORBID },
         { MouseFormat::HAND_GRABBING, MMI::HAND_GRABBING },
+        { MouseFormat::HAND_OPEN, MMI::HAND_OPEN },
         { MouseFormat::HAND_POINTING, MMI::HAND_POINTING },
         { MouseFormat::HELP, MMI::HELP },
         { MouseFormat::CURSOR_MOVE, MMI::CURSOR_MOVE },
@@ -56,6 +57,16 @@ bool MouseStyleOhos::SetPointerStyle(int32_t windowId, MouseFormat pointerStyle)
         { MouseFormat::TEXT_CURSOR, MMI::TEXT_CURSOR },
         { MouseFormat::ZOOM_IN, MMI::ZOOM_IN },
         { MouseFormat::ZOOM_OUT, MMI::ZOOM_OUT },
+        { MouseFormat::MIDDLE_BTN_EAST, MMI::MIDDLE_BTN_EAST },
+        { MouseFormat::MIDDLE_BTN_WEST, MMI::MIDDLE_BTN_WEST },
+        { MouseFormat::MIDDLE_BTN_SOUTH, MMI::MIDDLE_BTN_SOUTH },
+        { MouseFormat::MIDDLE_BTN_NORTH, MMI::MIDDLE_BTN_NORTH },
+        { MouseFormat::MIDDLE_BTN_NORTH_SOUTH, MMI::MIDDLE_BTN_NORTH_SOUTH },
+        { MouseFormat::MIDDLE_BTN_NORTH_EAST, MMI::MIDDLE_BTN_NORTH_EAST },
+        { MouseFormat::MIDDLE_BTN_NORTH_WEST, MMI::MIDDLE_BTN_NORTH_WEST },
+        { MouseFormat::MIDDLE_BTN_SOUTH_EAST, MMI::MIDDLE_BTN_SOUTH_EAST },
+        { MouseFormat::MIDDLE_BTN_SOUTH_WEST, MMI::MIDDLE_BTN_SOUTH_WEST },
+        { MouseFormat::MIDDLE_BTN_NORTH_SOUTH_WEST_EAST, MMI::MIDDLE_BTN_NORTH_SOUTH_WEST_EAST },
     };
     int32_t MMIPointStyle = MMI::DEFAULT;
     int64_t idx = BinarySearchFindIndex(mouseFormatMap, ArraySize(mouseFormatMap), pointerStyle);

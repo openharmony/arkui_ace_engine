@@ -43,9 +43,7 @@ std::optional<SizeF> ProgressLayoutAlgorithm::MeasureContent(
     CHECK_NULL_RETURN(progressLayoutProperty, std::nullopt);
     type_ = progressLayoutProperty->GetType().value_or(ProgressType::LINEAR);
     strokeWidth_ = progressLayoutProperty->GetStrokeWidth()
-                       .value_or(progressTheme ? (type_ == ProgressType::SCALE ? progressTheme->GetScaleLength()
-                                                                               : progressTheme->GetTrackThickness())
-                                               : Dimension(strokeWidth_))
+                       .value_or(progressTheme ? progressTheme->GetTrackThickness() : Dimension(strokeWidth_))
                        .ConvertToPx();
     float diameter =
         progressTheme ? progressTheme->GetRingDiameter().ConvertToPx() : DEFALT_RING_DIAMETER.ConvertToPx();
@@ -53,7 +51,7 @@ std::optional<SizeF> ProgressLayoutAlgorithm::MeasureContent(
     if (contentConstraint.selfIdealSize.Width()) {
         width_ = contentConstraint.selfIdealSize.Width().value();
     }
-    float height_ = strokeWidth_ * 2.0f;
+    float height_ = strokeWidth_;
     if (contentConstraint.selfIdealSize.Height()) {
         height_ = contentConstraint.selfIdealSize.Height().value();
     }
@@ -79,10 +77,6 @@ std::optional<SizeF> ProgressLayoutAlgorithm::MeasureContent(
     }
     height_ = std::min(height_, static_cast<float>(contentConstraint.maxSize.Height()));
     width_ = std::min(width_, static_cast<float>(contentConstraint.maxSize.Width()));
-    if (type_ == ProgressType::LINEAR) {
-        strokeWidth_ = std::min(strokeWidth_, height_ / 2.0f);
-        strokeWidth_ = std::min(strokeWidth_, width_ / 2.0f);
-    }
     LOGD("ProgressLayoutAlgorithm::Type:%{public}d MeasureContent: width_: %{public}fl ,height_: %{public}fl", type_,
         width_, height_);
     return SizeF(width_, height_);

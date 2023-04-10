@@ -18,6 +18,7 @@
 
 #include <optional>
 
+#include "base/memory/referenced.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -141,8 +142,23 @@ public:
     void UpdateText(const std::string& content);
     void UpdateIcon(const std::string& src);
 
+    void SetMenu(const WeakPtr<FrameNode>& menuWeak)
+    {
+        menuWeak_ = menuWeak;
+    }
+
+    const WeakPtr<FrameNode>& GetMenu() const
+    {
+        return menuWeak_;
+    }
+
 private:
     void OnModifyDone() override;
+    // make render after measure and layout
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override
+    {
+        return !(config.skipMeasure && config.skipLayout);
+    }
 
     // register option's callback
     void RegisterOnClick();
@@ -162,6 +178,7 @@ private:
 
     // src of icon image, used in XTS inspector
     std::string iconSrc_;
+    WeakPtr<FrameNode> menuWeak_;
     RefPtr<FrameNode> text_;
     RefPtr<FrameNode> icon_;
     RefPtr<TextTheme> textTheme_;

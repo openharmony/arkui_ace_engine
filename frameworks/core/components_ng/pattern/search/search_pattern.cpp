@@ -172,6 +172,8 @@ void SearchPattern::OnModifyDone()
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
+    InitFocusEvent(focusHub);
+    InitClickEvent();
 }
 
 void SearchPattern::InitButtonAndImageClickEvent()
@@ -331,28 +333,34 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
     if (event.code == KeyCode::KEY_DPAD_LEFT || event.IsShiftWith(KeyCode::KEY_TAB)) {
         if (focusChoice_ == FocusChoice::CANCEL_BUTTON) {
             focusChoice_ = FocusChoice::SEARCH;
-        } else if (focusChoice_ == FocusChoice::SEARCH_BUTTON) {
+            PaintFocusState();
+            return true;
+        }
+        if (focusChoice_ == FocusChoice::SEARCH_BUTTON) {
             if (NearZero(cancelButtonSize_.Height())) {
                 focusChoice_ = FocusChoice::SEARCH;
             } else {
                 focusChoice_ = FocusChoice::CANCEL_BUTTON;
             }
+            PaintFocusState();
+            return true;
         }
-        PaintFocusState();
-        return true;
     }
-    if (event.code == KeyCode::KEY_DPAD_RIGHT || event.code == KeyCode::KEY_TAB) {
+    if (event.code == KeyCode::KEY_DPAD_RIGHT || (event.pressedCodes.size() == 1 && event.code == KeyCode::KEY_TAB)) {
         if (focusChoice_ == FocusChoice::SEARCH) {
             if (NearZero(cancelButtonSize_.Height())) {
                 focusChoice_ = FocusChoice::SEARCH_BUTTON;
             } else {
                 focusChoice_ = FocusChoice::CANCEL_BUTTON;
             }
-        } else if (focusChoice_ == FocusChoice::CANCEL_BUTTON) {
-            focusChoice_ = FocusChoice::SEARCH_BUTTON;
+            PaintFocusState();
+            return true;
         }
-        PaintFocusState();
-        return true;
+        if (focusChoice_ == FocusChoice::CANCEL_BUTTON) {
+            focusChoice_ = FocusChoice::SEARCH_BUTTON;
+            PaintFocusState();
+            return true;
+        }
     }
 
     auto host = GetHost();
@@ -362,7 +370,7 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(textFieldPattern, false);
 
-    return textFieldPattern->HandleKeyEvent(event);
+    return textFieldPattern->OnKeyEvent(event);
 }
 
 void SearchPattern::PaintFocusState()
@@ -708,6 +716,77 @@ void SearchPattern::AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, f
         option, [renderContext, highlightEnd]() { renderContext->OnBackgroundColorUpdate(highlightEnd); });
 }
 
+void SearchPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
+{
+    auto focusTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleFocusEvent();
+        }
+    };
+    focusHub->SetOnFocusInternal(focusTask);
+    auto blurTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(pattern);
+        pattern->HandleBlurEvent();
+    };
+    focusHub->SetOnBlurInternal(blurTask);
+}
+
+void SearchPattern::HandleFocusEvent()
+{
+    LOGI("Search %{public}d on focus", GetHost()->GetId());
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
+    CHECK_NULL_VOID(textFieldFrameNode);
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(textFieldPattern);
+    textFieldPattern->HandleFocusEvent();
+}
+
+void SearchPattern::HandleBlurEvent()
+{
+    LOGI("Search %{public}d on blur", GetHost()->GetId());
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
+    CHECK_NULL_VOID(textFieldFrameNode);
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(textFieldPattern);
+    textFieldPattern->HandleBlurEvent();
+}
+
+void SearchPattern::InitClickEvent()
+{
+    if (clickListener_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gesture = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleClickEvent(info);
+    };
+    clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
+    gesture->AddClickEvent(clickListener_);
+}
+
+void SearchPattern::HandleClickEvent(GestureEvent& info)
+{
+    LOGI("Search %{public}d on click", GetHost()->GetId());
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
+    CHECK_NULL_VOID(textFieldFrameNode);
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(textFieldPattern);
+    textFieldPattern->HandleClickEvent(info);
+}
+
 bool SearchPattern::HandleInputChildOnFocus() const
 {
 #if !defined(PREVIEW)
@@ -730,6 +809,7 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json) co
     CHECK_NULL_VOID(textFieldPattern);
 
     json->Put("value", textFieldPattern->GetTextEditingValue().text.c_str());
+    json->Put("placeholder", textFieldPattern->GetPlaceHolder().c_str());
     json->Put("placeholderColor", textFieldPattern->GetPlaceholderColor().c_str());
     json->Put("placeholderFont", textFieldPattern->GetPlaceholderFont().c_str());
     json->Put("textAlign", V2::ConvertWrapTextAlignToString(textFieldPattern->GetTextAlign()).c_str());
@@ -755,7 +835,7 @@ void SearchPattern::ToJsonValueForSearchIcon(std::unique_ptr<JsonValue>& json) c
     CHECK_NULL_VOID(imageFrameNode);
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
-    auto searchIconJson = JsonUtil::Create(false);
+    auto searchIconJson = JsonUtil::Create(true);
 
     // icon size
     auto searchIconGeometryNode = imageFrameNode->GetGeometryNode();
@@ -775,6 +855,7 @@ void SearchPattern::ToJsonValueForSearchIcon(std::unique_ptr<JsonValue>& json) c
     // icon path
     auto searchIconPath = imageLayoutProperty->GetImageSourceInfo()->GetSrc();
     searchIconJson->Put("src", searchIconPath.c_str());
+    json->Put("icon", searchIconPath.c_str());
     json->Put("searchIcon", searchIconJson);
 }
 
@@ -788,7 +869,7 @@ void SearchPattern::ToJsonValueForCancelButton(std::unique_ptr<JsonValue>& json)
     CHECK_NULL_VOID(cancelImageFrameNode);
     auto cancelImageLayoutProperty = cancelImageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(cancelImageLayoutProperty);
-    auto cancelButtonJson = JsonUtil::Create(false);
+    auto cancelButtonJson = JsonUtil::Create(true);
 
     // style
     if (layoutProperty->GetCancelButtonStyle() == CancelButtonStyle::CONSTANT) {
@@ -799,7 +880,7 @@ void SearchPattern::ToJsonValueForCancelButton(std::unique_ptr<JsonValue>& json)
         cancelButtonJson->Put("style", "CancelButtonStyle.INPUT");
     }
 
-    auto cancelIconJson = JsonUtil::Create(false);
+    auto cancelIconJson = JsonUtil::Create(true);
 
     // icon size
     auto cancelIconGeometryNode = cancelImageFrameNode->GetGeometryNode();
@@ -824,7 +905,7 @@ void SearchPattern::ToJsonValueForCancelButton(std::unique_ptr<JsonValue>& json)
     json->Put("cancelButton", cancelButtonJson);
 }
 
-void SearchPattern::ToJsonValueForSearchButton(std::unique_ptr<JsonValue>& json) const
+void SearchPattern::ToJsonValueForSearchButtonOption(std::unique_ptr<JsonValue>& json) const
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -832,7 +913,7 @@ void SearchPattern::ToJsonValueForSearchButton(std::unique_ptr<JsonValue>& json)
     CHECK_NULL_VOID(searchButtonFrameNode);
     auto searchButtonLayoutProperty = searchButtonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(searchButtonLayoutProperty);
-    auto searchButtonJson = JsonUtil::Create(false);
+    auto searchButtonJson = JsonUtil::Create(true);
 
     // font size
     auto searchButtonFontSize = searchButtonLayoutProperty->GetFontSize().value_or(Dimension(0, DimensionUnit::VP));
@@ -841,7 +922,7 @@ void SearchPattern::ToJsonValueForSearchButton(std::unique_ptr<JsonValue>& json)
     // font color
     auto searchButtonFontColor = searchButtonLayoutProperty->GetFontColor().value_or(Color());
     searchButtonJson->Put("fontColor", searchButtonFontColor.ColorToString().c_str());
-    json->Put("searchButton", searchButtonJson);
+    json->Put("searchButtonOption", searchButtonJson);
 }
 
 void SearchPattern::ToJsonValueForCursor(std::unique_ptr<JsonValue>& json) const
@@ -852,7 +933,7 @@ void SearchPattern::ToJsonValueForCursor(std::unique_ptr<JsonValue>& json) const
     CHECK_NULL_VOID(textFieldFrameNode);
     auto textFieldPaintProperty = textFieldFrameNode->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(textFieldPaintProperty);
-    auto cursorJson = JsonUtil::Create(false);
+    auto cursorJson = JsonUtil::Create(true);
 
     // color
     auto caretColor = textFieldPaintProperty->GetCursorColor().value_or(Color());
@@ -870,7 +951,7 @@ void SearchPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     ToJsonValueForSearchIcon(json);
     ToJsonValueForCancelButton(json);
     ToJsonValueForCursor(json);
-    ToJsonValueForSearchButton(json);
+    ToJsonValueForSearchButtonOption(json);
 }
 
 } // namespace OHOS::Ace::NG

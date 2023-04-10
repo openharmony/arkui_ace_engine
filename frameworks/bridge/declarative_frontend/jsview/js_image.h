@@ -63,6 +63,8 @@ public:
 
     static void SetBorder(const Border& border);
     static void SetAutoResize(bool autoResize);
+
+    static bool IsDrawable(const JSRef<JSVal>& jsValue);
 };
 
 class JSColorFilter : public AceType {

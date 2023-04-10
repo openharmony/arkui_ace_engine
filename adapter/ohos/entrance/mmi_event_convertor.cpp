@@ -148,6 +148,17 @@ void GetMouseEventAction(int32_t action, MouseEvent& events)
         case OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE:
             events.action = MouseAction::MOVE;
             break;
+#ifdef ENABLE_DRAG_FRAMEWORK
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_DOWN:
+            events.action = MouseAction::PRESS;
+            break;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_MOVE:
+            events.action = MouseAction::MOVE;
+            break;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP:
+            events.action = MouseAction::RELEASE;
+            break;
+#endif // ENABLE_DRAG_FRAMEWORK
         default:
             events.action = MouseAction::NONE;
             break;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -238,7 +238,7 @@ public:
         std::string curveString("responsive-spring-motion");
         std::string comma(",");
         curveString.append(std::string("(") + std::to_string(response_) + comma + std::to_string(dampingRatio_) +
-                            comma + std::to_string(blendDuration_) + std::string(")"));
+                           comma + std::to_string(blendDuration_) + std::string(")"));
         return curveString;
     }
     float GetResponse() const
@@ -263,6 +263,59 @@ private:
     float response_;
     float dampingRatio_;
     float blendDuration_;
+};
+
+class InterpolatingSpring final : public Curve {
+    DECLARE_ACE_TYPE(InterpolatingSpring, Curve);
+
+public:
+    InterpolatingSpring(float velocity, float mass, float stiffness, float damping)
+        : velocity_(velocity), mass_(mass), stiffness_(stiffness), damping_(damping)
+    {}
+    ~InterpolatingSpring() override = default;
+    // this MoveInterval function is not the real implementation of the function.
+    // The curve should use the curve in rosen.
+    float MoveInternal(float time) override
+    {
+        return 0.0f;
+    }
+    const std::string ToString() override
+    {
+        std::string curveString("interpolating-spring");
+        std::string comma(",");
+        curveString.append(std::string("(") + std::to_string(velocity_) + comma + std::to_string(mass_) + comma +
+                           std::to_string(stiffness_) + comma + std::to_string(damping_) + std::string(")"));
+        return curveString;
+    }
+
+    float GetVelocity() const
+    {
+        return velocity_;
+    }
+
+    float GetMass() const
+    {
+        return mass_;
+    }
+
+    float GetStiffness() const
+    {
+        return stiffness_;
+    }
+
+    float GetDamping() const
+    {
+        return damping_;
+    }
+
+    static constexpr float DEFAULT_INTERPOLATING_SPRING_MASS = 1.0f;
+    static constexpr float DEFAULT_INTERPOLATING_SPRING_VELOCITY = 0.0f;
+
+private:
+    float velocity_ = 0.0f;
+    float mass_ = 0.0f;
+    float stiffness_ = 0.0f;
+    float damping_ = 0.0f;
 };
 
 } // namespace OHOS::Ace

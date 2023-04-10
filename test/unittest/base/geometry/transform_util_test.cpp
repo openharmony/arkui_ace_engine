@@ -25,35 +25,9 @@ namespace {
 const double NUM_D1 = 1.0;
 const double NUM_D2 = 0.0;
 const float PROGRESS = 0.5f;
-}
+} // namespace
 
-class TransformUtilTest : public testing::Test {
-public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
-    void SetUp();
-    void TearDown();
-};
-
-void TransformUtilTest::SetUpTestCase()
-{
-    GTEST_LOG_(INFO) << "TransformUtilTest SetUpTestCase";
-}
-
-void TransformUtilTest::TearDownTestCase()
-{
-    GTEST_LOG_(INFO) << "TransformUtilTest TearDownTestCase";
-}
-
-void TransformUtilTest::SetUp()
-{
-    GTEST_LOG_(INFO) << "TransformUtilTest SetUp";
-}
-
-void TransformUtilTest::TearDown()
-{
-    GTEST_LOG_(INFO) << "TransformUtilTest TearDown";
-}
+class TransformUtilTest : public testing::Test {};
 
 /**
  * @tc.name: TransformUtilTest001

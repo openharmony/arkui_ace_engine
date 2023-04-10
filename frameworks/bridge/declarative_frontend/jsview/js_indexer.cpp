@@ -15,6 +15,7 @@
 
 #include "bridge/declarative_frontend/jsview/js_indexer.h"
 
+#include "base/geometry/dimension.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_scroller.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
@@ -500,10 +501,10 @@ void JSIndexer::SetPopupPosition(const JSCallbackInfo& args)
             float positionX = 0.0f;
             float positionY = 0.0f;
             if (ConvertFromJSValue(obj->GetProperty("x"), positionX)) {
-                NG::IndexerView::SetPopupPositionX(positionX);
+                NG::IndexerView::SetPopupPositionX(Dimension(positionX, DimensionUnit::VP));
             }
             if (ConvertFromJSValue(obj->GetProperty("y"), positionY)) {
-                NG::IndexerView::SetPopupPositionY(positionY);
+                NG::IndexerView::SetPopupPositionY(Dimension(positionY, DimensionUnit::VP));
             }
         }
     }

@@ -15,24 +15,20 @@
 
 /**
  * SynchedPropertySimpleTwoWayPU
- * implementation of @Link and @Consume decorated variables of types boolean | number | string | enum
- *
+ * 
  * all definitions in this file are framework internal
  */
 
-class SynchedPropertySimpleTwoWayPU<T> extends ObservedPropertySimpleAbstractPU<T> {
+class SynchedPropertySimpleTwoWayPU<T> extends ObservedPropertySimpleAbstractPU<T>
+  implements ISinglePropertyChangeSubscriber<T> {
 
   private source_: ObservedPropertyAbstract<T>;
   private changeNotificationIsOngoing_: boolean = false;
 
   constructor(source: ObservedPropertyAbstract<T>, owningView: IPropertySubscriber, owningViewPropNme: PropertyInfo) {
     super(owningView, owningViewPropNme);
-    if (source) {
-      this.source_ = source;
-      this.source_.subscribeMe(this);
-    } else {
-      stateMgmtConsole.error(`SynchedPropertySimpleTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: constructor @Link/@Consume source must not be undefined. Application error!`);
-    }
+    this.source_ = source;
+    this.source_.subscribeMe(this);
   }
 
   /*
@@ -47,16 +43,13 @@ class SynchedPropertySimpleTwoWayPU<T> extends ObservedPropertySimpleAbstractPU<
     super.aboutToBeDeleted();
   }
 
-  /**
-   * Called when sync peer ObservedPropertySimple or SynchedPropertySimpletTwoWay has chnaged value
-   * that peer can be in either parent or child component if 'this' is used for a @Link
-   * that peer can be in either acestor or descendant component if 'this' is used for a @Consume
-   * @param eventSource 
-   */
-  syncPeerHasChanged(eventSource : ObservedPropertyAbstractPU<T>) {
+  // this object is subscriber to  SynchedPropertySimpleTwoWayPU
+  // will call this cb function when property has changed
+  // a set (newValue) is not done because get reads through for the source_
+  hasChanged(newValue: T): void {
     if (!this.changeNotificationIsOngoing_) {
-      stateMgmtConsole.debug(`SynchedPropertySimpleTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: propertyHasChangedPU, property ${eventSource.info()}`);
-      this.notifyPropertryHasChangedPU();
+      stateMgmtConsole.debug(`SynchedPropertySimpleTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: hasChanged to '${newValue}'.`)
+      this.notifyHasChanged(newValue);
     }
   }
 
@@ -68,7 +61,7 @@ class SynchedPropertySimpleTwoWayPU<T> extends ObservedPropertySimpleAbstractPU<
   // get 'read through` from the ObservedProperty
   public get(): T {
     stateMgmtConsole.debug(`SynchedPropertySimpleTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: get`);
-    this.notifyPropertryHasBeenReadPU()
+    this.notifyPropertyRead();
     return this.getUnmonitored();
   }
 
@@ -91,7 +84,7 @@ class SynchedPropertySimpleTwoWayPU<T> extends ObservedPropertySimpleAbstractPU<
 
     // the source_ ObservedProeprty will call: this.hasChanged(newValue);
     this.source_.set(newValue);
-    this.notifyPropertryHasChangedPU();
+    this.notifyHasChanged(newValue);
 
     this.changeNotificationIsOngoing_ = false;
   }

@@ -339,6 +339,14 @@ template("declarative_js_engine") {
       sources += [ "jsview/models/model_view_impl.cpp" ]
     }
 
+    external_deps = []
+    if (defined(config.enable_drag_framework) && config.enable_drag_framework) {
+      external_deps += [
+        "udmf:udmf_client",
+        "udmf:udmf_data_napi",
+      ]
+    }
+
     # rich components needed by phone and TV. wearable like watch do not need them
     if (defined(config.rich_components_support) &&
         config.rich_components_support) {
@@ -355,6 +363,10 @@ template("declarative_js_engine") {
           "jsview/js_video_controller.cpp",
           "jsview/models/video_model_impl.cpp",
         ]
+      }
+      if (defined(config.video_support_jsstack) &&
+          config.video_support_jsstack) {
+        external_deps += [ "hiview:libxpower_event_js" ]
       }
     }
 
@@ -428,7 +440,11 @@ template("declarative_js_engine") {
       deps += [ "$ace_root/build:libace" ]
       if (defined(config.build_container_scope_lib) &&
           config.build_container_scope_lib) {
-        deps += [ "$ace_napi:ace_container_scope" ]
+        if (is_cross_platform_build) {
+          deps += [ "$ace_napi:ace_container_scope_static" ]
+        } else {
+          deps += [ "$ace_napi:ace_container_scope" ]
+        }
       }
     }
 
@@ -444,23 +460,12 @@ template("declarative_js_engine") {
     include_dirs = [ "//foundation/window/window_manager/interfaces/innerkits" ]
     include_dirs += uicast_configs.uicast_root_include
 
-    external_deps = []
-
     # add for cross_platfrom_build temporarily, shall be removed after external_deps is supported
     if (is_cross_platform_build) {
       configs += [ "$ark_ets_path:ark_jsruntime_public_config" ]
-      if (defined(config.build_for_ios) && config.build_for_ios) {
-        deps += [ "$ark_ets_path:libark_jsruntime_static" ]
-      } else {
-        deps += [ "$ark_ets_path:libark_jsruntime" ]
-      }
+      deps += [ "$ark_ets_path:libark_jsruntime_static" ]
     } else {
-      if (defined(config.build_for_ios) && config.build_for_ios) {
-        # static library for ios platform
-        external_deps += [ "ets_runtime:libark_jsruntime_static" ]
-      } else {
-        external_deps += [ "ets_runtime:libark_jsruntime" ]
-      }
+      external_deps += [ "ets_runtime:libark_jsruntime" ]
     }
 
     if (platform == "windows" || platform == "mac" || platform == "linux") {
@@ -568,6 +573,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_toggle.cpp",
       "jsview/js_view.cpp",
       "jsview/js_view_abstract.cpp",
+      "jsview/js_view_context.cpp",
     ]
 
     sources += [
@@ -591,12 +597,31 @@ template("declarative_js_engine_ng") {
       }
     }
 
+    # add for cross_platfrom_build temporarily, shall be removed after external_deps is supported
+    external_deps = []
+    if (is_cross_platform_build) {
+      configs += [ "$ark_ets_path:ark_jsruntime_public_config" ]
+      deps += [ "$ark_ets_path:libark_jsruntime_static" ]
+    } else {
+      external_deps += [ "ets_runtime:libark_jsruntime" ]
+    }
+
+    defines += uicast_configs.uicast_defines
+    sources += uicast_configs.uicast_frontend_sources
+
     deps += [ "engine/$engine_path:declarative_js_engine_bridge_${engine_name}_$platform" ]
 
     deps += [
       ":gen_obj_src_js_enum_style",
       ":gen_obj_src_js_proxyclass",
     ]
+
+    if (defined(config.enable_drag_framework) && config.enable_drag_framework) {
+      external_deps += [
+        "udmf:udmf_client",
+        "udmf:udmf_data_napi",
+      ]
+    }
   }
 }
 

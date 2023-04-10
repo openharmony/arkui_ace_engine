@@ -62,6 +62,13 @@ public:
     // native implementation for js function: aceConsole.error()
     static shared_ptr<JsValue> JsErrorLogPrint(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
         const std::vector<shared_ptr<JsValue>>& argv, int32_t argc);
+    
+    // native implementation for js function: aceTrace.begin()
+    static shared_ptr<JsValue> JsTraceBegin(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+        const std::vector<shared_ptr<JsValue>>& argv, int32_t argc);
+    // native implementation for js function: aceTrace.end()
+    static shared_ptr<JsValue> JsTraceEnd(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+        const std::vector<shared_ptr<JsValue>>& argv, int32_t argc);
 
 private:
     static std::string GenerateErrorMsg(
@@ -80,8 +87,14 @@ private:
     static void ExtractEachInfo(const std::string& tempStack, std::vector<std::string>& res);
     static void GetPosInfo(const std::string& temp, int32_t start, std::string& line, std::string& column);
     static std::string GetSourceInfo(const std::string& line, const std::string& column,
-        const RefPtr<RevSourceMap>& pageMap, const RefPtr<RevSourceMap>& appMap, bool isAppPage, const AceType* data);
+        const RefPtr<RevSourceMap>& pageMap, const RefPtr<RevSourceMap>& appMap, bool isAppPage, const AceType* data,
+        const bool isBundle = true);
     static std::string GetRelativePath(const std::string& sources, std::string splitStr = "/\\");
+
+    // native aceTraceObject
+    static std::unique_ptr<AceScopedTrace> aceScopedTrace_;
+    static void GetStageSourceMap(const AceType* data,
+        std::unordered_map<std::string, RefPtr<RevSourceMap>>& sourceMaps);
 };
 } // namespace OHOS::Ace::Framework
 

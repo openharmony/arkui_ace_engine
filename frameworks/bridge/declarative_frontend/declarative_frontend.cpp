@@ -496,12 +496,13 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
     }
     delegate_->SetGroupJsBridge(jsEngine_->GetGroupJsBridge());
     if (Container::IsCurrentUseNewPipeline()) {
-        auto loadPageCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](const std::string& url) {
+        auto loadPageCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](const std::string& url,
+            const std::function<void(const std::string&, int32_t)>& errorCallback) {
             auto jsEngine = weakEngine.Upgrade();
             if (!jsEngine) {
                 return false;
             }
-            return jsEngine->LoadPageSource(url);
+            return jsEngine->LoadPageSource(url, errorCallback);
         };
         delegate_->InitializeRouterManager(std::move(loadPageCallback));
     }
@@ -588,6 +589,14 @@ RefPtr<Framework::RevSourceMap> DeclarativeFrontend::GetFaAppSourceMap() const
 {
     CHECK_NULL_RETURN(delegate_, nullptr);
     return delegate_->GetFaAppSourceMap();
+}
+
+void DeclarativeFrontend::GetStageSourceMap(
+    std::unordered_map<std::string, RefPtr<Framework::RevSourceMap>>& sourceMap) const
+{
+    if (delegate_) {
+        delegate_->GetStageSourceMap(sourceMap);
+    }
 }
 
 RefPtr<NG::PageRouterManager> DeclarativeFrontend::GetPageRouterManager() const

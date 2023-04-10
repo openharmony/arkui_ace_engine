@@ -519,6 +519,8 @@ public:
     virtual bool IsFrist() const = 0;
 
     virtual int32_t GetId() const = 0;
+
+    virtual int32_t GetParentNWebId() const = 0;
 };
 
 class ACE_EXPORT LoadWebPageStartEvent : public BaseEventInfo {
@@ -1279,6 +1281,32 @@ public:
 
 private:
     bool playing_;
+};
+
+class ACE_EXPORT FirstContentfulPaintEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(FirstContentfulPaintEvent, BaseEventInfo);
+
+public:
+    FirstContentfulPaintEvent(long navigationStartTick, long firstContentfulPaintMs)
+        : BaseEventInfo("FirstContentfulPaintEvent"), navigationStartTick_(navigationStartTick),
+          firstContentfulPaintMs_(firstContentfulPaintMs)
+    {}
+
+    ~FirstContentfulPaintEvent() = default;
+
+    long GetNavigationStartTick() const
+    {
+        return navigationStartTick_;
+    }
+
+    long GetFirstContentfulPaintMs() const
+    {
+        return firstContentfulPaintMs_;
+    }
+
+private:
+    long navigationStartTick_;
+    long firstContentfulPaintMs_;
 };
 } // namespace OHOS::Ace
 

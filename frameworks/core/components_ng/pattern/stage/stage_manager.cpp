@@ -137,7 +137,7 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
 {
     CHECK_NULL_RETURN(stageNode_, false);
     CHECK_NULL_RETURN(node, false);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = AceType::DynamicCast<NG::PipelineContext>(PipelineBase::GetCurrentContext());
     CHECK_NULL_RETURN(pipeline, false);
     StopPageTransition();
 
@@ -165,7 +165,7 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
     CHECK_NULL_RETURN(pagePattern, false);
     stagePattern_->currentPageIndex_ = pagePattern->GetPageInfo()->GetPageId();
     if (needTransition) {
-        pagePattern->SetFirstBuildCallback([weakStage = WeakClaim(this), weakIn = WeakPtr<FrameNode>(node),
+        pipeline->AddAfterLayoutTask([weakStage = WeakClaim(this), weakIn = WeakPtr<FrameNode>(node),
                                                weakOut = WeakPtr<FrameNode>(outPageNode)]() {
             auto stage = weakStage.Upgrade();
             CHECK_NULL_VOID(stage);
@@ -244,6 +244,8 @@ bool StageManager::PopPageToIndex(int32_t index, bool needShowNext, bool needTra
         return true;
     }
 
+    // log for cppCrash
+    LOGI("PopPageToIndex, to index:%{public}d, children size:%{public}zu", index, children.size());
     if (needTransition) {
         pipeline->FlushPipelineImmediately();
     }
@@ -268,7 +270,10 @@ bool StageManager::PopPageToIndex(int32_t index, bool needShowNext, bool needTra
     if (needTransition) {
         // from the penultimate node, (popSize - 1) nodes are deleted.
         // the last node will be deleted after pageTransition
-        auto iter = children.rbegin();
+        LOGI("PopPageToIndex, before pageTransition, to index:%{public}d, children size:%{public}zu, "
+             "stage children size:%{public}zu",
+            index, children.size(), stageNode_->GetChildren().size());
+        iter = children.rbegin();
         ++iter;
         for (int32_t current = 1; current < popSize; ++current) {
             auto pageNode = *(iter++);
@@ -330,6 +335,7 @@ bool StageManager::MovePageToFront(const RefPtr<FrameNode>& node, bool needHideL
         FirePageHide(lastPage, needTransition ? PageTransitionType::EXIT_PUSH : PageTransitionType::NONE);
     }
     node->MovePosition(static_cast<int32_t>(stageNode_->GetChildren().size() - 1));
+    node->GetRenderContext()->ResetPageTransitionEffect();
     FirePageShow(node, needTransition ? PageTransitionType::ENTER_PUSH : PageTransitionType::NONE);
 
     stageNode_->RebuildRenderContextTree();
@@ -369,6 +375,13 @@ void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType t
     CHECK_NULL_VOID(pageNode);
     auto pagePattern = pageNode->GetPattern<PagePattern>();
     CHECK_NULL_VOID(pagePattern);
+    auto layoutProperty = pageNode->GetLayoutProperty();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    const static int32_t PLATFORM_VERSION_TEN = 10;
+    if (pipeline && pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN && !pipeline->GetIgnoreViewSafeArea() &&
+        layoutProperty) {
+        layoutProperty->SetSafeArea(pipeline->GetCurrentViewSafeArea());
+    }
     pagePattern->OnShow();
     // With or without a page transition, we need to make the coming page visible first
     pagePattern->ProcessShowState();

@@ -418,6 +418,13 @@ void PipelineBase::ForceLayoutForImplicitAnimation()
     }
 }
 
+void PipelineBase::ForceRenderForImplicitAnimation()
+{
+    if (!pendingImplicitRender_.empty()) {
+        pendingImplicitRender_.top() = true;
+    }
+}
+
 bool PipelineBase::Animate(const AnimationOption& option, const RefPtr<Curve>& curve,
     const std::function<void()>& propertyCallback, const std::function<void()>& finishCallback)
 {
@@ -434,13 +441,11 @@ bool PipelineBase::Animate(const AnimationOption& option, const RefPtr<Curve>& c
 void PipelineBase::PrepareOpenImplicitAnimation()
 {
 #ifdef ENABLE_ROSEN_BACKEND
-    if (!SystemProperties::GetRosenBackendEnabled()) {
-        LOGE("rosen backend is disabled");
-        return;
-    }
-
-    // initialize false for implicit animation layout pending flag
+    // initialize false for implicit animation layout and render pending flag
     pendingImplicitLayout_.push(false);
+    pendingImplicitRender_.push(false);
+
+    // flush ui tasks before open implict animation
     FlushUITasks();
 #endif
 }
@@ -448,22 +453,21 @@ void PipelineBase::PrepareOpenImplicitAnimation()
 void PipelineBase::PrepareCloseImplicitAnimation()
 {
 #ifdef ENABLE_ROSEN_BACKEND
-    if (!SystemProperties::GetRosenBackendEnabled()) {
-        LOGE("rosen backend is disabled!");
-        return;
-    }
-
-    if (pendingImplicitLayout_.empty()) {
+    if (pendingImplicitLayout_.empty() && pendingImplicitRender_.empty()) {
         LOGE("close implicit animation failed, need to open implicit animation first!");
         return;
     }
 
-    // layout the views immediately to animate all related views, if layout updates are pending in the animation closure
-    if (pendingImplicitLayout_.top()) {
+    // layout or render the views immediately to animate all related views, if layout or render updates are pending in
+    // the animation closure
+    if (pendingImplicitLayout_.top() || pendingImplicitRender_.top()) {
         FlushUITasks();
     }
     if (!pendingImplicitLayout_.empty()) {
         pendingImplicitLayout_.pop();
+    }
+    if (!pendingImplicitRender_.empty()) {
+        pendingImplicitRender_.pop();
     }
 #endif
 }
@@ -506,7 +510,7 @@ void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount)
     CHECK_RUN_ON(UI);
     ACE_SCOPED_TRACE("OnVsyncEvent now:%" PRIu64 "", nanoTimestamp);
 
-    for (auto& callback : formVsyncCallbacks_) {
+    for (auto& callback : subWindowVsyncCallbacks_) {
         callback.second(nanoTimestamp, frameCount);
     }
 
@@ -584,16 +588,55 @@ void PipelineBase::SendEventToAccessibility(const AccessibilityEvent& accessibil
     accessibilityManager->SendAccessibilityAsyncEvent(accessibilityEvent);
 }
 
-void PipelineBase::SetFormVsyncCallback(AceVsyncCallback&& callback, int32_t formWindowId)
+void PipelineBase::SetSubWindowVsyncCallback(AceVsyncCallback&& callback, int32_t subWindowId)
 {
     if (callback) {
-        formVsyncCallbacks_.try_emplace(formWindowId, std::move(callback));
+        subWindowVsyncCallbacks_.try_emplace(subWindowId, std::move(callback));
     }
 }
 
-void PipelineBase::RemoveFormVsyncCallback(int32_t formWindowId)
+void PipelineBase::AddEtsCardTouchEventCallback(int32_t ponitId, EtsCardTouchEventCallback&& callback)
 {
-    formVsyncCallbacks_.erase(formWindowId);
+    if (!callback || ponitId < 0) {
+        return;
+    }
+
+    etsCardTouchEventCallback_[ponitId] = std::move(callback);
+}
+
+void PipelineBase::HandleEtsCardTouchEvent(const TouchEvent& point)
+{
+    if (point.id < 0) {
+        return;
+    }
+
+    auto iter = etsCardTouchEventCallback_.find(point.id);
+    if (iter == etsCardTouchEventCallback_.end()) {
+        return;
+    }
+
+    if (iter->second) {
+        iter->second(point);
+    }
+}
+
+void PipelineBase::RemoveEtsCardTouchEventCallback(int32_t ponitId)
+{
+    if (ponitId < 0) {
+        return;
+    }
+
+    auto iter = etsCardTouchEventCallback_.find(ponitId);
+    if (iter == etsCardTouchEventCallback_.end()) {
+        return;
+    }
+
+    etsCardTouchEventCallback_.erase(iter);
+}
+
+void PipelineBase::RemoveSubWindowVsyncCallback(int32_t subWindowId)
+{
+    subWindowVsyncCallbacks_.erase(subWindowId);
 }
 
 void PipelineBase::Destroy()
@@ -613,6 +656,7 @@ void PipelineBase::Destroy()
     window_->Destroy();
     touchPluginPipelineContext_.clear();
     virtualKeyBoardCallback_.clear();
+    etsCardTouchEventCallback_.clear();
     LOGI("PipelineBase::Destroy end.");
 }
 } // namespace OHOS::Ace

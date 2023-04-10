@@ -342,11 +342,12 @@ void DatePickerPattern::FlushColumn()
 
     auto dataPickerRowLayoutProperty = host->GetLayoutProperty<DataPickerRowLayoutProperty>();
     CHECK_NULL_VOID(dataPickerRowLayoutProperty);
+    auto lunarDate = dataPickerRowLayoutProperty->GetSelectedDate().value_or(SolarToLunar(GetSelectedDate()));
+    AdjustLunarDate(lunarDate);
     if (dataPickerRowLayoutProperty->GetLunar().value_or(false)) {
-        LunarColumnsBuilding(dataPickerRowLayoutProperty->GetSelectedDate().value_or(SolarToLunar(GetSelectedDate())));
+        LunarColumnsBuilding(lunarDate);
     } else {
-        SolarColumnsBuilding(
-            LunarToSolar(dataPickerRowLayoutProperty->GetSelectedDate().value_or(SolarToLunar(GetSelectedDate()))));
+        SolarColumnsBuilding(LunarToSolar(lunarDate));
     }
 
     auto yearNode = allChildNode["year"];

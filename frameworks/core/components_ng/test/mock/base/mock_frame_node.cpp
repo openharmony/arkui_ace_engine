@@ -138,6 +138,11 @@ OffsetF FrameNode::GetParentGlobalOffset() const
     return { 1.0f, 1.0f };
 }
 
+OffsetF FrameNode::GetPaintRectOffsetToPage() const
+{
+    return { 1.0f, 1.0f };
+}
+
 RefPtr<LayoutWrapper> FrameNode::CreateLayoutWrapper(bool forceMeasure, bool forceLayout)
 {
     return nullptr;
@@ -234,5 +239,10 @@ OffsetF FrameNode::GetTransformRelativeOffset() const
 bool FrameNode::MarkRemoving()
 {
     return false;
+}
+
+RefPtr<FrameNode> FrameNode::FindChildByPosition(float x, float y)
+{
+    return nullptr;
 }
 } // namespace OHOS::Ace::NG

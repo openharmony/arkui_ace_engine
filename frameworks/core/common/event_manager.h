@@ -151,12 +151,6 @@ public:
 
     void DelKeyboardShortcutNode(int32_t nodeId);
 
-    bool IsSameKeyboardShortcutNode(char value, uint8_t keys);
-
-    bool IsSystemKeyboardShortcut(char value, uint8_t keys);
-
-    uint8_t GetKeyboardShortcutKeys(const std::vector<CtrlKey>& keys);
-
     void AddKeyboardShortcutKeys(uint8_t keys, std::vector<KeyCode>& leftKeyCode, std::vector<KeyCode>& rightKeyCode,
         std::vector<uint8_t>& permutation);
 
@@ -169,6 +163,12 @@ public:
     {
         pressedKeyCodes_ = pressedKeyCodes;
     }
+
+    bool IsSameKeyboardShortcutNode(const std::string& value, uint8_t keys);
+
+    bool IsSystemKeyboardShortcut(const std::string& value, uint8_t keys);
+
+    uint8_t GetKeyboardShortcutKeys(const std::vector<CtrlKey>& keys);
 
 private:
     std::unordered_map<size_t, TouchTestResult> touchTestResults_;

@@ -165,11 +165,6 @@ public:
         return 0;
     }
 
-    virtual int32_t GetLiveRegion() const
-    {
-        return 0;
-    }
-
     virtual bool GetContentInvalid() const
     {
         return true;
@@ -185,7 +180,6 @@ public:
     void ResetSupportAction()
     {
         supportActions_ = 0;
-        SetCommonSupportAction();
         SetSpecificSupportAction();
     };
 
@@ -194,9 +188,6 @@ protected:
     WeakPtr<FrameNode> host_;
     uint64_t supportActions_ = 0;
     ACE_DISALLOW_COPY_AND_MOVE(AccessibilityProperty);
-
-private:
-    void SetCommonSupportAction();
 };
 } // namespace OHOS::Ace::NG
 

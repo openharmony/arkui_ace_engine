@@ -68,7 +68,7 @@ public:
         auto sliderMode = GetSliderModeValue(SliderModelNG::SliderMode::OUTSET);
         json->Put("blockBorderColor", GetBlockBorderColorValue(Color::TRANSPARENT).ColorToString().c_str());
         json->Put("blockBorderWidth", GetBlockBorderWidthValue(Dimension()).ToString().c_str());
-        json->Put("stepColor", GetStepColorValue(Color::TRANSPARENT).ColorToString().c_str());
+        json->Put("stepColor", GetStepColorValue(theme->GetMarkerColor()).ColorToString().c_str());
         if (GetTrackBorderRadius().has_value()) {
             json->Put("trackBorderRadius", GetTrackBorderRadius().value().ToString().c_str());
         }
@@ -87,7 +87,7 @@ public:
         json->Put("blockType",
             SLIDER_BLOCK_TYPE_TO_STRING.at(static_cast<int>(GetBlockTypeValue(SliderModelNG::BlockStyleType::DEFAULT)))
                 .c_str());
-        json->Put("stepSize", GetStepSizeValue(Dimension()).ToString().c_str());
+        json->Put("stepSize", GetStepSizeValue(theme->GetMarkerSize()).ToString().c_str());
     }
 
     ACE_DEFINE_PROPERTY_GROUP(SliderPaintStyle, SliderPaintStyle)

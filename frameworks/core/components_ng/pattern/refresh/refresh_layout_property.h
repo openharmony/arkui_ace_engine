@@ -52,6 +52,7 @@ public:
     RefPtr<LayoutProperty> Clone() const override
     {
         auto value = MakeRefPtr<RefreshLayoutProperty>();
+        value->UpdateLayoutProperty(this);
         value->propRefreshDistance_ = CloneRefreshDistance();
         value->propIsUseOffset_ = CloneIsUseOffset();
         value->propIndicatorOffset_ = CloneIndicatorOffset();

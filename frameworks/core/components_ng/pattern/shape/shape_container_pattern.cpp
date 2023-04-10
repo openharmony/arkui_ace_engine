@@ -54,7 +54,7 @@ void ShapeContainerPattern::ViewPortTransform()
                 CHECK_NULL_VOID(node);
                 auto context = node->GetRenderContext();
                 CHECK_NULL_VOID(context);
-                context->OnTransformCenterUpdate(DimensionOffset(Offset(0.0, 0.0)));
+                context->UpdateTransformCenter(DimensionOffset(Offset(0.0, 0.0)));
                 context->OnTransformTranslateUpdate({ tx, ty, 0 });
                 context->OnTransformScaleUpdate({ scale, scale });
 
@@ -92,5 +92,4 @@ void ShapeContainerPattern::OnAttachToFrameNode()
     host->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
     host->GetRenderContext()->SetClipToFrame(true);
 }
-
 } // namespace OHOS::Ace::NG

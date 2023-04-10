@@ -31,7 +31,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr Color SELECT_FILL_COLOR = Color(0x1A000000);
 constexpr Color SELECT_STROKE_COLOR = Color(0x33FFFFFF);
-constexpr Color ITEM_FILL_COLOR = Color(0x1A0A59f7);
+const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
 constexpr float SCROLL_MAX_TIME = 300.0f; // Scroll Animate max time 0.3 second
 } // namespace
 
@@ -43,8 +43,8 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
     StringUtils::StringSplitter(gridLayoutProperty->GetColumnsTemplate().value_or(""), ' ', cols);
     std::vector<std::string> rows;
     StringUtils::StringSplitter(gridLayoutProperty->GetRowsTemplate().value_or(""), ' ', rows);
-    auto crossCount = cols.empty() ? Infinity<int32_t>() : cols.size();
-    auto mainCount = rows.empty() ? Infinity<int32_t>() : rows.size();
+    auto crossCount = cols.empty() ? Infinity<int32_t>() : static_cast<int32_t>(cols.size());
+    auto mainCount = rows.empty() ? Infinity<int32_t>() : static_cast<int32_t>(rows.size());
     if (!gridLayoutProperty->IsVertical()) {
         std::swap(crossCount, mainCount);
     }
@@ -139,25 +139,48 @@ void GridPattern::InitMouseEvent()
 
 void GridPattern::HandleMouseEventWithoutKeyboard(const MouseInfo& info)
 {
+    if (info.GetButton() != MouseButton::LEFT_BUTTON) {
+        auto mouseOffsetX = static_cast<float>(info.GetLocalLocation().GetX());
+        auto mouseOffsetY = static_cast<float>(info.GetLocalLocation().GetY());
+        auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
+        if (!selectedZone.IsInRegion(PointF(mouseOffsetX, mouseOffsetY))) {
+            ClearMultiSelect();
+        }
+        return;
+    }
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto manager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(manager);
+    if (manager->IsDragged()) {
+        return;
+    }
     auto mouseOffsetX = static_cast<float>(info.GetLocalLocation().GetX());
     auto mouseOffsetY = static_cast<float>(info.GetLocalLocation().GetY());
 
-    if (info.GetButton() == MouseButton::LEFT_BUTTON) {
-        if (info.GetAction() == MouseAction::PRESS) {
+    if (info.GetAction() == MouseAction::PRESS) {
+        auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
+        if (!selectedZone.IsInRegion(PointF(mouseOffsetX, mouseOffsetY))) {
             ClearMultiSelect();
             mouseStartOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
             mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
-            auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
-            MultiSelectWithoutKeyboard(selectedZone);
-        } else if (info.GetAction() == MouseAction::MOVE) {
+        }
+        mousePressOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
+        // do not select when click
+    } else if (info.GetAction() == MouseAction::MOVE) {
+        const static double FRAME_SELECTION_DISTANCE =
+            pipeline->NormalizeToPx(Dimension(DEFAULT_PAN_DISTANCE, DimensionUnit::VP));
+        auto delta = OffsetF(mouseOffsetX, mouseOffsetY) - mousePressOffset_;
+        if (Offset(delta.GetX(), delta.GetY()).GetDistance() > FRAME_SELECTION_DISTANCE) {
             mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
             auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
             MultiSelectWithoutKeyboard(selectedZone);
-        } else if (info.GetAction() == MouseAction::RELEASE) {
-            mouseStartOffset_.Reset();
-            mouseEndOffset_.Reset();
-            ClearSelectedZone();
         }
+    } else if (info.GetAction() == MouseAction::RELEASE) {
+        mouseStartOffset_.Reset();
+        mouseEndOffset_.Reset();
+        ClearSelectedZone();
     }
 }
 
@@ -168,13 +191,17 @@ void GridPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)
     std::list<RefPtr<FrameNode>> children;
     host->GenerateOneDepthVisibleFrame(children);
     for (const auto& itemFrameNode : children) {
-        auto itemPattern = itemFrameNode->GetPattern<GridItemPattern>();
-        CHECK_NULL_VOID(itemPattern);
-
-        if (!itemPattern->Selectable()) {
+        auto itemEvent = itemFrameNode->GetEventHub<EventHub>();
+        CHECK_NULL_VOID(itemEvent);
+        if (!itemEvent->IsEnabled()) {
             continue;
         }
 
+        auto itemPattern = itemFrameNode->GetPattern<GridItemPattern>();
+        CHECK_NULL_VOID(itemPattern);
+        if (!itemPattern->Selectable()) {
+            continue;
+        }
         auto itemGeometry = itemFrameNode->GetGeometryNode();
         CHECK_NULL_VOID(itemGeometry);
         auto context = itemFrameNode->GetRenderContext();
@@ -346,10 +373,9 @@ void GridPattern::FlushFocusOnScroll(const GridLayoutInfo& gridLayoutInfo)
         return;
     }
     auto childFocusList = gridFocus->GetChildren();
-    for (const auto& childFocus : childFocusList) {
-        if (childFocus->IsCurrentFocus()) {
-            return;
-        }
+    if (std::any_of(childFocusList.begin(), childFocusList.end(),
+            [](const RefPtr<FocusHub>& childFocus) { return childFocus->IsCurrentFocus(); })) {
+        return;
     }
     int32_t curMainIndex = gridLayoutInfo.startMainLineIndex_;
     if (gridLayoutInfo.gridMatrix_.find(curMainIndex) == gridLayoutInfo.gridMatrix_.end()) {
@@ -739,12 +765,12 @@ void GridPattern::UpdateScrollBarOffset()
     auto layoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
 
     float heightSum = 0;
-    size_t itemCount = 0;
+    int32_t itemCount = 0;
     auto mainGap = GridUtils::GetMainGap(layoutProperty, viewScopeSize, info.axis_);
     for (const auto& item : info.lineHeightMap_) {
         auto line = info.gridMatrix_.find(item.first);
         if (line != info.gridMatrix_.end()) {
-            itemCount += line->second.size();
+            itemCount += static_cast<int32_t>(line->second.size());
         } else {
             itemCount += info.crossCount_;
         }
@@ -753,7 +779,7 @@ void GridPattern::UpdateScrollBarOffset()
 
     float estimatedHeight = 0.f;
     auto averageHeight_ = heightSum / itemCount;
-    if (itemCount >= static_cast<size_t>(info.childrenCount_ - 1)) {
+    if (itemCount >= (info.childrenCount_ - 1)) {
         estimatedHeight = heightSum - mainGap;
     } else {
         estimatedHeight = heightSum + (info.childrenCount_ - itemCount) * averageHeight_;
@@ -766,9 +792,16 @@ void GridPattern::UpdateScrollBarOffset()
 
 RefPtr<PaintProperty> GridPattern::CreatePaintProperty()
 {
+    auto defaultDisplayMode = DisplayMode::OFF;
+    const static int32_t PLATFORM_VERSION_TEN = 10;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        defaultDisplayMode = DisplayMode::AUTO;
+    }
     auto property = MakeRefPtr<ScrollablePaintProperty>();
     // default "scrollBar" attribute of Grid is BarState.Off
-    property->UpdateScrollBarMode(NG::DisplayMode::OFF);
+    property->UpdateScrollBarMode(defaultDisplayMode);
     return property;
 }
 
@@ -812,7 +845,7 @@ void GridPattern::UpdateRectOfDraggedInItem(int32_t insertIndex)
         CHECK_NULL_VOID(itemPattern);
         auto mainIndex = itemPattern->GetMainIndex();
         auto crossIndex = itemPattern->GetCrossIndex();
-        if (mainIndex * static_cast<int32_t>(gridLayoutInfo_.crossCount_) + crossIndex == insertIndex) {
+        if (mainIndex * gridLayoutInfo_.crossCount_ + crossIndex == insertIndex) {
             auto size = item->GetRenderContext()->GetPaintRectWithTransform();
             size.SetOffset(item->GetTransformRelativeOffset());
             gridLayoutInfo_.currentRect_ = size;

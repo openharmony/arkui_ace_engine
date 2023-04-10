@@ -52,6 +52,9 @@ void ScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto constraint = layoutProperty->GetLayoutConstraint();
     auto idealSize = CreateIdealSize(constraint.value(), axis, MeasureType::MATCH_CONTENT);
 
+    auto padding = layoutProperty->CreatePaddingAndBorder();
+    MinusPaddingToSize(padding, idealSize);
+
     // Calculate child layout constraint.
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
     UpdateChildConstraint(axis, idealSize, childLayoutConstraint);
@@ -69,7 +72,7 @@ void ScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (!idealSize.Height()) {
         idealSize.SetHeight(childSize.Height());
     }
-
+    AddPaddingToSize(padding, idealSize);
     auto selfSize = idealSize.ConvertToSizeT();
     selfSize.Constrain(constraint->minSize, constraint->maxSize);
     layoutWrapper->GetGeometryNode()->SetFrameSize(selfSize);
@@ -109,8 +112,7 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (layoutProperty->GetPositionProperty() && layoutProperty->GetPositionProperty()->HasAlignment()) {
         scrollAlignment = layoutProperty->GetPositionProperty()->GetAlignment().value();
     }
-    auto alignmentPosition =
-            Alignment::GetAlignPosition(viewPort_, viewPortExtent_, scrollAlignment);
+    auto alignmentPosition = Alignment::GetAlignPosition(viewPort_, viewPortExtent_, scrollAlignment);
     childGeometryNode->SetMarginFrameOffset(padding.Offset() + currentOffset + alignmentPosition);
     childWrapper->Layout();
 }

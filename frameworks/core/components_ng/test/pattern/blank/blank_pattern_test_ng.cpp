@@ -44,6 +44,7 @@ constexpr float SMALL_ITEM_HEIGHT = 60.0f;
 constexpr Dimension BLANK_MIN(10.0f);
 constexpr Dimension SMALL_BLANK_HEIGHT(5.0f);
 constexpr Dimension LARGE_BLANK_HEIGHT(20.0f);
+constexpr Dimension MIN(0.0f);
 
 const OffsetF ORIGIN_POINT(ZERO, ZERO);
 const SizeF SMALL_ITEM_SIZE(SMALL_ITEM_WIDTH, SMALL_ITEM_HEIGHT);
@@ -216,7 +217,7 @@ HWTEST_F(BlankPatternTestNg, BlankFrameNodeCreator001, TestSize.Level1)
     EXPECT_NE(frameNode, nullptr);
     auto blankLayoutProperty = frameNode->GetLayoutProperty<BlankLayoutProperty>();
     EXPECT_NE(blankLayoutProperty, nullptr);
-    EXPECT_EQ(blankLayoutProperty->GetMinSize().value_or(Dimension()), BLANK_MIN);
+    EXPECT_EQ(blankLayoutProperty->GetMinSize().value_or(Dimension()), MIN);
 }
 
 /**

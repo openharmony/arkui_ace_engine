@@ -25,31 +25,7 @@ namespace OHOS::Ace::NG {
 void ListItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     layoutWrapper->RemoveAllChildInRenderTree();
-    if (Positive(curOffset_) && startNodeIndex_ >= 0) {
-        auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
-        if (!NearZero(startNodeSize_) && curOffset_ > startNodeSize_) {
-            layoutConstraint.maxSize.SetCrossSize(curOffset_, axis_);
-            layoutConstraint.minSize.SetCrossSize(curOffset_, axis_);
-        }
-        auto child = layoutWrapper->GetOrCreateChildByIndex(startNodeIndex_);
-        CHECK_NULL_VOID(child);
-        child->Measure(layoutConstraint);
-        if (NearZero(startNodeSize_)) {
-            startNodeSize_ = child->GetGeometryNode()->GetMarginFrameSize().CrossSize(axis_);
-        }
-    } else if (Negative(curOffset_) && endNodeIndex_ >= 0) {
-        auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
-        if (!NearZero(endNodeSize_) && -curOffset_ > endNodeSize_) {
-            layoutConstraint.maxSize.SetCrossSize(-curOffset_, axis_);
-            layoutConstraint.minSize.SetCrossSize(-curOffset_, axis_);
-        }
-        auto child = layoutWrapper->GetOrCreateChildByIndex(endNodeIndex_);
-        CHECK_NULL_VOID(child);
-        child->Measure(layoutConstraint);
-        if (NearZero(endNodeSize_)) {
-            endNodeSize_ = child->GetGeometryNode()->GetMarginFrameSize().CrossSize(axis_);
-        }
-    }
+
     std::list<RefPtr<LayoutWrapper>> childList;
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     auto child = layoutWrapper->GetOrCreateChildByIndex(childNodeIndex_);
@@ -58,6 +34,41 @@ void ListItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         childList.push_back(child);
     }
     PerformMeasureSelfWithChildList(layoutWrapper, childList);
+    auto mainSize = layoutWrapper->GetGeometryNode()->GetPaddingSize().MainSize(axis_);
+    if (NonPositive(mainSize)) {
+        curOffset_ = 0.0f;
+        return;
+    }
+
+    if (Positive(curOffset_) && startNodeIndex_ >= 0) {
+        auto startLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+        if (!NearZero(startNodeSize_) && curOffset_ > startNodeSize_) {
+            startLayoutConstraint.maxSize.SetCrossSize(curOffset_, axis_);
+            startLayoutConstraint.minSize.SetCrossSize(curOffset_, axis_);
+        }
+        startLayoutConstraint.maxSize.SetMainSize(mainSize, axis_);
+        startLayoutConstraint.percentReference.SetMainSize(mainSize, axis_);
+        auto startNode = layoutWrapper->GetOrCreateChildByIndex(startNodeIndex_);
+        CHECK_NULL_VOID(startNode);
+        startNode->Measure(startLayoutConstraint);
+        if (NearZero(startNodeSize_)) {
+            startNodeSize_ = startNode->GetGeometryNode()->GetMarginFrameSize().CrossSize(axis_);
+        }
+    } else if (Negative(curOffset_) && endNodeIndex_ >= 0) {
+        auto endLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+        if (!NearZero(endNodeSize_) && -curOffset_ > endNodeSize_) {
+            endLayoutConstraint.maxSize.SetCrossSize(-curOffset_, axis_);
+            endLayoutConstraint.minSize.SetCrossSize(-curOffset_, axis_);
+        }
+        endLayoutConstraint.maxSize.SetMainSize(mainSize, axis_);
+        endLayoutConstraint.percentReference.SetMainSize(mainSize, axis_);
+        auto endNode = layoutWrapper->GetOrCreateChildByIndex(endNodeIndex_);
+        CHECK_NULL_VOID(endNode);
+        endNode->Measure(endLayoutConstraint);
+        if (NearZero(endNodeSize_)) {
+            endNodeSize_ = endNode->GetGeometryNode()->GetMarginFrameSize().CrossSize(axis_);
+        }
+    }
 }
 
 void ListItemLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)

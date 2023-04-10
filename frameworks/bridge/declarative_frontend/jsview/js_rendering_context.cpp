@@ -150,8 +150,10 @@ void JSRenderingContext::JsGetWidth(const JSCallbackInfo& info)
 {
     double width = 0.0;
     if (Container::IsCurrentUseNewPipeline()) {
+        CHECK_NULL_VOID(customPaintPattern_);
         width = customPaintPattern_->GetWidth();
     } else {
+        CHECK_NULL_VOID(pool_);
         width = pool_->GetWidth();
     }
     width = SystemProperties::Px2Vp(width);
@@ -174,8 +176,10 @@ void JSRenderingContext::JsGetHeight(const JSCallbackInfo& info)
 {
     double height = 0.0;
     if (Container::IsCurrentUseNewPipeline()) {
+        CHECK_NULL_VOID(customPaintPattern_);
         height = customPaintPattern_->GetHeight();
     } else {
+        CHECK_NULL_VOID(pool_);
         height = pool_->GetHeight();
     }
     height = SystemProperties::Px2Vp(height);
@@ -185,20 +189,26 @@ void JSRenderingContext::JsGetHeight(const JSCallbackInfo& info)
 }
 void JSRenderingContext::JsTransferFromImageBitmap(const JSCallbackInfo& info)
 {
-    if (info.Length() != 0) {
-        if (info[0]->IsObject()) {
-            uint32_t id = 0;
-            JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
-            JSRef<JSVal> widthId = obj->GetProperty("__id");
-            JSViewAbstract::ParseJsInteger(widthId, id);
-            if (Container::IsCurrentUseNewPipeline()) {
-                auto offscreenCanvasPattern = JSOffscreenRenderingContext::GetOffscreenCanvasPattern(id);
-                customPaintPattern_->TransferFromImageBitmap(offscreenCanvasPattern);
-            } else {
-                RefPtr<OffscreenCanvas> offscreenCanvas = JSOffscreenRenderingContext::GetOffscreenCanvas(id);
-                pool_->TransferFromImageBitmap(offscreenCanvas);
-            }
-        }
+    if (info.Length() == 0) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
+    if (!info[0]->IsObject()) {
+        LOGE("The arg is not Object or String.");
+        return;
+    }
+    uint32_t id = 0;
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> widthId = obj->GetProperty("__id");
+    JSViewAbstract::ParseJsInteger(widthId, id);
+    if (Container::IsCurrentUseNewPipeline()) {
+        CHECK_NULL_VOID(customPaintPattern_);
+        auto offscreenCanvasPattern = JSOffscreenRenderingContext::GetOffscreenCanvasPattern(id);
+        customPaintPattern_->TransferFromImageBitmap(offscreenCanvasPattern);
+    } else {
+        CHECK_NULL_VOID(pool_);
+        RefPtr<OffscreenCanvas> offscreenCanvas = JSOffscreenRenderingContext::GetOffscreenCanvas(id);
+        pool_->TransferFromImageBitmap(offscreenCanvas);
     }
 }
 

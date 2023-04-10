@@ -515,6 +515,11 @@ int32_t WebWindowNewHandlerOhos::GetId() const
     return -1;
 }
 
+int32_t WebWindowNewHandlerOhos::GetParentNWebId() const
+{
+    return parentNWebId_;
+}
+
 void DataResubmittedOhos::Resend()
 {
     if (handler_) {
@@ -868,7 +873,7 @@ void WebDelegate::ExecuteTypeScript(const std::string& jscode, const std::functi
                         }
                     });
                 }
-                delegate->nweb_->ExecuteJavaScript(jscode, callbackImpl);
+                delegate->nweb_->ExecuteJavaScript(jscode, callbackImpl, false);
             }
         },
         TaskExecutor::TaskType::PLATFORM);
@@ -1591,6 +1596,7 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
         onPageVisibleV2_ = useNewPipe ? eventHub->GetOnPageVisibleEvent() : nullptr;
         onTouchIconUrlV2_ = useNewPipe ? eventHub->GetOnTouchIconUrlEvent() : nullptr;
         onAudioStateChangedV2_ = GetAudioStateChangedCallback(useNewPipe, eventHub);
+        onFirstContentfulPaintV2_ = useNewPipe ? eventHub->GetOnFirstContentfulPaintEvent() : nullptr;
     }
     return true;
 }
@@ -1642,7 +1648,6 @@ void WebDelegate::GLContextInit(void* window)
         LOGE("unable to get EGL window.");
         return;
     }
-    LOGD("GLContextInit window = %{public}p", window);
     mEglWindow = static_cast<EGLNativeWindowType>(window);
 
     // 1. create sharedcontext
@@ -1718,6 +1723,7 @@ bool WebDelegate::InitWebSurfaceDelegate(const WeakPtr<PipelineBase>& context)
     surfaceDelegate_->AddSurfaceCallback(surfaceCallback_);
     surfaceDelegate_->CreateSurface();
     SetBoundsOrResize(drawSize_, offset_);
+    needResizeAtFirst_ = true;
     auto aNativeSurface = surfaceDelegate_->GetNativeWindow();
     if (aNativeSurface == nullptr) {
         LOGE("fail to call WebDelegate::InitWebSurfaceDelegate Create get NativeWindow is null");
@@ -1778,6 +1784,17 @@ void WebDelegate::RegisterOHOSWebEventAndMethord()
     }
 }
 
+void WebDelegate::NotifyPopupWindowResult(bool result)
+{
+    if (parentNWebId_ != -1) {
+        std::weak_ptr<OHOS::NWeb::NWeb> parentNWebWeak = OHOS::NWeb::NWebHelper::Instance().GetNWeb(parentNWebId_);
+        auto parentNWebSptr = parentNWebWeak.lock();
+        if (parentNWebSptr) {
+            parentNWebSptr->NotifyPopupWindowResult(result);
+        }
+    }
+}
+
 void WebDelegate::RunSetWebIdAndHapPathCallback()
 {
     CHECK_NULL_VOID(nweb_);
@@ -1794,6 +1811,7 @@ void WebDelegate::RunSetWebIdAndHapPathCallback()
             CHECK_NULL_VOID(setHapPathCallback);
             setHapPathCallback(hapPath_);
         }
+        NotifyPopupWindowResult(true);
         return;
     }
     auto webCom = webComponent_.Upgrade();
@@ -1806,6 +1824,7 @@ void WebDelegate::RunSetWebIdAndHapPathCallback()
         CHECK_NULL_VOID(setHapPathCallback);
         setHapPathCallback(hapPath_);
     }
+    NotifyPopupWindowResult(true);
 }
 
 void WebDelegate::RunJsProxyCallback()
@@ -2721,6 +2740,38 @@ void WebDelegate::UpdateForceDarkAccess(const bool& access)
         TaskExecutor::TaskType::PLATFORM);
 }
 
+void WebDelegate::UpdateAudioResumeInterval(const int32_t& resumeInterval)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), resumeInterval]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            CHECK_NULL_VOID(delegate->nweb_);
+            delegate->nweb_->SetAudioResumeInterval(resumeInterval);
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateAudioExclusive(const bool& audioExclusive)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), audioExclusive]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            CHECK_NULL_VOID(delegate->nweb_);
+            delegate->nweb_->SetAudioExclusive(audioExclusive);
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
 void WebDelegate::UpdateOverviewModeEnabled(const bool& isOverviewModeAccessEnabled)
 {
     auto context = context_.Upgrade();
@@ -3123,6 +3174,42 @@ void WebDelegate::UpdateVerticalScrollBarAccess(bool isVerticalScrollBarAccessEn
         TaskExecutor::TaskType::PLATFORM);
 }
 
+void WebDelegate::UpdateScrollBarColor(const std::string& colorValue)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    if (pipeline == nullptr) {
+        return;
+    }
+
+    auto themeManager = pipeline->GetThemeManager();
+    if (themeManager == nullptr) {
+        return;
+    }
+
+    auto themeConstants = themeManager->GetThemeConstants();
+    if (themeConstants == nullptr) {
+        return;
+    }
+    Color color = themeConstants->GetColorByName(colorValue);
+    uint32_t colorContent = color.GetValue();
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), colorContent]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->PutScrollBarColor(colorContent);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
 void WebDelegate::LoadUrl()
 {
     auto context = context_.Upgrade();
@@ -3183,6 +3270,25 @@ void WebDelegate::OnActive()
             }
             if (delegate->nweb_) {
                 delegate->nweb_->OnContinue();
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::SetShouldFrameSubmissionBeforeDraw(bool should)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), should]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->nweb_) {
+                delegate->nweb_->SetShouldFrameSubmissionBeforeDraw(should);
             }
         },
         TaskExecutor::TaskType::PLATFORM);
@@ -3550,7 +3656,7 @@ void WebDelegate::OnGeolocationPermissionsHidePrompt()
 }
 
 void WebDelegate::OnGeolocationPermissionsShowPrompt(
-    const std::string& origin, OHOS::NWeb::NWebGeolocationCallbackInterface* callback)
+    const std::string& origin, const std::shared_ptr<OHOS::NWeb::NWebGeolocationCallbackInterface>& callback)
 {
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
@@ -4146,8 +4252,9 @@ void WebDelegate::OnWindowNew(const std::string& targetUrl, bool isAlert, bool i
         [weak = WeakClaim(this), targetUrl, isAlert, isUserTrigger, handler]() {
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
+            int32_t parentNWebId = (delegate->nweb_ ? delegate->nweb_->GetWebId() : -1);
             auto param = std::make_shared<WebWindowNewEvent>(targetUrl, isAlert, isUserTrigger,
-                AceType::MakeRefPtr<WebWindowNewHandlerOhos>(handler));
+                AceType::MakeRefPtr<WebWindowNewHandlerOhos>(handler, parentNWebId));
             if (Container::IsCurrentUseNewPipeline()) {
                 auto webPattern = delegate->webPattern_.Upgrade();
                 CHECK_NULL_VOID(webPattern);
@@ -4185,6 +4292,14 @@ void WebDelegate::OnPageVisible(const std::string& url)
 {
     if (onPageVisibleV2_) {
         onPageVisibleV2_(std::make_shared<PageVisibleEvent>(url));
+    }
+}
+
+void WebDelegate::OnFirstContentfulPaint(long navigationStartTick, long firstContentfulPaintMs)
+{
+    if (onFirstContentfulPaintV2_) {
+        onFirstContentfulPaintV2_(std::make_shared<FirstContentfulPaintEvent>(navigationStartTick,
+            firstContentfulPaintMs));
     }
 }
 
@@ -4242,6 +4357,17 @@ void WebDelegate::OnAudioStateChanged(bool audible)
     }
 }
 
+void WebDelegate::OnGetTouchHandleHotZone(OHOS::NWeb::TouchHandleHotZone& hotZone)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<TextOverlayTheme>();
+    CHECK_NULL_VOID(theme);
+    auto touchHandleSize = theme->GetHandleHotZoneRadius().ConvertToPx();
+    hotZone.width = touchHandleSize;
+    hotZone.height = touchHandleSize;
+}
+
 RefPtr<PixelMap> WebDelegate::GetDragPixelMap()
 {
     if (isRefreshPixelMap_) {
@@ -4253,29 +4379,32 @@ RefPtr<PixelMap> WebDelegate::GetDragPixelMap()
 }
 
 #ifdef OHOS_STANDARD_SYSTEM
-void WebDelegate::HandleTouchDown(const int32_t& id, const double& x, const double& y)
+void WebDelegate::HandleTouchDown(const int32_t& id, const double& x, const double& y,
+    bool from_overlay)
 {
     ACE_DCHECK(nweb_ != nullptr);
     if (nweb_) {
         ResSchedReport::GetInstance().ResSchedDataReport("web_gesture");
-        nweb_->OnTouchPress(id, x, y);
+        nweb_->OnTouchPress(id, x, y, from_overlay);
     }
 }
 
-void WebDelegate::HandleTouchUp(const int32_t& id, const double& x, const double& y)
+void WebDelegate::HandleTouchUp(const int32_t& id, const double& x, const double& y,
+    bool from_overlay)
 {
     ACE_DCHECK(nweb_ != nullptr);
     if (nweb_) {
         ResSchedReport::GetInstance().ResSchedDataReport("web_gesture");
-        nweb_->OnTouchRelease(id, x, y);
+        nweb_->OnTouchRelease(id, x, y, from_overlay);
     }
 }
 
-void WebDelegate::HandleTouchMove(const int32_t& id, const double& x, const double& y)
+void WebDelegate::HandleTouchMove(const int32_t& id, const double& x, const double& y,
+    bool from_overlay)
 {
     ACE_DCHECK(nweb_ != nullptr);
     if (nweb_) {
-        nweb_->OnTouchMove(id, x, y);
+        nweb_->OnTouchMove(id, x, y, from_overlay);
     }
 }
 
@@ -4523,6 +4652,11 @@ void WebDelegate::SetBoundsOrResize(const Size& drawSize, const Offset& offset)
             LOGI("WebDelegate::SetBounds: x:%{public}d, y:%{public}d, w::%{public}d, h:%{public}d",
                 (int32_t)offset.GetX(), (int32_t)offset.GetY(),
                 (int32_t)drawSize.Width(), (int32_t)drawSize.Height());
+            if (needResizeAtFirst_) {
+                LOGI("WebDelegate::SetBounds: resize at first");
+                Resize(drawSize.Width(), drawSize.Height());
+                needResizeAtFirst_ = false;
+            }
             Size webSize = GetEnhanceSurfaceSize(drawSize);
             surfaceDelegate_->SetBounds(offset.GetX(), (int32_t)offset.GetY(), webSize.Width(), webSize.Height());
         }
@@ -4655,5 +4789,19 @@ void WebDelegate::UnregisterSurfacePositionChangedCallback()
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UnregisterSurfacePositionChangedCallback(callbackId_);
     callbackId_ = 0;
+}
+
+void WebDelegate::OnCompleteSwapWithNewSize()
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->OnCompleteSwapWithNewSize();
+}
+
+void WebDelegate::OnResizeNotWork()
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->OnResizeNotWork();
 }
 } // namespace OHOS::Ace

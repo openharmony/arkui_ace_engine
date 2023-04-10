@@ -81,6 +81,8 @@ HWTEST_F(WebPatternTestNg, WebPatternTestNg_001, TestSize.Level1)
     webpattern.OnAllowWindowOpenMethodUpdate(true);
     webpattern.OnHorizontalScrollBarAccessEnabledUpdate(true);
     webpattern.OnVerticalScrollBarAccessEnabledUpdate(true);
+    webpattern.OnAudioResumeIntervalUpdate(0);
+    webpattern.OnAudioExclusiveUpdate(true);
 #endif
 }
 
@@ -159,6 +161,8 @@ HWTEST_F(WebPatternTestNg, WebPatternTestNg_003, TestSize.Level1)
     webPattern->HandleDragMove(event);
     webPattern->OnDarkModeUpdate(WebDarkMode::On);
     webPattern->OnForceDarkAccessUpdate(true);
+    webPattern->OnAudioResumeIntervalUpdate(0);
+    webPattern->OnAudioExclusiveUpdate(true);
 #endif
 }
 } // namespace OHOS::Ace::NG

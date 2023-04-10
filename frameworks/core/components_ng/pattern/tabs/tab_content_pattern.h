@@ -39,6 +39,11 @@ public:
         return false;
     }
 
+    bool IsMeasureBoundary() const override
+    {
+        return false;
+    }
+
     bool UsResRegion() override
     {
         return false;

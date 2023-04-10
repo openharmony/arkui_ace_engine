@@ -109,6 +109,7 @@ private:
     bool isLinearLayoutFeature_ = false;
     bool isInfiniteLayout_ = false;
     TextDirection textDir_ = TextDirection::LTR;
+    bool childrenHasAlignSelfBaseLine_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(FlexLayoutAlgorithm);
 };

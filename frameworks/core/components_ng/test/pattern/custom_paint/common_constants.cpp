@@ -30,12 +30,23 @@ const SizeF MIN_SIZE(MIN_WIDTH, MIN_HEIGHT);
 
 const int32_t CANVAS_WIDTH = 300;
 const int32_t CANVAS_HEIGHT = 300;
+const int32_t IMAGEDATA_WIDTH = 40;
+const int32_t IMAGEDATA_HEIGHT = 40;
 const int32_t DEFAULT_INSTANCE_ID = 0;
+const int32_t DEFAULT_INSTANCE_ID1 = 1;
+const int32_t DEFAULT_INSTANCE_ID2 = 2;
+const int32_t BLENDMODE_VALUE_BEGIN = 3;
+const int32_t BLENDMODE_VALUE_END = 5;
 
 const double DEFAULT_DOUBLE0 = 0.0;
 const double DEFAULT_DOUBLE1 = 1.0;
 const double DEFAULT_DOUBLE2 = 2.0;
 const double DEFAULT_DOUBLE10 = 10.0;
+
+const double HALF_CIRCLE_ANGLE = 180.0;
+const double FULL_CIRCLE_ANGLE = 360.0;
+const double SPECIAL_CIRCLE_ANGLE = 324.0;
+const double SPECIAL2_CIRCLE_ANGLE = -36.0;
 
 const std::string URL_PREFIX = "data:";
 const std::string IMAGE_PNG = "image/png";

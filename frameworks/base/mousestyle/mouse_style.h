@@ -34,6 +34,7 @@ enum class MouseFormat : int32_t {
     CURSOR_COPY = 14,
     CURSOR_FORBID = 15,
     HAND_GRABBING = 17,
+    HAND_OPEN = 18,
     HAND_POINTING = 19, // Hyperlink mouse style
     HELP = 20,
     CURSOR_MOVE = 21,
@@ -42,6 +43,16 @@ enum class MouseFormat : int32_t {
     TEXT_CURSOR = 26,   // Text editing mouse style
     ZOOM_IN = 27,
     ZOOM_OUT = 28,
+    MIDDLE_BTN_EAST = 29,
+    MIDDLE_BTN_WEST = 30,
+    MIDDLE_BTN_SOUTH = 31,
+    MIDDLE_BTN_NORTH = 32,
+    MIDDLE_BTN_NORTH_SOUTH = 33,
+    MIDDLE_BTN_NORTH_EAST = 34,
+    MIDDLE_BTN_NORTH_WEST = 35,
+    MIDDLE_BTN_SOUTH_EAST = 36,
+    MIDDLE_BTN_SOUTH_WEST = 37,
+    MIDDLE_BTN_NORTH_SOUTH_WEST_EAST = 38,
 };
 
 class ACE_EXPORT MouseStyle : public AceType {

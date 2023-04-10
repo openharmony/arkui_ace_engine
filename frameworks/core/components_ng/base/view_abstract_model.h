@@ -43,6 +43,7 @@ namespace OHOS::Ace {
 
 using ClickEventFunc = std::function<void(const ClickInfo* info)>;
 using RemoteCallback = std::function<void(const BaseEventInfo* info)>;
+using OnNewDragFunc = std::function<void(const RefPtr<OHOS::Ace::DragEvent>&)>;
 
 enum class ResponseType : int32_t {
     RIGHT_CLICK = 0,
@@ -70,9 +71,9 @@ public:
     virtual void SetBackgroundImageSize(const BackgroundImageSize& bgImgSize) = 0;
     virtual void SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition) = 0;
     virtual void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle) = 0;
-    virtual void SetSphericalEffect(float radio) {}
+    virtual void SetSphericalEffect(double radio) {}
     virtual void SetPixelStretchEffect(PixStretchEffectOption& option) {}
-    virtual void SetLightUpEffect(float radio) {}
+    virtual void SetLightUpEffect(double radio) {}
 
     virtual void SetPadding(const Dimension& value) = 0;
     virtual void SetPaddings(const std::optional<Dimension>& top, const std::optional<Dimension>& bottom,
@@ -179,8 +180,10 @@ public:
     virtual void SetOnFocusMove(std::function<void(int32_t)>&& onFocusMoveCallback) = 0;
     virtual void SetOnFocus(OnFocusFunc&& onFocusCallback) = 0;
     virtual void SetOnBlur(OnBlurFunc&& onBlurCallback) = 0;
+    virtual void SetDraggable(bool draggable) = 0;
     virtual void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) = 0;
     virtual void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) = 0;
+    virtual void SetOnDragEnd(OnNewDragFunc&& onDragEnd) = 0;
     virtual void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) = 0;
     virtual void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) = 0;
     virtual void SetOnDrop(NG::OnDragDropFunc&& onDrop) = 0;
@@ -205,7 +208,8 @@ public:
     virtual void SetDebugLine(const std::string& line) = 0;
     virtual void SetHoverEffect(HoverEffectType hoverEffect) = 0;
     virtual void SetHitTestMode(NG::HitTestMode hitTestMode) = 0;
-    virtual void SetKeyboardShortcut(const std::string& value, const std::vector<CtrlKey>& keys) = 0;
+    virtual void SetKeyboardShortcut(const std::string& value, const std::vector<CtrlKey>& keys,
+        std::function<void()>&& onKeyboardShortcutAction) = 0;
 
     // popup and menu
     virtual void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) = 0;

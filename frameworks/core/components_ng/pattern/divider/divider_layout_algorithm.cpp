@@ -26,8 +26,6 @@ DividerLayoutAlgorithm::DividerLayoutAlgorithm() = default;
 std::optional<SizeF> DividerLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
-    auto frameNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_RETURN(frameNode, std::nullopt);
     auto dividerLayoutProperty = DynamicCast<DividerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(dividerLayoutProperty, std::nullopt);
 
@@ -36,20 +34,20 @@ std::optional<SizeF> DividerLayoutAlgorithm::MeasureContent(
     auto theme = pipeline->GetTheme<DividerTheme>();
     CHECK_NULL_RETURN(theme, std::nullopt);
     Dimension strokeWidth = dividerLayoutProperty->GetStrokeWidth().value_or(theme->GetStokeWidth());
-    constrainStrokeWidth_ = NonNegative(strokeWidth.ConvertToPx())
+    constrainStrokeWidth_ = Positive(strokeWidth.ConvertToPx())
                                 ? static_cast<float>(strokeWidth.ConvertToPx())
                                 : static_cast<float>(theme->GetStokeWidth().ConvertToPx());
     vertical_ = dividerLayoutProperty->GetVertical().value_or(false);
     SizeF constrainSize;
     if (!vertical_) {
         dividerLength_ = (contentConstraint.selfIdealSize.Width()) ? contentConstraint.selfIdealSize.Width().value()
-                                                                   : contentConstraint.maxSize.Width();
+                                                                   : contentConstraint.percentReference.Width();
         constrainStrokeWidth_ = constrainStrokeWidth_ > dividerLength_ ? dividerLength_ : constrainStrokeWidth_;
         constrainSize = SizeF(dividerLength_, constrainStrokeWidth_);
         constrainSize.Constrain(contentConstraint.minSize, contentConstraint.maxSize);
     } else {
         dividerLength_ = (contentConstraint.selfIdealSize.Height()) ? contentConstraint.selfIdealSize.Height().value()
-                                                                    : contentConstraint.maxSize.Height();
+                                                                    : contentConstraint.percentReference.Height();
         constrainStrokeWidth_ = constrainStrokeWidth_ > dividerLength_ ? dividerLength_ : constrainStrokeWidth_;
         constrainSize = SizeF(constrainStrokeWidth_, dividerLength_);
         constrainSize.Constrain(contentConstraint.minSize, contentConstraint.maxSize);

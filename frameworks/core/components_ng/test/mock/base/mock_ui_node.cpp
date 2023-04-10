@@ -127,7 +127,7 @@ int32_t UINode::GetChildIndexById(int32_t id)
     return -1;
 }
 
-RefPtr<LayoutWrapper> UINode::CreateLayoutWrapper(bool forceMeasure, bool forceLayout) const
+RefPtr<LayoutWrapper> UINode::CreateLayoutWrapper(bool forceMeasure, bool forceLayout)
 {
     return nullptr;
 }

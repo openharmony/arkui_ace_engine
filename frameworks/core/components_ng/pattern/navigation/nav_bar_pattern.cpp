@@ -77,6 +77,13 @@ void BuildTitle(const RefPtr<NavBarNode>& navBarNode, const RefPtr<TitleBarNode>
 
 void BuildSubtitle(const RefPtr<NavBarNode>& navBarNode, const RefPtr<TitleBarNode>& titleBarNode)
 {
+    if (!navBarNode->GetSubtitle() && titleBarNode->GetSubtitle()) {
+        auto subtitleNode = titleBarNode->GetSubtitle();
+        titleBarNode->SetSubtitle(nullptr);
+        titleBarNode->RemoveChild(subtitleNode);
+        titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        return;
+    }
     CHECK_NULL_VOID_NOLOG(navBarNode->GetSubtitle());
     if (navBarNode->GetSubtitleNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::NONE) {
         return;
@@ -147,7 +154,7 @@ void MountTitleBar(const RefPtr<NavBarNode>& hostNode)
     auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_VOID(titleBarLayoutProperty);
 
-    if (!hostNode->GetTitle() && !hostNode->GetSubtitle() && !hostNode->GetMenu()) {
+    if (!hostNode->GetTitle() && !hostNode->GetSubtitle() && !hostNode->GetMenu() && !hostNode->GetBackButton()) {
         return;
     }
     titleBarLayoutProperty->UpdateTitleMode(navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE));

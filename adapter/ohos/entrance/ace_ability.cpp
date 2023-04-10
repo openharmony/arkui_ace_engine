@@ -494,6 +494,11 @@ void AceAbility::OnStart(const Want& want)
         parsedPageUrl = "";
     }
 
+    auto windowRect = window->GetRect();
+    if (!windowRect.IsUninitializedRect()) {
+        LOGI("notify window rect explicitly");
+        OnSizeChange(windowRect, OHOS::Rosen::WindowSizeChangeReason::UNDEFINED);
+    }
     // run page.
     Platform::AceContainer::RunPage(abilityId_, Platform::AceContainer::GetContainer(abilityId_)->GeneratePageId(),
         parsedPageUrl, want.GetStringParam(START_PARAMS_KEY));
@@ -695,6 +700,7 @@ void AceAbility::OnSizeChange(const OHOS::Rosen::Rect& rect, OHOS::Rosen::Window
     if (pipelineContext) {
         pipelineContext->SetDisplayWindowRectInfo(
             Rect(Offset(rect.posX_, rect.posY_), Size(rect.width_, rect.height_)));
+        pipelineContext->SetIsLayoutFullScreen(Ability::GetWindow()->IsLayoutFullScreen());
     }
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);

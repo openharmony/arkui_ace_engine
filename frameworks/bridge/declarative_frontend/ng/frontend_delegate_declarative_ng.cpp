@@ -34,6 +34,7 @@ namespace OHOS::Ace::Framework {
 namespace {
 
 const char MANIFEST_JSON[] = "manifest.json";
+const char PAGES_JSON[] = "main_pages.json";
 
 } // namespace
 
@@ -54,6 +55,9 @@ void FrontendDelegateDeclarativeNG::RunPage(
         manifestParser_->Printer();
     } else if (!profile.empty() && GetAssetContent(profile, jsonContent)) {
         LOGI("Parse profile %{public}s", profile.c_str());
+        manifestParser_->Parse(jsonContent);
+    } else if (GetAssetContent(PAGES_JSON, jsonContent)) {
+        LOGI("Parse main_pages.json");
         manifestParser_->Parse(jsonContent);
     } else {
         LOGE("RunPage parse manifest.json failed");

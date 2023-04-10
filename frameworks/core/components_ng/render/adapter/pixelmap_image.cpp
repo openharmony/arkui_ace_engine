@@ -31,11 +31,7 @@
 namespace OHOS::Ace::NG {
 RefPtr<CanvasImage> CanvasImage::Create(const RefPtr<PixelMap>& pixelMap)
 {
-#ifndef NG_BUILD
     return AceType::MakeRefPtr<PixelMapImage>(pixelMap);
-#else
-    return nullptr;
-#endif
 }
 
 int32_t PixelMapImage::GetWidth() const
@@ -80,11 +76,13 @@ void PixelMapImage::DrawToRSCanvas(
         return;
     }
     SkPaint paint;
-    ImagePainterUtils::AddFilter(paint, GetPaintConfig());
+    auto config = GetPaintConfig();
+    ImagePainterUtils::AddFilter(paint, config);
     auto radii = ImagePainterUtils::ToSkRadius(radiusXY);
     recordingCanvas->ClipAdaptiveRRect(radii.get());
-    Rosen::RsImageInfo rsImageInfo(
-        (int)(GetPaintConfig().imageFit_), (int)(GetPaintConfig().imageRepeat_), radii.get(), 1.0, 0, 0, 0);
+    recordingCanvas->scale(config.scaleX_, config.scaleY_);
+
+    Rosen::RsImageInfo rsImageInfo((int)(config.imageFit_), (int)(config.imageRepeat_), radii.get(), 1.0, 0, 0, 0);
     recordingCanvas->DrawPixelMapWithParm(pixelMap_->GetPixelMapSharedPtr(), rsImageInfo, paint);
 #endif
 }

@@ -444,8 +444,7 @@ HWTEST_F(XComponentPropertyTestNg, XComponentLayoutAlgorithmTest006, TestSize.Le
     EXPECT_CALL(*(AceType::RawPtr(AceType::DynamicCast<MockRenderSurface>(pattern->renderSurface_))), IsSurfaceValid())
         .WillOnce(Return(true))
         .WillOnce(Return(true))
-        .WillOnce(Return(false))
-        .WillOnce(Return(false));
+        .WillRepeatedly(Return(true));
     auto flag = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config); // IsSurfaceValid=true
     EXPECT_FALSE(flag);
     EXPECT_TRUE(pattern->hasXComponentInit_);
@@ -454,8 +453,8 @@ HWTEST_F(XComponentPropertyTestNg, XComponentLayoutAlgorithmTest006, TestSize.Le
     pattern->OnRebuildFrame(); // type="surface", IsSurfaceValid=false
     // goto other branch
     pattern->type_ = XCOMPONENT_COMPONENT_TYPE_VALUE;
-    pattern->XComponentSizeInit(0.0f, 0.0f); // IsSurfaceValid=false
-    pattern->OnRebuildFrame();               // type="component"
+    pattern->XComponentSizeInit(); // IsSurfaceValid=false
+    pattern->OnRebuildFrame();     // type="component"
 
     /**
      * @tc.steps: step3. call OnDirtyLayoutWrapperSwap adjust frameOffsetChanges, contentOffsetChanges and

@@ -26,6 +26,7 @@ constexpr float RACE_MOVE_PERCENT_MAX = 100.0f;
 constexpr float RACE_TEMPO = 0.2f;
 constexpr uint32_t RACE_DURATION = 2000;
 constexpr float RACE_SPACE_WIDTH = 48.0f;
+constexpr float ROUND_VALUE = 0.5f;
 const FontWeight FONT_WEIGHT_CONVERT_MAP[] = {
     FontWeight::W100,
     FontWeight::W200,
@@ -165,7 +166,7 @@ void TextContentModifier::ModifyFontSizeInTextStyle(TextStyle& textStyle)
 void TextContentModifier::ModifyFontWeightInTextStyle(TextStyle& textStyle)
 {
     if (fontWeight_.has_value() && fontWeightFloat_) {
-        textStyle.SetFontWeight(static_cast<FontWeight>(std::floor(fontWeightFloat_->Get() + 0.5f)));
+        textStyle.SetFontWeight(static_cast<FontWeight>(std::floor(fontWeightFloat_->Get() + ROUND_VALUE)));
     }
 }
 
@@ -193,7 +194,7 @@ void TextContentModifier::ModifyDecorationInTextStyle(TextStyle& textStyle)
 {
     if (textDecoration_.has_value() && textDecorationColor_.has_value() && textDecorationColorAlpha_) {
         if (textDecorationAnimatable_) {
-            uint8_t alpha = static_cast<int>(std::floor(textDecorationColorAlpha_->Get() + 0.5f));
+            uint8_t alpha = static_cast<int>(std::floor(textDecorationColorAlpha_->Get() + ROUND_VALUE));
             if (alpha == 0) {
                 textStyle.SetTextDecoration(TextDecoration::NONE);
                 textStyle.SetTextDecorationColor(textDecorationColor_.value());
@@ -265,7 +266,7 @@ void TextContentModifier::UpdateTextShadowMeasureFlag(PropertyChangeFlag& flag)
 void TextContentModifier::UpdateTextDecorationMeasureFlag(PropertyChangeFlag& flag)
 {
     if (textDecoration_.has_value() && textDecorationColor_.has_value() && textDecorationColorAlpha_) {
-        uint8_t alpha = static_cast<int>(std::floor(textDecorationColorAlpha_->Get() + 0.5f));
+        uint8_t alpha = static_cast<int>(std::floor(textDecorationColorAlpha_->Get() + ROUND_VALUE));
         if (textDecoration_.value() == TextDecoration::UNDERLINE && alpha != textDecorationColor_.value().GetAlpha()) {
             flag |= PROPERTY_UPDATE_MEASURE;
         } else if (textDecoration_.value() == TextDecoration::NONE && alpha != 0.0) {

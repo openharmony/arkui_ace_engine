@@ -84,11 +84,11 @@ std::string GetStringFromHap(const std::string& hapPath, const std::string& file
 }
 
 RefPtr<FlutterAssetProvider> CreateAssetProvider(const std::string& packagePath,
-    const std::vector<std::string>& assetBasePaths)
+    const std::vector<std::string>& assetBasePaths, bool useCache)
 {
     if (std::regex_match(packagePath, std::regex(".*\\.hap"))) {
         auto assetProvider = AceType::MakeRefPtr<HapAssetProvider>();
-        if (assetProvider->Initialize(packagePath, assetBasePaths)) {
+        if (assetProvider->Initialize(packagePath, assetBasePaths, useCache)) {
             return assetProvider;
         }
     } else {

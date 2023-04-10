@@ -52,13 +52,21 @@ void HandleSignal(int signo)
 
 }
 
+std::atomic<bool> AceEngine::isAlive_ = true;
+
 AceEngine::AceEngine()
 {
+    isAlive_.store(true);
     if (!SystemProperties::GetHookModeEnabled()) {
         watchDog_ = AceType::MakeRefPtr<WatchDog>();
     }
 }
 
+AceEngine::~AceEngine()
+{
+    LOGI("~AceEngine");
+    isAlive_.store(false);
+}
 AceEngine& AceEngine::Get()
 {
     static AceEngine engine;
@@ -73,6 +81,9 @@ void AceEngine::InitJsDumpHeadSignal()
 
 void AceEngine::AddContainer(int32_t instanceId, const RefPtr<Container>& container)
 {
+    if (!isAlive_.load()) {
+        return;
+    }
     LOGI("AddContainer %{public}d", instanceId);
     std::unique_lock<std::shared_mutex> lock(mutex_);
     const auto result = containerMap_.try_emplace(instanceId, container);
@@ -83,6 +94,9 @@ void AceEngine::AddContainer(int32_t instanceId, const RefPtr<Container>& contai
 
 void AceEngine::RemoveContainer(int32_t instanceId)
 {
+    if (!isAlive_.load()) {
+        return;
+    }
     LOGI("RemoveContainer %{public}d", instanceId);
     size_t num = 0;
     {
@@ -96,6 +110,9 @@ void AceEngine::RemoveContainer(int32_t instanceId)
 
 RefPtr<Container> AceEngine::GetContainer(int32_t instanceId)
 {
+    if (!isAlive_.load()) {
+        return nullptr;
+    }
 #ifdef PLUGIN_COMPONENT_SUPPORTED
     if (instanceId >= MIN_PLUGIN_SUBCONTAINER_ID) {
         instanceId = PluginManager::GetInstance().GetPluginParentContainerId(instanceId);
@@ -136,6 +153,9 @@ void AceEngine::DefusingBomb(int32_t instanceId)
 
 void AceEngine::TriggerGarbageCollection()
 {
+    if (!isAlive_.load()) {
+        return;
+    }
     std::unordered_map<int32_t, RefPtr<Container>> copied;
     {
         std::shared_lock<std::shared_mutex> lock(mutex_);
@@ -164,6 +184,9 @@ void AceEngine::TriggerGarbageCollection()
 
 void AceEngine::NotifyContainers(const std::function<void(const RefPtr<Container>&)>& callback)
 {
+    if (!isAlive_.load()) {
+        return;
+    }
     CHECK_NULL_VOID_NOLOG(callback);
     std::shared_lock<std::shared_mutex> lock(mutex_);
     for (const auto& [first, second] : containerMap_) {
@@ -175,6 +198,9 @@ void AceEngine::NotifyContainers(const std::function<void(const RefPtr<Container
 
 void AceEngine::DumpJsHeap(bool isPrivate) const
 {
+    if (!isAlive_.load()) {
+        return;
+    }
     std::unordered_map<int32_t, RefPtr<Container>> copied;
     {
         std::shared_lock<std::shared_mutex> lock(mutex_);

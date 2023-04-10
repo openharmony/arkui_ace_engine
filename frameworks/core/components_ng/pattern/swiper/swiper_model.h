@@ -90,6 +90,8 @@ public:
     virtual void SetIndicatorType(SwiperIndicatorType indicatorType) {}
     virtual void SetDotIndicatorStyle(const SwiperParameters& swiperParameters) {}
     virtual void SetDigitIndicatorStyle(const SwiperDigitalParameters& swiperDigitalParameters) {}
+    virtual void SetPreviousMargin(const Dimension& prevMargin) {}
+    virtual void SetNextMargin(const Dimension& nextMargin) {}
 private:
     static std::unique_ptr<SwiperModel> instance_;
 };

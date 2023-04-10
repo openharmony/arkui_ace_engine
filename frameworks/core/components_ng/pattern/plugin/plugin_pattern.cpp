@@ -208,12 +208,14 @@ void PluginPattern::CreatePluginSubContainer()
     PluginManager::GetInstance().AddPluginSubContainer(pluginSubContainerId_, pluginSubContainer_);
     PluginManager::GetInstance().AddPluginParentContainer(pluginSubContainerId_, parentcontainerId);
     pluginSubContainer_->Initialize();
-    pluginSubContainer_->SetPluginPattern(WeakClaim(this));
-    pluginSubContainer_->SetPluginNode(GetHost());
     auto weak = WeakClaim(this);
+    pluginSubContainer_->SetPluginPattern(weak);
     auto pattern = weak.Upgrade();
     auto host_ = pattern->GetHost();
     CHECK_NULL_VOID(host_);
+    pluginSubContainer_->SetPluginWindowId(GetHost()->GetId());
+    pluginSubContainer_->SetPluginNode(GetHost());
+
     auto uiTaskExecutor = SingleTaskExecutor::Make(host_->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
 
     int32_t instanceID = context->GetInstanceId();
@@ -509,17 +511,18 @@ std::string PluginPattern::GerPackagePathByBms(const WeakPtr<PluginPattern>& wea
         }
         return packagePathStr;
     }
-    if (info.moduleName == "default" || info.moduleName.empty()) {
+    if (info.moduleName.empty() || info.moduleName == "default") {
         info.moduleResPath = bundleInfo.hapModuleInfos[0].resourcePath;
         packagePathStr = bundleInfo.hapModuleInfos[0].hapPath;
         return packagePathStr;
     }
-    for (const auto& hapModuleInfo : bundleInfo.hapModuleInfos) {
-        if (info.moduleName == hapModuleInfo.moduleName) {
-            info.moduleResPath = hapModuleInfo.resourcePath;
-            packagePathStr = hapModuleInfo.hapPath;
-            return packagePathStr;
-        }
+    auto result = std::find_if(bundleInfo.hapModuleInfos.begin(), bundleInfo.hapModuleInfos.end(),
+        [moduleName = info.moduleName](
+            AppExecFwk::HapModuleInfo hapModuleInfo) { return hapModuleInfo.moduleName == moduleName; });
+    if (result != bundleInfo.hapModuleInfos.end()) {
+        info.moduleResPath = result->resourcePath;
+        packagePathStr = result->hapPath;
+        return packagePathStr;
     }
     LOGE("Bms get hapInfo failed!");
     pluginPattern->FireOnErrorEvent(

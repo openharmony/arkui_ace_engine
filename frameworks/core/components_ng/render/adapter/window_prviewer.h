@@ -28,6 +28,7 @@
 
 #include "adapter/preview/entrance/rs_ace_view.h"
 #include "base/thread/sem_queue.h"
+#include "base/utils/time_util.h"
 #include "core/common/window.h"
 
 namespace OHOS {
@@ -87,8 +88,7 @@ public:
                 std::unique_lock lock(mutex_);
                 vsyncCallbacks_.swap(pendingVsyncCallbacks_);
             }
-            int64_t now = std::chrono::duration_cast<std::chrono::nanoseconds>(
-                std::chrono::steady_clock::now().time_since_epoch()).count();
+            int64_t now = Ace::GetSysTimestamp();
             for (auto& callback : vsyncCallbacks_) {
                 callback->onCallback(now);
             }

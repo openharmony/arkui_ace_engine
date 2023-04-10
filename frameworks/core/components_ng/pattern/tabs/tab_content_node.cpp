@@ -84,12 +84,12 @@ RefPtr<TabContentNode> TabContentNode::GetOrCreateTabContentNode(
 void TabContentNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     FrameNode::ToJsonValue(json);
-    auto tabBar = JsonUtil::Create(false);
+    auto tabBar = JsonUtil::Create(true);
 
     auto tabContentPattern = GetPattern<TabContentPattern>();
     CHECK_NULL_VOID(tabContentPattern);
 
-    auto indicator = JsonUtil::Create(false);
+    auto indicator = JsonUtil::Create(true);
     auto indicatorStyle = tabContentPattern->GetIndicatorStyle();
     indicator->Put("color", indicatorStyle.color.ColorToString().c_str());
     indicator->Put("height", indicatorStyle.height.ToString().c_str());
@@ -98,7 +98,7 @@ void TabContentNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     indicator->Put("marginTop", indicatorStyle.marginTop.ToString().c_str());
     tabBar->Put("indicator", indicator);
 
-    auto board = JsonUtil::Create(false);
+    auto board = JsonUtil::Create(true);
     auto boardStyle = tabContentPattern->GetBoardStyle();
     board->Put("borderRadius", boardStyle.borderRadius.ToString().c_str());
     tabBar->Put("board", board);
@@ -106,7 +106,7 @@ void TabContentNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     tabBar->Put("selectedMode", tabContentPattern->GetSelectedMode() == SelectedMode::INDICATOR ?
 		"SelectedMode.INDICATOR" : "SelectedMode.BOARD");
 
-    auto font = JsonUtil::Create(false);
+    auto font = JsonUtil::Create(true);
     auto labelStyle = tabContentPattern->GetLabelStyle();
     font->Put("size", labelStyle.fontSize.value_or(Dimension(0)).ToString().c_str());
     font->Put("weight",
@@ -122,7 +122,7 @@ void TabContentNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
                                 ? "FontStyle.Normal"
                                 : "FontStyle.Italic");
 
-    auto label = JsonUtil::Create(false);
+    auto label = JsonUtil::Create(true);
     label->Put("overflow",
         V2::ConvertWrapTextOverflowToString(labelStyle.textOverflow.value_or(TextOverflow::ELLIPSIS)).c_str());
     label->Put("maxLines", std::to_string(labelStyle.maxLines.value_or(DEFAULT_MAXLINES)).c_str());

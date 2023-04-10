@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
 #include "core/components_ng/pattern/text_picker/textpicker_layout_property.h"
 #include "core/components_ng/pattern/text_picker/toss_animation_controller.h"
+#include "core/components_ng/property/calc_length.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
@@ -42,6 +43,8 @@ void TextPickerPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToFrame(true);
+    auto calcLength = NG::CalcLength(Dimension(1.0, DimensionUnit::PERCENT));
+    host->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(calcLength, calcLength));
 }
 
 bool TextPickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -371,7 +374,7 @@ std::string TextPickerPattern::GetRangeStr() const
             result += "\"";
             result += ",";
         }
-        result = result.substr(0, result.size() - 1);
+        result.pop_back();
         result += "]";
         return result;
     }

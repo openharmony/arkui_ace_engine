@@ -77,25 +77,18 @@ void JSTextClock::Create(const JSCallbackInfo& info)
     }
     JSRef<JSObject> optionsObject = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> hourWestVal = optionsObject->GetProperty("timeZoneOffset");
-    if (hourWestVal->IsNumber()) {
-        auto hourWest_ = hourWestVal->ToNumber<int32_t>();
-        if (HoursWestIsValid(hourWest_)) {
-            TextClockModel::GetInstance()->SetHoursWest(hourWest_);
-            return;
-        }
-        LOGE("hourWest args is invalid");
-        if (Container::IsCurrentUseNewPipeline()) {
-            TextClockModel::GetInstance()->SetHoursWest(INT_MAX);
-        }
+    if (hourWestVal->IsNumber() && HoursWestIsValid(hourWestVal->ToNumber<int32_t>())) {
+        TextClockModel::GetInstance()->SetHoursWest(hourWestVal->ToNumber<int32_t>());
     } else {
-        LOGE("hourWest args is not number,args is invalid");
+        TextClockModel::GetInstance()->SetHoursWest(INT_MAX);
+        LOGE("hourWest args is invalid");
     }
     auto controllerObj = optionsObject->GetProperty("controller");
     if (!controllerObj->IsUndefined() && !controllerObj->IsNull()) {
         auto* jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextClockController>();
         if (jsController != nullptr) {
             if (controller) {
-                jsController->SetController(controller);
+                jsController->AddController(controller);
             } else {
                 LOGE("TextClockController is nullptr");
             }
@@ -188,15 +181,19 @@ void JSTextClockController::Destructor(JSTextClockController* scroller)
 
 void JSTextClockController::Start()
 {
-    if (controller_) {
-        controller_->Start();
+    if (!controller_.empty()) {
+        for (auto& i : controller_) {
+            i->Start();
+        }
     }
 }
 
 void JSTextClockController::Stop()
 {
-    if (controller_) {
-        controller_->Stop();
+    if (!controller_.empty()) {
+        for (auto& i : controller_) {
+            i->Stop();
+        }
     }
 }
 } // namespace OHOS::Ace::Framework

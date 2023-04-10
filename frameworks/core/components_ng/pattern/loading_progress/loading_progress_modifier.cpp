@@ -22,6 +22,7 @@
 #include "base/utils/utils.h"
 #include "bridge/common/dom/dom_type.h"
 #include "core/components/common/properties/animation_option.h"
+#include "core/components/progress/progress_theme.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_utill.h"
 #include "core/components_ng/pattern/refresh/refresh_animation_state.h"
@@ -32,8 +33,9 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float TOTAL_ANGLE = 360.0f;
-constexpr float ROTATEX = 100.f;
-constexpr float ROTATEZ = 30.0f;
+constexpr float ROTATEX = -116.0f;
+constexpr float ROTATEY = 30.0f;
+constexpr float ROTATEZ = 22.0f;
 constexpr float COUNT = 50.0f;
 constexpr float HALF = 0.5f;
 constexpr float DOUBLE = 2.0f;
@@ -47,7 +49,7 @@ constexpr float INITIAL_SIZE_SCALE = 0.825f;
 constexpr float INITIAL_OPACITY_SCALE = 0.7f;
 constexpr float COMET_TAIL_ANGLE = 3.0f;
 constexpr int32_t LOADING_DURATION = 1200;
-constexpr float FOLLOW_START = 58.0f;
+constexpr float FOLLOW_START = 72.0f;
 constexpr float FOLLOW_SPAN = 10.0f;
 constexpr float FULL_COUNT = 100.0f;
 constexpr float STAGE1 = 0.25f;
@@ -64,6 +66,7 @@ constexpr float SIZE_SCALE3 = 0.93f;
 constexpr float MOVE_STEP = 0.06f;
 constexpr float TRANS_OPACITY_SPAN = 0.3f;
 constexpr float FULL_OPACITY = 255.0f;
+constexpr float TWO = 2.0f;
 } // namespace
 LoadingProgressModifier::LoadingProgressModifier(LoadingProgressOwner loadingProgressOwner)
     : date_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f)),
@@ -72,6 +75,7 @@ LoadingProgressModifier::LoadingProgressModifier(LoadingProgressOwner loadingPro
       cometOpacity_(AceType::MakeRefPtr<AnimatablePropertyFloat>(INITIAL_OPACITY_SCALE)),
       cometSizeScale_(AceType::MakeRefPtr<AnimatablePropertyFloat>(INITIAL_SIZE_SCALE)),
       cometTailLen_(AceType::MakeRefPtr<AnimatablePropertyFloat>(TOTAL_TAIL_LENGTH)),
+      sizeScale_(AceType::MakeRefPtr<AnimatablePropertyFloat>(1.0f)),
       loadingProgressOwner_(loadingProgressOwner)
 {
     AttachProperty(date_);
@@ -80,6 +84,7 @@ LoadingProgressModifier::LoadingProgressModifier(LoadingProgressOwner loadingPro
     AttachProperty(cometOpacity_);
     AttachProperty(cometSizeScale_);
     AttachProperty(cometTailLen_);
+    AttachProperty(sizeScale_);
 };
 
 void LoadingProgressModifier::onDraw(DrawingContext& context)
@@ -87,17 +92,18 @@ void LoadingProgressModifier::onDraw(DrawingContext& context)
     float date = date_->Get();
     auto diameter = std::min(context.width, context.height);
     RingParam ringParam;
-    ringParam.strokeWidth = LoadingProgressUtill::GetRingStrokeWidth(diameter);
-    ringParam.radius = LoadingProgressUtill::GetRingRadius(diameter);
-    ringParam.movement = (ringParam.radius * DOUBLE + ringParam.strokeWidth) * centerDeviation_->Get();
+    ringParam.strokeWidth = LoadingProgressUtill::GetRingStrokeWidth(diameter) * sizeScale_->Get();
+    ringParam.radius = LoadingProgressUtill::GetRingRadius(diameter) * sizeScale_->Get();
+    ringParam.movement =
+        (ringParam.radius * DOUBLE + ringParam.strokeWidth) * centerDeviation_->Get() * sizeScale_->Get();
 
     CometParam cometParam;
-    cometParam.radius = LoadingProgressUtill::GetCometRadius(diameter);
+    cometParam.radius = LoadingProgressUtill::GetCometRadius(diameter) * sizeScale_->Get();
     cometParam.alphaScale = cometOpacity_->Get();
     cometParam.sizeScale = cometSizeScale_->Get();
     cometParam.pointCount = GetCometNumber();
 
-    auto orbitRadius = LoadingProgressUtill::GetOrbitRadius(diameter);
+    auto orbitRadius = LoadingProgressUtill::GetOrbitRadius(diameter) * sizeScale_->Get();
     if (date > COUNT) {
         DrawRing(context, ringParam);
         DrawOrbit(context, cometParam, orbitRadius, date);
@@ -113,7 +119,18 @@ void LoadingProgressModifier::DrawRing(DrawingContext& context, const RingParam&
     canvas.Save();
     RSPen pen;
     auto ringColor = color_->Get();
-    pen.SetColor(ToRSColor(Color::FromARGB(RING_ALPHA, ringColor.GetRed(), ringColor.GetGreen(), ringColor.GetBlue())));
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto progressTheme = pipeline->GetTheme<ProgressTheme>();
+    CHECK_NULL_VOID(progressTheme);
+    auto defaultColor = progressTheme->GetLoadingColor();
+    if (ringColor.GetValue() == defaultColor.GetValue()) {
+        pen.SetColor(ToRSColor(Color::FromARGB(RING_ALPHA, ringColor.GetRed(), ringColor.GetGreen(),
+            ringColor.GetBlue())));
+    } else {
+        pen.SetColor(ToRSColor(Color::FromARGB(ringColor.GetAlpha(), ringColor.GetRed(), ringColor.GetGreen(),
+            ringColor.GetBlue())));
+    }
     pen.SetWidth(ringParam.strokeWidth);
     pen.SetAntiAlias(true);
     canvas.AttachPen(pen);
@@ -132,8 +149,9 @@ void LoadingProgressModifier::DrawOrbit(
     double angle = TOTAL_ANGLE * date / FULL_COUNT;
     auto* camera_ = new RSCamera3D();
     camera_->Save();
-    camera_->RotateYDegrees(ROTATEZ);
+    camera_->RotateYDegrees(ROTATEY);
     camera_->RotateXDegrees(ROTATEX);
+    camera_->RotateZDegrees(ROTATEZ);
     RSMatrix matrix;
     camera_->ApplyToMatrix(matrix);
     camera_->Restore();
@@ -158,12 +176,16 @@ void LoadingProgressModifier::DrawOrbit(
     auto baseAlpha = colorAlpha * cometParam.alphaScale;
     for (uint32_t i = 0; i < distPoints.size(); i++) {
         RSPoint pointCenter = distPoints[i];
-        float setAlpha = GetCurentCometOpacity(baseAlpha, distPoints.size() - i, distPoints.size());
-        if (NearZero(setAlpha)) {
-            continue;
+        if (cometColor.GetValue() == Color::FOREGROUND.GetValue()) {
+            brush.SetColor(ToRSColor(cometColor));
+        } else {
+            float setAlpha = GetCurentCometOpacity(baseAlpha, distPoints.size() - i, distPoints.size());
+            if (NearZero(setAlpha)) {
+                continue;
+            }
+            brush.SetColor(
+                ToRSColor(Color::FromRGBO(cometColor.GetRed(), cometColor.GetGreen(), cometColor.GetBlue(), setAlpha)));
         }
-        brush.SetColor(
-            ToRSColor(Color::FromRGBO(cometColor.GetRed(), cometColor.GetGreen(), cometColor.GetBlue(), setAlpha)));
         canvas.AttachBrush(brush);
         canvas.DrawCircle(pointCenter, cometParam.radius * cometParam.sizeScale);
     }
@@ -250,6 +272,7 @@ void LoadingProgressModifier::StartRecycle()
     if (isLoading_) {
         return;
     }
+    sizeScale_->Set(1.0f);
     if (date_) {
         isLoading_ = true;
         date_->Set(0.0f);
@@ -287,8 +310,12 @@ void LoadingProgressModifier::StartTransToRecycleAnimation()
 
 void LoadingProgressModifier::ChangeRefreshFollowData(float refreshFollowRatio)
 {
-    CHECK_NULL_VOID(date_);
     auto ratio = CorrectNormalize(refreshFollowRatio);
+    sizeScale_->Set(std::sqrt(TWO) * HALF + (1.0 - std::sqrt(TWO) * HALF) * ratio);
+    if (isLoading_) {
+        return;
+    }
+    CHECK_NULL_VOID(date_);
     date_->Set(FOLLOW_START + FOLLOW_SPAN * ratio);
     cometTailLen_->Set(COMET_TAIL_ANGLE);
     cometOpacity_->Set(1.0f);

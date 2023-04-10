@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/text_field/text_field_pattern.h"
-#include "core/components_v2/inspector/utils.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components/theme/icon_theme.h"
+#include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::NG {
 constexpr uint32_t TWINKLING_INTERVAL_MS = 500;
@@ -59,6 +59,11 @@ void TextFieldPattern::OnDetachFromFrameNode(FrameNode*) {}
 
 void TextFieldPattern::OnValueChanged(bool needFireChangeEvent, bool needFireSelectChangeEvent) {}
 
+bool TextFieldPattern::OnKeyEvent(const KeyEvent& event)
+{
+    return false;
+}
+
 std::string TextFieldPattern::GetFontSize() const
 {
     return "string";
@@ -84,6 +89,11 @@ TextAlign TextFieldPattern::GetTextAlign() const
     return TextAlign::START;
 }
 
+std::string TextFieldPattern::GetPlaceHolder() const
+{
+    return "string";
+}
+
 std::string TextFieldPattern::GetPlaceholderColor() const
 {
     return "string";
@@ -92,11 +102,6 @@ std::string TextFieldPattern::GetPlaceholderColor() const
 std::string TextFieldPattern::GetPlaceholderFont() const
 {
     return "string";
-}
-
-bool TextFieldPattern::HandleKeyEvent(const KeyEvent& keyEvent)
-{
-    return true;
 }
 
 void TextFieldPattern::SetSelectionFlag(int32_t selectionStart, int32_t selectionEnd) {}
@@ -108,4 +113,12 @@ bool TextFieldPattern::OnScrollCallback(float offset, int32_t source)
     return true;
 }
 void TextFieldPattern::UpdateScrollBarOffset() {}
+
+void TextFieldPattern::HandleBlurEvent() {}
+void TextFieldPattern::HandleFocusEvent() {}
+
+void TextFieldPattern::InitSurfaceChangedCallback() {}
+void TextFieldPattern::InitSurfacePositionChangedCallback() {}
+
+void TextFieldPattern::HandleClickEvent(GestureEvent& info) {}
 } // namespace OHOS::Ace::NG

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -77,10 +77,11 @@ public:
     void BlendBorderColor(const Color& color) override;
 
     // Paint focus state by component's setting. It will paint along the paintRect
-    void PaintFocusState(const RoundRect& paintRect, const Color& paintColor, const Dimension& paintWidth) override;
+    void PaintFocusState(const RoundRect& paintRect, const Color& paintColor, const Dimension& paintWidth,
+        bool isAccessibilityFocus = false) override;
     // Paint focus state by component's setting. It will paint along the frameRect(padding: focusPaddingVp)
     void PaintFocusState(const RoundRect& paintRect, const Dimension& focusPaddingVp, const Color& paintColor,
-        const Dimension& paintWidth) override;
+        const Dimension& paintWidth, bool isAccessibilityFocus = false) override;
     // Paint focus state by default. It will paint along the component rect(padding: focusPaddingVp)
     void PaintFocusState(
         const Dimension& focusPaddingVp, const Color& paintColor, const Dimension& paintWidth) override;
@@ -129,9 +130,9 @@ public:
     void AnimateHoverEffectBoard(bool isHovered) override;
     void UpdateBackBlurRadius(const Dimension& radius) override;
     void UpdateBackBlurStyle(const BlurStyleOption& bgBlurStyle) override;
-    void OnSphericalEffectUpdate(float radio) override;
+    void OnSphericalEffectUpdate(double radio) override;
     void OnPixelStretchEffectUpdate(const PixStretchEffectOption& option) override;
-    void OnLightUpEffectUpdate(float radio) override;
+    void OnLightUpEffectUpdate(double radio) override;
     void OnBackShadowUpdate(const Shadow& shadow) override;
     void UpdateBorderWidthF(const BorderWidthPropertyF& value) override;
 
@@ -155,6 +156,7 @@ public:
 
     void SetSharedTranslate(float xTranslate, float yTranslate) override;
     void ResetSharedTranslate() override;
+    void ResetPageTransitionEffect() override;
 
     static std::list<std::shared_ptr<Rosen::RSNode>> GetChildrenRSNodes(
         const std::list<RefPtr<FrameNode>>& frameChildren);
@@ -168,7 +170,7 @@ public:
 
     void AddChild(const RefPtr<RenderContext>& renderContext, int index) override;
     void SetBounds(float positionX, float positionY, float width, float height) override;
-    void OnTransformTranslateUpdate(const Vector3F& value) override;
+    void OnTransformTranslateUpdate(const TranslateOptions& value) override;
 
     RectF GetPaintRectWithTransform() override;
 
@@ -182,6 +184,10 @@ public:
     void ScaleAnimation(const AnimationOption& option, double begin, double end) override;
 
     void PaintAccessibilityFocus() override;
+
+    virtual void ClearAccessibilityFocus() override;
+
+    void OnAccessibilityFocusUpdate(bool isAccessibilityFocus) override;
 
     void OnMouseSelectUpdate(bool isSelected, const Color& fillColor, const Color& strokeColor) override;
     void UpdateMouseSelectWithRect(const RectF& rect, const Color& fillColor, const Color& strokeColor) override;
@@ -206,6 +212,7 @@ public:
     void MarkDrivenRender(bool flag) override;
     void MarkDrivenRenderItemIndex(int32_t index) override;
     void MarkDrivenRenderFramePaintState(bool flag) override;
+    RefPtr<PixelMap> GetThumbnailPixelMap() override;
 
 private:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
@@ -258,8 +265,6 @@ private:
 
     void OnOverlayTextUpdate(const OverlayOptions& overlay) override;
     void OnMotionPathUpdate(const MotionPathOption& motionPath) override;
-
-    void OnAccessibilityFocusUpdate(bool isAccessibilityFocus) override;
 
     void ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
 
@@ -317,6 +322,7 @@ private:
     LoadSuccessNotifyTask CreateBgImageLoadSuccessCallback();
     DataReadyNotifyTask CreateBorderImageDataReadyCallback();
     LoadSuccessNotifyTask CreateBorderImageLoadSuccessCallback();
+    void BdImagePaintTask(RSCanvas& canvas);
 
     void PaintDebugBoundary();
 
@@ -333,6 +339,7 @@ private:
     bool firstTransitionIn_ = false;
     bool isBackBlurChanged_ = false;
     bool needDebugBoundary_ = false;
+    bool isDisappearing_ = false;
     int disappearingTransitionCount_ = 0;
     Color blendColor_ = Color::TRANSPARENT;
     Color hoveredColor_ = Color::TRANSPARENT;
@@ -343,6 +350,7 @@ private:
     std::shared_ptr<MouseSelectModifier> mouseSelectModifier_;
     std::shared_ptr<MoonProgressModifier> moonProgressModifier_;
     std::shared_ptr<FocusStateModifier> focusStateModifier_;
+    std::shared_ptr<FocusStateModifier> accessibilityFocusStateModifier_;
     std::optional<TransformMatrixModifier> transformMatrixModifier_;
     std::shared_ptr<Rosen::RSProperty<Rosen::Vector2f>> pivotProperty_;
     std::unique_ptr<SharedTransitionModifier> sharedTransitionModifier_;

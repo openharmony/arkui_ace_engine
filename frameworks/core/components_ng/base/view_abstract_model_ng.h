@@ -107,7 +107,7 @@ public:
         ViewAbstract::SetBackgroundBlurStyle(bgBlurStyle);
     }
 
-    void SetSphericalEffect(float radio) override
+    void SetSphericalEffect(double radio) override
     {
         ViewAbstract::SetSphericalEffect(radio);
     }
@@ -115,7 +115,7 @@ public:
     {
         ViewAbstract::SetPixelStretchEffect(option);
     }
-    void SetLightUpEffect(float radio) override
+    void SetLightUpEffect(double radio) override
     {
         ViewAbstract::SetLightUpEffect(radio);
     }
@@ -325,7 +325,7 @@ public:
 
     void SetTranslate(const Dimension& x, const Dimension& y, const Dimension& z) override
     {
-        ViewAbstract::SetTranslate(NG::Vector3F(x.ConvertToPx(), y.ConvertToPx(), z.ConvertToPx()));
+        ViewAbstract::SetTranslate(TranslateOptions(x, y, z));
     }
 
     void SetRotate(float x, float y, float z, float angle) override
@@ -562,6 +562,11 @@ public:
         ViewAbstract::SetOnBlur(std::move(onBlurCallback));
     }
 
+    void SetDraggable(bool draggable) override
+    {
+        ViewAbstract::SetDraggable(draggable);
+    }
+
     void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override
     {
         auto dragStart = [dragStartFunc = std::move(onDragStart)](const RefPtr<OHOS::Ace::DragEvent>& event,
@@ -579,6 +584,11 @@ public:
     void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) override
     {
         ViewAbstract::SetOnDragEnter(std::move(onDragEnter));
+    }
+
+    void SetOnDragEnd(OnNewDragFunc&& onDragEnd) override
+    {
+        ViewAbstract::SetOnDragEnd(std::move(onDragEnd));
     }
 
     void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) override
@@ -679,14 +689,18 @@ public:
         ViewAbstract::SetHitTestMode(hitTestMode);
     }
 
-    void SetKeyboardShortcut(const std::string& value, const std::vector<CtrlKey>& keys) override
+    void SetKeyboardShortcut(const std::string& value, const std::vector<CtrlKey>& keys,
+        std::function<void()>&& onKeyboardShortcutAction) override
     {
-        ViewAbstract::SetKeyboardShortcut(value, keys);
+        ViewAbstract::SetKeyboardShortcut(value, keys, std::move(onKeyboardShortcutAction));
     }
 
     void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) override
     {
         auto targetNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+#ifdef ENABLE_DRAG_FRAMEWORK
+        ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true);
+#endif // ENABLE_DRAG_FRAMEWORK
         ViewAbstract::BindPopup(param, targetNode, AceType::DynamicCast<UINode>(customNode));
     }
 

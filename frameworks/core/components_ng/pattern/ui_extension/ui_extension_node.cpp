@@ -42,11 +42,9 @@ HitTestResult UIExtensionNode::TouchTest(const PointF& globalPoint, const PointF
 
 void UIExtensionNode::DispatchPointerEvent(const TouchEvent& point) const
 {
-    auto pattern = GetPattern<UIExtensionPattern>();
-    CHECK_NULL_VOID(pattern);
     auto selfGlobalOffset = GetTransformRelativeOffset();
     auto pointerEvent = Platform::ConvertPointerEvent(selfGlobalOffset, point);
-    pattern->DispatchPointerEvent(pointerEvent);
+    GetPattern<UIExtensionPattern>()->DispatchPointerEvent(pointerEvent);
 }
 
 RefPtr<UIExtensionNode> UIExtensionNode::GetOrCreateUIExtensionNode(

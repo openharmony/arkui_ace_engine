@@ -39,6 +39,8 @@ public:
     virtual void SetControlWidth(const Dimension& value) = 0;
     virtual void SetStateChange(bool value) = 0;
     virtual void SetBackgroundColor(const Color& value) = 0;
+    virtual void SetEnableDec(bool enableDec) = 0;
+    virtual void SetEnableInc(bool enableInc) = 0;
 
 private:
     static std::unique_ptr<CounterModel> instance_;

@@ -90,9 +90,9 @@ public:
     static void SetBackgroundImageSize(const BackgroundImageSize& bgImgSize);
     static void SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition);
     static void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle);
-    static void SetSphericalEffect(float radio);
+    static void SetSphericalEffect(double radio);
     static void SetPixelStretchEffect(PixStretchEffectOption& option);
-    static void SetLightUpEffect(float radio);
+    static void SetLightUpEffect(double radio);
     static void SetPadding(const CalcLength& value);
     static void SetPadding(const PaddingProperty& value);
     static void SetMargin(const CalcLength& value);
@@ -153,7 +153,7 @@ public:
     // transform
     static void SetScale(const NG::VectorF& value);
     static void SetPivot(const DimensionOffset& value);
-    static void SetTranslate(const NG::Vector3F& value);
+    static void SetTranslate(const NG::TranslateOptions& value);
     static void SetRotate(const NG::Vector4F& value);
 
     static void SetTransformMatrix(const Matrix4& matrix);
@@ -164,6 +164,7 @@ public:
     static void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc);
     static void SetOnHover(OnHoverEventFunc&& onHoverEventFunc);
     static void SetHoverEffect(HoverEffectType hoverEffect);
+    static void SetHoverEffectAuto(HoverEffectType hoverEffect);
     static void SetEnabled(bool enabled);
     static void SetFocusable(bool focusable);
     static void SetOnFocus(OnFocusFunc&& onFocusCallback);
@@ -183,6 +184,7 @@ public:
     static void SetResponseRegion(const std::vector<DimensionRect>& responseRegion);
     static void SetTouchable(bool touchable);
     static void SetHitTestMode(HitTestMode hitTestMode);
+    static void SetDraggable(bool draggable);
     static void SetOnDragStart(
         std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragStart);
     static void SetOnDragEnter(
@@ -193,13 +195,16 @@ public:
         std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragMove);
     static void SetOnDrop(std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDrop);
 
+    static void SetOnDragEnd(std::function<void(const RefPtr<OHOS::Ace::DragEvent>&)>&& onDragEnd);
+
     // flex properties
     static void SetAlignSelf(FlexAlign value);
     static void SetFlexShrink(float value);
     static void SetFlexGrow(float value);
     static void SetFlexBasis(const Dimension& value);
     static void SetDisplayIndex(int32_t value);
-    static void SetKeyboardShortcut(const std::string& value, const std::vector<CtrlKey>& keys);
+    static void SetKeyboardShortcut(
+        const std::string& value, const std::vector<CtrlKey>& keys, std::function<void()>&& onKeyboardShortcutAction);
 
     // Bind properties
     static void BindPopup(

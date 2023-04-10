@@ -22,13 +22,10 @@
 #include "core/common/container_scope.h"
 
 namespace OHOS::Ace {
-
 Window::Window(std::unique_ptr<PlatformWindow> platformWindow) : platformWindow_(std::move(platformWindow))
 {
     CHECK_NULL_VOID(platformWindow_);
-    auto&& callback = [this](uint64_t nanoTimestamp, uint32_t frameCount) {
-        OnVsync(nanoTimestamp, frameCount);
-    };
+    auto&& callback = [this](uint64_t nanoTimestamp, uint32_t frameCount) { OnVsync(nanoTimestamp, frameCount); };
     platformWindow_->RegisterVsyncCallback(callback);
     LOGI("Window Created success.");
 }
@@ -60,19 +57,7 @@ void Window::OnVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         if (callback.callback_ == nullptr) {
             continue;
         }
-#if !defined(PREVIEW)
         callback.callback_(nanoTimestamp, frameCount);
-#else
-        auto task = [nanoTimestamp, frameCount, callback = callback.callback_] {
-            callback(nanoTimestamp, frameCount);
-        };
-
-        ContainerScope scope(callback.containerId_);
-        auto executor = Container::CurrentTaskExecutor();
-        if (executor != nullptr) {
-            executor->PostTask(task, TaskExecutor::TaskType::UI);
-        }
-#endif
     }
 }
 
@@ -83,6 +68,4 @@ void Window::SetVsyncCallback(AceVsyncCallback&& callback)
         .containerId_ = Container::CurrentId(),
     });
 }
-
-
 } // namespace OHOS::Ace

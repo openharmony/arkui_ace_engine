@@ -395,22 +395,6 @@ void PipelineContext::SetContainerWindow(bool isShow)
 #endif
 }
 
-void PipelineContext::BlurWindowWithDrag(bool isBlur)
-{
-    if (windowModal_ != WindowModal::CONTAINER_MODAL) {
-        LOGW("BlurWindowWithDrag failed, Window modal is not container.");
-        return;
-    }
-    if (!rootElement_) {
-        LOGW("BlurWindowWithDrag failed, rootElement_ is null.");
-        return;
-    }
-    auto containerModal = AceType::DynamicCast<ContainerModalElement>(rootElement_->GetFirstChild());
-    if (containerModal) {
-        containerModal->BlurWindow(isBlur);
-    }
-}
-
 void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize)
 {
     if (windowModal_ != WindowModal::CONTAINER_MODAL) {
@@ -2160,36 +2144,6 @@ void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, Win
             });
             break;
         }
-        case WindowSizeChangeReason::DRAG_START: {
-            isDragStart_ = true;
-#ifdef ENABLE_ROSEN_BACKEND
-            if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_) {
-                rsUIDirector_->SetAppFreeze(true);
-            }
-#endif
-            BlurWindowWithDrag(true);
-            NotifyWebPaint();
-            break;
-        }
-        case WindowSizeChangeReason::DRAG: {
-            isFirstDrag_ = false;
-            // Refresh once when first dragging.
-            SetRootSizeWithWidthHeight(width, height);
-            break;
-        }
-        case WindowSizeChangeReason::DRAG_END: {
-            isDragStart_ = false;
-            isFirstDrag_ = true;
-#ifdef ENABLE_ROSEN_BACKEND
-            if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_) {
-                rsUIDirector_->SetAppFreeze(false);
-            }
-#endif
-            BlurWindowWithDrag(false);
-            SetRootSizeWithWidthHeight(width, height);
-            NotifyWebPaint();
-            break;
-        }
         case WindowSizeChangeReason::ROTATION: {
 #ifdef ENABLE_ROSEN_BACKEND
             if (rsTransaction) {
@@ -2232,21 +2186,14 @@ void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, Win
 #endif
             break;
         }
+        case WindowSizeChangeReason::DRAG_START:
+        case WindowSizeChangeReason::DRAG:
+        case WindowSizeChangeReason::DRAG_END:
         case WindowSizeChangeReason::RESIZE:
         case WindowSizeChangeReason::UNDEFINED:
         default: {
             LOGD("PipelineContext::RootNodeAnimation : unsupported type, no animation added");
             SetRootSizeWithWidthHeight(width, height);
-        }
-    }
-}
-
-void PipelineContext::NotifyWebPaint() const
-{
-    CHECK_RUN_ON(UI);
-    for (auto& iterWebPaintCallback : webPaintCallback_) {
-        if (iterWebPaintCallback) {
-            iterWebPaintCallback();
         }
     }
 }
@@ -2262,16 +2209,11 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
     }
     // Refresh the screen when developers customize the resolution and screen density on the PC preview.
 #if !defined(PREVIEW)
-    if (width_ == width && height_ == height && isSurfaceReady_ && type != WindowSizeChangeReason::DRAG_START &&
-        type != WindowSizeChangeReason::DRAG_END && !isDensityUpdate_) {
-        LOGI("Surface size is same, no need update");
+    if (width_ == width && height_ == height && isSurfaceReady_ && !isDensityUpdate_) {
+        LOGD("Surface size is same, no need update");
         return;
     }
 #endif
-    if (type == WindowSizeChangeReason::DRAG && isDragStart_ && !isFirstDrag_) {
-        LOGI("WindowSizeChangeReason is drag, no need change size.");
-        return;
-    }
 
     for (auto&& [id, callback] : surfaceChangedCallbackMap_) {
         if (callback) {
@@ -2340,11 +2282,11 @@ void PipelineContext::OnSurfaceDensityChanged(double density)
 {
     CHECK_RUN_ON(UI);
     ACE_SCOPED_TRACE("OnSurfaceDensityChanged(%lf)", density);
-    LOGI("density_(%{public}lf) dipScale_(%{public}lf)", density_, dipScale_);
+    LOGD("density_(%{public}lf) dipScale_(%{public}lf)", density_, dipScale_);
     isDensityUpdate_ = density != density_;
     density_ = density;
     if (!NearZero(viewScale_)) {
-        LOGI("OnSurfaceDensityChanged viewScale_(%{public}lf)", viewScale_);
+        LOGD("viewScale_(%{public}lf)", viewScale_);
         dipScale_ = density_ / viewScale_;
     }
 }
@@ -2412,6 +2354,9 @@ void PipelineContext::SetRootSizeWithWidthHeight(int32_t width, int32_t height, 
         rootNode->MarkNeedLayout();
         rootNode->MarkNeedRender();
         focusAnimationManager_->SetAvailableRect(paintRect);
+    }
+    if (IsJsPlugin() || IsJsCard()) {
+        return;
     }
     ScreenSystemManager::GetInstance().SetWindowInfo(rootWidth_, density_, dipScale_);
     ScreenSystemManager::GetInstance().OnSurfaceChanged(width);
@@ -2608,7 +2553,6 @@ void PipelineContext::Destroy()
     explicitAnimators_.clear();
     preTargetRenderNode_.Reset();
     sharedImageManager_.Reset();
-    webPaintCallback_.clear();
     rectCallbackList_.clear();
     PipelineBase::Destroy();
     LOGI("PipelineContext::Destroy end.");

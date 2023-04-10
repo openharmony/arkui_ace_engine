@@ -246,8 +246,10 @@ public:
 
     void SetPositionMode(PositionMode positionMode)
     {
-        positionMode_ = positionMode;
-        positionModeUpdate_ = true;
+        if (positionMode_ != positionMode) {
+            positionModeUpdate_ = true;
+            positionMode_ = positionMode;
+        }
     }
 
     void SetShapeMode(ShapeMode shapeMode)
@@ -346,7 +348,7 @@ public:
     void SetGestureEvent();
     void SetMouseEvent();
     void FlushBarWidth();
-    void PlayAdaptAnimation(double activeSize, double activeMainOffset);
+    void PlayAdaptAnimation(double activeSize, double activeMainOffset, double inactiveSize, double inactiveMainOffset);
     void PlayGrowAnimation();
     void PlayShrinkAnimation();
     void PlayBarEndAnimation();
@@ -388,6 +390,8 @@ private:
     double minAngle_ = DEFAULT_MINANGLE;
     double outBoundary_ = 0.0;
     double offsetScale_ = 1.0f;
+    double scrollableOffset_ = 0.0;
+    double barRegionSize_ = 0.0;
 
     bool isScrollable_ = false;
 

@@ -90,6 +90,7 @@ template("js_pa_engine_ark") {
         [ "//base/global/resource_management/frameworks/resmgr:global_resmgr" ]
 
     sources = [
+      "$ace_root/adapter/ohos/entrance/pa_engine/engine/common/js_backend_asset_manager.cpp",
       "$ace_root/adapter/ohos/entrance/pa_engine/engine/common/js_backend_timer_module.cpp",
       "$ace_root/frameworks/bridge/js_frontend/engine/jsi/ark_js_runtime.cpp",
       "$ace_root/frameworks/bridge/js_frontend/engine/jsi/ark_js_value.cpp",

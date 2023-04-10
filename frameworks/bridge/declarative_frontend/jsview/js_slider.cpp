@@ -78,7 +78,7 @@ void JSSlider::JSBind(BindingTarget globalObj)
 double GetStep(double step, double max, double min)
 {
     if (LessOrEqual(step, 0.0) || step > max - min) {
-        step = max - min;
+        step = 1;
     }
     return step;
 }
@@ -186,9 +186,6 @@ void JSSlider::SetThickness(const JSCallbackInfo& info)
     }
     Dimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
-        return;
-    }
-    if (LessNotEqual(value.Value(), 0.0)) {
         return;
     }
     SliderModel::GetInstance()->SetThickness(value);
@@ -314,6 +311,9 @@ void JSSlider::SetBlockBorderWidth(const JSCallbackInfo& info)
     if (!ParseJsDimensionVp(info[0], blockBorderWidth)) {
         return;
     }
+    if (LessNotEqual(blockBorderWidth.Value(), 0.0)) {
+        return;
+    }
     SliderModel::GetInstance()->SetBlockBorderWidth(blockBorderWidth);
 }
 
@@ -342,6 +342,9 @@ void JSSlider::SetTrackBorderRadius(const JSCallbackInfo& info)
     if (!ParseJsDimensionVp(info[0], trackBorderRadius)) {
         return;
     }
+    if (LessNotEqual(trackBorderRadius.Value(), 0.0)) {
+        return;
+    }
     SliderModel::GetInstance()->SetTrackBorderRadius(trackBorderRadius);
 }
 
@@ -360,7 +363,7 @@ void JSSlider::SetBlockSize(const JSCallbackInfo& info)
     Dimension width;
     JSRef<JSVal> jsWidth = sizeObj->GetProperty("width");
     if (!ParseJsDimensionVp(jsWidth, width)) {
-        return;
+        width.SetValue(0.0);
     }
     if (LessNotEqual(width.Value(), 0.0)) {
         width.SetValue(0.0);
@@ -369,7 +372,7 @@ void JSSlider::SetBlockSize(const JSCallbackInfo& info)
     Dimension height;
     JSRef<JSVal> jsHeight = sizeObj->GetProperty("height");
     if (!ParseJsDimensionVp(jsHeight, height)) {
-        return;
+        height.SetValue(0.0);
     }
     if (LessNotEqual(height.Value(), 0.0)) {
         height.SetValue(0.0);
@@ -428,6 +431,11 @@ void JSSlider::SetStepSize(const JSCallbackInfo& info)
     Dimension stepSize;
     if (!ParseJsDimensionVp(info[0], stepSize)) {
         return;
+    }
+    if (LessNotEqual(stepSize.Value(), 0.0)) {
+        auto theme = GetTheme<SliderTheme>();
+        CHECK_NULL_VOID(theme);
+        stepSize = theme->GetMarkerSize();
     }
     SliderModel::GetInstance()->SetStepSize(stepSize);
 }

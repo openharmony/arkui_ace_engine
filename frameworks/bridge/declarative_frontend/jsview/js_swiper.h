@@ -27,9 +27,9 @@ public:
     static void Create(const JSCallbackInfo& info);
 
     static void SetAutoPlay(bool autoPlay);
-    static void SetDuration(int32_t duration);
+    static void SetDuration(const JSCallbackInfo& info);
     static void SetIndex(int32_t index);
-    static void SetInterval(int32_t interval);
+    static void SetInterval(const JSCallbackInfo& info);
     static void SetLoop(bool loop);
     static void SetVertical(bool isVertical);
     static void SetIndicator(const JSCallbackInfo& info);
@@ -40,6 +40,8 @@ public:
     static void SetSize(const JSCallbackInfo& info);
     static void SetIndicatorStyle(const JSCallbackInfo& info);
     static void SetItemSpace(const JSCallbackInfo& info);
+    static void SetPreviousMargin(const JSCallbackInfo& info);
+    static void SetNextMargin(const JSCallbackInfo& info);
     static void SetDisplayMode(int32_t index);
     static void SetEffectMode(const JSCallbackInfo& info);
     static void SetDisplayCount(const JSCallbackInfo& info);

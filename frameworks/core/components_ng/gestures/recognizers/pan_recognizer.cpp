@@ -170,6 +170,11 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+#ifdef ENABLE_DRAG_FRAMEWORK
+        if (onActionCancel_ && *onActionCancel_) {
+            (*onActionCancel_)();
+        }
+#endif // ENABLE_DRAG_FRAMEWORK
         return;
     }
 
@@ -372,6 +377,9 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
         if (!touchPoints_.empty()) {
             touchPoint = touchPoints_.begin()->second;
         }
+#ifdef ENABLE_DRAG_FRAMEWORK
+        info.SetPointerId(touchPoint.id);
+#endif // ENABLE_DRAG_FRAMEWORK
         info.SetGlobalPoint(globalPoint_)
             .SetLocalLocation(Offset(globalPoint_.GetX(), globalPoint_.GetY()) - coordinateOffset_);
         info.SetDeviceId(deviceId_);

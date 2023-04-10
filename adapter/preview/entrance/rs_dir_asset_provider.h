@@ -23,6 +23,7 @@
 #include <string>
 
 #ifdef WINDOWS_PLATFORM
+#include <shlwapi.h>
 #include <windows.h>
 #else
 #include <dirent.h>
@@ -50,16 +51,25 @@ public:
 
     bool IsValid() const override
     {
-        // TODO
         return true;
     }
 
-    RefPtr<Asset> GetAsset(const std::string &assetName) const override
+    RefPtr<Asset> GetAsset(const std::string& assetName) const override
     {
         errno = 0;
         LOGI("GetAsset: %{private}s, %{private}s", assetName.c_str(), basePath_.c_str());
         std::string fileName = basePath_ + assetName;
-        auto fp = std::fopen(fileName.c_str(), "rb");
+        char realPath[PATH_MAX] = { 0x00 };
+#if defined(WINDOWS_PLATFORM)
+        if (!PathCanonicalize(realPath, fileName.c_str())) {
+            return nullptr;
+        }
+#else
+        if (!realpath(fileName.c_str(), realPath)) {
+            return nullptr;
+        }
+#endif
+        auto fp = std::fopen(realPath, "rb");
         if (!fp) {
             LOGE("[%{private}s] open file error %{public}s", fileName.c_str(), strerror(errno));
             return nullptr;
@@ -105,7 +115,17 @@ public:
     std::string GetAssetPath(const std::string& assetName, bool isAddHapPath) override
     {
         std::string fileName = basePath_ + assetName;
-        std::FILE* fp = std::fopen(fileName.c_str(), "r");
+        char realPath[PATH_MAX] = { 0x00 };
+#if defined(WINDOWS_PLATFORM)
+        if (!PathCanonicalize(realPath, fileName.c_str())) {
+            return nullptr;
+        }
+#else
+        if (!realpath(fileName.c_str(), realPath)) {
+            return nullptr;
+        }
+#endif
+        std::FILE* fp = std::fopen(realPath, "r");
         if (fp == nullptr) {
             return "";
         }

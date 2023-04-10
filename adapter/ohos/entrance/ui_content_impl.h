@@ -65,6 +65,7 @@ public:
         const std::shared_ptr<OHOS::Rosen::RSTransaction> rsTransaction = nullptr) override;
     void UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco = true) override;
     void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize) override;
+    void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) override;
 
     // Window color
     uint32_t GetBackgroundColor() override;
@@ -128,13 +129,14 @@ private:
 
     // ITouchOutsideListener is used for touching out of hot areas of window.
     OHOS::sptr<OHOS::Rosen::ITouchOutsideListener> touchOutsideListener_ = nullptr;
-    
+
     // ArkTS Form
     bool isFormRender_ = false;
     bool isFormRenderInit_ = false;
     std::string bundleName_;
     std::string moduleName_;
     bool isBundle_ = false;
+    int32_t minCompatibleVersionCode_ = 0;
     float formWidth_ = 0.0;
     float formHeight_ = 0.0;
     std::string formData_;

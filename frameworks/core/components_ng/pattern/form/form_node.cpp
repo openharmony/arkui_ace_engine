@@ -27,7 +27,7 @@ namespace {
 const std::unordered_map<SourceType, int32_t> SOURCE_TYPE_MAP = {
     { SourceType::TOUCH, MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN },
     { SourceType::TOUCH_PAD, MMI::PointerEvent::SOURCE_TYPE_TOUCHPAD },
-    { SourceType::MOUSE, MMI::PointerEvent::SOURCE_TYPE_MOUSE },
+    { SourceType::MOUSE, MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN },
 };
 
 const std::unordered_map<TouchType, int32_t> TOUCH_TYPE_MAP = {
@@ -75,6 +75,13 @@ std::shared_ptr<MMI::PointerEvent> ConvertPointerEvent(const OffsetF offsetF, co
 HitTestResult FormNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
     const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId)
 {
+    // The mousetest has been merged into touchtest.
+    // FormComponent does not support some mouse event(eg. Hover, HoverAnimation..).
+    // Mouse event like LEFT_BUTTON, RELEASE use touchevent to dispatch, so they work well on FormComponent
+    if (touchRestrict.hitTestType == SourceType::MOUSE) {
+        return HitTestResult::OUT_OF_REGION;
+    }
+
     auto testResult = FrameNode::TouchTest(globalPoint, parentLocalPoint, touchRestrict, result, touchId);
     if (testResult == HitTestResult::OUT_OF_REGION) {
         return HitTestResult::OUT_OF_REGION;
@@ -97,7 +104,7 @@ HitTestResult FormNode::TouchTest(const PointF& globalPoint, const PointF& paren
             CHECK_NULL_VOID(formNode);
             formNode->DispatchPointerEvent(point);
         };
-        context->AddEtsCardTouchEventCallback(callback);
+        context->AddEtsCardTouchEventCallback(touchRestrict.touchEvent.id, callback);
         return testResult;
     }
     auto subContext = DynamicCast<OHOS::Ace::PipelineBase>(subContainer->GetPipelineContext());
@@ -112,9 +119,25 @@ void FormNode::DispatchPointerEvent(const TouchEvent& point) const
 {
     auto pattern = GetPattern<FormPattern>();
     CHECK_NULL_VOID(pattern);
-    auto selfGlobalOffset = GetTransformRelativeOffset();
+    auto selfGlobalOffset = GetFormOffset();
     auto pointerEvent = ConvertPointerEvent(selfGlobalOffset, point);
     pattern->DispatchPointerEvent(pointerEvent);
+}
+
+OffsetF FormNode::GetFormOffset() const
+{
+    auto context = GetRenderContext();
+    CHECK_NULL_RETURN(context, OffsetF());
+    auto offset = context->GetPaintRectWithoutTransform().GetOffset();
+    auto parent = GetAncestorNodeOfFrame();
+
+    while (parent) {
+        auto parentRenderContext = parent->GetRenderContext();
+        offset += parentRenderContext->GetPaintRectWithTransform().GetOffset();
+        parent = parent->GetAncestorNodeOfFrame();
+    }
+
+    return offset;
 }
 
 RefPtr<FormNode> FormNode::GetOrCreateFormNode(
@@ -139,4 +162,10 @@ RefPtr<FormNode> FormNode::GetOrCreateFormNode(
     return formNode;
 }
 
+void FormNode::OnDetachFromMainTree()
+{
+    auto eventHub = GetEventHub<FormEventHub>();
+    eventHub->FireOnCache();
+    FrameNode::OnDetachFromMainTree();
+}
 } // namespace OHOS::Ace::NG

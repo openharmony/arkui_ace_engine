@@ -15,10 +15,13 @@
 
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
 
+#include "core/components/slider/slider_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/slider/slider_layout_property.h"
 #include "core/components_ng/pattern/slider/slider_paint_property.h"
 #include "core/components_ng/pattern/slider/slider_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -79,7 +82,22 @@ void SliderModelNG::SetShowTips(bool value)
 }
 void SliderModelNG::SetThickness(const Dimension& value)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(SliderLayoutProperty, Thickness, value);
+    if (value.IsNonPositive()) {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto layoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<SliderTheme>();
+        CHECK_NULL_VOID(theme);
+        auto sliderMode = layoutProperty->GetSliderModeValue(SliderModel::SliderMode::OUTSET);
+        auto themeTrackThickness = sliderMode == SliderModel::SliderMode::OUTSET ? theme->GetOutsetTrackThickness()
+                                                                                 : theme->GetInsetTrackThickness();
+        ACE_UPDATE_LAYOUT_PROPERTY(SliderLayoutProperty, Thickness, themeTrackThickness);
+    } else {
+        ACE_UPDATE_LAYOUT_PROPERTY(SliderLayoutProperty, Thickness, value);
+    }
 }
 void SliderModelNG::SetBlockBorderColor(const Color& value)
 {
@@ -99,9 +117,29 @@ void SliderModelNG::SetTrackBorderRadius(const Dimension& value)
 }
 void SliderModelNG::SetBlockSize(const Size& value)
 {
-    SizeF size(value.Width(), value.Height());
-    ACE_UPDATE_LAYOUT_PROPERTY(SliderLayoutProperty, BlockSize, size);
-    ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, BlockSize, size);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    SizeF blockSize;
+    auto theme = pipeline->GetTheme<SliderTheme>();
+    if (theme != nullptr) {
+        auto mode = layoutProperty->GetSliderModeValue(SliderMode::OUTSET);
+        auto themeBlockSize = mode == SliderMode::OUTSET ? theme->GetOutsetBlockSize() : theme->GetInsetBlockSize();
+        blockSize =
+            layoutProperty->GetBlockSizeValue(SizeF(themeBlockSize.ConvertToPx(), themeBlockSize.ConvertToPx()));
+    }
+    if (GreatNotEqual(value.Width(), 0.0)) {
+        blockSize.SetWidth(value.Width());
+    }
+    if (GreatNotEqual(value.Height(), 0.0)) {
+        blockSize.SetHeight(value.Height());
+    }
+
+    ACE_UPDATE_LAYOUT_PROPERTY(SliderLayoutProperty, BlockSize, blockSize);
+    ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, BlockSize, blockSize);
 }
 void SliderModelNG::SetBlockType(BlockStyleType value)
 {

@@ -235,7 +235,8 @@ class WebGeolocationOhos : public WebGeolocation {
     DECLARE_ACE_TYPE(WebGeolocationOhos, WebGeolocation)
 
 public:
-    WebGeolocationOhos(OHOS::NWeb::NWebGeolocationCallbackInterface* callback) : geolocationCallback_(callback) {}
+    WebGeolocationOhos(const std::shared_ptr<OHOS::NWeb::NWebGeolocationCallbackInterface>& callback)
+        : geolocationCallback_(callback) {}
 
     void Invoke(const std::string& origin, const bool& allow, const bool& retain) override;
 
@@ -265,8 +266,8 @@ class WebWindowNewHandlerOhos : public WebWindowNewHandler {
     DECLARE_ACE_TYPE(WebWindowNewHandlerOhos, WebWindowNewHandler)
 
 public:
-    WebWindowNewHandlerOhos(const std::shared_ptr<OHOS::NWeb::NWebControllerHandler>& handler)
-        : handler_(handler) {}
+    WebWindowNewHandlerOhos(const std::shared_ptr<OHOS::NWeb::NWebControllerHandler>& handler, int32_t parentNWebId)
+        : handler_(handler), parentNWebId_(parentNWebId) {}
 
     void SetWebController(int32_t id) override;
 
@@ -274,8 +275,11 @@ public:
 
     int32_t GetId() const override;
 
+    int32_t GetParentNWebId() const override;
+
 private:
     std::shared_ptr<OHOS::NWeb::NWebControllerHandler> handler_;
+    int32_t parentNWebId_ = -1;
 };
 
 class DataResubmittedOhos : public DataResubmitted {
@@ -403,6 +407,8 @@ public:
     void UpdateDarkMode(const WebDarkMode& mode);
     void UpdateDarkModeAuto(RefPtr<WebDelegate> delegate, std::shared_ptr<OHOS::NWeb::NWebPreference> setting);
     void UpdateForceDarkAccess(const bool& access);
+    void UpdateAudioResumeInterval(const int32_t& resumeInterval);
+    void UpdateAudioExclusive(const bool& audioExclusive);
     void UpdateOverviewModeEnabled(const bool& isOverviewModeAccessEnabled);
     void UpdateFileFromUrlEnabled(const bool& isFileFromUrlAccessEnabled);
     void UpdateDatabaseEnabled(const bool& isDatabaseAccessEnabled);
@@ -425,15 +431,16 @@ public:
     void UpdateBlockNetwork(bool isNetworkBlocked);
     void UpdateHorizontalScrollBarAccess(bool isHorizontalScrollBarAccessEnabled);
     void UpdateVerticalScrollBarAccess(bool isVerticalScrollBarAccessEnabled);
+    void UpdateScrollBarColor(const std::string& colorValue);
     void LoadUrl();
     void CreateWebMessagePorts(std::vector<RefPtr<WebMessagePort>>& ports);
     void PostWebMessage(std::string& message, std::vector<RefPtr<WebMessagePort>>& ports, std::string& uri);
     void ClosePort(std::string& handle);
     void PostPortMessage(std::string& handle, std::string& data);
     void SetPortMessageCallback(std::string& handle, std::function<void(const std::string&)>&& callback);
-    void HandleTouchDown(const int32_t& id, const double& x, const double& y);
-    void HandleTouchUp(const int32_t& id, const double& x, const double& y);
-    void HandleTouchMove(const int32_t& id, const double& x, const double& y);
+    void HandleTouchDown(const int32_t& id, const double& x, const double& y, bool from_overlay = false);
+    void HandleTouchUp(const int32_t& id, const double& x, const double& y, bool from_overlay = false);
+    void HandleTouchMove(const int32_t& id, const double& x, const double& y, bool from_overlay = false);
     void HandleTouchCancel();
     void HandleAxisEvent(const double& x, const double& y, const double& deltaX, const double& deltaY);
     bool OnKeyEvent(int32_t keyCode, int32_t keyAction);
@@ -457,6 +464,7 @@ public:
     void OnSelectPopupMenu(
         std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params,
         std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback);
+    void SetShouldFrameSubmissionBeforeDraw(bool should);
 #endif
     void OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error);
@@ -472,7 +480,9 @@ public:
     void OnFullScreenExit();
     void OnGeolocationPermissionsHidePrompt();
     void OnGeolocationPermissionsShowPrompt(
-        const std::string& origin, OHOS::NWeb::NWebGeolocationCallbackInterface* callback);
+        const std::string& origin, const std::shared_ptr<OHOS::NWeb::NWebGeolocationCallbackInterface>& callback);
+    void OnCompleteSwapWithNewSize();
+    void OnResizeNotWork();
     void OnRequestFocus();
     bool OnCommonDialog(const std::shared_ptr<BaseEventInfo>& info, DialogEventType dialogEventType);
     bool OnHttpAuthRequest(const std::shared_ptr<BaseEventInfo>& info);
@@ -506,6 +516,8 @@ public:
         OHOS::NWeb::ImageAlphaType alphaType);
     void OnTouchIconUrl(const std::string& iconUrl, bool precomposed);
     void OnAudioStateChanged(bool audible);
+    void OnFirstContentfulPaint(long navigationStartTick, long firstContentfulPaintMs);
+    void OnGetTouchHandleHotZone(OHOS::NWeb::TouchHandleHotZone& hotZone);
 
     void SetNGWebPattern(const RefPtr<NG::WebPattern>& webPattern);
     void RequestFocus();
@@ -533,6 +545,10 @@ public:
     void SetPopup(bool popup)
     {
         isPopup_ = popup;
+    }
+    void SetParentNWebId(int32_t parentNWebId)
+    {
+        parentNWebId_ = parentNWebId;
     }
 #endif
 private:
@@ -606,6 +622,8 @@ private:
     void RegisterSurfacePositionChangedCallback();
     void UnregisterSurfacePositionChangedCallback();
 
+    void NotifyPopupWindowResult(bool result);
+
     EventCallbackV2 GetAudioStateChangedCallback(bool useNewPipe, const RefPtr<NG::WebEventHub>& eventHub);
 #endif
 
@@ -655,6 +673,7 @@ private:
     EventCallbackV2 onPageVisibleV2_;
     EventCallbackV2 onTouchIconUrlV2_;
     EventCallbackV2 onAudioStateChangedV2_;
+    EventCallbackV2 onFirstContentfulPaintV2_;
 
     std::string bundlePath_;
     std::string bundleDataPath_;
@@ -677,6 +696,8 @@ private:
     sptr<AppExecFwk::IConfigurationObserver> configChangeObserver_ = nullptr;
     OHOS::NWeb::BlurReason blurReason_ = OHOS::NWeb::BlurReason::FOCUS_SWITCH;
     bool isPopup_ = false;
+    int32_t parentNWebId_ = -1;
+    bool needResizeAtFirst_ = false;
 #endif
 };
 

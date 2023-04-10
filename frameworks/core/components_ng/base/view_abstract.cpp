@@ -31,6 +31,7 @@
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/option/option_paint_property.h"
 #include "core/components_ng/pattern/text/span_node.h"
+#include "core/components_ng/property/calc_length.h"
 #include "core/image/image_source_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
@@ -68,7 +69,13 @@ void ViewAbstract::SetWidth(const CalcLength& width)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(width, std::nullopt));
+    // get previously user defined ideal height
+    std::optional<CalcLength> height = std::nullopt;
+    auto&& layoutConstraint = layoutProperty->GetCalcLayoutConstraint();
+    if (layoutConstraint && layoutConstraint->selfIdealSize) {
+        height = layoutConstraint->selfIdealSize->Height();
+    }
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(width, height));
 }
 
 void ViewAbstract::SetHeight(const CalcLength& height)
@@ -81,7 +88,13 @@ void ViewAbstract::SetHeight(const CalcLength& height)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, height));
+    // get previously user defined ideal width
+    std::optional<CalcLength> width = std::nullopt;
+    auto&& layoutConstraint = layoutProperty->GetCalcLayoutConstraint();
+    if (layoutConstraint && layoutConstraint->selfIdealSize) {
+        width = layoutConstraint->selfIdealSize->Width();
+    }
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(width, height));
 }
 
 void ViewAbstract::ClearWidthOrHeight(bool isWidth)
@@ -221,17 +234,13 @@ void ViewAbstract::SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle)
     }
 }
 
-void ViewAbstract::SetSphericalEffect(float radio)
+void ViewAbstract::SetSphericalEffect(double radio)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         LOGD("current state is not processed, return");
         return;
     }
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto target = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(target);
-    target->OnSphericalEffectUpdate(radio);
+    ACE_UPDATE_RENDER_CONTEXT(SphericalEffect, radio);
 }
 
 void ViewAbstract::SetPixelStretchEffect(PixStretchEffectOption& option)
@@ -240,24 +249,16 @@ void ViewAbstract::SetPixelStretchEffect(PixStretchEffectOption& option)
         LOGD("current state is not processed, return");
         return;
     }
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto target = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(target);
-    target->OnPixelStretchEffectUpdate(option);
+    ACE_UPDATE_RENDER_CONTEXT(PixelStretchEffect, option);
 }
 
-void ViewAbstract::SetLightUpEffect(float radio)
+void ViewAbstract::SetLightUpEffect(double radio)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         LOGD("current state is not processed, return");
         return;
     }
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto target = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(target);
-    target->OnLightUpEffectUpdate(radio);
+    ACE_UPDATE_RENDER_CONTEXT(LightUpEffect, radio);
 }
 
 void ViewAbstract::SetLayoutWeight(int32_t value)
@@ -430,6 +431,7 @@ void ViewAbstract::SetBorderWidth(const Dimension& value)
         borderWidth.SetBorderWidth(value);
     }
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, borderWidth);
+    ACE_UPDATE_RENDER_CONTEXT(BorderWidth, borderWidth);
 }
 
 void ViewAbstract::SetBorderWidth(const BorderWidthProperty& value)
@@ -439,6 +441,7 @@ void ViewAbstract::SetBorderWidth(const BorderWidthProperty& value)
         return;
     }
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, value);
+    ACE_UPDATE_RENDER_CONTEXT(BorderWidth, value);
 }
 
 void ViewAbstract::SetBorderStyle(const BorderStyle& value)
@@ -493,7 +496,14 @@ void ViewAbstract::SetHoverEffect(HoverEffectType hoverEffect)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetHoverAnimation(hoverEffect);
+    eventHub->SetHoverEffect(hoverEffect);
+}
+
+void ViewAbstract::SetHoverEffectAuto(HoverEffectType hoverEffect)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetHoverEffectAuto(hoverEffect);
 }
 
 void ViewAbstract::SetEnabled(bool enabled)
@@ -504,7 +514,7 @@ void ViewAbstract::SetEnabled(bool enabled)
     }
 
     // The SetEnabled of focusHub must be after at eventHub
-    auto focusHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeFocusHub();
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
     if (focusHub) {
         focusHub->SetEnabled(enabled);
     }
@@ -639,12 +649,28 @@ void ViewAbstract::AddDragFrameNodeToManager()
     dragDropManager->AddDragFrameNode(AceType::WeakClaim(AceType::RawPtr(frameNode)));
 }
 
+void ViewAbstract::SetDraggable(bool draggable)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    if (draggable && !frameNode->IsDraggable()) {
+        auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        gestureHub->InitDragDropEvent();
+    }
+    frameNode->SetDraggable(draggable);
+}
+
 void ViewAbstract::SetOnDragStart(
     std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragStart)
 {
-    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
-    gestureHub->InitDragDropEvent();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    if (!frameNode->IsDraggable()) {
+        auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        gestureHub->InitDragDropEvent();
+    }
 
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -686,6 +712,15 @@ void ViewAbstract::SetOnDrop(std::function<void(const RefPtr<OHOS::Ace::DragEven
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDrop(std::move(onDrop));
+
+    AddDragFrameNodeToManager();
+}
+
+void ViewAbstract::SetOnDragEnd(std::function<void(const RefPtr<OHOS::Ace::DragEvent>&)>&& onDragEnd)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDragEnd(std::move(onDragEnd));
 
     AddDragFrameNodeToManager();
 }
@@ -776,7 +811,7 @@ void ViewAbstract::SetPivot(const DimensionOffset& value)
     ACE_UPDATE_RENDER_CONTEXT(TransformCenter, value);
 }
 
-void ViewAbstract::SetTranslate(const NG::Vector3F& value)
+void ViewAbstract::SetTranslate(const NG::TranslateOptions& value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         LOGD("current state is not processed, return");
@@ -851,7 +886,12 @@ void ViewAbstract::BindPopup(
         // use param to update PopupParm
         if (!isUseCustom) {
             BubbleView::UpdatePopupParam(popupId, param, targetNode);
-            LOGI("Update pop node.");
+            popupNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            LOGI("Update normal PopUp node.");
+        } else {
+            BubbleView::UpdateCustomPopupParam(popupId, param);
+            popupNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            LOGI("Update Custom Popup node.");
         }
     }
     // update PopupInfo props
@@ -1257,6 +1297,7 @@ void ViewAbstract::SetForegroundColor(const Color& color)
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, color);
+    ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy);
 }
 
 void ViewAbstract::SetForegroundColorStrategy(const ForegroundColorStrategy& strategy)
@@ -1266,9 +1307,11 @@ void ViewAbstract::SetForegroundColorStrategy(const ForegroundColorStrategy& str
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColorStrategy, strategy);
+    ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColor);
 }
 
-void ViewAbstract::SetKeyboardShortcut(const std::string& value, const std::vector<CtrlKey>& keys)
+void ViewAbstract::SetKeyboardShortcut(
+    const std::string& value, const std::vector<CtrlKey>& keys, std::function<void()>&& onKeyboardShortcutAction)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -1278,26 +1321,21 @@ void ViewAbstract::SetKeyboardShortcut(const std::string& value, const std::vect
     CHECK_NULL_VOID(eventHub);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    if (value.size() > 1) {
-        LOGE("KeyboardShortcut value arg is wrong, return");
-        return;
-    }
-    if (value.empty() || keys.size() == 0) {
+    if (value.empty() || (keys.size() == 0 && value.length() == 1)) {
         LOGI("KeyboardShortcut value and keys is invalid, return");
-        eventHub->SetKeyboardShortcut('\0', 0);
-        eventManager->DelKeyboardShortcutNode(frameNode->GetId());
+        eventHub->SetKeyboardShortcut("", 0, nullptr);
         return;
     }
     auto key = eventManager->GetKeyboardShortcutKeys(keys);
-    if (key == 0) {
+    if ((key == 0 && value.length() == 1) || (key == 0 && keys.size() > 0 && value.length() > 1)) {
         LOGI("KeyboardShortcut's keys are the same, return");
         return;
     }
-    if (eventManager->IsSameKeyboardShortcutNode(value[0], key)) {
+    if (eventManager->IsSameKeyboardShortcutNode(value, key)) {
         LOGI("KeyboardShortcut is the same, return");
         return;
     }
-    eventHub->SetKeyboardShortcut(value[0], key);
+    eventHub->SetKeyboardShortcut(value, key, std::move(onKeyboardShortcutAction));
     eventManager->AddKeyboardShortcutNode(WeakPtr<NG::FrameNode>(frameNode));
 }
 

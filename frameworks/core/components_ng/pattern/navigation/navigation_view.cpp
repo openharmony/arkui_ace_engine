@@ -47,6 +47,9 @@
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/navigator/navigator_event_hub.h"
 #include "core/components_ng/pattern/navigator/navigator_pattern.h"
+#include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
+#include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
+#include "core/components_ng/pattern/navrouter/navrouter_group_node.h"
 #include "core/components_ng/pattern/option/option_view.h"
 #include "core/components_ng/pattern/select/select_view.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -334,10 +337,6 @@ void NavigationView::Create()
             []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
         navigationGroupNode->AddChild(contentNode);
         navigationGroupNode->SetContentNode(contentNode);
-
-        auto context = contentNode->GetRenderContext();
-        CHECK_NULL_VOID(context);
-        context->UpdateBackgroundColor(CONTENT_COLOR);
     }
 
     // divider node
@@ -382,6 +381,13 @@ void NavigationView::SetTitle(const std::string& title, bool hasSubTitle)
             break;
         }
         auto titleProperty = titleNode->GetLayoutProperty<TextLayoutProperty>();
+        // if no subtitle, title's maxLine = 1. if has subtitle, title's maxLine = 2.
+        if (!hasSubTitle && navBarNode->GetSubtitle()) {
+            navBarNode->SetSubtitle(nullptr);
+            titleProperty->UpdateMaxLines(1);
+        } else {
+            titleProperty->UpdateMaxLines(2);
+        }
         // previous title is not a text node and might be custom, we remove it and create a new node
         if (!titleProperty) {
             navBarNode->UpdateTitleNodeOperation(ChildNodeOperation::REPLACE);
@@ -532,8 +538,8 @@ void NavigationView::SetMenuItems(std::vector<BarItem>&& menuItems)
             CHECK_NULL_VOID(menuItemNode);
             auto menuItemLayoutProperty = menuItemNode->GetLayoutProperty<ButtonLayoutProperty>();
             CHECK_NULL_VOID(menuItemLayoutProperty);
-            menuItemLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(BACK_BUTTON_SIZE.ConvertToPx()),
-                CalcLength(BACK_BUTTON_SIZE.ConvertToPx())));
+            menuItemLayoutProperty->UpdateUserDefinedIdealSize(
+                CalcSize(CalcLength(BACK_BUTTON_SIZE.ConvertToPx()), CalcLength(BACK_BUTTON_SIZE.ConvertToPx())));
             menuItemLayoutProperty->UpdateType(ButtonType::NORMAL);
             menuItemLayoutProperty->UpdateBorderRadius(BUTTON_RADIUS);
             auto renderContext = menuItemNode->GetRenderContext();
@@ -542,7 +548,7 @@ void NavigationView::SetMenuItems(std::vector<BarItem>&& menuItems)
 
             auto eventHub = menuItemNode->GetOrCreateInputEventHub();
             CHECK_NULL_VOID(eventHub);
-            eventHub->SetHoverAnimation(HoverEffectType::BOARD);
+            eventHub->SetHoverEffect(HoverEffectType::BOARD);
 
             PaddingProperty padding;
             padding.left = CalcLength(BUTTON_PADDING.ConvertToPx());
@@ -584,8 +590,8 @@ void NavigationView::SetMenuItems(std::vector<BarItem>&& menuItems)
         CHECK_NULL_VOID(menuItemNode);
         auto menuItemLayoutProperty = menuItemNode->GetLayoutProperty<ButtonLayoutProperty>();
         CHECK_NULL_VOID(menuItemLayoutProperty);
-        menuItemLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(BACK_BUTTON_SIZE.ConvertToPx()),
-            CalcLength(BACK_BUTTON_SIZE.ConvertToPx())));
+        menuItemLayoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(BACK_BUTTON_SIZE.ConvertToPx()), CalcLength(BACK_BUTTON_SIZE.ConvertToPx())));
         menuItemLayoutProperty->UpdateType(ButtonType::NORMAL);
         menuItemLayoutProperty->UpdateBorderRadius(BUTTON_RADIUS);
         auto renderContext = menuItemNode->GetRenderContext();
@@ -594,7 +600,7 @@ void NavigationView::SetMenuItems(std::vector<BarItem>&& menuItems)
 
         auto eventHub = menuItemNode->GetOrCreateInputEventHub();
         CHECK_NULL_VOID(eventHub);
-        eventHub->SetHoverAnimation(HoverEffectType::BOARD);
+        eventHub->SetHoverEffect(HoverEffectType::BOARD);
 
         PaddingProperty padding;
         padding.left = CalcLength(BUTTON_PADDING.ConvertToPx());
@@ -681,8 +687,8 @@ void NavigationView::SetTitleMode(NavigationTitleMode mode)
         CHECK_NULL_VOID(backButtonNode);
         auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
         CHECK_NULL_VOID(backButtonLayoutProperty);
-        backButtonLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(BACK_BUTTON_SIZE.ConvertToPx()),
-            CalcLength(BACK_BUTTON_SIZE.ConvertToPx())));
+        backButtonLayoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(BACK_BUTTON_SIZE.ConvertToPx()), CalcLength(BACK_BUTTON_SIZE.ConvertToPx())));
         backButtonLayoutProperty->UpdateType(ButtonType::NORMAL);
         backButtonLayoutProperty->UpdateBorderRadius(BUTTON_RADIUS);
         backButtonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
@@ -692,7 +698,7 @@ void NavigationView::SetTitleMode(NavigationTitleMode mode)
 
         auto eventHub = backButtonNode->GetOrCreateInputEventHub();
         CHECK_NULL_VOID(eventHub);
-        eventHub->SetHoverAnimation(HoverEffectType::BOARD);
+        eventHub->SetHoverEffect(HoverEffectType::BOARD);
 
         PaddingProperty padding;
         padding.left = CalcLength(BUTTON_PADDING.ConvertToPx());
@@ -796,15 +802,6 @@ void NavigationView::SetHideBackButton(bool hideBackButton)
     auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
     CHECK_NULL_VOID(navBarLayoutProperty);
     navBarLayoutProperty->UpdateHideBackButton(hideBackButton);
-    auto backButtonNode = AceType::DynamicCast<FrameNode>(navBarNode->GetBackButton());
-    CHECK_NULL_VOID(backButtonNode);
-    auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty();
-    CHECK_NULL_VOID(backButtonLayoutProperty);
-    if (hideBackButton) {
-        backButtonLayoutProperty->UpdateVisibility(VisibleType::GONE);
-    } else {
-        backButtonLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-    }
 }
 
 void NavigationView::SetHideToolBar(bool hideToolBar)
@@ -901,6 +898,32 @@ void NavigationView::SetBackButtonIcon(const std::string& src, bool noPixMap, Re
     ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, NoPixMap, noPixMap);
     ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, ImageSource, imageSourceInfo);
     ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, PixelMap, pixMap);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    auto navBarContentNode = navBarNode->GetNavBarContentNode();
+    CHECK_NULL_VOID(navBarContentNode);
+    if (navBarContentNode->GetChildren().empty()) {
+        return;
+    }
+    for (const auto& navBarContentChild : navBarContentNode->GetChildren()) {
+        auto navBarContentChildFrameNode = AceType::DynamicCast<FrameNode>(navBarContentChild);
+        CHECK_NULL_VOID(navBarContentChildFrameNode);
+        if (navBarContentChildFrameNode->GetTag() != V2::NAVROUTER_VIEW_ETS_TAG) {
+            return;
+        }
+        auto navRouterNode = AceType::DynamicCast<NavRouterGroupNode>(navBarContentChildFrameNode);
+        CHECK_NULL_VOID(navRouterNode);
+        auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(navRouterNode->GetNavDestinationNode());
+        CHECK_NULL_VOID(navDestinationNode);
+        auto navDestinationLayoutProperty = navDestinationNode->GetLayoutProperty<NavDestinationLayoutProperty>();
+        navDestinationLayoutProperty->UpdateImageSource(imageSourceInfo);
+        navDestinationLayoutProperty->UpdateNoPixMap(noPixMap);
+        navDestinationLayoutProperty->UpdatePixelMap(pixMap);
+        navDestinationNode->MarkModifyDone();
+    }
 }
 
 } // namespace OHOS::Ace::NG

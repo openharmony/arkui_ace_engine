@@ -363,12 +363,19 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
         dragEndCallback_();
     }
     RelatedEventEnd();
-    if (!moved_) {
+    if (!moved_ || info.GetInputEventType() == InputEventType::AXIS) {
         LOGI("It is not moved now,  no need to handle drag end motion");
         if (scrollEndCallback_) {
             scrollEndCallback_();
         }
         currentVelocity_ = 0.0;
+#ifdef OHOS_PLATFORM
+        LOGI("springController stop increase cpu frequency");
+        ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
+        if (FrameReport::GetInstance().GetEnable()) {
+            FrameReport::GetInstance().EndListFling();
+        }
+#endif
         return;
     }
     if (outBoundaryCallback_ && outBoundaryCallback_() && scrollOverCallback_) {

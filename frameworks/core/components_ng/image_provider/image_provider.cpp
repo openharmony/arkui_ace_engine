@@ -61,38 +61,43 @@ bool ImageProvider::PrepareImageData(const RefPtr<ImageObject>& imageObj)
         return true;
     }
     // if image object has no skData, reload data.
-    std::string errorMessage;
-    do {
-        auto imageLoader = ImageLoader::CreateImageLoader(imageObj->GetSourceInfo());
-        if (!imageLoader) {
-            errorMessage = "Fail to create image loader. Image source type is not supported";
-            break;
-        }
-        auto newLoadedData = imageLoader->GetImageData(
-            imageObj->GetSourceInfo(), WeakClaim(RawPtr(NG::PipelineContext::GetCurrentContext())));
-        if (!newLoadedData) {
-            errorMessage = "Fail to load data, please check if data source is invalid";
-            break;
-        }
-        // load data success
-        imageObj->SetData(newLoadedData);
-        return true;
-    } while (false);
-    return false;
+    auto imageLoader = ImageLoader::CreateImageLoader(imageObj->GetSourceInfo());
+    CHECK_NULL_RETURN(imageLoader, false);
+    auto newLoadedData = imageLoader->GetImageData(
+        imageObj->GetSourceInfo(), WeakClaim(RawPtr(NG::PipelineContext::GetCurrentContext())));
+    CHECK_NULL_RETURN(newLoadedData, false);
+    // load data success
+    imageObj->SetData(newLoadedData);
+    return true;
+}
+
+RefPtr<ImageObject> ImageProvider::QueryThumbnailCache(const ImageSourceInfo& src)
+{
+    // query thumbnail from cache
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto cache = pipeline->GetImageCache();
+    CHECK_NULL_RETURN(cache, nullptr);
+    auto data = DynamicCast<PixmapCachedData>(cache->GetCacheImageData(src.GetKey()));
+    if (data) {
+        LOGD("thumbnail cache found %{public}s", src.GetSrc().c_str());
+        return PixelMapImageObject::Create(src, MakeRefPtr<ImageData>(data->pixmap_));
+    }
+    return nullptr;
 }
 
 RefPtr<ImageObject> ImageProvider::QueryImageObjectFromCache(const ImageSourceInfo& src)
 {
-    if (!src.IsSupportCache()) {
+    if (src.GetSrcType() == SrcType::DATA_ABILITY_DECODED) {
+        return QueryThumbnailCache(src);
+    }
+    if (!src.SupportObjCache()) {
         return nullptr;
     }
     auto pipelineCtx = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineCtx, nullptr);
     auto imageCache = pipelineCtx->GetImageCache();
-    if (!imageCache) {
-        LOGD("No image cache %{private}s.", src.ToString().c_str());
-        return nullptr;
-    }
+    CHECK_NULL_RETURN(imageCache, nullptr);
     RefPtr<ImageObject> imageObj = imageCache->GetCacheImgObjNG(src.GetKey());
     if (imageObj) {
         LOGD("imageObj found in cache %{private}s", src.ToString().c_str());
@@ -214,6 +219,7 @@ std::set<WeakPtr<ImageLoadingContext>> ImageProvider::EndTask(const std::string&
 void ImageProvider::CancelTask(const std::string& key, const WeakPtr<ImageLoadingContext>& ctx)
 {
     std::scoped_lock<std::mutex> lock(taskMtx_);
+    LOGD("try cancel bgTask %{public}s", key.c_str());
     auto it = tasks_.find(key);
     CHECK_NULL_VOID(it != tasks_.end());
     CHECK_NULL_VOID(it->second.ctxs_.find(ctx) != it->second.ctxs_.end());

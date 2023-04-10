@@ -16,9 +16,11 @@
 #include "bridge/declarative_frontend/jsview/dialog/js_custom_dialog_controller.h"
 
 #include "base/subwindow/subwindow_manager.h"
+#include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
@@ -400,11 +402,13 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
             }
         };
 
+        WeakPtr<NG::FrameNode> dialog;
         if (dialogProperties_.isShowInSubWindow) {
-            dialog_ = SubwindowManager::GetInstance()->ShowDialogNG(dialogProperties_, customNode);
+            dialog = SubwindowManager::GetInstance()->ShowDialogNG(dialogProperties_, customNode);
         } else {
-            dialog_ = overlayManager->ShowDialog(dialogProperties_, customNode, false);
+            dialog = overlayManager->ShowDialog(dialogProperties_, customNode, false);
         }
+        dialogs_.emplace_back(dialog);
         return;
     }
 
@@ -438,7 +442,20 @@ void JSCustomDialogController::JsCloseDialog(const JSCallbackInfo& info)
     }
 
     if (Container::IsCurrentUseNewPipeline()) {
-        auto dialog = dialog_.Upgrade();
+        RefPtr<NG::FrameNode> dialog;
+        while (!dialogs_.empty()) {
+            dialog = dialogs_.back().Upgrade();
+            if (dialog && !dialog->IsRemoving()) {
+                // get the dialog not removed currently
+                break;
+            }
+            dialogs_.pop_back();
+        }
+
+        if (dialogs_.empty()) {
+            LOGW("dialogs are empty");
+            return;
+        }
         if (!dialog) {
             LOGW("dialog is null");
             return;
@@ -458,6 +475,7 @@ void JSCustomDialogController::JsCloseDialog(const JSCallbackInfo& info)
         auto overlayManager = context->GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
         overlayManager->CloseDialog(dialog);
+        dialogs_.pop_back();
         return;
     }
     CloseDialog();
@@ -478,6 +496,9 @@ bool JSCustomDialogController::ParseAnimation(
     auto delay = animationArgs->GetInt("delay", 0);
     auto iterations = animationArgs->GetInt("iterations", 1);
     auto tempo = static_cast<float>(animationArgs->GetDouble("tempo", 1.0));
+    if (NonPositive(tempo)) {
+        tempo = 1.0f;
+    }
     auto direction = StringToAnimationDirection(animationArgs->GetString("playMode", "normal"));
     RefPtr<Curve> curve;
     auto curveArgs = animationArgs->GetValue("curve");

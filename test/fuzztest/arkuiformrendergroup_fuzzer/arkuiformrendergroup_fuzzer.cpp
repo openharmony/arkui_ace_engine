@@ -36,9 +36,6 @@ bool FormRenderGroup(const std::string data, size_t size)
     fromGroup->ReloadForm();
     auto id = size % u16m;
     fromGroup->DeleteForm(std::to_string(id));
-    if (fromGroup->IsEmpty()) {
-        return false;
-    }
     return true;
 }
 }

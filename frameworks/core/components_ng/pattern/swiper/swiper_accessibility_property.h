@@ -34,13 +34,19 @@ public:
 
     int32_t GetEndIndex() const override;
 
-    AccessibilityValue GetAccessibilityValue() const override;
+    bool HasRange() const override
+    {
+        return true;
+    }
 
-    void SetSpecificSupportAction() override;
+    AccessibilityValue GetAccessibilityValue() const override;
 
     bool IsScrollable() const override;
 
     int32_t GetCollectionItemCounts() const override;
+
+protected:
+    void SetSpecificSupportAction() override;
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(SwiperAccessibilityProperty);

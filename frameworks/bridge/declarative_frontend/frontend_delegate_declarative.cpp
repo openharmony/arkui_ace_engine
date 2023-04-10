@@ -507,7 +507,7 @@ void FrontendDelegateDeclarative::OnBackGround()
 void FrontendDelegateDeclarative::OnForeground()
 {
     // first page show will be called by push page successfully
-    if (!isFirstNotifyShow_) {
+    if (Container::IsCurrentUseNewPipeline() || !isFirstNotifyShow_) {
         OnPageShow();
     }
     isFirstNotifyShow_ = false;
@@ -770,6 +770,22 @@ RefPtr<RevSourceMap> FrontendDelegateDeclarative::GetFaAppSourceMap()
         LOGW("app map load failed!");
     }
     return appSourceMap_;
+}
+
+void FrontendDelegateDeclarative::GetStageSourceMap(
+    std::unordered_map<std::string, RefPtr<Framework::RevSourceMap>>& sourceMaps)
+{
+    if (!Container::IsCurrentUseNewPipeline()) {
+        return;
+    }
+
+    std::string maps;
+    if (GetAssetContent(MERGE_SOURCEMAPS_PATH, maps)) {
+        auto SourceMap = AceType::MakeRefPtr<RevSourceMap>();
+        SourceMap->StageModeSourceMapSplit(maps, sourceMaps);
+    } else {
+        LOGW("app map load failed!");
+    }
 }
 
 void FrontendDelegateDeclarative::InitializeRouterManager(NG::LoadPageCallback&& loadPageCallback)
@@ -1358,7 +1374,10 @@ void FrontendDelegateDeclarative::ShowDialogInner(DialogProperties& dialogProper
     if (Container::IsCurrentUseNewPipeline()) {
         LOGI("Dialog IsCurrentUseNewPipeline.");
         dialogProperties.onSuccess = std::move(callback);
-
+        dialogProperties.onCancel = [callback, taskExecutor = taskExecutor_] {
+            taskExecutor->PostTask([callback]() { callback(CALLBACK_ERRORCODE_CANCEL, CALLBACK_DATACODE_ZERO); },
+                TaskExecutor::TaskType::JS);
+        };
         auto task = [dialogProperties](const RefPtr<NG::OverlayManager>& overlayManager) {
             CHECK_NULL_VOID(overlayManager);
             LOGI("Begin to show dialog ");
@@ -1444,6 +1463,10 @@ void FrontendDelegateDeclarative::ShowActionMenuInner(DialogProperties& dialogPr
     if (Container::IsCurrentUseNewPipeline()) {
         LOGI("Dialog IsCurrentUseNewPipeline.");
         dialogProperties.onSuccess = std::move(callback);
+        dialogProperties.onCancel = [callback, taskExecutor = taskExecutor_] {
+            taskExecutor->PostTask([callback]() { callback(CALLBACK_ERRORCODE_CANCEL, CALLBACK_DATACODE_ZERO); },
+                TaskExecutor::TaskType::JS);
+        };
         auto context = DynamicCast<NG::PipelineContext>(pipelineContextHolder_.Get());
         auto overlayManager = context ? context->GetOverlayManager() : nullptr;
         taskExecutor_->PostTask(
@@ -1688,7 +1711,7 @@ std::string FrontendDelegateDeclarative::GetAssetPath(const std::string& url)
 void FrontendDelegateDeclarative::LoadPage(
     int32_t pageId, const PageTarget& target, bool isMainPage, const std::string& params, bool isRestore)
 {
-    LOGI("FrontendDelegateDeclarative %{private}p LoadPage[%{public}d]: %{public}s.", this, pageId, target.url.c_str());
+    LOGI("LoadPage[%{public}d]: %{public}s.", pageId, target.url.c_str());
     if (pageId == INVALID_PAGE_ID) {
         LOGE("FrontendDelegateDeclarative, invalid page id");
         EventReport::SendPageRouterException(PageRouterExcepType::LOAD_PAGE_ERR, target.url);
@@ -1771,6 +1794,17 @@ void FrontendDelegateDeclarative::OnSurfaceChanged()
 
 void FrontendDelegateDeclarative::OnMediaQueryUpdate()
 {
+    auto containerId = Container::CurrentId();
+    if (containerId < 0) {
+        auto container = Container::GetActive();
+        if (container) {
+            containerId = container->GetInstanceId();
+        }
+    }
+    bool isInSubwindow = containerId >= 1000000;
+    if (isInSubwindow) {
+        return;
+    }
     if (mediaQueryInfo_->GetIsInit()) {
         return;
     }

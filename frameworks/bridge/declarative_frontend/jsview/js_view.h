@@ -373,11 +373,11 @@ public:
 
     void SetJSViewName(const std::string& name)
     {
-        jsViewName = name;
+        jsViewName_ = name;
     }
-    const std::string& GetJSViewName()
+    const std::string& GetJSViewName() const
     {
-        return jsViewName;
+        return jsViewName_;
     }
 
     void ExecuteInitiallyProvidedValue(const std::string& jsonData) override
@@ -427,7 +427,6 @@ private:
     // GC -> JS View Object -> JSView C++ Object
     JSRef<JSObject> jsViewObject_;
 
-    std::string jsViewName;
     // Restore the custom node related to the JSView object
     // If the JSView object is GC by engine, this CustomNode will abe deleted
     // If the JSView object is hold by RecycleManager, this CustomNode will be reused
@@ -435,6 +434,7 @@ private:
 
     // Store the recycle nodes name as key
     std::string recycleCustomNodeName_;
+    std::string jsViewName_;
 };
 
 } // namespace OHOS::Ace::Framework

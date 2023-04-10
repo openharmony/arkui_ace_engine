@@ -32,7 +32,7 @@ var Color;
 
 var ColoringStrategy;
 (function (ColoringStrategy){
-  ColoringStrategy["Invert"] = "Invert";
+  ColoringStrategy["INVERT"] = "Invert";
 })(ColoringStrategy || (ColoringStrategy = {}));
 
 var TextInputStyle;
@@ -1049,6 +1049,23 @@ var CtrlKey;
   CtrlKey[CtrlKey["ALT"] = 2] = "ALT";
 })(CtrlKey || (CtrlKey = {}));
 
+var FunctionKey;
+(function (FunctionKey) {
+  FunctionKey[FunctionKey["ESC"] = 0] = "ESC";
+  FunctionKey[FunctionKey["F1"] = 1] = "F1";
+  FunctionKey[FunctionKey["F2"] = 2] = "F2";
+  FunctionKey[FunctionKey["F3"] = 3] = "F3";
+  FunctionKey[FunctionKey["F4"] = 4] = "F4";
+  FunctionKey[FunctionKey["F5"] = 5] = "F5";
+  FunctionKey[FunctionKey["F6"] = 6] = "F6";
+  FunctionKey[FunctionKey["F7"] = 7] = "F7";
+  FunctionKey[FunctionKey["F8"] = 8] = "F8";
+  FunctionKey[FunctionKey["F9"] = 9] = "F9";
+  FunctionKey[FunctionKey["F10"] = 10] = "F10";
+  FunctionKey[FunctionKey["F11"] = 11] = "F11";
+  FunctionKey[FunctionKey["F12"] = 12] = "F12";
+})(FunctionKey || (FunctionKey = {}));
+
 class SubTabBarStyle {
   constructor(content) {
     this.type = 'SubTabBarStyle';
@@ -1290,7 +1307,7 @@ var OperationStyle;
 
 var TabItemType;
 (function (TabItemType) {
-  TabItemType[TabItemType["Tex"] = 0] = "Text";
+  TabItemType[TabItemType["Text"] = 0] = "Text";
   TabItemType[TabItemType["Icon"] = 1] = "Icon";
 })(TabItemType || (TabItemType = {}));
 

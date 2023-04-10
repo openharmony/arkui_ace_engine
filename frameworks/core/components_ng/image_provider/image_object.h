@@ -46,7 +46,7 @@ public:
 
     bool IsSupportCache() const
     {
-        return src_.IsSupportCache();
+        return src_.SupportObjCache();
     }
 
     virtual void MakeCanvasImage(

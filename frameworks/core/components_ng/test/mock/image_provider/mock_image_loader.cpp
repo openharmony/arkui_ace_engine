@@ -13,14 +13,17 @@
  * limitations under the License.
  */
 #include "mock_image_loader.h"
+#include <chrono>
 
 #include "core/image/image_loader.h"
-
 namespace OHOS::Ace {
-RefPtr<MockImageLoader> loader = AceType::MakeRefPtr<MockImageLoader>();
+RefPtr<MockImageLoader> g_loader;
+
 RefPtr<NG::ImageData> ImageLoader::GetImageData(
     const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context)
 {
+    using namespace std::chrono_literals;
+    std::this_thread::sleep_for(100ms);
     if (imageSourceInfo.IsPixmap()) {
         return LoadDecodedImageData(imageSourceInfo, context);
     }
@@ -30,7 +33,7 @@ RefPtr<NG::ImageData> ImageLoader::GetImageData(
 
 RefPtr<ImageLoader> ImageLoader::CreateImageLoader(const ImageSourceInfo& /*imageSourceInfo*/)
 {
-    return loader;
+    return g_loader;
 }
 
 std::string ImageLoader::RemovePathHead(const std::string& uri)

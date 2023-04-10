@@ -53,31 +53,10 @@ void TextFieldModelNG::CreateNode(
     pattern->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
     pattern->GetTextFieldController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(pattern)));
     pattern->SetTextEditController(AceType::MakeRefPtr<TextEditController>());
+    pattern->InitSurfaceChangedCallback();
+    pattern->InitSurfacePositionChangedCallback();
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-    if (!pattern->HasSurfaceChangedCallback()) {
-        auto callbackId = pipeline->RegisterSurfaceChangedCallback(
-            [weakPattern = AceType::WeakClaim(AceType::RawPtr(pattern))](
-                int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) {
-                auto pattern = weakPattern.Upgrade();
-                if (pattern) {
-                    pattern->HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight);
-                }
-            });
-        LOGI("Add surface changed callback id %{public}d", callbackId);
-        pattern->UpdateSurfaceChangedCallbackId(callbackId);
-    }
-    if (!pattern->HasSurfacePositionChangedCallback()) {
-        auto callbackId = pipeline->RegisterSurfacePositionChangedCallback(
-            [weakPattern = AceType::WeakClaim(AceType::RawPtr(pattern))](int32_t posX, int32_t posY) {
-                auto pattern = weakPattern.Upgrade();
-                if (pattern) {
-                    pattern->HandleSurfacePositionChanged(posX, posY);
-                }
-            });
-        LOGI("Add position changed callback id %{public}d", callbackId);
-        pattern->UpdateSurfacePositionChangedCallbackId(callbackId);
-    }
     auto themeManager = pipeline->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
     auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
@@ -147,6 +126,14 @@ void TextFieldModelNG::SetWidthAuto(bool isAuto)
         return;
     }
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, WidthAuto, isAuto);
+}
+
+void TextFieldModelNG::RequestKeyboardOnFocus(bool needToRequest)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    pattern->SetNeedToRequestKeyboardOnFocus(needToRequest);
 }
 
 void TextFieldModelNG::SetType(TextInputType value)
@@ -334,8 +321,8 @@ void TextFieldModelNG::SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOp
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto textFielePattern = frameNode->GetPattern<TextFieldPattern>();
-    textFielePattern->SetMenuOptionItems(std::move(menuOptionsItems));
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    textFieldPattern->SetMenuOptionItems(std::move(menuOptionsItems));
 }
 
 void TextFieldModelNG::AddDragFrameNodeToManager() const
@@ -346,7 +333,6 @@ void TextFieldModelNG::AddDragFrameNodeToManager() const
     CHECK_NULL_VOID(dragDropManager);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-
     dragDropManager->AddTextFieldDragFrameNode(AceType::WeakClaim(AceType::RawPtr(frameNode)));
 }
 

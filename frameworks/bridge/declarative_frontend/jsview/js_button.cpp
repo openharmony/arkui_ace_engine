@@ -389,14 +389,14 @@ void JSButton::CreateWithLabel(const JSCallbackInfo& info)
             if ((info.Length() > 1) && info[1]->IsObject()) {
                 SetTypeAndStateEffect(JSRef<JSObject>::Cast(info[1]));
             }
-            NG::ViewAbstract::SetHoverEffect(HoverEffectType::SCALE);
+            NG::ViewAbstract::SetHoverEffectAuto(HoverEffectType::SCALE);
             return;
         }
         auto textComponent = AceType::MakeRefPtr<TextComponent>(label);
         auto buttonTheme = GetTheme<ButtonTheme>();
         auto textStyle = buttonTheme ? buttonTheme->GetTextStyle() : textComponent->GetTextStyle();
         textStyle.SetMaxLines(buttonTheme ? buttonTheme->GetTextMaxLines() : 1);
-        textStyle.SetTextOverflow(TextOverflow::CLIP);
+        textStyle.SetTextOverflow(TextOverflow::ELLIPSIS);
         textComponent->SetTextStyle(textStyle);
         auto padding = AceType::MakeRefPtr<PaddingComponent>();
         padding->SetPadding(buttonTheme ? buttonTheme->GetPadding() : Edge());
@@ -406,14 +406,14 @@ void JSButton::CreateWithLabel(const JSCallbackInfo& info)
     }
 
     if (Container::IsCurrentUseNewPipeline()) {
-        NG::ButtonView::Create(V2::BUTTON_ETS_TAG);
+        NG::ButtonView::CreateWithLabel("");
         if (!labelSet && info[0]->IsObject()) {
             SetTypeAndStateEffect(JSRef<JSObject>::Cast(info[0]));
         }
         if ((info.Length() > 1) && info[1]->IsObject()) {
             SetTypeAndStateEffect(JSRef<JSObject>::Cast(info[1]));
         }
-        NG::ViewAbstract::SetHoverEffect(HoverEffectType::SCALE);
+        NG::ViewAbstract::SetHoverEffectAuto(HoverEffectType::SCALE);
         return;
     }
     auto buttonComponent = AceType::MakeRefPtr<ButtonComponent>(buttonChildren);
@@ -442,7 +442,7 @@ void JSButton::CreateWithChild(const JSCallbackInfo& info)
             auto obj = JSRef<JSObject>::Cast(info[0]);
             SetTypeAndStateEffect(obj);
         }
-        NG::ViewAbstract::SetHoverEffect(HoverEffectType::SCALE);
+        NG::ViewAbstract::SetHoverEffectAuto(HoverEffectType::SCALE);
         return;
     }
     std::list<RefPtr<Component>> buttonChildren;

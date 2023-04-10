@@ -163,7 +163,6 @@ private:
     SizeF size_;
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
-    bool isFirstAddhotZoneRect_ = true;
 
     RefPtr<SwitchModifier> switchModifier_;
 

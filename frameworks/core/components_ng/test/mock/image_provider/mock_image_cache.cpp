@@ -24,4 +24,14 @@ RefPtr<NG::ImageObject> ImageCache::GetCacheImgObjNG(const std::string& key)
 }
 
 void ImageCache::CacheImgObjNG(const std::string& key, const RefPtr<NG::ImageObject>& imgObj) {}
+
+RefPtr<ImageCache> ImageCache::Create()
+{
+    return nullptr;
+}
+
+RefPtr<CachedImageData> ImageCache::GetCacheImageData(const std::string& key)
+{
+    return nullptr;
+}
 } // namespace OHOS::Ace

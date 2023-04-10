@@ -144,6 +144,16 @@ public:
         return color_;
     }
 
+    void SetLinearColor(const LinearColor& linearColor)
+    {
+        linearColor_ = linearColor;
+    }
+
+    const LinearColor& GetLinearColor() const
+    {
+        return linearColor_;
+    }
+
     const Dimension& GetDimension() const
     {
         return dimension_;
@@ -167,12 +177,13 @@ public:
     bool operator==(const GradientColor& other) const
     {
         return (hasValue_ == other.GetHasValue() && color_ == other.GetColor() && dimension_ == other.GetDimension() &&
-                opacity_ == other.GetOpacity());
+                opacity_ == other.GetOpacity() && linearColor_ == other.GetLinearColor());
     }
 
 private:
     bool hasValue_ = true;
     Color color_ { Color::TRANSPARENT };
+    LinearColor linearColor_ { LinearColor::TRANSPARENT };
     Dimension dimension_ { BOX_END_SIZE, DimensionUnit::PERCENT };
     float opacity_ = 1.0f;
 };

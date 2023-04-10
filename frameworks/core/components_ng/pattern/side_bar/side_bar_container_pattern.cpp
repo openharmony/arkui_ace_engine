@@ -29,7 +29,7 @@
 namespace OHOS::Ace::NG {
 
 namespace {
-constexpr int32_t DEFAULT_MIN_CHILDREN_SIZE = 4;
+constexpr int32_t DEFAULT_MIN_CHILDREN_SIZE = 3;
 constexpr int32_t SLIDE_TRANSLATE_DURATION = 400;
 constexpr int32_t DIVIDER_HOT_ZONE_HORIZONTAL_PADDING_NUM = 2;
 constexpr float RATIO_NEGATIVE = -1.0f;
@@ -102,12 +102,12 @@ void SideBarContainerPattern::OnUpdateShowDivider(
 
     auto children = host->GetChildren();
     if (children.size() < DEFAULT_MIN_CHILDREN_SIZE) {
-        LOGE("OnUpdateShowDivider: children's size is less than 4.");
+        LOGE("OnUpdateShowDivider: children's size is less than 3.");
         return;
     }
 
-    auto begin = children.begin();
-    auto dividerNode = *(++(++begin));
+    auto begin = children.rbegin();
+    auto dividerNode = *(++begin);
     CHECK_NULL_VOID(dividerNode);
     if (dividerNode->GetTag() != V2::DIVIDER_ETS_TAG || !AceType::InstanceOf<FrameNode>(dividerNode)) {
         LOGE("OnUpdateShowDivider: Get divider failed.");
@@ -555,12 +555,12 @@ void SideBarContainerPattern::AddDividerHotZoneRect(const RefPtr<SideBarContaine
     CHECK_NULL_VOID(host);
     auto children = host->GetChildren();
     if (children.size() < DEFAULT_MIN_CHILDREN_SIZE) {
-        LOGE("AddDividerHotZoneRect: children's size is less than 4.");
+        LOGE("AddDividerHotZoneRect: children's size is less than 3.");
         return;
     }
 
-    auto begin = children.begin();
-    auto dividerNode = *(++(++begin));
+    auto begin = children.rbegin();
+    auto dividerNode = *(++begin);
     CHECK_NULL_VOID(dividerNode);
     if (dividerNode->GetTag() != V2::DIVIDER_ETS_TAG || !AceType::InstanceOf<FrameNode>(dividerNode)) {
         LOGE("AddDividerHotZoneRect: Get divider failed.");

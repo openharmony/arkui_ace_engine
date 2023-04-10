@@ -30,7 +30,7 @@ class TextFieldContentModifier : public ContentModifier {
     DECLARE_ACE_TYPE(TextFieldContentModifier, ContentModifier);
 
 public:
-    TextFieldContentModifier(const WeakPtr<OHOS::Ace::NG::Pattern>& pattern);
+    explicit TextFieldContentModifier(const WeakPtr<OHOS::Ace::NG::Pattern>& pattern);
     ~TextFieldContentModifier() override = default;
 
     void onDraw(DrawingContext& context) override;
@@ -43,19 +43,19 @@ public:
     void SetContentOffset(OffsetF& value);
     void SetContentSize(SizeF& value);
     void SetTextValue(std::string& value);
+    void SetPlaceholderValue(std::string&& value);
     void SetTextRectY(const float value);
     void SetTextObscured(bool value);
     void SetTextRectX(const float value);
+    void SetTextAlign(const TextAlign value);
     bool NeedMeasureUpdate(PropertyChangeFlag& flag);
 
 private:
-    RefPtr<OHOS::Ace::NG::PipelineContext> GetPipelineContext();
     void SetDefaultFontSize(const TextStyle& textStyle);
     void SetDefaultFontWeight(const TextStyle& textStyle);
     void SetDefaultTextColor(const TextStyle& textStyle);
     void SetDefaultPropertyValue();
 
-private:
     WeakPtr<Pattern> pattern_;
     std::optional<Dimension> fontSize_;
     RefPtr<AnimatablePropertyFloat> fontSizeFloat_;
@@ -71,7 +71,9 @@ private:
     RefPtr<PropertyOffsetF> contentOffset_;
     RefPtr<PropertySizeF> contentSize_;
     RefPtr<PropertyString> textValue_;
+    RefPtr<PropertyString> placeholderValue_;
     RefPtr<PropertyBool> textObscured_;
+    RefPtr<PropertyInt> textAlign_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldContentModifier);
 };

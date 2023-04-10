@@ -17,15 +17,18 @@
 
 #include <string>
 
+#include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkString.h"
 #include "third_party/skia/include/utils/SkBase64.h"
+#include "SkColorSpace.h"
 #include "wm/window.h"
 
+#include "adapter/ohos/osal/pixel_map_ohos.h"
 #include "base/thread/background_task_executor.h"
 #include "base/utils/utils.h"
+#include "core/common/ace_engine.h"
 #include "core/common/connect_server_manager.h"
 #include "core/common/container.h"
-#include "core/common/ace_engine.h"
 #include "core/common/container_scope.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_v2/inspector/inspector.h"
@@ -33,7 +36,64 @@
 
 namespace OHOS::Ace {
 
+namespace {
+
+sk_sp<SkColorSpace> ColorSpaceToSkColorSpace(const RefPtr<PixelMap>& pixmap)
+{
+    return SkColorSpace::MakeSRGB();
+}
+
+SkAlphaType AlphaTypeToSkAlphaType(const RefPtr<PixelMap>& pixmap)
+{
+    switch (pixmap->GetAlphaType()) {
+        case AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN:
+            return SkAlphaType::kUnknown_SkAlphaType;
+        case AlphaType::IMAGE_ALPHA_TYPE_OPAQUE:
+            return SkAlphaType::kOpaque_SkAlphaType;
+        case AlphaType::IMAGE_ALPHA_TYPE_PREMUL:
+            return SkAlphaType::kPremul_SkAlphaType;
+        case AlphaType::IMAGE_ALPHA_TYPE_UNPREMUL:
+            return SkAlphaType::kUnpremul_SkAlphaType;
+        default:
+            return SkAlphaType::kUnknown_SkAlphaType;
+    }
+}
+
+SkColorType PixelFormatToSkColorType(const RefPtr<PixelMap>& pixmap)
+{
+    switch (pixmap->GetPixelFormat()) {
+        case PixelFormat::RGB_565:
+            return SkColorType::kRGB_565_SkColorType;
+        case PixelFormat::RGBA_8888:
+            return SkColorType::kRGBA_8888_SkColorType;
+        case PixelFormat::BGRA_8888:
+            return SkColorType::kBGRA_8888_SkColorType;
+        case PixelFormat::ALPHA_8:
+            return SkColorType::kAlpha_8_SkColorType;
+        case PixelFormat::RGBA_F16:
+            return SkColorType::kRGBA_F16_SkColorType;
+        case PixelFormat::UNKNOWN:
+        case PixelFormat::ARGB_8888:
+        case PixelFormat::RGB_888:
+        case PixelFormat::NV21:
+        case PixelFormat::NV12:
+        case PixelFormat::CMYK:
+        default:
+            return SkColorType::kUnknown_SkColorType;
+    }
+}
+
+SkImageInfo MakeSkImageInfoFromPixelMap(const RefPtr<PixelMap>& pixmap)
+{
+    SkColorType colorType = PixelFormatToSkColorType(pixmap);
+    SkAlphaType alphaType = AlphaTypeToSkAlphaType(pixmap);
+    sk_sp<SkColorSpace> colorSpace = ColorSpaceToSkColorSpace(pixmap);
+    return SkImageInfo::Make(pixmap->GetWidth(), pixmap->GetHeight(), colorType, alphaType, colorSpace);
+}
+} // namespace
+
 bool LayoutInspector::layoutInspectorStatus_ = false;
+const char PNG_TAG[] = "png";
 
 void LayoutInspector::SupportInspector()
 {
@@ -127,19 +187,29 @@ void LayoutInspector::GetSnapshotJson(int32_t containerId, std::unique_ptr<JsonV
     CHECK_NULL_VOID_NOLOG(window);
     auto pixelMap = window->Snapshot();
     CHECK_NULL_VOID(pixelMap);
-
-    auto data = (*pixelMap).GetPixels();
+    auto acePixelMap = AceType::MakeRefPtr<PixelMapOhos>(pixelMap);
+    CHECK_NULL_VOID(acePixelMap);
+    auto imageInfo = MakeSkImageInfoFromPixelMap(acePixelMap);
+    SkPixmap imagePixmap(
+        imageInfo, reinterpret_cast<const void*>(acePixelMap->GetPixels()), acePixelMap->GetRowBytes());
+    sk_sp<SkImage> image;
+    image = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(acePixelMap));
+    CHECK_NULL_VOID(image);
+    auto data = image->encodeToData(SkEncodedImageFormat::kPNG, 100);
+    CHECK_NULL_VOID(data);
     auto height = (*pixelMap).GetHeight();
-    auto stride = (*pixelMap).GetRowBytes();
     message->Put("type", "snapShot");
+    message->Put("format", PNG_TAG);
     message->Put("width", (*pixelMap).GetWidth());
     message->Put("height", height);
     message->Put("posX", container->GetViewPosX());
     message->Put("posY", container->GetViewPosY());
-    int32_t encodeLength = SkBase64::Encode(data, height * stride, nullptr);
+    int32_t encodeLength = SkBase64::Encode(data->data(), data->size(), nullptr);
+    message->Put("size", data->size());
     SkString info(encodeLength);
-    SkBase64::Encode(data, height * stride, info.writable_str());
+    SkBase64::Encode(data->data(), data->size(), info.writable_str());
     message->Put("pixelMapBase64", info.c_str());
+    LOGI("GetSnapshotJson pixelMapBase64:%{public}s", info.c_str());
 }
 
 } // namespace OHOS::Ace

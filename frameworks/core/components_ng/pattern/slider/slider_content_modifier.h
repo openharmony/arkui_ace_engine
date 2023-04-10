@@ -48,7 +48,7 @@ public:
         Color blockColor;
     };
 
-    explicit SliderContentModifier(const Parameters& parameters);
+    explicit SliderContentModifier(const Parameters& parameters, std::function<void()> updateImageFunc);
     ~SliderContentModifier() override = default;
 
     void onDraw(DrawingContext& context) override;
@@ -205,6 +205,11 @@ public:
         }
     }
 
+    OffsetF GetBlockCenter()
+    {
+        return OffsetF(blockCenterX_->Get(), blockCenterY_->Get());
+    }
+
 private:
     void InitializeShapeProperty();
     RSRect GetTrackRect();
@@ -217,6 +222,8 @@ private:
     void DrawBlockShapeRect(DrawingContext& context, RefPtr<ShapeRect>& rect);
 
 private:
+    std::function<void()> updateImageFunc_;
+
     // animatable property
     RefPtr<AnimatablePropertyOffsetF> selectStart_;
     RefPtr<AnimatablePropertyOffsetF> selectEnd_;
@@ -266,7 +273,7 @@ private:
     bool mouseHoverFlag_ = false;
     bool mousePressedFlag_ = false;
     bool reverse_ = false;
-    bool needAnimate_ = true;
+    bool needAnimate_ = false; // Translate Animation on-off
     float hotCircleShadowWidth_ = 0.0f;
     Color blockOuterEdgeColor_;
     RefPtr<BasicShape> shape_;

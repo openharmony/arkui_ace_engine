@@ -739,6 +739,9 @@ SkPath SkiaDecorationPainter::SkiaCreateSkPath(const RefPtr<BasicShape>& basicSh
         skPath.addRect(SkRect::MakeXYWH(0.0, 0.0, size.Width(), size.Height()));
         return skPath;
     }
+    float offsetX = SkiaDimensionToPx(basicShape->GetPosition().GetX(), size, LengthMode::HORIZONTAL);
+    float offsetY = SkiaDimensionToPx(basicShape->GetPosition().GetY(), size, LengthMode::VERTICAL);
+    position += OffsetF(offsetX, offsetY);
     switch (basicShape->GetBasicShapeType()) {
         case BasicShapeType::INSET: {
             SkiaCreateInset(basicShape, size, position, skPath);

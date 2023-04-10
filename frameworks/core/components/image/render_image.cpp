@@ -732,8 +732,8 @@ void RenderImage::GenerateImageRects(const Size& srcSize, const BackgroundImageS
     if (imageLoadingStatus_ == ImageLoadingStatus::LOAD_SUCCESS) {
         currentDstRectList_ = rectList_;
     }
-    LOGD("[BOX][Dep:%{public}d][%{public}p][IMAGE] Result: X:%{public}d-%{public}d, Y:%{public}d-%{public}d",
-        GetDepth(), this, minX, maxX, minY, maxY);
+    LOGD("[BOX][Dep:%{public}d][IMAGE] Result: X:%{public}d-%{public}d, Y:%{public}d-%{public}d",
+        GetDepth(), minX, maxX, minY, maxY);
 }
 
 Size RenderImage::CalculateImageRenderSize(const Size& srcSize, const BackgroundImageSize& imageSize) const

@@ -79,7 +79,7 @@ int32_t GridEventHub::GetInsertPosition(float x, float y)
     CHECK_NULL_RETURN(host, -1);
     auto pattern = AceType::DynamicCast<GridPattern>(host->GetPattern());
     CHECK_NULL_RETURN(pattern, -1);
-    auto itemFrameNode = FindGridItemByPosition(x, y);
+    auto itemFrameNode = host->FindChildByPosition(x, y);
     if (itemFrameNode) {
         RefPtr<GridItemPattern> itemPattern = itemFrameNode->GetPattern<GridItemPattern>();
         CHECK_NULL_RETURN(itemPattern, 0);
@@ -104,35 +104,6 @@ int GridEventHub::GetFrameNodeChildSize()
     auto pattern = host->GetPattern<GridPattern>();
     CHECK_NULL_RETURN(pattern, 0);
     return pattern->GetChildrenCount();
-}
-
-RefPtr<FrameNode> GridEventHub::FindGridItemByPosition(float x, float y)
-{
-    auto host = GetFrameNode();
-    CHECK_NULL_RETURN(host, nullptr);
-
-    std::map<int32_t, RefPtr<FrameNode>> hitFrameNodes;
-    std::list<RefPtr<FrameNode>> children;
-    host->GenerateOneDepthAllFrame(children);
-    for (const auto& child : children) {
-        auto geometryNode = child->GetGeometryNode();
-        if (!geometryNode) {
-            continue;
-        }
-
-        auto globalFrameRect = geometryNode->GetFrameRect();
-        globalFrameRect.SetOffset(child->GetOffsetRelativeToWindow());
-
-        if (globalFrameRect.IsInRegion(PointF(x, y))) {
-            hitFrameNodes.insert(std::make_pair(child->GetDepth(), child));
-        }
-    }
-
-    if (hitFrameNodes.empty()) {
-        return nullptr;
-    }
-
-    return hitFrameNodes.rbegin()->second;
 }
 
 int32_t GridEventHub::GetGridItemIndex(const RefPtr<FrameNode>& frameNode)
@@ -182,7 +153,9 @@ void GridEventHub::HandleOnItemDragStart(const GestureEvent& info)
     auto globalX = static_cast<float>(info.GetGlobalPoint().GetX());
     auto globalY = static_cast<float>(info.GetGlobalPoint().GetY());
 
-    auto itemFrameNode = FindGridItemByPosition(globalX, globalY);
+    auto host = GetFrameNode();
+    CHECK_NULL_VOID(host);
+    auto itemFrameNode = host->FindChildByPosition(globalX, globalY);
     CHECK_NULL_VOID(itemFrameNode);
 
     draggedIndex_ = GetGridItemIndex(itemFrameNode);
@@ -196,7 +169,7 @@ void GridEventHub::HandleOnItemDragStart(const GestureEvent& info)
 
     dragDropProxy_ = manager->CreateAndShowDragWindow(customNode, info);
     CHECK_NULL_VOID(dragDropProxy_);
-    dragDropProxy_->OnItemDragStart(info, GetFrameNode());
+    dragDropProxy_->OnItemDragStart(info, host);
     itemFrameNode->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
     draggingItem_ = itemFrameNode;
 }
@@ -266,7 +239,6 @@ void GridEventHub::FireOnItemDragEnter(const ItemDragInfo& dragInfo)
 
 void GridEventHub::FireOnItemDragLeave(const ItemDragInfo& dragInfo, int32_t itemIndex)
 {
-    LOGI("itemIndex:%{public}d, %{public}p", itemIndex, this);
     if (itemIndex == -1) {
         auto host = GetFrameNode();
         CHECK_NULL_VOID(host);
@@ -281,13 +253,13 @@ void GridEventHub::FireOnItemDragLeave(const ItemDragInfo& dragInfo, int32_t ite
     }
 }
 
-void GridEventHub::FireOnItemDrop(const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex, bool isSuccess)
+bool GridEventHub::FireOnItemDrop(const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex, bool isSuccess)
 {
-    LOGI("itemIndex:%{public}d, insertIndex:%{public}d, %{public}p", itemIndex, insertIndex, this);
+    LOGI("itemIndex:%{public}d, insertIndex:%{public}d", itemIndex, insertIndex);
     auto host = GetFrameNode();
-    CHECK_NULL_VOID(host);
+    CHECK_NULL_RETURN(host, false);
     auto pattern = AceType::DynamicCast<GridPattern>(host->GetPattern());
-    CHECK_NULL_VOID(pattern);
+    CHECK_NULL_RETURN(pattern, false);
     insertIndex = (itemIndex == -1 || insertIndex == -1) ? insertIndex : pattern->GetOriginalIndex();
     pattern->ClearDragState();
     if (draggingItem_) {
@@ -295,7 +267,9 @@ void GridEventHub::FireOnItemDrop(const ItemDragInfo& dragInfo, int32_t itemInde
     }
     if (onItemDrop_) {
         onItemDrop_(dragInfo, itemIndex, insertIndex, isSuccess);
+        return true;
     }
+    return false;
 }
 
 void GridEventHub::FireOnItemDragMove(const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex) const

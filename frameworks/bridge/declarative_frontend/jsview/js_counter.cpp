@@ -52,6 +52,8 @@ void JSCounter::JSBind(BindingTarget globalObj)
 {
     JSClass<JSCounter>::Declare("Counter");
     JSClass<JSCounter>::StaticMethod("create", &JSCounter::Create, MethodOptions::NONE);
+    JSClass<JSCounter>::StaticMethod("enableDec", &JSCounter::JsEnableDec);
+    JSClass<JSCounter>::StaticMethod("enableInc", &JSCounter::JsEnableInc);
     JSClass<JSCounter>::StaticMethod("onInc", &JSCounter::JsOnInc);
     JSClass<JSCounter>::StaticMethod("onDec", &JSCounter::JsOnDec);
     JSClass<JSCounter>::StaticMethod("height", &JSCounter::JSHeight);
@@ -62,6 +64,28 @@ void JSCounter::JSBind(BindingTarget globalObj)
     JSClass<JSCounter>::StaticMethod("backgroundColor", &JSCounter::JsBackgroundColor);
     JSClass<JSCounter>::Inherit<JSContainerBase>();
     JSClass<JSCounter>::Bind(globalObj);
+}
+
+void JSCounter::JsEnableDec(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1) {
+        LOGW("Must contain at least 1 argument");
+        return;
+    }
+    if (args[0]->IsBoolean()) {
+        CounterModel::GetInstance()->SetEnableDec(args[0]->ToBoolean());
+    }
+}
+
+void JSCounter::JsEnableInc(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1) {
+        LOGW("Must contain at least 1 argument");
+        return;
+    }
+    if (args[0]->IsBoolean()) {
+        CounterModel::GetInstance()->SetEnableInc(args[0]->ToBoolean());
+    }
 }
 
 void JSCounter::JsOnInc(const JSCallbackInfo& args)

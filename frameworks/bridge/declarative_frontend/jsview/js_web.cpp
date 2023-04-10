@@ -543,6 +543,11 @@ private:
 
 class JSWebWindowNewHandler : public Referenced {
 public:
+    struct ChildWindowInfo {
+        int32_t parentWebId_ = -1;
+        JSRef<JSObject> controller_;
+    };
+
     static void JSBind(BindingTarget globalObj)
     {
         JSClass<JSWebWindowNewHandler>::Declare("WebWindowNewHandler");
@@ -564,32 +569,73 @@ public:
             LOGI("JSWebWindowNewHandler not find web controller");
             return JSRef<JSVal>::Make();
         }
-        auto controller = iter->second;
+        auto controller = iter->second.controller_;
         controller_map_.erase(iter);
         return controller;
     }
 
-    static bool ExistController(JSRef<JSObject>& controller)
+    static bool ExistController(JSRef<JSObject>& controller, int32_t& parentWebId)
     {
+        auto getThisVarFunction = controller->GetProperty("innerGetThisVar");
+        if (!getThisVarFunction->IsFunction()) {
+            LOGE("get innerGetThisVar failed");
+            parentWebId = -1;
+            return false;
+        }
+        auto func = JSRef<JSFunc>::Cast(getThisVarFunction);
+        auto thisVar = func->Call(controller, 0, {});
+        int64_t thisPtr = thisVar->ToNumber<int64_t>();
         for (auto iter = controller_map_.begin(); iter != controller_map_.end(); iter++) {
-            if (iter->second->Unwrap<void>() == controller->Unwrap<void>()) {
-                LOGI("exist popup controller");
-                return true;
+            auto getThisVarFunction1 = iter->second.controller_->GetProperty("innerGetThisVar");
+            if (getThisVarFunction1->IsFunction()) {
+                auto func1 = JSRef<JSFunc>::Cast(getThisVarFunction1);
+                auto thisVar1 = func1->Call(iter->second.controller_, 0, {});
+                if (thisPtr == thisVar1->ToNumber<int64_t>()) {
+                    parentWebId = iter->second.parentWebId_;
+                    return true;
+                }
             }
         }
+        parentWebId = -1;
         return false;
     }
 
     void SetWebController(const JSCallbackInfo& args)
     {
         LOGI("JSWebWindowNewHandler SetWebController");
-        if (args.Length() < 1 || !args[0]->IsObject()) {
-            LOGI("SetWebController param err");
-            return;
-        }
         if (handler_) {
+            int32_t parentNWebId = handler_->GetParentNWebId();
+            if (parentNWebId == -1) {
+                LOGE("SetWebController parent web id err");
+                return;
+            }
+            if (args.Length() < 1 || !args[0]->IsObject()) {
+                LOGE("SetWebController param err");
+                NG::WebView::NotifyPopupWindowResult(parentNWebId, false);
+                return;
+            }
             auto controller = JSRef<JSObject>::Cast(args[0]);
-            controller_map_.insert(std::pair<int32_t, JSRef<JSObject>>(handler_->GetId(), controller));
+            if (controller.IsEmpty()) {
+                LOGI("SetWebController controller is empty");
+                NG::WebView::NotifyPopupWindowResult(parentNWebId, false);
+                return;
+            }
+            auto getWebIdFunction = controller->GetProperty("innerGetWebId");
+            if (!getWebIdFunction->IsFunction()) {
+                LOGI("SetWebController get innerGetWebId failed");
+                NG::WebView::NotifyPopupWindowResult(parentNWebId, false);
+                return;
+            }
+            auto func = JSRef<JSFunc>::Cast(getWebIdFunction);
+            auto webId = func->Call(controller, 0, {});
+            int32_t childWebId = webId->ToNumber<int32_t>();
+            if (childWebId == parentNWebId || childWebId != -1) {
+                LOGE("The child window is initialized or the parent window is the same as the child window");
+                NG::WebView::NotifyPopupWindowResult(parentNWebId, false);
+                return;
+            }
+            controller_map_.insert(std::pair<int32_t, ChildWindowInfo>(handler_->GetId(),
+                { parentNWebId, controller }));
         }
     }
 
@@ -609,9 +655,9 @@ private:
     }
 
     RefPtr<WebWindowNewHandler> handler_;
-    static std::unordered_map<int32_t, JSRef<JSObject>> controller_map_;
+    static std::unordered_map<int32_t, ChildWindowInfo> controller_map_;
 };
-std::unordered_map<int32_t, JSRef<JSObject>> JSWebWindowNewHandler::controller_map_;
+std::unordered_map<int32_t, JSWebWindowNewHandler::ChildWindowInfo> JSWebWindowNewHandler::controller_map_;
 
 class JSDataResubmitted : public Referenced {
 public:
@@ -1489,6 +1535,8 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("horizontalScrollBarAccess", &JSWeb::HorizontalScrollBarAccess);
     JSClass<JSWeb>::StaticMethod("verticalScrollBarAccess", &JSWeb::VerticalScrollBarAccess);
     JSClass<JSWeb>::StaticMethod("onAudioStateChanged", &JSWeb::OnAudioStateChanged);
+    JSClass<JSWeb>::StaticMethod("mediaOptions", &JSWeb::MediaOptions);
+    JSClass<JSWeb>::StaticMethod("onFirstContentfulPaint", &JSWeb::OnFirstContentfulPaint);
     JSClass<JSWeb>::Inherit<JSViewAbstract>();
     JSClass<JSWeb>::Bind(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -1602,7 +1650,7 @@ JSRef<JSVal> LoadInterceptEventToJSValue(const LoadInterceptEvent& eventInfo)
     JSRef<JSObject> requestObj = JSClass<JSWebResourceRequest>::NewInstance();
     auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSWebResourceRequest>());
     requestEvent->SetLoadInterceptEvent(eventInfo);
-    obj->SetPropertyObject("request", requestObj);
+    obj->SetPropertyObject("data", requestObj);
     return JSRef<JSVal>::Cast(obj);
 }
 
@@ -1767,8 +1815,10 @@ void JSWeb::CreateInNewPipeline(
                 func->Call(webviewController, 1, argv);
             };
         }
+        int32_t parentNWebId = -1;
+        bool isPopup = JSWebWindowNewHandler::ExistController(controller, parentNWebId);
         NG::WebView::Create(dstSrc.value(), std::move(setIdCallback), std::move(setHapPathCallback),
-            JSWebWindowNewHandler::ExistController(controller));
+            parentNWebId, isPopup);
 
         auto getCmdLineFunction = controller->GetProperty("getCustomeSchemeCmdLine");
         std::string cmdLine = JSRef<JSFunc>::Cast(getCmdLineFunction)->Call(controller, 0, {})->ToString();
@@ -1797,7 +1847,10 @@ void JSWeb::CreateInOldPipeline(
     webComponent = AceType::MakeRefPtr<WebComponent>(dstSrc.value());
     webComponent->SetSrc(dstSrc.value());
     if (setWebIdFunction->IsFunction()) {
-        webComponent->SetPopup(JSWebWindowNewHandler::ExistController(controller));
+        int32_t parentNWebId = -1;
+        bool isPopup = JSWebWindowNewHandler::ExistController(controller, parentNWebId);
+        webComponent->SetPopup(isPopup);
+        webComponent->SetParentNWebId(parentNWebId);
         CreateWithWebviewController(controller, setWebIdFunction, webComponent);
     } else {
         CreateWithWebController(controller, webComponent);
@@ -4198,6 +4251,60 @@ void JSWeb::OnAudioStateChanged(const JSCallbackInfo& args)
             func->Execute(*eventInfo);
         };
         NG::WebView::SetAudioStateChangedId(std::move(uiCallback));
+    }
+}
+
+void JSWeb::MediaOptions(const JSCallbackInfo& args)
+{
+    if (!args[0]->IsObject()) {
+        LOGE("WebMediaOptions Param is invalid, it is not a object");
+        return;
+    }
+    auto paramObject = JSRef<JSObject>::Cast(args[0]);
+    auto resumeIntervalObj = paramObject->GetProperty("resumeInterval");
+    if (resumeIntervalObj->IsNumber()) {
+        int32_t resumeInterval = resumeIntervalObj->ToNumber<int32_t>();
+        NG::WebView::SetAudioResumeInterval(resumeInterval);
+    }
+
+    auto audioExclusiveObj = paramObject->GetProperty("audioExclusive");
+    if (audioExclusiveObj->IsBoolean()) {
+        bool audioExclusive = audioExclusiveObj->ToBoolean();
+        NG::WebView::SetAudioExclusive(audioExclusive);
+    }
+}
+
+JSRef<JSVal> FirstContentfulPaintEventToJSValue(const FirstContentfulPaintEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("navigationStartTick", eventInfo.GetNavigationStartTick());
+    obj->SetProperty("firstContentfulPaintMs", eventInfo.GetFirstContentfulPaintMs());
+    return JSRef<JSVal>::Cast(obj);
+}
+
+void JSWeb::OnFirstContentfulPaint(const JSCallbackInfo& args)
+{
+    if (!args[0]->IsFunction()) {
+        LOGE("Param is invalid, it is not a function");
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<FirstContentfulPaintEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), FirstContentfulPaintEventToJSValue);
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto instanceId = Container::CurrentId();
+        auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+                              const std::shared_ptr<BaseEventInfo>& info) {
+            ContainerScope scope(instanceId);
+            auto context = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(context);
+            context->PostAsyncEvent([execCtx, func = func, info]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                auto* eventInfo = TypeInfoHelper::DynamicCast<FirstContentfulPaintEvent>(info.get());
+                func->Execute(*eventInfo);
+            });
+        };
+        NG::WebView::SetFirstContentfulPaintId(std::move(uiCallback));
+        return;
     }
 }
 } // namespace OHOS::Ace::Framework

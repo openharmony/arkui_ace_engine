@@ -57,6 +57,16 @@ public:
     void OnModifyDone() override;
 
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+
+    void SetNavigationMode(NavigationMode navigationMode)
+    {
+        navigationMode_ = navigationMode;
+    }
+
+private:
+    RefPtr<RenderContext> GetTitleBarRenderContext();
+    void DoAnimation();
+    NavigationMode navigationMode_ = NavigationMode::AUTO;
 };
 
 } // namespace OHOS::Ace::NG

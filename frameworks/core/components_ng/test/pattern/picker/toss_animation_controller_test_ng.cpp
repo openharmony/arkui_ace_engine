@@ -50,16 +50,16 @@ const double TIME_PLUS_LARGE = 10 * 1000.0;
 
 class TossAnimationControllerTestNg : public testing::Test {
 public:
-    void SetUp() override;
-    void TearDown() override;
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
 };
 
-void TossAnimationControllerTestNg::SetUp()
+void TossAnimationControllerTestNg::SetUpTestSuite()
 {
     MockPipelineBase::SetUp();
 }
 
-void TossAnimationControllerTestNg::TearDown()
+void TossAnimationControllerTestNg::TearDownTestSuite()
 {
     MockPipelineBase::TearDown();
 }

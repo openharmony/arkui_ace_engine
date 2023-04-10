@@ -76,12 +76,29 @@ AceCollectionInfo GridAccessibilityProperty::GetCollectionInfo() const
     auto gridPattern = frameNode->GetPattern<GridPattern>();
     CHECK_NULL_RETURN(gridPattern, aceCollectionInfo);
     auto gridLayoutInfo = gridPattern->GetGridLayoutInfo();
-    aceCollectionInfo.rows = gridLayoutInfo.gridMatrix_.size();
+    aceCollectionInfo.rows = static_cast<int32_t>(gridLayoutInfo.gridMatrix_.size());
     if (aceCollectionInfo.rows > 0) {
-        aceCollectionInfo.columns = gridLayoutInfo.gridMatrix_.begin()->second.size();
+        aceCollectionInfo.columns = static_cast<int32_t>(gridLayoutInfo.gridMatrix_.begin()->second.size());
     } else {
         aceCollectionInfo.columns = 0;
     }
+    aceCollectionInfo.selectMode = gridPattern->MultiSelectable();
     return aceCollectionInfo;
+}
+
+void GridAccessibilityProperty::SetSpecificSupportAction()
+{
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto gridPattern = frameNode->GetPattern<GridPattern>();
+    CHECK_NULL_VOID(gridPattern);
+    if (IsScrollable()) {
+        if (!(gridPattern->IsAtTop())) {
+            AddSupportAction(AceAction::ACTION_SCROLL_BACKWARD);
+        }
+        if (!(gridPattern->IsAtBottom())) {
+            AddSupportAction(AceAction::ACTION_SCROLL_FORWARD);
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

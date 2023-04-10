@@ -109,15 +109,6 @@ void ButtonPattern::InitButtonLabel()
         LOGI("No label, no need to initialize label.");
         return;
     }
-    if ((!layoutProperty->GetCalcLayoutConstraint() ||
-            !layoutProperty->GetCalcLayoutConstraint()->selfIdealSize->Height().has_value()) &&
-        (!layoutProperty->GetPaddingProperty())) {
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
-        CHECK_NULL_VOID(buttonTheme);
-        layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(buttonTheme->GetHeight())));
-    }
     auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
     CHECK_NULL_VOID(textNode);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();

@@ -51,6 +51,7 @@ void BlankView::SetBlankMin(const Dimension& blankMin)
         return;
     }
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, FlexBasis, blankMin);
+    ACE_UPDATE_LAYOUT_PROPERTY(BlankLayoutProperty, MinSize, blankMin);
 }
 
 void BlankView::SetHeight(const Dimension& height)

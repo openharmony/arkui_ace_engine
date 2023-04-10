@@ -19,6 +19,18 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_register.h"
 
+#ifdef ENABLE_DRAG_FRAMEWORK
+#include "frameworks/bridge/declarative_frontend/engine/js_converter.h"
+#include "frameworks/bridge/common/utils/engine_helper.h"
+#include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
+#include "js_native_api_types.h"
+#include "napi/native_api.h"
+#include "native_engine/native_engine.h"
+#include "unified_data_napi.h"
+#include "summary_napi.h"
+#include "unified_data.h"
+#endif
+
 namespace OHOS::Ace::Framework {
 class JsPasteData : public Referenced {
 public:
@@ -71,7 +83,23 @@ private:
 
     RefPtr<PasteData> pasteData_;
 };
+#ifdef ENABLE_DRAG_FRAMEWORK
+class ScopeRAII {
+public:
+    explicit ScopeRAII(NativeScopeManager* manager) : manager_(manager)
+    {
+        scope_ = manager_->Open();
+    }
+    ~ScopeRAII()
+    {
+        manager_->Close(scope_);
+    }
 
+private:
+    NativeScopeManager* manager_;
+    NativeScope* scope_;
+};
+#endif
 class JsDragEvent : public Referenced {
 public:
     static void JSBind(BindingTarget globalObj)
@@ -82,6 +110,18 @@ public:
         JSClass<JsDragEvent>::CustomMethod("getY", &JsDragEvent::GetY);
         JSClass<JsDragEvent>::CustomMethod("getDescription", &JsDragEvent::GetDescription);
         JSClass<JsDragEvent>::CustomMethod("setDescription", &JsDragEvent::SetDescription);
+#ifdef ENABLE_DRAG_FRAMEWORK
+        JSClass<JsDragEvent>::CustomMethod("setData", &JsDragEvent::SetData);
+        JSClass<JsDragEvent>::CustomMethod("getData", &JsDragEvent::GetData);
+        JSClass<JsDragEvent>::CustomMethod("getSummary", &JsDragEvent::GetSummary);
+        JSClass<JsDragEvent>::CustomMethod("setResult", &JsDragEvent::SetResult);
+        JSClass<JsDragEvent>::CustomMethod("getResult", &JsDragEvent::GetResult);
+        JSClass<JsDragEvent>::CustomMethod("getPreviewRect", &JsDragEvent::GetPreviewRect);
+        JSClass<JsDragEvent>::CustomMethod("useCustomDropAnimation", &JsDragEvent::UseDropCustomDropAnimation);
+        JSClass<JsDragEvent>::CustomMethod("setDragInfo", &JsDragEvent::SetDragInfo);
+        JSClass<JsDragEvent>::CustomMethod("getDragInfo", &JsDragEvent::GetDragInfo);
+        JSClass<JsDragEvent>::CustomMethod("copy", &JsDragEvent::Copy);
+#endif
         JSClass<JsDragEvent>::Bind(globalObj, &JsDragEvent::Constructor, &JsDragEvent::Destructor);
     }
 
@@ -122,7 +162,135 @@ public:
             dragEvent_->SetDescription(args[0]->ToString());
         }
     }
+#ifdef ENABLE_DRAG_FRAMEWORK
+    void SetData(const JSCallbackInfo& args)
+    {
+        if (!args[0]->IsObject()) {
+            LOGE("info[0] is not an object when try SetData");
+            return ;
+        }
+        auto engine = EngineHelper::GetCurrentEngine();
+        CHECK_NULL_VOID(engine);
+        NativeEngine* nativeEngine = engine->GetNativeEngine();
+        napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+        panda::Local<JsiValue> value = args[0].Get().GetLocalHandle();
+        JSValueWrapper valueWrapper = value;
+        ScopeRAII scope(nativeEngine->GetScopeManager());
+        NativeValue* nativeValue = nativeEngine->ValueToNativeValue(valueWrapper);
+        void* native = nullptr;
+        napi_unwrap(env, reinterpret_cast<napi_value>(nativeValue), &native);
+        auto* unifiedData = reinterpret_cast<UDMF::UnifiedDataNapi*>(native);
+        CHECK_NULL_VOID(unifiedData);
+        CHECK_NULL_VOID(unifiedData->value_);
+        dragEvent_->SetData(unifiedData->value_);
+    }
 
+    void GetData(const JSCallbackInfo& args)
+    {
+        auto engine = EngineHelper::GetCurrentEngine();
+        CHECK_NULL_VOID(engine);
+        NativeEngine* nativeEngine = engine->GetNativeEngine();
+        napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+        auto dragData = dragEvent_->GetData();
+        napi_value dataVal = nullptr;
+        CHECK_NULL_VOID(dragData);
+        UDMF::UnifiedDataNapi::NewInstance(env, dragData, dataVal);
+        CHECK_NULL_VOID(dataVal);
+        NativeValue* nativeValue = reinterpret_cast<NativeValue*>(dataVal);
+        auto jsValue = JsConverter::ConvertNativeValueToJsVal(nativeValue);
+        args.SetReturnValue(jsValue);
+    }
+
+    void GetSummary(const JSCallbackInfo& args)
+    {
+        auto engine = EngineHelper::GetCurrentEngine();
+        CHECK_NULL_VOID(engine);
+        NativeEngine* nativeEngine = engine->GetNativeEngine();
+        napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+        auto summary = dragEvent_->GetSummary();
+        CHECK_NULL_VOID(summary);
+        napi_value dataVal = nullptr;
+        UDMF::SummaryNapi::NewInstance(env, summary, dataVal);
+        CHECK_NULL_VOID(dataVal);
+        NativeValue* nativeValue = reinterpret_cast<NativeValue*>(dataVal);
+        auto jsValue = JsConverter::ConvertNativeValueToJsVal(nativeValue);
+        args.SetReturnValue(jsValue);
+    }
+
+    void SetResult(const JSCallbackInfo& args)
+    {
+        if (args[0]->IsNumber()) {
+            auto dragRet = args[0]->ToNumber<int32_t>();
+            dragEvent_->SetResult((DragRet)dragRet);
+        }
+    }
+
+    void GetResult(const JSCallbackInfo& args)
+    {
+        auto dragRet = JSVal(ToJSValue(static_cast<int32_t>(dragEvent_->GetResult())));
+        auto dragRetRef = JSRef<JSVal>::Make(dragRet);
+        args.SetReturnValue(dragRetRef);
+    }
+
+    void GetPreviewRect(const JSCallbackInfo& args)
+    {
+        auto rectObj = CreateRectangle(dragEvent_->GetPreviewRect());
+        JSRef<JSVal> previewRect = JSRef<JSObject>::Cast(rectObj);
+        args.SetReturnValue(previewRect);
+    }
+
+    void UseDropCustomDropAnimation(const JSCallbackInfo& args)
+    {
+        if (args[0]->IsBoolean()) {
+            dragEvent_->UseCustomAnimation(args[0]->ToBoolean());
+        }
+    }
+
+    void SetDragInfo(const JSCallbackInfo& args)
+    {
+        if (!args[0]->IsObject()) {
+            LOGE("info[0] is not an object when try SetDragInfo");
+            return ;
+        }
+        auto engine = EngineHelper::GetCurrentEngine();
+        CHECK_NULL_VOID(engine);
+        NativeEngine* nativeEngine = engine->GetNativeEngine();
+        napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+        panda::Local<JsiValue> value = args[0].Get().GetLocalHandle();
+        JSValueWrapper valueWrapper = value;
+        ScopeRAII scope(nativeEngine->GetScopeManager());
+        NativeValue* nativeValue = nativeEngine->ValueToNativeValue(valueWrapper);
+        void* native = nullptr;
+        napi_unwrap(env, reinterpret_cast<napi_value>(nativeValue), &native);
+        auto* unifiedData = reinterpret_cast<UDMF::UnifiedDataNapi*>(native);
+        CHECK_NULL_VOID(unifiedData);
+        CHECK_NULL_VOID(unifiedData->value_);
+        dragEvent_->SetDragInfo(unifiedData->value_);
+    }
+
+    void GetDragInfo(const JSCallbackInfo& args)
+    {
+        auto engine = EngineHelper::GetCurrentEngine();
+        CHECK_NULL_VOID(engine);
+        NativeEngine* nativeEngine = engine->GetNativeEngine();
+        napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+        auto dragData = dragEvent_->GetDragInfo();
+        CHECK_NULL_VOID(dragData);
+        napi_value dataVal = nullptr;
+        UDMF::UnifiedDataNapi::NewInstance(env, dragData, dataVal);
+        NativeValue* nativeValue = reinterpret_cast<NativeValue*>(dataVal);
+        CHECK_NULL_VOID(dataVal);
+        auto jsValue = JsConverter::ConvertNativeValueToJsVal(nativeValue);
+        args.SetReturnValue(jsValue);
+    }
+
+    void Copy(const JSCallbackInfo& args)
+    {
+        if (args[0]->IsBoolean()) {
+            dragEvent_->SetCopy(args[0]->ToBoolean());
+        }
+    }
+#endif
     void SetDragEvent(const RefPtr<DragEvent>& dragEvent)
     {
         dragEvent_ = dragEvent;
@@ -147,7 +315,17 @@ private:
             dragEvent->DecRefCount();
         }
     }
-
+#ifdef ENABLE_DRAG_FRAMEWORK
+    JSRef<JSObject> CreateRectangle(const Rect& info)
+    {
+        JSRef<JSObject> rectObj = JSRef<JSObject>::New();
+        rectObj->SetProperty<double>("x", info.Left());
+        rectObj->SetProperty<double>("y", info.Top());
+        rectObj->SetProperty<double>("width", info.Width());
+        rectObj->SetProperty<double>("height", info.Height());
+        return rectObj;
+    }
+#endif
     RefPtr<DragEvent> dragEvent_;
     JSRef<JSObject> jsPasteData_;
 };
@@ -169,6 +347,13 @@ JSRef<JSVal> JsDragFunction::Execute(const RefPtr<DragEvent>& info, const std::s
     JSRef<JSVal> jsonInfo = JSRef<JSVal>::Make(ToJSValue(extraParams));
     JSRef<JSVal> params[] = { dragInfo, jsonInfo };
     return JsFunction::ExecuteJS(2, params);
+}
+
+JSRef<JSVal> JsDragFunction::Execute(const RefPtr<DragEvent>& info)
+{
+    JSRef<JSVal> dragInfo = JSRef<JSObject>::Cast(CreateDragEvent(info));
+    JSRef<JSVal> params[] = { dragInfo };
+    return JsFunction::ExecuteJS(1, params);
 }
 
 JSRef<JSVal> JsDragFunction::ItemDragStartExecute(const ItemDragInfo& info, int32_t itemIndex)

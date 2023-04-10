@@ -60,7 +60,6 @@ public:
     static void TryLoadImageInfo(const RefPtr<PipelineBase>& context, const std::string& src,
         std::function<void(bool, int32_t, int32_t)>&& loadCallback);
 
-#ifndef NG_BUILD
     static void GetSVGImageDOMAsyncFromSrc(const std::string& src, std::function<void(const sk_sp<SkSVGDOM>&)> callback,
         std::function<void()> failedCallback, const WeakPtr<PipelineBase> context, uint64_t svgThemeColor = 0,
         OnPostBackgroundTask onBackgroundTaskPostCallback = nullptr);
@@ -69,7 +68,6 @@ public:
         std::function<void(const sk_sp<SkSVGDOM>&)> callback, std::function<void()> failedCallback,
         const WeakPtr<PipelineBase> context, uint64_t svgThemeColor = 0,
         OnPostBackgroundTask onBackgroundTaskPostCallback = nullptr);
-#endif
 
     // upload image data to gpu context for painting asynchronously.
     static void UploadImageToGPUForRender(const WeakPtr<PipelineBase> context, const sk_sp<SkImage>& image,

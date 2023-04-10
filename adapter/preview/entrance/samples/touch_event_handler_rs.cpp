@@ -16,9 +16,9 @@
 #include "touch_event_handler.h"
 
 #include <vector>
+#include "adapter/preview/entrance/event_dispatcher.h"
 #include "base/log/log.h"
 #include "core/event/touch_event.h"
-#include "adapter/preview/entrance/event_dispatcher.h"
 
 namespace OHOS::Ace::Platform {
 namespace {
@@ -28,7 +28,7 @@ double lastMouseY = 0;
 bool lastMousePressed = false;
 } // namespace
 
-struct TouchEvent CreateMockTouchEvent(const TouchType &type)
+struct TouchEvent CreateMockTouchEvent(const TouchType& type)
 {
     std::lock_guard lock(lastMouseMutex);
     return {
@@ -58,7 +58,8 @@ void HandleMouseButton(int button, bool pressed, int mods)
     EventDispatcher::GetInstance().DispatchTouchEvent(event);
 }
 
-void HandleCursorPos(double x, double y) {
+void HandleCursorPos(double x, double y)
+{
     {
         std::lock_guard lock(lastMouseMutex);
         lastMouseX = x;
@@ -71,7 +72,7 @@ void HandleCursorPos(double x, double y) {
     }
 }
 
-void TouchEventHandler::InitialTouchEventCallback(const GlfwController &controller)
+void TouchEventHandler::InitialTouchEventCallback(const GlfwController& controller)
 {
     controller->OnMouseButton(HandleMouseButton);
     controller->OnCursorPos(HandleCursorPos);

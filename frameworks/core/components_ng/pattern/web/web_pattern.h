@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +27,7 @@
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_proxy.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/web/web_accessibility_property.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
 #include "core/components_ng/pattern/web/web_paint_property.h"
 #include "core/components_ng/pattern/web/web_pattern_property.h"
@@ -96,6 +97,11 @@ public:
         return MakeRefPtr<WebEventHub>();
     }
 
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        return MakeRefPtr<WebAccessibilityProperty>();
+    }
+
     void OnModifyDone() override;
 
     void SetWebSrc(const std::string& webSrc)
@@ -117,6 +123,11 @@ public:
     void SetPopup(bool popup)
     {
         isPopup_ = popup;
+    }
+
+    void SetParentNWebId(int32_t parentNWebId)
+    {
+        parentNWebId_ = parentNWebId;
     }
 
     void SetWebData(const std::string& webData)
@@ -244,8 +255,11 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, BlockNetwork, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, DarkMode, WebDarkMode);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, ForceDarkAccess, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, AudioResumeInterval, int32_t);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, AudioExclusive, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, HorizontalScrollBarAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, VerticalScrollBarAccessEnabled, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, ScrollBarColor, std::string);
 
     void RequestFullScreen();
     void ExitFullScreen();
@@ -272,6 +286,8 @@ public:
     {
         selectPopupMenuShowing_ = showing;
     }
+    void OnCompleteSwapWithNewSize();
+    void OnResizeNotWork();
 
 private:
     void RegistVirtualKeyBoardListener();
@@ -325,9 +341,12 @@ private:
     void OnBlockNetworkUpdate(bool value);
     void OnDarkModeUpdate(WebDarkMode mode);
     void OnForceDarkAccessUpdate(bool access);
+    void OnAudioResumeIntervalUpdate(int32_t resumeInterval);
+    void OnAudioExclusiveUpdate(bool audioExclusive);
     void OnHorizontalScrollBarAccessEnabledUpdate(bool value);
     void OnVerticalScrollBarAccessEnabledUpdate(bool value);
-
+    void OnScrollBarColorUpdate(const std::string& value);
+    
     void InitEvent();
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);
@@ -385,6 +404,7 @@ private:
     };
     static bool ParseTouchInfo(const TouchEventInfo& info, std::list<TouchInfo>& touchInfos);
     void InitEnhanceSurfaceFlag();
+    void UpdateBackgroundColorRightNow(int32_t color);
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
@@ -424,6 +444,9 @@ private:
     bool selectOverlayDragging_ = false;
     bool selectPopupMenuShowing_ = false;
     bool isPopup_ = false;
+    int32_t parentNWebId_ = -1;
+    bool isInWindowDrag_ = false;
+    bool isWaiting_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
 };
 } // namespace OHOS::Ace::NG

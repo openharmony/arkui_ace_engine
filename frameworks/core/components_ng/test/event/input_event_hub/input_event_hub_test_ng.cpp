@@ -158,7 +158,7 @@ HWTEST_F(InputEventHubTestNg, InputEventHubHoverEventTest003, TestSize.Level1)
      * @tc.expected: mouseEventActuator_ will be initialized and get the hoverEffect which will be assigned the correct
      * value.
      */
-    inputEventHub->SetHoverAnimation(HOVER_EFFECT_TYPE);
+    inputEventHub->SetHoverEffect(HOVER_EFFECT_TYPE);
     EXPECT_NE(inputEventHub->hoverEffectActuator_, nullptr);
     EXPECT_EQ(inputEventHub->GetHoverEffect(), HOVER_EFFECT_TYPE);
 
@@ -269,7 +269,7 @@ HWTEST_F(InputEventHubTestNg, InputEventHubProcessMouseTest005, TestSize.Level1)
      * @tc.expected: OnCollectMouseEvent will return directly, and ProcessMouseTestHit return false.
      */
     EXPECT_FALSE(inputEventHub->ProcessMouseTestHit(COORDINATE_OFFSET, mouseResult));
-    inputEventHub->SetHoverAnimation(HOVER_EFFECT_TYPE);
+    inputEventHub->SetHoverEffect(HOVER_EFFECT_TYPE);
     EXPECT_FALSE(inputEventHub->ProcessMouseTestHit(COORDINATE_OFFSET, mouseResult));
 
     /**

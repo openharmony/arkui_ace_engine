@@ -185,10 +185,12 @@ public:
     static void SetVisibility(const JSCallbackInfo& info);
     static void Pop();
 
+    static void JsSetDraggable(bool draggable);
     static void JsOnDragStart(const JSCallbackInfo& info);
     static bool ParseAndUpdateDragItemInfo(const JSRef<JSVal>& info, NG::DragDropBaseInfo& dragInfo);
     static RefPtr<AceType> ParseDragNode(const JSRef<JSVal>& info);
     static void JsOnDragEnter(const JSCallbackInfo& info);
+    static void JsOnDragEnd(const JSCallbackInfo& info);
     static void JsOnDragMove(const JSCallbackInfo& info);
     static void JsOnDragLeave(const JSCallbackInfo& info);
     static void JsOnDrop(const JSCallbackInfo& info);
@@ -307,7 +309,7 @@ public:
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
         JSRef<JSVal> type = jsObj->GetProperty("type");
         if (!type->IsNumber()) {
-            LOGW("type is not number");
+            LOGD("type is not number");
             return false;
         }
 
@@ -342,6 +344,54 @@ public:
             return true;
         }
         return false;
+    }
+
+    static std::string GetFunctionKeyName(FunctionKey functionkey)
+    {
+        switch (functionkey) {
+            case FunctionKey::ESC:
+                return "ESC";
+                break;
+            case FunctionKey::F1:
+                return "F1";
+                break;
+            case FunctionKey::F2:
+                return "F2";
+                break;
+            case FunctionKey::F3:
+                return "F3";
+                break;
+            case FunctionKey::F4:
+                return "F4";
+                break;
+            case FunctionKey::F5:
+                return "F5";
+                break;
+            case FunctionKey::F6:
+                return "F6";
+                break;
+            case FunctionKey::F7:
+                return "F7";
+                break;
+            case FunctionKey::F8:
+                return "F8";
+                break;
+            case FunctionKey::F9:
+                return "F9";
+                break;
+            case FunctionKey::F10:
+                return "F10";
+                break;
+            case FunctionKey::F11:
+                return "F11";
+                break;
+            case FunctionKey::F12:
+                return "F12";
+                break;
+            default:
+                return "";
+                break;
+        }
     }
 };
 } // namespace OHOS::Ace::Framework

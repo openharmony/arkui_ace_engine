@@ -25,6 +25,12 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
 
+#ifdef ENABLE_DRAG_FRAMEWORK
+namespace OHOS::UDMF {
+class UnifiedData;
+}
+#endif
+
 namespace OHOS::Ace::NG {
 
 class ACE_EXPORT DragDropManager : public virtual AceType {
@@ -72,6 +78,11 @@ public:
     void GetExtraInfoFromClipboard(std::string& extraInfo);
     void RestoreClipboardData();
     void DestroyDragWindow();
+#ifdef ENABLE_DRAG_FRAMEWORK
+    RefPtr<DragDropProxy> CreateFrameworkDragDropProxy();
+    int32_t GetDragData(const std::string& udKey, std::shared_ptr<UDMF::UnifiedData>& unifiedData);
+    void UpdatePixelMapPosition(int32_t globalX, int32_t globalY);
+#endif // ENABLE_DRAG_FRAMEWORK
 
     bool CheckDragDropProxy(int64_t id) const;
 
@@ -82,10 +93,14 @@ public:
 
 private:
     RefPtr<FrameNode> FindDragFrameNodeByPosition(float globalX, float globalY, DragType dragType);
+    std::map<int32_t, RefPtr<FrameNode>> FindDragFrameNodeMapByPosition(
+        float globalX, float globalY, DragType dragType);
     void FireOnDragEvent(
         const RefPtr<FrameNode>& frameNode, const Point& point, DragEventType type, const std::string& extraInfo);
     void FireOnItemDragEvent(const RefPtr<FrameNode>& frameNode, DragType dragType,
-        const OHOS::Ace::ItemDragInfo& itemDragInfo, DragEventType type, int32_t draggedIndex, int32_t insertIndex = 0);
+        const ItemDragInfo& itemDragInfo, DragEventType type, int32_t draggedIndex, int32_t insertIndex = 0);
+    bool FireOnItemDropEvent(const RefPtr<FrameNode>& frameNode, DragType dragType,
+        const ItemDragInfo& itemDragInfo, int32_t draggedIndex, int32_t insertIndex, bool isSuccess);
     int32_t GetItemIndex(const RefPtr<FrameNode>& frameNode, DragType dragType, float globalX, float globalY);
     void CreateDragWindow(const GestureEvent& info, uint32_t width, uint32_t height);
     RefPtr<FrameNode> CreateDragRootNode(const RefPtr<UINode>& customNode);

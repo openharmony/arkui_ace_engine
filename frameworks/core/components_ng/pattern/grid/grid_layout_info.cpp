@@ -29,12 +29,12 @@ int32_t GridLayoutInfo::GetItemIndexByPosition(int32_t position)
 int32_t GridLayoutInfo::GetPositionByItemIndex(int32_t itemIndex)
 {
     auto position = itemIndex;
-    for (const auto& iter : positionItemIndexMap_) {
-        if (iter.second == itemIndex) {
-            position = iter.first;
-            break;
-        }
+    auto find = std::find_if(positionItemIndexMap_.begin(), positionItemIndexMap_.end(),
+        [itemIndex](const std::pair<int32_t, int32_t>& item) { return item.second == itemIndex; });
+    if (find != positionItemIndexMap_.end()) {
+        position = find->first;
     }
+
     return position;
 }
 
