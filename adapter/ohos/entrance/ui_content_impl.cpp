@@ -137,7 +137,8 @@ public:
     explicit OccupiedAreaChangeListener(int32_t instanceId) : instanceId_(instanceId) {}
     ~OccupiedAreaChangeListener() = default;
 
-    void OnSizeChange(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info)
+    void OnSizeChange(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info,
+        const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)
     {
         auto rect = info->rect_;
         auto type = info->type_;
@@ -150,10 +151,10 @@ public:
             CHECK_NULL_VOID(taskExecutor);
             ContainerScope scope(instanceId_);
             taskExecutor->PostTask(
-                [container, keyboardRect] {
+                [container, keyboardRect, rsTransaction] {
                     auto context = container->GetPipelineContext();
                     CHECK_NULL_VOID_NOLOG(context);
-                    context->OnVirtualKeyboardAreaChange(keyboardRect);
+                    context->OnVirtualKeyboardAreaChange(keyboardRect, rsTransaction);
                 },
                 TaskExecutor::TaskType::UI);
         }
@@ -1225,9 +1226,15 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     }
 
     Platform::AceViewOhos::SurfaceChanged(aceView, 0, 0, deviceHeight >= deviceWidth ? 0 : 1);
+    auto pipeline = container->GetPipelineContext();
+    if (pipeline) {
+        auto rsConfig = window_->GetKeyboardAnimationConfig();
+        KeyboardAnimationConfig config = { rsConfig.curveType_, rsConfig.curveParams_, rsConfig.durationIn_,
+            rsConfig.durationOut_ };
+        pipeline->SetKeyboardAnimationConfig(config);
+    }
     // Set sdk version in module json mode
     if (isModelJson) {
-        auto pipeline = container->GetPipelineContext();
         if (pipeline && appInfo) {
             LOGI("SetMinPlatformVersion code is %{public}d", appInfo->apiCompatibleVersion);
             pipeline->SetMinPlatformVersion(appInfo->apiCompatibleVersion);
@@ -1424,7 +1431,7 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
 }
 
 void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
-    const std::shared_ptr<OHOS::Rosen::RSTransaction> rsTransaction)
+    const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)
 {
     LOGI("UIContentImpl: UpdateViewportConfig %{public}s", config.ToString().c_str());
     SystemProperties::SetResolution(config.Density());

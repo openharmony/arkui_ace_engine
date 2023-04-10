@@ -607,7 +607,7 @@ void AceContainer::InitializeCallback()
 
     auto&& viewChangeCallback = [context = pipelineContext_, id = instanceId_](int32_t width, int32_t height,
                                     WindowSizeChangeReason type,
-                                    const std::shared_ptr<Rosen::RSTransaction> rsTransaction) {
+                                    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) {
         ContainerScope scope(id);
         ACE_SCOPED_TRACE("ViewChangeCallback(%d, %d)", width, height);
         context->GetTaskExecutor()->PostTask(

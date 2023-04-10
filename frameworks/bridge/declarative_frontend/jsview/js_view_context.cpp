@@ -49,6 +49,9 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
         if (!container->GetSettings().usingSharedRuntime) {
             return;
         }
+        if (!container->WindowIsShow()) {
+            return;
+        }
         auto frontendType = context->GetFrontendType();
         if (frontendType != FrontendType::DECLARATIVE_JS && frontendType != FrontendType::JS_PLUGIN) {
             LOGW("Not compatible frontType(%{public}d) for declarative. containerId: %{public}d", frontendType,
@@ -75,6 +78,9 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
             return;
         }
         if (!container->GetSettings().usingSharedRuntime) {
+            return;
+        }
+        if (!container->WindowIsShow()) {
             return;
         }
         auto frontendType = context->GetFrontendType();
@@ -226,6 +232,7 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
 
 void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)
 {
+    ACE_FUNCTION_TRACE();
     auto scopedDelegate = EngineHelper::GetCurrentDelegate();
     if (!scopedDelegate) {
         // this case usually means there is no foreground container, need to figure out the reason.

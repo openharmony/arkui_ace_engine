@@ -317,7 +317,10 @@ void JSList::ItemMoveCallback(const JSCallbackInfo& args)
                               int32_t start, int32_t end) -> bool {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
             auto params = ConvertToJSValues(start, end);
-            func->Call(JSRef<JSObject>(), params.size(), params.data());
+            auto result = func->Call(JSRef<JSObject>(), params.size(), params.data());
+            if (!result.IsEmpty() && result->IsBoolean()) {
+                return result->ToBoolean();
+            }
             return true;
         };
         ListModel::GetInstance()->SetOnItemMove(std::move(onItemMove));

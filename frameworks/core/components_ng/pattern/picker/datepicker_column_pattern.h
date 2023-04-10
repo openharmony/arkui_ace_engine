@@ -228,7 +228,6 @@ private:
     ColumnChangeCallback changeCallback_;
     EventCallback EventCallback_;
     uint32_t currentIndex_ = 0;
-    RefPtr<ScrollableEvent> scrollableEvent_;
     int32_t currentChildIndex_ = 0;
     double yLast_ = 0.0;
     double yOffset_ = 0.0;

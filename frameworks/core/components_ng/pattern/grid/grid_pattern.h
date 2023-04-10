@@ -210,6 +210,7 @@ private:
     bool isMouseEventInit_ = false;
     bool scrollable_ = true;
     int32_t scrollState_ = SCROLL_FROM_NONE;
+    bool mousePressed_ = false;
 
     OffsetF mouseStartOffset_;
     OffsetF mouseEndOffset_;

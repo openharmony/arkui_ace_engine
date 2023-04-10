@@ -95,6 +95,10 @@ public:
 
     virtual uint32_t GetWindowId() const = 0;
     virtual void SetWindowId(uint32_t windowId) {}
+    virtual bool WindowIsShow() const
+    {
+        return false;
+    }
 
     virtual void* GetView() const = 0;
 

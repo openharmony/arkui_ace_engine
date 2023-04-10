@@ -86,8 +86,8 @@ public:
                                      ? "SwiperDisplayMode.AutoLinear"
                                      : "SwiperDisplayMode.Stretch");
         json->Put("displayCount", propDisplayCount_.value_or(1));
-        json->Put("prevMargin", propItemSpace_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
-        json->Put("nextMargin", propItemSpace_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
+        json->Put("prevMargin", propPrevMargin_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
+        json->Put("nextMargin", propNextMargin_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
     }
 
     void UpdateIndexWithoutMeasure(int32_t index)

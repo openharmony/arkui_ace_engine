@@ -91,7 +91,7 @@ public:
 
     void FireOnItemDragLeave(const ItemDragInfo& dragInfo, int32_t itemIndex);
 
-    void FireOnItemDrop(const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex, bool isSuccess);
+    bool FireOnItemDrop(const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex, bool isSuccess);
 
     bool HasOnItemDrop() const
     {

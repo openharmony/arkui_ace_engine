@@ -149,10 +149,11 @@ void AceWindowListener::OnDrag(int32_t x, int32_t y, OHOS::Rosen::DragEvent even
     callbackOwner_->OnDrag(x, y, event);
 }
 
-void AceWindowListener::OnSizeChange(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info)
+void AceWindowListener::OnSizeChange(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info,
+    const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)
 {
     CHECK_NULL_VOID(callbackOwner_);
-    callbackOwner_->OnSizeChange(info);
+    callbackOwner_->OnSizeChange(info, rsTransaction);
 }
 
 void AceWindowListener::SetBackgroundColor(uint32_t color)
@@ -168,7 +169,7 @@ uint32_t AceWindowListener::GetBackgroundColor()
 }
 
 void AceWindowListener::OnSizeChange(OHOS::Rosen::Rect rect, OHOS::Rosen::WindowSizeChangeReason reason,
-    const std::shared_ptr<OHOS::Rosen::RSTransaction> rsTransaction)
+    const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)
 {
     CHECK_NULL_VOID(callbackOwner_);
     callbackOwner_->OnSizeChange(rect, reason, rsTransaction);
@@ -480,6 +481,10 @@ void AceAbility::OnStart(const Want& want)
             rect.SetRect(windowRect.posX_, windowRect.posY_, windowRect.width_, windowRect.height_);
             return rect;
         });
+        auto rsConfig = window->GetKeyboardAnimationConfig();
+        KeyboardAnimationConfig config = { rsConfig.curveType_, rsConfig.curveParams_, rsConfig.durationIn_,
+            rsConfig.durationOut_ };
+        context->SetKeyboardAnimationConfig(config);
     }
 
     // get url
@@ -688,7 +693,7 @@ void AceAbility::OnRemoteTerminated()
 }
 
 void AceAbility::OnSizeChange(const OHOS::Rosen::Rect& rect, OHOS::Rosen::WindowSizeChangeReason reason,
-    const std::shared_ptr<OHOS::Rosen::RSTransaction> rsTransaction)
+    const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)
 {
     LOGI("width: %{public}u, height: %{public}u, left: %{public}d, top: %{public}d", rect.width_, rect.height_,
         rect.posX_, rect.posY_);
@@ -733,7 +738,8 @@ void AceAbility::OnModeChange(OHOS::Rosen::WindowMode mode, bool hasDeco)
         TaskExecutor::TaskType::UI);
 }
 
-void AceAbility::OnSizeChange(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info)
+void AceAbility::OnSizeChange(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info,
+    const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)
 {
     auto rect = info->rect_;
     auto type = info->type_;
@@ -746,10 +752,10 @@ void AceAbility::OnSizeChange(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& i
         CHECK_NULL_VOID(taskExecutor);
         ContainerScope scope(abilityId_);
         taskExecutor->PostTask(
-            [container, keyboardRect] {
+            [container, keyboardRect, rsTransaction] {
                 auto context = container->GetPipelineContext();
                 CHECK_NULL_VOID_NOLOG(context);
-                context->OnVirtualKeyboardAreaChange(keyboardRect);
+                context->OnVirtualKeyboardAreaChange(keyboardRect, rsTransaction);
             },
             TaskExecutor::TaskType::UI);
     }

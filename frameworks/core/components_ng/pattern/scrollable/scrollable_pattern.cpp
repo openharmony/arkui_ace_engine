@@ -145,6 +145,12 @@ void ScrollablePattern::AddScrollEvent()
         pattern->OnScrollEndCallback();
     };
     scrollableEvent_->SetScrollEndCallback(std::move(scrollEnd));
+    auto mouseLeftButtonScroll = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, false);
+        return pattern->IsScrollBarPressed();
+    };
+    scrollableEvent_->SetMouseLeftButtonScroll(std::move(mouseLeftButtonScroll));
     gestureHub->AddScrollableEvent(scrollableEvent_);
 }
 

@@ -54,6 +54,13 @@ class RSTransaction;
 
 namespace OHOS::Ace {
 
+struct KeyboardAnimationConfig {
+    std::string curveType_;
+    std::vector<float> curveParams_;
+    uint32_t durationIn_ = 0;
+    uint32_t durationOut_ = 0;
+};
+
 class Frontend;
 class OffscreenCanvas;
 class Window;
@@ -159,7 +166,7 @@ public:
 
     virtual void OnSurfaceChanged(int32_t width, int32_t height,
         WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED,
-        const std::shared_ptr<Rosen::RSTransaction> rsTransaction = nullptr) = 0;
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr) = 0;
 
     virtual void OnSurfacePositionChanged(int32_t posX, int32_t posY) = 0;
 
@@ -643,7 +650,8 @@ public:
     void SetTouchPipeline(const WeakPtr<PipelineBase>& context);
     void RemoveTouchPipeline(const WeakPtr<PipelineBase>& context);
 
-    void OnVirtualKeyboardAreaChange(Rect keyboardArea);
+    void OnVirtualKeyboardAreaChange(
+        Rect keyboardArea, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
 
     using virtualKeyBoardCallback = std::function<bool(int32_t, int32_t, double)>;
     void SetVirtualKeyBoardCallback(virtualKeyBoardCallback&& listener)
@@ -752,6 +760,11 @@ public:
         animationOption_ = option;
     }
 
+    void SetKeyboardAnimationConfig(const KeyboardAnimationConfig& config)
+    {
+        keyboardAnimationConfig_ = config;
+    }
+
     void SetNextFrameLayoutCallback(std::function<void()>&& callback)
     {
         nextFrameLayoutCallback_ = std::move(callback);
@@ -840,7 +853,8 @@ protected:
     virtual void SetRootRect(double width, double height, double offset = 0.0) = 0;
     virtual void FlushPipelineWithoutAnimation() = 0;
 
-    virtual void OnVirtualKeyboardHeightChange(float keyboardHeight) {}
+    virtual void OnVirtualKeyboardHeightChange(float keyboardHeight,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr) {}
 
     void UpdateRootSizeAndScale(int32_t width, int32_t height);
 
@@ -914,6 +928,8 @@ protected:
     std::function<void(const std::string&)> clipboardCallback_ = nullptr;
     Rect displayWindowRectInfo_;
     AnimationOption animationOption_;
+    KeyboardAnimationConfig keyboardAnimationConfig_;
+
 
     std::function<void()> nextFrameLayoutCallback_ = nullptr;
     SharePanelCallback sharePanelCallback_ = nullptr;

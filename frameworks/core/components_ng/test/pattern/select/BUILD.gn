@@ -124,7 +124,6 @@ ohos_unittest("select_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/gesture/recognizers/mock_sequenced_recognizer.cpp",
 
     # mock
-
     "$ace_root/frameworks/base/test/mock/mock_animatable_dimension.cpp",
     "$ace_root/frameworks/base/test/mock/mock_subwindow_manager.cpp",
     "$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
