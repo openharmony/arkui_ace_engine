@@ -56,6 +56,10 @@ constexpr uint32_t SLIDER_POS = 2;
 constexpr uint32_t DURATION_POS = 3;
 constexpr uint32_t FULL_SCREEN_POS = 4;
 constexpr int32_t AVERAGE_VALUE = 2;
+
+// Default error, empty string.
+const std::string ERROR = "";
+
 enum SliderChangeMode {
     BEGIN = 0,
     MOVING,
@@ -164,7 +168,7 @@ void VideoPattern::UpdateMediaPlayer()
     if (!mediaPlayer_->IsMediaPlayerValid()) {
         mediaPlayer_->CreateMediaPlayer();
         if (!mediaPlayer_->IsMediaPlayerValid()) {
-            LOGE("create media player failed");
+            LOGE("Video create media player failed");
             return;
         }
     }
@@ -176,11 +180,13 @@ void VideoPattern::PrepareMediaPlayer()
     auto videoLayoutProperty = GetLayoutProperty<VideoLayoutProperty>();
     // src has not set/changed
     if (!videoLayoutProperty->HasVideoSource() || videoLayoutProperty->GetVideoSource() == src_) {
+        LOGW("Video source is null or the source has not changed.");
         return;
     }
 
     if (!mediaPlayer_->IsMediaPlayerValid()) {
-        LOGE("media player is invalid.");
+        LOGE("Video media player is invalid.");
+        OnError(ERROR);
         return;
     }
 
@@ -189,7 +195,8 @@ void VideoPattern::PrepareMediaPlayer()
     float volume = muted_ ? 0.0f : 1.0f;
     mediaPlayer_->SetVolume(volume, volume);
     if (!SetSourceForMediaPlayer()) {
-        LOGE("set source for mediaPlayer failed");
+        LOGE("Video set source for mediaPlayer failed.");
+        OnError(ERROR);
         return;
     }
 
