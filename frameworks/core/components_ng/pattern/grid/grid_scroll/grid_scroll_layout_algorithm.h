@@ -40,6 +40,10 @@ public:
     static void PrintGridMatrix(
         const std::map<int32_t, std::map<int32_t, int32_t>>& gridMatrix, const std::map<int32_t, float>& positions);
     static void PrintLineHeightMap(const std::map<int32_t, float>& lineHeightMap);
+    void SetCanOverScroll(bool canOverScroll)
+    {
+        canOverScroll_ = canOverScroll;
+    }
 
 private:
     void FillGridViewportAndMeasureChildren(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
@@ -98,6 +102,7 @@ private:
 
     // Map structure: [index, crossPosition], store cross position of each item.
     std::map<int32_t, float> itemsCrossPosition_;
+    bool canOverScroll_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridScrollLayoutAlgorithm);
 };
