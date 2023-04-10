@@ -18,6 +18,7 @@
 #include <list>
 #include <type_traits>
 
+#include "base/log/ace_performance_check.h"
 #include "base/log/ace_trace.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/property/property.h"
@@ -60,7 +61,6 @@ void ForEachNode::CreateTempItems()
 void ForEachNode::CompareAndUpdateChildren()
 {
     ACE_SCOPED_TRACE("ForEachNode::CompareAndUpdateChildren");
-
     LOGD("Local update for ForEachNode nodeId: %{public}d ....", GetId());
 
     // result of id gen function of most re-recent render

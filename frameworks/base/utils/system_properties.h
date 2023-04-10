@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,11 +16,12 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_SYSTEM_PROPERTIES_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_SYSTEM_PROPERTIES_H
 
+#include <memory>
 #include <string>
 
-#include "base/utils/resource_configuration.h"
 #include "base/utils/device_type.h"
 #include "base/utils/macros.h"
+#include "base/utils/resource_configuration.h"
 
 namespace OHOS::Ace {
 
@@ -50,6 +51,30 @@ enum class ScreenShape : int32_t {
     SCREEN_SHAPE_UNDEFINED,
 };
 
+enum class PerformanceParameterType {
+    PAGE_NODES = 0,
+    PAGE_DEPTH,
+    NODE_CHILDREN,
+    FUNCTION_TIMEOUT,
+    VSYNC_TIMEOUT,
+    NODE_TIMEOUT,
+    FOREACH_ITEMS,
+    FLEX_LAYOUTS,
+};
+
+struct PerformanceCheckParameter {
+    uint32_t pageNodes;
+    uint32_t pageDepth;
+    uint32_t nodeChildren;
+    uint32_t functionTimeout;
+    uint32_t vsyncTimeout;
+    uint32_t nodeTimeout;
+    uint32_t foreachItems;
+    uint32_t flexLayouts;
+};
+
+using PerformancePtr = std::unique_ptr<PerformanceCheckParameter>;
+
 class ACE_FORCE_EXPORT SystemProperties final {
 public:
     /*
@@ -60,8 +85,8 @@ public:
     /*
      * Init device info for Ace.
      */
-    static void InitDeviceInfo(int32_t deviceWidth, int32_t deviceHeight, int32_t orientation,
-        double resolution, bool isRound);
+    static void InitDeviceInfo(
+        int32_t deviceWidth, int32_t deviceHeight, int32_t orientation, double resolution, bool isRound);
 
     /*
      * Init device type according to system property.
@@ -76,7 +101,7 @@ public:
     /*
      * check SystemCapability.
      */
-    static bool IsSyscapExist(const char *cap);
+    static bool IsSyscapExist(const char* cap);
 
     /**
      * Set type of current device.
@@ -340,7 +365,14 @@ public:
     {
         return dumpFrameCount_;
     }
+
     static bool GetIsUseMemoryMonitor();
+
+    static void InitPerformanceParameters();
+
+    static bool IsPerformanceCheckEnabled();
+
+    static uint32_t GetPerformanceParameterWithType(PerformanceParameterType type);
 
 private:
     static bool traceEnabled_;
@@ -377,6 +409,7 @@ private:
     static int32_t astcPsnr_;
     static bool extSurfaceEnabled_;
     static uint32_t dumpFrameCount_;
+    static PerformancePtr performanceProps_;
 };
 
 } // namespace OHOS::Ace
