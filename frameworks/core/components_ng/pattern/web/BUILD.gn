@@ -30,6 +30,7 @@ if (is_standard_system) {
 
 build_component_ng("web_pattern_ng") {
   sources = [
+    "web_layout_algorithm.cpp",
     "web_pattern.cpp",
     "web_view.cpp",
   ]

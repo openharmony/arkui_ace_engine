@@ -27,6 +27,7 @@
 #include "core/components_ng/manager/select_overlay/select_overlay_proxy.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
+#include "core/components_ng/pattern/web/web_layout_algorithm.h"
 #include "core/components_ng/pattern/web/web_paint_property.h"
 #include "core/components_ng/pattern/web/web_pattern_property.h"
 #include "core/components_ng/property/property.h"
@@ -203,6 +204,11 @@ public:
         return webPaintProperty_;
     }
 
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
+    {
+        return MakeRefPtr<WebLayoutAlgorithm>();
+    }
+
     ACE_DEFINE_PROPERTY_GROUP(WebProperty, WebPatternProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, JsEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, MediaPlayGestureAccess, bool);
@@ -242,6 +248,10 @@ public:
 
     void RequestFullScreen();
     void ExitFullScreen();
+    bool IsFullScreen() const
+    {
+        return isFullScreen_;
+    }
     bool RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
         std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback);
     void OnQuickMenuDismissed();
@@ -398,6 +408,7 @@ private:
     RefPtr<DragEvent> dragEvent_;
     bool isUrlLoaded_ = false;
     std::queue<MouseClickInfo> doubleClickQueue_;
+    bool isFullScreen_ = false;
     bool needOnFocus_ = false;
     Size drawSize_;
     Size drawSizeCache_;
