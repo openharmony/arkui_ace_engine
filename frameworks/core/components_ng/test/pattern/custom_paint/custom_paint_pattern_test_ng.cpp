@@ -783,4 +783,45 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg016, TestSize.Level1)
     customPattern->UpdateFillRuleForPath2D(rule);
     EXPECT_TRUE(paintMethod->HasTask());
 }
+
+/**
+ * @tc.name: CustomPaintPatternTestNg017
+ * @tc.desc: Test functions about canvas lifecycle OnDirtyLayoutWrapperSwap.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg017, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto customPattern = CreateCustomPaintPattern();
+    ASSERT_NE(customPattern, nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto layoutAlgorithm = customPattern->CreateLayoutAlgorithm();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    RefPtr<LayoutWrapper> dirty = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    dirty->skipMeasureContent_ = false;
+    dirty->layoutAlgorithm_ = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm);
+
+    /**
+     * @tc.steps2: Test functions about canvas lifecycle (onReady and onAreaChange) with OnDirtyLayoutWrapperSwap.
+     * @tc.expected: The result.
+     */
+    DirtySwapConfig config;
+    EXPECT_TRUE(customPattern->OnDirtyLayoutWrapperSwap(dirty, config));
+
+    config.frameOffsetChange = true;
+    EXPECT_FALSE(customPattern->OnDirtyLayoutWrapperSwap(dirty, config));
+
+    config.contentOffsetChange = true;
+    EXPECT_FALSE(customPattern->OnDirtyLayoutWrapperSwap(dirty, config));
+
+    config.frameOffsetChange = false;
+    EXPECT_FALSE(customPattern->OnDirtyLayoutWrapperSwap(dirty, config));
+}
+
 } // namespace OHOS::Ace::NG
