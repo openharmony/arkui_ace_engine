@@ -1659,12 +1659,7 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_HotReloadPage()
 {
     AceEngine::Get().NotifyContainers([](const RefPtr<Container>& container) {
         auto ace = AceType::DynamicCast<AceContainer>(container);
-        CHECK_NULL_VOID(ace);
-        if (ace->IsUseNewPipeline()) {
-            auto frontend = ace->GetFrontend();
-            CHECK_NULL_VOID(frontend);
-            frontend->RebuildAllPages();
-        } else {
+        if (ace) {
             ace->NotifyConfigurationChange(true);
         }
         LOGI("frontend rebuild finished");
