@@ -760,11 +760,7 @@ void ViewAbstract::SetAllowDrop(const std::set<std::string> allowDrop)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    if (!allowDrop.empty()) {
-        frameNode->SetAllowDrop(allowDrop);
-    } else {
-        return;
-    }
+    frameNode->SetAllowDrop(allowDrop);
 }
 
 void ViewAbstract::SetPosition(const OffsetT<Dimension>& value)
