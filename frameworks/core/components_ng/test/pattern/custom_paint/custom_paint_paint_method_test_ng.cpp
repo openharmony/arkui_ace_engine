@@ -42,6 +42,7 @@
 #include "core/components_ng/pattern/custom_paint/offscreen_canvas_pattern.h"
 #include "core/components_ng/pattern/custom_paint/canvas_paint_method.h"
 #include "core/image/image_object.h"
+#include "core/components/common/properties/decoration.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1046,5 +1047,73 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg019, TestSize
     sweepAngle = endAngle - startAngle;
     paintMethod->Path2DEllipse(offset, args);
     EXPECT_DOUBLE_EQ(sweepAngle, DEFAULT_DOUBLE0);
+}
+
+/**
+ * @tc.name: CustomPaintPaintMethodTestNg020
+ * @tc.desc: Test the functions MakeConicGradient of CustomPaintPaintMethod.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg020, TestSize.Level1)
+{
+    auto paintMethod = CreateCanvasPaintMethod();
+    ASSERT_NE(paintMethod, nullptr);
+    SizeF frameSize;
+    CreateBitmap(frameSize, paintMethod);
+
+    SkPaint paint;
+    Ace::Gradient gradient;
+    gradient.SetType(Ace::GradientType::CONIC);
+    auto result = paintMethod->MakeConicGradient(paint, gradient);
+    EXPECT_EQ(result, nullptr);
+
+    AnimatableDimension animatableDimension(2.0);
+    gradient.GetConicGradient().centerX = animatableDimension;
+    EXPECT_EQ(gradient.GetConicGradient().centerX.has_value(), true);
+    result = paintMethod->MakeConicGradient(paint, gradient);
+    EXPECT_EQ(result, nullptr);
+
+    gradient.GetConicGradient().centerY = animatableDimension;
+    EXPECT_EQ(gradient.GetConicGradient().centerY.has_value(), true);
+    result = paintMethod->MakeConicGradient(paint, gradient);
+    EXPECT_EQ(result, nullptr);
+
+    gradient.GetConicGradient().startAngle = animatableDimension;
+    EXPECT_EQ(gradient.GetConicGradient().startAngle.has_value(), true);
+    OHOS::Ace::GradientColor gradientColor1(Color::BLACK);
+    OHOS::Ace::GradientColor gradientColor2(Color::RED);
+    OHOS::Ace::GradientColor gradientColor3(Color::BLUE);
+    gradient.AddColor(gradientColor1);
+    gradient.AddColor(gradientColor2);
+    gradient.AddColor(gradientColor3);
+    result = paintMethod->MakeConicGradient(paint, gradient);
+    EXPECT_NE(result, nullptr);
+}
+
+/**
+ * @tc.name: CustomPaintPaintMethodTestNg021
+ * @tc.desc: Test the functions UpdatePaintShader of CustomPaintPaintMethod.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg021, TestSize.Level1)
+{
+    auto paintMethod = CreateCanvasPaintMethod();
+    ASSERT_NE(paintMethod, nullptr);
+    SizeF frameSize;
+    CreateBitmap(frameSize, paintMethod);
+
+    SkPaint paint;
+    Ace::Gradient gradient;
+    OffsetF offset(10.0, 10.0);
+    gradient.SetType(Ace::GradientType::LINEAR);
+    paintMethod->UpdatePaintShader(offset, paint, gradient);
+    EXPECT_EQ(paint.getShader(), nullptr);
+
+    OHOS::Ace::GradientColor gradientColor1(Color::BLACK);
+    OHOS::Ace::GradientColor gradientColor2(Color::RED);
+    gradient.AddColor(gradientColor1);
+    gradient.AddColor(gradientColor2);
+    paintMethod->UpdatePaintShader(offset, paint, gradient);
+    EXPECT_NE(paint.getShader(), nullptr);
 }
 } // namespace OHOS::Ace::NG
