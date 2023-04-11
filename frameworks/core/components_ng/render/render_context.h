@@ -255,6 +255,7 @@ public:
     {
         return nullptr;
     }
+    virtual void SetActualForegroundColor(const Color& value) {}
     // transform matrix
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TransformMatrix, Matrix4);
 
