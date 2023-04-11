@@ -193,12 +193,8 @@ public:
 
     void AttachSubPipelineContext(const RefPtr<PipelineContext>& context);
 
-    void FlushReload() override
-    {
-        if (jsEngine_) {
-            jsEngine_->FlushReload();
-        }
-    }
+    void FlushReload() override;
+    void HotReload() override;
 
 private:
     void InitializeDelegate(const RefPtr<TaskExecutor>& taskExecutor);

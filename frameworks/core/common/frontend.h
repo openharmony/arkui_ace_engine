@@ -255,6 +255,8 @@ public:
     }
 
     virtual void FlushReload() {}
+    // flush frontend for HotReload feature in NG
+    virtual void HotReload() {};
 
     State GetState() const
     {

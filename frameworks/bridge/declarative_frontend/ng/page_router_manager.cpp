@@ -877,6 +877,15 @@ void PageRouterManager::MovePageToFront(int32_t index, const RefPtr<FrameNode>& 
     }
 }
 
+void PageRouterManager::FlushFrontend()
+{
+    auto currentPage = pageRouterStack_.back().Upgrade();
+    CHECK_NULL_VOID(currentPage);
+    auto customNode = DynamicCast<CustomNode>(currentPage->GetFirstChild());
+    CHECK_NULL_VOID(customNode);
+    customNode->FlushReload();
+}
+
 void PageRouterManager::PopPage(const std::string& params, bool needShowNext, bool needTransition)
 {
     CHECK_RUN_ON(JS);
