@@ -134,7 +134,7 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest001, TestSize.Level1)
 
 /**
  * @tc.name: LinearSplitPatternTest002
- * @tc.desc: Test lineatSplit pattern OnModifyDone function.
+ * @tc.desc: Test linearSplit pattern OnModifyDone function.
  * @tc.type: FUNC
  */
 HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest002, TestSize.Level1)
@@ -162,5 +162,37 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest002, TestSize.Level1)
     EXPECT_TRUE(linearSPlitPattern->resizeable_);
     EXPECT_NE(linearSPlitPattern->panEvent_, nullptr);
     EXPECT_NE(linearSPlitPattern->mouseEvent_, nullptr);
+}
+
+/**
+ * @tc.name: LinearSplitPatternTest003
+ * @tc.desc: Test linerSplit pattern OnModifyDone function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create split and initialize related properties.
+     */
+    LinearSplitModelNG model;
+    model.Create(SplitType::COLUMN_SPLIT);
+    model.SetResizeable(SplitType::COLUMN_SPLIT, true);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Get linearSplitPattern and.
+     */
+    RefPtr<LinearSplitPattern> linearSPlitPattern = frameNode->GetPattern<LinearSplitPattern>();
+    EXPECT_NE(linearSPlitPattern, nullptr);
+
+    /**
+     * @tc.steps: step3. call linearSplitPattern OnDirtyLayoutWrapperSwap function, compare result.
+     */
+    RefPtr<LayoutWrapper> linearLayoutWrapper = frameNode->CreateLayoutWrapper(true, true);
+    linearSPlitPattern->OnDirtyLayoutWrapperSwap(linearLayoutWrapper, true, true);
+    EXPECT_EQ(linearSPlitPattern->splitLength_, 0.0f);
+    EXPECT_EQ(linearSPlitPattern->isOverParent_, false);
 }
 } // namespace OHOS::Ace::NG
