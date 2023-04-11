@@ -1787,6 +1787,38 @@ SubscribableHandler.IS_OBSERVED_OBJECT = Symbol("_____is_observed_object__");
 SubscribableHandler.RAW_OBJECT = Symbol("_____raw_object__");
 SubscribableHandler.SUBSCRIBE = Symbol("_____subscribe__");
 SubscribableHandler.UNSUBSCRIBE = Symbol("_____unsubscribe__");
+class SubscribableDateHandler extends SubscribableHandler {
+    constructor(owningProperty) {
+        super(owningProperty);
+    }
+    /**
+     * Get trap for Date type proxy
+     * Functions that modify Date in-place are intercepted and replaced with a function
+     * that executes the original function and notifies the handler of a change.
+     * @param target Original Date object
+     * @param property
+     * @returns
+     */
+    get(target, property) {
+        const dateSetFunctions = new Set(["setFullYear", "setMonth", "setDate", "setHours", "setMinutes", "setSeconds",
+            "setMilliseconds", "setTime", "setUTCFullYear", "setUTCMonth", "setUTCDate", "setUTCHours", "setUTCMinutes",
+            "setUTCSeconds", "setUTCMilliseconds"]);
+        let ret = super.get(target, property);
+        if (typeof ret === "function" && property.toString() && dateSetFunctions.has(property.toString())) {
+            const self = this;
+            return function () {
+                // execute original function with given arguments
+                let result = ret.apply(this, arguments);
+                self.notifyPropertyHasChanged(property.toString(), this);
+                return result;
+            }.bind(target); // bind "this" to target inside the function
+        }
+        else if (typeof ret === "function") {
+            ret = ret.bind(target);
+        }
+        return ret;
+    }
+}
 class ExtendableProxy {
     constructor(obj, handler) {
         return new Proxy(obj, handler);
@@ -1858,7 +1890,8 @@ class ObservedObject extends ExtendableProxy {
         if (ObservedObject.IsObservedObject(obj)) {
             throw new Error("Invalid constructor argument error: ObservableObject contructor called with an ObservedObject as parameer");
         }
-        let handler = new SubscribableHandler(objectOwningProperty);
+        let handler = (obj instanceof Date) ? new SubscribableDateHandler(objectOwningProperty)
+            : new SubscribableHandler(objectOwningProperty);
         super(obj, handler);
         if (ObservedObject.IsObservedObject(obj)) {
             stateMgmtConsole.error("ObservableOject constructor: INTERNAL ERROR: after jsObj is observedObject already");
