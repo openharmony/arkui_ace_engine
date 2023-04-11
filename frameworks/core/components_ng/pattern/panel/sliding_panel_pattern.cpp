@@ -115,12 +115,14 @@ void SlidingPanelPattern::Update()
                     ? PanelMode::FULL
                     : layoutProperty->GetPanelMode().value_or(PanelMode::HALF);
     auto isShow = layoutProperty->GetIsShowValue(true);
-    if (mode_.value() != mode && isShow_.has_value() && isShow_.value() == isShow) {
+    if (mode_.value() != mode) {
         mode_ = mode;
         CheckPanelModeAndType();
-        AnimateTo(defaultBlankHeights_[mode_.value_or(PanelMode::HALF)], mode_.value_or(PanelMode::HALF));
-        if (previousMode_ != mode_.value_or(PanelMode::HALF)) {
-            FireSizeChangeEvent();
+        if (isShow_.has_value() && isShow_.value() == isShow) {
+            AnimateTo(defaultBlankHeights_[mode_.value_or(PanelMode::HALF)], mode_.value_or(PanelMode::HALF));
+            if (previousMode_ != mode_.value_or(PanelMode::HALF)) {
+                FireSizeChangeEvent();
+            }
         }
     }
 }
