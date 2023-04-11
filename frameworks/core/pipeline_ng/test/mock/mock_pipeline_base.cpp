@@ -338,6 +338,8 @@ double PipelineBase::ConvertPxToVp(const Dimension& dimension) const
     return dimension.Value();
 }
 
+void PipelineBase::HyperlinkStartAbility(const std::string& address) const {}
+
 void PipelineBase::RequestFrame() {}
 
 Rect PipelineBase::GetCurrentWindowRect() const
