@@ -55,7 +55,7 @@ void MenuAccessibilityPropertyTestNg::TearDown()
 void MenuAccessibilityPropertyTestNg::InitMenuTestNg()
 {
     frameNode_ = FrameNode::GetOrCreateFrameNode(V2::MENU_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
-        []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, TYPE); });
+        []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
     ASSERT_NE(frameNode_, nullptr);
 
     menuAccessibilityProperty_ = frameNode_->GetAccessibilityProperty<MenuAccessibilityProperty>();

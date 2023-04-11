@@ -939,7 +939,8 @@ void ViewAbstract::BindMenuWithItems(std::vector<OptionParam>&& params,
         LOGD("menu params is empty");
         return;
     }
-    auto menuNode = MenuView::Create(std::move(params), targetNode->GetId(), MenuType::MENU, menuParam);
+    auto menuNode =
+        MenuView::Create(std::move(params), targetNode->GetId(), targetNode->GetTag(), MenuType::MENU, menuParam);
     BindMenu(menuNode, targetNode->GetId(), offset);
 }
 
@@ -954,7 +955,7 @@ void ViewAbstract::BindMenuWithCustomNode(const RefPtr<UINode>& customNode, cons
     isContextMenu = false;
 #endif
     auto type = isContextMenu ? MenuType::CONTEXT_MENU : MenuType::MENU;
-    auto menuNode = MenuView::Create(customNode, targetNode->GetId(), type, menuParam);
+    auto menuNode = MenuView::Create(customNode, targetNode->GetId(), targetNode->GetTag(), type, menuParam);
     if (isContextMenu) {
         SubwindowManager::GetInstance()->ShowMenuNG(menuNode, targetNode->GetId(), offset);
         return;

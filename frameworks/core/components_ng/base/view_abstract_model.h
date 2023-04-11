@@ -214,9 +214,10 @@ public:
 
     // popup and menu
     virtual void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) = 0;
-    virtual void BindMenu(std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc,
-        const NG::MenuParam& menuParam) = 0;
-    virtual void BindContextMenu(ResponseType type, std::function<void()>&& buildFunc) = 0;
+    virtual void BindMenu(
+        std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const NG::MenuParam& menuParam) = 0;
+    virtual void BindContextMenu(
+        ResponseType type, std::function<void()>&& buildFunc, const NG::MenuParam& menuParam) = 0;
     virtual void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<void()>&& buildFunc, int32_t type) = 0;
 

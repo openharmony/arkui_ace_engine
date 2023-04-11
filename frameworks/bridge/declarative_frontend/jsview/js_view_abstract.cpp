@@ -782,7 +782,7 @@ void ParseCustomPopupParam(
     auto placementValue = popupObj->GetProperty("placement");
     if (placementValue->IsNumber()) {
         auto placement = placementValue->ToNumber<int32_t>();
-        if (placement >= 0 && placement <= static_cast<int32_t>(PLACEMENT.size())) {
+        if (placement >= 0 && placement < static_cast<int32_t>(PLACEMENT.size())) {
             popupParam->SetPlacement(PLACEMENT[placement]);
         }
     }
@@ -2085,10 +2085,8 @@ std::vector<NG::OptionParam> ParseBindOptionParam(const JSCallbackInfo& info)
     return params;
 }
 
-void ParseBindOptionParam(const JSCallbackInfo& info, NG::MenuParam& menuParam)
+void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
 {
-    auto menuOptions = JSRef<JSObject>::Cast(info[1]);
-    JSViewAbstract::ParseJsString(menuOptions->GetProperty("title"), menuParam.title);
     auto offsetVal = menuOptions->GetProperty("offset");
     if (offsetVal->IsObject()) {
         auto offsetObj = JSRef<JSObject>::Cast(offsetVal);
@@ -2103,6 +2101,53 @@ void ParseBindOptionParam(const JSCallbackInfo& info, NG::MenuParam& menuParam)
             menuParam.positionOffset.SetY(dy.ConvertToPx());
         }
     }
+
+    auto placementValue = menuOptions->GetProperty("placement");
+    if (placementValue->IsNumber()) {
+        auto placement = placementValue->ToNumber<int32_t>();
+        if (placement >= 0 && placement < static_cast<int32_t>(PLACEMENT.size())) {
+            menuParam.placement = PLACEMENT[placement];
+        }
+    }
+
+    auto onAppearValue = menuOptions->GetProperty("onAppear");
+    if (onAppearValue->IsFunction()) {
+        RefPtr<JsFunction> jsOnAppearFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onAppearValue));
+        auto onAppear = [execCtx = info.GetExecutionContext(), func = std::move(jsOnAppearFunc)]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            LOGI("About to call onAppear method on js");
+            ACE_SCORING_EVENT("onAppear");
+            func->Execute();
+        };
+        menuParam.onAppear = std::move(onAppear);
+    }
+
+    auto onDisappearValue = menuOptions->GetProperty("onDisappear");
+    if (onDisappearValue->IsFunction()) {
+        RefPtr<JsFunction> jsOnDisAppearFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onDisappearValue));
+        auto onDisappear = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDisAppearFunc)]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            LOGI("About to call onAppear method on js");
+            ACE_SCORING_EVENT("onDisappear");
+            func->Execute();
+        };
+        menuParam.onDisappear = std::move(onDisappear);
+    }
+}
+
+void ParseBindOptionParam(const JSCallbackInfo& info, NG::MenuParam& menuParam)
+{
+    auto menuOptions = JSRef<JSObject>::Cast(info[1]);
+    JSViewAbstract::ParseJsString(menuOptions->GetProperty("title"), menuParam.title);
+    ParseMenuParam(info, menuOptions, menuParam);
+}
+
+void ParseBindContentOptionParam(const JSCallbackInfo& info, const JSRef<JSVal>& args, NG::MenuParam& menuParam)
+{
+    auto menuContentOptions = JSRef<JSObject>::Cast(args);
+    ParseMenuParam(info, menuContentOptions, menuParam);
 }
 
 void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
@@ -4484,7 +4529,13 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
         ACE_SCORING_EVENT("BuildContextMenu");
         func->Execute();
     };
-    ViewAbstractModel::GetInstance()->BindContextMenu(responseType, std::move(buildFunc));
+
+    NG::MenuParam menuParam;
+    if (info.Length() >= 3 && info[2]->IsObject()) {
+        ParseBindContentOptionParam(info, info[2], menuParam);
+    }
+
+    ViewAbstractModel::GetInstance()->BindContextMenu(responseType, std::move(buildFunc), menuParam);
 }
 
 void JSViewAbstract::JsBindContentCover(const JSCallbackInfo& info)

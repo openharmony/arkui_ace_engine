@@ -583,7 +583,8 @@ void NavigationView::SetMenuItems(std::vector<BarItem>&& menuItems)
 
         BuildMoreIemNode(barItemNode);
 
-        auto barMenuNode = MenuView::Create(std::move(params), barItemNodeId, MenuType::NAVIGATION_MENU);
+        auto barMenuNode =
+            MenuView::Create(std::move(params), barItemNodeId, V2::BAR_ITEM_ETS_TAG, MenuType::NAVIGATION_MENU);
         BuildMoreItemNodeAction(barItemNode, barMenuNode);
         auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());

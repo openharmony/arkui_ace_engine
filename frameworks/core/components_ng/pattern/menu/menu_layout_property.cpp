@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 
+#include "core/components/common/properties/placement.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -30,6 +31,7 @@ void MenuLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     auto defaultFontColor = theme ? theme->GetMenuFontColor() : Color::BLACK;
     json->Put("fontColor", GetFontColor().value_or(defaultFontColor).ColorToString().c_str());
     json->Put("fontWeight", V2::ConvertWrapFontWeightToStirng(GetFontWeight().value_or(FontWeight::REGULAR)).c_str());
+    json->Put("placement", std::to_string((int)GetMenuPlacement().value_or(OHOS::Ace::Placement::BOTTOM)).c_str());
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto menuPattern = host->GetPattern<MenuPattern>();

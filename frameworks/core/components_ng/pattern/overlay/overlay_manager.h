@@ -22,6 +22,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
+#include "core/components/common/properties/placement.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/picker/picker_data.h"
 #include "core/components_ng/base/ui_node.h"
@@ -113,6 +114,21 @@ public:
         onHideMenuCallback_ = callback;
     }
 
+    void RegisterOnShowMenu(std::function<void()> callback)
+    {
+        onShowMenuCallback_ = callback;
+    }
+
+    std::function<void()> GetOnShowMenuCallback()
+    {
+        return onShowMenuCallback_;
+    }
+
+    std::function<void()> GetOnHideMenuCallback()
+    {
+        return onHideMenuCallback_;
+    }
+
     void SetBackPressEvent(std::function<bool()> event)
     {
         backPressEvent_ = event;
@@ -193,6 +209,7 @@ private:
 #endif // ENABLE_DRAG_FRAMEWORK
 
     std::function<void()> onHideMenuCallback_ = nullptr;
+    std::function<void()> onShowMenuCallback_ = nullptr;
     CancelableCallback<void()> continuousTask_;
     std::function<bool()> backPressEvent_ = nullptr;
 
