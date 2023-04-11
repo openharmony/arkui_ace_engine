@@ -619,4 +619,25 @@ HWTEST_F(XComponentPropertyTestNg, XComponentTouchEventTest008, TestSize.Level1)
             static_cast<int>(sourceTools[i % sourceTools.size()]));
     }
 }
+
+/**
+ * @tc.name: XComponentTouchEventTest009
+ * @tc.desc: Test TouchEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentPropertyTestNg, XComponentTouchEventTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set type = XCOMPONENT_SURFACE_TYPE and call CreateXComponentNode
+     * @tc.expected: step1. xcomponent frameNode create successfully
+     */
+    testProperty.xcType = XCOMPONENT_SURFACE_TYPE;
+    auto frameNode = CreateXComponentNode(testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+
+    RefPtr<LayoutProperty> layoutPropertyTest = frameNode->GetLayoutProperty<LayoutProperty>();
+    ASSERT_TRUE(layoutPropertyTest);
+}
 } // namespace OHOS::Ace::NG
