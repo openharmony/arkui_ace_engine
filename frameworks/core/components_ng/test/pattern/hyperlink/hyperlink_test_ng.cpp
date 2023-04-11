@@ -89,3 +89,4 @@ HWTEST_F(HyperlinkTestNg, HyperlinkDrag001, TestSize.Level1)
     EXPECT_EQ(dragDropInfo.extraInfo, HYPERLINK_EXTRAINFO);
 }
 } // namespace OHOS::Ace::NG
+
