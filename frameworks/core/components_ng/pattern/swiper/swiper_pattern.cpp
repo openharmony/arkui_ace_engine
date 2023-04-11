@@ -278,7 +278,7 @@ void SwiperPattern::CalculateCacheRange()
 
     auto displayCount = GetDisplayCount();
     auto cacheCount = layoutProperty->GetCachedCount().value_or(1);
-    auto loadCount = cacheCount * 2 + displayCount;
+    auto loadCount = ComputeLoadCount(cacheCount);
     auto totalCount = TotalCount();
     if (totalCount <= 0) {
         LOGE("Total count of swiper children is not positive.");
@@ -1371,5 +1371,18 @@ void SwiperPattern::OnWindowHide()
 {
     isVisible_ = false;
     StopAutoPlay();
+}
+
+int32_t SwiperPattern::ComputeLoadCount(int32_t cacheCount)
+{
+    auto displayCount = GetDisplayCount();
+    if (IsLoop()) {
+        return cacheCount * 2 + displayCount;
+    }
+
+    auto preCount = std::min(cacheCount, currentIndex_);
+    auto nextCount = std::min(cacheCount, TotalCount() - currentIndex_ - displayCount);
+
+    return preCount + nextCount + displayCount;
 }
 } // namespace OHOS::Ace::NG
