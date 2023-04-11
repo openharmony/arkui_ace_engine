@@ -27,6 +27,12 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "pointer_event.h"
 
+#ifdef ENABLE_DRAG_FRAMEWORK
+#include "foundation/distributeddatamgr/udmf/interfaces/innerkits/common/unified_types.h"
+#include "foundation/distributeddatamgr/udmf/interfaces/innerkits/data/system_defined_form.h"
+#include "foundation/distributeddatamgr/udmf/interfaces/innerkits/data/unified_data.h"
+#endif // ENABLE_DRAG_FRAMEWORK
+
 namespace OHOS::Ace::NG {
 namespace {
 void ShowPointEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
@@ -152,6 +158,9 @@ bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         return false;
     }
     CreateCardContainer();
+    if (host->IsDraggable()) {
+        EnableDrag();
+    }
     if (formManagerBridge_) {
         formManagerBridge_->AddForm(host->GetContext(), info);
     }
@@ -559,5 +568,41 @@ void FormPattern::RemoveSubContainer()
         eventHub->FireOnCache();
     }
     subContainer_.Reset();
+}
+
+void FormPattern::EnableDrag()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    auto dragStart = [weak = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& event,
+                         const std::string& /* extraParams */) -> DragDropInfo {
+        DragDropInfo info;
+
+#ifdef ENABLE_DRAG_FRAMEWORK
+        auto form = weak.Upgrade();
+        CHECK_NULL_RETURN(form, info);
+        auto subcontainer = form->GetSubContainer();
+        CHECK_NULL_RETURN(subcontainer, info);
+
+        auto formRecord = std::make_shared<UDMF::SystemDefinedForm>();
+        formRecord->SetFormId(subcontainer->GetRunningCardId());
+        formRecord->SetFormName(form->cardInfo_.cardName);
+        formRecord->SetBundleName(form->cardInfo_.bundleName);
+        formRecord->SetAbilityName(form->cardInfo_.abilityName);
+        formRecord->SetModule(form->cardInfo_.moduleName);
+        formRecord->SetType(UDMF::UDType::SYSTEM_DEFINED_FORM);
+
+        auto unifiedData = std::make_shared<UDMF::UnifiedData>();
+        unifiedData->AddRecord(formRecord);
+        event->SetData(unifiedData);
+#endif // ENABLE_DRAG_FRAMEWORK
+
+        info.extraInfo = "card drag";
+        return info;
+    };
+    auto eventHub = GetHost()->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDragStart(std::move(dragStart));
 }
 } // namespace OHOS::Ace::NG
