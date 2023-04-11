@@ -72,7 +72,6 @@ constexpr double BLURRADIUS_VALUE = 0.0;
 constexpr double SPREADRADIUS_VALUE = 0.0;
 constexpr double ADAPT_OFFSETY_VALUE = 5.0;
 constexpr double ADAPT_OFFSETX_VALUE = 5.0;
-const std::string EMPTY_TEXT = "";
 const std::string TEXT_CONTENT = "text";
 constexpr int32_t TEXT_ERROR = -1;
 constexpr int32_t TEXT_SIZE_INT = 10;
@@ -2330,7 +2329,14 @@ HWTEST_F(TextTestNg, TextAccessibilityPropertyGetText001, TestSize.Level1)
     ASSERT_NE(textPattern, nullptr);
     auto textAccessibilityProperty = frameNode->GetAccessibilityProperty<TextAccessibilityProperty>();
     ASSERT_NE(textAccessibilityProperty, nullptr);
-    EXPECT_EQ(textAccessibilityProperty->GetText(), EMPTY_TEXT);
+
+    auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateContent(CREATE_VALUE);
+    EXPECT_EQ(textAccessibilityProperty->GetText(), CREATE_VALUE);
+
+    auto spanNode = SpanNode::GetOrCreateSpanNode(ElementRegister::GetInstance()->MakeUniqueId());
+    frameNode->AddChild(spanNode);
     textPattern->textForDisplay_ = TEXT_CONTENT;
     EXPECT_EQ(textAccessibilityProperty->GetText(), TEXT_CONTENT);
 }
