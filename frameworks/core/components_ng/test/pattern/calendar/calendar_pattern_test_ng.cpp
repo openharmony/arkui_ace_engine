@@ -18,26 +18,28 @@
 #include <string>
 
 #include "gtest/gtest.h"
-#include "core/components/calendar/calendar_data_adapter.h"
-#include "core/pipeline/base/element_register.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 
 #define private public
 #define protected public
 
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
+#include "core/components/calendar/calendar_data_adapter.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/video/video_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/calendar/calendar_paint_method.h"
 #include "core/components_ng/pattern/calendar/calendar_paint_property.h"
 #include "core/components_ng/pattern/calendar/calendar_pattern.h"
 #include "core/components_ng/pattern/calendar/calendar_view.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_property.h"
+#include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline/base/element_register.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
+#include "core/pipeline_ng/ui_task_scheduler.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -56,7 +58,9 @@ const int32_t JUMP_MONTH = 3;
 const int32_t JUMP_DAY_FIRST = 3;
 const int32_t JUMP_DAY_SECOND = 13;
 const int32_t JUMP_DAY_THIRD = 23;
-
+const int32_t DEFAULT_FOCUS_RADIUS = 15;
+const int32_t WEEKS_COUNT_FIVE = 5;
+const int32_t WEEKS_COUNT_SIX = 6;
 const int32_t FIRST_DAY_INDEX_VALUE = 1;
 const std::string LUNAR_MONTH_VALUE = "五月";
 const std::string LUNAR_DAY_VALUE = "初五";
@@ -67,16 +71,22 @@ const std::string OFF_DAYS_VALUE = "OFF_DAYS";
 
 class CalendarPatternTestNg : public testing::Test {
 public:
-    static void SetUpTestSuite();
-    static void TearDownTestSuite();
+    static void SetUpTestCase();
+    static void TearDownTestCase();
 
 protected:
     static RefPtr<FrameNode> CreateCalendarNode(TestProperty& testProperty);
 };
 
-void CalendarPatternTestNg::SetUpTestSuite() {}
+void CalendarPatternTestNg::SetUpTestCase()
+{
+    MockPipelineBase::SetUp();
+}
 
-void CalendarPatternTestNg::TearDownTestSuite() {}
+void CalendarPatternTestNg::TearDownTestCase()
+{
+    MockPipelineBase::TearDown();
+}
 
 RefPtr<FrameNode> CalendarPatternTestNg::CreateCalendarNode(TestProperty& testProperty)
 {
@@ -422,5 +432,255 @@ HWTEST_F(CalendarPatternTestNg, CalendarTest004, TestSize.Level1)
     pattern->FireGoToRequestData(JUMP_YEAR, JUMP_MONTH, JUMP_DAY_FIRST);
     pattern->JumpTo(pattern->currentMonth_);
     EXPECT_EQ(pattern->currentMonth_.days[JUMP_DAY_FIRST - 1].focused, true);
+}
+
+/**
+ * @tc.name: CalendarTest005
+ * @tc.desc: Create calendar, and check the 6 rows (42 days).
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPatternTestNg, CalendarTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Calendar
+     * @tc.expected: step1. Create Calendar successfully.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    RefPtr<CalendarPattern> calendar = AceType::MakeRefPtr<CalendarPattern>();
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode("testNode", 1, calendar);
+    stack->Push(frameNode);
+    ObtainedMonth obtainedMonth;
+    obtainedMonth.year = JUMP_YEAR;
+    obtainedMonth.month = JUMP_MONTH;
+    obtainedMonth.firstDayIndex = FIRST_DAY_INDEX_VALUE;
+
+    // Add 42 days totally.
+    // Add 31 days in March.
+    std::vector<CalendarDay> days;
+    for (int32_t i = 0; i < 31; i++) {
+        CalendarDay day;
+        day.index = i;
+        day.month.year = JUMP_YEAR;
+        day.month.month = JUMP_MONTH;
+        day.day = i + 1;
+        if (i == 1) {
+            day.focused = true;
+        }
+        days.emplace_back(std::move(day));
+    }
+
+    // Add 11 days in April.
+    for (int32_t i = 31; i < 42; i++) {
+        CalendarDay day;
+        day.index = i;
+        day.month.year = JUMP_YEAR;
+        day.month.month = JUMP_MONTH + 1;
+        day.day = i - 30;
+        days.emplace_back(std::move(day));
+    }
+
+    obtainedMonth.days = days;
+    CalendarView::SetCurrentData(obtainedMonth);
+    CalendarView::SetPreData(obtainedMonth);
+    CalendarView::SetNextData(obtainedMonth);
+
+    CalendarDay calendarDay;
+    calendarDay.index = INDEX_VALUE;
+    calendarDay.day = DAY_VALUE;
+    calendarDay.today = false;
+    calendarDay.focused = true;
+    calendarDay.touched = true;
+
+    /**
+     * @tc.steps: step2. Set 42 days in a month.
+     * @tc.expected: step2. The rows of month is 6.
+     */
+    CalendarMonth calendarMonth;
+    calendarMonth.year = JUMP_YEAR;
+    calendarMonth.month = JUMP_MONTH;
+    calendarDay.month = calendarMonth;
+    CalendarView::SetCalendarDay(calendarDay);
+
+    auto paintMethod = AceType::MakeRefPtr<CalendarPaintMethod>(obtainedMonth, calendarDay);
+    RSCanvas rsCanvas;
+    paintMethod->DrawWeekAndDates(rsCanvas, Offset(0, 0));
+    EXPECT_EQ(paintMethod->rowCount_, WEEKS_COUNT_SIX);
+}
+
+/**
+ * @tc.name: CalendarTest006
+ * @tc.desc: Create calendar, and check the 5 rows (35 days).
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPatternTestNg, CalendarTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Calendar
+     * @tc.expected: step1. Create Calendar successfully.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    RefPtr<CalendarPattern> calendar = AceType::MakeRefPtr<CalendarPattern>();
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode("testNode", 1, calendar);
+    stack->Push(frameNode);
+    ObtainedMonth obtainedMonth;
+    obtainedMonth.year = JUMP_YEAR;
+    obtainedMonth.month = JUMP_MONTH;
+    obtainedMonth.firstDayIndex = FIRST_DAY_INDEX_VALUE;
+
+    // Add 35 days totally.
+    // Add 31 days in March.
+    std::vector<CalendarDay> days;
+    for (int32_t i = 0; i < 31; i++) {
+        CalendarDay day;
+        day.index = i;
+        day.month.year = JUMP_YEAR;
+        day.month.month = JUMP_MONTH;
+        day.day = i + 1;
+        if (i == 1) {
+            day.focused = true;
+        }
+        days.emplace_back(std::move(day));
+    }
+
+    // Add 4 days in April.
+    for (int32_t i = 31; i < 35; i++) {
+        CalendarDay day;
+        day.index = i;
+        day.month.year = JUMP_YEAR;
+        day.month.month = JUMP_MONTH + 1;
+        day.day = i - 30;
+        days.emplace_back(std::move(day));
+    }
+
+    obtainedMonth.days = days;
+    CalendarView::SetCurrentData(obtainedMonth);
+    CalendarView::SetPreData(obtainedMonth);
+    CalendarView::SetNextData(obtainedMonth);
+
+    CalendarDay calendarDay;
+    calendarDay.index = INDEX_VALUE;
+    calendarDay.day = DAY_VALUE;
+
+    /**
+     * @tc.steps: step2. Set 35days in a month.
+     * @tc.expected: step2. The rows of month is 5.
+     */
+    CalendarMonth calendarMonth;
+    calendarMonth.year = JUMP_YEAR;
+    calendarMonth.month = JUMP_MONTH;
+    calendarDay.month = calendarMonth;
+    CalendarView::SetCalendarDay(calendarDay);
+
+    auto paintMethod = AceType::MakeRefPtr<CalendarPaintMethod>(obtainedMonth, calendarDay);
+    RSCanvas rsCanvas;
+    paintMethod->DrawWeekAndDates(rsCanvas, Offset(0, 0));
+    EXPECT_EQ(paintMethod->rowCount_, WEEKS_COUNT_FIVE);
+}
+
+/**
+ * @tc.name: CalendarTest007
+ * @tc.desc: Create calendar, and check the todayStyle focus status.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPatternTestNg, CalendarTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Calendar
+     * @tc.expected: step1. Create Calendar successfully.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
+
+    // Today style.
+    TodayStyle todayStyle;
+    Color focusedDayColor = Color::WHITE;
+    todayStyle.UpdateFocusedDayColor(focusedDayColor);
+    Color focusedLunarColor = Color::WHITE;
+    todayStyle.UpdateFocusedLunarColor(focusedLunarColor);
+    Color focusedAreaBackgroundColor = Color::BLUE;
+    todayStyle.UpdateFocusedAreaBackgroundColor(focusedAreaBackgroundColor);
+    Dimension focusedAreaRadius = Dimension(DEFAULT_FOCUS_RADIUS, DimensionUnit::VP);
+    todayStyle.UpdateFocusedAreaRadius(focusedAreaRadius);
+
+    // Day style of current month.
+    CurrentDayStyle dayStyle;
+    dayStyle.UpdateDayColor(Color::BLACK);
+
+    CalendarData calendarData;
+    auto calendarControllerNg = AceType::MakeRefPtr<CalendarControllerNg>();
+    calendarData.controller = calendarControllerNg;
+    CalendarView::Create(calendarData);
+    CalendarView::SetTodayStyle(todayStyle);
+    CalendarView::SetCurrentDayStyle(dayStyle);
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_ETS_TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    auto calendarPattern = frameNode->GetPattern<CalendarPattern>();
+    auto swiperNode = frameNode->GetChildren().front();
+    auto calendarFrameNode = AceType::DynamicCast<FrameNode>(swiperNode->GetChildren().front());
+    auto calendarPaintProperty = calendarFrameNode->GetPaintProperty<CalendarPaintProperty>();
+
+    ObtainedMonth obtainedMonth;
+    obtainedMonth.year = JUMP_YEAR;
+    obtainedMonth.month = JUMP_MONTH;
+    obtainedMonth.firstDayIndex = FIRST_DAY_INDEX_VALUE;
+
+    // Add 31 days.
+    std::vector<CalendarDay> days;
+    for (int32_t i = 0; i < 31; i++) {
+        CalendarDay day;
+        day.index = i;
+        day.month.year = JUMP_YEAR;
+        day.month.month = JUMP_MONTH;
+        day.day = i + 1;
+        if (i == 0) {
+            day.focused = true;
+        }
+        days.emplace_back(std::move(day));
+    }
+    obtainedMonth.days = days;
+
+    CalendarView::SetCurrentData(obtainedMonth);
+    CalendarView::SetPreData(obtainedMonth);
+    CalendarView::SetNextData(obtainedMonth);
+
+    CalendarDay calendarDay;
+    calendarDay.index = INDEX_VALUE;
+    calendarDay.day = DAY_VALUE;
+    calendarDay.today = false;
+    calendarDay.focused = true;
+    calendarDay.touched = true;
+
+    /**
+     * @tc.steps: step2. Set the first day focused, check the first day text style.
+     * @tc.expected: step2. The text color is 0xffffffff.
+     */
+    CalendarMonth calendarMonth;
+    calendarMonth.year = JUMP_YEAR;
+    calendarMonth.month = JUMP_MONTH;
+    calendarDay.month = calendarMonth;
+    CalendarView::SetCalendarDay(calendarDay);
+
+    auto paintMethod = AceType::MakeRefPtr<CalendarPaintMethod>(obtainedMonth, calendarDay);
+    RSCanvas rsCanvas;
+    paintMethod->SetCalendarTheme(calendarPaintProperty);
+    RSTextStyle dateTextStyle;
+    RSTextStyle lunarTextStyle;
+    paintMethod->InitTextStyle(dateTextStyle, lunarTextStyle);
+
+    paintMethod->SetDayTextStyle(dateTextStyle, lunarTextStyle, obtainedMonth.days[0]);
+
+    EXPECT_EQ(dateTextStyle.color_, RSColor(0xffffffff));
+    EXPECT_EQ(lunarTextStyle.color_, RSColor(0xffffffff));
+
+    /**
+     * @tc.steps: step3. Set the first day focused, check the second day text style.
+     * @tc.expected: step3. The text color is 0xff000000.
+     */
+    paintMethod->SetDayTextStyle(dateTextStyle, lunarTextStyle, obtainedMonth.days[1]);
+    EXPECT_EQ(dateTextStyle.color_, RSColor(0xff000000));
+    EXPECT_EQ(lunarTextStyle.color_, RSColor(0xff000000));
 }
 } // namespace OHOS::Ace::NG
