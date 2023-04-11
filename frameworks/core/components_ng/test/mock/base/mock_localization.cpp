@@ -16,6 +16,10 @@
 #include "base/i18n/localization.h"
 
 namespace OHOS::Ace {
+namespace {
+constexpr int32_t DAY_COUNTS_OF_WEEK = 7;
+} // namespace
+
 struct LocaleProxy final {};
 Localization::~Localization() = default;
 
@@ -96,5 +100,20 @@ std::vector<std::string> Localization::GetAmPmStrings()
 bool Localization::GetHourFormat(bool& isAmPm, bool& hasZero)
 {
     return false;
+}
+
+// Mock get weekdays, 7 days in a week.
+std::vector<std::string> Localization::GetWeekdays(bool isShortType)
+{
+    std::vector<std::string> weekdays;
+    for (int32_t i = 0; i < DAY_COUNTS_OF_WEEK; i++) {
+        weekdays.push_back(std::to_string(i));
+    }
+    return weekdays;
+}
+
+std::string Localization::NumberFormat(double number)
+{
+    return std::to_string(number);
 }
 } // namespace OHOS::Ace
