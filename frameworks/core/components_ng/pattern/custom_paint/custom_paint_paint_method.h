@@ -254,6 +254,7 @@ protected:
     void UpdatePaintShader(const Ace::Pattern& pattern, SkPaint& paint);
     void InitPaintBlend(SkPaint& paint);
     SkPaint GetStrokePaint();
+    sk_sp<SkShader> MakeConicGradient(SkPaint& paint, const Ace::Gradient& gradient);
 
     void Path2DFill(const OffsetF& offset);
     void Path2DStroke(const OffsetF& offset);
