@@ -2147,6 +2147,7 @@ void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, Win
         case WindowSizeChangeReason::ROTATION: {
 #ifdef ENABLE_ROSEN_BACKEND
             if (rsTransaction) {
+                FlushMessages();
                 rsTransaction->Begin();
             }
 #endif
