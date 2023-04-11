@@ -756,6 +756,12 @@ void ViewAbstract::SetOpacity(double opacity)
     }
     ACE_UPDATE_RENDER_CONTEXT(Opacity, opacity);
 }
+void ViewAbstract::SetAllowDrop(const std::set<std::string>& allowDrop)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetAllowDrop(allowDrop);
+}
 
 void ViewAbstract::SetPosition(const OffsetT<Dimension>& value)
 {

@@ -350,6 +350,16 @@ public:
         return userSet_;
     }
 
+    void SetAllowDrop(const std::set<std::string>& allowDrop)
+    {
+        allowDrop_ = allowDrop;
+    }
+
+    const std::set<std::string>& GetAllowDrop() const
+    {
+        return allowDrop_;
+    }
+
     RefPtr<FrameNode> FindChildByPosition(float x, float y);
 
 private:
@@ -417,6 +427,7 @@ private:
 
     std::unique_ptr<RectF> lastFrameRect_;
     std::unique_ptr<OffsetF> lastParentOffsetToWindow_;
+    std::set<std::string> allowDrop_;
 
     bool needSyncRenderTree_ = false;
 

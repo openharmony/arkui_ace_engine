@@ -32,7 +32,7 @@ void ConvertTouchEvent(const std::vector<uint8_t>& data, std::vector<TouchEvent>
         TimeStamp time(micros);
         TouchEvent point { static_cast<int32_t>(current->actionId), static_cast<float>(current->physicalX),
             static_cast<float>(current->physicalY), static_cast<float>(current->physicalX),
-            static_cast<float>(current->physicalY), TouchType::UNKNOWN, time, current->size,
+            static_cast<float>(current->physicalY), TouchType::UNKNOWN, TouchType::UNKNOWN, time, current->size,
             static_cast<float>(current->pressure), static_cast<int64_t>(current->sourceDeviceId) };
         switch (current->actionType) {
             case AceActionData::ActionType::CANCEL:

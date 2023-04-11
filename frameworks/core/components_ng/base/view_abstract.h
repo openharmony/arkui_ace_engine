@@ -106,6 +106,7 @@ public:
     static void SetBorderStyle(const BorderStyle& value);
     static void SetBorderStyle(const BorderStyleProperty& value);
     static void SetOpacity(double opacity);
+    static void SetAllowDrop(const std::set<std::string>& allowDrop);
 
     static void SetBorderImage(const RefPtr<BorderImage>& borderImage);
     static void SetBorderImageSource(const std::string& bdImageSrc);
