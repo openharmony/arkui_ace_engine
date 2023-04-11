@@ -147,9 +147,7 @@ bool UITaskScheduler::NeedAdditionalLayout()
     // if dirtynodes still exist after layout done as new dirty nodes are added during layout,
     // we need to initiate the additional layout, under normal build layout workflow the additional
     // layout will not be excuted.
-    if (dirtyLayoutNodes_.empty()) {
-        return false;
-    }
+    bool ret = false;
     for (auto&& pageNodes : dirtyLayoutNodes_) {
         for (auto&& node : pageNodes.second) {
             if (!node || !node->GetLayoutProperty()) {
@@ -174,9 +172,10 @@ bool UITaskScheduler::NeedAdditionalLayout()
                 }
                 parent = parent->GetParent();
             }
+            ret = true;
         }
     }
-    return true;
+    return ret;
 }
 
 void UITaskScheduler::FlushTask()

@@ -541,6 +541,7 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
         case WindowSizeChangeReason::ROTATION: {
 #ifdef ENABLE_ROSEN_BACKEND
             if (rsTransaction) {
+                FlushMessages();
                 rsTransaction->Begin();
             }
 #endif
@@ -1501,7 +1502,13 @@ void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
         manager->RestoreClipboardData();
         return;
     }
-
+#ifdef ENABLE_DRAG_FRAMEWORK
+    if (action == DragEventAction::DRAG_EVENT_START) {
+        manager->RequireSummary();
+    } else if (action == DragEventAction::DRAG_EVENT_OUT) {
+        manager->ClearSummary();
+    }
+#endif // ENABLE_DRAG_FRAMEWORK
     manager->OnDragMove(static_cast<float>(x), static_cast<float>(y), extraInfo);
 }
 

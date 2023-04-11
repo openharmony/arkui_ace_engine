@@ -24,7 +24,7 @@
 
 #include "common/task_runners.h"
 #include "flutter/fml/message_loop.h"
-#if defined(OHOS_PLATFORM) || defined(ANDROID_PLATFORM)
+#if defined(OHOS_PLATFORM) || defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
 #include "flutter/shell/platform/ohos/platform_task_runner_adapter.h"
 #endif
 #include "shell/common/thread_host.h"
@@ -57,7 +57,7 @@ std::unique_ptr<FlutterThreadModel> FlutterThreadModel::CreateThreadModel(
     fml::RefPtr<fml::TaskRunner> platformRunner =
         flutter::PlatformTaskRunnerAdapter::CurrentTaskRunner(useCurrentEventRunner);
 #else
-#ifdef ANDROID_PLATFORM
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
     fml::RefPtr<fml::TaskRunner> platformRunner;
     if (hasUiThread) {
         platformRunner = fml::MessageLoop::GetCurrent().GetTaskRunner();
