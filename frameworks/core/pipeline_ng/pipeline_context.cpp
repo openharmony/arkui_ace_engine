@@ -646,6 +646,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
     ACE_FUNCTION_TRACE();
 #ifdef ENABLE_ROSEN_BACKEND
     if (rsTransaction) {
+        FlushMessages();
         rsTransaction->Begin();
     }
 #endif
