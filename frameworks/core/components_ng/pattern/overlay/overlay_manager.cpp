@@ -779,6 +779,10 @@ bool OverlayManager::RemoveOverlay()
             if (FireBackPressEvent()) {
                 return true;
             }
+            auto hub = overlay->GetEventHub<DialogEventHub>();
+            if (hub) {
+                hub->FireCancelEvent();
+            }
             CloseDialog(overlay);
             SetBackPressEvent(nullptr);
             return true;
@@ -845,6 +849,10 @@ bool OverlayManager::RemoveOverlayInSubwindow()
     // close dialog with animation
     auto pattern = overlay->GetPattern();
     if (AceType::InstanceOf<DialogPattern>(pattern)) {
+        auto hub = overlay->GetEventHub<DialogEventHub>();
+        if (hub) {
+            hub->FireCancelEvent();
+        }
         CloseDialog(overlay);
         return true;
     }
