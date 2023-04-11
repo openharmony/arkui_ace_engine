@@ -43,8 +43,6 @@ void TextPickerPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToFrame(true);
-    auto calcLength = NG::CalcLength(Dimension(1.0, DimensionUnit::PERCENT));
-    host->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(calcLength, calcLength));
 }
 
 bool TextPickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
