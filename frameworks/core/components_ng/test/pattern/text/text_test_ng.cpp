@@ -150,8 +150,8 @@ public:
 
 protected:
     static RefPtr<FrameNode> CreateTextParagraph(const std::string& createValue, const TestProperty& testProperty);
-    static void SetContentModifier(TextContentModifier &textContentModifier);
-    static void SetPaintMethodModifier(TextPaintMethod &textPaintMethod);
+    static void SetContentModifier(TextContentModifier& textContentModifier);
+    static void SetPaintMethodModifier(TextPaintMethod& textPaintMethod);
     static void UpdateTextLayoutProperty(RefPtr<TextLayoutProperty> textLayoutProperty);
 };
 
@@ -226,7 +226,7 @@ RefPtr<FrameNode> TextTestNg::CreateTextParagraph(const std::string& createValue
     return AceType::DynamicCast<FrameNode>(element);
 }
 
-void TextTestNg::SetContentModifier(TextContentModifier &textContentModifier)
+void TextTestNg::SetContentModifier(TextContentModifier& textContentModifier)
 {
     textContentModifier.SetFontWeight(Ace::FontWeight::W200);
     textContentModifier.SetTextColor(TEXT_COLOR_VALUE);
@@ -244,7 +244,7 @@ void TextTestNg::SetContentModifier(TextContentModifier &textContentModifier)
     textContentModifier.SetPrintOffset(paintOffset);
 }
 
-void TextTestNg::SetPaintMethodModifier(TextPaintMethod &textPaintMethod)
+void TextTestNg::SetPaintMethodModifier(TextPaintMethod& textPaintMethod)
 {
     textPaintMethod.textContentModifier_->fontSize_ = ADAPT_FONT_SIZE_VALUE;
     textPaintMethod.textContentModifier_->fontWeight_ = FontWeight::LIGHTER;
@@ -2487,5 +2487,51 @@ HWTEST_F(TextTestNg, TextPatternTest001, TestSize.Level1)
     ASSERT_NE(nodePaintMethod, nullptr);
     ASSERT_NE(textPattern->textContentModifier_, nullptr);
     ASSERT_NE(textPattern->textOverlayModifier_, nullptr);
+}
+
+/**
+ * @tc.name: TextPatternTest002
+ * @tc.desc: test text_pattern.h CreateNodePaintMethod function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextPatternTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and textPattern.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call CreateLayoutProperty function.
+     * @tc.expected: The return value of CreateLayoutProperty is not empty.
+     */
+    RefPtr<LayoutProperty> textLayoutProperty = textPattern->CreateLayoutProperty();
+    ASSERT_NE(textLayoutProperty, nullptr);
+}
+
+/**
+ * @tc.name: TextPatternTest003
+ * @tc.desc: test text_pattern.h CreateNodePaintMethod function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextPatternTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and textPattern.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call CreateLayoutAlgorithm function.
+     * @tc.expected: The return value of CreateLayoutAlgorithm is not empty.
+     */
+    RefPtr<LayoutAlgorithm> textLayoutAlgorithm = textPattern->CreateLayoutAlgorithm();
+    ASSERT_NE(textLayoutAlgorithm, nullptr);
 }
 } // namespace OHOS::Ace::NG
