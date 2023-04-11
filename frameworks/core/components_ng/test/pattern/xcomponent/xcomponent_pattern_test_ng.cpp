@@ -639,5 +639,7 @@ HWTEST_F(XComponentPropertyTestNg, XComponentTouchEventTest009, TestSize.Level1)
 
     RefPtr<LayoutProperty> layoutPropertyTest = frameNode->GetLayoutProperty<LayoutProperty>();
     ASSERT_TRUE(layoutPropertyTest);
+    RefPtr<Property> propertyTest = frameNode->GetPaintProperty<Property>();
+    ASSERT_TRUE(propertyTest);
 }
 } // namespace OHOS::Ace::NG
