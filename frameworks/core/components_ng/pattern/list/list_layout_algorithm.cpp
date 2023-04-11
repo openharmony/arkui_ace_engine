@@ -208,13 +208,13 @@ void ListLayoutAlgorithm::MeasureList(
             jumpIndex_.value(), currentOffset_, startMainPos_, endMainPos_);
         if (scrollIndexAlignment_ == ScrollIndexAlignment::ALIGN_TOP) {
             jumpIndex_ = GetLanesFloor(layoutWrapper, jumpIndex_.value());
-            LayoutForward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value(), startMainPos_);
+            LayoutForward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value(), 0);
             if (jumpIndex_.value() > 0 && GreatNotEqual(GetStartPosition(), startMainPos_)) {
                 LayoutBackward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value() - 1, GetStartPosition());
             }
         } else if (scrollIndexAlignment_ == ScrollIndexAlignment::ALIGN_BOTTOM) {
             jumpIndex_ = GetLanesFloor(layoutWrapper, jumpIndex_.value()) + GetLanes() - 1;
-            LayoutBackward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value(), endMainPos_);
+            LayoutBackward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value(), contentMainSize_);
             if (jumpIndex_.value() < totalItemCount_ - 1 && LessNotEqual(GetEndPosition(), endMainPos_)) {
                 LayoutForward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value() + 1, GetEndPosition());
             }

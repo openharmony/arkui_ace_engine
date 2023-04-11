@@ -357,7 +357,7 @@ bool ListPattern::OutBoundaryCallback()
 bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
 {
     // check edgeEffect is not springEffect
-    if (!HandleEdgeEffect(offset, source, GetContentSize())) {
+    if (!jumpIndex_.has_value() && !HandleEdgeEffect(offset, source, GetContentSize())) {
         return false;
     }
     SetScrollState(source);
@@ -727,6 +727,7 @@ void ListPattern::ScrollToIndex(int32_t index, ScrollIndexAlignment align)
     LOGI("ScrollToIndex:%{public}d", index);
     StopAnimate();
     if (index >= 0 || index == ListLayoutAlgorithm::LAST_ITEM) {
+        currentDelta_ = 0;
         jumpIndex_ = index;
         scrollIndexAlignment_ = align;
         MarkDirtyNodeSelf();
@@ -738,6 +739,7 @@ void ListPattern::ScrollToIndex(int32_t index, int32_t indexInGroup, ScrollIndex
     LOGI("ScrollToIndex:%{public}d, %{public}d", index, indexInGroup);
     StopAnimate();
     if (index >= 0 || index == ListLayoutAlgorithm::LAST_ITEM) {
+        currentDelta_ = 0;
         jumpIndex_ = index;
         jumpIndexInGroup_ = indexInGroup;
         scrollIndexAlignment_ = align;
