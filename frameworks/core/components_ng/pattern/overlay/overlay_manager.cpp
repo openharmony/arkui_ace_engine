@@ -57,12 +57,18 @@ namespace {
 constexpr int32_t TOAST_ANIMATION_DURATION = 100;
 constexpr int32_t MENU_ANIMATION_DURATION = 150;
 constexpr float TOAST_ANIMATION_POSITION = 15.0f;
+
 #ifdef ENABLE_DRAG_FRAMEWORK
 constexpr float PIXELMAP_ANIMATION_WIDTH_RATE = 0.5f;
 constexpr float PIXELMAP_ANIMATION_HEIGHT_RATE = 0.2f;
 constexpr float PIXELMAP_DRAG_SCALE = 0.8f;
 constexpr int32_t PIXELMAP_ANIMATION_DURATION = 300;
 #endif // ENABLE_DRAG_FRAMEWORK
+
+constexpr int32_t FULL_MODAL_DEFAULT_ANIMATION_DURATION = 300;
+constexpr int32_t FULL_MODAL_ALPHA_ANIMATION_DURATION = 200;
+const Color MASK_COLOR = Color::FromARGB(33, 0, 0, 0);
+const Color DEFAULT_MASK_COLOR = Color::FromARGB(0, 0, 0, 0);
 
 // dialog animation params
 const RefPtr<Curve> SHOW_SCALE_ANIMATION_CURVE = AceType::MakeRefPtr<CubicCurve>(0.38f, 1.33f, 0.6f, 1.0f);
@@ -797,14 +803,21 @@ bool OverlayManager::RemoveOverlay()
             topModalNode->GetPattern<ModalPresentationPattern>()->FireCallback("false");
             auto builder = AceType::DynamicCast<FrameNode>(topModalNode->GetFirstChild());
             CHECK_NULL_RETURN(topModalNode, false);
+            auto modalTransition = topModalNode->GetPattern<ModalPresentationPattern>()->GetType();
             if (builder->GetRenderContext()->HasTransition()) {
                 topModalNode->Clean();
                 topModalNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+            }
+            if (modalTransition == ModalTransition::DEFAULT) {
+                PlayDefaultModalTransition(topModalNode, false);
+            } else if (modalTransition == ModalTransition::ALPHA) {
+                PlayAlphaModalTransition(topModalNode, false);
             } else {
                 rootNode->RemoveChild(topModalNode);
                 rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
             }
             modalStack_.pop();
+            SaveLastModalNode();
             return true;
         }
         rootNode->RemoveChild(overlay);
@@ -909,13 +922,35 @@ void OverlayManager::BlurOverlayNode(bool isInSubWindow)
     pageFocusHub->RequestFocus();
 }
 
+void OverlayManager::SaveLastModalNode()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto stageManager = pipeline->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    auto pageNode = stageManager->GetLastPage();
+    CHECK_NULL_VOID(pageNode);
+    if (modalStack_.empty()) {
+        lastModalNode_ = WeakClaim(RawPtr(pageNode));
+    } else {
+        auto topModalNode = modalStack_.top().Upgrade();
+        modalStack_.pop();
+        if (modalStack_.empty()) {
+            lastModalNode_ = WeakClaim(RawPtr(pageNode));
+        } else {
+            lastModalNode_ = modalStack_.top();
+        }
+        modalStack_.push(topModalNode);
+    }
+}
+
 void OverlayManager::BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
     std::function<RefPtr<UINode>()>&& buildNodeFunc, int32_t type, int32_t targetId)
 {
     LOGI("BindContentCover isShow: %{public}d, type: %{public}d, targetId: %{public}d", isShow, type, targetId);
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
-
+    auto modalTransition = static_cast<ModalTransition>(type);
     if (isShow) {
         if (!modalStack_.empty()) {
             auto topModalNode = modalStack_.top().Upgrade();
@@ -935,9 +970,15 @@ void OverlayManager::BindContentCover(bool isShow, std::function<void(const std:
             AceType::MakeRefPtr<ModalPresentationPattern>(
                 targetId, static_cast<ModalTransition>(type), std::move(callback)));
         modalStack_.push(WeakClaim(RawPtr(modalNode)));
+        SaveLastModalNode();
         modalNode->MountToParent(rootNode);
         modalNode->AddChild(builder);
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+        if (modalTransition == ModalTransition::DEFAULT) {
+            PlayDefaultModalTransition(modalNode, true);
+        } else if (modalTransition == ModalTransition::ALPHA) {
+            PlayAlphaModalTransition(modalNode, true);
+        }
         return;
     }
     if (!modalStack_.empty()) {
@@ -952,13 +993,123 @@ void OverlayManager::BindContentCover(bool isShow, std::function<void(const std:
         if (builder->GetRenderContext()->HasTransition()) {
             topModalNode->Clean();
             topModalNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+        }
+        if (modalTransition == ModalTransition::DEFAULT) {
+            PlayDefaultModalTransition(topModalNode, false);
+        } else if (modalTransition == ModalTransition::ALPHA) {
+            PlayAlphaModalTransition(topModalNode, false);
         } else {
             rootNode->RemoveChild(topModalNode);
             rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
         }
         modalStack_.pop();
+        SaveLastModalNode();
     }
 }
+
+void OverlayManager::PlayDefaultModalTransition(const RefPtr<FrameNode>& modalNode, bool isTransitionIn)
+{
+    // current modal animation
+    AnimationOption option;
+    option.SetCurve(Curves::FRICTION);
+    option.SetDuration(FULL_MODAL_DEFAULT_ANIMATION_DURATION);
+    option.SetFillMode(FillMode::FORWARDS);
+    auto context = modalNode->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto pageNode = pipeline->GetStageManager()->GetLastPage();
+    auto pageHeight = pageNode->GetGeometryNode()->GetFrameSize().Height();
+    if (isTransitionIn) {
+        DefaultModalTransition(true);
+        context->OnTransformTranslateUpdate({ 0.0f, pageHeight, 0.0f });
+        AnimationUtils::Animate(
+            option,
+            [context]() {
+                if (context) {
+                    context->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
+                }
+            });
+    } else {
+        DefaultModalTransition(false);
+        option.SetOnFinishEvent([rootWeak = rootNodeWeak_, modalWK = WeakClaim(RawPtr(modalNode)),
+            id = Container::CurrentId()] {
+            auto modal = modalWK.Upgrade();
+            auto root = rootWeak.Upgrade();
+            CHECK_NULL_VOID_NOLOG(modal && root);
+            ContainerScope scope(id);
+            root->RemoveChild(modal);
+            root->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+        });
+        AnimationUtils::Animate(
+            option,
+            [context, pageHeight]() {
+                if (context) {
+                    context->OnTransformTranslateUpdate({ 0.0f, pageHeight, 0.0f });
+                }
+            }, option.GetOnFinishEvent());
+    }
+}
+
+void OverlayManager::DefaultModalTransition(bool isTransitionIn)
+{
+    AnimationOption option;
+    const RefPtr<CubicCurve> curve = AceType::MakeRefPtr<CubicCurve>(0.56f, 0.0f, 0.44f, 0.99f);
+    option.SetCurve(curve);
+    option.SetDuration(FULL_MODAL_DEFAULT_ANIMATION_DURATION);
+    option.SetFillMode(FillMode::FORWARDS);
+    auto lastModalNode = lastModalNode_.Upgrade();
+    CHECK_NULL_VOID(lastModalNode);
+    auto context = lastModalNode->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    // scale animation
+    isTransitionIn ? context->ScaleAnimation(option, 1.0, 0.94) : // 0.94: scale end value
+        context->ScaleAnimation(option, 0.94, 1.0); // 0.94: scale initial value
+
+    // mask animation
+    AnimationUtils::Animate(option, [context, isTransitionIn]() {
+            if (context) {
+                context->SetActualForegroundColor(isTransitionIn ? MASK_COLOR : DEFAULT_MASK_COLOR);
+            }
+        });
+}
+
+void OverlayManager::PlayAlphaModalTransition(const RefPtr<FrameNode>& modalNode, bool isTransitionIn)
+{
+    AnimationOption option;
+    option.SetCurve(Curves::FRICTION);
+    option.SetDuration(FULL_MODAL_ALPHA_ANIMATION_DURATION);
+    option.SetFillMode(FillMode::FORWARDS);
+    auto lastModalNode = lastModalNode_.Upgrade();
+    CHECK_NULL_VOID(lastModalNode);
+    auto lastModalContext = lastModalNode->GetRenderContext();
+    CHECK_NULL_VOID(lastModalContext);
+    auto context = modalNode->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    if (isTransitionIn) {
+        // last page animation
+        lastModalContext->OpacityAnimation(option, 1, 0);
+
+        // current modal page animation
+        context->OpacityAnimation(option, 0, 1);
+    } else {
+        // last page animation
+        lastModalContext->OpacityAnimation(option, 0, 1);
+
+        // current modal page animation
+        option.SetOnFinishEvent([rootWeak = rootNodeWeak_, modalWK = WeakClaim(RawPtr(modalNode)),
+            id = Container::CurrentId()] {
+            auto modal = modalWK.Upgrade();
+            auto root = rootWeak.Upgrade();
+            CHECK_NULL_VOID_NOLOG(modal && root);
+            ContainerScope scope(id);
+            root->RemoveChild(modal);
+            root->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+        });
+        context->OpacityAnimation(option, 1, 0);
+    }
+}
+
 #ifdef ENABLE_DRAG_FRAMEWORK
 void OverlayManager::MountToRootNode(const RefPtr<FrameNode>& columnNode)
 {

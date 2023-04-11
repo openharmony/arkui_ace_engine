@@ -2158,4 +2158,11 @@ void RosenRenderContext::OnTransitionOutFinish()
     }
 }
 
+void RosenRenderContext::SetActualForegroundColor(const Color& value)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetForegroundColor(value.GetValue());
+    RequestNextFrame();
+}
+
 } // namespace OHOS::Ace::NG
