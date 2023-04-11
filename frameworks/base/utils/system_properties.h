@@ -373,6 +373,8 @@ public:
     static bool IsPerformanceCheckEnabled();
 
     static uint32_t GetPerformanceParameterWithType(PerformanceParameterType type);
+    
+    static bool IsFormAnimationLimited();
 
 private:
     static bool traceEnabled_;

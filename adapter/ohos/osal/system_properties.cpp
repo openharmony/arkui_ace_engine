@@ -502,4 +502,10 @@ ACE_WEAK_SYM bool SystemProperties::GetIsUseMemoryMonitor()
     static bool isUseMemoryMonitor = IsUseMemoryMonitor();
     return isUseMemoryMonitor;
 }
+
+bool SystemProperties::IsFormAnimationLimited()
+{
+    return system::GetBoolParameter("persist.sys.arkui.formAnimationLimit", true);
+}
+
 } // namespace OHOS::Ace

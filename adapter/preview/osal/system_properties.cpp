@@ -212,4 +212,9 @@ bool SystemProperties::IsPerformanceCheckEnabled()
 }
 
 void SystemProperties::InitPerformanceParameters() {}
+
+bool SystemProperties::IsFormAnimationLimited()
+{
+    return true;
+}
 } // namespace OHOS::Ace
