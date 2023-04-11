@@ -76,7 +76,7 @@ public:
     void UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode);
     void RequireSummary();
     void ClearSummary();
-    void SetSummaryMap(const std::map<std::string, int64_t> summaryMap)
+    void SetSummaryMap(const std::map<std::string, int64_t>& summaryMap)
     {
         summaryMap_ = summaryMap;
     }
@@ -121,7 +121,9 @@ private:
     std::function<void(const std::string&)> deleteDataCallback_ = nullptr;
     std::string extraInfo_;
     std::unique_ptr<JsonValue> newData_ = nullptr;
-
+#ifdef ENABLE_DRAG_FRAMEWORK
+    std::map<std::string, int64_t> summaryMap_;
+#endif // ENABLE_DRAG_FRAMEWORK
     int64_t currentId_ = -1;
 
     bool isDragged_ = false;

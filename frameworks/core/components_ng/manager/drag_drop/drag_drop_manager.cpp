@@ -272,7 +272,7 @@ bool DragDropManager::CheckDragDropProxy(int64_t id) const
 #ifdef ENABLE_DRAG_FRAMEWORK
 void DragDropManager::UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode)
 {
-    auto dragFrameNodeAllowDrop = dragFrameNode->GetAllowDrop();
+    const auto& dragFrameNodeAllowDrop = dragFrameNode->GetAllowDrop();
     if (dragFrameNodeAllowDrop.empty()) {
         InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::DEFAULT);
         return;
@@ -369,10 +369,9 @@ void DragDropManager::RequireSummary()
     }
 
     auto udmfClient = UDMF::UdmfClient::GetInstance();
-    udKey_ = udKey;
     UDMF::Summary summary;
     UDMF::QueryOption queryOption;
-    queryOption.key = udKey_;
+    queryOption.key = udKey;
     int32_t ret = udmfClient.GetSummary(queryOption, summary);
     if (ret != 0) {
         LOGW("OnDragStart: UDMF GetSummary failed: %{public}d", ret);
