@@ -329,6 +329,7 @@ template("declarative_js_engine") {
       "jsview/models/view_abstract_model_impl.cpp",
       "jsview/models/view_full_update_model_impl.cpp",
       "jsview/models/view_partial_update_model_impl.cpp",
+      "jsview/models/water_flow_item_model_impl.cpp",
       "jsview/models/water_flow_model_impl.cpp",
     ]
 

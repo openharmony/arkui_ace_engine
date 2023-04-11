@@ -17,9 +17,9 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_MODEL_NG_H
 
 #include "core/components_ng/pattern/waterflow/water_flow_model.h"
-
+#include "base/utils/macros.h"
 namespace OHOS::Ace::NG {
-class WaterFlowModelNG : public WaterFlowModel {
+class ACE_EXPORT WaterFlowModelNG : public WaterFlowModel {
 public:
     void Create() override;
     void SetFooter(std::function<void()>&& footer) override;
