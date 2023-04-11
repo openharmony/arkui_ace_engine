@@ -404,9 +404,15 @@ void JSShapeAbstract::ObjectPosition(const JSCallbackInfo& info)
         JSRef<JSVal> yVal = sizeObj->GetProperty("y");
         Dimension x;
         Dimension y;
-        if (basicShape_ && ParseJsDimensionVp(xVal, x) && ParseJsDimensionVp(yVal, y)) {
-            basicShape_->SetPosition(DimensionOffset(x, y));
+        DimensionOffset position(x, y);
+        CHECK_NULL_VOID(basicShape_);
+        if (ParseJsDimensionVp(xVal, x)) {
+            position.SetX(x);
         }
+        if (ParseJsDimensionVp(yVal, y)) {
+            position.SetY(y);
+        }
+        basicShape_->SetPosition(position);
     }
 }
 } // namespace OHOS::Ace::Framework
