@@ -20,7 +20,6 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-
 void HostWindowSceneModel::Create(const sptr<Rosen::Session>& session)
 {
     auto stack = ViewStackProcessor::GetInstance();
@@ -28,6 +27,8 @@ void HostWindowSceneModel::Create(const sptr<Rosen::Session>& session)
     auto frameNode = HostWindowNode::GetOrCreateHostWindowNode(V2::HOST_WINDOW_SCENE_ETS_TAG, nodeId,
         [&session]() { return AceType::MakeRefPtr<HostWindowScene>(session); });
     stack->Push(frameNode);
-}
 
+    auto pattern = frameNode->GetPattern<HostWindowScene>();
+    pattern->UpdateSession(session);
+}
 } // namespace OHOS::Ace::NG

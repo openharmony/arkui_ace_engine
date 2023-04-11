@@ -19,12 +19,10 @@
 #include "core/components_ng/pattern/window_scene/scene/host/host_window_scene.h"
 
 namespace OHOS::Ace::NG {
-
 class ACE_EXPORT HostWindowSceneModel {
 public:
     static void Create(const sptr<Rosen::Session>& session);
 };
-
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_HOST_WINDOW_SCENE_MODEL_H

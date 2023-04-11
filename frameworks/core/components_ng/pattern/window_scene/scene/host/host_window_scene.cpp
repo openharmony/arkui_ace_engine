@@ -15,7 +15,10 @@
 
 #include "core/components_ng/pattern/window_scene/scene/host/host_window_scene.h"
 
+#include "render_service_client/core/ui/rs_surface_node.h"
+
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -65,6 +68,26 @@ void HostWindowScene::UnregisterLifecycleListener()
 {
     CHECK_NULL_VOID(session_);
     session_->UnregisterLifecycleListener(lifecycleListener_);
+}
+
+void HostWindowScene::UpdateSession(const sptr<Rosen::Session>& session)
+{
+    CHECK_NULL_VOID(session_);
+    CHECK_NULL_VOID(session);
+    if (session_->GetPersistentId() == session->GetPersistentId()) {
+        return;
+    }
+
+    LOGI("session %{public}" PRIu64 " changes to %{public}" PRIu64,
+        session_->GetPersistentId(), session->GetPersistentId());
+    session_ = session;
+    auto surfaceNode = session_->GetSurfaceNode();
+    CHECK_NULL_VOID(surfaceNode);
+
+    CHECK_NULL_VOID(contentNode_);
+    auto context = AceType::DynamicCast<NG::RosenRenderContext>(contentNode_->GetRenderContext());
+    CHECK_NULL_VOID(context);
+    context->SetRSNode(surfaceNode);
 }
 
 void HostWindowScene::OnForeground()

@@ -32,6 +32,8 @@ private:
         return true;
     }
 
+    void UpdateSession(const sptr<Rosen::Session>& session);
+
     void RegisterLifecycleListener();
     void UnregisterLifecycleListener();
 
@@ -40,6 +42,7 @@ private:
 
     std::shared_ptr<Rosen::ILifecycleListener> lifecycleListener_;
 
+    friend class HostWindowSceneModel;
     friend class LifecycleListener;
 
     ACE_DISALLOW_COPY_AND_MOVE(HostWindowScene);
