@@ -803,7 +803,7 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg017, TestSize.Level1)
     ASSERT_NE(geometryNode, nullptr);
     auto layoutAlgorithm = customPattern->CreateLayoutAlgorithm();
     ASSERT_NE(layoutAlgorithm, nullptr);
-    RefPtr<LayoutWrapper> dirty = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto dirty = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
     dirty->skipMeasureContent_ = false;
     dirty->layoutAlgorithm_ = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm);
 
