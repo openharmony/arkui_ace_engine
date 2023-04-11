@@ -47,6 +47,11 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
+#ifdef ENABLE_DRAG_FRAMEWORK
+#include "video.h"
+#include "unified_data.h"
+#include "unified_record.h"
+#endif
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t SECONDS_PER_HOUR = 3600;
@@ -563,6 +568,7 @@ void VideoPattern::OnModifyDone()
         CHECK_NULL_VOID(host);
         pipelineContext->AddOnAreaChangeNode(host->GetId());
     }
+    EnableDrag();
 }
 
 void VideoPattern::AddPreviewNodeIfNeeded()
@@ -613,6 +619,11 @@ void VideoPattern::AddControlBarNodeIfNeeded()
         for (const auto& child : children) {
             if (child->GetTag() == V2::ROW_ETS_TAG) {
                 isExist = true;
+                if (isDrag_) {
+                    host->RemoveChild(child);
+                    auto controlBar = CreateControlBar();
+                    host->AddChild(controlBar);
+                }
                 break;
             }
         }
@@ -1144,4 +1155,88 @@ bool VideoPattern::OnBackPressed()
     return true;
 }
 
+void VideoPattern::EnableDrag()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
+    std::string videoSrcBefore = src_;
+    std::string imageSrcBefore = "";
+    if (layoutProperty->HasPosterImageInfo()) {
+        imageSrcBefore = layoutProperty->GetPosterImageInfo().value().GetSrc();
+    }
+#ifdef ENABLE_DRAG_FRAMEWORK
+    auto dragEnd = [this, videoSrcBefore](
+        const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
+        std::shared_ptr<UDMF::UnifiedData> unifiedData = event->GetData();
+        std::string videoSrc = "";
+        if (unifiedData != nullptr) {
+            auto records = unifiedData->GetRecords();
+            if (records.size() == 0 || records[0]->GetType() != UDMF::UDType::VIDEO) {
+                LOGE("unifiedRecords is empty");
+            }
+            auto video = reinterpret_cast<UDMF::Video *>(records[0].get());
+            videoSrc = video->GetUri();
+        } else {
+            auto json = JsonUtil::ParseJsonString(extraParams);
+            std::string key = "extraInfo";
+            videoSrc = json->GetString(key);
+        }
+
+        bool isInitialState = this->isInitialState_;
+        if (videoSrc == videoSrcBefore) {
+            return;
+        }
+
+        videoLayoutProperty->UpdateVideoSource(videoSrc);
+
+        if (!isInitialState) {
+            this->SetIsStop(true);
+        }
+        auto frameNode = this->GetHost();
+        frameNode->MarkModifyDone();
+    };
+#else
+    auto dragEnd = [this, videoSrcBefore, imageSrcBefore](
+        const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
+        if (extraParams.empty()) {
+            LOGE("extraParams is empty");
+        }
+        auto videoLayoutProperty = this->GetLayoutProperty<VideoLayoutProperty>();
+        auto json = JsonUtil::ParseJsonString(extraParams);
+        std::string key = "extraInfo";
+        std::string extraInfo = json->GetString(key);
+        int index = extraInfo.find("::");
+        if (index == extraInfo.length() - 2) {
+            LOGE("video source is empty");
+        }
+        std::string videoSrc = extraInfo.substr(index + 2); // 2 :the length of "::"
+        std::string imageSrc = "";
+        if (index != 0) {
+            imageSrc = extraInfo.substr(0, index);
+        }
+        
+        bool isInitialState = this->isInitialState_;
+        if ((!isInitialState && videoSrc == videoSrcBefore) ||
+            (isInitialState && videoSrc == videoSrcBefore && imageSrc == imageSrcBefore)) {
+            return;
+        }
+
+        videoLayoutProperty->UpdateVideoSource(videoSrc);
+        ImageSourceInfo imageSourceInfo = ImageSourceInfo(imageSrc);
+        videoLayoutProperty->UpdatePosterImageInfo(imageSourceInfo);
+
+        if (!isInitialState) {
+            this->SetIsStop(true);
+        }
+        this->SetIsDrag(true);
+        auto frameNode = this->GetHost();
+        frameNode->MarkModifyDone();
+        this->SetIsDrag(false);
+    };
+#endif
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDrop(std::move(dragEnd));
+}
 } // namespace OHOS::Ace::NG
