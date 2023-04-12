@@ -347,7 +347,7 @@ void SwiperPattern::SwipeTo(int32_t index)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto targetIndex = std::clamp(index, 0, TotalCount() - 1);
-    if (currentIndex_ == targetIndex) {
+    if (currentIndex_ == targetIndex || targetIndex_ == targetIndex) {
         LOGD("Target index is same with current index.");
         return;
     }
