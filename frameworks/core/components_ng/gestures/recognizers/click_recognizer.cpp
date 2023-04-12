@@ -69,7 +69,6 @@ void ClickRecognizer::InitGlobalValue(SourceType sourceType)
     }
 }
 
-
 void ClickRecognizer::OnAccepted()
 {
     LOGI("Click gesture has been accepted!");
