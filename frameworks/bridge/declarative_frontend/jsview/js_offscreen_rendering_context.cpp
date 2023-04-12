@@ -123,6 +123,9 @@ void JSOffscreenRenderingContext::JSBind(BindingTarget globalObj)
     JSClass<JSOffscreenRenderingContext>::CustomProperty("imageSmoothingQuality",
         &JSCanvasRenderer::JsGetImageSmoothingQuality, &JSCanvasRenderer::JsSetImageSmoothingQuality);
 
+    JSClass<JSOffscreenRenderingContext>::CustomMethod("createConicGradient",
+        &JSCanvasRenderer::JsCreateConicGradient);
+
     JSClass<JSOffscreenRenderingContext>::Bind(globalObj, JSOffscreenRenderingContext::Constructor,
         JSOffscreenRenderingContext::Destructor);
 }
