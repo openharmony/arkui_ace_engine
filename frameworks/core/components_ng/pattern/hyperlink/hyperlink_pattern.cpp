@@ -15,16 +15,40 @@
 
 #include "core/components_ng/pattern/hyperlink/hyperlink_pattern.h"
 
+#include "base/json/json_util.h"
+#ifdef ENABLE_DRAG_FRAMEWORK
+#include "link.h"
+#include "unified_data.h"
+#include "unified_record.h"
+#endif
+
 namespace OHOS::Ace::NG {
 void HyperlinkPattern::OnAttachToFrameNode() {}
 
 void HyperlinkPattern::EnableDrag()
 {
-    auto dragStart = [](const RefPtr<OHOS::Ace::DragEvent>& /* event */,
+    auto dragStart = [this](const RefPtr<OHOS::Ace::DragEvent>& event,
                         const std::string& /* extraParams */) -> DragDropInfo {
         DragDropInfo info;
         info.extraInfo = "hyperlink drag";
-
+        auto json = JsonUtil::Create(true);
+        json->Put("url", address_.c_str());
+        std::string content = GetTextForDisplay();
+        json->Put("title", content.c_str());
+        auto param = json->ToString();
+        info.extraInfo += "::";
+        info.extraInfo += param;
+#ifdef ENABLE_DRAG_FRAMEWORK
+        std::shared_ptr<UDMF::UnifiedRecord> record = nullptr;
+        if (content.empty()) {
+            record = std::make_shared<UDMF::Link>(address_);
+        } else {
+            record = std::make_shared<UDMF::Link>(address_, content);
+        }
+        auto unifiedData = std::make_shared<UDMF::UnifiedData>();
+        unifiedData->AddRecord(record);
+        event->SetData(unifiedData);
+#endif
         return info;
     };
     auto eventHub = GetHost()->GetEventHub<EventHub>();
