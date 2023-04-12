@@ -415,7 +415,7 @@ void OverlayManager::AdaptToSafeArea(const RefPtr<FrameNode>& node)
     const static int32_t PLATFORM_VERSION_TEN = 10;
     auto layoutProperty = node->GetLayoutProperty();
     if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN && pipeline->GetIsAppWindow() &&
-        pipeline->GetIsLayoutFullScreen() && layoutProperty) {
+        pipeline->GetIsLayoutFullScreen() && !pipeline->GetIgnoreViewSafeArea() && layoutProperty) {
         NG::MarginProperty margins;
         SafeAreaEdgeInserts safeArea = pipeline->GetCurrentViewSafeArea();
         margins.top = NG::CalcLength(safeArea.topRect_.Height());
