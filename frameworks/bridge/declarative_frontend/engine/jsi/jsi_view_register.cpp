@@ -18,6 +18,7 @@
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/declarative_frontend.h"
 #include "bridge/declarative_frontend/interfaces/profiler/js_profiler.h"
@@ -1243,7 +1244,7 @@ panda::Local<panda::JSValueRef> Lpx2Px(panda::JsiRuntimeCallInfo* runtimeCallInf
     CHECK_NULL_RETURN(frontend, panda::JSValueRef::Undefined(vm));
     auto windowConfig = frontend->GetWindowConfig();
     double lpxValue = firstArg->ToNumber(vm)->Value();
-    double pxValue = lpxValue * windowConfig.GetDesignWidthScale(container->GetViewWidth());
+    double pxValue = lpxValue * windowConfig.GetDesignWidthScale(SystemProperties::GetDeviceWidth());
     return panda::NumberRef::New(vm, pxValue);
 }
 
@@ -1266,8 +1267,7 @@ panda::Local<panda::JSValueRef> Px2Lpx(panda::JsiRuntimeCallInfo* runtimeCallInf
     CHECK_NULL_RETURN(frontend, panda::JSValueRef::Undefined(vm));
     auto windowConfig = frontend->GetWindowConfig();
     double pxValue = firstArg->ToNumber(vm)->Value();
-    double lpxValue = pxValue / windowConfig.GetDesignWidthScale(container->GetViewWidth());
-
+    double lpxValue = pxValue / windowConfig.GetDesignWidthScale(SystemProperties::GetDeviceWidth());
     return panda::NumberRef::New(vm, lpxValue);
 }
 
