@@ -314,6 +314,9 @@ void AceAbility::InitEnv()
     } else {
         paths.push_back(GetCustomAssetPath(runArgs_.assetPath) + ASSET_PATH_SHARE);
     }
+    if (!runArgs_.containerSdkPath.empty()) {
+        paths.push_back(runArgs_.containerSdkPath);
+    }
     AceContainer::AddAssetPath(ACE_INSTANCE_ID, "", paths);
     auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
     CHECK_NULL_VOID(container);

@@ -290,6 +290,16 @@ void JsiDeclarativeEngineInstance::InitAceModule()
     if (!jsMockSystemPlugin) {
         LOGE("EvaluateJsCode jsMockSystemPlugin failed");
     }
+    const std::string filename = "js-mock/jsMockHmos.abc";
+    std::string content;
+    if (!frontendDelegate_->GetAssetContent(filename, content)) {
+        LOGW("Failed to get the content from the file %{public}s", filename.c_str());
+        return;
+    }
+    LOGI("Successfully get the content from the file %{public}s", filename.c_str());
+    if (!runtime_->EvaluateJsCode((uint8_t*)(content.c_str()), content.length())) {
+        LOGE("EvaluateJsCode jsMockHmos failed");
+    }
 #endif
 }
 
