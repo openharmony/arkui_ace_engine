@@ -24,6 +24,7 @@
 #endif
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_paint_method.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/element_register.h"
@@ -250,8 +251,7 @@ void ImagePattern::LoadImageDataIfNeed()
         (src.IsSvg() && loadingCtx_->GetSvgFillColor() != svgFillColorOpt)) {
         LoadNotifier loadNotifier(CreateDataReadyCallback(), CreateLoadSuccessCallback(), CreateLoadFailCallback());
 
-        bool syncLoad = imageLayoutProperty->GetSyncModeValue(false);
-        loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(src, std::move(loadNotifier), syncLoad);
+        loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(src, std::move(loadNotifier), syncLoad_);
         LOGD("start loading image %{public}s", src.ToString().c_str());
         loadingCtx_->LoadImageData();
     }
@@ -276,6 +276,25 @@ void ImagePattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
     LoadImageDataIfNeed();
+
+    if (copyOption_ != CopyOptions::None) {
+        InitCopy();
+    } else {
+        // remove long press and mouse events
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+
+        auto gestureHub = host->GetOrCreateGestureEventHub();
+        gestureHub->SetLongPressEvent(nullptr);
+        longPressEvent_ = nullptr;
+
+        gestureHub->RemoveClickEvent(clickEvent_);
+        clickEvent_ = nullptr;
+
+        auto inputHub = host->GetOrCreateInputEventHub();
+        inputHub->RemoveOnMouseEvent(mouseEvent_);
+        mouseEvent_ = nullptr;
+    }
 }
 
 DataReadyNotifyTask ImagePattern::CreateDataReadyCallbackForAlt()
@@ -497,9 +516,106 @@ void ImagePattern::BeforeCreatePaintWrapper()
     host->GetRenderContext()->MarkContentChanged(true);
 }
 
+void ImagePattern::InitCopy()
+{
+    if (longPressEvent_ && mouseEvent_ && clickEvent_) {
+        return;
+    }
+    auto longPressTask = [weak = WeakClaim(this)](GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OpenSelectOverlay();
+    };
+    longPressEvent_ = MakeRefPtr<LongPressEvent>(std::move(longPressTask));
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gestureHub = host->GetOrCreateGestureEventHub();
+    gestureHub->SetLongPressEvent(longPressEvent_);
+
+    auto mouseTask = [weak = WeakClaim(this)](MouseInfo& info) {
+        if (info.GetButton() == MouseButton::RIGHT_BUTTON && info.GetAction() == MouseAction::PRESS) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID_NOLOG(pattern);
+            pattern->OpenSelectOverlay();
+        }
+    };
+    mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
+    auto inputHub = host->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(inputHub);
+    inputHub->AddOnMouseEvent(mouseEvent_);
+
+    // close overlay on click
+    clickEvent_ = MakeRefPtr<ClickEvent>([weak = WeakClaim(this)](GestureEvent& callback) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->CloseSelectOverlay();
+    });
+    gestureHub->AddClickEvent(clickEvent_);
+}
+
+void ImagePattern::OpenSelectOverlay()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto rect = host->GetTransformRectRelativeToWindow();
+    SelectOverlayInfo info;
+    SizeF handleSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), info.singleLineHeight };
+    info.firstHandle.paintRect = RectF(rect.GetOffset(), handleSize);
+    OffsetF offset(rect.Width() - handleSize.Width(), rect.Height() - handleSize.Height());
+    info.secondHandle.paintRect = RectF(rect.GetOffset() + offset, handleSize);
+    info.menuInfo.menuIsShow = true;
+    info.menuInfo.showCut = false;
+    info.menuInfo.showPaste = false;
+    info.menuCallback.onCopy = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleCopy();
+    };
+
+    CloseSelectOverlay();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    LOGI("Opening select overlay");
+    selectOverlay_ = pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(info);
+}
+
+void ImagePattern::CloseSelectOverlay()
+{
+    LOGI("closing select overlay");
+    if (selectOverlay_ && !selectOverlay_->IsClosed()) {
+        selectOverlay_->Close();
+        selectOverlay_ = nullptr;
+    }
+}
+
+void ImagePattern::HandleCopy()
+{
+    CHECK_NULL_VOID(image_);
+    if (!clipboard_) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(pipeline->GetTaskExecutor());
+    }
+    auto pixmap = image_->GetPixelMap();
+    if (pixmap) {
+        clipboard_->SetPixelMapData(pixmap, copyOption_);
+    } else {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        clipboard_->SetData(loadingCtx_->GetSourceInfo().GetSrc());
+    }
+}
+
 void ImagePattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     json->Put("draggable", draggable_ ? "true" : "false");
+
+    static const char* COPY_OPTIONS[] = { "CopyOptions.None", "CopyOptions.InApp", "CopyOptions.Local",
+        "CopyOptions.Distributed" };
+    json->Put("copyOption", COPY_OPTIONS[static_cast<int32_t>(copyOption_)]);
+
+    json->Put("syncLoad", syncLoad_ ? "true" : "false");
 }
 
 void ImagePattern::UpdateFillColorIfForegroundColor()
@@ -526,7 +642,7 @@ void ImagePattern::DumpInfo()
     auto layoutProp = GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(layoutProp);
     if (layoutProp->GetImageSourceInfo().has_value()) {
-        DumpLog::GetInstance().AddDesc(std::string("src: ").append(layoutProp->GetImageSourceInfo()->ToString()));
+        DumpLog::GetInstance().AddDesc(std::string("url: ").append(layoutProp->GetImageSourceInfo()->ToString()));
     }
 }
 } // namespace OHOS::Ace::NG

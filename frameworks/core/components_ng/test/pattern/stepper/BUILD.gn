@@ -75,9 +75,9 @@ ohos_unittest("stepper_pattern_test_ng") {
     "$ace_root/frameworks/core/components/theme/theme_utils.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/image/image_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/image/image_paint_method.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/image/image_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_loading_context.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_painter.cpp",
+    "$ace_root/frameworks/core/components_ng/test/pattern/image/mock/mock_image_pattern.cpp",
     "$ace_root/frameworks/core/image/image_source_info.cpp",
 
     # loadingProgress

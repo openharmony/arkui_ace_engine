@@ -23,7 +23,7 @@ constexpr int32_t SELECT_OVERLAY_ID = 143;
 
 RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(const SelectOverlayInfo& info)
 {
-    return nullptr;
+    return MakeRefPtr<SelectOverlayProxy>(0);
 }
 
 void SelectOverlayManager::DestroySelectOverlay(const RefPtr<SelectOverlayProxy>& proxy) {}

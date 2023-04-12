@@ -18,7 +18,7 @@
 namespace OHOS::Ace::NG {
 bool SelectOverlayProxy::IsClosed() const
 {
-    return true;
+    return false;
 }
 
 void SelectOverlayProxy::Close() const {}
