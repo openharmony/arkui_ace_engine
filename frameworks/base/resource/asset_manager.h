@@ -63,6 +63,8 @@ public:
     virtual std::string GetAppLibPathKey() const = 0;
 
     virtual void GetAssetList(const std::string& path, std::vector<std::string>& assetList) const = 0;
+
+    virtual void Reload() {}
 };
 
 } // namespace OHOS::Ace

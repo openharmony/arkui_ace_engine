@@ -46,6 +46,8 @@ public:
 
     void GetAssetList(const std::string& path, std::vector<std::string>& assetList) override;
 
+    void Reload() override;
+
 private:
     mutable std::mutex mutex_;
     std::string hapPath_;

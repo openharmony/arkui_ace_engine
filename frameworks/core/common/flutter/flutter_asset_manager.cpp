@@ -54,4 +54,11 @@ void FlutterAssetManager::GetAssetList(const std::string& path, std::vector<std:
     }
 }
 
+void FlutterAssetManager::ReloadProvider()
+{
+    for (const auto& provider : providers_) {
+        provider->Reload();
+    }
+}
+
 } // namespace OHOS::Ace
