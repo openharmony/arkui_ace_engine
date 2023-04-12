@@ -31,13 +31,11 @@ int32_t MULTI_FINGER_TIMEOUT = 300;
 constexpr int32_t MULTI_FINGER_TIMEOUT_TOUCH = 300;
 constexpr int32_t MULTI_FINGER_TIMEOUT_MOUSE = 300;
 int32_t MULTI_TAP_TIMEOUT = 300;
-constexpr int32_t MULTI_TAP_TIMEOUT_TOUCH = 350;
+constexpr int32_t MULTI_TAP_TIMEOUT_TOUCH = 600;
 constexpr int32_t MULTI_TAP_TIMEOUT_MOUSE = 500;
-constexpr int32_t MULTI_TAP_TIMEOUT_MOUSE_PAD = 500;
 int32_t MULTI_TAP_SLOP = 100;
 constexpr int32_t MULTI_TAP_SLOP_TOUCH = 30;
-constexpr int32_t MULTI_TAP_SLOP_MOUSE = 2;
-constexpr int32_t MULTI_TAP_SLOP_MOUSE_PAD = 30;
+constexpr int32_t MULTI_TAP_SLOP_MOUSE = 15;
 #ifndef WEARABLE_PRODUCT
 double MAX_THRESHOLD = 20.0;
 constexpr double MAX_THRESHOLD_TOUCH = 20.0;
@@ -60,21 +58,17 @@ void ClickRecognizer::InitGlobalValue(SourceType sourceType)
             MAX_THRESHOLD = MAX_THRESHOLD_TOUCH;
             break;
         case SourceType::MOUSE:
+        case SourceType::TOUCH_PAD:
             MULTI_FINGER_TIMEOUT = MULTI_FINGER_TIMEOUT_MOUSE;
             MULTI_TAP_TIMEOUT = MULTI_TAP_TIMEOUT_MOUSE;
             MULTI_TAP_SLOP = MULTI_TAP_SLOP_MOUSE;
-            MAX_THRESHOLD = MAX_THRESHOLD_MOUSE;
-            break;
-        case SourceType::TOUCH_PAD:
-            MULTI_FINGER_TIMEOUT = MULTI_FINGER_TIMEOUT_MOUSE;
-            MULTI_TAP_TIMEOUT = MULTI_TAP_TIMEOUT_MOUSE_PAD;
-            MULTI_TAP_SLOP = MULTI_TAP_SLOP_MOUSE_PAD;
             MAX_THRESHOLD = MAX_THRESHOLD_MOUSE;
             break;
         default:
             LOGI("Unrecognized input source type: %{public}d", sourceType);
     }
 }
+
 
 void ClickRecognizer::OnAccepted()
 {
