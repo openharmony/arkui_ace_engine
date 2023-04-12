@@ -27,23 +27,24 @@ void HyperlinkPattern::OnAttachToFrameNode() {}
 
 void HyperlinkPattern::EnableDrag()
 {
-    auto dragStart = [this](const RefPtr<OHOS::Ace::DragEvent>& event,
+    auto dragStart = [weak = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& event,
                         const std::string& /* extraParams */) -> DragDropInfo {
         DragDropInfo info;
-        info.extraInfo = "hyperlink drag";
+        auto hyperlinkPattern = weak.Upgrade();
+        CHECK_NULL_RETURN(hyperlinkPattern, info);
+        std::string address = hyperlinkPattern->GetAddress();
+        std::string content = hyperlinkPattern->GetTextForDisplay();
         auto json = JsonUtil::Create(true);
-        json->Put("url", address_.c_str());
-        std::string content = GetTextForDisplay();
+        json->Put("url", address.c_str());
         json->Put("title", content.c_str());
         auto param = json->ToString();
-        info.extraInfo += "::";
-        info.extraInfo += param;
+        info.extraInfo = param;
 #ifdef ENABLE_DRAG_FRAMEWORK
         std::shared_ptr<UDMF::UnifiedRecord> record = nullptr;
         if (content.empty()) {
-            record = std::make_shared<UDMF::Link>(address_);
+            record = std::make_shared<UDMF::Link>(address);
         } else {
-            record = std::make_shared<UDMF::Link>(address_, content);
+            record = std::make_shared<UDMF::Link>(address, content);
         }
         auto unifiedData = std::make_shared<UDMF::UnifiedData>();
         unifiedData->AddRecord(record);
