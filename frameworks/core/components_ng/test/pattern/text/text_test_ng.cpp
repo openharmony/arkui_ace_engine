@@ -27,6 +27,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 #include "core/components_ng/pattern/text/text_accessibility_property.h"
@@ -2533,5 +2534,135 @@ HWTEST_F(TextTestNg, TextPatternTest003, TestSize.Level1)
      */
     RefPtr<LayoutAlgorithm> textLayoutAlgorithm = textPattern->CreateLayoutAlgorithm();
     ASSERT_NE(textLayoutAlgorithm, nullptr);
+}
+
+/**
+ * @tc.name: CreateParagraph001
+ * @tc.desc: test text_pattern.h CreateNodePaintMethod function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, CreateParagraph001, TestSize.Level1)
+{
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+
+    DirtySwapConfig config;
+    config.skipMeasure = false;
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+        frameNode, AceType::MakeRefPtr<GeometryNode>(), frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto rowLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    TextStyle textStyle;
+    LayoutConstraintF contentConstraint;
+    auto ret = rowLayoutAlgorithm->CreateParagraph(textStyle, "", nullptr);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: Layout001
+ * @tc.desc: test text_pattern.h CreateNodePaintMethod function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, Layout001, TestSize.Level1)
+{
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+
+    DirtySwapConfig config;
+    config.skipMeasure = false;
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+        frameNode, AceType::MakeRefPtr<GeometryNode>(), frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    layoutWrapper->children_.push_back(layoutWrapper);
+    auto imageSpanNode = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(imageSpanNode, nullptr);
+    pattern->AddChildSpanItem(imageSpanNode);
+    frameNode->AddChild(imageSpanNode);
+    auto rowLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    TextStyle textStyle;
+    LayoutConstraintF contentConstraint;
+    auto ret = rowLayoutAlgorithm->CreateParagraph(textStyle, "", AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_TRUE(ret);
+    rowLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    frameNode->AddChild(nullptr);
+    pattern->AddChildSpanItem(nullptr);
+    rowLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    ret = rowLayoutAlgorithm->CreateParagraph(textStyle, "", nullptr);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: ApplyIndents001
+ * @tc.desc: test text_pattern.h CreateNodePaintMethod function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, ApplyIndents001, TestSize.Level1)
+{
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+
+    DirtySwapConfig config;
+    config.skipMeasure = false;
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+        frameNode, AceType::MakeRefPtr<GeometryNode>(), frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto rowLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    TextStyle textStyle;
+    LayoutConstraintF contentConstraint;
+    rowLayoutAlgorithm->ApplyIndents(textStyle, RECT_WIDTH_VALUE);
+    auto ret = rowLayoutAlgorithm->CreateParagraph(textStyle, "", nullptr);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: AddChildSpanItem001
+ * @tc.desc: test text_pattern.h CreateNodePaintMethod function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, AddChildSpanItem001, TestSize.Level1)
+{
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+
+    DirtySwapConfig config;
+    config.skipMeasure = false;
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+        frameNode, AceType::MakeRefPtr<GeometryNode>(), frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto rowLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    TextStyle textStyle;
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    pattern->AddChildSpanItem(element);
+    auto ret = rowLayoutAlgorithm->CreateParagraph(textStyle, "", nullptr);
+    EXPECT_TRUE(ret);
 }
 } // namespace OHOS::Ace::NG
