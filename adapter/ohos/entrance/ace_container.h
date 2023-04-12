@@ -380,7 +380,8 @@ public:
     void UpdateConfiguration(
         const std::string& colorMode, const std::string& inputDevice, const std::string& languageTag);
 
-    void NotifyConfigurationChange(bool needReloadTransition);
+    void NotifyConfigurationChange(bool needReloadTransition) override;
+    void HotReload() override;
 
     bool IsUseStageModel() const override
     {
