@@ -868,7 +868,7 @@ protected:
     bool isFullWindow_ = false;
     bool isLayoutFullScreen_ = false;
     bool isAppWindow_ = true;
-    bool ignoreViewSafeArea_ = false;
+    bool ignoreViewSafeArea_ = true;
     bool installationFree_ = false;
     bool isSubPipeline_ = false;
 
