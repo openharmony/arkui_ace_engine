@@ -1450,23 +1450,6 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
         TaskExecutor::TaskType::PLATFORM);
 }
 
-void UIContentImpl::SetIgnoreViewSafeArea(bool ignoreViewSafeArea)
-{
-    LOGI("UIContentImpl: SetIgnoreViewSafeArea:%{public}u", ignoreViewSafeArea);
-    auto container = AceEngine::Get().GetContainer(instanceId_);
-    CHECK_NULL_VOID(container);
-    ContainerScope scope(instanceId_);
-    auto taskExecutor = container->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostSyncTask(
-        [container, ignoreSafeArea = ignoreViewSafeArea]() {
-            auto pipelineContext = container->GetPipelineContext();
-            CHECK_NULL_VOID(pipelineContext);
-            pipelineContext->SetIgnoreViewSafeArea(ignoreSafeArea);
-        },
-        TaskExecutor::TaskType::UI);
-}
-
 void UIContentImpl::UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco)
 {
     LOGI("UIContentImpl: UpdateWindowMode, window mode is %{public}d, hasDeco is %{public}d", mode, hasDeco);
