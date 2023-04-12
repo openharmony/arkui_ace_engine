@@ -134,7 +134,8 @@ public:
     void JsSetPixelMap(const JSCallbackInfo& info);
     void JsDrawBitmapMesh(const JSCallbackInfo& info);
     void JsFilter(const JSCallbackInfo& info);
-    void JsDirection(const JSCallbackInfo& info);
+    void JsGetDirection(const JSCallbackInfo& info);
+    void JsSetDirection(const JSCallbackInfo& info);
 
     void SetComponent(const RefPtr<CanvasTaskPool>& controller)
     {
