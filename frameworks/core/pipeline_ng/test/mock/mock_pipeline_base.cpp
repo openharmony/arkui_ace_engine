@@ -298,9 +298,14 @@ RefPtr<PipelineBase> PipelineBase::GetCurrentContext()
     return NG::MockPipelineBase::GetCurrent();
 }
 
-double PipelineBase::NormalizeToPx(const Dimension& /*dimension*/) const
+double PipelineBase::NormalizeToPx(const Dimension& dimension) const
 {
-    return 1.0f;
+    if ((dimension.Unit() == DimensionUnit::VP) || (dimension.Unit() == DimensionUnit::FP)) {
+        return (dimension.Value() * dipScale_);
+    } else if (dimension.Unit() == DimensionUnit::LPX) {
+        return (dimension.Value() * designWidthScale_);
+    }
+    return dimension.Value();
 }
 
 PipelineBase::~PipelineBase() = default;

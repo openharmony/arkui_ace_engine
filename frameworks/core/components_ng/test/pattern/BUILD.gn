@@ -63,7 +63,7 @@ group("pattern_unittest") {
     "rating:rating_pattern_test_ng",
     "refresh:refresh_pattern_test_ng",
     "relative_container:relative_container_pattern_test_ng",
-    "scroll:scroll_unit_test",
+    "scroll:scroll_test_ng",
     "search:search_test_ng",
     "select:select_pattern_test_ng",
     "shape:shape_pattern_unit_test",
