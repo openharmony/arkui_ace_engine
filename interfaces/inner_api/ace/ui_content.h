@@ -27,13 +27,13 @@ namespace OHOS {
 
 namespace AbilityRuntime {
 class Context;
-}
+} // namespace AbilityRuntime
 
 namespace AppExecFwk {
 class Configuration;
 class Ability;
 class FormAshmem;
-}
+} // namespace AppExecFwk
 
 namespace Rosen {
 class Window;
@@ -41,11 +41,11 @@ enum class WindowSizeChangeReason : uint32_t;
 enum class WindowMode : uint32_t;
 class RSSurfaceNode;
 class RSTransaction;
-}
+} // namespace Rosen
 
 namespace AAFwk {
 class Want;
-}
+} // namespace AAFwk
 
 namespace MMI {
 class PointerEvent;
@@ -55,7 +55,7 @@ class AxisEvent;
 
 namespace Ace {
 class Window;
-}
+} // namespace Ace
 
 } // namespace OHOS
 
