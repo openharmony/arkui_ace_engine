@@ -28,7 +28,7 @@ group("unittest") {
 
 # unittest config
 config("ace_unittest_config") {
-  visibility = [ ":*" ]
+  visibility = [ "./../../*" ]
   include_dirs = [
     "$ace_root",
     "$ace_root/frameworks",
