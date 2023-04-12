@@ -1168,6 +1168,7 @@ void VideoPattern::EnableDrag()
 #ifdef ENABLE_DRAG_FRAMEWORK
     auto dragEnd = [this, videoSrcBefore](
         const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
+        auto videoLayoutProperty = this->GetLayoutProperty<VideoLayoutProperty>();
         std::shared_ptr<UDMF::UnifiedData> unifiedData = event->GetData();
         std::string videoSrc = "";
         if (unifiedData != nullptr) {
