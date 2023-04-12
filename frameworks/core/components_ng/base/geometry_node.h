@@ -254,6 +254,8 @@ public:
         return baselineDistance_.value_or(frame_.rect_.GetY());
     }
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
+
 private:
     // the layoutConstraint of prev measure task.
     std::optional<LayoutConstraintF> parentLayoutConstraint_;
