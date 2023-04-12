@@ -179,13 +179,13 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest003, TestSize.Level1)
     model.SetResizeable(SplitType::COLUMN_SPLIT, true);
 
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
 
     /**
      * @tc.steps: step2. Get linearSplitPattern and.
      */
     RefPtr<LinearSplitPattern> linearSPlitPattern = frameNode->GetPattern<LinearSplitPattern>();
-    EXPECT_NE(linearSPlitPattern, nullptr);
+    ASSERT_NE(linearSPlitPattern, nullptr);
 
     /**
      * @tc.steps: step3. call linearSplitPattern OnDirtyLayoutWrapperSwap function, compare result.
