@@ -811,7 +811,11 @@ void ViewAbstract::BindPopup(
         if (!isUseCustom) {
             BubbleView::UpdatePopupParam(popupId, param, targetNode);
             popupNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-            LOGI("Update pop node.");
+            LOGI("Update normal PopUp node.");
+        } else {
+            BubbleView::UpdateCustomPopupParam(popupId, param);
+            popupNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            LOGI("Update Custom Popup node.");
         }
     }
     // update PopupInfo props
