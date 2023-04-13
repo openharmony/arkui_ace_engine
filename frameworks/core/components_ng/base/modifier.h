@@ -103,10 +103,21 @@ public:
         }
     }
 
+    void SetUpdateCallback(std::function<void(const T&)>&& callback)
+    {
+        updateCallback_ = std::move(callback);
+    }
+
+    std::function<void(const T&)> GetUpdateCallback() const
+    {
+        return updateCallback_;
+    }
+
 private:
     T value_;
     std::function<T()> getFunc_;
     std::function<void(const T&)> setFunc_;
+    std::function<void(const T&)> updateCallback_;
     ACE_DISALLOW_COPY_AND_MOVE(NormalProperty);
 };
 
@@ -202,6 +213,77 @@ DECLARE_PROP_TYPED_CLASS(AnimatablePropertyVectorColor, AnimatableProperty, Grad
 DECLARE_PROP_TYPED_CLASS(AnimatablePropertyOffsetF, AnimatableProperty, OffsetF);
 DECLARE_PROP_TYPED_CLASS(AnimatablePropertySizeF, AnimatableProperty, SizeF);
 
+class ModifierImpl {
+};
+
+class NodeAnimatablePropertyBase : public AceType {
+    DECLARE_ACE_TYPE(NodeAnimatablePropertyBase, AceType);
+
+public:
+    NodeAnimatablePropertyBase() = default;
+    ~NodeAnimatablePropertyBase() override = default;
+
+    const std::shared_ptr<ModifierImpl>& GetModifyImpl() const
+    {
+        return modifyImpl_;
+    }
+
+    void SetModifyImpl(const std::shared_ptr<ModifierImpl>& impl)
+    {
+        modifyImpl_ = impl;
+    }
+
+    const RefPtr<PropertyBase>& GetProperty() const
+    {
+        return property_;
+    }
+
+    void SetProperty(const RefPtr<PropertyBase>& property)
+    {
+        property_ = property;
+    }
+
+private:
+    std::shared_ptr<ModifierImpl> modifyImpl_;
+    RefPtr<PropertyBase> property_;
+
+    ACE_DISALLOW_COPY_AND_MOVE(NodeAnimatablePropertyBase);
+};
+
+template<typename T, typename S>
+class NodeAnimatableProperty : public NodeAnimatablePropertyBase {
+    DECLARE_ACE_TYPE(NodeAnimatableProperty, NodeAnimatablePropertyBase);
+
+public:
+    NodeAnimatableProperty(const T& value, std::function<void(const T&)>&& updateCallback)
+    {
+        auto property = AceType::MakeRefPtr<S>(value);
+        property->SetUpdateCallback(std::move(updateCallback));
+        SetProperty(property);
+    }
+    ~NodeAnimatableProperty() override = default;
+
+    void Set(const T& value)
+    {
+        auto property = AceType::DynamicCast<S>(GetProperty());
+        if (property) {
+            property->Set(value);
+        }
+    }
+
+    T Get() const
+    {
+        auto property = AceType::DynamicCast<S>(GetProperty());
+        if (property) {
+            return property->Get();
+        }
+        return {};
+    }
+private:
+    ACE_DISALLOW_COPY_AND_MOVE(NodeAnimatableProperty);
+};
+
+using NodeAnimatablePropertyFloat = NodeAnimatableProperty<float, AnimatablePropertyFloat>;
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MODIFIER_H

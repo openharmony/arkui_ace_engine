@@ -214,6 +214,7 @@ public:
     void MarkDrivenRenderFramePaintState(bool flag) override;
     RefPtr<PixelMap> GetThumbnailPixelMap() override;
     void SetActualForegroundColor(const Color& value) override;
+    void AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePropertyBase> property) override;
 
 private:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;

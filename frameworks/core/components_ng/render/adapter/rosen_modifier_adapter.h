@@ -46,6 +46,7 @@ template<typename T>
 using RSAnimatableArithmetic = Rosen::RSAnimatableArithmetic<T>;
 using RSContentStyleModifier = Rosen::RSContentStyleModifier;
 using RSOverlayStyleModifier = Rosen::RSOverlayStyleModifier;
+using RSNodeModifier = Rosen::RSNodeModifier;
 using RSDrawingContext = Rosen::RSDrawingContext;
 using RSPropertyBase = Rosen::RSPropertyBase;
 
@@ -88,6 +89,21 @@ private:
     std::vector<std::shared_ptr<RSPropertyBase>> attachedProperties_;
 
     ACE_DISALLOW_COPY_AND_MOVE(OverlayModifierAdapter);
+};
+
+class RSNodeModifierImpl : public RSNodeModifier, public ModifierImpl {
+public:
+    RSNodeModifierImpl() = default;
+    virtual ~RSNodeModifierImpl() = default;
+
+    void Modify(RSNode& target) const override {}
+
+    void AddProperty(const RefPtr<PropertyBase>& property);
+
+private:
+    std::shared_ptr<RSPropertyBase> attachedProperty_;
+
+    ACE_DISALLOW_COPY_AND_MOVE(RSNodeModifierImpl);
 };
 
 } // namespace OHOS::Ace::NG
