@@ -156,7 +156,9 @@ void SvgNode::Draw(RSCanvas& canvas, const Size& viewPort, const std::optional<C
     if (!OnCanvas(canvas)) {
         return;
     }
-    canvas.Save();
+    // mask and filter create extra layers, need to record initial layer count
+    auto count = skCanvas_->getSaveCount();
+    skCanvas_->save();
     if (!hrefClipPath_.empty()) {
         OnClipPath(canvas, viewPort);
     }
@@ -172,7 +174,7 @@ void SvgNode::Draw(RSCanvas& canvas, const Size& viewPort, const std::optional<C
 
     OnDraw(canvas, viewPort, color);
     OnDrawTraversed(canvas, viewPort, color);
-    canvas.Restore();
+    skCanvas_->restoreToCount(count);
 }
 
 void SvgNode::OnDrawTraversed(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color)
