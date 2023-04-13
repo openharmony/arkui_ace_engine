@@ -100,6 +100,8 @@ public:
 
     void GetAssetList(const std::string& path, std::vector<std::string>& assetList) const override;
 
+    void ReloadProvider();
+
 private:
     std::deque<RefPtr<AssetProvider>> providers_;
     std::vector<std::string> packagePath_;

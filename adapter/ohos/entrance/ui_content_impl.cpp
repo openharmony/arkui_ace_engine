@@ -1222,6 +1222,7 @@ void UIContentImpl::ReloadForm()
     LOGI("ReloadForm startUrl = %{public}s", startUrl_.c_str());
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     auto flutterAssetManager = AceType::DynamicCast<FlutterAssetManager>(container->GetAssetManager());
+    flutterAssetManager->ReloadProvider();
     Platform::AceContainer::ClearEngineCache(instanceId_);
     Platform::AceContainer::RunPage(instanceId_, Platform::AceContainer::GetContainer(instanceId_)->GeneratePageId(),
         startUrl_, "");
