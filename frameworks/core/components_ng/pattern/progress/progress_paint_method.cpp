@@ -48,9 +48,7 @@ void ProgressPaintMethod::CalculateStrokeWidth(const SizeF& contentSize)
     constexpr float HALF = 0.5;
     switch (progressType_) {
         case ProgressType::LINEAR:
-        case ProgressType::CAPSULE:
             strokeWidth_ = std::min(strokeWidth_, length);
-            strokeWidth_ = std::max(strokeWidth_, static_cast<float>(capsuleBorderWidth_.ConvertToPx()) / HALF);
             break;
         case ProgressType::MOON:
         case ProgressType::RING:
@@ -60,6 +58,7 @@ void ProgressPaintMethod::CalculateStrokeWidth(const SizeF& contentSize)
                 strokeWidth_ = length * HALF * HALF;
             }
             break;
+        case ProgressType::CAPSULE:
         default:
             break;
     }
