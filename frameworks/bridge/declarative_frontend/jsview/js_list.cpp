@@ -143,12 +143,12 @@ void JSList::SetChainAnimationOptions(const JSCallbackInfo& info)
         ParseJsDimensionVp(jsObj->GetProperty("minSpace"), minSpace);
         Dimension maxSpace = 40.0_vp;
         ParseJsDimensionVp(jsObj->GetProperty("maxSpace"), maxSpace);
-        float conductivity = 0.7f;
-        ConvertFromJSValue(jsObj->GetProperty("conductivity"), conductivity);
-        float intensity = 0.3f;
-        ConvertFromJSValue(jsObj->GetProperty("intensity"), intensity);
+        double conductivity = 0.7f;
+        JSViewAbstract::ParseJsDouble(jsObj->GetProperty("conductivity"), conductivity);
+        double intensity = 0.3f;
+        JSViewAbstract::ParseJsDouble(jsObj->GetProperty("intensity"), intensity);
         int32_t edgeEffect = 0;
-        ConvertFromJSValue(jsObj->GetProperty("edgeEffect"), edgeEffect);
+        JSViewAbstract::ParseJsInt32(jsObj->GetProperty("edgeEffect"), edgeEffect);
         ListModel::GetInstance()->SetChainAnimationOptions(minSpace, maxSpace, conductivity, intensity, edgeEffect);
     }
 }

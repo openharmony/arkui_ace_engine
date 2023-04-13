@@ -41,6 +41,8 @@ constexpr double CHAIN_SPRING_STIFFNESS = 228;
 constexpr Color SELECT_FILL_COLOR = Color(0x1A000000);
 constexpr Color SELECT_STROKE_COLOR = Color(0x33FFFFFF);
 constexpr Color ITEM_FILL_COLOR = Color(0x1A0A59f7);
+constexpr float DEFAULT_MIN_SPACE_SCALE = 0.75f;
+constexpr float DEFAULT_MAX_SPACE_SCALE = 2.0f;
 } // namespace
 
 void ListPattern::OnAttachToFrameNode()
@@ -832,8 +834,9 @@ void ListPattern::SetChainAnimation(bool enable)
             auto effect = chainAnimationOptions_.value().edgeEffect;
             chainAnimation_->SetEdgeEffect(effect == 1 ? ChainEdgeEffect::STRETCH : ChainEdgeEffect::DEFAULT);
         } else {
-            chainAnimation_ =
-                AceType::MakeRefPtr<ChainAnimation>(space, space * 2, space / 2, springProperty_); /* 2:double */
+            auto minSpace = space * DEFAULT_MIN_SPACE_SCALE;
+            auto maxSpace = space * DEFAULT_MAX_SPACE_SCALE;
+            chainAnimation_ = AceType::MakeRefPtr<ChainAnimation>(space, maxSpace, minSpace, springProperty_);
         }
         chainAnimation_->SetAnimationCallback([weak = AceType::WeakClaim(this)]() {
             auto list = weak.Upgrade();
