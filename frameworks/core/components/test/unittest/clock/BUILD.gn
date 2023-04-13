@@ -192,7 +192,7 @@ ohos_unittest("ClockComponentTest") {
   ]
 
   external_deps = [ "c_utils:utils" ]
-  if (!is_standard_system) {
+  if (!is_ohos_standard_system) {
     external_deps += [
       "hilog:libhilog",
       "resmgr:resourcemanager",
@@ -215,7 +215,7 @@ group("unittest") {
   testonly = true
   deps = []
 
-  if (!is_standard_system) {
+  if (!is_ohos_standard_system) {
     deps = [ ":ClockComponentTest" ]
   }
 }

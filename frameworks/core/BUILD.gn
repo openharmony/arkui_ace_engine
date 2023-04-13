@@ -403,7 +403,7 @@ template("ace_core_source_set") {
     }
 
     if (!use_mingw_win && !use_mac && !is_wearable_product &&
-        !is_standard_system && !use_linux) {
+        !is_ohos_standard_system && !use_linux) {
       deps += [ "$ace_root/frameworks/core/components/rich_text:ace_core_components_rich_text_$platform" ]
     }
 

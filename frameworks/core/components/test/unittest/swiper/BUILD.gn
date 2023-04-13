@@ -241,7 +241,7 @@ ohos_unittest("SwiperComponentTest") {
     "//third_party/googletest:gtest_main",
   ]
 
-  if (!is_standard_system) {
+  if (!is_ohos_standard_system) {
     external_deps = [
       "hilog:libhilog",
       "resmgr:resourcemanager",
