@@ -182,6 +182,14 @@ void CanvasPaintMethod::DrawImage(
     CHECK_NULL_VOID(image);
     InitImagePaint();
     InitPaintBlend(imagePaint_);
+    const auto skCanvas =
+        globalState_.GetType() == CompositeOperation::SOURCE_OVER ? skCanvas_.get() : cacheCanvas_.get();
+    if (HasImageShadow()) {
+        SkRect skRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
+        SkPath path;
+        path.addRect(skRect);
+        PaintShadow(path, *imageShadow_, skCanvas);
+    }
 
     switch (canvasImage.flag) {
         case 0:
