@@ -109,15 +109,19 @@ public:
         auto theme = context ? context->GetTheme<SelectTheme>() : nullptr;
         auto defaultFontSize = theme ? theme->GetMenuFontSize() : Dimension(0, DimensionUnit::FP);
         auto defaultFontColor = theme ? theme->GetMenuFontColor() : Color::BLACK;
-        json->Put("fontSize", GetFontSize().value_or(defaultFontSize).ToString().c_str());
-        json->Put("fontColor", GetFontColor().value_or(defaultFontColor).ColorToString().c_str());
-        json->Put("fontWeight",
+        auto contentFontJsonObject = JsonUtil::Create(true);
+        contentFontJsonObject->Put("size", GetFontSize().value_or(defaultFontSize).ToString().c_str());
+        contentFontJsonObject->Put("weight",
             V2::ConvertWrapFontWeightToStirng(GetFontWeight().value_or(FontWeight::REGULAR)).c_str());
-        json->Put("labelFontSize", GetLabelFontSize().value_or(defaultFontSize).ToString().c_str());
+        json->Put("contentFont", contentFontJsonObject);
+        json->Put("contentFontColor", GetFontColor().value_or(defaultFontColor).ColorToString().c_str());
+        auto labelFontJsonObject = JsonUtil::Create(true);
+        labelFontJsonObject->Put("size", GetLabelFontSize().value_or(defaultFontSize).ToString().c_str());
+        labelFontJsonObject->Put("weight",
+            V2::ConvertWrapFontWeightToStirng(GetLabelFontWeight().value_or(FontWeight::REGULAR)).c_str());
+        json->Put("labelFont", labelFontJsonObject);
         auto defaultLabelFontColor = theme ? theme->GetSecondaryFontColor() : Color::GRAY;
         json->Put("labelFontColor", GetLabelFontColor().value_or(defaultLabelFontColor).ColorToString().c_str());
-        json->Put("labelFontWeight",
-            V2::ConvertWrapFontWeightToStirng(GetLabelFontWeight().value_or(FontWeight::REGULAR)).c_str());
     }
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuItemLayoutProperty);
