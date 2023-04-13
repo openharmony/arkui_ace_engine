@@ -156,5 +156,5 @@ ohos_unittest("text_test_ng") {
     "//third_party/googletest:gmock_main",
   ]
 
-  configs = test_configs
+  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 }
