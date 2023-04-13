@@ -85,6 +85,7 @@ ark_toolchain_path = "//arkcompiler/toolchain"
 window_manager_path = "//foundation/window/window_manager"
 graphic_standard_path = "//foundation/graphic/graphic_2d"
 ark_ets_path = "//arkcompiler/ets_runtime"
+crossplatform_plugin_root = "//plugins"
 
 # Config toolchain
 windows_buildtool = "//build/toolchain/mingw:mingw_x86_64"
