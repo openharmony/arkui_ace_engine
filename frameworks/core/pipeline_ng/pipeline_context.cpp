@@ -189,13 +189,13 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
                                                : AceApplicationInfo::GetInstance().GetProcessName();
     window_->RecordFrameTime(nanoTimestamp, abilityName);
     FlushAnimation(GetTimeFromExternalTimer());
+    FlushTouchEvents();
     FlushBuild();
     if (isFormRender_ && drawDelegate_) {
         auto renderContext = AceType::DynamicCast<NG::RenderContext>(rootNode_->GetRenderContext());
         drawDelegate_->DrawRSFrame(renderContext);
         drawDelegate_ = nullptr;
     }
-    FlushTouchEvents();
     if (!taskScheduler_.isEmpty()) {
 #if !defined(PREVIEW)
         LayoutInspector::SupportInspector();
