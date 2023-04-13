@@ -2165,4 +2165,16 @@ void RosenRenderContext::SetActualForegroundColor(const Color& value)
     RequestNextFrame();
 }
 
+void RosenRenderContext::AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePropertyBase> property)
+{
+    CHECK_NULL_VOID(rsNode_);
+    CHECK_NULL_VOID(property);
+    if (!property->GetModifyImpl()) {
+        auto nodeModifierImpl = std::make_shared<RSNodeModifierImpl>();
+        CHECK_NULL_VOID(nodeModifierImpl);
+        property->SetModifyImpl(nodeModifierImpl);
+        rsNode_->AddModifier(nodeModifierImpl);
+        nodeModifierImpl->AddProperty(property->GetProperty());
+    }
+}
 } // namespace OHOS::Ace::NG

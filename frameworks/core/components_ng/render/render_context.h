@@ -27,6 +27,7 @@
 #include "core/animation/page_transition_common.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/shared_transition_option.h"
+#include "core/components_ng/base/modifier.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/overlay_property.h"
 #include "core/components_ng/property/progress_mask_property.h"
@@ -231,6 +232,8 @@ public:
     {
         return GetBackground() ? GetBackground()->propBlurRadius : std::nullopt;
     }
+
+    virtual void AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePropertyBase> modifier) {};
 
     virtual void PaintAccessibilityFocus() {};
 
