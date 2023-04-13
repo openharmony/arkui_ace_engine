@@ -32,6 +32,13 @@ const char TRANSFORM_TRANSLATE[] = "translate";
 
 using namespace StringUtils;
 
+void SvgTransform::ApplyRotationPivot(Matrix4& mat, float x, float y)
+{
+    // translate matrix to offset rotation center
+    // effect = translate(pivot) -> rotate(angle) -> translate(-pivot)
+    mat = Matrix4::CreateTranslate(x, y, 0) * mat * Matrix4::CreateTranslate(-x, -y, 0);
+}
+
 Matrix4 SvgTransform::CreateMatrix4(const std::string& transform)
 {
     auto retMat = Matrix4::CreateIdentity();
@@ -63,6 +70,9 @@ Matrix4 SvgTransform::CreateMatrix4(const std::string& transform)
             }
         } else if (type == TRANSFORM_ROTATE) {
             mat = Matrix4::CreateRotate(StringToFloat(numVec[0].c_str()), 0, 0, 1);
+            if (numVec.size() >= 3) {
+                ApplyRotationPivot(mat, StringToFloat(numVec[1]), StringToFloat(numVec[2]));
+            }
         } else if (type == TRANSFORM_SKEWX) {
             mat = Matrix4::CreateSkew(StringToFloat(numVec[0].c_str()), 0);
         } else if (type == TRANSFORM_SKEWY) {
@@ -81,62 +91,15 @@ Matrix4 SvgTransform::CreateMatrix4(const std::string& transform)
 
 TransformInfo SvgTransform::CreateInfoFromString(const std::string& transform)
 {
-    auto retMat = Matrix4::CreateIdentity();
-    std::vector<std::string> attrs;
-    SplitStr(transform, ")", attrs);
     TransformInfo transformInfo;
-    for (auto& attr : attrs) {
-        std::string type = attr.substr(0, attr.find_first_of("("));
-        std::string values = attr.substr(attr.find_first_of("(") + 1);
-        std::vector<std::string> numVec;
-        std::string tag = (values.find(",") != std::string::npos) ? "," : " ";
-        SplitStr(values, tag, numVec);
-        if (numVec.empty()) {
-            continue;
-        }
-
-        Matrix4 mat = Matrix4::CreateIdentity();
-        TrimStr(attr);
-        if (type == TRANSFORM_TRANSLATE) {
-            if (numVec.size() == 1) {
-                mat = Matrix4::CreateTranslate(StringToFloat(numVec[0].c_str()), 0, 0);
-            } else {
-                mat = Matrix4::CreateTranslate(StringToFloat(numVec[0].c_str()), StringToFloat(numVec[1].c_str()), 0);
-            }
-        } else if (type == TRANSFORM_SCALE) {
-            if (numVec.size() == 1) {
-                mat = Matrix4::CreateScale(StringToFloat(numVec[0].c_str()), StringToFloat(numVec[0].c_str()), 1);
-            } else {
-                mat = Matrix4::CreateScale(StringToFloat(numVec[0].c_str()), StringToFloat(numVec[1].c_str()), 1);
-            }
-        } else if (type == TRANSFORM_ROTATE) {
-            mat = Matrix4::CreateRotate(StringToFloat(numVec[0].c_str()), 0, 0, 1);
-            if (numVec.size() >= 3) {
-                transformInfo.hasRotateCenter = true;
-                transformInfo.rotateCenter = Offset(StringToFloat(numVec[1]), StringToFloat(numVec[2]));
-            }
-        } else if (type == TRANSFORM_SKEWX) {
-            mat = Matrix4::CreateSkew(StringToFloat(numVec[0].c_str()), 0);
-        } else if (type == TRANSFORM_SKEWY) {
-            mat = Matrix4::CreateSkew(0, StringToFloat(numVec[0].c_str()));
-        } else if (type == TRANSFORM_MATRIX && numVec.size() == 6) {
-            mat = Matrix4::CreateMatrix2D(StringToFloat(numVec[0].c_str()), StringToFloat(numVec[1].c_str()),
-                                          StringToFloat(numVec[2].c_str()), StringToFloat(numVec[3].c_str()),
-                                          StringToFloat(numVec[4].c_str()), StringToFloat(numVec[5].c_str()));
-        } else {
-            continue;
-        }
-        retMat = retMat * mat;
-    }
-    transformInfo.matrix4 = retMat;
+    transformInfo.matrix4 = CreateMatrix4(transform);
     return transformInfo;
 }
 
-TransformInfo SvgTransform::CreateInfoFromMap(const std::map<std::string, std::vector<float>>& transform)
+Matrix4 SvgTransform::CreateMatrixFromMap(const std::map<std::string, std::vector<float>>& transform)
 {
     auto retMat = Matrix4::CreateIdentity();
     auto mat = Matrix4::CreateIdentity();
-    TransformInfo transformInfo;
     for (auto& [type, values] : transform) {
         if (values.empty()) {
             continue;
@@ -148,8 +111,7 @@ TransformInfo SvgTransform::CreateInfoFromMap(const std::map<std::string, std::v
         } else if (type == TRANSFORM_ROTATE) {
             mat = Matrix4::CreateRotate(values[0], 0, 0, 1);
             if (values.size() >= 3) {
-                transformInfo.hasRotateCenter = true;
-                transformInfo.rotateCenter = Offset(values[1], values[2]);
+                ApplyRotationPivot(mat, values[1], values[2]);
             }
         } else if (type == TRANSFORM_SKEW && values.size() >= 2) {
             mat = Matrix4::CreateSkew(values[0], values[1]);
@@ -158,7 +120,13 @@ TransformInfo SvgTransform::CreateInfoFromMap(const std::map<std::string, std::v
         }
         retMat = retMat * mat;
     }
-    transformInfo.matrix4 = retMat;
+    return retMat;
+}
+
+TransformInfo SvgTransform::CreateInfoFromMap(const std::map<std::string, std::vector<float>>& transform)
+{
+    TransformInfo transformInfo;
+    transformInfo.matrix4 = CreateMatrixFromMap(transform);
     return transformInfo;
 }
 
@@ -322,4 +290,3 @@ bool SvgTransform::AlignmentFrame(const std::string& type, std::vector<float>& f
 }
 
 } // namespace OHOS::Ace
-

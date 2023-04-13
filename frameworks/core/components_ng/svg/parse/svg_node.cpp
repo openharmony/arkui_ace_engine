@@ -225,14 +225,9 @@ void SvgNode::OnMask(RSCanvas& canvas, const Size& viewPort)
 
 void SvgNode::OnTransform(RSCanvas& canvas, const Size& viewPort)
 {
-    auto transformInfo = (animateTransform_.empty()) ? SvgTransform::CreateInfoFromString(transform_)
-                                                     : SvgTransform::CreateInfoFromMap(animateTransform_);
-    if (transformInfo.hasRotateCenter) {
-        transformInfo.matrix4 =
-            RenderTransform::GetTransformByOffset(transformInfo.matrix4, transformInfo.rotateCenter);
-        // maybe should process attr transformOrigin
-    }
-    skCanvas_->concat(FlutterSvgPainter::ToSkMatrix(transformInfo.matrix4));
+    auto matrix = (animateTransform_.empty()) ? SvgTransform::CreateMatrix4(transform_)
+                                              : SvgTransform::CreateMatrixFromMap(animateTransform_);
+    skCanvas_->concat(FlutterSvgPainter::ToSkMatrix(matrix));
 }
 
 double SvgNode::ConvertDimensionToPx(const Dimension& value, const Size& viewPort, SvgLengthType type) const
