@@ -878,6 +878,20 @@ void DeclarativeFrontend::OnSurfaceChanged(int32_t width, int32_t height)
     }
 }
 
+void DeclarativeFrontend::HotReload()
+{
+    auto manager = GetPageRouterManager();
+    CHECK_NULL_VOID(manager);
+    manager->FlushFrontend();
+}
+
+void DeclarativeFrontend::FlushReload()
+{
+    if (jsEngine_) {
+        jsEngine_->FlushReload();
+    }
+}
+
 void DeclarativeFrontend::DumpFrontend() const
 {
     if (!delegate_) {

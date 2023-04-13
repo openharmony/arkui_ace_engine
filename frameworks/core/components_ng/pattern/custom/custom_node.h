@@ -54,9 +54,16 @@ public:
         return 1;
     }
 
+    void SetCompleteReloadFunc(RenderFunction&& func) override
+    {
+        completeReloadFunc_ = std::move(func);
+    }
+    void FlushReload();
+
 private:
     std::string viewKey_;
     RenderFunction renderFunction_;
+    RenderFunction completeReloadFunc_;
 };
 } // namespace OHOS::Ace::NG
 
