@@ -151,7 +151,7 @@ void DragDropManager::UpdatePixelMapPosition(int32_t globalX, int32_t globalY)
     auto rootNode = pipeline->GetRootElement();
     CHECK_NULL_VOID(rootNode);
     if (manager->GetHasPixelMap()) {
-        auto columnNode = rootNode->GetLastChild();
+        auto columnNode = AceType::DynamicCast<NG::FrameNode>(rootNode->GetLastChild());
         CHECK_NULL_VOID(columnNode);
         auto imageNode = AceType::DynamicCast<NG::FrameNode>(columnNode->GetLastChild());
         CHECK_NULL_VOID(imageNode);
@@ -161,8 +161,14 @@ void DragDropManager::UpdatePixelMapPosition(int32_t globalX, int32_t globalY)
         auto height = geometryNode->GetFrameSize().Height();
         auto imageContext = imageNode->GetRenderContext();
         CHECK_NULL_VOID(imageContext);
-        imageContext->UpdatePosition(NG::OffsetT<Dimension>(Dimension(globalX - width * PIXELMAP_POSITION_WIDTH),
-            Dimension(globalY - height * PIXELMAP_POSITION_HEIGHT)));
+        auto hub = columnNode->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(hub);
+        RefPtr<PixelMap> pixelMap = hub->GetPixelMap();
+        CHECK_NULL_VOID(pixelMap);
+        float scale = pixelMap->GetWidth() / width;
+        imageContext->UpdatePosition(NG::OffsetT<Dimension>(
+            Dimension(globalX - width * PIXELMAP_POSITION_WIDTH * scale - width / 2.0f + width * scale / 2.0f),
+            Dimension(globalY - height * PIXELMAP_POSITION_HEIGHT * scale - height / 2.0f + height * scale / 2.0f)));
         imageContext->OnModifyDone();
     }
 }
@@ -647,6 +653,9 @@ void DragDropManager::AddDataToClipboard(const std::string& extraInfo)
         addDataCallback_ = callback;
     }
     clipboard_->GetData(addDataCallback_, true);
+#ifdef ENABLE_DRAG_FRAMEWORK
+    extraInfo_ = extraInfo;
+#endif // ENABLE_DRAG_FRAMEWORK
 }
 
 void DragDropManager::GetExtraInfoFromClipboard(std::string& extraInfo)
@@ -760,4 +769,21 @@ void DragDropManager::UpdateDragEvent(RefPtr<OHOS::Ace::DragEvent>& event, float
     }
 #endif // ENABLE_DRAG_FRAMEWORK
 }
+
+#ifdef ENABLE_DRAG_FRAMEWORK
+std::string DragDropManager::GetExtraInfo()
+{
+    return extraInfo_;
+}
+
+void DragDropManager::SetExtraInfo(const std::string& extraInfo)
+{
+    extraInfo_ = extraInfo;
+}
+
+void DragDropManager::ClearExtraInfo()
+{
+    extraInfo_.clear();
+}
+#endif // ENABLE_DRAG_FRAMEWORK
 } // namespace OHOS::Ace::NG

@@ -42,10 +42,6 @@ struct DragNotifyMsg;
 }
 #endif
 namespace OHOS::Ace::NG {
-#ifdef ENABLE_DRAG_FRAMEWORK
-const double PIXELMAP_WIDTH_RATE = -0.5;
-const double PIXELMAP_HEIGHT_RATE = -0.2;
-#endif // ENABLE_DRAG_FRAMEWORK
 
 enum class HitTestMode {
     /**
@@ -366,13 +362,13 @@ public:
 
     void OnModifyDone();
     bool KeyBoardShortCutClick(const KeyEvent& event, const WeakPtr<NG::FrameNode>& node);
+    bool IsAllowedDrag(RefPtr<EventHub> eventHub);
 
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult, int32_t touchId);
 
     void UpdateGestureHierarchy();
-    bool IsAllowedDrag(RefPtr<EventHub> eventHub);
 
     // old path.
     void UpdateExternalNGGestureRecognizer();

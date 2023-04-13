@@ -37,7 +37,9 @@
 namespace OHOS::Ace::NG {
 #ifdef ENABLE_DRAG_FRAMEWORK
 using namespace Msdp::DeviceStatus;
-constexpr float PIXELMAP_DRAG_SCALE = 0.8f;
+constexpr float PIXELMAP_DRAG_SCALE = 1.0f;
+constexpr float PIXELMAP_WIDTH_RATE = -0.5f;
+constexpr float PIXELMAP_HEIGHT_RATE = -0.2f;
 #endif // ENABLE_DRAG_FRAMEWORK
 constexpr const char* HIT_TEST_MODE[] = {
     "HitTestMode.Default",
