@@ -239,7 +239,7 @@ void AceContainer::InitializeStageAppConfig(const std::string& assetPath, bool f
     CHECK_NULL_VOID(appInfo);
     auto hapModuleInfo = stageContext->GetHapModuleInfo();
     CHECK_NULL_VOID(hapModuleInfo);
-    if (pipelineContext_ && !formsEnabled) {
+    if (pipelineContext_) {
         LOGI("Set MinPlatformVersion to %{public}d", appInfo->GetMinAPIVersion());
         pipelineContext_->SetMinPlatformVersion(appInfo->GetMinAPIVersion());
     }
@@ -953,6 +953,7 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, RSAceView* view, d
 
     auto cardFrontend = AceType::DynamicCast<FormFrontendDeclarative>(frontend_);
     if (cardFrontend) {
+        pipelineContext_->SetIsFormRender(true);
         cardFrontend->SetLoadCardCallBack(WeakPtr<PipelineBase>(pipelineContext_));
     }
 
