@@ -33,7 +33,7 @@ namespace {
 constexpr double RADIUS_DEFAULT = 300.0;
 const std::string HYPERLINK_ADDRESS = "https://www.baidu.com";
 const std::string HYPERLINK_CONTENT = "baidu";
-const std::string HYPERLINK_EXTRAINFO = "hyperlink drag";
+const std::string HYPERLINK_EXTRAINFO = "{\"url\":\"https://www.baidu.com\",\"title\":\"\"}";
 } // namespace
 
 class HyperlinkTestNg : public testing::Test {
