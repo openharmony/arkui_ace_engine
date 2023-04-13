@@ -296,6 +296,7 @@ void PipelineContext::FlushPipelineImmediately()
 
 void PipelineContext::FlushPipelineWithoutAnimation()
 {
+    ACE_FUNCTION_TRACE();
     FlushBuild();
     FlushTouchEvents();
     taskScheduler_.FlushTask();
