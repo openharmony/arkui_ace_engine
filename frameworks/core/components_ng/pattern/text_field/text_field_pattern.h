@@ -289,6 +289,7 @@ public:
 
     float AdjustTextRectOffsetX();
     float AdjustTextAreaOffsetY();
+    void AdjustTextSelectionRectOffsetX();
 
     float GetPaddingTop() const
     {

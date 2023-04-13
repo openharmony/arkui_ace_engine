@@ -65,7 +65,6 @@ void ButtonLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             // Fonsize is not set. When the font width is greater than the button width, dynamically change the font
             // size to no less than 9sp.
             if (GreatOrEqual(childSize_.Width(), layoutConstraint.maxSize.Width())) {
-                auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
                 auto textLayoutProperty = DynamicCast<TextLayoutProperty>(childWrapper->GetLayoutProperty());
                 textLayoutProperty->UpdateAdaptMaxFontSize(
                     buttonLayoutProperty->GetMaxFontSize().value_or(buttonTheme->GetMaxFontSize()));

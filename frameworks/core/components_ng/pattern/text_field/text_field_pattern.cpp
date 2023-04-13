@@ -886,14 +886,41 @@ void TextFieldPattern::HandleSetSelection(int32_t start, int32_t end)
     textEditingValue_.caretPosition =
         std::clamp(end, 0, static_cast<int32_t>(textEditingValue_.GetWideText().length()));
     selectionMode_ = start == end ? SelectionMode::NONE : SelectionMode::SELECT;
-    caretUpdateType_ = CaretUpdateType::EVENT;
     GetTextRectsInRange(textSelector_.GetStart(), textSelector_.GetEnd(), textBoxes_);
+    AdjustTextSelectionRectOffsetX();
+    UpdateCaretRectByPosition(textEditingValue_.caretPosition);
     if (start == end) {
         CreateSingleHandle();
     } else {
         CreateHandles();
     }
-    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    UpdateCaretInfoToController();
+    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void TextFieldPattern::AdjustTextSelectionRectOffsetX()
+{
+    auto contentLeftBoundary = contentRect_.GetX();
+    auto contentRightBoundary = contentRect_.GetX() + contentRect_.GetSize().Width();
+    auto selectionStart = textBoxes_.begin()->rect_.GetLeft() + textRect_.GetX();
+    auto selectionEnd = textBoxes_.begin()->rect_.GetRight() + textRect_.GetX();
+
+    float dx = 0.0f;
+    if (selectionEnd < contentLeftBoundary) {
+        if (selectionStart < selectionEnd) {
+            dx = contentLeftBoundary - selectionStart;
+        } else {
+            dx = contentLeftBoundary - selectionEnd;
+        }
+    } else if (selectionEnd > contentRightBoundary) {
+        if (selectionStart < selectionEnd) {
+            dx = selectionEnd - contentRightBoundary;
+        } else {
+            dx = selectionStart - contentRightBoundary;
+        }
+    }
+    textRect_.SetLeft(textRect_.GetX() + dx);
+    return;
 }
 
 void TextFieldPattern::HandleExtendAction(int32_t action)
