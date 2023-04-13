@@ -151,8 +151,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         }
         return SizeF(idealWidth, std::min(preferredHeight, idealHeight));
     }
-    float imageSize = 0.0f;
-    imageSize = showPasswordIcon ? preferredHeight : 0.0f;
+    float imageSize = showPasswordIcon ? pattern->GetIconSize() : 0.0f;
     if (contentConstraint.selfIdealSize.Height()) {
         imageSize = std::min(imageSize, contentConstraint.selfIdealSize.Height().value());
     }
@@ -218,17 +217,19 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         auto textOffset = Alignment::GetAlignPosition(contentSize, textRect_.GetSize(), Alignment::CENTER_LEFT);
         // adjust text rect to the basic padding
         auto textRectOffsetX = pattern->GetPaddingLeft();
-        switch (layoutProperty->GetTextAlignValue(TextAlign::START)) {
-            case TextAlign::START:
-                break;
-            case TextAlign::CENTER:
-                textRectOffsetX += (contentSize.Width() - textRect_.Width()) * 0.5f;
-                break;
-            case TextAlign::END:
-                textRectOffsetX += contentSize.Width() - textRect_.Width();
-                break;
-            default:
-                break;
+        if (!pattern->GetTextEditingValue().text.empty()) {
+            switch (layoutProperty->GetTextAlignValue(TextAlign::START)) {
+                case TextAlign::START:
+                    break;
+                case TextAlign::CENTER:
+                    textRectOffsetX += (contentSize.Width() - textRect_.Width()) * 0.5f;
+                    break;
+                case TextAlign::END:
+                    textRectOffsetX += contentSize.Width() - textRect_.Width();
+                    break;
+                default:
+                    break;
+            }
         }
         textRect_.SetOffset(OffsetF(textRectOffsetX, textOffset.GetY()));
     }
