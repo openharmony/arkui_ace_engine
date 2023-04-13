@@ -117,9 +117,7 @@ void ScrollBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         LOGW("scroll bar scrollable distance is zero");
     }
     currentOffset = std::clamp(currentOffset, 0.0f, scrollableDistance_);
-    if (currentOffset_ == currentOffset || scrollableDistance_ <= 0.0f) {
-        return;
-    } else {
+    if (scrollableDistance_ > 0.0f) {
         currentOffset_ = currentOffset;
     }
     auto currentAxisOffset = axis == Axis::VERTICAL ? OffsetF(0.0f, currentOffset_) : OffsetF(currentOffset_, 0.0f);
