@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,7 @@
 #include "napi/native_node_api.h"
 
 namespace OHOS::Ace::Napi {
-static napi_value PromptExport(napi_env env, napi_value exports)
+static napi_value PromptActionExport(napi_env env, napi_value exports)
 {
     napi_property_descriptor promptDesc[] = {
         DECLARE_NAPI_FUNCTION("showToast", JSPromptShowToast),
@@ -30,18 +30,18 @@ static napi_value PromptExport(napi_env env, napi_value exports)
     return exports;
 }
 
-static napi_module promptModule = {
+static napi_module promptActionModule = {
     .nm_version = 1,
     .nm_flags = 0,
     .nm_filename = nullptr,
-    .nm_register_func = PromptExport,
-    .nm_modname = "prompt",
+    .nm_register_func = PromptActionExport,
+    .nm_modname = "promptAction",
     .nm_priv = ((void*)0),
     .reserved = { 0 },
 };
 
 extern "C" __attribute__((constructor)) void PromptRegister()
 {
-    napi_module_register(&promptModule);
+    napi_module_register(&promptActionModule);
 }
 } // namespace OHOS::Ace::Napi
