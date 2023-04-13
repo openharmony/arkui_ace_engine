@@ -18,6 +18,7 @@ group("property_unittest") {
     "calc_length:calc_length_test_ng",
     "gradient:gradient_property_test_ng",
     "grid_property:grid_property_test_ng",
+    "measure_utils:measure_utils_test_ng",
     "panel:panel_property_test_ng",
     "property_test:property_test_ng",
     "swiper:swiper_property_test_ng",
