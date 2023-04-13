@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
+import("//foundation/arkui/ace_engine/ace_config.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("form_pattern_test_ng") {
@@ -54,7 +55,7 @@ ohos_unittest("form_pattern_test_ng") {
     "//foundation/graphic/graphic_2d:libsurface",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
   ]
-  if (is_standard_system) {
+  if (is_ohos_standard_system) {
     external_deps = [
       "ability_base:want",
       "ability_runtime:app_manager",

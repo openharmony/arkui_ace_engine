@@ -71,7 +71,7 @@ foreach(device, ace_devices) {
   }
 }
 
-if (is_standard_system) {
+if (is_ohos_standard_system) {
   # All dynamic libraries to be copied to the path "/previewer/common/bin/module/",
   # which are called by the napi framework, can be added to this script.
   foreach(module, napi_modules) {

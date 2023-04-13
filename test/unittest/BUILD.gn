@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
+import("//foundation/arkui/ace_engine/ace_config.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 group("unittest") {
@@ -37,7 +38,7 @@ config("ace_unittest_config") {
   cflags_cc = []
   defines = []
 
-  if (is_standard_system && !use_mingw_win && !use_mac && !use_linux) {
+  if (is_ohos_standard_system && !use_mingw_win && !use_mac && !use_linux) {
     cflags_cc += [
       "-Wno-thread-safety-attributes",
       "-Wno-thread-safety-analysis",
