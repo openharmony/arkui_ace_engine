@@ -118,6 +118,8 @@ private:
     void CommonInitializeForm(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);
     void InitializeSubWindow(OHOS::Rosen::Window* window, bool isDialog = false);
     void DestroyCallback() const;
+    void SetConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
+
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
     void* runtime_ = nullptr;
     OHOS::Rosen::Window* window_ = nullptr;
