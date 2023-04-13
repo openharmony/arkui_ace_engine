@@ -1365,6 +1365,27 @@ void AceContainer::NotifyConfigurationChange(bool needReloadTransition)
         TaskExecutor::TaskType::JS);
 }
 
+void AceContainer::HotReload()
+{
+    auto taskExecutor = GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [instanceId = instanceId_, weak = WeakClaim(this)]() {
+            ContainerScope scope(instanceId);
+            auto container = weak.Upgrade();
+            CHECK_NULL_VOID(container);
+            auto frontend = container->GetFrontend();
+            CHECK_NULL_VOID(frontend);
+            LOGI("AceContainer::Flush Frontend for HotReload");
+            frontend->HotReload();
+
+            auto pipeline = container->GetPipelineContext();
+            CHECK_NULL_VOID(pipeline);
+            pipeline->FlushReload();
+        },
+        TaskExecutor::TaskType::UI);
+}
+
 void AceContainer::SetToken(sptr<IRemoteObject>& token)
 {
     std::lock_guard<std::mutex> lock(cardTokensMutex_);
@@ -1515,16 +1536,12 @@ void AceContainer::GetImageDataFromAshmem(
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_HotReloadPage()
 {
     AceEngine::Get().NotifyContainers([](const RefPtr<Container>& container) {
-        auto ace = AceType::DynamicCast<AceContainer>(container);
-        CHECK_NULL_VOID(ace);
-        if (ace->IsUseNewPipeline()) {
-            auto frontend = ace->GetFrontend();
-            CHECK_NULL_VOID(frontend);
-            frontend->RebuildAllPages();
+        LOGI("starting hotReload");
+        if (Container::IsCurrentUseNewPipeline()) {
+            container->HotReload();
         } else {
-            ace->NotifyConfigurationChange(true);
+            container->NotifyConfigurationChange(true);
         }
-        LOGI("frontend rebuild finished");
     });
 }
 

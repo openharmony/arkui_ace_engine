@@ -57,6 +57,15 @@ void CustomNode::Build()
     UINode::Build();
 }
 
+// used in HotReload to update root view @Component
+void CustomNode::FlushReload()
+{
+    CHECK_NULL_VOID(completeReloadFunc_);
+    Clean();
+    renderFunction_ = completeReloadFunc_;
+    Build();
+}
+
 void CustomNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool forceMeasure, bool forceLayout)
 {
     Build();

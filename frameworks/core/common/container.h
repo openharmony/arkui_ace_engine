@@ -284,6 +284,9 @@ public:
         return false;
     }
 
+    virtual void NotifyConfigurationChange(bool) {}
+    virtual void HotReload() {}
+
 protected:
     std::chrono::time_point<std::chrono::high_resolution_clock> createTime_;
     bool firstUpdateData_ = true;

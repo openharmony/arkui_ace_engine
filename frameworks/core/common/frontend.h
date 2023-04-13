@@ -255,6 +255,8 @@ public:
     }
 
     virtual void FlushReload() {}
+    // flush frontend for HotReload feature in NG
+    virtual void HotReload() {}
 
     virtual void SetErrorEventHandler(
         std::function<void(const std::string&, const std::string&)>&& errorCallback) {}

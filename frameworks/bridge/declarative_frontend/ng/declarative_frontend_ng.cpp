@@ -251,4 +251,10 @@ void DeclarativeFrontendNG::RebuildAllPages()
     LOGW("RebuildAllPages not implemented");
 }
 
+void DeclarativeFrontendNG::HotReload()
+{
+    auto manager = GetPageRouterManager();
+    CHECK_NULL_VOID(manager);
+    manager->FlushFrontend();
+}
 } // namespace OHOS::Ace
