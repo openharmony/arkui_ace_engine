@@ -33,6 +33,8 @@
 
 #ifdef ENABLE_DRAG_FRAMEWORK
 #include "image.h"
+#include "pixel_map.h"
+#include "system_defined_pixelmap.h"
 #include "unified_data.h"
 #include "unified_record.h"
 #endif
@@ -462,28 +464,20 @@ void ImagePattern::EnableDrag()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto size = host->GetGeometryNode()->GetContentSize();
-    auto dragStart = [imageWk = WeakClaim(RawPtr(image_)), ctxWk = WeakClaim(RawPtr(loadingCtx_)), size](
-                         const RefPtr<OHOS::Ace::DragEvent>& event,
+    auto dragStart = [weak = WeakClaim(this), imageWk = WeakClaim(RawPtr(image_)),
+                         ctxWk = WeakClaim(RawPtr(loadingCtx_)), size](const RefPtr<OHOS::Ace::DragEvent>& event,
                          const std::string& /*extraParams*/) -> DragDropInfo {
         DragDropInfo info;
         auto image = imageWk.Upgrade();
         auto ctx = ctxWk.Upgrade();
-        CHECK_NULL_RETURN(image && ctx, info);
+        auto imagePattern = weak.Upgrade();
+        CHECK_NULL_RETURN(image && ctx && imagePattern, info);
 
 #if !defined(ACE_UNITTEST)
         AceEngineExt::GetInstance().DragStartExt();
 #endif
-#ifdef ENABLE_DRAG_FRAMEWORK
-        if (ctx->GetSourceInfo().IsPixmap()) {
-            LOGI("ImagePattern default dragStart image source is pixelmap");
-        } else {
-            std::shared_ptr<UDMF::UnifiedRecord> record = std::make_shared<UDMF::Image>(ctx->GetSourceInfo().GetSrc());
-            auto unifiedData = std::make_shared<UDMF::UnifiedData>();
-            unifiedData->AddRecord(record);
-            event->SetData(unifiedData);
-        }
-#endif
-        info.extraInfo = "image drag";
+        imagePattern->UpdateDragEvent(event);
+        info.extraInfo = ctx->GetSourceInfo().GetSrc();
         info.pixelMap = image->GetPixelMap();
         if (info.pixelMap) {
             LOGI("using pixmap onDrag");
@@ -644,5 +638,23 @@ void ImagePattern::DumpInfo()
     if (layoutProp->GetImageSourceInfo().has_value()) {
         DumpLog::GetInstance().AddDesc(std::string("url: ").append(layoutProp->GetImageSourceInfo()->ToString()));
     }
+}
+
+void ImagePattern::UpdateDragEvent(const RefPtr<OHOS::Ace::DragEvent>& event)
+{
+#ifdef ENABLE_DRAG_FRAMEWORK
+    std::shared_ptr<UDMF::UnifiedRecord> record = nullptr;
+    if (ctx->GetSourceInfo().IsPixmap()) {
+        const uint8_t* pixels = image_->GetPixelMap()->GetPixelMapSharedPtr()->GetPixels();
+        int32_t length = image_->GetPixelMap()->GetPixelMapSharedPtr()->GetByteCount();
+        std::vector<uint8_t> data(pixels, pixels + length);
+        record = std::make_shared<UDMF::SystemDefinedPixelMap>(data);
+    } else {
+        record = std::make_shared<UDMF::Image>(loadingCtx_->GetSourceInfo().GetSrc());
+    }
+    auto unifiedData = std::make_shared<UDMF::UnifiedData>();
+    unifiedData->AddRecord(record);
+    event->SetData(unifiedData);
+#endif
 }
 } // namespace OHOS::Ace::NG
