@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_sliding_panel.h"
 
 #include <algorithm>
+#include <cstdint>
 #include <iterator>
 
 #include "base/log/ace_scoring_log.h"
@@ -54,6 +55,10 @@ const std::vector<PanelMode> PANEL_MODES = { PanelMode::MINI, PanelMode::HALF, P
 const std::vector<PanelType> PANEL_TYPES = { PanelType::MINI_BAR, PanelType::FOLDABLE_BAR, PanelType::TEMP_DISPLAY };
 const std::vector<VisibleType> PANEL_VISIBLE_TYPES = { VisibleType::GONE, VisibleType::VISIBLE,
     VisibleType::INVISIBLE };
+
+const static bool DEFAULT_HASDRAGBAR = true;
+const static PanelMode DEFAULT_PANELMODE = PanelMode::HALF;
+const static PanelType DEFAULT_PANELTYPE = PanelType::FOLDABLE_BAR;
 
 } // namespace
 
@@ -300,10 +305,11 @@ void JSSlidingPanel::SetHasDragBar(const JSCallbackInfo& info)
         LOGE("The info is wrong, it is supposed to have at least 1 argument");
         return;
     }
+    bool hasDragBar = DEFAULT_HASDRAGBAR;
     if (info[0]->IsBoolean()) {
-        bool hasDragBar = info[0]->ToBoolean();
-        SlidingPanelModel::GetInstance()->SetHasDragBar(hasDragBar);
+        hasDragBar = info[0]->ToBoolean();
     }
+    SlidingPanelModel::GetInstance()->SetHasDragBar(hasDragBar);
 }
 
 void JSSlidingPanel::SetShow(bool isShow)
@@ -317,14 +323,14 @@ void JSSlidingPanel::SetPanelMode(const JSCallbackInfo& info)
         LOGE("The info is wrong, it is supposed to have at least 1 argument");
         return;
     }
+    int32_t mode = static_cast<int32_t>(DEFAULT_PANELTYPE);
     if (info[0]->IsNumber()) {
-        int32_t mode = info[0]->ToNumber<int32_t>();
-        if (mode < 0 || mode >= static_cast<int32_t>(PANEL_MODES.size())) {
-            return;
+        int32_t mode_number = info[0]->ToNumber<int32_t>();
+        if (mode_number >= 0 && mode_number < static_cast<int32_t>(PANEL_MODES.size())) {
+            mode = mode_number;
         }
-
-        SlidingPanelModel::GetInstance()->SetPanelMode(PANEL_MODES[mode]);
     }
+    SlidingPanelModel::GetInstance()->SetPanelMode(PANEL_MODES[mode]);
 }
 
 void JSSlidingPanel::SetPanelType(const JSCallbackInfo& info)
@@ -333,14 +339,14 @@ void JSSlidingPanel::SetPanelType(const JSCallbackInfo& info)
         LOGE("The info is wrong, it is supposed to have at least 1 argument");
         return;
     }
+    int32_t type = static_cast<int32_t>(DEFAULT_PANELMODE);
     if (info[0]->IsNumber()) {
-        int32_t type = info[0]->ToNumber<int32_t>();
-        if (type < 0 || type >= static_cast<int32_t>(PANEL_TYPES.size())) {
-            return;
+        int32_t type_number = info[0]->ToNumber<int32_t>();
+        if (type_number >= 0 && type_number < static_cast<int32_t>(PANEL_TYPES.size())) {
+            type = type_number;
         }
-
-        SlidingPanelModel::GetInstance()->SetPanelType(PANEL_TYPES[type]);
     }
+    SlidingPanelModel::GetInstance()->SetPanelType(PANEL_TYPES[type]);
 }
 
 void JSSlidingPanel::SetMiniHeight(const JSCallbackInfo& info)
