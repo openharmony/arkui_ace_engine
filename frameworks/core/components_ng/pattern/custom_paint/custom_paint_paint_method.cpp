@@ -55,6 +55,7 @@ constexpr double HALF_CIRCLE_ANGLE = 180.0;
 constexpr double FULL_CIRCLE_ANGLE = 360.0;
 constexpr double CONIC_START_ANGLE = 0.0;
 constexpr double CONIC_END_ANGLE = 359.9;
+constexpr double DOUBLE_TWO = 2.0;
 
 const LinearEnumMapNode<CompositeOperation, SkBlendMode> SK_BLEND_MODE_TABLE[] = {
     { CompositeOperation::SOURCE_OVER, SkBlendMode::kSrcOver },
@@ -689,10 +690,10 @@ void CustomPaintPaintMethod::Ellipse(PaintWrapper* paintWrapper, const EllipsePa
 {
     OffsetF offset = GetContentOffset(paintWrapper);
     // Init the start and end angle, then calculated the sweepAngle.
-    double startAngle = std::fmod(param.startAngle, M_PI * 2.0);
-    double endAngle = std::fmod(param.endAngle, M_PI * 2.0);
-    startAngle = (startAngle < 0.0 ? startAngle + M_PI * 2.0 : startAngle) * HALF_CIRCLE_ANGLE / M_PI;
-    endAngle = (endAngle < 0.0 ? endAngle + M_PI * 2.0 : endAngle) * HALF_CIRCLE_ANGLE / M_PI;
+    double startAngle = std::fmod(param.startAngle, M_PI * DOUBLE_TWO);
+    double endAngle = std::fmod(param.endAngle, M_PI * DOUBLE_TWO);
+    startAngle = (startAngle < 0.0 ? startAngle + M_PI * DOUBLE_TWO : startAngle) * HALF_CIRCLE_ANGLE / M_PI;
+    endAngle = (endAngle < 0.0 ? endAngle + M_PI * DOUBLE_TWO : endAngle) * HALF_CIRCLE_ANGLE / M_PI;
     if (NearEqual(param.startAngle, param.endAngle)) {
         return; // Just return when startAngle is same as endAngle.
     }
@@ -879,11 +880,11 @@ void CustomPaintPaintMethod::Path2DEllipse(const OffsetF& offset, const PathArgs
     double rx = args.para3;
     double ry = args.para4;
     double rotation = args.para5 * HALF_CIRCLE_ANGLE / M_PI;
-    double startAngle = std::fmod(args.para6, M_PI * 2.0);
-    double endAngle = std::fmod(args.para7, M_PI * 2.0);
+    double startAngle = std::fmod(args.para6, M_PI * DOUBLE_TWO);
+    double endAngle = std::fmod(args.para7, M_PI * DOUBLE_TWO);
     bool anticlockwise = NearZero(args.para8) ? false : true;
-    startAngle = (startAngle < 0.0 ? startAngle + M_PI * 2.0 : startAngle) * HALF_CIRCLE_ANGLE / M_PI;
-    endAngle = (endAngle < 0.0 ? endAngle + M_PI * 2.0 : endAngle) * HALF_CIRCLE_ANGLE / M_PI;
+    startAngle = (startAngle < 0.0 ? startAngle + M_PI * DOUBLE_TWO : startAngle) * HALF_CIRCLE_ANGLE / M_PI;
+    endAngle = (endAngle < 0.0 ? endAngle + M_PI * DOUBLE_TWO : endAngle) * HALF_CIRCLE_ANGLE / M_PI;
     double sweepAngle = endAngle - startAngle;
     if (anticlockwise) {
         if (sweepAngle > 0.0) { // Make sure the sweepAngle is negative when anticlockwise.
@@ -986,5 +987,45 @@ void CustomPaintPaintMethod::Transform(const TransformParam& param)
 void CustomPaintPaintMethod::Translate(double x, double y)
 {
     skCanvas_->translate(x, y);
+}
+
+double CustomPaintPaintMethod::GetAlignOffset(TextAlign align, std::unique_ptr<txt::Paragraph>& paragraph)
+{
+    double x = 0.0;
+    TextDirection textDirection = fillState_.GetOffTextDirection();
+    switch (align) {
+        case TextAlign::LEFT:
+            x = 0.0;
+            break;
+        case TextAlign::START:
+            x = (textDirection == TextDirection::LTR) ? 0.0 : -paragraph->GetMaxIntrinsicWidth();
+            break;
+        case TextAlign::RIGHT:
+            x = -paragraph->GetMaxIntrinsicWidth();
+            break;
+        case TextAlign::END:
+            x = (textDirection == TextDirection::LTR) ? -paragraph->GetMaxIntrinsicWidth() : 0.0;
+            break;
+        case TextAlign::CENTER:
+            x = -paragraph->GetMaxIntrinsicWidth() / DOUBLE_TWO;
+            break;
+        default:
+            x = 0.0;
+            break;
+    }
+    return x;
+}
+
+txt::TextAlign CustomPaintPaintMethod::GetEffectiveAlign(txt::TextAlign align, txt::TextDirection direction) const
+{
+    if (align == txt::TextAlign::start) {
+        return (direction == txt::TextDirection::ltr) ? txt::TextAlign::left
+                                                      : txt::TextAlign::right;
+    } else if (align == txt::TextAlign::end) {
+        return (direction == txt::TextDirection::ltr) ? txt::TextAlign::right
+                                                      : txt::TextAlign::left;
+    } else {
+        return align;
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -812,4 +812,15 @@ double CustomPaintPattern::GetHeight()
     CHECK_NULL_RETURN(canvasSize_, 0.0);
     return canvasSize_->Height();
 }
+
+void CustomPaintPattern::SetTextDirection(TextDirection direction)
+{
+    auto task = [direction](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.SetTextDirection(direction);
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
 } // namespace OHOS::Ace::NG
