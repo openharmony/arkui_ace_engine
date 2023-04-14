@@ -85,6 +85,7 @@ public:
     void JsToDataUrl(const JSCallbackInfo& info);
     void JsCreateLinearGradient(const JSCallbackInfo& info);
     void JsCreateRadialGradient(const JSCallbackInfo& info);
+    void JsCreateConicGradient(const JSCallbackInfo& info);
 
     void JsGetFillStyle(const JSCallbackInfo& info);
     void JsGetStrokeStyle(const JSCallbackInfo& info);
@@ -133,7 +134,8 @@ public:
     void JsSetPixelMap(const JSCallbackInfo& info);
     void JsDrawBitmapMesh(const JSCallbackInfo& info);
     void JsFilter(const JSCallbackInfo& info);
-    void JsDirection(const JSCallbackInfo& info);
+    void JsGetDirection(const JSCallbackInfo& info);
+    void JsSetDirection(const JSCallbackInfo& info);
 
     void SetComponent(const RefPtr<CanvasTaskPool>& controller)
     {

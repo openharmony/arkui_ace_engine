@@ -27,6 +27,7 @@
 #include "core/components_ng/layout/layout_property.h"
 #define private public
 #define protected public
+#include "core/components_ng/pattern/text/image_span_view.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -455,5 +456,50 @@ HWTEST_F(SpanTestNg, SpanItemUpdateParagraph004, TestSize.Level1)
     auto paragraph = Paragraph::Create(paraStyle, FontCollection::Current());
     spanNode->spanItem_->UpdateParagraph(paragraph);
     EXPECT_EQ(spanNode->spanItem_->fontStyle, nullptr);
+}
+
+/**
+ * @tc.name: SpanItemUpdateParagraph005
+ * @tc.desc: Test SpanItem UpdateParagraph when children is not empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanItemUpdateParagraph005, TestSize.Level1)
+{
+    RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<ImageSpanItem>();
+    ASSERT_NE(spanItem, nullptr);
+    TextStyle textStyle;
+    ParagraphStyle paraStyle = { .direction = TextDirection::LTR,
+        .align = textStyle.GetTextAlign(),
+        .maxLines = textStyle.GetMaxLines(),
+        .fontLocale = "zh-CN",
+        .wordBreak = textStyle.GetWordBreak(),
+        .textOverflow = textStyle.GetTextOverflow() };
+    auto paragraph = Paragraph::Create(paraStyle, FontCollection::Current());
+    ASSERT_NE(paragraph, nullptr);
+    auto index = spanItem->UpdateParagraph(paragraph, 9.0, 10.0, VerticalAlign::TOP);
+    EXPECT_EQ(index, 0);
+    index = spanItem->UpdateParagraph(paragraph, 9.0, 10.0, VerticalAlign::CENTER);
+    EXPECT_EQ(index, 1);
+    index = spanItem->UpdateParagraph(paragraph, 9.0, 10.0, VerticalAlign::BOTTOM);
+    EXPECT_EQ(index, 2);
+    index = spanItem->UpdateParagraph(paragraph, 9.0, 10.0, VerticalAlign::BASELINE);
+    EXPECT_EQ(index, 3);
+    index = spanItem->UpdateParagraph(paragraph, 9.0, 10.0, VerticalAlign::NONE);
+    EXPECT_EQ(index, 4);
+}
+
+/**
+ * @tc.name: ImageSpanViewCreat001
+ * @tc.desc: Test SpanItem UpdateParagraph when children is not empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, Create001, TestSize.Level1)
+{
+    ImageSpanView imageSpanView;
+    RefPtr<PixelMap> pixMap = nullptr;
+    imageSpanView.SetObjectFit(ImageFit::FILL);
+    imageSpanView.SetVerticalAlign(VerticalAlign::TOP);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
 }
 } // namespace OHOS::Ace::NG

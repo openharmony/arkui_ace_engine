@@ -694,6 +694,10 @@ void TextPattern::DumpInfo()
     auto textLayoutProp = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProp);
     DumpLog::GetInstance().AddDesc(std::string("Content: ").append(textLayoutProp->GetContent().value_or(" ")));
+    DumpLog::GetInstance().AddDesc(
+        std::string("FontColor: ").append(textLayoutProp->GetTextColor().value_or(Color::BLACK).ColorToString()));
+    DumpLog::GetInstance().AddDesc(
+        std::string("FontSize: ").append(textLayoutProp->GetFontSize().value_or(16.0_fp).ToString()));
 }
 
 } // namespace OHOS::Ace::NG

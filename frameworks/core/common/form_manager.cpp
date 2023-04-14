@@ -28,11 +28,6 @@ FormManager::~FormManager() {}
 void FormManager::AddSubContainer(int64_t formId, const RefPtr<SubContainer>& subContainer)
 {
     std::lock_guard<std::mutex> lock(mutex_);
-    auto preSubContainer = subContainerMap_.find(formId);
-    if (preSubContainer != subContainerMap_.end() && preSubContainer->second != nullptr) {
-        preSubContainer->second->Destroy();
-        subContainerMap_.erase(formId);
-    }
     subContainerMap_.insert_or_assign(formId, subContainer);
 }
 

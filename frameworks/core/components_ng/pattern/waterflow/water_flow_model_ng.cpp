@@ -15,11 +15,21 @@
 
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
 #include "core/components_ng/pattern/waterflow/water_flow_position_controller.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "frameworks/core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 
 namespace OHOS::Ace::NG {
-void WaterFlowModelNG::Create() {}
+void WaterFlowModelNG::Create()
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::WATERFLOW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WaterFlowPattern>(); });
+    stack->Push(frameNode);
+}
 void WaterFlowModelNG::SetFooter(std::function<void()>&& footer) {}
 RefPtr<ScrollControllerBase> WaterFlowModelNG::CreateScrollController()
 {

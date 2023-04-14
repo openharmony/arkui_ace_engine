@@ -46,7 +46,7 @@ ohos_unittest("RatingComponentTest") {
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
   ]
 
-  if (is_standard_system) {
+  if (is_ohos_standard_system) {
     sources += []
   } else {
     sources += [ "$ace_root/frameworks/core/components/test/mock/mock_resource_adapter.cpp" ]
@@ -79,7 +79,7 @@ ohos_unittest("RatingComponentTest") {
     "//third_party/googletest:gtest_main",
   ]
 
-  if (!is_standard_system) {
+  if (!is_ohos_standard_system) {
     external_deps = [
       "hilog:libhilog",
       "resmgr:resourcemanager",

@@ -189,13 +189,13 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
                                                : AceApplicationInfo::GetInstance().GetProcessName();
     window_->RecordFrameTime(nanoTimestamp, abilityName);
     FlushAnimation(GetTimeFromExternalTimer());
+    FlushTouchEvents();
     FlushBuild();
     if (isFormRender_ && drawDelegate_) {
         auto renderContext = AceType::DynamicCast<NG::RenderContext>(rootNode_->GetRenderContext());
         drawDelegate_->DrawRSFrame(renderContext);
         drawDelegate_ = nullptr;
     }
-    FlushTouchEvents();
     if (!taskScheduler_.isEmpty()) {
 #if !defined(PREVIEW)
         LayoutInspector::SupportInspector();
@@ -296,6 +296,7 @@ void PipelineContext::FlushPipelineImmediately()
 
 void PipelineContext::FlushPipelineWithoutAnimation()
 {
+    ACE_FUNCTION_TRACE();
     FlushBuild();
     FlushTouchEvents();
     taskScheduler_.FlushTask();
@@ -646,6 +647,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
     ACE_FUNCTION_TRACE();
 #ifdef ENABLE_ROSEN_BACKEND
     if (rsTransaction) {
+        FlushMessages();
         rsTransaction->Begin();
     }
 #endif
@@ -677,11 +679,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
     };
 
     AnimationOption option = AnimationUtil::CreateKeyboardAnimationOption(keyboardAnimationConfig_, keyboardHeight);
-    if (rsTransaction) {
-        Animate(option, option.GetCurve(), func);
-    } else {
-        func();
-    }
+    Animate(option, option.GetCurve(), func);
 
 #ifdef ENABLE_ROSEN_BACKEND
     if (rsTransaction) {

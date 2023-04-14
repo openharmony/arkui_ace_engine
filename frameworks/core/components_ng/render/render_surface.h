@@ -30,6 +30,7 @@ class RenderSurface : public virtual AceType {
     DECLARE_ACE_TYPE(NG::RenderSurface, AceType)
 
 public:
+    RenderSurface() = default;
     ~RenderSurface() override = default;
 
     static RefPtr<RenderSurface> Create();
@@ -66,7 +67,6 @@ public:
     virtual void SetExtSurfaceCallback(const RefPtr<ExtSurfaceCallbackInterface>& extSurfaceCallback) {}
 
 protected:
-    RenderSurface() = default;
 
     ACE_DISALLOW_COPY_AND_MOVE(RenderSurface);
 };

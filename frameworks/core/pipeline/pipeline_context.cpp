@@ -2081,6 +2081,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
     ACE_FUNCTION_TRACE();
 #ifdef ENABLE_ROSEN_BACKEND
     if (rsTransaction) {
+        FlushMessages();
         rsTransaction->Begin();
     }
 #endif
@@ -2118,11 +2119,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
     };
 
     AnimationOption option = AnimationUtil::CreateKeyboardAnimationOption(keyboardAnimationConfig_, keyboardHeight);
-    if (rsTransaction) {
-        Animate(option, option.GetCurve(), func);
-    } else {
-        func();
-    }
+    Animate(option, option.GetCurve(), func);
 
 #ifdef ENABLE_ROSEN_BACKEND
     if (rsTransaction) {

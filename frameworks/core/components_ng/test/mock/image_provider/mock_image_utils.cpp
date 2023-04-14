@@ -17,6 +17,10 @@
 #include "mock_image_loader.h"
 
 #include "core/components_ng/image_provider/image_utils.h"
+namespace {
+constexpr unsigned int MAX_THREADS = 2;
+} // namespace
+
 namespace OHOS::Ace {
 std::vector<std::thread> g_threads;
 
@@ -28,6 +32,10 @@ void ImageUtils::PostToUI(std::function<void()>&& task)
 
 void ImageUtils::PostToBg(std::function<void()>&& task)
 {
+    // mock bg thread pool
+    if (g_threads.size() > MAX_THREADS) {
+        return;
+    }
     g_threads.emplace_back(std::thread(task));
 }
 } // namespace NG

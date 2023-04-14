@@ -130,7 +130,7 @@ ohos_fuzztest("ImageLoaderFuzzTest") {
     "$ace_root:ace_test_config",
   ]
 
-  if (is_standard_system) {
+  if (is_ohos_standard_system) {
     external_deps = [
       "hiviewdfx_hilog_native:libhilog",
       "init:libbegetutil",

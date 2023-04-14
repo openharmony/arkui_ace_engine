@@ -2448,4 +2448,50 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldAccessibilityPropertyGetSupportAction0
     }
     EXPECT_EQ(actions, expectActions);
 }
+
+/**
+ * @tc.name: AdjustTextSelectionRectOffsetX001
+ * @tc.desc: test AdjustTextSelectionRectOffsetX
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, AdjustTextSelectionRectOffsetX, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXTINPUT_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    layoutProperty->UpdateMaxLines(1);
+    textFieldPattern->contentRect_.SetLeft(0.0f);
+    textFieldPattern->contentRect_.SetWidth(100.0f);
+    textFieldPattern->textRect_.SetLeft(0.0f);
+    RSTypographyProperties::TextBox textBox;
+    textFieldPattern->textBoxes_.emplace_back(textBox);
+
+    textFieldPattern->textBoxes_.begin()->rect_.SetRight(50.0f);
+    textFieldPattern->AdjustTextSelectionRectOffsetX();
+    EXPECT_EQ(textFieldPattern->textRect_.GetX(), 0.0f);
+
+    textFieldPattern->textBoxes_.begin()->rect_.SetLeft(-20.0f);
+    textFieldPattern->textBoxes_.begin()->rect_.SetRight(-10.0f);
+    textFieldPattern->AdjustTextSelectionRectOffsetX();
+    EXPECT_EQ(textFieldPattern->textRect_.GetX(), 20.0f);
+    textFieldPattern->textBoxes_.begin()->rect_.SetLeft(0.0f);
+    textFieldPattern->textRect_.SetLeft(0.0f);
+    textFieldPattern->AdjustTextSelectionRectOffsetX();
+    EXPECT_EQ(textFieldPattern->textRect_.GetX(), 10.0f);
+
+    textFieldPattern->textBoxes_.begin()->rect_.SetLeft(100.0f);
+    textFieldPattern->textBoxes_.begin()->rect_.SetRight(200.0f);
+    textFieldPattern->textRect_.SetLeft(0.0f);
+    textFieldPattern->AdjustTextSelectionRectOffsetX();
+    EXPECT_EQ(textFieldPattern->textRect_.GetX(), 100.0f);
+    textFieldPattern->textBoxes_.begin()->rect_.SetLeft(300.0f);
+    textFieldPattern->textRect_.SetLeft(0.0f);
+    textFieldPattern->AdjustTextSelectionRectOffsetX();
+    EXPECT_EQ(textFieldPattern->textRect_.GetX(), 200.0f);
+}
 } // namespace OHOS::Ace::NG

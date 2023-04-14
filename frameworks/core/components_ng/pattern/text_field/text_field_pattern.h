@@ -289,6 +289,7 @@ public:
 
     float AdjustTextRectOffsetX();
     float AdjustTextAreaOffsetY();
+    void AdjustTextSelectionRectOffsetX();
 
     float GetPaddingTop() const
     {
@@ -610,6 +611,7 @@ public:
     {
         needToRequestKeyboardOnFocus_ = needToRequest;
     }
+    static int32_t GetGraphemeClusterLength(const std::wstring& text, int32_t extend, bool checkPrev = false);
 
 private:
     bool HasFocus() const;
@@ -634,6 +636,8 @@ private:
     void OnHover(bool isHover);
     void HandleMouseEvent(MouseInfo& info);
     void HandleLongPress(GestureEvent& info);
+    void UpdateCaretPositionWithClamp(const int32_t& pos);
+    void UpdateSelectorByPosition(const int32_t& pos);
     void ShowSelectOverlay(const std::optional<RectF>& firstHandle, const std::optional<RectF>& secondHandle);
 
     void CursorMoveOnClick(const Offset& offset);

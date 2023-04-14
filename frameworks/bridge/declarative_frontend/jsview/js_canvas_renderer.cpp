@@ -215,6 +215,51 @@ void JSCanvasRenderer::JsCreateRadialGradient(const JSCallbackInfo& info)
     }
 }
 
+void JSCanvasRenderer::JsCreateConicGradient(const JSCallbackInfo& info)
+{
+    if (info.Length() != 3) {
+        LOGE("JsCreateConicGradient: The arg is wrong, it is supposed to have 3 arguments of number");
+        return;
+    }
+
+    JSRef<JSObject> pasteObj = JSClass<JSCanvasGradient>::NewInstance();
+    pasteObj->SetProperty("__type", "gradient");
+
+    // in radian
+    double startAngle = 0.0;
+    double x = 0.0;
+    double y = 0.0;
+    if (info[0]->IsNumber()) {
+        JSViewAbstract::ParseJsDouble(info[0], startAngle);
+    } else {
+        startAngle = 0.0;
+    }
+    if (info[1]->IsNumber()) {
+        JSViewAbstract::ParseJsDouble(info[1], x);
+    } else {
+        x = 0.0;
+    }
+    if (info[2]->IsNumber()) {
+        JSViewAbstract::ParseJsDouble(info[2], y);
+    } else {
+        y = 0.0;
+    }
+
+    x = SystemProperties::Vp2Px(x);
+    y = SystemProperties::Vp2Px(y);
+    startAngle = fmod(startAngle, (2 * M_PI));
+
+    Gradient* gradient = new Gradient();
+    gradient->SetType(GradientType::CONIC);
+    gradient->GetConicGradient().startAngle = AnimatableDimension(Dimension(startAngle));
+    gradient->GetConicGradient().centerX = AnimatableDimension(Dimension(x));
+    gradient->GetConicGradient().centerY = AnimatableDimension(Dimension(y));
+
+    auto pasteData = Referenced::Claim(pasteObj->Unwrap<JSCanvasGradient>());
+    pasteData->SetGradient(gradient);
+    info.SetReturnValue(pasteObj);
+}
+
 void JSCanvasRenderer::JsFillText(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -1256,9 +1301,26 @@ void JSCanvasRenderer::JsFilter(const JSCallbackInfo& info)
     return;
 }
 
-void JSCanvasRenderer::JsDirection(const JSCallbackInfo& info)
+void JSCanvasRenderer::JsGetDirection(const JSCallbackInfo& info)
 {
     return;
+}
+
+void JSCanvasRenderer::JsSetDirection(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsString()) {
+        return;
+    }
+    std::string directionStr;
+    JSViewAbstract::ParseJsString(info[0], directionStr);
+    auto direction = ConvertStrToTextDirection(directionStr);
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (isOffscreen_ && offscreenCanvasPattern_) {
+            offscreenCanvasPattern_->SetTextDirection(direction);
+        } else if (!isOffscreen_ && customPaintPattern_) {
+            customPaintPattern_->SetTextDirection(direction);
+        }
+    }
 }
 
 void JSCanvasRenderer::JsGetJsonData(const JSCallbackInfo& info)

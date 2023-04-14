@@ -29,7 +29,13 @@ ohos_unittest("ui_extension_pattern_test_ng") {
   ]
 
   sources += test_pattern_sources
-  deps = test_pattern_deps
+  deps = [
+    "$ace_root/frameworks/base:ace_memory_monitor_ohos",
+    "$ace_root/frameworks/core/components/theme:build_theme_code",
+    "$ace_root/test/unittest:ace_unittest_log",
+    "$cjson_root:cjson_static",
+    "//third_party/googletest:gmock_main",
+  ]
 
   deps += [ "$graphic_standard_path/rosen/modules/render_service_client:librender_service_client" ]
 
@@ -38,5 +44,5 @@ ohos_unittest("ui_extension_pattern_test_ng") {
     "window_manager:scene_session",
   ]
 
-  configs = test_configs
+  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 }

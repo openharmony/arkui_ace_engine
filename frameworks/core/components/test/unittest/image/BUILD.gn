@@ -14,7 +14,7 @@
 import("//build/test.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
-if (is_standard_system) {
+if (is_ohos_standard_system) {
   module_output_path = "ace_engine/graphicalbasicability/image"
 } else {
   module_output_path = "ace_engine_full/graphicalbasicability/image"
@@ -199,7 +199,7 @@ ohos_unittest("RenderImageTest") {
     "$cjson_root:cjson",
     "//third_party/googletest:gtest_main",
   ]
-  if (!is_standard_system) {
+  if (!is_ohos_standard_system) {
     external_deps = [
       "hilog:libhilog",
       "resmgr:resourcemanager",

@@ -25,6 +25,7 @@ public:
     void Create(const std::string& address, const std::string& summary) override;
     void SetColor(const Color& value) override;
     void Pop() override;
+    void SetDraggable(bool draggable) override {}
 
 private:
     RefPtr<HyperlinkComponent> GetComponent();
