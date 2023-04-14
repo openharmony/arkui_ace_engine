@@ -51,16 +51,18 @@ public:
 
 /**
  * @tc.name: SvgTransformParse001
- * @tc.desc: Parse single param of tranform.
+ * @tc.desc: Parse single param of transform.
  * @tc.type: FUNC
  */
 HWTEST_F(TransformParseTest, SvgTransformParse001, TestSize.Level0)
 {
     /**
-     * @tc.steps: step1. Parse single param of tranform.
+     * @tc.steps: step1. Parse single param of transform.
      * @tc.expected: step1. Result is in anticipation.
      */
-    ASSERT_EQ(SvgTransform::CreateMatrix4("rotate(-10, 50, 100)"), Matrix4::CreateRotate(-10.0f, 0.0f, 0.0f, 1.0f));
+    ASSERT_EQ(SvgTransform::CreateMatrix4("rotate(-10, 50, 100)"), Matrix4::CreateTranslate(50.0f, 100.0f, 0.0f) *
+                                                                       Matrix4::CreateRotate(-10.0f, 0.0f, 0.0f, 1.0f) *
+                                                                       Matrix4::CreateTranslate(-50.0f, -100.0f, 0.0f));
     ASSERT_EQ(SvgTransform::CreateMatrix4("translate(10)"), Matrix4::CreateTranslate(10.0f, 0.0f, 0.0f));
     ASSERT_EQ(SvgTransform::CreateMatrix4("translate(0, 9)"), Matrix4::CreateTranslate(0.0f, 9.0f, 0.0f));
     ASSERT_EQ(SvgTransform::CreateMatrix4("translate(-36, 45.5)"), Matrix4::CreateTranslate(-36.0f, 45.5f, 0.0f));
@@ -73,7 +75,7 @@ HWTEST_F(TransformParseTest, SvgTransformParse001, TestSize.Level0)
 
 /**
  * @tc.name: SvgTransformParse002
- * @tc.desc: Parse translate param of tranform.
+ * @tc.desc: Parse translate param of transform.
  * @tc.type: FUNC
  */
 HWTEST_F(TransformParseTest, SvgTransformParse002, TestSize.Level0)
@@ -91,7 +93,7 @@ HWTEST_F(TransformParseTest, SvgTransformParse002, TestSize.Level0)
 
 /**
  * @tc.name: SvgTransformParse003
- * @tc.desc: Parse skew param of tranform.
+ * @tc.desc: Parse skew param of transform.
  * @tc.type: FUNC
  */
 HWTEST_F(TransformParseTest, SvgTransformParse003, TestSize.Level0)
@@ -106,7 +108,7 @@ HWTEST_F(TransformParseTest, SvgTransformParse003, TestSize.Level0)
 
 /**
  * @tc.name: SvgTransformParse004
- * @tc.desc: Parse completed param of tranform.
+ * @tc.desc: Parse completed param of transform.
  * @tc.type: FUNC
  */
 HWTEST_F(TransformParseTest, SvgTransformParse004, TestSize.Level0)
@@ -117,17 +119,16 @@ HWTEST_F(TransformParseTest, SvgTransformParse004, TestSize.Level0)
      */
     auto mat = SvgTransform::CreateMatrix4(
         "rotate(-10, 50, 100) translate(-36, 45.5) skewX(40) skewY(50) scale(1, 0.5) matrix(1, 2, 3, 4, 5, 6)");
-    ASSERT_EQ(mat, Matrix4::CreateRotate(-10.0f, 0.0f, 0.0f, 1.0f) *
-                   Matrix4::CreateTranslate(-36.0f, 45.5f, 0.0f) *
-                   Matrix4::CreateSkew(40.0f, 0.0f) *
-                   Matrix4::CreateSkew(0.0f, 50.0f) *
-                   Matrix4::CreateScale(1.0f, 0.5f, 1.0f) *
-                   Matrix4::CreateMatrix2D(1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f));
+    ASSERT_EQ(mat, Matrix4::CreateTranslate(50, 100, 0) * Matrix4::CreateRotate(-10.0f, 0.0f, 0.0f, 1.0f) *
+                       Matrix4::CreateTranslate(-50, -100, 0) * Matrix4::CreateTranslate(-36.0f, 45.5f, 0.0f) *
+                       Matrix4::CreateSkew(40.0f, 0.0f) * Matrix4::CreateSkew(0.0f, 50.0f) *
+                       Matrix4::CreateScale(1.0f, 0.5f, 1.0f) *
+                       Matrix4::CreateMatrix2D(1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f));
 }
 
 /**
  * @tc.name: SvgTransformParse005
- * @tc.desc: Parse completed param of tranform.
+ * @tc.desc: Parse completed param of transform.
  * @tc.type: FUNC
  */
 HWTEST_F(TransformParseTest, SvgTransformParse005, TestSize.Level0)
@@ -142,36 +143,31 @@ HWTEST_F(TransformParseTest, SvgTransformParse005, TestSize.Level0)
     auto iter = transform.find("rotate");
     ASSERT_TRUE(iter != transform.end());
     if (iter != transform.end()) {
-        std::vector<float> rotation = {-10.0f, 50.0f, 100.0f};
+        std::vector<float> rotation = { -10.0f, 50.0f, 100.0f };
         ASSERT_TRUE(CompareVectorFloat(iter->second, rotation));
     }
 
     iter = transform.find("translate");
     ASSERT_TRUE(iter != transform.end());
     if (iter != transform.end()) {
-        std::vector<float> translate = {-36.0f, 45.5f, 0.0f};
+        std::vector<float> translate = { -36.0f, 45.5f, 0.0f };
         ASSERT_TRUE(CompareVectorFloat(iter->second, translate));
     }
 
     iter = transform.find("skew");
     ASSERT_TRUE(iter != transform.end());
     if (iter != transform.end()) {
-        std::vector<float> skew = {40.0f, 50.0f};
+        std::vector<float> skew = { 40.0f, 50.0f };
         ASSERT_TRUE(CompareVectorFloat(iter->second, skew));
     }
 
     iter = transform.find("matrix");
     ASSERT_TRUE(iter != transform.end());
     if (iter != transform.end()) {
-        std::vector<float> matrix = {1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f};
+        std::vector<float> matrix = { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f };
         ASSERT_TRUE(CompareVectorFloat(iter->second, matrix));
     }
-
-    auto transformInfo = SvgTransform::CreateInfoFromMap(transform);
-    ASSERT_TRUE(transformInfo.hasRotateCenter);
-    ASSERT_EQ(transformInfo.rotateCenter, Offset(50.0f, 100.0f));
 }
-
 
 /**
  * @tc.name: SvgTransformAlignment001
@@ -261,7 +257,7 @@ HWTEST_F(TransformParseTest, SvgTransformAlignment002, TestSize.Level0)
      */
     std::vector<float> frameScale = { 2.0 };
     ASSERT_TRUE(SvgTransform::AlignmentFrame("scale", frameScale));
-    ASSERT_TRUE(CompareVectorFloat((frameScale), std::vector<float>({2.0f, 2.0f})));
+    ASSERT_TRUE(CompareVectorFloat((frameScale), std::vector<float>({ 2.0f, 2.0f })));
 
     frameScale = {};
     ASSERT_FALSE(SvgTransform::AlignmentFrame("scale", frameScale));
@@ -300,4 +296,49 @@ HWTEST_F(TransformParseTest, SvgTransformAlignment002, TestSize.Level0)
     ASSERT_FALSE(SvgTransform::AlignmentFrame("translate", frameTranslate));
 }
 
+/**
+ * @tc.name: SvgTransformRotation001
+ * @tc.desc: Rotate with transform center.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TransformParseTest, SvgTransformRotation001, TestSize.Level0)
+{
+    auto mat = SvgTransform::CreateMatrix4("rotate(45, 10, 10)");
+    auto mat2 = SvgTransform::CreateMatrix4("translate(10, 10) rotate(45) translate(-10 -10)");
+    ASSERT_EQ(mat, mat2);
+}
+
+/**
+ * @tc.name: SvgTransformMap001
+ * @tc.desc: Test create matrix from map.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TransformParseTest, SvgTransformMap001, TestSize.Level0)
+{
+    auto transform = SvgTransform::CreateMap("rotate(-10, 50, 100)");
+    auto info = SvgTransform::CreateInfoFromMap(transform);
+    ASSERT_EQ(info.matrix4, Matrix4::CreateTranslate(50, 100, 0) * Matrix4::CreateRotate(-10, 0, 0, 1) *
+                                Matrix4::CreateTranslate(-50, -100, 0));
+
+    transform = SvgTransform::CreateMap("translate(-36, 45.5)");
+    auto matrix = SvgTransform::CreateMatrixFromMap(transform);
+    ASSERT_EQ(matrix, Matrix4::CreateTranslate(-36, 45.5, 0));
+
+    transform = SvgTransform::CreateMap("skewX(40)");
+    matrix = SvgTransform::CreateMatrixFromMap(transform);
+    ASSERT_EQ(matrix, Matrix4::CreateSkew(40, 0));
+
+    transform = SvgTransform::CreateMap("skewY(50)");
+    matrix = SvgTransform::CreateMatrixFromMap(transform);
+    ASSERT_EQ(matrix, Matrix4::CreateSkew(0, 50));
+
+    transform = SvgTransform::CreateMap("scale(1, 0.5)");
+    matrix = SvgTransform::CreateMatrixFromMap(transform);
+    ASSERT_EQ(matrix, Matrix4::CreateScale(1, 0.5, 1));
+
+    // AnimateTransform that uses map doesn't support matrix
+    transform = SvgTransform::CreateMap("matrix(1, 2, 3, 4, 5, 6)");
+    matrix = SvgTransform::CreateMatrixFromMap(transform);
+    ASSERT_EQ(matrix, Matrix4::CreateIdentity());
+}
 } // namespace OHOS::Ace

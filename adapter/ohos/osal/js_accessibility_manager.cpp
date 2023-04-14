@@ -1552,6 +1552,7 @@ void JsAccessibilityManager::DumpTree(int32_t depth, NodeId nodeID)
         DumpTreeNG(rootNode, depth, nodeID, commonProperty);
         for (auto subContext : GetSubPipelineContexts()) {
             ngPipeline = AceType::DynamicCast<NG::PipelineContext>(subContext.Upgrade());
+            CHECK_NULL_VOID(ngPipeline);
             rootNode = ngPipeline->GetRootElement();
             CHECK_NULL_VOID(rootNode);
             nodeID = rootNode->GetAccessibilityId();

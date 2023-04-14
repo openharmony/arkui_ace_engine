@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -589,12 +589,10 @@ void TextPattern::BeforeCreateLayoutWrapper()
     CHECK_NULL_VOID(host);
     const auto& layoutProperty = host->GetLayoutProperty();
     auto flag = layoutProperty ? layoutProperty->GetPropertyChangeFlag() : PROPERTY_UPDATE_NORMAL;
-    if (paragraph_) {
-        // When updating the scenario, needs to determine whether the SpanNode node is refreshed.
-        if ((flag & PROPERTY_UPDATE_BY_CHILD_REQUEST) != PROPERTY_UPDATE_BY_CHILD_REQUEST) {
-            LOGD("no need to refresh span node");
-            return;
-        }
+    // When updating the scenario, needs to determine whether the SpanNode node is refreshed.
+    if (paragraph_ && (flag & PROPERTY_UPDATE_BY_CHILD_REQUEST) != PROPERTY_UPDATE_BY_CHILD_REQUEST) {
+        LOGD("no need to refresh span node");
+        return;
     }
 
     // When dirty areas are marked because of child node changes, the text rendering node tree is reset.
@@ -635,6 +633,8 @@ void TextPattern::BeforeCreateLayoutWrapper()
             if (spanNode->GetSpanItem()->onClick) {
                 isSpanHasClick = true;
             }
+        } else if (current->GetTag() == V2::IMAGE_ETS_TAG) {
+            AddChildSpanItem(current);
         }
         const auto& nextChildren = current->GetChildren();
         for (auto iter = nextChildren.rbegin(); iter != nextChildren.rend(); ++iter) {
@@ -673,11 +673,31 @@ void TextPattern::OnVisibleChange(bool isVisible)
     }
 }
 
+void TextPattern::AddChildSpanItem(const RefPtr<UINode>& child)
+{
+    CHECK_NULL_VOID(child);
+    if (child->GetTag() == V2::SPAN_ETS_TAG) {
+        auto spanNode = DynamicCast<SpanNode>(child);
+        if (spanNode) {
+            spanItemChildren_.emplace_back(spanNode->GetSpanItem());
+        }
+    } else if (child->GetTag() == V2::IMAGE_ETS_TAG) {
+        auto imageNode = DynamicCast<FrameNode>(child);
+        if (imageNode) {
+            spanItemChildren_.emplace_back(MakeRefPtr<ImageSpanItem>());
+        }
+    }
+}
+
 void TextPattern::DumpInfo()
 {
     auto textLayoutProp = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProp);
     DumpLog::GetInstance().AddDesc(std::string("Content: ").append(textLayoutProp->GetContent().value_or(" ")));
+    DumpLog::GetInstance().AddDesc(
+        std::string("FontColor: ").append(textLayoutProp->GetTextColor().value_or(Color::BLACK).ColorToString()));
+    DumpLog::GetInstance().AddDesc(
+        std::string("FontSize: ").append(textLayoutProp->GetFontSize().value_or(16.0_fp).ToString()));
 }
 
 } // namespace OHOS::Ace::NG

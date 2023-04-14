@@ -134,4 +134,14 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetrics& r
 {
     return true;
 }
+
+int32_t TxtParagraph::AddPlaceholder(const PlaceholderRun& span)
+{
+    placeHolderIndex_ = -1;
+    return -1;
+}
+
+void TxtParagraph::GetRectsForPlaceholders(std::vector<Rect>& selectedRects) {}
+
+void TxtParagraph::SetIndents(const std::vector<float>& indents) {}
 } // namespace OHOS::Ace::NG

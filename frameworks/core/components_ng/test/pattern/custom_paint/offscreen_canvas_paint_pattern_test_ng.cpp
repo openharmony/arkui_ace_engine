@@ -105,14 +105,6 @@ HWTEST_F(OffscreenCanvasPaintPatternTestNg, OffscreenCanvasPaintPatternTestNg001
      */
     EXPECT_EQ(offscreenCanvasPattern->GetWidth(), CANVAS_WIDTH);
     EXPECT_EQ(offscreenCanvasPattern->GetHeight(), CANVAS_HEIGHT);
-
-    /**
-     * @tc.steps3: Test functions GetTextDirection.
-     * @tc.expected: The function GetTextDirection always returns TextDirection::LTR..
-     */
-    for (const std::string& item : CANDIDATE_STRINGS) {
-        EXPECT_EQ(paintMethod->GetTextDirection(item), TextDirection::LTR);
-    }
 }
 
 /**

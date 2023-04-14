@@ -24,6 +24,13 @@ ohos_unittest("accessibility_property_test_ng") {
     "$ace_root/frameworks/core/components_ng/property/accessibility_property.cpp",
     "accessibility_property_test_ng.cpp",
   ]
-  deps = test_pattern_deps
-  configs = test_configs
+  deps = [
+    "$ace_root/frameworks/base:ace_memory_monitor_ohos",
+    "$ace_root/frameworks/core/components/theme:build_theme_code",
+    "$ace_root/test/unittest:ace_unittest_log",
+    "$cjson_root:cjson_static",
+    "//third_party/googletest:gmock_main",
+  ]
+
+  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 }

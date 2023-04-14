@@ -49,6 +49,9 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
         if (!container->GetSettings().usingSharedRuntime) {
             return;
         }
+        if (!container->WindowIsShow()) {
+            return;
+        }
         auto frontendType = context->GetFrontendType();
         if (frontendType != FrontendType::DECLARATIVE_JS && frontendType != FrontendType::JS_PLUGIN) {
             LOGW("Not compatible frontType(%{public}d) for declarative. containerId: %{public}d", frontendType,
@@ -75,6 +78,9 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
             return;
         }
         if (!container->GetSettings().usingSharedRuntime) {
+            return;
+        }
+        if (!container->WindowIsShow()) {
             return;
         }
         auto frontendType = context->GetFrontendType();
@@ -144,10 +150,22 @@ const AnimationOption JSViewContext::CreateAnimation(const std::unique_ptr<JsonV
 
     // limit animation for ArkTS Form
     if (isForm) {
-        duration = std::min(duration, static_cast<int32_t>(DEFAULT_DURATION));
-        delay = 0;
-        iterations = 1;
-        tempo = 1.0;
+        if (duration > static_cast<int32_t>(DEFAULT_DURATION)) {
+            LOGW("Form delay is not allowed to be set to a value greater than 1000ms, set it to 1000ms");
+            duration = static_cast<int32_t>(DEFAULT_DURATION);
+        }
+        if (delay != 0) {
+            LOGW("Form delay is not allowed to be set to a value other than 0, set it to 0");
+            delay = 0;
+        }
+        if (SystemProperties::IsFormAnimationLimited() && iterations != 1) {
+            LOGW("Form iterations is not allowed to be set to a value other than 1, set it to 1.");
+            iterations = 1;
+        }
+        if (!NearEqual(tempo, 1.0)) {
+            LOGW("Form tempo is not allowed to be set to a value other than 1.0, set it to 1.0.");
+            tempo = 1.0;
+        }
     }
 
     option.SetDuration(duration);
@@ -226,6 +244,7 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
 
 void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)
 {
+    ACE_FUNCTION_TRACE();
     auto scopedDelegate = EngineHelper::GetCurrentDelegate();
     if (!scopedDelegate) {
         // this case usually means there is no foreground container, need to figure out the reason.

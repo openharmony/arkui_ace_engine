@@ -22,11 +22,20 @@
 namespace OHOS::Ace::NG {
 std::string TextAccessibilityProperty::GetText() const
 {
+    std::string value = "";
     auto frameNode = host_.Upgrade();
-    CHECK_NULL_RETURN(frameNode, "");
-    auto textPattern = frameNode->GetPattern<TextPattern>();
-    CHECK_NULL_RETURN(textPattern, "");
-    return textPattern->GetTextForDisplay();
+    CHECK_NULL_RETURN(frameNode, value);
+    auto children = frameNode->GetChildren();
+    if (children.empty()) {
+        auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_RETURN(textLayoutProperty, value);
+        value = textLayoutProperty->GetContentValue(value);
+    } else {
+        auto textPattern = frameNode->GetPattern<TextPattern>();
+        CHECK_NULL_RETURN(textPattern, value);
+        value = textPattern->GetTextForDisplay();
+    }
+    return value;
 }
 
 bool TextAccessibilityProperty::IsSelected() const

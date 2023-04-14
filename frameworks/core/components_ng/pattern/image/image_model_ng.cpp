@@ -40,7 +40,7 @@ void ImageModelNG::Create(const std::string& src, bool noPixMap, RefPtr<PixelMap
         if (noPixMap) {
             return ImageSourceInfo(src, bundleName, moduleName);
         }
-        return  ImageSourceInfo(pixMap);
+        return ImageSourceInfo(pixMap);
 #else
         return ImageSourceInfo(src, bundleName, moduleName);
 #endif
@@ -148,7 +148,9 @@ void ImageModelNG::SetAutoResize(bool autoResize)
 
 void ImageModelNG::SetSyncMode(bool syncMode)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, SyncMode, syncMode);
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSyncLoad(syncMode);
 }
 
 void ImageModelNG::SetColorFilterMatrix(const std::vector<float>& matrix)
@@ -197,7 +199,9 @@ void ImageModelNG::SetOnDrop(OnDragDropFunc&& onDrop) {}
 
 void ImageModelNG::SetCopyOption(const CopyOptions& copyOption)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, CopyOptions, copyOption);
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCopyOption(copyOption);
 }
 
 bool ImageModelNG::UpdateDragItemInfo(DragItemInfo& itemInfo)

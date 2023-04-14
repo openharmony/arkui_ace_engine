@@ -84,7 +84,8 @@ void JSOffscreenRenderingContext::JSBind(BindingTarget globalObj)
     JSClass<JSOffscreenRenderingContext>::CustomMethod("getPixelMap", &JSCanvasRenderer::JsGetPixelMap);
     JSClass<JSOffscreenRenderingContext>::CustomMethod("setPixelMap", &JSCanvasRenderer::JsSetPixelMap);
     JSClass<JSOffscreenRenderingContext>::CustomMethod("filter", &JSCanvasRenderer::JsFilter);
-    JSClass<JSOffscreenRenderingContext>::CustomMethod("direction", &JSCanvasRenderer::JsDirection);
+    JSClass<JSOffscreenRenderingContext>::CustomProperty("direction", &JSCanvasRenderer::JsGetDirection,
+        &JSCanvasRenderer::JsSetDirection);
 
     JSClass<JSOffscreenRenderingContext>::CustomProperty("fillStyle", &JSCanvasRenderer::JsGetFillStyle,
         &JSCanvasRenderer::JsSetFillStyle);
@@ -122,6 +123,9 @@ void JSOffscreenRenderingContext::JSBind(BindingTarget globalObj)
         &JSCanvasRenderer::JsGetImageSmoothingEnabled, &JSCanvasRenderer::JsSetImageSmoothingEnabled);
     JSClass<JSOffscreenRenderingContext>::CustomProperty("imageSmoothingQuality",
         &JSCanvasRenderer::JsGetImageSmoothingQuality, &JSCanvasRenderer::JsSetImageSmoothingQuality);
+
+    JSClass<JSOffscreenRenderingContext>::CustomMethod("createConicGradient",
+        &JSCanvasRenderer::JsCreateConicGradient);
 
     JSClass<JSOffscreenRenderingContext>::Bind(globalObj, JSOffscreenRenderingContext::Constructor,
         JSOffscreenRenderingContext::Destructor);

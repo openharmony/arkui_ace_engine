@@ -45,7 +45,9 @@ public:
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-        host->GetRenderContext()->UpdateBackgroundColor(PipelineContext::GetCurrentContext()->GetAppBgColor());
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        host->GetRenderContext()->UpdateBackgroundColor(pipeline->GetAppBgColor());
     }
 
     void OnRebuildFrame() override

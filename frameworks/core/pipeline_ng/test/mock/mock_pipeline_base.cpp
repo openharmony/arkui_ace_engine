@@ -128,10 +128,12 @@ void PipelineContext::FlushFocus() {}
 
 void PipelineContext::FlushAnimation(uint64_t nanoTimestamp) {}
 
-void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight) {}
+void PipelineContext::OnVirtualKeyboardHeightChange(
+    float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+{}
 
 void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSizeChangeReason type,
-    const std::shared_ptr<Rosen::RSTransaction> rsTransaction)
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {}
 
 void PipelineContext::OnSurfacePositionChanged(int32_t posX, int32_t posY) {}
@@ -296,9 +298,14 @@ RefPtr<PipelineBase> PipelineBase::GetCurrentContext()
     return NG::MockPipelineBase::GetCurrent();
 }
 
-double PipelineBase::NormalizeToPx(const Dimension& /*dimension*/) const
+double PipelineBase::NormalizeToPx(const Dimension& dimension) const
 {
-    return 1.0f;
+    if ((dimension.Unit() == DimensionUnit::VP) || (dimension.Unit() == DimensionUnit::FP)) {
+        return (dimension.Value() * dipScale_);
+    } else if (dimension.Unit() == DimensionUnit::LPX) {
+        return (dimension.Value() * designWidthScale_);
+    }
+    return dimension.Value();
 }
 
 PipelineBase::~PipelineBase() = default;
@@ -335,6 +342,8 @@ double PipelineBase::ConvertPxToVp(const Dimension& dimension) const
     }
     return dimension.Value();
 }
+
+void PipelineBase::HyperlinkStartAbility(const std::string& address) const {}
 
 void PipelineBase::RequestFrame() {}
 

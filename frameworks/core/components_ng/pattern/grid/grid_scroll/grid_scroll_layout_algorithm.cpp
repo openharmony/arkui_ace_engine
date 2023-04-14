@@ -292,8 +292,10 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
     auto haveNewLineAtStart = FillBlankAtStart(mainSize, crossSize, layoutWrapper);
     if (gridLayoutInfo_.reachStart_) {
         auto offset = gridLayoutInfo_.currentOffset_;
-        gridLayoutInfo_.currentOffset_ = 0.0;
-        gridLayoutInfo_.prevOffset_ = 0.0;
+        if (!canOverScroll_) {
+            gridLayoutInfo_.currentOffset_ = 0.0;
+            gridLayoutInfo_.prevOffset_ = 0.0;
+        }
         if (!haveNewLineAtStart) {
             return;
         }
@@ -339,19 +341,27 @@ bool GridScrollLayoutAlgorithm::FillBlankAtStart(float mainSize, float crossSize
 // be moved up, so we need to modify [currentOffset_] according to previous position.
 void GridScrollLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize)
 {
-    // scroll forward
-    if (LessNotEqual(gridLayoutInfo_.prevOffset_, gridLayoutInfo_.currentOffset_)) {
-        gridLayoutInfo_.reachEnd_ = false;
-        return;
-    }
     // Step1. Calculate total length of all items with main gap in viewport.
     // [lengthOfItemsInViewport] must be greater than or equal to viewport height
     float lengthOfItemsInViewport = gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap_);
+    // scroll forward
+    if (LessNotEqual(gridLayoutInfo_.prevOffset_, gridLayoutInfo_.currentOffset_)) {
+        if (!canOverScroll_) {
+            gridLayoutInfo_.reachEnd_ = false;
+            return;
+        } else {
+            if (LessNotEqual(lengthOfItemsInViewport, mainSize)) {
+                return;
+            }
+        }
+    }
     // Step2. Calculate real offset that items can only be moved up by.
     // Hint: [prevOffset_] is a non-positive value
     if (LessNotEqual(lengthOfItemsInViewport, mainSize) && gridLayoutInfo_.startIndex_ == 0) {
-        gridLayoutInfo_.currentOffset_ = 0;
-        gridLayoutInfo_.prevOffset_ = 0;
+        if (!canOverScroll_) {
+            gridLayoutInfo_.currentOffset_ = 0;
+            gridLayoutInfo_.prevOffset_ = 0;
+        }
         return;
     }
 
@@ -361,9 +371,11 @@ void GridScrollLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize)
     }
 
     // Step3. modify [currentOffset_]
-    float realOffsetToMoveUp = lengthOfItemsInViewport - mainSize + gridLayoutInfo_.prevOffset_;
-    gridLayoutInfo_.currentOffset_ = gridLayoutInfo_.prevOffset_ - realOffsetToMoveUp;
-    gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
+    if (!canOverScroll_) {
+        float realOffsetToMoveUp = lengthOfItemsInViewport - mainSize + gridLayoutInfo_.prevOffset_;
+        gridLayoutInfo_.currentOffset_ = gridLayoutInfo_.prevOffset_ - realOffsetToMoveUp;
+        gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
+    }
     gridLayoutInfo_.offsetEnd_ = true;
 }
 

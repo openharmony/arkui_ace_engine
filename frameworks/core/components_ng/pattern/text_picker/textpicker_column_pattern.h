@@ -273,7 +273,6 @@ private:
     int32_t columnkind_;
     int32_t currentChildIndex_ = 0;
     float deltaSize_ = 0.0f;
-    RefPtr<ScrollableEvent> scrollableEvent_;
     double yLast_ = 0.0;
     double yOffset_ = 0.0;
     double jumpInterval_;

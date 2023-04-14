@@ -330,7 +330,7 @@ void SelectPattern::BuildChild()
     row->SetInternal();
     auto rowProps = row->GetLayoutProperty<FlexLayoutProperty>();
     CHECK_NULL_VOID(rowProps);
-    rowProps->UpdateMainAxisAlign(FlexAlign::CENTER);
+    rowProps->UpdateMainAxisAlign(FlexAlign::FLEX_START);
     rowProps->UpdateCrossAxisAlign(FlexAlign::CENTER);
     rowProps->UpdateFlexDirection(FlexDirection::ROW);
     rowProps->UpdateSpace(theme->GetContentSpinnerPadding());

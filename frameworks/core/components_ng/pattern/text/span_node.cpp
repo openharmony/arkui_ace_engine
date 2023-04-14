@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -121,12 +121,13 @@ void SpanNode::RequestTextFlushDirty()
     LOGE("fail to find Text or Parent Span");
 }
 
-void SpanItem::UpdateParagraph(const RefPtr<Paragraph>& builder)
+int32_t SpanItem::UpdateParagraph(
+    const RefPtr<Paragraph>& builder, double /* width */, double /* height */, VerticalAlign /* verticalAlign */)
 {
-    CHECK_NULL_VOID(builder);
+    CHECK_NULL_RETURN(builder, -1);
     if (fontStyle) {
         auto pipelineContext = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipelineContext);
+        CHECK_NULL_RETURN(pipelineContext, -1);
         TextStyle textStyle = CreateTextStyleUsingTheme(fontStyle, nullptr, pipelineContext->GetTheme<TextTheme>());
         builder->PushStyle(textStyle);
     }
@@ -142,5 +143,36 @@ void SpanItem::UpdateParagraph(const RefPtr<Paragraph>& builder)
     if (fontStyle) {
         builder->PopStyle();
     }
+    return -1;
+}
+
+int32_t ImageSpanItem::UpdateParagraph(
+    const RefPtr<Paragraph>& builder, double width, double height, VerticalAlign verticalAlign)
+{
+    LOGI("ImageSpanItem::UpdateParagraph imageWidth = %{public}f, imageHeight = %{public}f verticalAlign = "
+         "%{public}d",
+        width, height, verticalAlign);
+    CHECK_NULL_RETURN(builder, -1);
+    PlaceholderRun run;
+    run.width = width;
+    run.height = height;
+    switch (verticalAlign) {
+        case VerticalAlign::TOP:
+            run.alignment = PlaceholderAlignment::TOP;
+            break;
+        case VerticalAlign::CENTER:
+            run.alignment = PlaceholderAlignment::MIDDLE;
+            break;
+        case VerticalAlign::BOTTOM:
+        case VerticalAlign::NONE:
+            run.alignment = PlaceholderAlignment::BOTTOM;
+            break;
+        case VerticalAlign::BASELINE:
+            run.alignment = PlaceholderAlignment::ABOVEBASELINE;
+            break;
+        default:
+            run.alignment = PlaceholderAlignment::BOTTOM;
+    }
+    return builder->AddPlaceholder(run);
 }
 } // namespace OHOS::Ace::NG

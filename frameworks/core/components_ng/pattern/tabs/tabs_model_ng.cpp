@@ -345,6 +345,7 @@ void TabsModelNG::Pop()
     dividerNode->MarkModifyDone();
 
     swiperNode->MarkModifyDone();
+    swiperNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
     ViewStackProcessor::GetInstance()->PopContainer();
 }

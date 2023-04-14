@@ -135,6 +135,17 @@ public:
 
     void OnAreaChangedInner() override;
 
+    void EnableDrag();
+    void SetIsStop(bool isStop)
+    {
+        isStop_ = isStop;
+    }
+
+    void SetIsDrag(bool isDrag)
+    {
+        isDrag_ = isDrag;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;
@@ -209,6 +220,8 @@ private:
     double progressRate_ = 1.0;
 
     Rect lastBoundsRect_;
+
+    bool isDrag_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(VideoPattern);
 };

@@ -31,7 +31,7 @@
 #define FML_EMBEDDER_ONLY
 #endif
 #include "flutter/fml/message_loop.h"
-#if defined(OHOS_STANDARD_SYSTEM) || defined(ANDROID_PLATFORM)
+#if defined(OHOS_STANDARD_SYSTEM) || defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
 #include "flutter/shell/platform/ohos/platform_task_runner.h"
 #endif
 
@@ -137,7 +137,7 @@ void FlutterTaskExecutor::InitPlatformThread(bool useCurrentEventRunner, bool is
 #ifdef OHOS_STANDARD_SYSTEM
     platformRunner_ = flutter::PlatformTaskRunner::CurrentTaskRunner(useCurrentEventRunner);
 #else
-#ifdef ANDROID_PLATFORM
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
     if (isStageModel) {
         LOGI("using eventhandler as platform thread in stage model.");
         platformRunner_ = flutter::PlatformTaskRunner::CurrentTaskRunner(useCurrentEventRunner);

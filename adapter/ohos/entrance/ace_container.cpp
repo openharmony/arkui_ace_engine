@@ -607,7 +607,7 @@ void AceContainer::InitializeCallback()
 
     auto&& viewChangeCallback = [context = pipelineContext_, id = instanceId_](int32_t width, int32_t height,
                                     WindowSizeChangeReason type,
-                                    const std::shared_ptr<Rosen::RSTransaction> rsTransaction) {
+                                    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) {
         ContainerScope scope(id);
         ACE_SCOPED_TRACE("ViewChangeCallback(%d, %d)", width, height);
         context->GetTaskExecutor()->PostTask(
@@ -1337,23 +1337,24 @@ void AceContainer::InitializeSubContainer(int32_t parentContainerId)
 void AceContainer::InitWindowCallback()
 {
     LOGD("AceContainer InitWindowCallback");
-    if (windowModal_ == WindowModal::CONTAINER_MODAL && pipelineContext_) {
-        auto& windowManager = pipelineContext_->GetWindowManager();
-        std::shared_ptr<AppExecFwk::AbilityInfo> info = abilityInfo_.lock();
-        if (info != nullptr) {
-            windowManager->SetAppLabelId(info->labelId);
-            windowManager->SetAppIconId(info->iconId);
-        }
-        windowManager->SetWindowMinimizeCallBack([window = uiWindow_]() { window->Minimize(); });
-        windowManager->SetWindowMaximizeCallBack([window = uiWindow_]() { window->Maximize(); });
-        windowManager->SetWindowRecoverCallBack([window = uiWindow_]() { window->Recover(); });
-        windowManager->SetWindowCloseCallBack([window = uiWindow_]() { window->Close(); });
-        windowManager->SetWindowStartMoveCallBack([window = uiWindow_]() { window->StartMove(); });
-        windowManager->SetWindowSplitCallBack(
-            [window = uiWindow_]() { window->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY); });
-        windowManager->SetWindowGetModeCallBack(
-            [window = uiWindow_]() -> WindowMode { return static_cast<WindowMode>(window->GetMode()); });
+    if (!pipelineContext_) {
+        return;
     }
+    auto& windowManager = pipelineContext_->GetWindowManager();
+    std::shared_ptr<AppExecFwk::AbilityInfo> info = abilityInfo_.lock();
+    if (info != nullptr) {
+        windowManager->SetAppLabelId(info->labelId);
+        windowManager->SetAppIconId(info->iconId);
+    }
+    windowManager->SetWindowMinimizeCallBack([window = uiWindow_]() { window->Minimize(); });
+    windowManager->SetWindowMaximizeCallBack([window = uiWindow_]() { window->Maximize(); });
+    windowManager->SetWindowRecoverCallBack([window = uiWindow_]() { window->Recover(); });
+    windowManager->SetWindowCloseCallBack([window = uiWindow_]() { window->Close(); });
+    windowManager->SetWindowStartMoveCallBack([window = uiWindow_]() { window->StartMove(); });
+    windowManager->SetWindowSplitCallBack(
+        [window = uiWindow_]() { window->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY); });
+    windowManager->SetWindowGetModeCallBack(
+        [window = uiWindow_]() -> WindowMode { return static_cast<WindowMode>(window->GetMode()); });
 
     pipelineContext_->SetGetWindowRectImpl([window = uiWindow_]() -> Rect {
         Rect rect;
@@ -1501,6 +1502,27 @@ void AceContainer::NotifyConfigurationChange(bool needReloadTransition)
                 TaskExecutor::TaskType::UI);
         },
         TaskExecutor::TaskType::JS);
+}
+
+void AceContainer::HotReload()
+{
+    auto taskExecutor = GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [instanceId = instanceId_, weak = WeakClaim(this)]() {
+            ContainerScope scope(instanceId);
+            auto container = weak.Upgrade();
+            CHECK_NULL_VOID(container);
+            auto frontend = container->GetFrontend();
+            CHECK_NULL_VOID(frontend);
+            LOGI("AceContainer::Flush Frontend for HotReload");
+            frontend->HotReload();
+
+            auto pipeline = container->GetPipelineContext();
+            CHECK_NULL_VOID(pipeline);
+            pipeline->FlushReload();
+        },
+        TaskExecutor::TaskType::UI);
 }
 
 void AceContainer::SetToken(sptr<IRemoteObject>& token)
@@ -1658,16 +1680,12 @@ void AceContainer::GetImageDataFromAshmem(
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_HotReloadPage()
 {
     AceEngine::Get().NotifyContainers([](const RefPtr<Container>& container) {
-        auto ace = AceType::DynamicCast<AceContainer>(container);
-        CHECK_NULL_VOID(ace);
-        if (ace->IsUseNewPipeline()) {
-            auto frontend = ace->GetFrontend();
-            CHECK_NULL_VOID(frontend);
-            frontend->RebuildAllPages();
+        LOGI("starting hotReload");
+        if (Container::IsCurrentUseNewPipeline()) {
+            container->HotReload();
         } else {
-            ace->NotifyConfigurationChange(true);
+            container->NotifyConfigurationChange(true);
         }
-        LOGI("frontend rebuild finished");
     });
 }
 

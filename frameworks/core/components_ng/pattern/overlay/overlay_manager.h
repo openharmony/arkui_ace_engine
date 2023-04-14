@@ -179,12 +179,18 @@ private:
 
     void AdaptToSafeArea(const RefPtr<FrameNode>& node);
 
+    void SaveLastModalNode();
+    void PlayDefaultModalTransition(const RefPtr<FrameNode>& modalNode, bool isTransitionIn);
+    void DefaultModalTransition(bool isTransitionIn);
+    void PlayAlphaModalTransition(const RefPtr<FrameNode>& modalNode, bool isTransitionIn);
+
     // Key: target Id, Value: PopupInfo
     std::unordered_map<int32_t, NG::PopupInfo> popupMap_;
     // K: target frameNode ID, V: menuNode
     std::unordered_map<int32_t, RefPtr<FrameNode>> menuMap_;
     std::unordered_map<int32_t, RefPtr<FrameNode>> customPopupMap_;
     std::stack<WeakPtr<FrameNode>> modalStack_;
+    WeakPtr<FrameNode> lastModalNode_;
     WeakPtr<UINode> rootNodeWeak_;
 #ifdef ENABLE_DRAG_FRAMEWORK
     bool hasPixelMap_ {false};

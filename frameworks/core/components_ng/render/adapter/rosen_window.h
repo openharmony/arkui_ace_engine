@@ -23,7 +23,11 @@
 #include "wm/window.h"
 #elif VIRTUAL_RS_WINDOW
 // use real rs window later
+#ifdef IOS_PLATFORM
+#include "adapter/ios/entrance/virtual_rs_window.h"
+#else
 #include "adapter/android/entrance/java/jni/virtual_rs_window.h"
+#endif
 #else
 #include "window_prviewer.h"
 #endif

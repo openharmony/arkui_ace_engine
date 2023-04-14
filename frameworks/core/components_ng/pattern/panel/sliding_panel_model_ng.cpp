@@ -48,6 +48,13 @@ void SlidingPanelModelNG::Create(bool isShow)
     auto columnNode = FrameNode::GetOrCreateFrameNode(
         V2::COLUMN_ETS_TAG, columnId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
     columnNode->MountToParent(panelNode);
+    auto contentId = panelNode->GetContentId();
+    auto contentNode = FrameNode::GetOrCreateFrameNode(
+        V2::COLUMN_ETS_TAG, contentId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    auto contentLayoutProperty = contentNode->GetLayoutProperty<LayoutProperty>();
+    CHECK_NULL_VOID(contentLayoutProperty);
+    contentLayoutProperty->UpdateLayoutWeight(1.0f);
+    contentNode->MountToParent(columnNode);
 
     ViewStackProcessor::GetInstance()->Push(panelNode);
     ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, PanelType, PanelType::FOLDABLE_BAR); // default value
@@ -66,6 +73,7 @@ void SlidingPanelModelNG::Create(bool isShow)
         radius.radiusTopLeft = PANEL_RADIUS;
         radius.radiusTopRight = PANEL_RADIUS;
         renderContext->UpdateBorderRadius(radius);
+        renderContext->UpdateClipEdge(true);
     }
 }
 

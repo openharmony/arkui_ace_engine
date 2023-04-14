@@ -95,6 +95,10 @@ public:
 
     virtual uint32_t GetWindowId() const = 0;
     virtual void SetWindowId(uint32_t windowId) {}
+    virtual bool WindowIsShow() const
+    {
+        return false;
+    }
 
     virtual void* GetView() const = 0;
 
@@ -299,6 +303,9 @@ public:
         auto container = Current();
         return container ? container->state_ == Frontend::State::ON_SHOW : false;
     }
+
+    virtual void NotifyConfigurationChange(bool) {}
+    virtual void HotReload() {}
 
 protected:
     std::chrono::time_point<std::chrono::high_resolution_clock> createTime_;

@@ -25,11 +25,9 @@
 #include "init_data.h"
 #include "ipc_skeleton.h"
 #include "js_runtime_utils.h"
+#include "locale_config.h"
 #include "native_reference.h"
 #include "service_extension_context.h"
-
-#include "adapter/ohos/osal/pixel_map_ohos.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/ui/rs_ui_director.h"
@@ -38,16 +36,18 @@
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/ace_new_pipe_judgement.h"
+#include "adapter/ohos/entrance/ace_view_ohos.h"
 #include "adapter/ohos/entrance/capability_registry.h"
 #include "adapter/ohos/entrance/dialog_container.h"
 #include "adapter/ohos/entrance/file_asset_provider.h"
-#include "adapter/ohos/entrance/ace_view_ohos.h"
 #include "adapter/ohos/entrance/form_utils_impl.h"
 #include "adapter/ohos/entrance/hap_asset_provider.h"
 #include "adapter/ohos/entrance/plugin_utils_impl.h"
 #include "adapter/ohos/entrance/utils.h"
 #include "adapter/ohos/osal/page_url_checker_ohos.h"
+#include "adapter/ohos/osal/pixel_map_ohos.h"
 #include "base/geometry/rect.h"
+#include "base/log/ace_performance_check.h"
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"
 #include "base/subwindow/subwindow_manager.h"
@@ -60,7 +60,7 @@
 #include "core/common/form_manager.h"
 #include "core/common/layout_inspector.h"
 #include "core/common/plugin_manager.h"
-#include "locale_config.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -137,7 +137,8 @@ public:
     explicit OccupiedAreaChangeListener(int32_t instanceId) : instanceId_(instanceId) {}
     ~OccupiedAreaChangeListener() = default;
 
-    void OnSizeChange(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info)
+    void OnSizeChange(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info,
+        const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)
     {
         auto rect = info->rect_;
         auto type = info->type_;
@@ -150,10 +151,10 @@ public:
             CHECK_NULL_VOID(taskExecutor);
             ContainerScope scope(instanceId_);
             taskExecutor->PostTask(
-                [container, keyboardRect] {
+                [container, keyboardRect, rsTransaction] {
                     auto context = container->GetPipelineContext();
                     CHECK_NULL_VOID_NOLOG(context);
-                    context->OnVirtualKeyboardAreaChange(keyboardRect);
+                    context->OnVirtualKeyboardAreaChange(keyboardRect, rsTransaction);
                 },
                 TaskExecutor::TaskType::UI);
         }
@@ -176,8 +177,7 @@ public:
         if (container->IsSubContainer()) {
             instanceId = container->GetParentId();
         }
-        auto aceView =
-            static_cast<Platform::AceViewOhos*>(Platform::AceContainer::GetContainer(instanceId)->GetView());
+        auto aceView = static_cast<Platform::AceViewOhos*>(Platform::AceContainer::GetContainer(instanceId)->GetView());
         CHECK_NULL_VOID(aceView);
         DragEventAction action;
         switch (event) {
@@ -241,8 +241,8 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runti
     LOGI("Create UIContentImpl successfully.");
 }
 
-UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context,
-                             void* runtime, bool isCard) : runtime_(runtime), isFormRender_(isCard)
+UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime, bool isCard)
+    : runtime_(runtime), isFormRender_(isCard)
 {
     CHECK_NULL_VOID(context);
     bundleName_ = context->GetBundleName();
@@ -319,19 +319,6 @@ void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& u
     LOGD("Initialize UIContentImpl done.");
 }
 
-void UIContentImpl::Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage)
-{
-    CommonInitialize(window, contentInfo, storage);
-    startUrl_ = Platform::AceContainer::RestoreRouterStack(instanceId_, contentInfo);
-    if (startUrl_.empty()) {
-        LOGW("UIContent Restore start url is empty");
-    }
-    LOGI("Restore startUrl = %{public}s", startUrl_.c_str());
-    Platform::AceContainer::RunPage(
-        instanceId_, Platform::AceContainer::GetContainer(instanceId_)->GeneratePageId(), startUrl_, "");
-    LOGI("Restore UIContentImpl done.");
-}
-
 void UIContentImpl::Initialize(const std::shared_ptr<Window>& aceWindow, const std::string& url, NativeValue* storage)
 {
     if (aceWindow && StringUtils::StartWith(aceWindow->GetWindowName(), SUBWINDOW_TOAST_DIALOG_PREFIX)) {
@@ -347,6 +334,19 @@ void UIContentImpl::Initialize(const std::shared_ptr<Window>& aceWindow, const s
     LOGI("Initialize UIContentImpl done");
 }
 
+void UIContentImpl::Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage)
+{
+    CommonInitialize(window, contentInfo, storage);
+    startUrl_ = Platform::AceContainer::RestoreRouterStack(instanceId_, contentInfo);
+    if (startUrl_.empty()) {
+        LOGW("UIContent Restore start url is empty");
+    }
+    LOGI("Restore startUrl = %{public}s", startUrl_.c_str());
+    Platform::AceContainer::RunPage(
+        instanceId_, Platform::AceContainer::GetContainer(instanceId_)->GeneratePageId(), startUrl_, "");
+    LOGI("Restore UIContentImpl done.");
+}
+
 std::string UIContentImpl::GetContentInfo() const
 {
     LOGI("UIContent GetContentInfo");
@@ -354,8 +354,8 @@ std::string UIContentImpl::GetContentInfo() const
 }
 
 // ArkTSCard start
-void UIContentImpl::CommonInitializeForm(OHOS::Rosen::Window* window,
-                                         const std::string& contentInfo, NativeValue* storage)
+void UIContentImpl::CommonInitializeForm(
+    OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage)
 {
     LOGI("Initialize CommonInitializeForm start.");
     ACE_FUNCTION_TRACE();
@@ -718,12 +718,10 @@ void UIContentImpl::CommonInitializeForm(OHOS::Rosen::Window* window,
     // create ace_view
     Platform::AceViewOhos* aceView = nullptr;
     if (isFormRender_) {
-        aceView =
-            Platform::AceViewOhos::CreateView(instanceId_, true, container->GetSettings().usePlatformAsUIThread);
+        aceView = Platform::AceViewOhos::CreateView(instanceId_, true, container->GetSettings().usePlatformAsUIThread);
         Platform::AceViewOhos::SurfaceCreated(aceView, window_);
     } else {
-        aceView =
-            Platform::AceViewOhos::CreateView(instanceId_, false, container->GetSettings().usePlatformAsUIThread);
+        aceView = Platform::AceViewOhos::CreateView(instanceId_, false, container->GetSettings().usePlatformAsUIThread);
         Platform::AceViewOhos::SurfaceCreated(aceView, window_);
     }
 
@@ -751,8 +749,8 @@ void UIContentImpl::CommonInitializeForm(OHOS::Rosen::Window* window,
         Platform::AceContainer::SetView(aceView, density, 0, 0, window_, callback);
     } else {
         if (isFormRender_) {
-            LOGI("Platform::AceContainer::SetViewNew is card formWidth=%{public}f, formHeight=%{public}f",
-                formWidth_, formHeight_);
+            LOGI("Platform::AceContainer::SetViewNew is card formWidth=%{public}f, formHeight=%{public}f", formWidth_,
+                formHeight_);
             Platform::AceContainer::SetViewNew(aceView, density, formWidth_, formHeight_, window_);
             auto frontend = AceType::DynamicCast<FormFrontendDeclarative>(container->GetFrontend());
             CHECK_NULL_VOID(frontend);
@@ -890,6 +888,9 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
             deviceHeight, density);
     }
     SystemProperties::InitDeviceInfo(deviceWidth, deviceHeight, deviceHeight >= deviceWidth ? 0 : 1, density, false);
+    // Initialize performance check parameters
+    SystemProperties::InitPerformanceParameters();
+    AcePerformanceCheck::Start();
     SystemProperties::SetColorMode(ColorMode::LIGHT);
 
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
@@ -1225,9 +1226,15 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     }
 
     Platform::AceViewOhos::SurfaceChanged(aceView, 0, 0, deviceHeight >= deviceWidth ? 0 : 1);
+    auto pipeline = container->GetPipelineContext();
+    if (pipeline) {
+        auto rsConfig = window_->GetKeyboardAnimationConfig();
+        KeyboardAnimationConfig config = { rsConfig.curveType_, rsConfig.curveParams_, rsConfig.durationIn_,
+            rsConfig.durationOut_ };
+        pipeline->SetKeyboardAnimationConfig(config);
+    }
     // Set sdk version in module json mode
     if (isModelJson) {
-        auto pipeline = container->GetPipelineContext();
         if (pipeline && appInfo) {
             LOGI("SetMinPlatformVersion code is %{public}d", appInfo->apiCompatibleVersion);
             pipeline->SetMinPlatformVersion(appInfo->apiCompatibleVersion);
@@ -1294,6 +1301,8 @@ void UIContentImpl::Destroy()
     LOGI("UIContentImpl: window destroy");
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_VOID_NOLOG(container);
+    // stop performance check and output json file
+    AcePerformanceCheck::Stop();
     if (strcmp(AceType::TypeName(container), AceType::TypeName<Platform::DialogContainer>()) == 0) {
         Platform::DialogContainer::DestroyContainer(instanceId_);
     } else {
@@ -1424,7 +1433,7 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
 }
 
 void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
-    const std::shared_ptr<OHOS::Rosen::RSTransaction> rsTransaction)
+    const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)
 {
     LOGI("UIContentImpl: UpdateViewportConfig %{public}s", config.ToString().c_str());
     SystemProperties::SetResolution(config.Density());
@@ -1511,10 +1520,7 @@ void UIContentImpl::DumpInfo(const std::vector<std::string>& params, std::vector
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     auto ret = taskExecutor->PostSyncTaskTimeout(
-        [&]() {
-            container->Dump(params, info);
-        },
-        TaskExecutor::TaskType::UI, 1500); // timeout 1.5s
+        [&]() { container->Dump(params, info); }, TaskExecutor::TaskType::UI, 1500); // timeout 1.5s
     if (!ret) {
         LOGE("DumpInfo failed");
     }

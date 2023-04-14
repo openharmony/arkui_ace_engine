@@ -351,6 +351,14 @@ public:
         return windowId_;
     }
 
+    bool WindowIsShow() const override
+    {
+        if (!uiWindow_) {
+            return false;
+        }
+        return uiWindow_->GetWindowState() == Rosen::WindowState::STATE_SHOWN;
+    }
+
     void SetWindowPos(int32_t left, int32_t top);
 
     void SetIsSubContainer(bool isSubContainer)
@@ -372,7 +380,8 @@ public:
     void UpdateConfiguration(
         const std::string& colorMode, const std::string& inputDevice, const std::string& languageTag);
 
-    void NotifyConfigurationChange(bool needReloadTransition);
+    void NotifyConfigurationChange(bool needReloadTransition) override;
+    void HotReload() override;
 
     bool IsUseStageModel() const override
     {

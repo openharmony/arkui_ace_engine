@@ -53,6 +53,8 @@ public:
     void ParseAnimationStyle(const std::vector<std::unordered_map<std::string, std::string>>& animationKeyframes,
         const RefPtr<Declaration>& declaration, const RefPtr<ThemeConstants> themeConstants);
 
+    static AnimationOption CreateKeyboardAnimationOption(const KeyboardAnimationConfig& config, float keyboardHeight);
+
 private:
     void KeyframesAddKeyFrame(const std::string& keyStyle, const std::string& value, const std::string& timeStr);
     template<class T>

@@ -70,6 +70,8 @@ public:
         }
     }
 
+    virtual void SetCompleteReloadFunc(RenderFunction&& func) = 0;
+
     void SetPageTransitionFunction(std::function<void()>&& pageTransitionFunc)
     {
         pageTransitionFunc_ = std::move(pageTransitionFunc);
@@ -160,6 +162,7 @@ private:
     std::function<void()> destroyFunc_;
     std::function<void()> pageTransitionFunc_;
     std::function<void(bool)> reloadFunc_;
+    std::function<void()> completeReloadFunc_;
     std::function<void(int32_t)> forceNodeUpdateFunc_;
     std::function<void(RefPtr<CustomNodeBase>)> recycleCustomNodeFunc_;
     std::function<void()> recycleRenderFunc_;

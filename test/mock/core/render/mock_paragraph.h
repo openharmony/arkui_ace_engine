@@ -44,6 +44,9 @@ public:
     MOCK_METHOD1(AddText, void(const std::u16string& text));
     MOCK_METHOD1(Layout, void(float width));
     MOCK_METHOD1(GetHandlePositionForClick, int32_t(const Offset& offset));
+    MOCK_METHOD1(AddPlaceholder, int32_t(const PlaceholderRun& span));
+    MOCK_METHOD1(GetRectsForPlaceholders, void(std::vector<Rect>& selectedRects));
+    MOCK_METHOD1(SetIndents, void(const std::vector<float>& indents));
     MOCK_METHOD2(ComputeOffsetForCaretDownstream, bool(int32_t extent, CaretMetrics& result));
     MOCK_METHOD2(ComputeOffsetForCaretUpstream, bool(int32_t extent, CaretMetrics& result));
     MOCK_METHOD3(GetRectsForRange, void(int32_t start, int32_t end, std::vector<Rect>& selectedRects));

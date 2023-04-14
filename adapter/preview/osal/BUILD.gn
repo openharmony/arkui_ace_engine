@@ -94,7 +94,7 @@ ohos_source_set("preview_osal_source") {
 
     include_dirs = [ "//commonlibrary/c_utils/base/include" ]
 
-    if (is_standard_system) {
+    if (is_ohos_standard_system) {
       sources += [
         "${ace_root}/adapter/ohos/osal/resource_theme_style.cpp",
         "frame_trace_adapter_impl.cpp",

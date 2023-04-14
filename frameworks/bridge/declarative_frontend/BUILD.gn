@@ -183,6 +183,7 @@ template("declarative_js_engine") {
       "jsview/js_if_else.cpp",
       "jsview/js_image.cpp",
       "jsview/js_image_animator.cpp",
+      "jsview/js_image_span.cpp",
       "jsview/js_indexer.cpp",
       "jsview/js_interactable_view.cpp",
       "jsview/js_lazy_foreach.cpp",
@@ -329,6 +330,8 @@ template("declarative_js_engine") {
       "jsview/models/view_abstract_model_impl.cpp",
       "jsview/models/view_full_update_model_impl.cpp",
       "jsview/models/view_partial_update_model_impl.cpp",
+      "jsview/models/water_flow_item_model_impl.cpp",
+      "jsview/models/water_flow_model_impl.cpp",
     ]
 
     defines += uicast_configs.uicast_defines
@@ -555,6 +558,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_grid_item.cpp",
       "jsview/js_if_else.cpp",
       "jsview/js_image.cpp",
+      "jsview/js_image_span.cpp",
       "jsview/js_interactable_view.cpp",
       "jsview/js_lazy_foreach.cpp",
       "jsview/js_list.cpp",

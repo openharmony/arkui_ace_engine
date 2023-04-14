@@ -116,6 +116,19 @@ public:
         return outBoundaryCallback_;
     }
 
+    void SetMouseLeftButtonScroll(MouseLeftButtonScroll&& mouseLeftButtonScroll)
+    {
+        if (!mouseLeftButtonScroll) {
+            return;
+        }
+        mouseLeftButtonScroll_ = std::move(mouseLeftButtonScroll);
+    }
+
+    const MouseLeftButtonScroll& GetMouseLeftButtonScroll() const
+    {
+        return mouseLeftButtonScroll_;
+    }
+
     Axis GetAxis() const
     {
         return axis_;
@@ -164,6 +177,7 @@ private:
     ScrollFrameBeginCallback scrollFrameBeginCallback_;
     ScrollEndCallback scrollEndCallback_;
     OutBoundaryCallback outBoundaryCallback_;
+    MouseLeftButtonScroll mouseLeftButtonScroll_;
 
     Axis axis_ = Axis::VERTICAL;
     bool enable_ = true;

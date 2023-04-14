@@ -156,7 +156,9 @@ void SvgNode::Draw(RSCanvas& canvas, const Size& viewPort, const std::optional<C
     if (!OnCanvas(canvas)) {
         return;
     }
-    canvas.Save();
+    // mask and filter create extra layers, need to record initial layer count
+    auto count = skCanvas_->getSaveCount();
+    skCanvas_->save();
     if (!hrefClipPath_.empty()) {
         OnClipPath(canvas, viewPort);
     }
@@ -172,7 +174,7 @@ void SvgNode::Draw(RSCanvas& canvas, const Size& viewPort, const std::optional<C
 
     OnDraw(canvas, viewPort, color);
     OnDrawTraversed(canvas, viewPort, color);
-    canvas.Restore();
+    skCanvas_->restoreToCount(count);
 }
 
 void SvgNode::OnDrawTraversed(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color)
@@ -225,14 +227,9 @@ void SvgNode::OnMask(RSCanvas& canvas, const Size& viewPort)
 
 void SvgNode::OnTransform(RSCanvas& canvas, const Size& viewPort)
 {
-    auto transformInfo = (animateTransform_.empty()) ? SvgTransform::CreateInfoFromString(transform_)
-                                                     : SvgTransform::CreateInfoFromMap(animateTransform_);
-    if (transformInfo.hasRotateCenter) {
-        transformInfo.matrix4 =
-            RenderTransform::GetTransformByOffset(transformInfo.matrix4, transformInfo.rotateCenter);
-        // maybe should process attr transformOrigin
-    }
-    skCanvas_->concat(FlutterSvgPainter::ToSkMatrix(transformInfo.matrix4));
+    auto matrix = (animateTransform_.empty()) ? SvgTransform::CreateMatrix4(transform_)
+                                              : SvgTransform::CreateMatrixFromMap(animateTransform_);
+    skCanvas_->concat(FlutterSvgPainter::ToSkMatrix(matrix));
 }
 
 double SvgNode::ConvertDimensionToPx(const Dimension& value, const Size& viewPort, SvgLengthType type) const

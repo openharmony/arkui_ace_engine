@@ -82,7 +82,7 @@ private:
     void FireOnUninstallEvent(int64_t id) const;
 
     bool ISAllowUpdate() const;
-
+    void EnableDrag();
     // used by ArkTS Card, for RSSurfaceNode from FRS,
     RefPtr<RenderContext> externalRenderContext_;
 

@@ -403,7 +403,7 @@ template("ace_core_source_set") {
     }
 
     if (!use_mingw_win && !use_mac && !is_wearable_product &&
-        !is_standard_system && !use_linux) {
+        !is_ohos_standard_system && !use_linux) {
       deps += [ "$ace_root/frameworks/core/components/rich_text:ace_core_components_rich_text_$platform" ]
     }
 
@@ -491,6 +491,13 @@ template("ace_core_source_set") {
     }
 
     include_dirs = [ "//foundation/window/window_manager/interfaces/innerkits" ]
+    if (is_cross_platform_build) {
+      include_dirs += [
+        "//foundation/appframework/ability/ability_runtime/cross_platform/frameworks/native/base/event_handler/include",
+        "//foundation/appframework/ability/ability_runtime/cross_platform/interfaces/inner_api/error",
+      ]
+    }
+
     include_dirs += uicast_configs.uicast_root_include
 
     if (!is_wearable_product) {
@@ -731,6 +738,12 @@ template("ace_core_ng_source_set") {
       "common/flutter/flutter_task_executor.cpp",
       "common/flutter/flutter_thread_model.cpp",
     ]
+    if (is_cross_platform_build) {
+      include_dirs = [
+        "//foundation/appframework/ability/ability_runtime/cross_platform/frameworks/native/base/event_handler/include",
+        "//foundation/appframework/ability/ability_runtime/cross_platform/interfaces/inner_api/error",
+      ]
+    }
 
     if (platform == "ohos") {
       sources -= [ "common/anr_thread.cpp" ]

@@ -92,8 +92,9 @@ struct TextEditingValueNG {
     std::string GetSelectedText(int32_t start, int32_t end) const
     {
         auto wideText = GetWideText();
-        auto min = std::max(std::min(start, end), 0);
-        auto max = std::min(std::max(start, end), static_cast<int32_t>(wideText.length()));
+        auto min = std::clamp(std::max(std::min(start, end), 0), 0, static_cast<int32_t>(wideText.length()));
+        auto max = std::clamp(std::min(std::max(start, end), static_cast<int32_t>(wideText.length())), 0,
+            static_cast<int32_t>(wideText.length()));
         return StringUtils::ToString(wideText.substr(min, max - min));
     }
 

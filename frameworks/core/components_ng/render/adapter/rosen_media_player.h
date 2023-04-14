@@ -56,7 +56,7 @@ public:
 
 private:
     // Interim programme
-    bool SetMediaSource(std::string& filePath, int32_t& fd);
+    bool SetMediaSource(std::string& filePath, int32_t& fd, bool& useFd);
     bool MediaPlay(const std::string& filePath);
     bool RawFilePlay(const std::string& filePath);
     bool RelativePathPlay(const std::string& filePath);

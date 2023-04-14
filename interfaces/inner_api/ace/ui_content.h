@@ -27,13 +27,13 @@ namespace OHOS {
 
 namespace AbilityRuntime {
 class Context;
-}
+} // namespace AbilityRuntime
 
 namespace AppExecFwk {
 class Configuration;
 class Ability;
 class FormAshmem;
-}
+} // namespace AppExecFwk
 
 namespace Rosen {
 class Window;
@@ -41,11 +41,11 @@ enum class WindowSizeChangeReason : uint32_t;
 enum class WindowMode : uint32_t;
 class RSSurfaceNode;
 class RSTransaction;
-}
+} // namespace Rosen
 
 namespace AAFwk {
 class Want;
-}
+} // namespace AAFwk
 
 namespace MMI {
 class PointerEvent;
@@ -55,7 +55,7 @@ class AxisEvent;
 
 namespace Ace {
 class Window;
-}
+} // namespace Ace
 
 } // namespace OHOS
 
@@ -101,7 +101,7 @@ public:
     virtual bool ProcessVsyncEvent(uint64_t timeStampNanos) = 0;
     virtual void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) = 0;
     virtual void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
-        const std::shared_ptr<OHOS::Rosen::RSTransaction> rsTransaction = nullptr) = 0;
+        const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr) = 0;
     virtual void UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco = true) = 0;
     virtual void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize) = 0;
     virtual void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) = 0;

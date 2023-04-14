@@ -145,6 +145,12 @@ void ScrollablePattern::AddScrollEvent()
         pattern->OnScrollEndCallback();
     };
     scrollableEvent_->SetScrollEndCallback(std::move(scrollEnd));
+    auto mouseLeftButtonScroll = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, false);
+        return pattern->IsScrollBarPressed();
+    };
+    scrollableEvent_->SetMouseLeftButtonScroll(std::move(mouseLeftButtonScroll));
     gestureHub->AddScrollableEvent(scrollableEvent_);
 }
 
@@ -194,8 +200,8 @@ bool ScrollablePattern::HandleEdgeEffect(float offset, int32_t source, const Siz
             scrollEffect_->HandleOverScroll(GetAxis(), -offset, size);
         }
     }
-    if (!(scrollEffect_ && scrollEffect_->IsSpringEffect()) ||
-        source == SCROLL_FROM_BAR || source == SCROLL_FROM_JUMP) {
+    if (!(scrollEffect_ && scrollEffect_->IsSpringEffect()) || source == SCROLL_FROM_BAR ||
+        source == SCROLL_FROM_AXIS || source == SCROLL_FROM_JUMP) {
         if (IsAtTop() && Positive(offset)) {
             return false;
         }

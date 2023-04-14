@@ -40,6 +40,7 @@ constexpr Dimension ITEM_SPACE = Dimension(20, DimensionUnit::PX);
 constexpr Dimension PREVIOUS_MARGIN = Dimension(50, DimensionUnit::PX);
 constexpr Dimension NEXT_MARGIN = Dimension(50, DimensionUnit::PX);
 constexpr Dimension NEXT_MARGIN_EXTRA_LARGE = Dimension(600, DimensionUnit::PX);
+constexpr int32_t MAX_NODE_NUMBER = 3;
 } // namespace
 
 class SwiperPatternTestNg : public testing::Test {
@@ -463,7 +464,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperFunc001, TestSize.Level1)
 
 /**
  * @tc.name: SwiperFunc002
- * @tc.desc: OnKeyEvent
+ * @tc.desc: OnVisibleChange
  * @tc.type: FUNC
  */
 HWTEST_F(SwiperPatternTestNg, SwiperFunc002, TestSize.Level1)
@@ -483,5 +484,30 @@ HWTEST_F(SwiperPatternTestNg, SwiperFunc002, TestSize.Level1)
     pattern->OnWindowShow();
     pattern->OnVisibleChange(isVisible);
     EXPECT_TRUE(pattern->isVisible_);
+}
+
+/**
+ * @tc.name: SwiperFunc003
+ * @tc.desc: OnIndexChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, SwiperFunc003, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto swiperNode =
+        FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    stack->Push(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    pattern->OnIndexChange();
+    int32_t nodeId = 0;
+    while (nodeId < MAX_NODE_NUMBER)
+    {
+        auto indicatorNode = FrameNode::GetOrCreateFrameNode(
+            "SwiperIndicator", nodeId, []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+        swiperNode->AddChild(indicatorNode);
+        nodeId++;
+    }
+    pattern->OnIndexChange();
+    EXPECT_EQ(pattern->TotalCount(), MAX_NODE_NUMBER - 1);
 }
 } // namespace OHOS::Ace::NG

@@ -600,6 +600,13 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
         jsView->jsViewFunction_->ExecuteReload(deep);
     };
 
+    // @Component level complete reload, can detect added/deleted frame nodes
+    auto completeReloadFunc = [weak = AceType::WeakClaim(this)]() -> RefPtr<AceType> {
+        auto jsView = weak.Upgrade();
+        CHECK_NULL_RETURN(jsView, nullptr);
+        return jsView->InitialRender();
+    };
+
     auto pageTransitionFunction = [weak = AceType::WeakClaim(this)]() {
         auto jsView = weak.Upgrade();
         if (!jsView || !jsView->jsViewFunction_) {
@@ -650,6 +657,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
         .updateNodeFunc = std::move(updateViewNodeFunction),
         .pageTransitionFunc = std::move(pageTransitionFunction),
         .reloadFunc = std::move(reloadFunction),
+        .completeReloadFunc = std::move(completeReloadFunc),
         .nodeUpdateFunc = std::move(nodeUpdateFunc),
         .recycleCustomNodeFunc = recycleCustomNode,
         .hasMeasureOrLayout = jsViewFunction_->HasMeasure() || jsViewFunction_->HasLayout(),
