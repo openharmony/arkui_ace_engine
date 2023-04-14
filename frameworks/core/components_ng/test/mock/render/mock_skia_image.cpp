@@ -22,4 +22,27 @@ RefPtr<CanvasImage> CanvasImage::Create(void* rawImage)
     return nullptr;
 }
 
+RefPtr<CanvasImage> SkiaImage::Clone()
+{
+    return Claim(this);
+}
+
+RefPtr<PixelMap> SkiaImage::GetPixelMap()
+{
+    return nullptr;
+}
+
+void SkiaImage::DrawToRSCanvas(
+    RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY)
+{}
+
+int32_t SkiaImage::GetWidth() const
+{
+    return {};
+}
+int32_t SkiaImage::GetHeight() const
+{
+    return {};
+}
+
 } // namespace OHOS::Ace::NG
