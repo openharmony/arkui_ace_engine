@@ -82,6 +82,23 @@ AceCollectionInfo GridAccessibilityProperty::GetCollectionInfo() const
     } else {
         aceCollectionInfo.columns = 0;
     }
+    aceCollectionInfo.selectMode = gridPattern->MultiSelectable();
     return aceCollectionInfo;
+}
+
+void GridAccessibilityProperty::SetSpecificSupportAction()
+{
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto gridPattern = frameNode->GetPattern<GridPattern>();
+    CHECK_NULL_VOID(gridPattern);
+    if (IsScrollable()) {
+        if (!(gridPattern->IsAtTop())) {
+            AddSupportAction(AceAction::ACTION_SCROLL_BACKWARD);
+        }
+        if (!(gridPattern->IsAtBottom())) {
+            AddSupportAction(AceAction::ACTION_SCROLL_FORWARD);
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

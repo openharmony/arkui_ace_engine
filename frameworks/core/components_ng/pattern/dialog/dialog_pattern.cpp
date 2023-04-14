@@ -257,6 +257,7 @@ RefPtr<FrameNode> DialogPattern::BuildTitle(const DialogProperties& dialogProper
     rowProps->UpdateMainAxisAlign(FlexAlign::FLEX_START);
     rowProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     title->MountToParent(row);
+    title->MarkModifyDone();
     return row;
 }
 
@@ -296,6 +297,7 @@ RefPtr<FrameNode> DialogPattern::BuildContent(const DialogProperties& props)
 
     // XTS inspector value
     message_ = props.content;
+    contentNode->MarkModifyDone();
     return contentNode;
 }
 
@@ -321,6 +323,7 @@ RefPtr<FrameNode> DialogPattern::CreateButton(const ButtonInfo& params, int32_t 
     auto textNode = CreateButtonText(params.text, params.textColor);
     CHECK_NULL_RETURN(textNode, nullptr);
     textNode->MountToParent(buttonNode);
+    textNode->MarkModifyDone();
 
     auto hub = buttonNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(hub, nullptr);
@@ -482,6 +485,7 @@ RefPtr<FrameNode> DialogPattern::BuildSheetItem(const ActionSheetInfo& item)
         props->UpdateMaxLines(style.GetMaxLines());
 
         titleNode->MountToParent(itemRow);
+        titleNode->MarkModifyDone();
     }
     // set sheetItem action
     auto hub = itemRow->GetOrCreateGestureEventHub();

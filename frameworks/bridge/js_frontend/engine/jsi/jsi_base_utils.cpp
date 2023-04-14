@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "frameworks/bridge/js_frontend/engine/jsi/jsi_base_utils.h"
+#include "bridge/js_frontend/engine/jsi/jsi_base_utils.h"
 
 #include <utility>
 
@@ -21,11 +21,11 @@
 #include "base/log/exception_handler.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
+#include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
+#include "bridge/js_frontend/engine/jsi/ark_js_value.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
-#include "frameworks/bridge/js_frontend/engine/jsi/ark_js_runtime.h"
-#include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
 
 namespace OHOS::Ace::Framework {
 constexpr char JS_CRASH_CODE[] = "100001";
@@ -453,7 +453,7 @@ std::string JsiBaseUtils::TranslateBySourceMap(const std::string& stackStr, cons
         std::string sourceInfo;
         auto iter = sourceMaps.find(key);
         if (iter != sourceMaps.end()) {
-            sourceInfo = GetSourceInfo(line, column, iter->second, appMap, isAppPage, data);
+            sourceInfo = GetSourceInfo(line, column, iter->second, appMap, isAppPage, data, false);
         }
         if (sourceInfo.empty()) {
             break;
@@ -505,7 +505,8 @@ void JsiBaseUtils::GetPosInfo(const std::string& temp, int32_t start, std::strin
 }
 
 std::string JsiBaseUtils::GetSourceInfo(const std::string& line, const std::string& column,
-    const RefPtr<RevSourceMap>& pageMap, const RefPtr<RevSourceMap>& appMap, bool isAppPage, const AceType* data)
+    const RefPtr<RevSourceMap>& pageMap, const RefPtr<RevSourceMap>& appMap, bool isAppPage, const AceType* data,
+    const bool isBundle)
 {
     int32_t offSet = GetLineOffset(data);
     std::string sourceInfo;
@@ -519,7 +520,7 @@ std::string JsiBaseUtils::GetSourceInfo(const std::string& line, const std::stri
         return "";
     }
 
-    std::string sources = GetRelativePath(mapInfo.sources);
+    std::string sources = isBundle ? GetRelativePath(mapInfo.sources) : mapInfo.sources;
     sourceInfo = "(" + sources + ":" + std::to_string(mapInfo.row) + ":" + std::to_string(mapInfo.col) + ")";
     return sourceInfo;
 }
@@ -785,8 +786,8 @@ shared_ptr<JsValue> JsiBaseUtils::JsErrorLogPrint(const shared_ptr<JsRuntime>& r
 
 std::unique_ptr<AceScopedTrace> JsiBaseUtils::aceScopedTrace_ = nullptr;
 
-shared_ptr<JsValue> JsiBaseUtils::JsTraceBegin(const shared_ptr<JsRuntime>& runtime,
-    const shared_ptr<JsValue>& thisObj, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+shared_ptr<JsValue> JsiBaseUtils::JsTraceBegin(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
     if (SystemProperties::GetDebugEnabled()) {
         std::string traceName = GetLogContent(runtime, argv, argc);
@@ -795,8 +796,8 @@ shared_ptr<JsValue> JsiBaseUtils::JsTraceBegin(const shared_ptr<JsRuntime>& runt
     return runtime->NewUndefined();
 }
 
-shared_ptr<JsValue> JsiBaseUtils::JsTraceEnd(const shared_ptr<JsRuntime>& runtime,
-    const shared_ptr<JsValue>& thisObj, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+shared_ptr<JsValue> JsiBaseUtils::JsTraceEnd(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
     if (SystemProperties::GetDebugEnabled()) {
         aceScopedTrace_.reset();

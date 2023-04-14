@@ -300,6 +300,7 @@ void JSRect::JSBind(BindingTarget globalObj)
     JSClass<JSRect>::CustomMethod("radiusHeight", &JSRect::ObjectRadiusHeight);
     JSClass<JSRect>::CustomMethod("radius", &JSRect::ObjectRadius);
     JSClass<JSRect>::CustomMethod("fill", &JSShapeAbstract::ObjectFill);
+    JSClass<JSRect>::CustomMethod("position", &JSShapeAbstract::ObjectPosition);
 
     JSClass<JSRect>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSRect>::StaticMethod("onHover", &JSInteractableView::JsOnHover);

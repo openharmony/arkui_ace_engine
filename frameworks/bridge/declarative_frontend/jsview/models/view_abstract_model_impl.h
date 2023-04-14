@@ -138,7 +138,9 @@ public:
     void SetOnFocusMove(std::function<void(int32_t)>&& onFocusMoveCallback) override;
     void SetOnFocus(OnFocusFunc&& onFocusCallback) override;
     void SetOnBlur(OnBlurFunc&& onBlurCallback) override;
+    void SetDraggable(bool draggable) override {}
     void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override;
+    void SetOnDragEnd(OnNewDragFunc&& onDragEnd) override;
     void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) override;
     void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) override;
     void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) override;
@@ -181,6 +183,7 @@ public:
     void SetProgressMask(const RefPtr<NG::ProgressMaskProperty>& progress) override {}
     void SetForegroundColor(const Color& color) override {}
     void SetForegroundColorStrategy(const ForegroundColorStrategy& strategy) override {}
+    void SetAllowDrop(const std::set<std::string>& allowDrop) override {}
 };
 
 } // namespace OHOS::Ace::Framework

@@ -66,34 +66,6 @@ char* realpath(const char* path, char* resolved_path)
     return resolved_path;
 }
 #endif
-
-#ifdef PIXEL_MAP_SUPPORTED
-// return orientation of pixmap for cache key
-std::string GetThumbnailOrientation(const ImageSourceInfo& src)
-{
-    // disabling orientation check
-    return "Undefined";
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, "");
-    auto dataProvider = pipeline->GetDataProviderManager();
-    CHECK_NULL_RETURN(dataProvider, "");
-
-    // get file fd
-    // concat to get file path ("datashare://media/xx")
-    auto path = src.GetSrc();
-    auto pos = path.find("/thumbnail");
-    path = path.substr(0, pos);
-    int32_t fd = dataProvider->GetDataProviderFile(path, "r");
-    CHECK_NULL_RETURN(fd >= 0, "");
-
-    // check image orientation
-    auto imageSrc = ImageSource::Create(fd);
-    CHECK_NULL_RETURN(imageSrc, "");
-    std::string orientation = imageSrc->GetProperty("Orientation");
-    LOGD("image %{public}s has orientation = %{public}s", path.c_str(), orientation.c_str());
-    return orientation;
-}
-#endif
 } // namespace
 
 std::string ImageLoader::RemovePathHead(const std::string& uri)
@@ -569,33 +541,48 @@ sk_sp<SkData> DecodedDataProviderImageLoader::LoadImageData(
     return nullptr;
 }
 
+// return orientation of pixmap for cache key
+const std::string& DecodedDataProviderImageLoader::GetThumbnailOrientation(const ImageSourceInfo& src)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, "");
+    auto dataProvider = pipeline->GetDataProviderManager();
+    CHECK_NULL_RETURN(dataProvider, "");
+
+    // get file fd
+    // concat to get file path ("datashare://media/xx")
+    auto path = src.GetSrc();
+    auto pos = path.find("/thumbnail");
+    path = path.substr(0, pos);
+    int32_t fd = dataProvider->GetDataProviderFile(path, "r");
+    CHECK_NULL_RETURN(fd >= 0, "");
+
+    // check image orientation
+    auto imageSrc = ImageSource::Create(fd);
+    CHECK_NULL_RETURN(imageSrc, "");
+    std::string orientation = imageSrc->GetProperty("Orientation");
+    LOGD("image %{public}s has orientation = %{public}s", path.c_str(), orientation.c_str());
+    return orientation;
+}
+
 RefPtr<NG::ImageData> DecodedDataProviderImageLoader::LoadDecodedImageData(
     const ImageSourceInfo& src, const WeakPtr<PipelineBase>& pipelineWk)
 {
 #if !defined(PIXEL_MAP_SUPPORTED)
     return nullptr;
 #else
-    auto orientation = GetThumbnailOrientation(src);
-
-    // query thumbnail from cache
     auto pipeline = pipelineWk.Upgrade();
     CHECK_NULL_RETURN(pipeline, nullptr);
-    auto cache = pipeline->GetImageCache();
-    CHECK_NULL_RETURN(cache, nullptr);
-    auto data = DynamicCast<PixmapCachedData>(cache->GetCacheImageData(src.GetKey() + orientation));
-    if (data) {
-        LOGD("thumbnail cache found %{public}s, orientation = %{public}s", src.GetSrc().c_str(), orientation.c_str());
-        return MakeRefPtr<NG::ImageData>(data->pixmap_);
-    }
-
     auto dataProvider = pipeline->GetDataProviderManager();
     CHECK_NULL_RETURN(dataProvider, nullptr);
 
     void* pixmapMediaUniquePtr = dataProvider->GetDataProviderThumbnailResFromUri(src.GetSrc());
     auto pixmap = PixelMap::CreatePixelMapFromDataAbility(pixmapMediaUniquePtr);
     CHECK_NULL_RETURN(pixmap, nullptr);
+
+    auto cache = pipeline->GetImageCache();
     if (cache) {
-        cache->CacheImageData(src.GetKey() + orientation, MakeRefPtr<PixmapCachedData>(pixmap));
+        cache->CacheImageData(src.GetKey(), MakeRefPtr<PixmapCachedData>(pixmap));
     }
     return MakeRefPtr<NG::ImageData>(pixmap);
 #endif

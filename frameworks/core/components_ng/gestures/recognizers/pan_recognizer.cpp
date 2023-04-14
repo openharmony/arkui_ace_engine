@@ -120,7 +120,11 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     deviceType_ = event.sourceType;
     lastTouchEvent_ = event;
     touchPoints_[event.id] = event;
-    inputEventType_ = InputEventType::TOUCH_SCREEN;
+    if (event.sourceType == SourceType::MOUSE) {
+        inputEventType_ = InputEventType::MOUSE_BUTTON;
+    } else {
+        inputEventType_ = InputEventType::TOUCH_SCREEN;
+    }
 
     auto fingerNum = static_cast<int32_t>(touchPoints_.size());
 
@@ -170,6 +174,11 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+#ifdef ENABLE_DRAG_FRAMEWORK
+        if (onActionCancel_ && *onActionCancel_) {
+            (*onActionCancel_)();
+        }
+#endif // ENABLE_DRAG_FRAMEWORK
         return;
     }
 

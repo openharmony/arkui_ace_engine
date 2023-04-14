@@ -22,6 +22,7 @@
 #include "render_service_base/include/property/rs_properties_def.h"
 #include "render_service_client/core/modifier/rs_property_modifier.h"
 #include "render_service_client/core/pipeline/rs_node_map.h"
+#include "render_service_client/core/transaction/rs_interfaces.h"
 #include "render_service_client/core/ui/rs_canvas_node.h"
 #include "render_service_client/core/ui/rs_root_node.h"
 #include "render_service_client/core/ui/rs_surface_node.h"
@@ -66,7 +67,11 @@
 
 namespace OHOS::Ace::NG {
 
+using namespace OHOS::Rosen;
 namespace {
+RefPtr<PixelMap> g_pixelMap {};
+std::mutex g_mutex;
+std::condition_variable thumbnailGet;
 float ConvertDimensionToScaleBySize(const Dimension& dimension, float size)
 {
     if (dimension.Unit() == DimensionUnit::PERCENT) {
@@ -434,10 +439,10 @@ void RosenRenderContext::UpdateBackBlurStyle(const BlurStyleOption& bgBlurStyle)
     isBackBlurChanged_ = true;
 }
 
-void RosenRenderContext::OnSphericalEffectUpdate(float radio)
+void RosenRenderContext::OnSphericalEffectUpdate(double radio)
 {
     CHECK_NULL_VOID(rsNode_);
-    rsNode_->SetSpherizeDegree(radio);
+    rsNode_->SetSpherizeDegree(static_cast<float>(radio));
     RequestNextFrame();
 }
 
@@ -458,10 +463,10 @@ void RosenRenderContext::OnPixelStretchEffectUpdate(const PixStretchEffectOption
     RequestNextFrame();
 }
 
-void RosenRenderContext::OnLightUpEffectUpdate(float radio)
+void RosenRenderContext::OnLightUpEffectUpdate(double radio)
 {
     CHECK_NULL_VOID(rsNode_);
-    rsNode_->SetLightUpEffectDegree(radio);
+    rsNode_->SetLightUpEffectDegree(static_cast<float>(radio));
     RequestNextFrame();
 }
 
@@ -470,6 +475,37 @@ void RosenRenderContext::OnOpacityUpdate(double opacity)
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetAlpha(opacity);
     RequestNextFrame();
+}
+
+class DrawDragThumbnailCallback : public SurfaceCaptureCallback {
+public:
+    void OnSurfaceCapture(std::shared_ptr<Media::PixelMap> pixelMap) override
+    {
+        if (pixelMap == nullptr) {
+            LOGE("%{public}s: failed to get pixelmap, return nullptr", __func__);
+            return;
+        }
+        std::unique_lock<std::mutex> lock(g_mutex);
+#ifdef PIXEL_MAP_SUPPORTED
+        g_pixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
+#endif // PIXEL_MAP_SUPPORTED
+        thumbnailGet.notify_all();
+        LOGI("Get pixelmap success");
+    }
+};
+
+RefPtr<PixelMap> RosenRenderContext::GetThumbnailPixelMap()
+{
+    if (rsNode_ == nullptr) {
+        LOGE("rsNode is nullptr");
+        return nullptr;
+    }
+    std::shared_ptr<DrawDragThumbnailCallback> drawDragThumbnailCallback =
+        std::make_shared<DrawDragThumbnailCallback>();
+    RSInterfaces::GetInstance().TakeSurfaceCaptureForUI(rsNode_, drawDragThumbnailCallback, 1, 1);
+    std::unique_lock<std::mutex> lock(g_mutex);
+    thumbnailGet.wait(lock);
+    return g_pixelMap;
 }
 
 void RosenRenderContext::OnTransformScaleUpdate(const VectorF& scale)
@@ -561,9 +597,16 @@ void RosenRenderContext::OnTransformMatrixUpdate(const Matrix4& matrix)
     RequestNextFrame();
 }
 
+const int degree90 = 90;
+const int degree180 = 180;
+const int degree135 = 135;
+const int degree45 = 45;
+
 RectF RosenRenderContext::GetPaintRectWithTransform()
 {
     RectF rect;
+
+    const float pi = 3.14159265;
     CHECK_NULL_RETURN(rsNode_, rect);
     rect = GetPaintRectWithoutTransform();
     auto translate = rsNode_->GetStagingProperties().GetTranslate();
@@ -579,6 +622,25 @@ RectF RosenRenderContext::GetPaintRectWithTransform()
     auto oldSize = rect.GetSize();
     auto newSize = SizeF(oldSize.Width() * scale[0], oldSize.Height() * scale[1]);
     rect.SetSize(newSize);
+    // calculate rotate
+    int degree = rsNode_->GetStagingProperties().GetRotation();
+
+    if ((abs(degree) % degree180 > degree45) && (abs(degree) % degree180 < degree135)) {
+        degree = degree90;
+        OffsetF leftCornerRotate(0, 0);
+        OffsetF leftCorner(-1 * oldSize.Width() * scale[0] / 2, -1 * oldSize.Height() * scale[1] / 2);
+        leftCornerRotate.SetX(leftCorner.GetX() * cos(degree * pi / degree180) * -1 -
+                              leftCorner.GetY() * sin(degree * pi / degree180) * -1);
+        leftCornerRotate.SetY(leftCorner.GetX() * sin(degree * pi / degree180) * -1 +
+                              leftCorner.GetY() * cos(degree * pi / degree180) * -1);
+        OffsetF screenRotate(rect.GetX() + leftCornerRotate.GetX() - leftCorner.GetX(),
+            rect.GetY() + oldSize.Height() * scale[1] - leftCornerRotate.GetY() + leftCorner.GetY());
+        rect.SetOffset(screenRotate);
+        if (abs(degree) % degree180 != 0) {
+            newSize = SizeF(oldSize.Height() * scale[1], oldSize.Width() * scale[0]);
+            rect.SetSize(newSize);
+        }
+    }
     return rect;
 }
 
@@ -688,41 +750,37 @@ void RosenRenderContext::OnAccessibilityFocusUpdate(bool isAccessibilityFocus)
 {
     auto uiNode = GetHost();
     CHECK_NULL_VOID(uiNode);
-    uiNode->MarkDirtyNode(false, true, PROPERTY_UPDATE_RENDER);
+    if (isAccessibilityFocus) {
+        PaintAccessibilityFocus();
+    } else {
+        ClearAccessibilityFocus();
+    }
     uiNode->OnAccessibilityEvent(isAccessibilityFocus ? AccessibilityEventType::ACCESSIBILITY_FOCUSED
                                                       : AccessibilityEventType::ACCESSIBILITY_FOCUS_CLEARED);
-    RequestNextFrame();
 }
 
 void RosenRenderContext::PaintAccessibilityFocus()
 {
     CHECK_NULL_VOID(rsNode_);
+    Dimension focusPaddingVp = Dimension(0.0, DimensionUnit::VP);
     constexpr uint32_t ACCESSIBILITY_FOCUS_COLOR = 0xbf39b500;
     constexpr double ACCESSIBILITY_FOCUS_WIDTH = 4.0;
-    constexpr double ACCESSIBILITY_FOCUS_RADIUS_X = 2.0;
-    constexpr double ACCESSIBILITY_FOCUS_RADIUS_Y = 2.0;
+    Color paintColor(ACCESSIBILITY_FOCUS_COLOR);
+    Dimension paintWidth(ACCESSIBILITY_FOCUS_WIDTH, DimensionUnit::PX);
+    const auto& bounds = rsNode_->GetStagingProperties().GetBounds();
+    RoundRect frameRect;
+    frameRect.SetRect(RectF(0.0, 0.0, bounds.z_, bounds.w_));
+    PaintFocusState(frameRect, focusPaddingVp, paintColor, paintWidth, true);
+}
 
-    auto paintAccessibilityFocusTask = [weak = WeakClaim(this)](std::shared_ptr<SkCanvas> canvas) {
-        auto rosenRenderContext = weak.Upgrade();
-        CHECK_NULL_VOID(rosenRenderContext);
-        auto paintRect = rosenRenderContext->GetPaintRectWithoutTransform();
-        if (NearZero(paintRect.Width()) || NearZero(paintRect.Height())) {
-            LOGE("PaintAccessibilityFocus return");
-            return;
-        }
-        RSCanvas rsCanvas(&canvas);
-        RSPen pen;
-        pen.SetAntiAlias(true);
-        pen.SetColor(ACCESSIBILITY_FOCUS_COLOR);
-        pen.SetWidth(ACCESSIBILITY_FOCUS_WIDTH);
-        rsCanvas.AttachPen(pen);
-        rsCanvas.Save();
-        RSRect rect(0, 0, paintRect.Width(), paintRect.Height());
-        RSRoundRect rrect(rect, ACCESSIBILITY_FOCUS_RADIUS_X, ACCESSIBILITY_FOCUS_RADIUS_Y);
-        rsCanvas.DrawRoundRect(rrect);
-        rsCanvas.Restore();
-    };
-    rsNode_->DrawOnNode(Rosen::RSModifierType::OVERLAY_STYLE, paintAccessibilityFocusTask);
+void RosenRenderContext::ClearAccessibilityFocus()
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    CHECK_NULL_VOID(accessibilityFocusStateModifier_);
+    rsNode_->RemoveModifier(accessibilityFocusStateModifier_);
+    RequestNextFrame();
 }
 
 void RosenRenderContext::BdImagePaintTask(RSCanvas& canvas)
@@ -1043,7 +1101,7 @@ void RosenRenderContext::BlendBorderColor(const Color& color)
 }
 
 void RosenRenderContext::PaintFocusState(
-    const RoundRect& paintRect, const Color& paintColor, const Dimension& paintWidth)
+    const RoundRect& paintRect, const Color& paintColor, const Dimension& paintWidth, bool isAccessibilityFocus)
 {
     LOGD("PaintFocusState rect is (%{public}f, %{public}f, %{public}f, %{public}f). Color is %{public}s, PainWidth is "
          "%{public}s",
@@ -1061,18 +1119,28 @@ void RosenRenderContext::PaintFocusState(
         rsCanvas.AttachPen(pen);
         rsCanvas.DrawRoundRect(rrect);
     };
-    if (!focusStateModifier_) {
-        // TODO: Add property data
-        focusStateModifier_ = std::make_shared<FocusStateModifier>();
+
+    if (isAccessibilityFocus) {
+        if (!accessibilityFocusStateModifier_) {
+            accessibilityFocusStateModifier_ = std::make_shared<FocusStateModifier>();
+        }
+        accessibilityFocusStateModifier_->SetRoundRect(paintRect, borderWidthPx);
+        accessibilityFocusStateModifier_->SetPaintTask(std::move(paintTask));
+        rsNode_->AddModifier(accessibilityFocusStateModifier_);
+    } else {
+        if (!focusStateModifier_) {
+            // TODO: Add property data
+            focusStateModifier_ = std::make_shared<FocusStateModifier>();
+        }
+        focusStateModifier_->SetRoundRect(paintRect, borderWidthPx);
+        focusStateModifier_->SetPaintTask(std::move(paintTask));
+        rsNode_->AddModifier(focusStateModifier_);
     }
-    focusStateModifier_->SetRoundRect(paintRect, borderWidthPx);
-    focusStateModifier_->SetPaintTask(std::move(paintTask));
-    rsNode_->AddModifier(focusStateModifier_);
     RequestNextFrame();
 }
 
-void RosenRenderContext::PaintFocusState(
-    const RoundRect& paintRect, const Dimension& focusPaddingVp, const Color& paintColor, const Dimension& paintWidth)
+void RosenRenderContext::PaintFocusState(const RoundRect& paintRect, const Dimension& focusPaddingVp,
+    const Color& paintColor, const Dimension& paintWidth, bool isAccessibilityFocus)
 {
     LOGD("PaintFocusState rect is (%{public}f, %{public}f, %{public}f, %{public}f). focusPadding is %{public}s, Color "
          "is %{public}s, PainWidth is %{public}s",
@@ -1104,7 +1172,7 @@ void RosenRenderContext::PaintFocusState(
     focusPaintRect.SetCornerRadius(
         RoundRect::CornerPos::BOTTOM_RIGHT_POS, focusPaintCornerBottomRight.x, focusPaintCornerBottomRight.y);
 
-    PaintFocusState(focusPaintRect, paintColor, paintWidth);
+    PaintFocusState(focusPaintRect, paintColor, paintWidth, isAccessibilityFocus);
 }
 
 void RosenRenderContext::PaintFocusState(
@@ -2090,4 +2158,23 @@ void RosenRenderContext::OnTransitionOutFinish()
     }
 }
 
+void RosenRenderContext::SetActualForegroundColor(const Color& value)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetForegroundColor(value.GetValue());
+    RequestNextFrame();
+}
+
+void RosenRenderContext::AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePropertyBase> property)
+{
+    CHECK_NULL_VOID(rsNode_);
+    CHECK_NULL_VOID(property);
+    if (!property->GetModifyImpl()) {
+        auto nodeModifierImpl = std::make_shared<RSNodeModifierImpl>();
+        CHECK_NULL_VOID(nodeModifierImpl);
+        property->SetModifyImpl(nodeModifierImpl);
+        rsNode_->AddModifier(nodeModifierImpl);
+        nodeModifierImpl->AddProperty(property->GetProperty());
+    }
+}
 } // namespace OHOS::Ace::NG

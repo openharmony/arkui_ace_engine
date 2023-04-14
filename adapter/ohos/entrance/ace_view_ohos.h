@@ -42,7 +42,7 @@ public:
     static void SurfaceCreated(AceViewOhos* view, OHOS::sptr<OHOS::Rosen::Window> window);
     static void SurfaceChanged(AceViewOhos* view, int32_t width, int32_t height, int32_t orientation,
         WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED,
-        const std::shared_ptr<Rosen::RSTransaction> rsTransaction = nullptr);
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
     static void SurfacePositionChanged(AceViewOhos* view, int32_t posX, int32_t posY);
     static void SetViewportMetrics(AceViewOhos* view, const ViewportConfig& config);
 
@@ -144,7 +144,7 @@ public:
 
 private:
     void NotifySurfaceChanged(int width, int height, WindowSizeChangeReason type,
-        const std::shared_ptr<Rosen::RSTransaction> rsTransaction = nullptr)
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr)
     {
         if (viewChangeCallback_) {
             viewChangeCallback_(width, height, type, rsTransaction);
@@ -156,7 +156,7 @@ private:
     void NotifySurfacePositionChanged(int32_t posX, int32_t posY)
     {
         if (posX_ == posX && posY_ == posY) {
-            LOGI("surface position not changed");
+            LOGD("surface position not changed");
             return;
         }
         if (viewPositionChangeCallback_) {

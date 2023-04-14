@@ -955,7 +955,7 @@ void JSViewAbstract::JsOpacity(const JSCallbackInfo& info)
     }
 
     if ((LessNotEqual(opacity, 0.0)) || opacity > 1) {
-        LOGW("set opacity to %{public}f, over range, set to default opacity", opacity);
+        LOGD("set opacity to %{public}f, over range, set to default opacity", opacity);
         opacity = 1.0;
     }
 
@@ -1201,6 +1201,10 @@ void JSViewAbstract::JsWidth(const JSCallbackInfo& info)
 bool JSViewAbstract::JsWidth(const JSRef<JSVal>& jsValue)
 {
     Dimension value;
+    if (jsValue->IsUndefined()) {
+        ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
+        return true;
+    }
     if (!ParseJsDimensionVp(jsValue, value)) {
         return false;
     }
@@ -1226,6 +1230,10 @@ void JSViewAbstract::JsHeight(const JSCallbackInfo& info)
 bool JSViewAbstract::JsHeight(const JSRef<JSVal>& jsValue)
 {
     Dimension value;
+    if (jsValue->IsUndefined()) {
+        ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
+        return true;
+    }
     if (!ParseJsDimensionVp(jsValue, value)) {
         return false;
     }
@@ -1765,10 +1773,6 @@ void JSViewAbstract::JsGeometryTransition(const JSCallbackInfo& info)
     }
     // id
     auto id = info[0]->ToString();
-    if (id.empty()) {
-        LOGE("JsGeometryTransition: id is empty.");
-        return;
-    }
     ViewAbstractModel::GetInstance()->SetGeometryTransition(id);
 }
 
@@ -1870,8 +1874,8 @@ void JSViewAbstract::JsSphericalEffect(const JSCallbackInfo& info)
         LOGE("The arg is not a number");
         return;
     }
-    auto radio = info[0]->ToNumber<float>();
-    ViewAbstractModel::GetInstance()->SetSphericalEffect(std::clamp(radio, 0.0f, 1.0f));
+    auto radio = info[0]->ToNumber<double>();
+    ViewAbstractModel::GetInstance()->SetSphericalEffect(std::clamp(radio, 0.0, 1.0));
 }
 
 void JSViewAbstract::JsPixelStretchEffect(const JSCallbackInfo& info)
@@ -1936,8 +1940,8 @@ void JSViewAbstract::JsLightUpEffect(const JSCallbackInfo& info)
         LOGE("The arg is wrong,it is supposed to be a number!");
         return;
     }
-    auto radio = info[0]->ToNumber<float>();
-    ViewAbstractModel::GetInstance()->SetLightUpEffect(std::clamp(radio, 0.0f, 1.0f));
+    auto radio = info[0]->ToNumber<double>();
+    ViewAbstractModel::GetInstance()->SetLightUpEffect(std::clamp(radio, 0.0, 1.0));
 }
 
 void JSViewAbstract::JsBackgroundImageSize(const JSCallbackInfo& info)
@@ -2767,7 +2771,7 @@ bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, Dimension& re
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     JSRef<JSVal> resId = jsObj->GetProperty("id");
     if (!resId->IsNumber()) {
-        LOGW("resId is not number");
+        LOGD("resId is not number");
         return false;
     }
     auto themeConstants = GetThemeConstants(jsObj);
@@ -3030,7 +3034,7 @@ bool JSViewAbstract::ParseJsFontFamilies(const JSRef<JSVal>& jsValue, std::vecto
 bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::string& result)
 {
     if (!jsValue->IsString() && !jsValue->IsObject()) {
-        LOGE("arg is not String or Object.");
+        LOGD("arg is not String or Object.");
         return false;
     }
 
@@ -3043,13 +3047,13 @@ bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::string& res
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     JSRef<JSVal> type = jsObj->GetProperty("type");
     if (!type->IsNumber()) {
-        LOGW("type is not number");
+        LOGD("type is not number");
         return false;
     }
 
     JSRef<JSVal> resId = jsObj->GetProperty("id");
     if (!resId->IsNumber()) {
-        LOGW("resId is not number");
+        LOGD("resId is not number");
         return false;
     }
 
@@ -3173,7 +3177,7 @@ bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& resu
         LOGE("JSImage::Create ParseJsMedia type is wrong");
         return false;
     }
-    LOGI("input value is not string or number, using PixelMap");
+    LOGD("input value is not string or number, using PixelMap");
     return false;
 }
 
@@ -3558,6 +3562,11 @@ void JSViewAbstract::Pop()
     ViewStackModel::GetInstance()->Pop();
 }
 
+void JSViewAbstract::JsSetDraggable(bool draggable)
+{
+    ViewAbstractModel::GetInstance()->SetDraggable(draggable);
+}
+
 void JSViewAbstract::JsOnDragStart(const JSCallbackInfo& info)
 {
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::FUNCTION };
@@ -3641,6 +3650,24 @@ void JSViewAbstract::JsOnDragEnter(const JSCallbackInfo& info)
     };
 
     ViewAbstractModel::GetInstance()->SetOnDragEnter(std::move(onDragEnter));
+}
+
+void JSViewAbstract::JsOnDragEnd(const JSCallbackInfo& info)
+{
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::FUNCTION };
+    if (!CheckJSCallbackInfo("JsOnDragEnd", info, checkList)) {
+        return;
+    }
+    RefPtr<JsDragFunction> jsOnDragEndFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+
+    auto onDragEnd = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEndFunc)](
+                           const RefPtr<OHOS::Ace::DragEvent>& info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onDragEnd");
+        func->Execute(info);
+    };
+
+    ViewAbstractModel::GetInstance()->SetOnDragEnd(std::move(onDragEnd));
 }
 
 void JSViewAbstract::JsOnDragMove(const JSCallbackInfo& info)
@@ -4377,7 +4404,7 @@ void JSViewAbstract::JsOpacityPassThrough(const JSCallbackInfo& info)
     }
 
     if ((LessNotEqual(opacity, 0.0)) || opacity > 1) {
-        LOGW("set opacity to %{public}f, over range, set to default opacity", opacity);
+        LOGD("set opacity to %{public}f, over range, set to default opacity", opacity);
         opacity = 1.0;
     }
 
@@ -4471,7 +4498,7 @@ void JSViewAbstract::JsBindContentCover(const JSCallbackInfo& info)
     bool isShow = false;
     DoubleBindCallback callback = nullptr;
     if (info[0]->IsBoolean()) {
-        isShow = info[1]->ToBoolean();
+        isShow = info[0]->ToBoolean();
     } else if (info[0]->IsObject()) {
         JSRef<JSObject> callbackObj = JSRef<JSObject>::Cast(info[0]);
         callback = ParseDoubleBindCallback(info, callbackObj);
@@ -4589,11 +4616,13 @@ void JSViewAbstract::JSBind()
     JSClass<JSViewAbstract>::StaticMethod("bindMenu", &JSViewAbstract::JsBindMenu);
     JSClass<JSViewAbstract>::StaticMethod("bindContextMenu", &JSViewAbstract::JsBindContextMenu);
     JSClass<JSViewAbstract>::StaticMethod("bindContentCover", &JSViewAbstract::JsBindContentCover);
+    JSClass<JSViewAbstract>::StaticMethod("draggable", &JSViewAbstract::JsSetDraggable);
     JSClass<JSViewAbstract>::StaticMethod("onDragStart", &JSViewAbstract::JsOnDragStart);
     JSClass<JSViewAbstract>::StaticMethod("onDragEnter", &JSViewAbstract::JsOnDragEnter);
     JSClass<JSViewAbstract>::StaticMethod("onDragMove", &JSViewAbstract::JsOnDragMove);
     JSClass<JSViewAbstract>::StaticMethod("onDragLeave", &JSViewAbstract::JsOnDragLeave);
     JSClass<JSViewAbstract>::StaticMethod("onDrop", &JSViewAbstract::JsOnDrop);
+    JSClass<JSViewAbstract>::StaticMethod("onDragEnd", &JSViewAbstract::JsOnDragEnd);
 
     JSClass<JSViewAbstract>::StaticMethod("linearGradient", &JSViewAbstract::JsLinearGradient);
     JSClass<JSViewAbstract>::StaticMethod("sweepGradient", &JSViewAbstract::JsSweepGradient);
@@ -4644,6 +4673,24 @@ void JSViewAbstract::JSBind()
     JSClass<JSViewAbstract>::StaticMethod("onVisibleAreaChange", &JSViewAbstract::JsOnVisibleAreaChange);
     JSClass<JSViewAbstract>::StaticMethod("hitTestBehavior", &JSViewAbstract::JsHitTestBehavior);
     JSClass<JSViewAbstract>::StaticMethod("keyboardShortcut", &JSViewAbstract::JsKeyboardShortcut);
+    JSClass<JSViewAbstract>::StaticMethod("allowDrop", &JSViewAbstract::JsAllowDrop);
+}
+void JSViewAbstract::JsAllowDrop(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsArray()) {
+        LOGE("JsAllowDrop: The param type is invalid.");
+        return;
+    }
+
+    auto allowDropArray = JSRef<JSArray>::Cast(info[0]);
+    std::set<std::string> allowDropSet;
+    allowDropSet.clear();
+    std::string allowDrop;
+    for (size_t i = 0; i < allowDropArray->Length(); i++) {
+        allowDrop = allowDropArray->GetValueAt(i)->ToString();
+        allowDropSet.insert(allowDrop);
+    }
+    ViewAbstractModel::GetInstance()->SetAllowDrop(allowDropSet);
 }
 
 void JSViewAbstract::JsAlignRules(const JSCallbackInfo& info)

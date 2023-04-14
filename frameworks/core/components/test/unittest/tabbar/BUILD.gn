@@ -14,7 +14,7 @@
 import("//build/test.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
-if (is_standard_system) {
+if (is_ohos_standard_system) {
   module_output_path = "ace_engine/backenduicomponent/tabbar"
 } else {
   module_output_path = "ace_engine_full/backenduicomponent/tabbar"
@@ -45,7 +45,7 @@ ohos_unittest("RenderTabContentTest") {
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
   ]
 
-  if (is_standard_system) {
+  if (is_ohos_standard_system) {
     sources += []
   } else {
     sources += [ "$ace_root/frameworks/core/components/test/mock/mock_resource_adapter.cpp" ]
@@ -77,7 +77,7 @@ ohos_unittest("RenderTabContentTest") {
     "//third_party/googletest:gtest_main",
   ]
 
-  if (!is_standard_system) {
+  if (!is_ohos_standard_system) {
     deps += [ "$ace_root/frameworks/base:ace_base_ohos" ]
     external_deps = [
       "hilog:libhilog",

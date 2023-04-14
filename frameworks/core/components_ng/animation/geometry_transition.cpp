@@ -31,7 +31,7 @@ GeometryTransition::GeometryTransition(const WeakPtr<FrameNode>& frameNode) : in
 
 bool GeometryTransition::IsRunning() const
 {
-    return hasInAnim_ || hasOutAnim_;
+    return !IsInvalid() && (hasInAnim_ || hasOutAnim_);
 }
 
 bool GeometryTransition::IsInvalid() const
@@ -41,17 +41,17 @@ bool GeometryTransition::IsInvalid() const
 
 bool GeometryTransition::IsNodeInAndActive(const WeakPtr<FrameNode>& frameNode) const
 {
-    return hasInAnim_ && frameNode.Upgrade() == inNode_ && state_ == State::ACTIVE;
+    return !IsInvalid() && hasInAnim_ && frameNode.Upgrade() == inNode_ && state_ == State::ACTIVE;
 }
 
 bool GeometryTransition::IsNodeInAndIdentity(const WeakPtr<FrameNode>& frameNode) const
 {
-    return hasInAnim_ && frameNode.Upgrade() == inNode_ && state_ == State::IDENTITY;
+    return !IsInvalid() && hasInAnim_ && frameNode.Upgrade() == inNode_ && state_ == State::IDENTITY;
 }
 
 bool GeometryTransition::IsNodeOutAndActive(const WeakPtr<FrameNode>& frameNode) const
 {
-    return hasOutAnim_ && frameNode.Upgrade() == outNode_;
+    return !IsInvalid() && hasOutAnim_ && frameNode.Upgrade() == outNode_;
 }
 
 void GeometryTransition::SwapInAndOut(bool condition)

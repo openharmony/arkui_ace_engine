@@ -39,8 +39,8 @@
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/position_property.h"
 #include "core/components_ng/property/property.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 #include "core/pipeline/base/element_register.h"
+#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 
@@ -50,6 +50,7 @@ class ACE_EXPORT LayoutProperty : public Property {
     DECLARE_ACE_TYPE(LayoutProperty, Property);
 
 public:
+
     LayoutProperty() = default;
 
     ~LayoutProperty() override = default;
@@ -185,10 +186,9 @@ public:
             // unregister node from old geometry transition
             geometryTransition_->Update(host_, nullptr);
             // register node into new geometry transition
-            auto geometryTransition = ElementRegister::GetInstance()->GetOrCreateGeometryTransition(id, host_);
-            if (geometryTransition != nullptr && geometryTransition->Update(nullptr, host_)) {
-                geometryTransition_ = geometryTransition;
-            }
+            geometryTransition_ = ElementRegister::GetInstance()->GetOrCreateGeometryTransition(id, host_);
+            CHECK_NULL_VOID(geometryTransition_);
+            geometryTransition_->Update(nullptr, host_);
         } else {
             geometryTransition_ = ElementRegister::GetInstance()->GetOrCreateGeometryTransition(id, host_);
             CHECK_NULL_VOID(geometryTransition_);
@@ -360,8 +360,20 @@ public:
 #ifdef ENABLE_DRAG_FRAMEWORK
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsBindOverlay, bool, PROPERTY_UPDATE_MEASURE);
 #endif // ENABLE_DRAG_FRAMEWORK
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_AND_USING_CALLBACK(Visibility, VisibleType, PROPERTY_UPDATE_MEASURE);
-    void OnVisibilityUpdate(VisibleType visible) const;
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_GET(Visibility, VisibleType);
+
+public:
+    void UpdateVisibility(const VisibleType& value)
+    {
+        if (propVisibility_.has_value()) {
+            if (NearEqual(propVisibility_.value(), value)) {
+                LOGD("the Visibility is same, just ignore");
+                return;
+            }
+        }
+        OnVisibilityUpdate(value);
+    }
+    void OnVisibilityUpdate(VisibleType visible);
 
     void UpdateLayoutConstraint(const RefPtr<LayoutProperty>& layoutProperty)
     {
@@ -369,6 +381,16 @@ public:
         contentConstraint_ = layoutProperty->contentConstraint_;
         gridProperty_ =
             (layoutProperty->gridProperty_) ? std::make_unique<GridProperty>(*layoutProperty->gridProperty_) : nullptr;
+    }
+
+    SafeAreaEdgeInserts GetSafeArea() const
+    {
+        return safeArea_;
+    }
+
+    void SetSafeArea(SafeAreaEdgeInserts safeArea)
+    {
+        safeArea_ = safeArea;
     }
 
 protected:
@@ -402,6 +424,7 @@ private:
 
     WeakPtr<FrameNode> host_;
 
+    SafeAreaEdgeInserts safeArea_;
     ACE_DISALLOW_COPY_AND_MOVE(LayoutProperty);
 };
 } // namespace OHOS::Ace::NG

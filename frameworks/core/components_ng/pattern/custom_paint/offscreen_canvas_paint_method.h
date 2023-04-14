@@ -75,11 +75,9 @@ private:
     void SetPaintImage() override;
 
     void PaintText(const std::string& text, double x, double y, bool isStroke, bool hasShadow = false);
-    double GetAlignOffset(const std::string& text, TextAlign align, std::unique_ptr<txt::Paragraph>& paragraph);
     double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph);
     bool UpdateOffParagraph(const std::string& text, bool isStroke, const PaintState& state, bool hasShadow = false);
     void UpdateTextStyleForeground(bool isStroke, txt::TextStyle& txtStyle, bool hasShadow);
-    TextDirection GetTextDirection(const std::string& content);
     void PaintShadow(const SkPath& path, const Shadow& shadow, SkCanvas* canvas) override;
     void Path2DRect(const OffsetF& offset, const PathArgs& args) override;
     SkCanvas* GetRawPtrOfSkCanvas() override

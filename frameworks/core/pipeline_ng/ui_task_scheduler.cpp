@@ -15,6 +15,7 @@
 
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
+#include "base/log/frame_report.h"
 #include "base/memory/referenced.h"
 #include "base/thread/background_task_executor.h"
 #include "base/thread/cancelable_callback.h"
@@ -107,6 +108,9 @@ void UITaskScheduler::FlushRenderTask(bool forceUseMainThread)
 {
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACE();
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().BeginFlushRender();
+    }
     auto dirtyRenderNodes = std::move(dirtyRenderNodes_);
     // Priority task creation
     uint64_t time = 0;
@@ -140,9 +144,7 @@ bool UITaskScheduler::NeedAdditionalLayout()
     // if dirtynodes still exist after layout done as new dirty nodes are added during layout,
     // we need to initiate the additional layout, under normal build layout workflow the additional
     // layout will not be excuted.
-    if (dirtyLayoutNodes_.empty()) {
-        return false;
-    }
+    bool ret = false;
     for (auto&& pageNodes : dirtyLayoutNodes_) {
         for (auto&& node : pageNodes.second) {
             if (!node || !node->GetLayoutProperty()) {
@@ -167,9 +169,10 @@ bool UITaskScheduler::NeedAdditionalLayout()
                 }
                 parent = parent->GetParent();
             }
+            ret = true;
         }
     }
-    return true;
+    return ret;
 }
 
 void UITaskScheduler::FlushTask()

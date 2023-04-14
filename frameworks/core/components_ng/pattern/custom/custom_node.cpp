@@ -62,6 +62,15 @@ void CustomNode::Render()
     }
 }
 
+// used in HotReload to update root view @Component
+void CustomNode::FlushReload()
+{
+    CHECK_NULL_VOID(completeReloadFunc_);
+    Clean();
+    renderFunction_ = completeReloadFunc_;
+    Render();
+}
+
 void CustomNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool forceMeasure, bool forceLayout)
 {
     if (parent->GetHostTag() != V2::TAB_CONTENT_ITEM_ETS_TAG) {

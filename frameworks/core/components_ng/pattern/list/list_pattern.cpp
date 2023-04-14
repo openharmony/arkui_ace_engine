@@ -41,6 +41,8 @@ constexpr double CHAIN_SPRING_STIFFNESS = 228;
 constexpr Color SELECT_FILL_COLOR = Color(0x1A000000);
 constexpr Color SELECT_STROKE_COLOR = Color(0x33FFFFFF);
 constexpr Color ITEM_FILL_COLOR = Color(0x1A0A59f7);
+constexpr float DEFAULT_MIN_SPACE_SCALE = 0.75f;
+constexpr float DEFAULT_MAX_SPACE_SCALE = 2.0f;
 } // namespace
 
 void ListPattern::OnAttachToFrameNode()
@@ -109,8 +111,12 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     }
     auto finalOffset = listLayoutAlgorithm->GetCurrentOffset();
     spaceWidth_ = listLayoutAlgorithm->GetSpaceWidth();
-    lastOffset_ = currentOffset_;
-    currentOffset_ = currentOffset_ - finalOffset;
+    if (listLayoutAlgorithm->GetStartIndex() == 0) {
+        estimateOffset_ = 0;
+        currentOffset_ = listLayoutAlgorithm->GetStartPosition();
+    } else {
+        currentOffset_ = currentOffset_ - finalOffset;
+    }
     currentDelta_ = 0.0f;
     float prevStartOffset = startMainPos_;
     float prevEndOffset = endMainPos_ - contentMainSize_;
@@ -139,6 +145,28 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     SetScrollState(SCROLL_FROM_NONE);
     isInitialized_ = true;
     return true;
+}
+
+RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
+{
+    auto listLayoutProperty = GetHost()->GetLayoutProperty<ListLayoutProperty>();
+    V2::ItemDivider itemDivider;
+    auto divider = listLayoutProperty->GetDivider().value_or(itemDivider);
+    auto axis = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
+    auto drawVertical = (axis == Axis::HORIZONTAL);
+    auto paint = MakeRefPtr<ListPaintMethod>(divider, drawVertical, lanes_, spaceWidth_);
+    paint->SetScrollBar(AceType::WeakClaim(AceType::RawPtr(GetScrollBar())));
+    paint->SetTotalItemCount(maxListItemIndex_ + 1);
+    auto scrollEffect = GetScrollEdgeEffect();
+    if (scrollEffect && scrollEffect->IsFadeEffect()) {
+        paint->SetEdgeEffect(scrollEffect);
+    }
+    if (!listContentModifier_) {
+        listContentModifier_ = AceType::MakeRefPtr<ListContentModifier>();
+    }
+    listContentModifier_->SetItemsPosition(itemPosition_);
+    paint->SetContentModifier(listContentModifier_);
+    return paint;
 }
 
 void ListPattern::ProcessEvent(
@@ -209,10 +237,10 @@ void ListPattern::DrivenRender(const RefPtr<LayoutWrapper>& layoutWrapper)
     auto listPaintProperty = host->GetPaintProperty<ListPaintProperty>();
     auto axis = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
     auto stickyStyle = listLayoutProperty->GetStickyStyle().value_or(V2::StickyStyle::NONE);
-    auto barDisplayMode = listPaintProperty->GetBarDisplayMode().value_or(DisplayMode::OFF);
+    bool barNeedPaint = GetScrollBar() ? GetScrollBar()->NeedPaint() : false;
     auto chainAnimation = listLayoutProperty->GetChainAnimation().value_or(false);
-    bool drivenRender = !(axis != Axis::VERTICAL || barDisplayMode != DisplayMode::OFF ||
-                          stickyStyle != V2::StickyStyle::NONE || chainAnimation || !scrollable_);
+    bool drivenRender = !(axis != Axis::VERTICAL || stickyStyle != V2::StickyStyle::NONE ||
+        barNeedPaint || chainAnimation || !scrollable_);
 
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -331,7 +359,7 @@ bool ListPattern::OutBoundaryCallback()
 bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
 {
     // check edgeEffect is not springEffect
-    if (!HandleEdgeEffect(offset, source, GetContentSize())) {
+    if (!jumpIndex_.has_value() && !HandleEdgeEffect(offset, source, GetContentSize())) {
         return false;
     }
     SetScrollState(source);
@@ -441,6 +469,9 @@ bool ListPattern::OnScrollCallback(float offset, int32_t source)
         }
         FireOnScrollStart();
         return true;
+    }
+    if (animator_ && !animator_->IsStopped()) {
+        return false;
     }
     auto scrollBar = GetScrollBar();
     if (scrollBar && scrollBar->IsDriving()) {
@@ -698,6 +729,7 @@ void ListPattern::ScrollToIndex(int32_t index, ScrollIndexAlignment align)
     LOGI("ScrollToIndex:%{public}d", index);
     StopAnimate();
     if (index >= 0 || index == ListLayoutAlgorithm::LAST_ITEM) {
+        currentDelta_ = 0;
         jumpIndex_ = index;
         scrollIndexAlignment_ = align;
         MarkDirtyNodeSelf();
@@ -709,6 +741,7 @@ void ListPattern::ScrollToIndex(int32_t index, int32_t indexInGroup, ScrollIndex
     LOGI("ScrollToIndex:%{public}d, %{public}d", index, indexInGroup);
     StopAnimate();
     if (index >= 0 || index == ListLayoutAlgorithm::LAST_ITEM) {
+        currentDelta_ = 0;
         jumpIndex_ = index;
         jumpIndexInGroup_ = indexInGroup;
         scrollIndexAlignment_ = align;
@@ -782,15 +815,28 @@ void ListPattern::SetChainAnimation(bool enable)
         if (chainAnimationOptions_.has_value()) {
             float maxSpace = chainAnimationOptions_.value().maxSpace.ConvertToPx();
             float minSpace = chainAnimationOptions_.value().minSpace.ConvertToPx();
+            if (GreatNotEqual(minSpace, maxSpace)) {
+                minSpace = space;
+                maxSpace = space;
+            }
             chainAnimation_ =
                 AceType::MakeRefPtr<ChainAnimation>(space, maxSpace, minSpace, springProperty_);
-            chainAnimation_->SetConductivity(chainAnimationOptions_.value().conductivity);
-            chainAnimation_->SetIntensity(chainAnimationOptions_.value().intensity);
+            auto conductivity = chainAnimationOptions_.value().conductivity;
+            if (LessNotEqual(conductivity, 0) || GreatNotEqual(conductivity, 1)) {
+                conductivity = ChainAnimation::DEFAULT_CONDUCTIVITY;
+            }
+            chainAnimation_->SetConductivity(conductivity);
+            auto intensity = chainAnimationOptions_.value().intensity;
+            if (LessNotEqual(intensity, 0) || GreatNotEqual(intensity, 1)) {
+                intensity = ChainAnimation::DEFAULT_INTENSITY;
+            }
+            chainAnimation_->SetIntensity(intensity);
             auto effect = chainAnimationOptions_.value().edgeEffect;
             chainAnimation_->SetEdgeEffect(effect == 1 ? ChainEdgeEffect::STRETCH : ChainEdgeEffect::DEFAULT);
         } else {
-            chainAnimation_ =
-                AceType::MakeRefPtr<ChainAnimation>(space, space * 2, space / 2, springProperty_); /* 2:double */
+            auto minSpace = space * DEFAULT_MIN_SPACE_SCALE;
+            auto maxSpace = space * DEFAULT_MAX_SPACE_SCALE;
+            chainAnimation_ = AceType::MakeRefPtr<ChainAnimation>(space, maxSpace, minSpace, springProperty_);
         }
         chainAnimation_->SetAnimationCallback([weak = AceType::WeakClaim(this)]() {
             auto list = weak.Upgrade();
@@ -809,9 +855,21 @@ void ListPattern::SetChainAnimationOptions(const ChainAnimationOptions& options)
         auto space = listLayoutProperty->GetSpace().value_or(CHAIN_INTERVAL_DEFAULT).ConvertToPx();
         float maxSpace = options.maxSpace.ConvertToPx();
         float minSpace = options.minSpace.ConvertToPx();
+        if (GreatNotEqual(minSpace, maxSpace)) {
+            minSpace = space;
+            maxSpace = space;
+        }
         chainAnimation_->SetSpace(space, maxSpace, minSpace);
-        chainAnimation_->SetConductivity(options.conductivity);
-        chainAnimation_->SetIntensity(options.intensity);
+        auto conductivity = chainAnimationOptions_.value().conductivity;
+        if (LessNotEqual(conductivity, 0) || GreatNotEqual(conductivity, 1)) {
+            conductivity = ChainAnimation::DEFAULT_CONDUCTIVITY;
+        }
+        chainAnimation_->SetConductivity(conductivity);
+        auto intensity = chainAnimationOptions_.value().intensity;
+        if (LessNotEqual(intensity, 0) || GreatNotEqual(intensity, 1)) {
+            intensity = ChainAnimation::DEFAULT_INTENSITY;
+        }
+        chainAnimation_->SetIntensity(intensity);
         auto effect = options.edgeEffect;
         chainAnimation_->SetEdgeEffect(effect == 1 ? ChainEdgeEffect::STRETCH : ChainEdgeEffect::DEFAULT);
     }
@@ -969,6 +1027,30 @@ void ListPattern::SetSwiperItem(WeakPtr<ListItemPattern> swiperItem)
         }
         swiperItem_ = std::move(swiperItem);
     }
+}
+
+int32_t ListPattern::GetItemIndexByPosition(float xOffset, float yOffset)
+{
+    auto host = GetHost();
+    auto globalOffset = host->GetTransformRelativeOffset();
+    float relativeX = xOffset - globalOffset.GetX();
+    float relativeY = yOffset - globalOffset.GetY();
+    float mainOffset = GetAxis() == Axis::VERTICAL ? relativeY : relativeX;
+    float crossOffset = GetAxis() == Axis::VERTICAL ? relativeX : relativeY;
+    float crossSize = GetCrossAxisSize(GetContentSize(), GetAxis());
+    int32_t lanesOffset = 0;
+    if (lanes_ > 1) {
+        lanesOffset = static_cast<int32_t>(crossOffset / (crossSize / lanes_));
+    }
+    for (auto & pos : itemPosition_) {
+        if (mainOffset <= pos.second.endPos + spaceWidth_ / 2) { /* 2:half */
+            return std::min(pos.first + lanesOffset, maxListItemIndex_ + 1);
+        }
+    }
+    if (!itemPosition_.empty()) {
+        return itemPosition_.rbegin()->first + 1;
+    }
+    return 0;
 }
 
 void ListPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const

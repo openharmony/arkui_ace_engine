@@ -20,6 +20,9 @@ template("napi_componentsnapshot_static") {
   ohos_source_set(target_name) {
     defines += invoker.defines
     cflags_cc += invoker.cflags_cc
+    if (is_mac) {
+      cflags_cc += [ "-O0" ]
+    }
 
     include_dirs = [
       "$ace_root",
@@ -34,10 +37,13 @@ template("napi_componentsnapshot_static") {
       deps += [ config.libace_target ]
     }
 
-    if (!is_cross_platform_build) {
-      external_deps = [ "napi:ace_napi" ]
+    if (platform != "" && is_cross_platform_build) {
+      deps += [ "//plugins/libs/napi:napi_$platform" ]
+    } else {
+      deps += [ "//foundation/arkui/napi/:ace_napi" ]
     }
 
+    external_deps = []
     if (defined(config.pixel_map_support)) {
       external_deps += [
         "multimedia_image_framework:image",

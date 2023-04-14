@@ -119,8 +119,6 @@ private:
 
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleTouchEvent(const TouchEventInfo& info);
-    void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
-    void HandleClickEvent();
     void InitMouseEvent(const RefPtr<InputEventHub>& inputEventHub);
     void HandleMouseEvent(const MouseInfo& info);
     void HandleHoverEvent(bool isHover);

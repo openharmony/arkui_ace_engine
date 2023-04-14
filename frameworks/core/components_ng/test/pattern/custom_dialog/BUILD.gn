@@ -59,7 +59,6 @@ ohos_unittest("custom_dialog_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/dialog/dialog_view.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/image/image_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/image/image_paint_method.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/image/image_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/list/list_item_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/list/list_item_event_hub.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/list/list_item_layout_algorithm.cpp",
@@ -77,6 +76,7 @@ ohos_unittest("custom_dialog_test_ng") {
     "$ace_root/frameworks/core/components_ng/property/calc_length.cpp",
     "$ace_root/frameworks/core/components_ng/property/measure_utils.cpp",
     "$ace_root/frameworks/core/components_ng/property/property.cpp",
+    "$ace_root/frameworks/core/components_ng/test/pattern/image/mock/mock_image_pattern.cpp",
     "$ace_root/frameworks/core/components_v2/inspector/inspector_constants.cpp",
 
     # components_ng_base
@@ -166,10 +166,5 @@ ohos_unittest("custom_dialog_test_ng") {
     "hiviewdfx_hilog_native:libhilog",
   ]
 
-  configs = [
-    "$ace_root:ace_config",
-    "$ace_root:ace_test_config",
-    "$ace_flutter_engine_root:flutter_config",
-    "$ace_flutter_engine_root/skia:skia_config",
-  ]
+  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 }

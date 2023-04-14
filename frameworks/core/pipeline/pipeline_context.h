@@ -229,7 +229,8 @@ public:
     // Called by view when idle event.
     void OnIdle(int64_t deadline) override;
 
-    void OnVirtualKeyboardHeightChange(float keyboardHeight) override;
+    void OnVirtualKeyboardHeightChange(
+        float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr) override;
 
     // Set card position for barrierFree
     void SetCardViewPosition(int id, float offsetX, float offsetY);
@@ -257,19 +258,19 @@ public:
 
     void OnSurfaceChanged(
         int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED,
-        const std::shared_ptr<Rosen::RSTransaction> rsTransaction = nullptr) override;
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr) override;
 
     void OnSurfacePositionChanged(int32_t posX, int32_t posY) override;
 
     void WindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
-        const std::shared_ptr<Rosen::RSTransaction> rsTransaction = nullptr);
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
 
     void OnSurfaceDensityChanged(double density) override;
 
     void OnSystemBarHeightChanged(double statusBar, double navigationBar) override;
 
     void OnSurfaceDestroyed() override;
-    
+
     // SemiModal and DialogModal have their own enter/exit animation and will exit after animation done.
     void Finish(bool autoFinish = true) const override;
 
@@ -294,6 +295,10 @@ public:
     Rect GetRootRect() const;
     Rect GetStageRect() const;
     Rect GetPageRect() const;
+
+    void SetGetViewSafeAreaImpl(std::function<SafeAreaEdgeInserts()>&& callback) override {};
+
+    SafeAreaEdgeInserts GetCurrentViewSafeArea() const override { return SafeAreaEdgeInserts(); };
 
     bool IsSurfaceReady() const
     {

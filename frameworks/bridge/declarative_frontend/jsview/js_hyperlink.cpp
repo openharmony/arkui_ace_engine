@@ -56,6 +56,8 @@ void JSHyperlink::JSBind(BindingTarget globalObj)
     JSClass<JSHyperlink>::StaticMethod("color", &JSHyperlink::SetColor, opt);
     JSClass<JSHyperlink>::StaticMethod("pop", &JSHyperlink::Pop);
 
+    JSClass<JSHyperlink>::StaticMethod("draggable", &JSHyperlink::JsSetDraggable);
+
     JSClass<JSHyperlink>::Inherit<JSViewAbstract>();
     JSClass<JSHyperlink>::Inherit<JSInteractableView>();
     JSClass<JSHyperlink>::Bind(globalObj);
@@ -95,6 +97,11 @@ void JSHyperlink::Pop()
     }
 
     HyperlinkModel::GetInstance()->Pop();
+}
+
+void JSHyperlink::JsSetDraggable(bool draggable)
+{
+    HyperlinkModel::GetInstance()->SetDraggable(draggable);
 }
 
 } // namespace OHOS::Ace::Framework

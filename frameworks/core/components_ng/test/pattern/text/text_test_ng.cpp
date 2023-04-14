@@ -27,6 +27,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 #include "core/components_ng/pattern/text/text_accessibility_property.h"
@@ -72,7 +73,6 @@ constexpr double BLURRADIUS_VALUE = 0.0;
 constexpr double SPREADRADIUS_VALUE = 0.0;
 constexpr double ADAPT_OFFSETY_VALUE = 5.0;
 constexpr double ADAPT_OFFSETX_VALUE = 5.0;
-const std::string EMPTY_TEXT = "";
 const std::string TEXT_CONTENT = "text";
 constexpr int32_t TEXT_ERROR = -1;
 constexpr int32_t TEXT_SIZE_INT = 10;
@@ -151,8 +151,8 @@ public:
 
 protected:
     static RefPtr<FrameNode> CreateTextParagraph(const std::string& createValue, const TestProperty& testProperty);
-    static void SetContentModifier(TextContentModifier &textContentModifier);
-    static void SetPaintMethodModifier(TextPaintMethod &textPaintMethod);
+    static void SetContentModifier(TextContentModifier& textContentModifier);
+    static void SetPaintMethodModifier(TextPaintMethod& textPaintMethod);
     static void UpdateTextLayoutProperty(RefPtr<TextLayoutProperty> textLayoutProperty);
 };
 
@@ -227,7 +227,7 @@ RefPtr<FrameNode> TextTestNg::CreateTextParagraph(const std::string& createValue
     return AceType::DynamicCast<FrameNode>(element);
 }
 
-void TextTestNg::SetContentModifier(TextContentModifier &textContentModifier)
+void TextTestNg::SetContentModifier(TextContentModifier& textContentModifier)
 {
     textContentModifier.SetFontWeight(Ace::FontWeight::W200);
     textContentModifier.SetTextColor(TEXT_COLOR_VALUE);
@@ -245,7 +245,7 @@ void TextTestNg::SetContentModifier(TextContentModifier &textContentModifier)
     textContentModifier.SetPrintOffset(paintOffset);
 }
 
-void TextTestNg::SetPaintMethodModifier(TextPaintMethod &textPaintMethod)
+void TextTestNg::SetPaintMethodModifier(TextPaintMethod& textPaintMethod)
 {
     textPaintMethod.textContentModifier_->fontSize_ = ADAPT_FONT_SIZE_VALUE;
     textPaintMethod.textContentModifier_->fontWeight_ = FontWeight::LIGHTER;
@@ -703,7 +703,7 @@ HWTEST_F(TextTestNg, OnDirtyLayoutWrapperSwap003, TestSize.Level1)
     auto rowLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
     TextStyle textStyle;
     LayoutConstraintF contentConstraint;
-    auto ret = rowLayoutAlgorithm->CreateParagraphAndLayout(textStyle, "", contentConstraint);
+    auto ret = rowLayoutAlgorithm->CreateParagraphAndLayout(textStyle, "", contentConstraint, nullptr);
     EXPECT_TRUE(ret);
     layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(rowLayoutAlgorithm));
     ret = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
@@ -730,7 +730,7 @@ HWTEST_F(TextTestNg, BeforeCreateLayoutWrapper001, TestSize.Level1)
     auto rowLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
     TextStyle textStyle;
     LayoutConstraintF contentConstraint;
-    auto ret = rowLayoutAlgorithm->CreateParagraphAndLayout(textStyle, "", contentConstraint);
+    auto ret = rowLayoutAlgorithm->CreateParagraphAndLayout(textStyle, "", contentConstraint, nullptr);
     EXPECT_TRUE(ret);
     auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
         frameNode, AceType::MakeRefPtr<GeometryNode>(), frameNode->GetLayoutProperty());
@@ -785,7 +785,7 @@ HWTEST_F(TextTestNg, BeforeCreateLayoutWrapper003, TestSize.Level1)
     auto rowLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
     TextStyle textStyle;
     LayoutConstraintF contentConstraint;
-    auto ret = rowLayoutAlgorithm->CreateParagraphAndLayout(textStyle, "", contentConstraint);
+    auto ret = rowLayoutAlgorithm->CreateParagraphAndLayout(textStyle, "", contentConstraint, nullptr);
     EXPECT_TRUE(ret);
 
     DirtySwapConfig config;
@@ -1069,7 +1069,8 @@ HWTEST_F(TextTestNg, TextLayoutTest003, TestSize.Level1)
      */
 
     auto textLayoutAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>();
-    auto result = textLayoutAlgorithm->AdaptMinTextSize(textStyle, CREATE_VALUE, parentLayoutConstraint, pipeline);
+    auto result =
+        textLayoutAlgorithm->AdaptMinTextSize(textStyle, CREATE_VALUE, parentLayoutConstraint, pipeline, nullptr);
 
     /**
      * @tc.steps: step4. check the fontSize.
@@ -1122,7 +1123,8 @@ HWTEST_F(TextTestNg, TextLayoutTest004, TestSize.Level1)
      */
 
     auto textLayoutAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>();
-    auto result = textLayoutAlgorithm->AdaptMinTextSize(textStyle, CREATE_VALUE, parentLayoutConstraint, pipeline);
+    auto result =
+        textLayoutAlgorithm->AdaptMinTextSize(textStyle, CREATE_VALUE, parentLayoutConstraint, pipeline, nullptr);
 
     /**
      * @tc.steps: step4. check the fontSize.
@@ -1175,7 +1177,8 @@ HWTEST_F(TextTestNg, TextLayoutTest005, TestSize.Level1)
      */
 
     auto textLayoutAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>();
-    auto result = textLayoutAlgorithm->AdaptMinTextSize(textStyle, CREATE_VALUE, parentLayoutConstraint, pipeline);
+    auto result =
+        textLayoutAlgorithm->AdaptMinTextSize(textStyle, CREATE_VALUE, parentLayoutConstraint, pipeline, nullptr);
 
     /**
      * @tc.steps: step4. check the fontSize.
@@ -1223,7 +1226,7 @@ HWTEST_F(TextTestNg, TextLayoutTest006, TestSize.Level1)
     auto textLayoutAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>();
     TextStyle textStyle;
     LayoutConstraintF contentConstraint;
-    auto ret = textLayoutAlgorithm->CreateParagraphAndLayout(textStyle, "", contentConstraint);
+    auto ret = textLayoutAlgorithm->CreateParagraphAndLayout(textStyle, "", contentConstraint, nullptr);
     EXPECT_TRUE(ret);
     auto sizeX =
         textLayoutAlgorithm->MeasureContent(parentLayoutConstraint, AccessibilityManager::RawPtr(layoutWrapper));
@@ -1276,7 +1279,7 @@ HWTEST_F(TextTestNg, TextLayoutTest007, TestSize.Level1)
     TextStyle textStyle;
     Dimension adaptMinFontSize(DIMENSION, DimensionUnit::PERCENT);
     textStyle.SetAdaptMinFontSize(adaptMinFontSize);
-    auto ret = textLayoutAlgorithm->CreateParagraphAndLayout(textStyle, "", parentLayoutConstraint);
+    auto ret = textLayoutAlgorithm->CreateParagraphAndLayout(textStyle, "", parentLayoutConstraint, nullptr);
     EXPECT_TRUE(ret);
     auto sizeX =
         textLayoutAlgorithm->MeasureContent(parentLayoutConstraint, AccessibilityManager::RawPtr(layoutWrapper));
@@ -1330,7 +1333,7 @@ HWTEST_F(TextTestNg, TextLayoutTest008, TestSize.Level1)
     TextStyle textStyle;
     Dimension adaptMinFontSize(DIMENSION, DimensionUnit::PERCENT);
     textStyle.SetAdaptMinFontSize(adaptMinFontSize);
-    auto ret = textLayoutAlgorithm->CreateParagraphAndLayout(textStyle, "", parentLayoutConstraint);
+    auto ret = textLayoutAlgorithm->CreateParagraphAndLayout(textStyle, "", parentLayoutConstraint, nullptr);
     EXPECT_TRUE(ret);
     auto sizeX =
         textLayoutAlgorithm->MeasureContent(parentLayoutConstraint, AccessibilityManager::RawPtr(layoutWrapper));
@@ -1574,7 +1577,7 @@ HWTEST_F(TextTestNg, DidExceedMaxLines001, TestSize.Level1)
     auto textLayoutAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>();
     TextStyle textStyle;
     LayoutConstraintF contentConstraint;
-    auto ret = textLayoutAlgorithm->CreateParagraphAndLayout(textStyle, "", contentConstraint);
+    auto ret = textLayoutAlgorithm->CreateParagraphAndLayout(textStyle, "", contentConstraint, nullptr);
     EXPECT_TRUE(ret);
     SizeF maxSize;
     ret = textLayoutAlgorithm->DidExceedMaxLines(maxSize);
@@ -1626,7 +1629,7 @@ HWTEST_F(TextTestNg, DidExceedMaxLines002, TestSize.Level1)
     TextStyle textStyle;
     textStyle.SetMaxLines(MAX_LINES);
     LayoutConstraintF contentConstraint;
-    auto ret = textLayoutAlgorithm->CreateParagraphAndLayout(textStyle, "", contentConstraint);
+    auto ret = textLayoutAlgorithm->CreateParagraphAndLayout(textStyle, "", contentConstraint, nullptr);
     EXPECT_TRUE(ret);
     SizeF maxSize;
     ret = textLayoutAlgorithm->DidExceedMaxLines(maxSize);
@@ -2193,25 +2196,28 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest008, TestSize.Level1)
     // maxFontSize < minFontSize
     textStyle.SetAdaptMaxFontSize(ADAPT_MIN_FONT_SIZE_VALUE);
     textStyle.SetAdaptMinFontSize(ADAPT_MAX_FONT_SIZE_VALUE);
-    EXPECT_EQ(textLayoutAlgorithm->AdaptMaxTextSize(textStyle, "abc", parentLayoutConstraint, pipeline), false);
+    EXPECT_EQ(
+        textLayoutAlgorithm->AdaptMaxTextSize(textStyle, "abc", parentLayoutConstraint, pipeline, nullptr), false);
 
     // create paragraph failed
     textStyle.SetAdaptMaxFontSize(ADAPT_MAX_FONT_SIZE_VALUE);
     textStyle.SetAdaptMinFontSize(ADAPT_MIN_FONT_SIZE_VALUE);
-    EXPECT_EQ(textLayoutAlgorithm->AdaptMaxTextSize(textStyle, "abc", parentLayoutConstraint, pipeline), false);
+    EXPECT_EQ(
+        textLayoutAlgorithm->AdaptMaxTextSize(textStyle, "abc", parentLayoutConstraint, pipeline, nullptr), false);
 
     MockTxtParagraph::SetCanConstruct(true);
 
     // increase font size
     std::vector<bool> didExceedMaxLines = { false, true };
     MockTxtParagraph::SetDidExceedMaxLines(didExceedMaxLines);
-    EXPECT_EQ(textLayoutAlgorithm->AdaptMaxTextSize(textStyle, "abc", parentLayoutConstraint, pipeline), true);
+    EXPECT_EQ(textLayoutAlgorithm->AdaptMaxTextSize(textStyle, "abc", parentLayoutConstraint, pipeline, nullptr), true);
     didExceedMaxLines.clear();
     MockTxtParagraph::SetDidExceedMaxLines(didExceedMaxLines);
 
     // set NormalizeToPx false
     textStyle.adaptFontSizeStep_.SetUnit(DimensionUnit::CALC);
-    EXPECT_EQ(textLayoutAlgorithm->AdaptMaxTextSize(textStyle, "abc", parentLayoutConstraint, pipeline), false);
+    EXPECT_EQ(
+        textLayoutAlgorithm->AdaptMaxTextSize(textStyle, "abc", parentLayoutConstraint, pipeline, nullptr), false);
 }
 
 /**
@@ -2324,7 +2330,14 @@ HWTEST_F(TextTestNg, TextAccessibilityPropertyGetText001, TestSize.Level1)
     ASSERT_NE(textPattern, nullptr);
     auto textAccessibilityProperty = frameNode->GetAccessibilityProperty<TextAccessibilityProperty>();
     ASSERT_NE(textAccessibilityProperty, nullptr);
-    EXPECT_EQ(textAccessibilityProperty->GetText(), EMPTY_TEXT);
+
+    auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateContent(CREATE_VALUE);
+    EXPECT_EQ(textAccessibilityProperty->GetText(), CREATE_VALUE);
+
+    auto spanNode = SpanNode::GetOrCreateSpanNode(ElementRegister::GetInstance()->MakeUniqueId());
+    frameNode->AddChild(spanNode);
     textPattern->textForDisplay_ = TEXT_CONTENT;
     EXPECT_EQ(textAccessibilityProperty->GetText(), TEXT_CONTENT);
 }
@@ -2475,5 +2488,181 @@ HWTEST_F(TextTestNg, TextPatternTest001, TestSize.Level1)
     ASSERT_NE(nodePaintMethod, nullptr);
     ASSERT_NE(textPattern->textContentModifier_, nullptr);
     ASSERT_NE(textPattern->textOverlayModifier_, nullptr);
+}
+
+/**
+ * @tc.name: TextPatternTest002
+ * @tc.desc: test text_pattern.h CreateNodePaintMethod function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextPatternTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and textPattern.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call CreateLayoutProperty function.
+     * @tc.expected: The return value of CreateLayoutProperty is not empty.
+     */
+    RefPtr<LayoutProperty> textLayoutProperty = textPattern->CreateLayoutProperty();
+    ASSERT_NE(textLayoutProperty, nullptr);
+}
+
+/**
+ * @tc.name: TextPatternTest003
+ * @tc.desc: test text_pattern.h CreateNodePaintMethod function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextPatternTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and textPattern.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call CreateLayoutAlgorithm function.
+     * @tc.expected: The return value of CreateLayoutAlgorithm is not empty.
+     */
+    RefPtr<LayoutAlgorithm> textLayoutAlgorithm = textPattern->CreateLayoutAlgorithm();
+    ASSERT_NE(textLayoutAlgorithm, nullptr);
+}
+
+/**
+ * @tc.name: CreateParagraph001
+ * @tc.desc: test text_pattern.h CreateNodePaintMethod function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, CreateParagraph001, TestSize.Level1)
+{
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+
+    DirtySwapConfig config;
+    config.skipMeasure = false;
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+        frameNode, AceType::MakeRefPtr<GeometryNode>(), frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto rowLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    TextStyle textStyle;
+    LayoutConstraintF contentConstraint;
+    auto ret = rowLayoutAlgorithm->CreateParagraph(textStyle, "", nullptr);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: Layout001
+ * @tc.desc: test text_pattern.h CreateNodePaintMethod function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, Layout001, TestSize.Level1)
+{
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+
+    DirtySwapConfig config;
+    config.skipMeasure = false;
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+        frameNode, AceType::MakeRefPtr<GeometryNode>(), frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    layoutWrapper->children_.push_back(layoutWrapper);
+    auto imageSpanNode = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(imageSpanNode, nullptr);
+    pattern->AddChildSpanItem(imageSpanNode);
+    frameNode->AddChild(imageSpanNode);
+    auto rowLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    TextStyle textStyle;
+    LayoutConstraintF contentConstraint;
+    auto ret = rowLayoutAlgorithm->CreateParagraph(textStyle, "", AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_TRUE(ret);
+    rowLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    frameNode->AddChild(nullptr);
+    pattern->AddChildSpanItem(nullptr);
+    rowLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    ret = rowLayoutAlgorithm->CreateParagraph(textStyle, "", nullptr);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: ApplyIndents001
+ * @tc.desc: test text_pattern.h CreateNodePaintMethod function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, ApplyIndents001, TestSize.Level1)
+{
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+
+    DirtySwapConfig config;
+    config.skipMeasure = false;
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+        frameNode, AceType::MakeRefPtr<GeometryNode>(), frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto rowLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    TextStyle textStyle;
+    LayoutConstraintF contentConstraint;
+    rowLayoutAlgorithm->ApplyIndents(textStyle, RECT_WIDTH_VALUE);
+    auto ret = rowLayoutAlgorithm->CreateParagraph(textStyle, "", nullptr);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: AddChildSpanItem001
+ * @tc.desc: test text_pattern.h CreateNodePaintMethod function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, AddChildSpanItem001, TestSize.Level1)
+{
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+
+    DirtySwapConfig config;
+    config.skipMeasure = false;
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+        frameNode, AceType::MakeRefPtr<GeometryNode>(), frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto rowLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    TextStyle textStyle;
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    pattern->AddChildSpanItem(element);
+    auto ret = rowLayoutAlgorithm->CreateParagraph(textStyle, "", nullptr);
+    EXPECT_TRUE(ret);
 }
 } // namespace OHOS::Ace::NG

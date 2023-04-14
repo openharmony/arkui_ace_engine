@@ -40,7 +40,7 @@ public:
     SubContainer(const WeakPtr<PipelineBase>& context, int32_t instanceId)
         : outSidePipelineContext_(context), instanceId_(instanceId)
     {}
-    ~SubContainer() = default;
+    ~SubContainer();
 
     void Initialize();
     void RunCard(int64_t formId, const std::string& path, const std::string& module, const std::string& data,

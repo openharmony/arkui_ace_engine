@@ -79,7 +79,6 @@ bool ArkJSRuntime::InitializeFromExistVM(EcmaVM* vm)
 {
     vm_ = vm;
     usingExistVM_ = true;
-    LOGD("InitializeFromExistVM %{public}p", vm);
     return vm_ != nullptr;
 }
 
@@ -116,9 +115,6 @@ bool ArkJSRuntime::StartDebugger()
         ret = JSNApi::StartDebugger(libPath_.c_str(), vm_, isDebugMode_, instanceId_, debuggerPostTask_);
 #endif
     }
-#if defined(IOS_PLATFORM)
-    ret = JSNApi::StartDebugger(nullptr, vm_, isDebugMode_, instanceId_, debuggerPostTask_);
-#endif
 #endif
     return ret;
 }

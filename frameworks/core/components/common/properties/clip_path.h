@@ -107,6 +107,16 @@ public:
         color_ = color;
     }
 
+    void SetPosition(const DimensionOffset& position)
+    {
+        position_ = position;
+    }
+
+    const DimensionOffset& GetPosition() const
+    {
+        return position_;
+    }
+
     Color GetColor() const
     {
         return color_;
@@ -138,6 +148,7 @@ protected:
     Dimension width_;
     Dimension height_;
     DimensionOffset offset_;
+    DimensionOffset position_;
     Color color_;
 };
 

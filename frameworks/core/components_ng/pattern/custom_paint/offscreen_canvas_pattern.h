@@ -96,6 +96,8 @@ public:
     const LineDashParam& GetLineDash() const;
     void SetLineDash(const std::vector<double>& segments);
 
+    void SetTextDirection(TextDirection direction);
+
     void Save();
     void Restore();
     void Scale(double x, double y);

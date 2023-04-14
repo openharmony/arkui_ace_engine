@@ -103,6 +103,7 @@ private:
 
     static RefPtr<ImageObject> BuildImageObject(const ImageSourceInfo& src, const RefPtr<ImageData>& data);
 
+    static RefPtr<ImageObject> QueryThumbnailCache(const ImageSourceInfo& src);
     static void CacheCanvasImage(const RefPtr<CanvasImage>& canvasImage, const std::string& key);
 
     // helper function to create image object from ImageSourceInfo

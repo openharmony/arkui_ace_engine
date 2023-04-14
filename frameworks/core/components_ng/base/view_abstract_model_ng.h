@@ -107,7 +107,7 @@ public:
         ViewAbstract::SetBackgroundBlurStyle(bgBlurStyle);
     }
 
-    void SetSphericalEffect(float radio) override
+    void SetSphericalEffect(double radio) override
     {
         ViewAbstract::SetSphericalEffect(radio);
     }
@@ -115,7 +115,7 @@ public:
     {
         ViewAbstract::SetPixelStretchEffect(option);
     }
-    void SetLightUpEffect(float radio) override
+    void SetLightUpEffect(double radio) override
     {
         ViewAbstract::SetLightUpEffect(radio);
     }
@@ -562,6 +562,11 @@ public:
         ViewAbstract::SetOnBlur(std::move(onBlurCallback));
     }
 
+    void SetDraggable(bool draggable) override
+    {
+        ViewAbstract::SetDraggable(draggable);
+    }
+
     void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override
     {
         auto dragStart = [dragStartFunc = std::move(onDragStart)](const RefPtr<OHOS::Ace::DragEvent>& event,
@@ -581,6 +586,11 @@ public:
         ViewAbstract::SetOnDragEnter(std::move(onDragEnter));
     }
 
+    void SetOnDragEnd(OnNewDragFunc&& onDragEnd) override
+    {
+        ViewAbstract::SetOnDragEnd(std::move(onDragEnd));
+    }
+
     void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) override
     {
         ViewAbstract::SetOnDragLeave(std::move(onDragLeave));
@@ -589,6 +599,10 @@ public:
     void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) override
     {
         ViewAbstract::SetOnDragMove(std::move(onDragMove));
+    }
+    void SetAllowDrop(const std::set<std::string>& allowDrop) override
+    {
+        ViewAbstract::SetAllowDrop(allowDrop);
     }
 
     void SetOnVisibleChange(

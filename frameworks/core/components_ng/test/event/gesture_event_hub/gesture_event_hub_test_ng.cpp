@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -751,5 +751,63 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest010, TestSize.Level1)
     gestureEventHub->ProcessTouchTestHierarchy(COORDINATE_OFFSET, touchRestrict, innerTargets5, finalResult, TOUCH_ID);
     sizeOfFinalResult = static_cast<int32_t>(finalResult.size());
     EXPECT_EQ(sizeOfFinalResult, 5);
+}
+
+/**
+ * @tc.name: GestureEventHubTest011
+ * @tc.desc: Test IsAccessibilityClickable and IsAccessibiityLongClickable
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GestureEventHubTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->AttachHost(frameNode);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    ASSERT_NE(gestureEventHub, nullptr);
+
+    /**
+     * @tc.steps: step3. gestureHierarchy_ has ClickRecognizer
+     * @tc.expected: IsAccessibilityClickable is true
+     */
+    EXPECT_FALSE(gestureEventHub->IsAccessibilityClickable());
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGERS, 1);
+    gestureEventHub->gestureHierarchy_.emplace_back(clickRecognizer);
+    EXPECT_TRUE(gestureEventHub->IsAccessibilityClickable());
+    gestureEventHub->gestureHierarchy_.clear();
+
+    /**
+     * @tc.steps: step2. call AddClickEvent
+     * @tc.expected: IsAccessibilityClickable is true
+     */
+    auto clickCallback = [](GestureEvent& info) {};
+    auto clickEvent = AceType::MakeRefPtr<ClickEvent>(std::move(clickCallback));
+    gestureEventHub->AddClickEvent(clickEvent);
+    EXPECT_TRUE(gestureEventHub->IsAccessibilityClickable());
+
+    /**
+     * @tc.steps: step4. gestureHierarchy_ has LongPressRecognizer
+     * @tc.expected: IsAccessibilityLongClickable is true
+     */
+    EXPECT_FALSE(gestureEventHub->IsAccessibilityLongClickable());
+    auto longPressRecognizer = AceType::MakeRefPtr<LongPressRecognizer>(false, false);
+    gestureEventHub->gestureHierarchy_.emplace_back(longPressRecognizer);
+    EXPECT_TRUE(gestureEventHub->IsAccessibilityLongClickable());
+    gestureEventHub->gestureHierarchy_.clear();
+
+    /**
+     * @tc.steps: step5. call SetLongPressEvent
+     * @tc.expected: IsAccessibilityLongClickable is true
+     */
+    auto longPressCallback = [](GestureEvent& info) {};
+    auto longPressEvent = AceType::MakeRefPtr<LongPressEvent>(longPressCallback);
+    gestureEventHub->SetLongPressEvent(longPressEvent);
+    EXPECT_TRUE(gestureEventHub->IsAccessibilityLongClickable());
 }
 } // namespace OHOS::Ace::NG

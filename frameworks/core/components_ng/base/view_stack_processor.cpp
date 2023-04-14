@@ -89,7 +89,7 @@ void ViewStackProcessor::FlushImplicitAnimation()
 void ViewStackProcessor::FlushRerenderTask()
 {
     auto node = Finish();
-    CHECK_NULL_VOID(node);
+    CHECK_NULL_VOID_NOLOG(node);
     node->FlushUpdateAndMarkDirty();
 }
 

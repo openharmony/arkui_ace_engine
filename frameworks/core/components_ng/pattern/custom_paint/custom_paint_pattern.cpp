@@ -46,8 +46,10 @@ bool CustomPaintPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     auto customPaintEventHub = GetEventHub<CustomPaintEventHub>();
     CHECK_NULL_RETURN(customPaintEventHub, false);
 
-    if (config.frameOffsetChange || config.contentOffsetChange || config.contentSizeChange) {
+    if (config.contentSizeChange || config.frameSizeChange) {
         isCanvasInit_ = false;
+    } else if (config.frameOffsetChange || config.contentOffsetChange) {
+        isCanvasInit_ = true;
     }
 
     if (!isCanvasInit_) {
@@ -809,5 +811,16 @@ double CustomPaintPattern::GetHeight()
 {
     CHECK_NULL_RETURN(canvasSize_, 0.0);
     return canvasSize_->Height();
+}
+
+void CustomPaintPattern::SetTextDirection(TextDirection direction)
+{
+    auto task = [direction](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.SetTextDirection(direction);
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 } // namespace OHOS::Ace::NG

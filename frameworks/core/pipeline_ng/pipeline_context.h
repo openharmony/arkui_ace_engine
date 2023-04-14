@@ -21,6 +21,7 @@
 #include <list>
 #include <utility>
 
+#include "base/geometry/ng/rect_t.h"
 #include "base/log/frame_info.h"
 #include "base/memory/referenced.h"
 #include "core/common/frontend.h"
@@ -127,7 +128,8 @@ public:
 
     void HandleOnAreaChangeEvent();
 
-    void AddVisibleAreaChangeNode(const RefPtr<FrameNode>& node, double ratio, const VisibleRatioCallback& callback);
+    void AddVisibleAreaChangeNode(
+        const RefPtr<FrameNode>& node, double ratio, const VisibleRatioCallback& callback, bool isUserCallback = true);
     void RemoveVisibleAreaChangeNode(int32_t nodeId);
 
     void HandleVisibleAreaChangeEvent();
@@ -148,9 +150,9 @@ public:
 
     void SetAppIcon(const RefPtr<PixelMap>& icon) override;
 
-    void OnSurfaceChanged(
-        int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED,
-        const std::shared_ptr<Rosen::RSTransaction> rsTransaction = nullptr) override;
+    void OnSurfaceChanged(int32_t width, int32_t height,
+        WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr) override;
 
     void OnSurfacePositionChanged(int32_t posX, int32_t posY) override;
 
@@ -184,6 +186,10 @@ public:
     void FlushDirtyNodeUpdate();
 
     void SetRootRect(double width, double height, double offset) override;
+
+    void SetGetViewSafeAreaImpl(std::function<SafeAreaEdgeInserts()>&& callback) override;
+
+    SafeAreaEdgeInserts GetCurrentViewSafeArea() const override;
 
     const RefPtr<FullScreenManager>& GetFullScreenManager();
 
@@ -319,7 +325,7 @@ public:
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
-        const std::shared_ptr<Rosen::RSTransaction> rsTransaction = nullptr);
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
 
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
     void FlushPipelineWithoutAnimation() override;
@@ -327,7 +333,8 @@ protected:
     void FlushAnimation(uint64_t nanoTimestamp) override;
     bool OnDumpInfo(const std::vector<std::string>& params) const override;
 
-    void OnVirtualKeyboardHeightChange(float keyboardHeight) override;
+    void OnVirtualKeyboardHeightChange(
+        float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr) override;
 
 private:
     void ExecuteSurfaceChangedCallbacks(int32_t newWidth, int32_t newHeight);
@@ -389,7 +396,7 @@ private:
     SurfacePositionChangedCallbackMap surfacePositionChangedCallbackMap_;
 
     std::unordered_set<int32_t> onAreaChangeNodeIds_;
-    std::unordered_map<int32_t, std::list<VisibleCallbackInfo>> visibleAreaChangeNodes_;
+    std::unordered_set<int32_t> onVisibleAreaChangeNodeIds_;
 
     RefPtr<StageManager> stageManager_;
     RefPtr<OverlayManager> overlayManager_;

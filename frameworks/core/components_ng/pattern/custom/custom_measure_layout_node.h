@@ -58,6 +58,7 @@ public:
     {
         measureFunc_ = std::move(measureFunc);
     }
+    void SetCompleteReloadFunc(RenderFunction&& func) override {}
 
 private:
     void BuildChildren(const RefPtr<FrameNode>& child);

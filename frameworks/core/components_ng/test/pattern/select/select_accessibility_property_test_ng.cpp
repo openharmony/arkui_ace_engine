@@ -43,16 +43,13 @@ public:
     static void TearDownTestCase() {};
     void SetUp() override;
     void TearDown() override;
-    bool InitSelectTestNg();
+    void InitSelectTestNg();
     RefPtr<FrameNode> frameNode_;
     RefPtr<SelectPattern> selectPattern_;
     RefPtr<SelectAccessibilityProperty> selectAccessibilityProperty_;
 };
 
-void SelectAccessibilityPropertyTestNg::SetUp()
-{
-    ASSERT_TRUE(InitSelectTestNg());
-}
+void SelectAccessibilityPropertyTestNg::SetUp() {}
 
 void SelectAccessibilityPropertyTestNg::TearDown()
 {
@@ -61,18 +58,17 @@ void SelectAccessibilityPropertyTestNg::TearDown()
     selectAccessibilityProperty_ = nullptr;
 }
 
-bool SelectAccessibilityPropertyTestNg::InitSelectTestNg()
+void SelectAccessibilityPropertyTestNg::InitSelectTestNg()
 {
     frameNode_ = FrameNode::GetOrCreateFrameNode(V2::SELECT_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
         []() { return AceType::MakeRefPtr<SelectPattern>(); });
-    CHECK_NULL_RETURN(frameNode_, false);
+    ASSERT_NE(frameNode_, nullptr);
 
     selectPattern_ = frameNode_->GetPattern<SelectPattern>();
-    CHECK_NULL_RETURN(selectPattern_, false);
+    ASSERT_NE(selectPattern_, nullptr);
 
     selectAccessibilityProperty_ = frameNode_->GetAccessibilityProperty<SelectAccessibilityProperty>();
-    CHECK_NULL_RETURN(selectAccessibilityProperty_, false);
-    return true;
+    ASSERT_NE(selectAccessibilityProperty_, nullptr);
 }
 
 /**
@@ -82,6 +78,8 @@ bool SelectAccessibilityPropertyTestNg::InitSelectTestNg()
  */
 HWTEST_F(SelectAccessibilityPropertyTestNg, SelectAccessibilityPropertyGetCurrentIndex001, TestSize.Level1)
 {
+    InitSelectTestNg();
+
     EXPECT_EQ(selectAccessibilityProperty_->GetCurrentIndex(), SELECT_ERROR);
 
     selectPattern_->selected_ = CURRENT_INDEX;
@@ -95,10 +93,13 @@ HWTEST_F(SelectAccessibilityPropertyTestNg, SelectAccessibilityPropertyGetCurren
  */
 HWTEST_F(SelectAccessibilityPropertyTestNg, SelectAccessibilityPropertyGetBeginIndex001, TestSize.Level1)
 {
+    InitSelectTestNg();
+
     EXPECT_EQ(selectAccessibilityProperty_->GetBeginIndex(), SELECT_ERROR);
 
     auto option = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<OptionPattern>(0); });
+    ASSERT_NE(option, nullptr);
 
     selectPattern_->options_.push_back(option);
     EXPECT_EQ(selectAccessibilityProperty_->GetBeginIndex(), 0);
@@ -111,10 +112,13 @@ HWTEST_F(SelectAccessibilityPropertyTestNg, SelectAccessibilityPropertyGetBeginI
  */
 HWTEST_F(SelectAccessibilityPropertyTestNg, SelectAccessibilityPropertyGetEndIndex001, TestSize.Level1)
 {
+    InitSelectTestNg();
+
     EXPECT_EQ(selectAccessibilityProperty_->GetEndIndex(), SELECT_ERROR);
 
     auto option = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<OptionPattern>(0); });
+    ASSERT_NE(option, nullptr);
 
     selectPattern_->options_.push_back(option);
     selectPattern_->options_.push_back(option);
@@ -128,6 +132,8 @@ HWTEST_F(SelectAccessibilityPropertyTestNg, SelectAccessibilityPropertyGetEndInd
  */
 HWTEST_F(SelectAccessibilityPropertyTestNg, SelectAccessibilityPropertyGetText001, TestSize.Level1)
 {
+    InitSelectTestNg();
+
     EXPECT_EQ(selectAccessibilityProperty_->GetText(), EMPTY_TEXT);
 
     selectPattern_->text_ = FrameNode::CreateFrameNode(
@@ -139,16 +145,40 @@ HWTEST_F(SelectAccessibilityPropertyTestNg, SelectAccessibilityPropertyGetText00
 }
 
 /**
+ * @tc.name: SelectAccessibilityPropertyGetCollectionItemCounts001
+ * @tc.desc: Test GetCollectionItemCounts of select.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectAccessibilityPropertyTestNg, SelectAccessibilityPropertyGetCollectionItemCounts001, TestSize.Level1)
+{
+    InitSelectTestNg();
+
+    EXPECT_EQ(selectAccessibilityProperty_->GetCollectionItemCounts(), SELECT_ERROR);
+
+    auto option = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<OptionPattern>(0); });
+    ASSERT_NE(option, nullptr);
+
+    for (int i = 0; i < CURRENT_INDEX; i++) {
+        selectPattern_->options_.push_back(option);
+    }
+    EXPECT_EQ(selectAccessibilityProperty_->GetCollectionItemCounts(), CURRENT_INDEX);
+}
+
+/**
  * @tc.name: SelectAccessibilityPropertyGetSupportAction001
  * @tc.desc: Test GetSupportAction of select.
  * @tc.type: FUNC
  */
 HWTEST_F(SelectAccessibilityPropertyTestNg, SelectAccessibilityPropertyGetSupportAction001, TestSize.Level1)
 {
+    InitSelectTestNg();
+
     selectAccessibilityProperty_->ResetSupportAction();
     std::unordered_set<AceAction> supportAceActions = selectAccessibilityProperty_->GetSupportAction();
     uint64_t actions = 0, expectActions = 0;
     expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SELECT);
+    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_CLEAR_SELECTION);
     for (auto action : supportAceActions) {
         actions |= 1UL << static_cast<uint32_t>(action);
     }

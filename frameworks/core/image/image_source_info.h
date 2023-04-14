@@ -86,7 +86,7 @@ public:
     const RefPtr<PixelMap>& GetPixmap() const;
     std::string GetKey() const;
 
-    bool IsSupportCache() const;
+    bool SupportObjCache() const;
 
 private:
     SrcType ResolveSrcType() const;

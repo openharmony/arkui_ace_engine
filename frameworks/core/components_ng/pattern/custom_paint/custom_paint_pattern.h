@@ -129,6 +129,8 @@ public:
     void UpdateFillPattern(const Ace::Pattern& pattern);
     void UpdateShadowColor(const Color& color);
     void UpdateStrokeGradient(const Ace::Gradient& grad);
+
+    void SetTextDirection(TextDirection direction);
     
 private:
     void OnAttachToFrameNode() override;

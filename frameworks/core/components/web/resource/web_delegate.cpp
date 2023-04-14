@@ -2740,6 +2740,38 @@ void WebDelegate::UpdateForceDarkAccess(const bool& access)
         TaskExecutor::TaskType::PLATFORM);
 }
 
+void WebDelegate::UpdateAudioResumeInterval(const int32_t& resumeInterval)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), resumeInterval]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            CHECK_NULL_VOID(delegate->nweb_);
+            delegate->nweb_->SetAudioResumeInterval(resumeInterval);
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateAudioExclusive(const bool& audioExclusive)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), audioExclusive]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            CHECK_NULL_VOID(delegate->nweb_);
+            delegate->nweb_->SetAudioExclusive(audioExclusive);
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
 void WebDelegate::UpdateOverviewModeEnabled(const bool& isOverviewModeAccessEnabled)
 {
     auto context = context_.Upgrade();

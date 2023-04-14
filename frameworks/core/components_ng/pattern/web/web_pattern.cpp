@@ -717,6 +717,20 @@ void WebPattern::OnForceDarkAccessUpdate(bool access)
     }
 }
 
+void WebPattern::OnAudioResumeIntervalUpdate(int32_t resumeInterval)
+{
+    if (delegate_) {
+        delegate_->UpdateAudioResumeInterval(resumeInterval);
+    }
+}
+
+void WebPattern::OnAudioExclusiveUpdate(bool audioExclusive)
+{
+    if (delegate_) {
+        delegate_->UpdateAudioExclusive(audioExclusive);
+    }
+}
+
 void WebPattern::OnOverviewModeAccessEnabledUpdate(bool value)
 {
     if (delegate_) {
@@ -950,6 +964,8 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateCacheMode(GetCacheModeValue(WebCacheMode::DEFAULT));
         delegate_->UpdateDarkMode(GetDarkModeValue(WebDarkMode::Off));
         delegate_->UpdateForceDarkAccess(GetForceDarkAccessValue(false));
+        delegate_->UpdateAudioResumeInterval(GetAudioResumeIntervalValue(-1));
+        delegate_->UpdateAudioExclusive(GetAudioExclusiveValue(true));
         delegate_->UpdateOverviewModeEnabled(GetOverviewModeAccessEnabledValue(true));
         delegate_->UpdateFileFromUrlEnabled(GetFileFromUrlAccessEnabledValue(false));
         delegate_->UpdateDatabaseEnabled(GetDatabaseAccessEnabledValue(false));
@@ -1131,7 +1147,7 @@ void WebPattern::RequestFullScreen()
     CHECK_NULL_VOID(host);
     auto fullScreenManager = context->GetFullScreenManager();
     CHECK_NULL_VOID(fullScreenManager);
-    fullScreenManager->RequestFullScreen(host);
+    fullScreenManager->RequestFullScreenForWeb(host);
 }
 
 void WebPattern::ExitFullScreen()
@@ -1142,7 +1158,7 @@ void WebPattern::ExitFullScreen()
     CHECK_NULL_VOID(host);
     auto fullScreenManager = context->GetFullScreenManager();
     CHECK_NULL_VOID(fullScreenManager);
-    fullScreenManager->ExitFullScreen(host);
+    fullScreenManager->ExitFullScreenForWeb(host);
 }
 
 bool WebPattern::IsTouchHandleValid(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> handle)

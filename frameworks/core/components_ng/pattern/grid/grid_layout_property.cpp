@@ -47,6 +47,14 @@ void GridLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("maxCount ", propMaxCount_.value_or(Infinity<int32_t>()));
     json->Put("minCount ", propMinCount_.value_or(1));
     json->Put("cellLength ", propCellLength_.value_or(0));
+    auto edgeEffect = propEdgeEffect_.value_or(EdgeEffect::NONE);
+    if (edgeEffect == EdgeEffect::SPRING) {
+        json->Put("edgeEffect", "EdgeEffect.Spring");
+    } else if (edgeEffect == EdgeEffect::FADE) {
+        json->Put("edgeEffect", "EdgeEffect.Fade");
+    } else {
+        json->Put("edgeEffect", "EdgeEffect.None");
+    }
 }
 
 std::string GridLayoutProperty::GetGridDirectionStr() const

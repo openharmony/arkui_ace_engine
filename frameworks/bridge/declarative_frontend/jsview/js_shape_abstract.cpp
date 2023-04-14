@@ -395,4 +395,24 @@ void JSShapeAbstract::SetSize(const JSCallbackInfo& info)
     }
 }
 
+void JSShapeAbstract::ObjectPosition(const JSCallbackInfo& info)
+{
+    info.ReturnSelf();
+    if (info.Length() > 0 && info[0]->IsObject()) {
+        JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
+        JSRef<JSVal> xVal = sizeObj->GetProperty("x");
+        JSRef<JSVal> yVal = sizeObj->GetProperty("y");
+        Dimension x;
+        Dimension y;
+        DimensionOffset position(x, y);
+        CHECK_NULL_VOID(basicShape_);
+        if (ParseJsDimensionVp(xVal, x)) {
+            position.SetX(x);
+        }
+        if (ParseJsDimensionVp(yVal, y)) {
+            position.SetY(y);
+        }
+        basicShape_->SetPosition(position);
+    }
+}
 } // namespace OHOS::Ace::Framework

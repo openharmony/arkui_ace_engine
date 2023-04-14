@@ -22,11 +22,20 @@
 namespace OHOS::Ace::NG {
 std::string TextAccessibilityProperty::GetText() const
 {
+    std::string value = "";
     auto frameNode = host_.Upgrade();
-    CHECK_NULL_RETURN(frameNode, "");
-    auto textPattern = frameNode->GetPattern<TextPattern>();
-    CHECK_NULL_RETURN(textPattern, "");
-    return textPattern->GetTextForDisplay();
+    CHECK_NULL_RETURN(frameNode, value);
+    auto children = frameNode->GetChildren();
+    if (children.empty()) {
+        auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_RETURN(textLayoutProperty, value);
+        value = textLayoutProperty->GetContentValue(value);
+    } else {
+        auto textPattern = frameNode->GetPattern<TextPattern>();
+        CHECK_NULL_RETURN(textPattern, value);
+        value = textPattern->GetTextForDisplay();
+    }
+    return value;
 }
 
 bool TextAccessibilityProperty::IsSelected() const
@@ -61,18 +70,18 @@ int32_t TextAccessibilityProperty::GetTextSelectionEnd() const
 
 void TextAccessibilityProperty::SetSpecificSupportAction()
 {
-    AddSupportAction(AceAction::ACTION_COPY);
-    AddSupportAction(AceAction::ACTION_NEXT_AT_MOVEMENT_GRANULARITY);
-    AddSupportAction(AceAction::ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY);
-
     auto frameNode = host_.Upgrade();
     CHECK_NULL_VOID(frameNode);
     auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     if (textLayoutProperty->GetCopyOptionValue(CopyOptions::None) != CopyOptions::None) {
+        AddSupportAction(AceAction::ACTION_COPY);
         AddSupportAction(AceAction::ACTION_SELECT);
         AddSupportAction(AceAction::ACTION_SET_SELECTION);
         AddSupportAction(AceAction::ACTION_CLEAR_SELECTION);
     }
+
+    AddSupportAction(AceAction::ACTION_NEXT_AT_MOVEMENT_GRANULARITY);
+    AddSupportAction(AceAction::ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY);
 }
 } // namespace OHOS::Ace::NG

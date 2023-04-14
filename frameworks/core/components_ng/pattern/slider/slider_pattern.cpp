@@ -68,7 +68,6 @@ void SliderPattern::OnModifyDone()
     stepRatio_ = step / (max - min);
     UpdateBlock();
     InitTouchEvent(gestureHub);
-    InitClickEvent(gestureHub);
     InitPanEvent(gestureHub);
     InitMouseEvent(inputEventHub);
     auto focusHub = hub->GetFocusHub();
@@ -174,10 +173,12 @@ void SliderPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
 
 void SliderPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
-    auto touchType = info.GetTouches().front().GetTouchType();
+    auto touchList = info.GetChangedTouches();
+    CHECK_NULL_VOID(!touchList.empty());
+    auto touchType = touchList.front().GetTouchType();
     if (touchType == TouchType::DOWN) {
         hotFlag_ = true;
-        UpdateValueByLocalLocation(info.GetChangedTouches().front().GetLocalLocation());
+        UpdateValueByLocalLocation(touchList.front().GetLocalLocation());
         if (showTips_) {
             bubbleFlag_ = true;
             InitializeBubble();
@@ -191,29 +192,11 @@ void SliderPattern::HandleTouchEvent(const TouchEventInfo& info)
             bubbleFlag_ = false;
         }
         mousePressedFlag_ = false;
+        FireChangeEvent(SliderChangeMode::Click);
+        FireChangeEvent(SliderChangeMode::End);
         CloseTranslateAnimation();
     }
     UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
-}
-
-void SliderPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
-{
-    if (clickListener_) {
-        return;
-    }
-    auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->HandleClickEvent();
-    };
-    clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
-    gestureHub->AddClickEvent(clickListener_);
-}
-
-void SliderPattern::HandleClickEvent()
-{
-    FireChangeEvent(SliderChangeMode::Click);
-    FireChangeEvent(SliderChangeMode::End);
 }
 
 void SliderPattern::InitializeBubble()
@@ -384,7 +367,6 @@ void SliderPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID_NOLOG(pattern);
         pattern->HandledGestureEvent();
-        pattern->FireChangeEvent(SliderChangeMode::End);
     };
     auto actionCancelTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();

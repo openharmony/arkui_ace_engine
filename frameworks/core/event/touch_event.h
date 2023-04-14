@@ -66,6 +66,7 @@ struct TouchEvent final {
     float screenX = 0.0f;
     float screenY = 0.0f;
     TouchType type = TouchType::UNKNOWN;
+    TouchType pullType = TouchType::UNKNOWN;
     // nanosecond time stamp.
     TimeStamp time;
     double size = 0.0;
@@ -92,7 +93,7 @@ struct TouchEvent final {
     TouchEvent CreateScalePoint(float scale) const
     {
         if (NearZero(scale)) {
-            return { id, x, y, screenX, screenY, type, time, size, force, tiltX, tiltY, deviceId, sourceType,
+            return { id, x, y, screenX, screenY, type, pullType, time, size, force, tiltX, tiltY, deviceId, sourceType,
                 sourceTool, pointers };
         }
         auto temp = pointers;
@@ -102,8 +103,8 @@ struct TouchEvent final {
             point.screenX = point.screenX / scale;
             point.screenY = point.screenY / scale;
         });
-        return { id, x / scale, y / scale, screenX / scale, screenY / scale, type, time, size, force, tiltX, tiltY,
-            deviceId, sourceType, sourceTool, temp };
+        return { id, x / scale, y / scale, screenX / scale, screenY / scale, type, pullType, time, size, force,
+            tiltX, tiltY, deviceId, sourceType, sourceTool, temp };
     }
 
     TouchEvent UpdateScalePoint(float scale, float offsetX, float offsetY, int32_t pointId) const
@@ -116,8 +117,8 @@ struct TouchEvent final {
                 point.screenX = point.screenX - offsetX;
                 point.screenY = point.screenY - offsetY;
             });
-            return { pointId, x - offsetX, y - offsetY, screenX - offsetX, screenY - offsetY, type, time, size, force,
-                tiltX, tiltY, deviceId, sourceType, sourceTool, temp };
+            return { pointId, x - offsetX, y - offsetY, screenX - offsetX, screenY - offsetY, type, pullType, time,
+                size, force, tiltX, tiltY, deviceId, sourceType, sourceTool, temp };
         }
 
         std::for_each(temp.begin(), temp.end(), [scale, offsetX, offsetY](auto&& point) {
@@ -127,8 +128,8 @@ struct TouchEvent final {
             point.screenY = (point.screenY - offsetY) / scale;
         });
         return { pointId, (x - offsetX) / scale, (y - offsetY) / scale, (screenX - offsetX) / scale,
-            (screenY - offsetY) / scale, type, time, size, force, tiltX, tiltY, deviceId, sourceType, sourceTool,
-            temp };
+            (screenY - offsetY) / scale, type, pullType, time, size, force, tiltX, tiltY, deviceId, sourceType,
+            sourceTool, temp };
     }
 
     TouchEvent UpdatePointers() const

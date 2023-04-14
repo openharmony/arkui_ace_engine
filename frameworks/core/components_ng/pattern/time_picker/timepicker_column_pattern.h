@@ -25,6 +25,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/time_picker/timepicker_column_accessibility_property.h"
 #include "core/components_ng/pattern/time_picker/timepicker_column_layout_algorithm.h"
 #include "core/components_ng/pattern/time_picker/timepicker_layout_property.h"
 #include "core/components_ng/pattern/time_picker/toss_animation_controller.h"
@@ -62,6 +63,11 @@ public:
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<LinearLayoutProperty>(isVertical_);
+    }
+
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        return MakeRefPtr<TimePickerColumnAccessibilityProperty>();
     }
 
     void FlushCurrentOptions(bool isDown = false, bool isUpateTextContentOnly = false);
@@ -251,7 +257,6 @@ private:
     ColumnChangeCallback changeCallback_;
     EventCallback EventCallback_;
     uint32_t currentIndex_ = 0;
-    RefPtr<ScrollableEvent> scrollableEvent_;
     double yLast_ = 0.0;
     double yOffset_ = 0.0;
     double jumpInterval_;

@@ -20,6 +20,9 @@ template("napi_measure_static") {
   ohos_source_set(target_name) {
     defines += invoker.defines
     cflags_cc += invoker.cflags_cc
+    if (is_mac) {
+      cflags_cc += [ "-O0" ]
+    }
 
     include_dirs = [
       "//foundation/arkui",
@@ -31,7 +34,9 @@ template("napi_measure_static") {
     sources = [ "js_measure.cpp" ]
 
     deps = []
-    if (!is_cross_platform_build) {
+    if (platform != "" && is_cross_platform_build) {
+      deps += [ "//plugins/libs/napi:napi_$platform" ]
+    } else {
       deps += [ "//foundation/arkui/napi/:ace_napi" ]
     }
     deps += [ "../utils:napi_utils_static_${platform}" ]

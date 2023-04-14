@@ -90,9 +90,9 @@ public:
     static void SetBackgroundImageSize(const BackgroundImageSize& bgImgSize);
     static void SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition);
     static void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle);
-    static void SetSphericalEffect(float radio);
+    static void SetSphericalEffect(double radio);
     static void SetPixelStretchEffect(PixStretchEffectOption& option);
-    static void SetLightUpEffect(float radio);
+    static void SetLightUpEffect(double radio);
     static void SetPadding(const CalcLength& value);
     static void SetPadding(const PaddingProperty& value);
     static void SetMargin(const CalcLength& value);
@@ -106,6 +106,7 @@ public:
     static void SetBorderStyle(const BorderStyle& value);
     static void SetBorderStyle(const BorderStyleProperty& value);
     static void SetOpacity(double opacity);
+    static void SetAllowDrop(const std::set<std::string>& allowDrop);
 
     static void SetBorderImage(const RefPtr<BorderImage>& borderImage);
     static void SetBorderImageSource(const std::string& bdImageSrc);
@@ -184,6 +185,7 @@ public:
     static void SetResponseRegion(const std::vector<DimensionRect>& responseRegion);
     static void SetTouchable(bool touchable);
     static void SetHitTestMode(HitTestMode hitTestMode);
+    static void SetDraggable(bool draggable);
     static void SetOnDragStart(
         std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragStart);
     static void SetOnDragEnter(
@@ -193,6 +195,8 @@ public:
     static void SetOnDragMove(
         std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragMove);
     static void SetOnDrop(std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDrop);
+
+    static void SetOnDragEnd(std::function<void(const RefPtr<OHOS::Ace::DragEvent>&)>&& onDragEnd);
 
     // flex properties
     static void SetAlignSelf(FlexAlign value);

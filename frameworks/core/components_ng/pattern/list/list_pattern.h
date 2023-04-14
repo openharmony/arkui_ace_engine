@@ -19,6 +19,7 @@
 #include "core/animation/chain_animation.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/list/list_accessibility_property.h"
+#include "core/components_ng/pattern/list/list_content_modifier.h"
 #include "core/components_ng/pattern/list/list_event_hub.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
@@ -49,22 +50,7 @@ public:
     ListPattern() = default;
     ~ListPattern() override = default;
 
-    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
-    {
-        auto listLayoutProperty = GetHost()->GetLayoutProperty<ListLayoutProperty>();
-        V2::ItemDivider itemDivider;
-        auto divider = listLayoutProperty->GetDivider().value_or(itemDivider);
-        auto axis = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
-        auto drawVertical = (axis == Axis::HORIZONTAL);
-        auto paint = MakeRefPtr<ListPaintMethod>(divider, drawVertical, lanes_, spaceWidth_, itemPosition_);
-        paint->SetScrollBar(AceType::WeakClaim(AceType::RawPtr(GetScrollBar())));
-        paint->SetTotalItemCount(maxListItemIndex_ + 1);
-        auto scrollEffect = GetScrollEdgeEffect();
-        if (scrollEffect && scrollEffect->IsFadeEffect()) {
-            paint->SetEdgeEffect(scrollEffect);
-        }
-        return paint;
-    }
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
     bool IsAtomicNode() const override
     {
@@ -203,6 +189,7 @@ public:
 
     void SetSwiperItem(WeakPtr<ListItemPattern> swiperItem);
 
+    int32_t GetItemIndexByPosition(float xOffset, float yOffset);
 private:
     void OnScrollEndCallback() override;
 
@@ -238,6 +225,8 @@ private:
 
     void DrivenRender(const RefPtr<LayoutWrapper>& layoutWrapper);
 
+    RefPtr<ListContentModifier> listContentModifier_;
+
     RefPtr<Animator> animator_;
     RefPtr<ListPositionController> positionController_;
     int32_t maxListItemIndex_ = 0;
@@ -248,7 +237,6 @@ private:
     bool isInitialized_ = false;
     float estimateOffset_ = 0.0f;
     float currentOffset_ = 0.0f;
-    float lastOffset_ = 0.0f;
     float spaceWidth_ = 0.0f;
     float contentMainSize_ = 0.0f;
 

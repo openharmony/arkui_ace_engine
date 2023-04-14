@@ -78,6 +78,7 @@ void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (textfieldLayoutProperty->GetWidthAutoValue(false)) {
         frameSize.SetWidth(contentWidth + pattern->GetHorizontalPaddingSum());
     }
+    frameSize.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize);
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
     frameRect_ =
         RectF(layoutWrapper->GetGeometryNode()->GetFrameOffset(), layoutWrapper->GetGeometryNode()->GetFrameSize());
@@ -125,7 +126,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         paragraph_->Layout(std::numeric_limits<double>::infinity());
     } else {
         // for text area or placeholder, max width is content width without password icon
-        paragraph_->Layout(idealWidth);
+        paragraph_->Layout(idealWidth - pattern->GetScrollBarWidth() - SCROLL_BAR_LEFT_WIDTH.ConvertToPx());
     }
     auto paragraphNewWidth = static_cast<float>(paragraph_->GetMaxIntrinsicWidth());
     if (!NearEqual(paragraphNewWidth, paragraph_->GetMaxWidth()) && !pattern->IsTextArea() && !showPlaceHolder) {
@@ -147,7 +148,8 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
                 idealHeight = maxHeightSize.ConvertToPx();
             }
         }
-        textRect_.SetSize(SizeF(idealWidth, useHeight));
+        textRect_.SetSize(
+            SizeF(idealWidth - pattern->GetScrollBarWidth() - SCROLL_BAR_LEFT_WIDTH.ConvertToPx(), useHeight));
         return SizeF(idealWidth, std::min(idealHeight, useHeight));
     }
     auto showPasswordIcon = textFieldLayoutProperty->GetShowPasswordIcon().value_or(true);

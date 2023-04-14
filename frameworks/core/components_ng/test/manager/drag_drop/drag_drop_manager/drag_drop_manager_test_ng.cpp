@@ -985,7 +985,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest011, TestSize.Level1)
     preTargetFrameNode = dragDropManager->preTargetFrameNode_;
     draggedFrameNode = dragDropManager->draggedFrameNode_;
     EXPECT_FALSE(preTargetFrameNode);
-    EXPECT_FALSE(draggedFrameNode);
+    EXPECT_TRUE(draggedFrameNode);
 }
 
 /**
@@ -1198,7 +1198,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest014, TestSize.Level1)
     EXPECT_EQ(onDropInfo, EXTRA_INFO);
 
     /**
-     * @tc.steps: step4. call FireOnItemDragEvent with type=DragEventType::DROP
+     * @tc.steps: step4. call FireOnItemDropEvent with type=DragEventType::DROP
      * @tc.expected: step4. FireOnItemDrop will be called
      */
     ItemDragInfo itemDragInfo;
@@ -1208,7 +1208,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest014, TestSize.Level1)
     ItemDropFunc onItemDrop = [&onItemDropInfo](const ItemDragInfo& /* dragInfo */, int32_t /* itemIndex */,
                                   int32_t /* insertIndex */, bool /* isSuccess */) { onItemDropInfo = EXTRA_INFO; };
     gridEvent->SetOnItemDrop(std::move(onItemDrop));
-    dragDropManager->FireOnItemDragEvent(gridNode, DragType::GRID, itemDragInfo, DragEventType::DROP, 0);
+    dragDropManager->FireOnItemDropEvent(gridNode, DragType::GRID, itemDragInfo, 0, 0, true);
     EXPECT_EQ(onItemDropInfo, EXTRA_INFO);
 
     auto listNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<ListPattern>());
@@ -1218,7 +1218,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest014, TestSize.Level1)
                                       int32_t /* insertIndex */,
                                       bool /* isSuccess */) { onItemDropInfoList = EXTRA_INFO; };
     listEvent->SetOnItemDrop(std::move(onItemDropList));
-    dragDropManager->FireOnItemDragEvent(listNode, DragType::LIST, itemDragInfo, DragEventType::DROP, 0);
+    dragDropManager->FireOnItemDropEvent(listNode, DragType::LIST, itemDragInfo, 0, 0, true);
     EXPECT_EQ(onItemDropInfoList, EXTRA_INFO);
 }
 } // namespace OHOS::Ace::NG

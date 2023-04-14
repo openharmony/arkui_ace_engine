@@ -185,10 +185,12 @@ public:
     static void SetVisibility(const JSCallbackInfo& info);
     static void Pop();
 
+    static void JsSetDraggable(bool draggable);
     static void JsOnDragStart(const JSCallbackInfo& info);
     static bool ParseAndUpdateDragItemInfo(const JSRef<JSVal>& info, NG::DragDropBaseInfo& dragInfo);
     static RefPtr<AceType> ParseDragNode(const JSRef<JSVal>& info);
     static void JsOnDragEnter(const JSCallbackInfo& info);
+    static void JsOnDragEnd(const JSCallbackInfo& info);
     static void JsOnDragMove(const JSCallbackInfo& info);
     static void JsOnDragLeave(const JSCallbackInfo& info);
     static void JsOnDrop(const JSCallbackInfo& info);
@@ -236,6 +238,7 @@ public:
     static void JsAccessibilityText(const std::string& text);
     static void JsAccessibilityDescription(const std::string& description);
     static void JsAccessibilityImportance(const std::string& importance);
+    static void JsAllowDrop(const JSCallbackInfo& info);
 
     static void ParseMenuOptions(
         const JSCallbackInfo& info, const JSRef<JSArray>& jsArray, std::vector<NG::MenuOptionsParam>& items);
@@ -307,7 +310,7 @@ public:
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
         JSRef<JSVal> type = jsObj->GetProperty("type");
         if (!type->IsNumber()) {
-            LOGW("type is not number");
+            LOGD("type is not number");
             return false;
         }
 

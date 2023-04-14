@@ -14,7 +14,8 @@
  */
 
 #include "gtest/gtest.h"
-
+#define private public
+#define protectd public
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
@@ -25,6 +26,8 @@
 #include "core/components_ng/pattern/flex/flex_layout_pattern.h"
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
 #include "core/components_ng/pattern/flex/flex_model_ng.h"
+#include "core/components_ng/pattern/flex/wrap_layout_algorithm.h"
+#include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 using namespace testing;
@@ -38,6 +41,7 @@ const float CONTAINER_WIDTH = 300.0f;
 const float CONTAINER_HEIGHT = 300.0f;
 const float FIRST_ITEM_WIDTH = 150.0f;
 const float FIRST_ITEM_HEIGHT = 75.0f;
+const float REMAINSPACE_VALUE = 20.0f;
 const SizeF CONTAINER_SIZE(CONTAINER_WIDTH, CONTAINER_HEIGHT);
 const SizeF FIRST_ITEM_SIZE(FIRST_ITEM_WIDTH, FIRST_ITEM_HEIGHT);
 } // namespace
@@ -74,6 +78,60 @@ void UpdateFlexProperties(const RefPtr<FlexLayoutProperty>& layoutProperty, cons
     layoutProperty->UpdateFlexDirection(flexProperty.flexDirection);
     layoutProperty->UpdateMainAxisAlign(flexProperty.flexAlign);
     layoutProperty->UpdateCrossAxisAlign(flexProperty.flexAlign);
+}
+
+void CreateLayoutProperty(RefPtr<WrapLayoutAlgorithm>& flexLayoutAlgorithm, RefPtr<LayoutWrapper>& firstLayoutWrapper,
+    RefPtr<GeometryNode>& firstGeometryNode)
+{
+    WrapProperties wrapProperty;
+    wrapProperty.wrapDirection = WrapDirection::HORIZONTAL;
+    auto flexNode = FrameNode::GetOrCreateFrameNode(
+        V2::FLEX_ETS_TAG, -1, []() { return AceType::MakeRefPtr<FlexLayoutPattern>(true); });
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(CONTAINER_SIZE);
+    LayoutWrapper layoutWrapper = LayoutWrapper(flexNode, geometryNode, flexNode->GetLayoutProperty());
+    ASSERT_NE(flexNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = flexNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<FlexLayoutProperty> flexLayoutProperty = AceType::DynamicCast<FlexLayoutProperty>(layoutProperty);
+    ASSERT_NE(flexLayoutProperty, nullptr);
+    UpdateWrapProperties(flexLayoutProperty, wrapProperty);
+    auto flexLayoutPattern = flexNode->GetPattern<FlexLayoutPattern>();
+    ASSERT_NE(flexLayoutPattern, nullptr);
+    flexLayoutAlgorithm = AccessibilityManager::MakeRefPtr<WrapLayoutAlgorithm>(false);
+    layoutWrapper.SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(flexLayoutAlgorithm));
+    auto childLayoutConstraint = layoutWrapper.GetLayoutProperty()->CreateChildConstraint();
+    childLayoutConstraint.selfIdealSize = OptionalSizeF(FIRST_ITEM_SIZE);
+    // create first item
+    auto firstItem =
+        FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, -1, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    // add first item to flex
+    flexNode->AddChild(firstItem);
+    firstGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    firstGeometryNode->Reset();
+    firstLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(firstItem, firstGeometryNode, firstItem->GetLayoutProperty());
+    ASSERT_NE(firstLayoutWrapper, nullptr);
+    auto firstItemPattern = firstItem->GetPattern<ButtonPattern>();
+    ASSERT_NE(firstItemPattern, nullptr);
+    firstLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
+    auto firstItemLayoutAlgorithm = firstItemPattern->CreateLayoutAlgorithm();
+    ASSERT_NE(firstItemLayoutAlgorithm, nullptr);
+    firstLayoutWrapper->SetLayoutAlgorithm(
+        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(firstItemLayoutAlgorithm));
+    firstLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(FIRST_ITEM_WIDTH), CalcLength(FIRST_ITEM_HEIGHT)));
+    layoutWrapper.AppendChild(firstLayoutWrapper);
+    // mock process in flex layout algorithm
+    flexLayoutAlgorithm->Measure(&layoutWrapper);
+    flexLayoutAlgorithm->Layout(&layoutWrapper);
+    auto firstItemGeometryNode = firstLayoutWrapper->GetGeometryNode();
+    ASSERT_NE(firstItemGeometryNode, nullptr);
+    auto firstItemOffset = firstGeometryNode->GetFrameOffset();
+    EXPECT_EQ(firstItemOffset.GetX(), OFFSET_LEFT);
+    EXPECT_EQ(firstItemOffset.GetY(), OFFSET_TOP);
+    EXPECT_EQ(firstGeometryNode->GetFrameSize(), SizeF(FIRST_ITEM_WIDTH, FIRST_ITEM_HEIGHT));
 }
 
 /**
@@ -285,4 +343,93 @@ HWTEST_F(FlexPatternTestNg, FlexWrapPatternTest002, TestSize.Level1)
     EXPECT_EQ(flexLayoutProperty->GetAlignment(), WrapAlignment::CENTER);
 }
 
+/**
+ * @tc.name: WrapLayoutAlgorithmTest001
+ * @tc.desc: Test setting of flex.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FlexPatternTestNg, WrapLayoutAlgorithmTest001, TestSize.Level1)
+{
+    RefPtr<WrapLayoutAlgorithm> flexLayoutAlgorithm;
+    RefPtr<LayoutWrapper> firstLayoutWrapper;
+    RefPtr<GeometryNode> firstGeometryNode;
+    ASSERT_NE(flexLayoutAlgorithm, nullptr);
+    ASSERT_NE(firstLayoutWrapper, nullptr);
+    ASSERT_NE(firstGeometryNode, nullptr);
+
+    CreateLayoutProperty(flexLayoutAlgorithm, firstLayoutWrapper, firstGeometryNode);
+    float main = 1.0;
+    float cross = 1.0;
+    int32_t total = 1;
+    std::list<RefPtr<LayoutWrapper>> nodeList;
+    nodeList.emplace_back(firstLayoutWrapper);
+    ContentInfo content(main, cross, total, nodeList);
+    FlexItemProperties flexItemProperties;
+    flexLayoutAlgorithm->GetFlexItemProperties(content, flexItemProperties);
+    EXPECT_EQ(flexLayoutAlgorithm->currentMainLength_, FIRST_ITEM_WIDTH);
+    flexLayoutAlgorithm->CalcFlexGrowLayout(
+        firstLayoutWrapper, flexItemProperties, (CONTAINER_WIDTH - FIRST_ITEM_WIDTH));
+    EXPECT_EQ(firstGeometryNode->GetFrameSize(), SizeF(FIRST_ITEM_WIDTH, FIRST_ITEM_HEIGHT));
+}
+
+/**
+ * @tc.name: WrapLayoutAlgorithmTest002
+ * @tc.desc: Test setting of flex.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FlexPatternTestNg, WrapLayoutAlgorithmTest002, TestSize.Level1)
+{
+    RefPtr<WrapLayoutAlgorithm> flexLayoutAlgorithm;
+    RefPtr<LayoutWrapper> firstLayoutWrapper;
+    RefPtr<GeometryNode> firstGeometryNode;
+    ASSERT_NE(flexLayoutAlgorithm, nullptr);
+    ASSERT_NE(firstLayoutWrapper, nullptr);
+    ASSERT_NE(firstGeometryNode, nullptr);
+
+    CreateLayoutProperty(flexLayoutAlgorithm, firstLayoutWrapper, firstGeometryNode);
+    float main = 1.0;
+    float cross = 1.0;
+    int32_t total = 1;
+    std::list<RefPtr<LayoutWrapper>> nodeList;
+    nodeList.emplace_back(firstLayoutWrapper);
+    ContentInfo content(main, cross, total, nodeList);
+    auto layoutProperty = firstLayoutWrapper->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateFlexGrow(1.0);
+    FlexItemProperties flexItemProperties;
+    flexLayoutAlgorithm->GetFlexItemProperties(content, flexItemProperties);
+    EXPECT_EQ(flexLayoutAlgorithm->currentMainLength_, FIRST_ITEM_WIDTH);
+    flexLayoutAlgorithm->CalcFlexGrowLayout(
+        firstLayoutWrapper, flexItemProperties, (CONTAINER_WIDTH - FIRST_ITEM_WIDTH));
+    EXPECT_EQ(firstGeometryNode->GetFrameSize(), SizeF(FIRST_ITEM_WIDTH, FIRST_ITEM_HEIGHT));
+    EXPECT_EQ(firstGeometryNode->GetFrameSize().Width(), firstGeometryNode->GetFrameSize().Width());
+}
+
+/**
+ * @tc.name: WrapLayoutAlgorithmTest003
+ * @tc.desc: Test setting of flex.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FlexPatternTestNg, WrapLayoutAlgorithmTest003, TestSize.Level1)
+{
+    RefPtr<WrapLayoutAlgorithm> wrapLayoutAlgorithm = AceType::MakeRefPtr<WrapLayoutAlgorithm>(false);
+    auto flexNode = FrameNode::GetOrCreateFrameNode(
+        V2::FLEX_ETS_TAG, -1, []() { return AceType::MakeRefPtr<FlexLayoutPattern>(true); });
+
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(CONTAINER_SIZE);
+    RefPtr<LayoutWrapper> itemWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(flexNode, geometryNode, flexNode->GetLayoutProperty());
+    ASSERT_NE(itemWrapper, nullptr);
+
+    FlexItemProperties flexItemProperties;
+    wrapLayoutAlgorithm->direction_ = WrapDirection::HORIZONTAL;
+    wrapLayoutAlgorithm->CalcFlexGrowLayout(itemWrapper, flexItemProperties, REMAINSPACE_VALUE);
+    EXPECT_EQ(wrapLayoutAlgorithm->direction_, WrapDirection::HORIZONTAL);
+
+    wrapLayoutAlgorithm->direction_ = WrapDirection::HORIZONTAL_REVERSE;
+    wrapLayoutAlgorithm->CalcFlexGrowLayout(itemWrapper, flexItemProperties, REMAINSPACE_VALUE);
+    EXPECT_EQ(wrapLayoutAlgorithm->direction_, WrapDirection::HORIZONTAL_REVERSE);
+}
 } // namespace OHOS::Ace::NG

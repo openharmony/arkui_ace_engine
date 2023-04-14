@@ -39,6 +39,7 @@
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/constants.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -75,7 +76,21 @@ const Rect SCROLLBAR_RECT_BOTTOM = Rect(-9899.0, 100.0, 9999.0, 0.0);
 const Rect SCROLLBAR_RECT_RIGHT = Rect(100.0, -9899.0, 0.0, 9999.0);
 } // namespace
 
-class ScrollTestNg : public testing::Test {};
+class ScrollTestNg : public testing::Test {
+public:
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
+};
+
+void ScrollTestNg::SetUpTestSuite()
+{
+    MockPipelineBase::SetUp();
+}
+
+void ScrollTestNg::TearDownTestSuite()
+{
+    MockPipelineBase::TearDown();
+}
 
 /**
  * @tc.name: ScrollTest001
@@ -1012,7 +1027,6 @@ HWTEST_F(ScrollTestNg, ScrollTest0010, TestSize.Level1)
     positionController->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, true);
     EXPECT_NE(pattern->animator_, nullptr);
     pattern->CreateOrStopAnimator();
-    EXPECT_EQ(pattern->animator_->status_, Animator::Status::STOPPED);
     pattern->animator_->NotifyStopListener();
     pattern->viewPortLength_ = 1.0f;
     positionController->ScrollPage(true, false);
@@ -1026,7 +1040,7 @@ HWTEST_F(ScrollTestNg, ScrollTest0010, TestSize.Level1)
     auto position = positionController->GetCurrentPosition();
     EXPECT_EQ(position, SCROLL_FLOAT_98);
     auto offset = positionController->GetCurrentOffset();
-    EXPECT_EQ(offset, Offset::Zero());
+    EXPECT_EQ(offset, Offset(0, -SCROLL_FLOAT_98));
     Dimension dimension(0, DimensionUnit::VP);
     auto animate = positionController->AnimateTo(dimension, 0.0f, Curves::LINEAR);
     EXPECT_EQ(animate, true);
@@ -1371,9 +1385,10 @@ HWTEST_F(ScrollTestNg, ScrollTest0014, TestSize.Level1)
      *            function.
      * @tc.expected: step2. Check whether relevant parameters are correct.
      */
+    scrollBar->positionModeUpdate_ = true;
     scrollBar->positionMode_ = PositionMode::BOTTOM;
     scrollBar->SetOutBoundary(1.0);
-    scrollBar->SetBarRegion(SCROLL_OFFSET_ZERO, SCROLL_SIZE_100);
+    scrollBar->UpdateScrollBarRegion(SCROLL_OFFSET_ZERO, SCROLL_SIZE_100, SCROLL_OFFSET_ONE, 1.0);
     barRect = Rect(0.0, 100.0, 100.0, 0.0) + SCROLL_OFFSET_ZERO;
     EXPECT_EQ(scrollBar->barRect_, barRect);
     EXPECT_EQ(scrollBar->activeRect_, SCROLLBAR_RECT_BOTTOM);
@@ -1383,8 +1398,9 @@ HWTEST_F(ScrollTestNg, ScrollTest0014, TestSize.Level1)
      * @tc.steps: step3. When the ShapeMode is RECT and DisplayMode is RIGHT, verify the UpdateScrollBarRegion function.
      * @tc.expected: step3. Check whether relevant parameters are correct.
      */
+    scrollBar->positionModeUpdate_ = true;
     scrollBar->positionMode_ = PositionMode::RIGHT;
-    scrollBar->SetBarRegion(SCROLL_OFFSET_ZERO, SCROLL_SIZE_100);
+    scrollBar->UpdateScrollBarRegion(SCROLL_OFFSET_ZERO, SCROLL_SIZE_100, SCROLL_OFFSET_ONE, 1.0);
     barRect = Rect(100.0, 0.0, 0.0, 100.0) + SCROLL_OFFSET_ZERO;
     EXPECT_EQ(scrollBar->barRect_, barRect);
     EXPECT_EQ(scrollBar->activeRect_, SCROLLBAR_RECT_RIGHT);
@@ -1394,9 +1410,10 @@ HWTEST_F(ScrollTestNg, ScrollTest0014, TestSize.Level1)
      * @tc.steps: step4. When the ShapeMode is ROUND and DisplayMode is LEFT, verify the UpdateScrollBarRegion function.
      * @tc.expected: step4. Check whether relevant parameters are correct.
      */
+    scrollBar->positionModeUpdate_ = true;
     scrollBar->shapeMode_ = ShapeMode::ROUND;
     scrollBar->positionMode_ = PositionMode::LEFT;
-    scrollBar->SetBarRegion(SCROLL_OFFSET_ZERO, SCROLL_SIZE_100);
+    scrollBar->UpdateScrollBarRegion(SCROLL_OFFSET_ZERO, SCROLL_SIZE_100, SCROLL_OFFSET_ONE, 1.0);
     EXPECT_EQ(scrollBar->trickStartAngle_, 150);
     EXPECT_EQ(scrollBar->trickSweepAngle_, -6000);
 
@@ -1405,8 +1422,9 @@ HWTEST_F(ScrollTestNg, ScrollTest0014, TestSize.Level1)
      *                   function.
      * @tc.expected: step5. Check whether relevant parameters are correct.
      */
+    scrollBar->positionModeUpdate_ = true;
     scrollBar->positionMode_ = PositionMode::RIGHT;
-    scrollBar->SetBarRegion(SCROLL_OFFSET_ZERO, SCROLL_SIZE_100);
+    scrollBar->UpdateScrollBarRegion(SCROLL_OFFSET_ZERO, SCROLL_SIZE_100, SCROLL_OFFSET_ONE, 1.0);
     EXPECT_EQ(scrollBar->trickStartAngle_, 30);
     EXPECT_EQ(scrollBar->trickSweepAngle_, 6000);
 
@@ -1414,6 +1432,7 @@ HWTEST_F(ScrollTestNg, ScrollTest0014, TestSize.Level1)
      * @tc.steps: step6. When the ShapeMode is ROUND and DisplayMode is LEFT, verify the UpdateScrollBarRegion function.
      * @tc.expected: step6. Check whether relevant parameters are correct.
      */
+    scrollBar->positionModeUpdate_ = true;
     scrollBar->positionMode_ = PositionMode::LEFT;
     scrollBar->bottomAngle_ = SCROLL_FLOAT_50;
     scrollBar->topAngle_ = SCROLL_DOUBLE_100;

@@ -66,6 +66,7 @@ void SlidingPanelModelNG::Create(bool isShow)
         radius.radiusTopLeft = PANEL_RADIUS;
         radius.radiusTopRight = PANEL_RADIUS;
         renderContext->UpdateBorderRadius(radius);
+        renderContext->UpdateClipEdge(true);
     }
 }
 

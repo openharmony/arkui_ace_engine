@@ -22,6 +22,7 @@
 #include "core/components/picker/picker_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/picker/datepicker_column_accessibility_property.h"
 #include "core/components_ng/pattern/picker/datepicker_column_layout_algorithm.h"
 #include "core/components_ng/pattern/picker/datepicker_event_hub.h"
 #include "core/components_ng/pattern/picker/datepicker_layout_property.h"
@@ -64,6 +65,11 @@ public:
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<DataPickerLayoutProperty>();
+    }
+
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        return MakeRefPtr<DatePickerColumnAccessibilityProperty>();
     }
 
     void FlushCurrentOptions(bool isDown = false, bool isUpateTextContentOnly = false,
@@ -222,7 +228,6 @@ private:
     ColumnChangeCallback changeCallback_;
     EventCallback EventCallback_;
     uint32_t currentIndex_ = 0;
-    RefPtr<ScrollableEvent> scrollableEvent_;
     int32_t currentChildIndex_ = 0;
     double yLast_ = 0.0;
     double yOffset_ = 0.0;

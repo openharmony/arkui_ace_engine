@@ -64,17 +64,21 @@ bool KeyEventHandler::HandleKeyEvent(const KeyEvent& keyEvent)
         }
         if (keyEvent.code == KeyCode::KEY_DEL) {
 #if defined(PREVIEW)
-            pattern->DeleteForward(1);
+            pattern->DeleteForward(TextFieldPattern::GetGraphemeClusterLength(
+                pattern->GetEditingValue().GetWideText(), pattern->GetEditingValue().caretPosition));
 #else
-            pattern->DeleteBackward(1);
+            pattern->DeleteBackward(TextFieldPattern::GetGraphemeClusterLength(
+                pattern->GetEditingValue().GetWideText(), pattern->GetEditingValue().caretPosition, true));
 #endif
             return true;
         }
         if (keyEvent.code == KeyCode::KEY_FORWARD_DEL) {
 #if defined(PREVIEW)
-            pattern->DeleteBackward(1);
+            pattern->DeleteBackward(TextFieldPattern::GetGraphemeClusterLength(
+                pattern->GetEditingValue().GetWideText(), pattern->GetEditingValue().caretPosition, true));
 #else
-            pattern->DeleteForward(1);
+            pattern->DeleteForward(TextFieldPattern::GetGraphemeClusterLength(
+                pattern->GetEditingValue().GetWideText(), pattern->GetEditingValue().caretPosition));
 #endif
             return true;
         }

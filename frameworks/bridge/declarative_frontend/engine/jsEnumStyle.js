@@ -1329,3 +1329,12 @@ var ContentTextStyle;
   ContentTextStyle[ContentTextStyle["DoubleLine"] = 1] = "DoubleLine";
   ContentTextStyle[ContentTextStyle["ThreeLines"] = 2] = "ThreeLines";
 })(ContentTextStyle || (ContentTextStyle = {}));
+
+var ImageSpanAlignment;
+(function (ImageSpanAlignment) {
+  ImageSpanAlignment[ImageSpanAlignment["NONE"] = 0] = "NONE";
+  ImageSpanAlignment[ImageSpanAlignment["TOP"] = 1] = "TOP";
+  ImageSpanAlignment[ImageSpanAlignment["CENTER"] = 2] = "CENTER";
+  ImageSpanAlignment[ImageSpanAlignment["BOTTOM"] = 3] = "BOTTOM";
+  ImageSpanAlignment[ImageSpanAlignment["BASELINE"] = 4] = "BASELINE";
+})(ImageSpanAlignment || (ImageSpanAlignment = {}));

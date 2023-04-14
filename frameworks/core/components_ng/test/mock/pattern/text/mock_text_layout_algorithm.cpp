@@ -30,19 +30,19 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     return SizeF(1.0f, 1.0f);
 }
 
-bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::string content)
+bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::string content, LayoutWrapper* layoutWrapper)
 {
     return true;
 }
 
-bool TextLayoutAlgorithm::CreateParagraphAndLayout(
-    const TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint)
+bool TextLayoutAlgorithm::CreateParagraphAndLayout(const TextStyle& textStyle, const std::string& content,
+    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
     return true;
 }
 
 bool TextLayoutAlgorithm::AdaptMinTextSize(TextStyle& textStyle, const std::string& content,
-    const LayoutConstraintF& contentConstraint, const RefPtr<PipelineContext>& pipeline)
+    const LayoutConstraintF& contentConstraint, const RefPtr<PipelineContext>& pipeline, LayoutWrapper* layoutWrapper)
 {
     return true;
 }
@@ -86,4 +86,6 @@ std::optional<TextStyle> TextLayoutAlgorithm::GetTextStyle() const
 {
     return std::optional<TextStyle>(TextStyle());
 }
+
+void TextLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper) {}
 } // namespace OHOS::Ace::NG

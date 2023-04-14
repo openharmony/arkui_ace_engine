@@ -62,9 +62,10 @@ void ContentModifierAdapter::Draw(RSDrawingContext& context) const
     // use dummy deleter avoid delete the SkCanvas by shared_ptr, its owned by context
     std::shared_ptr<SkCanvas> skCanvas { context.canvas, [](SkCanvas*) {} };
     RSCanvas canvas(&skCanvas);
-    CHECK_NULL_VOID_NOLOG(modifier_);
+    auto modifier = modifier_.Upgrade();
+    CHECK_NULL_VOID_NOLOG(modifier);
     DrawingContext context_ = { canvas, context.width, context.height };
-    modifier_->onDraw(context_);
+    modifier->onDraw(context_);
 }
 
 #define CONVERT_PROP(prop, srcType, propType)                                                 \
@@ -82,6 +83,7 @@ void ContentModifierAdapter::Draw(RSDrawingContext& context) const
         auto rsProp = std::make_shared<RSAnimatableProperty<propType>>(castProp->Get());      \
         castProp->SetUpCallbacks([rsProp]() -> propType { return rsProp->Get(); },            \
             [rsProp](const propType& value) { rsProp->Set(value); });                         \
+        rsProp->SetUpdateCallback(castProp->GetUpdateCallback());                             \
         return rsProp;                                                                        \
     }
 
@@ -107,8 +109,9 @@ inline std::shared_ptr<RSPropertyBase> ConvertToRSProperty(const RefPtr<Property
 
 void ContentModifierAdapter::AttachProperties()
 {
-    if (!attachedProperties_.size() && modifier_) {
-        for (const auto& property : modifier_->GetAttachedProperties()) {
+    auto modifier = modifier_.Upgrade();
+    if (!attachedProperties_.size() && modifier) {
+        for (const auto& property : modifier->GetAttachedProperties()) {
             auto rsProperty = ConvertToRSProperty(property);
             AttachProperty(rsProperty);
             attachedProperties_.emplace_back(rsProperty);
@@ -121,19 +124,30 @@ void OverlayModifierAdapter::Draw(RSDrawingContext& context) const
     // use dummy deleter avoid delete the SkCanvas by shared_ptr, its owned by context
     std::shared_ptr<SkCanvas> skCanvas { context.canvas, [](SkCanvas*) {} };
     RSCanvas canvas(&skCanvas);
-    CHECK_NULL_VOID_NOLOG(modifier_);
+    auto modifier = modifier_.Upgrade();
+    CHECK_NULL_VOID_NOLOG(modifier);
     DrawingContext context_ = { canvas, context.width, context.height };
-    modifier_->onDraw(context_);
+    modifier->onDraw(context_);
 }
 
 void OverlayModifierAdapter::AttachProperties()
 {
-    if (attachedProperties_.empty() && modifier_) {
-        for (const auto& property : modifier_->GetAttachedProperties()) {
+    auto modifier = modifier_.Upgrade();
+    if (attachedProperties_.empty() && modifier) {
+        for (const auto& property : modifier->GetAttachedProperties()) {
             auto rsProperty = ConvertToRSProperty(property);
             AttachProperty(rsProperty);
             attachedProperties_.emplace_back(rsProperty);
         }
+    }
+}
+
+void RSNodeModifierImpl::AddProperty(const RefPtr<PropertyBase>& property)
+{
+    if (!attachedProperty_) {
+        auto rsProperty = ConvertToRSProperty(property);
+        AttachProperty(rsProperty);
+        attachedProperty_ = rsProperty;
     }
 }
 } // namespace OHOS::Ace::NG

@@ -219,12 +219,8 @@ public:
 
     void AttachSubPipelineContext(const RefPtr<PipelineBase>& context);
 
-    void FlushReload() override
-    {
-        if (jsEngine_) {
-            jsEngine_->FlushReload();
-        }
-    }
+    void FlushReload() override;
+    void HotReload() override;
 
     RefPtr<Framework::FrontendDelegate> GetDelegate() const
     {

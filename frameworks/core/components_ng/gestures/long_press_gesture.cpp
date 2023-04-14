@@ -15,11 +15,8 @@
 
 #include "core/components_ng/gestures/long_press_gesture.h"
 
-#include "core/components_ng/gestures/recognizers/long_press_recognizer.h"
-
-#ifdef ENABLE_DRAG_FRAMEWORK
 #include "core/components_ng/event/gesture_event_hub.h"
-#endif
+#include "core/components_ng/gestures/recognizers/long_press_recognizer.h"
 
 namespace OHOS::Ace::NG {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,6 +35,7 @@ public:
     void SetTextAlign(TextAlign value) override;
     void SetTextOverflow(TextOverflow value) override;
     void SetMaxLines(uint32_t value) override;
+    void SetTextIndent(const Dimension& value) override;
     void SetLineHeight(const Dimension& value) override;
     void SetTextDecoration(TextDecoration value) override;
     void SetTextDecorationColor(const Color& value) override;

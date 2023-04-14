@@ -15,14 +15,33 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_water_flow_item.h"
 
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
-#include "frameworks/core/components_v2/water_flow/water_flow_item_component.h"
+#include "frameworks/bridge/declarative_frontend/jsview/models/water_flow_item_model_impl.h"
+#include "frameworks/core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
+
+namespace OHOS::Ace {
+std::unique_ptr<WaterFlowItemModel> WaterFlowItemModel::instance_ = nullptr;
+
+WaterFlowItemModel* WaterFlowItemModel::GetInstance()
+{
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance_.reset(new NG::WaterFlowItemModelNG());
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::WaterFlowItemModelNG());
+        } else {
+            instance_.reset(new Framework::WaterFlowItemModelImpl());
+        }
+#endif
+    }
+    return instance_.get();
+}
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 void JSWaterFlowItem::Create()
 {
-    auto itemComponent = AceType::MakeRefPtr<V2::WaterFlowItemComponent>();
-    ViewStackProcessor::GetInstance()->Push(itemComponent);
+    WaterFlowItemModel::GetInstance()->Create();
 }
 
 void JSWaterFlowItem::JSBind(BindingTarget globalObj)

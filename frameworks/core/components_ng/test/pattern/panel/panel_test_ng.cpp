@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/panel/sliding_panel_layout_algorithm.h"
 #include "core/components_ng/pattern/panel/sliding_panel_model_ng.h"
 #include "core/components_ng/pattern/panel/sliding_panel_pattern.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/ace_events.h"
 
 using namespace testing;
@@ -58,9 +59,12 @@ constexpr float FULL_HALF_BOUNDARY = 800.0f;
 constexpr float HALF_MINI_BOUNDARY = 200.0f;
 constexpr float TARGET_LOCATION = 480.0f;
 constexpr float DEFAULT_BLANK_HEIGHT_MODE_HALF = 568.0f;
+constexpr float DRAG_ICON_WIDTH = 64.0f;
+constexpr float DRAG_ICON_HEIGHT = 24.0f;
 
 const Offset START_POINT(START_X, START_Y);
 const SizeF CONTAINER_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
+const SizeF DRAGBAR_SIZE(DRAG_ICON_WIDTH, DRAG_ICON_HEIGHT);
 constexpr Color BACKGROUND_COLOR_VALUE = Color(0XFFFF0000);
 constexpr Color BORDER_COLOR = Color(0XFFDD0000);
 constexpr Dimension BORDER_WIDTH = 5.0_px;
@@ -892,6 +896,128 @@ HWTEST_F(PanelTestNg, PanelTestNg0016, TestSize.Level1)
     slidingPanelPattern->currentOffset_ = 110.0f;
     slidingPanelPattern->HandleDragEnd(static_cast<float>(endInfo.GetMainVelocity()));
     EXPECT_EQ(endInfo.GetMainVelocity(), MAIN_VELOCITY);
+}
+
+/**
+ * @tc.name: PanelTestNg0017
+ * @tc.desc: Test FireSizeChangeEvent and FireHeightChangeEvent function of slidingPanel without dragBar.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanelTestNg, PanelTestNg0017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create slidingPanel and frameNode.
+     */
+    SlidingPanelModelNG slidingPanelModelNG;
+    slidingPanelModelNG.Create(SLIDING_PANEL_SHOW);
+    slidingPanelModelNG.SetHasDragBar(SLIDING_PANEL_LAYOUT_PROPERTY_HAS_DRAG_BAR);
+    auto height_1 = HEIGHT_1;
+    auto onHeightChange = [&height_1](float isHeight) { height_1 = isHeight; };
+    slidingPanelModelNG.SetOnHeightChange(onHeightChange);
+
+    auto height_2 = HEIGHT_2;
+    PanelMode mode = PanelMode::MINI;
+    auto sizeChangeEvent = [&mode, &height_2](const BaseEventInfo* info) {
+        auto eventInfo = TypeInfoHelper::DynamicCast<SlidingPanelSizeChangeEvent>(info);
+        mode = eventInfo->GetMode();
+        height_2 = eventInfo->GetHeight();
+    };
+    slidingPanelModelNG.SetOnSizeChange(sizeChangeEvent);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get pattern and update frameNode.
+     * @tc.expected: related function is called.
+     */
+
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(CONTAINER_SIZE);
+    auto panelPattern = frameNode->GetPattern<SlidingPanelPattern>();
+    ASSERT_NE(panelPattern, nullptr);
+
+    panelPattern->currentOffset_ = CURRENT_OFFSET;
+    panelPattern->mode_ = PanelMode::HALF;
+    panelPattern->defaultBlankHeights_[panelPattern->mode_.value_or(PanelMode::HALF)] = DEFAULT_BLANK_HEIGHT_MODE_HALF;
+
+    /**
+     * @tc.steps: step3. call the event entry function.
+     * @tc.expected: check whether the value is correct.
+     */
+    panelPattern->FireHeightChangeEvent();
+    EXPECT_EQ(height_1, FULL_SCREEN_HEIGHT - CURRENT_OFFSET);
+    panelPattern->FireSizeChangeEvent();
+    EXPECT_EQ(mode, PanelMode::HALF);
+    EXPECT_EQ(height_2, FULL_SCREEN_HEIGHT - DEFAULT_BLANK_HEIGHT_MODE_HALF);
+}
+
+/**
+ * @tc.name: PanelTestNg0018
+ * @tc.desc: Test FireSizeChangeEvent and FireHeightChangeEvent function of slidingPanel with dragBar.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanelTestNg, PanelTestNg0018, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create slidingPanel and frameNode.
+     */
+    SlidingPanelModelNG slidingPanelModelNG;
+    slidingPanelModelNG.Create(SLIDING_PANEL_SHOW);
+    slidingPanelModelNG.SetHasDragBar(SLIDING_PANEL_HAS_DRAG_BAR_TRUE);
+    auto height_1 = HEIGHT_1;
+    auto onHeightChange = [&height_1](float isHeight) { height_1 = isHeight; };
+    slidingPanelModelNG.SetOnHeightChange(onHeightChange);
+
+    auto height_2 = HEIGHT_2;
+    PanelMode mode = PanelMode::MINI;
+    auto sizeChangeEvent = [&mode, &height_2](const BaseEventInfo* info) {
+        auto eventInfo = TypeInfoHelper::DynamicCast<SlidingPanelSizeChangeEvent>(info);
+        mode = eventInfo->GetMode();
+        height_2 = eventInfo->GetHeight();
+    };
+    slidingPanelModelNG.SetOnSizeChange(sizeChangeEvent);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto column = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(0));
+    ASSERT_NE(column, nullptr);
+    auto dragBarFrameNode = FrameNode::GetOrCreateFrameNode(V2::DRAG_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<DragBarPattern>(); });
+    dragBarFrameNode->MountToParent(column, 0);
+    dragBarFrameNode->MarkModifyDone();
+    auto dragBarNode = AceType::DynamicCast<FrameNode>(column->GetChildren().front());
+    ASSERT_NE(dragBarNode, nullptr);
+    EXPECT_EQ(dragBarFrameNode, dragBarNode);
+
+    /**
+     * @tc.steps: step2. get pattern and update frameNode.
+     * @tc.expected: related function is called.
+     */
+
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(CONTAINER_SIZE);
+
+    auto dragBarGeometryNode = dragBarNode->GetGeometryNode();
+    ASSERT_NE(dragBarGeometryNode, nullptr);
+    dragBarGeometryNode->SetFrameSize(DRAGBAR_SIZE);
+
+    auto panelPattern = frameNode->GetPattern<SlidingPanelPattern>();
+    ASSERT_NE(panelPattern, nullptr);
+
+    panelPattern->currentOffset_ = CURRENT_OFFSET;
+    panelPattern->mode_ = PanelMode::HALF;
+    panelPattern->defaultBlankHeights_[panelPattern->mode_.value_or(PanelMode::HALF)] = DEFAULT_BLANK_HEIGHT_MODE_HALF;
+
+    /**
+     * @tc.steps: step3. call the event entry function.
+     * @tc.expected: check whether the value is correct.
+     */
+    panelPattern->FireHeightChangeEvent();
+    EXPECT_EQ(height_1, FULL_SCREEN_HEIGHT - CURRENT_OFFSET - DRAG_ICON_HEIGHT);
+    panelPattern->FireSizeChangeEvent();
+    EXPECT_EQ(mode, PanelMode::HALF);
+    EXPECT_EQ(height_2, FULL_SCREEN_HEIGHT - DEFAULT_BLANK_HEIGHT_MODE_HALF - DRAG_ICON_HEIGHT);
 }
 
 } // namespace OHOS::Ace::NG

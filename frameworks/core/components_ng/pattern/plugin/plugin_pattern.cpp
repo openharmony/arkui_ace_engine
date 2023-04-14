@@ -208,12 +208,14 @@ void PluginPattern::CreatePluginSubContainer()
     PluginManager::GetInstance().AddPluginSubContainer(pluginSubContainerId_, pluginSubContainer_);
     PluginManager::GetInstance().AddPluginParentContainer(pluginSubContainerId_, parentcontainerId);
     pluginSubContainer_->Initialize();
-    pluginSubContainer_->SetPluginPattern(WeakClaim(this));
-    pluginSubContainer_->SetPluginNode(GetHost());
     auto weak = WeakClaim(this);
+    pluginSubContainer_->SetPluginPattern(weak);
     auto pattern = weak.Upgrade();
     auto host_ = pattern->GetHost();
     CHECK_NULL_VOID(host_);
+    pluginSubContainer_->SetPluginWindowId(GetHost()->GetId());
+    pluginSubContainer_->SetPluginNode(GetHost());
+
     auto uiTaskExecutor = SingleTaskExecutor::Make(host_->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
 
     int32_t instanceID = context->GetInstanceId();

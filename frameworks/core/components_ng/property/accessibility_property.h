@@ -165,11 +165,6 @@ public:
         return 0;
     }
 
-    virtual int32_t GetLiveRegion() const
-    {
-        return 0;
-    }
-
     virtual bool GetContentInvalid() const
     {
         return true;

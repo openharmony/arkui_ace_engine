@@ -236,7 +236,7 @@ void DeclarativeFrontend::AttachSubPipelineContext(const RefPtr<PipelineBase>& c
     if (!delegate_) {
         return;
     }
-    delegate_-> AttachSubPipelineContext(context);
+    delegate_->AttachSubPipelineContext(context);
 }
 
 void DeclarativeFrontend::SetAssetManager(const RefPtr<AssetManager>& assetManager)
@@ -881,6 +881,20 @@ void DeclarativeFrontend::OnSurfaceChanged(int32_t width, int32_t height)
 {
     if (delegate_) {
         delegate_->OnSurfaceChanged();
+    }
+}
+
+void DeclarativeFrontend::HotReload()
+{
+    auto manager = GetPageRouterManager();
+    CHECK_NULL_VOID(manager);
+    manager->FlushFrontend();
+}
+
+void DeclarativeFrontend::FlushReload()
+{
+    if (jsEngine_) {
+        jsEngine_->FlushReload();
     }
 }
 

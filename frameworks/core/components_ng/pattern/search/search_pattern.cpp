@@ -448,6 +448,7 @@ void SearchPattern::InitTouchEvent()
     CHECK_NULL_VOID(gesture);
     auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto searchPattern = weak.Upgrade();
+        CHECK_NULL_VOID(searchPattern);
         auto touchType = info.GetTouches().front().GetTouchType();
         auto touchLocalPosition = info.GetTouches().front().GetLocalLocation();
         auto touchPoint = PointF(touchLocalPosition.GetX(), touchLocalPosition.GetY());
@@ -835,7 +836,7 @@ void SearchPattern::ToJsonValueForSearchIcon(std::unique_ptr<JsonValue>& json) c
     CHECK_NULL_VOID(imageFrameNode);
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
-    auto searchIconJson = JsonUtil::Create(false);
+    auto searchIconJson = JsonUtil::Create(true);
 
     // icon size
     auto searchIconGeometryNode = imageFrameNode->GetGeometryNode();
@@ -869,7 +870,7 @@ void SearchPattern::ToJsonValueForCancelButton(std::unique_ptr<JsonValue>& json)
     CHECK_NULL_VOID(cancelImageFrameNode);
     auto cancelImageLayoutProperty = cancelImageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(cancelImageLayoutProperty);
-    auto cancelButtonJson = JsonUtil::Create(false);
+    auto cancelButtonJson = JsonUtil::Create(true);
 
     // style
     if (layoutProperty->GetCancelButtonStyle() == CancelButtonStyle::CONSTANT) {
@@ -880,7 +881,7 @@ void SearchPattern::ToJsonValueForCancelButton(std::unique_ptr<JsonValue>& json)
         cancelButtonJson->Put("style", "CancelButtonStyle.INPUT");
     }
 
-    auto cancelIconJson = JsonUtil::Create(false);
+    auto cancelIconJson = JsonUtil::Create(true);
 
     // icon size
     auto cancelIconGeometryNode = cancelImageFrameNode->GetGeometryNode();
@@ -913,7 +914,7 @@ void SearchPattern::ToJsonValueForSearchButtonOption(std::unique_ptr<JsonValue>&
     CHECK_NULL_VOID(searchButtonFrameNode);
     auto searchButtonLayoutProperty = searchButtonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(searchButtonLayoutProperty);
-    auto searchButtonJson = JsonUtil::Create(false);
+    auto searchButtonJson = JsonUtil::Create(true);
 
     // font size
     auto searchButtonFontSize = searchButtonLayoutProperty->GetFontSize().value_or(Dimension(0, DimensionUnit::VP));
@@ -933,7 +934,7 @@ void SearchPattern::ToJsonValueForCursor(std::unique_ptr<JsonValue>& json) const
     CHECK_NULL_VOID(textFieldFrameNode);
     auto textFieldPaintProperty = textFieldFrameNode->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(textFieldPaintProperty);
-    auto cursorJson = JsonUtil::Create(false);
+    auto cursorJson = JsonUtil::Create(true);
 
     // color
     auto caretColor = textFieldPaintProperty->GetCursorColor().value_or(Color());

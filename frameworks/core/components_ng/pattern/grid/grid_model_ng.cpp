@@ -162,7 +162,10 @@ void GridModelNG::SetSupportAnimation(bool value)
 
 void GridModelNG::SetSupportDragAnimation(bool value) {}
 
-void GridModelNG::SetEdgeEffect(EdgeEffect edgeEffect) {}
+void GridModelNG::SetEdgeEffect(EdgeEffect edgeEffect)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, EdgeEffect, edgeEffect);
+}
 
 void GridModelNG::SetOnScrollToIndex(ScrollToIndexFunc&& value)
 {

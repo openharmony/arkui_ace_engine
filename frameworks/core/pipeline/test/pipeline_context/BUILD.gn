@@ -15,7 +15,7 @@ import("//build/test.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 import("../../../../../build/uicast.gni")
 
-if (is_standard_system) {
+if (is_ohos_standard_system) {
   module_output_path = "ace_engine/graphicalbasicability/pipeline"
 } else {
   module_output_path = "ace_engine_full/graphicalbasicability/pipeline"
@@ -249,8 +249,8 @@ ohos_unittest("PipelineContextTest") {
 
   include_dirs += uicast_configs.uicast_root_include
 
-  if (!is_standard_system) {
-    aosp_deps = [ "shared_library:libcurl" ]
+  if (!is_ohos_standard_system) {
+    libs = [ "curl" ]
     external_deps = [
       "hilog:libhilog",
       "resmgr:resourcemanager",

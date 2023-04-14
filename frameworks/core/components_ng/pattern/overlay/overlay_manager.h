@@ -125,12 +125,33 @@ public:
         }
         return false;
     }
+
 #ifdef ENABLE_DRAG_FRAMEWORK
+    bool GetHasPixelMap()
+    {
+        return hasPixelMap_;
+    }
+
+    void SetHasPixelMap(bool hasPixelMap)
+    {
+        hasPixelMap_ = hasPixelMap;
+    }
+
+    bool GetHasFilter()
+    {
+        return hasFilter_;
+    }
+
+    void SetHasFilter(bool hasFilter)
+    {
+        hasFilter_ = hasFilter;
+    }
+
     void MountToRootNode(const RefPtr<FrameNode>& imageNode);
     void RemovePixelMap();
+    void RemovePixelMapAnimation(bool startDrag, double localX, double localY);
+    void UpdatePixelMapScale(float& scale);
     void RemoveFilter();
-    bool hasPixelMap {false};
-    bool hasFilter {false};
 #endif // ENABLE_DRAG_FRAMEWORK
     void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<RefPtr<UINode>()>&& buildNodeFunc, int32_t type, int32_t targetId);
@@ -156,14 +177,26 @@ private:
     void OpenDialogAnimation(const RefPtr<FrameNode>& node);
     void CloseDialogAnimation(const RefPtr<FrameNode>& node);
 
+    void AdaptToSafeArea(const RefPtr<FrameNode>& node);
+
+    void SaveLastModalNode();
+    void PlayDefaultModalTransition(const RefPtr<FrameNode>& modalNode, bool isTransitionIn);
+    void DefaultModalTransition(bool isTransitionIn);
+    void PlayAlphaModalTransition(const RefPtr<FrameNode>& modalNode, bool isTransitionIn);
+
     // Key: target Id, Value: PopupInfo
     std::unordered_map<int32_t, NG::PopupInfo> popupMap_;
     // K: target frameNode ID, V: menuNode
     std::unordered_map<int32_t, RefPtr<FrameNode>> menuMap_;
     std::unordered_map<int32_t, RefPtr<FrameNode>> customPopupMap_;
     std::stack<WeakPtr<FrameNode>> modalStack_;
+    WeakPtr<FrameNode> lastModalNode_;
     WeakPtr<UINode> rootNodeWeak_;
+#ifdef ENABLE_DRAG_FRAMEWORK
+    bool hasPixelMap_ {false};
+    bool hasFilter_ {false};
     WeakPtr<FrameNode> columnNodeWeak_;
+#endif // ENABLE_DRAG_FRAMEWORK
 
     std::function<void()> onHideMenuCallback_ = nullptr;
     CancelableCallback<void()> continuousTask_;

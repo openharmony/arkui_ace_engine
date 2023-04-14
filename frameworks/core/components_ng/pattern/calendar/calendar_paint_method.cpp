@@ -37,9 +37,13 @@ namespace OHOS::Ace::NG {
 namespace {
 
 const char ELLIPSIS[] = "...";
+constexpr int32_t DEFAULT_WEEKS = 5;
+constexpr int32_t TEXT_MAX_LENGTH = 3;
+constexpr int32_t TEXT_END_INDEX = 2;
+constexpr int32_t WEEK_TEXT_END_INDEX = 3;
 constexpr double WEEKEND_TRANSPARENT = 0x7D;
 
-std::unique_ptr<RSParagraph> GetTextParagraph(const std::string& text, const rosen::TextStyle& textStyle)
+std::unique_ptr<RSParagraph> GetTextParagraph(const std::string& text, const RSTextStyle& textStyle)
 {
     RSParagraphStyle style;
     auto fontCollection = RSFontCollection::GetInstance(false);
@@ -56,8 +60,8 @@ void DrawCalendarText(
     // The lunar calendar description is truncated by more than three characters.
     std::string newText { text };
     auto wText = StringUtils::ToWstring(text);
-    if (wText.size() > 3) {
-        wText = wText.substr(0, 2);
+    if (wText.size() > TEXT_MAX_LENGTH) {
+        wText = wText.substr(0, TEXT_END_INDEX);
         newText = StringUtils::ToString(wText);
         newText += ELLIPSIS;
     }
@@ -117,8 +121,15 @@ void CalendarPaintMethod::DrawWeekAndDates(RSCanvas& canvas, Offset offset)
         int32_t dateNumber = 0;
         double dailyRowSpace = 0.0;
         double dayNumberStartY = topPadding_ + weekHeight_ + weekAndDayRowSpace_;
-        // five line calendar
-        dailyRowSpace = dailyFiveRowSpace_;
+
+        // Set the rowCount.
+        if (totalWeek != 0) {
+            rowCount_ = (static_cast<int32_t>(calendarDays_.size()) / totalWeek);
+        }
+
+        // Set dailyFiveRowSpace_ for five line calendar.
+        // Set dailySixRowSpace_ for six line calendar.
+        dailyRowSpace = rowCount_ == DEFAULT_WEEKS ? dailyFiveRowSpace_ : dailySixRowSpace_;
         for (int32_t row = 0; row < rowCount_; row++) {
             double y = row * (dayHeight_ + dailyRowSpace) + dayNumberStartY;
             for (uint32_t column = 0; column < totalWeek; column++) {
@@ -135,8 +146,8 @@ void CalendarPaintMethod::DrawWeekAndDates(RSCanvas& canvas, Offset offset)
 void CalendarPaintMethod::DrawCalendar(
     RSCanvas& canvas, const Offset& offset, const Offset& dayOffset, const CalendarDay& day)
 {
-    rosen::TextStyle dateTextStyle;
-    rosen::TextStyle lunarTextStyle;
+    RSTextStyle dateTextStyle;
+    RSTextStyle lunarTextStyle;
     InitTextStyle(dateTextStyle, lunarTextStyle);
     dateTextStyle.locale_ = Localization::GetInstance()->GetFontLocale();
     lunarTextStyle.locale_ = Localization::GetInstance()->GetFontLocale();
@@ -181,7 +192,7 @@ void CalendarPaintMethod::DrawTodayArea(RSCanvas& canvas, const Offset& offset, 
     Offset circleCenter = Offset(x - (focusedAreaRadius_ * 2 - dayWidth_) / 2 + focusedAreaRadius_,
         y - (1.0_vp).ConvertToPx() + focusedAreaRadius_);
     Offset bgCircleStart = offset + circleCenter;
-    canvas.DrawCircle(rosen::Point(static_cast<float>(bgCircleStart.GetX()), static_cast<float>(bgCircleStart.GetY())),
+    canvas.DrawCircle(RSPoint(static_cast<float>(bgCircleStart.GetX()), static_cast<float>(bgCircleStart.GetY())),
         static_cast<float>(focusedAreaRadius_));
 }
 
@@ -196,21 +207,21 @@ void CalendarPaintMethod::DrawFocusedArea(RSCanvas& canvas, const Offset& offset
     Offset circleCenter = Offset(x - (focusedAreaRadius_ * 2 - dayWidth_) / 2 + focusedAreaRadius_,
         y - (1.0_vp).ConvertToPx() + focusedAreaRadius_);
     Offset bgCircleStart = offset + circleCenter;
-    canvas.DrawCircle(rosen::Point(static_cast<float>(bgCircleStart.GetX()), static_cast<float>(bgCircleStart.GetY())),
+    canvas.DrawCircle(RSPoint(static_cast<float>(bgCircleStart.GetX()), static_cast<float>(bgCircleStart.GetY())),
         static_cast<float>(focusedAreaRadius_));
 }
 
-void CalendarPaintMethod::InitTextStyle(rosen::TextStyle& dateTextStyle, rosen::TextStyle& lunarTextStyle)
+void CalendarPaintMethod::InitTextStyle(RSTextStyle& dateTextStyle, RSTextStyle& lunarTextStyle)
 {
     dateTextStyle.fontSize_ = dayFontSize_;
-    dateTextStyle.fontWeight_ = static_cast<rosen::FontWeight>(dayFontWeight_);
+    dateTextStyle.fontWeight_ = static_cast<RSFontWeight>(dayFontWeight_);
 
     lunarTextStyle.fontSize_ = lunarDayFontSize_;
-    lunarTextStyle.fontWeight_ = static_cast<rosen::FontWeight>(lunarDayFontWeight_);
+    lunarTextStyle.fontWeight_ = static_cast<RSFontWeight>(lunarDayFontWeight_);
 }
 
 void CalendarPaintMethod::SetDayTextStyle(
-    rosen::TextStyle& dateTextStyle, rosen::TextStyle& lunarTextStyle, const CalendarDay& day)
+    RSTextStyle& dateTextStyle, RSTextStyle& lunarTextStyle, const CalendarDay& day)
 {
     // Set the noncurrent month style and current month style.
     if (day.month.month != currentMonth_.month) {
@@ -218,27 +229,31 @@ void CalendarPaintMethod::SetDayTextStyle(
         lunarTextStyle.color_ = day.markLunarDay ? RSColor(markLunarColor_.GetRed(), markLunarColor_.GetGreen(),
             markLunarColor_.GetBlue(), WEEKEND_TRANSPARENT) : nonCurrentMonthLunarColor_;
     } else {
-        dateTextStyle.color_ = IsToday(day) ? focusedDayColor_ : IsOffDay(day) ? weekendDayColor_ : dayColor_;
+        dateTextStyle.color_ = (IsToday(day) && day.focused) ? focusedDayColor_
+                               : IsToday(day)                ? todayDayColor_
+                               : IsOffDay(day)               ? weekendDayColor_
+                                                             : dayColor_;
         lunarTextStyle.color_ =
-            IsToday(day) ? focusedLunarColor_
-                         : (day.markLunarDay ? markLunarColor_ : (IsOffDay(day) ? weekendLunarColor_ : lunarColor_));
+            (IsToday(day) && day.focused) ? focusedLunarColor_
+            : IsToday(day)                ? todayLunarColor_
+                           : (day.markLunarDay ? markLunarColor_ : (IsOffDay(day) ? weekendLunarColor_ : lunarColor_));
     }
 }
 
 void CalendarPaintMethod::PaintDay(
-    RSCanvas& canvas, const Offset& offset, const CalendarDay& day, rosen::TextStyle& textStyle) const
+    RSCanvas& canvas, const Offset& offset, const CalendarDay& day, RSTextStyle& textStyle) const
 {
     // paint day
     Rect boxRect { offset.GetX(), offset.GetY(), dayWidth_, gregorianCalendarHeight_ };
     Rect textRect;
-    rosen::TextStyle workStateStyle;
+    RSTextStyle workStateStyle;
 
     auto dayStr = std::to_string(day.day);
     dayStr = Localization::GetInstance()->NumberFormat(day.day);
     DrawCalendarText(&canvas, dayStr, textStyle, boxRect, textRect);
 
     if (!day.dayMark.empty() && showHoliday_) {
-        workStateStyle.fontWeight_ = static_cast<rosen::FontWeight>(workStateFontWeight_);
+        workStateStyle.fontWeight_ = static_cast<RSFontWeight>(workStateFontWeight_);
         workStateStyle.locale_ = Localization::GetInstance()->GetFontLocale();
         boxRect = { textRect.GetOffset().GetX() + textRect.Width() - workStateHorizontalMovingDistance_,
             textRect.GetOffset().GetY() + textRect.Height() - workStateVerticalMovingDistance_, workStateWidth_,
@@ -273,7 +288,7 @@ void CalendarPaintMethod::PaintDay(
 }
 
 void CalendarPaintMethod::PaintLunarDay(
-    RSCanvas& canvas, const Offset& offset, const CalendarDay& day, const rosen::TextStyle& textStyle) const
+    RSCanvas& canvas, const Offset& offset, const CalendarDay& day, const RSTextStyle& textStyle) const
 {
     Rect boxRect = { offset.GetX(), offset.GetY(), dayWidth_, lunarHeight_ };
     DrawCalendarText(&canvas, day.lunarDay, textStyle, boxRect);
@@ -282,7 +297,7 @@ void CalendarPaintMethod::PaintLunarDay(
 void CalendarPaintMethod::DrawWeek(RSCanvas& canvas, const Offset& offset) const
 {
     uint32_t totalWeek = weekNumbers_.size();
-    rosen::TextStyle weekTextStyle;
+    RSTextStyle weekTextStyle;
     weekTextStyle.color_ = weekColor_;
     weekTextStyle.fontSize_ = weekFontSize_;
     weekTextStyle.locale_ = Localization::GetInstance()->GetFontLocale();
@@ -296,8 +311,8 @@ void CalendarPaintMethod::DrawWeek(RSCanvas& canvas, const Offset& offset) const
         Rect boxRect { weekNumberOffset.GetX(), weekNumberOffset.GetY(), weekWidth_, weekHeight_ };
         std::string newText { weekNumbers_[(startDayOfWeek + 1) % daysOfWeek] };
         auto wText = StringUtils::ToWstring(newText);
-        if (wText.size() > 3) {
-            wText = wText.substr(0, 3);
+        if (wText.size() > TEXT_MAX_LENGTH) {
+            wText = wText.substr(0, WEEK_TEXT_END_INDEX);
             newText = StringUtils::ToString(wText);
         }
         DrawCalendarText(&canvas, newText, weekTextStyle, boxRect);
@@ -383,6 +398,10 @@ void CalendarPaintMethod::SetCalendarTheme(const RefPtr<CalendarPaintProperty>& 
     dailyFiveRowSpace_ = paintProperty->GetDailyFiveRowSpaceValue({}).ConvertToPx() <= 0
                              ? theme->GetCalendarTheme().dailyFiveRowSpace.ConvertToPx()
                              : paintProperty->GetDailyFiveRowSpaceValue({}).ConvertToPx();
+
+    dailySixRowSpace_ = paintProperty->GetDailySixRowSpaceValue({}).ConvertToPx() <= 0
+                            ? theme->GetCalendarTheme().dailySixRowSpace.ConvertToPx()
+                            : paintProperty->GetDailySixRowSpaceValue({}).ConvertToPx();
 
     gregorianCalendarHeight_ = paintProperty->GetGregorianCalendarHeightValue({}).ConvertToPx() <= 0
                                    ? theme->GetCalendarTheme().gregorianCalendarHeight.ConvertToPx()

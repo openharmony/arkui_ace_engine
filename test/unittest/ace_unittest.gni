@@ -15,23 +15,18 @@ import("//build/ohos.gni")
 import("//build/test.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
-# ======================= common constants =================================================================
-ace_mock = "//foundation/arkui/ace_engine/test/mock"
+pattern_test_output_path = "ace_engine/components"
+gestures_test_output_path = "ace_engine/gestures"
+event_test_output_path = "ace_engine/evnets"
+base_test_outout_path = "ace_engine/infrastrues"
+syntax_test_output_path = "ace_engine/syntaxs"
+image_test_output_path = "ace_engine/image"
+basic_test_output_path = "ace_engine/basic"
+manager_test_output_path = "ace_engine/manager"
+interface_test_output_path = "ace_engine/interfaces"
+accessibility_test_output_path = "ace_engine/accessibility"
+property_test_output_path = "ace_engine/property"
 
-# ======================= unittest cases output directory ==================================================
-pattern_test_output_path = "ace_engine/NewFrameworkBackendComponents"
-gestures_test_output_path = "ace_engine/NewFrameworkBackendGestures"
-event_test_output_path = "ace_engine/NewFrameworkBackendEvent"
-base_test_outout_path = "ace_engine/NewFrameworkInfrastructure"
-syntax_test_output_path = "ace_engine/NewFrameworkSyntaxNodes"
-image_test_output_path = "ace_engine/NewFrameworkImageResourceLoading"
-basic_test_output_path = "ace_engine/FrameworkBasicAbility"
-manager_test_output_path = "ace_engine/NewFrameworkManager"
-gestures_test_out_path = "ace_engine/NewFrameworkGestures"
-interface_test_output_path = "ace_engine/FrameworkInterfaces"
-accessibility_test_output_path = "ace_engine/FrameworkAccessibility"
-
-# ======================== common template =================================================================
 test_pattern_sources = [
   # base
   "$ace_root/frameworks/base/geometry/dimension.cpp",
@@ -108,18 +103,119 @@ test_pattern_sources = [
   "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_base.cpp",
 ]
 
-test_pattern_deps = [
-  "$ace_root/frameworks/base:ace_memory_monitor_ohos",
-  "$ace_root/frameworks/core/components/theme:build_theme_code",
-  "$ace_root/test/unittest:ace_unittest_log",
-  "$cjson_root:cjson_static",
-  "//third_party/googletest:gmock_main",
-]
+template("ace_unittest") {
+  forward_variables_from(invoker, "*")
 
-test_base_deps = [
-  "$ace_root/test/unittest:ace_unittest_log",
-  "$cjson_root:cjson_static",
-  "//third_party/googletest:gmock_main",
-]
+  type = "components"
+  ace_animation = false
+  flutter_skia = false
+  ace_unittest_out_path = "ace_engine/$type"
+  ace_unittest_name = target_name
+  ace_unittest_config = [ "$ace_root/test/unittest:ace_unittest_config" ]
 
-test_configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
+  ace_unittest_deps = [
+    "$ace_root/frameworks/base:ace_memory_monitor_ohos",
+    "$ace_root/test/unittest:ace_unittest_log",
+    "$ace_root/test/unittest:ace_unittest_trace",
+    "//third_party/googletest:gmock_main",
+  ]
+
+  ace_mock_sources = [
+    "$ace_root/frameworks/base/test/mock/mock_drag_window.cpp",
+    "$ace_root/frameworks/base/test/mock/mock_ressched_report.cpp",
+    "$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
+    "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
+    "$ace_root/frameworks/core/components_ng/test/event/scrollable_event/mock_scrollable.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/base/mock_localization.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_cache.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_loading_context.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_source_info.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/render/mock_animation_utils.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/render/mock_modifier_adapter.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_context_creator.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_surface_creator.cpp",
+    "$ace_root/frameworks/core/components_ng/test/pattern/text/mock/mock_text_layout_adapter.cpp",
+    "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_element_register.cpp",
+    "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_base.cpp",
+    "$ace_root/test/mock/core/common/mock_container.cpp",
+    "$ace_root/test/mock/core/render/mock_font_collection.cpp",
+    "$ace_root/test/mock/core/render/mock_paragraph.cpp",
+  ]
+
+  if (defined(invoker.ace_log)) {
+    ace_log = invoker.ace_log
+  }
+
+  if (defined(invoker.type)) {
+    type = invoker.type
+    ace_unittest_out_path = "ace_engine/$type"
+  }
+
+  if (defined(invoker.ace_animation)) {
+    ace_animation = invoker.ace_animation
+  }
+
+  if (ace_animation) {
+    ace_unittest_deps += [ "$ace_root/test/unittest:ace_core_animation" ]
+  }
+
+  if (defined(invoker.flutter_skia)) {
+    flutter_skia = invoker.flutter_skia
+  }
+
+  if (flutter_skia) {
+    ace_unittest_deps += [
+      "$ace_flutter_engine_root:third_party_flutter_engine_ohos",
+      "$ace_flutter_engine_root/skia:ace_skia_ohos",
+    ]
+  }
+
+  if (defined(invoker.extra_deps)) {
+    ace_unittest_deps += invoker.extra_deps
+  }
+
+  if (type == "components") {
+    ohos_unittest(ace_unittest_name) {
+      module_out_path = ace_unittest_out_path
+      sources = []
+      sources += invoker.sources
+      sources += ace_mock_sources
+
+      deps = ace_unittest_deps
+      deps += [
+        "$ace_root/frameworks/core/components/theme:build_theme_code",
+        "$ace_root/test/unittest:ace_base",
+        "$ace_root/test/unittest:ace_components_base",
+        "$ace_root/test/unittest:ace_components_event",
+        "$ace_root/test/unittest:ace_components_extra",
+        "$ace_root/test/unittest:ace_components_gestures",
+        "$ace_root/test/unittest:ace_components_layout",
+        "$ace_root/test/unittest:ace_components_property",
+        "$ace_root/test/unittest:ace_components_render",
+        "$ace_root/test/unittest:ace_components_syntax",
+      ]
+
+      configs = ace_unittest_config
+
+      if (defined(invoker.configs)) {
+        configs += invoker.configs
+      }
+
+      if (defined(invoker.external_deps)) {
+        external_deps = []
+        external_deps += invoker.external_deps
+      }
+    }
+  } else if (type == "events") {
+  } else if (type == "gestures") {
+  } else if (type == "base") {
+  } else if (type == "basic") {
+  } else if (type == "syntax") {
+  } else if (type == "image") {
+  } else if (type == "manager") {
+  } else if (type == "interface") {
+  } else if (type == "accessibility") {
+  } else {
+    assert(false)
+  }
+}

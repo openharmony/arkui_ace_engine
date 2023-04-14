@@ -71,18 +71,33 @@ bool ImageProvider::PrepareImageData(const RefPtr<ImageObject>& imageObj)
     return true;
 }
 
+RefPtr<ImageObject> ImageProvider::QueryThumbnailCache(const ImageSourceInfo& src)
+{
+    // query thumbnail from cache
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto cache = pipeline->GetImageCache();
+    CHECK_NULL_RETURN(cache, nullptr);
+    auto data = DynamicCast<PixmapCachedData>(cache->GetCacheImageData(src.GetKey()));
+    if (data) {
+        LOGD("thumbnail cache found %{public}s", src.GetSrc().c_str());
+        return PixelMapImageObject::Create(src, MakeRefPtr<ImageData>(data->pixmap_));
+    }
+    return nullptr;
+}
+
 RefPtr<ImageObject> ImageProvider::QueryImageObjectFromCache(const ImageSourceInfo& src)
 {
-    if (!src.IsSupportCache()) {
+    if (src.GetSrcType() == SrcType::DATA_ABILITY_DECODED) {
+        return QueryThumbnailCache(src);
+    }
+    if (!src.SupportObjCache()) {
         return nullptr;
     }
     auto pipelineCtx = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineCtx, nullptr);
     auto imageCache = pipelineCtx->GetImageCache();
-    if (!imageCache) {
-        LOGD("No image cache %{private}s.", src.ToString().c_str());
-        return nullptr;
-    }
+    CHECK_NULL_RETURN(imageCache, nullptr);
     RefPtr<ImageObject> imageObj = imageCache->GetCacheImgObjNG(src.GetKey());
     if (imageObj) {
         LOGD("imageObj found in cache %{private}s", src.ToString().c_str());

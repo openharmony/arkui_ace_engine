@@ -58,7 +58,7 @@ public:
         onLoad_ = std::move(onLoad);
     }
 
-    void SetOnOnCache(FormCacheCallback&& onCache)
+    void SetOnCache(FormCacheCallback&& onCache)
     {
         onCache_ = std::move(onCache);
     }

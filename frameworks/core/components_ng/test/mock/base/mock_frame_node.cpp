@@ -240,4 +240,9 @@ bool FrameNode::MarkRemoving()
 {
     return false;
 }
+
+RefPtr<FrameNode> FrameNode::FindChildByPosition(float x, float y)
+{
+    return nullptr;
+}
 } // namespace OHOS::Ace::NG
