@@ -16,7 +16,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_sliding_panel.h"
 
 #include <algorithm>
-#include <cstdint>
 #include <iterator>
 
 #include "base/log/ace_scoring_log.h"
@@ -323,7 +322,7 @@ void JSSlidingPanel::SetPanelMode(const JSCallbackInfo& info)
         LOGE("The info is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    int32_t mode = static_cast<int32_t>(DEFAULT_PANELTYPE);
+    int32_t mode = static_cast<int32_t>(DEFAULT_PANELMODE);
     if (info[0]->IsNumber()) {
         int32_t mode_number = info[0]->ToNumber<int32_t>();
         if (mode_number >= 0 && mode_number < static_cast<int32_t>(PANEL_MODES.size())) {
@@ -339,7 +338,7 @@ void JSSlidingPanel::SetPanelType(const JSCallbackInfo& info)
         LOGE("The info is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    int32_t type = static_cast<int32_t>(DEFAULT_PANELMODE);
+    int32_t type = static_cast<int32_t>(DEFAULT_PANELTYPE);
     if (info[0]->IsNumber()) {
         int32_t type_number = info[0]->ToNumber<int32_t>();
         if (type_number >= 0 && type_number < static_cast<int32_t>(PANEL_TYPES.size())) {
