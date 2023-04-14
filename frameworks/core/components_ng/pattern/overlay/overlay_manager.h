@@ -147,11 +147,38 @@ public:
         hasFilter_ = hasFilter;
     }
 
-    void MountToRootNode(const RefPtr<FrameNode>& imageNode);
+    bool GetHasEvent()
+    {
+        return hasEvent_;
+    }
+
+    void SetHasEvent(bool hasEvent)
+    {
+        hasEvent_ = hasEvent;
+    }
+
+    bool GetIsOnAnimation()
+    {
+        return isOnAnimation_;
+    }
+
+    void SetIsOnAnimation(bool isOnAnimation)
+    {
+        isOnAnimation_ = isOnAnimation;
+    }
+
+    void SetFilterColumnNode(const RefPtr<FrameNode>& columnNode)
+    {
+        filterColumnNodeWeak_ = columnNode;
+    }
+
+    void MountPixelmapToRootNode(const RefPtr<FrameNode>& columnNode);
+    void MountEventToRootNode(const RefPtr<FrameNode>& columnNode);
     void RemovePixelMap();
-    void RemovePixelMapAnimation(bool startDrag, double localX, double localY);
+    void RemovePixelMapAnimation(bool startDrag, double x, double y);
     void UpdatePixelMapScale(float& scale);
     void RemoveFilter();
+    void RemoveEventColumn();
 #endif // ENABLE_DRAG_FRAMEWORK
     void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<RefPtr<UINode>()>&& buildNodeFunc, int32_t type, int32_t targetId);
@@ -195,7 +222,11 @@ private:
 #ifdef ENABLE_DRAG_FRAMEWORK
     bool hasPixelMap_ {false};
     bool hasFilter_ {false};
-    WeakPtr<FrameNode> columnNodeWeak_;
+    bool hasEvent_ {false};
+    bool isOnAnimation_ {false};
+    WeakPtr<FrameNode> pixelmapColumnNodeWeak_;
+    WeakPtr<FrameNode> filterColumnNodeWeak_;
+    WeakPtr<FrameNode> eventColumnNodeWeak_;
 #endif // ENABLE_DRAG_FRAMEWORK
 
     std::function<void()> onHideMenuCallback_ = nullptr;

@@ -55,8 +55,12 @@ void DragDropProxy::OnDragMove(const GestureEvent& info)
     CHECK_NULL_VOID(manager);
     CHECK_NULL_VOID(manager->CheckDragDropProxy(id_));
 
+#ifdef ENABLE_DRAG_FRAMEWORK
+    std::string extraInfo = manager->GetExtraInfo();
+#else
     std::string extraInfo;
     manager->GetExtraInfoFromClipboard(extraInfo);
+#endif // ENABLE_DRAG_FRAMEWORK
 
     manager->OnDragMove(
         static_cast<float>(info.GetGlobalPoint().GetX()), static_cast<float>(info.GetGlobalPoint().GetY()), extraInfo);
