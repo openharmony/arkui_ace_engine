@@ -16,9 +16,6 @@
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components_ng/render/adapter/rosen_render_surface.h"
 #endif
-#ifdef FLUTTER_2_5
-#include "core/components_ng/render/adapter/flutter_render_surface.h"
-#endif
 #include "core/components_ng/render/render_surface.h"
 
 namespace OHOS::Ace::NG {
@@ -27,12 +24,10 @@ RefPtr<RenderSurface> RenderSurface::Create()
     if (SystemProperties::GetRosenBackendEnabled()) {
 #if defined(OHOS_PLATFORM) && defined(ENABLE_ROSEN_BACKEND)
         return MakeRefPtr<RosenRenderSurface>();
+#else
+        return MakeRefPtr<RenderSurface>();
 #endif
     }
-#ifdef FLUTTER_2_5
-    return MakeRefPtr<FlutterRenderSurface>();
-#else
-    return nullptr;
-#endif
+    return MakeRefPtr<RenderSurface>();
 }
 } // namespace OHOS::Ace::NG

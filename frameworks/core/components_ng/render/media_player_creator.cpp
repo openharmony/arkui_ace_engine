@@ -16,9 +16,6 @@
 #if defined(ENABLE_ROSEN_BACKEND) && defined(OHOS_PLATFORM)
 #include "core/components_ng/render/adapter/rosen_media_player.h"
 #endif
-#ifdef FLUTTER_2_5
-#include "core/components_ng/render/adapter/flutter_media_player.h"
-#endif
 #include "core/components_ng/render/media_player.h"
 
 namespace OHOS::Ace::NG {
@@ -29,14 +26,10 @@ RefPtr<MediaPlayer> MediaPlayer::Create()
 #if defined(OHOS_PLATFORM)
         return MakeRefPtr<RosenMediaPlayer>();
 #else
-        return nullptr;
+        return MakeRefPtr<MediaPlayer>();
 #endif
 #endif
     }
-#ifdef FLUTTER_2_5
-    return MakeRefPtr<FlutterMediaPlayer>();
-#else
-    return nullptr;
-#endif
+    return MakeRefPtr<MediaPlayer>();
 }
 } // namespace OHOS::Ace::NG
