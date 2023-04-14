@@ -32,6 +32,7 @@ public:
 
     void Draw(RSDrawingContext& context) const override
     {
+        LOGD("BorderImage draw");
         std::shared_ptr<SkCanvas> skCanvas { context.canvas, [](SkCanvas* /*unused*/) {} };
         RSCanvas rsCanvas(&skCanvas);
         CHECK_NULL_VOID(paintTask_);
