@@ -29,7 +29,11 @@ void MenuLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("fontSize", GetFontSize().value_or(defaultFontSize).ToString().c_str());
     auto defaultFontColor = theme ? theme->GetMenuFontColor() : Color::BLACK;
     json->Put("fontColor", GetFontColor().value_or(defaultFontColor).ColorToString().c_str());
-    json->Put("fontWeight", V2::ConvertWrapFontWeightToStirng(GetFontWeight().value_or(FontWeight::REGULAR)).c_str());
+    auto fontJsonObject = JsonUtil::Create(true);
+    fontJsonObject->Put("size", GetFontSize().value_or(defaultFontSize).ToString().c_str());
+    fontJsonObject->Put("weight",
+        V2::ConvertWrapFontWeightToStirng(GetFontWeight().value_or(FontWeight::REGULAR)).c_str());
+    json->Put("font", fontJsonObject);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto menuPattern = host->GetPattern<MenuPattern>();
