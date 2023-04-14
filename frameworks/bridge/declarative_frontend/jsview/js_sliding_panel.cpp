@@ -297,7 +297,7 @@ void JSSlidingPanel::SetOnHeightChange(const JSCallbackInfo& args)
 void JSSlidingPanel::SetHasDragBar(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
+        LOGE("The info is wrong, it is supposed to have at least 1 argument");
         return;
     }
     if (info[0]->IsBoolean()) {
@@ -314,7 +314,7 @@ void JSSlidingPanel::SetShow(bool isShow)
 void JSSlidingPanel::SetPanelMode(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
+        LOGE("The info is wrong, it is supposed to have at least 1 argument");
         return;
     }
     if (info[0]->IsNumber()) {
@@ -330,7 +330,7 @@ void JSSlidingPanel::SetPanelMode(const JSCallbackInfo& info)
 void JSSlidingPanel::SetPanelType(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
+        LOGE("The info is wrong, it is supposed to have at least 1 argument");
         return;
     }
     if (info[0]->IsNumber()) {
