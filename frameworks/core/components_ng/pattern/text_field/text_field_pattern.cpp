@@ -920,7 +920,6 @@ void TextFieldPattern::AdjustTextSelectionRectOffsetX()
         }
     }
     textRect_.SetLeft(textRect_.GetX() + dx);
-    return;
 }
 
 void TextFieldPattern::HandleExtendAction(int32_t action)

@@ -76,10 +76,10 @@ void CheckBoxGroupPattern::OnModifyDone()
     CHECK_NULL_VOID(layoutProperty);
     if (!layoutProperty->GetMarginProperty()) {
         MarginProperty margin;
-        margin.left = CalcLength(checkBoxTheme->GetHotZoneHorizontalPadding().Value());
-        margin.right = CalcLength(checkBoxTheme->GetHotZoneHorizontalPadding().Value());
-        margin.top = CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().Value());
-        margin.bottom = CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().Value());
+        margin.left = CalcLength(checkBoxTheme->GetHotZoneHorizontalPadding().ConvertToPx());
+        margin.right = CalcLength(checkBoxTheme->GetHotZoneHorizontalPadding().ConvertToPx());
+        margin.top = CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().ConvertToPx());
+        margin.bottom = CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().ConvertToPx());
         layoutProperty->UpdateMargin(margin);
     }
     hotZoneHorizontalPadding_ = checkBoxTheme->GetHotZoneHorizontalPadding();
