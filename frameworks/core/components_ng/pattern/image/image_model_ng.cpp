@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/image/image_model_ng.h"
 
 #include "core/components/common/layout/constants.h"
+#include "core/components/image/image_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #ifndef ACE_UNITTEST
 #include "core/components_ng/base/view_abstract.h"
@@ -49,6 +50,12 @@ void ImageModelNG::Create(const std::string& src, bool noPixMap, RefPtr<PixelMap
         V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
     stack->Push(frameNode);
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, createSourceInfoFunc());
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<ImageTheme>();
+    CHECK_NULL_VOID(theme);
+    SetDraggable(theme->GetDraggable());
 }
 
 void ImageModelNG::SetAlt(const std::string& src)
@@ -160,15 +167,12 @@ void ImageModelNG::SetColorFilterMatrix(const std::vector<float>& matrix)
 
 void ImageModelNG::SetDraggable(bool draggable)
 {
-    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>();
-    CHECK_NULL_VOID(pattern);
-    if (draggable && !pattern->IsDraggable()) {
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    if (draggable && !frameNode->IsDraggable()) {
         auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
         gestureHub->InitDragDropEvent();
     }
-    pattern->SetDraggable(draggable);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     frameNode->SetDraggable(draggable);
 }

@@ -19,9 +19,6 @@
 
 #include "base/log/dump_log.h"
 #include "base/utils/utils.h"
-#if !defined(ACE_UNITTEST)
-#include "core/common/ace_engine_ext.h"
-#endif
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
@@ -35,6 +32,8 @@
 #include "image.h"
 #include "unified_data.h"
 #include "unified_record.h"
+
+#include "core/common/ace_engine_ext.h"
 #endif
 
 namespace OHOS::Ace::NG {
@@ -151,7 +150,7 @@ void ImagePattern::OnImageLoadSuccess()
 
     SetImagePaintConfig(image_, srcRect_, dstRect_, loadingCtx_->GetSourceInfo().IsSvg());
     PrepareAnimation();
-    if (draggable_) {
+    if (host->IsDraggable()) {
         EnableDrag();
     }
     // clear alt data
@@ -470,10 +469,8 @@ void ImagePattern::EnableDrag()
         auto ctx = ctxWk.Upgrade();
         CHECK_NULL_RETURN(image && ctx, info);
 
-#if !defined(ACE_UNITTEST)
-        AceEngineExt::GetInstance().DragStartExt();
-#endif
 #ifdef ENABLE_DRAG_FRAMEWORK
+        AceEngineExt::GetInstance().DragStartExt();
         if (ctx->GetSourceInfo().IsPixmap()) {
             LOGI("ImagePattern default dragStart image source is pixelmap");
         } else {
@@ -609,8 +606,6 @@ void ImagePattern::HandleCopy()
 
 void ImagePattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
-    json->Put("draggable", draggable_ ? "true" : "false");
-
     static const char* COPY_OPTIONS[] = { "CopyOptions.None", "CopyOptions.InApp", "CopyOptions.Local",
         "CopyOptions.Distributed" };
     json->Put("copyOption", COPY_OPTIONS[static_cast<int32_t>(copyOption_)]);

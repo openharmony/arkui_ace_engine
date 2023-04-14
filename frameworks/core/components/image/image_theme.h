@@ -62,6 +62,7 @@ public:
                 return;
             }
             theme->fillColor_ = pattern->GetAttr<Color>("fill_color", Color());
+            theme->draggable_ = pattern->GetAttr<int32_t>("draggable", 0);
         }
     };
 
@@ -72,11 +73,17 @@ public:
         return fillColor_;
     }
 
+    bool GetDraggable() const
+    {
+        return draggable_;
+    }
+
 protected:
     ImageTheme() = default;
 
 private:
     Color fillColor_;
+    bool draggable_ = false;
 };
 
 } // namespace OHOS::Ace

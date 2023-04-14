@@ -220,15 +220,16 @@ HWTEST_F(ImageTestNg, ImagePatternModifyDone001, TestSize.Level1)
  */
 HWTEST_F(ImageTestNg, UpdateInternalResource001, TestSize.Level1)
 {
-    // create mock theme manager
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<IconTheme>()));
     auto frameNode = ImageTestNg::CreateImageNode("", ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
     ASSERT_NE(imagePattern, nullptr);
+
+    // create mock theme manager
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<IconTheme>()));
     /**
     //     case1 : imageSource is not internal resource, and it can not load correct resource Icon.
     */
@@ -249,6 +250,8 @@ HWTEST_F(ImageTestNg, UpdateInternalResource001, TestSize.Level1)
     sourceInfo.SetResourceId(InternalResource::ResourceId::PLAY_SVG);
     imagePattern->UpdateInternalResource(sourceInfo);
     EXPECT_EQ(imageLayoutProperty->GetImageSourceInfo()->GetSrc(), RESOURCE_URL);
+
+    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -1310,9 +1313,9 @@ HWTEST_F(ImageTestNg, Drag001, TestSize.Level1)
     auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    frameNode->SetDraggable(true);
     frameNode->MarkModifyDone();
     auto pattern = frameNode->GetPattern<ImagePattern>();
-    pattern->SetDraggable(true);
     pattern->loadingCtx_->SuccessCallback(nullptr);
 
     // emulate drag event

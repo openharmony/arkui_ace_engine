@@ -78,14 +78,6 @@ public:
     void OnVisibleChange(bool isVisible) override;
 
     void EnableDrag();
-    void SetDraggable(bool draggable)
-    {
-        draggable_ = draggable;
-    }
-    bool IsDraggable() const
-    {
-        return draggable_;
-    }
 
     void SetCopyOption(CopyOptions value)
     {
@@ -139,7 +131,6 @@ private:
 
     CopyOptions copyOption_ = CopyOptions::None;
     bool syncLoad_ = false;
-    bool draggable_ = false;
     bool isShow_ = true; // TODO: remove it later when use [isActive_] to determine image data management
 
     RefPtr<ImageLoadingContext> loadingCtx_;
