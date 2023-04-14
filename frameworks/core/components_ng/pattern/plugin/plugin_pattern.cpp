@@ -271,7 +271,7 @@ std::unique_ptr<DrawDelegate> PluginPattern::GetDrawDelegate()
                 node->SetBackgroundColor(Color::TRANSPARENT.GetValue());
             }
             rsNode->AddChild(node, -1);
-            host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         });
 #endif
     return drawDelegate;
