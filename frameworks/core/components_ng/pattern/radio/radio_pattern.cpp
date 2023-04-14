@@ -72,10 +72,10 @@ void RadioPattern::OnModifyDone()
     auto layoutProperty = host->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     MarginProperty margin;
-    margin.left = CalcLength(radioTheme->GetHotZoneHorizontalPadding().Value());
-    margin.right = CalcLength(radioTheme->GetHotZoneHorizontalPadding().Value());
-    margin.top = CalcLength(radioTheme->GetHotZoneVerticalPadding().Value());
-    margin.bottom = CalcLength(radioTheme->GetHotZoneVerticalPadding().Value());
+    margin.left = CalcLength(radioTheme->GetHotZoneHorizontalPadding().ConvertToPx());
+    margin.right = CalcLength(radioTheme->GetHotZoneHorizontalPadding().ConvertToPx());
+    margin.top = CalcLength(radioTheme->GetHotZoneVerticalPadding().ConvertToPx());
+    margin.bottom = CalcLength(radioTheme->GetHotZoneVerticalPadding().ConvertToPx());
     auto& setMargin = layoutProperty->GetMarginProperty();
     if (setMargin) {
         if (setMargin->left.has_value()) {

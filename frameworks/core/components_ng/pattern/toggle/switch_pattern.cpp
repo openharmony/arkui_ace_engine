@@ -80,10 +80,10 @@ void SwitchPattern::OnModifyDone()
     auto layoutProperty = host->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     MarginProperty margin;
-    margin.left = CalcLength(switchTheme->GetHotZoneHorizontalPadding().Value());
-    margin.right = CalcLength(switchTheme->GetHotZoneHorizontalPadding().Value());
-    margin.top = CalcLength(switchTheme->GetHotZoneVerticalPadding().Value());
-    margin.bottom = CalcLength(switchTheme->GetHotZoneVerticalPadding().Value());
+    margin.left = CalcLength(switchTheme->GetHotZoneHorizontalPadding().ConvertToPx());
+    margin.right = CalcLength(switchTheme->GetHotZoneHorizontalPadding().ConvertToPx());
+    margin.top = CalcLength(switchTheme->GetHotZoneVerticalPadding().ConvertToPx());
+    margin.bottom = CalcLength(switchTheme->GetHotZoneVerticalPadding().ConvertToPx());
     auto& setMargin = layoutProperty->GetMarginProperty();
     if (setMargin) {
         if (setMargin->left.has_value()) {

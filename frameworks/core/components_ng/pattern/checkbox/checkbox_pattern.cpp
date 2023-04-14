@@ -51,10 +51,10 @@ void CheckBoxPattern::OnModifyDone()
     auto layoutProperty = host->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     MarginProperty margin;
-    margin.left = CalcLength(checkBoxTheme->GetHotZoneHorizontalPadding().Value());
-    margin.right = CalcLength(checkBoxTheme->GetHotZoneHorizontalPadding().Value());
-    margin.top = CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().Value());
-    margin.bottom = CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().Value());
+    margin.left = CalcLength(checkBoxTheme->GetHotZoneHorizontalPadding().ConvertToPx());
+    margin.right = CalcLength(checkBoxTheme->GetHotZoneHorizontalPadding().ConvertToPx());
+    margin.top = CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().ConvertToPx());
+    margin.bottom = CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().ConvertToPx());
     auto& setMargin = layoutProperty->GetMarginProperty();
     if (setMargin) {
         if (setMargin->left.has_value()) {
