@@ -1504,4 +1504,31 @@ RefPtr<FrameNode> FrameNode::FindChildByPosition(float x, float y)
 
     return hitFrameNodes.rbegin()->second;
 }
+
+void FrameNode::CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
+    const std::function<void(float)>& onCallbackEvent)
+{
+    auto context = GetRenderContext();
+    CHECK_NULL_VOID(context);
+    auto iter = nodeAnimatablePropertyMap_.find(propertyName);
+    if (iter != nodeAnimatablePropertyMap_.end()) {
+        LOGW("AnimatableProperty already exists!");
+        return;
+    }
+    auto property = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(value, std::move(onCallbackEvent));
+    context->AttachNodeAnimatableProperty(property);
+    nodeAnimatablePropertyMap_.emplace(propertyName, property);
+}
+
+void FrameNode::UpdateAnimatablePropertyFloat(const std::string& propertyName, float value)
+{
+    auto iter = nodeAnimatablePropertyMap_.find(propertyName);
+    if (iter == nodeAnimatablePropertyMap_.end()) {
+        LOGW("AnimatableProperty not exists!");
+        return;
+    }
+    auto property = AceType::DynamicCast<NodeAnimatablePropertyFloat>(iter->second);
+    CHECK_NULL_VOID(property);
+    property->Set(value);
+}
 } // namespace OHOS::Ace::NG

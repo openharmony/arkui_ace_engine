@@ -184,6 +184,10 @@ public:
     void SetForegroundColor(const Color& color) override {}
     void SetForegroundColorStrategy(const ForegroundColorStrategy& strategy) override {}
     void SetAllowDrop(const std::set<std::string>& allowDrop) override {}
+
+    void CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
+        const std::function<void(float)>& onCallbackEvent) override {};
+    void UpdateAnimatablePropertyFloat(const std::string& propertyName, float value) override {};
 };
 
 } // namespace OHOS::Ace::Framework
