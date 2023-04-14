@@ -294,9 +294,16 @@ void JSSlidingPanel::SetOnHeightChange(const JSCallbackInfo& args)
     args.ReturnSelf();
 }
 
-void JSSlidingPanel::SetHasDragBar(bool hasDragBar)
+void JSSlidingPanel::SetHasDragBar(const JSCallbackInfo& info)
 {
-    SlidingPanelModel::GetInstance()->SetHasDragBar(hasDragBar);
+    if (info.Length() < 1) {
+        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    if (info[0]->IsBoolean()) {
+        bool hasDragBar = info[0]->ToBoolean();
+        SlidingPanelModel::GetInstance()->SetHasDragBar(hasDragBar);
+    }
 }
 
 void JSSlidingPanel::SetShow(bool isShow)
@@ -304,22 +311,36 @@ void JSSlidingPanel::SetShow(bool isShow)
     SlidingPanelModel::GetInstance()->SetIsShow(isShow);
 }
 
-void JSSlidingPanel::SetPanelMode(int32_t mode)
+void JSSlidingPanel::SetPanelMode(const JSCallbackInfo& info)
 {
-    if (mode < 0 || mode >= static_cast<int32_t>(PANEL_MODES.size())) {
+    if (info.Length() < 1) {
+        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
+    if (info[0]->IsNumber()) {
+        int32_t mode = info[0]->ToNumber<int32_t>();
+        if (mode < 0 || mode >= static_cast<int32_t>(PANEL_MODES.size())) {
+            return;
+        }
 
-    SlidingPanelModel::GetInstance()->SetPanelMode(PANEL_MODES[mode]);
+        SlidingPanelModel::GetInstance()->SetPanelMode(PANEL_MODES[mode]);
+    }
 }
 
-void JSSlidingPanel::SetPanelType(int32_t type)
+void JSSlidingPanel::SetPanelType(const JSCallbackInfo& info)
 {
-    if (type < 0 || type >= static_cast<int32_t>(PANEL_TYPES.size())) {
+    if (info.Length() < 1) {
+        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
+    if (info[0]->IsNumber()) {
+        int32_t type = info[0]->ToNumber<int32_t>();
+        if (type < 0 || type >= static_cast<int32_t>(PANEL_TYPES.size())) {
+            return;
+        }
 
-    SlidingPanelModel::GetInstance()->SetPanelType(PANEL_TYPES[type]);
+        SlidingPanelModel::GetInstance()->SetPanelType(PANEL_TYPES[type]);
+    }
 }
 
 void JSSlidingPanel::SetMiniHeight(const JSCallbackInfo& info)
