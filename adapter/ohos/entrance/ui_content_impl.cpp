@@ -1227,7 +1227,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
 
     Platform::AceViewOhos::SurfaceChanged(aceView, 0, 0, deviceHeight >= deviceWidth ? 0 : 1);
     auto pipeline = container->GetPipelineContext();
-    if (pipeline) {
+    if (pipeline && window_) {
         auto rsConfig = window_->GetKeyboardAnimationConfig();
         KeyboardAnimationConfig config = { rsConfig.curveType_, rsConfig.curveParams_, rsConfig.durationIn_,
             rsConfig.durationOut_ };
@@ -1449,7 +1449,9 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
             if (pipelineContext) {
                 pipelineContext->SetDisplayWindowRectInfo(
                     Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())));
-                pipelineContext->SetIsLayoutFullScreen(rsWindow->IsLayoutFullScreen());
+                if (rsWindow) {
+                    pipelineContext->SetIsLayoutFullScreen(rsWindow->IsLayoutFullScreen());
+                }
             }
             auto aceView = static_cast<Platform::AceViewOhos*>(container->GetAceView());
             CHECK_NULL_VOID(aceView);
