@@ -17,6 +17,7 @@
 
 #include "include/core/SkClipOp.h"
 #include "include/core/SkMaskFilter.h"
+#include "include/core/SkRRect.h"
 
 #include "core/components/align/render_align.h"
 #include "core/components/common/painter/rosen_universal_painter.h"

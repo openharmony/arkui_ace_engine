@@ -637,6 +637,7 @@ bool RenderBubble::HandleMouseEvent(const MouseEvent& event)
     return true;
 }
 
+#ifndef NEW_SKIA
 void RenderBubble::BuildCornerPath(SkPath& path, Placement placement, double radius)
 {
     switch (placement) {
@@ -660,6 +661,31 @@ void RenderBubble::BuildCornerPath(SkPath& path, Placement placement, double rad
             break;
     }
 }
+#else
+void RenderBubble::BuildCornerPath(SkPath& path, Placement placement, double radius)
+{
+    switch (placement) {
+        case Placement::TOP_LEFT:
+            path.arcTo(radius, radius, 0.0f, SkPath::ArcSize::kSmall_ArcSize, SkPathDirection::kCW,
+                childOffset_.GetX() + radius, childOffset_.GetY());
+            break;
+        case Placement::TOP_RIGHT:
+            path.arcTo(radius, radius, 0.0f, SkPath::ArcSize::kSmall_ArcSize, SkPathDirection::kCW,
+                childOffset_.GetX() + childSize_.Width(), childOffset_.GetY() + radius);
+            break;
+        case Placement::BOTTOM_RIGHT:
+            path.arcTo(radius, radius, 0.0f, SkPath::ArcSize::kSmall_ArcSize, SkPathDirection::kCW,
+                childOffset_.GetX() + childSize_.Width() - radius, childOffset_.GetY() + childSize_.Height());
+            break;
+        case Placement::BOTTOM_LEFT:
+            path.arcTo(radius, radius, 0.0f, SkPath::ArcSize::kSmall_ArcSize, SkPathDirection::kCW,
+                childOffset_.GetX(), childOffset_.GetY() + childSize_.Height() - radius);
+            break;
+        default:
+            break;
+    }
+}
+#endif
 
 void RenderBubble::BuildTopLinePath(SkPath& path, double arrowOffset, double radius)
 {

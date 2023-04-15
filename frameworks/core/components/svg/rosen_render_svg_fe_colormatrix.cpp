@@ -16,6 +16,8 @@
 #include "frameworks/core/components/svg/rosen_render_svg_fe_colormatrix.h"
 
 #include "include/effects/SkColorFilterImageFilter.h"
+#include "include/core/SkColorFilter.h"
+#include "include/effects/SkImageFilters.h"
 
 namespace OHOS::Ace {
 
@@ -26,7 +28,11 @@ void RosenRenderSvgFeColorMatrix::OnAsImageFilter(sk_sp<SkImageFilter>& imageFil
 #else
     auto colorFilter = SkColorFilters::Matrix(matrix_);
 #endif
+#ifndef NEW_SKIA
     imageFilter = SkColorFilterImageFilter::Make(colorFilter, imageFilter);
+#else
+    imageFilter = SkImageFilters::ColorFilter(colorFilter, imageFilter);
+#endif
 }
 
 } // namespace OHOS::Ace

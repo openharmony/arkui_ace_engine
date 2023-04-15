@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
+#ifndef NEW_SKIA
 #include "flutter_render_image.h"
+#endif
 #include "render_image.h"
 #include "rosen_render_image.h"
 
@@ -27,7 +29,11 @@ RefPtr<RenderNode> RenderImage::Create()
         return nullptr;
 #endif
     } else {
+#ifndef NEW_SKIA
         return AceType::MakeRefPtr<FlutterRenderImage>();
+#else
+        return nullptr;
+#endif
     }
 }
 } // namespace OHOS::Ace

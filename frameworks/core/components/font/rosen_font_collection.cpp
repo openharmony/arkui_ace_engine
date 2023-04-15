@@ -18,7 +18,6 @@
 #include "txt/src/minikin/FontFamily.h"
 #include "txt/src/minikin/FontLanguageListCache.h"
 #include "include/core/SkTypeface.h"
-
 #include "base/i18n/localization.h"
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"
