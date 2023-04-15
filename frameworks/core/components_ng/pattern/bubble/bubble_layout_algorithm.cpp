@@ -21,6 +21,7 @@
 #include "base/geometry/ng/point_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/device_config.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
@@ -161,6 +162,17 @@ void BubbleLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         auto buttonRow = columnChild.back();
         buttonRowSize_ = buttonRow->GetGeometryNode()->GetMarginFrameSize();
         buttonRowOffset_ = buttonRow->GetGeometryNode()->GetMarginFrameOffset() + childOffset_;
+    }
+    if (bubbleProp->GetShowInSubWindowValue(false)) {
+        std::vector<Rect> rects;
+        if (!bubbleProp->GetBlockEventValue(true)) {
+            auto rect = Rect(childOffset_.GetX(), childOffset_.GetY(), childSize_.Width(), childSize_.Height());
+            rects.emplace_back(rect);
+        } else {
+            auto rect = Rect(0.0f, 0.0f, selfSize_.Width(), selfSize_.Height());
+            rects.emplace_back(rect);
+        }
+        SubwindowManager::GetInstance()->SetHotAreas(rects);
     }
 }
 
@@ -486,20 +498,25 @@ void BubbleLayoutAlgorithm::InitTargetSizeAndPosition(const RefPtr<BubbleLayoutP
     auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL &&
                             pipelineContext->GetWindowManager()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
     targetOffset_ = targetNode->GetPaintRectOffset();
-    if (isContainerModal) {
-        auto newOffsetX = targetOffset_.GetX() - static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx()) -
-                          static_cast<float>(CONTENT_PADDING.ConvertToPx());
-        auto newOffsetY = targetOffset_.GetY() - static_cast<float>(CONTAINER_TITLE_HEIGHT.ConvertToPx());
-        targetOffset_.SetX(newOffsetX);
-        targetOffset_.SetY(newOffsetY);
-    }
     // Show in SubWindow
     if (showInSubWindow) {
         auto overlayManager = pipelineContext->GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
         auto displayWindowOffset = layoutProp->GetDisplayWindowOffset().value_or(OffsetF());
         targetOffset_ += displayWindowOffset;
+        auto currentSubwindow = SubwindowManager::GetInstance()->GetCurrentWindow();
+        if (currentSubwindow) {
+            auto subwindowRect = currentSubwindow->GetRect();
+            targetOffset_ -= subwindowRect.GetOffset();
+        }
         auto popupInfo = overlayManager->GetPopupInfo(targetNodeId_);
+    } else if (isContainerModal) {
+        // popup not show in subwindow need minus container modal.
+        auto newOffsetX = targetOffset_.GetX() - static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx()) -
+                          static_cast<float>(CONTENT_PADDING.ConvertToPx());
+        auto newOffsetY = targetOffset_.GetY() - static_cast<float>(CONTAINER_TITLE_HEIGHT.ConvertToPx());
+        targetOffset_.SetX(newOffsetX);
+        targetOffset_.SetY(newOffsetY);
     }
 }
 

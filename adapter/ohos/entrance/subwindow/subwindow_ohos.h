@@ -34,6 +34,7 @@
 #include "core/components/tween/tween_component.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
+#include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Rosen {
@@ -53,6 +54,7 @@ public:
 
     void InitContainer() override;
     void ResizeWindow() override;
+    NG::RectF GetRect() override;
     void ShowMenu(const RefPtr<Component>& newComponent) override;
     void ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t targetId, const NG::OffsetF& offset) override;
     void HideMenuNG(int32_t targetId) override;
@@ -124,6 +126,8 @@ private:
         std::function<void(int32_t, int32_t)>&& callback);
     void ShowActionMenuForService(const std::string& title, const std::vector<ButtonInfo>& button,
         std::function<void(int32_t, int32_t)>&& callback);
+
+    RefPtr<PipelineBase> GetChildPipelineContext() const;
 
 #ifdef ENABLE_DRAG_FRAMEWORK
     void HideFilter();

@@ -21,6 +21,7 @@
 #include "window.h"
 
 #include "adapter/ohos/entrance/ace_application_info.h"
+#include "base/geometry/rect.h"
 #include "core/components/root/root_element.h"
 #if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
 #include "adapter/ohos/entrance/ace_rosen_sync_task.h"
@@ -48,6 +49,9 @@
 #include "frameworks/bridge/declarative_frontend/declarative_frontend.h"
 
 namespace OHOS::Ace {
+namespace {
+const Rect MIN_WINDOW_HOT_AREA = Rect(0.0f, 0.0f, 1.0f, 1.0f);
+} // namespace
 
 int32_t SubwindowOhos::id_ = 0;
 static std::atomic<int32_t> gToastDialogId = 0;
@@ -87,7 +91,7 @@ void SubwindowOhos::InitContainer()
             windowOption->SetParentId(parentWindowId);
         }
         windowOption->SetWindowRect({ 0, 0, defaultDisplay->GetWidth(), defaultDisplay->GetHeight() });
-        windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
+        windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FULLSCREEN);
         window_ = OHOS::Rosen::Window::Create(
             "ARK_APP_SUBWINDOW_" + parentWindowName + std::to_string(windowId_), windowOption);
         CHECK_NULL_VOID(window_);
@@ -161,12 +165,53 @@ void SubwindowOhos::InitContainer()
     subPipelineContext->SetupSubRootElement();
 }
 
+RefPtr<PipelineBase> SubwindowOhos::GetChildPipelineContext() const
+{
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    CHECK_NULL_RETURN(aceContainer, nullptr);
+    return aceContainer->GetPipelineContext();
+}
+
 void SubwindowOhos::ResizeWindow()
 {
     LOGI("SubwindowOhos::ResizeWindow");
     auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
     CHECK_NULL_VOID(defaultDisplay);
-    window_->Resize(defaultDisplay->GetWidth(), defaultDisplay->GetHeight());
+    auto pipeline = GetChildPipelineContext();
+    CHECK_NULL_VOID(pipeline);
+    SafeAreaEdgeInserts safeArea = pipeline->GetCurrentViewSafeArea();
+
+    if (safeArea.leftRect_.IsValid() && safeArea.topRect_.IsValid()) {
+        auto retMove = window_->MoveTo(static_cast<int32_t>(window_->GetRect().posX_ + safeArea.leftRect_.Right()),
+            static_cast<int32_t>(window_->GetRect().posY_ + safeArea.topRect_.Bottom()));
+        if (retMove != Rosen::WMError::WM_OK) {
+            LOGE("Move window failed with errCode: %{public}d", static_cast<int32_t>(retMove));
+            return;
+        }
+    }
+
+    if (safeArea.leftRect_.IsValid() && safeArea.topRect_.IsValid() && safeArea.rightRect_.IsValid() &&
+        safeArea.bottomRect_.IsValid()) {
+        auto retResize = window_->Resize(window_->GetRect().width_ - static_cast<int32_t>(safeArea.leftRect_.Width()) -
+                                             static_cast<int32_t>(safeArea.rightRect_.Width()),
+            window_->GetRect().height_ - static_cast<int32_t>(safeArea.topRect_.Height()) -
+                static_cast<int32_t>(safeArea.bottomRect_.Height()));
+        if (retResize != Rosen::WMError::WM_OK) {
+            LOGE("Resize window failed with errCode: %{public}d", static_cast<int32_t>(retResize));
+            return;
+        }
+    }
+    LOGI("SubwindowOhos window rect is resized to x: %{public}d, y: %{public}d, width: %{public}u, height: %{public}u",
+        window_->GetRect().posX_, window_->GetRect().posY_, window_->GetRect().width_, window_->GetRect().height_);
+}
+
+NG::RectF SubwindowOhos::GetRect()
+{
+    NG::RectF rect;
+    CHECK_NULL_RETURN(window_, rect);
+    rect.SetRect(
+        window_->GetRect().posX_, window_->GetRect().posY_, window_->GetRect().width_, window_->GetRect().height_);
+    return rect;
 }
 
 void SubwindowOhos::ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent)
@@ -206,6 +251,7 @@ void SubwindowOhos::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     ShowWindow();
+    ResizeWindow();
     overlayManager->UpdatePopupNode(targetId, popupInfo);
 }
 
@@ -264,11 +310,10 @@ void SubwindowOhos::ShowWindow()
 {
     LOGI("Show the subwindow");
     CHECK_NULL_VOID(window_);
-
-    auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
-    CHECK_NULL_VOID(defaultDisplay);
-    window_->Resize(defaultDisplay->GetWidth(), defaultDisplay->GetHeight());
-
+    // Set min window hot area so that sub window can transparent event.
+    std::vector<Rect> rects;
+    rects.emplace_back(MIN_WINDOW_HOT_AREA);
+    SetHotAreas(rects);
     OHOS::Rosen::WMError ret = window_->Show();
 
     if (ret != OHOS::Rosen::WMError::WM_OK) {
@@ -283,8 +328,8 @@ void SubwindowOhos::ShowWindow()
 
 void SubwindowOhos::HideWindow()
 {
-    LOGI("Hide the subwindow");
     CHECK_NULL_VOID(window_);
+    LOGI("Hide the subwindow %{public}s", window_->GetWindowName().c_str());
 
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_VOID(aceContainer);
@@ -363,6 +408,7 @@ void SubwindowOhos::ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t tar
     auto overlay = context->GetOverlayManager();
     CHECK_NULL_VOID(overlay);
     ShowWindow();
+    ResizeWindow();
     overlay->ShowMenuInSubWindow(targetId, offset, menuNode);
 }
 

@@ -38,6 +38,7 @@ public:
         value->propShowInSubWindow_ = CloneShowInSubWindow();
         value->propDisplayWindowOffset_ = CloneDisplayWindowOffset();
         value->propTargetSpace_ = CloneTargetSpace();
+        value->propBlockEvent_ = CloneBlockEvent();
         return value;
     }
 
@@ -50,6 +51,7 @@ public:
         ResetShowInSubWindow();
         ResetDisplayWindowOffset();
         ResetTargetSpace();
+        ResetBlockEvent();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EnableArrow, bool, PROPERTY_UPDATE_MEASURE);
@@ -58,6 +60,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowInSubWindow, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DisplayWindowOffset, OffsetF, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TargetSpace, Dimension, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BlockEvent, bool, PROPERTY_UPDATE_MEASURE);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(BubbleLayoutProperty);

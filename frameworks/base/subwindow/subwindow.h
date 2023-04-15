@@ -18,6 +18,7 @@
 
 #include <set>
 
+#include "base/geometry/ng/rect_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components/dialog/dialog_properties.h"
@@ -35,6 +36,7 @@ public:
 
     virtual void InitContainer() = 0;
     virtual void ResizeWindow() = 0;
+    virtual NG::RectF GetRect() = 0;
     virtual void ShowMenu(const RefPtr<Component>& newComponent) = 0;
     virtual void ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t targetId, const NG::OffsetF& offset) = 0;
     virtual void HideMenuNG(int32_t targetId) = 0;
