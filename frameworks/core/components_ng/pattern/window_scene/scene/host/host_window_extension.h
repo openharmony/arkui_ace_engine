@@ -41,6 +41,8 @@ protected:
         return false;
     }
 
+    void OnConnect() override;
+
     void RequestExtensionSessionActivation();
     void RequestExtensionSessionBackground();
     void RequestExtensionSessionDestruction();

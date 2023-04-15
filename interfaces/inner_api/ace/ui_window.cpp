@@ -21,9 +21,9 @@ namespace OHOS::Ace::NG {
 
 using CreateRootSceneFunc = std::shared_ptr<UIWindow>* (*)();
 using CreateWindowSceneFunc = std::shared_ptr<UIWindow>* (*)(const std::shared_ptr<AbilityRuntime::Context>&,
-    const sptr<Rosen::ISession>&, const std::shared_ptr<Rosen::RSSurfaceNode>&);
+    const sptr<Rosen::ISession>&);
 using CreateWindowExtensionFunc = std::shared_ptr<UIWindow>* (*)(const std::shared_ptr<AbilityRuntime::Context>&,
-    const sptr<Rosen::ISession>&, const std::shared_ptr<Rosen::RSSurfaceNode>&);
+    const sptr<Rosen::ISession>&);
 constexpr char CREATE_ROOT_SCENE_FUNC[] = "OHOS_ACE_CreateRootScene";
 constexpr char CREATE_WINDOW_SCENE_FUNC[] = "OHOS_ACE_CreateWindowScene";
 constexpr char CREATE_WINDOW_EXTENSION_FUNC[] = "OHOS_ACE_CreateWindowExtension";
@@ -52,7 +52,7 @@ std::shared_ptr<UIWindow> UIWindow::CreateRootScene()
 }
 
 std::shared_ptr<UIWindow> UIWindow::CreateWindowScene(const std::shared_ptr<AbilityRuntime::Context>& context,
-    const sptr<Rosen::ISession>& iSession, const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode)
+    const sptr<Rosen::ISession>& iSession)
 {
     void* handle = dlopen("libace.z.so", RTLD_LAZY);
     if (handle == nullptr) {
@@ -65,7 +65,7 @@ std::shared_ptr<UIWindow> UIWindow::CreateWindowScene(const std::shared_ptr<Abil
         return nullptr;
     }
 
-    auto uiWindowPtr = entry(context, iSession, surfaceNode);
+    auto uiWindowPtr = entry(context, iSession);
     if (uiWindowPtr == nullptr) {
         return nullptr;
     }
@@ -76,7 +76,7 @@ std::shared_ptr<UIWindow> UIWindow::CreateWindowScene(const std::shared_ptr<Abil
 }
 
 std::shared_ptr<UIWindow> UIWindow::CreateWindowExtension(const std::shared_ptr<AbilityRuntime::Context>& context,
-    const sptr<Rosen::ISession>& iSession, const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode)
+    const sptr<Rosen::ISession>& iSession)
 {
     void* handle = dlopen("libace.z.so", RTLD_LAZY);
     if (handle == nullptr) {
@@ -89,7 +89,7 @@ std::shared_ptr<UIWindow> UIWindow::CreateWindowExtension(const std::shared_ptr<
         return nullptr;
     }
 
-    auto uiWindowPtr = entry(context, iSession, surfaceNode);
+    auto uiWindowPtr = entry(context, iSession);
     if (uiWindowPtr == nullptr) {
         return nullptr;
     }

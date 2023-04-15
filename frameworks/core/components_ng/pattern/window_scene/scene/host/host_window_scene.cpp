@@ -22,30 +22,6 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-class LifecycleListener : public Rosen::ILifecycleListener {
-public:
-    explicit LifecycleListener(const WeakPtr<HostWindowScene>& hostWindowScene)
-        : hostWindowScene_(hostWindowScene) {}
-    virtual ~LifecycleListener() = default;
-
-    void OnForeground() override
-    {
-        auto hostWindowScene = hostWindowScene_.Upgrade();
-        CHECK_NULL_VOID(hostWindowScene);
-        hostWindowScene->OnForeground();
-    }
-
-    void OnBackground() override
-    {
-        auto hostWindowScene = hostWindowScene_.Upgrade();
-        CHECK_NULL_VOID(hostWindowScene);
-        hostWindowScene->OnBackground();
-    }
-
-private:
-    WeakPtr<HostWindowScene> hostWindowScene_;
-};
-
 HostWindowScene::HostWindowScene(const sptr<Rosen::Session>& session)
 {
     session_ = session;
@@ -55,19 +31,6 @@ HostWindowScene::HostWindowScene(const sptr<Rosen::Session>& session)
 HostWindowScene::~HostWindowScene()
 {
     UnregisterLifecycleListener();
-}
-
-void HostWindowScene::RegisterLifecycleListener()
-{
-    CHECK_NULL_VOID(session_);
-    lifecycleListener_ = std::make_shared<LifecycleListener>(WeakClaim(this));
-    session_->RegisterLifecycleListener(lifecycleListener_);
-}
-
-void HostWindowScene::UnregisterLifecycleListener()
-{
-    CHECK_NULL_VOID(session_);
-    session_->UnregisterLifecycleListener(lifecycleListener_);
 }
 
 void HostWindowScene::UpdateSession(const sptr<Rosen::Session>& session)

@@ -194,8 +194,8 @@ protected:
     uint64_t lastRequestVsyncTime_ = 0;
 
     // window properties
-    std::string windowName_ = "window";
-    uint32_t windowId_ = 100;
+    std::string windowName_;
+    uint32_t windowId_ = 0;
     Rect windowRect_;
 
 private:

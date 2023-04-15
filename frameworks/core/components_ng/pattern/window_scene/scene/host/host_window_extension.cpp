@@ -42,12 +42,24 @@ HostWindowExtension::HostWindowExtension(const std::string& bundleName, const st
         .callerToken_ = callerToken,
     };
     session_ = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSession(extensionSessionInfo);
+    RegisterLifecycleListener();
     RequestExtensionSessionActivation();
 }
 
 HostWindowExtension::~HostWindowExtension()
 {
+    UnregisterLifecycleListener();
     RequestExtensionSessionDestruction();
+}
+
+void HostWindowExtension::OnConnect()
+{
+    HostWindowPattern::OnConnect();
+
+    CHECK_NULL_VOID(session_);
+    auto surfaceNode = session_->GetSurfaceNode();
+    CHECK_NULL_VOID(surfaceNode);
+    surfaceNode->CreateNodeInRenderThread();
 }
 
 void HostWindowExtension::OnWindowShow()

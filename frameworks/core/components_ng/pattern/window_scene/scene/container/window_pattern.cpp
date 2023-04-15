@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/window_scene/scene/container/window_pattern.h"
 
+#include "ability_context.h"
+
 #include "base/utils/time_util.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
@@ -104,10 +106,17 @@ private:
 };
 } // namespace
 
-WindowPattern::WindowPattern(
-    const std::shared_ptr<AbilityRuntime::Context>& context, const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode)
-    : surfaceNode_(surfaceNode), context_(context)
-{}
+WindowPattern::WindowPattern(const std::shared_ptr<AbilityRuntime::Context>& context)
+    : context_(context)
+{
+    ACE_DCHECK(context_);
+
+    auto name = context_->GetBundleName();
+    auto pos = name.find_last_of('.');
+    name = (pos == std::string::npos) ? name : name.substr(pos + 1); // skip '.'
+    windowName_ = name + std::to_string(windowId_);
+    surfaceNode_ = CreateSurfaceNode(windowName_);
+}
 
 void WindowPattern::Init()
 {
@@ -156,6 +165,13 @@ void WindowPattern::Destroy()
     rsUIDirector_->Destroy();
     rsUIDirector_.reset();
     callbacks_.clear();
+}
+
+std::shared_ptr<Rosen::RSSurfaceNode> WindowPattern::CreateSurfaceNode(const std::string& name)
+{
+    struct Rosen::RSSurfaceNodeConfig rsSurfaceNodeConfig;
+    rsSurfaceNodeConfig.SurfaceNodeName = name;
+    return Rosen::RSSurfaceNode::Create(rsSurfaceNodeConfig);
 }
 
 void WindowPattern::LoadContent(
@@ -310,7 +326,7 @@ void WindowPattern::Connect()
     RegisterSizeChangeListener(sizeChangeListener);
 
     CHECK_NULL_VOID(sessionStage_);
-    sessionStage_->Connect();
+    sessionStage_->Connect(surfaceNode_);
 }
 
 void WindowPattern::Foreground()

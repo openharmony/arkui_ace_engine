@@ -36,9 +36,16 @@ public:
 protected:
     void OnAttachToFrameNode() override;
 
-    virtual void InitContent();
+    void InitContent();
 
     virtual bool HasStartingPage() = 0;
+
+    void RegisterLifecycleListener();
+    void UnregisterLifecycleListener();
+
+    virtual void OnConnect();
+    virtual void OnForeground() {}
+    virtual void OnBackground() {}
 
     int32_t instanceId_ = -1;
 
@@ -49,9 +56,14 @@ protected:
     sptr<Rosen::Session> session_;
 
 private:
-    void CreateSnapshotNode();
     void CreateStartingNode();
+    void CreateSnapshotNode();
+
     void BufferAvailableCallback();
+
+    std::shared_ptr<Rosen::ILifecycleListener> lifecycleListener_;
+
+    friend class LifecycleListener;
 
     ACE_DISALLOW_COPY_AND_MOVE(HostWindowPattern);
 };

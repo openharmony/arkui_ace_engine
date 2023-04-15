@@ -17,8 +17,9 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_PATTERN_H
 
 #include "include/vsync_station.h"
-#include "render_service_client/core/ui/rs_ui_director.h"
 #include "session/container/include/session_stage.h"
+#include "ui/rs_surface_node.h"
+#include "ui/rs_ui_director.h"
 #include "ui_window.h"
 
 #include "session/container/include/session_stage.h"
@@ -35,8 +36,7 @@ class WindowPattern : public UIWindow,
 
 public:
     WindowPattern() = default;
-    WindowPattern(const std::shared_ptr<AbilityRuntime::Context>& context,
-        const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode);
+    WindowPattern(const std::shared_ptr<AbilityRuntime::Context>& context);
     virtual ~WindowPattern() = default;
 
     void Init() override;
@@ -115,6 +115,8 @@ protected:
     sptr<Rosen::SessionStage> sessionStage_;
 
 private:
+    std::shared_ptr<Rosen::RSSurfaceNode> CreateSurfaceNode(const std::string& name);
+
     std::recursive_mutex mutex_;
 
     WeakPtr<TaskExecutor> taskExecutor_;

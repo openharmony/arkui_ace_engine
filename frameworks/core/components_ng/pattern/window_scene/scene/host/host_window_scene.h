@@ -34,16 +34,10 @@ private:
 
     void UpdateSession(const sptr<Rosen::Session>& session);
 
-    void RegisterLifecycleListener();
-    void UnregisterLifecycleListener();
-
-    void OnForeground();
-    void OnBackground();
-
-    std::shared_ptr<Rosen::ILifecycleListener> lifecycleListener_;
+    void OnForeground() override;
+    void OnBackground() override;
 
     friend class HostWindowSceneModel;
-    friend class LifecycleListener;
 
     ACE_DISALLOW_COPY_AND_MOVE(HostWindowScene);
 };
