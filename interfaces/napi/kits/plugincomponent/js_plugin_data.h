@@ -31,6 +31,7 @@ namespace OHOS::Ace::Napi {
 struct ACECallbackInfo {
     napi_env env = nullptr;
     napi_ref callback = nullptr;
+    int32_t containerId = -1;
 };
 
 enum class TACENativeValueType {
