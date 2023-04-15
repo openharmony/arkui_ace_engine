@@ -66,10 +66,13 @@ namespace OHOS::Ace::NG {
 
 constexpr Dimension CURSOR_WIDTH = 1.5_vp;
 constexpr Dimension SCROLL_BAR_MIN_HEIGHT = 4.0_vp;
+constexpr uint32_t TEXT_DRAG_OPACITY = 0x66;
 
 enum class SelectionMode { SELECT, SELECT_ALL, NONE };
 
 enum class MouseStatus { PRESSED, RELEASED, MOVE, NONE };
+
+enum class DragStatus { DRAGGING, ON_DROP, NONE };
 
 enum {
     ACTION_SELECT_ALL, // Smallest code unit.
@@ -560,6 +563,70 @@ public:
 
     double GetScrollBarWidth();
 
+    double GetLineHeight() const
+    {
+        return caretRect_.Height();
+    }
+
+    const OffsetF& GetParentGlobalOffset() const
+    {
+        return parentGlobalOffset_;
+    }
+
+    void SetDragNode(const RefPtr<FrameNode>& dragNode)
+    {
+        dragNode_ = dragNode;
+    }
+
+    const RectF& GetTextContentRect() const
+    {
+        return contentRect_;
+    }
+
+    const std::shared_ptr<RSParagraph>& GetDragParagraph() const
+    {
+        return dragParagraph_;
+    }
+
+    const RefPtr<FrameNode>& GetDragNode()
+    {
+        return dragNode_;
+    }
+
+    const std::vector<std::string>& GetDragContents() const
+    {
+        return dragContents_;
+    }
+
+    void AddDragFrameNodeToManager(const RefPtr<FrameNode>& frameNode)
+    {
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        auto dragDropManager = context->GetDragDropManager();
+        CHECK_NULL_VOID(dragDropManager);
+        dragDropManager->AddDragFrameNode(AceType::WeakClaim(AceType::RawPtr(frameNode)));
+    }
+
+    void CreateHandles();
+
+    bool IsDragging() const
+    {
+        return dragStatus_ == DragStatus::DRAGGING;
+    }
+
+    bool BetweenSelectedPosition(const Offset& globalOffset)
+    {
+        if (!InSelectMode()) {
+            return false;
+        }
+        Offset offset = globalOffset - Offset(textRect_.GetX(), textRect_.GetY()) -
+            Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY());
+        auto position = ConvertTouchOffsetToCaretPosition(offset);
+        auto selectStart = std::min(textSelector_.GetStart(), textSelector_.GetEnd());
+        auto selectEnd = std::max(textSelector_.GetStart(), textSelector_.GetEnd());
+        return (position >= selectStart) && (position < selectEnd) ;
+    }
+
     // xts
     std::string TextInputTypeToString() const;
     std::string TextInputActionToString() const;
@@ -623,6 +690,10 @@ private:
     void InitTouchEvent();
     void InitLongPressEvent();
     void InitClickEvent();
+#ifdef ENABLE_DRAG_FRAMEWORK
+    void InitDragDropEvent();
+    std::function<void(Offset)> GetThumbnailCallback();
+#endif
     bool CaretPositionCloseToTouchPosition();
     void CreateSingleHandle();
     int32_t UpdateCaretPositionOnHandleMove(const OffsetF& localOffset);
@@ -653,8 +724,6 @@ private:
     void UpdateCaretByRightClick();
 
     void AfterSelection();
-    
-    void CreateHandles();
 
     void FireEventHubOnChange(const std::string& text);
     void FireOnChangeIfNeeded();
@@ -709,6 +778,7 @@ private:
     RectF textRect_;
     RectF imageRect_;
     std::shared_ptr<RSParagraph> paragraph_;
+    std::shared_ptr<RSParagraph> dragParagraph_;
     std::shared_ptr<RSParagraph> textLineHeightUtilParagraph_;
     std::shared_ptr<RSParagraph> placeholderLineHeightUtilParagraph_;
     TextStyle nextLineUtilTextStyle_;
@@ -784,6 +854,11 @@ private:
     RefPtr<TextFieldContentModifier> textFieldContentModifier_;
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldPattern);
 
+    int32_t dragTextStart_ = 0;
+    int32_t dragTextEnd_ = 0;
+    RefPtr<FrameNode> dragNode_;
+    DragStatus dragStatus_ = DragStatus::NONE;
+    std::vector<std::string> dragContents_;
     RefPtr<Clipboard> clipboard_;
     std::vector<TextEditingValueNG> operationRecords_;
     std::vector<TextEditingValueNG> redoOperationRecords_;

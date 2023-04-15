@@ -79,6 +79,12 @@ public:
         TestingTypographyProperties::PositionAndAffinity res(1, TestingTypographyProperties::Affinity::UPSTREAM);
         return res;
     }
+
+    virtual TestingTypographyProperties::PositionAndAffinity GetGlyphPositionAtCoordinate(double x, double y)
+    {
+        TestingTypographyProperties::PositionAndAffinity res(1, TestingTypographyProperties::Affinity::UPSTREAM);
+        return res;
+    }
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_TYPOGRAPHY_H

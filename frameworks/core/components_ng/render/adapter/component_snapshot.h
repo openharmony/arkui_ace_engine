@@ -30,6 +30,7 @@ public:
 
     void Get(JsCallback&& callback);
 
+    static void ProcessOfflineNode(const RefPtr<FrameNode>& node);
 private:
     static std::shared_ptr<Rosen::RSNode> GetRsNode(const RefPtr<FrameNode>& node);
 

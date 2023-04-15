@@ -105,6 +105,8 @@ struct DragDropInfo {
 #ifdef ENABLE_DRAG_FRAMEWORK
 using DragNotifyMsg = Msdp::DeviceStatus::DragNotifyMsg;
 using OnDragCallback = std::function<void(const DragNotifyMsg&)>;
+constexpr float PIXELMAP_WIDTH_RATE = -0.5f;
+constexpr float PIXELMAP_HEIGHT_RATE = -0.2f;
 #endif
 class EventHub;
 
@@ -341,6 +343,25 @@ public:
         touchable_ = touchable;
     }
 
+#ifdef ENABLE_DRAG_FRAMEWORK
+    void SetThumbnailCallback(std::function<void(Offset)>&& callback)
+    {
+        if (dragEventActuator_) {
+            dragEventActuator_->SetThumbnailCallback(std::move(callback));
+        }
+    }
+#endif // ENABLE_DRAG_FRAMEWORK
+
+    bool GetTextFieldDraggable() const
+    {
+        return textFieldDraggable_;
+    }
+
+    void SetTextFieldDraggable(bool draggable)
+    {
+        textFieldDraggable_ = draggable;
+    }
+
     void SetPixelMap(RefPtr<PixelMap> pixelMap)
     {
         pixelMap_ = pixelMap;
@@ -401,6 +422,7 @@ private:
     bool isResponseRegion_ = false;
     std::vector<DimensionRect> responseRegion_;
     bool touchable_ = true;
+    bool textFieldDraggable_ = false;
     RefPtr<PixelMap> pixelMap_;
 };
 
