@@ -58,7 +58,9 @@ public:
             swiperIndicatorModifier_ = AceType::MakeRefPtr<SwiperIndicatorModifier>();
         }
         auto paintMethod = MakeRefPtr<SwiperIndicatorPaintMethod>(swiperIndicatorModifier_);
-        auto swiperPattern = GetSwiperNode()->GetPattern<SwiperPattern>();
+        auto swiperNode = GetSwiperNode();
+        CHECK_NULL_RETURN(swiperNode, nullptr);
+        auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
         CHECK_NULL_RETURN(swiperPattern, nullptr);
         paintMethod->SetAxis(swiperPattern->GetDirection());
         paintMethod->SetCurrentIndex(swiperPattern->GetCurrentIndex());
