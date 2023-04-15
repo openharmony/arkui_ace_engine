@@ -1419,7 +1419,7 @@ void TextFieldPattern::InitDragDropEvent()
     CHECK_NULL_VOID(eventHub);
     auto onDragStart =
         [weakPtr = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& event,
-                                    const std::string& extraParams) -> NG::DragDropInfo {
+                           const std::string& extraParams) -> NG::DragDropInfo {
         NG::DragDropInfo itemInfo;
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_RETURN(pattern, itemInfo);
@@ -1469,7 +1469,7 @@ void TextFieldPattern::InitDragDropEvent()
         auto touchX = Dimension(event->GetX(), DimensionUnit::VP).ConvertToPx();
         auto touchY = Dimension(event->GetY(), DimensionUnit::VP).ConvertToPx();
         Offset offset = Offset(touchX, touchY) - Offset(pattern->textRect_.GetX(), pattern->textRect_.GetY()) -
-            Offset(pattern->parentGlobalOffset_.GetX(), pattern->parentGlobalOffset_.GetY());
+                        Offset(pattern->parentGlobalOffset_.GetX(), pattern->parentGlobalOffset_.GetY());
         auto position = pattern->ConvertTouchOffsetToCaretPosition(offset);
         if (pattern->textEditingValue_.caretPosition == position) {
             return;
@@ -1530,12 +1530,12 @@ void TextFieldPattern::InitDragDropEvent()
             if (current < dragTextStart) {
                 pattern->textEditingValue_.text =
                     pattern->textEditingValue_.GetValueBeforePosition(dragTextStart) +
-                    pattern->textEditingValue_.GetValueAfterPosition(dragTextEnd);
+                                                  pattern->textEditingValue_.GetValueAfterPosition(dragTextEnd);
                 pattern->InsertValue(str);
             } else if (current > dragTextEnd) {
                 pattern->textEditingValue_.text =
                     pattern->textEditingValue_.GetValueBeforePosition(dragTextStart) +
-                    pattern->textEditingValue_.GetValueAfterPosition(dragTextEnd);
+                                                  pattern->textEditingValue_.GetValueAfterPosition(dragTextEnd);
                 pattern->textEditingValue_.caretPosition = current - (dragTextEnd - dragTextStart);
                 pattern->InsertValue(str);
             }
@@ -2803,9 +2803,10 @@ void TextFieldPattern::OnCursorMoveDone()
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
-void TextFieldPattern::CursorMoveLeft()
+bool TextFieldPattern::CursorMoveLeft()
 {
     LOGI("Handle cursor move left");
+    auto originCaretPosition = textEditingValue_.caretPosition;
     if (InSelectMode() && selectionMode_ == SelectionMode::SELECT_ALL) {
         textEditingValue_.caretPosition = 0;
     } else if (InSelectMode()) {
@@ -2816,11 +2817,16 @@ void TextFieldPattern::CursorMoveLeft()
             GetGraphemeClusterLength(textEditingValue_.GetWideText(), textEditingValue_.caretPosition, true));
     }
     OnCursorMoveDone();
+    if (originCaretPosition == textEditingValue_.caretPosition) {
+        return false;
+    }
+    return true;
 }
 
-void TextFieldPattern::CursorMoveRight()
+bool TextFieldPattern::CursorMoveRight()
 {
     LOGI("Handle cursor move right");
+    auto originCaretPosition = textEditingValue_.caretPosition;
     if (InSelectMode() && selectionMode_ == SelectionMode::SELECT_ALL) {
         textEditingValue_.caretPosition = static_cast<int32_t>(textEditingValue_.GetWideText().length());
     } else if (InSelectMode()) {
@@ -2831,26 +2837,40 @@ void TextFieldPattern::CursorMoveRight()
             GetGraphemeClusterLength(textEditingValue_.GetWideText(), textEditingValue_.caretPosition));
     }
     OnCursorMoveDone();
+    if (originCaretPosition == textEditingValue_.caretPosition) {
+        return false;
+    }
+    return true;
 }
 
-void TextFieldPattern::CursorMoveUp()
+bool TextFieldPattern::CursorMoveUp()
 {
     LOGI("Handle cursor move up");
-    CHECK_NULL_VOID_NOLOG(IsTextArea());
+    CHECK_NULL_RETURN_NOLOG(IsTextArea(), false);
+    auto originCaretPosition = textEditingValue_.caretPosition;
     float verticalOffset = caretRect_.GetY() - PreferredLineHeight();
     textEditingValue_.caretPosition = static_cast<int32_t>(
         paragraph_->GetGlyphPositionAtCoordinateWithCluster(caretRect_.GetX(), verticalOffset).pos_);
     OnCursorMoveDone();
+    if (originCaretPosition == textEditingValue_.caretPosition) {
+        return false;
+    }
+    return true;
 }
 
-void TextFieldPattern::CursorMoveDown()
+bool TextFieldPattern::CursorMoveDown()
 {
     LOGI("Handle cursor move down");
-    CHECK_NULL_VOID_NOLOG(IsTextArea());
+    CHECK_NULL_RETURN_NOLOG(IsTextArea(), false);
+    auto originCaretPosition = textEditingValue_.caretPosition;
     float verticalOffset = caretRect_.GetY() + PreferredLineHeight();
     textEditingValue_.caretPosition = static_cast<int32_t>(
         paragraph_->GetGlyphPositionAtCoordinateWithCluster(caretRect_.GetX(), verticalOffset).pos_);
     OnCursorMoveDone();
+    if (originCaretPosition == textEditingValue_.caretPosition) {
+        return false;
+    }
+    return true;
 }
 
 void TextFieldPattern::Delete(int32_t start, int32_t end)
