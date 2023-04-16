@@ -219,9 +219,7 @@ void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu, bool isInS
             CHECK_NULL_VOID_NOLOG(menu && overlayManager);
             ContainerScope scope(id);
             overlayManager->FocusOverlayNode(menu, isInSubWindow);
-            if (overlayManager->GetOnShowMenuCallback()) {
-                overlayManager->GetOnShowMenuCallback()();
-            }
+            overlayManager->CallOnShowMenuCallback();
         });
 
     auto context = menu->GetRenderContext();
@@ -258,9 +256,7 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu)
         auto root = rootWeak.Upgrade();
         auto overlayManager = weak.Upgrade();
         CHECK_NULL_VOID_NOLOG(menu && root && overlayManager);
-        if (overlayManager->GetOnHideMenuCallback()) {
-            overlayManager->GetOnHideMenuCallback()();
-        }
+        overlayManager->CallOnHideMenuCallback();
 
         ContainerScope scope(id);
         auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();

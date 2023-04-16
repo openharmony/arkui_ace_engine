@@ -114,19 +114,23 @@ public:
         onHideMenuCallback_ = callback;
     }
 
-    void RegisterOnShowMenu(std::function<void()> callback)
+    void RegisterOnShowMenu(const std::function<void()>& callback)
     {
         onShowMenuCallback_ = callback;
     }
 
-    std::function<void()> GetOnShowMenuCallback()
+    void CallOnShowMenuCallback()
     {
-        return onShowMenuCallback_;
+        if (onShowMenuCallback_) {
+            onShowMenuCallback_();
+        }
     }
 
-    std::function<void()> GetOnHideMenuCallback()
+    void CallOnHideMenuCallback()
     {
-        return onHideMenuCallback_;
+         if (onHideMenuCallback_) {
+            onHideMenuCallback_();
+        }
     }
 
     void SetBackPressEvent(std::function<bool()> event)
@@ -215,7 +219,7 @@ private:
 #endif // ENABLE_DRAG_FRAMEWORK
 
     std::function<void()> onHideMenuCallback_ = nullptr;
-    std::function<void()> onShowMenuCallback_ = nullptr;
+    std::function<void()> onShowMenuCallback_;
     CancelableCallback<void()> continuousTask_;
     std::function<bool()> backPressEvent_ = nullptr;
 
