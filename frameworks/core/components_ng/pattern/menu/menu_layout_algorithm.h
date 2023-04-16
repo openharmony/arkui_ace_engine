@@ -106,7 +106,7 @@ private:
     float optionPadding_ = 0.0f;
 
     using PlacementFunc = OffsetF (MenuLayoutAlgorithm::*)(const SizeF&, const OffsetF&, const OffsetF&);
-    std::map<uint32_t, PlacementFunc> placementFuncMap_;
+    std::map<Placement, PlacementFunc> placementFuncMap_;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuLayoutAlgorithm);
 };

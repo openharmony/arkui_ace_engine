@@ -128,7 +128,7 @@ public:
 
     void CallOnHideMenuCallback()
     {
-         if (onHideMenuCallback_) {
+        if (onHideMenuCallback_) {
             onHideMenuCallback_();
         }
     }
