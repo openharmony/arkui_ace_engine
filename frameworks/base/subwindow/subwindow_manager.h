@@ -122,8 +122,8 @@ private:
     SubwindowMap dialogSubwindowMap_;
     std::mutex currentDialogSubwindowMutex_;
     RefPtr<Subwindow> currentDialogSubwindow_;
-    std::function<void()> onShowMenuCallback_ = nullptr;
-    std::function<void()> onHideMenuCallback_ = nullptr;
+    std::function<void()> onShowMenuCallback_;
+    std::function<void()> onHideMenuCallback_;
 };
 
 } // namespace OHOS::Ace

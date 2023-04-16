@@ -38,7 +38,7 @@ void ViewAbstractModelNG::BindMenu(
 #endif // ENABLE_DRAG_FRAMEWORK
     auto overlayManager = NG::PipelineContext::GetCurrentContext()->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
-    RegisterMenuAppearCallback(std::move(params), std::move(buildFunc), menuParam);
+    RegisterMenuAppearCallback(params, std::move(buildFunc), menuParam);
 
     GestureEventFunc showMenu;
     auto weakTarget = AceType::WeakClaim(AceType::RawPtr(targetNode));
@@ -71,7 +71,7 @@ void ViewAbstractModelNG::BindMenu(
     auto gestureHub = targetNode->GetOrCreateGestureEventHub();
     gestureHub->BindMenu(std::move(showMenu));
 
-    RegisterMenuDisappearCallback(std::move(params), std::move(buildFunc), menuParam);
+    RegisterMenuDisappearCallback(std::move(buildFunc), menuParam);
 
     // delete menu when target node is removed from render tree
     auto eventHub = targetNode->GetEventHub<NG::EventHub>();
@@ -181,7 +181,7 @@ void ViewAbstractModelNG::BindContentCover(
 }
 
 void ViewAbstractModelNG::RegisterMenuAppearCallback(
-    std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const MenuParam& menuParam)
+    std::vector<NG::OptionParam>& params, std::function<void()>&& buildFunc, const MenuParam& menuParam)
 {
     auto overlayManager = NG::PipelineContext::GetCurrentContext()->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
@@ -194,8 +194,7 @@ void ViewAbstractModelNG::RegisterMenuAppearCallback(
     }
 }
 
-void ViewAbstractModelNG::RegisterMenuDisappearCallback(
-    std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const MenuParam& menuParam)
+void ViewAbstractModelNG::RegisterMenuDisappearCallback(std::function<void()>&& buildFunc, const MenuParam& menuParam)
 {
     auto overlayManager = NG::PipelineContext::GetCurrentContext()->GetOverlayManager();
     if (overlayManager) {

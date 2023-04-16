@@ -30,9 +30,9 @@ class MenuLayoutProperty;
 class MenuLayoutAlgorithm : public BoxLayoutAlgorithm {
     DECLARE_ACE_TYPE(MenuLayoutAlgorithm, BoxLayoutAlgorithm)
 public:
-    MenuLayoutAlgorithm(int32_t id, const std::string& tag) : targetNodeId_(id), targetTag_(tag) {}
+    MenuLayoutAlgorithm(int32_t id, const std::string& tag);
     MenuLayoutAlgorithm() = default;
-    ~MenuLayoutAlgorithm() override = default;
+    ~MenuLayoutAlgorithm() override;
 
     // override measureSelf and measureChildren.
     void Measure(LayoutWrapper* layoutWrapper) override;
@@ -74,6 +74,20 @@ private:
     OffsetF GetChildPosition(const SizeF& childSize, const RefPtr<MenuLayoutProperty>& layoutProp);
     ErrorPositionType GetErrorPositionType(const OffsetF& childOffset, const SizeF& childSize);
     OffsetF FitToScreen(const OffsetF& fitPosition, const SizeF& childSize);
+
+    OffsetF GetPositionWithPlacementTop(const SizeF&, const OffsetF&, const OffsetF&);
+    OffsetF GetPositionWithPlacementTopLeft(const SizeF&, const OffsetF&, const OffsetF&);
+    OffsetF GetPositionWithPlacementTopRight(const SizeF&, const OffsetF&, const OffsetF&);
+    OffsetF GetPositionWithPlacementBottom(const SizeF&, const OffsetF&, const OffsetF&);
+    OffsetF GetPositionWithPlacementBottomLeft(const SizeF&, const OffsetF&, const OffsetF&);
+    OffsetF GetPositionWithPlacementBottomRight(const SizeF&, const OffsetF&, const OffsetF&);
+    OffsetF GetPositionWithPlacementLeft(const SizeF&, const OffsetF&, const OffsetF&);
+    OffsetF GetPositionWithPlacementLeftTop(const SizeF&, const OffsetF&, const OffsetF&);
+    OffsetF GetPositionWithPlacementLeftBottom(const SizeF&, const OffsetF&, const OffsetF&);
+    OffsetF GetPositionWithPlacementRight(const SizeF&, const OffsetF&, const OffsetF&);
+    OffsetF GetPositionWithPlacementRightTop(const SizeF&, const OffsetF&, const OffsetF&);
+    OffsetF GetPositionWithPlacementRightBottom(const SizeF&, const OffsetF&, const OffsetF&);
+
     OffsetF targetOffset_;
     SizeF targetSize_;
     Placement placement_ = Placement::BOTTOM;
@@ -90,6 +104,9 @@ private:
 
     float margin_ = 0.0f;
     float optionPadding_ = 0.0f;
+
+    using PlacementFunc = OffsetF (MenuLayoutAlgorithm::*)(const SizeF&, const OffsetF&, const OffsetF&);
+    std::map<uint32_t, PlacementFunc> placementFuncMap_;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuLayoutAlgorithm);
 };
