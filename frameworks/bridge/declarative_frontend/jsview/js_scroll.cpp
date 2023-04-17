@@ -284,7 +284,13 @@ void JSScroll::SetScrollBarColor(const std::string& scrollBarColor)
     if (scrollBarColor.empty()) {
         return;
     }
-    ScrollModel::GetInstance()->SetScrollBarColor(Color::FromString(scrollBarColor));
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID_NOLOG(pipelineContext);
+    auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
+    CHECK_NULL_VOID_NOLOG(theme);
+    Color color(theme->GetForegroundColor());
+    Color::ParseColorString(scrollBarColor, color);
+    ScrollModel::GetInstance()->SetScrollBarColor(color);
 }
 
 void JSScroll::SetEdgeEffect(int edgeEffect)
