@@ -402,7 +402,6 @@ HWTEST_F(FlexPatternTestNg, WrapLayoutAlgorithmTest002, TestSize.Level1)
     flexLayoutAlgorithm->CalcFlexGrowLayout(
         firstLayoutWrapper, flexItemProperties, (CONTAINER_WIDTH - FIRST_ITEM_WIDTH));
     EXPECT_EQ(firstGeometryNode->GetFrameSize(), SizeF(FIRST_ITEM_WIDTH, FIRST_ITEM_HEIGHT));
-    EXPECT_EQ(firstGeometryNode->GetFrameSize().Width(), firstGeometryNode->GetFrameSize().Width());
 }
 
 /**

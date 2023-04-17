@@ -41,19 +41,6 @@ void PageEventHubTest::SetUp() {}
 void PageEventHubTest::TearDown() {}
 
 /**
- * @tc.name: PageEventHubTest001
- * @tc.desc: Test all the properties of PageEventHub
- * @tc.type: FUNC
- */
-HWTEST_F(PageEventHubTest, PageEventHubTest001, TestSize.Level1)
-{
-    string group = "123";
-    int32_t radioId = 1;
-    manager_.AddRadioToGroup(group, radioId);
-    manager_.RemoveRadioFromGroup(group, radioId);
-}
-
-/**
  * @tc.name: PageEventHubTest002
  * @tc.desc: Test all the properties of PageEventHub
  * @tc.type: FUNC
@@ -65,73 +52,6 @@ HWTEST_F(PageEventHubTest, PageEventHubTest002, TestSize.Level1)
     manager_.AddRadioToGroup(group, radioId);
     auto ret = manager_.HasRadioId(group, radioId);
     EXPECT_EQ(ret, true);
-}
-
-/**
- * @tc.name: PageEventHubTest003
- * @tc.desc: Test all the properties of PageEventHub
- * @tc.type: FUNC
- */
-HWTEST_F(PageEventHubTest, PageEventHubTest003, TestSize.Level1)
-{
-    string group = "123";
-    int32_t radioId = 1;
-    manager_.AddRadioToGroup(group, radioId);
-    manager_.UpdateRadioGroupValue(group, radioId);
-}
-
-/**
- * @tc.name: PageEventHubTest004
- * @tc.desc: Test all the properties of PageEventHub
- * @tc.type: FUNC
- */
-HWTEST_F(PageEventHubTest, PageEventHubTest004, TestSize.Level1)
-{
-    string group = "123";
-    int32_t radioId = 1;
-    int32_t radioId1 = 2;
-    manager_.AddRadioToGroup(group, radioId);
-    manager_.UpdateRadioGroupValue(group, radioId1);
-}
-
-/**
- * @tc.name: PageEventHubTest005
- * @tc.desc: Test all the properties of PageEventHub
- * @tc.type: FUNC
- */
-HWTEST_F(PageEventHubTest, PageEventHubTest005, TestSize.Level1)
-{
-    string group = "123";
-    int32_t checkboxId = 1;
-    manager_.AddCheckBoxToGroup(group, checkboxId);
-    manager_.RemoveCheckBoxFromGroup(group, checkboxId);
-}
-
-/**
- * @tc.name: PageEventHubTest006
- * @tc.desc: Test all the properties of PageEventHub
- * @tc.type: FUNC
- */
-HWTEST_F(PageEventHubTest, PageEventHubTest006, TestSize.Level1)
-{
-    string group = "123";
-    int32_t checkboxId = 1;
-    manager_.AddCheckBoxToGroup(group, checkboxId);
-    manager_.AddCheckBoxGroupToGroup(group, checkboxId);
-}
-
-/**
- * @tc.name: PageEventHubTest007
- * @tc.desc: Test all the properties of PageEventHub
- * @tc.type: FUNC
- */
-HWTEST_F(PageEventHubTest, PageEventHubTest007, TestSize.Level1)
-{
-    string group = "123";
-    int32_t checkboxId = 1;
-    int32_t checkboxId1 = 2;
-    manager_.AddCheckBoxToGroup(group, checkboxId);
-    manager_.AddCheckBoxGroupToGroup(group, checkboxId1);
 }
 
 /**

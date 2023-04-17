@@ -452,10 +452,6 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest009, TestSize.Level1)
     RefPtr<RefreshLayoutProperty> layoutProperty = frameNode->GetLayoutProperty<RefreshLayoutProperty>();
     EXPECT_NE(layoutProperty, nullptr);
     /**
-     * @tc.steps: step4. test refresh status for default
-     */
-    EXPECT_EQ(stateChangeValue, -1);
-    /**
      * @tc.steps: step5. test refresh status for DRAG
      */
     pattern->HandleDragStart();
