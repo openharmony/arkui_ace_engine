@@ -19,7 +19,6 @@
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/layout/layout_property.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 // Geometry transition is used for hero animation dealing with matched pair of inNode and outNode holding the
@@ -194,7 +193,6 @@ void GeometryTransition::DidLayout(const WeakPtr<FrameNode>& frameNode)
         hasInAnim_ = false;
     } else if (IsNodeOutAndActive(frameNode)) {
         LOGD("GeometryTransition: node%{public}d: out and active", node->GetId());
-        SyncGeometry(false);
         direction = false;
         hasOutAnim_ = false;
     }
@@ -202,10 +200,10 @@ void GeometryTransition::DidLayout(const WeakPtr<FrameNode>& frameNode)
     if (direction.has_value()) {
         auto pipeline = AceType::DynamicCast<NG::PipelineContext>(PipelineBase::GetCurrentContext());
         CHECK_NULL_VOID(pipeline);
-        pipeline->AddAfterLayoutTask([weak = WeakClaim(this), dir = direction.value()]() {
+        pipeline->AddAfterLayoutTask([weak = WeakClaim(this), isNodeIn = direction.value()]() {
             auto geometryTransition = weak.Upgrade();
             CHECK_NULL_VOID(geometryTransition);
-            geometryTransition->SyncGeometry(dir);
+            geometryTransition->SyncGeometry(isNodeIn);
         });
     }
 }

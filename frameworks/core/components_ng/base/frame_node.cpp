@@ -353,7 +353,7 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     if (geometryTransition != nullptr && geometryTransition->IsRunning()) {
         geometryTransition->DidLayout(WeakClaim(this));
     } else if (frameSizeChange || frameOffsetChange || HasPositionProp() ||
-                         (pattern_->GetSurfaceNodeName().has_value() && contentSizeChange)) {
+               (pattern_->GetSurfaceNodeName().has_value() && contentSizeChange)) {
         if (pattern_->NeedOverridePaintRect()) {
             renderContext_->SyncGeometryProperties(pattern_->GetOverridePaintRect().value_or(RectF()));
         } else {
@@ -615,9 +615,7 @@ std::optional<UITask> FrameNode::CreateLayoutTask(bool forceUseMainThread)
             }
             auto host = layoutWrapper->GetHostNode();
             CHECK_NULL_VOID(host);
-            host->PostTask([layoutWrapper]() {
-                layoutWrapper->MountToHostOnMainThread();
-            });
+            host->PostTask([layoutWrapper]() { layoutWrapper->MountToHostOnMainThread(); });
         }
     };
     if (forceUseMainThread || layoutWrapper->CheckShouldRunOnMain()) {
@@ -1524,8 +1522,8 @@ RefPtr<FrameNode> FrameNode::FindChildByPosition(float x, float y)
     return hitFrameNodes.rbegin()->second;
 }
 
-void FrameNode::CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
-    const std::function<void(float)>& onCallbackEvent)
+void FrameNode::CreateAnimatablePropertyFloat(
+    const std::string& propertyName, float value, const std::function<void(float)>& onCallbackEvent)
 {
     auto context = GetRenderContext();
     CHECK_NULL_VOID(context);

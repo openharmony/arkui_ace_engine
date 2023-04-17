@@ -222,11 +222,6 @@ public:
 
     void BuildLazyItem();
 
-    void RegisterFinishCallback(std::function<void()>&& finishCallback)
-    {
-        finishCallbacks_.emplace_back(finishCallback);
-    }
-
     std::pair<int32_t, int32_t> GetLazyBuildRange();
 
 private:
@@ -257,8 +252,6 @@ private:
 
     // When the location property is set, it departs from the layout flow.
     bool outOfLayout_ = false;
-
-    std::list<std::function<void()>> finishCallbacks_;
 
     ACE_DISALLOW_COPY_AND_MOVE(LayoutWrapper);
 };
