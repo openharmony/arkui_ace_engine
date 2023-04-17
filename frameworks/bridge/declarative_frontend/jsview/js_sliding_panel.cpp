@@ -304,7 +304,7 @@ void JSSlidingPanel::SetHasDragBar(const JSCallbackInfo& info)
         LOGE("The info is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    bool hasDragBar = DEFAULT_HASDRAGBAR;
+    auto hasDragBar = DEFAULT_HASDRAGBAR;
     if (info[0]->IsBoolean()) {
         hasDragBar = info[0]->ToBoolean();
     }
@@ -322,9 +322,9 @@ void JSSlidingPanel::SetPanelMode(const JSCallbackInfo& info)
         LOGE("The info is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    int32_t mode = static_cast<int32_t>(DEFAULT_PANELMODE);
+    auto mode = static_cast<int32_t>(DEFAULT_PANELMODE);
     if (info[0]->IsNumber()) {
-        const int32_t modeNumber = info[0]->ToNumber<int32_t>();
+        const auto modeNumber = info[0]->ToNumber<int32_t>();
         if (modeNumber >= 0 && modeNumber < static_cast<int32_t>(PANEL_MODES.size())) {
             mode = modeNumber;
         }
@@ -338,9 +338,9 @@ void JSSlidingPanel::SetPanelType(const JSCallbackInfo& info)
         LOGE("The info is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    int32_t type = static_cast<int32_t>(DEFAULT_PANELTYPE);
+    auto type = static_cast<int32_t>(DEFAULT_PANELTYPE);
     if (info[0]->IsNumber()) {
-        const int32_t typeNumber = info[0]->ToNumber<int32_t>();
+        const auto typeNumber = info[0]->ToNumber<int32_t>();
         if (typeNumber >= 0 && typeNumber < static_cast<int32_t>(PANEL_TYPES.size())) {
             type = typeNumber;
         }
