@@ -76,7 +76,7 @@ public:
         auto enabled = eventHub->IsEnabled();
         paintMethod->SetEnabled(enabled);
         paintMethod->SetMainDelta(currentOffset_);
-        paintMethod->SetIsHover(isHover_);
+        paintMethod->SetTouchHoverAnimationType(touchHoverType_);
         return paintMethod;
     }
 
@@ -163,9 +163,10 @@ private:
     SizeF size_;
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
+    bool isFirstAddhotZoneRect_ = true;
+    TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
 
     RefPtr<SwitchModifier> switchModifier_;
-
     ACE_DISALLOW_COPY_AND_MOVE(SwitchPattern);
 };
 } // namespace OHOS::Ace::NG

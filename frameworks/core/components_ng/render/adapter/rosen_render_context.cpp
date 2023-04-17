@@ -1119,13 +1119,16 @@ void RosenRenderContext::PaintFocusState(
         rsCanvas.AttachPen(pen);
         rsCanvas.DrawRoundRect(rrect);
     };
-
+    std::shared_ptr<Rosen::RectF> overlayRect = std::make_shared<Rosen::RectF>(
+        paintRect.GetRect().Left() - borderWidthPx / 2, paintRect.GetRect().Top() - borderWidthPx / 2,
+        paintRect.GetRect().Width() + borderWidthPx, paintRect.GetRect().Height() + borderWidthPx);
     if (isAccessibilityFocus) {
         if (!accessibilityFocusStateModifier_) {
             accessibilityFocusStateModifier_ = std::make_shared<FocusStateModifier>();
         }
         accessibilityFocusStateModifier_->SetRoundRect(paintRect, borderWidthPx);
         accessibilityFocusStateModifier_->SetPaintTask(std::move(paintTask));
+        rsNode_->SetDrawRegion(overlayRect);
         rsNode_->AddModifier(accessibilityFocusStateModifier_);
     } else {
         if (!focusStateModifier_) {
@@ -1134,6 +1137,7 @@ void RosenRenderContext::PaintFocusState(
         }
         focusStateModifier_->SetRoundRect(paintRect, borderWidthPx);
         focusStateModifier_->SetPaintTask(std::move(paintTask));
+        rsNode_->SetDrawRegion(overlayRect);
         rsNode_->AddModifier(focusStateModifier_);
     }
     RequestNextFrame();
@@ -1217,6 +1221,14 @@ void RosenRenderContext::FlushContentModifier(const RefPtr<Modifier>& modifier)
     CHECK_NULL_VOID(rsNode_);
     CHECK_NULL_VOID(modifier);
     auto modifierAdapter = std::static_pointer_cast<ContentModifierAdapter>(ConvertContentModifier(modifier));
+    auto contentModifier = AceType::DynamicCast<ContentModifier>(modifier);
+    CHECK_NULL_VOID(contentModifier);
+    auto rect = contentModifier->GetBoundsRect();
+    if (rect.has_value()) {
+        std::shared_ptr<Rosen::RectF> overlayRect =
+            std::make_shared<Rosen::RectF>(rect->GetX(), rect->GetY(), rect->Width(), rect->Height());
+        rsNode_->SetDrawRegion(overlayRect);
+    }
     rsNode_->AddModifier(modifierAdapter);
     modifierAdapter->AttachProperties();
 }
@@ -1248,10 +1260,12 @@ void RosenRenderContext::FlushOverlayModifier(const RefPtr<Modifier>& modifier)
     CHECK_NULL_VOID(rsNode_);
     CHECK_NULL_VOID(modifier);
     auto modifierAdapter = std::static_pointer_cast<OverlayModifierAdapter>(ConvertOverlayModifier(modifier));
-    auto rect = AceType::DynamicCast<OverlayModifier>(modifier)->GetBoundsRect();
+    auto overlayModifier = AceType::DynamicCast<OverlayModifier>(modifier);
+    CHECK_NULL_VOID(overlayModifier);
+    auto rect = overlayModifier->GetBoundsRect();
     std::shared_ptr<Rosen::RectF> overlayRect =
         std::make_shared<Rosen::RectF>(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
-    modifierAdapter->SetOverlayBounds(overlayRect);
+    rsNode_->SetDrawRegion(overlayRect);
     rsNode_->AddModifier(modifierAdapter);
     modifierAdapter->AttachProperties();
 }

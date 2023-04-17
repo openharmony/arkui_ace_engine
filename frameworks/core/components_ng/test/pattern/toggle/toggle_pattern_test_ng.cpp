@@ -673,11 +673,11 @@ HWTEST_F(TogglePatternTestNg, TogglePatternTest0012, TestSize.Level1)
     switchPattern->OnModifyDone();
     EXPECT_EQ(layoutProperty->GetMarginProperty()->left.value(), CalcLength(PADDING.ConvertToPx()));
     EXPECT_EQ(layoutProperty->GetMarginProperty()->right.value(),
-              CalcLength(switchTheme->GetHotZoneHorizontalPadding().Value()));
-    EXPECT_EQ(layoutProperty->GetMarginProperty()->top.value(),
-              CalcLength(switchTheme->GetHotZoneVerticalPadding().Value()));
+        CalcLength(switchTheme->GetHotZoneHorizontalPadding().Value()));
+    EXPECT_EQ(
+        layoutProperty->GetMarginProperty()->top.value(), CalcLength(switchTheme->GetHotZoneVerticalPadding().Value()));
     EXPECT_EQ(layoutProperty->GetMarginProperty()->bottom.value(),
-              CalcLength(switchTheme->GetHotZoneVerticalPadding().Value()));
+        CalcLength(switchTheme->GetHotZoneVerticalPadding().Value()));
 
     MarginProperty margin1;
     margin1.right = CalcLength(PADDING.ConvertToPx());
@@ -686,11 +686,63 @@ HWTEST_F(TogglePatternTestNg, TogglePatternTest0012, TestSize.Level1)
     switchPattern->OnModifyDone();
     EXPECT_EQ(layoutProperty->GetMarginProperty()->right.value(), CalcLength(PADDING.ConvertToPx()));
     EXPECT_EQ(layoutProperty->GetMarginProperty()->left.value(),
-              CalcLength(switchTheme->GetHotZoneHorizontalPadding().Value()));
-    EXPECT_EQ(layoutProperty->GetMarginProperty()->top.value(),
-              CalcLength(switchTheme->GetHotZoneVerticalPadding().Value()));
+        CalcLength(switchTheme->GetHotZoneHorizontalPadding().Value()));
+    EXPECT_EQ(
+        layoutProperty->GetMarginProperty()->top.value(), CalcLength(switchTheme->GetHotZoneVerticalPadding().Value()));
     EXPECT_EQ(layoutProperty->GetMarginProperty()->bottom.value(),
-              CalcLength(switchTheme->GetHotZoneVerticalPadding().Value()));
+        CalcLength(switchTheme->GetHotZoneVerticalPadding().Value()));
+}
+
+/**
+ * @tc.name: TogglePatternTest0013
+ * @tc.desc: Test Toggle pattern method HandleMouseEvent, OnTouchUp and OnTouchDown.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TogglePatternTestNg, TogglePatternTest0013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Toggle node
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
+
+    /**
+     * @tc.steps: step2. Get Toggle pattern object
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SwitchPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step3. Set Toggle pattern variable and call HandleMouseEvent, OnTouchUp and OnTouchDown
+     * @tc.expected: step3. Check the Toggle pattern value
+     */
+    pattern->isTouch_ = true;
+    pattern->isHover_ = false;
+    pattern->HandleMouseEvent(true);
+    EXPECT_EQ(pattern->touchHoverType_, TouchHoverAnimationType::HOVER);
+    EXPECT_EQ(pattern->isTouch_, true);
+    pattern->HandleMouseEvent(false);
+    EXPECT_EQ(pattern->touchHoverType_, TouchHoverAnimationType::NONE);
+
+    pattern->isTouch_ = true;
+    pattern->isHover_ = false;
+    pattern->OnTouchUp();
+    EXPECT_EQ(pattern->isTouch_, false);
+    EXPECT_EQ(pattern->touchHoverType_, TouchHoverAnimationType::NONE);
+    pattern->isHover_ = true;
+    pattern->OnTouchUp();
+    EXPECT_EQ(pattern->touchHoverType_, TouchHoverAnimationType::PRESS_TO_HOVER);
+
+    pattern->isTouch_ = false;
+    pattern->isHover_ = false;
+    pattern->OnTouchDown();
+    EXPECT_EQ(pattern->isTouch_, true);
+    EXPECT_EQ(pattern->touchHoverType_, TouchHoverAnimationType::PRESS);
+    pattern->isHover_ = true;
+    pattern->OnTouchDown();
+    EXPECT_EQ(pattern->touchHoverType_, TouchHoverAnimationType::HOVER_TO_PRESS);
 }
 
 /**
@@ -813,5 +865,33 @@ HWTEST_F(TogglePatternTestNg, TogglePaintTest001, TestSize.Level1)
     auto contentSize = SizeF(100, 50);
     auto contentOffset = OffsetF(0, 0);
     switchPaintMethod.switchModifier_->PaintSwitch(rsCanvas, contentOffset, contentSize);
+}
+
+/**
+ * @tc.name: TogglePaintTest002
+ * @tc.desc: Test Toggle UpdateAnimatableProperty and SetBoardColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TogglePatternTestNg, TogglePaintTest002, TestSize.Level1)
+{
+    auto switchModifier = AceType::MakeRefPtr<SwitchModifier>(false, SELECTED_COLOR, 0.0f);
+    switchModifier->hoverColor_ = Color::RED;
+    switchModifier->clickEffectColor_ = Color::BLUE;
+    switchModifier->touchHoverType_ = TouchHoverAnimationType::HOVER;
+    switchModifier->UpdateAnimatableProperty();
+    switchModifier->animateTouchHoverColor_ =
+        AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::TRANSPARENT));
+    switchModifier->touchHoverType_ = TouchHoverAnimationType::PRESS_TO_HOVER;
+    switchModifier->UpdateAnimatableProperty();
+    EXPECT_EQ(switchModifier->animateTouchHoverColor_->Get(), LinearColor(Color::RED));
+    switchModifier->touchHoverType_ = TouchHoverAnimationType::NONE;
+    switchModifier->UpdateAnimatableProperty();
+    EXPECT_EQ(switchModifier->animateTouchHoverColor_->Get(), LinearColor(Color::RED.BlendOpacity(0)));
+    switchModifier->touchHoverType_ = TouchHoverAnimationType::HOVER_TO_PRESS;
+    switchModifier->UpdateAnimatableProperty();
+    EXPECT_EQ(switchModifier->animateTouchHoverColor_->Get(), LinearColor(Color::BLUE));
+    switchModifier->touchHoverType_ = TouchHoverAnimationType::PRESS;
+    switchModifier->UpdateAnimatableProperty();
+    EXPECT_EQ(switchModifier->animateTouchHoverColor_->Get(), LinearColor(Color::BLUE));
 }
 } // namespace OHOS::Ace::NG

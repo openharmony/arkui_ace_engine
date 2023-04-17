@@ -720,11 +720,11 @@ HWTEST_F(RadioTestNg, RadioPatternTest021, TestSize.Level1)
     radioPattern->OnModifyDone();
     EXPECT_EQ(layoutProperty->GetMarginProperty()->left.value(), CalcLength(HORIZONTAL_PADDING.ConvertToPx()));
     EXPECT_EQ(layoutProperty->GetMarginProperty()->right.value(),
-              CalcLength(radioTheme->GetHotZoneHorizontalPadding().Value()));
-    EXPECT_EQ(layoutProperty->GetMarginProperty()->top.value(),
-              CalcLength(radioTheme->GetHotZoneVerticalPadding().Value()));
+        CalcLength(radioTheme->GetHotZoneHorizontalPadding().Value()));
+    EXPECT_EQ(
+        layoutProperty->GetMarginProperty()->top.value(), CalcLength(radioTheme->GetHotZoneVerticalPadding().Value()));
     EXPECT_EQ(layoutProperty->GetMarginProperty()->bottom.value(),
-              CalcLength(radioTheme->GetHotZoneVerticalPadding().Value()));
+        CalcLength(radioTheme->GetHotZoneVerticalPadding().Value()));
 
     MarginProperty margin1;
     margin1.right = CalcLength(HORIZONTAL_PADDING.ConvertToPx());
@@ -733,11 +733,11 @@ HWTEST_F(RadioTestNg, RadioPatternTest021, TestSize.Level1)
     radioPattern->OnModifyDone();
     EXPECT_EQ(layoutProperty->GetMarginProperty()->right.value(), CalcLength(HORIZONTAL_PADDING.ConvertToPx()));
     EXPECT_EQ(layoutProperty->GetMarginProperty()->left.value(),
-              CalcLength(radioTheme->GetHotZoneHorizontalPadding().Value()));
-    EXPECT_EQ(layoutProperty->GetMarginProperty()->top.value(),
-              CalcLength(radioTheme->GetHotZoneVerticalPadding().Value()));
+        CalcLength(radioTheme->GetHotZoneHorizontalPadding().Value()));
+    EXPECT_EQ(
+        layoutProperty->GetMarginProperty()->top.value(), CalcLength(radioTheme->GetHotZoneVerticalPadding().Value()));
     EXPECT_EQ(layoutProperty->GetMarginProperty()->bottom.value(),
-              CalcLength(radioTheme->GetHotZoneVerticalPadding().Value()));
+        CalcLength(radioTheme->GetHotZoneVerticalPadding().Value()));
 }
 
 /**
@@ -842,6 +842,34 @@ HWTEST_F(RadioTestNg, RadioPaintMethodTest004, TestSize.Level1)
     radioPaintMethod.radioModifier_->enabled_ = AceType::MakeRefPtr<PropertyBool>(true);
     radioPaintMethod.radioModifier_->uiStatus_ =
         AceType::MakeRefPtr<PropertyInt>(static_cast<int32_t>(UIStatus::UNSELECTED));
+}
+
+/**
+ * @tc.name: RadioPaintMethodTest005
+ * @tc.desc: Test Radio UpdateAnimatableProperty and SetBoardColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioTestNg, RadioPaintMethodTest005, TestSize.Level1)
+{
+    auto radioModifier = AceType::MakeRefPtr<RadioModifier>();
+    radioModifier->hoverColor_ = Color::RED;
+    radioModifier->clickEffectColor_ = Color::BLUE;
+    radioModifier->touchHoverType_ = TouchHoverAnimationType::HOVER;
+    radioModifier->UpdateAnimatableProperty();
+    radioModifier->animateTouchHoverColor_ =
+        AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::TRANSPARENT));
+    radioModifier->touchHoverType_ = TouchHoverAnimationType::PRESS_TO_HOVER;
+    radioModifier->UpdateAnimatableProperty();
+    EXPECT_EQ(radioModifier->animateTouchHoverColor_->Get(), LinearColor(Color::RED));
+    radioModifier->touchHoverType_ = TouchHoverAnimationType::NONE;
+    radioModifier->UpdateAnimatableProperty();
+    EXPECT_EQ(radioModifier->animateTouchHoverColor_->Get(), LinearColor(Color::RED.BlendOpacity(0)));
+    radioModifier->touchHoverType_ = TouchHoverAnimationType::HOVER_TO_PRESS;
+    radioModifier->UpdateAnimatableProperty();
+    EXPECT_EQ(radioModifier->animateTouchHoverColor_->Get(), LinearColor(Color::BLUE));
+    radioModifier->touchHoverType_ = TouchHoverAnimationType::PRESS;
+    radioModifier->UpdateAnimatableProperty();
+    EXPECT_EQ(radioModifier->animateTouchHoverColor_->Get(), LinearColor(Color::BLUE));
 }
 
 /**
