@@ -1758,6 +1758,8 @@ void JsiDeclarativeEngine::SetLocalStorage(int32_t instanceId, NativeReference* 
         JSLocalStorage::AddStorage(instanceId, storage);
     } else {
         LOGI("SetLocalStorage instanceId:%{public}d invalid storage", instanceId);
+        delete nativeValue;
+        nativeValue = nullptr;
     }
 #endif
 }
