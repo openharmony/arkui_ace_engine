@@ -74,6 +74,7 @@ public:
     virtual void ShowActionMenu(const std::string& title, const std::vector<ButtonInfo>& button,
         std::function<void(int32_t, int32_t)>&& callback) = 0;
     virtual void CloseDialog(int32_t instanceId) = 0;
+    virtual const RefPtr<NG::OverlayManager> GetOverlayManager() = 0;
 
 private:
     int32_t subwindowId_ = 0;

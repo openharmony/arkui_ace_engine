@@ -1495,8 +1495,8 @@ GestureEventFunc CreateMenuEventWithBuilder(
     };
 }
 
-void ViewAbstractModelImpl::BindMenu(std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc,
-    const NG::MenuParam&)
+void ViewAbstractModelImpl::BindMenu(
+    std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const NG::MenuParam&)
 {
     ViewStackProcessor::GetInstance()->GetCoverageComponent();
     auto menuComponent = ViewStackProcessor::GetInstance()->GetMenuComponent(true);
@@ -1517,7 +1517,7 @@ void ViewAbstractModelImpl::BindMenu(std::vector<NG::OptionParam>&& params, std:
     click->SetOnClick(tapGesture);
 }
 
-void ViewAbstractModelImpl::BindContextMenu(ResponseType type, std::function<void()>&& buildFunc)
+void ViewAbstractModelImpl::BindContextMenu(ResponseType type, std::function<void()>&& buildFunc, const NG::MenuParam&)
 {
     ViewStackProcessor::GetInstance()->GetCoverageComponent();
     auto menuComponent = ViewStackProcessor::GetInstance()->GetMenuComponent(true);

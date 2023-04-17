@@ -219,6 +219,7 @@ void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu, bool isInS
             CHECK_NULL_VOID_NOLOG(menu && overlayManager);
             ContainerScope scope(id);
             overlayManager->FocusOverlayNode(menu, isInSubWindow);
+            overlayManager->CallOnShowMenuCallback();
         });
 
     auto context = menu->GetRenderContext();
@@ -249,10 +250,14 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu)
     option.SetCurve(Curves::FAST_OUT_SLOW_IN);
     option.SetDuration(MENU_ANIMATION_DURATION);
     option.SetFillMode(FillMode::FORWARDS);
-    option.SetOnFinishEvent([rootWeak = rootNodeWeak_, menuWK = WeakClaim(RawPtr(menu)), id = Container::CurrentId()] {
+    option.SetOnFinishEvent([rootWeak = rootNodeWeak_, menuWK = WeakClaim(RawPtr(menu)), id = Container::CurrentId(),
+                                weak = WeakClaim(this)] {
         auto menu = menuWK.Upgrade();
         auto root = rootWeak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(menu && root);
+        auto overlayManager = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(menu && root && overlayManager);
+        overlayManager->CallOnHideMenuCallback();
+
         ContainerScope scope(id);
         auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
         // clear contextMenu then return
@@ -666,9 +671,6 @@ void OverlayManager::HideMenu(int32_t targetId)
         return;
     }
     PopMenuAnimation(menuMap_[targetId]);
-    if (onHideMenuCallback_) {
-        onHideMenuCallback_();
-    }
     BlurOverlayNode();
 }
 

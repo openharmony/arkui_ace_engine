@@ -44,6 +44,7 @@
 #ifdef ENABLE_DRAG_FRAMEWORK
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #endif // ENABLE_DRAG_FRAMEWORK
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/declarative_frontend.h"
@@ -306,6 +307,15 @@ void SubwindowOhos::GetPopupInfoNG(int32_t targetId, NG::PopupInfo& popupInfo)
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     popupInfo = overlayManager->GetPopupInfo(targetId);
+}
+
+const RefPtr<NG::OverlayManager> SubwindowOhos::GetOverlayManager()
+{
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    CHECK_NULL_RETURN(aceContainer, nullptr);
+    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
+    CHECK_NULL_RETURN(context, nullptr);
+    return context->GetOverlayManager();
 }
 
 void SubwindowOhos::ShowWindow()
