@@ -89,8 +89,8 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
     std::chrono::microseconds microseconds(pointerEvent->GetActionTime());
     TimeStamp time(microseconds);
     TouchEvent event { touchPoint.id, touchPoint.x, touchPoint.y, touchPoint.screenX, touchPoint.screenY,
-        TouchType::UNKNOWN, time, touchPoint.size, touchPoint.force, touchPoint.tiltX, touchPoint.tiltY,
-        pointerEvent->GetDeviceId(), SourceType::NONE, touchPoint.sourceTool };
+        TouchType::UNKNOWN, TouchType::UNKNOWN, time, touchPoint.size, touchPoint.force, touchPoint.tiltX,
+        touchPoint.tiltY, pointerEvent->GetDeviceId(), SourceType::NONE, touchPoint.sourceTool };
     int32_t orgDevice = pointerEvent->GetSourceType();
     GetEventDevice(orgDevice, event);
     int32_t orgAction = pointerEvent->GetPointerAction();
@@ -109,18 +109,23 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
             break;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_DOWN:
             event.type = TouchType::PULL_DOWN;
+            event.pullType = TouchType::PULL_DOWN;
             break;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_MOVE:
             event.type = TouchType::PULL_MOVE;
+            event.pullType = TouchType::PULL_MOVE;
             break;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP:
             event.type = TouchType::PULL_UP;
+            event.pullType = TouchType::PULL_UP;
             break;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW:
             event.type = TouchType::PULL_IN_WINDOW;
+            event.pullType = TouchType::PULL_IN_WINDOW;
             break;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW:
             event.type = TouchType::PULL_OUT_WINDOW;
+            event.pullType = TouchType::PULL_OUT_WINDOW;
             break;
         default:
             LOGW("unknown type");

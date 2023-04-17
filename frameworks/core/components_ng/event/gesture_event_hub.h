@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,11 +33,15 @@
 #include "core/components_ng/gestures/recognizers/parallel_recognizer.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
 
-namespace OHOS::Ace::NG {
 #ifdef ENABLE_DRAG_FRAMEWORK
-const double PIXELMAP_WIDTH_RATE = -0.5;
-const double PIXELMAP_HEIGHT_RATE = -0.2;
-#endif // ENABLE_DRAG_FRAMEWORK
+namespace OHOS::UDMF {
+class UnifiedData;
+}
+namespace OHOS::Msdp::DeviceStatus {
+struct DragNotifyMsg;
+}
+#endif
+namespace OHOS::Ace::NG {
 
 enum class HitTestMode {
     /**
@@ -98,6 +102,12 @@ struct DragDropInfo {
     std::string extraInfo;
 };
 
+#ifdef ENABLE_DRAG_FRAMEWORK
+using DragNotifyMsg = Msdp::DeviceStatus::DragNotifyMsg;
+using OnDragCallback = std::function<void(const DragNotifyMsg&)>;
+constexpr float PIXELMAP_WIDTH_RATE = -0.5f;
+constexpr float PIXELMAP_HEIGHT_RATE = -0.2f;
+#endif
 class EventHub;
 
 // The gesture event hub is mainly used to handle common gesture events.
@@ -178,6 +188,9 @@ public:
     {
         return clickEventActuator_ != nullptr;
     }
+
+    bool IsAccessibilityClickable();
+    bool IsAccessibilityLongClickable();
 
     bool ActClick();
 
@@ -331,15 +344,36 @@ public:
     }
 
 #ifdef ENABLE_DRAG_FRAMEWORK
-    void SetPixelMap(std::shared_ptr<Media::PixelMap> pixelMap)
+    void SetThumbnailCallback(std::function<void(Offset)>&& callback)
+    {
+        if (dragEventActuator_) {
+            dragEventActuator_->SetThumbnailCallback(std::move(callback));
+        }
+    }
+#endif // ENABLE_DRAG_FRAMEWORK
+
+    bool GetTextFieldDraggable() const
+    {
+        return textFieldDraggable_;
+    }
+
+    void SetTextFieldDraggable(bool draggable)
+    {
+        textFieldDraggable_ = draggable;
+    }
+
+    void SetPixelMap(RefPtr<PixelMap> pixelMap)
     {
         pixelMap_ = pixelMap;
     }
 
-    std::shared_ptr<Media::PixelMap> GetPixelMap()
+    RefPtr<PixelMap> GetPixelMap()
     {
         return pixelMap_;
     }
+#ifdef ENABLE_DRAG_FRAMEWORK
+    int32_t SetDragData(std::shared_ptr<UDMF::UnifiedData>& unifiedData, std::string& udKey);
+    OnDragCallback GetDragCallback();
 #endif // ENABLE_DRAG_FRAMEWORK
     void InitDragDropEvent();
     void HandleOnDragStart(const GestureEvent& info);
@@ -349,6 +383,7 @@ public:
 
     void OnModifyDone();
     bool KeyBoardShortCutClick(const KeyEvent& event, const WeakPtr<NG::FrameNode>& node);
+    bool IsAllowedDrag(RefPtr<EventHub> eventHub);
 
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
@@ -387,9 +422,8 @@ private:
     bool isResponseRegion_ = false;
     std::vector<DimensionRect> responseRegion_;
     bool touchable_ = true;
-#ifdef ENABLE_DRAG_FRAMEWORK
-    std::shared_ptr<Media::PixelMap> pixelMap_;
-#endif // ENABLE_DRAG_FRAMEWORK
+    bool textFieldDraggable_ = false;
+    RefPtr<PixelMap> pixelMap_;
 };
 
 } // namespace OHOS::Ace::NG

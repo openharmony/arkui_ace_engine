@@ -25,11 +25,14 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-
 ImageLoadingContext::ImageLoadingContext(const ImageSourceInfo& src, LoadNotifier&& loadNotifier, bool syncLoad)
     : src_(src), notifiers_(std::move(loadNotifier)), syncLoad_(syncLoad)
 {
     stateManager_ = MakeRefPtr<ImageStateManager>(WeakClaim(this));
+    // pixmap src is ready to draw
+    if (src_.GetSrcType() == SrcType::PIXMAP) {
+        syncLoad_ = true;
+    }
 }
 
 ImageLoadingContext::~ImageLoadingContext()
@@ -125,24 +128,30 @@ void ImageLoadingContext::OnMakeCanvasImage()
     ImagePainter::ApplyImageFit(imageFit_, GetImageSize(), dstSize_, srcRect_, dstRect_);
 
     // step2: calculate resize target
-    auto resizeTarget = GetImageSize();
+    auto targetSize = GetImageSize();
     bool isPixelMapResource = (SrcType::DATA_ABILITY_DECODED == GetSourceInfo().GetSrcType());
     if (autoResize_ && !isPixelMapResource) {
-        resizeTarget = ImageLoadingContext::CalculateTargetSize(
-            srcRect_.GetSize(), dstRect_.GetSize(), GetSourceSize().value_or(GetImageSize()));
+        targetSize =
+            CalculateTargetSize(srcRect_.GetSize(), dstRect_.GetSize(), GetSourceSize().value_or(GetImageSize()));
     }
 
     // step3: do second [ApplyImageFit] to calculate real srcRect used for paint based on resized image size
-    ImagePainter::ApplyImageFit(imageFit_, resizeTarget, dstSize_, srcRect_, dstRect_);
+    ImagePainter::ApplyImageFit(imageFit_, targetSize, dstSize_, srcRect_, dstRect_);
 
-    if (auto image = ImageProvider::QueryCanvasImageFromCache(src_, resizeTarget); image) {
+    // upscale targetSize if size level is mapped
+    bool forceResize = GetSourceSize().has_value();
+    if (!forceResize && sizeLevel_ > 0) {
+        targetSize.ApplyScale(sizeLevel_ / targetSize.Width());
+    }
+
+    if (auto image = ImageProvider::QueryCanvasImageFromCache(src_, targetSize); image) {
         SuccessCallback(image);
         return;
     }
     LOGI("start MakeCanvasImage: %{public}s", imageObj_->GetSourceInfo().ToString().c_str());
     // step4: [MakeCanvasImage] according to [resizeTarget]
-    canvasKey_ = ImageUtils::GenerateImageKey(src_, resizeTarget);
-    imageObj_->MakeCanvasImage(Claim(this), resizeTarget, GetSourceSize().has_value(), syncLoad_);
+    canvasKey_ = ImageUtils::GenerateImageKey(src_, targetSize);
+    imageObj_->MakeCanvasImage(Claim(this), targetSize, forceResize, syncLoad_);
 }
 
 void ImageLoadingContext::DataReadyCallback(const RefPtr<ImageObject>& imageObj)
@@ -160,7 +169,7 @@ void ImageLoadingContext::SuccessCallback(const RefPtr<CanvasImage>& canvasImage
 
 void ImageLoadingContext::FailCallback(const std::string& errorMsg)
 {
-    LOGI("Image LoadFail, source = %{private}s, reason: %{public}s", src_.ToString().c_str(), errorMsg.c_str());
+    LOGD("Image LoadFail, source = %{private}s, reason: %{public}s", src_.ToString().c_str(), errorMsg.c_str());
     stateManager_->HandleCommand(ImageLoadingCommand::LOAD_FAIL);
 }
 
@@ -184,19 +193,34 @@ void ImageLoadingContext::LoadImageData()
     stateManager_->HandleCommand(ImageLoadingCommand::LOAD_DATA);
 }
 
-void ImageLoadingContext::MakeCanvasImageIfNeed(
-    const SizeF& dstSize, bool incomingNeedResize, ImageFit incomingImageFit, const std::optional<SizeF>& sourceSize)
+int32_t ImageLoadingContext::RoundUp(int32_t value)
 {
-    bool needMakeCanvasImage = incomingNeedResize != GetAutoResize() || dstSize != GetDstSize() ||
-                               incomingImageFit != GetImageFit() || sourceSize != GetSourceSize();
-    // do [MakeCanvasImage] only when:
-    // 1. [autoResize] changes
-    // 2. component size (aka [dstSize] here) changes.
-    // 3. [ImageFit] changes
-    // 4. [sourceSize] changes
-    if (needMakeCanvasImage) {
-        MakeCanvasImage(dstSize, incomingNeedResize, incomingImageFit, sourceSize);
+    CHECK_NULL_RETURN(imageObj_, -1);
+    auto res = imageObj_->GetImageSize().Width();
+    while (res / 2 >= value) {
+        res /= 2;
     }
+    return res;
+}
+
+bool ImageLoadingContext::MakeCanvasImageIfNeed(
+    const SizeF& dstSize, bool autoResize, ImageFit imageFit, const std::optional<SizeF>& sourceSize)
+{
+    bool res = autoResize != autoResize_ || imageFit != imageFit_ || sourceSize != GetSourceSize();
+
+    /* When function is called with a changed dstSize, assume the image will be resized frequently. To minimize
+     * MakeCanvasImage operations, map dstSize to size levels in log_2. Only Remake when the size level changes.
+     */
+    if (SizeChanging(dstSize)) {
+        res |= RoundUp(dstSize.Width()) != sizeLevel_;
+    } else if (dstSize_ == SizeF()) {
+        res |= dstSize.IsPositive();
+    }
+
+    if (res) {
+        MakeCanvasImage(dstSize, autoResize, imageFit, sourceSize);
+    }
+    return res;
 }
 
 void ImageLoadingContext::MakeCanvasImage(
@@ -208,6 +232,9 @@ void ImageLoadingContext::MakeCanvasImage(
     updateParamsCallback_ = [wp = WeakClaim(this), dstSize, autoResize, imageFit, sourceSize]() {
         auto ctx = wp.Upgrade();
         CHECK_NULL_VOID(ctx);
+        if (ctx->SizeChanging(dstSize)) {
+            ctx->sizeLevel_ = ctx->RoundUp(dstSize.Width());
+        }
         ctx->dstSize_ = dstSize;
         ctx->imageFit_ = imageFit;
         ctx->autoResize_ = autoResize;

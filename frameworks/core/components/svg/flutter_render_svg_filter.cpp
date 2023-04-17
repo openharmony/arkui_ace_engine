@@ -20,8 +20,8 @@
 #include "frameworks/core/components/svg/flutter_render_svg_fe_gaussianblur.h"
 #include "frameworks/core/components/svg/flutter_render_svg_fe_offset.h"
 
-#include "third_party/skia/include/effects/SkColorFilterImageFilter.h"
-#include "third_party/skia/include/effects/SkColorMatrix.h"
+#include "include/effects/SkColorFilterImageFilter.h"
+#include "include/effects/SkColorMatrix.h"
 
 namespace OHOS::Ace {
 

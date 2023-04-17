@@ -61,7 +61,7 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     LayoutProperty::ToJsonValue(json);
     json->Put("content", GetContent().value_or("").c_str());
-    json->Put("fontSize", GetFontSize().value_or(10.0_vp).ToString().c_str());
+    json->Put("fontSize", GetFontSize().value_or(16.0_fp).ToString().c_str());
     json->Put("fontColor",
         GetForegroundColor().value_or(GetTextColor().value_or(Color::BLACK)).ColorToString().c_str());
     json->Put("fontStyle", GetItalicFontStyle().value_or(Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL

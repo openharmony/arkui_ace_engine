@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,9 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_TXT_PARAGRAPH_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_TXT_PARAGRAPH_H
 
-#include "flutter/third_party/txt/src/txt/font_collection.h"
-#include "flutter/third_party/txt/src/txt/paragraph_builder.h"
-#include "flutter/third_party/txt/src/txt/paragraph_txt.h"
+#include "txt/font_collection.h"
+#include "txt/paragraph_builder.h"
+#include "txt/paragraph_txt.h"
 
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/render/paragraph.h"
@@ -43,6 +43,7 @@ public:
     void PopStyle() override;
 
     void AddText(const std::u16string& text) override;
+    int32_t AddPlaceholder(const PlaceholderRun& span) override;
     void Build() override;
     void Reset() override;
 
@@ -64,8 +65,10 @@ public:
     // interfaces for calculate the the specified paragraph position
     int32_t GetHandlePositionForClick(const Offset& offset) override;
     void GetRectsForRange(int32_t start, int32_t end, std::vector<Rect>& selectedRects) override;
+    void GetRectsForPlaceholders(std::vector<Rect>& selectedRects) override;
     bool ComputeOffsetForCaretDownstream(int32_t extent, CaretMetrics& result) override;
     bool ComputeOffsetForCaretUpstream(int32_t extent, CaretMetrics& result) override;
+    void SetIndents(const std::vector<float>& indents) override;
 
 private:
     void CreateBuilder();
@@ -74,6 +77,7 @@ private:
     std::unique_ptr<txt::ParagraphBuilder> builder_;
     std::shared_ptr<txt::FontCollection> fontCollection_;
     std::u16string text_;
+    int32_t placeHolderIndex_ = -1;
 
     ACE_DISALLOW_COPY_AND_MOVE(TxtParagraph);
 };

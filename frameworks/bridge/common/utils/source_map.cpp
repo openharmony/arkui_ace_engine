@@ -415,13 +415,11 @@ void RevSourceMap::StageModeSourceMapSplit(const std::string& sourceMap,
     std::string value;
     std::string key;
     while ((leftBracket = sourceMap.find(": {", rightBracket)) != std::string::npos) {
-        rightBracket = sourceMap.find("},", leftBracket);
+        rightBracket = sourceMap.find("}", leftBracket);
         if (rightBracket == std::string::npos) {
             return;
         }
-        uint32_t subLeftBracket = leftBracket;
-        uint32_t subRightBracket = rightBracket;
-        value = sourceMap.substr(subLeftBracket + SOURCES_VAL, subRightBracket - subLeftBracket + BEFORE_ROW);
+        value = sourceMap.substr(leftBracket, rightBracket);
         std::size_t  sources = value.find("\"sources\": [");
         if (sources == std::string::npos) {
             continue;

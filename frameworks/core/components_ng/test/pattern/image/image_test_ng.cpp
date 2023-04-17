@@ -611,8 +611,6 @@ HWTEST_F(ImageTestNg, ImageCreator002, TestSize.Level1)
     EXPECT_EQ(imageLayoutProperty->GetImageSourceInfo().value(), ImageSourceInfo(""));
     EXPECT_EQ(imageLayoutProperty->GetImageFit(), std::nullopt);
     EXPECT_EQ(imageLayoutProperty->GetAlt(), std::nullopt);
-    EXPECT_EQ(imageLayoutProperty->GetSyncMode(), std::nullopt);
-    EXPECT_EQ(imageLayoutProperty->GetCopyOptions(), std::nullopt);
     EXPECT_EQ(imageLayoutProperty->GetImageSizeStyle(), nullptr);
     auto imageRenderProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
     ASSERT_NE(imageRenderProperty, nullptr);
@@ -651,8 +649,8 @@ HWTEST_F(ImageTestNg, ImageCreator003, TestSize.Level1)
     EXPECT_EQ(imageLayoutProperty->GetImageSourceInfoValue(), ImageSourceInfo(IMAGE_SRC_URL));
     EXPECT_EQ(imageLayoutProperty->GetImageFitValue(), IMAGE_FIT_DEFAULT);
     EXPECT_EQ(imageLayoutProperty->GetAltValue(), ImageSourceInfo(ALT_SRC_URL));
-    EXPECT_EQ(imageLayoutProperty->GetSyncModeValue(), false);
-    EXPECT_EQ(imageLayoutProperty->GetCopyOptionsValue(), COPYOPTIONS_DEFAULT);
+    EXPECT_EQ(frameNode->GetPattern<ImagePattern>()->syncLoad_, false);
+    EXPECT_EQ(frameNode->GetPattern<ImagePattern>()->copyOption_, COPYOPTIONS_DEFAULT);
     EXPECT_TRUE(imageLayoutProperty->GetImageSizeStyle() != nullptr);
     EXPECT_EQ(imageLayoutProperty->GetAutoResize().value(), AUTORESIZE_DEFAULT);
     EXPECT_EQ(imageLayoutProperty->GetFitOriginalSize().value(), FIT_ORIGINAL_SIZE_DEFAULT);
@@ -1344,5 +1342,36 @@ HWTEST_F(ImageTestNg, Drag001, TestSize.Level1)
     dragPattern = dragNode->GetPattern<ImagePattern>();
     ASSERT_NE(dragPattern->image_, nullptr);
     EXPECT_EQ(dragPattern->loadingCtx_->src_.GetSrc(), ALT_SRC_URL);
+}
+
+/**
+ * @tc.name: CopyOption001
+ * @tc.desc: Test image copyOption.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, CopyOption001, TestSize.Level1)
+{
+    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    pattern->SetCopyOption(CopyOptions::InApp);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(pattern->copyOption_, CopyOptions::InApp);
+    EXPECT_TRUE(pattern->clickEvent_ && pattern->longPressEvent_ && pattern->mouseEvent_);
+
+    // emulate long press to open select overlay and click to close it
+    EXPECT_FALSE(pattern->selectOverlay_);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    gestureHub->ActLongClick();
+    EXPECT_TRUE(pattern->selectOverlay_);
+    gestureHub->ActClick();
+    EXPECT_FALSE(pattern->selectOverlay_);
+
+    pattern->SetCopyOption(CopyOptions::None);
+    frameNode->MarkModifyDone();
+    EXPECT_FALSE(gestureHub->longPressEventActuator_->longPressEvent_);
+
+    pattern->SetCopyOption(CopyOptions::Distributed);
+    frameNode->MarkModifyDone();
+    EXPECT_TRUE(gestureHub->longPressEventActuator_->longPressEvent_);
 }
 } // namespace OHOS::Ace::NG

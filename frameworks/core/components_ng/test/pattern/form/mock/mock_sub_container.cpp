@@ -18,6 +18,8 @@
 #include "core/components/form/sub_container.h"
 
 namespace OHOS::Ace {
+SubContainer::~SubContainer() {}
+
 void SubContainer::Initialize() {}
 
 void SubContainer::Destroy() {}

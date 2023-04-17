@@ -213,7 +213,7 @@ RefPtr<Element> Element::UpdateChildWithSlot(
     // Considering 4 cases:
     // 1. child == null && newComponent == null  -->  do nothing
     if (!child && !newComponent) {
-        LOGW("no child and no newComponent, likely an internal error!");
+        LOGD("no child and no newComponent, likely an internal error!");
         return nullptr;
     }
 

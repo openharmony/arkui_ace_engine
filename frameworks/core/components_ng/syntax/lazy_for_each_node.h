@@ -69,13 +69,13 @@ public:
     void PostIdleTask(std::list<int32_t>&& items);
 
 private:
-    void OnAttachToMainTree() override
+    void OnAttachToMainTree(bool recursive) override
     {
         CHECK_NULL_VOID(builder_);
         builder_->RegisterDataChangeListener(Claim(this));
     }
 
-    void OnDetachFromMainTree() override
+    void OnDetachFromMainTree(bool recursive) override
     {
         CHECK_NULL_VOID(builder_);
         builder_->UnregisterDataChangeListener(Claim(this));

@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_MULTIMODAL_ROSEN_RENDER_MULTIMODAL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_MULTIMODAL_ROSEN_RENDER_MULTIMODAL_H
 
-#include "flutter/third_party/txt/src/txt/paragraph.h"
+#include "txt/paragraph.h"
 #include "core/components/multimodal/render_multimodal.h"
 
 namespace OHOS::Ace {

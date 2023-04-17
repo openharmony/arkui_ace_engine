@@ -75,8 +75,7 @@ LoadingProgressModifier::LoadingProgressModifier(LoadingProgressOwner loadingPro
       cometOpacity_(AceType::MakeRefPtr<AnimatablePropertyFloat>(INITIAL_OPACITY_SCALE)),
       cometSizeScale_(AceType::MakeRefPtr<AnimatablePropertyFloat>(INITIAL_SIZE_SCALE)),
       cometTailLen_(AceType::MakeRefPtr<AnimatablePropertyFloat>(TOTAL_TAIL_LENGTH)),
-      sizeScale_(AceType::MakeRefPtr<AnimatablePropertyFloat>(1.0f)),
-      loadingProgressOwner_(loadingProgressOwner)
+      sizeScale_(AceType::MakeRefPtr<AnimatablePropertyFloat>(1.0f)), loadingProgressOwner_(loadingProgressOwner)
 {
     AttachProperty(date_);
     AttachProperty(color_);
@@ -125,11 +124,11 @@ void LoadingProgressModifier::DrawRing(DrawingContext& context, const RingParam&
     CHECK_NULL_VOID(progressTheme);
     auto defaultColor = progressTheme->GetLoadingColor();
     if (ringColor.GetValue() == defaultColor.GetValue()) {
-        pen.SetColor(ToRSColor(Color::FromARGB(RING_ALPHA, ringColor.GetRed(), ringColor.GetGreen(),
-            ringColor.GetBlue())));
+        pen.SetColor(
+            ToRSColor(Color::FromARGB(RING_ALPHA, ringColor.GetRed(), ringColor.GetGreen(), ringColor.GetBlue())));
     } else {
-        pen.SetColor(ToRSColor(Color::FromARGB(ringColor.GetAlpha(), ringColor.GetRed(), ringColor.GetGreen(),
-            ringColor.GetBlue())));
+        pen.SetColor(ToRSColor(
+            Color::FromARGB(ringColor.GetAlpha(), ringColor.GetRed(), ringColor.GetGreen(), ringColor.GetBlue())));
     }
     pen.SetWidth(ringParam.strokeWidth);
     pen.SetAntiAlias(true);
@@ -209,10 +208,28 @@ void LoadingProgressModifier::StartRecycleRingAnimation()
     }
     AnimationUtils::OpenImplicitAnimation(option, previousStageCurve, nullptr);
     auto middleStageCurve = AceType::MakeRefPtr<CubicCurve>(0.33f, 0.0f, 0.67f, 1.0f);
-    AnimationUtils::AddKeyFrame(STAGE1, middleStageCurve, [&]() { centerDeviation_->Set(-1 * MOVE_STEP); });
+    AnimationUtils::AddKeyFrame(
+        STAGE1, middleStageCurve, [weakCenterDeviation = AceType::WeakClaim(AceType::RawPtr(centerDeviation_))]() {
+            auto centerDeviation = weakCenterDeviation.Upgrade();
+            if (centerDeviation) {
+                centerDeviation->Set(-1 * MOVE_STEP);
+            }
+        });
     auto latterStageCurve = AceType::MakeRefPtr<CubicCurve>(0.33f, 0.0f, 1.0f, 1.0f);
-    AnimationUtils::AddKeyFrame(STAGE3, latterStageCurve, [&]() { centerDeviation_->Set(MOVE_STEP); });
-    AnimationUtils::AddKeyFrame(STAGE5, latterStageCurve, [&]() { centerDeviation_->Set(0.0f); });
+    AnimationUtils::AddKeyFrame(
+        STAGE3, latterStageCurve, [weakCenterDeviation = AceType::WeakClaim(AceType::RawPtr(centerDeviation_))]() {
+            auto centerDeviation = weakCenterDeviation.Upgrade();
+            if (centerDeviation) {
+                centerDeviation->Set(MOVE_STEP);
+            }
+        });
+    AnimationUtils::AddKeyFrame(
+        STAGE5, latterStageCurve, [weakCenterDeviation = AceType::WeakClaim(AceType::RawPtr(centerDeviation_))]() {
+            auto centerDeviation = weakCenterDeviation.Upgrade();
+            if (centerDeviation) {
+                centerDeviation->Set(0.0f);
+            }
+        });
     AnimationUtils::CloseImplicitAnimation();
 }
 
@@ -233,26 +250,66 @@ void LoadingProgressModifier::StartRecycleCometAnimation()
 
     cometOpacity_->Set(OPACITY2);
     AnimationUtils::OpenImplicitAnimation(option, curve, nullptr);
-    AnimationUtils::AddKeyFrame(STAGE1, curve, [&]() {
-        cometOpacity_->Set(OPACITY1);
-        cometSizeScale_->Set(SIZE_SCALE1);
-    });
-    AnimationUtils::AddKeyFrame(STAGE2, curve, [&]() {
-        cometOpacity_->Set(OPACITY3);
-        cometSizeScale_->Set(SIZE_SCALE3);
-    });
-    AnimationUtils::AddKeyFrame(STAGE3, curve, [&]() {
-        cometOpacity_->Set(OPACITY3);
-        cometSizeScale_->Set(1.0f);
-    });
-    AnimationUtils::AddKeyFrame(STAGE4, curve, [&]() {
-        cometOpacity_->Set(OPACITY3);
-        cometSizeScale_->Set(SIZE_SCALE3);
-    });
-    AnimationUtils::AddKeyFrame(STAGE5, curve, [&]() {
-        cometOpacity_->Set(OPACITY2);
-        cometSizeScale_->Set(SIZE_SCALE2);
-    });
+    AnimationUtils::AddKeyFrame(STAGE1, curve,
+        [weakCometOpacity = AceType::WeakClaim(AceType::RawPtr(cometOpacity_)),
+            weakCometSizeScale = AceType::WeakClaim(AceType::RawPtr(cometSizeScale_))]() {
+            auto cometOpacity = weakCometOpacity.Upgrade();
+            if (cometOpacity) {
+                cometOpacity->Set(OPACITY1);
+            }
+            auto cometSizeScale = weakCometSizeScale.Upgrade();
+            if (cometSizeScale) {
+                cometSizeScale->Set(SIZE_SCALE1);
+            }
+        });
+    AnimationUtils::AddKeyFrame(STAGE2, curve,
+        [weakCometOpacity = AceType::WeakClaim(AceType::RawPtr(cometOpacity_)),
+            weakCometSizeScale = AceType::WeakClaim(AceType::RawPtr(cometSizeScale_))]() {
+            auto cometOpacity = weakCometOpacity.Upgrade();
+            if (cometOpacity) {
+                cometOpacity->Set(OPACITY3);
+            }
+            auto cometSizeScale = weakCometSizeScale.Upgrade();
+            if (cometSizeScale) {
+                cometSizeScale->Set(SIZE_SCALE3);
+            }
+        });
+    AnimationUtils::AddKeyFrame(STAGE3, curve,
+        [weakCometOpacity = AceType::WeakClaim(AceType::RawPtr(cometOpacity_)),
+            weakCometSizeScale = AceType::WeakClaim(AceType::RawPtr(cometSizeScale_))]() {
+            auto cometOpacity = weakCometOpacity.Upgrade();
+            if (cometOpacity) {
+                cometOpacity->Set(OPACITY3);
+            }
+            auto cometSizeScale = weakCometSizeScale.Upgrade();
+            if (cometSizeScale) {
+                cometSizeScale->Set(1.0f);
+            }
+        });
+    AnimationUtils::AddKeyFrame(STAGE4, curve,
+        [weakCometOpacity = AceType::WeakClaim(AceType::RawPtr(cometOpacity_)),
+            weakCometSizeScale = AceType::WeakClaim(AceType::RawPtr(cometSizeScale_))]() {
+            auto cometOpacity = weakCometOpacity.Upgrade();
+            if (cometOpacity) {
+                cometOpacity->Set(OPACITY3);
+            }
+            auto cometSizeScale = weakCometSizeScale.Upgrade();
+            if (cometSizeScale) {
+                cometSizeScale->Set(SIZE_SCALE3);
+            }
+        });
+    AnimationUtils::AddKeyFrame(STAGE5, curve,
+        [weakCometOpacity = AceType::WeakClaim(AceType::RawPtr(cometOpacity_)),
+            weakCometSizeScale = AceType::WeakClaim(AceType::RawPtr(cometSizeScale_))]() {
+            auto cometOpacity = weakCometOpacity.Upgrade();
+            if (cometOpacity) {
+                cometOpacity->Set(OPACITY2);
+            }
+            auto cometSizeScale = weakCometSizeScale.Upgrade();
+            if (cometSizeScale) {
+                cometSizeScale->Set(SIZE_SCALE2);
+            }
+        });
     AnimationUtils::CloseImplicitAnimation();
 }
 
@@ -263,7 +320,12 @@ void LoadingProgressModifier::StartCometTailAnimation()
     option.SetDuration(TAIL_ANIAMTION_DURATION);
     option.SetIteration(1);
     option.SetCurve(curve);
-    AnimationUtils::Animate(option, [&]() { cometTailLen_->Set(TOTAL_TAIL_LENGTH); });
+    AnimationUtils::Animate(option, [weakCometTailLen = AceType::WeakClaim(AceType::RawPtr(cometTailLen_))]() {
+        auto cometTailLen = weakCometTailLen.Upgrade();
+        if (cometTailLen) {
+            cometTailLen->Set(TOTAL_TAIL_LENGTH);
+        }
+    });
 }
 
 float LoadingProgressModifier::GetCurentCometOpacity(float baseOpacity, uint32_t index, uint32_t totalNumber)
@@ -304,8 +366,12 @@ void LoadingProgressModifier::StartRecycle()
         } else {
             option.SetIteration(-1);
         }
-
-        AnimationUtils::Animate(option, [&]() { date_->Set(FULL_COUNT); });
+        AnimationUtils::Animate(option, [weakDate = AceType::WeakClaim(AceType::RawPtr(date_))]() {
+            auto date = weakDate.Upgrade();
+            if (date) {
+                date->Set(FULL_COUNT);
+            }
+        });
     }
     cometOpacity_->Set(INITIAL_OPACITY_SCALE);
     cometSizeScale_->Set(INITIAL_SIZE_SCALE);
@@ -322,12 +388,28 @@ void LoadingProgressModifier::StartTransToRecycleAnimation()
     option.SetCurve(curve);
     AnimationUtils::Animate(
         option,
-        [&]() {
-            date_->Set(FULL_COUNT);
-            cometOpacity_->Set(1.0 - TRANS_OPACITY_SPAN);
-            cometSizeScale_->Set(INITIAL_SIZE_SCALE);
+        [weakDate = AceType::WeakClaim(AceType::RawPtr(date_)),
+            weakCometOpacity = AceType::WeakClaim(AceType::RawPtr(cometOpacity_)),
+            weakCometSizeScale = AceType::WeakClaim(AceType::RawPtr(cometSizeScale_))]() {
+            auto date = weakDate.Upgrade();
+            if (date) {
+                date->Set(FULL_COUNT);
+            }
+            auto cometOpacity = weakCometOpacity.Upgrade();
+            if (cometOpacity) {
+                cometOpacity->Set(1.0 - TRANS_OPACITY_SPAN);
+            }
+            auto cometSizeScale = weakCometSizeScale.Upgrade();
+            if (cometSizeScale) {
+                cometSizeScale->Set(INITIAL_SIZE_SCALE);
+            }
         },
-        [&]() { StartRecycle(); });
+        [weak = AceType::WeakClaim(this)]() {
+            auto modify = weak.Upgrade();
+            if (modify) {
+                modify->StartRecycle();
+            }
+        });
     StartCometTailAnimation();
 }
 

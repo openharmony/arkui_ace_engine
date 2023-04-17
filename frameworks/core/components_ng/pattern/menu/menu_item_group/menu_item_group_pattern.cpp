@@ -101,4 +101,12 @@ RefPtr<FrameNode> MenuItemGroupPattern::GetMenu()
     auto menu = AceType::DynamicCast<FrameNode>(host->GetParent());
     return menu ? menu : nullptr;
 }
+
+std::string MenuItemGroupPattern::GetHeaderContent()
+{
+    CHECK_NULL_RETURN(headerContent_, "");
+    auto content = headerContent_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(content, "");
+    return content->GetContentValue("");
+}
 } // namespace OHOS::Ace::NG

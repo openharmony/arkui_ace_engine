@@ -22,7 +22,7 @@
 #include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
 #include "core/components_ng/render/node_paint_method.h"
 namespace OHOS::Ace::NG {
-constexpr float CHECKBOX_MARK_STROKEWIDTH_RATIO = 0.2f;
+constexpr float CHECKBOX_MARK_STROKEWIDTH_LIMIT_RATIO = 0.25f;
 class CheckBoxPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(CheckBoxPaintMethod, NodePaintMethod)
 
@@ -63,12 +63,16 @@ public:
             if (paintProperty->GetCheckBoxCheckMarkSizeValue().ConvertToPx() >= 0) {
                 strokePaintSize = paintProperty->GetCheckBoxCheckMarkSizeValue().ConvertToPx();
             }
+            if (strokePaintSize > size.Width()) {
+                strokePaintSize = size.Width();
+            }
         }
         checkboxModifier_->SetStrokeSize(strokePaintSize);
         if (paintProperty->HasCheckBoxCheckMarkWidth()) {
             auto strokeWidth = paintProperty->GetCheckBoxCheckMarkWidthValue().ConvertToPx();
-            if (strokeWidth > strokePaintSize * CHECKBOX_MARK_STROKEWIDTH_RATIO) {
-                strokeWidth = strokePaintSize * CHECKBOX_MARK_STROKEWIDTH_RATIO;
+            auto strokeLimitByMarkSize = strokePaintSize * CHECKBOX_MARK_STROKEWIDTH_LIMIT_RATIO;
+            if (strokeWidth > strokeLimitByMarkSize) {
+                strokeWidth = strokeLimitByMarkSize;
             }
             checkboxModifier_->SetStrokeWidth(strokeWidth);
         }

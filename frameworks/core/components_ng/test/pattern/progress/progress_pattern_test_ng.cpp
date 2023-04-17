@@ -100,6 +100,7 @@ constexpr float CONTEXT_LARGE_HEIGHT = 200.0f;
 constexpr float CONTEXT_HUGE_WIDTH = 20000.0f;
 constexpr float CONTEXT_HUGE_HEIGHT = 20000.0f;
 constexpr Dimension DEFALT_RING_DIAMETER = 72.0_vp;
+constexpr Dimension DEFALT_CAPSULE_WIDTH = 28.0_vp;
 constexpr Dimension TEST_PROGRERSS_THICKNESS = 4.0_vp;
 constexpr Dimension TEST_PROGRESS_STROKE_WIDTH = 10.0_vp;
 constexpr Dimension TEST_PROGRESS_DEFAULT_WIDTH = 300.0_vp;
@@ -236,7 +237,7 @@ void ProgressPatternTestNg::CheckValue(const RefPtr<FrameNode>& frameNode, const
         EXPECT_EQ(progresspaintProperty->GetBackgroundColor(), testProperty.bgColor.value());
     }
 
-    if (testProperty.borderColor.has_value()) {
+    if (testProperty.borderColor.has_value() && progressLayoutProperty->GetType() == PROGRESS_TYPE_CAPSULE) {
         EXPECT_EQ(progresspaintProperty->GetBorderColor(), testProperty.borderColor.value());
     }
 }
@@ -737,12 +738,12 @@ HWTEST_F(ProgressPatternTestNg, CapulseProgressCreator001, TestSize.Level1)
     auto size = progressLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
     EXPECT_EQ(progressLayoutAlgorithm->GetType(), PROGRESS_TYPE_CAPSULE);
     EXPECT_EQ(progressLayoutAlgorithm->GetStrokeWidth(), STORKE_WIDTH.ConvertToPx());
-    EXPECT_EQ(size->Height(), DEFALT_RING_DIAMETER.ConvertToPx());
-    EXPECT_EQ(size->Width(), DEFALT_RING_DIAMETER.ConvertToPx());
+    EXPECT_EQ(size->Height(), DEFALT_CAPSULE_WIDTH.ConvertToPx());
+    EXPECT_EQ(size->Width(), TEST_PROGRESS_DEFAULT_WIDTH.ConvertToPx());
 
     contentConstraint.selfIdealSize.SetWidth(PROGRESS_COMPONENT_WIDTH);
     size = progressLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
-    EXPECT_EQ(size->Height(), DEFALT_RING_DIAMETER.ConvertToPx());
+    EXPECT_EQ(size->Height(), DEFALT_CAPSULE_WIDTH.ConvertToPx());
     EXPECT_EQ(size->Width(), PROGRESS_COMPONENT_WIDTH);
 
     LayoutConstraintF contentConstraint2;
@@ -751,7 +752,7 @@ HWTEST_F(ProgressPatternTestNg, CapulseProgressCreator001, TestSize.Level1)
     contentConstraint2.selfIdealSize.SetHeight(PROGRESS_COMPONENT_HEIGHT);
     size = progressLayoutAlgorithm->MeasureContent(contentConstraint2, &layoutWrapper);
     EXPECT_EQ(size->Height(), PROGRESS_COMPONENT_HEIGHT);
-    EXPECT_EQ(size->Width(), DEFALT_RING_DIAMETER.ConvertToPx());
+    EXPECT_EQ(size->Width(), DEFALT_CAPSULE_WIDTH.ConvertToPx());
 }
 
 /**

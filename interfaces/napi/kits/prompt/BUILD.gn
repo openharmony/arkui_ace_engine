@@ -20,6 +20,9 @@ template("napi_prompt_static") {
   ohos_source_set(target_name) {
     defines += invoker.defines
     cflags_cc += invoker.cflags_cc
+    if (is_mac) {
+      cflags_cc += [ "-O0" ]
+    }
 
     include_dirs = [
       "//foundation/arkui",
@@ -28,13 +31,17 @@ template("napi_prompt_static") {
       "$root_out_dir/arkui/framework",
     ]
 
-    sources = [ "js_prompt.cpp" ]
+    sources = [
+      "../promptaction/prompt_action.cpp",
+      "js_prompt.cpp",
+    ]
 
     deps = []
-    if (!is_cross_platform_build) {
+    if (platform != "" && is_cross_platform_build) {
+      deps += [ "//plugins/libs/napi:napi_$platform" ]
+    } else {
       deps += [ "//foundation/arkui/napi/:ace_napi" ]
     }
-
     if (defined(config.libace_target)) {
       deps += [ config.libace_target ]
     }

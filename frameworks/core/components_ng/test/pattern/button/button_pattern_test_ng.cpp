@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,6 +30,7 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/pattern/button/button_accessibility_property.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/button/button_view.h"
@@ -998,5 +999,28 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest016, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetFontWeightValue(), FontWeight::MEDIUM);
     EXPECT_EQ(layoutProperty->GetFontFamilyValue(), FONT_FAMILY_VALUE);
     EXPECT_EQ(layoutProperty->GetFontStyleValue(), Ace::FontStyle::NORMAL);
+}
+
+/**
+ * @tc.name: ButtonAccessibilityPropertyTest001
+ * @tc.desc: Test button accessibility property
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonPatternTestNg, ButtonAccessibilityPropertyTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create button and get frameNode.
+     */
+    ButtonView::CreateWithLabel(CREATE_VALUE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get button accessibility property.
+     * @tc.expected: step2. check whether the properties is correct.
+     */
+    auto buttonAccessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(buttonAccessibilityProperty, nullptr);
+    EXPECT_EQ(buttonAccessibilityProperty->GetText(), CREATE_VALUE);
 }
 } // namespace OHOS::Ace::NG

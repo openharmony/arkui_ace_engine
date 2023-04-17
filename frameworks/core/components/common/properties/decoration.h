@@ -310,6 +310,15 @@ struct ACE_EXPORT SweepGradient {
     std::optional<AnimatableDimension> rotation;
 };
 
+struct ACE_EXPORT ConicGradient {
+    // center of x-axis
+    std::optional<AnimatableDimension> centerX;
+    // center of y-axis
+    std::optional<AnimatableDimension> centerY;
+    // startAngle in radian
+    std::optional<AnimatableDimension> startAngle;
+};
+
 class ACE_EXPORT Gradient final {
 public:
     void AddColor(const GradientColor& color);
@@ -432,6 +441,21 @@ public:
         sweepGradient_ = sweepGradient;
     }
 
+    ConicGradient& GetConicGradient()
+    {
+        return conicGradient_;
+    }
+
+    const ConicGradient& GetConicGradient() const
+    {
+        return conicGradient_;
+    }
+
+    void SetConicGradient(const ConicGradient& conicGradient)
+    {
+        conicGradient_ = conicGradient;
+    }
+
     RadialGradient& GetRadialGradient()
     {
         return radialGradient_;
@@ -521,6 +545,8 @@ private:
     LinearGradient linearGradient_;
     // for SweepGradient
     SweepGradient sweepGradient_;
+    // for ConicGradient
+    ConicGradient conicGradient_;
     // used for CanvasLinearGradient
     Offset beginOffset_;
     Offset endOffset_;

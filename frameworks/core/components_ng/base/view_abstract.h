@@ -34,6 +34,7 @@
 #include "core/components/common/properties/clip_path.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/motion_path_option.h"
+#include "core/components/common/properties/placement.h"
 #include "core/components/common/properties/popup_param.h"
 #include "core/components/common/properties/shared_transition_option.h"
 #include "core/components_ng/event/gesture_event_hub.h"
@@ -68,6 +69,9 @@ struct OptionParam {
 struct MenuParam {
     std::string title;
     OffsetF positionOffset;
+    std::optional<Placement> placement;
+    std::function<void()> onAppear;
+    std::function<void()> onDisappear;
 };
 
 class ACE_EXPORT ViewAbstract {
@@ -90,9 +94,9 @@ public:
     static void SetBackgroundImageSize(const BackgroundImageSize& bgImgSize);
     static void SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition);
     static void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle);
-    static void SetSphericalEffect(float radio);
+    static void SetSphericalEffect(double radio);
     static void SetPixelStretchEffect(PixStretchEffectOption& option);
-    static void SetLightUpEffect(float radio);
+    static void SetLightUpEffect(double radio);
     static void SetPadding(const CalcLength& value);
     static void SetPadding(const PaddingProperty& value);
     static void SetMargin(const CalcLength& value);
@@ -106,6 +110,7 @@ public:
     static void SetBorderStyle(const BorderStyle& value);
     static void SetBorderStyle(const BorderStyleProperty& value);
     static void SetOpacity(double opacity);
+    static void SetAllowDrop(const std::set<std::string>& allowDrop);
 
     static void SetBorderImage(const RefPtr<BorderImage>& borderImage);
     static void SetBorderImageSource(const std::string& bdImageSrc);
@@ -184,6 +189,7 @@ public:
     static void SetResponseRegion(const std::vector<DimensionRect>& responseRegion);
     static void SetTouchable(bool touchable);
     static void SetHitTestMode(HitTestMode hitTestMode);
+    static void SetDraggable(bool draggable);
     static void SetOnDragStart(
         std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragStart);
     static void SetOnDragEnter(
@@ -193,6 +199,8 @@ public:
     static void SetOnDragMove(
         std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragMove);
     static void SetOnDrop(std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDrop);
+
+    static void SetOnDragEnd(std::function<void(const RefPtr<OHOS::Ace::DragEvent>&)>&& onDragEnd);
 
     // flex properties
     static void SetAlignSelf(FlexAlign value);
@@ -239,6 +247,10 @@ public:
     static void SetForegroundColor(const Color& color);
     static void SetForegroundColorStrategy(const ForegroundColorStrategy& strategy);
 
+    // custom animatable property
+    static void CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
+        const std::function<void(float)>& onCallbackEvent);
+    static void UpdateAnimatablePropertyFloat(const std::string& propertyName, float value);
 private:
     static void AddDragFrameNodeToManager();
 };

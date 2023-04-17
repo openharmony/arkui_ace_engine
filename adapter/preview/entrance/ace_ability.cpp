@@ -19,7 +19,7 @@
 #include "unicode/putil.h"
 #endif
 
-#include "third_party/skia/include/core/SkFontMgr.h"
+#include "include/core/SkFontMgr.h"
 
 #include "adapter/preview/entrance/ace_application_info.h"
 #include "adapter/preview/entrance/ace_container.h"

@@ -111,6 +111,9 @@ void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
     auto actionStart = [weakScroll = AceType::WeakClaim(this)](const GestureEvent& info) {
         auto scroll = weakScroll.Upgrade();
         if (scroll) {
+            if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON && !scroll->NeedMouseLeftButtonScroll()) {
+                return;
+            }
             // Send event to accessibility when scroll start.
             auto context = scroll->GetContext().Upgrade();
             if (context) {
@@ -126,6 +129,9 @@ void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
     auto actionUpdate = [weakScroll = AceType::WeakClaim(this)](const GestureEvent& info) {
         auto scroll = weakScroll.Upgrade();
         if (scroll) {
+            if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON && !scroll->NeedMouseLeftButtonScroll()) {
+                return;
+            }
             scroll->HandleDragUpdate(info);
         }
     };
@@ -133,6 +139,9 @@ void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
     auto actionEnd = [weakScroll = AceType::WeakClaim(this)](const GestureEvent& info) {
         auto scroll = weakScroll.Upgrade();
         if (scroll) {
+            if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON && !scroll->NeedMouseLeftButtonScroll()) {
+                return;
+            }
             scroll->HandleDragEnd(info);
             // Send event to accessibility when scroll stop.
             auto context = scroll->GetContext().Upgrade();

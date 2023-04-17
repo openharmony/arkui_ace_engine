@@ -22,6 +22,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
+#include "core/components/common/properties/placement.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/picker/picker_data.h"
 #include "core/components_ng/base/ui_node.h"
@@ -113,6 +114,25 @@ public:
         onHideMenuCallback_ = callback;
     }
 
+    void RegisterOnShowMenu(const std::function<void()>& callback)
+    {
+        onShowMenuCallback_ = callback;
+    }
+
+    void CallOnShowMenuCallback()
+    {
+        if (onShowMenuCallback_) {
+            onShowMenuCallback_();
+        }
+    }
+
+    void CallOnHideMenuCallback()
+    {
+        if (onHideMenuCallback_) {
+            onHideMenuCallback_();
+        }
+    }
+
     void SetBackPressEvent(std::function<bool()> event)
     {
         backPressEvent_ = event;
@@ -125,12 +145,60 @@ public:
         }
         return false;
     }
+
 #ifdef ENABLE_DRAG_FRAMEWORK
-    void MountToRootNode(const RefPtr<FrameNode>& imageNode);
+    bool GetHasPixelMap()
+    {
+        return hasPixelMap_;
+    }
+
+    void SetHasPixelMap(bool hasPixelMap)
+    {
+        hasPixelMap_ = hasPixelMap;
+    }
+
+    bool GetHasFilter()
+    {
+        return hasFilter_;
+    }
+
+    void SetHasFilter(bool hasFilter)
+    {
+        hasFilter_ = hasFilter;
+    }
+
+    bool GetHasEvent()
+    {
+        return hasEvent_;
+    }
+
+    void SetHasEvent(bool hasEvent)
+    {
+        hasEvent_ = hasEvent;
+    }
+
+    bool GetIsOnAnimation()
+    {
+        return isOnAnimation_;
+    }
+
+    void SetIsOnAnimation(bool isOnAnimation)
+    {
+        isOnAnimation_ = isOnAnimation;
+    }
+
+    void SetFilterColumnNode(const RefPtr<FrameNode>& columnNode)
+    {
+        filterColumnNodeWeak_ = columnNode;
+    }
+
+    void MountPixelmapToRootNode(const RefPtr<FrameNode>& columnNode);
+    void MountEventToRootNode(const RefPtr<FrameNode>& columnNode);
     void RemovePixelMap();
+    void RemovePixelMapAnimation(bool startDrag, double x, double y);
+    void UpdatePixelMapScale(float& scale);
     void RemoveFilter();
-    bool hasPixelMap {false};
-    bool hasFilter {false};
+    void RemoveEventColumn();
 #endif // ENABLE_DRAG_FRAMEWORK
     void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<RefPtr<UINode>()>&& buildNodeFunc, int32_t type, int32_t targetId);
@@ -156,16 +224,33 @@ private:
     void OpenDialogAnimation(const RefPtr<FrameNode>& node);
     void CloseDialogAnimation(const RefPtr<FrameNode>& node);
 
+    void AdaptToSafeArea(const RefPtr<FrameNode>& node);
+
+    void SaveLastModalNode();
+    void PlayDefaultModalTransition(const RefPtr<FrameNode>& modalNode, bool isTransitionIn);
+    void DefaultModalTransition(bool isTransitionIn);
+    void PlayAlphaModalTransition(const RefPtr<FrameNode>& modalNode, bool isTransitionIn);
+
     // Key: target Id, Value: PopupInfo
     std::unordered_map<int32_t, NG::PopupInfo> popupMap_;
     // K: target frameNode ID, V: menuNode
     std::unordered_map<int32_t, RefPtr<FrameNode>> menuMap_;
     std::unordered_map<int32_t, RefPtr<FrameNode>> customPopupMap_;
     std::stack<WeakPtr<FrameNode>> modalStack_;
+    WeakPtr<FrameNode> lastModalNode_;
     WeakPtr<UINode> rootNodeWeak_;
-    WeakPtr<FrameNode> columnNodeWeak_;
+#ifdef ENABLE_DRAG_FRAMEWORK
+    bool hasPixelMap_ {false};
+    bool hasFilter_ {false};
+    bool hasEvent_ {false};
+    bool isOnAnimation_ {false};
+    WeakPtr<FrameNode> pixelmapColumnNodeWeak_;
+    WeakPtr<FrameNode> filterColumnNodeWeak_;
+    WeakPtr<FrameNode> eventColumnNodeWeak_;
+#endif // ENABLE_DRAG_FRAMEWORK
 
     std::function<void()> onHideMenuCallback_ = nullptr;
+    std::function<void()> onShowMenuCallback_;
     CancelableCallback<void()> continuousTask_;
     std::function<bool()> backPressEvent_ = nullptr;
 

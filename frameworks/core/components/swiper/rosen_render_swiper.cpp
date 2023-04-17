@@ -16,8 +16,8 @@
 #include "core/components/swiper/rosen_render_swiper.h"
 
 #include "render_service_client/core/ui/rs_node.h"
-#include "third_party/skia/include/core/SkPaint.h"
-#include "third_party/skia/include/effects/SkGradientShader.h"
+#include "include/core/SkPaint.h"
+#include "include/effects/SkGradientShader.h"
 
 #include "base/utils/system_properties.h"
 #include "core/components/align/render_align.h"

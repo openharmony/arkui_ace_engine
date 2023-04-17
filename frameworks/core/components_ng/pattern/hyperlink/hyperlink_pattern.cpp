@@ -15,8 +15,47 @@
 
 #include "core/components_ng/pattern/hyperlink/hyperlink_pattern.h"
 
+#include "base/json/json_util.h"
+#ifdef ENABLE_DRAG_FRAMEWORK
+#include "link.h"
+#include "unified_data.h"
+#include "unified_record.h"
+#endif
+
 namespace OHOS::Ace::NG {
 void HyperlinkPattern::OnAttachToFrameNode() {}
+
+void HyperlinkPattern::EnableDrag()
+{
+    auto dragStart = [weak = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& event,
+                        const std::string& /* extraParams */) -> DragDropInfo {
+        DragDropInfo info;
+        auto hyperlinkPattern = weak.Upgrade();
+        CHECK_NULL_RETURN(hyperlinkPattern, info);
+        std::string address = hyperlinkPattern->GetAddress();
+        std::string content = hyperlinkPattern->GetTextForDisplay();
+        auto json = JsonUtil::Create(true);
+        json->Put("url", address.c_str());
+        json->Put("title", content.c_str());
+        auto param = json->ToString();
+        info.extraInfo = param;
+#ifdef ENABLE_DRAG_FRAMEWORK
+        std::shared_ptr<UDMF::UnifiedRecord> record = nullptr;
+        if (content.empty()) {
+            record = std::make_shared<UDMF::Link>(address);
+        } else {
+            record = std::make_shared<UDMF::Link>(address, content);
+        }
+        auto unifiedData = std::make_shared<UDMF::UnifiedData>();
+        unifiedData->AddRecord(record);
+        event->SetData(unifiedData);
+#endif
+        return info;
+    };
+    auto eventHub = GetHost()->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDragStart(std::move(dragStart));
+}
 
 void HyperlinkPattern::OnModifyDone()
 {
@@ -33,6 +72,10 @@ void HyperlinkPattern::OnModifyDone()
     auto inputHub = hub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
     InitInputEvent(inputHub);
+
+    if (draggable_) {
+        EnableDrag();
+    }
 }
 
 void HyperlinkPattern::LinkToAddress()

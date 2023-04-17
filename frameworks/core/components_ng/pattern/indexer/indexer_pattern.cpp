@@ -494,8 +494,8 @@ void IndexerPattern::ShowBubble()
         popupNode_ = CreatePopupNode();
         AddPopupTouchListener(popupNode_);
         UpdatePopupOpacity(0.0f);
-        overlayManager->ShowIndexerPopup(host->GetId(), popupNode_);
     }
+    overlayManager->ShowIndexerPopup(host->GetId(), popupNode_);
     UpdateBubbleView();
     StartBubbleAppearAnimation();
 }

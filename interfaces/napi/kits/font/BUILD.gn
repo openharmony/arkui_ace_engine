@@ -20,6 +20,9 @@ template("napi_font_static") {
   ohos_source_set(target_name) {
     defines += invoker.defines
     cflags_cc += invoker.cflags_cc
+    if (is_mac) {
+      cflags_cc += [ "-O0" ]
+    }
 
     include_dirs = [
       "//foundation/arkui",
@@ -31,7 +34,9 @@ template("napi_font_static") {
     sources = [ "js_font.cpp" ]
 
     deps = []
-    if (!is_cross_platform_build) {
+    if (platform != "" && is_cross_platform_build) {
+      deps += [ "//plugins/libs/napi:napi_$platform" ]
+    } else {
       deps += [ "//foundation/arkui/napi/:ace_napi" ]
     }
 
@@ -48,6 +53,7 @@ foreach(item, ace_platforms) {
   napi_font_static("font_static_" + item.name) {
     defines = []
     cflags_cc = []
+    platform = item.name
     config = {
     }
 

@@ -136,6 +136,14 @@ public:
         scrollable->StopScrollable();
     }
 
+    bool IsScrollBarPressed() const
+    {
+        if (scrollBar_) {
+            return scrollBar_->IsPressed();
+        }
+        return false;
+    }
+
 protected:
     RefPtr<ScrollBar> GetScrollBar() const
     {

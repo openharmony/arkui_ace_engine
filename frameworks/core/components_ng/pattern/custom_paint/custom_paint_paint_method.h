@@ -17,9 +17,9 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CUSTOM_PAINT_CUSTOM_PAINT_PAINT_METHOD_H
 
 #include "experimental/svg/model/SkSVGDOM.h"
-#include "flutter/third_party/txt/src/txt/paragraph.h"
-#include "third_party/skia/include/core/SkCanvas.h"
-#include "third_party/skia/include/core/SkPath.h"
+#include "txt/paragraph.h"
+#include "include/core/SkCanvas.h"
+#include "include/core/SkPath.h"
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
@@ -89,15 +89,21 @@ public:
     {
         fillState_.SetGradient(gradient);
     }
-    
+
     void SetAlpha(double alpha)
     {
         globalState_.SetAlpha(alpha);
     }
-    
+
     void SetCompositeType(CompositeOperation operation)
     {
         globalState_.SetType(operation);
+    }
+
+    // direction is also available in strokeText
+    void SetTextDirection(TextDirection direction)
+    {
+        fillState_.SetOffTextDirection(direction);
     }
 
     void SetStrokeColor(const Color& color)
@@ -254,6 +260,7 @@ protected:
     void UpdatePaintShader(const Ace::Pattern& pattern, SkPaint& paint);
     void InitPaintBlend(SkPaint& paint);
     SkPaint GetStrokePaint();
+    sk_sp<SkShader> MakeConicGradient(SkPaint& paint, const Ace::Gradient& gradient);
 
     void Path2DFill(const OffsetF& offset);
     void Path2DStroke(const OffsetF& offset);
@@ -284,6 +291,9 @@ protected:
     {
         return OffsetF(0.0f, 0.0f);
     }
+
+    double GetAlignOffset(TextAlign align, std::unique_ptr<txt::Paragraph>& paragraph);
+    txt::TextAlign GetEffectiveAlign(txt::TextAlign align, txt::TextDirection direction) const;
 
     PaintState fillState_;
     StrokePaintState strokeState_;

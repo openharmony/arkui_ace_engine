@@ -337,10 +337,6 @@ void NavigationView::Create()
             []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
         navigationGroupNode->AddChild(contentNode);
         navigationGroupNode->SetContentNode(contentNode);
-
-        auto context = contentNode->GetRenderContext();
-        CHECK_NULL_VOID(context);
-        context->UpdateBackgroundColor(Color::WHITE);
     }
 
     // divider node
@@ -542,8 +538,8 @@ void NavigationView::SetMenuItems(std::vector<BarItem>&& menuItems)
             CHECK_NULL_VOID(menuItemNode);
             auto menuItemLayoutProperty = menuItemNode->GetLayoutProperty<ButtonLayoutProperty>();
             CHECK_NULL_VOID(menuItemLayoutProperty);
-            menuItemLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(BACK_BUTTON_SIZE.ConvertToPx()),
-                CalcLength(BACK_BUTTON_SIZE.ConvertToPx())));
+            menuItemLayoutProperty->UpdateUserDefinedIdealSize(
+                CalcSize(CalcLength(BACK_BUTTON_SIZE.ConvertToPx()), CalcLength(BACK_BUTTON_SIZE.ConvertToPx())));
             menuItemLayoutProperty->UpdateType(ButtonType::NORMAL);
             menuItemLayoutProperty->UpdateBorderRadius(BUTTON_RADIUS);
             auto renderContext = menuItemNode->GetRenderContext();
@@ -587,15 +583,16 @@ void NavigationView::SetMenuItems(std::vector<BarItem>&& menuItems)
 
         BuildMoreIemNode(barItemNode);
 
-        auto barMenuNode = MenuView::Create(std::move(params), barItemNodeId, MenuType::NAVIGATION_MENU);
+        auto barMenuNode =
+            MenuView::Create(std::move(params), barItemNodeId, V2::BAR_ITEM_ETS_TAG, MenuType::NAVIGATION_MENU);
         BuildMoreItemNodeAction(barItemNode, barMenuNode);
         auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
         CHECK_NULL_VOID(menuItemNode);
         auto menuItemLayoutProperty = menuItemNode->GetLayoutProperty<ButtonLayoutProperty>();
         CHECK_NULL_VOID(menuItemLayoutProperty);
-        menuItemLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(BACK_BUTTON_SIZE.ConvertToPx()),
-            CalcLength(BACK_BUTTON_SIZE.ConvertToPx())));
+        menuItemLayoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(BACK_BUTTON_SIZE.ConvertToPx()), CalcLength(BACK_BUTTON_SIZE.ConvertToPx())));
         menuItemLayoutProperty->UpdateType(ButtonType::NORMAL);
         menuItemLayoutProperty->UpdateBorderRadius(BUTTON_RADIUS);
         auto renderContext = menuItemNode->GetRenderContext();
@@ -691,8 +688,8 @@ void NavigationView::SetTitleMode(NavigationTitleMode mode)
         CHECK_NULL_VOID(backButtonNode);
         auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
         CHECK_NULL_VOID(backButtonLayoutProperty);
-        backButtonLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(BACK_BUTTON_SIZE.ConvertToPx()),
-            CalcLength(BACK_BUTTON_SIZE.ConvertToPx())));
+        backButtonLayoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(BACK_BUTTON_SIZE.ConvertToPx()), CalcLength(BACK_BUTTON_SIZE.ConvertToPx())));
         backButtonLayoutProperty->UpdateType(ButtonType::NORMAL);
         backButtonLayoutProperty->UpdateBorderRadius(BUTTON_RADIUS);
         backButtonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);

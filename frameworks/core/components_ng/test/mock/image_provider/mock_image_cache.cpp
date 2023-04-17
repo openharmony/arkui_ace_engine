@@ -29,4 +29,9 @@ RefPtr<ImageCache> ImageCache::Create()
 {
     return nullptr;
 }
+
+RefPtr<CachedImageData> ImageCache::GetCacheImageData(const std::string& key)
+{
+    return nullptr;
+}
 } // namespace OHOS::Ace

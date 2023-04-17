@@ -25,10 +25,9 @@
 #include "init_data.h"
 #include "ipc_skeleton.h"
 #include "js_runtime_utils.h"
+#include "locale_config.h"
 #include "native_reference.h"
 #include "service_extension_context.h"
-
-#include "adapter/ohos/osal/pixel_map_ohos.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/ui/rs_ui_director.h"
@@ -37,16 +36,19 @@
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/ace_new_pipe_judgement.h"
+#include "adapter/ohos/entrance/ace_view_ohos.h"
 #include "adapter/ohos/entrance/capability_registry.h"
 #include "adapter/ohos/entrance/dialog_container.h"
 #include "adapter/ohos/entrance/file_asset_provider.h"
-#include "adapter/ohos/entrance/ace_view_ohos.h"
 #include "adapter/ohos/entrance/form_utils_impl.h"
 #include "adapter/ohos/entrance/hap_asset_provider.h"
 #include "adapter/ohos/entrance/plugin_utils_impl.h"
 #include "adapter/ohos/entrance/utils.h"
 #include "adapter/ohos/osal/page_url_checker_ohos.h"
+#include "adapter/ohos/osal/pixel_map_ohos.h"
 #include "base/geometry/rect.h"
+#include "base/i18n/localization.h"
+#include "base/log/ace_performance_check.h"
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"
 #include "base/subwindow/subwindow_manager.h"
@@ -59,7 +61,7 @@
 #include "core/common/form_manager.h"
 #include "core/common/layout_inspector.h"
 #include "core/common/plugin_manager.h"
-#include "locale_config.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -136,7 +138,8 @@ public:
     explicit OccupiedAreaChangeListener(int32_t instanceId) : instanceId_(instanceId) {}
     ~OccupiedAreaChangeListener() = default;
 
-    void OnSizeChange(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info)
+    void OnSizeChange(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info,
+        const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)
     {
         auto rect = info->rect_;
         auto type = info->type_;
@@ -149,10 +152,10 @@ public:
             CHECK_NULL_VOID(taskExecutor);
             ContainerScope scope(instanceId_);
             taskExecutor->PostTask(
-                [container, keyboardRect] {
+                [container, keyboardRect, rsTransaction] {
                     auto context = container->GetPipelineContext();
                     CHECK_NULL_VOID_NOLOG(context);
-                    context->OnVirtualKeyboardAreaChange(keyboardRect);
+                    context->OnVirtualKeyboardAreaChange(keyboardRect, rsTransaction);
                 },
                 TaskExecutor::TaskType::UI);
         }
@@ -175,8 +178,7 @@ public:
         if (container->IsSubContainer()) {
             instanceId = container->GetParentId();
         }
-        auto aceView =
-            static_cast<Platform::AceViewOhos*>(Platform::AceContainer::GetContainer(instanceId)->GetView());
+        auto aceView = static_cast<Platform::AceViewOhos*>(Platform::AceContainer::GetContainer(instanceId)->GetView());
         CHECK_NULL_VOID(aceView);
         DragEventAction action;
         switch (event) {
@@ -240,8 +242,8 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runti
     LOGI("Create UIContentImpl successfully.");
 }
 
-UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context,
-                             void* runtime, bool isCard) : runtime_(runtime), isFormRender_(isCard)
+UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime, bool isCard)
+    : runtime_(runtime), isFormRender_(isCard)
 {
     CHECK_NULL_VOID(context);
     bundleName_ = context->GetBundleName();
@@ -252,6 +254,7 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context,
     CHECK_NULL_VOID(applicationInfo);
     minCompatibleVersionCode_ = applicationInfo->minCompatibleVersionCode;
     isBundle_ = (hapModuleInfo->compileMode == AppExecFwk::CompileMode::JS_BUNDLE);
+    SetConfiguration(context->GetConfiguration());
     const auto& obj = context->GetBindingObject();
     CHECK_NULL_VOID(obj);
     auto ref = obj->Get<NativeReference>();
@@ -318,19 +321,6 @@ void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& u
     LOGD("Initialize UIContentImpl done.");
 }
 
-void UIContentImpl::Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage)
-{
-    CommonInitialize(window, contentInfo, storage);
-    startUrl_ = Platform::AceContainer::RestoreRouterStack(instanceId_, contentInfo);
-    if (startUrl_.empty()) {
-        LOGW("UIContent Restore start url is empty");
-    }
-    LOGI("Restore startUrl = %{public}s", startUrl_.c_str());
-    Platform::AceContainer::RunPage(
-        instanceId_, Platform::AceContainer::GetContainer(instanceId_)->GeneratePageId(), startUrl_, "");
-    LOGI("Restore UIContentImpl done.");
-}
-
 void UIContentImpl::Initialize(const std::shared_ptr<Window>& aceWindow, const std::string& url, NativeValue* storage)
 {
     if (aceWindow && StringUtils::StartWith(aceWindow->GetWindowName(), SUBWINDOW_TOAST_DIALOG_PREFIX)) {
@@ -346,6 +336,19 @@ void UIContentImpl::Initialize(const std::shared_ptr<Window>& aceWindow, const s
     LOGI("Initialize UIContentImpl done");
 }
 
+void UIContentImpl::Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage)
+{
+    CommonInitialize(window, contentInfo, storage);
+    startUrl_ = Platform::AceContainer::RestoreRouterStack(instanceId_, contentInfo);
+    if (startUrl_.empty()) {
+        LOGW("UIContent Restore start url is empty");
+    }
+    LOGI("Restore startUrl = %{public}s", startUrl_.c_str());
+    Platform::AceContainer::RunPage(
+        instanceId_, Platform::AceContainer::GetContainer(instanceId_)->GeneratePageId(), startUrl_, "");
+    LOGI("Restore UIContentImpl done.");
+}
+
 std::string UIContentImpl::GetContentInfo() const
 {
     LOGI("UIContent GetContentInfo");
@@ -353,8 +356,8 @@ std::string UIContentImpl::GetContentInfo() const
 }
 
 // ArkTSCard start
-void UIContentImpl::CommonInitializeForm(OHOS::Rosen::Window* window,
-                                         const std::string& contentInfo, NativeValue* storage)
+void UIContentImpl::CommonInitializeForm(
+    OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage)
 {
     LOGI("Initialize CommonInitializeForm start.");
     ACE_FUNCTION_TRACE();
@@ -417,9 +420,8 @@ void UIContentImpl::CommonInitializeForm(OHOS::Rosen::Window* window,
         LOGI("UIContent: deviceWidth: %{public}d, deviceHeight: %{public}d, default density: %{public}f", deviceWidth,
             deviceHeight, density);
     }
-    SystemProperties::InitDeviceInfo(deviceWidth, deviceHeight, deviceHeight >= deviceWidth ? 0 : 1, density, false);
-    SystemProperties::SetColorMode(ColorMode::LIGHT);
 
+    SystemProperties::InitDeviceInfo(deviceWidth, deviceHeight, deviceHeight >= deviceWidth ? 0 : 1, density, false);
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
     if (context) {
         auto resourceManager = context->GetResourceManager();
@@ -444,12 +446,6 @@ void UIContentImpl::CommonInitializeForm(OHOS::Rosen::Window* window,
             SystemProperties::SetDeviceAccess(
                 resConfig->GetInputDevice() == Global::Resource::InputDevice::INPUTDEVICE_POINTINGDEVICE);
         }
-    } else {
-        LOGI("Context is nullptr, set localeInfo to default");
-        UErrorCode status = U_ZERO_ERROR;
-        icu::Locale locale = icu::Locale::forLanguageTag(Global::I18n::LocaleConfig::GetSystemLanguage(), status);
-        AceApplicationInfo::GetInstance().SetLocale(locale.getLanguage(), locale.getCountry(), locale.getScript(), "");
-        SystemProperties::SetColorMode(ColorMode::LIGHT);
     }
 
     auto abilityContext = OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(context);
@@ -717,12 +713,10 @@ void UIContentImpl::CommonInitializeForm(OHOS::Rosen::Window* window,
     // create ace_view
     Platform::AceViewOhos* aceView = nullptr;
     if (isFormRender_) {
-        aceView =
-            Platform::AceViewOhos::CreateView(instanceId_, true, container->GetSettings().usePlatformAsUIThread);
+        aceView = Platform::AceViewOhos::CreateView(instanceId_, true, container->GetSettings().usePlatformAsUIThread);
         Platform::AceViewOhos::SurfaceCreated(aceView, window_);
     } else {
-        aceView =
-            Platform::AceViewOhos::CreateView(instanceId_, false, container->GetSettings().usePlatformAsUIThread);
+        aceView = Platform::AceViewOhos::CreateView(instanceId_, false, container->GetSettings().usePlatformAsUIThread);
         Platform::AceViewOhos::SurfaceCreated(aceView, window_);
     }
 
@@ -750,8 +744,8 @@ void UIContentImpl::CommonInitializeForm(OHOS::Rosen::Window* window,
         Platform::AceContainer::SetView(aceView, density, 0, 0, window_, callback);
     } else {
         if (isFormRender_) {
-            LOGI("Platform::AceContainer::SetViewNew is card formWidth=%{public}f, formHeight=%{public}f",
-                formWidth_, formHeight_);
+            LOGI("Platform::AceContainer::SetViewNew is card formWidth=%{public}f, formHeight=%{public}f", formWidth_,
+                formHeight_);
             Platform::AceContainer::SetViewNew(aceView, density, formWidth_, formHeight_, window_);
             auto frontend = AceType::DynamicCast<FormFrontendDeclarative>(container->GetFrontend());
             CHECK_NULL_VOID(frontend);
@@ -805,6 +799,48 @@ void UIContentImpl::CommonInitializeForm(OHOS::Rosen::Window* window,
         }
     }
     LayoutInspector::SetCallback(instanceId_);
+}
+
+void UIContentImpl::SetConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config)
+{
+    if (config == nullptr) {
+        LOGI("config is nullptr, set localeInfo to default");
+        UErrorCode status = U_ZERO_ERROR;
+        icu::Locale locale = icu::Locale::forLanguageTag(Global::I18n::LocaleConfig::GetSystemLanguage(), status);
+        AceApplicationInfo::GetInstance().SetLocale(locale.getLanguage(), locale.getCountry(), locale.getScript(), "");
+        SystemProperties::SetColorMode(ColorMode::LIGHT);
+        return;
+    }
+
+    LOGI("SetConfiguration");
+    auto colorMode = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+    auto deviceAccess = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
+    auto languageTag = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
+    if (!colorMode.empty()) {
+        LOGI("SetConfiguration colorMode: %{public}s", colorMode.c_str());
+        if (colorMode == "dark") {
+            SystemProperties::SetColorMode(ColorMode::DARK);
+        } else {
+            SystemProperties::SetColorMode(ColorMode::LIGHT);
+        }
+    }
+
+    if (!deviceAccess.empty()) {
+        // Event of accessing mouse or keyboard
+        LOGI("SetConfiguration deviceAccess: %{public}s", deviceAccess.c_str());
+        SystemProperties::SetDeviceAccess(deviceAccess == "true");
+    }
+
+    if (!languageTag.empty()) {
+        LOGI("SetConfiguration languageTag: %{public}s", languageTag.c_str());
+        std::string language;
+        std::string script;
+        std::string region;
+        Localization::ParseLocaleTag(languageTag, language, script, region, false);
+        if (!language.empty() || !script.empty() || !region.empty()) {
+            AceApplicationInfo::GetInstance().SetLocale(language, region, script, "");
+        }
+    }
 }
 
 std::shared_ptr<Rosen::RSSurfaceNode> UIContentImpl::GetFormRootNode()
@@ -889,6 +925,9 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
             deviceHeight, density);
     }
     SystemProperties::InitDeviceInfo(deviceWidth, deviceHeight, deviceHeight >= deviceWidth ? 0 : 1, density, false);
+    // Initialize performance check parameters
+    SystemProperties::InitPerformanceParameters();
+    AcePerformanceCheck::Start();
     SystemProperties::SetColorMode(ColorMode::LIGHT);
 
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
@@ -1224,9 +1263,15 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     }
 
     Platform::AceViewOhos::SurfaceChanged(aceView, 0, 0, deviceHeight >= deviceWidth ? 0 : 1);
+    auto pipeline = container->GetPipelineContext();
+    if (pipeline && window_) {
+        auto rsConfig = window_->GetKeyboardAnimationConfig();
+        KeyboardAnimationConfig config = { rsConfig.curveType_, rsConfig.curveParams_, rsConfig.durationIn_,
+            rsConfig.durationOut_ };
+        pipeline->SetKeyboardAnimationConfig(config);
+    }
     // Set sdk version in module json mode
     if (isModelJson) {
-        auto pipeline = container->GetPipelineContext();
         if (pipeline && appInfo) {
             LOGI("SetMinPlatformVersion code is %{public}d", appInfo->apiCompatibleVersion);
             pipeline->SetMinPlatformVersion(appInfo->apiCompatibleVersion);
@@ -1272,6 +1317,8 @@ void UIContentImpl::ReloadForm()
     auto flutterAssetManager = AceType::DynamicCast<FlutterAssetManager>(container->GetAssetManager());
     flutterAssetManager->ReloadProvider();
     Platform::AceContainer::ClearEngineCache(instanceId_);
+    Platform::AceContainer::RunPage(instanceId_, Platform::AceContainer::GetContainer(instanceId_)->GeneratePageId(),
+        startUrl_, "");
 }
 
 void UIContentImpl::Focus()
@@ -1291,6 +1338,8 @@ void UIContentImpl::Destroy()
     LOGI("UIContentImpl: window destroy");
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_VOID_NOLOG(container);
+    // stop performance check and output json file
+    AcePerformanceCheck::Stop();
     if (strcmp(AceType::TypeName(container), AceType::TypeName<Platform::DialogContainer>()) == 0) {
         Platform::DialogContainer::DestroyContainer(instanceId_);
     } else {
@@ -1377,7 +1426,7 @@ bool UIContentImpl::ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::Pointer
 
 bool UIContentImpl::ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& touchEvent)
 {
-    LOGI("UIContentImpl: OnKeyUp called,touchEvent info: keyCode is %{private}d,"
+    LOGD("UIContentImpl: OnKeyUp called,touchEvent info: keyCode is %{private}d,"
          "keyAction is %{public}d, keyActionTime is %{public}" PRId64,
         touchEvent->GetKeyCode(), touchEvent->GetKeyAction(), touchEvent->GetActionTime());
     auto container = AceEngine::Get().GetContainer(instanceId_);
@@ -1388,13 +1437,13 @@ bool UIContentImpl::ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& 
 
 bool UIContentImpl::ProcessAxisEvent(const std::shared_ptr<OHOS::MMI::AxisEvent>& axisEvent)
 {
-    LOGI("UIContentImpl ProcessAxisEvent");
+    LOGD("UIContentImpl ProcessAxisEvent");
     return false;
 }
 
 bool UIContentImpl::ProcessVsyncEvent(uint64_t timeStampNanos)
 {
-    LOGI("UIContentImpl ProcessVsyncEvent");
+    LOGD("UIContentImpl ProcessVsyncEvent");
     return false;
 }
 
@@ -1421,7 +1470,7 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
 }
 
 void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
-    const std::shared_ptr<OHOS::Rosen::RSTransaction> rsTransaction)
+    const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)
 {
     LOGI("UIContentImpl: UpdateViewportConfig %{public}s", config.ToString().c_str());
     SystemProperties::SetResolution(config.Density());
@@ -1431,12 +1480,15 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
-        [config, container, reason, rsTransaction]() {
+        [config, container, reason, rsTransaction, rsWindow = window_]() {
             container->SetWindowPos(config.Left(), config.Top());
             auto pipelineContext = container->GetPipelineContext();
             if (pipelineContext) {
                 pipelineContext->SetDisplayWindowRectInfo(
                     Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())));
+                if (rsWindow) {
+                    pipelineContext->SetIsLayoutFullScreen(rsWindow->IsLayoutFullScreen());
+                }
             }
             auto aceView = static_cast<Platform::AceViewOhos*>(container->GetAceView());
             CHECK_NULL_VOID(aceView);
@@ -1446,6 +1498,23 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
             Platform::AceViewOhos::SurfacePositionChanged(aceView, config.Left(), config.Top());
         },
         TaskExecutor::TaskType::PLATFORM);
+}
+
+void UIContentImpl::SetIgnoreViewSafeArea(bool ignoreViewSafeArea)
+{
+    LOGI("UIContentImpl: SetIgnoreViewSafeArea:%{public}u", ignoreViewSafeArea);
+    auto container = AceEngine::Get().GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostSyncTask(
+        [container, ignoreSafeArea = ignoreViewSafeArea]() {
+            auto pipelineContext = container->GetPipelineContext();
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->SetIgnoreViewSafeArea(ignoreSafeArea);
+        },
+        TaskExecutor::TaskType::UI);
 }
 
 void UIContentImpl::UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco)
@@ -1489,11 +1558,11 @@ void UIContentImpl::DumpInfo(const std::vector<std::string>& params, std::vector
     CHECK_NULL_VOID(container);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostSyncTask(
-        [&]() {
-            container->Dump(params, info);
-        },
-        TaskExecutor::TaskType::UI);
+    auto ret = taskExecutor->PostSyncTaskTimeout(
+        [&]() { container->Dump(params, info); }, TaskExecutor::TaskType::UI, 1500); // timeout 1.5s
+    if (!ret) {
+        LOGE("DumpInfo failed");
+    }
 }
 
 void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDialog)

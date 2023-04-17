@@ -16,8 +16,8 @@
 #include "core/components/calendar/rosen_render_calendar.h"
 
 #include "render_service_client/core/ui/rs_node.h"
-#include "flutter/third_party/txt/src/txt/paragraph_builder.h"
-#include "flutter/third_party/txt/src/txt/paragraph_style.h"
+#include "txt/paragraph_builder.h"
+#include "txt/paragraph_style.h"
 
 #include "base/i18n/localization.h"
 #include "base/utils/string_utils.h"

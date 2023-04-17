@@ -53,7 +53,7 @@ public:
 
     FormRendererGroup(const std::shared_ptr<OHOS::AbilityRuntime::Context> context,
                       const std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime);
-    ~FormRendererGroup() = default;
+    ~FormRendererGroup();
 
     void AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
     void UpdateForm(const OHOS::AppExecFwk::FormJsInfo& formJsInfo);

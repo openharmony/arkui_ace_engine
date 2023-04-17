@@ -2386,6 +2386,8 @@ void WebDelegate::InitWebViewWithSurface()
                 initArgs.web_engine_args_to_add.push_back(
                     std::string("--ohos-custom-scheme=").append(customScheme));
             }
+            initArgs.web_engine_args_to_add.push_back(
+                std::string("--init-background-color=").append(std::to_string(delegate->backgroundColor_)));
             if (isEnhanceSurface) {
                 LOGI("Create webview with isEnhanceSurface");
                 delegate->nweb_ = OHOS::NWeb::NWebAdapterHelper::Instance().CreateNWeb(
@@ -2736,6 +2738,38 @@ void WebDelegate::UpdateForceDarkAccess(const bool& access)
             } else {
                 setting->PutForceDarkModeEnabled(false);
             }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateAudioResumeInterval(const int32_t& resumeInterval)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), resumeInterval]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            CHECK_NULL_VOID(delegate->nweb_);
+            delegate->nweb_->SetAudioResumeInterval(resumeInterval);
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateAudioExclusive(const bool& audioExclusive)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), audioExclusive]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            CHECK_NULL_VOID(delegate->nweb_);
+            delegate->nweb_->SetAudioExclusive(audioExclusive);
         },
         TaskExecutor::TaskType::PLATFORM);
 }

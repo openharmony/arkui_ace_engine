@@ -20,6 +20,8 @@
 
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components_ng/event/click_event.h"
 #include "core/components_ng/pattern/image/image_event_hub.h"
 #include "core/components_ng/pattern/image/image_layout_algorithm.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
@@ -27,6 +29,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/canvas_image.h"
+#include "core/image/image_source_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -79,8 +82,23 @@ public:
     {
         draggable_ = draggable;
     }
+    bool IsDraggable() const
+    {
+        return draggable_;
+    }
+
+    void SetCopyOption(CopyOptions value)
+    {
+        copyOption_ = value;
+    }
+
+    void SetSyncLoad(bool value)
+    {
+        syncLoad_ = value;
+    }
 
     void BeforeCreatePaintWrapper() override;
+    void DumpInfo() override;
 
 private:
     void OnAttachToFrameNode() override;
@@ -101,7 +119,13 @@ private:
     void SetRedrawCallback();
     void RegisterVisibleAreaChange();
 
+    void InitCopy();
+    void HandleCopy();
+    void OpenSelectOverlay();
+    void CloseSelectOverlay();
+
     void UpdateFillColorIfForegroundColor();
+    void UpdateDragEvent(const RefPtr<OHOS::Ace::DragEvent>& event);
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
@@ -113,19 +137,28 @@ private:
     LoadSuccessNotifyTask CreateLoadSuccessCallbackForAlt();
     LoadFailNotifyTask CreateLoadFailCallbackForAlt();
 
+
+    CopyOptions copyOption_ = CopyOptions::None;
+    bool syncLoad_ = false;
+    bool draggable_ = false;
+    bool isShow_ = true; // TODO: remove it later when use [isActive_] to determine image data management
+
     RefPtr<ImageLoadingContext> loadingCtx_;
     RefPtr<CanvasImage> image_;
     RectF dstRect_;
     RectF srcRect_;
-
-    bool draggable_ = false;
-    bool isShow_ = true; // TODO: remove it later when use [isActive_] to determine image data management
 
     // clear alt data after [OnImageLoadSuccess] being called
     RefPtr<ImageLoadingContext> altLoadingCtx_;
     RefPtr<CanvasImage> altImage_;
     std::unique_ptr<RectF> altDstRect_;
     std::unique_ptr<RectF> altSrcRect_;
+
+    RefPtr<LongPressEvent> longPressEvent_;
+    RefPtr<ClickEvent> clickEvent_;
+    RefPtr<InputEvent> mouseEvent_;
+    RefPtr<Clipboard> clipboard_;
+    RefPtr<SelectOverlayProxy> selectOverlay_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ImagePattern);
 };

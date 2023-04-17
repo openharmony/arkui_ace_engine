@@ -40,6 +40,8 @@ public:
     static void SetSize(const JSCallbackInfo& info);
     static void SetIndicatorStyle(const JSCallbackInfo& info);
     static void SetItemSpace(const JSCallbackInfo& info);
+    static void SetPreviousMargin(const JSCallbackInfo& info);
+    static void SetNextMargin(const JSCallbackInfo& info);
     static void SetDisplayMode(int32_t index);
     static void SetEffectMode(const JSCallbackInfo& info);
     static void SetDisplayCount(const JSCallbackInfo& info);

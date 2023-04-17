@@ -63,6 +63,7 @@ void ScrollableActuator::InitializeScrollable()
             scrollEffect->InitialEdgeEffect();
         }
         scrollable->Initialize(host->GetContext());
+        scrollable->SetMouseLeftButtonScroll(event->GetMouseLeftButtonScroll());
         event->SetScrollable(scrollable);
     }
     initialized_ = true;

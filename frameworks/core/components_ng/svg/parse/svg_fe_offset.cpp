@@ -15,7 +15,7 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_fe_offset.h"
 
-#include "third_party/skia/include/effects/SkOffsetImageFilter.h"
+#include "include/effects/SkOffsetImageFilter.h"
 
 #include "base/utils/utils.h"
 #include "frameworks/core/components/declaration/svg/svg_fe_offset_declaration.h"

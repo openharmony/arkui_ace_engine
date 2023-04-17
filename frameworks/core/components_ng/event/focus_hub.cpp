@@ -268,7 +268,7 @@ bool FocusHub::IsFocusableScope()
     }
     std::list<RefPtr<FocusHub>> focusNodes;
     FlushChildrenFocusHub(focusNodes);
-    // TODO: Contaner without child can be focusable
+    // TODO: Container without child can be focusable
     return std::any_of(focusNodes.begin(), focusNodes.end(),
         [](const RefPtr<FocusHub>& focusNode) { return focusNode->IsFocusable(); });
 }
@@ -597,11 +597,11 @@ void FocusHub::SwitchFocus(const RefPtr<FocusHub>& focusNode)
     lastWeakFocusNode_ = AceType::WeakClaim(AceType::RawPtr(focusNode));
 
     if (focusNodeNeedBlur) {
-        LOGD("Switch focus frome %{public}s/%{public}d to %{public}s/%{public}d",
+        LOGD("Switch focus from %{public}s/%{public}d to %{public}s/%{public}d",
             focusNodeNeedBlur->GetFrameName().c_str(), focusNodeNeedBlur->GetFrameId(),
             focusNode->GetFrameName().c_str(), focusNode->GetFrameId());
     } else {
-        LOGD("Switch focus frome NULL/NULL to %{public}s/%{public}d", focusNode->GetFrameName().c_str(),
+        LOGD("Switch focus from NULL/NULL to %{public}s/%{public}d", focusNode->GetFrameName().c_str(),
             focusNode->GetFrameId());
     }
     if (IsCurrentFocus()) {
@@ -746,7 +746,7 @@ void FocusHub::OnFocusNode()
 
 void FocusHub::OnBlurNode()
 {
-    LOGI("FocusHub: Node(%{public}s/%{public}d) on blur", GetFrameName().c_str(), GetFrameId());
+    LOGD("FocusHub: Node(%{public}s/%{public}d) on blur", GetFrameName().c_str(), GetFrameId());
     if (onBlurInternal_) {
         onBlurInternal_();
     }

@@ -172,7 +172,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg002, TestSize.Level1)
     /**
      * @tc.steps2: Call the function AddOnAreaChangeNode.
      */
-    context_->visibleAreaChangeNodes_.clear();
+    context_->onVisibleAreaChangeNodeIds_.clear();
     context_->AddOnAreaChangeNode(frameNode_->GetId());
     context_->AddOnAreaChangeNode(customNode_->GetId());
     context_->AddOnAreaChangeNode(ElementRegister::UndefinedElementId);
@@ -183,10 +183,11 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg002, TestSize.Level1)
      */
     context_->onAreaChangeNodeIds_.clear();
     context_->AddVisibleAreaChangeNode(frameNode_, DEFAULT_DOUBLE1, nullptr);
-    EXPECT_EQ(context_->visibleAreaChangeNodes_.size(), DEFAULT_SIZE1);
-    context_->visibleAreaChangeNodes_[customNode_->GetId()] = std::list<VisibleCallbackInfo>();
-    context_->visibleAreaChangeNodes_[ElementRegister::UndefinedElementId] = std::list<VisibleCallbackInfo>();
-    EXPECT_EQ(context_->visibleAreaChangeNodes_.size(), DEFAULT_SIZE3);
+    context_->AddVisibleAreaChangeNode(frameNode_, DEFAULT_DOUBLE1, nullptr, false);
+    EXPECT_EQ(context_->onVisibleAreaChangeNodeIds_.size(), DEFAULT_SIZE1);
+    context_->onVisibleAreaChangeNodeIds_.emplace(customNode_->GetId());
+    context_->onVisibleAreaChangeNodeIds_.emplace(ElementRegister::UndefinedElementId);
+    EXPECT_EQ(context_->onVisibleAreaChangeNodeIds_.size(), DEFAULT_SIZE3);
 
     /**
      * @tc.steps4: Call the function FlushVsync with isEtsCard=false.

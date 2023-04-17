@@ -66,6 +66,19 @@ void AnimationUtils::Animate(
         timingProtocol, NativeCurveHelper::ToNativeCurve(option.GetCurve()), callback, finishCallback);
 }
 
+void AnimationUtils::AnimateWithCurrentOptions(
+    const PropertyCallback& callback, const FinishCallback& finishCallback, bool timingSensitive)
+{
+    Rosen::RSNode::AnimateWithCurrentOptions(callback, finishCallback, timingSensitive);
+}
+
+void AnimationUtils::AnimateWithCurrentCallback(const AnimationOption& option, const PropertyCallback& callback)
+{
+    const auto& timingProtocol = OptionToTimingProtocol(option);
+    Rosen::RSNode::AnimateWithCurrentCallback(timingProtocol, NativeCurveHelper::ToNativeCurve(option.GetCurve()),
+        callback);
+}
+
 void AnimationUtils::AddKeyFrame(float fraction, const RefPtr<Curve>& curve, const PropertyCallback& callback)
 {
     Rosen::RSNode::AddKeyFrame(fraction, NativeCurveHelper::ToNativeCurve(curve), callback);

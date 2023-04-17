@@ -15,7 +15,7 @@ import("//build/test.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("gestures_test_ng") {
-  module_out_path = gestures_test_out_path
+  module_out_path = gestures_test_output_path
 
   sources = [ "gestures_test_ng.cpp" ]
 

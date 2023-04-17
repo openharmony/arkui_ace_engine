@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -66,16 +66,39 @@ namespace OHOS::Ace::NG {
 
 class Paragraph;
 
-struct SpanItem : public Referenced {
+struct SpanItem : public AceType {
+    DECLARE_ACE_TYPE(SpanItem, AceType);
+
+public:
+    SpanItem() = default;
+    virtual ~SpanItem()
+    {
+        children.clear();
+    }
     int32_t positon;
     std::string content;
     std::unique_ptr<FontStyle> fontStyle;
     GestureEventFunc onClick;
     std::list<RefPtr<SpanItem>> children;
+    int32_t placeHolderIndex = -1;
 
-    void UpdateParagraph(const RefPtr<Paragraph>& builder);
+    virtual int32_t UpdateParagraph(const RefPtr<Paragraph>& builder, double width = 0.0f, double height = 0.0f,
+        VerticalAlign verticalAlign = VerticalAlign::BASELINE);
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
+    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
+};
+
+struct ImageSpanItem : public SpanItem {
+    DECLARE_ACE_TYPE(ImageSpanItem, SpanItem);
+
+public:
+    ImageSpanItem() = default;
+    ~ImageSpanItem() override = default;
+    int32_t UpdateParagraph(
+        const RefPtr<Paragraph>& builder, double width, double height, VerticalAlign verticalAlign) override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override {};
+
+    ACE_DISALLOW_COPY_AND_MOVE(ImageSpanItem);
 };
 
 class ACE_EXPORT SpanNode : public UINode {

@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DATA_PANEL_ROSEN_RENDER_DATA_PANEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DATA_PANEL_ROSEN_RENDER_DATA_PANEL_H
 
-#include "third_party/skia/include/core/SkCanvas.h"
+#include "include/core/SkCanvas.h"
 
 #include "core/components/data_panel/render_data_panel.h"
 

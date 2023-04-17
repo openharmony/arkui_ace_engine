@@ -38,6 +38,11 @@ const int32_t THEME_ID_DEFAULT = 117440515;
 
 } // namespace
 
+SubContainer::~SubContainer()
+{
+    Destroy();
+}
+
 void SubContainer::Initialize()
 {
     if (!outSidePipelineContext_.Upgrade()) {

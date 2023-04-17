@@ -66,9 +66,21 @@ public:
     {
         duration_ = duration;
     }
-#ifdef ENABLE_DRAG_FRAMEWORK
-    void SetGestureHub(WeakPtr<GestureEventHub> gestureHub);
-#endif // ENABLE_DRAG_FRAMEWORK
+
+    void SetGestureHub(WeakPtr<GestureEventHub> gestureHub)
+    {
+        gestureHub_ = gestureHub;
+    }
+
+    void SetThumbnailCallback(std::function<void(Offset)>&& callback)
+    {
+        callback_ = std::move(callback);
+    }
+
+    bool HasThumbnailCallback()
+    {
+        return static_cast<bool>(callback_);
+    }
 private:
     void HandleTouchDownEvent(const TouchEvent& event) override;
     void HandleTouchUpEvent(const TouchEvent& event) override;
@@ -82,17 +94,15 @@ private:
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback, bool isRepeat);
     void OnResetStatus() override;
     double ConvertPxToVp(double offset) const;
-#ifdef ENABLE_DRAG_FRAMEWORK
     void ThumbnailTimer(int32_t time);
-    void GetThumbnailPixelMap();
 
     WeakPtr<GestureEventHub> gestureHub_;
     CancelableCallback<void()> thumbnailTimer_;
     int32_t thumbnailDeadline = 150;
-#endif // ENABLE_DRAG_FRAMEWORK
     OnLongPress onLongPress_;
     CancelableCallback<void()> deadlineTimer_;
     CancelableCallback<void()> timer_;
+    std::function<void(Offset)> callback_;
     int32_t duration_ = 500;
     bool repeat_ = false;
     TimeStamp time_;

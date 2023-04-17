@@ -607,7 +607,7 @@ void AceContainer::InitializeCallback()
 
     auto&& viewChangeCallback = [context = pipelineContext_, id = instanceId_](int32_t width, int32_t height,
                                     WindowSizeChangeReason type,
-                                    const std::shared_ptr<Rosen::RSTransaction> rsTransaction) {
+                                    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) {
         ContainerScope scope(id);
         ACE_SCOPED_TRACE("ViewChangeCallback(%d, %d)", width, height);
         context->GetTaskExecutor()->PostTask(
@@ -1113,6 +1113,11 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, AceView* view, dou
     pipelineContext_->SetIsRightToLeft(AceApplicationInfo::GetInstance().IsRightToLeft());
     pipelineContext_->SetWindowId(windowId);
     pipelineContext_->SetWindowModal(windowModal_);
+    if (uiWindow_) {
+        auto windowType = uiWindow_->GetType();
+        pipelineContext_->SetIsAppWindow(
+            windowType < Rosen::WindowType::SYSTEM_WINDOW_BASE && windowType >= Rosen::WindowType::APP_WINDOW_BASE);
+    }
     if (installationFree_) {
         pipelineContext_->SetInstallationFree(installationFree_);
         pipelineContext_->SetSharePanelCallback(std::move(sharePanelCallback_));
@@ -1332,23 +1337,24 @@ void AceContainer::InitializeSubContainer(int32_t parentContainerId)
 void AceContainer::InitWindowCallback()
 {
     LOGD("AceContainer InitWindowCallback");
-    if (windowModal_ == WindowModal::CONTAINER_MODAL && pipelineContext_) {
-        auto& windowManager = pipelineContext_->GetWindowManager();
-        std::shared_ptr<AppExecFwk::AbilityInfo> info = abilityInfo_.lock();
-        if (info != nullptr) {
-            windowManager->SetAppLabelId(info->labelId);
-            windowManager->SetAppIconId(info->iconId);
-        }
-        windowManager->SetWindowMinimizeCallBack([window = uiWindow_]() { window->Minimize(); });
-        windowManager->SetWindowMaximizeCallBack([window = uiWindow_]() { window->Maximize(); });
-        windowManager->SetWindowRecoverCallBack([window = uiWindow_]() { window->Recover(); });
-        windowManager->SetWindowCloseCallBack([window = uiWindow_]() { window->Close(); });
-        windowManager->SetWindowStartMoveCallBack([window = uiWindow_]() { window->StartMove(); });
-        windowManager->SetWindowSplitCallBack(
-            [window = uiWindow_]() { window->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY); });
-        windowManager->SetWindowGetModeCallBack(
-            [window = uiWindow_]() -> WindowMode { return static_cast<WindowMode>(window->GetMode()); });
+    if (!pipelineContext_ || !uiWindow_) {
+        return;
     }
+    auto& windowManager = pipelineContext_->GetWindowManager();
+    std::shared_ptr<AppExecFwk::AbilityInfo> info = abilityInfo_.lock();
+    if (info != nullptr) {
+        windowManager->SetAppLabelId(info->labelId);
+        windowManager->SetAppIconId(info->iconId);
+    }
+    windowManager->SetWindowMinimizeCallBack([window = uiWindow_]() { window->Minimize(); });
+    windowManager->SetWindowMaximizeCallBack([window = uiWindow_]() { window->Maximize(); });
+    windowManager->SetWindowRecoverCallBack([window = uiWindow_]() { window->Recover(); });
+    windowManager->SetWindowCloseCallBack([window = uiWindow_]() { window->Close(); });
+    windowManager->SetWindowStartMoveCallBack([window = uiWindow_]() { window->StartMove(); });
+    windowManager->SetWindowSplitCallBack(
+        [window = uiWindow_]() { window->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY); });
+    windowManager->SetWindowGetModeCallBack(
+        [window = uiWindow_]() -> WindowMode { return static_cast<WindowMode>(window->GetMode()); });
 
     pipelineContext_->SetGetWindowRectImpl([window = uiWindow_]() -> Rect {
         Rect rect;
@@ -1357,6 +1363,60 @@ void AceContainer::InitWindowCallback()
         rect.SetRect(windowRect.posX_, windowRect.posY_, windowRect.width_, windowRect.height_);
         return rect;
     });
+
+    pipelineContext_->SetGetViewSafeAreaImpl([window = uiWindow_, this]() -> SafeAreaEdgeInserts {
+        return SetViewSafeArea(window);
+    });
+}
+
+// Get SafeArea by Window
+SafeAreaEdgeInserts AceContainer::SetViewSafeArea(sptr<OHOS::Rosen::Window> window)
+{
+    SafeAreaEdgeInserts viewSafeArea;
+    CHECK_NULL_RETURN_NOLOG(window, viewSafeArea);
+
+    Rosen::AvoidArea systemAvoidArea;
+    Rosen::AvoidArea cutoutAvoidArea;
+    Rosen::WMError systemRet = window->GetAvoidAreaByType(Rosen::AvoidAreaType::TYPE_SYSTEM, systemAvoidArea);
+    Rosen::WMError cutoutRet = window->GetAvoidAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT, cutoutAvoidArea);
+    Rect topRect;
+    Rect leftRect;
+    Rect rightRect;
+    Rect bottomRect;
+    if (systemRet == Rosen::WMError::WM_OK) {
+        topRect = Rect(static_cast<double>(systemAvoidArea.topRect_.posX_),
+            static_cast<double>(systemAvoidArea.topRect_.posY_), static_cast<double>(systemAvoidArea.topRect_.width_),
+            static_cast<double>(systemAvoidArea.topRect_.height_));
+        leftRect = Rect(static_cast<double>(systemAvoidArea.leftRect_.posX_),
+            static_cast<double>(systemAvoidArea.leftRect_.posY_), static_cast<double>(systemAvoidArea.leftRect_.width_),
+            static_cast<double>(systemAvoidArea.leftRect_.height_));
+        rightRect = Rect(static_cast<double>(systemAvoidArea.rightRect_.posX_),
+            static_cast<double>(systemAvoidArea.rightRect_.posY_),
+            static_cast<double>(systemAvoidArea.rightRect_.width_),
+            static_cast<double>(systemAvoidArea.rightRect_.height_));
+        bottomRect = Rect(static_cast<double>(systemAvoidArea.bottomRect_.posX_),
+            static_cast<double>(systemAvoidArea.bottomRect_.posY_),
+            static_cast<double>(systemAvoidArea.bottomRect_.width_),
+            static_cast<double>(systemAvoidArea.bottomRect_.height_));
+    }
+    if (cutoutRet == Rosen::WMError::WM_OK) {
+        topRect.CombineRect(Rect(static_cast<double>(cutoutAvoidArea.topRect_.posX_),
+            static_cast<double>(cutoutAvoidArea.topRect_.posY_), static_cast<double>(cutoutAvoidArea.topRect_.width_),
+            static_cast<double>(cutoutAvoidArea.topRect_.height_)));
+        leftRect.CombineRect(Rect(static_cast<double>(cutoutAvoidArea.leftRect_.posX_),
+            static_cast<double>(cutoutAvoidArea.leftRect_.posY_), static_cast<double>(cutoutAvoidArea.leftRect_.width_),
+            static_cast<double>(cutoutAvoidArea.leftRect_.height_)));
+        rightRect.CombineRect(Rect(static_cast<double>(cutoutAvoidArea.rightRect_.posX_),
+            static_cast<double>(cutoutAvoidArea.rightRect_.posY_),
+            static_cast<double>(cutoutAvoidArea.rightRect_.width_),
+            static_cast<double>(cutoutAvoidArea.rightRect_.height_)));
+        bottomRect.CombineRect(Rect(static_cast<double>(cutoutAvoidArea.bottomRect_.posX_),
+            static_cast<double>(cutoutAvoidArea.bottomRect_.posY_),
+            static_cast<double>(cutoutAvoidArea.bottomRect_.width_),
+            static_cast<double>(cutoutAvoidArea.bottomRect_.height_)));
+    }
+    viewSafeArea.SetRect(leftRect, topRect, rightRect, bottomRect);
+    return viewSafeArea;
 }
 
 std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityContextByModule(
@@ -1442,6 +1502,27 @@ void AceContainer::NotifyConfigurationChange(bool needReloadTransition)
                 TaskExecutor::TaskType::UI);
         },
         TaskExecutor::TaskType::JS);
+}
+
+void AceContainer::HotReload()
+{
+    auto taskExecutor = GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [instanceId = instanceId_, weak = WeakClaim(this)]() {
+            ContainerScope scope(instanceId);
+            auto container = weak.Upgrade();
+            CHECK_NULL_VOID(container);
+            auto frontend = container->GetFrontend();
+            CHECK_NULL_VOID(frontend);
+            LOGI("AceContainer::Flush Frontend for HotReload");
+            frontend->HotReload();
+
+            auto pipeline = container->GetPipelineContext();
+            CHECK_NULL_VOID(pipeline);
+            pipeline->FlushReload();
+        },
+        TaskExecutor::TaskType::UI);
 }
 
 void AceContainer::SetToken(sptr<IRemoteObject>& token)
@@ -1599,16 +1680,12 @@ void AceContainer::GetImageDataFromAshmem(
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_HotReloadPage()
 {
     AceEngine::Get().NotifyContainers([](const RefPtr<Container>& container) {
-        auto ace = AceType::DynamicCast<AceContainer>(container);
-        CHECK_NULL_VOID(ace);
-        if (ace->IsUseNewPipeline()) {
-            auto frontend = ace->GetFrontend();
-            CHECK_NULL_VOID(frontend);
-            frontend->RebuildAllPages();
+        LOGI("starting hotReload");
+        if (Container::IsCurrentUseNewPipeline()) {
+            container->HotReload();
         } else {
-            ace->NotifyConfigurationChange(true);
+            container->NotifyConfigurationChange(true);
         }
-        LOGI("frontend rebuild finished");
     });
 }
 

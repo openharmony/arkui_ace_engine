@@ -2074,37 +2074,58 @@ void PipelineContext::OnIdle(int64_t deadline)
     FlushPageUpdateTasks();
 }
 
-void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight)
+void PipelineContext::OnVirtualKeyboardHeightChange(
+    float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     CHECK_RUN_ON(UI);
-    double positionY = 0;
-    if (textFieldManager_) {
-        positionY = textFieldManager_->GetClickPosition().GetY();
+    ACE_FUNCTION_TRACE();
+#ifdef ENABLE_ROSEN_BACKEND
+    if (rsTransaction) {
+        FlushMessages();
+        rsTransaction->Begin();
     }
-    keyboardHeight = keyboardHeight / viewScale_;
-    auto height = height_ / viewScale_;
-    double offsetFix = (height - positionY) > 100.0 ? keyboardHeight - (height - positionY) / 2.0 : keyboardHeight;
-    LOGI("OnVirtualKeyboardAreaChange positionY:%{public}f safeArea:%{public}f offsetFix:%{public}f", positionY,
-        (height - keyboardHeight), offsetFix);
-    if (NearZero(keyboardHeight)) {
-        if (textFieldManager_ && AceType::InstanceOf<TextFieldManager>(textFieldManager_)) {
-            auto textFieldManager = AceType::DynamicCast<TextFieldManager>(textFieldManager_);
-            if (textFieldManager->ResetSlidingPanelParentHeight()) {
-                return;
-            }
+#endif
+
+    auto func = [this, keyboardHeight]() {
+        double positionY = 0;
+        if (textFieldManager_) {
+            positionY = textFieldManager_->GetClickPosition().GetY();
         }
-        SetRootSizeWithWidthHeight(width_, height_, 0);
-        rootOffset_.SetY(0.0);
-    } else if (positionY > (height - keyboardHeight) && offsetFix > 0.0) {
-        if (textFieldManager_ && AceType::InstanceOf<TextFieldManager>(textFieldManager_)) {
-            auto textFieldManager = AceType::DynamicCast<TextFieldManager>(textFieldManager_);
-            if (textFieldManager->UpdatePanelForVirtualKeyboard(-offsetFix, height)) {
-                return;
+        auto newKeyboardHeight = keyboardHeight / viewScale_;
+        auto height = height_ / viewScale_;
+        double offsetFix =
+            (height - positionY) > 100.0 ? newKeyboardHeight - (height - positionY) / 2.0 : newKeyboardHeight;
+        LOGI("OnVirtualKeyboardAreaChange positionY:%{public}f safeArea:%{public}f offsetFix:%{public}f", positionY,
+            (height - newKeyboardHeight), offsetFix);
+        if (NearZero(newKeyboardHeight)) {
+            if (textFieldManager_ && AceType::InstanceOf<TextFieldManager>(textFieldManager_)) {
+                auto textFieldManager = AceType::DynamicCast<TextFieldManager>(textFieldManager_);
+                if (textFieldManager->ResetSlidingPanelParentHeight()) {
+                    return;
+                }
             }
+            SetRootSizeWithWidthHeight(width_, height_, 0);
+            rootOffset_.SetY(0.0);
+        } else if (positionY > (height - newKeyboardHeight) && offsetFix > 0.0) {
+            if (textFieldManager_ && AceType::InstanceOf<TextFieldManager>(textFieldManager_)) {
+                auto textFieldManager = AceType::DynamicCast<TextFieldManager>(textFieldManager_);
+                if (textFieldManager->UpdatePanelForVirtualKeyboard(-offsetFix, height)) {
+                    return;
+                }
+            }
+            SetRootSizeWithWidthHeight(width_, height_, -offsetFix);
+            rootOffset_.SetY(-offsetFix);
         }
-        SetRootSizeWithWidthHeight(width_, height_, -offsetFix);
-        rootOffset_.SetY(-offsetFix);
+    };
+
+    AnimationOption option = AnimationUtil::CreateKeyboardAnimationOption(keyboardAnimationConfig_, keyboardHeight);
+    Animate(option, option.GetCurve(), func);
+
+#ifdef ENABLE_ROSEN_BACKEND
+    if (rsTransaction) {
+        rsTransaction->Commit();
     }
+#endif
 }
 
 void PipelineContext::FlushPipelineImmediately()
@@ -2119,7 +2140,7 @@ void PipelineContext::FlushPipelineImmediately()
 }
 
 void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
-    const std::shared_ptr<Rosen::RSTransaction> rsTransaction)
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     static const bool IsWindowSizeAnimationEnabled = SystemProperties::IsWindowSizeAnimationEnabled();
     if (!rootElement_ || !rootElement_->GetRenderNode() || !IsWindowSizeAnimationEnabled) {
@@ -2147,6 +2168,7 @@ void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, Win
         case WindowSizeChangeReason::ROTATION: {
 #ifdef ENABLE_ROSEN_BACKEND
             if (rsTransaction) {
+                FlushMessages();
                 rsTransaction->Begin();
             }
 #endif
@@ -2199,7 +2221,7 @@ void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, Win
 }
 
 void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSizeChangeReason type,
-    const std::shared_ptr<Rosen::RSTransaction> rsTransaction)
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     CHECK_RUN_ON(UI);
     LOGD("PipelineContext: OnSurfaceChanged start.");
@@ -2210,7 +2232,7 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
     // Refresh the screen when developers customize the resolution and screen density on the PC preview.
 #if !defined(PREVIEW)
     if (width_ == width && height_ == height && isSurfaceReady_ && !isDensityUpdate_) {
-        LOGI("Surface size is same, no need update");
+        LOGD("Surface size is same, no need update");
         return;
     }
 #endif
@@ -2282,11 +2304,11 @@ void PipelineContext::OnSurfaceDensityChanged(double density)
 {
     CHECK_RUN_ON(UI);
     ACE_SCOPED_TRACE("OnSurfaceDensityChanged(%lf)", density);
-    LOGI("density_(%{public}lf) dipScale_(%{public}lf)", density_, dipScale_);
+    LOGD("density_(%{public}lf) dipScale_(%{public}lf)", density_, dipScale_);
     isDensityUpdate_ = density != density_;
     density_ = density;
     if (!NearZero(viewScale_)) {
-        LOGI("OnSurfaceDensityChanged viewScale_(%{public}lf)", viewScale_);
+        LOGD("viewScale_(%{public}lf)", viewScale_);
         dipScale_ = density_ / viewScale_;
     }
 }
@@ -2354,6 +2376,9 @@ void PipelineContext::SetRootSizeWithWidthHeight(int32_t width, int32_t height, 
         rootNode->MarkNeedLayout();
         rootNode->MarkNeedRender();
         focusAnimationManager_->SetAvailableRect(paintRect);
+    }
+    if (IsJsPlugin() || IsJsCard()) {
+        return;
     }
     ScreenSystemManager::GetInstance().SetWindowInfo(rootWidth_, density_, dipScale_);
     ScreenSystemManager::GetInstance().OnSurfaceChanged(width);

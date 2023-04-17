@@ -129,6 +129,8 @@ public:
         isCardRouter_ = true;
     }
 
+    void FlushFrontend();
+
 private:
     class RouterOptScope {
     public:

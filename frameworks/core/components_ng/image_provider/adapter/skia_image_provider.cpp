@@ -16,8 +16,8 @@
 #include <mutex>
 #include <utility>
 
-#include "third_party/skia/include/codec/SkCodec.h"
-#include "third_party/skia/include/core/SkGraphics.h"
+#include "include/codec/SkCodec.h"
+#include "include/core/SkGraphics.h"
 
 #include "base/log/ace_trace.h"
 #include "base/memory/referenced.h"
@@ -158,6 +158,7 @@ bool ImageProvider::MakeCanvasImageHelper(
 {
     auto obj = objWp.Upgrade();
     CHECK_NULL_RETURN(obj, false);
+    ACE_SCOPED_TRACE("MakeCanvasImage %s", obj->GetSourceInfo().ToString().c_str());
     CHECK_NULL_RETURN(PrepareImageData(obj), false);
 
     auto skiaImageData = DynamicCast<SkiaImageData>(obj->GetData());

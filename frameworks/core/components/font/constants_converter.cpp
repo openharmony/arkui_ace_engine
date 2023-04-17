@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,10 +15,10 @@
 
 #include "constants_converter.h"
 
-#include "flutter/third_party/txt/src/txt/font_style.h"
-#include "flutter/third_party/txt/src/txt/font_weight.h"
-#include "flutter/third_party/txt/src/txt/paragraph_style.h"
-#include "flutter/third_party/txt/src/txt/text_decoration.h"
+#include "txt/font_style.h"
+#include "txt/font_weight.h"
+#include "txt/paragraph_style.h"
+#include "txt/text_decoration.h"
 
 #include "base/i18n/localization.h"
 #include "core/components/common/properties/color.h"
@@ -273,6 +273,44 @@ Rect ConvertSkRect(SkRect skRect)
     result.SetWidth(skRect.width());
     result.SetHeight(skRect.height());
     return result;
+}
+
+txt::PlaceholderAlignment ConvertPlaceholderAlignment(PlaceholderAlignment textDecoration)
+{
+    txt::PlaceholderAlignment convertValue = txt::PlaceholderAlignment::kBaseline;
+    switch (textDecoration) {
+        case PlaceholderAlignment::BASELINE:
+            convertValue = txt::PlaceholderAlignment::kBaseline;
+            break;
+        case PlaceholderAlignment::ABOVEBASELINE:
+            convertValue = txt::PlaceholderAlignment::kAboveBaseline;
+            break;
+        case PlaceholderAlignment::BELOWBASELINE:
+            convertValue = txt::PlaceholderAlignment::kBelowBaseline;
+            break;
+        case PlaceholderAlignment::TOP:
+            convertValue = txt::PlaceholderAlignment::kTop;
+            break;
+        case PlaceholderAlignment::BOTTOM:
+            convertValue = txt::PlaceholderAlignment::kBottom;
+            break;
+        case PlaceholderAlignment::MIDDLE:
+            convertValue = txt::PlaceholderAlignment::kMiddle;
+            break;
+        default:
+            LOGW("PlaceholderAlignment setting error! Now using default PlaceholderAlignment");
+            break;
+    }
+    return convertValue;
+}
+
+void ConvertPlaceholderRun(const PlaceholderRun& span, txt::PlaceholderRun& txtSpan)
+{
+    txtSpan.width = span.width;
+    txtSpan.height = span.height;
+    txtSpan.alignment = ConvertPlaceholderAlignment(span.alignment);
+    txtSpan.baseline = ConvertTxtTextBaseline(span.baseline);
+    txtSpan.baseline_offset = span.baseline_offset;
 }
 
 } // namespace OHOS::Ace::Constants

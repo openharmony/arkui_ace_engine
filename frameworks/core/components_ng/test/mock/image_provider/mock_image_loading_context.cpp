@@ -29,8 +29,6 @@ SizeF ImageLoadingContext::CalculateTargetSize(const SizeF& srcSize, const SizeF
     return resizeTarget;
 }
 
-void ImageLoadingContext::RegisterStateChangeCallbacks() {}
-
 void ImageLoadingContext::OnUnloaded() {}
 
 void ImageLoadingContext::OnDataLoading() {}
@@ -84,12 +82,13 @@ RefPtr<CanvasImage> ImageLoadingContext::MoveCanvasImage()
 
 void ImageLoadingContext::LoadImageData() {}
 
-void ImageLoadingContext::MakeCanvasImageIfNeed(
+bool ImageLoadingContext::MakeCanvasImageIfNeed(
     const SizeF& dstSize, bool incomingNeedResize, ImageFit incomingImageFit, const std::optional<SizeF>& sourceSize)
 {
     dstSize_ = dstSize;
     imageFit_ = incomingImageFit;
     autoResize_ = incomingNeedResize;
+    return true;
 }
 
 void ImageLoadingContext::MakeCanvasImage(

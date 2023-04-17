@@ -187,7 +187,7 @@ void MenuItemPattern::ShowSubMenu()
         NG::ScopedViewStackProcessor builderViewStackProcessor;
         buildFunc();
         auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
-        auto subMenu = MenuView::Create(customNode, host->GetId(), MenuType::SUB_MENU);
+        auto subMenu = MenuView::Create(customNode, host->GetId(), host->GetTag(), MenuType::SUB_MENU);
         auto menuPattern = subMenu->GetPattern<MenuPattern>();
         menuPattern->SetParentMenuItem(host);
         subMenuId_ = subMenu->GetId();
@@ -512,6 +512,8 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
     UpdateFontColor(
         textProperty, menuProperty, fontColor, isLabel ? theme->GetSecondaryFontColor() : theme->GetMenuFontColor());
     textProperty->UpdateContent(content);
+    textProperty->UpdateMaxLines(1);
+    textProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     node->MountToParent(row, isLabel ? 0 : DEFAULT_NODE_SLOT);
     node->MarkModifyDone();
     node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);

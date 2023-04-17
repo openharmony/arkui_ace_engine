@@ -33,7 +33,7 @@
 #include "core/components_ng/pattern/progress/progress_modifier.h"
 
 namespace OHOS::Ace::NG {
-constexpr double DEFAULT_BORDER_WIDTH = 1.0;
+constexpr float DEFAULT_BORDER_WIDTH = 1.0f;
 
 class ACE_EXPORT ProgressPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(ProgressPaintMethod, NodePaintMethod)

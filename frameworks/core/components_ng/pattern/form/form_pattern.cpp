@@ -27,6 +27,12 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "pointer_event.h"
 
+#ifdef ENABLE_DRAG_FRAMEWORK
+#include "foundation/distributeddatamgr/udmf/interfaces/innerkits/common/unified_types.h"
+#include "foundation/distributeddatamgr/udmf/interfaces/innerkits/data/system_defined_form.h"
+#include "foundation/distributeddatamgr/udmf/interfaces/innerkits/data/unified_data.h"
+#endif // ENABLE_DRAG_FRAMEWORK
+
 namespace OHOS::Ace::NG {
 namespace {
 void ShowPointEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
@@ -60,6 +66,28 @@ void FormPattern::OnAttachToFrameNode()
     externalRenderContext_ = RenderContext::Create();
     externalRenderContext_->InitContext(false, "Form_" + std::to_string(host->GetId()) + "_Remote_Surface", true);
     InitFormManagerDelegate();
+    auto eventHub = host->GetEventHub<FormEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnCache([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto subContainer = pattern->GetSubContainer();
+        CHECK_NULL_VOID(subContainer);
+        auto uiTaskExecutor =
+            SingleTaskExecutor::Make(host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        auto id = subContainer->GetRunningCardId();
+        FormManager::GetInstance().AddSubContainer(id, subContainer);
+        uiTaskExecutor.PostDelayedTask(
+            [id, nodeId = subContainer->GetNodeId()] {
+                auto cachedubContainer = FormManager::GetInstance().GetSubContainer(id);
+                if (cachedubContainer != nullptr && cachedubContainer->GetNodeId() == nodeId) {
+                    FormManager::GetInstance().RemoveSubContainer(id);
+                }
+            },
+            DELAY_TIME_FOR_FORM_SUBCONTAINER_CACHE);
+    });
 }
 
 void FormPattern::OnRebuildFrame()
@@ -130,6 +158,9 @@ bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         return false;
     }
     CreateCardContainer();
+    if (host->IsDraggable()) {
+        EnableDrag();
+    }
     if (formManagerBridge_) {
         formManagerBridge_->AddForm(host->GetContext(), info);
     }
@@ -357,30 +388,6 @@ void FormPattern::CreateCardContainer()
         pattern->isLoaded_ = true;
     });
 
-    auto eventhHub = host->GetEventHub<FormEventHub>();
-    CHECK_NULL_VOID(eventhHub);
-    eventhHub->SetOnOnCache([weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        auto host = pattern->GetHost();
-        CHECK_NULL_VOID(host);
-        auto subContainer = pattern->GetSubContainer();
-        CHECK_NULL_VOID(subContainer);
-        auto uiTaskExecutor =
-            SingleTaskExecutor::Make(host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-        auto id = subContainer->GetRunningCardId();
-        FormManager::GetInstance().AddSubContainer(id, subContainer);
-        uiTaskExecutor.PostDelayedTask(
-            [id, nodeId = subContainer->GetNodeId()] {
-                auto cachedubContainer = FormManager::GetInstance().GetSubContainer(id);
-                if (cachedubContainer != nullptr && cachedubContainer->GetNodeId() == nodeId) {
-                    FormManager::GetInstance().RemoveSubContainer(id);
-                    cachedubContainer->Destroy();
-                    cachedubContainer.Reset();
-                }
-            },
-            DELAY_TIME_FOR_FORM_SUBCONTAINER_CACHE);
-    });
     if (hasContainer) {
         subContainer_->RunSameCard();
     }
@@ -555,14 +562,47 @@ void FormPattern::DispatchPointerEvent(
 
 void FormPattern::RemoveSubContainer()
 {
-    if (subContainer_) {
-        auto id = subContainer_->GetRunningCardId();
-        auto cachedubContainer = FormManager::GetInstance().GetSubContainer(id);
-        if (cachedubContainer != nullptr && cachedubContainer->GetNodeId() == subContainer_->GetNodeId()) {
-            FormManager::GetInstance().RemoveSubContainer(id);
-        }
-        subContainer_->Destroy();
-        subContainer_.Reset();
+    auto host = GetHost();
+    auto eventHub = host->GetEventHub<FormEventHub>();
+    if (eventHub) {
+        eventHub->FireOnCache();
     }
+    subContainer_.Reset();
+}
+
+void FormPattern::EnableDrag()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    auto dragStart = [weak = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& event,
+                         const std::string& /* extraParams */) -> DragDropInfo {
+        DragDropInfo info;
+
+#ifdef ENABLE_DRAG_FRAMEWORK
+        auto form = weak.Upgrade();
+        CHECK_NULL_RETURN(form, info);
+        auto subcontainer = form->GetSubContainer();
+        CHECK_NULL_RETURN(subcontainer, info);
+
+        auto formRecord = std::make_shared<UDMF::SystemDefinedForm>();
+        formRecord->SetFormId(subcontainer->GetRunningCardId());
+        formRecord->SetFormName(form->cardInfo_.cardName);
+        formRecord->SetBundleName(form->cardInfo_.bundleName);
+        formRecord->SetAbilityName(form->cardInfo_.abilityName);
+        formRecord->SetModule(form->cardInfo_.moduleName);
+        formRecord->SetType(UDMF::UDType::SYSTEM_DEFINED_FORM);
+
+        auto unifiedData = std::make_shared<UDMF::UnifiedData>();
+        unifiedData->AddRecord(formRecord);
+        event->SetData(unifiedData);
+#endif // ENABLE_DRAG_FRAMEWORK
+
+        info.extraInfo = "card drag";
+        return info;
+    };
+    auto eventHub = GetHost()->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDragStart(std::move(dragStart));
 }
 } // namespace OHOS::Ace::NG

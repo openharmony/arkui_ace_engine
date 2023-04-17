@@ -183,6 +183,7 @@ template("declarative_js_engine") {
       "jsview/js_if_else.cpp",
       "jsview/js_image.cpp",
       "jsview/js_image_animator.cpp",
+      "jsview/js_image_span.cpp",
       "jsview/js_indexer.cpp",
       "jsview/js_interactable_view.cpp",
       "jsview/js_lazy_foreach.cpp",
@@ -328,6 +329,8 @@ template("declarative_js_engine") {
       "jsview/models/view_abstract_model_impl.cpp",
       "jsview/models/view_full_update_model_impl.cpp",
       "jsview/models/view_partial_update_model_impl.cpp",
+      "jsview/models/water_flow_item_model_impl.cpp",
+      "jsview/models/water_flow_model_impl.cpp",
     ]
 
     defines += uicast_configs.uicast_defines
@@ -339,6 +342,12 @@ template("declarative_js_engine") {
     }
 
     external_deps = []
+    if (defined(config.enable_drag_framework) && config.enable_drag_framework) {
+      external_deps += [
+        "udmf:udmf_client",
+        "udmf:udmf_data_napi",
+      ]
+    }
 
     # rich components needed by phone and TV. wearable like watch do not need them
     if (defined(config.rich_components_support) &&
@@ -405,8 +414,6 @@ template("declarative_js_engine") {
 
     if (defined(config.plugin_components_support) &&
         config.plugin_components_support) {
-      deps +=
-          [ "$ace_flutter_engine_root:third_party_flutter_engine_$platform" ]
       sources += [
         "jsview/js_plugin.cpp",
         "jsview/models/plugin_model_impl.cpp",
@@ -548,6 +555,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_grid_item.cpp",
       "jsview/js_if_else.cpp",
       "jsview/js_image.cpp",
+      "jsview/js_image_span.cpp",
       "jsview/js_interactable_view.cpp",
       "jsview/js_lazy_foreach.cpp",
       "jsview/js_list.cpp",
@@ -591,20 +599,12 @@ template("declarative_js_engine_ng") {
     }
 
     # add for cross_platfrom_build temporarily, shall be removed after external_deps is supported
+    external_deps = []
     if (is_cross_platform_build) {
       configs += [ "$ark_ets_path:ark_jsruntime_public_config" ]
-      if (defined(config.build_for_ios) && config.build_for_ios) {
-        deps += [ "$ark_ets_path:libark_jsruntime_static" ]
-      } else {
-        deps += [ "$ark_ets_path:libark_jsruntime" ]
-      }
+      deps += [ "$ark_ets_path:libark_jsruntime_static" ]
     } else {
-      if (defined(config.build_for_ios) && config.build_for_ios) {
-        # static library for ios platform
-        external_deps = [ "ets_runtime:libark_jsruntime_static" ]
-      } else {
-        external_deps = [ "ets_runtime:libark_jsruntime" ]
-      }
+      external_deps += [ "ets_runtime:libark_jsruntime" ]
     }
 
     defines += uicast_configs.uicast_defines
@@ -616,6 +616,13 @@ template("declarative_js_engine_ng") {
       ":gen_obj_src_js_enum_style",
       ":gen_obj_src_js_proxyclass",
     ]
+
+    if (defined(config.enable_drag_framework) && config.enable_drag_framework) {
+      external_deps += [
+        "udmf:udmf_client",
+        "udmf:udmf_data_napi",
+      ]
+    }
   }
 }
 

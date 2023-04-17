@@ -29,6 +29,7 @@ public:
     virtual void Create(const std::string& address, const std::string& summary) = 0;
     virtual void Pop() = 0;
     virtual void SetColor(const Color& value) = 0;
+    virtual void SetDraggable(bool draggable) = 0;
 
 private:
     static std::unique_ptr<HyperlinkModel> instance_;

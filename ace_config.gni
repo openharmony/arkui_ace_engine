@@ -49,6 +49,7 @@ declare_args() {
 }
 
 enable_dump_drawcmd = false
+is_ohos_standard_system = is_standard_system && !build_cross_platform_version
 use_mingw_win = "${current_os}_${current_cpu}" == "mingw_x86_64"
 use_mac = "${current_os}_${current_cpu}" == "mac_x64" ||
           "${current_os}_${current_cpu}" == "mac_arm64"
@@ -84,6 +85,8 @@ ark_toolchain_path = "//arkcompiler/toolchain"
 window_manager_path = "//foundation/window/window_manager"
 graphic_standard_path = "//foundation/graphic/graphic_2d"
 ark_ets_path = "//arkcompiler/ets_runtime"
+crossplatform_plugin_root = "//plugins"
+skia_root_new = "//third_party/skia"
 
 # Config toolchain
 windows_buildtool = "//build/toolchain/mingw:mingw_x86_64"
@@ -101,7 +104,7 @@ if ("${current_os}_${current_cpu}" == "mac_arm64") {
 
 objcopy_clang = "$clang_base_path/bin/llvm-objcopy"
 
-if (is_standard_system) {
+if (is_ohos_standard_system) {
   objcopy_default = "//prebuilts/clang/ohos/linux-x86_64/llvm/bin/llvm-objcopy"
   node_js_path =
       "//prebuilts/build-tools/common/nodejs/node-v12.18.4-linux-x64/bin/"
@@ -117,7 +120,7 @@ if (is_standard_system) {
 ace_engine_subsystem = "arkui"
 
 # Config part name
-if (is_standard_system) {
+if (is_ohos_standard_system) {
   ace_engine_part = "ace_engine"
   hilog_deps = [ "hiviewdfx_hilog_native:libhilog" ]
   ark_runtime_path = "//arkcompiler/runtime_core"
@@ -132,7 +135,7 @@ if (is_standard_system) {
 }
 
 # Config test output path
-if (is_standard_system) {
+if (is_ohos_standard_system) {
   test_output_path = "ace_engine/backenduiFrameNode"
 } else {
   test_output_path = "ace_engine_full/backenduiFrameNode"
@@ -168,6 +171,12 @@ if (enable_ace_instance_log) {
 
 if (enable_dump_drawcmd) {
   ace_common_defines += [ "DUMP_DRAW_CMD" ]
+}
+
+ace_use_new_skia = false
+if (defined(use_new_skia) && use_new_skia) {
+  ace_use_new_skia = true
+  ace_common_defines += [ "NEW_SKIA" ]
 }
 
 if (enable_ng_build) {
@@ -215,4 +224,11 @@ foreach(item, _adapters) {
   }
 }
 
-print(ace_platforms)
+current_platform = {
+}
+foreach(item, ace_platforms) {
+  if ((use_mingw_win && item.name == "windows") ||
+      (use_mac && item.name == "mac") || (use_linux && item.name == "linux")) {
+    current_platform = item
+  }
+}

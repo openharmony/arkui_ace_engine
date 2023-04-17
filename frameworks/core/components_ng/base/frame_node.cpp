@@ -64,11 +64,15 @@ FrameNode::~FrameNode()
     }
     pattern_->DetachFromFrameNode(this);
     if (IsOnMainTree()) {
-        OnDetachFromMainTree();
+        OnDetachFromMainTree(false);
     }
+    TriggerVisibleAreaChangeCallback(true);
+    visibleAreaUserCallbacks_.clear();
+    visibleAreaInnerCallbacks_.clear();
     auto pipeline = PipelineContext::GetCurrentContext();
     if (pipeline) {
         pipeline->RemoveOnAreaChangeNode(GetId());
+        pipeline->RemoveVisibleAreaChangeNode(GetId());
     }
 }
 
@@ -114,6 +118,29 @@ RefPtr<FrameNode> FrameNode::CreateFrameNode(
     frameNode->InitializePatternAndContext();
     ElementRegister::GetInstance()->AddUINode(frameNode);
     return frameNode;
+}
+
+void FrameNode::ProcessOffscreenNode(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_VOID(node);
+    node->UpdateLayoutPropertyFlag();
+    auto layoutWrapper = node->CreateLayoutWrapper();
+    CHECK_NULL_VOID(layoutWrapper);
+    layoutWrapper->SetActive();
+    layoutWrapper->SetRootMeasureNode();
+    layoutWrapper->WillLayout();
+    layoutWrapper->Measure(node->GetLayoutConstraint());
+    layoutWrapper->Layout();
+    layoutWrapper->MountToHostOnMainThread();
+    layoutWrapper->DidLayout(layoutWrapper);
+    auto paintProperty = node->GetPaintProperty<PaintProperty>();
+    auto wrapper = node->CreatePaintWrapper();
+    CHECK_NULL_VOID(wrapper);
+    wrapper->FlushRender();
+    paintProperty->CleanDirty();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->FlushMessages();
 }
 
 void FrameNode::InitializePatternAndContext()
@@ -251,6 +278,7 @@ void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     ACE_PROPERTY_TO_JSON_VALUE(layoutProperty_, LayoutProperty);
     ACE_PROPERTY_TO_JSON_VALUE(paintProperty_, PaintProperty);
     ACE_PROPERTY_TO_JSON_VALUE(pattern_, Pattern);
+    ACE_PROPERTY_TO_JSON_VALUE(geometryNode_, Pattern);
     if (eventHub_) {
         eventHub_->ToJsonValue(json);
     }
@@ -260,11 +288,11 @@ void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("id", propInspectorId_.value_or("").c_str());
 }
 
-void FrameNode::OnAttachToMainTree()
+void FrameNode::OnAttachToMainTree(bool recursive)
 {
-    UINode::OnAttachToMainTree();
+    UINode::OnAttachToMainTree(recursive);
     eventHub_->FireOnAppear();
-    renderContext_->OnNodeAppear();
+    renderContext_->OnNodeAppear(recursive);
     if (IsResponseRegion() || HasPositionProp()) {
         auto parent = GetParent();
         while (parent) {
@@ -291,12 +319,13 @@ void FrameNode::OnVisibleChange(bool isVisible)
     for (const auto& child : GetChildren()) {
         child->OnVisibleChange(isVisible);
     }
+    TriggerVisibleAreaChangeCallback(true);
 }
 
-void FrameNode::OnDetachFromMainTree()
+void FrameNode::OnDetachFromMainTree(bool recursive)
 {
     eventHub_->FireOnDisappear();
-    renderContext_->OnNodeDisappear();
+    renderContext_->OnNodeDisappear(recursive);
 }
 
 void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& dirty)
@@ -419,29 +448,39 @@ void FrameNode::TriggerOnAreaChangeCallback()
     pattern_->OnAreaChangedInner();
 }
 
-void FrameNode::TriggerVisibleAreaChangeCallback(std::list<VisibleCallbackInfo>& callbackInfoList)
+void FrameNode::TriggerVisibleAreaChangeCallback(bool forceDisappear)
 {
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
 
-    bool curFrameIsActive = true;
-    auto parent = GetParent();
-    while (parent) {
-        auto parentFrame = AceType::DynamicCast<FrameNode>(parent);
-        if (!parentFrame) {
+    bool isFrameDisappear = forceDisappear || !context->GetOnShow();
+    if (!isFrameDisappear) {
+        bool curFrameIsActive = isActive_;
+        bool curIsVisible = IsVisible();
+        auto parent = GetParent();
+        while (parent) {
+            auto parentFrame = AceType::DynamicCast<FrameNode>(parent);
+            if (!parentFrame) {
+                parent = parent->GetParent();
+                continue;
+            }
+            if (!parentFrame->isActive_) {
+                curFrameIsActive = false;
+                break;
+            }
+            if (!parentFrame->IsVisible()) {
+                curIsVisible = false;
+                break;
+            }
             parent = parent->GetParent();
-            continue;
         }
-        if (!parentFrame->isActive_) {
-            curFrameIsActive = false;
-            break;
-        }
-        parent = parent->GetParent();
+        isFrameDisappear = !curIsVisible || !curFrameIsActive;
     }
 
-    if (!context->GetOnShow() || !IsVisible() || !curFrameIsActive) {
+    if (isFrameDisappear) {
         if (!NearEqual(lastVisibleRatio_, VISIBLE_RATIO_MIN)) {
-            ProcessAllVisibleCallback(callbackInfoList, VISIBLE_RATIO_MIN);
+            ProcessAllVisibleCallback(visibleAreaUserCallbacks_, VISIBLE_RATIO_MIN);
+            ProcessAllVisibleCallback(visibleAreaInnerCallbacks_, VISIBLE_RATIO_MIN);
             lastVisibleRatio_ = VISIBLE_RATIO_MIN;
         }
         return;
@@ -467,7 +506,8 @@ void FrameNode::TriggerVisibleAreaChangeCallback(std::list<VisibleCallbackInfo>&
     double currentVisibleRatio =
         std::clamp(CalculateCurrentVisibleRatio(visibleRect, frameRect), VISIBLE_RATIO_MIN, VISIBLE_RATIO_MAX);
     if (!NearEqual(currentVisibleRatio, lastVisibleRatio_)) {
-        ProcessAllVisibleCallback(callbackInfoList, currentVisibleRatio);
+        ProcessAllVisibleCallback(visibleAreaUserCallbacks_, currentVisibleRatio);
+        ProcessAllVisibleCallback(visibleAreaInnerCallbacks_, currentVisibleRatio);
         lastVisibleRatio_ = currentVisibleRatio;
     }
 }
@@ -480,32 +520,33 @@ double FrameNode::CalculateCurrentVisibleRatio(const RectF& visibleRect, const R
     return visibleRect.Width() * visibleRect.Height() / (renderRect.Width() * renderRect.Height());
 }
 
-void FrameNode::ProcessAllVisibleCallback(std::list<VisibleCallbackInfo>& callbackInfoList, double currentVisibleRatio)
+void FrameNode::ProcessAllVisibleCallback(
+    std::unordered_map<double, VisibleCallbackInfo>& visibleAreaCallbacks, double currentVisibleRatio)
 {
-    for (auto& nodeCallbackInfo : callbackInfoList) {
-        if (GreatNotEqual(currentVisibleRatio, nodeCallbackInfo.visibleRatio) && !nodeCallbackInfo.isCurrentVisible) {
-            OnVisibleAreaChangeCallback(nodeCallbackInfo, true, currentVisibleRatio);
+    for (auto& nodeCallbackInfo : visibleAreaCallbacks) {
+        auto callbackRatio = nodeCallbackInfo.first;
+        auto callbackIsVisible = nodeCallbackInfo.second.isCurrentVisible;
+        if (GreatNotEqual(currentVisibleRatio, callbackRatio) && !callbackIsVisible) {
+            OnVisibleAreaChangeCallback(nodeCallbackInfo.second, true, currentVisibleRatio);
             continue;
         }
 
-        if (LessNotEqual(currentVisibleRatio, nodeCallbackInfo.visibleRatio) && nodeCallbackInfo.isCurrentVisible) {
-            OnVisibleAreaChangeCallback(nodeCallbackInfo, false, currentVisibleRatio);
+        if (LessNotEqual(currentVisibleRatio, callbackRatio) && callbackIsVisible) {
+            OnVisibleAreaChangeCallback(nodeCallbackInfo.second, false, currentVisibleRatio);
             continue;
         }
 
-        if (NearEqual(currentVisibleRatio, nodeCallbackInfo.visibleRatio) &&
-            NearEqual(nodeCallbackInfo.visibleRatio, VISIBLE_RATIO_MIN)) {
-            if (nodeCallbackInfo.isCurrentVisible) {
-                OnVisibleAreaChangeCallback(nodeCallbackInfo, false, VISIBLE_RATIO_MIN);
+        if (NearEqual(currentVisibleRatio, callbackRatio) && NearEqual(callbackRatio, VISIBLE_RATIO_MIN)) {
+            if (callbackIsVisible) {
+                OnVisibleAreaChangeCallback(nodeCallbackInfo.second, false, VISIBLE_RATIO_MIN);
             } else {
-                OnVisibleAreaChangeCallback(nodeCallbackInfo, true, VISIBLE_RATIO_MIN);
+                OnVisibleAreaChangeCallback(nodeCallbackInfo.second, true, VISIBLE_RATIO_MIN);
             }
-        } else if (NearEqual(currentVisibleRatio, nodeCallbackInfo.visibleRatio) &&
-                   NearEqual(nodeCallbackInfo.visibleRatio, VISIBLE_RATIO_MAX)) {
-            if (!nodeCallbackInfo.isCurrentVisible) {
-                OnVisibleAreaChangeCallback(nodeCallbackInfo, true, VISIBLE_RATIO_MAX);
+        } else if (NearEqual(currentVisibleRatio, callbackRatio) && NearEqual(callbackRatio, VISIBLE_RATIO_MAX)) {
+            if (!callbackIsVisible) {
+                OnVisibleAreaChangeCallback(nodeCallbackInfo.second, true, VISIBLE_RATIO_MAX);
             } else {
-                OnVisibleAreaChangeCallback(nodeCallbackInfo, false, VISIBLE_RATIO_MAX);
+                OnVisibleAreaChangeCallback(nodeCallbackInfo.second, false, VISIBLE_RATIO_MAX);
             }
         }
     }
@@ -1461,4 +1502,70 @@ bool FrameNode::OnRemoveFromParent()
     }
 }
 
+RefPtr<FrameNode> FrameNode::FindChildByPosition(float x, float y)
+{
+    std::map<int32_t, RefPtr<FrameNode>> hitFrameNodes;
+    std::list<RefPtr<FrameNode>> children;
+    GenerateOneDepthAllFrame(children);
+    for (const auto& child : children) {
+        auto geometryNode = child->GetGeometryNode();
+        if (!geometryNode) {
+            continue;
+        }
+
+        auto globalFrameRect = geometryNode->GetFrameRect();
+        globalFrameRect.SetOffset(child->GetOffsetRelativeToWindow());
+
+        if (globalFrameRect.IsInRegion(PointF(x, y))) {
+            hitFrameNodes.insert(std::make_pair(child->GetDepth(), child));
+        }
+    }
+
+    if (hitFrameNodes.empty()) {
+        return nullptr;
+    }
+
+    return hitFrameNodes.rbegin()->second;
+}
+
+void FrameNode::CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
+    const std::function<void(float)>& onCallbackEvent)
+{
+    auto context = GetRenderContext();
+    CHECK_NULL_VOID(context);
+    auto iter = nodeAnimatablePropertyMap_.find(propertyName);
+    if (iter != nodeAnimatablePropertyMap_.end()) {
+        LOGW("AnimatableProperty already exists!");
+        return;
+    }
+    auto property = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(value, std::move(onCallbackEvent));
+    context->AttachNodeAnimatableProperty(property);
+    nodeAnimatablePropertyMap_.emplace(propertyName, property);
+}
+
+void FrameNode::UpdateAnimatablePropertyFloat(const std::string& propertyName, float value)
+{
+    auto iter = nodeAnimatablePropertyMap_.find(propertyName);
+    if (iter == nodeAnimatablePropertyMap_.end()) {
+        LOGW("AnimatableProperty not exists!");
+        return;
+    }
+    auto property = AceType::DynamicCast<NodeAnimatablePropertyFloat>(iter->second);
+    CHECK_NULL_VOID(property);
+    property->Set(value);
+}
+
+void FrameNode::OnAddDisappearingChild()
+{
+    auto context = GetRenderContext();
+    CHECK_NULL_VOID(context);
+    context->UpdateFreeze(true);
+}
+
+void FrameNode::OnRemoveDisappearingChild()
+{
+    auto context = GetRenderContext();
+    CHECK_NULL_VOID(context);
+    context->UpdateFreeze(false);
+}
 } // namespace OHOS::Ace::NG

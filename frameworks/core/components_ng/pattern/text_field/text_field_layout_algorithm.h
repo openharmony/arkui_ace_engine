@@ -29,8 +29,10 @@
 #include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
-class TextFieldContentModifier;
 
+constexpr Dimension SCROLL_BAR_LEFT_WIDTH = 2.0_vp;
+
+class TextFieldContentModifier;
 class ACE_EXPORT TextFieldLayoutAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(TextFieldLayoutAlgorithm, LayoutAlgorithm);
 
@@ -93,6 +95,8 @@ public:
 
 private:
     void CreateParagraph(const TextStyle& textStyle, std::string content, bool needObscureText, bool disableTextAlign);
+    void CreateParagraph(const std::vector<TextStyle>& textStyles, const std::vector<std::string>& contents,
+        const std::string& content, bool needObscureText, bool disableTextAlign);
     bool CreateParagraphAndLayout(
         const TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint);
     bool AdaptMinTextSize(TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint,

@@ -28,7 +28,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-void OffsetByAlign(LayoutConstraintF& layoutConstraint, float rowLen, float colLen, float& positionX, float& positionY)
+void OffsetByAlign(
+    const LayoutConstraintF& layoutConstraint, float rowLen, float colLen, float& positionX, float& positionY)
 {
     // only support Alignment.Center now
     auto size = layoutConstraint.selfIdealSize;

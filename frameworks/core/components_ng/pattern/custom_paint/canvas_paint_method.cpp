@@ -16,13 +16,13 @@
 #include "core/components_ng/pattern/custom_paint/canvas_paint_method.h"
 
 #include "drawing/engine_adapter/skia_adapter/skia_canvas.h"
-#include "flutter/third_party/txt/src/txt/paragraph_builder.h"
-#include "flutter/third_party/txt/src/txt/paragraph_style.h"
-#include "third_party/skia/include/core/SkMaskFilter.h"
-#include "third_party/skia/include/encode/SkJpegEncoder.h"
-#include "third_party/skia/include/encode/SkPngEncoder.h"
-#include "third_party/skia/include/encode/SkWebpEncoder.h"
-#include "third_party/skia/include/utils/SkBase64.h"
+#include "txt/paragraph_builder.h"
+#include "txt/paragraph_style.h"
+#include "include/core/SkMaskFilter.h"
+#include "include/encode/SkJpegEncoder.h"
+#include "include/encode/SkPngEncoder.h"
+#include "include/encode/SkWebpEncoder.h"
+#include "include/utils/SkBase64.h"
 
 #include "base/i18n/localization.h"
 #include "base/image/pixel_map.h"
@@ -394,8 +394,9 @@ void CanvasPaintMethod::PaintText(
     const OffsetF& offset, const SizeF& frameSize, double x, double y, bool isStroke, bool hasShadow)
 {
     paragraph_->Layout(frameSize.Width());
-    if (frameSize.Width() > paragraph_->GetMaxIntrinsicWidth()) {
-        paragraph_->Layout(std::ceil(paragraph_->GetMaxIntrinsicWidth()));
+    auto width = paragraph_->GetMaxIntrinsicWidth();
+    if (frameSize.Width() > width) {
+        paragraph_->Layout(std::ceil(width));
     }
     auto align = isStroke ? strokeState_.GetTextAlign() : fillState_.GetTextAlign();
     double dx = offset.GetX() + x + GetAlignOffset(align, paragraph_);
@@ -413,33 +414,6 @@ void CanvasPaintMethod::PaintText(
     }
 
     paragraph_->Paint(skCanvas_.get(), dx, dy);
-}
-
-double CanvasPaintMethod::GetAlignOffset(TextAlign align, std::unique_ptr<txt::Paragraph>& paragraph)
-{
-    double x = 0.0;
-    TextDirection textDirection = TextDirection::LTR;
-    switch (align) {
-        case TextAlign::LEFT:
-            x = 0.0;
-            break;
-        case TextAlign::START:
-            x = (textDirection == TextDirection::LTR) ? 0.0 : -paragraph->GetMaxIntrinsicWidth();
-            break;
-        case TextAlign::RIGHT:
-            x = -paragraph->GetMaxIntrinsicWidth();
-            break;
-        case TextAlign::END:
-            x = (textDirection == TextDirection::LTR) ? -paragraph->GetMaxIntrinsicWidth() : 0.0;
-            break;
-        case TextAlign::CENTER:
-            x = -paragraph->GetMaxIntrinsicWidth() / 2;
-            break;
-        default:
-            x = 0.0;
-            break;
-    }
-    return x;
 }
 
 double CanvasPaintMethod::GetBaselineOffset(TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph)
@@ -480,6 +454,10 @@ bool CanvasPaintMethod::UpdateParagraph(const OffsetF& offset, const std::string
     } else {
         style.text_align = ConvertTxtTextAlign(fillState_.GetTextAlign());
     }
+    if (fillState_.GetOffTextDirection() == TextDirection::RTL) {
+        style.text_direction = txt::TextDirection::rtl;
+    }
+    style.text_align = GetEffectiveAlign(style.text_align, style.text_direction);
     auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
     CHECK_NULL_RETURN(fontCollection, false);
     std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);

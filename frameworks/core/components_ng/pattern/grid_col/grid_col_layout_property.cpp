@@ -33,6 +33,7 @@ void GridColLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     auto order = GetOrder(sizeType);
     json->Put("span", std::to_string(span).c_str());
     json->Put("offset", std::to_string(offset).c_str());
+    json->Put("gridColOffset", std::to_string(offset).c_str());
     json->Put("order", std::to_string(order).c_str());
 }
 

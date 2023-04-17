@@ -16,20 +16,22 @@
 #include "core/components_ng/pattern/custom_paint/custom_paint_paint_method.h"
 
 #include <cmath>
+#include <unistd.h>
 
 #include "drawing/engine_adapter/skia_adapter/skia_canvas.h"
 #include "include/core/SkCanvas.h"
 #include "include/core/SkColor.h"
+#include "include/core/SkShader.h"
 #include "third_party/bounds_checking_function/include/securec.h"
-#include "third_party/skia/include/core/SkBlendMode.h"
-#include "third_party/skia/include/core/SkCanvas.h"
-#include "third_party/skia/include/core/SkColor.h"
-#include "third_party/skia/include/core/SkImage.h"
-#include "third_party/skia/include/core/SkPoint.h"
-#include "third_party/skia/include/core/SkSurface.h"
-#include "third_party/skia/include/effects/SkDashPathEffect.h"
-#include "third_party/skia/include/effects/SkGradientShader.h"
-#include "third_party/skia/include/utils/SkParsePath.h"
+#include "include/core/SkBlendMode.h"
+#include "include/core/SkCanvas.h"
+#include "include/core/SkColor.h"
+#include "include/core/SkImage.h"
+#include "include/core/SkPoint.h"
+#include "include/core/SkSurface.h"
+#include "include/effects/SkDashPathEffect.h"
+#include "include/effects/SkGradientShader.h"
+#include "include/utils/SkParsePath.h"
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/json/json_util.h"
@@ -40,6 +42,7 @@
 #include "core/components/calendar/rosen_render_calendar.h"
 #include "core/components/common/painter/flutter_decoration_painter.h"
 #include "core/components/common/painter/rosen_decoration_painter.h"
+#include "core/components/common/properties/decoration.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/image/flutter_image_cache.h"
 #include "core/image/image_cache.h"
@@ -50,6 +53,9 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr double HALF_CIRCLE_ANGLE = 180.0;
 constexpr double FULL_CIRCLE_ANGLE = 360.0;
+constexpr double CONIC_START_ANGLE = 0.0;
+constexpr double CONIC_END_ANGLE = 359.9;
+constexpr double DOUBLE_TWO = 2.0;
 
 const LinearEnumMapNode<CompositeOperation, SkBlendMode> SK_BLEND_MODE_TABLE[] = {
     { CompositeOperation::SOURCE_OVER, SkBlendMode::kSrcOver },
@@ -93,6 +99,46 @@ void CustomPaintPaintMethod::UpdateLineDash(SkPaint& paint)
     }
 }
 
+sk_sp<SkShader> CustomPaintPaintMethod::MakeConicGradient(SkPaint& paint, const Ace::Gradient& gradient)
+{
+    sk_sp<SkShader> skShader = nullptr;
+    if (gradient.GetType() == Ace::GradientType::CONIC) {
+        if (!gradient.GetConicGradient().centerX.has_value() ||
+            !gradient.GetConicGradient().centerY.has_value() ||
+            !gradient.GetConicGradient().startAngle.has_value()) {
+            return skShader;
+        }
+        SkMatrix matrix = SkMatrix::I();
+        SkScalar centerX = SkDoubleToScalar(gradient.GetConicGradient().centerX->Value());
+        SkScalar centerY = SkDoubleToScalar(gradient.GetConicGradient().centerY->Value());
+        auto gradientColors = gradient.GetColors();
+        std::stable_sort(gradientColors.begin(), gradientColors.end(),
+            [](auto& colorA, auto& colorB) { return colorA.GetDimension() < colorB.GetDimension(); });
+        uint32_t colorsSize = gradientColors.size();
+        SkColor colors[gradientColors.size()];
+        float pos[gradientColors.size()];
+        double angle = gradient.GetConicGradient().startAngle->Value() / M_PI * 180.0;
+        SkScalar startAngle = SkDoubleToScalar(angle);
+        matrix.preRotate(startAngle, centerX, centerY);
+        for (uint32_t i = 0; i < colorsSize; ++i) {
+            const auto& gradientColor = gradientColors[i];
+            colors[i] = gradientColor.GetColor().GetValue();
+            pos[i] = gradientColor.GetDimension().Value();
+        }
+#ifdef USE_SYSTEM_SKIA
+    auto mode = SkShader::kClamp_TileMode;
+#else
+    auto mode = SkTileMode::kClamp;
+#endif
+        skShader = SkGradientShader::MakeSweep(centerX, centerY,
+                                               colors, pos, colorsSize, mode,
+                                               SkDoubleToScalar(CONIC_START_ANGLE),
+                                               SkDoubleToScalar(CONIC_END_ANGLE),
+                                               0, &matrix);
+    }
+    return skShader;
+}
+
 void CustomPaintPaintMethod::UpdatePaintShader(const OffsetF& offset, SkPaint& paint, const Ace::Gradient& gradient)
 {
     SkPoint beginPoint = SkPoint::Make(SkDoubleToScalar(gradient.GetBeginOffset().GetX() + offset.GetX()),
@@ -119,6 +165,8 @@ void CustomPaintPaintMethod::UpdatePaintShader(const OffsetF& offset, SkPaint& p
     sk_sp<SkShader> skShader = nullptr;
     if (gradient.GetType() == Ace::GradientType::LINEAR) {
         skShader = SkGradientShader::MakeLinear(pts, colors, pos, gradientColors.size(), mode);
+    } else if (gradient.GetType() == Ace::GradientType::CONIC) {
+        skShader = MakeConicGradient(paint, gradient);
     } else {
         if (gradient.GetInnerRadius() <= 0.0 && beginPoint == endPoint) {
             skShader = SkGradientShader::MakeRadial(
@@ -140,6 +188,22 @@ void CustomPaintPaintMethod::UpdatePaintShader(const Ace::Pattern& pattern, SkPa
                      : ImageProvider::GetSkImage(pattern.GetImgSrc(), context_);
     CHECK_NULL_VOID(image);
     static const LinearMapNode<void (*)(sk_sp<SkImage>, SkPaint&)> staticPattern[] = {
+        { "clamp",
+            [](sk_sp<SkImage> image, SkPaint& paint) {
+#ifdef USE_SYSTEM_SKIA
+                paint.setShader(image->makeShader(SkShader::kClamp_TileMode, SkShader::kClamp_TileMode, nullptr));
+#else
+                paint.setShader(image->makeShader(SkTileMode::kClamp, SkTileMode::kClamp, nullptr));
+#endif
+            } },
+        { "mirror",
+            [](sk_sp<SkImage> image, SkPaint& paint) {
+#ifdef USE_SYSTEM_SKIA
+                paint.setShader(image->makeShader(SkShader::kClamp_TileMode, SkShader::kClamp_TileMode, nullptr));
+#else
+                paint.setShader(image->makeShader(SkTileMode::kMirror, SkTileMode::kMirror, nullptr));
+#endif
+            } },
         { "no-repeat",
             [](sk_sp<SkImage> image, SkPaint& paint) {
 #ifdef USE_SYSTEM_SKIA
@@ -642,10 +706,10 @@ void CustomPaintPaintMethod::Ellipse(PaintWrapper* paintWrapper, const EllipsePa
 {
     OffsetF offset = GetContentOffset(paintWrapper);
     // Init the start and end angle, then calculated the sweepAngle.
-    double startAngle = std::fmod(param.startAngle, M_PI * 2.0);
-    double endAngle = std::fmod(param.endAngle, M_PI * 2.0);
-    startAngle = (startAngle < 0.0 ? startAngle + M_PI * 2.0 : startAngle) * HALF_CIRCLE_ANGLE / M_PI;
-    endAngle = (endAngle < 0.0 ? endAngle + M_PI * 2.0 : endAngle) * HALF_CIRCLE_ANGLE / M_PI;
+    double startAngle = std::fmod(param.startAngle, M_PI * DOUBLE_TWO);
+    double endAngle = std::fmod(param.endAngle, M_PI * DOUBLE_TWO);
+    startAngle = (startAngle < 0.0 ? startAngle + M_PI * DOUBLE_TWO : startAngle) * HALF_CIRCLE_ANGLE / M_PI;
+    endAngle = (endAngle < 0.0 ? endAngle + M_PI * DOUBLE_TWO : endAngle) * HALF_CIRCLE_ANGLE / M_PI;
     if (NearEqual(param.startAngle, param.endAngle)) {
         return; // Just return when startAngle is same as endAngle.
     }
@@ -832,11 +896,11 @@ void CustomPaintPaintMethod::Path2DEllipse(const OffsetF& offset, const PathArgs
     double rx = args.para3;
     double ry = args.para4;
     double rotation = args.para5 * HALF_CIRCLE_ANGLE / M_PI;
-    double startAngle = std::fmod(args.para6, M_PI * 2.0);
-    double endAngle = std::fmod(args.para7, M_PI * 2.0);
+    double startAngle = std::fmod(args.para6, M_PI * DOUBLE_TWO);
+    double endAngle = std::fmod(args.para7, M_PI * DOUBLE_TWO);
     bool anticlockwise = NearZero(args.para8) ? false : true;
-    startAngle = (startAngle < 0.0 ? startAngle + M_PI * 2.0 : startAngle) * HALF_CIRCLE_ANGLE / M_PI;
-    endAngle = (endAngle < 0.0 ? endAngle + M_PI * 2.0 : endAngle) * HALF_CIRCLE_ANGLE / M_PI;
+    startAngle = (startAngle < 0.0 ? startAngle + M_PI * DOUBLE_TWO : startAngle) * HALF_CIRCLE_ANGLE / M_PI;
+    endAngle = (endAngle < 0.0 ? endAngle + M_PI * DOUBLE_TWO : endAngle) * HALF_CIRCLE_ANGLE / M_PI;
     double sweepAngle = endAngle - startAngle;
     if (anticlockwise) {
         if (sweepAngle > 0.0) { // Make sure the sweepAngle is negative when anticlockwise.
@@ -939,5 +1003,45 @@ void CustomPaintPaintMethod::Transform(const TransformParam& param)
 void CustomPaintPaintMethod::Translate(double x, double y)
 {
     skCanvas_->translate(x, y);
+}
+
+double CustomPaintPaintMethod::GetAlignOffset(TextAlign align, std::unique_ptr<txt::Paragraph>& paragraph)
+{
+    double x = 0.0;
+    TextDirection textDirection = fillState_.GetOffTextDirection();
+    switch (align) {
+        case TextAlign::LEFT:
+            x = 0.0;
+            break;
+        case TextAlign::START:
+            x = (textDirection == TextDirection::LTR) ? 0.0 : -paragraph->GetMaxIntrinsicWidth();
+            break;
+        case TextAlign::RIGHT:
+            x = -paragraph->GetMaxIntrinsicWidth();
+            break;
+        case TextAlign::END:
+            x = (textDirection == TextDirection::LTR) ? -paragraph->GetMaxIntrinsicWidth() : 0.0;
+            break;
+        case TextAlign::CENTER:
+            x = -paragraph->GetMaxIntrinsicWidth() / DOUBLE_TWO;
+            break;
+        default:
+            x = 0.0;
+            break;
+    }
+    return x;
+}
+
+txt::TextAlign CustomPaintPaintMethod::GetEffectiveAlign(txt::TextAlign align, txt::TextDirection direction) const
+{
+    if (align == txt::TextAlign::start) {
+        return (direction == txt::TextDirection::ltr) ? txt::TextAlign::left
+                                                      : txt::TextAlign::right;
+    } else if (align == txt::TextAlign::end) {
+        return (direction == txt::TextDirection::ltr) ? txt::TextAlign::right
+                                                      : txt::TextAlign::left;
+    } else {
+        return align;
+    }
 }
 } // namespace OHOS::Ace::NG

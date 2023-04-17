@@ -12,12 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "core/components_ng/image_provider/image_provider.h"
-namespace OHOS::Ace::NG {
-void ImageProvider::MakeCanvasImage(const WeakPtr<ImageObject>& objWp, const WeakPtr<ImageLoadingContext>& ctxWp,
-    const SizeF& targetSize, bool forceResize, bool sync)
-{}
+#include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 
-RefPtr<CanvasImage> ImageProvider::QueryCanvasImageFromCache(const ImageSourceInfo& src, const SizeF& targetSize)
-{return nullptr;}
+namespace OHOS::Ace::NG {
+Dimension SelectHandleInfo::GetDefaultLineWidth()
+{
+    return {};
+}
 } // namespace OHOS::Ace::NG

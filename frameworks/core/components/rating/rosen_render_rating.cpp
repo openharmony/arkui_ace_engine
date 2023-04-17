@@ -15,8 +15,8 @@
 
 #include "core/components/rating/rosen_render_rating.h"
 
-#include "third_party/skia/include/core/SkClipOp.h"
-#include "third_party/skia/include/core/SkMaskFilter.h"
+#include "include/core/SkClipOp.h"
+#include "include/core/SkMaskFilter.h"
 
 #include "core/components/align/render_align.h"
 #include "core/components/common/painter/rosen_universal_painter.h"

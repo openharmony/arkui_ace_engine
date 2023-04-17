@@ -230,7 +230,7 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
 #endif
 
     LocalScope scope(std::static_pointer_cast<ArkJSRuntime>(runtime_)->GetEcmaVm());
-    if (!isModulePreloaded_ || !usingSharedRuntime_ || IsPlugin()) {
+    if (!isModulePreloaded_ || !usingSharedRuntime_) {
         InitGlobalObjectTemplate();
     }
 
@@ -239,7 +239,7 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
         LOGI("InitJsEnv SharedRuntime has initialized, skip...");
     } else {
         InitGroupJsBridge();
-        if (!isModulePreloaded_ || !usingSharedRuntime_ || IsPlugin() || isUnique_) { // ArtTsCard
+        if (!isModulePreloaded_ || !usingSharedRuntime_ || isUnique_) { // ArtTsCard
             InitConsoleModule();
             InitAceModule();
             InitJsExportsUtilObject();
@@ -649,7 +649,7 @@ RefPtr<JsAcePage> JsiDeclarativeEngineInstance::GetStagingPage(int32_t instanceI
         return nullptr;
     }
     auto engineInstance = jsiEngine->GetEngineInstance();
-    LOGD("GetStagingPage id:%{public}d instance:%{public}p", instanceId, RawPtr(engineInstance));
+    LOGD("GetStagingPage id:%{public}d", instanceId);
     if (engineInstance == nullptr) {
         LOGE("engineInstance is nullptr");
         return nullptr;
@@ -682,7 +682,7 @@ shared_ptr<JsRuntime> JsiDeclarativeEngineInstance::InnerGetCurrentRuntime()
     auto engine = EngineHelper::GetCurrentEngine();
     auto jsiEngine = AceType::DynamicCast<JsiDeclarativeEngine>(engine);
     if (!jsiEngine) {
-        LOGE("jsiEngine is null");
+        LOGD("jsiEngine is null");
         return nullptr;
     }
 
@@ -797,7 +797,7 @@ void JsiDeclarativeEngine::Destroy()
 
     engineInstance_->GetDelegate()->RemoveTaskObserver();
     engineInstance_->DestroyAllRootViewHandle();
-    if (isUnique_) {
+    if (isUnique_ || engineInstance_->IsPlugin()) {
         RunFullGarbageCollection();
     }
 
@@ -828,7 +828,6 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
         arkRuntime = std::make_shared<ArkJSRuntime>();
         if (isUnique_ && reinterpret_cast<NativeEngine*>(cardRuntime_) != nullptr) {
             sharedRuntime = reinterpret_cast<NativeEngine*>(cardRuntime_);
-            LOGI("Initialize use thread local rootRuntime:%{public}p.", sharedRuntime);
         }
         auto nativeArkEngine = static_cast<ArkNativeEngine*>(sharedRuntime);
         vm = const_cast<EcmaVM*>(nativeArkEngine->GetEcmaVm());
@@ -1928,7 +1927,6 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_PreloadAceModuleCard(void* runtime)
 void JsiDeclarativeEngineInstance::PreloadAceModuleCard(void* runtime)
 {
     isUnique_ = true;
-    LOGI("PreloadAceModuleCard for ArkTS Card runtime:%{public}p.", runtime);
     if (isModulePreloaded_ && !IsPlugin() && !isUnique_) {
         LOGE("PreloadAceModule already preloaded");
         return;

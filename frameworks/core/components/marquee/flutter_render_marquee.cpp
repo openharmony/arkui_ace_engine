@@ -15,7 +15,7 @@
 
 #include "core/components/marquee/flutter_render_marquee.h"
 
-#include "flutter/third_party/icu/source/common/unicode/uchar.h"
+#include "unicode/uchar.h"
 
 #include "base/utils/string_utils.h"
 

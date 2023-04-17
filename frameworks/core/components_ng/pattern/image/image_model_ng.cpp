@@ -40,7 +40,7 @@ void ImageModelNG::Create(const std::string& src, bool noPixMap, RefPtr<PixelMap
         if (noPixMap) {
             return ImageSourceInfo(src, bundleName, moduleName);
         }
-        return  ImageSourceInfo(pixMap);
+        return ImageSourceInfo(pixMap);
 #else
         return ImageSourceInfo(src, bundleName, moduleName);
 #endif
@@ -49,12 +49,6 @@ void ImageModelNG::Create(const std::string& src, bool noPixMap, RefPtr<PixelMap
         V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
     stack->Push(frameNode);
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, createSourceInfoFunc());
-    // register image frame node to pipeline context to receive memory level notification and window state change
-    // notification
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->AddNodesToNotifyMemoryLevel(nodeId);
-    pipeline->AddWindowStateChangedCallback(nodeId);
 }
 
 void ImageModelNG::SetAlt(const std::string& src)
@@ -154,7 +148,9 @@ void ImageModelNG::SetAutoResize(bool autoResize)
 
 void ImageModelNG::SetSyncMode(bool syncMode)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, SyncMode, syncMode);
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSyncLoad(syncMode);
 }
 
 void ImageModelNG::SetColorFilterMatrix(const std::vector<float>& matrix)
@@ -166,13 +162,15 @@ void ImageModelNG::SetDraggable(bool draggable)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetDraggable(draggable);
-
-    if (draggable) {
+    if (draggable && !pattern->IsDraggable()) {
         auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
         gestureHub->InitDragDropEvent();
     }
+    pattern->SetDraggable(draggable);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetDraggable(draggable);
 }
 
 void ImageModelNG::SetOnDragStart(OnDragStartFunc&& onDragStart)
@@ -201,7 +199,9 @@ void ImageModelNG::SetOnDrop(OnDragDropFunc&& onDrop) {}
 
 void ImageModelNG::SetCopyOption(const CopyOptions& copyOption)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, CopyOptions, copyOption);
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCopyOption(copyOption);
 }
 
 bool ImageModelNG::UpdateDragItemInfo(DragItemInfo& itemInfo)

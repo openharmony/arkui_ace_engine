@@ -19,7 +19,7 @@
 #include <unordered_map>
 
 #include "flutter/fml/memory/ref_counted.h"
-#include "third_party/skia/include/codec/SkCodec.h"
+#include "include/codec/SkCodec.h"
 
 #include "base/memory/ace_type.h"
 #include "core/animation/animator.h"

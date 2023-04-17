@@ -115,12 +115,14 @@ void SlidingPanelPattern::Update()
                     ? PanelMode::FULL
                     : layoutProperty->GetPanelMode().value_or(PanelMode::HALF);
     auto isShow = layoutProperty->GetIsShowValue(true);
-    if (mode_.value() != mode && isShow_.has_value() && isShow_.value() == isShow) {
+    if (mode_.value() != mode) {
         mode_ = mode;
         CheckPanelModeAndType();
-        AnimateTo(defaultBlankHeights_[mode_.value_or(PanelMode::HALF)], mode_.value_or(PanelMode::HALF));
-        if (previousMode_ != mode_.value_or(PanelMode::HALF)) {
-            FireSizeChangeEvent();
+        if (isShow_.has_value() && isShow_.value() == isShow) {
+            AnimateTo(defaultBlankHeights_[mode_.value_or(PanelMode::HALF)], mode_.value_or(PanelMode::HALF));
+            if (previousMode_ != mode_.value_or(PanelMode::HALF)) {
+                FireSizeChangeEvent();
+            }
         }
     }
 }
@@ -618,8 +620,9 @@ void SlidingPanelPattern::FireSizeChangeEvent()
         auto dragBarFrameSize = dragBar->GetGeometryNode()->GetFrameSize();
         height = std::floor(
             frameSize.Height() - defaultBlankHeights_[mode_.value_or(PanelMode::HALF)] - dragBarFrameSize.Height());
+    } else {
+        height = std::floor(frameSize.Height() - defaultBlankHeights_[mode_.value_or(PanelMode::HALF)]);
     }
-    height = std::floor(frameSize.Height() - defaultBlankHeights_[mode_.value_or(PanelMode::HALF)]);
     float width = std::floor(frameSize.Width());
     slidingPanelEventHub->FireSizeChangeEvent(mode_.value_or(PanelMode::HALF), width, height);
     previousMode_ = mode_.value_or(PanelMode::HALF);
@@ -634,7 +637,19 @@ void SlidingPanelPattern::FireHeightChangeEvent()
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
 
-    auto currentHeight = static_cast<float>(geometryNode->GetFrameSize().Height() - currentOffset_);
+    auto layoutProperty = GetLayoutProperty<SlidingPanelLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto currentHeight = 0.0f;
+    if (layoutProperty->GetHasDragBarValue(true)) {
+        auto dragBar = GetDragBarNode();
+        CHECK_NULL_VOID(dragBar);
+        auto dragBarFrameSize = dragBar->GetGeometryNode()->GetFrameSize();
+        currentHeight =
+            static_cast<float>(geometryNode->GetFrameSize().Height() - currentOffset_ - dragBarFrameSize.Height());
+    } else {
+        currentHeight = static_cast<float>(geometryNode->GetFrameSize().Height() - currentOffset_);
+    }
+
     slidingPanelEventHub->FireHeightChangeEvent(currentHeight);
 }
 

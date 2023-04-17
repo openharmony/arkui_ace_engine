@@ -717,6 +717,20 @@ void WebPattern::OnForceDarkAccessUpdate(bool access)
     }
 }
 
+void WebPattern::OnAudioResumeIntervalUpdate(int32_t resumeInterval)
+{
+    if (delegate_) {
+        delegate_->UpdateAudioResumeInterval(resumeInterval);
+    }
+}
+
+void WebPattern::OnAudioExclusiveUpdate(bool audioExclusive)
+{
+    if (delegate_) {
+        delegate_->UpdateAudioExclusive(audioExclusive);
+    }
+}
+
 void WebPattern::OnOverviewModeAccessEnabledUpdate(bool value)
 {
     if (delegate_) {
@@ -928,6 +942,8 @@ void WebPattern::OnModifyDone()
         delegate_->SetEnhanceSurfaceFlag(isEnhanceSurface_);
         delegate_->SetPopup(isPopup_);
         delegate_->SetParentNWebId(parentNWebId_);
+        delegate_->SetBackgroundColor(GetBackgroundColorValue(
+            static_cast<int32_t>(renderContext->GetBackgroundColor().value_or(Color::WHITE).GetValue())));
         if (isEnhanceSurface_) {
             auto drawSize = Size(1, 1);
             delegate_->SetDrawSize(drawSize);
@@ -950,6 +966,8 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateCacheMode(GetCacheModeValue(WebCacheMode::DEFAULT));
         delegate_->UpdateDarkMode(GetDarkModeValue(WebDarkMode::Off));
         delegate_->UpdateForceDarkAccess(GetForceDarkAccessValue(false));
+        delegate_->UpdateAudioResumeInterval(GetAudioResumeIntervalValue(-1));
+        delegate_->UpdateAudioExclusive(GetAudioExclusiveValue(true));
         delegate_->UpdateOverviewModeEnabled(GetOverviewModeAccessEnabledValue(true));
         delegate_->UpdateFileFromUrlEnabled(GetFileFromUrlAccessEnabledValue(false));
         delegate_->UpdateDatabaseEnabled(GetDatabaseAccessEnabledValue(false));
@@ -1125,6 +1143,10 @@ bool WebPattern::ParseTouchInfo(const TouchEventInfo& info, std::list<TouchInfo>
 
 void WebPattern::RequestFullScreen()
 {
+    if (isFullScreen_) {
+        LOGE("The Web is already full screen when FullScreen");
+        return;
+    }
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto host = GetHost();
@@ -1132,10 +1154,15 @@ void WebPattern::RequestFullScreen()
     auto fullScreenManager = context->GetFullScreenManager();
     CHECK_NULL_VOID(fullScreenManager);
     fullScreenManager->RequestFullScreen(host);
+    isFullScreen_ = true;
 }
 
 void WebPattern::ExitFullScreen()
 {
+    if (!isFullScreen_) {
+        LOGE("The Web is not full screen when ExitFullScreen");
+        return;
+    }
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto host = GetHost();
@@ -1143,6 +1170,7 @@ void WebPattern::ExitFullScreen()
     auto fullScreenManager = context->GetFullScreenManager();
     CHECK_NULL_VOID(fullScreenManager);
     fullScreenManager->ExitFullScreen(host);
+    isFullScreen_ = false;
 }
 
 bool WebPattern::IsTouchHandleValid(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> handle)

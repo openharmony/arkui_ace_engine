@@ -14,14 +14,23 @@
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
-template("preview_external_source") {
-  forward_variables_from(invoker, "*")
-
-  ohos_source_set(target_name) {
-    subsystem_name = ace_engine_subsystem
-    part_name = ace_engine_part
-    defines += invoker.defines
-    cflags_cc += invoker.cflags_cc
+ohos_source_set("preview_external_source") {
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+  if (defined(current_platform.name)) {
+    defines = []
+    cflags_cc = []
+    config = {
+    }
+    if (defined(current_platform.config)) {
+      config = current_platform.config
+    }
+    if (defined(config.defines)) {
+      defines += config.defines
+    }
+    if (defined(config.cflags_cc)) {
+      cflags_cc += config.cflags_cc
+    }
     configs = [ "$ace_root:ace_config" ]
 
     sources = [
@@ -33,29 +42,5 @@ template("preview_external_source") {
       "ability/stage/stage_context.cpp",
       "ability/stage/stage_hap_module_info.cpp",
     ]
-  }
-}
-
-foreach(item, ace_platforms) {
-  platform = item.name
-  if (platform == "windows" || platform == "mac" || platform == "linux") {
-    preview_external_source("preview_external_source_" + item.name) {
-      defines = []
-      cflags_cc = []
-      config = {
-      }
-
-      if (defined(item.config)) {
-        config = item.config
-      }
-
-      if (defined(config.defines)) {
-        defines = config.defines
-      }
-
-      if (defined(config.cflags_cc)) {
-        cflags_cc = config.cflags_cc
-      }
-    }
   }
 }

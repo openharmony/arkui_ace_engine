@@ -15,8 +15,8 @@
 
 #include "core/components/qrcode/rosen_render_qrcode.h"
 
-#include "third_party/skia/include/core/SkCanvas.h"
-#include "third_party/skia/include/core/SkRRect.h"
+#include "include/core/SkCanvas.h"
+#include "include/core/SkRRect.h"
 
 #include "core/pipeline/base/rosen_render_context.h"
 #include "core/pipeline/pipeline_context.h"

@@ -351,6 +351,14 @@ public:
         return windowId_;
     }
 
+    bool WindowIsShow() const override
+    {
+        if (!uiWindow_) {
+            return false;
+        }
+        return uiWindow_->GetWindowState() == Rosen::WindowState::STATE_SHOWN;
+    }
+
     void SetWindowPos(int32_t left, int32_t top);
 
     void SetIsSubContainer(bool isSubContainer)
@@ -372,7 +380,8 @@ public:
     void UpdateConfiguration(
         const std::string& colorMode, const std::string& inputDevice, const std::string& languageTag);
 
-    void NotifyConfigurationChange(bool needReloadTransition);
+    void NotifyConfigurationChange(bool needReloadTransition) override;
+    void HotReload() override;
 
     bool IsUseStageModel() const override
     {
@@ -409,6 +418,8 @@ private:
     void InitializeCallback();
     void InitializeTask();
     void InitWindowCallback();
+
+    SafeAreaEdgeInserts SetViewSafeArea(sptr<OHOS::Rosen::Window> window);
 
     void AttachView(std::shared_ptr<Window> window, AceView* view, double density, int32_t width, int32_t height,
         int32_t windowId, UIEnvCallback callback = nullptr);

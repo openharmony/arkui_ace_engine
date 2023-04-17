@@ -138,7 +138,9 @@ public:
     void SetOnFocusMove(std::function<void(int32_t)>&& onFocusMoveCallback) override;
     void SetOnFocus(OnFocusFunc&& onFocusCallback) override;
     void SetOnBlur(OnBlurFunc&& onBlurCallback) override;
+    void SetDraggable(bool draggable) override {}
     void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override;
+    void SetOnDragEnd(OnNewDragFunc&& onDragEnd) override;
     void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) override;
     void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) override;
     void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) override;
@@ -169,7 +171,8 @@ public:
     void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) override;
     void BindMenu(std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc,
         const NG::MenuParam& menuParam) override;
-    void BindContextMenu(ResponseType type, std::function<void()>&& buildFunc) override;
+
+    void BindContextMenu(ResponseType type, std::function<void()>&& buildFunc, const NG::MenuParam& menuParam) override;
     void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<void()>&& buildFunc, int32_t type) override {}
 
@@ -181,6 +184,11 @@ public:
     void SetProgressMask(const RefPtr<NG::ProgressMaskProperty>& progress) override {}
     void SetForegroundColor(const Color& color) override {}
     void SetForegroundColorStrategy(const ForegroundColorStrategy& strategy) override {}
+    void SetAllowDrop(const std::set<std::string>& allowDrop) override {}
+
+    void CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
+        const std::function<void(float)>& onCallbackEvent) override {};
+    void UpdateAnimatablePropertyFloat(const std::string& propertyName, float value) override {};
 };
 
 } // namespace OHOS::Ace::Framework

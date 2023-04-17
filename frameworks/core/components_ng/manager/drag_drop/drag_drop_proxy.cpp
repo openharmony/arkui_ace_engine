@@ -55,8 +55,12 @@ void DragDropProxy::OnDragMove(const GestureEvent& info)
     CHECK_NULL_VOID(manager);
     CHECK_NULL_VOID(manager->CheckDragDropProxy(id_));
 
+#ifdef ENABLE_DRAG_FRAMEWORK
+    std::string extraInfo = manager->GetExtraInfo();
+#else
     std::string extraInfo;
     manager->GetExtraInfoFromClipboard(extraInfo);
+#endif // ENABLE_DRAG_FRAMEWORK
 
     manager->OnDragMove(
         static_cast<float>(info.GetGlobalPoint().GetX()), static_cast<float>(info.GetGlobalPoint().GetY()), extraInfo);
@@ -69,7 +73,6 @@ void DragDropProxy::OnDragEnd(const GestureEvent& info, bool isTextDragEnd)
     auto manager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(manager);
     CHECK_NULL_VOID(manager->CheckDragDropProxy(id_));
-
     std::string extraInfo;
     manager->GetExtraInfoFromClipboard(extraInfo);
     if (isTextDragEnd) {

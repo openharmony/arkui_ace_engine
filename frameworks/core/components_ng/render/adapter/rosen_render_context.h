@@ -21,9 +21,9 @@
 #include <optional>
 
 #include "render_service_client/core/ui/rs_node.h"
-#include "third_party/skia/include/core/SkCanvas.h"
-#include "third_party/skia/include/core/SkPictureRecorder.h"
-#include "third_party/skia/include/core/SkRefCnt.h"
+#include "include/core/SkCanvas.h"
+#include "include/core/SkPictureRecorder.h"
+#include "include/core/SkRefCnt.h"
 
 #include "base/geometry/dimension_offset.h"
 #include "base/geometry/ng/offset_t.h"
@@ -77,10 +77,11 @@ public:
     void BlendBorderColor(const Color& color) override;
 
     // Paint focus state by component's setting. It will paint along the paintRect
-    void PaintFocusState(const RoundRect& paintRect, const Color& paintColor, const Dimension& paintWidth) override;
+    void PaintFocusState(const RoundRect& paintRect, const Color& paintColor, const Dimension& paintWidth,
+        bool isAccessibilityFocus = false) override;
     // Paint focus state by component's setting. It will paint along the frameRect(padding: focusPaddingVp)
     void PaintFocusState(const RoundRect& paintRect, const Dimension& focusPaddingVp, const Color& paintColor,
-        const Dimension& paintWidth) override;
+        const Dimension& paintWidth, bool isAccessibilityFocus = false) override;
     // Paint focus state by default. It will paint along the component rect(padding: focusPaddingVp)
     void PaintFocusState(
         const Dimension& focusPaddingVp, const Color& paintColor, const Dimension& paintWidth) override;
@@ -129,9 +130,9 @@ public:
     void AnimateHoverEffectBoard(bool isHovered) override;
     void UpdateBackBlurRadius(const Dimension& radius) override;
     void UpdateBackBlurStyle(const BlurStyleOption& bgBlurStyle) override;
-    void OnSphericalEffectUpdate(float radio) override;
+    void OnSphericalEffectUpdate(double radio) override;
     void OnPixelStretchEffectUpdate(const PixStretchEffectOption& option) override;
-    void OnLightUpEffectUpdate(float radio) override;
+    void OnLightUpEffectUpdate(double radio) override;
     void OnBackShadowUpdate(const Shadow& shadow) override;
     void UpdateBorderWidthF(const BorderWidthPropertyF& value) override;
 
@@ -147,8 +148,8 @@ public:
     {
         return propTransitionDisappearing_ != nullptr;
     }
-    void OnNodeAppear() override;
-    void OnNodeDisappear() override;
+    void OnNodeAppear(bool recursive) override;
+    void OnNodeDisappear(bool recursive) override;
     void ClipWithRect(const RectF& rectF) override;
 
     bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish) override;
@@ -163,6 +164,8 @@ public:
     // if translate params use percent dimension, frameSize should be given correctly
     static std::shared_ptr<Rosen::RSTransitionEffect> GetRSTransitionWithoutType(
         const TransitionOptions& options, const SizeF& frameSize = SizeF());
+
+    static float ConvertDimensionToScaleBySize(const Dimension& dimension, float size);
 
     void FlushContentModifier(const RefPtr<Modifier>& modifier) override;
     void FlushOverlayModifier(const RefPtr<Modifier>& modifier) override;
@@ -183,6 +186,10 @@ public:
     void ScaleAnimation(const AnimationOption& option, double begin, double end) override;
 
     void PaintAccessibilityFocus() override;
+
+    void ClearAccessibilityFocus() override;
+
+    void OnAccessibilityFocusUpdate(bool isAccessibilityFocus) override;
 
     void OnMouseSelectUpdate(bool isSelected, const Color& fillColor, const Color& strokeColor) override;
     void UpdateMouseSelectWithRect(const RectF& rect, const Color& fillColor, const Color& strokeColor) override;
@@ -207,6 +214,9 @@ public:
     void MarkDrivenRender(bool flag) override;
     void MarkDrivenRenderItemIndex(int32_t index) override;
     void MarkDrivenRenderFramePaintState(bool flag) override;
+    RefPtr<PixelMap> GetThumbnailPixelMap() override;
+    void SetActualForegroundColor(const Color& value) override;
+    void AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePropertyBase> property) override;
 
 private:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
@@ -241,7 +251,7 @@ private:
     void OnClipEdgeUpdate(bool isClip) override;
     void OnClipMaskUpdate(const RefPtr<BasicShape>& basicShape) override;
 
-    void OnProgressMaskUpdate(const RefPtr<ProgressMaskProperty>& prgress) override;
+    void OnProgressMaskUpdate(const RefPtr<ProgressMaskProperty>& progress) override;
 
     void OnLinearGradientUpdate(const NG::Gradient& value) override;
     void OnSweepGradientUpdate(const NG::Gradient& value) override;
@@ -260,8 +270,7 @@ private:
     void OnOverlayTextUpdate(const OverlayOptions& overlay) override;
     void OnMotionPathUpdate(const MotionPathOption& motionPath) override;
 
-    void OnAccessibilityFocusUpdate(bool isAccessibilityFocus) override;
-
+    void OnFreezeUpdate(bool isFreezed) override;
     void ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
 
     void NotifyTransitionInner(const SizeF& frameSize, bool isTransitionIn);
@@ -333,6 +342,7 @@ private:
     bool isPositionChanged_ = false;
     bool isSynced_ = false;
     bool firstTransitionIn_ = false;
+    bool transitionWithAnimation_ = false;
     bool isBackBlurChanged_ = false;
     bool needDebugBoundary_ = false;
     bool isDisappearing_ = false;
@@ -346,6 +356,7 @@ private:
     std::shared_ptr<MouseSelectModifier> mouseSelectModifier_;
     std::shared_ptr<MoonProgressModifier> moonProgressModifier_;
     std::shared_ptr<FocusStateModifier> focusStateModifier_;
+    std::shared_ptr<FocusStateModifier> accessibilityFocusStateModifier_;
     std::optional<TransformMatrixModifier> transformMatrixModifier_;
     std::shared_ptr<Rosen::RSProperty<Rosen::Vector2f>> pivotProperty_;
     std::unique_ptr<SharedTransitionModifier> sharedTransitionModifier_;
@@ -362,7 +373,8 @@ private:
     std::shared_ptr<ColorBlendModifier> colorBlendModifier_;
 
     template<typename Modifier, typename PropertyType>
-    friend class PropertyTransitionEffectImpl;
+    friend class PropertyTransitionEffectTemplate;
+    friend class RosenPivotTransitionEffect;
 
     ACE_DISALLOW_COPY_AND_MOVE(RosenRenderContext);
 };

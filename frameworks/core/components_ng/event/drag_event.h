@@ -94,11 +94,19 @@ public:
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result) override;
 #ifdef ENABLE_DRAG_FRAMEWORK
+    void SetThumbnailCallback(std::function<void(Offset)>&& callback);
     void SetFilter(const RefPtr<DragEventActuator>& actuator);
-    void BindClickEvent(const RefPtr<DragEventActuator>& actuator, const RefPtr<FrameNode>& columnNode);
-    void SetPixelMap(const RefPtr<DragEventActuator>& actuator, const Offset& screenLocation);
-    void HideFilter(const RefPtr<DragEventActuator>& actuator);
-    void HidePixelMap();
+    void SetPixelMap(const RefPtr<DragEventActuator>& actuator);
+    void SetEventColumn();
+    void HideFilter();
+    void HidePixelMap(bool startDrag = false, double x = 0, double y = 0);
+    void HideEventColumn();
+    void BindClickEvent(const RefPtr<FrameNode>& columnNode);
+    void ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode);
+    void SetTextAnimation(const RefPtr<GestureEventHub>& gestureHub, const Offset& globalLocation);
+    void HideTextAnimation(bool startDrag = false, double globalX = 0, double globalY = 0);
+    bool GetIsBindOverlayValue(const RefPtr<DragEventActuator>& actuator);
+    bool IsAllowedDrag();
 #endif // ENABLE_DRAG_FRAMEWORK
     PanDirection GetDirection() const
     {

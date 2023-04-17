@@ -189,6 +189,9 @@ void ElementRegister::Clear()
 RefPtr<NG::GeometryTransition> ElementRegister::GetOrCreateGeometryTransition(const std::string& id,
                                                                               const WeakPtr<NG::FrameNode>& frameNode)
 {
+    if (id.empty()) {
+        return nullptr;
+    }
     CHECK_NULL_RETURN(frameNode.Upgrade(), nullptr);
     RefPtr<NG::GeometryTransition> geometryTransition;
     auto iter = geometryTransitionMap_.begin();

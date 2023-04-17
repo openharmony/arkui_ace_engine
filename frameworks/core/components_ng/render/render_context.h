@@ -27,6 +27,7 @@
 #include "core/animation/page_transition_common.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/shared_transition_option.h"
+#include "core/components_ng/base/modifier.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/overlay_property.h"
 #include "core/components_ng/property/progress_mask_property.h"
@@ -107,10 +108,12 @@ public:
     virtual void BlendBorderColor(const Color& color) {}
 
     // Paint focus state by component's setting. It will paint along the paintRect
-    virtual void PaintFocusState(const RoundRect& paintRect, const Color& paintColor, const Dimension& paintWidth) {}
+    virtual void PaintFocusState(const RoundRect& paintRect, const Color& paintColor, const Dimension& paintWidth,
+        bool isAccessibilityFocus = false)
+    {}
     // Paint focus state by component's setting. It will paint along the frameRect(padding: focusPaddingVp)
     virtual void PaintFocusState(const RoundRect& paintRect, const Dimension& focusPaddingVp, const Color& paintColor,
-        const Dimension& paintWidth)
+        const Dimension& paintWidth, bool isAccessibilityFocus = false)
     {}
     // Paint focus state by default. It will paint along the component rect(padding: focusPaddingVp)
     virtual void PaintFocusState(const Dimension& focusPaddingVp, const Color& paintColor, const Dimension& paintWidth)
@@ -138,8 +141,8 @@ public:
 
     virtual void UpdateTransition(const TransitionOptions& options) {}
     virtual void UpdateChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect) {}
-    virtual void OnNodeDisappear() {}
-    virtual void OnNodeAppear() {}
+    virtual void OnNodeDisappear(bool recursive) {}
+    virtual void OnNodeAppear(bool recursive) {}
     virtual bool HasTransitionOutAnimation() const
     {
         return false;
@@ -230,7 +233,13 @@ public:
         return GetBackground() ? GetBackground()->propBlurRadius : std::nullopt;
     }
 
+    virtual void AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePropertyBase> modifier) {};
+
     virtual void PaintAccessibilityFocus() {};
+
+    virtual void ClearAccessibilityFocus() {};
+
+    virtual void OnAccessibilityFocusUpdate(bool isAccessibilityFocus) {};
 
     virtual void OnMouseSelectUpdate(bool isSelected, const Color& fillColor, const Color& strokeColor) {}
     virtual void UpdateMouseSelectWithRect(const RectF& rect, const Color& fillColor, const Color& strokeColor) {}
@@ -239,12 +248,17 @@ public:
     virtual void OnZIndexUpdate(int32_t value) {}
 
     virtual void OnBackgroundColorUpdate(const Color& value) {}
-    virtual void OnSphericalEffectUpdate(float radio) {}
+    virtual void OnSphericalEffectUpdate(double radio) {}
     virtual void OnPixelStretchEffectUpdate(const PixStretchEffectOption& option) {}
-    virtual void OnLightUpEffectUpdate(float radio) {}
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(SphericalEffect, float);
+    virtual void OnLightUpEffectUpdate(double radio) {}
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(SphericalEffect, double);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PixelStretchEffect, PixStretchEffectOption);
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(LightUpEffect, float);
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(LightUpEffect, double);
+    virtual RefPtr<PixelMap> GetThumbnailPixelMap()
+    {
+        return nullptr;
+    }
+    virtual void SetActualForegroundColor(const Color& value) {}
     // transform matrix
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TransformMatrix, Matrix4);
 
@@ -336,6 +350,9 @@ public:
     // accessibility
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AccessibilityFocus, bool);
 
+    // freeze
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Freeze, bool);
+
 protected:
     RenderContext() = default;
     std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;
@@ -373,7 +390,7 @@ protected:
     virtual void OnClipEdgeUpdate(bool isClip) {}
     virtual void OnClipMaskUpdate(const RefPtr<BasicShape>& basicShape) {}
 
-    virtual void OnProgressMaskUpdate(const RefPtr<ProgressMaskProperty>& prgress) {}
+    virtual void OnProgressMaskUpdate(const RefPtr<ProgressMaskProperty>& progress) {}
 
     virtual void OnLinearGradientUpdate(const NG::Gradient& value) {}
     virtual void OnSweepGradientUpdate(const NG::Gradient& value) {}
@@ -392,7 +409,7 @@ protected:
 
     virtual void OnOverlayTextUpdate(const OverlayOptions& overlay) {}
     virtual void OnMotionPathUpdate(const MotionPathOption& motionPath) {}
-    virtual void OnAccessibilityFocusUpdate(bool isAccessibilityFocus) {}
+    virtual void OnFreezeUpdate(bool isFreezed) {}
 
 private:
     std::function<void()> requestFrame_;

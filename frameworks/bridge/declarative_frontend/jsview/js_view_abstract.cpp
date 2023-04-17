@@ -101,6 +101,9 @@ constexpr double ROUND_UNIT = 360.0;
 constexpr double VISIBLE_RATIO_MIN = 0.0;
 constexpr double VISIBLE_RATIO_MAX = 1.0;
 constexpr int32_t MIN_ROTATE_VECTOR_Z = 9;
+constexpr int32_t PARAMETER_LENGTH_FIRST = 1;
+constexpr int32_t PARAMETER_LENGTH_SECOND = 2;
+constexpr int32_t PARAMETER_LENGTH_THIRD = 3;
 
 bool CheckJSCallbackInfo(
     const std::string& callerName, const JSCallbackInfo& info, std::vector<JSCallbackInfoType>& infoTypes)
@@ -782,7 +785,7 @@ void ParseCustomPopupParam(
     auto placementValue = popupObj->GetProperty("placement");
     if (placementValue->IsNumber()) {
         auto placement = placementValue->ToNumber<int32_t>();
-        if (placement >= 0 && placement <= static_cast<int32_t>(PLACEMENT.size())) {
+        if (placement >= 0 && placement < static_cast<int32_t>(PLACEMENT.size())) {
             popupParam->SetPlacement(PLACEMENT[placement]);
         }
     }
@@ -955,7 +958,7 @@ void JSViewAbstract::JsOpacity(const JSCallbackInfo& info)
     }
 
     if ((LessNotEqual(opacity, 0.0)) || opacity > 1) {
-        LOGW("set opacity to %{public}f, over range, set to default opacity", opacity);
+        LOGD("set opacity to %{public}f, over range, set to default opacity", opacity);
         opacity = 1.0;
     }
 
@@ -1201,6 +1204,10 @@ void JSViewAbstract::JsWidth(const JSCallbackInfo& info)
 bool JSViewAbstract::JsWidth(const JSRef<JSVal>& jsValue)
 {
     Dimension value;
+    if (jsValue->IsUndefined()) {
+        ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
+        return true;
+    }
     if (!ParseJsDimensionVp(jsValue, value)) {
         return false;
     }
@@ -1226,6 +1233,10 @@ void JSViewAbstract::JsHeight(const JSCallbackInfo& info)
 bool JSViewAbstract::JsHeight(const JSRef<JSVal>& jsValue)
 {
     Dimension value;
+    if (jsValue->IsUndefined()) {
+        ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
+        return true;
+    }
     if (!ParseJsDimensionVp(jsValue, value)) {
         return false;
     }
@@ -1765,10 +1776,6 @@ void JSViewAbstract::JsGeometryTransition(const JSCallbackInfo& info)
     }
     // id
     auto id = info[0]->ToString();
-    if (id.empty()) {
-        LOGE("JsGeometryTransition: id is empty.");
-        return;
-    }
     ViewAbstractModel::GetInstance()->SetGeometryTransition(id);
 }
 
@@ -1870,8 +1877,8 @@ void JSViewAbstract::JsSphericalEffect(const JSCallbackInfo& info)
         LOGE("The arg is not a number");
         return;
     }
-    auto radio = info[0]->ToNumber<float>();
-    ViewAbstractModel::GetInstance()->SetSphericalEffect(std::clamp(radio, 0.0f, 1.0f));
+    auto radio = info[0]->ToNumber<double>();
+    ViewAbstractModel::GetInstance()->SetSphericalEffect(std::clamp(radio, 0.0, 1.0));
 }
 
 void JSViewAbstract::JsPixelStretchEffect(const JSCallbackInfo& info)
@@ -1936,8 +1943,8 @@ void JSViewAbstract::JsLightUpEffect(const JSCallbackInfo& info)
         LOGE("The arg is wrong,it is supposed to be a number!");
         return;
     }
-    auto radio = info[0]->ToNumber<float>();
-    ViewAbstractModel::GetInstance()->SetLightUpEffect(std::clamp(radio, 0.0f, 1.0f));
+    auto radio = info[0]->ToNumber<double>();
+    ViewAbstractModel::GetInstance()->SetLightUpEffect(std::clamp(radio, 0.0, 1.0));
 }
 
 void JSViewAbstract::JsBackgroundImageSize(const JSCallbackInfo& info)
@@ -2081,10 +2088,8 @@ std::vector<NG::OptionParam> ParseBindOptionParam(const JSCallbackInfo& info)
     return params;
 }
 
-void ParseBindOptionParam(const JSCallbackInfo& info, NG::MenuParam& menuParam)
+void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
 {
-    auto menuOptions = JSRef<JSObject>::Cast(info[1]);
-    JSViewAbstract::ParseJsString(menuOptions->GetProperty("title"), menuParam.title);
     auto offsetVal = menuOptions->GetProperty("offset");
     if (offsetVal->IsObject()) {
         auto offsetObj = JSRef<JSObject>::Cast(offsetVal);
@@ -2099,12 +2104,59 @@ void ParseBindOptionParam(const JSCallbackInfo& info, NG::MenuParam& menuParam)
             menuParam.positionOffset.SetY(dy.ConvertToPx());
         }
     }
+
+    auto placementValue = menuOptions->GetProperty("placement");
+    if (placementValue->IsNumber()) {
+        auto placement = placementValue->ToNumber<int32_t>();
+        if (placement >= 0 && placement < static_cast<int32_t>(PLACEMENT.size())) {
+            menuParam.placement = PLACEMENT[placement];
+        }
+    }
+
+    auto onAppearValue = menuOptions->GetProperty("onAppear");
+    if (onAppearValue->IsFunction()) {
+        RefPtr<JsFunction> jsOnAppearFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onAppearValue));
+        auto onAppear = [execCtx = info.GetExecutionContext(), func = std::move(jsOnAppearFunc)]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            LOGI("About to call onAppear method on js");
+            ACE_SCORING_EVENT("onAppear");
+            func->Execute();
+        };
+        menuParam.onAppear = std::move(onAppear);
+    }
+
+    auto onDisappearValue = menuOptions->GetProperty("onDisappear");
+    if (onDisappearValue->IsFunction()) {
+        RefPtr<JsFunction> jsOnDisAppearFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onDisappearValue));
+        auto onDisappear = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDisAppearFunc)]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            LOGI("About to call onAppear method on js");
+            ACE_SCORING_EVENT("onDisappear");
+            func->Execute();
+        };
+        menuParam.onDisappear = std::move(onDisappear);
+    }
+}
+
+void ParseBindOptionParam(const JSCallbackInfo& info, NG::MenuParam& menuParam)
+{
+    auto menuOptions = JSRef<JSObject>::Cast(info[1]);
+    JSViewAbstract::ParseJsString(menuOptions->GetProperty("title"), menuParam.title);
+    ParseMenuParam(info, menuOptions, menuParam);
+}
+
+void ParseBindContentOptionParam(const JSCallbackInfo& info, const JSRef<JSVal>& args, NG::MenuParam& menuParam)
+{
+    auto menuContentOptions = JSRef<JSObject>::Cast(args);
+    ParseMenuParam(info, menuContentOptions, menuParam);
 }
 
 void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
 {
     NG::MenuParam menuParam;
-    if (info.Length() > 1 && info[1]->IsObject()) {
+    if (info.Length() > PARAMETER_LENGTH_FIRST && info[1]->IsObject()) {
         ParseBindOptionParam(info, menuParam);
     }
     if (info[0]->IsArray()) {
@@ -2767,7 +2819,7 @@ bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, Dimension& re
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     JSRef<JSVal> resId = jsObj->GetProperty("id");
     if (!resId->IsNumber()) {
-        LOGW("resId is not number");
+        LOGD("resId is not number");
         return false;
     }
     auto themeConstants = GetThemeConstants(jsObj);
@@ -3030,7 +3082,7 @@ bool JSViewAbstract::ParseJsFontFamilies(const JSRef<JSVal>& jsValue, std::vecto
 bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::string& result)
 {
     if (!jsValue->IsString() && !jsValue->IsObject()) {
-        LOGE("arg is not String or Object.");
+        LOGD("arg is not String or Object.");
         return false;
     }
 
@@ -3043,13 +3095,13 @@ bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::string& res
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     JSRef<JSVal> type = jsObj->GetProperty("type");
     if (!type->IsNumber()) {
-        LOGW("type is not number");
+        LOGD("type is not number");
         return false;
     }
 
     JSRef<JSVal> resId = jsObj->GetProperty("id");
     if (!resId->IsNumber()) {
-        LOGW("resId is not number");
+        LOGD("resId is not number");
         return false;
     }
 
@@ -3173,7 +3225,7 @@ bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& resu
         LOGE("JSImage::Create ParseJsMedia type is wrong");
         return false;
     }
-    LOGI("input value is not string or number, using PixelMap");
+    LOGD("input value is not string or number, using PixelMap");
     return false;
 }
 
@@ -3558,6 +3610,11 @@ void JSViewAbstract::Pop()
     ViewStackModel::GetInstance()->Pop();
 }
 
+void JSViewAbstract::JsSetDraggable(bool draggable)
+{
+    ViewAbstractModel::GetInstance()->SetDraggable(draggable);
+}
+
 void JSViewAbstract::JsOnDragStart(const JSCallbackInfo& info)
 {
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::FUNCTION };
@@ -3641,6 +3698,24 @@ void JSViewAbstract::JsOnDragEnter(const JSCallbackInfo& info)
     };
 
     ViewAbstractModel::GetInstance()->SetOnDragEnter(std::move(onDragEnter));
+}
+
+void JSViewAbstract::JsOnDragEnd(const JSCallbackInfo& info)
+{
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::FUNCTION };
+    if (!CheckJSCallbackInfo("JsOnDragEnd", info, checkList)) {
+        return;
+    }
+    RefPtr<JsDragFunction> jsOnDragEndFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+
+    auto onDragEnd = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEndFunc)](
+                           const RefPtr<OHOS::Ace::DragEvent>& info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onDragEnd");
+        func->Execute(info);
+    };
+
+    ViewAbstractModel::GetInstance()->SetOnDragEnd(std::move(onDragEnd));
 }
 
 void JSViewAbstract::JsOnDragMove(const JSCallbackInfo& info)
@@ -4377,7 +4452,7 @@ void JSViewAbstract::JsOpacityPassThrough(const JSCallbackInfo& info)
     }
 
     if ((LessNotEqual(opacity, 0.0)) || opacity > 1) {
-        LOGW("set opacity to %{public}f, over range, set to default opacity", opacity);
+        LOGD("set opacity to %{public}f, over range, set to default opacity", opacity);
         opacity = 1.0;
     }
 
@@ -4447,7 +4522,7 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
     CHECK_NULL_VOID(builderFunc);
 
     ResponseType responseType = ResponseType::LONG_PRESS;
-    if (info.Length() == 2 && info[1]->IsNumber()) {
+    if (info.Length() >= PARAMETER_LENGTH_SECOND && info[1]->IsNumber()) {
         auto response = info[1]->ToNumber<int32_t>();
         LOGI("Set the responseType is %{public}d.", response);
         responseType = static_cast<ResponseType>(response);
@@ -4457,7 +4532,13 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
         ACE_SCORING_EVENT("BuildContextMenu");
         func->Execute();
     };
-    ViewAbstractModel::GetInstance()->BindContextMenu(responseType, std::move(buildFunc));
+
+    NG::MenuParam menuParam;
+    if (info.Length() >= PARAMETER_LENGTH_THIRD && info[2]->IsObject()) {
+        ParseBindContentOptionParam(info, info[2], menuParam);
+    }
+
+    ViewAbstractModel::GetInstance()->BindContextMenu(responseType, std::move(buildFunc), menuParam);
 }
 
 void JSViewAbstract::JsBindContentCover(const JSCallbackInfo& info)
@@ -4471,7 +4552,7 @@ void JSViewAbstract::JsBindContentCover(const JSCallbackInfo& info)
     bool isShow = false;
     DoubleBindCallback callback = nullptr;
     if (info[0]->IsBoolean()) {
-        isShow = info[1]->ToBoolean();
+        isShow = info[0]->ToBoolean();
     } else if (info[0]->IsObject()) {
         JSRef<JSObject> callbackObj = JSRef<JSObject>::Cast(info[0]);
         callback = ParseDoubleBindCallback(info, callbackObj);
@@ -4501,6 +4582,59 @@ void JSViewAbstract::JsBindContentCover(const JSCallbackInfo& info)
     // parse ModalTransition
     auto type = (info.Length() == 3 && info[2]->IsNumber()) ? info[2]->ToNumber<int32_t>() : 0;
     ViewAbstractModel::GetInstance()->BindContentCover(isShow, std::move(callback), std::move(buildFunc), type);
+}
+
+void JSViewAbstract::JSCreateAnimatableProperty(const JSCallbackInfo& info)
+{
+    if (info.Length() < 3 || !info[0]->IsString()) { /* 3:args number */
+        LOGE("JSCreateAnimatableProperty: The arg is invalid.");
+        return;
+    }
+
+    JSRef<JSVal> callback = info[2]; /* 2:args index */
+    if (!callback->IsFunction()) {
+        LOGE("JSCreateAnimatableProperty: callback function type is invalid.");
+        return;
+    }
+
+    std::string propertyName = info[0]->ToString();
+    if (info[1]->IsNumber()) {
+        float numValue = info[1]->ToNumber<float>();
+        std::function<void(float)> onCallbackEvent;
+        RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(callback));
+        onCallbackEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
+                            id = Container::CurrentId()](const float val) {
+            ContainerScope scope(id);
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            LOGD("onCallbackEvent(number) execute js func. val: %f", val);
+            auto newJSVal = JSRef<JSVal>::Make(ToJSValue(val));
+            func->ExecuteJS(1, &newJSVal);
+        };
+        ViewAbstractModel::GetInstance()->CreateAnimatablePropertyFloat(propertyName, numValue, onCallbackEvent);
+    } else if (info[1]->IsObject()) {
+        LOGD("Object type (AnimatableArithmetic) to be handled.");
+    } else {
+        LOGE("JSCreateAnimatableProperty: The value param type is invalid.");
+    }
+}
+
+void JSViewAbstract::JSUpdateAnimatableProperty(const JSCallbackInfo& info)
+{
+    if (info.Length() < 2 || !info[0]->IsString()) { /* 2:args number */
+        LOGE("JSUpdateAnimatableProperty: The arg is invalid.");
+        return;
+    }
+
+    std::string propertyName = info[0]->ToString();
+    float numValue = 0.0;
+    if (info[1]->IsNumber()) {
+        numValue = info[1]->ToNumber<float>();
+        ViewAbstractModel::GetInstance()->UpdateAnimatablePropertyFloat(propertyName, numValue);
+    } else if (info[1]->IsObject()) {
+        LOGD("Object type (RSAnimatableArithmetic) to be handled");
+    } else {
+        LOGE("JSUpdateAnimatableProperty: The value param type is invalid.");
+    }
 }
 
 void JSViewAbstract::JSBind()
@@ -4589,11 +4723,13 @@ void JSViewAbstract::JSBind()
     JSClass<JSViewAbstract>::StaticMethod("bindMenu", &JSViewAbstract::JsBindMenu);
     JSClass<JSViewAbstract>::StaticMethod("bindContextMenu", &JSViewAbstract::JsBindContextMenu);
     JSClass<JSViewAbstract>::StaticMethod("bindContentCover", &JSViewAbstract::JsBindContentCover);
+    JSClass<JSViewAbstract>::StaticMethod("draggable", &JSViewAbstract::JsSetDraggable);
     JSClass<JSViewAbstract>::StaticMethod("onDragStart", &JSViewAbstract::JsOnDragStart);
     JSClass<JSViewAbstract>::StaticMethod("onDragEnter", &JSViewAbstract::JsOnDragEnter);
     JSClass<JSViewAbstract>::StaticMethod("onDragMove", &JSViewAbstract::JsOnDragMove);
     JSClass<JSViewAbstract>::StaticMethod("onDragLeave", &JSViewAbstract::JsOnDragLeave);
     JSClass<JSViewAbstract>::StaticMethod("onDrop", &JSViewAbstract::JsOnDrop);
+    JSClass<JSViewAbstract>::StaticMethod("onDragEnd", &JSViewAbstract::JsOnDragEnd);
 
     JSClass<JSViewAbstract>::StaticMethod("linearGradient", &JSViewAbstract::JsLinearGradient);
     JSClass<JSViewAbstract>::StaticMethod("sweepGradient", &JSViewAbstract::JsSweepGradient);
@@ -4644,6 +4780,27 @@ void JSViewAbstract::JSBind()
     JSClass<JSViewAbstract>::StaticMethod("onVisibleAreaChange", &JSViewAbstract::JsOnVisibleAreaChange);
     JSClass<JSViewAbstract>::StaticMethod("hitTestBehavior", &JSViewAbstract::JsHitTestBehavior);
     JSClass<JSViewAbstract>::StaticMethod("keyboardShortcut", &JSViewAbstract::JsKeyboardShortcut);
+    JSClass<JSViewAbstract>::StaticMethod("allowDrop", &JSViewAbstract::JsAllowDrop);
+
+    JSClass<JSViewAbstract>::StaticMethod("createAnimatableProperty", &JSViewAbstract::JSCreateAnimatableProperty);
+    JSClass<JSViewAbstract>::StaticMethod("updateAnimatableProperty", &JSViewAbstract::JSUpdateAnimatableProperty);
+}
+void JSViewAbstract::JsAllowDrop(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsArray()) {
+        LOGE("JsAllowDrop: The param type is invalid.");
+        return;
+    }
+
+    auto allowDropArray = JSRef<JSArray>::Cast(info[0]);
+    std::set<std::string> allowDropSet;
+    allowDropSet.clear();
+    std::string allowDrop;
+    for (size_t i = 0; i < allowDropArray->Length(); i++) {
+        allowDrop = allowDropArray->GetValueAt(i)->ToString();
+        allowDropSet.insert(allowDrop);
+    }
+    ViewAbstractModel::GetInstance()->SetAllowDrop(allowDropSet);
 }
 
 void JSViewAbstract::JsAlignRules(const JSCallbackInfo& info)

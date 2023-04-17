@@ -234,7 +234,7 @@ void ViewAbstract::SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle)
     }
 }
 
-void ViewAbstract::SetSphericalEffect(float radio)
+void ViewAbstract::SetSphericalEffect(double radio)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         LOGD("current state is not processed, return");
@@ -252,7 +252,7 @@ void ViewAbstract::SetPixelStretchEffect(PixStretchEffectOption& option)
     ACE_UPDATE_RENDER_CONTEXT(PixelStretchEffect, option);
 }
 
-void ViewAbstract::SetLightUpEffect(float radio)
+void ViewAbstract::SetLightUpEffect(double radio)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         LOGD("current state is not processed, return");
@@ -385,6 +385,7 @@ void ViewAbstract::SetBorderRadius(const Dimension& value)
     }
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(value);
+    borderRadius.SetRadiusFlag(true);
     ACE_UPDATE_RENDER_CONTEXT(BorderRadius, borderRadius);
 }
 
@@ -649,12 +650,28 @@ void ViewAbstract::AddDragFrameNodeToManager()
     dragDropManager->AddDragFrameNode(AceType::WeakClaim(AceType::RawPtr(frameNode)));
 }
 
+void ViewAbstract::SetDraggable(bool draggable)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    if (draggable && !frameNode->IsDraggable()) {
+        auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        gestureHub->InitDragDropEvent();
+    }
+    frameNode->SetDraggable(draggable);
+}
+
 void ViewAbstract::SetOnDragStart(
     std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragStart)
 {
-    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
-    gestureHub->InitDragDropEvent();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    if (!frameNode->IsDraggable()) {
+        auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        gestureHub->InitDragDropEvent();
+    }
 
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -700,6 +717,15 @@ void ViewAbstract::SetOnDrop(std::function<void(const RefPtr<OHOS::Ace::DragEven
     AddDragFrameNodeToManager();
 }
 
+void ViewAbstract::SetOnDragEnd(std::function<void(const RefPtr<OHOS::Ace::DragEvent>&)>&& onDragEnd)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDragEnd(std::move(onDragEnd));
+
+    AddDragFrameNodeToManager();
+}
+
 void ViewAbstract::SetAlign(Alignment alignment)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -730,6 +756,12 @@ void ViewAbstract::SetOpacity(double opacity)
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(Opacity, opacity);
+}
+void ViewAbstract::SetAllowDrop(const std::set<std::string>& allowDrop)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetAllowDrop(allowDrop);
 }
 
 void ViewAbstract::SetPosition(const OffsetT<Dimension>& value)
@@ -908,7 +940,8 @@ void ViewAbstract::BindMenuWithItems(std::vector<OptionParam>&& params,
         LOGD("menu params is empty");
         return;
     }
-    auto menuNode = MenuView::Create(std::move(params), targetNode->GetId(), MenuType::MENU, menuParam);
+    auto menuNode =
+        MenuView::Create(std::move(params), targetNode->GetId(), targetNode->GetTag(), MenuType::MENU, menuParam);
     BindMenu(menuNode, targetNode->GetId(), offset);
 }
 
@@ -923,7 +956,7 @@ void ViewAbstract::BindMenuWithCustomNode(const RefPtr<UINode>& customNode, cons
     isContextMenu = false;
 #endif
     auto type = isContextMenu ? MenuType::CONTEXT_MENU : MenuType::MENU;
-    auto menuNode = MenuView::Create(customNode, targetNode->GetId(), type, menuParam);
+    auto menuNode = MenuView::Create(customNode, targetNode->GetId(), targetNode->GetTag(), type, menuParam);
     if (isContextMenu) {
         SubwindowManager::GetInstance()->ShowMenuNG(menuNode, targetNode->GetId(), offset);
         return;
@@ -1314,4 +1347,18 @@ void ViewAbstract::SetKeyboardShortcut(
     eventManager->AddKeyboardShortcutNode(WeakPtr<NG::FrameNode>(frameNode));
 }
 
+void ViewAbstract::CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
+    const std::function<void(float)>& onCallbackEvent)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->CreateAnimatablePropertyFloat(propertyName, value, onCallbackEvent);
+}
+
+void ViewAbstract::UpdateAnimatablePropertyFloat(const std::string& propertyName, float value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->UpdateAnimatablePropertyFloat(propertyName, value);
+}
 } // namespace OHOS::Ace::NG

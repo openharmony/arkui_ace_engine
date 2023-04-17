@@ -28,11 +28,13 @@ bool KeyEventHandler::HandleKeyEvent(const KeyEvent& keyEvent)
             keyEvent.code == KeyCode::KEY_DPAD_CENTER) {
             if (pattern->GetKeyboard() != TextInputType::MULTILINE) {
                 pattern->PerformAction(pattern->GetAction(), false);
+                return true;
             }
         } else if (HandleShiftPressedEvent(keyEvent)) {
             return true;
         } else if (keyEvent.IsDirectionalKey()) {
-            HandleDirectionalKey(keyEvent);
+            auto handleDirectionalKey = HandleDirectionalKey(keyEvent);
+            return handleDirectionalKey;
         } else if (keyEvent.IsNumberKey()) {
             appendElement = keyEvent.ConvertCodeToString();
         } else if (keyEvent.IsLetterKey()) {
@@ -64,26 +66,31 @@ bool KeyEventHandler::HandleKeyEvent(const KeyEvent& keyEvent)
         }
         if (keyEvent.code == KeyCode::KEY_DEL) {
 #if defined(PREVIEW)
-            pattern->DeleteForward(1);
+            pattern->DeleteForward(TextFieldPattern::GetGraphemeClusterLength(
+                pattern->GetEditingValue().GetWideText(), pattern->GetEditingValue().caretPosition));
 #else
-            pattern->DeleteBackward(1);
+            pattern->DeleteBackward(TextFieldPattern::GetGraphemeClusterLength(
+                pattern->GetEditingValue().GetWideText(), pattern->GetEditingValue().caretPosition, true));
 #endif
             return true;
         }
         if (keyEvent.code == KeyCode::KEY_FORWARD_DEL) {
 #if defined(PREVIEW)
-            pattern->DeleteBackward(1);
+            pattern->DeleteBackward(TextFieldPattern::GetGraphemeClusterLength(
+                pattern->GetEditingValue().GetWideText(), pattern->GetEditingValue().caretPosition, true));
 #else
-            pattern->DeleteForward(1);
+            pattern->DeleteForward(TextFieldPattern::GetGraphemeClusterLength(
+                pattern->GetEditingValue().GetWideText(), pattern->GetEditingValue().caretPosition));
 #endif
             return true;
         }
         ParseAppendValue(keyEvent.code, appendElement);
         if (!appendElement.empty()) {
             pattern->InsertValue(appendElement);
+            return true;
         }
     }
-    return true;
+    return false;
 }
 
 void KeyEventHandler::ParseAppendValue(KeyCode keycode, std::string& appendElement)
@@ -97,10 +104,10 @@ void KeyEventHandler::ParseAppendValue(KeyCode keycode, std::string& appendEleme
     }
 }
 
-void KeyEventHandler::HandleDirectionalKey(const KeyEvent& keyEvent)
+bool KeyEventHandler::HandleDirectionalKey(const KeyEvent& keyEvent)
 {
     auto pattern = DynamicCast<TextFieldPattern>(weakPattern_.Upgrade());
-    CHECK_NULL_VOID(pattern);
+    CHECK_NULL_RETURN(pattern, false);
     bool updateSelection = false;
     if (keyEvent.IsKey({ KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_DPAD_UP }) ||
         keyEvent.IsKey({ KeyCode::KEY_SHIFT_RIGHT, KeyCode::KEY_DPAD_UP })) {
@@ -120,24 +127,26 @@ void KeyEventHandler::HandleDirectionalKey(const KeyEvent& keyEvent)
         updateSelection = true;
     }
     if (updateSelection) {
-        return;
+        return true;
     }
+    bool handleDirectionalKey = false;
     switch (keyEvent.code) {
         case KeyCode::KEY_DPAD_UP:
-            pattern->CursorMoveUp();
+            handleDirectionalKey = pattern->CursorMoveUp();
             break;
         case KeyCode::KEY_DPAD_DOWN:
-            pattern->CursorMoveDown();
+            handleDirectionalKey = pattern->CursorMoveDown();
             break;
         case KeyCode::KEY_DPAD_LEFT:
-            pattern->CursorMoveLeft();
+            handleDirectionalKey = pattern->CursorMoveLeft();
             break;
         case KeyCode::KEY_DPAD_RIGHT:
-            pattern->CursorMoveRight();
+            handleDirectionalKey = pattern->CursorMoveRight();
             break;
         default:
             LOGW("Unknown direction");
     }
+    return handleDirectionalKey;
 }
 
 bool KeyEventHandler::HandleShiftPressedEvent(const KeyEvent& event)

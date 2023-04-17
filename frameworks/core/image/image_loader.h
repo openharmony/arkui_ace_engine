@@ -20,7 +20,7 @@
 #include <regex>
 #include <string>
 
-#include "third_party/skia/include/core/SkImage.h"
+#include "include/core/SkImage.h"
 
 #include "base/geometry/size.h"
 #include "base/memory/ace_type.h"
@@ -82,6 +82,8 @@ public:
         const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context = nullptr) override;
     RefPtr<NG::ImageData> LoadDecodedImageData(
         const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context = nullptr) override;
+private:
+    static const std::string& GetThumbnailOrientation(const ImageSourceInfo& src);
 };
 
 class AssetImageLoader final : public ImageLoader {

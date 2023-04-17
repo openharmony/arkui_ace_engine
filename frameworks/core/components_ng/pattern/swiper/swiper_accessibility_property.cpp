@@ -86,7 +86,6 @@ int32_t SwiperAccessibilityProperty::GetCollectionItemCounts() const
 
 void SwiperAccessibilityProperty::SetSpecificSupportAction()
 {
-    AddSupportAction(AceAction::ACTION_SELECT);
     auto frameNode = host_.Upgrade();
     CHECK_NULL_VOID(frameNode);
     auto swiperPaintProperty = frameNode->GetPaintProperty<SwiperPaintProperty>();
@@ -94,10 +93,11 @@ void SwiperAccessibilityProperty::SetSpecificSupportAction()
     bool isLoop = swiperPaintProperty->GetLoop().value_or(true);
     if (IsScrollable()) {
         if (!isLoop) {
-            if (GetCurrentIndex() > GetBeginIndex()) {
+            if (GetCurrentIndex() > 0) {
                 AddSupportAction(AceAction::ACTION_SCROLL_BACKWARD);
             }
-            if (GetCurrentIndex() < GetEndIndex()) {
+
+            if (GetCurrentIndex() < GetCollectionItemCounts() - 1) {
                 AddSupportAction(AceAction::ACTION_SCROLL_FORWARD);
             }
         } else {
@@ -105,5 +105,8 @@ void SwiperAccessibilityProperty::SetSpecificSupportAction()
             AddSupportAction(AceAction::ACTION_SCROLL_BACKWARD);
         }
     }
+
+    AddSupportAction(AceAction::ACTION_SELECT);
+    AddSupportAction(AceAction::ACTION_CLEAR_SELECTION);
 }
 } // namespace OHOS::Ace::NG

@@ -73,9 +73,20 @@ public:
     void RestoreClipboardData();
     void DestroyDragWindow();
 #ifdef ENABLE_DRAG_FRAMEWORK
+    void UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode);
+    void RequireSummary();
+    void ClearSummary();
+    void SetSummaryMap(const std::map<std::string, int64_t>& summaryMap)
+    {
+        summaryMap_ = summaryMap;
+    }
     RefPtr<DragDropProxy> CreateFrameworkDragDropProxy();
+    void UpdatePixelMapPosition(int32_t globalX, int32_t globalY);
+    std::string GetExtraInfo();
+    void SetExtraInfo(const std::string& extraInfo);
+    void ClearExtraInfo();
 #endif // ENABLE_DRAG_FRAMEWORK
-
+    void UpdateDragEvent(RefPtr<OHOS::Ace::DragEvent>& event, float globalX, float globalY);
     bool CheckDragDropProxy(int64_t id) const;
 
     bool IsDragged() const
@@ -90,7 +101,9 @@ private:
     void FireOnDragEvent(
         const RefPtr<FrameNode>& frameNode, const Point& point, DragEventType type, const std::string& extraInfo);
     void FireOnItemDragEvent(const RefPtr<FrameNode>& frameNode, DragType dragType,
-        const OHOS::Ace::ItemDragInfo& itemDragInfo, DragEventType type, int32_t draggedIndex, int32_t insertIndex = 0);
+        const ItemDragInfo& itemDragInfo, DragEventType type, int32_t draggedIndex, int32_t insertIndex = 0);
+    bool FireOnItemDropEvent(const RefPtr<FrameNode>& frameNode, DragType dragType,
+        const ItemDragInfo& itemDragInfo, int32_t draggedIndex, int32_t insertIndex, bool isSuccess);
     int32_t GetItemIndex(const RefPtr<FrameNode>& frameNode, DragType dragType, float globalX, float globalY);
     void CreateDragWindow(const GestureEvent& info, uint32_t width, uint32_t height);
     RefPtr<FrameNode> CreateDragRootNode(const RefPtr<UINode>& customNode);
@@ -111,7 +124,9 @@ private:
     std::function<void(const std::string&)> deleteDataCallback_ = nullptr;
     std::string extraInfo_;
     std::unique_ptr<JsonValue> newData_ = nullptr;
-
+#ifdef ENABLE_DRAG_FRAMEWORK
+    std::map<std::string, int64_t> summaryMap_;
+#endif // ENABLE_DRAG_FRAMEWORK
     int64_t currentId_ = -1;
 
     bool isDragged_ = false;

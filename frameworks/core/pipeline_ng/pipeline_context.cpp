@@ -27,6 +27,7 @@
 #endif
 
 #include "base/geometry/ng/offset_t.h"
+#include "base/geometry/ng/rect_t.h"
 #include "base/log/ace_trace.h"
 #include "base/log/ace_tracker.h"
 #include "base/log/dump_log.h"
@@ -188,13 +189,13 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
                                                : AceApplicationInfo::GetInstance().GetProcessName();
     window_->RecordFrameTime(nanoTimestamp, abilityName);
     FlushAnimation(GetTimeFromExternalTimer());
+    FlushTouchEvents();
     FlushBuild();
-    if (isFormRender_ && drawDelegate_) {
+    if (isFormRender_ && drawDelegate_ && rootNode_) {
         auto renderContext = AceType::DynamicCast<NG::RenderContext>(rootNode_->GetRenderContext());
         drawDelegate_->DrawRSFrame(renderContext);
         drawDelegate_ = nullptr;
     }
-    FlushTouchEvents();
     if (!taskScheduler_.isEmpty()) {
 #if !defined(PREVIEW)
         LayoutInspector::SupportInspector();
@@ -295,6 +296,7 @@ void PipelineContext::FlushPipelineImmediately()
 
 void PipelineContext::FlushPipelineWithoutAnimation()
 {
+    ACE_FUNCTION_TRACE();
     FlushBuild();
     FlushTouchEvents();
     taskScheduler_.FlushTask();
@@ -462,7 +464,7 @@ const RefPtr<FullScreenManager>& PipelineContext::GetFullScreenManager()
 }
 
 void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSizeChangeReason type,
-    const std::shared_ptr<Rosen::RSTransaction> rsTransaction)
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     CHECK_RUN_ON(UI);
     LOGD("PipelineContext: OnSurfaceChanged start.");
@@ -510,7 +512,7 @@ void PipelineContext::OnSurfacePositionChanged(int32_t posX, int32_t posY)
 }
 
 void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
-    const std::shared_ptr<Rosen::RSTransaction> rsTransaction)
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     static const bool IsWindowSizeAnimationEnabled = SystemProperties::IsWindowSizeAnimationEnabled();
     if (!IsWindowSizeAnimationEnabled) {
@@ -540,6 +542,7 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
         case WindowSizeChangeReason::ROTATION: {
 #ifdef ENABLE_ROSEN_BACKEND
             if (rsTransaction) {
+                FlushMessages();
                 rsTransaction->Begin();
             }
 #endif
@@ -622,31 +625,67 @@ void PipelineContext::SetRootRect(double width, double height, double offset)
     }
 }
 
-void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight)
+void PipelineContext::SetGetViewSafeAreaImpl(std::function<SafeAreaEdgeInserts()>&& callback)
+{
+    if (window_) {
+        window_->SetGetViewSafeAreaImpl(std::move(callback));
+    }
+}
+
+SafeAreaEdgeInserts PipelineContext::GetCurrentViewSafeArea() const
+{
+    if (window_) {
+        return window_->GetCurrentViewSafeArea();
+    }
+    return {};
+}
+
+void PipelineContext::OnVirtualKeyboardHeightChange(
+    float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     CHECK_RUN_ON(UI);
-    float positionY = 0;
-    auto manager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
-    float height = 0.0f;
-    if (manager) {
-        height = manager->GetHeight();
-        positionY = static_cast<float>(manager->GetClickPosition().GetY());
+    ACE_FUNCTION_TRACE();
+#ifdef ENABLE_ROSEN_BACKEND
+    if (rsTransaction) {
+        FlushMessages();
+        rsTransaction->Begin();
     }
-    SizeF rootSize { static_cast<float>(rootWidth_), static_cast<float>(rootHeight_) };
-    float offsetFix = (rootSize.Height() - positionY) > 100.0 ? keyboardHeight - (rootSize.Height() - positionY) / 2.0
-                                                              : keyboardHeight;
-    LOGI("OnVirtualKeyboardAreaChange positionY:%{public}f safeArea:%{public}f offsetFix:%{public}f, "
-         "keyboardHeight %{public}f",
-        positionY, (rootSize.Height() - keyboardHeight), offsetFix, keyboardHeight);
-    if (NearZero(keyboardHeight)) {
-        SetRootRect(rootSize.Width(), rootSize.Height(), 0);
-    } else if (positionY > (rootSize.Height() - keyboardHeight) && offsetFix > 0.0) {
-        SetRootRect(rootSize.Width(), rootSize.Height(), -offsetFix);
-    } else if ((positionY + height > rootSize.Height() - keyboardHeight &&
-                   positionY < rootSize.Height() - keyboardHeight && height < keyboardHeight / 2.0f) &&
-               NearZero(rootNode_->GetGeometryNode()->GetFrameOffset().GetY())) {
-        SetRootRect(rootSize.Width(), rootSize.Height(), -height - offsetFix / 2.0f);
+#endif
+
+    auto func = [this, keyboardHeight]() {
+        float positionY = 0.0f;
+        auto manager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
+        float height = 0.0f;
+        if (manager) {
+            height = manager->GetHeight();
+            positionY = static_cast<float>(manager->GetClickPosition().GetY());
+        }
+        SizeF rootSize { static_cast<float>(rootWidth_), static_cast<float>(rootHeight_) };
+        float offsetFix = (rootSize.Height() - positionY) > 100.0
+                              ? keyboardHeight - (rootSize.Height() - positionY) / 2.0
+                              : keyboardHeight;
+        LOGI("OnVirtualKeyboardAreaChange positionY:%{public}f safeArea:%{public}f offsetFix:%{public}f, "
+             "keyboardHeight %{public}f",
+            positionY, (rootSize.Height() - keyboardHeight), offsetFix, keyboardHeight);
+        if (NearZero(keyboardHeight)) {
+            SetRootRect(rootSize.Width(), rootSize.Height(), 0);
+        } else if (positionY > (rootSize.Height() - keyboardHeight) && offsetFix > 0.0) {
+            SetRootRect(rootSize.Width(), rootSize.Height(), -offsetFix);
+        } else if ((positionY + height > rootSize.Height() - keyboardHeight &&
+                       positionY < rootSize.Height() - keyboardHeight && height < keyboardHeight / 2.0f) &&
+                   NearZero(rootNode_->GetGeometryNode()->GetFrameOffset().GetY())) {
+            SetRootRect(rootSize.Width(), rootSize.Height(), -height - offsetFix / 2.0f);
+        }
+    };
+
+    AnimationOption option = AnimationUtil::CreateKeyboardAnimationOption(keyboardAnimationConfig_, keyboardHeight);
+    Animate(option, option.GetCurve(), func);
+
+#ifdef ENABLE_ROSEN_BACKEND
+    if (rsTransaction) {
+        rsTransaction->Commit();
     }
+#endif
 }
 
 bool PipelineContext::OnBackPressed()
@@ -851,11 +890,10 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
 void PipelineContext::OnSurfaceDensityChanged(double density)
 {
     CHECK_RUN_ON(UI);
-    LOGI("OnSurfaceDensityChanged density_(%{public}lf)", density_);
-    LOGI("OnSurfaceDensityChanged dipScale_(%{public}lf)", dipScale_);
+    LOGD("density_(%{public}lf), dipScale_(%{public}lf)", density_, dipScale_);
     density_ = density;
     if (!NearZero(viewScale_)) {
-        LOGI("OnSurfaceDensityChanged viewScale_(%{public}lf)", viewScale_);
+        LOGD("viewScale_(%{public}lf)", viewScale_);
         dipScale_ = density_ / viewScale_;
     }
 }
@@ -1146,36 +1184,32 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event)
 }
 
 void PipelineContext::AddVisibleAreaChangeNode(
-    const RefPtr<FrameNode>& node, double ratio, const VisibleRatioCallback& callback)
+    const RefPtr<FrameNode>& node, double ratio, const VisibleRatioCallback& callback, bool isUserCallback)
 {
     CHECK_NULL_VOID(node);
-    VisibleCallbackInfo info;
-    info.callback = callback;
-    info.visibleRatio = ratio;
-    info.isCurrentVisible = false;
-    auto iter = visibleAreaChangeNodes_.find(node->GetId());
-    if (iter != visibleAreaChangeNodes_.end()) {
-        auto& callbackList = iter->second;
-        callbackList.emplace_back(info);
+    VisibleCallbackInfo addInfo;
+    addInfo.callback = callback;
+    addInfo.isCurrentVisible = false;
+    onVisibleAreaChangeNodeIds_.emplace(node->GetId());
+    if (isUserCallback) {
+        node->AddVisibleAreaUserCallback(ratio, addInfo);
     } else {
-        std::list<VisibleCallbackInfo> callbackList;
-        callbackList.emplace_back(info);
-        visibleAreaChangeNodes_[node->GetId()] = callbackList;
+        node->AddVisibleAreaInnerCallback(ratio, addInfo);
     }
 }
 
 void PipelineContext::RemoveVisibleAreaChangeNode(int32_t nodeId)
 {
-    visibleAreaChangeNodes_.erase(nodeId);
+    onVisibleAreaChangeNodeIds_.erase(nodeId);
 }
 
 void PipelineContext::HandleVisibleAreaChangeEvent()
 {
-    if (visibleAreaChangeNodes_.empty()) {
+    if (onVisibleAreaChangeNodeIds_.empty()) {
         return;
     }
-    for (auto& visibleChangeNode : visibleAreaChangeNodes_) {
-        auto uiNode = ElementRegister::GetInstance()->GetUINodeById(visibleChangeNode.first);
+    for (const auto& visibleChangeNodeId : onVisibleAreaChangeNodeIds_) {
+        auto uiNode = ElementRegister::GetInstance()->GetUINodeById(visibleChangeNodeId);
         if (!uiNode) {
             continue;
         }
@@ -1183,7 +1217,7 @@ void PipelineContext::HandleVisibleAreaChangeEvent()
         if (!frameNode) {
             continue;
         }
-        frameNode->TriggerVisibleAreaChangeCallback(visibleChangeNode.second);
+        frameNode->TriggerVisibleAreaChangeCallback();
     }
 }
 
@@ -1394,6 +1428,7 @@ void PipelineContext::FlushWindowStateChangedCallback(bool isShow)
             ++iter;
         }
     }
+    HandleVisibleAreaChangeEvent();
 }
 
 void PipelineContext::AddWindowFocusChangedCallback(int32_t nodeId)
@@ -1452,20 +1487,33 @@ void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
 {
     auto manager = GetDragDropManager();
     CHECK_NULL_VOID(manager);
-    if (manager->IsDragged()) {
+#ifdef ENABLE_DRAG_FRAMEWORK
+    if (action == DragEventAction::DRAG_EVENT_OUT) {
+        manager->ClearSummary();
+        manager->ClearExtraInfo();
+    }
+#endif // ENABLE_DRAG_FRAMEWORK
+    if (manager->IsDragged() && action != DragEventAction::DRAG_EVENT_END) {
         LOGI("current context is the source of drag");
         return;
     }
 
     std::string extraInfo;
-    manager->GetExtraInfoFromClipboard(extraInfo);
 
+#ifdef ENABLE_DRAG_FRAMEWORK
+    if (action == DragEventAction::DRAG_EVENT_START) {
+        manager->RequireSummary();
+        manager->GetExtraInfoFromClipboard(extraInfo);
+        manager->SetExtraInfo(extraInfo);
+    }
+#else
+    manager->GetExtraInfoFromClipboard(extraInfo);
+#endif // ENABLE_DRAG_FRAMEWORK
     if (action == DragEventAction::DRAG_EVENT_END) {
         manager->OnDragEnd(static_cast<float>(x), static_cast<float>(y), extraInfo);
         manager->RestoreClipboardData();
         return;
     }
-
     manager->OnDragMove(static_cast<float>(x), static_cast<float>(y), extraInfo);
 }
 
