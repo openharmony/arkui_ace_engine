@@ -25,9 +25,9 @@
 #define USE_OPENCL_WRAPPER
 #include "opencl_wrapper.h"
 #endif // ENABLE_OPENCL
-#include "third_party/skia/include/core/SkData.h"
-#include "third_party/skia/include/core/SkGraphics.h"
-#include "third_party/skia/include/core/SkPixmap.h"
+#include "include/core/SkData.h"
+#include "include/core/SkGraphics.h"
+#include "include/core/SkPixmap.h"
 
 namespace OHOS::Ace {
 #define MAGIC_FILE_CONSTANT 0x5CA1AB13

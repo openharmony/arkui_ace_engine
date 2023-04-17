@@ -21,9 +21,9 @@
 #include <optional>
 
 #include "render_service_client/core/ui/rs_node.h"
-#include "third_party/skia/include/core/SkCanvas.h"
-#include "third_party/skia/include/core/SkPictureRecorder.h"
-#include "third_party/skia/include/core/SkRefCnt.h"
+#include "include/core/SkCanvas.h"
+#include "include/core/SkPictureRecorder.h"
+#include "include/core/SkRefCnt.h"
 
 #include "base/geometry/dimension_offset.h"
 #include "base/geometry/ng/offset_t.h"

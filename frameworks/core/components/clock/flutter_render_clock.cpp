@@ -16,9 +16,9 @@
 #include "core/components/clock/flutter_render_clock.h"
 
 #include "flutter/common/task_runners.h"
-#include "third_party/skia/include/core/SkCanvas.h"
-#include "third_party/skia/include/core/SkColor.h"
-#include "third_party/skia/include/core/SkMaskFilter.h"
+#include "include/core/SkCanvas.h"
+#include "include/core/SkColor.h"
+#include "include/core/SkMaskFilter.h"
 
 #include "base/json/json_util.h"
 #include "core/components/text/text_component.h"

@@ -15,10 +15,10 @@
 
 #include "core/components/track/rosen_render_circular_track.h"
 
-#include "third_party/skia/include/core/SkCanvas.h"
-#include "third_party/skia/include/core/SkColor.h"
-#include "third_party/skia/include/core/SkPaint.h"
-#include "third_party/skia/include/effects/SkGradientShader.h"
+#include "include/core/SkCanvas.h"
+#include "include/core/SkColor.h"
+#include "include/core/SkPaint.h"
+#include "include/effects/SkGradientShader.h"
 
 #include "core/pipeline/base/rosen_render_context.h"
 

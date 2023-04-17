@@ -15,9 +15,9 @@
 
 #include "core/components/track/rosen_render_scale_ring_track.h"
 
-#include "third_party/skia/include/core/SkCanvas.h"
-#include "third_party/skia/include/core/SkPaint.h"
-#include "third_party/skia/include/effects/Sk1DPathEffect.h"
+#include "include/core/SkCanvas.h"
+#include "include/core/SkPaint.h"
+#include "include/effects/Sk1DPathEffect.h"
 
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_constants_defines.h"

@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SEARCH_ROSEN_RENDER_SEARCH_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SEARCH_ROSEN_RENDER_SEARCH_H
 
-#include "third_party/skia/include/core/SkCanvas.h"
+#include "include/core/SkCanvas.h"
 
 #include "core/components/search/render_search.h"
 #include "core/pipeline/base/rosen_render_context.h"

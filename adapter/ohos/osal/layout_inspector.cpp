@@ -17,10 +17,11 @@
 
 #include <string>
 
-#include "third_party/skia/include/core/SkImage.h"
-#include "third_party/skia/include/core/SkString.h"
-#include "third_party/skia/include/utils/SkBase64.h"
-#include "SkColorSpace.h"
+#include "include/core/SkImage.h"
+#include "include/core/SkString.h"
+#include "include/core/SkColorSpace.h"
+#include "include/utils/SkBase64.h"
+
 #include "wm/window.h"
 
 #include "adapter/ohos/osal/pixel_map_ohos.h"

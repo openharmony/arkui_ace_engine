@@ -15,7 +15,7 @@
 
 #include "core/components/progress/flutter_render_progress.h"
 
-#include "third_party/skia/include/effects/SkGradientShader.h"
+#include "include/effects/SkGradientShader.h"
 
 #include "core/components/progress/progress_component.h"
 #include "core/components/progress/render_progress.h"

@@ -15,10 +15,10 @@
 
 #include "core/components/bubble/rosen_render_bubble.h"
 
-#include "third_party/skia/include/core/SkMaskFilter.h"
-#include "third_party/skia/include/effects/Sk1DPathEffect.h"
-#include "third_party/skia/include/effects/SkDashPathEffect.h"
-#include "third_party/skia/include/effects/SkGradientShader.h"
+#include "include/core/SkMaskFilter.h"
+#include "include/effects/Sk1DPathEffect.h"
+#include "include/effects/SkDashPathEffect.h"
+#include "include/effects/SkGradientShader.h"
 
 #include "core/components/common/painter/rosen_decoration_painter.h"
 #include "core/components/common/properties/placement.h"

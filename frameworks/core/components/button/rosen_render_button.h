@@ -16,8 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BUTTON_ROSEN_RENDER_BUTTON_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BUTTON_ROSEN_RENDER_BUTTON_H
 
-#include "third_party/skia/include/core/SkCanvas.h"
-#include "third_party/skia/include/core/SkPoint.h"
+#include "include/core/SkCanvas.h"
+#include "include/core/SkPoint.h"
 
 #include "core/components/button/render_button.h"
 

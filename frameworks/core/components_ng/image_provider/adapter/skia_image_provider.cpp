@@ -16,8 +16,8 @@
 #include <mutex>
 #include <utility>
 
-#include "third_party/skia/include/codec/SkCodec.h"
-#include "third_party/skia/include/core/SkGraphics.h"
+#include "include/codec/SkCodec.h"
+#include "include/core/SkGraphics.h"
 
 #include "base/log/ace_trace.h"
 #include "base/memory/referenced.h"

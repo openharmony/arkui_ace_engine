@@ -15,10 +15,10 @@
 
 #include "constants_converter.h"
 
-#include "flutter/third_party/txt/src/txt/font_style.h"
-#include "flutter/third_party/txt/src/txt/font_weight.h"
-#include "flutter/third_party/txt/src/txt/paragraph_style.h"
-#include "flutter/third_party/txt/src/txt/text_decoration.h"
+#include "txt/font_style.h"
+#include "txt/font_weight.h"
+#include "txt/paragraph_style.h"
+#include "txt/text_decoration.h"
 
 #include "base/i18n/localization.h"
 #include "core/components/common/properties/color.h"

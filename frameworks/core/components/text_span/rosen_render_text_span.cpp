@@ -15,8 +15,8 @@
 
 #include "core/components/text_span/rosen_render_text_span.h"
 
-#include "flutter/third_party/txt/src/txt/paragraph_builder.h"
-#include "flutter/third_party/txt/src/txt/paragraph_txt.h"
+#include "txt/paragraph_builder.h"
+#include "txt/paragraph_txt.h"
 
 #include "base/utils/string_utils.h"
 #include "core/components/calendar/rosen_render_calendar.h"

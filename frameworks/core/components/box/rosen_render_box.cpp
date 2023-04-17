@@ -20,8 +20,8 @@
 #include "animation/rs_animation_timing_protocol.h"
 #include "flutter/common/task_runners.h"
 #include "render_service_client/core/ui/rs_node.h"
-#include "third_party/skia/include/effects/SkGradientShader.h"
-#include "third_party/skia/include/utils/SkParsePath.h"
+#include "include/effects/SkGradientShader.h"
+#include "include/utils/SkParsePath.h"
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"

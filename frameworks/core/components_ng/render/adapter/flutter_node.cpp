@@ -18,8 +18,8 @@
 #include "ace_shell/shell/common/window_manager.h"
 #include "flutter/flow/layers/picture_layer.h"
 #include "flutter/flow/layers/transform_layer.h"
-#include "third_party/skia/include/core/SkCanvas.h"
-#include "third_party/skia/include/core/SkPictureRecorder.h"
+#include "include/core/SkCanvas.h"
+#include "include/core/SkPictureRecorder.h"
 
 #include "base/thread/task_executor.h"
 #include "core/common/container.h"
