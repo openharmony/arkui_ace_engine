@@ -101,6 +101,9 @@ constexpr double ROUND_UNIT = 360.0;
 constexpr double VISIBLE_RATIO_MIN = 0.0;
 constexpr double VISIBLE_RATIO_MAX = 1.0;
 constexpr int32_t MIN_ROTATE_VECTOR_Z = 9;
+constexpr int32_t PARAMETER_LENGTH_FIRST = 1;
+constexpr int32_t PARAMETER_LENGTH_SECOND = 2;
+constexpr int32_t PARAMETER_LENGTH_THIRD = 3;
 
 bool CheckJSCallbackInfo(
     const std::string& callerName, const JSCallbackInfo& info, std::vector<JSCallbackInfoType>& infoTypes)
@@ -2153,7 +2156,7 @@ void ParseBindContentOptionParam(const JSCallbackInfo& info, const JSRef<JSVal>&
 void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
 {
     NG::MenuParam menuParam;
-    if (info.Length() > 1 && info[1]->IsObject()) {
+    if (info.Length() > PARAMETER_LENGTH_FIRST && info[1]->IsObject()) {
         ParseBindOptionParam(info, menuParam);
     }
     if (info[0]->IsArray()) {
@@ -4519,7 +4522,7 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
     CHECK_NULL_VOID(builderFunc);
 
     ResponseType responseType = ResponseType::LONG_PRESS;
-    if (info.Length() == 2 && info[1]->IsNumber()) {
+    if (info.Length() >= PARAMETER_LENGTH_SECOND && info[1]->IsNumber()) {
         auto response = info[1]->ToNumber<int32_t>();
         LOGI("Set the responseType is %{public}d.", response);
         responseType = static_cast<ResponseType>(response);
@@ -4531,7 +4534,7 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
     };
 
     NG::MenuParam menuParam;
-    if (info.Length() >= 3 && info[2]->IsObject()) {
+    if (info.Length() >= PARAMETER_LENGTH_THIRD && info[2]->IsObject()) {
         ParseBindContentOptionParam(info, info[2], menuParam);
     }
 
