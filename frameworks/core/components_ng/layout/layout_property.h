@@ -194,6 +194,7 @@ public:
             CHECK_NULL_VOID(geometryTransition_);
             geometryTransition_->Build(host_, true);
         }
+        ElementRegister::GetInstance()->DumpGeometryTransition();
     }
 
     void UpdateAspectRatio(float ratio)

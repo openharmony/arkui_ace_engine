@@ -19,6 +19,7 @@
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 // Geometry transition is used for hero animation dealing with matched pair of inNode and outNode holding the
@@ -29,29 +30,34 @@ namespace OHOS::Ace::NG {
 // single view move from its old position to its new position, thus visual focus guidance is completed.
 GeometryTransition::GeometryTransition(const WeakPtr<FrameNode>& frameNode) : inNode_(frameNode) {}
 
-bool GeometryTransition::IsRunning() const
-{
-    return !IsInvalid() && (hasInAnim_ || hasOutAnim_);
-}
-
-bool GeometryTransition::IsInvalid() const
+bool GeometryTransition::IsInAndOutEmpty() const
 {
     return !inNode_.Upgrade() && !outNode_.Upgrade();
 }
 
+bool GeometryTransition::IsInAndOutValid() const
+{
+    return inNode_.Upgrade() && outNode_.Upgrade();
+}
+
+bool GeometryTransition::IsRunning() const
+{
+    return IsInAndOutValid() && (hasInAnim_ || hasOutAnim_);
+}
+
 bool GeometryTransition::IsNodeInAndActive(const WeakPtr<FrameNode>& frameNode) const
 {
-    return !IsInvalid() && hasInAnim_ && frameNode.Upgrade() == inNode_ && state_ == State::ACTIVE;
+    return IsInAndOutValid() && hasInAnim_ && frameNode.Upgrade() == inNode_ && state_ == State::ACTIVE;
 }
 
 bool GeometryTransition::IsNodeInAndIdentity(const WeakPtr<FrameNode>& frameNode) const
 {
-    return !IsInvalid() && hasInAnim_ && frameNode.Upgrade() == inNode_ && state_ == State::IDENTITY;
+    return IsInAndOutValid() && hasInAnim_ && frameNode.Upgrade() == inNode_ && state_ == State::IDENTITY;
 }
 
 bool GeometryTransition::IsNodeOutAndActive(const WeakPtr<FrameNode>& frameNode) const
 {
-    return !IsInvalid() && hasOutAnim_ && frameNode.Upgrade() == outNode_;
+    return IsInAndOutValid() && hasOutAnim_ && frameNode.Upgrade() == outNode_;
 }
 
 void GeometryTransition::SwapInAndOut(bool condition)
@@ -97,6 +103,9 @@ void GeometryTransition::Build(const WeakPtr<FrameNode>& frameNode, bool isNodeI
     if (!inNode || !outNode || !inNode->GetLayoutProperty() || !outNode->GetLayoutProperty()) {
         hasInAnim_ = false;
         hasOutAnim_ = false;
+        return;
+    }
+    if (inNode == outNode) {
         return;
     }
 
@@ -160,7 +169,7 @@ void GeometryTransition::WillLayout(const RefPtr<LayoutWrapper>& layoutWrapper)
 }
 
 // Called after layout, perform final adjustments of geometry position
-void GeometryTransition::DidLayout(const RefPtr<LayoutWrapper>& root, const WeakPtr<FrameNode>& frameNode)
+void GeometryTransition::DidLayout(const WeakPtr<FrameNode>& frameNode)
 {
     if (buildDuringLayout_ && GeometryTransition::layoutStarted_) {
         buildDuringLayout_ = false;
@@ -168,6 +177,8 @@ void GeometryTransition::DidLayout(const RefPtr<LayoutWrapper>& root, const Weak
     }
     auto node = frameNode.Upgrade();
     CHECK_NULL_VOID(node);
+    std::optional<bool> direction = std::nullopt;
+
     if (IsNodeInAndActive(frameNode) && isInNodeLayoutModified_) {
         LOGD("GeometryTransition: node%{public}d: in and active", node->GetId());
         state_ = State::IDENTITY;
@@ -179,18 +190,23 @@ void GeometryTransition::DidLayout(const RefPtr<LayoutWrapper>& root, const Weak
         LOGD("GeometryTransition: node%{public}d: in and identity", node->GetId());
         state_ = State::IDLE;
         node->SetLayoutPriority(0);
+        direction = true;
         hasInAnim_ = false;
-        CHECK_NULL_VOID(root);
-        // sync geometry of inNode is deferred until when root node's layout is done due to dependency
-        root->RegisterFinishCallback([weak = WeakClaim(this)]() {
-            auto geometryTransition = weak.Upgrade();
-            CHECK_NULL_VOID(geometryTransition);
-            geometryTransition->SyncGeometry(true);
-        });
     } else if (IsNodeOutAndActive(frameNode)) {
         LOGD("GeometryTransition: node%{public}d: out and active", node->GetId());
         SyncGeometry(false);
+        direction = false;
         hasOutAnim_ = false;
+    }
+
+    if (direction.has_value()) {
+        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(PipelineBase::GetCurrentContext());
+        CHECK_NULL_VOID(pipeline);
+        pipeline->AddAfterLayoutTask([weak = WeakClaim(this), dir = direction.value()]() {
+            auto geometryTransition = weak.Upgrade();
+            CHECK_NULL_VOID(geometryTransition);
+            geometryTransition->SyncGeometry(dir);
+        });
     }
 }
 
@@ -203,9 +219,12 @@ void GeometryTransition::ModifyLayoutConstraint(const RefPtr<LayoutWrapper>& lay
     CHECK_NULL_VOID(target);
     // target's geometry is ensured ready to use because layout nodes are sorted to respect dependency,
     // the order is active inNode, normal layout, active outNode.
+    auto targetGeometryNode = target->GetGeometryNode();
+    CHECK_NULL_VOID(targetGeometryNode);
     auto targetRenderContext = target->GetRenderContext();
     CHECK_NULL_VOID(targetRenderContext);
-    auto size = targetRenderContext->GetPaintRectWithTransform().GetSize();
+    auto size = isNodeIn ? targetRenderContext->GetPaintRectWithTransform().GetSize() :
+                           targetGeometryNode->GetFrameSize();
     auto targetSize = CalcSize(NG::CalcLength(size.Width()), NG::CalcLength(size.Height()));
     auto layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
