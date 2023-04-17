@@ -15,7 +15,7 @@
 
 #include "frameworks/core/components/svg/rosen_render_svg_fe_gaussianblur.h"
 
-#include "third_party/skia/include/effects/SkBlurImageFilter.h"
+#include "include/effects/SkBlurImageFilter.h"
 
 namespace OHOS::Ace {
 

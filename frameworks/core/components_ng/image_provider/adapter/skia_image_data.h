@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_IMAGE_PROVIDER_ADAPTER_SKIA_IMAGE_DATA_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_IMAGE_PROVIDER_ADAPTER_SKIA_IMAGE_DATA_H
 
-#include "third_party/skia/include/core/SkData.h"
+#include "include/core/SkData.h"
 
 #include "core/components_ng/image_provider/image_data.h"
 

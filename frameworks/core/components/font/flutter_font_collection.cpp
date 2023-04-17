@@ -15,8 +15,8 @@
 
 #include "core/components/font/flutter_font_collection.h"
 
-#include "flutter/third_party/txt/src/minikin/FontFamily.h"
-#include "flutter/third_party/txt/src/minikin/FontLanguageListCache.h"
+#include "txt/src/minikin/FontFamily.h"
+#include "txt/src/minikin/FontLanguageListCache.h"
 
 #include "base/i18n/localization.h"
 #include "base/log/ace_trace.h"

@@ -15,14 +15,14 @@
 
 #include "core/components_ng/pattern/custom_paint/offscreen_canvas_paint_method.h"
 
-#include "flutter/third_party/txt/src/txt/paragraph_builder.h"
-#include "flutter/third_party/txt/src/txt/paragraph_style.h"
-#include "third_party/skia/include/core/SkMaskFilter.h"
-#include "third_party/skia/include/effects/SkBlurImageFilter.h"
-#include "third_party/skia/include/encode/SkJpegEncoder.h"
-#include "third_party/skia/include/encode/SkPngEncoder.h"
-#include "third_party/skia/include/encode/SkWebpEncoder.h"
-#include "third_party/skia/include/utils/SkBase64.h"
+#include "txt/paragraph_builder.h"
+#include "txt/paragraph_style.h"
+#include "include/core/SkMaskFilter.h"
+#include "include/effects/SkBlurImageFilter.h"
+#include "include/encode/SkJpegEncoder.h"
+#include "include/encode/SkPngEncoder.h"
+#include "include/encode/SkWebpEncoder.h"
+#include "include/utils/SkBase64.h"
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/i18n/localization.h"

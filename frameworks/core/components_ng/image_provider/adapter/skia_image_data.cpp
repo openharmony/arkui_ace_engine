@@ -15,8 +15,8 @@
 
 #include "core/components_ng/image_provider/adapter/skia_image_data.h"
 
-#include "third_party/skia/include/codec/SkCodec.h"
-#include "third_party/skia/include/core/SkGraphics.h"
+#include "include/codec/SkCodec.h"
+#include "include/core/SkGraphics.h"
 
 #include "base/utils/system_properties.h"
 #include "core/components_ng/image_provider/adapter/skia_svg_dom.h"

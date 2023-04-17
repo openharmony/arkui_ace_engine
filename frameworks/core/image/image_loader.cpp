@@ -21,8 +21,8 @@
 #include <regex>
 #include <string_view>
 
-#include "third_party/skia/include/codec/SkCodec.h"
-#include "third_party/skia/include/utils/SkBase64.h"
+#include "include/codec/SkCodec.h"
+#include "include/utils/SkBase64.h"
 
 #include "base/image/image_source.h"
 #include "base/log/ace_trace.h"

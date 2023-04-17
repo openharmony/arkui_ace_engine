@@ -17,9 +17,9 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CUSTOM_PAINT_ROSEN_RENDER_OFFSCREEN_CANVAS_H
 
 #include "experimental/svg/model/SkSVGDOM.h"
-#include "flutter/third_party/txt/src/txt/paragraph.h"
-#include "third_party/skia/include/core/SkCanvas.h"
-#include "third_party/skia/include/core/SkPath.h"
+#include "txt/paragraph.h"
+#include "include/core/SkCanvas.h"
+#include "include/core/SkPath.h"
 
 #include "core/components/custom_paint/offscreen_canvas.h"
 #include "core/components/custom_paint/render_custom_paint.h"

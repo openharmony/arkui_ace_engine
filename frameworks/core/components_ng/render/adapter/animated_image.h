@@ -19,8 +19,8 @@
 #include <memory>
 #include <utility>
 
-#include "third_party/skia/include/codec/SkCodec.h"
-#include "third_party/skia/include/core/SkImage.h"
+#include "include/codec/SkCodec.h"
+#include "include/core/SkImage.h"
 
 #include "core/components_ng/image_provider/image_data.h"
 #include "core/components_ng/image_provider/image_loading_context.h"

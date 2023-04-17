@@ -15,8 +15,8 @@
 
 #include "core/components/divider/rosen_render_divider.h"
 
-#include "third_party/skia/include/core/SkCanvas.h"
-#include "third_party/skia/include/core/SkPaint.h"
+#include "include/core/SkCanvas.h"
+#include "include/core/SkPaint.h"
 
 #include "core/components/divider/render_divider.h"
 #include "core/pipeline/base/rosen_render_context.h"

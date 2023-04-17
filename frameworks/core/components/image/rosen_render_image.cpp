@@ -17,10 +17,10 @@
 
 #include "flutter/common/task_runners.h"
 #include "render_service_client/core/ui/rs_node.h"
-#include "third_party/skia/include/core/SkClipOp.h"
-#include "third_party/skia/include/core/SkColorFilter.h"
-#include "third_party/skia/include/core/SkRect.h"
-#include "third_party/skia/include/core/SkShader.h"
+#include "include/core/SkClipOp.h"
+#include "include/core/SkColorFilter.h"
+#include "include/core/SkRect.h"
+#include "include/core/SkShader.h"
 
 #include "base/image/pixel_map.h"
 #include "base/log/ace_trace.h"

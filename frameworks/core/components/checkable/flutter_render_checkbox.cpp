@@ -16,7 +16,7 @@
 #include "core/components/checkable/flutter_render_checkbox.h"
 
 #include "flutter/lib/ui/painting/canvas.h"
-#include "third_party/skia/include/core/SkMaskFilter.h"
+#include "include/core/SkMaskFilter.h"
 
 #include "core/components/checkable/checkable_component.h"
 #include "core/components/common/painter/flutter_checkable_painter.h"

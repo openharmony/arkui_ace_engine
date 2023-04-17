@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SLIDER_ROSEN_RENDER_CIRCLE_BLOCK_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SLIDER_ROSEN_RENDER_CIRCLE_BLOCK_H
 
-#include "third_party/skia/include/core/SkCanvas.h"
+#include "include/core/SkCanvas.h"
 
 #include "core/components/slider/render_block.h"
 
