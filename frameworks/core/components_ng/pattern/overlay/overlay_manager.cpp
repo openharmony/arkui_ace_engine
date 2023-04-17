@@ -257,7 +257,7 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu)
         auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
         // clear contextMenu then return
         if (menuWrapperPattern && menuWrapperPattern->IsContextMenu()) {
-            SubwindowManager::GetInstance()->ClearMenuNG();
+            SubwindowManager::GetInstance()->ClearMenuNG(id);
             return;
         }
         root->RemoveChild(menu);
@@ -611,7 +611,13 @@ void OverlayManager::ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPt
 // subwindow only contains one menu instance.
 void OverlayManager::ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu)
 {
-    if (!ShowMenuHelper(menu, targetId, offset)) {
+    auto menuOffset = offset;
+    auto currentSubwindow = SubwindowManager::GetInstance()->GetCurrentWindow();
+    if (currentSubwindow) {
+        auto subwindowRect = currentSubwindow->GetRect();
+        menuOffset -= subwindowRect.GetOffset();
+    }
+    if (!ShowMenuHelper(menu, targetId, menuOffset)) {
         LOGW("show menu failed");
         return;
     }

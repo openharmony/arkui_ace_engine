@@ -192,9 +192,15 @@ void SubwindowManager::HideMenuNG()
     }
 }
 
-void SubwindowManager::ClearMenuNG()
+void SubwindowManager::ClearMenuNG(int32_t instanceId)
 {
-    auto subwindow = GetCurrentWindow();
+    RefPtr<Subwindow> subwindow;
+    if (instanceId != -1) {
+        // get the subwindow which overlay node in, not current
+        subwindow = GetSubwindow(GetParentContainerId(instanceId));
+    } else {
+        subwindow = GetCurrentWindow();
+    }
     if (subwindow) {
         subwindow->ClearMenuNG();
     }
