@@ -512,7 +512,7 @@ void SubwindowManager::HideSubWindowNG()
     }
 }
 
-void SubwindowManager::RegisterOnShowMenu(std::function<void()>& callback)
+void SubwindowManager::RegisterOnShowMenu(const std::function<void()>& callback)
 {
     onShowMenuCallback_ = callback;
     if (currentSubwindow_) {
@@ -522,7 +522,7 @@ void SubwindowManager::RegisterOnShowMenu(std::function<void()>& callback)
     }
 }
 
-void SubwindowManager::RegisterOnHideMenu(const std::function<void()>&& callback)
+void SubwindowManager::RegisterOnHideMenu(const std::function<void()>& callback)
 {
     onHideMenuCallback_ = callback;
     if (currentSubwindow_) {

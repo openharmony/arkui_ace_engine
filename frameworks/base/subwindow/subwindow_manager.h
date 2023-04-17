@@ -93,8 +93,8 @@ public:
     void ShowActionMenu(const std::string& title, const std::vector<ButtonInfo>& button,
         std::function<void(int32_t, int32_t)>&& callback);
     void CloseDialog(int32_t instanceId);
-    void RegisterOnShowMenu(std::function<void()>& callback);
-    void RegisterOnHideMenu(const std::function<void()>&& callback);
+    void RegisterOnShowMenu(const std::function<void()>& callback);
+    void RegisterOnHideMenu(const std::function<void()>& callback);
 
 private:
     RefPtr<Subwindow> GetOrCreateSubWindow();
