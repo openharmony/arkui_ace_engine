@@ -23,6 +23,7 @@
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/transaction/rs_transaction.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
+
 #include "core/components_ng/render/adapter/rosen_window.h"
 #endif
 
@@ -331,9 +332,7 @@ void PipelineContext::RegisterRootEvent()
     // use an empty longPress event placeholder in the EtsCard scenario
     auto hub = rootNode_->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(hub);
-    auto event = [](const GestureEvent& info) mutable {
-        LOGD("Not Support LongPress");
-    };
+    auto event = [](const GestureEvent& info) mutable { LOGD("Not Support LongPress"); };
     auto longPress = AceType::MakeRefPtr<NG::LongPressEvent>(std::move(event));
     hub->SetLongPressEvent(longPress, false, true);
 }
@@ -668,7 +667,9 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
             positionY, (rootSize.Height() - keyboardHeight), offsetFix, keyboardHeight);
         if (NearZero(keyboardHeight)) {
             SetRootRect(rootSize.Width(), rootSize.Height(), 0);
-        } else if (positionY > (rootSize.Height() - keyboardHeight) && offsetFix > 0.0) {
+        } else if (LessOrEqual(rootSize.Height() - positionY - height, height)) {
+            SetRootRect(rootSize.Width(), rootSize.Height(), -keyboardHeight);
+        } else if (positionY + height > (rootSize.Height() - keyboardHeight) && offsetFix > 0.0) {
             SetRootRect(rootSize.Width(), rootSize.Height(), -offsetFix);
         } else if ((positionY + height > rootSize.Height() - keyboardHeight &&
                        positionY < rootSize.Height() - keyboardHeight && height < keyboardHeight / 2.0f) &&
