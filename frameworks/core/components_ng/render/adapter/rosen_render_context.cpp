@@ -749,7 +749,10 @@ LoadSuccessNotifyTask RosenRenderContext::CreateBorderImageLoadSuccessCallback()
 void RosenRenderContext::OnBorderImageUpdate(const RefPtr<BorderImage>& /*borderImage*/)
 {
     CHECK_NULL_VOID(rsNode_);
-    RequestNextFrame();
+    if (bdImageLoadingCtx_ && bdImage_) {
+        PaintBorderImage();
+        RequestNextFrame();
+    }
 }
 
 void RosenRenderContext::OnBorderImageSourceUpdate(const ImageSourceInfo& borderImageSourceInfo)
@@ -762,7 +765,6 @@ void RosenRenderContext::OnBorderImageSourceUpdate(const ImageSourceInfo& border
         CHECK_NULL_VOID(bdImageLoadingCtx_);
         bdImageLoadingCtx_->LoadImageData();
     }
-    RequestNextFrame();
 }
 
 void RosenRenderContext::OnHasBorderImageSliceUpdate(bool tag) {}
