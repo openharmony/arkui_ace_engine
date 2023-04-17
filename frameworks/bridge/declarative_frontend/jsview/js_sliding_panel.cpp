@@ -324,9 +324,9 @@ void JSSlidingPanel::SetPanelMode(const JSCallbackInfo& info)
     }
     int32_t mode = static_cast<int32_t>(DEFAULT_PANELMODE);
     if (info[0]->IsNumber()) {
-        int32_t mode_Number = info[0]->ToNumber<int32_t>();
-        if (mode_Number >= 0 && mode_Number < static_cast<int32_t>(PANEL_MODES.size())) {
-            mode = mode_Number;
+        int32_t modeNumber = info[0]->ToNumber<int32_t>();
+        if (modeNumber >= 0 && modeNumber < static_cast<int32_t>(PANEL_MODES.size())) {
+            mode = modeNumber;
         }
     }
     SlidingPanelModel::GetInstance()->SetPanelMode(PANEL_MODES[mode]);
@@ -340,9 +340,9 @@ void JSSlidingPanel::SetPanelType(const JSCallbackInfo& info)
     }
     int32_t type = static_cast<int32_t>(DEFAULT_PANELTYPE);
     if (info[0]->IsNumber()) {
-        int32_t type_Number = info[0]->ToNumber<int32_t>();
-        if (type_Number >= 0 && type_Number < static_cast<int32_t>(PANEL_TYPES.size())) {
-            type = type_Number;
+        int32_t typeNumber = info[0]->ToNumber<int32_t>();
+        if (typeNumber >= 0 && typeNumber < static_cast<int32_t>(PANEL_TYPES.size())) {
+            type = typeNumber;
         }
     }
     SlidingPanelModel::GetInstance()->SetPanelType(PANEL_TYPES[type]);
