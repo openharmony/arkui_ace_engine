@@ -346,7 +346,6 @@ void ViewAbstract::SetBorderRadius(const Dimension& value)
     }
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(value);
-    borderRadius.SetRadiusFlag(true);
     ACE_UPDATE_RENDER_CONTEXT(BorderRadius, borderRadius);
 }
 
