@@ -67,6 +67,7 @@
       OHOS::Ace::UIContentImpl::*;
       OHOS::Ace::MemoryMonitor::*;
       OHOS::Ace::DumpLog::*;
+      OHOS::Ace::AceEngine::*;
 
       virtual?thunk?to?OHOS::Ace::Animator::~Animator??;
 

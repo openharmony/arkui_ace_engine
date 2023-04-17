@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_PLUGIN_COMPONENT_CALLBACK_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_PLUGIN_COMPONENT_CALLBACK_H
 
+#include <memory>
 #include "core/components/plugin/plugin_component_template.h"
 #include "want.h"
 
@@ -27,7 +28,7 @@ enum class CallBackType {
     RequestCallBack,
 };
 
-class PluginComponentCallBack {
+class PluginComponentCallBack : public std::enable_shared_from_this<PluginComponentCallBack> {
 public:
     PluginComponentCallBack() = default;
     virtual ~PluginComponentCallBack() = default;
