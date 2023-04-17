@@ -324,7 +324,7 @@ void JSSlidingPanel::SetPanelMode(const JSCallbackInfo& info)
     }
     int32_t mode = static_cast<int32_t>(DEFAULT_PANELMODE);
     if (info[0]->IsNumber()) {
-        int32_t modeNumber = info[0]->ToNumber<int32_t>();
+        const int32_t modeNumber = info[0]->ToNumber<int32_t>();
         if (modeNumber >= 0 && modeNumber < static_cast<int32_t>(PANEL_MODES.size())) {
             mode = modeNumber;
         }
@@ -340,7 +340,7 @@ void JSSlidingPanel::SetPanelType(const JSCallbackInfo& info)
     }
     int32_t type = static_cast<int32_t>(DEFAULT_PANELTYPE);
     if (info[0]->IsNumber()) {
-        int32_t typeNumber = info[0]->ToNumber<int32_t>();
+        const int32_t typeNumber = info[0]->ToNumber<int32_t>();
         if (typeNumber >= 0 && typeNumber < static_cast<int32_t>(PANEL_TYPES.size())) {
             type = typeNumber;
         }
