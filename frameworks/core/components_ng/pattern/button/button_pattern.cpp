@@ -59,8 +59,8 @@ void ButtonPattern::SetDefaultAttributes(const RefPtr<FrameNode>& buttonNode, co
     renderContext->UpdateBackgroundColor(buttonTheme->GetBgColor());
 }
 
-void ButtonPattern::UpdateTextLayoutProperty(
-    RefPtr<ButtonLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty)
+void ButtonPattern::UpdateTextLayoutProperty(RefPtr<ButtonLayoutProperty> layoutProperty,
+    RefPtr<TextLayoutProperty> textLayoutProperty)
 {
     CHECK_NULL_VOID(layoutProperty);
     CHECK_NULL_VOID(textLayoutProperty);
