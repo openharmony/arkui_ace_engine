@@ -65,15 +65,15 @@ public:
     void RemoveChildAtIndex(int32_t index);
     RefPtr<UINode> GetChildAtIndex(int32_t index) const;
     int32_t GetChildIndex(const RefPtr<UINode>& child) const;
-    void AttachToMainTree();
-    void DetachFromMainTree();
+    void AttachToMainTree(bool recursive = false);
+    void DetachFromMainTree(bool recursive = false);
 
     int32_t TotalChildCount() const;
 
-    // Returns index in the flattern tree structure
+    // Returns index in the flatten tree structure
     // of the node with given id and type
     // Returns std::pair with
-    // boolean first - inidication of node is found
+    // boolean first - indication of node is found
     // int32_t second - index of the node
     std::pair<bool, int32_t> GetChildFlatIndex(int32_t id);
 
@@ -308,7 +308,15 @@ public:
         return childrenUpdatedFrom_;
     }
 
+    // utility function for adding child to disappearingChildren_
+    void AddDisappearingChild(const RefPtr<UINode>& child, uint32_t index = UINT32_MAX);
+    // utility function for removing child from disappearingChildren_, return true if child is removed
     bool RemoveDisappearingChild(const RefPtr<UINode>& child);
+    // return if we are in parent's disappearing children
+    bool IsDisappearing() const
+    {
+        return isDisappearing_;
+    }
 
     // These two interfaces are only used for fast preview.
     // FastPreviewUpdateChild: Replace the old child at the specified slot with the new created node.
@@ -355,18 +363,7 @@ protected:
     }
 
     virtual void OnGenerateOneDepthVisibleFrameWithTransition(
-        std::list<RefPtr<FrameNode>>& visibleList, uint32_t index = UINT_MAX)
-    {
-        for (const auto& child : children_) {
-            child->OnGenerateOneDepthVisibleFrameWithTransition(visibleList);
-        }
-        // disappearing children
-        for (const auto& pair : disappearingChildren_) {
-            auto& child = pair.first;
-            auto index = pair.second;
-            child->OnGenerateOneDepthVisibleFrameWithTransition(visibleList, index);
-        }
-    }
+        std::list<RefPtr<FrameNode>>& visibleList, uint32_t index = UINT_MAX);
 
     virtual void OnGenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& allList)
     {
@@ -375,13 +372,16 @@ protected:
         }
     }
 
+    virtual void OnAddDisappearingChild() {}
+    virtual void OnRemoveDisappearingChild() {}
+
     virtual void OnContextAttached() {}
     // dump self info.
     virtual void DumpInfo() {}
 
     // Mount to the main tree to display.
-    virtual void OnAttachToMainTree();
-    virtual void OnDetachFromMainTree();
+    virtual void OnAttachToMainTree(bool recursive = false);
+    virtual void OnDetachFromMainTree(bool recursive = false);
 
     bool isRemoving_ = false;
     // return value: return true if node has disappearing transition
@@ -404,6 +404,7 @@ private:
     bool onMainTree_ = false;
     bool removeSilently_ = true;
     bool isInDestroying_ = false;
+    bool isDisappearing_ = false;
 
     int32_t childrenUpdatedFrom_ = -1;
     static thread_local int32_t currentAccessibilityId_;

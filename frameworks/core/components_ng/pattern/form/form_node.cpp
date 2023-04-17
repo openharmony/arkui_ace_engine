@@ -162,10 +162,10 @@ RefPtr<FormNode> FormNode::GetOrCreateFormNode(
     return formNode;
 }
 
-void FormNode::OnDetachFromMainTree()
+void FormNode::OnDetachFromMainTree(bool recursive)
 {
     auto eventHub = GetEventHub<FormEventHub>();
     eventHub->FireOnCache();
-    FrameNode::OnDetachFromMainTree();
+    FrameNode::OnDetachFromMainTree(recursive);
 }
 } // namespace OHOS::Ace::NG
