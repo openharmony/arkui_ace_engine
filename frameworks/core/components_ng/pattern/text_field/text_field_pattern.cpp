@@ -2150,14 +2150,14 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
             LOGE("Request open soft keyboard failed because input method is null.");
             return false;
         }
-        if (context) {
-            LOGI("RequestKeyboard set calling window id is : %{public}d", context->GetWindowId());
-            inputMethod->SetCallingWindow(context->GetWindowId());
-        }
         MiscServices::InputAttribute inputAttribute;
         inputAttribute.inputPattern = (int32_t)keyboard_;
         inputAttribute.enterKeyType = (int32_t)GetTextInputActionValue(TextInputAction::DONE);
         inputMethod->Attach(textChangeListener_, needShowSoftKeyboard, inputAttribute);
+        if (context) {
+            LOGI("RequestKeyboard set calling window id is : %{public}d", context->GetWindowId());
+            inputMethod->SetCallingWindow(context->GetWindowId());
+        }
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
         imeAttached_ = true;
 #endif
