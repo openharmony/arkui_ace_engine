@@ -232,6 +232,10 @@ public:
     virtual void SetForegroundColor(const Color& color) = 0;
     virtual void SetForegroundColorStrategy(const ForegroundColorStrategy& strategy) = 0;
 
+    // custom animation properties
+    virtual void CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
+        const std::function<void(float)>& onCallbackEvent) = 0;
+    virtual void UpdateAnimatablePropertyFloat(const std::string& propertyName, float value) = 0;
 private:
     static std::unique_ptr<ViewAbstractModel> instance_;
 };
