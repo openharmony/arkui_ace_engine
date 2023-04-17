@@ -72,6 +72,15 @@ public:
         gestureHub_ = gestureHub;
     }
 
+    void SetThumbnailCallback(std::function<void(Offset)>&& callback)
+    {
+        callback_ = std::move(callback);
+    }
+
+    bool HasThumbnailCallback()
+    {
+        return static_cast<bool>(callback_);
+    }
 private:
     void HandleTouchDownEvent(const TouchEvent& event) override;
     void HandleTouchUpEvent(const TouchEvent& event) override;
@@ -86,7 +95,6 @@ private:
     void OnResetStatus() override;
     double ConvertPxToVp(double offset) const;
     void ThumbnailTimer(int32_t time);
-    void SetThumbnailPixelMap();
 
     WeakPtr<GestureEventHub> gestureHub_;
     CancelableCallback<void()> thumbnailTimer_;
@@ -94,6 +102,7 @@ private:
     OnLongPress onLongPress_;
     CancelableCallback<void()> deadlineTimer_;
     CancelableCallback<void()> timer_;
+    std::function<void(Offset)> callback_;
     int32_t duration_ = 500;
     bool repeat_ = false;
     TimeStamp time_;

@@ -736,6 +736,15 @@ private:
     void RegisterMenuDisappearCallback(std::function<void()>&& buildFunc, const MenuParam& menuParam);
     void RegisterContextMenuAppearCallback(ResponseType type, const MenuParam& menuParam);
     void RegisterContextMenuDisappearCallback(const MenuParam& menuParam);
+
+    void CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
+        const std::function<void(float)>& onCallbackEvent) override {
+        ViewAbstract::CreateAnimatablePropertyFloat(propertyName, value, onCallbackEvent);
+    }
+
+    void UpdateAnimatablePropertyFloat(const std::string& propertyName, float value) override {
+        ViewAbstract::UpdateAnimatablePropertyFloat(propertyName, value);
+    }
 };
 } // namespace OHOS::Ace::NG
 

@@ -4581,6 +4581,59 @@ void JSViewAbstract::JsBindContentCover(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->BindContentCover(isShow, std::move(callback), std::move(buildFunc), type);
 }
 
+void JSViewAbstract::JSCreateAnimatableProperty(const JSCallbackInfo& info)
+{
+    if (info.Length() < 3 || !info[0]->IsString()) { /* 3:args number */
+        LOGE("JSCreateAnimatableProperty: The arg is invalid.");
+        return;
+    }
+
+    JSRef<JSVal> callback = info[2]; /* 2:args index */
+    if (!callback->IsFunction()) {
+        LOGE("JSCreateAnimatableProperty: callback function type is invalid.");
+        return;
+    }
+
+    std::string propertyName = info[0]->ToString();
+    if (info[1]->IsNumber()) {
+        float numValue = info[1]->ToNumber<float>();
+        std::function<void(float)> onCallbackEvent;
+        RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(callback));
+        onCallbackEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
+                            id = Container::CurrentId()](const float val) {
+            ContainerScope scope(id);
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            LOGD("onCallbackEvent(number) execute js func. val: %f", val);
+            auto newJSVal = JSRef<JSVal>::Make(ToJSValue(val));
+            func->ExecuteJS(1, &newJSVal);
+        };
+        ViewAbstractModel::GetInstance()->CreateAnimatablePropertyFloat(propertyName, numValue, onCallbackEvent);
+    } else if (info[1]->IsObject()) {
+        LOGD("Object type (AnimatableArithmetic) to be handled.");
+    } else {
+        LOGE("JSCreateAnimatableProperty: The value param type is invalid.");
+    }
+}
+
+void JSViewAbstract::JSUpdateAnimatableProperty(const JSCallbackInfo& info)
+{
+    if (info.Length() < 2 || !info[0]->IsString()) { /* 2:args number */
+        LOGE("JSUpdateAnimatableProperty: The arg is invalid.");
+        return;
+    }
+
+    std::string propertyName = info[0]->ToString();
+    float numValue = 0.0;
+    if (info[1]->IsNumber()) {
+        numValue = info[1]->ToNumber<float>();
+        ViewAbstractModel::GetInstance()->UpdateAnimatablePropertyFloat(propertyName, numValue);
+    } else if (info[1]->IsObject()) {
+        LOGD("Object type (RSAnimatableArithmetic) to be handled");
+    } else {
+        LOGE("JSUpdateAnimatableProperty: The value param type is invalid.");
+    }
+}
+
 void JSViewAbstract::JSBind()
 {
     JSClass<JSViewAbstract>::Declare("JSViewAbstract");
@@ -4725,6 +4778,9 @@ void JSViewAbstract::JSBind()
     JSClass<JSViewAbstract>::StaticMethod("hitTestBehavior", &JSViewAbstract::JsHitTestBehavior);
     JSClass<JSViewAbstract>::StaticMethod("keyboardShortcut", &JSViewAbstract::JsKeyboardShortcut);
     JSClass<JSViewAbstract>::StaticMethod("allowDrop", &JSViewAbstract::JsAllowDrop);
+
+    JSClass<JSViewAbstract>::StaticMethod("createAnimatableProperty", &JSViewAbstract::JSCreateAnimatableProperty);
+    JSClass<JSViewAbstract>::StaticMethod("updateAnimatableProperty", &JSViewAbstract::JSUpdateAnimatableProperty);
 }
 void JSViewAbstract::JsAllowDrop(const JSCallbackInfo& info)
 {

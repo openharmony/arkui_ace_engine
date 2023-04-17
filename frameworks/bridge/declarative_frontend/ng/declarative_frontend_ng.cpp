@@ -251,6 +251,13 @@ void DeclarativeFrontendNG::RebuildAllPages()
     LOGW("RebuildAllPages not implemented");
 }
 
+void DeclarativeFrontendNG::FlushReload()
+{
+    if (jsEngine_) {
+        jsEngine_->FlushReload();
+    }
+}
+
 void DeclarativeFrontendNG::HotReload()
 {
     auto manager = GetPageRouterManager();

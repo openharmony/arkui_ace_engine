@@ -96,7 +96,6 @@ void NavRouterGroupNode::OnAttachToMainTree()
     }
     SetDestinationChangeEvent(parent);
     SetBackButtonEvent(parent);
-    InitNavigationContent(parent);
 }
 
 void NavRouterGroupNode::SetDestinationChangeEvent(const RefPtr<UINode>& parent)
@@ -118,21 +117,6 @@ void NavRouterGroupNode::SetDestinationChangeEvent(const RefPtr<UINode>& parent)
     eventHub->SetOnDestinationChange(std::move(onDestinationChange));
 }
 
-void NavRouterGroupNode::InitNavigationContent(const RefPtr<UINode>& parent)
-{
-    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(parent);
-    CHECK_NULL_VOID(navigationNode);
-    auto layoutProperty = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    if (navigationNode->IsFirstNavDestination() &&
-        layoutProperty->GetNavigationModeValue(NavigationMode::AUTO) == NavigationMode::SPLIT) {
-        AddNavDestinationToNavigation(parent);
-        auto eventHub = GetEventHub<NavRouterEventHub>();
-        CHECK_NULL_VOID(eventHub);
-        eventHub->FireChangeEvent(true);
-        navigationNode->MarkIsFirstNavDestination(false);
-    }
-}
 
 void NavRouterGroupNode::AddBackButtonIconToNavDestination(const RefPtr<UINode>& parent)
 {

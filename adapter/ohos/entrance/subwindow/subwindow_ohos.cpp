@@ -225,6 +225,7 @@ void SubwindowOhos::HidePopupNG(int32_t targetId)
     context->FlushPipelineImmediately();
     HideWindow();
 #ifdef ENABLE_DRAG_FRAMEWORK
+    HideEventColumn();
     HidePixelMap();
     HideFilter();
 #endif // ENABLE_DRAG_FRAMEWORK
@@ -245,6 +246,7 @@ void SubwindowOhos::HidePopupNG()
     context->FlushPipelineImmediately();
     HideWindow();
 #ifdef ENABLE_DRAG_FRAMEWORK
+    HideEventColumn();
     HidePixelMap();
     HideFilter();
 #endif // ENABLE_DRAG_FRAMEWORK
@@ -422,6 +424,7 @@ void SubwindowOhos::ClearMenuNG()
     context->FlushPipelineImmediately();
     HideWindow();
 #ifdef ENABLE_DRAG_FRAMEWORK
+    HideEventColumn();
     HidePixelMap();
     HideFilter();
 #endif // ENABLE_DRAG_FRAMEWORK
@@ -860,10 +863,11 @@ void SubwindowOhos::HideFilter()
     CHECK_NULL_VOID(parentPipeline);
     auto manager = parentPipeline->GetOverlayManager();
     CHECK_NULL_VOID(manager);
+    ContainerScope scope(parentContainerId_);
     manager->RemoveFilter();
 }
 
-void SubwindowOhos::HidePixelMap(bool startDrag, double localX, double localY)
+void SubwindowOhos::HidePixelMap(bool startDrag, double x, double y)
 {
     auto parentAceContainer = Platform::AceContainer::GetContainer(parentContainerId_);
     CHECK_NULL_VOID(parentAceContainer);
@@ -871,7 +875,20 @@ void SubwindowOhos::HidePixelMap(bool startDrag, double localX, double localY)
     CHECK_NULL_VOID(parentPipeline);
     auto manager = parentPipeline->GetOverlayManager();
     CHECK_NULL_VOID(manager);
-    manager->RemovePixelMapAnimation(startDrag, localX, localY);
+    ContainerScope scope(parentContainerId_);
+    manager->RemovePixelMapAnimation(startDrag, x, y);
+}
+
+void SubwindowOhos::HideEventColumn()
+{
+    auto parentAceContainer = Platform::AceContainer::GetContainer(parentContainerId_);
+    CHECK_NULL_VOID(parentAceContainer);
+    auto parentPipeline = DynamicCast<NG::PipelineContext>(parentAceContainer->GetPipelineContext());
+    CHECK_NULL_VOID(parentPipeline);
+    auto manager = parentPipeline->GetOverlayManager();
+    CHECK_NULL_VOID(manager);
+    ContainerScope scope(parentContainerId_);
+    manager->RemoveEventColumn();
 }
 #endif // ENABLE_DRAG_FRAMEWORK
 } // namespace OHOS::Ace

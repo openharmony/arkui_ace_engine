@@ -82,6 +82,9 @@ public:
     }
     RefPtr<DragDropProxy> CreateFrameworkDragDropProxy();
     void UpdatePixelMapPosition(int32_t globalX, int32_t globalY);
+    std::string GetExtraInfo();
+    void SetExtraInfo(const std::string& extraInfo);
+    void ClearExtraInfo();
 #endif // ENABLE_DRAG_FRAMEWORK
     void UpdateDragEvent(RefPtr<OHOS::Ace::DragEvent>& event, float globalX, float globalY);
     bool CheckDragDropProxy(int64_t id) const;

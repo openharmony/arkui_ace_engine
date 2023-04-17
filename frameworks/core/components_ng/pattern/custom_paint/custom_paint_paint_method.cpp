@@ -188,6 +188,22 @@ void CustomPaintPaintMethod::UpdatePaintShader(const Ace::Pattern& pattern, SkPa
                      : ImageProvider::GetSkImage(pattern.GetImgSrc(), context_);
     CHECK_NULL_VOID(image);
     static const LinearMapNode<void (*)(sk_sp<SkImage>, SkPaint&)> staticPattern[] = {
+        { "clamp",
+            [](sk_sp<SkImage> image, SkPaint& paint) {
+#ifdef USE_SYSTEM_SKIA
+                paint.setShader(image->makeShader(SkShader::kClamp_TileMode, SkShader::kClamp_TileMode, nullptr));
+#else
+                paint.setShader(image->makeShader(SkTileMode::kClamp, SkTileMode::kClamp, nullptr));
+#endif
+            } },
+        { "mirror",
+            [](sk_sp<SkImage> image, SkPaint& paint) {
+#ifdef USE_SYSTEM_SKIA
+                paint.setShader(image->makeShader(SkShader::kClamp_TileMode, SkShader::kClamp_TileMode, nullptr));
+#else
+                paint.setShader(image->makeShader(SkTileMode::kMirror, SkTileMode::kMirror, nullptr));
+#endif
+            } },
         { "no-repeat",
             [](sk_sp<SkImage> image, SkPaint& paint) {
 #ifdef USE_SYSTEM_SKIA

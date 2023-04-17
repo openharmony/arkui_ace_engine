@@ -54,8 +54,8 @@ private:
     void PaintRing(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
     void PaintScaleRing(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
     void PaintMoon(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
-    void PaintCapsule(RSCanvas& canvas, const OffsetF& contentOffset, const SizeF& contentSize) const;
-    void PaintVerticalCapsule(RSCanvas& canvas, const OffsetF& contentOffset, const SizeF& contentSize) const;
+    void PaintCapsule(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
+    void PaintVerticalCapsule(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
 
     // Animatable
     RefPtr<AnimatablePropertyFloat> strokeWidth_; // After adjusting to the content width and height
