@@ -262,4 +262,40 @@ HWTEST_F(CounterPatternTestNg, CounterPatternTest008, TestSize.Level1)
     opacity = subNodeRenderContext->GetOpacityValue(-1);
     EXPECT_EQ(opacity, BUTTON_ALPHA_DISABLED);
 }
+
+/**
+ * @tc.name: CounterPatternTest009
+ * @tc.desc: Test counter Create function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CounterPatternTestNg, CounterPatternTest009, TestSize.Level1)
+{
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
+    CounterModelNG counterModelNG;
+    counterModelNG.Create();
+    auto counterNode = AceType::DynamicCast<CounterNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(counterNode, nullptr);
+    /**
+     * Create again,cover all branches in function Create
+    */
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
+    counterModelNG.Create();
+}
+
+/**
+ * @tc.name: CounterPatternTest010
+ * @tc.desc: Test counter Create function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CounterPatternTestNg, CounterPatternTest010, TestSize.Level1)
+{
+    auto columnNode = CounterNode::GetOrCreateCounterNode(
+        "Column", 100, []() { return AceType::MakeRefPtr<CounterPattern>(); });
+    ASSERT_NE(columnNode, nullptr);
+    auto subNode = CounterNode::GetOrCreateCounterNode(
+        "Column", 101, []() { return AceType::MakeRefPtr<CounterPattern>(); });
+    ASSERT_NE(subNode, nullptr);
+    subNode->MountToParent(columnNode);
+    CounterNode::GetOrCreateCounterNode("Counter", 101, []() { return AceType::MakeRefPtr<CounterPattern>(); });
+}
 } // namespace OHOS::Ace::NG
