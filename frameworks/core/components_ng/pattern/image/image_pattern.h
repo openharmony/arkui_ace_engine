@@ -117,6 +117,7 @@ private:
     void CloseSelectOverlay();
 
     void UpdateFillColorIfForegroundColor();
+    void UpdateDragEvent(const RefPtr<OHOS::Ace::DragEvent>& event);
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 

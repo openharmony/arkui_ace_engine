@@ -1301,9 +1301,26 @@ void JSCanvasRenderer::JsFilter(const JSCallbackInfo& info)
     return;
 }
 
-void JSCanvasRenderer::JsDirection(const JSCallbackInfo& info)
+void JSCanvasRenderer::JsGetDirection(const JSCallbackInfo& info)
 {
     return;
+}
+
+void JSCanvasRenderer::JsSetDirection(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsString()) {
+        return;
+    }
+    std::string directionStr;
+    JSViewAbstract::ParseJsString(info[0], directionStr);
+    auto direction = ConvertStrToTextDirection(directionStr);
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (isOffscreen_ && offscreenCanvasPattern_) {
+            offscreenCanvasPattern_->SetTextDirection(direction);
+        } else if (!isOffscreen_ && customPaintPattern_) {
+            customPaintPattern_->SetTextDirection(direction);
+        }
+    }
 }
 
 void JSCanvasRenderer::JsGetJsonData(const JSCallbackInfo& info)

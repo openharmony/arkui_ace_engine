@@ -14,7 +14,7 @@
 import("//build/test.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
-if (is_standard_system) {
+if (is_ohos_standard_system) {
   module_output_path = "ace_engine/frameworkbasicability/transition"
 } else {
   module_output_path = "ace_engine_full/frameworkbasicability/transition"
@@ -235,7 +235,7 @@ ohos_unittest("TransitionElementTest") {
     "//third_party/zlib:libz",
   ]
 
-  if (is_standard_system) {
+  if (is_ohos_standard_system) {
     external_deps = [
       "eventhandler:libeventhandler",
       "hitrace_native:hitrace_meter",
@@ -292,7 +292,7 @@ ohos_unittest("SharedTransitionElementTest") {
     "//third_party/zlib:libz",
   ]
 
-  if (is_standard_system) {
+  if (is_ohos_standard_system) {
     external_deps = [
       "eventhandler:libeventhandler",
       "hitrace_native:hitrace_meter",
@@ -350,7 +350,7 @@ ohos_unittest("TransitionPropertyElementTest") {
     "//third_party/zlib:libz",
   ]
 
-  if (is_standard_system) {
+  if (is_ohos_standard_system) {
     external_deps = [
       "eventhandler:libeventhandler",
       "hitrace_native:hitrace_meter",

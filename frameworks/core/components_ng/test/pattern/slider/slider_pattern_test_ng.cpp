@@ -391,7 +391,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTestNg005, TestSize.Level1)
     /**
      * @tc.cases: case3. when TouchType is UP.
      */
-    info.touches_.front().touchType_ = TouchType::UP;
+    info.changedTouches_.front().touchType_ = TouchType::UP;
     sliderPattern->HandleTouchEvent(info);
     EXPECT_EQ(sliderPattern->hotFlag_, false);
     sliderPattern->HandleTouchEvent(info);
@@ -1969,5 +1969,48 @@ HWTEST_F(SliderPatternTestNg, SliderPaintMethodTest001, TestSize.Level1)
     EXPECT_EQ(
         sliderPaintMethod.sliderContentModifier_->blockType_, static_cast<int>(SliderModelNG::BlockStyleType::IMAGE));
     EXPECT_EQ(sliderPaintMethod.sliderContentModifier_->directionAxis_, static_cast<int>(Axis::HORIZONTAL));
+}
+
+/**
+ * @tc.name: SliderAccessibilityPropertyTest001
+ * @tc.desc: Test the HasRange and RangeInfo properties of Slider
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderAccessibilityPropertyTest001, TestSize.Level1)
+{
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(VALUE, STEP, MIN, MAX);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
+
+    auto sliderAccessibilityProperty = frameNode->GetAccessibilityProperty<SliderAccessibilityProperty>();
+    ASSERT_NE(sliderAccessibilityProperty, nullptr);
+    EXPECT_TRUE(sliderAccessibilityProperty->HasRange());
+    EXPECT_EQ(sliderAccessibilityProperty->GetAccessibilityValue().current, VALUE);
+    EXPECT_EQ(sliderAccessibilityProperty->GetAccessibilityValue().max, MAX);
+    EXPECT_EQ(sliderAccessibilityProperty->GetAccessibilityValue().min, MIN);
+}
+
+/**
+ * @tc.name: SliderAccessibilityPropertyTest002
+ * @tc.desc: Test the Text property of Slider
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderAccessibilityPropertyTest002, TestSize.Level1)
+{
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(VALUE, STEP, MIN, MAX);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
+
+    auto sliderAccessibilityProperty = frameNode->GetAccessibilityProperty<SliderAccessibilityProperty>();
+    ASSERT_NE(sliderAccessibilityProperty, nullptr);
+    EXPECT_EQ(sliderAccessibilityProperty->GetText(), std::to_string(VALUE));
 }
 } // namespace OHOS::Ace::NG

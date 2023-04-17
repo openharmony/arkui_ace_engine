@@ -189,13 +189,13 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
                                                : AceApplicationInfo::GetInstance().GetProcessName();
     window_->RecordFrameTime(nanoTimestamp, abilityName);
     FlushAnimation(GetTimeFromExternalTimer());
+    FlushTouchEvents();
     FlushBuild();
-    if (isFormRender_ && drawDelegate_) {
+    if (isFormRender_ && drawDelegate_ && rootNode_) {
         auto renderContext = AceType::DynamicCast<NG::RenderContext>(rootNode_->GetRenderContext());
         drawDelegate_->DrawRSFrame(renderContext);
         drawDelegate_ = nullptr;
     }
-    FlushTouchEvents();
     if (!taskScheduler_.isEmpty()) {
 #if !defined(PREVIEW)
         LayoutInspector::SupportInspector();
@@ -296,6 +296,7 @@ void PipelineContext::FlushPipelineImmediately()
 
 void PipelineContext::FlushPipelineWithoutAnimation()
 {
+    ACE_FUNCTION_TRACE();
     FlushBuild();
     FlushTouchEvents();
     taskScheduler_.FlushTask();
@@ -678,11 +679,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
     };
 
     AnimationOption option = AnimationUtil::CreateKeyboardAnimationOption(keyboardAnimationConfig_, keyboardHeight);
-    if (rsTransaction) {
-        Animate(option, option.GetCurve(), func);
-    } else {
-        func();
-    }
+    Animate(option, option.GetCurve(), func);
 
 #ifdef ENABLE_ROSEN_BACKEND
     if (rsTransaction) {
@@ -1490,26 +1487,33 @@ void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
 {
     auto manager = GetDragDropManager();
     CHECK_NULL_VOID(manager);
+#ifdef ENABLE_DRAG_FRAMEWORK
+    if (action == DragEventAction::DRAG_EVENT_OUT) {
+        manager->ClearSummary();
+        manager->ClearExtraInfo();
+    }
+#endif // ENABLE_DRAG_FRAMEWORK
     if (manager->IsDragged() && action != DragEventAction::DRAG_EVENT_END) {
         LOGI("current context is the source of drag");
         return;
     }
 
     std::string extraInfo;
-    manager->GetExtraInfoFromClipboard(extraInfo);
 
+#ifdef ENABLE_DRAG_FRAMEWORK
+    if (action == DragEventAction::DRAG_EVENT_START) {
+        manager->RequireSummary();
+        manager->GetExtraInfoFromClipboard(extraInfo);
+        manager->SetExtraInfo(extraInfo);
+    }
+#else
+    manager->GetExtraInfoFromClipboard(extraInfo);
+#endif // ENABLE_DRAG_FRAMEWORK
     if (action == DragEventAction::DRAG_EVENT_END) {
         manager->OnDragEnd(static_cast<float>(x), static_cast<float>(y), extraInfo);
         manager->RestoreClipboardData();
         return;
     }
-#ifdef ENABLE_DRAG_FRAMEWORK
-    if (action == DragEventAction::DRAG_EVENT_START) {
-        manager->RequireSummary();
-    } else if (action == DragEventAction::DRAG_EVENT_OUT) {
-        manager->ClearSummary();
-    }
-#endif // ENABLE_DRAG_FRAMEWORK
     manager->OnDragMove(static_cast<float>(x), static_cast<float>(y), extraInfo);
 }
 

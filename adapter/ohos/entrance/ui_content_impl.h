@@ -20,8 +20,8 @@
 #include "interfaces/inner_api/ace/ui_content.h"
 #include "interfaces/inner_api/ace/viewport_config.h"
 #include "key_event.h"
-#include "native_engine/native_value.h"
 #include "native_engine/native_engine.h"
+#include "native_engine/native_value.h"
 #include "wm/window.h"
 
 #include "core/common/flutter/flutter_asset_manager.h"
@@ -39,7 +39,7 @@ public:
         DestroyCallback();
     }
 
-    // UI content lifecycles
+    // UI content lifeCycles
     void Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage) override;
     void Initialize(const std::shared_ptr<Window>& aceWindow, const std::string& url, NativeValue* storage) override;
     void Foreground() override;
@@ -85,8 +85,7 @@ public:
     // ArkTS Form
     std::shared_ptr<Rosen::RSSurfaceNode> GetFormRootNode() override;
     void UpdateFormData(const std::string& data) override;
-    void UpdateFormSharedImage(
-        const std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>>& imageDataMap) override;
+    void UpdateFormSharedImage(const std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>>& imageDataMap) override;
     void ReloadForm() override;
 
     void SetFormWidth(float width) override
@@ -106,10 +105,8 @@ public:
         return formHeight_;
     }
 
-    void SetActionEventHandler(
-        std::function<void(const std::string& action)>&& actionCallback) override;
-    void SetErrorEventHandler(
-        std::function<void(const std::string&, const std::string&)>&& errorCallback) override;
+    void SetActionEventHandler(std::function<void(const std::string& action)>&& actionCallback) override;
+    void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& errorCallback) override;
 
     void OnFormSurfaceChange(float width, float height) override;
 
@@ -119,6 +116,8 @@ private:
     void CommonInitializeForm(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);
     void InitializeSubWindow(OHOS::Rosen::Window* window, bool isDialog = false);
     void DestroyCallback() const;
+    void SetConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
+
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
     void* runtime_ = nullptr;
     OHOS::Rosen::Window* window_ = nullptr;

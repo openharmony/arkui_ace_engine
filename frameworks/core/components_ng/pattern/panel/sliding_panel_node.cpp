@@ -26,8 +26,10 @@ void SlidingPanelNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t slot
 
     columnChildren_.emplace(child->GetId());
     auto columnNode = GetChildren().back();
-    if (columnNode) {
-        child->MountToParent(columnNode);
+    CHECK_NULL_VOID(columnNode);
+    auto contentNode = columnNode->GetChildren().back();
+    if (contentNode) {
+        child->MountToParent(contentNode);
     }
 }
 

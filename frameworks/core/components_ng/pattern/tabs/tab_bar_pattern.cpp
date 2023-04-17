@@ -668,7 +668,12 @@ void TabBarPattern::PlayPressAnimation(int32_t index, const Color& pressColor, A
                     : animationType == AnimationType::HOVER ? Curves::FRICTION
                                                             : Curves::SHARP);
     option.SetFillMode(FillMode::FORWARDS);
-    AnimationUtils::Animate(option, [weak = AceType::WeakClaim(this), selectedIndex = index, color = pressColor]() {
+    Color color = pressColor;
+    if (color == Color::TRANSPARENT && tabBarStyles_[index] == TabBarStyle::SUBTABBATSTYLE
+        && selectedModes_[index] == SelectedMode::BOARD) {
+        color = indicatorStyles_[index].color;
+    }
+    AnimationUtils::Animate(option, [weak = AceType::WeakClaim(this), selectedIndex = index, color = color]() {
         auto tabBar = weak.Upgrade();
         if (tabBar) {
             auto host = tabBar->GetHost();
@@ -677,15 +682,26 @@ void TabBarPattern::PlayPressAnimation(int32_t index, const Color& pressColor, A
             CHECK_NULL_VOID(columnNode);
             auto renderContext = columnNode->GetRenderContext();
             CHECK_NULL_VOID(renderContext);
-            auto pipelineContext = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipelineContext);
+            if (tabBar->tabBarStyles_[selectedIndex] != TabBarStyle::SUBTABBATSTYLE) {
+                BorderRadiusProperty borderRadiusProperty;
+                auto pipelineContext = PipelineContext::GetCurrentContext();
+                auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+                borderRadiusProperty.SetRadius(tabTheme->GetFocusIndicatorRadius());
+                renderContext->UpdateBorderRadius(borderRadiusProperty);
+            }
             renderContext->UpdateBackgroundColor(color);
             columnNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         }
-    }, [weak = AceType::WeakClaim(this)]() {
+    }, [weak = AceType::WeakClaim(this), selectedIndex = index]() {
         auto tabBar = weak.Upgrade();
-        if (tabBar && tabBar->GetSelectedMode() == SelectedMode::BOARD) {
-            tabBar->UpdateSubTabBoard();
+        if (tabBar) {
+            if (tabBar->tabBarStyles_[selectedIndex] != TabBarStyle::SUBTABBATSTYLE) {
+                auto host = tabBar->GetHost();
+                auto columnNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(selectedIndex));
+                auto renderContext = columnNode->GetRenderContext();
+                renderContext->ResetBorderRadius();
+                columnNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+            }
         }
     });
 }
@@ -813,12 +829,14 @@ void TabBarPattern::UpdateSubTabBoard()
         auto columnFrameNode = AceType::DynamicCast<FrameNode>(columnNode);
         auto renderContext = columnFrameNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
-        if (selectedModes_[indicator_] == SelectedMode::BOARD && columnFrameNode->GetId() == selectedColumnId) {
-            renderContext->UpdateBackgroundColor(indicatorStyles_[indicator_].color);
-        } else {
-            renderContext->UpdateBackgroundColor(Color::BLACK.BlendOpacity(0.0f));
+        if (tabBarStyles_[indicator_] == TabBarStyle::SUBTABBATSTYLE) {
+            if (selectedModes_[indicator_] == SelectedMode::BOARD && columnFrameNode->GetId() == selectedColumnId) {
+                renderContext->UpdateBackgroundColor(indicatorStyles_[indicator_].color);
+            } else {
+                renderContext->UpdateBackgroundColor(Color::BLACK.BlendOpacity(0.0f));
+            }
+            columnFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         }
-        columnFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
 }
 

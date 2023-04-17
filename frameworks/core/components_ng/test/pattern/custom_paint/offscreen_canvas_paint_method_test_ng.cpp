@@ -767,12 +767,12 @@ HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg016, 
      * @tc.steps2: Test functions GetAlignOffset.
      * @tc.expected: The return value is affected by the second parameter.
      */
-    EXPECT_DOUBLE_EQ(paintMethod->GetAlignOffset(DEFAULT_STR, TextAlign::LEFT, paragraph), DEFAULT_DOUBLE0);
-    EXPECT_DOUBLE_EQ(paintMethod->GetAlignOffset(DEFAULT_STR, TextAlign::RIGHT, paragraph), -DEFAULT_DOUBLE10);
-    EXPECT_DOUBLE_EQ(paintMethod->GetAlignOffset(DEFAULT_STR, TextAlign::CENTER, paragraph), -DEFAULT_DOUBLE10 / 2);
-    EXPECT_DOUBLE_EQ(paintMethod->GetAlignOffset(DEFAULT_STR, TextAlign::JUSTIFY, paragraph), DEFAULT_DOUBLE0);
-    EXPECT_DOUBLE_EQ(paintMethod->GetAlignOffset(DEFAULT_STR, TextAlign::START, paragraph), DEFAULT_DOUBLE0);
-    EXPECT_DOUBLE_EQ(paintMethod->GetAlignOffset(DEFAULT_STR, TextAlign::END, paragraph), -DEFAULT_DOUBLE10);
+    EXPECT_DOUBLE_EQ(paintMethod->GetAlignOffset(TextAlign::LEFT, paragraph), DEFAULT_DOUBLE0);
+    EXPECT_DOUBLE_EQ(paintMethod->GetAlignOffset(TextAlign::RIGHT, paragraph), -DEFAULT_DOUBLE10);
+    EXPECT_DOUBLE_EQ(paintMethod->GetAlignOffset(TextAlign::CENTER, paragraph), -DEFAULT_DOUBLE10 / 2);
+    EXPECT_DOUBLE_EQ(paintMethod->GetAlignOffset(TextAlign::JUSTIFY, paragraph), DEFAULT_DOUBLE0);
+    EXPECT_DOUBLE_EQ(paintMethod->GetAlignOffset(TextAlign::START, paragraph), DEFAULT_DOUBLE0);
+    EXPECT_DOUBLE_EQ(paintMethod->GetAlignOffset(TextAlign::END, paragraph), -DEFAULT_DOUBLE10);
 }
 
 /**

@@ -27,6 +27,7 @@
 #include "core/animation/page_transition_common.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/shared_transition_option.h"
+#include "core/components_ng/base/modifier.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/overlay_property.h"
 #include "core/components_ng/property/progress_mask_property.h"
@@ -140,8 +141,8 @@ public:
 
     virtual void UpdateTransition(const TransitionOptions& options) {}
     virtual void UpdateChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect) {}
-    virtual void OnNodeDisappear() {}
-    virtual void OnNodeAppear() {}
+    virtual void OnNodeDisappear(bool recursive) {}
+    virtual void OnNodeAppear(bool recursive) {}
     virtual bool HasTransitionOutAnimation() const
     {
         return false;
@@ -231,6 +232,8 @@ public:
     {
         return GetBackground() ? GetBackground()->propBlurRadius : std::nullopt;
     }
+
+    virtual void AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePropertyBase> modifier) {};
 
     virtual void PaintAccessibilityFocus() {};
 
@@ -347,6 +350,9 @@ public:
     // accessibility
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AccessibilityFocus, bool);
 
+    // freeze
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Freeze, bool);
+
 protected:
     RenderContext() = default;
     std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;
@@ -384,7 +390,7 @@ protected:
     virtual void OnClipEdgeUpdate(bool isClip) {}
     virtual void OnClipMaskUpdate(const RefPtr<BasicShape>& basicShape) {}
 
-    virtual void OnProgressMaskUpdate(const RefPtr<ProgressMaskProperty>& prgress) {}
+    virtual void OnProgressMaskUpdate(const RefPtr<ProgressMaskProperty>& progress) {}
 
     virtual void OnLinearGradientUpdate(const NG::Gradient& value) {}
     virtual void OnSweepGradientUpdate(const NG::Gradient& value) {}
@@ -403,6 +409,7 @@ protected:
 
     virtual void OnOverlayTextUpdate(const OverlayOptions& overlay) {}
     virtual void OnMotionPathUpdate(const MotionPathOption& motionPath) {}
+    virtual void OnFreezeUpdate(bool isFreezed) {}
 
 private:
     std::function<void()> requestFrame_;

@@ -12,12 +12,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/image_provider/image_provider.h"
+#include "core/components_ng/render/adapter/skia_image.h"
 namespace OHOS::Ace::NG {
 void ImageProvider::MakeCanvasImage(const WeakPtr<ImageObject>& objWp, const WeakPtr<ImageLoadingContext>& ctxWp,
     const SizeF& targetSize, bool forceResize, bool sync)
-{}
+{
+    auto ctx = ctxWp.Upgrade();
+    ctx->SuccessCallback(MakeRefPtr<SkiaImage>(nullptr));
+}
 
 RefPtr<CanvasImage> ImageProvider::QueryCanvasImageFromCache(const ImageSourceInfo& src, const SizeF& targetSize)
-{return nullptr;}
+{
+    return nullptr;
+}
 } // namespace OHOS::Ace::NG

@@ -942,6 +942,8 @@ void WebPattern::OnModifyDone()
         delegate_->SetEnhanceSurfaceFlag(isEnhanceSurface_);
         delegate_->SetPopup(isPopup_);
         delegate_->SetParentNWebId(parentNWebId_);
+        delegate_->SetBackgroundColor(GetBackgroundColorValue(
+            static_cast<int32_t>(renderContext->GetBackgroundColor().value_or(Color::WHITE).GetValue())));
         if (isEnhanceSurface_) {
             auto drawSize = Size(1, 1);
             delegate_->SetDrawSize(drawSize);
@@ -1141,24 +1143,34 @@ bool WebPattern::ParseTouchInfo(const TouchEventInfo& info, std::list<TouchInfo>
 
 void WebPattern::RequestFullScreen()
 {
+    if (isFullScreen_) {
+        LOGE("The Web is already full screen when FullScreen");
+        return;
+    }
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto fullScreenManager = context->GetFullScreenManager();
     CHECK_NULL_VOID(fullScreenManager);
-    fullScreenManager->RequestFullScreenForWeb(host);
+    fullScreenManager->RequestFullScreen(host);
+    isFullScreen_ = true;
 }
 
 void WebPattern::ExitFullScreen()
 {
+    if (!isFullScreen_) {
+        LOGE("The Web is not full screen when ExitFullScreen");
+        return;
+    }
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto fullScreenManager = context->GetFullScreenManager();
     CHECK_NULL_VOID(fullScreenManager);
-    fullScreenManager->ExitFullScreenForWeb(host);
+    fullScreenManager->ExitFullScreen(host);
+    isFullScreen_ = false;
 }
 
 bool WebPattern::IsTouchHandleValid(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> handle)

@@ -141,18 +141,20 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     auto selectedMode = tabContentPattern->GetSelectedMode();
     auto indicatorStyle = tabContentPattern->GetIndicatorStyle();
     auto boardStyle = tabContentPattern->GetBoardStyle();
-    auto renderContext = columnNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    BorderRadiusProperty borderRadiusProperty;
-    borderRadiusProperty.SetRadius(boardStyle.borderRadius);
-    renderContext->UpdateBorderRadius(borderRadiusProperty);
-	
+
     auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
     CHECK_NULL_VOID(swiperNode);
     auto myIndex = swiperNode->GetChildFlatIndex(tabContentId).second;
     
     tabBarPattern->SetTabBarStyle(tabBarParam.GetTabBarStyle(), myIndex);
     auto tabBarStyle = tabContentPattern->GetTabBarStyle();
+    if (tabBarStyle == TabBarStyle::SUBTABBATSTYLE) {
+        auto renderContext = columnNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        BorderRadiusProperty borderRadiusProperty;
+        borderRadiusProperty.SetRadius(boardStyle.borderRadius);
+        renderContext->UpdateBorderRadius(borderRadiusProperty);
+    }
     if (tabBarStyle != TabBarStyle::SUBTABBATSTYLE) {
         indicatorStyle.marginTop = 0.0_vp;
     }

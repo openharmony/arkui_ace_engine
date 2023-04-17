@@ -100,6 +100,12 @@ public:
         globalState_.SetType(operation);
     }
 
+    // direction is also available in strokeText
+    void SetTextDirection(TextDirection direction)
+    {
+        fillState_.SetOffTextDirection(direction);
+    }
+
     void SetStrokeColor(const Color& color)
     {
         strokeState_.SetColor(color);
@@ -285,6 +291,9 @@ protected:
     {
         return OffsetF(0.0f, 0.0f);
     }
+
+    double GetAlignOffset(TextAlign align, std::unique_ptr<txt::Paragraph>& paragraph);
+    txt::TextAlign GetEffectiveAlign(txt::TextAlign align, txt::TextDirection direction) const;
 
     PaintState fillState_;
     StrokePaintState strokeState_;

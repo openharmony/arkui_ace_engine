@@ -121,6 +121,7 @@ void TextFieldContentModifier::SetDefaultPropertyValue()
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
 
     textObscured_ = AceType::MakeRefPtr<PropertyBool>(textFieldPattern->GetTextObscured());
+    dragStatus_ = AceType::MakeRefPtr<PropertyBool>(false);
     contentOffset_ = AceType::MakeRefPtr<PropertyOffsetF>(OffsetF());
     contentSize_ = AceType::MakeRefPtr<PropertySizeF>(SizeF());
     textValue_ = AceType::MakeRefPtr<PropertyString>("");
@@ -134,6 +135,7 @@ void TextFieldContentModifier::SetDefaultPropertyValue()
     AttachProperty(placeholderValue_);
     AttachProperty(textRectY_);
     AttachProperty(textObscured_);
+    AttachProperty(dragStatus_);
     AttachProperty(textRectX_);
     AttachProperty(textAlign_);
 }
@@ -243,6 +245,11 @@ void TextFieldContentModifier::SetTextObscured(bool value)
     if (textObscured_) {
         textObscured_->Set(value);
     }
+}
+
+void TextFieldContentModifier::ChangeDragStatus()
+{
+    dragStatus_->Set(!dragStatus_->Get());
 }
 
 void TextFieldContentModifier::SetTextRectX(const float value)

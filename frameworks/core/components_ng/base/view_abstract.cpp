@@ -1346,4 +1346,18 @@ void ViewAbstract::SetKeyboardShortcut(
     eventManager->AddKeyboardShortcutNode(WeakPtr<NG::FrameNode>(frameNode));
 }
 
+void ViewAbstract::CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
+    const std::function<void(float)>& onCallbackEvent)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->CreateAnimatablePropertyFloat(propertyName, value, onCallbackEvent);
+}
+
+void ViewAbstract::UpdateAnimatablePropertyFloat(const std::string& propertyName, float value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->UpdateAnimatablePropertyFloat(propertyName, value);
+}
 } // namespace OHOS::Ace::NG

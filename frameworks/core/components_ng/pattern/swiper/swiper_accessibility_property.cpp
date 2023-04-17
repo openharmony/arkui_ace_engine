@@ -93,10 +93,11 @@ void SwiperAccessibilityProperty::SetSpecificSupportAction()
     bool isLoop = swiperPaintProperty->GetLoop().value_or(true);
     if (IsScrollable()) {
         if (!isLoop) {
-            if (GetCurrentIndex() > GetBeginIndex()) {
+            if (GetCurrentIndex() > 0) {
                 AddSupportAction(AceAction::ACTION_SCROLL_BACKWARD);
             }
-            if (GetCurrentIndex() < GetEndIndex()) {
+
+            if (GetCurrentIndex() < GetCollectionItemCounts() - 1) {
                 AddSupportAction(AceAction::ACTION_SCROLL_FORWARD);
             }
         } else {

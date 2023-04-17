@@ -218,12 +218,12 @@ ohos_unittest("SpringChainTest") {
     "//third_party/googletest:gtest_main",
   ]
 
-  if (!is_standard_system) {
+  if (!is_ohos_standard_system) {
     external_deps = [
       "hilog:libhilog",
       "resmgr:resourcemanager",
     ]
-    aosp_deps = [ "shared_library:libcurl" ]
+    libs = [ "curl" ]
   } else {
     configs += [ "//third_party/curl:curl_config" ]
     deps += [ "//third_party/curl:curl" ]

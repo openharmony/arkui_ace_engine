@@ -24,7 +24,7 @@ config("ace_config") {
     "//third_party/zlib",
   ]
 
-  if (is_standard_system && !use_mingw_win && !use_mac && !use_linux) {
+  if (is_ohos_standard_system && !use_mingw_win && !use_mac && !use_linux) {
     include_dirs += [
       "//base/global/resource_management/frameworks/resmgr/include",
       "//base/global/resource_management/interfaces/inner_api/include",
@@ -76,7 +76,7 @@ config("ace_test_config") {
   cflags_cc = []
   defines = ace_common_defines
 
-  if (is_standard_system && !use_mingw_win && !use_mac && !use_linux) {
+  if (is_ohos_standard_system && !use_mingw_win && !use_mac && !use_linux) {
     include_dirs += [
       "//base/global/resource_management/frameworks/resmgr/include",
       "//base/global/resource_management/interfaces/inner_api/include",
@@ -90,7 +90,7 @@ config("ace_test_config") {
     defines += [ "OHOS_STANDARD_SYSTEM" ]
   }
 
-  if (!is_standard_system) {
+  if (!is_ohos_standard_system) {
     defines += [ "ENABLE_NATIVE_VIEW" ]
   }
 

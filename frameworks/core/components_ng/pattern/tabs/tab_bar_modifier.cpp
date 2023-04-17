@@ -47,7 +47,7 @@ TabBarModifier::TabBarModifier()
 
 void TabBarModifier::onDraw(DrawingContext& context)
 {
-    if (!hasIndicator_ || hasIndicator_->Get()) {
+    if ((!hasIndicator_ || hasIndicator_->Get()) && !NearZero(indicator_.Height())) {
         PaintIndicator(context, indicator_);
     }
 }

@@ -683,7 +683,7 @@ TextMetrics OffscreenCanvasPaintMethod::MeasureTextMetrics(const std::string& te
     auto textBaseLine = state.GetTextStyle().GetTextBaseline();
     textMetrics.width = paragraph->GetMaxIntrinsicWidth();
     textMetrics.height = paragraph->GetHeight();
-    textMetrics.actualBoundingBoxLeft = -GetAlignOffset(text, textAlign, paragraph);
+    textMetrics.actualBoundingBoxLeft = -GetAlignOffset(textAlign, paragraph);
     textMetrics.actualBoundingBoxRight = textMetrics.width - textMetrics.actualBoundingBoxLeft;
     textMetrics.actualBoundingBoxAscent = -GetBaselineOffset(textBaseLine, paragraph);
     textMetrics.actualBoundingBoxDescent = textMetrics.height - textMetrics.actualBoundingBoxAscent;
@@ -698,7 +698,7 @@ void OffscreenCanvasPaintMethod::PaintText(
         paragraph_->Layout(std::ceil(paragraph_->GetMaxIntrinsicWidth()));
     }
     auto align = isStroke ? strokeState_.GetTextAlign() : fillState_.GetTextAlign();
-    double dx = x + GetAlignOffset(text, align, paragraph_);
+    double dx = x + GetAlignOffset(align, paragraph_);
     auto baseline =
         isStroke ? strokeState_.GetTextStyle().GetTextBaseline() : fillState_.GetTextStyle().GetTextBaseline();
     double dy = y + GetBaselineOffset(baseline, paragraph_);
@@ -712,32 +712,6 @@ void OffscreenCanvasPaintMethod::PaintText(
         return;
     }
     paragraph_->Paint(skCanvas_.get(), dx, dy);
-}
-
-double OffscreenCanvasPaintMethod::GetAlignOffset(const std::string& text, TextAlign align, std::unique_ptr<txt::Paragraph>& paragraph)
-{
-    double x = 0.0;
-    switch (align) {
-        case TextAlign::LEFT:
-            x = 0.0;
-            break;
-        case TextAlign::START:
-            x = (GetTextDirection(text) == TextDirection::LTR) ? 0.0 : -paragraph->GetMaxIntrinsicWidth();
-            break;
-        case TextAlign::RIGHT:
-            x = -paragraph->GetMaxIntrinsicWidth();
-            break;
-        case TextAlign::END:
-            x = (GetTextDirection(text) == TextDirection::LTR) ? -paragraph->GetMaxIntrinsicWidth() : 0.0;
-            break;
-        case TextAlign::CENTER:
-            x = -paragraph->GetMaxIntrinsicWidth() / 2;
-            break;
-        default:
-            x = 0.0;
-            break;
-    }
-    return x;
 }
 
 double OffscreenCanvasPaintMethod::GetBaselineOffset(TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph)
@@ -778,7 +752,10 @@ bool OffscreenCanvasPaintMethod::UpdateOffParagraph(const std::string& text, boo
     } else {
         style.text_align = ConvertTxtTextAlign(fillState_.GetTextAlign());
     }
-    style.text_direction = ConvertTxtTextDirection(state.GetOffTextDirection());
+    if (fillState_.GetOffTextDirection() == TextDirection::RTL) {
+        style.text_direction = txt::TextDirection::rtl;
+    }
+    style.text_align = GetEffectiveAlign(style.text_align, style.text_direction);
     auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
     CHECK_NULL_RETURN(fontCollection, false);
     std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
@@ -841,22 +818,6 @@ void OffscreenCanvasPaintMethod::UpdateTextStyleForeground(bool isStroke, txt::T
         txtStyle.foreground = paint;
         txtStyle.has_foreground = true;
     }
-}
-
-TextDirection OffscreenCanvasPaintMethod::GetTextDirection(const std::string& content)
-{
-    TextDirection textDirection = TextDirection::LTR;
-    auto showingTextForWString = StringUtils::ToWstring(content);
-    for (const auto& charOfShowingText : showingTextForWString) {
-        if (u_charDirection(charOfShowingText) == UCharDirection::U_LEFT_TO_RIGHT) {
-            textDirection = TextDirection::LTR;
-        } else if (u_charDirection(charOfShowingText) == UCharDirection::U_RIGHT_TO_LEFT) {
-            textDirection = TextDirection::RTL;
-        } else if (u_charDirection(charOfShowingText) == UCharDirection::U_RIGHT_TO_LEFT_ARABIC) {
-            textDirection = TextDirection::RTL;
-        }
-    }
-    return textDirection;
 }
 
 void OffscreenCanvasPaintMethod::PaintShadow(const SkPath& path, const Shadow& shadow, SkCanvas* canvas)

@@ -71,9 +71,9 @@ void NavRouterGroupNode::DeleteChildFromGroup(int32_t slot)
     UINode::RemoveChildAtIndex(slot);
 }
 
-void NavRouterGroupNode::OnDetachFromMainTree()
+void NavRouterGroupNode::OnDetachFromMainTree(bool recursive)
 {
-    FrameNode::OnDetachFromMainTree();
+    FrameNode::OnDetachFromMainTree(recursive);
     auto parent = GetParent();
     while (parent) {
         if (CleanNodeInNavigation(parent)) {
@@ -83,9 +83,9 @@ void NavRouterGroupNode::OnDetachFromMainTree()
     }
 }
 
-void NavRouterGroupNode::OnAttachToMainTree()
+void NavRouterGroupNode::OnAttachToMainTree(bool recursive)
 {
-    FrameNode::OnAttachToMainTree();
+    FrameNode::OnAttachToMainTree(recursive);
     auto parent = GetParent();
     while (parent) {
         auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(parent);
@@ -96,7 +96,6 @@ void NavRouterGroupNode::OnAttachToMainTree()
     }
     SetDestinationChangeEvent(parent);
     SetBackButtonEvent(parent);
-    InitNavigationContent(parent);
 }
 
 void NavRouterGroupNode::SetDestinationChangeEvent(const RefPtr<UINode>& parent)
@@ -118,21 +117,6 @@ void NavRouterGroupNode::SetDestinationChangeEvent(const RefPtr<UINode>& parent)
     eventHub->SetOnDestinationChange(std::move(onDestinationChange));
 }
 
-void NavRouterGroupNode::InitNavigationContent(const RefPtr<UINode>& parent)
-{
-    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(parent);
-    CHECK_NULL_VOID(navigationNode);
-    auto layoutProperty = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    if (navigationNode->IsFirstNavDestination() &&
-        layoutProperty->GetNavigationModeValue(NavigationMode::AUTO) == NavigationMode::SPLIT) {
-        AddNavDestinationToNavigation(parent);
-        auto eventHub = GetEventHub<NavRouterEventHub>();
-        CHECK_NULL_VOID(eventHub);
-        eventHub->FireChangeEvent(true);
-        navigationNode->MarkIsFirstNavDestination(false);
-    }
-}
 
 void NavRouterGroupNode::AddBackButtonIconToNavDestination(const RefPtr<UINode>& parent)
 {

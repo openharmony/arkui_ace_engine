@@ -158,6 +158,7 @@ bool ImageProvider::MakeCanvasImageHelper(
 {
     auto obj = objWp.Upgrade();
     CHECK_NULL_RETURN(obj, false);
+    ACE_SCOPED_TRACE("MakeCanvasImage %s", obj->GetSourceInfo().ToString().c_str());
     CHECK_NULL_RETURN(PrepareImageData(obj), false);
 
     auto skiaImageData = DynamicCast<SkiaImageData>(obj->GetData());

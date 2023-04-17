@@ -83,6 +83,7 @@ void ContentModifierAdapter::Draw(RSDrawingContext& context) const
         auto rsProp = std::make_shared<RSAnimatableProperty<propType>>(castProp->Get());      \
         castProp->SetUpCallbacks([rsProp]() -> propType { return rsProp->Get(); },            \
             [rsProp](const propType& value) { rsProp->Set(value); });                         \
+        rsProp->SetUpdateCallback(castProp->GetUpdateCallback());                             \
         return rsProp;                                                                        \
     }
 
@@ -138,6 +139,15 @@ void OverlayModifierAdapter::AttachProperties()
             AttachProperty(rsProperty);
             attachedProperties_.emplace_back(rsProperty);
         }
+    }
+}
+
+void RSNodeModifierImpl::AddProperty(const RefPtr<PropertyBase>& property)
+{
+    if (!attachedProperty_) {
+        auto rsProperty = ConvertToRSProperty(property);
+        AttachProperty(rsProperty);
+        attachedProperty_ = rsProperty;
     }
 }
 } // namespace OHOS::Ace::NG

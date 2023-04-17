@@ -74,7 +74,8 @@ void JSRenderingContext::JSBind(BindingTarget globalObj)
     JSClass<JSRenderingContext>::CustomMethod("setPixelMap", &JSCanvasRenderer::JsSetPixelMap);
     JSClass<JSRenderingContext>::CustomMethod("drawBitmapMesh", &JSCanvasRenderer::JsDrawBitmapMesh);
     JSClass<JSRenderingContext>::CustomMethod("filter", &JSCanvasRenderer::JsFilter);
-    JSClass<JSRenderingContext>::CustomMethod("direction", &JSCanvasRenderer::JsDirection);
+    JSClass<JSRenderingContext>::CustomProperty("direction", &JSCanvasRenderer::JsGetDirection,
+        &JSCanvasRenderer::JsSetDirection);
 
     JSClass<JSRenderingContext>::CustomProperty("fillStyle", &JSCanvasRenderer::JsGetFillStyle,
                                                 &JSCanvasRenderer::JsSetFillStyle);
@@ -115,6 +116,8 @@ void JSRenderingContext::JSBind(BindingTarget globalObj)
                                                 &JSCanvasRenderer::JsSetImageSmoothingQuality);
     JSClass<JSRenderingContext>::CustomMethod("transferFromImageBitmap",
                                               &JSRenderingContext::JsTransferFromImageBitmap);
+
+    JSClass<JSRenderingContext>::CustomMethod("createConicGradient", &JSCanvasRenderer::JsCreateConicGradient);
 
     JSClass<JSRenderingContext>::Bind(globalObj, JSRenderingContext::Constructor, JSRenderingContext::Destructor);
 }
