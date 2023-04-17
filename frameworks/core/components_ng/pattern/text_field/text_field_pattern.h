@@ -364,10 +364,10 @@ public:
         return isUsingMouse_;
     }
 
-    void CursorMoveLeft();
-    void CursorMoveRight();
-    void CursorMoveUp();
-    void CursorMoveDown();
+    bool CursorMoveLeft();
+    bool CursorMoveRight();
+    bool CursorMoveUp();
+    bool CursorMoveDown();
     void SetCaretPosition(int32_t position);
     void SetTextSelection(int32_t selectionStart, int32_t selectionEnd);
     void HandleSetSelection(int32_t start, int32_t end);
