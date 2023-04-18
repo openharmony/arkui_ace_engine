@@ -27,8 +27,6 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/resource/ace_res_config.h"
-#include "base/subwindow/subwindow_manager.h"
-#include "base/thread/background_task_executor.h"
 #include "base/utils/measure_util.h"
 #include "base/utils/utils.h"
 #include "bridge/common/manifest/manifest_parser.h"
@@ -43,6 +41,7 @@
 #include "core/components/dialog/dialog_component.h"
 #include "core/components/toast/toast_component.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/render/adapter/component_snapshot.h"
@@ -2737,9 +2736,20 @@ void FrontendDelegateDeclarative::GetSnapshot(
     const std::string& componentId, NG::ComponentSnapshot::JsCallback&& callback)
 {
 #ifdef ENABLE_ROSEN_BACKEND
-    NG::ComponentSnapshot snapshot(componentId);
-    snapshot.Get(std::move(callback));
+    NG::ComponentSnapshot::Get(componentId, std::move(callback));
 #endif
 }
 
+void FrontendDelegateDeclarative::CreateSnapshot(
+    std::function<void()>&& customBuilder, NG::ComponentSnapshot::JsCallback&& callback)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    ViewStackModel::GetInstance()->NewScope();
+    CHECK_NULL_VOID(customBuilder);
+    customBuilder();
+    auto customNode = ViewStackModel::GetInstance()->Finish();
+
+    NG::ComponentSnapshot::Create(customNode, std::move(callback));
+#endif
+}
 } // namespace OHOS::Ace::Framework
