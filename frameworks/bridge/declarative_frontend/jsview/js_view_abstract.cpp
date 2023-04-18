@@ -4417,8 +4417,17 @@ void JSViewAbstract::JsKey(const std::string& key)
     ViewAbstractModel::GetInstance()->SetInspectorId(key);
 }
 
-void JSViewAbstract::JsId(const std::string& id)
+void JSViewAbstract::JsId(const JSCallbackInfo& info)
 {
+    if (!info[0]->IsString() || info[0]->IsNull() || info[0]->IsUndefined()) {
+        LOGE("Param is wrong, it is supposed to be a string");
+        return;
+    }
+    std::string id = info[0]->ToString();
+    if (id.empty()) {
+        LOGE("string is empty");
+        return;
+    }
     JsKey(id);
 }
 
