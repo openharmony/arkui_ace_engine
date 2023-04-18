@@ -680,9 +680,10 @@ void OverlayManager::HideAllMenus()
         return;
     }
     auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(rootNode);
     for (const auto& child : rootNode->GetChildren()) {
         auto node = DynamicCast<FrameNode>(child);
-        if (node->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
+        if (node && node->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
             PopMenuAnimation(node);
             BlurOverlayNode();
         }
