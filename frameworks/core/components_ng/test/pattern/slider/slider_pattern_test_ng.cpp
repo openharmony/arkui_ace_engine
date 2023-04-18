@@ -468,21 +468,27 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTestNg007, TestSize.Level1)
     auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
     EXPECT_NE(sliderLayoutProperty, nullptr);
     /**
-     * @tc.cases: case1. InputEventType is AXIS and info.GetMainDelta() <= 0.0.
+     * @tc.cases: case1. InputEventType is AXIS and MoveStep(-1).
      */
-    sliderPattern->value_ = -2;
+    sliderPattern->value_ = 1.0f;
     GestureEvent info;
     info.inputEventType_ = InputEventType::AXIS;
     info.localLocation_ = Offset(MIN_LABEL, MAX_LABEL);
+    info.SetOffsetX(.0);
+    info.SetOffsetY(1.0);
     sliderPattern->HandlingGestureEvent(info);
-    EXPECT_EQ(sliderPattern->valueRatio_, .0);
+    EXPECT_EQ(sliderPattern->valueRatio_, .0f);
+    EXPECT_EQ(sliderPattern->value_, .0f);
     /**
-     * @tc.cases: case2. InputEventType is AXIS and info.GetMainDelta() > 0.0.
+     * @tc.cases: case2. InputEventType is AXIS and MoveStep(1).
      */
-    info.mainDelta_ = 1.0;
+    info.SetOffsetX(-1.0);
+    sliderPattern->HandlingGestureEvent(info);
+    EXPECT_EQ(sliderPattern->valueRatio_, 0.01f);
+    EXPECT_EQ(sliderPattern->value_, 1.0f);
     sliderPaintProperty->UpdateStep(.0);
     sliderPattern->HandlingGestureEvent(info);
-    EXPECT_EQ(sliderPattern->valueRatio_, .0);
+    EXPECT_EQ(sliderPattern->valueRatio_, 0.01f);
     /**
      * @tc.cases: case3. InputEventType is not AXIS, direction is HORIZONTAL and revese is false.
      */

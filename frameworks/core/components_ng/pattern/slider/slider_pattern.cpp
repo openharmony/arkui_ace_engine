@@ -221,7 +221,8 @@ void SliderPattern::InitializeBubble()
 void SliderPattern::HandlingGestureEvent(const GestureEvent& info)
 {
     if (info.GetInputEventType() == InputEventType::AXIS) {
-        info.GetMainDelta() > 0.0 ? MoveStep(-1) : MoveStep(1);
+        auto offset = NearZero(info.GetOffsetX()) ? info.GetOffsetY() : info.GetOffsetX();
+        offset > 0.0 ? MoveStep(-1) : MoveStep(1);
     } else {
         UpdateValueByLocalLocation(info.GetLocalLocation());
         UpdateBubble();
