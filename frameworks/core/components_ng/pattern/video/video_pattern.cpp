@@ -461,14 +461,34 @@ void VideoPattern::OnVisibleChange(bool isVisible)
 void VideoPattern::UpdateLooping()
 {
     if (mediaPlayer_->IsMediaPlayerValid()) {
-        mediaPlayer_->SetLooping(loop_);
+        LOGI("Video media player set the loop.");
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
+        platformTask.PostTask([weak = WeakClaim(RawPtr(mediaPlayer_)), loop = loop_] {
+            auto mediaPlayer = weak.Upgrade();
+            CHECK_NULL_VOID(mediaPlayer);
+            mediaPlayer->SetLooping(loop);
+        });
+    } else {
+        LOGW("Video media player is invalid.");
     }
 }
 
 void VideoPattern::SetSpeed()
 {
     if (mediaPlayer_->IsMediaPlayerValid()) {
-        mediaPlayer_->SetPlaybackSpeed(static_cast<float>(progressRate_));
+        LOGI("Video media player set the speed.");
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
+        platformTask.PostTask([weak = WeakClaim(RawPtr(mediaPlayer_)), progress = progressRate_] {
+            auto mediaPlayer = weak.Upgrade();
+            CHECK_NULL_VOID(mediaPlayer);
+            mediaPlayer->SetPlaybackSpeed(static_cast<float>(progress));
+        });
+    } else {
+        LOGW("Video media player is invalid.");
     }
 }
 
@@ -476,7 +496,17 @@ void VideoPattern::UpdateMuted()
 {
     if (mediaPlayer_->IsMediaPlayerValid()) {
         float volume = muted_ ? 0.0f : 1.0f;
-        mediaPlayer_->SetVolume(volume, volume);
+        LOGI("Video media player set the volume.");
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
+        platformTask.PostTask([weak = WeakClaim(RawPtr(mediaPlayer_)), videoVolume = volume] {
+            auto mediaPlayer = weak.Upgrade();
+            CHECK_NULL_VOID(mediaPlayer);
+            mediaPlayer->SetVolume(videoVolume, videoVolume);
+        });
+    } else {
+        LOGW("Video media player is invalid.");
     }
 }
 
