@@ -151,7 +151,7 @@ bool UITaskScheduler::NeedAdditionalLayout()
             if (!geometryTransition || !geometryTransition->IsNodeInAndActive(node)) {
                 continue;
             }
-            // if geometry transition nodes are added during layout, we need to initiate the additional layout
+            // if nodes with geometry transitions are added during layout, we need to initiate the additional layout
             // in current frame, while under normal build layout workflow the additional layout is unnecessary.
             auto parent = node->GetParent();
             while (parent) {

@@ -160,7 +160,7 @@ void GeometryTransition::WillLayout(const RefPtr<LayoutWrapper>& layoutWrapper)
     }
     CHECK_NULL_VOID(layoutWrapper);
     auto hostNode = layoutWrapper->GetHostNode();
-    if (IsNodeInAndActive(hostNode) && layoutWrapper->IsRootMeasureNode()) {
+    if (layoutWrapper->IsRootMeasureNode() && IsNodeInAndActive(hostNode)) {
         ModifyLayoutConstraint(layoutWrapper, true);
         isInNodeLayoutModified_ = true;
     } else if (IsNodeOutAndActive(hostNode)) {
@@ -179,7 +179,7 @@ void GeometryTransition::DidLayout(const WeakPtr<FrameNode>& frameNode)
     CHECK_NULL_VOID(node);
     std::optional<bool> direction = std::nullopt;
 
-    if (IsNodeInAndActive(frameNode) && isInNodeLayoutModified_) {
+    if (isInNodeLayoutModified_ && IsNodeInAndActive(frameNode)) {
         LOGD("GeometryTransition: node%{public}d: in and active", node->GetId());
         state_ = State::IDENTITY;
         isInNodeLayoutModified_ = false;
