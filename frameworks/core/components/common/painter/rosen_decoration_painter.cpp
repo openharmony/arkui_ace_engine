@@ -27,6 +27,8 @@
 #include "include/effects/Sk1DPathEffect.h"
 #ifndef NEW_SKIA
 #include "include/effects/SkBlurImageFilter.h"
+#else
+#include "include/effects/SkImageFilters.h"
 #endif
 #include "include/effects/SkDashPathEffect.h"
 #include "include/effects/SkGradientShader.h"

@@ -443,9 +443,11 @@ void RosenRenderText::ApplyIndents(double width)
         indents.push_back(-indent);
     }
     auto* paragraphTxt = static_cast<txt::ParagraphTxt*>(paragraph_.get());
+#ifndef NEW_SKIA
     if (paragraphTxt != nullptr) {
         paragraphTxt->SetIndents(indents);
     }
+#endif
 }
 
 bool RosenRenderText::UpdateParagraph()
@@ -492,7 +494,9 @@ bool RosenRenderText::UpdateParagraph()
             style.max_lines = 1;
         }
     }
+#ifndef NEW_SKIA
     style.word_break_type = static_cast<minikin::WordBreakType>(textStyle_.GetWordBreak());
+#endif
 
     std::unique_ptr<txt::ParagraphBuilder> builder;
     auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();

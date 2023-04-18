@@ -16,10 +16,12 @@ import(
 
 build_component("pattern_lock") {
   sources = [
-    "flutter_render_pattern_lock.cpp",
     "pattern_lock_component.cpp",
     "render_pattern_lock.cpp",
     "render_pattern_lock_creator.cpp",
   ]
+  if (!ace_use_new_skia) {
+    sources += [ "flutter_render_pattern_lock.cpp" ]
+  }
   rosen_sources = [ "rosen_render_pattern_lock.cpp" ]
 }

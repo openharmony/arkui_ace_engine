@@ -185,8 +185,12 @@ bool SkiaImage::DrawWithRecordingCanvas(
 
     SkPaint paint;
     auto config = GetPaintConfig();
+#ifndef NEW_SKIA
     ImagePainterUtils::AddFilter(paint, config);
-
+#else
+    SkSamplingOptions options;
+    ImagePainterUtils::AddFilter(paint, options, config);
+#endif
     auto radii = ImagePainterUtils::ToSkRadius(radiusXY);
     recordingCanvas->ClipAdaptiveRRect(radii.get());
     if (config.imageFit_ == ImageFit::TOP_LEFT) {
@@ -200,7 +204,12 @@ bool SkiaImage::DrawWithRecordingCanvas(
     Rosen::RsImageInfo rsImageInfo((int)(config.imageFit_), (int)(config.imageRepeat_), radii.get(), 1.0, GetUniqueID(),
         GetCompressWidth(), GetCompressHeight());
     auto data = GetCompressData();
+#ifndef NEW_SKIA
     recordingCanvas->DrawImageWithParm(GetImage(), std::move(data), rsImageInfo, paint);
+#else
+    // TODO:Haw to set SamplingOptions?
+    recordingCanvas->DrawImageWithParm(GetImage(), std::move(data), rsImageInfo, paint);
+#endif
     return true;
 #else
     return false;

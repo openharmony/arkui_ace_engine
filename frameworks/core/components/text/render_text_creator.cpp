@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
+#ifndef NEW_SKIA
 #include "flutter_render_text.h"
+#endif
 #include "rosen_render_text.h"
 #include "core/components/text_overlay/text_overlay_component.h"
 
@@ -27,7 +29,11 @@ RefPtr<RenderNode> RenderText::Create()
         return nullptr;
 #endif
     } else {
+#ifndef NEW_SKIA
         return AceType::MakeRefPtr<FlutterRenderText>();
+#else
+        return nullptr;
+#endif
     }
 }
 } // namespace OHOS::Ace

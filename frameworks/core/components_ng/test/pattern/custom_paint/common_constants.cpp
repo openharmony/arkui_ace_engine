@@ -191,8 +191,15 @@ const std::vector<CanvasFillRule> CANDIDATE_CANVAS_FILL_RULES = {
     CanvasFillRule::EVENODD
 };
 
+#ifndef NEW_SKIA
 const std::vector<SkPath::FillType> CANDIDATE_SKPATH_FILL_TYPES = {
     SkPath::FillType::kWinding_FillType,
     SkPath::FillType::kEvenOdd_FillType
 };
+#else
+const std::vector<SkPathFillType> CANDIDATE_SKPATH_FILL_TYPES = {
+    SkPathFillType::kWinding,
+    SkPathFillType::kEvenOdd
+};
+#endif
 } // namespace OHOS::Ace::NG
