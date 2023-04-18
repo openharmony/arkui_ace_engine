@@ -752,6 +752,39 @@ void JSViewPartialUpdate::Create(const JSCallbackInfo& info)
     }
 }
 
+enum {
+    PARAM_VIEW_OBJ = 0,
+    PARAM_IS_RECYCLE,
+    PARAM_NODE_NAME,
+    PARAM_RECYCLE_UPDATE_FUNC,
+
+    PARAM_SIZE,
+};
+
+bool ParseRecycleParams(const JSCallbackInfo& info, JSRef<JSVal> (&params)[PARAM_SIZE])
+{
+    if (info.Length() != PARAM_SIZE) {
+        return false;
+    }
+    if (!info[PARAM_VIEW_OBJ]->IsObject()) {
+        return false;
+    }
+    if (!info[PARAM_IS_RECYCLE]->IsBoolean()) {
+        return false;
+    }
+    if (!info[PARAM_NODE_NAME]->IsString()) {
+        return false;
+    }
+    if (!info[PARAM_RECYCLE_UPDATE_FUNC]->IsFunction()) {
+        return false;
+    }
+
+    for (int32_t idx = PARAM_VIEW_OBJ; idx < PARAM_SIZE; ++idx) {
+        params[idx] = info[idx];
+    }
+    return true;
+}
+
 /**
  * in JS ViewPU.createRecycle(...)
  * create a recyclable custom node
@@ -760,37 +793,37 @@ void JSViewPartialUpdate::CreateRecycle(const JSCallbackInfo& info)
 {
     ACE_DCHECK(Container::IsCurrentUsePartialUpdate());
 
-    if (info.Length() == 4 && info[0]->IsObject() && info[1]->IsBoolean() && info[2]->IsString() &&
-        info[3]->IsFunction()) {
-        auto viewObj = JSRef<JSObject>::Cast(info[0]);
-        auto* view = viewObj->Unwrap<JSViewPartialUpdate>();
-        if (!view) {
-            LOGE("Invalid JSView");
-            return;
-        }
+    JSRef<JSVal> params[PARAM_SIZE];
+    if (!ParseRecycleParams(info, params)) {
+        LOGE("Invalid parameters");
+        return;
+    }
 
-        auto recycle = info[1]->ToBoolean();
-        auto nodeName = info[2]->ToString();
-        auto jsRecycleRenderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[3]));
-        auto recycleRenderFunc = [execCtx = info.GetExecutionContext(),
-                                     func = std::move(jsRecycleRenderFunc)]() -> void {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            func->ExecuteJS();
-        };
+    auto viewObj = JSRef<JSObject>::Cast(params[PARAM_VIEW_OBJ]);
+    auto* view = viewObj->Unwrap<JSViewPartialUpdate>();
+    if (!view) {
+        LOGE("Invalid JSView");
+        return;
+    }
+    auto recycle = params[PARAM_IS_RECYCLE]->ToBoolean();
+    auto nodeName = params[PARAM_NODE_NAME]->ToString();
+    auto jsRecycleUpdateFunc =
+        AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(params[PARAM_RECYCLE_UPDATE_FUNC]));
+    auto recycleUpdateFunc = [execCtx = info.GetExecutionContext(), func = std::move(jsRecycleUpdateFunc)]() -> void {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        func->ExecuteJS();
+    };
 
-        // update view and node property
-        view->SetRecycleCustomNodeName(nodeName);
+    // update view and node property
+    view->SetRecycleCustomNodeName(nodeName);
 
-        // get or create recycle node
-        if (recycle) {
-            auto node = view->GetCachedRecycleNode();
-            node->SetRecycleRenderFunc(std::move(recycleRenderFunc));
-            ViewStackModel::GetInstance()->Push(node, true);
-        } else {
-            ViewStackModel::GetInstance()->Push(view->CreateViewNode(), true);
-        }
+    // get or create recycle node
+    if (recycle) {
+        auto node = view->GetCachedRecycleNode();
+        node->SetRecycleRenderFunc(std::move(recycleUpdateFunc));
+        ViewStackModel::GetInstance()->Push(node, true);
     } else {
-        LOGE("RecycleView received invalid param");
+        ViewStackModel::GetInstance()->Push(view->CreateViewNode(), true);
     }
 }
 
