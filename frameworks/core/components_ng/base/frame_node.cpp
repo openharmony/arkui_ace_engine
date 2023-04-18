@@ -1623,6 +1623,35 @@ void FrameNode::UpdateAnimatablePropertyFloat(const std::string& propertyName, f
     property->Set(value);
 }
 
+void FrameNode::CreateAnimatableArithmeticProperty(const std::string& propertyName,
+    RefPtr<CustomAnimatableArithmetic>& value,
+    std::function<void(const RefPtr<CustomAnimatableArithmetic>&)>& onCallbackEvent)
+{
+    auto context = GetRenderContext();
+    CHECK_NULL_VOID(context);
+    auto iter = nodeAnimatablePropertyMap_.find(propertyName);
+    if (iter != nodeAnimatablePropertyMap_.end()) {
+        LOGW("AnimatableProperty already exists!");
+        return;
+    }
+    auto property = AceType::MakeRefPtr<NodeAnimatableArithmeticProperty>(value, std::move(onCallbackEvent));
+    context->AttachNodeAnimatableProperty(property);
+    nodeAnimatablePropertyMap_.emplace(propertyName, property);
+}
+
+void FrameNode::UpdateAnimatableArithmeticProperty(const std::string& propertyName,
+    RefPtr<CustomAnimatableArithmetic>& value)
+{
+    auto iter = nodeAnimatablePropertyMap_.find(propertyName);
+    if (iter == nodeAnimatablePropertyMap_.end()) {
+        LOGW("AnimatableProperty not exists!");
+        return;
+    }
+    auto property = AceType::DynamicCast<NodeAnimatableArithmeticProperty>(iter->second);
+    CHECK_NULL_VOID(property);
+    property->Set(value);
+}
+
 std::string FrameNode::ProvideRestoreInfo()
 {
     return pattern_->ProvideRestoreInfo();

@@ -40,6 +40,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_key_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_on_area_change_function.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
+#include "bridge/declarative_frontend/jsview/js_animatable_arithmetic.h"
 #include "bridge/declarative_frontend/jsview/js_grid_container.h"
 #include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
@@ -4753,7 +4754,27 @@ void JSViewAbstract::JSCreateAnimatableProperty(const JSCallbackInfo& info)
         };
         ViewAbstractModel::GetInstance()->CreateAnimatablePropertyFloat(propertyName, numValue, onCallbackEvent);
     } else if (info[1]->IsObject()) {
-        LOGD("Object type (AnimatableArithmetic) to be handled.");
+        LOGD("JSCreateAnimatableProperty handle animatable arithmetic");
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[1]);
+        RefPtr<JSAnimatableArithmetic> animatableArithmeticImpl =
+            AceType::MakeRefPtr<JSAnimatableArithmetic>(obj,  info.GetExecutionContext());
+        RefPtr<CustomAnimatableArithmetic> animatableArithmetic =
+            AceType::DynamicCast<CustomAnimatableArithmetic>(animatableArithmeticImpl);
+        std::function<void(const RefPtr<NG::CustomAnimatableArithmetic>&)> onCallbackEvent;
+        RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(callback));
+        onCallbackEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
+                            id = Container::CurrentId()](const RefPtr<NG::CustomAnimatableArithmetic>& value) {
+            ContainerScope scope(id);
+            RefPtr<JSAnimatableArithmetic> impl = AceType::DynamicCast<JSAnimatableArithmetic>(value);
+            if (!impl) {
+                return;
+            }
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto newJSVal = JSRef<JSVal>(impl->GetObject());
+            func->ExecuteJS(1, &newJSVal);
+        };
+        ViewAbstractModel::GetInstance()->CreateAnimatableArithmeticProperty(propertyName,
+            animatableArithmetic, onCallbackEvent);
     } else {
         LOGE("JSCreateAnimatableProperty: The value param type is invalid.");
     }
@@ -4772,7 +4793,13 @@ void JSViewAbstract::JSUpdateAnimatableProperty(const JSCallbackInfo& info)
         numValue = info[1]->ToNumber<float>();
         ViewAbstractModel::GetInstance()->UpdateAnimatablePropertyFloat(propertyName, numValue);
     } else if (info[1]->IsObject()) {
-        LOGD("Object type (RSAnimatableArithmetic) to be handled");
+        LOGD("JSUpdateAnimatableProperty handle animatable arithmetic");
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[1]);
+        RefPtr<JSAnimatableArithmetic> animatableArithmeticImpl =
+            AceType::MakeRefPtr<JSAnimatableArithmetic>(obj,  info.GetExecutionContext());
+        RefPtr<CustomAnimatableArithmetic> animatableArithmetic =
+            AceType::DynamicCast<CustomAnimatableArithmetic>(animatableArithmeticImpl);
+        ViewAbstractModel::GetInstance()->UpdateAnimatableArithmeticProperty(propertyName, animatableArithmetic);
     } else {
         LOGE("JSUpdateAnimatableProperty: The value param type is invalid.");
     }
