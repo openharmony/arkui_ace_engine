@@ -26,7 +26,6 @@
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/animation/geometry_transition.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/layout/layout_algorithm.h"

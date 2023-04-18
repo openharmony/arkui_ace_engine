@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include <list>
 
 #include "gtest/gtest.h"
@@ -24,6 +25,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/system_properties.h"
 #include "core/common/ace_application_info.h"
+#include "core/components_ng/animation/geometry_transition.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/pattern.h"
