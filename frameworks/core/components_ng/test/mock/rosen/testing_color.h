@@ -20,11 +20,12 @@
 
 namespace OHOS::Ace::Testing {
 namespace {
-    constexpr int32_t ZERO = 0;
-    constexpr int32_t EIGHT = 8;
-    constexpr int32_t SIXTEEN = 16;
-    constexpr int32_t TWENTY_FOUR = 24;
-}
+constexpr int32_t ZERO = 0;
+constexpr int32_t EIGHT = 8;
+constexpr int32_t SIXTEEN = 16;
+constexpr int32_t TWENTY_FOUR = 24;
+constexpr uint32_t COLOR_DEFAULT = 0xff;
+} // namespace
 class TestingColor {
 public:
     constexpr static uint32_t COLOR_TRANSPARENT = 0;
@@ -45,12 +46,9 @@ public:
         : red_(red), green_(green), blue_(blue), alpha_(alpha)
     {}
     TestingColor(uint32_t rgba)
-    {
-        alpha_ = rgba >> TWENTY_FOUR;
-        red_ = (rgba >> SIXTEEN) & 0xff;
-        green_ = (rgba >> EIGHT) & 0xff;
-        blue_ = (rgba >> ZERO) & 0xff;
-    }
+        : red_((rgba >> SIXTEEN) & COLOR_DEFAULT), green_((rgba >> EIGHT) & COLOR_DEFAULT),
+          blue_((rgba >> ZERO) & COLOR_DEFAULT), alpha_(rgba >> TWENTY_FOUR)
+    {}
     virtual ~TestingColor() = default;
 
     bool operator==(const TestingColor& rhs) const
@@ -58,7 +56,7 @@ public:
         return red_ == rhs.red_ && green_ == rhs.green_ && blue_ == rhs.blue_ && alpha_ == rhs.alpha_;
     }
 
-    float GetAlphaF()
+    virtual float GetAlphaF()
     {
         return 1.0f;
     }
