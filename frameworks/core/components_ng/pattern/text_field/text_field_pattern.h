@@ -108,8 +108,8 @@ struct CaretMetricsF {
     }
 };
 
-class TextFieldPattern : public ScrollablePattern, public ValueChangeObserver {
-    DECLARE_ACE_TYPE(TextFieldPattern, ScrollablePattern, ValueChangeObserver);
+class TextFieldPattern : public ScrollablePattern, public ValueChangeObserver, public TextInputClient {
+    DECLARE_ACE_TYPE(TextFieldPattern, ScrollablePattern, ValueChangeObserver, TextInputClient);
 
 public:
     TextFieldPattern();
@@ -214,7 +214,10 @@ public:
     }
 
     void UpdateConfiguration();
-    void PerformAction(TextInputAction action, bool forceCloseKeyboard = true);
+
+    void PerformAction(TextInputAction action, bool forceCloseKeyboard = true) override;
+    void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
+
     void OnValueChanged(bool needFireChangeEvent = true, bool needFireSelectChangeEvent = true) override;
 
     void OnAreaChangedInner() override;
@@ -400,8 +403,9 @@ public:
     {
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
         return imeAttached_;
+#else
+        return connection_;
 #endif
-        return false;
     }
     float PreferredLineHeight();
     void SetNeedCloseOverlay(bool needClose)
@@ -525,7 +529,7 @@ public:
 
     void UpdateEditingValueToRecord();
     void UpdateScrollBarOffset() override;
-    
+
     bool UpdateCurrentOffset(float offset, int32_t source) override
     {
         return true;
@@ -819,7 +823,11 @@ private:
     bool isMousePressed_ = false;
     MouseStatus mouseStatus_ = MouseStatus::NONE;
     bool needCloseOverlay_ = true;
+#if defined(ENABLE_STANDARD_INPUT)
     bool textObscured_ = true;
+#else
+    bool textObscured_ = false;
+#endif
     bool enableTouchAndHoverEffect_ = true;
     bool isUsingMouse_ = false;
     bool isOnHover_ = false;
@@ -867,7 +875,8 @@ private:
     std::vector<MenuOptionsParam> menuOptionItems_;
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> textChangeListener_;
-
+#else
+    RefPtr<TextInputConnection> connection_;
 #endif
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     bool imeAttached_ = false;
