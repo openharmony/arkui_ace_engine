@@ -15,7 +15,7 @@ import("//build/test.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("stack_test_ng") {
-  module_out_path = "$pattern_test_output_path/stack"
+  module_out_path = pattern_test_output_path
 
   sources = [
     "$ace_root/frameworks/core/components_ng/pattern/stack/stack_layout_algorithm.cpp",

@@ -15,7 +15,7 @@ import("//build/test.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("indexer_test_ng") {
-  module_out_path = "$pattern_test_output_path/indexer"
+  module_out_path = pattern_test_output_path
 
   sources = [
     # inner
