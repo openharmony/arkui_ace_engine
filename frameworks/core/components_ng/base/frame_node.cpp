@@ -128,11 +128,9 @@ void FrameNode::ProcessOffscreenNode(const RefPtr<FrameNode>& node)
     CHECK_NULL_VOID(layoutWrapper);
     layoutWrapper->SetActive();
     layoutWrapper->SetRootMeasureNode();
-    layoutWrapper->WillLayout();
     layoutWrapper->Measure(node->GetLayoutConstraint());
     layoutWrapper->Layout();
     layoutWrapper->MountToHostOnMainThread();
-    layoutWrapper->DidLayout(layoutWrapper);
     auto paintProperty = node->GetPaintProperty<PaintProperty>();
     auto wrapper = node->CreatePaintWrapper();
     CHECK_NULL_VOID(wrapper);
@@ -352,9 +350,10 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     SetGeometryNode(dirty->GetGeometryNode());
 
     const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
-    bool skipSync = geometryTransition != nullptr && geometryTransition->IsRunning();
-    if (!skipSync && (frameSizeChange || frameOffsetChange || HasPositionProp() ||
-                         (pattern_->GetSurfaceNodeName().has_value() && contentSizeChange))) {
+    if (geometryTransition != nullptr && geometryTransition->IsRunning()) {
+        geometryTransition->DidLayout(WeakClaim(this));
+    } else if (frameSizeChange || frameOffsetChange || HasPositionProp() ||
+               (pattern_->GetSurfaceNodeName().has_value() && contentSizeChange)) {
         if (pattern_->NeedOverridePaintRect()) {
             renderContext_->SyncGeometryProperties(pattern_->GetOverridePaintRect().value_or(RectF()));
         } else {
@@ -600,7 +599,6 @@ std::optional<UITask> FrameNode::CreateLayoutTask(bool forceUseMainThread)
     auto task = [layoutWrapper, layoutConstraint = GetLayoutConstraint(), forceUseMainThread]() {
         layoutWrapper->SetActive();
         layoutWrapper->SetRootMeasureNode();
-        layoutWrapper->WillLayout();
         {
             ACE_SCOPED_TRACE("LayoutWrapper::Measure");
             layoutWrapper->Measure(layoutConstraint);
@@ -613,15 +611,11 @@ std::optional<UITask> FrameNode::CreateLayoutTask(bool forceUseMainThread)
             ACE_SCOPED_TRACE("LayoutWrapper::MountToHostOnMainThread");
             if (forceUseMainThread || layoutWrapper->CheckShouldRunOnMain()) {
                 layoutWrapper->MountToHostOnMainThread();
-                layoutWrapper->DidLayout(layoutWrapper);
                 return;
             }
             auto host = layoutWrapper->GetHostNode();
             CHECK_NULL_VOID(host);
-            host->PostTask([layoutWrapper]() {
-                layoutWrapper->MountToHostOnMainThread();
-                layoutWrapper->DidLayout(layoutWrapper);
-            });
+            host->PostTask([layoutWrapper]() { layoutWrapper->MountToHostOnMainThread(); });
         }
     };
     if (forceUseMainThread || layoutWrapper->CheckShouldRunOnMain()) {
