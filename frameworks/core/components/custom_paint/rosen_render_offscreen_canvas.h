@@ -16,7 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CUSTOM_PAINT_ROSEN_RENDER_OFFSCREEN_CANVAS_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CUSTOM_PAINT_ROSEN_RENDER_OFFSCREEN_CANVAS_H
 
+#ifndef NEW_SKIA
 #include "experimental/svg/model/SkSVGDOM.h"
+#else
+#include "modules/svg/include/SkSVGDOM.h"
+#endif
 #include "txt/paragraph.h"
 #include "include/core/SkCanvas.h"
 #include "include/core/SkPath.h"
@@ -26,7 +30,9 @@
 #include "core/image/image_source_info.h"
 #include "core/image/image_object.h"
 #include "core/image/image_provider.h"
+#ifndef NEW_SKIA
 #include "core/pipeline/base/scoped_canvas_state.h"
+#endif
 
 namespace OHOS::Ace {
 using setColorFunc = std::function<void (const std::string&)>;
@@ -85,6 +91,9 @@ private:
     void InitCachePaint();
     bool antiAlias_ = true;
     SkPaint GetStrokePaint();
+#ifdef NEW_SKIA
+    SkSamplingOptions options_;
+#endif
     WeakPtr<PipelineBase> pipelineContext_;
     SkBitmap skBitmap_;
     SkPath skPath_;

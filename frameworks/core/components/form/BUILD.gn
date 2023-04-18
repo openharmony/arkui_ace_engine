@@ -50,5 +50,8 @@ build_component("form") {
       "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     ]
   }
+  if (ace_use_new_skia) {
+    sources -= [ "flutter_render_form.cpp" ]
+  }
   rosen_sources = [ "rosen_render_form.cpp" ]
 }

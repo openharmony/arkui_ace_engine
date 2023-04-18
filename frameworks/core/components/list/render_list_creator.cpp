@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
+#ifndef NEW_SKIA
 #include "core/components/list/flutter_render_list.h"
+#endif
 #include "core/components/list/rosen_render_list.h"
 
 namespace OHOS::Ace {
@@ -27,7 +29,11 @@ RefPtr<RenderNode> RenderList::Create()
         return nullptr;
 #endif
     } else {
+#ifndef NEW_SKIA
         return AceType::MakeRefPtr<FlutterRenderList>();
+#else
+        return nullptr;
+#endif
     }
 }
 

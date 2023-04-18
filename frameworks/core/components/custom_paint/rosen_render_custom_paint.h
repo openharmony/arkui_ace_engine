@@ -142,6 +142,9 @@ private:
     SkPath skPath2d_;
     SkPaint imagePaint_;
     SkPaint cachePaint_;
+#ifdef NEW_SKIA
+    SkSamplingOptions options_;
+#endif
     SkBitmap cacheBitmap_;
     SkBitmap canvasCache_;
     SkBitmap webglBitmap_;

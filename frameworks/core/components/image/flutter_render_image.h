@@ -16,7 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_IMAGE_FLUTTER_RENDER_IMAGE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_IMAGE_FLUTTER_RENDER_IMAGE_H
 
+#ifndef NEW_SKIA
 #include "experimental/svg/model/SkSVGDOM.h"
+#else
+#include "modules/svg/include/SkSVGDOM.h"
+#endif
 
 #include "core/components/image/render_image.h"
 #include "core/image/image_provider.h"

@@ -24,7 +24,11 @@
 
 #include "base/utils/string_utils.h"
 #include "core/components/calendar/rosen_render_calendar.h"
+#ifndef NEW_SKIA
 #include "core/components/font/flutter_font_collection.h"
+#else
+#include "core/components/font/rosen_font_collection.h"
+#endif
 #include "core/pipeline/base/rosen_render_context.h"
 
 namespace OHOS::Ace {
@@ -132,7 +136,11 @@ void RosenRenderChart::PaintText(SkCanvas* canvas, const Rect& paintRegion, cons
     if (chartData.GetData().empty()) {
         return;
     }
+#ifndef NEW_SKIA
     auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
+#else
+    auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
+#endif
     if (!fontCollection) {
         LOGW("PaintText: fontCollection is null");
         return;

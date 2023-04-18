@@ -57,4 +57,3 @@ ScreenSizeType ScreenSystemManager::GetSize(double width) const
     return size;
 }
 } // namespace OHOS::Ace
-

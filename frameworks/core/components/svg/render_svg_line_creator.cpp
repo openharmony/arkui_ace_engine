@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
+#ifndef NEW_SKIA
 #include "flutter_render_svg_line.h"
+#endif
 #include "rosen_render_svg_line.h"
 
 namespace OHOS::Ace {
@@ -26,7 +28,11 @@ RefPtr<RenderNode> RenderSvgLine::Create()
         return nullptr;
 #endif
     } else {
+#ifndef NEW_SKIA
         return AceType::MakeRefPtr<FlutterRenderSvgLine>();
+#else
+        return nullptr;
+#endif
     }
 }
 } // namespace OHOS::Ace
