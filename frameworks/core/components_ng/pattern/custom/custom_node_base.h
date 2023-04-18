@@ -118,7 +118,7 @@ public:
     void FireRecycleRenderFunc()
     {
         if (recycleRenderFunc_) {
-            ACE_SCOPED_TRACE("CustomNode:BuildRecycle");
+            ACE_SCOPED_TRACE("CustomNode:BuildRecycle %s", GetJSViewName().c_str());
             recycleRenderFunc_();
             recycleRenderFunc_ = nullptr;
         }

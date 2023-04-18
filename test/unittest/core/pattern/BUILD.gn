@@ -13,5 +13,8 @@
 
 group("core_pattern_unittest") {
   testonly = true
-  deps = [ "ui_extension:ui_extension_pattern_test_ng" ]
+  deps = [
+    "ui_extension:ui_extension_pattern_test_ng",
+    "recycle_node:recycle_node_test_ng",
+  ]
 }

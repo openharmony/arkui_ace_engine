@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-#include "frameworks/core/components_ng/pattern/recycle_view/recycle_dummy_node.h"
+#include "core/components_ng/pattern/recycle_view/recycle_dummy_node.h"
 
 #include "base/memory/ace_type.h"
+#include "base/utils/utils.h"
+#include "core/components_ng/pattern/custom/custom_node_base.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/element_register.h"
-#include "frameworks/base/utils/utils.h"
-#include "frameworks/core/components_ng/pattern/custom/custom_node_base.h"
 
 namespace OHOS::Ace::NG {
 RefPtr<RecycleDummyNode> RecycleDummyNode::CreateRecycleDummyNode(int32_t nodeId)
@@ -29,9 +29,7 @@ RefPtr<RecycleDummyNode> RecycleDummyNode::CreateRecycleDummyNode(int32_t nodeId
     return node;
 }
 
-RecycleDummyNode::RecycleDummyNode(int32_t nodeId)
-    : UINode(V2::RECYCLE_VIEW_ETS_TAG, nodeId)
-{}
+RecycleDummyNode::RecycleDummyNode(int32_t nodeId) : UINode(V2::RECYCLE_VIEW_ETS_TAG, nodeId) {}
 
 RecycleDummyNode::~RecycleDummyNode()
 {

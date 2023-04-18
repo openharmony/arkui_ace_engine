@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-#include "frameworks/core/components_ng/pattern/recycle_view/recycle_view_model_ng.h"
+#include "core/components_ng/pattern/recycle_view/recycle_view_model_ng.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
-#include "frameworks/core/components_ng/pattern/recycle_view/recycle_dummy_node.h"
+#include "core/components_ng/pattern/recycle_view/recycle_dummy_node.h"
 
 namespace OHOS::Ace::NG {
 void RecycleViewModelNG::Create()
