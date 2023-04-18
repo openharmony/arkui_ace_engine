@@ -133,6 +133,9 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     linearLayoutProperty->UpdateMainAxisAlign(FlexAlign::CENTER);
     linearLayoutProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
     linearLayoutProperty->UpdateSpace(tabTheme->GetBottomTabBarSpace());
+    auto columnRenderContext = columnNode->GetRenderContext();
+    CHECK_NULL_VOID(columnRenderContext);
+    columnRenderContext->UpdateClipEdge(true);
     auto tabBarFrameNode = AceType::DynamicCast<FrameNode>(tabBarNode);
     CHECK_NULL_VOID(tabBarFrameNode);
     auto tabBarPattern = tabBarFrameNode->GetPattern<TabBarPattern>();
