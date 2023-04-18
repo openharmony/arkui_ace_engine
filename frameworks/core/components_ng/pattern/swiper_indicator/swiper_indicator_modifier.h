@@ -37,7 +37,8 @@ public:
           hoverToNormalPointDilateRatio_(AceType::MakeRefPtr<AnimatablePropertyFloat>(1)),
           longPointDilateRatio_(AceType::MakeRefPtr<AnimatablePropertyFloat>(1)),
           indicatorPadding_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0)),
-          indicatorMargin_(AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF(0, 0)))
+          indicatorMargin_(AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF(0, 0))),
+          isHorizontal_(AceType::MakeRefPtr<PropertyBool>(true))
     {
         AttachProperty(vectorBlackPointCenterX_);
         AttachProperty(longPointLeftCenterX_);
@@ -49,6 +50,7 @@ public:
         AttachProperty(backgroundColor_);
         AttachProperty(indicatorPadding_);
         AttachProperty(indicatorMargin_);
+        AttachProperty(isHorizontal_);
     }
     ~SwiperIndicatorModifier() override = default;
 
@@ -188,6 +190,13 @@ public:
         return longPointIsHover_;
     }
 
+    void SetIsHorizontal_(bool isHorizontal)
+    {
+        if (isHorizontal_) {
+            isHorizontal_->Set(isHorizontal);
+        }
+    }
+
 private:
     static RefPtr<OHOS::Ace::SwiperIndicatorTheme> GetSwiperIndicatorTheme()
     {
@@ -208,6 +217,7 @@ private:
     RefPtr<AnimatablePropertyFloat> longPointDilateRatio_;
     RefPtr<AnimatablePropertyFloat> indicatorPadding_;
     RefPtr<AnimatablePropertyOffsetF> indicatorMargin_;
+    RefPtr<PropertyBool> isHorizontal_;
 
     float centerY_ = 0;
     Axis axis_ = Axis::HORIZONTAL;

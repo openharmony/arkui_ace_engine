@@ -62,6 +62,7 @@ void SwiperIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* paintWrappe
     swiperIndicatorModifier_->SetSelectedColor(paintProperty->GetSelectedColorValue(swiperTheme->GetSelectedColor()));
     swiperIndicatorModifier_->SetIndicatorMask(paintProperty->GetIndicatorMaskValue(false));
     swiperIndicatorModifier_->SetOffset(geometryNode->GetContentOffset());
+    swiperIndicatorModifier_->SetIsHorizontal_(axis_ == Axis::HORIZONTAL);
     SizeF contentSize = geometryNode->GetFrameSize();
     centerY_ = (axis_ == Axis::HORIZONTAL ? contentSize.Height() : contentSize.Width()) * HALF;
     swiperIndicatorModifier_->SetCenterY(centerY_);
