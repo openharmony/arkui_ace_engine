@@ -121,4 +121,8 @@ void TextFieldPattern::InitSurfaceChangedCallback() {}
 void TextFieldPattern::InitSurfacePositionChangedCallback() {}
 
 void TextFieldPattern::HandleClickEvent(GestureEvent& info) {}
+
+void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyboard) {}
+void TextFieldPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent) {}
+
 } // namespace OHOS::Ace::NG
