@@ -505,7 +505,7 @@ std::optional<SizeF> TextLayoutAlgorithm::BuildTextRaceParagraph(TextStyle& text
 
     // layout the paragraph to the width of text
     paragraph_->Layout(std::numeric_limits<float>::max());
-    float paragraphWidth = paragraph_->GetTextWidth();
+    float paragraphWidth = paragraph_->GetMaxWidth();
     paragraph_->Layout(paragraphWidth);
 
     textStyle_ = textStyle;
