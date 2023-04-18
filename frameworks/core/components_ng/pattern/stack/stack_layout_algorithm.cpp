@@ -58,7 +58,7 @@ void StackLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
     // Update child position.
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         auto translate =
-            Alignment::GetAlignPosition(size, child->GetGeometryNode()->GetMarginFrameSize(), align) + paddingOffset;
+            CalculateStackAlignment(size, child->GetGeometryNode()->GetMarginFrameSize(), align) + paddingOffset;
         if (layoutDirection == TextDirection::RTL) {
             translate.SetX(size.Width() - translate.GetX() - child->GetGeometryNode()->GetMarginFrameSize().Width());
         }
@@ -67,11 +67,20 @@ void StackLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
     // Update content position.
     const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
     if (content) {
-        auto translate = Alignment::GetAlignPosition(size, content->GetRect().GetSize(), align) + paddingOffset;
+        auto translate = CalculateStackAlignment(size, content->GetRect().GetSize(), align) + paddingOffset;
         if (layoutDirection == TextDirection::RTL) {
             translate.SetX(size.Width() - translate.GetX() - content->GetRect().GetSize().Width());
         }
         content->SetOffset(translate);
     }
+}
+
+NG::OffsetF StackLayoutAlgorithm::CalculateStackAlignment(
+    const NG::SizeF& parentSize, const NG::SizeF& childSize, const Alignment& alignment)
+{
+    NG::OffsetF offset;
+    offset.SetX((1.0 + alignment.GetHorizontal()) * (parentSize.Width() - childSize.Width()) / 2.0);
+    offset.SetY((1.0 + alignment.GetVertical()) * (parentSize.Height() - childSize.Height()) / 2.0);
+    return offset;
 }
 } // namespace OHOS::Ace::NG

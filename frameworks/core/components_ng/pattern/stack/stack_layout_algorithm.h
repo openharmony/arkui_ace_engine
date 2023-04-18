@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_STACK_STACK_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_STACK_STACK_LAYOUT_ALGORITHM_H
 
+#include "core/components/common/properties/alignment.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
@@ -30,6 +31,9 @@ public:
     void Layout(LayoutWrapper* layoutWrapper) override;
 
 private:
+    // calculate stack alignment
+    static NG::OffsetF CalculateStackAlignment(
+        const NG::SizeF& parentSize, const NG::SizeF& childSize, const Alignment& alignment);
     static void PerformLayout(LayoutWrapper* layoutWrapper);
     ACE_DISALLOW_COPY_AND_MOVE(StackLayoutAlgorithm);
 };
