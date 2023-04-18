@@ -23,6 +23,7 @@
 #include <set>
 #include <unordered_map>
 #include <utility>
+#include <thread>
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/offset.h"

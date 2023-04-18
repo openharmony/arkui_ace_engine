@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <mutex>
 #include "core/common/container_scope.h"
 
 #include "base/utils/utils.h"
