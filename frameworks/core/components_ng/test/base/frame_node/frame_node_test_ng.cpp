@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include <list>
 
 #include "gtest/gtest.h"
@@ -25,7 +24,6 @@
 #include "base/memory/referenced.h"
 #include "base/utils/system_properties.h"
 #include "core/common/ace_application_info.h"
-#include "core/components_ng/animation/geometry_transition.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -34,7 +32,6 @@
 #include "core/components_ng/test/mock/render/mock_render_context.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 #undef private
 #undef protected
@@ -1164,7 +1161,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg0054, TestSize.Level1)
      * @tc.expected: step1. expect The function return value is true.
      */
     FRAME_NODE2->AddChild(FRAME_NODE3);
-    // FRAME_NODE2->layoutProperty_->UpdateGeometryTransition("id");
+    FRAME_NODE2->layoutProperty_->UpdateGeometryTransition("id");
     auto test = FRAME_NODE2->MarkRemoving();
     FRAME_NODE2->Clean();
     EXPECT_TRUE(test);
