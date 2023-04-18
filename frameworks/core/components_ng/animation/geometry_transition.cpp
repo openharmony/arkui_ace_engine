@@ -160,7 +160,7 @@ void GeometryTransition::WillLayout(const RefPtr<LayoutWrapper>& layoutWrapper)
     }
     CHECK_NULL_VOID(layoutWrapper);
     auto hostNode = layoutWrapper->GetHostNode();
-    if (IsNodeInAndActive(hostNode)) {
+    if (IsNodeInAndActive(hostNode) && layoutWrapper->IsRootMeasureNode()) {
         ModifyLayoutConstraint(layoutWrapper, true);
         isInNodeLayoutModified_ = true;
     } else if (IsNodeOutAndActive(hostNode)) {
