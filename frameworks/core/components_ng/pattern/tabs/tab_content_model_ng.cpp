@@ -263,6 +263,7 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     imageProperty->UpdateImageSourceInfo(imageSourceInfo);
     columnNode->MarkModifyDone();
     textNode->MarkModifyDone();
+    textNode->MarkDirtyNode();
     imageNode->MarkModifyDone();
     tabBarFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     tabBarPattern->AddTabBarItemType(tabContentId, false);
