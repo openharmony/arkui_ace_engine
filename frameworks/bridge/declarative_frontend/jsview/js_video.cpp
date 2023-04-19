@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_video.h"
 
 #include "base/log/ace_scoring_log.h"
+#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_video_controller.h"
 #include "bridge/declarative_frontend/jsview/models/video_model_impl.h"
 #include "core/components_ng/pattern/video/video_model_ng.h"
@@ -95,7 +96,12 @@ void JSVideo::Create(const JSCallbackInfo& info)
         VideoModel::GetInstance()->SetPosterSourceInfo(previewUri);
     } else {
         // Src is a pixelmap.
+#if defined(PIXEL_MAP_SUPPORTED)
+        RefPtr<PixelMap> pixMap = CreatePixelMapFromNapiValue(previewUriValue);
+        VideoModel::GetInstance()->SetPosterSourceByPixelMap(pixMap);
+#else
         LOGE("can not support pixel map");
+#endif
     }
 }
 
