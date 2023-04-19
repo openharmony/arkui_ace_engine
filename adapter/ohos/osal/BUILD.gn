@@ -27,7 +27,7 @@ template("ace_osal_ohos_source_set") {
         vendor_configs.use_ext_surface) {
       defines += [ "EXT_SURFACE_ENABLE" ]
     }
-    if (is_standard_system) {
+    if (is_ohos_standard_system) {
       external_deps = [
         "hitrace_native:hitrace_meter",
         "hiviewdfx_hilog_native:libhilog",
@@ -68,7 +68,7 @@ template("ace_osal_ohos_source_set") {
 
     public_deps = [ "//base/startup/init/interfaces/innerkits:libbegetutil" ]
 
-    if (is_standard_system) {
+    if (is_ohos_standard_system) {
       sources += [
         "resource_adapter_impl.cpp",
         "resource_convertor.cpp",

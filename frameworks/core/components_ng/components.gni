@@ -78,11 +78,6 @@ template("build_component_ng") {
         public_configs += invoker.public_configs
       }
 
-      if (defined(invoker.aosp_deps)) {
-        aosp_deps = []
-        aosp_deps += invoker.aosp_deps
-      }
-
       if (defined(invoker.external_deps)) {
         external_deps = []
         external_deps += invoker.external_deps

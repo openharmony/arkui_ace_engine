@@ -49,6 +49,7 @@ declare_args() {
 }
 
 enable_dump_drawcmd = false
+is_ohos_standard_system = is_standard_system && !build_cross_platform_version
 use_mingw_win = "${current_os}_${current_cpu}" == "mingw_x86_64"
 use_mac = "${current_os}_${current_cpu}" == "mac_x64" ||
           "${current_os}_${current_cpu}" == "mac_arm64"
@@ -101,7 +102,7 @@ if ("${current_os}_${current_cpu}" == "mac_arm64") {
 
 objcopy_clang = "$clang_base_path/bin/llvm-objcopy"
 
-if (is_standard_system) {
+if (is_ohos_standard_system) {
   objcopy_default = "//prebuilts/clang/ohos/linux-x86_64/llvm/bin/llvm-objcopy"
   node_js_path =
       "//prebuilts/build-tools/common/nodejs/node-v12.18.4-linux-x64/bin/"
@@ -117,7 +118,7 @@ if (is_standard_system) {
 ace_engine_subsystem = "arkui"
 
 # Config part name
-if (is_standard_system) {
+if (is_ohos_standard_system) {
   ace_engine_part = "ace_engine"
   hilog_deps = [ "hiviewdfx_hilog_native:libhilog" ]
   ark_runtime_path = "//arkcompiler/runtime_core"
@@ -132,7 +133,7 @@ if (is_standard_system) {
 }
 
 # Config test output path
-if (is_standard_system) {
+if (is_ohos_standard_system) {
   test_output_path = "ace_engine/backenduiFrameNode"
 } else {
   test_output_path = "ace_engine_full/backenduiFrameNode"
