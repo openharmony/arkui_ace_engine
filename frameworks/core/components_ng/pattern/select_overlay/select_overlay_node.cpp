@@ -439,27 +439,27 @@ void SelectOverlayNode::UpdateToolBar(bool menuItemChanged)
 
         GetDefaultButtonAndMenuWidth(defaultOptionWidth, maxWidth);
 
-        if (info->menuInfo.showCopy) {
-            auto button = BuildButton(
-                Localization::GetInstance()->GetEntryLetters(BUTTON_COPY), info->menuCallback.onCopy, GetId());
-            button->MountToParent(selectMenu_);
-            allocatedSize += defaultOptionWidth;
-        }
-        if (info->menuInfo.showCopyAll) {
-            auto button = BuildButton(Localization::GetInstance()->GetEntryLetters(BUTTON_COPY_ALL),
-                info->menuCallback.onSelectAll, GetId(), true);
-            button->MountToParent(selectMenu_);
-            allocatedSize += defaultOptionWidth;
-        }
         if (info->menuInfo.showCut) {
             auto button = BuildButton(
                 Localization::GetInstance()->GetEntryLetters(BUTTON_CUT), info->menuCallback.onCut, GetId());
             button->MountToParent(selectMenu_);
             allocatedSize += defaultOptionWidth;
         }
+        if (info->menuInfo.showCopy) {
+            auto button = BuildButton(
+                Localization::GetInstance()->GetEntryLetters(BUTTON_COPY), info->menuCallback.onCopy, GetId());
+            button->MountToParent(selectMenu_);
+            allocatedSize += defaultOptionWidth;
+        }
         if (info->menuInfo.showPaste) {
             auto button = BuildButton(
                 Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE), info->menuCallback.onPaste, GetId());
+            button->MountToParent(selectMenu_);
+            allocatedSize += defaultOptionWidth;
+        }
+        if (info->menuInfo.showCopyAll) {
+            auto button = BuildButton(Localization::GetInstance()->GetEntryLetters(BUTTON_COPY_ALL),
+                info->menuCallback.onSelectAll, GetId(), true);
             button->MountToParent(selectMenu_);
             allocatedSize += defaultOptionWidth;
         }
