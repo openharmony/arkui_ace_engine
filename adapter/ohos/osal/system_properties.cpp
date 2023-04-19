@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,18 @@
  * limitations under the License.
  */
 
+#include "base/utils/system_properties.h"
+
+#include <memory>
 #include <mutex>
 #include <shared_mutex>
 #include <unistd.h>
-
-#include "base/utils/utils.h"
-#include "base/utils/system_properties.h"
 
 #include "parameter.h"
 #include "parameters.h"
 
 #include "base/log/log.h"
+#include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #ifdef OHOS_STANDARD_SYSTEM
 #include "systemcapability.h"
@@ -31,27 +32,31 @@
 
 namespace OHOS::Ace {
 namespace {
-
-const char PROPERTY_DEVICE_TYPE[] = "const.product.devicetype";
-const char PROPERTY_DEVICE_TYPE_DEFAULT[] = "default";
-const char PROPERTY_DEVICE_TYPE_TV[] = "tv";
-const char PROPERTY_DEVICE_TYPE_TABLET[] = "tablet";
-const char PROPERTY_DEVICE_TYPE_WATCH[] = "watch";
-const char PROPERTY_DEVICE_TYPE_CAR[] = "car";
-#ifdef ENABLE_ROSEN_BACKEND
-const char DISABLE_ROSEN_FILE_PATH[] = "/etc/disablerosen";
-const char DISABLE_WINDOW_ANIMATION_PATH[] = "/etc/disable_window_size_animation";
-#endif
-const char ENABLE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.boundary.enabled";
-const char ANIMATION_SCALE_KEY[] = "persist.sys.arkui.animationscale";
-
+constexpr char PROPERTY_DEVICE_TYPE[] = "const.product.devicetype";
+constexpr char PROPERTY_DEVICE_TYPE_DEFAULT[] = "default";
+constexpr char PROPERTY_DEVICE_TYPE_TV[] = "tv";
+constexpr char PROPERTY_DEVICE_TYPE_TABLET[] = "tablet";
+constexpr char PROPERTY_DEVICE_TYPE_WATCH[] = "watch";
+constexpr char PROPERTY_DEVICE_TYPE_CAR[] = "car";
+constexpr char ENABLE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.boundary.enabled";
+constexpr char ANIMATION_SCALE_KEY[] = "persist.sys.arkui.animationscale";
 constexpr int32_t ORIENTATION_PORTRAIT = 0;
 constexpr int32_t ORIENTATION_LANDSCAPE = 1;
 constexpr float DEFAULT_ANIMATION_SCALE = 1.0f;
-
 float animationScale_ = DEFAULT_ANIMATION_SCALE;
-
 std::shared_mutex mutex_;
+constexpr uint32_t PAGE_NODES = 1000;
+constexpr uint32_t PAGE_DEPTH = 30;
+constexpr uint32_t NODE_CHILDREN = 100;
+constexpr uint32_t FUNCTION_TIMEOUT = 15;
+constexpr uint32_t VSYNC_TIMEOUT = 500;
+constexpr uint32_t NODE_TIMEOUT = 15;
+constexpr uint32_t FOREACH_ITEMS = 50;
+constexpr uint32_t FLEX_LAYOUTS = 8;
+#ifdef ENABLE_ROSEN_BACKEND
+constexpr char DISABLE_ROSEN_FILE_PATH[] = "/etc/disablerosen";
+constexpr char DISABLE_WINDOW_ANIMATION_PATH[] = "/etc/disable_window_size_animation";
+#endif
 
 void Swap(int32_t& deviceWidth, int32_t& deviceHeight)
 {
@@ -78,12 +83,12 @@ bool IsSvgTraceEnabled()
 
 bool IsHookModeEnabled()
 {
-#if defined(PREVIEW)
+#ifdef PREVIEW
     return false;
 #endif
     const int bufferLen = 128;
-    char paramOutBuf[bufferLen] = {0};
-    const char *hook_mode = "startup:";
+    char paramOutBuf[bufferLen] = { 0 };
+    constexpr char hook_mode[] = "startup:";
     int ret = GetParameter("persist.libc.hook_mode", "", paramOutBuf, bufferLen);
     if (ret <= 0 || strncmp(paramOutBuf, hook_mode, strlen(hook_mode)) != 0) {
         return false;
@@ -93,7 +98,7 @@ bool IsHookModeEnabled()
 
 bool IsRosenBackendEnabled()
 {
-#if defined(PREVIEW)
+#ifdef PREVIEW
     return false;
 #endif
 #ifdef ENABLE_ROSEN_BACKEND
@@ -114,7 +119,7 @@ bool IsRosenBackendEnabled()
 
 bool IsWindowAnimationEnabled()
 {
-#if defined(PREVIEW)
+#ifdef PREVIEW
     return false;
 #endif
 #ifdef ENABLE_ROSEN_BACKEND
@@ -144,7 +149,7 @@ bool IsGpuUploadEnabled()
             system::GetParameter("debug.ace.gpuupload.enabled", "0") == "1");
 }
 
-void OnAnimationScaleChanged(const char *key, const char *value, void *context)
+void OnAnimationScaleChanged(const char* key, const char* value, void* context)
 {
     CHECK_NULL_VOID(key);
     if (strcmp(key, ANIMATION_SCALE_KEY) != 0) {
@@ -171,7 +176,71 @@ uint32_t GetSysDumpFrameCount()
     return system::GetUintParameter<uint32_t>("persist.ace.framedumpcount", 10);
 }
 
+bool GetAstcEnabled()
+{
+    return system::GetParameter("persist.astc.enable", "true") == "true";
+}
+
+int32_t GetAstcMaxErrorProp()
+{
+    return system::GetIntParameter<int>("persist.astc.max", 50000);
+}
+
+int32_t GetAstcPsnrProp()
+{
+    return system::GetIntParameter<int>("persist.astc.psnr", 0);
+}
+
+bool IsUseMemoryMonitor()
+{
+    return (system::GetParameter("persist.ace.memorymonitor.enabled", "0") == "1");
+}
+
+bool IsExtSurfaceEnabled()
+{
+#ifdef EXT_SURFACE_ENABLE
+    return true;
+#else
+    return false;
+#endif
+}
 } // namespace
+
+bool SystemProperties::traceEnabled_ = IsTraceEnabled();
+bool SystemProperties::svgTraceEnable_ = IsSvgTraceEnabled();
+bool SystemProperties::accessibilityEnabled_ = IsAccessibilityEnabled();
+bool SystemProperties::isRound_ = false;
+bool SystemProperties::isDeviceAccess_ = false;
+int32_t SystemProperties::deviceWidth_ = 0;
+int32_t SystemProperties::deviceHeight_ = 0;
+ACE_WEAK_SYM double SystemProperties::resolution_ = 1.0;
+ACE_WEAK_SYM DeviceType SystemProperties::deviceType_ { DeviceType::UNKNOWN };
+ACE_WEAK_SYM DeviceOrientation SystemProperties::orientation_ { DeviceOrientation::PORTRAIT };
+std::string SystemProperties::brand_ = INVALID_PARAM;
+std::string SystemProperties::manufacturer_ = INVALID_PARAM;
+std::string SystemProperties::model_ = INVALID_PARAM;
+std::string SystemProperties::product_ = INVALID_PARAM;
+std::string SystemProperties::apiVersion_ = INVALID_PARAM;
+std::string SystemProperties::releaseType_ = INVALID_PARAM;
+std::string SystemProperties::paramDeviceType_ = INVALID_PARAM;
+int32_t SystemProperties::mcc_ = MCC_UNDEFINED;
+int32_t SystemProperties::mnc_ = MNC_UNDEFINED;
+ColorMode SystemProperties::colorMode_ { ColorMode::LIGHT };
+ScreenShape SystemProperties::screenShape_ { ScreenShape::NOT_ROUND };
+LongScreenType SystemProperties::LongScreen_ { LongScreenType::NOT_LONG };
+bool SystemProperties::unZipHap_ = true;
+ACE_WEAK_SYM bool SystemProperties::rosenBackendEnabled_ = IsRosenBackendEnabled();
+ACE_WEAK_SYM bool SystemProperties::isHookModeEnabled_ = IsHookModeEnabled();
+bool SystemProperties::debugBoundaryEnabled_ = IsDebugBoundaryEnabled();
+ACE_WEAK_SYM bool SystemProperties::windowAnimationEnabled_ = IsWindowAnimationEnabled();
+bool SystemProperties::debugEnabled_ = IsDebugEnabled();
+bool SystemProperties::gpuUploadEnabled_ = IsGpuUploadEnabled();
+bool SystemProperties::astcEnabled_ = GetAstcEnabled();
+int32_t SystemProperties::astcMax_ = GetAstcMaxErrorProp();
+int32_t SystemProperties::astcPsnr_ = GetAstcPsnrProp();
+ACE_WEAK_SYM bool SystemProperties::extSurfaceEnabled_ = IsExtSurfaceEnabled();
+ACE_WEAK_SYM uint32_t SystemProperties::dumpFrameCount_ = GetSysDumpFrameCount();
+PerformancePtr SystemProperties::performanceProps_ = nullptr;
 
 bool SystemProperties::IsSyscapExist(const char* cap)
 {
@@ -180,6 +249,71 @@ bool SystemProperties::IsSyscapExist(const char* cap)
 #else
     return false;
 #endif
+}
+
+void SystemProperties::InitPerformanceParameters()
+{
+    auto enable = system::GetBoolParameter("arkui.performancecheck.enable", false);
+    if (!enable) {
+        LOGI("Performance detection mode is not turned on");
+        return;
+    }
+    SystemProperties::performanceProps_ = std::make_unique<PerformanceCheckParameter>();
+    SystemProperties::performanceProps_->pageNodes =
+        system::GetUintParameter<uint32_t>("arkui.performancecheck.9901.pagenodes", PAGE_NODES);
+    SystemProperties::performanceProps_->pageDepth =
+        system::GetUintParameter<uint32_t>("arkui.performancecheck.9901.pagedepth", PAGE_DEPTH);
+    SystemProperties::performanceProps_->nodeChildren =
+        system::GetUintParameter<uint32_t>("arkui.performancecheck.9901.nodechildren", NODE_CHILDREN);
+    SystemProperties::performanceProps_->functionTimeout =
+        system::GetUintParameter<uint32_t>("arkui.performancecheck.9902.functiontimeout", FUNCTION_TIMEOUT);
+    SystemProperties::performanceProps_->vsyncTimeout =
+        system::GetUintParameter<uint32_t>("arkui.performancecheck.9903.vsynctimeout", VSYNC_TIMEOUT);
+    SystemProperties::performanceProps_->nodeTimeout =
+        system::GetUintParameter<uint32_t>("arkui.performancecheck.9903.nodetimeout", NODE_TIMEOUT);
+    SystemProperties::performanceProps_->foreachItems =
+        system::GetUintParameter<uint32_t>("arkui.performancecheck.9904.foreachitems", FOREACH_ITEMS);
+    SystemProperties::performanceProps_->flexLayouts =
+        system::GetUintParameter<uint32_t>("arkui.performancecheck.9905.flexlayouts", FLEX_LAYOUTS);
+}
+
+bool SystemProperties::IsPerformanceCheckEnabled()
+{
+    return SystemProperties::performanceProps_ != nullptr;
+}
+
+uint32_t SystemProperties::GetPerformanceParameterWithType(PerformanceParameterType type)
+{
+    uint32_t result = 0;
+    switch (type) {
+        case PerformanceParameterType::PAGE_NODES:
+            result = performanceProps_->pageNodes;
+            break;
+        case PerformanceParameterType::PAGE_DEPTH:
+            result = performanceProps_->pageDepth;
+            break;
+        case PerformanceParameterType::NODE_CHILDREN:
+            result = performanceProps_->nodeChildren;
+            break;
+        case PerformanceParameterType::FUNCTION_TIMEOUT:
+            result = performanceProps_->functionTimeout;
+            break;
+        case PerformanceParameterType::VSYNC_TIMEOUT:
+            result = performanceProps_->vsyncTimeout;
+            break;
+        case PerformanceParameterType::NODE_TIMEOUT:
+            result = performanceProps_->nodeTimeout;
+            break;
+        case PerformanceParameterType::FOREACH_ITEMS:
+            result = performanceProps_->foreachItems;
+            break;
+        case PerformanceParameterType::FLEX_LAYOUTS:
+            result = performanceProps_->flexLayouts;
+            break;
+        default:
+            result = -1;
+    }
+    return result;
 }
 
 void SystemProperties::InitDeviceType(DeviceType)
@@ -231,70 +365,6 @@ bool SystemProperties::IsScoringEnabled(const std::string& name)
     std::string prop = system::GetParameter("persist.ace.trace.scoringtool", "");
     return prop == name;
 }
-
-bool GetAstcEnabled()
-{
-    return system::GetParameter("persist.astc.enable", "true") == "true";
-}
-
-int32_t GetAstcMaxErrorProp()
-{
-    return system::GetIntParameter<int>("persist.astc.max", 50000);
-}
-
-int32_t GetAstcPsnrProp()
-{
-    return system::GetIntParameter<int>("persist.astc.psnr", 0);
-}
-
-bool IsUseMemoryMonitor()
-{
-    return (system::GetParameter("persist.ace.memorymonitor.enabled", "0") == "1");
-}
-
-bool IsExtSurfaceEnabled()
-{
-#ifdef EXT_SURFACE_ENABLE
-    return true;
-#else
-    return false;
-#endif
-}
-
-bool SystemProperties::traceEnabled_ = IsTraceEnabled();
-bool SystemProperties::svgTraceEnable_ = IsSvgTraceEnabled();
-bool SystemProperties::accessibilityEnabled_ = IsAccessibilityEnabled();
-bool SystemProperties::isRound_ = false;
-bool SystemProperties::isDeviceAccess_ = false;
-int32_t SystemProperties::deviceWidth_ = 0;
-int32_t SystemProperties::deviceHeight_ = 0;
-ACE_WEAK_SYM double SystemProperties::resolution_ = 1.0;
-ACE_WEAK_SYM DeviceType SystemProperties::deviceType_ { DeviceType::UNKNOWN };
-ACE_WEAK_SYM DeviceOrientation SystemProperties::orientation_ { DeviceOrientation::PORTRAIT };
-std::string SystemProperties::brand_ = INVALID_PARAM;
-std::string SystemProperties::manufacturer_ = INVALID_PARAM;
-std::string SystemProperties::model_ = INVALID_PARAM;
-std::string SystemProperties::product_ = INVALID_PARAM;
-std::string SystemProperties::apiVersion_ = INVALID_PARAM;
-std::string SystemProperties::releaseType_ = INVALID_PARAM;
-std::string SystemProperties::paramDeviceType_ = INVALID_PARAM;
-int32_t SystemProperties::mcc_ = MCC_UNDEFINED;
-int32_t SystemProperties::mnc_ = MNC_UNDEFINED;
-ColorMode SystemProperties::colorMode_ { ColorMode::LIGHT };
-ScreenShape SystemProperties::screenShape_ { ScreenShape::NOT_ROUND };
-LongScreenType SystemProperties::LongScreen_ { LongScreenType::NOT_LONG };
-bool SystemProperties::unZipHap_ = true;
-ACE_WEAK_SYM bool SystemProperties::rosenBackendEnabled_ = IsRosenBackendEnabled();
-ACE_WEAK_SYM bool SystemProperties::isHookModeEnabled_ = IsHookModeEnabled();
-bool SystemProperties::debugBoundaryEnabled_ = IsDebugBoundaryEnabled();
-ACE_WEAK_SYM bool SystemProperties::windowAnimationEnabled_ = IsWindowAnimationEnabled();
-bool SystemProperties::debugEnabled_ = IsDebugEnabled();
-bool SystemProperties::gpuUploadEnabled_ = IsGpuUploadEnabled();
-bool SystemProperties::astcEnabled_ = GetAstcEnabled();
-int32_t SystemProperties::astcMax_ = GetAstcMaxErrorProp();
-int32_t SystemProperties::astcPsnr_ = GetAstcPsnrProp();
-ACE_WEAK_SYM bool SystemProperties::extSurfaceEnabled_ = IsExtSurfaceEnabled();
-ACE_WEAK_SYM uint32_t SystemProperties::dumpFrameCount_ = GetSysDumpFrameCount();
 
 ACE_WEAK_SYM DeviceType SystemProperties::GetDeviceType()
 {
@@ -433,4 +503,8 @@ ACE_WEAK_SYM bool SystemProperties::GetIsUseMemoryMonitor()
     return isUseMemoryMonitor;
 }
 
+bool SystemProperties::IsFormAnimationLimited()
+{
+    return false;
+}
 } // namespace OHOS::Ace

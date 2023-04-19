@@ -1020,7 +1020,7 @@ bool JsiDeclarativeEngine::ExecuteAbc(const std::string& fileName)
         LOGD("GetAssetContent \"%{public}s\" failed.", fileName.c_str());
         return true;
     }
-#ifdef OHOS_PLATFORM
+#if !defined(PREVIEW)
     const std::string abcPath = delegate->GetAssetPath(fileName).append(fileName);
 #else
     const std::string& abcPath = fileName;

@@ -19,14 +19,13 @@
 
 namespace OHOS::Ace {
 namespace {
-
 constexpr int32_t ORIENTATION_PORTRAIT = 0;
 constexpr int32_t ORIENTATION_LANDSCAPE = 1;
-const char PROPERTY_DEVICE_TYPE_PHONE[] = "phone";
-const char PROPERTY_DEVICE_TYPE_TV[] = "tv";
-const char PROPERTY_DEVICE_TYPE_TABLET[] = "tablet";
-const char PROPERTY_DEVICE_TYPE_WEARABLE[] = "wearable";
-const char PROPERTY_DEVICE_TYPE_CAR[] = "car";
+constexpr char PROPERTY_DEVICE_TYPE_PHONE[] = "phone";
+constexpr char PROPERTY_DEVICE_TYPE_TV[] = "tv";
+constexpr char PROPERTY_DEVICE_TYPE_TABLET[] = "tablet";
+constexpr char PROPERTY_DEVICE_TYPE_WEARABLE[] = "wearable";
+constexpr char PROPERTY_DEVICE_TYPE_CAR[] = "car";
 
 static constexpr char UNDEFINED_PARAM[] = "undefined parameter";
 
@@ -36,29 +35,7 @@ void Swap(int32_t& deviceWidth, int32_t& deviceHeight)
     deviceWidth = deviceHeight;
     deviceHeight = temp;
 }
-
 } // namespace
-
-void SystemProperties::InitDeviceType(DeviceType type)
-{
-    // Properties: "phone", "tv", "tablet", "watch", "car"
-    if (type == DeviceType::TV) {
-        deviceType_ = DeviceType::TV;
-        paramDeviceType_ = PROPERTY_DEVICE_TYPE_TV;
-    } else if (type == DeviceType::WATCH) {
-        deviceType_ = DeviceType::WATCH;
-        paramDeviceType_ = PROPERTY_DEVICE_TYPE_WEARABLE;
-    } else if (type == DeviceType::CAR) {
-        deviceType_ = DeviceType::CAR;
-        paramDeviceType_ = PROPERTY_DEVICE_TYPE_CAR;
-    } else if (type == DeviceType::TABLET) {
-        deviceType_ = DeviceType::TABLET;
-        paramDeviceType_ = PROPERTY_DEVICE_TYPE_TABLET;
-    } else {
-        deviceType_ = DeviceType::PHONE;
-        paramDeviceType_ = PROPERTY_DEVICE_TYPE_PHONE;
-    }
-}
 
 bool SystemProperties::traceEnabled_ = false;
 bool SystemProperties::svgTraceEnable_ = false;
@@ -83,11 +60,6 @@ ColorMode SystemProperties::colorMode_ = ColorMode::LIGHT;
 ScreenShape SystemProperties::screenShape_ { ScreenShape::NOT_ROUND };
 LongScreenType SystemProperties::LongScreen_ { LongScreenType::NOT_LONG };
 bool SystemProperties::unZipHap_ = true;
-#ifndef ENABLE_ROSEN_BACKEND
-bool SystemProperties::rosenBackendEnabled_ = false;
-#else
-bool SystemProperties::rosenBackendEnabled_ = true;
-#endif
 bool SystemProperties::windowAnimationEnabled_ = false;
 bool SystemProperties::debugBoundaryEnabled_ = false;
 bool SystemProperties::gpuUploadEnabled_ = false;
@@ -97,6 +69,38 @@ int SystemProperties::astcMax_ = 0;
 int SystemProperties::astcPsnr_ = 0;
 bool SystemProperties::extSurfaceEnabled_ = false;
 uint32_t SystemProperties::dumpFrameCount_ = 0;
+PerformancePtr SystemProperties::performanceProps_ = nullptr;
+#ifndef ENABLE_ROSEN_BACKEND
+bool SystemProperties::rosenBackendEnabled_ = false;
+#else
+bool SystemProperties::rosenBackendEnabled_ = true;
+#endif
+
+void SystemProperties::InitDeviceType(DeviceType type)
+{
+    // Properties: "phone", "tv", "tablet", "watch", "car"
+    if (type == DeviceType::TV) {
+        deviceType_ = DeviceType::TV;
+        paramDeviceType_ = PROPERTY_DEVICE_TYPE_TV;
+    } else if (type == DeviceType::WATCH) {
+        deviceType_ = DeviceType::WATCH;
+        paramDeviceType_ = PROPERTY_DEVICE_TYPE_WEARABLE;
+    } else if (type == DeviceType::CAR) {
+        deviceType_ = DeviceType::CAR;
+        paramDeviceType_ = PROPERTY_DEVICE_TYPE_CAR;
+    } else if (type == DeviceType::TABLET) {
+        deviceType_ = DeviceType::TABLET;
+        paramDeviceType_ = PROPERTY_DEVICE_TYPE_TABLET;
+    } else {
+        deviceType_ = DeviceType::PHONE;
+        paramDeviceType_ = PROPERTY_DEVICE_TYPE_PHONE;
+    }
+}
+
+uint32_t SystemProperties::GetPerformanceParameterWithType(PerformanceParameterType /* type */)
+{
+    return -1;
+}
 
 DeviceType SystemProperties::GetDeviceType()
 {
@@ -183,13 +187,13 @@ std::string SystemProperties::GetRegion()
 std::string SystemProperties::GetPartialUpdatePkg()
 {
     // TODO: add support for pc preview.
-    return "";
+    return {};
 }
 
 std::string SystemProperties::GetNewPipePkg()
 {
     // TODO: add support for pc preview.
-    return "";
+    return {};
 }
 
 int32_t SystemProperties::GetSvgMode()
@@ -198,6 +202,18 @@ int32_t SystemProperties::GetSvgMode()
 }
 
 bool SystemProperties::GetIsUseMemoryMonitor()
+{
+    return false;
+}
+
+bool SystemProperties::IsPerformanceCheckEnabled()
+{
+    return false;
+}
+
+void SystemProperties::InitPerformanceParameters() {}
+
+bool SystemProperties::IsFormAnimationLimited()
 {
     return false;
 }
