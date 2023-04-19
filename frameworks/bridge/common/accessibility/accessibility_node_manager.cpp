@@ -209,6 +209,8 @@ AccessibilityNodeManager::~AccessibilityNodeManager()
 
 void AccessibilityNodeManager::InitializeCallback() {}
 
+void AccessibilityNodeManager::RegisterSubWindowInteractionOperation(int windowId) {}
+
 void AccessibilityNodeManager::SetPipelineContext(const RefPtr<PipelineBase>& context)
 {
     context_ = context;
