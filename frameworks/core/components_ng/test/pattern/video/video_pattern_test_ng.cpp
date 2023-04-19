@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1151,11 +1151,11 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest013, TestSize.Level1)
 }
 
 /**
- * @tc.name: VideoPatternTest015
+ * @tc.name: VideoPatternTest014
  * @tc.desc: Test OnResolutionChange & OnHiddenChange
  * @tc.type: FUNC
  */
-HWTEST_F(VideoPropertyTestNg, VideoPatternTest015, TestSize.Level1)
+HWTEST_F(VideoPropertyTestNg, VideoPatternTest014, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create Video
@@ -1219,11 +1219,11 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest015, TestSize.Level1)
 }
 
 /**
- * @tc.name: VideoFullScreenTest016
+ * @tc.name: VideoFullScreenTest015
  * @tc.desc: Create Video, and invoke its MeasureContent function to calculate the content size when it is fullscreen.
  * @tc.type: FUNC
  */
-HWTEST_F(VideoPropertyTestNg, VideoFullScreenTest016, TestSize.Level1)
+HWTEST_F(VideoPropertyTestNg, VideoFullScreenTest015, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create Video
@@ -1297,5 +1297,68 @@ HWTEST_F(VideoPropertyTestNg, VideoFullScreenTest016, TestSize.Level1)
 
     videoSize = videoLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper).value_or(SizeF(0.0f, 0.0f));
     EXPECT_EQ(videoSize, SizeF(VIDEO_WIDTH, VIDEO_HEIGHT));
+}
+
+/**
+ * @tc.name: VideoPropertyTest016
+ * @tc.desc: Create Vdeo, and check the pixelmap.
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoPropertyTestNg, VideoPropertyTest016, TestSize.Level1)
+{
+    VideoModelNG video;
+    auto videoController = AceType::MakeRefPtr<VideoControllerV2>();
+    video.Create(videoController);
+
+    /**
+     * @tc.steps: step1. Create a video.
+     * @tc.expected: step1. Create successfully.
+     */
+    auto frameNodeTemp = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNodeTemp);
+    auto videoPatternTemp = AceType::DynamicCast<VideoPattern>(frameNodeTemp->GetPattern());
+    CHECK_NULL_VOID(videoPatternTemp);
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPatternTemp->mediaPlayer_)), IsMediaPlayerValid())
+        .WillRepeatedly(Return(false));
+
+    /**
+     * @tc.steps: step3. Set the preview by pixelmap.
+     * @tc.expected: step2. Set the pixelmap successfully.
+     */
+    void* voidPtr = static_cast<void*>(new char[0]);
+    void* secondVoidPtr = static_cast<void*>(new char[0]);
+    RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
+    RefPtr<PixelMap> secondPixelMap = PixelMap::CreatePixelMap(secondVoidPtr);
+
+    // Default image and pixelmap image and url image.
+    ImageSourceInfo defaultImage = ImageSourceInfo("");
+    ImageSourceInfo pixelMapImage = ImageSourceInfo(pixelMap);
+    ImageSourceInfo secondPixelMapImage = ImageSourceInfo(secondPixelMap);
+    ImageSourceInfo urlImage = ImageSourceInfo(VIDEO_POSTER_URL);
+
+    video.SetSrc(VIDEO_SRC);
+    video.SetProgressRate(VIDEO_PROGRESS_RATE);
+    video.SetPosterSourceByPixelMap(pixelMap);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::VIDEO_ETS_TAG);
+    auto videoLayoutProperty = frameNode->GetLayoutProperty<VideoLayoutProperty>();
+    EXPECT_FALSE(videoLayoutProperty == nullptr);
+
+    EXPECT_EQ(videoLayoutProperty->GetVideoSource().value_or(""), VIDEO_SRC);
+    EXPECT_EQ(videoLayoutProperty->GetPosterImageInfoValue(defaultImage), pixelMapImage);
+
+    /**
+     * @tc.steps: step3. Reset preview by another pixelmap.
+     * @tc.expected: step2. Reset the pixelmap successfully.
+     */
+    video.SetPosterSourceByPixelMap(secondPixelMap);
+    EXPECT_EQ(videoLayoutProperty->GetPosterImageInfoValue(defaultImage), secondPixelMapImage);
+
+    video.SetPosterSourceInfo(VIDEO_POSTER_URL);
+    EXPECT_EQ(videoLayoutProperty->GetPosterImageInfoValue(defaultImage), urlImage);
+
+    video.SetPosterSourceByPixelMap(pixelMap);
+    EXPECT_EQ(videoLayoutProperty->GetPosterImageInfoValue(defaultImage), pixelMapImage);
 }
 } // namespace OHOS::Ace::NG
