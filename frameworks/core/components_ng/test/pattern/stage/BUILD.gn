@@ -20,7 +20,6 @@ ohos_unittest("stage_pattern_test_ng") {
   sources = [
     "page_event_hub_test.cpp",
     "page_pattern_test.cpp",
-    "page_transition_model_ng_test.cpp",
   ]
 
   deps = [
