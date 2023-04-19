@@ -174,7 +174,9 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutWrapper);
     auto menuProp = DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(menuProp);
-    InitTargetSizeAndPosition(menuProp);
+    if (!targetTag_.empty()) {
+        InitTargetSizeAndPosition(menuProp);
+    }
 
     auto menuNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(menuNode);
