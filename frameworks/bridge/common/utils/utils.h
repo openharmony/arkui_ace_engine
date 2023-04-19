@@ -76,6 +76,7 @@ const char LEFT_CURLY_BRACES = '{';
 const char RIGHT_CURLY_BRACES = '}';
 
 // Common error code
+constexpr int32_t ERROR_CODE_NO_ERROR = 0;
 constexpr int32_t ERROR_CODE_PERMISSION_DENIED = 201; // The application does not have permission to call the interface.
 constexpr int32_t ERROR_CODE_PARAM_INVALID = 401;     // Invalid input parameter.
 constexpr int32_t ERROR_CODE_SYSTEMCAP_ERROR = 801;   // The specified SystemCapability names was not found.
@@ -130,9 +131,9 @@ inline std::string GetAssetPathImpl(const RefPtr<AssetManager>& assetManager, co
 {
     if (!assetManager) {
         LOGE("AssetManager is null");
-        return "";
+        return {};
     }
-    return assetManager->GetAssetPath(url);
+    return assetManager->GetAssetPath(url, true);
 }
 
 inline std::unique_ptr<JsonValue> ParseFileData(const std::string& data)
@@ -230,9 +231,9 @@ inline ImageRepeat ConvertStrToImageRepeat(const std::string& repeat)
     return index < 0 ? ImageRepeat::NO_REPEAT : imageRepeatTable[index].value;
 }
 
-inline FontWeight ConvertStrToFontWeight(const std::string& weight)
+inline FontWeight ConvertStrToFontWeight(const std::string& weight, FontWeight defaultFontWeight = FontWeight::NORMAL)
 {
-    return StringUtils::StringToFontWeight(weight);
+    return StringUtils::StringToFontWeight(weight, defaultFontWeight);
 }
 
 inline TextDecoration ConvertStrToTextDecoration(const std::string& textDecoration)
@@ -428,7 +429,7 @@ ACE_EXPORT_WITH_PREVIEW RefPtr<Curve> CreateBuiltinCurve(const std::string& aniT
 
 ACE_EXPORT_WITH_PREVIEW RefPtr<Curve> CreateCustomCurve(const std::string& aniTimFunc);
 
-ACE_EXPORT_WITH_PREVIEW RefPtr<Curve> CreateCurve(const std::string& aniTimFunc, bool useDefault = true);
+ACE_FORCE_EXPORT_WITH_PREVIEW RefPtr<Curve> CreateCurve(const std::string& aniTimFunc, bool useDefault = true);
 
 ACE_EXPORT TransitionType ParseTransitionType(const std::string& transitionType);
 

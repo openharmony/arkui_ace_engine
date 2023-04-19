@@ -78,6 +78,7 @@ public:
                 auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>("stepper_pattern", nullptr);
                 if (pattern) {
                     theme->textStyle_.SetTextColor(pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color::RED));
+                    theme->textStyle_.SetFontSize(pattern->GetAttr<Dimension>(PATTERN_TEXT_SIZE, 16.0_vp));
                     theme->radius_ = pattern->GetAttr<Dimension>("border_radius", 0.0_vp);
                     theme->buttonPressedColor_ = pattern->GetAttr<Color>("button_bg_color_pressed", Color::RED);
                     theme->mouseHoverColor_ = pattern->GetAttr<Color>("button_bg_color_hovered", Color::RED);
@@ -87,6 +88,7 @@ public:
                     theme->progressColor_ = pattern->GetAttr<Color>("progress_color", Color::RED);
                     theme->disabledColor_ = pattern->GetAttr<Color>("button_bg_color_disabled", Color::RED);
                     theme->disabledAlpha_ = pattern->GetAttr<double>("button_bg_color_disabled_alpha", 0.0);
+                    theme->defaultAlpha_ = pattern->GetAttr<double>("attribute_alpha_content_primary", 0.9);
                 }
             }
             return theme;
@@ -200,6 +202,11 @@ public:
         return disabledAlpha_;
     }
 
+    double GetDefaultAlpha() const
+    {
+        return defaultAlpha_;
+    }
+
 protected:
     StepperTheme() = default;
 
@@ -225,6 +232,7 @@ private:
     Dimension focusBorderWidth_;
     Color mouseHoverColor_;
     double disabledAlpha_ = 0.4;
+    double defaultAlpha_ = 0.9;
 };
 
 } // namespace OHOS::Ace

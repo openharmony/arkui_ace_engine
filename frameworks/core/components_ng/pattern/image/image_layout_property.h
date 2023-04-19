@@ -49,9 +49,8 @@ public:
         value->propImageSourceInfo_ = CloneImageSourceInfo();
         value->propAlt_ = CloneAlt();
         value->propImageFit_ = CloneImageFit();
-        value->propSyncMode_ = CloneSyncMode();
-        value->propCopyOptions_ = CloneCopyOptions();
         value->propImageSizeStyle_ = CloneImageSizeStyle();
+        value->propVerticalAlign_ = CloneVerticalAlign();
         return value;
     }
 
@@ -61,22 +60,21 @@ public:
         ResetImageSourceInfo();
         ResetAlt();
         ResetImageFit();
-        ResetSyncMode();
-        ResetCopyOptions();
         ResetImageSizeStyle();
+        ResetVerticalAlign();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
         LayoutProperty::ToJsonValue(json);
         static const char* OBJECTFITVALUE[] = { "ImageFit.Fill", "ImageFit.Contain", "ImageFit.Cover",
-            "ImageFit.FitWidth", "ImageFit.FitHeight", "ImageFit.None", "ImageFit.ScaleDown" };
-        static const char* COPYOPTIONSVALUE[] = { "CopyOptions.None", "CopyOptions.InApp", "CopyOptions.Local",
-            "CopyOptions.Distributed" };
+            "ImageFit.Auto", "ImageFit.FitHeight", "ImageFit.None", "ImageFit.ScaleDown" };
+        static const char* VERTICALALIGNVALUE[] = { "VerticalAlign.NONE", "VerticalAlign.TOP", "VerticalAlign.CENTER",
+            "VerticalAlign.BOTTOM", "CopyOptions.BASELINE", "VerticalAlign.NONE" };
         json->Put("alt", propAlt_.value_or(ImageSourceInfo("")).GetSrc().c_str());
         json->Put("objectFit", OBJECTFITVALUE[static_cast<int32_t>(propImageFit_.value_or(ImageFit::COVER))]);
-        json->Put("syncLoad", propSyncMode_.value_or(false) ? "true" : "false");
-        json->Put("copyOption", COPYOPTIONSVALUE[static_cast<int32_t>(propCopyOptions_.value_or(CopyOptions::None))]);
+        json->Put("verticalAlign",
+            VERTICALALIGNVALUE[static_cast<int32_t>(propVerticalAlign_.value_or(VerticalAlign::BOTTOM))]);
         std::string src;
         if (propImageSourceInfo_.has_value()) {
             src = propImageSourceInfo_->GetSrc();
@@ -84,20 +82,22 @@ public:
                 auto num = src.find("resources");
                 src = src.substr(num);
             }
+            for (auto& character : src) {
+                character = tolower(character);
+            }
         }
         json->Put("src", src.c_str());
         ACE_PROPERTY_TO_JSON_VALUE(propImageSizeStyle_, ImageSizeStyle);
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ImageFit, ImageFit, PROPERTY_UPDATE_LAYOUT);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ImageSourceInfo, ImageSourceInfo, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Alt, ImageSourceInfo, PROPERTY_UPDATE_LAYOUT);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SyncMode, bool, PROPERTY_UPDATE_LAYOUT);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CopyOptions, CopyOptions, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ImageSourceInfo, ImageSourceInfo, PROPERTY_UPDATE_NORMAL);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Alt, ImageSourceInfo, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_GROUP(ImageSizeStyle, ImageSizeStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ImageSizeStyle, AutoResize, bool, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ImageSizeStyle, SourceSize, SizeF, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ImageSizeStyle, FitOriginalSize, bool, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(VerticalAlign, VerticalAlign, PROPERTY_UPDATE_MEASURE);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(ImageLayoutProperty);

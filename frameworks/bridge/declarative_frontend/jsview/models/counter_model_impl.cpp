@@ -83,5 +83,6 @@ void CounterModelImpl::SetBackgroundColor(const Color& value)
     auto counterComponent = AceType::DynamicCast<CounterComponent>(component);
     counterComponent->SetBackgroundColor(value);
 }
-
+void CounterModelImpl::SetEnableDec(bool enableDec) {};
+void CounterModelImpl::SetEnableInc(bool enableInc) {};
 } // namespace OHOS::Ace::Framework

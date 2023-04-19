@@ -15,8 +15,6 @@
 
 #include "core/components/common/painter/flutter_scroll_fade_painter.h"
 
-#include "flutter/lib/ui/text/paragraph_builder.h"
-
 #include "base/geometry/rect.h"
 #include "base/log/log.h"
 #include "core/pipeline/base/flutter_render_context.h"

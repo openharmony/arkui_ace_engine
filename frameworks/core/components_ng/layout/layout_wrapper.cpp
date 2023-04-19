@@ -25,6 +25,7 @@
 #include "core/components_ng/layout/layout_wrapper_builder.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
@@ -32,12 +33,13 @@ namespace OHOS::Ace::NG {
 RefPtr<LayoutWrapper> LayoutWrapper::GetOrCreateChildByIndex(int32_t index, bool addToRenderTree)
 {
     if ((index >= currentChildCount_) || (index < 0)) {
-        LOGI("index is of out boundary, total count: %{public}d, target index: %{public}d", currentChildCount_, index);
+        LOGD("index is of out boundary, total count: %{public}d, target index: %{public}d", currentChildCount_, index);
         return nullptr;
     }
     auto iter = childrenMap_.find(index);
     if (iter != childrenMap_.end()) {
         if (addToRenderTree) {
+            iter->second->BuildLazyItem();
             iter->second->isActive_ = true;
         }
         return iter->second;
@@ -72,6 +74,7 @@ const std::list<RefPtr<LayoutWrapper>>& LayoutWrapper::GetAllChildrenWithBuild(b
     }
     if (addToRenderTree) {
         for (const auto& child : cachedList_) {
+            child->BuildLazyItem();
             if (!child->isActive_) {
                 child->isActive_ = true;
             }
@@ -98,7 +101,7 @@ void LayoutWrapper::RemoveAllChildInRenderTree()
     for (auto& child : childrenMap_) {
         child.second->isActive_ = false;
     }
-    CHECK_NULL_VOID(layoutWrapperBuilder_);
+    CHECK_NULL_VOID_NOLOG(layoutWrapperBuilder_);
     layoutWrapperBuilder_->RemoveAllChildInRenderTree();
 }
 
@@ -145,16 +148,40 @@ void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstr
         return;
     }
 
+    const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
+    if (geometryTransition != nullptr) {
+        geometryTransition->WillLayout(Claim(this));
+    }
+
     auto preConstraint = layoutProperty_->GetLayoutConstraint();
     auto contentConstraint = layoutProperty_->GetContentLayoutConstraint();
     layoutProperty_->BuildGridProperty(host);
+    const auto& magicItemProperty = layoutProperty_->GetMagicItemProperty();
+    auto hasAspectRatio = magicItemProperty && magicItemProperty->HasAspectRatio();
     if (parentConstraint) {
-        geometryNode_->SetParentLayoutConstraint(parentConstraint.value());
-        layoutProperty_->UpdateLayoutConstraint(parentConstraint.value());
+        if (hasAspectRatio) {
+            auto useConstraint = parentConstraint.value();
+            useConstraint.ApplyAspectRatio(magicItemProperty->GetAspectRatioValue(),
+                layoutProperty_->GetCalcLayoutConstraint() ? layoutProperty_->GetCalcLayoutConstraint()->selfIdealSize
+                                                           : std::nullopt);
+            geometryNode_->SetParentLayoutConstraint(useConstraint);
+            layoutProperty_->UpdateLayoutConstraint(useConstraint);
+        } else {
+            geometryNode_->SetParentLayoutConstraint(parentConstraint.value());
+            layoutProperty_->UpdateLayoutConstraint(parentConstraint.value());
+        }
     } else {
         LayoutConstraintF layoutConstraint;
         layoutConstraint.percentReference.SetWidth(PipelineContext::GetCurrentRootWidth());
-        layoutConstraint.percentReference.SetHeight(PipelineContext::GetCurrentRootHeight());
+        if (hasAspectRatio) {
+            auto aspectRatio = magicItemProperty->GetAspectRatioValue();
+            if (Positive(aspectRatio)) {
+                auto height = PipelineContext::GetCurrentRootHeight() / aspectRatio;
+                layoutConstraint.percentReference.SetHeight(height);
+            }
+        } else {
+            layoutConstraint.percentReference.SetHeight(PipelineContext::GetCurrentRootHeight());
+        }
         layoutProperty_->UpdateLayoutConstraint(layoutConstraint);
     }
     layoutProperty_->UpdateContentConstraint();
@@ -186,8 +213,6 @@ void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstr
         layoutAlgorithm_->Measure(this);
 
         // check aspect radio.
-        const auto& magicItemProperty = layoutProperty_->GetMagicItemProperty();
-        auto hasAspectRatio = magicItemProperty ? magicItemProperty->HasAspectRatio() : false;
         if (hasAspectRatio) {
             auto aspectRatio = magicItemProperty->GetAspectRatioValue();
             // Adjust by aspect ratio, firstly pick height based on width. It means that when width, height and
@@ -284,14 +309,24 @@ void LayoutWrapper::MountToHostOnMainThread()
 
 void LayoutWrapper::SwapDirtyLayoutWrapperOnMainThread()
 {
-    for (const auto& child : children_) {
-        if (child) {
+    if (GetHostTag() != V2::TAB_CONTENT_ITEM_ETS_TAG || isActive_) {
+        for (const auto& child : children_) {
+            if (!child) {
+                continue;
+            }
+            auto node = child->GetHostNode();
+            if (node && node->GetLayoutProperty()) {
+                const auto& geometryTransition = node->GetLayoutProperty()->GetGeometryTransition();
+                if (geometryTransition != nullptr && geometryTransition->IsNodeInAndActive(node)) {
+                    continue;
+                }
+            }
             child->SwapDirtyLayoutWrapperOnMainThread();
         }
-    }
 
-    if (layoutWrapperBuilder_) {
-        layoutWrapperBuilder_->SwapDirtyAndUpdateBuildCache();
+        if (layoutWrapperBuilder_) {
+            layoutWrapperBuilder_->SwapDirtyAndUpdateBuildCache();
+        }
     }
 
     auto host = hostNode_.Upgrade();
@@ -306,5 +341,24 @@ void LayoutWrapper::SwapDirtyLayoutWrapperOnMainThread()
     }
     CHECK_NULL_VOID_NOLOG(layoutWrapperBuilder_);
     layoutWrapperBuilder_->AdjustGridOffset();
+}
+
+void LayoutWrapper::BuildLazyItem()
+{
+    if (!lazyBuildFunction_) {
+        return;
+    }
+    lazyBuildFunction_(Claim(this));
+    lazyBuildFunction_ = nullptr;
+}
+
+std::pair<int32_t, int32_t> LayoutWrapper::GetLazyBuildRange()
+{
+    if (layoutWrapperBuilder_) {
+        auto start = layoutWrapperBuilder_->GetStartIndex();
+        auto end = start + layoutWrapperBuilder_->GetTotalCount();
+        return { start, end };
+    }
+    return { -1, 0 };
 }
 } // namespace OHOS::Ace::NG

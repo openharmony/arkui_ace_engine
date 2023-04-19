@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -89,7 +89,8 @@ SrcType ImageSourceInfo::ResolveURIType(const std::string& uri)
     } else if (head == "internal") {
         return SrcType::INTERNAL;
     } else if (head == "data") {
-        static constexpr char BASE64_PATTERN[] = "^data:image/(jpeg|jpg|png|ico|gif|bmp|webp);base64$";
+        static constexpr char BASE64_PATTERN[] =
+            "^data:image/(jpeg|JPEG|jpg|JPG|png|PNG|ico|ICO|gif|GIF|bmp|BMP|webp|WEBP);base64$";
         if (IsValidBase64Head(uri, BASE64_PATTERN)) {
             return SrcType::BASE64;
         }
@@ -109,9 +110,11 @@ SrcType ImageSourceInfo::ResolveURIType(const std::string& uri)
     }
 }
 
-ImageSourceInfo::ImageSourceInfo(const std::string& imageSrc, Dimension width, Dimension height,
-    InternalResource::ResourceId resourceId, const RefPtr<PixelMap>& pixmap)
-    : src_(imageSrc), sourceWidth_(width), sourceHeight_(height), resourceId_(resourceId), pixmap_(pixmap),
+// add constructor method for decompressed hap
+ImageSourceInfo::ImageSourceInfo(std::string imageSrc, std::string bundleName, std::string moduleName, Dimension width,
+    Dimension height, InternalResource::ResourceId resourceId, const RefPtr<PixelMap>& pixmap)
+    : src_(std::move(imageSrc)), bundleName_(std::move(bundleName)), moduleName_(std::move(moduleName)),
+      sourceWidth_(width), sourceHeight_(height), resourceId_(resourceId), pixmap_(pixmap),
       isSvg_(IsSVGSource(src_, resourceId_)), isPng_(IsPngSource(src_, resourceId_)), srcType_(ResolveSrcType())
 {
     // count how many source set.
@@ -147,7 +150,7 @@ SrcType ImageSourceInfo::ResolveSrcType() const
 
 void ImageSourceInfo::GenerateCacheKey()
 {
-    auto name = src_ + AceApplicationInfo::GetInstance().GetAbilityName();
+    auto name = ToString() + AceApplicationInfo::GetInstance().GetAbilityName() + bundleName_ + moduleName_;
     cacheKey_ = std::to_string(std::hash<std::string> {}(name)) + std::to_string(static_cast<int32_t>(resourceId_));
 }
 
@@ -214,6 +217,16 @@ void ImageSourceInfo::SetPixMap(const RefPtr<PixelMap>& pixmap, std::optional<Co
     pixmap_ = pixmap;
 }
 
+void ImageSourceInfo::SetBundleName(const std::string& bundleName)
+{
+    bundleName_ = bundleName;
+}
+
+void ImageSourceInfo::SetModuleName(const std::string& moduleName)
+{
+    moduleName_ = moduleName;
+}
+
 bool ImageSourceInfo::IsInternalResource() const
 {
     return src_.empty() && resourceId_ != InternalResource::ResourceId::NO_ID && !pixmap_;
@@ -240,6 +253,16 @@ bool ImageSourceInfo::IsPixmap() const
     return pixmap_ != nullptr || SrcType::DATA_ABILITY_DECODED == srcType_;
 }
 
+const std::string& ImageSourceInfo::GetBundleName() const
+{
+    return bundleName_;
+}
+
+const std::string& ImageSourceInfo::GetModuleName() const
+{
+    return moduleName_;
+}
+
 SrcType ImageSourceInfo::GetSrcType() const
 {
     return srcType_;
@@ -249,13 +272,14 @@ std::string ImageSourceInfo::ToString() const
 {
     if (!src_.empty()) {
         return src_;
-    } else if (resourceId_ != InternalResource::ResourceId::NO_ID) {
-        return std::string("internal resource id: ") + std::to_string(static_cast<int32_t>(resourceId_));
-    } else if (pixmap_) {
-        return std::string("pixmapID: ") + pixmap_->GetId() + std::string(" -> modifyID: ") + pixmap_->GetModifyId();
-    } else {
-        return std::string("empty source");
     }
+    if (resourceId_ != InternalResource::ResourceId::NO_ID) {
+        return std::string("internal resource id: ") + std::to_string(static_cast<int32_t>(resourceId_));
+    }
+    if (pixmap_) {
+        return std::string("pixmapID: ") + pixmap_->GetId() + std::string(" -> modifyID: ") + pixmap_->GetModifyId();
+    }
+    return std::string("empty source");
 }
 
 void ImageSourceInfo::SetDimension(Dimension width, Dimension Height)
@@ -286,7 +310,7 @@ void ImageSourceInfo::Reset()
     cacheKey_.clear();
 }
 
-std::optional<Color> ImageSourceInfo::GetFillColor() const
+const std::optional<Color>& ImageSourceInfo::GetFillColor() const
 {
     return fillColor_;
 }
@@ -296,7 +320,15 @@ const RefPtr<PixelMap>& ImageSourceInfo::GetPixmap() const
     return pixmap_;
 }
 
-std::string ImageSourceInfo::GetCacheKey() const
+bool ImageSourceInfo::SupportObjCache() const
+{
+    if (IsPixmap()) {
+        return false;
+    }
+    return !src_.empty() || resourceId_ != InternalResource::ResourceId::NO_ID;
+}
+
+std::string ImageSourceInfo::GetKey() const
 {
     // only svg sets fillColor
     if (isSvg_ && fillColor_.has_value()) {

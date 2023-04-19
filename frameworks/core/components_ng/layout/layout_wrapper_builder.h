@@ -58,7 +58,7 @@ public:
 
     void SetCacheCount(int32_t cacheCount)
     {
-        cacheCount_ = cacheCount;
+        cacheCount_ = cacheCount < 0 ? 1 : cacheCount;
     }
 
     virtual void SwapDirtyAndUpdateBuildCache() {}

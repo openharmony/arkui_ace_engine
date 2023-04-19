@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,16 +16,23 @@
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 
 #include "base/geometry/ng/size_t.h"
+#include "base/ressched/ressched_report.h"
+#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#include "bridge/declarative_frontend/declarative_frontend.h"
 #include "core/components_ng/event/input_event.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_event_hub.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_ext_surface_callback_client.h"
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline/pipeline_context.h"
-#include "frameworks/bridge/declarative_frontend/declarative_frontend.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
+#ifdef OHOS_PLATFORM
+constexpr int64_t INCREASE_CPU_TIME_ONCE = 4000000000; // 4s(unit: ns)
+#endif
 OH_NativeXComponent_TouchEventType ConvertNativeXComponentTouchEvent(const TouchType& touchType)
 {
     switch (touchType) {
@@ -75,19 +82,47 @@ XComponentPattern::XComponentPattern(const std::string& id, XComponentType type,
 void XComponentPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     if (type_ == XComponentType::SURFACE) {
+        renderContext->SetClipToFrame(true);
+        renderContext->SetClipToBounds(true);
+        renderSurface_ = RenderSurface::Create();
         renderContextForSurface_ = RenderContext::Create();
         renderContextForSurface_->InitContext(false, id_ + "Surface");
-        renderSurface_ = RenderSurface::Create();
-        renderSurface_->SetRenderContext(renderContextForSurface_);
+        renderContextForSurface_->UpdateBackgroundColor(Color::BLACK);
+        scopeId_ = Container::CurrentId();
+        if (!SystemProperties::GetExtSurfaceEnabled()) {
+            renderSurface_->SetRenderContext(renderContextForSurface_);
+        } else {
+            auto pipelineContext = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->AddOnAreaChangeNode(host->GetId());
+            extSurfaceClient_ = MakeRefPtr<XComponentExtSurfaceCallbackClient>(WeakClaim(this));
+            renderSurface_->SetExtSurfaceCallback(extSurfaceClient_);
+        }
         renderSurface_->InitSurface();
         renderSurface_->UpdateXComponentConfig();
-        renderContextForSurface_->UpdateBackgroundColor(Color::BLACK);
         InitEvent();
         SetMethodCall();
     }
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+}
+
+void XComponentPattern::OnAreaChangedInner()
+{
+    if (SystemProperties::GetExtSurfaceEnabled()) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto geometryNode = host->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        auto xcomponentNodeSize = geometryNode->GetContentSize();
+        auto xcomponentNodeOffset = geometryNode->GetContentOffset();
+        auto transformRelativeOffset = host->GetTransformRelativeOffset();
+        renderSurface_->SetExtSurfaceBounds(transformRelativeOffset.GetX() + xcomponentNodeOffset.GetX(),
+            transformRelativeOffset.GetY() + xcomponentNodeOffset.GetY(), xcomponentNodeSize.Width(),
+            xcomponentNodeSize.Height());
+    }
 }
 
 void XComponentPattern::OnRebuildFrame()
@@ -117,16 +152,6 @@ void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
         auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->FireDestroyEvent();
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto taskExecutor = pipelineContext->GetTaskExecutor();
-        CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask(
-            [eventHub] {
-                CHECK_NULL_VOID(eventHub);
-                eventHub->FireSurfaceDestroyEvent();
-            },
-            TaskExecutor::TaskType::JS);
     }
 }
 
@@ -160,11 +185,17 @@ bool XComponentPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     }
     auto geometryNode = dirty->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
+    auto drawSize = geometryNode->GetContentSize();
+    if (drawSize.IsNonPositive()) {
+        return false;
+    }
 
     if (!hasXComponentInit_) {
+        initSize_ = drawSize;
         auto position = geometryNode->GetContentOffset() + geometryNode->GetFrameOffset();
-        auto drawSize = geometryNode->GetContentSize();
-        XComponentSizeInit(drawSize.Width(), drawSize.Height());
+        if (!SystemProperties::GetExtSurfaceEnabled()) {
+            XComponentSizeInit();
+        }
         NativeXComponentOffset(position.GetX(), position.GetY());
         hasXComponentInit_ = true;
     } else {
@@ -173,14 +204,21 @@ bool XComponentPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
             NativeXComponentOffset(position.GetX(), position.GetY());
         }
         if (config.contentSizeChange) {
-            auto drawSize = geometryNode->GetContentSize();
-            XComponentSizeChange(drawSize.Width(), drawSize.Height());
+            if (!SystemProperties::GetExtSurfaceEnabled()) {
+                XComponentSizeChange(drawSize.Width(), drawSize.Height());
+            }
         }
     }
-
-    auto size = geometryNode->GetContentSize();
     auto offset = geometryNode->GetContentOffset();
-    renderContextForSurface_->SetBounds(offset.GetX(), offset.GetY(), size.Width(), size.Height());
+    if (SystemProperties::GetExtSurfaceEnabled()) {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        auto transformRelativeOffset = host->GetTransformRelativeOffset();
+        renderSurface_->SetExtSurfaceBounds(static_cast<int32_t>(transformRelativeOffset.GetX() + offset.GetX()),
+            static_cast<int32_t>(transformRelativeOffset.GetY() + offset.GetY()),
+            static_cast<int32_t>(drawSize.Width()), static_cast<int32_t>(drawSize.Height()));
+    }
+    renderContextForSurface_->SetBounds(offset.GetX(), offset.GetY(), drawSize.Width(), drawSize.Height());
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     host->MarkNeedSyncRenderTree();
@@ -197,91 +235,75 @@ void XComponentPattern::OnPaint()
 
 void XComponentPattern::NativeXComponentChange(float width, float height)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto taskExecutor = pipelineContext->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(
-        [nXCompImpl = nativeXComponentImpl_, &nXComp = nativeXComponent_, width, height] {
-            CHECK_NULL_VOID(nXComp && nXCompImpl);
-            nXCompImpl->SetXComponentWidth(static_cast<int>(width));
-            nXCompImpl->SetXComponentHeight(static_cast<int>(height));
-            auto* surface = const_cast<void*>(nXCompImpl->GetSurface());
-            const auto* callback = nXCompImpl->GetCallback();
-            CHECK_NULL_VOID_NOLOG(callback && callback->OnSurfaceChanged);
-            callback->OnSurfaceChanged(nXComp, surface);
-        },
-        TaskExecutor::TaskType::JS);
+    CHECK_RUN_ON(UI);
+    CHECK_NULL_VOID(nativeXComponent_);
+    CHECK_NULL_VOID(nativeXComponentImpl_);
+    nativeXComponentImpl_->SetXComponentWidth(static_cast<int32_t>(width));
+    nativeXComponentImpl_->SetXComponentHeight(static_cast<int32_t>(height));
+    auto* surface = const_cast<void*>(nativeXComponentImpl_->GetSurface());
+    const auto* callback = nativeXComponentImpl_->GetCallback();
+    CHECK_NULL_VOID_NOLOG(callback);
+    CHECK_NULL_VOID_NOLOG(callback->OnSurfaceChanged);
+    callback->OnSurfaceChanged(nativeXComponent_.get(), surface);
 }
 
 void XComponentPattern::NativeXComponentDestroy()
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto taskExecutor = pipelineContext->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(
-        [nXCompImpl = nativeXComponentImpl_, &nXComp = nativeXComponent_] {
-            CHECK_NULL_VOID(nXComp && nXCompImpl);
-            auto* surface = const_cast<void*>(nXCompImpl->GetSurface());
-            const auto* callback = nXCompImpl->GetCallback();
-            CHECK_NULL_VOID_NOLOG(callback && callback->OnSurfaceDestroyed);
-            callback->OnSurfaceDestroyed(nXComp, surface);
-            delete nXComp;
-            nXComp = nullptr;
-        },
-        TaskExecutor::TaskType::JS);
+    CHECK_RUN_ON(UI);
+    CHECK_NULL_VOID(nativeXComponent_);
+    CHECK_NULL_VOID(nativeXComponentImpl_);
+    auto* surface = const_cast<void*>(nativeXComponentImpl_->GetSurface());
+    const auto* callback = nativeXComponentImpl_->GetCallback();
+    CHECK_NULL_VOID_NOLOG(callback);
+    CHECK_NULL_VOID_NOLOG(callback->OnSurfaceDestroyed);
+    callback->OnSurfaceDestroyed(nativeXComponent_.get(), surface);
 }
 
 void XComponentPattern::NativeXComponentOffset(double x, double y)
 {
+    CHECK_RUN_ON(UI);
+    CHECK_NULL_VOID(nativeXComponent_);
+    CHECK_NULL_VOID(nativeXComponentImpl_);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     float scale = pipelineContext->GetViewScale();
-    auto taskExecutor = pipelineContext->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(
-        [nXCompImpl = nativeXComponentImpl_, &nXComp = nativeXComponent_, x, y, scale] {
-            CHECK_NULL_VOID(nXComp && nXCompImpl);
-            nXCompImpl->SetXComponentOffsetX(x * scale);
-            nXCompImpl->SetXComponentOffsetY(y * scale);
-        },
-        TaskExecutor::TaskType::JS);
+    nativeXComponentImpl_->SetXComponentOffsetX(x * scale);
+    nativeXComponentImpl_->SetXComponentOffsetY(y * scale);
 }
 
 void XComponentPattern::NativeXComponentDispatchTouchEvent(
     const OH_NativeXComponent_TouchEvent& touchEvent, const std::vector<XComponentTouchPoint>& xComponentTouchPoints)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto taskExecutor = pipelineContext->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(
-        [nXCompImpl = nativeXComponentImpl_, &nXComp = nativeXComponent_, touchEvent, xComponentTouchPoints] {
-            CHECK_NULL_VOID(nXComp && nXCompImpl);
-            nXCompImpl->SetTouchEvent(touchEvent);
-            nXCompImpl->SetTouchPoint(xComponentTouchPoints);
-            auto* surface = const_cast<void*>(nXCompImpl->GetSurface());
-            const auto* callback = nXCompImpl->GetCallback();
-            CHECK_NULL_VOID_NOLOG(callback && callback->DispatchTouchEvent);
-            callback->DispatchTouchEvent(nXComp, surface);
-        },
-        TaskExecutor::TaskType::JS);
+    CHECK_RUN_ON(UI);
+    CHECK_NULL_VOID(nativeXComponent_);
+    CHECK_NULL_VOID(nativeXComponentImpl_);
+    nativeXComponentImpl_->SetTouchEvent(touchEvent);
+    nativeXComponentImpl_->SetTouchPoint(xComponentTouchPoints);
+    auto* surface = const_cast<void*>(nativeXComponentImpl_->GetSurface());
+    const auto* callback = nativeXComponentImpl_->GetCallback();
+    CHECK_NULL_VOID_NOLOG(callback);
+    CHECK_NULL_VOID_NOLOG(callback->DispatchTouchEvent);
+    callback->DispatchTouchEvent(nativeXComponent_.get(), surface);
 }
 
-void XComponentPattern::XComponentSizeInit(float textureWidth, float textureHeight)
+void XComponentPattern::InitNativeWindow(float textureWidth, float textureHeight)
 {
-    auto host = GetHost();
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-
     if (renderSurface_->IsSurfaceValid() && type_ == XComponentType::SURFACE) {
         float viewScale = context->GetViewScale();
         renderSurface_->CreateNativeWindow();
         renderSurface_->AdjustNativeWindowSize(
-            static_cast<int>(textureWidth * viewScale), static_cast<int>(textureHeight * viewScale));
+            static_cast<uint32_t>(textureWidth * viewScale), static_cast<uint32_t>(textureHeight * viewScale));
     }
+}
 
+void XComponentPattern::XComponentSizeInit()
+{
+    ContainerScope scope(scopeId_);
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    InitNativeWindow(initSize_.Width(), initSize_.Height());
     auto platformTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::JS);
     platformTaskExecutor.PostTask([weak = WeakClaim(this)] {
         auto pattern = weak.Upgrade();
@@ -297,11 +319,12 @@ void XComponentPattern::XComponentSizeInit(float textureWidth, float textureHeig
 
 void XComponentPattern::XComponentSizeChange(float textureWidth, float textureHeight)
 {
+    ContainerScope scope(scopeId_);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto viewScale = context->GetViewScale();
     renderSurface_->AdjustNativeWindowSize(
-        static_cast<int>(textureWidth * viewScale), static_cast<int>(textureHeight * viewScale));
+        static_cast<uint32_t>(textureWidth * viewScale), static_cast<uint32_t>(textureHeight * viewScale));
     NativeXComponentChange(textureWidth, textureHeight);
 }
 
@@ -381,7 +404,21 @@ void XComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
     touchEventPoint_.timeStamp = timeStamp;
     auto touchType = touchInfoList.front().GetTouchType();
     touchEventPoint_.type = ConvertNativeXComponentTouchEvent(touchType);
-
+#ifdef OHOS_PLATFORM
+    // increase cpu frequency
+    if (touchType == TouchType::MOVE) {
+        auto currentTime = GetSysTimestamp();
+        auto increaseCpuTime = currentTime - startIncreaseTime_;
+        if (increaseCpuTime >= INCREASE_CPU_TIME_ONCE) {
+            LOGD("HandleTouchEvent increase cpu frequency");
+            startIncreaseTime_ = currentTime;
+            ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
+        }
+    } else if (touchType == TouchType::UP) {
+        startIncreaseTime_ = 0;
+        ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
+    }
+#endif
     SetTouchPoint(info.GetTouches(), timeStamp, touchType);
 
     NativeXComponentDispatchTouchEvent(touchEventPoint_, nativeXComponentTouchPoints_);
@@ -434,34 +471,26 @@ void XComponentPattern::HandleMouseEvent(const MouseInfo& info)
 
 void XComponentPattern::HandleMouseHoverEvent(bool isHover)
 {
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    context->GetTaskExecutor()->PostTask(
-        [nXCompImpl = nativeXComponentImpl_, &nXComp = nativeXComponent_, isHover] {
-            CHECK_NULL_VOID(nXComp && nXCompImpl);
-            const auto* callback = nXCompImpl->GetMouseEventCallback();
-            CHECK_NULL_VOID_NOLOG(callback && callback->DispatchHoverEvent);
-            callback->DispatchHoverEvent(nXComp, isHover);
-        },
-        TaskExecutor::TaskType::JS);
+    CHECK_RUN_ON(UI);
+    CHECK_NULL_VOID(nativeXComponent_);
+    CHECK_NULL_VOID(nativeXComponentImpl_);
+    const auto* callback = nativeXComponentImpl_->GetMouseEventCallback();
+    CHECK_NULL_VOID_NOLOG(callback);
+    CHECK_NULL_VOID_NOLOG(callback->DispatchHoverEvent);
+    callback->DispatchHoverEvent(nativeXComponent_.get(), isHover);
 }
 
 void XComponentPattern::NativeXComponentDispatchMouseEvent(const OH_NativeXComponent_MouseEvent& mouseEvent)
 {
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    auto taskExecutor = context->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(
-        [nXCompImpl = nativeXComponentImpl_, nXComp = nativeXComponent_, mouseEvent] {
-            CHECK_NULL_VOID(nXComp && nXCompImpl);
-            nXCompImpl->SetMouseEvent(mouseEvent);
-            auto* surface = const_cast<void*>(nXCompImpl->GetSurface());
-            const auto* callback = nXCompImpl->GetMouseEventCallback();
-            CHECK_NULL_VOID_NOLOG(callback && callback->DispatchMouseEvent);
-            callback->DispatchMouseEvent(nXComp, surface);
-        },
-        TaskExecutor::TaskType::JS);
+    CHECK_RUN_ON(UI);
+    CHECK_NULL_VOID(nativeXComponent_);
+    CHECK_NULL_VOID(nativeXComponentImpl_);
+    nativeXComponentImpl_->SetMouseEvent(mouseEvent);
+    auto* surface = const_cast<void*>(nativeXComponentImpl_->GetSurface());
+    const auto* callback = nativeXComponentImpl_->GetMouseEventCallback();
+    CHECK_NULL_VOID_NOLOG(callback);
+    CHECK_NULL_VOID_NOLOG(callback->DispatchMouseEvent);
+    callback->DispatchMouseEvent(nativeXComponent_.get(), surface);
 }
 
 void XComponentPattern::SetTouchPoint(
@@ -513,14 +542,15 @@ void XComponentPattern::SetTouchPoint(
 
 ExternalEvent XComponentPattern::CreateExternalEvent()
 {
-    return
-        [weak = AceType::WeakClaim(this)](const std::string& componentId, const uint32_t nodeId, const bool isDestroy) {
-            auto context = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(context);
-            auto frontEnd = AceType::DynamicCast<DeclarativeFrontend>(context->GetFrontend());
-            CHECK_NULL_VOID(frontEnd);
-            auto jsEngine = frontEnd->GetJsEngine();
-            jsEngine->FireExternalEvent(componentId, nodeId, isDestroy);
-        };
+    return [weak = AceType::WeakClaim(this), scopeId = scopeId_](
+               const std::string& componentId, const uint32_t nodeId, const bool isDestroy) {
+        ContainerScope scope(scopeId);
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        auto frontEnd = AceType::DynamicCast<DeclarativeFrontend>(context->GetFrontend());
+        CHECK_NULL_VOID(frontEnd);
+        auto jsEngine = frontEnd->GetJsEngine();
+        jsEngine->FireExternalEvent(componentId, nodeId, isDestroy);
+    };
 }
 } // namespace OHOS::Ace::NG

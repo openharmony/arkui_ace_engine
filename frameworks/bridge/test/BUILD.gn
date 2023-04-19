@@ -48,7 +48,7 @@ group("unittest") {
       "unittest/jsfrontend/utils:unittest",
     ]
 
-    if (!is_standard_system) {
+    if (!is_ohos_standard_system) {
       deps += [ "unittest/jsfrontend/codec:unittest" ]
     }
 

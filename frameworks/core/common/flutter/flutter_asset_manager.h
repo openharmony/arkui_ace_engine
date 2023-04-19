@@ -80,7 +80,7 @@ public:
 
     RefPtr<Asset> GetAsset(const std::string& assetName) override;
 
-    std::string GetAssetPath(const std::string& assetName) override;
+    std::string GetAssetPath(const std::string& assetName, bool isAddHapPath) override;
 
     void SetLibPath(const std::string& appLibPathKey, const std::vector<std::string>& packagePath) override
     {
@@ -100,10 +100,15 @@ public:
 
     void GetAssetList(const std::string& path, std::vector<std::string>& assetList) const override;
 
+    bool GetFileInfo(const std::string& fileName, MediaFileInfo& fileInfo) const override;
+
+    void ReloadProvider();
+
 private:
     std::deque<RefPtr<AssetProvider>> providers_;
     std::vector<std::string> packagePath_;
     std::string appLibPathKey_;
+    std::string loadPath_;
 };
 
 } // namespace OHOS::Ace

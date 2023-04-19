@@ -49,6 +49,8 @@ private:
     RefPtr<Element> OnUpdateElement(const RefPtr<Element>& element, const RefPtr<Component>& component) override;
     RefPtr<Component> OnMakeEmptyComponent() override;
     void OnDataSourceUpdated(size_t startIndex) override;
+
+    RefPtr<FocusNode> GetChildFocusNode(const RefPtr<Element>& node);
 };
 
 } // namespace OHOS::Ace::V2

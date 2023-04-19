@@ -37,18 +37,25 @@ public:
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
 
-    static void PrintGridMatrix(const std::map<int32_t, std::map<int32_t, int32_t>>& gridMatrix);
+    static void PrintGridMatrix(
+        const std::map<int32_t, std::map<int32_t, int32_t>>& gridMatrix, const std::map<int32_t, float>& positions);
     static void PrintLineHeightMap(const std::map<int32_t, float>& lineHeightMap);
+    void SetCanOverScroll(bool canOverScroll)
+    {
+        canOverScroll_ = canOverScroll;
+    }
 
 private:
     void FillGridViewportAndMeasureChildren(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
     float MeasureRecordedItems(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
     bool UseCurrentLines(float mainSize, float crossSize, LayoutWrapper* layoutWrapper, float& mainLength);
+    void SkipForwardLines(float mainSize, LayoutWrapper* layoutWrapper);
+    void SkipBackwardLines(float mainSize, LayoutWrapper* layoutWrapper);
 
     // fill start of viewport
     bool FillBlankAtStart(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
     float FillNewLineForward(float crossSize, float mainSize, LayoutWrapper* layoutWrapper);
-    void UpdateMatrixForDeletedItems(int32_t deletedLineCount);
+    void AddForwardLines(int32_t currentIndex, float crossSize, float mainSize, LayoutWrapper* layoutWrapper);
     void UpdateMatrixForAddedItems();
 
     // fill end of viewport
@@ -67,16 +74,16 @@ private:
     // Find next valid cell when current is not valid.
     void GetNextGrid(int32_t& curMain, int32_t& curCross, bool reverse) const;
     // Find a valid cell to place grid item and save to grid matrix.
-    bool CheckGridPlaced(int32_t index, int32_t main, int32_t cross, int32_t& mainSpan, int32_t& crossSpan);
+    bool CheckGridPlaced(int32_t index, int32_t main, int32_t cross, int32_t mainSpan, int32_t crossSpan);
     LayoutConstraintF CreateChildConstraint(float mainSize, float crossSize,
         const RefPtr<GridLayoutProperty>& gridLayoutProperty, int32_t crossStart, int32_t crossSpan) const;
     void ModifyCurrentOffsetWhenReachEnd(float mainSize);
     void InitialItemsCrossSize(const RefPtr<GridLayoutProperty>& layoutProperty, const SizeF& frameSize);
-    bool IsIndexInMatrix(int32_t index);
-    void UpdateGridLayoutInfo(LayoutWrapper* layoutWrapper);
-    void GetTargetIndexInfoWithBenchMark(
-        LayoutWrapper* layoutWrapper, int32_t benchmarkIndex, int32_t mainStartIndex, int32_t targetIndex);
+    bool IsIndexInMatrix(int32_t index, int32_t& startLine);
+    void UpdateGridLayoutInfo(LayoutWrapper* layoutWrapper, float mainSize);
+    void GetTargetIndexInfoWithBenchMark(LayoutWrapper* layoutWrapper, bool isTargetBackward, int32_t targetIndex);
 
+    void UpdateOffsetOnVirtualKeyboardHeightChange(LayoutWrapper* layoutWrapper, float mainSize);
     void AdaptToChildMainSize(LayoutWrapper* layoutWrapper, RefPtr<GridLayoutProperty>& gridLayoutProperty,
         float mainSize, const SizeF& idealSize);
 
@@ -85,13 +92,17 @@ private:
     uint32_t crossCount_ = 0;
     uint32_t mainCount_ = 0;
     int32_t currentMainLineIndex_ = 0;        // it equals to row index in vertical grid
+    int32_t moveToEndLineIndex_ = -1;         // place index in the last line when scroll to index after matrix
     std::map<int32_t, float> itemsCrossSize_; // grid item's size in cross axis.
     Axis axis_ = Axis::VERTICAL;
 
     float mainGap_ = 0;
+    float crossGap_ = 0;
+    float crossPaddingOffset_ = 0;
 
     // Map structure: [index, crossPosition], store cross position of each item.
     std::map<int32_t, float> itemsCrossPosition_;
+    bool canOverScroll_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridScrollLayoutAlgorithm);
 };

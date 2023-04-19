@@ -34,7 +34,7 @@ public:
         : GroupNode(tag, nodeId, pattern)
     {}
     ~NavigationGroupNode() override = default;
-    void AddChildToGroup(const RefPtr<UINode>& child) override;
+    void AddChildToGroup(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT) override;
     static RefPtr<NavigationGroupNode> GetOrCreateGroupNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
 
@@ -73,21 +73,11 @@ public:
         return dividerNode_;
     }
 
-    void MarkIsFirstNavDestination(bool isFirstNavDestination)
-    {
-        isFirstNavDestination_ = isFirstNavDestination;
-    }
-
-    bool IsFirstNavDestination() const
-    {
-        return isFirstNavDestination_;
-    }
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 private:
     RefPtr<UINode> navBarNode_;
     RefPtr<UINode> contentNode_;
     RefPtr<UINode> dividerNode_;
-    bool isFirstNavDestination_ = true;
 };
 
 } // namespace OHOS::Ace::NG

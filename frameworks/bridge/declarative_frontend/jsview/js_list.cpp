@@ -71,8 +71,11 @@ void JSList::SetEditMode(bool editMode)
     ListModel::GetInstance()->SetEditMode(editMode);
 }
 
-void JSList::SetCachedCount(int32_t cachedCount)
+void JSList::SetCachedCount(const JSCallbackInfo& info)
 {
+    int32_t cachedCount = 1;
+    ParseJsInteger<int32_t>(info[0], cachedCount);
+    cachedCount = cachedCount < 0 ? 1 : cachedCount;
     ListModel::GetInstance()->SetCachedCount(cachedCount);
 }
 
@@ -101,8 +104,10 @@ void JSList::Create(const JSCallbackInfo& args)
     ListModel::GetInstance()->Create();
     if (args.Length() >= 1 && args[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
-        Dimension space;
-        if (ConvertFromJSValue(obj->GetProperty("space"), space) && space.IsValid()) {
+        JSRef<JSVal> spaceValue = obj->GetProperty("space");
+        if (!spaceValue->IsNull()) {
+            Dimension space;
+            ConvertFromJSValue(spaceValue, space);
             ListModel::GetInstance()->SetSpace(space);
         }
         int32_t initialIndex = 0;
@@ -123,6 +128,29 @@ void JSList::Create(const JSCallbackInfo& args)
 void JSList::SetChainAnimation(bool enableChainAnimation)
 {
     ListModel::GetInstance()->SetChainAnimation(enableChainAnimation);
+}
+
+void JSList::SetChainAnimationOptions(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+
+    if (info[0]->IsObject()) {
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
+        Dimension minSpace = 10.0_vp;
+        ParseJsDimensionVp(jsObj->GetProperty("minSpace"), minSpace);
+        Dimension maxSpace = 40.0_vp;
+        ParseJsDimensionVp(jsObj->GetProperty("maxSpace"), maxSpace);
+        double conductivity = 0.7f;
+        JSViewAbstract::ParseJsDouble(jsObj->GetProperty("conductivity"), conductivity);
+        double intensity = 0.3f;
+        JSViewAbstract::ParseJsDouble(jsObj->GetProperty("intensity"), intensity);
+        int32_t edgeEffect = 0;
+        JSViewAbstract::ParseJsInt32(jsObj->GetProperty("edgeEffect"), edgeEffect);
+        ListModel::GetInstance()->SetChainAnimationOptions(minSpace, maxSpace, conductivity, intensity, edgeEffect);
+    }
 }
 
 void JSList::JsWidth(const JSCallbackInfo& info)
@@ -187,14 +215,11 @@ void JSList::SetDivider(const JSCallbackInfo& args)
     }
 
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
-    Dimension strokeWidth;
-    if (!ConvertFromJSValue(obj->GetProperty("strokeWidth"), strokeWidth) && strokeWidth.IsValid()) {
-        LOGW("Invalid strokeWidth of divider");
-        return;
-    }
-
     V2::ItemDivider divider;
-    divider.strokeWidth = strokeWidth;
+    if (!ConvertFromJSValue(obj->GetProperty("strokeWidth"), divider.strokeWidth)) {
+        LOGW("Invalid strokeWidth of divider");
+        divider.strokeWidth.Reset();
+    }
     if (!ConvertFromJSValue(obj->GetProperty("color"), divider.color)) {
         // Failed to get color from param, using default color defined in theme
         RefPtr<ListTheme> listTheme = GetTheme<ListTheme>();
@@ -213,7 +238,7 @@ void JSList::ScrollCallback(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
         auto onScroll = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
-                            const Dimension& scrollOffset, const V2::ScrollState& scrollState) {
+                            const Dimension& scrollOffset, const ScrollState& scrollState) {
             auto params = ConvertToJSValues(scrollOffset, scrollState);
             func->Call(JSRef<JSObject>(), params.size(), params.data());
             return;
@@ -243,6 +268,18 @@ void JSList::ReachEndCallback(const JSCallbackInfo& args)
             return;
         };
         ListModel::GetInstance()->SetOnReachEnd(std::move(onReachEnd));
+    }
+    args.ReturnSelf();
+}
+
+void JSList::ScrollStartCallback(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto onScrollStart = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
+            func->Call(JSRef<JSObject>());
+            return;
+        };
+        ListModel::GetInstance()->SetOnScrollStart(std::move(onScrollStart));
     }
     args.ReturnSelf();
 }
@@ -280,7 +317,10 @@ void JSList::ItemMoveCallback(const JSCallbackInfo& args)
                               int32_t start, int32_t end) -> bool {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
             auto params = ConvertToJSValues(start, end);
-            func->Call(JSRef<JSObject>(), params.size(), params.data());
+            auto result = func->Call(JSRef<JSObject>(), params.size(), params.data());
+            if (!result.IsEmpty() && result->IsBoolean()) {
+                return result->ToBoolean();
+            }
             return true;
         };
         ListModel::GetInstance()->SetOnItemMove(std::move(onItemMove));
@@ -449,6 +489,36 @@ void JSList::ScrollBeginCallback(const JSCallbackInfo& args)
     }
 }
 
+void JSList::ScrollFrameBeginCallback(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto onScrollBegin = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
+                                 const Dimension& offset, const ScrollState& state) -> ScrollFrameResult {
+            ScrollFrameResult scrollRes { .offset = offset };
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, scrollRes);
+            auto params = ConvertToJSValues(offset, state);
+            auto result = func->Call(JSRef<JSObject>(), params.size(), params.data());
+            if (result.IsEmpty()) {
+                LOGE("Error calling onScrollFrameBegin, result is empty.");
+                return scrollRes;
+            }
+
+            if (!result->IsObject()) {
+                LOGE("Error calling onScrollFrameBegin, result is not object.");
+                return scrollRes;
+            }
+
+            auto resObj = JSRef<JSObject>::Cast(result);
+            auto dxRemainValue = resObj->GetProperty("offsetRemain");
+            if (dxRemainValue->IsNumber()) {
+                scrollRes.offset = Dimension(dxRemainValue->ToNumber<float>(), DimensionUnit::VP);
+            }
+            return scrollRes;
+        };
+        ListModel::GetInstance()->SetOnScrollFrameBegin(std::move(onScrollBegin));
+    }
+}
+
 void JSList::JSBind(BindingTarget globalObj)
 {
     JSClass<JSList>::Declare("List");
@@ -463,6 +533,7 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("editMode", &JSList::SetEditMode);
     JSClass<JSList>::StaticMethod("cachedCount", &JSList::SetCachedCount);
     JSClass<JSList>::StaticMethod("chainAnimation", &JSList::SetChainAnimation);
+    JSClass<JSList>::StaticMethod("chainAnimationOptions", &JSList::SetChainAnimationOptions);
     JSClass<JSList>::StaticMethod("multiSelectable", &JSList::SetMultiSelectable);
     JSClass<JSList>::StaticMethod("alignListItem", &JSList::SetListItemAlign);
     JSClass<JSList>::StaticMethod("lanes", &JSList::SetLanes);
@@ -471,11 +542,13 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("onScroll", &JSList::ScrollCallback);
     JSClass<JSList>::StaticMethod("onReachStart", &JSList::ReachStartCallback);
     JSClass<JSList>::StaticMethod("onReachEnd", &JSList::ReachEndCallback);
+    JSClass<JSList>::StaticMethod("onScrollStart", &JSList::ScrollStartCallback);
     JSClass<JSList>::StaticMethod("onScrollStop", &JSList::ScrollStopCallback);
     JSClass<JSList>::StaticMethod("onItemDelete", &JSList::ItemDeleteCallback);
     JSClass<JSList>::StaticMethod("onItemMove", &JSList::ItemMoveCallback);
     JSClass<JSList>::StaticMethod("onScrollIndex", &JSList::ScrollIndexCallback);
     JSClass<JSList>::StaticMethod("onScrollBegin", &JSList::ScrollBeginCallback);
+    JSClass<JSList>::StaticMethod("onScrollFrameBegin", &JSList::ScrollFrameBeginCallback);
 
     JSClass<JSList>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSList>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);

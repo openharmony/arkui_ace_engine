@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,9 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLL_SCROLL_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLL_SCROLL_PATTERN_H
 
+#include "base/geometry/axis.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/scroll/scroll_accessibility_property.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 #include "core/components_ng/pattern/scroll/scroll_event_hub.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_algorithm.h"
@@ -27,11 +29,12 @@
 #include "core/components_ng/pattern/scroll/scroll_paint_method.h"
 #include "core/components_ng/pattern/scroll/scroll_position_controller.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
+#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 
 namespace OHOS::Ace::NG {
 
-class ScrollPattern : public Pattern {
-    DECLARE_ACE_TYPE(ScrollPattern, Pattern);
+class ScrollPattern : public ScrollablePattern {
+    DECLARE_ACE_TYPE(ScrollPattern, ScrollablePattern);
 
 public:
     ScrollPattern() = default;
@@ -39,8 +42,6 @@ public:
     {
         animator_ = nullptr;
         positionController_ = nullptr;
-        scrollableEvent_ = nullptr;
-        scrollEffect_ = nullptr;
     }
 
     bool IsAtomicNode() const override
@@ -48,6 +49,11 @@ public:
         return false;
     }
 
+    bool UsResRegion() override
+    {
+        return false;
+    }
+    
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<ScrollLayoutProperty>();
@@ -58,6 +64,11 @@ public:
         return MakeRefPtr<ScrollPaintProperty>();
     }
 
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        return MakeRefPtr<ScrollAccessibilityProperty>();
+    }
+
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         auto layoutAlgorithm = MakeRefPtr<ScrollLayoutAlgorithm>(currentOffset_);
@@ -66,7 +77,13 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        return MakeRefPtr<ScrollPaintMethod>();
+        auto paint = MakeRefPtr<ScrollPaintMethod>();
+        paint->SetScrollBar(GetScrollBar());
+        auto scrollEffect = GetScrollEdgeEffect();
+        if (scrollEffect && scrollEffect->IsFadeEffect()) {
+            paint->SetEdgeEffect(scrollEffect);
+        }
+        return paint;
     }
 
     RefPtr<EventHub> CreateEventHub() override
@@ -79,6 +96,14 @@ public:
         return true;
     }
 
+    bool IsScrollable() const override
+    {
+        return GetAxis() != Axis::NONE;
+    }
+
+    bool OnScrollCallback(float offset, int32_t source) override;
+    void OnScrollEndCallback() override;
+
     double GetCurrentPosition() const
     {
         return currentOffset_;
@@ -88,20 +113,10 @@ public:
 
     Offset GetCurrentOffset() const
     {
-        if (axis_ == Axis::HORIZONTAL) {
+        if (GetAxis() == Axis::HORIZONTAL) {
             return Offset{currentOffset_, 0};
         }
         return Offset{0, currentOffset_};
-    }
-
-    const RefPtr<ScrollEdgeEffect>& GetScrollEdgeEffect() const
-    {
-        return scrollEffect_;
-    }
-
-    Axis GetAxis() const
-    {
-        return axis_;
     }
 
     float GetScrollableDistance() const
@@ -135,19 +150,10 @@ public:
         direction_ = direction;
     }
 
-    void SetScrollContent(bool isScrollContent = true)
-    {
-        isScrollContent_ = isScrollContent;
-    }
+    bool IsAtTop() const override;
+    bool IsAtBottom() const override;
 
-    void SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBarProxy);
-
-    bool IsAtTop() const;
-    bool IsAtBottom() const;
-    bool IsOutOfBoundary() const;
-
-    void SetScrollEdgeEffect(const RefPtr<ScrollEdgeEffect>& scrollEffect);
-    bool UpdateCurrentOffset(float offset, int32_t source);
+    bool UpdateCurrentOffset(float offset, int32_t source) override;
     void AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool limitDuration = true,
         const std::function<void()>& onFinish = nullptr);
     void ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth);
@@ -178,16 +184,14 @@ private:
     void HandleScrollBarOutBoundary();
     void ValidateOffset(int32_t source);
     void HandleScrollPosition(float scroll, int32_t scrollState);
-    void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect);
-    void RemoveScrollEdgeEffect();
+    void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
+    void AddScrollEdgeEffect(RefPtr<ScrollEdgeEffect> scrollEffect);
+    void UpdateScrollBarOffset() override;
+    void FireOnScrollStart();
+    void FireOnScrollStop();
 
     RefPtr<Animator> animator_;
     RefPtr<ScrollPositionController> positionController_;
-    RefPtr<ScrollBarProxy> scrollBarProxy_;
-    RefPtr<ScrollableEvent> scrollableEvent_;
-    RefPtr<ScrollEdgeEffect> scrollEffect_;
-    RefPtr<TouchEventImpl> touchEvent_;
-    Axis axis_ = Axis::VERTICAL;
     float currentOffset_ = 0.0f;
     float lastOffset_ = 0.0f;
     float scrollableDistance_ = 0.0f;
@@ -195,7 +199,8 @@ private:
     SizeF viewPort_;
     SizeF viewPortExtent_;
     FlexDirection direction_ { FlexDirection::COLUMN };
-    bool isScrollContent_ = true; // true: 操作内容区, false: 操作scrollBar
+    bool scrollStop_ = false;
+    bool scrollAbort_ = false;
 };
 
 } // namespace OHOS::Ace::NG

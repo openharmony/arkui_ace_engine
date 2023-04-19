@@ -30,6 +30,8 @@ public:
     void SetControlWidth(const Dimension& value) override;
     void SetStateChange(bool value) override;
     void SetBackgroundColor(const Color& value) override;
+    void SetEnableDec(bool enableDec) override;
+    void SetEnableInc(bool enableInc) override;
 };
 
 } // namespace OHOS::Ace::Framework

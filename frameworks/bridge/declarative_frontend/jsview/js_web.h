@@ -55,9 +55,9 @@ public:
     static void OnErrorReceive(const JSCallbackInfo& args);
     static void OnHttpErrorReceive(const JSCallbackInfo& args);
     static void OnFileSelectorShow(const JSCallbackInfo& args);
-    static void CustomSchemes(const JSCallbackInfo& args);
     static void OnInterceptRequest(const JSCallbackInfo& args);
     static void OnUrlLoadIntercept(const JSCallbackInfo& args);
+    static void OnLoadIntercept(const JSCallbackInfo& args);
     static void JsEnabled(bool isJsEnabled);
     static void ContentAccessEnabled(bool isContentAccessEnabled);
     static void FileAccessEnabled(bool isFileAccessEnabled);
@@ -74,6 +74,8 @@ public:
     static void OnRefreshAccessedHistory(const JSCallbackInfo& args);
     static void CacheMode(int32_t cacheMode);
     static void OverviewModeAccess(bool isOverviewModeAccessEnabled);
+    static void WebDebuggingAccess(const JSCallbackInfo& args);
+    static void WideViewModeAccess(const JSCallbackInfo& args);
     static void FileFromUrlAccess(bool isFileFromUrlAccessEnabled);
     static void DatabaseAccess(bool isDatabaseAccessEnabled);
     static void TextZoomRatio(int32_t textZoomRatioNum);
@@ -104,14 +106,33 @@ public:
     static void OnWindowNew(const JSCallbackInfo& args);
     static void OnWindowExit(const JSCallbackInfo& args);
     static void MultiWindowAccessEnabled(bool isMultiWindowAccessEnable);
+    static void AllowWindowOpenMethod(bool isAllowWindowOpenMethod);
     static void WebCursiveFont(const std::string& cursiveFontFamily);
     static void WebFantasyFont(const std::string& fantasyFontFamily);
+    static void WebFixedFont(const std::string& fixedFontFamily);
     static void WebSansSerifFont(const std::string& sansSerifFontFamily);
     static void WebSerifFont(const std::string& serifFontFamily);
     static void WebStandardFont(const std::string& standardFontFamily);
     static void DefaultFixedFontSize(int32_t defaultFixedFontSize);
     static void DefaultFontSize(int32_t defaultFontSize);
     static void MinFontSize(int32_t minFontSize);
+    static void MinLogicalFontSize(int32_t minLogicalFontSize);
+    static void BlockNetwork(bool isNetworkBlocked);
+    static void OnPageVisible(const JSCallbackInfo& args);
+    static void OnInterceptKeyEvent(const JSCallbackInfo& args);
+    static void OnDataResubmitted(const JSCallbackInfo& args);
+    static void OnFaviconReceived(const JSCallbackInfo& args);
+    static void OnTouchIconUrlReceived(const JSCallbackInfo& args);
+    static void DarkMode(int32_t darkMode);
+    static void ForceDarkAccess(bool access);
+    static void HorizontalScrollBarAccess(bool isHorizontalScrollBarAccessEnabled);
+    static void VerticalScrollBarAccess(bool isVerticalScrollBarAccessEnabled);
+    static void OnAudioStateChanged(const JSCallbackInfo& args);
+    static void MediaOptions(const JSCallbackInfo& args);
+    static void OnFirstContentfulPaint(const JSCallbackInfo& args);
+
+    // Enable or disable debugging of web content
+    static bool webDebuggingAccess_;
 
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);

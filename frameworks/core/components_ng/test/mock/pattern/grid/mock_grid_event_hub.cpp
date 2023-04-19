@@ -16,11 +16,6 @@
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
 
 namespace OHOS::Ace::NG {
-RefPtr<FrameNode> GridEventHub::FindGridItemByPosition(float /* x */, float /* y */)
-{
-    return nullptr;
-}
-
 bool GridEventHub::CheckPostionInGrid(float x, float y)
 {
     return false;
@@ -50,10 +45,24 @@ void GridEventHub::FireOnItemDragLeave(const ItemDragInfo& dragInfo, int32_t ite
     }
 }
 
-void GridEventHub::FireOnItemDrop(const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex, bool isSuccess)
+bool GridEventHub::FireOnItemDrop(const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex, bool isSuccess)
 {
     if (onItemDrop_) {
         onItemDrop_(dragInfo, itemIndex, insertIndex, isSuccess);
+        return true;
     }
+    return false;
+}
+
+void GridEventHub::FireOnItemDragMove(const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex) const
+{
+    if (onItemDragMove_) {
+        onItemDragMove_(dragInfo, itemIndex, insertIndex);
+    }
+}
+
+int32_t GridEventHub::GetInsertPosition(float x, float y)
+{
+    return -1;
 }
 } // namespace OHOS::Ace::NG

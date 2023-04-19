@@ -33,6 +33,8 @@ public:
 
 private:
     std::shared_ptr<Render3D::TextureLayer> textureLayer_;
+    uint32_t width_ = 0;
+    uint32_t height_ = 0;
 };
 
 } // namespace OHOS::Ace

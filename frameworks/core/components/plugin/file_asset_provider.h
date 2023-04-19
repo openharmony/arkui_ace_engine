@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_ADAPTER_OHOS_CPP_FILE_ASSET_PROVIDER_H
-#define FOUNDATION_ACE_ADAPTER_OHOS_CPP_FILE_ASSET_PROVIDER_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_PLUGIN_FILE_ASSET_PROVIDER_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_PLUGIN_FILE_ASSET_PROVIDER_H
 
 #include <map>
 #include <string>
@@ -42,7 +42,7 @@ public:
 
     bool IsValid() const override;
 
-    std::string GetAssetPath(const std::string& assetName) override;
+    std::string GetAssetPath(const std::string& assetName, bool isAddHapPath) override;
 
     void GetAssetList(const std::string& path, std::vector<std::string>& assetList) override;
 
@@ -72,5 +72,5 @@ private:
     std::string packagePath_;
     std::vector<std::string> assetBasePaths_;
 };
-} // namespace OHOS::Ace
-#endif // FOUNDATION_ACE_ADAPTER_OHOS_CPP_FILE_ASSET_PROVIDER_H
+} // namespace OHOS::Ace::Plugin
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_PLUGIN_FILE_ASSET_PROVIDER_H

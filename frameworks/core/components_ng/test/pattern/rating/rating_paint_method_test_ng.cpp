@@ -120,15 +120,16 @@ HWTEST_F(RatingPaintMethodTestNg, RatingPaintPropertyTest001, TestSize.Level1)
     auto* paintWrapper1 = new PaintWrapper(renderContext, geometryNode, ratingPaintProperty);
     EXPECT_NE(paintWrapper1, nullptr);
 
-    auto ratingCanvasDrawFunction1 = ratingPaintMethod->GetContentDrawFunction(paintWrapper1);
-    EXPECT_NE(ratingCanvasDrawFunction1, nullptr);
+    ratingPaintMethod->UpdateContentModifier(paintWrapper1);
+    EXPECT_EQ(ratingPaintMethod->ratingModifier_->touchStar_->Get(), RATING_TOUCH_STAR);
     auto mockCanvas = OHOS::Ace::Testing::MockCanvas();
+    DrawingContext context = { mockCanvas, 10.0f, 10.0f };
     EXPECT_CALL(mockCanvas, DrawBackground(_)).Times(RATING_DRAW_BACKGROUND_TIMES);
     EXPECT_CALL(mockCanvas, Save()).Times(RATING_SAVE_TIMES);
     EXPECT_CALL(mockCanvas, ClipRoundRect(_, _)).Times(RATING_CLIP_ROUND_RECT_TIMES);
     EXPECT_CALL(mockCanvas, Restore()).Times(RATING_RESTORE_TIMES);
     EXPECT_CALL(mockCanvas, ClipRect(_, _)).Times(RATING_CLIP_CLIP_RECT_TIMES);
-    ratingCanvasDrawFunction1(mockCanvas);
+    ratingPaintMethod->ratingModifier_->onDraw(context);
 
     /**
      * @tc.steps: step4. Invoke GetContentDrawFunction to get draw function and execute it when touch star is invalid
@@ -138,13 +139,16 @@ HWTEST_F(RatingPaintMethodTestNg, RatingPaintPropertyTest001, TestSize.Level1)
     ratingPaintProperty->UpdateTouchStar(RATING_INVALID_TOUCH_STAR);
     ratingPaintProperty->UpdateRatingScore(RATING_SCORE_2);
     auto* paintWrapper2 = new PaintWrapper(renderContext, geometryNode, ratingPaintProperty);
-    auto ratingCanvasDrawFunction2 = ratingPaintMethod->GetContentDrawFunction(paintWrapper2);
+    ratingPaintMethod->UpdateContentModifier(paintWrapper2);
+    EXPECT_EQ(ratingPaintMethod->ratingModifier_->touchStar_->Get(), RATING_INVALID_TOUCH_STAR);
+    EXPECT_EQ(ratingPaintMethod->ratingModifier_->drawScore_->Get(), RATING_SCORE_2);
     auto mockCanvas2 = OHOS::Ace::Testing::MockCanvas();
+    DrawingContext context2 = { mockCanvas2, 10.0f, 10.0f };
 
     EXPECT_CALL(mockCanvas2, Save()).Times(RATING_SAVE_TIMES_1);
     EXPECT_CALL(mockCanvas2, Restore()).Times(RATING_RESTORE_TIMES_1);
     EXPECT_CALL(mockCanvas2, ClipRect(_, _)).Times(RATING_CLIP_CLIP_RECT_TIMES_1);
-    ratingCanvasDrawFunction2(mockCanvas2);
+    ratingPaintMethod->ratingModifier_->onDraw(context2);
 
     /**
      * @tc.steps: step5. Invoke GetContentDrawFunction to get draw function and execute it when touch star is invalid
@@ -153,12 +157,13 @@ HWTEST_F(RatingPaintMethodTestNg, RatingPaintPropertyTest001, TestSize.Level1)
      */
     ratingPaintProperty->UpdateTouchStar(RATING_INVALID_TOUCH_STAR_2);
     auto* paintWrapper3 = new PaintWrapper(renderContext, geometryNode, ratingPaintProperty);
-    auto ratingCanvasDrawFunction3 = ratingPaintMethod->GetContentDrawFunction(paintWrapper3);
+    ratingPaintMethod->UpdateContentModifier(paintWrapper3);
+    EXPECT_EQ(ratingPaintMethod->ratingModifier_->touchStar_->Get(), RATING_INVALID_TOUCH_STAR_2);
     auto mockCanvas3 = OHOS::Ace::Testing::MockCanvas();
-
+    DrawingContext context3 = { mockCanvas3, 10.0f, 10.0f };
     EXPECT_CALL(mockCanvas3, Save()).Times(RATING_SAVE_TIMES_1);
     EXPECT_CALL(mockCanvas3, Restore()).Times(RATING_RESTORE_TIMES_1);
     EXPECT_CALL(mockCanvas3, ClipRect(_, _)).Times(RATING_CLIP_CLIP_RECT_TIMES_1);
-    ratingCanvasDrawFunction3(mockCanvas3);
+    ratingPaintMethod->ratingModifier_->onDraw(context3);
 }
 } // namespace OHOS::Ace::NG

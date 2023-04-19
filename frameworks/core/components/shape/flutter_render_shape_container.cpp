@@ -51,6 +51,15 @@ RenderLayer FlutterRenderShapeContainer::GetRenderLayer()
 
 void FlutterRenderShapeContainer::Paint(RenderContext& context, const Offset& offset)
 {
+    const auto renderContext = static_cast<FlutterRenderContext*>(&context);
+    flutter::Canvas* canvas = renderContext->GetCanvas();
+    if (!canvas) {
+        return;
+    }
+    skCanvas_ = canvas->canvas();
+    if (!skCanvas_) {
+        return;
+    }
     if (mesh_.size() == 0) {
         auto imageInfo = SkImageInfo::Make(GetLayoutSize().Width(), GetLayoutSize().Height(),
             SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kOpaque_SkAlphaType);
@@ -69,17 +78,22 @@ void FlutterRenderShapeContainer::Paint(RenderContext& context, const Offset& of
             skOffCanvas_->scale(scale, scale);
             skOffCanvas_->translate(tx, ty);
         }
-        RenderNode::Paint(context, offset);
+
+        const auto& children = GetChildren();
+        for (const auto& item : SortChildrenByZIndex(children)) {
+            Offset childOffset = offset;
+            RefPtr<FlutterRenderShape> renderShape = GetShapeChild(item, childOffset);
+            if (renderShape) {
+                renderShape->PaintOnCanvas(skOffCanvas_.get(), childOffset);
+                continue;
+            }
+            RenderNode::Paint(context, offset);
+        }
+
+        if (column_ == 0 && row_ == 0) {
+            skCanvas_->drawBitmap(skOffBitmap_, 0, 0);
+        }
     } else {
-        const auto renderContext = static_cast<FlutterRenderContext*>(&context);
-        flutter::Canvas* canvas = renderContext->GetCanvas();
-        if (!canvas) {
-            return;
-        }
-        skCanvas_ = canvas->canvas();
-        if (!skCanvas_) {
-            return;
-        }
         BitmapMesh(context, offset);
     }
 }

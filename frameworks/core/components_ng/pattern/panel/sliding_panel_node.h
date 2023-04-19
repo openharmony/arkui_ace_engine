@@ -32,8 +32,7 @@ public:
         : GroupNode(tag, nodeId, pattern, isRoot)
     {}
     ~SlidingPanelNode() override = default;
-    void AddChildToGroup(const RefPtr<UINode>& child) override;
-
+    void AddChildToGroup(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT) override;
     bool HasColumnNode() const
     {
         return columnId_.has_value();
@@ -55,9 +54,18 @@ public:
         return dragBarId_.value();
     }
 
+    int32_t GetContentId()
+    {
+        if (!contentId_.has_value()) {
+            contentId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        }
+        return contentId_.value();
+    }
+
 private:
     std::optional<int32_t> columnId_;
     std::optional<int32_t> dragBarId_;
+    std::optional<int32_t> contentId_;
     std::set<int32_t> columnChildren_;
     std::map<int32_t, RefPtr<UINode>> builderNode_;
 

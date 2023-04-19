@@ -55,6 +55,11 @@ void JSLine::JSBind(BindingTarget globalObj)
     JSClass<JSLine>::StaticMethod("startPoint", &JSLine::SetStart);
     JSClass<JSLine>::StaticMethod("endPoint", &JSLine::SetEnd);
 
+    JSClass<JSLine>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSLine>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
+    JSClass<JSLine>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
+    JSClass<JSLine>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+
     JSClass<JSLine>::Inherit<JSShapeAbstract>();
     JSClass<JSLine>::Bind<>(globalObj);
 }
@@ -67,7 +72,7 @@ void JSLine::Create(const JSCallbackInfo& info)
 
 void JSLine::SetStart(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
+    if (info.Length() < 1 || !info[0]->IsArray()) {
         LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
@@ -79,7 +84,7 @@ void JSLine::SetStart(const JSCallbackInfo& info)
 
 void JSLine::SetEnd(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
+    if (info.Length() < 1 || !info[0]->IsArray()) {
         LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }

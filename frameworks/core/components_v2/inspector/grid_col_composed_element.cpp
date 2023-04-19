@@ -46,6 +46,7 @@ void FindGridRowParent(RefPtr<RenderNode>& nodePtr)
 const std::unordered_map<std::string, std::function<std::string(const GridColComposedElement&)>> CREATE_JSON_MAP {
     { "span", [](const GridColComposedElement& inspector) { return inspector.GetGridColSpan(); } },
     { "offset", [](const GridColComposedElement& inspector) { return inspector.GetGridColOffset(); } },
+    { "gridColOffset", [](const GridColComposedElement& inspector) { return inspector.GetGridColOffset(); } },
     { "order", [](const GridColComposedElement& inspector) { return inspector.GetGridColOffset(); } }
 };
 
@@ -58,6 +59,8 @@ void GridColComposedElement::Dump()
         std::string("span: ").append(GetGridColSpan()));
     DumpLog::GetInstance().AddDesc(
         std::string("offset: ").append(GetGridColOffset()));
+    DumpLog::GetInstance().AddDesc(
+        std::string("gridColOffset: ").append(GetGridColOffset()));
     DumpLog::GetInstance().AddDesc(
         std::string("order: ").append(GetGridColOrder()));
 }
@@ -123,52 +126,6 @@ std::string GridColComposedElement::GetGridColOrder() const
         return "0";
     }
     return std::to_string(renderGridCol->GetOrder(renderGridRow->GetCurrentSizeType()));
-}
-
-void GridColComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
-{
-    auto gridColElement = GetContentElement<GridColElement>(GridColElement::TypeId());
-    if (!gridColElement) {
-        LOGE("get GetGridColElement failed");
-        return;
-    }
-    gridColElement->UpdateChildWithSlot(nullptr, newComponent, slot, slot);
-    gridColElement->MarkDirty();
-    LOGD("gridItem AddChildWithSlot");
-}
-
-void GridColComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
-{
-    auto gridColElement = GetContentElement<GridColElement>(GridColElement::TypeId());
-    if (!gridColElement) {
-        LOGE("get GetGridColElement failed");
-        return;
-    }
-    auto child = GetElementChildBySlot(gridColElement, slot);
-    if (!child) {
-        LOGE("gridColElement get GetChildBySlot failed");
-        return;
-    }
-    gridColElement->UpdateChildWithSlot(child, newComponent, slot, slot);
-    gridColElement->MarkDirty();
-    LOGD("gridColElement UpdateChildWithSlot");
-}
-
-void GridColComposedElement::DeleteChildWithSlot(int32_t slot)
-{
-    auto gridColElement = GetContentElement<GridColElement>(GridColElement::TypeId());
-    if (!gridColElement) {
-        LOGE("get GetGridColElement failed");
-        return;
-    }
-    auto child = GetElementChildBySlot(gridColElement, slot);
-    if (!child) {
-        LOGE("gridColElement get GetChildBySlot failed");
-        return;
-    }
-    gridColElement->UpdateChildWithSlot(child, nullptr, slot, slot);
-    gridColElement->MarkDirty();
-    LOGD("gridColElement DeleteChildWithSlot");
 }
 
 } // namespace OHOS::Ace::V2

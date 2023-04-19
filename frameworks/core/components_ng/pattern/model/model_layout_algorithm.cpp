@@ -15,10 +15,6 @@
 
 #include "core/components_ng/pattern/model/model_layout_algorithm.h"
 
-#ifdef NG_BUILD
-#include "ace_shell/shell/common/window_manager.h"
-#endif
-
 #include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {

@@ -17,8 +17,20 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_ADAPTER_ROSEN_WINDOW_H
 
 #include "render_service_client/core/ui/rs_ui_director.h"
+
+#ifdef OHOS_PLATFORM
 #include "vsync_receiver.h"
 #include "wm/window.h"
+#elif VIRTUAL_RS_WINDOW
+// use real rs window later
+#ifdef IOS_PLATFORM
+#include "adapter/ios/entrance/virtual_rs_window.h"
+#else
+#include "adapter/android/entrance/java/jni/virtual_rs_window.h"
+#endif
+#else
+#include "window_prviewer.h"
+#endif
 
 #include "base/thread/task_executor.h"
 #include "base/utils/noncopyable.h"
@@ -33,13 +45,15 @@ public:
 
     void RequestFrame() override;
 
+    void Init() override;
+
     void Destroy() override;
 
     void SetRootRenderNode(const RefPtr<RenderNode>& root) override {}
 
     void SetRootFrameNode(const RefPtr<NG::FrameNode>& root) override;
 
-    std::shared_ptr<OHOS::Rosen::RSUIDirector> GetRsUIDirector() const
+    std::shared_ptr<Rosen::RSUIDirector> GetRSUIDirector() const override
     {
         return rsUIDirector_;
     }
@@ -59,6 +73,8 @@ public:
     void OnHide() override;
 
     void SetDrawTextAsBitmap(bool useBitmap) override;
+
+    float GetRefreshRate() const override;
 
 private:
     OHOS::sptr<OHOS::Rosen::Window> rsWindow_;

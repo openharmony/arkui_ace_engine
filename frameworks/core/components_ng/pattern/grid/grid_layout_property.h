@@ -44,10 +44,11 @@ public:
         value->propRowsGap_ = CloneRowsGap();
         value->propColumnsGap_ = CloneColumnsGap();
         value->propCachedCount_ = CloneCachedCount();
-        value->propLayoutDirection_ = CloneLayoutDirection();
+        value->propGridDirection_ = CloneGridDirection();
         value->propMaxCount_ = CloneMaxCount();
         value->propMinCount_ = CloneMinCount();
         value->propCellLength_ = CloneCellLength();
+        value->propEdgeEffect_ = CloneEdgeEffect();
         return value;
     }
 
@@ -59,10 +60,11 @@ public:
         ResetColumnsGap();
         ResetRowsGap();
         ResetCachedCount();
-        ResetLayoutDirection();
+        ResetGridDirection();
         ResetMaxCount();
         ResetMinCount();
         ResetCellLength();
+        ResetEdgeEffect();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
@@ -105,8 +107,8 @@ public:
         ResetGridLayoutInfoAndMeasure();
     }
 
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(LayoutDirection, FlexDirection);
-    void OnLayoutDirectionUpdate(FlexDirection /*layoutDirection*/) const
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(GridDirection, FlexDirection);
+    void OnGridDirectionUpdate(FlexDirection /*gridDirection*/) const
     {
         ResetGridLayoutInfoAndMeasure();
     }
@@ -130,13 +132,14 @@ public:
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Editable, bool, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EdgeEffect, EdgeEffect, PROPERTY_UPDATE_MEASURE);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(GridLayoutProperty);
 
     void ResetGridLayoutInfoAndMeasure() const;
     std::string GetBarStateString() const;
-    std::string GetLayoutDirectionStr() const;
+    std::string GetGridDirectionStr() const;
     Color GetBarColor() const;
     Dimension GetBarWidth() const;
 };

@@ -34,6 +34,7 @@
 #include "core/common/clipboard/clipboard_proxy.h"
 #include "core/common/container_scope.h"
 #include "core/common/font_manager.h"
+#include "core/common/ime/text_input_type.h"
 #include "core/common/text_field_manager.h"
 #include "core/components/stack/stack_element.h"
 #include "core/components/text/text_utils.h"
@@ -66,10 +67,13 @@ constexpr double FIFTY_PERCENT = 0.5;
 constexpr Dimension OFFSET_FOCUS = 4.0_vp;
 constexpr Dimension DEFLATE_RADIUS_FOCUS = 3.0_vp;
 
+const std::string DIGIT_BLACK_LIST = "[^\\d.\\-e]+";
+const std::string PHONE_BLACK_LIST = "[^\\d\\-\\+\\*\\#]+";
 const std::string DIGIT_WHITE_LIST = "^[0-9]*$";
 const std::string PHONE_WHITE_LIST = "[\\d\\-\\+\\*\\#]+";
-const std::string EMAIL_WHITE_LIST = "\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*";
+const std::string EMAIL_WHITE_LIST = "[\\w.]";
 const std::string URL_WHITE_LIST = "[a-zA-z]+://[^\\s]*";
+const std::string NEW_LINE = "\n";
 // Whether the system is Mac or not determines which key code is selected.
 #if defined(MAC_PLATFORM)
 #define KEY_META_OR_CTRL_LEFT KeyCode::KEY_META_LEFT
@@ -79,6 +83,7 @@ const std::string URL_WHITE_LIST = "[a-zA-z]+://[^\\s]*";
 #define KEY_META_OR_CTRL_RIGHT KeyCode::KEY_CTRL_RIGHT
 #endif
 
+#if !defined(PREVIEW)
 void RemoveErrorTextFromValue(const std::string& value, const std::string& errorText, std::string& result)
 {
     int32_t valuePtr = 0;
@@ -100,16 +105,17 @@ void RemoveErrorTextFromValue(const std::string& value, const std::string& error
     }
     result += value.substr(valuePtr);
 }
+#endif
 
-void GetKeyboardFilter(TextInputType keyboard, std::string& keyboardFilterValue)
+void GetKeyboardFilter(TextInputType keyboard, std::string& keyboardFilterValue, bool useBlackList)
 {
     switch (keyboard) {
         case TextInputType::NUMBER: {
-            keyboardFilterValue = DIGIT_WHITE_LIST;
+            keyboardFilterValue = useBlackList ? DIGIT_BLACK_LIST : DIGIT_WHITE_LIST;
             break;
         }
         case TextInputType::PHONE: {
-            keyboardFilterValue = PHONE_WHITE_LIST;
+            keyboardFilterValue = useBlackList ? PHONE_BLACK_LIST : PHONE_WHITE_LIST;
             break;
         }
         case TextInputType::EMAIL_ADDRESS: {
@@ -132,6 +138,8 @@ void GetKeyboardFilter(TextInputType keyboard, std::string& keyboardFilterValue)
 void RenderTextField::UpdateConfiguration()
 {
     MiscServices::Configuration configuration;
+    LOGI("UpdateConfiguration: Enter key type %{public}d", static_cast<int32_t>(action_));
+    LOGI("UpdateConfiguration: Enter keyboard type %{public}d", static_cast<int32_t>(keyboard_));
     configuration.SetEnterKeyType(static_cast<MiscServices::EnterKeyType>((int32_t)action_));
     configuration.SetTextInputType(static_cast<MiscServices::TextInputType>((int32_t)keyboard_));
     MiscServices::InputMethodController::GetInstance()->OnConfigurationChange(configuration);
@@ -160,7 +168,15 @@ RenderTextField::~RenderTextField()
         fontManager->UnRegisterCallback(AceType::WeakClaim(this));
         fontManager->RemoveVariationNode(WeakClaim(this));
     }
-
+    if (HasSurfaceChangedCallback()) {
+        LOGD("Unregister surface change callback with id %{public}d", surfaceChangedCallbackId_.value_or(-1));
+        pipelineContext->UnregisterSurfaceChangedCallback(surfaceChangedCallbackId_.value_or(-1));
+    }
+    if (HasSurfacePositionChangedCallback()) {
+        LOGD("Unregister surface position change callback with id %{public}d",
+            surfacePositionChangedCallbackId_.value_or(-1));
+        pipelineContext->UnregisterSurfacePositionChangedCallback(surfacePositionChangedCallbackId_.value_or(-1));
+    }
     // If soft keyboard is still exist, close it.
     if (HasConnection()) {
 #if defined(ENABLE_STANDARD_INPUT)
@@ -264,6 +280,7 @@ void RenderTextField::Update(const RefPtr<Component>& component)
         resetToStart_ = textField->GetResetToStart();
     }
     if (keyboard_ != TextInputType::UNSPECIFIED && keyboard_ != textField->GetTextInputType()) {
+        LOGI("TextInput changed, close keyboard");
         CloseKeyboard();
     }
     if (keyboard_ != textField->GetTextInputType()) {
@@ -277,14 +294,19 @@ void RenderTextField::Update(const RefPtr<Component>& component)
         }
         keyboard_ = textField->GetTextInputType();
     }
-    if (action_ != TextInputAction::UNSPECIFIED && action_ != textField->GetAction()) {
-        auto context = context_.Upgrade();
-        if (context && context->GetIsDeclarative()) {
-            CloseKeyboard();
+    if (keyboard_ == TextInputType::MULTILINE) {
+        action_ = TextInputAction::DONE;
+    } else {
+        if (action_ != TextInputAction::UNSPECIFIED && action_ != textField->GetAction()) {
+            auto context = context_.Upgrade();
+            if (context && context->GetIsDeclarative()) {
+                LOGI("Action changed, close keyboard");
+                CloseKeyboard();
+            }
         }
-    }
-    if (action_ != textField->GetAction()) {
-        action_ = textField->GetAction();
+        if (action_ != textField->GetAction()) {
+            action_ = textField->GetAction();
+        }
     }
 
     actionLabel_ = textField->GetActionLabel();
@@ -353,9 +375,6 @@ void RenderTextField::Update(const RefPtr<Component>& component)
     if (textField->IsSetFocusOnTouch()) {
         isFocusOnTouch_ = textField->IsFocusOnTouch();
     }
-#if defined(ENABLE_STANDARD_INPUT)
-    UpdateConfiguration();
-#endif
     SetCallback(textField);
     UpdateFocusStyles();
     UpdateIcon(textField);
@@ -375,6 +394,74 @@ void RenderTextField::SetCallback(const RefPtr<TextFieldComponent>& textField)
     if (textField->GetOnPaste()) {
         onPaste_ = *textField->GetOnPaste();
     }
+    auto pipeline = GetContext().Upgrade();
+    CHECK_NULL_VOID(pipeline);
+    if (!HasSurfaceChangedCallback()) {
+        auto callbackId =
+            pipeline->RegisterSurfaceChangedCallback([weakTextField = AceType::WeakClaim(this)](int32_t newWidth,
+                                                         int32_t newHeight, int32_t prevWidth, int32_t prevHeight) {
+                auto textfield = weakTextField.Upgrade();
+                if (textfield) {
+                    textfield->HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight);
+                }
+            });
+        LOGI("Add surface changed callback id %{public}d", callbackId);
+        UpdateSurfaceChangedCallbackId(callbackId);
+    }
+    if (!HasSurfacePositionChangedCallback()) {
+        auto callbackId = pipeline->RegisterSurfacePositionChangedCallback(
+            [weakTextField = AceType::WeakClaim(this)](int32_t posX, int32_t posY) {
+                auto textfield = weakTextField.Upgrade();
+                if (textfield) {
+                    textfield->HandleSurfacePositionChanged(posX, posY);
+                }
+            });
+        LOGI("Add position changed callback id %{public}d", callbackId);
+        UpdateSurfacePositionChangedCallbackId(callbackId);
+    }
+}
+
+void RenderTextField::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight)
+{
+    LOGD("Textfield handle surface change, new width %{public}d, new height %{public}d, prev width %{public}d, prev "
+         "height %{public}d",
+        newWidth, newHeight, prevWidth, prevHeight);
+    UpdateCaretInfoToController();
+}
+
+void RenderTextField::HandleSurfacePositionChanged(int32_t posX, int32_t posY)
+{
+    LOGD("Textfield handle surface position change, posX %{public}d, posY %{public}d", posX, posY);
+    UpdateCaretInfoToController();
+}
+
+void RenderTextField::UpdateCaretInfoToController()
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto manager = context->GetTextFieldManager();
+    CHECK_NULL_VOID(manager);
+    auto textFieldManager = AceType::DynamicCast<TextFieldManager>(manager);
+    CHECK_NULL_VOID(textFieldManager);
+    auto weakFocusedTextField = textFieldManager->GetOnFocusTextField();
+    auto focusedTextField = weakFocusedTextField.Upgrade();
+    if (!focusedTextField || focusedTextField != AceType::Claim(this)) {
+        return;
+    }
+#if defined(ENABLE_STANDARD_INPUT)
+    auto globalOffset = GetGlobalOffset();
+    auto windowOffset = context->GetDisplayWindowRectInfo().GetOffset();
+    MiscServices::CursorInfo cursorInfo { .left = caretRect_.Left() + globalOffset.GetX() + windowOffset.GetX(),
+        .top = caretRect_.Top() + globalOffset.GetY() + windowOffset.GetY(),
+        .width = caretRect_.Width(),
+        .height = caretRect_.Height() };
+    LOGD("UpdateCaretInfoToController, left %{public}f, top %{public}f, width %{public}f, height %{public}f",
+        cursorInfo.left, cursorInfo.top, cursorInfo.width, cursorInfo.height);
+    MiscServices::InputMethodController::GetInstance()->OnCursorUpdate(cursorInfo);
+    auto value = GetEditingValue();
+    MiscServices::InputMethodController::GetInstance()->OnSelectionChange(
+        StringUtils::Str8ToStr16(value.text), value.selection.GetStart(), value.selection.GetEnd());
+#endif
 }
 
 void RenderTextField::OnPaintFinish()
@@ -481,12 +568,12 @@ bool RenderTextField::HandleMouseEvent(const MouseEvent& event)
         }
     }
 
-    if (event.button == MouseButton::RIGHT_BUTTON && event.action == MouseAction::PRESS) {
+    if (event.button == MouseButton::RIGHT_BUTTON && event.action == MouseAction::RELEASE) {
         Offset rightClickOffset = event.GetOffset();
         ShowTextOverlay(rightClickOffset, false, true);
     }
 
-    return false;
+    return true;
 }
 
 void RenderTextField::HandleMouseHoverEvent(MouseState mouseState)
@@ -680,7 +767,6 @@ void RenderTextField::OnClick(const ClickInfo& clickInfo)
     if (clickInfo.GetSourceDevice() == SourceType::MOUSE) {
         StartTwinkling();
     } else {
-        StartTwinkling();
         ShowTextOverlay(globalPosition, true);
     }
 }
@@ -692,7 +778,12 @@ void RenderTextField::OnTapCallback()
         context->SetClickPosition(GetGlobalOffset() + Size(0, GetLayoutSize().Height()));
     }
     if (isFocusOnTouch_ && tapCallback_) {
-        onTapCallbackResult_ = tapCallback_();
+        if (isLongPressStatus_) {
+            onTapCallbackResult_ = tapCallback_(false);
+            isLongPressStatus_ = false;
+        } else {
+            onTapCallbackResult_ = tapCallback_(true);
+        }
     }
 }
 
@@ -719,6 +810,7 @@ void RenderTextField::AddOutOfRectCallbackToContext()
                 render->PopTextOverlay();
             }
             render->StopTwinkling();
+            LOGI("Out of rect, close keyboard");
             render->CloseKeyboard();
             render->OnEditChange(false);
         }
@@ -789,7 +881,7 @@ void RenderTextField::OnDoubleClick(const ClickInfo& clickInfo)
 void RenderTextField::OnLongPress(const LongPressInfo& longPressInfo)
 {
     if (isFocusOnTouch_ && tapCallback_ && !isOverlayShowed_) {
-        if (!tapCallback_()) {
+        if (!tapCallback_(false)) {
             return;
         }
     }
@@ -804,6 +896,7 @@ void RenderTextField::OnLongPress(const LongPressInfo& longPressInfo)
         return;
     }
 
+    isLongPressStatus_ = true;
     Offset longPressPosition = longPressInfo.GetGlobalLocation();
     bool isTextEnd =
         (static_cast<size_t>(GetCursorPositionForClick(longPressPosition)) == GetEditingValue().GetWideText().length());
@@ -882,6 +975,10 @@ void RenderTextField::ShowTextOverlay(const Offset& showOffset, bool isSingleHan
     textOverlay_->SetSearchButtonMarker(onSearch_);
     textOverlay_->SetContext(context_);
     textOverlay_->SetIsUsingMouse(isUsingMouse);
+    if (isUsingMouse) {
+        textOverlay_->SetMouseOffset(showOffset);
+    }
+
     // Add the Animation
     InitAnimation();
 
@@ -1000,24 +1097,30 @@ void RenderTextField::PushTextOverlayToStack()
         return;
     }
 
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto textOverlayManager = context->GetTextOverlayManager();
+    CHECK_NULL_VOID(textOverlayManager);
+    textOverlayManager->PushTextOverlayToStack(textOverlay_, context);
+
     hasTextOverlayPushed_ = true;
+    isOverlayShowed_ = true;
     auto lastStack = GetLastStack();
     if (!lastStack) {
         LOGE("LastStack is null");
         return;
     }
-    isOverlayShowed_ = true;
-    lastStack->PushComponent(textOverlay_, false);
     stackElement_ = WeakClaim(RawPtr(lastStack));
     MarkNeedRender();
 }
 
 void RenderTextField::PopTextOverlay()
 {
-    const auto& stackElement = stackElement_.Upgrade();
-    if (stackElement) {
-        stackElement->PopTextOverlay();
-    }
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto textOverlayManager = context->GetTextOverlayManager();
+    CHECK_NULL_VOID(textOverlayManager);
+    textOverlayManager->PopTextOverlay();
     isOverlayShowed_ = false;
 }
 
@@ -1065,7 +1168,7 @@ void RenderTextField::ResetOnFocusForTextFieldManager()
 bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard)
 {
     if (!enabled_) {
-        LOGD("TextField is not enabled.");
+        LOGW("TextField is not enabled.");
         return false;
     }
 
@@ -1074,6 +1177,7 @@ bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwi
     if (softKeyboardEnabled_) {
         LOGI("Request open soft keyboard");
 #if defined(ENABLE_STANDARD_INPUT)
+        UpdateConfiguration();
         if (textChangeListener_ == nullptr) {
             textChangeListener_ = new OnTextChangedListenerImpl(WeakClaim(this), context_);
         }
@@ -1087,7 +1191,10 @@ bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwi
             LOGI("RequestKeyboard set calling window id is : %{public}d", context->GetWindowId());
             inputMethod->SetCallingWindow(context->GetWindowId());
         }
-        inputMethod->Attach(textChangeListener_, needShowSoftKeyboard);
+        MiscServices::InputAttribute inputAttribute;
+        inputAttribute.inputPattern = (int32_t)keyboard_;
+        inputAttribute.enterKeyType = (int32_t)action_;
+        inputMethod->Attach(textChangeListener_, needShowSoftKeyboard, inputAttribute);
 #else
         if (!HasConnection()) {
             AttachIme();
@@ -1120,6 +1227,11 @@ bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwi
 
 bool RenderTextField::CloseKeyboard(bool forceClose)
 {
+#if defined(OHOS_STANDARD_SYSTEM)
+    if (!imeAttached_) {
+        return false;
+    }
+#endif
     if (!isOverlayShowed_ || !isOverlayFocus_ || forceClose) {
         if (!textFieldController_) {
             StopTwinkling();
@@ -1169,7 +1281,7 @@ void RenderTextField::AttachIme()
     config.action = action_;
     config.actionLabel = actionLabel_;
     config.obscureText = obscure_;
-    LOGD("Request keyboard configuration: type=%{private}d action=%{private}d actionLabel=%{private}s "
+    LOGI("Request keyboard configuration: type=%{private}d action=%{private}d actionLabel=%{private}s "
          "obscureText=%{private}d",
         keyboard_, action_, actionLabel_.c_str(), obscure_);
     connection_ =
@@ -1200,6 +1312,54 @@ void RenderTextField::StopTwinkling()
         cursorVisibility_ = false;
         MarkNeedRender();
     }
+}
+
+void RenderTextField::HandleSetSelection(int32_t start, int32_t end)
+{
+    LOGI("HandleSetSelection %{public}d, %{public}d", start, end);
+    UpdateSelection(start, end);
+}
+
+void RenderTextField::HandleExtendAction(int32_t action)
+{
+    LOGI("HandleExtendAction %{public}d", action);
+    switch (action) {
+        case ACTION_SELECT_ALL: {
+            auto end = GetEditingValue().GetWideText().length();
+            UpdateSelection(0, end);
+            break;
+        }
+        case ACTION_UNDO: {
+            HandleOnRevoke();
+            break;
+        }
+        case ACTION_REDO: {
+            HandleOnInverseRevoke();
+            break;
+        }
+        case ACTION_CUT: {
+            HandleOnCut();
+            break;
+        }
+        case ACTION_COPY: {
+            HandleOnCopy();
+            break;
+        }
+        case ACTION_PASTE: {
+            HandleOnPaste();
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+}
+
+void RenderTextField::HandleSelect(int32_t keyCode, int32_t cursorMoveSkip)
+{
+    KeyCode code = static_cast<KeyCode>(keyCode);
+    CursorMoveSkip skip = static_cast<CursorMoveSkip>(cursorMoveSkip);
+    HandleOnSelect(code, skip);
 }
 
 const TextEditingValue& RenderTextField::GetEditingValue() const
@@ -1382,16 +1542,58 @@ bool RenderTextField::FilterWithRegex(std::string& valueToUpdate, const std::str
     if (!needToEscape) {
         escapeFilter = filter;
     }
-    std::regex filterRegex(escapeFilter);
-    auto errorText = std::regex_replace(valueToUpdate, filterRegex, "");
-    if (!errorText.empty()) {
-        std::string result;
-        RemoveErrorTextFromValue(valueToUpdate, errorText, result);
-        valueToUpdate = result;
-        if (onError_) {
-            onError_(errorText);
+#if defined(PREVIEW)
+    if (keyboard_ == TextInputType::EMAIL_ADDRESS) {
+        std::string tmpValue;
+        std::string errorText;
+        std::string checkedList = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890_@.";
+        for (auto value : valueToUpdate) {
+            if (checkedList.find(value) != std::string::npos) {
+                tmpValue += value;
+            } else {
+                errorText += value;
+            }
         }
-        return true;
+        valueToUpdate = tmpValue;
+        if (!errorText.empty()) {
+            if (onError_) {
+                onError_(errorText);
+            }
+            return true;
+        }
+        return false;
+    }
+#else
+    // Specialized processed for Email because of regex.
+    if (keyboard_ == TextInputType::EMAIL_ADDRESS || keyboard_ == TextInputType::URL) {
+        std::regex filterRegex(escapeFilter);
+        auto errorText = regex_replace(valueToUpdate, filterRegex, "");
+        if (!errorText.empty()) {
+            std::string result;
+            RemoveErrorTextFromValue(valueToUpdate, errorText, result);
+            valueToUpdate = result;
+            if (onError_) {
+                onError_(errorText);
+            }
+            return true;
+        }
+    }
+#endif
+    if (keyboard_ == TextInputType::NUMBER || keyboard_ == TextInputType::PHONE) {
+        GetKeyboardFilter(keyboard_, escapeFilter, true);
+        std::wregex filterRegex(StringUtils::ToWstring(escapeFilter));
+        std::wstring wValueToUpdate = StringUtils::ToWstring(valueToUpdate);
+        auto manipulateText = std::regex_replace(wValueToUpdate, filterRegex, L"");
+        if (manipulateText.length() != wValueToUpdate.length()) {
+            valueToUpdate = StringUtils::ToString(manipulateText);
+            if (onError_) {
+                GetKeyboardFilter(keyboard_, escapeFilter, false);
+                std::regex filterRegex(escapeFilter);
+                auto errorText = regex_replace(valueToUpdate, filterRegex, "");
+                onError_(errorText);
+            }
+            return true;
+        }
     }
     return false;
 }
@@ -1405,8 +1607,16 @@ void RenderTextField::EditingValueFilter(TextEditingValue& valueToUpdate)
 void RenderTextField::KeyboardEditingValueFilter(TextEditingValue& valueToUpdate)
 {
     std::string keyboardFilterValue;
-    GetKeyboardFilter(keyboard_, keyboardFilterValue);
+    GetKeyboardFilter(keyboard_, keyboardFilterValue, false);
     if (keyboardFilterValue.empty()) {
+        return;
+    }
+    if (keyboard_ == TextInputType::EMAIL_ADDRESS && valueToUpdate.text == "@") {
+        if (GetEditingValue().text.find('@') != std::string::npos) {
+            valueToUpdate.text = "";
+            valueToUpdate.selection.baseOffset = 0;
+            valueToUpdate.selection.extentOffset = 0;
+        }
         return;
     }
     bool textChanged = false;
@@ -1435,7 +1645,7 @@ void RenderTextField::KeyboardEditingValueFilter(TextEditingValue& valueToUpdate
         if (!textChanged) {
             return;
         }
-        valueToUpdate.text = strBeforeSelection + strBeforeSelection + strBeforeSelection;
+        valueToUpdate.text = strBeforeSelection + strInSelection + strAfterSelection;
         if (valueToUpdate.selection.baseOffset > valueToUpdate.selection.extentOffset) {
             valueToUpdate.selection.Update(static_cast<int32_t>(strBeforeSelection.length() + strInSelection.length()),
                 static_cast<int32_t>(strBeforeSelection.length()));
@@ -1452,8 +1662,18 @@ void RenderTextField::UpdateInsertText(std::string insertValue)
     insertTextUpdated_ = true;
 }
 
+bool RenderTextField::NeedToFilter()
+{
+    std::string keyboardFilterValue;
+    GetKeyboardFilter(keyboard_, keyboardFilterValue, false);
+    return !keyboardFilterValue.empty() || !inputFilter_.empty();
+}
+
 void RenderTextField::HandleValueFilter(TextEditingValue& valueBeforeUpdate, TextEditingValue& valueNeedToUpdate)
 {
+    if (!NeedToFilter()) {
+        return;
+    }
     if (insertTextUpdated_) {
         TextEditingValue textEditingValue;
         textEditingValue.text = insertValue_;
@@ -1480,6 +1700,10 @@ void RenderTextField::UpdateEditingValue(const std::shared_ptr<TextEditingValue>
         LOGE("the value is nullptr");
         return;
     }
+    if (static_cast<uint32_t>(value->GetWideText().length()) > maxLength_) {
+        LOGW("Max length reached");
+        return;
+    }
 
     lastKnownRemoteEditingValue_ = value;
     lastKnownRemoteEditingValue_->hint = placeholder_;
@@ -1494,7 +1718,9 @@ void RenderTextField::UpdateEditingValue(const std::shared_ptr<TextEditingValue>
 
     ChangeCounterStyle(valueNeedToUpdate);
 
-    HandleValueFilter(valueBeforeUpdate, valueNeedToUpdate);
+    if (lastInputAction_ != InputAction::DELETE_BACKWARD && lastInputAction_ != InputAction::DELETE_FORWARD) {
+        HandleValueFilter(valueBeforeUpdate, valueNeedToUpdate);
+    }
 
     if (obscure_ && (valueNeedToUpdate.text.length() == valueBeforeUpdate.text.length() + 1)) {
         // Reset pending.
@@ -1528,11 +1754,20 @@ void RenderTextField::PerformDefaultAction()
 
 void RenderTextField::PerformAction(TextInputAction action, bool forceCloseKeyboard)
 {
-    LOGD("PerformAction  %{public}d", static_cast<int32_t>(action));
+    LOGI("PerformAction  %{public}d", static_cast<int32_t>(action));
     ContainerScope scope(instanceId_);
+    if (keyboard_ == TextInputType::MULTILINE) {
+        auto value = GetEditingValue();
+        auto textEditingValue = std::make_shared<TextEditingValue>();
+        textEditingValue->text = value.GetBeforeSelection() + NEW_LINE + value.GetAfterSelection();
+        textEditingValue->UpdateSelection(std::max(value.selection.GetStart(), 0) + 1);
+        UpdateEditingValue(textEditingValue, true);
+        return;
+    }
     if (action == TextInputAction::NEXT && moveNextFocusEvent_) {
         moveNextFocusEvent_();
     } else {
+        LOGI("Perform action received from input frame, close keyboard");
         CloseKeyboard(forceCloseKeyboard);
     }
     if (onFinishInputEvent_) {
@@ -1639,13 +1874,13 @@ bool RenderTextField::OnKeyEvent(const KeyEvent& event)
             obscureTickPendings_ = 0;
             return true;
         }
-        if (event.code == KeyCode::KEY_FORWARD_DEL) {
+        if (event.code == KeyCode::KEY_DEL) {
             int32_t startPos = GetEditingValue().selection.GetStart();
             int32_t endPos = GetEditingValue().selection.GetEnd();
             Delete(startPos, startPos == endPos ? startPos - 1 : endPos);
             return true;
         }
-        if (event.code == KeyCode::KEY_DEL) {
+        if (event.code == KeyCode::KEY_FORWARD_DEL) {
             int32_t startPos = GetEditingValue().selection.GetStart();
             int32_t endPos = GetEditingValue().selection.GetEnd();
             Delete(startPos, startPos == endPos ? startPos + 1 : endPos);
@@ -1945,11 +2180,24 @@ void RenderTextField::CursorMoveDown()
     MarkNeedLayout();
 }
 
+void RenderTextField::HandleOnBlur()
+{
+    LOGI("Textfield on blur");
+    SetCanPaintSelection(false);
+    auto lastPosition = static_cast<int32_t>(GetEditingValue().GetWideText().length());
+    UpdateSelection(lastPosition, lastPosition);
+    StopTwinkling();
+    PopTextOverlay();
+    OnEditChange(false);
+    ResetOnFocusForTextFieldManager();
+}
+
 void RenderTextField::CursorMoveOnClick(const Offset& offset)
 {
     auto value = GetEditingValue();
     auto position = GetCursorPositionForClick(offset);
     value.MoveToPosition(position);
+    UpdateSelection(position, position);
     SetEditingValue(std::move(value));
 
     if (!GetEditingValue().text.empty() && position == GetEditingValue().selection.GetEnd()) {
@@ -2153,11 +2401,11 @@ void RenderTextField::HandleOnCut()
         return;
     }
     if (GetEditingValue().GetSelectedText().empty()) {
-        LOGD("copy value is empty");
+        LOGW("copy value is empty");
         return;
     }
     if (copyOption_ != CopyOptions::None) {
-        LOGD("copy value is %{private}s", GetEditingValue().GetSelectedText().c_str());
+        LOGI("copy value is %{private}s", GetEditingValue().GetSelectedText().c_str());
         clipboard_->SetData(GetEditingValue().GetSelectedText(), copyOption_);
     }
     if (onCut_) {
@@ -2182,7 +2430,7 @@ void RenderTextField::HandleOnCopy()
         return;
     }
     if (copyOption_ != CopyOptions::None) {
-        LOGD("copy value is %{private}s", GetEditingValue().GetSelectedText().c_str());
+        LOGI("copy value is %{private}s", GetEditingValue().GetSelectedText().c_str());
         clipboard_->SetData(GetEditingValue().GetSelectedText(), copyOption_);
     }
     if (onCopy_) {
@@ -2203,7 +2451,7 @@ void RenderTextField::HandleOnPaste()
             LOGW("paste value is empty");
             return;
         }
-        LOGD("paste value is %{private}s", data.c_str());
+        LOGI("paste value is %{private}s", data.c_str());
         auto textfield = weak.Upgrade();
         if (textfield) {
             auto value = textfield->GetEditingValue();
@@ -2313,14 +2561,8 @@ bool RenderTextField::HandleKeyEvent(const KeyEvent& event)
     if (appendElement.empty()) {
         return false;
     }
-
-    auto editingValue = std::make_shared<TextEditingValue>();
-    editingValue->text = GetEditingValue().GetBeforeSelection() + appendElement + GetEditingValue().GetAfterSelection();
-    editingValue->UpdateSelection(
-        std::max(GetEditingValue().selection.GetEnd(), 0) + StringUtils::Str8ToStr16(appendElement).length());
-    UpdateEditingValue(editingValue);
-    MarkNeedLayout();
-    return true;
+    LOGW("Insert text through key event is no longer supported");
+    return false;
 }
 
 void RenderTextField::UpdateAccessibilityAttr()
@@ -2511,6 +2753,7 @@ void RenderTextField::HandleDeviceOrientationChange()
 void RenderTextField::OnHiddenChanged(bool hidden)
 {
     if (hidden) {
+        LOGI("On hidden change, close keyboard");
         CloseKeyboard();
         PopTextOverlay();
     }

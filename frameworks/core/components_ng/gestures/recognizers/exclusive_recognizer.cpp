@@ -32,7 +32,7 @@ namespace OHOS::Ace::NG {
 
 void ExclusiveRecognizer::OnAccepted()
 {
-    LOGD("the %{public}p exclusive gesture recognizer has been accepted, active recognizer: %{public}s", this,
+    LOGD("the exclusive gesture recognizer has been accepted, active recognizer: %{public}s",
         AceType::TypeName(activeRecognizer_));
     refereeState_ = RefereeState::SUCCEED;
     if (activeRecognizer_) {
@@ -45,14 +45,18 @@ void ExclusiveRecognizer::OnAccepted()
         if (recognizer && (recognizer != activeRecognizer_)) {
             LOGD("the sub gesture %{public}s is rejected because %{public}s is accepted", AceType::TypeName(recognizer),
                 AceType::TypeName(activeRecognizer_));
-            recognizer->OnRejected();
+            if (AceType::InstanceOf<RecognizerGroup>(recognizer)) {
+                auto group = AceType::DynamicCast<RecognizerGroup>(recognizer);
+                group->ForceReject();
+            } else {
+                recognizer->OnRejected();
+            }
         }
     }
 }
 
 void ExclusiveRecognizer::OnRejected()
 {
-    LOGD("the %{public}p exclusive gesture recognizer has been rejected!", this);
     refereeState_ = RefereeState::FAIL;
     for (const auto& recognizer : recognizers_) {
         if (!recognizer) {
@@ -60,17 +64,18 @@ void ExclusiveRecognizer::OnRejected()
         }
         if (recognizer->GetRefereeState() == RefereeState::FAIL) {
             LOGE("the %{public}s gesture recognizer already failed", AceType::TypeName(recognizer));
-            continue;
         }
-
-        LOGD("the %{public}s gesture recognizer call on reject", AceType::TypeName(recognizer));
-        recognizer->OnRejected();
+        if (AceType::InstanceOf<RecognizerGroup>(recognizer)) {
+            auto group = AceType::DynamicCast<RecognizerGroup>(recognizer);
+            group->ForceReject();
+        } else {
+            recognizer->OnRejected();
+        }
     }
 }
 
 void ExclusiveRecognizer::OnPending()
 {
-    LOGD("the %{public}p exclusive gesture recognizer is pending!", this);
     refereeState_ = RefereeState::PENDING;
     if (activeRecognizer_) {
         activeRecognizer_->OnPending();

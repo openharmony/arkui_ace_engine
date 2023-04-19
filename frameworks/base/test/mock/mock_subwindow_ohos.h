@@ -50,6 +50,11 @@ public:
     void ShowActionMenu(const std::string& title,
         const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback) override {}
     void InitContainer() override;
+
+    NG::RectF GetRect() override
+    {
+        return {};
+    }
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_BASE_TEST_MOCK_MOCK_SUBWINDOW_OHOS_H

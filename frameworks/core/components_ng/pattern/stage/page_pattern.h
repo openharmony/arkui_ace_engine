@@ -60,6 +60,9 @@ public:
 
     bool OnBackPressed() const
     {
+        if (isPageInTransition_) {
+            return true;
+        }
         if (OnBackPressed_) {
             return OnBackPressed_();
         }
@@ -86,7 +89,7 @@ public:
         pageTransitionFunc_ = std::move(pageTransitionFunc);
     }
 
-    // find pageTransition effect according to transition type, it will clear the transition effect stack
+    // find pageTransition effect according to transition type
     RefPtr<PageTransitionEffect> FindPageTransitionEffect(PageTransitionType type);
 
     void ClearPageTransitionEffect();
@@ -121,26 +124,43 @@ public:
 
     void SetFirstBuildCallback(std::function<void()>&& buildCallback);
 
+    void SetPageInTransition(bool pageTransition)
+    {
+        isPageInTransition_ = pageTransition;
+    }
+
+    // Mark current page node invisible in render tree.
+    void ProcessHideState();
+    // Mark current page node visible in render tree.
+    void ProcessShowState();
+
+    void StopPageTransition();
+
+    void MarkRenderDone()
+    {
+        isRenderDone_ = true;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& wrapper, const DirtySwapConfig& config) override;
-
-    // Mark current page node inactive state to show in render tree.
-    void ProcessHideState();
-    // Mark current page node active state to show in render tree.
-    void ProcessShowState();
+    void FirePageTransitionFinish();
 
     RefPtr<PageInfo> pageInfo_;
+    RefPtr<Animator> controller_;
 
     std::function<void()> onPageShow_;
     std::function<void()> onPageHide_;
     std::function<bool()> OnBackPressed_;
     std::function<void()> pageTransitionFunc_;
     std::function<void()> firstBuildCallback_;
-    std::stack<RefPtr<PageTransitionEffect>> pageTransitionEffects_;
+    std::shared_ptr<std::function<void()>> pageTransitionFinish_;
+    std::list<RefPtr<PageTransitionEffect>> pageTransitionEffects_;
 
     bool isOnShow_ = false;
     bool isFirstLoad_ = true;
+    bool isPageInTransition_ = false;
+    bool isRenderDone_ = false;
 
     SharedTransitionMap sharedTransitionMap_;
     JSAnimatorMap jsAnimatorMap_;

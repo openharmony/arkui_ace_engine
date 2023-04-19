@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,46 +17,52 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-OffsetF GetMenuPosition(const RefPtr<FrameNode>& targetNode)
-{
-    // show menu at bottom center point of targetNode
-    auto frameSize = targetNode->GetGeometryNode()->GetMarginFrameSize();
-    auto position = targetNode->GetPaintRectOffset() + OffsetF(frameSize.Width() / 2, frameSize.Height());
-    return position;
-}
+constexpr int32_t LONG_PRESS_DURATION = 280;
 
 void CreateCustomMenu(std::function<void()>& buildFunc, const RefPtr<NG::FrameNode>& targetNode, bool isContextMenu,
-    const NG::OffsetF& offset)
+    const NG::OffsetF& offset, const MenuParam& menuParam = MenuParam())
 {
     NG::ScopedViewStackProcessor builderViewStackProcessor;
     buildFunc();
     auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
-    NG::ViewAbstract::BindMenuWithCustomNode(customNode, targetNode, isContextMenu, offset);
+    NG::ViewAbstract::BindMenuWithCustomNode(customNode, targetNode, isContextMenu, offset, menuParam);
 }
 } // namespace
 
-void ViewAbstractModelNG::BindMenu(std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc)
+void ViewAbstractModelNG::BindMenu(
+    std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const MenuParam& menuParam)
 {
     auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+#ifdef ENABLE_DRAG_FRAMEWORK
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true);
+#endif // ENABLE_DRAG_FRAMEWORK
+    auto overlayManager = NG::PipelineContext::GetCurrentContext()->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    RegisterMenuAppearCallback(params, std::move(buildFunc), menuParam);
+
     GestureEventFunc showMenu;
     auto weakTarget = AceType::WeakClaim(AceType::RawPtr(targetNode));
     if (!params.empty()) {
-        showMenu = [params, weakTarget](GestureEvent& /* info */) mutable {
+        showMenu = [params, weakTarget, menuParam](GestureEvent& info) mutable {
             auto targetNode = weakTarget.Upgrade();
             CHECK_NULL_VOID(targetNode);
+            NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() + menuParam.positionOffset.GetX(),
+                info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
             // menu already created
             if (params.empty()) {
-                NG::ViewAbstract::ShowMenu(targetNode->GetId(), GetMenuPosition(targetNode));
+                NG::ViewAbstract::ShowMenu(targetNode->GetId(), menuPosition);
                 return;
             }
-            NG::ViewAbstract::BindMenuWithItems(std::move(params), targetNode, GetMenuPosition(targetNode));
+            NG::ViewAbstract::BindMenuWithItems(std::move(params), targetNode, menuPosition, menuParam);
             params.clear();
         };
     } else if (buildFunc) {
-        showMenu = [builderFunc = std::move(buildFunc), weakTarget](const GestureEvent& /* info */) mutable {
+        showMenu = [builderFunc = std::move(buildFunc), weakTarget, menuParam](const GestureEvent& info) mutable {
             auto targetNode = weakTarget.Upgrade();
             CHECK_NULL_VOID(targetNode);
-            CreateCustomMenu(builderFunc, targetNode, false, GetMenuPosition(targetNode));
+            NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() + menuParam.positionOffset.GetX(),
+                info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
+            CreateCustomMenu(builderFunc, targetNode, false, menuPosition, menuParam);
         };
     } else {
         LOGE("empty param or null builder");
@@ -64,6 +70,8 @@ void ViewAbstractModelNG::BindMenu(std::vector<NG::OptionParam>&& params, std::f
     }
     auto gestureHub = targetNode->GetOrCreateGestureEventHub();
     gestureHub->BindMenu(std::move(showMenu));
+
+    RegisterMenuDisappearCallback(std::move(buildFunc), menuParam);
 
     // delete menu when target node is removed from render tree
     auto eventHub = targetNode->GetEventHub<NG::EventHub>();
@@ -77,20 +85,31 @@ void ViewAbstractModelNG::BindMenu(std::vector<NG::OptionParam>&& params, std::f
     eventHub->SetOnDisappear(destructor);
 }
 
-void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void()>&& buildFunc)
+void ViewAbstractModelNG::BindContextMenu(
+    ResponseType type, std::function<void()>&& buildFunc, const MenuParam& menuParam)
 {
     auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(targetNode);
+#ifdef ENABLE_DRAG_FRAMEWORK
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true);
+#endif // ENABLE_DRAG_FRAMEWORK
+    RegisterContextMenuAppearCallback(type, menuParam);
+
     auto hub = targetNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(hub);
     auto weakTarget = AceType::WeakClaim(AceType::RawPtr(targetNode));
     if (type == ResponseType::RIGHT_CLICK) {
-        OnMouseEventFunc event = [builder = std::move(buildFunc), weakTarget](MouseInfo& info) mutable {
+        OnMouseEventFunc event = [builder = std::move(buildFunc), weakTarget, menuParam](MouseInfo& info) mutable {
             auto targetNode = weakTarget.Upgrade();
             CHECK_NULL_VOID(targetNode);
+            NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() + menuParam.positionOffset.GetX(),
+                info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
+            auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipelineContext);
+            auto windowRect = pipelineContext->GetDisplayWindowRectInfo();
+            menuPosition += NG::OffsetF { windowRect.Left(), windowRect.Top() };
             if (info.GetButton() == MouseButton::RIGHT_BUTTON && info.GetAction() == MouseAction::RELEASE) {
-                CreateCustomMenu(builder, targetNode, true,
-                    NG::OffsetF(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY()));
+                CreateCustomMenu(builder, targetNode, true, menuPosition, menuParam);
                 info.SetStopPropagation(true);
             }
         };
@@ -99,18 +118,111 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
         inputHub->BindContextMenu(std::move(event));
     } else if (type == ResponseType::LONG_PRESS) {
         // create or show menu on long press
-        auto event = [builder = std::move(buildFunc), weakTarget](const GestureEvent& info) mutable {
+        auto event = [builder = std::move(buildFunc), weakTarget, menuParam](const GestureEvent& info) mutable {
             auto targetNode = weakTarget.Upgrade();
             CHECK_NULL_VOID(targetNode);
-            CreateCustomMenu(builder, targetNode, true,
-                NG::OffsetF(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY()));
+            NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() + menuParam.positionOffset.GetX(),
+                info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
+            auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipelineContext);
+            auto windowRect = pipelineContext->GetDisplayWindowRectInfo();
+            menuPosition += NG::OffsetF { windowRect.Left(), windowRect.Top() };
+            CreateCustomMenu(builder, targetNode, true, menuPosition, menuParam);
         };
         auto longPress = AceType::MakeRefPtr<NG::LongPressEvent>(std::move(event));
 
-        hub->SetLongPressEvent(longPress, false, true);
+        hub->SetLongPressEvent(longPress, false, true, LONG_PRESS_DURATION);
     } else {
         LOGE("The arg responseType is invalid.");
         return;
     }
+
+    RegisterContextMenuDisappearCallback(menuParam);
+}
+
+void ViewAbstractModelNG::SetPivot(const Dimension& x, const Dimension& y, const Dimension& z)
+{
+    DimensionOffset center(x, y);
+    if (!NearZero(z.Value())) {
+        center.SetZ(z);
+    }
+    ViewAbstract::SetPivot(center);
+}
+
+void ViewAbstractModelNG::SetScale(float x, float y, float z)
+{
+    if (x < 0) {
+        x = 1;
+    }
+    if (y < 0) {
+        y = 1;
+    }
+    VectorF scale(x, y);
+    ViewAbstract::SetScale(scale);
+}
+
+void ViewAbstractModelNG::BindContentCover(
+    bool isShow, std::function<void(const std::string&)>&& callback, std::function<void()>&& buildFunc, int32_t type)
+{
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(targetNode);
+    auto buildNodeFunc = [buildFunc]() -> RefPtr<UINode> {
+        NG::ScopedViewStackProcessor builderViewStackProcessor;
+        buildFunc();
+        auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
+        return customNode;
+    };
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+
+    overlayManager->BindContentCover(isShow, std::move(callback), std::move(buildNodeFunc), type, targetNode->GetId());
+}
+
+void ViewAbstractModelNG::RegisterMenuAppearCallback(
+    std::vector<NG::OptionParam>& params, std::function<void()>&& buildFunc, const MenuParam& menuParam)
+{
+    auto overlayManager = NG::PipelineContext::GetCurrentContext()->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    if (!params.empty() || buildFunc) {
+        overlayManager->RegisterOnShowMenu([menuParam]() {
+            if (menuParam.onAppear) {
+                menuParam.onAppear();
+            }
+        });
+    }
+}
+
+void ViewAbstractModelNG::RegisterMenuDisappearCallback(std::function<void()>&& buildFunc, const MenuParam& menuParam)
+{
+    auto overlayManager = NG::PipelineContext::GetCurrentContext()->GetOverlayManager();
+    if (overlayManager) {
+        overlayManager->RegisterOnHideMenu([menuParam]() {
+            if (menuParam.onDisappear) {
+                menuParam.onDisappear();
+            }
+        });
+    }
+}
+
+void ViewAbstractModelNG::RegisterContextMenuAppearCallback(ResponseType type, const MenuParam& menuParam)
+{
+    if (type == ResponseType::RIGHT_CLICK || type == ResponseType::LONG_PRESS) {
+        SubwindowManager::GetInstance()->RegisterOnShowMenu([menuParam]() {
+            if (menuParam.onAppear) {
+                menuParam.onAppear();
+            }
+        });
+    }
+}
+
+void ViewAbstractModelNG::RegisterContextMenuDisappearCallback(const MenuParam& menuParam)
+{
+    SubwindowManager::GetInstance()->RegisterOnHideMenu([menuParam]() {
+        if (menuParam.onDisappear) {
+            menuParam.onDisappear();
+        }
+    });
 }
 } // namespace OHOS::Ace::NG

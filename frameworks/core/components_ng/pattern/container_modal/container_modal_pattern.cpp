@@ -35,17 +35,7 @@ constexpr double TITLE_POPUP_DISTANCE = 37.0;     // 37vp height of title
 
 } // namespace
 
-void ContainerModalPattern::OnModifyDone()
-{
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto windowManager = pipeline->GetWindowManager();
-    CHECK_NULL_VOID(windowManager);
-    windowMode_ = windowManager->GetWindowMode();
-    ShowTitle(windowMode_ == WindowMode::WINDOW_MODE_FLOATING);
-}
-
-void ContainerModalPattern::ShowTitle(bool isShow)
+void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco)
 {
     auto containerNode = GetHost();
     CHECK_NULL_VOID(containerNode);
@@ -55,11 +45,14 @@ void ContainerModalPattern::ShowTitle(bool isShow)
     CHECK_NULL_VOID(titleNode);
     auto stackNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().back());
     CHECK_NULL_VOID(stackNode);
-    auto contentNode = AceType::DynamicCast<FrameNode>(stackNode->GetChildren().front());
-    CHECK_NULL_VOID(contentNode);
     auto floatingTitleNode = AceType::DynamicCast<FrameNode>(containerNode->GetChildren().back());
     CHECK_NULL_VOID(floatingTitleNode);
     windowMode_ = PipelineContext::GetCurrentContext()->GetWindowManager()->GetWindowMode();
+    hasDeco_ = hasDeco;
+    LOGI("ShowTitle isShow: %{public}d, windowMode: %{public}d, hasDeco: %{public}d", isShow, windowMode_, hasDeco_);
+    if (!hasDeco_) {
+        isShow = false;
+    }
 
     // set container window show state to RS
     PipelineContext::GetCurrentContext()->SetContainerWindow(isShow);
@@ -133,6 +126,9 @@ void ContainerModalPattern::InitContainerEvent()
                                      TouchEventInfo& info) {
         auto container = weak.Upgrade();
         CHECK_NULL_VOID(container);
+        if (!container->hasDeco_) {
+            return;
+        }
         if (info.GetChangedTouches().begin()->GetGlobalLocation().GetY() <= titlePopupDistance) {
             // step1. Record the coordinates of the start of the touch.
             if (info.GetChangedTouches().begin()->GetTouchType() == TouchType::DOWN) {
@@ -178,7 +174,7 @@ void ContainerModalPattern::InitContainerEvent()
                                      MouseInfo& info) {
         auto container = weak.Upgrade();
         CHECK_NULL_VOID(container);
-        if (info.GetAction() != MouseAction::MOVE) {
+        if (info.GetAction() != MouseAction::MOVE || !container->hasDeco_) {
             return;
         }
         if (info.GetLocalLocation().GetY() <= MOUSE_MOVE_POPUP_DISTANCE && container->CanShowFloatingTitle()) {
@@ -225,14 +221,11 @@ void ContainerModalPattern::WindowFocus(bool isFocus)
     CHECK_NULL_VOID(windowManager);
 
     // update normal title
-    if (windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
-        auto columnNode = AceType::DynamicCast<FrameNode>(containerNode->GetChildren().front());
-        CHECK_NULL_VOID(columnNode);
-        auto titleNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
-        CHECK_NULL_VOID(titleNode);
-        ChangeTitle(titleNode, isFocus);
-        return;
-    }
+    auto columnNode = AceType::DynamicCast<FrameNode>(containerNode->GetChildren().front());
+    CHECK_NULL_VOID(columnNode);
+    auto titleNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
+    CHECK_NULL_VOID(titleNode);
+    ChangeTitle(titleNode, isFocus);
 
     // update floating title
     auto floatingTitleNode = AceType::DynamicCast<FrameNode>(containerNode->GetChildren().back());
@@ -362,12 +355,14 @@ void ContainerModalPattern::SetAppTitle(const std::string& title)
     CHECK_NULL_VOID(titleNode);
     auto titleLabel = AceType::DynamicCast<FrameNode>(titleNode->GetChildAtIndex(TITLE_LABEL_INDEX));
     titleLabel->GetLayoutProperty<TextLayoutProperty>()->UpdateContent(title);
+    titleLabel->MarkModifyDone();
     titleLabel->MarkDirtyNode();
 
     auto floatingNode = AceType::DynamicCast<FrameNode>(GetHost()->GetChildren().back());
     CHECK_NULL_VOID(floatingNode);
     auto floatingTitleLabel = AceType::DynamicCast<FrameNode>(floatingNode->GetChildAtIndex(TITLE_LABEL_INDEX));
     floatingTitleLabel->GetLayoutProperty<TextLayoutProperty>()->UpdateContent(title);
+    floatingTitleLabel->MarkModifyDone();
     floatingTitleLabel->MarkDirtyNode();
 }
 

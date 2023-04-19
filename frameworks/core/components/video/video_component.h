@@ -329,7 +329,7 @@ public:
         pastPlayingStatus_ = pastPlayingStatus;
     }
 
-    bool GetPastPlayingStatus()
+    bool GetPastPlayingStatus() const
     {
         return pastPlayingStatus_;
     }
@@ -339,7 +339,7 @@ public:
         isMediaPlayerFullStatus_ = isMediaPlayerFullStatus;
     }
 
-    bool GetMediaPlayerFullStatus()
+    bool GetMediaPlayerFullStatus() const
     {
         return isMediaPlayerFullStatus_;
     }

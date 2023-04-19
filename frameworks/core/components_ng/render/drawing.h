@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,12 +18,16 @@
 
 #ifndef ACE_UNITTEST
 #include "draw/canvas.h"
+#include "draw/shadow.h"
 #include "drawing/engine_adapter/skia_adapter/skia_canvas.h"
+#include "drawing/engine_adapter/skia_adapter/skia_path.h"
 #include "image/image.h"
+#include "rosen_text/properties/text_style.h"
 #include "rosen_text/ui/font_collection.h"
 #include "rosen_text/ui/typography.h"
 #include "rosen_text/ui/typography_create.h"
 #include "utils/camera3d.h"
+#include "utils/point3.h"
 #include "utils/scalar.h"
 
 namespace OHOS::Ace {
@@ -40,6 +44,8 @@ using RSRoundRect = Rosen::Drawing::RoundRect;
 using RSRRect = Rosen::Drawing::Rect;
 using RSPoint = Rosen::Drawing::PointF;
 using RSRPoint = Rosen::Drawing::Point;
+using RSPoint3 = Rosen::Drawing::Point3;
+using RSShadowFlags = Rosen::Drawing::ShadowFlags;
 using RSBlendMode = Rosen::Drawing::BlendMode;
 using RSSamplingOptions = Rosen::Drawing::SamplingOptions;
 using RSRoundRect = Rosen::Drawing::RoundRect;
@@ -55,7 +61,8 @@ using RSMatrix = Rosen::Drawing::Matrix;
 using RSCamera3D = Rosen::Drawing::Camera3D;
 using RSMaskFilter = Rosen::Drawing::MaskFilter;
 using RSBlurType = Rosen::Drawing::BlurType;
-
+using RSPathFillType = Rosen::Drawing::PathFillType;
+using RSSkPath = Rosen::Drawing::SkiaPath;
 using RSPathEffect = rosen::PathEffect;
 using RSPathDirection = rosen::PathDirection;
 using RSPathDashStyle = rosen::PathDashStyle;
@@ -64,10 +71,17 @@ using RSTypographyProperties = rosen::TypographyProperties;
 using RSParagraphBuilder = rosen::TypographyCreate;
 using RSFontCollection = rosen::FontCollection;
 using RSParagraphStyle = rosen::TypographyStyle;
-using RSTextStyle = rosen::TextStyle;
 using RSColorQuad = rosen::ColorQuad;
 using RSShaderEffect = rosen::ShaderEffect;
 using RSTileMode = rosen::TileMode;
+using RSTextDirection = rosen::TextDirection;
+using RSTextAlign = rosen::TextAlign;
+using RSWordBreakType = rosen::WordBreakType;
+using RSTextStyle = rosen::TextStyle;
+using RSTextDecoration = rosen::TextDecoration;
+using RSFontWeight = rosen::FontWeight;
+using RSFontStyle = rosen::FontStyle;
+using RSTextBaseline = rosen::TextBaseline;
 } // namespace OHOS::Ace
 #else
 #include "core/components_ng/render/drawing_mock.h"

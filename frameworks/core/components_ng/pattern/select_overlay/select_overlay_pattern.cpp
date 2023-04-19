@@ -76,6 +76,15 @@ void SelectOverlayPattern::OnAttachToFrameNode()
     panEvent_ =
         MakeRefPtr<PanEvent>(std::move(panStart), std::move(panUpdate), std::move(panEnd), std::move(panCancel));
     gesture->SetPanEvent(panEvent_, { PanDirection::ALL }, 1, DEFAULT_PAN_DISTANCE);
+
+    auto touchTask = [weak = WeakClaim(this)](const TouchEventInfo& info) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleTouchEvent(info);
+        }
+    };
+    touchEvent_ = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
+    gesture->AddTouchEvent(touchEvent_);
 }
 
 void SelectOverlayPattern::OnDetachFromFrameNode(FrameNode* /*frameNode*/)
@@ -152,6 +161,18 @@ void SelectOverlayPattern::HandleOnClick(GestureEvent& /*info*/)
     }
 }
 
+void SelectOverlayPattern::HandleTouchEvent(const TouchEventInfo& info)
+{
+    const auto& changedPoint = info.GetChangedTouches().front();
+    if (info_->onTouchDown && changedPoint.GetTouchType() == TouchType::DOWN) {
+        info_->onTouchDown(info);
+    } else if (info_->onTouchDown && changedPoint.GetTouchType() == TouchType::UP) {
+        info_->onTouchUp(info);
+    } else if (info_->onTouchMove && changedPoint.GetTouchType() == TouchType::MOVE) {
+        info_->onTouchMove(info);
+    }
+}
+
 void SelectOverlayPattern::HandlePanStart(GestureEvent& info)
 {
     auto host = DynamicCast<SelectOverlayNode>(GetHost());
@@ -164,9 +185,15 @@ void SelectOverlayPattern::HandlePanStart(GestureEvent& info)
     if (firstHandleRegion_.IsInRegion(point)) {
         firstHandleDrag_ = true;
         secondHandleDrag_ = false;
+        if (info_->onHandleMoveStart) {
+            info_->onHandleMoveStart(firstHandleDrag_);
+        }
     } else if (secondHandleRegion_.IsInRegion(point)) {
         firstHandleDrag_ = false;
         secondHandleDrag_ = true;
+        if (info_->onHandleMoveStart) {
+            info_->onHandleMoveStart(firstHandleDrag_);
+        }
     } else {
         LOGW("the point is not in drag area");
     }
@@ -294,6 +321,25 @@ void SelectOverlayPattern::UpdateSecondSelectHandleInfo(const SelectHandleInfo& 
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
+void SelectOverlayPattern::UpdateFirstAndSecondHandleInfo(
+    const SelectHandleInfo& firstInfo, const SelectHandleInfo& secondInfo)
+{
+    if (info_->firstHandle == firstInfo && info_->secondHandle == secondInfo) {
+        return;
+    }
+    if (info_->firstHandle != firstInfo) {
+        info_->firstHandle = firstInfo;
+    }
+    if (info_->secondHandle != secondInfo) {
+        info_->secondHandle = secondInfo;
+    }
+    CheckHandleReverse();
+    UpdateHandleHotZone();
+    auto host = DynamicCast<SelectOverlayNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    host->UpdateToolBar(false);
+}
+
 void SelectOverlayPattern::UpdateSelectMenuInfo(const SelectMenuInfo& info)
 {
     auto host = DynamicCast<SelectOverlayNode>(GetHost());
@@ -313,9 +359,17 @@ void SelectOverlayPattern::UpdateShowArea(const RectF& area)
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
 
-bool SelectOverlayPattern::OnDirtyLayoutWrapperSwap(
-    const RefPtr<LayoutWrapper>& /*dirty*/, const DirtySwapConfig& /*config*/)
+bool SelectOverlayPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
+    if (config.skipMeasure || dirty->SkipMeasureContent()) {
+        return false;
+    }
+    
+    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
+    CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
+    auto textLayoutAlgorithm = DynamicCast<SelectOverlayLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_RETURN(textLayoutAlgorithm, false);
+    defaultMenuEndOffset_ = textLayoutAlgorithm->GetDefaultMenuEndOffset();
     return true;
 }
 

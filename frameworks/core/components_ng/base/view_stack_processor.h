@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,13 +22,15 @@
 #include <vector>
 
 #include "base/memory/referenced.h"
+#include "core/components/common/properties/animation_option.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/event/state_style_manager.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
-#include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
 #include "core/gestures/gesture_processor.h"
 #include "core/pipeline/base/render_context.h"
+
 #define ACE_UPDATE_LAYOUT_PROPERTY(target, name, value)                         \
     do {                                                                        \
         auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode(); \
@@ -56,6 +58,33 @@
         if (target) {                                                           \
             target->Update##name(value);                                        \
         }                                                                       \
+    } while (false)
+
+#define ACE_RESET_LAYOUT_PROPERTY(target, name)                                 \
+    do {                                                                        \
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode(); \
+        CHECK_NULL_VOID(frameNode);                                             \
+        auto cast##target = frameNode->GetLayoutProperty<target>();             \
+        CHECK_NULL_VOID(cast##target);                                          \
+        cast##target->Reset##name();                                            \
+    } while (false)
+
+#define ACE_RESET_PAINT_PROPERTY(target, name)                                  \
+    do {                                                                        \
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode(); \
+        CHECK_NULL_VOID(frameNode);                                             \
+        auto cast##target = frameNode->GetPaintProperty<target>();              \
+        CHECK_NULL_VOID(cast##target);                                          \
+        cast##target->Reset##name();                                            \
+    } while (false)
+
+#define ACE_RESET_RENDER_CONTEXT(target, name)                                  \
+    do {                                                                        \
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode(); \
+        CHECK_NULL_VOID(frameNode);                                             \
+        auto cast##target = frameNode->GetRenderContext();                      \
+        CHECK_NULL_VOID(cast##target);                                          \
+        cast##target->Reset##name();                                            \
     } while (false)
 
 namespace OHOS::Ace::NG {
@@ -104,13 +133,22 @@ public:
         return frameNode->GetOrCreateInputEventHub();
     }
 
-    RefPtr<FocusHub> GetMainFrameNodeFocusHub() const
+    RefPtr<FocusHub> GetOrCreateMainFrameNodeFocusHub() const
     {
         auto frameNode = GetMainFrameNode();
         if (!frameNode) {
             return nullptr;
         }
         return frameNode->GetOrCreateFocusHub();
+    }
+
+    RefPtr<FocusHub> GetMainFrameNodeFocusHub() const
+    {
+        auto frameNode = GetMainFrameNode();
+        if (!frameNode) {
+            return nullptr;
+        }
+        return frameNode->GetFocusHub();
     }
 
     RefPtr<FrameNode> GetMainFrameNode() const;
@@ -144,12 +182,15 @@ public:
     // Clear the key pushed to the stack
     void PopKey();
 
-    void SetVisualState(VisualState state)
-    {
-        visualState_ = state;
-    }
+    // Check whether the current node is in the corresponding polymorphic style state.
+    // When the polymorphic style is not set on the front end, it returns true regardless of the current node state;
+    // When the polymorphic style is set on the front end, true is returned only if the current node state is the same
+    // as the polymorphic style.
+    bool IsCurrentVisualStateProcess();
 
-    std::optional<VisualState> GetVisualState() const
+    void SetVisualState(VisualState state);
+
+    std::optional<UIState> GetVisualState() const
     {
         return visualState_;
     }
@@ -248,6 +289,14 @@ public:
         return currentPage_;
     }
 
+    // Sets the implicit animation option. This is needed for 3D Model View.
+    void SetImplicitAnimationOption(const AnimationOption& option);
+
+    // Returns implicit animation option.
+    const AnimationOption& GetImplicitAnimationOption() const;
+
+    RefPtr<UINode> GetNewUINode();
+
 private:
     ViewStackProcessor();
 
@@ -268,13 +317,15 @@ private:
 
     std::stack<int32_t> parentIdStack_;
 
-    std::optional<VisualState> visualState_ = std::nullopt;
+    std::optional<UIState> visualState_ = std::nullopt;
 
     // elmtId reserved for next component creation
     ElementIdType reservedNodeId_ = ElementRegister::UndefinedElementId;
 
     // elmtId to account get access to
     ElementIdType accountGetAccessToNodeId_ = ElementRegister::UndefinedElementId;
+
+    AnimationOption implicitAnimationOption_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ViewStackProcessor);
 };

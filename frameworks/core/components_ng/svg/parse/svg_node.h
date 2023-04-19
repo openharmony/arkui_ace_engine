@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,9 +23,10 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
+#include "core/animation/svg_animate.h"
 #include "core/components/declaration/svg/svg_base_declaration.h"
-#include "core/components_ng/render/drawing.h"
-#include "core/components_ng/svg/parse/svg_context.h"
+#include "core/components_ng/render/drawing_forward.h"
+#include "core/components_ng/svg/svg_context.h"
 
 namespace OHOS::Ace::NG {
 enum class SvgLengthType {
@@ -35,6 +36,7 @@ enum class SvgLengthType {
 };
 
 class SvgContext;
+class SvgAnimation;
 
 // three level inherit class, for example:
 // 1. SvgMask::SvgQuote::SvgNode
@@ -71,10 +73,7 @@ public:
         return {};
     }
 
-    virtual RSPath AsRSPath(const Size& viewPort) const
-    {
-        return {};
-    }
+    virtual RSPath AsRSPath(const Size& viewPort) const;
 
     Rect AsBounds(const Size& viewPort) const
     {
@@ -95,6 +94,11 @@ public:
     void SetText(const std::string& text)
     {
         text_ = text;
+    }
+
+    RefPtr<SvgBaseDeclaration> GetDeclaration()
+    {
+        return declaration_;
     }
 
 protected:
@@ -119,6 +123,20 @@ protected:
     std::optional<Gradient> GetGradient(const std::string& href);
     const Rect& GetRootViewBox() const;
 
+    virtual void PrepareAnimation(const RefPtr<SvgAnimation>& animate);
+    // create animation that changes an attribute
+    template<typename T>
+    void AnimateOnAttribute(const RefPtr<SvgAnimation>& animate, const T& originalValue);
+    // animate a transformation attribute
+    void AnimateTransform(const RefPtr<SvgAnimation>& animate, double originalValue);
+    void AnimateValueTransform(const RefPtr<SvgAnimation>& animate, double originalValue);
+    void AnimateFrameTransform(const RefPtr<SvgAnimation>& animate, double originalValue);
+
+    // update svg attribute in animation
+    template<typename T>
+    void UpdateAttr(const std::string& name, const T& val);
+    void UpdateAttrHelper(const std::string& name, const std::string& val);
+
     // defs gradient animation
     void InitNoneFlag()
     {
@@ -134,18 +152,19 @@ protected:
     std::vector<RefPtr<SvgNode>> children_;
     std::string nodeId_;
     std::string text_;
+    std::string transform_;
+    std::map<std::string, std::vector<float>> animateTransform_;
 
     std::string hrefClipPath_;
     std::string hrefMaskId_;
     std::string hrefFilterId_;
-    std::string transform_;
     uint8_t opacity_ = 0xFF;
 
-    bool hrefFill_ = true;   // 需要根据svg_xx特殊处理
-    bool hrefRender_ = true; // 需要根据svg_xx特殊处理
-    bool passStyle_ = true; // 样式继承传递时，是否传递给子标签， 图形标签 circle/path/line/... = false
-    bool inheritStyle_ = true; // 样式继承传递时，是否支持被遍历 mask/defs/pattern/filter = false
-    bool drawTraversed_ = true;  // 绘制时，是否支持被遍历 mask/defs/pattern/filter = false
+    bool hrefFill_ = true;   // get fill attributes from reference
+    bool hrefRender_ = true; // get render attr (mask, filter, transform, opacity, clip path) from reference
+    bool passStyle_ = true; // pass style attributes to child node, TAGS circle/path/line/... = false
+    bool inheritStyle_ = true;  // inherit style attributes from parent node, TAGS mask/defs/pattern/filter = false
+    bool drawTraversed_ = true; // enable OnDraw, TAGS mask/defs/pattern/filter = false
 
     SkCanvas* skCanvas_ = nullptr;
 

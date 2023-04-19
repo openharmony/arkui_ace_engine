@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_FRAME_NODE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_FRAME_NODE_H
 
+#include <functional>
 #include <list>
 #include <utility>
 
@@ -26,8 +27,10 @@
 #include "base/thread/cancelable_callback.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/macros.h"
+#include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/geometry_node.h"
+#include "core/components_ng/base/modifier.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/focus_hub.h"
@@ -48,8 +51,6 @@ class Pattern;
 class StateModifyTask;
 class UITask;
 
-constexpr int32_t DEFAULT_FRAME_SLOT = -1;
-
 // FrameNode will display rendering region in the screen.
 class ACE_EXPORT FrameNode : public UINode {
     DECLARE_ACE_TYPE(FrameNode, UINode);
@@ -69,6 +70,7 @@ public:
     // get element with nodeId from node map.
     static RefPtr<FrameNode> GetFrameNode(const std::string& tag, int32_t nodeId);
 
+    static void ProcessOffscreenNode(const RefPtr<FrameNode>& node);
     // avoid use creator function, use CreateFrameNode
     FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot = false);
 
@@ -99,7 +101,10 @@ public:
 
     void UpdateLayoutConstraint(const MeasureProperty& calcLayoutConstraint);
 
-    RefPtr<LayoutWrapper> CreateLayoutWrapper(bool forceMeasure = false, bool forceLayout = false);
+    RefPtr<LayoutWrapper> CreateLayoutWrapper(bool forceMeasure = false, bool forceLayout = false) override;
+
+    RefPtr<LayoutWrapper> UpdateLayoutWrapper(
+        RefPtr<LayoutWrapper> layoutWrapper, bool forceMeasure = false, bool forceLayout = false);
 
     std::optional<UITask> CreateLayoutTask(bool forceUseMainThread = false);
 
@@ -110,7 +115,15 @@ public:
     void SetOnAreaChangeCallback(OnAreaChangedFunc&& callback);
     void TriggerOnAreaChangeCallback();
 
-    void TriggerVisibleAreaChangeCallback(std::list<VisibleCallbackInfo>& callbackInfoList);
+    void AddVisibleAreaUserCallback(double ratio, const VisibleCallbackInfo& callback)
+    {
+        visibleAreaUserCallbacks_[ratio] = callback;
+    }
+    void AddVisibleAreaInnerCallback(double ratio, const VisibleCallbackInfo& callback)
+    {
+        visibleAreaInnerCallbacks_[ratio] = callback;
+    }
+    void TriggerVisibleAreaChangeCallback(bool forceDisappear = false);
 
     const RefPtr<GeometryNode>& GetGeometryNode() const
     {
@@ -199,22 +212,7 @@ public:
     HitTestResult AxisTest(
         const PointF& globalPoint, const PointF& parentLocalPoint, AxisTestResult& onAxisResult) override;
 
-    void AnimateHoverEffect(bool isHovered) const
-    {
-        auto renderContext = GetRenderContext();
-        if (!renderContext) {
-            return;
-        }
-        HoverEffectType animationType = HoverEffectType::UNKNOWN;
-        if (eventHub_->GetInputEventHub()) {
-            animationType = eventHub_->GetInputEventHub()->GetHoverEffect();
-        }
-        if (animationType == HoverEffectType::SCALE) {
-            renderContext->AnimateHoverEffectScale(isHovered);
-        } else if (animationType == HoverEffectType::BOARD) {
-            renderContext->AnimateHoverEffectBoard(isHovered);
-        }
-    }
+    void AnimateHoverEffect(bool isHovered) const;
 
     bool IsAtomicNode() const override;
 
@@ -254,11 +252,19 @@ public:
 
     void OnWindowUnfocused() override;
 
+    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
+
     void OnNotifyMemoryLevel(int32_t level) override;
 
     OffsetF GetOffsetRelativeToWindow() const;
 
-    OffsetF GetPaintRectOffset() const;
+    OffsetF GetTransformRelativeOffset() const;
+
+    RectF GetTransformRectRelativeToWindow() const;
+
+    OffsetF GetPaintRectOffset(bool excludeSelf = false) const;
+
+    OffsetF GetPaintRectOffsetToPage() const;
 
     void AdjustGridOffset();
 
@@ -279,13 +285,88 @@ public:
         isInternal_ = true;
     }
 
+    int32_t GetAllDepthChildrenCount();
+
     void OnAccessibilityEvent(AccessibilityEventType eventType) const;
     void MarkNeedRenderOnly();
 
-    void OnDetachFromMainTree() override;
-    void OnAttachToMainTree() override;
+    void OnDetachFromMainTree(bool recursive) override;
+    void OnAttachToMainTree(bool recursive) override;
 
     void OnVisibleChange(bool isVisible) override;
+
+    void PushDestroyCallback(std::function<void()>&& callback)
+    {
+        destroyCallbacks_.emplace_back(callback);
+    }
+
+    bool MarkRemoving() override;
+
+    void AddHotZoneRect(const DimensionRect& hotZoneRect) const;
+    void RemoveLastHotZoneRect() const;
+
+    bool IsOutOfTouchTestRegion(const PointF& parentLocalPoint);
+
+    bool IsLayoutDirtyMarked() const
+    {
+        return isLayoutDirtyMarked_;
+    }
+
+    bool HasPositionProp() const
+    {
+        CHECK_NULL_RETURN_NOLOG(renderContext_, false);
+        return renderContext_->HasPosition() || renderContext_->HasOffset() || renderContext_->HasAnchor();
+    }
+
+    bool OnRemoveFromParent() override;
+
+    // The function is only used for fast preview.
+    void FastPreviewUpdateChildDone() override
+    {
+        OnMountToParentDone();
+    }
+
+    bool IsExclusiveEventForChild() const
+    {
+        return exclusiveEventForChild_;
+    }
+
+    void SetExclusiveEventForChild(bool exclusiveEventForChild)
+    {
+        exclusiveEventForChild_ = exclusiveEventForChild;
+    }
+
+    void SetDraggable(bool draggable)
+    {
+        draggable_ = draggable;
+        userSet_ = true;
+    }
+
+    bool IsDraggable() const
+    {
+        return draggable_;
+    }
+
+    bool IsUserSet() const
+    {
+        return userSet_;
+    }
+
+    void SetAllowDrop(const std::set<std::string>& allowDrop)
+    {
+        allowDrop_ = allowDrop;
+    }
+
+    const std::set<std::string>& GetAllowDrop() const
+    {
+        return allowDrop_;
+    }
+
+    RefPtr<FrameNode> FindChildByPosition(float x, float y);
+
+    void CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
+        const std::function<void(float)>& onCallbackEvent);
+    void UpdateAnimatablePropertyFloat(const std::string& propertyName, float value);
 
 private:
     void MarkNeedRender(bool isRenderBoundary);
@@ -302,7 +383,12 @@ private:
     RefPtr<PaintWrapper> CreatePaintWrapper();
 
     void OnGenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList) override;
+    void OnGenerateOneDepthVisibleFrameWithTransition(
+        std::list<RefPtr<FrameNode>>& visibleList, uint32_t index) override;
     void OnGenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& allList) override;
+
+    void OnAddDisappearingChild() override;
+    void OnRemoveDisappearingChild() override;
 
     bool IsMeasureBoundary();
     bool IsRenderBoundary();
@@ -311,15 +397,17 @@ private:
     void DumpInfo() override;
 
     void FocusToJsonValue(std::unique_ptr<JsonValue>& json) const;
+    void MouseToJsonValue(std::unique_ptr<JsonValue>& json) const;
+    void TouchToJsonValue(std::unique_ptr<JsonValue>& json) const;
 
     HitTestMode GetHitTestMode() const override;
     bool GetTouchable() const;
     std::vector<RectF> GetResponseRegionList(const RectF& rect);
     bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const;
 
-    void ProcessAllVisibleCallback(std::list<VisibleCallbackInfo>& callbackInfoList, double currentVisibleRatio);
-    void OnVisibleAreaChangeCallback(
-        VisibleCallbackInfo& callbackInfo, bool visibleType, double currentVisibleRatio);
+    void ProcessAllVisibleCallback(
+        std::unordered_map<double, VisibleCallbackInfo>& visibleAreaCallbacks, double currentVisibleRatio);
+    void OnVisibleAreaChangeCallback(VisibleCallbackInfo& callbackInfo, bool visibleType, double currentVisibleRatio);
     double CalculateCurrentVisibleRatio(const RectF& visibleRect, const RectF& renderRect);
 
     struct ZIndexComparator {
@@ -335,6 +423,10 @@ private:
     std::multiset<RefPtr<FrameNode>, ZIndexComparator> frameChildren_;
     RefPtr<GeometryNode> geometryNode_ = MakeRefPtr<GeometryNode>();
 
+    std::list<std::function<void()>> destroyCallbacks_;
+    std::unordered_map<double, VisibleCallbackInfo> visibleAreaUserCallbacks_;
+    std::unordered_map<double, VisibleCallbackInfo> visibleAreaInnerCallbacks_;
+
     RefPtr<AccessibilityProperty> accessibilityProperty_;
     RefPtr<LayoutProperty> layoutProperty_;
     RefPtr<PaintProperty> paintProperty_;
@@ -344,6 +436,7 @@ private:
 
     std::unique_ptr<RectF> lastFrameRect_;
     std::unique_ptr<OffsetF> lastParentOffsetToWindow_;
+    std::set<std::string> allowDrop_;
 
     bool needSyncRenderTree_ = false;
 
@@ -352,6 +445,8 @@ private:
     bool isMeasureBoundary_ = false;
     bool hasPendingRequest_ = false;
 
+    // for container, this flag controls only the last child in touch area is consuming event.
+    bool exclusiveEventForChild_ = false;
     bool isActive_ = false;
     bool isResponseRegion_ = false;
 
@@ -362,6 +457,11 @@ private:
     bool isInternal_ = false;
 
     std::string nodeName_;
+
+    bool draggable_ = false;
+    bool userSet_ = false;
+
+    std::map<std::string, RefPtr<NodeAnimatablePropertyBase>> nodeAnimatablePropertyMap_;
 
     friend class RosenRenderContext;
     friend class RenderContext;

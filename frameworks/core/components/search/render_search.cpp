@@ -73,10 +73,14 @@ void RenderSearch::Update(const RefPtr<Component>& component)
     if (context && context->GetIsDeclarative()) {
         if (searchComponent_->GetOnChange()) {
             changeEvent_ = *searchComponent_->GetOnChange();
+        } else {
+            changeEvent_ = nullptr;
         }
 
         if (searchComponent_->GetOnSubmit()) {
             submitEvent_ = *searchComponent_->GetOnSubmit();
+        } else {
+            submitEvent_ = nullptr;
         }
     } else {
         changeEvent_ = AceAsyncEvent<void(const std::string)>::Create(searchComponent_->GetChangeEventId(), context_);

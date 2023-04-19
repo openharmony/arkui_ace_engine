@@ -25,6 +25,7 @@
 #include "base/geometry/rect.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
+#include "base/utils/utils.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/animatable_color.h"
 #include "core/components/common/properties/border.h"
@@ -85,10 +86,88 @@ enum class SpreadMethod {
 };
 
 enum class BlurStyle {
-    NoMaterial,
+    NO_MATERIAL = 0,
     THIN,
     REGULAR,
     THICK,
+    BACKGROUND_THIN,
+    BACKGROUND_REGULAR,
+    BACKGROUND_THICK,
+    BACKGROUND_ULTRA_THICK,
+};
+
+enum class ThemeColorMode {
+    SYSTEM = 0,
+    LIGHT,
+    DARK,
+};
+
+enum class AdaptiveColor {
+    DEFAULT = 0,
+    AVERAGE,
+};
+
+struct BlurStyleOption {
+    BlurStyle blurStyle = BlurStyle::NO_MATERIAL;
+    ThemeColorMode colorMode = ThemeColorMode::SYSTEM;
+    AdaptiveColor adaptiveColor = AdaptiveColor::DEFAULT;
+    bool operator == (const BlurStyleOption& other) const
+    {
+        return blurStyle == other.blurStyle && colorMode == other.colorMode && adaptiveColor == other.adaptiveColor;
+    }
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const
+    {
+        static const char* STYLE[] = { "", "BlurStyle.Thin", "BlurStyle.Regular", "BlurStyle.Thick",
+            "BlurStyle.BackgroundThin", "BlurStyle.BackgroundRegular", "BlurStyle.BackgroundThick",
+            "BlurStyle.BackgroundUltraThick" };
+        static const char* COLOR_MODE[] = { "ThemeColorMode.System", "ThemeColorMode.Light", "ThemeColorMode.Dark" };
+        static const char* ADAPTIVE_COLOR[] = { "AdaptiveColor.Default", "AdaptiveColor.Average" };
+        auto jsonBlurStyle = JsonUtil::Create(true);
+        jsonBlurStyle->Put("value", STYLE[static_cast<int>(blurStyle)]);
+        auto jsonBlurStyleOption = JsonUtil::Create(true);
+        jsonBlurStyleOption->Put("colorMode", COLOR_MODE[static_cast<int>(colorMode)]);
+        jsonBlurStyleOption->Put("adaptiveColor", ADAPTIVE_COLOR[static_cast<int>(adaptiveColor)]);
+        jsonBlurStyle->Put("options", jsonBlurStyleOption);
+        json->Put("backgroundBlurStyle", jsonBlurStyle);
+    }
+};
+
+struct PixStretchEffectOption {
+    Dimension left;
+    Dimension top;
+    Dimension right;
+    Dimension bottom;
+    bool operator==(const PixStretchEffectOption& other) const
+    {
+        return left == other.left && top == other.top && right == other.right && bottom == other.bottom;
+    }
+
+    bool IsPercentOption() const
+    {
+        return (left.Unit() == DimensionUnit::PERCENT && top.Unit() == DimensionUnit::PERCENT &&
+                right.Unit() == DimensionUnit::PERCENT && bottom.Unit() == DimensionUnit::PERCENT);
+    }
+
+    void ResetValue()
+    {
+        left = Dimension(0.0f);
+        top = Dimension(0.0f);
+        right = Dimension(0.0f);
+        bottom = Dimension(0.0f);
+    }
+
+    std::string ToString() const
+    {
+        return std::string("PixStretchEffectOption (")
+            .append(left.ToString())
+            .append(",")
+            .append(top.ToString())
+            .append(",")
+            .append(right.ToString())
+            .append(",")
+            .append(bottom.ToString())
+            .append(")");
+    }
 };
 
 struct LinearGradientInfo {
@@ -231,6 +310,15 @@ struct ACE_EXPORT SweepGradient {
     std::optional<AnimatableDimension> rotation;
 };
 
+struct ACE_EXPORT ConicGradient {
+    // center of x-axis
+    std::optional<AnimatableDimension> centerX;
+    // center of y-axis
+    std::optional<AnimatableDimension> centerY;
+    // startAngle in radian
+    std::optional<AnimatableDimension> startAngle;
+};
+
 class ACE_EXPORT Gradient final {
 public:
     void AddColor(const GradientColor& color);
@@ -353,6 +441,21 @@ public:
         sweepGradient_ = sweepGradient;
     }
 
+    ConicGradient& GetConicGradient()
+    {
+        return conicGradient_;
+    }
+
+    const ConicGradient& GetConicGradient() const
+    {
+        return conicGradient_;
+    }
+
+    void SetConicGradient(const ConicGradient& conicGradient)
+    {
+        conicGradient_ = conicGradient;
+    }
+
     RadialGradient& GetRadialGradient()
     {
         return radialGradient_;
@@ -442,6 +545,8 @@ private:
     LinearGradient linearGradient_;
     // for SweepGradient
     SweepGradient sweepGradient_;
+    // for ConicGradient
+    ConicGradient conicGradient_;
     // used for CanvasLinearGradient
     Offset beginOffset_;
     Offset endOffset_;
@@ -928,9 +1033,9 @@ public:
         windowBlurStyle_ = style;
     }
 
-    void SetBlurStyle(BlurStyle style)
+    void SetBlurStyle(const BlurStyleOption& style)
     {
-        blurStyle = style;
+        blurStyle_ = style;
     }
 
     const Border& GetBorder() const
@@ -1116,9 +1221,9 @@ public:
         return windowBlurStyle_;
     }
 
-    BlurStyle GetBlurStyle()
+    const BlurStyleOption& GetBlurStyle() const
     {
-        return blurStyle;
+        return blurStyle_;
     }
 
     // Indicate how much size the decoration taken, excluding the content size.
@@ -1171,8 +1276,8 @@ private:
     // window blur style;
     WindowBlurStyle windowBlurStyle_ = WindowBlurStyle::STYLE_BACKGROUND_SMALL_LIGHT;
     Color colorBlend;
-    // window blur form rosen
-    BlurStyle blurStyle = BlurStyle::NoMaterial;
+    // blur from rosen
+    BlurStyleOption blurStyle_;
 };
 
 class Pattern final {

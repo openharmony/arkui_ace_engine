@@ -15,16 +15,20 @@
 
 #include "core/components/chart/rosen_render_chart.h"
 
-#include "flutter/lib/ui/text/font_collection.h"
-#include "flutter/third_party/txt/src/txt/paragraph_txt.h"
-#include "third_party/skia/include/core/SkColor.h"
-#include "third_party/skia/include/core/SkPaint.h"
-#include "third_party/skia/include/effects/Sk1DPathEffect.h"
-#include "third_party/skia/include/effects/SkGradientShader.h"
+#include "include/core/SkColor.h"
+#include "include/core/SkPaint.h"
+#include "include/effects/Sk1DPathEffect.h"
+#include "include/effects/SkGradientShader.h"
+#include "txt/paragraph_builder.h"
+#include "txt/paragraph_txt.h"
 
 #include "base/utils/string_utils.h"
 #include "core/components/calendar/rosen_render_calendar.h"
+#ifndef NEW_SKIA
 #include "core/components/font/flutter_font_collection.h"
+#else
+#include "core/components/font/rosen_font_collection.h"
+#endif
 #include "core/pipeline/base/rosen_render_context.h"
 
 namespace OHOS::Ace {
@@ -102,8 +106,7 @@ void RosenRenderChart::Paint(RenderContext& context, const Offset& offset)
     PaintDatas(context, dataRegion);
 }
 
-void RosenRenderChart::PaintStylePoints(
-    SkCanvas* canvas, const Rect& paintRegion, const MainChart& chartData)
+void RosenRenderChart::PaintStylePoints(SkCanvas* canvas, const Rect& paintRegion, const MainChart& chartData)
 {
     SkPaint paint;
     paint.setAntiAlias(true);
@@ -133,7 +136,11 @@ void RosenRenderChart::PaintText(SkCanvas* canvas, const Rect& paintRegion, cons
     if (chartData.GetData().empty()) {
         return;
     }
+#ifndef NEW_SKIA
     auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
+#else
+    auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
+#endif
     if (!fontCollection) {
         LOGW("PaintText: fontCollection is null");
         return;
@@ -161,8 +168,7 @@ void RosenRenderChart::PaintText(SkCanvas* canvas, const Rect& paintRegion, cons
             paragraph->Paint(canvas, pointPosition.GetX() - textSize.Width() / 2,
                 pointPosition.GetY() - textSize.Height() - TEXT_PADDING);
         } else if (text.GetPlacement() == Placement::BOTTOM) {
-            paragraph->Paint(
-                canvas, pointPosition.GetX() - textSize.Width() / 2, pointPosition.GetY() + TEXT_PADDING);
+            paragraph->Paint(canvas, pointPosition.GetX() - textSize.Width() / 2, pointPosition.GetY() + TEXT_PADDING);
         }
     }
 }
@@ -191,10 +197,12 @@ void RosenRenderChart::PaintPoint(SkCanvas* canvas, const Offset& offset, SkPain
         }
         case PointShape::SQUARE: {
             canvas->drawRect(SkRect::MakeLTRB(offset.GetX() - innerRadius, offset.GetY() - innerRadius,
-                                              offset.GetX() + innerRadius, offset.GetY() + innerRadius), paint);
+                                 offset.GetX() + innerRadius, offset.GetY() + innerRadius),
+                paint);
             SetEdgeStyle(point, paint);
             canvas->drawRect(SkRect::MakeLTRB(offset.GetX() - pointSize / 2, offset.GetY() - pointSize / 2,
-                                              offset.GetX() + pointSize / 2, offset.GetY() + pointSize / 2), paint);
+                                 offset.GetX() + pointSize / 2, offset.GetY() + pointSize / 2),
+                paint);
             break;
         }
         case PointShape::TRIANGLE: {
@@ -358,8 +366,8 @@ void RosenRenderChart::PaintLinearGraph(SkCanvas* canvas, const Rect& paintRect)
     }
 }
 
-void RosenRenderChart::PaintLineEdge(SkCanvas* canvas, SkPath &path,
-    const SegmentInfo segmentInfo, double thickness, bool drawGradient)
+void RosenRenderChart::PaintLineEdge(
+    SkCanvas* canvas, SkPath& path, const SegmentInfo segmentInfo, double thickness, bool drawGradient)
 {
     SkPaint paint;
     paint.setAntiAlias(true);
@@ -369,8 +377,8 @@ void RosenRenderChart::PaintLineEdge(SkCanvas* canvas, SkPath &path,
         subPath.addRRect(
             SkRRect::MakeRectXY(SkRect::MakeXYWH(0.0, -0.5 * thickness, segmentInfo.GetSolidWidth(), thickness),
                 0.5 * thickness, 0.5 * thickness));
-        paint.setPathEffect(SkPath1DPathEffect::Make(subPath,
-            segmentInfo.GetSpaceWidth() + segmentInfo.GetSolidWidth(), 5.0f, SkPath1DPathEffect::kMorph_Style));
+        paint.setPathEffect(SkPath1DPathEffect::Make(subPath, segmentInfo.GetSpaceWidth() + segmentInfo.GetSolidWidth(),
+            5.0f, SkPath1DPathEffect::kMorph_Style));
     } else {
         paint.setStrokeWidth(thickness);
     }
@@ -385,8 +393,7 @@ void RosenRenderChart::PaintLineEdge(SkCanvas* canvas, SkPath &path,
         paint.setShader(
             SkGradientShader::MakeLinear(points, colors, nullptr, 2, SkShader::kClamp_TileMode, 0, nullptr));
 #else
-        paint.setShader(
-            SkGradientShader::MakeLinear(points, colors, nullptr, 2, SkTileMode::kClamp, 0, nullptr));
+        paint.setShader(SkGradientShader::MakeLinear(points, colors, nullptr, 2, SkTileMode::kClamp, 0, nullptr));
 #endif
     }
     if (gradientOfLine_ && drawGradient) {
@@ -398,21 +405,19 @@ void RosenRenderChart::PaintLineEdge(SkCanvas* canvas, SkPath &path,
         paint.setShader(
             SkGradientShader::MakeLinear(points, colors, nullptr, 2, SkShader::kClamp_TileMode, 0, nullptr));
 #else
-        paint.setShader(
-            SkGradientShader::MakeLinear(points, colors, nullptr, 2, SkTileMode::kClamp, 0, nullptr));
+        paint.setShader(SkGradientShader::MakeLinear(points, colors, nullptr, 2, SkTileMode::kClamp, 0, nullptr));
 #endif
     }
     paint.setStyle(SkPaint::Style::kStroke_Style);
     canvas->drawPath(path, paint);
 }
 
-void RosenRenderChart::PaintLineGradient(SkCanvas* canvas, SkPath& path,
-    const Rect& paintRect, Color fillColor, const PointInfo& peekPoint)
+void RosenRenderChart::PaintLineGradient(
+    SkCanvas* canvas, SkPath& path, const Rect& paintRect, Color fillColor, const PointInfo& peekPoint)
 {
     SkPaint paint;
     paint.setAntiAlias(true);
-    paint.setShader(
-        CreateFillGradientShader(paintRect, fillColor, ConvertDataToPosition(paintRect, peekPoint).GetY()));
+    paint.setShader(CreateFillGradientShader(paintRect, fillColor, ConvertDataToPosition(paintRect, peekPoint).GetY()));
 
     paint.setStyle(SkPaint::Style::kStrokeAndFill_Style);
     canvas->drawPath(path, paint);
@@ -442,8 +447,8 @@ Offset RosenRenderChart::CalculateControlB(const Offset& cur, const Offset& next
         next.GetY() - (nextNext.GetY() - cur.GetY()) / BEZIER_CONSTANT);
 }
 
-int32_t RosenRenderChart::PaintLine(uint32_t startIndex, const std::vector<LineInfo>& line,
-    SkPath& path, const MainChart& data, const Rect& paintRect)
+int32_t RosenRenderChart::PaintLine(
+    uint32_t startIndex, const std::vector<LineInfo>& line, SkPath& path, const MainChart& data, const Rect& paintRect)
 {
     uint32_t index = startIndex;
     startIndex_ = startIndex;
@@ -488,8 +493,8 @@ int32_t RosenRenderChart::PaintLine(uint32_t startIndex, const std::vector<LineI
     return index;
 }
 
-void RosenRenderChart::AddCubicPath(SkPath& path, const Rect& paintRect,
-    const std::vector<LineInfo>& line, uint32_t index, bool isEnd)
+void RosenRenderChart::AddCubicPath(
+    SkPath& path, const Rect& paintRect, const std::vector<LineInfo>& line, uint32_t index, bool isEnd)
 {
     // use control point A = [(Xi + (Xi+1 - Xi-1) / 4), (Yi + (Yi+1 - Yi-1) / 4)]
     // and control point B = [(Xi+1 - (Xi+2 - Xi) / 4), (Yi+1 - (Yi+2 - Yi) / 4)]
@@ -577,9 +582,8 @@ void RosenRenderChart::PaintVerticalAxis(RenderContext& context, const Offset& o
         offset.GetX() + paintRect.Width() - 0.5 * TICK_LENGTH, offset.GetY() + paintRect.Height(), paint);
 }
 
-void RosenRenderChart::PaintBar(SkCanvas* canvas, SkPaint& paint,
-    const std::vector<LineInfo>& barGroupData, const Rect& paintRect, int32_t barGroupNum, int32_t barsAreaNum,
-    int32_t barGroupIndex)
+void RosenRenderChart::PaintBar(SkCanvas* canvas, SkPaint& paint, const std::vector<LineInfo>& barGroupData,
+    const Rect& paintRect, int32_t barGroupNum, int32_t barsAreaNum, int32_t barGroupIndex)
 {
     if (NearEqual(paintRect.Width(), 0.0) || NearEqual(paintRect.Height(), 0.0)) {
         LOGE("data paint region width:%{public}lf height:%{public}lf", paintRect.Width(), paintRect.Height());
@@ -604,9 +608,10 @@ void RosenRenderChart::PaintBar(SkCanvas* canvas, SkPaint& paint,
         auto originX = barAreaPaintRect.GetOffset().GetX() + (BAR_INTERVAL_PROPORTION / 2) * barAreaPaintRect.Width();
         auto originY = position.GetY();
 
-        canvas->drawRect(SkRect::MakeLTRB(originX, originY,
-                                          originX + barAreaPaintRect.Width() * (1 - BAR_INTERVAL_PROPORTION),
-                                          paintRect.GetOffset().GetY() + paintRect.Height()), paint);
+        canvas->drawRect(
+            SkRect::MakeLTRB(originX, originY, originX + barAreaPaintRect.Width() * (1 - BAR_INTERVAL_PROPORTION),
+                paintRect.GetOffset().GetY() + paintRect.Height()),
+            paint);
     }
 }
 
@@ -627,8 +632,8 @@ Rect RosenRenderChart::GetBarAreaPaintRect(
     auto barAreaWidth = (1 - barInterval) * barsAreaPaintRect.Width() / barGroupNumber;
     auto barAreaHeight = barsAreaPaintRect.Height();
     // After leaving the interval, the left border of the barArea area is obtained
-    auto barAreaLeft = barsAreaPaintRect.Left() + barInterval / 2 * barsAreaPaintRect.Width() +
-                       barGroupIndex * barAreaWidth;
+    auto barAreaLeft =
+        barsAreaPaintRect.Left() + barInterval / 2 * barsAreaPaintRect.Width() + barGroupIndex * barAreaWidth;
     Rect barAreaRect = Rect(barAreaLeft, barsAreaPaintRect.Top(), barAreaWidth, barAreaHeight);
     return barAreaRect;
 }

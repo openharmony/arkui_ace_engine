@@ -16,7 +16,7 @@
 #include "core/components_ng/event/focus_hub.h"
 
 namespace OHOS::Ace::NG {
-void FocusHub::RemoveSelf(FrameNode* frameNode) {}
+void FocusHub::RemoveSelf() {}
 
 bool FocusHub::IsEnabled() const
 {

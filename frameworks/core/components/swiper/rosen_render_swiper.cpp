@@ -16,8 +16,8 @@
 #include "core/components/swiper/rosen_render_swiper.h"
 
 #include "render_service_client/core/ui/rs_node.h"
-#include "third_party/skia/include/core/SkPaint.h"
-#include "third_party/skia/include/effects/SkGradientShader.h"
+#include "include/core/SkPaint.h"
+#include "include/effects/SkGradientShader.h"
 
 #include "base/utils/system_properties.h"
 #include "core/components/align/render_align.h"
@@ -50,8 +50,7 @@ void RosenRenderSwiper::Update(const RefPtr<Component>& component)
 
 void RosenRenderSwiper::Paint(RenderContext& context, const Offset& offset)
 {
-    UpdateChildrenVisible();
-    RenderNode::Paint(context, offset);
+    RenderNode::PaintChildList(GetPaintChildList(), context, offset);
 
     if (auto rsNode = static_cast<RosenRenderContext*>(&context)->GetRSNode()) {
         rsNode->SetPaintOrder(true);

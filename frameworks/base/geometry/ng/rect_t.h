@@ -278,6 +278,12 @@ public:
                  LessNotEqual(other.Bottom(), Top()) || GreatNotEqual(other.Top(), Bottom()));
     }
 
+    bool IsInnerIntersectWith(const RectT& other) const
+    {
+        return !(LessOrEqual(other.Right(), Left()) || GreatOrEqual(other.Left(), Right()) ||
+                 LessOrEqual(other.Bottom(), Top()) || GreatOrEqual(other.Top(), Bottom()));
+    }
+
     RectT IntersectRectT(const RectT& other) const
     {
         T left = std::max(Left(), other.Left());
@@ -443,6 +449,7 @@ public:
     inline RoundRect(const RectF& rect, const RadiusF& radius) noexcept;
 
     inline void SetCornerRadius(CornerPos pos, float radiusX, float radiusY);
+    inline void SetCornerRadius(float radius);
     inline EdgeF GetCornerRadius(CornerPos pos) const;
 
     inline void SetRect(const RectF& rect);
@@ -481,6 +488,14 @@ inline RoundRect::RoundRect(const RectF& r, const RadiusF& rad) noexcept : Round
 inline void RoundRect::SetCornerRadius(CornerPos pos, float radiusX, float radiusY)
 {
     radius_.SetCorner(pos, EdgeF(radiusX, radiusY));
+}
+
+inline void RoundRect::SetCornerRadius(float radius)
+{
+    radius_.SetCorner(TOP_LEFT_POS, EdgeF(radius, radius));
+    radius_.SetCorner(TOP_RIGHT_POS, EdgeF(radius, radius));
+    radius_.SetCorner(BOTTOM_LEFT_POS, EdgeF(radius, radius));
+    radius_.SetCorner(BOTTOM_RIGHT_POS, EdgeF(radius, radius));
 }
 
 inline EdgeF RoundRect::GetCornerRadius(CornerPos pos) const

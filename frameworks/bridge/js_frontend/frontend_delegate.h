@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 
 #include <vector>
 
+#include "base/geometry/size.h"
 #include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
@@ -113,6 +114,7 @@ public:
     // system.measure
     // ----------------
     virtual double MeasureText(const MeasureContext& context) = 0;
+    virtual Size MeasureTextSize(const MeasureContext& context) = 0;
 
     // ----------------
     // system.prompt
@@ -159,6 +161,9 @@ public:
     // ----------------
     virtual void RequestAnimationFrame(const std::string& callbackId) = 0;
     virtual void CancelAnimationFrame(const std::string& callbackId) = 0;
+
+    virtual void GetSnapshot(
+        const std::string& componentId, std::function<void(std::shared_ptr<Media::PixelMap>, int32_t)>&& callback) = 0;
 
     virtual bool GetAssetContent(const std::string& url, std::string& content) = 0;
     virtual bool GetAssetContent(const std::string& url, std::vector<uint8_t>& content) = 0;
@@ -225,6 +230,7 @@ public:
 protected:
     RefPtr<AssetManager> assetManager_;
     bool disallowPopLastPage_ = false;
+    bool isFirstNotifyShow_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(FrontendDelegate);
 };

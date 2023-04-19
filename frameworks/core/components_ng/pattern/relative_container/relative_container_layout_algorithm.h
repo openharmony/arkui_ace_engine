@@ -50,7 +50,7 @@ private:
     float CalcHorizontalOffset(
         AlignDirection alignDirection, const AlignRule& alignRule, float containerWidth, const std::string& nodeName);
     float CalcVerticalOffset(
-        AlignDirection alignDirection, const AlignRule& alignRule, float containerWidth, const std::string& nodeName);
+        AlignDirection alignDirection, const AlignRule& alignRule, float containerHeight, const std::string& nodeName);
 
     std::list<std::string> renderList_;
     std::map<std::string, RefPtr<LayoutWrapper>> idNodeMap_;

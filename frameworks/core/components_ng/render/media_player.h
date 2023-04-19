@@ -32,6 +32,7 @@ class MediaPlayer : public virtual AceType {
     DECLARE_ACE_TYPE(NG::MediaPlayer, AceType)
 
 public:
+    MediaPlayer() = default;
     ~MediaPlayer() override = default;
 
     static RefPtr<MediaPlayer> Create();
@@ -93,11 +94,6 @@ public:
         return -1;
     }
 
-    virtual int32_t Prepare()
-    {
-        return -1;
-    }
-
     virtual bool IsPlaying()
     {
         return false;
@@ -124,7 +120,6 @@ public:
     }
 
 protected:
-    MediaPlayer() = default;
 
     ACE_DISALLOW_COPY_AND_MOVE(MediaPlayer);
 };

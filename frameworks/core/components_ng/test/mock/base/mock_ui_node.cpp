@@ -18,11 +18,10 @@
 namespace OHOS::Ace::NG {
 UINode::~UINode() {}
 void UINode::ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& newNode) {}
-void UINode::Clean() {}
-void UINode::OnRemoveFromParent() {}
+void UINode::Clean(bool cleanDirectly) {}
 void UINode::GetFocusChildren(std::list<RefPtr<FrameNode>>& children) const {}
-void UINode::AttachToMainTree() {}
-void UINode::DetachFromMainTree() {}
+void UINode::AttachToMainTree(bool) {}
+void UINode::DetachFromMainTree(bool) {}
 void UINode::MovePosition(int32_t slot) {}
 void UINode::UpdateLayoutPropertyFlag() {}
 void UINode::AdjustParentLayoutFlag(PropertyChangeFlag& flag) {}
@@ -30,8 +29,14 @@ void UINode::MarkDirtyNode(PropertyChangeFlag extraFlag) {}
 void UINode::MarkNeedFrameFlushDirty(PropertyChangeFlag extraFlag) {}
 void UINode::MarkNeedSyncRenderTree() {}
 void UINode::RebuildRenderContextTree() {}
-void UINode::OnDetachFromMainTree() {}
-void UINode::OnAttachToMainTree() {}
+void UINode::OnDetachFromMainTree(bool) {}
+void UINode::OnAttachToMainTree(bool) {}
+void UINode::OnGenerateOneDepthVisibleFrameWithTransition(
+    std::list<RefPtr<FrameNode>>& visibleList, uint32_t index) {}
+bool UINode::OnRemoveFromParent()
+{
+    return false;
+}
 void UINode::DumpTree(int32_t depth) {}
 void UINode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool forceMeasure, bool forceLayout) {}
 void UINode::GenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList) {}
@@ -124,8 +129,20 @@ int32_t UINode::GetChildIndexById(int32_t id)
     return -1;
 }
 
-RefPtr<LayoutWrapper> UINode::CreateLayoutWrapper(bool forceMeasure, bool forceLayout) const
+RefPtr<LayoutWrapper> UINode::CreateLayoutWrapper(bool forceMeasure, bool forceLayout)
 {
     return nullptr;
 }
+
+bool UINode::MarkRemoving()
+{
+    return false;
+}
+
+bool UINode::RemoveDisappearingChild(const RefPtr<UINode>& child)
+{
+    return false;
+}
+
+void UINode::AddDisappearingChild(const RefPtr<UINode>& child, uint32_t) {}
 } // namespace OHOS::Ace::NG

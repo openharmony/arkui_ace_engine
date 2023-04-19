@@ -15,7 +15,9 @@
 
 #include "core/components/page_transition/page_transition_component.h"
 
+#ifndef NEW_SKIA
 #include "core/components/stack/flutter_render_stack.h"
+#endif
 #include "core/components/stack/rosen_render_stack.h"
 
 namespace OHOS::Ace {
@@ -31,10 +33,14 @@ RefPtr<RenderNode> PageTransitionComponent::CreateRenderNode()
             rosenRenderNode->SetBoundary();
         }
     } else {
+#ifndef NEW_SKIA
         auto flutterRenderNode = AceType::DynamicCast<FlutterRenderStack>(renderNode);
         if (flutterRenderNode) {
             flutterRenderNode->SetBoundary();
         }
+#else
+        return nullptr;
+#endif
     }
 
     return renderNode;

@@ -43,6 +43,7 @@ RefPtr<FrameNode> RenderContext::GetHost() const
 void RenderContext::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     ACE_PROPERTY_TO_JSON_VALUE(propBorder_, BorderProperty);
+    ACE_PROPERTY_TO_JSON_VALUE(propBdImage_, BorderImageProperty);
     ACE_PROPERTY_TO_JSON_VALUE(propOverlay_, OverlayProperty);
     ACE_PROPERTY_TO_JSON_VALUE(propPositionProperty_, RenderPositionProperty);
     ACE_PROPERTY_TO_JSON_VALUE(propBackground_, BackgroundProperty);
@@ -50,6 +51,7 @@ void RenderContext::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     ACE_PROPERTY_TO_JSON_VALUE(propGradient_, GradientProperty);
     ACE_PROPERTY_TO_JSON_VALUE(propTransform_, TransformProperty);
     ACE_PROPERTY_TO_JSON_VALUE(propClip_, ClipProperty);
+    ACE_PROPERTY_TO_JSON_VALUE(GetBackBlurStyle(), BlurStyleOption);
     if (propTransformMatrix_.has_value()) {
         auto jsonValue = JsonUtil::Create(true);
         jsonValue->Put("type", "matrix");
@@ -66,5 +68,20 @@ void RenderContext::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("backgroundColor", propBackgroundColor_.value_or(Color::TRANSPARENT).ColorToString().c_str());
     json->Put("zIndex", propZIndex_.value_or(0));
     json->Put("opacity", propOpacity_.value_or(1));
+    if (propProgressMask_.has_value()) {
+        json->Put("total", propProgressMask_.value()->GetMaxValue());
+        json->Put("updateProgress", propProgressMask_.value()->GetValue());
+        json->Put("updateColor", propProgressMask_.value()->GetColor().ColorToString().c_str());
+    }
+    json->Put("lightUpEffect", propLightUpEffect_.value_or(0.0));
+    json->Put("sphericalEffect", propSphericalEffect_.value_or(0.0));
+    auto pixStretchEffectOption = propPixelStretchEffect_.value_or(PixStretchEffectOption());
+    auto pixelJsonValue = JsonUtil::Create(true);
+    pixelJsonValue->Put("left", pixStretchEffectOption.left.ToString().c_str());
+    pixelJsonValue->Put("right", pixStretchEffectOption.right.ToString().c_str());
+    pixelJsonValue->Put("top", pixStretchEffectOption.top.ToString().c_str());
+    pixelJsonValue->Put("bottom", pixStretchEffectOption.bottom.ToString().c_str());
+    json->Put("pixelStretchEffect", pixelJsonValue);
+    json->Put("foregroundColor", propForegroundColor_.value_or(Color::FOREGROUND).ColorToString().c_str());
 }
 } // namespace OHOS::Ace::NG

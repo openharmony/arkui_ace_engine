@@ -16,6 +16,7 @@ import(
 
 build_component_ng("property_ng") {
   sources = [
+    "accessibility_property.cpp",
     "calc_length.cpp",
     "gradient_property.cpp",
     "grid_property.cpp",

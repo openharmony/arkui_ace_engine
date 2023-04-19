@@ -145,6 +145,9 @@ public:
     void SetEndHandleOffset(const Offset& offset);
     const Offset& GetEndHandleOffset() const;
 
+    void SetMouseOffset(const Offset& mouseOffset);
+    const Offset& GetMouseOffset() const;
+
     void SetOnStartHandleMove(const StartHandleMoveCallback& onStartHandleMove);
     const StartHandleMoveCallback& GetOnStartHandleMove() const;
 
@@ -237,6 +240,7 @@ private:
     Dimension menuSpacingWithText_;
     Offset startHandleOffset_;
     Offset endHandleOffset_;
+    Offset mouseOffset_;
     TextDirection realTextDirection_ = TextDirection::LTR;
     ComposeId innerComposeId_;
     ComposeId outerComposeId_;

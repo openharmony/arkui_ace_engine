@@ -15,8 +15,8 @@
 
 #include "core/components/marquee/rosen_render_marquee.h"
 
-#include "flutter/third_party/icu/source/common/unicode/uchar.h"
 #include "render_service_client/core/ui/rs_node.h"
+#include "unicode/uchar.h"
 
 #include "base/utils/string_utils.h"
 

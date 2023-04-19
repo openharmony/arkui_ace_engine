@@ -20,6 +20,7 @@
 #include "core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
+
 class RadioPaintProperty : public PaintProperty {
     DECLARE_ACE_TYPE(RadioPaintProperty, PaintProperty)
 
@@ -32,7 +33,9 @@ public:
         auto paintProperty = MakeRefPtr<RadioPaintProperty>();
         paintProperty->UpdatePaintProperty(this);
         paintProperty->propRadioCheck_ = CloneRadioCheck();
-
+        paintProperty->propRadioCheckedBackgroundColor_ = CloneRadioCheckedBackgroundColor();
+        paintProperty->propRadioUncheckedBorderColor_ = CloneRadioUncheckedBorderColor();
+        paintProperty->propRadioIndicatorColor_ = CloneRadioIndicatorColor();
         return paintProperty;
     }
 
@@ -40,17 +43,33 @@ public:
     {
         PaintProperty::Reset();
         ResetRadioCheck();
+        ResetRadioCheckedBackgroundColor();
+        ResetRadioUncheckedBorderColor();
+        ResetRadioIndicatorColor();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto radioTheme = pipeline->GetTheme<RadioTheme>();
         PaintProperty::ToJsonValue(json);
         json->Put("checked", GetRadioCheck().value_or(false) ? "true" : "false");
+        auto jsonValue = JsonUtil::Create(true);
+        jsonValue->Put("checkedBackgroundColor",
+            GetRadioCheckedBackgroundColor().value_or(radioTheme->GetActiveColor()).ColorToString().c_str());
+        jsonValue->Put("uncheckedBorderColor",
+            GetRadioUncheckedBorderColor().value_or(radioTheme->GetInactiveColor()).ColorToString().c_str());
+        jsonValue->Put("indicatorColor",
+            GetRadioIndicatorColor().value_or(radioTheme->GetPointColor()).ColorToString().c_str());
+        json->Put("radioStyle", jsonValue->ToString().c_str());
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(RadioCheck, bool, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(RadioCheckedBackgroundColor, Color, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(RadioUncheckedBorderColor, Color, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(RadioIndicatorColor, Color, PROPERTY_UPDATE_RENDER);
 };
-
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_RADIO_RADIO_PAINT_PROPERTY_H

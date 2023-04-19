@@ -39,9 +39,10 @@ public:
     {
         return RowSplitElement::TypeId();
     }
-    void AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent) override;
-    void UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent) override;
-    void DeleteChildWithSlot(int32_t slot) override;
+    RefPtr<Element> GetRenderElement() const override
+    {
+        return GetContentElement<RowSplitElement>(RowSplitElement::TypeId());
+    }
 
 private:
     RefPtr<RenderRowSplit> GetRenderRowSplit() const;

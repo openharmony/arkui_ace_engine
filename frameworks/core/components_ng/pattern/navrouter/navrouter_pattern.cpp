@@ -21,13 +21,12 @@ namespace OHOS::Ace::NG {
 
 void NavRouterPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto gesture = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
-    if (clickListener_) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(!clickListener_);
     auto clickCallback = [weak = WeakClaim(this)](GestureEvent& /*info*/) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);

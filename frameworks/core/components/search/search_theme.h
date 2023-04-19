@@ -24,6 +24,7 @@
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_constants_defines.h"
+#include "core/components_ng/pattern/search/search_model.h"
 
 namespace OHOS::Ace {
 
@@ -81,6 +82,17 @@ public:
             theme->textColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color());
             theme->focusTextColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR_FOCUSED, Color());
             theme->fontSize_ = pattern->GetAttr<Dimension>(PATTERN_TEXT_SIZE, 0.0_fp);
+            theme->touchColor_ = pattern->GetAttr<Color>("search_touch_color", Color());
+            theme->hoverColor_ = pattern->GetAttr<Color>("search_hover_color", Color());
+            theme->searchDividerColor_ = pattern->GetAttr<Color>("search_divider_color", Color());
+            theme->searchButtonTextColor_ = pattern->GetAttr<Color>("search_button_text_color", Color());
+            theme->searchIconColor_ = pattern->GetAttr<Color>("search_icon_color", Color());
+            theme->searchButtonTextPadding_ = pattern->GetAttr<Dimension>("search_button_text_padding", Dimension());
+            theme->searchButtonSpace_ = pattern->GetAttr<Dimension>("search_button_space", Dimension());
+            theme->dividerSideSpace_ = pattern->GetAttr<Dimension>("search_divider_side_space", Dimension());
+            theme->iconHeight_ = pattern->GetAttr<Dimension>("search_icon_height", Dimension());
+            theme->searchIconLeftSpace_ = pattern->GetAttr<Dimension>("search_icon_left_space", Dimension());
+            theme->searchIconRightSpace_ = pattern->GetAttr<Dimension>("search_icon_right_space", Dimension());
         }
     };
 
@@ -104,6 +116,16 @@ public:
     const Color& GetFocusTextColor() const
     {
         return focusTextColor_;
+    }
+
+    const Color& GetTouchColor() const
+    {
+        return touchColor_;
+    }
+
+    const Color& GetHoverColor() const
+    {
+        return hoverColor_;
     }
 
     const Dimension& GetHeight() const
@@ -161,24 +183,24 @@ public:
         return blockRightShade_;
     }
 
-    float GetDividerSpace() const
+    const Dimension& GetDividerSideSpace() const
     {
-        return dividerSpace_;
+        return dividerSideSpace_;
     }
 
-    float GetSearchDividerWidth() const
+    const Dimension& GetSearchDividerWidth() const
     {
         return searchDividerWidth_;
     }
 
-    float GetTextPadding() const
+    const Dimension& GetSearchButtonTextPadding() const
     {
-        return textPadding_;
+        return searchButtonTextPadding_;
     }
 
-    const Dimension& GetSearchSpacing() const
+    const Dimension& GetSearchButtonSpace() const
     {
-        return searchSpacing_;
+        return searchButtonSpace_;
     }
 
     const Dimension& GetIconHeight() const
@@ -186,9 +208,14 @@ public:
         return iconHeight_;
     }
 
-    const Dimension& GetIconWidthOffset() const
+    const Dimension& GetSearchIconLeftSpace() const
     {
-        return iconWidthOffset_;
+        return searchIconLeftSpace_;
+    }
+
+    const Dimension& GetSearchIconRightSpace() const
+    {
+        return searchIconRightSpace_;
     }
 
     const Color& GetSearchDividerColor() const
@@ -201,6 +228,16 @@ public:
         return searchButtonTextColor_;
     }
 
+    const Color& GetSearchIconColor() const
+    {
+        return searchIconColor_;
+    }
+
+    const CancelButtonStyle& GetCancelButtonStyle() const
+    {
+        return cancelButtonStyle_;
+    }
+
 protected:
     SearchTheme() = default;
 
@@ -209,6 +246,8 @@ private:
     Color focusPlaceholderColor_;
     Color textColor_;
     Color focusTextColor_;
+    Color touchColor_;
+    Color hoverColor_;
     Dimension height_;
     Dimension fontSize_;
     Dimension iconSize_;
@@ -220,14 +259,17 @@ private:
     FontWeight fontWeight_ = FontWeight::NORMAL;
     Radius borderRadius_;
     bool blockRightShade_ = false;
-    float dividerSpace_ = 7.0f;
-    float searchDividerWidth_ = 1.0f;
-    float textPadding_ = 18.0f;
-    Dimension searchSpacing_ = 2.0_vp;
-    Dimension iconHeight_ = 16.0_vp;
-    Dimension iconWidthOffset_ = 14.0_vp;
-    Color searchDividerColor_ = Color(0x33000000);
-    Color searchButtonTextColor_ = Color(0xFF254FF7);
+    Dimension dividerSideSpace_;
+    Dimension searchDividerWidth_ = 1.0_px;
+    Dimension searchButtonTextPadding_;
+    Dimension searchButtonSpace_;
+    Dimension iconHeight_;
+    Dimension searchIconLeftSpace_;
+    Dimension searchIconRightSpace_;
+    Color searchDividerColor_;
+    Color searchButtonTextColor_;
+    Color searchIconColor_;
+    CancelButtonStyle cancelButtonStyle_ = CancelButtonStyle::INPUT;
 };
 
 } // namespace OHOS::Ace

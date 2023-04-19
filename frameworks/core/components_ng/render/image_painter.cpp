@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include "core/components_ng/render/image_painter.h"
 
+#include "base/utils/utils.h"
 #include "core/components_ng/render/adapter/svg_canvas_image.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -86,59 +87,56 @@ void ApplyNone(const SizeF& rawPicSize, const SizeF& dstSize, RectF& srcRect, Re
 // | M31 M32 M33 M34 M35 | x | B | = | B' |
 // | M41 M42 M43 M44 M45 |   | A |   | A' |
 //                           | 1 |
-const float GRAY_COLOR_MATRIX[20] = { 0.30f, 0.59f, 0.11f, 0,    0,  // red
-                                      0.30f, 0.59f, 0.11f, 0,    0,  // green
-                                      0.30f, 0.59f, 0.11f, 0,    0,  // blue
-                                      0,     0,     0,     1.0f, 0}; // alpha transparency
+const float GRAY_COLOR_MATRIX[20] = { 0.30f, 0.59f, 0.11f, 0, 0, // red
+    0.30f, 0.59f, 0.11f, 0, 0,                                   // green
+    0.30f, 0.59f, 0.11f, 0, 0,                                   // blue
+    0, 0, 0, 1.0f, 0 };                                          // alpha transparency
 } // namespace
 
-void ImagePainter::DrawImage(
-    RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize, const ImagePaintConfig& imagePaintConfig) const
+void ImagePainter::DrawImage(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const
 {
-    if (imagePaintConfig.isSvg_) {
-        DrawSVGImage(canvas, offset, contentSize, imagePaintConfig);
-        return;
+    CHECK_NULL_VOID(canvasImage_);
+    const auto config = canvasImage_->GetPaintConfig();
+    if (config.isSvg_) {
+        DrawSVGImage(canvas, offset, contentSize);
+    } else if (config.imageRepeat_ == ImageRepeat::NO_REPEAT) {
+        DrawStaticImage(canvas, offset);
+    } else {
+        RectF rect(offset.GetX(), offset.GetY(), contentSize.Width(), contentSize.Height());
+        DrawImageWithRepeat(canvas, rect);
     }
-    if (imagePaintConfig.imageRepeat_ == ImageRepeat::NO_REPEAT) {
-        DrawStaticImage(canvas, offset, imagePaintConfig);
-        return;
-    }
-    DrawImageWithRepeat(
-        canvas, imagePaintConfig, RectF(offset.GetX(), offset.GetY(), contentSize.Width(), contentSize.Height()));
 }
 
-void ImagePainter::DrawSVGImage(RSCanvas& canvas, const OffsetF& offset, const SizeF& svgContainerSize,
-    const ImagePaintConfig& imagePaintConfig) const
+void ImagePainter::DrawSVGImage(RSCanvas& canvas, const OffsetF& offset, const SizeF& svgContainerSize) const
 {
     CHECK_NULL_VOID(canvasImage_);
     canvas.Save();
     canvas.Translate(offset.GetX(), offset.GetY());
-
-    if (imagePaintConfig.needFlipCanvasHorizontally_) {
-        ImagePainter::FlipHorizontal(canvas, offset.GetX(), imagePaintConfig.dstRect_.Width());
+    const auto config = canvasImage_->GetPaintConfig();
+    if (config.needFlipCanvasHorizontally_) {
+        ImagePainter::FlipHorizontal(canvas, offset.GetX(), config.dstRect_.Width());
     }
 
     RectF srcRect;
     srcRect.SetSize(svgContainerSize);
-    canvasImage_->DrawToRSCanvas(
-        canvas, ToRSRect(srcRect), ToRSRect(imagePaintConfig.dstRect_), std::array<PointF, 4>());
+    canvasImage_->DrawToRSCanvas(canvas, ToRSRect(srcRect), ToRSRect(config.dstRect_), BorderRadiusArray());
     canvas.Restore();
 }
 
-void ImagePainter::DrawStaticImage(
-    RSCanvas& canvas, const OffsetF& offset, const ImagePaintConfig& imagePaintConfig) const
+void ImagePainter::DrawStaticImage(RSCanvas& canvas, const OffsetF& offset) const
 {
     CHECK_NULL_VOID(canvasImage_);
     RSBrush brush;
     RSFilter filter;
-    filter.SetFilterQuality(RSFilter::FilterQuality(imagePaintConfig.imageInterpolation_));
+    const auto config = canvasImage_->GetPaintConfig();
+    filter.SetFilterQuality(RSFilter::FilterQuality(config.imageInterpolation_));
     // note that [colorFilter] has higher priority to [renderMode], because the [ImageRenderMode::TEMPLATE] is actually
     // a special value of colorFilter
-    if (ImageRenderMode::TEMPLATE == imagePaintConfig.renderMode_ || imagePaintConfig.colorFilter_) {
+    if (ImageRenderMode::TEMPLATE == config.renderMode_ || config.colorFilter_) {
         RSColorMatrix colorFilterMatrix;
-        if (imagePaintConfig.colorFilter_) {
-            colorFilterMatrix.SetArray(imagePaintConfig.colorFilter_->data());
-        } else if (ImageRenderMode::TEMPLATE == imagePaintConfig.renderMode_) {
+        if (config.colorFilter_) {
+            colorFilterMatrix.SetArray(config.colorFilter_->data());
+        } else if (ImageRenderMode::TEMPLATE == config.renderMode_) {
             colorFilterMatrix.SetArray(GRAY_COLOR_MATRIX);
         }
         filter.SetColorFilter(RSColorFilter::CreateMatrixColorFilter(colorFilterMatrix));
@@ -146,15 +144,15 @@ void ImagePainter::DrawStaticImage(
     canvas.Save();
     canvas.Translate(offset.GetX(), offset.GetY());
 
-    if (imagePaintConfig.needFlipCanvasHorizontally_) {
-        ImagePainter::FlipHorizontal(canvas, offset.GetX(), imagePaintConfig.dstRect_.Width());
+    if (config.needFlipCanvasHorizontally_) {
+        ImagePainter::FlipHorizontal(canvas, offset.GetX(), config.dstRect_.Width());
     }
 
     brush.SetFilter(filter);
     canvas.AttachBrush(brush);
     // include recordingCanvas's ClipAdaptiveRRect operation.
-    canvasImage_->DrawToRSCanvas(canvas, ToRSRect(imagePaintConfig.srcRect_), ToRSRect(imagePaintConfig.dstRect_),
-        imagePaintConfig.borderRadiusXY_ ? *imagePaintConfig.borderRadiusXY_ : std::array<PointF, 4>());
+    canvasImage_->DrawToRSCanvas(canvas, ToRSRect(config.srcRect_), ToRSRect(config.dstRect_),
+        config.borderRadiusXY_ ? *config.borderRadiusXY_ : BorderRadiusArray());
     canvas.Restore();
 }
 
@@ -166,60 +164,59 @@ void ImagePainter::FlipHorizontal(RSCanvas& canvas, double horizontalOffset, dou
     canvas.Translate(horizontalMoveDelta, 0.0);
 }
 
-void ImagePainter::DrawImageWithRepeat(
-    RSCanvas& canvas, const ImagePaintConfig& imagePaintConfig, const RectF& contentRect) const
+void ImagePainter::DrawImageWithRepeat(RSCanvas& canvas, const RectF& contentRect) const
 {
-    if (imagePaintConfig.imageRepeat_ == ImageRepeat::NO_REPEAT) {
+    auto config = canvasImage_->GetPaintConfig();
+    if (config.imageRepeat_ == ImageRepeat::NO_REPEAT) {
         return;
     }
     auto offset = contentRect.GetOffset();
     float contentWidth = contentRect.Width();
     float contentHeight = contentRect.Height();
-    float singleImageWidth = imagePaintConfig.dstRect_.Width();
-    float singleImageHeight = imagePaintConfig.dstRect_.Height();
-    bool imageRepeatX =
-        imagePaintConfig.imageRepeat_ == ImageRepeat::REPEAT || imagePaintConfig.imageRepeat_ == ImageRepeat::REPEAT_X;
-    bool imageRepeatY =
-        imagePaintConfig.imageRepeat_ == ImageRepeat::REPEAT || imagePaintConfig.imageRepeat_ == ImageRepeat::REPEAT_Y;
-    std::vector<uint32_t> dirRepeatNum = {
-        static_cast<uint32_t>(ceil(imagePaintConfig.dstRect_.GetY() / singleImageHeight)),
-        static_cast<uint32_t>((ceil((contentHeight - imagePaintConfig.dstRect_.GetY()) / singleImageHeight))) - 1,
-        static_cast<uint32_t>(ceil(imagePaintConfig.dstRect_.GetX() / singleImageWidth)),
-        imageRepeatX ? static_cast<uint32_t>(ceil((contentWidth - imagePaintConfig.dstRect_.GetX()) / singleImageWidth))
-                     : 1 };
+    float singleImageWidth = config.dstRect_.Width();
+    float singleImageHeight = config.dstRect_.Height();
+    if (NearZero(singleImageWidth) || NearZero(singleImageHeight)) {
+        return;
+    }
+
+    bool imageRepeatX = config.imageRepeat_ == ImageRepeat::REPEAT || config.imageRepeat_ == ImageRepeat::REPEAT_X;
+    bool imageRepeatY = config.imageRepeat_ == ImageRepeat::REPEAT || config.imageRepeat_ == ImageRepeat::REPEAT_Y;
+    std::vector<uint32_t> dirRepeatNum = { static_cast<uint32_t>(ceil(config.dstRect_.GetY() / singleImageHeight)),
+        static_cast<uint32_t>((ceil((contentHeight - config.dstRect_.GetY()) / singleImageHeight))) - 1,
+        static_cast<uint32_t>(ceil(config.dstRect_.GetX() / singleImageWidth)),
+        imageRepeatX ? static_cast<uint32_t>(ceil((contentWidth - config.dstRect_.GetX()) / singleImageWidth)) : 1 };
 
     canvas.Save();
-    auto clipRect = RSRect(offset.GetX(), offset.GetY(),
-        static_cast<float>(offset.GetX() + contentWidth),
+    auto clipRect = RSRect(offset.GetX(), offset.GetY(), static_cast<float>(offset.GetX() + contentWidth),
         static_cast<float>(offset.GetY() + contentHeight));
-    canvas.ClipRect(clipRect, OHOS::Rosen::Drawing::ClipOp::INTERSECT);
+    canvas.ClipRect(clipRect, RSClipOp::INTERSECT);
     uint32_t up = 0;
     uint32_t down = 1;
     uint32_t left = 2;
     uint32_t right = 3;
-    auto DrawRepeatYTask = [this, &canvas, &imagePaintConfig, &dirRepeatNum, &singleImageHeight, &imageRepeatY](
+    auto drawRepeatYTask = [this, &canvas, &config, &dirRepeatNum, &singleImageHeight, &imageRepeatY](
                                OffsetF offsetTempY, uint32_t dir) {
         float downNum = (dir == 0) ? -1 : 1;
         for (size_t j = 0; j < dirRepeatNum[dir] && imageRepeatY; j++) {
             offsetTempY.SetY(static_cast<float>(offsetTempY.GetY() + singleImageHeight * downNum));
-            DrawStaticImage(canvas, offsetTempY, imagePaintConfig);
+            DrawStaticImage(canvas, offsetTempY);
         }
     };
     auto offsetTempX = offset;
     // right
     for (size_t i = 0; i < dirRepeatNum[right]; i++) {
-        DrawStaticImage(canvas, offsetTempX, imagePaintConfig);
-        DrawRepeatYTask(offsetTempX, up);
-        DrawRepeatYTask(offsetTempX, down);
+        DrawStaticImage(canvas, offsetTempX);
+        drawRepeatYTask(offsetTempX, up);
+        drawRepeatYTask(offsetTempX, down);
         offsetTempX.SetX(static_cast<float>(offsetTempX.GetX() + singleImageWidth));
     }
     // left
     offsetTempX = offset;
     for (size_t i = 0; i < dirRepeatNum[left] && imageRepeatX; i++) {
         offsetTempX.SetX(static_cast<float>(offsetTempX.GetX() - singleImageWidth));
-        DrawStaticImage(canvas, offsetTempX, imagePaintConfig);
-        DrawRepeatYTask(offsetTempX, up);
-        DrawRepeatYTask(offsetTempX, down);
+        DrawStaticImage(canvas, offsetTempX);
+        drawRepeatYTask(offsetTempX, up);
+        drawRepeatYTask(offsetTempX, down);
     }
     canvas.Restore();
     // TODO: repeat refactory
@@ -289,6 +286,62 @@ OffsetF ImagePainter::CalculateBgImagePosition(const SizeF& boxPaintSize_, const
     return offset;
 }
 
+namespace {
+float CalculateBgWidth(const SizeF& boxPaintSize_, const SizeF& srcSize, const BackgroundImageSize& bgImageSize)
+{
+    float width = 0.0f;
+    float paintAspectRatio = boxPaintSize_.Width() / boxPaintSize_.Height();
+    float srcAspectRatio = srcSize.Width() / srcSize.Height();
+    auto bgImageSizeTypeX = bgImageSize.GetSizeTypeX();
+    switch (bgImageSizeTypeX) {
+        case BackgroundImageSizeType::COVER:
+            width = paintAspectRatio >= srcAspectRatio ? boxPaintSize_.Width()
+                                                       : srcSize.Width() * (boxPaintSize_.Height() / srcSize.Height());
+            break;
+        case BackgroundImageSizeType::CONTAIN:
+            width = paintAspectRatio >= srcAspectRatio ? srcSize.Width() * (boxPaintSize_.Height() / srcSize.Height())
+                                                       : boxPaintSize_.Width();
+            break;
+        case BackgroundImageSizeType::LENGTH:
+            width = bgImageSize.GetSizeValueX();
+            break;
+        case BackgroundImageSizeType::PERCENT:
+            width = boxPaintSize_.Width() * bgImageSize.GetSizeValueX() / PERCENT_TRANSLATE;
+            break;
+        default:
+            break;
+    }
+    return width;
+}
+
+float CalculateBgHeight(const SizeF& boxPaintSize_, const SizeF& srcSize, const BackgroundImageSize& bgImageSize)
+{
+    float height = 0.0f;
+    float paintAspectRatio = boxPaintSize_.Width() / boxPaintSize_.Height();
+    float srcAspectRatio = srcSize.Width() / srcSize.Height();
+    auto bgImageSizeTypeY = bgImageSize.GetSizeTypeY();
+    switch (bgImageSizeTypeY) {
+        case BackgroundImageSizeType::COVER:
+            height = paintAspectRatio >= srcAspectRatio ? srcSize.Height() * (boxPaintSize_.Width() / srcSize.Width())
+                                                        : boxPaintSize_.Height();
+            break;
+        case BackgroundImageSizeType::CONTAIN:
+            height = paintAspectRatio >= srcAspectRatio ? boxPaintSize_.Height()
+                                                        : srcSize.Height() * (boxPaintSize_.Width() / srcSize.Width());
+            break;
+        case BackgroundImageSizeType::LENGTH:
+            height = bgImageSize.GetSizeValueY();
+            break;
+        case BackgroundImageSizeType::PERCENT:
+            height = boxPaintSize_.Height() * bgImageSize.GetSizeValueY() / PERCENT_TRANSLATE;
+            break;
+        default:
+            break;
+    }
+    return height;
+}
+} // namespace
+
 SizeF ImagePainter::CalculateBgImageSize(
     const SizeF& boxPaintSize_, const SizeF& srcSize, const std::optional<BackgroundImageSize>& bgImageSizeOpt)
 {
@@ -297,53 +350,10 @@ SizeF ImagePainter::CalculateBgImageSize(
         NearZero(boxPaintSize_.Width()) || NearZero(boxPaintSize_.Height())) {
         return sizeRet;
     }
-    float renderSizeX = 0.0;
-    float renderSizeY = 0.0;
-    float srcAspectRatio = srcSize.Width() / srcSize.Height();
-    float paintAspectRatio = boxPaintSize_.Width() / boxPaintSize_.Height();
     auto bgImageSize = bgImageSizeOpt.value();
-    auto bgImageSizeTypeX = bgImageSize.GetSizeTypeX();
-    switch (bgImageSizeTypeX) {
-        case BackgroundImageSizeType::COVER:
-            renderSizeX = paintAspectRatio >= srcAspectRatio
-                              ? boxPaintSize_.Width()
-                              : srcSize.Width() * (boxPaintSize_.Height() / srcSize.Height());
-            break;
-        case BackgroundImageSizeType::CONTAIN:
-            renderSizeX = paintAspectRatio >= srcAspectRatio
-                              ? srcSize.Width() * (boxPaintSize_.Height() / srcSize.Height())
-                              : boxPaintSize_.Width();
-            break;
-        case BackgroundImageSizeType::LENGTH:
-            renderSizeX = bgImageSize.GetSizeValueX();
-            break;
-        case BackgroundImageSizeType::PERCENT:
-            renderSizeX = boxPaintSize_.Width() * bgImageSize.GetSizeValueX() / PERCENT_TRANSLATE;
-            break;
-        default:
-            break;
-    }
-    auto bgImageSizeTypeY = bgImageSize.GetSizeTypeY();
-    switch (bgImageSizeTypeY) {
-        case BackgroundImageSizeType::COVER:
-            renderSizeY = paintAspectRatio >= srcAspectRatio
-                              ? srcSize.Height() * (boxPaintSize_.Width() / srcSize.Width())
-                              : boxPaintSize_.Height();
-            break;
-        case BackgroundImageSizeType::CONTAIN:
-            renderSizeY = paintAspectRatio >= srcAspectRatio
-                              ? boxPaintSize_.Height()
-                              : srcSize.Height() * (boxPaintSize_.Width() / srcSize.Width());
-            break;
-        case BackgroundImageSizeType::LENGTH:
-            renderSizeY = bgImageSize.GetSizeValueY();
-            break;
-        case BackgroundImageSizeType::PERCENT:
-            renderSizeY = boxPaintSize_.Height() * bgImageSize.GetSizeValueY() / PERCENT_TRANSLATE;
-            break;
-        default:
-            break;
-    }
+    float renderSizeX = CalculateBgWidth(boxPaintSize_, srcSize, bgImageSize);
+    float renderSizeY = CalculateBgHeight(boxPaintSize_, srcSize, bgImageSize);
+
     if (bgImageSize.GetSizeTypeX() == BackgroundImageSizeType::AUTO &&
         bgImageSize.GetSizeTypeY() == BackgroundImageSizeType::AUTO) {
         renderSizeX = srcSize.Width();
@@ -352,6 +362,14 @@ SizeF ImagePainter::CalculateBgImageSize(
         renderSizeX = srcSize.Width() * (renderSizeY / srcSize.Height());
     } else if (bgImageSize.GetSizeTypeY() == BackgroundImageSizeType::AUTO) {
         renderSizeY = srcSize.Height() * (renderSizeX / srcSize.Width());
+    }
+    // fit image ratio if width or height is not set
+    float srcRatio = srcSize.Width() / srcSize.Height();
+    CHECK_NULL_RETURN(srcRatio > 0, sizeRet);
+    if (renderSizeX <= 0) {
+        renderSizeX = renderSizeY * srcRatio;
+    } else if (renderSizeY <= 0) {
+        renderSizeY = renderSizeX / srcRatio;
     }
     sizeRet.SetWidth(renderSizeX);
     sizeRet.SetHeight(renderSizeY);

@@ -15,7 +15,7 @@
 
 #include "core/components/clip/flutter_render_clip.h"
 
-#include "third_party/skia/include/core/SkScalar.h"
+#include "include/core/SkScalar.h"
 
 namespace OHOS::Ace {
 

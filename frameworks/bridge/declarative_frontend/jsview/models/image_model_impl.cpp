@@ -67,11 +67,11 @@ void ImageModelImpl::SetBlur(double blur)
     }
 }
 
-void ImageModelImpl::SetImageFit(int32_t value)
+void ImageModelImpl::SetImageFit(ImageFit value)
 {
     auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (image) {
-        image->SetImageFit(static_cast<ImageFit>(value));
+        image->SetImageFit(value);
     }
 }
 
@@ -118,9 +118,11 @@ void ImageModelImpl::SetSvgAnimatorFinishEvent(std::function<void()>&& callback)
     image->SetSvgAnimatorFinishEvent(onFinishEvent);
 }
 
-void ImageModelImpl::Create(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap)
+void ImageModelImpl::Create(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap,
+    const std::string& bundleName, const std::string& moduleName)
 {
     RefPtr<ImageComponent> image = AceType::MakeRefPtr<OHOS::Ace::ImageComponent>(src);
+    image->SetBundleInfo(bundleName, moduleName);
     ViewStackProcessor::GetInstance()->ClaimElementId(image);
     image->SetUseSkiaSvg(false);
     ViewStackProcessor::GetInstance()->Push(image);

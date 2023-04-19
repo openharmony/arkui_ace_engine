@@ -20,6 +20,7 @@
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_v2/common/element_proxy.h"
 #include "core/pipeline/base/element.h"
 
@@ -181,6 +182,49 @@ void ElementRegister::Clear()
     LOGD("Empty the ElementRegister");
     itemMap_.clear();
     removedItems_.clear();
+    geometryTransitionMap_.clear();
+    pendingRemoveNodes_.clear();
+}
+
+RefPtr<NG::GeometryTransition> ElementRegister::GetOrCreateGeometryTransition(const std::string& id,
+                                                                              const WeakPtr<NG::FrameNode>& frameNode)
+{
+    if (id.empty()) {
+        return nullptr;
+    }
+    CHECK_NULL_RETURN(frameNode.Upgrade(), nullptr);
+    RefPtr<NG::GeometryTransition> geometryTransition;
+    if (geometryTransitionMap_.find(id) == geometryTransitionMap_.end()) {
+        geometryTransition = AceType::MakeRefPtr<NG::GeometryTransition>(frameNode);
+        geometryTransitionMap_.emplace(id, geometryTransition);
+    } else {
+        geometryTransition = geometryTransitionMap_[id];
+    }
+    return geometryTransition;
+}
+
+void ElementRegister::DumpGeometryTransition()
+{
+    auto iter = geometryTransitionMap_.begin();
+    while (iter != geometryTransitionMap_.end()) {
+        auto [itemId, item] = *iter;
+        if (!item || item->IsInAndOutEmpty()) {
+            iter = geometryTransitionMap_.erase(iter);
+        } else {
+            LOGD("GeometryTransition map item: id: %{public}s, %{public}s", itemId.c_str(), item->ToString().c_str());
+            iter++;
+        }
+    }
+}
+
+void ElementRegister::AddPendingRemoveNode(const RefPtr<NG::UINode>& node)
+{
+    pendingRemoveNodes_.emplace_back(node);
+}
+
+void ElementRegister::ClearPendingRemoveNodes()
+{
+    pendingRemoveNodes_.clear();
 }
 
 } // namespace OHOS::Ace

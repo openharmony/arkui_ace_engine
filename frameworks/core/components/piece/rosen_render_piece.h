@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_PIECE_ROSEN_RENDER_PIECE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_PIECE_ROSEN_RENDER_PIECE_H
 
-#include "third_party/skia/include/core/SkRRect.h"
+#include "include/core/SkRRect.h"
 
 #include "core/components/piece/render_piece.h"
 #include "core/pipeline/base/rosen_render_context.h"

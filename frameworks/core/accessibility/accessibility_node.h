@@ -90,6 +90,7 @@ public:
     void AddNode(const RefPtr<AccessibilityNode>& node, int32_t slot = DEFAULT_INDEX);
     void RemoveNode(const RefPtr<AccessibilityNode>& node);
     void Mount(int32_t slot);
+    void AddOffsetForChildren(const Offset& offset);
 
     void SetWindowId(int32_t windowId)
     {
@@ -117,7 +118,7 @@ public:
         children_.swap(children);
     }
 
-    const std::list<RefPtr<AccessibilityNode>>& GetChildList() const
+    const std::list<RefPtr<AccessibilityNode>> GetChildList() const
     {
         return children_;
     }

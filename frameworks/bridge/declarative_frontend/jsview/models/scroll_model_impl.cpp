@@ -64,6 +64,10 @@ void ScrollModelImpl::SetOnScrollBegin(NG::ScrollBeginEvent&& event)
     JSViewSetProperty(&ScrollComponent::SetOnScrollBegin, std::move(event));
 }
 
+void ScrollModelImpl::SetOnScrollFrameBegin(NG::ScrollFrameBeginEvent&& event)
+{
+}
+
 void ScrollModelImpl::SetOnScroll(NG::OnScrollEvent&& event)
 {
     auto onScroll = EventMarker([scrollEvent = std::move(event)](const BaseEventInfo* info) {
@@ -150,6 +154,16 @@ void ScrollModelImpl::SetEdgeEffect(EdgeEffect edgeEffect)
         scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::NONE);
     }
     scrollComponent->SetScrollEffect(scrollEdgeEffect);
+}
+
+void ScrollModelImpl::SetHasWidth(bool hasWidth)
+{
+    JSViewSetProperty(&ScrollComponent::SetHasWidth, hasWidth);
+}
+
+void ScrollModelImpl::SetHasHeight(bool hasHeight)
+{
+    JSViewSetProperty(&ScrollComponent::SetHasHeight, hasHeight);
 }
 
 } // namespace OHOS::Ace::Framework

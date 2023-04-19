@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,7 @@
 #include "core/common/container.h"
 #include "core/common/thread_checker.h"
 #include "core/components/navigator/navigator_component.h"
+#include "frameworks/bridge/card_frontend/form_frontend_delegate_declarative.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -222,13 +223,20 @@ void DeclarativeFrontend::AttachPipelineContext(const RefPtr<PipelineBase>& cont
     delegate_->AttachPipelineContext(context);
 }
 
-void DeclarativeFrontend::AttachSubPipelineContext(const RefPtr<PipelineContext>& context)
+void DeclarativeFrontend::AttachSubPipelineContext(const RefPtr<PipelineBase>& context)
 {
     LOGI("DeclarativeFrontend AttachSubPipelineContext.");
     if (!context) {
         return;
     }
-    context->RegisterEventHandler(handler_);
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(context);
+    if (pipelineContext) {
+        pipelineContext->RegisterEventHandler(handler_);
+    }
+    if (!delegate_) {
+        return;
+    }
+    delegate_->AttachSubPipelineContext(context);
 }
 
 void DeclarativeFrontend::SetAssetManager(const RefPtr<AssetManager>& assetManager)
@@ -457,13 +465,27 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
         jsEngine->FireExternalEvent(componentId, nodeId, isDestroy);
     };
 
-    delegate_ = AceType::MakeRefPtr<Framework::FrontendDelegateDeclarative>(taskExecutor, loadCallback,
-        setPluginMessageTransferCallback, asyncEventCallback, syncEventCallback, updatePageCallback,
-        resetStagingPageCallback, destroyPageCallback, destroyApplicationCallback, updateApplicationStateCallback,
-        timerCallback, mediaQueryCallback, requestAnimationCallback, jsCallback, onWindowDisplayModeChangedCallBack,
-        onConfigurationUpdatedCallBack, onSaveAbilityStateCallBack, onRestoreAbilityStateCallBack, onNewWantCallBack,
-        onMemoryLevelCallBack, onStartContinuationCallBack, onCompleteContinuationCallBack, onRemoteTerminatedCallBack,
-        onSaveDataCallBack, onRestoreDataCallBack, externalEventCallback);
+    if (isFormRender_) {
+        LOGI("Init Form Delegate");
+        delegate_ = AceType::MakeRefPtr<Framework::FormFrontendDelegateDeclarative>(taskExecutor, loadCallback,
+            setPluginMessageTransferCallback, asyncEventCallback, syncEventCallback, updatePageCallback,
+            resetStagingPageCallback, destroyPageCallback, destroyApplicationCallback, updateApplicationStateCallback,
+            timerCallback, mediaQueryCallback, requestAnimationCallback, jsCallback,
+            onWindowDisplayModeChangedCallBack, onConfigurationUpdatedCallBack, onSaveAbilityStateCallBack,
+            onRestoreAbilityStateCallBack, onNewWantCallBack,
+            onMemoryLevelCallBack, onStartContinuationCallBack, onCompleteContinuationCallBack,
+            onRemoteTerminatedCallBack, onSaveDataCallBack, onRestoreDataCallBack, externalEventCallback);
+    } else {
+        delegate_ = AceType::MakeRefPtr<Framework::FrontendDelegateDeclarative>(taskExecutor, loadCallback,
+            setPluginMessageTransferCallback, asyncEventCallback, syncEventCallback, updatePageCallback,
+            resetStagingPageCallback, destroyPageCallback, destroyApplicationCallback, updateApplicationStateCallback,
+            timerCallback, mediaQueryCallback, requestAnimationCallback, jsCallback,
+            onWindowDisplayModeChangedCallBack, onConfigurationUpdatedCallBack, onSaveAbilityStateCallBack,
+            onRestoreAbilityStateCallBack, onNewWantCallBack, onMemoryLevelCallBack, onStartContinuationCallBack,
+            onCompleteContinuationCallBack, onRemoteTerminatedCallBack,
+            onSaveDataCallBack, onRestoreDataCallBack, externalEventCallback);
+    }
+
     if (disallowPopLastPage_) {
         delegate_->DisallowPopLastPage();
     }
@@ -474,12 +496,13 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
     }
     delegate_->SetGroupJsBridge(jsEngine_->GetGroupJsBridge());
     if (Container::IsCurrentUseNewPipeline()) {
-        auto loadPageCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](const std::string& url) {
+        auto loadPageCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](const std::string& url,
+            const std::function<void(const std::string&, int32_t)>& errorCallback) {
             auto jsEngine = weakEngine.Upgrade();
             if (!jsEngine) {
                 return false;
             }
-            return jsEngine->LoadPageSource(url);
+            return jsEngine->LoadPageSource(url, errorCallback);
         };
         delegate_->InitializeRouterManager(std::move(loadPageCallback));
     }
@@ -504,7 +527,12 @@ void DeclarativeFrontend::RunPage(int32_t pageId, const std::string& url, const 
     }
     // Not use this pageId from backend, manage it in FrontendDelegateDeclarative.
     if (delegate_) {
-        delegate_->RunPage(url, params, pageProfile_);
+        if (isFormRender_) {
+            auto delegate = AceType::DynamicCast<Framework::FormFrontendDelegateDeclarative>(delegate_);
+            delegate->RunCard(url, params, pageProfile_, 0);
+        } else {
+            delegate_->RunPage(url, params, pageProfile_);
+        }
     }
 }
 
@@ -561,6 +589,14 @@ RefPtr<Framework::RevSourceMap> DeclarativeFrontend::GetFaAppSourceMap() const
 {
     CHECK_NULL_RETURN(delegate_, nullptr);
     return delegate_->GetFaAppSourceMap();
+}
+
+void DeclarativeFrontend::GetStageSourceMap(
+    std::unordered_map<std::string, RefPtr<Framework::RevSourceMap>>& sourceMap) const
+{
+    if (delegate_) {
+        delegate_->GetStageSourceMap(sourceMap);
+    }
 }
 
 RefPtr<NG::PageRouterManager> DeclarativeFrontend::GetPageRouterManager() const
@@ -625,6 +661,14 @@ void DeclarativeFrontend::TransferJsResponseData(int callbackId, int32_t code, s
 void DeclarativeFrontend::TransferJsResponseDataPreview(int callbackId, int32_t code, ResponseData responseData) const
 {
     delegate_->TransferJsResponseDataPreview(callbackId, code, responseData);
+}
+
+RefPtr<Component> DeclarativeFrontend::GetNewComponentWithJsCode(const std::string& jsCode, const std::string& viewID)
+{
+    if (jsEngine_) {
+        return jsEngine_->GetNewComponentWithJsCode(jsCode, viewID);
+    }
+    return nullptr;
 }
 #endif
 
@@ -732,6 +776,7 @@ bool DeclarativeFrontend::OnBackPressed()
 void DeclarativeFrontend::OnShow()
 {
     if (delegate_) {
+        foregroundFrontend_ = true;
         delegate_->OnForeground();
     }
 }
@@ -839,6 +884,20 @@ void DeclarativeFrontend::OnSurfaceChanged(int32_t width, int32_t height)
     }
 }
 
+void DeclarativeFrontend::HotReload()
+{
+    auto manager = GetPageRouterManager();
+    CHECK_NULL_VOID(manager);
+    manager->FlushFrontend();
+}
+
+void DeclarativeFrontend::FlushReload()
+{
+    if (jsEngine_) {
+        jsEngine_->FlushReload();
+    }
+}
+
 void DeclarativeFrontend::DumpFrontend() const
 {
     if (!delegate_) {
@@ -904,14 +963,6 @@ void DeclarativeFrontend::NotifyAppStorage(const std::string& key, const std::st
         return;
     }
     delegate_->NotifyAppStorage(jsEngine_, key, value);
-}
-
-RefPtr<Component> DeclarativeFrontend::GetNewComponentWithJsCode(const std::string& jsCode)
-{
-    if (jsEngine_) {
-        return jsEngine_->GetNewComponentWithJsCode(jsCode);
-    }
-    return nullptr;
 }
 
 void DeclarativeEventHandler::HandleAsyncEvent(const EventMarker& eventMarker)

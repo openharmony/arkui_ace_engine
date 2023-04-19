@@ -16,8 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CALENDAR_ROSEN_RENDER_CALENDAR_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CALENDAR_ROSEN_RENDER_CALENDAR_H
 
-#include "third_party/skia/include/core/SkCanvas.h"
-#include "third_party/skia/include/core/SkColor.h"
+#include "include/core/SkCanvas.h"
+#include "include/core/SkColor.h"
 #include "third_party/txt/src/txt/text_style.h"
 
 #include "core/components/calendar/render_calendar.h"

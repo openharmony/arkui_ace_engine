@@ -22,10 +22,12 @@
 
 namespace OHOS::Ace::Framework {
 
-void RatingModelImpl::Create()
+void RatingModelImpl::Create(double rating, bool indicator)
 {
     auto component = AceType::MakeRefPtr<RatingComponent>();
     component->SetMouseAnimationType(HoverAnimationType::NONE);
+    component->SetRatingScore(rating);
+    component->SetIndicator(indicator);
     ViewStackProcessor::GetInstance()->ClaimElementId(component);
     ViewStackProcessor::GetInstance()->Push(component);
 
@@ -87,21 +89,21 @@ void RatingModelImpl::SetStepSize(double value)
     ratingComponent->SetStepSize(value);
 }
 
-void RatingModelImpl::SetForegroundSrc(const std::string& value)
+void RatingModelImpl::SetForegroundSrc(const std::string& value, bool flag)
 {
     auto ratingComponent = AceType::DynamicCast<RatingComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     CHECK_NULL_VOID(ratingComponent);
     ratingComponent->SetForegroundSrc(value);
 }
 
-void RatingModelImpl::SetSecondarySrc(const std::string& value)
+void RatingModelImpl::SetSecondarySrc(const std::string& value, bool flag)
 {
     auto ratingComponent = AceType::DynamicCast<RatingComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     CHECK_NULL_VOID(ratingComponent);
     ratingComponent->SetSecondarySrc(value);
 }
 
-void RatingModelImpl::SetBackgroundSrc(const std::string& value)
+void RatingModelImpl::SetBackgroundSrc(const std::string& value, bool flag)
 {
     auto ratingComponent = AceType::DynamicCast<RatingComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     CHECK_NULL_VOID(ratingComponent);

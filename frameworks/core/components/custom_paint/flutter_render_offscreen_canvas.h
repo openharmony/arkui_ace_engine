@@ -18,9 +18,9 @@
 
 #include "flutter/fml/memory/ref_ptr.h"
 #include "flutter/lib/ui/painting/path.h"
-#include "flutter/third_party/txt/src/txt/paragraph.h"
-#include "third_party/skia/include/core/SkCanvas.h"
-#include "third_party/skia/include/core/SkPath.h"
+#include "txt/paragraph.h"
+#include "include/core/SkCanvas.h"
+#include "include/core/SkPath.h"
 
 #include "core/components/custom_paint/offscreen_canvas.h"
 #include "core/components/custom_paint/render_custom_paint.h"
@@ -95,7 +95,6 @@ private:
     std::unique_ptr<SkCanvas> cacheCanvas_;
     std::unique_ptr<SkCanvas> skCanvas_;
     std::map<std::string, setColorFunc> filterFunc_;
-    RefPtr<FlutterRenderTaskHolder> renderTaskHolder_;
     void UpdatePaintShader(SkPaint& paint, const Gradient& gradient);
     void UpdatePaintShader(const Pattern& pattern, SkPaint& paint);
     void PaintText(const std::string& text, double x, double y, bool isStroke, bool hasShadow = false);
@@ -142,7 +141,6 @@ private:
     double BlurStrToDouble(const std::string& str);
     bool IsPercentStr(std::string& percentStr);
     void SetColorFilter(float matrix[20]);
-    void SetRenderTaskHolder(const RefPtr<FlutterRenderTaskHolder> renderTaskHolder);
 };
 } // namespace OHOS::Ace
 

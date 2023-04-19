@@ -17,13 +17,13 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CUSTOM_PAINT_CUSTOM_PAINT_PAINT_METHOD_H
 
 #include "experimental/svg/model/SkSVGDOM.h"
-#include "flutter/third_party/txt/src/txt/paragraph.h"
-#include "third_party/skia/include/core/SkPath.h"
+#include "txt/paragraph.h"
+#include "include/core/SkCanvas.h"
+#include "include/core/SkPath.h"
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
-#include "core/components_ng/render/adapter/skia_canvas.h"
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/image/image_loader.h"
 #include "core/image/image_object.h"
@@ -89,15 +89,21 @@ public:
     {
         fillState_.SetGradient(gradient);
     }
-    
+
     void SetAlpha(double alpha)
     {
         globalState_.SetAlpha(alpha);
     }
-    
+
     void SetCompositeType(CompositeOperation operation)
     {
         globalState_.SetType(operation);
+    }
+
+    // direction is also available in strokeText
+    void SetTextDirection(TextDirection direction)
+    {
+        fillState_.SetOffTextDirection(direction);
     }
 
     void SetStrokeColor(const Color& color)
@@ -187,6 +193,11 @@ public:
         smoothingEnabled_ = enabled;
     }
 
+    void SetSmoothingQuality(const std::string& quality)
+    {
+        smoothingQuality_ = quality;
+    }
+
     void SetFontSize(const Dimension& size)
     {
         fillState_.SetFontSize(size);
@@ -236,7 +247,7 @@ public:
 
     void FlushPipelineImmediately()
     {
-        auto context = AceType::DynamicCast<PipelineContext>(context_);
+        auto context = context_.Upgrade();
         if (context) {
             context->FlushPipelineImmediately();
         }
@@ -249,6 +260,7 @@ protected:
     void UpdatePaintShader(const Ace::Pattern& pattern, SkPaint& paint);
     void InitPaintBlend(SkPaint& paint);
     SkPaint GetStrokePaint();
+    sk_sp<SkShader> MakeConicGradient(SkPaint& paint, const Ace::Gradient& gradient);
 
     void Path2DFill(const OffsetF& offset);
     void Path2DStroke(const OffsetF& offset);
@@ -280,6 +292,9 @@ protected:
         return OffsetF(0.0f, 0.0f);
     }
 
+    double GetAlignOffset(TextAlign align, std::unique_ptr<txt::Paragraph>& paragraph);
+    txt::TextAlign GetEffectiveAlign(txt::TextAlign align, txt::TextDirection direction) const;
+
     PaintState fillState_;
     StrokePaintState strokeState_;
 
@@ -295,7 +310,7 @@ protected:
     Shadow shadow_;
     std::unique_ptr<txt::Paragraph> paragraph_;
 
-    RefPtr<PipelineBase> context_;
+    WeakPtr<PipelineBase> context_;
 
     SkPath skPath_;
     SkPath skPath2d_;
@@ -305,8 +320,6 @@ protected:
     SkBitmap canvasCache_;
     std::unique_ptr<SkCanvas> skCanvas_;
     std::unique_ptr<SkCanvas> cacheCanvas_;
-
-    RefPtr<FlutterRenderTaskHolder> renderTaskHolder_;
 
     sk_sp<SkSVGDOM> skiaDom_ = nullptr;
     Ace::CanvasImage canvasImage_;

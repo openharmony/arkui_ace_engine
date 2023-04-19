@@ -31,8 +31,7 @@ class ContainerModalElement : public SoleChildElement {
 public:
     RefPtr<OverlayElement> GetOverlayElement() const;
     RefPtr<StageElement> GetStageElement() const;
-    void ShowTitle(bool isShow);
-    void BlurWindow(bool isBlur);
+    void ShowTitle(bool isShow, bool hasDeco = true);
     void WindowFocus(bool isFocus);
     void SetAppBgColor(const Color& color);
     void SetTitleButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize);
@@ -48,6 +47,7 @@ private:
     bool CanHideFloatingTitle();
     void ChangeFloatingTitleIcon(bool isFocus = true);
     void ChangeTitleIcon(bool isFocus = true);
+    void SetTitleAccessibilityNodeOffset();
     RefPtr<RenderText> GetTitleRender(bool isFloatingTitle);
     RefPtr<RenderImage> GetIconRender(bool isFloatingTitle);
     WindowMode windowMode_;
@@ -61,6 +61,7 @@ private:
     float moveX_ = 0.0f;
     float moveY_ = 0.0f;
     bool windowFocus_ = true;
+    bool hasDeco_ = true;
 };
 
 } // namespace OHOS::Ace

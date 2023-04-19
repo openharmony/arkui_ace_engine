@@ -313,6 +313,15 @@ void AccessibilityNode::Mount(int32_t slot)
     parentNode->AddNode(AceType::Claim(this), slot);
 }
 
+void AccessibilityNode::AddOffsetForChildren(const Offset& offset)
+{
+    SetLeft(GetLeft() + offset.GetX());
+    SetTop(GetTop() + offset.GetY());
+    for (const auto& child : GetChildList()) {
+        child->AddOffsetForChildren(offset);
+    }
+}
+
 void AccessibilityNode::SetOperableInfo()
 {
     static const LinearMapNode<OperableInfo> nodeOperatorMap[] = {

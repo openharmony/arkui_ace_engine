@@ -84,6 +84,12 @@ std::unique_ptr<DataProviderRes> DataProviderManagerStandard::GetDataProviderRes
 
 void DataProviderManagerStandard::InitHelper()
 {
+    {
+        std::shared_lock lock(helperMutex_);
+        if (helper_) {
+            return;
+        }
+    }
     // creating helper_, need exclusive access
     std::unique_lock lock(helperMutex_);
     if (!helper_ && dataAbilityHelperImpl_) {

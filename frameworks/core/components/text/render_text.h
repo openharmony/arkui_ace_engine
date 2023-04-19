@@ -170,6 +170,7 @@ protected:
     double paragraphWidth_ = 0.0;
     double paragraphHeight_ = 0.0;
     std::optional<TextAlign> alignment_;
+    bool isCustomFont_ = false;
 
 private:
     bool IsDeclarativePara();

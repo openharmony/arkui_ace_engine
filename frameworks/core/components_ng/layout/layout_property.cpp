@@ -19,6 +19,7 @@
 
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/utils.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/property/calc_length.h"
@@ -71,6 +72,9 @@ void LayoutProperty::Reset()
     measureType_.reset();
     layoutDirection_.reset();
     propVisibility_.reset();
+#ifdef ENABLE_DRAG_FRAMEWORK
+    propIsBindOverlay_.reset();
+#endif // ENABLE_DRAG_FRAMEWORK
     CleanDirty();
 }
 
@@ -86,13 +90,13 @@ void LayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     if (padding_) {
         json->Put("padding", padding_->ToJsonString().c_str());
     } else {
-        json->Put("padding", "0.0");
+        json->Put("padding", "0.00vp");
     }
 
     if (margin_) {
         json->Put("margin", margin_->ToJsonString().c_str());
     } else {
-        json->Put("margin", "0.0");
+        json->Put("margin", "0.00vp");
     }
 
     json->Put("visibility", VisibleTypeToString(propVisibility_.value_or(VisibleType::VISIBLE)).c_str());
@@ -138,10 +142,15 @@ void LayoutProperty::UpdateLayoutProperty(const LayoutProperty* layoutProperty)
     if (layoutProperty->flexItemProperty_) {
         flexItemProperty_ = std::make_unique<FlexItemProperty>(*layoutProperty->flexItemProperty_);
     }
+    geometryTransition_ = layoutProperty->geometryTransition_;
     propVisibility_ = layoutProperty->GetVisibility();
     measureType_ = layoutProperty->measureType_;
     layoutDirection_ = layoutProperty->layoutDirection_;
     propertyChangeFlag_ = layoutProperty->propertyChangeFlag_;
+    safeArea_ = layoutProperty->safeArea_;
+#ifdef ENABLE_DRAG_FRAMEWORK
+    propIsBindOverlay_ = layoutProperty->propIsBindOverlay_;
+#endif // ENABLE_DRAG_FRAMEWORK
 }
 
 void LayoutProperty::UpdateCalcLayoutProperty(const MeasureProperty& constraint)
@@ -456,16 +465,28 @@ RefPtr<FrameNode> LayoutProperty::GetHost() const
     return host_.Upgrade();
 }
 
-void LayoutProperty::OnVisibilityUpdate(VisibleType visible) const
+void LayoutProperty::OnVisibilityUpdate(VisibleType visible)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    // store the previous visibility value.
+    auto preVisible = host->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE);
+    
+    // update visibility value.
+    propVisibility_ = visible;
     host->OnVisibleChange(visible == VisibleType::VISIBLE);
+
     auto parent = host->GetAncestorNodeOfFrame();
-    if (parent) {
+    CHECK_NULL_VOID(parent);
+    // if visible is not changed to/from VisibleType::Gone, only need to update render tree.
+    if (preVisible != VisibleType::GONE && visible != VisibleType::GONE) {
         parent->MarkNeedSyncRenderTree();
-        parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        parent->RebuildRenderContextTree();
+        return;
     }
+    UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+    parent->MarkNeedSyncRenderTree();
+    parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 } // namespace OHOS::Ace::NG

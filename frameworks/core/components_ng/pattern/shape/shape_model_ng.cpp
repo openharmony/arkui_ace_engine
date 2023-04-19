@@ -16,8 +16,8 @@
 #include "core/components_ng/pattern/shape/shape_model_ng.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/shape/container_paint_property.h"
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
+#include "core/components_ng/pattern/shape/shape_container_paint_property.h"
 #include "core/components_ng/pattern/shape/shape_container_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
@@ -34,7 +34,7 @@ void ShapeModelNG::Create()
 
 void ShapeModelNG::SetBitmapMesh(std::vector<double>& mesh, int32_t column, int32_t row)
 {
-    ACE_UPDATE_PAINT_PROPERTY(ContainerPaintProperty, ImageMesh, ImageMesh(mesh, (int32_t)column, (int32_t)row));
+    ACE_UPDATE_PAINT_PROPERTY(ShapeContainerPaintProperty, ImageMesh, ImageMesh(mesh, (int32_t)column, (int32_t)row));
 }
 
 void ShapeModelNG::SetViewPort(
@@ -45,7 +45,7 @@ void ShapeModelNG::SetViewPort(
     shapeViewBox.SetTop(dimTop);
     shapeViewBox.SetWidth(dimWidth);
     shapeViewBox.SetHeight(dimHeight);
-    ACE_UPDATE_PAINT_PROPERTY(ContainerPaintProperty, ShapeViewBox, shapeViewBox);
+    ACE_UPDATE_PAINT_PROPERTY(ShapeContainerPaintProperty, ShapeViewBox, shapeViewBox);
 }
 
 void ShapeModelNG::SetStroke(const Color& color)

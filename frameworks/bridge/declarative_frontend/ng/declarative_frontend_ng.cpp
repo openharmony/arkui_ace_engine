@@ -90,12 +90,13 @@ void DeclarativeFrontendNG::SetAssetManager(const RefPtr<AssetManager>& assetMan
 void DeclarativeFrontendNG::InitializeDelegate(const RefPtr<TaskExecutor>& taskExecutor)
 {
     auto pageRouterManager = AceType::MakeRefPtr<NG::PageRouterManager>();
-    auto loadPageCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](const std::string& url) {
+    auto loadPageCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](const std::string& url,
+        const std::function<void(const std::string&, int32_t)>& errorCallback) {
         auto jsEngine = weakEngine.Upgrade();
         if (!jsEngine) {
             return false;
         }
-        return jsEngine->LoadPageSource(url);
+        return jsEngine->LoadPageSource(url, errorCallback);
     };
     pageRouterManager->SetLoadJsCallback(std::move(loadPageCallback));
 
@@ -250,4 +251,17 @@ void DeclarativeFrontendNG::RebuildAllPages()
     LOGW("RebuildAllPages not implemented");
 }
 
+void DeclarativeFrontendNG::FlushReload()
+{
+    if (jsEngine_) {
+        jsEngine_->FlushReload();
+    }
+}
+
+void DeclarativeFrontendNG::HotReload()
+{
+    auto manager = GetPageRouterManager();
+    CHECK_NULL_VOID(manager);
+    manager->FlushFrontend();
+}
 } // namespace OHOS::Ace

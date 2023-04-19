@@ -158,39 +158,4 @@ RefPtr<RenderFlex> ColumnComposedElement::GetRenderColumn() const
     return nullptr;
 }
 
-void ColumnComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
-{
-    auto flexElement = GetContentElement<FlexElement>(ColumnElement::TypeId());
-    if (!flexElement) {
-        LOGE("get GetFlexElement failed");
-        return;
-    }
-    flexElement->UpdateChildWithSlot(nullptr, newComponent, slot, slot);
-    flexElement->MarkDirty();
-}
-
-void ColumnComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
-{
-    auto flexElement = GetContentElement<FlexElement>(ColumnElement::TypeId());
-    if (!flexElement) {
-        LOGE("get GetFlexElement failed");
-        return;
-    }
-    auto child = flexElement->GetChildBySlot(slot);
-    flexElement->UpdateChildWithSlot(child, newComponent, slot, slot);
-    flexElement->MarkDirty();
-}
-
-void ColumnComposedElement::DeleteChildWithSlot(int32_t slot)
-{
-    auto flexElement = GetContentElement<FlexElement>(ColumnElement::TypeId());
-    if (!flexElement) {
-        LOGE("get GetFlexElement failed");
-        return;
-    }
-    auto child = flexElement->GetChildBySlot(slot);
-    flexElement->UpdateChildWithSlot(child, nullptr, slot, slot);
-    flexElement->MarkDirty();
-}
-
 } // namespace OHOS::Ace::V2

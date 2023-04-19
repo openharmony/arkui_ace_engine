@@ -38,10 +38,7 @@ ohos_unittest("panel_layout_test_ng") {
     ":config_panel_layout_test",
     "$ace_root:ace_config",
   ]
-  configs += [
-    "$ace_root:ace_test_coverage_config",
-    "//third_party/curl:curl_config",
-  ]
+  configs += [ "//third_party/curl:curl_config" ]
 }
 
 config("config_panel_layout_test") {

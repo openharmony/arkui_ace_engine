@@ -38,7 +38,7 @@ void WebResource::Release(const std::function<void(bool)>& onRelease)
         return;
     }
     // TODO: add support for ng.
-    auto context = DynamicCast<PipelineContext>(context_.Upgrade());
+    auto context = context_.Upgrade();
     if (!context) {
         LOGE("fail to release resource due to context is null");
         return;
@@ -153,7 +153,7 @@ void WebResource::CallResRegisterMethod(
         return;
     }
 
-    auto context = DynamicCast<PipelineContext>(context_.Upgrade());
+    auto context = context_.Upgrade();
     if (!context) {
         LOGE("fail to get context to call res register method");
         return;

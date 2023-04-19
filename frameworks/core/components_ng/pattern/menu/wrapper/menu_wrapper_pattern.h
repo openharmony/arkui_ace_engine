@@ -16,9 +16,13 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_WRAPPER_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_WRAPPER_PATTERN_H
 
+#include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/string_utils.h"
+#include "base/utils/utils.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_paint_method.h"
@@ -44,19 +48,76 @@ public:
         return false;
     }
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::SCOPE, true };
+    }
+
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         return MakeRefPtr<MenuWrapperLayoutAlgorithm>();
     }
 
+    void HandleMouseEvent(const MouseInfo& info, RefPtr<MenuItemPattern>& menuItem);
+
+    int32_t GetTargetId() const
+    {
+        return targetId_;
+    }
+
+    void HideMenu();
+
+    void AddSubMenuId(int32_t subMenuId)
+    {
+        subMenuIds_.emplace_back(subMenuId);
+    }
+
+    bool IsHided() const
+    {
+        return isHided_;
+    }
+
+    bool IsContextMenu() const
+    {
+        auto menu = GetMenu();
+        CHECK_NULL_RETURN(menu, false);
+        auto menuPattern = menu->GetPattern<MenuPattern>();
+        CHECK_NULL_RETURN(menuPattern, false);
+        return menuPattern->IsContextMenu();
+    }
+
+    bool IsSelectMenu() const
+    {
+        auto menu = GetMenu();
+        CHECK_NULL_RETURN(menu, false);
+        auto menuPattern = menu->GetPattern<MenuPattern>();
+        CHECK_NULL_RETURN(menuPattern, false);
+        return menuPattern->IsSelectMenu();
+    }
+
+    void HideSubMenu();
+
 private:
     void OnModifyDone() override;
 
-    void HideMenu(const RefPtr<FrameNode>& menu) const;
+    void HideMenu(const RefPtr<FrameNode>& menu);
+
+    RefPtr<FrameNode> GetMenu() const
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, nullptr);
+        auto menu = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(0));
+        CHECK_NULL_RETURN(menu, nullptr);
+        return menu;
+    }
 
     RefPtr<TouchEventImpl> onTouch_;
     // menuId in OverlayManager's map
     int32_t targetId_ = -1;
+
+    bool isHided_ = false;
+
+    std::list<int32_t> subMenuIds_;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuWrapperPattern);
 };

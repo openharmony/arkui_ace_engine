@@ -18,6 +18,9 @@
 #include "include/core/SkClipOp.h"
 
 #include "base/utils/utils.h"
+#include "core/components_ng/svg/svg_context.h"
+#include "frameworks/core/components_ng/render/drawing.h"
+#include "frameworks/core/components_ng/svg/parse/svg_animation.h"
 #include "frameworks/core/components_ng/svg/parse/svg_circle.h"
 #include "frameworks/core/components_ng/svg/parse/svg_clip_path.h"
 #include "frameworks/core/components_ng/svg/parse/svg_defs.h"
@@ -48,6 +51,9 @@ const char DOM_SVG_CLASS[] = "class";
 } // namespace
 
 static const LinearMapNode<RefPtr<SvgNode> (*)()> TAG_FACTORIES[] = {
+    { "animate", []() -> RefPtr<SvgNode> { return SvgAnimation::Create(); } },
+    { "animateMotion", []() -> RefPtr<SvgNode> { return SvgAnimation::CreateAnimateMotion(); } },
+    { "animateTransform", []() -> RefPtr<SvgNode> { return SvgAnimation::CreateAnimateTransform(); } },
     { "circle", []() -> RefPtr<SvgNode> { return SvgCircle::Create(); } },
     { "clipPath", []() -> RefPtr<SvgNode> { return SvgClipPath::Create(); } },
     { "defs", []() -> RefPtr<SvgNode> { return SvgDefs::Create(); } },
@@ -106,6 +112,7 @@ bool SvgDom::ParseSvg(SkStream& svgStream)
     SkDOM xmlDom;
     CHECK_NULL_RETURN_NOLOG(svgContext_, false);
     if (!xmlDom.build(svgStream)) {
+        LOGE("Failed to parse xml file.");
         return false;
     }
     root_ = TranslateSvgNode(xmlDom, xmlDom.getRootNode(), nullptr);
@@ -236,11 +243,27 @@ void SvgDom::SetAttrValue(const std::string& name, const std::string& value, con
     svgNode->SetAttr(name, value);
 }
 
-void SvgDom::SetFunction(const FuncNormalizeToPx& funcNormalizeToPx, const FuncAnimateFlush& funcAnimateFlush)
+void SvgDom::SetFuncNormalizeToPx(FuncNormalizeToPx&& funcNormalizeToPx)
 {
     CHECK_NULL_VOID_NOLOG(svgContext_);
     svgContext_->SetFuncNormalizeToPx(funcNormalizeToPx);
-    svgContext_->SetFuncAnimateFlush(funcAnimateFlush);
+}
+
+void SvgDom::SetAnimationCallback(FuncAnimateFlush&& funcAnimateFlush, const WeakPtr<CanvasImage>& imagePtr)
+{
+    CHECK_NULL_VOID_NOLOG(svgContext_);
+    svgContext_->SetFuncAnimateFlush(std::move(funcAnimateFlush), imagePtr);
+}
+
+void SvgDom::ControlAnimation(bool play)
+{
+    CHECK_NULL_VOID_NOLOG(svgContext_);
+    svgContext_->ControlAnimators(play);
+}
+
+bool SvgDom::IsStatic()
+{
+    return svgContext_->GetAnimatorCount() == 0;
 }
 
 void SvgDom::DrawImage(
@@ -274,10 +297,15 @@ void SvgDom::FitImage(RSCanvas& canvas, const ImageFit& imageFit, const Size& la
     }
     if (viewBox_.IsValid()) {
         if (svgSize_.IsValid() && !svgSize_.IsInfinite()) {
+            // center align viewBox to svg
             scaleViewBox = std::min(svgSize_.Width() / viewBox_.Width(), svgSize_.Height() / viewBox_.Height());
             tx = svgSize_.Width() * half - (viewBox_.Width() * half + viewBox_.Left()) * scaleViewBox;
             ty = svgSize_.Height() * half - (viewBox_.Height() * half + viewBox_.Top()) * scaleViewBox;
+            // center align svg to layout container
+            tx += layout_.Width() * half - svgSize_.Width() * half * scaleX;
+            ty += layout_.Height() * half - svgSize_.Height() * half * scaleY;
         } else if (!layout_.IsEmpty()) {
+            // no svg size, center align viewBox to layout container
             scaleViewBox = std::min(layout_.Width() / viewBox_.Width(), layout_.Height() / viewBox_.Height());
             tx = layout_.Width() * half - (viewBox_.Width() * half + viewBox_.Left()) * scaleViewBox;
             ty = layout_.Height() * half - (viewBox_.Height() * half + viewBox_.Top()) * scaleViewBox;
@@ -285,8 +313,15 @@ void SvgDom::FitImage(RSCanvas& canvas, const ImageFit& imageFit, const Size& la
             LOGW("FitImage containerSize and svgSize is null");
         }
     }
-    canvas.Translate(static_cast<float>(tx), static_cast<float>(ty));
-    canvas.Scale(static_cast<float>(scaleX * scaleViewBox), static_cast<float>(scaleY * scaleViewBox));
+    RSRect clipRect(0.0f, 0.0f, layout_.Width(), layout_.Height());
+    canvas.ClipRect(clipRect, RSClipOp::INTERSECT);
+
+    canvas.Translate(tx, ty);
+
+    if (NearZero(scaleX) || NearZero(scaleViewBox) || NearZero(scaleY)) {
+        return;
+    }
+    canvas.Scale(scaleX * scaleViewBox, scaleY * scaleViewBox);
 }
 
 void SvgDom::FitViewPort(const Size& layout)

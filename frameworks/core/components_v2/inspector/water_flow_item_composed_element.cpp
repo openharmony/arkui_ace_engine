@@ -44,47 +44,4 @@ std::unique_ptr<JsonValue> WaterFlowItemComposedElement::ToJsonObject() const
     return resultJson;
 }
 
-void WaterFlowItemComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
-{
-    auto waterFlowItem = GetContentElement<BoxElement>(BoxElement::TypeId());
-    if (!waterFlowItem) {
-        LOGE("get GetWaterFlowItemElement failed");
-        return;
-    }
-    waterFlowItem->UpdateChildWithSlot(nullptr, newComponent, slot, slot);
-    waterFlowItem->MarkDirty();
-}
-
-void WaterFlowItemComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
-{
-    auto waterFlowItem = GetContentElement<BoxElement>(BoxElement::TypeId());
-    if (!waterFlowItem) {
-        LOGE("get GetWaterFlowItemElement failed");
-        return;
-    }
-    auto child = GetElementChildBySlot(waterFlowItem, slot);
-    if (!child) {
-        LOGE("waterFlowItem get GetChildBySlot failed");
-        return;
-    }
-    waterFlowItem->UpdateChildWithSlot(child, newComponent, slot, slot);
-    waterFlowItem->MarkDirty();
-}
-
-void WaterFlowItemComposedElement::DeleteChildWithSlot(int32_t slot)
-{
-    auto waterFlowItem = GetContentElement<BoxElement>(BoxElement::TypeId());
-    if (!waterFlowItem) {
-        LOGE("get GetWaterFlowItemElement failed");
-        return;
-    }
-    auto child = GetElementChildBySlot(waterFlowItem, slot);
-    if (!child) {
-        LOGE("waterFlowItem get GetChildBySlot failed");
-        return;
-    }
-    waterFlowItem->UpdateChildWithSlot(child, nullptr, slot, slot);
-    waterFlowItem->MarkDirty();
-}
-
 } // namespace OHOS::Ace::V2

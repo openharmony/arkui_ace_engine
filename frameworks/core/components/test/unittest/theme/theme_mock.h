@@ -38,6 +38,15 @@ public:
     double GetDouble(uint32_t resId) override;
     int32_t GetInt(uint32_t resId) override;
 
+    Color GetColorByName(const std::string& resName) override;
+    Dimension GetDimensionByName(const std::string& resName) override;
+    std::string GetStringByName(const std::string& resName) override;
+    std::vector<std::string> GetStringArrayByName(const std::string& resName) const override;
+    double GetDoubleByName(const std::string& resName) override;
+    int32_t GetIntByName(const std::string& resName) override;
+    std::string GetMediaPathByName(const std::string& resName) override;
+    std::vector<uint32_t> GetIntArrayByName(const std::string& resName) const override;
+
 private:
     ACE_DISALLOW_COPY_AND_MOVE(ResourceAdapterMock);
 };

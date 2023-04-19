@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,8 +16,8 @@
 #include "core/components_ng/pattern/select/select_view.h"
 
 #include "base/utils/utils.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/select/select_pattern.h"
 #include "core/components_ng/property/property.h"
@@ -37,18 +37,27 @@ void SelectView::Create(const std::vector<SelectParam>& params)
 
     auto pattern = select->GetPattern<SelectPattern>();
     pattern->BuildChild();
-
     // create menu node
-    auto menu = MenuView::Create(params, nodeId);
-    pattern->SetMenuNode(menu);
-
+    if (!pattern->GetMenuNode()) {
+        auto menuWrapper = MenuView::Create(params, nodeId);
+        pattern->SetMenuNode(menuWrapper);
+        pattern->InitSelected();
+    } else {
+        auto menuNode = pattern->GetMenuNode();
+        CHECK_NULL_VOID(menuNode);
+        auto menuPattern = menuNode->GetPattern<MenuPattern>();
+        CHECK_NULL_VOID(menuPattern);
+        menuPattern->UpdateSelectParam(params);
+    }
     // store option pointers in select
-    auto menuContainer = menu->GetChildAtIndex(0);
+    auto menuContainer = pattern->GetMenuNode();
     CHECK_NULL_VOID(menuContainer);
-    auto options = menuContainer->GetChildren();
+    pattern->ClearOptions();
+    auto menuPattern = menuContainer->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    auto options = menuPattern->GetOptions();
     for (auto&& option : options) {
-        auto optionNode = AceType::DynamicCast<FrameNode>(option);
-        pattern->AddOptionNode(optionNode);
+        pattern->AddOptionNode(option);
     }
 
     // delete menu when select node is deleted
@@ -172,7 +181,7 @@ void SelectView::SetOptionFontColor(const Color& color)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetOptionBgColor(color);
+    pattern->SetOptionFontColor(color);
 }
 
 void SelectView::SetOptionItalicFontStyle(const Ace::FontStyle& value)
@@ -203,4 +212,17 @@ void SelectView::SetOnSelect(SelectEvent&& onSelect)
     hub->SetSelectEvent(std::move(onSelect));
 }
 
+void SelectView::SetSpace(const Dimension& value)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSpace(value);
+}
+
+void SelectView::SetArrowPosition(const ArrowPosition value)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetArrowPosition(value);
+}
 } // namespace OHOS::Ace::NG

@@ -34,13 +34,14 @@ void GridAdaptiveLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto gridLayoutProperty = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(gridLayoutProperty);
-    auto layoutDirection = gridLayoutProperty->GetLayoutDirection().value_or(FlexDirection::ROW);
+    auto layoutDirection = gridLayoutProperty->GetGridDirection().value_or(FlexDirection::ROW);
     auto axis = (layoutDirection == FlexDirection::ROW || layoutDirection == FlexDirection::ROW_REVERSE)
                     ? Axis::HORIZONTAL
                     : Axis::VERTICAL;
     auto idealSize =
         CreateIdealSize(gridLayoutProperty->GetLayoutConstraint().value(), axis, MeasureType::MATCH_CONTENT);
-    MinusPaddingToSize(gridLayoutProperty->CreatePaddingAndBorder(), idealSize);
+    auto padding = gridLayoutProperty->CreatePaddingAndBorder();
+    MinusPaddingToSize(padding, idealSize);
 
     auto firstChildWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(firstChildWrapper);
@@ -80,7 +81,7 @@ void GridAdaptiveLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     mainCount_ = std::clamp(mainCount_, minCount, maxCount);
     crossCount_ = std::floor((idealSize.CrossSize(axis).value_or(Infinity<float>()) + crossGap) /
                              (gridCellSize_.CrossSize(axis) + crossGap));
-    auto maxCrossCount = std::max(static_cast<int32_t>(std::ceil(childrenCount / mainCount_)), 1);
+    auto maxCrossCount = std::max(static_cast<int32_t>(std::ceil(static_cast<float>(childrenCount) / mainCount_)), 1);
     crossCount_ = std::clamp(crossCount_, 1, maxCrossCount);
     displayCount_ = std::min(childrenCount, mainCount_ * crossCount_);
     LOGI("axis: %{public}d, main count: %{public}d, cross count: %{public}d, displayCount: %{public}d, gridCellSize: "
@@ -93,6 +94,7 @@ void GridAdaptiveLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     idealSize.UpdateIllegalSizeWithCheck(
         OptionalSizeF(columnCount * gridCellSize_.Width() + (columnCount - 1) * columnsGap,
             rowCount * gridCellSize_.Height() + (rowCount - 1) * rowsGap));
+    AddPaddingToSize(padding, idealSize);
     layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize.ConvertToSizeT());
 
     // Create child constraint.
@@ -156,11 +158,11 @@ OffsetF GridAdaptiveLayoutAlgorithm::CalculateChildOffset(int32_t index, LayoutW
     auto layoutProperty = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(layoutProperty, OffsetF());
     auto padding = layoutProperty->CreatePaddingAndBorder();
-    auto layoutDirection = layoutProperty->GetLayoutDirection().value_or(FlexDirection::ROW);
+    auto layoutDirection = layoutProperty->GetGridDirection().value_or(FlexDirection::ROW);
     auto scale = layoutProperty->GetLayoutConstraint()->scaleProperty;
-    auto rowsGap = ConvertToPx(layoutProperty->GetRowsGap().value_or(0.0_vp), scale, frameSize.Width()).value_or(0);
+    auto rowsGap = ConvertToPx(layoutProperty->GetRowsGap().value_or(0.0_vp), scale, frameSize.Height()).value_or(0);
     auto columnsGap =
-        ConvertToPx(layoutProperty->GetColumnsGap().value_or(0.0_vp), scale, frameSize.Height()).value_or(0);
+        ConvertToPx(layoutProperty->GetColumnsGap().value_or(0.0_vp), scale, frameSize.Width()).value_or(0);
 
     int32_t rowIndex = 0;
     int32_t columnIndex = 0;

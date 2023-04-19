@@ -31,6 +31,23 @@ void FlutterRenderWeb::OnPaintFinish()
     if (!delegate_) {
         return;
     }
+
+    position_ = GetGlobalOffset();
+    if (!isCreateWebView_) {
+        isCreateWebView_ = true;
+        prePosition_ = position_;
+        preDrawSize_ = drawSize_;
+        return;
+    }
+
+    if (NearEqual(prePosition_.GetX(), position_.GetX()) &&
+        NearEqual(prePosition_.GetY(), position_.GetY()) &&
+        NearEqual(preDrawSize_.Width(), drawSize_.Width()) &&
+        NearEqual(preDrawSize_.Height(), drawSize_.Height())) {
+    } else {
+        delegate_->SetBoundsOrResize(drawSize_, position_);
+    }
+    LOGI("FlutterRenderWeb::OnPaintFinish");
 }
 
 RenderLayer FlutterRenderWeb::GetRenderLayer()
@@ -43,7 +60,7 @@ RenderLayer FlutterRenderWeb::GetRenderLayer()
     } else {
         holeLayer_->SetSize(drawSize_.Width(), drawSize_.Height());
     }
-    holeLayer_->SetOffset(GetCoordinatePoint().GetY(), GetCoordinatePoint().GetY());
+    holeLayer_->SetOffset(GetCoordinatePoint().GetX(), GetCoordinatePoint().GetY());
 
     return AceType::RawPtr(holeLayer_);
 }
@@ -54,20 +71,12 @@ void FlutterRenderWeb::Paint(RenderContext& context, const Offset& offset)
         return;
     }
     LOGI("FlutterRenderWeb::Paint");
-    auto pipelineContext = context_.Upgrade();
-    if (!pipelineContext) {
-        LOGE("Paint context null");
-        return;
-    }
-    if (pipelineContext->GetIsDragStart()) {
-        drawSize_ = Size(1.0, 1.0);
-    }
     if (drawSize_.Width() == Size::INFINITE_SIZE || drawSize_.Height() == Size::INFINITE_SIZE) {
         LOGE("Web drawSize height or width is invalid");
         return;
     }
     if (delegate_) {
-        delegate_->Resize(drawSize_.Width(), drawSize_.Height());
+        delegate_->SetBoundsOrResize(drawSize_, GetGlobalOffset());
     }
     RenderNode::Paint(context, offset);
 }

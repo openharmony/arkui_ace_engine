@@ -46,11 +46,6 @@ public:
         return MakeRefPtr<CustomPaintEventHub>();
     }
 
-    bool IsAtomicNode() const override
-    {
-        return false;
-    }
-
     void SetCanvasSize(std::optional<SizeF> canvasSize)
     {
         canvasSize_ = canvasSize;
@@ -113,6 +108,7 @@ public:
     void UpdateGlobalAlpha(double alpha);
     void UpdateCompositeOperation(CompositeOperation type);
     void UpdateSmoothingEnabled(bool enabled);
+    void UpdateSmoothingQuality(const std::string& quality);
     void UpdateLineCap(LineCapStyle cap);
     void UpdateLineDashOffset(double dash);
     void UpdateLineWidth(double width);
@@ -133,6 +129,8 @@ public:
     void UpdateFillPattern(const Ace::Pattern& pattern);
     void UpdateShadowColor(const Color& color);
     void UpdateStrokeGradient(const Ace::Gradient& grad);
+
+    void SetTextDirection(TextDirection direction);
     
 private:
     void OnAttachToFrameNode() override;
@@ -140,6 +138,7 @@ private:
 
     RefPtr<CanvasPaintMethod> paintMethod_;
     std::optional<SizeF> canvasSize_;
+    bool isCanvasInit_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(CustomPaintPattern);
 };

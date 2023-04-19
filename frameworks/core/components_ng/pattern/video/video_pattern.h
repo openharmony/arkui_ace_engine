@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@
 #include "core/components/video/video_controller_v2.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/video/video_accessibility_property.h"
 #include "core/components_ng/pattern/video/video_event_hub.h"
 #include "core/components_ng/pattern/video/video_layout_algorithm.h"
 #include "core/components_ng/pattern/video/video_layout_property.h"
@@ -30,6 +31,7 @@
 #include "core/components_ng/render/media_player.h"
 #include "core/components_ng/render/render_surface.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "frameworks/base/geometry/rect.h"
 
 namespace OHOS::Ace::NG {
 class VideoPattern : public Pattern {
@@ -55,6 +57,11 @@ public:
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         return MakeRefPtr<VideoLayoutAlgorithm>();
+    }
+
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        return MakeRefPtr<VideoAccessibilityProperty>();
     }
 
     void UpdateMuted(bool muted)
@@ -87,6 +94,11 @@ public:
         return loop_;
     }
 
+    bool IsFullScreen() const
+    {
+        return isFullScreen_;
+    }
+
     void UpdateProgressRate(double progressRate)
     {
         progressRate_ = progressRate;
@@ -107,9 +119,32 @@ public:
         hiddenChangeEvent_ = std::move(hiddenChangeEvent);
     }
 
+    uint32_t GetCurrentPos() const
+    {
+        return currentPos_;
+    }
+
+    uint32_t GetDuration() const
+    {
+        return duration_;
+    }
+
     bool OnBackPressed();
 
     void OnVisibleChange(bool isVisible) override;
+
+    void OnAreaChangedInner() override;
+
+    void EnableDrag();
+    void SetIsStop(bool isStop)
+    {
+        isStop_ = isStop;
+    }
+
+    void SetIsDrag(bool isDrag)
+    {
+        isDrag_ = isDrag;
+    }
 
 private:
     void OnAttachToFrameNode() override;
@@ -183,6 +218,10 @@ private:
     bool isPlaying_ = false;
     bool pastPlayingStatus_ = false;
     double progressRate_ = 1.0;
+
+    Rect lastBoundsRect_;
+
+    bool isDrag_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(VideoPattern);
 };

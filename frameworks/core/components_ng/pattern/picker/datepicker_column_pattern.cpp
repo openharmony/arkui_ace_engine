@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,10 +21,14 @@
 #include <stdint.h>
 
 #include "base/utils/utils.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/picker/picker_base_component.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
+#include "core/components_ng/pattern/picker/datepicker_event_hub.h"
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
+#include "core/components_ng/pattern/picker/toss_animation_controller.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/calc_length.h"
@@ -43,7 +47,11 @@ const float TEXT_HEIGHT_NUMBER = 3.0f;
 const float TEXT_WEIGHT_NUMBER = 6.0f;
 const int32_t ANIMATION_ZERO_TO_OUTER = 200;
 const int32_t ANIMATION_OUTER_TO_ZERO = 150;
-
+const Dimension FOCUS_SIZE = Dimension(1.0);
+const float MOVE_DISTANCE = 5.0f;
+constexpr int32_t HOVER_ANIMATION_DURATION = 250;
+constexpr int32_t PRESS_ANIMATION_DURATION = 100;
+constexpr int32_t MINDDLE_CHILD_INDEX = 2;
 } // namespace
 
 void DatePickerColumnPattern::OnAttachToFrameNode()
@@ -65,21 +73,147 @@ void DatePickerColumnPattern::OnAttachToFrameNode()
     InitPanEvent(gestureHub);
 }
 
+void DatePickerColumnPattern::OnModifyDone()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    pressColor_ = theme->GetPressColor();
+    hoverColor_ = theme->GetHoverColor();
+    InitMouseAndPressEvent();
+}
+
+void DatePickerColumnPattern::InitMouseAndPressEvent()
+{
+    if (mouseEvent_ || touchListener_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    RefPtr<FrameNode> middleChild = nullptr;
+    if (GetShowCount() != OPTION_COUNT_PHONE_LANDSCAPE) {
+        middleChild = DynamicCast<FrameNode>(host->GetChildAtIndex(MINDDLE_CHILD_INDEX));
+    } else {
+        middleChild = DynamicCast<FrameNode>(host->GetChildAtIndex(1));
+    }
+    CHECK_NULL_VOID(middleChild);
+    auto eventHub = middleChild->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto inputHub = eventHub->GetOrCreateInputEventHub();
+    auto mouseTask = [weak = WeakClaim(this)](bool isHover) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleMouseEvent(isHover);
+        }
+    };
+    mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
+    inputHub->AddOnHoverEvent(mouseEvent_);
+    auto gesture = middleChild->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
+            pattern->SetLocalDownDistance(info.GetTouches().front().GetLocalLocation().GetDistance());
+            pattern->OnTouchDown();
+        }
+        if (info.GetTouches().front().GetTouchType() == TouchType::UP) {
+            pattern->OnTouchUp();
+            pattern->SetLocalDownDistance(0.0f);
+        }
+        if (info.GetTouches().front().GetTouchType() == TouchType::MOVE) {
+            if (std::abs(info.GetTouches().front().GetLocalLocation().GetDistance() - pattern->GetLocalDownDistance()) >
+                MOVE_DISTANCE) {
+                pattern->OnTouchUp();
+            }
+        }
+    };
+    touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
+    gesture->AddTouchEvent(touchListener_);
+}
+
+void DatePickerColumnPattern::HandleMouseEvent(bool isHover)
+{
+    if (isHover) {
+        hoverd_ = true;
+        PlayHoverAnimation(hoverColor_);
+    } else {
+        hoverd_ = false;
+        PlayHoverAnimation(Color::TRANSPARENT);
+    }
+}
+
+void DatePickerColumnPattern::OnTouchDown()
+{
+    PlayPressAnimation(pressColor_);
+}
+
+void DatePickerColumnPattern::OnTouchUp()
+{
+    if (hoverd_) {
+        PlayPressAnimation(hoverColor_);
+    } else {
+        PlayPressAnimation(Color::TRANSPARENT);
+    }
+}
+
+void DatePickerColumnPattern::SetButtonBackgroundColor(const Color& pressColor)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto stack = host->GetParent();
+    CHECK_NULL_VOID(stack);
+    auto buttonNode = DynamicCast<FrameNode>(stack->GetFirstChild());
+    auto renderContext = buttonNode->GetRenderContext();
+    renderContext->UpdateBackgroundColor(pressColor);
+    buttonNode->MarkModifyDone();
+    buttonNode->MarkDirtyNode();
+}
+
+void DatePickerColumnPattern::PlayPressAnimation(const Color& pressColor)
+{
+    AnimationOption option = AnimationOption();
+    option.SetDuration(PRESS_ANIMATION_DURATION);
+    option.SetCurve(Curves::SHARP);
+    option.SetFillMode(FillMode::FORWARDS);
+    AnimationUtils::Animate(option, [weak = AceType::WeakClaim(this), pressColor]() {
+        auto picker = weak.Upgrade();
+        if (picker) {
+            picker->SetButtonBackgroundColor(pressColor);
+        }
+    });
+}
+
+void DatePickerColumnPattern::PlayHoverAnimation(const Color& color)
+{
+    AnimationOption option = AnimationOption();
+    option.SetDuration(HOVER_ANIMATION_DURATION);
+    option.SetCurve(Curves::FRICTION);
+    option.SetFillMode(FillMode::FORWARDS);
+    AnimationUtils::Animate(option, [weak = AceType::WeakClaim(this), color]() {
+        auto picker = weak.Upgrade();
+        if (picker) {
+            picker->SetButtonBackgroundColor(color);
+        }
+    });
+}
+
 bool DatePickerColumnPattern::OnDirtyLayoutWrapperSwap(
     const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    if (!config.frameSizeChange) {
-        return false;
-    }
+    CHECK_NULL_RETURN_NOLOG(config.frameSizeChange, false);
     CHECK_NULL_RETURN(dirty, false);
     return true;
 }
 
-void DatePickerColumnPattern::FlushCurrentOptions()
+void DatePickerColumnPattern::FlushCurrentOptions(bool isDown, bool isUpateTextContentOnly,
+    bool isUpdateAnimationProperties)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto parentNode = DynamicCast<FrameNode>(host->GetParent());
+    auto stackNode = DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_VOID(stackNode);
+    auto parentNode = DynamicCast<FrameNode>(stackNode->GetParent());
     CHECK_NULL_VOID(parentNode);
 
     auto dataPickerLayoutProperty = host->GetLayoutProperty<DataPickerLayoutProperty>();
@@ -89,6 +223,8 @@ void DatePickerColumnPattern::FlushCurrentOptions()
 
     auto datePickerPattern = parentNode->GetPattern<DatePickerPattern>();
     CHECK_NULL_VOID(datePickerPattern);
+    auto dataPickerRowLayoutProperty = parentNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    CHECK_NULL_VOID(dataPickerRowLayoutProperty);
     auto showOptionCount = datePickerPattern->GetShowCount();
     uint32_t totalOptionCount = datePickerPattern->GetOptionCount(host);
     uint32_t currentIndex = host->GetPattern<DatePickerColumnPattern>()->GetCurrentIndex();
@@ -100,16 +236,11 @@ void DatePickerColumnPattern::FlushCurrentOptions()
     if (child.size() != showOptionCount) {
         return;
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
-    CHECK_NULL_VOID(pickerTheme);
-    auto middleIndex = showOptionCount / 2;
-    auto normalOptionSize = pickerTheme->GetOptionStyle(false, false).GetFontSize();
-    auto focusOptionSize = pickerTheme->GetOptionStyle(false, false).GetFontSize() + FONT_SIZE;
-    auto selectedOptionSize = pickerTheme->GetOptionStyle(true, false).GetFontSize();
     SetCurrentIndex(currentIndex);
     SetDividerHeight(showOptionCount);
+    if (!isUpateTextContentOnly) {
+        animationProperties_.clear();
+    }
     for (uint32_t index = 0; index < showOptionCount; index++) {
         currentChildIndex_ = index;
         uint32_t optionIndex = (totalOptionCount + currentIndex + index - selectedIndex) % totalOptionCount;
@@ -118,29 +249,9 @@ void DatePickerColumnPattern::FlushCurrentOptions()
         CHECK_NULL_VOID(textNode);
         auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
-        if (index < middleIndex) {
-            if (index == 0) {
-                textLayoutProperty->UpdateFontSize(normalOptionSize);
-            } else {
-                textLayoutProperty->UpdateFontSize(focusOptionSize);
-            }
-            textLayoutProperty->UpdateMaxLines(1);
-            textLayoutProperty->UpdateAlignment(Alignment::TOP_CENTER);
-        }
-        if (index == middleIndex) {
-            textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
-            textLayoutProperty->UpdateMaxLines(1);
-            textLayoutProperty->UpdateFontSize(selectedOptionSize);
-            textLayoutProperty->UpdateAlignment(Alignment::CENTER);
-        }
-        if (index > middleIndex) {
-            if (index == showOptionCount - 1) {
-                textLayoutProperty->UpdateFontSize(normalOptionSize);
-            } else {
-                textLayoutProperty->UpdateFontSize(focusOptionSize);
-            }
-            textLayoutProperty->UpdateMaxLines(1);
-            textLayoutProperty->UpdateAlignment(Alignment::BOTTOM_CENTER);
+
+        if (!isUpateTextContentOnly) {
+            UpdatePickerTextProperties(index, showOptionCount, textLayoutProperty, dataPickerRowLayoutProperty);
         }
         iter++;
         int32_t diffIndex = static_cast<int32_t>(index) - static_cast<int32_t>(selectedIndex);
@@ -148,14 +259,103 @@ void DatePickerColumnPattern::FlushCurrentOptions()
         bool virtualIndexValidate = virtualIndex >= 0 && virtualIndex < static_cast<int32_t>(totalOptionCount);
         if (NotLoopOptions() && !virtualIndexValidate) {
             textLayoutProperty->UpdateContent("");
-            textNode->MarkDirtyNode();
             textNode->MarkModifyDone();
+            textNode->MarkDirtyNode();
             continue;
         }
         auto optionValue = datePickerPattern->GetAllOptions(host)[optionIndex];
         textLayoutProperty->UpdateContent(optionValue);
-        textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
         textNode->MarkModifyDone();
+        textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
+    if (isUpateTextContentOnly && isUpdateAnimationProperties) {
+        FlushAnimationTextProperties(isDown);
+    }
+}
+
+void DatePickerColumnPattern::UpdatePickerTextProperties(
+    uint32_t index, uint32_t showOptionCount, const RefPtr<TextLayoutProperty>& textLayoutProperty,
+    const RefPtr<DataPickerRowLayoutProperty>& dataPickerRowLayoutProperty)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+    uint32_t selectedIndex = showOptionCount / 2; // the center option is selected.
+    if (index == selectedIndex) {
+        UpdateSelectedTextProperties(pickerTheme, textLayoutProperty, dataPickerRowLayoutProperty);
+        textLayoutProperty->UpdateAlignment(Alignment::CENTER);
+    } else if ((index == 0) || (index == showOptionCount - 1)) {
+        UpdateDisappearTextProperties(pickerTheme, textLayoutProperty, dataPickerRowLayoutProperty);
+    } else {
+        UpdateCandidateTextProperties(pickerTheme, textLayoutProperty, dataPickerRowLayoutProperty);
+    }
+    if (index < selectedIndex) {
+        textLayoutProperty->UpdateAlignment(Alignment::TOP_CENTER);
+    } else if (index > selectedIndex) {
+        textLayoutProperty->UpdateAlignment(Alignment::BOTTOM_CENTER);
+    }
+    textLayoutProperty->UpdateMaxLines(1);
+    AddAnimationTextProperties(index, textLayoutProperty);
+}
+
+void DatePickerColumnPattern::UpdateDisappearTextProperties(const RefPtr<PickerTheme>& pickerTheme,
+    const RefPtr<TextLayoutProperty>& textLayoutProperty,
+    const RefPtr<DataPickerRowLayoutProperty>& dataPickerRowLayoutProperty)
+{
+    auto normalOptionSize = pickerTheme->GetOptionStyle(false, false).GetFontSize();
+    if (dataPickerRowLayoutProperty->HasDisappearColor()) {
+        textLayoutProperty->UpdateTextColor(dataPickerRowLayoutProperty->GetDisappearColor().value());
+    }
+    if (dataPickerRowLayoutProperty->HasDisappearFontSize()) {
+        textLayoutProperty->UpdateFontSize(dataPickerRowLayoutProperty->GetDisappearFontSize().value());
+    } else {
+        textLayoutProperty->UpdateAdaptMaxFontSize(normalOptionSize);
+        textLayoutProperty->UpdateAdaptMinFontSize(
+            pickerTheme->GetOptionStyle(false, false).GetAdaptMinFontSize());
+    }
+    if (dataPickerRowLayoutProperty->HasDisappearWeight()) {
+        textLayoutProperty->UpdateFontWeight(dataPickerRowLayoutProperty->GetDisappearWeight().value());
+    }
+}
+
+void DatePickerColumnPattern::UpdateCandidateTextProperties(const RefPtr<PickerTheme>& pickerTheme,
+    const RefPtr<TextLayoutProperty>& textLayoutProperty,
+    const RefPtr<DataPickerRowLayoutProperty>& dataPickerRowLayoutProperty)
+{
+    auto focusOptionSize = pickerTheme->GetOptionStyle(false, false).GetFontSize() + FONT_SIZE;
+    if (dataPickerRowLayoutProperty->HasColor()) {
+        textLayoutProperty->UpdateTextColor(dataPickerRowLayoutProperty->GetColor().value());
+    }
+    if (dataPickerRowLayoutProperty->HasFontSize()) {
+        textLayoutProperty->UpdateFontSize(dataPickerRowLayoutProperty->GetFontSize().value());
+    } else {
+        textLayoutProperty->UpdateAdaptMaxFontSize(focusOptionSize);
+        textLayoutProperty->UpdateAdaptMinFontSize(
+            pickerTheme->GetOptionStyle(true, false).GetAdaptMinFontSize() - FOCUS_SIZE);
+    }
+    if (dataPickerRowLayoutProperty->HasWeight()) {
+        textLayoutProperty->UpdateFontWeight(dataPickerRowLayoutProperty->GetWeight().value());
+    }
+}
+
+void DatePickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTheme>& pickerTheme,
+    const RefPtr<TextLayoutProperty>& textLayoutProperty,
+    const RefPtr<DataPickerRowLayoutProperty>& dataPickerRowLayoutProperty)
+{
+    auto selectedOptionSize = pickerTheme->GetOptionStyle(true, false).GetFontSize();
+    Color themeSelectedColor = pickerTheme->GetOptionStyle(true, false).GetTextColor();
+    Color selectedColor = dataPickerRowLayoutProperty->GetSelectedColor().value_or(themeSelectedColor);
+    textLayoutProperty->UpdateTextColor(selectedColor);
+    FontWeight themeFontWeight = pickerTheme->GetOptionStyle(true, false).GetFontWeight();
+    FontWeight selectedFontWeight = dataPickerRowLayoutProperty->GetSelectedWeight().value_or(themeFontWeight);
+    textLayoutProperty->UpdateFontWeight(selectedFontWeight);
+    if (dataPickerRowLayoutProperty->HasSelectedFontSize()) {
+        textLayoutProperty->UpdateFontSize(dataPickerRowLayoutProperty->GetSelectedFontSize().value());
+    } else {
+        textLayoutProperty->UpdateAdaptMaxFontSize(selectedOptionSize);
+        textLayoutProperty->UpdateAdaptMinFontSize(pickerTheme->GetOptionStyle(true, false).GetAdaptMinFontSize());
     }
 }
 
@@ -183,17 +383,148 @@ bool DatePickerColumnPattern::NotLoopOptions() const
     return totalOptionCount <= showOptionCount / 2 + 1; // the critical value of loop condition.
 }
 
-bool DatePickerColumnPattern::InnerHandleScroll(bool isDown)
+void DatePickerColumnPattern::AddAnimationTextProperties(uint32_t currentIndex,
+    const RefPtr<TextLayoutProperty>& textLayoutProperty)
+{
+    DateTextProperties properties;
+    if (textLayoutProperty->HasFontSize()) {
+        properties.fontSize = Dimension(textLayoutProperty->GetFontSize().value().ConvertToPx());
+    }
+    if (textLayoutProperty->HasTextColor()) {
+        properties.currentColor = textLayoutProperty->GetTextColor().value();
+    }
+    if (currentIndex > 0) {
+        properties.upFontSize = animationProperties_[currentIndex - 1].fontSize;
+        animationProperties_[currentIndex - 1].downFontSize = properties.fontSize;
+
+        properties.upColor = animationProperties_[currentIndex - 1].currentColor;
+        animationProperties_[currentIndex - 1].downColor = properties.currentColor;
+    }
+    animationProperties_.emplace_back(properties);
+}
+
+void DatePickerColumnPattern::FlushAnimationTextProperties(bool isDown)
+{
+    if (!animationProperties_.size()) {
+        return;
+    }
+    if (isDown) {
+        for (size_t i = 0; i < animationProperties_.size(); i++) {
+            if (i > 0) {
+                animationProperties_[i - 1].upFontSize = animationProperties_[i].upFontSize;
+                animationProperties_[i - 1].fontSize = animationProperties_[i].fontSize;
+                animationProperties_[i - 1].downFontSize = animationProperties_[i].downFontSize;
+
+                animationProperties_[i - 1].upColor = animationProperties_[i].upColor;
+                animationProperties_[i - 1].currentColor = animationProperties_[i].currentColor;
+                animationProperties_[i - 1].downColor = animationProperties_[i].downColor;
+            }
+            if (i == (animationProperties_.size() - 1)) {
+                animationProperties_[i].upFontSize = animationProperties_[i].fontSize;
+                animationProperties_[i].fontSize = animationProperties_[i].fontSize * 0.5;
+                animationProperties_[i].downFontSize = Dimension();
+
+                animationProperties_[i].upColor = animationProperties_[i].currentColor;
+                auto colorEvaluator = AceType::MakeRefPtr<LinearEvaluator<Color>>();
+                animationProperties_[i].currentColor =
+                    colorEvaluator->Evaluate(Color(), animationProperties_[i].currentColor, 0.5);
+                animationProperties_[i].downColor = Color();
+            }
+        }
+    } else {
+        for (size_t i = animationProperties_.size() - 1;; i--) {
+            if (i == 0) {
+                animationProperties_[i].upFontSize = Dimension();
+                animationProperties_[i].downFontSize = animationProperties_[i].fontSize;
+                animationProperties_[i].fontSize = animationProperties_[i].fontSize * 0.5;
+
+                animationProperties_[i].upColor = Color();
+                animationProperties_[i].downColor = animationProperties_[i].currentColor;
+                auto colorEvaluator = AceType::MakeRefPtr<LinearEvaluator<Color>>();
+                animationProperties_[i].currentColor =
+                    colorEvaluator->Evaluate(Color(), animationProperties_[i].currentColor, 0.5);
+                break;
+            } else {
+                animationProperties_[i].upFontSize = animationProperties_[i - 1].upFontSize;
+                animationProperties_[i].fontSize = animationProperties_[i - 1].fontSize;
+                animationProperties_[i].downFontSize = animationProperties_[i - 1].downFontSize;
+
+                animationProperties_[i].upColor = animationProperties_[i - 1].upColor;
+                animationProperties_[i].currentColor = animationProperties_[i - 1].currentColor;
+                animationProperties_[i].downColor = animationProperties_[i - 1].downColor;
+            }
+        }
+    }
+}
+
+void DatePickerColumnPattern::TextPropertiesLinearAnimation(const RefPtr<TextLayoutProperty>& textLayoutProperty,
+    uint32_t index, uint32_t showCount, bool isDown, double scale)
+{
+    if (index >= animationProperties_.size()) {
+        LOGE("Animation Properties vactor is break.");
+        return;
+    }
+    if ((!index && isDown) || ((index == (showCount - 1)) && !isDown)) {
+        return;
+    }
+    Dimension startFontSize = animationProperties_[index].fontSize;
+    Color startColor = animationProperties_[index].currentColor;
+    Dimension endFontSize;
+    Color endColor;
+    if (!isDown) {
+        endFontSize = animationProperties_[index].downFontSize;
+        endColor = animationProperties_[index].downColor;
+    } else {
+        endFontSize = animationProperties_[index].upFontSize;
+        endColor = animationProperties_[index].upColor;
+    }
+    Dimension updateSize = LinearFontSize(startFontSize, endFontSize, scale);
+    textLayoutProperty->UpdateFontSize(updateSize);
+    auto colorEvaluator = AceType::MakeRefPtr<LinearEvaluator<Color>>();
+    Color updateColor = colorEvaluator->Evaluate(startColor, endColor, scale);
+    textLayoutProperty->UpdateTextColor(updateColor);
+}
+
+void DatePickerColumnPattern::UpdateTextPropertiesLinear(bool isDown, double scale)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    uint32_t showCount = GetShowCount();
+    auto child = host->GetChildren();
+    auto iter = child.begin();
+    if (child.size() != showCount) {
+        return;
+    }
+    for (uint32_t index = 0; index < showCount; index++) {
+        auto textNode = DynamicCast<FrameNode>(*iter);
+        CHECK_NULL_VOID(textNode);
+        auto textPattern = textNode->GetPattern<TextPattern>();
+        CHECK_NULL_VOID(textPattern);
+        RefPtr<TextLayoutProperty> textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        TextPropertiesLinearAnimation(textLayoutProperty, index, showCount, isDown, scale);
+        textNode->MarkModifyDone();
+        textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        iter++;
+    }
+}
+
+Dimension DatePickerColumnPattern::LinearFontSize(const Dimension& startFontSize,
+    const Dimension& endFontSize, double percent)
+{
+    return startFontSize + (endFontSize - startFontSize) * percent;
+}
+
+bool DatePickerColumnPattern::InnerHandleScroll(bool isDown, bool isUpatePropertiesOnly,
+    bool isUpdateAnimationProperties)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto options = GetOptions();
     auto totalOptionCount = options[host].size();
 
-    if (!host || !totalOptionCount) {
-        LOGE("options is empty.");
-        return false;
-    }
+    CHECK_NULL_RETURN(host, false);
+    CHECK_NULL_RETURN(totalOptionCount, false);
 
     uint32_t currentIndex = GetCurrentIndex();
     if (isDown) {
@@ -202,7 +533,7 @@ bool DatePickerColumnPattern::InnerHandleScroll(bool isDown)
         currentIndex = (totalOptionCount + currentIndex - 1) % totalOptionCount; // index reduce one
     }
     SetCurrentIndex(currentIndex);
-    FlushCurrentOptions();
+    FlushCurrentOptions(isDown, isUpatePropertiesOnly, isUpdateAnimationProperties);
     HandleChangeCallback(isDown, true);
     HandleEventCallback(true);
     return true;
@@ -210,9 +541,7 @@ bool DatePickerColumnPattern::InnerHandleScroll(bool isDown)
 
 void DatePickerColumnPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-    if (panEvent_) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(!panEvent_);
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& event) {
         LOGI("Pan event start");
         auto pattern = weak.Upgrade();
@@ -248,9 +577,8 @@ void DatePickerColumnPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestur
 
 void DatePickerColumnPattern::HandleDragStart(const GestureEvent& event)
 {
-    if (!GetHost() || !GetToss()) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(GetHost());
+    CHECK_NULL_VOID_NOLOG(GetToss());
     auto toss = GetToss();
     yOffset_ = event.GetGlobalPoint().GetY();
     toss->SetStart(yOffset_);
@@ -264,13 +592,9 @@ void DatePickerColumnPattern::HandleDragMove(const GestureEvent& event)
         InnerHandleScroll(LessNotEqual(event.GetDelta().GetY(), 0.0));
         return;
     }
-    if (!pressed_) {
-        LOGE("not pressed.");
-        return;
-    }
-    if (!GetHost() || !GetToss()) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(pressed_);
+    CHECK_NULL_VOID_NOLOG(GetHost());
+    CHECK_NULL_VOID_NOLOG(GetToss());
     auto toss = GetToss();
     double offsetY = event.GetGlobalPoint().GetY();
     if (NearEqual(offsetY, yLast_, 1.0)) { // if changing less than 1.0, no need to handle
@@ -283,9 +607,8 @@ void DatePickerColumnPattern::HandleDragMove(const GestureEvent& event)
 void DatePickerColumnPattern::HandleDragEnd()
 {
     pressed_ = false;
-    if (!GetHost() || !GetToss()) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(GetHost());
+    CHECK_NULL_VOID_NOLOG(GetToss());
     auto toss = GetToss();
     if (!NotLoopOptions() && toss->Play()) {
         return;
@@ -303,9 +626,7 @@ void DatePickerColumnPattern::HandleDragEnd()
 }
 void DatePickerColumnPattern::CreateAnimation()
 {
-    if (animationCreated_) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(!animationCreated_);
     toController_ = AceType::MakeRefPtr<Animator>(PipelineContext::GetCurrentContext());
     toController_->SetDuration(ANIMATION_ZERO_TO_OUTER); // 200ms for animation that from zero to outer.
     auto weak = AceType::WeakClaim(this);
@@ -335,10 +656,7 @@ RefPtr<CurveAnimation<double>> DatePickerColumnPattern::CreateAnimation(double f
 
 void DatePickerColumnPattern::HandleCurveStopped()
 {
-    if (!animationCreated_) {
-        LOGE("animation not created.");
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(animationCreated_);
     if (NearZero(scrollDelta_)) {
         return;
     }
@@ -353,10 +671,31 @@ void DatePickerColumnPattern::HandleCurveStopped()
     fromController_->Play();
 }
 
-void DatePickerColumnPattern::ScrollOption(double delta)
+void DatePickerColumnPattern::ScrollOption(double delta, bool isJump)
 {
     UpdateScrollDelta(delta);
+    double oldDelta = scrollDelta_;
     scrollDelta_ = delta;
+
+    if ((isJump_ && LessOrEqual(delta * oldDelta, 0.0)) || NearZero(delta) || (isJump_ && isJump)) {
+        isJump_ = false;
+        FlushCurrentOptions();
+        return;
+    }
+    if (isJump) {
+        isJump_ = true;
+    }
+    if (NearZero(jumpInterval_)) {
+        return;
+    }
+    double scale = 0.0;
+    if (!isJump_) {
+        scale = fabs(delta) / (jumpInterval_ * 2);
+        UpdateTextPropertiesLinear(LessNotEqual(delta, 0.0), scale);
+    } else {
+        scale = ((2 * jumpInterval_) - fabs(delta))  / (jumpInterval_ * 2);
+        UpdateTextPropertiesLinear(!LessNotEqual(delta, 0.0), scale);
+    }
 }
 
 void DatePickerColumnPattern::UpdateScrollDelta(double delta)
@@ -391,17 +730,15 @@ void DatePickerColumnPattern::UpdateColumnChildPosition(double offsetY)
         ScrollOption(dragDelta);
         return;
     }
-    InnerHandleScroll(LessNotEqual(dragDelta, 0.0));
+    InnerHandleScroll(LessNotEqual(dragDelta, 0.0), true, true);
     double jumpDelta = (LessNotEqual(dragDelta, 0.0) ? jumpInterval_ : 0.0 - jumpInterval_);
-    ScrollOption(jumpDelta);
+    ScrollOption(jumpDelta, true);
     yOffset_ = offsetY - jumpDelta;
 }
 
 bool DatePickerColumnPattern::CanMove(bool isDown) const
 {
-    if (!NotLoopOptions()) {
-        return true;
-    }
+    CHECK_NULL_RETURN_NOLOG(NotLoopOptions(), true);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto options = GetOptions();

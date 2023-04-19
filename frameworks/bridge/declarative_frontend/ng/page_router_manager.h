@@ -31,7 +31,8 @@
 
 namespace OHOS::Ace::NG {
 
-using LoadPageCallback = std::function<bool(const std::string&)>;
+using LoadPageCallback = std::function<bool(const std::string&,
+    const std::function<void(const std::string&, int32_t)>&)>;
 using LoadCardCallback = std::function<bool(const std::string&, int64_t cardId)>;
 
 enum class RouterMode {
@@ -66,6 +67,7 @@ public:
     ~PageRouterManager() override = default;
 
     void RunPage(const std::string& url, const std::string& params);
+    void LoadOhmUrl(const RouterPageInfo& target, const std::string& params);
 
     void RunCard(const std::string& url, const std::string& params, int64_t cardId);
 
@@ -127,6 +129,8 @@ public:
         isCardRouter_ = true;
     }
 
+    void FlushFrontend();
+
 private:
     class RouterOptScope {
     public:
@@ -148,18 +152,24 @@ private:
 
     std::pair<int32_t, RefPtr<FrameNode>> FindPageInStack(const std::string& url);
 
+    void PushOhmUrl(const RouterPageInfo& target, const std::string& params, RouterMode mode,
+        const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr);
     void StartPush(const RouterPageInfo& target, const std::string& params, RouterMode mode = RouterMode::STANDARD,
         const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr);
-    void StartBack(const RouterPageInfo& target, const std::string& params);
+    void StartBack(const RouterPageInfo& target, const std::string& params, bool enableAlert = false);
     bool StartPop();
     void StartReplace(const RouterPageInfo& target, const std::string& params, RouterMode mode = RouterMode::STANDARD,
         const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr);
+    void ReplaceOhmUrl(const RouterPageInfo& target, const std::string& params, RouterMode mode,
+        const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr);
     void BackCheckAlert(const RouterPageInfo& target, const std::string& params);
     void StartClean();
+    void CleanPageOverlay();
 
     // page operations
     void LoadPage(int32_t pageId, const RouterPageInfo& target, const std::string& params, bool isRestore = false,
-        bool needHideLast = true, bool needTransition = true);
+        bool needHideLast = true, bool needTransition = true,
+        const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr);
     void MovePageToFront(int32_t index, const RefPtr<FrameNode>& pageNode, const std::string& params, bool needHideLast,
         bool forceShowCurrent = false, bool needTransition = true);
     void PopPage(const std::string& params, bool needShowNext, bool needTransition);

@@ -16,10 +16,10 @@
 
 /**
  * ObservedObject, i.e. wrapper for class Object type state variable
- * 
- * This class and all other definitoons in this file are framework 
+ *
+ * This class and all other definitoons in this file are framework
  * internal / non-SDK
- * 
+ *
  */
 
 
@@ -49,7 +49,8 @@ function Observed<C extends Object>(target: Type<C>): any {
   // the new constructor behaviour
   var f: any = function (...args: any[]) {
     stateMgmtConsole.debug(`New ${original.name}, gets wrapped inside ObservableObject proxy.`);
-    return new ObservedObject<C>(new original(...args), undefined);
+    return ObservedObject.createNew(new original(...args), undefined);
+//    return new ObservedObject<C>(new original(...args), undefined);
   };
 
   Object.setPrototypeOf(f, Object.getPrototypeOf(original));
@@ -166,6 +167,11 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
    */
   public static createNew<T extends Object>(rawObject: T,
     owningProperty: IPropertySubscriber): any {
+
+    if (rawObject === null || rawObject === undefined) {
+      stateMgmtConsole.error(`ObservedObject.CreateNew, input object must not be null or undefined.`);
+      return null;
+    }
 
     if (ObservedObject.IsObservedObject(rawObject)) {
       ObservedObject.addOwningProperty(rawObject, owningProperty);

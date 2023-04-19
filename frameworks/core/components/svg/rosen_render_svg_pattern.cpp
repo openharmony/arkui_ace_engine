@@ -90,8 +90,8 @@ bool RosenRenderSvgPattern::FitAttribute(const Rect& paintRect, Rect& tileRect, 
 
 const Matrix4 RosenRenderSvgPattern::GetTransform(const Rect& patternRect) const
 {
-    auto transformInfo = (!animateTransformAttrs_.empty()) ? SvgTransform::CreateMatrix4(animateTransformAttrs_)
-                                                           : SvgTransform::CreateTransformInfo(transform_);
+    auto transformInfo = (!animateTransformAttrs_.empty()) ? SvgTransform::CreateInfoFromMap(animateTransformAttrs_)
+                                                           : SvgTransform::CreateInfoFromString(transform_);
     if (!NearZero(patternRect.Left()) || !NearZero(patternRect.Top())) {
         transformInfo.matrix4 =
             Matrix4::CreateTranslate(patternRect.Left(), patternRect.Top(), 0) * transformInfo.matrix4;

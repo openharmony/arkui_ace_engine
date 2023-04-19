@@ -12,9 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#include "flutter/lib/ui/ui_dart_state.h"
-
 #include "core/components/scroll_bar/render_scroll_bar.h"
 #include "core/pipeline/base/rosen_render_context.h"
 

@@ -42,6 +42,11 @@ struct MediaQueryResult {
     {
         /* construct a MediaQueryListener object */
         napi_create_object(env, &result);
+        napi_handle_scope scope = nullptr;
+        napi_open_handle_scope(env, &scope);
+        if (scope == nullptr) {
+            return;
+        }
 
         napi_value matchesVal = nullptr;
         napi_get_boolean(env, matches_, &matchesVal);
@@ -50,6 +55,7 @@ struct MediaQueryResult {
         napi_value mediaVal = nullptr;
         napi_create_string_utf8(env, media_.c_str(), media_.size(), &mediaVal);
         napi_set_named_property(env, result, "media", mediaVal);
+        napi_close_handle_scope(env, scope);
     }
 };
 
@@ -89,6 +95,11 @@ public:
             auto json = MediaQueryInfo::GetMediaQueryJsonInfo();
             listener->matches_ = queryer.MatchCondition(listener->media_, json);
             for (auto& cbRef : listener->cbList_) {
+                napi_handle_scope scope = nullptr;
+                napi_open_handle_scope(listener->env_, &scope);
+                if (scope == nullptr) {
+                    return;
+                }
                 napi_value thisVal = nullptr;
                 napi_get_reference_value(listener->env_, listener->thisVarRef_, &thisVal);
 
@@ -99,8 +110,8 @@ public:
                 listener->MediaQueryResult::NapiSerializer(listener->env_, resultArg);
 
                 napi_value result = nullptr;
-                LOGI("NAPI MediaQueryCallback call js");
                 napi_call_function(listener->env_, thisVal, cb, 1, &resultArg, &result);
+                napi_close_handle_scope(listener->env_, scope);
             }
         }
     }
@@ -115,6 +126,11 @@ public:
         }
         jsEngine->RegisterMediaUpdateCallback(NapiCallback);
 
+        napi_handle_scope scope = nullptr;
+        napi_open_handle_scope(env, &scope);
+        if (scope == nullptr) {
+            return nullptr;
+        }
         napi_value thisVar = nullptr;
         napi_value cb = nullptr;
         size_t argc = ParseArgs(env, info, thisVar, cb);
@@ -123,15 +139,18 @@ public:
         MediaQueryListener* listener = GetListener(env, thisVar);
         if (!listener) {
             LOGE("listener is null");
+            napi_close_handle_scope(env, scope);
             return nullptr;
         }
         auto iter = listener->FindCbList(cb);
         if (iter != listener->cbList_.end()) {
+            napi_close_handle_scope(env, scope);
             return nullptr;
         }
         napi_ref ref = nullptr;
         napi_create_reference(env, cb, 1, &ref);
         listener->cbList_.emplace_back(ref);
+        napi_close_handle_scope(env, scope);
 
 #if defined(PREVIEW)
         NapiCallback(AceType::RawPtr(jsEngine));
@@ -215,12 +234,18 @@ public:
 private:
     void Initialize(napi_env env, napi_value thisVar)
     {
+        napi_handle_scope scope = nullptr;
+        napi_open_handle_scope(env, &scope);
+        if (scope == nullptr) {
+            return;
+        }
         if (env_ == nullptr) {
             env_ = env;
         }
         if (thisVarRef_ == nullptr) {
             napi_create_reference(env, thisVar, 1, &thisVarRef_);
         }
+        napi_close_handle_scope(env, scope);
         auto jsEngine = EngineHelper::GetCurrentEngine();
         if (!jsEngine) {
             LOGE("get jsEngine failed");

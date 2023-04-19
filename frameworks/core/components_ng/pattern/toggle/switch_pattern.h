@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/toggle/switch_accessibility_property.h"
 #include "core/components_ng/pattern/toggle/switch_event_hub.h"
 #include "core/components_ng/pattern/toggle/switch_layout_algorithm.h"
 #include "core/components_ng/pattern/toggle/switch_paint_method.h"
@@ -59,11 +60,29 @@ public:
     {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, nullptr);
+        if (!switchModifier_) {
+            auto pipeline = PipelineBase::GetCurrentContext();
+            auto switchTheme = pipeline->GetTheme<SwitchTheme>();
+            auto paintProperty = host->GetPaintProperty<SwitchPaintProperty>();
+            auto isSelect = paintProperty->GetIsOnValue(false);
+            auto boardColor = isSelect ? paintProperty->GetSelectedColorValue(switchTheme->GetActiveColor())
+                                       : switchTheme->GetInactivePointColor();
+            switchModifier_ = AceType::MakeRefPtr<SwitchModifier>(isSelect, boardColor, currentOffset_);
+        }
+        auto paintMethod = MakeRefPtr<SwitchPaintMethod>(switchModifier_);
+        paintMethod->SetIsSelect(isOnBeforeAnimate_.value_or(false));
         auto eventHub = host->GetEventHub<EventHub>();
         CHECK_NULL_RETURN(eventHub, nullptr);
         auto enabled = eventHub->IsEnabled();
-        auto paintMethod = MakeRefPtr<SwitchPaintMethod>(currentOffset_, enabled, isTouch_, isHover_);
+        paintMethod->SetEnabled(enabled);
+        paintMethod->SetMainDelta(currentOffset_);
+        paintMethod->SetIsHover(isHover_);
         return paintMethod;
+    }
+
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        return MakeRefPtr<SwitchAccessibilityProperty>();
     }
 
     FocusPattern GetFocusPattern() const override
@@ -81,7 +100,10 @@ public:
         return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
     }
 
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    bool IsChecked()
+    {
+        return isOn_.value_or(false);
+    }
 
 private:
     void OnModifyDone() override;
@@ -107,16 +129,16 @@ private:
 
     // Init key event
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    bool OnKeyEvent(const KeyEvent& event);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
 
     void HandleDragUpdate(const GestureEvent& info);
     void HandleDragEnd();
 
     bool IsOutOfBoundary(double mainOffset) const;
-
-    RectF GetHotZoneRect(bool isOriginal) const;
-
     void OnClick();
+    void AddHotZoneRect();
+    void RemoveLastHotZoneRect() const;
 
     RefPtr<PanEvent> panEvent_;
 
@@ -124,6 +146,7 @@ private:
     RefPtr<ClickEvent> clickListener_;
     RefPtr<CurveAnimation<double>> translate_;
     std::optional<bool> isOn_;
+    std::optional<bool> isOnBeforeAnimate_;
     bool changeFlag_ = false;
     float currentOffset_ = 0.0f;
 
@@ -134,6 +157,15 @@ private:
 
     float width_ = 0.0f;
     float height_ = 0.0f;
+    Dimension hotZoneHorizontalPadding_;
+    Dimension hotZoneVerticalPadding_;
+    OffsetF offset_;
+    SizeF size_;
+    OffsetF hotZoneOffset_;
+    SizeF hotZoneSize_;
+
+    RefPtr<SwitchModifier> switchModifier_;
+
     ACE_DISALLOW_COPY_AND_MOVE(SwitchPattern);
 };
 } // namespace OHOS::Ace::NG

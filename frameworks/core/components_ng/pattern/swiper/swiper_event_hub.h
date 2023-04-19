@@ -35,6 +35,8 @@ using ChangeIndicatorEvent = std::function<void()>;
 using ChangeEvent = std::function<void(int32_t index)>;
 using ChangeEventPtr = std::shared_ptr<ChangeEvent>;
 using ChangeDoneEvent = std::function<void()>;
+using AnimationStartEvent = std::function<void(int32_t index)>;
+using AnimationEndEvent = std::function<void(int32_t index)>;
 
 class SwiperEventHub : public EventHub {
     DECLARE_ACE_TYPE(SwiperEventHub, EventHub)
@@ -57,6 +59,16 @@ public:
     void SetChangeDoneEvent(ChangeDoneEvent&& changeDoneEvent)
     {
         changeDoneEvent_ = std::move(changeDoneEvent);
+    }
+
+    void SetAnimationStartEvent(AnimationStartEvent&& animationStartEvent)
+    {
+        animationStartEvent_ = std::move(animationStartEvent);
+    }
+
+    void SetAnimationEndEvent(AnimationEndEvent&& animationEndEvent)
+    {
+        animationEndEvent_ = std::move(animationEndEvent);
     }
 
     void FireChangeDoneEvent(bool direction)
@@ -91,11 +103,27 @@ public:
         return direction_;
     }
 
+    void FireAnimationStartEvent(int32_t index) const
+    {
+        if (animationStartEvent_) {
+            animationStartEvent_(index);
+        }
+    }
+
+    void FireAnimationEndEvent(int32_t index) const
+    {
+        if (animationEndEvent_) {
+            animationEndEvent_(index);
+        }
+    }
+
 private:
     Direction direction_;
     std::list<ChangeEventPtr> changeEvents_;
     ChangeDoneEvent changeDoneEvent_;
     ChangeIndicatorEvent changeIndicatorEvent_;
+    AnimationStartEvent animationStartEvent_;
+    AnimationEndEvent animationEndEvent_;
 };
 
 } // namespace OHOS::Ace::NG

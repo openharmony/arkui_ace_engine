@@ -46,9 +46,11 @@ public:
     // Evaluate a piece of js code, returns true if success.
     // If exception occurs during execution, it is handled inside this interface.
     virtual shared_ptr<JsValue> EvaluateJsCode(const std::string &src) = 0;
-    virtual bool EvaluateJsCode(const uint8_t *buffer, int32_t size, const std::string& filePath = "") = 0;
+    virtual bool EvaluateJsCode(
+        const uint8_t* buffer, int32_t size, const std::string& filePath = "", bool needUpdate = false) = 0;
 
-    virtual bool ExecuteJsBin([[maybe_unused]] const std::string &fileName)
+    virtual bool ExecuteJsBin([[maybe_unused]] const std::string &fileName,
+        const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr)
     {
         return true;
     }
@@ -56,6 +58,7 @@ public:
     // Get the global object.
     virtual shared_ptr<JsValue> GetGlobal() = 0;
     virtual void RunGC() = 0;
+    virtual void RunFullGC() {}
 
     virtual shared_ptr<JsValue> NewNumber(double d) = 0;
     virtual shared_ptr<JsValue> NewInt32(int32_t value) = 0;
@@ -70,10 +73,13 @@ public:
     virtual shared_ptr<JsValue> NewNativePointer(void *ptr) = 0;
     virtual void ThrowError(const std::string& msg, int32_t code) = 0;
     virtual void RegisterUncaughtExceptionHandler(UncaughtExceptionCallback callback) = 0;
-    virtual void HandleUncaughtException() = 0;
+    virtual void HandleUncaughtException(
+        const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr) = 0;
     virtual bool HasPendingException() = 0;
     virtual void ExecutePendingJob() = 0;
     virtual void DumpHeapSnapshot(bool isPrivate) {}
+    virtual void SetErrorEventHandler(
+        std::function<void(const std::string&, const std::string&)>&& errorCallback) {}
 
     // Set c++ data to js environment.
     void SetEmbedderData(void *data)

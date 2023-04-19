@@ -47,6 +47,16 @@ float MeasureTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& ho
         titleBarWrapper->Measure(constraint);
         return 0.0f;
     }
+    auto titleBarFrameNode = AceType::DynamicCast<FrameNode>(titleBarNode);
+    CHECK_NULL_RETURN(titleBarFrameNode, 0.0f);
+    auto titleBarLayoutProperty = titleBarFrameNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_RETURN(titleBarLayoutProperty, 0.0f);
+    if (titleBarLayoutProperty->HasTitleHeight()) {
+        constraint.selfIdealSize.SetHeight(
+            static_cast<float>(titleBarLayoutProperty->GetTitleHeightValue().ConvertToPx()));
+        titleBarWrapper->Measure(constraint);
+        return titleBarLayoutProperty->GetTitleHeight()->ConvertToPx();
+    }
 
     // MINI 模式
     if (navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI) {
@@ -101,7 +111,9 @@ float MeasureToolBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& hos
     auto toolBarWrapper = layoutWrapper->GetOrCreateChildByIndex((index));
     CHECK_NULL_RETURN(toolBarWrapper, 0.0f);
     auto constraint = navBarLayoutProperty->CreateChildConstraint();
-    if (navBarLayoutProperty->GetHideToolBar().value_or(false)) {
+
+    if (navBarLayoutProperty->GetHideToolBar().value_or(false) ||
+        toolBarNode->GetChildren().empty()) {
         constraint.selfIdealSize = OptionalSizeF(0.0f, 0.0f);
         toolBarWrapper->Measure(constraint);
         return 0.0f;

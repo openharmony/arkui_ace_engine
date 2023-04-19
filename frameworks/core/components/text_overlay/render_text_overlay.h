@@ -119,6 +119,7 @@ protected:
     Offset endHandleOffset_;
     Offset startHandleCenter_;
     Offset endHandleCenter_;
+    Offset mouseOffset_;
 
     // dot offset align to arrow endings
     Offset dot1StartOffset_;

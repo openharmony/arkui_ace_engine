@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,14 +16,13 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRID_GRID_ITEM_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRID_GRID_ITEM_PATTERN_H
 
-#include "base/memory/referenced.h"
-#include "base/utils/noncopyable.h"
+#include "core/components_ng/pattern/grid/grid_item_accessibility_property.h"
+#include "core/components_ng/pattern/grid/grid_item_event_hub.h"
 #include "core/components_ng/pattern/grid/grid_item_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/syntax/shallow_builder.h"
 
 namespace OHOS::Ace::NG {
-
 class ACE_EXPORT GridItemPattern : public Pattern {
     DECLARE_ACE_TYPE(GridItemPattern, Pattern);
 
@@ -41,6 +40,18 @@ public:
         return MakeRefPtr<GridItemLayoutProperty>();
     }
 
+    RefPtr<EventHub> CreateEventHub() override
+    {
+        return MakeRefPtr<GridItemEventHub>();
+    }
+
+    
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        return MakeRefPtr<GridItemAccessibilityProperty>();
+    }
+
+
     void BeforeCreateLayoutWrapper() override
     {
         if (shallowBuilder_ && !shallowBuilder_->IsExecuteDeepRenderDone()) {
@@ -48,7 +59,6 @@ public:
             shallowBuilder_.Reset();
         }
     }
-
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override
     {
         auto layoutProperty = dirty->GetLayoutProperty();
@@ -91,7 +101,7 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::SCOPE, true };
+        return { FocusType::SCOPE, true, FocusStyleType::INNER_BORDER };
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -101,10 +111,7 @@ public:
         json->Put("selectable", selectable_ ? "true" : "false");
     }
 
-    void MarkIsSelected(bool isSelected)
-    {
-        isSelected_ = isSelected;
-    }
+    void MarkIsSelected(bool isSelected);
 
     bool IsSelected() const
     {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,11 +37,13 @@
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
 #include "core/gestures/gesture_info.h"
+#include "core/components_ng/property/progress_mask_property.h"
 
 namespace OHOS::Ace {
 
 using ClickEventFunc = std::function<void(const ClickInfo* info)>;
 using RemoteCallback = std::function<void(const BaseEventInfo* info)>;
+using OnNewDragFunc = std::function<void(const RefPtr<OHOS::Ace::DragEvent>&)>;
 
 enum class ResponseType : int32_t {
     RIGHT_CLICK = 0,
@@ -56,6 +58,7 @@ public:
     // basic size
     virtual void SetWidth(const Dimension& width) = 0;
     virtual void SetHeight(const Dimension& height) = 0;
+    virtual void ClearWidthOrHeight(bool isWidth) = 0;
     virtual void SetMinWidth(const Dimension& minWidth) = 0;
     virtual void SetMinHeight(const Dimension& minHeight) = 0;
     virtual void SetMaxWidth(const Dimension& maxWidth) = 0;
@@ -67,7 +70,11 @@ public:
     virtual void SetBackgroundImageRepeat(const ImageRepeat& imageRepeat) = 0;
     virtual void SetBackgroundImageSize(const BackgroundImageSize& bgImgSize) = 0;
     virtual void SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition) = 0;
-    virtual void SetBackgroundBlurStyle(const BlurStyle& bgBlurStyle) = 0;
+    virtual void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle) = 0;
+    virtual void SetSphericalEffect(double radio) {}
+    virtual void SetPixelStretchEffect(PixStretchEffectOption& option) {}
+    virtual void SetLightUpEffect(double radio) {}
+
     virtual void SetPadding(const Dimension& value) = 0;
     virtual void SetPaddings(const std::optional<Dimension>& top, const std::optional<Dimension>& bottom,
         const std::optional<Dimension>& left, const std::optional<Dimension>& right) = 0;
@@ -111,7 +118,7 @@ public:
 
     // transforms
     virtual void SetScale(float x, float y, float z) = 0;
-    virtual void SetPivot(const Dimension& x, const Dimension& y) = 0;
+    virtual void SetPivot(const Dimension& x, const Dimension& y, const Dimension& z) = 0;
     virtual void SetTranslate(const Dimension& x, const Dimension& y, const Dimension& z) = 0;
     virtual void SetRotate(float x, float y, float z, float angle) = 0;
     virtual void SetTransformMatrix(const std::vector<float>& matrix) = 0;
@@ -119,6 +126,7 @@ public:
     // display props
     virtual void SetOpacity(double opacity, bool passThrough = false) = 0;
     virtual void SetTransition(const NG::TransitionOptions& transitionOptions, bool passThrough = false) = 0;
+    virtual void SetChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect, bool passThrough = false) = 0;
     virtual void SetOverlay(const std::string& text, const std::optional<Alignment>& align,
         const std::optional<Dimension>& offsetX, const std::optional<Dimension>& offsetY) = 0;
     virtual void SetVisibility(VisibleType visible, std::function<void(int32_t)>&& changeEventFunc) = 0;
@@ -172,11 +180,14 @@ public:
     virtual void SetOnFocusMove(std::function<void(int32_t)>&& onFocusMoveCallback) = 0;
     virtual void SetOnFocus(OnFocusFunc&& onFocusCallback) = 0;
     virtual void SetOnBlur(OnBlurFunc&& onBlurCallback) = 0;
+    virtual void SetDraggable(bool draggable) = 0;
     virtual void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) = 0;
     virtual void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) = 0;
+    virtual void SetOnDragEnd(OnNewDragFunc&& onDragEnd) = 0;
     virtual void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) = 0;
     virtual void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) = 0;
     virtual void SetOnDrop(NG::OnDragDropFunc&& onDrop) = 0;
+    virtual void SetAllowDrop(const std::set<std::string>& allowDrop) = 0;
     virtual void SetOnVisibleChange(
         std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratios) = 0;
     virtual void SetOnAreaChanged(
@@ -198,11 +209,17 @@ public:
     virtual void SetDebugLine(const std::string& line) = 0;
     virtual void SetHoverEffect(HoverEffectType hoverEffect) = 0;
     virtual void SetHitTestMode(NG::HitTestMode hitTestMode) = 0;
+    virtual void SetKeyboardShortcut(const std::string& value, const std::vector<CtrlKey>& keys,
+        std::function<void()>&& onKeyboardShortcutAction) = 0;
 
     // popup and menu
     virtual void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) = 0;
-    virtual void BindMenu(std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc) = 0;
-    virtual void BindContextMenu(ResponseType type, std::function<void()>&& buildFunc) = 0;
+    virtual void BindMenu(
+        std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const NG::MenuParam& menuParam) = 0;
+    virtual void BindContextMenu(
+        ResponseType type, std::function<void()>&& buildFunc, const NG::MenuParam& menuParam) = 0;
+    virtual void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
+        std::function<void()>&& buildFunc, int32_t type) = 0;
 
     // accessibility
     virtual void SetAccessibilityGroup(bool accessible) = 0;
@@ -210,6 +227,16 @@ public:
     virtual void SetAccessibilityDescription(const std::string& description) = 0;
     virtual void SetAccessibilityImportance(const std::string& importance) = 0;
 
+    // progress mask
+    virtual void SetProgressMask(const RefPtr<NG::ProgressMaskProperty>& progress) = 0;
+    // foregroundColor
+    virtual void SetForegroundColor(const Color& color) = 0;
+    virtual void SetForegroundColorStrategy(const ForegroundColorStrategy& strategy) = 0;
+
+    // custom animation properties
+    virtual void CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
+        const std::function<void(float)>& onCallbackEvent) = 0;
+    virtual void UpdateAnimatablePropertyFloat(const std::string& propertyName, float value) = 0;
 private:
     static std::unique_ptr<ViewAbstractModel> instance_;
 };

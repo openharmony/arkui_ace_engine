@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,11 +18,6 @@
 #include "utils/rect.h"
 
 namespace OHOS::Ace::NG {
-void SvgCanvasImage::SetSVGDom(const RefPtr<SvgDomBase>& svgDom)
-{
-    svgDom_ = svgDom;
-}
-
 const RefPtr<SvgDomBase>& SvgCanvasImage::GetSVGDom() const
 {
     return svgDom_;
@@ -33,11 +28,27 @@ std::optional<Color> SvgCanvasImage::GetSvgFillColor()
     return svgDom_ ? std::nullopt : svgDom_->GetSvgFillColor();
 }
 
-void SvgCanvasImage::DrawToRSCanvas(
-    RSCanvas& canvas, const RSRect& srcRect, const RSRect& /* dstRect */, const std::array<PointF, 4>& /* radiusXY */)
+void SvgCanvasImage::DrawToRSCanvas(RSCanvas& canvas, const RSRect& srcRect, const RSRect& /* dstRect */,
+    const BorderRadiusArray& /* radiusXY */)
 {
     CHECK_NULL_VOID(svgDom_);
     svgDom_->DrawImage(
         canvas, GetPaintConfig().imageFit_, Size(srcRect.GetWidth(), srcRect.GetHeight()), GetSvgFillColor());
+}
+
+bool SvgCanvasImage::IsStatic()
+{
+    CHECK_NULL_RETURN(svgDom_, true);
+    return svgDom_->IsStatic();
+}
+
+void SvgCanvasImage::SetRedrawCallback(std::function<void()>&& callback)
+{
+    svgDom_->SetAnimationCallback(std::move(callback), WeakClaim(this));
+}
+
+void SvgCanvasImage::ControlAnimation(bool play)
+{
+    svgDom_->ControlAnimation(play);
 }
 } // namespace OHOS::Ace::NG

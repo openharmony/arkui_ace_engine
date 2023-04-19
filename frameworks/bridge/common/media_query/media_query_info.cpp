@@ -18,6 +18,7 @@
 #include "base/log/log.h"
 #include "core/common/container.h"
 #include "core/common/thread_checker.h"
+#include "core/components/container_modal/container_modal_constants.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -69,6 +70,18 @@ std::unique_ptr<JsonValue> MediaQueryInfo::GetMediaQueryJsonInfo()
     auto container = Container::Current();
     int32_t width = container ? container->GetViewWidth() : 0;
     int32_t height = container ? container->GetViewHeight() : 0;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    if (pipeline) {
+        auto windowManager = pipeline->GetWindowManager();
+        if (windowManager) {
+            auto mode = windowManager->GetWindowMode();
+            if (mode == WindowMode::WINDOW_MODE_FLOATING) {
+                width -= static_cast<int32_t>(2 * (CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx());
+                height -= static_cast<int32_t>(2 * CONTAINER_BORDER_WIDTH.ConvertToPx() +
+                                               (CONTENT_PADDING + CONTAINER_TITLE_HEIGHT).ConvertToPx());
+            }
+        }
+    }
     double aspectRatio = (height != 0) ? (static_cast<double>(width) / height) : 1.0;
     json->Put("width", width);
     json->Put("height", height);

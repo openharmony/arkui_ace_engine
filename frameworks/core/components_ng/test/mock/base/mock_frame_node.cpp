@@ -24,13 +24,22 @@ void FrameNode::OnWindowShow() {}
 void FrameNode::OnWindowHide() {}
 void FrameNode::OnWindowFocused() {}
 void FrameNode::OnWindowUnfocused() {}
+void FrameNode::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) {}
 void FrameNode::OnNotifyMemoryLevel(int32_t level) {}
 void FrameNode::OnAccessibilityEvent(AccessibilityEventType eventType) const {}
 void FrameNode::DumpInfo() {}
 void FrameNode::FocusToJsonValue(std::unique_ptr<JsonValue>& json) const {}
+void FrameNode::MouseToJsonValue(std::unique_ptr<JsonValue>& json) const {}
+void FrameNode::TouchToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
-void FrameNode::OnAttachToMainTree() {}
-void FrameNode::OnDetachFromMainTree() {}
+void FrameNode::OnAttachToMainTree(bool) {}
+void FrameNode::OnDetachFromMainTree(bool) {}
+void FrameNode::OnAddDisappearingChild() {}
+void FrameNode::OnRemoveDisappearingChild() {}
+bool FrameNode::OnRemoveFromParent()
+{
+    return false;
+}
 void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& dirty) {}
 void FrameNode::SetActive(bool active)
 {
@@ -51,6 +60,8 @@ void FrameNode::MarkNeedRender(bool isRenderBoundary) {}
 void FrameNode::MarkDirtyNode(bool isMeasureBoundary, bool isRenderBoundary, PropertyChangeFlag extraFlag) {}
 void FrameNode::OnGenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList) {}
 void FrameNode::OnGenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& allList) {}
+void FrameNode::OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList, uint32_t index)
+{}
 void FrameNode::UpdateChildrenLayoutWrapper(const RefPtr<LayoutWrapper>& self, bool forceMeasure, bool forceLayout) {}
 void FrameNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool forceMeasure, bool forceLayout) {}
 void FrameNode::UpdateLayoutPropertyFlag() {}
@@ -125,6 +136,11 @@ LayoutConstraintF FrameNode::GetLayoutConstraint() const
 }
 
 OffsetF FrameNode::GetParentGlobalOffset() const
+{
+    return { 1.0f, 1.0f };
+}
+
+OffsetF FrameNode::GetPaintRectOffsetToPage() const
 {
     return { 1.0f, 1.0f };
 }
@@ -215,5 +231,20 @@ RefPtr<FocusHub> FrameNode::GetOrCreateFocusHub() const
 OffsetF FrameNode::GetOffsetRelativeToWindow() const
 {
     return { 1.0f, 1.0f };
+}
+
+OffsetF FrameNode::GetTransformRelativeOffset() const
+{
+    return { 1.0f, 1.0f };
+}
+
+bool FrameNode::MarkRemoving()
+{
+    return false;
+}
+
+RefPtr<FrameNode> FrameNode::FindChildByPosition(float x, float y)
+{
+    return nullptr;
 }
 } // namespace OHOS::Ace::NG

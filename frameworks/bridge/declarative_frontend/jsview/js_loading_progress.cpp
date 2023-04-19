@@ -17,6 +17,7 @@
 
 #include "bridge/declarative_frontend/jsview/models/loading_progress_model_impl.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_model.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_model_ng.h"
 
@@ -49,6 +50,7 @@ void JSLoadingProgress::JSBind(BindingTarget globalObj)
 
     JSClass<JSLoadingProgress>::StaticMethod("create", &JSLoadingProgress::Create, opt);
     JSClass<JSLoadingProgress>::StaticMethod("color", &JSLoadingProgress::SetColor, opt);
+    JSClass<JSLoadingProgress>::StaticMethod("foregroundColor", &JSLoadingProgress::SetForegroundColor, opt);
     JSClass<JSLoadingProgress>::Inherit<JSViewAbstract>();
     JSClass<JSLoadingProgress>::Bind(globalObj);
 }
@@ -65,6 +67,20 @@ void JSLoadingProgress::SetColor(const JSCallbackInfo& info)
         return;
     }
 
+    LoadingProgressModel::GetInstance()->SetColor(progressColor);
+}
+
+void JSLoadingProgress::SetForegroundColor(const JSCallbackInfo& info)
+{
+    ForegroundColorStrategy strategy;
+    if (ParseJsColorStrategy(info[0], strategy)) {
+        ViewAbstractModel::GetInstance()->SetForegroundColorStrategy(strategy);
+        return;
+    }
+    Color progressColor;
+    if (!ParseJsColor(info[0], progressColor)) {
+        return;
+    }
     LoadingProgressModel::GetInstance()->SetColor(progressColor);
 }
 }; // namespace OHOS::Ace::Framework

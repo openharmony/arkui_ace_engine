@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,11 +15,23 @@
 
 #include "core/components_ng/pattern/refresh/refresh_pattern.h"
 
-#include <stack>
-#include <string>
-#include <sys/time.h>
-#include <utility>
-
+#include "base/geometry/dimension.h"
+#include "base/geometry/ng/offset_t.h"
+#include "base/memory/ace_type.h"
+#include "base/utils/utils.h"
+#include "core/animation/spring_curve.h"
+#include "core/common/container.h"
+#include "core/components/common/properties/animation_option.h"
+#include "core/components/refresh/refresh_theme.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/loading_progress/loading_progress_layout_property.h"
+#include "core/components_ng/pattern/loading_progress/loading_progress_paint_property.h"
+#include "core/components_ng/pattern/refresh/refresh_layout_property.h"
+#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/components_ng/property/property.h"
+#include "core/components_ng/render/animation_utils.h"
+#include "core/pipeline/base/element_register.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/i18n/localization.h"
 #include "frameworks/base/utils/time_util.h"
 #include "frameworks/base/utils/utils.h"
@@ -30,48 +42,209 @@
 namespace OHOS::Ace::NG {
 
 namespace {
-
-constexpr int32_t BASE_YEAR = 1900;
-const char LAST_UPDATE_FORMAT[] = "yyyy/M/d HH:mm"; // Date format for last updated
-constexpr float DIAMETER_HALF = 0.5;
-constexpr float DEFAULT_SHOW_TIME_HEIGHT = 300.0; // Default time show height for time
-constexpr float PERCENT = 0.01;                   // Percent
-constexpr int32_t CHILD_COUNT = 2;
-
+constexpr float PERCENT = 0.01; // Percent
+constexpr float FOLLOW_TO_RECYCLE_DURATION = 600;
+constexpr float CUSTOM_BUILDER_RECYCLE_DURATION = 100;
+constexpr float CUSTOM_BUILDER_EXIT_DURATION = 100;
+constexpr float LOADING_EXIT_DURATION = 350;
+constexpr Dimension TRIGGER_LOADING_DISTANCE = 16.0_vp;
+constexpr Dimension TRIGGER_REFRESH_DISTANCE = 64.0_vp;
+constexpr Dimension MAX_SCROLL_DISTANCE = 128.0_vp;
+constexpr Dimension LOADING_PROGRESS_SIZE = 32.0_vp;
+constexpr Dimension CUSTOM_BUILDER_HIGHT_LIGHT_SIZE = 32.0_vp;
+constexpr float DEFAULT_FRICTION = 64.0f;
+constexpr int32_t STATE_PROGRESS_LOADING = 1;
+constexpr int32_t STATE_PROGRESS_RECYCLE = 2;
+constexpr int32_t STATE_PROGRESS_DRAG = 3;
 } // namespace
 
 void RefreshPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    InitPanEvent(gestureHub);
     auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (layoutProperty->GetIsShowLastTimeValue()) {
-        layoutProperty->UpdateTriggerRefreshDistance(
-            layoutProperty->GetShowTimeDistanceValue(Dimension(0, DimensionUnit::VP)));
-    } else {
-        layoutProperty->UpdateTriggerRefreshDistance(layoutProperty->GetRefreshDistanceValue());
+    triggerLoadingDistance_ = static_cast<float>(
+        std::clamp(layoutProperty->GetIndicatorOffset().value_or(TRIGGER_LOADING_DISTANCE).ConvertToPx(),
+            -1.0f * TRIGGER_LOADING_DISTANCE.ConvertToPx(), TRIGGER_REFRESH_DISTANCE.ConvertToPx()));
+    InitPanEvent(gestureHub);
+    CheckCoordinationEvent();
+    auto paintProperty = GetPaintProperty<RefreshRenderProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto refreshingProp = paintProperty->GetIsRefreshing().value_or(false);
+    if (layoutProperty->GetIsCustomBuilderExistValue()) {
+        CustomBuilderReset();
+        if (refreshingProp) {
+            TriggerRefresh();
+            CustomBuilderAppear();
+        } else {
+            CustomBuilderExit();
+        }
+        return;
     }
-    auto indicatorOffset = layoutProperty->GetIndicatorOffsetValue().ConvertToPx();
-    layoutProperty->UpdateScrollableOffset(OffsetF(0, 0));
-    layoutProperty->UpdateLoadingProcessOffset(OffsetF(0, static_cast<float>(indicatorOffset)));
-    layoutProperty->UpdateShowTimeOffset(OffsetF(0, GetShowTimeOffset().GetY()));
-    timeOffset_ = layoutProperty->GetShowTimeOffsetValue();
+    if (!progressChild_) {
+        progressChild_ = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(host->TotalChildCount() - 1));
+        LoadingProgressReset();
+    }
+
+    if (isRefreshing_ != refreshingProp) {
+        if (refreshingProp) {
+            ReplaceLoadingProgressNode();
+            TriggerRefresh();
+            LoadingProgressAppear();
+        } else {
+            LoadingProgressExit();
+        }
+    }
 }
 
-bool RefreshPattern::OnDirtyLayoutWrapperSwap(
-    const RefPtr<LayoutWrapper>& /*dirty*/, bool /*skipMeasure*/, bool /*skipLayout*/)
+void RefreshPattern::CheckCoordinationEvent()
 {
-    auto refreshLayoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
-    CHECK_NULL_RETURN(refreshLayoutProperty, false);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto scrollableNode = FindScrollableChild();
+    scrollableNode_ = WeakClaim(AceType::RawPtr(scrollableNode));
+    CHECK_NULL_VOID(scrollableNode);
+    auto scrollablePattern = scrollableNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_VOID(scrollablePattern);
+    auto coordinationEvent = AceType::MakeRefPtr<ScrollableCoordinationEvent>();
+    auto onScrollEvent = [weak = WeakClaim(this)](double offset) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleDragUpdate(static_cast<float>(offset));
+    };
+    coordinationEvent->SetOnScrollEvent(onScrollEvent);
+    auto onScrollStartEvent = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleDragStart();
+    };
+    coordinationEvent->SetOnScrollStartEvent(onScrollStartEvent);
+    auto onScrollEndEvent = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleDragEnd();
+    };
+    coordinationEvent->SetOnScrollEndEvent(onScrollEndEvent);
+    scrollablePattern->SetCoordinationEvent(coordinationEvent);
+}
 
-    refreshStatus = GetNextStatus();
-    return false;
+RefPtr<FrameNode> RefreshPattern::FindScrollableChild()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    std::queue<RefPtr<FrameNode>> frameNodeQueue;
+    frameNodeQueue.push(host);
+    while (!frameNodeQueue.empty()) {
+        auto size = frameNodeQueue.size();
+        while (size > 0) {
+            auto node = frameNodeQueue.front();
+            CHECK_NULL_RETURN(node, nullptr);
+            if (AceType::InstanceOf<ScrollablePattern>(node->GetPattern())) {
+                return node;
+            }
+            frameNodeQueue.pop();
+            auto children = node->GetChildren();
+            for (auto const& child : children) {
+                auto childNode = DynamicCast<FrameNode>(child);
+                if (childNode) {
+                    frameNodeQueue.push(childNode);
+                }
+            }
+            size--;
+        }
+    }
+    return nullptr;
+}
+
+void RefreshPattern::TriggerRefresh()
+{
+    isRefreshing_ = true;
+    FireChangeEvent("true");
+    FireRefreshing();
+    TriggerStatusChange(RefreshStatus::REFRESH);
+}
+
+void RefreshPattern::LoadingProgressRecycle()
+{
+    CHECK_NULL_VOID(progressChild_);
+    auto progressPaintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
+    CHECK_NULL_VOID(progressPaintProperty);
+    progressPaintProperty->UpdateRefreshAnimationState(static_cast<int32_t>(RefreshAnimationState::RECYCLE));
+    progressChild_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void RefreshPattern::ReplaceLoadingProgressNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (progressChild_) {
+        host->RemoveChild(progressChild_);
+    }
+    auto loadingProgressChild = FrameNode::CreateFrameNode(V2::LOADING_PROGRESS_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LoadingProgressPattern>());
+    CHECK_NULL_VOID(loadingProgressChild);
+    host->AddChild(loadingProgressChild);
+    progressChild_ = loadingProgressChild;
+    host->RebuildRenderContextTree();
+    LoadingProgressReset();
+}
+
+void RefreshPattern::LoadingProgressReset()
+{
+    CHECK_NULL_VOID(progressChild_);
+    UpdateLoadingProgress(STATE_PROGRESS_LOADING, 0.0f);
+    auto progressLayoutProperty = progressChild_->GetLayoutProperty<LoadingProgressLayoutProperty>();
+    CHECK_NULL_VOID(progressLayoutProperty);
+    progressLayoutProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(LOADING_PROGRESS_SIZE.ConvertToPx()), CalcLength(LOADING_PROGRESS_SIZE.ConvertToPx())));
+    ResetLoadingProgressColor();
+    auto progressPaintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
+    CHECK_NULL_VOID(progressPaintProperty);
+    progressPaintProperty->UpdateLoadingProgressOwner(LoadingProgressOwner::REFRESH);
+    scrollOffset_.SetY(0.0f);
+    progressChild_->MarkDirtyNode();
+}
+
+void RefreshPattern::OnExitAnimationFinish()
+{
+    if (customBuilder_) {
+        CustomBuilderReset();
+        TriggerFinish();
+        return;
+    }
+    ReplaceLoadingProgressNode();
+    TriggerFinish();
+    CHECK_NULL_VOID(progressChild_);
+    progressChild_->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+}
+
+void RefreshPattern::TriggerInActive()
+{
+    isRefreshing_ = false;
+    FireChangeEvent("false");
+    TriggerStatusChange(RefreshStatus::INACTIVE);
+}
+
+void RefreshPattern::TriggerDone()
+{
+    isRefreshing_ = false;
+    FireChangeEvent("false");
+    TriggerStatusChange(RefreshStatus::DONE);
+}
+
+void RefreshPattern::TriggerFinish()
+{
+    if (refreshStatus_ == RefreshStatus::REFRESH) {
+        TriggerDone();
+    } else {
+        TriggerInActive();
+    }
 }
 
 void RefreshPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -110,125 +283,216 @@ void RefreshPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 
 void RefreshPattern::HandleDragStart()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto refreshLayoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
-    CHECK_NULL_VOID(refreshLayoutProperty);
-    if (refreshStatus != RefreshStatus::DRAG) {
-        refreshStatus = RefreshStatus::DRAG;
-        FireStateChange(static_cast<int>(RefreshStatus::DRAG));
-    }
-    if (host->TotalChildCount() < CHILD_COUNT) {
-        LOGI("%{public}s have %{public}d child", host->GetTag().c_str(), host->TotalChildCount());
+    if (isRefreshing_) {
         return;
     }
-    if (!progressChild_) {
-        progressChild_ = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(host->TotalChildCount() - 1));
+    TriggerStatusChange(RefreshStatus::DRAG);
+    if (customBuilder_) {
+        scrollOffset_.SetY(0.0f);
+        return;
     }
-    if (!textChild_) {
-        textChild_ = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(host->TotalChildCount() - 2));
-    }
-    refreshLayoutProperty->UpdateScrollableOffset(OffsetF(0, 0));
-    refreshLayoutProperty->UpdateLoadingProcessOffset(OffsetF(0, 0));
-    refreshLayoutProperty->UpdateShowTimeOffset(OffsetF(0, 0));
+    CHECK_NULL_VOID(progressChild_);
+    auto progressPaintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
+    CHECK_NULL_VOID(progressPaintProperty);
+    progressPaintProperty->UpdateRefreshAnimationState(static_cast<int32_t>(RefreshAnimationState::FOLLOW_HAND));
+    progressChild_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void RefreshPattern::HandleDragUpdate(float delta)
 {
-    if (NearZero(delta)) {
-        LOGI("Delta is near zero!");
+    if (NearZero(delta) || isRefreshing_) {
+        LOGI("Delta is near zero or isRefreshing!");
         return;
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto refreshLayoutProperty = host->GetLayoutProperty<RefreshLayoutProperty>();
-    CHECK_NULL_VOID(refreshLayoutProperty);
-    auto refreshRenderProperty = host->GetPaintProperty<RefreshRenderProperty>();
-    CHECK_NULL_VOID(refreshRenderProperty);
-    UpdateScrollableOffset(delta);
-    refreshLayoutProperty->UpdateLoadingProcessOffset(GetLoadingOffset());
-    refreshLayoutProperty->UpdateShowTimeOffset(GetShowTimeOffset());
 
-    if (host->TotalChildCount() < CHILD_COUNT) {
+    scrollOffset_.SetY(GetScrollOffset(delta));
+    if (customBuilder_) {
+        CheckCustomBuilderDragUpdateStage();
         return;
     }
-    CHECK_NULL_VOID_NOLOG(progressChild_);
-    CHECK_NULL_VOID_NOLOG(textChild_);
-    auto diameter = static_cast<float>(GetLoadingDiameter());
+    CHECK_NULL_VOID(progressChild_);
+    if (scrollOffset_.GetY() > triggerLoadingDistance_) {
+        auto refreshFollowRadio = GetFollowRatio();
+        UpdateLoadingProgress(STATE_PROGRESS_DRAG, refreshFollowRadio);
+        UpdateLoadingMarginTop(scrollOffset_.GetY());
+        auto progressPaintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
+        CHECK_NULL_VOID(progressPaintProperty);
+        progressPaintProperty->UpdateRefreshFollowRatio(refreshFollowRadio);
+    }
+
+    if (scrollOffset_.GetY() > TRIGGER_REFRESH_DISTANCE.ConvertToPx()) {
+        TriggerStatusChange(RefreshStatus::OVER_DRAG);
+    }
+    progressChild_->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+}
+
+void RefreshPattern::UpdateLoadingProgress(int32_t state, float ratio)
+{
+    CHECK_NULL_VOID(progressChild_);
     auto progressLayoutProperty = progressChild_->GetLayoutProperty<LoadingProgressLayoutProperty>();
     CHECK_NULL_VOID(progressLayoutProperty);
-    progressLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(diameter), CalcLength(diameter)));
-    progressChild_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    auto triggerLoadingDistance =
-        refreshLayoutProperty->GetLoadingDistanceValue(Dimension(0, DimensionUnit::VP)).ConvertToPx();
-    auto triggerShowTimeDistance =
-        refreshLayoutProperty->GetShowTimeDistanceValue(Dimension(0, DimensionUnit::VP)).ConvertToPx();
-    auto scrollableOffset = refreshLayoutProperty->GetScrollableOffsetValue();
-    auto progressChildLayoutProperty = progressChild_->GetLayoutProperty<LoadingProgressLayoutProperty>();
-    auto textChildLayoutProperty = textChild_->GetLayoutProperty<TextLayoutProperty>();
-    if (scrollableOffset.GetY() > triggerLoadingDistance &&
-        progressChildLayoutProperty->GetVisibilityValue() == VisibleType::INVISIBLE) {
-        progressChildLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+    auto scale = std::clamp(ratio, 0.0f, 1.0f);
+    switch (state) {
+        case STATE_PROGRESS_LOADING:
+            scale = 0.0f;
+            UpdateLoadingMarginTop(triggerLoadingDistance_);
+            break;
+        case STATE_PROGRESS_RECYCLE:
+            scale = 1.0f;
+            UpdateLoadingMarginTop(TRIGGER_REFRESH_DISTANCE.ConvertToPx());
+            break;
+        default:;
     }
-    if (scrollableOffset.GetY() > triggerShowTimeDistance && refreshLayoutProperty->GetIsShowLastTimeValue() &&
-        textChildLayoutProperty->GetVisibilityValue() == VisibleType::INVISIBLE) {
-        textChildLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+    auto progressContext = progressChild_->GetRenderContext();
+    CHECK_NULL_VOID_NOLOG(progressContext);
+    progressContext->UpdateOpacity(scale);
+}
+
+float RefreshPattern::GetFollowRatio()
+{
+    auto triggerLoading = std::clamp(triggerLoadingDistance_, 0.0f,
+        static_cast<float>(TRIGGER_REFRESH_DISTANCE.ConvertToPx()));
+    if (GreatNotEqual(TRIGGER_REFRESH_DISTANCE.ConvertToPx(), triggerLoading)) {
+        return (scrollOffset_.GetY() - triggerLoading) / (TRIGGER_REFRESH_DISTANCE.ConvertToPx() - triggerLoading);
     }
-    if (refreshLayoutProperty->GetIsShowLastTimeValue()) {
-        auto lastTimeText = refreshRenderProperty->GetLastTimeTextValue();
-        auto timeText = StringUtils::FormatString(lastTimeText.c_str(), GetFormatDateTime().c_str());
-        refreshRenderProperty->UpdateTimeText(timeText);
-        if (textChild_) {
-            auto textLayoutProperty = textChild_->GetLayoutProperty<TextLayoutProperty>();
-            textLayoutProperty->UpdateContent(timeText);
-        }
+    return 1.0f;
+}
+
+float RefreshPattern::GetFadeAwayRatio()
+{
+    CHECK_NULL_RETURN(progressChild_, 0.0f);
+    auto progressLayoutProperty = progressChild_->GetLayoutProperty<LoadingProgressLayoutProperty>();
+    CHECK_NULL_RETURN(progressLayoutProperty, 0.0f);
+    auto& marginProperty = progressLayoutProperty->GetMarginProperty();
+    CHECK_NULL_RETURN(marginProperty, 0.0f);
+    auto triggerLoading = std::clamp(triggerLoadingDistance_, 0.0f,
+        static_cast<float>(TRIGGER_REFRESH_DISTANCE.ConvertToPx()));
+    if (GreatNotEqual(TRIGGER_REFRESH_DISTANCE.ConvertToPx(), triggerLoading)) {
+        return (marginProperty->top->GetDimension().ConvertToPx() - triggerLoading) /
+               (TRIGGER_REFRESH_DISTANCE.ConvertToPx() - triggerLoading);
     }
-    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    return 0.0f;
+}
+
+void RefreshPattern::TransitionPeriodAnimation()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    CHECK_NULL_VOID(progressChild_);
+    auto progressPaintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
+    CHECK_NULL_VOID(progressPaintProperty);
+
+    auto progressLayoutProperty = progressChild_->GetLayoutProperty<LoadingProgressLayoutProperty>();
+    CHECK_NULL_VOID(progressLayoutProperty);
+    progressPaintProperty->UpdateRefreshAnimationState(static_cast<int32_t>(RefreshAnimationState::FOLLOW_TO_RECYCLE));
+    progressPaintProperty->UpdateRefreshTransitionRatio(0.0f);
+    progressChild_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    pipeline->FlushUITasks();
+
+    auto curve = AceType::MakeRefPtr<SpringCurve>(0.0f, 1.0f, 228.0f, 30.0f);
+    AnimationOption option;
+    option.SetDuration(FOLLOW_TO_RECYCLE_DURATION);
+    option.SetCurve(curve);
+    option.SetIteration(1);
+
+    AnimationUtils::OpenImplicitAnimation(option, curve, [weak = AceType::WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->LoadingProgressRecycle();
+    });
+    auto distance = TRIGGER_REFRESH_DISTANCE.ConvertToPx();
+    scrollOffset_.SetY(distance);
+    UpdateLoadingMarginTop(distance);
+    progressChild_->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    pipeline->FlushUITasks();
+    AnimationUtils::CloseImplicitAnimation();
+}
+
+void RefreshPattern::LoadingProgressAppear()
+{
+    CHECK_NULL_VOID(progressChild_);
+    auto progressPaintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
+    CHECK_NULL_VOID(progressPaintProperty);
+    progressPaintProperty->UpdateRefreshAnimationState(static_cast<int32_t>(RefreshAnimationState::RECYCLE));
+    progressChild_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->FlushUITasks();
+
+    AnimationOption option;
+    option.SetDuration(LOADING_EXIT_DURATION);
+    auto curve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
+    AnimationUtils::OpenImplicitAnimation(option, curve, nullptr);
+    scrollOffset_.SetY(TRIGGER_REFRESH_DISTANCE.ConvertToPx());
+    UpdateLoadingProgress(STATE_PROGRESS_RECYCLE, 1.0f);
+    progressChild_->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    pipeline->FlushUITasks();
+    AnimationUtils::CloseImplicitAnimation();
+}
+
+void RefreshPattern::LoadingProgressExit()
+{
+    CHECK_NULL_VOID(progressChild_);
+    auto progressPaintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
+    CHECK_NULL_VOID(progressPaintProperty);
+    progressPaintProperty->UpdateRefreshAnimationState(static_cast<int32_t>(RefreshAnimationState::FADEAWAY));
+    progressPaintProperty->UpdateRefreshFadeAwayRatio(GetFadeAwayRatio());
+    progressChild_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->FlushUITasks();
+
+    AnimationOption option;
+    option.SetDuration(LOADING_EXIT_DURATION);
+    auto curve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
+    AnimationUtils::OpenImplicitAnimation(option, curve, [weak = AceType::WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnExitAnimationFinish();
+    });
+
+    scrollOffset_.SetY(0.0f);
+    UpdateLoadingProgress(STATE_PROGRESS_LOADING, 0.0f);
+    progressPaintProperty->UpdateRefreshFadeAwayRatio(0.0f);
+    progressChild_->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    pipeline->FlushUITasks();
+    AnimationUtils::CloseImplicitAnimation();
 }
 
 void RefreshPattern::HandleDragEnd()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-
-    auto refreshLayoutProperty = host->GetLayoutProperty<RefreshLayoutProperty>();
-    CHECK_NULL_VOID(refreshLayoutProperty);
-    auto refreshRenderProperty = host->GetPaintProperty<RefreshRenderProperty>();
-    CHECK_NULL_VOID(refreshRenderProperty);
-    if (refreshStatus != RefreshStatus::DONE && refreshStatus != RefreshStatus::INACTIVE) {
-        auto scrollableOffset = refreshLayoutProperty->GetScrollableOffsetValue();
-        auto triggerRefreshDistance = refreshLayoutProperty->GetTriggerRefreshDistanceValue();
-        if (scrollableOffset.GetY() > triggerRefreshDistance.ConvertToPx()) {
-            FireChangeEvent("true");
-            FireRefreshing();
-            refreshStatus = RefreshStatus::REFRESH;
-        } else {
-            refreshStatus = RefreshStatus::INACTIVE;
-        }
-    }
-    FireStateChange(static_cast<int>(refreshStatus));
-    if (host->TotalChildCount() < CHILD_COUNT) {
-        LOGI("%{public}s have %{public}d child", host->GetTag().c_str(), host->TotalChildCount());
+    if (isRefreshing_) {
         return;
     }
-    auto indicatorOffset = refreshLayoutProperty->GetIndicatorOffsetValue().ConvertToPx();
-    auto triggerShowTimeDistance =
-        refreshLayoutProperty->GetShowTimeDistanceValue(Dimension(0, DimensionUnit::VP)).ConvertToPx();
-    refreshLayoutProperty->UpdateScrollableOffset(OffsetF(0, 0));
-    refreshLayoutProperty->UpdateLoadingProcessOffset(OffsetF(0, static_cast<float>(indicatorOffset)));
-    refreshLayoutProperty->UpdateShowTimeOffset(OffsetF(0, static_cast<float>(triggerShowTimeDistance)));
-    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-    host->MarkNeedSyncRenderTree();
-    host->RebuildRenderContextTree();
+    auto triggerRefreshDistance = TRIGGER_REFRESH_DISTANCE.ConvertToPx();
+    if (customBuilder_) {
+        CheckCustomBuilderDragEndStage();
+        return;
+    }
+    if (scrollOffset_.GetY() >= triggerRefreshDistance) {
+        TriggerRefresh();
+        TransitionPeriodAnimation();
+        return;
+    }
+    LoadingProgressExit();
+}
+
+void RefreshPattern::TriggerStatusChange(RefreshStatus newStatus)
+{
+    if (refreshStatus_ == newStatus) {
+        return;
+    }
+    refreshStatus_ = newStatus;
+    FireStateChange(static_cast<int>(refreshStatus_));
 }
 
 void RefreshPattern::HandleDragCancel()
 {
-    auto refreshLayoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
-    CHECK_NULL_VOID(refreshLayoutProperty);
-    auto scrollableOffset = refreshLayoutProperty->GetScrollableOffsetValue();
-    scrollableOffset.Reset();
-    refreshLayoutProperty->UpdateScrollableOffset(scrollableOffset);
+    if (customBuilder_) {
+        CustomBuilderExit();
+        return;
+    }
+    LoadingProgressExit();
 }
 
 void RefreshPattern::FireStateChange(int32_t value)
@@ -252,222 +516,284 @@ void RefreshPattern::FireChangeEvent(const std::string& value)
     refreshEventHub->FireChangeEvent(value);
 }
 
-RefreshStatus RefreshPattern::GetNextStatus()
+float RefreshPattern::GetScrollOffset(float delta)
 {
-    RefreshStatus nextStatus;
+    auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, 0.0f);
+    auto frictionRatio = static_cast<float>(layoutProperty->GetFriction().value_or(DEFAULT_FRICTION)) * PERCENT;
+    auto scrollY = delta * frictionRatio;
+    auto scrollOffset = std::clamp(scrollOffset_.GetY() + scrollY, static_cast<float>(0.0f),
+        static_cast<float>(MAX_SCROLL_DISTANCE.ConvertToPx()));
+    return scrollOffset;
+}
+
+void RefreshPattern::ResetLoadingProgressColor()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto theme = themeManager->GetTheme<RefreshTheme>();
+    CHECK_NULL_VOID(theme);
+    CHECK_NULL_VOID(progressChild_);
+    auto paintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    paintProperty->UpdateColor(theme->GetProgressColor());
+    progressChild_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void RefreshPattern::AddCustomBuilderNode(const RefPtr<NG::UINode>& builder) const
+{
+    CHECK_NULL_VOID(builder);
     auto host = GetHost();
-    CHECK_NULL_RETURN(host, RefreshStatus::INACTIVE);
-    auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, RefreshStatus::INACTIVE);
-    auto renderProperty = GetPaintProperty<RefreshRenderProperty>();
-    CHECK_NULL_RETURN(layoutProperty, RefreshStatus::INACTIVE);
-    auto triggerRefreshDistance = layoutProperty->GetTriggerRefreshDistanceValue().ConvertToPx();
-    auto scrollableOffset = layoutProperty->GetScrollableOffsetValue();
-    switch (refreshStatus) {
-        case RefreshStatus::INACTIVE:
-            nextStatus = RefreshStatus::INACTIVE;
-            FireStateChange(static_cast<int>(nextStatus));
-            if (progressChild_ && textChild_) {
-                auto textChildLayoutProperty = textChild_->GetLayoutProperty<TextLayoutProperty>();
-                if (textChildLayoutProperty->GetVisibilityValue() == VisibleType::VISIBLE) {
-                    textChildLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
-                }
-                auto progressChildLayoutProperty = progressChild_->GetLayoutProperty<LoadingProgressLayoutProperty>();
-                if (progressChildLayoutProperty->GetVisibilityValue() == VisibleType::VISIBLE) {
-                    progressChildLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
-                    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-                    host->MarkNeedSyncRenderTree();
-                    host->RebuildRenderContextTree();
-                }
-            }
-            break;
-        case RefreshStatus::DRAG:
-        case RefreshStatus::OVER_DRAG:
-            if (LessOrEqual(scrollableOffset.GetY(), 0.0)) {
-                nextStatus = RefreshStatus::INACTIVE;
-            } else if (scrollableOffset.GetY() < triggerRefreshDistance) {
-                nextStatus = RefreshStatus::DRAG;
-            } else {
-                nextStatus = RefreshStatus::OVER_DRAG;
-            }
-            break;
-        case RefreshStatus::REFRESH:
-            if (!renderProperty->GetIsRefreshingValue()) {
-                auto refreshLayoutProperty = host->GetLayoutProperty<RefreshLayoutProperty>();
-                if (refreshLayoutProperty->GetIsShowLastTimeValue()) {
-                    auto refreshRenderProperty = host->GetPaintProperty<RefreshRenderProperty>();
-                    auto timeText = StringUtils::FormatString(
-                        refreshRenderProperty->GetLastTimeTextValue().c_str(), GetFormatDateTime().c_str());
-                    refreshRenderProperty->UpdateTimeText(timeText);
-                }
-                nextStatus = RefreshStatus::DONE;
-                break;
-            }
-            nextStatus = RefreshStatus::REFRESH;
-            FireStateChange(static_cast<int>(nextStatus));
-            break;
-        case RefreshStatus::DONE:
-        default:
-            nextStatus = RefreshStatus::INACTIVE;
-            break;
-    }
-    if (refreshStatus != nextStatus) {
-        FireStateChange(static_cast<int>(nextStatus));
-        host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-    }
-    return nextStatus;
-}
-
-float RefreshPattern::GetFriction(float percentage) const
-{
-    if (NearEqual(percentage, 1.0)) {
-        return 0.0;
-    }
-    auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, 0.0);
-    auto frictionRatio = static_cast<float>(layoutProperty->GetFrictionValue()) * PERCENT;
-    return static_cast<float>(frictionRatio * std::pow(1.0 - percentage, SQUARE));
-}
-
-float RefreshPattern::GetOffset(float delta) const
-{
-    auto size = GetHost()->GetGeometryNode()->GetFrameSize();
-    auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
-    auto scrollableOffset = layoutProperty->GetScrollableOffsetValue();
-    float height = size.Height();
-    if (!NearZero(height)) {
-        float friction = GetFriction(std::abs(scrollableOffset.GetY() / height));
-        return friction * delta;
-    }
-    return delta;
-}
-
-float RefreshPattern::MaxScrollableHeight() const
-{
-    auto size = GetHost()->GetGeometryNode()->GetFrameSize();
-    return size.Height();
-}
-
-double RefreshPattern::GetLoadingDiameter() const
-{
-    auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
-    double diameter = 0.0;
-    auto triggerLoadingDistance =
-        layoutProperty->GetLoadingDistanceValue(Dimension(0, DimensionUnit::VP)).ConvertToPx();
-    auto triggerRefreshDistance = layoutProperty->GetTriggerRefreshDistanceValue().ConvertToPx();
-    auto loadingDiameter = layoutProperty->GetProgressDiameterValue(Dimension(0, DimensionUnit::VP)).ConvertToPx();
-    auto scrollableOffset = layoutProperty->GetScrollableOffsetValue();
-    if (scrollableOffset.GetY() < triggerLoadingDistance) {
-        return diameter;
-    }
-    if (scrollableOffset.GetY() < triggerRefreshDistance) {
-        double maxDistance = triggerRefreshDistance - triggerLoadingDistance;
-        double actualDistance = scrollableOffset.GetY() - triggerLoadingDistance;
-        // Get the diameter by actual distance
-        diameter = ((actualDistance * loadingDiameter * DIAMETER_HALF) / maxDistance) + loadingDiameter * DIAMETER_HALF;
+    CHECK_NULL_VOID(host);
+    auto refreshLayoutProperty = host->GetLayoutProperty<RefreshLayoutProperty>();
+    CHECK_NULL_VOID(refreshLayoutProperty);
+    if (!refreshLayoutProperty->HasCustomBuilderIndex()) {
+        host->AddChild(builder);
+        refreshLayoutProperty->UpdateCustomBuilderIndex(host->TotalChildCount() - 1);
     } else {
-        diameter = loadingDiameter;
+        auto customNodeChild = host->GetChildAtIndex(refreshLayoutProperty->GetCustomBuilderIndexValue());
+        CHECK_NULL_VOID(customNodeChild);
+        if (builder->GetId() != customNodeChild->GetId()) {
+            host->ReplaceChild(customNodeChild, builder);
+        }
     }
-    return diameter;
+    refreshLayoutProperty->UpdateIsCustomBuilderExist(true);
 }
 
-void RefreshPattern::UpdateScrollableOffset(float delta)
+void RefreshPattern::CustomBuilderAppear()
 {
-    auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
-    if (refreshStatus == RefreshStatus::REFRESH && delta > 0.0) {
-        LOGI("The refresh status is refreshing!");
+    auto hostLayoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
+    CHECK_NULL_VOID(hostLayoutProperty);
+    auto customBuilderOffset = hostLayoutProperty->GetCustomBuilderOffsetValue().GetY();
+    auto refreshingDistance = TRIGGER_REFRESH_DISTANCE.ConvertToPx();
+    if (GreatOrEqual(static_cast<double>(customBuilderOffset), refreshingDistance)) {
         return;
     }
-    OffsetF deltaOffset(0, delta);
-    if (refreshStatus == RefreshStatus::DRAG || refreshStatus == RefreshStatus::OVER_DRAG ||
-        refreshStatus == RefreshStatus::DONE) {
-        deltaOffset.SetY(GetOffset(delta));
-    }
-    auto scrollableOffset = layoutProperty->GetScrollableOffsetValue();
-    auto maxScrollOffset = layoutProperty->GetMaxDistanceValue(Dimension(0, DimensionUnit::VP)).ConvertToPx();
-    scrollableOffset += deltaOffset;
-    scrollableOffset.SetY(
-        std::clamp(scrollableOffset.GetY(), static_cast<float>(0.0), static_cast<float>(maxScrollOffset)));
-    layoutProperty->UpdateScrollableOffset(scrollableOffset);
+    AnimationOption option;
+    auto curve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
+    option.SetDuration(CUSTOM_BUILDER_RECYCLE_DURATION);
+    option.SetCurve(curve);
+
+    AnimationUtils::Animate(
+        option,
+        [weak = AceType::WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->UpdateCustomBuilderProperty(RefreshState::STATE_RECYCLE, 1.0f);
+        },
+        nullptr);
 }
 
-OffsetF RefreshPattern::GetLoadingOffset() const
+void RefreshPattern::CustomBuilderExit()
 {
-    auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
-    auto indicatorOffset = layoutProperty->GetIndicatorOffsetValue().ConvertToPx();
-    OffsetF offset(0, 0);
-    auto triggerLoadingDistance =
-        layoutProperty->GetLoadingDistanceValue(Dimension(0, DimensionUnit::VP)).ConvertToPx();
-    auto triggerRefreshDistance = layoutProperty->GetTriggerRefreshDistanceValue().ConvertToPx();
+    auto hostLayoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
+    CHECK_NULL_VOID(hostLayoutProperty);
+    auto customBuilderOffset = hostLayoutProperty->GetCustomBuilderOffsetValue().GetY();
+    if (LessNotEqual(static_cast<double>(customBuilderOffset), static_cast<double>(triggerLoadingDistance_))) {
+        return;
+    }
+    AnimationOption option;
+    option.SetDuration(CUSTOM_BUILDER_EXIT_DURATION);
+    auto finishCallback = [weak = AceType::WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnExitAnimationFinish();
+    };
 
-    auto scrollableOffset = layoutProperty->GetScrollableOffsetValue();
-    if (scrollableOffset.GetY() < triggerLoadingDistance) {
-        return offset;
-    }
-    if (!layoutProperty->GetIsUseOffsetValue()) {
-        return scrollableOffset * DIAMETER_HALF -
-               OffsetF(0.0, static_cast<float>(GetLoadingDiameter()) * DIAMETER_HALF);
-    }
-    double factor =
-        (scrollableOffset.GetY() - triggerLoadingDistance) / (triggerRefreshDistance - triggerLoadingDistance);
-    return OffsetF(0.0, static_cast<float>(indicatorOffset * factor));
+    AnimationUtils::Animate(
+        option,
+        [weak = AceType::WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->UpdateCustomBuilderProperty(RefreshState::STATE_LOADING, 0.0f);
+        },
+        std::move(finishCallback));
 }
 
-OffsetF RefreshPattern::GetShowTimeOffset() const
+void RefreshPattern::CheckCustomBuilderDragUpdateStage()
 {
-    auto loadingOffset = GetLoadingOffset();
-    float bottomOffset = static_cast<float>(Dimension(DEFAULT_SHOW_TIME_HEIGHT, DimensionUnit::VP).ConvertToPx());
-    return loadingOffset - OffsetF(0.0, bottomOffset);
-}
-
-float RefreshPattern::GetOpacity() const
-{
-    double factor = 0.0;
-    auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, factor);
-    auto triggerRefreshDistance = layoutProperty->GetTriggerRefreshDistanceValue().ConvertToPx();
-    auto timeDistance = layoutProperty->GetShowTimeDistance()->ConvertToPx();
-    auto scrollableOffset = layoutProperty->GetScrollableOffsetValue();
-    if (scrollableOffset.GetY() < triggerRefreshDistance - timeDistance) {
-        factor = 0.0;
-    } else if (scrollableOffset.GetY() < triggerRefreshDistance) {
-        double actualDistance = scrollableOffset.GetY() - triggerRefreshDistance + timeDistance;
-        // Get the factor, timeDistance_ never be zero
-        if (!NearZero(timeDistance)) {
-            factor = actualDistance / timeDistance;
-        }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(customBuilder_);
+    auto hostLayoutProperty = host->GetLayoutProperty<RefreshLayoutProperty>();
+    CHECK_NULL_VOID(hostLayoutProperty);
+    auto customBuilderSize = customBuilder_->GetGeometryNode()->GetMarginFrameSize();
+    auto maxScroll = MAX_SCROLL_DISTANCE.ConvertToPx();
+    if (NearZero(static_cast<double>(customBuilder_->GetGeometryNode()->GetMarginFrameSize().Height()))) {
+        return;
+    }
+    if (LessNotEqual(static_cast<double>(maxScroll - customBuilderSize.Height()),
+        static_cast<double>(triggerLoadingDistance_))) {
+        return;
+    }
+    if (LessOrEqual(static_cast<double>(scrollOffset_.GetY()),
+        static_cast<double>(triggerLoadingDistance_ + customBuilderSize.Height()))) {
+        UpdateCustomBuilderProperty(RefreshState::STATE_LOADING, 0.0f);
     } else {
-        factor = 1.0;
+        auto refreshFollowRadio = GetCustomBuilderOpacityRatio();
+        UpdateCustomBuilderProperty(RefreshState::STATE_DRAG, refreshFollowRadio);
+        if (GreatNotEqual(static_cast<double>(hostLayoutProperty->GetCustomBuilderOffsetValue().GetY()),
+            TRIGGER_REFRESH_DISTANCE.ConvertToPx())) {
+            TriggerStatusChange(RefreshStatus::OVER_DRAG);
+        }
     }
-    return static_cast<float>(factor);
+    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
 
-std::string RefreshPattern::GetFormatDateTime()
+void RefreshPattern::CheckCustomBuilderDragEndStage()
 {
-    auto now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-    auto* local = std::localtime(&now);
-    CHECK_NULL_RETURN(local, "");
-    // This is for i18n date time
-    DateTime dateTime;
-    dateTime.year = static_cast<uint32_t>(local->tm_year + BASE_YEAR);
-    dateTime.month = static_cast<uint32_t>(local->tm_mon);
-    dateTime.day = static_cast<uint32_t>(local->tm_mday);
-    dateTime.hour = static_cast<uint32_t>(local->tm_hour);
-    dateTime.minute = static_cast<uint32_t>(local->tm_min);
-    std::string time = Localization::GetInstance()->FormatDateTime(dateTime, LAST_UPDATE_FORMAT);
-    return time;
+    CHECK_NULL_VOID(customBuilder_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto customBuilderSize = customBuilder_->GetGeometryNode()->GetMarginFrameSize();
+    auto hostLayoutProperty = host->GetLayoutProperty<RefreshLayoutProperty>();
+    CHECK_NULL_VOID(hostLayoutProperty);
+    auto maxScroll = MAX_SCROLL_DISTANCE.ConvertToPx();
+    if (LessNotEqual(static_cast<double>(maxScroll - customBuilderSize.Height()),
+        static_cast<double>(triggerLoadingDistance_))) {
+        return;
+    }
+
+    if (GreatNotEqual(static_cast<double>(hostLayoutProperty->GetCustomBuilderOffsetValue().GetY()),
+                      TRIGGER_REFRESH_DISTANCE.ConvertToPx())) {
+        TriggerRefresh();
+        CustomBuilderRefreshingAnimation();
+        scrollOffset_.SetY(TRIGGER_REFRESH_DISTANCE.ConvertToPx() + customBuilderSize.Height());
+    } else {
+        CustomBuilderExit();
+        scrollOffset_.SetY(0.0f);
+    }
+    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
 
-void RefreshPattern::OnInActive()
+void RefreshPattern::CustomBuilderReset()
 {
-    auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
-    auto renderProperty = GetPaintProperty<RefreshRenderProperty>();
-    renderProperty->UpdateIsRefreshing(false);
-    FireChangeEvent("false");
-    refreshStatus = RefreshStatus::INACTIVE;
-    auto scrollableOffset = layoutProperty->GetScrollableOffsetValue();
-    scrollableOffset.Reset();
-    layoutProperty->UpdateScrollableOffset(scrollableOffset);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto refreshLayoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
+    CHECK_NULL_VOID(refreshLayoutProperty);
+    customBuilder_ = AceType::DynamicCast<FrameNode>(
+        host->GetChildAtIndex(refreshLayoutProperty->GetCustomBuilderIndexValue()));
+    CHECK_NULL_VOID(customBuilder_);
+    scrollOffset_.SetY(0.0f);
+    UpdateCustomBuilderProperty(RefreshState::STATE_LOADING, 0.0f);
+    customBuilder_->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
 
+void RefreshPattern::UpdateCustomBuilderProperty(RefreshState state, float ratio)
+{
+    CHECK_NULL_VOID(customBuilder_);
+    auto refreshLayoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
+    CHECK_NULL_VOID(refreshLayoutProperty);
+    ratio = std::clamp(ratio, 0.0f, 1.0f);
+    auto verticalOffset = scrollOffset_.GetY();
+    auto customBuilderSize = customBuilder_->GetGeometryNode()->GetMarginFrameSize();
+    auto maxScroll = static_cast<float>(MAX_SCROLL_DISTANCE.ConvertToPx());
+    auto custombuilderOffset = verticalOffset - customBuilderSize.Height();
+    custombuilderOffset =
+        std::clamp(custombuilderOffset, triggerLoadingDistance_, maxScroll - customBuilderSize.Height());
+    switch (state) {
+        case RefreshState::STATE_LOADING:
+            refreshLayoutProperty->UpdateCustomBuilderOffset(OffsetF(0.0f, triggerLoadingDistance_));
+            break;
+        case RefreshState::STATE_DRAG:
+            refreshLayoutProperty->UpdateCustomBuilderOffset(OffsetF(0.0f, custombuilderOffset));
+            break;
+        case RefreshState::STATE_RECYCLE:
+            refreshLayoutProperty->UpdateCustomBuilderOffset(OffsetF(0.0f, TRIGGER_REFRESH_DISTANCE.ConvertToPx()));
+            break;
+        default:;
+    }
+    auto customBuilderContext = customBuilder_->GetRenderContext();
+    CHECK_NULL_VOID(customBuilderContext);
+    customBuilderContext->UpdateOpacity(ratio);
+}
+
+void RefreshPattern::CustomBuilderRefreshingAnimation()
+{
+    auto hostLayoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
+    CHECK_NULL_VOID(hostLayoutProperty);
+    auto customBuilderOffset = hostLayoutProperty->GetCustomBuilderOffsetValue().GetY();
+    auto refreshingDistance = TRIGGER_REFRESH_DISTANCE.ConvertToPx();
+    if (LessNotEqual(static_cast<double>(customBuilderOffset), refreshingDistance)) {
+        return;
+    }
+    AnimationOption option;
+    auto curve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
+    option.SetDuration(CUSTOM_BUILDER_RECYCLE_DURATION);
+    option.SetCurve(curve);
+
+    AnimationUtils::Animate(
+        option,
+        [weak = AceType::WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->UpdateCustomBuilderProperty(RefreshState::STATE_RECYCLE, 1.0f);
+        },
+        nullptr);
+}
+
+float RefreshPattern::GetCustomBuilderOpacityRatio()
+{
+    auto verticalOffset = scrollOffset_.GetY();
+    auto customBuilderSize = customBuilder_->GetGeometryNode()->GetMarginFrameSize();
+    auto adjustOffset = verticalOffset - customBuilderSize.Height();
+    float opacityRatio = 0.0f;
+    if (GreatOrEqual(
+        static_cast<double>(customBuilderSize.Height() + std::clamp(static_cast<double>(triggerLoadingDistance_),
+        0.0, TRIGGER_REFRESH_DISTANCE.ConvertToPx())),
+        TRIGGER_REFRESH_DISTANCE.ConvertToPx() + CUSTOM_BUILDER_HIGHT_LIGHT_SIZE.ConvertToPx())) {
+        opacityRatio = 1.0f;
+    } else {
+        opacityRatio = (adjustOffset - std::clamp(triggerLoadingDistance_, 0.0f,
+            static_cast<float>(TRIGGER_REFRESH_DISTANCE.ConvertToPx()))) /
+            (TRIGGER_REFRESH_DISTANCE.ConvertToPx() - TRIGGER_LOADING_DISTANCE.ConvertToPx());
+    }
+    return std::clamp(static_cast<float>(opacityRatio), 0.0f, 1.0f);
+}
+
+bool RefreshPattern::OnDirtyLayoutWrapperSwap(
+    const RefPtr<LayoutWrapper>& /* dirty */, const DirtySwapConfig& /* changeConfig */)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto layoutProperty = host->GetLayoutProperty<RefreshLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto paintProperty = GetPaintProperty<RefreshRenderProperty>();
+    CHECK_NULL_RETURN(paintProperty, false);
+    auto refreshingProp = paintProperty->GetIsRefreshing().value_or(false);
+    if (customBuilder_ && layoutProperty->GetIsCustomBuilderExistValue(false)) {
+        if (refreshingProp) {
+            auto distance = TRIGGER_REFRESH_DISTANCE.ConvertToPx();
+            if (NearZero(static_cast<double>(customBuilder_->GetGeometryNode()->GetMarginFrameSize().Height()))) {
+                return false;
+            }
+            isRefreshing_ = true;
+            scrollOffset_.SetY(distance + customBuilder_->GetGeometryNode()->GetMarginFrameSize().Height());
+            host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+        }
+    }
+    return false;
+}
+
+void RefreshPattern::UpdateLoadingMarginTop(float top)
+{
+    if (LessNotEqual(top, 0.0)) {
+        return;
+    }
+    CHECK_NULL_VOID(progressChild_);
+    auto progressLayoutProperty = progressChild_->GetLayoutProperty<LoadingProgressLayoutProperty>();
+    CHECK_NULL_VOID(progressLayoutProperty);
+    MarginProperty marginProperty;
+    if (progressLayoutProperty->GetMarginProperty()) {
+        const auto& originMargin = (*progressLayoutProperty->GetMarginProperty());
+        marginProperty.left = originMargin.left;
+        marginProperty.right = originMargin.right;
+        marginProperty.bottom = originMargin.bottom;
+    }
+    marginProperty.top = CalcLength(top);
+    progressLayoutProperty->UpdateMargin(marginProperty);
+}
 } // namespace OHOS::Ace::NG

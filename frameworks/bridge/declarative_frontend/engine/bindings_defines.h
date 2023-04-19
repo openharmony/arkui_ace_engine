@@ -18,30 +18,9 @@
 
 #include "frameworks/bridge/declarative_frontend/engine/js_types.h"
 
-enum class JavascriptEngine { NONE, V8, ARK };
+enum class JavascriptEngine { NONE, ARK };
 
-#ifdef USE_V8_ENGINE
-
-#include "third_party/v8/include/v8.h"
-
-using BindingTarget = v8::Local<v8::ObjectTemplate>;
-using FunctionCallback = void (*)(const v8::FunctionCallbackInfo<v8::Value>&);
-using FunctionGetCallback = void (*)(const v8::FunctionCallbackInfo<v8::Value>&);
-using FunctionSetCallback = void (*)(const v8::FunctionCallbackInfo<v8::Value>&);
-template<typename T>
-using MemberFunctionCallback = void (T::*)(const v8::FunctionCallbackInfo<v8::Value>&);
-template<typename T>
-using MemberFunctionGetCallback = void (T::*)(const v8::FunctionCallbackInfo<v8::Value>&);
-template<typename T>
-using MemberFunctionSetCallback = void (T::*)(const v8::FunctionCallbackInfo<v8::Value>&);
-using ExoticGetterCallback = int;
-using ExoticSetterCallback = int;
-using ExoticHasPropertyCallback = int;
-using ExoticIsArrayCallback = int;
-
-constexpr const JavascriptEngine cCurrentJSEngine = JavascriptEngine::V8;
-
-#elif USE_ARK_ENGINE
+#ifdef USE_ARK_ENGINE
 
 #include "ecmascript/napi/include/jsnapi.h"
 

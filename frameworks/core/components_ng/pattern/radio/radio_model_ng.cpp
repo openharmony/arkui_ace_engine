@@ -27,7 +27,7 @@ namespace OHOS::Ace::NG {
 void RadioModelNG::Create(const std::optional<std::string>& value, const std::optional<std::string>& group)
 {
     auto* stack = ViewStackProcessor::GetInstance();
-    int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
+    int32_t nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::RADIO_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RadioPattern>(); });
     ViewStackProcessor::GetInstance()->Push(frameNode);
@@ -61,4 +61,18 @@ void RadioModelNG::SetHeight(const Dimension& height) {}
 
 void RadioModelNG::SetPadding(const NG::PaddingPropertyF& args) {}
 
+void RadioModelNG::SetCheckedBackgroundColor(const Color& color)
+{
+    ACE_UPDATE_PAINT_PROPERTY(RadioPaintProperty, RadioCheckedBackgroundColor, color);
+}
+
+void RadioModelNG::SetUncheckedBorderColor(const Color& color)
+{
+    ACE_UPDATE_PAINT_PROPERTY(RadioPaintProperty, RadioUncheckedBorderColor, color);
+}
+
+void RadioModelNG::SetIndicatorColor(const Color& color)
+{
+    ACE_UPDATE_PAINT_PROPERTY(RadioPaintProperty, RadioIndicatorColor, color);
+}
 } // namespace OHOS::Ace::NG

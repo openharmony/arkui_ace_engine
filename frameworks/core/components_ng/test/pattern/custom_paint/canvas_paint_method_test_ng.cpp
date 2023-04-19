@@ -17,11 +17,11 @@
 #include <sys/types.h>
 
 #include "gtest/gtest.h"
+#include "test/mock/core/common/mock_container.h"
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/common/ace_engine.h"
-#include "core/common/test/mock/mock_container.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/flex/flex_layout_algorithm.h"
@@ -44,37 +44,23 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 class CanvasPaintMethodTestNg : public testing::Test {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
-    void SetUp();
-    void TearDown();
-
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
 private:
     static RefPtr<CanvasPaintMethod> paintMethod_;
 };
 
 RefPtr<CanvasPaintMethod> CanvasPaintMethodTestNg::paintMethod_ = nullptr;
 
-void CanvasPaintMethodTestNg::SetUpTestCase()
+void CanvasPaintMethodTestNg::SetUpTestSuite()
 {
-    GTEST_LOG_(INFO) << "CanvasPaintMethodTestNg SetUpTestCase";
     RefPtr<PipelineBase> pipelineContext = AceType::MakeRefPtr<MockPipelineBase>();
     paintMethod_ = AceType::MakeRefPtr<CanvasPaintMethod>(pipelineContext);
 }
 
-void CanvasPaintMethodTestNg::TearDownTestCase()
+void CanvasPaintMethodTestNg::TearDownTestSuite()
 {
-    GTEST_LOG_(INFO) << "CanvasPaintMethodTestNg TearDownTestCase";
-}
-
-void CanvasPaintMethodTestNg::SetUp()
-{
-    GTEST_LOG_(INFO) << "CanvasPaintMethodTestNg SetUp";
-}
-
-void CanvasPaintMethodTestNg::TearDown()
-{
-    GTEST_LOG_(INFO) << "CanvasPaintMethodTestNg TearDown";
+    paintMethod_ =  nullptr;
 }
 
 /**
@@ -428,10 +414,37 @@ HWTEST_F(CanvasPaintMethodTestNg, CanvasPaintMethodTestNg008, TestSize.Level1)
 
     /**
      * @tc.steps2: Test the function ToDataURL.
-     * @tc.expected: The return value is affected by the first parameter.
+     * @tc.expected: The part of result is equal to IMAGE_PNG.
      * @tc.note: The test is incomplete.
      */
     std::string result = paintMethod_->ToDataURL(IMAGE_PNG);
+    EXPECT_EQ(result.substr(URL_PREFIX.size(), IMAGE_PNG.size()), IMAGE_PNG);
+
+    /**
+     * @tc.steps3: Test the function ToDataURL.
+     * @tc.expected: The part of result is equal to IMAGE_PNG.
+     * @tc.note: The test is incomplete.
+     */
+    const string testMimeType1(IMAGE_PNG + "\"" + IMAGE_PNG + "\"" + IMAGE_PNG + "," + QUALITY_0);
+    result = paintMethod_->ToDataURL(testMimeType1);
+    EXPECT_EQ(result.substr(URL_PREFIX.size(), IMAGE_PNG.size()), IMAGE_PNG);
+
+    /**
+     * @tc.steps4: Test the function ToDataURL.
+     * @tc.expected: The part of result is equal to IMAGE_PNG.
+     * @tc.note: The test is incomplete.
+     */
+    const string testMimeType2(IMAGE_WEBP + "\"" + IMAGE_WEBP + "\"" + IMAGE_WEBP + "," + QUALITY_50);
+    result = paintMethod_->ToDataURL(testMimeType2);
+    EXPECT_EQ(result.substr(URL_PREFIX.size(), IMAGE_PNG.size()), IMAGE_PNG);
+
+    /**
+     * @tc.steps5: Test the function ToDataURL.
+     * @tc.expected: The part of result is equal to IMAGE_PNG.
+     * @tc.note: The test is incomplete.
+     */
+    const string testMimeType3(IMAGE_JPEG + "\"" + IMAGE_JPEG + "\"" + IMAGE_JPEG + "," + QUALITY_100);
+    result = paintMethod_->ToDataURL(testMimeType3);
     EXPECT_EQ(result.substr(URL_PREFIX.size(), IMAGE_PNG.size()), IMAGE_PNG);
 }
 
@@ -453,6 +466,8 @@ HWTEST_F(CanvasPaintMethodTestNg, CanvasPaintMethodTestNg009, TestSize.Level1)
      * @tc.expected: The pathEffect of paint is null.
      */
     EXPECT_EQ(paint.getPathEffect(), nullptr);
+    const std::vector<double> lineDash1 = {};
+    paintMethod_->strokeState_.SetLineDash(lineDash1);
     paintMethod_->UpdateLineDash(paint);
     EXPECT_EQ(paint.getPathEffect(), nullptr);
 
@@ -461,8 +476,8 @@ HWTEST_F(CanvasPaintMethodTestNg, CanvasPaintMethodTestNg009, TestSize.Level1)
      * @tc.expected: The pathEffect of paint is non-null.
      */
     constexpr uint32_t lineDashSize = 4;
-    const std::vector<double> lineDash(lineDashSize, DEFAULT_DOUBLE1);
-    paintMethod_->strokeState_.SetLineDash(lineDash);
+    const std::vector<double> lineDash2(lineDashSize, DEFAULT_DOUBLE1);
+    paintMethod_->strokeState_.SetLineDash(lineDash2);
     paintMethod_->strokeState_.SetLineDashOffset(DEFAULT_DOUBLE1);
     EXPECT_EQ(paint.getPathEffect(), nullptr);
     paintMethod_->UpdateLineDash(paint);
@@ -610,7 +625,7 @@ HWTEST_F(CanvasPaintMethodTestNg, CanvasPaintMethodTestNg012, TestSize.Level1)
  * @tc.desc: Test the function InitImageCallbacks of CanvasPaintMethod.
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasPaintMethodTestNg, CanvasPaintMethodTestNg014, TestSize.Level1)
+HWTEST_F(CanvasPaintMethodTestNg, CanvasPaintMethodTestNg013, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.

@@ -12,7 +12,6 @@
 # limitations under the License.
 
 import("//build/ohos/ace/ace_args.gni")
-import("//foundation/arkui/ace_engine/build/ace_ext.gni")
 import("//foundation/graphic/graphic_2d/graphic_config.gni")
 
 defines = [
@@ -28,8 +27,7 @@ ark_engine = {
 }
 js_engines += [ ark_engine ]
 
-if (ace_enable_gpu || (defined(vendor_configs.use_ext_surface) &&
-                       vendor_configs.use_ext_surface)) {
+if (ace_enable_gpu) {
   disable_gpu = false
 } else {
   disable_gpu = true
@@ -48,6 +46,7 @@ if (ace_engine_feature_enable_web) {
   web_components_support = true
 }
 
+use_build_in_js_engine = true
 use_external_icu = "shared"
 use_curl_download = true
 ohos_standard_fontmgr = true
@@ -63,21 +62,28 @@ js_pa_support = true
 connect_server_support = true
 hdc_register_support = true
 pa_engine_path = "adapter/ohos/entrance/pa_engine"
-if (defined(vendor_configs.use_ext_surface) && vendor_configs.use_ext_surface) {
-  enable_rosen_backend = false
+enable_rosen_backend = true
+enable_drag_framework = false
+if (defined(global_parts_info.inputmethod_imf)) {
+  enable_standard_input = true
 } else {
-  enable_rosen_backend = true
+  enable_standard_input = false
 }
-enable_standard_input = true
 build_container_scope_lib = true
 multiple_window_support = true
 enable_ability_component = true
 video_components_support = true
+video_support_jsstack = true
 image_components_support = true
 preview_support = false
-enable_system_clipboard = true
+if (defined(global_parts_info.distributeddatamgr_pasteboard)) {
+  enable_system_clipboard = true
+} else {
+  enable_system_clipboard = false
+}
 enable_image_compression = true
 model_component_support = false
+window_scene_support = true
 
 if (defined(preview_support) && preview_support) {
   defines += [ "PREVIEW" ]
@@ -89,6 +95,10 @@ if (defined(image_components_support) && image_components_support) {
 
 if (defined(video_components_support) && video_components_support) {
   defines += [ "VIDEO_SUPPORTED" ]
+}
+
+if (defined(video_support_jsstack) && video_support_jsstack) {
+  defines += [ "SUPPORT_JSSTACK" ]
 }
 
 if (defined(is_experiment_build) && is_experiment_build) {
@@ -116,7 +126,7 @@ if (form_components_support) {
   defines += [ "FORM_SUPPORTED" ]
 }
 
-if (form_components_support) {
+if (remote_window_support) {
   defines += [ "REMOTE_WINDOW_SUPPORTED" ]
 }
 
@@ -146,6 +156,18 @@ if (multiple_window_support) {
 
 if (model_component_support) {
   defines += [ "MODEL_COMPONENT_SUPPORTED" ]
+}
+
+if (use_build_in_js_engine) {
+  defines += [ "HIDDEN_SYMBOL" ]
+}
+
+if (window_scene_support) {
+  defines += [ "WINDOW_SCENE_SUPPORTED" ]
+}
+
+if (enable_drag_framework) {
+  defines += [ "ENABLE_DRAG_FRAMEWORK" ]
 }
 
 cflags_cc = [

@@ -79,10 +79,9 @@ bool FocusNode::HandleKeyEvent(const KeyEvent& keyEvent)
                 return false;
             }
             if (context->GetIsDeclarative()) {
-                OnClick(keyEvent);
-            } else {
-                OnClick();
+                return OnClick(keyEvent);
             }
+            OnClick();
             return true;
 
         default:
@@ -145,22 +144,22 @@ bool FocusNode::GoToFocusByTabNodeIdx(TabIndexNodeList& tabIndexNodes, int32_t t
     return nodeNeedToFocus->RequestFocusImmediately();
 }
 
-bool FocusNode::HandleFocusByTabIndex(const KeyEvent& event, const RefPtr<FocusGroup>& curPage)
+bool FocusNode::HandleFocusByTabIndex(const KeyEvent& event, const RefPtr<FocusGroup>& mainNode)
 {
     if (event.code != KeyCode::KEY_TAB || event.action != KeyAction::DOWN) {
         return false;
     }
-    if (!curPage) {
+    if (!mainNode) {
         LOGE("Current page node is not exit. Can't handle focus by tabIndex.");
         return false;
     }
     TabIndexNodeList tabIndexNodes;
     tabIndexNodes.clear();
-    curPage->CollectTabIndexNodes(tabIndexNodes);
+    mainNode->CollectTabIndexNodes(tabIndexNodes);
     tabIndexNodes.sort([](std::pair<int32_t, WeakPtr<FocusNode>>& a, std::pair<int32_t, WeakPtr<FocusNode>>& b) {
         return a.first < b.first;
     });
-    int32_t curTabFocusIndex = curPage->GetFocusingTabNodeIdx(tabIndexNodes);
+    int32_t curTabFocusIndex = mainNode->GetFocusingTabNodeIdx(tabIndexNodes);
     if ((curTabFocusIndex < 0 || curTabFocusIndex >= static_cast<int32_t>(tabIndexNodes.size())) &&
         curTabFocusIndex != DEFAULT_TAB_FOCUSED_INDEX) {
         LOGI("Current focused tabIndex node: %{public}d. Use default focus system.", curTabFocusIndex);
@@ -467,7 +466,7 @@ void FocusNode::RequestFocus()
     }
 }
 
-void FocusNode::OnClick(const KeyEvent& event)
+bool FocusNode::OnClick(const KeyEvent& event)
 {
     if (onClickEventCallback_) {
         auto info = std::make_shared<ClickInfo>(-1);
@@ -493,7 +492,9 @@ void FocusNode::OnClick(const KeyEvent& event)
             info->GetDeviceId(), info->GetTimeStamp().time_since_epoch().count());
 #endif
         onClickEventCallback_(info);
+        return true;
     }
+    return false;
 }
 
 void FocusGroup::AddChild(const RefPtr<FocusNode>& focusNode)

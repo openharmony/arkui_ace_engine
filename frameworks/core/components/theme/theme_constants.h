@@ -70,12 +70,28 @@ public:
     Color GetColor(uint32_t key) const;
 
     /*
+     * Get color value from platform constants.
+     * Color::BLACK will be returned if value not found or corresponding value is not Color.
+     * @param[in] key Target color key.
+     * @return Color corresponding to the name.
+     */
+    Color GetColorByName(const std::string& resName) const;
+
+    /*
      * Get dimension value from platform constants.
      * Dimension with 0.0 will be returned if not found or value is not Dimension.
      * @param[in] key Target dimension key.
      * @return Dimension corresponding to the key.
      */
     Dimension GetDimension(uint32_t key) const;
+
+    /*
+     * Get dimension value from platform constants.
+     * Dimension with 0.0 will be returned if not found or value is not Dimension.
+     * @param[in] name Target dimension name.
+     * @return Dimension corresponding to the name.
+     */
+    Dimension GetDimensionByName(const std::string& resName) const;
 
     /*
      * Get int32_t value from platform constants.
@@ -86,12 +102,28 @@ public:
     int32_t GetInt(uint32_t key) const;
 
     /*
+     * Get int32_t value from platform constants.
+     * NOTE: -1 will be returned if not found or value is not int32_t.
+     * @param[in] key Target key.
+     * @return Int value corresponding to the key.
+     */
+    int32_t GetIntByName(const std::string& resName) const;
+
+    /*
      * Get double value from platform constants.
      * NOTE: 0.0 will be returned if not found or value is not double.
      * @param[in] key Target key.
      * @return Double value corresponding to the key.
      */
     double GetDouble(uint32_t key) const;
+
+    /*
+     * Get double value from platform constants.
+     * NOTE: 0.0 will be returned if not found or value is not double.
+     * @param[in] key Target key.
+     * @return Double value corresponding to the key.
+     */
+    double GetDoubleByName(const std::string& resName) const;
 
     /*
      * Get string value from platform constants.
@@ -102,13 +134,29 @@ public:
     std::string GetString(uint32_t key) const;
 
     /*
+     * Get string value from platform constants.
+     * NOTE: empty string will be returned if not found or value is not string.
+     * @param[in] key Target key.
+     * @return String value corresponding to the key.
+     */
+    std::string GetStringByName(const std::string& resName) const;
+
+    /*
      * Get plural string value from platform constants.
      * NOTE: empty string will be returned if not found.
      * @param[in] key Target key, count Target plural string quantity.
      * @return plural string value corresponding to the key and count.
      */
     std::string GetPluralString(uint32_t key, int count) const;
-    
+
+    /*
+     * Get plural string value from platform constants.
+     * NOTE: empty string will be returned if not found.
+     * @param[in] key Target key, count Target plural string quantity.
+     * @return plural string value corresponding to the name and count.
+     */
+    std::string GetPluralStringByName(const std::string& resName, int count) const;
+
     /*
      * Get bool value from platform constants.
      * NOTE: false will be returned if not found or value is not boolean.
@@ -118,12 +166,28 @@ public:
     bool GetBoolean(uint32_t key) const;
 
     /*
+     * Get bool value from platform constants.
+     * NOTE: false will be returned if not found or value is not boolean.
+     * @param[in] key Target key.
+     * @return bool value corresponding to the name.
+     */
+    bool GetBooleanByName(const std::string& resName) const;
+
+    /*
      * Get int array value from platform constants.
      * NOTE: empty array will be returned if not found or value is not boolean.
      * @param[in] key Target key.
      * @return int array value corresponding to the key.
      */
     std::vector<uint32_t> GetIntArray(uint32_t key) const;
+
+    /*
+     * Get int array value from platform constants.
+     * NOTE: empty array will be returned if not found or value is not boolean.
+     * @param[in] key Target key.
+     * @return int array value corresponding to the name.
+     */
+    std::vector<uint32_t> GetIntArrayByName(const std::string& resName) const;
 
     /*
      * Get ResourceId from platform constants.
@@ -140,6 +204,14 @@ public:
     std::vector<std::string> GetStringArray(uint32_t key) const;
 
     /*
+     * Get string array value from platform constants.
+     * NOTE: empty array will be returned if not found or value is not boolean.
+     * @param[in] key Target key.
+     * @return string array value corresponding to the name.
+     */
+    std::vector<std::string> GetStringArrayByName(const std::string& resName) const;
+
+    /*
      * Get media path value from platform constants.
      * NOTE: empty string will be returned if not found.
      * @param[in] key Target key.
@@ -148,12 +220,36 @@ public:
     std::string GetMediaPath(uint32_t key) const;
 
     /*
+     * Get media path value from platform constants.
+     * NOTE: empty string will be returned if not found.
+     * @param[in] key Target key.
+     * @return media path value corresponding to the name.
+     */
+    std::string GetMediaPathByName(const std::string& resName) const;
+
+    /*
      * Get rawfile path.
      * NOTE: empty string will be returned if not found.
      * @param[in] fileName Target file name.
      * @return rawfile path value corresponding to file name.
      */
     std::string GetRawfile(const std::string& fileName) const;
+
+    /*
+     * Get rawfile file description.
+     * NOTE: false value will be returned if not found.
+     * @param[in] rawfileName Target rawfile, rawfileDescription Target file info.
+     * @return success or not to get file info.
+     */
+    bool GetRawFileDescription(const std::string& rawfileName, RawfileDescription& rawfileDescription) const;
+
+    /*
+     * Get resource media file path.
+     * NOTE: false value will be returned if not found.
+     * @param[in] resId Target resource id, mediaPath Target media path.
+     * @return success or not to get media path.
+     */
+    bool GetMediaById(const int32_t& resId, std::string& mediaPath) const;
 
     template<class T>
     bool GetMediaResource(T& resId, std::ostream& dest) const
@@ -165,7 +261,7 @@ public:
     }
 
     template<class T>
-    bool GetMediaData(T& resId, size_t& len, std::unique_ptr<uint8_t[]> &dest)
+    bool GetMediaData(T& resId, size_t& len, std::unique_ptr<uint8_t[]>& dest)
     {
         if (!resAdapter_) {
             return false;
@@ -173,7 +269,7 @@ public:
         return resAdapter_->GetMediaData(resId, len, dest);
     }
 
-    bool GetRawFileData(const std::string& rawFile, size_t& len, std::unique_ptr<uint8_t[]> &dest)
+    bool GetRawFileData(const std::string& rawFile, size_t& len, std::unique_ptr<uint8_t[]>& dest)
     {
         if (!resAdapter_) {
             return false;
@@ -208,6 +304,14 @@ public:
             resAdapter_->UpdateResourceManager(bundleName, moduleName);
         }
     }
+
+    void ReloadResource()
+    {
+        if (resAdapter_) {
+            resAdapter_->Reload();
+        }
+    }
+
 private:
     static const ResValueWrapper* GetPlatformConstants(uint32_t key);
     static const ResValueWrapper* styleMapDefault[];

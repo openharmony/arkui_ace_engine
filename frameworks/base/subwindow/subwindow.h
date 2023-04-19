@@ -18,6 +18,7 @@
 
 #include <set>
 
+#include "base/geometry/ng/rect_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components/dialog/dialog_properties.h"
@@ -34,6 +35,8 @@ public:
     static RefPtr<Subwindow> CreateSubwindow(int32_t instanceId);
 
     virtual void InitContainer() = 0;
+    virtual void ResizeWindow() = 0;
+    virtual NG::RectF GetRect() = 0;
     virtual void ShowMenu(const RefPtr<Component>& newComponent) = 0;
     virtual void ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t targetId, const NG::OffsetF& offset) = 0;
     virtual void HideMenuNG(int32_t targetId) = 0;
@@ -42,15 +45,19 @@ public:
     virtual void ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo) = 0;
     virtual void HidePopupNG(int32_t targetId) = 0;
     virtual void HidePopupNG() = 0;
+    virtual void GetPopupInfoNG(int32_t targetId, NG::PopupInfo& popupInfo) = 0;
     virtual bool CancelPopup(const std::string& id) = 0;
     virtual void CloseMenu() = 0;
     virtual void ClearMenu() {};
     virtual void ClearMenuNG() = 0;
+    virtual RefPtr<NG::FrameNode> ShowDialogNG(
+        const DialogProperties& dialogProps, const RefPtr<NG::UINode>& customNode) = 0;
+    virtual void HideSubWindowNG() = 0;
 
     // Add interface for hot regions
     virtual void SetHotAreas(const std::vector<Rect>& rects) {};
 
-    int32_t GetSubwindowId()
+    int32_t GetSubwindowId() const
     {
         return subwindowId_;
     }
@@ -66,6 +73,8 @@ public:
         const std::set<std::string>& callbacks) = 0;
     virtual void ShowActionMenu(const std::string& title, const std::vector<ButtonInfo>& button,
         std::function<void(int32_t, int32_t)>&& callback) = 0;
+    virtual void CloseDialog(int32_t instanceId) = 0;
+    virtual const RefPtr<NG::OverlayManager> GetOverlayManager() = 0;
 
 private:
     int32_t subwindowId_ = 0;

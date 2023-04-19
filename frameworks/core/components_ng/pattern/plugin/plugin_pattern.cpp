@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,6 @@
 #ifdef OS_ACCOUNT_EXISTS
 #include "os_account_manager.h"
 #endif // OS_ACCOUNT_EXISTS
-#include "flutter/lib/ui/ui_dart_state.h"
 
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
@@ -33,11 +32,10 @@
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 
 namespace OHOS::Ace::NG {
-
 namespace {
 #ifndef OS_ACCOUNT_EXISTS
 constexpr int32_t DEFAULT_OS_ACCOUNT_ID = 0; // 0 is the default id when there is no os_account part
-#endif // OS_ACCOUNT_EXISTS
+#endif                                       // OS_ACCOUNT_EXISTS
 
 ErrCode GetActiveAccountIds(std::vector<int32_t>& userIds)
 {
@@ -50,16 +48,21 @@ ErrCode GetActiveAccountIds(std::vector<int32_t>& userIds)
     return ERR_OK;
 #endif // OS_ACCOUNT_EXISTS
 }
+constexpr char JS_EXT[] = ".js";
+constexpr char ETS_EXT[] = ".ets";
+constexpr size_t SIZE_OF_ETS_EXT = 4;
 } // namespace
 
 PluginPattern::~PluginPattern()
 {
-    auto currentId = pluginSubContainer_->GetInstanceId();
-    PluginManager::GetInstance().RemovePluginSubContainer(currentId);
-    PluginManager::GetInstance().RemovePluginParentContainer(currentId);
     pluginManagerBridge_.Reset();
-    pluginSubContainer_->Destroy();
-    pluginSubContainer_.Reset();
+    if (pluginSubContainer_) {
+        auto currentId = pluginSubContainer_->GetInstanceId();
+        PluginManager::GetInstance().RemovePluginSubContainer(currentId);
+        PluginManager::GetInstance().RemovePluginParentContainer(currentId);
+        pluginSubContainer_->Destroy();
+        pluginSubContainer_.Reset();
+    }
 }
 
 void PluginPattern::OnAttachToFrameNode()
@@ -85,11 +88,12 @@ bool PluginPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     info.width = Dimension(size.Width());
     info.height = Dimension(size.Height());
     layoutProperty->UpdateRequestPluginInfo(info);
-
+    auto data = layoutProperty->GetData().value_or("");
     if (info.bundleName != pluginInfo_.bundleName || info.abilityName != pluginInfo_.abilityName ||
         info.moduleName != pluginInfo_.moduleName || info.pluginName != pluginInfo_.pluginName ||
-        info.dimension != pluginInfo_.dimension) {
+        info.dimension != pluginInfo_.dimension || data_ != data) {
         pluginInfo_ = info;
+        data_ = data;
         LOGI(" pluginInfo_ = info; pluginInfo_.width:: %{public}lf, pluginInfo_.height:: %{public}lf",
             pluginInfo_.width.Value(), pluginInfo_.height.Value());
     } else {
@@ -112,6 +116,7 @@ bool PluginPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         }
         return false;
     }
+    loadFialState_ = false;
     CreatePluginSubContainer();
     if (pluginManagerBridge_) {
         pluginManagerBridge_->AddPlugin(host->GetContext(), info);
@@ -121,10 +126,7 @@ bool PluginPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
 
 void PluginPattern::InitPluginManagerDelegate()
 {
-    if (pluginManagerBridge_) {
-        LOGD("PluginInfo manager bridge is already initialized.");
-        return;
-    }
+    CHECK_NULL_VOID(!pluginManagerBridge_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
@@ -205,14 +207,15 @@ void PluginPattern::CreatePluginSubContainer()
 
     PluginManager::GetInstance().AddPluginSubContainer(pluginSubContainerId_, pluginSubContainer_);
     PluginManager::GetInstance().AddPluginParentContainer(pluginSubContainerId_, parentcontainerId);
-    flutter::UIDartState::Current()->AddPluginParentContainer(pluginSubContainerId_, parentcontainerId);
     pluginSubContainer_->Initialize();
-    pluginSubContainer_->SetPluginPattern(WeakClaim(this));
-    pluginSubContainer_->SetPluginNode(GetHost());
     auto weak = WeakClaim(this);
+    pluginSubContainer_->SetPluginPattern(weak);
     auto pattern = weak.Upgrade();
     auto host_ = pattern->GetHost();
     CHECK_NULL_VOID(host_);
+    pluginSubContainer_->SetPluginWindowId(GetHost()->GetId());
+    pluginSubContainer_->SetPluginNode(GetHost());
+
     auto uiTaskExecutor = SingleTaskExecutor::Make(host_->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
 
     int32_t instanceID = context->GetInstanceId();
@@ -224,9 +227,30 @@ void PluginPattern::CreatePluginSubContainer()
         RequestPluginInfo info = pluginPattern->GetPluginRequestInfo();
         CHECK_NULL_VOID(pluginSubContainer);
         auto packagePathStr = pluginPattern->GetPackagePath(weak, info);
-        pluginSubContainer_->RunPlugin(
-            packagePathStr, info.moduleName, info.source, info.moduleResPath, pluginPattern->GetData());
+        if (packagePathStr.empty()) {
+            LOGE("package path is empty.");
+            pluginPattern->FireOnErrorEvent("1", "package path is empty.");
+            return;
+        }
+        if (packagePathStr.rfind(".hap") != std::string::npos) {
+            std::string sub = packagePathStr.substr(1, packagePathStr.size() - 5) + "/";
+            ReplaceAll(info.source, sub, "");
+            pluginSubContainer_->RunDecompressedPlugin(
+                packagePathStr, info.abilityName, info.source, info.moduleResPath, pluginPattern->GetData());
+        } else {
+            pluginSubContainer_->RunPlugin(
+                packagePathStr, info.abilityName, info.source, info.moduleResPath, pluginPattern->GetData());
+        }
     });
+}
+
+void PluginPattern::ReplaceAll(std::string& str, const std::string& pattern, const std::string& newPattern)
+{
+    const size_t nSize = newPattern.size();
+    const size_t pSize = pattern.size();
+    for (size_t pos = str.find(pattern, 0); pos != std::string::npos; pos = str.find(pattern, pos + nSize)) {
+        str.replace(pos, pSize, newPattern);
+    }
 }
 
 std::unique_ptr<DrawDelegate> PluginPattern::GetDrawDelegate()
@@ -247,7 +271,7 @@ std::unique_ptr<DrawDelegate> PluginPattern::GetDrawDelegate()
                 node->SetBackgroundColor(Color::TRANSPARENT.GetValue());
             }
             rsNode->AddChild(node, -1);
-            host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         });
 #endif
     return drawDelegate;
@@ -256,6 +280,9 @@ std::unique_ptr<DrawDelegate> PluginPattern::GetDrawDelegate()
 void PluginPattern::FireOnCompleteEvent() const
 {
     LOGI("FireOnCompleteEvent");
+    if (loadFialState_) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<PluginEventHub>();
@@ -264,8 +291,9 @@ void PluginPattern::FireOnCompleteEvent() const
     eventHub->FireOnComplete(json->ToString());
 }
 
-void PluginPattern::FireOnErrorEvent(const std::string& code, const std::string& msg) const
+void PluginPattern::FireOnErrorEvent(const std::string& code, const std::string& msg)
 {
+    loadFialState_ = true;
     LOGI("FireOnErrorEvent code: %{public}s, msg: %{public}s", code.c_str(), msg.c_str());
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -333,8 +361,13 @@ void PluginPattern::SplitString(const std::string& str, char tag, std::vector<st
 std::string PluginPattern::GetPackagePath(const WeakPtr<PluginPattern>& weak, RequestPluginInfo& info) const
 {
     std::string packagePathStr;
-    size_t pos = info.pluginName.rfind(".js");
-    if (info.pluginName.front() == '/' && pos != std::string::npos) {
+    size_t pos = info.pluginName.rfind(JS_EXT);
+    size_t pos_ets = info.pluginName.rfind(ETS_EXT);
+    if (pos_ets != std::string::npos && info.pluginName.substr(pos_ets) == ETS_EXT) {
+        info.pluginName = info.pluginName.substr(0, info.pluginName.length() - SIZE_OF_ETS_EXT);
+        info.pluginName = info.pluginName + JS_EXT;
+    }
+    if (info.pluginName.front() == '/' && pos != std::string::npos && info.pluginName.substr(pos) == JS_EXT) {
         packagePathStr = GetPackagePathByAbsolutePath(weak, info);
     } else {
         packagePathStr = GetPackagePathByWant(weak, info);
@@ -357,7 +390,7 @@ std::string PluginPattern::GetPackagePathByWant(const WeakPtr<PluginPattern>& we
         pluginPattern->FireOnErrorEvent("1", "Query Active OsAccountIds failed!");
         return packagePathStr;
     }
-    GetModuleNameByWant(weak, info);
+    GetAbilityNameByWant(weak, info);
     packagePathStr = GerPackagePathByBms(weak, info, strList, userIds);
 
     return packagePathStr;
@@ -374,23 +407,23 @@ std::string PluginPattern::GetPackagePathByAbsolutePath(
         packagePathStr = info.pluginName.substr(0, posAssets);
         size_t posModule = info.pluginName.find("/", posAssets + assets.size());
         if (posModule != std::string::npos) {
-            info.moduleName =
+            info.abilityName =
                 info.pluginName.substr(posAssets + assets.size(), posModule - (posAssets + assets.size()));
             info.source = info.pluginName.substr(posModule);
         } else {
-            info.moduleName = "/";
+            info.abilityName = "/";
             info.source = info.pluginName.substr(posAssets + assets.size());
         }
     } else {
         size_t pos = info.pluginName.rfind("/");
         packagePathStr = info.pluginName.substr(0, pos + 1);
         info.source = info.pluginName.substr(pos + 1);
-        info.moduleName = "/";
+        info.abilityName = "/";
     }
     return packagePathStr;
 }
 
-void PluginPattern::GetModuleNameByWant(const WeakPtr<PluginPattern>& weak, RequestPluginInfo& info) const
+void PluginPattern::GetAbilityNameByWant(const WeakPtr<PluginPattern>& weak, RequestPluginInfo& info) const
 {
     auto pluginPattern = weak.Upgrade();
     CHECK_NULL_VOID(pluginPattern);
@@ -402,17 +435,25 @@ void PluginPattern::GetModuleNameByWant(const WeakPtr<PluginPattern>& weak, Requ
         return;
     }
     if (strList.size() == 1) {
-        if (info.pluginName.rfind(".js") != std::string::npos) {
-            info.moduleName = "default";
+        auto pos = info.pluginName.rfind(JS_EXT);
+        if (pos != std::string::npos && (strList[0].substr(pos) == JS_EXT)) {
             info.source = info.pluginName;
         } else {
-            info.moduleName = info.pluginName;
+            info.abilityName = info.pluginName;
         }
     } else {
-        if (strList[0].rfind(".js") != std::string::npos) {
-            info.source = strList[1];
+        auto pos = strList[0].rfind(JS_EXT);
+        size_t pos_ets = info.pluginName.rfind(ETS_EXT);
+        if (pos_ets != std::string::npos && info.pluginName.substr(pos_ets) == ETS_EXT) {
+            info.pluginName = info.pluginName.substr(0, info.pluginName.length() - SIZE_OF_ETS_EXT);
+            info.pluginName = info.pluginName + JS_EXT;
         }
-        info.moduleName = strList[0];
+        if (pos != std::string::npos && (strList[0].substr(pos) == JS_EXT)) {
+            info.source = strList[0];
+        } else {
+            info.abilityName = strList[0];
+        }
+        info.moduleName = strList[1];
     }
 }
 
@@ -434,38 +475,58 @@ std::string PluginPattern::GerPackagePathByBms(const WeakPtr<PluginPattern>& wea
         pluginPattern->FireOnErrorEvent("1", "App bundleName is empty.");
         return packagePathStr;
     }
-    if (strList.size() == 1) {
-        AppExecFwk::BundleInfo bundleInfo;
-        bool ret = bms->GetBundleInfo(strList[0], AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo,
-            userIds.size() > 0 ? userIds[0] : AppExecFwk::Constants::UNSPECIFIED_USERID);
-        if (!ret) {
-            LOGE("Bms get bundleName failed!");
-            pluginPattern->FireOnErrorEvent("1", "Bms get bundleName failed!");
-            return packagePathStr;
-        }
-        if (bundleInfo.moduleResPaths.size() == 1) {
-            info.moduleResPath = bundleInfo.moduleResPaths[0];
-        } else {
-            LOGE("Bms moduleResPaths is empty.");
-            pluginPattern->FireOnErrorEvent("1", "Bms moduleResPaths is empty.");
-            return packagePathStr;
-        }
-        packagePathStr = bundleInfo.applicationInfo.entryDir + "/";
-    } else {
-        AAFwk::Want want;
-        AppExecFwk::AbilityInfo abilityInfo;
-        AppExecFwk::ElementName element("", strList[0], strList[1]);
-        want.SetElement(element);
-        bool ret = bms->QueryAbilityInfo(want, AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_DEFAULT,
-            userIds.size() > 0 ? userIds[0] : AppExecFwk::Constants::UNSPECIFIED_USERID, abilityInfo);
-        if (!ret) {
-            LOGE("Bms get abilityInfo failed!");
-            pluginPattern->FireOnErrorEvent("1", "Bms get bundleName failed!");
-            return packagePathStr;
-        }
-        packagePathStr = abilityInfo.applicationInfo.codePath + "/" + abilityInfo.package + "/";
-        info.moduleResPath = abilityInfo.resourcePath;
+
+    AppExecFwk::BundleInfo bundleInfo;
+    bool ret = bms->GetBundleInfo(strList[0], AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo,
+        userIds.size() > 0 ? userIds[0] : AppExecFwk::Constants::UNSPECIFIED_USERID);
+    if (!ret) {
+        LOGE("Bms get bundleName failed!");
+        pluginPattern->FireOnErrorEvent("1", "Bms get bundleName failed!");
+        return packagePathStr;
     }
+    if (bundleInfo.hapModuleInfos.empty() || bundleInfo.hapModuleInfos[0].hapPath.empty()) {
+        if (strList.size() == 1) {
+            if (bundleInfo.moduleResPaths.size() == 1) {
+                info.moduleResPath = bundleInfo.moduleResPaths[0];
+            } else {
+                LOGE("Bms moduleResPaths is empty.");
+                pluginPattern->FireOnErrorEvent("1", "Bms moduleResPaths is empty.");
+                return packagePathStr;
+            }
+            packagePathStr = bundleInfo.moduleDirs[0] + "/";
+        } else {
+            AAFwk::Want want;
+            AppExecFwk::AbilityInfo abilityInfo;
+            AppExecFwk::ElementName element("", strList[0], strList[1]);
+            want.SetElement(element);
+            bool ret = bms->QueryAbilityInfo(want, AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_DEFAULT,
+                userIds.size() > 0 ? userIds[0] : AppExecFwk::Constants::UNSPECIFIED_USERID, abilityInfo);
+            if (!ret) {
+                LOGE("Bms get abilityInfo failed!");
+                pluginPattern->FireOnErrorEvent("1", "Bms get bundleName failed!");
+                return packagePathStr;
+            }
+            packagePathStr = abilityInfo.applicationInfo.codePath + "/" + abilityInfo.package + "/";
+            info.moduleResPath = abilityInfo.resourcePath;
+        }
+        return packagePathStr;
+    }
+    if (info.moduleName.empty() || info.moduleName == "default") {
+        info.moduleResPath = bundleInfo.hapModuleInfos[0].resourcePath;
+        packagePathStr = bundleInfo.hapModuleInfos[0].hapPath;
+        return packagePathStr;
+    }
+    auto result = std::find_if(bundleInfo.hapModuleInfos.begin(), bundleInfo.hapModuleInfos.end(),
+        [moduleName = info.moduleName](
+            AppExecFwk::HapModuleInfo hapModuleInfo) { return hapModuleInfo.moduleName == moduleName; });
+    if (result != bundleInfo.hapModuleInfos.end()) {
+        info.moduleResPath = result->resourcePath;
+        packagePathStr = result->hapPath;
+        return packagePathStr;
+    }
+    LOGE("Bms get hapInfo failed!");
+    pluginPattern->FireOnErrorEvent(
+        "1", "Bms get hapPath failed! Cannot find hap according to BundleName and ModuleName!");
     return packagePathStr;
 }
 

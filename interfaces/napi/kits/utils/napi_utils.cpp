@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -111,6 +111,27 @@ size_t GetParamLen(napi_value param)
     auto nativeString = reinterpret_cast<NativeString*>(resultValue->GetInterface(NativeString::INTERFACE_ID));
     size_t len = nativeString->GetLength();
     return len;
+}
+
+bool GetNapiString(napi_env env, napi_value value, std::string& retStr)
+{
+    size_t ret = 0;
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, value, &valueType);
+    if (valueType == napi_string) {
+        size_t valueLen = GetParamLen(value) + 1;
+        std::unique_ptr<char[]> buffer = std::make_unique<char[]>(valueLen);
+        napi_get_value_string_utf8(env, value, buffer.get(), valueLen, &ret);
+        retStr = buffer.get();
+    } else if (valueType == napi_object) {
+        int32_t id = 0;
+        int32_t type = 0;
+        std::vector<std::string> params;
+        if (ParseResourceParam(env, value, id, type, params)) {
+            ParseString(id, type, params, retStr);
+        }
+    }
+    return !retStr.empty();
 }
 
 RefPtr<ThemeConstants> GetThemeConstants()

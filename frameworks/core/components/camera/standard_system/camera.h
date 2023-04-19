@@ -147,7 +147,7 @@ private:
     sptr<OHOS::CameraStandard::CaptureOutput> videoOutput_;
     std::string cacheFilePath_;
     TakePhotoListener takePhotoListener_;
-    sptr<Surface> captureConsumerSurface_;
+    sptr<IConsumerSurface> captureConsumerSurface_;
     PrepareEventListener prepareEventListener_;
 };
 

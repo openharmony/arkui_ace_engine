@@ -141,6 +141,7 @@ JSRef<JSArray> GenMeasureChildArray(std::list<RefPtr<NG::LayoutWrapper>> childre
 
 void ViewFunctions::ExecuteLayout(NG::LayoutWrapper* layoutWrapper)
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
     ACE_SCOPED_TRACE("ViewFunctions::ExecuteLayout");
     auto children = layoutWrapper->GetAllChildrenWithBuild();
     auto parentConstraint = layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint();
@@ -155,6 +156,7 @@ void ViewFunctions::ExecuteLayout(NG::LayoutWrapper* layoutWrapper)
 
 void ViewFunctions::ExecuteMeasure(NG::LayoutWrapper* layoutWrapper)
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
     ACE_SCOPED_TRACE("ViewFunctions::ExecuteMeasure");
     auto children = layoutWrapper->GetAllChildrenWithBuild();
     auto parentConstraint = layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint();
@@ -172,6 +174,7 @@ void ViewFunctions::ExecuteMeasure(NG::LayoutWrapper* layoutWrapper)
 
 void ViewFunctions::ExecuteReload(bool deep)
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
     ACE_SCOPED_TRACE("ViewFunctions::ExecuteReload");
     auto func = jsReloadFunc_.Lock();
     if (!func.IsEmpty()) {
@@ -183,6 +186,20 @@ void ViewFunctions::ExecuteReload(bool deep)
     }
 }
 
+void ViewFunctions::ExecuteForceNodeRerender(int32_t elemId)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
+    ACE_SCOPED_TRACE("ViewFunctions::ExecuteForceNodeRerender");
+    auto func = jsForceRerenderNodeFunc_.Lock();
+    if (!func.IsEmpty()) {
+        JSRef<JSVal> params[1];
+        params[0] = JSRef<JSVal>(JSVal(JsiValueConvertor::toJsiValue(elemId)));
+        func->Call(jsObject_.Lock(), 1, params);
+    } else {
+        LOGE("the force node rerender func is null");
+    }
+}
+
 #else
 
 void ViewFunctions::ExecuteLayout(NG::LayoutWrapper* layoutWrapper) {}
@@ -190,6 +207,8 @@ void ViewFunctions::ExecuteLayout(NG::LayoutWrapper* layoutWrapper) {}
 void ViewFunctions::ExecuteMeasure(NG::LayoutWrapper* layoutWrapper) {}
 
 void ViewFunctions::ExecuteReload(bool deep) {}
+
+void ViewFunctions::ExecuteForceNodeRerender(int32_t elemId) {}
 
 #endif
 
@@ -222,6 +241,13 @@ void ViewFunctions::InitViewFunctions(
             jsReloadFunc_ = JSRef<JSFunc>::Cast(jsReloadFunc);
         } else {
             LOGE("View lacks mandatory 'forceCompleteRerender()' function, fatal internal error.");
+        }
+
+        JSRef<JSVal> jsForceRerenderNodeFunc = jsObject->GetProperty("forceRerenderNode");
+        if (jsReloadFunc->IsFunction()) {
+            jsForceRerenderNodeFunc_ = JSRef<JSFunc>::Cast(jsForceRerenderNodeFunc);
+        } else {
+            LOGE("View lacks mandatory 'forceRerenderNode()' function, fatal internal error.");
         }
     }
 
@@ -310,6 +336,11 @@ void ViewFunctions::InitViewFunctions(
         LOGD("onBackPress is not a function");
     }
 
+    JSRef<JSVal> jsSetInitiallyProvidedValueFunc = jsObject->GetProperty("setInitiallyProvidedValue");
+    if (jsSetInitiallyProvidedValueFunc->IsFunction()) {
+        jsSetInitiallyProvidedValueFunc_ = JSRef<JSFunc>::Cast(jsSetInitiallyProvidedValueFunc);
+    }
+
     if (!partialUpdate) {
         JSRef<JSVal> jsUpdateWithValueParamsFunc = jsObject->GetProperty("updateWithValueParams");
         if (jsUpdateWithValueParamsFunc->IsFunction()) {
@@ -318,6 +349,33 @@ void ViewFunctions::InitViewFunctions(
         } else {
             LOGD("updateWithValueParams is not a function");
         }
+
+#ifdef UICAST_COMPONENT_SUPPORTED
+        JSRef<JSVal> jsCreateChildViewFunc = jsObject->GetProperty("createChildView");
+        if (jsCreateChildViewFunc->IsFunction()) {
+            LOGD("UICast createChildView is a function");
+            jsCreateChildViewFunc_ = JSRef<JSFunc>::Cast(jsCreateChildViewFunc);
+        } else {
+            LOGD("UICast createChildView is not a function");
+        }
+
+        JSRef<JSVal> jsRouterHandleFunc = jsObject->GetProperty("routerHandle");
+        if (jsRouterHandleFunc->IsFunction()) {
+            LOGD("UICast routerHandle is a function");
+            jsRouterHandleFunc_ = JSRef<JSFunc>::Cast(jsRouterHandleFunc);
+        } else {
+            LOGD("UICast routerHandle is not a function");
+        }
+
+        JSRef<JSVal> jsReplayOnEventFunc = jsObject->GetProperty("replayOnEvent");
+        if (jsReplayOnEventFunc->IsFunction()) {
+            LOGD("UICast replayOnEvent is a function");
+            jsReplayOnEventFunc_ = JSRef<JSFunc>::Cast(jsReplayOnEventFunc);
+        } else {
+            LOGD("UICast replayOnEvent is not a function");
+        }
+#endif
+
         jsRenderFunc_ = jsRenderFunction;
     }
 }
@@ -330,6 +388,7 @@ ViewFunctions::ViewFunctions(const JSRef<JSObject>& jsObject, const JSRef<JSFunc
 
 void ViewFunctions::ExecuteRender()
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
     if (jsRenderFunc_.IsEmpty()) {
         LOGE("no render function in View!");
         return;
@@ -401,11 +460,33 @@ void ViewFunctions::ExecuteHide()
     ExecuteFunction(jsOnHideFunc_, "onPageHide");
 }
 
+void ViewFunctions::ExecuteInitiallyProvidedValue(const std::string& jsonData)
+{
+    ExecuteFunctionWithParams(jsSetInitiallyProvidedValueFunc_, "setInitiallyProvidedValue", jsonData);
+}
+
 // Method not needed for Partial Update code path
 void ViewFunctions::ExecuteUpdateWithValueParams(const std::string& jsonData)
 {
     ExecuteFunctionWithParams(jsUpdateWithValueParamsFunc_, "updateWithValueParams", jsonData);
 }
+
+#ifdef UICAST_COMPONENT_SUPPORTED
+void ViewFunctions::ExecuteCreateChildView(const std::string& jsonData)
+{
+    ExecuteFunctionWithParams(jsCreateChildViewFunc_, "createChildView", jsonData);
+}
+
+void ViewFunctions::ExecuteRouterHandle(const std::string& jsonData)
+{
+    ExecuteFunctionWithParams(jsRouterHandleFunc_, "routerHandle", jsonData);
+}
+
+void ViewFunctions::ExecuteReplayOnEvent(const std::string& jsonData)
+{
+    ExecuteFunctionWithParams(jsReplayOnEventFunc_, "replayOnEvent", jsonData);
+}
+#endif
 
 bool ViewFunctions::ExecuteOnBackPress()
 {
@@ -525,6 +606,7 @@ void ViewFunctions::Destroy()
 // Partial update method
 void ViewFunctions::ExecuteRerender()
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
     if (jsRerenderFunc_.IsEmpty()) {
         LOGE("no rerender function in View!");
         return;

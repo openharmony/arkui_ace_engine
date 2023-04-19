@@ -152,6 +152,7 @@ void JSAnimator::JSBind(BindingTarget globalObj)
     JSClass<JSAnimator>::StaticMethod("iterations", &JSAnimator::SetIteration, opt);
     JSClass<JSAnimator>::StaticMethod("playMode", &JSAnimator::SetPlayMode, opt);
     JSClass<JSAnimator>::StaticMethod("motion", &JSAnimator::SetMotion, opt);
+    JSClass<JSAnimator>::StaticMethod("pop", &JSAnimator::Pop, opt);
 
     JSClass<JSAnimator>::StaticMethod("onStart", &JSAnimator::OnStart, opt);
     JSClass<JSAnimator>::StaticMethod("onPause", &JSAnimator::OnPause, opt);
@@ -189,6 +190,8 @@ void JSAnimator::Create(const JSCallbackInfo& info)
     animatorId_ = info[0]->ToString();
     AnimatorModel::GetInstance()->Create(animatorId_);
 }
+
+void JSAnimator::Pop() {}
 
 void JSAnimator::SetState(int32_t state)
 {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,35 +25,6 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-FontWeight ConvertFontWeight(FontWeight fontWeight)
-{
-    FontWeight convertValue = fontWeight;
-    switch (fontWeight) {
-        case FontWeight::LIGHTER:
-            convertValue = FontWeight::W100;
-            break;
-        case FontWeight::NORMAL:
-        case FontWeight::REGULAR:
-            convertValue = FontWeight::W400;
-            break;
-        case FontWeight::MEDIUM:
-            convertValue = FontWeight::W500;
-            break;
-        case FontWeight::BOLD:
-            convertValue = FontWeight::W700;
-            break;
-        case FontWeight::BOLDER:
-            convertValue = FontWeight::W900;
-            break;
-        default:
-            convertValue = fontWeight;
-            break;
-    }
-    return convertValue;
-}
-} // namespace
-
 void TextModelNG::Create(const std::string& content)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -71,6 +42,7 @@ void TextModelNG::SetFontSize(const Dimension& value)
 {
     if (!value.IsValid()) {
         LOGE("FontSize value is not valid");
+        ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontSize, Dimension());
         return;
     }
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontSize, value);
@@ -79,6 +51,13 @@ void TextModelNG::SetFontSize(const Dimension& value)
 void TextModelNG::SetTextColor(const Color& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextColor, value);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, ForegroundColor, value);
+    ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, value);
+}
+
+void TextModelNG::SetTextShadow(const Shadow& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextShadow, value);
 }
 
 void TextModelNG::SetItalicFontStyle(Ace::FontStyle value)
@@ -88,7 +67,7 @@ void TextModelNG::SetItalicFontStyle(Ace::FontStyle value)
 
 void TextModelNG::SetFontWeight(Ace::FontWeight value)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontWeight, ConvertFontWeight(value));
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontWeight, value);
 }
 
 void TextModelNG::SetFontFamily(const std::vector<std::string>& value)
@@ -99,13 +78,6 @@ void TextModelNG::SetFontFamily(const std::vector<std::string>& value)
 void TextModelNG::SetTextAlign(Ace::TextAlign value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextAlign, value);
-    if (value == Ace::TextAlign::START) {
-        ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, Alignment::CENTER_LEFT);
-    } else if (value == Ace::TextAlign::END) {
-        ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, Alignment::CENTER_RIGHT);
-    } else {
-        ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, Alignment::CENTER);
-    }
 }
 
 void TextModelNG::SetTextOverflow(Ace::TextOverflow value)
@@ -116,6 +88,11 @@ void TextModelNG::SetTextOverflow(Ace::TextOverflow value)
 void TextModelNG::SetMaxLines(uint32_t value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, MaxLines, value);
+}
+
+void TextModelNG::SetTextIndent(const Dimension& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextIndent, value);
 }
 
 void TextModelNG::SetLineHeight(const Dimension& value)
@@ -158,6 +135,11 @@ void TextModelNG::SetAdaptMaxFontSize(const Dimension& value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, AdaptMaxFontSize, value);
 }
 
+void TextModelNG::SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, HeightAdaptivePolicy, value);
+}
+
 void TextModelNG::SetOnClick(std::function<void(const BaseEventInfo* info)>&& click)
 {
     LOGE("no support OnClick");
@@ -170,7 +152,20 @@ void TextModelNG::SetRemoteMessage(std::function<void()>&& event)
 
 void TextModelNG::SetCopyOption(CopyOptions copyOption)
 {
-    LOGE("no support CopyOption");
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, CopyOption, copyOption);
+}
+
+void TextModelNG::SetDraggable(bool draggable)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, Draggable, draggable);
+}
+
+void TextModelNG::SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOptionsItems)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    textPattern->SetMenuOptionItems(std::move(menuOptionsItems));
 }
 
 void TextModelNG::SetOnDragStart(NG::OnDragStartFunc&& onDragStart)
@@ -206,5 +201,4 @@ void TextModelNG::SetOnDrop(NG::OnDragDropFunc&& onDrop)
 {
     ViewAbstract::SetOnDrop(std::move(onDrop));
 }
-
 } // namespace OHOS::Ace::NG

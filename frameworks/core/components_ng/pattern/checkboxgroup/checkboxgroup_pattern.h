@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,8 +20,10 @@
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_accessibility_property.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_event_hub.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_layout_algorithm.h"
+#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_modifier.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_method.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_property.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -58,8 +60,22 @@ public:
         auto eventHub = host->GetEventHub<EventHub>();
         CHECK_NULL_RETURN(eventHub, nullptr);
         auto enabled = eventHub->IsEnabled();
-        auto paintMethod = MakeRefPtr<CheckBoxGroupPaintMethod>(enabled, isTouch_, isHover_, shapeScale_, uiStatus_);
+        if (!checkBoxGroupModifier_) {
+            CheckBoxGroupModifier::Parameters paintParameters;
+            InitializeModifierParam(paintParameters);
+            UpdateModifierParam(paintParameters);
+            checkBoxGroupModifier_ = AceType::MakeRefPtr<CheckBoxGroupModifier>(paintParameters);
+        }
+        auto paintMethod = MakeRefPtr<CheckBoxGroupPaintMethod>(enabled, isTouch_, isHover_,
+            shapeScale_, uiStatus_, checkBoxGroupModifier_);
+        paintMethod->SetHotZoneOffset(hotZoneOffset_);
+        paintMethod->SetHotZoneSize(hotZoneSize_);
         return paintMethod;
+    }
+
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        return MakeRefPtr<CheckBoxGroupAccessibilityProperty>();
     }
 
     bool OnDirtyLayoutWrapperSwap(
@@ -114,6 +130,7 @@ public:
     FocusPattern GetFocusPattern() const override;
     void UpdateAnimation(bool check);
     void UpdateUIStatus(bool check);
+    void UpdateModifierParam(CheckBoxGroupModifier::Parameters& paintParameters);
 
 private:
     void OnAttachToFrameNode() override;
@@ -134,16 +151,20 @@ private:
     void UpdateCheckBoxStatus(const RefPtr<FrameNode>& frameNode,
         std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>> checkBoxGroupMap, const std::string& group,
         bool select);
-    RectF GetHotZoneRect(bool isOriginal) const;
     // Init key event
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    bool OnKeyEvent(const KeyEvent& event);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
+    void AddHotZoneRect();
+    void RemoveLastHotZoneRect() const;
+    void InitializeModifierParam(CheckBoxGroupModifier::Parameters& paintParameters);
 
     std::optional<std::string> preGroup_;
     bool isAddToMap_ = true;
     RefPtr<ClickEvent> clickListener_;
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<InputEvent> mouseEvent_;
+    RefPtr<CheckBoxGroupModifier> checkBoxGroupModifier_;
     bool isTouch_ = false;
     bool isHover_ = false;
     bool isClick_ = false;
@@ -153,10 +174,12 @@ private:
     RefPtr<CurveAnimation<float>> translate_;
     float shapeScale_ = 1.0f;
     UIStatus uiStatus_ = UIStatus::UNSELECTED;
-    Dimension hotZoneHorizontalPadding_ = 11.0_vp;
-    Dimension hotZoneVerticalPadding_ = 11.0_vp;
+    Dimension hotZoneHorizontalPadding_;
+    Dimension hotZoneVerticalPadding_;
     OffsetF offset_;
     SizeF size_;
+    OffsetF hotZoneOffset_;
+    SizeF hotZoneSize_;
 
     ACE_DISALLOW_COPY_AND_MOVE(CheckBoxGroupPattern);
 };

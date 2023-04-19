@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,23 +16,15 @@
 #include "core/components_ng/render/image_painter.h"
 
 namespace OHOS::Ace::NG {
-void ImagePainter::DrawImage(
-    RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize, const ImagePaintConfig& imagePaintConfig) const
-{}
+void ImagePainter::DrawImage(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const {}
 
-void ImagePainter::DrawSVGImage(RSCanvas& canvas, const OffsetF& offset, const SizeF& svgContainerSize,
-    const ImagePaintConfig& imagePaintConfig) const
-{}
+void ImagePainter::DrawSVGImage(RSCanvas& canvas, const OffsetF& offset, const SizeF& svgContainerSize) const {}
 
-void ImagePainter::DrawStaticImage(
-    RSCanvas& canvas, const OffsetF& offset, const ImagePaintConfig& imagePaintConfig) const
-{}
+void ImagePainter::DrawStaticImage(RSCanvas& canvas, const OffsetF& offset) const {}
 
 void ImagePainter::FlipHorizontal(RSCanvas& canvas, double horizontalOffset, double drawRectWidth) {}
 
-void ImagePainter::DrawImageWithRepeat(
-    RSCanvas& canvas, const ImagePaintConfig& imagePaintConfig, const RectF& contentRect) const
-{}
+void ImagePainter::DrawImageWithRepeat(RSCanvas& canvas, const RectF& contentRect) const {}
 
 void ImagePainter::ApplyImageFit(
     ImageFit imageFit, const SizeF& rawPicSize, const SizeF& dstSize, RectF& srcRect, RectF& dstRect)

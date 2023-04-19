@@ -21,6 +21,11 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
     return nullptr;
 }
 
+RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
+{
+    return nullptr;
+}
+
 void ListPattern::OnModifyDone() {}
 
 void ListPattern::OnAttachToFrameNode() {}
@@ -29,5 +34,45 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(
     const RefPtr<LayoutWrapper>& /* dirty */, const DirtySwapConfig& /* config */)
 {
     return false;
+}
+
+bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
+{
+    return true;
+}
+
+void ListPattern::UpdateScrollBarOffset() {}
+
+bool ListPattern::OnScrollCallback(float offset, int32_t source)
+{
+    return true;
+}
+
+void ListPattern::OnScrollEndCallback() {}
+
+bool ListPattern::IsAtBottom() const
+{
+    return false;
+}
+
+bool ListPattern::IsAtTop() const
+{
+    return false;
+}
+
+bool ListPattern::OutBoundaryCallback()
+{
+    return false;
+}
+
+void ListPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) {}
+
+void ListPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
+
+void ListPattern::SetSwiperItem(WeakPtr<ListItemPattern> swiperItem) {}
+
+WeakPtr<FocusHub> ListPattern::GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode)
+{
+    return nullptr;
 }
 } // namespace OHOS::Ace::NG

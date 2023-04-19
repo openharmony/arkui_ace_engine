@@ -519,6 +519,8 @@ public:
     virtual bool IsFrist() const = 0;
 
     virtual int32_t GetId() const = 0;
+
+    virtual int32_t GetParentNWebId() const = 0;
 };
 
 class ACE_EXPORT LoadWebPageStartEvent : public BaseEventInfo {
@@ -648,6 +650,23 @@ public:
 
 private:
     std::string data_;
+};
+
+class ACE_EXPORT LoadInterceptEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(LoadInterceptEvent, BaseEventInfo);
+
+public:
+    explicit LoadInterceptEvent(const RefPtr<WebRequest>& request) :
+        BaseEventInfo("LoadInterceptEvent"), request_(request) {}
+    ~LoadInterceptEvent() = default;
+
+    const RefPtr<WebRequest>& GetRequest() const
+    {
+        return request_;
+    }
+
+private:
+    RefPtr<WebRequest> request_;
 };
 
 class ACE_EXPORT LoadWebGeolocationHideEvent : public BaseEventInfo {
@@ -1021,6 +1040,12 @@ public:
     virtual std::string GetUnfilteredLinkUrl() const = 0;
     virtual std::string GetSourceUrl() const = 0;
     virtual bool HasImageContents() const = 0;
+    virtual bool IsEditable() const = 0;
+    virtual int GetEditStateFlags() const = 0;
+    virtual int GetSourceType() const = 0;
+    virtual int GetMediaType() const = 0;
+    virtual int GetInputFieldType() const = 0;
+    virtual std::string GetSelectionText() const = 0;
 };
 
 class ACE_EXPORT ContextMenuResult : public AceType {
@@ -1032,6 +1057,10 @@ public:
 
     virtual void Cancel() const = 0;
     virtual void CopyImage() const = 0;
+    virtual void Copy() const = 0;
+    virtual void Paste() const = 0;
+    virtual void Cut() const = 0;
+    virtual void SelectAll() const = 0;
 };
 
 class ACE_EXPORT ContextMenuEvent : public BaseEventInfo {
@@ -1133,6 +1162,151 @@ class ACE_EXPORT WebWindowExitEvent : public BaseEventInfo {
 public:
     WebWindowExitEvent() : BaseEventInfo("WebWindowExitEvent") {}
     ~WebWindowExitEvent() = default;
+};
+
+class ACE_EXPORT PageVisibleEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(PageVisibleEvent, BaseEventInfo);
+
+public:
+    PageVisibleEvent(const std::string& url)
+        : BaseEventInfo("PageVisibleEvent"), url_(url)
+    {}
+
+    ~PageVisibleEvent() = default;
+
+    const std::string& GetUrl() const
+    {
+        return url_;
+    }
+
+private:
+    std::string url_;
+};
+
+class ACE_EXPORT DataResubmitted : public AceType {
+    DECLARE_ACE_TYPE(DataResubmitted, AceType)
+
+public:
+    DataResubmitted() = default;
+    ~DataResubmitted() = default;
+
+    virtual void Resend() = 0;
+    virtual void Cancel() = 0;
+};
+
+class ACE_EXPORT DataResubmittedEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(DataResubmittedEvent, BaseEventInfo);
+
+public:
+    DataResubmittedEvent(const RefPtr<DataResubmitted>& handler)
+        : BaseEventInfo("DataResubmittedEvent"), handler_(handler) {}
+    ~DataResubmittedEvent() = default;
+
+    const RefPtr<DataResubmitted>& GetHandler() const
+    {
+        return handler_;
+    }
+
+private:
+    RefPtr<DataResubmitted> handler_;
+};
+
+class ACE_EXPORT WebFaviconReceived : public AceType {
+    DECLARE_ACE_TYPE(WebFaviconReceived, AceType)
+
+public:
+    WebFaviconReceived() = default;
+    ~WebFaviconReceived() = default;
+
+    virtual const void* GetData() = 0;
+    virtual size_t GetWidth() = 0;
+    virtual size_t GetHeight() = 0;
+    virtual int GetColorType() = 0;
+    virtual int GetAlphaType() = 0;
+};
+
+class ACE_EXPORT FaviconReceivedEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(FaviconReceivedEvent, BaseEventInfo);
+
+public:
+    FaviconReceivedEvent(const RefPtr<WebFaviconReceived>& handler)
+        : BaseEventInfo("FaviconReceivedEvent"), handler_(handler) {}
+    ~FaviconReceivedEvent() = default;
+
+    const RefPtr<WebFaviconReceived>& GetHandler() const
+    {
+        return handler_;
+    }
+
+private:
+    RefPtr<WebFaviconReceived> handler_;
+};
+
+class ACE_EXPORT TouchIconUrlEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(TouchIconUrlEvent, BaseEventInfo);
+
+public:
+    TouchIconUrlEvent(const std::string& iconUrl, bool precomposed)
+        : BaseEventInfo("TouchIconUrlEvent"), url_(iconUrl), precomposed_(precomposed)
+    {}
+
+    ~TouchIconUrlEvent() = default;
+
+    const std::string& GetUrl() const
+    {
+        return url_;
+    }
+
+    bool GetPreComposed() const
+    {
+        return precomposed_;
+    }
+
+private:
+    std::string url_;
+    bool precomposed_;
+};
+
+class ACE_EXPORT AudioStateChangedEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(AudioStateChangedEvent, BaseEventInfo);
+
+public:
+    AudioStateChangedEvent(bool playing) : BaseEventInfo("AudioStateChangedEvent"), playing_(playing) {}
+    ~AudioStateChangedEvent() = default;
+
+    bool IsPlaying() const
+    {
+        return playing_;
+    }
+
+private:
+    bool playing_;
+};
+
+class ACE_EXPORT FirstContentfulPaintEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(FirstContentfulPaintEvent, BaseEventInfo);
+
+public:
+    FirstContentfulPaintEvent(long navigationStartTick, long firstContentfulPaintMs)
+        : BaseEventInfo("FirstContentfulPaintEvent"), navigationStartTick_(navigationStartTick),
+          firstContentfulPaintMs_(firstContentfulPaintMs)
+    {}
+
+    ~FirstContentfulPaintEvent() = default;
+
+    long GetNavigationStartTick() const
+    {
+        return navigationStartTick_;
+    }
+
+    long GetFirstContentfulPaintMs() const
+    {
+        return firstContentfulPaintMs_;
+    }
+
+private:
+    long navigationStartTick_;
+    long firstContentfulPaintMs_;
 };
 } // namespace OHOS::Ace
 

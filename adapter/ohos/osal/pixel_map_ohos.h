@@ -42,7 +42,7 @@ public:
     void* GetRawPixelMapPtr() const override;
     std::string GetId() override;
     std::string GetModifyId() override;
-    std::shared_ptr<Media::PixelMap> GetPixelMapSharedPtr();
+    std::shared_ptr<Media::PixelMap> GetPixelMapSharedPtr() override;
 
 private:
     std::shared_ptr<Media::PixelMap> pixmap_;

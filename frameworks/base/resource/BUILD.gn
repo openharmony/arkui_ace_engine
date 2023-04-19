@@ -59,6 +59,8 @@ source_set("binary_resource_mac_and_windows") {
   ace_resource_dir =
       get_label_info(":binary_resource($current_toolchain)", "target_out_dir")
   sources = [
+    "$ace_resource_dir/app_bar_back.c",
+    "$ace_resource_dir/app_bar_fa.c",
     "$ace_resource_dir/close.c",
     "$ace_resource_dir/container_modal_window_close.c",
     "$ace_resource_dir/container_modal_window_defocus_close.c",
@@ -88,6 +90,7 @@ source_set("binary_resource_mac_and_windows") {
     "$ace_resource_dir/ic_more_dark.c",
     "$ace_resource_dir/ic_more_transparent.c",
     "$ace_resource_dir/ic_public_drawer.c",
+    "$ace_resource_dir/ic_public_input_search.c",
     "$ace_resource_dir/ic_public_spinner.c",
     "$ace_resource_dir/indexer_arrow.c",
     "$ace_resource_dir/indexletter_bar.c",
@@ -159,6 +162,8 @@ action_foreach("objcopy_resource") {
 action_foreach("objcopy_resource_mac_and_windows") {
   # add resource file here
   sources = [
+    "binary/app_bar_back.svg",
+    "binary/app_bar_fa.svg",
     "binary/close.svg",
     "binary/container_modal_window_close.png",
     "binary/container_modal_window_defocus_close.png",
@@ -188,6 +193,7 @@ action_foreach("objcopy_resource_mac_and_windows") {
     "binary/ic_more_dark.svg",
     "binary/ic_more_transparent.svg",
     "binary/ic_public_drawer.svg",
+    "binary/ic_public_input_search.svg",
     "binary/ic_public_spinner.svg",
     "binary/indexer_arrow.png",
     "binary/indexletter_bar.json",

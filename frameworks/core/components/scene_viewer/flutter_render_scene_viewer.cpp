@@ -27,7 +27,6 @@ EGLContext FlutterRenderSceneViewer::GetRenderContext()
     EGLContext eglContext = EGL_NO_CONTEXT;
     pipelineContext->GetTaskExecutor()->PostSyncTask([&eglContext, this] {
         eglContext = eglGetCurrentContext();
-        LOGD("ACE-3D TaskType::GPU eglcontext %p", eglContext);
     }, TaskExecutor::TaskType::GPU);
     return eglContext;
 }

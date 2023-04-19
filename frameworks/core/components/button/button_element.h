@@ -37,7 +37,7 @@ public:
 private:
     void OnFocus() override;
     void OnClick() override;
-    void OnClick(const KeyEvent& event) override;
+    bool OnClick(const KeyEvent& event) override;
     void OnBlur() override;
     RefPtr<RenderNode> CreateRenderNode() override;
 

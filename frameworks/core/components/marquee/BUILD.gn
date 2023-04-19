@@ -20,5 +20,8 @@ build_component("marquee") {
     "render_marquee.cpp",
     "render_marquee_creator.cpp",
   ]
+  if (ace_use_new_skia) {
+    sources -= [ "flutter_render_marquee.cpp" ]
+  }
   rosen_sources = [ "rosen_render_marquee.cpp" ]
 }

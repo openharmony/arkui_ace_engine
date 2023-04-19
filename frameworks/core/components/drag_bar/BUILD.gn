@@ -22,5 +22,8 @@ build_component("drag_bar") {
     "render_drag_bar.cpp",
     "render_drag_bar_creator.cpp",
   ]
+  if (ace_use_new_skia) {
+    sources -= [ "flutter_render_drag_bar.cpp" ]
+  }
   rosen_sources = [ "rosen_render_drag_bar.cpp" ]
 }

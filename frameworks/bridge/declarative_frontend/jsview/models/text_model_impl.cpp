@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -66,6 +66,8 @@ void TextModelImpl::SetTextColor(const Color& value)
     component->SetTextStyle(textStyle);
 }
 
+void TextModelImpl::SetTextShadow(const Shadow& value) {}
+
 void TextModelImpl::SetItalicFontStyle(Ace::FontStyle value)
 {
     auto component = GetComponent();
@@ -122,6 +124,16 @@ void TextModelImpl::SetMaxLines(uint32_t value)
 
     auto textStyle = component->GetTextStyle();
     textStyle.SetMaxLines(value);
+    component->SetTextStyle(textStyle);
+}
+
+void TextModelImpl::SetTextIndent(const Dimension& value)
+{
+    auto component = GetComponent();
+    CHECK_NULL_VOID(component);
+
+    auto textStyle = component->GetTextStyle();
+    textStyle.SetTextIndent(value);
     component->SetTextStyle(textStyle);
 }
 
@@ -203,6 +215,8 @@ void TextModelImpl::SetAdaptMaxFontSize(const Dimension& value)
     component->SetTextStyle(textStyle);
 }
 
+void TextModelImpl::SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value) {}
+
 void TextModelImpl::OnSetWidth()
 {
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
@@ -277,6 +291,8 @@ void TextModelImpl::SetCopyOption(CopyOptions copyOption)
     component->SetCopyOption(copyOption);
 }
 
+void TextModelImpl::SetDraggable(bool draggable) {}
+
 void TextModelImpl::SetOnDragStart(NG::OnDragStartFunc&& onDragStart)
 {
     auto component = GetComponent();
@@ -311,5 +327,7 @@ void TextModelImpl::SetOnDrop(NG::OnDragDropFunc&& onDrop)
     CHECK_NULL_VOID(component);
     component->SetOnDropId(onDrop);
 }
+
+void TextModelImpl::SetMenuOptionItems(std::vector<NG::MenuOptionsParam>&& menuOptionsItems) {}
 
 } // namespace OHOS::Ace::Framework

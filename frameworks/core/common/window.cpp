@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,15 +18,14 @@
 #include "base/log/log.h"
 #include "base/utils/macros.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
+#include "core/common/container_scope.h"
 
 namespace OHOS::Ace {
-
 Window::Window(std::unique_ptr<PlatformWindow> platformWindow) : platformWindow_(std::move(platformWindow))
 {
     CHECK_NULL_VOID(platformWindow_);
-    auto&& callback = [this](uint64_t nanoTimestamp, uint32_t frameCount) {
-        OnVsync(nanoTimestamp, frameCount);
-    };
+    auto&& callback = [this](uint64_t nanoTimestamp, uint32_t frameCount) { OnVsync(nanoTimestamp, frameCount); };
     platformWindow_->RegisterVsyncCallback(callback);
     LOGI("Window Created success.");
 }
@@ -55,10 +54,18 @@ void Window::OnVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     isRequestVsync_ = false;
 
     for (auto& callback : callbacks_) {
-        if (callback) {
-            callback(nanoTimestamp, frameCount);
+        if (callback.callback_ == nullptr) {
+            continue;
         }
+        callback.callback_(nanoTimestamp, frameCount);
     }
 }
 
+void Window::SetVsyncCallback(AceVsyncCallback&& callback)
+{
+    callbacks_.push_back({
+        .callback_ = std::move(callback),
+        .containerId_ = Container::CurrentId(),
+    });
+}
 } // namespace OHOS::Ace

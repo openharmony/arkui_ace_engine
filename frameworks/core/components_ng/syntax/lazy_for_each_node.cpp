@@ -21,6 +21,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/syntax/for_each_node.h"
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -46,6 +47,9 @@ void LazyForEachNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& paren
 {
     CHECK_NULL_VOID(builder_);
     auto lazyLayoutWrapperBuilder = MakeRefPtr<LazyLayoutWrapperBuilder>(builder_, WeakClaim(this));
+    if (parent->GetHostTag() == V2::SWIPER_ETS_TAG) {
+        lazyLayoutWrapperBuilder->SetLazySwiper();
+    }
     lazyLayoutWrapperBuilder->UpdateIndexRange(startIndex_, endIndex_, ids_);
     lazyLayoutWrapperBuilder->UpdateForceFlag(forceMeasure, forceLayout);
     parent->SetLayoutWrapperBuilder(lazyLayoutWrapperBuilder);
@@ -58,11 +62,11 @@ void LazyForEachNode::UpdateLazyForEachItems(int32_t newStartIndex, int32_t newE
     ACE_SCOPED_TRACE("lazyforeach update cache [%d -%d]", newStartIndex, newEndIndex);
     CHECK_NULL_VOID(builder_);
     std::list<std::optional<std::string>> newIds(std::move(nodeIds));
-    // clean current children.
-    Clean();
 
     // delete all.
     if (newIds.empty()) {
+        // clean current children.
+        Clean(true);
         builder_->Clean();
         startIndex_ = -1;
         endIndex_ = -1;
@@ -76,12 +80,22 @@ void LazyForEachNode::UpdateLazyForEachItems(int32_t newStartIndex, int32_t newE
         return;
     }
 
-    // use new ids to create new child tree.
+    int32_t slot = 0;
+    // use new ids to update child tree.
     for (const auto& id : newIds) {
         CHECK_NULL_VOID(id);
         auto uiNode = builder_->GetChildByKey(*id);
         CHECK_NULL_VOID(uiNode);
-        AddChild(uiNode);
+        int32_t childIndex = GetChildIndex(uiNode);
+        if (childIndex < 0) {
+            AddChild(uiNode, slot);
+        } else if (childIndex != slot) {
+            uiNode->MovePosition(slot);
+        }
+        slot++;
+    }
+    while (static_cast<size_t>(slot) < GetChildren().size()) {
+        RemoveChild(GetLastChild());
     }
 
     // delete useless items.

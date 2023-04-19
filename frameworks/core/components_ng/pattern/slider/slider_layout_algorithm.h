@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,30 +26,38 @@ class ACE_EXPORT SliderLayoutAlgorithm : public BoxLayoutAlgorithm {
     DECLARE_ACE_TYPE(SliderLayoutAlgorithm, BoxLayoutAlgorithm);
 
 public:
-    explicit SliderLayoutAlgorithm(bool bubbleFlag = false, const OffsetF& circleCenter = { 0, 0 })
-        : circleCenter_(circleCenter), bubbleFlag_(bubbleFlag) {};
+    explicit SliderLayoutAlgorithm() = default;
     ~SliderLayoutAlgorithm() override = default;
 
     std::optional<SizeF> MeasureContent(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
-
+    void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
 
     float GetTrackThickness() const
     {
         return trackThickness_;
     }
-    float GetBlockDiameter() const
+
+    SizeF GetBlockSize() const
     {
-        return blockDiameter_;
+        return blockSize_;
+    }
+
+    float GetBlockHotSize() const
+    {
+        return blockHotSize_;
     }
 
 private:
-    float trackThickness_ = 0.0f;
-    float blockDiameter_ = 0.0f;
+    void CalculateBlockOffset(
+        LayoutWrapper* layoutWrapper, const SizeF& selfSize, float selectOffset, Axis axis, bool reverse);
 
-    OffsetF circleCenter_ = { 0, 0 };
-    bool bubbleFlag_ = false;
+private:
+    float trackThickness_ = 0.0f;
+    SizeF blockSize_;
+    float blockHotSize_ = 0.0f;
+
     ACE_DISALLOW_COPY_AND_MOVE(SliderLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

@@ -21,15 +21,17 @@
 #include "core/components_ng/render/shape_painter.h"
 
 namespace OHOS::Ace::NG {
-void CirclePainter::DrawCircle(RSCanvas& canvas, float radius, const ShapePaintProperty& shapePaintProperty)
+void CirclePainter::DrawCircle(
+    RSCanvas& canvas, float radius, const OffsetF& offset, const ShapePaintProperty& shapePaintProperty)
 {
     RSPen pen;
     RSBrush brush;
-    ShapePainter::SetPan(pen, shapePaintProperty);
+    if (ShapePainter::SetPen(pen, shapePaintProperty)) {
+        canvas.AttachPen(pen);
+    }
     ShapePainter::SetBrush(brush, shapePaintProperty);
-    canvas.AttachPen(pen);
     canvas.AttachBrush(brush);
-    PointF centerPoint = PointF(radius, radius);
+    PointF centerPoint = PointF(radius + offset.GetX(), radius + offset.GetY());
     canvas.DrawCircle(ToRSPoint(centerPoint), radius);
 }
 } // namespace OHOS::Ace::NG

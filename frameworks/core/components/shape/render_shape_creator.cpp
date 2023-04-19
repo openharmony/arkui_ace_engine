@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
+#ifndef NEW_SKIA
 #include "flutter_render_shape.h"
+#endif
 #include "rosen_render_shape.h"
 
 namespace OHOS::Ace {
@@ -26,7 +28,11 @@ RefPtr<RenderNode> RenderShape::Create()
         return nullptr;
 #endif
     } else {
+#ifndef NEW_SKIA
         return AceType::MakeRefPtr<FlutterRenderShape>();
+#else
+        return nullptr;
+#endif
     }
 }
 } // namespace OHOS::Ace

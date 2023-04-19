@@ -107,6 +107,20 @@ public:
         return true;
     }
 
+    bool ClearSize(bool clearWidth, bool clearHeight)
+    {
+        bool changed = false;
+        if (clearWidth && width_.has_value()) {
+            width_.reset();
+            changed = true;
+        }
+        if (clearHeight && height_.has_value()) {
+            height_.reset();
+            changed = true;
+        }
+        return changed;
+    }
+
     std::string ToString() const
     {
         static const int32_t precision = 2;
@@ -155,6 +169,14 @@ struct MeasureProperty {
         return true;
     }
 
+    bool ClearSelfIdealSize(bool clearWidth, bool clearHeight)
+    {
+        if (selfIdealSize.has_value()) {
+            return selfIdealSize->ClearSize(clearWidth, clearHeight);
+        }
+        return false;
+    }
+
     bool UpdateMaxSizeWithCheck(const CalcSize& size)
     {
         if (maxSize == size) {
@@ -190,6 +212,8 @@ struct MeasureProperty {
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const
     {
+        // this may affect XTS, check later.
+#if !defined(PREVIEW)
         std::string width =
             selfIdealSize.has_value()
                 ? (selfIdealSize.value().Width().has_value() ? selfIdealSize.value().Width().value().ToString() : "-")
@@ -205,6 +229,7 @@ struct MeasureProperty {
         jsonSize->Put("width", width.c_str());
         jsonSize->Put("height", height.c_str());
         json->Put("size", jsonSize);
+#endif
 
         auto jsonConstraintSize = JsonUtil::Create(true);
         jsonConstraintSize->Put("minWidth",

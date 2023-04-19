@@ -52,55 +52,62 @@ RefPtr<PictureAnimation<int32_t>> ImageAnimatorPattern::CreatePictureAnimation(i
     pictureAnimation->AddListener([weak = WeakClaim(this)](int32_t index) {
         auto imageAnimator = weak.Upgrade();
         CHECK_NULL_VOID(imageAnimator);
-        auto frameNode = imageAnimator->GetHost();
-        CHECK_NULL_VOID(frameNode);
-        auto imageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-        CHECK_NULL_VOID(imageFrameNode);
-        auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
-        CHECK_NULL_VOID(imageLayoutProperty);
-        imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(imageAnimator->images_[index].src));
-        imageFrameNode->MarkModifyDone();
-
-        MarginProperty margin;
-        if (!imageAnimator->fixedSize_) {
-            margin.left = CalcLength(imageAnimator->images_[index].left);
-            margin.top = CalcLength(imageAnimator->images_[index].top);
-            imageLayoutProperty->UpdateMargin(margin);
-            CalcSize realSize = { CalcLength(imageAnimator->images_[index].width),
-                CalcLength(imageAnimator->images_[index].height) };
-            imageLayoutProperty->UpdateUserDefinedIdealSize(realSize);
-            imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_CONTENT);
-            return;
-        }
-        margin.SetEdges(CalcLength(0.0));
-        imageLayoutProperty->UpdateMargin(margin);
-        imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+        imageAnimator->SetShowingIndex(index);
     });
     return pictureAnimation;
 }
 
+void ImageAnimatorPattern::SetShowingIndex(int32_t index)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto imageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(imageFrameNode);
+    auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
+    if (index >= static_cast<int32_t>(images_.size())) {
+        LOGW("ImageAnimator update index error, index: %{public}d, size: %{public}zu", index, images_.size());
+        return;
+    }
+    nowImageIndex_ = index;
+    imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(images_[index].src));
+
+    MarginProperty margin;
+    if (!fixedSize_) {
+        margin.left = CalcLength(images_[index].left);
+        margin.top = CalcLength(images_[index].top);
+        imageLayoutProperty->UpdateMargin(margin);
+        CalcSize realSize = { CalcLength(images_[index].width), CalcLength(images_[index].height) };
+        imageLayoutProperty->UpdateUserDefinedIdealSize(realSize);
+        imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_CONTENT);
+        imageFrameNode->MarkModifyDone();
+        return;
+    }
+    margin.SetEdges(CalcLength(0.0));
+    imageLayoutProperty->UpdateMargin(margin);
+    imageLayoutProperty->ClearUserDefinedIdealSize(true, true);
+    imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    imageFrameNode->MarkModifyDone();
+}
+
 void ImageAnimatorPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto size = static_cast<int32_t>(images_.size());
     if (size <= 0) {
         LOGE("image size is less than 0.");
         return;
     }
-    if (status_ == Animator::Status::IDLE || status_ == Animator::Status::STOPPED) {
-        auto frameNode = GetHost();
-        CHECK_NULL_VOID(frameNode);
-        auto imageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-        CHECK_NULL_VOID(imageFrameNode);
-        ImageProperties childImage = isReverse_ ? images_.back() : images_.front();
-        auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
-        CHECK_NULL_VOID(imageLayoutProperty);
-        imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(childImage.src));
-        imageFrameNode->MarkModifyDone();
+    auto index = nowImageIndex_;
+    if ((status_ == Animator::Status::IDLE || status_ == Animator::Status::STOPPED) && firstUpdateEvent_) {
+        index = isReverse_ ? (size - 1) : 0;
     }
+    SetShowingIndex(index);
 
     if (imagesChangedFlag_) {
         animator_->ClearInterpolators();
         animator_->AddInterpolator(CreatePictureAnimation(size));
+        AdaptSelfSize();
         imagesChangedFlag_ = false;
     }
     if (firstUpdateEvent_) {
@@ -116,7 +123,7 @@ void ImageAnimatorPattern::OnModifyDone()
             animator_->Pause();
             break;
         case Animator::Status::STOPPED:
-            animator_->Stop();
+            animator_->Finish();
             break;
         default:
             isReverse_ ? animator_->Backward() : animator_->Forward();
@@ -193,6 +200,51 @@ std::string ImageAnimatorPattern::ImagesToString() const
         imageArray->Put(item);
     }
     return imageArray->ToString();
+}
+
+void ImageAnimatorPattern::AdaptSelfSize()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->GetCalcLayoutConstraint() && layoutProperty->GetCalcLayoutConstraint()->selfIdealSize &&
+        layoutProperty->GetCalcLayoutConstraint()->selfIdealSize->IsValid()) {
+        return;
+    }
+    Dimension maxWidth;
+    Dimension maxHeight;
+    double maxWidthPx = 0.0;
+    double maxHeightPx = 0.0;
+    for (const auto& image : images_) {
+        if (image.width.Unit() != DimensionUnit::PERCENT) {
+            auto widthPx = image.width.ConvertToPx();
+            if (widthPx > maxWidthPx) {
+                maxWidthPx = widthPx;
+                maxWidth = image.width;
+            }
+        }
+        if (image.height.Unit() != DimensionUnit::PERCENT) {
+            auto heightPx = image.height.ConvertToPx();
+            if (heightPx > maxHeightPx) {
+                maxHeightPx = heightPx;
+                maxHeight = image.height;
+            }
+        }
+    }
+    if (!maxWidth.IsValid() || !maxHeight.IsValid()) {
+        return;
+    }
+    const auto& layoutConstraint = layoutProperty->GetCalcLayoutConstraint();
+    if (!layoutConstraint || !layoutConstraint->selfIdealSize) {
+        layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(maxWidth), CalcLength(maxHeight)));
+        return;
+    }
+    if (!layoutConstraint->selfIdealSize->Width()) {
+        layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(maxWidth), std::nullopt));
+        return;
+    }
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(maxHeight)));
 }
 
 } // namespace OHOS::Ace::NG

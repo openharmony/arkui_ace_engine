@@ -25,9 +25,8 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void JSAnimation(const JSCallbackInfo& info);
     static void JSAnimateTo(const JSCallbackInfo& info);
-
-private:
-    static const AnimationOption CreateAnimation(const std::unique_ptr<JsonValue>& animationArgs);
+    static const AnimationOption CreateAnimation(
+        const std::unique_ptr<JsonValue>& animationArgs, bool isForm = false);
 };
 
 } // namespace OHOS::Ace::Framework

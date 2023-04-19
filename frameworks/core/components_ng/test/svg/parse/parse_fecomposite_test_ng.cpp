@@ -21,6 +21,7 @@
 
 #include "core/components/common/properties/color.h"
 #include "core/components/declaration/svg/svg_fe_composite_declaration.h"
+#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/svg/parse/svg_fe_composite.h"
 #include "core/components_ng/svg/parse/svg_filter.h"
 #include "core/components_ng/svg/parse/svg_svg.h"

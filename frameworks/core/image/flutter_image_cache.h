@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,31 +16,30 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_IMAGE_FLUTTER_IMAGE_CACHE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_IMAGE_FLUTTER_IMAGE_CACHE_H
 
-#include "flutter/fml/memory/ref_counted.h"
-#ifdef NG_BUILD
-#include "core/components_ng/render/canvas_image.h"
-#else
-#include "flutter/lib/ui/painting/image.h"
-#endif
+#include <utility>
 
+#include "core/components_ng/render/canvas_image.h"
 #include "core/image/image_cache.h"
 #include "core/image/image_object.h"
 
 namespace OHOS::Ace {
 
 struct CachedImage {
-#ifdef NG_BUILD
-    explicit CachedImage(const RefPtr<NG::CanvasImage>& image) : imagePtr(image) {}
-    RefPtr<NG::CanvasImage> imagePtr;
-#else
-    explicit CachedImage(const fml::RefPtr<flutter::CanvasImage>& image) : imagePtr(image) {}
-    fml::RefPtr<flutter::CanvasImage> imagePtr;
-#endif
+    explicit CachedImage(const sk_sp<SkImage>& image) : imagePtr(image) {}
+    sk_sp<SkImage> imagePtr;
     uint32_t uniqueId = 0;
 };
 
+namespace NG {
+struct CachedImage {
+    explicit CachedImage(sk_sp<SkImage> image) : imagePtr(std::move(image)) {}
+    sk_sp<SkImage> imagePtr;
+};
+} // namespace NG
+
 struct SkiaCachedImageData : public CachedImageData {
     DECLARE_ACE_TYPE(SkiaCachedImageData, CachedImageData);
+
 public:
     explicit SkiaCachedImageData(const sk_sp<SkData>& data) : imageData(data) {}
     ~SkiaCachedImageData() override = default;

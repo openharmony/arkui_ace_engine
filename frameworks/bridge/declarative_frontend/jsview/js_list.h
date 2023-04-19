@@ -33,19 +33,22 @@ public:
     static void ScrollCallback(const JSCallbackInfo& args);
     static void ReachStartCallback(const JSCallbackInfo& args);
     static void ReachEndCallback(const JSCallbackInfo& args);
+    static void ScrollStartCallback(const JSCallbackInfo& args);
     static void ScrollStopCallback(const JSCallbackInfo& args);
     static void ItemDeleteCallback(const JSCallbackInfo& args);
     static void ItemMoveCallback(const JSCallbackInfo& args);
     static void ScrollIndexCallback(const JSCallbackInfo& args);
     static void ScrollBeginCallback(const JSCallbackInfo& args);
+    static void ScrollFrameBeginCallback(const JSCallbackInfo& args);
 
     static void SetDivider(const JSCallbackInfo& args);
     static void SetDirection(int32_t direction);
     static void SetScrollBar(int32_t scrollBar);
     static void SetEdgeEffect(int32_t edgeEffect);
     static void SetEditMode(bool editMode);
-    static void SetCachedCount(int32_t cachedCount);
+    static void SetCachedCount(const JSCallbackInfo& info);
     static void SetChainAnimation(bool enableChainAnimation);
+    static void SetChainAnimationOptions(const JSCallbackInfo& info);
     static void SetMultiSelectable(bool multiSelectable);
     static void SetListItemAlign(int32_t itemAlignment);
     static void SetLanes(const JSCallbackInfo& info);

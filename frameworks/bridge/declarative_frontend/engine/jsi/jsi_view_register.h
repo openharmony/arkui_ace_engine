@@ -22,6 +22,7 @@
 namespace OHOS::Ace::Framework {
 
 void JsBindViews(BindingTarget globalObj);
+void JsBindFormViews(BindingTarget globalObj);
 
 void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj);
 

@@ -45,6 +45,7 @@ void TextFieldElement::Update()
             trigger->clickHandler_ = [weak]() {
                 auto textField = weak.Upgrade();
                 if (textField) {
+                    LOGI("Element update, request keyboard");
                     textField->RequestKeyboard(true);
                 }
             };
@@ -63,6 +64,7 @@ void TextFieldElement::Update()
 
     // If auto focus, request keyboard immediately.
     if (textField->GetAutoFocus() && isFirstLoad_) {
+        LOGI("Auto focus, request keyboard");
         RequestKeyboard(true);
         isFirstLoad_ = false;
     }
@@ -85,10 +87,11 @@ RefPtr<RenderNode> TextFieldElement::CreateRenderNode()
 
     auto renderNode = AceType::DynamicCast<RenderTextField>(node);
     if (renderNode) {
-        renderNode->RegisterTapCallback([wp = AceType::WeakClaim(this)]() {
+        renderNode->RegisterTapCallback([wp = AceType::WeakClaim(this)](bool isRequestKeyboard) {
             auto sp = wp.Upgrade();
             if (sp) {
-                return sp->RequestKeyboard();
+                LOGI("tap callback, request keyboard");
+                return sp->RequestKeyboard(false, isRequestKeyboard);
             }
             return false;
         });
@@ -104,6 +107,7 @@ RefPtr<RenderNode> TextFieldElement::CreateRenderNode()
 
                 KeyEvent keyEvent(KeyCode::KEY_DPAD_DOWN, KeyAction::UP);
                 if (!pipeline->OnKeyEvent(keyEvent)) {
+                    LOGI("Key pressed change next focus, close keyboard");
                     sp->CloseKeyboard();
                 } else {
                     // below textfield will auto open keyboard
@@ -117,6 +121,7 @@ RefPtr<RenderNode> TextFieldElement::CreateRenderNode()
             auto sp = wp.Upgrade();
             if (sp) {
                 if (!isFocus && !sp->isRequestFocus_) {
+                    LOGI("Overlay focus change, close keyboard");
                     sp->CloseKeyboard();
                 }
             }
@@ -151,6 +156,7 @@ bool TextFieldElement::OnKeyEvent(const KeyEvent& keyEvent)
         case KeyCode::KEY_BACK:
         case KeyCode::KEY_ESCAPE: {
             bool editingMode = editingMode_;
+            LOGI("Escape key pressed, close keyboard");
             CloseKeyboard();
             // If not editingMode, mark the keyevent unhandled to let navigator pop page..
             return editingMode;
@@ -158,6 +164,7 @@ bool TextFieldElement::OnKeyEvent(const KeyEvent& keyEvent)
         case KeyCode::KEY_ENTER:
         case KeyCode::KEY_NUMPAD_ENTER:
         case KeyCode::KEY_DPAD_CENTER:
+            LOGI("Pad center key pressed, request keyboard");
             RequestKeyboard(true);
             return true;
         case KeyCode::KEY_DPAD_LEFT:
@@ -178,13 +185,16 @@ void TextFieldElement::OnFocus()
     if (!enabled_) {
         return;
     }
+    LOGI("Textfield on focus");
     auto textField = DynamicCast<RenderTextField>(renderNode_);
     if (textField) {
         textField->StartTwinkling();
         textField->OnEditChange(true);
     }
+    LOGI("On focus, request keyboard");
     RequestKeyboard(true, false);
     FocusNode::OnFocus();
+    textField->SetCanPaintSelection(true);
     auto context = context_.Upgrade();
     if (context && context->GetIsTabKeyPressed() && renderNode_) {
         renderNode_->ChangeStatus(RenderStatus::FOCUS);
@@ -198,11 +208,9 @@ void TextFieldElement::OnBlur()
     }
     auto textField = DynamicCast<RenderTextField>(renderNode_);
     if (textField) {
-        textField->StopTwinkling();
-        textField->PopTextOverlay();
-        textField->OnEditChange(false);
-        textField->ResetOnFocusForTextFieldManager();
+        textField->HandleOnBlur();
     }
+    LOGI("On blur, close keyboard");
     CloseKeyboard();
     FocusNode::OnBlur();
     auto context = context_.Upgrade();
@@ -268,6 +276,7 @@ void TextFieldElement::Delete()
     }
     auto value = textField->GetEditingValue();
     if (value.text.empty()) {
+        LOGI("Delete and text empty, request keyboard");
         RequestKeyboard(true);
         return;
     }
@@ -280,6 +289,7 @@ void TextFieldElement::Delete()
     } else {
         textField->Delete(value.GetWideText().size() - 1, value.GetWideText().size());
     }
+    LOGI("Delete, request keyboard");
     RequestKeyboard(true);
 }
 

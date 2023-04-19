@@ -36,6 +36,7 @@ public:
         paintProperty->propColor_ = CloneColor();
         paintProperty->propBackgroundColor_ = CloneBackgroundColor();
         paintProperty->propProgressType_ = CloneProgressType();
+        paintProperty->propBorderColor_ = CloneBorderColor();
         return paintProperty;
     }
 
@@ -46,6 +47,7 @@ public:
         ResetColor();
         ResetBackgroundColor();
         ResetProgressType();
+        ResetBorderColor();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
@@ -61,6 +63,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Color, Color, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BackgroundColor, Color, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ProgressType, ProgressType, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BorderColor, Color, PROPERTY_UPDATE_MEASURE);
 };
 } // namespace OHOS::Ace::NG
 

@@ -37,27 +37,20 @@ CanvasDrawFunction ScrollPaintMethod::GetForegroundDrawFunction(PaintWrapper* pa
 
 void ScrollPaintMethod::PaintScrollBar(RSCanvas& canvas, PaintWrapper* paintWrapper) const
 {
-    CHECK_NULL_VOID(paintWrapper);
-    auto paintProperty = DynamicCast<ScrollPaintProperty>(paintWrapper->GetPaintProperty());
-    CHECK_NULL_VOID(paintProperty);
-
-    auto scrollBar = paintProperty->GetScrollBar();
+    auto scrollBar = scrollBar_.Upgrade();
     CHECK_NULL_VOID(scrollBar);
     if (!scrollBar->NeedPaint()) {
         LOGD("no need paint scroll bar.");
         return;
     }
 
-    ScrollBarPainter::PaintRectBar(canvas, scrollBar, UINT8_MAX);
+    ScrollBarPainter::PaintRectBar(canvas, scrollBar);
 }
 
 void ScrollPaintMethod::PaintScrollEffect(RSCanvas& canvas, PaintWrapper* paintWrapper) const
 {
-    CHECK_NULL_VOID(paintWrapper);
-    auto paintProperty = DynamicCast<ScrollPaintProperty>(paintWrapper->GetPaintProperty());
-    CHECK_NULL_VOID(paintProperty);
-    auto scrollEdgeEffect = paintProperty->GetScrollEdgeEffect();
-    CHECK_NULL_VOID(scrollEdgeEffect);
+    auto scrollEdgeEffect = edgeEffect_.Upgrade();
+    CHECK_NULL_VOID_NOLOG(scrollEdgeEffect);
     auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
     scrollEdgeEffect->Paint(canvas, frameSize, { 0.0f, 0.0f });
 }

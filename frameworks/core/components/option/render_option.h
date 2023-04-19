@@ -21,6 +21,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/image/render_image.h"
 #include "core/components/select/select_component.h"
+#include "core/components/slider/render_slider.h"
 #include "core/components/text/render_text.h"
 #include "core/components/touch_listener/render_touch_listener.h"
 #include "core/gestures/click_recognizer.h"
@@ -75,11 +76,16 @@ public:
 
     void UpdateSelfStatus();
 
+    void ProcessTouchUp(const TouchEventInfo& info);
+    void ProcessTouchDown(const TouchEventInfo& info);
+
 protected:
     void OnTouchTestHit(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
     void OnMouseHoverEnterTest() override;
     void OnMouseHoverExitTest() override;
+    void HandleMouseHoverEvent(const MouseState mouseState) override;
+    bool HandleMouseEvent(const MouseEvent& event) override;
 
     void UpdateAccessibilityInfo(Size size, Offset offset, bool isSelected);
 
@@ -134,6 +140,9 @@ protected:
     bool isTv_ = SystemProperties::GetDeviceType() == DeviceType::TV;
     RefPtr<Animator> eventEffectController_;
     bool hovered_ = false;
+    TouchRegion optionRegion_;
+    Offset firstTouchDownOffset_;
+    Offset firstTouchUpOffset_;
 };
 
 } // namespace OHOS::Ace

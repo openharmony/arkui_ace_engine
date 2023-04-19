@@ -25,16 +25,6 @@
 
 namespace OHOS::Ace::V2 {
 
-void GridElement::Update()
-{
-    RenderElement::Update();
-    RefPtr<RenderGridScroll> render = AceType::DynamicCast<RenderGridScroll>(renderNode_);
-    if (!render) {
-        return;
-    }
-    render->OnDataSourceUpdated(0);
-}
-
 RefPtr<RenderNode> GridElement::CreateRenderNode()
 {
     auto render = RenderElement::CreateRenderNode();
@@ -82,6 +72,9 @@ void GridElement::PerformBuild()
     auto component = AceType::DynamicCast<GridLayoutComponent>(component_);
     ACE_DCHECK(component); // MUST be GridComponent
     V2::ElementProxyHost::UpdateChildren(component->GetChildren());
+    RefPtr<RenderGridScroll> render = AceType::DynamicCast<RenderGridScroll>(renderNode_);
+    CHECK_NULL_VOID_NOLOG(render);
+    render->OnDataSourceUpdated(0);
 }
 
 bool GridElement::BuildChildByIndex(int32_t index)

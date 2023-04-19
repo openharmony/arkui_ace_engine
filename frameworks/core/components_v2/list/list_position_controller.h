@@ -33,6 +33,7 @@ public:
     Offset GetCurrentOffset() const override;
     void ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth) override;
     void ScrollPage(bool reverse, bool smooth) override;
+    void ScrollBy(double pixelX, double pixelY, bool smooth) override;
 };
 
 } // namespace OHOS::Ace::V2

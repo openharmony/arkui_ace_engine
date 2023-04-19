@@ -15,8 +15,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SELECT_OVERLAY_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SELECT_OVERLAY_LAYOUT_ALGORITHM_H
 
+#include <optional>
 #include <utility>
 
+#include "base/geometry/ng/offset_t.h"
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
@@ -27,17 +29,26 @@ class ACE_EXPORT SelectOverlayLayoutAlgorithm : public BoxLayoutAlgorithm {
     DECLARE_ACE_TYPE(SelectOverlayLayoutAlgorithm, BoxLayoutAlgorithm);
 
 public:
-    explicit SelectOverlayLayoutAlgorithm(std::shared_ptr<SelectOverlayInfo> info) : info_(std::move(info)) {}
+    explicit SelectOverlayLayoutAlgorithm(std::shared_ptr<SelectOverlayInfo> info, const OffsetF& defaultMenuEndOffset)
+        : info_(std::move(info)), defaultMenuEndOffset_(defaultMenuEndOffset)
+    {}
     ~SelectOverlayLayoutAlgorithm() override = default;
 
     void Layout(LayoutWrapper* layoutWrapper) override;
 
     static bool CheckInShowArea(const std::shared_ptr<SelectOverlayInfo>& info);
 
+    const OffsetF& GetDefaultMenuEndOffset() const
+    {
+        return defaultMenuEndOffset_;
+    }
+
 private:
     OffsetF ComputeSelectMenuPosition(LayoutWrapper* layoutWrapper);
 
     std::shared_ptr<SelectOverlayInfo> info_;
+
+    OffsetF defaultMenuEndOffset_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayLayoutAlgorithm);
 };

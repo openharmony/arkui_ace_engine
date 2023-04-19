@@ -67,6 +67,22 @@ enum class CursorMoveSkip {
     PARAGRAPH,
 };
 
+enum class InputAction { UNKNOWN, INSERT, DELETE_FORWARD, DELETE_BACKWARD };
+
+enum {
+    ACTION_SELECT_ALL, // Smallest code unit.
+    ACTION_UNDO,
+    ACTION_REDO,
+    ACTION_CUT,
+    ACTION_COPY,
+    ACTION_PASTE,
+    ACTION_SHARE,
+    ACTION_PASTE_AS_PLAIN_TEXT,
+    ACTION_REPLACE,
+    ACTION_ASSIST,
+    ACTION_AUTOFILL,
+};
+
 class RenderTextField : public RenderNode, public TextInputClient, public ValueChangeObserver {
     DECLARE_ACE_TYPE(RenderTextField, RenderNode, TextInputClient, ValueChangeObserver);
 
@@ -75,7 +91,7 @@ public:
 
     static RefPtr<RenderNode> Create();
 
-    using TapCallback = std::function<bool()>;
+    using TapCallback = std::function<bool(bool)>;
 
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
@@ -121,6 +137,9 @@ public:
     RefPtr<RenderSlidingPanel> GetSlidingPanelAncest();
     void ResetOnFocusForTextFieldManager();
     void ResetSlidingPanelParentHeight();
+    void HandleSetSelection(int32_t start, int32_t end);
+    void HandleExtendAction(int32_t action);
+    void HandleSelect(int32_t keyCode, int32_t cursorMoveSkip);
 
     void SetInputFilter(const std::string& inputFilter)
     {
@@ -353,6 +372,48 @@ public:
         return inputStyle_;
     }
 
+    void HandleOnBlur();
+
+    void SetCanPaintSelection(bool flag)
+    {
+        canPaintSelection_ = flag;
+    }
+
+    bool GetCanPaintSelection() const
+    {
+        return canPaintSelection_;
+    }
+
+    void SetLastInputAction(InputAction action)
+    {
+        lastInputAction_ = action;
+    }
+
+    InputAction GetLastInputAction()
+    {
+        return lastInputAction_;
+    }
+
+    bool NeedToFilter();
+
+    bool HasSurfaceChangedCallback()
+    {
+        return surfaceChangedCallbackId_.has_value();
+    }
+    void UpdateSurfaceChangedCallbackId(int32_t id)
+    {
+        surfaceChangedCallbackId_ = id;
+    }
+
+    bool HasSurfacePositionChangedCallback()
+    {
+        return surfacePositionChangedCallbackId_.has_value();
+    }
+    void UpdateSurfacePositionChangedCallbackId(int32_t id)
+    {
+        surfacePositionChangedCallbackId_ = id;
+    }
+
 protected:
     // Describe where caret is and how tall visually.
     struct CaretMetrics {
@@ -365,6 +426,14 @@ protected:
         Offset offset;
         // When caret is close to different glyphs, the height will be different.
         double height = 0.0;
+        std::string ToString() const
+        {
+            std::string result = "Offset: ";
+            result += offset.ToString();
+            result += ", height: ";
+            result += std::to_string(height);
+            return result;
+        }
     };
 
     RenderTextField();
@@ -401,6 +470,7 @@ protected:
     void UpdateSelection(int32_t both);
     void UpdateSelection(int32_t start, int32_t end);
     void UpdateDirectionStatus();
+    void UpdateCaretInfoToController();
     Offset GetPositionForExtend(int32_t extend, bool isSingleHandle);
     /**
      * Get grapheme cluster length before or after extend.
@@ -530,7 +600,8 @@ protected:
     bool extend_ = false;           // Whether input support extend, this attribute is worked in textarea.
     bool isCallbackCalled_ = false; // Whether custom font is loaded.
     bool isOverlayShowed_ = false;  // Whether overlay has showed.
-    double textHeight_ = 0.0;       // Height of text.
+    bool isLongPressStatus_ = false;
+    double textHeight_ = 0.0; // Height of text.
     double textHeightLast_ = 0.0;
     double iconSize_ = 0.0;
     double iconHotZoneSize_ = 0.0;
@@ -538,6 +609,7 @@ protected:
     double widthReservedForSearch_ = 0.0;  // Width reserved for delete icon of search.
     double paddingHorizonForSearch_ = 0.0; // Width reserved for search button of search.
     double selectHeight_ = 0.0;
+    bool canPaintSelection_ = false;
     Dimension height_;
     Dimension iconSizeInDimension_;
     Dimension iconHotZoneSizeInDimension_;
@@ -556,6 +628,7 @@ protected:
     // It maybe seems rough, and doesn't support scrolling smoothly.
     Offset textOffsetForShowCaret_;
     InputStyle inputStyle_;
+    Rect caretRect_;
 
 private:
     void SetCallback(const RefPtr<TextFieldComponent>& textField);
@@ -611,6 +684,8 @@ private:
     // distribute
     void ApplyRestoreInfo();
     void OnTapCallback();
+    void HandleSurfacePositionChanged(int32_t posX, int32_t posY);
+    void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight);
 
     int32_t initIndex_ = 0;
     bool isOverlayFocus_ = false;
@@ -623,6 +698,7 @@ private:
     bool isInEditStatus_ = false;
     bool isFocusOnTouch_ = true;
     bool onTapCallbackResult_ = false;
+    InputAction lastInputAction_ = InputAction::UNKNOWN;
     Color pressColor_;
     Color hoverColor_;
     TextSelection selection_; // Selection from custom.
@@ -658,6 +734,8 @@ private:
     TapCallback tapCallback_;
     CancelableCallback<void()> cursorTwinklingTask_;
 
+    std::optional<int32_t> surfaceChangedCallbackId_;
+    std::optional<int32_t> surfacePositionChangedCallbackId_;
     std::vector<InputOption> inputOptions_;
     std::list<std::unique_ptr<TextInputFormatter>> textInputFormatters_;
     RefPtr<TextEditController> controller_;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -68,23 +68,10 @@ public:
         }
     }
 
-    void SetOnSurfaceDestroyEvent(DestroyEvent&& surfaceDestroyEvent)
-    {
-        surfaceDestroyEvent_ = std::move(surfaceDestroyEvent);
-    }
-
-    void FireSurfaceDestroyEvent() const
-    {
-        if (surfaceDestroyEvent_) {
-            surfaceDestroyEvent_();
-        }
-    }
-
 private:
     LoadEvent loadEvent_;
     DestroyEvent destroyEvent_;
     ExternalEvent surfaceInitEvent_;
-    DestroyEvent surfaceDestroyEvent_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_XCOMPONENT_XCOMPONENT_EVENT_HUB_H

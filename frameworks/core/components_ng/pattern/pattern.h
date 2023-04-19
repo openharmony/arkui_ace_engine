@@ -121,7 +121,52 @@ public:
 
     virtual void OnContextAttached() {}
 
-    virtual void OnModifyDone() {}
+    virtual void OnModifyDone()
+    {
+        auto frameNode = frameNode_.Upgrade();
+        if (frameNode->IsAtomicNode()) {
+            return;
+        }
+        auto children = frameNode->GetChildren();
+        if (children.empty()) {
+            return;
+        }
+        auto renderContext = frameNode->GetRenderContext();
+        if (!renderContext->HasForegroundColor() && !renderContext->HasForegroundColorStrategy()) {
+            return;
+        }
+        std::list<RefPtr<FrameNode>> childrenList {};
+        std::queue<RefPtr<FrameNode>> queue {};
+        queue.emplace(frameNode);
+        RefPtr<FrameNode> parentNode;
+        while (!queue.empty()) {
+            parentNode = queue.front();
+            queue.pop();
+            auto childs = parentNode->GetChildren();
+            if (children.empty()) {
+                continue;
+            }
+            for (auto child : childs) {
+                if (!AceType::InstanceOf<NG::FrameNode>(child)) {
+                    continue;
+                }
+                auto childFrameNode = AceType::DynamicCast<FrameNode>(child);
+                queue.emplace(childFrameNode);
+                childrenList.emplace_back(childFrameNode);
+            }
+        }
+        bool isForegroundColor = renderContext->HasForegroundColor();
+        for (auto child : childrenList) {
+            auto childRenderContext = child->GetRenderContext();
+            if (!childRenderContext->HasForegroundColor() && !childRenderContext->HasForegroundColorStrategy()) {
+                if (isForegroundColor) {
+                    childRenderContext->UpdateForegroundColor(renderContext->GetForegroundColorValue());
+                } else {
+                    childRenderContext->UpdateForegroundColorStrategy(renderContext->GetForegroundColorStrategyValue());
+                }
+            }
+        }
+    }
 
     virtual void OnMountToParentDone() {}
 
@@ -152,6 +197,11 @@ public:
         const RefPtr<LayoutWrapper>& /*dirty*/, const DirtySwapConfig& /*changeConfig*/)
     {
         return false;
+    }
+
+    virtual bool UsResRegion()
+    {
+        return true;
     }
 
     std::optional<SizeF> GetHostFrameSize() const
@@ -251,6 +301,7 @@ public:
     virtual void OnWindowHide() {}
     virtual void OnWindowFocused() {}
     virtual void OnWindowUnfocused() {}
+    virtual void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) {}
     virtual void OnNotifyMemoryLevel(int32_t level) {}
 
     // get XTS inspector value

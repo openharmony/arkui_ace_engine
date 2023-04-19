@@ -38,6 +38,8 @@ public:
 
     void UpdateSecondSelectHandleInfo(const SelectHandleInfo& info) const;
 
+    void UpdateFirstAndSecondHandleInfo(const SelectHandleInfo& firstInfo, const SelectHandleInfo& secondInfo) const;
+
     void UpdateSelectMenuInfo(const SelectMenuInfo& info) const;
 
     void UpdateShowArea(const RectF& area) const;
@@ -50,6 +52,8 @@ public:
     {
         return selectOverlayId_;
     }
+
+    void SetSelectInfo(const std::string& selectInfo) const;
 
 private:
     int32_t selectOverlayId_ = 0;

@@ -55,6 +55,10 @@ const std::vector<PanelType> PANEL_TYPES = { PanelType::MINI_BAR, PanelType::FOL
 const std::vector<VisibleType> PANEL_VISIBLE_TYPES = { VisibleType::GONE, VisibleType::VISIBLE,
     VisibleType::INVISIBLE };
 
+const static bool DEFAULT_HASDRAGBAR = true;
+const static PanelMode DEFAULT_PANELMODE = PanelMode::HALF;
+const static PanelType DEFAULT_PANELTYPE = PanelType::FOLDABLE_BAR;
+
 } // namespace
 
 void JSSlidingPanel::Create(const JSCallbackInfo& info)
@@ -294,8 +298,16 @@ void JSSlidingPanel::SetOnHeightChange(const JSCallbackInfo& args)
     args.ReturnSelf();
 }
 
-void JSSlidingPanel::SetHasDragBar(bool hasDragBar)
+void JSSlidingPanel::SetHasDragBar(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1) {
+        LOGE("The info is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    auto hasDragBar = DEFAULT_HASDRAGBAR;
+    if (info[0]->IsBoolean()) {
+        hasDragBar = info[0]->ToBoolean();
+    }
     SlidingPanelModel::GetInstance()->SetHasDragBar(hasDragBar);
 }
 
@@ -304,21 +316,35 @@ void JSSlidingPanel::SetShow(bool isShow)
     SlidingPanelModel::GetInstance()->SetIsShow(isShow);
 }
 
-void JSSlidingPanel::SetPanelMode(int32_t mode)
+void JSSlidingPanel::SetPanelMode(const JSCallbackInfo& info)
 {
-    if (mode < 0 || mode >= static_cast<int32_t>(PANEL_MODES.size())) {
+    if (info.Length() < 1) {
+        LOGE("The info is wrong, it is supposed to have at least 1 argument");
         return;
     }
-
+    auto mode = static_cast<int32_t>(DEFAULT_PANELMODE);
+    if (info[0]->IsNumber()) {
+        const auto modeNumber = info[0]->ToNumber<int32_t>();
+        if (modeNumber >= 0 && modeNumber < static_cast<int32_t>(PANEL_MODES.size())) {
+            mode = modeNumber;
+        }
+    }
     SlidingPanelModel::GetInstance()->SetPanelMode(PANEL_MODES[mode]);
 }
 
-void JSSlidingPanel::SetPanelType(int32_t type)
+void JSSlidingPanel::SetPanelType(const JSCallbackInfo& info)
 {
-    if (type < 0 || type >= static_cast<int32_t>(PANEL_TYPES.size())) {
+    if (info.Length() < 1) {
+        LOGE("The info is wrong, it is supposed to have at least 1 argument");
         return;
     }
-
+    auto type = static_cast<int32_t>(DEFAULT_PANELTYPE);
+    if (info[0]->IsNumber()) {
+        const auto typeNumber = info[0]->ToNumber<int32_t>();
+        if (typeNumber >= 0 && typeNumber < static_cast<int32_t>(PANEL_TYPES.size())) {
+            type = typeNumber;
+        }
+    }
     SlidingPanelModel::GetInstance()->SetPanelType(PANEL_TYPES[type]);
 }
 

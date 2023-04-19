@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BOX_FLUTTER_RENDER_BOX_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BOX_FLUTTER_RENDER_BOX_H
 
-#include "flutter/lib/ui/ui_dart_state.h"
 #include "include/core/SkPath.h"
 
 #include "core/components/box/render_box.h"
@@ -146,7 +145,7 @@ private:
     bool CreatePath(const RefPtr<BasicShape>& basicShape, const Size& size, const Offset& position, SkPath *skPath);
     bool CreateRect(const RefPtr<BasicShape>& basicShape, const Size& size, const Offset& position, SkPath *skPath);
 
-    void ImageDataPaintSuccess(const fml::RefPtr<flutter::CanvasImage>& image);
+    void ImageDataPaintSuccess(const RefPtr<NG::CanvasImage>& image);
     void ImageObjReady(const RefPtr<ImageObject>& imageObj);
     void ImageObjFailed();
 
@@ -168,7 +167,6 @@ private:
     OnPostBackgroundTask onPostBackgroundTask_;
 
     RefPtr<ImageObject> imageObj_;
-    RefPtr<FlutterRenderTaskHolder> renderTaskHolder_;
 
     UploadSuccessCallback uploadSuccessCallback_;
     RefPtr<Flutter::TransformLayer> transformLayer_;

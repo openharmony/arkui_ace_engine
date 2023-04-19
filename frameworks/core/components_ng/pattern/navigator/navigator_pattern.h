@@ -38,6 +38,11 @@ public:
 
     void OnModifyDone() override;
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::SCOPE, true };
+    }
+
 private:
     RefPtr<ClickEvent> clickListener_;
 };

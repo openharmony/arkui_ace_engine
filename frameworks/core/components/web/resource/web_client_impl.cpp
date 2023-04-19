@@ -239,7 +239,7 @@ void WebClientImpl::OnGeolocationHide()
 }
 
 void WebClientImpl::OnGeolocationShow(const std::string& origin,
-    OHOS::NWeb::NWebGeolocationCallbackInterface* callback)
+    std::shared_ptr<OHOS::NWeb::NWebGeolocationCallbackInterface> callback)
 {
     ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();
@@ -304,14 +304,19 @@ void WebClientImpl::OnRouterPush(const std::string& param)
     delegate->OnRouterPush(param);
 }
 
-bool WebClientImpl::OnHandleInterceptUrlLoading(const std::string& url)
+bool WebClientImpl::OnHandleInterceptUrlLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request)
 {
     ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();
     if (!delegate) {
         return false;
     }
-    return delegate->OnHandleInterceptUrlLoading(url);
+
+    bool result = delegate->OnHandleInterceptUrlLoading(request->Url());
+    if (!result) {
+        result = delegate->OnHandleInterceptLoading(request);
+    }
+    return result;
 }
 
 std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> WebClientImpl::OnHandleInterceptRequest(
@@ -683,13 +688,116 @@ void WebClientImpl::OnWindowExitByJS()
     delegate->OnWindowExit();
 }
 
+void WebClientImpl::OnPageVisible(const std::string& url)
+{
+    LOGI("OnPageVisible");
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnPageVisible(url);
+}
+
+void WebClientImpl::OnDataResubmission(std::shared_ptr<NWeb::NWebDataResubmissionCallback> handler)
+{
+    LOGI("OnDataResubmission");
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    CHECK_NULL_VOID(handler);
+    delegate->OnDataResubmitted(handler);
+}
+
+void WebClientImpl::OnPageIcon(const void* data,
+                               size_t width,
+                               size_t height,
+                               NWeb::ImageColorType colorType,
+                               NWeb::ImageAlphaType alphaType)
+{
+    LOGI("OnPageIcon");
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnFaviconReceived(data, width, width, colorType, alphaType);
+}
+
+void WebClientImpl::OnDesktopIconUrl(const std::string& icon_url, bool precomposed)
+{
+    LOGI("OnDesktopIconUrl");
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnTouchIconUrl(icon_url, precomposed);
+}
+
+bool WebClientImpl::OnCursorChange(const NWeb::CursorType& type, const NWeb::NWebCursorInfo& info)
+{
+    LOGI("OnCursorChange");
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_RETURN(delegate, false);
+    return delegate->OnCursorChange(type, info);
+}
+
+void WebClientImpl::OnSelectPopupMenu(
+    std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params,
+    std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback)
+{
+    LOGI("OnSelectPopupMenu");
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnSelectPopupMenu(params, callback);
+}
+
 void ReleaseSurfaceImpl::ReleaseSurface()
 {
     ContainerScope scope(instanceId_);
-    // if (!surfaceDelegate_) {
-    //     return;
-    // }
-    // SURFACE_DELEGATE
-    // surfaceDelegate_->ReleaseSurface();
+    if (!surfaceDelegate_) {
+        return;
+    }
+    surfaceDelegate_->ReleaseSurface();
+}
+
+void WebClientImpl::OnAudioStateChanged(bool playing)
+{
+    LOGI("OnAudioStateChanged playing: %{public}s", (playing ? "true" : "false"));
+
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnAudioStateChanged(playing);
+}
+
+void WebClientImpl::OnFirstContentfulPaint(long navigationStartTick, long firstContentfulPaintMs)
+{
+    LOGI("OnFirstContentfulPaint");
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnFirstContentfulPaint(navigationStartTick, firstContentfulPaintMs);
+}
+
+void WebClientImpl::OnCompleteSwapWithNewSize()
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnCompleteSwapWithNewSize();
+}
+
+void WebClientImpl::OnResizeNotWork()
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnResizeNotWork();
+}
+
+void WebClientImpl::OnGetTouchHandleHotZone(NWeb::TouchHandleHotZone& hotZone)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnGetTouchHandleHotZone(hotZone);
 }
 } // namespace OHOS::Ace

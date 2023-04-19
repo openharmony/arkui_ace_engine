@@ -64,6 +64,9 @@ public:
                 themeConstants->GetColor(THEME_DATA_PANEL_CONFIG_COLOR_8_END));
             theme->percentageColors_.emplace_back(themeConstants->GetColor(THEME_DATA_PANEL_CONFIG_COLOR_9_START),
                 themeConstants->GetColor(THEME_DATA_PANEL_CONFIG_COLOR_9_END));
+            theme->trackShadowRadius_ = themeConstants->GetDimension(THEME_DATA_PANEL_TRACKSHADOW_RADIU);
+            theme->trackShadowOffsetX_ = themeConstants->GetDimension(THEME_DATA_PANEL_TRACKSHADOW_OFFSETX);
+            theme->trackShadowOffsetY_ = themeConstants->GetDimension(THEME_DATA_PANEL_TRACKSHADOW_OFFSETY);
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
         }
@@ -80,6 +83,7 @@ public:
                 return;
             }
             theme->backgroundColor_ = dataPanelPattern->GetAttr<Color>(PATTERN_BG_COLOR, Color::BLACK);
+            theme->trackShadowRadius_ = dataPanelPattern->GetAttr<Dimension>(DATA_PANEL_TRACK_SHADOW_RADIU, 0.0_vp);
             theme->loadingColors_.first = dataPanelPattern->GetAttr<Color>(DATA_PANEL_LOADING_COLOR_END, Color::BLACK);
             theme->loadingColors_.second =
                 dataPanelPattern->GetAttr<Color>(DATA_PANEL_LOADING_COLOR_START, Color::BLACK);
@@ -153,6 +157,21 @@ public:
         return percentageColors_;
     }
 
+    const Dimension& GetTrackShadowRadius() const
+    {
+        return trackShadowRadius_;
+    }
+
+    const Dimension& GetTrackShadowOffsetX() const
+    {
+        return trackShadowOffsetX_;
+    }
+
+    const Dimension& GetTrackShadowOffsetY() const
+    {
+        return trackShadowOffsetY_;
+    }
+
 protected:
 private:
     std::vector<std::pair<Color, Color>> percentageColors_;
@@ -162,6 +181,9 @@ private:
     Dimension defaultHeight_;
     Dimension defaultWidth_;
     Dimension thickness_;
+    Dimension trackShadowRadius_;
+    Dimension trackShadowOffsetX_;
+    Dimension trackShadowOffsetY_;
 };
 
 } // namespace OHOS::Ace

@@ -30,29 +30,12 @@ enum class TouchType : size_t {
     UP,
     MOVE,
     CANCEL,
+    PULL_DOWN,
+    PULL_UP,
+    PULL_MOVE,
+    PULL_IN_WINDOW,
+    PULL_OUT_WINDOW,
     UNKNOWN,
-};
-
-struct TouchRestrict final {
-    static constexpr uint32_t NONE = 0x00000000;
-    static constexpr uint32_t CLICK = 0x00000001;
-    static constexpr uint32_t LONG_PRESS = 0x00000010;
-    static constexpr uint32_t SWIPE_LEFT = 0x00000100;
-    static constexpr uint32_t SWIPE_RIGHT = 0x00000200;
-    static constexpr uint32_t SWIPE_UP = 0x00000400;
-    static constexpr uint32_t SWIPE_DOWN = 0x00000800;
-    static constexpr uint32_t SWIPE = 0x00000F00;
-    static constexpr uint32_t SWIPE_VERTICAL = 0x0000C00;   // Vertical
-    static constexpr uint32_t SWIPE_HORIZONTAL = 0x0000300; // Horizontal
-    static constexpr uint32_t TOUCH = 0xFFFFFFFF;
-
-    uint32_t forbiddenType = NONE;
-
-    void UpdateForbiddenType(uint32_t gestureType)
-    {
-        forbiddenType |= gestureType;
-    }
-    SourceType sourceType = SourceType::NONE;
 };
 
 struct TouchPoint final {
@@ -83,6 +66,7 @@ struct TouchEvent final {
     float screenX = 0.0f;
     float screenY = 0.0f;
     TouchType type = TouchType::UNKNOWN;
+    TouchType pullType = TouchType::UNKNOWN;
     // nanosecond time stamp.
     TimeStamp time;
     double size = 0.0;
@@ -109,7 +93,7 @@ struct TouchEvent final {
     TouchEvent CreateScalePoint(float scale) const
     {
         if (NearZero(scale)) {
-            return { id, x, y, screenX, screenY, type, time, size, force, tiltX, tiltY, deviceId, sourceType,
+            return { id, x, y, screenX, screenY, type, pullType, time, size, force, tiltX, tiltY, deviceId, sourceType,
                 sourceTool, pointers };
         }
         auto temp = pointers;
@@ -119,8 +103,8 @@ struct TouchEvent final {
             point.screenX = point.screenX / scale;
             point.screenY = point.screenY / scale;
         });
-        return { id, x / scale, y / scale, screenX / scale, screenY / scale, type, time, size, force, tiltX, tiltY,
-            deviceId, sourceType, sourceTool, temp };
+        return { id, x / scale, y / scale, screenX / scale, screenY / scale, type, pullType, time, size, force,
+            tiltX, tiltY, deviceId, sourceType, sourceTool, temp };
     }
 
     TouchEvent UpdateScalePoint(float scale, float offsetX, float offsetY, int32_t pointId) const
@@ -133,8 +117,8 @@ struct TouchEvent final {
                 point.screenX = point.screenX - offsetX;
                 point.screenY = point.screenY - offsetY;
             });
-            return { pointId, x - offsetX, y - offsetY, screenX - offsetX, screenY - offsetY, type, time, size, force,
-                tiltX, tiltY, deviceId, sourceType, sourceTool, temp };
+            return { pointId, x - offsetX, y - offsetY, screenX - offsetX, screenY - offsetY, type, pullType, time,
+                size, force, tiltX, tiltY, deviceId, sourceType, sourceTool, temp };
         }
 
         std::for_each(temp.begin(), temp.end(), [scale, offsetX, offsetY](auto&& point) {
@@ -144,8 +128,8 @@ struct TouchEvent final {
             point.screenY = (point.screenY - offsetY) / scale;
         });
         return { pointId, (x - offsetX) / scale, (y - offsetY) / scale, (screenX - offsetX) / scale,
-            (screenY - offsetY) / scale, type, time, size, force, tiltX, tiltY, deviceId, sourceType, sourceTool,
-            temp };
+            (screenY - offsetY) / scale, type, pullType, time, size, force, tiltX, tiltY, deviceId, sourceType,
+            sourceTool, temp };
     }
 
     TouchEvent UpdatePointers() const
@@ -173,6 +157,32 @@ struct TouchEvent final {
         event.pointers.emplace_back(std::move(point));
         return event;
     }
+};
+
+struct TouchRestrict final {
+    static constexpr uint32_t NONE = 0x00000000;
+    static constexpr uint32_t CLICK = 0x00000001;
+    static constexpr uint32_t LONG_PRESS = 0x00000010;
+    static constexpr uint32_t SWIPE_LEFT = 0x00000100;
+    static constexpr uint32_t SWIPE_RIGHT = 0x00000200;
+    static constexpr uint32_t SWIPE_UP = 0x00000400;
+    static constexpr uint32_t SWIPE_DOWN = 0x00000800;
+    static constexpr uint32_t SWIPE = 0x00000F00;
+    static constexpr uint32_t SWIPE_VERTICAL = 0x0000C00;   // Vertical
+    static constexpr uint32_t SWIPE_HORIZONTAL = 0x0000300; // Horizontal
+    static constexpr uint32_t TOUCH = 0xFFFFFFFF;
+
+    uint32_t forbiddenType = NONE;
+
+    void UpdateForbiddenType(uint32_t gestureType)
+    {
+        forbiddenType |= gestureType;
+    }
+    SourceType sourceType = SourceType::NONE;
+
+    SourceType hitTestType = SourceType::TOUCH;
+
+    TouchEvent touchEvent;
 };
 
 class TouchCallBackInfo : public BaseEventInfo {
@@ -347,6 +357,10 @@ class ACE_EXPORT TouchEventTarget : public virtual AceType {
     DECLARE_ACE_TYPE(TouchEventTarget, AceType);
 
 public:
+    TouchEventTarget() = default;
+    TouchEventTarget(std::string nodeName, int32_t nodeId) : nodeName_(std::move(nodeName)), nodeId_(nodeId) {}
+    ~TouchEventTarget() override = default;
+
     // if return false means need to stop event dispatch.
     virtual bool DispatchEvent(const TouchEvent& point) = 0;
     // if return false means need to stop event bubbling.
@@ -418,12 +432,24 @@ public:
         return HandleEvent(point);
     }
 
+    std::string GetNodeName() const
+    {
+        return nodeName_;
+    }
+
+    int32_t GetNodeId() const
+    {
+        return nodeId_;
+    }
+
 protected:
     Offset coordinateOffset_;
     GetEventTargetImpl getEventTargetImpl_;
     TouchRestrict touchRestrict_ { TouchRestrict::NONE };
     Offset subPipelineGlobalOffset_;
     float viewScale_ = 1.0f;
+    std::string nodeName_ = "NULL";
+    int32_t nodeId_ = -1;
 };
 
 using TouchTestResult = std::list<RefPtr<TouchEventTarget>>;

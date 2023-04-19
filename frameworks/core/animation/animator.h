@@ -30,7 +30,7 @@
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT_WITH_PREVIEW Animator : public AceType, public StatusListenable {
+class ACE_FORCE_EXPORT_WITH_PREVIEW Animator : public AceType, public StatusListenable {
     DECLARE_ACE_TYPE(Animator, AceType);
 
 public:
@@ -137,6 +137,9 @@ public:
 
     // Stop at the start frame.
     void Cancel();
+
+    // Reset isReverse_ value.
+    void ResetIsReverse();
 
     // Get Controller Id.
     int32_t GetId() const;

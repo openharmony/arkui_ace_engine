@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,32 +15,25 @@
 
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 
-#include <memory>
-
 #include "base/geometry/axis.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/grid/grid_adaptive/grid_adaptive_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_layout/grid_layout_algorithm.h"
-#include "core/components_ng/pattern/grid/grid_paint_property.h"
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_layout_algorithm.h"
-#include "core/components_ng/pattern/grid/grid_scroll_bar.h"
+#include "core/components_ng/pattern/grid/grid_utils.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/property/property.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
 namespace {
 constexpr Color SELECT_FILL_COLOR = Color(0x1A000000);
 constexpr Color SELECT_STROKE_COLOR = Color(0x33FFFFFF);
-constexpr Color ITEM_FILL_COLOR = Color(0x1A0A59f7);
+const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
 constexpr float SCROLL_MAX_TIME = 300.0f; // Scroll Animate max time 0.3 second
 } // namespace
-
-GridPattern::~GridPattern()
-{
-    delete scrollBar_;
-}
 
 RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
 {
@@ -50,8 +43,8 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
     StringUtils::StringSplitter(gridLayoutProperty->GetColumnsTemplate().value_or(""), ' ', cols);
     std::vector<std::string> rows;
     StringUtils::StringSplitter(gridLayoutProperty->GetRowsTemplate().value_or(""), ' ', rows);
-    auto crossCount = cols.empty() ? Infinity<int32_t>() : cols.size();
-    auto mainCount = rows.empty() ? Infinity<int32_t>() : rows.size();
+    auto crossCount = cols.empty() ? Infinity<int32_t>() : static_cast<int32_t>(cols.size());
+    auto mainCount = rows.empty() ? Infinity<int32_t>() : static_cast<int32_t>(rows.size());
     if (!gridLayoutProperty->IsVertical()) {
         std::swap(crossCount, mainCount);
     }
@@ -68,15 +61,25 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
     }
 
     // If only set one of rowTemplate and columnsTemplate, use scrollable layout algorithm.
-    return MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
+    auto result = MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
+
+    auto effect = gridLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::NONE);
+    bool canOverScroll = (effect == EdgeEffect::SPRING) && scrollState_ != SCROLL_FROM_AXIS &&
+                         scrollState_ != SCROLL_FROM_BAR && scrollable_;
+    result->SetCanOverScroll(canOverScroll);
+
+    return result;
 }
 
 RefPtr<NodePaintMethod> GridPattern::CreateNodePaintMethod()
 {
-    if (scrollBar_ && scrollBar_->GetInnerScrollBar()) {
-        return MakeRefPtr<GridPaintMethod>(scrollBar_->GetInnerScrollBar());
+    auto paint = MakeRefPtr<GridPaintMethod>(GetScrollBar());
+    CHECK_NULL_RETURN(paint, nullptr);
+    auto scrollEffect = GetScrollEdgeEffect();
+    if (scrollEffect && scrollEffect->IsFadeEffect()) {
+        paint->SetEdgeEffect(scrollEffect);
     }
-    return Pattern::CreateNodePaintMethod();
+    return paint;
 }
 
 void GridPattern::OnAttachToFrameNode()
@@ -88,27 +91,33 @@ void GridPattern::OnAttachToFrameNode()
 
 void GridPattern::OnModifyDone()
 {
+    auto gridLayoutProperty = GetLayoutProperty<GridLayoutProperty>();
+    CHECK_NULL_VOID(gridLayoutProperty);
+
+    auto edgeEffect = gridLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::NONE);
+    SetEdgeEffect(edgeEffect);
+
     if (multiSelectable_ && !isMouseEventInit_) {
         InitMouseEvent();
     }
 
-    auto gridLayoutProperty = GetLayoutProperty<GridLayoutProperty>();
-    CHECK_NULL_VOID(gridLayoutProperty);
+    if (!multiSelectable_ && isMouseEventInit_) {
+        UninitMouseEvent();
+    }
+
     gridLayoutInfo_.axis_ = gridLayoutProperty->IsVertical() ? Axis::VERTICAL : Axis::HORIZONTAL;
     isConfigScrollable_ = gridLayoutProperty->IsConfiguredScrollable();
     if (!isConfigScrollable_) {
         LOGD("use fixed grid template");
         return;
     }
+    SetAxis(gridLayoutInfo_.axis_);
     AddScrollEvent();
 
-    auto gridPaintProperty = GetPaintProperty<GridPaintProperty>();
-    CHECK_NULL_VOID(gridPaintProperty);
-    if (gridPaintProperty->GetScrollBarProperty()) {
-        if (!scrollBar_) {
-            scrollBar_ = new GridScrollBar(Claim(this));
-        }
-        scrollBar_->CreateInnerBar();
+    auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (paintProperty->GetScrollBarProperty()) {
+        SetScrollBar(paintProperty->GetScrollBarProperty());
     }
 
     auto host = GetHost();
@@ -117,6 +126,17 @@ void GridPattern::OnModifyDone()
     if (focusHub) {
         InitOnKeyEvent(focusHub);
     }
+}
+
+void GridPattern::UninitMouseEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto mouseEventHub = host->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(mouseEventHub);
+    mouseEventHub->SetMouseEvent(nullptr);
+    ClearMultiSelect();
+    isMouseEventInit_ = false;
 }
 
 void GridPattern::InitMouseEvent()
@@ -136,25 +156,44 @@ void GridPattern::InitMouseEvent()
 
 void GridPattern::HandleMouseEventWithoutKeyboard(const MouseInfo& info)
 {
+    if (info.GetButton() != MouseButton::LEFT_BUTTON) {
+        return;
+    }
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto manager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(manager);
+    if (manager->IsDragged()) {
+        return;
+    }
+
     auto mouseOffsetX = static_cast<float>(info.GetLocalLocation().GetX());
     auto mouseOffsetY = static_cast<float>(info.GetLocalLocation().GetY());
-
-    if (info.GetButton() == MouseButton::LEFT_BUTTON) {
-        if (info.GetAction() == MouseAction::PRESS) {
-            ClearMultiSelect();
-            mouseStartOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
-            mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
-            auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
-            MultiSelectWithoutKeyboard(selectedZone);
-        } else if (info.GetAction() == MouseAction::MOVE) {
-            mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
-            auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
-            MultiSelectWithoutKeyboard(selectedZone);
-        } else if (info.GetAction() == MouseAction::RELEASE) {
-            mouseStartOffset_.Reset();
-            mouseEndOffset_.Reset();
-            ClearSelectedZone();
+    if (info.GetAction() == MouseAction::PRESS) {
+        ClearMultiSelect();
+        mouseStartOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
+        mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
+        mousePressOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
+        mousePressed_ = true;
+        // do not select when click
+    } else if (info.GetAction() == MouseAction::MOVE) {
+        if (!mousePressed_) {
+            return;
         }
+        const static double FRAME_SELECTION_DISTANCE =
+            pipeline->NormalizeToPx(Dimension(DEFAULT_PAN_DISTANCE, DimensionUnit::VP));
+        auto delta = OffsetF(mouseOffsetX, mouseOffsetY) - mousePressOffset_;
+        if (Offset(delta.GetX(), delta.GetY()).GetDistance() > FRAME_SELECTION_DISTANCE) {
+            mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
+            auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
+            MultiSelectWithoutKeyboard(selectedZone);
+        }
+    } else if (info.GetAction() == MouseAction::RELEASE) {
+        mouseStartOffset_.Reset();
+        mouseEndOffset_.Reset();
+        mousePressed_ = false;
+        ClearSelectedZone();
     }
 }
 
@@ -162,32 +201,33 @@ void GridPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-
-    for (const auto& item : host->GetChildren()) {
-        if (!AceType::InstanceOf<FrameNode>(item)) {
+    std::list<RefPtr<FrameNode>> children;
+    host->GenerateOneDepthVisibleFrame(children);
+    for (const auto& itemFrameNode : children) {
+        auto itemEvent = itemFrameNode->GetEventHub<EventHub>();
+        CHECK_NULL_VOID(itemEvent);
+        if (!itemEvent->IsEnabled()) {
             continue;
         }
 
-        auto itemFrameNode = AceType::DynamicCast<FrameNode>(item);
         auto itemPattern = itemFrameNode->GetPattern<GridItemPattern>();
         CHECK_NULL_VOID(itemPattern);
-
         if (!itemPattern->Selectable()) {
             continue;
         }
-
         auto itemGeometry = itemFrameNode->GetGeometryNode();
         CHECK_NULL_VOID(itemGeometry);
+        auto context = itemFrameNode->GetRenderContext();
+        CHECK_NULL_VOID(context);
 
         auto itemRect = itemGeometry->GetFrameRect();
         if (!selectedZone.IsIntersectWith(itemRect)) {
             itemPattern->MarkIsSelected(false);
+            context->OnMouseSelectUpdate(false, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
         } else {
             itemPattern->MarkIsSelected(true);
+            context->OnMouseSelectUpdate(true, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
         }
-        auto context = itemFrameNode->GetRenderContext();
-        CHECK_NULL_VOID(context);
-        context->OnMouseSelectUpdate(ITEM_FILL_COLOR, ITEM_FILL_COLOR);
     }
 
     auto hostContext = host->GetRenderContext();
@@ -199,8 +239,9 @@ void GridPattern::ClearMultiSelect()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-
-    for (const auto& item : host->GetChildren()) {
+    std::list<RefPtr<FrameNode>> children;
+    host->GenerateOneDepthAllFrame(children);
+    for (const auto& item : children) {
         if (!AceType::InstanceOf<FrameNode>(item)) {
             continue;
         }
@@ -211,7 +252,7 @@ void GridPattern::ClearMultiSelect()
         itemPattern->MarkIsSelected(false);
         auto renderContext = itemFrameNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
-        renderContext->OnMouseSelectUpdate(ITEM_FILL_COLOR, ITEM_FILL_COLOR);
+        renderContext->OnMouseSelectUpdate(false, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
     }
 
     ClearSelectedZone();
@@ -276,64 +317,100 @@ float GridPattern::GetMainContentSize() const
     return geometryNode->GetPaddingSize().MainSize(gridLayoutInfo_.axis_);
 }
 
-void GridPattern::AddScrollEvent()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(hub);
-    auto gestureHub = hub->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
-    if (scrollableEvent_) {
-        gestureHub->RemoveScrollableEvent(scrollableEvent_);
-    }
-    scrollableEvent_ = MakeRefPtr<ScrollableEvent>(gridLayoutInfo_.axis_);
-    auto scrollCallback = [weak = WeakClaim(this)](double offset, int32_t source) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_RETURN(pattern, false);
-        if (source == SCROLL_FROM_UPDATE && pattern->scrollBar_) {
-            if (pattern->scrollBar_->OnInnerBarScroll(offset)) {
-                return true;
-            }
-        }
-        return pattern->OnScrollCallback(static_cast<float>(offset), source);
-    };
-    scrollableEvent_->SetScrollPositionCallback(std::move(scrollCallback));
-    gestureHub->AddScrollableEvent(scrollableEvent_);
-}
-
 bool GridPattern::OnScrollCallback(float offset, int32_t source)
 {
     if (animator_) {
         animator_->Stop();
     }
-    if (source == SCROLL_FROM_START) {
-        return true;
-    }
-    return UpdateScrollPosition(offset);
+    return ScrollablePattern::OnScrollCallback(offset, source);
 }
 
-bool GridPattern::UpdateScrollPosition(float offset)
+SizeF GridPattern::GetContentSize() const
 {
-    if (!isConfigScrollable_) {
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, SizeF());
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, SizeF());
+    return geometryNode->GetPaddingSize();
+}
+
+void GridPattern::CheckRestartSpring()
+{
+    if (!ScrollableIdle() || !IsOutOfBoundary()) {
+        return;
+    }
+    auto edgeEffect = GetScrollEdgeEffect();
+    if (!edgeEffect || !edgeEffect->IsSpringEffect()) {
+        return;
+    }
+    if (animator_ && animator_->IsRunning()) {
+        return;
+    }
+    edgeEffect->ProcessScrollOver(0);
+}
+
+float GridPattern::GetMainGap()
+{
+    float mainGap = 0.0;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 0.0);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, 0.0);
+    auto viewScopeSize = geometryNode->GetPaddingSize();
+    auto layoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
+    mainGap = GridUtils::GetMainGap(layoutProperty, viewScopeSize, gridLayoutInfo_.axis_);
+    return mainGap;
+}
+
+bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
+{
+    if (!isConfigScrollable_ || !scrollable_) {
+        return true;
+    }
+    // check edgeEffect is not springEffect
+    if (!HandleEdgeEffect(offset, source, GetContentSize())) {
         return false;
     }
+    SetScrollState(source);
+
+    auto itemsHeight = gridLayoutInfo_.GetTotalHeightOfItemsInView(GetMainGap());
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     // When finger moves down, offset is positive.
     // When finger moves up, offset is negative.
     if (gridLayoutInfo_.offsetEnd_) {
-        if (LessOrEqual(offset, 0)) {
-            return false;
+        if (source == SCROLL_FROM_UPDATE) {
+            auto overScroll = gridLayoutInfo_.currentOffset_ - (GetMainContentSize() - itemsHeight);
+            auto friction = CalculateFriction(std::abs(overScroll) / GetMainContentSize());
+            gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
+            gridLayoutInfo_.currentOffset_ = gridLayoutInfo_.currentOffset_ + offset * friction;
+        } else {
+            gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
+            gridLayoutInfo_.currentOffset_ += offset;
         }
-        gridLayoutInfo_.offsetEnd_ = false;
-        gridLayoutInfo_.reachEnd_ = false;
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+
+        if (GreatOrEqual(gridLayoutInfo_.currentOffset_, GetMainContentSize() - itemsHeight)) {
+            gridLayoutInfo_.offsetEnd_ = false;
+            gridLayoutInfo_.reachEnd_ = false;
+        }
+        return true;
     }
     if (gridLayoutInfo_.reachStart_) {
-        if (GreatOrEqual(offset, 0.0)) {
-            return false;
+        if (source == SCROLL_FROM_UPDATE) {
+            auto friction = CalculateFriction(std::abs(gridLayoutInfo_.currentOffset_) / GetMainContentSize());
+            gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
+            gridLayoutInfo_.currentOffset_ = gridLayoutInfo_.currentOffset_ + offset * friction;
+        } else {
+            gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
+            gridLayoutInfo_.currentOffset_ += offset;
         }
-        gridLayoutInfo_.reachStart_ = false;
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+
+        if (LessOrEqual(gridLayoutInfo_.currentOffset_, 0.0)) {
+            gridLayoutInfo_.reachStart_ = false;
+        }
+        return true;
     }
     gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
     gridLayoutInfo_.currentOffset_ += offset;
@@ -355,14 +432,80 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     CHECK_NULL_RETURN(eventhub, false);
     if (gridLayoutInfo_.startMainLineIndex_ != gridLayoutInfo.startMainLineIndex_) {
         eventhub->FireOnScrollToIndex(gridLayoutInfo.startIndex_);
+        FlushFocusOnScroll(gridLayoutInfo);
     }
     gridLayoutInfo_ = gridLayoutInfo;
     gridLayoutInfo_.childrenCount_ = dirty->GetTotalChildCount();
 
-    if (scrollBar_) {
-        scrollBar_->UpdateBarOffset(dirty);
-    }
+    SetScrollState(SCROLL_FROM_NONE);
+    UpdateScrollBarOffset();
+    CheckRestartSpring();
+    CheckScrollable();
     return false;
+}
+
+void GridPattern::CheckScrollable()
+{
+    if (((gridLayoutInfo_.endIndex_ - gridLayoutInfo_.startIndex_ + 1) < gridLayoutInfo_.childrenCount_) ||
+        (gridLayoutInfo_.GetTotalHeightOfItemsInView(GetMainGap()) > GetMainContentSize())) {
+        scrollable_ = true;
+    } else {
+        scrollable_ = false;
+    }
+
+    SetScrollEnable(scrollable_);
+}
+
+void GridPattern::FlushFocusOnScroll(const GridLayoutInfo& gridLayoutInfo)
+{
+    auto gridFrame = GetHost();
+    CHECK_NULL_VOID(gridFrame);
+    auto gridFocus = gridFrame->GetFocusHub();
+    CHECK_NULL_VOID(gridFocus);
+    if (!gridFocus->IsCurrentFocus()) {
+        return;
+    }
+    auto childFocusList = gridFocus->GetChildren();
+    if (std::any_of(childFocusList.begin(), childFocusList.end(),
+            [](const RefPtr<FocusHub>& childFocus) { return childFocus->IsCurrentFocus(); })) {
+        return;
+    }
+    int32_t curMainIndex = gridLayoutInfo.startMainLineIndex_;
+    if (gridLayoutInfo.gridMatrix_.find(curMainIndex) == gridLayoutInfo.gridMatrix_.end()) {
+        LOGE("Can not find main index: %{public}d", curMainIndex);
+        return;
+    }
+    auto curCrossNum = static_cast<int32_t>(gridLayoutInfo.gridMatrix_.at(curMainIndex).size());
+    auto weakChild = SearchFocusableChildInCross(curMainIndex, 0, curCrossNum);
+    auto child = weakChild.Upgrade();
+    if (child) {
+        child->RequestFocusImmediately();
+    }
+}
+
+std::pair<FocusStep, FocusStep> GridPattern::GetFocusSteps(
+    int32_t curCrossIndex, int32_t curMaxCrossCount, FocusStep step) const
+{
+    auto firstStep = FocusStep::NONE;
+    auto secondStep = FocusStep::NONE;
+    if (gridLayoutInfo_.axis_ == Axis::VERTICAL) {
+        if (curCrossIndex == 0 && step == FocusStep::LEFT) {
+            firstStep = FocusStep::UP;
+            secondStep = FocusStep::RIGHT_END;
+        } else if (curCrossIndex == curMaxCrossCount - 1 && step == FocusStep::RIGHT) {
+            firstStep = FocusStep::DOWN;
+            secondStep = FocusStep::LEFT_END;
+        }
+    } else if (gridLayoutInfo_.axis_ == Axis::HORIZONTAL) {
+        if (curCrossIndex == 0 && step == FocusStep::UP) {
+            firstStep = FocusStep::LEFT;
+            secondStep = FocusStep::DOWN_END;
+        } else if (curCrossIndex == curMaxCrossCount - 1 && step == FocusStep::DOWN) {
+            firstStep = FocusStep::RIGHT;
+            secondStep = FocusStep::UP_END;
+        }
+    }
+    return { firstStep, secondStep };
 }
 
 WeakPtr<FocusHub> GridPattern::GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode)
@@ -375,41 +518,176 @@ WeakPtr<FocusHub> GridPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
     CHECK_NULL_RETURN(curPattern, nullptr);
     auto curItemPattern = AceType::DynamicCast<GridItemPattern>(curPattern);
     CHECK_NULL_RETURN(curItemPattern, nullptr);
+    auto curItemProperty = curItemPattern->GetLayoutProperty<GridItemLayoutProperty>();
+    CHECK_NULL_RETURN(curItemProperty, nullptr);
 
     auto curMainIndex = curItemPattern->GetMainIndex();
     auto curCrossIndex = curItemPattern->GetCrossIndex();
+    auto curMainSpan = curItemProperty->GetMainSpan(gridLayoutInfo_.axis_);
+    auto curCrossSpan = curItemProperty->GetCrossSpan(gridLayoutInfo_.axis_);
     if (curMainIndex < 0 || curCrossIndex < 0) {
         LOGE("can't find focused child.");
         return nullptr;
     }
-    LOGD("Current item location is (%{public}d,%{public}d)", curMainIndex, curCrossIndex);
+    auto curMaxCrossCount = static_cast<int32_t>((gridLayoutInfo_.gridMatrix_[curMainIndex]).size());
+    LOGD("Current focused item(%{public}d,%{public}d)-[%{public}d,%{public}d]'s cross count is %{public}d.",
+        curMainIndex, curCrossIndex, curMainSpan, curCrossSpan, curMaxCrossCount);
+    auto focusSteps = GetFocusSteps(curCrossIndex, curMaxCrossCount, step);
+    if (focusSteps.first != FocusStep::NONE && focusSteps.second != FocusStep::NONE) {
+        auto firstStepRes = GetNextFocusNode(focusSteps.first, currentFocusNode);
+        if (!firstStepRes.Upgrade()) {
+            return nullptr;
+        }
+        auto secondStepRes = GetNextFocusNode(focusSteps.second, firstStepRes);
+        if (!secondStepRes.Upgrade()) {
+            return firstStepRes;
+        }
+        return secondStepRes;
+    }
+    auto indexes = GetNextIndexByStep(curMainIndex, curCrossIndex, curMainSpan, curCrossSpan, step);
+    auto nextMainIndex = indexes.first;
+    auto nextCrossIndex = indexes.second;
+    while (nextMainIndex >= 0 && nextCrossIndex >= 0) {
+        auto nextMaxCrossCount = static_cast<int32_t>((gridLayoutInfo_.gridMatrix_[nextMainIndex]).size());
+        auto weakChild = SearchFocusableChildInCross(nextMainIndex, nextCrossIndex, nextMaxCrossCount);
+        auto child = weakChild.Upgrade();
+        if (child && child->IsFocusable()) {
+            ScrollToFocusNode(weakChild);
+            return weakChild;
+        }
+        auto indexes = GetNextIndexByStep(nextMainIndex, nextCrossIndex, 1, 1, step);
+        nextMainIndex = indexes.first;
+        nextCrossIndex = indexes.second;
+    }
+    return nullptr;
+}
+
+std::pair<int32_t, int32_t> GridPattern::GetNextIndexByStep(
+    int32_t curMainIndex, int32_t curCrossIndex, int32_t curMainSpan, int32_t curCrossSpan, FocusStep step)
+{
+    LOGD("Current item: (%{public}d,%{public}d)-[%{public}d,%{public}d]. Grid axis: %{public}d, step: %{public}d",
+        curMainIndex, curCrossIndex, curMainSpan, curCrossSpan, gridLayoutInfo_.axis_, step);
+    auto curMainStart = gridLayoutInfo_.startMainLineIndex_;
+    auto curMainEnd = gridLayoutInfo_.endMainLineIndex_;
+    auto curChildStartIndex = gridLayoutInfo_.startIndex_;
+    auto curChildEndIndex = gridLayoutInfo_.endIndex_;
+    auto childrenCount = gridLayoutInfo_.childrenCount_;
+    auto curMaxCrossCount = static_cast<int32_t>((gridLayoutInfo_.gridMatrix_[curMainIndex]).size());
+    LOGD("Current main index start-end: %{public}d-%{public}d, Current cross count: %{public}d, Current child "
+         "index start-end: %{public}d-%{public}d, Total children count: %{public}d",
+        curMainStart, curMainEnd, curMaxCrossCount, curChildStartIndex, curChildEndIndex, childrenCount);
 
     auto nextMainIndex = curMainIndex;
     auto nextCrossIndex = curCrossIndex;
-    switch (step) {
-        case FocusStep::UP:
-            gridLayoutInfo_.axis_ == Axis::HORIZONTAL ? --nextCrossIndex : --nextMainIndex;
-            break;
-        case FocusStep::DOWN:
-            gridLayoutInfo_.axis_ == Axis::HORIZONTAL ? ++nextCrossIndex : ++nextMainIndex;
-            break;
-        case FocusStep::LEFT:
-            gridLayoutInfo_.axis_ == Axis::HORIZONTAL ? --nextMainIndex : --nextCrossIndex;
-            break;
-        case FocusStep::RIGHT:
-            gridLayoutInfo_.axis_ == Axis::HORIZONTAL ? ++nextMainIndex : ++nextCrossIndex;
-            break;
-        default:
-            break;
+    if ((step == FocusStep::UP_END && gridLayoutInfo_.axis_ == Axis::HORIZONTAL) ||
+        (step == FocusStep::LEFT_END && gridLayoutInfo_.axis_ == Axis::VERTICAL)) {
+        nextMainIndex = curMainIndex;
+        nextCrossIndex = 0;
+    } else if ((step == FocusStep::DOWN_END && gridLayoutInfo_.axis_ == Axis::HORIZONTAL) ||
+               (step == FocusStep::RIGHT_END && gridLayoutInfo_.axis_ == Axis::VERTICAL)) {
+        nextMainIndex = curMainIndex;
+        nextCrossIndex = curMaxCrossCount - 1;
+    } else if ((step == FocusStep::UP && gridLayoutInfo_.axis_ == Axis::HORIZONTAL) ||
+               (step == FocusStep::LEFT && gridLayoutInfo_.axis_ == Axis::VERTICAL)) {
+        nextMainIndex = curMainIndex;
+        nextCrossIndex = curCrossIndex - 1;
+    } else if ((step == FocusStep::UP && gridLayoutInfo_.axis_ == Axis::VERTICAL) ||
+               (step == FocusStep::LEFT && gridLayoutInfo_.axis_ == Axis::HORIZONTAL)) {
+        nextMainIndex = curMainIndex - 1;
+        nextCrossIndex = curCrossIndex;
+    } else if ((step == FocusStep::DOWN && gridLayoutInfo_.axis_ == Axis::HORIZONTAL) ||
+               (step == FocusStep::RIGHT && gridLayoutInfo_.axis_ == Axis::VERTICAL)) {
+        nextMainIndex = curMainIndex;
+        nextCrossIndex = curCrossIndex + curCrossSpan;
+    } else if ((step == FocusStep::DOWN && gridLayoutInfo_.axis_ == Axis::VERTICAL) ||
+               (step == FocusStep::RIGHT && gridLayoutInfo_.axis_ == Axis::HORIZONTAL)) {
+        nextMainIndex = curMainIndex + curMainSpan;
+        nextCrossIndex = curCrossIndex;
+    } else {
+        LOGE("Return: Invalid step: %{public}d and axis: %{public}d", step, gridLayoutInfo_.axis_);
+        return { -1, -1 };
     }
-    LOGD("Next item location is (%{public}d,%{public}d)", nextMainIndex, nextCrossIndex);
-    auto maxMainCount = static_cast<int32_t>((gridLayoutInfo_.gridMatrix_).size());
-    auto maxCrossCount = static_cast<int32_t>((gridLayoutInfo_.gridMatrix_[nextMainIndex]).size());
-    if (nextMainIndex < 0 || nextMainIndex >= maxMainCount || nextCrossIndex < 0 || nextCrossIndex >= maxCrossCount) {
-        LOGD("Next item is not exist");
-        return nullptr;
+    if (curChildStartIndex == 0 && curMainIndex == 0 && nextMainIndex < curMainIndex) {
+        LOGD("Item reach at grid top and next main index less than current main index. Reset next main index.");
+        nextMainIndex = curMainIndex;
     }
+    if (curChildEndIndex == childrenCount - 1 && curMainIndex == curMainEnd && nextMainIndex > curMainIndex) {
+        LOGD("Item reach at grid top and next main index greater than current main index. Reset next main index.");
+        nextMainIndex = curMainIndex;
+    }
+    if (nextMainIndex == curMainIndex && nextCrossIndex == curCrossIndex) {
+        LOGI("Return: Move stoped. Next index: (%{public}d,%{public}d) is same as current: (%{public}d,%{public}d).",
+            nextMainIndex, nextCrossIndex, curMainIndex, curCrossIndex);
+        return { -1, -1 };
+    }
+    if (curChildStartIndex != 0 && curMainIndex == curMainStart && nextMainIndex < curMainIndex) {
+        // Scroll item up.
+        LOGD("Item donot reach top and next main index is less than current. Do UpdateStartIndex(%{public}d)",
+            curChildStartIndex - 1);
+        UpdateStartIndex(curChildStartIndex - 1);
+        auto pipeline = PipelineContext::GetCurrentContext();
+        if (pipeline) {
+            pipeline->FlushUITasks();
+        }
+    } else if (curChildEndIndex != childrenCount - 1 && curMainIndex == curMainEnd && nextMainIndex > curMainIndex) {
+        // Scroll item down.
+        LOGD("Item donot reach bottom and next main index is greater than current. Do UpdateStartIndex(%{public}d)",
+            curChildEndIndex + 1);
+        UpdateStartIndex(curChildEndIndex + 1);
+        auto pipeline = PipelineContext::GetCurrentContext();
+        if (pipeline) {
+            pipeline->FlushUITasks();
+        }
+    }
+    curMainStart = gridLayoutInfo_.startMainLineIndex_;
+    curMainEnd = gridLayoutInfo_.endMainLineIndex_;
+    if (nextMainIndex < curMainStart || nextMainIndex > curMainEnd) {
+        LOGW("Return: Error. Next main index is out of range(%{public}d,%{public}d)", curMainStart, curMainEnd);
+        return { -1, -1 };
+    }
+    if (nextCrossIndex < 0) {
+        LOGW("Return: Error. Next cross index is less than 0.");
+        return { -1, -1 };
+    }
+    auto nextMaxCrossCount = static_cast<int32_t>((gridLayoutInfo_.gridMatrix_[nextMainIndex]).size());
+    if (nextCrossIndex >= nextMaxCrossCount) {
+        LOGD("Return: { %{public}d,%{public}d }. Next cross index is greater than max cross count", nextMainIndex,
+            nextMaxCrossCount - 1);
+        return { nextMainIndex, nextMaxCrossCount - 1 };
+    }
+    LOGD("Return: { %{public}d,%{public}d }.", nextMainIndex, nextCrossIndex);
+    return { nextMainIndex, nextCrossIndex };
+}
 
+WeakPtr<FocusHub> GridPattern::SearchFocusableChildInCross(int32_t mainIndex, int32_t crossIndex, int32_t maxCrossCount)
+{
+    LOGD("Search child from index: (%{public}d,%{public}d)", mainIndex, crossIndex);
+    int32_t direction = 0;
+    auto indexLeft = crossIndex;
+    auto indexRight = crossIndex;
+    while (indexLeft >= 0 || indexRight < maxCrossCount) {
+        int32_t curIndex = indexLeft;
+        if (indexLeft < 0) {
+            curIndex = indexRight++;
+        } else if (indexRight >= maxCrossCount) {
+            curIndex = indexLeft--;
+        } else {
+            curIndex = direction++ % 2 == 0 ? indexLeft-- : indexRight--;
+        }
+        auto weakChild = GetChildFocusNodeByIndex(mainIndex, curIndex);
+        auto child = weakChild.Upgrade();
+        if (child && child->IsFocusable()) {
+            LOGD("Found child. Index: %{public}d,%{public}d", mainIndex, curIndex);
+            return weakChild;
+        }
+    }
+    LOGD("Child can not be found.");
+    return nullptr;
+}
+
+WeakPtr<FocusHub> GridPattern::GetChildFocusNodeByIndex(int32_t tarMainIndex, int32_t tarCrossIndex)
+{
+    LOGD("Get target item location is (%{public}d,%{public}d)", tarMainIndex, tarCrossIndex);
     auto gridFrame = GetHost();
     CHECK_NULL_RETURN(gridFrame, nullptr);
     auto gridFocus = gridFrame->GetFocusHub();
@@ -428,12 +706,37 @@ WeakPtr<FocusHub> GridPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
         if (!childItemPattern) {
             continue;
         }
-        if (childItemPattern->GetMainIndex() == nextMainIndex && childItemPattern->GetCrossIndex() == nextCrossIndex) {
+        auto childItemProperty = childItemPattern->GetLayoutProperty<GridItemLayoutProperty>();
+        if (!childItemProperty) {
+            continue;
+        }
+        auto curMainIndex = childItemPattern->GetMainIndex();
+        auto curCrossIndex = childItemPattern->GetCrossIndex();
+        auto curMainSpan = childItemProperty->GetMainSpan(gridLayoutInfo_.axis_);
+        auto curCrossSpan = childItemProperty->GetCrossSpan(gridLayoutInfo_.axis_);
+        if (curMainIndex <= tarMainIndex && curMainIndex + curMainSpan > tarMainIndex &&
+            curCrossIndex <= tarCrossIndex && curCrossIndex + curCrossSpan > tarCrossIndex) {
             return AceType::WeakClaim(AceType::RawPtr(childFocus));
         }
     }
-
+    LOGD("The target item at location(%{public}d,%{public}d) can not found.", tarMainIndex, tarCrossIndex);
     return nullptr;
+}
+
+void GridPattern::ScrollToFocusNode(const WeakPtr<FocusHub>& focusNode)
+{
+    auto nextFocus = focusNode.Upgrade();
+    CHECK_NULL_VOID(nextFocus);
+    auto nextFrame = nextFocus->GetFrameNode();
+    CHECK_NULL_VOID(nextFrame);
+    auto nextPattern = nextFrame->GetPattern();
+    CHECK_NULL_VOID(nextPattern);
+    auto nextItemPattern = AceType::DynamicCast<GridItemPattern>(nextPattern);
+    CHECK_NULL_VOID(nextItemPattern);
+    auto nextMainIndex = nextItemPattern->GetMainIndex();
+    auto nextCrossIndex = nextItemPattern->GetCrossIndex();
+    auto nextIndex = gridLayoutInfo_.gridMatrix_[nextMainIndex][nextCrossIndex];
+    UpdateStartIndex(nextIndex);
 }
 
 void GridPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
@@ -462,10 +765,6 @@ bool GridPattern::OnKeyEvent(const KeyEvent& event)
     }
     if ((event.code == KeyCode::KEY_PAGE_DOWN) || (event.code == KeyCode::KEY_PAGE_UP)) {
         ScrollPage(event.code == KeyCode::KEY_PAGE_UP);
-    }
-    if (event.code == KeyCode::KEY_DPAD_UP || event.code == KeyCode::KEY_DPAD_DOWN) {
-        HandleDirectionKey(event.code);
-        return true;
     }
     return false;
 }
@@ -498,10 +797,10 @@ void GridPattern::ScrollPage(bool reverse)
     }
     if (!reverse) {
         LOGD("PgDn. Scroll offset is %{public}f", -GetMainContentSize());
-        UpdateScrollPosition(-GetMainContentSize());
+        UpdateCurrentOffset(-GetMainContentSize(), SCROLL_FROM_JUMP);
     } else {
         LOGD("PgUp. Scroll offset is %{public}f", GetMainContentSize());
-        UpdateScrollPosition(GetMainContentSize());
+        UpdateCurrentOffset(GetMainContentSize(), SCROLL_FROM_JUMP);
     }
 }
 
@@ -515,12 +814,6 @@ bool GridPattern::UpdateStartIndex(uint32_t index)
     gridLayoutInfo_.jumpIndex_ = index;
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return true;
-}
-
-void GridPattern::UpdateScrollerAnimation(float offset)
-{
-    UpdateScrollPosition(offset - animatorOffset_);
-    animatorOffset_ = offset;
 }
 
 bool GridPattern::AnimateTo(float position, float duration, const RefPtr<Curve>& curve)
@@ -542,7 +835,7 @@ bool GridPattern::AnimateTo(float position, float duration, const RefPtr<Curve>&
         [offset = gridLayoutInfo_.currentOffset_, weakScroll = AceType::WeakClaim(this)](float value) {
             auto gridPattern = weakScroll.Upgrade();
             if (gridPattern) {
-                gridPattern->UpdateScrollPosition(value);
+                gridPattern->UpdateCurrentOffset(value, SCROLL_FROM_JUMP);
             }
         });
     animator_->AddInterpolator(animation);
@@ -551,22 +844,160 @@ bool GridPattern::AnimateTo(float position, float duration, const RefPtr<Curve>&
     return true;
 }
 
-void GridPattern::SetScrollBarProxy(const RefPtr<NG::ScrollBarProxy>& scrollBarProxy)
+void GridPattern::UpdateScrollBarOffset()
 {
-    if (!scrollBar_) {
-        scrollBar_ = new GridScrollBar(Claim(this));
+    if (!GetScrollBar() && !GetScrollBarProxy()) {
+        return;
     }
-    scrollBar_->CreateBarProxy(scrollBarProxy);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    const auto& info = gridLayoutInfo_;
+    auto viewScopeSize = geometryNode->GetPaddingSize();
+    auto layoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
+
+    float heightSum = 0;
+    int32_t itemCount = 0;
+    auto mainGap = GridUtils::GetMainGap(layoutProperty, viewScopeSize, info.axis_);
+    for (const auto& item : info.lineHeightMap_) {
+        auto line = info.gridMatrix_.find(item.first);
+        if (line != info.gridMatrix_.end()) {
+            itemCount += static_cast<int32_t>(line->second.size());
+        } else {
+            itemCount += info.crossCount_;
+        }
+        heightSum += item.second + mainGap;
+    }
+
+    float estimatedHeight = 0.f;
+    auto averageHeight_ = heightSum / itemCount;
+    if (itemCount >= (info.childrenCount_ - 1)) {
+        estimatedHeight = heightSum - mainGap;
+    } else {
+        estimatedHeight = heightSum + (info.childrenCount_ - itemCount) * averageHeight_;
+    }
+
+    float offset = info.startIndex_ * averageHeight_ - info.currentOffset_;
+    Size mainSize = { viewScopeSize.Width(), viewScopeSize.Height() };
+    UpdateScrollBarRegion(offset, estimatedHeight, mainSize);
 }
 
-float GridPattern::GetScrollableDistance() const
+RefPtr<PaintProperty> GridPattern::CreatePaintProperty()
 {
-    return scrollBar_ ? scrollBar_->GetEstimatedHeight() : 0.0f;
+    auto defaultDisplayMode = DisplayMode::OFF;
+    const static int32_t PLATFORM_VERSION_TEN = 10;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        defaultDisplayMode = DisplayMode::AUTO;
+    }
+    auto property = MakeRefPtr<ScrollablePaintProperty>();
+    // default "scrollBar" attribute of Grid is BarState.Off
+    property->UpdateScrollBarMode(defaultDisplayMode);
+    return property;
 }
 
-float GridPattern::GetCurrentPosition() const
+int32_t GridPattern::GetInsertPosition(float x, float y) const
 {
-    return scrollBar_ ? -scrollBar_->GetOffset() : 0.0f;
+    if (gridLayoutInfo_.currentRect_.IsInRegion(PointF(x, y))) {
+        return gridLayoutInfo_.GetOriginalIndex();
+    }
+
+    return -1;
+}
+
+int32_t GridPattern::GetOriginalIndex() const
+{
+    return gridLayoutInfo_.GetOriginalIndex();
+}
+
+int32_t GridPattern::GetCrossCount() const
+{
+    return gridLayoutInfo_.crossCount_;
+}
+
+int32_t GridPattern::GetChildrenCount() const
+{
+    return gridLayoutInfo_.childrenCount_;
+}
+
+void GridPattern::ClearDragState()
+{
+    gridLayoutInfo_.ClearDragState();
+}
+
+void GridPattern::UpdateRectOfDraggedInItem(int32_t insertIndex)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    std::list<RefPtr<FrameNode>> children;
+    host->GenerateOneDepthAllFrame(children);
+    for (const auto& item : children) {
+        auto itemPattern = item->GetPattern<GridItemPattern>();
+        CHECK_NULL_VOID(itemPattern);
+        auto mainIndex = itemPattern->GetMainIndex();
+        auto crossIndex = itemPattern->GetCrossIndex();
+        if (mainIndex * gridLayoutInfo_.crossCount_ + crossIndex == insertIndex) {
+            auto size = item->GetRenderContext()->GetPaintRectWithTransform();
+            size.SetOffset(item->GetTransformRelativeOffset());
+            gridLayoutInfo_.currentRect_ = size;
+            break;
+        }
+    }
+}
+
+void GridPattern::MoveItems(int32_t itemIndex, int32_t insertIndex)
+{
+    if (insertIndex < 0 ||
+        insertIndex >= ((itemIndex == -1) ? (gridLayoutInfo_.childrenCount_ + 1) : gridLayoutInfo_.childrenCount_)) {
+        return;
+    }
+
+    if (itemIndex == -1) {
+        UpdateRectOfDraggedInItem(insertIndex);
+    }
+
+    gridLayoutInfo_.SwapItems(itemIndex, insertIndex);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    if (pipeline) {
+        pipeline->FlushUITasks();
+    }
+}
+
+bool GridPattern::IsOutOfBoundary()
+{
+    return gridLayoutInfo_.reachStart_ || gridLayoutInfo_.offsetEnd_;
+}
+
+void GridPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect)
+{
+    scrollEffect->SetCurrentPositionCallback([weak = AceType::WeakClaim(this)]() -> double {
+        auto grid = weak.Upgrade();
+        CHECK_NULL_RETURN_NOLOG(grid, 0.0);
+        return grid->gridLayoutInfo_.currentOffset_;
+    });
+    scrollEffect->SetLeadingCallback([weak = AceType::WeakClaim(this)]() -> double {
+        auto grid = weak.Upgrade();
+        CHECK_NULL_RETURN_NOLOG(grid, 0.0);
+        return grid->GetMainContentSize() - grid->gridLayoutInfo_.GetTotalHeightOfItemsInView(grid->GetMainGap());
+    });
+    scrollEffect->SetTrailingCallback([]() -> double { return 0.0; });
+    scrollEffect->SetInitLeadingCallback([weak = AceType::WeakClaim(this)]() -> double {
+        auto grid = weak.Upgrade();
+        CHECK_NULL_RETURN_NOLOG(grid, 0.0);
+        return grid->GetMainContentSize() - grid->gridLayoutInfo_.GetTotalHeightOfItemsInView(grid->GetMainGap());
+    });
+    scrollEffect->SetInitTrailingCallback([]() -> double { return 0.0; });
+}
+
+bool GridPattern::OutBoundaryCallback()
+{
+    return IsOutOfBoundary();
 }
 
 } // namespace OHOS::Ace::NG

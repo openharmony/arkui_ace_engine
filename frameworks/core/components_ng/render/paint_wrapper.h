@@ -70,6 +70,11 @@ public:
         return geometryNode_;
     }
 
+    RefPtr<RenderContext> GetRenderContext() const
+    {
+        return renderContext_.Upgrade();
+    }
+
     SizeF GetContentSize() const
     {
         return geometryNode_->GetContentSize();
@@ -78,6 +83,24 @@ public:
     OffsetF GetContentOffset() const
     {
         return geometryNode_->GetContentOffset();
+    }
+
+    bool HasForegroundColor() const
+    {
+        auto renderContext = renderContext_.Upgrade();
+        return renderContext->HasForegroundColor();
+    }
+
+    bool HasForegroundColorStrategy() const
+    {
+        auto renderContext = renderContext_.Upgrade();
+        return renderContext->HasForegroundColorStrategy();
+    }
+
+    Color GetForegroundColor() const
+    {
+        auto renderContext = renderContext_.Upgrade();
+        return renderContext->GetForegroundColor().value_or(Color::FOREGROUND);
     }
 
 private:

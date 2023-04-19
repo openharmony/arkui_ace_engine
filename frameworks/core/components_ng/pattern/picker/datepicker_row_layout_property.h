@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,9 +18,11 @@
 
 #include "base/geometry/dimension.h"
 #include "base/i18n/localization.h"
+#include "base/json/json_util.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
+#include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/utils.h"
 
@@ -40,6 +42,9 @@ public:
         value->propLunar_ = CloneLunar();
         value->propStartDate_ = CloneStartDate();
         value->propEndDate_ = CloneEndDate();
+        value->propDisappearTextStyle_ = CloneDisappearTextStyle();
+        value->propTextStyle_ = CloneTextStyle();
+        value->propSelectedTextStyle_ = CloneSelectedTextStyle();
         return value;
     }
 
@@ -50,15 +55,41 @@ public:
         ResetStartDate();
         ResetEndDate();
         ResetLunar();
+        ResetDisappearTextStyle();
+        ResetTextStyle();
+        ResetSelectedTextStyle();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
         LayoutProperty::ToJsonValue(json);
         json->Put("lunar", V2::ConvertBoolToString(GetLunar().value_or(false)).c_str());
-        json->Put("selectedDate", GetDateSelected().c_str());
-        json->Put("startDate", GetDateStart().c_str());
-        json->Put("endDate", GetDateEnd().c_str());
+
+        auto disappearFont = JsonUtil::Create(true);
+        disappearFont->Put("size", GetDisappearFontSizeValue(Dimension(0)).ToString().c_str());
+        disappearFont->Put("weight", V2::ConvertWrapFontWeightToStirng(
+            GetDisappearWeight().value_or(FontWeight::NORMAL)).c_str());
+        auto disappearTextStyle = JsonUtil::Create(true);
+        disappearTextStyle->Put("color", GetDisappearColor().value_or(Color::BLACK).ColorToString().c_str());
+        disappearTextStyle->Put("font", disappearFont);
+        json->Put("disappearTextStyle", disappearTextStyle);
+
+        auto normalFont = JsonUtil::Create(true);
+        normalFont->Put("size", GetFontSizeValue(Dimension(0)).ToString().c_str());
+        normalFont->Put("weight", V2::ConvertWrapFontWeightToStirng(GetWeight().value_or(FontWeight::NORMAL)).c_str());
+        auto normalTextStyle = JsonUtil::Create(true);
+        normalTextStyle->Put("color", GetColor().value_or(Color::BLACK).ColorToString().c_str());
+        normalTextStyle->Put("font", normalFont);
+        json->Put("textStyle", normalTextStyle);
+
+        auto selectedFont = JsonUtil::Create(true);
+        selectedFont->Put("size", GetSelectedFontSizeValue(Dimension(0)).ToString().c_str());
+        selectedFont->Put("weight", V2::ConvertWrapFontWeightToStirng(
+            GetSelectedWeight().value_or(FontWeight::NORMAL)).c_str());
+        auto selectedTextStyle = JsonUtil::Create(true);
+        selectedTextStyle->Put("color", GetSelectedColor().value_or(Color::BLACK).ColorToString().c_str());
+        selectedTextStyle->Put("font", selectedFont);
+        json->Put("selectedTextStyle", selectedTextStyle);
     }
 
     std::string GetDateStart() const
@@ -108,6 +139,29 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StartDate, LunarDate, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EndDate, LunarDate, PROPERTY_UPDATE_RENDER);
 
+    ACE_DEFINE_PROPERTY_GROUP(DisappearTextStyle, FontStyle);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
+        DisappearTextStyle, FontSize, DisappearFontSize, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
+        DisappearTextStyle, TextColor, DisappearColor, Color, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
+        DisappearTextStyle, FontWeight, DisappearWeight, FontWeight, PROPERTY_UPDATE_MEASURE);
+
+    ACE_DEFINE_PROPERTY_GROUP(TextStyle, FontStyle);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
+        TextStyle, FontSize, FontSize, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
+        TextStyle, TextColor, Color, Color, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
+        TextStyle, FontWeight, Weight, FontWeight, PROPERTY_UPDATE_MEASURE);
+
+    ACE_DEFINE_PROPERTY_GROUP(SelectedTextStyle, FontStyle);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
+        SelectedTextStyle, FontSize, SelectedFontSize, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
+        SelectedTextStyle, TextColor, SelectedColor, Color, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
+        SelectedTextStyle, FontWeight, SelectedWeight, FontWeight, PROPERTY_UPDATE_MEASURE);
 private:
     ACE_DISALLOW_COPY_AND_MOVE(DataPickerRowLayoutProperty);
 };

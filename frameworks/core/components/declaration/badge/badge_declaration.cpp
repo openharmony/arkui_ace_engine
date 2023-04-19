@@ -53,8 +53,11 @@ bool BadgeDeclaration::SetSpecializedAttr(const std::pair<std::string, std::stri
             } },
         { DOM_BADGE_LABEL,
             [](BadgeDeclaration& declaration, const std::string& value) { declaration.SetBadgeLabel(value); } },
-        { DOM_BADGE_MAX_COUNT, [](BadgeDeclaration& declaration, const std::string& value) {
-            declaration.SetMaxCount(static_cast<int64_t>(StringUtils::StringToLongInt(value)));
+        { DOM_BADGE_MAX_COUNT,
+            [](BadgeDeclaration& declaration, const std::string& value) {
+                auto maxCount = static_cast<int64_t>(StringUtils::StringToLongInt(value));
+                maxCount = maxCount > INT_MAX ? INT_MAX : maxCount;
+                declaration.SetMaxCount(maxCount);
             } },
         { DOM_BADGE_PLACEMENT,
             [](BadgeDeclaration& declaration, const std::string& value) {

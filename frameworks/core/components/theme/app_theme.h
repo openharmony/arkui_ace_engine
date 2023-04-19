@@ -147,7 +147,7 @@ private:
 
     // Focus State parameters
     // TODO: these parameters need put in theme.csv
-    Color focusColor_ = Color(0xFF254FF7);                      // General focus state color
+    Color focusColor_ = Color(0xFF007DFF);                      // General focus state color
     Dimension focusWidthVp_ = 2.0_vp;                           // General focus border width
     Dimension focusOutPaddingVp_ = 2.0_vp;                      // General distance between focus border and component border
 };

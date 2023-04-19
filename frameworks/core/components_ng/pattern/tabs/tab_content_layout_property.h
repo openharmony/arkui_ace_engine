@@ -51,6 +51,11 @@ public:
         LayoutProperty::ToJsonValue(json);
         json->Put("icon", propIcon_.value_or("").c_str());
         json->Put("text", propText_.value_or("").c_str());
+
+        auto jsonValue = JsonUtil::Create(true);
+        jsonValue->Put("icon", propIcon_.value_or("").c_str());
+        jsonValue->Put("text", propText_.value_or("").c_str());
+        json->Put("tabBar", jsonValue->ToString().c_str());
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Icon, std::string, PROPERTY_UPDATE_LAYOUT);

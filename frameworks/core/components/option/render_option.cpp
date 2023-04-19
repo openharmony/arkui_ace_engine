@@ -15,6 +15,7 @@
 
 #include "core/components/option/render_option.h"
 
+#include "base/geometry/offset.h"
 #include "base/log/log.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/system_properties.h"
@@ -217,6 +218,36 @@ void RenderOption::OnTouch(bool down)
         endColor = Color::TRANSPARENT;
     }
     PlayEventEffectAnimation(endColor, PRESS_DURATION);
+}
+
+void RenderOption::HandleMouseHoverEvent(const MouseState mouseState)
+{
+    if (!data_ || data_->IsDisabledStatus() || data_->GetCustomComponent()) {
+        return;
+    }
+    Color color;
+    if (mouseState == MouseState::HOVER) {
+        color = hoveredColor_;
+    } else {
+        color = Color::TRANSPARENT;
+    }
+    PlayEventEffectAnimation(color, PRESS_DURATION);
+}
+
+bool RenderOption::HandleMouseEvent(const MouseEvent& event)
+{
+    if (!data_ || data_->IsDisabledStatus() || data_->GetCustomComponent()) {
+        return false;
+    }
+    if (event.button == MouseButton::LEFT_BUTTON) {
+        if (event.action == MouseAction::PRESS || event.action == MouseAction::MOVE) {
+            PlayEventEffectAnimation(clickedColor_, PRESS_DURATION);
+        } else if (event.action == MouseAction::RELEASE) {
+            PlayEventEffectAnimation(data_->GetSelectedBackgroundColor(), PRESS_DURATION);
+        }
+        return true;
+    }
+    return false;
 }
 
 void RenderOption::OnMouseHoverEnterTest()
@@ -511,19 +542,21 @@ void RenderOption::InitTouchEvent()
     }
     touch_ = AceType::MakeRefPtr<RawRecognizer>();
     auto weak = AceType::WeakClaim(this);
-    touch_->SetOnTouchDown([weak](const TouchEventInfo&) {
+    touch_->SetOnTouchDown([weak](const TouchEventInfo& info) {
         auto ref = weak.Upgrade();
         if (!ref) {
             return;
         }
         ref->OnTouch(true);
+        ref->ProcessTouchDown(info);
     });
-    touch_->SetOnTouchUp([weak](const TouchEventInfo&) {
+    touch_->SetOnTouchUp([weak](const TouchEventInfo& info) {
         auto ref = weak.Upgrade();
         if (!ref) {
             return;
         }
         ref->OnTouch(false);
+        ref->ProcessTouchUp(info);
     });
     touch_->SetOnTouchCancel([weak](const TouchEventInfo&) {
         auto ref = weak.Upgrade();
@@ -544,6 +577,49 @@ void RenderOption::OnTouchTestHit(
     touch_->SetCoordinateOffset(coordinateOffset);
     result.emplace_back(click_);
     result.emplace_back(touch_);
+}
+
+void RenderOption::ProcessTouchDown(const TouchEventInfo& info)
+{
+    LOGI("RenderOption ProcessTouchDown");
+    auto touches = info.GetTouches();
+    if (touches.empty()) {
+        LOGW("touch event info is empty.");
+        return;
+    }
+
+    if (data_->GetCustomComponent()) {
+        return;
+    }
+
+    auto touchPosition = touches.front().GetLocalLocation();
+    if (!optionRegion_.ContainsInRegion(touchPosition.GetX(), touchPosition.GetY())) {
+        LOGI("Do not contains the touch region.");
+        return;
+    }
+    firstTouchDownOffset_ = touchPosition;
+}
+
+void RenderOption::ProcessTouchUp(const TouchEventInfo& info)
+{
+    LOGI("RenderOption ProcessTouchUp");
+    auto touches = info.GetTouches();
+    if (touches.empty()) {
+        LOGW("touch event info is empty.");
+        return;
+    }
+
+    if (data_->GetCustomComponent()) {
+        return;
+    }
+
+    auto touchPosition = touches.front().GetLocalLocation();
+    firstTouchUpOffset_ = touchPosition;
+    if (optionRegion_.ContainsInRegion(touchPosition.GetX(), touchPosition.GetY()) &&
+        (firstTouchDownOffset_ != firstTouchUpOffset_)) {
+        OnClick(false);
+    }
+    firstTouchDownOffset_ = Offset();
 }
 
 void RenderOption::Update(const RefPtr<Component>& component)
@@ -739,6 +815,8 @@ void RenderOption::PerformLayout()
     } else {
         LayoutText(text);
     }
+
+    optionRegion_ = TouchRegion(Offset(), Offset(GetLayoutSize().Width(), GetLayoutSize().Height()));
 }
 
 void RenderOption::PlayEventEffectAnimation(const Color& endColor, int32_t duration, bool isHoverExists)

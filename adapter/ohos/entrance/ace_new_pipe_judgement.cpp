@@ -20,6 +20,7 @@
 #include <list>
 
 #include "base/log/log.h"
+#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace {
@@ -31,7 +32,7 @@ const std::string ACE_NEW_PIPE_DISABLED_TAG = "DISABLED";
 const std::string ACE_NEW_PIPE_ENABLED_FOR_ALL_TAG = "ENABLED_FOR_ALL";
 const std::string NEW_PIPE_ENABLED_RELEASE_TYPE = "Beta4";
 const std::string NEW_PIPE_ENABLED_RELEASE_TYPE_NEW = "Beta5";
-const std::list<std::string> WHITE_LIST = { "com.ohos.launcher" };
+const std::string NEW_PIPE_ENABLED_RELEASE_TYPE_RELEASE = "Release";
 constexpr int32_t NEW_PIPE_MIN_VERSION = 9;
 
 } // namespace
@@ -53,11 +54,15 @@ std::ifstream& AceNewPipeJudgement::SafeGetLine(std::ifstream& configFile, std::
     return configFile;
 }
 
-bool AceNewPipeJudgement::QueryAceNewPipeEnabledFa(
-    const std::string& packagename, uint32_t apiCompatibleVersion, const std::string& apiReleaseType)
+bool AceNewPipeJudgement::QueryAceNewPipeEnabledFA(const std::string& packagename, uint32_t apiCompatibleVersion,
+    uint32_t apiTargetVersion, const std::string& apiReleaseType)
 {
-    if ((apiCompatibleVersion == NEW_PIPE_MIN_VERSION && apiReleaseType == NEW_PIPE_ENABLED_RELEASE_TYPE_NEW) ||
-        apiCompatibleVersion > NEW_PIPE_MIN_VERSION) {
+    if (((apiTargetVersion == NEW_PIPE_MIN_VERSION &&
+             (apiReleaseType == NEW_PIPE_ENABLED_RELEASE_TYPE || apiReleaseType == NEW_PIPE_ENABLED_RELEASE_TYPE_NEW ||
+                 apiReleaseType == NEW_PIPE_ENABLED_RELEASE_TYPE_RELEASE ||
+                 SystemProperties::GetExtSurfaceEnabled())) ||
+            apiTargetVersion > NEW_PIPE_MIN_VERSION) &&
+        apiCompatibleVersion >= NEW_PIPE_MIN_VERSION) {
         return true;
     }
     switch (aceNewPipeEnabledType_) {
@@ -73,17 +78,17 @@ bool AceNewPipeJudgement::QueryAceNewPipeEnabledFa(
 }
 
 bool AceNewPipeJudgement::QueryAceNewPipeEnabledStage(const std::string& packagename, uint32_t apiCompatibleVersion,
-    const std::string& apiReleaseType, const std::vector<OHOS::AppExecFwk::Metadata>& metaData)
+    uint32_t apiTargetVersion, const std::string& apiReleaseType, bool closeArkTSPartialUpdate)
 {
-    bool arkTSPartialUpdate = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
-        return metaDataItem.name == "ArkTSPartialUpdate" && metaDataItem.value == "true";
-    });
-    bool isWhiteListItem = std::any_of(WHITE_LIST.begin(), WHITE_LIST.end(),
-        [packagename](const auto& whiteListItem) { return whiteListItem == packagename; });
-    if ((apiCompatibleVersion == NEW_PIPE_MIN_VERSION && apiReleaseType == NEW_PIPE_ENABLED_RELEASE_TYPE_NEW) ||
-        apiCompatibleVersion > NEW_PIPE_MIN_VERSION ||
-        (apiCompatibleVersion == NEW_PIPE_MIN_VERSION && apiReleaseType == NEW_PIPE_ENABLED_RELEASE_TYPE &&
-            (arkTSPartialUpdate || isWhiteListItem))) {
+    if (closeArkTSPartialUpdate) {
+        return false;
+    }
+    if (((apiTargetVersion == NEW_PIPE_MIN_VERSION &&
+             (apiReleaseType == NEW_PIPE_ENABLED_RELEASE_TYPE || apiReleaseType == NEW_PIPE_ENABLED_RELEASE_TYPE_NEW ||
+                 apiReleaseType == NEW_PIPE_ENABLED_RELEASE_TYPE_RELEASE ||
+                 SystemProperties::GetExtSurfaceEnabled())) ||
+            apiTargetVersion > NEW_PIPE_MIN_VERSION) &&
+        apiCompatibleVersion >= NEW_PIPE_MIN_VERSION) {
         return true;
     }
     switch (aceNewPipeEnabledType_) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,12 +28,14 @@ public:
     void Create(const std::string& content) override;
     void SetFontSize(const Dimension& value) override;
     void SetTextColor(const Color& value) override;
+    void SetTextShadow(const Shadow& value) override;
     void SetItalicFontStyle(Ace::FontStyle value) override;
     void SetFontWeight(FontWeight value) override;
     void SetFontFamily(const std::vector<std::string>& value) override;
     void SetTextAlign(TextAlign value) override;
     void SetTextOverflow(TextOverflow value) override;
     void SetMaxLines(uint32_t value) override;
+    void SetTextIndent(const Dimension& value) override;
     void SetLineHeight(const Dimension& value) override;
     void SetTextDecoration(TextDecoration value) override;
     void SetTextDecorationColor(const Color& value) override;
@@ -42,6 +44,7 @@ public:
     void SetLetterSpacing(const Dimension& value) override;
     void SetAdaptMinFontSize(const Dimension& value) override;
     void SetAdaptMaxFontSize(const Dimension& value) override;
+    void SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value) override;
     void OnSetHeight() override;
     void OnSetWidth() override;
     void OnSetAlign() override;
@@ -54,6 +57,8 @@ public:
     void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) override;
     void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) override;
     void SetOnDrop(NG::OnDragDropFunc&& onDrop) override;
+    void SetDraggable(bool draggable) override;
+    void SetMenuOptionItems(std::vector<NG::MenuOptionsParam>&& menuOptionsItems) override;
 
 private:
     static RefPtr<TextComponentV2> GetComponent();

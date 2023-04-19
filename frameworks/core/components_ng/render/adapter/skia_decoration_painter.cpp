@@ -247,9 +247,7 @@ public:
     static std::unique_ptr<GradientShader> CreateLinearGradient(const NG::Gradient& gradient, const SkSize& size)
     {
         auto linearGradient = gradient.GetLinearGradient();
-        if (!linearGradient) {
-            return nullptr;
-        }
+        CHECK_NULL_RETURN_NOLOG(linearGradient, nullptr);
         SkPoint firstPoint { 0.0f, 0.0f };
         SkPoint secondPoint { 0.0f, 0.0f };
         if (linearGradient->angle) {
@@ -630,9 +628,7 @@ public:
     static std::unique_ptr<GradientShader> CreateSweepGradient(const NG::Gradient& gradient, const SkSize& size)
     {
         auto sweepGradient = gradient.GetSweepGradient();
-        if (!sweepGradient) {
-            return nullptr;
-        }
+        CHECK_NULL_RETURN_NOLOG(sweepGradient, nullptr);
         SkPoint center = GetCenter(sweepGradient, size);
         float rotationAngle = 0.0f;
         if (sweepGradient->rotation) {
@@ -743,6 +739,9 @@ SkPath SkiaDecorationPainter::SkiaCreateSkPath(const RefPtr<BasicShape>& basicSh
         skPath.addRect(SkRect::MakeXYWH(0.0, 0.0, size.Width(), size.Height()));
         return skPath;
     }
+    float offsetX = SkiaDimensionToPx(basicShape->GetPosition().GetX(), size, LengthMode::HORIZONTAL);
+    float offsetY = SkiaDimensionToPx(basicShape->GetPosition().GetY(), size, LengthMode::VERTICAL);
+    position += OffsetF(offsetX, offsetY);
     switch (basicShape->GetBasicShapeType()) {
         case BasicShapeType::INSET: {
             SkiaCreateInset(basicShape, size, position, skPath);
@@ -942,9 +941,7 @@ void SkiaDecorationPainter::PaintBrightness(const SizeF& frameSize, SkCanvas* ca
     SkRRect outerRRect = SkRRect::MakeRect(SkRect::MakeLTRB(0.0f, 0.0f, frameSize.Width(), frameSize.Height()));
     // brightness range = (0, 2)
     // skip painting when brightness is normal
-    if (NearEqual(bright, 1.0)) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(!NearEqual(bright, 1.0));
     if (canvas) {
         SkAutoCanvasRestore acr(canvas, true);
         canvas->clipRRect(outerRRect, true);
@@ -965,9 +962,7 @@ void SkiaDecorationPainter::PaintContrast(const SizeF& frameSize, SkCanvas* canv
 {
     SkRRect outerRRect = SkRRect::MakeRect(SkRect::MakeLTRB(0.0f, 0.0f, frameSize.Width(), frameSize.Height()));
     // skip painting if contrast is normal
-    if (NearEqual(contrasts, 1.0)) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(!NearEqual(contrasts, 1.0));
     if (canvas) {
         SkAutoCanvasRestore acr(canvas, true);
         canvas->clipRRect(outerRRect, true);

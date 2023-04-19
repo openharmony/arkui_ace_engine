@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,16 +21,15 @@
 namespace OHOS::Ace::NG {
 class ACE_EXPORT RatingModelNG : public OHOS::Ace::RatingModel {
 public:
-    void Create() override;
+    void Create(double rating = .0, bool indicator = false) override;
     void SetRatingScore(double value) override;
     void SetIndicator(bool value) override;
     void SetStars(int32_t value) override;
     void SetStepSize(double value) override;
-    void SetForegroundSrc(const std::string& value) override;
-    void SetSecondarySrc(const std::string& value) override;
-    void SetBackgroundSrc(const std::string& value) override;
+    void SetForegroundSrc(const std::string& value, bool flag = false) override;
+    void SetSecondarySrc(const std::string& value, bool flag = false) override;
+    void SetBackgroundSrc(const std::string& value, bool flag = false) override;
     void SetOnChange(ChangeEvent&& onChange) override;
 };
 } // namespace OHOS::Ace::NG
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RATING_RATING_MODEL_NG_H

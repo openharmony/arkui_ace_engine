@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,17 +20,11 @@
 #include "interfaces/inner_api/ace/ui_content.h"
 #include "interfaces/inner_api/ace/viewport_config.h"
 #include "key_event.h"
-#include "native_engine/native_value.h"
 #include "native_engine/native_engine.h"
-
-#include "base/utils/macros.h"
+#include "native_engine/native_value.h"
 #include "wm/window.h"
 
-namespace OHOS {
-
-class Window;
-
-} // namespace OHOS
+#include "core/common/flutter/flutter_asset_manager.h"
 
 namespace OHOS::Ace {
 
@@ -38,14 +32,16 @@ class ACE_FORCE_EXPORT UIContentImpl : public UIContent {
 public:
     UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime);
     UIContentImpl(OHOS::AppExecFwk::Ability* ability);
+    UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime, bool isCard);
     ~UIContentImpl()
     {
         DestroyUIDirector();
         DestroyCallback();
     }
 
-    // UI content lifecycles
+    // UI content lifeCycles
     void Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage) override;
+    void Initialize(const std::shared_ptr<Window>& aceWindow, const std::string& url, NativeValue* storage) override;
     void Foreground() override;
     void Background() override;
     void Focus() override;
@@ -65,9 +61,11 @@ public:
     bool ProcessAxisEvent(const std::shared_ptr<OHOS::MMI::AxisEvent>& axisEvent) override;
     bool ProcessVsyncEvent(uint64_t timeStampNanos) override;
     void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) override;
-    void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason) override;
-    void UpdateWindowMode(OHOS::Rosen::WindowMode mode) override;
+    void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
+        const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr) override;
+    void UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco = true) override;
     void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize) override;
+    void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) override;
 
     // Window color
     uint32_t GetBackgroundColor() override;
@@ -83,10 +81,43 @@ public:
 
     void SetAppWindowTitle(const std::string& title) override;
     void SetAppWindowIcon(const std::shared_ptr<Media::PixelMap>& pixelMap) override;
+
+    // ArkTS Form
+    std::shared_ptr<Rosen::RSSurfaceNode> GetFormRootNode() override;
+    void UpdateFormData(const std::string& data) override;
+    void UpdateFormSharedImage(const std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>>& imageDataMap) override;
+    void ReloadForm() override;
+
+    void SetFormWidth(float width) override
+    {
+        formWidth_ = width;
+    }
+    void SetFormHeight(float height) override
+    {
+        formHeight_ = height;
+    }
+    float GetFormWidth() override
+    {
+        return formWidth_;
+    }
+    float GetFormHeight() override
+    {
+        return formHeight_;
+    }
+
+    void SetActionEventHandler(std::function<void(const std::string& action)>&& actionCallback) override;
+    void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& errorCallback) override;
+
+    void OnFormSurfaceChange(float width, float height) override;
+
 private:
-    void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);
+    void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage,
+        const std::shared_ptr<Window>& aceWindow = nullptr);
+    void CommonInitializeForm(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);
     void InitializeSubWindow(OHOS::Rosen::Window* window, bool isDialog = false);
     void DestroyCallback() const;
+    void SetConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
+
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
     void* runtime_ = nullptr;
     OHOS::Rosen::Window* window_ = nullptr;
@@ -97,6 +128,18 @@ private:
 
     // ITouchOutsideListener is used for touching out of hot areas of window.
     OHOS::sptr<OHOS::Rosen::ITouchOutsideListener> touchOutsideListener_ = nullptr;
+
+    // ArkTS Form
+    bool isFormRender_ = false;
+    bool isFormRenderInit_ = false;
+    std::string bundleName_;
+    std::string moduleName_;
+    bool isBundle_ = false;
+    int32_t minCompatibleVersionCode_ = 0;
+    float formWidth_ = 0.0;
+    float formHeight_ = 0.0;
+    std::string formData_;
+    std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>> formImageDataMap_;
 };
 
 } // namespace OHOS::Ace

@@ -29,6 +29,8 @@ template("card_frontend") {
       "card_frontend_declarative.cpp",
       "card_frontend_delegate.cpp",
       "card_frontend_delegate_declarative.cpp",
+      "form_frontend_declarative.cpp",
+      "form_frontend_delegate_declarative.cpp",
       "js_card_parser.cpp",
     ]
 

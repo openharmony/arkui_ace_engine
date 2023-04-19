@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,17 +20,25 @@
 #include <memory>
 
 #include "base/geometry/axis.h"
+#include "base/geometry/size.h"
+#include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
+#include "core/components/common/properties/clip_path.h"
 #include "core/components/common/properties/color.h"
 
 namespace OHOS::Ace {
-
 class ACE_EXPORT SliderModel {
 public:
     enum class SliderMode {
         OUTSET,  // block on track, track is thin
         INSET,   // block inside track, track is rough
         CAPSULE, // capsule slider.
+    };
+
+    enum class BlockStyleType {
+        DEFAULT,
+        IMAGE,
+        SHAPE,
     };
 
     static SliderModel* GetInstance();
@@ -48,6 +56,15 @@ public:
     virtual void SetShowSteps(bool value) = 0;
     virtual void SetShowTips(bool value) = 0;
     virtual void SetThickness(const Dimension& value) = 0;
+    virtual void SetBlockBorderColor(const Color& value) = 0;
+    virtual void SetBlockBorderWidth(const Dimension& value) = 0;
+    virtual void SetStepColor(const Color& value) = 0;
+    virtual void SetTrackBorderRadius(const Dimension& value) = 0;
+    virtual void SetBlockSize(const Size& value) = 0;
+    virtual void SetBlockType(BlockStyleType value) = 0;
+    virtual void SetBlockImage(const std::string& value) = 0;
+    virtual void SetBlockShape(const RefPtr<BasicShape>& value) = 0;
+    virtual void SetStepSize(const Dimension& value) = 0;
     virtual void SetOnChange(std::function<void(float, int32_t)>&& eventOnChange) = 0;
 
 private:
@@ -55,5 +72,4 @@ private:
 };
 
 } // namespace OHOS::Ace
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SLIDER_SLIDER_MODEL_H

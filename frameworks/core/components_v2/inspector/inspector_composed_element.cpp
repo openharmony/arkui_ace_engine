@@ -19,6 +19,7 @@
 
 #include "base/log/dump_log.h"
 #include "base/utils/system_properties.h"
+#include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/components/box/box_element.h"
 #include "core/components/common/layout/constants.h"
@@ -365,8 +366,8 @@ void InspectorComposedElement::AddComposedComponentId()
     }
     accessibilityManager->AddComposedElement(std::to_string(inspectorId_), AceType::Claim(this));
     if (accessibilityEnabled_) {
-        accessibilityNode_ =
-            InspectorComposedComponent::CreateAccessibilityNode(inspectorTag_, inspectorId_, inspectorParentId_, -1);
+        accessibilityNode_ = InspectorComposedComponent::CreateAccessibilityNode(
+            inspectorTag_, inspectorId_, inspectorParentId_, GetRenderSlot());
         if (accessibilityNode_) {
             accessibilityNode_->SetJsComponentId(key_);
         }
@@ -1393,6 +1394,51 @@ std::string InspectorComposedElement::GetColorBlend() const
     }
     auto colorBlend = node->GetColorBlend();
     return colorBlend.ColorToString();
+}
+
+void InspectorComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
+{
+    auto renderElement = GetRenderElement();
+    CHECK_NULL_VOID(renderElement);
+    renderElement->UpdateChildWithSlot(nullptr, newComponent, slot, slot);
+    renderElement->MarkDirty();
+}
+
+void InspectorComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
+{
+    auto renderElement = GetRenderElement();
+    CHECK_NULL_VOID(renderElement);
+    auto child = GetElementChildBySlot(renderElement, slot);
+    CHECK_NULL_VOID(child);
+    // Deals with the case where the component to be updated is a custom component.
+    auto rootElement = renderElement;
+    auto childComposedElement = AceType::DynamicCast<ComposedElement>(child);
+    if (childComposedElement && childComposedElement->GetName() == "view") {
+        rootElement = child;
+        child = rootElement->GetChildren().empty() ? nullptr : rootElement->GetChildren().front();
+    }
+
+    // Replace the component with newComponent.
+    auto context = rootElement->GetContext().Upgrade();
+    auto needRebuildFocusElement = AceType::DynamicCast<Element>(rootElement->GetFocusScope());
+    if (context && needRebuildFocusElement) {
+        context->AddNeedRebuildFocusElement(needRebuildFocusElement);
+    }
+    ElementRegister::GetInstance()->RemoveItemSilently(child->GetElementId());
+    rootElement->DeactivateChild(child);
+    auto newChild = rootElement->InflateComponent(newComponent, child->GetSlot(), child->GetRenderSlot());
+    ElementRegister::GetInstance()->AddElement(newChild);
+    renderElement->MarkDirty();
+}
+
+void InspectorComposedElement::DeleteChildWithSlot(int32_t slot)
+{
+    auto renderElement = GetRenderElement();
+    CHECK_NULL_VOID(renderElement);
+    auto child = GetElementChildBySlot(renderElement, slot);
+    CHECK_NULL_VOID(child);
+    renderElement->UpdateChildWithSlot(child, nullptr, slot, slot);
+    renderElement->MarkDirty();
 }
 
 void InspectorComposedElement::UpdateEventTarget(BaseEventInfo& info) const

@@ -76,9 +76,8 @@ void RectModelImpl::SetRadiusValue(const Dimension& radiusX, const Dimension& ra
     }
 }
 
-template<class T>
 void RectModelImpl::SetCallbackRadius(
-    const RefPtr<T>& component, const Dimension& radiusX, const Dimension& radiusY, int32_t index)
+    const RefPtr<ShapeComponent>& component, const Dimension& radiusX, const Dimension& radiusY, int32_t index)
 {
     if (!component) {
         return;

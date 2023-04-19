@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PANEL_PANEL_PATTERN_H
 
 #include <optional>
+
 #include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
@@ -52,6 +53,7 @@ public:
         auto layoutAlgorithm = MakeRefPtr<SlidingPanelLayoutAlgorithm>();
         layoutAlgorithm->SetCurrentOffset(currentOffset_);
         layoutAlgorithm->SetIsFirstLayout(isFirstLayout_);
+        layoutAlgorithm->SetInvisibleFlag(invisibleFlag_.value_or(false));
         return layoutAlgorithm;
     }
 
@@ -90,11 +92,10 @@ private:
     int32_t GetAnimationDuration(float delta, float dragRange) const;
     void CheckHeightValidity();
     void CheckPanelModeAndType();
-    void RemoveEvent();
-    void AddEvent();
     void FirstLayout();
     void IsShowChanged(bool isShow);
     void HeightDynamicUpdate();
+    void SetDragBarCallBack();
 
     PanelType GetPanelType() const;
     PanelMode GetPanelMode() const;
@@ -104,11 +105,11 @@ private:
     RefPtr<PanEvent> panEvent_;
     RefPtr<Animator> animator_;
     std::unordered_map<PanelMode, double> defaultBlankHeights_;
-    
+
     bool isAnimating_ = false;
     bool isFirstLayout_ = true;
 
-    PanelMode mode_ = PanelMode::FULL;
+    std::optional<PanelMode> mode_;
     PanelMode previousMode_ = PanelMode::HALF;
     PanelType type_ = PanelType::FOLDABLE_BAR;
     float fullHalfBoundary_ = 0.0f;
@@ -124,9 +125,9 @@ private:
     float dragStartCurrentOffset_ = 0.0f;
 
     std::optional<bool> isShow_;
-    PanDirection panDirection_;
-    float distance_ = 0.0f;
     bool isDrag_ = false;
+    std::optional<bool> invisibleFlag_;
+    std::queue<bool> isShowQueue_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SlidingPanelPattern);
 };

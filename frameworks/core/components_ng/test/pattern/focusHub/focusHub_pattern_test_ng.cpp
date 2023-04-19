@@ -39,24 +39,5 @@ class FocusHubPatternTestNg : public testing::Test {
 public:
 };
 
-/**
- * @tc.name: FocusHubTest001
- * @tc.desc: Test FocusHub function: GetFrameNode GetGeometryNode GetInspectorKey
- * @tc.type: FUNC
- */
-HWTEST_F(FocusHubPatternTestNg, FocusHubTest001, TestSize.Level1)
-{
-    ButtonView::CreateWithLabel(BUTTON_CREATE_VALUE);
-    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
-    EXPECT_NE(element, nullptr);
-    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(element);
-    EXPECT_NE(frameNode, nullptr);
-
-    RefPtr<FocusHub> focusHub = frameNode->GetOrCreateFocusHub();
-    EXPECT_NE(focusHub, nullptr);
-    EXPECT_EQ(focusHub->GetFrameNode(), frameNode);
-    EXPECT_EQ(focusHub->GetGeometryNode(), frameNode->GetGeometryNode());
-    EXPECT_EQ(focusHub->GetInspectorKey(), frameNode->GetInspectorId());
-}
 } // namespace OHOS::Ace::NG
 

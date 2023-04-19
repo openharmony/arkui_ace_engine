@@ -18,6 +18,7 @@
 
 #include <memory>
 
+#include "core/components/common/properties/clip_path.h"
 #include "core/components/shape/shape_component.h"
 
 namespace OHOS::Ace {
@@ -30,10 +31,10 @@ public:
     virtual void SetRadiusWidth(const Dimension& value);
     virtual void SetRadiusHeight(const Dimension& value);
     virtual void SetRadiusValue(const Dimension& radiusX, const Dimension& radiusY, int32_t index);
-    template<class T>
-    void SetCallbackRadius(
-        const RefPtr<T>& component, const Dimension& radiusX, const Dimension& radiusY, int32_t index)
-    {}
+    virtual void SetCallbackRadius(
+        const RefPtr<ShapeRect>& component, const Dimension& radiusX, const Dimension& radiusY, int32_t index);
+    virtual void SetCallbackRadius(
+        const RefPtr<ShapeComponent>& component, const Dimension& radiusX, const Dimension& radiusY, int32_t index);
 
 protected:
     enum RADIUS { TOP_LEFT_RADIUS = 0, TOP_RIGHT_RADIUS = 1, BOTTOM_RIGHT_RADIUS = 2, BOTTOM_LEFT_RADIUS = 3 };

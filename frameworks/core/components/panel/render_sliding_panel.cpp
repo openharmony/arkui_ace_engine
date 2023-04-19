@@ -323,6 +323,12 @@ void RenderSlidingPanel::InitializeRecognizer()
                 panel->HandleDragEnd(info.GetLocalLocation(), info.GetMainVelocity());
             }
         });
+        dragDetector_->SetOnDragCancel([weakDrag = AceType::WeakClaim(this)]() {
+            auto panel = weakDrag.Upgrade();
+            if (panel) {
+                panel->HandleDragEnd({}, 0.0);
+            }
+        });
     }
 }
 

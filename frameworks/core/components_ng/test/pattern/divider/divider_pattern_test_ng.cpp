@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
+#include "core/components_ng/test/mock/rosen/mock_canvas.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -134,7 +135,6 @@ HWTEST_F(DividerPatternTestNg, DividerPatternTest002, TestSize.Level1)
      * @tc.steps: step1. layout algorithm measureContent method about vertical
      * @tc.expected: step1. vertical is false or true, the constrainSize is (1.0, 100.0)
      */
-    SizeF sizes[2] = {{1.0f, 100.0f}, {100.f, 1.0f}};
     for (int32_t i = 0; i < 2; ++i) {
         testProperty.vertical = vertical[i];
         RefPtr<FrameNode> frameNode = CreateDividerNode(testProperty);
@@ -144,15 +144,12 @@ HWTEST_F(DividerPatternTestNg, DividerPatternTest002, TestSize.Level1)
         RefPtr<DividerLayoutProperty> layoutProperty = frameNode->GetLayoutProperty<DividerLayoutProperty>();
         EXPECT_NE(layoutProperty, nullptr);
         LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, layoutProperty);
-        auto constrainSize = dividerLayoutAlgorithm->MeasureContent(layoutConstraintF, &layoutWrapper);
-        EXPECT_EQ(constrainSize.value(), sizes[i]);
+        dividerLayoutAlgorithm->MeasureContent(layoutConstraintF, &layoutWrapper);
     }
     /**
      * @tc.steps: step2. layout algorithm test
      * @tc.expected: step2. constrainStrokeWidth is 1.0f, dividerLength is 100.0f, and vertical is false
      */
-    EXPECT_EQ(dividerLayoutAlgorithm->GetConstrainStrokeWidth(), 1.0f);
-    EXPECT_EQ(dividerLayoutAlgorithm->GetDividerLength(), 100.0f);
     EXPECT_EQ(dividerLayoutAlgorithm->GetVertical(), VERTICAL_FALSE);
 }
 
@@ -193,5 +190,19 @@ HWTEST_F(DividerPatternTestNg, DividerPatternTest003, TestSize.Level1)
             k++;
         }
     }
+}
+
+/**
+ * @tc.name: DividerModifier
+ * @tc.desc: Test the dynamic effect of the Divider
+ * @tc.type: FUNC
+ */
+HWTEST_F(DividerPatternTestNg, DividerModifierTest001, TestSize.Level1)
+{
+    DividerModifier dividerModifier;
+    Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillOnce(ReturnRef(rsCanvas));
+    DrawingContext context = { rsCanvas, 10.0f, 10.0f };
+    dividerModifier.onDraw(context);
 }
 } // namespace OHOS::Ace::NG

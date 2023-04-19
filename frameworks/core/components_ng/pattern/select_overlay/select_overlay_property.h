@@ -18,10 +18,12 @@
 
 #include <cstdint>
 #include <functional>
+#include <vector>
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/pattern/text/text_menu_extension.h"
 
 namespace OHOS::Ace::NG {
 
@@ -65,6 +67,7 @@ struct SelectMenuCallback {
 };
 
 struct SelectOverlayInfo {
+    bool isUsingMouse = false;
     bool isSingleHandle = false;
     // when handleReverse is true, The first one is on the right side of the second.
     bool handleReverse = false;
@@ -78,7 +81,15 @@ struct SelectOverlayInfo {
     bool useFullScreen = true;
     RectF showArea;
 
+    OffsetF rightClickOffset;
+
+    // handle touch event
+    std::function<void(const TouchEventInfo&)> onTouchDown;
+    std::function<void(const TouchEventInfo&)> onTouchUp;
+    std::function<void(const TouchEventInfo&)> onTouchMove;
+
     // handle move callback.
+    std::function<void(bool isFirst)> onHandleMoveStart;
     std::function<void(const RectF&, bool isFirst)> onHandleMove;
     std::function<void(const RectF&, bool isFirst)> onHandleMoveDone;
     std::function<void(bool)> onHandleReverse;
@@ -86,6 +97,8 @@ struct SelectOverlayInfo {
     // menu info.
     SelectMenuInfo menuInfo;
     SelectMenuCallback menuCallback;
+
+    std::vector<MenuOptionsParam> menuOptionItems;
 
     // force hide callback, which may be called when other textOverlay shows.
     std::function<void()> onClose;

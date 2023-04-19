@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,14 +15,15 @@
 
 #include "core/components_ng/pattern/badge/badge_view.h"
 
+#include "base/utils/utils.h"
 #include "core/components/badge/badge_theme.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/badge/badge_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 
@@ -34,7 +35,7 @@ void BadgeView::Create(BadgeParameters& badgeParameters)
         V2::BADGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<BadgePattern>(); });
     ViewStackProcessor::GetInstance()->Push(frameNode);
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
 
@@ -47,11 +48,12 @@ void BadgeView::Create(BadgeParameters& badgeParameters)
     }
     if (badgeParameters.badgeMaxCount.has_value()) {
         layoutProperty->UpdateBadgeMaxCount(badgeParameters.badgeMaxCount.value());
+    } else {
+        layoutProperty->UpdateBadgeMaxCount(badgeTheme->GetMaxCount());
     }
 
     if (badgeParameters.badgePosition.has_value()) {
-        BadgeLayoutProperty::BadgePosition badgePosition =
-            static_cast<BadgeLayoutProperty::BadgePosition>(badgeParameters.badgePosition.value());
+        auto badgePosition = static_cast<BadgeLayoutProperty::BadgePosition>(badgeParameters.badgePosition.value());
         layoutProperty->SetBadgePosition(badgePosition);
     }
 
@@ -67,7 +69,8 @@ void BadgeView::Create(BadgeParameters& badgeParameters)
         layoutProperty->UpdateBadgeTextColor(badgeTheme->GetBadgeTextColor());
     }
 
-    if (badgeParameters.badgeFontSize.has_value()) {
+    if (badgeParameters.badgeFontSize.has_value() &&
+        GreatOrEqual(badgeParameters.badgeFontSize.value().ConvertToPx(), 0)) {
         layoutProperty->UpdateBadgeFontSize(badgeParameters.badgeFontSize.value());
     } else {
         layoutProperty->UpdateBadgeFontSize(badgeTheme->GetBadgeFontSize());
@@ -75,6 +78,24 @@ void BadgeView::Create(BadgeParameters& badgeParameters)
 
     if (badgeParameters.badgeCircleSize.has_value()) {
         layoutProperty->UpdateBadgeCircleSize(badgeParameters.badgeCircleSize.value());
+    }
+
+    if (badgeParameters.badgeBorderColor.has_value()) {
+        layoutProperty->UpdateBadgeBorderColor(badgeParameters.badgeBorderColor.value());
+    } else {
+        layoutProperty->UpdateBadgeBorderColor(badgeTheme->GetBadgeBorderColor());
+    }
+
+    if (badgeParameters.badgeBorderWidth.has_value()) {
+        layoutProperty->UpdateBadgeBorderWidth(badgeParameters.badgeBorderWidth.value());
+    } else {
+        layoutProperty->UpdateBadgeBorderWidth(badgeTheme->GetBadgeBorderWidth());
+    }
+
+    if (badgeParameters.badgeFontWeight.has_value()) {
+        layoutProperty->UpdateBadgeFontWeight(badgeParameters.badgeFontWeight.value());
+    } else {
+        layoutProperty->UpdateBadgeFontWeight(FontWeight::NORMAL);
     }
 }
 

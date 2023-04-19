@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//foundation/arkui/ace_engine/ace_config.gni")
 import(
     "//foundation/arkui/ace_engine/frameworks/core/components/components.gni")
 
@@ -27,16 +28,30 @@ build_component("form") {
     "sub_container.cpp",
   ]
 
-  if (is_standard_system) {
+  if (is_ohos_standard_system) {
     external_deps = [
       "ability_base:want",
       "ability_runtime:app_manager",
+      "ace_engine:ace_form_render",
       "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
       "form_fwk:fmskit_native",
       "form_fwk:form_manager",
+      "input:libmmi-client",
       "ipc:ipc_core",
     ]
+    include_dirs = [
+      "//foundation/graphic/graphic_2d/interfaces/innerkits/surface",
+      "//foundation/arkui/ace_engine/interfaces/inner_api/form_render/include",
+    ]
+    deps = [
+      "//foundation/arkui/ace_engine/interfaces/inner_api/form_render:ace_form_render",
+      "//foundation/graphic/graphic_2d:libsurface",
+      "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
+    ]
+  }
+  if (ace_use_new_skia) {
+    sources -= [ "flutter_render_form.cpp" ]
   }
   rosen_sources = [ "rosen_render_form.cpp" ]
 }

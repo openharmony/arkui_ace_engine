@@ -37,6 +37,8 @@ public:
 
     void AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool forceMeasure, bool forceLayout) override;
 
+    RefPtr<LayoutWrapper> CreateLayoutWrapper(bool forceMeasure = false, bool forceLayout = false) override;
+
     bool IsAtomicNode() const override
     {
         return true;
@@ -54,9 +56,18 @@ public:
         return 1;
     }
 
+    void Render();
+
+    void SetCompleteReloadFunc(RenderFunction&& func) override
+    {
+        completeReloadFunc_ = std::move(func);
+    }
+    void FlushReload();
+
 private:
     std::string viewKey_;
     RenderFunction renderFunction_;
+    RenderFunction completeReloadFunc_;
 };
 } // namespace OHOS::Ace::NG
 

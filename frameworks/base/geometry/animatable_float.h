@@ -19,7 +19,7 @@
 #include "core/animation/animator.h"
 #include "core/animation/curve_animation.h"
 #include "core/components/common/properties/animation_option.h"
-#include "core/pipeline/pipeline_context.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
 
@@ -34,7 +34,7 @@ public:
     ~AnimatableFloat() = default;
     using RenderNodeAnimationCallback = std::function<void()>;
 
-    void SetContextAndCallback(const WeakPtr<PipelineContext>& context, RenderNodeAnimationCallback&& callback)
+    void SetContextAndCallback(const WeakPtr<PipelineBase>& context, RenderNodeAnimationCallback&& callback)
     {
         LOGD("AnimatableFloat SetContextAndCallback()");
         context_ = context;
@@ -147,7 +147,7 @@ private:
     float value_ = std::numeric_limits<float>::max();
     AnimationOption animationOption_;
     RefPtr<Animator> animationController_;
-    WeakPtr<PipelineContext> context_;
+    WeakPtr<PipelineBase> context_;
     RenderNodeAnimationCallback animationCallback_;
     float animateToEndValue_ = -1.0f;
 };

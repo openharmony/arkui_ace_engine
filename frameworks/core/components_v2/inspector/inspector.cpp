@@ -18,6 +18,7 @@
 #include "inspector_composed_element.h"
 #include "shape_composed_element.h"
 
+#include "core/common/ace_application_info.h"
 #include "core/components/page/page_element.h"
 #include "core/components/root/root_element.h"
 
@@ -58,6 +59,68 @@ RefPtr<V2::InspectorComposedElement> GetInspectorByKey(const RefPtr<RootElement>
         }
     }
     return nullptr;
+}
+
+void GetInspectorChildren(const RefPtr<Element>& element, std::list<RefPtr<Element>>& childrenList)
+{
+    if (element->GetChildren().empty()) {
+        return;
+    }
+    const auto& children = element->GetChildren();
+    for (auto& childElement : children) {
+        if (AceType::InstanceOf<V2::InspectorComposedElement>(childElement)) {
+            childrenList.emplace_back(childElement);
+        } else {
+            GetInspectorChildren(childElement, childrenList);
+        }
+    }
+}
+
+void DumpInspectorTree(
+    const RefPtr<Element>& element, std::map<RefPtr<Element>, std::list<RefPtr<Element>>>& inspectorTreeMap)
+{
+    std::list<RefPtr<Element>> childrenList;
+    GetInspectorChildren(element, childrenList);
+    if (childrenList.empty()) {
+        return;
+    }
+    inspectorTreeMap.emplace(element, childrenList);
+    for (const auto& child : childrenList) {
+        DumpInspectorTree(child, inspectorTreeMap);
+    }
+}
+
+void ToJsonValue(const RefPtr<Element>& element,
+    const std::map<RefPtr<Element>, std::list<RefPtr<Element>>>& inspectorTree, std::unique_ptr<JsonValue>& json)
+{
+    auto inspectorElement = AceType::DynamicCast<V2::InspectorComposedElement>(element);
+    if (inspectorElement == nullptr) {
+        return;
+    }
+    json->Put(INSPECTOR_TYPE, inspectorElement->GetTag().c_str());
+    auto shapeComposedElement = AceType::DynamicCast<V2::ShapeComposedElement>(element);
+    if (shapeComposedElement != nullptr) {
+        int type = StringUtils::StringToInt(shapeComposedElement->GetShapeType());
+        json->Replace(INSPECTOR_TYPE, SHAPE_TYPE_STRINGS[type]);
+    }
+    json->Put(INSPECTOR_ID, std::stoi(inspectorElement->GetId()));
+    json->Put(INSPECTOR_Z_INDEX, inspectorElement->GetZIndex());
+    json->Put(INSPECTOR_RECT, inspectorElement->GetRenderRect().ToBounds().c_str());
+    auto jsonObject = inspectorElement->ToJsonObject();
+    json->Put(INSPECTOR_ATTRS, jsonObject);
+
+    auto iter = inspectorTree.find(element);
+    if (iter == inspectorTree.end()) {
+        return;
+    }
+
+    auto jsonNodeArray = JsonUtil::CreateArray(true);
+    for (const auto& child : iter->second) {
+        auto jsonChild = JsonUtil::Create(true);
+        ToJsonValue(child, inspectorTree, jsonChild);
+        jsonNodeArray->Put(jsonChild);
+    }
+    json->Put(INSPECTOR_CHILDREN, jsonNodeArray);
 }
 
 void DumpElementTree(
@@ -102,6 +165,7 @@ std::string Inspector::GetInspectorNodeByKey(const RefPtr<PipelineContext>& cont
 
 std::string Inspector::GetInspectorTree(const RefPtr<PipelineContext>& context, bool isLayoutInspector)
 {
+    LOGI("GetInspectorTree start");
     auto jsonRoot = JsonUtil::Create(true);
     jsonRoot->Put(INSPECTOR_TYPE, INSPECTOR_ROOT);
 
@@ -117,77 +181,22 @@ std::string Inspector::GetInspectorTree(const RefPtr<PipelineContext>& context, 
         return jsonRoot->ToString();
     }
 
-    std::map<int32_t, std::list<RefPtr<Element>>> depthElementMap;
-    depthElementMap[0].emplace_back(root);
-
     auto pageElement = AceType::DynamicCast<Element>(context->GetLastPage());
     if (pageElement == nullptr) {
         return jsonRoot->ToString();
     }
-    DumpElementTree(1, pageElement, depthElementMap);
-
-    size_t height = 0;
-    std::unordered_map<int32_t, std::vector<std::pair<RefPtr<Element>, std::string>>> elementJSONInfoMap;
-    for (int depth = static_cast<int32_t>(depthElementMap.size()); depth > 0; depth--) {
-        const auto& depthElements = depthElementMap[depth];
-        for (const auto& element : depthElements) {
-            auto inspectorElement = AceType::DynamicCast<V2::InspectorComposedElement>(element);
-            if (inspectorElement == nullptr) {
-                continue;
-            }
-
-            auto jsonNode = JsonUtil::Create(true);
-            jsonNode->Put(INSPECTOR_TYPE, inspectorElement->GetTag().c_str());
-            jsonNode->Put(INSPECTOR_ID, std::stoi(inspectorElement->GetId()));
-            jsonNode->Put(INSPECTOR_Z_INDEX, inspectorElement->GetZIndex());
-            jsonNode->Put(INSPECTOR_RECT, inspectorElement->GetRenderRect().ToBounds().c_str());
-#if defined(PREVIEW)
-            std::string debugLine = inspectorElement->GetDebugLine();
-            jsonNode->Put(INSPECTOR_DEBUGLINE, debugLine.c_str());
-#endif
-            auto jsonObject = inspectorElement->ToJsonObject();
-            jsonNode->Put(INSPECTOR_ATTRS, jsonObject);
-            auto shapeComposedElement = AceType::DynamicCast<V2::ShapeComposedElement>(element);
-            if (shapeComposedElement != nullptr) {
-                int type = StringUtils::StringToInt(shapeComposedElement->GetShapeType());
-                jsonNode->Replace(INSPECTOR_TYPE, SHAPE_TYPE_STRINGS[type]);
-            }
-            if (!element->GetChildren().empty()) {
-                if (height > 0) {
-                    auto jsonNodeArray = JsonUtil::CreateArray(true);
-                    auto childNodeJSONVec = elementJSONInfoMap[height - 1];
-                    for (auto iter = childNodeJSONVec.begin(); iter != childNodeJSONVec.end(); iter++) {
-                        auto parent = iter->first->GetElementParent().Upgrade();
-                        while (parent) {
-                            if (AceType::TypeName(parent) == AceType::TypeName(element) &&
-                                parent->GetRetakeId() == element->GetRetakeId()) {
-                                auto childJSONValue = JsonUtil::ParseJsonString(iter->second);
-                                jsonNodeArray->Put(childJSONValue);
-                                break;
-                            } else {
-                                parent = parent->GetElementParent().Upgrade();
-                            }
-                        }
-                    }
-                    if (jsonNodeArray->GetArraySize()) {
-                        jsonNode->Put(INSPECTOR_CHILDREN, jsonNodeArray);
-                    }
-                }
-            }
-            elementJSONInfoMap[height].emplace_back(element, jsonNode->ToString());
+    std::map<RefPtr<Element>, std::list<RefPtr<Element>>> inspectorTree;
+    DumpInspectorTree(pageElement, inspectorTree);
+    auto pageChildren = inspectorTree.find(pageElement);
+    if (pageChildren != inspectorTree.end()) {
+        auto jsonNodeArray = JsonUtil::CreateArray(true);
+        for (const auto& child : pageChildren->second) {
+            auto jsonChild = JsonUtil::Create(true);
+            ToJsonValue(child, inspectorTree, jsonChild);
+            jsonNodeArray->Put(jsonChild);
         }
-        if (elementJSONInfoMap.find(height) != elementJSONInfoMap.end()) {
-            height++;
-        }
+        jsonRoot->Put(INSPECTOR_CHILDREN, jsonNodeArray);
     }
-
-    auto jsonNodeArray = JsonUtil::CreateArray(true);
-    auto firstDepthNodeVec = elementJSONInfoMap[elementJSONInfoMap.size() - 1];
-    for (const auto& nodeJSONInfo : firstDepthNodeVec) {
-        auto nodeJSONValue = JsonUtil::ParseJsonString(nodeJSONInfo.second);
-        jsonNodeArray->Put(nodeJSONValue);
-    }
-    jsonRoot->Put(INSPECTOR_CHILDREN, jsonNodeArray);
 
     if (isLayoutInspector) {
         auto jsonTree = JsonUtil::Create(true);

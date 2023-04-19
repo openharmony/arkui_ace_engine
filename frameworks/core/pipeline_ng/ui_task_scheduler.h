@@ -22,6 +22,7 @@
 #include <set>
 #include <unordered_map>
 
+#include "base/log/frame_info.h"
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
 
@@ -75,11 +76,13 @@ public:
     void AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty);
     void AddDirtyRenderNode(const RefPtr<FrameNode>& dirty);
     void AddPredictTask(PredictTask&& task);
+    void AddAfterLayoutTask(std::function<void()>&& task);
 
     void FlushLayoutTask(bool forceUseMainThread = false);
     void FlushRenderTask(bool forceUseMainThread = false);
     void FlushTask();
     void FlushPredictTask(int64_t deadline);
+    void FlushAfterLayoutTask();
 
     void UpdateCurrentPageId(uint32_t id)
     {
@@ -90,7 +93,19 @@ public:
 
     bool isEmpty();
 
+    void StartRecordFrameInfo(FrameInfo* info)
+    {
+        frameInfo_ = info;
+    }
+
+    void FinishRecordFrameInfo()
+    {
+        frameInfo_ = nullptr;
+    }
+
 private:
+    bool NeedAdditionalLayout();
+
     template<typename T>
     struct NodeCompare {
         bool operator()(const T& nodeLeft, const T& nodeRight) const
@@ -114,8 +129,11 @@ private:
     RootDirtyMap dirtyLayoutNodes_;
     RootDirtyMap dirtyRenderNodes_;
     std::list<PredictTask> predictTask_;
+    std::list<std::function<void()>> afterLayoutTasks_;
 
     uint32_t currentPageId_ = 0;
+
+    FrameInfo* frameInfo_ = nullptr;
 
     ACE_DISALLOW_COPY_AND_MOVE(UITaskScheduler);
 };

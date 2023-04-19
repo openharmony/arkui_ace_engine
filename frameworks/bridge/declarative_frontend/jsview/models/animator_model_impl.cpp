@@ -19,9 +19,7 @@
 #include "core/pipeline/pipeline_context.h"
 #include "frameworks/core/event/ace_event_handler.h"
 
-#ifdef USE_V8_ENGINE
-#include "bridge/declarative_frontend/engine/v8/v8_declarative_engine.h"
-#elif USE_ARK_ENGINE
+#ifdef USE_ARK_ENGINE
 #include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #endif
 
@@ -29,11 +27,7 @@ namespace OHOS::Ace::Framework {
 namespace {
 RefPtr<JsAcePage> GetCurrentPage()
 {
-#ifdef USE_V8_ENGINE
-    auto isolate = V8DeclarativeEngineInstance::GetV8Isolate();
-    auto page = V8DeclarativeEngineInstance::GetStagingPage(isolate);
-    return page;
-#elif USE_ARK_ENGINE
+#ifdef USE_ARK_ENGINE
     auto page = JsiDeclarativeEngineInstance::GetStagingPage(Container::CurrentId());
     return page;
 #endif

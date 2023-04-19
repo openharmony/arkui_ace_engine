@@ -59,10 +59,10 @@ public:
         mouseEventActuator_->RemoveInputEvent(onMouseEvent);
     }
 
-    void SetHoverAnimation(HoverEffectType type)
+    void SetHoverEffect(HoverEffectType type)
     {
-        if (!mouseEventActuator_) {
-            mouseEventActuator_ = MakeRefPtr<InputEventActuator>(WeakClaim(this));
+        if (!hoverEffectActuator_) {
+            hoverEffectActuator_ = MakeRefPtr<InputEventActuator>(WeakClaim(this));
         }
         hoverEffectType_ = type;
     }
@@ -70,6 +70,20 @@ public:
     HoverEffectType GetHoverEffect()
     {
         return hoverEffectType_;
+    }
+    std::string GetHoverEffectStr() const;
+
+    void SetHoverEffectAuto(HoverEffectType type)
+    {
+        if (!hoverEffectActuator_) {
+            hoverEffectActuator_ = MakeRefPtr<InputEventActuator>(WeakClaim(this));
+        }
+        hoverEffectAuto_ = type;
+    }
+
+    HoverEffectType GetHoverEffectAuto()
+    {
+        return hoverEffectAuto_;
     }
 
     // Set by user define, which will replace old one.
@@ -114,8 +128,7 @@ public:
     }
 
     // the return value means prevents event bubbling.
-    bool ProcessMouseTestHit(const OffsetF& coordinateOffset, MouseTestResult& onMouseResult,
-        MouseTestResult& onHoverResult, RefPtr<FrameNode>& hoverNode);
+    bool ProcessMouseTestHit(const OffsetF& coordinateOffset, TouchTestResult& result);
 
     bool ProcessAxisTestHit(const OffsetF& coordinateOffset, AxisTestResult& onAxisResult);
 
@@ -130,11 +143,13 @@ private:
     WeakPtr<EventHub> eventHub_;
     RefPtr<InputEventActuator> mouseEventActuator_;
     RefPtr<InputEventActuator> hoverEventActuator_;
+    RefPtr<InputEventActuator> hoverEffectActuator_;
     RefPtr<InputEventActuator> axisEventActuator_;
 
     RefPtr<InputEvent> showMenu_;
 
     HoverEffectType hoverEffectType_ = HoverEffectType::UNKNOWN;
+    HoverEffectType hoverEffectAuto_ = HoverEffectType::UNKNOWN;
 };
 
 } // namespace OHOS::Ace::NG

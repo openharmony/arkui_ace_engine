@@ -105,6 +105,8 @@ void RenderImage::Update(const RefPtr<Component>& component)
     auto inComingSrc = image->GetSrc();
     ImageSourceInfo inComingSource(
         inComingSrc,
+        image->GetBundleName(),
+        image->GetModuleName(),
         image->GetImageSourceSize().first,
         image->GetImageSourceSize().second,
         inComingSrc.empty() ? image->GetResourceId() : InternalResource::ResourceId::NO_ID,
@@ -132,8 +134,11 @@ void RenderImage::Update(const RefPtr<Component>& component)
     LOGD("inComingSource %{public}s", inComingSource.ToString().c_str());
     LOGD("imageLoadingStatus_: %{public}d", static_cast<int32_t>(imageLoadingStatus_));
     proceedPreviousLoading_ = sourceInfo_.IsValid() && sourceInfo_ == inComingSource;
-    sourceInfo_ = inComingSource;
-    MarkNeedLayout(sourceInfo_.IsSvg());
+    // perform layout only if loading new image
+    if (!proceedPreviousLoading_) {
+        sourceInfo_ = inComingSource;
+        MarkNeedLayout(sourceInfo_.IsSvg());
+    }
 }
 
 void RenderImage::UpdateThemeIcon(ImageSourceInfo& sourceInfo)
@@ -727,8 +732,8 @@ void RenderImage::GenerateImageRects(const Size& srcSize, const BackgroundImageS
     if (imageLoadingStatus_ == ImageLoadingStatus::LOAD_SUCCESS) {
         currentDstRectList_ = rectList_;
     }
-    LOGD("[BOX][Dep:%{public}d][%{public}p][IMAGE] Result: X:%{public}d-%{public}d, Y:%{public}d-%{public}d",
-        GetDepth(), this, minX, maxX, minY, maxY);
+    LOGD("[BOX][Dep:%{public}d][IMAGE] Result: X:%{public}d-%{public}d, Y:%{public}d-%{public}d",
+        GetDepth(), minX, maxX, minY, maxY);
 }
 
 Size RenderImage::CalculateImageRenderSize(const Size& srcSize, const BackgroundImageSize& imageSize) const

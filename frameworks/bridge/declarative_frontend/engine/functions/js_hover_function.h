@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_V8_FUNCTION_V8_HOVER_FUNCTION_H
-#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_V8_FUNCTION_V8_HOVER_FUNCTION_H
+#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_FUNCTION_JS_HOVER_FUNCTION_H
+#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_FUNCTION_JS_HOVER_FUNCTION_H
 
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 
@@ -26,10 +26,13 @@ class JsHoverFunction : public JsFunction {
 public:
     explicit JsHoverFunction(const JSRef<JSFunc>& jsFunction) : JsFunction(JSRef<JSObject>(), jsFunction) {}
     ~JsHoverFunction() override = default;
-
+    void Execute() override
+    {
+        ExecuteJS();
+    }
     void Execute(bool isHover);
 };
 
 } // namespace OHOS::Ace::Framework
 
-#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_V8_FUNCTION_V8_HOVER_FUNCTION_H
+#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_FUNCTION_JS_HOVER_FUNCTION_H

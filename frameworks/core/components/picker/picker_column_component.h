@@ -176,6 +176,16 @@ public:
         fixHeight_ = value;
     }
 
+    bool GetDefaultHeight() const
+    {
+        return defaultHeight_;
+    }
+
+    void SetDefaultHeight(bool value)
+    {
+        defaultHeight_ = value;
+    }
+
     void HandleChangeCallback(bool isAdd, bool needNotify)
     {
         if (changeCallback_) {
@@ -251,7 +261,7 @@ private:
     std::string suffix_;
 
     Dimension fixHeight_;
-
+    bool defaultHeight_ = false;
     uint32_t widthRatio_ = 1; // default column ratio is 1:1
 
     std::function<void()> requestFocusCallback_;

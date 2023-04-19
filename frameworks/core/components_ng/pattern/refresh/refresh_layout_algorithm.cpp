@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 #include "frameworks/base/utils/utils.h"
 #include "frameworks/core/components_ng/base/frame_node.h"
 #include "frameworks/core/components_ng/pattern/refresh/refresh_layout_property.h"
+#include "frameworks/core/components_ng/pattern/refresh/refresh_pattern.h"
 #include "frameworks/core/components_ng/property/measure_property.h"
 #include "frameworks/core/components_ng/property/measure_utils.h"
 #include "frameworks/core/components_ng/property/property.h"
@@ -26,21 +27,16 @@ namespace OHOS::Ace::NG {
 
 RefreshLayoutAlgorithm::RefreshLayoutAlgorithm() = default;
 
-std::optional<SizeF> RefreshLayoutAlgorithm::MeasureContent(
-    const LayoutConstraintF& contentConstraint, LayoutWrapper* /*layoutWrapper*/)
-{
-    if (contentConstraint.selfIdealSize.IsValid()) {
-        return contentConstraint.selfIdealSize.ConvertToSizeT();
-    }
-
-    return contentConstraint.maxSize;
-}
-
 void RefreshLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     PerformLayout(layoutWrapper);
+    auto layoutProperty = AceType::DynamicCast<NG::RefreshLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
 
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
+        if (!child) {
+            continue;
+        }
         child->Layout();
     }
 }
@@ -61,17 +57,33 @@ void RefreshLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
     auto layoutProperty = AceType::DynamicCast<NG::RefreshLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
 
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<RefreshPattern>();
+    CHECK_NULL_VOID(pattern);
     // Update child position.
     int32_t index = 0;
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
+        if (!child) {
+            index++;
+            continue;
+        }
         auto paddingOffsetChild = paddingOffset;
         auto alignChild = align;
-        if (index == layoutWrapper->GetTotalChildCount() - 2) {
-            paddingOffsetChild += layoutProperty->GetShowTimeOffsetValue();
-            alignChild = Alignment::TOP_CENTER;
-        } else if (index == layoutWrapper->GetTotalChildCount() - 1) {
-            paddingOffsetChild += layoutProperty->GetLoadingProcessOffsetValue();
-            alignChild = Alignment::TOP_CENTER;
+        if (!layoutProperty->GetIsCustomBuilderExistValue(false)) {
+            if (index == layoutWrapper->GetTotalChildCount() - 2) {
+                paddingOffsetChild += layoutProperty->GetShowTimeOffsetValue();
+                alignChild = Alignment::TOP_CENTER;
+            } else if (index == layoutWrapper->GetTotalChildCount() - 1) {
+                alignChild = Alignment::TOP_CENTER;
+            }
+        } else {
+            if (index == layoutProperty->GetCustomBuilderIndexValue(-1)) {
+                alignChild = Alignment::TOP_CENTER;
+                paddingOffsetChild += layoutProperty->GetCustomBuilderOffsetValue();
+            } else {
+                paddingOffsetChild += pattern->GetScrollOffsetValue();
+            }
         }
         auto translate = Alignment::GetAlignPosition(size, child->GetGeometryNode()->GetMarginFrameSize(), alignChild) +
                          paddingOffsetChild;

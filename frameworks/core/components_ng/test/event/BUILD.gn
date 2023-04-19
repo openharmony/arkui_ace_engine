@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -17,6 +17,7 @@ group("event_unittest") {
     "click_event:click_event_test_ng",
     "drag_event:drag_event_test_ng",
     "event_hub:event_hub_test_ng",
+    "event_manager:event_manager_test_ng",
     "focus_hub:focus_hub_test_ng",
     "gesture_event_hub:gesture_event_hub_test_ng",
     "input_event_hub:input_event_hub_test_ng",

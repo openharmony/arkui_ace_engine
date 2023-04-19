@@ -73,8 +73,8 @@ void RadioLayoutAlgorithm::InitializeParam()
     CHECK_NULL_VOID(pipeline);
     auto radioTheme = pipeline->GetTheme<RadioTheme>();
     CHECK_NULL_VOID(radioTheme);
-    defaultWidth_ = radioTheme->GetDefaultWidth().ConvertToPx();
-    defaultHeight_ = radioTheme->GetDefaultHeight().ConvertToPx();
+    defaultWidth_ = radioTheme->GetWidth().ConvertToPx();
+    defaultHeight_ = radioTheme->GetHeight().ConvertToPx();
     horizontalPadding_ = radioTheme->GetHotZoneHorizontalPadding().ConvertToPx();
     verticalPadding_ = radioTheme->GetHotZoneVerticalPadding().ConvertToPx();
 }

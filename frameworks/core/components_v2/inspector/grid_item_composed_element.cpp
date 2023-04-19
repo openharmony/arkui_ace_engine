@@ -16,7 +16,6 @@
 #include "core/components_v2/inspector/grid_item_composed_element.h"
 
 #include "base/log/dump_log.h"
-#include "core/components/box/box_element.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/grid_layout/render_grid_layout_item.h"
 #include "core/components_v2/inspector/utils.h"
@@ -148,52 +147,6 @@ std::string GridItemComposedElement::GetSelectable() const
         return renderGripItem->GetSelectable() ? "true" : "false";
     }
     return "true";
-}
-
-void GridItemComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
-{
-    auto gridLayoutItemElement = GetContentElement<BoxElement>(BoxElement::TypeId());
-    if (!gridLayoutItemElement) {
-        LOGE("get GetGridLayoutItemElement failed");
-        return;
-    }
-    gridLayoutItemElement->UpdateChildWithSlot(nullptr, newComponent, slot, slot);
-    gridLayoutItemElement->MarkDirty();
-    LOGD("gridItem AddChildWithSlot");
-}
-
-void GridItemComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
-{
-    auto gridLayoutItemElement = GetContentElement<BoxElement>(BoxElement::TypeId());
-    if (!gridLayoutItemElement) {
-        LOGE("get GetGridLayoutItemElement failed");
-        return;
-    }
-    auto child = GetElementChildBySlot(gridLayoutItemElement, slot);
-    if (!child) {
-        LOGE("gridLayoutItemElement get GetChildBySlot failed");
-        return;
-    }
-    gridLayoutItemElement->UpdateChildWithSlot(child, newComponent, slot, slot);
-    gridLayoutItemElement->MarkDirty();
-    LOGD("gridItem UpdateChildWithSlot");
-}
-
-void GridItemComposedElement::DeleteChildWithSlot(int32_t slot)
-{
-    auto gridLayoutItemElement = GetContentElement<BoxElement>(BoxElement::TypeId());
-    if (!gridLayoutItemElement) {
-        LOGE("get GetGridLayoutItemElement failed");
-        return;
-    }
-    auto child = GetElementChildBySlot(gridLayoutItemElement, slot);
-    if (!child) {
-        LOGE("gridLayoutItemElement get GetChildBySlot failed");
-        return;
-    }
-    gridLayoutItemElement->UpdateChildWithSlot(child, nullptr, slot, slot);
-    gridLayoutItemElement->MarkDirty();
-    LOGD("gridItem DeleteChildWithSlot");
 }
 
 } // namespace OHOS::Ace::V2

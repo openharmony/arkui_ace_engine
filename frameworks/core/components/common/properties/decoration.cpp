@@ -203,8 +203,8 @@ std::string BackgroundImageSize::ToString() const
         return "ImageSize.Auto";
     }
     auto jsonValue = JsonUtil::Create(true);
-    Dimension width = Dimension((GetSizeValueX()), DimensionUnit::VP);
-    Dimension height = Dimension((GetSizeValueY()), DimensionUnit::VP);
+    Dimension width = Dimension((GetSizeValueX()), DimensionUnit::PX);
+    Dimension height = Dimension((GetSizeValueY()), DimensionUnit::PX);
     jsonValue->Put("width", width.ToString().c_str());
     jsonValue->Put("height", height.ToString().c_str());
     return jsonValue->ToString();

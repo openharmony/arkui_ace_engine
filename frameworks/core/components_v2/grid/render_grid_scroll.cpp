@@ -734,6 +734,16 @@ void RenderGridScroll::CalculateViewPort()
                 }
             }
             currentOffset_ = 0.0;
+
+            auto blank = CalculateBlankOfEnd();
+            if (GreatOrEqual(0.0, blank)) {
+                return;
+            }
+            // request new item until the blank is filled up
+            blank -= BuildLazyGridLayout(*mainCount_, blank);
+            if (LessOrEqual(blank, 0)) {
+                return;
+            }
         } else {
             // [currentOffset_] <= 0  means grid items are going to move up.
             if (!NearZero(firstItemOffset_)) {
@@ -1164,11 +1174,14 @@ void RenderGridScroll::CalculateWholeSize(double drawLength)
         itemCount += gridCells_.at(index).size();
         scrollBarExtent += GetSize(gridCells_.at(index).at(0)) + *mainGap_;
     }
-    if (itemCount > 0 && !gridMatrix_.empty()) {
+    if (itemCount > 0 && !gridCells_.empty()) {
         estimateAverageHeight_ = scrollBarExtent / itemCount;
         estimateHeight_ = estimateAverageHeight_ * GetItemTotalCount();
-        int32_t startItem = gridMatrix_.begin()->second[0];
-        estimatePos_ = estimateAverageHeight_ * startItem;
+        auto result = gridMatrix_.find(gridCells_.begin()->first);
+        if (result != gridMatrix_.end()) {
+            int32_t startItem = result->second.begin()->second;
+            estimatePos_ = estimateAverageHeight_ * startItem;
+        }
     }
 
     bool isScrollable = false;

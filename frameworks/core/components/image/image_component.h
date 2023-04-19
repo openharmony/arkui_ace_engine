@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,7 +31,6 @@
 #include "core/pipeline/base/element.h"
 #include "core/pipeline/base/measurable.h"
 #include "core/pipeline/base/render_component.h"
-#include "core/components/common/properties/decoration.h"
 
 namespace OHOS::Ace {
 constexpr int32_t COLOR_FILTER_MATRIX_SIZE = 20;
@@ -183,9 +182,28 @@ public:
         blurRadius_ = radius;
     }
 
+    void SetBundleInfo(const std::string& bundleName, const std::string moduleName)
+    {
+        bundleName_ = bundleName;
+        moduleName_ = moduleName;
+    }
+
+    std::string GetBundleName() const
+    {
+        return bundleName_;
+    }
+
+    std::string GetModuleName() const
+    {
+        return moduleName_;
+    }
+
 private:
     std::string src_;
     std::string alt_;
+    // Interim programme
+    std::string bundleName_;
+    std::string moduleName_;
     Alignment alignment_ = Alignment::CENTER;
     ImageObjectPosition imageObjectPosition_;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,29 +15,33 @@
 
 #include "adapter/ohos/entrance/ace_container.h"
 
+#include <fstream>
 #include <functional>
 
+#include "ability_context.h"
 #include "ability_info.h"
-
-#if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
-#include "adapter/ohos/entrance/ace_rosen_sync_task.h"
-#endif
-#include "flutter/lib/ui/ui_dart_state.h"
 #include "wm/wm_common.h"
 
 #include "adapter/ohos/entrance/ace_application_info.h"
+#include "adapter/ohos/entrance/ace_view_ohos.h"
 #include "adapter/ohos/entrance/data_ability_helper_standard.h"
 #include "adapter/ohos/entrance/file_asset_provider.h"
-#include "adapter/ohos/entrance/flutter_ace_view.h"
 #include "adapter/ohos/entrance/hap_asset_provider.h"
 #include "base/i18n/localization.h"
 #include "base/log/ace_trace.h"
+#include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 #include "base/log/frame_report.h"
 #include "base/log/log.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#include "bridge/card_frontend/card_frontend.h"
+#include "bridge/card_frontend/form_frontend_declarative.h"
+#include "bridge/common/utils/engine_helper.h"
+#include "bridge/declarative_frontend/declarative_frontend.h"
+#include "bridge/js_frontend/engine/common/js_engine_loader.h"
+#include "bridge/js_frontend/js_frontend.h"
 #include "core/common/ace_engine.h"
 #include "core/common/connect_server_manager.h"
 #include "core/common/container_scope.h"
@@ -50,14 +54,14 @@
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_manager_impl.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/components_ng/render/adapter/form_render_window.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "frameworks/bridge/card_frontend/card_frontend.h"
-#include "frameworks/bridge/common/utils/engine_helper.h"
-#include "frameworks/bridge/declarative_frontend/declarative_frontend.h"
-#include "frameworks/bridge/js_frontend/engine/common/js_engine_loader.h"
-#include "frameworks/bridge/js_frontend/js_frontend.h"
+
+#if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
+#include "adapter/ohos/entrance/ace_rosen_sync_task.h"
+#endif
 
 namespace OHOS::Ace::Platform {
 namespace {
@@ -167,11 +171,7 @@ void AceContainer::Destroy()
             frontend->Destroy();
         } else {
             frontend->UpdateState(Frontend::State::ON_DESTROY);
-            taskExecutor_->PostTask(
-                [frontend]() {
-                    frontend->Destroy();
-                },
-                TaskExecutor::TaskType::JS);
+            taskExecutor_->PostTask([frontend]() { frontend->Destroy(); }, TaskExecutor::TaskType::JS);
         }
     }
     resRegister_.Reset();
@@ -182,9 +182,9 @@ void AceContainer::DestroyView()
 {
     ContainerScope scope(instanceId_);
     CHECK_NULL_VOID_NOLOG(aceView_);
-    auto flutterAceView = static_cast<FlutterAceView*>(aceView_);
-    if (flutterAceView) {
-        flutterAceView->DecRefCount();
+    auto aceView = static_cast<AceViewOhos*>(aceView_);
+    if (aceView) {
+        aceView->DecRefCount();
     }
     aceView_ = nullptr;
 }
@@ -206,14 +206,33 @@ void AceContainer::InitializeFrontend()
         AceApplicationInfo::GetInstance().SetCardType();
         frontend_ = AceType::MakeRefPtr<CardFrontend>();
     } else if (type_ == FrontendType::DECLARATIVE_JS) {
-        if (!isSubContainer_) {
+        if (isFormRender_) {
+            LOGI("Init Form Frontend");
+            frontend_ = AceType::MakeRefPtr<FormFrontendDeclarative>();
+            auto cardFrontend = AceType::DynamicCast<FormFrontendDeclarative>(frontend_);
+            auto& loader = Framework::JsEngineLoader::GetDeclarative(GetDeclarativeSharedLibrary());
+            RefPtr<Framework::JsEngine> jsEngine;
+            if (GetSettings().usingSharedRuntime) {
+                jsEngine = loader.CreateJsEngineUsingSharedRuntime(instanceId_, sharedRuntime_);
+            } else {
+                jsEngine = loader.CreateJsEngine(instanceId_);
+            }
+            jsEngine->AddExtraNativeObject("ability", aceAbility.get());
+            EngineHelper::AddEngine(instanceId_, jsEngine);
+            cardFrontend->SetJsEngine(jsEngine);
+            cardFrontend->SetPageProfile(pageProfile_);
+            cardFrontend->SetNeedDebugBreakPoint(AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint());
+            cardFrontend->SetDebugVersion(AceApplicationInfo::GetInstance().IsDebugVersion());
+            // Card front
+            cardFrontend->SetRunningCardId(0); // ArkTsCard : nodeId, Host->FMS->FRS->innersdk
+            cardFrontend->SetIsFormRender(true);
+        } else if (!isSubContainer_) {
             frontend_ = AceType::MakeRefPtr<DeclarativeFrontend>();
             auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
             auto& loader = Framework::JsEngineLoader::GetDeclarative(GetDeclarativeSharedLibrary());
             RefPtr<Framework::JsEngine> jsEngine;
             if (GetSettings().usingSharedRuntime) {
                 jsEngine = loader.CreateJsEngineUsingSharedRuntime(instanceId_, sharedRuntime_);
-                LOGI("Create engine using runtime, engine %{public}p", RawPtr(jsEngine));
             } else {
                 jsEngine = loader.CreateJsEngine(instanceId_);
             }
@@ -253,18 +272,22 @@ bool AceContainer::OnBackPressed(int32_t instanceId)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
     CHECK_NULL_RETURN_NOLOG(container, false);
-    // When the container is for menu, it need close the menu first.
+    // When the container is for overlay, it need close the overlay first.
     if (container->IsSubContainer()) {
+        if (container->IsUseNewPipeline()) {
+            LOGI("back press for remove overlay node");
+            ContainerScope scope(instanceId);
+            auto subPipelineContext = DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+            CHECK_NULL_RETURN_NOLOG(subPipelineContext, false);
+            auto overlayManager = subPipelineContext->GetOverlayManager();
+            CHECK_NULL_RETURN_NOLOG(overlayManager, false);
+            return overlayManager->RemoveOverlayInSubwindow();
+        }
         SubwindowManager::GetInstance()->CloseMenu();
         return true;
     }
     ContainerScope scope(instanceId);
-    auto baseContext = container->GetPipelineContext();
-    auto contextNG = DynamicCast<NG::PipelineContext>(baseContext);
-    if (contextNG) {
-        return contextNG->OnBackPressed();
-    }
-    auto context = DynamicCast<PipelineContext>(baseContext);
+    auto context = container->GetPipelineContext();
     CHECK_NULL_RETURN_NOLOG(context, false);
     if (context->PopPageStackOverlay()) {
         return true;
@@ -282,38 +305,39 @@ void AceContainer::OnShow(int32_t instanceId)
     if (!container->UpdateState(Frontend::State::ON_SHOW)) {
         return;
     }
-    auto front = container->GetFrontend();
-    if (front && !container->IsSubContainer()) {
-        WeakPtr<Frontend> weakFrontend = front;
-        taskExecutor->PostTask(
-            [weakFrontend]() {
-                auto frontend = weakFrontend.Upgrade();
-                if (frontend) {
-                    frontend->UpdateState(Frontend::State::ON_SHOW);
-                    frontend->OnShow();
-                }
-            },
-            TaskExecutor::TaskType::JS);
-    }
 
-    taskExecutor->PostTask(
-        [container]() {
-            std::unordered_map<int64_t, WeakPtr<Frontend>> cardFrontendMap;
-            container->GetCardFrontendMap(cardFrontendMap);
-            for (const auto& [_, weakCardFront] : cardFrontendMap) {
-                auto cardFront = weakCardFront.Upgrade();
-                if (!cardFront) {
-                    LOGE("cardFront is null");
-                    continue;
-                }
-                cardFront->OnShow();
+    auto jsTask = [container, front = container->GetFrontend()]() {
+        if (front && !container->IsSubContainer()) {
+            front->UpdateState(Frontend::State::ON_SHOW);
+            front->OnShow();
+        }
+    };
+
+    auto uiTask = [container]() {
+        std::unordered_map<int64_t, WeakPtr<Frontend>> cardFrontendMap;
+        container->GetCardFrontendMap(cardFrontendMap);
+        for (const auto& [_, weakCardFront] : cardFrontendMap) {
+            auto cardFront = weakCardFront.Upgrade();
+            if (!cardFront) {
+                LOGE("cardFront is null");
+                continue;
             }
-            auto pipelineBase = container->GetPipelineContext();
-            CHECK_NULL_VOID(pipelineBase);
-            pipelineBase->OnShow();
-            pipelineBase->SetForegroundCalled(true);
-        },
-        TaskExecutor::TaskType::UI);
+            cardFront->OnShow();
+        }
+        auto pipelineBase = container->GetPipelineContext();
+        CHECK_NULL_VOID(pipelineBase);
+        pipelineBase->OnShow();
+        pipelineBase->SetForegroundCalled(true);
+    };
+
+    // stege model needn't post task when already run on UI
+    if (container->GetSettings().useUIAsJSThread && taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+        jsTask();
+        uiTask();
+    } else {
+        taskExecutor->PostTask(jsTask, TaskExecutor::TaskType::JS);
+        taskExecutor->PostTask(uiTask, TaskExecutor::TaskType::UI);
+    }
 }
 
 void AceContainer::OnHide(int32_t instanceId)
@@ -326,43 +350,47 @@ void AceContainer::OnHide(int32_t instanceId)
     if (!container->UpdateState(Frontend::State::ON_HIDE)) {
         return;
     }
-    auto front = container->GetFrontend();
-    if (front && !container->IsSubContainer()) {
-        WeakPtr<Frontend> weakFrontend = front;
-        taskExecutor->PostTask(
-            [weakFrontend]() {
-                auto frontend = weakFrontend.Upgrade();
-                if (frontend) {
-                    frontend->UpdateState(Frontend::State::ON_HIDE);
-                    frontend->OnHide();
-                    frontend->TriggerGarbageCollection();
-                }
-            },
-            TaskExecutor::TaskType::JS);
-    }
+    std::unordered_map<int64_t, WeakPtr<Frontend>> cardFrontendMap;
+    container->GetCardFrontendMap(cardFrontendMap);
 
-    taskExecutor->PostTask(
-        [container]() {
-            auto taskExecutor = container->GetTaskExecutor();
-            std::unordered_map<int64_t, WeakPtr<Frontend>> cardFrontendMap;
-            container->GetCardFrontendMap(cardFrontendMap);
-            for (const auto& [_, weakCardFront] : cardFrontendMap) {
-                auto cardFront = weakCardFront.Upgrade();
-                if (!cardFront) {
-                    LOGE("cardFront is null");
-                    continue;
-                }
-                cardFront->OnHide();
-                if (taskExecutor) {
-                    taskExecutor->PostTask(
-                        [cardFront]() { cardFront->TriggerGarbageCollection(); }, TaskExecutor::TaskType::JS);
-                }
+    auto jsTask = [container, front = container->GetFrontend(), cardFrontendMap]() {
+        if (front && !container->IsSubContainer()) {
+            front->UpdateState(Frontend::State::ON_HIDE);
+            front->OnHide();
+            front->TriggerGarbageCollection();
+        }
+        for (const auto& [_, weakCardFront] : cardFrontendMap) {
+            auto cardFront = weakCardFront.Upgrade();
+            if (!cardFront) {
+                LOGE("cardFront is null");
+                continue;
             }
-            auto pipelineContext = container->GetPipelineContext();
-            CHECK_NULL_VOID(pipelineContext);
-            pipelineContext->OnHide();
-        },
-        TaskExecutor::TaskType::UI);
+            cardFront->TriggerGarbageCollection();
+        }
+    };
+
+    auto uiTask = [container, cardFrontendMap]() {
+        for (const auto& [_, weakCardFront] : cardFrontendMap) {
+            auto cardFront = weakCardFront.Upgrade();
+            if (!cardFront) {
+                LOGE("cardFront is null");
+                continue;
+            }
+            cardFront->OnHide();
+        }
+        auto pipelineBase = container->GetPipelineContext();
+        CHECK_NULL_VOID(pipelineBase);
+        pipelineBase->OnHide();
+    };
+
+    // stege model needn't post task when already run on UI
+    if (container->GetSettings().useUIAsJSThread && taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+        jsTask();
+        uiTask();
+    } else {
+        taskExecutor->PostTask(jsTask, TaskExecutor::TaskType::JS);
+        taskExecutor->PostTask(uiTask, TaskExecutor::TaskType::UI);
+    }
 }
 
 void AceContainer::OnActive(int32_t instanceId)
@@ -377,7 +405,7 @@ void AceContainer::OnActive(int32_t instanceId)
     if (front && !container->IsSubContainer()) {
         WeakPtr<Frontend> weakFrontend = front;
         taskExecutor->PostTask(
-            [weakFrontend] () {
+            [weakFrontend]() {
                 auto frontend = weakFrontend.Upgrade();
                 if (frontend) {
                     frontend->UpdateState(Frontend::State::ON_ACTIVE);
@@ -411,7 +439,7 @@ void AceContainer::OnInactive(int32_t instanceId)
     if (front && !container->IsSubContainer()) {
         WeakPtr<Frontend> weakFrontend = front;
         taskExecutor->PostTask(
-            [weakFrontend] () {
+            [weakFrontend]() {
                 auto frontend = weakFrontend.Upgrade();
                 if (frontend) {
                     frontend->UpdateState(Frontend::State::ON_INACTIVE);
@@ -577,12 +605,20 @@ void AceContainer::InitializeCallback()
     };
     aceView_->RegisterRotationEventCallback(rotationEventCallback);
 
-    auto&& viewChangeCallback = [context = pipelineContext_, id = instanceId_](
-                                    int32_t width, int32_t height, WindowSizeChangeReason type) {
+    auto&& viewChangeCallback = [context = pipelineContext_, id = instanceId_](int32_t width, int32_t height,
+                                    WindowSizeChangeReason type,
+                                    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) {
         ContainerScope scope(id);
         ACE_SCOPED_TRACE("ViewChangeCallback(%d, %d)", width, height);
         context->GetTaskExecutor()->PostTask(
-            [context, width, height, type]() { context->OnSurfaceChanged(width, height, type); },
+            [context, width, height, type, rsTransaction, id]() {
+                context->OnSurfaceChanged(width, height, type, rsTransaction);
+                if (type == WindowSizeChangeReason::ROTATION) {
+                    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(id);
+                    CHECK_NULL_VOID_NOLOG(subwindow);
+                    subwindow->ResizeWindow();
+                }
+            },
             TaskExecutor::TaskType::UI);
     };
     aceView_->RegisterViewChangeCallback(viewChangeCallback);
@@ -629,9 +665,9 @@ void AceContainer::InitializeCallback()
     aceView_->RegisterDragEventCallback(dragEventCallback);
 }
 
-void AceContainer::CreateContainer(int32_t instanceId, FrontendType type,
-    const std::string& instanceName, std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility,
-    std::unique_ptr<PlatformEventCallback> callback, bool useCurrentEventRunner, bool useNewPipeline)
+void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, const std::string& instanceName,
+    std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility, std::unique_ptr<PlatformEventCallback> callback,
+    bool useCurrentEventRunner, bool useNewPipeline)
 {
     auto aceContainer = AceType::MakeRefPtr<AceContainer>(
         instanceId, type, aceAbility, std::move(callback), useCurrentEventRunner, useNewPipeline);
@@ -653,6 +689,7 @@ void AceContainer::CreateContainer(int32_t instanceId, FrontendType type,
 
 void AceContainer::DestroyContainer(int32_t instanceId, const std::function<void()>& destroyCallback)
 {
+    SubwindowManager::GetInstance()->CloseDialog(instanceId);
     auto container = AceEngine::Get().GetContainer(instanceId);
     CHECK_NULL_VOID(container);
     HdcRegister::Get().StopHdcRegister(instanceId);
@@ -690,14 +727,14 @@ void AceContainer::SetView(AceView* view, double density, int32_t width, int32_t
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
 
-    std::unique_ptr<Window> window = std::make_unique<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
+    auto window = std::make_shared<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
 #else
     auto platformWindow = PlatformWindow::Create(view);
     CHECK_NULL_VOID(platformWindow);
-    std::unique_ptr<Window> window = std::make_unique<Window>(std::move(platformWindow));
+    auto window = std::make_shared<Window>(std::move(platformWindow));
 #endif
     AceContainer::SetUIWindow(view->GetInstanceId(), rsWindow);
-    container->AttachView(std::move(window), view, density, width, height, rsWindow->GetWindowId(), callback);
+    container->AttachView(window, view, density, width, height, rsWindow->GetWindowId(), callback);
 }
 
 void AceContainer::SetViewNew(
@@ -711,8 +748,31 @@ void AceContainer::SetViewNew(
     CHECK_NULL_VOID(taskExecutor);
     AceContainer::SetUIWindow(view->GetInstanceId(), rsWindow);
 
-    std::unique_ptr<Window> window = std::make_unique<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
-    container->AttachView(std::move(window), view, density, width, height, rsWindow->GetWindowId(), nullptr);
+    if (container->isFormRender_) {
+        auto window = std::make_shared<FormRenderWindow>(taskExecutor, view->GetInstanceId());
+        container->AttachView(window, view, density, width, height, view->GetInstanceId(), nullptr);
+    } else {
+        auto window = std::make_shared<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
+        container->AttachView(window, view, density, width, height, rsWindow->GetWindowId(), nullptr);
+    }
+#endif
+}
+
+void AceContainer::SetView(
+    AceView* view, double density, int32_t width, int32_t height, const std::shared_ptr<Window>& window)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    CHECK_NULL_VOID(view);
+    auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(view->GetInstanceId()));
+    CHECK_NULL_VOID(container);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    CHECK_NULL_VOID(window);
+    window->SetTaskExecutor(taskExecutor);
+    window->SetInstanceId(view->GetInstanceId());
+    window->Init();
+
+    container->AttachView(window, view, density, width, height, window->GetWindowId(), nullptr);
 #endif
 }
 
@@ -750,6 +810,19 @@ bool AceContainer::RunPage(int32_t instanceId, int32_t pageId, const std::string
     return true;
 }
 
+void AceContainer::ClearEngineCache(int32_t instanceId)
+{
+    auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId);
+    if (!container->IsFormRender()) {
+        return;
+    }
+    auto formFrontend = AceType::DynamicCast<FormFrontendDeclarative>(container->GetFrontend());
+    CHECK_NULL_VOID(formFrontend);
+    formFrontend->ClearEngineCache();
+}
+
 bool AceContainer::PushPage(int32_t instanceId, const std::string& content, const std::string& params)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
@@ -773,15 +846,14 @@ bool AceContainer::UpdatePage(int32_t instanceId, int32_t pageId, const std::str
 
 void AceContainer::SetHapPath(const std::string& hapPath)
 {
-    if (!SystemProperties::GetResourceUseHapPathEnable()) {
+    if (hapPath.empty()) {
         LOGI("SetHapPath, Use .index to load resource");
         return;
     }
     LOGI("SetHapPath, Use hap path to load resource");
+    webHapPath_ = hapPath;
     resourceInfo_.SetHapPath(hapPath);
-    if (!hapPath.empty()) {
-        SystemProperties::SetUnZipHap(false);
-    }
+    SystemProperties::SetUnZipHap(false);
 }
 
 void AceContainer::Dispatch(
@@ -802,16 +874,90 @@ void AceContainer::DispatchPluginError(int32_t callbackId, int32_t errorCode, st
         TaskExecutor::TaskType::BACKGROUND);
 }
 
-bool AceContainer::Dump(const std::vector<std::string>& params)
+bool AceContainer::Dump(const std::vector<std::string>& params, std::vector<std::string>& info)
 {
+    if (isDumping_.test_and_set()) {
+        LOGI("another dump is still running");
+        return false;
+    }
     ContainerScope scope(instanceId_);
+    auto result = false;
+    if (!SystemProperties::GetDebugEnabled()) {
+        std::unique_ptr<std::ostream> ss = std::make_unique<std::ostringstream>();
+        CHECK_NULL_RETURN(ss, false);
+        DumpLog::GetInstance().SetDumpFile(std::move(ss));
+        result = DumpInfo(params);
+        const auto& infoFile = DumpLog::GetInstance().GetDumpFile();
+        auto* ostringstream = static_cast<std::ostringstream*>(infoFile.get());
+        info.emplace_back(ostringstream->str().substr(0, DumpLog::MAX_DUMP_LENGTH));
+        DumpLog::GetInstance().Reset();
+    } else {
+        auto dumpFilePath = AceApplicationInfo::GetInstance().GetDataFileDirPath() + "/arkui.dump";
+        std::unique_ptr<std::ostream> ss = std::make_unique<std::ofstream>(dumpFilePath);
+        CHECK_NULL_RETURN(ss, false);
+        DumpLog::GetInstance().SetDumpFile(std::move(ss));
+        result = DumpInfo(params);
+        info.emplace_back("dumpFilePath: " + dumpFilePath);
+        DumpLog::GetInstance().Reset();
+    }
+    if (!result) {
+        DumpLog::ShowDumpHelp(info);
+    }
+    isDumping_.clear();
+    return true;
+}
+
+bool AceContainer::DumpInfo(const std::vector<std::string>& params)
+{
     if (aceView_ && aceView_->Dump(params)) {
         return true;
     }
 
+    if (OnDumpInfo(params)) {
+        return true;
+    }
     CHECK_NULL_RETURN_NOLOG(pipelineContext_, false);
-    pipelineContext_->Dump(params);
-    return true;
+    return pipelineContext_->Dump(params);
+}
+
+bool AceContainer::OnDumpInfo(const std::vector<std::string>& params)
+{
+    if (!params.empty() && params[0] == "-basicinfo") {
+        DumpLog::GetInstance().Print("BasicInfo: ");
+        DumpLog::GetInstance().Print(1, "InstanceId: " + std::to_string(instanceId_));
+        DumpLog::GetInstance().Print(1,
+            "FrontendType: " + std::to_string(static_cast<typename std::underlying_type<FrontendType>::type>(type_)));
+        DumpLog::GetInstance().Print(1, "NewPipeline: " + std::string(IsUseNewPipeline() ? "true" : "false"));
+        DumpLog::GetInstance().Print(1, "WindowName: " + windowName_);
+        DumpLog::GetInstance().Print(
+            1, "WindowState: " +
+                   (!frontend_ ? "frontend is null"
+                               : std::to_string(static_cast<typename std::underlying_type<Frontend::State>::type>(
+                                     frontend_->GetState()))));
+        DumpLog::GetInstance().Print(1, "Language: " + AceApplicationInfo::GetInstance().GetLocaleTag());
+        DumpLog::GetInstance().Print(
+            1, "RTL: " + std::string(AceApplicationInfo::GetInstance().IsRightToLeft() ? "true" : "false"));
+        DumpLog::GetInstance().Print(
+            1, "ColorMode: " + std::string(SystemProperties::GetColorMode() == ColorMode::DARK ? "Dark" : "Light"));
+        DumpLog::GetInstance().Print(1,
+            "DeviceOrientation: " + std::string(SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE
+                                                    ? "Landscape"
+                                                    : "Portrait"));
+        DumpLog::GetInstance().Print(1, "Resolution: " + std::to_string(SystemProperties::GetDeviceWidth()) + "*" +
+                                            std::to_string(SystemProperties::GetDeviceHeight()));
+        if (pipelineContext_) {
+            DumpLog::GetInstance().Print(1, "AppBgColor: " + pipelineContext_->GetAppBgColor().ColorToString());
+            DumpLog::GetInstance().Print(1, "Density: " + std::to_string(pipelineContext_->GetDensity()));
+            DumpLog::GetInstance().Print(1, "ViewScale: " + std::to_string(pipelineContext_->GetViewScale()));
+            DumpLog::GetInstance().Print(
+                1, "DisplayWindowRect: " + pipelineContext_->GetDisplayWindowRectInfo().ToString());
+        }
+        DumpLog::GetInstance().Print(1, "ApiVersion: " + SystemProperties::GetApiVersion());
+        DumpLog::GetInstance().Print(1, "ReleaseType: " + SystemProperties::GetReleaseType());
+        DumpLog::GetInstance().Print(1, "DeviceType: " + SystemProperties::GetParamDeviceType());
+        return true;
+    }
+    return false;
 }
 
 void AceContainer::TriggerGarbageCollection()
@@ -914,19 +1060,16 @@ void AceContainer::AddLibPath(int32_t instanceId, const std::vector<std::string>
     flutterAssetManager->SetLibPath("default", libPath);
 }
 
-void AceContainer::AttachView(std::unique_ptr<Window> window, AceView* view, double density, int32_t width,
+void AceContainer::AttachView(std::shared_ptr<Window> window, AceView* view, double density, int32_t width,
     int32_t height, int32_t windowId, UIEnvCallback callback)
 {
     aceView_ = view;
     auto instanceId = aceView_->GetInstanceId();
     auto flutterTaskExecutor = AceType::DynamicCast<FlutterTaskExecutor>(taskExecutor_);
     if (!isSubContainer_) {
-        auto state = flutter::UIDartState::Current()->GetStateById(instanceId);
-        ACE_DCHECK(state != nullptr);
-        flutterTaskExecutor->InitOtherThreads(state->GetTaskRunners());
-        if (GetSettings().usePlatformAsUIThread) {
-            ContainerScope::SetScopeNotify([](int32_t id) { flutter::UIDartState::Current()->SetCurInstance(id); });
-        }
+        auto* aceView = static_cast<AceViewOhos*>(aceView_);
+        ACE_DCHECK(aceView != nullptr);
+        flutterTaskExecutor->InitOtherThreads(aceView->GetThreadModel());
     }
     ContainerScope scope(instanceId);
     if (type_ == FrontendType::DECLARATIVE_JS) {
@@ -946,24 +1089,48 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceView* view, dou
     if (useNewPipeline_) {
         LOGI("New pipeline version creating...");
         pipelineContext_ = AceType::MakeRefPtr<NG::PipelineContext>(
-            std::move(window), taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
+            window, taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
         pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<NG::TextFieldManagerNG>());
     } else {
         pipelineContext_ = AceType::MakeRefPtr<PipelineContext>(
-            std::move(window), taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
+            window, taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
         pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<TextFieldManager>());
     }
+
+    if (isFormRender_) {
+        pipelineContext_->SetIsFormRender(isFormRender_);
+        auto cardFrontend = AceType::DynamicCast<FormFrontendDeclarative>(frontend_);
+        if (cardFrontend) {
+            cardFrontend->SetTaskExecutor(taskExecutor_);
+            cardFrontend->SetLoadCardCallBack(WeakPtr<PipelineBase>(pipelineContext_));
+        }
+    }
+
     pipelineContext_->SetRootSize(density, width, height);
+    if (isFormRender_) {
+        pipelineContext_->OnSurfaceDensityChanged(density);
+    }
     pipelineContext_->SetIsRightToLeft(AceApplicationInfo::GetInstance().IsRightToLeft());
     pipelineContext_->SetWindowId(windowId);
     pipelineContext_->SetWindowModal(windowModal_);
-    auto pipelineContext = AceType::DynamicCast<PipelineContext>(pipelineContext_);
-    if (pipelineContext) {
-        pipelineContext->SetDrawDelegate(aceView_->GetDrawDelegate());
-        if (isSubContainer_) {
-            pipelineContext->SetIsSubPipeline(true);
+    if (uiWindow_) {
+        auto windowType = uiWindow_->GetType();
+        pipelineContext_->SetIsAppWindow(
+            windowType < Rosen::WindowType::SYSTEM_WINDOW_BASE && windowType >= Rosen::WindowType::APP_WINDOW_BASE);
+    }
+    if (installationFree_) {
+        pipelineContext_->SetInstallationFree(installationFree_);
+        pipelineContext_->SetSharePanelCallback(std::move(sharePanelCallback_));
+        std::shared_ptr<AppExecFwk::AbilityInfo> info = abilityInfo_.lock();
+        if (info != nullptr) {
+            pipelineContext_->SetAppLabelId(info->labelId);
         }
     }
+    if (isSubContainer_) {
+        pipelineContext_->SetIsSubPipeline(true);
+    }
+
+    pipelineContext_->SetDrawDelegate(aceView_->GetDrawDelegate());
     InitWindowCallback();
     InitializeCallback();
 
@@ -1063,7 +1230,7 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceView* view, dou
     } else {
         auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
         if (declarativeFrontend) {
-            declarativeFrontend->AttachSubPipelineContext(AceType::DynamicCast<PipelineContext>(pipelineContext_));
+            declarativeFrontend->AttachSubPipelineContext(pipelineContext_);
         }
         return;
     }
@@ -1170,23 +1337,24 @@ void AceContainer::InitializeSubContainer(int32_t parentContainerId)
 void AceContainer::InitWindowCallback()
 {
     LOGD("AceContainer InitWindowCallback");
-    if (windowModal_ == WindowModal::CONTAINER_MODAL && pipelineContext_) {
-        auto& windowManager = pipelineContext_->GetWindowManager();
-        std::shared_ptr<AppExecFwk::AbilityInfo> info = abilityInfo_.lock();
-        if (info != nullptr) {
-            windowManager->SetAppLabelId(info->labelId);
-            windowManager->SetAppIconId(info->iconId);
-        }
-        windowManager->SetWindowMinimizeCallBack([window = uiWindow_]() { window->Minimize(); });
-        windowManager->SetWindowMaximizeCallBack([window = uiWindow_]() { window->Maximize(); });
-        windowManager->SetWindowRecoverCallBack([window = uiWindow_]() { window->Recover(); });
-        windowManager->SetWindowCloseCallBack([window = uiWindow_]() { window->Close(); });
-        windowManager->SetWindowStartMoveCallBack([window = uiWindow_]() { window->StartMove(); });
-        windowManager->SetWindowSplitCallBack(
-            [window = uiWindow_]() { window->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY); });
-        windowManager->SetWindowGetModeCallBack(
-            [window = uiWindow_]() -> WindowMode { return static_cast<WindowMode>(window->GetMode()); });
+    if (!pipelineContext_ || !uiWindow_) {
+        return;
     }
+    auto& windowManager = pipelineContext_->GetWindowManager();
+    std::shared_ptr<AppExecFwk::AbilityInfo> info = abilityInfo_.lock();
+    if (info != nullptr) {
+        windowManager->SetAppLabelId(info->labelId);
+        windowManager->SetAppIconId(info->iconId);
+    }
+    windowManager->SetWindowMinimizeCallBack([window = uiWindow_]() { window->Minimize(); });
+    windowManager->SetWindowMaximizeCallBack([window = uiWindow_]() { window->Maximize(); });
+    windowManager->SetWindowRecoverCallBack([window = uiWindow_]() { window->Recover(); });
+    windowManager->SetWindowCloseCallBack([window = uiWindow_]() { window->Close(); });
+    windowManager->SetWindowStartMoveCallBack([window = uiWindow_]() { window->StartMove(); });
+    windowManager->SetWindowSplitCallBack(
+        [window = uiWindow_]() { window->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY); });
+    windowManager->SetWindowGetModeCallBack(
+        [window = uiWindow_]() -> WindowMode { return static_cast<WindowMode>(window->GetMode()); });
 
     pipelineContext_->SetGetWindowRectImpl([window = uiWindow_]() -> Rect {
         Rect rect;
@@ -1195,6 +1363,60 @@ void AceContainer::InitWindowCallback()
         rect.SetRect(windowRect.posX_, windowRect.posY_, windowRect.width_, windowRect.height_);
         return rect;
     });
+
+    pipelineContext_->SetGetViewSafeAreaImpl([window = uiWindow_, this]() -> SafeAreaEdgeInserts {
+        return SetViewSafeArea(window);
+    });
+}
+
+// Get SafeArea by Window
+SafeAreaEdgeInserts AceContainer::SetViewSafeArea(sptr<OHOS::Rosen::Window> window)
+{
+    SafeAreaEdgeInserts viewSafeArea;
+    CHECK_NULL_RETURN_NOLOG(window, viewSafeArea);
+
+    Rosen::AvoidArea systemAvoidArea;
+    Rosen::AvoidArea cutoutAvoidArea;
+    Rosen::WMError systemRet = window->GetAvoidAreaByType(Rosen::AvoidAreaType::TYPE_SYSTEM, systemAvoidArea);
+    Rosen::WMError cutoutRet = window->GetAvoidAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT, cutoutAvoidArea);
+    Rect topRect;
+    Rect leftRect;
+    Rect rightRect;
+    Rect bottomRect;
+    if (systemRet == Rosen::WMError::WM_OK) {
+        topRect = Rect(static_cast<double>(systemAvoidArea.topRect_.posX_),
+            static_cast<double>(systemAvoidArea.topRect_.posY_), static_cast<double>(systemAvoidArea.topRect_.width_),
+            static_cast<double>(systemAvoidArea.topRect_.height_));
+        leftRect = Rect(static_cast<double>(systemAvoidArea.leftRect_.posX_),
+            static_cast<double>(systemAvoidArea.leftRect_.posY_), static_cast<double>(systemAvoidArea.leftRect_.width_),
+            static_cast<double>(systemAvoidArea.leftRect_.height_));
+        rightRect = Rect(static_cast<double>(systemAvoidArea.rightRect_.posX_),
+            static_cast<double>(systemAvoidArea.rightRect_.posY_),
+            static_cast<double>(systemAvoidArea.rightRect_.width_),
+            static_cast<double>(systemAvoidArea.rightRect_.height_));
+        bottomRect = Rect(static_cast<double>(systemAvoidArea.bottomRect_.posX_),
+            static_cast<double>(systemAvoidArea.bottomRect_.posY_),
+            static_cast<double>(systemAvoidArea.bottomRect_.width_),
+            static_cast<double>(systemAvoidArea.bottomRect_.height_));
+    }
+    if (cutoutRet == Rosen::WMError::WM_OK) {
+        topRect.CombineRect(Rect(static_cast<double>(cutoutAvoidArea.topRect_.posX_),
+            static_cast<double>(cutoutAvoidArea.topRect_.posY_), static_cast<double>(cutoutAvoidArea.topRect_.width_),
+            static_cast<double>(cutoutAvoidArea.topRect_.height_)));
+        leftRect.CombineRect(Rect(static_cast<double>(cutoutAvoidArea.leftRect_.posX_),
+            static_cast<double>(cutoutAvoidArea.leftRect_.posY_), static_cast<double>(cutoutAvoidArea.leftRect_.width_),
+            static_cast<double>(cutoutAvoidArea.leftRect_.height_)));
+        rightRect.CombineRect(Rect(static_cast<double>(cutoutAvoidArea.rightRect_.posX_),
+            static_cast<double>(cutoutAvoidArea.rightRect_.posY_),
+            static_cast<double>(cutoutAvoidArea.rightRect_.width_),
+            static_cast<double>(cutoutAvoidArea.rightRect_.height_)));
+        bottomRect.CombineRect(Rect(static_cast<double>(cutoutAvoidArea.bottomRect_.posX_),
+            static_cast<double>(cutoutAvoidArea.bottomRect_.posY_),
+            static_cast<double>(cutoutAvoidArea.bottomRect_.width_),
+            static_cast<double>(cutoutAvoidArea.bottomRect_.height_)));
+    }
+    viewSafeArea.SetRect(leftRect, topRect, rightRect, bottomRect);
+    return viewSafeArea;
 }
 
 std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityContextByModule(
@@ -1282,6 +1504,27 @@ void AceContainer::NotifyConfigurationChange(bool needReloadTransition)
         TaskExecutor::TaskType::JS);
 }
 
+void AceContainer::HotReload()
+{
+    auto taskExecutor = GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [instanceId = instanceId_, weak = WeakClaim(this)]() {
+            ContainerScope scope(instanceId);
+            auto container = weak.Upgrade();
+            CHECK_NULL_VOID(container);
+            auto frontend = container->GetFrontend();
+            CHECK_NULL_VOID(frontend);
+            LOGI("AceContainer::Flush Frontend for HotReload");
+            frontend->HotReload();
+
+            auto pipeline = container->GetPipelineContext();
+            CHECK_NULL_VOID(pipeline);
+            pipeline->FlushReload();
+        },
+        TaskExecutor::TaskType::UI);
+}
+
 void AceContainer::SetToken(sptr<IRemoteObject>& token)
 {
     std::lock_guard<std::mutex> lock(cardTokensMutex_);
@@ -1300,14 +1543,149 @@ sptr<IRemoteObject> AceContainer::GetToken()
     return nullptr;
 }
 
-extern "C" ACE_EXPORT void OHOS_ACE_HotReloadPage()
+std::shared_ptr<AbilityRuntime::Context> AceContainer::GetAbilityRuntimeContext()
+{
+    return runtimeContext_.lock();
+}
+
+// ArkTsCard start
+std::shared_ptr<Rosen::RSSurfaceNode> AceContainer::GetFormSurfaceNode(int32_t instanceId)
+{
+    auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
+    CHECK_NULL_RETURN_NOLOG(container, nullptr);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_RETURN(context, nullptr);
+    auto window = static_cast<FormRenderWindow*>(context->GetWindow());
+    CHECK_NULL_RETURN(window, nullptr);
+    return window->GetRSSurfaceNode();
+}
+
+void AceContainer::UpdateFormData(const std::string& data)
+{
+    auto frontend = AceType::DynamicCast<FormFrontendDeclarative>(frontend_);
+    CHECK_NULL_VOID(frontend);
+    frontend->UpdateData(data);
+}
+
+void AceContainer::UpdateFormSharedImage(const std::map<std::string, sptr<AppExecFwk::FormAshmem>>& imageDataMap)
+{
+    std::vector<std::string> picNameArray;
+    std::vector<int> fileDescriptorArray;
+    std::vector<int> byteLenArray;
+    if (!imageDataMap.empty()) {
+        for (auto& imageData : imageDataMap) {
+            picNameArray.push_back(imageData.first);
+            fileDescriptorArray.push_back(imageData.second->GetAshmemFd());
+            byteLenArray.push_back(imageData.second->GetAshmemSize());
+        }
+        GetNamesOfSharedImage(picNameArray);
+        UpdateSharedImage(picNameArray, byteLenArray, fileDescriptorArray);
+    }
+}
+
+void AceContainer::GetNamesOfSharedImage(std::vector<std::string>& picNameArray)
+{
+    if (picNameArray.empty()) {
+        LOGE("picNameArray is null!");
+        return;
+    }
+    auto context = AceType::DynamicCast<NG::PipelineContext>(GetPipelineContext());
+    CHECK_NULL_VOID(context);
+    RefPtr<SharedImageManager> sharedImageManager = context->GetSharedImageManager();
+    if (!sharedImageManager) {
+        sharedImageManager = AceType::MakeRefPtr<SharedImageManager>(context->GetTaskExecutor());
+        context->SetSharedImageManager(sharedImageManager);
+    }
+    auto nameSize = picNameArray.size();
+    for (uint32_t i = 0; i < nameSize; i++) {
+        // get name of picture
+        auto name = picNameArray[i];
+        sharedImageManager->AddPictureNamesToReloadMap(std::move(name));
+    }
+}
+
+void AceContainer::UpdateSharedImage(
+    std::vector<std::string>& picNameArray, std::vector<int32_t>& byteLenArray, std::vector<int>& fileDescriptorArray)
+{
+    auto context = GetPipelineContext();
+    CHECK_NULL_VOID(context);
+    if (picNameArray.empty() || byteLenArray.empty() || fileDescriptorArray.empty()) {
+        LOGE("array is null! when try UpdateSharedImage");
+        return;
+    }
+    auto nameArraySize = picNameArray.size();
+    if (nameArraySize != byteLenArray.size()) {
+        LOGE("nameArraySize does not equal to fileDescriptorArraySize, please check!");
+        return;
+    }
+    if (nameArraySize != fileDescriptorArray.size()) {
+        LOGE("nameArraySize does not equal to fileDescriptorArraySize, please check!");
+        return;
+    }
+    // now it can be assured that all three arrays are of the same size
+
+    std::string picNameCopy;
+    for (uint32_t i = 0; i < nameArraySize; i++) {
+        // get name of picture
+        auto picName = picNameArray[i];
+        // save a copy of picName and ReleaseStringUTFChars immediately to avoid memory leak
+        picNameCopy = picName;
+
+        // get fd ID
+        auto fd = fileDescriptorArray[i];
+
+        auto newFd = dup(fd);
+        if (newFd < 0) {
+            LOGE("dup fd fail, fail reason: %{public}s, fd: %{public}d, picName: %{private}s, length: %{public}d",
+                strerror(errno), fd, picNameCopy.c_str(), byteLenArray[i]);
+            continue;
+        }
+
+        auto ashmem = Ashmem(newFd, byteLenArray[i]);
+        GetImageDataFromAshmem(picNameCopy, ashmem, context, byteLenArray[i]);
+        ashmem.UnmapAshmem();
+        ashmem.CloseAshmem();
+    }
+}
+
+void AceContainer::GetImageDataFromAshmem(
+    const std::string& picName, Ashmem& ashmem, const RefPtr<PipelineBase>& pipelineContext, int len)
+{
+    bool ret = ashmem.MapReadOnlyAshmem();
+    // if any exception causes a [return] before [AddSharedImage], the memory image will not show because [RenderImage]
+    // will never be notified to start loading.
+    if (!ret) {
+        LOGE("MapReadOnlyAshmem fail, fail reason: %{public}s, picName: %{private}s, length: %{public}d, "
+             "fd: %{public}d",
+            strerror(errno), picName.c_str(), len, ashmem.GetAshmemFd());
+        return;
+    }
+    const uint8_t* imageData = reinterpret_cast<const uint8_t*>(ashmem.ReadFromAshmem(len, 0));
+    if (imageData == nullptr) {
+        LOGE("imageData is nullptr, errno is: %{public}s, picName: %{private}s, length: %{public}d, fd: %{public}d",
+            strerror(errno), picName.c_str(), len, ashmem.GetAshmemFd());
+        return;
+    }
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    CHECK_NULL_VOID(context);
+    RefPtr<SharedImageManager> sharedImageManager = context->GetSharedImageManager();
+    if (sharedImageManager) {
+        // read image data from shared memory and save a copy to sharedImageManager
+        sharedImageManager->AddSharedImage(picName, std::vector<uint8_t>(imageData, imageData + len));
+    }
+}
+
+// ArkTsCard end
+
+extern "C" ACE_FORCE_EXPORT void OHOS_ACE_HotReloadPage()
 {
     AceEngine::Get().NotifyContainers([](const RefPtr<Container>& container) {
-        auto ace = AceType::DynamicCast<AceContainer>(container);
-        if (ace) {
-            ace->NotifyConfigurationChange(true);
+        LOGI("starting hotReload");
+        if (Container::IsCurrentUseNewPipeline()) {
+            container->HotReload();
+        } else {
+            container->NotifyConfigurationChange(true);
         }
-        LOGI("frontend rebuild finished");
     });
 }
 
