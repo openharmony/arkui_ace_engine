@@ -463,8 +463,8 @@ void SliderPattern::GetOutsetInnerFocusPaintRect(RoundRect& paintRect)
 
 void SliderPattern::GetInsetInnerFocusPaintRect(RoundRect& paintRect)
 {
-    auto frameSize = GetHostFrameSize();
-    CHECK_NULL_VOID(frameSize);
+    const auto& content = GetHost()->GetGeometryNode()->GetContent();
+    CHECK_NULL_VOID(content);
     auto theme = PipelineBase::GetCurrentContext()->GetTheme<SliderTheme>();
     CHECK_NULL_VOID(theme);
     auto focusSideDistance = theme->GetFocusSideDistance();
@@ -472,19 +472,20 @@ void SliderPattern::GetInsetInnerFocusPaintRect(RoundRect& paintRect)
     CHECK_NULL_VOID(appTheme);
     auto paintWidth = appTheme->GetFocusWidthVp();
     auto focusDistance = paintWidth * HALF + focusSideDistance;
-    float offsetX = 0;
-    float offsetY = 0;
-    float width = frameSize->Width();
-    float height = frameSize->Height();
+    // use content area
+    float offsetX = content->GetRect().GetX();
+    float offsetY = content->GetRect().GetY();
+    float width = content->GetRect().Width();
+    float height = content->GetRect().Height();
     float focusRadius = trackThickness_ + static_cast<float>(focusDistance.ConvertToPx()) / HALF;
     if (direction_ == Axis::HORIZONTAL) {
-        offsetX = borderBlank_ - trackThickness_ * HALF - static_cast<float>(focusDistance.ConvertToPx());
-        offsetY = (frameSize->Height() - trackThickness_) * HALF - static_cast<float>(focusDistance.ConvertToPx());
+        offsetX += borderBlank_ - trackThickness_ * HALF - static_cast<float>(focusDistance.ConvertToPx());
+        offsetY += (height - trackThickness_) * HALF - static_cast<float>(focusDistance.ConvertToPx());
         width = sliderLength_ + trackThickness_ + static_cast<float>(focusDistance.ConvertToPx()) / HALF;
         height = trackThickness_ + static_cast<float>(focusDistance.ConvertToPx()) / HALF;
     } else {
-        offsetX = (frameSize->Width() - trackThickness_) * HALF - static_cast<float>(focusDistance.ConvertToPx());
-        offsetY = borderBlank_ - trackThickness_ * HALF - static_cast<float>(focusDistance.ConvertToPx());
+        offsetX += (width - trackThickness_) * HALF - static_cast<float>(focusDistance.ConvertToPx());
+        offsetY += borderBlank_ - trackThickness_ * HALF - static_cast<float>(focusDistance.ConvertToPx());
         width = trackThickness_ + static_cast<float>(focusDistance.ConvertToPx()) / HALF;
         height = sliderLength_ + trackThickness_ + static_cast<float>(focusDistance.ConvertToPx()) / HALF;
     }
@@ -548,6 +549,7 @@ bool SliderPattern::MoveStep(int32_t stepCount)
     }
     value_ = nextValue;
     valueRatio_ = (value_ - min) / (max - min);
+    FireChangeEvent(SliderChangeMode::End);
     LOGD("Move %{public}d steps, Value change to %{public}f", stepCount, value_);
     UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
     return true;
