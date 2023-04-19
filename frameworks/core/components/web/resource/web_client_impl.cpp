@@ -712,7 +712,7 @@ void WebClientImpl::OnPageIcon(const void* data,
     ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_VOID(delegate);
-    delegate->OnFaviconReceived(data, width, width, colorType, alphaType);
+    delegate->OnFaviconReceived(data, width, height, colorType, alphaType);
 }
 
 void WebClientImpl::OnDesktopIconUrl(const std::string& icon_url, bool precomposed)

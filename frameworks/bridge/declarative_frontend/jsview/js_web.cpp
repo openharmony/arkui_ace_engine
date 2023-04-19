@@ -4034,7 +4034,7 @@ void JSWeb::OnFaviconReceived(const JSCallbackInfo& args)
             ContainerScope scope(instanceId);
             auto context = PipelineBase::GetCurrentContext();
             CHECK_NULL_VOID(context);
-            context->PostAsyncEvent([execCtx, func = func, info]() {
+            context->PostSyncEvent([execCtx, func = func, info]() {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 auto* eventInfo = TypeInfoHelper::DynamicCast<FaviconReceivedEvent>(info.get());
                 func->Execute(*eventInfo);
