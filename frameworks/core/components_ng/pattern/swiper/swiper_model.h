@@ -88,6 +88,7 @@ public:
     virtual void SetMainSwiperSizeHeight();
     virtual void SetIndicatorStyle(const SwiperParameters& swiperParameters);
     virtual void SetIndicatorType(SwiperIndicatorType indicatorType) {}
+    virtual void SetIsIndicatorCustomSize(bool isCustomSize) {}
     virtual void SetDotIndicatorStyle(const SwiperParameters& swiperParameters) {}
     virtual void SetDigitIndicatorStyle(const SwiperDigitalParameters& swiperDigitalParameters) {}
     virtual void SetPreviousMargin(const Dimension& prevMargin) {}

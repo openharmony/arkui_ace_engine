@@ -71,8 +71,9 @@ public:
     void onDraw(DrawingContext& context) override;
     // paint
     void PaintContent(DrawingContext& context, ContentProperty& contentProperty);
-    void PaintUnselectedIndicator(RSCanvas& canvas, const OffsetF& center, const LinearVector<float>& itemHalfSizes);
-    void PaintSelectedIndicator(RSCanvas& canvas, const OffsetF& leftCenter,
+    void PaintUnselectedIndicator(
+        RSCanvas& canvas, const OffsetF& center, const LinearVector<float>& itemHalfSizes, bool currentIndexFlag);
+    void PaintSelectedIndicator(RSCanvas& canvas, const OffsetF& center, const OffsetF& leftCenter,
         const OffsetF& rightCenter, const LinearVector<float>& itemHalfSizes);
     void PaintMask(DrawingContext& context);
     void PaintBackground(DrawingContext& context, const ContentProperty& contentProperty);
@@ -221,6 +222,11 @@ public:
         selectedItemHeight_ = selectedItemHeight;
     }
 
+    void SetIsIndicatorCustomSize(bool isCustomSize)
+    {
+        isCustomSize_ = isCustomSize;
+    }
+
 private:
     static RefPtr<OHOS::Ace::SwiperIndicatorTheme> GetSwiperIndicatorTheme()
     {
@@ -253,6 +259,7 @@ private:
     bool isPressed_ = false;
 
     bool indicatorMask_ = false;
+    bool isCustomSize_ = false;
     int32_t currentIndex_ = 0;
     OffsetF offset_;
     float itemWidth_ = 0.0f;
