@@ -73,9 +73,9 @@ const Color DEFAULT_MASK_COLOR = Color::FromARGB(0, 0, 0, 0);
 // dialog animation params
 const RefPtr<Curve> SHOW_SCALE_ANIMATION_CURVE = AceType::MakeRefPtr<CubicCurve>(0.38f, 1.33f, 0.6f, 1.0f);
 
-void OnDialogCloseEvent(const RefPtr<UINode>& root, const RefPtr<FrameNode>& node)
+void OnDialogCloseEvent(const RefPtr<FrameNode>& node)
 {
-    CHECK_NULL_VOID(root && node);
+    CHECK_NULL_VOID(node);
     auto dialogPattern = node->GetPattern<DialogPattern>();
     CHECK_NULL_VOID(dialogPattern);
     auto option = dialogPattern->GetCloseAnimation().value_or(AnimationOption());
@@ -90,6 +90,8 @@ void OnDialogCloseEvent(const RefPtr<UINode>& root, const RefPtr<FrameNode>& nod
         onFinish();
     }
 
+    auto root = node->GetParent();
+    CHECK_NULL_VOID(root);
     root->RemoveChild(node);
     root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     auto lastChild = AceType::DynamicCast<FrameNode>(root->GetLastChild());
@@ -176,13 +178,12 @@ void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
     auto dialogPattern = node->GetPattern<DialogPattern>();
     option = dialogPattern->GetCloseAnimation().value_or(option);
 
-    option.SetOnFinishEvent([rootWk = rootNodeWeak_, nodeWk = WeakClaim(RawPtr(node)), id = Container::CurrentId()] {
+    option.SetOnFinishEvent([nodeWk = WeakClaim(RawPtr(node)), id = Container::CurrentId()] {
         ContainerScope scope(id);
-        auto root = rootWk.Upgrade();
         auto node = nodeWk.Upgrade();
-        CHECK_NULL_VOID(root && node);
+        CHECK_NULL_VOID(node);
 
-        OnDialogCloseEvent(root, node);
+        OnDialogCloseEvent(node);
 
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
