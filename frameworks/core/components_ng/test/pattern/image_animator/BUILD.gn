@@ -72,6 +72,7 @@ ohos_unittest("image_animator_pattern_test") {
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_context.cpp",
 
     # self
+    "image_animator_model_test_ng.cpp",
     "image_animator_view_test_ng.cpp",
   ]
 

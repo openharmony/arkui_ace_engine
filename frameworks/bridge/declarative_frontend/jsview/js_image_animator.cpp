@@ -16,26 +16,42 @@
 #include "bridge/declarative_frontend/jsview/js_image_animator.h"
 
 #include "base/log/ace_scoring_log.h"
+#include "bridge/declarative_frontend/jsview/models/image_animator_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components_ng/pattern/image_animator/image_animator_model_ng.h"
 #include "core/components_ng/pattern/image_animator/image_animator_view.h"
+
+namespace OHOS::Ace {
+
+std::unique_ptr<ImageAnimatorModel> ImageAnimatorModel::instance_ = nullptr;
+
+ImageAnimatorModel* ImageAnimatorModel::GetInstance()
+{
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance_.reset(new NG::ImageAnimatorModelNG());
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::ImageAnimatorModelNG());
+        } else {
+            instance_.reset(new Framework::ImageAnimatorModelImpl());
+        }
+#endif
+    }
+    return instance_.get();
+}
+
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 
 constexpr uint32_t DEFAULT_DURATION = 1000; // ms
 constexpr uint32_t DEFAULT_ITERATIONS = 1;
+constexpr FillMode DEFAULT_FILL_MODE = FillMode::FORWARDS;
 
 void JSImageAnimator::Create()
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ImageAnimatorView::Create();
-        return;
-    }
-    RefPtr<ImageAnimatorComponent> imageAnimator = AceType::MakeRefPtr<ImageAnimatorComponent>("ImageAnimator");
-    imageAnimator->SetIteration(DEFAULT_ITERATIONS);
-    imageAnimator->SetDuration(DEFAULT_DURATION);
-    ViewStackProcessor::GetInstance()->Push(imageAnimator);
-    // Init Common Styles for ImageAnimator
-    ViewStackProcessor::GetInstance()->GetBoxComponent();
+    ImageAnimatorModel::GetInstance()->Create();
 }
 
 void JSImageAnimator::JSBind(BindingTarget globalObj)
@@ -85,197 +101,119 @@ void JSImageAnimator::SetImages(const JSCallbackInfo& info)
         images.push_back(imageProperties);
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ImageAnimatorView::SetImages(std::move(images));
-        return;
-    }
-
-    auto imageAnimator =
-        AceType::DynamicCast<ImageAnimatorComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (imageAnimator) {
-        imageAnimator->SetImageProperties(images);
-    }
+    ImageAnimatorModel::GetInstance()->SetImages(images);
 }
 
 void JSImageAnimator::SetState(int32_t state)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ImageAnimatorView::SetStatus(static_cast<Animator::Status>(state));
-        return;
+    if (state < static_cast<int32_t>(Animator::Status::IDLE) ||
+        state > static_cast<int32_t>(Animator::Status::STOPPED)) {
+        LOGW("ImageAnimator SetState %{public}d, invalid, use default AnimationStatus.Initial", state);
+        state = static_cast<int32_t>(Animator::Status::IDLE);
     }
-    auto imageAnimator =
-        AceType::DynamicCast<ImageAnimatorComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (imageAnimator) {
-        imageAnimator->SetStatus(static_cast<Animator::Status>(state));
-    }
+
+    ImageAnimatorModel::GetInstance()->SetState(state);
 }
 
 void JSImageAnimator::SetDuration(int32_t duration)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ImageAnimatorView::SetDuration(duration);
-        return;
+    if (duration < 0) {
+        LOGW("ImageAnimator SetDuration %{public}d, invalid, use default %{public}d", duration, DEFAULT_DURATION);
+        duration = DEFAULT_DURATION;
     }
-    auto imageAnimator =
-        AceType::DynamicCast<ImageAnimatorComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (imageAnimator) {
-        imageAnimator->SetDuration(duration);
-    }
+
+    ImageAnimatorModel::GetInstance()->SetDuration(duration);
 }
 
 void JSImageAnimator::SetIteration(int32_t iteration)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ImageAnimatorView::SetIteration(iteration);
-        return;
+    if (iteration < -1) {
+        LOGW("ImageAnimator SetIteration %{public}d, invalid, use default %{public}d", iteration, DEFAULT_ITERATIONS);
+        iteration = DEFAULT_ITERATIONS;
     }
-    auto imageAnimator =
-        AceType::DynamicCast<ImageAnimatorComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (imageAnimator) {
-        imageAnimator->SetIteration(iteration);
-    }
+
+    ImageAnimatorModel::GetInstance()->SetIteration(iteration);
 }
 
 void JSImageAnimator::SetFillMode(int32_t fillMode)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ImageAnimatorView::SetFillMode(static_cast<FillMode>(fillMode));
-        return;
+    if (fillMode < static_cast<int32_t>(FillMode::NONE) || fillMode > static_cast<int32_t>(FillMode::BOTH)) {
+        LOGW("ImageAnimator SetFillMode %{public}d, invalid, use default %{public}d", fillMode,
+            static_cast<int32_t>(DEFAULT_FILL_MODE));
+        fillMode = static_cast<int32_t>(DEFAULT_FILL_MODE);
     }
-    auto imageAnimator =
-        AceType::DynamicCast<ImageAnimatorComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (imageAnimator) {
-        imageAnimator->SetFillMode(static_cast<FillMode>(fillMode));
-    }
+
+    ImageAnimatorModel::GetInstance()->SetFillMode(fillMode);
 }
 
 void JSImageAnimator::SetPreDecode(int32_t preDecode)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ImageAnimatorView::SetPreDecode(preDecode);
-        return;
-    }
-    auto imageAnimator =
-        AceType::DynamicCast<ImageAnimatorComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (imageAnimator) {
-        imageAnimator->SetPreDecode(preDecode);
-    }
+    ImageAnimatorModel::GetInstance()->SetPreDecode(preDecode);
 }
 
 void JSImageAnimator::SetIsReverse(bool isReverse)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ImageAnimatorView::SetIsReverse(isReverse);
-        return;
-    }
-    auto imageAnimator =
-        AceType::DynamicCast<ImageAnimatorComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (imageAnimator) {
-        imageAnimator->SetIsReverse(isReverse);
-    }
+    ImageAnimatorModel::GetInstance()->SetIsReverse(isReverse);
 }
 
 void JSImageAnimator::SetFixedSize(bool fixedSize)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ImageAnimatorView::SetFixedSize(fixedSize);
-        return;
-    }
-    auto imageAnimator =
-        AceType::DynamicCast<ImageAnimatorComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (imageAnimator) {
-        imageAnimator->SetIsFixedSize(fixedSize);
-    }
+    ImageAnimatorModel::GetInstance()->SetFixedSize(fixedSize);
 }
 
 void JSImageAnimator::OnStart(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ImageAnimatorView::SetImageAnimatorEvent(GetAnimatorEvent(info), NG::AnimatorEventType::ON_START);
-        return;
-    }
-    auto imageAnimator =
-        AceType::DynamicCast<ImageAnimatorComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (!imageAnimator) {
-        return;
-    }
-    const auto& controller = imageAnimator->GetImageAnimatorController();
-    if (controller) {
-        auto startEvent = GetEventMarker(info);
-        controller->SetStartEvent(startEvent);
-    }
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto onStart = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("ImageAnimator.onClick");
+        func->Execute();
+    };
+    ImageAnimatorModel::GetInstance()->SetOnStart(onStart);
 }
 
 void JSImageAnimator::OnPause(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ImageAnimatorView::SetImageAnimatorEvent(GetAnimatorEvent(info), NG::AnimatorEventType::ON_PAUSE);
-        return;
-    }
-    auto imageAnimator =
-        AceType::DynamicCast<ImageAnimatorComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (!imageAnimator) {
-        return;
-    }
-    const auto& controller = imageAnimator->GetImageAnimatorController();
-    if (controller) {
-        auto pauseEvent = GetEventMarker(info);
-        controller->SetPauseEvent(pauseEvent);
-    }
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto onPause = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("ImageAnimator.onClick");
+        func->Execute();
+    };
+    ImageAnimatorModel::GetInstance()->SetOnPause(onPause);
 }
 
 void JSImageAnimator::OnRepeat(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ImageAnimatorView::SetImageAnimatorEvent(GetAnimatorEvent(info), NG::AnimatorEventType::ON_REPEAT);
-        return;
-    }
-    auto imageAnimator =
-        AceType::DynamicCast<ImageAnimatorComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (!imageAnimator) {
-        return;
-    }
-    const auto& controller = imageAnimator->GetImageAnimatorController();
-    if (controller) {
-        auto repeatEvent = GetEventMarker(info);
-        controller->SetRepeatEvent(repeatEvent);
-    }
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto onRepeat = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("ImageAnimator.onClick");
+        func->Execute();
+    };
+    ImageAnimatorModel::GetInstance()->SetOnRepeat(onRepeat);
 }
 
 void JSImageAnimator::OnCancel(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ImageAnimatorView::SetImageAnimatorEvent(GetAnimatorEvent(info), NG::AnimatorEventType::ON_CANCEL);
-        return;
-    }
-    auto imageAnimator =
-        AceType::DynamicCast<ImageAnimatorComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (!imageAnimator) {
-        return;
-    }
-    const auto& controller = imageAnimator->GetImageAnimatorController();
-    if (controller) {
-        auto cancelEvent = GetEventMarker(info);
-        controller->SetCancelEvent(cancelEvent);
-    }
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto onCancel = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("ImageAnimator.onClick");
+        func->Execute();
+    };
+    ImageAnimatorModel::GetInstance()->SetOnCancel(onCancel);
 }
 
 void JSImageAnimator::OnFinish(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ImageAnimatorView::SetImageAnimatorEvent(GetAnimatorEvent(info), NG::AnimatorEventType::ON_FINISH);
-        return;
-    }
-    auto imageAnimator =
-        AceType::DynamicCast<ImageAnimatorComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (!imageAnimator) {
-        return;
-    }
-    const auto& controller = imageAnimator->GetImageAnimatorController();
-    if (controller) {
-        auto finishEvent = GetEventMarker(info);
-        controller->SetStopEvent(finishEvent);
-    }
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto onFinish = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("ImageAnimator.onClick");
+        func->Execute();
+    };
+    ImageAnimatorModel::GetInstance()->SetOnFinish(onFinish);
 }
 
 EventMarker JSImageAnimator::GetEventMarker(const JSCallbackInfo& info)
@@ -314,21 +252,11 @@ void JSImageAnimator::ParseImages(const JSRef<JSVal>& image, ImageProperties& im
     if (!ParseJsMedia(jsObjImage->GetProperty("src"), imageProperties.src)) {
         LOGE("parse image property src failed!");
     }
-    if (!ParseJsDimensionVp(jsObjImage->GetProperty("width"), imageProperties.width)) {
-        LOGW("parse image property width failed!");
-    }
-    if (!ParseJsDimensionVp(jsObjImage->GetProperty("height"), imageProperties.height)) {
-        LOGW("parse image property height failed!");
-    }
-    if (!ParseJsDimensionVp(jsObjImage->GetProperty("top"), imageProperties.top)) {
-        LOGW("parse image property top failed!");
-    }
-    if (!ParseJsDimensionVp(jsObjImage->GetProperty("left"), imageProperties.left)) {
-        LOGW("parse image property left failed!");
-    }
-    if (!ParseJsInt32(jsObjImage->GetProperty("duration"), imageProperties.duration)) {
-        LOGW("parse image property duration failed!");
-    }
+    ParseJsDimensionVp(jsObjImage->GetProperty("width"), imageProperties.width);
+    ParseJsDimensionVp(jsObjImage->GetProperty("height"), imageProperties.height);
+    ParseJsDimensionVp(jsObjImage->GetProperty("top"), imageProperties.top);
+    ParseJsDimensionVp(jsObjImage->GetProperty("left"), imageProperties.left);
+    ParseJsInt32(jsObjImage->GetProperty("duration"), imageProperties.duration);
 }
 
 } // namespace OHOS::Ace::Framework
