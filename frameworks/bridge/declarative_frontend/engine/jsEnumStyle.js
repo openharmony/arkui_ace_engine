@@ -1330,6 +1330,130 @@ var ContentTextStyle;
   ContentTextStyle[ContentTextStyle["ThreeLines"] = 2] = "ThreeLines";
 })(ContentTextStyle || (ContentTextStyle = {}));
 
+class NavPathInfo {
+  constructor(name, param) {
+      this.name = name;
+      this.param = param;
+  }
+}
+
+class NavPathStack {
+  constructor() {
+      this.pathArray = [];                                                                                                                                  
+      // indicate class has changed.
+      this.changeFlag = 0;
+      this.type = this.constructor.name;
+  }
+  pushName(name, param) {
+      this.pathArray.push(new NavPathInfo(name, param));
+      this.changeFlag = this.changeFlag + 1;
+  }
+  push(info) {
+      this.pathArray.push(info);
+      this.changeFlag = this.changeFlag + 1;
+  }
+  pop() {
+      if (this.pathArray.length === 0) {
+          return undefined;
+      }
+      let pathInfo = this.pathArray.pop();
+      this.changeFlag = this.changeFlag + 1;
+      return pathInfo;
+  }
+  popTo(name) {
+      let index = this.pathArray.findIndex(element => element.name === name);
+      if (index === -1) {
+          return -1;
+      }
+      this.pathArray.splice(index + 1);
+      this.changeFlag = this.changeFlag + 1;
+      return index;
+  }
+  popToIndex(index) {
+      if (index >= this.pathArray.length) {
+          return;
+      }
+      this.pathArray.splice(index + 1);
+      this.changeFlag = this.changeFlag + 1;
+  }
+  moveToTop(name) {
+      let index = this.pathArray.findIndex(element => element.name === name);
+      if (index === -1) {
+          return -1;
+      }
+      let info = this.pathArray.splice(index, 1);
+      this.pathArray.push(info[0]);
+      this.changeFlag = this.changeFlag + 1;
+      return index;
+  }
+  moveIndexToTop(index) {
+      if (index >= this.pathArray.length) {
+          return;
+      }
+      let info = this.pathArray.splice(index, 1);
+      this.pathArray.push(info[0]);
+      this.changeFlag = this.changeFlag + 1;
+  }
+  clear() {
+      this.pathArray.splice(0);
+      this.changeFlag = this.changeFlag + 1;
+  }
+  removeName(name) {
+      var removed = false;
+      for (var i = 0; i < this.pathArray.length; i++) {
+          if (this.pathArray[i].name === name) {
+              this.pathArray.splice(i, 1);
+              removed = true;
+          }
+      }
+      if (removed) {
+          this.changeFlag = this.changeFlag + 1;
+      }
+  }
+  getAllPathName() {
+      let array = this.pathArray.flatMap(element => element.name);
+      return array;
+  }
+  getParamByIndex(index) {
+      let item = this.pathArray[index];
+      if (item === undefined) {
+          return undefined;
+      }
+      return item.param;
+  }
+  getParamByName(name) {
+      let array = new Array();
+      this.pathArray.forEach((element) => {
+          if (element.name === name) {
+              array.push(element.param);
+          }
+      });
+      return array;
+  }
+  getIndexByName(name) {
+      let array = new Array();
+      this.pathArray.forEach((element, index) => {
+          if (element.name === name) {
+              array.push(index);
+          }
+      });
+      return array;
+  }
+  getNameByIndex(index) {
+      if (index >= this.pathArray.length) {
+          return;
+      }
+      this.pathArray.forEach((element, i) => {
+          if (i == index) {
+              return element.name;
+          }
+      });
+  }
+  size() {
+      return this.pathArray.length;
+  }
+}
+
 var ImageSpanAlignment;
 (function (ImageSpanAlignment) {
   ImageSpanAlignment[ImageSpanAlignment["NONE"] = 0] = "NONE";
