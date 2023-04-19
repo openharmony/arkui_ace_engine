@@ -30,8 +30,13 @@ public:
 
     void MakeCanvasImage(
         const RefPtr<ImageLoadingContext>& ctx, const SizeF& resizeTarget, bool forceResize, bool syncLoad) override;
-        
+
     RefPtr<ImageObject> Clone() override;
+
+    void ClearData() override
+    {
+        // do nothing. AnimatedImage keeps data in memory.
+    }
 private:
     ACE_DISALLOW_COPY_AND_MOVE(AnimatedImageObject);
 };

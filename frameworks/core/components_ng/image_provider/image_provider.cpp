@@ -170,6 +170,8 @@ void ImageProvider::CreateImageObjHelper(const ImageSourceInfo& src, bool sync)
             }
             ctx->DataReadyCallback(imageObj);
         }
+        // ImageObject cache is only for saving image size info, clear data to save memory
+        imageObj->ClearData();
     };
     if (sync) {
         notifyDataReadyTask();

@@ -40,7 +40,7 @@ public:
 
     void SetData(const RefPtr<ImageData>& data);
     void SetImageSize(const SizeF& imageSize);
-    void ClearData();
+    virtual void ClearData();
 
     virtual RefPtr<ImageObject> Clone() = 0;
 
