@@ -26,9 +26,7 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
-
 class RecycleNodeTestNG : public testing::Test {};
-
 /**
  * @tc.name: RecycleNodeTestNg001
  * @tc.desc: create RecycleNode
@@ -89,5 +87,4 @@ HWTEST_F(RecycleNodeTestNG, RecycleNodeTestNG002, TestSize.Level1)
     EXPECT_EQ(customNode2, nullptr);
     recycleNode2.Reset();
 }
-
 } // namespace OHOS::Ace::NG
