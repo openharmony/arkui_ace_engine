@@ -252,6 +252,13 @@ var TextDecorationType;
   TextDecorationType[TextDecorationType["LineThrough"] = 3] = "LineThrough";
 })(TextDecorationType || (TextDecorationType= {}));
 
+var ClickEffectLevel;
+(function (ClickEffectLevel) {
+  ClickEffectLevel[ClickEffectLevel["LIGHT"] = 0] = "LIGHT";
+  ClickEffectLevel[ClickEffectLevel["MIDDLE"] = 1] = "MIDDLE";
+  ClickEffectLevel[ClickEffectLevel["HEAVY"] = 2] = "HEAVY";
+})(ClickEffectLevel || (ClickEffectLevel= {}));
+
 var TextCase;
 (function (TextCase) {
   TextCase[TextCase["Normal"] = 0] = "Normal";

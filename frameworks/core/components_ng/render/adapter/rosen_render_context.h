@@ -20,16 +20,17 @@
 #include <memory>
 #include <optional>
 
-#include "render_service_client/core/ui/rs_node.h"
 #include "include/core/SkCanvas.h"
 #include "include/core/SkPictureRecorder.h"
 #include "include/core/SkRefCnt.h"
+#include "render_service_client/core/ui/rs_node.h"
 
 #include "base/geometry/dimension_offset.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/utils/noncopyable.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/progress_mask_property.h"
@@ -302,6 +303,10 @@ private:
     void SetBackBlurFilter();
     void GetPaddingOfFirstFrameNodeParent(Dimension& parentPaddingLeft, Dimension& parentPaddingTop);
 
+    void InitEventClickEffect();
+    RefPtr<Curve> UpdatePlayAnimationValue(const ClickEffectLevel& level, float& scaleValue);
+    void ClickEffectPlayAnimation(const TouchType& touchType);
+
     // helper function to check if paint rect is valid
     bool RectIsNull();
 
@@ -371,6 +376,9 @@ private:
     std::shared_ptr<InvertModifier> invertModifier_;
     std::shared_ptr<HueRotateModifier> hueRotateModifier_;
     std::shared_ptr<ColorBlendModifier> colorBlendModifier_;
+
+    RefPtr<TouchEventImpl> touchListener_;
+    std::shared_ptr<AnimationUtils::Animation> clickEffectAnimation_;
 
     template<typename Modifier, typename PropertyType>
     friend class PropertyTransitionEffectTemplate;

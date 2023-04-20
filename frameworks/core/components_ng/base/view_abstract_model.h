@@ -31,13 +31,13 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/property/gradient_property.h"
+#include "core/components_ng/property/progress_mask_property.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/event/ace_events.h"
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
 #include "core/gestures/gesture_info.h"
-#include "core/components_ng/property/progress_mask_property.h"
 
 namespace OHOS::Ace {
 
@@ -165,6 +165,7 @@ public:
     virtual void SetSepia(const Dimension& value) = 0;
     virtual void SetInvert(const Dimension& value) = 0;
     virtual void SetHueRotate(float value) = 0;
+    virtual void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue) = 0;
 
     // event
     virtual void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc) = 0;
