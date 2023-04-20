@@ -62,9 +62,11 @@ private:
 
     // ensure frames decode serially, protect bitmap
     std::mutex decodeMtx_;
-
-    sk_sp<SkImage> currentFrame_;
     SkBitmap requiredFrame_;
+
+    // protect currentFrame_
+    mutable std::mutex frameMtx_;
+    sk_sp<SkImage> currentFrame_;
 
     std::function<void()> redraw_;
     RefPtr<Animator> animator_;
