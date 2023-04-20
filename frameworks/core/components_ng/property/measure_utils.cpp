@@ -253,11 +253,11 @@ void SetMainAxisSize(float value, Axis axis, OptionalSizeF& size)
     size.SetWidth(value);
 }
 
-SizeF CreateIdealSize(const LayoutConstraintF& layoutConstraint, Axis axis, MeasureType measureType, bool usingMaxSize)
+SizeF CreateIdealSize(const LayoutConstraintF& layoutConstraint, Axis axis, MeasureType measureType, bool usingParent)
 {
     auto optional = CreateIdealSize(layoutConstraint, axis, measureType);
-    if (usingMaxSize) {
-        optional.UpdateIllegalSizeWithCheck(layoutConstraint.maxSize);
+    if (usingParent) {
+        optional.UpdateIllegalSizeWithCheck(layoutConstraint.percentReference);
     } else {
         optional.UpdateIllegalSizeWithCheck(layoutConstraint.minSize);
     }
@@ -276,7 +276,7 @@ OptionalSizeF CreateIdealSize(const LayoutConstraintF& layoutConstraint, Axis ax
 
         if (measureType == MeasureType::MATCH_PARENT) {
             idealSize.UpdateIllegalSizeWithCheck(layoutConstraint.parentIdealSize);
-            idealSize.UpdateIllegalSizeWithCheck(layoutConstraint.maxSize);
+            idealSize.UpdateIllegalSizeWithCheck(layoutConstraint.percentReference);
             break;
         }
 
@@ -287,7 +287,7 @@ OptionalSizeF CreateIdealSize(const LayoutConstraintF& layoutConstraint, Axis ax
                 if (parentCrossSize) {
                     SetCrossAxisSize(parentCrossSize.value(), axis, idealSize);
                 } else {
-                    parentCrossSize = GetCrossAxisSize(layoutConstraint.maxSize, axis);
+                    parentCrossSize = GetCrossAxisSize(layoutConstraint.percentReference, axis);
                     SetCrossAxisSize(parentCrossSize.value(), axis, idealSize);
                 }
             }
@@ -301,7 +301,7 @@ OptionalSizeF CreateIdealSize(const LayoutConstraintF& layoutConstraint, Axis ax
                 if (parentMainSize) {
                     SetMainAxisSize(parentMainSize.value(), axis, idealSize);
                 } else {
-                    parentMainSize = GetMainAxisSize(layoutConstraint.maxSize, axis);
+                    parentMainSize = GetMainAxisSize(layoutConstraint.percentReference, axis);
                     SetMainAxisSize(parentMainSize.value(), axis, idealSize);
                 }
             }
