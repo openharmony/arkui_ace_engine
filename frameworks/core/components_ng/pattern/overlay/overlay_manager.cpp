@@ -446,7 +446,7 @@ void OverlayManager::UpdatePopupNode(int32_t targetId, const PopupInfo& popupInf
     if (iter != rootChildren.end()) {
         // Pop popup
         CHECK_NULL_VOID_NOLOG(popupInfo.isCurrentOnShow);
-        LOGI("OverlayManager: popup begin pop");
+        LOGI("OverlayManager: Popup begin pop");
         popupInfo.popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
         rootNode->RemoveChild(popupMap_[targetId].popupNode);
 #ifdef ENABLE_DRAG_FRAMEWORK
@@ -457,7 +457,7 @@ void OverlayManager::UpdatePopupNode(int32_t targetId, const PopupInfo& popupInf
     } else {
         // Push popup
         CHECK_NULL_VOID_NOLOG(!popupInfo.isCurrentOnShow);
-        LOGI("OverlayManager: popup begin push");
+        LOGI("OverlayManager: Popup begin push");
         popupInfo.popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(true);
         auto hub = popupInfo.popupNode->GetEventHub<BubbleEventHub>();
         if (!popupInfo.isBlockEvent && hub) {
@@ -502,7 +502,7 @@ void OverlayManager::RemoveIndexerPopup()
 
 void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
 {
-    LOGI("begin pop");
+    LOGI("OverlayManager:: Hide Popup");
     popupMap_[targetId] = popupInfo;
     CHECK_NULL_VOID_NOLOG(popupInfo.markNeedUpdate);
     popupMap_[targetId].markNeedUpdate = false;
