@@ -71,6 +71,15 @@ void CustomNode::FlushReload()
     Render();
 }
 
+void CustomNode::SetActive(bool active, bool isSubtreeRoot)
+{
+    isActive_ = active;
+    if (IsActive() && PipelineContext::GetCurrentContext()->FindInactiveDirtyNodeActive(GetId())) {
+        PipelineContext::GetCurrentContext()->AddDirtyCustomNode(AceType::DynamicCast<UINode>(Claim(this)));
+    }
+    UINode::SetActive(active, isSubtreeRoot);
+}
+
 void CustomNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool forceMeasure, bool forceLayout)
 {
     if (parent->GetHostTag() != V2::TAB_CONTENT_ITEM_ETS_TAG) {

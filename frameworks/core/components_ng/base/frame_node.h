@@ -266,12 +266,7 @@ public:
 
     void AdjustGridOffset();
 
-    void SetActive(bool active) override;
-
-    bool IsActive() const
-    {
-        return isActive_;
-    }
+    void SetActive(bool active, bool isSubtreeRoot = true) override;
 
     bool IsInternal() const
     {
@@ -438,7 +433,6 @@ private:
 
     // for container, this flag controls only the last child in touch area is consuming event.
     bool exclusiveEventForChild_ = false;
-    bool isActive_ = false;
     bool isResponseRegion_ = false;
 
     double lastVisibleRatio_ = 0.0;

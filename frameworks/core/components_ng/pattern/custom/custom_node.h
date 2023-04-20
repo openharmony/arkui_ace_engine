@@ -64,6 +64,8 @@ public:
     }
     void FlushReload();
 
+    void SetActive(bool active, bool isSubtreeRoot = true) override;
+
 private:
     std::string viewKey_;
     RenderFunction renderFunction_;
