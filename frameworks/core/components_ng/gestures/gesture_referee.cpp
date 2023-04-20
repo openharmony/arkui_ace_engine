@@ -206,15 +206,16 @@ bool GestureReferee::QueryAllDone(size_t touchId)
 
 bool GestureReferee::CheckDeviceChange(size_t id)
 {
-    for (auto iter = gestureScopes_.begin(); iter != gestureScopes_.end(); iter++){
+    for (auto iter = gestureScopes_.begin(); iter != gestureScopes_.end(); iter++) {
         if ( (id+iter->first > SOURCE_TYPE_MOUSE_BEG) && (id+iter->first < SOURCE_TYPE_MOUSE_END)) {
-           return true; 
+            return true; 
         }
     }
     return false;
 }
 
-void GestureReferee::CleanAll(){
+void GestureReferee::CleanAll()
+{
     for (auto iter = gestureScopes_.begin(); iter != gestureScopes_.end(); iter++) {
         iter->second->Close();
         gestureScopes_.erase(iter);
