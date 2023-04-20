@@ -2671,6 +2671,7 @@ void FrontendDelegateDeclarative::AttachSubPipelineContext(const RefPtr<Pipeline
         return;
     }
     jsAccessibilityManager_->AddSubPipelineContext(context);
+    jsAccessibilityManager_->RegisterSubWindowInteractionOperation(context->GetWindowId());
 }
 
 RefPtr<PipelineBase> FrontendDelegateDeclarative::GetPipelineContext()

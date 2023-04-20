@@ -1109,7 +1109,6 @@ static void DumpCommonPropertyNG(const AccessibilityElementInfo& nodeInfo)
     DumpLog::GetInstance().AddDesc("page id: " + std::to_string(nodeInfo.GetPageId()));
     DumpLog::GetInstance().AddDesc("page path: ", nodeInfo.GetPagePath());
     DumpLog::GetInstance().AddDesc("is valid element: ", BoolToString(nodeInfo.IsValidElement()));
-    DumpLog::GetInstance().AddDesc("js component id: ", nodeInfo.GetInspectorKey());
     DumpLog::GetInstance().AddDesc("resource name: ", nodeInfo.GetComponentResourceId());
 
     DumpLog::GetInstance().AddDesc("clickable: ", BoolToString(nodeInfo.IsClickable()));
@@ -2221,21 +2220,37 @@ int JsAccessibilityManager::RegisterInteractionOperation(int windowId)
 
     std::shared_ptr<AccessibilitySystemAbilityClient> instance = AccessibilitySystemAbilityClient::GetInstance();
     CHECK_NULL_RETURN_NOLOG(instance, -1);
-    interactionOperation_ = std::make_shared<JsInteractionOperation>(windowId);
-    interactionOperation_->SetHandler(WeakClaim(this));
-    Accessibility::RetError retReg = instance->RegisterElementOperator(windowId, interactionOperation_);
+    auto interactionOperation = std::make_shared<JsInteractionOperation>(windowId);
+    interactionOperation->SetHandler(WeakClaim(this));
+    Accessibility::RetError retReg = instance->RegisterElementOperator(windowId, interactionOperation);
     RefPtr<PipelineBase> context;
     for (auto subContext : GetSubPipelineContexts()) {
         context = subContext.Upgrade();
         CHECK_NULL_RETURN_NOLOG(context, -1);
-        interactionOperation_ = std::make_shared<JsInteractionOperation>(context->GetWindowId());
-        interactionOperation_->SetHandler(WeakClaim(this));
-        retReg = instance->RegisterElementOperator(context->GetWindowId(), interactionOperation_);
+        interactionOperation = std::make_shared<JsInteractionOperation>(context->GetWindowId());
+        interactionOperation->SetHandler(WeakClaim(this));
+        retReg = instance->RegisterElementOperator(context->GetWindowId(), interactionOperation);
     }
     LOGI("RegisterInteractionOperation end windowId:%{public}d, ret:%{public}d", windowId, retReg);
     Register(retReg == RET_OK);
 
     return retReg;
+}
+
+void JsAccessibilityManager::RegisterSubWindowInteractionOperation(int windowId)
+{
+    if (!AceApplicationInfo::GetInstance().IsAccessibilityEnabled() || !IsRegister()) {
+        return;
+    }
+
+    std::shared_ptr<AccessibilitySystemAbilityClient> instance = AccessibilitySystemAbilityClient::GetInstance();
+    CHECK_NULL_VOID_NOLOG(instance);
+    auto interactionOperation = std::make_shared<JsInteractionOperation>(windowId);
+    interactionOperation->SetHandler(WeakClaim(this));
+    Accessibility::RetError retReg = instance->RegisterElementOperator(windowId, interactionOperation);
+    if (!retReg) {
+        LOGE("RegisterInteractionOperation failed, windowId:%{public}d, ret:%{public}d", windowId, retReg);
+    }
 }
 
 void JsAccessibilityManager::DeregisterInteractionOperation()

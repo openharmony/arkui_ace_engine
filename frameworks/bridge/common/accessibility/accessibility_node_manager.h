@@ -22,9 +22,9 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
+#include "core/pipeline/base/composed_element.h"
 #include "core/pipeline/pipeline_base.h"
 #include "frameworks/bridge/js_frontend/js_ace_page.h"
-#include "core/pipeline/base/composed_element.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -50,6 +50,7 @@ public:
 
     // AccessibilityNodeManager functions.
     virtual void InitializeCallback();
+    virtual void RegisterSubWindowInteractionOperation(int windowId);
     void SetPipelineContext(const RefPtr<PipelineBase>& context);
     void AddSubPipelineContext(const RefPtr<PipelineBase>& context);
     void SetRunningPage(const RefPtr<JsAcePage>& page);
