@@ -135,15 +135,24 @@ void OverlayManager::OpenDialogAnimation(const RefPtr<FrameNode>& node)
 
     option.SetOnFinishEvent(
         [weak = WeakClaim(this), nodeWK = WeakClaim(RawPtr(node)), id = Container::CurrentId(), onFinish] {
-            auto node = nodeWK.Upgrade();
-            auto overlayManager = weak.Upgrade();
-            CHECK_NULL_VOID(node && overlayManager);
             ContainerScope scope(id);
-            overlayManager->FocusOverlayNode(node);
-
-            if (onFinish != nullptr) {
-                onFinish();
-            }
+            auto context = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID_NOLOG(context);
+            auto taskExecutor = context->GetTaskExecutor();
+            CHECK_NULL_VOID_NOLOG(taskExecutor);
+            taskExecutor->PostTask(
+                [weak, nodeWK, id, onFinish]() {
+                    ContainerScope scope(id);
+                    auto node = nodeWK.Upgrade();
+                    auto overlayManager = weak.Upgrade();
+                    CHECK_NULL_VOID(node && overlayManager);
+                    LOGI("Execute dialog FocusOverlayNode");
+                    overlayManager->FocusOverlayNode(node);
+                    if (onFinish != nullptr) {
+                        onFinish();
+                    }
+                },
+                TaskExecutor::TaskType::UI);
         });
     auto ctx = node->GetRenderContext();
     CHECK_NULL_VOID(ctx);
@@ -180,16 +189,25 @@ void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
 
     option.SetOnFinishEvent([nodeWk = WeakClaim(RawPtr(node)), id = Container::CurrentId()] {
         ContainerScope scope(id);
-        auto node = nodeWk.Upgrade();
-        CHECK_NULL_VOID(node);
-
-        OnDialogCloseEvent(node);
-
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto overlayManager = pipeline->GetOverlayManager();
-        CHECK_NULL_VOID(overlayManager);
-        overlayManager->BlurOverlayNode();
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID_NOLOG(context);
+        auto taskExecutor = context->GetTaskExecutor();
+        CHECK_NULL_VOID_NOLOG(taskExecutor);
+        // animation finish event should be posted to UI thread.
+        taskExecutor->PostTask(
+            [nodeWk, id]() {
+                ContainerScope scope(id);
+                LOGI("Execute dialog blur overlay node");
+                auto node = nodeWk.Upgrade();
+                CHECK_NULL_VOID(node);
+                OnDialogCloseEvent(node);
+                auto pipeline = PipelineContext::GetCurrentContext();
+                CHECK_NULL_VOID(pipeline);
+                auto overlayManager = pipeline->GetOverlayManager();
+                CHECK_NULL_VOID(overlayManager);
+                overlayManager->BlurOverlayNode();
+            },
+            TaskExecutor::TaskType::UI);
     });
     auto ctx = node->GetRenderContext();
     CHECK_NULL_VOID(ctx);
