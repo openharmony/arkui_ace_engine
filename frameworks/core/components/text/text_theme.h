@@ -65,6 +65,7 @@ public:
             theme->textStyle_.SetTextColor(pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color::BLACK)
                                                .BlendOpacity(pattern->GetAttr<double>(PATTERN_TEXT_COLOR_ALPHA, 0.9)));
             theme->selectedColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_SELECTED, Color(0x33007dff));
+            theme->draggable = pattern->GetAttr<int32_t>("draggable", 0);
         }
     };
 
@@ -80,12 +81,18 @@ public:
         return selectedColor_;
     }
 
+    bool GetDraggable() const
+    {
+        return draggable;
+    }
+
 protected:
     TextTheme() = default;
 
 private:
     TextStyle textStyle_;
     Color selectedColor_;
+    bool draggable = false;
 };
 
 } // namespace OHOS::Ace
