@@ -664,6 +664,7 @@ public:
     void HandleOnCopy();
     void HandleOnPaste();
     void HandleOnCut();
+    void StripNextLine(std::wstring& data);
     bool OnKeyEvent(const KeyEvent& event);
     TextInputType GetKeyboard()
     {
