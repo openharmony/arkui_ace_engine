@@ -5374,7 +5374,7 @@ void JSViewAbstract::JsKeyboardShortcut(const JSCallbackInfo& info)
     }
     if ((!info[0]->IsString() && !info[0]->IsNumber()) || !info[1]->IsArray()) {
         LOGE("JsKeyboardShortcut: The param type is invalid.");
-        ViewAbstractModel::GetInstance()->SetKeyboardShortcut("", std::vector<CtrlKey>(), nullptr);
+        ViewAbstractModel::GetInstance()->SetKeyboardShortcut("", std::vector<ModifierKey>(), nullptr);
         return;
     }
 
@@ -5383,7 +5383,7 @@ void JSViewAbstract::JsKeyboardShortcut(const JSCallbackInfo& info)
         value = info[0]->ToString();
         if (value.empty() || value.size() > 1) {
             LOGE("KeyboardShortcut value arg is wrong, return");
-            ViewAbstractModel::GetInstance()->SetKeyboardShortcut("", std::vector<CtrlKey>(), nullptr);
+            ViewAbstractModel::GetInstance()->SetKeyboardShortcut("", std::vector<ModifierKey>(), nullptr);
             return;
         }
     } else {
@@ -5393,12 +5393,12 @@ void JSViewAbstract::JsKeyboardShortcut(const JSCallbackInfo& info)
 
     auto keysArray = JSRef<JSArray>::Cast(info[1]);
     size_t size = keysArray->Length();
-    std::vector<CtrlKey> keys(size);
+    std::vector<ModifierKey> keys(size);
     keys.clear();
     for (size_t i = 0; i < size; i++) {
         JSRef<JSVal> key = keysArray->GetValueAt(i);
         if (key->IsNumber()) {
-            keys.emplace_back(static_cast<CtrlKey>(key->ToNumber<int32_t>()));
+            keys.emplace_back(static_cast<ModifierKey>(key->ToNumber<int32_t>()));
         }
     }
 
