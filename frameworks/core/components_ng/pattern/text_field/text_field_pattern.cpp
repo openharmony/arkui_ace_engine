@@ -81,7 +81,7 @@ constexpr char16_t OBSCURING_CHARACTER = u'•';
 constexpr char16_t OBSCURING_CHARACTER_FOR_AR = u'*';
 const std::string NEWLINE = "\n";
 const std::wstring WIDE_NEWLINE = StringUtils::ToWstring(NEWLINE);
-const std::string DIGIT_WHITE_LIST = "^[0-9]*$";
+const std::string DIGIT_WHITE_LIST = "[0-9]";
 const std::string PHONE_WHITE_LIST = "[\\d\\-\\+\\*\\#]+";
 const std::string EMAIL_WHITE_LIST = "[\\w.]";
 const std::string URL_WHITE_LIST = "[a-zA-z]+://[^\\s]*";
@@ -1186,8 +1186,14 @@ void TextFieldPattern::HandleOnPaste()
             start = value.caretPosition;
             end = value.caretPosition;
         }
+        std::string result;
+        std::string valueToUpdate(data);
+        textfield->EditingValueFilter(valueToUpdate, result);
+        LOGD("After filter paste value is %{private}s", result.c_str());
+        CHECK_NULL_VOID_NOLOG(!result.empty());
         std::wstring pasteData;
-        std::wstring wData = StringUtils::ToWstring(data);
+        std::wstring wData = StringUtils::ToWstring(result);
+        textfield->StripNextLine(wData);
         if (wData.length() + valueLength > textfield->GetMaxLength()) {
             pasteData = wData.substr(0, textfield->GetMaxLength() - valueLength);
         } else {
