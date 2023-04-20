@@ -22,6 +22,9 @@
 
 namespace OHOS::Ace::NG {
 
+constexpr int32_t SOURCE_TYPE_MOUSE_BEG = 1000;
+constexpr int32_t SOURCE_TYPE_MOUSE_END = 2000;
+
 void GestureScope::AddMember(const RefPtr<NGGestureRecognizer>& recognizer)
 {
     CHECK_NULL_VOID(recognizer);
@@ -199,6 +202,23 @@ bool GestureReferee::QueryAllDone(size_t touchId)
         ret = scope->QueryAllDone(touchId);
     }
     return ret;
+}
+
+bool GestureReferee::CheckDeviceChange(size_t id)
+{
+    for (auto iter = gestureScopes_.begin(); iter != gestureScopes_.end(); iter++){
+        if ( (id+iter->first > SOURCE_TYPE_MOUSE_BEG) && (id+iter->first < SOURCE_TYPE_MOUSE_END)) {
+           return true; 
+        }
+    }
+    return false;
+}
+
+void GestureReferee::CleanAll(){
+    for (auto iter = gestureScopes_.begin(); iter != gestureScopes_.end(); iter++) {
+        iter->second->Close();
+        gestureScopes_.erase(iter);
+    }
 }
 
 void GestureReferee::Adjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)
