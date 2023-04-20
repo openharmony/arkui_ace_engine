@@ -1200,6 +1200,7 @@ void TextFieldPattern::HandleOnPaste()
         }
         std::wstring pasteData;
         std::wstring wData = StringUtils::ToWstring(data);
+        textfield->StripNextLine(wData);
         if (wData.length() + valueLength > textfield->GetMaxLength()) {
             pasteData = wData.substr(0, textfield->GetMaxLength() - valueLength);
         } else {
@@ -1241,6 +1242,24 @@ void TextFieldPattern::HandleOnPaste()
     CHECK_NULL_VOID(clipboard_);
     clipboard_->GetData(pasteCallback);
 #endif
+}
+
+void TextFieldPattern::StripNextLine(std::wstring& data)
+{
+    CHECK_NULL_VOID(!(data.empty() || IsTextArea()));
+    std::wstring result;
+    bool dataChanged = false;
+    int32_t dataPtr = 0;
+    while (dataPtr < static_cast<int32_t>(data.length())) {
+        if (data[dataPtr] != WIDE_NEWLINE[0]) {
+            result += data[dataPtr];
+        } else {
+            dataChanged = true;
+        }
+        dataPtr++;
+    }
+    CHECK_NULL_VOID(dataChanged);
+    data = result;
 }
 
 void TextFieldPattern::HandleOnCut()
