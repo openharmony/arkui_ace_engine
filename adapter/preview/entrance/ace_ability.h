@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_ADAPTER_PREVIEW_ACE_ABILITY_H
 
 #include <atomic>
+#include <thread>
 
 #include "flutter/shell/platform/glfw/public/flutter_glfw.h"
 #ifdef ENABLE_ROSEN_BACKEND

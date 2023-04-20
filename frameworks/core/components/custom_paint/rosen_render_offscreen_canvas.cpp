@@ -18,28 +18,36 @@
 #include <cmath>
 #include <sstream>
 
-#include "flutter/third_party/txt/src/txt/paragraph_builder.h"
-#include "flutter/third_party/txt/src/txt/paragraph_style.h"
-#include "third_party/skia/include/core/SkBlendMode.h"
-#include "third_party/skia/include/core/SkColor.h"
-#include "third_party/skia/include/core/SkMaskFilter.h"
-#include "third_party/skia/include/core/SkPoint.h"
-#include "third_party/skia/include/effects/SkBlurImageFilter.h"
-#include "third_party/skia/include/effects/SkDashPathEffect.h"
-#include "third_party/skia/include/effects/SkGradientShader.h"
-#include "third_party/skia/include/encode/SkJpegEncoder.h"
-#include "third_party/skia/include/encode/SkPngEncoder.h"
-#include "third_party/skia/include/encode/SkWebpEncoder.h"
-#include "third_party/skia/include/utils/SkBase64.h"
-#include "third_party/skia/include/utils/SkParsePath.h"
+#include "txt/paragraph_builder.h"
+#include "txt/paragraph_style.h"
+#include "include/core/SkBlendMode.h"
+#include "include/core/SkColor.h"
+#include "include/core/SkMaskFilter.h"
+#include "include/core/SkPoint.h"
+#include "include/effects/SkBlurImageFilter.h"
+#include "include/effects/SkDashPathEffect.h"
+#include "include/effects/SkGradientShader.h"
+#include "include/encode/SkJpegEncoder.h"
+#include "include/encode/SkPngEncoder.h"
+#include "include/encode/SkWebpEncoder.h"
+#include "include/utils/SkBase64.h"
+#include "include/utils/SkParsePath.h"
 
 #include "base/i18n/localization.h"
 #include "base/image/pixel_map.h"
 #include "base/log/log.h"
 #include "base/utils/string_utils.h"
+#ifndef NEW_SKIA
 #include "core/components/common/painter/flutter_decoration_painter.h"
+#else
+#include "core/components/common/painter/rosen_decoration_painter.h"
+#endif
 #include "core/components/font/constants_converter.h"
+#ifndef NEW_SKIA
 #include "core/components/font/flutter_font_collection.h"
+#else
+#include "core/components/font/rosen_font_collection.h"
+#endif
 #include "core/image/image_provider.h"
 
 namespace OHOS::Ace {
@@ -130,18 +138,34 @@ void RosenRenderOffscreenCanvas::AddRect(const Rect& rect)
 void RosenRenderOffscreenCanvas::SetFillRuleForPath(const CanvasFillRule& rule)
 {
     if (rule == CanvasFillRule::NONZERO) {
+#ifndef NEW_SKIA
         skPath_.setFillType(SkPath::FillType::kWinding_FillType);
+#else
+        skPath_.setFillType(SkPathFillType::kWinding);
+#endif
     } else if (rule == CanvasFillRule::EVENODD) {
+#ifndef NEW_SKIA
         skPath_.setFillType(SkPath::FillType::kEvenOdd_FillType);
+#else
+        skPath_.setFillType(SkPathFillType::kEvenOdd);
+#endif
     }
 }
 
 void RosenRenderOffscreenCanvas::SetFillRuleForPath2D(const CanvasFillRule& rule)
 {
     if (rule == CanvasFillRule::NONZERO) {
+#ifndef NEW_SKIA
         skPath2d_.setFillType(SkPath::FillType::kWinding_FillType);
+#else
+        skPath2d_.setFillType(SkPathFillType::kWinding);
+#endif
     } else if (rule == CanvasFillRule::EVENODD) {
+#ifndef NEW_SKIA
         skPath2d_.setFillType(SkPath::FillType::kEvenOdd_FillType);
+#else
+        skPath2d_.setFillType(SkPathFillType::kEvenOdd);
+#endif
     }
 }
 
@@ -207,7 +231,11 @@ void RosenRenderOffscreenCanvas::Fill()
     paint.setColor(fillState_.GetColor().GetValue());
     paint.setStyle(SkPaint::Style::kFill_Style);
     if (HasShadow()) {
+#ifndef NEW_SKIA
         FlutterDecorationPainter::PaintShadow(skPath_, shadow_, skCanvas_.get());
+#else
+        RosenDecorationPainter::PaintShadow(skPath_, shadow_, skCanvas_.get());
+#endif
     }
     if (fillState_.GetGradient().IsValid()) {
         UpdatePaintShader(paint, fillState_.GetGradient());
@@ -223,7 +251,11 @@ void RosenRenderOffscreenCanvas::Fill()
     } else {
         InitCachePaint();
         cacheCanvas_->drawPath(skPath_, paint);
+#ifndef NEW_SKIA
         skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
+#else
+        skCanvas_->drawImage(cacheBitmap_.asImage(), 0, 0, SkSamplingOptions(), &cachePaint_);
+#endif
         cacheBitmap_.eraseColor(0);
     }
 }
@@ -265,7 +297,11 @@ void RosenRenderOffscreenCanvas::FillRect(Rect rect)
     if (HasShadow()) {
         SkPath path;
         path.addRect(skRect);
+#ifndef NEW_SKIA
         FlutterDecorationPainter::PaintShadow(path, shadow_, skCanvas_.get());
+#else
+        RosenDecorationPainter::PaintShadow(path, shadow_, skCanvas_.get());
+#endif
     }
     if (fillState_.GetGradient().IsValid()) {
         UpdatePaintShader(paint, fillState_.GetGradient());
@@ -281,7 +317,11 @@ void RosenRenderOffscreenCanvas::FillRect(Rect rect)
     } else {
         InitCachePaint();
         cacheCanvas_->drawRect(skRect, paint);
+#ifndef NEW_SKIA
         skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
+#else
+        skCanvas_->drawImage(cacheBitmap_.asImage(), 0, 0, SkSamplingOptions(), &cachePaint_);
+#endif
         cacheBitmap_.eraseColor(0);
     }
 }
@@ -304,7 +344,11 @@ void RosenRenderOffscreenCanvas::PutImageData(const ImageData& imageData)
         SkAlphaType::kOpaque_SkAlphaType);
     skBitmap.allocPixels(imageInfo);
     skBitmap.setPixels(data);
+#ifndef NEW_SKIA
     skCanvas_->drawBitmap(skBitmap, imageData.x, imageData.y);
+#else
+    skCanvas_->drawImage(skBitmap.asImage(), imageData.x, imageData.y, SkSamplingOptions());
+#endif
     delete[] data;
 }
 
@@ -319,7 +363,11 @@ void RosenRenderOffscreenCanvas::SetPaintImage()
 #endif
 
     imagePaint_.setMaskFilter(SkMaskFilter::MakeBlur(SkBlurStyle::kNormal_SkBlurStyle, 0));
+#ifndef NEW_SKIA
     imagePaint_.setImageFilter(SkBlurImageFilter::Make(0, 0, nullptr));
+#else
+    imagePaint_.setImageFilter(SkImageFilters::Blur(0, 0, nullptr));
+#endif
 
     SetDropShadowFilter("0px 0px 0px black");
     std::string filterType, filterParam;
@@ -333,6 +381,7 @@ void RosenRenderOffscreenCanvas::SetPaintImage()
 
 void RosenRenderOffscreenCanvas::InitImagePaint()
 {
+#ifndef NEW_SKIA
     if (smoothingEnabled_) {
         if (smoothingQuality_ == "low") {
             imagePaint_.setFilterQuality(SkFilterQuality::kLow_SkFilterQuality);
@@ -346,6 +395,21 @@ void RosenRenderOffscreenCanvas::InitImagePaint()
     } else {
         imagePaint_.setFilterQuality(SkFilterQuality::kNone_SkFilterQuality);
     }
+#else
+    if (smoothingEnabled_) {
+        if (smoothingQuality_ == "low") {
+            options_ = SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kNone);
+        } else if (smoothingQuality_ == "medium") {
+            options_ = SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kLinear);
+        } else if (smoothingQuality_ == "high") {
+            options_ = SkSamplingOptions(SkCubicResampler { 1 / 3.0f, 1 / 3.0f });
+        } else {
+            LOGE("Unsupported Quality type:%{public}s", smoothingQuality_.c_str());
+        }
+    } else {
+        options_ = SkSamplingOptions(SkFilterMode::kNearest, SkMipmapMode::kNone);
+    }
+#endif
     SetPaintImage();
 }
 
@@ -368,7 +432,6 @@ void RosenRenderOffscreenCanvas::InitImageCallbacks()
         LOGE("failedCallback_");
         render->ImageObjFailed();
     };
-
     uploadSuccessCallback_ = [weak = AceType::WeakClaim(this)](
         ImageSourceInfo sourceInfo, const RefPtr<NG::CanvasImage>& image) {};
 
@@ -475,7 +538,11 @@ void RosenRenderOffscreenCanvas::DrawImage(const CanvasImage& canvasImage, doubl
         SkRect skRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
         SkPath path;
         path.addRect(skRect);
+#ifndef NEW_SKIA
         FlutterDecorationPainter::PaintShadow(path, imageShadow_, skCanvas);
+#else
+        RosenDecorationPainter::PaintShadow(path, imageShadow_, skCanvas);
+#endif
     }
     switch (canvasImage.flag) {
         case 0:
@@ -483,22 +550,34 @@ void RosenRenderOffscreenCanvas::DrawImage(const CanvasImage& canvasImage, doubl
             break;
         case 1: {
             SkRect rect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
+#ifndef NEW_SKIA
             skCanvas->drawImageRect(image, rect, &imagePaint_);
+#else
+            skCanvas->drawImageRect(image, rect, options_, &imagePaint_);
+#endif
             break;
         }
         case 2: {
             SkRect dstRect =
                 SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
             SkRect srcRect =
+#ifndef NEW_SKIA
                 SkRect::MakeXYWH(canvasImage.sx, canvasImage.sy, canvasImage.sWidth, canvasImage.sHeight);
             skCanvas->drawImageRect(image, srcRect, dstRect, &imagePaint_);
+#else
+            skCanvas->drawImageRect(image, srcRect, dstRect, options_, &imagePaint_, SkCanvas::kFast_SrcRectConstraint);
+#endif
             break;
         }
         default:
             break;
     }
     if (globalState_.GetType() != CompositeOperation::SOURCE_OVER) {
+#ifndef NEW_SKIA
         skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
+#else
+        skCanvas_->drawImage(cacheBitmap_.asImage(), 0, 0, SkSamplingOptions(), &cachePaint_);
+#endif
         cacheBitmap_.eraseColor(0);
     }
 }
@@ -533,7 +612,11 @@ void RosenRenderOffscreenCanvas::DrawPixelMap(RefPtr<PixelMap> pixelMap, const C
             break;
         case 1: {
             SkRect rect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
+#ifndef NEW_SKIA
             skCanvas->drawImageRect(image, rect, &imagePaint_);
+#else
+            skCanvas->drawImageRect(image, rect, options_, &imagePaint_);
+#endif
             break;
         }
         case 2: {
@@ -541,14 +624,22 @@ void RosenRenderOffscreenCanvas::DrawPixelMap(RefPtr<PixelMap> pixelMap, const C
                 SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
             SkRect srcRect =
                 SkRect::MakeXYWH(canvasImage.sx, canvasImage.sy, canvasImage.sWidth, canvasImage.sHeight);
+#ifndef NEW_SKIA
             skCanvas->drawImageRect(image, srcRect, dstRect, &imagePaint_);
+#else
+            skCanvas->drawImageRect(image, srcRect, dstRect, options_, &imagePaint_, SkCanvas::kFast_SrcRectConstraint);
+#endif
             break;
         }
         default:
             break;
     }
     if (globalState_.GetType() != CompositeOperation::SOURCE_OVER) {
+#ifndef NEW_SKIA
         skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
+#else
+        skCanvas_->drawImage(cacheBitmap_.asImage(), 0, 0, SkSamplingOptions(), &cachePaint_);
+#endif
         cacheBitmap_.eraseColor(0);
     }
 }
@@ -574,9 +665,9 @@ std::unique_ptr<ImageData> RosenRenderOffscreenCanvas::GetImageData(double left,
     SkBitmap tempCache;
     tempCache.allocPixels(imageInfo);
     SkCanvas tempCanvas(tempCache);
-#ifdef USE_SYSTEM_SKIA_S
+#if defined (USE_SYSTEM_SKIA_S) || defined (NEW_SKIA)
     tempCanvas.drawImageRect(
-        skBitmap_.asImage(), srcRect, dstRect, SkSamplingOptions(), nullptr, SkCanvas::kFast_SrcRectConstraint);
+        skBitmap_.asImage(), srcRect, dstRect, options_, nullptr, SkCanvas::kFast_SrcRectConstraint);
 #else
     tempCanvas.drawBitmapRect(skBitmap_, srcRect, dstRect, nullptr);
 #endif
@@ -624,7 +715,7 @@ std::string RosenRenderOffscreenCanvas::ToDataURL(const std::string& type, const
     double viewScale = pipeline->GetViewScale();
     tempCanvas.clear(SK_ColorTRANSPARENT);
     tempCanvas.scale(1.0 / viewScale, 1.0 / viewScale);
-#ifdef USE_SYSTEM_SKIA_S
+#if defined(USE_SYSTEM_SKIA_S) || defined (NEW_SKIA)
     //The return value of the dual framework interface has no alpha
     tempCanvas.drawImage(skBitmap_.asImage(), 0.0f, 0.0f);
 #else
@@ -740,6 +831,8 @@ void RosenRenderOffscreenCanvas::UpdatePaintShader(const Pattern& pattern, SkPai
             [](sk_sp<SkImage> image, SkPaint& paint) {
 #ifdef USE_SYSTEM_SKIA
                 paint.setShader(image->makeShader(SkShader::kDecal_TileMode, SkShader::kDecal_TileMode, nullptr));
+#elif defined NEW_SKIA
+                paint.setShader(image->makeShader(SkTileMode::kDecal, SkTileMode::kDecal, SkSamplingOptions(), nullptr));
 #else
                 paint.setShader(image->makeShader(SkTileMode::kDecal, SkTileMode::kDecal, nullptr));
 #endif
@@ -748,6 +841,8 @@ void RosenRenderOffscreenCanvas::UpdatePaintShader(const Pattern& pattern, SkPai
             [](sk_sp<SkImage> image, SkPaint& paint) {
 #ifdef USE_SYSTEM_SKIA
                 paint.setShader(image->makeShader(SkShader::kRepeat_TileMode, SkShader::kRepeat_TileMode, nullptr));
+#elif defined NEW_SKIA
+                paint.setShader(image->makeShader(SkTileMode::kRepeat, SkTileMode::kRepeat, SkSamplingOptions(), nullptr));
 #else
                 paint.setShader(image->makeShader(SkTileMode::kRepeat, SkTileMode::kRepeat, nullptr));
 #endif
@@ -756,6 +851,8 @@ void RosenRenderOffscreenCanvas::UpdatePaintShader(const Pattern& pattern, SkPai
             [](sk_sp<SkImage> image, SkPaint& paint) {
 #ifdef USE_SYSTEM_SKIA
                 paint.setShader(image->makeShader(SkShader::kRepeat_TileMode, SkShader::kDecal_TileMode, nullptr));
+#elif defined NEW_SKIA
+                paint.setShader(image->makeShader(SkTileMode::kRepeat, SkTileMode::kDecal, SkSamplingOptions(), nullptr));
 #else
                 paint.setShader(image->makeShader(SkTileMode::kRepeat, SkTileMode::kDecal, nullptr));
 #endif
@@ -764,6 +861,8 @@ void RosenRenderOffscreenCanvas::UpdatePaintShader(const Pattern& pattern, SkPai
             [](sk_sp<SkImage> image, SkPaint& paint) {
 #ifdef USE_SYSTEM_SKIA
                 paint.setShader(image->makeShader(SkShader::kDecal_TileMode, SkShader::kRepeat_TileMode, nullptr));
+#elif defined NEW_SKIA
+                paint.setShader(image->makeShader(SkTileMode::kDecal, SkTileMode::kRepeat, SkSamplingOptions(), nullptr));
 #else
                 paint.setShader(image->makeShader(SkTileMode::kDecal, SkTileMode::kRepeat, nullptr));
 #endif
@@ -825,7 +924,11 @@ void RosenRenderOffscreenCanvas::StrokeRect(Rect rect)
     if (HasShadow()) {
         SkPath path;
         path.addRect(skRect);
+#ifndef NEW_SKIA
         FlutterDecorationPainter::PaintShadow(path, shadow_, skCanvas_.get());
+#else
+        RosenDecorationPainter::PaintShadow(path, shadow_, skCanvas_.get());
+#endif
     }
     if (strokeState_.GetGradient().IsValid()) {
         UpdatePaintShader(paint, strokeState_.GetGradient());
@@ -838,7 +941,11 @@ void RosenRenderOffscreenCanvas::StrokeRect(Rect rect)
     } else {
         InitCachePaint();
         cacheCanvas_->drawRect(skRect, paint);
+#ifndef NEW_SKIA
         skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
+#else
+        skCanvas_->drawImage(cacheBitmap_.asImage(), 0, 0, SkSamplingOptions(), &cachePaint_);
+#endif
         cacheBitmap_.eraseColor(0);
     }
 }
@@ -848,7 +955,11 @@ void RosenRenderOffscreenCanvas::Stroke()
     SkPaint paint = GetStrokePaint();
     paint.setAntiAlias(antiAlias_);
     if (HasShadow()) {
+#ifndef NEW_SKIA
         FlutterDecorationPainter::PaintShadow(skPath_, shadow_, skCanvas_.get());
+#else
+        RosenDecorationPainter::PaintShadow(skPath_, shadow_, skCanvas_.get());
+#endif
     }
     if (strokeState_.GetGradient().IsValid()) {
         UpdatePaintShader(paint, strokeState_.GetGradient());
@@ -861,7 +972,11 @@ void RosenRenderOffscreenCanvas::Stroke()
     } else {
         InitCachePaint();
         cacheCanvas_->drawPath(skPath_, paint);
+#ifndef NEW_SKIA
         skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
+#else
+        skCanvas_->drawImage(cacheBitmap_.asImage(), 0, 0, SkSamplingOptions(), &cachePaint_);
+#endif
         cacheBitmap_.eraseColor(0);
     }
 }
@@ -1082,7 +1197,11 @@ void RosenRenderOffscreenCanvas::Path2DStroke()
     SkPaint paint = GetStrokePaint();
     paint.setAntiAlias(antiAlias_);
     if (HasShadow()) {
+#ifndef NEW_SKIA
         FlutterDecorationPainter::PaintShadow(skPath2d_, shadow_, skCanvas_.get());
+#else
+        RosenDecorationPainter::PaintShadow(skPath2d_, shadow_, skCanvas_.get());
+#endif
     }
     if (strokeState_.GetGradient().IsValid()) {
         UpdatePaintShader(paint, strokeState_.GetGradient());
@@ -1095,7 +1214,11 @@ void RosenRenderOffscreenCanvas::Path2DStroke()
     } else {
         InitCachePaint();
         cacheCanvas_->drawPath(skPath2d_, paint);
+#ifndef NEW_SKIA
         skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
+#else
+        skCanvas_->drawImage(cacheBitmap_.asImage(), 0, 0, SkSamplingOptions(), &cachePaint_);
+#endif
         cacheBitmap_.eraseColor(0);
     }
 }
@@ -1107,7 +1230,11 @@ void RosenRenderOffscreenCanvas::Path2DFill()
     paint.setColor(fillState_.GetColor().GetValue());
     paint.setStyle(SkPaint::Style::kFill_Style);
     if (HasShadow()) {
+#ifndef NEW_SKIA
         FlutterDecorationPainter::PaintShadow(skPath2d_, shadow_, skCanvas_.get());
+#else
+        RosenDecorationPainter::PaintShadow(skPath2d_, shadow_, skCanvas_.get());
+#endif
     }
     if (fillState_.GetGradient().IsValid()) {
         UpdatePaintShader(paint, fillState_.GetGradient());
@@ -1123,7 +1250,11 @@ void RosenRenderOffscreenCanvas::Path2DFill()
     } else {
         InitCachePaint();
         cacheCanvas_->drawPath(skPath2d_, paint);
+#ifndef NEW_SKIA
         skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
+#else
+        skCanvas_->drawImage(cacheBitmap_.asImage(), 0, 0, SkSamplingOptions(), &cachePaint_);
+#endif
         cacheBitmap_.eraseColor(0);
     }
 }
@@ -1202,7 +1333,11 @@ double RosenRenderOffscreenCanvas::MeasureText(const std::string& text, const Pa
     txt::ParagraphStyle style;
     style.text_align = ConvertTxtTextAlign(state.GetTextAlign());
     style.text_direction = ConvertTxtTextDirection(state.GetOffTextDirection());
+#ifndef NEW_SKIA
     auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
+#else
+    auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
+#endif
     if (!fontCollection) {
         LOGW("MeasureText: fontCollection is null");
         return 0.0;
@@ -1224,7 +1359,11 @@ double RosenRenderOffscreenCanvas::MeasureTextHeight(const std::string& text, co
     txt::ParagraphStyle style;
     style.text_align = ConvertTxtTextAlign(state.GetTextAlign());
     style.text_direction = ConvertTxtTextDirection(state.GetOffTextDirection());
+#ifndef NEW_SKIA
     auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
+#else
+    auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
+#endif
     if (!fontCollection) {
         LOGW("MeasureText: fontCollection is null");
         return 0.0;
@@ -1246,7 +1385,11 @@ TextMetrics RosenRenderOffscreenCanvas::MeasureTextMetrics(const std::string& te
     txt::ParagraphStyle style;
     style.text_align = ConvertTxtTextAlign(state.GetTextAlign());
     style.text_direction = ConvertTxtTextDirection(state.GetOffTextDirection());
+#ifndef NEW_SKIA
     auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
+#else
+    auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
+#endif
     if (!fontCollection) {
         LOGW("MeasureText: fontCollection is null");
         return { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
@@ -1358,7 +1501,11 @@ bool RosenRenderOffscreenCanvas::UpdateOffParagraph(const std::string& text, boo
         style.text_align = ConvertTxtTextAlign(fillState_.GetTextAlign());
     }
     style.text_direction = ConvertTxtTextDirection(state.GetOffTextDirection());
+#ifndef NEW_SKIA
     auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
+#else
+    auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
+#endif
     if (!fontCollection) {
         return false;
     }
@@ -1369,7 +1516,11 @@ bool RosenRenderOffscreenCanvas::UpdateOffParagraph(const std::string& text, boo
         txtShadow.color = shadow_.GetColor().GetValue();
         txtShadow.offset.fX = shadow_.GetOffset().GetX();
         txtShadow.offset.fY = shadow_.GetOffset().GetY();
+#ifndef NEW_SKIA
         txtShadow.blur_radius = shadow_.GetBlurRadius();
+#else
+        txtShadow.blur_sigma = shadow_.GetBlurRadius();
+#endif
         txtStyle.text_shadows.emplace_back(txtShadow);
     }
     txtStyle.locale = Localization::GetInstance()->GetFontLocale();
@@ -1417,8 +1568,13 @@ void RosenRenderOffscreenCanvas::UpdateTextStyleForeground(
         }
         if (hasShadow) {
             paint.setColor(shadow_.GetColor().GetValue());
+#ifndef NEW_SKIA
             paint.setMaskFilter(SkMaskFilter::MakeBlur(SkBlurStyle::kNormal_SkBlurStyle,
                 FlutterDecorationPainter::ConvertRadiusToSigma(shadow_.GetBlurRadius())));
+#else
+            paint.setMaskFilter(SkMaskFilter::MakeBlur(SkBlurStyle::kNormal_SkBlurStyle,
+                RosenDecorationPainter::ConvertRadiusToSigma(shadow_.GetBlurRadius())));
+#endif
         }
         txtStyle.foreground = paint;
         txtStyle.has_foreground = true;
@@ -1864,7 +2020,11 @@ void RosenRenderOffscreenCanvas::SetContrastFilter(const std::string& percent)
 
 void RosenRenderOffscreenCanvas::SetBlurFilter(const std::string& percent)
 {
+#ifndef NEW_SKIA
     imagePaint_.setImageFilter(SkBlurImageFilter::Make(BlurStrToDouble(percent), BlurStrToDouble(percent), nullptr));
+#else
+    imagePaint_.setImageFilter(SkImageFilters::Blur(BlurStrToDouble(percent), BlurStrToDouble(percent), nullptr));
+#endif
 }
 
 void RosenRenderOffscreenCanvas::SetDropShadowFilter(const std::string& percent)

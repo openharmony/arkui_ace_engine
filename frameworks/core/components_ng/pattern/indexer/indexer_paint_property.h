@@ -61,8 +61,8 @@ public:
     {
         PaintProperty::ToJsonValue(json);
         json->Put(
-            "SelectedBackgroundColor", propSelectedBackgroundColor_.value_or(Color::WHITE).ColorToString().c_str());
-        json->Put("PopupBackground", propPopupBackground_.value_or(Color::WHITE).ColorToString().c_str());
+            "selectedBackgroundColor", propSelectedBackgroundColor_.value_or(Color::WHITE).ColorToString().c_str());
+        json->Put("popupBackground", propPopupBackground_.value_or(Color::WHITE).ColorToString().c_str());
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto indexerTheme = pipeline->GetTheme<IndexerTheme>();

@@ -25,5 +25,8 @@ build_component("grid_layout") {
     "render_grid_layout_creator.cpp",
     "render_grid_layout_item.cpp",
   ]
+  if (ace_use_new_skia) {
+    sources -= [ "flutter_render_grid_layout.cpp" ]
+  }
   rosen_sources = [ "rosen_render_grid_layout.cpp" ]
 }

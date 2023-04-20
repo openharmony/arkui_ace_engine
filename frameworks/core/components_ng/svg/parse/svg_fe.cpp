@@ -15,8 +15,8 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_fe.h"
 
-#include "third_party/skia/include/effects/SkColorFilterImageFilter.h"
-#include "third_party/skia/include/effects/SkColorMatrix.h"
+#include "include/effects/SkColorFilterImageFilter.h"
+#include "include/effects/SkColorMatrix.h"
 
 #include "base/utils/utils.h"
 

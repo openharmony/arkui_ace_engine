@@ -15,9 +15,9 @@
 
 #include "rosen_render_moon_track.h"
 
-#include "third_party/skia/include/core/SkCanvas.h"
-#include "third_party/skia/include/core/SkPaint.h"
-#include "third_party/skia/include/core/SkPath.h"
+#include "include/core/SkCanvas.h"
+#include "include/core/SkPaint.h"
+#include "include/core/SkPath.h"
 
 #include "core/pipeline/base/rosen_render_context.h"
 

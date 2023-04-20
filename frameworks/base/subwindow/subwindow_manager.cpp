@@ -147,6 +147,13 @@ void SubwindowManager::SetCurrentSubwindow(const RefPtr<Subwindow>& subwindow)
 {
     std::lock_guard<std::mutex> lock(currentSubwindowMutex_);
     currentSubwindow_ = subwindow;
+
+    if (onShowMenuCallback_) {
+        RegisterOnShowMenu(onShowMenuCallback_);
+    }
+    if (onHideMenuCallback_) {
+        RegisterOnHideMenu(onHideMenuCallback_);
+    }
 }
 
 const RefPtr<Subwindow>& SubwindowManager::GetCurrentWindow()
@@ -508,6 +515,26 @@ void SubwindowManager::HideSubWindowNG()
     }
     if (subwindow) {
         subwindow->HideSubWindowNG();
+    }
+}
+
+void SubwindowManager::RegisterOnShowMenu(const std::function<void()>& callback)
+{
+    onShowMenuCallback_ = callback;
+    if (currentSubwindow_) {
+        auto overlayManager = currentSubwindow_->GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+        overlayManager->RegisterOnShowMenu(callback);
+    }
+}
+
+void SubwindowManager::RegisterOnHideMenu(const std::function<void()>& callback)
+{
+    onHideMenuCallback_ = callback;
+    if (currentSubwindow_) {
+        auto overlayManager = currentSubwindow_->GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+        overlayManager->RegisterOnHideMenu(callback);
     }
 }
 } // namespace OHOS::Ace

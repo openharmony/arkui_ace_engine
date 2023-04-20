@@ -213,4 +213,33 @@ HWTEST_F(ImageProviderTestNg, ImageProviderTestNg006, TestSize.Level1)
     src = ImageSourceInfo(SRC_THUMBNAIL);
     EXPECT_FALSE(ImageProvider::BuildImageObject(src, data));
 }
+
+/**
+ * @tc.name: RoundUp001
+ * @tc.desc: Test RoundUp with invalid input (infinite loop)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, RoundUp001, TestSize.Level1)
+{
+    auto ctx =
+        AceType::MakeRefPtr<ImageLoadingContext>(ImageSourceInfo(), LoadNotifier(nullptr, nullptr, nullptr), true);
+    ctx->imageObj_ = AceType::MakeRefPtr<NG::StaticImageObject>(ImageSourceInfo(SRC_JPG), SizeF(-1, -1), nullptr);
+    EXPECT_EQ(ctx->RoundUp(-1), -1);
+
+    ctx->imageObj_ = AceType::MakeRefPtr<NG::StaticImageObject>(ImageSourceInfo(SRC_JPG), SizeF(0, 0), nullptr);
+    EXPECT_EQ(ctx->RoundUp(0), -1);
+
+    ctx->imageObj_ = AceType::MakeRefPtr<NG::StaticImageObject>(ImageSourceInfo(SRC_JPG), SizeF(-1, -1), nullptr);
+    EXPECT_EQ(ctx->RoundUp(0), -1);
+
+    ctx->imageObj_ = AceType::MakeRefPtr<NG::StaticImageObject>(ImageSourceInfo(SRC_JPG), SizeF(0, 0), nullptr);
+    EXPECT_EQ(ctx->RoundUp(-1), -1);
+
+    ctx->imageObj_ =
+        AceType::MakeRefPtr<NG::StaticImageObject>(ImageSourceInfo(SRC_JPG), SizeF(LENGTH_128, LENGTH_128), nullptr);
+    EXPECT_EQ(ctx->RoundUp(0), -1);
+
+    ctx->imageObj_ = AceType::MakeRefPtr<NG::StaticImageObject>(ImageSourceInfo(SRC_JPG), SizeF(0, 0), nullptr);
+    EXPECT_EQ(ctx->RoundUp(LENGTH_128), -1);
+}
 } // namespace OHOS::Ace::NG

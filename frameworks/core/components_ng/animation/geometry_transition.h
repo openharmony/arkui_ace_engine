@@ -33,12 +33,12 @@ public:
 
     bool IsNodeInAndActive(const WeakPtr<FrameNode>& frameNode) const;
     bool IsRunning() const;
-    bool IsInvalid() const;
+    bool IsInAndOutEmpty() const;
     std::string ToString() const;
     void Build(const WeakPtr<FrameNode>& frameNode, bool isNodeIn);
     bool Update(const WeakPtr<FrameNode>& which, const WeakPtr<FrameNode>& value);
     void WillLayout(const RefPtr<LayoutWrapper>& layoutWrapper);
-    void DidLayout(const RefPtr<LayoutWrapper>& root, const WeakPtr<FrameNode>& frameNode);
+    void DidLayout(const WeakPtr<FrameNode>& frameNode);
 
     static void OnLayout(bool layoutStarted)
     {
@@ -52,6 +52,7 @@ private:
         IDENTITY,
     };
 
+    bool IsInAndOutValid() const;
     bool IsNodeInAndIdentity(const WeakPtr<FrameNode>& frameNode) const;
     bool IsNodeOutAndActive(const WeakPtr<FrameNode>& frameNode) const;
     void SwapInAndOut(bool condition);

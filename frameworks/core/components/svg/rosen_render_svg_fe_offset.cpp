@@ -15,7 +15,7 @@
 
 #include "frameworks/core/components/svg/rosen_render_svg_fe_offset.h"
 
-#include "third_party/skia/include/effects/SkOffsetImageFilter.h"
+#include "include/effects/SkOffsetImageFilter.h"
 
 namespace OHOS::Ace {
 

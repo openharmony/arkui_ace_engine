@@ -256,6 +256,17 @@ public:
     }
 
     SwiperIndicatorType GetIndicatorType() const;
+
+    bool IsIndicatorCustomSize() const
+    {
+        return IsCustomSize_;
+    }
+
+    void SetIsIndicatorCustomSize(bool IsCustomSize)
+    {
+        IsCustomSize_ = IsCustomSize;
+    }
+
     std::shared_ptr<SwiperParameters> GetSwiperParameters() const;
     std::shared_ptr<SwiperDigitalParameters> GetSwiperDigitalParameters() const;
 
@@ -368,6 +379,7 @@ private:
     bool isInit_ = true;
     bool hasVisibleChangeRegistered_ = false;
     bool isVisible_ = true;
+    bool IsCustomSize_ = false;
 
     Axis direction_ = Axis::HORIZONTAL;
 

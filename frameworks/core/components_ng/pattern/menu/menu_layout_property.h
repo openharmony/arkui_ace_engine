@@ -52,6 +52,7 @@ public:
         value->propPositionOffset_ = ClonePositionOffset();
         value->propMenuItemFontStyle_ = CloneMenuItemFontStyle();
         value->propTitle_ = CloneTitle();
+        value->propMenuPlacement_ = CloneMenuPlacement();
         return value;
     }
 
@@ -63,6 +64,7 @@ public:
         ResetPositionOffset();
         ResetMenuItemFontStyle();
         ResetTitle();
+        ResetMenuPlacement();
     }
 
     // target frameNode that this menu belongs to
@@ -74,6 +76,9 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PositionOffset, NG::OffsetF, PROPERTY_UPDATE_LAYOUT);
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Title, std::string, PROPERTY_UPDATE_LAYOUT);
+
+    // placement to menu
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MenuPlacement, Placement, PROPERTY_UPDATE_LAYOUT);
 
     ACE_DEFINE_PROPERTY_GROUP(MenuItemFontStyle, MenuItemFontStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(MenuItemFontStyle, FontSize, Dimension, PROPERTY_UPDATE_MEASURE);

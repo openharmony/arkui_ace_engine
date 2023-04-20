@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_THREAD_FRAME_TRACE_IMPL_H
 
 #include <functional>
+#include <string>
 
 namespace OHOS::Ace {
 class FrameTraceAdapter {

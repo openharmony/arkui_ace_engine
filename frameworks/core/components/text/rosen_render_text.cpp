@@ -17,8 +17,8 @@
 
 #include <cmath>
 
-#include "flutter/third_party/txt/src/txt/paragraph_builder.h"
-#include "flutter/third_party/txt/src/txt/paragraph_txt.h"
+#include "txt/paragraph_builder.h"
+#include "txt/paragraph_txt.h"
 #include "render_service_client/core/ui/rs_node.h"
 #include "unicode/uchar.h"
 

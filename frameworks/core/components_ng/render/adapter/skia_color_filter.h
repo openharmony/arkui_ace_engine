@@ -16,8 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_SKIA_COLOR_FILTER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_SKIA_COLOR_FILTER_H
 
-#include "third_party/skia/include/core/SkColorFilter.h"
-#include "third_party/skia/include/core/SkRefCnt.h"
+#include "include/core/SkColorFilter.h"
+#include "include/core/SkRefCnt.h"
 
 #include "core/components_ng/render/color_filter.h"
 

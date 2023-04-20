@@ -134,52 +134,6 @@ int32_t LayoutWrapper::GetHostDepth() const
     return host->GetDepth();
 }
 
-void LayoutWrapper::WillLayout()
-{
-    auto host = GetHostNode();
-    if (!layoutProperty_ || !geometryNode_ || !host) {
-        return;
-    }
-
-    const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
-    if (geometryTransition != nullptr) {
-        LOGD("GeometryTransition: node%{public}d will layout, priority: %{public}d", host->GetId(),
-            host->GetLayoutPriority());
-        geometryTransition->WillLayout(Claim(this));
-    }
-
-    for (const auto& child : children_) {
-        child->WillLayout();
-    }
-}
-
-void LayoutWrapper::DidLayout(const RefPtr<LayoutWrapper>& root)
-{
-    auto host = GetHostNode();
-    if (!layoutProperty_ || !geometryNode_ || !host) {
-        return;
-    }
-
-    const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
-    if (geometryTransition != nullptr) {
-        geometryTransition->DidLayout(root, hostNode_);
-        LOGD("GeometryTransition: node%{public}d did layout", host->GetId());
-    }
-
-    for (auto&& child : GetAllChildrenWithBuild(false)) {
-        child->DidLayout(root);
-    }
-
-    if (root == this && !finishCallbacks_.empty()) {
-        for (const auto& callback : finishCallbacks_) {
-            if (callback) {
-                callback();
-            }
-        }
-        finishCallbacks_.clear();
-    }
-}
-
 // This will call child and self measure process.
 void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstraint)
 {
@@ -192,6 +146,11 @@ void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstr
         LOGD("%{public}s, depth: %{public}d: the layoutAlgorithm skip measure", host->GetTag().c_str(),
             host->GetDepth());
         return;
+    }
+
+    const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
+    if (geometryTransition != nullptr) {
+        geometryTransition->WillLayout(Claim(this));
     }
 
     auto preConstraint = layoutProperty_->GetLayoutConstraint();

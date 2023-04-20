@@ -15,7 +15,7 @@
 
 #include "frameworks/core/components/svg/flutter_render_svg_fe_colormatrix.h"
 
-#include "third_party/skia/include/effects/SkColorFilterImageFilter.h"
+#include "include/effects/SkColorFilterImageFilter.h"
 
 namespace OHOS::Ace {
 

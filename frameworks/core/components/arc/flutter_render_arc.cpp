@@ -15,7 +15,7 @@
 
 #include "core/components/arc/flutter_render_arc.h"
 
-#include "third_party/skia/include/core/SkMaskFilter.h"
+#include "include/core/SkMaskFilter.h"
 
 namespace OHOS::Ace {
 

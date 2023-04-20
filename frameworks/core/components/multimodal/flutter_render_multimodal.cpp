@@ -17,8 +17,8 @@
 
 #include <cstdint>
 
-#include "flutter/third_party/txt/src/txt/paragraph_builder.h"
-#include "flutter/third_party/txt/src/txt/paragraph_style.h"
+#include "txt/paragraph_builder.h"
+#include "txt/paragraph_style.h"
 
 #include "base/i18n/localization.h"
 #include "base/utils/string_utils.h"

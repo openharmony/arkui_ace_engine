@@ -197,6 +197,7 @@ int32_t ImageLoadingContext::RoundUp(int32_t value)
 {
     CHECK_NULL_RETURN(imageObj_, -1);
     auto res = imageObj_->GetImageSize().Width();
+    CHECK_NULL_RETURN(value > 0 && res > 0, -1);
     while (res / 2 >= value) {
         res /= 2;
     }

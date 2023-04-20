@@ -15,8 +15,8 @@
 
 #include "core/components/text_overlay/rosen_render_text_overlay.h"
 
-#include "third_party/skia/include/core/SkMaskFilter.h"
-#include "third_party/skia/include/core/SkPath.h"
+#include "include/core/SkMaskFilter.h"
+#include "include/core/SkPath.h"
 
 #include "core/components/common/painter/rosen_decoration_painter.h"
 #include "core/components/common/properties/shadow_config.h"

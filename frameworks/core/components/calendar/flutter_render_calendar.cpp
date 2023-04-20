@@ -15,8 +15,8 @@
 
 #include "core/components/calendar/flutter_render_calendar.h"
 
-#include "flutter/third_party/txt/src/txt/paragraph.h"
-#include "flutter/third_party/txt/src/txt/paragraph_builder.h"
+#include "txt/paragraph.h"
+#include "txt/paragraph_builder.h"
 
 #include "base/i18n/localization.h"
 #include "base/utils/string_utils.h"

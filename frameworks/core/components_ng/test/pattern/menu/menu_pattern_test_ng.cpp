@@ -68,7 +68,7 @@ void MenuPatternTestNg::TearDown() {}
  */
 HWTEST_F(MenuPatternTestNg, MenuPatternTestNg001, TestSize.Level1)
 {
-    RefPtr<MenuPattern> menuPattern = AceType::MakeRefPtr<MenuPattern>(TARGET_ID, TYPE);
+    RefPtr<MenuPattern> menuPattern = AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE);
     std::string type = "1";
     TouchEventInfo info(type);
     menuPattern->RegisterOnTouch();
@@ -82,7 +82,7 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg001, TestSize.Level1)
  */
 HWTEST_F(MenuPatternTestNg, MenuPatternTestNg002, TestSize.Level1)
 {
-    RefPtr<MenuPattern> menuPattern = AceType::MakeRefPtr<MenuPattern>(TARGET_ID, TYPE);
+    RefPtr<MenuPattern> menuPattern = AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE);
     std::string type = "1";
     TouchType touchType = TouchType::UP;
     TouchEventInfo info(type);
@@ -103,7 +103,7 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg002, TestSize.Level1)
  */
 HWTEST_F(MenuPatternTestNg, MenuPatternTestNg003, TestSize.Level1)
 {
-    RefPtr<MenuPattern> menuPattern = AceType::MakeRefPtr<MenuPattern>(TARGET_ID, TYPE);
+    RefPtr<MenuPattern> menuPattern = AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE);
     std::string type = "1";
     TouchType touchType = TouchType::UP;
     TouchEventInfo info(type);
@@ -125,7 +125,7 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg003, TestSize.Level1)
  */
 HWTEST_F(MenuPatternTestNg, MenuPatternTestNg004, TestSize.Level1)
 {
-    RefPtr<MenuPattern> menuPattern = AceType::MakeRefPtr<MenuPattern>(TARGET_ID, TYPE);
+    RefPtr<MenuPattern> menuPattern = AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE);
     std::string type = "1";
     TouchEventInfo info(type);
     TouchLocationInfo locationInfo(TARGET_ID);
@@ -144,7 +144,7 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg004, TestSize.Level1)
  */
 HWTEST_F(MenuPatternTestNg, MenuPatternTestNg005, TestSize.Level1)
 {
-    RefPtr<MenuPattern> menuPattern = AceType::MakeRefPtr<MenuPattern>(TARGET_ID, TYPE);
+    RefPtr<MenuPattern> menuPattern = AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE);
     std::string type = "1";
     TouchEventInfo info(type);
     TouchType touchType = TouchType::UP;

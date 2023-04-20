@@ -104,7 +104,11 @@ void RosenRenderShapeContainer::Paint(RenderContext& context, const Offset& offs
             RenderNode::Paint(context, offset);
         }
         if (column_ == 0 && row_ == 0) {
+#ifndef NEW_SKIA
             skCanvas_->drawBitmap(skOffBitmap_, 0, 0);
+#else
+            skCanvas_->drawImage(skOffBitmap_.asImage(), 0, 0, SkSamplingOptions());
+#endif
         }
     } else {
         BitmapMesh(context, offset);
@@ -163,7 +167,11 @@ void RosenRenderShapeContainer::BitmapMesh(RenderContext& context, const Offset&
         }
     }
     if (column_ == 0 && row_ == 0) {
+#ifndef NEW_SKIA
         skCanvas_->drawBitmap(skOffBitmap_, 0, 0);
+#else
+        skCanvas_->drawImage(skOffBitmap_.asImage(), 0, 0, SkSamplingOptions());
+#endif
         return;
     }
     uint32_t size = mesh_.size();
@@ -251,6 +259,8 @@ void RosenRenderShapeContainer::DrawBitmapMesh(SkBitmap& bitmap, int column, int
     sk_sp<SkImage> image = SkImage::MakeFromBitmap(bitmap);
 #ifdef USE_SYSTEM_SKIA
     shader = image->makeShader(SkShader::kClamp_TileMode, SkShader::kClamp_TileMode);
+#elif defined NEW_SKIA
+    shader = image->makeShader(SkTileMode::kClamp, SkTileMode::kClamp, SkSamplingOptions());
 #else
     shader = image->makeShader(SkTileMode::kClamp, SkTileMode::kClamp);
 #endif
