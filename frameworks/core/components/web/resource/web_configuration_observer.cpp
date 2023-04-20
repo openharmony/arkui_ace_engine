@@ -19,11 +19,13 @@ namespace OHOS::Ace {
 void WebConfigurationObserver::OnConfigurationUpdated(const OHOS::AppExecFwk::Configuration& configuration)
 {
     std::string colorMode = configuration.GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
-    auto nweb = delegate_->GetNweb();
+    auto delegate = delegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    auto nweb = delegate->GetNweb();
     if (nweb) {
         if (colorMode == "dark") {
             nweb->GetPreference()->PutDarkSchemeEnabled(true);
-            if (delegate_->GetForceDarkMode()) {
+            if (delegate->GetForceDarkMode()) {
                 nweb->GetPreference()->PutForceDarkModeEnabled(true);
             }
             return;

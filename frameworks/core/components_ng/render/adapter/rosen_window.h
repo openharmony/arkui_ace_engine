@@ -76,6 +76,8 @@ public:
 
     float GetRefreshRate() const override;
 
+    void SetKeepScreenOn(bool keepScreenOn) override;
+
 private:
     OHOS::sptr<OHOS::Rosen::Window> rsWindow_;
     WeakPtr<TaskExecutor> taskExecutor_;
