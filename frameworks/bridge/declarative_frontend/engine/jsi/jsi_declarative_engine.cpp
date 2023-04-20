@@ -82,8 +82,11 @@ const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib/libark_debugger.z.so";
 #else
 const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib64/libark_debugger.z.so";
 #endif
-const std::string FORM_ES_MODULE_PATH = "ets/widgets.abc";
+const std::string FORM_ES_MODULE_CARD_PATH = "ets/widgets.abc";
+const std::string FORM_ES_MODULE_PATH = "ets/modules.abc";
+
 const std::string ASSET_PATH_PREFIX = "/data/storage/el1/bundle/";
+
 constexpr uint32_t PREFIX_LETTER_NUMBER = 4;
 std::mutex loadFormMutex_;
 
@@ -1050,16 +1053,17 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
             }
             return true;
         }
-        if (!delegate->GetAssetContent(FORM_ES_MODULE_PATH, content)) {
-            LOGE("EvaluateJsCode GetAssetContent \"%{public}s\" failed.", FORM_ES_MODULE_PATH.c_str());
+        if (!delegate->GetAssetContent(FORM_ES_MODULE_CARD_PATH, content)) {
+            LOGE("EvaluateJsCode GetAssetContent \"%{public}s\" failed.", FORM_ES_MODULE_CARD_PATH.c_str());
             return false;
         }
         const std::string bundleName = frontEnd->GetBundleName();
         const std::string moduleName = frontEnd->GetModuleName();
 #ifdef PREVIEW
-        const std::string assetPath = delegate->GetAssetPath(FORM_ES_MODULE_PATH).append(FORM_ES_MODULE_PATH);
+        const std::string assetPath = delegate->GetAssetPath(FORM_ES_MODULE_CARD_PATH).append(FORM_ES_MODULE_CARD_PATH);
 #else
-        const std::string assetPath = ASSET_PATH_PREFIX + bundleName + "/" + moduleName + "/" + FORM_ES_MODULE_PATH;
+        const std::string assetPath =
+            ASSET_PATH_PREFIX + bundleName + "/" + moduleName + "/" + FORM_ES_MODULE_CARD_PATH;
 #endif
         LOGI("bundleName = %{public}s, moduleName = %{public}s, assetPath = %{public}s", bundleName.c_str(),
             moduleName.c_str(), assetPath.c_str());
@@ -1187,12 +1191,18 @@ void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
     }
 }
 
-bool JsiDeclarativeEngine::LoadJsWithModule(const std::string& urlName,
+bool JsiDeclarativeEngine::LoadJsWithModule(std::string& urlName,
     const std::function<void(const std::string&, int32_t)>& errorCallback)
 {
-    auto runtime = engineInstance_->GetJsRuntime();
-    auto vm = const_cast<EcmaVM*>(std::static_pointer_cast<ArkJSRuntime>(runtime)->GetEcmaVm());
-    if (!JSNApi::IsBundle(vm)) {
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+
+    if (!container->IsBundle()) {
+        const std::string assetPath = ASSET_PATH_PREFIX +
+            container->GetModuleName() + "/" + FORM_ES_MODULE_PATH;
+        auto runtime = std::static_pointer_cast<ArkJSRuntime>(engineInstance_->GetJsRuntime());
+        runtime->SetAssetPath(assetPath);
+        urlName = container->GetModuleName() + "/ets/" + urlName;
         if (!runtime->ExecuteJsBin(urlName, errorCallback)) {
             LOGE("ExecuteJsBin %{private}s failed.", urlName.c_str());
         }
