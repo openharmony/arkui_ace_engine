@@ -63,7 +63,7 @@ LayoutConstraintF GridLayoutAlgorithm::CreateChildConstraint(const SizeF& idealS
 
     layoutConstraint.maxSize = SizeF(colLen, rowLen);
     layoutConstraint.percentReference = SizeF(colLen, rowLen);
-    if (!childLayoutProperty->GetCalcLayoutConstraint()) {
+    if (!childLayoutProperty || !childLayoutProperty->GetCalcLayoutConstraint()) {
         layoutConstraint.selfIdealSize.UpdateIllegalSizeWithCheck(layoutConstraint.maxSize);
     }
     return layoutConstraint;
@@ -196,9 +196,11 @@ OffsetF GridLayoutAlgorithm::ComputeItemPosition(LayoutWrapper* layoutWrapper, i
     }
     colLen += (colSpan - 1) * columnsGap_;
 
-    auto layoutConstraint = childLayoutProperty->GetLayoutConstraint();
-    if (layoutConstraint.has_value()) {
-        OffsetByAlign(layoutConstraint.value(), rowLen, colLen, positionX, positionY);
+    if (childLayoutProperty) {
+        auto layoutConstraint = childLayoutProperty->GetLayoutConstraint();
+        if (layoutConstraint.has_value()) {
+            OffsetByAlign(layoutConstraint.value(), rowLen, colLen, positionX, positionY);
+        }
     }
 
     // If RTL, place the item from right.
