@@ -47,7 +47,7 @@ static napi_value JSRegisterFont(napi_env env, napi_callback_info info)
     napi_typeof(env, familyNameNApi, &valueType);
     if (valueType == napi_string) {
         size_t nameLen = 0;
-        napi_get_value_string_utf8(env, familySrcNApi, nullptr, 0, &nameLen);
+        napi_get_value_string_utf8(env, familyNameNApi, nullptr, 0, &nameLen);
         std::unique_ptr<char[]> name = std::make_unique<char[]>(nameLen + 1);
         napi_get_value_string_utf8(env, familyNameNApi, name.get(), nameLen + 1, &nameLen);
         familyName = name.get();
