@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CHECKBOXGROUP_CHECKBOXGROUP_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CHECKBOXGROUP_CHECKBOXGROUP_MODEL_H
 
+#include <mutex>
+
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_event_hub.h"
 
 namespace OHOS::Ace {
@@ -39,6 +41,7 @@ public:
 
 private:
     static std::unique_ptr<CheckBoxGroupModel> instance_;
+    static std::mutex mutex_;
 };
 
 } // namespace OHOS::Ace

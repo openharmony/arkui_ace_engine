@@ -25,6 +25,7 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<TabContentModel> TabContentModel::instance_ = nullptr;
+std::mutex TabContentModel::mutex_;
 
 const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
     TextOverflow::MARQUEE };
@@ -35,15 +36,18 @@ const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICIES = { TextHei
 TabContentModel* TabContentModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::TabContentModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::TabContentModelNG());
-        } else {
-            instance_.reset(new Framework::TabContentModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::TabContentModelNG());
+            } else {
+                instance_.reset(new Framework::TabContentModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }

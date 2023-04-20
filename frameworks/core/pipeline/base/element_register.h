@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_ELEMENT_REGISTER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_ELEMENT_REGISTER_H
 
+#include <mutex>
 #include <unordered_map>
 #include <unordered_set>
 #include <list>
@@ -113,6 +114,7 @@ private:
 
     //  Singleton instance
     static thread_local ElementRegister* instance_;
+    static std::mutex mutex_;
 
     // ElementID assigned during initial render
     // first to Component, then synced to Element

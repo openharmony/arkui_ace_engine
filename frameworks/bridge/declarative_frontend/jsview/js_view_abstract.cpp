@@ -67,20 +67,24 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<ViewAbstractModel> ViewAbstractModel::instance_ = nullptr;
+std::mutex ViewAbstractModel::mutex_;
 using DoubleBindCallback = std::function<void(const std::string&)>;
 
 ViewAbstractModel* ViewAbstractModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::ViewAbstractModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::ViewAbstractModelNG());
-        } else {
-            instance_.reset(new Framework::ViewAbstractModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::ViewAbstractModelNG());
+            } else {
+                instance_.reset(new Framework::ViewAbstractModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }

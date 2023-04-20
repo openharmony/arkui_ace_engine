@@ -26,19 +26,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<HyperlinkModel> HyperlinkModel::instance_ = nullptr;
+std::mutex HyperlinkModel::mutex_;
 
 HyperlinkModel* HyperlinkModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::HyperlinkModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::HyperlinkModelNG());
-        } else {
-            instance_.reset(new Framework::HyperlinkModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::HyperlinkModelNG());
+            } else {
+                instance_.reset(new Framework::HyperlinkModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }

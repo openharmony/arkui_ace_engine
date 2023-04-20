@@ -28,19 +28,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<ScrollModel> ScrollModel::instance_ = nullptr;
+std::mutex ScrollModel::mutex_;
 
 ScrollModel* ScrollModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::ScrollModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::ScrollModelNG());
-        } else {
-            instance_.reset(new Framework::ScrollModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::ScrollModelNG());
+            } else {
+                instance_.reset(new Framework::ScrollModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }

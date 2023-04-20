@@ -18,6 +18,7 @@
 
 #include <functional>
 #include <memory>
+#include <mutex>
 #include <string>
 
 #include "base/memory/ace_type.h"
@@ -46,6 +47,7 @@ public:
 
 private:
     static std::unique_ptr<ViewFullUpdateModel> instance_;
+    static std::mutex mutex_;
 };
 
 } // namespace OHOS::Ace

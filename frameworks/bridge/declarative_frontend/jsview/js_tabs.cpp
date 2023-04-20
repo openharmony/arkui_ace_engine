@@ -24,19 +24,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<TabsModel> TabsModel::instance_ = nullptr;
+std::mutex TabsModel::mutex_;
 
 TabsModel* TabsModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::TabsModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::TabsModelNG());
-        } else {
-            instance_.reset(new Framework::TabsModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::TabsModelNG());
+            } else {
+                instance_.reset(new Framework::TabsModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }

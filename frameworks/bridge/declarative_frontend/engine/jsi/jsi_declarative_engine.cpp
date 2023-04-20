@@ -85,7 +85,6 @@ const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib64/libark_debugger.z.so";
 const std::string FORM_ES_MODULE_PATH = "ets/widgets.abc";
 const std::string ASSET_PATH_PREFIX = "/data/storage/el1/bundle/";
 constexpr uint32_t PREFIX_LETTER_NUMBER = 4;
-std::mutex loadFormMutex_;
 
 // native implementation for js function: perfutil.print()
 shared_ptr<JsValue> JsPerfPrint(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
@@ -1087,7 +1086,6 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
         }
         LOGI("JsiDeclarativeEngine::ExecuteCardAbc abcPath = %{public}s", abcPath.c_str());
         {
-            std::lock_guard<std::mutex> lock(loadFormMutex_);
             if (!arkRuntime->ExecuteModuleBuffer(content.data(), content.size(), abcPath, true)) {
                 LOGE("ExecuteCardAbc ExecuteModuleBuffer \"%{public}s\" failed.", fileName.c_str());
                 return false;

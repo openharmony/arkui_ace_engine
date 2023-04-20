@@ -23,19 +23,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<LinearSplitModel> LinearSplitModel::instance_ = nullptr;
+std::mutex LinearSplitModel::mutex_;
 
 LinearSplitModel* LinearSplitModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::LinearSplitModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::LinearSplitModelNG());
-        } else {
-            instance_.reset(new Framework::LinearSplitModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::LinearSplitModelNG());
+            } else {
+                instance_.reset(new Framework::LinearSplitModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }

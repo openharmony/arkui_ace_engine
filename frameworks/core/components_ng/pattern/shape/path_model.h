@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PATH_PATH_MODEL_H
 
 #include <memory>
+#include <mutex>
 
 namespace OHOS::Ace {
 class PathModel {
@@ -29,6 +30,7 @@ public:
 
 private:
     static std::unique_ptr<PathModel> instance_;
+    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PATH_PATH_MODEL_H
