@@ -1139,6 +1139,8 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     container->SetAssetManager(flutterAssetManager);
     container->SetBundlePath(context->GetBundleCodeDir());
     container->SetFilesDataPath(context->GetFilesDir());
+    container->SetModuleName(hapModuleInfo->moduleName);
+    container->SetIsBundle(hapModuleInfo->compileMode == AppExecFwk::CompileMode::JS_BUNDLE);
     // for atomic service
     container->SetInstallationFree(hapModuleInfo && hapModuleInfo->installationFree);
     if (hapModuleInfo->installationFree) {
