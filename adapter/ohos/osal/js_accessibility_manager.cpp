@@ -899,7 +899,7 @@ void ClearAccessibilityFocus(const RefPtr<NG::FrameNode>& root, int32_t focusNod
 {
     auto oldFocusNode = GetInspectorById(root, focusNodeId);
     CHECK_NULL_VOID_NOLOG(oldFocusNode);
-    oldFocusNode->GetRenderContext()->OnAccessibilityFocusUpdate(false);
+    oldFocusNode->GetRenderContext()->UpdateAccessibilityFocus(false);
 }
 
 inline string GetSupportAction(const std::unordered_set<AceAction>& supportAceActions)
@@ -2124,7 +2124,7 @@ bool JsAccessibilityManager::ExecuteActionNG(int32_t elementId, ActionType actio
                 return result;
             }
             Framework::ClearAccessibilityFocus(ngPipeline->GetRootElement(), currentFocusNodeId_);
-            frameNode->GetRenderContext()->OnAccessibilityFocusUpdate(true);
+            frameNode->GetRenderContext()->UpdateAccessibilityFocus(true);
             currentFocusNodeId_ = frameNode->GetAccessibilityId();
             result = true;
             break;
@@ -2133,7 +2133,7 @@ bool JsAccessibilityManager::ExecuteActionNG(int32_t elementId, ActionType actio
             if (elementId != currentFocusNodeId_) {
                 return result;
             }
-            frameNode->GetRenderContext()->OnAccessibilityFocusUpdate(false);
+            frameNode->GetRenderContext()->UpdateAccessibilityFocus(false);
             currentFocusNodeId_ = -1;
             result = true;
             break;
