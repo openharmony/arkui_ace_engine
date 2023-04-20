@@ -13,9 +13,10 @@
 
 import("//build/test.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("geometry_node_test_ng") {
-  module_out_path = "$test_output_path/base"
+  module_out_path = base_test_output_path
 
   sources = [
     "$ace_root/frameworks/base/geometry/dimension.cpp",

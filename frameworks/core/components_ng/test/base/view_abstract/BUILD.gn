@@ -14,10 +14,8 @@
 import("//build/test.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-#import("//build/toolchain/ohos:ohos_clang_arm")
-
 ohos_unittest("view_abstract_test") {
-  module_out_path = "$test_output_path/base"
+  module_out_path = base_test_output_path
 
   sources = [
     "$ace_root/frameworks/base/geometry/dimension.cpp",

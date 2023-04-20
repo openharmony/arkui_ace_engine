@@ -15,7 +15,7 @@ import("//build/test.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("property_test_ng") {
-  module_out_path = "$test_output_path/property"
+  module_out_path = property_test_output_path
 
   sources = [
     "$ace_root/frameworks/core/components_ng/property/property.cpp",
