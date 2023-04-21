@@ -23,7 +23,7 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT ImageAnimatorModelNG : public OHOS::Ace::ImageAnimatorModel {
 public:
     void Create() override;
-    void SetImages(std::vector<ImageProperties> images) override;
+    void SetImages(const std::vector<ImageProperties>& images) override;
     void SetState(int32_t state) override;
     void SetDuration(int32_t duration) override;
     void SetIteration(int32_t iteration) override;

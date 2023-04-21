@@ -15,7 +15,6 @@
 
 #include "frameworks/core/components_ng/pattern/stack/stack_layout_algorithm.h"
 
-
 #include "core/common/ace_application_info.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/stack/stack_layout_property.h"
@@ -49,11 +48,11 @@ void StackLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
     auto align = Alignment::CENTER;
     auto layoutProperty = DynamicCast<StackLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    if (layoutProperty->HasAlignment()) {
-        align = layoutProperty->GetAlignment().value_or(Alignment::CENTER);
-    }
     if (layoutProperty->HasAlignmentContent()) {
         align = layoutProperty->GetAlignmentContent().value_or(Alignment::CENTER);
+    }
+    if (layoutProperty->HasAlignment()) {
+        align = layoutProperty->GetAlignment().value_or(Alignment::CENTER);
     }
     // Update child position.
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {

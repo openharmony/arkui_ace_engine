@@ -32,7 +32,7 @@ void ImageAnimatorModelImpl::Create()
     ViewStackProcessor::GetInstance()->GetBoxComponent();
 }
 
-void ImageAnimatorModelImpl::SetImages(std::vector<ImageProperties> images)
+void ImageAnimatorModelImpl::SetImages(const std::vector<ImageProperties>& images)
 {
     auto imageAnimator =
         AceType::DynamicCast<ImageAnimatorComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());

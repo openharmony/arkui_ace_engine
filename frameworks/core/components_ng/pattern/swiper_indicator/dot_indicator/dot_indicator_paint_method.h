@@ -124,6 +124,7 @@ private:
     bool isHover_ = false;
     bool isPressed_ = false;
     bool longPointIsHover_ = false;
+    bool IsCustomSizeValue_ = false;
     // Animatable properties for updating Modifier
     LinearVector<float> vectorBlackPointCenterX_ = {};
     std::pair<float, float> longPointCenterX_ = { 0, 0 };

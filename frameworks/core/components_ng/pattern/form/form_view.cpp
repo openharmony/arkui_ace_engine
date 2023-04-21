@@ -133,13 +133,18 @@ void FormView::SetOnLoad(FormCallback&& onLoad)
 
 void FormView::SetVisibility(VisibleType visible)
 {
-    if (visible != VisibleType::VISIBLE) {
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto formPattern = frameNode->GetPattern<FormPattern>();
+    CHECK_NULL_VOID(formPattern);
+    auto isLoaded = formPattern->GetIsLoaded();
+    if (isLoaded || visible != VisibleType::VISIBLE) {
         ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Visibility, visible);
     } else {
         ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Visibility, VisibleType::INVISIBLE);
     }
 
-    ACE_UPDATE_LAYOUT_PROPERTY(FormLayoutProperty, VisibleType, VisibleType::VISIBLE);
+    ACE_UPDATE_LAYOUT_PROPERTY(FormLayoutProperty, VisibleType, visible);
 }
 
 } // namespace OHOS::Ace::NG

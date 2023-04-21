@@ -154,6 +154,7 @@ void LazyForEachNode::OnDataReloaded()
 void LazyForEachNode::OnDataAdded(size_t index)
 {
     auto insertIndex = static_cast<int32_t>(index);
+    NotifyDataCountChanged(insertIndex);
     // check if insertIndex is in the range [startIndex_, endIndex_ + 1]
     if ((insertIndex < startIndex_)) {
         LOGI("insertIndex is out of begin range, ignored, %{public}d, %{public}d", insertIndex, startIndex_);
@@ -178,13 +179,14 @@ void LazyForEachNode::OnDataAdded(size_t index)
         ids_.insert(iter, std::nullopt);
     }
     endIndex_++;
-    NotifyDataCountChanged(insertIndex);
+
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
 void LazyForEachNode::OnDataDeleted(size_t index)
 {
     auto deletedIndex = static_cast<int32_t>(index);
+    NotifyDataCountChanged(deletedIndex);
     if (deletedIndex > endIndex_) {
         LOGI("deletedIndex is out of end range, ignored, %{public}d, %{public}d", deletedIndex, endIndex_);
         return;
@@ -208,7 +210,7 @@ void LazyForEachNode::OnDataDeleted(size_t index)
         ids_.erase(iter);
     }
     endIndex_--;
-    NotifyDataCountChanged(deletedIndex);
+
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
@@ -230,13 +232,14 @@ void LazyForEachNode::OnDataMoved(size_t from, size_t to)
 {
     auto fromIndex = static_cast<int32_t>(from);
     auto toIndex = static_cast<int32_t>(to);
+    NotifyDataCountChanged(startIndex_ + std::min(fromIndex, toIndex));
     auto fromOutOfRange = (fromIndex < startIndex_) || (fromIndex > endIndex_);
     auto toOutOfRange = (toIndex < startIndex_) || (toIndex > endIndex_);
     if (fromOutOfRange && toOutOfRange) {
         LOGI("both out of range, ignored");
         return;
     }
-    NotifyDataCountChanged(startIndex_ + std::min(from, to));
+
     if (fromOutOfRange && !toOutOfRange) {
         auto iter = ids_.begin();
         std::advance(iter, toIndex - startIndex_);
@@ -261,11 +264,11 @@ void LazyForEachNode::OnDataMoved(size_t from, size_t to)
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
-void LazyForEachNode::NotifyDataCountChanged(size_t index)
+void LazyForEachNode::NotifyDataCountChanged(int32_t index)
 {
     auto parent = GetParent();
     if (parent) {
-        parent->ChildrenUpdatedFrom(static_cast<int32_t>(index));
+        parent->ChildrenUpdatedFrom(index);
     }
 }
 } // namespace OHOS::Ace::NG

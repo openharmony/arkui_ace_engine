@@ -97,6 +97,15 @@ void SwiperModelNG::SetCachedCount(int32_t cachedCount)
     ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, CachedCount, cachedCount);
 }
 
+void SwiperModelNG::SetIsIndicatorCustomSize(bool isCustomSize)
+{
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIsIndicatorCustomSize(isCustomSize);
+}
+
 void SwiperModelNG::SetAutoPlay(bool autoPlay)
 {
     ACE_UPDATE_PAINT_PROPERTY(SwiperPaintProperty, AutoPlay, autoPlay);

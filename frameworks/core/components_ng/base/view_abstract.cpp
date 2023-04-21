@@ -894,7 +894,7 @@ void ViewAbstract::BindPopup(
         if (!isUseCustom) {
             BubbleView::UpdatePopupParam(popupId, param, targetNode);
             popupNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-            LOGI("Update normal PopUp node.");
+            LOGI("Update normal Popup node.");
         } else {
             BubbleView::UpdateCustomPopupParam(popupId, param);
             popupNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -926,7 +926,7 @@ void ViewAbstract::BindPopup(
         CHECK_NULL_VOID(overlay);
         overlay->ErasePopup(targetId);
     };
-    LOGI("begin to update popup node.");
+    LOGI("begin to update Popup node.");
     targetNode->PushDestroyCallback(destroyCallback);
     overlayManager->UpdatePopupNode(targetId, popupInfo);
 }

@@ -18,7 +18,6 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
-#include "core/components_ng/pattern/image_animator/image_animator_view.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -41,9 +40,10 @@ void ImageAnimatorModelNG::Create()
     stack->Push(frameNode);
 }
 
-void ImageAnimatorModelNG::SetImages(std::vector<ImageProperties> images)
+void ImageAnimatorModelNG::SetImages(const std::vector<ImageProperties>& images)
 {
-    GetImageAnimatorPattern()->SetImages(std::move(images));
+    std::vector<ImageProperties> imageList = images;
+    GetImageAnimatorPattern()->SetImages(std::move(imageList));
 }
 
 void ImageAnimatorModelNG::SetState(int32_t state)

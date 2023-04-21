@@ -16,8 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_IMAGE_ANIMATOR_IMAGE_ANIMATOR_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_IMAGE_ANIMATOR_IMAGE_ANIMATOR_MODEL_H
 
+#include <mutex>
+
+#include "base/memory/ace_type.h"
 #include "core/components/image/image_animator_component.h"
-#include "core/components_ng/pattern/image_animator/image_animator_event_hub.h"
 
 namespace OHOS::Ace {
 class ImageAnimatorModel {
@@ -26,7 +28,7 @@ public:
     virtual ~ImageAnimatorModel() = default;
 
     virtual void Create() = 0;
-    virtual void SetImages(std::vector<ImageProperties> images) = 0;
+    virtual void SetImages(const std::vector<ImageProperties>& images) = 0;
     virtual void SetState(int32_t state) = 0;
     virtual void SetDuration(int32_t duration) = 0;
     virtual void SetIteration(int32_t iteration) = 0;
@@ -42,6 +44,7 @@ public:
 
 private:
     static std::unique_ptr<ImageAnimatorModel> instance_;
+    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
 

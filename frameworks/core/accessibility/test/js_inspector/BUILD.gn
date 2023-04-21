@@ -13,9 +13,10 @@
 
 import("//build/test.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("js_inspector_test") {
-  module_out_path = "$test_output_path/js_inspector"
+  module_out_path = "$accessibility_test_output_path/js_inspector"
 
   sources = [
     "inspect_badge_test.cpp",

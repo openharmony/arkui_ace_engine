@@ -305,6 +305,15 @@ void JSSwiper::GetFontContent(const JSRef<JSVal>& font, bool isSelected, SwiperD
     }
 }
 
+void JSSwiper::SetIsIndicatorCustomSize(const Dimension& dimPosition, bool parseOk)
+{
+    if (parseOk && dimPosition > 0.0_vp) {
+        SwiperModel::GetInstance()->SetIsIndicatorCustomSize(true);
+    } else {
+        SwiperModel::GetInstance()->SetIsIndicatorCustomSize(false);
+    }
+}
+
 SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
 {
     JSRef<JSVal> leftValue = obj->GetProperty("left");
@@ -334,13 +343,17 @@ SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
     parseOk = ParseJsDimensionPx(bottomValue, dimPosition);
     swiperParameters.dimBottom = parseOk ? dimPosition : 0.0_vp;
     parseOk = ParseJsDimensionPx(itemWidthValue, dimPosition);
+    SetIsIndicatorCustomSize(dimPosition, parseOk);
     auto defaultSize = swiperIndicatorTheme->GetSize();
     swiperParameters.itemWidth = parseOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
     parseOk = ParseJsDimensionPx(itemHeightValue, dimPosition);
+    SetIsIndicatorCustomSize(dimPosition, parseOk);
     swiperParameters.itemHeight = parseOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
     parseOk = ParseJsDimensionPx(selectedItemWidthValue, dimPosition);
+    SetIsIndicatorCustomSize(dimPosition, parseOk);
     swiperParameters.selectedItemWidth = parseOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
     parseOk = ParseJsDimensionPx(selectedItemHeightValue, dimPosition);
+    SetIsIndicatorCustomSize(dimPosition, parseOk);
     swiperParameters.selectedItemHeight = parseOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
     if (maskValue->IsBoolean()) {
         auto mask = maskValue->ToBoolean();
@@ -393,6 +406,10 @@ SwiperDigitalParameters JSSwiper::GetDigitIndicatorInfo(const JSRef<JSObject>& o
 
 void JSSwiper::SetIndicator(const JSCallbackInfo& info)
 {
+    if (info.Length() > 0 && info[0]->IsUndefined()) {
+        SwiperModel::GetInstance()->SetShowIndicator(true);
+        return;
+    }
     auto obj = JSRef<JSObject>::Cast(info[0]);
     if (info.Length() > 0 && info[0]->IsObject()) {
         JSRef<JSVal> typeParam = obj->GetProperty("type");
@@ -453,6 +470,7 @@ void JSSwiper::SetIndicatorStyle(const JSCallbackInfo& info)
         parseOk = ParseJsDimensionPx(bottomValue, dimPosition);
         swiperParameters.dimBottom = parseOk ? dimPosition : 0.0_vp;
         parseOk = ParseJsDimensionPx(sizeValue, dimPosition);
+        SwiperModel::GetInstance()->SetIsIndicatorCustomSize(false);
         swiperParameters.itemWidth = parseOk && dimPosition > 0.0_vp ? dimPosition : swiperIndicatorTheme->GetSize();
         swiperParameters.itemHeight = parseOk && dimPosition > 0.0_vp ? dimPosition : swiperIndicatorTheme->GetSize();
         swiperParameters.selectedItemWidth = parseOk && dimPosition > 0.0_vp ?

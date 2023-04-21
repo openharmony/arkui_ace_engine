@@ -13,10 +13,11 @@
 
 import("//build/test.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 import("$ace_root/frameworks/core/components_ng/components.gni")
 
 ohos_unittest("custom_dialog_test_ng") {
-  module_out_path = "$test_output_path/dialog"
+  module_out_path = pattern_test_output_path
 
   include_dirs = [
     "$ace_hitrace/interfaces/native/innerkits/include/hitrace_meter",

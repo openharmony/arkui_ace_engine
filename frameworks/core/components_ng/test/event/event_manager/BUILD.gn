@@ -13,9 +13,10 @@
 
 import("//build/test.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("event_manager_test_ng") {
-  module_out_path = "$test_output_path/text"
+  module_out_path = event_test_output_path
 
   sources = [
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
