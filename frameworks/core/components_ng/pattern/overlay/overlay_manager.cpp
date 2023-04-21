@@ -122,6 +122,7 @@ void OverlayManager::OpenDialogAnimation(const RefPtr<FrameNode>& node)
     CHECK_NULL_VOID(root && node);
     node->MountToParent(root);
     root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FocusOverlayNode(node);
 
     AnimationOption option;
     // default opacity animation params
@@ -139,8 +140,6 @@ void OverlayManager::OpenDialogAnimation(const RefPtr<FrameNode>& node)
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(node && overlayManager);
             ContainerScope scope(id);
-            overlayManager->FocusOverlayNode(node);
-
             if (onFinish != nullptr) {
                 onFinish();
             }
@@ -167,6 +166,8 @@ void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(theme);
+    // blur dialog node, set focus to last page
+    BlurOverlayNode();
 
     // default opacity animation params
     AnimationOption option;
@@ -184,12 +185,6 @@ void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
         CHECK_NULL_VOID(node);
 
         OnDialogCloseEvent(node);
-
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto overlayManager = pipeline->GetOverlayManager();
-        CHECK_NULL_VOID(overlayManager);
-        overlayManager->BlurOverlayNode();
     });
     auto ctx = node->GetRenderContext();
     CHECK_NULL_VOID(ctx);
@@ -903,7 +898,7 @@ void OverlayManager::FocusOverlayNode(const RefPtr<FrameNode>& overlayNode, bool
     CHECK_NULL_VOID(overlayNode);
     auto focusHub = overlayNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->RequestFocusImmediately();
+    focusHub->RequestFocus();
 
     if (isInSubWindow) {
         // no need to set page lost focus in sub window.
