@@ -34,7 +34,10 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        return MakeRefPtr<CirclePaintMethod>(GetAncestorPaintProperty());
+        if (!shapeOverlayModifier_) {
+            shapeOverlayModifier_ = MakeRefPtr<ShapeOverlayModifier>();
+        }
+        return MakeRefPtr<CirclePaintMethod>(GetAncestorPaintProperty(), shapeOverlayModifier_);
     }
 
 private:
