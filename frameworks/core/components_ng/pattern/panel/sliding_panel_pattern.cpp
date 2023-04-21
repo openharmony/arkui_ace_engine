@@ -55,7 +55,6 @@ void SlidingPanelPattern::OnModifyDone()
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     InitPanEvent(gestureHub);
-    Update();
     if (layoutProperty->GetHasDragBarValue(true)) {
         auto dragBar = GetDragBarNode();
         CHECK_NULL_VOID(dragBar);
@@ -93,6 +92,7 @@ bool SlidingPanelPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& 
     auto layoutAlgorithm = DynamicCast<SlidingPanelLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithm, false);
     InitializeLayoutProps();
+    Update();
     isFirstLayout_ = layoutAlgorithm->GetIsFirstLayout();
     fullHeight_ = layoutAlgorithm->GetFullHeight();
     halfHeight_ = layoutAlgorithm->GetHalfHeight();
