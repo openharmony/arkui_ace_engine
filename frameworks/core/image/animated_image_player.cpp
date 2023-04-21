@@ -15,15 +15,14 @@
 
 #include "core/image/animated_image_player.h"
 
-#include "third_party/skia/include/codec/SkCodecAnimation.h"
-#include "third_party/skia/include/core/SkPixelRef.h"
+#include "include/codec/SkCodecAnimation.h"
+#include "include/core/SkPixelRef.h"
 
+#include "base/log/ace_trace.h"
 #include "base/log/log.h"
-#include "core/image/image_provider.h"
-
-#ifdef NG_BUILD
+#include "base/memory/ace_type.h"
 #include "core/components_ng/render/canvas_image.h"
-#endif
+#include "core/image/image_provider.h"
 
 namespace OHOS::Ace {
 
@@ -47,30 +46,32 @@ void AnimatedImagePlayer::RenderFrame(const int32_t& index)
     auto taskExecutor = context->GetTaskExecutor();
     taskExecutor->PostTask(
         [weak = AceType::WeakClaim(this), index, dstWidth = dstWidth_, dstHeight = dstHeight_, taskExecutor] {
+            ACE_SCOPED_TRACE("decode frame %d", index);
             auto player = weak.Upgrade();
             if (!player) {
                 return;
             }
-#ifdef NG_BUILD
-            auto canvasImage = NG::CanvasImage::Create(nullptr);
-#else
-            auto canvasImage = flutter::CanvasImage::Create();
+
             sk_sp<SkImage> skImage = player->DecodeFrameImage(index);
             if (dstWidth > 0 && dstHeight > 0) {
                 skImage = ImageProvider::ApplySizeToSkImage(skImage, dstWidth, dstHeight);
             }
-            if (skImage) {
-                canvasImage->set_image({ skImage, player->unrefQueue_ });
-            } else {
+            if (!skImage) {
                 LOGW("animated player cannot get the %{public}d skImage!", index);
                 return;
             }
-#endif
+            auto canvasImage = NG::CanvasImage::Create(&skImage);
+#ifdef PREVIEW
+            player->successCallback_(player->imageSource_, canvasImage);
+        },
+        TaskExecutor::TaskType::UI);
+#else
             taskExecutor->PostTask([callback = player->successCallback_, canvasImage,
                                        source = player->imageSource_] { callback(source, canvasImage); },
                 TaskExecutor::TaskType::UI);
         },
         TaskExecutor::TaskType::IO);
+#endif
 }
 
 sk_sp<SkImage> AnimatedImagePlayer::DecodeFrameImage(const int32_t& index)
@@ -116,16 +117,6 @@ sk_sp<SkImage> AnimatedImagePlayer::DecodeFrameImage(const int32_t& index)
         LOGD("index %{private}d cached.", index);
         iterator->second = std::make_unique<SkBitmap>(bitmap);
     }
-#ifndef GPU_DISABLED
-    // weak reference of io manager must be check and used on io thread, because io manager is created on io thread.
-    if (ioManager_) {
-        auto resourceContext = ioManager_->GetResourceContext();
-        if (resourceContext) {
-            SkPixmap pixmap(bitmap.info(), bitmap.pixelRef()->pixels(), bitmap.pixelRef()->rowBytes());
-            return SkImage::MakeCrossContextFromPixmap(resourceContext.get(), pixmap, true, pixmap.colorSpace());
-        }
-    }
-#endif
     return SkImage::MakeFromBitmap(bitmap);
 }
 

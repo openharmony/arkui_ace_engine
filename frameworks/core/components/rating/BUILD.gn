@@ -21,6 +21,9 @@ build_component("rating") {
     "render_rating.cpp",
     "render_rating_creator.cpp",
   ]
+  if (ace_use_new_skia) {
+    sources -= [ "flutter_render_rating.cpp" ]
+  }
   rosen_sources = [ "rosen_render_rating.cpp" ]
 
   component_deps = [ "image" ]

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_MODAL_CONTAINER_MODAL_PATTERN_H
 
 #include "core/components/container_modal/container_modal_constants.h"
+#include "core/components_ng/pattern/container_modal/container_modal_accessibility_property.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -28,6 +29,11 @@ class ACE_EXPORT ContainerModalPattern : public Pattern {
 public:
     ContainerModalPattern() = default;
     ~ContainerModalPattern() override = default;
+
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        return MakeRefPtr<ContainerModalAccessibilityProperty>();
+    }
 
     bool IsMeasureBoundary() const override
     {
@@ -54,15 +60,13 @@ public:
 
     void InitContainerEvent();
 
-    void ShowTitle(bool isShow);
+    void ShowTitle(bool isShow, bool hasDeco = true);
 
     void SetAppTitle(const std::string& title);
 
     void SetAppIcon(const RefPtr<PixelMap>& icon);
 
 private:
-    void OnModifyDone() override;
-
     void WindowFocus(bool isFocus);
 
     void ChangeFloatingTitle(const RefPtr<FrameNode>& floatingNode, bool isFocus = true);
@@ -77,6 +81,7 @@ private:
     WindowMode windowMode_;
     float moveX_ = 0.0f;
     float moveY_ = 0.0f;
+    bool hasDeco_ = true;
 };
 
 } // namespace OHOS::Ace::NG

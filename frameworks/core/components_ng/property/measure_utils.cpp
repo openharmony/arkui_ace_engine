@@ -253,11 +253,11 @@ void SetMainAxisSize(float value, Axis axis, OptionalSizeF& size)
     size.SetWidth(value);
 }
 
-SizeF CreateIdealSize(const LayoutConstraintF& layoutConstraint, Axis axis, MeasureType measureType, bool usingMaxSize)
+SizeF CreateIdealSize(const LayoutConstraintF& layoutConstraint, Axis axis, MeasureType measureType, bool usingParent)
 {
     auto optional = CreateIdealSize(layoutConstraint, axis, measureType);
-    if (usingMaxSize) {
-        optional.UpdateIllegalSizeWithCheck(layoutConstraint.maxSize);
+    if (usingParent) {
+        optional.UpdateIllegalSizeWithCheck(layoutConstraint.percentReference);
     } else {
         optional.UpdateIllegalSizeWithCheck(layoutConstraint.minSize);
     }
@@ -276,7 +276,7 @@ OptionalSizeF CreateIdealSize(const LayoutConstraintF& layoutConstraint, Axis ax
 
         if (measureType == MeasureType::MATCH_PARENT) {
             idealSize.UpdateIllegalSizeWithCheck(layoutConstraint.parentIdealSize);
-            idealSize.UpdateIllegalSizeWithCheck(layoutConstraint.maxSize);
+            idealSize.UpdateIllegalSizeWithCheck(layoutConstraint.percentReference);
             break;
         }
 
@@ -287,7 +287,7 @@ OptionalSizeF CreateIdealSize(const LayoutConstraintF& layoutConstraint, Axis ax
                 if (parentCrossSize) {
                     SetCrossAxisSize(parentCrossSize.value(), axis, idealSize);
                 } else {
-                    parentCrossSize = GetCrossAxisSize(layoutConstraint.maxSize, axis);
+                    parentCrossSize = GetCrossAxisSize(layoutConstraint.percentReference, axis);
                     SetCrossAxisSize(parentCrossSize.value(), axis, idealSize);
                 }
             }
@@ -301,7 +301,7 @@ OptionalSizeF CreateIdealSize(const LayoutConstraintF& layoutConstraint, Axis ax
                 if (parentMainSize) {
                     SetMainAxisSize(parentMainSize.value(), axis, idealSize);
                 } else {
-                    parentMainSize = GetMainAxisSize(layoutConstraint.maxSize, axis);
+                    parentMainSize = GetMainAxisSize(layoutConstraint.percentReference, axis);
                     SetMainAxisSize(parentMainSize.value(), axis, idealSize);
                 }
             }
@@ -311,28 +311,17 @@ OptionalSizeF CreateIdealSize(const LayoutConstraintF& layoutConstraint, Axis ax
     return idealSize;
 }
 
-void CreateChildrenConstraint(
-    SizeF& size, const std::unique_ptr<MarginProperty>& margin, const std::unique_ptr<PaddingProperty>& padding)
+void CreateChildrenConstraint(SizeF& size, const PaddingPropertyF& padding)
 {
     float width = 0;
     float height = 0;
 
-    if (margin) {
-        float marginLeft = margin->left.has_value() ? margin->left->GetDimension().ConvertToPx() : 0;
-        float marginRight = margin->right.has_value() ? margin->right->GetDimension().ConvertToPx() : 0;
-        float marginTop = margin->top.has_value() ? margin->top->GetDimension().ConvertToPx() : 0;
-        float marginBottom = margin->bottom.has_value() ? margin->bottom->GetDimension().ConvertToPx() : 0;
-        width += (marginLeft + marginRight);
-        height += (marginTop + marginBottom);
-    }
-    if (padding) {
-        float paddingLeft = padding->left.has_value() ? padding->left->GetDimension().ConvertToPx() : 0;
-        float paddingRight = padding->right.has_value() ? padding->right->GetDimension().ConvertToPx() : 0;
-        float paddingTop = padding->top.has_value() ? padding->top->GetDimension().ConvertToPx() : 0;
-        float paddingBottom = padding->bottom.has_value() ? padding->bottom->GetDimension().ConvertToPx() : 0;
-        width += (paddingLeft + paddingRight);
-        height += (paddingTop + paddingBottom);
-    }
+    float paddingLeft = padding.left.has_value() ? padding.left.value() : 0;
+    float paddingRight = padding.right.has_value() ? padding.right.value() : 0;
+    float paddingTop = padding.top.has_value() ? padding.top.value() : 0;
+    float paddingBottom = padding.bottom.has_value() ? padding.bottom.value() : 0;
+    width += (paddingLeft + paddingRight);
+    height += (paddingTop + paddingBottom);
 
     size.SetHeight(size.Height() - height);
     size.SetWidth(size.Width() - width);

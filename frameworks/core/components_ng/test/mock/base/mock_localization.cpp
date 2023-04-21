@@ -16,6 +16,10 @@
 #include "base/i18n/localization.h"
 
 namespace OHOS::Ace {
+namespace {
+constexpr int32_t DAY_COUNTS_OF_WEEK = 7;
+} // namespace
+
 struct LocaleProxy final {};
 Localization::~Localization() = default;
 
@@ -40,6 +44,11 @@ const std::string Localization::FormatDateTime(DateTime dateTime, const std::str
     return "08:00:00";
 }
 
+const std::string Localization::FormatDateTime(DateTime dateTime, DateTimeStyle dateStyle, DateTimeStyle timeStyle)
+{
+    return "08:00:00";
+}
+
 std::string Localization::GetEntryLetters(const std::string& lettersIndex)
 {
     return "";
@@ -53,5 +62,58 @@ std::string Localization::GetErrorDescription(const std::string& errorIndex)
 const std::string Localization::FormatDuration(uint32_t duration, bool needShowHour)
 {
     return "08:00:00";
+}
+
+std::vector<std::string> Localization::GetMonths(bool isShortType, const std::string& calendarType)
+{
+    std::vector<std::string> months;
+    return months;
+}
+
+std::string Localization::GetLanguage()
+{
+    return "Chinese";
+}
+
+std::string Localization::GetLunarMonth(uint32_t month, bool isLeapMonth)
+{
+    return "";
+}
+
+std::string Localization::GetLunarDay(uint32_t dayOfMonth)
+{
+    return "";
+}
+
+LunarDate Localization::GetLunarDate(Date date)
+{
+    LunarDate dateRet;
+    return dateRet;
+}
+
+std::vector<std::string> Localization::GetAmPmStrings()
+{
+    std::vector<std::string> amPms;
+    return amPms;
+}
+
+bool Localization::GetHourFormat(bool& isAmPm, bool& hasZero)
+{
+    return false;
+}
+
+// Mock get weekdays, 7 days in a week.
+std::vector<std::string> Localization::GetWeekdays(bool isShortType)
+{
+    std::vector<std::string> weekdays;
+    for (int32_t i = 0; i < DAY_COUNTS_OF_WEEK; i++) {
+        weekdays.push_back(std::to_string(i));
+    }
+    return weekdays;
+}
+
+std::string Localization::NumberFormat(double number)
+{
+    return std::to_string(number);
 }
 } // namespace OHOS::Ace

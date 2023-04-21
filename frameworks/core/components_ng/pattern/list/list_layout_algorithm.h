@@ -23,7 +23,6 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/pattern/list/list_item_group_layout_property.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_v2/list/list_component.h"
 #include "core/components_v2/list/list_properties.h"
@@ -33,7 +32,7 @@ class PipelineContext;
 
 enum class ScrollIndexAlignment {
     ALIGN_TOP = 0,
-    ALIGN_BUTTON = 1,
+    ALIGN_BOTTOM = 1,
 };
 
 struct ListItemInfo {
@@ -48,6 +47,7 @@ class ACE_EXPORT ListLayoutAlgorithm : public LayoutAlgorithm {
 
 public:
     using PositionMap = std::map<int32_t, ListItemInfo>;
+    static const int32_t LAST_ITEM = -1;
 
     ListLayoutAlgorithm() = default;
 
@@ -80,6 +80,11 @@ public:
         jumpIndex_ = index;
     }
 
+    void SetIndexInGroup(int32_t index)
+    {
+        jumpIndexInGroup_ = index;
+    }
+
     void SetIndexAlignment(ScrollIndexAlignment align)
     {
         scrollIndexAlignment_ = align;
@@ -94,6 +99,16 @@ public:
     float GetCurrentOffset() const
     {
         return currentOffset_;
+    }
+
+    float GetContentMainSize() const
+    {
+        return contentMainSize_;
+    }
+
+    void SetPrevContentMainSize(float mainSize)
+    {
+        prevContentMainSize_ = mainSize;
     }
 
     int32_t GetStartIndex() const
@@ -148,15 +163,27 @@ public:
         return itemPosition_.rbegin()->second.endPos + spaceWidth_;
     }
 
-    WeakPtr<FrameNode> GetHeaderGroupNode() const
+    std::list<WeakPtr<FrameNode>>& GetItemGroupList()
     {
-        return headerGroupNode_;
+        return itemGroupList_;
     }
 
-    WeakPtr<FrameNode> GetFooterGroupNode() const
+    void SetChainOffsetCallback(std::function<float(int32_t)> func)
     {
-        return footerGroupNode_;
+        chainOffsetFunc_ = std::move(func);
     }
+
+    void SetChainInterval(float interval)
+    {
+        chainInterval_ = interval;
+    }
+
+    bool IsCrossMatchChild() const
+    {
+        return crossMatchChild_;
+    }
+
+    float GetChildMaxCrossSize(LayoutWrapper* layoutWrapper, Axis axis) const;
 
     void Measure(LayoutWrapper* layoutWrapper) override;
 
@@ -173,22 +200,27 @@ public:
     }
 
 protected:
-    virtual void UpdateListItemConstraint(Axis axis, const OptionalSizeF& selfIdealSize,
-        LayoutConstraintF& contentConstraint);
+    virtual void UpdateListItemConstraint(
+        Axis axis, const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
     virtual int32_t LayoutALineForward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
         Axis axis, int32_t& currentIndex, float startPos, float& endPos);
     virtual int32_t LayoutALineBackward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
         Axis axis, int32_t& currentIndex, float endPos, float& startPos);
     virtual float CalculateLaneCrossOffset(float crossSize, float childCrossSize);
     virtual void CalculateLanes(const RefPtr<ListLayoutProperty>& layoutProperty,
-        const LayoutConstraintF& layoutConstraint, Axis axis) {};
+        const LayoutConstraintF& layoutConstraint, std::optional<float> crossSizeOptional, Axis axis) {};
     virtual int32_t GetLanesFloor(LayoutWrapper* layoutWrapper, int32_t index)
     {
         return index;
     }
 
-    static RefPtr<ListItemGroupLayoutProperty> GetListItemGroup(const RefPtr<LayoutWrapper>&  layoutWrapper);
-    void SetListItemGroupProperty(const RefPtr<ListItemGroupLayoutProperty>& itemGroup, Axis axis, int32_t lanes);
+    virtual void SetCacheCount(LayoutWrapper* layoutWrapper, int32_t cachedCount);
+    void SetListItemGroupParam(const RefPtr<LayoutWrapper>& layoutWrapper, float referencePos, bool forwardLayout,
+        const RefPtr<ListLayoutProperty>& layoutProperty);
+    static void SetListItemIndex(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t index);
+    void CheckListItemGroupRecycle(
+        LayoutWrapper* layoutWrapper, int32_t index, float referencePos, bool forwardLayout) const;
+    void AdjustPostionForListItemGroup(LayoutWrapper* layoutWrapper, Axis axis, int32_t index);
     void SetItemInfo(int32_t index, ListItemInfo&& info)
     {
         itemPosition_[index] = info;
@@ -208,9 +240,11 @@ private:
     std::pair<int32_t, float> RequestNewItemsBackward(LayoutWrapper* layoutWrapper,
         const LayoutConstraintF& layoutConstraint, int32_t startIndex, float startPos, Axis axis);
 
-    void GetHeaderFooterGroupNode(LayoutWrapper* layoutWrapper);
+    void CreateItemGroupList(LayoutWrapper* layoutWrapper);
+    void OnSurfaceChanged(LayoutWrapper* layoutWrapper);
 
     std::optional<int32_t> jumpIndex_;
+    std::optional<int32_t> jumpIndexInGroup_;
     ScrollIndexAlignment scrollIndexAlignment_ = ScrollIndexAlignment::ALIGN_TOP;
 
     PositionMap itemPosition_;
@@ -230,13 +264,17 @@ private:
     float estimateOffset_ = 0.0f;
 
     bool mainSizeIsDefined_ = false;
+    bool crossMatchChild_ = false;
     float contentMainSize_ = 0.0f;
+    float prevContentMainSize_ = 0.0f;
     float paddingBeforeContent_ = 0.0f;
     float paddingAfterContent_ = 0.0f;
 
     V2::StickyStyle stickyStyle_ = V2::StickyStyle::NONE;
-    WeakPtr<FrameNode> headerGroupNode_;
-    WeakPtr<FrameNode> footerGroupNode_;
+    std::list<WeakPtr<FrameNode>> itemGroupList_;
+
+    std::function<float(int32_t)> chainOffsetFunc_;
+    float chainInterval_ = 0.0f;
 };
 } // namespace OHOS::Ace::NG
 

@@ -31,7 +31,15 @@ public:
     void Layout(LayoutWrapper* layoutWrapper) override;
 
 private:
+    void MeasureSwiper(LayoutWrapper* layoutWrapper, LayoutConstraintF swiperLayoutConstraint);
+    void MeasureLeftButton(LayoutWrapper* layoutWrapper, LayoutConstraintF buttonLayoutConstraint);
+    void MeasureRightButton(LayoutWrapper* layoutWrapper, LayoutConstraintF buttonLayoutConstraint);
+    void MeasureText(
+        const RefPtr<LayoutWrapper>& layoutWrapper, const LayoutConstraintF& buttonLayoutConstraint, bool isLeft);
     static LayoutConstraintF CreateButtonLayoutConstraint(const LayoutConstraintF& childLayoutConstraint, bool isLeft);
+    void LayoutSwiper(LayoutWrapper* layoutWrapper);
+    void LayoutLeftButton(LayoutWrapper* layoutWrapper);
+    void LayoutRightButton(LayoutWrapper* layoutWrapper);
     bool layoutLeftButton_ = true;
     ACE_DISALLOW_COPY_AND_MOVE(StepperLayoutAlgorithm);
 };

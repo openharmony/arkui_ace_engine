@@ -54,5 +54,5 @@ void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConst
     layoutConstraint_ = parentConstraint;
 }
 
-void LayoutProperty::OnVisibilityUpdate(VisibleType visible) const {}
+void LayoutProperty::OnVisibilityUpdate(VisibleType visible) {}
 } // namespace OHOS::Ace::NG

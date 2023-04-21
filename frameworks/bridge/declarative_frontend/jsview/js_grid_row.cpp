@@ -266,7 +266,6 @@ void JSGridRow::Create(const JSCallbackInfo& info)
         auto parsedGutter = ParserGutter(gutter);
         auto parsedBreakpoints = ParserBreakpoints(breakpoints);
         auto parsedDirection = ParserDirection(direction);
-
         GridRowModel::GetInstance()->Create(parsedColumns, parsedGutter, parsedBreakpoints, parsedDirection);
     } else {
         GridRowModel::GetInstance()->Create();
@@ -300,12 +299,36 @@ void JSGridRow::Height(const JSCallbackInfo& info)
     GridRowModel::GetInstance()->SetHeight();
 }
 
+void JSGridRow::AlignItems(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGI("The arg is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    if (info[0]->IsNumber()) {
+        auto value = info[0]->ToNumber<int32_t>();
+        ParseAlignItems(value);
+    }
+}
+
+void JSGridRow::ParseAlignItems(int32_t alignItem)
+{
+    if (alignItem == static_cast<int32_t>(FlexAlign::FLEX_START) ||
+        alignItem == static_cast<int32_t>(FlexAlign::FLEX_END) ||
+        alignItem == static_cast<int32_t>(FlexAlign::CENTER) || alignItem == static_cast<int32_t>(FlexAlign::STRETCH)) {
+        GridRowModel::GetInstance()->SetAlignItems(static_cast<FlexAlign>(alignItem));
+    } else {
+        LOGI("invalid value for alignItems");
+    }
+}
+
 void JSGridRow::JSBind(BindingTarget globalObj)
 {
     JSClass<JSGridRow>::Declare("GridRow");
     JSClass<JSGridRow>::StaticMethod("create", &JSGridRow::Create);
     JSClass<JSGridRow>::StaticMethod("onBreakpointChange", &JSGridRow::JsBreakpointEvent);
     JSClass<JSGridRow>::StaticMethod("height", &JSGridRow::Height);
+    JSClass<JSGridRow>::StaticMethod("alignItems", &JSGridRow::AlignItems);
     JSClass<JSGridRow>::Inherit<JSContainerBase>();
     JSClass<JSGridRow>::Bind<>(globalObj);
 }

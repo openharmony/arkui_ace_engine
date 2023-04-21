@@ -15,6 +15,8 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
 
+#include "scope_manager/native_scope_manager.h"
+
 #if !defined(PREVIEW)
 #include <dlfcn.h>
 #endif
@@ -29,6 +31,21 @@
 
 namespace OHOS::Ace::Framework {
 #if !defined(PREVIEW)
+class ScopeRAII {
+public:
+    explicit ScopeRAII(NativeScopeManager* manager) : manager_(manager)
+    {
+        scope_ = manager_->Open();
+    }
+    ~ScopeRAII()
+    {
+        manager_->Close(scope_);
+    }
+
+private:
+    NativeScopeManager* manager_;
+    NativeScope* scope_;
+};
 
 RefPtr<PixelMap> CreatePixelMapFromNapiValue(JSRef<JSVal> obj)
 {
@@ -41,17 +58,17 @@ RefPtr<PixelMap> CreatePixelMapFromNapiValue(JSRef<JSVal> obj)
         LOGE("CreatePixelMapFromNapiValue engine is null");
         return nullptr;
     }
-    auto nativeEngine = engine->GetNativeEngine();
+    auto* nativeEngine = engine->GetNativeEngine();
     if (nativeEngine == nullptr) {
         LOGE("nativeEngine is nullptr.");
         return nullptr;
     }
-#ifdef USE_V8_ENGINE
-    v8::Local<v8::Value> value = obj->operator v8::Local<v8::Value>();
-#elif USE_ARK_ENGINE
+#ifdef USE_ARK_ENGINE
     panda::Local<JsiValue> value = obj.Get().GetLocalHandle();
 #endif
     JSValueWrapper valueWrapper = value;
+
+    ScopeRAII scope(nativeEngine->GetScopeManager());
     NativeValue* nativeValue = nativeEngine->ValueToNativeValue(valueWrapper);
 
     PixelMapNapiEntry pixelMapNapiEntry = JsEngine::GetPixelMapNapiEntry();
@@ -69,46 +86,47 @@ RefPtr<PixelMap> CreatePixelMapFromNapiValue(JSRef<JSVal> obj)
     return PixelMap::CreatePixelMap(pixmapPtrAddr);
 }
 
-const std::shared_ptr<Rosen::RSNode> CreateRSNodeFromNapiValue(JSRef<JSVal> obj)
+namespace {
+void* UnwrapNapiValue(const JSRef<JSVal>& obj)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     if (!obj->IsObject()) {
-        LOGE("info[0] is not an object when try CreateRSNodeFromNapiValue");
+        LOGE("info[0] is not an object when try CreateFromNapiValue");
         return nullptr;
     }
     auto engine = EngineHelper::GetCurrentEngine();
-    if (!engine) {
-        LOGE("CreateRSNodeFromNapiValue engine is null");
-        return nullptr;
-    }
+    CHECK_NULL_RETURN(engine, nullptr);
     auto nativeEngine = engine->GetNativeEngine();
-    if (nativeEngine == nullptr) {
-        LOGE("nativeEngine is nullptr.");
-        return nullptr;
-    }
-#ifdef USE_V8_ENGINE
-    v8::Local<v8::Value> value = obj->operator v8::Local<v8::Value>();
-#elif USE_ARK_ENGINE
+    CHECK_NULL_RETURN(nativeEngine, nullptr);
+#ifdef USE_ARK_ENGINE
     panda::Local<JsiValue> value = obj.Get().GetLocalHandle();
 #endif
     JSValueWrapper valueWrapper = value;
-    NativeValue* nativeValue = nativeEngine->ValueToNativeValue(valueWrapper);
-    if (nativeValue == nullptr) {
-        LOGE("nativeValue is nullptr.");
-        return nullptr;
-    }
-    NativeObject* object = static_cast<NativeObject*>(nativeValue->GetInterface(NativeObject::INTERFACE_ID));
-    if (object == nullptr) {
-        return nullptr;
-    }
 
-    auto nodePtr = static_cast<std::shared_ptr<Rosen::RSNode>*>(object->GetNativePointer());
+    ScopeRAII scope(nativeEngine->GetScopeManager());
+    NativeValue* nativeValue = nativeEngine->ValueToNativeValue(valueWrapper);
+    CHECK_NULL_RETURN(nativeValue, nullptr);
+    NativeObject* object = static_cast<NativeObject*>(nativeValue->GetInterface(NativeObject::INTERFACE_ID));
+    CHECK_NULL_RETURN(object, nullptr);
+    return object->GetNativePointer();
+}
+} // namespace
+
+RefPtr<PixelMap> GetDrawablePixmap(JSRef<JSVal> obj)
+{
+    return PixelMap::GetFromDrawable(UnwrapNapiValue(obj));
+}
+
+const std::shared_ptr<Rosen::RSNode> CreateRSNodeFromNapiValue(JSRef<JSVal> obj)
+{
+    auto nodePtr = static_cast<std::shared_ptr<Rosen::RSNode>*>(UnwrapNapiValue(obj));
     if (nodePtr == nullptr) {
         return nullptr;
     }
     return *nodePtr;
 #else
     return nullptr;
+}
 #endif
 }
 
@@ -124,16 +142,15 @@ RefPtr<OHOS::Ace::WantWrap> CreateWantWrapFromNapiValue(JSRef<JSVal> obj)
     NativeEngine* nativeEngine = engine->GetNativeEngine();
     CHECK_NULL_RETURN(nativeEngine, nullptr);
 
-#ifdef USE_V8_ENGINE
-    v8::Local<v8::Value> value = obj->operator v8::Local<v8::Value>();
-#elif USE_ARK_ENGINE
+#ifdef USE_ARK_ENGINE
     panda::Local<JsiValue> value = obj.Get().GetLocalHandle();
 #endif
     JSValueWrapper valueWrapper = value;
+
+    ScopeRAII scope(nativeEngine->GetScopeManager());
     NativeValue* nativeValue = nativeEngine->ValueToNativeValue(valueWrapper);
 
-    return WantWrap::CreateWantWrap(reinterpret_cast<void*>(nativeEngine),
-                                    reinterpret_cast<void*>(nativeValue));
+    return WantWrap::CreateWantWrap(reinterpret_cast<void*>(nativeEngine), reinterpret_cast<void*>(nativeValue));
 }
 
 #endif

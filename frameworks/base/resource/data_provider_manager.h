@@ -56,6 +56,7 @@ public:
 
     virtual std::unique_ptr<DataProviderRes> GetDataProviderResFromUri(const std::string& uriStr) = 0;
     virtual void* GetDataProviderThumbnailResFromUri(const std::string& uriStr) = 0;
+    virtual int32_t GetDataProviderFile(const std::string& uriStr, const std::string& mode) = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(DataProviderManagerInterface);
 };
@@ -68,10 +69,14 @@ public:
     ~DataProviderManager() override = default;
 
     std::unique_ptr<DataProviderRes> GetDataProviderResFromUri(const std::string& uriStr) override;
-    void* GetDataProviderThumbnailResFromUri(const std::string& uriStr) override
+    void* GetDataProviderThumbnailResFromUri(const std::string& /* uriStr */) override
     {
         return nullptr;
     };
+    int32_t GetDataProviderFile(const std::string& /* uriStr */, const std::string& /* mode */) override
+    {
+        return -1;
+    }
 
 private:
     DataProviderImpl platformImpl_;
@@ -93,7 +98,7 @@ public:
     std::unique_ptr<DataProviderRes> GetDataProviderResFromUri(const std::string& uriStr) override;
     void* GetDataProviderThumbnailResFromUri(const std::string& uriStr) override;
 
-    int32_t GetDataProviderFile(const std::string& uriStr, const std::string& mode);
+    int32_t GetDataProviderFile(const std::string& uriStr, const std::string& mode) override;
 
 private:
     void InitHelper();

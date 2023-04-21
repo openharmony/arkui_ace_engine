@@ -36,6 +36,12 @@ public:
 
     static RefPtr<FormNode> GetOrCreateFormNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
+
+    void DispatchPointerEvent(const TouchEvent& point) const;
+
+    void OnDetachFromMainTree(bool) override;
+
+    OffsetF GetFormOffset() const;
 };
 
 } // namespace OHOS::Ace::NG

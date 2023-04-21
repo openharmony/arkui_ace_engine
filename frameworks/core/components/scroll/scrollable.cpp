@@ -111,6 +111,9 @@ void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
     auto actionStart = [weakScroll = AceType::WeakClaim(this)](const GestureEvent& info) {
         auto scroll = weakScroll.Upgrade();
         if (scroll) {
+            if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON && !scroll->NeedMouseLeftButtonScroll()) {
+                return;
+            }
             // Send event to accessibility when scroll start.
             auto context = scroll->GetContext().Upgrade();
             if (context) {
@@ -126,6 +129,9 @@ void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
     auto actionUpdate = [weakScroll = AceType::WeakClaim(this)](const GestureEvent& info) {
         auto scroll = weakScroll.Upgrade();
         if (scroll) {
+            if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON && !scroll->NeedMouseLeftButtonScroll()) {
+                return;
+            }
             scroll->HandleDragUpdate(info);
         }
     };
@@ -133,6 +139,9 @@ void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
     auto actionEnd = [weakScroll = AceType::WeakClaim(this)](const GestureEvent& info) {
         auto scroll = weakScroll.Upgrade();
         if (scroll) {
+            if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON && !scroll->NeedMouseLeftButtonScroll()) {
+                return;
+            }
             scroll->HandleDragEnd(info);
             // Send event to accessibility when scroll stop.
             auto context = scroll->GetContext().Upgrade();
@@ -201,6 +210,23 @@ void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
     available_ = true;
 }
 
+void Scrollable::SetAxis(Axis axis)
+{
+    axis_ = axis;
+    PanDirection panDirection;
+    if (axis_ == Axis::VERTICAL) {
+        panDirection.type = PanDirection::VERTICAL;
+    } else {
+        panDirection.type = PanDirection::HORIZONTAL;
+    }
+    if (panRecognizer_) {
+        panRecognizer_->SetDirection(panDirection);
+    }
+    if (panRecognizerNG_) {
+        panRecognizerNG_->SetDirection(panDirection);
+    }
+}
+
 void Scrollable::HandleTouchDown()
 {
     LOGD("handle touch down");
@@ -251,6 +277,11 @@ bool Scrollable::Idle() const
 bool Scrollable::IsStopped() const
 {
     return (!springController_ || (springController_->IsStopped())) && (!controller_ || (controller_->IsStopped()));
+}
+
+bool Scrollable::IsSpringStopped() const
+{
+    return !springController_ || (springController_->IsStopped());
 }
 
 void Scrollable::StopScrollable()
@@ -320,7 +351,8 @@ void Scrollable::HandleDragUpdate(const GestureEvent& info)
         return;
     }
     ExecuteScrollBegin(mainDelta);
-    auto source = info.GetSourceDevice() == SourceType::MOUSE ? SCROLL_FROM_AXIS : SCROLL_FROM_UPDATE;
+    ExecuteScrollFrameBegin(mainDelta, ScrollState::SCROLL);
+    auto source = info.GetInputEventType() == InputEventType::AXIS ? SCROLL_FROM_AXIS : SCROLL_FROM_UPDATE;
     moved_ = UpdateScrollPosition(mainDelta, source);
 }
 
@@ -340,11 +372,19 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
         dragEndCallback_();
     }
     RelatedEventEnd();
-    if (!moved_) {
+    if (!moved_ || info.GetInputEventType() == InputEventType::AXIS) {
         LOGI("It is not moved now,  no need to handle drag end motion");
         if (scrollEndCallback_) {
             scrollEndCallback_();
         }
+        currentVelocity_ = 0.0;
+#ifdef OHOS_PLATFORM
+        LOGI("springController stop increase cpu frequency");
+        ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
+        if (FrameReport::GetInstance().GetEnable()) {
+            FrameReport::GetInstance().EndListFling();
+        }
+#endif
         return;
     }
     if (outBoundaryCallback_ && outBoundaryCallback_() && scrollOverCallback_) {
@@ -406,6 +446,18 @@ void Scrollable::ExecuteScrollBegin(double& mainDelta)
         scrollInfo = scrollBeginCallback_(Dimension(mainDelta / context->GetDipScale(), DimensionUnit::VP), 0.0_vp);
         mainDelta = context->NormalizeToPx(scrollInfo.dx);
     }
+}
+
+void Scrollable::ExecuteScrollFrameBegin(double& mainDelta, ScrollState state)
+{
+    auto context = context_.Upgrade();
+    if (!scrollFrameBeginCallback_ || !context) {
+        return;
+    }
+
+    auto offset = Dimension(mainDelta / context->GetDipScale(), DimensionUnit::VP);
+    auto scrollRes = scrollFrameBeginCallback_(-offset, state);
+    mainDelta = -context->NormalizeToPx(scrollRes.offset);
 }
 
 void Scrollable::FixScrollMotion(double position)
@@ -525,7 +577,8 @@ void Scrollable::ProcessSpringMotion(double position)
     if (NearEqual(currentPos_, position)) {
         UpdateScrollPosition(0.0, SCROLL_FROM_ANIMATION_SPRING);
     } else {
-        if (!UpdateScrollPosition(position - currentPos_, SCROLL_FROM_ANIMATION_SPRING)) {
+        moved_ = UpdateScrollPosition(position - currentPos_, SCROLL_FROM_ANIMATION_SPRING);
+        if (!moved_) {
             springController_->Stop();
         } else if (!touchUp_) {
             if (scrollTouchUpCallback_) {
@@ -547,6 +600,7 @@ void Scrollable::ProcessScrollMotion(double position)
         // UpdateScrollPosition return false, means reach to scroll limit.
         auto mainDelta = position - currentPos_;
         ExecuteScrollBegin(mainDelta);
+        ExecuteScrollFrameBegin(mainDelta, ScrollState::FLING);
         if (!UpdateScrollPosition(mainDelta, SCROLL_FROM_ANIMATION)) {
             controller_->Stop();
         } else if (!touchUp_) {

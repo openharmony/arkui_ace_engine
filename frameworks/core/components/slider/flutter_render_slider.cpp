@@ -15,8 +15,6 @@
 
 #include "core/components/slider/flutter_render_slider.h"
 
-#include "flutter/lib/ui/ui_dart_state.h"
-
 #include "core/components/box/render_box.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/slider/render_block.h"

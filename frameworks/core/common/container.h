@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,6 +28,7 @@
 #include "base/utils/noncopyable.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/frontend.h"
+#include "core/common/page_url_checker.h"
 #include "core/common/platform_res_register.h"
 #include "core/common/settings.h"
 #include "core/common/window.h"
@@ -84,7 +85,7 @@ public:
     virtual RefPtr<PipelineBase> GetPipelineContext() const = 0;
 
     // Dump container.
-    virtual bool Dump(const std::vector<std::string>& params) = 0;
+    virtual bool Dump(const std::vector<std::string>& params, std::vector<std::string>& info);
 
     // Get the width/height of the view
     virtual int32_t GetViewWidth() const = 0;
@@ -94,6 +95,10 @@ public:
 
     virtual uint32_t GetWindowId() const = 0;
     virtual void SetWindowId(uint32_t windowId) {}
+    virtual bool WindowIsShow() const
+    {
+        return false;
+    }
 
     virtual void* GetView() const = 0;
 
@@ -120,7 +125,7 @@ public:
         return nullptr;
     }
 
-    // Get MutilModal ptr.
+    // Get MultiModal ptr.
     virtual uintptr_t GetMutilModalPtr() const
     {
         return 0;
@@ -132,7 +137,12 @@ public:
 
     virtual std::string GetHapPath() const
     {
-        return "";
+        return {};
+    }
+
+    virtual std::string GetWebHapPath() const
+    {
+        return {};
     }
 
     void SetCreateTime(std::chrono::time_point<std::chrono::high_resolution_clock> time)
@@ -263,6 +273,40 @@ public:
         return nullptr;
     }
 
+    bool IsFRSCardContainer() const
+    {
+        return isFRSCardContainer_;
+    }
+
+    void SetIsFRSCardContainer(bool isFRSCardContainer)
+    {
+        isFRSCardContainer_ = isFRSCardContainer;
+    }
+
+    void SetPageUrlChecker(const RefPtr<PageUrlChecker>& pageUrlChecker)
+    {
+        pageUrlChecker_ = pageUrlChecker;
+    }
+
+    const RefPtr<PageUrlChecker>& GetPageUrlChecker()
+    {
+        return pageUrlChecker_;
+    }
+
+    virtual bool IsDialogContainer() const
+    {
+        return false;
+    }
+
+    static bool IsForeground()
+    {
+        auto container = Current();
+        return container ? container->state_ == Frontend::State::ON_SHOW : false;
+    }
+
+    virtual void NotifyConfigurationChange(bool) {}
+    virtual void HotReload() {}
+
 protected:
     std::chrono::time_point<std::chrono::high_resolution_clock> createTime_;
     bool firstUpdateData_ = true;
@@ -270,6 +314,7 @@ protected:
     bool useNewPipeline_ = false;
     std::mutex stateMutex_;
     Frontend::State state_ = Frontend::State::UNDEFINE;
+    bool isFRSCardContainer_ = false;
 
 private:
     std::string moduleName_;
@@ -277,6 +322,7 @@ private:
     std::string filesDataPath_;
     bool usePartialUpdate_ = false;
     Settings settings_;
+    RefPtr<PageUrlChecker> pageUrlChecker_;
     ACE_DISALLOW_COPY_AND_MOVE(Container);
 };
 

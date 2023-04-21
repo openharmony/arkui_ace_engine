@@ -27,7 +27,6 @@ build_component("scene_viewer") {
   configs = [
     ":scene_viewer_component_config",
     "//commonlibrary/c_utils/base:utils_config",
-    "//base/startup/syspara_lite/interfaces/innerkits/native/syspara:syspara_config",
   ]
 
   sources = [

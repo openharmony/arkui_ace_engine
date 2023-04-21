@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_IMAGE_PROVIDER_ADAPTER_SKIA_SVG_DOM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_IMAGE_PROVIDER_ADAPTER_SKIA_SVG_DOM_H
 
-#ifdef NG_BUILD
+#ifdef FLUTTER_2_5
 #include "include/core/SkColor.h"
 #include "modules/svg/include/SkSVGDOM.h"
 #else
@@ -46,6 +46,9 @@ public:
 
     SizeF GetContainerSize() const override;
     void SetContainerSize(const SizeF& containerSize) override;
+
+    // skia SVG doesn't support <animate> element
+
     const std::optional<Color>& GetSvgFillColor() override
     {
         return svgColor_;

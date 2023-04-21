@@ -14,11 +14,11 @@
  */
 
 #include "gtest/gtest.h"
+#include "test/mock/core/common/mock_container.h"
 
 #include "base/memory/ace_type.h"
 #include "bridge/common/manifest/manifest_parser.h"
 #include "core/common/ace_engine.h"
-#include "core/common/test/mock/mock_container.h"
 #include "core/components/test/mock/mock_resource_adapter.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/pipeline_ng/test/mock/mock_interface.h"
@@ -176,14 +176,14 @@ HWTEST_F(ManifestParserTest, ManifestParserTest002, TestSize.Level1)
     std::string resourceName = "color";
     std::string str = "string";
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    auto pipelineContext = AceType::MakeRefPtr<MockPipelineBase>();
-    auto container = AceType::MakeRefPtr<MockContainer>(pipelineContext);
-    pipelineContext->SetThemeManager(themeManager);
+    auto pipeline = AceType::MakeRefPtr<NG::MockPipelineBase>();
+    auto container = AceType::MakeRefPtr<MockContainer>(pipeline);
+    pipeline->SetThemeManager(themeManager);
     AceEngine::Get().AddContainer(-1, container);
 
     auto resourceAdapter = AceType::MakeRefPtr<MockResourceAdapter>();
     auto themeConstant = AceType::MakeRefPtr<ThemeConstants>(resourceAdapter);
-    EXPECT_CALL(*themeManager, GetThemeConstants("", "")).WillOnce(Return(themeConstant));
+    EXPECT_CALL(*themeManager, GetThemeConstants()).WillOnce(Return(themeConstant));
     EXPECT_CALL(*resourceAdapter, GetIdByName(resourceName, str, resId)).WillOnce(Return(true));
 
     ManifestParser manifestParser;

@@ -15,32 +15,37 @@
 
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_layout_algorithm.h"
 
+#include "base/geometry/axis.h"
 #include "base/utils/utils.h"
+#include "core/components/declaration/common/declaration_constants.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
-#include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/property/measure_utils.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 // set wrapper to full screen size
 void MenuWrapperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
-    auto frameNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto screenSize = SizeF(pipeline->GetRootWidth(), pipeline->GetRootHeight());
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto constraint = layoutProperty->GetLayoutConstraint();
+    auto idealSize = CreateIdealSize(
+        constraint.value(), Axis::FREE, layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT), true);
+    layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
 
-    layoutWrapper->GetGeometryNode()->SetFrameSize(screenSize);
-
-    auto menu = layoutWrapper->GetOrCreateChildByIndex(0);
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
-    menu->Measure(layoutConstraint);
+    for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
+        child->Measure(layoutConstraint);
+    }
 }
 
-void MenuWrapperLayoutAlgorithm::Layout(LayoutWrapper *layoutWrapper)
+void MenuWrapperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
-    auto menu = layoutWrapper->GetOrCreateChildByIndex(0);
-    menu->Layout();
+    for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
+        child->Layout();
+    }
 }
 
 } // namespace OHOS::Ace::NG

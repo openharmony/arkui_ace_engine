@@ -22,6 +22,7 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
+#include "core/components/common/properties/alignment.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
@@ -51,6 +52,9 @@ void ScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto constraint = layoutProperty->GetLayoutConstraint();
     auto idealSize = CreateIdealSize(constraint.value(), axis, MeasureType::MATCH_CONTENT);
 
+    auto padding = layoutProperty->CreatePaddingAndBorder();
+    MinusPaddingToSize(padding, idealSize);
+
     // Calculate child layout constraint.
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
     UpdateChildConstraint(axis, idealSize, childLayoutConstraint);
@@ -68,7 +72,7 @@ void ScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (!idealSize.Height()) {
         idealSize.SetHeight(childSize.Height());
     }
-
+    AddPaddingToSize(padding, idealSize);
     auto selfSize = idealSize.ConvertToSizeT();
     selfSize.Constrain(constraint->minSize, constraint->maxSize);
     layoutWrapper->GetGeometryNode()->SetFrameSize(selfSize);
@@ -92,8 +96,8 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     MinusPaddingToSize(padding, size);
     auto childSize = childGeometryNode->GetMarginFrameSize();
     scrollableDistance_ = GetMainAxisSize(childSize, axis) - GetMainAxisSize(size, axis);
-    auto scrollEffect = layoutProperty->GetScrollEdgeEffect();
-    if (scrollEffect && scrollEffect->IsRestrictBoundary()) {
+    auto scrollEffect = layoutProperty->GetEdgeEffect().value_or(EdgeEffect::NONE);
+    if (scrollEffect != EdgeEffect::SPRING) {
         if (scrollableDistance_ > 0.0f) {
             currentOffset_ = std::clamp(currentOffset_, -scrollableDistance_, 0.0f);
         } else {
@@ -104,7 +108,12 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     viewPortExtent_ = childSize;
     viewPortLength_ = GetMainAxisSize(size, axis);
     auto currentOffset = axis == Axis::VERTICAL ? OffsetF(0.0f, currentOffset_) : OffsetF(currentOffset_, 0.0f);
-    childGeometryNode->SetMarginFrameOffset(padding.Offset() + currentOffset);
+    auto scrollAlignment = Alignment::CENTER;
+    if (layoutProperty->GetPositionProperty() && layoutProperty->GetPositionProperty()->HasAlignment()) {
+        scrollAlignment = layoutProperty->GetPositionProperty()->GetAlignment().value();
+    }
+    auto alignmentPosition = Alignment::GetAlignPosition(viewPort_, viewPortExtent_, scrollAlignment);
+    childGeometryNode->SetMarginFrameOffset(padding.Offset() + currentOffset + alignmentPosition);
     childWrapper->Layout();
 }
 

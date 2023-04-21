@@ -21,13 +21,13 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
+#include "base/utils/resource_configuration.h"
 #include "bridge/common/utils/source_map.h"
 #include "core/accessibility/accessibility_manager.h"
 #include "core/common/ace_page.h"
 #include "core/common/js_message_dispatcher.h"
 #include "core/event/ace_event_handler.h"
 #include "core/pipeline/pipeline_base.h"
-#include "frameworks/base/utils/resource_configuration.h"
 
 using FrontendDialogCallback = std::function<void(const std::string& event, const std::string& param)>;
 
@@ -92,19 +92,23 @@ public:
     virtual std::string GetCurrentPageUrl() const
     {
         return "";
-    };
+    }
 
     // Get the currently running JS page information in NG structure.
     virtual RefPtr<Framework::RevSourceMap> GetCurrentPageSourceMap() const
     {
         return nullptr;
-    };
+    }
 
     // Get the currently running JS page information in NG structure.
     virtual RefPtr<Framework::RevSourceMap> GetFaAppSourceMap() const
     {
         return nullptr;
-    };
+    }
+
+    // Get the stage mode sourceMap.
+    virtual void GetStageSourceMap(
+        std::unordered_map<std::string, RefPtr<Framework::RevSourceMap>>& sourceMap) const {};
 
     virtual void RunPage(int32_t pageId, const std::string& content, const std::string& params) = 0;
 
@@ -224,18 +228,20 @@ public:
     {
         return "";
     }
+
     virtual std::string GetContentInfo() const
     {
         return "";
     }
+
+    // only declarative frontend need to support
     virtual int32_t GetRouterSize() const
     {
-        // only declarative frontend need to support
         return -1;
     }
 
     virtual void NotifyAppStorage(const std::string& key, const std::string& value) {}
-#if defined(PREVIEW)
+#ifdef PREVIEW
     virtual void RunNativeEngineLoop() {}
 #endif
 
@@ -251,6 +257,15 @@ public:
     }
 
     virtual void FlushReload() {}
+    // flush frontend for HotReload feature in NG
+    virtual void HotReload() {};
+
+    State GetState() const
+    {
+        return state_;
+    }
+
+    virtual void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& errorCallback) {}
 
 protected:
     bool disallowPopLastPage_ = false;

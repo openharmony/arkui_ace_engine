@@ -69,6 +69,16 @@ public:
         height_ = height;
     }
 
+    void SetMainSize(T mainSize, Axis axis)
+    {
+        axis == Axis::HORIZONTAL ? width_ = mainSize : height_ = mainSize;
+    }
+
+    void SetCrossSize(T crossSize, Axis axis)
+    {
+        axis == Axis::HORIZONTAL ? height_ = crossSize : width_ = crossSize;
+    }
+
     void SetSizeT(const SizeT& SizeT)
     {
         width_ = SizeT.Width();
@@ -366,6 +376,16 @@ public:
     void SetHeight(T height)
     {
         height_ = height;
+    }
+
+    void SetMainSize(T mainSize, Axis axis)
+    {
+        axis == Axis::HORIZONTAL ? width_ = mainSize : height_ = mainSize;
+    }
+
+    void SetCrossSize(T crossSize, Axis axis)
+    {
+        axis == Axis::HORIZONTAL ? height_ = crossSize : width_ = crossSize;
     }
 
     void SetWidth(const std::optional<T>& width)

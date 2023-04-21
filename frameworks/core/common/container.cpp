@@ -66,4 +66,12 @@ bool Container::UpdateState(const Frontend::State& state)
     return true;
 }
 
+bool Container::Dump(const std::vector<std::string>& params, std::vector<std::string>& info)
+{
+    std::string tip("container not support, type:");
+    tip.append(AceType::TypeName(this));
+    info.emplace_back(tip);
+    return true;
+}
+
 } // namespace OHOS::Ace

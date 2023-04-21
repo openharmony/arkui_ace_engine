@@ -60,8 +60,17 @@ const std::unordered_map<uint32_t, ResValueWrapper> RESOURCES = {
     { 117441012, { .type = ThemeConstantsType::COLOR, .value = Color(0xff5434ff) } },
 };
 
+const std::unordered_map<std::string, ResValueWrapper> RESOURCES_WITH_NAME = {
+    { "sys.color.test_color", { .type = ThemeConstantsType::COLOR, .value = Color(0xffffffff) } },
+    { "sys.float.test_dimension", { .type = ThemeConstantsType::DIMENSION, .value = 10.0_vp } },
+    { "sys.double.test_double", { .type = ThemeConstantsType::DOUBLE, .value = 10.0 } },
+    { "sys.integer.test_int", { .type = ThemeConstantsType::INT, .value = -10 } },
+    { "sys.string.test_string", { .type = ThemeConstantsType::STRING, .value = "sans-serif" } },
+    { "sys.string.test_media_path", { .type = ThemeConstantsType::STRING, .value = "./user/a.png" } },
+};
+
 const Color ERROR_VALUE_COLOR = Color(0xff000000);
-constexpr Dimension ERROR_VALUE_DIMENSION = 0.0_vp;
+constexpr Dimension ERROR_VALUE_DIMENSION = 0.0_px;
 constexpr double ERROR_VALUE_DOUBLE = 0.0;
 constexpr int32_t ERROR_VALUE_INT = 0;
 
@@ -181,6 +190,70 @@ int32_t ResourceAdapterMock::GetInt(uint32_t resId)
     return findIter->second.GetValue<int32_t>(ERROR_VALUE_INT).second;
 }
 
+Color ResourceAdapterMock::GetColorByName(const std::string& resName)
+{
+    auto findIter = RESOURCES_WITH_NAME.find(resName);
+    if (findIter == RESOURCES_WITH_NAME.end()) {
+        return ERROR_VALUE_COLOR;
+    }
+    return findIter->second.GetValue<Color>(ERROR_VALUE_COLOR).second;
+}
+
+Dimension ResourceAdapterMock::GetDimensionByName(const std::string& resName)
+{
+    auto findIter = RESOURCES_WITH_NAME.find(resName);
+    if (findIter == RESOURCES_WITH_NAME.end()) {
+        return ERROR_VALUE_DIMENSION;
+    }
+    return findIter->second.GetValue<Dimension>(ERROR_VALUE_DIMENSION).second;
+}
+
+std::string ResourceAdapterMock::GetStringByName(const std::string& resName)
+{
+    auto findIter = RESOURCES_WITH_NAME.find(resName);
+    if (findIter == RESOURCES_WITH_NAME.end()) {
+        return "";
+    }
+    return findIter->second.GetValue<std::string>("").second;
+}
+
+std::vector<std::string> ResourceAdapterMock::GetStringArrayByName(const std::string& resName) const
+{
+    return {};
+}
+
+double ResourceAdapterMock::GetDoubleByName(const std::string& resName)
+{
+    auto findIter = RESOURCES_WITH_NAME.find(resName);
+    if (findIter == RESOURCES_WITH_NAME.end()) {
+        return ERROR_VALUE_DOUBLE;
+    }
+    return findIter->second.GetValue<double>(ERROR_VALUE_DOUBLE).second;
+}
+
+int32_t ResourceAdapterMock::GetIntByName(const std::string& resName)
+{
+    auto findIter = RESOURCES_WITH_NAME.find(resName);
+    if (findIter == RESOURCES_WITH_NAME.end()) {
+        return ERROR_VALUE_INT;
+    }
+    return findIter->second.GetValue<int32_t>(ERROR_VALUE_INT).second;
+}
+
+std::string ResourceAdapterMock::GetMediaPathByName(const std::string& resName)
+{
+    auto findIter = RESOURCES_WITH_NAME.find(resName);
+    if (findIter == RESOURCES_WITH_NAME.end()) {
+        return "";
+    }
+    return findIter->second.GetValue<std::string>("").second;
+}
+
+std::vector<uint32_t> ResourceAdapterMock::GetIntArrayByName(const std::string& resName) const
+{
+    return {};
+}
+
 AnimationOption PipelineContext::GetExplicitAnimationOption() const
 {
     return {};
@@ -196,9 +269,7 @@ uint32_t PipelineContext::AddScheduleTask(const RefPtr<ScheduleTask>& task)
     return 0;
 }
 
-void PipelineContext::RemoveScheduleTask(uint32_t id)
-{
-}
+void PipelineContext::RemoveScheduleTask(uint32_t id) {}
 
 bool PipelineBase::Animate(const AnimationOption& option, const RefPtr<Curve>& curve,
     const std::function<void()>& propertyCallback, const std::function<void()>& finishCallBack)
@@ -206,8 +277,8 @@ bool PipelineBase::Animate(const AnimationOption& option, const RefPtr<Curve>& c
     return true;
 }
 
-void PipelineBase::OpenImplicitAnimation(const AnimationOption& option,
-    const RefPtr<Curve>& curve, const std::function<void()>& finishCallBack)
+void PipelineBase::OpenImplicitAnimation(
+    const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& finishCallBack)
 {}
 
 bool PipelineBase::CloseImplicitAnimation()

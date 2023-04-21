@@ -49,7 +49,7 @@ public:
 
     virtual int32_t FrameCount() const;
 
-    RefPtr<LayoutWrapper> CreateLayoutWrapper(bool forceMeasure = false, bool forceLayout = false) const;
+    virtual RefPtr<LayoutWrapper> CreateLayoutWrapper(bool forceMeasure = false, bool forceLayout = false);
 
     // Tree operation start.
     void AddChild(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT, bool silently = false);
@@ -59,19 +59,21 @@ public:
     void MovePosition(int32_t slot);
     void MountToParent(const RefPtr<UINode>& parent, int32_t slot = DEFAULT_NODE_SLOT, bool silently = false);
     RefPtr<FrameNode> GetFocusParent() const;
+    RefPtr<FocusHub> GetFirstFocusHubChild() const;
     void GetFocusChildren(std::list<RefPtr<FrameNode>>& children) const;
-    void Clean();
+    void Clean(bool cleanDirectly = false);
     void RemoveChildAtIndex(int32_t index);
     RefPtr<UINode> GetChildAtIndex(int32_t index) const;
-    void AttachToMainTree();
-    void DetachFromMainTree();
+    int32_t GetChildIndex(const RefPtr<UINode>& child) const;
+    void AttachToMainTree(bool recursive = false);
+    void DetachFromMainTree(bool recursive = false);
 
     int32_t TotalChildCount() const;
 
-    // Returns index in the flattern tree structure
+    // Returns index in the flatten tree structure
     // of the node with given id and type
     // Returns std::pair with
-    // boolean first - inidication of node is found
+    // boolean first - indication of node is found
     // int32_t second - index of the node
     std::pair<bool, int32_t> GetChildFlatIndex(int32_t id);
 
@@ -97,6 +99,7 @@ public:
     }
 
     void GenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList);
+    void GenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList);
     void GenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& visibleList);
 
     int32_t GetChildIndexById(int32_t id);
@@ -189,6 +192,33 @@ public:
         nodeId_ = -1;
     }
 
+    bool IsRemoving() const
+    {
+        return isRemoving_;
+    }
+
+    int32_t GetLayoutPriority() const
+    {
+        return layoutPriority_;
+    }
+
+    void SetLayoutPriority(int32_t priority)
+    {
+        layoutPriority_ = priority;
+    }
+
+    void SetInDestroying()
+    {
+        isInDestroying_ = true;
+    }
+
+    bool IsInDestroying() const
+    {
+        return isInDestroying_;
+    }
+
+    void SetChildrenInDestroying();
+
     virtual HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
         const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId);
     virtual HitTestMode GetHitTestMode() const
@@ -232,11 +262,15 @@ public:
 
     virtual void OnWindowUnfocused() {}
 
+    virtual void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) {}
+
     virtual void OnNotifyMemoryLevel(int32_t level) {}
 
     virtual void SetActive(bool active);
 
     virtual void OnVisibleChange(bool isVisible);
+
+    virtual bool MarkRemoving();
 
     bool IsOnMainTree() const
     {
@@ -274,6 +308,47 @@ public:
         return childrenUpdatedFrom_;
     }
 
+    // utility function for adding child to disappearingChildren_
+    void AddDisappearingChild(const RefPtr<UINode>& child, uint32_t index = UINT32_MAX);
+    // utility function for removing child from disappearingChildren_, return true if child is removed
+    bool RemoveDisappearingChild(const RefPtr<UINode>& child);
+    // return if we are in parent's disappearing children
+    bool IsDisappearing() const
+    {
+        return isDisappearing_;
+    }
+
+    // These two interfaces are only used for fast preview.
+    // FastPreviewUpdateChild: Replace the old child at the specified slot with the new created node.
+    // FastPreviewUpdateChildDone: the new created node performs some special operations.
+    virtual void FastPreviewUpdateChild(int32_t slot, const RefPtr<UINode>& newChild)
+    {
+        RemoveChildAtIndex(slot);
+        newChild->MountToParent(AceType::Claim(this), slot, false);
+    }
+    virtual void FastPreviewUpdateChildDone() {}
+
+#ifdef PREVIEW
+    void SetDebugLine(const std::string& line)
+    {
+        debugLine_ = line;
+    }
+    std::string GetDebugLine() const
+    {
+        return debugLine_;
+    }
+
+    void SetViewId(const std::string& viewId)
+    {
+        viewId_ = viewId;
+    }
+
+    std::string GetViewId() const
+    {
+        return viewId_;
+    }
+#endif
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -287,6 +362,9 @@ protected:
         }
     }
 
+    virtual void OnGenerateOneDepthVisibleFrameWithTransition(
+        std::list<RefPtr<FrameNode>>& visibleList, uint32_t index = UINT_MAX);
+
     virtual void OnGenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& allList)
     {
         for (const auto& child : children_) {
@@ -294,19 +372,26 @@ protected:
         }
     }
 
+    virtual void OnAddDisappearingChild() {}
+    virtual void OnRemoveDisappearingChild() {}
+
     virtual void OnContextAttached() {}
     // dump self info.
     virtual void DumpInfo() {}
 
     // Mount to the main tree to display.
-    virtual void OnAttachToMainTree();
-    virtual void OnDetachFromMainTree();
+    virtual void OnAttachToMainTree(bool recursive = false);
+    virtual void OnDetachFromMainTree(bool recursive = false);
+
+    bool isRemoving_ = false;
+    // return value: return true if node has disappearing transition
+    virtual bool OnRemoveFromParent();
 
 private:
-    void OnRemoveFromParent();
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false);
 
     std::list<RefPtr<UINode>> children_;
+    std::list<std::pair<RefPtr<UINode>, uint32_t>> disappearingChildren_;
     WeakPtr<UINode> parent_;
     std::string tag_ = "UINode";
     int32_t depth_ = 0;
@@ -314,13 +399,20 @@ private:
     int32_t hostPageId_ = 0;
     int32_t nodeId_ = 0;
     int32_t accessibilityId_ = -1;
+    int32_t layoutPriority_ = 0;
     bool isRoot_ = false;
     bool onMainTree_ = false;
     bool removeSilently_ = true;
+    bool isInDestroying_ = false;
+    bool isDisappearing_ = false;
 
     int32_t childrenUpdatedFrom_ = -1;
     static thread_local int32_t currentAccessibilityId_;
 
+#ifdef PREVIEW
+    std::string debugLine_;
+    std::string viewId_;
+#endif
     ACE_DISALLOW_COPY_AND_MOVE(UINode);
 };
 

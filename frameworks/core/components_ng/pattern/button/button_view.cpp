@@ -48,6 +48,12 @@ void ButtonView::CreateWithLabel(const std::string& label)
     buttonAccessibilityProperty->SetText(label);
     stack->Push(buttonNode);
     ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Label, label);
+    auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
+    CHECK_NULL_VOID(buttonTheme);
+    auto padding = buttonTheme->GetPadding();
+    PaddingProperty defaultPadding({ CalcLength(padding.Left()), CalcLength(padding.Right()), CalcLength(padding.Top()),
+        CalcLength(padding.Bottom()) });
+    ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Padding, defaultPadding);
 }
 
 void ButtonView::Create(const std::string& tagName)
@@ -72,10 +78,6 @@ void ButtonView::SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, const st
     textLayoutProperty->UpdateFontSize(textStyle.GetFontSize());
     textLayoutProperty->UpdateTextColor(textStyle.GetTextColor());
     textLayoutProperty->UpdateFontWeight(textStyle.GetFontWeight());
-    auto padding = buttonTheme->GetPadding();
-    PaddingProperty defaultPadding({ CalcLength(padding.Left()), CalcLength(padding.Right()), CalcLength(padding.Top()),
-        CalcLength(padding.Bottom()) });
-    textLayoutProperty->UpdatePadding(defaultPadding);
 }
 
 void ButtonView::SetType(ButtonType buttonType)
@@ -90,6 +92,38 @@ void ButtonView::SetStateEffect(bool stateEffect)
     auto buttonEventHub = frameNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEventHub);
     buttonEventHub->SetStateEffect(stateEffect);
+}
+
+void ButtonView::SetLableStyle(ButtonParameters& buttonParameters)
+{
+    if (buttonParameters.textOverflow.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, TextOverflow, buttonParameters.textOverflow.value());
+    }
+    if (buttonParameters.maxLines.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, MaxLines, buttonParameters.maxLines.value());
+    }
+    if (buttonParameters.minFontSize.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, MinFontSize, buttonParameters.minFontSize.value());
+    }
+    if (buttonParameters.maxFontSize.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, MaxFontSize, buttonParameters.maxFontSize.value());
+    }
+    if (buttonParameters.heightAdaptivePolicy.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(
+            ButtonLayoutProperty, HeightAdaptivePolicy, buttonParameters.heightAdaptivePolicy.value());
+    }
+    if (buttonParameters.fontSize.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontSize, buttonParameters.fontSize.value());
+    }
+    if (buttonParameters.fontWeight.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontWeight, buttonParameters.fontWeight.value());
+    }
+    if (buttonParameters.fontFamily.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontFamily, buttonParameters.fontFamily.value());
+    }
+    if (buttonParameters.fontStyle.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontStyle, buttonParameters.fontStyle.value());
+    }
 }
 
 void ButtonView::SetFontSize(const Dimension& fontSize)
@@ -115,6 +149,7 @@ void ButtonView::SetFontFamily(const std::vector<std::string>& fontFamilies)
 void ButtonView::SetFontColor(const Color& textColor)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontColor, textColor);
+    ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, textColor);
 }
 
 void ButtonView::SetBorderRadius(const Dimension& radius)

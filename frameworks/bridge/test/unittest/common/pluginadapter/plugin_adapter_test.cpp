@@ -14,12 +14,12 @@
  */
 
 #include "gtest/gtest.h"
-
 #define private public
+#include "test/mock/core/common/mock_container.h"
+#include "base/utils/system_properties.h"
 #include "bridge/common/plugin_adapter/plugin_bridge.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
-#include "core/common/test/mock/mock_container.h"
 
 using namespace testing;
 using namespace testing::ext;

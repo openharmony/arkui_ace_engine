@@ -94,10 +94,11 @@ void SetMainAxisSize(float value, Axis axis, OptionalSizeF& size);
  * @param layoutConstraint the constraint of current node.
  * @param axis the axis of this node.
  * @param measureType the measure info.
- * @param usingMaxSize When the component cannot confirm the size, it decides whether to use the max or min value.
+ * @param usingParent When the component cannot confirm the size, it decides whether to use the percentRefence or min
+ * value.
  * @return SizeF the node size info.
  */
-SizeF CreateIdealSize(const LayoutConstraintF& layoutConstraint, Axis axis, MeasureType measureType, bool usingMaxSize);
+SizeF CreateIdealSize(const LayoutConstraintF& layoutConstraint, Axis axis, MeasureType measureType, bool usingParent);
 
 /**
  * @brief Create node IdealSize.
@@ -116,8 +117,7 @@ OptionalSizeF CreateIdealSize(const LayoutConstraintF& layoutConstraint, Axis ax
  * @param margin the margin property of this node.
  * @param padding the padding property of this node.
  */
-void CreateChildrenConstraint(
-    SizeF& size, const std::unique_ptr<MarginProperty>& margin, const std::unique_ptr<PaddingProperty>& padding);
+void CreateChildrenConstraint(SizeF& size, const PaddingPropertyF& padding);
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PROPERTIES_MEASURE_UTILS_H

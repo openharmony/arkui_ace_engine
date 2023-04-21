@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,7 +14,7 @@
 import("//build/test.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
-if (is_standard_system) {
+if (is_ohos_standard_system) {
   module_output_path = "ace_engine/backenduicomponent/theme"
 } else {
   module_output_path = "ace_engine_full/backenduicomponent/theme"
@@ -90,11 +90,11 @@ ohos_unittest("ThemeManagerTest") {
   deps = [
     "$ace_root/adapter/ohos/osal:ace_osal_ohos",
     "$ace_root/frameworks/core/components/theme:build_theme_code",
-    "$cjson_root:cjson_static",
+    "$cjson_root:cjson",
     "//third_party/googletest:gtest_main",
   ]
 
-  if (!is_standard_system) {
+  if (!is_ohos_standard_system) {
     sources += [
       "$ace_root/frameworks/bridge/common/dom/dom_type.cpp",
       "$ace_root/frameworks/bridge/common/utils/utils.cpp",
@@ -112,6 +112,7 @@ ohos_unittest("ThemeManagerTest") {
     sources += [
       "$ace_root/frameworks/base/geometry/animatable_dimension.cpp",
       "$ace_root/frameworks/base/log/dump_log.cpp",
+      "$ace_root/frameworks/base/memory/memory_monitor.cpp",
       "$ace_root/frameworks/base/utils/base_id.cpp",
     ]
     external_deps = [
@@ -130,7 +131,9 @@ ohos_unittest("ThemeConstantsTest") {
 
   sources = [
     # base
+    "$ace_root/adapter/ohos/osal/ace_trace.cpp",
     "$ace_root/frameworks/base/json/json_util.cpp",
+    "$ace_root/frameworks/base/log/ace_trace.cpp",
     "$ace_root/frameworks/base/log/dump_log.cpp",
     "$ace_root/frameworks/base/utils/base_id.cpp",
 
@@ -140,6 +143,7 @@ ohos_unittest("ThemeConstantsTest") {
     "$ace_root/frameworks/core/components/common/properties/border_edge.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
     "$ace_root/frameworks/core/components/common/properties/text_style.cpp",
+    "$ace_root/frameworks/core/components/theme/icon_theme.cpp",
 
     # theme
     "$ace_root/frameworks/core/components/theme/app_theme.cpp",
@@ -196,12 +200,13 @@ ohos_unittest("ThemeConstantsTest") {
 
   deps = [
     "$ace_root/frameworks/core/components/theme:build_theme_code",
-    "$cjson_root:cjson_static",
+    "$cjson_root:cjson",
     "//third_party/googletest:gtest_main",
   ]
 
-  if (is_standard_system) {
+  if (is_ohos_standard_system) {
     external_deps = [
+      "hitrace_native:hitrace_meter",
       "hiviewdfx_hilog_native:libhilog",
       "init:libbegetutil",
     ]
@@ -232,7 +237,7 @@ group("unittest") {
   testonly = true
   if (!is_asan) {
     deps = [
-      #":ThemeConstantsTest",
+      ":ThemeConstantsTest",
       ":ThemeManagerTest",
     ]
   }

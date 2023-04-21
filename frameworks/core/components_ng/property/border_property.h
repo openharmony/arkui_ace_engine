@@ -31,6 +31,7 @@ struct BorderRadiusPropertyT {
     std::optional<T> radiusTopRight;
     std::optional<T> radiusBottomRight;
     std::optional<T> radiusBottomLeft;
+    std::optional<bool> radiusFlag;
 
     void SetRadius(const T& borderRadius)
     {
@@ -38,6 +39,12 @@ struct BorderRadiusPropertyT {
         radiusTopRight = borderRadius;
         radiusBottomLeft = borderRadius;
         radiusBottomRight = borderRadius;
+    }
+
+    // This function is used when the input value is length
+    void SetRadiusFlag(bool flag)
+    {
+        radiusFlag = flag;
     }
 
     bool operator==(const BorderRadiusPropertyT& value) const

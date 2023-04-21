@@ -97,17 +97,17 @@ void GridModelNG::SetGridHeight(const Dimension& value)
 void GridModelNG::SetScrollBarMode(int32_t value)
 {
     auto displayMode = static_cast<NG::DisplayMode>(value);
-    ACE_UPDATE_PAINT_PROPERTY(GridPaintProperty, ScrollBarMode, displayMode);
+    ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarMode, displayMode);
 }
 
 void GridModelNG::SetScrollBarColor(const std::string& value)
 {
-    ACE_UPDATE_PAINT_PROPERTY(GridPaintProperty, ScrollBarColor, Color::FromString(value));
+    ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, Color::FromString(value));
 }
 
 void GridModelNG::SetScrollBarWidth(const std::string& value)
 {
-    ACE_UPDATE_PAINT_PROPERTY(GridPaintProperty, ScrollBarWidth, StringUtils::StringToDimensionWithUnit(value));
+    ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, StringUtils::StringToDimensionWithUnit(value));
 }
 
 void GridModelNG::SetCachedCount(int32_t value)
@@ -124,7 +124,7 @@ void GridModelNG::SetIsRTL(bool rightToLeft) {}
 
 void GridModelNG::SetLayoutDirection(FlexDirection value)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, LayoutDirection, value);
+    ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, GridDirection, value);
 }
 
 void GridModelNG::SetMaxCount(int32_t value)
@@ -162,7 +162,10 @@ void GridModelNG::SetSupportAnimation(bool value)
 
 void GridModelNG::SetSupportDragAnimation(bool value) {}
 
-void GridModelNG::SetEdgeEffect(EdgeEffect edgeEffect) {}
+void GridModelNG::SetEdgeEffect(EdgeEffect edgeEffect)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, EdgeEffect, edgeEffect);
+}
 
 void GridModelNG::SetOnScrollToIndex(ScrollToIndexFunc&& value)
 {

@@ -99,6 +99,7 @@ bool OptionComponent::Initialize(const RefPtr<AccessibilityManager>& manager)
             textStyle = GetTextStyle();
             text_->SetTextStyle(textStyle);
         }
+        textStyle.SetFontSize(GetFontSize());
         textStyle.SetTextDecoration(GetTextDecoration());
         text_->SetData(value_);
     } else {

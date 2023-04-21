@@ -53,7 +53,6 @@ public:
     MOCK_METHOD0(BeforeCreateLayoutWrapper, void());
     MOCK_METHOD0(BeforeCreatePaintWrapper, void());
     MOCK_METHOD0(GetScopeFocusAlgorithm, ScopeFocusAlgorithm());
-    MOCK_CONST_METHOD0(GetFocusPattern, FocusPattern());
     MOCK_METHOD0(OnInActive, void());
     MOCK_METHOD0(OnActive, void());
     MOCK_METHOD0(OnWindowShow, void());

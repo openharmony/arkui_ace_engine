@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -71,10 +71,57 @@ enum class TextCase {
 
 enum class WordBreak { NORMAL = 0, BREAK_ALL, BREAK_WORD };
 
+/// Where to vertically align the placeholder relative to the surrounding text.
+enum class PlaceholderAlignment {
+    /// Match the baseline of the placeholder with the baseline.
+    BASELINE,
+
+    /// Align the bottom edge of the placeholder with the baseline such that the
+    /// placeholder sits on top of the baseline.
+    ABOVEBASELINE,
+
+    /// Align the top edge of the placeholder with the baseline specified in
+    /// such that the placeholder hangs below the baseline.
+    BELOWBASELINE,
+
+    /// Align the top edge of the placeholder with the top edge of the font.
+    /// When the placeholder is very tall, the extra space will hang from
+    /// the top and extend through the bottom of the line.
+    TOP,
+
+    /// Align the bottom edge of the placeholder with the top edge of the font.
+    /// When the placeholder is very tall, the extra space will rise from
+    /// the bottom and extend through the top of the line.
+    BOTTOM,
+
+    /// Align the middle of the placeholder with the middle of the text. When the
+    /// placeholder is very tall, the extra space will grow equally from
+    /// the top and bottom of the line.
+    MIDDLE,
+};
+
 struct TextSizeGroup {
     Dimension fontSize = 14.0_px;
     uint32_t maxLines = INT32_MAX;
     TextOverflow textOverflow = TextOverflow::CLIP;
+};
+
+/// Placeholder properties
+struct PlaceholderRun {
+    /// Placeholder's width
+    float width = 0.0f;
+
+    /// Placeholder's height
+    float height = 0.0f;
+
+    /// Vertically alignment the placeholder relative to the surrounding text.
+    PlaceholderAlignment alignment = PlaceholderAlignment::BOTTOM;
+
+    /// The placeholder with the baseline styles
+    TextBaseline baseline = TextBaseline::ALPHABETIC;
+
+    /// The baseline offset
+    float baseline_offset = 0.0f;
 };
 
 class ACE_EXPORT TextStyle final {
@@ -438,7 +485,7 @@ private:
 
 namespace StringUtils {
 
-inline FontWeight StringToFontWeight(const std::string& weight)
+inline FontWeight StringToFontWeight(const std::string& weight, FontWeight defaultFontWeight = FontWeight::NORMAL)
 {
     static const LinearMapNode<FontWeight> fontWeightTable[] = {
         { "100", FontWeight::W100 },
@@ -454,10 +501,11 @@ inline FontWeight StringToFontWeight(const std::string& weight)
         { "bolder", FontWeight::BOLDER },
         { "lighter", FontWeight::LIGHTER },
         { "medium", FontWeight::MEDIUM },
+        { "normal", FontWeight::NORMAL },
         { "regular", FontWeight::REGULAR },
     };
     auto weightIter = BinarySearchFindIndex(fontWeightTable, ArraySize(fontWeightTable), weight.c_str());
-    return weightIter != -1 ? fontWeightTable[weightIter].value : FontWeight::NORMAL;
+    return weightIter != -1 ? fontWeightTable[weightIter].value : defaultFontWeight;
 }
 
 inline WordBreak StringToWordBreak(const std::string& wordBreak)

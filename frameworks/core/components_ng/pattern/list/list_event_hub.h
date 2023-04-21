@@ -53,6 +53,26 @@ public:
         return onScrollBeginEvent_;
     }
 
+    void SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& onScrollFrameBegin)
+    {
+        onScrollFrameBeginEvent_ = std::move(onScrollFrameBegin);
+    }
+
+    const OnScrollFrameBeginEvent& GetOnScrollFrameBegin() const
+    {
+        return onScrollFrameBeginEvent_;
+    }
+
+    void SetOnScrollStart(OnScrollStartEvent&& onScrollStart)
+    {
+        onScrollStartEvent_ = std::move(onScrollStart);
+    }
+
+    const OnScrollStartEvent& GetOnScrollStart() const
+    {
+        return onScrollStartEvent_;
+    }
+
     void SetOnScrollStop(OnScrollStopEvent&& onScrollStop)
     {
         onScrollStopEvent_ = std::move(onScrollStop);
@@ -182,25 +202,24 @@ public:
         }
     }
 
-    void FireOnItemDrop(const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex, bool isSuccess) const
+    bool FireOnItemDrop(const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex, bool isSuccess) const
     {
         if (onItemDropEvent_) {
+            if (onItemMoveEvent_ && itemIndex >= 0 && insertIndex >= 0) {
+                isSuccess = onItemMoveEvent_(itemIndex, insertIndex);
+            }
             onItemDropEvent_(dragInfo, itemIndex, insertIndex, isSuccess);
+            return true;
         }
+        return false;
     }
 
     std::string GetDragExtraParams(const std::string& extraInfo, const Point& point, DragEventType drag) override
     {
         auto json = JsonUtil::Create(true);
-        if (drag == DragEventType::START) {
-            int32_t index = GetListItemIndexByPosition(point.GetX(), point.GetY());
-            json->Put("selectedIndex", index);
-        } else if (drag == DragEventType::DROP || drag == DragEventType::MOVE) {
+        if (drag == DragEventType::DROP || drag == DragEventType::MOVE) {
             int32_t index = GetListItemIndexByPosition(point.GetX(), point.GetY());
             json->Put("insertIndex", index);
-        } else {
-            int32_t index = INVALID_IDX;
-            json->Put("selectedIndex", index);
         }
         if (!extraInfo.empty()) {
             json->Put("extraInfo", extraInfo.c_str());
@@ -213,12 +232,14 @@ public:
     void HandleOnItemDragUpdate(const GestureEvent& info);
     void HandleOnItemDragEnd(const GestureEvent& info);
     void HandleOnItemDragCancel();
-    int32_t GetListItemIndexByPosition(float x, float y);
+    int32_t GetListItemIndexByPosition(float x, float y, bool strict = false);
 private:
     Axis GetDirection() const;
 
     OnScrollEvent onScrollEvent_;
     OnScrollBeginEvent onScrollBeginEvent_;
+    OnScrollFrameBeginEvent onScrollFrameBeginEvent_;
+    OnScrollStartEvent onScrollStartEvent_;
     OnScrollStopEvent onScrollStopEvent_;
     OnScrollIndexEvent onScrollIndexEvent_;
     OnReachEvent onReachStartEvent_;

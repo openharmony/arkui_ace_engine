@@ -16,15 +16,15 @@
 #include "core/components_ng/pattern/text/text_layout_adapter.h"
 
 namespace OHOS::Ace::NG {
-bool TextLayoutadapter::IsLeftToRight(UChar32 charOfShowingText)
+bool TextLayoutadapter::IsLeftToRight(int32_t charOfShowingText)
 {
     return true;
 }
-bool TextLayoutadapter::IsRightToLeft(UChar32 charOfShowingText)
+bool TextLayoutadapter::IsRightToLeft(int32_t charOfShowingText)
 {
     return false;
 }
-bool TextLayoutadapter::IsRightTOLeftArabic(UChar32 charOfShowingText)
+bool TextLayoutadapter::IsRightTOLeftArabic(int32_t charOfShowingText)
 {
     return false;
 }

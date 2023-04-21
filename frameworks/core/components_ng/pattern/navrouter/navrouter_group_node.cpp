@@ -30,6 +30,7 @@
 #include "core/components_ng/pattern/navrouter/navdestination_event_hub.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
+#include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/navrouter/navrouter_event_hub.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
@@ -39,9 +40,7 @@ RefPtr<NavRouterGroupNode> NavRouterGroupNode::GetOrCreateGroupNode(
     const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
 {
     auto frameNode = GetFrameNode(tag, nodeId);
-    if (frameNode) {
-        return AceType::DynamicCast<NavRouterGroupNode>(frameNode);
-    }
+    CHECK_NULL_RETURN_NOLOG(!frameNode, AceType::DynamicCast<NavRouterGroupNode>(frameNode));
     auto pattern = patternCreator ? patternCreator() : MakeRefPtr<Pattern>();
     auto navRouterGroupNode = AceType::MakeRefPtr<NavRouterGroupNode>(tag, nodeId, pattern);
     navRouterGroupNode->InitializePatternAndContext();
@@ -49,7 +48,7 @@ RefPtr<NavRouterGroupNode> NavRouterGroupNode::GetOrCreateGroupNode(
     return navRouterGroupNode;
 }
 
-void NavRouterGroupNode::AddChildToGroup(const RefPtr<UINode>& child)
+void NavRouterGroupNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t slot)
 {
     auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(child);
     if (navDestination) {
@@ -67,9 +66,14 @@ void NavRouterGroupNode::AddChildToGroup(const RefPtr<UINode>& child)
     UINode::AddChild(child);
 }
 
-void NavRouterGroupNode::OnDetachFromMainTree()
+void NavRouterGroupNode::DeleteChildFromGroup(int32_t slot)
 {
-    FrameNode::OnDetachFromMainTree();
+    UINode::RemoveChildAtIndex(slot);
+}
+
+void NavRouterGroupNode::OnDetachFromMainTree(bool recursive)
+{
+    FrameNode::OnDetachFromMainTree(recursive);
     auto parent = GetParent();
     while (parent) {
         if (CleanNodeInNavigation(parent)) {
@@ -79,9 +83,9 @@ void NavRouterGroupNode::OnDetachFromMainTree()
     }
 }
 
-void NavRouterGroupNode::OnAttachToMainTree()
+void NavRouterGroupNode::OnAttachToMainTree(bool recursive)
 {
-    FrameNode::OnAttachToMainTree();
+    FrameNode::OnAttachToMainTree(recursive);
     auto parent = GetParent();
     while (parent) {
         auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(parent);
@@ -92,7 +96,6 @@ void NavRouterGroupNode::OnAttachToMainTree()
     }
     SetDestinationChangeEvent(parent);
     SetBackButtonEvent(parent);
-    InitNavigationContent(parent);
 }
 
 void NavRouterGroupNode::SetDestinationChangeEvent(const RefPtr<UINode>& parent)
@@ -114,21 +117,6 @@ void NavRouterGroupNode::SetDestinationChangeEvent(const RefPtr<UINode>& parent)
     eventHub->SetOnDestinationChange(std::move(onDestinationChange));
 }
 
-void NavRouterGroupNode::InitNavigationContent(const RefPtr<UINode>& parent)
-{
-    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(parent);
-    CHECK_NULL_VOID(navigationNode);
-    auto layoutProperty = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    if (navigationNode->IsFirstNavDestination() &&
-        layoutProperty->GetNavigationModeValue(NavigationMode::AUTO) == NavigationMode::SPLIT) {
-        AddNavDestinationToNavigation(parent);
-        auto eventHub = GetEventHub<NavRouterEventHub>();
-        CHECK_NULL_VOID(eventHub);
-        eventHub->FireChangeEvent(true);
-        navigationNode->MarkIsFirstNavDestination(false);
-    }
-}
 
 void NavRouterGroupNode::AddBackButtonIconToNavDestination(const RefPtr<UINode>& parent)
 {
@@ -173,6 +161,17 @@ void NavRouterGroupNode::SetBackButtonEvent(const RefPtr<UINode>& parent)
         CHECK_NULL_VOID(navRouter);
         auto layoutProperty = navigation->GetLayoutProperty<NavigationLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
+
+        auto destinationContent = navDestination->GetContentNode();
+        if (destinationContent) {
+            auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
+            CHECK_NULL_VOID(navDestinationPattern);
+            auto shallowBuilder = navDestinationPattern->GetShallowBuilder();
+            CHECK_NULL_VOID(shallowBuilder);
+            shallowBuilder->MarkIsExecuteDeepRenderDone(false);
+            destinationContent->Clean();
+        }
+
         if (layoutProperty->GetNavigationModeValue(NavigationMode::AUTO) == NavigationMode::STACK) {
             if (navDestination->GetPreNode()) {
                 navRouter->BackToPreNavDestination(navDestination->GetPreNode(), navigation);
@@ -180,7 +179,6 @@ void NavRouterGroupNode::SetBackButtonEvent(const RefPtr<UINode>& parent)
                 layoutProperty->UpdateDestinationChange(true);
                 return;
             }
-
             navRouter->BackToNavBar(navigation);
             navRouter->SetOnStateChangeFalse(navDestination, navigation, true);
             layoutProperty->UpdateDestinationChange(false);
@@ -218,6 +216,15 @@ void NavRouterGroupNode::AddNavDestinationToNavigation(const RefPtr<UINode>& par
         const auto& childNode = *iter;
         auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(childNode);
         if (navDestinationNode && navDestinationNode != navDestination) {
+            auto destinationContent = navDestinationNode->GetContentNode();
+            if (destinationContent) {
+                auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+                CHECK_NULL_VOID(navDestinationPattern);
+                auto shallowBuilder = navDestinationPattern->GetShallowBuilder();
+                CHECK_NULL_VOID(shallowBuilder);
+                shallowBuilder->MarkIsExecuteDeepRenderDone(false);
+                destinationContent->Clean();
+            }
             navDestination->SetPreNode(navDestinationNode);
             SetOnStateChangeFalse(navDestinationNode, parent);
             break;
@@ -238,16 +245,16 @@ void NavRouterGroupNode::AddNavDestinationToNavigation(const RefPtr<UINode>& par
     if (navBarNode && layoutProperty->GetNavigationModeValue(NavigationMode::AUTO) == NavigationMode::SPLIT) {
         navigationContentNode->Clean();
         navigationContentNode->AddChild(navDestination);
-        navigationContentNode->MarkModifyDone();
-        navigationContentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        navigationNode->MarkModifyDone();
+        navigationNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return;
     }
 
     SetBackButtonVisible(navDestination);
     navigationContentNode->Clean();
     navigationContentNode->AddChild(navDestination);
-    navigationContentNode->MarkModifyDone();
-    navigationContentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    navigationNode->MarkModifyDone();
+    navigationNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void NavRouterGroupNode::SetOnStateChangeFalse(
@@ -265,9 +272,8 @@ void NavRouterGroupNode::SetOnStateChangeFalse(
         return;
     }
 
-    if (isBackButton) {
-        auto newDestiantion = AceType::DynamicCast<FrameNode>(navDestination->GetPreNode());
-        CHECK_NULL_VOID(newDestiantion);
+    auto newDestiantion = AceType::DynamicCast<FrameNode>(navDestination->GetPreNode());
+    if (isBackButton && newDestiantion) {
         auto newEventHub = newDestiantion->GetEventHub<NavDestinationEventHub>();
         CHECK_NULL_VOID(newEventHub);
         newEventHub->FireChangeEvent(true);

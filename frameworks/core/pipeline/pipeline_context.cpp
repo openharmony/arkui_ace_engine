@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,6 +31,7 @@
 #include "render_service_client/core/ui/rs_node.h"
 #include "render_service_client/core/ui/rs_surface_node.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
+#include "render_service_client/core/transaction/rs_transaction.h"
 
 #include "core/animation/native_curve_helper.h"
 #endif
@@ -54,10 +55,10 @@
 #include "core/common/event_manager.h"
 #include "core/common/font_manager.h"
 #include "core/common/frontend.h"
+#include "core/common/layout_inspector.h"
 #include "core/common/manager_interface.h"
 #include "core/common/text_field_manager.h"
 #include "core/common/thread_checker.h"
-#include "core/common/layout_inspector.h"
 #include "core/components/checkable/render_checkable.h"
 #include "core/components/common/layout/screen_system_manager.h"
 #include "core/components/container_modal/container_modal_component.h"
@@ -93,6 +94,7 @@
 #include "core/pipeline/base/composed_element.h"
 #include "core/pipeline/base/factories/flutter_render_factory.h"
 #include "core/pipeline/base/render_context.h"
+#include "uicast_interface/uicast_context_impl.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -132,11 +134,11 @@ void ThreadStuckTask(int32_t seconds)
 
 } // namespace
 
-PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
+PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
     RefPtr<AssetManager> assetManager, RefPtr<PlatformResRegister> platformResRegister,
     const RefPtr<Frontend>& frontend, int32_t instanceId)
-    : PipelineBase(std::move(window), std::move(taskExecutor), std::move(assetManager), frontend, instanceId,
-        (std::move(platformResRegister))),
+    : PipelineBase(window, std::move(taskExecutor), std::move(assetManager), frontend, instanceId,
+          (std::move(platformResRegister))),
       timeProvider_(g_defaultTimeProvider)
 {
     RegisterEventHandler(frontend->GetEventHandler());
@@ -149,13 +151,16 @@ PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExec
     renderFactory_ = AceType::MakeRefPtr<FlutterRenderFactory>();
     eventManager_ = AceType::MakeRefPtr<EventManager>();
     UpdateFontWeightScale();
+    {
+        UICastContextImpl::Init(AceType::WeakClaim(this));
+    }
     eventManager_->SetInstanceId(instanceId);
     textOverlayManager_ = AceType::MakeRefPtr<TextOverlayManager>(WeakClaim(this));
 }
 
-PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExecutor>& taskExecutor,
+PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor>& taskExecutor,
     RefPtr<AssetManager> assetManager, const RefPtr<Frontend>& frontend)
-    : PipelineBase(std::move(window), std::move(taskExecutor), std::move(assetManager), frontend, 0),
+    : PipelineBase(window, std::move(taskExecutor), std::move(assetManager), frontend, 0),
       timeProvider_(g_defaultTimeProvider)
 {
     RegisterEventHandler(frontend->GetEventHandler());
@@ -165,6 +170,9 @@ PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExec
     cardTransitionController_ = AceType::MakeRefPtr<CardTransitionController>(AceType::WeakClaim(this));
     renderFactory_ = AceType::MakeRefPtr<FlutterRenderFactory>();
     UpdateFontWeightScale();
+    {
+        UICastContextImpl::Init(AceType::WeakClaim(this));
+    }
     textOverlayManager_ = AceType::MakeRefPtr<TextOverlayManager>(WeakClaim(this));
 }
 
@@ -206,6 +214,10 @@ void PipelineContext::FlushBuild()
     ACE_FUNCTION_TRACK();
     ACE_FUNCTION_TRACE();
 
+    {
+        UICastContextImpl::OnFlushBuildStart();
+    }
+
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().BeginFlushBuild();
     }
@@ -245,6 +257,10 @@ void PipelineContext::FlushBuild()
 
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EndFlushBuild();
+    }
+
+    {
+        UICastContextImpl::OnFlushBuildFinish();
     }
 #if !defined(PREVIEW)
     LayoutInspector::SupportInspector();
@@ -354,7 +370,7 @@ void PipelineContext::RefreshStageFocus()
     stageElement->RefreshFocus();
 }
 
-void PipelineContext::ShowContainerTitle(bool isShow)
+void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco)
 {
     if (windowModal_ != WindowModal::CONTAINER_MODAL) {
         LOGW("ShowContainerTitle failed, Window modal is not container.");
@@ -366,7 +382,7 @@ void PipelineContext::ShowContainerTitle(bool isShow)
     }
     auto containerModal = AceType::DynamicCast<ContainerModalElement>(rootElement_->GetFirstChild());
     if (containerModal) {
-        containerModal->ShowTitle(isShow);
+        containerModal->ShowTitle(isShow, hasDeco);
     }
 }
 
@@ -377,22 +393,6 @@ void PipelineContext::SetContainerWindow(bool isShow)
         rsUIDirector_->SetContainerWindow(isShow, density_); // set container window show state to render service
     }
 #endif
-}
-
-void PipelineContext::BlurWindowWithDrag(bool isBlur)
-{
-    if (windowModal_ != WindowModal::CONTAINER_MODAL) {
-        LOGW("BlurWindowWithDrag failed, Window modal is not container.");
-        return;
-    }
-    if (!rootElement_) {
-        LOGW("BlurWindowWithDrag failed, rootElement_ is null.");
-        return;
-    }
-    auto containerModal = AceType::DynamicCast<ContainerModalElement>(rootElement_->GetFirstChild());
-    if (containerModal) {
-        containerModal->BlurWindow(isBlur);
-    }
 }
 
 void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize)
@@ -677,9 +677,6 @@ void PipelineContext::FlushRender()
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EndFlushRender();
     }
-#ifdef ENABLE_ROSEN_BACKEND
-    Rosen::RSSystemProperties::SetDrawTextAsBitmap(false);
-#endif
 }
 
 void PipelineContext::FlushRenderFinish()
@@ -1001,8 +998,6 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     } else if (params[0] == "-layer") {
         auto rootNode = AceType::DynamicCast<RenderRoot>(rootElement_->GetRenderNode());
         rootNode->DumpLayerTree();
-    } else if (params[0] == "-frontend") {
-        DumpFrontend();
 #ifndef WEARABLE_PRODUCT
     } else if (params[0] == "-multimodal") {
         multiModalManager_->DumpMultimodalScene();
@@ -1126,7 +1121,13 @@ void PipelineContext::PushPage(const RefPtr<PageComponent>& pageComponent, const
         stageElement->PushPage(display);
     }
 
-#if defined(ENABLE_NATIVE_VIEW) || defined(ENABLE_ROSEN_BACKEND)
+#if defined(ENABLE_ROSEN_BACKEND)
+    if (GetIsDeclarative()) {
+        FlushBuild();
+        return;
+    }
+#endif
+#if defined(ENABLE_NATIVE_VIEW)
     if (GetIsDeclarative()) {
         // if not use flutter scheduler, can flush pipeline immediately.
         if (isSurfaceReady_) {
@@ -1359,6 +1360,12 @@ bool PipelineContext::CallRouterBackToPopPage()
         return false;
     }
 
+    {
+        if (UICastContextImpl::CallRouterBackToPopPage()) {
+            return true;
+        }
+    }
+
     if (frontend->OnBackPressed()) {
         // if user accept
         LOGI("CallRouterBackToPopPage(): user consume the back key event");
@@ -1398,6 +1405,14 @@ bool PipelineContext::PopPageStackOverlay()
 
     pageStack->PopComponent();
     return true;
+}
+
+void PipelineContext::HideOverlays()
+{
+    CloseContextMenu();
+    if (textOverlayManager_) {
+        textOverlayManager_->PopTextOverlay();
+    }
 }
 
 void PipelineContext::ScheduleUpdate(const RefPtr<ComposedComponent>& compose)
@@ -1734,25 +1749,51 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
     if (event.code == KeyCode::KEY_TAB && event.action == KeyAction::DOWN && !isTabKeyPressed_) {
         isTabKeyPressed_ = true;
     }
-    if (!eventManager_->DispatchTabIndexEvent(event, rootElement_, GetLastPage())) {
-        return eventManager_->DispatchKeyEvent(event, rootElement_);
+    auto lastPage = GetLastPage();
+    if (lastPage) {
+        if (!eventManager_->DispatchTabIndexEvent(event, rootElement_, lastPage)) {
+            return eventManager_->DispatchKeyEvent(event, rootElement_);
+        }
+    } else {
+        if (!eventManager_->DispatchTabIndexEvent(event, rootElement_, rootElement_)) {
+            return eventManager_->DispatchKeyEvent(event, rootElement_);
+        }
     }
     return true;
 }
 
 bool PipelineContext::RequestDefaultFocus()
 {
+    RefPtr<FocusNode> defaultFocusNode;
+    std::string mainNodeName;
     auto curPageElement = GetLastPage();
-    CHECK_NULL_RETURN_NOLOG(curPageElement, false);
-    if (curPageElement->IsFocused()) {
+    if (curPageElement) {
+        if (curPageElement->IsDefaultHasFocused()) {
+            return false;
+        }
+        curPageElement->SetIsDefaultHasFocused(true);
+        defaultFocusNode = curPageElement->GetChildDefaultFocusNode();
+        mainNodeName = std::string(AceType::TypeName(curPageElement));
+    } else if (rootElement_) {
+        if (rootElement_->IsDefaultHasFocused()) {
+            return false;
+        }
+        rootElement_->SetIsDefaultHasFocused(true);
+        defaultFocusNode = rootElement_->GetChildDefaultFocusNode();
+        mainNodeName = std::string(AceType::TypeName(rootElement_));
+    } else {
+        LOGE("RequestDefaultFocus: rootElement or pageElement is nullptr!");
         return false;
     }
-    curPageElement->SetIsFocused(true);
-    auto defaultFocusNode = curPageElement->GetChildDefaultFocusNode();
-    CHECK_NULL_RETURN_NOLOG(defaultFocusNode, false);
+    if (!defaultFocusNode) {
+        LOGD("RequestDefaultFocus: %{public}s do not has default focus node.", mainNodeName.c_str());
+        return false;
+    }
     if (!defaultFocusNode->IsFocusableWholePath()) {
+        LOGD("RequestDefaultFocus: %{public}s 's default focus node is not focusable.", mainNodeName.c_str());
         return false;
     }
+    LOGD("Focus: request default focus node %{public}s", AceType::TypeName(defaultFocusNode));
     return defaultFocusNode->RequestFocusImmediately();
 }
 
@@ -1815,6 +1856,16 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
     eventManager_->DispatchMouseEvent(scaleEvent);
     eventManager_->DispatchMouseHoverAnimation(scaleEvent);
     eventManager_->DispatchMouseHoverEvent(scaleEvent);
+#ifdef ENABLE_ROSEN_BACKEND
+    std::chrono::high_resolution_clock::duration epoch_time = event.time.time_since_epoch();
+    auto eventTimestamp = std::chrono::duration_cast<std::chrono::nanoseconds>(epoch_time);
+    if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_) {
+        std::string abilityName = AceApplicationInfo::GetInstance().GetProcessName().empty()
+                                      ? AceApplicationInfo::GetInstance().GetPackageName()
+                                      : AceApplicationInfo::GetInstance().GetProcessName();
+        rsUIDirector_->SetTimeStamp(eventTimestamp.count(), abilityName);
+    }
+#endif
     FlushMessages();
 }
 
@@ -1866,6 +1917,19 @@ void PipelineContext::CreateTouchEventOnZoom(const AxisEvent& event)
     }
 }
 
+MouseEvent ConvertAxisToMouse(const AxisEvent& event)
+{
+    MouseEvent result;
+    result.x = event.x;
+    result.y = event.y;
+    result.action = MouseAction::MOVE;
+    result.button = MouseButton::NONE_BUTTON;
+    result.time = event.time;
+    result.deviceId = event.deviceId;
+    result.sourceType = event.sourceType;
+    return result;
+}
+
 void PipelineContext::OnAxisEvent(const AxisEvent& event)
 {
     if (isKeyCtrlPressed_ && !NearZero(event.verticalAxis) &&
@@ -1889,6 +1953,9 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event)
         eventManager_->AxisTest(scaleEvent, rootElement_->GetRenderNode());
         eventManager_->DispatchAxisEvent(scaleEvent);
     }
+
+    auto mouseEvent = ConvertAxisToMouse(event);
+    OnMouseEvent(mouseEvent);
 }
 
 void PipelineContext::AddToHoverList(const RefPtr<RenderNode>& node)
@@ -1954,6 +2021,9 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
 {
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACK();
+    {
+        UICastContextImpl::CheckEvent();
+    }
 #if defined(ENABLE_NATIVE_VIEW)
     if (frameCount_ < 2) {
         frameCount_++;
@@ -2004,35 +2074,58 @@ void PipelineContext::OnIdle(int64_t deadline)
     FlushPageUpdateTasks();
 }
 
-void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight)
+void PipelineContext::OnVirtualKeyboardHeightChange(
+    float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     CHECK_RUN_ON(UI);
-    double positionY = 0;
-    if (textFieldManager_) {
-        positionY = textFieldManager_->GetClickPosition().GetY();
+    ACE_FUNCTION_TRACE();
+#ifdef ENABLE_ROSEN_BACKEND
+    if (rsTransaction) {
+        FlushMessages();
+        rsTransaction->Begin();
     }
-    double offsetFix = (height_ - positionY) > 100.0 ? keyboardHeight - (height_ - positionY) / 2.0 : keyboardHeight;
-    LOGI("OnVirtualKeyboardAreaChange positionY:%{public}f safeArea:%{public}f offsetFix:%{public}f", positionY,
-        (height_ - keyboardHeight), offsetFix);
-    if (NearZero(keyboardHeight)) {
-        if (textFieldManager_ && AceType::InstanceOf<TextFieldManager>(textFieldManager_)) {
-            auto textFieldManager = AceType::DynamicCast<TextFieldManager>(textFieldManager_);
-            if (textFieldManager->ResetSlidingPanelParentHeight()) {
-                return;
-            }
+#endif
+
+    auto func = [this, keyboardHeight]() {
+        double positionY = 0;
+        if (textFieldManager_) {
+            positionY = textFieldManager_->GetClickPosition().GetY();
         }
-        SetRootSizeWithWidthHeight(width_, height_, 0);
-        rootOffset_.SetY(0.0);
-    } else if (positionY > (height_ - keyboardHeight) && offsetFix > 0.0) {
-        if (textFieldManager_ && AceType::InstanceOf<TextFieldManager>(textFieldManager_)) {
-            auto textFieldManager = AceType::DynamicCast<TextFieldManager>(textFieldManager_);
-            if (textFieldManager->UpdatePanelForVirtualKeyboard(-offsetFix, height_)) {
-                return;
+        auto newKeyboardHeight = keyboardHeight / viewScale_;
+        auto height = height_ / viewScale_;
+        double offsetFix =
+            (height - positionY) > 100.0 ? newKeyboardHeight - (height - positionY) / 2.0 : newKeyboardHeight;
+        LOGI("OnVirtualKeyboardAreaChange positionY:%{public}f safeArea:%{public}f offsetFix:%{public}f", positionY,
+            (height - newKeyboardHeight), offsetFix);
+        if (NearZero(newKeyboardHeight)) {
+            if (textFieldManager_ && AceType::InstanceOf<TextFieldManager>(textFieldManager_)) {
+                auto textFieldManager = AceType::DynamicCast<TextFieldManager>(textFieldManager_);
+                if (textFieldManager->ResetSlidingPanelParentHeight()) {
+                    return;
+                }
             }
+            SetRootSizeWithWidthHeight(width_, height_, 0);
+            rootOffset_.SetY(0.0);
+        } else if (positionY > (height - newKeyboardHeight) && offsetFix > 0.0) {
+            if (textFieldManager_ && AceType::InstanceOf<TextFieldManager>(textFieldManager_)) {
+                auto textFieldManager = AceType::DynamicCast<TextFieldManager>(textFieldManager_);
+                if (textFieldManager->UpdatePanelForVirtualKeyboard(-offsetFix, height)) {
+                    return;
+                }
+            }
+            SetRootSizeWithWidthHeight(width_, height_, -offsetFix);
+            rootOffset_.SetY(-offsetFix);
         }
-        SetRootSizeWithWidthHeight(width_, height_, -offsetFix);
-        rootOffset_.SetY(-offsetFix);
+    };
+
+    AnimationOption option = AnimationUtil::CreateKeyboardAnimationOption(keyboardAnimationConfig_, keyboardHeight);
+    Animate(option, option.GetCurve(), func);
+
+#ifdef ENABLE_ROSEN_BACKEND
+    if (rsTransaction) {
+        rsTransaction->Commit();
     }
+#endif
 }
 
 void PipelineContext::FlushPipelineImmediately()
@@ -2046,7 +2139,8 @@ void PipelineContext::FlushPipelineImmediately()
     }
 }
 
-void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type)
+void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     static const bool IsWindowSizeAnimationEnabled = SystemProperties::IsWindowSizeAnimationEnabled();
     if (!rootElement_ || !rootElement_->GetRenderNode() || !IsWindowSizeAnimationEnabled) {
@@ -2071,37 +2165,13 @@ void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, Win
             });
             break;
         }
-        case WindowSizeChangeReason::DRAG_START: {
-            isDragStart_ = true;
-#ifdef ENABLE_ROSEN_BACKEND
-            if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_) {
-                rsUIDirector_->SetAppFreeze(true);
-            }
-#endif
-            BlurWindowWithDrag(true);
-            NotifyWebPaint();
-            break;
-        }
-        case WindowSizeChangeReason::DRAG: {
-            isFirstDrag_ = false;
-            // Refresh once when first dragging.
-            SetRootSizeWithWidthHeight(width, height);
-            break;
-        }
-        case WindowSizeChangeReason::DRAG_END: {
-            isDragStart_ = false;
-            isFirstDrag_ = true;
-#ifdef ENABLE_ROSEN_BACKEND
-            if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_) {
-                rsUIDirector_->SetAppFreeze(false);
-            }
-#endif
-            BlurWindowWithDrag(false);
-            SetRootSizeWithWidthHeight(width, height);
-            NotifyWebPaint();
-            break;
-        }
         case WindowSizeChangeReason::ROTATION: {
+#ifdef ENABLE_ROSEN_BACKEND
+            if (rsTransaction) {
+                FlushMessages();
+                rsTransaction->Begin();
+            }
+#endif
             LOGD("PipelineContext::Root node ROTATION animation, width = %{private}d, height = %{private}d", width,
                 height);
             AnimationOption option;
@@ -2112,13 +2182,35 @@ void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, Win
             Animate(option, curve, [width, height, this]() {
                 SetRootSizeWithWidthHeight(width, height);
                 FlushLayout();
+            }, [weak = AceType::WeakClaim(this)]() {
+                auto pipeline = weak.Upgrade();
+                if (pipeline == nullptr) {
+                    return;
+                }
+                pipeline->rotationAnimationCount_--;
+                if (pipeline->rotationAnimationCount_ < 0) {
+                    LOGE("PipelineContext::Root node ROTATION animation callback"
+                        "rotationAnimationCount Invalid %{public}d", pipeline->rotationAnimationCount_);
+                }
+                if (pipeline->rotationAnimationCount_ == 0) {
+#ifdef ENABLE_ROSEN_BACKEND
+                    // to improve performance, duration rotation animation, draw text as bitmap
+                    Rosen::RSSystemProperties::SetDrawTextAsBitmap(false);
+#endif
+                }
             });
 #ifdef ENABLE_ROSEN_BACKEND
             // to improve performance, duration rotation animation, draw text as bitmap
             Rosen::RSSystemProperties::SetDrawTextAsBitmap(true);
+            if (rsTransaction) {
+                rsTransaction->Commit();
+            }
 #endif
             break;
         }
+        case WindowSizeChangeReason::DRAG_START:
+        case WindowSizeChangeReason::DRAG:
+        case WindowSizeChangeReason::DRAG_END:
         case WindowSizeChangeReason::RESIZE:
         case WindowSizeChangeReason::UNDEFINED:
         default: {
@@ -2128,17 +2220,8 @@ void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, Win
     }
 }
 
-void PipelineContext::NotifyWebPaint() const
-{
-    CHECK_RUN_ON(UI);
-    for (auto& iterWebPaintCallback : webPaintCallback_) {
-        if (iterWebPaintCallback) {
-            iterWebPaintCallback();
-        }
-    }
-}
-
-void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
+void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSizeChangeReason type,
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     CHECK_RUN_ON(UI);
     LOGD("PipelineContext: OnSurfaceChanged start.");
@@ -2148,16 +2231,11 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
     }
     // Refresh the screen when developers customize the resolution and screen density on the PC preview.
 #if !defined(PREVIEW)
-    if (width_ == width && height_ == height && isSurfaceReady_ && type != WindowSizeChangeReason::DRAG_START &&
-        type != WindowSizeChangeReason::DRAG_END && !isDensityUpdate_) {
-        LOGI("Surface size is same, no need update");
+    if (width_ == width && height_ == height && isSurfaceReady_ && !isDensityUpdate_) {
+        LOGD("Surface size is same, no need update");
         return;
     }
 #endif
-    if (type == WindowSizeChangeReason::DRAG && isDragStart_ && !isFirstDrag_) {
-        LOGI("WindowSizeChangeReason is drag, no need change size.");
-        return;
-    }
 
     for (auto&& [id, callback] : surfaceChangedCallbackMap_) {
         if (callback) {
@@ -2197,7 +2275,7 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
         }
     }
 #ifdef ENABLE_ROSEN_BACKEND
-    WindowSizeChangeAnimate(width, height, type);
+    WindowSizeChangeAnimate(width, height, type, rsTransaction);
 #else
     SetRootSizeWithWidthHeight(width, height);
 #endif
@@ -2226,11 +2304,11 @@ void PipelineContext::OnSurfaceDensityChanged(double density)
 {
     CHECK_RUN_ON(UI);
     ACE_SCOPED_TRACE("OnSurfaceDensityChanged(%lf)", density);
-    LOGI("density_(%{public}lf) dipScale_(%{public}lf)", density_, dipScale_);
+    LOGD("density_(%{public}lf) dipScale_(%{public}lf)", density_, dipScale_);
     isDensityUpdate_ = density != density_;
     density_ = density;
     if (!NearZero(viewScale_)) {
-        LOGI("OnSurfaceDensityChanged viewScale_(%{public}lf)", viewScale_);
+        LOGD("viewScale_(%{public}lf)", viewScale_);
         dipScale_ = density_ / viewScale_;
     }
 }
@@ -2298,6 +2376,9 @@ void PipelineContext::SetRootSizeWithWidthHeight(int32_t width, int32_t height, 
         rootNode->MarkNeedLayout();
         rootNode->MarkNeedRender();
         focusAnimationManager_->SetAvailableRect(paintRect);
+    }
+    if (IsJsPlugin() || IsJsCard()) {
+        return;
     }
     ScreenSystemManager::GetInstance().SetWindowInfo(rootWidth_, density_, dipScale_);
     ScreenSystemManager::GetInstance().OnSurfaceChanged(width);
@@ -2494,7 +2575,6 @@ void PipelineContext::Destroy()
     explicitAnimators_.clear();
     preTargetRenderNode_.Reset();
     sharedImageManager_.Reset();
-    webPaintCallback_.clear();
     rectCallbackList_.clear();
     PipelineBase::Destroy();
     LOGI("PipelineContext::Destroy end.");
@@ -2582,7 +2662,7 @@ bool PipelineContext::RequestFocus(const RefPtr<Element>& targetElement)
 bool PipelineContext::RequestFocus(const std::string& targetNodeId)
 {
     CHECK_NULL_RETURN(rootElement_, false);
-    auto currentFocusChecked =  rootElement_->RequestFocusImmediatelyById(targetNodeId);
+    auto currentFocusChecked = rootElement_->RequestFocusImmediatelyById(targetNodeId);
     if (!isSubPipeline_ || currentFocusChecked) {
         LOGI("Request focus finish currentFocus is %{public}d", currentFocusChecked);
         return currentFocusChecked;
@@ -3240,14 +3320,6 @@ void PipelineContext::MakeThreadStuck(const std::vector<std::string>& params) co
         taskExecutor_->PostTask([time] { ThreadStuckTask(time); }, TaskExecutor::TaskType::JS);
     } else {
         taskExecutor_->PostTask([time] { ThreadStuckTask(time); }, TaskExecutor::TaskType::UI);
-    }
-}
-
-void PipelineContext::DumpFrontend() const
-{
-    auto frontend = weakFrontend_.Upgrade();
-    if (frontend) {
-        frontend->DumpFrontend();
     }
 }
 

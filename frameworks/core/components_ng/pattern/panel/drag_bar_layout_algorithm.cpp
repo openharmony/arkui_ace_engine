@@ -33,7 +33,7 @@ constexpr Dimension DRAG_ICON_WIDTH = 64.0_vp;
 constexpr Dimension DRAG_ICON_HEIGHT = 24.0_vp;
 constexpr Dimension HOT_REGION_WIDTH = 64.0_vp;
 constexpr Dimension HOT_REGION_HEIGHT = 24.0_vp;
-const Size DRAG_BAR_SIZE = Size(64.0, 24.0);
+constexpr Dimension PADDING = 16.0_vp;
 
 } // namespace
 
@@ -58,6 +58,7 @@ std::optional<SizeF> DragBarLayoutAlgorithm::MeasureContent(
         idealSize.SetWidth(layoutConstraint->maxSize.Width());
         idealSize.SetHeight(static_cast<float>(hotRegionHeight));
     }
+    layoutProperty->UpdatePadding({ CalcLength(PADDING), CalcLength(PADDING), {}, {} });
     auto realSize = SizeF(DRAG_ICON_WIDTH.ConvertToPx(), DRAG_ICON_HEIGHT.ConvertToPx());
     iconOffset_ = Alignment::GetAlignPosition(idealSize, realSize, Alignment::CENTER);
     return idealSize;

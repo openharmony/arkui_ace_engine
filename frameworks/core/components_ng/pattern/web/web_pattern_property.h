@@ -36,6 +36,10 @@ struct WebPatternProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(GeolocationAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(UserAgent, std::string);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(CacheMode, WebCacheMode);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(DarkMode, WebDarkMode);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ForceDarkAccess, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(AudioResumeInterval, int32_t);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(AudioExclusive, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(OverviewModeAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FileFromUrlAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(DatabaseAccessEnabled, bool);
@@ -45,14 +49,21 @@ struct WebPatternProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(InitialScale, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(PinchSmoothModeEnabled, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MultiWindowAccessEnabled, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(AllowWindowOpenMethod, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(WebCursiveFont, std::string);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(WebFantasyFont, std::string);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(WebFixedFont, std::string);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(WebSansSerifFont, std::string);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(WebSerifFont, std::string);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(WebStandardFont, std::string);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(DefaultFixedFontSize, int32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(DefaultFontSize, int32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MinFontSize, int32_t);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(MinLogicalFontSize, int32_t);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(BlockNetwork, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(HorizontalScrollBarAccessEnabled, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(VerticalScrollBarAccessEnabled, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ScrollBarColor, std::string);
 };
 
 } // namespace OHOS::Ace::NG

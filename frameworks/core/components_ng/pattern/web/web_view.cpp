@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/web/web_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "nweb_helper.h"
 
 namespace OHOS::Ace::NG {
 void WebView::Create(const std::string& webData)
@@ -54,7 +55,8 @@ void WebView::Create(const std::string& src, const RefPtr<WebController>& webCon
     RegisterPipelineCallback(nodeId);
 }
 
-void WebView::Create(const std::string& src, SetWebIdCallback&& setWebIdCallback)
+void WebView::Create(const std::string& src, SetWebIdCallback&& setWebIdCallback,
+    SetHapPathCallback&& setHapPathCallback, int32_t parentWebId, bool popup)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -64,7 +66,10 @@ void WebView::Create(const std::string& src, SetWebIdCallback&& setWebIdCallback
     auto webPattern = frameNode->GetPattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
     webPattern->SetWebSrc(src);
+    webPattern->SetPopup(popup);
     webPattern->SetSetWebIdCallback(std::move(setWebIdCallback));
+    webPattern->SetSetHapPathCallback(std::move(setHapPathCallback));
+    webPattern->SetParentNWebId(parentWebId);
     RegisterPipelineCallback(nodeId);
 }
 
@@ -73,6 +78,7 @@ void WebView::RegisterPipelineCallback(int32_t nodeId)
     auto pipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowStateChangedCallback(nodeId);
+    pipeline->AddWindowSizeChangeCallback(nodeId);
 }
 
 void WebView::SetOnCommonDialogImpl(OnWebSyncFunc&& onCommonDialogImpl, DialogEventType dialogEventType)
@@ -228,6 +234,13 @@ void WebView::SetOnUrlLoadIntercept(OnWebSyncFunc&& onUrlLoadInterceptImpl)
     auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnUrlLoadInterceptEvent(std::move(onUrlLoadInterceptImpl));
+}
+
+void WebView::SetOnLoadIntercept(OnWebSyncFunc&& onLoadInterceptImpl)
+{
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnLoadInterceptEvent(std::move(onLoadInterceptImpl));
 }
 
 void WebView::SetOnFileSelectorShow(OnWebSyncFunc&& onFileSelectorShowImpl)
@@ -447,6 +460,13 @@ void WebView::SetMultiWindowAccessEnabled(bool isMultiWindowAccessEnabled)
     webPattern->UpdateMultiWindowAccessEnabled(isMultiWindowAccessEnabled);
 }
 
+void WebView::SetAllowWindowOpenMethod(bool isAllowWindowOpenMethod)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateAllowWindowOpenMethod(isAllowWindowOpenMethod);
+}
+
 void WebView::SetJsProxyCallback(JsProxyCallback&& jsProxyCallback)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
@@ -466,6 +486,13 @@ void WebView::SetWebFantasyFont(const std::string& fantasyFontFamily)
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateWebFantasyFont(fantasyFontFamily);
+}
+
+void WebView::SetWebFixedFont(const std::string& fixedFontFamily)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateWebFixedFont(fixedFontFamily);
 }
 
 void WebView::SetWebSansSerifFont(const std::string& sansSerifFontFamily)
@@ -508,5 +535,121 @@ void WebView::SetMinFontSize(int32_t minFontSize)
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateMinFontSize(minFontSize);
+}
+
+void WebView::SetMinLogicalFontSize(int32_t minLogicalFontSize)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateMinLogicalFontSize(minLogicalFontSize);
+}
+
+void WebView::SetBlockNetwork(bool isNetworkBlocked)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateBlockNetwork(isNetworkBlocked);
+}
+
+void WebView::SetHorizontalScrollBarAccessEnabled(bool isHorizontalScrollBarAccessEnabled)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateHorizontalScrollBarAccessEnabled(isHorizontalScrollBarAccessEnabled);
+}
+
+void WebView::SetVerticalScrollBarAccessEnabled(bool isVerticalScrollBarAccessEnabled)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateVerticalScrollBarAccessEnabled(isVerticalScrollBarAccessEnabled);
+}
+
+void WebView::SetPageVisibleId(OnWebAsyncFunc&& pageVisibleId)
+{
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnPageVisibleEvent(std::move(pageVisibleId));
+}
+
+void WebView::SetOnInterceptKeyEventCallback(std::function<bool(KeyEventInfo& keyEventInfo)>&& onPreKeyEventId)
+{
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnPreKeyEvent(std::move(onPreKeyEventId));
+}
+
+void WebView::SetDataResubmittedId(OnWebAsyncFunc&& dataResubmittedId)
+{
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnDataResubmittedEvent(std::move(dataResubmittedId));
+}
+
+void WebView::SetFaviconReceivedId(OnWebAsyncFunc&& faviconReceivedId)
+{
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnFaviconReceivedEvent(std::move(faviconReceivedId));
+}
+
+void WebView::SetTouchIconUrlId(OnWebAsyncFunc&& touchIconUrlId)
+{
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnTouchIconUrlEvent(std::move(touchIconUrlId));
+}
+
+void WebView::SetDarkMode(WebDarkMode mode)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateDarkMode(mode);
+}
+
+void WebView::SetForceDarkAccess(bool access)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateForceDarkAccess(access);
+}
+
+void WebView::SetAudioStateChangedId(OnWebAsyncFunc&& audioStateChanged)
+{
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnAudioStateChangedEvent(std::move(audioStateChanged));
+}
+
+void WebView::SetAudioResumeInterval(int32_t resumeInterval)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateAudioResumeInterval(resumeInterval);
+}
+
+void WebView::SetAudioExclusive(bool audioExclusive)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateAudioExclusive(audioExclusive);
+}
+
+void WebView::SetFirstContentfulPaintId(OnWebAsyncFunc&& firstContentfulPaintId)
+{
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnFirstContentfulPaintEvent(std::move(firstContentfulPaintId));
+}
+
+void WebView::NotifyPopupWindowResult(int32_t webId, bool result)
+{
+    if (webId != -1) {
+        std::weak_ptr<OHOS::NWeb::NWeb> nwebWeak = OHOS::NWeb::NWebHelper::Instance().GetNWeb(webId);
+        auto nwebSptr = nwebWeak.lock();
+        if (nwebSptr) {
+            nwebSptr->NotifyPopupWindowResult(result);
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

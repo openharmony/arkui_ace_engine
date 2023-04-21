@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
+#include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -27,9 +28,7 @@ RefPtr<NavDestinationGroupNode> NavDestinationGroupNode::GetOrCreateGroupNode(
     const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
 {
     auto frameNode = GetFrameNode(tag, nodeId);
-    if (frameNode) {
-        return AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
-    }
+    CHECK_NULL_RETURN_NOLOG(!frameNode, AceType::DynamicCast<NavDestinationGroupNode>(frameNode));
     auto pattern = patternCreator ? patternCreator() : MakeRefPtr<Pattern>();
     auto navDestinationNode = AceType::MakeRefPtr<NavDestinationGroupNode>(tag, nodeId, pattern);
     navDestinationNode->InitializePatternAndContext();
@@ -37,7 +36,7 @@ RefPtr<NavDestinationGroupNode> NavDestinationGroupNode::GetOrCreateGroupNode(
     return navDestinationNode;
 }
 
-void NavDestinationGroupNode::AddChildToGroup(const RefPtr<UINode>& child)
+void NavDestinationGroupNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t slot)
 {
     auto pattern = AceType::DynamicCast<Pattern>(GetPattern());
     CHECK_NULL_VOID(pattern);
@@ -51,7 +50,25 @@ void NavDestinationGroupNode::AddChildToGroup(const RefPtr<UINode>& child)
         CHECK_NULL_VOID(layoutProperty);
         AddChild(contentNode);
     }
-    contentNode->AddChild(child);
+    contentNode->AddChild(child, slot);
+}
+
+void NavDestinationGroupNode::DeleteChildFromGroup(int32_t slot)
+{
+    auto navDestination = GetContentNode();
+    CHECK_NULL_VOID(navDestination);
+    navDestination->RemoveChildAtIndex(slot);
+}
+
+void NavDestinationGroupNode::OnAttachToMainTree(bool recursive)
+{
+    FrameNode::OnAttachToMainTree(recursive);
+    auto navDestinationPattern = GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(navDestinationPattern);
+    auto shallowBuilder = navDestinationPattern->GetShallowBuilder();
+    if (shallowBuilder && !shallowBuilder->IsExecuteDeepRenderDone()) {
+        shallowBuilder->ExecuteDeepRender();
+    }
 }
 
 } // namespace OHOS::Ace::NG

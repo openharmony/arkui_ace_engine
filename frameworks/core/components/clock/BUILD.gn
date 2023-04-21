@@ -21,6 +21,8 @@ build_component("clock") {
     "render_clock.cpp",
     "render_clock_creator.cpp",
   ]
-
+  if (ace_use_new_skia) {
+    sources -= [ "flutter_render_clock.cpp" ]
+  }
   rosen_sources = [ "rosen_render_clock.cpp" ]
 }

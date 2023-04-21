@@ -196,14 +196,43 @@ static napi_value JSReset(napi_env env, napi_callback_info info)
     napi_unwrap(env, thisVar, (void**)&animatorResult);
     if (!animatorResult) {
         LOGE("unwrap animator result is failed");
+        NapiThrow(env, "Internal error. Unwrap animator result is failed.", Framework::ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
     }
     auto option = animatorResult->GetAnimatorOption();
     if (!option) {
         LOGE("Option is null in AnimatorResult");
+        NapiThrow(env, "Internal error. Option is null in AnimatorResult.", Framework::ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
     }
     ParseAnimatorOption(env, info, option);
+    auto animator = animatorResult->GetAnimator();
+    if (!animator) {
+        LOGW("animator is null");
+        NapiThrow(env, "Internal error. Animator is null in AnimatorResult.", Framework::ERROR_CODE_INTERNAL_ERROR);
+        return nullptr;
+    }
+    animator->ClearInterpolators();
+    animator->ResetIsReverse();
+    animatorResult->ApplyOption();
+    napi_ref onframeRef = animatorResult->GetOnframeRef();
+    if (onframeRef) {
+        auto curve = Framework::CreateCurve(option->easing);
+        auto animation = AceType::MakeRefPtr<CurveAnimation<double>>(option->begin, option->end, curve);
+        animation->AddListener([env, onframeRef](double value) {
+            napi_value ret = nullptr;
+            napi_value valueNapi = nullptr;
+            napi_value onframe = nullptr;
+            auto result = napi_get_reference_value(env, onframeRef, &onframe);
+            if (result != napi_ok || onframe == nullptr) {
+                LOGW("get onframe in callback failed");
+                return;
+            }
+            napi_create_double(env, value, &valueNapi);
+            napi_call_function(env, nullptr, onframe, 1, &valueNapi, &ret);
+        });
+        animator->AddInterpolator(animation);
+    }
     napi_value result;
     napi_get_null(env, &result);
     return result;
@@ -223,6 +252,9 @@ static napi_value JSPlay(napi_env env, napi_callback_info info)
     if (!animator) {
         LOGE("animator is null");
         return nullptr;
+    }
+    if (!animator->HasScheduler()) {
+        animator->AttachSchedulerOnContainer();
     }
     animator->Play();
     napi_value result = nullptr;
@@ -280,6 +312,9 @@ static napi_value JSReverse(napi_env env, napi_callback_info info)
         LOGE("animator is null");
         return nullptr;
     }
+    if (!animator->HasScheduler()) {
+        animator->AttachSchedulerOnContainer();
+    }
     animator->Reverse();
     napi_value result;
     napi_get_null(env, &result);
@@ -310,11 +345,6 @@ static napi_value SetOnframe(napi_env env, napi_callback_info info)
         return nullptr;
     }
     animator->ClearInterpolators();
-    animator->SetDuration(option->duration);
-    animator->SetIteration(option->iterations);
-    animator->SetStartDelay(option->delay);
-    animator->SetFillMode(StringToFillMode(option->fill));
-    animator->SetAnimationDirection(StringToAnimationDirection(option->direction));
     auto curve = Framework::CreateCurve(option->easing);
     auto animation = AceType::MakeRefPtr<CurveAnimation<double>>(option->begin, option->end, curve);
     // convert onframe function to reference
@@ -335,10 +365,12 @@ static napi_value SetOnframe(napi_env env, napi_callback_info info)
             return;
         }
         napi_create_double(env, value, &valueNapi);
-        napi_call_function(env, NULL, onframe, 1, &valueNapi, &ret);
+        napi_call_function(env, nullptr, onframe, 1, &valueNapi, &ret);
     });
     animator->AddInterpolator(animation);
-    animator->AttachSchedulerOnContainer();
+    if (!animator->HasScheduler()) {
+        animator->AttachSchedulerOnContainer();
+    }
     napi_value undefined;
     napi_get_undefined(env, &undefined);
     return undefined;
@@ -494,6 +526,7 @@ static napi_value JSCreate(napi_env env, napi_callback_info info)
     auto option = std::make_shared<AnimatorOption>();
     ParseAnimatorOption(env, info, option);
     auto animator = AceType::MakeRefPtr<Animator>();
+    animator->AttachSchedulerOnContainer();
     AnimatorResult* animatorResult = new AnimatorResult(animator, option);
     napi_value jsAnimator = nullptr;
     napi_create_object(env, &jsAnimator);
@@ -570,6 +603,17 @@ static napi_module animatorModule = {
 extern "C" __attribute__((constructor)) void AnimatorRegister()
 {
     napi_module_register(&animatorModule);
+}
+
+void AnimatorResult::ApplyOption()
+{
+    CHECK_NULL_VOID_NOLOG(animator_);
+    CHECK_NULL_VOID_NOLOG(option_);
+    animator_->SetDuration(option_->duration);
+    animator_->SetIteration(option_->iterations);
+    animator_->SetStartDelay(option_->delay);
+    animator_->SetFillMode(StringToFillMode(option_->fill));
+    animator_->SetAnimationDirection(StringToAnimationDirection(option_->direction));
 }
 
 } // namespace OHOS::Ace::Napi

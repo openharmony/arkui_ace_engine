@@ -74,6 +74,15 @@ public:
         return dataDirFilePath_;
     }
 
+    void SetApiTargetVersion(int32_t apiVersion)
+    {
+        apiVersion_ = apiVersion;
+    }
+    int32_t GetApiTargetVersion() const
+    {
+        return apiVersion_;
+    }
+
     virtual bool GetBundleInfo(const std::string& packageName, AceBundleInfo& bundleInfo) = 0;
     virtual double GetLifeTime() const = 0;
 
@@ -178,6 +187,8 @@ protected:
 
     int userId_ = 0;
     bool isAccessibilityEnabled_ = false;
+
+    int32_t apiVersion_ = 0;
 };
 
 } // namespace OHOS::Ace

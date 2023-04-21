@@ -23,11 +23,12 @@ template("ace_base_base64") {
     include_dirs = []
     sources = []
 
-    if (enable_ng_build) {
+    if (ace_use_new_skia) {
       deps += [
-        "$ace_flutter_engine_root_new:third_party_flutter_engine_dev_$platform",
-        "$ace_flutter_engine_root_new/third_party/skia:ace_skia_dev_$platform",
+        "$ace_flutter_engine_root/libtxt:thirdparty_lib_txt_$platform",
+        "$skia_root_new:skia",
       ]
+      configs += [ "$ace_flutter_engine_root:flutter_config" ]
     } else {
       deps += [
         "$ace_flutter_engine_root:third_party_flutter_engine_$platform",

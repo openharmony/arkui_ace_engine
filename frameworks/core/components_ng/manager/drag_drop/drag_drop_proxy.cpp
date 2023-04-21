@@ -21,6 +21,17 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+
+void DragDropProxy::OnTextDragStart(const std::string& extraInfo)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto manager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(manager);
+    CHECK_NULL_VOID(manager->CheckDragDropProxy(id_));
+    manager->AddDataToClipboard(extraInfo);
+}
+
 void DragDropProxy::OnDragStart(
     const GestureEvent& info, const std::string& extraInfo, const RefPtr<FrameNode>& frameNode)
 {
@@ -44,25 +55,34 @@ void DragDropProxy::OnDragMove(const GestureEvent& info)
     CHECK_NULL_VOID(manager);
     CHECK_NULL_VOID(manager->CheckDragDropProxy(id_));
 
+#ifdef ENABLE_DRAG_FRAMEWORK
+    std::string extraInfo = manager->GetExtraInfo();
+#else
     std::string extraInfo;
     manager->GetExtraInfoFromClipboard(extraInfo);
+#endif // ENABLE_DRAG_FRAMEWORK
 
     manager->OnDragMove(
         static_cast<float>(info.GetGlobalPoint().GetX()), static_cast<float>(info.GetGlobalPoint().GetY()), extraInfo);
 }
 
-void DragDropProxy::OnDragEnd(const GestureEvent& info)
+void DragDropProxy::OnDragEnd(const GestureEvent& info, bool isTextDragEnd)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto manager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(manager);
     CHECK_NULL_VOID(manager->CheckDragDropProxy(id_));
-
     std::string extraInfo;
     manager->GetExtraInfoFromClipboard(extraInfo);
-    manager->OnDragEnd(
-        static_cast<float>(info.GetGlobalPoint().GetX()), static_cast<float>(info.GetGlobalPoint().GetY()), extraInfo);
+    if (isTextDragEnd) {
+        manager->OnTextDragEnd(static_cast<float>(info.GetGlobalPoint().GetX()),
+            static_cast<float>(info.GetGlobalPoint().GetY()), extraInfo);
+    } else {
+        manager->OnDragEnd(static_cast<float>(info.GetGlobalPoint().GetX()),
+            static_cast<float>(info.GetGlobalPoint().GetY()), extraInfo);
+    }
+
     manager->RestoreClipboardData();
 }
 

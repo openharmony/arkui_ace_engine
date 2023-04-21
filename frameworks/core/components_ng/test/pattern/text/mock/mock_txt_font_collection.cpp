@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-#include "third_party/flutter/engine/flutter/third_party/txt/src/txt/font_collection.h"
-
 #include "core/components_ng/render/adapter/txt_font_collection.h"
 #include "core/components_ng/render/font_collection.h"
 

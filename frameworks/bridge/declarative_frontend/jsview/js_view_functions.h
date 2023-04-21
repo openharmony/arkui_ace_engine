@@ -49,6 +49,7 @@ public:
     void ExecuteRender();
     void ExecuteRerender();
     void ExecuteReload(bool deep);
+    void ExecuteForceNodeRerender(int32_t elemId);
     void ExecuteAppear();
     void ExecuteDisappear();
     void ExecuteMeasure(NG::LayoutWrapper* layoutWrapper);
@@ -60,7 +61,13 @@ public:
     bool ExecuteOnBackPress();
     void ExecuteShow();
     void ExecuteHide();
+    void ExecuteInitiallyProvidedValue(const std::string& jsonData);
     void ExecuteUpdateWithValueParams(const std::string& jsonData);
+#ifdef UICAST_COMPONENT_SUPPORTED
+    void ExecuteCreateChildView(const std::string& jsonData);
+    void ExecuteRouterHandle(const std::string& jsonData);
+    void ExecuteReplayOnEvent(const std::string& jsonData);
+#endif
 
     bool HasPageTransition() const;
     bool HasMeasure() const;
@@ -92,6 +99,7 @@ private:
     JSWeak<JSFunc> jsRenderFunc_;
     JSWeak<JSFunc> jsRerenderFunc_;
     JSWeak<JSFunc> jsReloadFunc_;
+    JSWeak<JSFunc> jsForceRerenderNodeFunc_;
     JSWeak<JSFunc> jsTransitionFunc_;
     JSWeak<JSVal> jsRenderResult_;
 
@@ -99,6 +107,12 @@ private:
     JSWeak<JSFunc> jsOnShowFunc_;
     JSWeak<JSFunc> jsBackPressFunc_;
     JSWeak<JSFunc> jsUpdateWithValueParamsFunc_;
+    JSWeak<JSFunc> jsSetInitiallyProvidedValueFunc_;
+#ifdef UICAST_COMPONENT_SUPPORTED
+    JSWeak<JSFunc> jsCreateChildViewFunc_;
+    JSWeak<JSFunc> jsRouterHandleFunc_;
+    JSWeak<JSFunc> jsReplayOnEventFunc_;
+#endif
 
     JSExecutionContext context_;
 };

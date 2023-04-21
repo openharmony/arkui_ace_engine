@@ -95,7 +95,8 @@ public:
     }
 
     // Load the je file of the page in NG structure..
-    virtual bool LoadPageSource(const std::string& /*url*/)
+    virtual bool LoadPageSource(const std::string& /*url*/,
+        const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr)
     {
         return false;
     }
@@ -175,9 +176,16 @@ public:
 
     virtual void JsCallback(const std::string& callbackId, const std::string& args) = 0;
 
+    virtual void SetErrorEventHandler(
+        std::function<void(const std::string&, const std::string&)>&& errorCallback) {}
+
     virtual void RunGarbageCollection() = 0;
 
+    virtual void RunFullGarbageCollection() {}
+
     virtual void DumpHeapSnapshot(bool isPrivate) {}
+
+    virtual void ClearCache() {}
 
     virtual std::string GetStacktraceMessage()
     {
@@ -237,9 +245,9 @@ public:
         return extraNativeObject_;
     }
 
-    virtual RefPtr<Component> GetNewComponentWithJsCode(const std::string& jsCode)
+    void SetForceUpdate(bool needUpdate)
     {
-        return nullptr;
+        needUpdate_ = needUpdate;
     }
 
     NativeEngine* GetNativeEngine()
@@ -263,15 +271,26 @@ public:
 #endif
 
 #if defined(PREVIEW)
+    virtual RefPtr<Component> GetNewComponentWithJsCode(const std::string& jsCode, const std::string& viewID)
+    {
+        return nullptr;
+    }
+
+    virtual bool ExecuteJsForFastPreview(const std::string& jsCode, const std::string& viewID)
+    {
+        return true;
+    }
+    
     virtual void ReplaceJSContent(const std::string& url, const std::string componentName)
     {
-        LOGE("V8 does not support replaceJSContent");
+        LOGE("Ark does not support replaceJSContent");
         return;
     }
 
-    virtual void InitializeModuleSearcher(const std::string& bundleName, const std::string assetPath, bool isBundle)
+    virtual void InitializeModuleSearcher(const std::string& bundleName, const std::string& moduleName,
+                                          const std::string assetPath, bool isBundle)
     {
-        LOGE("V8 does not support InitializeModuleSearcher");
+        LOGE("Ark does not support InitializeModuleSearcher");
     }
 #endif
 
@@ -280,6 +299,7 @@ public:
 protected:
     NativeEngine* nativeEngine_ = nullptr;
     std::function<void(JsEngine*)> mediaUpdateCallback_;
+    bool needUpdate_ = false;
 
 private:
     // weather the app has debugger.so.

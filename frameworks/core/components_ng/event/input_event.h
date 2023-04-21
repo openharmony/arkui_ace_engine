@@ -121,17 +121,22 @@ public:
     }
 
     void OnCollectMouseEvent(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
-        MouseTestResult& onMouseResult, RefPtr<FrameNode>& hoverNode);
+        TouchTestResult& result);
 
     void OnCollectHoverEvent(
-        const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl, MouseTestResult& onHoverResult);
+        const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result);
+
+    void OnCollectHoverEffect(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
+        TouchTestResult& result);
 
     void OnCollectAxisEvent(
         const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl, AxisTestResult& onAxisResult);
 
 private:
     WeakPtr<InputEventHub> inputEventHub_;
-    RefPtr<MouseEventTarget> eventTarget_;
+    RefPtr<MouseEventTarget> mouseEventTarget_;
+    RefPtr<HoverEventTarget> hoverEventTarget_;
+    RefPtr<HoverEffectTarget> hoverEffectTarget_;
     RefPtr<AxisEventTarget> axisEventTarget_;
     std::list<RefPtr<InputEvent>> inputEvents_;
     RefPtr<InputEvent> userCallback_;

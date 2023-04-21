@@ -18,12 +18,28 @@
 #include "core/components_ng/pattern/scroll/inner/scroll_bar_painter.h"
 
 namespace OHOS::Ace::NG {
-CanvasDrawFunction GridPaintMethod::GetForegroundDrawFunction(PaintWrapper* /* paintWrapper */)
+void GridPaintMethod::PaintEdgeEffect(PaintWrapper* paintWrapper, RSCanvas& canvas)
 {
-    return [weak = scrollBar_](RSCanvas& canvas) {
-        auto scrollBar = weak.Upgrade();
+    auto edgeEffect = edgeEffect_.Upgrade();
+    CHECK_NULL_VOID_NOLOG(edgeEffect);
+    CHECK_NULL_VOID(paintWrapper);
+    auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
+    edgeEffect->Paint(canvas, frameSize, { 0.0f, 0.0f });
+}
+
+CanvasDrawFunction GridPaintMethod::GetForegroundDrawFunction(PaintWrapper* paintWrapper)
+{
+    return [weak = WeakClaim(this), paintWrapper, weakScrollBar = scrollBar_](RSCanvas& canvas) {
+        auto painter = weak.Upgrade();
+        CHECK_NULL_VOID(painter);
+        painter->PaintEdgeEffect(paintWrapper, canvas);
+
+        auto scrollBar = weakScrollBar.Upgrade();
         CHECK_NULL_VOID(scrollBar);
-        ScrollBarPainter::PaintRectBar(canvas, scrollBar, UINT8_MAX);
+        if (!scrollBar->NeedPaint()) {
+            return;
+        }
+        ScrollBarPainter::PaintRectBar(canvas, scrollBar);
     };
 }
 } // namespace OHOS::Ace::NG

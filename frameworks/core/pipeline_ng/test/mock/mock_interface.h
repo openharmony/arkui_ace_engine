@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_PIPELINE_NG_TEST_MOCK_MOCK_INTERFACE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_PIPELINE_NG_TEST_MOCK_MOCK_INTERFACE_H
 
-#include "gmock/gmock.h"
 #include "base/memory/ace_type.h"
 
 namespace OHOS::Ace {
@@ -26,6 +25,10 @@ class FontManager : public AceType {
 
 class ManagerInterface : public AceType {
     DECLARE_ACE_TYPE(ManagerInterface, AceType);
+};
+
+class OffscreenCanvas : public AceType {
+    DECLARE_ACE_TYPE(OffscreenCanvas, AceType);
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_PIPELINE_NG_TEST_MOCK_MOCK_INTERFACE_H

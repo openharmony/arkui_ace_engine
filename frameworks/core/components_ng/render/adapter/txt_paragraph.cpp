@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,13 +18,14 @@
 #include "base/utils/utils.h"
 #include "core/components/font/constants_converter.h"
 #include "core/components_ng/base/ui_node.h"
-#include "core/components_ng/render/adapter/skia_canvas.h"
 #include "core/components_ng/render/adapter/txt_font_collection.h"
+#include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 const std::u16string ELLIPSIS = u"\u2026";
-}
+constexpr char16_t NEWLINE_CODE = u'\n';
+} // namespace
 RefPtr<Paragraph> Paragraph::Create(const ParagraphStyle& paraStyle, const RefPtr<FontCollection>& fontCollection)
 {
     auto txtFontCollection = DynamicCast<TxtFontCollection>(fontCollection);
@@ -48,7 +49,7 @@ void TxtParagraph::CreateBuilder()
     if (paraStyle_.textOverflow == TextOverflow::ELLIPSIS) {
         style.ellipsis = ELLIPSIS;
     }
-#ifndef NG_BUILD
+#ifndef FLUTTER_2_5
     // keep WordBreak define same with WordBreakType in minikin
     style.word_break_type = static_cast<minikin::WordBreakType>(paraStyle_.wordBreak);
 #endif
@@ -77,7 +78,19 @@ void TxtParagraph::AddText(const std::u16string& text)
     if (!builder_) {
         CreateBuilder();
     }
+    text_ = text;
     builder_->AddText(text);
+}
+
+int32_t TxtParagraph::AddPlaceholder(const PlaceholderRun& span)
+{
+    if (!builder_) {
+        CreateBuilder();
+    }
+    txt::PlaceholderRun txtSpan;
+    Constants::ConvertPlaceholderRun(span, txtSpan);
+    builder_->AddPlaceholder(txtSpan);
+    return ++placeHolderIndex_;
 }
 
 void TxtParagraph::Build()
@@ -157,6 +170,132 @@ void TxtParagraph::Paint(const RSCanvas& canvas, float x, float y)
     SkCanvas* skCanvas = canvas.GetImpl<RSSkCanvas>()->ExportSkCanvas();
     CHECK_NULL_VOID(skCanvas);
     paragraph_->Paint(skCanvas, x, y);
+}
+
+void TxtParagraph::Paint(SkCanvas* skCanvas, float x, float y)
+{
+    CHECK_NULL_VOID(skCanvas);
+    paragraph_->Paint(skCanvas, x, y);
+}
+
+int32_t TxtParagraph::GetHandlePositionForClick(const Offset& offset)
+{
+    if (!paragraph_) {
+        return 0;
+    }
+    return static_cast<int32_t>(paragraph_->GetGlyphPositionAtCoordinate(offset.GetX(), offset.GetY()).position);
+}
+
+bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetrics& result)
+{
+    if (!paragraph_ || text_.empty()) {
+        return false;
+    }
+
+    char16_t prevChar = 0;
+    if (static_cast<size_t>(extent) <= text_.length()) {
+        prevChar = text_[std::max(0, extent - 1)];
+    }
+
+    result.Reset();
+    int32_t graphemeClusterLength = StringUtils::NotInUtf16Bmp(prevChar) ? 2 : 1;
+    int32_t prev = extent - graphemeClusterLength;
+    auto boxes = paragraph_->GetRectsForRange(
+        prev, extent, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
+    while (boxes.empty() && !text_.empty()) {
+        graphemeClusterLength *= 2;
+        prev = extent - graphemeClusterLength;
+        if (prev < 0) {
+            boxes = paragraph_->GetRectsForRange(
+                0, extent, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
+            break;
+        }
+        boxes = paragraph_->GetRectsForRange(
+            prev, extent, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
+    }
+    if (boxes.empty()) {
+        return false;
+    }
+
+    const auto& textBox = *boxes.begin();
+
+    if (prevChar == NEWLINE_CODE) {
+        // Return the start of next line.
+        result.offset.SetX(0.0);
+        result.offset.SetY(textBox.rect.fBottom);
+        return true;
+    }
+
+    bool isLtr = textBox.direction == txt::TextDirection::ltr;
+    // Caret is within width of the downstream glyphs.
+    double caretStart = isLtr ? textBox.rect.fRight : textBox.rect.fLeft;
+    double offsetX = std::min(caretStart, paragraph_->GetMaxWidth());
+    result.offset.SetX(offsetX);
+    result.offset.SetY(textBox.rect.fTop);
+    result.height = textBox.rect.fBottom - textBox.rect.fTop;
+
+    return true;
+}
+
+bool TxtParagraph::ComputeOffsetForCaretDownstream(int32_t extent, CaretMetrics& result)
+{
+    if (!paragraph_ || static_cast<size_t>(extent) >= text_.length()) {
+        return false;
+    }
+
+    result.Reset();
+    const int32_t graphemeClusterLength = 1;
+    const int32_t next = extent + graphemeClusterLength;
+    auto boxes = paragraph_->GetRectsForRange(
+        extent, next, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
+    if (boxes.empty()) {
+        return false;
+    }
+
+    const auto& textBox = *boxes.begin();
+    bool isLtr = textBox.direction == txt::TextDirection::ltr;
+    // Caret is within width of the downstream glyphs.
+    double caretStart = isLtr ? textBox.rect.fLeft : textBox.rect.fRight;
+    double offsetX = std::min(caretStart, paragraph_->GetMaxWidth());
+    result.offset.SetX(offsetX);
+    result.offset.SetY(textBox.rect.fTop);
+    result.height = textBox.rect.fBottom - textBox.rect.fTop;
+
+    return true;
+}
+
+void TxtParagraph::GetRectsForRange(int32_t start, int32_t end, std::vector<Rect>& selectedRects)
+{
+    CHECK_NULL_VOID(paragraph_);
+    const auto& boxes = paragraph_->GetRectsForRange(
+        start, end, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
+    if (boxes.empty()) {
+        return;
+    }
+    for (const auto& box : boxes) {
+        auto selectionRect = Constants::ConvertSkRect(box.rect);
+        selectedRects.emplace_back(selectionRect);
+    }
+}
+
+void TxtParagraph::GetRectsForPlaceholders(std::vector<Rect>& selectedRects)
+{
+    CHECK_NULL_VOID(paragraph_);
+    const auto& boxes = paragraph_->GetRectsForPlaceholders();
+    if (boxes.empty()) {
+        return;
+    }
+    for (const auto& box : boxes) {
+        auto selectionRect = Constants::ConvertSkRect(box.rect);
+        selectedRects.emplace_back(selectionRect);
+    }
+}
+
+void TxtParagraph::SetIndents(const std::vector<float>& indents)
+{
+    auto* paragraphTxt = static_cast<txt::ParagraphTxt*>(paragraph_.get());
+    CHECK_NULL_VOID(paragraphTxt);
+    paragraphTxt->SetIndents(indents);
 }
 
 } // namespace OHOS::Ace::NG

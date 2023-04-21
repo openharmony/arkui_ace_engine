@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 
 #include <string>
 
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/property/property.h"
@@ -45,6 +46,7 @@ public:
         ResetFontStyle();
         ResetTextLineStyle();
         ResetContent();
+        ResetForegroundColor();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
@@ -52,6 +54,7 @@ public:
     ACE_DEFINE_PROPERTY_GROUP(FontStyle, FontStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, FontSize, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, TextColor, Color, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, TextShadow, Shadow, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, ItalicFontStyle, Ace::FontStyle, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, FontWeight, FontWeight, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, FontFamily, std::vector<std::string>, PROPERTY_UPDATE_MEASURE);
@@ -68,7 +71,13 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TextAlign, TextAlign, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TextOverflow, TextOverflow, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, MaxLines, uint32_t, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
+        TextLineStyle, HeightAdaptivePolicy, TextHeightAdaptivePolicy, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TextIndent, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Content, std::string, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CopyOption, CopyOptions, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Draggable, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ForegroundColor, Color, PROPERTY_UPDATE_MEASURE_SELF);
 
     // for XTS inspector
     std::string InspectorGetTextFont() const
@@ -88,6 +97,7 @@ public:
         }
         return V2::GetTextStyleInJson(font);
     }
+    std::string GetCopyOptionString() const;
 
 protected:
     void Clone(RefPtr<LayoutProperty> property) const override
@@ -97,6 +107,7 @@ protected:
         value->propFontStyle_ = CloneFontStyle();
         value->propTextLineStyle_ = CloneTextLineStyle();
         value->propContent_ = CloneContent();
+        value->propForegroundColor_ = CloneForegroundColor();
     }
 
 private:

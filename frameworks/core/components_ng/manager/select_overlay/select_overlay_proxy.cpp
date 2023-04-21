@@ -51,6 +51,14 @@ void SelectOverlayProxy::UpdateSecondSelectHandleInfo(const SelectHandleInfo& in
     pattern->UpdateSecondSelectHandleInfo(info);
 }
 
+void SelectOverlayProxy::UpdateFirstAndSecondHandleInfo(
+    const SelectHandleInfo& firstInfo, const SelectHandleInfo& secondInfo) const
+{
+    auto pattern = GetSelectOverlayPattern(selectOverlayId_);
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateFirstAndSecondHandleInfo(firstInfo, secondInfo);
+}
+
 void SelectOverlayProxy::UpdateSelectMenuInfo(const SelectMenuInfo& info) const
 {
     auto pattern = GetSelectOverlayPattern(selectOverlayId_);
@@ -71,7 +79,7 @@ bool SelectOverlayProxy::IsClosed() const
     CHECK_NULL_RETURN(pipeline, true);
     auto manager = pipeline->GetSelectOverlayManager();
     CHECK_NULL_RETURN(manager, true);
-    return manager->HasSelectOverlay(selectOverlayId_);
+    return !manager->HasSelectOverlay(selectOverlayId_);
 }
 
 void SelectOverlayProxy::Close() const
@@ -81,6 +89,13 @@ void SelectOverlayProxy::Close() const
     auto manager = pipeline->GetSelectOverlayManager();
     CHECK_NULL_VOID(manager);
     manager->DestroySelectOverlay(selectOverlayId_);
+}
+
+void SelectOverlayProxy::SetSelectInfo(const std::string& selectInfo) const
+{
+    auto pattern = GetSelectOverlayPattern(selectOverlayId_);
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelectInfo(selectInfo);
 }
 
 } // namespace OHOS::Ace::NG

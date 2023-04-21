@@ -36,14 +36,15 @@ public:
 
     // input: "rotate(-10, 50, 100) translate(-36, 45.5) skewX(40) skewY(40) scale(1, 0.5) matrix(1, 2, 3, 4, 5, 6)"
     static Matrix4 CreateMatrix4(const std::string& transform);
-    static TransformInfo CreateTransformInfo(const std::string& transform);
+    static TransformInfo CreateInfoFromString(const std::string& transform);
 
     // input: "rotate(-10, 50, 100) translate(-36, 45.5) skewX(40) skewY(40) scale(1, 0.5) matrix(1, 2, 3, 4, 5, 6)"
     // output: "{ { "rotate" : {-10, 50, 100} }, { "translate" : {-36, 45.5} }, { "skew" : {40, 50} },
     //            { "scale", {1, 0.5} }, { "matrix", {1, 2, 3, 4, 5, 6} } }"
     static std::map<std::string, std::vector<float>> CreateMap(const std::string& transform);
 
-    static TransformInfo CreateMatrix4(const std::map<std::string, std::vector<float>>& transform);
+    static Matrix4 CreateMatrixFromMap(const std::map<std::string, std::vector<float>>& transform);
+    static TransformInfo CreateInfoFromMap(const std::map<std::string, std::vector<float>>& transform);
 
     static bool SetProperty(const std::string& type, const std::vector<float>& from, const std::vector<float>& to,
         double value, std::map<std::string, std::vector<float>>& transformAttrs);
@@ -51,6 +52,9 @@ public:
     static bool AlignmentValues(const std::string& type, std::vector<float>& from, std::vector<float>& to);
 
     static bool AlignmentFrame(const std::string& type, std::vector<float>& frame);
+
+private:
+    static void ApplyRotationPivot(Matrix4& mat, float x, float y);
 };
 
 } // namespace OHOS::Ace

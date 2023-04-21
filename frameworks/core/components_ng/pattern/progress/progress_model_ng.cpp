@@ -21,6 +21,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/progress/progress_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_ng/pattern/progress/progress_date.h"
 
 namespace OHOS::Ace::NG {
 void ProgressModelNG::Create(double min, double value, double cachedValue, double max, NG::ProgressType type)
@@ -74,6 +75,18 @@ void ProgressModelNG::SetScaleCount(int32_t value)
 void ProgressModelNG::SetScaleWidth(const Dimension& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, ScaleWidth, value);
+}
+
+void ProgressModelNG::SetBorderColor(const Color& value)
+{
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto progressPaintProperty = frameNode->GetPaintProperty<NG::ProgressPaintProperty>();
+    CHECK_NULL_VOID(progressPaintProperty);
+    auto progressType = progressPaintProperty->GetProgressTypeValue();
+    if (progressType == ProgressType::CAPSULE) {
+        ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, BorderColor, value);
+    }
 }
 
 } // namespace OHOS::Ace::NG

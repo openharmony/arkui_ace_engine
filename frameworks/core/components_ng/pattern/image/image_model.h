@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,13 +37,14 @@ public:
     virtual void SetBlur(double blur) = 0;
     virtual void SetBorder(const Border& border) = 0;
     virtual void SetBackBorder() = 0;
-    virtual void SetImageFit(int32_t value) = 0;
+    virtual void SetImageFit(ImageFit value) = 0;
     virtual void SetMatchTextDirection(bool value) = 0;
     virtual void SetFitOriginSize(bool value) = 0;
     virtual void SetOnComplete(std::function<void(const LoadImageSuccessEvent& info)>&& callback) = 0;
     virtual void SetOnError(std::function<void(const LoadImageFailEvent& info)>&& callback) = 0;
     virtual void SetSvgAnimatorFinishEvent(std::function<void()>&& callback) = 0;
-    virtual void Create(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap) = 0;
+    virtual void Create(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap, const std::string& bundleName,
+        const std::string& moduleName) = 0;
     virtual void SetImageSourceSize(const std::pair<Dimension, Dimension>& size) = 0;
     virtual void SetImageFill(const Color& color) = 0;
     virtual void SetImageInterpolation(ImageInterpolation interpolation) = 0;
@@ -53,6 +54,7 @@ public:
     virtual void SetAutoResize(bool autoResize) = 0;
     virtual void SetSyncMode(bool syncMode) = 0;
     virtual void SetColorFilterMatrix(const std::vector<float>& matrix) = 0;
+    virtual void SetDraggable(bool draggable) = 0;
     virtual void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) = 0;
     virtual void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) = 0;
     virtual void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) = 0;

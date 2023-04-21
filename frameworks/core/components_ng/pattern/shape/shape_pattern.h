@@ -24,6 +24,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/shape/shape_container_pattern.h"
 #include "core/components_ng/pattern/shape/shape_layout_algorithm.h"
 #include "core/components_ng/pattern/shape/shape_paint_property.h"
 #include "core/components_ng/pattern/shape/shape_view_box.h"
@@ -51,17 +52,40 @@ protected:
     {
         auto curFrameNode = GetHost();
         CHECK_NULL_RETURN(curFrameNode, nullptr);
+        auto childNode = curFrameNode;
         ShapePaintProperty propertiesFromAncestor;
         auto parentFrameNode = AceType::DynamicCast<FrameNode>(curFrameNode->GetAncestorNodeOfFrame());
         while (parentFrameNode) {
             auto parentPaintProperty = parentFrameNode->GetPaintProperty<ShapePaintProperty>();
             if (parentPaintProperty) {
                 propertiesFromAncestor.UpdateShapeProperty(parentPaintProperty);
+                UpdateForeground(parentFrameNode, childNode);
+                auto pattern = AceType::DynamicCast<ShapeContainerPattern>(parentFrameNode->GetPattern());
+                if (pattern) {
+                    pattern->AddChildShapeNode(WeakPtr<FrameNode>(childNode));
+                }
             }
             curFrameNode = parentFrameNode;
             parentFrameNode = AceType::DynamicCast<FrameNode>(curFrameNode->GetAncestorNodeOfFrame());
         }
         return DynamicCast<ShapePaintProperty>(propertiesFromAncestor.Clone());
+    }
+
+    void UpdateForeground(RefPtr<FrameNode> parentFrameNode, RefPtr<FrameNode> childFrameNode)
+    {
+        auto renderContext = parentFrameNode->GetRenderContext();
+        auto childRenderContext = childFrameNode->GetRenderContext();
+        if (childRenderContext) {
+            if (!childRenderContext->HasForegroundColor() && !childRenderContext->HasForegroundColorStrategy()) {
+                if (renderContext->HasForegroundColor()) {
+                    childRenderContext->UpdateForegroundColor(renderContext->GetForegroundColorValue());
+                    childRenderContext->ResetForegroundColorStrategy();
+                } else if (renderContext->HasForegroundColorStrategy()) {
+                    childRenderContext->UpdateForegroundColorStrategy(renderContext->GetForegroundColorStrategyValue());
+                    childRenderContext->ResetForegroundColor();
+                }
+            }
+        }
     }
 
 private:

@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
+#ifndef NEW_SKIA
 #include "flutter_render_plugin.h"
+#endif
 #include "rosen_render_plugin.h"
 
 namespace OHOS::Ace {
@@ -26,7 +28,11 @@ RefPtr<RenderNode> RenderPlugin::Create()
         return nullptr;
 #endif
     } else {
+#ifndef NEW_SKIA
         return AceType::MakeRefPtr<FlutterRenderPlugin>();
+#else
+        return nullptr;
+#endif
     }
 }
 } // namespace OHOS::Ace

@@ -22,4 +22,7 @@ build_component("proxy") {
     "render_item_proxy_creator.cpp",
     "render_proxy.cpp",
   ]
+  if (ace_use_new_skia) {
+    sources -= [ "flutter_render_item_proxy.cpp" ]
+  }
 }

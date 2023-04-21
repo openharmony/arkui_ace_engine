@@ -169,7 +169,7 @@ void JSNavigation::JSBind(BindingTarget globalObj)
     JSClass<JSNavigation>::StaticMethod("menus", &JSNavigation::SetMenus);
     JSClass<JSNavigation>::StaticMethod("menuCount", &JSNavigation::SetMenuCount);
     JSClass<JSNavigation>::StaticMethod("onTitleModeChange", &JSNavigation::SetOnTitleModeChanged);
-    JSClass<JSNavigation>::StaticMethod("mode", &JSNavigation::SetNavigationMode);
+    JSClass<JSNavigation>::StaticMethod("mode", &JSNavigation::SetUsrNavigationMode);
     JSClass<JSNavigation>::StaticMethod("navBarWidth", &JSNavigation::SetNavBarWidth);
     JSClass<JSNavigation>::StaticMethod("navBarPosition", &JSNavigation::SetNavBarPosition);
     JSClass<JSNavigation>::StaticMethod("hideNavBar", &JSNavigation::SetHideNavBar);
@@ -202,7 +202,13 @@ void JSNavigation::SetTitle(const JSCallbackInfo& info)
         if (ParseCommonTitle(info[0])) {
             return;
         }
-
+        if (Container::IsCurrentUseNewPipeline()) {
+            std::string title;
+            if (ParseJsString(info[0], title)) {
+                NG::NavigationView::SetTitle(title);
+                return;
+            }
+        }
         // CustomBuilder | NavigationCustomTitle
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
         JSRef<JSVal> builderObject = jsObj->GetProperty("builder");
@@ -249,9 +255,11 @@ void JSNavigation::SetTitle(const JSCallbackInfo& info)
         if (height->IsNumber()) {
             if (height->ToNumber<int32_t>() == 0) {
                 NG::NavigationView::SetTitleHeight(NG::FULL_SINGLE_LINE_TITLEBAR_HEIGHT);
+                return;
             }
             if (height->ToNumber<int32_t>() == 1) {
                 NG::NavigationView::SetTitleHeight(NG::FULL_DOUBLE_LINE_TITLEBAR_HEIGHT);
+                return;
             }
             Dimension titleHeight;
             if (!JSContainerBase::ParseJsDimensionVp(height, titleHeight)) {
@@ -538,14 +546,14 @@ void JSNavigation::SetOnTitleModeChanged(const JSCallbackInfo& info)
     info.ReturnSelf();
 }
 
-void JSNavigation::SetNavigationMode(int32_t value)
+void JSNavigation::SetUsrNavigationMode(int32_t value)
 {
     if (!Container::IsCurrentUseNewPipeline()) {
         return;
     }
 
     if (value >= 0 && value <= NAVIGATION_MODE_RANGE) {
-        NG::NavigationView::SetNavigationMode(static_cast<NG::NavigationMode>(value));
+        NG::NavigationView::SetUsrNavigationMode(static_cast<NG::NavigationMode>(value));
     } else {
         LOGE("invalid value for navigationMode");
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,7 +44,11 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("backgroundColor", &JSTextField::SetBackgroundColor);
     JSClass<JSTextInput>::StaticMethod("enterKeyType", &JSTextField::SetEnterKeyType);
     JSClass<JSTextInput>::StaticMethod("caretColor", &JSTextField::SetCaretColor);
+    JSClass<JSTextInput>::StaticMethod("caretPosition", &JSTextField::SetCaretPosition);
+    JSClass<JSTextInput>::StaticMethod("selectedBackgroundColor", &JSTextField::SetSelectedBackgroundColor);
+    JSClass<JSTextInput>::StaticMethod("caretStyle", &JSTextField::SetCaretStyle);
     JSClass<JSTextInput>::StaticMethod("maxLength", &JSTextField::SetMaxLength);
+    JSClass<JSTextInput>::StaticMethod("width", &JSTextField::JsWidth);
     JSClass<JSTextInput>::StaticMethod("height", &JSTextField::JsHeight);
     JSClass<JSTextInput>::StaticMethod("padding", &JSTextField::JsPadding);
     JSClass<JSTextInput>::StaticMethod("border", &JSTextField::JsBorder);
@@ -63,6 +67,8 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("style", &JSTextField::SetInputStyle);
     JSClass<JSTextInput>::StaticMethod("hoverEffect", &JSTextField::JsHoverEffect);
     JSClass<JSTextInput>::StaticMethod("copyOption", &JSTextField::SetCopyOption);
+    JSClass<JSTextInput>::StaticMethod("textMenuOptions", &JSTextField::JsMenuOptionsExtension);
+    JSClass<JSTextInput>::StaticMethod("foregroundColor", &JSTextField::SetForegroundColor);
     // API7 onEditChanged deprecated
     JSClass<JSTextInput>::StaticMethod("onEditChanged", &JSTextField::SetOnEditChanged);
     JSClass<JSTextInput>::StaticMethod("onEditChange", &JSTextField::SetOnEditChanged);
@@ -72,6 +78,7 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("onCut", &JSTextField::SetOnCut);
     JSClass<JSTextInput>::StaticMethod("onPaste", &JSTextField::SetOnPaste);
     JSClass<JSTextInput>::StaticMethod("onClick", &JSTextField::SetOnClick);
+    JSClass<JSTextInput>::StaticMethod("requestKeyboardOnFocus", &JSTextField::RequestKeyboardOnFocus);
     JSClass<JSTextInput>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSTextInput>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSTextInput>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
@@ -91,6 +98,7 @@ void JSTextInputController::JSBind(BindingTarget globalObj)
 {
     JSClass<JSTextInputController>::Declare("TextInputController");
     JSClass<JSTextInputController>::Method("caretPosition", &JSTextInputController::CaretPosition);
+    JSClass<JSTextInputController>::Method("setTextSelection", &JSTextInputController::SetTextSelection);
     JSClass<JSTextInputController>::Bind(
         globalObj, JSTextInputController::Constructor, JSTextInputController::Destructor);
 }
@@ -111,8 +119,17 @@ void JSTextInputController::Destructor(JSTextInputController* scroller)
 
 void JSTextInputController::CaretPosition(int32_t caretPosition)
 {
-    if (controller_) {
-        controller_->CaretPosition(caretPosition);
+    auto controller = controllerWeak_.Upgrade();
+    if (controller) {
+        controller->CaretPosition(caretPosition);
+    }
+}
+
+void JSTextInputController::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
+{
+    auto controller = controllerWeak_.Upgrade();
+    if (controller) {
+        controller->SetTextSelection(selectionStart, selectionEnd);
     }
 }
 

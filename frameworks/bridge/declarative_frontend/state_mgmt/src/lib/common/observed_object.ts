@@ -16,10 +16,10 @@
 
 /**
  * ObservedObject, i.e. wrapper for class Object type state variable
- * 
- * This class and all other definitoons in this file are framework 
+ *
+ * This class and all other definitoons in this file are framework
  * internal / non-SDK
- * 
+ *
  */
 
 
@@ -49,7 +49,8 @@ function Observed<C extends Object>(target: Type<C>): any {
   // the new constructor behaviour
   var f: any = function (...args: any[]) {
     stateMgmtConsole.debug(`New ${original.name}, gets wrapped inside ObservableObject proxy.`);
-    return new ObservedObject<C>(new original(...args), undefined);
+    return ObservedObject.createNew(new original(...args), undefined);
+//    return new ObservedObject<C>(new original(...args), undefined);
   };
 
   Object.setPrototypeOf(f, Object.getPrototypeOf(original));
@@ -145,6 +146,42 @@ class SubscribableHandler {
   }
 }
 
+class SubscribableDateHandler extends SubscribableHandler {
+
+  constructor(owningProperty: IPropertySubscriber) {
+    super(owningProperty);
+  }
+
+  /**
+   * Get trap for Date type proxy
+   * Functions that modify Date in-place are intercepted and replaced with a function
+   * that executes the original function and notifies the handler of a change.
+   * @param target Original Date object
+   * @param property
+   * @returns
+   */
+  public get(target: Object, property: PropertyKey): any {
+
+    const dateSetFunctions = new Set(["setFullYear", "setMonth", "setDate", "setHours", "setMinutes", "setSeconds",
+      "setMilliseconds", "setTime", "setUTCFullYear", "setUTCMonth", "setUTCDate", "setUTCHours", "setUTCMinutes",
+      "setUTCSeconds", "setUTCMilliseconds"]);
+
+    let ret = super.get(target, property);
+
+    if (typeof ret === "function" && property.toString() && dateSetFunctions.has(property.toString())) {
+      const self = this;
+      return function () {
+        // execute original function with given arguments
+        let result = ret.apply(this, arguments);
+        self.notifyPropertyHasChanged(property.toString(), this);
+        return result;
+      }.bind(target) // bind "this" to target inside the function
+    } else if (typeof ret === "function") {
+      ret = ret.bind(target);
+    }
+    return ret;
+  }
+}
 
 class ExtendableProxy {
   constructor(obj: Object, handler: SubscribableHandler) {
@@ -166,6 +203,11 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
    */
   public static createNew<T extends Object>(rawObject: T,
     owningProperty: IPropertySubscriber): any {
+
+    if (rawObject === null || rawObject === undefined) {
+      stateMgmtConsole.error(`ObservedObject.CreateNew, input object must not be null or undefined.`);
+      return null;
+    }
 
     if (ObservedObject.IsObservedObject(rawObject)) {
       ObservedObject.addOwningProperty(rawObject, owningProperty);
@@ -224,7 +266,8 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
     if (ObservedObject.IsObservedObject(obj)) {
       throw new Error("Invalid constructor argument error: ObservableObject contructor called with an ObservedObject as parameer");
     }
-    let handler = new SubscribableHandler(objectOwningProperty);
+    let handler = (obj instanceof Date) ? new SubscribableDateHandler(objectOwningProperty)
+      : new SubscribableHandler(objectOwningProperty);
     super(obj, handler);
 
     if (ObservedObject.IsObservedObject(obj)) {

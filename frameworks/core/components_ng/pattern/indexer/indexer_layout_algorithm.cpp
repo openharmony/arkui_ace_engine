@@ -29,34 +29,25 @@
 #include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr float HALF = 0.5;
+}
 
 void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto indexerLayoutProperty = AceType::DynamicCast<IndexerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(indexerLayoutProperty);
-    if (indexerLayoutProperty->GetArrayValue().has_value()) {
-        arrayValue_ = indexerLayoutProperty->GetArrayValue().value();
-        itemCount_ = arrayValue_.size();
-    }
-    if (!isInitialized_ && indexerLayoutProperty->GetSelected().has_value()) {
-        selected_ = indexerLayoutProperty->GetSelected().value();
-    }
-    isInitialized_ = true;
     LayoutConstraintF layoutConstraint;
     if (indexerLayoutProperty->GetLayoutConstraint().has_value()) {
         layoutConstraint = indexerLayoutProperty->GetLayoutConstraint().value();
     }
-    SizeF maxSize = layoutConstraint.maxSize;
-
-    usingPopup_ = indexerLayoutProperty->GetUsingPopup().value_or(false);
     auto indexerItemSize = Dimension(INDEXER_ITEM_SIZE, DimensionUnit::VP);
     auto itemSize = indexerLayoutProperty->GetItemSize().value_or(indexerItemSize);
     if (GreatNotEqual(itemSize.ConvertToPx(), 0.0)) {
-        itemSize_ = ConvertToPx(itemSize, layoutConstraint.scaleProperty, maxSize.Height()).value();
+        itemSize_ = ConvertToPx(itemSize, layoutConstraint.scaleProperty, layoutConstraint.maxSize.Height()).value();
     } else {
         itemSize_ = 0.0f;
     }
-    alignStyle_ = indexerLayoutProperty->GetAlignStyle().value_or(NG::AlignStyle::RIGHT);
     if (itemCount_ <= 0) {
         LOGE("AlphabetIndexer arrayValue size is less than 0");
         return;
@@ -65,62 +56,30 @@ void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         LOGE("AlphabetIndexer itemSize is near zero");
         return;
     }
-    if (LessOrEqual(itemCount_ * itemSize_, maxSize.Height())) {
-        itemSizeRender_ = itemSize_;
-    } else {
-        itemSizeRender_ = maxSize.Height() / itemCount_;
-    }
+    auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+    auto verticalPadding = (padding.top.value_or(0) + padding.bottom.value_or(0));
+    auto horizontalPadding = padding.left.value_or(0.0f) + padding.right.value_or(0.0f);
+    auto contentWidth = itemSize_ + horizontalPadding;
+    auto contentHeight = itemCount_ * itemSize_ + verticalPadding;
+    auto selfIdealSize = layoutConstraint.selfIdealSize;
+    auto actualWidth = selfIdealSize.Width().has_value() ? selfIdealSize.Width().value() :
+        std::clamp(contentWidth, 0.0f, layoutConstraint.maxSize.Width());
+    auto actualHeight = selfIdealSize.Height().has_value() ? selfIdealSize.Height().value() :
+        std::clamp(contentHeight, 0.0f, layoutConstraint.maxSize.Height());
+    itemWidth_ = GreatOrEqual(actualWidth - horizontalPadding, 0.0f) ? actualWidth - horizontalPadding : 0.0f;
+    itemSizeRender_ =
+        GreatOrEqual(actualHeight - verticalPadding, 0.0f) ? (actualHeight - verticalPadding) / itemCount_ : 0.0f;
     auto childLayoutConstraint = indexerLayoutProperty->CreateChildConstraint();
     for (int32_t index = 0; index < itemCount_; index++) {
         auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
         CHECK_NULL_VOID(childWrapper);
         auto childLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(childWrapper->GetLayoutProperty());
         CHECK_NULL_VOID(childLayoutProperty);
-        childLayoutConstraint.UpdateSelfMarginSizeWithCheck(OptionalSizeF(itemSizeRender_, itemSizeRender_));
+        childLayoutConstraint.UpdateSelfMarginSizeWithCheck(OptionalSizeF(itemWidth_, itemSizeRender_));
         childLayoutProperty->UpdateAlignment(Alignment::CENTER);
         childWrapper->Measure(childLayoutConstraint);
     }
-    auto max = childLayoutConstraint.maxSize;
-    childLayoutConstraint.Reset();
-    childLayoutConstraint.UpdateMinSizeWithCheck(SizeF(TEXTVIEW_MIN_SIZE, TEXTVIEW_MIN_SIZE));
-    childLayoutConstraint.maxSize = max;
-    if (usingPopup_) {
-        auto popupListWrapper = layoutWrapper->GetOrCreateChildByIndex(itemCount_);
-        CHECK_NULL_VOID(popupListWrapper);
-        if (popupSize_ == 1) {
-            auto bubbleSize = Dimension(BUBBLE_BOX_SIZE, DimensionUnit::VP).ConvertToPx();
-            childLayoutConstraint.UpdateSelfMarginSizeWithCheck(OptionalSizeF(bubbleSize, bubbleSize));
-        }
-        popupListWrapper->Measure(childLayoutConstraint);
-        uint32_t listWidth = 0;
-        uint32_t listHeight = 0;
-        for (uint32_t i = 0; i < popupSize_; i++) {
-            auto listItemWrapper = popupListWrapper->GetOrCreateChildByIndex(i);
-            CHECK_NULL_VOID(listItemWrapper);
-            auto listItemGeoNode = listItemWrapper->GetGeometryNode();
-            CHECK_NULL_VOID(listItemGeoNode);
-            auto width = listItemGeoNode->GetFrameSize().Width();
-            if (listWidth < width) {
-                listWidth = width;
-            }
-            auto height = listItemWrapper->GetGeometryNode()->GetFrameSize().Height();
-            listHeight += height;
-        }
-        popupListWrapper->GetGeometryNode()->SetFrameSize(SizeF(listWidth, listHeight));
-    }
-    auto size = SizeF(itemSizeRender_, itemSizeRender_ * itemCount_);
-    auto selfIdealSize = layoutConstraint.selfIdealSize;
-    if (selfIdealSize.Width().has_value() && selfIdealSize.Width().value() >= size.Width()) {
-        size.SetWidth(selfIdealSize.Width().value());
-    }
-    if (selfIdealSize.Height().has_value() && selfIdealSize.Height().value() >= size.Height()) {
-        size.SetHeight(selfIdealSize.Height().value());
-    }
-    auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
-    MinusPaddingToSize(padding, size);
-    auto left = padding.left.value_or(0.0f);
-    auto top = padding.top.value_or(0.0f);
-    layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(left + size.Width(), top + size.Height()));
+    layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(actualWidth, actualHeight));
 }
 
 void IndexerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -128,59 +87,30 @@ void IndexerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto indexerLayoutProperty = AceType::DynamicCast<IndexerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(indexerLayoutProperty);
 
-    auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
     auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
-    MinusPaddingToSize(padding, size);
     auto left = padding.left.value_or(0.0f);
     auto top = padding.top.value_or(0.0f);
 
-    constexpr float half = 0.5f;
-    if (size.Width() >= itemSize_) {
-        left = left + half * (size.Width() - itemSize_);
-    }
-    if (size.Height() >= itemSize_ * itemCount_) {
-        top = top + half * (size.Height() - itemSize_ * itemCount_);
-    }
-    auto paddingOffset = OffsetF(left, top);
+    auto indexerWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
+    auto indexerHeight = layoutWrapper->GetGeometryNode()->GetFrameSize().Height();
 
-    float popupPositionX = 0.0f;
-    float popupPositionY = 0.0f;
-    if (indexerLayoutProperty->GetPopupPositionX().has_value()) {
-        popupPositionX = indexerLayoutProperty->GetPopupPositionX().value();
-    } else {
-        if (alignStyle_ == NG::AlignStyle::LEFT) {
-            popupPositionX = -NG::BUBBLE_POSITION_X + itemSizeRender_ * half;
-        } else {
-            popupPositionX = NG::BUBBLE_POSITION_X - itemSizeRender_ * half;
-        }
-    }
-    popupPositionY = indexerLayoutProperty->GetPopupPositionY().value_or(NG::BUBBLE_POSITION_Y);
-
+    auto firstChildWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    CHECK_NULL_VOID(firstChildWrapper);
+    auto childWidth = firstChildWrapper->GetGeometryNode()->GetFrameSize().Width();
+    auto childHeight = firstChildWrapper->GetGeometryNode()->GetFrameSize().Height();
+    auto originMarginLeft = (indexerWidth - childWidth) * HALF;
+    auto adjustMarginLeft = left < originMarginLeft ? originMarginLeft : left;
+    auto originMarginTop = (indexerHeight - childHeight * itemCount_) * HALF;
+    auto adjustMarginTop = top < originMarginTop ? originMarginTop : top;
+    auto marginOffset = OffsetF(adjustMarginLeft, adjustMarginTop);
     for (int32_t index = 0; index < itemCount_; index++) {
-        auto offset = paddingOffset;
         auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
-        if (!childWrapper) {
-            LOGI("indexerLayoutAlgorithm wrapper is out of boundary");
-            continue;
-        }
-        offset = offset + OffsetF(0, index * itemSizeRender_);
-        childWrapper->GetGeometryNode()->SetMarginFrameOffset(offset);
-
-        auto childNode = childWrapper->GetHostNode();
-        CHECK_NULL_VOID(childNode);
-
+        CHECK_NULL_VOID(childWrapper);
+        auto layoutProperty = childWrapper->GetLayoutProperty();
+        CHECK_NULL_VOID(childWrapper);
+        childWrapper->GetGeometryNode()->SetMarginFrameOffset(marginOffset);
         childWrapper->Layout();
-    }
-
-    if (usingPopup_) {
-        auto offset = paddingOffset;
-        auto listWrapper = layoutWrapper->GetOrCreateChildByIndex(itemCount_);
-        CHECK_NULL_VOID(listWrapper);
-
-        OffsetF bubblePosition = OffsetF(popupPositionX, popupPositionY);
-        offset = offset + bubblePosition;
-        listWrapper->GetGeometryNode()->SetMarginFrameOffset(offset);
-        listWrapper->Layout();
+        marginOffset = marginOffset + OffsetF(0, itemSizeRender_);
     }
 }
 } // namespace OHOS::Ace::NG

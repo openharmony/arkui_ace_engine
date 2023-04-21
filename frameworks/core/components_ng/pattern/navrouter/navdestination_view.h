@@ -24,6 +24,7 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT NavDestinationView {
 public:
     static void Create();
+    static void Create(std::function<void()>&& deepRenderFunc);
     static void SetHideTitleBar(bool hideTitleBar);
     static void SetTitle(const std::string& title);
     static void SetSubtitle(const std::string& subtitle);

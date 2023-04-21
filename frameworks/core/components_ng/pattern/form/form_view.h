@@ -26,7 +26,6 @@
 #include "core/components_ng/pattern/form/form_node.h"
 
 namespace OHOS::Ace::NG {
-
 class ACE_EXPORT FormView {
 public:
     static void Create(const RequestFormInfo& formInfo);
@@ -38,6 +37,9 @@ public:
     static void SetOnError(FormCallback&& onError);
     static void SetOnUninstall(FormCallback&& onUninstall);
     static void SetOnRouter(FormCallback&& onRouter);
+    static void SetOnLoad(FormCallback&& onLoad);
+    static void SetVisibility(VisibleType visible);
+
 };
 
 } // namespace OHOS::Ace::NG

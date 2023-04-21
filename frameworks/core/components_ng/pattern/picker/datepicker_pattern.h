@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,10 +20,12 @@
 
 #include "core/components/common/layout/constants.h"
 #include "core/components/picker/picker_data.h"
+#include "core/components/picker/picker_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/picker/datepicker_accessibility_property.h"
 #include "core/components_ng/pattern/picker/datepicker_column_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_event_hub.h"
 #include "core/components_ng/pattern/picker/datepicker_layout_property.h"
@@ -31,6 +33,10 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+const Dimension FOCUS_PAINT_WIDTH = 2.0_vp;
+}
+
 class DatePickerPattern : public LinearLayoutPattern {
     DECLARE_ACE_TYPE(DatePickerPattern, LinearLayoutPattern);
 
@@ -61,7 +67,14 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        return MakeRefPtr<DatePickerPaintMethod>();
+        auto paintMethod = MakeRefPtr<DatePickerPaintMethod>();
+        paintMethod->SetEnabled(enabled_);
+        return paintMethod;
+    }
+
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        return MakeRefPtr<DatePickerAccessibilityProperty>();
     }
 
     void SetChangeCallback(ColumnChangeCallback&& value);
@@ -71,6 +84,10 @@ public:
     void SolarColumnsBuilding(const PickerDate& current);
 
     void LunarColumnsBuilding(const LunarDate& current);
+
+    void SolarMonthDaysColumnsBuilding(const PickerDate& current);
+
+    void LunarMonthDaysColumnBuilding(const LunarDate& current);
 
     void HandleYearChange(bool isAdd, uint32_t index, std::vector<RefPtr<FrameNode>>& resultTags);
 
@@ -96,6 +113,16 @@ public:
 
     void HandleSolarDayChange(bool isAdd, uint32_t index);
 
+    void HandleSolarMonthDaysChange(bool isAdd, uint32_t index);
+
+    void HandleLunarMonthDaysChange(bool isAdd, uint32_t index);
+
+    void HandleAddLunarMonthDaysChange(uint32_t index);
+
+    void HandleReduceLunarMonthDaysChange(uint32_t index);
+
+    LunarDate GetCurrentLunarDateByMonthDaysColumn(uint32_t lunarYear) const;
+
     PickerDate GetCurrentDate() const;
 
     void SetEventCallback(EventCallback&& value);
@@ -103,6 +130,8 @@ public:
     void FireChangeEvent(bool refresh) const;
 
     void FlushColumn();
+
+    void FlushMonthDaysColumn();
 
     void AdjustLunarDate(LunarDate& date) const;
 
@@ -122,6 +151,11 @@ public:
         datePickerColumns_.emplace_back(value);
     }
 
+    void ClearColumn()
+    {
+        datePickerColumns_.clear();
+    }
+
     void SetShowLunar(bool value)
     {
         lunar_ = value;
@@ -130,6 +164,16 @@ public:
     bool IsShowLunar() const
     {
         return lunar_;
+    }
+
+    void SetShowMonthDaysFlag(bool value)
+    {
+        showMonthDays_ = value;
+    }
+
+    bool ShowMonthDays() const
+    {
+        return showMonthDays_;
     }
 
     const EventMarker& GetDialogAcceptEvent() const
@@ -227,6 +271,9 @@ public:
     void OnDataLinking(
         const RefPtr<FrameNode>& tag, bool isAdd, uint32_t index, std::vector<RefPtr<FrameNode>>& resultTags);
 
+    void HandleMonthDaysChange(
+        const RefPtr<FrameNode>& tag, bool isAdd, uint32_t index, std::vector<RefPtr<FrameNode>>& resultTags);
+
     std::string GetSelectedObject(bool isColumnChange, int status = -1) const
     {
         auto date = selectedDate_;
@@ -246,7 +293,7 @@ public:
     void SetSelectDate(const PickerDate& value)
     {
         selectedDate_ = value;
-        AdjustSolarDate(selectedDate_, limitStartDate_, limitEndDate_);
+        AdjustSolarDate(selectedDate_, startDateSolar_, endDateSolar_);
         selectedLunar_ = SolarToLunar(selectedDate_);
     }
 
@@ -360,9 +407,31 @@ public:
         return dayId_.value();
     }
 
+    bool HasMonthDaysNode() const
+    {
+        return monthDaysId_.has_value();
+    }
+
+    int32_t GetMonthDaysId()
+    {
+        if (!monthDaysId_.has_value()) {
+            monthDaysId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        }
+        return monthDaysId_.value();
+    }
+
     bool HasTitleNode() const
     {
         return titleId_.has_value();
+    }
+
+    bool SetTitleId(const int32_t id)
+    {
+        if (HasTitleNode()) {
+            return false;
+        }
+        titleId_ = id;
+        return true;
     }
 
     int32_t GetTitleId()
@@ -411,29 +480,53 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true };
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipeline, FocusPattern());
+        auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+        CHECK_NULL_RETURN(pickerTheme, FocusPattern());
+        auto focusColor = pickerTheme->GetFocusColor();
+
+        FocusPaintParam focusPaintParams;
+        focusPaintParams.SetPaintColor(focusColor);
+        focusPaintParams.SetPaintWidth(FOCUS_PAINT_WIDTH);
+
+        return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
     }
 
     void ShowTitle(int32_t titleId);
-
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     static void Init();
-    RefPtr<ClickEvent> clickEventListener_;
+    void InitDisabled();
+    void GetInnerFocusPaintRect(RoundRect& paintRect);
+    void PaintFocusState();
 
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
     bool HandleDirectionKey(KeyCode code);
 
+    PickerDate GetCurrentDateByMonthDaysColumn() const;
+    PickerDate GetCurrentDateByYearMonthDayColumn() const;
+    void FillSolarYearOptions(const PickerDate& current, RefPtr<FrameNode>& yearColumn);
+    void FillLunarMonthDaysOptions(const LunarDate& current, RefPtr<FrameNode>& monthDaysColumn);
+    void AdjustSolarStartEndDate();
+    void AdjustLunarStartEndDate();
+
+    RefPtr<ClickEvent> clickEventListener_;
+    bool enabled_ = true;
+    int32_t focusKeyID_ = 0;
     std::map<RefPtr<FrameNode>, std::vector<std::string>> options_;
     uint32_t showCount_ = 0;
     std::vector<RefPtr<FrameNode>> datePickerColumns_;
     bool lunar_ = false;
+    bool showMonthDays_ = false;
     std::optional<int32_t> yearId_;
     std::optional<int32_t> monthId_;
     std::optional<int32_t> dayId_;
+    std::optional<int32_t> monthDaysId_;
     std::optional<int32_t> dateNodeId_;
     std::optional<int32_t> titleId_;
     std::optional<int32_t> ButtonTitleId_;

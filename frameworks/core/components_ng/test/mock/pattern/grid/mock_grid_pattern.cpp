@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,6 @@
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 
 namespace OHOS::Ace::NG {
-GridPattern::~GridPattern() {}
 void GridPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 void GridPattern::OnAttachToFrameNode() {}
 void GridPattern::OnModifyDone() {}
@@ -46,4 +45,28 @@ CanvasDrawFunction GridPaintMethod::GetForegroundDrawFunction(PaintWrapper* /* p
 {
     return [](RSCanvas& canvas) {};
 }
+
+bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
+{
+    return true;
+}
+
+void GridPattern::UpdateScrollBarOffset() {}
+
+bool GridPattern::OnScrollCallback(float offset, int32_t source)
+{
+    return true;
+}
+
+RefPtr<PaintProperty> GridPattern::CreatePaintProperty()
+{
+    return MakeRefPtr<ScrollablePaintProperty>();
+}
+
+bool GridPattern::OutBoundaryCallback()
+{
+    return false;
+}
+
+void GridPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) {}
 } // namespace OHOS::Ace::NG

@@ -36,17 +36,23 @@ public:
     void Paint(RenderContext &context, const Offset &offset) override;
     void OnAppShow() override
     {
-        adapter_->Show();
+        if (adapter_) {
+            adapter_->Show();
+        }
     }
 
     void OnAppHide() override
     {
-        adapter_->Hide();
+        if (adapter_) {
+            adapter_->Hide();
+        }
     }
 
     void FireConnect()
     {
-        adapter_->UpdateRect(currentRect_);
+        if (adapter_) {
+            adapter_->UpdateRect(currentRect_);
+        }
         hasConnectionToAbility_ = true;
         if (component_) {
             component_->FireOnConnected();
@@ -67,6 +73,8 @@ public:
 
     void ConnectOrUpdateExtension();
 
+    void OnPaintFinish() override;
+
 private:
     Rect currentRect_;
     bool needLayout_ = false;
@@ -74,6 +82,7 @@ private:
     int32_t callbackId_ = 0;
     Dimension width_;
     Dimension height_;
+    Offset globalOffsetExternal_;
 
     RefPtr<WindowExtensionConnectionAdapter> adapter_;
     RefPtr<V2::AbilityComponent> component_;

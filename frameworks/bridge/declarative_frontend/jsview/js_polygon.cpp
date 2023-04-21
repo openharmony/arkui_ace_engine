@@ -60,21 +60,26 @@ void JSPolygon::JSBind(BindingTarget globalObj)
     JSClass<JSPolygon>::StaticMethod("height", &JSShapeAbstract::JsHeight);
     JSClass<JSPolygon>::StaticMethod("points", &JSPolygon::JsPoints);
 
+    JSClass<JSPolygon>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSPolygon>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
+    JSClass<JSPolygon>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
+    JSClass<JSPolygon>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+
     JSClass<JSPolygon>::Inherit<JSShapeAbstract>();
     JSClass<JSPolygon>::Bind(globalObj);
 }
 
 void JSPolygon::JsPoints(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
+    if (info.Length() < 1 || !info[0]->IsArray()) {
         LOGE("The arg is wrong, it is supposed to have atleast 1 argument.");
         return;
     }
     ShapePoint shapePoint;
     ShapePoints shapePoints;
     JSRef<JSArray> pointsArray = JSRef<JSArray>::Cast(info[0]);
-    if (pointsArray->Length() < 3) {
-        LOGE("Less than three parameters");
+    if (pointsArray->Length() < 2) {
+        LOGE("Less than two parameters");
         return;
     } else {
         for (size_t i = 0; i < pointsArray->Length(); i++) {

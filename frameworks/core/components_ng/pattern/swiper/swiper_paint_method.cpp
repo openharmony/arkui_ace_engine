@@ -35,6 +35,9 @@ CanvasDrawFunction SwiperPaintMethod::GetForegroundDrawFunction(PaintWrapper* pa
 
 void SwiperPaintMethod::PaintFade(RSCanvas& canvas, PaintWrapper* paintWrapper) const
 {
+    if (!needPaintFade_) {
+        return;
+    }
     if (NearZero(mainDelta_)) {
         return;
     }
@@ -102,6 +105,32 @@ void SwiperPaintMethod::PaintFade(RSCanvas& canvas, PaintWrapper* paintWrapper) 
         canvas.DrawCircle({ centerX, centerY + fadeTranslate }, radius);
     } else {
         canvas.DrawCircle({ centerX + fadeTranslate, centerY }, radius);
+    }
+}
+
+CanvasDrawFunction SwiperPaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
+{
+    auto paintFunc = [weak = WeakClaim(this), paintWrapper](RSCanvas& canvas) {
+        auto painter = weak.Upgrade();
+        CHECK_NULL_VOID(painter);
+        painter->ClipPadding(paintWrapper, canvas);
+    };
+    return paintFunc;
+}
+
+void SwiperPaintMethod::ClipPadding(PaintWrapper* paintWrapper, RSCanvas& canvas) const
+{
+    if (!needClipPadding_) {
+        return;
+    }
+    const auto& geometryNode = paintWrapper->GetGeometryNode();
+    auto frameSize = geometryNode->GetPaddingSize();
+    OffsetF paddingOffset = geometryNode->GetPaddingOffset() - geometryNode->GetFrameOffset();
+    auto renderContext = paintWrapper->GetRenderContext();
+    if (!renderContext || renderContext->GetClipEdge().value_or(true)) {
+        auto clipRect = RSRect(paddingOffset.GetX(), paddingOffset.GetY(), frameSize.Width() + paddingOffset.GetX(),
+                    paddingOffset.GetY() + frameSize.Height());
+        canvas.ClipRect(clipRect, RSClipOp::INTERSECT);
     }
 }
 

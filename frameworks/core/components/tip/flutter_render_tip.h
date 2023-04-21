@@ -16,8 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TIP_FLUTTER_RENDER_TIP_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TIP_FLUTTER_RENDER_TIP_H
 
-#include "flutter/lib/ui/ui_dart_state.h"
-#include "third_party/skia/include/core/SkCanvas.h"
+#include "include/core/SkCanvas.h"
 
 #include "core/components/tip/render_tip.h"
 #include "core/pipeline/base/flutter_render_context.h"

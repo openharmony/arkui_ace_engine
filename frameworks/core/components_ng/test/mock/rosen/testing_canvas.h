@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,16 +13,21 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_CANVAS_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_CANVAS_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_CANVAS_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_CANVAS_H
 
 #include "testing_bitmap.h"
 #include "testing_brush.h"
+#include "testing_color.h"
+#include "testing_image.h"
 #include "testing_path.h"
 #include "testing_pen.h"
 #include "testing_point.h"
+#include "testing_point3.h"
 #include "testing_rect.h"
 #include "testing_round_rect.h"
+#include "testing_sampling_options.h"
+#include "testing_shadowflags.h"
 
 namespace OHOS::Ace::Testing {
 enum class ClipOp {
@@ -32,6 +37,11 @@ enum class ClipOp {
     XOR,
     REVERSE_DIFFERENCE,
     REPLACE,
+};
+
+enum class SrcRectConstraint {
+    STRICT_SRC_RECT_CONSTRAINT,
+    FAST_SRC_RECT_CONSTRAINT,
 };
 
 class TestingCanvas {
@@ -46,8 +56,12 @@ public:
     virtual void DrawRect(const TestingRect& rect) {}
     virtual void ClipRoundRect(const TestingRoundRect& roundRect, ClipOp op) {}
     virtual void Rotate(float deg, float sx, float sy) {}
+    virtual void Rotate(float deg) {}
     virtual void Translate(float dx, float dy) {}
     virtual void DrawBitmap(const TestingBitmap& bitmap, const float px, const float py) {}
+    virtual void DrawShadow(const TestingPath& path, const TestingPoint3& planeParams, const TestingPoint3& devLightPos,
+        float lightRadius, TestingColor /* ambientColor */, TestingColor /* spotColor */, TestingShadowFlags flag)
+    {}
 
     virtual TestingCanvas& AttachPen(const TestingPen& pen)
     {
@@ -75,7 +89,16 @@ public:
     virtual void DrawRoundRect(const TestingRoundRect& roundRect) {}
     virtual void DrawBackground(const TestingBrush& brush) {}
     virtual void ClipRect(const TestingRect& rect, ClipOp op) {}
-    virtual void ClipPath(const TestingPath& path, ClipOp op) {}
+    virtual void Scale(float sx, float sy) {}
+    virtual void ClipPath(const TestingPath& path, ClipOp op, bool doAntiAlias) {}
+    virtual void DrawOval(const TestingRect& oval) {}
+    virtual void DrawImageRect(
+        const TestingImage& image, const TestingRect& dst, const TestingSamplingOptions& sampling)
+    {}
+    virtual void DrawImageRect(const TestingImage& image, const TestingRect& src, const TestingRect& dst,
+        const TestingSamplingOptions& sampling,
+        SrcRectConstraint constraint = SrcRectConstraint::STRICT_SRC_RECT_CONSTRAINT)
+    {}
 };
 } // namespace OHOS::Ace::Testing
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_CANVAS_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_CANVAS_H

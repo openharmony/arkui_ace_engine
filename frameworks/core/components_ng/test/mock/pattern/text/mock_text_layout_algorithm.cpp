@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 
+#include "core/components_ng/render/paragraph.h"
+
 namespace OHOS::Ace::NG {
 TextLayoutAlgorithm::TextLayoutAlgorithm() = default;
 
@@ -28,19 +30,19 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     return SizeF(1.0f, 1.0f);
 }
 
-bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::string content)
+bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::string content, LayoutWrapper* layoutWrapper)
 {
     return true;
 }
 
-bool TextLayoutAlgorithm::CreateParagraphAndLayout(
-    const TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint)
+bool TextLayoutAlgorithm::CreateParagraphAndLayout(const TextStyle& textStyle, const std::string& content,
+    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
     return true;
 }
 
 bool TextLayoutAlgorithm::AdaptMinTextSize(TextStyle& textStyle, const std::string& content,
-    const LayoutConstraintF& contentConstraint, const RefPtr<PipelineContext>& pipeline)
+    const LayoutConstraintF& contentConstraint, const RefPtr<PipelineContext>& pipeline, LayoutWrapper* layoutWrapper)
 {
     return true;
 }
@@ -74,4 +76,16 @@ SizeF TextLayoutAlgorithm::GetMaxMeasureSize(const LayoutConstraintF& contentCon
 {
     return SizeF(1.0f, 1.0f);
 }
+
+std::list<RefPtr<SpanItem>>&& TextLayoutAlgorithm::GetSpanItemChildren()
+{
+    return std::move(spanItemChildren_);
+}
+
+std::optional<TextStyle> TextLayoutAlgorithm::GetTextStyle() const
+{
+    return std::optional<TextStyle>(TextStyle());
+}
+
+void TextLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper) {}
 } // namespace OHOS::Ace::NG

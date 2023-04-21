@@ -31,10 +31,11 @@
 namespace OHOS::Ace {
 
 constexpr int32_t MIN_SUBCONTAINER_ID = 1000000;
+constexpr int32_t MIN_PA_SERVICE_ID = 100000;
 
 using SubwindowMap = std::unordered_map<int32_t, RefPtr<Subwindow>>;
 
-class ACE_EXPORT SubwindowManager final : public NonCopyable {
+class ACE_FORCE_EXPORT SubwindowManager final : public NonCopyable {
 public:
     // Get the instance
     static std::shared_ptr<SubwindowManager> GetInstance();
@@ -73,7 +74,9 @@ public:
     bool CancelPopup(const std::string& id);
     void CloseMenu();
     void ClearMenu();
-    void ClearMenuNG();
+    void ClearMenuNG(int32_t instanceId = -1);
+    RefPtr<NG::FrameNode> ShowDialogNG(const DialogProperties& dialogProps, const RefPtr<NG::UINode>& customNode);
+    void HideSubWindowNG();
 
     void SetHotAreas(const std::vector<Rect>& rects);
 
@@ -89,6 +92,9 @@ public:
         const std::set<std::string>& dialogCallbacks);
     void ShowActionMenu(const std::string& title, const std::vector<ButtonInfo>& button,
         std::function<void(int32_t, int32_t)>&& callback);
+    void CloseDialog(int32_t instanceId);
+    void RegisterOnShowMenu(const std::function<void()>& callback);
+    void RegisterOnHideMenu(const std::function<void()>& callback);
 
 private:
     RefPtr<Subwindow> GetOrCreateSubWindow();
@@ -116,6 +122,8 @@ private:
     SubwindowMap dialogSubwindowMap_;
     std::mutex currentDialogSubwindowMutex_;
     RefPtr<Subwindow> currentDialogSubwindow_;
+    std::function<void()> onShowMenuCallback_;
+    std::function<void()> onHideMenuCallback_;
 };
 
 } // namespace OHOS::Ace

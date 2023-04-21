@@ -29,6 +29,7 @@ namespace OHOS::Ace {
 
 using OnHoverCallback = std::function<void(bool)>;
 using OnMouseCallback = std::function<void(MouseInfo& info)>;
+using OnNewDragFunc = std::function<void(const RefPtr<OHOS::Ace::DragEvent>&)>;
 
 enum class BoxStateAttribute {
     ASPECT_RATIO,
@@ -290,6 +291,16 @@ public:
         onDragMoveId_ = onDragMoveId;
     }
 
+    const OnNewDragFunc& GetOnDragEndId() const
+    {
+        return onDragEndId_;
+    }
+
+    void SetOnDragEndId(const OnNewDragFunc& onDragEndId)
+    {
+        onDragEndId_ = onDragEndId;
+    }
+
     const OnDropFunc& GetOnDragLeaveId() const
     {
         return onDragLeaveId_;
@@ -398,6 +409,7 @@ private:
     OnDropFunc onDragMoveId_;
     OnDropFunc onDragLeaveId_;
     OnDropFunc onDropId_;
+    OnNewDragFunc onDragEndId_;
     bool needMaterial_ = false;
 };
 

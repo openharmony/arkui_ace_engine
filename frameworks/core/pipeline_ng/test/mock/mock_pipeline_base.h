@@ -18,11 +18,11 @@
 
 #include "gmock/gmock.h"
 
-#include "core/pipeline/pipeline_base.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
-namespace OHOS::Ace {
-class MockPipelineBase : public PipelineBase {
-    DECLARE_ACE_TYPE(MockPipelineBase, PipelineBase);
+namespace OHOS::Ace::NG {
+class MockPipelineBase : public PipelineContext {
+    DECLARE_ACE_TYPE(MockPipelineBase, PipelineContext);
 
 public:
     MockPipelineBase() = default;
@@ -31,6 +31,7 @@ public:
     static void SetUp();
     static void TearDown();
     static RefPtr<MockPipelineBase> GetCurrent();
+    void SetRootSize(double rootWidth, double rootHeight);
 
     MOCK_METHOD0(SetupRootElement, void());
     MOCK_METHOD3(
@@ -55,8 +56,9 @@ public:
     MOCK_METHOD0(OnShow, void());
     MOCK_METHOD0(OnHide, void());
     MOCK_METHOD1(WindowFocus, void(bool isFocus));
-    MOCK_METHOD1(ShowContainerTitle, void(bool isShow));
-    MOCK_METHOD3(OnSurfaceChanged, void(int32_t width, int32_t height, WindowSizeChangeReason type));
+    MOCK_METHOD2(ShowContainerTitle, void(bool isShow, bool hasDeco));
+    MOCK_METHOD4(OnSurfaceChanged, void(int32_t width, int32_t height, WindowSizeChangeReason type,
+                                       const std::shared_ptr<Rosen::RSTransaction>& rsTransaction));
     MOCK_METHOD2(OnSurfacePositionChanged, void(int32_t posX, int32_t posY));
     MOCK_METHOD1(OnSurfaceDensityChanged, void(double density));
     MOCK_METHOD2(OnSystemBarHeightChanged, void(double statusBar, double navigationBar));
@@ -85,11 +87,20 @@ public:
     MOCK_CONST_METHOD1(OnDumpInfo, bool(const std::vector<std::string>& params));
     MOCK_METHOD2(FlushVsync, void(uint64_t nanoTimestamp, uint32_t frameCount));
     MOCK_METHOD3(SetRootRect, void(double width, double height, double offset));
+    MOCK_METHOD1(SetGetViewSafeAreaImpl, void(std::function<SafeAreaEdgeInserts()>&& callback));
+    MOCK_CONST_METHOD0(GetCurrentViewSafeArea, SafeAreaEdgeInserts());
     MOCK_METHOD0(FlushPipelineWithoutAnimation, void());
-    MOCK_METHOD1(OnVirtualKeyboardHeightChange, void(float keyboardHeight));
+    MOCK_METHOD0(FlushPipelineImmediately, void());
+    MOCK_METHOD2(OnVirtualKeyboardHeightChange,
+        void(float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction));
     MOCK_METHOD1(SetContainerWindow, void(bool isShow));
+    MOCK_METHOD1(SetTouchPipeline, void(const WeakPtr<PipelineBase>& context));
+    MOCK_METHOD2(AddEtsCardTouchEventCallback, void(int32_t ponitId, EtsCardTouchEventCallback&& callback));
 
     static RefPtr<MockPipelineBase> pipeline_;
+
+protected:
+    double dipScale_ = 1.0;
 };
-} // namespace OHOS::Ace
+} // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_PIPELINE_BASE_H

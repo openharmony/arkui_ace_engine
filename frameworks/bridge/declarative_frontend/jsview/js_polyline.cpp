@@ -36,13 +36,19 @@ void JSPolyline::JSBind(BindingTarget globalObj)
     JSClass<JSPolyline>::StaticMethod("width", &JSShapeAbstract::JsWidth);
     JSClass<JSPolyline>::StaticMethod("height", &JSShapeAbstract::JsHeight);
     JSClass<JSPolyline>::StaticMethod("points", &JSPolyline::JSPoints);
+
+    JSClass<JSPolyline>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSPolyline>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
+    JSClass<JSPolyline>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
+    JSClass<JSPolyline>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+
     JSClass<JSPolyline>::Inherit<JSShapeAbstract>();
     JSClass<JSPolyline>::Bind<>(globalObj);
 }
 
 void JSPolyline::JSPoints(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
+    if (info.Length() < 1 || !info[0]->IsArray()) {
         LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }

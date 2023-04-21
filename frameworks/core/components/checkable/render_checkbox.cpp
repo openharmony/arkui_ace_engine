@@ -168,7 +168,7 @@ void RenderCheckbox::HandleClick()
         if (!(component_->GetGroupName().empty())) {
             lastStatus_ = status_;
             auto value = (component_->GetGroupValue() ==
-                CheckableStatus::ALL) ? CheckableStatus::NONE : CheckableStatus::ALL;
+                CheckableStatus::NONE) ? CheckableStatus::ALL : CheckableStatus::NONE;
             component_->SetGroupValue(value);
             component_->SetMember(value == CheckableStatus::ALL);
             UpdateGroupStatus();

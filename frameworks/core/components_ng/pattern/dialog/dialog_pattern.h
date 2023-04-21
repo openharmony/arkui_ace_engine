@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,7 @@
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/pattern/dialog//dialog_event_hub.h"
+#include "core/components_ng/pattern/dialog/dialog_accessibility_property.h"
 #include "core/components_ng/pattern/dialog/dialog_layout_algorithm.h"
 #include "core/components_ng/pattern/dialog/dialog_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -59,6 +60,11 @@ public:
         return MakeRefPtr<DialogEventHub>();
     }
 
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        return MakeRefPtr<DialogAccessibilityProperty>();
+    }
+
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::SCOPE, true };
@@ -78,20 +84,43 @@ public:
         return message_;
     }
 
+    void SetOpenAnimation(const std::optional<AnimationOption>& openAnimation)
+    {
+        openAnimation_ = openAnimation;
+    }
+    std::optional<AnimationOption> GetOpenAnimation() const
+    {
+        return openAnimation_;
+    }
+
+    void SetCloseAnimation(const std::optional<AnimationOption>& closeAnimation)
+    {
+        closeAnimation_ = closeAnimation;
+    }
+    std::optional<AnimationOption> GetCloseAnimation() const
+    {
+        return closeAnimation_;
+    }
+
 private:
     void OnModifyDone() override;
+
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleClick(const GestureEvent& info);
+    void RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    bool OnKeyEvent(const KeyEvent& event);
+
     void PopDialog(int32_t buttonIdx);
 
     // set render context properties of content frame
-    static void UpdateContentRenderContext(const RefPtr<FrameNode>& contentNode, const RefPtr<DialogTheme>& theme);
+    void UpdateContentRenderContext(const RefPtr<FrameNode>& contentNode);
 
     RefPtr<FrameNode> BuildTitle(const DialogProperties& dialogProperties);
     RefPtr<FrameNode> BuildContent(const DialogProperties& dialogProperties);
 
     RefPtr<FrameNode> BuildButtons(const std::vector<ButtonInfo>& buttons);
-    RefPtr<FrameNode> CreateButton(const ButtonInfo& params, int32_t index);
+    RefPtr<FrameNode> CreateButton(const ButtonInfo& params, int32_t index, bool isCancel = false);
+    RefPtr<FrameNode> CreateButtonText(const std::string& text, const std::string& colorStr);
     // to close dialog when button is clicked
     void BindCloseCallBack(const RefPtr<GestureEventHub>& hub, int32_t buttonIdx);
     // build ActionSheet items
@@ -103,6 +132,9 @@ private:
     RefPtr<DialogTheme> dialogTheme_;
     RefPtr<UINode> customNode_;
     RefPtr<ClickEvent> onClick_;
+
+    std::optional<AnimationOption> openAnimation_;
+    std::optional<AnimationOption> closeAnimation_;
 
     // XTS inspector values
     std::string message_;

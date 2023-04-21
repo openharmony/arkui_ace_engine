@@ -47,15 +47,24 @@ enum WebCacheMode {
     USE_CACHE_ONLY
 };
 
+enum class WebDarkMode {
+    Off,
+    On,
+    Auto,
+};
+
 constexpr int32_t DEFAULT_TEXT_ZOOM_RATIO = 100;
 constexpr int32_t DEFAULT_FIXED_FONT_SIZE = 13;
 constexpr int32_t DEFAULT_FONT_SIZE = 16;
 constexpr int32_t DEFAULT_MINIMUM_FONT_SIZE = 8;
+constexpr int32_t DEFAULT_MINIMUM_LOGICAL_FONT_SIZE = 8;
 const std::string DEFAULT_CURSIVE_FONT_FAMILY = "cursive";
 const std::string DEFAULT_FANTASY_FONT_FAMILY = "fantasy";
+const std::string DEFAULT_FIXED_fONT_FAMILY = "monospace";
 const std::string DEFAULT_SANS_SERIF_FONT_FAMILY = "sans-serif";
 const std::string DEFAULT_SERIF_FONT_FAMILY = "serif";
 const std::string DEFAULT_STANDARD_FONT_FAMILY = "sans-serif";
+const std::string DEFAULT_SCROLLBAR_COLOR = "sys.color.ohos_id_color_foreground";
 
 class HitTestResult : public virtual AceType {
     DECLARE_ACE_TYPE(HitTestResult, AceType);

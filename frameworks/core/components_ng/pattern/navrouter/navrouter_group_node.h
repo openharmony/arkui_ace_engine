@@ -32,7 +32,8 @@ public:
         : GroupNode(tag, nodeId, pattern)
     {}
     ~NavRouterGroupNode() override = default;
-    void AddChildToGroup(const RefPtr<UINode>& child) override;
+    void AddChildToGroup(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT) override;
+    void DeleteChildFromGroup(int32_t slot = DEFAULT_NODE_SLOT) override;
     static RefPtr<NavRouterGroupNode> GetOrCreateGroupNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
 
@@ -51,13 +52,12 @@ public:
         return navDestinationNode_;
     }
 
-    void OnDetachFromMainTree() override;
-    void OnAttachToMainTree() override;
+    void OnDetachFromMainTree(bool recursive) override;
+    void OnAttachToMainTree(bool recursive) override;
 
 private:
     void AddNavDestinationToNavigation(const RefPtr<UINode>& parent);
     void SetDestinationChangeEvent(const RefPtr<UINode>& parent);
-    void InitNavigationContent(const RefPtr<UINode>& parent);
     void SetBackButtonEvent(const RefPtr<UINode>& parent);
     void SetOnStateChangeFalse(
         const RefPtr<UINode>& preNavDestination, const RefPtr<UINode>& navigation, bool isBackButton = false);

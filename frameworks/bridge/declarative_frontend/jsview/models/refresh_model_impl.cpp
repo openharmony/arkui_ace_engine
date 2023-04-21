@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -187,4 +187,6 @@ void RefreshModelImpl::SetChangeEvent(std::function<void(const std::string)>&& c
     auto eventMarker = EventMarker(changeEvent);
     component->SetChangeEvent(eventMarker);
 }
+
+void RefreshModelImpl::SetCustomBuilder(const RefPtr<NG::UINode>& customBuilder) {}
 } // namespace OHOS::Ace::Framework

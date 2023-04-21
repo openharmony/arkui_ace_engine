@@ -77,6 +77,10 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CrossIndex, int32_t, PROPERTY_UPDATE_LAYOUT);
 
     int32_t GetCustomCrossIndex(Axis axis) const;
+    int32_t GetMainSpan(Axis axis) const;
+    int32_t GetCrossSpan(Axis axis) const;
+    int32_t GetMainStart(Axis axis) const;
+    int32_t GetCrossStart(Axis axis) const;
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(GridItemLayoutProperty);

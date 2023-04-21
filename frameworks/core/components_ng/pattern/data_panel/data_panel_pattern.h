@@ -17,7 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_DATA_PANEL_DATA_PANEL_PATTERN_H
 
 #include "core/components_ng/pattern/data_panel/data_panel_layout_algorithm.h"
-#include "core/components_ng/pattern/data_panel/data_panel_modifer.h"
+#include "core/components_ng/pattern/data_panel/data_panel_modifier.h"
 #include "core/components_ng/pattern/data_panel/data_panel_paint_method.h"
 #include "core/components_ng/pattern/data_panel/data_panel_paint_property.h"
 #include "core/components_ng/pattern/pattern.h"

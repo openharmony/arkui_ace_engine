@@ -34,6 +34,9 @@ public:
     void SendKeyEventFromInputMethod(const MiscServices::KeyEvent& event) override;
     void SendKeyboardInfo(const MiscServices::KeyboardInfo& info) override;
     void MoveCursor(MiscServices::Direction direction) override;
+    void HandleSetSelection(int32_t start, int32_t end) override;
+    void HandleExtendAction(int32_t action) override;
+    void HandleSelect(int32_t keyCode, int32_t cursorMoveSkip) override;
 
 private:
     void PostTaskToUI(const std::function<void()>& task);

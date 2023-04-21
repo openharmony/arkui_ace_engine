@@ -16,8 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_ROSEN_RENDER_CONTEXT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_ROSEN_RENDER_CONTEXT_H
 
-#include "third_party/skia/include/core/SkCanvas.h"
-#include "third_party/skia/include/core/SkRefCnt.h"
+#include "include/core/SkCanvas.h"
+#include "include/core/SkRefCnt.h"
 
 #include "base/geometry/rect.h"
 #include "core/pipeline/base/render_context.h"

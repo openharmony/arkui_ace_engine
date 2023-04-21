@@ -19,7 +19,6 @@
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 
 namespace OHOS::Ace::NG {
-
 void TextFieldController::Focus(bool focus) {}
 
 void TextFieldController::ShowError(const std::string& errorText) {}
@@ -35,6 +34,12 @@ void TextFieldController::CaretPosition(int32_t caretPosition)
     if (setCaretPosition_) {
         setCaretPosition_(caretPosition);
     }
+}
+
+void TextFieldController::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
+{
+    auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    textFieldPattern->SetSelectionFlag(selectionStart, selectionEnd);
 }
 
 void TextFieldController::Insert(const std::string& args) {}

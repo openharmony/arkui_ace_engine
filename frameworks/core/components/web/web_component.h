@@ -20,6 +20,7 @@
 #include <utility>
 
 #include "base/geometry/size.h"
+#include "base/log/log.h"
 #include "base/utils/utils.h"
 #include "core/components/box/drag_drop_event.h"
 #include "core/components/declaration/common/declaration.h"
@@ -46,7 +47,9 @@ public:
     using MethodCall = std::function<void(const std::string&)>;
     using Method = std::string;
     using SetWebIdCallback = std::function<void(int32_t)>;
+    using SetHapPathCallback = std::function<void(const std::string&)>;
     using JsProxyCallback = std::function<void()>;
+    using PreKeyEventCallback = std::function<bool(KeyEventInfo& keyEventInfo)>;
 
     WebComponent() = default;
     explicit WebComponent(const std::string& type);
@@ -67,6 +70,7 @@ public:
 
     void SetSrc(const std::string& src)
     {
+        CHECK_NULL_VOID(declaration_);
         declaration_->SetWebSrc(src);
     }
 
@@ -75,8 +79,19 @@ public:
         return declaration_->GetWebSrc();
     }
 
+    void SetPopup(bool popup)
+    {
+        isPopup_ = popup;
+    }
+
+    void SetParentNWebId(int32_t parentNWebId)
+    {
+        parentNWebId_ = parentNWebId;
+    }
+
     void SetData(const std::string& data)
     {
+        CHECK_NULL_VOID(declaration_);
         declaration_->SetWebData(data);
     }
 
@@ -87,6 +102,7 @@ public:
 
     void SetPageStartedEventId(const EventMarker& pageStartedEventId)
     {
+        CHECK_NULL_VOID(declaration_);
         declaration_->SetPageStartedEventId(pageStartedEventId);
     }
 
@@ -97,6 +113,7 @@ public:
 
     void SetPageFinishedEventId(const EventMarker& pageFinishedEventId)
     {
+        CHECK_NULL_VOID(declaration_);
         declaration_->SetPageFinishedEventId(pageFinishedEventId);
     }
 
@@ -122,6 +139,7 @@ public:
 
     void SetTitleReceiveEventId(const EventMarker& titleReceiveEventId)
     {
+        CHECK_NULL_VOID(declaration_);
         declaration_->SetTitleReceiveEventId(titleReceiveEventId);
     }
 
@@ -132,6 +150,7 @@ public:
 
     void SetOnFullScreenExitEventId(const EventMarker& fullScreenExitEventId)
     {
+        CHECK_NULL_VOID(declaration_);
         declaration_->SetOnFullScreenExitEventId(fullScreenExitEventId);
     }
 
@@ -142,6 +161,7 @@ public:
 
     void SetGeolocationHideEventId(const EventMarker& geolocationHideEventId)
     {
+        CHECK_NULL_VOID(declaration_);
         declaration_->SetGeolocationHideEventId(geolocationHideEventId);
     }
 
@@ -152,6 +172,7 @@ public:
 
     void SetGeolocationShowEventId(const EventMarker& geolocationShowEventId)
     {
+        CHECK_NULL_VOID(declaration_);
         declaration_->SetGeolocationShowEventId(geolocationShowEventId);
     }
 
@@ -162,6 +183,7 @@ public:
 
     void SetRequestFocusEventId(const EventMarker& requestFocusEventId)
     {
+        CHECK_NULL_VOID(declaration_);
         declaration_->SetRequestFocusEventId(requestFocusEventId);
     }
 
@@ -172,6 +194,7 @@ public:
 
     void SetDownloadStartEventId(const EventMarker& downloadStartEventId)
     {
+        CHECK_NULL_VOID(declaration_);
         declaration_->SetDownloadStartEventId(downloadStartEventId);
     }
 
@@ -182,6 +205,7 @@ public:
 
     void SetPageErrorEventId(const EventMarker& pageErrorEventId)
     {
+        CHECK_NULL_VOID(declaration_);
         declaration_->SetPageErrorEventId(pageErrorEventId);
     }
 
@@ -192,6 +216,7 @@ public:
 
     void SetHttpErrorEventId(const EventMarker& httpErrorEventId)
     {
+        CHECK_NULL_VOID(declaration_);
         declaration_->SetHttpErrorEventId(httpErrorEventId);
     }
 
@@ -202,6 +227,7 @@ public:
 
     void SetMessageEventId(const EventMarker& messageEventId)
     {
+        CHECK_NULL_VOID(declaration_);
         declaration_->SetMessageEventId(messageEventId);
     }
 
@@ -212,6 +238,7 @@ public:
 
     void SetRenderExitedId(const EventMarker& renderExitedId)
     {
+        CHECK_NULL_VOID(declaration_);
         declaration_->SetRenderExitedId(renderExitedId);
     }
 
@@ -222,6 +249,7 @@ public:
 
     void SetRefreshAccessedHistoryId(const EventMarker& refreshAccessedHistoryId)
     {
+        CHECK_NULL_VOID(declaration_);
         declaration_->SetRefreshAccessedHistoryId(refreshAccessedHistoryId);
     }
 
@@ -232,6 +260,7 @@ public:
 
     void SetResourceLoadId(const EventMarker& resourceLoadId)
     {
+        CHECK_NULL_VOID(declaration_);
         declaration_->SetResourceLoadId(resourceLoadId);
     }
 
@@ -242,6 +271,7 @@ public:
 
     void SetScaleChangeId(const EventMarker& scaleChangeId)
     {
+        CHECK_NULL_VOID(declaration_);
         declaration_->SetScaleChangeId(scaleChangeId);
     }
 
@@ -252,6 +282,7 @@ public:
 
     void SetScrollId(const EventMarker& scrollId)
     {
+        CHECK_NULL_VOID(declaration_);
         declaration_->SetScrollId(scrollId);
     }
 
@@ -262,6 +293,7 @@ public:
 
     void SetPermissionRequestEventId(const EventMarker& permissionRequestEventId)
     {
+        CHECK_NULL_VOID(declaration_);
         declaration_->SetPermissionRequestEventId(permissionRequestEventId);
     }
 
@@ -288,6 +320,7 @@ public:
 
     void SetWindowExitEventId(const EventMarker& windowExitEventId)
     {
+        CHECK_NULL_VOID(declaration_);
         declaration_->SetWindowExitEventId(windowExitEventId);
     }
 
@@ -321,6 +354,16 @@ public:
     SetWebIdCallback GetSetWebIdCallback() const
     {
         return setWebIdCallback_;
+    }
+
+    void SetSetHapPathCallback(SetHapPathCallback&& callback)
+    {
+        setHapPathCallback_ = std::move(callback);
+    }
+
+    SetHapPathCallback GetSetHapPathCallback() const
+    {
+        return setHapPathCallback_;
     }
 
     bool GetJsEnabled() const
@@ -500,6 +543,16 @@ public:
     void SetMultiWindowAccessEnabled(bool isEnabled)
     {
         isMultiWindowAccessEnabled_ = isEnabled;
+    }
+
+    bool GetAllowWindowOpenMethod() const
+    {
+        return isAllowWindowOpenMethod_;
+    }
+
+    void SetAllowWindowOpenMethod(bool isEnabled)
+    {
+        isAllowWindowOpenMethod_ = isEnabled;
     }
 
     bool GetIsInitialScaleSet() const
@@ -716,6 +769,23 @@ public:
         onUrlLoadInterceptImpl_ = onUrlLoadInterceptImpl;
     }
 
+    using OnLoadInterceptImpl = std::function<bool(const BaseEventInfo* info)>;
+    bool OnLoadIntercept(const BaseEventInfo* info) const
+    {
+        if (onLoadInterceptImpl_) {
+            return onLoadInterceptImpl_(info);
+        }
+        return false;
+    }
+    void SetOnLoadIntercept(OnLoadInterceptImpl&& onLoadInterceptImpl)
+    {
+        if (onLoadInterceptImpl == nullptr) {
+            return;
+        }
+
+        onLoadInterceptImpl_ = onLoadInterceptImpl;
+    }
+
     using OnInterceptRequestImpl = std::function<RefPtr<WebResponse>(const BaseEventInfo* info)>;
     RefPtr<WebResponse> OnInterceptRequest(const BaseEventInfo* info) const
     {
@@ -760,6 +830,7 @@ public:
 
     void SetSearchResultReceiveEventId(const EventMarker& searchResultReceiveEventId)
     {
+        CHECK_NULL_VOID(declaration_);
         declaration_->SetSearchResultReceiveEventId(searchResultReceiveEventId);
     }
 
@@ -840,12 +911,23 @@ public:
         }
     }
 
+    void SetOnInterceptKeyEventCallback(const PreKeyEventCallback& onPreKeyEventId)
+    {
+        onPreKeyEvent_ = onPreKeyEventId;
+    }
+
+    PreKeyEventCallback GetOnInterceptKeyEventCallback() const
+    {
+        return onPreKeyEvent_;
+    }
+
 private:
     RefPtr<WebDeclaration> declaration_;
     CreatedCallback createdCallback_ = nullptr;
     ReleasedCallback releasedCallback_ = nullptr;
     ErrorCallback errorCallback_ = nullptr;
     SetWebIdCallback setWebIdCallback_ = nullptr;
+    SetHapPathCallback setHapPathCallback_ = nullptr;
     JsProxyCallback jsProxyCallback_ = nullptr;
     RefPtr<WebDelegate> delegate_;
     RefPtr<WebController> webController_;
@@ -857,6 +939,7 @@ private:
     OnFileSelectorShowImpl onFileSelectorShowImpl_;
     OnFullScreenEnterImpl onFullScreenEnterImpl_;
     OnUrlLoadInterceptImpl onUrlLoadInterceptImpl_;
+    OnLoadInterceptImpl onLoadInterceptImpl_;
     OnHttpAuthRequestImpl onHttpAuthRequestImpl_;
     OnSslErrorRequestImpl onSslErrorRequestImpl_;
     OnSslSelectCertRequestImpl onSslSelectCertRequestImpl_;
@@ -885,6 +968,7 @@ private:
     WebCacheMode cacheMode_ = WebCacheMode::DEFAULT;
     bool isWebDebuggingAccessEnabled_ = false;
     bool isMultiWindowAccessEnabled_ = false;
+    bool isAllowWindowOpenMethod_ = false;
     OnMouseCallback onMouseEvent_;
     OnKeyEventCallback onKeyEvent_;
     float initialScale_;
@@ -898,6 +982,9 @@ private:
     OnDropFunc onDragLeaveId_;
     OnDropFunc onDropId_;
     bool isPinchSmoothModeEnabled_ = false;
+    PreKeyEventCallback onPreKeyEvent_;
+    bool isPopup_ = false;
+    int32_t parentNWebId_ = -1;
 };
 
 } // namespace OHOS::Ace

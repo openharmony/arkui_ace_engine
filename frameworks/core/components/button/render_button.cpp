@@ -239,16 +239,18 @@ void RenderButton::HandleClickEvent()
     PlayClickAnimation();
 }
 
-void RenderButton::HandleKeyEnterEvent(const ClickInfo& info)
+bool RenderButton::HandleKeyEnterEvent(const ClickInfo& info)
 {
     if (!buttonComponent_) {
-        return;
+        return false;
     }
     auto onEnterWithInfo =
         AceAsyncEvent<void(const ClickInfo&)>::Create(buttonComponent_->GetKeyEnterEventId(), context_);
     if (onEnterWithInfo) {
         onEnterWithInfo(info);
+        return true;
     }
+    return false;
 }
 
 void RenderButton::HandleKeyEnterEvent()
@@ -322,6 +324,10 @@ void RenderButton::OnMouseHoverEnterTest()
         return;
     }
     if (hoverAnimationType_ == HoverAnimationType::NONE) {
+        if (buttonComponent_->IsPopupButton()) {
+            needHoverColor_ = true;
+            MarkNeedRender();
+        }
         LOGW("HoverAnimationType: %{public}d is not supported in this component.", hoverAnimationType_);
         return;
     }
@@ -349,7 +355,7 @@ void RenderButton::AnimateMouseHoverExit()
 }
 void RenderButton::OnMouseHoverExitTest()
 {
-    if (hoverAnimationType_ == HoverAnimationType::NONE) {
+    if (hoverAnimationType_ == HoverAnimationType::NONE && !buttonComponent_->IsPopupButton()) {
         LOGW("HoverAnimationType: %{public}d is not supported in this component.", hoverAnimationType_);
         return;
     }
@@ -827,7 +833,7 @@ void RenderButton::PlayClickScaleAnimation(float keyTime, int32_t duration)
 
 void RenderButton::PlayClickAnimation()
 {
-    if (isPhone_ || isWatch_) {
+    if (isPhone_ || isWatch_ || isTablet_) {
         return;
     }
     if (!isFocus_) {

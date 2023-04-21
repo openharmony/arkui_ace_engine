@@ -29,6 +29,7 @@ namespace OHOS::Ace::NG {
 class GestureEventHub;
 class PanRecognizer;
 class LongPressRecognizer;
+class FrameNode;
 
 class DragEvent : public AceType {
     DECLARE_ACE_TYPE(DragEvent, AceType)
@@ -92,7 +93,21 @@ public:
 
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result) override;
-
+#ifdef ENABLE_DRAG_FRAMEWORK
+    void SetThumbnailCallback(std::function<void(Offset)>&& callback);
+    void SetFilter(const RefPtr<DragEventActuator>& actuator);
+    void SetPixelMap(const RefPtr<DragEventActuator>& actuator);
+    void SetEventColumn();
+    void HideFilter();
+    void HidePixelMap(bool startDrag = false, double x = 0, double y = 0);
+    void HideEventColumn();
+    void BindClickEvent(const RefPtr<FrameNode>& columnNode);
+    void ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode);
+    void SetTextAnimation(const RefPtr<GestureEventHub>& gestureHub, const Offset& globalLocation);
+    void HideTextAnimation(bool startDrag = false, double globalX = 0, double globalY = 0);
+    bool GetIsBindOverlayValue(const RefPtr<DragEventActuator>& actuator);
+    bool IsAllowedDrag();
+#endif // ENABLE_DRAG_FRAMEWORK
     PanDirection GetDirection() const
     {
         return direction_;
@@ -105,6 +120,7 @@ private:
     RefPtr<PanRecognizer> panRecognizer_;
     RefPtr<LongPressRecognizer> longPressRecognizer_;
     RefPtr<SequencedRecognizer> SequencedRecognizer_;
+    WeakPtr<FrameNode> columnNodeWeak_;
 
     PanDirection direction_;
     int32_t fingers_ = 1;

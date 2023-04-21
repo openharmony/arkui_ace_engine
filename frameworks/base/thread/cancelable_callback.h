@@ -25,6 +25,9 @@
 
 namespace OHOS::Ace {
 
+using std::chrono_literals::operator""s;
+using std::chrono_literals::operator""ms;
+
 using TaskThread = uint32_t;
 constexpr TaskThread PLATFORM_TASK = 0;
 constexpr TaskThread MAIN_TASK = 1;
@@ -63,7 +66,7 @@ public:
 
     void Reset(const FunctionType& callback, bool needCancel = true, bool waitUntilCompleted = false);
     void Reset(FunctionType&& callback, bool needCancel = true, bool waitUntilCompleted = false);
-    bool WaitUntilComplete();
+    bool WaitUntilComplete(std::chrono::milliseconds timeoutMs = 0ms);
     bool Cancel(bool waitUntilCompleted = false);
     void operator()(V&&... values) const;
     operator bool() const
@@ -122,7 +125,7 @@ void CancelableCallback<void(V...)>::Reset(
 }
 
 template<class... V>
-bool CancelableCallback<void(V...)>::WaitUntilComplete()
+bool CancelableCallback<void(V...)>::WaitUntilComplete(std::chrono::milliseconds timeoutMs)
 {
     RefPtr<Callback> impl(std::move(impl_));
     if (!impl) {
@@ -133,6 +136,11 @@ bool CancelableCallback<void(V...)>::WaitUntilComplete()
         case READY:
         case RUNNING: {
             std::shared_future<int32_t> future(impl->future_);
+            if (timeoutMs != 0ms && std::future_status::timeout == future.wait_for(timeoutMs)) {
+                CancelableCallback avatar(*this);
+                avatar.impl_ = impl;
+                avatar.Cancel(true);
+            }
             impl.Reset();
             return future.get() == COMPLETED;
         }

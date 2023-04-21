@@ -25,22 +25,15 @@ InputEventActuator::InputEventActuator(const WeakPtr<InputEventHub>& inputEventH
     CHECK_NULL_VOID(refInputEventHub);
     auto frameNode = refInputEventHub->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
-    eventTarget_ = MakeRefPtr<MouseEventTarget>();
+    mouseEventTarget_ = MakeRefPtr<MouseEventTarget>(frameNode->GetTag(), frameNode->GetId());
+    hoverEventTarget_ = MakeRefPtr<HoverEventTarget>(frameNode->GetTag(), frameNode->GetId());
+    hoverEffectTarget_ = MakeRefPtr<HoverEffectTarget>(frameNode->GetTag(), frameNode->GetId());
     axisEventTarget_ = MakeRefPtr<AxisEventTarget>(frameNode->GetTag());
 }
 
-void InputEventActuator::OnCollectMouseEvent(const OffsetF& coordinateOffset,
-    const GetEventTargetImpl& getEventTargetImpl, MouseTestResult& onMouseResult, RefPtr<FrameNode>& hoverNode)
+void InputEventActuator::OnCollectMouseEvent(
+    const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result)
 {
-    auto inputEventHub = inputEventHub_.Upgrade();
-    CHECK_NULL_VOID(inputEventHub);
-    auto frameNode = inputEventHub->GetFrameNode();
-    CHECK_NULL_VOID(frameNode);
-
-    if (!hoverNode && inputEventHub->GetHoverEffect() != HoverEffectType::UNKNOWN) {
-        hoverNode = frameNode;
-    }
-
     if (inputEvents_.empty() && !userCallback_) {
         return;
     }
@@ -57,14 +50,14 @@ void InputEventActuator::OnCollectMouseEvent(const OffsetF& coordinateOffset,
             (*actuator->userCallback_)(info);
         }
     };
-    eventTarget_->SetOnMouseCallback(onMouseCallback);
-    eventTarget_->SetCoordinateOffset(coordinateOffset);
-    eventTarget_->SetGetEventTargetImpl(getEventTargetImpl);
-    onMouseResult.emplace_back(eventTarget_);
+    mouseEventTarget_->SetCallback(onMouseCallback);
+    mouseEventTarget_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
+    mouseEventTarget_->SetGetEventTargetImpl(getEventTargetImpl);
+    result.emplace_back(mouseEventTarget_);
 }
 
 void InputEventActuator::OnCollectHoverEvent(
-    const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl, MouseTestResult& onHoverResult)
+    const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result)
 {
     if (inputEvents_.empty() && !userCallback_) {
         return;
@@ -82,10 +75,24 @@ void InputEventActuator::OnCollectHoverEvent(
             (*actuator->userCallback_)(info);
         }
     };
-    eventTarget_->SetOnHoverCallback(onHoverCallback);
-    eventTarget_->SetCoordinateOffset(coordinateOffset);
-    eventTarget_->SetGetEventTargetImpl(getEventTargetImpl);
-    onHoverResult.emplace_back(eventTarget_);
+    hoverEventTarget_->SetCallback(onHoverCallback);
+    hoverEventTarget_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
+    hoverEventTarget_->SetGetEventTargetImpl(getEventTargetImpl);
+    result.emplace_back(hoverEventTarget_);
+}
+
+void InputEventActuator::OnCollectHoverEffect(
+    const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result)
+{
+    auto inputEventHub = inputEventHub_.Upgrade();
+    CHECK_NULL_VOID(inputEventHub);
+    auto frameNode = inputEventHub->GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+
+    hoverEffectTarget_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
+    hoverEffectTarget_->SetGetEventTargetImpl(getEventTargetImpl);
+    hoverEffectTarget_->SetHoverNode(AceType::WeakClaim(AceType::RawPtr(frameNode)));
+    result.emplace_back(hoverEffectTarget_);
 }
 
 void InputEventActuator::OnCollectAxisEvent(

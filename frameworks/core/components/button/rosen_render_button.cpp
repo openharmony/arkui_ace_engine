@@ -15,9 +15,9 @@
 
 #include "core/components/button/rosen_render_button.h"
 
-#include "third_party/skia/include/core/SkMaskFilter.h"
-#include "third_party/skia/include/core/SkPath.h"
-#include "third_party/skia/include/core/SkRRect.h"
+#include "include/core/SkMaskFilter.h"
+#include "include/core/SkPath.h"
+#include "include/core/SkRRect.h"
 
 #include "core/components/box/render_box.h"
 #include "core/pipeline/base/rosen_render_context.h"
@@ -54,6 +54,7 @@ constexpr uint8_t DEFAULT_OPACITY = 255;
 constexpr Dimension FOCUS_PADDING = 2.0_vp;
 constexpr Dimension FOCUS_BORDER_WIDTH = 2.0_vp;
 constexpr uint32_t FOCUS_BORDER_COLOR = 0xFF0A59F7;
+constexpr uint32_t FOCUS_POPUP_BORDER_COLOR = 0xFFFFFFFF;
 
 } // namespace
 
@@ -114,7 +115,11 @@ void RosenRenderButton::Paint(RenderContext& context, const Offset& offset)
     auto pipeline = context_.Upgrade();
     if (isFocus_ && (isTablet_ || isPhone_) && pipeline && pipeline->GetIsTabKeyPressed()) {
         // Need to use PipelineContext::ShowFocusAnimation
-        PaintFocus(context, offset);
+        if (buttonComponent_->IsPopupButton()) {
+            PaintPopupFocus(context);
+        } else {
+            PaintFocus(context, offset);
+        }
         SyncFocusGeometryProperties();
     }
     RenderNode::Paint(context, offset);
@@ -493,8 +498,34 @@ void RosenRenderButton::PaintFocus(RenderContext& context, const Offset& offset)
     paint.setAntiAlias(true);
     SkRRect rRect;
     rRect.setRectXY(SkRect::MakeIWH(focusBorderWidth, focusBorderHeight), focusRadius, focusRadius);
-    rRect.offset(- NormalizeToPx(FOCUS_PADDING  + FOCUS_BORDER_WIDTH * HALF),
-        - NormalizeToPx(FOCUS_PADDING  + FOCUS_BORDER_WIDTH * HALF));
+    rRect.offset(-NormalizeToPx(FOCUS_PADDING + FOCUS_BORDER_WIDTH * HALF),
+        -NormalizeToPx(FOCUS_PADDING + FOCUS_BORDER_WIDTH * HALF));
+    canvas->drawRRect(rRect, paint);
+}
+
+void RosenRenderButton::PaintPopupFocus(RenderContext& context)
+{
+    auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
+    if (!canvas) {
+        LOGE("paint canvas is null");
+        return;
+    }
+    Size canvasSize = GetLayoutSize();
+    double focusBorderHeight = canvasSize.Height() - NormalizeToPx(FOCUS_BORDER_WIDTH) / HALF;
+    double focusBorderWidth = canvasSize.Width() - NormalizeToPx(FOCUS_BORDER_WIDTH) / HALF;
+    double focusRadius = focusBorderHeight * HALF;
+    if (!buttonComponent_) {
+        return;
+    }
+
+    SkPaint paint;
+    paint.setColor(FOCUS_POPUP_BORDER_COLOR);
+    paint.setStyle(SkPaint::Style::kStroke_Style);
+    paint.setStrokeWidth(NormalizeToPx(FOCUS_BORDER_WIDTH));
+    paint.setAntiAlias(true);
+    SkRRect rRect;
+    rRect.setRectXY(SkRect::MakeIWH(focusBorderWidth, focusBorderHeight), focusRadius, focusRadius);
+    rRect.offset(NormalizeToPx(FOCUS_BORDER_WIDTH), NormalizeToPx(FOCUS_BORDER_WIDTH));
     canvas->drawRRect(rRect, paint);
 }
 

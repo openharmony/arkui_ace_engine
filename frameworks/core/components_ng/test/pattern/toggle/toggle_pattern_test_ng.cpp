@@ -12,20 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#include <cstddef>
-#include <optional>
-#include <vector>
-
 #include "gtest/gtest.h"
-
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-
 #define protected public
 #define private public
 #include "base/geometry/dimension.h"
 #include "core/components/checkable/checkable_theme.h"
+#include "core/components/toggle/toggle_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/toggle_button_event_hub.h"
 #include "core/components_ng/pattern/button/toggle_button_paint_property.h"
@@ -40,7 +32,6 @@
 #include "core/components_ng/pattern/toggle/toggle_model.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
 #include "core/components_ng/test/mock/rosen/mock_canvas.h"
-#include "core/components_ng/test/mock/rosen/testing_canvas.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
@@ -401,6 +392,17 @@ HWTEST_F(TogglePatternTestNg, TogglePatternTest008, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetMarginProperty()->right.value(), CalcLength(PADDING.ConvertToPx()));
     EXPECT_EQ(layoutProperty->GetMarginProperty()->top.value(), CalcLength(PADDING.ConvertToPx()));
     EXPECT_EQ(layoutProperty->GetMarginProperty()->bottom.value(), CalcLength(PADDING.ConvertToPx()));
+
+    auto geometryNode = switchFrameNode->GetGeometryNode();
+    geometryNode->SetContentSize(SizeF(SWITCH_WIDTH, SWITCH_HEIGHT));
+    auto paintProperty = switchFrameNode->GetPaintProperty<SwitchPaintProperty>();
+    switchPattern->isOn_ = false;
+    paintProperty->UpdateIsOn(true);
+    switchPattern->OnModifyDone();
+    EXPECT_EQ(switchPattern->isOn_, false);
+    EXPECT_EQ(paintProperty->GetIsOnValue(), true);
+    paintProperty->UpdateCurve(Curves::LINEAR);
+    switchPattern->PlayTranslateAnimation(0.0f, 1.0f);
 }
 
 /**
@@ -444,34 +446,20 @@ HWTEST_F(TogglePatternTestNg, TogglePatternTest009, TestSize.Level1)
      * @tc.steps: step4. call switchPattern OnDirtyLayoutWrapperSwap function, compare result.
      * @tc.expected: step4. OnDirtyLayoutWrapperSwap success and result correct.
      */
-
-    /**
-    //     case 1: LayoutWrapper::SkipMeasure = true , skipLayout = true;
-    */
     bool first_case = switchPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, true);
     EXPECT_FALSE(first_case);
-
-    /**
-    //     case 2: LayoutWrapper::SkipMeasure = false , skipLayout = false;
-    */
     bool second_case = switchPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
     EXPECT_FALSE(second_case);
-
     layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(switchLayoutAlgorithm, NO_SKIP_MEASURE);
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
     switchPattern->isOn_ = true;
-
-    /**
-    //     case 3: LayoutWrapper::SkipMeasure = false , skipLayout = true;
-    */
     bool third_case = switchPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, false);
     EXPECT_FALSE(third_case);
-
-    /**
-    //     case 4: LayoutWrapper::SkipMeasure = false , skipLayout = true;
-    */
     bool forth_case = switchPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, true);
     EXPECT_TRUE(forth_case);
+    switchPattern->isOn_ = false;
+    bool fifth_case = switchPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, true);
+    EXPECT_TRUE(fifth_case);
 }
 
 /**
@@ -503,22 +491,42 @@ HWTEST_F(TogglePatternTestNg, TogglePatternTest0010, TestSize.Level1)
     EXPECT_NE(hub, nullptr);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     EXPECT_NE(gestureHub, nullptr);
-    RefPtr<PanEvent> panEvent = AceType::MakeRefPtr<PanEvent>(nullptr, nullptr, nullptr, nullptr);
-    switchPattern->panEvent_ = panEvent;
+    // InitPanEvent()
     switchPattern->InitPanEvent(gestureHub);
-
-    RefPtr<ClickEvent> clickEvent = AceType::MakeRefPtr<ClickEvent>(nullptr);
-    switchPattern->clickListener_ = clickEvent;
+    GestureEvent info;
+    info.SetInputEventType(InputEventType::AXIS);
+    switchPattern->panEvent_->actionStart_(info);
+    switchPattern->panEvent_->actionUpdate_(info);
+    switchPattern->panEvent_->actionEnd_(info);
+    switchPattern->panEvent_->actionCancel_();
+    info.SetInputEventType(InputEventType::TOUCH_SCREEN);
+    switchPattern->panEvent_->actionStart_(info);
+    switchPattern->panEvent_->actionUpdate_(info);
+    switchPattern->panEvent_->actionEnd_(info);
+    switchPattern->InitPanEvent(gestureHub);
+    // InitClickEvent()
     switchPattern->InitClickEvent();
-
-    RefPtr<TouchEventImpl> touchEvent = AceType::MakeRefPtr<TouchEventImpl>(nullptr);
-    switchPattern->touchListener_ = touchEvent;
+    switchPattern->InitClickEvent();
+    // InitTouchEvent()
     switchPattern->InitTouchEvent();
+    switchPattern->InitTouchEvent();
+    TouchEventInfo touchInfo("onTouch");
+    TouchLocationInfo touchInfo1(1);
+    touchInfo1.SetTouchType(TouchType::DOWN);
+    touchInfo.AddTouchLocationInfo(std::move(touchInfo1));
+    switchPattern->touchListener_->GetTouchEventCallback()(touchInfo);
+    TouchLocationInfo touchInfo2(2);
+    touchInfo2.SetTouchType(TouchType::UP);
+    touchInfo.AddTouchLocationInfo(std::move(touchInfo2));
+    switchPattern->touchListener_->GetTouchEventCallback()(touchInfo);
+    TouchLocationInfo touchInfo3(3);
+    touchInfo2.SetTouchType(TouchType::CANCEL);
+    touchInfo.AddTouchLocationInfo(std::move(touchInfo3));
+    switchPattern->touchListener_->GetTouchEventCallback()(touchInfo);
 
-    // std::move(mouseTask)
-    auto mouseTask = [](bool isHover) {};
-    RefPtr<InputEvent> inputEvent = AceType::MakeRefPtr<InputEvent>(std::move(mouseTask));
-    switchPattern->mouseEvent_ = inputEvent;
+    // InitMouseEvent()
+    switchPattern->InitMouseEvent();
+    EXPECT_NE(switchPattern->mouseEvent_, nullptr);
     switchPattern->InitMouseEvent();
 
     switchPattern->isOn_ = true;
@@ -529,7 +537,6 @@ HWTEST_F(TogglePatternTestNg, TogglePatternTest0010, TestSize.Level1)
 
     // execute Handle function
     switchPattern->HandleMouseEvent(true);
-    GestureEvent info;
     info.SetMainDelta(10.0f);
     switchPattern->HandleDragUpdate(info);
     info.SetMainDelta(0.0f);
@@ -555,6 +562,135 @@ HWTEST_F(TogglePatternTestNg, TogglePatternTest0010, TestSize.Level1)
     switchPattern->HandleDragEnd();
     switchPattern->isOn_ = true;
     switchPattern->HandleDragEnd();
+    switchPattern->controller_ = AccessibilityManager::MakeRefPtr<Animator>();
+    switchPattern->controller_->status_ = Animator::Status::RUNNING;
+    switchPattern->OnClick();
+}
+
+/**
+ * @tc.name: TogglePaintTest0011
+ * @tc.desc: Test toggle SetSelectedColor(undefined).
+ * @tc.type: FUNC
+ */
+HWTEST_F(TogglePatternTestNg, TogglePatternTest0011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create switch and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    std::optional<Color> selectedColor = std::optional<Color>();
+
+    /**
+     * @tc.steps: step1. test checkbox
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto checkboxTheme = AceType::MakeRefPtr<CheckboxTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(checkboxTheme));
+
+    toggleModelNG.Create(TOGGLE_TYPE[0], IS_ON);
+    toggleModelNG.SetSelectedColor(selectedColor);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+
+    auto checkboxPattern = AceType::DynamicCast<CheckBoxPattern>(frameNode->GetPattern());
+    EXPECT_NE(checkboxPattern, nullptr);
+    auto checkboxPaintProperty = checkboxPattern->GetPaintProperty<CheckBoxPaintProperty>();
+    EXPECT_NE(checkboxPaintProperty, nullptr);
+    EXPECT_EQ(checkboxPaintProperty->GetCheckBoxSelectedColor(), checkboxTheme->GetActiveColor());
+
+    /**
+     * @tc.steps: step2. test button
+     */
+    themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto toggleButtonTheme = AceType::MakeRefPtr<ToggleTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(toggleButtonTheme));
+
+    toggleModelNG.Create(TOGGLE_TYPE[1], IS_ON);
+    toggleModelNG.SetSelectedColor(selectedColor);
+
+    frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+    auto buttonPaintProperty = frameNode->GetPaintProperty<ToggleButtonPaintProperty>();
+    EXPECT_NE(buttonPaintProperty, nullptr);
+    EXPECT_EQ(buttonPaintProperty->GetSelectedColor(), toggleButtonTheme->GetCheckedColor());
+
+    /**
+     * @tc.steps: step3. test switch
+     */
+    themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto switchTheme = AceType::MakeRefPtr<SwitchTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
+
+    toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
+    toggleModelNG.SetSelectedColor(selectedColor);
+
+    frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+    auto switchPattern = AceType::DynamicCast<SwitchPattern>(frameNode->GetPattern());
+    EXPECT_NE(switchPattern, nullptr);
+    auto switchPaintProperty = switchPattern->GetPaintProperty<SwitchPaintProperty>();
+    EXPECT_NE(switchPaintProperty, nullptr);
+    EXPECT_EQ(switchPaintProperty->GetSelectedColor(), switchTheme->GetActiveColor());
+}
+
+/**
+ * @tc.name: TogglePatternTest0012
+ * @tc.desc: Test toggle OnModifyDone default margin.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TogglePatternTestNg, TogglePatternTest0012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create switch and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
+    auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(switchFrameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. create switch frameNode, get switchPattern.
+     * @tc.expected: step2. get switchPattern success.
+     */
+    auto switchPattern = switchFrameNode->GetPattern<SwitchPattern>();
+    EXPECT_NE(switchPattern, nullptr);
+    auto layoutProperty = switchFrameNode->GetLayoutProperty();
+
+    // set switchTheme to themeManager before using themeManager to get switchTheme
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto switchTheme = AceType::MakeRefPtr<SwitchTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
+
+    MarginProperty margin;
+    margin.left = CalcLength(PADDING.ConvertToPx());
+    layoutProperty->UpdateMargin(margin); // GetMarginProperty
+
+    switchPattern->OnModifyDone();
+    EXPECT_EQ(layoutProperty->GetMarginProperty()->left.value(), CalcLength(PADDING.ConvertToPx()));
+    EXPECT_EQ(layoutProperty->GetMarginProperty()->right.value(),
+              CalcLength(switchTheme->GetHotZoneHorizontalPadding().Value()));
+    EXPECT_EQ(layoutProperty->GetMarginProperty()->top.value(),
+              CalcLength(switchTheme->GetHotZoneVerticalPadding().Value()));
+    EXPECT_EQ(layoutProperty->GetMarginProperty()->bottom.value(),
+              CalcLength(switchTheme->GetHotZoneVerticalPadding().Value()));
+
+    MarginProperty margin1;
+    margin1.right = CalcLength(PADDING.ConvertToPx());
+    layoutProperty->UpdateMargin(margin1); // GetMarginProperty
+
+    switchPattern->OnModifyDone();
+    EXPECT_EQ(layoutProperty->GetMarginProperty()->right.value(), CalcLength(PADDING.ConvertToPx()));
+    EXPECT_EQ(layoutProperty->GetMarginProperty()->left.value(),
+              CalcLength(switchTheme->GetHotZoneHorizontalPadding().Value()));
+    EXPECT_EQ(layoutProperty->GetMarginProperty()->top.value(),
+              CalcLength(switchTheme->GetHotZoneVerticalPadding().Value()));
+    EXPECT_EQ(layoutProperty->GetMarginProperty()->bottom.value(),
+              CalcLength(switchTheme->GetHotZoneVerticalPadding().Value()));
 }
 
 /**
@@ -635,7 +771,7 @@ HWTEST_F(TogglePatternTestNg, ToggleLayoutTest001, TestSize.Level1)
 
 /**
  * @tc.name: TogglePaintTest001
- * @tc.desc: Test toggle GetContentDrawFunction.
+ * @tc.desc: Test toggle PaintContent.
  * @tc.type: FUNC
  */
 HWTEST_F(TogglePatternTestNg, TogglePaintTest001, TestSize.Level1)
@@ -647,36 +783,8 @@ HWTEST_F(TogglePatternTestNg, TogglePaintTest001, TestSize.Level1)
     toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
     auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_NE(switchFrameNode, nullptr);
-    SwitchPaintMethod switchPaintMethod = SwitchPaintMethod(1, true, true, true);
-
-    /**
-     * @tc.steps: step2. get paintWrapper
-     * @tc.expected: paintWrapper is not null
-     */
-    RefPtr<RenderContext> renderContext;
-    auto switchPaintProperty = switchFrameNode->GetPaintProperty<SwitchPaintProperty>();
-    EXPECT_NE(switchPaintProperty, nullptr);
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    auto* paintWrapper = new PaintWrapper(renderContext, geometryNode, switchPaintProperty);
-    EXPECT_NE(paintWrapper, nullptr);
-    switchPaintMethod.GetContentDrawFunction(paintWrapper);
-}
-
-/**
- * @tc.name: TogglePaintTest001
- * @tc.desc: Test toggle GetContentDrawFunction.
- * @tc.type: FUNC
- */
-HWTEST_F(TogglePatternTestNg, TogglePaintTest002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create switch and get frameNode.
-     */
-    ToggleModelNG toggleModelNG;
-    toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
-    auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(switchFrameNode, nullptr);
-    SwitchPaintMethod switchPaintMethod = SwitchPaintMethod(1, true, true, true);
+    auto switchModifier = AceType::MakeRefPtr<SwitchModifier>(false, SELECTED_COLOR, 0.0f);
+    SwitchPaintMethod switchPaintMethod = SwitchPaintMethod(switchModifier);
 
     /**
      * @tc.steps: step2. get paintWrapper
@@ -699,19 +807,11 @@ HWTEST_F(TogglePatternTestNg, TogglePaintTest002, TestSize.Level1)
 
     Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DrawRoundRect(_)).Times(9);
-    EXPECT_CALL(rsCanvas, DrawCircle(_, _)).Times(3);
+    EXPECT_CALL(rsCanvas, DrawRoundRect(_)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, DrawCircle(_, _)).Times(AtLeast(1));
 
     auto contentSize = SizeF(100, 50);
     auto contentOffset = OffsetF(0, 0);
-    switchPaintMethod.PaintContent(rsCanvas, switchPaintProperty, contentSize, contentOffset);
-    switchPaintMethod.enabled_ = false;
-    switchPaintMethod.PaintContent(rsCanvas, switchPaintProperty, contentSize, contentOffset);
-
-    // update switchPaintMethod member value
-    switchPaintMethod.isTouch_ = false;
-    switchPaintMethod.isHover_ = false;
-    switchPaintMethod.mainDelta_ = 0;
-    switchPaintMethod.PaintContent(rsCanvas, switchPaintProperty, contentSize, contentOffset);
+    switchPaintMethod.switchModifier_->PaintSwitch(rsCanvas, contentOffset, contentSize);
 }
 } // namespace OHOS::Ace::NG

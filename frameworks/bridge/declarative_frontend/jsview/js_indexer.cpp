@@ -336,6 +336,12 @@ void JSIndexer::SetPopupSelectedColor(const JSCallbackInfo& args)
         if (ParseJsColor(args[0], color)) {
             selectedColor = color;
         }
+        Dimension popupHorizontalSpace(-1.0);
+        if (args.Length() > 1) {
+            ParseJsDimensionVp(args[1], popupHorizontalSpace);
+        }
+        NG::IndexerView::SetPopupHorizontalSpace(popupHorizontalSpace);
+        return;
     }
     IndexerModel::GetInstance()->SetPopupSelectedColor(selectedColor);
 }

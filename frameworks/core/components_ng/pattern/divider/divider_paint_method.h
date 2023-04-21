@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,7 @@
 
 #include "core/components/divider/divider_theme.h"
 #include "core/components_ng/pattern/divider/divider_render_property.h"
-#include "core/components_ng/render/divider_painter.h"
+#include "core/components_ng/pattern/divider/divider_modifier.h"
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/pipeline/pipeline_base.h"
 
@@ -26,24 +26,47 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT DividerPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(DividerPaintMethod, NodePaintMethod)
 public:
-    DividerPaintMethod(float constrainStrokeWidth, float dividerLength, bool vertical)
-        : constrainStrokeWidth_(constrainStrokeWidth), dividerLength_(dividerLength), vertical_(vertical)
+    DividerPaintMethod(
+        float constrainStrokeWidth, float dividerLength, bool vertical, RefPtr<DividerModifier> dividerModifier)
+        : constrainStrokeWidth_(constrainStrokeWidth), dividerLength_(dividerLength),
+        vertical_(vertical), dividerModifier_(dividerModifier)
     {}
     ~DividerPaintMethod() override = default;
-    CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override
+
+    RefPtr<Modifier> GetContentModifier(PaintWrapper* paintWrapper) override
     {
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_RETURN(pipeline, nullptr);
-        auto theme = pipeline->GetTheme<DividerTheme>();
-        CHECK_NULL_RETURN(theme, nullptr);
+        CHECK_NULL_RETURN(dividerModifier_, nullptr);
+        return dividerModifier_;
+    }
+
+    void UpdateContentModifier(PaintWrapper* paintWrapper) override
+    {
+        CHECK_NULL_VOID(dividerModifier_);
         auto dividerRenderProperty = DynamicCast<DividerRenderProperty>(paintWrapper->GetPaintProperty());
-        CHECK_NULL_RETURN(dividerRenderProperty, nullptr);
+        CHECK_NULL_VOID(dividerRenderProperty);
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<DividerTheme>();
+        CHECK_NULL_VOID(theme);
         dividerColor_ = dividerRenderProperty->GetDividerColor().value_or(theme->GetColor());
-        lineCap_ = dividerRenderProperty->GetLineCap();
-        auto offset = paintWrapper->GetContentOffset();
-        lineCap_ = lineCap_ == LineCap::BUTT ? LineCap::SQUARE : lineCap_;
-        DividerPainter dividerPainter(constrainStrokeWidth_, dividerLength_, vertical_, dividerColor_, lineCap_);
-        return [dividerPainter, offset](RSCanvas& canvas) { dividerPainter.DrawLine(canvas, offset); };
+        lineCap_ = dividerRenderProperty->GetLineCap().value_or(LineCap::BUTT);
+        offset_ = paintWrapper->GetContentOffset();
+        if (lineCap_ == LineCap::SQUARE || lineCap_ == LineCap::ROUND) {
+            dividerLength_ += constrainStrokeWidth_;
+            if (vertical_) {
+                auto offsetY = offset_.GetY();
+                offset_.SetY(offsetY - constrainStrokeWidth_ / 2);
+            } else {
+                auto offsetX = offset_.GetX();
+                offset_.SetX(offsetX - constrainStrokeWidth_ / 2);
+            }
+        }
+        dividerModifier_->SetStrokeWidth(constrainStrokeWidth_);
+        dividerModifier_->SetDividerLength(dividerLength_);
+        dividerModifier_->SetVertical(vertical_);
+        dividerModifier_->SetOffset(offset_);
+        dividerModifier_->SetColor(LinearColor(dividerColor_));
+        dividerModifier_->SetLineCap(lineCap_);
     }
 
 private:
@@ -51,8 +74,10 @@ private:
     float dividerLength_;
     bool vertical_ = false;
 
-    std::optional<Color> dividerColor_;
-    std::optional<LineCap> lineCap_;
+    OffsetF offset_;
+    Color dividerColor_;
+    LineCap lineCap_;
+    RefPtr<DividerModifier> dividerModifier_;
     ACE_DISALLOW_COPY_AND_MOVE(DividerPaintMethod);
 };
 } // namespace OHOS::Ace::NG

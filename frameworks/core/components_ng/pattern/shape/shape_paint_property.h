@@ -34,7 +34,7 @@ public:
     const double FILL_OPACITY_DEFAULT = 1.0f;
     const double STOKE_MITERLIMIT_DEFAULT = 4.0f;
     const double STOKE_OPACITY_DEFAULT = 1.0f;
-    const Dimension STOKE_WIDTH_DEFAULT = Dimension(1.0f);
+    const Dimension STOKE_WIDTH_DEFAULT = 1.0_vp;
     const bool ANTIALIAS_DEFAULT = true;
     const int SQUARE_CAP = 2;
     const int DEFAULT_LINE_JOIN=0;

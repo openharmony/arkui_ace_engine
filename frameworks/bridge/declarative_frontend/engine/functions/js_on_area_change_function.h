@@ -32,6 +32,10 @@ class JsOnAreaChangeFunction : public JsFunction {
 public:
     explicit JsOnAreaChangeFunction(const JSRef<JSFunc>& jsFunction) : JsFunction(jsFunction) {}
     ~JsOnAreaChangeFunction() override = default;
+    void Execute() override
+    {
+        ExecuteJS();
+    }
     void Execute(const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin);
     void Execute(
         const NG::RectF& oldRect, const NG::OffsetF& oldOrigin, const NG::RectF& rect, const NG::OffsetF& origin);

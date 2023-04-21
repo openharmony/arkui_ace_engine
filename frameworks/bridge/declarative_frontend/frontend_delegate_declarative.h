@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -76,6 +76,7 @@ public:
     ~FrontendDelegateDeclarative() override;
 
     void AttachPipelineContext(const RefPtr<PipelineBase>& context) override;
+    void AttachSubPipelineContext(const RefPtr<PipelineBase>& context);
 
     // JSFrontend delegate functions.
     void RunPage(const std::string& url, const std::string& params, const std::string& profile);
@@ -172,6 +173,7 @@ public:
     }
 
     double MeasureText(const MeasureContext& context) override;
+    Size MeasureTextSize(const MeasureContext& context) override;
 
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom) override;
     void SetToastStopListenerCallback(std::function<void()>&& stopCallback) override;
@@ -233,6 +235,9 @@ public:
 
     void HandleImage(const std::string& src, std::function<void(bool, int32_t, int32_t)>&& callback) override;
 
+    void GetSnapshot(const std::string& componentId,
+        std::function<void(std::shared_ptr<Media::PixelMap>, int32_t)>&& callback) override;
+
     void RequestAnimationFrame(const std::string& callbackId) override;
 
     void CancelAnimationFrame(const std::string& callbackId) override;
@@ -279,12 +284,28 @@ public:
     // Get the currently running JS page information in NG structure.
     RefPtr<RevSourceMap> GetFaAppSourceMap();
 
+    void GetStageSourceMap(
+        std::unordered_map<std::string, RefPtr<Framework::RevSourceMap>>& sourceMap);
+
     void InitializeRouterManager(NG::LoadPageCallback&& loadPageCallback);
 
     const RefPtr<NG::PageRouterManager>& GetPageRouterManager() const
     {
         return pageRouterManager_;
     }
+
+    const RefPtr<TaskExecutor>& GetTaskExecutor() const
+    {
+        return taskExecutor_;
+    }
+
+    const RefPtr<Framework::ManifestParser>& GetManifestParser() const
+    {
+        return manifestParser_;
+    }
+
+protected:
+    bool isCardDelegate_ = false;
 
 private:
     int32_t GenerateNextPageId();

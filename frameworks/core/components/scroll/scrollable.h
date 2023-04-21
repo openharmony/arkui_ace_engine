@@ -33,6 +33,12 @@
 
 namespace OHOS::Ace {
 
+enum class ScrollState {
+    IDLE = 0,
+    SCROLL,
+    FLING,
+};
+
 struct ScrollInfo {
     Dimension dx;
     Dimension dy;
@@ -40,6 +46,25 @@ struct ScrollInfo {
     bool operator==(const ScrollInfo& scrollInfo) const
     {
         return dx == scrollInfo.dx && dy == scrollInfo.dy;
+    }
+};
+
+struct ScrollFrameInfo {
+    Dimension offset;
+    ScrollState state;
+
+    bool operator==(const ScrollFrameInfo& scrollInfo) const
+    {
+        return offset == scrollInfo.offset && state == scrollInfo.state;
+    }
+};
+
+struct ScrollFrameResult {
+    Dimension offset;
+
+    bool operator==(const ScrollFrameResult& scrollRes) const
+    {
+        return offset == scrollRes.offset;
     }
 };
 
@@ -62,8 +87,10 @@ using OutBoundaryCallback = std::function<bool()>;
 using ScrollOverCallback = std::function<void(double velocity)>;
 using WatchFixCallback = std::function<double(double final, double current)>;
 using ScrollBeginCallback = std::function<ScrollInfo(Dimension, Dimension)>;
+using ScrollFrameBeginCallback = std::function<ScrollFrameResult(Dimension, ScrollState)>;
 using DragEndForRefreshCallback = std::function<void()>;
 using DragCancelRefreshCallback = std::function<void()>;
+using MouseLeftButtonScroll = std::function<bool()>;
 
 class Scrollable : public TouchEventTarget, public RelatedChild {
     DECLARE_ACE_TYPE(Scrollable, TouchEventTarget);
@@ -95,22 +122,7 @@ public:
         return isTouching_ && controller_->IsRunning();
     }
 
-    void SetAxis(Axis axis)
-    {
-        axis_ = axis;
-        PanDirection panDirection;
-        if (axis_ == Axis::VERTICAL) {
-            panDirection.type = PanDirection::VERTICAL;
-        } else {
-            panDirection.type = PanDirection::HORIZONTAL;
-        }
-        if (panRecognizer_) {
-            panRecognizer_->SetDirection(panDirection);
-        }
-        if (panRecognizerNG_) {
-            panRecognizerNG_->SetDirection(panDirection);
-        }
-    }
+    void SetAxis(Axis axis);
 
     void SetScrollableNode(const WeakPtr<RenderNode>& node)
     {
@@ -252,6 +264,19 @@ public:
         return dragCancelCallback_;
     }
 
+    void SetMouseLeftButtonScroll(const MouseLeftButtonScroll& mouseLeftButtonScroll)
+    {
+        mouseLeftButtonScroll_ = mouseLeftButtonScroll;
+    }
+
+    bool NeedMouseLeftButtonScroll() const
+    {
+        if (mouseLeftButtonScroll_) {
+            return mouseLeftButtonScroll_();
+        }
+        return true;
+    }
+
     void SetWatchFixCallback(const WatchFixCallback& watchFixCallback)
     {
         watchFixCallback_ = watchFixCallback;
@@ -275,6 +300,8 @@ public:
     bool Idle() const;
 
     bool IsStopped() const;
+
+    bool IsSpringStopped() const;
 
     void StopScrollable();
 
@@ -326,6 +353,11 @@ public:
         scrollBeginCallback_ = scrollBeginCallback;
     }
 
+    void SetOnScrollFrameBegin(const ScrollFrameBeginCallback& scrollFrameBeginCallback)
+    {
+        scrollFrameBeginCallback_ = scrollFrameBeginCallback;
+    }
+
     void OnFlushTouchEventsBegin() override;
     void OnFlushTouchEventsEnd() override;
 
@@ -335,6 +367,7 @@ private:
     void ProcessScrollMotion(double position);
     void FixScrollMotion(double position);
     void ExecuteScrollBegin(double& mainDelta);
+    void ExecuteScrollFrameBegin(double& mainDelta, ScrollState state);
 
     ScrollPositionCallback callback_;
     ScrollEventCallback scrollEnd_;
@@ -346,8 +379,10 @@ private:
 
     WatchFixCallback watchFixCallback_;
     ScrollBeginCallback scrollBeginCallback_;
+    ScrollFrameBeginCallback scrollFrameBeginCallback_;
     DragEndForRefreshCallback dragEndCallback_;
     DragCancelRefreshCallback dragCancelCallback_;
+    MouseLeftButtonScroll mouseLeftButtonScroll_;
     Axis axis_;
     RefPtr<PanRecognizer> panRecognizer_;
 

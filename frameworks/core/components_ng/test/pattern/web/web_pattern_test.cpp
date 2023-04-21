@@ -205,15 +205,23 @@ HWTEST_F(WebPatternTest, OnModifyDoneTest001, TestSize.Level1)
     g_webPattern->touchEvent_->callback_(info);
 
     touch.SetTouchType(TouchType::DOWN);
+    info.changedTouches_.clear();
+    info.changedTouches_.emplace_back(touch);
     g_webPattern->touchEvent_->callback_(info);
 
     touch.SetTouchType(TouchType::MOVE);
+    info.changedTouches_.clear();
+    info.changedTouches_.emplace_back(touch);
     g_webPattern->touchEvent_->callback_(info);
 
     touch.SetTouchType(TouchType::UP);
+    info.changedTouches_.clear();
+    info.changedTouches_.emplace_back(touch);
     g_webPattern->touchEvent_->callback_(info);
 
     touch.SetTouchType(TouchType::CANCEL);
+    info.changedTouches_.clear();
+    info.changedTouches_.emplace_back(touch);
     g_webPattern->touchEvent_->callback_(info);
 #endif
 }
@@ -501,11 +509,11 @@ HWTEST_F(WebPatternTest, HandleDragUpdateTest010, TestSize.Level1)
     EXPECT_NE(webPattern, nullptr);
     webPattern->isW3cDragEvent_ = true;
     webPattern->HandleDragUpdate(info);
-    g_webPattern->HandleDragEnd(info);
+    webPattern->HandleDragEnd(info);
     g_webPattern->HandleDragCancel();
     webPattern->isW3cDragEvent_ = false;
     webPattern->HandleDragUpdate(info);
-    g_webPattern->HandleDragEnd(info);
+    webPattern->HandleDragEnd(info);
     g_webPattern->HandleDragCancel();
 #endif
 }
@@ -532,6 +540,9 @@ HWTEST_F(WebPatternTest, OnWindowShowTest011, TestSize.Level1)
     g_webPattern->isActive_ = false;
     g_webPattern->OnInActive();
     g_webPattern->OnActive();
+
+    g_webPattern->OnVisibleChange(false);
+    g_webPattern->OnVisibleChange(true);
 #endif
 }
 }

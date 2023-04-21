@@ -103,6 +103,8 @@ void SelectElement::PerformBuild()
 
     if (component->GetOnSelected()) {
         onSelected_ = *component->GetOnSelected();
+    } else {
+        onSelected_ = nullptr;
     }
 
     dataComponent_ = component;

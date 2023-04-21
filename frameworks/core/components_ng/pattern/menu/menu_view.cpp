@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,8 +15,13 @@
 
 #include "core/components_ng/pattern/menu/menu_view.h"
 
+#include "base/geometry/dimension.h"
+#include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/components/common/properties/placement.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
@@ -24,79 +29,243 @@
 #include "core/components_ng/pattern/option/option_paint_property.h"
 #include "core/components_ng/pattern/option/option_view.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
+/**
+ * The structure of menu is designed as follows :
+ * |--menuWrapper(size is same as root)
+ *   |--menu
+ *      |--scroll
+ *          |--column(for bindMenu/select)
+ *            |--options
+ *          |--customNode(for custom builder)
+ */
+
 namespace {
 // create menuWrapper and menu node, update menu props
-std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(int32_t targetId, MenuType type = MenuType::MENU)
+std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(
+    int32_t targetId, const std::string& targetTag = "", MenuType type = MenuType::MENU)
 {
     // use wrapper to detect click events outside menu
     auto wrapperNode = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(targetId));
 
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto menuNode =
-        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, nodeId, AceType::MakeRefPtr<MenuPattern>(targetId, type));
+    auto menuNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, nodeId, AceType::MakeRefPtr<MenuPattern>(targetId, targetTag, type));
 
     auto menuFrameNode = menuNode->GetPattern<MenuPattern>();
     menuNode->MountToParent(wrapperNode);
-    menuNode->MarkModifyDone();
 
     return { wrapperNode, menuNode };
 }
-} // namespace
 
-// create menu with menuItems
-RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t targetId, MenuType type)
+void CreateTitleNode(const std::string& title, RefPtr<FrameNode>& column)
 {
-    auto [wrapperNode, menuNode] = CreateMenu(targetId, type);
-    // append options to menu
-    for (size_t i = 0; i < params.size(); ++i) {
-        auto optionNode = OptionView::CreateMenuOption(params[i].first, std::move(params[i].second), i);
-        // first node never paints divider
-        if (i == 0) {
-            auto props = optionNode->GetPaintProperty<OptionPaintProperty>();
-            props->UpdateNeedDivider(false);
-        }
-        optionNode->MountToParent(menuNode);
-        optionNode->MarkModifyDone();
-    }
-    return wrapperNode;
+    auto textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_VOID(textNode);
+    auto textProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textProperty);
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    auto padding = static_cast<float>(theme->GetMenuIconPadding().ConvertToPx()) -
+                   static_cast<float>(theme->GetOutPadding().ConvertToPx());
+    PaddingProperty textPadding;
+    textPadding.left = CalcLength(padding);
+    textPadding.right = CalcLength(padding);
+    textProperty->UpdatePadding(textPadding);
+    textProperty->UpdateFontSize(theme->GetMenuTitleFontSize());
+    textProperty->UpdateFontWeight(FontWeight::MEDIUM);
+    textProperty->UpdateTextColor(theme->GetMenuFontColor());
+    textProperty->UpdateContent(title);
+
+    CalcSize idealSize;
+    idealSize.SetHeight(CalcLength(theme->GetMenuTitleHeight()));
+    MeasureProperty layoutConstraint;
+    layoutConstraint.selfIdealSize = idealSize;
+    textProperty->UpdateCalcLayoutProperty(layoutConstraint);
+
+    auto eventHub = textNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetEnabled(false);
+
+    textNode->MountToParent(column);
+    textNode->MarkModifyDone();
 }
 
-// create menu with custom node from a builder
-RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t targetId, MenuType type)
+RefPtr<FrameNode> CreateMenuScroll(const RefPtr<UINode>& node)
 {
-    auto [wrapperNode, menuNode] = CreateMenu(targetId, type);
-    // put custom node in a scroll to limit its height
     auto scroll = FrameNode::CreateFrameNode(
         V2::SCROLL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ScrollPattern>());
     CHECK_NULL_RETURN(scroll, nullptr);
     auto props = scroll->GetLayoutProperty<ScrollLayoutProperty>();
     props->UpdateAxis(Axis::VERTICAL);
+    props->UpdateAlignment(Alignment::CENTER_LEFT);
 
-    customNode->MountToParent(scroll);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(theme, nullptr);
+    auto contentPadding = static_cast<float>(theme->GetOutPadding().ConvertToPx());
+    PaddingProperty padding;
+    padding.left = padding.right = padding.top = padding.bottom = CalcLength(contentPadding);
+    props->UpdatePadding(padding);
+    node->MountToParent(scroll);
+
+    return scroll;
+}
+
+void OptionKeepMenu(RefPtr<FrameNode>& option, WeakPtr<FrameNode>& menuWeak)
+{
+    auto pattern = option->GetPattern<OptionPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetMenu(menuWeak);
+}
+} // namespace
+
+// create menu with menuItems
+RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t targetId, const std::string& targetTag,
+    MenuType type, const MenuParam& menuParam)
+{
+    auto [wrapperNode, menuNode] = CreateMenu(targetId, targetTag, type);
+    auto column = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    if (!menuParam.title.empty()) {
+        CreateTitleNode(menuParam.title, column);
+    }
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_RETURN(menuPattern, nullptr);
+    // append options to menu
+    for (size_t i = 0; i < params.size(); ++i) {
+        auto optionNode = OptionView::CreateMenuOption(params[i].value, std::move(params[i].action), i, params[i].icon);
+        menuPattern->AddOptionNode(optionNode);
+        auto menuWeak = AceType::WeakClaim(AceType::RawPtr(menuNode));
+        OptionKeepMenu(optionNode, menuWeak);
+        // first node never paints divider
+        if (i == 0 && menuParam.title.empty()) {
+            auto props = optionNode->GetPaintProperty<OptionPaintProperty>();
+            props->UpdateNeedDivider(false);
+        }
+        optionNode->MountToParent(column);
+        optionNode->MarkModifyDone();
+    }
+    auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    if (menuProperty) {
+        menuProperty->UpdateTitle(menuParam.title);
+        menuProperty->UpdatePositionOffset(menuParam.positionOffset);
+        if (menuParam.placement.has_value()) {
+            menuProperty->UpdateMenuPlacement(menuParam.placement.value_or(OHOS::Ace::Placement::BOTTOM));
+        }
+    }
+    auto scroll = CreateMenuScroll(column);
+    CHECK_NULL_RETURN(scroll, nullptr);
     scroll->MountToParent(menuNode);
     scroll->MarkModifyDone();
+    menuNode->MarkModifyDone();
+    return wrapperNode;
+}
 
+// create menu with custom node from a builder
+RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t targetId, const std::string& targetTag,
+    MenuType type, const MenuParam& menuParam)
+{
+    auto [wrapperNode, menuNode] = CreateMenu(targetId, targetTag, type);
+    // put custom node in a scroll to limit its height
+    auto scroll = CreateMenuScroll(customNode);
+    CHECK_NULL_RETURN(scroll, nullptr);
+
+    scroll->MountToParent(menuNode);
+    scroll->MarkModifyDone();
+    menuNode->MarkModifyDone();
+
+    auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    if (menuProperty) {
+        menuProperty->UpdateTitle(menuParam.title);
+        menuProperty->UpdatePositionOffset(menuParam.positionOffset);
+        if (menuParam.placement.has_value()) {
+            menuProperty->UpdateMenuPlacement(menuParam.placement.value());
+        }
+    }
+
+    if (type == MenuType::SUB_MENU) {
+        wrapperNode->RemoveChild(menuNode);
+        wrapperNode.Reset();
+        return menuNode;
+    }
     return wrapperNode;
 }
 
 RefPtr<FrameNode> MenuView::Create(const std::vector<SelectParam>& params, int32_t targetId)
 {
     auto [wrapperNode, menuNode] = CreateMenu(targetId);
+    auto column = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_RETURN(menuPattern, nullptr);
     for (size_t i = 0; i < params.size(); ++i) {
         auto optionNode = OptionView::CreateSelectOption(params[i].first, params[i].second, i);
+        menuPattern->AddOptionNode(optionNode);
+        auto menuWeak = AceType::WeakClaim(AceType::RawPtr(menuNode));
+        OptionKeepMenu(optionNode, menuWeak);
         // first node never paints divider
         if (i == 0) {
             auto props = optionNode->GetPaintProperty<OptionPaintProperty>();
             props->UpdateNeedDivider(false);
         }
-        optionNode->MountToParent(menuNode);
+        optionNode->MarkModifyDone();
+        optionNode->MountToParent(column);
     }
+    auto scroll = CreateMenuScroll(column);
+    CHECK_NULL_RETURN(scroll, nullptr);
+    scroll->MountToParent(menuNode);
+    scroll->MarkModifyDone();
+    menuNode->MarkModifyDone();
+
+    menuPattern->SetIsSelectMenu(true);
     return wrapperNode;
 }
 
+// create menu with menuItem and menuItemGroup
+void MenuView::Create()
+{
+    LOGI("MenuView::Create");
+    auto* stack = ViewStackProcessor::GetInstance();
+    int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
+    auto menuNode = FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, nodeId,
+        []() { return AceType::MakeRefPtr<MenuPattern>(-1, V2::MENU_ETS_TAG, MenuType::MULTI_MENU); });
+    CHECK_NULL_VOID(menuNode);
+    ViewStackProcessor::GetInstance()->Push(menuNode);
+}
+
+void MenuView::SetFontSize(const Dimension& fontSize)
+{
+    if (fontSize.IsValid()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, FontSize, fontSize);
+    } else {
+        LOGW("FontSize value is not valid");
+        ACE_RESET_LAYOUT_PROPERTY(MenuLayoutProperty, FontSize);
+    }
+}
+
+void MenuView::SetFontColor(const std::optional<Color>& color)
+{
+    if (color.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, FontColor, color.value());
+    } else {
+        ACE_RESET_LAYOUT_PROPERTY(MenuLayoutProperty, FontColor);
+    }
+}
+
+void MenuView::SetFontWeight(Ace::FontWeight weight)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, FontWeight, weight);
+}
 } // namespace OHOS::Ace::NG

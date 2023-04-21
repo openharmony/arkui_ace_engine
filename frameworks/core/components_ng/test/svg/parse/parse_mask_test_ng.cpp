@@ -22,6 +22,7 @@
 #include "base/memory/ace_type.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/declaration/svg/svg_mask_declaration.h"
+#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/svg/parse/svg_g.h"
 #include "core/components_ng/svg/parse/svg_mask.h"
 #include "core/components_ng/svg/parse/svg_svg.h"
@@ -69,9 +70,14 @@ HWTEST_F(ParseMaskTestNg, ParseTest001, TestSize.Level1)
     auto svgMask = AceType::DynamicCast<SvgMask>(svgGChild->children_.at(INDEX_ZEARO));
     EXPECT_NE(svgMask, nullptr);
     EXPECT_STREQ(svgMask->nodeId_.c_str(), ID.c_str());
-    RSCanvas rSCanvas;
-    svgDom->DrawImage(rSCanvas, ImageFit::FITHEIGHT, Size(IMAGE_COPONENT_WIDTH, IMAGE_COPONENT_HEIGHT), Color::RED);
+    RSCanvas rsCanvas;
+    // test canvas layer save and restore
+    // all saved layers need to be restored
+    auto skCanvas = rsCanvas.GetImpl<RSSkCanvas>()->ExportSkCanvas();
+    auto layerCount = skCanvas->getSaveCount();
+    svgDom->DrawImage(rsCanvas, ImageFit::FITHEIGHT, Size(IMAGE_COPONENT_WIDTH, IMAGE_COPONENT_HEIGHT), Color::RED);
     EXPECT_EQ(svgDom->svgSize_.IsValid(), true);
     EXPECT_EQ(svgDom->viewBox_.IsValid(), true);
+    EXPECT_EQ(skCanvas->getSaveCount(), layerCount);
 }
 } // namespace OHOS::Ace::NG

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -57,43 +57,61 @@ struct TextEditingValueNG {
 
     std::string GetValueBeforeCursor() const
     {
-        if (caretPosition > static_cast<int32_t>(GetWideText().length()) || caretPosition <= 0) {
+        auto wideText = GetWideText();
+        if (caretPosition > static_cast<int32_t>(wideText.length()) || caretPosition <= 0) {
             return "";
         }
-        return StringUtils::ToString(GetWideText().substr(0, caretPosition));
+        return StringUtils::ToString(wideText.substr(0, caretPosition));
     }
 
     std::string GetValueAfterCursor() const
     {
-        if (caretPosition > static_cast<int32_t>(GetWideText().length()) || caretPosition < 0) {
+        auto wideText = GetWideText();
+        if (caretPosition > static_cast<int32_t>(wideText.length()) || caretPosition < 0) {
             return "";
         }
-        return StringUtils::ToString(GetWideText().substr(caretPosition));
+        return StringUtils::ToString(wideText.substr(caretPosition));
     }
 
     std::string GetValueBeforePosition(int32_t position) const
     {
-        position = std::clamp(position, 0, static_cast<int32_t>(GetWideText().length()));
-        LOGD("GetValueBeforePosition %{public}d", position);
-        return StringUtils::ToString(GetWideText().substr(0, position));
+        auto wideText = GetWideText();
+        position = std::clamp(position, 0, static_cast<int32_t>(wideText.length()));
+        LOGI("GetValueBeforePosition %{public}d", position);
+        return StringUtils::ToString(wideText.substr(0, position));
     }
 
     std::string GetValueAfterPosition(int32_t position) const
     {
-        position = std::clamp(position, 0, static_cast<int32_t>(GetWideText().length()));
-        LOGD("GetValueAfterPosition %{public}d", position);
-        return StringUtils::ToString(GetWideText().substr(position));
+        auto wideText = GetWideText();
+        position = std::clamp(position, 0, static_cast<int32_t>(wideText.length()));
+        LOGI("GetValueAfterPosition %{public}d", position);
+        return StringUtils::ToString(wideText.substr(position));
     }
 
     std::string GetSelectedText(int32_t start, int32_t end) const
     {
-        if (start < 0 || end > static_cast<int32_t>(GetWideText().length()) || start >= end) {
-            LOGE("Get selected boundary is invalid");
-            return "";
+        auto wideText = GetWideText();
+        auto min = std::clamp(std::max(std::min(start, end), 0), 0, static_cast<int32_t>(wideText.length()));
+        auto max = std::clamp(std::min(std::max(start, end), static_cast<int32_t>(wideText.length())), 0,
+            static_cast<int32_t>(wideText.length()));
+        return StringUtils::ToString(wideText.substr(min, max - min));
+    }
+
+    bool CaretAtLast() const
+    {
+        return static_cast<int32_t>(GetWideText().length()) == caretPosition;
+    }
+
+    char16_t LastChar() const
+    {
+        if (text.empty()) {
+            return 0;
         }
-        auto min = std::min(start, end);
-        auto max = std::max(start, end);
-        return StringUtils::ToString(GetWideText().substr(min, max - min));
+        if (static_cast<size_t>(caretPosition) > text.length()) {
+            return 0;
+        }
+        return text[std::max(0, caretPosition - 1)];
     }
 
     std::string ToString() const

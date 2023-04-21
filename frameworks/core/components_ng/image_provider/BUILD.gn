@@ -16,14 +16,16 @@ import(
 
 build_component_ng("image_provider_ng") {
   sources = [
-    "adapter/flutter_image_provider.cpp",
     "adapter/skia_image_data.cpp",
+    "adapter/skia_image_provider.cpp",
     "adapter/skia_svg_dom.cpp",
+    "animated_image_object.cpp",
     "image_data.cpp",
     "image_loading_context.cpp",
     "image_object.cpp",
     "image_provider.cpp",
     "image_state_manager.cpp",
+    "image_utils.cpp",
     "pixel_map_image_object.cpp",
     "static_image_object.cpp",
     "svg_image_object.cpp",

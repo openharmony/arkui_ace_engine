@@ -20,6 +20,13 @@
 #include "base/memory/referenced.h"
 
 namespace OHOS::Ace {
+struct MediaFileInfo {
+    std::string fileName;
+    uint32_t offset = 0;
+    uint32_t length = 0;
+    uint16_t lastModTime = 0;
+    uint16_t lastModDate = 0;
+};
 
 class Asset : public Referenced {
 public:
@@ -33,11 +40,18 @@ class AssetProvider : public AceType {
     DECLARE_ACE_TYPE(AssetProvider, AceType);
 
 public:
-    virtual std::string GetAssetPath(const std::string& assetName) = 0;
+    virtual std::string GetAssetPath(const std::string& assetName, bool isAddHapPath) = 0;
 
     virtual void GetAssetList(const std::string& path, std::vector<std::string>& assetList) = 0;
 
     virtual bool IsValid() const = 0;
+
+    virtual bool GetFileInfo(const std::string& /* fileName */, MediaFileInfo& /* fileInfo */) const
+    {
+        return false;
+    }
+
+    virtual void Reload() {}
 };
 
 class AssetManager : public AceType {
@@ -52,7 +66,7 @@ public:
 
     virtual RefPtr<Asset> GetAsset(const std::string& assetName) = 0;
 
-    virtual std::string GetAssetPath(const std::string& assetName) = 0;
+    virtual std::string GetAssetPath(const std::string& assetName, bool isAddHapPath) = 0;
 
     virtual void SetLibPath(const std::string& appLibPathKey, const std::vector<std::string>& packagePath) = 0;
 
@@ -61,8 +75,8 @@ public:
     virtual std::string GetAppLibPathKey() const = 0;
 
     virtual void GetAssetList(const std::string& path, std::vector<std::string>& assetList) const = 0;
+
+    virtual bool GetFileInfo(const std::string& fileName, MediaFileInfo& fileInfo) const = 0;
 };
-
 } // namespace OHOS::Ace
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_RESOURCE_ASSET_MANAGER_H

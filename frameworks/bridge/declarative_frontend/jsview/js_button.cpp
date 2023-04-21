@@ -28,7 +28,6 @@
 #include "core/components/padding/padding_component.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model.h"
-#include "core/components_ng/pattern/button/button_view.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/declarative_frontend/engine/bindings.h"
@@ -37,6 +36,12 @@
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
+
+const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
+    TextOverflow::MARQUEE };
+const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
+const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
+    TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
 
 void JSButton::SetFontSize(const JSCallbackInfo& info)
 {
@@ -167,8 +172,15 @@ RefPtr<TextComponent> JSButton::GetTextComponent()
     return textComponent;
 }
 
-void JSButton::SetType(int value)
+void JSButton::SetType(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1) {
+        return;
+    }
+    int32_t value = 1;
+    if (info[0]->IsNumber()) {
+        value = info[0]->ToNumber<int32_t>();
+    }
     if ((ButtonType)value == ButtonType::CAPSULE || (ButtonType)value == ButtonType::CIRCLE ||
         (ButtonType)value == ButtonType::ARC || (ButtonType)value == ButtonType::NORMAL) {
         if (Container::IsCurrentUseNewPipeline()) {
@@ -198,6 +210,123 @@ void JSButton::SetStateEffect(bool stateEffect)
     }
 }
 
+void JSButton::GetFontContent(const JSRef<JSVal> font, NG::ButtonView::ButtonParameters& buttonParameters)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(font);
+    JSRef<JSVal> size = obj->GetProperty("size");
+    Dimension fontSize;
+    if (ParseJsDimensionFp(size, fontSize)) {
+        buttonParameters.fontSize = fontSize;
+    }
+
+    JSRef<JSVal> weight = obj->GetProperty("weight");
+    if (weight->IsString()) {
+        buttonParameters.fontWeight = ConvertStrToFontWeight(weight->ToString());
+    }
+
+    JSRef<JSVal> family = obj->GetProperty("family");
+    std::vector<std::string> fontFamilies;
+    if (ParseJsFontFamilies(family, fontFamilies)) {
+        buttonParameters.fontFamily = fontFamilies;
+    }
+
+    JSRef<JSVal> style = obj->GetProperty("style");
+    if (style->IsNumber()) {
+        int32_t value = style->ToNumber<int32_t>();
+        if (value >= 0 && value < static_cast<int32_t>(FONT_STYLES.size())) {
+            buttonParameters.fontStyle = FONT_STYLES[value];
+        }
+    }
+}
+
+void JSButton::CompleteParameters(NG::ButtonView::ButtonParameters& buttonParameters)
+{
+    auto buttonTheme = GetTheme<ButtonTheme>();
+    if (!buttonTheme) {
+        return;
+    }
+    auto textStyle = buttonTheme->GetTextStyle();
+    if (!buttonParameters.maxLines.has_value()) {
+        buttonParameters.maxLines = buttonTheme->GetTextMaxLines();
+    }
+    if (!buttonParameters.minFontSize.has_value()) {
+        buttonParameters.minFontSize = buttonTheme->GetMinFontSize();
+    }
+    if (!buttonParameters.maxFontSize.has_value()) {
+        buttonParameters.maxFontSize = buttonTheme->GetMaxFontSize();
+    }
+    if (!buttonParameters.fontSize.has_value()) {
+        buttonParameters.fontSize = textStyle.GetFontSize();
+    }
+    if (!buttonParameters.fontWeight.has_value()) {
+        buttonParameters.fontWeight = textStyle.GetFontWeight();
+    }
+    if (!buttonParameters.fontStyle.has_value()) {
+        buttonParameters.fontStyle = textStyle.GetFontStyle();
+    }
+    if (!buttonParameters.heightAdaptivePolicy.has_value()) {
+        buttonParameters.heightAdaptivePolicy = TextHeightAdaptivePolicy::MAX_LINES_FIRST;
+    }
+    if (!buttonParameters.textOverflow.has_value()) {
+        buttonParameters.textOverflow = TextOverflow::CLIP;
+    }
+}
+
+void JSButton::SetLableStyle(const JSCallbackInfo& info)
+{
+    if (!Container::IsCurrentUseNewPipeline()) {
+        return;
+    }
+    if (!info[0]->IsObject()) {
+        LOGE("info[0] not is Object");
+        return;
+    }
+
+    NG::ButtonView::ButtonParameters buttonParameters;
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> overflowValue = obj->GetProperty("overflow");
+    if (!overflowValue->IsNull() && overflowValue->IsNumber()) {
+        auto overflow = overflowValue->ToNumber<int32_t>();
+        if (overflow >= 0 && overflow < static_cast<int32_t>(TEXT_OVERFLOWS.size()) &&
+            TEXT_OVERFLOWS[overflow] != TextOverflow::MARQUEE) {
+            buttonParameters.textOverflow = TEXT_OVERFLOWS[overflow];
+        }
+    }
+
+    JSRef<JSVal> maxLines = obj->GetProperty("maxLines");
+    if (!maxLines->IsNull() && maxLines->IsNumber()) {
+        buttonParameters.maxLines = maxLines->ToNumber<int32_t>();
+    }
+
+    JSRef<JSVal> minFontSizeValue = obj->GetProperty("minFontSize");
+    Dimension minFontSize;
+    if (ParseJsDimensionFp(minFontSizeValue, minFontSize)) {
+        buttonParameters.minFontSize = minFontSize;
+    }
+
+    JSRef<JSVal> maxFontSizeValue = obj->GetProperty("maxFontSize");
+    Dimension maxFontSize;
+    if (ParseJsDimensionFp(maxFontSizeValue, maxFontSize)) {
+        buttonParameters.maxFontSize = maxFontSize;
+    }
+
+    JSRef<JSVal> adaptHeightValue = obj->GetProperty("heightAdaptivePolicy");
+    if (!adaptHeightValue->IsNull() && adaptHeightValue->IsNumber()) {
+        auto adaptHeight = adaptHeightValue->ToNumber<int32_t>();
+        if (adaptHeight >= 0 && adaptHeight < static_cast<int32_t>(HEIGHT_ADAPTIVE_POLICY.size())) {
+            buttonParameters.heightAdaptivePolicy = HEIGHT_ADAPTIVE_POLICY[adaptHeight];
+        }
+    }
+
+    JSRef<JSVal> font = obj->GetProperty("font");
+    if (!font->IsNull() && font->IsObject()) {
+        GetFontContent(font, buttonParameters);
+    }
+
+    CompleteParameters(buttonParameters);
+    NG::ButtonView::SetLableStyle(buttonParameters);
+}
+
 void JSButton::JsRemoteMessage(const JSCallbackInfo& info)
 {
     RemoteCallback remoteCallback;
@@ -220,6 +349,7 @@ void JSButton::JSBind(BindingTarget globalObj)
     JSClass<JSButton>::StaticMethod("fontFamily", &JSButton::SetFontFamily, MethodOptions::NONE);
     JSClass<JSButton>::StaticMethod("type", &JSButton::SetType, MethodOptions::NONE);
     JSClass<JSButton>::StaticMethod("stateEffect", &JSButton::SetStateEffect, MethodOptions::NONE);
+    JSClass<JSButton>::StaticMethod("labelStyle", &JSButton::SetLableStyle, MethodOptions::NONE);
     JSClass<JSButton>::StaticMethod("onClick", &JSButton::JsOnClick);
     JSClass<JSButton>::StaticMethod("remoteMessage", &JSButton::JsRemoteMessage);
     JSClass<JSButton>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
@@ -259,7 +389,7 @@ void JSButton::CreateWithLabel(const JSCallbackInfo& info)
             if ((info.Length() > 1) && info[1]->IsObject()) {
                 SetTypeAndStateEffect(JSRef<JSObject>::Cast(info[1]));
             }
-            NG::ViewAbstract::SetHoverEffect(HoverEffectType::SCALE);
+            NG::ViewAbstract::SetHoverEffectAuto(HoverEffectType::SCALE);
             return;
         }
         auto textComponent = AceType::MakeRefPtr<TextComponent>(label);
@@ -276,14 +406,14 @@ void JSButton::CreateWithLabel(const JSCallbackInfo& info)
     }
 
     if (Container::IsCurrentUseNewPipeline()) {
-        NG::ButtonView::Create(V2::BUTTON_ETS_TAG);
+        NG::ButtonView::CreateWithLabel("");
         if (!labelSet && info[0]->IsObject()) {
             SetTypeAndStateEffect(JSRef<JSObject>::Cast(info[0]));
         }
         if ((info.Length() > 1) && info[1]->IsObject()) {
             SetTypeAndStateEffect(JSRef<JSObject>::Cast(info[1]));
         }
-        NG::ViewAbstract::SetHoverEffect(HoverEffectType::SCALE);
+        NG::ViewAbstract::SetHoverEffectAuto(HoverEffectType::SCALE);
         return;
     }
     auto buttonComponent = AceType::MakeRefPtr<ButtonComponent>(buttonChildren);
@@ -312,7 +442,7 @@ void JSButton::CreateWithChild(const JSCallbackInfo& info)
             auto obj = JSRef<JSObject>::Cast(info[0]);
             SetTypeAndStateEffect(obj);
         }
-        NG::ViewAbstract::SetHoverEffect(HoverEffectType::SCALE);
+        NG::ViewAbstract::SetHoverEffectAuto(HoverEffectType::SCALE);
         return;
     }
     std::list<RefPtr<Component>> buttonChildren;
@@ -357,6 +487,9 @@ void JSButton::SetTypeAndStateEffect(const JSRef<JSObject>& obj)
     if (type->IsNumber()) {
         auto buttonType = static_cast<ButtonType>(type->ToNumber<int32_t>());
         NG::ButtonView::SetType(buttonType);
+    } else {
+        // undefined use capsule type.
+        NG::ButtonView::SetType(ButtonType::CAPSULE);
     }
     auto stateEffect = obj->GetProperty("stateEffect");
     if (stateEffect->IsBoolean()) {
@@ -370,6 +503,9 @@ void JSButton::SetTypeAndStateEffect(const JSRef<JSObject>& obj, const RefPtr<Bu
     if (type->IsNumber()) {
         auto buttonType = (ButtonType)type->ToNumber<int32_t>();
         buttonComponent->SetType(buttonType);
+    } else {
+        // undefined use capsule type.
+        buttonComponent->SetType(ButtonType::CAPSULE);
     }
     auto stateEffect = obj->GetProperty("stateEffect");
     if (stateEffect->IsBoolean()) {
@@ -392,6 +528,10 @@ void JSButton::ResetButtonHeight()
 
 void JSButton::JsPadding(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::JsPadding(info);
+        return;
+    }
     if (!info[0]->IsString() && !info[0]->IsNumber() && !info[0]->IsObject()) {
         LOGE("arg is not a string, number or object.");
         return;
@@ -497,15 +637,22 @@ void JSButton::JsOnClick(const JSCallbackInfo& info)
 
 void JSButton::JsBackgroundColor(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        JSViewAbstract::JsBackgroundColor(info);
-        return;
-    }
     if (info.Length() < 1) {
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     Color backgroundColor;
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (!ParseJsColor(info[0], backgroundColor)) {
+            auto buttonTheme = GetTheme<ButtonTheme>();
+            if (buttonTheme) {
+                backgroundColor = buttonTheme->GetBgColor();
+            }
+        }
+        ViewAbstractModel::GetInstance()->SetBackgroundColor(backgroundColor);
+        return;
+    }
+
     if (!ParseJsColor(info[0], backgroundColor)) {
         return;
     }
@@ -629,6 +776,18 @@ void JSButton::JsSize(const JSCallbackInfo& info)
         return;
     }
 
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
+        Dimension width;
+        if (ParseJsDimensionVp(sizeObj->GetProperty("width"), width)) {
+            NG::ViewAbstract::SetWidth(NG::CalcLength(width));
+        }
+        Dimension height;
+        if (ParseJsDimensionVp(sizeObj->GetProperty("height"), height)) {
+            NG::ViewAbstract::SetHeight(NG::CalcLength(height));
+        }
+        return;
+    }
     auto stack = ViewStackProcessor::GetInstance();
     auto buttonComponent = AceType::DynamicCast<ButtonComponent>(stack->GetMainComponent());
     auto option = stack->GetImplicitAnimationOption();

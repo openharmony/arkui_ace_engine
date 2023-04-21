@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_THREAD_FRAME_TRACE_IMPL_H
 
 #include <functional>
+#include <string>
 
 namespace OHOS::Ace {
 class FrameTraceAdapter {
@@ -27,6 +28,10 @@ public:
     virtual void QuickExecute(std::function<void()> && func) {}
     virtual void SlowExecute(std::function<void()> && func) {}
     virtual bool EnableFrameTrace(const std::string &traceTag)
+    {
+        return false;
+    }
+    virtual bool IsEnabled()
     {
         return false;
     }

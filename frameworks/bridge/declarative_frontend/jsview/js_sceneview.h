@@ -36,6 +36,8 @@ public:
     static void JSAddCone(const JSCallbackInfo& info);
     static void JSGLTFAnimation(const JSCallbackInfo& info);
     static void JSAddCustomRender(const JSCallbackInfo& info);
+    static void JsWidth(const JSCallbackInfo& info);
+    static void JsHeight(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

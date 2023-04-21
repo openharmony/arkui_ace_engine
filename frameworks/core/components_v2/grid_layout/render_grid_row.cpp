@@ -146,7 +146,7 @@ void RenderGridRow::PerformLayout()
     double currentRowHeight = 0.0;
     double totalHeight = 0.0;
     double lastLength = maxSize.Width();
-    for (auto child : gridColChildren_) {
+    for (const auto& child : gridColChildren_) {
         auto gridColChild = AceType::DynamicCast<RenderGridCol>(child);
         if (!gridColChild) {
             continue;
@@ -205,6 +205,8 @@ void RenderGridRow::PerformLayout()
     } else {
         SetLayoutSize(Size(maxSize.Width(), totalHeight));
     }
+    gridColToNodeMap.clear();
+    gridColChildren_.clear();
 }
 
 void RenderGridRow::LayoutEachChild(
@@ -212,7 +214,7 @@ void RenderGridRow::LayoutEachChild(
 {
     auto children = GetChildren();
     std::list<RefPtr<RenderNode>> gridColChildren;
-    for (auto child : children) {
+    for (const auto& child : children) {
         RefPtr<RenderNode> childPtr = child;
         FindGridColChild(childPtr);
         auto gridCol = AceType::DynamicCast<RenderGridCol>(childPtr);
@@ -231,8 +233,8 @@ void RenderGridRow::LayoutEachChild(
     gridColChildren_ = SortChildrenByOrder(gridColChildren);
 }
 
-void RenderGridRow::ParseNewLineForLargeOffset(int32_t childSpan, int32_t childOffset, int32_t restColumnNum,
-    int32_t totalColumnNum, NewLineOffset& newLineOffset)
+void RenderGridRow::ParseNewLineForLargeOffset(
+    int32_t childSpan, int32_t childOffset, int32_t restColumnNum, int32_t totalColumnNum, NewLineOffset& newLineOffset)
 {
     int32_t totalOffsetStartFromNewLine = childOffset - restColumnNum;
     newLineOffset.newLineCount = totalOffsetStartFromNewLine / totalColumnNum + 1;
@@ -302,6 +304,5 @@ void RenderGridRow::FindGridColChild(RefPtr<RenderNode>& gridColChild) const
         }
         gridColChild = gridColChild->GetChildren().front();
     }
-    return;
 }
 } // namespace OHOS::Ace::V2

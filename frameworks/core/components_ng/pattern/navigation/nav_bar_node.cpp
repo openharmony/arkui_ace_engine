@@ -34,9 +34,7 @@ RefPtr<NavBarNode> NavBarNode::GetOrCreateNavBarNode(
     const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
 {
     auto frameNode = GetFrameNode(tag, nodeId);
-    if (frameNode) {
-        return AceType::DynamicCast<NavBarNode>(frameNode);
-    }
+    CHECK_NULL_RETURN_NOLOG(!frameNode, AceType::DynamicCast<NavBarNode>(frameNode));
     auto pattern = patternCreator ? patternCreator() : MakeRefPtr<Pattern>();
     auto navBarNode = AceType::MakeRefPtr<NavBarNode>(tag, nodeId, pattern);
     navBarNode->InitializePatternAndContext();
@@ -44,7 +42,7 @@ RefPtr<NavBarNode> NavBarNode::GetOrCreateNavBarNode(
     return navBarNode;
 }
 
-void NavBarNode::AddChildToGroup(const RefPtr<UINode>& child)
+void NavBarNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t slot)
 {
     auto pattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
     CHECK_NULL_VOID(pattern);
@@ -135,11 +133,13 @@ std::string NavBarNode::GetBarItemsString(bool isMenu) const
 
 void NavBarNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
-    FrameNode::ToJsonValue(json);
     json->Put("title", GetTitleString().c_str());
     json->Put("subtitle", GetSubtitleString().c_str());
     json->Put("menus", GetBarItemsString(true).c_str());
     json->Put("toolBar", GetBarItemsString(false).c_str());
+    auto layoutProperty = GetLayoutProperty<NavBarLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->ToJsonValue(json);
 }
 
 } // namespace OHOS::Ace::NG

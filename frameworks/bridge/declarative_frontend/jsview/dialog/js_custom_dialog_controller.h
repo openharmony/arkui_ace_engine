@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,7 +27,9 @@ enum class DialogOperation {
     DIALOG_CLOSE,
 };
 
-class JSCustomDialogController {
+class JSCustomDialogController : public virtual AceType {
+    DECLARE_ACE_TYPE(JSCustomDialogController, AceType)
+
 public:
     explicit JSCustomDialogController(JSView* ownerView) : ownerView_(ownerView) {}
     ~JSCustomDialogController() = default;
@@ -44,12 +46,15 @@ private:
     void CloseDialog();
     void NotifyDialogOperation(DialogOperation operation);
 
+    static bool ParseAnimation(
+        const JsiExecutionContext& execContext, const JsiRef<JsiValue>& jsiValue, AnimationOption& result);
+
     JSView* ownerView_ = nullptr;
     bool isShown_ = false;
     bool pending_ = false;
 
     // NG
-    WeakPtr<NG::FrameNode> dialog_;
+    std::vector<WeakPtr<NG::FrameNode>> dialogs_;
 
     DialogProperties dialogProperties_;
     RefPtr<JsFunction> jsBuilderFunction_;

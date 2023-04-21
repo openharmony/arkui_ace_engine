@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,8 +28,7 @@ namespace OHOS::Ace::NG {
 
 inline RefPtr<NavigationBarTheme> NavigationGetTheme()
 {
-    // get theme
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     auto theme = pipeline->GetTheme<NavigationBarTheme>();
     return theme;
 }
@@ -57,6 +56,7 @@ constexpr Dimension SUBTITLE_FONT_SIZE = 14.0_vp; // ohos_id_text_size_sub_title
 constexpr Color SUBTITLE_COLOR = Color(0x99000000); // ohos_id_alpha_content_secondary
 constexpr Dimension SUBTITLE_HEIGHT = 26.0_vp;
 // back button
+constexpr Dimension BACK_BUTTON_SIZE = 48.0_vp;
 constexpr Dimension BACK_BUTTON_ICON_SIZE = 24.0_vp;
 // title bar
 constexpr Dimension TITLEBAR_HEIGHT_MINI = 56.0_vp;
@@ -83,6 +83,9 @@ constexpr Dimension FULL_SINGLE_LINE_TITLEBAR_HEIGHT = 112.0_vp;
 constexpr Dimension FULL_DOUBLE_LINE_TITLEBAR_HEIGHT = 138.0_vp;
 constexpr Dimension HORIZONTAL_MARGIN = 16.0_vp; // ohos_id_elements_margin_horizontal_l
 constexpr Dimension HORIZONTAL_MARGIN_M = 8.0_vp; // ohos_id_elements_margin_horizontal_m
+constexpr Dimension MENU_ITEM_PADDING = 24.0_vp;
+constexpr Dimension BUTTON_PADDING = 12.0_vp;
+constexpr Dimension BUTTON_RADIUS = 5.0_vp;
 
 // more button
 constexpr Dimension MORE_BUTTON_CORNER_RADIUS = 8.0_vp;

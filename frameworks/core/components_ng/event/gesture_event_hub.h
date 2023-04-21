@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,6 +33,14 @@
 #include "core/components_ng/gestures/recognizers/parallel_recognizer.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
 
+#ifdef ENABLE_DRAG_FRAMEWORK
+namespace OHOS::UDMF {
+class UnifiedData;
+}
+namespace OHOS::Msdp::DeviceStatus {
+struct DragNotifyMsg;
+}
+#endif
 namespace OHOS::Ace::NG {
 
 enum class HitTestMode {
@@ -94,6 +102,12 @@ struct DragDropInfo {
     std::string extraInfo;
 };
 
+#ifdef ENABLE_DRAG_FRAMEWORK
+using DragNotifyMsg = Msdp::DeviceStatus::DragNotifyMsg;
+using OnDragCallback = std::function<void(const DragNotifyMsg&)>;
+constexpr float PIXELMAP_WIDTH_RATE = -0.5f;
+constexpr float PIXELMAP_HEIGHT_RATE = -0.2f;
+#endif
 class EventHub;
 
 // The gesture event hub is mainly used to handle common gesture events.
@@ -175,6 +189,9 @@ public:
         return clickEventActuator_ != nullptr;
     }
 
+    bool IsAccessibilityClickable();
+    bool IsAccessibilityLongClickable();
+
     bool ActClick();
 
     void CheckClickActuator();
@@ -200,13 +217,15 @@ public:
 
     bool ActLongClick();
 
-    void SetLongPressEvent(const RefPtr<LongPressEvent>& event, bool isForDrag = false, bool isDisableMouseLeft = false)
+    void SetLongPressEvent(const RefPtr<LongPressEvent>& event, bool isForDrag = false, bool isDisableMouseLeft = false,
+        int32_t duration = 500)
     {
         if (!longPressEventActuator_) {
             longPressEventActuator_ = MakeRefPtr<LongPressEventActuator>(WeakClaim(this));
             longPressEventActuator_->SetOnAccessibility(GetOnAccessibilityEventFunc());
         }
         longPressEventActuator_->SetLongPressEvent(event, isForDrag, isDisableMouseLeft);
+        longPressEventActuator_->SetDuration(duration);
     }
 
     // Set by user define, which will replace old one.
@@ -259,6 +278,8 @@ public:
 
     void OnContextAttached() {}
 
+    std::string GetHitTestModeStr() const;
+
     HitTestMode GetHitTestMode() const
     {
         return hitTestMode_;
@@ -294,6 +315,24 @@ public:
         }
     }
 
+    void AddResponseRect(const DimensionRect& responseRect)
+    {
+        responseRegion_.emplace_back(responseRect);
+        isResponseRegion_ = true;
+    }
+
+    void RemoveLastResponseRect()
+    {
+        if (responseRegion_.empty()) {
+            isResponseRegion_ = false;
+            return;
+        }
+        responseRegion_.pop_back();
+        if (responseRegion_.empty()) {
+            isResponseRegion_ = false;
+        }
+    }
+
     bool GetTouchable() const
     {
         return touchable_;
@@ -304,6 +343,38 @@ public:
         touchable_ = touchable;
     }
 
+#ifdef ENABLE_DRAG_FRAMEWORK
+    void SetThumbnailCallback(std::function<void(Offset)>&& callback)
+    {
+        if (dragEventActuator_) {
+            dragEventActuator_->SetThumbnailCallback(std::move(callback));
+        }
+    }
+#endif // ENABLE_DRAG_FRAMEWORK
+
+    bool GetTextFieldDraggable() const
+    {
+        return textFieldDraggable_;
+    }
+
+    void SetTextFieldDraggable(bool draggable)
+    {
+        textFieldDraggable_ = draggable;
+    }
+
+    void SetPixelMap(RefPtr<PixelMap> pixelMap)
+    {
+        pixelMap_ = pixelMap;
+    }
+
+    RefPtr<PixelMap> GetPixelMap()
+    {
+        return pixelMap_;
+    }
+#ifdef ENABLE_DRAG_FRAMEWORK
+    int32_t SetDragData(std::shared_ptr<UDMF::UnifiedData>& unifiedData, std::string& udKey);
+    OnDragCallback GetDragCallback();
+#endif // ENABLE_DRAG_FRAMEWORK
     void InitDragDropEvent();
     void HandleOnDragStart(const GestureEvent& info);
     void HandleOnDragUpdate(const GestureEvent& info);
@@ -311,6 +382,8 @@ public:
     void HandleOnDragCancel();
 
     void OnModifyDone();
+    bool KeyBoardShortCutClick(const KeyEvent& event, const WeakPtr<NG::FrameNode>& node);
+    bool IsAllowedDrag(RefPtr<EventHub> eventHub);
 
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
@@ -349,6 +422,8 @@ private:
     bool isResponseRegion_ = false;
     std::vector<DimensionRect> responseRegion_;
     bool touchable_ = true;
+    bool textFieldDraggable_ = false;
+    RefPtr<PixelMap> pixelMap_;
 };
 
 } // namespace OHOS::Ace::NG

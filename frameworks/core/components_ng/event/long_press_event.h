@@ -65,6 +65,14 @@ public:
         isDisableMouseLeft_ = isDisableMouseLeft;
     }
 
+    void SetDuration(int32_t duration)
+    {
+        if (!longPressRecognizer_) {
+            longPressRecognizer_ = MakeRefPtr<LongPressRecognizer>(isForDrag_, isDisableMouseLeft_);
+        }
+        longPressRecognizer_->SetDuration(duration);
+    }
+
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result) override;
 

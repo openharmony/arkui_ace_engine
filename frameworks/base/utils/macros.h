@@ -17,9 +17,10 @@
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_MACROS_H
 
 #define ACE_FORCE_EXPORT __attribute__((visibility("default")))
+#define ACE_WEAK_SYM     __attribute__((weak))
 
 #ifndef ACE_EXPORT
-#ifndef WEARABLE_PRODUCT
+#ifndef HIDDEN_SYMBOL
 #define ACE_EXPORT ACE_FORCE_EXPORT
 #else
 #define ACE_EXPORT

@@ -28,7 +28,8 @@ SharedTransitionEffect::SharedTransitionEffect(
     const ShareId& shareId, const std::shared_ptr<SharedTransitionOption>& sharedOption)
     : shareId_(shareId), option_(sharedOption)
 {
-    controller_ = AceType::MakeRefPtr<Animator>();
+    std::string animatorName = "SharedTransition(" + shareId + ")";
+    controller_ = AceType::MakeRefPtr<Animator>(animatorName.c_str());
 }
 
 RefPtr<SharedTransitionEffect> SharedTransitionEffect::GetSharedTransitionEffect(
@@ -127,8 +128,8 @@ bool SharedTransitionExchange::CreateAnimation()
 
 bool SharedTransitionExchange::CreateTranslateAnimation(const RefPtr<FrameNode>& src, const RefPtr<FrameNode>& dest)
 {
-    auto destOffset = dest->GetOffsetRelativeToWindow();
-    auto srcOffset = src->GetOffsetRelativeToWindow();
+    auto destOffset = dest->GetPaintRectOffsetToPage();
+    auto srcOffset = src->GetPaintRectOffsetToPage();
     LOGI("Get Offset, share id: %{public}s. src: %{public}s, dest: %{public}s", GetShareId().c_str(),
         srcOffset.ToString().c_str(), destOffset.ToString().c_str());
     if (NearEqual(destOffset, srcOffset)) {
@@ -180,6 +181,9 @@ bool SharedTransitionExchange::CreateSizeAnimation(const RefPtr<FrameNode>& src,
     }
     const auto& magicProperty = src->GetLayoutProperty()->GetMagicItemProperty();
     auto initAspectRatio = magicProperty ? magicProperty->GetAspectRatio() : std::nullopt;
+    auto initSize = src->GetLayoutProperty()->GetCalcLayoutConstraint()
+                        ? src->GetLayoutProperty()->GetCalcLayoutConstraint()->selfIdealSize
+                        : std::nullopt;
     auto sizeAnimation = AceType::MakeRefPtr<CurveAnimation<SizeF>>(srcSize, destSize, option_->curve);
     auto sizeListener = [weakFrame = WeakPtr<FrameNode>(src), setAspect = initAspectRatio.has_value()](
                             const SizeF& size) {
@@ -190,21 +194,21 @@ bool SharedTransitionExchange::CreateSizeAnimation(const RefPtr<FrameNode>& src,
         if (setAspect) {
             src->GetLayoutProperty()->UpdateAspectRatio(size.Width() / size.Height());
         }
-        src->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        src->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };
     sizeAnimation->AddListener(sizeListener);
     controller_->AddInterpolator(sizeAnimation);
-    finishCallbacks_.emplace_back(
-        [weakFrame = WeakPtr<FrameNode>(src),
-            initSize = CalcSize(CalcLength(srcSize.Width()), CalcLength(srcSize.Height())), initAspectRatio]() {
-            auto src = weakFrame.Upgrade();
-            CHECK_NULL_VOID(src);
-            src->GetLayoutProperty()->UpdateUserDefinedIdealSize(initSize);
-            if (initAspectRatio.has_value()) {
-                src->GetLayoutProperty()->UpdateAspectRatio(initAspectRatio.value());
-            }
-            src->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-        });
+    finishCallbacks_.emplace_back([weakFrame = WeakPtr<FrameNode>(src), initSize, initAspectRatio]() {
+        auto src = weakFrame.Upgrade();
+        CHECK_NULL_VOID(src);
+        if (src->GetLayoutProperty()->GetCalcLayoutConstraint()) {
+            src->GetLayoutProperty()->GetCalcLayoutConstraint()->selfIdealSize = initSize;
+        }
+        if (initAspectRatio.has_value()) {
+            src->GetLayoutProperty()->UpdateAspectRatio(initAspectRatio.value());
+        }
+        src->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    });
     return true;
 }
 

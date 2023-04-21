@@ -36,7 +36,7 @@ public:
     void Execute(const DragStartInfo& info);
     void Execute(const DragUpdateInfo& info);
     void Execute(const DragEndInfo& info);
-    void Execute();
+    void Execute() override;
 
 private:
     JSRef<JSObject> createPanInfo(const TouchLocationInfo& info);

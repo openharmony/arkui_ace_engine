@@ -17,6 +17,7 @@
 #include "core/components_v2/inspector/stepper_item_composed_element.h"
 
 #include "base/log/dump_log.h"
+#include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/stepper/render_stepper_item.h"
 #include "core/components_v2/inspector/utils.h"
@@ -88,39 +89,11 @@ std::string StepperItemComposedElement::GetStatus() const
     
 }
 
-void StepperItemComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
+RefPtr<Element> StepperItemComposedElement::GetElementChildBySlot(const RefPtr<Element>& element, int32_t& slot) const
 {
-    auto stepperItemV2 = GetContentElement<FlexElement>(FlexElement::TypeId());
-    if (!stepperItemV2) {
-        LOGE("get GetStepperItemV2 failed");
-        return;
-    }
-    stepperItemV2->UpdateChildWithSlot(nullptr, newComponent, -1, -1);
-    stepperItemV2->MarkDirty();
-}
-
-void StepperItemComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
-{
-    auto stepperItemV2 = GetContentElement<FlexElement>(FlexElement::TypeId());
-    if (!stepperItemV2) {
-        LOGE("get GetStepperItemV2 failed");
-        return;
-    }
-    auto child = stepperItemV2->GetFirstChild();
-    stepperItemV2->UpdateChildWithSlot(child, newComponent, -1, -1);
-    stepperItemV2->MarkDirty();
-}
-
-void StepperItemComposedElement::DeleteChildWithSlot(int32_t slot)
-{
-    auto stepperItemV2 = GetContentElement<FlexElement>(FlexElement::TypeId());
-    if (!stepperItemV2) {
-        LOGE("get GetStepperItemV2 failed");
-        return;
-    }
-    auto child = stepperItemV2->GetFirstChild();
-    stepperItemV2->UpdateChildWithSlot(child, nullptr, -1, -1);
-    stepperItemV2->MarkDirty();
+    auto stepperItemV2 = AceType::DynamicCast<FlexElement>(element);
+    CHECK_NULL_RETURN(stepperItemV2, nullptr);
+    return stepperItemV2->GetFirstChild();
 }
 
 } // namespace OHOS::Ace::V2

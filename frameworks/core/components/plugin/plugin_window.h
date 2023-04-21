@@ -28,7 +28,14 @@ namespace OHOS::Ace {
 class ACE_EXPORT PluginWindow : public Window {
 public:
     explicit PluginWindow(WeakPtr<PipelineBase> context) : Window(nullptr), outSidePipelineContext_(context) {}
-    ~PluginWindow() = default;
+    ~PluginWindow() {
+        auto context = outSidePipelineContext_.Upgrade();
+        if (!context) {
+            LOGE("form remove vsync callback fail due to null context");
+            return;
+        }
+        context->RemoveSubWindowVsyncCallback(pluginWindowId_);
+    };
 
     void RequestFrame() override;
 
@@ -40,8 +47,13 @@ public:
 
     void SetVsyncCallback(AceVsyncCallback&& callback) override;
 
+    void SetPluginWindowId(int64_t pluginWindowId)
+    {
+        pluginWindowId_ = pluginWindowId;
+    };
 private:
     WeakPtr<PipelineBase> outSidePipelineContext_;
+    int64_t pluginWindowId_ = -1;
 
     ACE_DISALLOW_COPY_AND_MOVE(PluginWindow);
 };

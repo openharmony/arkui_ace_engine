@@ -17,32 +17,33 @@
 
 #include "base/log/ace_trace.h"
 #include "frameworks/bridge/common/utils/utils.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_canvas_renderer.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_rendering_context.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+#include "frameworks/bridge/declarative_frontend/jsview/models/preview_mock_model_impl.h"
+#include "frameworks/core/components_ng/pattern/preview_mock/preview_mock_model.h"
+#include "frameworks/core/components_ng/pattern/preview_mock/preview_mock_model_ng.h"
+
+namespace OHOS::Ace {
+
+std::unique_ptr<PreviewMockModel> PreviewMockModel::instance_ = nullptr;
+
+PreviewMockModel* PreviewMockModel::GetInstance()
+{
+    if (!instance_) {
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::PreviewMockModelNG());
+        } else {
+            instance_.reset(new Framework::PreviewMockModelImpl());
+        }
+    }
+    return instance_.get();
+}
+
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
-namespace {
-constexpr Dimension DEFAULT_FONT_SIZE = 30.0_px;
-constexpr double DEFAULT_OFFSET = 25;
-constexpr double DEFAULT_HEIGHT = 30;
-}
 
 void CreateMockComponent(const std::string inspectorTag)
 {
-    RefPtr<OHOS::Ace::CustomPaintComponent> mockComponent = AceType::MakeRefPtr<OHOS::Ace::CustomPaintComponent>();
-    auto jsContext = Referenced::MakeRefPtr<JSRenderingContext>();
-    jsContext->SetAnti(true);
-    jsContext->SetComponent(mockComponent->GetTaskPool());
-    jsContext->SetAntiAlias();
-    mockComponent->GetTaskPool()->UpdateFontSize(DEFAULT_FONT_SIZE);
-    mockComponent->GetTaskPool()->FillText("This component is not supported on PC preview.", Offset(0, DEFAULT_OFFSET));
-    mockComponent->SetInspectorTag(inspectorTag);
-    ViewStackProcessor::GetInstance()->Push(mockComponent);
-
-    RefPtr<BoxComponent> mountBox = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    mountBox->SetColor(Color::FromString("#808080"));
-    mountBox->SetHeight(DEFAULT_HEIGHT);
+    OHOS::Ace::PreviewMockModel::GetInstance()->Create(inspectorTag);
 }
 
 void JSForm::Create(const JSCallbackInfo& info)
@@ -89,8 +90,7 @@ void JSRichText::Create(const JSCallbackInfo& info)
         LOGI("richtext create error, info is non-valid");
         return;
     }
-    LOGE("lihao js Create JSRichText::Create");
-    CreateMockComponent("RichTextComponent");
+    CreateMockComponent("RichText");
 }
 
 void JSRichText::Mock(const JSCallbackInfo& info) {}
@@ -245,7 +245,7 @@ void JSWeb::Create(const JSCallbackInfo& info)
         return;
     }
 
-    CreateMockComponent("WebComponent");
+    CreateMockComponent("Web");
 }
 
 void JSWeb::Mock(const JSCallbackInfo& info) {}
@@ -387,7 +387,7 @@ void JSXComponent::Create(const JSCallbackInfo& info)
         LOGI("xcomponent create error, info is invalid");
         return;
     }
-    CreateMockComponent("XComponentComponent");
+    CreateMockComponent("XComponent");
 }
 
 void JSXComponent::Mock(const JSCallbackInfo& info) {}
@@ -412,5 +412,99 @@ void JSXComponentController::JSBind(BindingTarget globalObj)
 }
 
 void JSXComponentController::Mock(const JSCallbackInfo& info) {}
+
+void JSVideo::Create(const JSCallbackInfo& info)
+{
+    if (info.Length() <= 0 || !info[0]->IsObject()) {
+        LOGE("video create error, info is invalid.");
+        return;
+    }
+    CreateMockComponent("Video");
+}
+
+void JSVideo::Mock(const JSCallbackInfo& info) {}
+
+void JSVideo::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSVideo>::Declare("Video");
+    MethodOptions opt = MethodOptions::NONE;
+    JSClass<JSVideo>::StaticMethod("create", &JSVideo::Create, opt);
+    JSClass<JSVideo>::StaticMethod("muted", &JSVideo::Mock, opt);
+    JSClass<JSVideo>::StaticMethod("autoPlay", &JSVideo::Mock, opt);
+    JSClass<JSVideo>::StaticMethod("controls", &JSVideo::Mock, opt);
+    JSClass<JSVideo>::StaticMethod("loop", &JSVideo::Mock, opt);
+    JSClass<JSVideo>::StaticMethod("objectFit", &JSVideo::Mock, opt);
+
+    JSClass<JSVideo>::StaticMethod("onStart", &JSVideo::Mock);
+    JSClass<JSVideo>::StaticMethod("onPause", &JSVideo::Mock);
+    JSClass<JSVideo>::StaticMethod("onFinish", &JSVideo::Mock);
+    JSClass<JSVideo>::StaticMethod("onFullscreenChange", &JSVideo::Mock);
+    JSClass<JSVideo>::StaticMethod("onPrepared", &JSVideo::Mock);
+    JSClass<JSVideo>::StaticMethod("onSeeking", &JSVideo::Mock);
+    JSClass<JSVideo>::StaticMethod("onSeeked", &JSVideo::Mock);
+    JSClass<JSVideo>::StaticMethod("onUpdate", &JSVideo::Mock);
+    JSClass<JSVideo>::StaticMethod("onError", &JSVideo::Mock);
+
+    JSClass<JSVideo>::StaticMethod("onTouch", &JSVideo::Mock);
+    JSClass<JSVideo>::StaticMethod("onHover", &JSVideo::Mock);
+    JSClass<JSVideo>::StaticMethod("onKeyEvent", &JSVideo::Mock);
+    JSClass<JSVideo>::StaticMethod("onDeleteEvent", &JSVideo::Mock);
+    JSClass<JSVideo>::StaticMethod("onClick", &JSVideo::Mock);
+    JSClass<JSVideo>::StaticMethod("onAppear", &JSVideo::Mock);
+    JSClass<JSVideo>::StaticMethod("onDisAppear", &JSVideo::Mock);
+    JSClass<JSVideo>::StaticMethod("remoteMessage", &JSVideo::Mock);
+
+    JSClass<JSVideo>::Inherit<JSViewAbstract>();
+    // override method
+    JSClass<JSVideo>::StaticMethod("opacity", &JSVideo::Mock);
+    JSClass<JSVideo>::StaticMethod("transition", &JSVideo::Mock);
+    JSClass<JSVideo>::Bind<>(globalObj);
+}
+
+void JSVideoController::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSVideoController>::Declare("VideoController");
+    JSClass<JSVideoController>::StaticMethod("start", &JSVideoController::Mock);
+    JSClass<JSVideoController>::StaticMethod("pause", &JSVideoController::Mock);
+    JSClass<JSVideoController>::StaticMethod("stop", &JSVideoController::Mock);
+    JSClass<JSVideoController>::StaticMethod("setCurrentTime", &JSVideoController::Mock);
+    JSClass<JSVideoController>::StaticMethod("requestFullscreen", &JSVideoController::Mock);
+    JSClass<JSVideoController>::StaticMethod("exitFullscreen", &JSVideoController::Mock);
+    JSClass<JSVideoController>::Bind(globalObj);
+}
+
+void JSVideoController::Mock(const JSCallbackInfo& info) {}
+
+void JSPlugin::Create(const JSCallbackInfo& info)
+{
+    if (info.Length() <= 0 || !info[0]->IsObject()) {
+        LOGE("plugin create error, info is invalid.");
+        return;
+    }
+    CreateMockComponent("PluginComponent");
+}
+
+void JSPlugin::Mock(const JSCallbackInfo& info) {}
+
+void JSPlugin::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSPlugin>::Declare("PluginComponent");
+    MethodOptions opt = MethodOptions::NONE;
+    JSClass<JSPlugin>::StaticMethod("create", &JSPlugin::Create, opt);
+    JSClass<JSPlugin>::StaticMethod("size", &JSPlugin::Mock, opt);
+    JSClass<JSPlugin>::StaticMethod("width", &JSPlugin::Mock);
+    JSClass<JSPlugin>::StaticMethod("height", &JSPlugin::Mock);
+    JSClass<JSPlugin>::StaticMethod("onComplete", &JSPlugin::Mock);
+    JSClass<JSPlugin>::StaticMethod("onError", &JSPlugin::Mock);
+    JSClass<JSPlugin>::StaticMethod("onAppear", &JSPlugin::Mock);
+    JSClass<JSPlugin>::StaticMethod("onDisAppear", &JSPlugin::Mock);
+    JSClass<JSPlugin>::StaticMethod("onTouch", &JSPlugin::Mock);
+    JSClass<JSPlugin>::StaticMethod("onKeyEvent", &JSPlugin::Mock);
+    JSClass<JSPlugin>::StaticMethod("onDeleteEvent", &JSPlugin::Mock);
+    JSClass<JSPlugin>::StaticMethod("onClick", &JSPlugin::Mock);
+
+    JSClass<JSPlugin>::Inherit<JSViewAbstract>();
+    JSClass<JSPlugin>::Bind<>(globalObj);
+}
 
 } // namespace OHOS::Ace::Framework

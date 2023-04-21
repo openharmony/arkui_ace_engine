@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LOADING_PROGRESS_LOADING_PROGRESS_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LOADING_PROGRESS_LOADING_PROGRESS_PATTERN_H
 
+#include "base/log/log_wrapper.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_layout_algorithm.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_layout_property.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_paint_method.h"
@@ -35,7 +36,13 @@ public:
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
         if (!loadingProgressModifier_) {
-            loadingProgressModifier_ = AceType::MakeRefPtr<LoadingProgressModifier>();
+            auto host = GetHost();
+            CHECK_NULL_RETURN(host, nullptr);
+            auto paintProperty = GetPaintProperty<LoadingProgressPaintProperty>();
+            CHECK_NULL_RETURN(paintProperty, nullptr);
+            auto loadingOwner =
+                paintProperty->GetLoadingProgressOwner().value_or(LoadingProgressOwner::SELF);
+            loadingProgressModifier_ = AceType::MakeRefPtr<LoadingProgressModifier>(loadingOwner);
         }
         return MakeRefPtr<LoadingProgressPaintMethod>(loadingProgressModifier_);
     }

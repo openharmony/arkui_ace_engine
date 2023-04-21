@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,6 +31,8 @@ public:
 
     virtual void InitResource(const ResourceInfo& resourceInfo) {}
 
+    virtual void ReloadResource() {}
+
     virtual void UpdateConfig(const ResourceConfiguration& config) {}
 
     virtual void LoadSystemTheme(int32_t themeId) {}
@@ -44,7 +46,9 @@ public:
     virtual Color GetBackgroundColor() const = 0;
 
     virtual RefPtr<ThemeConstants> GetThemeConstants(
-        const std::string& bundleName = "", const std::string& moduleName = "") const = 0;
+        const std::string& bundleName, const std::string& moduleName) const = 0;
+
+    virtual RefPtr<ThemeConstants> GetThemeConstants() const = 0;
 
     virtual RefPtr<Theme> GetTheme(ThemeType type) = 0;
 

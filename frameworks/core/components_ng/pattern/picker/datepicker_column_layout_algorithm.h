@@ -34,8 +34,8 @@ public:
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
     void MeasureText(LayoutWrapper* layoutWrapper, const SizeF& size);
-    void ChangeTextStyle(
-        uint32_t index, uint32_t showOptionCount, const SizeF& size, const RefPtr<LayoutWrapper>& childLayoutWrapper);
+    void ChangeTextStyle(uint32_t index, uint32_t showOptionCount, const SizeF& size,
+        const RefPtr<LayoutWrapper>& childLayoutWrapper, LayoutWrapper* layoutWrapper);
 
     double GetCurrentOffset() const
     {

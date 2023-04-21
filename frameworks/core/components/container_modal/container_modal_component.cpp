@@ -28,6 +28,7 @@
 #include "core/components/tween/tween_component.h"
 #include "core/components_v2/inspector/inspector_composed_component.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/gestures/pan_gesture.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -69,21 +70,18 @@ RefPtr<Component> ContainerModalComponent::BuildTitle()
     auto titleChildrenRow =
         AceType::MakeRefPtr<RowComponent>(FlexAlign::FLEX_START, FlexAlign::CENTER, BuildTitleChildren(false));
 
-    // handle mouse move
-    titleBox->SetOnMouseId([contextWptr = context_](MouseInfo& info) {
-        auto context = contextWptr.Upgrade();
-        if (context && info.GetButton() == MouseButton::LEFT_BUTTON && info.GetAction() == MouseAction::PRESS) {
-            context->GetWindowManager()->WindowStartMove();
-        }
-    });
-
-    // handle touch move
-    titleBox->SetOnTouchMoveId([contextWptr = context_](const TouchEventInfo&) {
+    // handle touch move and mouse move
+    PanDirection panDirection;
+    panDirection.type = PanDirection::ALL;
+    auto panGesture = AceType::MakeRefPtr<PanGesture>(DEFAULT_PAN_FINGER, panDirection, DEFAULT_PAN_DISTANCE);
+    panGesture->SetOnActionStartId([contextWptr = context_] (const GestureEvent&) {
         auto context = contextWptr.Upgrade();
         if (context) {
+            LOGI("container window start move.");
             context->GetWindowManager()->WindowStartMove();
         }
     });
+    titleBox->AddGesture(GesturePriority::Low, panGesture);
     titleBox->SetChild(titleChildrenRow);
 
     if (isDeclarative_) {
@@ -212,7 +210,8 @@ void ContainerModalComponent::BuildInnerChild()
     SetChild(containerBox);
 }
 
-std::list<RefPtr<Component>> ContainerModalComponent::BuildTitleChildren(bool isFloating, bool isFocus)
+std::list<RefPtr<Component>> ContainerModalComponent::BuildTitleChildren(bool isFloating, bool isFocus,
+    bool isFullWindow)
 {
     // title icon
     if (!titleIcon_) {
@@ -249,11 +248,12 @@ std::list<RefPtr<Component>> ContainerModalComponent::BuildTitleChildren(bool is
                 windowManager->FireWindowSplitCallBack();
             }
         }, isFocus, isFloating);
-    auto maxRecoverButton = isFloating ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_RECOVER
-                                       : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE;
+    auto maxRecoverButton = isFloating && isFullWindow ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_RECOVER
+                                                       : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE;
     if (!isFocus) {
-        maxRecoverButton = isFloating ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_RECOVER
-                                      : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_MAXIMIZE;
+        maxRecoverButton = isFloating && isFullWindow ?
+            InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_RECOVER :
+            InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_MAXIMIZE;
     }
     auto titleMaximizeRecoverButton = BuildControlButton(maxRecoverButton, [windowManager]() {
             if (windowManager) {

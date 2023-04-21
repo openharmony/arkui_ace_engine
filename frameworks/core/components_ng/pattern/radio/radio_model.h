@@ -31,11 +31,13 @@ public:
     virtual void SetWidth(const Dimension& width);
     virtual void SetHeight(const Dimension& height);
     virtual void SetPadding(const NG::PaddingPropertyF& args);
+    virtual void SetCheckedBackgroundColor(const Color& color) {}
+    virtual void SetUncheckedBorderColor(const Color& color) {}
+    virtual void SetIndicatorColor(const Color& color) {}
 
 private:
     static std::unique_ptr<RadioModel> instance_;
 };
-
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RADIO_RADIO_MODEL_H

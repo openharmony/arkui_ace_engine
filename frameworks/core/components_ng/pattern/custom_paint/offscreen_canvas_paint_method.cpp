@@ -15,14 +15,14 @@
 
 #include "core/components_ng/pattern/custom_paint/offscreen_canvas_paint_method.h"
 
-#include "flutter/third_party/txt/src/txt/paragraph_builder.h"
-#include "flutter/third_party/txt/src/txt/paragraph_style.h"
-#include "third_party/skia/include/core/SkMaskFilter.h"
-#include "third_party/skia/include/effects/SkBlurImageFilter.h"
-#include "third_party/skia/include/encode/SkJpegEncoder.h"
-#include "third_party/skia/include/encode/SkPngEncoder.h"
-#include "third_party/skia/include/encode/SkWebpEncoder.h"
-#include "third_party/skia/include/utils/SkBase64.h"
+#include "txt/paragraph_builder.h"
+#include "txt/paragraph_style.h"
+#include "include/core/SkMaskFilter.h"
+#include "include/effects/SkBlurImageFilter.h"
+#include "include/encode/SkJpegEncoder.h"
+#include "include/encode/SkPngEncoder.h"
+#include "include/encode/SkWebpEncoder.h"
+#include "include/utils/SkBase64.h"
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/i18n/localization.h"
@@ -71,7 +71,7 @@ double GetQuality(const std::string& args, const double quality)
 } // namespace
 
 OffscreenCanvasPaintMethod::OffscreenCanvasPaintMethod(
-    const RefPtr<PipelineBase> context, int32_t width, int32_t height)
+    const WeakPtr<PipelineBase> context, int32_t width, int32_t height)
 {
     antiAlias_ = true;
     context_ = context;
@@ -86,9 +86,6 @@ OffscreenCanvasPaintMethod::OffscreenCanvasPaintMethod(
     cacheBitmap_.eraseColor(SK_ColorTRANSPARENT);
     skCanvas_ = std::make_unique<SkCanvas>(canvasCache_);
     cacheCanvas_ = std::make_unique<SkCanvas>(cacheBitmap_);
-
-    auto* currentDartState = flutter::UIDartState::Current();
-    CHECK_NULL_VOID(currentDartState);
 
     InitFilterFunc();
     InitImageCallbacks();
@@ -442,9 +439,6 @@ void OffscreenCanvasPaintMethod::ImageObjFailed()
 void OffscreenCanvasPaintMethod::DrawImage(
     PaintWrapper* paintWrapper, const Ace::CanvasImage& canvasImage, double width, double height)
 {
-    auto* currentDartState = flutter::UIDartState::Current();
-    CHECK_NULL_VOID(currentDartState);
-
     std::string::size_type tmp = canvasImage.src.find(".svg");
     if (tmp != std::string::npos) {
         DrawSvgImage(paintWrapper, canvasImage);
@@ -493,9 +487,6 @@ void OffscreenCanvasPaintMethod::DrawImage(
 
 void OffscreenCanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& canvasImage)
 {
-    auto* currentDartState = flutter::UIDartState::Current();
-    CHECK_NULL_VOID(currentDartState);
-
     // get skImage form pixelMap
     auto imageInfo = Ace::ImageProvider::MakeSkImageInfoFromPixelMap(pixelMap);
     SkPixmap imagePixmap(imageInfo, reinterpret_cast<const void*>(pixelMap->GetPixels()), pixelMap->GetRowBytes());
@@ -569,8 +560,9 @@ std::unique_ptr<Ace::ImageData> OffscreenCanvasPaintMethod::GetImageData(
     double left, double top, double width, double height)
 {
     double viewScale = 1.0;
-    CHECK_NULL_RETURN(context_, std::unique_ptr<Ace::ImageData>());
-    viewScale = context_->GetViewScale();
+    auto context = context_.Upgrade();
+    CHECK_NULL_RETURN(context, std::unique_ptr<Ace::ImageData>());
+    viewScale = context->GetViewScale();
 
     // copy the bitmap to tempCanvas
     auto imageInfo =
@@ -691,7 +683,7 @@ TextMetrics OffscreenCanvasPaintMethod::MeasureTextMetrics(const std::string& te
     auto textBaseLine = state.GetTextStyle().GetTextBaseline();
     textMetrics.width = paragraph->GetMaxIntrinsicWidth();
     textMetrics.height = paragraph->GetHeight();
-    textMetrics.actualBoundingBoxLeft = -GetAlignOffset(text, textAlign, paragraph);
+    textMetrics.actualBoundingBoxLeft = -GetAlignOffset(textAlign, paragraph);
     textMetrics.actualBoundingBoxRight = textMetrics.width - textMetrics.actualBoundingBoxLeft;
     textMetrics.actualBoundingBoxAscent = -GetBaselineOffset(textBaseLine, paragraph);
     textMetrics.actualBoundingBoxDescent = textMetrics.height - textMetrics.actualBoundingBoxAscent;
@@ -706,7 +698,7 @@ void OffscreenCanvasPaintMethod::PaintText(
         paragraph_->Layout(std::ceil(paragraph_->GetMaxIntrinsicWidth()));
     }
     auto align = isStroke ? strokeState_.GetTextAlign() : fillState_.GetTextAlign();
-    double dx = x + GetAlignOffset(text, align, paragraph_);
+    double dx = x + GetAlignOffset(align, paragraph_);
     auto baseline =
         isStroke ? strokeState_.GetTextStyle().GetTextBaseline() : fillState_.GetTextStyle().GetTextBaseline();
     double dy = y + GetBaselineOffset(baseline, paragraph_);
@@ -720,32 +712,6 @@ void OffscreenCanvasPaintMethod::PaintText(
         return;
     }
     paragraph_->Paint(skCanvas_.get(), dx, dy);
-}
-
-double OffscreenCanvasPaintMethod::GetAlignOffset(const std::string& text, TextAlign align, std::unique_ptr<txt::Paragraph>& paragraph)
-{
-    double x = 0.0;
-    switch (align) {
-        case TextAlign::LEFT:
-            x = 0.0;
-            break;
-        case TextAlign::START:
-            x = (GetTextDirection(text) == TextDirection::LTR) ? 0.0 : -paragraph->GetMaxIntrinsicWidth();
-            break;
-        case TextAlign::RIGHT:
-            x = -paragraph->GetMaxIntrinsicWidth();
-            break;
-        case TextAlign::END:
-            x = (GetTextDirection(text) == TextDirection::LTR) ? -paragraph->GetMaxIntrinsicWidth() : 0.0;
-            break;
-        case TextAlign::CENTER:
-            x = -paragraph->GetMaxIntrinsicWidth() / 2;
-            break;
-        default:
-            x = 0.0;
-            break;
-    }
-    return x;
 }
 
 double OffscreenCanvasPaintMethod::GetBaselineOffset(TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph)
@@ -786,7 +752,10 @@ bool OffscreenCanvasPaintMethod::UpdateOffParagraph(const std::string& text, boo
     } else {
         style.text_align = ConvertTxtTextAlign(fillState_.GetTextAlign());
     }
-    style.text_direction = ConvertTxtTextDirection(state.GetOffTextDirection());
+    if (fillState_.GetOffTextDirection() == TextDirection::RTL) {
+        style.text_direction = txt::TextDirection::rtl;
+    }
+    style.text_align = GetEffectiveAlign(style.text_align, style.text_direction);
     auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
     CHECK_NULL_RETURN(fontCollection, false);
     std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
@@ -851,22 +820,6 @@ void OffscreenCanvasPaintMethod::UpdateTextStyleForeground(bool isStroke, txt::T
     }
 }
 
-TextDirection OffscreenCanvasPaintMethod::GetTextDirection(const std::string& content)
-{
-    TextDirection textDirection = TextDirection::LTR;
-    auto showingTextForWString = StringUtils::ToWstring(content);
-    for (const auto& charOfShowingText : showingTextForWString) {
-        if (u_charDirection(charOfShowingText) == UCharDirection::U_LEFT_TO_RIGHT) {
-            textDirection = TextDirection::LTR;
-        } else if (u_charDirection(charOfShowingText) == UCharDirection::U_RIGHT_TO_LEFT) {
-            textDirection = TextDirection::RTL;
-        } else if (u_charDirection(charOfShowingText) == UCharDirection::U_RIGHT_TO_LEFT_ARABIC) {
-            textDirection = TextDirection::RTL;
-        }
-    }
-    return textDirection;
-}
-
 void OffscreenCanvasPaintMethod::PaintShadow(const SkPath& path, const Shadow& shadow, SkCanvas* canvas)
 {
     FlutterDecorationPainter::PaintShadow(path, shadow, canvas);
@@ -883,7 +836,9 @@ void OffscreenCanvasPaintMethod::Path2DRect(const OffsetF& offset, const PathArg
 
 void OffscreenCanvasPaintMethod::SetTransform(const TransformParam& param)
 {
-    double viewScale = context_->GetViewScale();
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    double viewScale = context->GetViewScale();
     SkMatrix skMatrix;
     skMatrix.setAll(param.scaleX * viewScale, param.skewY * viewScale, param.translateX, param.skewX * viewScale,
         param.scaleY * viewScale, param.translateY, 0, 0, 1);
@@ -892,14 +847,15 @@ void OffscreenCanvasPaintMethod::SetTransform(const TransformParam& param)
 
 std::string OffscreenCanvasPaintMethod::ToDataURL(const std::string& type, const double quality)
 {
-    CHECK_NULL_RETURN(context_, UNSUPPORTED);
+    auto context = context_.Upgrade();
+    CHECK_NULL_RETURN(context, UNSUPPORTED);
     std::string mimeType = GetMimeType(type);
     double qua = GetQuality(type, quality);
     SkBitmap tempCache;
     tempCache.allocPixels(SkImageInfo::Make(width_, height_, SkColorType::kBGRA_8888_SkColorType,
         (mimeType == IMAGE_JPEG) ? SkAlphaType::kOpaque_SkAlphaType : SkAlphaType::kUnpremul_SkAlphaType));
     SkCanvas tempCanvas(tempCache);
-    double viewScale = context_->GetViewScale();
+    double viewScale = context->GetViewScale();
     tempCanvas.clear(SK_ColorTRANSPARENT);
     tempCanvas.scale(1.0 / viewScale, 1.0 / viewScale);
 #ifdef USE_SYSTEM_SKIA_S

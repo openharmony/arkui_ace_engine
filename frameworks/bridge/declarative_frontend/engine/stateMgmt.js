@@ -236,7 +236,15 @@ class LocalStorage extends NativeLocalStorage {
             stateMgmtConsole.warn(`${this.constructor.name}: link: no property ${propName} error.`);
             return undefined;
         }
-        let linkResult = p.createLink(linkUser, propName);
+        let linkResult;
+        if (ViewStackProcessor.UsesNewPipeline()) {
+            linkResult = (p instanceof ObservedPropertySimple)
+                ? new SynchedPropertySimpleTwoWayPU(p, linkUser, propName)
+                : new SynchedPropertyObjectTwoWayPU(p, linkUser, propName);
+        }
+        else {
+            linkResult = p.createLink(linkUser, propName);
+        }
         linkResult.setInfo(subscribersName);
         return linkResult;
     }
@@ -279,7 +287,15 @@ class LocalStorage extends NativeLocalStorage {
             stateMgmtConsole.warn(`${this.constructor.name}: prop: no property ${propName} error.`);
             return undefined;
         }
-        let propResult = p.createProp(propUser, propName);
+        let propResult;
+        if (ViewStackProcessor.UsesNewPipeline()) {
+            propResult = (p instanceof ObservedPropertySimple)
+                ? new SynchedPropertySimpleOneWayPU(p, propUser, propName)
+                : new SynchedPropertyObjectOneWayPU(p, propUser, propName);
+        }
+        else {
+            propResult = p.createProp(propUser, propName);
+        }
         propResult.setInfo(subscribersName);
         return propResult;
     }
@@ -362,6 +378,7 @@ class LocalStorage extends NativeLocalStorage {
             var p = this.storage_.get(propName);
             p.aboutToBeDeleted();
         }
+        this.storage_.clear();
         
         return true;
     }
@@ -1497,6 +1514,14 @@ class stateMgmtConsole {
         aceConsole.error(...args);
     }
 }
+class stateMgmtTrace {
+    static scopedTrace(codeBlock, arg1, ...args) {
+        aceTrace.begin(arg1, ...args);
+        let result = codeBlock();
+        aceTrace.end();
+        return result;
+    }
+}
 /*
  * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -1695,7 +1720,8 @@ function Observed(target) {
     // the new constructor behaviour
     var f = function (...args) {
         
-        return new ObservedObject(new original(...args), undefined);
+        return ObservedObject.createNew(new original(...args), undefined);
+        //    return new ObservedObject<C>(new original(...args), undefined);
     };
     Object.setPrototypeOf(f, Object.getPrototypeOf(original));
     // return new constructor (will override original)
@@ -1778,6 +1804,38 @@ SubscribableHandler.IS_OBSERVED_OBJECT = Symbol("_____is_observed_object__");
 SubscribableHandler.RAW_OBJECT = Symbol("_____raw_object__");
 SubscribableHandler.SUBSCRIBE = Symbol("_____subscribe__");
 SubscribableHandler.UNSUBSCRIBE = Symbol("_____unsubscribe__");
+class SubscribableDateHandler extends SubscribableHandler {
+    constructor(owningProperty) {
+        super(owningProperty);
+    }
+    /**
+     * Get trap for Date type proxy
+     * Functions that modify Date in-place are intercepted and replaced with a function
+     * that executes the original function and notifies the handler of a change.
+     * @param target Original Date object
+     * @param property
+     * @returns
+     */
+    get(target, property) {
+        const dateSetFunctions = new Set(["setFullYear", "setMonth", "setDate", "setHours", "setMinutes", "setSeconds",
+            "setMilliseconds", "setTime", "setUTCFullYear", "setUTCMonth", "setUTCDate", "setUTCHours", "setUTCMinutes",
+            "setUTCSeconds", "setUTCMilliseconds"]);
+        let ret = super.get(target, property);
+        if (typeof ret === "function" && property.toString() && dateSetFunctions.has(property.toString())) {
+            const self = this;
+            return function () {
+                // execute original function with given arguments
+                let result = ret.apply(this, arguments);
+                self.notifyPropertyHasChanged(property.toString(), this);
+                return result;
+            }.bind(target); // bind "this" to target inside the function
+        }
+        else if (typeof ret === "function") {
+            ret = ret.bind(target);
+        }
+        return ret;
+    }
+}
 class ExtendableProxy {
     constructor(obj, handler) {
         return new Proxy(obj, handler);
@@ -1795,6 +1853,10 @@ class ObservedObject extends ExtendableProxy {
      *          otherwise the newly created ObservedObject
      */
     static createNew(rawObject, owningProperty) {
+        if (rawObject === null || rawObject === undefined) {
+            stateMgmtConsole.error(`ObservedObject.CreateNew, input object must not be null or undefined.`);
+            return null;
+        }
         if (ObservedObject.IsObservedObject(rawObject)) {
             ObservedObject.addOwningProperty(rawObject, owningProperty);
             return rawObject;
@@ -1845,7 +1907,8 @@ class ObservedObject extends ExtendableProxy {
         if (ObservedObject.IsObservedObject(obj)) {
             throw new Error("Invalid constructor argument error: ObservableObject contructor called with an ObservedObject as parameer");
         }
-        let handler = new SubscribableHandler(objectOwningProperty);
+        let handler = (obj instanceof Date) ? new SubscribableDateHandler(objectOwningProperty)
+            : new SubscribableHandler(objectOwningProperty);
         super(obj, handler);
         if (ObservedObject.IsObservedObject(obj)) {
             stateMgmtConsole.error("ObservableOject constructor: INTERNAL ERROR: after jsObj is observedObject already");
@@ -2247,8 +2310,10 @@ class SynchedPropertyObjectTwoWay extends ObservedPropertyObjectAbstract {
         super(owningChildView, thisPropertyName);
         this.changeNotificationIsOngoing_ = false;
         this.linkedParentProperty_ = linkSource;
-        // register to the parent property
-        this.linkedParentProperty_.subscribeMe(this);
+        if (this.linkedParentProperty_) {
+            // register to the parent property
+            this.linkedParentProperty_.subscribeMe(this);
+        }
         // register to the ObservedObject
         ObservedObject.addOwningProperty(this.getObject(), this);
     }
@@ -3110,7 +3175,7 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
             this.source_ = new ObservedPropertyObjectPU(source, this, thisPropertyName);
         }
         // deep copy source Object and wrap it
-        this.wrappedValue_ = ObservedObject.createNew(Object.assign({}, ObservedObject.GetRawObject(this.source_.get())), this);
+        this.setWrapperValue(this.source_.get());
         
     }
     /*
@@ -3131,7 +3196,7 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
     hasChanged(newValue) {
         if (typeof newValue == "object") {
             
-            this.wrappedValue_ = ObservedObject.createNew(Object.assign({}, ObservedObject.GetRawObject(newValue)), this);
+            this.setWrapperValue(newValue);
             this.notifyHasChanged(ObservedObject.GetRawObject(this.wrappedValue_));
         }
     }
@@ -3162,13 +3227,25 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
             stateMgmtConsole.warn(`@Prop ${this.info()} Set: Provided new object's class 
          lacks @Observed class decorator. Object property changes will not be observed.`);
         }
-        this.wrappedValue_ = ObservedObject.createNew(Object.assign({}, ObservedObject.GetRawObject(newValue)), this);
+        this.setWrapperValue(newValue);
         this.notifyHasChanged(this.wrappedValue_);
     }
     reset(sourceChangedValue) {
         
         // if set causes an actual change, then, ObservedPropertyObject source_ will call hasChanged
         this.source_.set(sourceChangedValue);
+    }
+    setWrapperValue(value) {
+        let rawValue = ObservedObject.GetRawObject(value);
+        let copy;
+        if (rawValue instanceof Array) {
+            copy = ObservedObject.createNew([...rawValue], this);
+        }
+        else {
+            copy = ObservedObject.createNew(Object.assign({}, rawValue), this);
+        }
+        Object.setPrototypeOf(copy, Object.getPrototypeOf(rawValue));
+        this.wrappedValue_ = copy;
     }
 }
 /*
@@ -3195,8 +3272,10 @@ class SynchedPropertyObjectTwoWayPU extends ObservedPropertyObjectAbstractPU {
         super(owningChildView, thisPropertyName);
         this.changeNotificationIsOngoing_ = false;
         this.linkedParentProperty_ = linkSource;
-        // register to the parent property
-        this.linkedParentProperty_.subscribeMe(this);
+        if (this.linkedParentProperty_) {
+            // register to the parent property
+            this.linkedParentProperty_.subscribeMe(this);
+        }
         // register to the ObservedObject
         ObservedObject.addOwningProperty(this.linkedParentProperty_.get(), this);
     }
@@ -3588,7 +3667,7 @@ class ViewPU extends NativeViewPartialUpdate {
     // its aboutToBeDeleted implementation
     aboutToBeDeletedInternal() {
         // When a custom component is deleted, need to notify the C++ side to clean the corresponding deletion cache Map,
-        // because after the deletion, can no longer clean the RemoveIds cache on the C++ side through the 
+        // because after the deletion, can no longer clean the RemoveIds cache on the C++ side through the
         // updateDirtyElements function.
         let removedElmtIds = [];
         this.updateFuncByElmtId.forEach((value, key) => {
@@ -3657,6 +3736,22 @@ class ViewPU extends NativeViewPartialUpdate {
     initialRenderView() {
         this.initialRender();
     }
+    UpdateElement(elmtId) {
+        // do not process an Element that has been marked to be deleted
+        const updateFunc = this.updateFuncByElmtId.get(elmtId);
+        if ((updateFunc == undefined) || (typeof updateFunc !== "function")) {
+            stateMgmtConsole.error(`${this.constructor.name}[${this.id__()}]: update function of ElementId ${elmtId} not found, internal error!`);
+        }
+        else {
+            
+            updateFunc(elmtId, /* isFirstRender */ false);
+            // continue in native JSView
+            // Finish the Update in JSView::JsFinishUpdateFunc
+            // this function appends no longer used elmtIds (as recrded by VSP) to the given allRmElmtIds array
+            this.finishUpdateFunc(elmtId);
+            
+        }
+    }
     /**
      * force a complete rerender / update by executing all update functions
      * exec a regular rerender first
@@ -3673,16 +3768,7 @@ class ViewPU extends NativeViewPartialUpdate {
         // see which elmtIds are managed by this View
         // and clean up all book keeping for them
         this.purgeDeletedElmtIds(deletedElmtIds);
-        Array.from(this.updateFuncByElmtId.keys()).sort(ViewPU.compareNumber).forEach(elmtId => {
-            const updateFunc = this.updateFuncByElmtId.get(elmtId);
-            if (updateFunc == undefined) {
-                stateMgmtConsole.error(`${this.constructor.name}[${this.id__()}]: update function of ElementId ${elmtId} not found, internal error!`);
-            }
-            else {
-                updateFunc(elmtId, /* isFirstRender */ false);
-                this.finishUpdateFunc(elmtId);
-            }
-        });
+        Array.from(this.updateFuncByElmtId.keys()).sort(ViewPU.compareNumber).forEach(elmtId => this.UpdateElement(elmtId));
         if (deep) {
             this.childrenWeakrefMap_.forEach((weakRefChild) => {
                 const child = weakRefChild.deref();
@@ -3692,6 +3778,24 @@ class ViewPU extends NativeViewPartialUpdate {
             });
         }
         stateMgmtConsole.warn(`ViewPU('${this.constructor.name}', ${this.id__()}).forceCompleteRerender - end`);
+    }
+    /**
+     * force a complete rerender / update on specific node by executing update function.
+     *
+     * @param elmtId which node needs to update.
+     *
+     * framework internal functions, apps must not call
+     */
+    forceRerenderNode(elmtId) {
+        // request list of all (gloabbly) deleted elmtIds;
+        let deletedElmtIds = [];
+        this.getDeletedElemtIds(deletedElmtIds);
+        // see which elmtIds are managed by this View
+        // and clean up all book keeping for them
+        this.purgeDeletedElmtIds(deletedElmtIds);
+        this.UpdateElement(elmtId);
+        // remove elemtId from dirtDescendantElementIds.
+        this.dirtDescendantElementIds_.delete(elmtId);
     }
     updateStateVarsOfChildByElmtId(elmtId, params) {
         
@@ -3709,25 +3813,27 @@ class ViewPU extends NativeViewPartialUpdate {
     }
     // implements IMultiPropertiesChangeSubscriber
     viewPropertyHasChanged(varName, dependentElmtIds) {
-        
-        this.syncInstanceId();
-        if (dependentElmtIds.size) {
-            if (!this.dirtDescendantElementIds_.size) {
-                // mark Composedelement dirty when first elmtIds are added
-                // do not need to do this every time
-                this.markNeedUpdate();
+        stateMgmtTrace.scopedTrace(() => {
+            
+            this.syncInstanceId();
+            if (dependentElmtIds.size && !this.isFirstRender()) {
+                if (!this.dirtDescendantElementIds_.size) {
+                    // mark Composedelement dirty when first elmtIds are added
+                    // do not need to do this every time
+                    this.markNeedUpdate();
+                }
+                
+                const union = new Set([...this.dirtDescendantElementIds_, ...dependentElmtIds]);
+                this.dirtDescendantElementIds_ = union;
+                
             }
-            
-            const union = new Set([...this.dirtDescendantElementIds_, ...dependentElmtIds]);
-            this.dirtDescendantElementIds_ = union;
-            
-        }
-        let cb = this.watchedProps.get(varName);
-        if (cb) {
-            
-            cb.call(this, varName);
-        }
-        this.restoreInstanceId();
+            let cb = this.watchedProps.get(varName);
+            if (cb) {
+                
+                cb.call(this, varName);
+            }
+            this.restoreInstanceId();
+        }, "ViewPU.viewPropertyHasChanged", this.constructor.name, varName, dependentElmtIds.size);
     }
     /**
      * Function to be called from the constructor of the sub component
@@ -3791,37 +3897,22 @@ class ViewPU extends NativeViewPartialUpdate {
      *
      */
     updateDirtyElements() {
-        if (this.dirtDescendantElementIds_.size == 0) {
+        do {
             
-            return;
-        }
-        
-        // request list of all (gloabbly) deleteelmtIds;
-        let deletedElmtIds = [];
-        this.getDeletedElemtIds(deletedElmtIds);
-        // see which elmtIds are managed by this View
-        // and clean up all book keeping for them
-        this.purgeDeletedElmtIds(deletedElmtIds);
-        // process all elmtIds marked as needing update in ascending order.
-        // ascending order ensures parent nodes will be updated before their children
-        // prior cleanup ensure no already deleted Elements have their update func executed
-        Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber).forEach(elmtId => {
-            // do not process an Element that has been marked to be deleted
-            const updateFunc = this.updateFuncByElmtId.get(elmtId);
-            if (updateFunc == undefined) {
-                stateMgmtConsole.error(`${this.constructor.name}[${this.id__()}]: update function of ElementId ${elmtId} not found, internal error!`);
-            }
-            else {
-                
-                updateFunc(elmtId, /* isFirstRender */ false);
-                // continue in native JSView
-                // Finish the Update in JSView::JsFinishUpdateFunc
-                // this function appends no longer used elmtIds (as recrded by VSP) to the given allRmElmtIds array
-                this.finishUpdateFunc(elmtId);
-                
-            }
-        });
-        this.dirtDescendantElementIds_.clear();
+            // request list of all (gloabbly) deleteelmtIds;
+            let deletedElmtIds = [];
+            this.getDeletedElemtIds(deletedElmtIds);
+            // see which elmtIds are managed by this View
+            // and clean up all book keeping for them
+            this.purgeDeletedElmtIds(deletedElmtIds);
+            // process all elmtIds marked as needing update in ascending order.
+            // ascending order ensures parent nodes will be updated before their children
+            // prior cleanup ensure no already deleted Elements have their update func executed
+            Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber).forEach(elmtId => {
+                this.UpdateElement(elmtId);
+                this.dirtDescendantElementIds_.delete(elmtId);
+            });
+        } while (this.dirtDescendantElementIds_.size);
     }
     //  given a list elementIds removes these from state variables dependency list and from elmtId -> updateFunc map
     purgeDeletedElmtIds(rmElmtIds) {
@@ -3876,13 +3967,30 @@ class ViewPU extends NativeViewPartialUpdate {
      */
     forEachUpdateFunction(elmtId, itemArray, itemGenFunc, idGenFunc, itemGenFuncUsesIndex = false, idGenFuncUsesIndex = false) {
         
+        if (itemArray === null || itemArray === undefined) {
+            stateMgmtConsole.error(`ForEach input array is null or undefined error.`);
+            return;
+        }
+        if (itemGenFunc === null || itemGenFunc === undefined) {
+            stateMgmtConsole.error(`Error: Item generation function not defined in forEach function.`);
+            return;
+        }
         if (idGenFunc === undefined) {
             
-            idGenFunc = (item, index) => `${index}__${JSON.stringify(item)}`;
             idGenFuncUsesIndex = true;
+            // catch possible error caused by Stringify and re-throw an Error with a meaningful (!) error message
+            idGenFunc = (item, index) => {
+                try {
+                    return `${index}__${JSON.stringify(item)}`;
+                }
+                catch (e) {
+                    throw new Error(`${this.constructor.name}[${this.id__()}]: ForEach id ${elmtId}: use of default id generator function not possble on provided data structure. Need to specify id generator function (ForEach 3rd parameter).`);
+                }
+            };
         }
         let diffIndexArray = []; // New indexes compared to old one.
         let newIdArray = [];
+        let idDuplicates = [];
         const arr = itemArray; // just to trigger a 'get' onto the array
         // ID gen is with index.
         if (idGenFuncUsesIndex) {
@@ -3899,10 +4007,17 @@ class ViewPU extends NativeViewPartialUpdate {
                 newIdArray.push(`${itemGenFuncUsesIndex ? index + '_' : ''}` + idGenFunc(item));
             });
         }
-        // set new array on C++ side.
+        // Set new array on C++ side.
         // C++ returns array of indexes of newly added array items.
         // these are indexes in new child list.
-        ForEach.setIdArray(elmtId, newIdArray, diffIndexArray);
+        ForEach.setIdArray(elmtId, newIdArray, diffIndexArray, idDuplicates);
+        // Its error if there are duplicate IDs.
+        if (idDuplicates.length > 0) {
+            idDuplicates.forEach((indx) => {
+                stateMgmtConsole.error(`Error: ${newIdArray[indx]} generated for ${indx}${indx < 4 ? indx == 2 ? "nd" : "rd" : "th"} array item ${arr[indx]}.`);
+            });
+            stateMgmtConsole.error(`Ids generated by the ForEach id gen function must be unique, error.`);
+        }
         
         // Item gen is with index.
         
@@ -3961,6 +4076,82 @@ class ViewPU extends NativeViewPartialUpdate {
 ViewPU.compareNumber = (a, b) => {
     return (a < b) ? -1 : (a > b) ? 1 : 0;
 };
+/*
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ *  * ViewPU - View for Partial Update
+ *
+* all definitions in this file are framework internal
+*/
+/**
+    given parameters for calling a @Builder function
+    this function wraps the Object of type T inside a ES6 Proxy.
+    Each param, i.e. Object property is either a function or a value.
+    If it is a function the function can either return a value of expected
+    parameter type or an ObservedPropertyabstract<T> where T is the exected
+    parameter type. The latter is the case when passing a state variable by
+    reference.
+
+    Two purposes:
+    1 - @Builder function boxy accesses params a '$$.paramA'
+        However paramA can be a function, so to obtain the value the
+        access would need to be '$$.param()' The proxy executes
+        the function and return s the result
+    2 - said function returns to ObservedPropertyAbstract backing store of
+        a calling @Component state variable (whenever the state var is
+        provided to the @Builder function). For this case the proxy can provide
+        - the value by executing paramA() to return the ObservedPropertyAbstract
+          and further (monitored!) get() to read its value
+        - when requested to return '__param1' it returns the ObservedPropertyAbstract
+          object. The scenario is to use to init a @Link source.
+  */
+function makeBuilderParameterProxy(builderName, source) {
+    return new Proxy(source, {
+        set(target, prop, val) {
+            throw Error(`@Builder '${builderName}': Invalid attempt to set(write to) parameter '${prop.toString()}' error!`);
+        },
+        get(target, prop) {
+            const prop1 = prop.toString().trim().startsWith("__")
+                ? prop.toString().trim().substring(2)
+                : prop.toString().trim();
+            
+            if (!(typeof target === "object") && (prop1 in target)) {
+                throw Error(`@Builder '${builderName}': '${prop1}' used but not a function parameter error!`);
+            }
+            const value = target[prop1];
+            if (typeof value !== "function") {
+                
+                return value;
+            }
+            const funcRet = value();
+            if ((typeof funcRet === "object") && ('get' in funcRet)) {
+                if (prop1 !== prop) {
+                    
+                    return funcRet;
+                }
+                else {
+                    
+                    const result = funcRet.get();
+                    
+                    return result;
+                }
+            }
+            
+            return funcRet;
+        } // get
+    }); // new Proxy
+}
 /*
  * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");

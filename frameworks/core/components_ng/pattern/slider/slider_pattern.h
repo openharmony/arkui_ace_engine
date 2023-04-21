@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #include <cstddef>
 
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/slider/slider_content_modifier.h"
 #include "core/components_ng/pattern/slider/slider_event_hub.h"
 #include "core/components_ng/pattern/slider/slider_layout_algorithm.h"
 #include "core/components_ng/pattern/slider/slider_layout_property.h"
@@ -26,7 +27,6 @@
 #include "core/components_ng/pattern/slider/slider_paint_property.h"
 
 namespace OHOS::Ace::NG {
-
 class SliderPattern : public Pattern {
     DECLARE_ACE_TYPE(SliderPattern, Pattern);
 
@@ -36,9 +36,22 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        SliderPaintMethod::Parameters paintParameters { trackThickness_, blockDiameter_, sliderLength_, borderBlank_,
-            static_cast<float>(stepRatio_), static_cast<float>(valueRatio_), hotFlag_ };
-        return MakeRefPtr<SliderPaintMethod>(paintParameters);
+        auto visibility = GetLayoutProperty<LayoutProperty>()->GetVisibility().value_or(VisibleType::VISIBLE);
+        if (visibility == VisibleType::GONE) {
+            return MakeRefPtr<NodePaintMethod>();
+        }
+
+        auto paintParameters = UpdateContentParameters();
+        if (!sliderContentModifier_) {
+            sliderContentModifier_ =
+                AceType::MakeRefPtr<SliderContentModifier>(paintParameters, [this]() { LayoutImageNode(); });
+        }
+        SliderPaintMethod::TipParameters tipParameters { bubbleSize_, bubbleOffset_, textOffset_, bubbleFlag_ };
+        if (!sliderTipModifier_ && bubbleFlag_) {
+            sliderTipModifier_ = AceType::MakeRefPtr<SliderTipModifier>();
+        }
+        return MakeRefPtr<SliderPaintMethod>(sliderContentModifier_, paintParameters, sliderLength_, borderBlank_,
+            sliderTipModifier_, paragraph_, tipParameters);
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -53,7 +66,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<SliderLayoutAlgorithm>(bubbleFlag_, circleCenter_);
+        return MakeRefPtr<SliderLayoutAlgorithm>();
     }
 
     RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override;
@@ -65,47 +78,73 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true, FocusStyleType::OUTER_BORDER };
+        return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION };
     }
 
-    bool HasBubbleNode() const
+    const OffsetF& GetBlockCenter() const
     {
-        return bubbleId_.has_value();
+        return circleCenter_;
     }
 
-    int32_t GetBubbleId()
+    const OffsetF GetAnimatableBlockCenter() const
     {
-        if (!bubbleId_.has_value()) {
-            bubbleId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        if (sliderContentModifier_ != nullptr) {
+            return sliderContentModifier_->GetBlockCenter();
         }
-        return bubbleId_.value();
+        return OffsetF();
+    }
+
+    float GetValueRatio() const
+    {
+        return valueRatio_;
     }
 
 private:
     void OnModifyDone() override;
+    void CancelExceptionValue(float& min, float& max, float& step);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
 
+    void CreateParagraphFunc();
+    void CreateParagraphAndLayout(
+        const TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint);
+    bool CreateParagraph(const TextStyle& textStyle, std::string content);
     void UpdateCircleCenterOffset();
     void UpdateTipsValue();
-    void CreateAndSetBubbleNode();
-    void RemoveBubbleNode();
-    
+    void UpdateBubbleSizeAndLayout();
+    void UpdateBubble();
+    void InitializeBubble();
+
     void UpdateMarkDirtyNode(const PropertyChangeFlag& Flag);
     Axis GetDirection() const;
 
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleTouchEvent(const TouchEventInfo& info);
-
-    void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void InitMouseEvent(const RefPtr<InputEventHub>& inputEventHub);
+    void HandleMouseEvent(const MouseInfo& info);
+    void HandleHoverEvent(bool isHover);
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandlingGestureEvent(const GestureEvent& info);
     void HandledGestureEvent();
+
     void UpdateValueByLocalLocation(const std::optional<Offset>& localLocation);
     void FireChangeEvent(int32_t mode);
 
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    void GetInnerFocusPaintRect(RoundRect& paintRect);
+    void GetOutsetInnerFocusPaintRect(RoundRect& paintRect);
+    void GetInsetInnerFocusPaintRect(RoundRect& paintRect);
     bool OnKeyEvent(const KeyEvent& event);
+    void PaintFocusState();
     bool MoveStep(int32_t stepCount);
+
+    void OpenTranslateAnimation();
+    void CloseTranslateAnimation();
+    SliderContentModifier::Parameters UpdateContentParameters();
+    void GetSelectPosition(SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset);
+    void GetBackgroundPosition(SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset);
+    void GetCirclePosition(SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset);
+    void UpdateBlock();
+    void LayoutImageNode();
 
     Axis direction_ = Axis::HORIZONTAL;
     enum SliderChangeMode { Begin = 0, Moving = 1, End = 2, Click = 3 };
@@ -113,26 +152,39 @@ private:
     bool showTips_ = false;
     bool hotFlag_ = false;
     bool valueChangeFlag_ = false;
+    bool mouseHoverFlag_ = false;
+    bool mousePressedFlag_ = false;
 
     float stepRatio_ = 1.0f / 100.0f;
     float valueRatio_ = 0.0f;
     float sliderLength_ = 0.0f;
     float borderBlank_ = 0.0f;
+    float hotBlockShadowWidth_ = 0.0f;
     OffsetF circleCenter_ = { 0, 0 };
 
     float trackThickness_ = 0.0f;
-    float blockDiameter_ = 0.0f;
-    static constexpr float BLOCK_DIAMETER_SCALE = 1.1f;
+    float blockHotSize_ = 0.0f;
+    SizeF blockSize_;
 
     RefPtr<TouchEventImpl> touchEvent_;
+    RefPtr<ClickEvent> clickListener_;
     RefPtr<PanEvent> panEvent_;
-    RefPtr<ClickEvent> clickEvent_;
+    RefPtr<InputEvent> mouseEvent_;
+    RefPtr<InputEvent> hoverEvent_;
 
-    std::optional<int32_t> bubbleId_;
+    RefPtr<SliderContentModifier> sliderContentModifier_;
+
+    // tip Parameters
     bool bubbleFlag_ = false;
+    RefPtr<Paragraph> paragraph_;
+    SizeF bubbleSize_;
+    OffsetF bubbleOffset_;
+    OffsetF textOffset_;
+    RefPtr<SliderTipModifier> sliderTipModifier_;
+
+    RefPtr<FrameNode> imageFrameNode_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SliderPattern);
 };
-
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SLIDER_SLIDER_PATTERN_H

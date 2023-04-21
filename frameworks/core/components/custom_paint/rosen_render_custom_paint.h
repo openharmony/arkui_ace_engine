@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,11 +17,11 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CUSTOM_PAINT_ROSEN_RENDER_CUSTOM_PAINT_H
 
 #include "experimental/svg/model/SkSVGDOM.h"
-#include "flutter/third_party/txt/src/txt/paragraph.h"
-#include "third_party/skia/include/core/SkBitmap.h"
-#include "third_party/skia/include/core/SkCanvas.h"
-#include "third_party/skia/include/core/SkPaint.h"
-#include "third_party/skia/include/core/SkPath.h"
+#include "txt/paragraph.h"
+#include "include/core/SkBitmap.h"
+#include "include/core/SkCanvas.h"
+#include "include/core/SkPaint.h"
+#include "include/core/SkPath.h"
 
 #include "base/utils/measure_util.h"
 #include "core/components/custom_paint/offscreen_canvas.h"
@@ -31,11 +31,6 @@
 #include "core/image/image_source_info.h"
 
 namespace OHOS::Ace {
-
-#ifdef CANVAS_USE_GPU
-class EnvironmentGL;
-#endif
-
 class RosenRenderCustomPaint : public RenderCustomPaint {
     DECLARE_ACE_TYPE(RosenRenderCustomPaint, RenderCustomPaint);
 
@@ -58,6 +53,7 @@ public:
     void FillText(const Offset& offset, const std::string& text, double x, double y) override;
     void StrokeText(const Offset& offset, const std::string& text, double x, double y) override;
     static double MeasureTextInner(const MeasureContext& context);
+    static Size MeasureTextSizeInner(const MeasureContext& context);
     double MeasureText(const std::string& text, const PaintState& state) override;
     double MeasureTextHeight(const std::string& text, const PaintState& state) override;
     TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state) override;
@@ -146,32 +142,25 @@ private:
     SkPath skPath2d_;
     SkPaint imagePaint_;
     SkPaint cachePaint_;
+#ifdef NEW_SKIA
+    SkSamplingOptions options_;
+#endif
     SkBitmap cacheBitmap_;
     SkBitmap canvasCache_;
     SkBitmap webglBitmap_;
     std::unique_ptr<SkCanvas> skCanvas_;
     std::unique_ptr<SkCanvas> cacheCanvas_;
-#ifdef CANVAS_USE_GPU
-    void InitializeEglContext();
-
-    RefPtr<EnvironmentGL> environment_;
-    sk_sp<SkSurface> surface_;
-#endif
-
     ImageSourceInfo loadingSource_;
     ImageSourceInfo currentSource_;
     ImageObjSuccessCallback imageObjSuccessCallback_;
     UploadSuccessCallback uploadSuccessCallback_;
     FailedCallback failedCallback_;
     OnPostBackgroundTask onPostBackgroundTask_;
-    RefPtr<FlutterRenderTaskHolder> renderTaskHolder_;
     RefPtr<ImageObject> imageObj_ = nullptr;
     sk_sp<SkSVGDOM> skiaDom_ = nullptr;
     CanvasImage canvasImage_;
     Size lastLayoutSize_;
     RefPtr<ImageCache> imageCache_;
 };
-
 } // namespace OHOS::Ace
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CUSTOM_PAINT_ROSEN_RENDER_CUSTOM_PAINT_H

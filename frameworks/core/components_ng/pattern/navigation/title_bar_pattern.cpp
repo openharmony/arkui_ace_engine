@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 
 #include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -30,6 +31,26 @@ void MountBackButton(const RefPtr<TitleBarNode>& hostNode)
     CHECK_NULL_VOID(titleBarLayoutProperty);
     auto backButtonNode = AceType::DynamicCast<FrameNode>(hostNode->GetBackButton());
     CHECK_NULL_VOID(backButtonNode);
+    if (titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR) == TitleBarParentType::NAVBAR) {
+        auto buttonNode = backButtonNode->GetChildren().front();
+        CHECK_NULL_VOID(buttonNode);
+        auto backButtonImageNode = AceType::DynamicCast<FrameNode>(buttonNode->GetChildren().front());
+        CHECK_NULL_VOID(backButtonImageNode);
+        auto backButtonImageLayoutProperty = backButtonImageNode->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(backButtonImageLayoutProperty);
+        auto navBarNode = AceType::DynamicCast<FrameNode>(hostNode->GetParent());
+        CHECK_NULL_VOID(navBarNode);
+        auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
+        CHECK_NULL_VOID(navBarLayoutProperty);
+        auto hideBackButton = navBarLayoutProperty->GetHideBackButtonValue(false);
+        if (hideBackButton) {
+            backButtonImageLayoutProperty->UpdateVisibility(VisibleType::GONE);
+        } else {
+            backButtonImageLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+        }
+        backButtonImageNode->MarkModifyDone();
+        return;
+    }
     auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(backButtonLayoutProperty);
 
@@ -58,7 +79,20 @@ void MountTitle(const RefPtr<TitleBarNode>& hostNode)
     auto titleNode = AceType::DynamicCast<FrameNode>(hostNode->GetTitle());
     CHECK_NULL_VOID(titleNode);
     auto titleLayoutProperty = titleNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(titleLayoutProperty);
+    if (!titleLayoutProperty) {
+        titleNode->MarkModifyDone();
+        return;
+    }
+
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
+    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI) {
+        if (titleBarLayoutProperty->HasHideBackButton() && titleBarLayoutProperty->GetHideBackButtonValue()) {
+            titleLayoutProperty->UpdateFontSize(theme->GetTitleFontSize());
+        } else {
+            titleLayoutProperty->UpdateFontSize(theme->GetTitleFontSizeMin());
+        }
+    }
     titleNode->MarkModifyDone();
 }
 
@@ -77,6 +111,7 @@ void MountSubTitle(const RefPtr<TitleBarNode>& hostNode)
 
 void TitleBarPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto hostNode = AceType::DynamicCast<TitleBarNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
     MountBackButton(hostNode);
@@ -95,9 +130,7 @@ void TitleBarPattern::OnModifyDone()
 
 void TitleBarPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-    if (panEvent_) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(!panEvent_);
 
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         LOGI("Pan event start");
@@ -346,6 +379,7 @@ void TitleBarPattern::UpdateTitleFontSize(const Dimension& tempTitleFontSize)
     auto textLayoutProperty = titleNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateFontSize(tempTitleFontSize);
+    titleNode->MarkModifyDone();
 }
 
 void TitleBarPattern::UpdateSubTitleOpacity(const double &value)

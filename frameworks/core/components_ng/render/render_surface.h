@@ -17,9 +17,11 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_RENDER_SURFACE_H
 
 #include <cstdint>
+#include <stdint.h>
 
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
+#include "core/components_ng/render/ext_surface_callback_interface.h"
 #include "core/components_ng/render/render_context.h"
 
 namespace OHOS::Ace::NG {
@@ -28,6 +30,7 @@ class RenderSurface : public virtual AceType {
     DECLARE_ACE_TYPE(NG::RenderSurface, AceType)
 
 public:
+    RenderSurface() = default;
     ~RenderSurface() override = default;
 
     static RefPtr<RenderSurface> Create();
@@ -59,8 +62,11 @@ public:
         return "";
     }
 
+    virtual void SetExtSurfaceBounds(int32_t left, int32_t top, int32_t width, int32_t height) {}
+
+    virtual void SetExtSurfaceCallback(const RefPtr<ExtSurfaceCallbackInterface>& extSurfaceCallback) {}
+
 protected:
-    RenderSurface() = default;
 
     ACE_DISALLOW_COPY_AND_MOVE(RenderSurface);
 };

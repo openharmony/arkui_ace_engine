@@ -28,7 +28,6 @@
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -72,7 +71,7 @@ std::optional<SizeF> CheckBoxGroupLayoutAlgorithm::MeasureContent(
 
 void CheckBoxGroupLayoutAlgorithm::InitializeParam()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
     CHECK_NULL_VOID(checkBoxTheme);

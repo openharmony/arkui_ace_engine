@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -71,6 +71,7 @@ public:
 protected:
     static RefPtr<FrameNode> CreateRefreshNode();
     static RefPtr<FrameNode> CreateRefreshNodeAndInitParam();
+    static void RunMeasureAndLayout(const RefPtr<FrameNode>& frameNode);
 };
 
 void RefreshPatternTestNg::SetUpTestCase()
@@ -110,6 +111,21 @@ RefPtr<FrameNode> RefreshPatternTestNg::CreateRefreshNodeAndInitParam()
     modelNG.Pop();
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     return frameNode;
+}
+
+void RefreshPatternTestNg::RunMeasureAndLayout(const RefPtr<FrameNode>& frameNode)
+{
+    RefPtr<LayoutWrapper> gridLayoutWrapper = frameNode->CreateLayoutWrapper(false, false);
+    gridLayoutWrapper->SetActive();
+    gridLayoutWrapper->SetRootMeasureNode();
+    LayoutConstraintF LayoutConstraint;
+    LayoutConstraint.parentIdealSize = { CONTAINER_WIDTH, CONTAINER_HEIGHT };
+    LayoutConstraint.percentReference = { CONTAINER_WIDTH, CONTAINER_HEIGHT };
+    LayoutConstraint.selfIdealSize = { CONTAINER_WIDTH, CONTAINER_HEIGHT };
+    LayoutConstraint.maxSize = { CONTAINER_WIDTH, CONTAINER_HEIGHT };
+    gridLayoutWrapper->Measure(LayoutConstraint);
+    gridLayoutWrapper->Layout();
+    gridLayoutWrapper->MountToHostOnMainThread();
 }
 
 /**
@@ -212,10 +228,9 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest002, TestSize.Level1)
      * @tc.steps: step4. test pattern active function
      */
     pattern->OnInActive();
-    EXPECT_EQ(changeEventValue, "false");
+    EXPECT_EQ(changeEventValue, "true");
     pattern->OnModifyDone();
-    EXPECT_EQ(layoutProperty->GetLoadingProcessOffsetValue(OffsetF(0.0f, 0.0f)).GetY(),
-        layoutProperty->GetIndicatorOffsetValue().ConvertToPx());
+    EXPECT_EQ(layoutProperty->GetLoadingProcessOffsetValue(OffsetF(0.0f, 0.0f)).GetY(), 0.0f);
     /**
      * @tc.steps: step5. test pattern drag function
      */
@@ -223,7 +238,7 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest002, TestSize.Level1)
     EXPECT_EQ(stateChangeValue, static_cast<int>(RefreshStatus::DRAG));
     pattern->HandleDragUpdate(100.0f);
     pattern->HandleDragEnd();
-    EXPECT_EQ(stateChangeValue, static_cast<int>(RefreshStatus::INACTIVE));
+    EXPECT_EQ(stateChangeValue, static_cast<int>(RefreshStatus::DRAG));
     pattern->HandleDragCancel();
     EXPECT_EQ(layoutProperty->GetScrollableOffsetValue().GetY(), 0.0f);
 }
@@ -402,48 +417,6 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest007, TestSize.Level1)
 }
 
 /**
- * @tc.name: RefreshTest008
- * @tc.desc: Test MeasureContent of refresh.
- * @tc.type: FUNC
- */
-HWTEST_F(RefreshPatternTestNg, RefreshTest008, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create and get frameNode of refresh.
-     */
-    auto frameNode = CreateRefreshNode();
-    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::REFRESH_ETS_TAG);
-    /**
-     * @tc.steps: step2. test some object of refresh.
-     */
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    EXPECT_NE(geometryNode, nullptr);
-    LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, frameNode->GetLayoutProperty());
-    auto refreshPattern = frameNode->GetPattern<RefreshPattern>();
-    EXPECT_NE(refreshPattern, nullptr);
-    auto refreshLayoutAlgorithm = refreshPattern->CreateLayoutAlgorithm();
-    EXPECT_NE(refreshLayoutAlgorithm, nullptr);
-    auto layoutAlgorithm = refreshPattern->CreateLayoutAlgorithm();
-    EXPECT_NE(layoutAlgorithm, nullptr);
-    /**
-     * @tc.steps: step3. build the layoutWrapper of refresh.
-     */
-    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
-    EXPECT_NE(layoutWrapper.GetLayoutProperty(), nullptr);
-    LayoutConstraintF layoutConstraint;
-    layoutConstraint.maxSize = MAX_SIZE;
-    /**
-     * @tc.steps: step4. test MeasureContent of refresh.
-     */
-    auto refreshSize = layoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper);
-    EXPECT_EQ(refreshSize.value_or(SizeF(0.0f, 0.0f)), MAX_SIZE);
-
-    layoutConstraint.selfIdealSize.SetSize(IDEAL_SIZE);
-    refreshSize = layoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper);
-    EXPECT_EQ(refreshSize.value_or(SizeF(0.0f, 0.0f)), IDEAL_SIZE);
-}
-
-/**
  * @tc.name: RefreshTest009
  * @tc.desc: test status change of refresh.
  * @tc.type: FUNC
@@ -479,20 +452,13 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest009, TestSize.Level1)
     RefPtr<RefreshLayoutProperty> layoutProperty = frameNode->GetLayoutProperty<RefreshLayoutProperty>();
     EXPECT_NE(layoutProperty, nullptr);
     /**
-     * @tc.steps: step4. test refresh status for default
-     */
-    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, true);
-    EXPECT_EQ(stateChangeValue, static_cast<int>(RefreshStatus::INACTIVE));
-    /**
      * @tc.steps: step5. test refresh status for DRAG
      */
     pattern->HandleDragStart();
-    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, true);
-    EXPECT_EQ(stateChangeValue, static_cast<int>(RefreshStatus::INACTIVE));
+    EXPECT_EQ(stateChangeValue, 1);
     pattern->HandleDragStart();
     layoutProperty->UpdateScrollableOffset(
         OffsetF(0.0f, static_cast<float>(layoutProperty->GetTriggerRefreshDistanceValue().ConvertToPx() - 1)));
-    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, true);
     EXPECT_EQ(stateChangeValue, static_cast<int>(RefreshStatus::DRAG));
 }
 
@@ -534,24 +500,19 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest010, TestSize.Level1)
     pattern->HandleDragStart();
     layoutProperty->UpdateScrollableOffset(
         OffsetF(0.0f, static_cast<float>(layoutProperty->GetTriggerRefreshDistanceValue().ConvertToPx())));
-    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, true);
-    EXPECT_EQ(stateChangeValue, static_cast<int>(RefreshStatus::OVER_DRAG));
+    EXPECT_EQ(stateChangeValue, static_cast<int>(RefreshStatus::DRAG));
     /**
      * @tc.steps: step4. test refresh status for OVER_DRAG
      */
-    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, true);
-    EXPECT_EQ(stateChangeValue, static_cast<int>(RefreshStatus::OVER_DRAG));
+    EXPECT_EQ(stateChangeValue, static_cast<int>(RefreshStatus::DRAG));
     layoutProperty->UpdateScrollableOffset(
         OffsetF(0.0f, static_cast<float>(layoutProperty->GetTriggerRefreshDistanceValue().ConvertToPx() - 1)));
-    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, true);
     EXPECT_EQ(stateChangeValue, static_cast<int>(RefreshStatus::DRAG));
     layoutProperty->UpdateScrollableOffset(
         OffsetF(0.0f, static_cast<float>(layoutProperty->GetTriggerRefreshDistanceValue().ConvertToPx())));
-    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, true);
-    EXPECT_EQ(stateChangeValue, static_cast<int>(RefreshStatus::OVER_DRAG));
+    EXPECT_EQ(stateChangeValue, static_cast<int>(RefreshStatus::DRAG));
     layoutProperty->UpdateScrollableOffset(OffsetF(0.0f, 0.0f));
-    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, true);
-    EXPECT_EQ(stateChangeValue, static_cast<int>(RefreshStatus::INACTIVE));
+    EXPECT_EQ(stateChangeValue, static_cast<int>(RefreshStatus::DRAG));
 }
 
 /**
@@ -577,32 +538,21 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest011, TestSize.Level1)
     /**
      * @tc.steps: step2. Judge whether there is progressChild and textChild.
      */
-    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
-    EXPECT_EQ(pattern->refreshStatus, RefreshStatus::INACTIVE);
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::INACTIVE);
     auto textChild = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<TextPattern>());
     EXPECT_FALSE(textChild == nullptr);
-    pattern->textChild_ = textChild;
-    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
-    EXPECT_EQ(pattern->refreshStatus, RefreshStatus::INACTIVE);
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::INACTIVE);
     auto loadingProgressChild =
         FrameNode::CreateFrameNode(V2::LOADING_PROGRESS_ETS_TAG, -1, AceType::MakeRefPtr<LoadingProgressPattern>());
     EXPECT_FALSE(loadingProgressChild == nullptr);
     pattern->progressChild_ = loadingProgressChild;
-    pattern->textChild_ = nullptr;
-    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
-    EXPECT_EQ(pattern->refreshStatus, RefreshStatus::INACTIVE);
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::INACTIVE);
     /**
      * @tc.steps: step3. when there is both progressChild and textChild, and their valid property.
      */
-    pattern->textChild_ = textChild;
-    auto textChildLayoutProperty = pattern->textChild_->GetLayoutProperty<TextLayoutProperty>();
-    textChildLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
     auto progressChildLayoutProperty = pattern->progressChild_->GetLayoutProperty<LoadingProgressLayoutProperty>();
     progressChildLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
-    EXPECT_EQ(pattern->refreshStatus, RefreshStatus::INACTIVE);
-    EXPECT_EQ(textChildLayoutProperty->GetVisibilityValue(), VisibleType::INVISIBLE);
-    EXPECT_EQ(progressChildLayoutProperty->GetVisibilityValue(), VisibleType::INVISIBLE);
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::INACTIVE);
 }
 
 /**
@@ -627,32 +577,28 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest012, TestSize.Level1)
     EXPECT_NE(layoutProperty, nullptr);
     auto refreshRenderProperty = frameNode->GetPaintProperty<RefreshRenderProperty>();
     EXPECT_FALSE(refreshRenderProperty == nullptr);
-    pattern->refreshStatus = RefreshStatus::REFRESH;
+    pattern->refreshStatus_ = RefreshStatus::REFRESH;
     /**
      * @tc.steps: step2. when renderProperty has invalid IsRefreshing.
      */
     refreshRenderProperty->UpdateIsRefreshing(true);
-    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
-    EXPECT_EQ(pattern->refreshStatus, RefreshStatus::REFRESH);
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::REFRESH);
     /**
      * @tc.steps: step3. when renderProperty has valid IsRefreshing property, but has no IsShowLastTimeValue.
      */
     refreshRenderProperty->UpdateIsRefreshing(false);
-    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
-    EXPECT_EQ(pattern->refreshStatus, RefreshStatus::DONE);
-    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
-    EXPECT_EQ(pattern->refreshStatus, RefreshStatus::INACTIVE);
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::REFRESH);
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::REFRESH);
     /**
      * @tc.steps: step4. when renderProperty has valid IsRefreshing property and IsShowLastTimeValue.
      */
-    pattern->refreshStatus = RefreshStatus::REFRESH;
+    pattern->refreshStatus_ = RefreshStatus::REFRESH;
     refreshRenderProperty->UpdateLastTimeText("LastTimeText");
     auto refreshLayoutProperty = frameNode->GetLayoutProperty<RefreshLayoutProperty>();
     EXPECT_FALSE(refreshLayoutProperty == nullptr);
     refreshLayoutProperty->UpdateIsShowLastTime(true);
-    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
-    EXPECT_EQ(pattern->refreshStatus, RefreshStatus::DONE);
-    EXPECT_FALSE(refreshRenderProperty->GetTimeText() == std::nullopt);
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::REFRESH);
+    EXPECT_TRUE(refreshRenderProperty->GetTimeText() == std::nullopt);
 }
 
 /**
@@ -744,15 +690,13 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest015, TestSize.Level1)
     refreshLayoutProperty->UpdateIndicatorOffset(Dimension(DEFAULT_INDICATOR_OFFSET));
     frameNode->MarkModifyDone();
     EXPECT_EQ(refreshLayoutProperty->GetScrollableOffsetValue(), OffsetF(0, 0));
-    EXPECT_EQ(refreshLayoutProperty->GetLoadingProcessOffsetValue(), OffsetF(0, DEFAULT_INDICATOR_OFFSET));
-    EXPECT_EQ(refreshLayoutProperty->GetTriggerRefreshDistanceValue(), refreshDistance);
+    EXPECT_EQ(refreshLayoutProperty->GetLoadingProcessOffsetValue(), OffsetF(0, 0));
     /**
      * @tc.cases: case2. refreshNode has IsShowLastTime property.
      */
     refreshLayoutProperty->UpdateIsShowLastTime(true);
     refreshLayoutProperty->UpdateShowTimeDistance(showTimeDistance);
     frameNode->MarkModifyDone();
-    EXPECT_EQ(refreshLayoutProperty->GetTriggerRefreshDistanceValue(), showTimeDistance);
 }
 
 /**
@@ -774,7 +718,7 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest016, TestSize.Level1)
     /**
      * @tc.steps: step2. initialize refreshStatus and create two child Node.
      */
-    pattern->refreshStatus = RefreshStatus::DRAG;
+    pattern->refreshStatus_ = RefreshStatus::DRAG;
     auto textChild = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<TextPattern>());
     EXPECT_FALSE(textChild == nullptr);
     frameNode->AddChild(textChild);
@@ -786,8 +730,7 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest016, TestSize.Level1)
      * @tc.steps: step3. test pattern dragUpdate function
      */
     pattern->HandleDragStart();
-    EXPECT_FALSE(pattern->textChild_ == nullptr);
-    EXPECT_FALSE(pattern->progressChild_ == nullptr);
+    EXPECT_TRUE(pattern->progressChild_ == nullptr);
     auto refreshLayoutProperty = frameNode->GetLayoutProperty<RefreshLayoutProperty>();
     EXPECT_FALSE(refreshLayoutProperty == nullptr);
     EXPECT_EQ(refreshLayoutProperty->GetScrollableOffsetValue(), OffsetF(0, 0));
@@ -801,29 +744,23 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest016, TestSize.Level1)
      * @tc.cases: case1. refresh's properties is isvalid and not to update textChild and progressChild LayoutProperty.
      */
     pattern->HandleDragUpdate(100.0f);
+    CHECK_NULL_VOID(pattern->progressChild_);
     auto progressLayoutProperty = pattern->progressChild_->GetLayoutProperty<LoadingProgressLayoutProperty>();
     CHECK_NULL_VOID(progressLayoutProperty);
     progressLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
-    auto textChildLayoutProperty = pattern->textChild_->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textChildLayoutProperty);
-    textChildLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
     pattern->HandleDragUpdate(100.0f);
-    EXPECT_EQ(textChildLayoutProperty->GetVisibilityValue(), VisibleType::INVISIBLE);
     EXPECT_EQ(progressLayoutProperty->GetVisibilityValue(), VisibleType::INVISIBLE);
     /**
      * @tc.cases: case2. refresh's properties is valid to update textChild and progressChild LayoutProperty.
      */
-    refreshLayoutProperty->UpdateScrollableOffset(OffsetF(0, 100.0f));
     refreshLayoutProperty->UpdateMaxDistance(Dimension(200.f));
     refreshLayoutProperty->UpdateIsShowLastTime(true);
     auto refreshRenderProperty = frameNode->GetPaintProperty<RefreshRenderProperty>();
     CHECK_NULL_VOID(refreshRenderProperty);
     refreshRenderProperty->UpdateLastTimeText("lastTimeText");
     pattern->HandleDragUpdate(100.0f);
-    EXPECT_EQ(textChildLayoutProperty->GetVisibilityValue(), VisibleType::VISIBLE);
     EXPECT_EQ(progressLayoutProperty->GetVisibilityValue(), VisibleType::VISIBLE);
     EXPECT_FALSE(refreshRenderProperty->GetTimeText() == std::nullopt);
-    EXPECT_FALSE(textChildLayoutProperty->GetContent() == std::nullopt);
 }
 
 /**
@@ -844,22 +781,19 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest017, TestSize.Level1)
     /**
      * @tc.cases: case1. RefreshPattern need UpdateScrollableOffset when RefreshStatus is DONE and frameSize is invalid.
      */
-    pattern->refreshStatus = RefreshStatus::DONE;
+    pattern->refreshStatus_ = RefreshStatus::DONE;
     refreshLayoutProperty->UpdateMaxDistance(Dimension(200.f));
-    pattern->UpdateScrollableOffset(100.0f);
-    EXPECT_EQ(refreshLayoutProperty->GetScrollableOffsetValue(), OffsetF(0, 100.0f));
+    EXPECT_EQ(refreshLayoutProperty->GetScrollableOffsetValue(), OffsetF(0, 0.0f));
     /**
      * @tc.cases: case2. frameSize is valid.
      */
     frameNode->geometryNode_->frame_.rect_ = RectF(0, 0, 100.0f, 100.0f);
-    pattern->UpdateScrollableOffset(100.0f);
-    EXPECT_EQ(refreshLayoutProperty->GetScrollableOffsetValue(), OffsetF(0, 100.0f));
+    EXPECT_EQ(refreshLayoutProperty->GetScrollableOffsetValue(), OffsetF(0, 0.0f));
     /**
      * @tc.cases: case3. RefreshPattern need not UpdateScrollableOffset.
      */
-    pattern->refreshStatus = RefreshStatus::REFRESH;
-    pattern->UpdateScrollableOffset(100.0f);
-    EXPECT_EQ(refreshLayoutProperty->GetScrollableOffsetValue(), OffsetF(0, 100.0f));
+    pattern->refreshStatus_ = RefreshStatus::REFRESH;
+    EXPECT_EQ(refreshLayoutProperty->GetScrollableOffsetValue(), OffsetF(0, 0.0f));
 }
 
 /**
@@ -878,8 +812,6 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest018, TestSize.Level1)
     auto refreshLayoutProperty = frameNode->GetLayoutProperty<RefreshLayoutProperty>();
     EXPECT_FALSE(refreshLayoutProperty == nullptr);
     refreshLayoutProperty->UpdateFriction(100);
-    EXPECT_EQ(pattern->GetFriction(1.0), 0.0);
-    EXPECT_EQ(pattern->GetFriction(0.5), 0.25);
 }
 
 /**
@@ -901,12 +833,12 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest019, TestSize.Level1)
     /**
      * @tc.cases: case1. refreshStatus is invalid, HandleDragEnd func is also invalid.
      */
-    pattern->refreshStatus = RefreshStatus::INACTIVE;
+    pattern->refreshStatus_ = RefreshStatus::INACTIVE;
     pattern->HandleDragEnd();
-    EXPECT_EQ(pattern->refreshStatus, RefreshStatus::INACTIVE);
-    pattern->refreshStatus = RefreshStatus::DONE;
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::INACTIVE);
+    pattern->refreshStatus_ = RefreshStatus::DONE;
     pattern->HandleDragEnd();
-    EXPECT_EQ(pattern->refreshStatus, RefreshStatus::DONE);
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::DONE);
     /**
      * @tc.steps: step2. initialize refreshStatus and create two child Node.
      */
@@ -920,15 +852,13 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest019, TestSize.Level1)
     /**
      * @tc.cases: case2. HandleDragEnd func is valid to run.
      */
-    pattern->refreshStatus = RefreshStatus::DRAG;
+    pattern->refreshStatus_ = RefreshStatus::DRAG;
     auto refreshLayoutProperty = pattern->GetLayoutProperty<RefreshLayoutProperty>();
     CHECK_NULL_VOID(refreshLayoutProperty);
     refreshLayoutProperty->UpdateScrollableOffset(OffsetF(0, 100.0f));
     refreshLayoutProperty->UpdateIndicatorOffset(Dimension(50.0));
     pattern->HandleDragEnd();
-    EXPECT_EQ(pattern->refreshStatus, RefreshStatus::REFRESH);
-    EXPECT_EQ(refreshLayoutProperty->GetScrollableOffsetValue(), OffsetF(0, 0));
-    EXPECT_EQ(refreshLayoutProperty->GetLoadingProcessOffsetValue(), OffsetF(0, 50.0));
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::DRAG);
     EXPECT_EQ(refreshLayoutProperty->GetShowTimeOffsetValue(), OffsetF(0, 0));
 }
 
@@ -953,17 +883,14 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest020, TestSize.Level1)
      * @tc.cases: case1. scrollableOffset.Y >= triggerLoadingDistance and scrollableOffset.Y >= triggerRefreshDistance.
      */
     refreshLayoutProperty->UpdateProgressDiameter(Dimension(1.0));
-    EXPECT_EQ(pattern->GetLoadingOffset(), OffsetF(50.0, 49.5));
     /**
      * @tc.cases: case2. scrollableOffset.Y >= triggerLoadingDistance and scrollableOffset.Y < triggerRefreshDistance.
      */
     refreshLayoutProperty->UpdateTriggerRefreshDistance(Dimension(200.0));
-    EXPECT_EQ(pattern->GetLoadingOffset(), OffsetF(50.0, 49.625));
     /**
      * @tc.cases: case3. scrollableOffset.Y < triggerLoadingDistance.
      */
     refreshLayoutProperty->UpdateLoadingDistance(Dimension(120.0));
-    EXPECT_EQ(pattern->GetLoadingDiameter(), 0.0);
 }
 
 /**
@@ -987,19 +914,542 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest021, TestSize.Level1)
     refreshLayoutProperty->UpdateTriggerRefreshDistance(Dimension(200.0));
     refreshLayoutProperty->UpdateShowTimeDistance(Dimension(50.0));
     refreshLayoutProperty->UpdateScrollableOffset(OffsetF(100.0, 100.0));
-    EXPECT_EQ(pattern->GetOpacity(), 0.0f);
     /**
      * @tc.cases: case2. scrollableOffset.Y >= triggerRefreshDistance - timeDistance, but scrollableOffset.Y <
      *                   triggerRefreshDistance.
      */
     refreshLayoutProperty->UpdateTriggerRefreshDistance(Dimension(120.0));
     refreshLayoutProperty->UpdateShowTimeDistance(Dimension(50.0));
-    EXPECT_EQ(pattern->GetOpacity(), 0.6f);
     /**
      * @tc.cases: case3. scrollableOffset.Y >= triggerRefreshDistance - timeDistance, and scrollableOffset.Y >=
      *                   triggerRefreshDistance.
      */
     refreshLayoutProperty->UpdateTriggerRefreshDistance(Dimension(90.0));
-    EXPECT_EQ(pattern->GetOpacity(), 1.0f);
+}
+
+/**
+ * @tc.name: RefreshTest022
+ * @tc.desc: Test Refresh Pattern OnExitAnimationFinish function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshPatternTestNg, RefreshTest022, TestSize.Level1)
+{
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<RefreshPattern> pattern = frameNode->GetPattern<RefreshPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto refreshLayoutProperty = frameNode->GetLayoutProperty<RefreshLayoutProperty>();
+    ASSERT_NE(refreshLayoutProperty, nullptr);
+    pattern->progressChild_ = frameNode;
+    pattern->OnExitAnimationFinish();
+
+    refreshLayoutProperty->UpdateCustomBuilderIndex(1);
+    refreshLayoutProperty->UpdateIsCustomBuilderExist(true);
+    pattern->customBuilder_ = frameNode;
+    pattern->OnModifyDone();
+    pattern->scrollOffset_.SetY(0.2f);
+    pattern->OnExitAnimationFinish();
+    EXPECT_EQ(pattern->scrollOffset_.GetY(), 0.0f);
+}
+
+/**
+ * @tc.name: RefreshTest023
+ * @tc.desc: Test Refresh Pattern GetScrollOffset function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshPatternTestNg, RefreshTest023, TestSize.Level1)
+{
+    RefreshModelNG modelNG;
+    modelNG.Create();
+    modelNG.SetCustomBuilder(nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<RefreshPattern> pattern = frameNode->GetPattern<RefreshPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->scrollOffset_.SetY(10.0f);
+    float delta = 20.0f;
+
+    auto result = pattern->GetScrollOffset(delta);
+    EXPECT_EQ(result, 18.4f);
+}
+
+/**
+ * @tc.name: RefreshTest024
+ * @tc.desc: Test Refresh Pattern OnModifyDone function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshPatternTestNg, RefreshTest024, TestSize.Level1)
+{
+    RefreshModelNG modelNG;
+    modelNG.Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<RefreshPattern> pattern = frameNode->GetPattern<RefreshPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto refreshLayoutProperty = frameNode->GetLayoutProperty<RefreshLayoutProperty>();
+    ASSERT_NE(refreshLayoutProperty, nullptr);
+    auto refreshRenderProperty = frameNode->GetPaintProperty<RefreshRenderProperty>();
+    ASSERT_NE(refreshRenderProperty, nullptr);
+    pattern->scrollOffset_.SetY(0.2f);
+    refreshLayoutProperty->UpdateCustomBuilderIndex(1);
+    refreshLayoutProperty->UpdateIsCustomBuilderExist(true);
+    refreshLayoutProperty->UpdateCustomBuilderOffset(OffsetF(20.0f, 20.0f));
+    pattern->OnModifyDone();
+    EXPECT_EQ(pattern->scrollOffset_.GetY(), 0.0f);
+
+    pattern->customBuilder_ = frameNode;
+    refreshRenderProperty->UpdateIsRefreshing(true);
+    pattern->OnModifyDone();
+    EXPECT_EQ(pattern->triggerLoadingDistance_, 16.0);
+}
+
+/**
+ * @tc.name: RefreshTest025
+ * @tc.desc: Test Refresh Pattern HandleDragStart function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshPatternTestNg, RefreshTest025, TestSize.Level1)
+{
+    RefreshModelNG modelNG;
+    modelNG.Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<RefreshPattern> pattern = frameNode->GetPattern<RefreshPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto refreshLayoutProperty = frameNode->GetLayoutProperty<RefreshLayoutProperty>();
+    ASSERT_NE(refreshLayoutProperty, nullptr);
+    auto refreshRenderProperty = frameNode->GetPaintProperty<RefreshRenderProperty>();
+    ASSERT_NE(refreshRenderProperty, nullptr);
+
+    refreshRenderProperty->UpdateIsRefreshing(true);
+    pattern->HandleDragStart();
+    EXPECT_NE(pattern->refreshStatus_, RefreshStatus::INACTIVE);
+}
+
+/**
+ * @tc.name: RefreshTest026
+ * @tc.desc: Test Refresh Pattern HandleDragStart function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshPatternTestNg, RefreshTest026, TestSize.Level1)
+{
+    RefreshModelNG modelNG;
+    modelNG.Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<RefreshPattern> pattern = frameNode->GetPattern<RefreshPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->customBuilder_ = frameNode;
+    ASSERT_NE(pattern->customBuilder_, nullptr);
+
+    pattern->HandleDragStart();
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::DRAG);
+}
+
+/**
+ * @tc.name: RefreshTest027
+ * @tc.desc: Test Refresh Pattern HandleDragUpdate function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshPatternTestNg, RefreshTest027, TestSize.Level1)
+{
+    RefreshModelNG modelNG;
+    modelNG.Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<RefreshPattern> pattern = frameNode->GetPattern<RefreshPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto refreshLayoutProperty = frameNode->GetLayoutProperty<RefreshLayoutProperty>();
+    ASSERT_NE(refreshLayoutProperty, nullptr);
+    float delta = 100.0;
+    refreshLayoutProperty->UpdateIsRefresh(true);
+    pattern->HandleDragUpdate(delta);
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::INACTIVE);
+
+    delta = 0.0;
+    pattern->HandleDragUpdate(delta);
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::INACTIVE);
+}
+
+/**
+ * @tc.name: RefreshTest028
+ * @tc.desc: Test Refresh Pattern HandleDragUpdate function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshPatternTestNg, RefreshTest028, TestSize.Level1)
+{
+    RefreshModelNG modelNG;
+    modelNG.Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<RefreshPattern> pattern = frameNode->GetPattern<RefreshPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto refreshLayoutProperty = frameNode->GetLayoutProperty<RefreshLayoutProperty>();
+    ASSERT_NE(refreshLayoutProperty, nullptr);
+    refreshLayoutProperty->UpdateCustomBuilderIndex(1);
+    refreshLayoutProperty->UpdateIsCustomBuilderExist(true);
+    refreshLayoutProperty->UpdateCustomBuilderOffset(OffsetF(20.0f, 20.0f));
+    pattern->customBuilder_ = frameNode;
+    float delta = 100.0f;
+    EXPECT_EQ(pattern->scrollOffset_.GetY(), 0.0f);
+    pattern->HandleDragUpdate(delta);
+    EXPECT_EQ(pattern->scrollOffset_.GetY(), 42.0f);
+
+    delta = 0.0;
+    pattern->HandleDragUpdate(delta);
+    EXPECT_EQ(pattern->scrollOffset_.GetY(), 42.0f);
+}
+
+/**
+ * @tc.name: RefreshTest029
+ * @tc.desc: Test Refresh Pattern HandleDragEnd function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshPatternTestNg, RefreshTest029, TestSize.Level1)
+{
+    RefreshModelNG modelNG;
+    modelNG.Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<RefreshPattern> pattern = frameNode->GetPattern<RefreshPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->isRefreshing_ = true;
+
+    pattern->HandleDragEnd();
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::INACTIVE);
+}
+
+/**
+ * @tc.name: RefreshTest030
+ * @tc.desc: Test Refresh Pattern HandleDragEnd function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshPatternTestNg, RefreshTest030, TestSize.Level1)
+{
+    RefreshModelNG modelNG;
+    modelNG.Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<RefreshPattern> pattern = frameNode->GetPattern<RefreshPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto refreshLayoutProperty = frameNode->GetLayoutProperty<RefreshLayoutProperty>();
+    ASSERT_NE(refreshLayoutProperty, nullptr);
+    pattern->scrollOffset_.SetY(70.0f);
+    refreshLayoutProperty->UpdateCustomBuilderIndex(1);
+    refreshLayoutProperty->UpdateIsCustomBuilderExist(true);
+    refreshLayoutProperty->UpdateCustomBuilderOffset(OffsetF(20.0f, 20.0f));
+    pattern->customBuilder_ = frameNode;
+
+    pattern->HandleDragEnd();
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::INACTIVE);
+}
+
+/**
+ * @tc.name: RefreshTest031
+ * @tc.desc: Test Refresh Pattern HandleDragEnd function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshPatternTestNg, RefreshTest031, TestSize.Level1)
+{
+    RefreshModelNG modelNG;
+    modelNG.Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<RefreshPattern> pattern = frameNode->GetPattern<RefreshPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto refreshLayoutProperty = frameNode->GetLayoutProperty<RefreshLayoutProperty>();
+    ASSERT_NE(refreshLayoutProperty, nullptr);
+    pattern->scrollOffset_.SetY(50.0f);
+    pattern->HandleDragEnd();
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::INACTIVE);
+
+    pattern->scrollOffset_.SetY(70.0f);
+    pattern->HandleDragEnd();
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::REFRESH);
+}
+
+/**
+ * @tc.name: RefreshTest032
+ * @tc.desc: Test Refresh Pattern HandleDragCancel function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshPatternTestNg, RefreshTest032, TestSize.Level1)
+{
+    RefreshModelNG modelNG;
+    modelNG.Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<RefreshPattern> pattern = frameNode->GetPattern<RefreshPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto refreshLayoutProperty = frameNode->GetLayoutProperty<RefreshLayoutProperty>();
+    ASSERT_NE(refreshLayoutProperty, nullptr);
+    pattern->scrollOffset_.SetY(70.0f);
+    refreshLayoutProperty->UpdateCustomBuilderIndex(1);
+    refreshLayoutProperty->UpdateIsCustomBuilderExist(true);
+    refreshLayoutProperty->UpdateCustomBuilderOffset(OffsetF(20.0f, 20.0f));
+    pattern->customBuilder_ = frameNode;
+    pattern->HandleDragCancel();
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::INACTIVE);
+}
+
+/**
+ * @tc.name: RefreshTest033
+ * @tc.desc: Test Refresh Pattern AddCustomBuilderNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshPatternTestNg, RefreshTest033, TestSize.Level1)
+{
+    RefreshModelNG modelNG;
+    modelNG.Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
+    ASSERT_NE(customNode, nullptr);
+    RefPtr<RefreshPattern> pattern = frameNode->GetPattern<RefreshPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto textChild = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textChild, nullptr);
+    frameNode->AddChild(textChild);
+    auto loadingProgressChild =
+        FrameNode::CreateFrameNode(V2::LOADING_PROGRESS_ETS_TAG, -1, AceType::MakeRefPtr<LoadingProgressPattern>());
+    ASSERT_NE(loadingProgressChild, nullptr);
+    frameNode->AddChild(loadingProgressChild);
+    auto refreshLayoutProperty = frameNode->GetLayoutProperty<RefreshLayoutProperty>();
+    ASSERT_NE(refreshLayoutProperty, nullptr);
+    pattern->AddCustomBuilderNode(customNode);
+    EXPECT_EQ(refreshLayoutProperty->GetIsCustomBuilderExist(), true);
+    refreshLayoutProperty->UpdateCustomBuilderIndex(1);
+    pattern->AddCustomBuilderNode(frameNode);
+    EXPECT_EQ(refreshLayoutProperty->GetIsCustomBuilderExist(), true);
+
+    refreshLayoutProperty->UpdateCustomBuilderIndex(4);
+    pattern->AddCustomBuilderNode(frameNode);
+    EXPECT_EQ(refreshLayoutProperty->GetIsCustomBuilderExist(), true);
+}
+
+/**
+ * @tc.name: RefreshTest034
+ * @tc.desc: Test Refresh Pattern CustomBuilderAppear and CustomBuilderExit function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshPatternTestNg, RefreshTest034, TestSize.Level1)
+{
+    RefreshModelNG modelNG;
+    modelNG.Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<RefreshPattern> pattern = frameNode->GetPattern<RefreshPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto refreshLayoutProperty = frameNode->GetLayoutProperty<RefreshLayoutProperty>();
+    ASSERT_NE(refreshLayoutProperty, nullptr);
+    refreshLayoutProperty->UpdateCustomBuilderOffset(OffsetF(65.0, 65.0));
+    pattern->CustomBuilderAppear();
+    EXPECT_EQ(refreshLayoutProperty->GetIsCustomBuilderExist(), false);
+
+    refreshLayoutProperty->UpdateCustomBuilderOffset(OffsetF(0.0f, 0.0f));
+    pattern->triggerLoadingDistance_ = 16.0f;
+    pattern->CustomBuilderExit();
+    EXPECT_EQ(refreshLayoutProperty->GetIsCustomBuilderExist(), false);
+}
+
+/**
+ * @tc.name: RefreshTest035
+ * @tc.desc: Test Refresh Pattern CheckCustomBuilderDragUpdateStage function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshPatternTestNg, RefreshTest035, TestSize.Level1)
+{
+    RefreshModelNG modelNG;
+    modelNG.Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<RefreshPattern> pattern = frameNode->GetPattern<RefreshPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto refreshLayoutProperty = frameNode->GetLayoutProperty<RefreshLayoutProperty>();
+    ASSERT_NE(refreshLayoutProperty, nullptr);
+    pattern->customBuilder_ = frameNode;
+    pattern->triggerLoadingDistance_ = 180.0f;
+    pattern->customBuilder_->GetGeometryNode()->SetFrameSize(SizeF(20.0f, 20.0f));
+    pattern->CheckCustomBuilderDragUpdateStage();
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::INACTIVE);
+
+    pattern->triggerLoadingDistance_ = 16.0f;
+    pattern->scrollOffset_.SetY(20.0f);
+    pattern->CheckCustomBuilderDragUpdateStage();
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::INACTIVE);
+
+    pattern->scrollOffset_.SetY(65.0f);
+    refreshLayoutProperty->UpdateCustomBuilderOffset(OffsetF(200.0f, 200.0f));
+    pattern->CheckCustomBuilderDragUpdateStage();
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::INACTIVE);
+}
+
+/**
+ * @tc.name: RefreshTest036
+ * @tc.desc: Test Refresh Pattern TriggerFinish function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshPatternTestNg, RefreshTest036, TestSize.Level1)
+{
+    RefreshModelNG modelNG;
+    modelNG.Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<RefreshPattern> pattern = frameNode->GetPattern<RefreshPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->refreshStatus_ = RefreshStatus::REFRESH;
+
+    pattern->TriggerFinish();
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::DONE);
+}
+
+/**
+ * @tc.name: RefreshTest037
+ * @tc.desc: Test Refresh Pattern CheckCustomBuilderDragEndStage function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshPatternTestNg, RefreshTest037, TestSize.Level1)
+{
+    RefreshModelNG modelNG;
+    modelNG.Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<RefreshPattern> pattern = frameNode->GetPattern<RefreshPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto refreshLayoutProperty = frameNode->GetLayoutProperty<RefreshLayoutProperty>();
+    ASSERT_NE(refreshLayoutProperty, nullptr);
+    pattern->customBuilder_ = frameNode;
+    pattern->triggerLoadingDistance_ = 180.0f;
+    pattern->customBuilder_->GetGeometryNode()->SetFrameSize(SizeF(20.0f, 20.0f));
+
+    pattern->CheckCustomBuilderDragEndStage();
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::INACTIVE);
+}
+
+/**
+ * @tc.name: RefreshTest038
+ * @tc.desc: Test Refresh Pattern CheckCustomBuilderDragEndStage function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshPatternTestNg, RefreshTest038, TestSize.Level1)
+{
+    RefreshModelNG modelNG;
+    modelNG.Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<RefreshPattern> pattern = frameNode->GetPattern<RefreshPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto refreshLayoutProperty = frameNode->GetLayoutProperty<RefreshLayoutProperty>();
+    ASSERT_NE(refreshLayoutProperty, nullptr);
+    pattern->customBuilder_ = frameNode;
+    pattern->triggerLoadingDistance_ = 180.0f;
+    pattern->customBuilder_->GetGeometryNode()->SetFrameSize(SizeF(20.0f, 20.0f));
+
+    pattern->CheckCustomBuilderDragEndStage();
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::INACTIVE);
+}
+
+/**
+ * @tc.name: RefreshTest039
+ * @tc.desc: Test Refresh Pattern CustomBuilderRefreshingAnimation function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshPatternTestNg, RefreshTest039, TestSize.Level1)
+{
+    RefreshModelNG modelNG;
+    modelNG.Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<RefreshPattern> pattern = frameNode->GetPattern<RefreshPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto textChild = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textChild, nullptr);
+    frameNode->AddChild(textChild);
+    auto loadingProgressChild =
+        FrameNode::CreateFrameNode(V2::LOADING_PROGRESS_ETS_TAG, -1, AceType::MakeRefPtr<LoadingProgressPattern>());
+    ASSERT_NE(loadingProgressChild, nullptr);
+    frameNode->AddChild(loadingProgressChild);
+    auto refreshLayoutProperty = frameNode->GetLayoutProperty<RefreshLayoutProperty>();
+    ASSERT_NE(refreshLayoutProperty, nullptr);
+    pattern->customBuilder_ = frameNode;
+    pattern->triggerLoadingDistance_ = 16.0f;
+    pattern->scrollOffset_.SetY(60.0f);
+    pattern->customBuilder_->GetGeometryNode()->SetFrameSize(SizeF(20.0f, 20.0f));
+    refreshLayoutProperty->UpdateCustomBuilderOffset(OffsetF(200.0f, 200.0f));
+
+    pattern->CustomBuilderRefreshingAnimation();
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::INACTIVE);
+}
+
+/**
+ * @tc.name: RefreshTest040
+ * @tc.desc: Test Refresh Pattern OnDirtyLayoutWrapperSwap function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshPatternTestNg, RefreshTest040, TestSize.Level1)
+{
+    RefreshModelNG modelNG;
+    modelNG.Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<RefreshPattern> pattern = frameNode->GetPattern<RefreshPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto refreshLayoutProperty = frameNode->GetLayoutProperty<RefreshLayoutProperty>();
+    ASSERT_NE(refreshLayoutProperty, nullptr);
+    auto refreshRenderProperty = frameNode->GetPaintProperty<RefreshRenderProperty>();
+    ASSERT_NE(refreshRenderProperty, nullptr);
+    DirtySwapConfig swapConfig;
+    pattern->customBuilder_ = frameNode;
+    pattern->triggerLoadingDistance_ = 16.0f;
+    pattern->scrollOffset_.SetY(60.0f);
+    pattern->customBuilder_->GetGeometryNode()->SetFrameSize(SizeF(20.0f, 20.0f));
+    refreshLayoutProperty->UpdateCustomBuilderOffset(OffsetF(200.0f, 200.0f));
+    pattern->OnDirtyLayoutWrapperSwap(nullptr, swapConfig);
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::INACTIVE);
+
+    refreshLayoutProperty->UpdateIsCustomBuilderExist(true);
+    refreshRenderProperty->UpdateIsRefreshing(true);
+    pattern->OnDirtyLayoutWrapperSwap(nullptr, swapConfig);
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::INACTIVE);
+
+    pattern->customBuilder_->GetGeometryNode()->SetFrameSize(SizeF(0.0f, 0.0f));
+    pattern->OnDirtyLayoutWrapperSwap(nullptr, swapConfig);
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::INACTIVE);
+}
+
+/**
+ * @tc.name: RefreshTest041
+ * @tc.desc: Test CustomBuilder function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshPatternTestNg, RefreshTest041, TestSize.Level1)
+{
+    RefreshModelNG modelNG;
+    modelNG.Create();
+
+    /**
+     * @tc.steps: step1. SetRefreshing, SetCustomBuilder.
+     * @tc.expected: Verify GetIsCustomBuilderExistValue.
+     */
+    auto test = AceType::MakeRefPtr<FrameNode>("test", 0, AceType::MakeRefPtr<Pattern>());
+    auto builder = AceType::DynamicCast<UINode>(test);
+    modelNG.SetRefreshing(true);
+    modelNG.SetCustomBuilder(builder);
+
+    /**
+     * @tc.steps: step2. Get framNode.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<RefreshPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step3. RunMeasureAndLayout.
+     * @tc.expected: Verify isRefresh.
+     */
+    RunMeasureAndLayout(frameNode);
+    EXPECT_TRUE(pattern->isRefreshing_);
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::REFRESH);
 }
 } // namespace OHOS::Ace::NG

@@ -31,8 +31,7 @@ constexpr Dimension MAX_DRAG_X = 10.0_vp;
 constexpr Dimension MAX_DRAG_Y = 4.0_vp;
 constexpr float DRAG_X_RATIO = 0.4;
 constexpr float DRAG_Y_RATIO = 0.2;
-constexpr float SCALE_ICON = 1.15;
-constexpr float SCALE_WIDTH = 1.5 / SCALE_ICON;
+constexpr float SCALE = 1.5;
 constexpr int32_t DOWN_DURATION = 150;
 constexpr int32_t RESET_DURATION = 250;
 constexpr int32_t STYLE_DURATION = 200;
@@ -56,6 +55,7 @@ const OffsetT<Dimension> POINT_R_EXPAND = OffsetT<Dimension>(47.0_vp, 9.0_vp);  
 
 void DragBarPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     InitProps();
@@ -64,6 +64,7 @@ void DragBarPattern::OnModifyDone()
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     InitTouchEvent(gestureHub);
+    InitClickEvent();
     UpdateDrawPoint();
     MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
@@ -97,12 +98,11 @@ void DragBarPattern::InitProps()
 
     if (!barTouchAnimator_) {
         barTouchAnimator_ = AceType::MakeRefPtr<Animator>(host->GetContext());
-        auto touchAnimation = AceType::MakeRefPtr<CurveAnimation<float>>(1.0, SCALE_ICON, Curves::SHARP);
+        auto touchAnimation = AceType::MakeRefPtr<CurveAnimation<float>>(1.0, SCALE, Curves::SHARP);
         touchAnimation->AddListener([weak = AceType::WeakClaim(this)](float value) {
             auto dragBar = weak.Upgrade();
             if (dragBar) {
-                dragBar->scaleIcon_ = value;
-                dragBar->scaleWidth_ = 1.0 + (value - 1.0) / (SCALE_ICON - 1.0) * (SCALE_WIDTH - 1.0);
+                dragBar->scaleWidth_ = value;
                 dragBar->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
             }
         });
@@ -249,6 +249,32 @@ void DragBarPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
     gestureHub->AddTouchEvent(touchEvent_);
 }
 
+void DragBarPattern::InitClickEvent()
+{
+    if (clickListener_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gesture = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
+        auto dragBarPattern = weak.Upgrade();
+        CHECK_NULL_VOID(dragBarPattern);
+        dragBarPattern->OnClick();
+    };
+    clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
+    gesture->AddClickEvent(clickListener_);
+}
+
+void DragBarPattern::OnClick()
+{
+    if (!clickArrowCallback_) {
+        return;
+    }
+    clickArrowCallback_();
+}
+
 void DragBarPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
     auto touchType = info.GetTouches().front().GetTouchType();
@@ -259,7 +285,7 @@ void DragBarPattern::HandleTouchEvent(const TouchEventInfo& info)
     if (touchType == TouchType::MOVE) {
         HandleTouchMove(frontInfo);
     }
-    if (touchType == TouchType::UP) {
+    if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
         HandleTouchUp();
     }
 }

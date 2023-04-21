@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,16 +19,65 @@
 #include <map>
 
 #include "base/geometry/axis.h"
+#include "base/geometry/ng/rect_t.h"
 
 namespace OHOS::Ace::NG {
 
 // Try not to add more variables in [GridLayoutInfo] because the more state variables, the more problematic and the
 // harder it is to maintain
 struct GridLayoutInfo {
+    float GetTotalHeightOfItemsInView(float mainGap)
+    {
+        float lengthOfItemsInViewport = 0.0;
+        for (auto i = startMainLineIndex_; i <= endMainLineIndex_; i++) {
+            lengthOfItemsInViewport += (lineHeightMap_[i] + mainGap);
+        }
+        return lengthOfItemsInViewport - mainGap;
+    }
+
+    void UpdateStartIndexByStartLine()
+    {
+        auto startLine = gridMatrix_.find(startMainLineIndex_);
+        if (startLine == gridMatrix_.end()) {
+            return;
+        }
+        if (startLine->second.empty()) {
+            return;
+        }
+        startIndex_ = startLine->second.begin()->second;
+    }
+
+    void UpdateEndLine(float mainSize, float mainGap);
+
+    void SwapItems(int32_t itemIndex, int32_t insertIndex);
+    int32_t GetOriginalIndex() const;
+    void ClearDragState();
+
+    float GetAverageLineHeight()
+    {
+        float totalHeight = 0;
+        int32_t totalRow = 0;
+        for (const auto& record : lineHeightMap_) {
+            if (record.second > 0) {
+                totalRow++;
+                totalHeight += record.second;
+            }
+        }
+        return totalRow > 0 ? totalHeight / totalRow : 0;
+    }
+
+    void ResetPositionFlags()
+    {
+        reachEnd_ = false;
+        reachStart_ = false;
+        offsetEnd_ = false;
+    }
+
     Axis axis_ = Axis::VERTICAL;
 
     float currentOffset_ = 0.0f;
     float prevOffset_ = 0.0f;
+    float lastMainSize_ = 0.0f;
 
     // index of first and last GridItem in viewport
     int32_t startIndex_ = 0;
@@ -39,8 +88,8 @@ struct GridLayoutInfo {
     int32_t endMainLineIndex_ = 0;
 
     int32_t jumpIndex_ = -1;
-    uint32_t crossCount_ = 0;
-    uint32_t childrenCount_ = 0;
+    int32_t crossCount_ = 0;
+    int32_t childrenCount_ = 0;
 
     bool reachEnd_ = false;
     bool reachStart_ = false;
@@ -52,6 +101,20 @@ struct GridLayoutInfo {
     std::map<int32_t, std::map<int32_t, int32_t>> gridMatrix_;
     // in vertical grid, this map is like: [rowIndex: rowHeight]
     std::map<int32_t, float> lineHeightMap_;
+
+    // rect of grid item dragged in
+    RectF currentRect_;
+
+    // Grid has GridItem whose columnEnd - columnStart > 0
+    bool hasBigItem_;
+
+private:
+    int32_t GetItemIndexByPosition(int32_t position);
+    int32_t GetPositionByItemIndex(int32_t itemIndex);
+    void MoveItemsBack(int32_t from, int32_t to, int32_t itemIndex);
+    void MoveItemsForward(int32_t from, int32_t to, int32_t itemIndex);
+    int32_t currentMovingItemPosition_ = -1;
+    std::map<int32_t, int32_t> positionItemIndexMap_;
 };
 
 } // namespace OHOS::Ace::NG

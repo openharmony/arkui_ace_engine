@@ -18,6 +18,8 @@
 #include "transaction/rs_interfaces.h"
 
 #include "base/thread/task_executor.h"
+#include "base/utils/time_util.h"
+#include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/thread_checker.h"
@@ -31,7 +33,11 @@ constexpr float ONE_SECOND_IN_NANO = 1000000000.0f;
 
 float GetDisplayRefreshRate()
 {
+#ifdef PREVIEW
+    return 30.0f;
+#else
     return 60.0f;
+#endif
 }
 } // namespace
 
@@ -64,7 +70,9 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
         uiTaskRunner.PostTask([callback = std::move(onVsync)]() { callback(); });
     };
     rsUIDirector_ = OHOS::Rosen::RSUIDirector::Create();
-    rsUIDirector_->SetRSSurfaceNode(window->GetSurfaceNode());
+    if (window->GetSurfaceNode()) {
+        rsUIDirector_->SetRSSurfaceNode(window->GetSurfaceNode());
+    }
     rsUIDirector_->SetCacheDir(AceApplicationInfo::GetInstance().GetDataFileDirPath());
     rsUIDirector_->Init();
     rsUIDirector_->SetUITaskRunner([taskExecutor, id](const std::function<void()>& task) {
@@ -74,19 +82,24 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
     });
 }
 
+void RosenWindow::Init()
+{
+    CHECK_NULL_VOID(rsWindow_);
+    auto surfaceNode = rsWindow_->GetSurfaceNode();
+    if (rsUIDirector_ && surfaceNode) {
+        rsUIDirector_->SetRSSurfaceNode(surfaceNode);
+    }
+}
+
 void RosenWindow::RequestFrame()
 {
-    if (!onShow_) {
-        LOGD("window is not show, stop request frame");
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(onShow_);
     CHECK_RUN_ON(UI);
-    if (isRequestVsync_) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(!isRequestVsync_);
     LOGD("request next vsync");
     if (rsWindow_) {
         rsWindow_->RequestVsync(vsyncCallback_);
+        lastRequestVsyncTime_ = GetSysTimestamp();
     }
     isRequestVsync_ = true;
     auto taskExecutor = taskExecutor_.Upgrade();
@@ -107,12 +120,14 @@ void RosenWindow::RequestFrame()
 void RosenWindow::OnShow()
 {
     Window::OnShow();
+    CHECK_NULL_VOID(rsUIDirector_);
     rsUIDirector_->GoForeground();
 }
 
 void RosenWindow::OnHide()
 {
     Window::OnHide();
+    CHECK_NULL_VOID(rsUIDirector_);
     rsUIDirector_->GoBackground();
     rsUIDirector_->SendMessages();
 }
@@ -139,6 +154,7 @@ void RosenWindow::SetRootFrameNode(const RefPtr<NG::FrameNode>& root)
     auto rosenRenderContext = AceType::DynamicCast<RosenRenderContext>(root->GetRenderContext());
     CHECK_NULL_VOID(rosenRenderContext);
     if (rosenRenderContext->GetRSNode()) {
+        CHECK_NULL_VOID(rsUIDirector_);
         rsUIDirector_->SetRoot(rosenRenderContext->GetRSNode()->GetId());
     }
 }
@@ -146,6 +162,7 @@ void RosenWindow::SetRootFrameNode(const RefPtr<NG::FrameNode>& root)
 void RosenWindow::RecordFrameTime(uint64_t timeStamp, const std::string& name)
 {
     LOGD("Rosenwindow RecordFrameTime");
+    CHECK_NULL_VOID(rsUIDirector_);
     rsUIDirector_->SetTimeStamp(timeStamp, name);
 }
 
@@ -153,7 +170,13 @@ void RosenWindow::FlushTasks()
 {
     CHECK_RUN_ON(UI);
     LOGD("Rosenwindow flush tasks");
+    CHECK_NULL_VOID(rsUIDirector_);
     rsUIDirector_->SendMessages();
+}
+
+float RosenWindow::GetRefreshRate() const
+{
+    return GetDisplayRefreshRate();
 }
 
 } // namespace OHOS::Ace::NG

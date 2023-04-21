@@ -212,8 +212,12 @@ HWTEST_F(PluginManagerDelegateTest, PluginManagerDelegateOnPluginAcquired001, Te
      * @tc.steps: step2. On Plugin Acquired.
      * @tc.expected: step2.  On Plugin Acquired success. no expect because Plugin Complete Call Back has no param
      */
-    pluginManagerDelegate.onPluginCompleteCallback_ = []() {};
+    std::string str = "";
+    pluginManagerDelegate.onPluginCompleteCallback_ = [&str]() {
+        str = "PluginManagerDelegateOnPluginAcquired";
+    };
     pluginManagerDelegate.OnPluginComplete("1#HWJS-=-#");
+    EXPECT_EQ(str, "PluginManagerDelegateOnPluginAcquired");
 }
 
 /**

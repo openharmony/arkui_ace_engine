@@ -18,6 +18,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
+#include "core/components_ng/gestures/recognizers/recognizer_group.h"
 
 namespace OHOS::Ace::NG {
 
@@ -92,14 +93,57 @@ RefPtr<NGGestureRecognizer> GestureScope::UnBlockGesture()
     return (*iter).Upgrade();
 }
 
-bool GestureScope::IsPending()
+bool GestureScope::IsPending(size_t touchId)
 {
-    auto iter =
-        std::find_if(std::begin(recognizers_), std::end(recognizers_), [](const WeakPtr<NGGestureRecognizer>& member) {
+    auto iter = std::find_if(
+        std::begin(recognizers_), std::end(recognizers_), [touchId](const WeakPtr<NGGestureRecognizer>& member) {
             auto recognizer = member.Upgrade();
-            return recognizer && ((recognizer->GetRefereeState() == RefereeState::PENDING));
+            RefereeState state = RefereeState::READY;
+            if (recognizer) {
+                state = recognizer->GetRefereeState();
+                if (AceType::InstanceOf<RecognizerGroup>(recognizer)) {
+                    auto group = AceType::DynamicCast<RecognizerGroup>(recognizer);
+                    state = group->CheckStates(touchId);
+                }
+            }
+            return recognizer && ((state == RefereeState::PENDING));
         });
     return iter != recognizers_.end();
+}
+
+bool DectectAllDone(const RefPtr<NGGestureRecognizer> recognizer)
+{
+    RefereeState state = recognizer->GetRefereeState();
+    if (!AceType::InstanceOf<RecognizerGroup>(recognizer)) {
+        if (state != RefereeState::SUCCEED && state != RefereeState::SUCCEED_BLOCKED && state != RefereeState::FAIL) {
+            return false;
+        }
+    } else {
+        auto group = AceType::DynamicCast<RecognizerGroup>(recognizer);
+        for (const auto& item : group->GetGroupRecognizer()) {
+            bool ret = DectectAllDone(item);
+            if (!ret) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+bool GestureScope::QueryAllDone(size_t touchId)
+{
+    bool ret = true;
+    for (auto item : recognizers_) {
+        auto recognizer = item.Upgrade();
+        if (!recognizer) {
+            continue;
+        }
+        ret = DectectAllDone(recognizer);
+        if (ret == false) {
+            break;
+        }
+    }
+    return ret;
 }
 
 void GestureScope::Close()
@@ -137,13 +181,24 @@ void GestureReferee::CleanGestureScope(size_t touchId)
     const auto iter = gestureScopes_.find(touchId);
     if (iter != gestureScopes_.end()) {
         const auto& scope = iter->second;
-        if (scope->IsPending()) {
+        if (scope->IsPending(touchId)) {
             scope->SetDelayClose();
             return;
         }
         scope->Close();
         gestureScopes_.erase(iter);
     }
+}
+
+bool GestureReferee::QueryAllDone(size_t touchId)
+{
+    bool ret = false;
+    const auto iter = gestureScopes_.find(touchId);
+    if (iter != gestureScopes_.end()) {
+        const auto& scope = iter->second;
+        ret = scope->QueryAllDone(touchId);
+    }
+    return ret;
 }
 
 void GestureReferee::Adjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)

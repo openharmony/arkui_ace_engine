@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -369,7 +369,11 @@ void FrontendDelegateImpl::OnBackGround()
 
 void FrontendDelegateImpl::OnForeground()
 {
-    OnPageShow();
+    // first page show will be called by push page successfully
+    if (!isFirstNotifyShow_) {
+        OnPageShow();
+    }
+    isFirstNotifyShow_ = false;
 }
 
 bool FrontendDelegateImpl::OnStartContinuation()
@@ -557,6 +561,18 @@ void FrontendDelegateImpl::InitializeAccessibilityCallback()
 // Start FrontendDelegate overrides.
 void FrontendDelegateImpl::Push(const std::string& uri, const std::string& params)
 {
+    Push(uri, params, nullptr);
+}
+
+void FrontendDelegateImpl::PushWithCallback(const std::string& uri, const std::string& params,
+    const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
+{
+    Push(uri, params, errorCallback);
+}
+
+void FrontendDelegateImpl::Push(const std::string& uri, const std::string& params,
+    const std::function<void(const std::string&, int32_t)>& errorCallback)
+{
     if (uri.empty()) {
         LOGE("router.Push uri is empty");
         return;
@@ -564,6 +580,9 @@ void FrontendDelegateImpl::Push(const std::string& uri, const std::string& param
     if (isRouteStackFull_) {
         LOGE("the router stack has reached its max size, you can't push any more pages.");
         EventReport::SendPageRouterException(PageRouterExcepType::PAGE_STACK_OVERFLOW_ERR, uri);
+        if (errorCallback != nullptr) {
+            errorCallback("The pages are pushed too much.", ERROR_CODE_PAGE_STACK_FULL);
+        }
         return;
     }
     std::string pagePath = manifestParser_->GetRouter()->GetPagePath(uri);
@@ -571,9 +590,15 @@ void FrontendDelegateImpl::Push(const std::string& uri, const std::string& param
     if (!pagePath.empty()) {
         isPagePathInvalid_ = true;
         LoadPage(GenerateNextPageId(), pagePath, false, params);
+        if (errorCallback != nullptr) {
+            errorCallback("", ERROR_CODE_NO_ERROR);
+        }
     } else {
         isPagePathInvalid_ = false;
         LOGW("[Engine Log] this uri not support in route push.");
+        if (errorCallback != nullptr) {
+            errorCallback("The uri of router is not exist.", ERROR_CODE_URI_ERROR);
+        }
     }
 
     if (taskExecutor_) {
@@ -589,6 +614,18 @@ void FrontendDelegateImpl::Push(const std::string& uri, const std::string& param
 
 void FrontendDelegateImpl::Replace(const std::string& uri, const std::string& params)
 {
+    Replace(uri, params, nullptr);
+}
+
+void FrontendDelegateImpl::ReplaceWithCallback(const std::string& uri, const std::string& params,
+    const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
+{
+    Push(uri, params, errorCallback);
+}
+
+void FrontendDelegateImpl::Replace(const std::string& uri, const std::string& params,
+    const std::function<void(const std::string&, int32_t)>& errorCallback)
+{
     if (uri.empty()) {
         LOGE("router.Replace uri is empty");
         return;
@@ -598,8 +635,14 @@ void FrontendDelegateImpl::Replace(const std::string& uri, const std::string& pa
     LOGD("router.Replace pagePath = %{private}s", pagePath.c_str());
     if (!pagePath.empty()) {
         LoadReplacePage(GenerateNextPageId(), pagePath, params);
+        if (errorCallback != nullptr) {
+            errorCallback("", ERROR_CODE_NO_ERROR);
+        }
     } else {
         LOGW("[Engine Log] this uri not support in route replace.");
+        if (errorCallback != nullptr) {
+            errorCallback("The uri of router is not exist.", ERROR_CODE_URI_ERROR_LITE);
+        }
     }
 }
 
@@ -647,10 +690,13 @@ void FrontendDelegateImpl::BackImplement(const std::string& uri, const std::stri
         }
     }
 
-    auto context = pipelineContextHolder_.Get();
-    if (context) {
-        context->NotifyRouterBackDismiss();
-    }
+    taskExecutor_->PostTask(
+        [context = pipelineContextHolder_.Get()]() {
+            if (context) {
+                context->NotifyRouterBackDismiss();
+            }
+        },
+        TaskExecutor::TaskType::UI);
 }
 
 void FrontendDelegateImpl::PostponePageTransition()
@@ -862,6 +908,13 @@ double FrontendDelegateImpl::MeasureText(const MeasureContext& context)
     LOGD("FrontendDelegateImpl MeasureTxt.");
     return MeasureUtil::MeasureText(context);
 }
+
+Size FrontendDelegateImpl::MeasureTextSize(const MeasureContext& context)
+{
+    LOGD("FrontendDelegateImpl MeasureTxtSize.");
+    return MeasureUtil::MeasureTextSize(context);
+}
+
 
 void FrontendDelegateImpl::ShowToast(const std::string& message, int32_t duration, const std::string& bottom)
 {
@@ -1522,6 +1575,19 @@ int32_t FrontendDelegateImpl::OnClearInvisiblePagesSuccess()
 
 void FrontendDelegateImpl::ClearInvisiblePages()
 {
+    std::lock_guard<std::mutex> lock(mutex_);
+    // Execute invisible pages' OnJsEngineDestroy to release JsValue
+    for (auto pageRouteIter = pageRouteStack_.cbegin(); pageRouteIter != pageRouteStack_.cend() - 1; ++pageRouteIter) {
+        const auto& info = *pageRouteIter;
+        auto iter = pageMap_.find(info.pageId);
+        if (iter != pageMap_.end()) {
+            auto page = iter->second;
+            if (page) {
+                page->OnJsEngineDestroy();
+            }
+        }
+    }
+
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this)] {
             auto delegate = weak.Upgrade();

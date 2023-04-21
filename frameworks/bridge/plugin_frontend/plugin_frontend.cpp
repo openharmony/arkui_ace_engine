@@ -157,6 +157,7 @@ void SwipeInfoToString(const BaseEventInfo& info, std::string& eventParam)
 
 PluginFrontend::~PluginFrontend() noexcept
 {
+    Destroy();
     LOG_DESTROY();
 }
 
@@ -164,7 +165,10 @@ void PluginFrontend::Destroy()
 {
     CHECK_RUN_ON(JS);
     // To guarantee the jsEngine_ and delegate_ released in js thread
-    jsEngine_.Reset();
+    if (jsEngine_) {
+        jsEngine_->Destroy();
+        jsEngine_.Reset();
+    }
     delegate_.Reset();
     handler_.Reset();
 }

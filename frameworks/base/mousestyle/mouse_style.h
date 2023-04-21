@@ -17,16 +17,42 @@
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_MOUSESTYLE_MOUSE_STYLE_MANAGER_H
 
 #include "base/memory/ace_type.h"
-#include "core/components/declaration/common/style.h"
 
 namespace OHOS::Ace {
 
 enum class MouseFormat : int32_t {
     DEFAULT = 0,        // Default mouse style
+    EAST = 1,           // Eastwards arrow
+    WEST = 2,           // Westwards arrow
+    SOUTH = 3,          // Southwards arrow
+    NORTH = 4,          // Northwards arrow
     WEST_EAST = 5,      // Drag left-right mouse style
     NORTH_SOUTH = 6,    // Drag up-down mouse style
+    NORTH_EAST_SOUTH_WEST = 11,
+    NORTH_WEST_SOUTH_EAST = 12,
+    CROSS = 13,
+    CURSOR_COPY = 14,
+    CURSOR_FORBID = 15,
+    HAND_GRABBING = 17,
+    HAND_OPEN = 18,
     HAND_POINTING = 19, // Hyperlink mouse style
+    HELP = 20,
+    CURSOR_MOVE = 21,
+    RESIZE_LEFT_RIGHT = 22,
+    RESIZE_UP_DOWN = 23,
     TEXT_CURSOR = 26,   // Text editing mouse style
+    ZOOM_IN = 27,
+    ZOOM_OUT = 28,
+    MIDDLE_BTN_EAST = 29,
+    MIDDLE_BTN_WEST = 30,
+    MIDDLE_BTN_SOUTH = 31,
+    MIDDLE_BTN_NORTH = 32,
+    MIDDLE_BTN_NORTH_SOUTH = 33,
+    MIDDLE_BTN_NORTH_EAST = 34,
+    MIDDLE_BTN_NORTH_WEST = 35,
+    MIDDLE_BTN_SOUTH_EAST = 36,
+    MIDDLE_BTN_SOUTH_WEST = 37,
+    MIDDLE_BTN_NORTH_SOUTH_WEST_EAST = 38,
 };
 
 class ACE_EXPORT MouseStyle : public AceType {
@@ -37,6 +63,7 @@ public:
 
     virtual bool SetPointerStyle(int32_t windowId, MouseFormat pointerStyle) const = 0;
     virtual int32_t GetPointerStyle(int32_t windowId, int32_t& pointerStyle) const = 0;
+    virtual bool ChangePointerStyle(int32_t windowId, MouseFormat mouseFormat) const = 0;
 };
 
 } // namespace OHOS::Ace

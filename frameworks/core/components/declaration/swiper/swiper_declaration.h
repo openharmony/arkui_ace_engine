@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,6 +34,11 @@ enum class SwiperDisplayMode {
     AUTO_LINEAR,
 };
 
+enum class SwiperIndicatorType {
+    DOT = 0,
+    DIGIT,
+};
+
 struct SwiperAttribute : Attribute {
     uint32_t index = DEFAULT_SWIPER_CURRENT_INDEX;
     double duration = DEFAULT_SWIPER_ANIMATION_DURATION;
@@ -62,6 +67,8 @@ struct SwiperEvent : Event {
     EventMarker rotationEventId;
     EventMarker clickEventId;
     EventMarker animationFinishEventId;
+    EventMarker animationStartEventId;
+    EventMarker animationEndEventId;
 };
 
 struct SwiperMethod : Method {};
@@ -279,6 +286,28 @@ public:
     {
         auto& event = MaybeResetEvent<SwiperEvent>(EventTag::SPECIALIZED_EVENT);
         event.changeEventId = changeEventId;
+    }
+
+    const EventMarker& GetAnimationStartEventId() const
+    {
+        auto& event = static_cast<SwiperEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
+        return event.animationStartEventId;
+    }
+    void SetAnimationStartEventId(const EventMarker& animationStartEventId)
+    {
+        auto& event = MaybeResetEvent<SwiperEvent>(EventTag::SPECIALIZED_EVENT);
+        event.animationStartEventId = animationStartEventId;
+    }
+
+    const EventMarker& GetAnimationEndEventId() const
+    {
+        auto& event = static_cast<SwiperEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
+        return event.animationEndEventId;
+    }
+    void SetAnimationEndEventId(const EventMarker& animationEndEventId)
+    {
+        auto& event = MaybeResetEvent<SwiperEvent>(EventTag::SPECIALIZED_EVENT);
+        event.animationEndEventId = animationEndEventId;
     }
 
     const EventMarker& GetRotationEventId() const

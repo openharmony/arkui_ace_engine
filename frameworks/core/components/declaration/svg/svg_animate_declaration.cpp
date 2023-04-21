@@ -125,7 +125,10 @@ bool SvgAnimateDeclaration::SetAnimateAttr(const std::pair<std::string, std::str
                 declaration.SetTransformType(val);
             } },
     };
-    auto attrIter = svgMap.find(attr.first);
+    std::string key = attr.first;
+    // convert key to lower case to match dom_type strings
+    std::transform(key.begin(), key.end(), key.begin(), ::tolower);
+    auto attrIter = svgMap.find(key);
     if (attrIter != svgMap.end()) {
         attrIter->second(attr.second, *this);
         return true;

@@ -30,6 +30,30 @@ RefPtr<FrameNode> EventHub::GetFrameNode() const
     return host_.Upgrade();
 }
 
+void EventHub::AddSupportedState(UIState state)
+{
+    if (!stateStyleMgr_) {
+        stateStyleMgr_ = MakeRefPtr<StateStyleManager>(host_);
+    }
+    stateStyleMgr_->AddSupportedState(state);
+}
+
+void EventHub::SetSupportedStates(UIState state)
+{
+    if (!stateStyleMgr_) {
+        stateStyleMgr_ = MakeRefPtr<StateStyleManager>(host_);
+    }
+    stateStyleMgr_->SetSupportedStates(state);
+}
+
+bool EventHub::IsCurrentStateOn(UIState state)
+{
+    if (!stateStyleMgr_) {
+        return false;
+    }
+    return stateStyleMgr_->IsCurrentStateOn(state);
+}
+
 GetEventTargetImpl EventHub::CreateGetEventTargetImpl() const
 {
     auto impl = [weak = host_]() -> std::optional<EventTarget> {
@@ -44,7 +68,7 @@ GetEventTargetImpl EventHub::CreateGetEventTargetImpl() const
         eventTarget.area.SetOffset(DimensionOffset(offset));
         eventTarget.area.SetHeight(Dimension(size.Height()));
         eventTarget.area.SetWidth(Dimension(size.Width()));
-        eventTarget.origin = DimensionOffset(geometryNode->GetParentGlobalOffset());
+        eventTarget.origin = DimensionOffset(host->GetOffsetRelativeToWindow() - offset);
         return eventTarget;
     };
     return impl;
@@ -52,6 +76,20 @@ GetEventTargetImpl EventHub::CreateGetEventTargetImpl() const
 
 void EventHub::MarkModifyDone()
 {
+    if (stateStyleMgr_) {
+        // focused style is managered in focus event hub.
+        if (stateStyleMgr_->HasStateStyle(UI_STATE_PRESSED)) {
+            GetOrCreateGestureEventHub()->AddTouchEvent(stateStyleMgr_->GetPressedListener());
+        }
+        if (stateStyleMgr_->HasStateStyle(UI_STATE_DISABLED)) {
+            if (enabled_) {
+                stateStyleMgr_->ResetCurrentUIState(UI_STATE_DISABLED);
+            } else {
+                stateStyleMgr_->UpdateCurrentUIState(UI_STATE_DISABLED);
+            }
+        }
+    }
+
     if (gestureEventHub_) {
         gestureEventHub_->OnModifyDone();
     }

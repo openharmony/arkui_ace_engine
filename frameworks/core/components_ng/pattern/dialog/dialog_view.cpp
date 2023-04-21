@@ -14,6 +14,7 @@
  */
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 
+#include <optional>
 #include <string>
 
 #include "base/memory/ace_type.h"
@@ -34,7 +35,7 @@ namespace OHOS::Ace::NG {
 RefPtr<FrameNode> DialogView::CreateDialogNode(
     const DialogProperties& param, const RefPtr<UINode>& customNode = nullptr)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_RETURN(dialogTheme, nullptr);
@@ -64,10 +65,11 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     dialogLayoutProp->UpdateGridCount(param.gridCount);
     dialogLayoutProp->UpdateUseCustomStyle(param.customStyle);
     dialogLayoutProp->UpdateAutoCancel(param.autoCancel);
+    dialogLayoutProp->UpdateShowInSubWindow(param.isShowInSubWindow);
     // create gray background
     auto dialogContext = dialog->GetRenderContext();
     CHECK_NULL_RETURN(dialogContext, dialog);
-    dialogContext->UpdateBackgroundColor(dialogTheme->GetMaskColorEnd());
+    dialogContext->UpdateBackgroundColor(param.maskColor.value_or(dialogTheme->GetMaskColorEnd()));
 
     // set onCancel callback
     auto hub = dialog->GetEventHub<DialogEventHub>();
@@ -78,6 +80,11 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     auto pattern = dialog->GetPattern<DialogPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
     pattern->BuildChild(param);
+
+    // set open and close animation
+    pattern->SetOpenAnimation(param.openAnimation);
+    pattern->SetCloseAnimation(param.closeAnimation);
+
     dialog->MarkModifyDone();
     return dialog;
 }

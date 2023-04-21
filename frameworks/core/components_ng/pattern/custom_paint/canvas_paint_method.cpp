@@ -16,13 +16,13 @@
 #include "core/components_ng/pattern/custom_paint/canvas_paint_method.h"
 
 #include "drawing/engine_adapter/skia_adapter/skia_canvas.h"
-#include "flutter/third_party/txt/src/txt/paragraph_builder.h"
-#include "flutter/third_party/txt/src/txt/paragraph_style.h"
-#include "third_party/skia/include/core/SkMaskFilter.h"
-#include "third_party/skia/include/encode/SkJpegEncoder.h"
-#include "third_party/skia/include/encode/SkPngEncoder.h"
-#include "third_party/skia/include/encode/SkWebpEncoder.h"
-#include "third_party/skia/include/utils/SkBase64.h"
+#include "txt/paragraph_builder.h"
+#include "txt/paragraph_style.h"
+#include "include/core/SkMaskFilter.h"
+#include "include/encode/SkJpegEncoder.h"
+#include "include/encode/SkPngEncoder.h"
+#include "include/encode/SkWebpEncoder.h"
+#include "include/utils/SkBase64.h"
 
 #include "base/i18n/localization.h"
 #include "base/image/pixel_map.h"
@@ -97,6 +97,8 @@ CanvasDrawFunction CanvasPaintMethod::GetForegroundDrawFunction(PaintWrapper* pa
 
 void CanvasPaintMethod::PaintCustomPaint(RSCanvas& canvas, PaintWrapper* paintWrapper)
 {
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
     SkCanvas* skCanvas = canvas.GetImpl<Rosen::Drawing::SkiaCanvas>()->ExportSkCanvas();
     auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
     if (lastLayoutSize_ != frameSize) {
@@ -108,7 +110,7 @@ void CanvasPaintMethod::PaintCustomPaint(RSCanvas& canvas, PaintWrapper* paintWr
         return;
     }
 
-    auto viewScale = context_->GetViewScale();
+    auto viewScale = context->GetViewScale();
     skCanvas_->scale(viewScale, viewScale);
 
     for (const auto& task : tasks_) {
@@ -126,7 +128,9 @@ void CanvasPaintMethod::PaintCustomPaint(RSCanvas& canvas, PaintWrapper* paintWr
 
 void CanvasPaintMethod::CreateBitmap(SizeF frameSize)
 {
-    auto viewScale = context_->GetViewScale();
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto viewScale = context->GetViewScale();
     auto imageInfo = SkImageInfo::Make(frameSize.Width() * viewScale, frameSize.Height() * viewScale,
         SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kUnpremul_SkAlphaType);
     canvasCache_.reset();
@@ -164,8 +168,6 @@ void CanvasPaintMethod::ImageObjFailed()
 void CanvasPaintMethod::DrawImage(
     PaintWrapper* paintWrapper, const Ace::CanvasImage& canvasImage, double width, double height)
 {
-    auto* currentDartState = flutter::UIDartState::Current();
-    CHECK_NULL_VOID(currentDartState);
     std::string::size_type tmp = canvasImage.src.find(".svg");
     if (tmp != std::string::npos) {
         DrawSvgImage(paintWrapper, canvasImage);
@@ -199,25 +201,12 @@ void CanvasPaintMethod::DrawImage(
 
 void CanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& canvasImage)
 {
-    auto* currentDartState = flutter::UIDartState::Current();
-    CHECK_NULL_VOID(currentDartState);
-
     // get skImage form pixelMap
     auto imageInfo = Ace::ImageProvider::MakeSkImageInfoFromPixelMap(pixelMap);
     SkPixmap imagePixmap(imageInfo, reinterpret_cast<const void*>(pixelMap->GetPixels()), pixelMap->GetRowBytes());
 
     // Step2: Create SkImage and draw it, using gpu or cpu
-    sk_sp<SkImage> image;
-    if (!renderTaskHolder_->ioManager) {
-        image = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
-    } else {
-#ifndef GPU_DISABLED
-        image = SkImage::MakeCrossContextFromPixmap(renderTaskHolder_->ioManager->GetResourceContext().get(),
-            imagePixmap, true, imagePixmap.colorSpace(), true);
-#else
-        image = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
-#endif
-    }
+    sk_sp<SkImage> image = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
     CHECK_NULL_VOID(image);
     InitImagePaint();
     InitPaintBlend(imagePaint_);
@@ -249,17 +238,15 @@ sk_sp<SkImage> CanvasPaintMethod::GetImage(const std::string& src)
     }
     auto cacheImage = imageCache_->GetCacheImage(src);
     if (cacheImage && cacheImage->imagePtr) {
-        return cacheImage->imagePtr->image();
+        return cacheImage->imagePtr;
     }
 
-    CHECK_NULL_RETURN(context_, nullptr);
-
-    auto image = Ace::ImageProvider::GetSkImage(src, context_);
+    auto context = context_.Upgrade();
+    CHECK_NULL_RETURN(context, nullptr);
+    auto image = Ace::ImageProvider::GetSkImage(src, context);
     CHECK_NULL_RETURN(image, nullptr);
     auto rasterizedImage = image->makeRasterImage();
-    auto canvasImage = flutter::CanvasImage::Create();
-    canvasImage->set_image({ rasterizedImage, renderTaskHolder_->unrefQueue });
-    imageCache_->CacheImage(src, std::make_shared<CachedImage>(canvasImage));
+    imageCache_->CacheImage(src, std::make_shared<Ace::CachedImage>(rasterizedImage));
     return rasterizedImage;
 }
 
@@ -267,8 +254,9 @@ std::unique_ptr<Ace::ImageData> CanvasPaintMethod::GetImageData(
     double left, double top, double width, double height)
 {
     double viewScale = 1.0;
-    CHECK_NULL_RETURN(context_, nullptr);
-    viewScale = context_->GetViewScale();
+    auto context = context_.Upgrade();
+    CHECK_NULL_RETURN(context, nullptr);
+    viewScale = context->GetViewScale();
     // copy the bitmap to tempCanvas
     auto imageInfo =
         SkImageInfo::Make(width, height, SkColorType::kBGRA_8888_SkColorType, SkAlphaType::kOpaque_SkAlphaType);
@@ -279,15 +267,11 @@ std::unique_ptr<Ace::ImageData> CanvasPaintMethod::GetImageData(
     double dirtyHeight = height >= 0 ? height : 0;
     tempCache.allocPixels(imageInfo);
     int32_t size = dirtyWidth * dirtyHeight;
-    bool isGpuEnable = false;
     const uint8_t* pixels = nullptr;
     SkCanvas tempCanvas(tempCache);
     auto srcRect = SkRect::MakeXYWH(scaledLeft, scaledTop, width * viewScale, height * viewScale);
     auto dstRect = SkRect::MakeXYWH(0.0, 0.0, dirtyWidth, dirtyHeight);
-
-    if (!isGpuEnable) {
-        tempCanvas.drawBitmapRect(canvasCache_, srcRect, dstRect, nullptr);
-    }
+    tempCanvas.drawBitmapRect(canvasCache_, srcRect, dstRect, nullptr);
     pixels = tempCache.pixmap().addr8();
     CHECK_NULL_RETURN(pixels, nullptr);
     std::unique_ptr<Ace::ImageData> imageData = std::make_unique<Ace::ImageData>();
@@ -410,8 +394,9 @@ void CanvasPaintMethod::PaintText(
     const OffsetF& offset, const SizeF& frameSize, double x, double y, bool isStroke, bool hasShadow)
 {
     paragraph_->Layout(frameSize.Width());
-    if (frameSize.Width() > paragraph_->GetMaxIntrinsicWidth()) {
-        paragraph_->Layout(std::ceil(paragraph_->GetMaxIntrinsicWidth()));
+    auto width = paragraph_->GetMaxIntrinsicWidth();
+    if (frameSize.Width() > width) {
+        paragraph_->Layout(std::ceil(width));
     }
     auto align = isStroke ? strokeState_.GetTextAlign() : fillState_.GetTextAlign();
     double dx = offset.GetX() + x + GetAlignOffset(align, paragraph_);
@@ -429,33 +414,6 @@ void CanvasPaintMethod::PaintText(
     }
 
     paragraph_->Paint(skCanvas_.get(), dx, dy);
-}
-
-double CanvasPaintMethod::GetAlignOffset(TextAlign align, std::unique_ptr<txt::Paragraph>& paragraph)
-{
-    double x = 0.0;
-    TextDirection textDirection = TextDirection::LTR;
-    switch (align) {
-        case TextAlign::LEFT:
-            x = 0.0;
-            break;
-        case TextAlign::START:
-            x = (textDirection == TextDirection::LTR) ? 0.0 : -paragraph->GetMaxIntrinsicWidth();
-            break;
-        case TextAlign::RIGHT:
-            x = -paragraph->GetMaxIntrinsicWidth();
-            break;
-        case TextAlign::END:
-            x = (textDirection == TextDirection::LTR) ? -paragraph->GetMaxIntrinsicWidth() : 0.0;
-            break;
-        case TextAlign::CENTER:
-            x = -paragraph->GetMaxIntrinsicWidth() / 2;
-            break;
-        default:
-            x = 0.0;
-            break;
-    }
-    return x;
 }
 
 double CanvasPaintMethod::GetBaselineOffset(TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph)
@@ -496,6 +454,10 @@ bool CanvasPaintMethod::UpdateParagraph(const OffsetF& offset, const std::string
     } else {
         style.text_align = ConvertTxtTextAlign(fillState_.GetTextAlign());
     }
+    if (fillState_.GetOffTextDirection() == TextDirection::RTL) {
+        style.text_direction = txt::TextDirection::rtl;
+    }
+    style.text_align = GetEffectiveAlign(style.text_align, style.text_direction);
     auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
     CHECK_NULL_RETURN(fontCollection, false);
     std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
@@ -581,7 +543,9 @@ void CanvasPaintMethod::Path2DRect(const OffsetF& offset, const PathArgs& args)
 
 void CanvasPaintMethod::SetTransform(const TransformParam& param)
 {
-    double viewScale = context_->GetViewScale();
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    double viewScale = context->GetViewScale();
     SkMatrix skMatrix;
     skMatrix.setAll(param.scaleX * viewScale, param.skewY * viewScale, param.translateX * viewScale,
         param.skewX * viewScale, param.scaleY * viewScale, param.translateY * viewScale, 0, 0, 1);
@@ -597,18 +561,14 @@ std::string CanvasPaintMethod::ToDataURL(const std::string& args)
     SkBitmap tempCache;
     tempCache.allocPixels(SkImageInfo::Make(width, height, SkColorType::kBGRA_8888_SkColorType,
         (mimeType == IMAGE_JPEG) ? SkAlphaType::kOpaque_SkAlphaType : SkAlphaType::kUnpremul_SkAlphaType));
-    bool isGpuEnable = false;
     bool success = false;
-
-    if (!isGpuEnable) {
-        if (canvasCache_.empty()) {
-            LOGE("Bitmap is empty");
-            return UNSUPPORTED;
-        }
-
-        success = canvasCache_.pixmap().scalePixels(tempCache.pixmap(), SkFilterQuality::kHigh_SkFilterQuality);
-        CHECK_NULL_RETURN(success, UNSUPPORTED);
+    if (canvasCache_.empty()) {
+        LOGE("Bitmap is empty");
+        return UNSUPPORTED;
     }
+
+    success = canvasCache_.pixmap().scalePixels(tempCache.pixmap(), SkFilterQuality::kHigh_SkFilterQuality);
+    CHECK_NULL_RETURN(success, UNSUPPORTED);
     SkPixmap src = tempCache.pixmap();
     SkDynamicMemoryWStream dst;
     if (mimeType == IMAGE_JPEG) {

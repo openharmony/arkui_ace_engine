@@ -26,13 +26,15 @@ namespace OHOS::Ace::NG {
 using OnWebSyncFunc = std::function<bool(const std::shared_ptr<BaseEventInfo>& info)>;
 using OnWebAsyncFunc = std::function<void(const std::shared_ptr<BaseEventInfo>& info)>;
 using SetWebIdCallback = std::function<void(int32_t)>;
+using SetHapPathCallback = std::function<void(const std::string&)>;
 using JsProxyCallback = std::function<void()>;
 
 class ACE_EXPORT WebView {
 public:
     static void Create(const std::string& webData);
     static void Create(const std::string& src, const RefPtr<WebController>& webController);
-    static void Create(const std::string& src, SetWebIdCallback&& setWebIdCallback);
+    static void Create(const std::string& src, SetWebIdCallback&& setWebIdCallback,
+        SetHapPathCallback&& setHapPathCallback, int32_t parentWebId = -1, bool popup = false);
     static void SetOnCommonDialogImpl(OnWebSyncFunc&& onCommonDialogImpl, DialogEventType dialogEventType);
     static void SetOnPageStart(OnWebAsyncFunc&& onPageStart);
     static void SetOnPageFinish(OnWebAsyncFunc&& onPageEnd);
@@ -56,6 +58,7 @@ public:
     static void SetOnInterceptRequest(
         std::function<RefPtr<WebResponse>(const std::shared_ptr<BaseEventInfo>& info)>&& onInterceptRequestImpl);
     static void SetOnUrlLoadIntercept(OnWebSyncFunc&& onUrlLoadInterceptImpl);
+    static void SetOnLoadIntercept(OnWebSyncFunc&& onLoadInterceptImpl);
     static void SetOnFileSelectorShow(OnWebSyncFunc&& onFileSelectorShowImpl);
     static void SetOnContextMenuShow(OnWebSyncFunc&& onContextMenuImpl);
     static void SetFileAccessEnabled(bool isFileAccessEnabled);
@@ -87,15 +90,33 @@ public:
     static void SetWindowNewEvent(OnWebAsyncFunc&& windowNewEventId);
     static void SetWindowExitEventId(OnWebAsyncFunc&& windowExitEventId);
     static void SetMultiWindowAccessEnabled(bool isMultiWindowAccessEnabled);
+    static void SetAllowWindowOpenMethod(bool isAllowWindowOpenMethod);
+    static void SetJsProxyCallback(JsProxyCallback&& jsProxyCallback);
     static void SetWebCursiveFont(const std::string& cursiveFontFamily);
     static void SetWebFantasyFont(const std::string& fantasyFontFamily);
+    static void SetWebFixedFont(const std::string& fixedFontFamily);
     static void SetWebSansSerifFont(const std::string& sansSerif);
     static void SetWebSerifFont(const std::string& serifFontFamily);
     static void SetWebStandardFont(const std::string& standardFontFamily);
     static void SetDefaultFixedFontSize(int32_t defaultFixedFontSize);
     static void SetDefaultFontSize(int32_t defaultFontSize);
     static void SetMinFontSize(int32_t minFontSize);
-    static void SetJsProxyCallback(JsProxyCallback&& jsProxyCallback);
+    static void SetMinLogicalFontSize(int32_t minLogicalFontSize);
+    static void SetBlockNetwork(bool isNetworkBlocked);
+    static void SetPageVisibleId(OnWebAsyncFunc&& pageVisibleId);
+    static void SetOnInterceptKeyEventCallback(std::function<bool(KeyEventInfo& keyEventInfo)>&& onPreKeyEventId);
+    static void SetDataResubmittedId(OnWebAsyncFunc&& DataResubmittedId);
+    static void SetFaviconReceivedId(OnWebAsyncFunc&& faviconReceivedId);
+    static void SetTouchIconUrlId(OnWebAsyncFunc&& touchIconUrlId);
+    static void SetDarkMode(WebDarkMode mode);
+    static void SetForceDarkAccess(bool access);
+    static void SetHorizontalScrollBarAccessEnabled(bool isHorizontalScrollBarAccessEnabled);
+    static void SetVerticalScrollBarAccessEnabled(bool isVerticalScrollBarAccessEnabled);
+    static void SetAudioStateChangedId(OnWebAsyncFunc&& audioStateChanged);
+    static void SetAudioResumeInterval(int32_t resumeInterval);
+    static void SetAudioExclusive(bool audioExclusive);
+    static void SetFirstContentfulPaintId(OnWebAsyncFunc&& firstContentfulPaintId);
+    static void NotifyPopupWindowResult(int32_t webId, bool result);
 
 private:
     static void RegisterPipelineCallback(int32_t nodeId);

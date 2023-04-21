@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,9 +22,9 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
+#include "core/pipeline/base/composed_element.h"
 #include "core/pipeline/pipeline_base.h"
 #include "frameworks/bridge/js_frontend/js_ace_page.h"
-#include "core/pipeline/base/composed_element.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -50,7 +50,9 @@ public:
 
     // AccessibilityNodeManager functions.
     virtual void InitializeCallback();
+    virtual void RegisterSubWindowInteractionOperation(int windowId);
     void SetPipelineContext(const RefPtr<PipelineBase>& context);
+    void AddSubPipelineContext(const RefPtr<PipelineBase>& context);
     void SetRunningPage(const RefPtr<JsAcePage>& page);
     std::string GetNodeChildIds(const RefPtr<AccessibilityNode>& node);
     void AddNodeWithId(const std::string& key, const RefPtr<AccessibilityNode>& node);
@@ -94,6 +96,11 @@ public:
     WeakPtr<PipelineBase> GetPipelineContext()
     {
         return context_;
+    }
+
+    std::list<WeakPtr<PipelineBase>>& GetSubPipelineContexts()
+    {
+        return subContexts_;
     }
 
     // AccessibilityNodeManager overrides functions.
@@ -160,6 +167,7 @@ protected:
     std::unordered_map<std::string, WeakPtr<ComposedElement>> composedElementIdMap_;
     std::unordered_map<NodeId, std::list<VisibleCallbackInfo>> visibleChangeNodes_;
     WeakPtr<PipelineBase> context_;
+    std::list<WeakPtr<PipelineBase>> subContexts_;
     WeakPtr<JsAcePage> indexPage_;
     int32_t rootNodeId_ = -1;
     Offset cardOffset_;

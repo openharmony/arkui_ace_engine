@@ -481,6 +481,39 @@ void AnimationUtil::KeyframesAddKeyFrame(
     }
 }
 
+AnimationOption AnimationUtil::CreateKeyboardAnimationOption(
+    const KeyboardAnimationConfig& config, float keyboardHeight)
+{
+    static const LinearMapNode<RefPtr<Curve>> curveMap[] = {
+        { "ease", Curves::EASE },
+        { "easeIn", Curves::EASE_IN },
+        { "easeInOut", Curves::EASE_IN_OUT },
+        { "easeOut", Curves::EASE_OUT },
+        { "default", Curves::EASE_IN_OUT },
+        { "linear", Curves::LINEAR },
+        { "spring", AceType::MakeRefPtr<ResponsiveSpringMotion>(ResponsiveSpringMotion::DEFAULT_SPRING_MOTION_RESPONSE,
+                        ResponsiveSpringMotion::DEFAULT_SPRING_MOTION_DAMPING_RATIO,
+                        ResponsiveSpringMotion::DEFAULT_SPRING_MOTION_BLEND_DURATION) },
+        { "interactiveSpring", AceType::MakeRefPtr<ResponsiveSpringMotion>(
+                                   ResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_RESPONSE,
+                                   ResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_DAMPING_RATIO,
+                                   ResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_BLEND_DURATION) },
+    };
+
+    AnimationOption option;
+    NearZero(keyboardHeight) ? option.SetDuration(config.durationOut_) : option.SetDuration(config.durationIn_);
+    RefPtr<Curve> curve;
+    if (config.curveType_ == "cubic" && config.curveParams_.size() == 4) {
+        curve = AceType::MakeRefPtr<CubicCurve>(
+            config.curveParams_[0], config.curveParams_[1], config.curveParams_[2], config.curveParams_[3]);
+    } else {
+        auto index = BinarySearchFindIndex(curveMap, ArraySize(curveMap), config.curveType_.c_str());
+        curve = index < 0 ? nullptr : curveMap[index].value;
+    }
+    option.SetCurve(curve);
+    return option;
+}
+
 template<class T>
 void AnimationUtil::AddAnimatable(const T& value, double time, AnimatableType type)
 {

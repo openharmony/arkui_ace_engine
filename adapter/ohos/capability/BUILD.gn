@@ -46,6 +46,9 @@ template("ace_capability_ohos_source_set") {
     }
     if (defined(config.enable_ability_component) &&
         config.enable_ability_component) {
+      if (os_account_exists) {
+        external_deps += [ "os_account:os_account_innerkits" ]
+      }
       external_deps += [
         "ability_base:want",
         "ability_runtime:ability_manager",

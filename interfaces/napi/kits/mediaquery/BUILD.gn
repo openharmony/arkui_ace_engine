@@ -20,6 +20,9 @@ template("napi_mediaquery_static") {
   ohos_source_set(target_name) {
     defines += invoker.defines
     cflags_cc += invoker.cflags_cc
+    if (is_mac) {
+      cflags_cc += [ "-O0" ]
+    }
 
     include_dirs = [
       "//foundation/arkui",
@@ -30,7 +33,12 @@ template("napi_mediaquery_static") {
 
     sources = [ "js_media_query.cpp" ]
 
-    deps = [ "//foundation/arkui/napi/:ace_napi" ]
+    deps = []
+    if (platform != "" && is_cross_platform_build) {
+      deps += [ "//plugins/libs/napi:napi_$platform" ]
+    } else {
+      deps += [ "//foundation/arkui/napi/:ace_napi" ]
+    }
 
     if (defined(config.libace_target)) {
       deps += [ config.libace_target ]
@@ -45,6 +53,7 @@ foreach(item, ace_platforms) {
   napi_mediaquery_static("mediaquery_static_" + item.name) {
     defines = []
     cflags_cc = []
+    platform = item.name
     config = {
     }
 

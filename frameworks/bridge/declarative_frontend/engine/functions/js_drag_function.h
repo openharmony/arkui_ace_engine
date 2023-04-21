@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_V8_FUNCTION_V8_JS_DRAG_FUNCTION_H
-#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_V8_FUNCTION_V8_JS_DRAG_FUNCTION_H
+#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_FUNCTION_JS_DRAG_FUNCTION_H
+#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_FUNCTION_JS_DRAG_FUNCTION_H
 
 #include "frameworks/bridge/declarative_frontend/engine/bindings.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
@@ -32,8 +32,8 @@ public:
     {
         LOGD("Destroy: JsDragFunction");
     };
-    void Execute();
-    void Execute(const RefPtr<DragEvent>& info);
+    void Execute() override;
+    JSRef<JSVal> Execute(const RefPtr<DragEvent>& info);
     JSRef<JSVal> ItemDragStartExecute(const ItemDragInfo& info, int32_t itemIndex);
     void ItemDragEnterExecute(const ItemDragInfo& info);
     void ItemDragMoveExecute(const ItemDragInfo& info, int32_t itemIndex, int32_t insertIndex);
@@ -48,4 +48,4 @@ private:
 };
 
 } // namespace OHOS::Ace::Framework
-#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_V8_FUNCTION_V8_JS_DRAG_FUNCTION_H
+#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_FUNCTION_JS_DRAG_FUNCTION_H

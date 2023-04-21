@@ -17,7 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_ENGINE_JSI_ARK_JS_RUNTIME_H
 
 #if defined(PREVIEW)
-#include <unordered_map>
+#include <map>
 #include "frameworks/bridge/declarative_frontend/engine/jsi/utils/jsi_module_searcher.h"
 #endif
 #include <memory>
@@ -57,6 +57,7 @@ using DebuggerPostTask = std::function<void(std::function<void()>&&)>;
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class ArkJSRuntime final : public JsRuntime, public std::enable_shared_from_this<ArkJSRuntime> {
 public:
+    using ErrorEventHandler = std::function<void(const std::string&, const std::string&)>;
 #if !defined(WINDOWS_PLATFORM)
     bool StartDebugger(const char* libraryPath, EcmaVM* vm) const;
 #endif
@@ -66,10 +67,13 @@ public:
     void SetLogPrint(LOG_PRINT out) override;
     bool StartDebugger() override;
     shared_ptr<JsValue> EvaluateJsCode(const std::string& src) override;
-    bool EvaluateJsCode(const uint8_t* buffer, int32_t size, const std::string& filePath = "") override;
-    bool ExecuteJsBin(const std::string& fileName) override;
+    bool EvaluateJsCode(
+        const uint8_t* buffer, int32_t size, const std::string& filePath = "", bool needUpdate = false) override;
+    bool ExecuteJsBin(const std::string& fileName,
+        const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr) override;
     shared_ptr<JsValue> GetGlobal() override;
     void RunGC() override;
+    void RunFullGC() override;
 
     shared_ptr<JsValue> NewNumber(double d) override;
     shared_ptr<JsValue> NewInt32(int32_t value) override;
@@ -84,19 +88,61 @@ public:
     shared_ptr<JsValue> NewNativePointer(void* ptr) override;
     void ThrowError(const std::string& msg, int32_t code) override;
     void RegisterUncaughtExceptionHandler(UncaughtExceptionCallback callback) override;
-    void HandleUncaughtException() override;
+    void HandleUncaughtException(
+        const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr) override;
     bool HasPendingException() override;
     void ExecutePendingJob() override;
     void DumpHeapSnapshot(bool isPrivate) override;
+    bool ExecuteModuleBuffer(const uint8_t *data, int32_t size, const std::string &filename, bool needUpdate = false);
 
     const EcmaVM* GetEcmaVm() const
     {
         return vm_;
     }
 
+    void SetAssetPath(const std::string& assetPath)
+    {
+        panda::JSNApi::SetAssetPath(vm_, assetPath);
+    }
+
+    void SetBundleName(const std::string& bundleName)
+    {
+        panda::JSNApi::SetBundleName(vm_, bundleName);
+    }
+
+    void SetBundle(bool isBundle)
+    {
+        panda::JSNApi::SetBundle(vm_, isBundle);
+    }
+
+    void SetModuleName(const std::string& moduleName)
+    {
+        panda::JSNApi::SetModuleName(vm_, moduleName);
+    }
+
     void SetDebuggerPostTask(DebuggerPostTask&& task)
     {
         debuggerPostTask_ = std::move(task);
+    }
+
+    void SetErrorEventHandler(ErrorEventHandler&& errorCallback) override
+    {
+        errorCallback_ = std::move(errorCallback);
+    }
+
+    const ErrorEventHandler& GetErrorEventHandler()
+    {
+        return errorCallback_;
+    }
+
+    void SetDebugMode(bool isDebugMode)
+    {
+        isDebugMode_ = isDebugMode;
+    }
+
+    void SetInstanceId(int32_t instanceId)
+    {
+        instanceId_ = instanceId;
     }
 
 #if defined(PREVIEW)
@@ -122,31 +168,21 @@ public:
 
     void AddPreviewComponent(const std::string &componentName, const panda::Global<panda::ObjectRef> &componentObj)
     {
-        previewComponents_.insert_or_assign(componentName, componentObj);
+        previewComponents_.emplace(componentName, componentObj);
     }
 
     panda::Global<panda::ObjectRef> GetPreviewComponent(EcmaVM* vm, const std::string &componentName)
     {
         auto iter = previewComponents_.find(componentName);
         if (iter != previewComponents_.end()) {
-            return iter->second;
+            auto retVal = iter->second;
+            previewComponents_.erase(iter);
+            return retVal;
         }
         panda::Global<panda::ObjectRef> undefined(vm, panda::JSValueRef::Undefined(vm));
         return undefined;
     }
 
-    void SetPathResolveCallback(const std::string& bundleName, const std::string& assetPath)
-    {
-        panda::JSNApi::SetHostResolvePathTracker(vm_, JsiModuleSearcher(bundleName, assetPath));
-        panda::JSNApi::SetAssetPath(vm_, assetPath);
-    }
-
-    void SetBundle(bool isBundle)
-    {
-        panda::JSNApi::SetBundle(vm_, isBundle);
-    }
-
-    bool ExecuteModuleBuffer(const uint8_t *data, int32_t size, const std::string &filename);
     void AddRootView(const panda::Global<panda::ObjectRef> &RootView)
     {
         RootView_ = RootView;
@@ -161,25 +197,25 @@ public:
 private:
     EcmaVM* vm_ = nullptr;
     int32_t instanceId_ = 0;
-    std::vector<PandaFunctionData*> dataList_;
     LOG_PRINT print_ { nullptr };
     UncaughtExceptionCallback uncaughtErrorHandler_ { nullptr };
     std::string libPath_ {};
     bool usingExistVM_ = false;
     bool isDebugMode_ = true;
     DebuggerPostTask debuggerPostTask_;
+    ErrorEventHandler errorCallback_;
 #if defined(PREVIEW)
     bool isComponentPreview_ = false;
     std::string requiredComponent_ {};
-    std::unordered_map<std::string, panda::Global<panda::ObjectRef>> previewComponents_;
+    std::multimap<std::string, panda::Global<panda::ObjectRef>> previewComponents_;
     panda::Global<panda::ObjectRef> RootView_;
 #endif
 };
 
 class PandaFunctionData {
 public:
-    PandaFunctionData(shared_ptr<ArkJSRuntime> runtime, RegisterFunctionType func)
-        : runtime_(std::move(runtime)), func_(std::move(func))
+    PandaFunctionData(std::weak_ptr<ArkJSRuntime> runtime, RegisterFunctionType func)
+        : runtime_(runtime), func_(std::move(func))
     {}
 
     ~PandaFunctionData() = default;
@@ -189,7 +225,7 @@ public:
 
 private:
     Local<JSValueRef> Callback(panda::JsiRuntimeCallInfo* info) const;
-    shared_ptr<ArkJSRuntime> runtime_;
+    std::weak_ptr<ArkJSRuntime> runtime_;
     RegisterFunctionType func_;
     friend Local<JSValueRef> FunctionCallback(panda::JsiRuntimeCallInfo* info);
 };

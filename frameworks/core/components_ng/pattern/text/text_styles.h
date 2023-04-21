@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,7 @@ namespace OHOS::Ace::NG {
 struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontSize, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextColor, Color);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextShadow, Shadow);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ItalicFontStyle, Ace::FontStyle);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontWeight, FontWeight);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontFamily, std::vector<std::string>);
@@ -34,6 +35,7 @@ struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AdaptMinFontSize, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AdaptMaxFontSize, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LetterSpacing, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ForegroundColor, Color);
 };
 
 struct TextLineStyle {
@@ -44,10 +46,16 @@ struct TextLineStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextAlign, TextAlign);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MaxLength, uint32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MaxLines, uint32_t);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(HeightAdaptivePolicy, TextHeightAdaptivePolicy);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextIndent, Dimension);
 };
 
 TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontStyle>& fontStyle,
     const std::unique_ptr<TextLineStyle>& textLineStyle, const RefPtr<TextTheme>& textTheme);
+
+TextStyle CreateTextStyleUsingThemeWithText(const RefPtr<FrameNode> frameNode,
+    const std::unique_ptr<FontStyle>& fontStyle, const std::unique_ptr<TextLineStyle>& textLineStyle,
+    const RefPtr<TextTheme>& textTheme);
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_TEXT_STYLES_H

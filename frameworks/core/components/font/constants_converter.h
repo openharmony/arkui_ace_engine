@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,10 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_FONT_CONSTANTS_CONVERTER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_FONT_CONSTANTS_CONVERTER_H
 
-#include "flutter/third_party/txt/src/txt/text_baseline.h"
-#include "flutter/third_party/txt/src/txt/text_decoration.h"
-#include "flutter/third_party/txt/src/txt/text_style.h"
-#include "third_party/skia/include/core/SkColor.h"
+#include "txt/placeholder_run.h"
+#include "txt/text_baseline.h"
+#include "txt/text_decoration.h"
+#include "txt/text_style.h"
+#include "include/core/SkColor.h"
 
 #include "core/components/common/properties/text_style.h"
 #include "core/pipeline/pipeline_base.h"
@@ -61,6 +62,10 @@ txt::TextDecoration ConvertTxtTextDecoration(TextDecoration textDecoration);
 void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& context, txt::TextStyle& txtStyle);
 
 Rect ConvertSkRect(SkRect skRect);
+
+txt::PlaceholderAlignment ConvertPlaceholderAlignment(PlaceholderAlignment textDecoration);
+
+void ConvertPlaceholderRun(const PlaceholderRun& span, txt::PlaceholderRun& txtSpan);
 
 } // namespace Constants
 

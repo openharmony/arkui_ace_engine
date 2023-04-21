@@ -91,6 +91,7 @@ private:
     void RefreshFocus();
 
     Size optionSize_;
+    bool optionDefaultHeight_ = false;
     DimensionUnit optionSizeUnit_ = DimensionUnit::PX;
     Size realSize_;
     double deltaSize_ = 0.0;

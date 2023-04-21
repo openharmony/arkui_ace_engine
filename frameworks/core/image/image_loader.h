@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,10 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_IMAGE_IMAGE_LOADER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_IMAGE_IMAGE_LOADER_H
 
+#include <condition_variable>
 #include <regex>
 #include <string>
 
-#include "third_party/skia/include/core/SkImage.h"
+#include "include/core/SkImage.h"
 
 #include "base/geometry/size.h"
 #include "base/memory/ace_type.h"
@@ -37,9 +38,9 @@ class ImageLoader : public virtual AceType {
 
 public:
     virtual sk_sp<SkData> LoadImageData(
-        const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context = nullptr) = 0;
+        const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context) = 0;
     virtual RefPtr<NG::ImageData> LoadDecodedImageData(
-        const ImageSourceInfo& /*imageSourceInfo*/, const WeakPtr<PipelineBase>& /*context*/ = nullptr)
+        const ImageSourceInfo& /*imageSourceInfo*/, const WeakPtr<PipelineBase>& /*context*/)
     {
         return nullptr;
     }
@@ -52,7 +53,7 @@ public:
     // implementation in adapter layer
     static sk_sp<SkData> QueryImageDataFromImageCache(const ImageSourceInfo& sourceInfo);
     static void CacheImageDataToImageCache(const std::string& key, const RefPtr<CachedImageData>& imageData);
-    static RefPtr<NG::ImageData> LoadImageDataFromFileCache(const std::string key, const std::string suffix);
+    static RefPtr<NG::ImageData> LoadImageDataFromFileCache(const std::string& key, const std::string& suffix);
 };
 
 // File image provider: read image from file.
@@ -81,6 +82,8 @@ public:
         const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context = nullptr) override;
     RefPtr<NG::ImageData> LoadDecodedImageData(
         const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context = nullptr) override;
+private:
+    static const std::string& GetThumbnailOrientation(const ImageSourceInfo& src);
 };
 
 class AssetImageLoader final : public ImageLoader {
@@ -141,6 +144,19 @@ public:
         const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context = nullptr) override;
 };
 
-} // namespace OHOS::Ace
+class SharedMemoryImageLoader : public ImageLoader, public ImageProviderLoader {
+    DECLARE_ACE_TYPE(SharedMemoryImageLoader, ImageLoader);
 
+public:
+    SharedMemoryImageLoader() = default;
+    ~SharedMemoryImageLoader() override = default;
+    sk_sp<SkData> LoadImageData(const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context) override;
+    void UpdateData(const std::string& uri, const std::vector<uint8_t>& memData) override;
+
+private:
+    std::condition_variable cv_;
+    std::mutex mtx_;
+    std::vector<uint8_t> data_;
+};
+} // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_IMAGE_IMAGE_LOADER_H

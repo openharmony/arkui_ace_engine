@@ -16,8 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TIP_ROSEN_RENDER_TIP_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TIP_ROSEN_RENDER_TIP_H
 
-#include "third_party/skia/include/core/SkCanvas.h"
-#include "third_party/skia/include/core/SkPath.h"
+#include "include/core/SkCanvas.h"
+#include "include/core/SkPath.h"
 
 #include "core/components/tip/render_tip.h"
 #include "core/pipeline/base/rosen_render_context.h"

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "base/memory/referenced.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
@@ -28,7 +29,9 @@ public:
     static void Create(const JSCallbackInfo& info);
 };
 
-class JSTextInputController final : public Referenced {
+class JSTextInputController final : public virtual AceType {
+    DECLARE_ACE_TYPE(JSTextInputController, AceType)
+
 public:
     JSTextInputController() = default;
     ~JSTextInputController() override = default;
@@ -37,13 +40,14 @@ public:
     static void Constructor(const JSCallbackInfo& args);
     static void Destructor(JSTextInputController* scroller);
     void CaretPosition(int32_t caretPosition);
+    void SetTextSelection(int32_t selectionStart, int32_t selectionEnd);
     void SetController(const RefPtr<TextFieldControllerBase>& controller)
     {
-        controller_ = controller;
+        controllerWeak_ = controller;
     }
 
 private:
-    RefPtr<TextFieldControllerBase> controller_;
+    WeakPtr<TextFieldControllerBase> controllerWeak_;
     ACE_DISALLOW_COPY_AND_MOVE(JSTextInputController);
 };
 

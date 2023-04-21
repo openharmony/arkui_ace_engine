@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,15 +13,15 @@
 
 import("//build/test.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
-import(
-    "//foundation/arkui/ace_engine/frameworks/core/components_ng/components.gni")
+import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("ability_component_pattern_test_ng") {
-  module_out_path = "$test_output_path/ability_component"
+  module_out_path = pattern_test_output_path
   include_dirs = [
     "//third_party/flutter/skia/src",
     "//third_party/jsoncpp/include",
     "//third_party/bounds_checking_function/include",
+    "//base/account/os_account/interfaces/innerkits/domain_account/native/include",
     "//base/account/os_account/interfaces/innerkits/osaccount/native/include",
     "//foundation/window/window_manager/interfaces/innerkits/extension",
     "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src",
@@ -51,6 +51,7 @@ ohos_unittest("ability_component_pattern_test_ng") {
     "$ace_root/frameworks/core/common/container.cpp",
     "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/frameworks/core/components/common/properties/alignment.cpp",
+    "$ace_root/frameworks/core/components/common/properties/border_image.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
     "$ace_root/frameworks/core/components_ng/event/event_hub.cpp",
     "$ace_root/frameworks/core/components_ng/layout/layout_wrapper.cpp",
@@ -67,6 +68,7 @@ ohos_unittest("ability_component_pattern_test_ng") {
     "$ace_root/frameworks/core/components_v2/inspector/inspector_constants.cpp",
 
     # mock
+
     "$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
     "$ace_root/frameworks/core/common/test/mock/mock_watch_dog.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/base/mock_frame_node.cpp",
@@ -77,11 +79,10 @@ ohos_unittest("ability_component_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/layout/mock_layout_property.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/ability_component/mock_window_connection.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/mock_pattern.h",
+    "$ace_root/frameworks/core/components_ng/test/mock/render/mock_modifier_adapter.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_context_creator.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_property.cpp",
-    "$ace_root/frameworks/core/components_ng/test/mock/render/mock_rosen_modier_adapter.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_base.cpp",
-    "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_context.cpp",
     "//foundation/barrierfree/accessibility/services/aams/test/mock/src/mock_os_account_manager.cpp",
 
     # self
@@ -99,7 +100,8 @@ ohos_unittest("ability_component_pattern_test_ng") {
   ]
   deps = [
     "$ace_flutter_engine_root/skia:ace_skia_ohos",
-    "$cjson_root:cjson_static",
+    "$ace_root/frameworks/base:ace_memory_monitor_ohos",
+    "$cjson_root:cjson",
     "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//foundation/window/window_manager/wm:libwm",
@@ -108,7 +110,7 @@ ohos_unittest("ability_component_pattern_test_ng") {
 
   configs = [
     "$ace_root:ace_test_config",
-    "$ace_root:ace_test_coverage_config",
+
     "$ace_root:ace_config",
     "$ace_flutter_engine_root:flutter_config",
     "$ace_flutter_engine_root/skia:skia_config",
@@ -126,8 +128,4 @@ ohos_unittest("ability_component_pattern_test_ng") {
     "ENABLE_ROSEN_BACKEND",
     "OS_ACCOUNT_EXISTS",
   ]
-}
-group("ability_component_pattern_unit_test") {
-  testonly = true
-  deps = [ ":ability_component_pattern_test_ng" ]
 }

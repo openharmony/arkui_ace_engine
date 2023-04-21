@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,10 +34,26 @@ struct SwiperParameters {
     std::optional<Dimension> dimTop;
     std::optional<Dimension> dimRight;
     std::optional<Dimension> dimBottom;
-    std::optional<Dimension> dimSize;
+    std::optional<Dimension> itemWidth;
+    std::optional<Dimension> itemHeight;
+    std::optional<Dimension> selectedItemWidth;
+    std::optional<Dimension> selectedItemHeight;
     std::optional<bool> maskValue;
     std::optional<Color> colorVal;
     std::optional<Color> selectedColorVal;
+};
+
+struct SwiperDigitalParameters {
+    std::optional<Dimension> dimLeft;
+    std::optional<Dimension> dimTop;
+    std::optional<Dimension> dimRight;
+    std::optional<Dimension> dimBottom;
+    std::optional<Color> fontColor;
+    std::optional<Color> selectedFontColor;
+    std::optional<Dimension> fontSize;
+    std::optional<Dimension> selectedFontSize;
+    std::optional<FontWeight> fontWeight;
+    std::optional<FontWeight> selectedFontWeight;
 };
 
 class ACE_EXPORT SwiperModel {
@@ -62,6 +78,8 @@ public:
     virtual void SetItemSpace(const Dimension& itemSpace);
     virtual void SetCachedCount(int32_t cachedCount);
     virtual void SetOnChange(std::function<void(const BaseEventInfo* info)>&& onChange);
+    virtual void SetOnAnimationStart(std::function<void(const BaseEventInfo* info)>&& onAnimationStart);
+    virtual void SetOnAnimationEnd(std::function<void(const BaseEventInfo* info)>&& onAnimationEnd);
 
     virtual void SetRemoteMessageEventId(RemoteCallback&& remoteCallback);
     virtual void SetOnClick(
@@ -69,7 +87,12 @@ public:
     virtual void SetMainSwiperSizeWidth();
     virtual void SetMainSwiperSizeHeight();
     virtual void SetIndicatorStyle(const SwiperParameters& swiperParameters);
-
+    virtual void SetIndicatorType(SwiperIndicatorType indicatorType) {}
+    virtual void SetIsIndicatorCustomSize(bool isCustomSize) {}
+    virtual void SetDotIndicatorStyle(const SwiperParameters& swiperParameters) {}
+    virtual void SetDigitIndicatorStyle(const SwiperDigitalParameters& swiperDigitalParameters) {}
+    virtual void SetPreviousMargin(const Dimension& prevMargin) {}
+    virtual void SetNextMargin(const Dimension& nextMargin) {}
 private:
     static std::unique_ptr<SwiperModel> instance_;
 };

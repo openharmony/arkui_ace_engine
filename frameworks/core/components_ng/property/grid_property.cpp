@@ -24,12 +24,14 @@ namespace OHOS::Ace::NG {
 
 Dimension GridProperty::GetWidth()
 {
+    CHECK_NULL_RETURN_NOLOG(gridInfo_, Dimension());
     // gridInfo_ must exist, because layout algorithm invoke UpdateContainer first
     return Dimension(gridInfo_->GetWidth());
 }
 
 Dimension GridProperty::GetOffset()
 {
+    CHECK_NULL_RETURN_NOLOG(gridInfo_, Dimension());
     // gridInfo_ must exist, because layout algorithm invoke UpdateContainer() first
     auto offset = gridInfo_->GetOffset();
     if (offset == UNDEFINED_DIMENSION) {
@@ -144,7 +146,7 @@ void GridProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
             json->Put("gridOffset", item->offset_);
         }
 
-        auto useSizeType = JsonUtil::Create(false);
+        auto useSizeType = JsonUtil::Create(true);
         for (const auto& item : typedPropertySet_) {
             auto jsonValue = JsonUtil::Create(true);
             jsonValue->Put("span", item.span_);
@@ -159,7 +161,7 @@ void GridProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("gridSpan", static_cast<int32_t>(gridInfo_->GetColumns()));
     json->Put("gridOffset", gridOffset == -1 ? 0 : gridOffset);
 
-    auto useSizeType = JsonUtil::Create(false);
+    auto useSizeType = JsonUtil::Create(true);
     auto index = static_cast<int32_t>(GridSizeType::XS);
     for (; index < static_cast<int32_t>(GridSizeType::XL); index++) {
         auto jsonValue = JsonUtil::Create(true);

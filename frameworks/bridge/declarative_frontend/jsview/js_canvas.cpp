@@ -31,6 +31,7 @@ void JSCanvas::Create(const JSCallbackInfo& info)
             JSCanvasRenderer* jsContext = JSRef<JSObject>::Cast(info[0])->Unwrap<JSCanvasRenderer>();
             if (jsContext) {
                 jsContext->SetCustomPaintPattern(pattern);
+                LOGI("SetCustomPaintPattern successfully");
                 jsContext->SetAntiAlias();
             }
         }
@@ -42,6 +43,7 @@ void JSCanvas::Create(const JSCallbackInfo& info)
         JSCanvasRenderer* jsContext = JSRef<JSObject>::Cast(info[0])->Unwrap<JSCanvasRenderer>();
         if (jsContext) {
             jsContext->SetComponent(paintChild->GetTaskPool());
+            LOGI("SetComponent successfully");
             jsContext->SetAntiAlias();
         }
     }

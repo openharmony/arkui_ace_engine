@@ -16,48 +16,52 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LIST_LIST_PAINT_METHOD_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LIST_LIST_PAINT_METHOD_H
 
-#include "core/components_ng/pattern/list/list_layout_algorithm.h"
+#include "core/components_ng/pattern/list/list_content_modifier.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
+#include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_v2/list/list_properties.h"
 
 namespace OHOS::Ace::NG {
-struct DividerInfo {
-    float constrainStrokeWidth;
-    float crossSize;
-    float startMargin;
-    float endMargin;
-    float halfSpaceWidth;
-    float mainPadding;
-    float crossPadding;
-    bool isVertical;
-    int32_t lanes;
-    int32_t totalItemCount;
-    Color color;
-};
-
 class ACE_EXPORT ListPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(ListPaintMethod, NodePaintMethod)
 public:
-    using PositionMap = ListLayoutAlgorithm::PositionMap;
     ListPaintMethod(
-        const V2::ItemDivider& divider, bool vertical, int32_t lanes, float space, PositionMap& itemPosition)
-        : divider_(divider), vertical_(vertical), lanes_(lanes), space_(space), itemPosition_(itemPosition)
+        const V2::ItemDivider& divider, bool vertical, int32_t lanes, float space)
+        : divider_(divider), vertical_(vertical), lanes_(lanes), space_(space)
     {}
     ~ListPaintMethod() override = default;
 
     CanvasDrawFunction GetForegroundDrawFunction(PaintWrapper* paintWrapper) override;
 
-    static void PaintDivider(const DividerInfo& dividerInfo, const PositionMap& itemPosition, RSCanvas& canvas);
+    RefPtr<Modifier> GetContentModifier(PaintWrapper* paintWrapper) override
+    {
+        return listContentModifier_;
+    }
+
+    void UpdateContentModifier(PaintWrapper* paintWrapper) override;
+
+    void PaintScrollBar(RSCanvas& canvas);
+    void PaintEdgeEffect(PaintWrapper* paintWrapper, RSCanvas& canvas);
 
     void SetScrollBar(WeakPtr<ScrollBar>&& scrollBar)
     {
         scrollBar_ = scrollBar;
     }
 
+    void SetEdgeEffect(WeakPtr<ScrollEdgeEffect>&& edgeEffect)
+    {
+        edgeEffect_ = edgeEffect;
+    }
+
     void SetTotalItemCount(int32_t totalItemCount)
     {
         totalItemCount_ = totalItemCount;
+    }
+
+    void SetContentModifier(const RefPtr<ListContentModifier>& modify)
+    {
+        listContentModifier_ = modify;
     }
 
 private:
@@ -66,9 +70,11 @@ private:
     int32_t lanes_ = 1;
     int32_t totalItemCount_;
     float space_;
-    PositionMap itemPosition_;
+
+    RefPtr<ListContentModifier> listContentModifier_;
 
     WeakPtr<ScrollBar> scrollBar_;
+    WeakPtr<ScrollEdgeEffect> edgeEffect_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LIST_LIST_PAINT_METHOD_H

@@ -245,6 +245,26 @@ public:
         return onScrollBegin_;
     }
 
+    void SetHasWidth(const bool& hasWidth)
+    {
+        hasWidth_ = hasWidth;
+    }
+
+    const bool& GetHasWidth() const
+    {
+        return hasWidth_;
+    }
+
+    void SetHasHeight(const bool& hasHeight)
+    {
+        hasHeight_ = hasHeight;
+    }
+
+    const bool& GetHasHeight() const
+    {
+        return hasHeight_;
+    }
+
 private:
     Edge padding_;
     Axis axisDirection_ = Axis::VERTICAL;
@@ -267,6 +287,9 @@ private:
     EventMarker onScrollEnd_;
 
     ScrollBeginCallback onScrollBegin_;
+
+    bool hasWidth_ = false;
+    bool hasHeight_ = false;
 };
 
 } // namespace OHOS::Ace

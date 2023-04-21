@@ -25,7 +25,6 @@
 #include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/progress/progress_date.h"
-#include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace::NG {
 // ProgressLayoutAlgorithm acts as the underlying progress layout.

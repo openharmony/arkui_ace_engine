@@ -24,6 +24,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/popup_param.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
@@ -41,6 +42,8 @@ public:
     static RefPtr<FrameNode> CreateButton(
         ButtonProperties& buttonParam, int32_t popupId, int32_t targetId, const RefPtr<PopupParam>& param);
     static void UpdatePopupParam(int32_t popupId, const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode);
+    static void UpdateCustomPopupParam(int32_t popupId, const RefPtr<PopupParam>& param);
+    static void UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& param);
 };
 } // namespace OHOS::Ace::NG
 

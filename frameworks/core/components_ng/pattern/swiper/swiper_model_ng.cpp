@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +25,8 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
-#include "core/components_ng/pattern/swiper_indicator/swiper_indicator_pattern.h"
+#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
+#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_utils.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -75,6 +76,12 @@ void SwiperModelNG::SetShowIndicator(bool showIndicator)
     ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, ShowIndicator, showIndicator);
 }
 
+void SwiperModelNG::SetIndicatorType(SwiperIndicatorType indicatorType)
+{
+    SwiperIndicatorUtils::SetSwiperIndicatorType(indicatorType);
+    ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, IndicatorType, indicatorType);
+}
+
 void SwiperModelNG::SetItemSpace(const Dimension& itemSpace)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, ItemSpace, itemSpace);
@@ -88,6 +95,15 @@ void SwiperModelNG::SetCachedCount(int32_t cachedCount)
     }
 
     ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, CachedCount, cachedCount);
+}
+
+void SwiperModelNG::SetIsIndicatorCustomSize(bool isCustomSize)
+{
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIsIndicatorCustomSize(isCustomSize);
 }
 
 void SwiperModelNG::SetAutoPlay(bool autoPlay)
@@ -143,6 +159,32 @@ void SwiperModelNG::SetOnChange(std::function<void(const BaseEventInfo* info)>&&
     });
 }
 
+void SwiperModelNG::SetOnAnimationStart(std::function<void(const BaseEventInfo* info)>&& onAnimationStart)
+{
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
+    CHECK_NULL_VOID(eventHub);
+
+    eventHub->SetAnimationStartEvent([event = std::move(onAnimationStart)](int32_t index) {
+        SwiperChangeEvent eventInfo(index);
+        event(&eventInfo);
+    });
+}
+
+void SwiperModelNG::SetOnAnimationEnd(std::function<void(const BaseEventInfo* info)>&& onAnimationEnd)
+{
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
+    CHECK_NULL_VOID(eventHub);
+
+    eventHub->SetAnimationEndEvent([event = std::move(onAnimationEnd)](int32_t index) {
+        SwiperChangeEvent eventInfo(index);
+        event(&eventInfo);
+    });
+}
+
 void SwiperModelNG::SetRemoteMessageEventId(RemoteCallback&& remoteCallback) {}
 
 void SwiperModelNG::SetIndicatorStyle(const SwiperParameters& swiperParameters)
@@ -154,6 +196,24 @@ void SwiperModelNG::SetIndicatorStyle(const SwiperParameters& swiperParameters)
     pattern->SetSwiperParameters(swiperParameters);
 };
 
+void SwiperModelNG::SetDotIndicatorStyle(const SwiperParameters& swiperParameters)
+{
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSwiperParameters(swiperParameters);
+};
+
+void SwiperModelNG::SetDigitIndicatorStyle(const SwiperDigitalParameters& swiperDigitalParameters)
+{
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSwiperDigitalParameters(swiperDigitalParameters);
+};
+
 void SwiperModelNG::SetOnClick(
     std::function<void(const BaseEventInfo* info, const RefPtr<V2::InspectorFunctionImpl>& impl)>&& value)
 {}
@@ -162,4 +222,13 @@ void SwiperModelNG::SetMainSwiperSizeWidth() {}
 
 void SwiperModelNG::SetMainSwiperSizeHeight() {}
 
+void SwiperModelNG::SetPreviousMargin(const Dimension& prevMargin)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, PrevMargin, prevMargin);
+}
+
+void SwiperModelNG::SetNextMargin(const Dimension& nextMargin)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, NextMargin, nextMargin);
+}
 } // namespace OHOS::Ace::NG

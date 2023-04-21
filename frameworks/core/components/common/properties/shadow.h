@@ -26,6 +26,16 @@ constexpr float LIGHT_RADIUS = 800.0f; // System recommended value.
 constexpr float LIGHT_POSITION_X = 540.0f; // System recommended value.
 constexpr float LIGHT_POSITION_Y = 0.0f; // System recommended value.
 
+enum class ShadowStyle {
+    OuterDefaultXS,
+    OuterDefaultSM,
+    OuterDefaultMD,
+    OuterDefaultLG,
+    OuterFloatingSM,
+    OuterFloatingMD,
+    None,
+};
+
 // A style class indicates the way to render shadow effect
 class Shadow final {
 public:
@@ -35,7 +45,8 @@ public:
     ~Shadow() = default;
 
     // create shadow for hardware rending.
-    Shadow(float elevation, Offset offset, Color spotColor) : offset_(offset), color_(spotColor)
+    Shadow(float elevation, Offset offset, Color spotColor, ShadowStyle style)
+        : offset_(offset), color_(spotColor), style_(style)
     {
         SetElevation(elevation);
     };
@@ -46,6 +57,8 @@ public:
     {
         SetBlurRadius(blurRadius);
     };
+
+    static Shadow CreateShadow(ShadowStyle style);
 
     bool operator==(const Shadow& rhs) const
     {
@@ -163,6 +176,11 @@ public:
         return lightRadius_;
     }
 
+    ShadowStyle GetStyle() const
+    {
+        return style_;
+    }
+
     bool IsValid() const
     {
         if (isHardwareAcceleration_) {
@@ -180,6 +198,7 @@ private:
     Offset offset_;
     Color color_ = Color::BLACK;
     bool isHardwareAcceleration_ = false;
+    ShadowStyle style_ = ShadowStyle::None;
 };
 
 } // namespace OHOS::Ace

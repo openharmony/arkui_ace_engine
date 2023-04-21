@@ -56,6 +56,29 @@ void JSNavDestination::Create()
     NG::NavDestinationView::Create();
 }
 
+void JSNavDestination::Create(const JSCallbackInfo& info)
+{
+    if (!Container::IsCurrentUseNewPipeline()) {
+        return;
+    }
+    CreateForPartialUpdate(info);
+}
+
+void JSNavDestination::CreateForPartialUpdate(const JSCallbackInfo& info)
+{
+    if (info.Length() <= 0 && !info[0]->IsFunction()) {
+        NG::NavDestinationView::Create();
+        return;
+    }
+
+    JSRef<JSVal> builderFunctionJS = info[0];
+    auto builderFunc = [context = info.GetExecutionContext(), builder = std::move(builderFunctionJS)]() {
+        JAVASCRIPT_EXECUTION_SCOPE(context)
+        JSRef<JSFunc>::Cast(builder)->Call(JSRef<JSObject>());
+    };
+    NG::NavDestinationView::Create(std::move(builderFunc));
+}
+
 void JSNavDestination::SetHideTitleBar(bool hide)
 {
     if (!Container::IsCurrentUseNewPipeline()) {

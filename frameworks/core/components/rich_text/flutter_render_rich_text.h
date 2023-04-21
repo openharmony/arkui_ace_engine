@@ -18,7 +18,6 @@
 
 #include "core/components/common/properties/color.h"
 #include "core/components/rich_text/render_rich_text.h"
-#include "flutter/fml/memory/ref_counted.h"
 
 namespace OHOS::Ace {
 

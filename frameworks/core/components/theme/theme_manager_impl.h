@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,6 +29,11 @@ public:
     void InitResource(const ResourceInfo& resourceInfo) override
     {
         themeConstants_->InitResource(resourceInfo);
+    }
+
+    void ReloadResource() override
+    {
+        themeConstants_->ReloadResource();
     }
 
     void UpdateConfig(const ResourceConfiguration& config) override
@@ -62,16 +67,21 @@ public:
 
     /*
      * Get color value from AppTheme (if exists) or system theme style.
-     * Prebuild background color will be returned if AppTheme and system theme style both not exists.
+     * Prebuilt background color will be returned if AppTheme and system theme style both not exists.
      * @return App background color.
      */
     Color GetBackgroundColor() const override;
 
     RefPtr<ThemeConstants> GetThemeConstants(
-        const std::string& bundleName = "", const std::string& moduleName = "") const override
+        const std::string& bundleName, const std::string& moduleName) const override
     {
         themeConstants_->UpdateThemeConstants(bundleName, moduleName);
         return themeConstants_;
+    }
+
+    RefPtr<ThemeConstants> GetThemeConstants() const override
+    {
+        return GetThemeConstants("", "");
     }
 
     /*

@@ -39,6 +39,7 @@ public:
         props->propGridCount_ = CloneGridCount();
         props->propUseCustomStyle_ = CloneUseCustomStyle();
         props->propAutoCancel_ = CloneAutoCancel();
+        props->propShowInSubWindow_ = CloneShowInSubWindow();
         return props;
     }
 
@@ -50,6 +51,7 @@ public:
         ResetGridCount();
         ResetUseCustomStyle();
         ResetAutoCancel();
+        ResetShowInSubWindow();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DialogAlignment, DialogAlignment, PROPERTY_UPDATE_MEASURE);
@@ -57,6 +59,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(GridCount, int32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(UseCustomStyle, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(AutoCancel, bool, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowInSubWindow, bool, PROPERTY_UPDATE_RENDER);
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
@@ -73,6 +76,7 @@ public:
         json->Put("gridCount", std::to_string(propGridCount_.value_or(-1)).c_str());
         json->Put("customStyle", propUseCustomStyle_.value_or(false) ? "true" : "false");
         json->Put("autoCancel", propAutoCancel_.value_or(true) ? "true" : "false");
+        json->Put("showInSubWindow", propShowInSubWindow_.value_or(false) ? "true" : "false");
     }
 
 private:

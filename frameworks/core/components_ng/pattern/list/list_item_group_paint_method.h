@@ -37,6 +37,8 @@ public:
 
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
 
+    void PaintDivider(PaintWrapper* paintWrapper, RSCanvas& canvas);
+
 private:
     V2::ItemDivider divider_;
     bool vertical_ = false;

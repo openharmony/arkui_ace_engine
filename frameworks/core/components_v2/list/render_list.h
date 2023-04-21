@@ -162,6 +162,8 @@ public:
 
     void ScrollPage(bool reverse, bool smooth);
 
+    void ScrollBy(double pixelX, double pixelY);
+
     RefPtr<Component> GetComponent() override
     {
         return component_;
@@ -266,6 +268,27 @@ public:
     int32_t GetLanes() const
     {
         return lanes_;
+    }
+
+    bool IsFramePaintStateValid() const
+    {
+        return isFramePaintStateValid_;
+    }
+
+    void MarkFramePaintStateValid(bool isValid)
+    {
+        isFramePaintStateValid_ = isValid;
+    }
+
+    bool GetPaintState() const
+    {
+        return paintStateFlag_;
+    }
+
+    void SetPaintState(bool flag)
+    {
+        paintStateFlag_ = flag;
+        MarkFramePaintStateValid(true);
     }
 
 protected:
@@ -425,6 +448,7 @@ protected:
     double prevMainPos_ = 0.0;
     double estimatedHeight_ = 0.0;
     bool isRightToLeft_ = false;
+    bool drivenRender_ = false;
 
 private:
     int32_t lanes_ = -1;
@@ -472,6 +496,8 @@ private:
     bool hasWidth_ = false;
     bool isAxisResponse_ = true;
     ScrollState scrollState_;
+    bool paintStateFlag_ = false;
+    bool isFramePaintStateValid_ = false;
 
     void MultiSelectWithoutKeyboard(const Rect& selectedZone);
     void HandleMouseEventWithoutKeyboard(const MouseEvent& event);

@@ -17,28 +17,29 @@
 
 #include "gtest/gtest.h"
 
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "core/common/ace_engine.h"
-#include "core/common/test/mock/mock_container.h"
-#include "core/components/common/properties/color.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/test/pattern/custom_paint/common_constants.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline_ng/test/mock/mock_interface.h"
-#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
-
 // Add the following two macro definitions to test the private and protected method.
 #define private public
 #define protected public
 
+#include "test/mock/core/common/mock_container.h"
+
+#include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
+#include "core/common/ace_engine.h"
+#include "core/components/common/properties/color.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/custom_paint/canvas_paint_method.h"
 #include "core/components_ng/pattern/custom_paint/custom_paint_event_hub.h"
 #include "core/components_ng/pattern/custom_paint/custom_paint_layout_algorithm.h"
 #include "core/components_ng/pattern/custom_paint/custom_paint_paint_method.h"
 #include "core/components_ng/pattern/custom_paint/custom_paint_pattern.h"
 #include "core/components_ng/pattern/custom_paint/custom_paint_view.h"
+#include "core/components_ng/test/pattern/custom_paint/common_constants.h"
+#include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline_ng/test/mock/mock_interface.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -186,42 +187,6 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg003, TestSize.Level1)
     ASSERT_NE(layoutWrapper, nullptr);
     auto layoutAlgorithm = customPattern->CreateLayoutAlgorithm();
     ASSERT_NE(layoutAlgorithm, nullptr);
-    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
-    DirtySwapConfig config;
-
-    /**
-     * @tc.steps2: Call the function OnDirtyLayoutWrapperSwap with config.skipMeasure = false.
-     * @tc.expected: The return value is equal to true.
-     */
-    config.skipMeasure = false;
-    EXPECT_TRUE(customPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
-
-    /**
-     * @tc.steps3: Call the function OnDirtyLayoutWrapperSwap with config.skipMeasure = true.
-     * @tc.expected: The return value is equal to false.
-     */
-    config.skipMeasure = true;
-    EXPECT_FALSE(customPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
-
-    /**
-     * @tc.steps4: Call the function SetCanvasSize with IDEAL_SIZE.
-     * @tc.expected: The return value of GetWidth and GetHeight are equal to the corresponding value of IDEAL_SIZE.
-     */
-    customPattern->SetCanvasSize(IDEAL_SIZE);
-    EXPECT_DOUBLE_EQ(customPattern->GetWidth(), IDEAL_WIDTH);
-    EXPECT_DOUBLE_EQ(customPattern->GetHeight(), IDEAL_HEIGHT);
-
-    /**
-     * @tc.steps5: Call the function SetLineDash and SetLineDashOffset.
-     * @tc.expected: The value of GetLineDash().dashOffset is equal to DEFAULT_DOUBLE10.
-     *               The value of GetLineDash().lineDash is equal to CANDIDATE_DOUBLES.
-     */
-    paintMethod->SetLineDash(CANDIDATE_DOUBLES);
-    paintMethod->SetLineDashOffset(DEFAULT_DOUBLE10);
-    EXPECT_DOUBLE_EQ(customPattern->GetLineDash().dashOffset, DEFAULT_DOUBLE10);
-    for (uint32_t i = 1; i < CANDIDATE_DOUBLES.size(); ++i) {
-        EXPECT_DOUBLE_EQ(paintMethod->GetLineDash().lineDash[i], CANDIDATE_DOUBLES[i]);
-    }
 }
 
 /**
@@ -230,41 +195,6 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg003, TestSize.Level1)
  * @tc.type: FUNC
  */
 HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg004, TestSize.Level1)
-{
-    /**
-     * @tc.steps1: initialize parameters.
-     * @tc.expected: All pointer is non-null.
-     */
-    auto customPattern = CreateCustomPaintPattern();
-    ASSERT_NE(customPattern, nullptr);
-    PaintState paintState;
-
-    /**
-     * @tc.steps2: Call the function MeasureTextMetrics.
-     * @tc.expected: All parts of the return TextMetrics object are equal to zero.
-     */
-    TextMetrics textMetrics = customPattern->MeasureTextMetrics(DEFAULT_STR, paintState);
-    EXPECT_DOUBLE_EQ(textMetrics.width, DEFAULT_DOUBLE0);
-    EXPECT_DOUBLE_EQ(textMetrics.height, DEFAULT_DOUBLE0);
-    EXPECT_DOUBLE_EQ(textMetrics.actualBoundingBoxLeft, DEFAULT_DOUBLE0);
-    EXPECT_DOUBLE_EQ(textMetrics.actualBoundingBoxRight, DEFAULT_DOUBLE0);
-    EXPECT_DOUBLE_EQ(textMetrics.actualBoundingBoxAscent, DEFAULT_DOUBLE0);
-    EXPECT_DOUBLE_EQ(textMetrics.actualBoundingBoxDescent, DEFAULT_DOUBLE0);
-
-    /**
-     * @tc.steps3: Call functions MeasureText and MeasureTextHeight.
-     * @tc.expected: All return values are equal to zero.
-     */
-    EXPECT_DOUBLE_EQ(customPattern->MeasureText(DEFAULT_STR, paintState), DEFAULT_DOUBLE0);
-    EXPECT_DOUBLE_EQ(customPattern->MeasureTextHeight(DEFAULT_STR, paintState), DEFAULT_DOUBLE0);
-}
-
-/**
- * @tc.name: CustomPaintPatternTestNg005
- * @tc.desc: Test functions about MeasureText of the class CustomPaintPattern.
- * @tc.type: FUNC
- */
-HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg005, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -308,11 +238,11 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg005, TestSize.Level1)
 }
 
 /**
- * @tc.name: CustomPaintPatternTestNg006
+ * @tc.name: CustomPaintPatternTestNg005
  * @tc.desc: Test functions about GetImageData of the class CustomPaintPattern.
  * @tc.type: FUNC
  */
-HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg006, TestSize.Level1)
+HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg005, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -349,11 +279,11 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg006, TestSize.Level1)
 }
 
 /**
- * @tc.name: CustomPaintPatternTestNg007
+ * @tc.name: CustomPaintPatternTestNg006
  * @tc.desc: Test functions about text.
  * @tc.type: FUNC
  */
-HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg007, TestSize.Level1)
+HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg006, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -408,11 +338,11 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg007, TestSize.Level1)
 }
 
 /**
- * @tc.name: CustomPaintPatternTestNg008
+ * @tc.name: CustomPaintPatternTestNg007
  * @tc.desc: Test functions about TransformParam.
  * @tc.type: FUNC
  */
-HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg008, TestSize.Level1)
+HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg007, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -454,11 +384,11 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg008, TestSize.Level1)
 }
 
 /**
- * @tc.name: CustomPaintPatternTestNg009
+ * @tc.name: CustomPaintPatternTestNg008
  * @tc.desc: Test functions about Rect.
  * @tc.type: FUNC
  */
-HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg009, TestSize.Level1)
+HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg008, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -493,11 +423,11 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg009, TestSize.Level1)
 }
 
 /**
- * @tc.name: CustomPaintPatternTestNg010
+ * @tc.name: CustomPaintPatternTestNg09
  * @tc.desc: Test functions about Shadow.
  * @tc.type: FUNC
  */
-HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg010, TestSize.Level1)
+HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg09, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -532,11 +462,11 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg010, TestSize.Level1)
 }
 
 /**
- * @tc.name: CustomPaintPatternTestNg011
+ * @tc.name: CustomPaintPatternTestNg010
  * @tc.desc: Test functions about Stroke.
  * @tc.type: FUNC
  */
-HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg011, TestSize.Level1)
+HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg010, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -578,11 +508,11 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg011, TestSize.Level1)
 }
 
 /**
- * @tc.name: CustomPaintPatternTestNg012
+ * @tc.name: CustomPaintPatternTestNg011
  * @tc.desc: Test functions about path.
  * @tc.type: FUNC
  */
-HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg012, TestSize.Level1)
+HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg011, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -633,11 +563,11 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg012, TestSize.Level1)
 }
 
 /**
- * @tc.name: CustomPaintPatternTestNg013
+ * @tc.name: CustomPaintPatternTestNg012
  * @tc.desc: Test functions about line.
  * @tc.type: FUNC
  */
-HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg013, TestSize.Level1)
+HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg012, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -681,11 +611,11 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg013, TestSize.Level1)
 }
 
 /**
- * @tc.name: CustomPaintPatternTestNg014
+ * @tc.name: CustomPaintPatternTestNg013
  * @tc.desc: Test functions about updating parameters.
  * @tc.type: FUNC
  */
-HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg014, TestSize.Level1)
+HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg013, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -731,11 +661,11 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg014, TestSize.Level1)
 }
 
 /**
- * @tc.name: CustomPaintPatternTestNg015
+ * @tc.name: CustomPaintPatternTestNg014
  * @tc.desc: Test functions about image.
  * @tc.type: FUNC
  */
-HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg015, TestSize.Level1)
+HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg014, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -773,11 +703,11 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg015, TestSize.Level1)
 }
 
 /**
- * @tc.name: CustomPaintPatternTestNg016
+ * @tc.name: CustomPaintPatternTestNg015
  * @tc.desc: Test functions about curve.
  * @tc.type: FUNC
  */
-HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg016, TestSize.Level1)
+HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg015, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -824,11 +754,11 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg016, TestSize.Level1)
 }
 
 /**
- * @tc.name: CustomPaintPatternTestNg017
+ * @tc.name: CustomPaintPatternTestNg016
  * @tc.desc: Test functions about CanvasFillRule.
  * @tc.type: FUNC
  */
-HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg017, TestSize.Level1)
+HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg016, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -853,4 +783,45 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg017, TestSize.Level1)
     customPattern->UpdateFillRuleForPath2D(rule);
     EXPECT_TRUE(paintMethod->HasTask());
 }
+
+/**
+ * @tc.name: CustomPaintPatternTestNg017
+ * @tc.desc: Test functions about canvas lifecycle OnDirtyLayoutWrapperSwap.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg017, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto customPattern = CreateCustomPaintPattern();
+    ASSERT_NE(customPattern, nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto layoutAlgorithm = customPattern->CreateLayoutAlgorithm();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    auto dirty = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    dirty->skipMeasureContent_ = false;
+    dirty->layoutAlgorithm_ = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm);
+
+    /**
+     * @tc.steps2: Test functions about canvas lifecycle (onReady and onAreaChange) with OnDirtyLayoutWrapperSwap.
+     * @tc.expected: The result.
+     */
+    DirtySwapConfig config;
+    EXPECT_TRUE(customPattern->OnDirtyLayoutWrapperSwap(dirty, config));
+
+    config.frameOffsetChange = true;
+    EXPECT_FALSE(customPattern->OnDirtyLayoutWrapperSwap(dirty, config));
+
+    config.contentOffsetChange = true;
+    EXPECT_FALSE(customPattern->OnDirtyLayoutWrapperSwap(dirty, config));
+
+    config.frameOffsetChange = false;
+    EXPECT_FALSE(customPattern->OnDirtyLayoutWrapperSwap(dirty, config));
+}
+
 } // namespace OHOS::Ace::NG

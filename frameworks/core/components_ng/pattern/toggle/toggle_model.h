@@ -41,7 +41,7 @@ public:
     virtual ~ToggleModel() = default;
 
     virtual void Create(NG::ToggleType toggleType, bool isOn) = 0;
-    virtual void SetSelectedColor(const Color& selectedColor) = 0;
+    virtual void SetSelectedColor(const std::optional<Color>& selectedColor) = 0;
     virtual void SetSwitchPointColor(const Color& switchPointColor) = 0;
     virtual void OnChange(NG::ChangeEvent&& onChange) = 0;
     virtual void SetWidth(const Dimension& width) = 0;

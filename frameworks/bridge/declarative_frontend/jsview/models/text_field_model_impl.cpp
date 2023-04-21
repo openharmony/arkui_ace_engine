@@ -202,6 +202,10 @@ void TextFieldModelImpl::SetCaretColor(const Color& value)
     component->SetCursorColor(value);
 }
 
+void TextFieldModelImpl::SetCaretStyle(const CaretStyle& value) {};
+void TextFieldModelImpl::SetCaretPosition(const int32_t& value) {};
+void TextFieldModelImpl::SetSelectedBackgroundColor(const Color& value) {};
+
 void TextFieldModelImpl::SetMaxLength(uint32_t value)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -339,6 +343,8 @@ void TextFieldModelImpl::SetOnPaste(std::function<void(const std::string&)>&& fu
     CHECK_NULL_VOID(component);
     component->SetOnPaste(std::move(func));
 }
+
+void TextFieldModelImpl::SetMenuOptionItems(std::vector<NG::MenuOptionsParam>&& menuOptionsItems) {}
 
 void TextFieldModelImpl::SetCopyOption(CopyOptions copyOption)
 {

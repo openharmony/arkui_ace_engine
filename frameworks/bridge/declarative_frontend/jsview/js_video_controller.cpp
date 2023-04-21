@@ -18,6 +18,9 @@
 #include "base/utils/linear_map.h"
 #include "base/utils/utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
+#ifdef SUPPORT_JSSTACK
+#include "xpower_event_jsvm.h"
+#endif
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -62,6 +65,9 @@ void JSVideoController::Destructor(JSVideoController* videoController)
 void JSVideoController::Start(const JSCallbackInfo& args)
 {
     if (videoController_) {
+#ifdef SUPPORT_JSSTACK
+        HiviewDFX::ReportXPowerJsStackSysEvent(args.GetVm(), "STREAM_CHANGE", "SRC=Video");
+#endif
         videoController_->Start();
     }
 }
@@ -89,7 +95,7 @@ void JSVideoController::SetCurrentTime(const JSCallbackInfo& args)
     }
 
     SeekMode seekMode = SeekMode::SEEK_PREVIOUS_SYNC;
-    if (args.Length() > 1 && args[1]->IsNumber()) {
+    if (args.Length() > 1 && args[1]->IsNumber() && args[1]->ToNumber<uint32_t>() < SEEK_MODE.size()) {
         seekMode = SEEK_MODE[args[1]->ToNumber<int32_t>()];
     }
 

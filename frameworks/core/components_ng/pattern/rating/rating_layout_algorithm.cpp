@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,8 +36,15 @@ std::optional<SizeF> RatingLayoutAlgorithm::MeasureContent(
     CHECK_NULL_RETURN(ratingTheme, std::nullopt);
 
     SizeF componentSize;
-    componentSize.SetHeight(static_cast<float>(ratingTheme->GetRatingHeight().ConvertToPx()));
-    componentSize.SetWidth(static_cast<float>(ratingTheme->GetRatingWidth().ConvertToPx()));
+    auto ratingLayoutProperty = DynamicCast<RatingLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    // case 2.1: Rating use the mini size specified in the theme, when it is used as indicator.
+    bool indicator = ratingLayoutProperty->GetIndicator().value_or(false);
+    auto stars =
+        ratingLayoutProperty->GetStarsValue(RatingPattern::GetStarNumFromTheme().value_or(DEFAULT_RATING_STAR_NUM));
+    auto height =
+        indicator ? ratingTheme->GetRatingMiniHeight().ConvertToPx() : ratingTheme->GetRatingHeight().ConvertToPx();
+    componentSize.SetHeight(static_cast<float>(height));
+    componentSize.SetWidth(static_cast<float>(height * stars));
     return contentConstraint.Constrain(componentSize);
 }
 
@@ -45,9 +52,7 @@ void RatingLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     BoxLayoutAlgorithm::Layout(layoutWrapper);
     // if layout size has not decided yet, resize target can not be calculated
-    if (!layoutWrapper->GetGeometryNode()->GetContent()) {
-        return;
-    }
+    CHECK_NULL_VOID(layoutWrapper->GetGeometryNode()->GetContent());
     const auto& ratingSize = layoutWrapper->GetGeometryNode()->GetContentSize();
     auto ratingLayoutProperty = DynamicCast<RatingLayoutProperty>(layoutWrapper->GetLayoutProperty());
 

@@ -68,6 +68,7 @@ extern const char THEME_PATTERN_TEXTFIELD[];
 extern const char THEME_PATTERN_TEXT_OVERLAY[];
 extern const char THEME_PATTERN_VIDEO[];
 extern const char THEME_PATTERN_INDEXER[];
+extern const char THEME_PATTERN_APP_BAR[];
 
 // pattern general attributes
 extern const char PATTERN_FG_COLOR[];
@@ -80,6 +81,7 @@ extern const char PATTERN_BG_COLOR_FOCUSED[];
 extern const char PATTERN_BG_COLOR_DISABLED_ALPHA[];
 extern const char PATTERN_BG_COLOR_ALPHA[];
 extern const char PATTERN_TEXT_COLOR[];
+extern const char PATTERN_TEXT_COLOR_ALPHA[];
 extern const char PATTERN_TEXT_COLOR_FOCUSED[];
 extern const char PATTERN_TEXT_COLOR_SELECTED[];
 extern const char PATTERN_TEXT_COLOR_DISABLED[];
@@ -119,6 +121,7 @@ extern const char DATA_PANEL_LOADING_COLOR_START[];
 extern const char DATA_PANEL_LOADING_COLOR_END[];
 extern const char DATA_PANEL_PROGRESS_COLOR_START[];
 extern const char DATA_PANEL_PROGRESS_COLOR_END[];
+extern const char DATA_PANEL_TRACK_SHADOW_RADIU[];
 
 // pattern attributes for dialog
 extern const char DIALOG_CONTENT_TOP_PADDING[];
@@ -135,5 +138,17 @@ extern const char DIALOG_MASK_COLOR_END[];
 // pattern attributes for drag bar
 extern const char DRAG_BAR_COLOR[];
 
+// pattern attributes for popup
+extern const char POPUP_BORDER_RADIUS[];
+extern const char POPUP_HORIZONTAL_PADDING[];
+extern const char POPUP_VERTICAL_PADDING[];
+extern const char POPUP_BUTTON_TEXT_FONT_SIZE[];
+
+// pattern attributes for badge
+extern const char BADGE_BORDER_COLOR[];
+extern const char BADGE_BORDER_WIDTH[];
+// swiper attributes
+extern const char INDICATOR_TEXT_FONT_SIZE[];
+extern const char INDICATOR_TEXT_FONT_COLOR[];
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_THEME_ATTRIBUTES_H

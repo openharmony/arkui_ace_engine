@@ -31,7 +31,7 @@
 #define FML_EMBEDDER_ONLY
 #endif
 #include "flutter/fml/message_loop.h"
-#ifdef OHOS_STANDARD_SYSTEM
+#if defined(OHOS_STANDARD_SYSTEM) || defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
 #include "flutter/shell/platform/ohos/platform_task_runner.h"
 #endif
 
@@ -44,7 +44,6 @@
 
 namespace OHOS::Ace {
 namespace {
-
 constexpr int32_t GPU_THREAD_PRIORITY = -10;
 constexpr int32_t UI_THREAD_PRIORITY = -15;
 
@@ -118,7 +117,7 @@ FlutterTaskExecutor::FlutterTaskExecutor(const flutter::TaskRunners& taskRunners
     platformRunner_ = taskRunners.GetPlatformTaskRunner();
     uiRunner_ = taskRunners.GetUITaskRunner();
     ioRunner_ = taskRunners.GetIOTaskRunner();
-#ifdef NG_BUILD
+#ifdef FLUTTER_2_5
     gpuRunner_ = taskRunners.GetRasterTaskRunner();
 #else
     gpuRunner_ = taskRunners.GetGPUTaskRunner();
@@ -133,13 +132,24 @@ FlutterTaskExecutor::~FlutterTaskExecutor()
         platformRunner_, [rawPtr] { std::unique_ptr<fml::Thread> jsThread(rawPtr); }, 0);
 }
 
-void FlutterTaskExecutor::InitPlatformThread(bool useCurrentEventRunner)
+void FlutterTaskExecutor::InitPlatformThread(bool useCurrentEventRunner, bool isStageModel)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     platformRunner_ = flutter::PlatformTaskRunner::CurrentTaskRunner(useCurrentEventRunner);
 #else
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
+    if (isStageModel) {
+        LOGI("using eventhandler as platform thread in stage model.");
+        platformRunner_ = flutter::PlatformTaskRunner::CurrentTaskRunner(useCurrentEventRunner);
+    } else {
+        LOGI("using messageLoop as platform thread in fa model.");
+        fml::MessageLoop::EnsureInitializedForCurrentThread();
+        platformRunner_ = fml::MessageLoop::GetCurrent().GetTaskRunner();
+    }
+#else
     fml::MessageLoop::EnsureInitializedForCurrentThread();
     platformRunner_ = fml::MessageLoop::GetCurrent().GetTaskRunner();
+#endif
 #endif
 
     FillTaskTypeTable(TaskType::PLATFORM);
@@ -158,11 +168,18 @@ void FlutterTaskExecutor::InitJsThread(bool newThread)
         jsRunner_, [weak = AceType::WeakClaim(this)] { FillTaskTypeTable(weak, TaskType::JS); }, 0);
 }
 
+void FlutterTaskExecutor::InitOtherThreads(FlutterThreadModel* threadModel)
+{
+    if (threadModel) {
+        InitOtherThreads(threadModel->GetTaskRunners());
+    }
+}
+
 void FlutterTaskExecutor::InitOtherThreads(const flutter::TaskRunners& taskRunners)
 {
     uiRunner_ = taskRunners.GetUITaskRunner();
     ioRunner_ = taskRunners.GetIOTaskRunner();
-#ifdef NG_BUILD
+#ifdef FLUTTER_2_5
     gpuRunner_ = taskRunners.GetRasterTaskRunner();
 #else
     gpuRunner_ = taskRunners.GetGPUTaskRunner();
@@ -356,5 +373,4 @@ void FlutterTaskExecutor::FillTaskTypeTable(const WeakPtr<FlutterTaskExecutor>& 
         taskExecutor->FillTaskTypeTable(type);
     }
 }
-
 } // namespace OHOS::Ace

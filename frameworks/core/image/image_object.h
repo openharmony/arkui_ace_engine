@@ -16,9 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_IMAGE_IMAGE_OBJECT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_IMAGE_IMAGE_OBJECT_H
 
-#ifndef NG_BUILD
 #include "experimental/svg/model/SkSVGDOM.h"
-#endif
 
 #include "base/image/pixel_map.h"
 #include "core/image/animated_image_player.h"
@@ -92,7 +90,6 @@ public:
 
     virtual void UploadToGpuForRender(
         const WeakPtr<PipelineBase>& context,
-        const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
         const UploadSuccessCallback& successCallback,
         const FailedCallback& failedCallback,
         const Size& imageSize,
@@ -104,10 +101,10 @@ public:
     virtual void Resume() {}
     virtual void ClearData() {}
 
-    // this will be called on ui thread when renderImage do perform layout for deferent image objects.
+    // this will be called on ui thread when renderImage do perform layout for different image objects.
     virtual void PerformLayoutImageObject(RefPtr<RenderImage> image) {}
 
-    // this will be called on ui thread when renderImage do measure for deferent image objects.
+    // this will be called on ui thread when renderImage do measure for different image objects.
     virtual Size MeasureForImage(RefPtr<RenderImage> image);
 
     virtual bool CancelBackgroundTasks()
@@ -128,7 +125,6 @@ protected:
     bool isApng_ = false;
 };
 
-#ifndef NG_BUILD
 class SvgSkiaImageObject : public ImageObject {
     DECLARE_ACE_TYPE(SvgSkiaImageObject, ImageObject);
 public:
@@ -158,7 +154,6 @@ public:
 private:
     sk_sp<SkSVGDOM> skiaDom_;
 };
-#endif
 
 class SvgImageObject : public ImageObject {
     DECLARE_ACE_TYPE(SvgImageObject, ImageObject);
@@ -206,7 +201,6 @@ public:
 
     void UploadToGpuForRender(
         const WeakPtr<PipelineBase>& context,
-        const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
         const UploadSuccessCallback& successCallback,
         const FailedCallback& failedCallback,
         const Size& imageSize,

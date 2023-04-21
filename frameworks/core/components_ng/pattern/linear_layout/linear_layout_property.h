@@ -78,6 +78,7 @@ public:
                 alignItems = "VerticalAlign.Bottom";
             }
         }
+        json->Put("space", GetSpaceValue(Dimension(0.0f)).ToString().c_str());
         json->Put("alignItems", alignItems.c_str());
         auto justifyContent = V2::ConvertFlexAlignToStirng(GetMainAxisAlign().value_or(FlexAlign::FLEX_START));
         json->Put("justifyContent", justifyContent.c_str());

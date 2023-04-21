@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,7 @@
 
 #include "core/pipeline/pipeline_base.h"
 
-#include <fstream>
+#include <cinttypes>
 
 #include "base/log/ace_tracker.h"
 #include "base/log/dump_log.h"
@@ -36,9 +36,9 @@ namespace OHOS::Ace {
 
 constexpr int32_t DEFAULT_VIEW_SCALE = 1;
 
-PipelineBase::PipelineBase(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
+PipelineBase::PipelineBase(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
     RefPtr<AssetManager> assetManager, const RefPtr<Frontend>& frontend, int32_t instanceId)
-    : window_(std::move(window)), taskExecutor_(std::move(taskExecutor)), assetManager_(std::move(assetManager)),
+    : window_(window), taskExecutor_(std::move(taskExecutor)), assetManager_(std::move(assetManager)),
       weakFrontend_(frontend), instanceId_(instanceId)
 {
     CHECK_NULL_VOID(frontend);
@@ -60,10 +60,10 @@ PipelineBase::PipelineBase(std::unique_ptr<Window> window, RefPtr<TaskExecutor> 
     window_->SetVsyncCallback(vsyncCallback);
 }
 
-PipelineBase::PipelineBase(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
+PipelineBase::PipelineBase(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
     RefPtr<AssetManager> assetManager, const RefPtr<Frontend>& frontend, int32_t instanceId,
     RefPtr<PlatformResRegister> platformResRegister)
-    : window_(std::move(window)), taskExecutor_(std::move(taskExecutor)), assetManager_(std::move(assetManager)),
+    : window_(window), taskExecutor_(std::move(taskExecutor)), assetManager_(std::move(assetManager)),
       weakFrontend_(frontend), instanceId_(instanceId), platformResRegister_(std::move(platformResRegister))
 {
     CHECK_NULL_VOID(frontend);
@@ -229,6 +229,22 @@ void PipelineBase::NotifyPopupDismiss() const
     }
 }
 
+void PipelineBase::NotifyMenuDismiss() const
+{
+    CHECK_RUN_ON(UI);
+    if (menuEventHandler_) {
+        menuEventHandler_();
+    }
+}
+
+void PipelineBase::NotifyContextMenuDismiss() const
+{
+    CHECK_RUN_ON(UI);
+    if (contextMenuEventHandler_) {
+        contextMenuEventHandler_();
+    }
+}
+
 void PipelineBase::NotifyRouterBackDismiss() const
 {
     CHECK_RUN_ON(UI);
@@ -356,27 +372,11 @@ void PipelineBase::UpdateRootSizeAndScale(int32_t width, int32_t height)
     rootWidth_ = width / viewScale_;
 }
 
-void PipelineBase::DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) const
+void PipelineBase::DumpFrontend() const
 {
-    auto result = false;
-    if (!SystemProperties::GetDebugEnabled()) {
-        std::unique_ptr<std::ostream> ss = std::make_unique<std::ostringstream>();
-        DumpLog::GetInstance().SetDumpFile(std::move(ss));
-        result = Dump(params);
-        const auto& infoFile = DumpLog::GetInstance().GetDumpFile();
-        auto* ostringstream = static_cast<std::ostringstream*>(infoFile.get());
-        info.emplace_back(ostringstream->str().substr(0, DumpLog::MAX_DUMP_LENGTH));
-        DumpLog::GetInstance().Reset();
-    } else {
-        auto dumpFilePath = AceApplicationInfo::GetInstance().GetDataFileDirPath() + "/arkui.dump";
-        std::unique_ptr<std::ostream> ss = std::make_unique<std::ofstream>(dumpFilePath);
-        DumpLog::GetInstance().SetDumpFile(std::move(ss));
-        result = Dump(params);
-        info.emplace_back("dumpFilePath: " + dumpFilePath);
-        DumpLog::GetInstance().Reset();
-    }
-    if (!result) {
-        DumpLog::ShowDumpHelp(info);
+    auto frontend = weakFrontend_.Upgrade();
+    if (frontend) {
+        frontend->DumpFrontend();
     }
 }
 
@@ -387,12 +387,10 @@ bool PipelineBase::Dump(const std::vector<std::string>& params) const
         return false;
     }
     // the first param is the key word of dump.
-#ifdef ACE_MEMORY_MONITOR
     if (params[0] == "-memory") {
         MemoryMonitor::GetInstance().Dump();
         return true;
     }
-#endif
     if (params[0] == "-jscrash") {
         EventReport::JsErrReport(
             AceApplicationInfo::GetInstance().GetPackageName(), "js crash reason", "js crash summary");
@@ -406,6 +404,10 @@ bool PipelineBase::Dump(const std::vector<std::string>& params) const
         return true;
     }
     ContainerScope scope(instanceId_);
+    if (params[0] == "-frontend") {
+        DumpFrontend();
+        return true;
+    }
     return OnDumpInfo(params);
 }
 
@@ -413,6 +415,13 @@ void PipelineBase::ForceLayoutForImplicitAnimation()
 {
     if (!pendingImplicitLayout_.empty()) {
         pendingImplicitLayout_.top() = true;
+    }
+}
+
+void PipelineBase::ForceRenderForImplicitAnimation()
+{
+    if (!pendingImplicitRender_.empty()) {
+        pendingImplicitRender_.top() = true;
     }
 }
 
@@ -432,13 +441,11 @@ bool PipelineBase::Animate(const AnimationOption& option, const RefPtr<Curve>& c
 void PipelineBase::PrepareOpenImplicitAnimation()
 {
 #ifdef ENABLE_ROSEN_BACKEND
-    if (!SystemProperties::GetRosenBackendEnabled()) {
-        LOGE("rosen backend is disabled");
-        return;
-    }
-
-    // initialize false for implicit animation layout pending flag
+    // initialize false for implicit animation layout and render pending flag
     pendingImplicitLayout_.push(false);
+    pendingImplicitRender_.push(false);
+
+    // flush ui tasks before open implict animation
     FlushUITasks();
 #endif
 }
@@ -446,21 +453,22 @@ void PipelineBase::PrepareOpenImplicitAnimation()
 void PipelineBase::PrepareCloseImplicitAnimation()
 {
 #ifdef ENABLE_ROSEN_BACKEND
-    if (!SystemProperties::GetRosenBackendEnabled()) {
-        LOGE("rosen backend is disabled!");
-        return;
-    }
-
-    if (pendingImplicitLayout_.empty()) {
+    if (pendingImplicitLayout_.empty() && pendingImplicitRender_.empty()) {
         LOGE("close implicit animation failed, need to open implicit animation first!");
         return;
     }
 
-    // layout the views immediately to animate all related views, if layout updates are pending in the animation closure
-    if (pendingImplicitLayout_.top()) {
+    // layout or render the views immediately to animate all related views, if layout or render updates are pending in
+    // the animation closure
+    if (pendingImplicitLayout_.top() || pendingImplicitRender_.top()) {
         FlushUITasks();
     }
-    pendingImplicitLayout_.pop();
+    if (!pendingImplicitLayout_.empty()) {
+        pendingImplicitLayout_.pop();
+    }
+    if (!pendingImplicitRender_.empty()) {
+        pendingImplicitRender_.pop();
+    }
 #endif
 }
 
@@ -500,7 +508,12 @@ bool PipelineBase::CloseImplicitAnimation()
 void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount)
 {
     CHECK_RUN_ON(UI);
-    ACE_FUNCTION_TRACE();
+    ACE_SCOPED_TRACE("OnVsyncEvent now:%" PRIu64 "", nanoTimestamp);
+
+    for (auto& callback : subWindowVsyncCallbacks_) {
+        callback.second(nanoTimestamp, frameCount);
+    }
+
     if (onVsyncProfiler_) {
         AceTracker::Start();
     }
@@ -531,13 +544,17 @@ void PipelineBase::RemoveTouchPipeline(const WeakPtr<PipelineBase>& context)
     }
 }
 
-void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea)
+void PipelineBase::OnVirtualKeyboardAreaChange(
+    Rect keyboardArea, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
+    if (windowManager_ && windowManager_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
+        return;
+    }
     double keyboardHeight = keyboardArea.Height();
     if (NotifyVirtualKeyBoard(rootWidth_, rootHeight_, keyboardHeight)) {
         return;
     }
-    OnVirtualKeyboardHeightChange(keyboardHeight);
+    OnVirtualKeyboardHeightChange(keyboardHeight, rsTransaction);
 }
 
 void PipelineBase::SetGetWindowRectImpl(std::function<Rect()>&& callback)
@@ -575,6 +592,57 @@ void PipelineBase::SendEventToAccessibility(const AccessibilityEvent& accessibil
     accessibilityManager->SendAccessibilityAsyncEvent(accessibilityEvent);
 }
 
+void PipelineBase::SetSubWindowVsyncCallback(AceVsyncCallback&& callback, int32_t subWindowId)
+{
+    if (callback) {
+        subWindowVsyncCallbacks_.try_emplace(subWindowId, std::move(callback));
+    }
+}
+
+void PipelineBase::AddEtsCardTouchEventCallback(int32_t ponitId, EtsCardTouchEventCallback&& callback)
+{
+    if (!callback || ponitId < 0) {
+        return;
+    }
+
+    etsCardTouchEventCallback_[ponitId] = std::move(callback);
+}
+
+void PipelineBase::HandleEtsCardTouchEvent(const TouchEvent& point)
+{
+    if (point.id < 0) {
+        return;
+    }
+
+    auto iter = etsCardTouchEventCallback_.find(point.id);
+    if (iter == etsCardTouchEventCallback_.end()) {
+        return;
+    }
+
+    if (iter->second) {
+        iter->second(point);
+    }
+}
+
+void PipelineBase::RemoveEtsCardTouchEventCallback(int32_t ponitId)
+{
+    if (ponitId < 0) {
+        return;
+    }
+
+    auto iter = etsCardTouchEventCallback_.find(ponitId);
+    if (iter == etsCardTouchEventCallback_.end()) {
+        return;
+    }
+
+    etsCardTouchEventCallback_.erase(iter);
+}
+
+void PipelineBase::RemoveSubWindowVsyncCallback(int32_t subWindowId)
+{
+    subWindowVsyncCallbacks_.erase(subWindowId);
+}
+
 void PipelineBase::Destroy()
 {
     CHECK_RUN_ON(UI);
@@ -592,7 +660,7 @@ void PipelineBase::Destroy()
     window_->Destroy();
     touchPluginPipelineContext_.clear();
     virtualKeyBoardCallback_.clear();
+    etsCardTouchEventCallback_.clear();
     LOGI("PipelineBase::Destroy end.");
 }
-
 } // namespace OHOS::Ace

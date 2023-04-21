@@ -15,10 +15,12 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_marquee.h"
 
+#include "base/geometry/dimension.h"
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/marquee_model_impl.h"
+#include "core/components/text/text_theme.h"
 #include "core/components_ng/pattern/marquee/marquee_model.h"
 #include "core/components_ng/pattern/marquee/marquee_model_ng.h"
 
@@ -131,6 +133,14 @@ void JSMarquee::SetFontSize(const JSCallbackInfo& info)
 
     Dimension fontSize;
     if (!ParseJsDimensionFp(info[0], fontSize)) {
+        return;
+    }
+    if (fontSize.IsNegative() || fontSize.Unit() == DimensionUnit::PERCENT) {
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID_NOLOG(pipelineContext);
+        auto theme = pipelineContext->GetTheme<TextTheme>();
+        CHECK_NULL_VOID_NOLOG(theme);
+        MarqueeModel::GetInstance()->SetFontSize(theme->GetTextStyle().GetFontSize());
         return;
     }
     MarqueeModel::GetInstance()->SetFontSize(fontSize);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,8 +19,7 @@
 #include <future>
 
 #include "flutter/common/task_runners.h"
-#include "flutter/lib/ui/text/font_collection.h"
-#include "flutter/lib/ui/window/window.h"
+#include "txt/font_collection.h"
 
 #include "core/components/font/font_collection.h"
 
@@ -34,8 +33,6 @@ public:
 
     void LoadFontFromList(const uint8_t* fontData, size_t length, std::string familyName);
 
-    void CreateFontCollection(const fml::RefPtr<fml::TaskRunner>& ioTaskRunner);
-
     void VaryFontCollectionWithFontWeightScale(float fontWeightScale);
 
     void LoadSystemFont();
@@ -43,17 +40,12 @@ public:
     void SetIsZawgyiMyanmar(bool isZawgyiMyanmar);
 
 private:
-    flutter::WindowClient* GetRosenEngineWindowClient();
-
-    std::unique_ptr<flutter::FontCollection> fontCollection_;
+    std::shared_ptr<txt::FontCollection> fontCollection_;
+    sk_sp<txt::DynamicFontManager> dynamicFontManager_;
     std::vector<std::string> families_;
 
-    std::promise<bool> promise_;
-    std::shared_future<bool> future_ = promise_.get_future();
-    bool isInit_ = false;
-    bool isCompleted_ = false;
-    bool isUseRosenEngine = true;
     bool isZawgyiMyanmar_ = false;
+    std::once_flag fontFlag_;
 
     static RosenFontCollection instance;
 };

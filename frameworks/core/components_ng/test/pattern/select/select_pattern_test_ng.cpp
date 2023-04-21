@@ -13,16 +13,24 @@
  * limitations under the License.
  */
 #include <cstdint>
+#include <optional>
 #include <string>
 
 #include "gtest/gtest.h"
-#define private public
 
+#define protected public
+#define private public
+#include "core/components/select/select_theme.h"
+#include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/option/option_pattern.h"
 #include "core/components_ng/pattern/select/select_pattern.h"
 #include "core/components_ng/pattern/select/select_view.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -34,13 +42,29 @@ const std::string OPTION_TEXT_2 = "BBB";
 const std::string OPTION_TEXT_3 = "CCC";
 const std::string INTERNAL_SOURCE = "$r('app.media.icon')";
 const std::string FILE_SOURCE = "/common/icon.png";
+const std::string TEXT_VALUE = "test";
+const CalcLength MARGIN_LENGTH = CalcLength("8vp");
+const CalcSize TEXT_IDEAL_SIZE = CalcSize(CalcLength("50vp"), std::nullopt);
+constexpr float FULL_SCREEN_WIDTH = 720.0f;
+constexpr float FULL_SCREEN_HEIGHT = 1136.0f;
+const SizeF FULL_SCREEN_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 } // namespace
 
 class SelectPropertyTestNg : public testing::Test {
 public:
-    static void SetUpTestSuite() {};
-    static void TearDownTestSuite() {};
+    static void SetUpTestCase();
+    static void TearDownTestCase();
 };
+
+void SelectPropertyTestNg::SetUpTestCase()
+{
+    MockPipelineBase::SetUp();
+}
+
+void SelectPropertyTestNg::TearDownTestCase()
+{
+    MockPipelineBase::TearDown();
+}
 
 /**
  * @tc.name: SelectLayoutPropertyTest001
@@ -49,6 +73,11 @@ public:
  */
 HWTEST_F(SelectPropertyTestNg, SelectLayoutPropertyTest001, TestSize.Level1)
 {
+    // set buttonTheme to themeManager before using themeManager to get buttonTheme
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+
     std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT, INTERNAL_SOURCE },
         { OPTION_TEXT_2, INTERNAL_SOURCE } };
     SelectView::Create(params);
@@ -58,10 +87,10 @@ HWTEST_F(SelectPropertyTestNg, SelectLayoutPropertyTest001, TestSize.Level1)
     EXPECT_TRUE(pattern);
 
     auto options = pattern->GetOptions();
-    EXPECT_TRUE(options.size() == params.size());
+    EXPECT_EQ(options.size(), params.size());
     for (size_t i = 0; i < options.size(); ++i) {
         auto optionPattern = options[i]->GetPattern<OptionPattern>();
-        EXPECT_TRUE(optionPattern->GetText() == params[i].first);
+        EXPECT_EQ(optionPattern->GetText(), params[i].first);
     }
 }
 
@@ -72,21 +101,54 @@ HWTEST_F(SelectPropertyTestNg, SelectLayoutPropertyTest001, TestSize.Level1)
  */
 HWTEST_F(SelectPropertyTestNg, SelectLayoutPropertyTest002, TestSize.Level1)
 {
+    // set buttonTheme to themeManager before using themeManager to get buttonTheme
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+
     std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT, INTERNAL_SOURCE },
         { OPTION_TEXT_2, INTERNAL_SOURCE } };
     SelectView::Create(params);
     auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     EXPECT_TRUE(select && select->GetTag() == V2::SELECT_ETS_TAG);
     auto pattern = select->GetPattern<SelectPattern>();
-    EXPECT_FALSE(pattern == nullptr);
+    ASSERT_NE(pattern, nullptr);
 
     DirtySwapConfig config;
     config.skipMeasure = true;
     auto layoutWrapper = select->CreateLayoutWrapper();
-    EXPECT_FALSE(layoutWrapper == nullptr);
+    ASSERT_NE(layoutWrapper, nullptr);
     EXPECT_FALSE(pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
-    config.skipMeasure = false;
-    EXPECT_TRUE(pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+}
+
+/**
+ * @tc.name: SelectLayoutPropertyTest003
+ * @tc.desc: Test Select Layout Algorithm MeasureAndGetSize width.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPropertyTestNg, SelectLayoutPropertyTest003, TestSize.Level1)
+{
+    auto text = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_TRUE(text);
+
+    auto textProps = text->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_TRUE(textProps);
+    MarginProperty margin;
+    margin.left = MARGIN_LENGTH;
+    textProps->UpdateMargin(margin);
+    textProps->UpdateUserDefinedIdealSize(TEXT_IDEAL_SIZE);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(text, geometryNode, text->GetLayoutProperty());
+
+    LayoutConstraintF constraint;
+    constraint.maxSize = FULL_SCREEN_SIZE;
+    constraint.percentReference = FULL_SCREEN_SIZE;
+
+    auto layoutAlgorithm = AceType::MakeRefPtr<SelectLayoutAlgorithm>();
+    auto size = layoutAlgorithm->MeasureAndGetSize(layoutWrapper, constraint);
+    auto expectWidth =
+        MARGIN_LENGTH.GetDimension().ConvertToPx() + TEXT_IDEAL_SIZE.Width()->GetDimension().ConvertToPx();
+    EXPECT_EQ(size.Width(), static_cast<float>(expectWidth));
 }
 
 } // namespace OHOS::Ace::NG

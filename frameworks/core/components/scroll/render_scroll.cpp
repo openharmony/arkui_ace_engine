@@ -530,11 +530,6 @@ void RenderScroll::InitScrollBar(const RefPtr<ScrollBar>& scrollBar)
         return;
     }
 
-    if (scrollBar_) {
-        // Clear the old data.
-        scrollBar_->Reset(scrollBar);
-        return;
-    }
     scrollBar_ = scrollBar;
     if (!scrollBar_) {
         scrollBar_ = AceType::MakeRefPtr<ScrollBar>(DisplayMode::OFF);
@@ -682,9 +677,9 @@ bool RenderScroll::HandleMouseEvent(const MouseEvent& event)
     }
     auto globalOffset = GetGlobalOffset();
     auto localPoint = Point(event.x - globalOffset.GetX(), event.y - globalOffset.GetY());
-    bool isScrollBarHover = scrollBar_->InBarRegion(localPoint);
-    scrollBar_->SetIsHover(isScrollBarHover);
-    return isScrollBarHover;
+    bool isInBarRegion = scrollBar_->InBarRegion(localPoint);
+    scrollBar_->SetIsHover(isInBarRegion);
+    return isInBarRegion;
 }
 
 void RenderScroll::JumpToIndex(int32_t index, int32_t source)
@@ -719,10 +714,12 @@ bool RenderScroll::ScrollPage(bool reverse, bool smooth, const std::function<voi
 void RenderScroll::JumpToPosition(double position, int32_t source)
 {
     // If an animation is playing, stop it.
-    if (!animator_->IsStopped()) {
-        animator_->Stop();
+    if (animator_) {
+        if (!animator_->IsStopped()) {
+            animator_->Stop();
+        }
+        animator_->ClearInterpolators();
     }
-    animator_->ClearInterpolators();
     DoJump(position, source);
     HandleScrollBarEnd();
 }
@@ -747,6 +744,10 @@ void RenderScroll::AnimateTo(double position, float duration, const RefPtr<Curve
 {
     LOGD("animate from position %{public}lf to %{public}lf, duration: %{public}f", GetCurrentPosition(), position,
         duration);
+    if (!animator_) {
+        animator_ = AceType::MakeRefPtr<Animator>(GetContext());
+        CHECK_NULL_VOID(animator_);
+    }
     if (!animator_->IsStopped()) {
         animator_->Stop();
     }
@@ -849,6 +850,13 @@ double RenderScroll::GetCurrentPosition() const
 
 void RenderScroll::Update(const RefPtr<Component>& component)
 {
+    auto scroll = AceType::DynamicCast<ScrollComponent>(component);
+    if (scroll == nullptr) {
+        LOGI("scroll component is null, which it is multi scroll, not single scroll");
+        return;
+    }
+    hasHeight_ = scroll->GetHasHeight();
+    hasWidth_ = scroll->GetHasWidth();
     if (!animator_) {
         animator_ = AceType::MakeRefPtr<Animator>(GetContext());
     }
@@ -858,11 +866,6 @@ void RenderScroll::Update(const RefPtr<Component>& component)
     // Send scroll none when first build.
     HandleScrollPosition(0.0, 0.0, SCROLL_NONE);
     MarkNeedLayout();
-    auto scroll = AceType::DynamicCast<ScrollComponent>(component);
-    if (scroll == nullptr) {
-        LOGI("scroll component is null, which it is multi scroll, not single scroll");
-        return;
-    }
     onReachStart_ = AceAsyncEvent<void(const std::string&)>::Create(scroll->GetOnReachStart(), context_);
     onReachEnd_ = AceAsyncEvent<void(const std::string&)>::Create(scroll->GetOnReachEnd(), context_);
     onReachTop_ = AceAsyncEvent<void(const std::string&)>::Create(scroll->GetOnReachTop(), context_);

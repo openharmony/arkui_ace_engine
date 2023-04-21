@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//foundation/arkui/ace_engine/ace_config.gni")
 import(
     "//foundation/arkui/ace_engine/frameworks/core/components/components.gni")
 
@@ -18,6 +19,7 @@ build_component("plugin") {
   sources = [
     "file_asset_provider.cpp",
     "flutter_render_plugin.cpp",
+    "hap_asset_provider.cpp",
     "plugin_component.cpp",
     "plugin_component_manager.cpp",
     "plugin_element.cpp",
@@ -28,9 +30,12 @@ build_component("plugin") {
     "resource/plugin_manager_delegate.cpp",
     "resource/plugin_manager_resource.cpp",
   ]
+  if (ace_use_new_skia) {
+    sources -= [ "flutter_render_plugin.cpp" ]
+  }
   rosen_sources = [ "rosen_render_plugin.cpp" ]
 
-  if (is_standard_system && !use_mingw_win && !use_mac && !use_linux) {
+  if (is_ohos_standard_system && !use_mingw_win && !use_mac && !use_linux) {
     include_dirs = [
       "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager/include",
       "//foundation/multimodalinput/input/interfaces/native/innerkits/event/include",
@@ -40,17 +45,17 @@ build_component("plugin") {
       "$ability_runtime_inner_api_path/ability_manager:ability_manager",
       "$ability_runtime_path/frameworks/native/ability/native:abilitykit_native",
       "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
-      "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
-      "//foundation/multimodalinput/input/frameworks/proxy:libmmi-common",
       "//foundation/systemabilitymgr/safwk/interfaces/innerkits/safwk:system_ability_fwk",
       "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
       "//foundation/window/window_manager/wm:libwm",
     ]
 
     external_deps = [
+      "ability_base:extractortool",
       "ability_base:want",
       "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
+      "input:libmmi-client",
       "ipc:ipc_core",
     ]
 

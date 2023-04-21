@@ -263,10 +263,10 @@ public:
         return barController_ ?  barController_->IsPressed() : false;
     }
 
-    void SetIsHover(bool isHover) const
+    void SetIsHover(bool isInBarRegion) const
     {
         if (barController_) {
-            barController_->SetIsHover(isHover);
+            barController_->SetIsHover(isInBarRegion);
         }
     }
 

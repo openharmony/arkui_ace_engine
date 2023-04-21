@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,13 +18,15 @@
 
 #include <optional>
 
+#include "base/memory/referenced.h"
+#include "core/components/select/select_theme.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/option/option_accessibility_property.h"
 #include "core/components_ng/pattern/option/option_event_hub.h"
 #include "core/components_ng/pattern/option/option_layout_algorithm.h"
 #include "core/components_ng/pattern/option/option_paint_method.h"
 #include "core/components_ng/pattern/option/option_paint_property.h"
-#include "core/components_ng/pattern/option/option_theme.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/render/paint_property.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
@@ -52,6 +54,11 @@ public:
         return MakeRefPtr<OptionEventHub>();
     }
 
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        return MakeRefPtr<OptionAccessibilityProperty>();
+    }
+
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         return MakeRefPtr<OptionLayoutAlgorithm>();
@@ -65,6 +72,11 @@ public:
     void SetTextNode(const RefPtr<FrameNode>& text)
     {
         text_ = text;
+    }
+
+    void SetIconNode(const RefPtr<FrameNode>& icon)
+    {
+        icon_ = icon;
     }
 
     void SetBgColor(const Color& color);
@@ -103,28 +115,79 @@ public:
         return { FocusType::NODE, true, FocusStyleType::INNER_BORDER };
     }
 
+    void UpdateNextNodeDivider(bool needDivider);
+
+    void SetBgBlendColor(const Color& color)
+    {
+        bgBlendColor_ = color;
+    }
+
+    Color GetBgBlendColor() const
+    {
+        return bgBlendColor_;
+    }
+
+    void SetIsHover(bool isHover)
+    {
+        isHover_ = isHover;
+    }
+
+    bool IsHover() const
+    {
+        return isHover_;
+    }
+
+    void PlayBgColorAnimation(bool isHoverChange = true);
+
+    void UpdateText(const std::string& content);
+    void UpdateIcon(const std::string& src);
+
+    void SetMenu(const WeakPtr<FrameNode>& menuWeak)
+    {
+        menuWeak_ = menuWeak;
+    }
+
+    const WeakPtr<FrameNode>& GetMenu() const
+    {
+        return menuWeak_;
+    }
+
 private:
     void OnModifyDone() override;
-
-    void UpdateNextNodeDivider(bool needDivider);
+    // make render after measure and layout
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override
+    {
+        return !(config.skipMeasure && config.skipLayout);
+    }
 
     // register option's callback
     void RegisterOnClick();
 
     void RegisterOnTouch();
     void RegisterOnHover();
+    void RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+
     // change option paint props on press
     void OnPress(const TouchEventInfo& info);
     void OnHover(bool isHover);
+    bool OnKeyEvent(const KeyEvent& event);
+
+    void OnSelectProcess();
 
     std::optional<Color> bgColor_;
 
     // src of icon image, used in XTS inspector
     std::string iconSrc_;
-    RefPtr<FrameNode> text_ = nullptr;
-    RefPtr<TextTheme> textTheme_ = nullptr;
+    WeakPtr<FrameNode> menuWeak_;
+    RefPtr<FrameNode> text_;
+    RefPtr<FrameNode> icon_;
+    RefPtr<TextTheme> textTheme_;
+    RefPtr<SelectTheme> selectTheme_;
     // this option node's index in the menu
     int index_ = -1;
+
+    Color bgBlendColor_ = Color::TRANSPARENT;
+    bool isHover_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(OptionPattern);
 };

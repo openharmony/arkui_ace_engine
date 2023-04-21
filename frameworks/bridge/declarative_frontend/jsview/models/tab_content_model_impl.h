@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,6 +28,11 @@ public:
     void Pop() override;
     void SetTabBar(const std::optional<std::string>& text, const std::optional<std::string>& icon,
         std::function<void()>&& builder, bool useContentOnly) override;
+    void SetTabBarStyle(TabBarStyle tabBarStyle) override {}
+    void SetIndicator(const IndicatorStyle& indicator) override {}
+    void SetBoard(const BoardStyle& board) override {}
+    void SetSelectedMode(SelectedMode selectedMode) override {}
+    void SetLabelStyle(const LabelStyle& labelStyle) override {}
 
 private:
     RefPtr<Component> ProcessTabBarBuilderFunction(

@@ -962,11 +962,10 @@ public:
         } else {
             for (size_t idx = from - 1; idx >= to; --idx) {
                 auto it = children_.find(idx);
-                if (it == children_.end()) {
-                    continue;
+                if (it != children_.end()) {
+                    items.emplace_back(idx + 1, it->second);
+                    children_.erase(it);
                 }
-                items.emplace_back(idx + 1, it->second);
-                children_.erase(it);
                 if (idx == 0) {
                     break;
                 }

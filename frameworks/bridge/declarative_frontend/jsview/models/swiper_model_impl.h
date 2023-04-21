@@ -39,6 +39,8 @@ public:
     void SetItemSpace(const Dimension& itemSpace) override;
     void SetCachedCount(int32_t cachedCount) override;
     void SetOnChange(std::function<void(const BaseEventInfo* info)>&& onChange) override;
+    void SetOnAnimationStart(std::function<void(const BaseEventInfo* info)>&& onAnimationStart) override;
+    void SetOnAnimationEnd(std::function<void(const BaseEventInfo* info)>&& onAnimationEnd) override;
 
     void SetRemoteMessageEventId(RemoteCallback&& remoteCallback) override;
     void SetOnClick(

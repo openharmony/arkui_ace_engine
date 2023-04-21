@@ -148,7 +148,7 @@ public:
         return isPressed_;
     }
 
-    void SetIsHover(bool isHover);
+    void SetIsHover(bool isInBarRegion);
 
     void OnFlushTouchEventsBegin() override;
     void OnFlushTouchEventsEnd() override;
@@ -190,6 +190,8 @@ protected:
     bool isPressed_ = false;
     // Whether scroll bar is hover.
     bool isHover_ = false;
+    // Whether event is in scroll bar region.
+    bool isInBar_ = false;
     double currentPos_ = 0.0;
     Dimension activeWidth_;
     Dimension inactiveWidth_;

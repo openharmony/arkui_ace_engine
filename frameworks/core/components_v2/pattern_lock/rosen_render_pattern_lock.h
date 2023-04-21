@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_PATTERN_LOCK_ROSEN_RENDER_PATTERN_LOCK_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_PATTERN_LOCK_ROSEN_RENDER_PATTERN_LOCK_H
 
-#include "third_party/skia/include/core/SkCanvas.h"
+#include "include/core/SkCanvas.h"
 
 #include "core/components_v2/pattern_lock/render_pattern_lock.h"
 

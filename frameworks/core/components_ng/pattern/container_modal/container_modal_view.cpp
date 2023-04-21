@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/container_modal/container_modal_view.h"
 
+#include "core/components_ng/gestures/pan_gesture.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
@@ -77,6 +78,7 @@ RefPtr<FrameNode> ContainerModalView::BuildTitle(RefPtr<FrameNode>& containerNod
 {
     auto containerTitleRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    containerTitleRow->UpdateInspectorId("ContainerModalTitleRow");
     auto layoutProperty = containerTitleRow->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, nullptr);
     layoutProperty->UpdateUserDefinedIdealSize(
@@ -93,24 +95,21 @@ RefPtr<FrameNode> ContainerModalView::BuildTitle(RefPtr<FrameNode>& containerNod
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto windowManager = pipeline->GetWindowManager();
     CHECK_NULL_RETURN(windowManager, nullptr);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_RETURN(containerPattern, nullptr);
     if (!isFloatingTitle) {
         // touch the title to move the floating window
-        auto touchEventHub = containerTitleRow->GetOrCreateGestureEventHub();
-        CHECK_NULL_RETURN(touchEventHub, nullptr);
-        touchEventHub->SetTouchEvent([windowManager](TouchEventInfo& info) {
+        auto eventHub = containerTitleRow->GetOrCreateGestureEventHub();
+        CHECK_NULL_RETURN(eventHub, nullptr);
+        PanDirection panDirection;
+        panDirection.type = PanDirection::ALL;
+        auto panActionStart = [windowManager](const GestureEvent&) {
             CHECK_NULL_VOID_NOLOG(windowManager);
+            LOGI("container window start move.");
             windowManager->WindowStartMove();
-        });
-
-        // click the title to move the floating window with the mouse
-        auto mouseEventHub = containerTitleRow->GetOrCreateInputEventHub();
-        CHECK_NULL_RETURN(mouseEventHub, nullptr);
-        mouseEventHub->SetMouseEvent([windowManager](MouseInfo& info) {
-            if (windowManager && info.GetButton() == MouseButton::LEFT_BUTTON &&
-                info.GetAction() == MouseAction::PRESS) {
-                windowManager->WindowStartMove();
-            }
-        });
+        };
+        auto panEvent = AceType::MakeRefPtr<PanEvent>(std::move(panActionStart), nullptr, nullptr, nullptr);
+        eventHub->AddPanEvent(panEvent, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
     }
 
     auto themeManager = pipeline->GetThemeManager();
@@ -122,6 +121,10 @@ RefPtr<FrameNode> ContainerModalView::BuildTitle(RefPtr<FrameNode>& containerNod
     ImageSourceInfo imageSourceInfo;
     auto titleIcon = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    auto titleFocus = titleIcon->GetFocusHub();
+    if (titleFocus) {
+        titleFocus->SetFocusable(false);
+    }
     imageSourceInfo.SetSrc(themeConstants->GetMediaPath(pipeline->GetWindowManager()->GetAppIconId()));
     auto imageLayoutProperty = titleIcon->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
@@ -152,7 +155,7 @@ RefPtr<FrameNode> ContainerModalView::BuildTitle(RefPtr<FrameNode>& containerNod
     // add leftSplit / maxRecover / minimize / close button
     containerTitleRow->AddChild(BuildControlButton(InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_SPLIT_LEFT,
         [windowManager](GestureEvent& info) {
-            CHECK_NULL_VOID_NOLOG(windowManager);
+            CHECK_NULL_VOID(windowManager);
             LOGI("left split button clicked");
             windowManager->FireWindowSplitCallBack();
         }));
@@ -168,15 +171,16 @@ RefPtr<FrameNode> ContainerModalView::BuildTitle(RefPtr<FrameNode>& containerNod
                 windowManager->WindowMaximize();
             }
         }));
-    containerTitleRow->AddChild(BuildControlButton(
-        InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MINIMIZE, [windowManager](GestureEvent& info) {
-            CHECK_NULL_VOID_NOLOG(windowManager);
+    containerTitleRow->AddChild(BuildControlButton(InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MINIMIZE,
+        [windowManager] (GestureEvent& info) {
+            CHECK_NULL_VOID(windowManager);
             LOGI("minimize button clicked");
             windowManager->WindowMinimize();
         }));
     containerTitleRow->AddChild(BuildControlButton(
-        InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_CLOSE, [windowManager](GestureEvent& info) {
-            CHECK_NULL_VOID_NOLOG(windowManager);
+        InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_CLOSE,
+        [windowManager](GestureEvent& info) {
+            CHECK_NULL_VOID(windowManager);
             LOGI("close button clicked");
             windowManager->WindowClose();
         }, true));
@@ -191,6 +195,10 @@ RefPtr<FrameNode> ContainerModalView::BuildControlButton(
     ImageSourceInfo imageSourceInfo;
     auto imageIcon = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    auto imageFocus = imageIcon->GetFocusHub();
+    if (imageFocus) {
+        imageFocus->SetFocusable(false);
+    }
     imageSourceInfo.SetResourceId(icon);
     auto imageLayoutProperty = imageIcon->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
@@ -200,6 +208,10 @@ RefPtr<FrameNode> ContainerModalView::BuildControlButton(
 
     auto buttonNode = FrameNode::CreateFrameNode(
         V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    auto buttonFocus = buttonNode->GetFocusHub();
+    if (buttonFocus) {
+        buttonFocus->SetFocusable(false);
+    }
     auto renderContext = buttonNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
     renderContext->UpdateBackgroundColor(TITLE_BUTTON_BACKGROUND_COLOR);

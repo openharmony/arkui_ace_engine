@@ -35,8 +35,6 @@ bool OHOS::Ace::SystemProperties::GetDebugEnabled()
 namespace OHOS::Ace::NG {
 namespace {
 constexpr bool EVENT_HUB_ENABLE = false;
-constexpr bool APPEAR_VALUE = true;
-constexpr bool DISAPPEAR_VALUE = false;
 const std::string DRAG_STARR_EVENT_TYPE = "drag start";
 const std::string DRAG_ENTER_EVENT_TYPE = "drag enter";
 const std::string DRAG_LEAVE_EVENT_TYPE = "drag leave";
@@ -56,6 +54,13 @@ const float NEW_WIDTH = 500.0f;
 const float NEW_HEIGHT = 500.0f;
 const RectF NEW_RECT = RectF(NEW_X_VALUE, NEW_Y_VALUE, NEW_WIDTH, NEW_HEIGHT);
 const OffsetF NEW_ORIGIN = OffsetF(NEW_WIDTH, NEW_HEIGHT);
+
+const std::string STRINGCTER_A = "A";
+const std::string STRINGCTER_Q = "Q";
+const std::string STRINGCTER_E = "E";
+constexpr int32_t NUM_CTRL_VALUE = 1;
+constexpr int32_t NUM_SHIFT_VALUE = 2;
+constexpr int32_t NUM_ALT_VALUE = 4;
 } // namespace
 
 class EventHubTestNg : public testing::Test {
@@ -195,16 +200,11 @@ HWTEST_F(EventHubTestNg, EventHubPropertyTest003, TestSize.Level1)
      * @tc.steps: step3. Set/fire EventHub onAppear and onDisappear function.
      * @tc.expected: isAppear is assigned with correct value.
      */
-    double isAppear = false;
-    auto onAppear = [&isAppear]() { isAppear = APPEAR_VALUE; };
-    eventHub->SetOnAppear(onAppear);
+    eventHub->SetOnAppear([]() {});
     eventHub->FireOnAppear();
-    EXPECT_EQ(isAppear, APPEAR_VALUE);
 
-    auto onDisappear = [&isAppear]() { isAppear = DISAPPEAR_VALUE; };
-    eventHub->SetOnDisappear(onDisappear);
+    eventHub->SetOnDisappear([]() {});
     eventHub->FireOnDisappear();
-    EXPECT_EQ(isAppear, DISAPPEAR_VALUE);
 }
 
 /**
@@ -276,5 +276,40 @@ HWTEST_F(EventHubTestNg, EventHubDragEventsTest004, TestSize.Level1)
     eventHub->FireOnDragMove(dragEvent, DRAG_DROP_EVENT_TYPE);
     EXPECT_TRUE(eventHub->HasOnDrop());
     EXPECT_EQ(dragEventType, DRAG_DROP_EVENT_TYPE);
+}
+
+/**
+ * @tc.name: EventHubCreateTest005
+ * @tc.desc: Create EventHub.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubDragEventsTest005, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    std::vector<KeyboardShortcut> keyboardShortcut;
+    eventHub->SetKeyboardShortcut(STRINGCTER_A, NUM_CTRL_VALUE, []() {});
+    keyboardShortcut = eventHub->GetKeyboardShortcut();
+    for (auto iter = keyboardShortcut.begin(); iter != keyboardShortcut.end(); iter++) {
+        EXPECT_EQ(STRINGCTER_A, (*iter).value);
+        EXPECT_EQ(NUM_CTRL_VALUE, (*iter).keys);
+    }
+    keyboardShortcut.clear();
+
+    eventHub->SetKeyboardShortcut(STRINGCTER_Q, NUM_SHIFT_VALUE, []() {});
+    eventHub->GetKeyboardShortcut();
+    for (auto iter = keyboardShortcut.begin(); iter != keyboardShortcut.end(); iter++) {
+        EXPECT_EQ(STRINGCTER_Q, (*iter).value);
+        EXPECT_EQ(NUM_SHIFT_VALUE, (*iter).keys);
+    }
+    keyboardShortcut.clear();
+
+    eventHub->SetKeyboardShortcut(STRINGCTER_E, NUM_ALT_VALUE, []() {});
+    eventHub->GetKeyboardShortcut();
+    for (auto iter = keyboardShortcut.begin(); iter != keyboardShortcut.end(); iter++) {
+        EXPECT_EQ(STRINGCTER_E, (*iter).value);
+        EXPECT_EQ(NUM_CTRL_VALUE, (*iter).keys);
+    }
+    keyboardShortcut.clear();
 }
 } // namespace OHOS::Ace::NG

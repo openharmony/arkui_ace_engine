@@ -56,6 +56,11 @@ public:
         return { isVertical_, true, ScopeType::FLEX };
     }
 
+    bool GetIsVertical() const
+    {
+        return isVertical_;
+    }
+
 private:
     bool isVertical_ = false;
 

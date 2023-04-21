@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@
 #include <set>
 #include <unordered_map>
 #include <utility>
+#include <thread>
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/offset.h"
@@ -110,10 +111,10 @@ public:
         std::unordered_map<int32_t, std::function<void(int32_t, int32_t, int32_t, int32_t)>>;
     using SurfacePositionChangedCallbackMap = std::unordered_map<int32_t, std::function<void(int32_t, int32_t)>>;
 
-    PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
+    PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
         RefPtr<AssetManager> assetManager, RefPtr<PlatformResRegister> platformResRegister,
         const RefPtr<Frontend>& frontend, int32_t instanceId);
-    PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExecutor>& taskExecutor,
+    PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor>& taskExecutor,
         RefPtr<AssetManager> assetManager, const RefPtr<Frontend>& frontend);
 
     ~PipelineContext() override;
@@ -159,7 +160,9 @@ public:
 
     void SetSinglePageId(int32_t pageId);
 
-    bool PopPageStackOverlay();
+    bool PopPageStackOverlay() override;
+
+    void HideOverlays() override;
 
     void NotifyAppStorage(const std::string& key, const std::string& value);
 
@@ -227,14 +230,15 @@ public:
     // Called by view when idle event.
     void OnIdle(int64_t deadline) override;
 
-    void OnVirtualKeyboardHeightChange(float keyboardHeight) override;
+    void OnVirtualKeyboardHeightChange(
+        float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr) override;
 
     // Set card position for barrierFree
     void SetCardViewPosition(int id, float offsetX, float offsetY);
 
     void SetCardViewAccessibilityParams(const std::string& key, bool focus);
 
-    void FlushPipelineImmediately();
+    void FlushPipelineImmediately() override;
 
     void RegisterEventHandler(const RefPtr<AceEventHandler>& handler)
     {
@@ -254,29 +258,24 @@ public:
     }
 
     void OnSurfaceChanged(
-        int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED) override;
+        int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr) override;
 
     void OnSurfacePositionChanged(int32_t posX, int32_t posY) override;
 
-    void WindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type);
+    void WindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
 
     void OnSurfaceDensityChanged(double density) override;
 
     void OnSystemBarHeightChanged(double statusBar, double navigationBar) override;
 
     void OnSurfaceDestroyed() override;
-    
+
     // SemiModal and DialogModal have their own enter/exit animation and will exit after animation done.
     void Finish(bool autoFinish = true) const override;
 
     void RequestFullWindow(int32_t duration) override;
-
-    using WebPaintCallback = std::function<void()>;
-    void SetWebPaintCallback(WebPaintCallback&& listener)
-    {
-        webPaintCallback_.push_back(std::move(listener));
-    }
-    void NotifyWebPaint() const;
 
     // Get the font scale used to covert fp to logic px.
     double GetFontUnitScale() const
@@ -297,6 +296,10 @@ public:
     Rect GetRootRect() const;
     Rect GetStageRect() const;
     Rect GetPageRect() const;
+
+    void SetGetViewSafeAreaImpl(std::function<SafeAreaEdgeInserts()>&& callback) override {};
+
+    SafeAreaEdgeInserts GetCurrentViewSafeArea() const override { return SafeAreaEdgeInserts(); };
 
     bool IsSurfaceReady() const
     {
@@ -334,11 +337,9 @@ public:
 
     void RefreshStageFocus();
 
-    void ShowContainerTitle(bool isShow) override;
+    void ShowContainerTitle(bool isShow, bool hasDeco = true) override;
 
-    void BlurWindowWithDrag(bool isBlur);
-
-    void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize);
+    void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize) override;
 
     RefPtr<StageElement> GetStageElement() const;
 
@@ -512,16 +513,6 @@ public:
     bool IsBuildingFirstPage() const
     {
         return buildingFirstPage_;
-    }
-
-    const RefPtr<SharedImageManager>& GetSharedImageManager() const
-    {
-        return sharedImageManager_;
-    }
-
-    void SetSharedImageManager(const RefPtr<SharedImageManager>& sharedImageManager)
-    {
-        sharedImageManager_ = sharedImageManager;
     }
 
     using UpdateWindowBlurDrawOpHandler = std::function<void(void)>;
@@ -773,21 +764,6 @@ public:
 
     std::string GetRestoreInfo(int32_t restoreId);
 
-    void SetIsSubPipeline(bool isSubPipeline)
-    {
-        isSubPipeline_ = isSubPipeline;
-    }
-
-    bool IsSubPipeline() const
-    {
-        return isSubPipeline_;
-    }
-
-    bool GetIsDragStart() const
-    {
-        return isDragStart_;
-    }
-
     bool GetIsTabKeyPressed() const
     {
         return isTabKeyPressed_;
@@ -819,11 +795,6 @@ public:
     void SetRootRect(double width, double height, double offset = 0.0) override
     {
         SetRootSizeWithWidthHeight(width, height, offset);
-    }
-
-    void SetParentPipeline(const WeakPtr<PipelineBase>& pipeline)
-    {
-        parentPipeline_ = pipeline;
     }
 
     void SetContainerWindow(bool isShow) override;
@@ -864,7 +835,6 @@ private:
     void DumpAccessibility(const std::vector<std::string>& params) const;
     void FlushWindowBlur();
     void MakeThreadStuck(const std::vector<std::string>& params) const;
-    void DumpFrontend() const;
     void ExitAnimation();
     void CreateGeometryTransition();
     void CorrectPosition();
@@ -893,7 +863,7 @@ private:
             auto nodeLeft = nodeLeftWeak.Upgrade();
             auto nodeRight = nodeRightWeak.Upgrade();
             if (!nodeLeft || !nodeRight) {
-                return false;
+                return true;
             }
             auto compare = NodeCompare<decltype(nodeLeft)>();
             return compare(nodeLeft, nodeRight);
@@ -922,7 +892,6 @@ private:
     RefPtr<RootElement> rootElement_;
     WeakPtr<FocusNode> dirtyFocusNode_;
     WeakPtr<FocusNode> dirtyFocusScope_;
-    RefPtr<SharedImageManager> sharedImageManager_;
     std::list<std::function<void()>> buildAfterCallback_;
     RefPtr<RenderFactory> renderFactory_;
     UpdateWindowBlurRegionHandler updateWindowBlurRegionHandler_;
@@ -950,8 +919,6 @@ private:
     RefPtr<CardTransitionController> cardTransitionController_;
     RefPtr<TextOverlayManager> textOverlayManager_;
     EventTrigger eventTrigger_;
-
-    std::list<WebPaintCallback> webPaintCallback_;
 
     WeakPtr<RenderNode> requestedRenderNode_;
     // Make page update tasks pending here to avoid block receiving vsync.
@@ -986,8 +953,6 @@ private:
     bool needWindowBlurRegionRefresh_ = false;
     bool useLiteStyle_ = false;
     bool isFirstLoaded_ = true;
-    bool isDragStart_ = false;
-    bool isFirstDrag_ = true;
     bool isDensityUpdate_ = false;
     uint64_t flushAnimationTimestamp_ = 0;
     TimeProvider timeProvider_;
@@ -1036,13 +1001,12 @@ private:
     std::unordered_map<int32_t, WeakPtr<RenderElement>> storeNode_;
     std::unordered_map<int32_t, std::string> restoreNodeInfo_;
 
-    bool isSubPipeline_ = false;
-    WeakPtr<PipelineBase> parentPipeline_;
-
     std::unordered_map<ComposeId, std::list<VisibleCallbackInfo>> visibleAreaChangeNodes_;
 
     std::vector<RectCallback> rectCallbackList_;
     std::list<TouchEvent> touchEvents_;
+
+    int32_t rotationAnimationCount_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };

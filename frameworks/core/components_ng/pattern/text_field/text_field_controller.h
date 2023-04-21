@@ -39,6 +39,7 @@ public:
     void Delete() override;
     void Insert(const std::string& args) override;
     void CaretPosition(int32_t caretPosition) override;
+    void SetTextSelection(int32_t selectionStart, int32_t selectionEnd) override;
 
 private:
     WeakPtr<Pattern> pattern_;

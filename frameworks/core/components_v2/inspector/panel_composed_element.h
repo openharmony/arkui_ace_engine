@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_PANEL_COMPOSED_ELEMENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_PANEL_COMPOSED_ELEMENT_H
 
+#include "base/utils/utils.h"
 #include "core/components/panel/sliding_panel_element.h"
 #include "core/components_v2/inspector/inspector_composed_element.h"
 #include "core/pipeline/base/composed_element.h"
@@ -45,9 +46,12 @@ public:
         return SlidingPanelElement::TypeId();
     }
 
-    void AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent) override;
-    void UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent) override;
-    void DeleteChildWithSlot(int32_t slot) override;
+    RefPtr<Element> GetRenderElement() const override
+    {
+        auto slidingPanelElement = GetContentElement<SlidingPanelElement>(SlidingPanelElement::TypeId());
+        CHECK_NULL_RETURN(slidingPanelElement, nullptr);
+        return GetInspectorComposedElementParent(slidingPanelElement);
+    }
 };
 
 } // namespace OHOS::Ace

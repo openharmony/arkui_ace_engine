@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,12 +15,10 @@
 
 #include "core/image/image_provider.h"
 
-#ifndef NG_BUILD
 #include "experimental/svg/model/SkSVGDOM.h"
-#endif
 #include "image_compressor.h"
-#include "third_party/skia/include/core/SkGraphics.h"
-#include "third_party/skia/include/core/SkStream.h"
+#include "include/core/SkGraphics.h"
+#include "include/core/SkStream.h"
 
 #include "base/log/ace_trace.h"
 #include "base/thread/background_task_executor.h"
@@ -51,7 +49,7 @@ bool ImageProvider::TrySetLoadingImage(
     const FailedCallback& failedCallback)
 {
     std::lock_guard lock(loadingImageMutex_);
-    auto key = imageInfo.GetCacheKey();
+    auto key = imageInfo.GetKey();
     auto iter = loadingImage_.find(key);
     if (iter == loadingImage_.end()) {
         std::vector<LoadCallback> callbacks { { successCallback, uploadCallback, failedCallback } };
@@ -70,31 +68,33 @@ void ImageProvider::ProccessLoadingResult(
     bool canStartUploadImageObj,
     const RefPtr<ImageObject>& imageObj,
     const RefPtr<PipelineBase>& context,
-    const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
     const std::string& errorMsg)
 {
     std::lock_guard lock(loadingImageMutex_);
     std::vector<LoadCallback> callbacks;
-    auto key = imageInfo.GetCacheKey();
+    auto key = imageInfo.GetKey();
     auto iter = loadingImage_.find(key);
     if (iter != loadingImage_.end()) {
         std::swap(callbacks, iter->second);
         for (const auto& callback : callbacks) {
             if (imageObj == nullptr) {
                 taskExecutor->PostTask([imageInfo, callback, errorMsg]() {
-                    callback.failedCallback(imageInfo, errorMsg);
+                    if (callback.failedCallback) {
+                        callback.failedCallback(imageInfo, errorMsg);
+                    }
                 }, TaskExecutor::TaskType::UI);
                 return;
             }
             auto obj = imageObj->Clone();
             taskExecutor->PostTask([obj, imageInfo, callback]() {
-                callback.successCallback(imageInfo, obj);
+                if (callback.successCallback) {
+                    callback.successCallback(imageInfo, obj);
+                }
             }, TaskExecutor::TaskType::UI);
             if (canStartUploadImageObj) {
                 bool forceResize = (!obj->IsSvg()) && (imageInfo.IsSourceDimensionValid());
                 obj->UploadToGpuForRender(
                     context,
-                    renderTaskHolder,
                     callback.uploadCallback,
                     callback.failedCallback,
                     obj->GetImageSize(),
@@ -128,11 +128,7 @@ void ImageProvider::ProccessUploadResult(
     const RefPtr<TaskExecutor>& taskExecutor,
     const ImageSourceInfo& imageInfo,
     const Size& imageSize,
-#ifdef NG_BUILD
     const RefPtr<NG::CanvasImage>& canvasImage,
-#else
-    const fml::RefPtr<flutter::CanvasImage>& canvasImage,
-#endif
     const std::string& errorMsg)
 {
     std::lock_guard lock(uploadMutex_);
@@ -165,10 +161,9 @@ void ImageProvider::FetchImageObject(
     bool syncMode,
     bool useSkiaSvg,
     bool needAutoResize,
-    const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
     const OnPostBackgroundTask& onBackgroundTaskPostCallback)
 {
-    auto task = [context, imageInfo, successCallback, failedCallback, useSkiaSvg, renderTaskHolder,
+    auto task = [context, imageInfo, successCallback, failedCallback, useSkiaSvg,
                     uploadSuccessCallback, needAutoResize, id = Container::CurrentId(), syncMode]() mutable {
         ContainerScope scope(id);
         auto pipelineContext = context.Upgrade();
@@ -195,7 +190,7 @@ void ImageProvider::FetchImageObject(
                     "Image data may be broken or absent, please check if image file or image data is valid");
                 return;
             }
-            ProccessLoadingResult(taskExecutor, imageInfo, false, nullptr, pipelineContext, renderTaskHolder,
+            ProccessLoadingResult(taskExecutor, imageInfo, false, nullptr, pipelineContext,
                 "Image data may be broken or absent, please check if image file or image data is valid.");
             return;
         }
@@ -207,8 +202,7 @@ void ImageProvider::FetchImageObject(
                 imageInfo,
                 !needAutoResize && (imageObj->GetFrameCount() == 1),
                 imageObj,
-                pipelineContext,
-                renderTaskHolder);
+                pipelineContext);
         }
     };
     if (syncMode) {
@@ -288,7 +282,6 @@ sk_sp<SkData> ImageProvider::LoadImageRawDataFromFileCache(
     return nullptr;
 }
 
-#ifndef NG_BUILD
 void ImageProvider::GetSVGImageDOMAsyncFromSrc(const std::string& src,
     std::function<void(const sk_sp<SkSVGDOM>&)> successCallback, std::function<void()> failedCallback,
     const WeakPtr<PipelineBase> context, uint64_t svgThemeColor, OnPostBackgroundTask onBackgroundTaskPostCallback)
@@ -366,49 +359,39 @@ void ImageProvider::GetSVGImageDOMAsyncFromData(const sk_sp<SkData>& skData,
     }
     BackgroundTaskExecutor::GetInstance().PostTask(cancelableTask);
 }
-#endif
 
 void ImageProvider::UploadImageToGPUForRender(const WeakPtr<PipelineBase> context,
     const sk_sp<SkImage>& image,
     const sk_sp<SkData>& data,
-    const std::function<void(flutter::SkiaGPUObject<SkImage>, sk_sp<SkData>)>&& callback,
-    const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
+    const std::function<void(sk_sp<SkImage>, sk_sp<SkData>)>&& callback,
     const std::string src)
 {
-    if (!renderTaskHolder) {
-        LOGW("renderTaskHolder has been released.");
-        return;
-    }
 #ifdef UPLOAD_GPU_DISABLED
     // If want to dump draw command or gpu disabled, should use CPU image.
-    callback({ image, renderTaskHolder->unrefQueue }, nullptr);
+    callback(image, nullptr);
 #else
     if (data && ImageCompressor::GetInstance()->CanCompress()) {
         LOGI("use astc cache %{public}s %{public}d * %{public}d", src.c_str(), image->width(), image->height());
-        callback({ image, renderTaskHolder->unrefQueue }, data);
+        callback(image, data);
         return;
     }
-    auto task = [context, image, callback, renderTaskHolder, src] () {
-        if (!renderTaskHolder) {
-            LOGW("renderTaskHolder has been released.");
-            return;
-        }
+    auto task = [context, image, callback, src] () {
         ACE_DCHECK(!image->isTextureBacked());
         bool needRaster = ImageCompressor::GetInstance()->CanCompress();
         if (!needRaster) {
-            callback({ image, renderTaskHolder->unrefQueue }, nullptr);
+            callback(image, nullptr);
             return;
         } else {
             auto rasterizedImage = image->isLazyGenerated() ? image->makeRasterImage() : image;
             if (!rasterizedImage) {
                 LOGW("Rasterize image failed. callback.");
-                callback({ image, renderTaskHolder->unrefQueue }, nullptr);
+                callback(image, nullptr);
                 return;
             }
             SkPixmap pixmap;
             if (!rasterizedImage->peekPixels(&pixmap)) {
                 LOGW("Could not peek pixels of image for texture upload.");
-                callback({ rasterizedImage, renderTaskHolder->unrefQueue }, nullptr);
+                callback(rasterizedImage, nullptr);
                 return;
             }
             int32_t width = static_cast<int32_t>(pixmap.width());
@@ -427,7 +410,7 @@ void ImageProvider::UploadImageToGPUForRender(const WeakPtr<PipelineBase> contex
                         ImageCompressor::GetInstance()->ScheduleReleaseTask());
                 }
             }
-            callback({ image, renderTaskHolder->unrefQueue }, compressData);
+            callback(image, compressData);
             // Trigger purge cpu bitmap resource, after image upload to gpu.
             SkGraphics::PurgeResourceCache();
         }
@@ -481,7 +464,7 @@ sk_sp<SkImage> ImageProvider::ApplySizeToSkImage(
             srcKey.c_str(), dstWidth, dstHeight, rawImage->width(), rawImage->height());
         return rawImage;
     }
-#ifdef NG_BUILD
+#ifdef FLUTTER_2_5
     if (!rawImage->scalePixels(scaledBitmap.pixmap(), SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kNone),
             SkImage::kDisallow_CachingHint)) {
 #else

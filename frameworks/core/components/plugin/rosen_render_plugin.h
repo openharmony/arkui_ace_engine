@@ -17,7 +17,11 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_PLUGIN_ROSEN_RENDER_PLUGIN_H
 
 #include "core/components/plugin/render_plugin.h"
+#ifndef NEW_SKIA
 #include "core/pipeline/layers/offset_layer.h"
+#else
+#include "base/geometry/offset.h"
+#endif
 
 namespace OHOS::Ace {
 class RosenRenderPlugin : public RenderPlugin {
