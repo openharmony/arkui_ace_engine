@@ -34,7 +34,7 @@
 #include "core/components_ng/pattern/web/web_pattern_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/render_surface.h"
-#include "nweb_handler.h"
+#include "base/web/webview/ohos_nweb/include/nweb_handler.h"
 
 namespace OHOS::Ace::NG {
 namespace {

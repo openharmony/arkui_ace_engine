@@ -261,6 +261,7 @@ build_component_ng("pattern_ng") {
     "refresh/refresh_pattern.cpp",
     "relative_container/relative_container_layout_algorithm.cpp",
     "relative_container/relative_container_view.cpp",
+    "richtext/richtext_model_ng.cpp",
     "scroll/effect/scroll_fade_controller.cpp",
     "scroll/effect/scroll_fade_effect.cpp",
     "scroll/effect/scroll_fade_painter.cpp",
