@@ -2400,7 +2400,10 @@ void WebDelegate::InitWebViewWithSurface()
                 wptr<Surface> surfaceWeak(delegate->surface_);
                 sptr<Surface> surface = surfaceWeak.promote();
                 CHECK_NULL_VOID(surface);
-                delegate->nweb_ = OHOS::NWeb::NWebAdapterHelper::Instance().CreateNWeb(surface, initArgs);
+                delegate->nweb_ = OHOS::NWeb::NWebAdapterHelper::Instance().CreateNWeb(
+                    surface,
+                    initArgs,
+                    delegate->drawSize_.Width(), delegate->drawSize_.Height());
 #endif
             }
             CHECK_NULL_VOID(delegate->nweb_);
