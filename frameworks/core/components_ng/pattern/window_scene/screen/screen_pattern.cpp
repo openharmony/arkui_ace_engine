@@ -16,15 +16,16 @@
 #include "core/components_ng/pattern/window_scene/screen/screen_pattren.h"
 
 #include "display_info.h"
-#include "ipc_skeleton.h"
 #include "input_manager.h"
-#include "render_service_client/core/ui/rs_display_node.h"
+#include "ipc_skeleton.h"
+#include "ui/rs_display_node.h"
 
 #include "base/utils/utils.h"
+#include "core/common/container.h"
+#include "core/components_ng/pattern/window_scene/scene/container/window_pattern.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 
 namespace OHOS::Ace::NG {
-
 namespace {
 MMI::Direction ConvertDegreeToMMIRotation(float degree)
 {
@@ -60,14 +61,23 @@ void ScreenPattern::OnAttachToFrameNode()
     context->SetRSNode(displayNode);
 
     UpdateDisplayInfo();
+
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto window = static_cast<WindowPattern*>(container->GetWindow());
+    CHECK_NULL_VOID(window);
+    auto screenBounds = screenSession_->GetScreenProperty().GetBounds();
+    auto rect = Rect(screenBounds.rect_.left_, screenBounds.rect_.top_,
+        screenBounds.rect_.width_, screenBounds.rect_.height_);
+    window->UpdateViewportConfig(rect, Rosen::WindowSizeChangeReason::UNDEFINED);
 }
 
 void ScreenPattern::UpdateDisplayInfo()
 {
     CHECK_NULL_VOID(screenSession_);
 
-    int pid = IPCSkeleton::GetCallingPid();
-    int uid = IPCSkeleton::GetCallingUid();
+    auto pid = IPCSkeleton::GetCallingPid();
+    auto uid = IPCSkeleton::GetCallingUid();
     auto screenId = screenSession_->GetScreenId();
     auto screenProperty = screenSession_->GetScreenProperty();
     auto screenRotation = screenProperty.GetRotation();
@@ -103,31 +113,6 @@ void ScreenPattern::UpdateDisplayInfo()
         .direction = ConvertDegreeToMMIRotation(screenRotation)
     };
 
-    // TODO: update MMI::DisplayGroupInfo when creating a screen component or destroy a screen component 
-    // TODO: calculate display group width and height
-    /**
-     * --------------------------------Display Group Width-------------------------------------
-     * +----------------------------+                                                         |
-     * |                            |                                                         |
-     * |                            |                                                         |
-     * |                            |                                                         |
-     * |          Screen            |                                                         |
-     * |                            |                                                         |
-     * |                            |                                                         |
-     * |                            |                                                         |
-     * +----------------------------+                                                         |
-     *                                                                                Display Group Height
-     *                                                                                        |
-     * +----------------------------+                  +-----------------------------+        |
-     * |                            |                  |                             |        |
-     * |                            |                  |                             |        |
-     * |                            |                  |                             |        |
-     * |          Screen            |                  |           Screen            |        |
-     * |                            |                  |                             |        |
-     * |                            |                  |                             |        |
-     * |                            |                  |                             |        |
-     * +----------------------------+                  +-----------------------------+        |
-     */
     MMI::DisplayGroupInfo displayGroupInfo = {
         .width = screenBounds.rect_.width_,
         .height = screenBounds.rect_.height_,
@@ -137,5 +122,4 @@ void ScreenPattern::UpdateDisplayInfo()
     };
     MMI::InputManager::GetInstance()->UpdateDisplayInfo(displayGroupInfo);
 }
-
 } // namespace OHOS::Ace::NG

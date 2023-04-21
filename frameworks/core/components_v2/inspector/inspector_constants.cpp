@@ -488,9 +488,7 @@ const char MODEL_ETS_TAG[] = "Model";
 // window scene
 ACE_EXPORT extern const char ROOT_SCENE_ETS_TAG[] = "RootScene";
 ACE_EXPORT extern const char SCREEN_ETS_TAG[] = "Screen";
-const char WINDOW_SCENE_ETS_TAG[] = "WindowScene";
 ACE_EXPORT extern const char HOST_WINDOW_SCENE_ETS_TAG[] = "HostWindowScene";
-ACE_EXPORT extern const char WINDOW_EXTENSION_ETS_TAG[] = "WindowExtension";
 
 // ui_extension_component
 const char UI_EXTENSION_COMPONENT_TAG[] = "UIExtensionComponent";

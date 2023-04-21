@@ -19,12 +19,10 @@
 #include "core/components_ng/pattern/window_scene/screen/screen_pattren.h"
 
 namespace OHOS::Ace::NG {
-
 class ACE_EXPORT ScreenModel {
 public:
     static void Create(const sptr<Rosen::ScreenSession>& screenSession);
 };
-
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCREEN_MODEL_H

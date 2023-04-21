@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,14 +20,12 @@
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 
 namespace OHOS::Ace::Framework {
-
 class JSRootScene {
 public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
     static void Pop();
 };
-
 } // namespace OHOS::Ace::Framework
 
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_ROOT_SCENE_H

@@ -19,7 +19,6 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-
 void ScreenModel::Create(const sptr<Rosen::ScreenSession>& screenSession)
 {
     auto stack = ViewStackProcessor::GetInstance();
@@ -28,5 +27,4 @@ void ScreenModel::Create(const sptr<Rosen::ScreenSession>& screenSession)
         [&screenSession]() { return AceType::MakeRefPtr<ScreenPattern>(screenSession); });
     stack->Push(frameNode);
 }
-
 } // namespace OHOS::Ace::NG

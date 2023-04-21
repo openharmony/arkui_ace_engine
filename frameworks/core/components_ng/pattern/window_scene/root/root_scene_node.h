@@ -20,7 +20,6 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-
 class RootSceneNode : public UINode {
     DECLARE_ACE_TYPE(RootSceneNode, UINode);
 
@@ -46,7 +45,6 @@ public:
 
     ACE_DISALLOW_COPY_AND_MOVE(RootSceneNode);
 };
-
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_ROOT_SCENE_NODE_H

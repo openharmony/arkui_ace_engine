@@ -21,7 +21,6 @@
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 
 namespace OHOS::Ace::NG {
-
 class ScreenPattern : public StackPattern {
     DECLARE_ACE_TYPE(ScreenPattern, StackPattern);
 
@@ -44,7 +43,6 @@ private:
 
     ACE_DISALLOW_COPY_AND_MOVE(ScreenPattern);
 };
-
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCREEN_PATTERN_H

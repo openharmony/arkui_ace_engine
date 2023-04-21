@@ -16,9 +16,9 @@
 #include "core/components_ng/pattern/window_scene/root/root_scene_model.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/window_scene/root/root_scene_node.h"
 
 namespace OHOS::Ace::NG {
-
 void RootSceneModel::Create()
 {
     auto stack = ViewStackProcessor::GetInstance();
@@ -26,5 +26,4 @@ void RootSceneModel::Create()
     auto rootSceneNode = RootSceneNode::GetOrCreateRootSceneNode(nodeId);
     stack->Push(rootSceneNode);
 }
-
 } // namespace OHOS::Ace::NG

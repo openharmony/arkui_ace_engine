@@ -16,7 +16,6 @@
 #include "core/components_ng/pattern/window_scene/root/root_scene.h"
 
 #include "input_manager.h"
-#include "wm_common.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -63,7 +62,6 @@ void RootScene::LoadContent(const std::string& contentUrl, NativeEngine* engine,
     uiContent_->Initialize(shared_from_this(), contentUrl, storage);
 
     uiContent_->Foreground();
-    UpdateViewportConfig(Rect(0, 0, 720, 1280), Rosen::WindowSizeChangeReason::UNDEFINED);
 }
 
 void RootScene::RegisterInputEventListener()

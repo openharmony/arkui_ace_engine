@@ -77,7 +77,7 @@ void HostWindowPattern::UnregisterLifecycleListener()
 void HostWindowPattern::InitContent()
 {
     contentNode_ = FrameNode::CreateFrameNode(
-        V2::WINDOW_SCENE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+        V2::HOST_WINDOW_SCENE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     contentNode_->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
 
     CHECK_NULL_VOID(session_);

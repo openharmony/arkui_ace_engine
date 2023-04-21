@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,13 +13,12 @@
  * limitations under the License.
  */
 
-#include "frameworks/bridge/declarative_frontend/jsview/window_scene/js_screen.h"
+#include "bridge/declarative_frontend/jsview/window_scene/js_screen.h"
 
-#include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
-#include "frameworks/core/components_ng/pattern/window_scene/screen/screen_model.h"
+#include "bridge/declarative_frontend/jsview/js_utils.h"
+#include "core/components_ng/pattern/window_scene/screen/screen_model.h"
 
 namespace OHOS::Ace::Framework {
-
 void JSScreen::JSBind(BindingTarget globalObj)
 {
     JSClass<JSScreen>::Declare("Screen");
@@ -40,7 +39,7 @@ void JSScreen::Create(const JSCallbackInfo& info)
         return;
     }
 
-    if (info.Length() < 1) {
+    if (info.Length() != 1) {
         LOGE("The arg is wrong, it is supposed to have 1 argument");
         return;
     }
@@ -48,5 +47,4 @@ void JSScreen::Create(const JSCallbackInfo& info)
     auto screenSession = CreateScreenSessionFromNapiValue(info[0]);
     NG::ScreenModel::Create(screenSession);
 }
-
 } // namespace OHOS::Ace::Framework

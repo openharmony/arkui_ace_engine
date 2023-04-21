@@ -16,15 +16,13 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_ROOT_SCENE_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_ROOT_SCENE_MODEL_H
 
-#include "core/components_ng/pattern/window_scene/root/root_scene_node.h"
+#include "base/utils/macros.h"
 
 namespace OHOS::Ace::NG {
-
 class ACE_EXPORT RootSceneModel {
 public:
     static void Create();
 };
-
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_ROOT_SCENE_MODEL_H
