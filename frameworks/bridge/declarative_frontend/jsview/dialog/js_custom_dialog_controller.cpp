@@ -16,21 +16,47 @@
 #include "bridge/declarative_frontend/jsview/dialog/js_custom_dialog_controller.h"
 
 #include "base/subwindow/subwindow_manager.h"
+#include "base/utils/utils.h"
+#include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
+#include "bridge/declarative_frontend/jsview/models/custom_dialog_controller_model_impl.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/dialog/custom_dialog_controller_model_ng.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 #include "frameworks/core/components_ng/base/view_stack_processor.h"
+namespace OHOS::Ace {
+
+std::unique_ptr<CustomDialogControllerMdoel> CustomDialogControllerMdoel::instance_ = nullptr;
+
+CustomDialogControllerMdoel* CustomDialogControllerMdoel::GetInstance()
+{
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance_.reset(new NG::CustomDialogControllerMdoelNG());
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::CustomDialogControllerMdoelNG());
+        } else {
+            instance_.reset(new Framework::CustomDialogControllerMdoelImpl());
+        }
+#endif
+    }
+    return instance_.get();
+}
+
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 namespace {
-
 constexpr uint32_t DELAY_TIME_FOR_STACK = 100;
 const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, DialogAlignment::CENTER,
     DialogAlignment::BOTTOM, DialogAlignment::DEFAULT, DialogAlignment::TOP_START, DialogAlignment::TOP_END,
     DialogAlignment::CENTER_START, DialogAlignment::CENTER_END, DialogAlignment::BOTTOM_START,
     DialogAlignment::BOTTOM_END };
+constexpr int32_t DEFAULT_ANIMATION_DURATION = 200;
 
 } // namespace
 
@@ -319,101 +345,25 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
         LOGE("Builder of CustomDialog is null.");
         return;
     }
-    // NG
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto container = Container::Current();
-        auto currentId = Container::CurrentId();
-        CHECK_NULL_VOID(container);
-        if (container->IsSubContainer()) {
-            currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
-            container = AceEngine::Get().GetContainer(currentId);
-        }
-        ContainerScope scope(currentId);
-        auto pipelineContext = container->GetPipelineContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
-        CHECK_NULL_VOID(context);
-        auto overlayManager = context->GetOverlayManager();
-        CHECK_NULL_VOID(overlayManager);
-
-        NG::ScopedViewStackProcessor builderViewStackProcessor;
-        LOGD("custom JS node building");
-        jsBuilderFunction_->Execute();
-        auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
-        CHECK_NULL_VOID(customNode);
-        customNode->Build();
-
-        dialogProperties_.onStatusChanged = [this](bool isShown) {
-            if (!isShown) {
-                this->isShown_ = isShown;
-            }
-        };
-        dialog_ = overlayManager->ShowDialog(dialogProperties_, customNode, false);
-        return;
-    }
-
-    CHECK_NULL_VOID(jsBuilderFunction_);
     auto scopedDelegate = EngineHelper::GetCurrentDelegate();
     if (!scopedDelegate) {
         // this case usually means there is no foreground container, need to figure out the reason.
         LOGE("scopedDelegate is null, please check");
         return;
-    }
-
-    // Cannot reuse component because might depend on state
-    if (customDialog_) {
-        customDialog_ = nullptr;
     }
 
     {
         ACE_SCORING_EVENT("CustomDialog.builder");
         jsBuilderFunction_->Execute();
     }
-    customDialog_ = ViewStackProcessor::GetInstance()->Finish();
 
-    if (!customDialog_) {
-        LOGE("Builder does not generate view.");
-        return;
-    }
-
-    ShowDialog();
+    CustomDialogControllerMdoel::GetInstance()->SetOpenDialog();
 }
 
 void JSCustomDialogController::JsCloseDialog(const JSCallbackInfo& info)
 {
     LOGI("JSCustomDialogController(JsCloseDialog)");
-
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto dialog = dialog_.Upgrade();
-        if (!dialog) {
-            LOGW("dialog is null");
-            return;
-        }
-        auto container = Container::Current();
-        auto currentId = Container::CurrentId();
-        CHECK_NULL_VOID(container);
-        if (container->IsSubContainer()) {
-            currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
-            container = AceEngine::Get().GetContainer(currentId);
-        }
-        ContainerScope scope(currentId);
-        auto pipelineContext = container->GetPipelineContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
-        CHECK_NULL_VOID(context);
-        auto overlayManager = context->GetOverlayManager();
-        CHECK_NULL_VOID(overlayManager);
-        overlayManager->CloseDialog(dialog);
-        return;
-    }
-
-    auto scopedDelegate = EngineHelper::GetCurrentDelegate();
-    if (!scopedDelegate) {
-        // this case usually means there is no foreground container, need to figure out the reason.
-        LOGE("scopedDelegate is null, please check");
-        return;
-    }
-    CloseDialog();
+    CustomDialogControllerMdoel::GetInstance()->SetCloseDialog();
 }
 
 void JSCustomDialogController::JSBind(BindingTarget object)
@@ -424,5 +374,4 @@ void JSCustomDialogController::JSBind(BindingTarget object)
     JSClass<JSCustomDialogController>::Bind(
         object, &JSCustomDialogController::ConstructorCallback, &JSCustomDialogController::DestructorCallback);
 }
-
 } // namespace OHOS::Ace::Framework
