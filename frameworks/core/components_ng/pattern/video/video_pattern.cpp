@@ -1203,7 +1203,7 @@ void VideoPattern::EnableDrag()
         std::string videoSrc = "";
         if (unifiedData != nullptr) {
             auto records = unifiedData->GetRecords();
-            if (records.size() == 0 || records[0]->GetType() != UDMF::UDType::VIDEO) {
+            if (records.size() == 0) {
                 LOGE("unifiedRecords is empty");
             }
             auto video = reinterpret_cast<UDMF::Video *>(records[0].get());
