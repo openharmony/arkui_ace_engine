@@ -23,7 +23,6 @@
 
 namespace OHOS::Ace::NG {
 
-
 void GestureScope::AddMember(const RefPtr<NGGestureRecognizer>& recognizer)
 {
     CHECK_NULL_VOID(recognizer);
