@@ -21,32 +21,32 @@
 #include "bridge/declarative_frontend/jsview/models/custom_dialog_controller_model_impl.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/dialog/custom_dialog_controller_model_ng.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
-#include "frameworks/core/components_ng/base/view_stack_processor.h"
+
 namespace OHOS::Ace {
-
-std::unique_ptr<CustomDialogControllerMdoel> CustomDialogControllerMdoel::instance_ = nullptr;
-
-CustomDialogControllerMdoel* CustomDialogControllerMdoel::GetInstance()
+std::unique_ptr<CustomDialogControllerModel> CustomDialogControllerModel::instance_ = nullptr;
+std::mutex CustomDialogControllerModel::mutex_;
+CustomDialogControllerModel* CustomDialogControllerModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::CustomDialogControllerMdoelNG());
+            instance_.reset(new NG::CustomDialogControllerModelNG());
 #else
-        if (Container::IsCurrentUseNewPipeline()) {
-            instance_.reset(new NG::CustomDialogControllerMdoelNG());
-        } else {
-            instance_.reset(new Framework::CustomDialogControllerMdoelImpl());
-        }
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::CustomDialogControllerModelNG());
+            } else {
+                instance_.reset(new Framework::CustomDialogControllerModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }
-
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
@@ -95,14 +95,13 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
             auto jsCancelFunction = AceType::MakeRefPtr<JsFunction>(ownerObj, JSRef<JSFunc>::Cast(cancelCallback));
             instance->jsCancelFunction_ = jsCancelFunction;
 
-            if (Container::IsCurrentUseNewPipeline()) {
-                auto onCancel = [execCtx = info.GetExecutionContext(), func = std::move(jsCancelFunction)]() {
-                    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                    ACE_SCORING_EVENT("onCancel");
-                    func->Execute();
-                };
-                instance->dialogProperties_.onCancel = onCancel;
-            }
+            auto onCancel = [execCtx = info.GetExecutionContext(), func = std::move(jsCancelFunction)]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                ACE_SCORING_EVENT("onCancel");
+                func->Execute();
+            };
+            CustomDialogControllerModel::GetInstance()->setOnCancel(
+                std::move(instance->dialogProperties_.onCancel), std::move(onCancel));
         }
 
         // Parses autoCancel.
@@ -130,10 +129,10 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
         auto offsetValue = constructorArg->GetProperty("offset");
         if (offsetValue->IsObject()) {
             auto offsetObj = JSRef<JSObject>::Cast(offsetValue);
-            Dimension dx;
+            CalcDimension dx;
             auto dxValue = offsetObj->GetProperty("dx");
             JSViewAbstract::ParseJsDimensionVp(dxValue, dx);
-            Dimension dy;
+            CalcDimension dy;
             auto dyValue = offsetObj->GetProperty("dy");
             JSViewAbstract::ParseJsDimensionVp(dyValue, dy);
             dx.ResetInvalidValue();
@@ -287,7 +286,7 @@ void JSCustomDialogController::ShowDialog()
     pending_ = true;
     auto task = [context, dialogProperties = dialogProperties_, this]() mutable {
         if (context) {
-            this->dialogComponent_ = context->ShowDialog(dialogProperties, false, "CustomDialog");
+            this->dialogComponent_ = AceType::DynamicCast<DialogComponent>(context->ShowDialog(dialogProperties, false, "CustomDialog"));
         } else {
             LOGE("JSCustomDialogController(ShowDialog) context is null.");
         }
@@ -355,16 +354,16 @@ void JSCustomDialogController::CloseDialog()
             this->NotifyDialogOperation(DialogOperation::DIALOG_CLOSE);
             return;
         }
-        auto animator = dialogComponent->GetAnimator();
-        auto dialogId = dialogComponent->GetDialogId();
+        auto animator = AceType::DynamicCast<DialogComponent>(dialogComponent)->GetAnimator();
+        auto dialogId = AceType::DynamicCast<DialogComponent>(dialogComponent)->GetDialogId();
         if (animator) {
-            if (!dialogComponent->HasStopListenerAdded()) {
+            if (!AceType::DynamicCast<DialogComponent>(dialogComponent)->HasStopListenerAdded()) {
                 animator->AddStopListener([lastStack, dialogId] {
                     if (lastStack) {
                         lastStack->PopDialog(dialogId);
                     }
                 });
-                dialogComponent->SetHasStopListenerAdded(true);
+                AceType::DynamicCast<DialogComponent>(dialogComponent)->SetHasStopListenerAdded(true);
             }
             animator->Play();
         } else {
@@ -395,18 +394,120 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
         return;
     }
 
+    std::function<void(RefPtr<AceType>& dialogComponent)> task;
+    std::function<void()> cancelTask;
+    auto aceType = CustomDialogControllerModel::GetInstance()->SetOpenDialog();
+
+    if (customDialog_) {
+        customDialog_ = nullptr;
+    }
+
     {
         ACE_SCORING_EVENT("CustomDialog.builder");
         jsBuilderFunction_->Execute();
     }
+    customDialog_ = ViewStackProcessor::GetInstance()->Finish();
 
-    CustomDialogControllerMdoel::GetInstance()->SetOpenDialog();
+    if (customDialog_) {
+        LOGE("Builder does not generate view.");
+        dialogProperties_.customComponent = customDialog_;
+        cancelTask = ([cancelCallback = jsCancelFunction_]() {
+            if (cancelCallback) {
+                ACE_SCORING_EVENT("CustomDialog.cancel");
+                cancelCallback->Execute();
+            }
+        });
+        task = [dialogProperties = dialogProperties_, this](RefPtr<AceType>& dialogComponent) mutable {
+            this->dialogComponent_ = dialogComponent;
+            this->NotifyDialogOperation(DialogOperation::DIALOG_OPEN);
+        };
+    }
+
+    dialogProperties_.onStatusChanged = [this](bool isShown) {
+        if (!isShown) {
+            this->isShown_ = isShown;
+        }
+    };
+
+    CustomDialogControllerModel::GetInstance()->SetOpenDialog(
+        dialogProperties_, dialogs_, std::move(task), pending_, aceType, std::move(cancelTask));
+    return;
 }
 
 void JSCustomDialogController::JsCloseDialog(const JSCallbackInfo& info)
 {
     LOGI("JSCustomDialogController(JsCloseDialog)");
-    CustomDialogControllerMdoel::GetInstance()->SetCloseDialog();
+    auto scopedDelegate = EngineHelper::GetCurrentDelegate();
+    if (!scopedDelegate) {
+        // this case usually means there is no foreground container, need to figure out the reason.
+        LOGE("scopedDelegate is null, please check");
+        return;
+    }
+
+    if (pending_) {
+        LOGI("JSCustomDialogController(CloseDialog) current state is pending.");
+        dialogOperation_.emplace_back(DialogOperation::DIALOG_CLOSE);
+        return;
+    }
+
+    auto task = [this]() { this->NotifyDialogOperation(DialogOperation::DIALOG_CLOSE); };
+    CustomDialogControllerModel::GetInstance()->SetCloseDialog(
+        dialogProperties_, dialogs_, pending_, task, dialogComponent_);
+}
+
+bool JSCustomDialogController::ParseAnimation(
+    const JsiExecutionContext& execContext, const JsiRef<JsiValue>& animationValue, AnimationOption& result)
+{
+    if (animationValue->IsNull() || !animationValue->IsObject()) {
+        return false;
+    }
+    auto animationArgs = JsonUtil::ParseJsonString(animationValue->ToString());
+    if (animationArgs->IsNull()) {
+        return false;
+    }
+    // If the attribute does not exist, the default value is used.
+    auto duration = animationArgs->GetInt("duration", DEFAULT_ANIMATION_DURATION);
+    auto delay = animationArgs->GetInt("delay", 0);
+    auto iterations = animationArgs->GetInt("iterations", 1);
+    auto tempo = static_cast<float>(animationArgs->GetDouble("tempo", 1.0));
+    if (NonPositive(tempo)) {
+        tempo = 1.0f;
+    }
+    auto direction = StringToAnimationDirection(animationArgs->GetString("playMode", "normal"));
+    RefPtr<Curve> curve;
+    auto curveArgs = animationArgs->GetValue("curve");
+    if (curveArgs->IsString()) {
+        curve = CreateCurve(animationArgs->GetString("curve", "linear"));
+    } else if (curveArgs->IsObject()) {
+        auto curveString = curveArgs->GetValue("__curveString");
+        if (!curveString) {
+            // Default AnimationOption which is invalid.
+            return false;
+        }
+        curve = CreateCurve(curveString->GetString());
+    } else {
+        curve = Curves::EASE_IN_OUT;
+    }
+    result.SetDuration(duration);
+    result.SetDelay(delay);
+    result.SetIteration(iterations);
+    result.SetTempo(tempo);
+    result.SetAnimationDirection(direction);
+    result.SetCurve(curve);
+
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(animationValue);
+    JSRef<JSVal> onFinish = obj->GetProperty("onFinish");
+    std::function<void()> onFinishEvent;
+    if (onFinish->IsFunction()) {
+        RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onFinish));
+        onFinishEvent = [execCtx = execContext, func = std::move(jsFunc)]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("CustomDialog.onFinish");
+            func->Execute();
+        };
+        result.SetOnFinishEvent(onFinishEvent);
+    }
+    return true;
 }
 
 void JSCustomDialogController::JSBind(BindingTarget object)

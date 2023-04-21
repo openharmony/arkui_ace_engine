@@ -54,13 +54,14 @@ private:
     bool pending_ = false;
 
     // NG
-    std::vector<WeakPtr<NG::FrameNode>> dialogs_;
+    // std::vector<WeakPtr<NG::FrameNode>> dialogs_;
+    std::vector<WeakPtr<AceType>> dialogs_;
 
     DialogProperties dialogProperties_;
     RefPtr<JsFunction> jsBuilderFunction_;
     RefPtr<JsFunction> jsCancelFunction_;
     RefPtr<Component> customDialog_;
-    RefPtr<DialogComponent> dialogComponent_;
+    RefPtr<AceType> dialogComponent_;
     std::list<DialogOperation> dialogOperation_;
 };
 

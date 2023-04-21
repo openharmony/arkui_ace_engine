@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,54 +24,52 @@
 #include "frameworks/core/components_ng/base/view_stack_processor.h"
 
 namespace OHOS::Ace::NG {
-CustomDialogControllerMdoelNG::CustomDialogControllerMdoelNG()
+RefPtr<AceType> CustomDialogControllerModelNG::SetOpenDialog()
 {
     auto container = Container::Current();
     auto currentId = Container::CurrentId();
-    CHECK_NULL_VOID(container);
     if (container->IsSubContainer()) {
         currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
         container = AceEngine::Get().GetContainer(currentId);
     }
     ContainerScope scope(currentId);
     auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto context_ = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
-    CHECK_NULL_VOID(context_);
-    overlayManager = context_->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
-
-    NG::ScopedViewStackProcessor builderViewStackProcessor;
-    LOGD("custom JS node building");
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    return context->GetOverlayManager();
 }
 
-void CustomDialogControllerMdoelNG::SetOpenDialog()
+void CustomDialogControllerModelNG::SetOpenDialog(DialogProperties& dialogProperties,
+    std::vector<WeakPtr<AceType>>& dialogs, std::function<void(RefPtr<AceType>&)>&& task, bool& pending,
+    RefPtr<AceType>& overlayManager, std::function<void()>&& cancelTask)
 {
+    auto overlayManager_ = AceType::DynamicCast<OverlayManager>(overlayManager);
     auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
     CHECK_NULL_VOID(customNode);
 
     WeakPtr<NG::FrameNode> dialog;
-    if (dialogProperties_.isShowInSubWindow) {
-        dialog = SubwindowManager::GetInstance()->ShowDialogNG(dialogProperties_, customNode);
+    if (dialogProperties.isShowInSubWindow) {
+        dialog = SubwindowManager::GetInstance()->ShowDialogNG(dialogProperties, customNode);
     } else {
-        dialog = overlayManager->ShowDialog(dialogProperties_, customNode, false);
+        dialog = overlayManager_->ShowDialog(dialogProperties, customNode, false);
     }
-    dialogs_.emplace_back(dialog);
+    dialogs.emplace_back(dialog);
 }
 
-void CustomDialogControllerMdoelNG::SetCloseDialog()
+void CustomDialogControllerModelNG::SetCloseDialog(DialogProperties& dialogProperties,
+    std::vector<WeakPtr<AceType>>& dialogs, bool& pending, std::function<void()>&& task,
+    RefPtr<AceType>& dialogComponent)
 {
     RefPtr<NG::FrameNode> dialog;
-    while (!dialogs_.empty()) {
-        dialog = dialogs_.back().Upgrade();
+    while (!dialogs.empty()) {
+        dialog = AceType::DynamicCast<NG::FrameNode>(dialogs.back().Upgrade());
         if (dialog && !dialog->IsRemoving()) {
             // get the dialog not removed currently
             break;
         }
-        dialogs_.pop_back();
+        dialogs.pop_back();
     }
 
-    if (dialogs_.empty()) {
+    if (dialogs.empty()) {
         LOGW("dialogs are empty");
         return;
     }
@@ -82,7 +80,7 @@ void CustomDialogControllerMdoelNG::SetCloseDialog()
     auto container = Container::Current();
     auto currentId = Container::CurrentId();
     CHECK_NULL_VOID(container);
-    if (container->IsSubContainer() && !dialogProperties_.isShowInSubWindow) {
+    if (container->IsSubContainer() && !dialogProperties.isShowInSubWindow) {
         currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
         container = AceEngine::Get().GetContainer(currentId);
     }
@@ -94,6 +92,11 @@ void CustomDialogControllerMdoelNG::SetCloseDialog()
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     overlayManager->CloseDialog(dialog);
-    dialogs_.pop_back();
+    dialogs.pop_back();
+}
+
+void CustomDialogControllerModelNG::setOnCancel(std::function<void()>&& event, std::function<void()>&& onCancel)
+{
+    event = onCancel;
 }
 } // namespace OHOS::Ace::NG

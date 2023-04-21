@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,23 +18,18 @@
 
 #include "core/components/dialog/dialog_component.h"
 #include "core/components_ng/pattern/dialog/custom_dialog_controller_model.h"
-#include "core/components_ng/pattern/overlay/overlay_manager.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-enum class DialogOperation {
-    DIALOG_OPEN = 0,
-    DIALOG_CLOSE,
-};
-
-class ACE_EXPORT CustomDialogControllerMdoelNG : public OHOS::Ace::CustomDialogControllerMdoel {
+class ACE_EXPORT CustomDialogControllerModelNG : public OHOS::Ace::CustomDialogControllerModel {
 public:
-    CustomDialogControllerMdoelNG();
-    void SetOpenDialog() override;
-    void SetCloseDialog() override;
-private:
-    OHOS::Ace::RefPtr<OHOS::Ace::NG::OverlayManager> overlayManager;
-    std::vector<WeakPtr<NG::FrameNode>> dialogs_;
-    DialogProperties dialogProperties_;
+    RefPtr<AceType> SetOpenDialog() override;
+    void SetOpenDialog(DialogProperties& dialogProperties, std::vector<WeakPtr<AceType>>& dialogs,
+        std::function<void(RefPtr<AceType>&)>&& task, bool& pending, RefPtr<AceType>& overlayManager,
+        std::function<void()>&& cancelTask) override;
+    void SetCloseDialog(DialogProperties& dialogProperties, std::vector<WeakPtr<AceType>>& dialogs, bool& pending,
+        std::function<void()>&& task, RefPtr<AceType>& dialogComponent) override;
+    void setOnCancel(std::function<void()>&& event, std::function<void()>&& onCancel) override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_DIALOG_JS_CUSTOM_DIALOG_CONTROLLER_H
