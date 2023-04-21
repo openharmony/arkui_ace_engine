@@ -208,11 +208,12 @@ HWTEST_F(MenuLayoutPropertyTestNg, MenuLayoutPropertyTestNg009, TestSize.Level1)
 
     auto json = JsonUtil::Create(true);
     property.ToJsonValue(json);
+    auto fontJsonObject = json->GetObject("font");
     EXPECT_EQ(json->GetString("title"), "title");
     EXPECT_EQ(json->GetString("offset"), OffsetF(25.0f, 30.0f).ToString());
     EXPECT_EQ(json->GetString("fontSize"), Dimension(25.0f).ToString());
     EXPECT_EQ(json->GetString("fontColor"), Color::RED.ColorToString());
-    EXPECT_EQ(json->GetString("fontWeight"), V2::ConvertWrapFontWeightToStirng(FontWeight::BOLD));
+    EXPECT_EQ(fontJsonObject->GetString("weight"), V2::ConvertWrapFontWeightToStirng(FontWeight::BOLD));
 }
 
 /**
