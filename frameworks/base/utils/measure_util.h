@@ -16,21 +16,33 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_MEASURE_UTIL_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_MEASURE_UTIL_H
 
+#include <optional>
 #include <string>
+
+#include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/text_style.h"
 
 namespace OHOS::Ace {
 struct MeasureContext {
     std::string textContent;
-    double fontSize = 0.0;
-    int32_t fontStyle = 0;
     std::string fontWeight;
     std::string fontFamily;
-    double letterSpacing = 0.0;
+    std::optional<Dimension> constraintWidth = std::nullopt;
+    std::optional<Dimension> fontSize = std::nullopt;
+    std::optional<Dimension> lineHeight = std::nullopt;
+    std::optional<Dimension> baselineOffset = std::nullopt;
+    std::optional<Dimension> letterSpacing = std::nullopt;
+    int32_t maxlines = 0;
+    TextAlign textAlign = TextAlign::START;
+    FontStyle fontStyle = FontStyle::NORMAL;
+    TextOverflow textOverlayFlow = TextOverflow::CLIP;
+    TextCase textCase = TextCase::NORMAL;
 };
 
 class MeasureUtil {
 public:
     static double MeasureText(const MeasureContext& context);
+    static Size MeasureTextSize(const MeasureContext& context);
 };
 } // namespace OHOS::Ace
 

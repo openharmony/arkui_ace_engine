@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,9 @@
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -40,8 +42,11 @@ public:
 
         value->propBadgeColor_ = CloneBadgeColor();
         value->propBadgeTextColor_ = CloneBadgeTextColor();
+        value->propBadgeTextColor_ = CloneBadgeBorderColor();
         value->propBadgeCircleSize_ = CloneBadgeCircleSize();
         value->propBadgeFontSize_ = CloneBadgeFontSize();
+        value->propBadgeFontWeight_ = CloneBadgeFontWeight();
+        value->propBadgeBorderWidth_ = CloneBadgeBorderWidth();
         return value;
     }
 
@@ -55,8 +60,11 @@ public:
 
         ResetBadgeColor();
         ResetBadgeTextColor();
+        ResetBadgeBorderColor();
         ResetBadgeCircleSize();
         ResetBadgeFontSize();
+        ResetBadgeFontWeight();
+        ResetBadgeBorderWidth();
     }
 
     enum class BadgePosition {
@@ -108,8 +116,11 @@ public:
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgeColor, Color, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgeTextColor, Color, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgeBorderColor, Color, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgeFontSize, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgeCircleSize, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgeFontWeight, FontWeight, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgeBorderWidth, Dimension, PROPERTY_UPDATE_MEASURE);
 
 private:
     BadgePosition propBadgePosition_ = BadgePosition::RIGHT_TOP;

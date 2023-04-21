@@ -50,6 +50,7 @@ public:
     void SetOnStateChange(StateChangeEvent&& stateChange) override;
     void SetOnRefreshing(RefreshingEvent&& refreshing) override;
     void SetChangeEvent(ChangeEvent&& changeEvent) override;
+    void SetCustomBuilder(const RefPtr<NG::UINode>& customBuilder) override;
 };
 } // namespace OHOS::Ace::NG
 

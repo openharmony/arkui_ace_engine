@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace::Framework {
 
-class JsTouchFunction : public JsFunction {
+class JsTouchFunction : public virtual JsFunction {
     DECLARE_ACE_TYPE(JsTouchFunction, JsFunction)
 
 public:
@@ -33,6 +33,10 @@ public:
         LOGD("Destroy: JsTouchFunction");
     };
 
+    void Execute() override
+    {
+        JsFunction::Execute();
+    }
     void Execute(TouchEventInfo& info);
 
 private:

@@ -155,7 +155,7 @@ void JSForm::SetVisibility(const JSCallbackInfo& info)
 
     auto type = info[0]->ToNumber<int32_t>();
     if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetVisibility(VisibleType(type));
+        NG::FormView::SetVisibility(VisibleType(type));
         return;
     }
 
@@ -185,6 +185,10 @@ void JSForm::SetModuleName(const JSCallbackInfo& info)
 
 void JSForm::JsOnAcquired(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 argument.");
+        return;
+    }
     if (Container::IsCurrentUseNewPipeline()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
         auto onAcquired = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
@@ -306,6 +310,24 @@ void JSForm::JsOnRouter(const JSCallbackInfo& info)
     }
 }
 
+void JSForm::JsOnLoad(const JSCallbackInfo& info)
+{
+    LOGI("JsOnLoad");
+    if (!Container::IsCurrentUseNewPipeline()) {
+        LOGE("Not support onLoad in old pipeline");
+        return;
+    }
+
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto onLoad = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Form.onLoad");
+        std::vector<std::string> keys;
+        func->Execute(keys, param);
+    };
+    NG::FormView::SetOnLoad(std::move(onLoad));
+}
+
 void JSForm::JSBind(BindingTarget globalObj)
 {
     JSClass<JSForm>::Declare("FormComponent");
@@ -315,12 +337,14 @@ void JSForm::JSBind(BindingTarget globalObj)
     JSClass<JSForm>::StaticMethod("dimension", &JSForm::SetDimension, opt);
     JSClass<JSForm>::StaticMethod("allowUpdate", &JSForm::AllowUpdate, opt);
     JSClass<JSForm>::StaticMethod("visibility", &JSForm::SetVisibility, opt);
+    JSClass<JSForm>::StaticMethod("moduleName", &JSForm::SetModuleName, opt);
     JSClass<JSForm>::StaticMethod("clip", &JSViewAbstract::JsClip, opt);
 
     JSClass<JSForm>::StaticMethod("onAcquired", &JSForm::JsOnAcquired);
     JSClass<JSForm>::StaticMethod("onError", &JSForm::JsOnError);
     JSClass<JSForm>::StaticMethod("onUninstall", &JSForm::JsOnUninstall);
     JSClass<JSForm>::StaticMethod("onRouter", &JSForm::JsOnRouter);
+    JSClass<JSForm>::StaticMethod("onLoad", &JSForm::JsOnLoad);
     JSClass<JSForm>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSForm>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSForm>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);

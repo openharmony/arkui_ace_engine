@@ -16,13 +16,23 @@ import(
 
 build_component_ng("text_field_pattern_ng") {
   sources = [
+    "key_event_handler.cpp",
+    "text_field_accessibility_property.cpp",
+    "text_field_content_modifier.cpp",
     "text_field_controller.cpp",
     "text_field_layout_algorithm.cpp",
+    "text_field_manager.cpp",
     "text_field_model_ng.cpp",
+    "text_field_overlay_modifier.cpp",
     "text_field_paint_method.cpp",
+    "text_field_paint_property.cpp",
     "text_field_pattern.cpp",
   ]
 
   standard_input_sources = [ "on_text_changed_listener_impl.cpp" ]
-  standard_input_deps = [ "imf:inputmethod_client" ]
+  standard_input_deps = [
+    "hiviewdfx_hilog_native:libhilog",
+    "imf:inputmethod_client",
+    "input:libmmi-client",
+  ]
 }

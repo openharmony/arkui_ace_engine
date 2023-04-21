@@ -37,30 +37,34 @@ foreach(item, ace_platforms) {
 
   # generate separated libace_engine lib
   if (platform == "ohos") {
+    build_in_engine = defined(engine_config.use_build_in_js_engine) &&
+                      engine_config.use_build_in_js_engine
     foreach(engine, support_engines) {
-      # generate libace_engine
-      ace_bridge_engine("libace_engine_${engine.engine_name}") {
-        platform = item.name
-        engine_name = engine.engine_name
-        build_type = "engine"
-        use_js_debug = false
-      }
-
-      # generate libace_engine_debug
-      if (defined(engine.have_debug) && engine.have_debug) {
-        ace_bridge_engine("libace_engine_${engine.engine_name}_debug") {
+      if (!build_in_engine) {
+        # generate libace_engine
+        ace_bridge_engine("libace_engine_${engine.engine_name}") {
           platform = item.name
           engine_name = engine.engine_name
           build_type = "engine"
-          use_js_debug = true
+          use_js_debug = false
         }
-      }
 
-      # generate libace_engine_declarative
-      ace_bridge_engine("libace_engine_declarative_${engine.engine_name}") {
-        platform = item.name
-        engine_name = engine.engine_name
-        build_type = "engine_declarative"
+        # generate libace_engine_debug
+        if (defined(engine.have_debug) && engine.have_debug) {
+          ace_bridge_engine("libace_engine_${engine.engine_name}_debug") {
+            platform = item.name
+            engine_name = engine.engine_name
+            build_type = "engine"
+            use_js_debug = true
+          }
+        }
+
+        # generate libace_engine_declarative
+        ace_bridge_engine("libace_engine_declarative_${engine.engine_name}") {
+          platform = item.name
+          engine_name = engine.engine_name
+          build_type = "engine_declarative"
+        }
       }
 
       # generate libace_engine_pa
@@ -82,6 +86,7 @@ foreach(item, ace_platforms) {
     # libace target
     ohos_shared_library("libace") {
       deps = [ "$ace_root/build:libace_static_ohos" ]
+      version_script = "libace.map"
       part_name = ace_engine_part
       subsystem_name = ace_engine_subsystem
     }
@@ -99,7 +104,7 @@ foreach(item, ace_platforms) {
         "$ace_root/frameworks/core/components/test/unittest/mock/subwindow_mock.cpp",
       ]
 
-      if (is_standard_system) {
+      if (is_ohos_standard_system) {
         sources -= [
           "$ace_root/frameworks/base/test/mock/mock_download_manager.cpp",
           "$ace_root/frameworks/core/components/test/mock/mock_resource_adapter.cpp",

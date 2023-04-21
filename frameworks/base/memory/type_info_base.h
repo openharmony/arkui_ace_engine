@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -84,9 +84,7 @@ protected:
 
     virtual IdType GetTypeId() const = 0;
     virtual const char* GetTypeName() const = 0;
-#ifdef ACE_MEMORY_MONITOR
-    virtual size_t GetTypeSize() const = 0;
-#endif // ACE_MEMORY_MONITOR
+    virtual size_t GetTypeSize() const { return 0; }
 };
 
 class TypeInfoHelper final {
@@ -126,7 +124,6 @@ public:
     {
         return TypeName(&instance);
     }
-#ifdef ACE_MEMORY_MONITOR
     static size_t TypeSize(const TypeInfoBase* rawPtr)
     {
         return rawPtr != nullptr ? rawPtr->GetTypeSize() : 0;
@@ -135,7 +132,6 @@ public:
     {
         return TypeSize(&instance);
     }
-#endif
 
     // Get type info by type itself.
     template<class T>

@@ -28,17 +28,9 @@
 #include "values_bucket.h"
 #include "want.h"
 
-#include "adapter/ohos/entrance/pa_engine/backend_delegate.h"
 #include "core/common/backend.h"
 
 namespace OHOS::Ace {
-
-class JsBackendEngineInstance {
-public:
-    JsBackendEngineInstance() = default;
-    virtual ~JsBackendEngineInstance() = default;
-};
-
 class JsBackendEngine : public AceType {
     DECLARE_ACE_TYPE(JsBackendEngine, AceType);
 
@@ -46,15 +38,11 @@ public:
     JsBackendEngine() = default;
     virtual ~JsBackendEngine() = default;
 
-    virtual bool Initialize(const RefPtr<BackendDelegate>& delegate) = 0;
+    virtual bool Initialize(const RefPtr<TaskExecutor>& taskExecutor, BackendType type) = 0;
+
+    virtual void SetAssetManager(const RefPtr<AssetManager>& assetManager) = 0;
 
     virtual void LoadJs(const std::string& url, const OHOS::AAFwk::Want& want) = 0;
-
-    virtual void SetJsMessageDispatcher(const RefPtr<JsMessageDispatcher>& dispatcher) = 0;
-
-    virtual void FireAsyncEvent(const std::string& eventId, const std::string& param) = 0;
-
-    virtual void FireSyncEvent(const std::string& eventId, const std::string& param) = 0;
 
     virtual void DestroyApplication(const std::string& packageName) = 0;
 
@@ -90,7 +78,6 @@ public:
     virtual int32_t OnAcquireFormState(const OHOS::AAFwk::Want& want) = 0;
     virtual void OnCommand(const OHOS::AAFwk::Want& want, int startId) = 0;
     virtual bool OnShare(int64_t formId, OHOS::AAFwk::WantParams& wantParams) = 0;
-    virtual void DumpHeapSnapshot(bool isPrivate) = 0;
 
     void SetFormData(const AppExecFwk::FormProviderData& formProviderData)
     {
@@ -101,10 +88,6 @@ public:
     {
         return formProviderData_;
     }
-
-    virtual void OnCommandApplication(const std::string& intent, int startId) = 0;
-
-    virtual RefPtr<GroupJsBridge> GetGroupJsBridge() = 0;
 
     void AddExtraNativeObject(const std::string& key, void* value)
     {

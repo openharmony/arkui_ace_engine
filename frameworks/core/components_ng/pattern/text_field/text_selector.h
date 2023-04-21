@@ -20,10 +20,22 @@
 #include <string>
 
 #include "base/geometry/ng/offset_t.h"
-#include "frameworks/base/geometry/ng/rect_t.h"
+#include "base/geometry/ng/rect_t.h"
 
 namespace OHOS::Ace::NG {
 
+enum class CaretUpdateType {
+    PRESSED,
+    LONG_PRESSED,
+    ICON_PRESSED,
+    DEL,
+    EVENT,
+    HANDLE_MOVE,
+    HANDLE_MOVE_DONE,
+    INPUT,
+    NONE,
+    RIGHT_CLICK
+};
 /**
  * Stands for selection indexes
  * We use base/destination to indicate the start/end position because of uncertain direction.
@@ -55,14 +67,24 @@ struct TextSelector {
         return !operator==(other);
     }
 
-    inline int32_t GetStart() const
+    inline int32_t GetTextStart() const
     {
         return std::min(baseOffset, destinationOffset);
     }
 
-    inline int32_t GetEnd() const
+    inline int32_t GetTextEnd() const
     {
         return std::max(baseOffset, destinationOffset);
+    }
+
+    inline int32_t GetStart() const
+    {
+        return baseOffset;
+    }
+
+    inline int32_t GetEnd() const
+    {
+        return destinationOffset;
     }
 
     inline bool IsValid() const
@@ -82,17 +104,23 @@ struct TextSelector {
         return destinationOffset == baseOffset;
     }
 
+    double GetSelectHeight() const
+    {
+        return std::max(firstHandle.Height(), secondHandle.Height());
+    }
+
+    bool StartEqualToDest() const
+    {
+        return baseOffset == destinationOffset;
+    }
+
     std::string ToString()
     {
         std::string result;
         result.append("base offset: ");
         result.append(std::to_string(baseOffset));
-        result.append(", base position: ");
-        result.append(selectionBaseOffset.ToString());
         result.append(", destination offset: ");
         result.append(std::to_string(destinationOffset));
-        result.append(", destination position: ");
-        result.append(selectionDestinationOffset.ToString());
         return result;
     }
 
@@ -107,6 +135,8 @@ struct TextSelector {
     int32_t charCount = 0;
     RectF firstHandle;
     RectF secondHandle;
+    OffsetF firstHandleOffset_;
+    OffsetF secondHandleOffset_;
 };
 
 } // namespace OHOS::Ace::NG

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_VIEW_H
 #define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_VIEW_H
 
+#include <functional>
 #include <list>
 #include <string>
 
@@ -29,7 +30,9 @@
 
 namespace OHOS::Ace::Framework {
 
-class JSView : public JSViewAbstract, public Referenced {
+class JSView : public JSViewAbstract, public virtual AceType {
+    DECLARE_ACE_TYPE(JSView, AceType)
+
 public:
     JSView() : instanceId_(Container::CurrentId()) {}
     ~JSView() override = default;
@@ -73,20 +76,14 @@ public:
 
     virtual void MarkNeedUpdate() = 0;
 
-    bool NeedsUpdate()
-    {
-        return needsUpdate_;
-    }
+    bool NeedsUpdate();
 
     static void JSBind(BindingTarget globalObj);
     /**
      * Views which do not have a state can mark static.
      * The element will be reused and re-render will be skipped.
      */
-    void MarkStatic()
-    {
-        isStatic_ = true;
-    }
+    void MarkStatic();
 
     bool IsStatic()
     {
@@ -109,6 +106,11 @@ public:
         return cardId_;
     }
 
+    void RegisterRenderDoneCallback(std::function<void()>&& OnRenderDone)
+    {
+        notifyRenderDone_ = std::move(OnRenderDone);
+    }
+
     // Used to set/get card id JS
     void JsSetCardId(int64_t cardId);
     void JsGetCardId(const JSCallbackInfo& info);
@@ -118,10 +120,50 @@ public:
     virtual void MarkLazyForEachProcess(const std::string& groudId) {}
     virtual void ResetLazyForEachProcess() {}
     virtual void ExecuteUpdateWithValueParams(const std::string& jsonData) {}
+    virtual void ExecuteInitiallyProvidedValue(const std::string& jsonData) {}
 
     virtual bool isFullUpdate() const
     {
         return true;
+    }
+
+#ifdef UICAST_COMPONENT_SUPPORTED
+    void ExecuteCreateChildView(const std::string& childViewId)
+    {
+        std::string jsonData = R"({"viewID":")" + childViewId + R"("})";
+        LOGI("UICast para: %{public}s", jsonData.c_str());
+        jsViewFunction_->ExecuteCreateChildView(jsonData);
+    }
+
+    void ExecuteRouterHandle(const std::string& type, const std::string& uri)
+    {
+        std::string jsonData = R"({"uri":")" + uri + R"(","type":")" + type + R"("})";
+        LOGI("UICast para: %{public}s", jsonData.c_str());
+        ContainerScope scope(instanceId_);
+        jsViewFunction_->ExecuteRouterHandle(jsonData);
+    }
+
+    void ExecuteReplayOnEvent(const std::string& event)
+    {
+        std::string jsonData = R"({"event":")" + event + R"("})";
+        LOGI("UICast para: %{public}s", jsonData.c_str());
+        jsViewFunction_->ExecuteReplayOnEvent(jsonData);
+    }
+#endif
+
+    std::string UICastGetViewId() const
+    {
+        return viewId_;
+    }
+
+    int UICastGetUniqueId() const
+    {
+        return uniqueId_;
+    }
+
+    int32_t GetInstanceId() const
+    {
+        return instanceId_;
     }
 
 protected:
@@ -131,6 +173,7 @@ protected:
     WeakPtr<AceType> viewNode_;
     // view id for custom view itself
     std::string viewId_;
+    int uniqueId_ = -1;
 
     // card id for eTS Card
     // set on the root JSView of the card and inherited by all child JSViews
@@ -141,9 +184,12 @@ private:
     int32_t instanceId_ = -1;
     int32_t restoreInstanceId_ = -1;
     bool isStatic_ = false;
+    std::function<void()> notifyRenderDone_;
 };
 
 class JSViewFullUpdate : public JSView {
+    DECLARE_ACE_TYPE(JSViewFullUpdate, JSView)
+
 public:
     JSViewFullUpdate(const std::string& viewId, JSRef<JSObject> jsObject, JSRef<JSFunc> jsRenderFunction);
     ~JSViewFullUpdate() override;
@@ -249,6 +295,8 @@ private:
 };
 
 class JSViewPartialUpdate : public JSView {
+    DECLARE_ACE_TYPE(JSViewPartialUpdate, JSView)
+
 public:
     explicit JSViewPartialUpdate(JSRef<JSObject> jsObject);
     ~JSViewPartialUpdate() override;
@@ -312,6 +360,23 @@ public:
         return false;
     }
 
+    void IsFirstRender(const JSCallbackInfo& info);
+    void FindChildByIdForPreview(const JSCallbackInfo& info);
+
+    void SetJSViewName(const std::string& name)
+    {
+        jsViewName_ = name;
+    }
+    const std::string& GetJSViewName() const
+    {
+        return jsViewName_;
+    }
+
+    void ExecuteInitiallyProvidedValue(const std::string& jsonData) override
+    {
+        jsViewFunction_->ExecuteInitiallyProvidedValue(jsonData);
+    }
+
 private:
     void MarkNeedUpdate() override;
 
@@ -332,6 +397,8 @@ private:
     // Destroy deleted the ref, and thereby triggers the deletion
     // GC -> JS View Object -> JSView C++ Object
     JSRef<JSObject> jsViewObject_;
+
+    std::string jsViewName_;
 };
 
 } // namespace OHOS::Ace::Framework

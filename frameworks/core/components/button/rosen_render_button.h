@@ -16,8 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BUTTON_ROSEN_RENDER_BUTTON_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BUTTON_ROSEN_RENDER_BUTTON_H
 
-#include "third_party/skia/include/core/SkCanvas.h"
-#include "third_party/skia/include/core/SkPoint.h"
+#include "include/core/SkCanvas.h"
+#include "include/core/SkPoint.h"
 
 #include "core/components/button/render_button.h"
 
@@ -53,6 +53,7 @@ private:
     void DrawButton(SkCanvas* canvas, const Offset& offset);
     void ConvertToSkVector(const std::array<Radius, 4>& radii, SkVector* skRadii);
     void PaintFocus(RenderContext& context, const Offset& offset);
+    void PaintPopupFocus(RenderContext& context);
     uint32_t GetStateColor();
     bool NeedClickedColor(const Color& backgroundColor);
 

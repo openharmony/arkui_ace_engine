@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,8 +27,10 @@
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "core/common/container.h"
+#include "core/components/common/properties/popup_param.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/pattern/text/text_menu_extension.h"
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/transition_property.h"
 
@@ -36,6 +38,7 @@ namespace OHOS::Ace::Framework {
 
 constexpr int32_t DEFAULT_TAP_FINGERS = 1;
 constexpr int32_t DEFAULT_TAP_COUNTS = 1;
+constexpr float DEFAULT_PROGRESS_TOTAL = 100.0f;
 
 enum class ResourceType : uint32_t {
     COLOR = 10001,
@@ -80,8 +83,12 @@ public:
     static void JsBackgroundImageSize(const JSCallbackInfo& info);
     static void JsBackgroundImagePosition(const JSCallbackInfo& info);
     static void JsBackgroundBlurStyle(const JSCallbackInfo& info);
+    static void JsSphericalEffect(const JSCallbackInfo& info);
+    static void JsPixelStretchEffect(const JSCallbackInfo& info);
+    static void JsLightUpEffect(const JSCallbackInfo& info);
     static void JsBindMenu(const JSCallbackInfo& info);
     static void JsBindContextMenu(const JSCallbackInfo& info);
+    static void JsBindContentCover(const JSCallbackInfo& info);
     static void JsBorderColor(const JSCallbackInfo& info);
     static void ParseBorderColor(const JSRef<JSVal>& args);
     static void JsPadding(const JSCallbackInfo& info);
@@ -123,6 +130,7 @@ public:
     static void JsRestoreId(int32_t restoreId);
     static void JsOnVisibleAreaChange(const JSCallbackInfo& info);
     static void JsHitTestBehavior(const JSCallbackInfo& info);
+    static void JsForegroundColor(const JSCallbackInfo& info);
 
     // response region
     static void JsResponseRegion(const JSCallbackInfo& info);
@@ -137,6 +145,7 @@ public:
     static bool ParseJsDouble(const JSRef<JSVal>& jsValue, double& result);
     static bool ParseJsInt32(const JSRef<JSVal>& jsValue, int32_t& result);
     static bool ParseJsColor(const JSRef<JSVal>& jsValue, Color& result);
+    static bool ParseJsColorStrategy(const JSRef<JSVal>& jsValue, ForegroundColorStrategy& strategy);
     static bool ParseJsFontFamilies(const JSRef<JSVal>& jsValue, std::vector<std::string>& result);
 
     static bool ParseJsonDimension(
@@ -152,6 +161,7 @@ public:
     static bool ParseJsInteger(const JSRef<JSVal>& jsValue, int32_t& result);
     static bool ParseJsIntegerArray(const JSRef<JSVal>& jsValue, std::vector<uint32_t>& result);
     static bool ParseJsStrArray(const JSRef<JSVal>& jsValue, std::vector<std::string>& result);
+    static bool IsGetResourceByName(const JSRef<JSObject>& jsObj);
 
     static std::pair<Dimension, Dimension> ParseSize(const JSCallbackInfo& info);
     static void JsUseAlign(const JSCallbackInfo& info);
@@ -175,10 +185,12 @@ public:
     static void SetVisibility(const JSCallbackInfo& info);
     static void Pop();
 
+    static void JsSetDraggable(bool draggable);
     static void JsOnDragStart(const JSCallbackInfo& info);
     static bool ParseAndUpdateDragItemInfo(const JSRef<JSVal>& info, NG::DragDropBaseInfo& dragInfo);
     static RefPtr<AceType> ParseDragNode(const JSRef<JSVal>& info);
     static void JsOnDragEnter(const JSCallbackInfo& info);
+    static void JsOnDragEnd(const JSCallbackInfo& info);
     static void JsOnDragMove(const JSCallbackInfo& info);
     static void JsOnDragLeave(const JSCallbackInfo& info);
     static void JsOnDrop(const JSCallbackInfo& info);
@@ -204,7 +216,7 @@ public:
     static void JsMask(const JSCallbackInfo& info);
 
     static void JsKey(const std::string& key);
-    static void JsId(const std::string& id);
+    static void JsId(const JSCallbackInfo& info);
 
     static void JsFocusable(const JSCallbackInfo& info);
     static void JsOnFocusMove(const JSCallbackInfo& args);
@@ -220,11 +232,19 @@ public:
 #endif
     static void JsOpacityPassThrough(const JSCallbackInfo& info);
     static void JsTransitionPassThrough(const JSCallbackInfo& info);
+    static void JsKeyboardShortcut(const JSCallbackInfo& info);
 
     static void JsAccessibilityGroup(bool accessible);
     static void JsAccessibilityText(const std::string& text);
     static void JsAccessibilityDescription(const std::string& description);
     static void JsAccessibilityImportance(const std::string& importance);
+    static void JsAllowDrop(const JSCallbackInfo& info);
+
+    static void JSCreateAnimatableProperty(const JSCallbackInfo& info);
+    static void JSUpdateAnimatableProperty(const JSCallbackInfo& info);
+
+    static void ParseMenuOptions(
+        const JSCallbackInfo& info, const JSRef<JSArray>& jsArray, std::vector<NG::MenuOptionsParam>& items);
 
 #ifndef WEARABLE_PRODUCT
     static void JsBindPopup(const JSCallbackInfo& info);
@@ -293,7 +313,7 @@ public:
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
         JSRef<JSVal> type = jsObj->GetProperty("type");
         if (!type->IsNumber()) {
-            LOGW("type is not number");
+            LOGD("type is not number");
             return false;
         }
 
@@ -309,11 +329,72 @@ public:
             return false;
         }
 
+        auto resIdNum = resId->ToNumber<int32_t>();
+        if (resIdNum == -1) {
+            if (!IsGetResourceByName(jsObj)) {
+                return false;
+            }
+            JSRef<JSVal> args = jsObj->GetProperty("params");
+            JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
+            auto param = params->GetValueAt(0);
+            if (type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::INTEGER)) {
+                result = static_cast<T>(themeConstants->GetIntByName(param->ToString()));
+                return true;
+            }
+            return false;
+        }
         if (type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::INTEGER)) {
             result = static_cast<T>(themeConstants->GetInt(resId->ToNumber<uint32_t>()));
             return true;
-        } else {
-            return false;
+        }
+        return false;
+    }
+
+    static std::string GetFunctionKeyName(FunctionKey functionkey)
+    {
+        switch (functionkey) {
+            case FunctionKey::ESC:
+                return "ESC";
+                break;
+            case FunctionKey::F1:
+                return "F1";
+                break;
+            case FunctionKey::F2:
+                return "F2";
+                break;
+            case FunctionKey::F3:
+                return "F3";
+                break;
+            case FunctionKey::F4:
+                return "F4";
+                break;
+            case FunctionKey::F5:
+                return "F5";
+                break;
+            case FunctionKey::F6:
+                return "F6";
+                break;
+            case FunctionKey::F7:
+                return "F7";
+                break;
+            case FunctionKey::F8:
+                return "F8";
+                break;
+            case FunctionKey::F9:
+                return "F9";
+                break;
+            case FunctionKey::F10:
+                return "F10";
+                break;
+            case FunctionKey::F11:
+                return "F11";
+                break;
+            case FunctionKey::F12:
+                return "F12";
+                break;
+            default:
+                return "";
+                break;
         }
     }
 };

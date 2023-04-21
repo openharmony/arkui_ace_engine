@@ -26,11 +26,12 @@
 #include "values_bucket.h"
 #include "want.h"
 
-#include "adapter/ohos/entrance/pa_engine/backend_delegate_impl.h"
+#include "adapter/ohos/entrance/pa_engine/engine/common/js_backend_asset_manager.h"
 #include "adapter/ohos/entrance/pa_engine/engine/common/js_backend_engine.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/string_utils.h"
 #include "core/common/backend.h"
+#include "frameworks/bridge/common/manifest/manifest_parser.h"
 
 namespace OHOS::Ace {
 
@@ -46,29 +47,6 @@ public:
     void LoadEngine(const char* libName, int32_t instanceId) override;
 
     void UpdateState(Backend::State state) override;
-
-    void SetJsMessageDispatcher(const RefPtr<JsMessageDispatcher>& dispatcher) const override;
-
-    BackendType GetType() override
-    {
-        return type_;
-    }
-
-    void MethodChannel(const std::string& methodName, std::string& jsonStr) override;
-
-    void RunPa(const std::string& url) override;
-
-    void OnCommand(const std::string& intent, int startId) override;
-
-    void TransferJsResponseData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const override;
-
-    void TransferJsPluginGetError(int32_t callbackId, int32_t errorCode, std::string&& errorMessage) const override;
-
-    void TransferJsEventData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const override;
-
-    void LoadPluginJsCode(std::string&& jsCode) const override;
-
-    void LoadPluginJsByteCode(std::vector<uint8_t>&& jsCode, std::vector<int32_t>&& jsCodeLen) const override;
 
     void SetJsEngine(const RefPtr<JsBackendEngine>& jsBackEngine)
     {
@@ -117,14 +95,24 @@ public:
     }
 
     void OnCommand(const OHOS::AAFwk::Want &want, int startId);
-    void DumpHeapSnapshot(bool isPrivate) override;
 
 private:
-    void InitializeBackendDelegate(const RefPtr<TaskExecutor>& taskExecutor);
+    void ParseManifest();
+    void LoadPa(const std::string& url, const OHOS::AAFwk::Want& want);
+    SingleTaskExecutor GetAnimationJsTask();
+
     BackendType type_ = BackendType::SERVICE;
 
-    RefPtr<BackendDelegateImpl> delegate_;
-    RefPtr<JsBackendEngine> jsBackendEngine_;
+    RefPtr<Framework::ManifestParser> manifestParser_ = nullptr;
+    RefPtr<TaskExecutor> taskExecutor_ = nullptr;
+    RefPtr<AssetManager> assetManager_ = nullptr;
+    RefPtr<JsBackendAssetManager> jsBackendAssetManager_ = nullptr;
+    RefPtr<JsBackendEngine> jsBackendEngine_ = nullptr;
+
+    mutable std::once_flag onceFlag_;
+    std::mutex LoadPaMutex_;
+    std::condition_variable condition_;
+    bool isStagingPageExist_ = false;
 };
 
 } // namespace OHOS::Ace

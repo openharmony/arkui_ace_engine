@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,20 +13,116 @@
  * limitations under the License.
  */
 
-#include "frameworks/bridge/js_frontend/engine/jsi/jsi_base_utils.h"
+#include "bridge/js_frontend/engine/jsi/jsi_base_utils.h"
 
 #include <utility>
 
 #include "base/log/event_report.h"
 #include "base/log/exception_handler.h"
 #include "base/utils/utils.h"
+#include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
+#include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
+#include "bridge/js_frontend/engine/jsi/ark_js_value.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
-#include "frameworks/bridge/js_frontend/engine/jsi/ark_js_runtime.h"
-#include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
 
 namespace OHOS::Ace::Framework {
+constexpr char JS_CRASH_CODE[] = "100001";
+
+int32_t GetLineOffset(const AceType* data)
+{
+#ifndef PA_SUPPORT
+    if (data == nullptr) {
+        return 0;
+    }
+    if (AceType::InstanceOf<JsiDeclarativeEngineInstance>(data)) {
+        return 0;
+    }
+#endif
+    const int32_t offset = 14;
+    return offset;
+}
+
+std::string GetMsgStr(const std::string& msg)
+{
+    int pos = msg.find('\n');
+    if (pos == std::string::npos) {
+        return msg;
+    }
+
+    return msg.substr(0, pos);
+}
+
+RefPtr<JsAcePage> GetRunningPage(const AceType* data)
+{
+#ifndef PA_SUPPORT
+    if (data == nullptr) {
+        return nullptr;
+    }
+    if (AceType::InstanceOf<JsiDeclarativeEngineInstance>(data)) {
+        auto instance = static_cast<const JsiDeclarativeEngineInstance*>(data);
+        return instance->GetRunningPage();
+    }
+#ifndef NG_BUILD
+    else if (AceType::InstanceOf<JsiEngineInstance>(data)) {
+        auto instance = static_cast<const JsiEngineInstance*>(data);
+        return instance->GetRunningPage();
+    }
+#endif
+#endif
+    return nullptr;
+}
+
+RefPtr<FrontendDelegate> GetDelegate(const AceType* data)
+{
+#ifndef PA_SUPPORT
+    if (data == nullptr) {
+        return nullptr;
+    }
+    if (AceType::InstanceOf<JsiDeclarativeEngineInstance>(data)) {
+        auto instance = static_cast<const JsiDeclarativeEngineInstance*>(data);
+        return instance->GetDelegate();
+    }
+#ifndef NG_BUILD
+    else if (AceType::InstanceOf<JsiEngineInstance>(data)) {
+        auto instance = static_cast<const JsiEngineInstance*>(data);
+        return instance->GetDelegate();
+    }
+#endif
+#endif
+    return nullptr;
+}
+
+std::string JsiBaseUtils::GenerateErrorMsg(
+    const std::shared_ptr<JsValue>& error, const std::shared_ptr<JsRuntime>& runtime)
+{
+    std::string errMsg;
+    if (!error) {
+        errMsg.append("error uncaught");
+        return errMsg;
+    }
+
+    std::string messageStr;
+    std::string rawStack;
+    shared_ptr<JsValue> message = error->GetProperty(runtime, "message");
+    if (message) {
+        messageStr = message->ToString(runtime);
+    }
+
+    shared_ptr<JsValue> stack = error->GetProperty(runtime, "stack");
+    if (stack) {
+        rawStack = stack->ToString(runtime);
+    }
+
+    errMsg.append("{\"ErrMsg\":\"")
+        .append(messageStr)
+        .append("\", \"Stacktrace\": \"")
+        .append(GetMsgStr(rawStack))
+        .append("\"}");
+    return errMsg;
+}
+
 std::string JsiBaseUtils::GenerateSummaryBody(
     const std::shared_ptr<JsValue>& error, const std::shared_ptr<JsRuntime>& runtime)
 {
@@ -54,7 +150,11 @@ std::string JsiBaseUtils::GenerateSummaryBody(
         auto frontEnd = container->GetFrontend();
         if (frontEnd) {
             pageUrl = frontEnd->GetCurrentPageUrl();
-            pageMap = frontEnd->GetCurrentPageSourceMap();
+            if (!JSNApi::IsBundle(vm)) {
+                frontEnd->GetStageSourceMap(sourceMaps);
+            } else {
+                pageMap = frontEnd->GetCurrentPageSourceMap();
+            }
             appMap = frontEnd->GetFaAppSourceMap();
         }
     } else {
@@ -63,7 +163,7 @@ std::string JsiBaseUtils::GenerateSummaryBody(
             pageUrl = runningPage->GetUrl();
             appMap = runningPage->GetAppMap();
             if (!JSNApi::IsBundle(vm)) {
-                sourceMaps = runningPage->GetSourceMap();
+                GetStageSourceMap(data, sourceMaps);
             } else {
                 pageMap = runningPage->GetPageMap();
             }
@@ -80,6 +180,13 @@ std::string JsiBaseUtils::GenerateSummaryBody(
     std::string messageStr = message->ToString(runtime);
     summaryBody.append("Error message: ");
     summaryBody.append(messageStr).append("\n");
+
+    if (error->HasProperty(runtime, "code")) {
+        shared_ptr<JsValue> code = error->GetProperty(runtime, "code");
+        std::string codeStr = code->ToString(runtime);
+        summaryBody.append("Error code: ");
+        summaryBody.append(codeStr).append("\n");
+    }
 
     shared_ptr<JsValue> stack = error->GetProperty(runtime, "stack");
     std::string rawStack = stack->ToString(runtime);
@@ -125,8 +232,7 @@ std::string JsiBaseUtils::GenerateSummaryBody(
         if (currPosOfNextLine == -1) {
             break;
         }
-        summaryBodyInsertedWithTagStr
-            .append("[Engine Log]")
+        summaryBodyInsertedWithTagStr.append("[Engine Log]")
             .append(summaryBody.substr(lastPosOfNextLine, (currPosOfNextLine - lastPosOfNextLine) + 1));
         lastPosOfNextLine = currPosOfNextLine;
     }
@@ -138,11 +244,12 @@ std::string JsiBaseUtils::GenerateSummaryBody(
 
 ErrorPos JsiBaseUtils::GetErrorPos(const std::string& rawStack)
 {
-    uint32_t lineEnd = rawStack.find("\n") - 1;
-    if (lineEnd < 1) {
+    size_t findLineEnd = rawStack.find("\n");
+    if (findLineEnd == std::string::npos) {
         return std::make_pair(0, 0);
     }
-    if (rawStack[lineEnd - 1] == '?') {
+    int32_t lineEnd = findLineEnd - 1;
+    if (lineEnd < 1 || rawStack[lineEnd - 1] == '?') {
         return std::make_pair(0, 0);
     }
 
@@ -266,8 +373,10 @@ std::string JsiBaseUtils::TranslateStack(const std::string& stackStr, const std:
             replace(str.begin(), str.end(), '/', '\\');
         }
         char* ch = strrchr((char*)str.c_str(), '.');
-        int index = ch - str.c_str();
-        str.insert(index, "_");
+        if (ch != nullptr) {
+            int index = ch - str.c_str();
+            str.insert(index, "_");
+        }
         runningPageTag = str;
     }
 
@@ -303,8 +412,8 @@ std::string JsiBaseUtils::TranslateStack(const std::string& stackStr, const std:
 }
 
 std::string JsiBaseUtils::TranslateBySourceMap(const std::string& stackStr, const std::string& pageUrl,
-    const std::unordered_map<std::string, RefPtr<RevSourceMap>>& sourceMaps,
-    const RefPtr<RevSourceMap>& appMap, const AceType* data)
+    const std::unordered_map<std::string, RefPtr<RevSourceMap>>& sourceMaps, const RefPtr<RevSourceMap>& appMap,
+    const AceType* data)
 {
     const std::string closeBrace = ")";
     const std::string openBrace = "(";
@@ -316,8 +425,10 @@ std::string JsiBaseUtils::TranslateBySourceMap(const std::string& stackStr, cons
     if (!isAppPage) {
         std::string tag = std::as_const(pageUrl);
         char* ch = strrchr((char*)tag.c_str(), '.');
-        int index = ch - tag.c_str();
-        tag.insert(index, "_");
+        if (ch != nullptr) {
+            int index = ch - tag.c_str();
+            tag.insert(index, "_");
+        }
         runningPageTag = tag;
     }
     // find per line of stack
@@ -328,7 +439,7 @@ std::string JsiBaseUtils::TranslateBySourceMap(const std::string& stackStr, cons
     for (uint32_t i = 0; i < res.size(); i++) {
         std::string temp = res[i];
         uint32_t start = temp.find(openBrace);
-        uint32_t end  = temp.find(":");
+        uint32_t end = temp.find(":");
         std::string key = temp.substr(start + 1, end - start - 1);
         auto closeBracePos = static_cast<int32_t>(temp.find(closeBrace));
         auto openBracePos = static_cast<int32_t>(temp.find(openBrace));
@@ -342,7 +453,7 @@ std::string JsiBaseUtils::TranslateBySourceMap(const std::string& stackStr, cons
         std::string sourceInfo;
         auto iter = sourceMaps.find(key);
         if (iter != sourceMaps.end()) {
-            sourceInfo = GetSourceInfo(line, column, iter->second, appMap, isAppPage, data);
+            sourceInfo = GetSourceInfo(line, column, iter->second, appMap, isAppPage, data, false);
         }
         if (sourceInfo.empty()) {
             break;
@@ -394,7 +505,8 @@ void JsiBaseUtils::GetPosInfo(const std::string& temp, int32_t start, std::strin
 }
 
 std::string JsiBaseUtils::GetSourceInfo(const std::string& line, const std::string& column,
-    const RefPtr<RevSourceMap>& pageMap, const RefPtr<RevSourceMap>& appMap, bool isAppPage, const AceType* data)
+    const RefPtr<RevSourceMap>& pageMap, const RefPtr<RevSourceMap>& appMap, bool isAppPage, const AceType* data,
+    const bool isBundle)
 {
     int32_t offSet = GetLineOffset(data);
     std::string sourceInfo;
@@ -408,7 +520,7 @@ std::string JsiBaseUtils::GetSourceInfo(const std::string& line, const std::stri
         return "";
     }
 
-    std::string sources = GetRelativePath(mapInfo.sources);
+    std::string sources = isBundle ? GetRelativePath(mapInfo.sources) : mapInfo.sources;
     sourceInfo = "(" + sources + ":" + std::to_string(mapInfo.row) + ":" + std::to_string(mapInfo.col) + ")";
     return sourceInfo;
 }
@@ -441,7 +553,16 @@ void JsiBaseUtils::ReportJsErrorEvent(std::shared_ptr<JsValue> error, std::share
         LOGI("ReportJsErrorEvent: jsi engine has been destroyed");
         return;
     }
+
     LOGI("ReportJsErrorEvent");
+    auto arkJSRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    if (arkJSRuntime && arkJSRuntime->GetErrorEventHandler()) {
+        std::string msg = GenerateErrorMsg(error, runtime);
+        LOGI("Handle error event, errMsg: \n%{public}s", msg.c_str());
+        arkJSRuntime->GetErrorEventHandler()(JS_CRASH_CODE, msg);
+        return;
+    }
+
     std::string summaryBody = GenerateSummaryBody(error, runtime);
     LOGE("summaryBody: \n%{public}s", summaryBody.c_str());
     EventReport::JsErrReport(AceApplicationInfo::GetInstance().GetPackageName(), "", summaryBody);
@@ -453,6 +574,7 @@ void JsiBaseUtils::ReportJsErrorEvent(std::shared_ptr<JsValue> error, std::share
 std::string ParseLogContent(const std::vector<std::string>& params)
 {
     std::string ret;
+    int32_t flag = 0;
     if (params.empty()) {
         return ret;
     }
@@ -466,6 +588,7 @@ std::string ParseLogContent(const std::vector<std::string>& params)
             break;
         }
         if (formatStr[pos] == '%') {
+            flag = 1;
             if (pos + 1 >= len) {
                 break;
             }
@@ -495,6 +618,24 @@ std::string ParseLogContent(const std::vector<std::string>& params)
     }
     if (pos < len) {
         ret += formatStr.substr(pos, len - pos);
+    }
+    switch (flag) {
+        case 0:
+            ret += " ";
+            for (int32_t i = 1; i < size; ++i) {
+                ret += params[i];
+                if (i != size - 1) {
+                    ret += " ";
+                }
+            }
+            break;
+        case 1:
+            for (int32_t i = 2; i < size; ++i) {
+                ret += params[i];
+            }
+            break;
+        default:
+            break;
     }
     return ret;
 }
@@ -643,6 +784,27 @@ shared_ptr<JsValue> JsiBaseUtils::JsErrorLogPrint(const shared_ptr<JsRuntime>& r
     return JsLogPrint(runtime, JsLogLevel::ERROR, argv, argc);
 }
 
+std::unique_ptr<AceScopedTrace> JsiBaseUtils::aceScopedTrace_ = nullptr;
+
+shared_ptr<JsValue> JsiBaseUtils::JsTraceBegin(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    if (SystemProperties::GetDebugEnabled()) {
+        std::string traceName = GetLogContent(runtime, argv, argc);
+        aceScopedTrace_ = std::make_unique<AceScopedTrace>(traceName.c_str());
+    }
+    return runtime->NewUndefined();
+}
+
+shared_ptr<JsValue> JsiBaseUtils::JsTraceEnd(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    if (SystemProperties::GetDebugEnabled()) {
+        aceScopedTrace_.reset();
+    }
+    return runtime->NewUndefined();
+}
+
 std::string GetLogContent(NativeEngine* nativeEngine, NativeCallbackInfo* info)
 {
     std::string content;
@@ -706,5 +868,18 @@ NativeValue* AppWarnLogPrint(NativeEngine* nativeEngine, NativeCallbackInfo* inf
 NativeValue* AppErrorLogPrint(NativeEngine* nativeEngine, NativeCallbackInfo* info)
 {
     return AppLogPrint(nativeEngine, info, JsLogLevel::ERROR);
+}
+
+void JsiBaseUtils::GetStageSourceMap(
+    const AceType* data, std::unordered_map<std::string, RefPtr<Framework::RevSourceMap>>& sourceMaps)
+{
+    auto delegate = GetDelegate(data);
+    std::string maps;
+    if (delegate != nullptr && delegate->GetAssetContent(MERGE_SOURCEMAPS_PATH, maps)) {
+        auto SourceMap = AceType::MakeRefPtr<RevSourceMap>();
+        SourceMap->StageModeSourceMapSplit(maps, sourceMaps);
+    } else {
+        LOGW("GetRunningPage SourceMap load failed!");
+    }
 }
 } // namespace OHOS::Ace::Framework

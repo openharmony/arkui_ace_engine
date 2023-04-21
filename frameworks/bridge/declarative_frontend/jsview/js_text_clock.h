@@ -39,12 +39,12 @@ public:
     static void Destructor(JSTextClockController* scroller);
     void Start();
     void Stop();
-    void SetController(const RefPtr<TextClockController>& controller)
+    void AddController(const RefPtr<TextClockController>& controller)
     {
-        controller_ = controller;
+        controller_.emplace_back(controller);
     }
 private:
-    RefPtr<TextClockController> controller_;
+    std::vector<RefPtr<TextClockController>> controller_;
     ACE_DISALLOW_COPY_AND_MOVE(JSTextClockController);
 };
 } // namespace OHOS::Ace::Framework

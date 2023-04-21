@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,6 +30,7 @@
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/image/image_model.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
+#include "core/image/image_source_info.h"
 
 namespace OHOS::Ace {
 
@@ -91,7 +92,12 @@ void JSImage::SetAlt(const JSCallbackInfo& args)
 
 void JSImage::SetObjectFit(int32_t value)
 {
-    ImageModel::GetInstance()->SetImageFit(value);
+    auto fit = static_cast<ImageFit>(value);
+    if (fit < ImageFit::FILL || fit > ImageFit::SCALE_DOWN) {
+        LOGW("The value of objectFit is out of range %{public}d", value);
+        fit = ImageFit::COVER;
+    }
+    ImageModel::GetInstance()->SetImageFit(fit);
 }
 
 void JSImage::SetMatchTextDirection(bool value)
@@ -111,7 +117,7 @@ void JSImage::SetBorder(const Border& border)
 
 void JSImage::OnComplete(const JSCallbackInfo& args)
 {
-    LOGD("JSImage V8OnComplete");
+    LOGD("JSImage OnComplete");
     if (args[0]->IsFunction()) {
         auto jsLoadSuccFunc = AceType::MakeRefPtr<JsEventFunction<LoadImageSuccessEvent, 1>>(
             JSRef<JSFunc>::Cast(args[0]), LoadImageSuccEventToJSValue);
@@ -130,7 +136,7 @@ void JSImage::OnComplete(const JSCallbackInfo& args)
 
 void JSImage::OnError(const JSCallbackInfo& args)
 {
-    LOGD("JSImage V8OnError");
+    LOGD("JSImage OnError");
     if (args[0]->IsFunction()) {
         auto jsLoadFailFunc = AceType::MakeRefPtr<JsEventFunction<LoadImageFailEvent, 1>>(
             JSRef<JSFunc>::Cast(args[0]), LoadImageFailEventToJSValue);
@@ -149,7 +155,7 @@ void JSImage::OnError(const JSCallbackInfo& args)
 
 void JSImage::OnFinish(const JSCallbackInfo& info)
 {
-    LOGD("JSImage V8OnFinish");
+    LOGD("JSImage OnFinish");
     if (!info[0]->IsFunction()) {
         LOGE("info[0] is not a function.");
         return;
@@ -169,17 +175,70 @@ void JSImage::Create(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
-    std::string src;
-    auto noPixMap = ParseJsMedia(info[0], src);
 
-    RefPtr<PixelMap> pixMap = nullptr;
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    // Interim programme
+    std::string bundleName;
+    std::string moduleName;
+    std::string src;
+    auto noPixmap = ParseJsMedia(info[0], src);
+    if (context->IsFormRender() && info[0]->IsString()) {
+        SrcType srcType = ImageSourceInfo::ResolveURIType(src);
+        bool notSupport = (srcType == SrcType::NETWORK || srcType == SrcType::FILE || srcType == SrcType::DATA_ABILITY);
+        if (notSupport) {
+            LOGE("Not supported src : %{public}s when form render", src.c_str());
+            src.clear();
+        }
+    }
+    GetJsMediaBundleInfo(info[0], bundleName, moduleName);
+    RefPtr<PixelMap> pixmap = nullptr;
 #if defined(PIXEL_MAP_SUPPORTED)
-    if (!noPixMap) {
-        pixMap = CreatePixelMapFromNapiValue(info[0]);
+    if (!noPixmap) {
+        if (context->IsFormRender()) {
+            LOGE("Not supported pixmap when form render");
+        } else {
+            if (IsDrawable(info[0])) {
+                pixmap = GetDrawablePixmap(info[0]);
+            } else {
+                pixmap = CreatePixelMapFromNapiValue(info[0]);
+            }
+        }
     }
 #endif
+    ImageModel::GetInstance()->Create(src, noPixmap, pixmap, bundleName, moduleName);
+}
 
-    ImageModel::GetInstance()->Create(src, noPixMap, pixMap);
+// Interim programme
+void JSImage::GetJsMediaBundleInfo(const JSRef<JSVal>& jsValue, std::string& bundleName, std::string& moduleName)
+{
+    if (!jsValue->IsObject() || jsValue->IsString()) {
+        return;
+    }
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+    if (!jsObj->IsUndefined()) {
+        JSRef<JSVal> bundle = jsObj->GetProperty("bundleName");
+        JSRef<JSVal> module = jsObj->GetProperty("moduleName");
+        if (bundle->IsString() && module->IsString()) {
+            bundleName = bundle->ToString();
+            moduleName = module->ToString();
+        }
+    }
+}
+
+bool JSImage::IsDrawable(const JSRef<JSVal>& jsValue)
+{
+    if (!jsValue->IsObject()) {
+        return false;
+    }
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+    if (jsObj->IsUndefined()) {
+        return false;
+    }
+
+    // if jsObject has function getPixelMap, it's a DrawableDescriptor object
+    JSRef<JSVal> func = jsObj->GetProperty("getPixelMap");
+    return (!func->IsNull() && func->IsFunction());
 }
 
 void JSImage::JsBorder(const JSCallbackInfo& info)
@@ -215,17 +274,32 @@ void JSImage::SetImageFill(const JSCallbackInfo& info)
 
 void JSImage::SetImageRenderMode(int32_t imageRenderMode)
 {
-    ImageModel::GetInstance()->SetImageRenderMode(static_cast<ImageRenderMode>(imageRenderMode));
+    auto renderMode = static_cast<ImageRenderMode>(imageRenderMode);
+    if (renderMode < ImageRenderMode::ORIGINAL || renderMode > ImageRenderMode::TEMPLATE) {
+        LOGW("invalid imageRenderMode value %{public}d", imageRenderMode);
+        renderMode = ImageRenderMode::ORIGINAL;
+    }
+    ImageModel::GetInstance()->SetImageRenderMode(renderMode);
 }
 
 void JSImage::SetImageInterpolation(int32_t imageInterpolation)
 {
-    ImageModel::GetInstance()->SetImageInterpolation(static_cast<ImageInterpolation>(imageInterpolation));
+    auto interpolation = static_cast<ImageInterpolation>(imageInterpolation);
+    if (interpolation < ImageInterpolation::NONE || interpolation > ImageInterpolation::HIGH) {
+        LOGW("invalid imageInterpolation value %{public}d", imageInterpolation);
+        interpolation = ImageInterpolation::NONE;
+    }
+    ImageModel::GetInstance()->SetImageInterpolation(interpolation);
 }
 
 void JSImage::SetImageRepeat(int32_t imageRepeat)
 {
-    ImageModel::GetInstance()->SetImageRepeat(static_cast<ImageRepeat>(imageRepeat));
+    auto repeat = static_cast<ImageRepeat>(imageRepeat);
+    if (repeat < ImageRepeat::NO_REPEAT || repeat > ImageRepeat::REPEAT) {
+        LOGW("invalid imageRepeat value %{public}d", imageRepeat);
+        repeat = ImageRepeat::NO_REPEAT;
+    }
+    ImageModel::GetInstance()->SetImageRepeat(repeat);
 }
 
 void JSImage::JsTransition(const JSCallbackInfo& info)
@@ -318,13 +392,27 @@ void JSColorFilter::DestructorCallback(JSColorFilter* obj)
 
 void JSImage::SetColorFilter(const JSCallbackInfo& info)
 {
-    if (info.Length() != 1 || !info[0]->IsObject()) {
+    if (info.Length() != 1 || !info[0]->IsArray()) {
         LOGE("The arg is wrong, it is supposed to have 1 arguments");
         return;
     }
-    JSColorFilter* colorfilter = JSRef<JSObject>::Cast(info[0])->Unwrap<JSColorFilter>();
-    CHECK_NULL_VOID(colorfilter);
-    ImageModel::GetInstance()->SetColorFilterMatrix(colorfilter->GetColorFilterMatrix());
+    JSRef<JSArray> array = JSRef<JSArray>::Cast(info[0]);
+    if (array->Length() != COLOR_FILTER_MATRIX_SIZE) {
+        LOGE("arg length illegal");
+        return;
+    }
+    std::vector<float> colorfilter;
+    for (size_t i = 0; i < array->Length(); i++) {
+        JSRef<JSVal> value = array->GetValueAt(i);
+        if (value->IsNumber()) {
+            colorfilter.emplace_back(value->ToNumber<float>());
+        }
+    }
+    if (colorfilter.size() != COLOR_FILTER_MATRIX_SIZE) {
+        LOGE("colorfilter length illegal");
+        return;
+    }
+    ImageModel::GetInstance()->SetColorFilterMatrix(colorfilter);
 }
 
 void JSImage::JSBind(BindingTarget globalObj)
@@ -359,6 +447,7 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::StaticMethod("onFinish", &JSImage::OnFinish);
     JSClass<JSImage>::StaticMethod("syncLoad", &JSImage::SetSyncLoad);
     JSClass<JSImage>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
+    JSClass<JSImage>::StaticMethod("draggable", &JSImage::JsSetDraggable);
     JSClass<JSImage>::StaticMethod("onDragStart", &JSImage::JsOnDragStart);
     JSClass<JSImage>::StaticMethod("onDragEnter", &JSImage::JsOnDragEnter);
     JSClass<JSImage>::StaticMethod("onDragMove", &JSImage::JsOnDragMove);
@@ -374,6 +463,11 @@ void JSImage::JSBind(BindingTarget globalObj)
 
     JSClass<JSColorFilter>::Declare("ColorFilter");
     JSClass<JSColorFilter>::Bind(globalObj, JSColorFilter::ConstructorCallback, JSColorFilter::DestructorCallback);
+}
+
+void JSImage::JsSetDraggable(bool draggable)
+{
+    ImageModel::GetInstance()->SetDraggable(draggable);
 }
 
 void JSImage::JsOnDragStart(const JSCallbackInfo& info)
@@ -461,8 +555,12 @@ void JSImage::SetCopyOption(const JSCallbackInfo& info)
     }
     auto copyOptions = CopyOptions::None;
     if (info[0]->IsNumber()) {
-        auto emunNumber = info[0]->ToNumber<int>();
-        copyOptions = static_cast<CopyOptions>(emunNumber);
+        auto enumNumber = info[0]->ToNumber<int>();
+        copyOptions = static_cast<CopyOptions>(enumNumber);
+        if (copyOptions < CopyOptions::None || copyOptions > CopyOptions::Distributed) {
+            LOGW("copy option is invalid %{public}d", copyOptions);
+            copyOptions = CopyOptions::None;
+        }
     }
     LOGI("copy option: %{public}d", copyOptions);
     ImageModel::GetInstance()->SetCopyOption(copyOptions);

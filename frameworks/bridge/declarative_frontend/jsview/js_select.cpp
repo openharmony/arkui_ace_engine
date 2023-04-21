@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "base/log/ace_scoring_log.h"
+#include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
@@ -27,8 +28,10 @@
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "core/components/option/option_component.h"
 #include "core/components/select/select_component.h"
+#include "core/components/select/select_theme.h"
 #include "core/components_ng/pattern/select/select_view.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::Framework {
 void JSSelect::Create(const JSCallbackInfo& info)
@@ -54,7 +57,7 @@ void JSSelect::Create(const JSCallbackInfo& info)
                     return;
                 }
                 if (!ParseJsMedia(selectIcon, icon)) {
-                    LOGE("selectValue is null");
+                    LOGI("selectIcon is null");
                 }
 
                 params[i] = { value, icon };
@@ -97,10 +100,11 @@ void JSSelect::Create(const JSCallbackInfo& info)
 
             auto optionComponent = AceType::MakeRefPtr<OHOS::Ace::OptionComponent>(optionTheme);
             auto textComponent = AceType::MakeRefPtr<OHOS::Ace::TextComponent>(value);
-            auto iconComponent = AceType::MakeRefPtr<OHOS::Ace::ImageComponent>(icon);
+            if (!icon.empty()) {
+                optionComponent->SetIcon(AceType::MakeRefPtr<OHOS::Ace::ImageComponent>(icon));
+            }
             optionComponent->SetTheme(optionTheme);
             optionComponent->SetText(textComponent);
-            optionComponent->SetIcon(iconComponent);
             optionComponent->SetTextStyle(optionTheme->GetTitleStyle());
             optionComponent->SetSelectedTextStyle(optionTheme->GetTitleStyle());
             optionComponent->SetSelectedBackgroundColor(optionTheme->GetSelectedColor());
@@ -130,6 +134,9 @@ void JSSelect::JSBind(BindingTarget globalObj)
     JSClass<JSSelect>::StaticMethod("optionFont", &JSSelect::OptionFont, opt);
     JSClass<JSSelect>::StaticMethod("optionFontColor", &JSSelect::OptionFontColor, opt);
     JSClass<JSSelect>::StaticMethod("onSelect", &JSSelect::OnSelected, opt);
+    JSClass<JSSelect>::StaticMethod("space", &JSSelect::SetSpace, opt);
+    JSClass<JSSelect>::StaticMethod("arrowPosition", &JSSelect::SetArrowPosition, opt);
+
     // API7 onSelected deprecated
     JSClass<JSSelect>::StaticMethod("onSelected", &JSSelect::OnSelected, opt);
     JSClass<JSSelect>::StaticMethod("width", &JSSelect::JsWidth);
@@ -154,7 +161,9 @@ void JSSelect::JSBind(BindingTarget globalObj)
 void JSSelect::Selected(int value)
 {
     if (Container::IsCurrentUseNewPipeline()) {
-        LOGI("set selected");
+        if (value <= 0) {
+            value = 0;
+        }
         NG::SelectView::SetSelected(value);
         return;
     }
@@ -178,13 +187,19 @@ void JSSelect::Selected(int value)
 
     auto tipText = selectComponent->GetTipText();
     auto optionComponent = selectComponent->GetSelectOption(value);
+    if (!optionComponent) {
+        LOGE("optionComponent is null");
+        return;
+    }
     optionComponent->SetSelected(true);
 
     auto optionText = optionComponent->GetText();
     if (!optionText) {
         return;
     }
-    tipText->SetData(optionText->GetData());
+    if (!selectComponent->HasSetTipText()) {
+        tipText->SetData(optionText->GetData());
+    }
 }
 
 void JSSelect::Value(const std::string& value)
@@ -200,6 +215,9 @@ void JSSelect::Value(const std::string& value)
         return;
     }
     auto tipText = selectComponent->GetTipText();
+    if (!value.empty()) {
+        selectComponent->SetTipText(true);
+    }
     tipText->SetData(value);
 }
 
@@ -294,7 +312,15 @@ void JSSelect::FontColor(const JSCallbackInfo& info)
 
     Color textColor;
     if (!ParseJsColor(info[0], textColor)) {
-        return;
+        if (info[0]->IsNull() || info[0]->IsUndefined()) {
+            auto pipeline = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID_NOLOG(pipeline);
+            auto theme = pipeline->GetTheme<SelectTheme>();
+            CHECK_NULL_VOID_NOLOG(theme);
+            textColor = theme->GetFontColor();
+        } else {
+            return;
+        }
     }
 
     if (Container::IsCurrentUseNewPipeline()) {
@@ -321,7 +347,15 @@ void JSSelect::SelectedOptionBgColor(const JSCallbackInfo& info)
     }
     Color bgColor;
     if (!ParseJsColor(info[0], bgColor)) {
-        return;
+        if (info[0]->IsUndefined() || info[0]->IsNull()) {
+            auto pipeline = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID_NOLOG(pipeline);
+            auto theme = pipeline->GetTheme<SelectTheme>();
+            CHECK_NULL_VOID_NOLOG(theme);
+            bgColor = theme->GetSelectedColor();
+        } else {
+            return;
+        }
     }
 
     if (Container::IsCurrentUseNewPipeline()) {
@@ -450,7 +484,15 @@ void JSSelect::SelectedOptionFontColor(const JSCallbackInfo& info)
     }
     Color textColor;
     if (!ParseJsColor(info[0], textColor)) {
-        return;
+        if (info[0]->IsNull() || info[0]->IsUndefined()) {
+            auto pipeline = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID_NOLOG(pipeline);
+            auto theme = pipeline->GetTheme<SelectTheme>();
+            CHECK_NULL_VOID_NOLOG(theme);
+            textColor = theme->GetSelectedColorText();
+        } else {
+            return;
+        }
     }
 
     if (Container::IsCurrentUseNewPipeline()) {
@@ -666,6 +708,10 @@ void JSSelect::OnSelected(const JSCallbackInfo& info)
 
 void JSSelect::JsWidth(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::JsWidth(info);
+        return;
+    }
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
@@ -689,6 +735,10 @@ void JSSelect::Width(const JSRef<JSVal>& jsValue)
 
 void JSSelect::JsHeight(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::JsHeight(info);
+        return;
+    }
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
@@ -712,6 +762,10 @@ void JSSelect::Height(const JSRef<JSVal>& jsValue)
 
 void JSSelect::JsSize(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::JsSize(info);
+        return;
+    }
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
@@ -791,6 +845,10 @@ void JSSelect::JsPadding(const JSCallbackInfo& info)
 
 void JSSelect::SetPaddingLeft(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::SetPaddingLeft(info);
+        return;
+    }
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
@@ -808,6 +866,10 @@ void JSSelect::SetPaddingLeft(const JSCallbackInfo& info)
 
 void JSSelect::SetPaddingTop(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::SetPaddingTop(info);
+        return;
+    }
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
@@ -825,6 +887,10 @@ void JSSelect::SetPaddingTop(const JSCallbackInfo& info)
 
 void JSSelect::SetPaddingRight(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::SetPaddingRight(info);
+        return;
+    }
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
@@ -842,6 +908,10 @@ void JSSelect::SetPaddingRight(const JSCallbackInfo& info)
 
 void JSSelect::SetPaddingBottom(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::SetPaddingBottom(info);
+        return;
+    }
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
@@ -854,6 +924,54 @@ void JSSelect::SetPaddingBottom(const JSCallbackInfo& info)
     auto selectComponent = AceType::DynamicCast<SelectComponent>(stack->GetMainComponent());
     if (selectComponent) {
         selectComponent->SetBottomPadding(value);
+    }
+}
+
+void JSSelect::SetSpace(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGI("The arg is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+
+    auto selectTheme = GetTheme<SelectTheme>();
+
+    Dimension value;
+    if (!ParseJsDimensionVp(info[0], value)) {
+        LOGI("JSSelect set space value is mull");
+        value = selectTheme->GetContentSpinnerPadding();
+    }
+    if (LessNotEqual(value.Value(), 0.0)) {
+        LOGI("JSSelect set space value is to small");
+        value = selectTheme->GetContentSpinnerPadding();
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::SelectView::SetSpace(value);
+    }
+}
+
+void JSSelect::SetArrowPosition(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGI("The arg is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+
+    int32_t direction = 0;
+    if (!ParseJsInt32(info[0], direction)) {
+        LOGI("direction is wrong");
+        direction = 0;
+    }
+
+    if (static_cast<NG::ArrowPosition>(direction) != NG::ArrowPosition::START &&
+        static_cast<NG::ArrowPosition>(direction) != NG::ArrowPosition::END) {
+            LOGI("direction is unused FlexDirection");
+            direction = 0;
+        }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::SelectView::SetArrowPosition(static_cast<NG::ArrowPosition>(direction));
     }
 }
 } // namespace OHOS::Ace::Framework

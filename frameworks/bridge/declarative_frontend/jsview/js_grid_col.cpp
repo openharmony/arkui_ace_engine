@@ -145,6 +145,17 @@ void JSGridCol::Offset(const JSCallbackInfo& info)
         LOGI("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
+
+    if (info[0]->IsObject()) {
+        auto obj = JSRef<JSObject>::Cast(info[0]);
+        auto xVal = obj->GetProperty("x");
+        auto yVal = obj->GetProperty("y");
+        if (!xVal->IsUndefined() || !yVal->IsUndefined()) {
+            JSViewAbstract::JsOffset(info);
+            return;
+        }
+    }
+
     auto offset = ParserGridContainerSize(info[0], 0);
     GridColModel::GetInstance()->SetOffset(offset);
 }
@@ -165,6 +176,7 @@ void JSGridCol::JSBind(BindingTarget globalObj)
     JSClass<JSGridCol>::StaticMethod("create", &JSGridCol::Create, MethodOptions::NONE);
     JSClass<JSGridCol>::StaticMethod("span", &JSGridCol::Span, MethodOptions::NONE);
     JSClass<JSGridCol>::StaticMethod("offset", &JSGridCol::Offset, MethodOptions::NONE);
+    JSClass<JSGridCol>::StaticMethod("gridColOffset", &JSGridCol::Offset, MethodOptions::NONE);
     JSClass<JSGridCol>::StaticMethod("order", &JSGridCol::Order, MethodOptions::NONE);
     JSClass<JSGridCol>::Inherit<JSContainerBase>();
     JSClass<JSGridCol>::Bind<>(globalObj);

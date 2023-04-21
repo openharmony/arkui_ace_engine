@@ -118,6 +118,7 @@ ACE_EXPORT extern const char NAVIGATION_CONTENT_ETS_TAG[];
 ACE_EXPORT extern const char TOOL_BAR_ETS_TAG[];
 ACE_EXPORT extern const char NAVIGATION_MENU_ETS_TAG[];
 ACE_EXPORT extern const char BACK_BUTTON_ETS_TAG[];
+ACE_EXPORT extern const char BACK_BUTTON_IMAGE_ETS_TAG[];
 ACE_EXPORT extern const char NAVBAR_CONTENT_ETS_TAG[];
 ACE_EXPORT extern const char NAVBAR_ETS_TAG[];
 
@@ -385,11 +386,16 @@ ACE_EXPORT extern const char RELATIVE_CONTAINER_ETS_TAG[];
 ACE_EXPORT extern const char MENU_COMPONENT_TAG[];
 ACE_EXPORT extern const char MENU_TAG[];
 ACE_EXPORT extern const char MENU_ETS_TAG[];
+ACE_EXPORT extern const char MENU_ITEM_ETS_TAG[];
+ACE_EXPORT extern const char MENU_ITEM_GROUP_ETS_TAG[];
 ACE_EXPORT extern const char MENU_WRAPPER_ETS_TAG[];
 
 // textarea
 ACE_EXPORT extern const char TEXTAREA_COMPONENT_TAG[];
 ACE_EXPORT extern const char TEXTAREA_ETS_TAG[];
+
+// textdrag
+ACE_EXPORT extern const char TEXTDRAG_ETS_TAG[];
 
 // textinput
 ACE_EXPORT extern const char TEXTINPUT_COMPONENT_TAG[];
@@ -487,6 +493,12 @@ ACE_EXPORT extern const char REMOTE_WINDOW_ETS_TAG[];
 ACE_EXPORT extern const char MODEL_COMPONENT_TAG[];
 ACE_EXPORT extern const char MODEL_ETS_TAG[];
 
-} // namespace OHOS::Ace::V2
+// window scene
+ACE_EXPORT extern const char WINDOW_SCENE_ETS_TAG[];
 
+// ui_extension_component
+ACE_EXPORT extern const char UI_EXTENSION_COMPONENT_TAG[];
+ACE_EXPORT extern const char UI_EXTENSION_COMPONENT_ETS_TAG[];
+
+} // namespace OHOS::Ace::V2
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_INSPECTOR_CONSTANTS_H

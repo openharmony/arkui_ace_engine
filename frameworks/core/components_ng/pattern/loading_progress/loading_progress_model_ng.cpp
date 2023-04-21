@@ -34,6 +34,7 @@ void LoadingProgressModelNG::Create()
 void LoadingProgressModelNG::SetColor(const Color& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(LoadingProgressPaintProperty, Color, value);
+    ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, value);
 }
 
 } // namespace OHOS::Ace::NG

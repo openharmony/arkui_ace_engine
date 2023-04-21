@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,11 +22,29 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/gestures/recognizers/click_recognizer.h"
 #include "core/components_ng/gestures/recognizers/exclusive_recognizer.h"
 #include "core/components_ng/gestures/recognizers/parallel_recognizer.h"
+#include "core/components_ng/gestures/recognizers/long_press_recognizer.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
+#ifdef ENABLE_DRAG_FRAMEWORK
+#include "base/msdp/device_status/interfaces/innerkits/interaction/include/interaction_manager.h"
+#include "unified_data.h"
+#include "udmf_client.h"
+#include "unified_types.h"
+#endif // ENABLE_DRAG_FRAMEWORK
 namespace OHOS::Ace::NG {
+#ifdef ENABLE_DRAG_FRAMEWORK
+using namespace Msdp::DeviceStatus;
+constexpr float PIXELMAP_DRAG_SCALE = 1.0f;
+#endif // ENABLE_DRAG_FRAMEWORK
+constexpr const char* HIT_TEST_MODE[] = {
+    "HitTestMode.Default",
+    "HitTestMode.Block",
+    "HitTestMode.Transparent",
+    "HitTestMode.None",
+};
 
 GestureEventHub::GestureEventHub(const WeakPtr<EventHub>& eventHub) : eventHub_(eventHub) {}
 
@@ -320,16 +338,35 @@ void GestureEventHub::InitDragDropEvent()
     SetDragEvent(dragEvent, { PanDirection::ALL }, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
 }
 
+bool GestureEventHub::IsAllowedDrag(RefPtr<EventHub> eventHub)
+{
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, false);
+    if (frameNode->IsDraggable()) {
+        if (!eventHub->HasOnDragStart()) {
+            LOGE("Default support for drag and drop, but there is no onDragStart function.");
+            return false;
+        }
+    } else {
+        if (frameNode->IsUserSet()) {
+            LOGE("User settings cannot be dragged");
+            return false;
+        }
+        if (!eventHub->HasOnDragStart()) {
+            LOGE("The default does not support drag and drop, and there is no onDragStart function.");
+            return false;
+        }
+    }
+    return true;
+}
+
 void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
 {
     auto eventHub = eventHub_.Upgrade();
     CHECK_NULL_VOID(eventHub);
-
-    if (!eventHub->HasOnDragStart()) {
-        LOGE("HandleOnDragStart: there is no onDragStart function.");
+    if (!IsAllowedDrag(eventHub)) {
         return;
     }
-
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
 
@@ -338,21 +375,68 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     event->SetY(pipeline->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetY(), DimensionUnit::PX)));
     auto extraParams = eventHub->GetDragExtraParams(std::string(), info.GetGlobalPoint(), DragEventType::START);
     auto dragDropInfo = (eventHub->GetOnDragStart())(event, extraParams);
-
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
-
     if (dragDropProxy_) {
         dragDropProxy_ = nullptr;
     }
-
-    if (dragDropInfo.customNode) {
-        dragDropProxy_ = dragDropManager->CreateAndShowDragWindow(dragDropInfo.customNode, info);
-    } else {
-        dragDropProxy_ = dragDropManager->CreateAndShowDragWindow(dragDropInfo.pixelMap, info);
+#ifdef ENABLE_DRAG_FRAMEWORK
+    std::string udKey;
+    auto unifiedData = event->GetData();
+    SetDragData(unifiedData, udKey);
+    auto udmfClient = UDMF::UdmfClient::GetInstance();
+    UDMF::Summary summary;
+    UDMF::QueryOption queryOption;
+    queryOption.key = udKey;
+    int32_t ret = udmfClient.GetSummary(queryOption, summary);
+    if (ret != 0) {
+        LOGW("HandleOnDragStart: UDMF GetSummary failed, ret %{public}d", ret);
+    }
+    dragDropManager->SetSummaryMap(summary.summary);
+    CHECK_NULL_VOID(pixelMap_);
+    std::shared_ptr<Media::PixelMap> pixelMap = pixelMap_->GetPixelMapSharedPtr();
+    if (pixelMap->GetWidth() > Msdp::DeviceStatus::MAX_PIXEL_MAP_WIDTH ||
+        pixelMap->GetHeight() > Msdp::DeviceStatus::MAX_PIXEL_MAP_HEIGHT) {
+            float scaleWidth = static_cast<float>(Msdp::DeviceStatus::MAX_PIXEL_MAP_WIDTH) / pixelMap->GetWidth();
+            float scaleHeight = static_cast<float>(Msdp::DeviceStatus::MAX_PIXEL_MAP_HEIGHT) / pixelMap->GetHeight();
+            float scale = std::min(scaleWidth, scaleHeight);
+            pixelMap->scale(scale, scale);
+    } else if (!GetTextFieldDraggable()) {
+        pixelMap->scale(PIXELMAP_DRAG_SCALE, PIXELMAP_DRAG_SCALE);
+    }
+    uint32_t width = pixelMap->GetWidth();
+    uint32_t height = pixelMap->GetHeight();
+    DragData dragData {{pixelMap, width * PIXELMAP_WIDTH_RATE, height * PIXELMAP_HEIGHT_RATE}, {}, udKey,
+        static_cast<int32_t>(info.GetSourceDevice()), 1, info.GetPointerId(), info.GetScreenLocation().GetX(),
+        info.GetScreenLocation().GetY(), info.GetDeviceId(), true};
+    ret = Msdp::DeviceStatus::InteractionManager::GetInstance()->StartDrag(dragData, GetDragCallback());
+    if (ret != 0) {
+        LOGE("InteractionManager: drag start error");
+        return;
+    }
+    dragDropProxy_ = dragDropManager->CreateFrameworkDragDropProxy();
+    if (!dragDropProxy_) {
+        LOGE("HandleOnDragStart: drag start error");
+        return;
     }
     CHECK_NULL_VOID(dragDropProxy_);
     dragDropProxy_->OnDragStart(info, dragDropInfo.extraInfo, GetFrameNode());
+#else
+    if (dragDropInfo.customNode) {
+        dragDropProxy_ = dragDropManager->CreateAndShowDragWindow(dragDropInfo.customNode, info);
+    } else if (dragDropInfo.pixelMap) {
+        dragDropProxy_ = dragDropManager->CreateAndShowDragWindow(dragDropInfo.pixelMap, info);
+    } else {
+        dragDropProxy_ = dragDropManager->CreateAndShowDragWindow(pixelMap_, info);
+    }
+    if (!dragDropProxy_) {
+        LOGE("HandleOnDragStart: drag start error");
+        return;
+    }
+
+    CHECK_NULL_VOID(dragDropProxy_);
+    dragDropProxy_->OnDragStart(info, dragDropInfo.extraInfo, GetFrameNode());
+#endif // ENABLE_DRAG_FRAMEWORK
 }
 
 void GestureEventHub::HandleOnDragUpdate(const GestureEvent& info)
@@ -465,5 +549,113 @@ bool GestureEventHub::ActLongClick()
     GestureEvent info;
     click(info);
     return true;
+}
+
+std::string GestureEventHub::GetHitTestModeStr() const
+{
+    auto mode = static_cast<int32_t>(hitTestMode_);
+    if (mode < 0 || mode >= static_cast<int32_t>(std::size(HIT_TEST_MODE))) {
+        return HIT_TEST_MODE[0];
+    }
+    return HIT_TEST_MODE[mode];
+}
+
+bool GestureEventHub::KeyBoardShortCutClick(const KeyEvent& event, const WeakPtr<NG::FrameNode>& node)
+{
+    auto host = node.Upgrade();
+    CHECK_NULL_RETURN(host, false);
+    CHECK_NULL_RETURN(clickEventActuator_, false);
+    auto click = clickEventActuator_->GetClickEvent();
+    CHECK_NULL_RETURN(click, false);
+    GestureEvent info;
+    info.SetSourceDevice(event.sourceType);
+    info.SetTimeStamp(event.timeStamp);
+    EventTarget target;
+    target.id = host->GetId();
+    target.type = host->GetTag();
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
+    auto offset = geometryNode->GetFrameOffset();
+    auto size = geometryNode->GetFrameSize();
+    target.area.SetOffset(DimensionOffset(offset));
+    target.area.SetHeight(Dimension(size.Height()));
+    target.area.SetWidth(Dimension(size.Width()));
+    target.origin = DimensionOffset(host->GetOffsetRelativeToWindow() - offset);
+    info.SetTarget(target);
+    click(info);
+    return true;
+}
+
+#ifdef ENABLE_DRAG_FRAMEWORK
+int32_t GestureEventHub::SetDragData(std::shared_ptr<UDMF::UnifiedData>& unifiedData, std::string& udKey)
+{
+    if (unifiedData == nullptr) {
+        LOGE("HandleOnDragStart: SetDragData unifiedData is null");
+        return -1;
+    }
+    auto udmfClient = UDMF::UdmfClient::GetInstance();
+    UDMF::CustomOption udCustomOption;
+    udCustomOption.intention = UDMF::Intention::UD_INTENTION_DRAG;
+    int32_t ret = udmfClient.SetData(udCustomOption, *unifiedData, udKey);
+    if (ret != 0) {
+        LOGE("HandleOnDragStart: UDMF Setdata failed:%{public}d", ret);
+    }
+    return ret;
+}
+OnDragCallback GestureEventHub::GetDragCallback()
+{
+    auto ret = [](const DragNotifyMsg& notifyMessage) {};
+    auto eventHub = eventHub_.Upgrade();
+    CHECK_NULL_RETURN(eventHub, ret);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, ret);
+    auto taskScheduler = pipeline->GetTaskExecutor();
+    CHECK_NULL_RETURN(taskScheduler, ret);
+    RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    auto callback = [eventHub, dragEvent, taskScheduler](const DragNotifyMsg& notifyMessage) {
+        DragRet result = DragRet::DRAG_FAIL;
+        switch (notifyMessage.result) {
+            case DragResult::DRAG_SUCCESS:
+                result = DragRet::DRAG_SUCCESS;
+                break;
+            case DragResult::DRAG_FAIL:
+                result = DragRet::DRAG_FAIL;
+                break;
+            default:
+                break;
+        }
+        dragEvent->SetResult(result);
+        taskScheduler->PostTask(
+            [eventHub, dragEvent]() {
+                if (eventHub->HasOnDragEnd()) {
+                    (eventHub->GetOnDragEnd())(dragEvent);
+                }
+            },
+            TaskExecutor::TaskType::UI);
+    };
+    return callback;
+}
+
+#endif
+bool GestureEventHub::IsAccessibilityClickable()
+{
+    bool ret = IsClickable();
+    for (auto gestureRecognizer : gestureHierarchy_) {
+        if (AceType::DynamicCast<ClickRecognizer>(gestureRecognizer)) {
+            return true;
+        }
+    }
+    return ret;
+}
+
+bool GestureEventHub::IsAccessibilityLongClickable()
+{
+    bool ret = IsLongClickable();
+    for (auto gestureRecognizer : gestureHierarchy_) {
+        if (AceType::DynamicCast<LongPressRecognizer>(gestureRecognizer)) {
+            return true;
+        }
+    }
+    return ret;
 }
 } // namespace OHOS::Ace::NG

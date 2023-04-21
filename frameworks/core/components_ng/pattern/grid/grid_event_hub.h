@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -87,16 +87,11 @@ public:
 
     void FireOnItemDragEnter(const ItemDragInfo& dragInfo);
 
-    void FireOnItemDragMove(const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex) const
-    {
-        if (onItemDragMove_) {
-            onItemDragMove_(dragInfo, itemIndex, insertIndex);
-        }
-    }
+    void FireOnItemDragMove(const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex) const;
 
     void FireOnItemDragLeave(const ItemDragInfo& dragInfo, int32_t itemIndex);
 
-    void FireOnItemDrop(const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex, bool isSuccess);
+    bool FireOnItemDrop(const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex, bool isSuccess);
 
     bool HasOnItemDrop() const
     {
@@ -108,13 +103,14 @@ public:
     void HandleOnItemDragUpdate(const GestureEvent& info);
     void HandleOnItemDragEnd(const GestureEvent& info);
     void HandleOnItemDragCancel();
-    RefPtr<FrameNode> FindGridItemByPosition(float x, float y);
     int32_t GetGridItemIndex(const RefPtr<FrameNode>& frameNode);
     bool CheckPostionInGrid(float x, float y);
+    int32_t GetInsertPosition(float x, float y);
     int GetFrameNodeChildSize();
 
 private:
     bool GetEditable() const;
+    void MoveItems(int32_t itemIndex, int32_t insertIndex) const;
 
     ScrollToIndexFunc onScrollToIndex_;
     ItemDragStartFunc onItemDragStart_;

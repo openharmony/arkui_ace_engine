@@ -29,17 +29,19 @@ RefPtr<FrameNode> InputEventHub::GetFrameNode() const
     return eventHub ? eventHub->GetFrameNode() : nullptr;
 }
 
-bool InputEventHub::ProcessMouseTestHit(const OffsetF& coordinateOffset, MouseTestResult& onMouseResult,
-    MouseTestResult& onHoverResult, RefPtr<FrameNode>& hoverNode)
+bool InputEventHub::ProcessMouseTestHit(const OffsetF& coordinateOffset, TouchTestResult& result)
 {
     auto eventHub = eventHub_.Upgrade();
     auto getEventTargetImpl = eventHub ? eventHub->CreateGetEventTargetImpl() : nullptr;
 
     if (mouseEventActuator_) {
-        mouseEventActuator_->OnCollectMouseEvent(coordinateOffset, getEventTargetImpl, onMouseResult, hoverNode);
+        mouseEventActuator_->OnCollectMouseEvent(coordinateOffset, getEventTargetImpl, result);
     }
     if (hoverEventActuator_) {
-        hoverEventActuator_->OnCollectHoverEvent(coordinateOffset, getEventTargetImpl, onHoverResult);
+        hoverEventActuator_->OnCollectHoverEvent(coordinateOffset, getEventTargetImpl, result);
+    }
+    if (hoverEffectActuator_) {
+        hoverEffectActuator_->OnCollectHoverEffect(coordinateOffset, getEventTargetImpl, result);
     }
     return false;
 }
@@ -63,6 +65,22 @@ void InputEventHub::BindContextMenu(OnMouseEventFunc&& showMenu)
     }
     showMenu_ = MakeRefPtr<InputEvent>(std::move(showMenu));
     AddOnMouseEvent(showMenu_);
+}
+
+std::string InputEventHub::GetHoverEffectStr() const
+{
+    switch (hoverEffectType_) {
+        case HoverEffectType::AUTO:
+            return "HoverEffect.Auto";
+        case HoverEffectType::SCALE:
+            return "HoverEffect.Scale";
+        case HoverEffectType::BOARD:
+            return "HoverEffect.Highlight";
+        case HoverEffectType::NONE:
+            return "HoverEffect.None";
+        default:
+            return "HoverEffect.Auto";
+    }
 }
 
 } // namespace OHOS::Ace::NG

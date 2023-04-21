@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,13 +33,19 @@ constexpr Dimension DEFAULT_CONTROL_BUTTON_TOP = 48.0_vp;
 constexpr Dimension DEFAULT_SIDE_BAR_WIDTH = 200.0_vp;
 constexpr Dimension DEFAULT_MIN_SIDE_BAR_WIDTH = 200.0_vp;
 constexpr Dimension DEFAULT_MAX_SIDE_BAR_WIDTH = 280.0_vp;
+constexpr Dimension DEFAULT_DIVIDER_STROKE_WIDTH = 1.0_vp;
+constexpr Dimension DEFAULT_DIVIDER_START_MARGIN = 0.0_vp;
+constexpr Dimension DEFAULT_DIVIDER_END_MARGIN = 0.0_vp;
+constexpr static int INDEX_CONTRON_BUTTON = 1;
+constexpr static int INDEX_DIVIDER = 2;
+constexpr static int INDEX_SIDE_BAR = 3;
 } // namespace
 
 void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
-    if (children.empty() || children.size() < DEFAULT_MIN_CHILDREN_SIZE) {
-        LOGE("SideBarContainerLayoutAlgorithm::Measure, children is empty or less than 3.");
+    if (children.size() < DEFAULT_MIN_CHILDREN_SIZE) {
+        LOGE("SideBarContainerLayoutAlgorithm::Measure, children is less than 3.");
         return;
     }
 
@@ -56,15 +62,31 @@ void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         InitRealSideBarWidth(layoutWrapper, parentWidth);
     }
 
-    auto begin = children.begin();
-    auto sideBarLayoutWrapper = *(++begin);
-    MeasureSideBar(layoutProperty, sideBarLayoutWrapper);
+    /*
+     * child inverted order is: controlbutton, divider, sidebar, contentxxx, ..., content2, content1
+     * content only display the first one, use itor from end
+     */
+    int index = 0;
+    for (auto it = children.rbegin(); it != children.rend(); ++it) {
+        index++;
+        if (index == INDEX_CONTRON_BUTTON) {
+            auto imgLayoutWrapper = (*it);
+            MeasureControlButton(layoutProperty, imgLayoutWrapper, parentWidth);
+        } else if (index == INDEX_DIVIDER) {
+            auto dividerLayoutWrapper = (*it);
+            MeasureDivider(layoutProperty, dividerLayoutWrapper, parentWidth);
+        } else if (index == INDEX_SIDE_BAR) {
+            auto sideBarLayoutWrapper = (*it);
+            MeasureSideBar(layoutProperty, sideBarLayoutWrapper);
+        } else { // other break
+            break;
+        }
+    }
 
-    auto contentLayoutWrapper = children.front();
-    MeasureSideBarContent(layoutProperty, contentLayoutWrapper, parentWidth);
-
-    auto imgLayoutWrapper = children.back();
-    MeasureControlButton(layoutProperty, imgLayoutWrapper, parentWidth);
+    if (children.size() > DEFAULT_MIN_CHILDREN_SIZE) { // when sidebar only add one component, content is not display
+        auto contentLayoutWrapper = children.front();
+        MeasureSideBarContent(layoutProperty, contentLayoutWrapper, parentWidth);
+    }
 }
 
 void SideBarContainerLayoutAlgorithm::InitRealSideBarWidth(LayoutWrapper* layoutWrapper, float parentWidth)
@@ -109,6 +131,34 @@ void SideBarContainerLayoutAlgorithm::MeasureSideBar(
     sideBarLayoutWrapper->Measure(sideBarConstraint);
 }
 
+void SideBarContainerLayoutAlgorithm::MeasureDivider(const RefPtr<SideBarContainerLayoutProperty>& layoutProperty,
+    const RefPtr<LayoutWrapper>& dividerLayoutWrapper, float parentWidth)
+{
+    CHECK_NULL_VOID(layoutProperty);
+    CHECK_NULL_VOID(dividerLayoutWrapper);
+    auto constraint = layoutProperty->GetLayoutConstraint();
+    CHECK_NULL_VOID(constraint);
+    auto scaleProperty = constraint->scaleProperty;
+    auto dividerIdealSize = CreateIdealSize(
+        constraint.value(), Axis::HORIZONTAL, layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT), true);
+
+    auto dividerStrokeWidth = layoutProperty->GetDividerStrokeWidth().value_or(DEFAULT_DIVIDER_STROKE_WIDTH);
+    auto dividerStartMargin = layoutProperty->GetDividerStartMargin().value_or(DEFAULT_DIVIDER_START_MARGIN);
+    auto dividerEndMargin = layoutProperty->GetDividerEndMargin().value_or(DEFAULT_DIVIDER_END_MARGIN);
+
+    auto dividerStrokeWidthPx = ConvertToPx(dividerStrokeWidth, scaleProperty, parentWidth).value_or(1);
+    auto dividerStartMarginPx = ConvertToPx(dividerStartMargin, scaleProperty, parentWidth).value_or(0);
+    auto dividerEndMarginPx = ConvertToPx(dividerEndMargin, scaleProperty, parentWidth).value_or(0);
+
+    dividerIdealSize.SetWidth(dividerStrokeWidthPx);
+    dividerIdealSize.SetHeight(realSideBarHeight_ - dividerStartMarginPx - dividerEndMarginPx);
+    realDividerWidth_ = dividerStrokeWidthPx;
+
+    auto dividerLayoutConstraint = layoutProperty->CreateChildConstraint();
+    dividerLayoutConstraint.selfIdealSize = OptionalSizeF(dividerIdealSize);
+    dividerLayoutWrapper->Measure(dividerLayoutConstraint);
+}
+
 void SideBarContainerLayoutAlgorithm::MeasureSideBarContent(
     const RefPtr<SideBarContainerLayoutProperty>& layoutProperty, const RefPtr<LayoutWrapper>& contentLayoutWrapper,
     float parentWidth)
@@ -120,11 +170,11 @@ void SideBarContainerLayoutAlgorithm::MeasureSideBarContent(
 
     if (type == SideBarContainerType::EMBED) {
         if (sideBarStatus_ == SideBarStatus::SHOW) {
-            contentWidth -= realSideBarWidth_;
+            contentWidth -= (realSideBarWidth_ + realDividerWidth_);
         } else if (sideBarStatus_ == SideBarStatus::CHANGING) {
             contentWidth = (sideBarPosition == SideBarPosition::START)
-                               ? (parentWidth - realSideBarWidth_ - currentOffset_)
-                               : (parentWidth + currentOffset_);
+                               ? (parentWidth - realSideBarWidth_ - realDividerWidth_ - currentOffset_)
+                               : (parentWidth - realDividerWidth_ + currentOffset_);
         }
     }
 
@@ -156,19 +206,32 @@ void SideBarContainerLayoutAlgorithm::MeasureControlButton(const RefPtr<SideBarC
 void SideBarContainerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
-    if (children.empty() || children.size() < DEFAULT_MIN_CHILDREN_SIZE) {
-        LOGE("SideBarContainerLayoutAlgorithm::Measure, children is empty or less than 3.");
+    if (children.size() < DEFAULT_MIN_CHILDREN_SIZE) {
+        LOGE("SideBarContainerLayoutAlgorithm::Measure, children is less than 3.");
         return;
     }
 
-    auto controlButtonLayoutWrapper = children.back();
-    auto begin = children.begin();
-    auto sideBarLayoutWrapper = *(++begin);
-    auto contentLayoutWrapper = children.front();
+    int index = 0;
+    for (auto it = children.rbegin(); it != children.rend(); ++it) {
+        index++;
+        if (index == INDEX_CONTRON_BUTTON) {
+            auto controlButtonLayoutWrapper = (*it);
+            LayoutControlButton(layoutWrapper, controlButtonLayoutWrapper);
+        } else if (index == INDEX_DIVIDER) {
+            auto dividerLayoutWrapper = (*it);
+            LayoutDivider(layoutWrapper, dividerLayoutWrapper);
+        } else if (index == INDEX_SIDE_BAR) {
+            auto sideBarLayoutWrapper = (*it);
+            LayoutSideBar(layoutWrapper, sideBarLayoutWrapper);
+        } else { // other break
+            break;
+        }
+    }
 
-    LayoutControlButton(layoutWrapper, controlButtonLayoutWrapper);
-    LayoutSideBar(layoutWrapper, sideBarLayoutWrapper);
-    LayoutSideBarContent(layoutWrapper, contentLayoutWrapper);
+    if (children.size() > DEFAULT_MIN_CHILDREN_SIZE) { // when sidebar only add one component, content is not display
+        auto contentLayoutWrapper = children.front();
+        LayoutSideBarContent(layoutWrapper, contentLayoutWrapper);
+    }
 }
 
 void SideBarContainerLayoutAlgorithm::LayoutControlButton(
@@ -184,8 +247,36 @@ void SideBarContainerLayoutAlgorithm::LayoutControlButton(
 
     auto controlButtonLeft = layoutProperty->GetControlButtonLeft().value_or(DEFAULT_CONTROL_BUTTON_LEFT);
     auto controlButtonTop = layoutProperty->GetControlButtonTop().value_or(DEFAULT_CONTROL_BUTTON_TOP);
+    if (LessNotEqual(controlButtonLeft.Value(), 0.0)) {
+        controlButtonLeft = DEFAULT_CONTROL_BUTTON_LEFT;
+    }
+
+    if (LessNotEqual(controlButtonTop.Value(), 0.0)) {
+        controlButtonTop = DEFAULT_CONTROL_BUTTON_TOP;
+    }
+
     auto controlButtonLeftPx = ConvertToPx(controlButtonLeft, scaleProperty, parentWidth).value_or(0);
     auto controlButtonTopPx = ConvertToPx(controlButtonTop, scaleProperty, parentWidth).value_or(0);
+
+    /*
+     * Control buttion left position need to special handle:
+     *   1. when sideBarPosition set to END and controlButtonLeft do not set in ButtonStyle
+     *   control button need to move follow the sidebar to the right
+     *   2. when sideBarPosition set to START or controlButtonLeft has set by user
+     *   control button keep before handle
+     *   3. if the controlButtonLeft has set, whether sideBarPosition set to START or END
+     *   control button offset the left, if value invalid set to default 16vp
+     */
+    auto sideBarPosition = layoutProperty->GetSideBarPosition().value_or(SideBarPosition::START);
+    auto controlButtonWidth = layoutProperty->GetControlButtonWidth().value_or(DEFAULT_CONTROL_BUTTON_WIDTH);
+
+    if ((sideBarPosition == SideBarPosition::END) && // sideBarPosition is End, other pass
+        (!layoutProperty->GetControlButtonLeft().has_value())) { // origin value has not set
+        auto defaultControlButtonLeftPx = ConvertToPx(DEFAULT_CONTROL_BUTTON_LEFT,
+            scaleProperty, parentWidth).value_or(0);
+        auto controlButtonWidthPx = ConvertToPx(controlButtonWidth, scaleProperty, parentWidth).value_or(0);
+        controlButtonLeftPx = parentWidth - defaultControlButtonLeftPx - controlButtonWidthPx;
+    }
 
     auto imgOffset = OffsetF(controlButtonLeftPx, controlButtonTopPx);
     buttonLayoutWrapper->GetGeometryNode()->SetMarginFrameOffset(imgOffset);
@@ -211,7 +302,7 @@ void SideBarContainerLayoutAlgorithm::LayoutSideBar(
             break;
         case SideBarStatus::HIDDEN:
             if (sideBarPosition == SideBarPosition::START) {
-                sideBarOffsetX = -realSideBarWidth_;
+                sideBarOffsetX = -(realSideBarWidth_ + realDividerWidth_);
             } else {
                 sideBarOffsetX = parentWidth;
             }
@@ -244,9 +335,9 @@ void SideBarContainerLayoutAlgorithm::LayoutSideBarContent(
     float contentOffsetX = 0.0f;
     if (type == SideBarContainerType::EMBED && sideBarPosition == SideBarPosition::START) {
         if (sideBarStatus_ == SideBarStatus::SHOW) {
-            contentOffsetX = realSideBarWidth_;
+            contentOffsetX = realSideBarWidth_ + realDividerWidth_;
         } else if (sideBarStatus_ == SideBarStatus::CHANGING) {
-            contentOffsetX = realSideBarWidth_ + currentOffset_;
+            contentOffsetX = realSideBarWidth_ + realDividerWidth_ + currentOffset_;
         }
     }
 
@@ -255,4 +346,55 @@ void SideBarContainerLayoutAlgorithm::LayoutSideBarContent(
     contentLayoutWrapper->Layout();
 }
 
+void SideBarContainerLayoutAlgorithm::LayoutDivider(
+    LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& dividerLayoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    CHECK_NULL_VOID(dividerLayoutWrapper);
+    auto layoutProperty = AceType::DynamicCast<SideBarContainerLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+
+    auto sideBarPosition = layoutProperty->GetSideBarPosition().value_or(SideBarPosition::START);
+
+    CHECK_NULL_VOID(layoutWrapper->GetGeometryNode());
+    auto parentWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
+    auto constraint = layoutProperty->GetLayoutConstraint();
+    CHECK_NULL_VOID(constraint);
+    auto scaleProperty = constraint->scaleProperty;
+
+    auto dividerStartMargin = layoutProperty->GetDividerStartMargin().value_or(DEFAULT_DIVIDER_START_MARGIN);
+    auto dividerStartMarginPx = ConvertToPx(dividerStartMargin, scaleProperty, parentWidth).value_or(0);
+
+    float dividerOffsetX = 0.0f;
+    switch (sideBarStatus_) {
+        case SideBarStatus::SHOW:
+            if (sideBarPosition == SideBarPosition::START) {
+                dividerOffsetX = realSideBarWidth_;
+            } else {
+                dividerOffsetX = parentWidth - realSideBarWidth_ - realDividerWidth_;
+            }
+            break;
+        case SideBarStatus::HIDDEN:
+            if (sideBarPosition == SideBarPosition::START) {
+                dividerOffsetX = -realDividerWidth_;
+            } else {
+                dividerOffsetX = parentWidth + realSideBarWidth_;
+            }
+            break;
+        case SideBarStatus::CHANGING:
+            if (sideBarPosition == SideBarPosition::START) {
+                dividerOffsetX = realSideBarWidth_ + currentOffset_;
+            } else {
+                dividerOffsetX = parentWidth - realDividerWidth_ + currentOffset_ ;
+            }
+            break;
+        default:
+            break;
+    }
+
+    auto dividerOffset = OffsetF(dividerOffsetX, dividerStartMarginPx);
+    CHECK_NULL_VOID(dividerLayoutWrapper->GetGeometryNode());
+    dividerLayoutWrapper->GetGeometryNode()->SetMarginFrameOffset(dividerOffset);
+    dividerLayoutWrapper->Layout();
+}
 } // namespace OHOS::Ace::NG

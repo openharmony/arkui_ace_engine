@@ -23,6 +23,7 @@
 #include "base/utils/macros.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/custom/custom_node_pattern.h"
+#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 
@@ -69,6 +70,8 @@ public:
         }
     }
 
+    virtual void SetCompleteReloadFunc(RenderFunction&& func) = 0;
+
     void SetPageTransitionFunction(std::function<void()>&& pageTransitionFunc)
     {
         pageTransitionFunc_ = std::move(pageTransitionFunc);
@@ -78,6 +81,20 @@ public:
     {
         if (pageTransitionFunc_) {
             pageTransitionFunc_();
+        }
+    }
+
+    void SetForceUpdateNodeFunc(std::function<void(int32_t)>&& forceNodeUpdateFunc)
+    {
+        forceNodeUpdateFunc_ = std::move(forceNodeUpdateFunc);
+    }
+
+    void FireNodeUpdateFunc(ElementIdType id)
+    {
+        if (forceNodeUpdateFunc_) {
+            forceNodeUpdateFunc_(id);
+        } else {
+            LOGE("fail to find node update func to execute %{public}d node update", id);
         }
     }
 
@@ -94,13 +111,27 @@ public:
     // called by pipeline in js thread of update.
     void Update();
 
+    void SetJSViewName(std::string&& name)
+    {
+        jsViewName_ = name;
+    }
+
+    const std::string& GetJSViewName() const
+    {
+        return jsViewName_;
+    }
+
 private:
     std::function<void()> updateFunc_;
     std::function<void()> appearFunc_;
     std::function<void()> destroyFunc_;
     std::function<void()> pageTransitionFunc_;
     std::function<void(bool)> reloadFunc_;
+    std::function<void()> completeReloadFunc_;
+    std::function<void(int32_t)> forceNodeUpdateFunc_;
     bool needRebuild_ = false;
+
+    std::string jsViewName_;
 };
 } // namespace OHOS::Ace::NG
 

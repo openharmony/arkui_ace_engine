@@ -271,7 +271,7 @@ void CameraCallback::SetLayoutOffset(double x, double y)
 int32_t CameraCallback::PreparePhoto(sptr<OHOS::CameraStandard::CameraManager> camManagerObj)
 {
     int32_t intResult = 0;
-    captureConsumerSurface_ = Surface::CreateSurfaceAsConsumer();
+    captureConsumerSurface_ = IConsumerSurface::Create();
     if (captureConsumerSurface_ == nullptr) {
         LOGE("Camera CreateSurface failed.");
         return -1;
@@ -283,8 +283,8 @@ int32_t CameraCallback::PreparePhoto(sptr<OHOS::CameraStandard::CameraManager> c
         photoListener_ = new CaptureListener(this);
     }
     captureConsumerSurface_->RegisterConsumerListener(photoListener_);
-
-    photoOutput_ = camManagerObj->CreatePhotoOutput(captureConsumerSurface_);
+    sptr<IBufferProducer> bp = captureConsumerSurface_->GetProducer();
+    photoOutput_ = camManagerObj->CreatePhotoOutput(bp);
     if (photoOutput_ == nullptr) {
         LOGE("Failed to create PhotoOutput");
         return -1;

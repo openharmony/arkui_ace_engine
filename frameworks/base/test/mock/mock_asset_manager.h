@@ -47,24 +47,29 @@ public:
         return nullptr;
     }
 
-    std::string GetAssetPath(const std::string& assetName) override
+    std::string GetAssetPath(const std::string& /* assetName */, bool /* isAddHapPath */) override
     {
-        return "";
+        return {};
     }
 
     void SetLibPath(const std::string& appLibPathKey, const std::vector<std::string>& packagePath) override {}
 
     std::string GetAppLibPathKey() const override
     {
-        return "";
+        return {};
     }
 
     std::vector<std::string> GetLibPath() const override
     {
-        return std::vector<std::string>();
+        return {};
     }
 
     void GetAssetList(const std::string& path, std::vector<std::string>& assetList) const override {}
+
+    bool GetFileInfo(const std::string& /* fileName */, MediaFileInfo& /* fileInfo */) const override
+    {
+        return false;
+    }
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_TEST_MOCK_MOCK_ASSET_MANAGER_H

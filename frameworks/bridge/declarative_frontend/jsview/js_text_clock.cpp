@@ -73,33 +73,29 @@ void JSTextClock::Create(const JSCallbackInfo& info)
     auto controller = TextClockModel::GetInstance()->Create();
     if (info.Length() < 1 || !info[0]->IsObject()) {
         LOGD("TextClock Info is non-valid");
-    } else {
-        JSRef<JSObject> optionsObject = JSRef<JSObject>::Cast(info[0]);
-        JSRef<JSVal> hourWestVal = optionsObject->GetProperty("timeZoneOffset");
-        if (hourWestVal->IsNumber()) {
-            auto hourWest_ = hourWestVal->ToNumber<int32_t>();
-            if (HoursWestIsValid(hourWest_)) {
-                TextClockModel::GetInstance()->SetHoursWest(hourWest_);
-            } else {
-                LOGE("hourWest args is invalid");
-            }
-        } else {
-            LOGE("hourWest args is not number,args is invalid");
-        }
-        auto controllerObj = optionsObject->GetProperty("controller");
-        if (!controllerObj->IsUndefined() && !controllerObj->IsNull()) {
-            auto* jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextClockController>();
-            if (jsController != nullptr) {
-                if (controller) {
-                    jsController->SetController(controller);
-                } else {
-                    LOGE("TextClockController is nullptr");
-                }
-            }
-        } else {
-            LOGE("controllerObj is nullptr or undefined");
-        }
+        return;
     }
+    JSRef<JSObject> optionsObject = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> hourWestVal = optionsObject->GetProperty("timeZoneOffset");
+    if (hourWestVal->IsNumber() && HoursWestIsValid(hourWestVal->ToNumber<int32_t>())) {
+        TextClockModel::GetInstance()->SetHoursWest(hourWestVal->ToNumber<int32_t>());
+    } else {
+        TextClockModel::GetInstance()->SetHoursWest(INT_MAX);
+        LOGE("hourWest args is invalid");
+    }
+    auto controllerObj = optionsObject->GetProperty("controller");
+    if (!controllerObj->IsUndefined() && !controllerObj->IsNull()) {
+        auto* jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextClockController>();
+        if (jsController != nullptr) {
+            if (controller) {
+                jsController->AddController(controller);
+            } else {
+                LOGE("TextClockController is nullptr");
+            }
+        }
+        return;
+    }
+    LOGE("controllerObj is nullptr or undefined");
 }
 
 void JSTextClock::JSBind(BindingTarget globalObj)
@@ -138,6 +134,7 @@ void JSTextClock::SetFormat(const JSCallbackInfo& info)
         R"(^([Yy]*[_|\W\s]*[M]*[_|\W\s]*[d]*[_|\W\s]*[D]*[_|\W\s]*[Hh]*[_|\W\s]*[m]*[_|\W\s]*[s]*[_|\W\s]*[S]*)$)");
     if (!std::regex_match(value, pattern)) {
         LOGE("The arg is wrong, because of format matching error.");
+        TextClockModel::GetInstance()->SetFormat("hms");
         return;
     }
     TextClockModel::GetInstance()->SetFormat(value);
@@ -184,15 +181,19 @@ void JSTextClockController::Destructor(JSTextClockController* scroller)
 
 void JSTextClockController::Start()
 {
-    if (controller_) {
-        controller_->Start();
+    if (!controller_.empty()) {
+        for (auto& i : controller_) {
+            i->Start();
+        }
     }
 }
 
 void JSTextClockController::Stop()
 {
-    if (controller_) {
-        controller_->Stop();
+    if (!controller_.empty()) {
+        for (auto& i : controller_) {
+            i->Stop();
+        }
     }
 }
 } // namespace OHOS::Ace::Framework

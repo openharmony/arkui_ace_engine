@@ -43,6 +43,11 @@ public:
     {
         return WrapElement::TypeId();
     }
+
+    RefPtr<Element> GetRenderElement() const override
+    {
+        return GetContentElement<WrapElement>(WrapElement::TypeId());
+    }
 };
 
 } // namespace OHOS::Ace

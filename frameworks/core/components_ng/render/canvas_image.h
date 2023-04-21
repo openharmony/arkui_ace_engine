@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,24 +17,28 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_CANVAS_IMAGE_H
 
 #include <memory>
+
 #include "base/geometry/ng/rect_t.h"
+#include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components_ng/render/drawing_forward.h"
 
 namespace OHOS::Ace::NG {
-
+using BorderRadiusArray = std::array<PointF, 4>;
 struct ImagePaintConfig {
     RectF srcRect_;
     RectF dstRect_;
+    std::shared_ptr<std::vector<float>> colorFilter_ = nullptr;
+    std::shared_ptr<BorderRadiusArray> borderRadiusXY_ = nullptr;
+    float scaleX_ = 1.0f;
+    float scaleY_ = 1.0f;
     ImageRenderMode renderMode_ = ImageRenderMode::ORIGINAL;
     ImageInterpolation imageInterpolation_ = ImageInterpolation::NONE;
     ImageRepeat imageRepeat_ = ImageRepeat::NO_REPEAT;
     ImageFit imageFit_ = ImageFit::COVER;
-    std::shared_ptr<std::vector<float>> colorFilter_ = nullptr;
     bool needFlipCanvasHorizontally_ = false;
-    std::shared_ptr<std::array<PointF, 4>> borderRadiusXY_ = nullptr;
     bool isSvg_ = false;
 };
 
@@ -47,27 +51,50 @@ public:
     CanvasImage() = default;
     ~CanvasImage() override = default;
     virtual void DrawToRSCanvas(
-        RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const std::array<PointF, 4>& radiusXY) = 0;
+        RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY) = 0;
 
     static RefPtr<CanvasImage> Create(void* rawImage);
     static RefPtr<CanvasImage> Create();
     // TODO: use [PixelMap] as data source when rs provides interface like
     // DrawBitmapRect(Media::PixelMap* pixelMap, const Rect& dstRect, const Rect& srcRect, ...)
     // now we make [SkImage] from [PixelMap] and use [drawImageRect] to draw image
-    static RefPtr<CanvasImage> Create(
-        const RefPtr<PixelMap>& pixelMap, const RefPtr<RenderTaskHolder>& renderTaskHolder);
+    static RefPtr<CanvasImage> Create(const RefPtr<PixelMap>& pixelMap);
+
+    virtual RefPtr<PixelMap> GetPixelMap()
+    {
+        return nullptr;
+    }
+
     virtual int32_t GetWidth() const = 0;
     virtual int32_t GetHeight() const = 0;
+
+    virtual RefPtr<CanvasImage> Clone()
+    {
+        return Claim(this);
+    }
 
     void SetPaintConfig(const ImagePaintConfig& config)
     {
         paintConfig_ = std::make_unique<ImagePaintConfig>(config);
     }
 
-    ImagePaintConfig& GetPaintConfig()
+    inline ImagePaintConfig& GetPaintConfig()
     {
+        if (!paintConfig_) {
+            LOGW("image paint config is null");
+        }
         return *paintConfig_;
     }
+
+    virtual bool IsStatic()
+    {
+        return true;
+    }
+    virtual void SetRedrawCallback(std::function<void()>&& callback) {}
+
+    virtual void ControlAnimation(bool play) {}
+
+    virtual void SetRawCompressData(void* dataPtr, int32_t w, int32_t h) {}
 
 private:
     std::unique_ptr<ImagePaintConfig> paintConfig_;

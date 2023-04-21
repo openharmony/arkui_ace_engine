@@ -76,6 +76,7 @@ public:
     virtual void FillText(const Offset& offset, const std::string& text, double x, double y) = 0;
     virtual void StrokeText(const Offset& offset, const std::string& text, double x, double y) = 0;
     static double PaintMeasureText(const MeasureContext& context);
+    static Size MeasureTextSize(const MeasureContext& context);
     virtual double MeasureText(const std::string& text, const PaintState& state) = 0;
     virtual double MeasureTextHeight(const std::string& text, const PaintState& state) = 0;
     virtual TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state) = 0;

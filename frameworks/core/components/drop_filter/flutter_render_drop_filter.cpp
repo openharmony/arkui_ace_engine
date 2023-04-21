@@ -18,7 +18,6 @@
 #include "flutter/fml/memory/ref_counted.h"
 #include "flutter/lib/ui/painting/canvas.h"
 #include "flutter/lib/ui/painting/picture_recorder.h"
-#include "flutter/lib/ui/ui_dart_state.h"
 
 #include "base/log/dump_log.h"
 #include "core/components/drop_filter/drop_filter_component.h"

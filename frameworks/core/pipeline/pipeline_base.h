@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,7 +48,18 @@
 #include "core/image/image_cache.h"
 #include "core/pipeline/container_window_manager.h"
 
+namespace OHOS::Rosen {
+class RSTransaction;
+}
+
 namespace OHOS::Ace {
+
+struct KeyboardAnimationConfig {
+    std::string curveType_;
+    std::vector<float> curveParams_;
+    uint32_t durationIn_ = 0;
+    uint32_t durationOut_ = 0;
+};
 
 class Frontend;
 class OffscreenCanvas;
@@ -56,15 +67,17 @@ class Window;
 class FontManager;
 class ManagerInterface;
 enum class FrontendType;
-
+using SharePanelCallback = std::function<void(const std::string& bundleName, const std::string& abilityName)>;
+using AceVsyncCallback = std::function<void(uint64_t, uint32_t)>;
+using EtsCardTouchEventCallback = std::function<void(const TouchEvent&)>;
 class ACE_EXPORT PipelineBase : public AceType {
     DECLARE_ACE_TYPE(PipelineBase, AceType);
 
 public:
     PipelineBase() = default;
-    PipelineBase(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor, RefPtr<AssetManager> assetManager,
+    PipelineBase(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor, RefPtr<AssetManager> assetManager,
         const RefPtr<Frontend>& frontend, int32_t instanceId);
-    PipelineBase(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor, RefPtr<AssetManager> assetManager,
+    PipelineBase(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor, RefPtr<AssetManager> assetManager,
         const RefPtr<Frontend>& frontend, int32_t instanceId, RefPtr<PlatformResRegister> platformResRegister);
     ~PipelineBase() override;
 
@@ -92,6 +105,8 @@ public:
     bool CloseImplicitAnimation();
 
     void ForceLayoutForImplicitAnimation();
+
+    void ForceRenderForImplicitAnimation();
 
     // add schedule task and return the unique mark id.
     virtual uint32_t AddScheduleTask(const RefPtr<ScheduleTask>& task) = 0;
@@ -147,10 +162,11 @@ public:
 
     virtual void WindowFocus(bool isFocus) = 0;
 
-    virtual void ShowContainerTitle(bool isShow) = 0;
+    virtual void ShowContainerTitle(bool isShow, bool hasDeco = true) = 0;
 
-    virtual void OnSurfaceChanged(
-        int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED) = 0;
+    virtual void OnSurfaceChanged(int32_t width, int32_t height,
+        WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr) = 0;
 
     virtual void OnSurfacePositionChanged(int32_t posX, int32_t posY) = 0;
 
@@ -163,6 +179,13 @@ public:
     virtual void NotifyOnPreDraw() = 0;
 
     virtual bool CallRouterBackToPopPage() = 0;
+
+    virtual bool PopPageStackOverlay()
+    {
+        return false;
+    }
+
+    virtual void HideOverlays() {}
 
     virtual void OnPageShow() {}
 
@@ -177,10 +200,7 @@ public:
         return false;
     }
 
-    // Called by AceAbility and UiContent.
-    void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) const;
-
-    // Called by AceEngine.
+    // Called by AceContainer.
     bool Dump(const std::vector<std::string>& params) const;
 
     virtual bool IsLastPage()
@@ -203,9 +223,21 @@ public:
         return appBgColor_;
     }
 
+    int32_t GetAppLabelId() const
+    {
+        return appLabelId_;
+    }
+
+    void SetAppLabelId(int32_t appLabelId)
+    {
+        appLabelId_ = appLabelId;
+    }
+
     virtual void SetAppTitle(const std::string& title) = 0;
 
     virtual void SetAppIcon(const RefPtr<PixelMap>& icon) = 0;
+
+    virtual void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize) {}
 
     virtual void RefreshRootBgColor() const {}
 
@@ -249,13 +281,27 @@ public:
         statusBarBgColorEventHandler_ = std::move(listener);
     }
     void NotifyStatusBarBgColor(const Color& color) const;
-    using PopupEventHandler = std::function<void()>;
 
+    using PopupEventHandler = std::function<void()>;
     void SetPopupEventHandler(PopupEventHandler&& listener)
     {
         popupEventHandler_ = std::move(listener);
     }
     void NotifyPopupDismiss() const;
+
+    using MenuEventHandler = std::function<void()>;
+    void SetMenuEventHandler(MenuEventHandler&& listener)
+    {
+        menuEventHandler_ = std::move(listener);
+    }
+    void NotifyMenuDismiss() const;
+
+    using ContextMenuEventHandler = std::function<void()>;
+    void SetContextMenuEventHandler(ContextMenuEventHandler&& listener)
+    {
+        contextMenuEventHandler_ = std::move(listener);
+    }
+    void NotifyContextMenuDismiss() const;
 
     using RouterBackEventHandler = std::function<void()>;
     void SetRouterBackEventHandler(RouterBackEventHandler&& listener)
@@ -355,6 +401,16 @@ public:
 
     RefPtr<ImageCache> GetImageCache() const;
 
+    const RefPtr<SharedImageManager>& GetSharedImageManager() const
+    {
+        return sharedImageManager_;
+    }
+
+    void SetSharedImageManager(const RefPtr<SharedImageManager>& sharedImageManager)
+    {
+        sharedImageManager_ = sharedImageManager;
+    }
+
     Window* GetWindow()
     {
         return window_.get();
@@ -369,9 +425,27 @@ public:
     {
         return minPlatformVersion_;
     }
+
     void SetMinPlatformVersion(int32_t minPlatformVersion)
     {
         minPlatformVersion_ = minPlatformVersion;
+    }
+
+    void SetInstallationFree(int32_t installationFree)
+    {
+        installationFree_ = installationFree;
+    }
+
+    void SetSharePanelCallback(SharePanelCallback&& callback)
+    {
+        sharePanelCallback_ = std::move(callback);
+    }
+
+    void FireSharePanelCallback(const std::string& bundleName, const std::string& abilityName)
+    {
+        if (sharePanelCallback_) {
+            sharePanelCallback_(bundleName, abilityName);
+        }
     }
 
     RefPtr<ThemeManager> GetThemeManager() const
@@ -441,14 +515,14 @@ public:
         return isJsCard_;
     }
 
-    void SetIsEtsCard(bool isEtsCard)
+    void SetIsFormRender(bool isEtsCard)
     {
-        isEtsCard_ = isEtsCard;
+        isFormRender_ = isEtsCard;
     }
 
-    bool IsEtsCard() const
+    bool IsFormRender() const
     {
-        return isEtsCard_;
+        return isFormRender_;
     }
 
     // Get the dp scale which used to covert dp to logic px.
@@ -576,7 +650,8 @@ public:
     void SetTouchPipeline(const WeakPtr<PipelineBase>& context);
     void RemoveTouchPipeline(const WeakPtr<PipelineBase>& context);
 
-    void OnVirtualKeyboardAreaChange(Rect keyboardArea);
+    void OnVirtualKeyboardAreaChange(
+        Rect keyboardArea, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
 
     using virtualKeyBoardCallback = std::function<bool(int32_t, int32_t, double)>;
     void SetVirtualKeyBoardCallback(virtualKeyBoardCallback&& listener)
@@ -585,12 +660,13 @@ public:
     }
     bool NotifyVirtualKeyBoard(int32_t width, int32_t height, double keyboard) const
     {
+        bool isConsume = false;
         for (const auto& iterVirtualKeyBoardCallback : virtualKeyBoardCallback_) {
             if (iterVirtualKeyBoardCallback && iterVirtualKeyBoardCallback(width, height, keyboard)) {
-                return true;
+                isConsume = true;
             }
         }
-        return false;
+        return isConsume;
     }
 
     using configChangedCallback = std::function<void()>;
@@ -624,6 +700,10 @@ public:
     void SetGetWindowRectImpl(std::function<Rect()>&& callback);
 
     Rect GetCurrentWindowRect() const;
+
+    virtual void SetGetViewSafeAreaImpl(std::function<SafeAreaEdgeInserts()>&& callback) = 0;
+
+    virtual SafeAreaEdgeInserts GetCurrentViewSafeArea() const = 0;
 
     void SetPluginOffset(const Offset& offset)
     {
@@ -667,6 +747,8 @@ public:
 
     virtual void FlushUITasks() = 0;
 
+    virtual void FlushPipelineImmediately() = 0;
+
     // for sync animation only
     AnimationOption GetSyncAnimationOption()
     {
@@ -678,6 +760,11 @@ public:
         animationOption_ = option;
     }
 
+    void SetKeyboardAnimationConfig(const KeyboardAnimationConfig& config)
+    {
+        keyboardAnimationConfig_ = config;
+    }
+
     void SetNextFrameLayoutCallback(std::function<void()>&& callback)
     {
         nextFrameLayoutCallback_ = std::move(callback);
@@ -686,6 +773,66 @@ public:
     void SetForegroundCalled(bool isForegroundCalled)
     {
         isForegroundCalled_ = isForegroundCalled;
+    }
+
+    void SetIsSubPipeline(bool isSubPipeline)
+    {
+        isSubPipeline_ = isSubPipeline;
+    }
+
+    bool IsSubPipeline() const
+    {
+        return isSubPipeline_;
+    }
+
+    void SetParentPipeline(const WeakPtr<PipelineBase>& pipeline)
+    {
+        parentPipeline_ = pipeline;
+    }
+
+    void AddEtsCardTouchEventCallback(int32_t ponitId, EtsCardTouchEventCallback&& callback);
+
+    void HandleEtsCardTouchEvent(const TouchEvent& point);
+
+    void RemoveEtsCardTouchEventCallback(int32_t ponitId);
+
+    void AddUIExtensionCallback(std::function<void(const TouchEvent&)>&& callback)
+    {
+        uiExtensionCallback_ = std::move(callback);
+    }
+
+    void SetSubWindowVsyncCallback(AceVsyncCallback&& callback, int32_t subWindowId);
+
+    void RemoveSubWindowVsyncCallback(int32_t subWindowId);
+
+    void SetIsLayoutFullScreen(bool isLayoutFullScreen)
+    {
+        isLayoutFullScreen_ = isLayoutFullScreen;
+    }
+
+    bool GetIsLayoutFullScreen() const
+    {
+        return isLayoutFullScreen_;
+    }
+
+    void SetIsAppWindow(bool isAppWindow)
+    {
+        isAppWindow_ = isAppWindow;
+    }
+
+    bool GetIsAppWindow() const
+    {
+        return isAppWindow_;
+    }
+
+    void SetIgnoreViewSafeArea(bool ignoreViewSafeArea)
+    {
+        ignoreViewSafeArea_ = ignoreViewSafeArea;
+    }
+
+    bool GetIgnoreViewSafeArea() const
+    {
+        return ignoreViewSafeArea_;
     }
 
 protected:
@@ -706,7 +853,8 @@ protected:
     virtual void SetRootRect(double width, double height, double offset = 0.0) = 0;
     virtual void FlushPipelineWithoutAnimation() = 0;
 
-    virtual void OnVirtualKeyboardHeightChange(float keyboardHeight) {}
+    virtual void OnVirtualKeyboardHeightChange(float keyboardHeight,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr) {}
 
     void UpdateRootSizeAndScale(int32_t width, int32_t height);
 
@@ -715,13 +863,21 @@ protected:
 
     bool isRebuildFinished_ = false;
     bool isJsCard_ = false;
-    bool isEtsCard_ = false;
+    bool isFormRender_ = false;
     bool isRightToLeft_ = false;
     bool isFullWindow_ = false;
+    bool isLayoutFullScreen_ = false;
+    bool isAppWindow_ = true;
+    bool ignoreViewSafeArea_ = false;
+    bool installationFree_ = false;
+    bool isSubPipeline_ = false;
 
     bool isJsPlugin_ = false;
+
+    std::unordered_map<int32_t, AceVsyncCallback> subWindowVsyncCallbacks_;
     int32_t minPlatformVersion_ = 0;
     int32_t windowId_ = 0;
+    int32_t appLabelId_ = 0;
     float fontScale_ = 1.0f;
     float designWidthScale_ = 1.0f;
     float viewScale_ = 1.0f;
@@ -738,13 +894,15 @@ protected:
 
     std::unique_ptr<DrawDelegate> drawDelegate_;
     std::stack<bool> pendingImplicitLayout_;
-    std::unique_ptr<Window> window_;
+    std::stack<bool> pendingImplicitRender_;
+    std::shared_ptr<Window> window_;
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<AssetManager> assetManager_;
     WeakPtr<Frontend> weakFrontend_;
     int32_t instanceId_ = 0;
     RefPtr<EventManager> eventManager_;
     RefPtr<ImageCache> imageCache_;
+    RefPtr<SharedImageManager> sharedImageManager_;
     mutable std::shared_mutex imageCacheMutex_;
     RefPtr<ThemeManager> themeManager_;
     RefPtr<DataProviderManagerInterface> dataProviderManager_;
@@ -760,19 +918,29 @@ protected:
     ActionEventHandler actionEventHandler_;
     RefPtr<PlatformResRegister> platformResRegister_;
 
+    WeakPtr<PipelineBase> parentPipeline_;
+
     std::vector<WeakPtr<PipelineBase>> touchPluginPipelineContext_;
+    std::unordered_map<int32_t, EtsCardTouchEventCallback> etsCardTouchEventCallback_;
+    std::function<void(const TouchEvent&)> uiExtensionCallback_;
 
     RefPtr<Clipboard> clipboard_;
     std::function<void(const std::string&)> clipboardCallback_ = nullptr;
     Rect displayWindowRectInfo_;
     AnimationOption animationOption_;
+    KeyboardAnimationConfig keyboardAnimationConfig_;
+
 
     std::function<void()> nextFrameLayoutCallback_ = nullptr;
+    SharePanelCallback sharePanelCallback_ = nullptr;
     std::atomic<bool> isForegroundCalled_ = false;
 
 private:
+    void DumpFrontend() const;
     StatusBarEventHandler statusBarBgColorEventHandler_;
     PopupEventHandler popupEventHandler_;
+    MenuEventHandler menuEventHandler_;
+    ContextMenuEventHandler contextMenuEventHandler_;
     RouterBackEventHandler routerBackEventHandler_;
     std::list<PopPageSuccessEventHandler> popPageSuccessEventHandler_;
     std::list<IsPagePathInvalidEventHandler> isPagePathInvalidEventHandler_;

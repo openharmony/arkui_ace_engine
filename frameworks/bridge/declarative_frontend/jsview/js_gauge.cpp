@@ -113,21 +113,26 @@ void JSGauge::SetEndAngle(const JSCallbackInfo& info)
 
 void JSGauge::SetColors(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE(" JSGauge::SetColors::The info is wrong, it is supposed to have atleast 1 arguments");
+    if (info.Length() < 1 || !info[0]->IsArray()) {
+        LOGE("The number of argument is less than 1, or the argument is not array.");
         return;
     }
     std::vector<Color> colors;
     std::vector<double> values;
     std::vector<float> weights;
+    auto theme = GetTheme<ProgressTheme>();
     auto jsColor = JSRef<JSArray>::Cast(info[0]);
     for (size_t i = 0; i < jsColor->Length(); ++i) {
+        JSRef<JSVal> jsValue = jsColor->GetValueAt(i);
+        if (!jsValue->IsArray()) {
+            return;
+        }
         JSRef<JSArray> tempColors = jsColor->GetValueAt(i);
         double value = tempColors->GetValueAt(1)->ToNumber<double>();
         float weight = tempColors->GetValueAt(1)->ToNumber<float>();
         Color selectedColor;
         if (!ParseJsColor(tempColors->GetValueAt(0), selectedColor)) {
-            return;
+            selectedColor = Color::BLACK;
         }
         colors.push_back(selectedColor);
         values.push_back(value);
@@ -148,7 +153,7 @@ void JSGauge::SetStrokeWidth(const JSCallbackInfo& info)
     }
     Dimension strokeWidth;
     if (!ParseJsDimensionVp(info[0], strokeWidth)) {
-        return;
+        strokeWidth = Dimension(0);
     }
     GaugeModel::GetInstance()->SetStrokeWidth(strokeWidth);
 }

@@ -23,6 +23,7 @@
 #include "bridge/declarative_frontend/jsview/models/toggle_model_impl.h"
 #include "core/common/container.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/toggle/toggle_theme.h"
 #include "core/components_ng/pattern/button/toggle_button_model_ng.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
 
@@ -165,6 +166,10 @@ void JSToggle::JsSize(const JSCallbackInfo& info)
 
 void JSToggle::OnChange(const JSCallbackInfo& args)
 {
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 argument.");
+        return;
+    }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
     auto onChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](bool isOn) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -182,9 +187,10 @@ void JSToggle::SelectedColor(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
-    Color selectedColor;
-    if (!ParseJsColor(info[0], selectedColor)) {
-        return;
+    Color color;
+    std::optional<Color> selectedColor;
+    if (ParseJsColor(info[0], color)) {
+        selectedColor = color;
     }
 
     ToggleModel::GetInstance()->SetSelectedColor(selectedColor);
@@ -198,7 +204,10 @@ void JSToggle::SwitchPointColor(const JSCallbackInfo& info)
     }
     Color color;
     if (!ParseJsColor(info[0], color)) {
-        return;
+        auto theme = GetTheme<SwitchTheme>();
+        if (theme) {
+            color = theme->GetPointColor();
+        }
     }
 
     ToggleModel::GetInstance()->SetSwitchPointColor(color);

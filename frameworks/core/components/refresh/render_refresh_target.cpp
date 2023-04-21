@@ -41,6 +41,7 @@ bool RenderRefreshTarget::HandleRefreshEffect(double delta, int32_t source, doub
         LOGD("not support refresh");
         return false;
     }
+    refresh->SetHasScrollableChild(true);
     if ((LessOrEqual(currentOffset, 0.0) && source == SCROLL_FROM_UPDATE) || inLinkRefresh_) {
         refresh->UpdateScrollableOffset(delta);
         inLinkRefresh_ = true;

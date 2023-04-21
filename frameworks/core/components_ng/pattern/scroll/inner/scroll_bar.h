@@ -24,6 +24,8 @@
 #include "base/utils/utils.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/edge.h"
+#include "core/components_ng/event/input_event.h"
+#include "core/components_ng/event/touch_event.h"
 
 namespace OHOS::Ace::NG {
 
@@ -88,13 +90,14 @@ public:
         PositionMode positionMode = PositionMode::RIGHT);
     ~ScrollBar() override = default;
 
-    bool InBarRegion(const Point& point) const;
+    bool InBarTouchRegion(const Point& point) const;
+    bool InBarActiveRegion(const Point& point) const;
     bool NeedScrollBar() const;
     bool NeedPaint() const;
     void UpdateScrollBarRegion(
         const Offset& offset, const Size& size, const Offset& lastOffset, double estimatedHeight);
     double GetNormalWidthToPx() const;
-    double CalcPatternOffset(double scrollBarOffset);
+    float CalcPatternOffset(float scrollBarOffset) const;
 
     ShapeMode GetShapeMode() const
     {
@@ -243,7 +246,10 @@ public:
 
     void SetPositionMode(PositionMode positionMode)
     {
-        positionMode_ = positionMode;
+        if (positionMode_ != positionMode) {
+            positionModeUpdate_ = true;
+            positionMode_ = positionMode;
+        }
     }
 
     void SetShapeMode(ShapeMode shapeMode)
@@ -254,10 +260,14 @@ public:
     void SetDisplayMode(DisplayMode displayMode)
     {
         displayMode_ = displayMode;
+        if (displayMode_ == DisplayMode::AUTO) {
+            PlayBarEndAnimation();
+        }
     }
 
     void SetOutBoundary(double outBoundary)
     {
+        inSpring =  !NearEqual(outBoundary_, outBoundary, 0.000001f);
         outBoundary_ = outBoundary;
     }
 
@@ -281,10 +291,67 @@ public:
         return isPressed_;
     }
 
+    void SetHover(bool hover)
+    {
+        isHover_ = hover;
+    }
+
+    bool IsHover() const
+    {
+        return isHover_;
+    }
+
     void SetDriving(bool isDriving)
     {
         isDriving_ = isDriving;
     }
+
+    bool IsDriving() const
+    {
+        return isDriving_;
+    }
+
+    uint8_t GetOpacity() const
+    {
+        return opacity_;
+    }
+
+    void OnScrollEnd()
+    {
+        if (displayMode_ == DisplayMode::AUTO) {
+            PlayBarEndAnimation();
+        }
+    }
+
+    void MarkNeedRender()
+    {
+        if (markNeedRenderFunc_) {
+            markNeedRenderFunc_();
+        }
+    }
+
+    void SetMarkNeedRenderFunc(std::function<void()>&& func)
+    {
+        markNeedRenderFunc_ = func;
+    }
+
+    RefPtr<TouchEventImpl> GetTouchEvent()
+    {
+        return touchEvent_;
+    }
+
+    RefPtr<InputEvent> GetMouseEvent()
+    {
+        return mouseEvent_;
+    }
+
+    void SetGestureEvent();
+    void SetMouseEvent();
+    void FlushBarWidth();
+    void PlayAdaptAnimation(double activeSize, double activeMainOffset, double inactiveSize, double inactiveMainOffset);
+    void PlayGrowAnimation();
+    void PlayShrinkAnimation();
+    void PlayBarEndAnimation();
 
 protected:
     void InitTheme();
@@ -293,9 +360,11 @@ private:
     void SetBarRegion(const Offset& offset, const Size& size);
     void SetRectTrickRegion(const Offset& offset, const Size& size, const Offset& lastOffset, double mainScrollExtent);
     void SetRoundTrickRegion(const Offset& offset, const Size& size, const Offset& lastOffset, double mainScrollExtent);
+    void UpdateActiveRectSize(double activeSize);
+    void UpdateActiveRectOffset(double activeMainOffset);
     double NormalizeToPx(const Dimension& dimension) const;
 
-    DisplayMode displayMode_ = DisplayMode::OFF;
+    DisplayMode displayMode_ = DisplayMode::AUTO;
     ShapeMode shapeMode_ = ShapeMode::RECT;
     PositionMode positionMode_ = PositionMode::RIGHT;
     Edge padding_;
@@ -321,11 +390,28 @@ private:
     double minAngle_ = DEFAULT_MINANGLE;
     double outBoundary_ = 0.0;
     double offsetScale_ = 1.0f;
+    double scrollableOffset_ = 0.0;
+    double barRegionSize_ = 0.0;
 
     bool isScrollable_ = false;
 
     bool isPressed_ = false;
     bool isDriving_ = false; // false: scroll driving; true: bar driving
+    bool isHover_ = false;
+    bool inSpring = false; // whether bar in the spring state
+    bool positionModeUpdate_ = false;
+
+    Offset paintOffset_;
+    Size viewPortSize_;
+    Offset lastOffset_;
+    double estimatedHeight_ = 0.0;
+    uint8_t opacity_ = UINT8_MAX;
+    RefPtr<TouchEventImpl> touchEvent_;
+    RefPtr<InputEvent> mouseEvent_;
+    RefPtr<Animator> touchAnimator_;
+    RefPtr<Animator> scrollEndAnimator_;
+    RefPtr<Animator> adaptAnimator_;
+    std::function<void()> markNeedRenderFunc_;
 };
 
 } // namespace OHOS::Ace::NG

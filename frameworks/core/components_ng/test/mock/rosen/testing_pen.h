@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_PEN_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_PEN_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_PEN_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_PEN_H
 
 #include <memory>
 
@@ -32,22 +32,36 @@ public:
         ROUND_CAP,
     };
 
+    enum class JoinStyle {
+        MITER_JOIN,
+        ROUND_JOIN,
+        BEVEL_JOIN,
+    };
+
     TestingPen() = default;
     ~TestingPen() = default;
 
     virtual void SetAntiAlias(bool aa) {}
+    virtual void SetBlendMode(BlendMode mode) {}
     virtual void SetWidth(float width) {}
     virtual void SetCapStyle(CapStyle cap) {}
     virtual void SetColor(const TestingColor& color) {}
     virtual void SetColor(int color) {}
     virtual void SetFilter(const TestingFilter& filter) {}
-    virtual void SetShaderEffect(std::shared_ptr<TestingShaderEffect> effect) {}
-    virtual void SetPathEffect(std::shared_ptr<TestingPathEffect> effect) {}
+    virtual void SetShaderEffect(std::shared_ptr<TestingShaderEffect> /* effect */) {}
+    virtual void SetPathEffect(std::shared_ptr<TestingPathEffect> /* effect */) {}
+    virtual void SetJoinStyle(JoinStyle js) {}
+    virtual void SetMiterLimit(float limit) {}
 
     virtual std::shared_ptr<TestingShaderEffect> GetShaderEffect()
     {
         return std::make_shared<TestingShaderEffect>();
     }
+
+    virtual float GetWidth()
+    {
+        return .0f;
+    }
 };
 } // namespace OHOS::Ace::Testing
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_PEN_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_PEN_H

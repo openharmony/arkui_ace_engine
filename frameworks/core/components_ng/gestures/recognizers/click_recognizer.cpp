@@ -31,10 +31,10 @@ int32_t MULTI_FINGER_TIMEOUT = 300;
 constexpr int32_t MULTI_FINGER_TIMEOUT_TOUCH = 300;
 constexpr int32_t MULTI_FINGER_TIMEOUT_MOUSE = 300;
 int32_t MULTI_TAP_TIMEOUT = 300;
-constexpr int32_t MULTI_TAP_TIMEOUT_TOUCH = 600;
+constexpr int32_t MULTI_TAP_TIMEOUT_TOUCH = 350;
 constexpr int32_t MULTI_TAP_TIMEOUT_MOUSE = 500;
 int32_t MULTI_TAP_SLOP = 100;
-constexpr int32_t MULTI_TAP_SLOP_TOUCH = 100;
+constexpr int32_t MULTI_TAP_SLOP_TOUCH = 30;
 constexpr int32_t MULTI_TAP_SLOP_MOUSE = 15;
 #ifndef WEARABLE_PRODUCT
 double MAX_THRESHOLD = 20.0;
@@ -152,7 +152,6 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         // Turn off the multi-finger press deadline timer
         fingerDeadlineTimer_.Cancel();
         equalsToFingers_ = true;
-        refereeState_ = RefereeState::DETECTING;
         if (ExceedSlop()) {
             LOGE("fail to detect multi finger tap due to offset is out of slop");
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);

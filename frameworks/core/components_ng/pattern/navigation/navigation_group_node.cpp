@@ -35,9 +35,7 @@ RefPtr<NavigationGroupNode> NavigationGroupNode::GetOrCreateGroupNode(
     const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
 {
     auto frameNode = GetFrameNode(tag, nodeId);
-    if (frameNode) {
-        return AceType::DynamicCast<NavigationGroupNode>(frameNode);
-    }
+    CHECK_NULL_RETURN_NOLOG(!frameNode, AceType::DynamicCast<NavigationGroupNode>(frameNode));
     auto pattern = patternCreator ? patternCreator() : MakeRefPtr<Pattern>();
     auto navigationGroupNode = AceType::MakeRefPtr<NavigationGroupNode>(tag, nodeId, pattern);
     navigationGroupNode->InitializePatternAndContext();
@@ -45,7 +43,7 @@ RefPtr<NavigationGroupNode> NavigationGroupNode::GetOrCreateGroupNode(
     return navigationGroupNode;
 }
 
-void NavigationGroupNode::AddChildToGroup(const RefPtr<UINode>& child)
+void NavigationGroupNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t slot)
 {
     auto pattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
     CHECK_NULL_VOID(pattern);
@@ -66,6 +64,7 @@ void NavigationGroupNode::AddChildToGroup(const RefPtr<UINode>& child)
 
 void NavigationGroupNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
+    FrameNode::ToJsonValue(json);
     auto navBarNode = DynamicCast<NavBarNode>(GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
     navBarNode->ToJsonValue(json);

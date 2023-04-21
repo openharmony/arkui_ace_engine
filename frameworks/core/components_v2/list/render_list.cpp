@@ -170,6 +170,12 @@ void RenderList::Update(const RefPtr<Component>& component)
     hasWidth_ = component_->GetHasWidth();
     isLaneList_ = (component_->GetLanes() != -1) || (component_->GetLaneConstrain() != std::nullopt);
     sticky_ = component_->GetSticky();
+    if (!vertical_ || scrollBar_->GetDisplayMode() != DisplayMode::OFF || chainAnimation_ ||
+        sticky_ != StickyStyle::NONE || isLaneList_ || !scrollable_->Available()) {
+        drivenRender_ = false;
+    } else {
+        drivenRender_ = true;
+    }
     MarkNeedLayout();
 }
 
@@ -713,6 +719,13 @@ void RenderList::PerformLayout()
     // Clear auto scrolling flags
     autoScrollingForItemMove_ = false;
     double currentTotalOffset = startIndexOffset_ - currentOffset_;
+
+    if (!NearEqual(currentTotalOffset, prevTotalOffset)) {
+        SetPaintState(true);
+    } else {
+        SetPaintState(false);
+    }
+
     if (!NearEqual(currentTotalOffset, prevTotalOffset)) {
         auto offset = Dimension((currentTotalOffset - prevTotalOffset) / dipScale_, DimensionUnit::VP);
         if (scrollable_ && scrollable_->Idle()) {
@@ -1228,16 +1241,6 @@ bool RenderList::UpdateScrollPosition(double offset, int32_t source)
     }
     currentOffset_ += offset;
     bool next = HandleOverScroll();
-    if (source == SCROLL_FROM_AXIS) {
-        double curMainPos = 0.0;
-        double mainSize = 0.0;
-        GetCurMainPosAndMainSize(curMainPos, mainSize);
-        if (currentOffset_ < 0 && curMainPos < mainSize) {
-            currentOffset_ += mainSize - curMainPos;
-        } else if (currentOffset_ > 0) {
-            currentOffset_ = 0;
-        }
-    }
     MarkNeedLayout(true);
     return next;
 }
@@ -1827,6 +1830,16 @@ void RenderList::ScrollPage(bool reverse, bool smooth)
             MarkNeedLayout();
         }
     }
+}
+
+void RenderList::ScrollBy(double pixelX, double pixelY)
+{
+    if (IsVertical()) {
+        currentOffset_ -= pixelY;
+    } else {
+        currentOffset_ -= pixelX;
+    }
+    MarkNeedLayout();
 }
 
 void RenderList::AdjustOffset(Offset& delta, int32_t source)
@@ -3088,6 +3101,7 @@ void RenderList::LayoutChild(RefPtr<RenderNode> child, double referencePos, bool
             .endMainPos = (cachedCount_ == 0 || isLaneList_) ? endMainPos_ : mainSize_,
             .listMainSize = mainSize_,
             .referencePos = referencePos,
+            .maxLaneLength = isLaneList_ ? maxLaneLength_ : 0.0,
             .forwardLayout = forward,
             .isVertical = vertical_,
             .sticky = sticky_,
@@ -3095,10 +3109,7 @@ void RenderList::LayoutChild(RefPtr<RenderNode> child, double referencePos, bool
             .align = component_->GetAlignListItemAlign(),
         };
         listItemGroup->SetItemGroupLayoutParam(param);
-        listItemGroup->SetNeedLayout(true);
-        if (renderNode) {
-            renderNode->SetNeedLayout(true);
-        }
+        listItemGroup->SetNeedLayoutDeep();
     } else if (isLaneList_) {
         innerLayout = MakeInnerLayoutForLane();
     }

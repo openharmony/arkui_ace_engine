@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/image/image_model_ng.h"
 
 #include "core/components/common/layout/constants.h"
+#include "core/components/image/image_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #ifndef ACE_UNITTEST
 #include "core/components_ng/base/view_abstract.h"
@@ -29,27 +30,32 @@
 
 namespace OHOS::Ace::NG {
 
-void ImageModelNG::Create(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap)
+void ImageModelNG::Create(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap,
+    const std::string& bundleName, const std::string& moduleName)
 {
+    LOGD("creating new image %{public}s", src.c_str());
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    auto createSourceInfoFunc = [&src, noPixMap, &pixMap]() -> ImageSourceInfo {
+    auto createSourceInfoFunc = [&src, noPixMap, &pixMap, &bundleName, &moduleName]() -> ImageSourceInfo {
 #if defined(PIXEL_MAP_SUPPORTED)
-        return noPixMap ? ImageSourceInfo(src) : ImageSourceInfo(pixMap);
+        if (noPixMap) {
+            return ImageSourceInfo(src, bundleName, moduleName);
+        }
+        return ImageSourceInfo(pixMap);
 #else
-        return ImageSourceInfo(src);
+        return ImageSourceInfo(src, bundleName, moduleName);
 #endif
     };
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
     stack->Push(frameNode);
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, createSourceInfoFunc());
-    // register image frame node to pipeline context to receive memory level notification and window state change
-    // notification
+
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    pipeline->AddNodesToNotifyMemoryLevel(nodeId);
-    pipeline->AddWindowStateChangedCallback(nodeId);
+    auto theme = pipeline->GetTheme<ImageTheme>();
+    CHECK_NULL_VOID(theme);
+    SetDraggable(theme->GetDraggable());
 }
 
 void ImageModelNG::SetAlt(const std::string& src)
@@ -66,9 +72,9 @@ void ImageModelNG::SetBackBorder()
 
 void ImageModelNG::SetBlur(double blur) {}
 
-void ImageModelNG::SetImageFit(int32_t value)
+void ImageModelNG::SetImageFit(ImageFit value)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageFit, static_cast<ImageFit>(value));
+    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageFit, value);
 }
 
 void ImageModelNG::SetMatchTextDirection(bool value)
@@ -119,11 +125,12 @@ void ImageModelNG::SetImageFill(const Color& color)
         ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, imageSourceInfo);
     }
     ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, SvgFillColor, color);
+    ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, color);
 }
 
-void ImageModelNG::SetImageInterpolation(ImageInterpolation iterpolation)
+void ImageModelNG::SetImageInterpolation(ImageInterpolation interpolation)
 {
-    ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, ImageInterpolation, iterpolation);
+    ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, ImageInterpolation, interpolation);
 }
 
 void ImageModelNG::SetImageRepeat(ImageRepeat imageRepeat)
@@ -148,12 +155,26 @@ void ImageModelNG::SetAutoResize(bool autoResize)
 
 void ImageModelNG::SetSyncMode(bool syncMode)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, SyncMode, syncMode);
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSyncLoad(syncMode);
 }
 
 void ImageModelNG::SetColorFilterMatrix(const std::vector<float>& matrix)
 {
     ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, ColorFilter, matrix);
+}
+
+void ImageModelNG::SetDraggable(bool draggable)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    if (draggable && !frameNode->IsDraggable()) {
+        auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        gestureHub->InitDragDropEvent();
+    }
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetDraggable(draggable);
 }
 
 void ImageModelNG::SetOnDragStart(OnDragStartFunc&& onDragStart)
@@ -182,7 +203,9 @@ void ImageModelNG::SetOnDrop(OnDragDropFunc&& onDrop) {}
 
 void ImageModelNG::SetCopyOption(const CopyOptions& copyOption)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, CopyOptions, copyOption);
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCopyOption(copyOption);
 }
 
 bool ImageModelNG::UpdateDragItemInfo(DragItemInfo& itemInfo)

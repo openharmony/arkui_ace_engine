@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -77,6 +77,9 @@ public:
     // Get the currently running JS page information in NG structure.
     RefPtr<Framework::RevSourceMap> GetFaAppSourceMap() const override;
 
+    void GetStageSourceMap(
+        std::unordered_map<std::string, RefPtr<Framework::RevSourceMap>>& sourceMap) const override;
+
     RefPtr<NG::PageRouterManager> GetPageRouterManager() const;
 
     void SendCallbackMessage(const std::string& callbackId, const std::string& data) const override;
@@ -99,11 +102,12 @@ public:
     }
 
     void TransferJsResponseDataPreview(int32_t callbackId, int32_t code, ResponseData responseData) const;
-
-    void InitializeModuleSearcher(const std::string& bundleName, const std::string& assetPath, bool isBundle)
+    RefPtr<Component> GetNewComponentWithJsCode(const std::string& jsCode, const std::string& viewID);
+    void InitializeModuleSearcher(const std::string& bundleName, const std::string& moduleName,
+                                  const std::string& assetPath, bool isBundle)
     {
         if (jsEngine_) {
-            jsEngine_->InitializeModuleSearcher(bundleName, assetPath, isBundle);
+            jsEngine_->InitializeModuleSearcher(bundleName, moduleName, assetPath, isBundle);
         }
     }
 #endif
@@ -143,7 +147,6 @@ public:
     void SetColorMode(ColorMode colorMode) override;
     void RebuildAllPages() override;
     void NotifyAppStorage(const std::string& key, const std::string& value) override;
-    RefPtr<Component> GetNewComponentWithJsCode(const std::string& jsCode);
     RefPtr<AceEventHandler> GetEventHandler() override
     {
         return handler_;
@@ -214,25 +217,24 @@ public:
         return jsEngine_;
     }
 
-    void AttachSubPipelineContext(const RefPtr<PipelineContext>& context);
+    void AttachSubPipelineContext(const RefPtr<PipelineBase>& context);
 
-    void FlushReload() override
-    {
-        if (jsEngine_) {
-            jsEngine_->FlushReload();
-        }
-    }
+    void FlushReload() override;
+    void HotReload() override;
 
     RefPtr<Framework::FrontendDelegate> GetDelegate() const
     {
         return AceType::DynamicCast<Framework::FrontendDelegate>(delegate_);
     }
 
+protected:
+    bool isFormRender_ = false;
+    RefPtr<Framework::FrontendDelegateDeclarative> delegate_;
+
 private:
     void InitializeFrontendDelegate(const RefPtr<TaskExecutor>& taskExecutor);
 
     FrontendType type_ = FrontendType::DECLARATIVE_JS;
-    RefPtr<Framework::FrontendDelegateDeclarative> delegate_;
     RefPtr<AceEventHandler> handler_;
     RefPtr<Framework::JsEngine> jsEngine_;
     RefPtr<AccessibilityManager> accessibilityManager_;

@@ -17,6 +17,7 @@
 
 #include "base/geometry/offset.h"
 #include "base/log/log.h"
+#include "base/ressched/ressched_report.h"
 #include "core/components_ng/gestures/gesture_referee.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
@@ -119,7 +120,11 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     deviceType_ = event.sourceType;
     lastTouchEvent_ = event;
     touchPoints_[event.id] = event;
-    inputEventType_ = InputEventType::TOUCH_SCREEN;
+    if (event.sourceType == SourceType::MOUSE) {
+        inputEventType_ = InputEventType::MOUSE_BUTTON;
+    } else {
+        inputEventType_ = InputEventType::TOUCH_SCREEN;
+    }
 
     auto fingerNum = static_cast<int32_t>(touchPoints_.size());
 
@@ -162,12 +167,18 @@ void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
     LOGI("pan recognizer receives %{public}d touch up event", event.id);
+    ResSchedReport::GetInstance().ResSchedDataReport("click");
     globalPoint_ = Point(event.x, event.y);
     lastTouchEvent_ = event;
     velocityTracker_.UpdateTouchPoint(event, true);
 
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+#ifdef ENABLE_DRAG_FRAMEWORK
+        if (onActionCancel_ && *onActionCancel_) {
+            (*onActionCancel_)();
+        }
+#endif // ENABLE_DRAG_FRAMEWORK
         return;
     }
 
@@ -244,8 +255,8 @@ void PanRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
         return;
     }
     globalPoint_ = Point(event.x, event.y);
-    if ((direction_.type & PanDirection::HORIZONTAL) == 0) {
-        // PanRecognizer Direction: Vertical
+    if (direction_.type == PanDirection::ALL || (direction_.type & PanDirection::HORIZONTAL) == 0) {
+        // PanRecognizer Direction: Vertical or ALL
         delta_ =
             Offset(-event.horizontalAxis * DISTANCE_PER_MOUSE_DEGREE, -event.verticalAxis * DISTANCE_PER_MOUSE_DEGREE);
     } else if ((direction_.type & PanDirection::VERTICAL) == 0) {
@@ -370,6 +381,9 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
         if (!touchPoints_.empty()) {
             touchPoint = touchPoints_.begin()->second;
         }
+#ifdef ENABLE_DRAG_FRAMEWORK
+        info.SetPointerId(touchPoint.id);
+#endif // ENABLE_DRAG_FRAMEWORK
         info.SetGlobalPoint(globalPoint_)
             .SetLocalLocation(Offset(globalPoint_.GetX(), globalPoint_.GetY()) - coordinateOffset_);
         info.SetDeviceId(deviceId_);

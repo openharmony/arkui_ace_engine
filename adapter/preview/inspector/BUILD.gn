@@ -14,13 +14,19 @@
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
-template("ace_inspector") {
-  forward_variables_from(invoker, "*")
-
-  ohos_source_set(target_name) {
-    subsystem_name = ace_engine_subsystem
-    part_name = ace_engine_part
-    defines += invoker.defines
+ohos_source_set("preview_inspector_source") {
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+  if (defined(current_platform.name)) {
+    defines = []
+    config = {
+    }
+    if (defined(current_platform.config)) {
+      config = current_platform.config
+    }
+    if (defined(config.defines)) {
+      defines += config.defines
+    }
 
     configs = [ "$ace_root:ace_config" ]
 
@@ -30,23 +36,5 @@ template("ace_inspector") {
     ]
 
     deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
-  }
-}
-
-foreach(item, ace_platforms) {
-  platform = item.name
-  if (platform == "windows" || platform == "mac" || platform == "linux") {
-    ace_inspector("ace_inspector_" + item.name) {
-      defines = []
-      config = {
-      }
-
-      if (defined(item.config)) {
-        config = item.config
-      }
-      if (defined(config.defines)) {
-        defines = config.defines
-      }
-    }
   }
 }

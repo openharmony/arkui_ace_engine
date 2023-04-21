@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,14 +15,38 @@
 
 #include "core/components_ng/pattern/image/image_layout_algorithm.h"
 
-#ifdef NG_BUILD
+#ifdef FLUTTER_2_5
 #include "ace_shell/shell/common/window_manager.h"
 #endif
-
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+// returns maximum size of image component
+// if maxSize is infinite, match screen size and retain aspectRatio
+SizeF GetMaxSize(const SizeF& maxSize, float aspectRatio)
+{
+    if (NearZero(aspectRatio)) {
+        return SizeF(0.0, 0.0);
+    }
+    // infinite size not allowed
+    bool infWidth = GreaterOrEqualToInfinity(maxSize.Width());
+    bool infHeight = GreaterOrEqualToInfinity(maxSize.Height());
+    if (infWidth && infHeight) {
+        auto width = PipelineContext::GetCurrentRootWidth();
+        return SizeF(width, width / aspectRatio);
+    }
+    if (infWidth) {
+        return SizeF(maxSize.Height() * aspectRatio, maxSize.Height());
+    }
+    if (infHeight) {
+        return SizeF(maxSize.Width(), maxSize.Width() / aspectRatio);
+    }
+    return maxSize;
+}
+} // namespace
 
 std::optional<SizeF> ImageLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
@@ -41,17 +65,21 @@ std::optional<SizeF> ImageLayoutAlgorithm::MeasureContent(
     // if image data is valid, use image source, or use altImage data
     auto imageLoadingContext = loadingCtx_ ? loadingCtx_ : altLoadingCtx_;
     auto rawImageSize = imageLoadingContext->GetImageSize();
-    SizeF componentSize(rawImageSize);
+    SizeF size(rawImageSize);
     do {
+        auto aspectRatio = static_cast<float>(Size::CalcRatio(rawImageSize));
+        if (NearZero(aspectRatio)) {
+            LOGW("image aspectRatio is 0");
+            return std::nullopt;
+        }
         // case 2.1: image component is not set with size, use image source size as image component size
-        //          if isFitMaxSize is true, use image source size as image component size
-        //          if isFitMaxSize is false, use the parent component LayoutConstraint size as image component size
-        const auto& imageLayoutProperty = DynamicCast<ImageLayoutProperty>(layoutWrapper->GetLayoutProperty());
-        SizeF layoutConstraintMaxSize = imageLayoutProperty->GetLayoutConstraint()->maxSize;
-        bool fitOriginalSize = imageLayoutProperty->GetFitOriginalSize().value_or(false);
+        //          if fitOriginalSize is true, use image source size as image component size
+        //          if fitOriginalSize is false, use the parent component LayoutConstraint size as image component size
+        const auto& props = DynamicCast<ImageLayoutProperty>(layoutWrapper->GetLayoutProperty());
+        bool fitOriginalSize = props->GetFitOriginalSize().value_or(false);
         if (contentConstraint.selfIdealSize.IsNull()) {
             if (!fitOriginalSize) {
-                componentSize.SetSizeT(layoutConstraintMaxSize);
+                size.SetSizeT(GetMaxSize(contentConstraint.maxSize, aspectRatio));
             }
             break;
         }
@@ -60,22 +88,21 @@ std::optional<SizeF> ImageLayoutAlgorithm::MeasureContent(
         //          keep the principle of making the component aspect ratio and the image source aspect ratio the same.
         //          the fitOriginSize is only useful in case 2.1.
         auto sizeSet = contentConstraint.selfIdealSize.ConvertToSizeT();
-        componentSize.SetSizeT(sizeSet);
+        size.SetSizeT(sizeSet);
         uint8_t sizeSetStatus = Negative(sizeSet.Width()) << 1 | Negative(sizeSet.Height());
-        double aspectRatio = Size::CalcRatio(rawImageSize);
         switch (sizeSetStatus) {
             case 0b01: // width is positive and height is negative
-                componentSize.SetHeight(static_cast<float>(sizeSet.Width() / aspectRatio));
+                size.SetHeight(sizeSet.Width() / aspectRatio);
                 break;
             case 0b10: // width is negative and height is positive
-                componentSize.SetWidth(static_cast<float>(sizeSet.Height() * aspectRatio));
+                size.SetWidth(sizeSet.Height() * aspectRatio);
                 break;
             case 0b11: // both width and height are negative
             default:
                 break;
         }
     } while (false);
-    return contentConstraint.Constrain(componentSize);
+    return contentConstraint.Constrain(size);
 }
 
 void ImageLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -88,12 +115,14 @@ void ImageLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     const auto& imageLayoutProperty = DynamicCast<ImageLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(imageLayoutProperty);
     const auto& dstSize = layoutWrapper->GetGeometryNode()->GetContentSize();
-    bool incomingNeedResize = imageLayoutProperty->GetAutoResize().value_or(true);
-    ImageFit incomingImageFit = imageLayoutProperty->GetImageFit().value_or(ImageFit::COVER);
+    bool autoResize = imageLayoutProperty->GetAutoResize().value_or(true);
+    ImageFit imageFit = imageLayoutProperty->GetImageFit().value_or(ImageFit::COVER);
     const std::optional<SizeF>& sourceSize = imageLayoutProperty->GetSourceSize();
-    ImageLoadingContext::MakeCanvasImageIfNeed(loadingCtx_, dstSize, incomingNeedResize, incomingImageFit, sourceSize);
+    if (loadingCtx_) {
+        loadingCtx_->MakeCanvasImageIfNeed(dstSize, autoResize, imageFit, sourceSize);
+    }
     if (altLoadingCtx_) {
-        ImageLoadingContext::MakeCanvasImageIfNeed(altLoadingCtx_, dstSize, true, incomingImageFit, sourceSize);
+        altLoadingCtx_->MakeCanvasImageIfNeed(dstSize, true, imageFit, sourceSize);
     }
 }
 

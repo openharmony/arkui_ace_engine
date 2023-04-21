@@ -116,6 +116,7 @@ void JSProgress::JSBind(BindingTarget globalObj)
     JSClass<JSProgress>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSProgress>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSProgress>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSProgress>::StaticMethod("borderColor", &JSProgress::JsBorderColor, opt);
     JSClass<JSProgress>::Inherit<JSViewAbstract>();
     JSClass<JSProgress>::Bind(globalObj);
 }
@@ -138,7 +139,8 @@ void JSProgress::SetColor(const JSCallbackInfo& info)
 {
     Color colorVal;
     if (!ParseJsColor(info[0], colorVal)) {
-        return;
+        RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
+        colorVal = theme->GetTrackSelectedColor();
     }
 
     ProgressModel::GetInstance()->SetColor(colorVal);
@@ -169,7 +171,7 @@ void JSProgress::SetCircularStyle(const JSCallbackInfo& info)
 
     auto jsScaleCount = paramObject->GetProperty("scaleCount");
     auto scaleCount = jsScaleCount->IsNumber() ? jsScaleCount->ToNumber<int32_t>() : theme->GetScaleNumber();
-    if (scaleCount > 0.0) {
+    if (scaleCount > 1.0) {
         ProgressModel::GetInstance()->SetScaleCount(scaleCount);
     } else {
         ProgressModel::GetInstance()->SetScaleCount(theme->GetScaleNumber());
@@ -199,10 +201,29 @@ void JSProgress::JsBackgroundColor(const JSCallbackInfo& info)
 
     Color colorVal;
     if (!ParseJsColor(info[0], colorVal)) {
-        return;
+        RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
+        colorVal = theme->GetTrackBgColor();
     }
 
     ProgressModel::GetInstance()->SetBackgroundColor(colorVal);
+}
+
+void JSProgress::JsBorderColor(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsBorderColor(info);
+
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
+
+    Color colorVal;
+    if (ParseJsColor(info[0], colorVal)) {
+        ProgressModel::GetInstance()->SetBorderColor(colorVal);
+    } else {
+        RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
+        ProgressModel::GetInstance()->SetBorderColor(theme->GetBorderColor());
+    }
 }
 
 } // namespace OHOS::Ace::Framework

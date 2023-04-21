@@ -65,14 +65,16 @@ std::string GetStringFromFile(const std::string& packagePathStr, const std::stri
 
 std::string GetStringFromHap(const std::string& hapPath, const std::string& fileName)
 {
-    std::shared_ptr<AbilityBase::Extractor> runtimeExtractor = AbilityBase::Extractor::Create(hapPath);
-    if (!runtimeExtractor) {
+    bool newCreate = false;
+    std::string loadPath = AbilityBase::ExtractorUtil::GetLoadFilePath(hapPath);
+    std::shared_ptr<AbilityBase::Extractor> extractor = AbilityBase::ExtractorUtil::GetExtractor(loadPath, newCreate);
+    if (!extractor) {
         LOGE("read file %{public}s error\n", hapPath.c_str());
         return "";
     }
 
     std::ostringstream osstream;
-    bool hasFile = runtimeExtractor->GetFileBuffer(fileName, osstream);
+    bool hasFile = extractor->GetFileBuffer(fileName, osstream);
     if (!hasFile) {
         LOGE("read file %{public}s /config.json error\n", hapPath.c_str());
         return "";
@@ -82,11 +84,11 @@ std::string GetStringFromHap(const std::string& hapPath, const std::string& file
 }
 
 RefPtr<FlutterAssetProvider> CreateAssetProvider(const std::string& packagePath,
-    const std::vector<std::string>& assetBasePaths)
+    const std::vector<std::string>& assetBasePaths, bool useCache)
 {
     if (std::regex_match(packagePath, std::regex(".*\\.hap"))) {
         auto assetProvider = AceType::MakeRefPtr<HapAssetProvider>();
-        if (assetProvider->Initialize(packagePath, assetBasePaths)) {
+        if (assetProvider->Initialize(packagePath, assetBasePaths, useCache)) {
             return assetProvider;
         }
     } else {

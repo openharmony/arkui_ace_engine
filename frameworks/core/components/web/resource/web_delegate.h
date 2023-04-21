@@ -26,16 +26,22 @@
 #include <ui/rs_surface_node.h>
 #endif
 
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
+#include <GLES3/gl3.h>
 #include "base/image/pixel_map.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/web/resource/web_client_impl.h"
 #include "core/components/web/resource/web_resource.h"
 #include "core/components/web/web_component.h"
 #include "core/components/web/web_event.h"
+#include "core/components_ng/pattern/web/web_event_hub.h"
+#include "surface_delegate.h"
 #ifdef OHOS_STANDARD_SYSTEM
 #include "nweb_handler.h"
 #include "nweb_helper.h"
 #include "nweb_hit_testresult.h"
+#include "app_mgr_client.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "surface.h"
 #endif
@@ -43,6 +49,14 @@
 #endif
 
 namespace OHOS::Ace {
+
+typedef struct WindowsSurfaceInfoTag {
+    void* window;
+    EGLDisplay display;
+    EGLContext context;
+    EGLSurface surface;
+} WindowsSurfaceInfo;
+
 class WebMessagePortOhos : public WebMessagePort {
     DECLARE_ACE_TYPE(WebMessagePortOhos, WebMessagePort)
 
@@ -189,6 +203,12 @@ public:
     std::string GetUnfilteredLinkUrl() const override;
     std::string GetSourceUrl() const override;
     bool HasImageContents() const override;
+    bool IsEditable() const override;
+    int GetEditStateFlags() const override;
+    int GetSourceType() const override;
+    int GetMediaType() const override;
+    int GetInputFieldType() const override;
+    std::string GetSelectionText() const override;
 
 private:
     std::shared_ptr<OHOS::NWeb::NWebContextMenuParams> param_;
@@ -202,6 +222,10 @@ public:
 
     void Cancel() const override;
     void CopyImage() const override;
+    void Copy() const override;
+    void Paste() const override;
+    void Cut() const override;
+    void SelectAll() const override;
 
 private:
     std::shared_ptr<OHOS::NWeb::NWebContextMenuCallback> callback_;
@@ -211,7 +235,8 @@ class WebGeolocationOhos : public WebGeolocation {
     DECLARE_ACE_TYPE(WebGeolocationOhos, WebGeolocation)
 
 public:
-    WebGeolocationOhos(OHOS::NWeb::NWebGeolocationCallbackInterface* callback) : geolocationCallback_(callback) {}
+    WebGeolocationOhos(const std::shared_ptr<OHOS::NWeb::NWebGeolocationCallbackInterface>& callback)
+        : geolocationCallback_(callback) {}
 
     void Invoke(const std::string& origin, const bool& allow, const bool& retain) override;
 
@@ -241,8 +266,8 @@ class WebWindowNewHandlerOhos : public WebWindowNewHandler {
     DECLARE_ACE_TYPE(WebWindowNewHandlerOhos, WebWindowNewHandler)
 
 public:
-    WebWindowNewHandlerOhos(const std::shared_ptr<OHOS::NWeb::NWebControllerHandler>& handler)
-        : handler_(handler) {}
+    WebWindowNewHandlerOhos(const std::shared_ptr<OHOS::NWeb::NWebControllerHandler>& handler, int32_t parentNWebId)
+        : handler_(handler), parentNWebId_(parentNWebId) {}
 
     void SetWebController(int32_t id) override;
 
@@ -250,8 +275,62 @@ public:
 
     int32_t GetId() const override;
 
+    int32_t GetParentNWebId() const override;
+
 private:
     std::shared_ptr<OHOS::NWeb::NWebControllerHandler> handler_;
+    int32_t parentNWebId_ = -1;
+};
+
+class DataResubmittedOhos : public DataResubmitted {
+    DECLARE_ACE_TYPE(DataResubmittedOhos, DataResubmitted)
+
+public:
+    DataResubmittedOhos(std::shared_ptr<OHOS::NWeb::NWebDataResubmissionCallback> handler) : handler_(handler) {}
+    void Resend() override;
+    void Cancel() override;
+
+private:
+    std::shared_ptr<OHOS::NWeb::NWebDataResubmissionCallback> handler_;
+};
+
+class FaviconReceivedOhos : public WebFaviconReceived {
+    DECLARE_ACE_TYPE(FaviconReceivedOhos, WebFaviconReceived)
+
+public:
+    FaviconReceivedOhos(
+        const void* data,
+        size_t width,
+        size_t height,
+        OHOS::NWeb::ImageColorType colorType,
+        OHOS::NWeb::ImageAlphaType alphaType)
+        : data_(data), width_(width), height_(height), colorType_(colorType), alphaType_(alphaType)  {}
+    const void* GetData() override;
+    size_t GetWidth() override;
+    size_t GetHeight() override;
+    int GetColorType() override;
+    int GetAlphaType() override;
+
+private:
+    const void* data_ = nullptr;
+    size_t width_ = 0;
+    size_t height_ = 0;
+    OHOS::NWeb::ImageColorType colorType_ = OHOS::NWeb::ImageColorType::COLOR_TYPE_UNKNOWN;
+    OHOS::NWeb::ImageAlphaType alphaType_ = OHOS::NWeb::ImageAlphaType::ALPHA_TYPE_UNKNOWN;
+};
+
+class WebSurfaceCallback : public OHOS::SurfaceDelegate::ISurfaceCallback {
+
+public:
+    WebSurfaceCallback(const WeakPtr<WebDelegate>& delegate) : delegate_(delegate) {}
+    ~WebSurfaceCallback() = default;
+
+    void OnSurfaceCreated(const OHOS::sptr<OHOS::Surface>& surface) override;
+    void OnSurfaceChanged(const OHOS::sptr<OHOS::Surface>& surface, int32_t width, int32_t height) override;
+    void OnSurfaceDestroyed() override;
+private:
+    WeakPtr<WebDelegate> delegate_;
+
 };
 
 enum class DragAction {
@@ -323,6 +402,13 @@ public:
     void UpdateDomStorageEnabled(const bool& isDomStorageAccessEnabled);
     void UpdateGeolocationEnabled(const bool& isGeolocationAccessEnabled);
     void UpdateCacheMode(const WebCacheMode& mode);
+    std::shared_ptr<OHOS::NWeb::NWeb> GetNweb();
+    bool GetForceDarkMode();
+    void UpdateDarkMode(const WebDarkMode& mode);
+    void UpdateDarkModeAuto(RefPtr<WebDelegate> delegate, std::shared_ptr<OHOS::NWeb::NWebPreference> setting);
+    void UpdateForceDarkAccess(const bool& access);
+    void UpdateAudioResumeInterval(const int32_t& resumeInterval);
+    void UpdateAudioExclusive(const bool& audioExclusive);
     void UpdateOverviewModeEnabled(const bool& isOverviewModeAccessEnabled);
     void UpdateFileFromUrlEnabled(const bool& isFileFromUrlAccessEnabled);
     void UpdateDatabaseEnabled(const bool& isDatabaseAccessEnabled);
@@ -331,23 +417,30 @@ public:
     void UpdatePinchSmoothModeEnabled(bool isPinchSmoothModeEnabled);
     void UpdateMediaPlayGestureAccess(bool isNeedGestureAccess);
     void UpdateMultiWindowAccess(bool isMultiWindowAccessEnabled);
+    void UpdateAllowWindowOpenMethod(bool isAllowWindowOpenMethod);
     void UpdateWebCursiveFont(const std::string& cursiveFontFamily);
     void UpdateWebFantasyFont(const std::string& fantasyFontFamily);
+    void UpdateWebFixedFont(const std::string& fixedFontFamily);
     void UpdateWebSansSerifFont(const std::string& sansSerifFontFamily);
     void UpdateWebSerifFont(const std::string& serifFontFamily);
     void UpdateWebStandardFont(const std::string& standardFontFamily);
     void UpdateDefaultFixedFontSize(int32_t size);
     void UpdateDefaultFontSize(int32_t defaultFontSize);
     void UpdateMinFontSize(int32_t minFontSize);
+    void UpdateMinLogicalFontSize(int32_t minLogicalFontSize);
+    void UpdateBlockNetwork(bool isNetworkBlocked);
+    void UpdateHorizontalScrollBarAccess(bool isHorizontalScrollBarAccessEnabled);
+    void UpdateVerticalScrollBarAccess(bool isVerticalScrollBarAccessEnabled);
+    void UpdateScrollBarColor(const std::string& colorValue);
     void LoadUrl();
     void CreateWebMessagePorts(std::vector<RefPtr<WebMessagePort>>& ports);
     void PostWebMessage(std::string& message, std::vector<RefPtr<WebMessagePort>>& ports, std::string& uri);
     void ClosePort(std::string& handle);
     void PostPortMessage(std::string& handle, std::string& data);
     void SetPortMessageCallback(std::string& handle, std::function<void(const std::string&)>&& callback);
-    void HandleTouchDown(const int32_t& id, const double& x, const double& y);
-    void HandleTouchUp(const int32_t& id, const double& x, const double& y);
-    void HandleTouchMove(const int32_t& id, const double& x, const double& y);
+    void HandleTouchDown(const int32_t& id, const double& x, const double& y, bool from_overlay = false);
+    void HandleTouchUp(const int32_t& id, const double& x, const double& y, bool from_overlay = false);
+    void HandleTouchMove(const int32_t& id, const double& x, const double& y, bool from_overlay = false);
     void HandleTouchCancel();
     void HandleAxisEvent(const double& x, const double& y, const double& deltaX, const double& deltaY);
     bool OnKeyEvent(int32_t keyCode, int32_t keyAction);
@@ -355,8 +448,8 @@ public:
     void OnFocus();
     void OnBlur();
     void OnPermissionRequestPrompt(const std::shared_ptr<OHOS::NWeb::NWebAccessRequest>& request);
-    bool RunQuickMenu(
-        std::shared_ptr<NWeb::NWebQuickMenuParams> params, std::shared_ptr<NWeb::NWebQuickMenuCallback> callback);
+    bool RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
+        std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback);
     void OnQuickMenuDismissed();
     void OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
@@ -367,6 +460,15 @@ public:
     void UpdateLocale();
     void OnInactive();
     void OnActive();
+    bool OnCursorChange(const OHOS::NWeb::CursorType& type, const OHOS::NWeb::NWebCursorInfo& info);
+    void OnSelectPopupMenu(
+        std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params,
+        std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback);
+    void SetShouldFrameSubmissionBeforeDraw(bool should);
+    void SetBackgroundColor(int32_t backgroundColor)
+    {
+        backgroundColor_ = backgroundColor;
+    }
 #endif
     void OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error);
@@ -382,7 +484,9 @@ public:
     void OnFullScreenExit();
     void OnGeolocationPermissionsHidePrompt();
     void OnGeolocationPermissionsShowPrompt(
-        const std::string& origin, OHOS::NWeb::NWebGeolocationCallbackInterface* callback);
+        const std::string& origin, const std::shared_ptr<OHOS::NWeb::NWebGeolocationCallbackInterface>& callback);
+    void OnCompleteSwapWithNewSize();
+    void OnResizeNotWork();
     void OnRequestFocus();
     bool OnCommonDialog(const std::shared_ptr<BaseEventInfo>& info, DialogEventType dialogEventType);
     bool OnHttpAuthRequest(const std::shared_ptr<BaseEventInfo>& info);
@@ -400,6 +504,7 @@ public:
     bool OnFileSelectorShow(const std::shared_ptr<BaseEventInfo>& info);
     bool OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info);
     bool OnHandleInterceptUrlLoading(const std::string& url);
+    bool OnHandleInterceptLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request);
     void OnResourceLoad(const std::string& url);
     void OnScaleChange(float oldScaleFactor, float newScaleFactor);
     void OnScroll(double xOffset, double yOffset);
@@ -409,11 +514,25 @@ public:
     void OnWindowNew(const std::string& targetUrl, bool isAlert, bool isUserTrigger,
         const std::shared_ptr<OHOS::NWeb::NWebControllerHandler>& handler);
     void OnWindowExit();
+    void OnPageVisible(const std::string& url);
+    void OnDataResubmitted(std::shared_ptr<OHOS::NWeb::NWebDataResubmissionCallback> handler);
+    void OnFaviconReceived(const void* data, size_t width, size_t height, OHOS::NWeb::ImageColorType colorType,
+        OHOS::NWeb::ImageAlphaType alphaType);
+    void OnTouchIconUrl(const std::string& iconUrl, bool precomposed);
+    void OnAudioStateChanged(bool audible);
+    void OnFirstContentfulPaint(long navigationStartTick, long firstContentfulPaintMs);
+    void OnGetTouchHandleHotZone(OHOS::NWeb::TouchHandleHotZone& hotZone);
 
     void SetNGWebPattern(const RefPtr<NG::WebPattern>& webPattern);
     void RequestFocus();
     void SetDrawSize(const Size& drawSize);
     void SetEnhanceSurfaceFlag(const bool& isEnhanceSurface);
+    EGLConfig GLGetConfig(int version, EGLDisplay eglDisplay);
+    void GLContextInit(void* window);
+    sptr<OHOS::SurfaceDelegate> GetSurfaceDelegateClient();
+    void SetBoundsOrResize(const Size& drawSize, const Offset& offset);
+    Offset GetWebRenderGlobalPos();
+    bool InitWebSurfaceDelegate(const WeakPtr<PipelineBase>& context);
 #if defined(ENABLE_ROSEN_BACKEND)
     void SetSurface(const sptr<Surface>& surface);
     sptr<Surface> surface_ = nullptr;
@@ -422,6 +541,18 @@ public:
     void SetWebRendeGlobalPos(const Offset& pos)
     {
         offset_ = pos;
+    }
+    void SetBlurReason(const OHOS::NWeb::BlurReason& blurReason)
+    {
+        blurReason_ = blurReason;
+    }
+    void SetPopup(bool popup)
+    {
+        isPopup_ = popup;
+    }
+    void SetParentNWebId(int32_t parentNWebId)
+    {
+        parentNWebId_ = parentNWebId;
     }
 #endif
 private:
@@ -466,8 +597,10 @@ private:
     void DeleteEntirelyCookie();
     void RegisterOHOSWebEventAndMethord();
     void SetWebCallBack();
-    void RunSetWebIdCallback();
+    void RunSetWebIdAndHapPathCallback();
     void RunJsProxyCallback();
+    void RegisterConfigObserver();
+    void UnRegisterConfigObserver();
 
     // Backward and forward
     void Backward();
@@ -488,6 +621,15 @@ private:
 
     std::string GetCustomScheme();
     void InitWebViewWithSurface();
+    Size GetEnhanceSurfaceSize(const Size& drawSize);
+    void UpdateScreenOffSet(double& offsetX, double& offsetY);
+    void RegisterSurfacePositionChangedCallback();
+    void UnregisterSurfacePositionChangedCallback();
+
+    void NotifyPopupWindowResult(bool result);
+
+    EventCallbackV2 GetAudioStateChangedCallback(bool useNewPipe, const RefPtr<NG::WebEventHub>& eventHub);
+
 #endif
 
     WeakPtr<WebComponent> webComponent_;
@@ -512,6 +654,7 @@ private:
     OHOS::NWeb::NWebCookieManager* cookieManager_ = nullptr;
     sptr<Rosen::Window> window_;
     bool isCreateWebView_ = false;
+    int32_t callbackId_ = 0;
 
     EventCallbackV2 onPageFinishedV2_;
     EventCallbackV2 onPageStartedV2_;
@@ -532,6 +675,10 @@ private:
     EventCallbackV2 onPermissionRequestV2_;
     EventCallbackV2 onSearchResultReceiveV2_;
     EventCallbackV2 onWindowExitV2_;
+    EventCallbackV2 onPageVisibleV2_;
+    EventCallbackV2 onTouchIconUrlV2_;
+    EventCallbackV2 onAudioStateChangedV2_;
+    EventCallbackV2 onFirstContentfulPaintV2_;
 
     std::string bundlePath_;
     std::string bundleDataPath_;
@@ -541,7 +688,22 @@ private:
     Size drawSize_;
     Offset offset_;
     bool isEnhanceSurface_ = false;
-    void *enhanceSurfaceInfo_ = nullptr;
+    sptr<WebSurfaceCallback> surfaceCallback_;
+    sptr<OHOS::SurfaceDelegate> surfaceDelegate_;
+    EGLNativeWindowType mEglWindow;
+    EGLDisplay mEGLDisplay = EGL_NO_DISPLAY;
+    EGLConfig mEGLConfig = nullptr;
+    EGLContext mEGLContext = EGL_NO_CONTEXT;
+    EGLContext mSharedEGLContext = EGL_NO_CONTEXT;
+    EGLSurface mEGLSurface = nullptr;
+    WindowsSurfaceInfo surfaceInfo_;
+    bool forceDarkMode_ = false;
+    sptr<AppExecFwk::IConfigurationObserver> configChangeObserver_ = nullptr;
+    OHOS::NWeb::BlurReason blurReason_ = OHOS::NWeb::BlurReason::FOCUS_SWITCH;
+    bool isPopup_ = false;
+    int32_t parentNWebId_ = -1;
+    bool needResizeAtFirst_ = false;
+    int32_t backgroundColor_ = 0xffffffff;
 #endif
 };
 

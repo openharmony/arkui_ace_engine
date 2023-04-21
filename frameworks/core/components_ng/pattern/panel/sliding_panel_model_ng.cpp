@@ -15,10 +15,12 @@
 
 #include "core/components_ng/pattern/panel/sliding_panel_model_ng.h"
 
+#include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/drag_bar/drag_bar_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
@@ -26,11 +28,12 @@
 #include "core/components_ng/pattern/panel/sliding_panel_node.h"
 #include "core/components_ng/pattern/panel/sliding_panel_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
 namespace {
-const Color BG_COLOR = Color(0xfff1f3f5);
+const Dimension PANEL_RADIUS = 32.0_vp;
 } // namespace
 
 void SlidingPanelModelNG::Create(bool isShow)
@@ -45,6 +48,13 @@ void SlidingPanelModelNG::Create(bool isShow)
     auto columnNode = FrameNode::GetOrCreateFrameNode(
         V2::COLUMN_ETS_TAG, columnId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
     columnNode->MountToParent(panelNode);
+    auto contentId = panelNode->GetContentId();
+    auto contentNode = FrameNode::GetOrCreateFrameNode(
+        V2::COLUMN_ETS_TAG, contentId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    auto contentLayoutProperty = contentNode->GetLayoutProperty<LayoutProperty>();
+    CHECK_NULL_VOID(contentLayoutProperty);
+    contentLayoutProperty->UpdateLayoutWeight(1.0f);
+    contentNode->MountToParent(columnNode);
 
     ViewStackProcessor::GetInstance()->Push(panelNode);
     ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, PanelType, PanelType::FOLDABLE_BAR); // default value
@@ -54,7 +64,16 @@ void SlidingPanelModelNG::Create(bool isShow)
 
     auto renderContext = columnNode->GetRenderContext();
     if (renderContext) {
-        renderContext->UpdateBackgroundColor(BG_COLOR);
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto dragBarTheme = pipeline->GetTheme<DragBarTheme>();
+        CHECK_NULL_VOID(dragBarTheme);
+        renderContext->UpdateBackgroundColor(dragBarTheme->GetPanelBgColor());
+        BorderRadiusProperty radius;
+        radius.radiusTopLeft = PANEL_RADIUS;
+        radius.radiusTopRight = PANEL_RADIUS;
+        renderContext->UpdateBorderRadius(radius);
+        renderContext->UpdateClipEdge(true);
     }
 }
 
@@ -128,7 +147,16 @@ void SlidingPanelModelNG::SetIsShow(bool isShow)
 
 void SlidingPanelModelNG::SetBackgroundMask(const Color& backgroundMask)
 {
-    NG::ViewAbstract::SetBackgroundColor(backgroundMask);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProp = frameNode->GetLayoutProperty<SlidingPanelLayoutProperty>();
+    CHECK_NULL_VOID(layoutProp);
+    auto isShow = layoutProp->GetIsShow().value();
+    if (isShow) {
+        ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, backgroundMask);
+    } else {
+        ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, Color::TRANSPARENT);
+    }
 }
 
 // Set the color of the panel content area
@@ -140,6 +168,7 @@ void SlidingPanelModelNG::SetBackgroundColor(const Color& backgroundColor)
     CHECK_NULL_VOID(columnNode);
     auto renderContext = columnNode->GetRenderContext();
     if (renderContext) {
+        ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, BackgroundColor, backgroundColor);
         renderContext->UpdateBackgroundColor(backgroundColor);
     }
 }
@@ -186,6 +215,7 @@ void SlidingPanelModelNG::Pop()
             dragBarNode->MountToParent(columnNode, 0);
             dragBarNode->MarkModifyDone();
         }
+        NG::ViewStackProcessor::GetInstance()->PopContainer();
         return;
     }
 

@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_VIDEO_VIDEO_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_VIDEO_VIDEO_MODEL_H
 
+#include "base/image/pixel_map.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/video/video_controller_v2.h"
 
@@ -30,6 +31,7 @@ public:
     virtual void SetSrc(const std::string& src) = 0;
     virtual void SetProgressRate(double progressRate) = 0;
     virtual void SetPosterSourceInfo(const std::string& posterUrl) = 0;
+    virtual void SetPosterSourceByPixelMap(RefPtr<PixelMap>& pixMap) = 0;
     virtual void SetMuted(bool muted) = 0;
     virtual void SetAutoPlay(bool autoPlay) = 0;
     virtual void SetControls(bool controls) = 0;

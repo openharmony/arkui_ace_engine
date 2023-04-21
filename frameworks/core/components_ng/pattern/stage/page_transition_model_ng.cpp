@@ -68,12 +68,16 @@ void PageTransitionModelNG::SetOpacityEffect(float opacity)
 
 void PageTransitionModelNG::SetOnEnter(PageTransitionEventFunc&& handler)
 {
-    LOGW("not support onEnter in pageTransition");
+    auto transition = GetCurrentEffect();
+    CHECK_NULL_VOID(transition);
+    transition->SetUserCallback(std::move(handler));
 }
 
 void PageTransitionModelNG::SetOnExit(PageTransitionEventFunc&& handler)
 {
-    LOGW("not support onExit in pageTransition");
+    auto transition = GetCurrentEffect();
+    CHECK_NULL_VOID(transition);
+    transition->SetUserCallback(std::move(handler));
 }
 
 void PageTransitionModelNG::CreateTransition(PageTransitionType type, const PageTransitionOption& option)

@@ -16,16 +16,14 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_TEXT_LAYOUT_ADAPTER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_TEXT_LAYOUT_ADAPTER_H
 
-#include <atomic>
 #include <string>
-#include <unicode/uchar.h>
 
 namespace OHOS::Ace::NG {
 class TextLayoutadapter {
 public:
-    static bool IsLeftToRight(UChar32 charOfShowingText);
-    static bool IsRightToLeft(UChar32 charOfShowingText);
-    static bool IsRightTOLeftArabic(UChar32 charOfShowingText);
+    static bool IsLeftToRight(int32_t charOfShowingText);
+    static bool IsRightToLeft(int32_t charOfShowingText);
+    static bool IsRightTOLeftArabic(int32_t charOfShowingText);
 };
 } // namespace OHOS::Ace::NG
 

@@ -31,8 +31,7 @@ public:
     {}
     ~SearchNode() override = default;
 
-    void AddChildToGroup(const RefPtr<UINode>& child) override;
-
+    void AddChildToGroup(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT) override;
     bool HasTextFieldNode() const
     {
         return textFieldId_.has_value();
@@ -46,6 +45,16 @@ public:
     bool HasButtonNode() const
     {
         return buttonId_.has_value();
+    }
+
+    bool HasCancelImageNode() const
+    {
+        return cancelImageId_.has_value();
+    }
+
+    bool HasCancelButtonNode() const
+    {
+        return cancelButtonId_.has_value();
     }
 
     int32_t GetTextFieldId()
@@ -72,10 +81,28 @@ public:
         return buttonId_.value();
     }
 
+    int32_t GetCancelImageId()
+    {
+        if (!cancelImageId_.has_value()) {
+            cancelImageId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        }
+        return cancelImageId_.value();
+    }
+
+    int32_t GetCancelButtonId()
+    {
+        if (!cancelButtonId_.has_value()) {
+            cancelButtonId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        }
+        return cancelButtonId_.value();
+    }
+
 private:
     std::optional<int32_t> textFieldId_;
     std::optional<int32_t> imageId_;
     std::optional<int32_t> buttonId_;
+    std::optional<int32_t> cancelImageId_;
+    std::optional<int32_t> cancelButtonId_;
 
     std::set<int32_t> searchChildren_;
 };

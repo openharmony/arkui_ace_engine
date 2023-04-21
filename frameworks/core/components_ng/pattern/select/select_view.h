@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,11 @@
 
 
 namespace OHOS::Ace::NG {
+
+enum class ArrowPosition {
+    END = 0,
+    START,
+};
 
 // pair<value, icon>
 using SelectParam = std::pair<std::string, std::string>;
@@ -57,6 +62,8 @@ public:
     static void SetOptionFontColor(const Color& color);
 
     static void SetOnSelect(SelectEvent&& onSelect);
+    static void SetSpace(const Dimension& value);
+    static void SetArrowPosition(const ArrowPosition value);
 };
 
 } // namespace OHOS::Ace::NG

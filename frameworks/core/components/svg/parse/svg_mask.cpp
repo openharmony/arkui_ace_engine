@@ -57,7 +57,10 @@ RefPtr<RenderNode> SvgMask::CreateRender(
         LOGW("svgContext is null.");
         return nullptr;
     }
-
+    auto ifMaskIsUsed = svgContext->IfIdInMaskReferSet(nodeId_);
+    if (!ifMaskIsUsed) {
+        return nullptr;
+    }
     auto renderNode = AceType::DynamicCast<RenderSvgMask>(component_->CreateRenderNode());
     if (renderNode == nullptr) {
         return nullptr;
@@ -73,7 +76,6 @@ RefPtr<RenderNode> SvgMask::CreateRender(
             child->Update(childRender);
         }
     }
-
     return renderNode;
 }
 

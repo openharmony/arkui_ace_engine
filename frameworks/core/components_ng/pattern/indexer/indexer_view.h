@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,10 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_INDEXER_INDEXER_VIEW_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_INDEXER_INDEXER_VIEW_H
 
+#include "base/geometry/dimension.h"
 #include "core/components_v2/indexer/indexer_component.h"
 #include "core/components_ng/pattern/indexer/indexer_event_hub.h"
 #include "core/components_ng/pattern/indexer/indexer_layout_property.h"
-#include "core/components_ng/pattern/indexer/indexer_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -38,11 +38,17 @@ public:
     static void SetItemSize(const Dimension& itemSize);
     static void SetAlignStyle(NG::AlignStyle alignStyle);
     static void SetSelected(int32_t selected);
-    static void SetPopupPositionX(float popupPositionX);
-    static void SetPopupPositionY(float popupPositionY);
+    static void SetPopupPositionX(const Dimension& popupPositionX);
+    static void SetPopupPositionY(const Dimension& popupPositionY);
     static void SetOnSelected(OnSelectedEvent&& onSelected);
     static void SetOnRequestPopupData(OnRequestPopupDataEvent&& onRequestPopupData);
     static void SetOnPopupSelected(OnPopupSelectedEvent&& onPopupSelectedEvent);
+    static void SetPopupSelectedColor(const std::optional<Color>& popupSelectedColor);
+    static void SetPopupUnselectedColor(const std::optional<Color>& popupUnselectedColor);
+    static void SetFontSize(const Dimension& fontSize);
+    static void SetFontWeight(FontWeight weight);
+    static void SetPopupItemBackground(const std::optional<Color>& popupItemBackground);
+    static void SetPopupHorizontalSpace(const Dimension& popupHorizontalSpace);
 };
 
 } // namespace OHOS::Ace::NG

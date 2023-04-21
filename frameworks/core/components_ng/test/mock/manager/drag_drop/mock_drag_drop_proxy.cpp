@@ -17,6 +17,8 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+void DragDropProxy::OnTextDragStart(const std::string& extraInfo) {}
+
 void DragDropProxy::OnDragStart(
     const GestureEvent& info, const std::string& extraInfo, const RefPtr<FrameNode>& frameNode)
 {
@@ -29,7 +31,7 @@ void DragDropProxy::OnDragStart(
 
 void DragDropProxy::OnDragMove(const GestureEvent& info) {}
 
-void DragDropProxy::OnDragEnd(const GestureEvent& info) {}
+void DragDropProxy::OnDragEnd(const GestureEvent& info, bool isTextDragEnd) {}
 
 void DragDropProxy::onDragCancel() {}
 

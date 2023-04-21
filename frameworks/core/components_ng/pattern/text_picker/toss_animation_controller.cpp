@@ -19,7 +19,7 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/text_picker/textpicker_pattern.h"
+#include "core/components_ng/pattern/text_picker/textpicker_column_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -77,30 +77,18 @@ bool TextPickerTossAnimationController::Play()
     auto weak = AceType::WeakClaim(this);
     toss_ = AceType::MakeRefPtr<PickerAnimation>(pipeline_, 0.0, time, 0, nTime, Curves::LINEAR, [weak](double value) {
         auto ref = weak.Upgrade();
-        if (!ref) {
-            LOGE("toss ref is null.");
-            return;
-        }
-        auto column = AceType::DynamicCast<TextPickerPattern>(ref->column_.Upgrade());
-        if (!column) {
-            LOGE("toss column is null.");
-            return;
-        }
+        CHECK_NULL_VOID(ref);
+        auto column = AceType::DynamicCast<TextPickerColumnPattern>(ref->column_.Upgrade());
+        CHECK_NULL_VOID(column);
         double distance = std::pow(DRAG, value);
         distance = (distance - 1.0) * ref->speed_ / std::log(DRAG);
         column->UpdateToss(ref->yEnd_ + distance);
     });
     toss_->AddStopCallback([weak] {
         auto ref = weak.Upgrade();
-        if (!ref) {
-            LOGE("toss ref is null when stop.");
-            return;
-        }
-        auto column = AceType::DynamicCast<TextPickerPattern>(ref->column_.Upgrade());
-        if (!column) {
-            LOGE("column is null when stop.");
-            return;
-        }
+        CHECK_NULL_VOID(ref);
+        auto column = AceType::DynamicCast<TextPickerColumnPattern>(ref->column_.Upgrade());
+        CHECK_NULL_VOID(column);
         column->TossStoped();
     });
     toss_->Play();

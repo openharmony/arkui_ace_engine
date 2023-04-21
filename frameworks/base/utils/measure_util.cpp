@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,11 +14,17 @@
  */
 
 #include "base/utils/measure_util.h"
+#include "base/geometry/size.h"
 #include "core/components/custom_paint/render_custom_paint.h"
 
 namespace OHOS::Ace {
 double MeasureUtil::MeasureText(const MeasureContext& context)
 {
     return RenderCustomPaint::PaintMeasureText(context);
+}
+
+Size MeasureUtil::MeasureTextSize(const MeasureContext& context)
+{
+    return RenderCustomPaint::MeasureTextSize(context);
 }
 } // namespace OHOS::Ace

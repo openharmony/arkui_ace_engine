@@ -164,6 +164,26 @@ inline std::string ConvertFlexDirectionToStirng(FlexDirection direction)
         }
     }
 
+    inline std::string ConvertItemAlignToStirng(FlexAlign align)
+    {
+        if (align == FlexAlign::FLEX_START) {
+            return "ItemAlign.Start";
+        }
+        if (align == FlexAlign::CENTER) {
+            return "ItemAlign.Center";
+        }
+        if (align == FlexAlign::FLEX_END) {
+            return "ItemAlign.End";
+        }
+        if (align == FlexAlign::BASELINE) {
+            return "ItemAlign.Baseline";
+        }
+        if (align == FlexAlign::STRETCH) {
+            return "ItemAlign.Stretch";
+        }
+        return "ItemAlign.Auto";
+    }
+
     inline std::string ConvertWrapAlignmentToStirng(WrapAlignment align)
     {
         if (align == WrapAlignment::START) {
@@ -283,9 +303,10 @@ inline std::string ConvertFlexDirectionToStirng(FlexDirection direction)
     inline std::string ConvertWrapTextOverflowToString(TextOverflow textOverflow)
     {
         static const LinearEnumMapNode<TextOverflow, std::string> textOverflowTable[] = {
+            { TextOverflow::NONE, "TextOverflow.None" },
             { TextOverflow::CLIP, "TextOverflow.Clip" },
             { TextOverflow::ELLIPSIS, "TextOverflow.Ellipsis" },
-            { TextOverflow::NONE, "TextOverflow.None" },
+            { TextOverflow::MARQUEE, "TextOverflow.Marquee" },
         };
 
         auto index = BinarySearchFindIndex(textOverflowTable, ArraySize(textOverflowTable), textOverflow);
@@ -306,15 +327,15 @@ inline std::string ConvertFlexDirectionToStirng(FlexDirection direction)
     inline std::string ConvertWrapFontWeightToStirng(FontWeight fontWeight)
     {
         static const LinearEnumMapNode<FontWeight, std::string> fontWeightTable[] = {
-            { FontWeight::W100, "FontWeight.100" },
-            { FontWeight::W200, "FontWeight.200" },
-            { FontWeight::W300, "FontWeight.300" },
-            { FontWeight::W400, "FontWeight.400" },
-            { FontWeight::W500, "FontWeight.500" },
-            { FontWeight::W600, "FontWeight.600" },
-            { FontWeight::W700, "FontWeight.700" },
-            { FontWeight::W800, "FontWeight.800" },
-            { FontWeight::W900, "FontWeight.900" },
+            { FontWeight::W100, "100" },
+            { FontWeight::W200, "200" },
+            { FontWeight::W300, "300" },
+            { FontWeight::W400, "400" },
+            { FontWeight::W500, "500" },
+            { FontWeight::W600, "600" },
+            { FontWeight::W700, "700" },
+            { FontWeight::W800, "800" },
+            { FontWeight::W900, "900" },
             { FontWeight::BOLD, "FontWeight.Bold" },
             { FontWeight::NORMAL, "FontWeight.Normal" },
             { FontWeight::BOLDER, "FontWeight.Bolder" },
@@ -383,6 +404,19 @@ inline std::string ConvertFlexDirectionToStirng(FlexDirection direction)
     }
 
     std::string GetTextStyleInJson(const TextStyle& textStyle);
+
+    inline std::string ConvertWrapTextHeightAdaptivePolicyToString(TextHeightAdaptivePolicy heightAdaptivePolicy)
+    {
+        static const LinearEnumMapNode<TextHeightAdaptivePolicy, std::string> heightAdaptivePolicytTable[] = {
+            { TextHeightAdaptivePolicy::MAX_LINES_FIRST, "TextHeightAdaptivePolicy.MAX_LINES_FIRST" },
+            { TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, "TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST" },
+            { TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST, "TextHeightAdaptivePolicy.LAYOUT_CONSTRAINT_FIRST" },
+        };
+
+        auto index = BinarySearchFindIndex(
+            heightAdaptivePolicytTable, ArraySize(heightAdaptivePolicytTable), heightAdaptivePolicy);
+        return index < 0 ? "TextHeightAdaptivePolicy.MAX_LINES_FIRST" : heightAdaptivePolicytTable[index].value;
+    }
 
 } // namespace OHOS::Ace::V2
 

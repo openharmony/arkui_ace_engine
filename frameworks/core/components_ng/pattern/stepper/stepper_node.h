@@ -33,7 +33,8 @@ public:
     static RefPtr<StepperNode> GetOrCreateStepperNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
 
-    void AddChildToGroup(const RefPtr<UINode>& child) override;
+    void AddChildToGroup(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT) override;
+    void DeleteChildFromGroup(int32_t slot = DEFAULT_NODE_SLOT) override;
 
     bool HasSwiperNode() const
     {
@@ -49,7 +50,7 @@ public:
     {
         return rightButtonId_.has_value();
     }
-    
+
     int32_t GetSwiperId()
     {
         if (!swiperId_.has_value()) {
@@ -72,6 +73,20 @@ public:
             rightButtonId_ = ElementRegister::GetInstance()->MakeUniqueId();
         }
         return rightButtonId_.value();
+    }
+
+    void RemoveLeftButtonNode()
+    {
+        CHECK_NULL_VOID_NOLOG(HasLeftButtonNode());
+        RemoveChildAtIndex(GetChildIndexById(GetLeftButtonId()));
+        leftButtonId_ = std::nullopt;
+    }
+
+    void RemoveRightButtonNode()
+    {
+        CHECK_NULL_VOID_NOLOG(HasRightButtonNode());
+        RemoveChildAtIndex(GetChildIndexById(GetRightButtonId()));
+        rightButtonId_ = std::nullopt;
     }
 
 private:

@@ -16,9 +16,7 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JS_OBJECT_TEMPLATE_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JS_OBJECT_TEMPLATE_H
 
-#ifdef USE_V8_ENGINE
-#include "frameworks/bridge/declarative_frontend/engine/v8/v8_object_template.h"
-#elif USE_ARK_ENGINE
+#ifdef USE_ARK_ENGINE
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_object_template.h"
 #endif
 
@@ -37,9 +35,7 @@ public:
     auto NewInstance() const;
 };
 
-#ifdef USE_V8_ENGINE
-using JSObjectTemplate = JSObjectTemplateImpl<V8ObjectTemplate>;
-#elif USE_ARK_ENGINE
+#ifdef USE_ARK_ENGINE
 using JSObjectTemplate = JSObjectTemplateImpl<JsiObjectTemplate>;
 #endif
 

@@ -70,6 +70,16 @@ public:
         return indicator_;
     }
 
+    void SetIsBuilder(bool isBuilder)
+    {
+        isBuilder_ = isBuilder;
+    }
+
+    void SetTabBarStyle(TabBarStyle tabBarStyle)
+    {
+        tabBarStyle_ = tabBarStyle;
+    }
+
 private:
     Axis GetAxis(LayoutWrapper* layoutWrapper) const;
     void UpdateChildConstraint(LayoutConstraintF& childConstraint, const RefPtr<TabBarLayoutProperty>& layoutProperty,
@@ -83,6 +93,8 @@ private:
     float currentOffset_ = 0.0f;
     float childrenMainSize_ = 0.0f; // Children total size in main axis.
     int32_t indicator_ = 0;
+    bool isBuilder_ = false;
+    TabBarStyle tabBarStyle_;
 };
 } // namespace OHOS::Ace::NG
 

@@ -153,39 +153,4 @@ std::string RowComposedElement::ConvertFlexAlignToString(FlexAlign flexAlign) co
     return result;
 }
 
-void RowComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
-{
-    auto rowElement = GetContentElement<FlexElement>(RowElement::TypeId());
-    if (!rowElement) {
-        LOGE("get GetRowElement failed");
-        return;
-    }
-    rowElement->UpdateChildWithSlot(nullptr, newComponent, slot, slot);
-    rowElement->MarkDirty();
-}
-
-void RowComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
-{
-    auto rowElement = GetContentElement<FlexElement>(RowElement::TypeId());
-    if (!rowElement) {
-        LOGE("get GetRowElement failed");
-        return;
-    }
-    auto child = rowElement->GetChildBySlot(slot);
-    rowElement->UpdateChildWithSlot(child, newComponent, slot, slot);
-    rowElement->MarkDirty();
-}
-
-void RowComposedElement::DeleteChildWithSlot(int32_t slot)
-{
-    auto rowElement = GetContentElement<FlexElement>(RowElement::TypeId());
-    if (!rowElement) {
-        LOGE("get GetRowElement failed");
-        return;
-    }
-    auto child = rowElement->GetChildBySlot(slot);
-    rowElement->UpdateChildWithSlot(child, nullptr, slot, slot);
-    rowElement->MarkDirty();
-}
-
 } // namespace OHOS::Ace::V2

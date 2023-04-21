@@ -42,7 +42,8 @@ using JsonFuncType = std::function<std::unique_ptr<JsonValue>(const ShapeContain
 const std::unordered_map<std::string, JsonFuncType> CREATE_JSON_JSON_VALUE_MAP {
     { "strokeDashArray",
         [](const ShapeContainerComposedElement& inspector) { return inspector.GetStrokeDashArray(); } },
-    { "viewPort", [](const ShapeContainerComposedElement& inspector) { return inspector.GetViewBox(); } }
+    { "viewPort", [](const ShapeContainerComposedElement& inspector) { return inspector.GetViewBox(); } },
+    { "mesh", [](const ShapeContainerComposedElement& inspector) { return inspector.GetMesh(); } },
 };
 
 }
@@ -218,4 +219,22 @@ std::unique_ptr<JsonValue> ShapeContainerComposedElement::GetViewBox() const
     return jsonViewBox;
 }
 
+std::unique_ptr<JsonValue> ShapeContainerComposedElement::GetMesh() const
+{
+    auto render = GetContentRender<RenderShapeContainer>(ShapeContainerElement::TypeId());
+    auto jsonMesh = JsonUtil::Create(true);
+    if (render && jsonMesh) {
+        auto jsonValueArray = JsonUtil::CreateArray(true);
+        std::vector<double> array = render->GetMesh();
+        for (size_t i = 0; i < array.size(); i++) {
+            auto index = std::to_string(i);
+            auto value = std::to_string(array[i]);
+            jsonValueArray->Put(index.c_str(), value.c_str());
+        }
+        jsonMesh->Put("value", jsonValueArray);
+        jsonMesh->Put("column", std::to_string(render->GetColumn()).c_str());
+        jsonMesh->Put("row", std::to_string(render->GetRow()).c_str());
+    }
+    return jsonMesh;
+}
 } // namespace OHOS::Ace::V2

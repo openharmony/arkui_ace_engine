@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,8 @@
 #include <regex>
 #include <string>
 
+#include "uicast_interface/uicast_context_impl.h"
+
 #include "base/i18n/localization.h"
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
@@ -27,8 +29,8 @@
 #include "base/resource/ace_res_config.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/thread/background_task_executor.h"
-#include "base/utils/utils.h"
 #include "base/utils/measure_util.h"
+#include "base/utils/utils.h"
 #include "bridge/common/manifest/manifest_parser.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/ng/page_router_manager.h"
@@ -40,8 +42,10 @@
 #include "core/common/thread_checker.h"
 #include "core/components/dialog/dialog_component.h"
 #include "core/components/toast/toast_component.h"
+#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#include "core/components_ng/render/adapter/component_snapshot.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/common/ace_engine.h"
 
@@ -69,19 +73,12 @@ const char STYLES_FOLDER[] = "styles/";
 const char I18N_FILE_SUFFIX[] = "/properties/string.json";
 
 // helper function to run OverlayManager task
-// ensures that the task runs in main window instead of subWindow
+// ensures that the task runs in subwindow instead of main Window
 void MainWindowOverlay(std::function<void(RefPtr<NG::OverlayManager>)>&& task)
 {
     auto currentId = Container::CurrentId();
-    if (Container::Current()->IsSubContainer()) {
-        currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
-    }
     ContainerScope scope(currentId);
-    auto container = AceEngine::Get().GetContainer(currentId);
-    CHECK_NULL_VOID(container);
-    auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    auto context = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
     context->GetTaskExecutor()->PostTask(
@@ -504,28 +501,16 @@ void FrontendDelegateDeclarative::NotifyAppStorage(
 
 void FrontendDelegateDeclarative::OnBackGround()
 {
-    taskExecutor_->PostTask(
-        [weak = AceType::WeakClaim(this)] {
-            auto delegate = weak.Upgrade();
-            if (!delegate) {
-                return;
-            }
-            delegate->OnPageHide();
-        },
-        TaskExecutor::TaskType::JS);
+    OnPageHide();
 }
 
 void FrontendDelegateDeclarative::OnForeground()
 {
-    taskExecutor_->PostTask(
-        [weak = AceType::WeakClaim(this)] {
-            auto delegate = weak.Upgrade();
-            if (!delegate) {
-                return;
-            }
-            delegate->OnPageShow();
-        },
-        TaskExecutor::TaskType::JS);
+    // first page show will be called by push page successfully
+    if (Container::IsCurrentUseNewPipeline() || !isFirstNotifyShow_) {
+        OnPageShow();
+    }
+    isFirstNotifyShow_ = false;
 }
 
 void FrontendDelegateDeclarative::OnConfigurationUpdated(const std::string& data)
@@ -787,6 +772,22 @@ RefPtr<RevSourceMap> FrontendDelegateDeclarative::GetFaAppSourceMap()
     return appSourceMap_;
 }
 
+void FrontendDelegateDeclarative::GetStageSourceMap(
+    std::unordered_map<std::string, RefPtr<Framework::RevSourceMap>>& sourceMaps)
+{
+    if (!Container::IsCurrentUseNewPipeline()) {
+        return;
+    }
+
+    std::string maps;
+    if (GetAssetContent(MERGE_SOURCEMAPS_PATH, maps)) {
+        auto SourceMap = AceType::MakeRefPtr<RevSourceMap>();
+        SourceMap->StageModeSourceMapSplit(maps, sourceMaps);
+    } else {
+        LOGW("app map load failed!");
+    }
+}
+
 void FrontendDelegateDeclarative::InitializeRouterManager(NG::LoadPageCallback&& loadPageCallback)
 {
     pageRouterManager_ = AceType::MakeRefPtr<NG::PageRouterManager>();
@@ -1035,6 +1036,12 @@ void FrontendDelegateDeclarative::StartPush(const PageTarget& target, const std:
     LOGD("router.Push pagePath = %{private}s", pagePath.c_str());
     if (!pagePath.empty()) {
         LoadPage(GenerateNextPageId(), PageTarget(target, pagePath), false, params);
+        {
+            UICastContextImpl::HandleRouterPageCall("UICast::Page::push", target.url);
+        }
+        if (errorCallback != nullptr) {
+            errorCallback("", ERROR_CODE_NO_ERROR);
+        }
     } else {
         LOGW("[Engine Log] this uri not support in route push.");
         if (errorCallback != nullptr) {
@@ -1075,6 +1082,12 @@ void FrontendDelegateDeclarative::StartReplace(const PageTarget& target, const s
     LOGD("router.Replace pagePath = %{private}s", pagePath.c_str());
     if (!pagePath.empty()) {
         LoadReplacePage(GenerateNextPageId(), PageTarget(target, pagePath), params);
+        {
+            UICastContextImpl::HandleRouterPageCall("UICast::Page::replace", target.url);
+        }
+        if (errorCallback != nullptr) {
+            errorCallback("", ERROR_CODE_NO_ERROR);
+        }
     } else {
         LOGW("[Engine Log] this uri not support in route replace.");
         if (errorCallback != nullptr) {
@@ -1160,6 +1173,9 @@ void FrontendDelegateDeclarative::BackWithTarget(const PageTarget& target, const
 
 void FrontendDelegateDeclarative::StartBack(const PageTarget& target, const std::string& params)
 {
+    {
+        UICastContextImpl::HandleRouterPageCall("UICast::Page::back", target.url);
+    }
     if (target.url.empty()) {
         std::string pagePath;
         {
@@ -1206,6 +1222,12 @@ void FrontendDelegateDeclarative::StartBack(const PageTarget& target, const std:
 
 size_t FrontendDelegateDeclarative::GetComponentsCount()
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        CHECK_NULL_RETURN(pageRouterManager_, 0);
+        auto pageNode = pageRouterManager_->GetCurrentPageNode();
+        CHECK_NULL_RETURN(pageNode, 0);
+        return pageNode->GetAllDepthChildrenCount();
+    }
     auto pipelineContext = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
     CHECK_NULL_RETURN(pipelineContext, 0);
     const auto& pageElement = pipelineContext->GetLastPage();
@@ -1308,14 +1330,24 @@ double FrontendDelegateDeclarative::MeasureText(const MeasureContext& context)
     return MeasureUtil::MeasureText(context);
 }
 
+Size FrontendDelegateDeclarative::MeasureTextSize(const MeasureContext& context)
+{
+    return MeasureUtil::MeasureTextSize(context);
+}
+
 void FrontendDelegateDeclarative::ShowToast(const std::string& message, int32_t duration, const std::string& bottom)
 {
     LOGD("FrontendDelegateDeclarative ShowToast.");
+    {
+        UICastContextImpl::ShowToast(message, duration, bottom);
+    }
     int32_t durationTime = std::clamp(duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
     bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (Container::IsCurrentUseNewPipeline()) {
-        auto task = [durationTime, message, bottom, isRightToLeft](const RefPtr<NG::OverlayManager>& overlayManager) {
+        auto task = [durationTime, message, bottom, isRightToLeft, containerId = Container::CurrentId()](
+                        const RefPtr<NG::OverlayManager>& overlayManager) {
             CHECK_NULL_VOID(overlayManager);
+            ContainerScope scope(containerId);
             LOGI("Begin to show toast message %{public}s, duration is %{public}d", message.c_str(), durationTime);
             overlayManager->ShowToast(message, durationTime, bottom, isRightToLeft);
         };
@@ -1342,16 +1374,16 @@ void FrontendDelegateDeclarative::ShowDialogInner(DialogProperties& dialogProper
     if (Container::IsCurrentUseNewPipeline()) {
         LOGI("Dialog IsCurrentUseNewPipeline.");
         dialogProperties.onSuccess = std::move(callback);
-        auto context = DynamicCast<NG::PipelineContext>(pipelineContext);
-        auto overlayManager = context ? context->GetOverlayManager() : nullptr;
-        taskExecutor_->PostTask(
-            [dialogProperties, weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
-                auto overlayManager = weak.Upgrade();
-                CHECK_NULL_VOID(overlayManager);
-                overlayManager->ShowDialog(
-                    dialogProperties, nullptr, AceApplicationInfo::GetInstance().IsRightToLeft());
-            },
-            TaskExecutor::TaskType::UI);
+        dialogProperties.onCancel = [callback, taskExecutor = taskExecutor_] {
+            taskExecutor->PostTask([callback]() { callback(CALLBACK_ERRORCODE_CANCEL, CALLBACK_DATACODE_ZERO); },
+                TaskExecutor::TaskType::JS);
+        };
+        auto task = [dialogProperties](const RefPtr<NG::OverlayManager>& overlayManager) {
+            CHECK_NULL_VOID(overlayManager);
+            LOGI("Begin to show dialog ");
+            overlayManager->ShowDialog(dialogProperties, nullptr, AceApplicationInfo::GetInstance().IsRightToLeft());
+        };
+        MainWindowOverlay(std::move(task));
         return;
     }
     std::unordered_map<std::string, EventMarker> callbackMarkers;
@@ -1401,6 +1433,9 @@ void FrontendDelegateDeclarative::ShowDialog(const std::string& title, const std
         .buttons = buttons,
     };
     ShowDialogInner(dialogProperties, std::move(callback), callbacks);
+    {
+        UICastContextImpl::ShowDialog(dialogProperties);
+    }
 }
 
 void FrontendDelegateDeclarative::ShowDialog(const std::string& title, const std::string& message,
@@ -1415,6 +1450,9 @@ void FrontendDelegateDeclarative::ShowDialog(const std::string& title, const std
         .onStatusChanged = std::move(onStatusChanged),
     };
     ShowDialogInner(dialogProperties, std::move(callback), callbacks);
+    {
+        UICastContextImpl::ShowDialog(dialogProperties);
+    }
 }
 
 void FrontendDelegateDeclarative::ShowActionMenuInner(DialogProperties& dialogProperties,
@@ -1425,6 +1463,10 @@ void FrontendDelegateDeclarative::ShowActionMenuInner(DialogProperties& dialogPr
     if (Container::IsCurrentUseNewPipeline()) {
         LOGI("Dialog IsCurrentUseNewPipeline.");
         dialogProperties.onSuccess = std::move(callback);
+        dialogProperties.onCancel = [callback, taskExecutor = taskExecutor_] {
+            taskExecutor->PostTask([callback]() { callback(CALLBACK_ERRORCODE_CANCEL, CALLBACK_DATACODE_ZERO); },
+                TaskExecutor::TaskType::JS);
+        };
         auto context = DynamicCast<NG::PipelineContext>(pipelineContextHolder_.Get());
         auto overlayManager = context ? context->GetOverlayManager() : nullptr;
         taskExecutor_->PostTask(
@@ -1478,6 +1520,9 @@ void FrontendDelegateDeclarative::ShowActionMenu(
         .buttons = button,
     };
     ShowActionMenuInner(dialogProperties, button, std::move(callback));
+    {
+        UICastContextImpl::ShowDialog(dialogProperties);
+    }
 }
 
 void FrontendDelegateDeclarative::ShowActionMenu(const std::string& title, const std::vector<ButtonInfo>& button,
@@ -1491,6 +1536,9 @@ void FrontendDelegateDeclarative::ShowActionMenu(const std::string& title, const
         .onStatusChanged = std::move(onStatusChanged),
     };
     ShowActionMenuInner(dialogProperties, button, std::move(callback));
+    {
+        UICastContextImpl::ShowDialog(dialogProperties);
+    }
 }
 
 void FrontendDelegateDeclarative::EnableAlertBeforeBackPage(
@@ -1663,7 +1711,7 @@ std::string FrontendDelegateDeclarative::GetAssetPath(const std::string& url)
 void FrontendDelegateDeclarative::LoadPage(
     int32_t pageId, const PageTarget& target, bool isMainPage, const std::string& params, bool isRestore)
 {
-    LOGI("FrontendDelegateDeclarative %{private}p LoadPage[%{public}d]: %{public}s.", this, pageId, target.url.c_str());
+    LOGI("LoadPage[%{public}d]: %{public}s.", pageId, target.url.c_str());
     if (pageId == INVALID_PAGE_ID) {
         LOGE("FrontendDelegateDeclarative, invalid page id");
         EventReport::SendPageRouterException(PageRouterExcepType::LOAD_PAGE_ERR, target.url);
@@ -1746,6 +1794,17 @@ void FrontendDelegateDeclarative::OnSurfaceChanged()
 
 void FrontendDelegateDeclarative::OnMediaQueryUpdate()
 {
+    auto containerId = Container::CurrentId();
+    if (containerId < 0) {
+        auto container = Container::GetActive();
+        if (container) {
+            containerId = container->GetInstanceId();
+        }
+    }
+    bool isInSubwindow = containerId >= 1000000;
+    if (isInSubwindow) {
+        return;
+    }
     if (mediaQueryInfo_->GetIsInit()) {
         return;
     }
@@ -2360,6 +2419,13 @@ void FrontendDelegateDeclarative::SetColorMode(ColorMode colorMode)
 
 void FrontendDelegateDeclarative::RebuildAllPages()
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        CHECK_NULL_VOID(pageRouterManager_);
+        auto url = pageRouterManager_->GetCurrentPageUrl();
+        pageRouterManager_->Clear();
+        pageRouterManager_->RunPage(url, "");
+        return;
+    }
     std::unordered_map<int32_t, RefPtr<JsAcePage>> pages;
     {
         std::lock_guard<std::mutex> lock(mutex_);
@@ -2373,41 +2439,67 @@ void FrontendDelegateDeclarative::RebuildAllPages()
 
 void FrontendDelegateDeclarative::OnPageShow()
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        CHECK_NULL_VOID(pageRouterManager_);
-        auto pageNode = pageRouterManager_->GetCurrentPageNode();
-        CHECK_NULL_VOID(pageNode);
-        auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
-        CHECK_NULL_VOID(pagePattern);
-        pagePattern->OnShow();
-        return;
-    }
+    auto task = [weak = AceType::WeakClaim(this)] {
+        auto delegate = weak.Upgrade();
+        CHECK_NULL_VOID(delegate);
+        if (Container::IsCurrentUseNewPipeline()) {
+            auto pageRouterManager = delegate->GetPageRouterManager();
+            CHECK_NULL_VOID(pageRouterManager);
+            auto pageNode = pageRouterManager->GetCurrentPageNode();
+            CHECK_NULL_VOID(pageNode);
+            auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+            CHECK_NULL_VOID(pagePattern);
+            pagePattern->OnShow();
+            return;
+        }
 
-    auto pageId = GetRunningPageId();
-    auto page = GetPage(pageId);
-    if (page) {
-        page->FireDeclarativeOnPageAppearCallback();
+        auto pageId = delegate->GetRunningPageId();
+        auto page = delegate->GetPage(pageId);
+        if (page) {
+            page->FireDeclarativeOnPageAppearCallback();
+        }
+    };
+
+    if (taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::JS)) {
+        task();
+        FireSyncEvent("_root", std::string("\"viewappear\",null,null"), std::string(""));
+        return;
+    } else {
+        taskExecutor_->PostTask(task, TaskExecutor::TaskType::JS);
+        FireAsyncEvent("_root", std::string("\"viewappear\",null,null"), std::string(""));
     }
-    FireAsyncEvent("_root", std::string("\"viewappear\",null,null"), std::string(""));
 }
 
 void FrontendDelegateDeclarative::OnPageHide()
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        CHECK_NULL_VOID(pageRouterManager_);
-        auto pageNode = pageRouterManager_->GetCurrentPageNode();
-        CHECK_NULL_VOID(pageNode);
-        auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
-        CHECK_NULL_VOID(pagePattern);
-        pagePattern->OnHide();
-        return;
+    auto task = [weak = AceType::WeakClaim(this)] {
+        auto delegate = weak.Upgrade();
+        CHECK_NULL_VOID(delegate);
+        if (Container::IsCurrentUseNewPipeline()) {
+            auto pageRouterManager = delegate->GetPageRouterManager();
+            CHECK_NULL_VOID(pageRouterManager);
+            auto pageNode = pageRouterManager->GetCurrentPageNode();
+            CHECK_NULL_VOID(pageNode);
+            auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+            CHECK_NULL_VOID(pagePattern);
+            pagePattern->OnHide();
+            return;
+        }
+
+        auto pageId = delegate->GetRunningPageId();
+        auto page = delegate->GetPage(pageId);
+        if (page) {
+            page->FireDeclarativeOnPageDisAppearCallback();
+        }
+    };
+
+    if (taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::JS)) {
+        task();
+        FireSyncEvent("_root", std::string("\"viewdisappear\",null,null"), std::string(""));
+    } else {
+        taskExecutor_->PostTask(task, TaskExecutor::TaskType::JS);
+        FireAsyncEvent("_root", std::string("\"viewdisappear\",null,null"), std::string(""));
     }
-    auto pageId = GetRunningPageId();
-    auto page = GetPage(pageId);
-    if (page) {
-        page->FireDeclarativeOnPageDisAppearCallback();
-    }
-    FireAsyncEvent("_root", std::string("\"viewdisappear\",null,null"), std::string(""));
 }
 
 void FrontendDelegateDeclarative::ClearAlertCallback(PageInfo pageInfo)
@@ -2573,6 +2665,15 @@ void FrontendDelegateDeclarative::AttachPipelineContext(const RefPtr<PipelineBas
     jsAccessibilityManager_->InitializeCallback();
 }
 
+void FrontendDelegateDeclarative::AttachSubPipelineContext(const RefPtr<PipelineBase>& context)
+{
+    if (!context) {
+        return;
+    }
+    jsAccessibilityManager_->AddSubPipelineContext(context);
+    jsAccessibilityManager_->RegisterSubWindowInteractionOperation(context->GetWindowId());
+}
+
 RefPtr<PipelineBase> FrontendDelegateDeclarative::GetPipelineContext()
 {
     return pipelineContextHolder_.Get();
@@ -2631,6 +2732,15 @@ std::string FrontendDelegateDeclarative::GetContentInfo()
     jsonContentInfo->Put("nodeInfo", pipelineContext->GetStoredNodeInfo());
 
     return jsonContentInfo->ToString();
+}
+
+void FrontendDelegateDeclarative::GetSnapshot(
+    const std::string& componentId, NG::ComponentSnapshot::JsCallback&& callback)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    NG::ComponentSnapshot snapshot(componentId);
+    snapshot.Get(std::move(callback));
+#endif
 }
 
 } // namespace OHOS::Ace::Framework

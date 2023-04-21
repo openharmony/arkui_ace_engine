@@ -50,23 +50,16 @@ template("pa_backend") {
       "eventhandler:libeventhandler",
       "hiviewdfx_hilog_native:libhilog",
       "ipc:ipc_core",
-      "ipc_js:rpc",
+      "ipc:ipc_napi_common",
       "napi:ace_napi",
       "relational_store:native_dataability",
       "relational_store:native_rdb",
       "samgr:samgr_proxy",
     ]
 
-    sources = [
-      "backend_delegate_impl.cpp",
-      "pa_backend.cpp",
-    ]
+    sources = [ "pa_backend.cpp" ]
 
-    # if not build-in js engine, should use engine loader to load so
-    if (!defined(config.use_build_in_js_engine) ||
-        !config.use_build_in_js_engine) {
-      sources += [ "engine/common/js_backend_engine_loader.cpp" ]
-    }
+    sources += [ "engine/common/js_backend_engine_loader.cpp" ]
   }
 }
 

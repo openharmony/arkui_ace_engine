@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_v2/list/list_properties.h"
 
 namespace OHOS::Ace::NG {
 
@@ -75,12 +76,37 @@ void ListModelNG::SetEdgeEffect(EdgeEffect edgeEffect)
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, EdgeEffect, edgeEffect);
 }
 
+void ListModelNG::SetEditMode(bool editMode)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, EditMode, editMode);
+}
+
 void ListModelNG::SetDivider(const V2::ItemDivider& divider)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, Divider, divider);
 }
 
-void ListModelNG::SetChainAnimation(bool enableChainAnimation) {}
+void ListModelNG::SetChainAnimation(bool enableChainAnimation)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, ChainAnimation, enableChainAnimation);
+}
+
+void ListModelNG::SetChainAnimationOptions(const Dimension& minSpace, const Dimension& maxSpace, float conductivity,
+    float intensity, int32_t edgeEffect)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    ChainAnimationOptions options = {
+        .minSpace = minSpace,
+        .maxSpace = maxSpace,
+        .conductivity = conductivity,
+        .intensity = intensity,
+        .edgeEffect = edgeEffect,
+    };
+    pattern->SetChainAnimationOptions(options);
+}
 
 void ListModelNG::SetLanes(int32_t lanes)
 {
@@ -118,6 +144,15 @@ void ListModelNG::SetSticky(V2::StickyStyle stickyStyle)
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, StickyStyle, stickyStyle);
 }
 
+void ListModelNG::SetMultiSelectable(bool selectable)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetMultiSelectable(selectable);
+}
+
 void ListModelNG::SetOnScroll(OnScrollEvent&& onScroll)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -134,6 +169,24 @@ void ListModelNG::SetOnScrollBegin(OnScrollBeginEvent&& onScrollBegin)
     auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollBegin(std::move(onScrollBegin));
+}
+
+void ListModelNG::SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& onScrollFrameBegin)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScrollFrameBegin(std::move(onScrollFrameBegin));
+}
+
+void ListModelNG::SetOnScrollStart(OnScrollStartEvent&& onScrollStart)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScrollStart(std::move(onScrollStart));
 }
 
 void ListModelNG::SetOnScrollStop(OnScrollStopEvent&& onScrollStop)

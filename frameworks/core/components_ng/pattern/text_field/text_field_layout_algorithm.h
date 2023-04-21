@@ -26,10 +26,13 @@
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
-#include "core/components_ng/render/paragraph.h"
+#include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
 
+constexpr Dimension SCROLL_BAR_LEFT_WIDTH = 2.0_vp;
+
+class TextFieldContentModifier;
 class ACE_EXPORT TextFieldLayoutAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(TextFieldLayoutAlgorithm, LayoutAlgorithm);
 
@@ -84,18 +87,22 @@ public:
 
     static TextDirection GetTextDirection(const std::string& content);
 
-    static void UpdateTextStyle(const RefPtr<TextFieldLayoutProperty>& layoutProperty,
-        const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle);
+    static void UpdateTextStyle(const RefPtr<FrameNode>& frameNode,
+        const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
+        TextStyle& textStyle, bool isDisabled);
     static void UpdatePlaceholderTextStyle(const RefPtr<TextFieldLayoutProperty>& layoutProperty,
-        const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle);
+        const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle, bool isDisabled);
 
 private:
-    void CreateParagraph(const TextStyle& textStyle, std::string content);
+    void CreateParagraph(const TextStyle& textStyle, std::string content, bool needObscureText, bool disableTextAlign);
+    void CreateParagraph(const std::vector<TextStyle>& textStyles, const std::vector<std::string>& contents,
+        const std::string& content, bool needObscureText, bool disableTextAlign);
     bool CreateParagraphAndLayout(
         const TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint);
     bool AdaptMinTextSize(TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint,
         const RefPtr<PipelineContext>& pipeline);
     bool DidExceedMaxLines(const LayoutConstraintF& contentConstraint);
+    void SetPropertyToModifier(const TextStyle& textStyle, RefPtr<TextFieldContentModifier> modifier);
 
     float GetTextFieldDefaultHeight();
     float GetTextFieldDefaultImageHeight();

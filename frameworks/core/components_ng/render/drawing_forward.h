@@ -22,12 +22,20 @@ class RSNode;
 namespace Drawing {
 class Canvas;
 class RectF;
+enum class ClipOp;
+class Pen;
+class Brush;
+class Path;
 } // namespace Drawing
 } // namespace OHOS::Rosen
 namespace OHOS::Ace {
 using RSCanvas = Rosen::Drawing::Canvas;
 using RSRect = Rosen::Drawing::RectF;
 using RSNode = Rosen::RSNode;
+using RSClipOp = Rosen::Drawing::ClipOp;
+using RSPen = Rosen::Drawing::Pen;
+using RSBrush = Rosen::Drawing::Brush;
+using RSPath = Rosen::Drawing::Path;
 } // namespace OHOS::Ace
 #else
 #include "core/components_ng/render/drawing_mock.h"

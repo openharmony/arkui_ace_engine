@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SWIPER_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SWIPER_H
 
+#include "core/components_ng/pattern/swiper/swiper_model.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
 
 namespace OHOS::Ace::Framework {
@@ -25,14 +26,13 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
 
-protected:
     static void SetAutoPlay(bool autoPlay);
-    static void SetDuration(int32_t duration);
+    static void SetDuration(const JSCallbackInfo& info);
     static void SetIndex(int32_t index);
-    static void SetInterval(int32_t interval);
+    static void SetInterval(const JSCallbackInfo& info);
     static void SetLoop(bool loop);
     static void SetVertical(bool isVertical);
-    static void SetIndicator(bool showIndicator);
+    static void SetIndicator(const JSCallbackInfo& info);
     static void SetWidth(const JSCallbackInfo& info);
     static void SetHeight(const JSCallbackInfo& info);
     static void SetWidth(const JSRef<JSVal>& jsValue);
@@ -40,6 +40,8 @@ protected:
     static void SetSize(const JSCallbackInfo& info);
     static void SetIndicatorStyle(const JSCallbackInfo& info);
     static void SetItemSpace(const JSCallbackInfo& info);
+    static void SetPreviousMargin(const JSCallbackInfo& info);
+    static void SetNextMargin(const JSCallbackInfo& info);
     static void SetDisplayMode(int32_t index);
     static void SetEffectMode(const JSCallbackInfo& info);
     static void SetDisplayCount(const JSCallbackInfo& info);
@@ -48,8 +50,14 @@ protected:
     static void SetDisableSwipe(bool disableSwipe);
     static void SetCurve(const std::string& curveStr);
     static void SetOnChange(const JSCallbackInfo& info);
+    static void SetOnAnimationStart(const JSCallbackInfo& info);
+    static void SetOnAnimationEnd(const JSCallbackInfo& info);
     static void SetOnClick(const JSCallbackInfo& info);
     static void JsRemoteMessage(const JSCallbackInfo& info);
+    static void GetFontContent(const JSRef<JSVal>& font, bool isSelected, SwiperDigitalParameters& digitalParameters);
+    static SwiperParameters GetDotIndicatorInfo(const JSRef<JSObject>& obj);
+    static SwiperDigitalParameters GetDigitIndicatorInfo(const JSRef<JSObject>& obj);
+    static void SetIsIndicatorCustomSize(const Dimension& dimPosition, bool parseOk);
 };
 
 class JSSwiperController final : public Referenced {

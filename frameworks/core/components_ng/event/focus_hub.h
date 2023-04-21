@@ -31,6 +31,8 @@ class EventHub;
 using TabIndexNodeList = std::list<std::pair<int32_t, WeakPtr<FocusHub>>>;
 constexpr int32_t DEFAULT_TAB_FOCUSED_INDEX = -2;
 constexpr int32_t NONE_TAB_FOCUSED_INDEX = -1;
+constexpr int32_t MASK_FOCUS_STEP_FORWARD = 0x10;
+
 enum class FocusType : int32_t {
     DISABLE = 0,
     NODE = 1,
@@ -45,11 +47,17 @@ enum class ScopeType : int32_t {
     FLEX = 1,
 };
 enum class FocusStep : int32_t {
-    LEFT = 0,
-    UP = 1,
-    RIGHT = 2,
-    DOWN = 3,
+    NONE = 0x0,
+    LEFT = 0x1,
+    UP = 0x2,
+    RIGHT = 0x11,
+    DOWN = 0x12,
+    LEFT_END = 0x3,
+    UP_END = 0x4,
+    RIGHT_END = 0X13,
+    DOWN_END = 0x14,
 };
+
 using GetNextFocusNodeFunc = std::function<void(FocusStep, const WeakPtr<FocusHub>&, WeakPtr<FocusHub>&)>;
 
 enum class FocusStyleType : int32_t {
@@ -130,7 +138,7 @@ class ACE_EXPORT FocusPattern : public virtual AceType {
     DECLARE_ACE_TYPE(FocusPattern, AceType)
 
 public:
-    explicit FocusPattern() = default;
+    FocusPattern() = default;
     FocusPattern(FocusType focusType, bool focusable) : focusType_(focusType), focusable_(focusable) {}
     FocusPattern(FocusType focusType, bool focusable, FocusStyleType styleType)
         : focusType_(focusType), focusable_(focusable), styleType_(styleType)
@@ -233,7 +241,7 @@ struct ScopeFocusAlgorithm final {
 class ACE_EXPORT FocusCallbackEvents : public virtual AceType {
     DECLARE_ACE_TYPE(FocusCallbackEvents, AceType)
 public:
-    explicit FocusCallbackEvents() = default;
+    FocusCallbackEvents() = default;
     ~FocusCallbackEvents() override = default;
 
     void SetOnFocusCallback(OnFocusFunc&& onFocusCallback)
@@ -299,7 +307,7 @@ public:
         isDefaultGroupFocus_ = isDefaultGroupFocus;
     }
 
-    bool IsFocusOnTouch() const
+    std::optional<bool> IsFocusOnTouch() const
     {
         return isFocusOnTouch_;
     }
@@ -332,7 +340,7 @@ private:
     OnKeyCallbackFunc onKeyEventCallback_;
     GestureEventFunc onClickEventCallback_;
 
-    bool isFocusOnTouch_ { false };
+    std::optional<bool> isFocusOnTouch_;
     bool isDefaultFocus_ = { false };
     bool isDefaultHasFocused_ = { false };
     bool isDefaultGroupFocus_ = { false };
@@ -443,8 +451,9 @@ public:
 
     RefPtr<FrameNode> GetFrameNode() const;
     RefPtr<GeometryNode> GetGeometryNode() const;
-    RefPtr<FocusHub> GetParentFocusHub(FrameNode* node = nullptr) const;
+    RefPtr<FocusHub> GetParentFocusHub() const;
     std::string GetFrameName() const;
+    int32_t GetFrameId() const;
 
     bool HandleKeyEvent(const KeyEvent& keyEvent);
     bool RequestFocusImmediately();
@@ -454,11 +463,12 @@ public:
 
     void LostFocus(BlurReason reason = BlurReason::FOCUS_SWITCH);
     void LostSelfFocus();
-    void RemoveSelf(FrameNode* frameNode);
-    void RemoveChild(FocusHub* focusNode);
+    void RemoveSelf();
+    void RemoveChild(const RefPtr<FocusHub>& focusNode);
     bool GoToNextFocusLinear(bool reverse, const RectF& rect = RectF());
     bool TryRequestFocus(const RefPtr<FocusHub>& focusNode, const RectF& rect);
 
+    bool AcceptFocusOfLastFocus();
     bool AcceptFocusByRectOfLastFocus(const RectF& rect);
     bool AcceptFocusByRectOfLastFocusNode(const RectF& rect);
     bool AcceptFocusByRectOfLastFocusScope(const RectF& rect);
@@ -466,7 +476,7 @@ public:
 
     void CollectTabIndexNodes(TabIndexNodeList& tabIndexNodes);
     bool GoToFocusByTabNodeIdx(TabIndexNodeList& tabIndexNodes, int32_t tabNodeIdx);
-    bool HandleFocusByTabIndex(const KeyEvent& event, const RefPtr<FocusHub>& curPage);
+    bool HandleFocusByTabIndex(const KeyEvent& event, const RefPtr<FocusHub>& mainFocusHub);
     RefPtr<FocusHub> GetChildFocusNodeByType(FocusNodeType nodeType = FocusNodeType::DEFAULT);
     RefPtr<FocusHub> GetChildFocusNodeById(const std::string& id);
     int32_t GetFocusingTabNodeIdx(TabIndexNodeList& tabIndexNodes);
@@ -583,12 +593,13 @@ public:
         onKeyEventInternal_ = std::move(onKeyEventInternal);
     }
 
-    void FlushChildrenFocusHub();
+    std::list<RefPtr<FocusHub>>::iterator FlushChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes);
 
-    std::list<RefPtr<FocusHub>>& GetChildren()
+    std::list<RefPtr<FocusHub>> GetChildren()
     {
-        FlushChildrenFocusHub();
-        return focusNodes_;
+        std::list<RefPtr<FocusHub>> focusNodes;
+        FlushChildrenFocusHub(focusNodes);
+        return focusNodes;
     }
 
     bool IsChild() const
@@ -656,9 +667,9 @@ public:
         focusCallbackEvents_->SetIsDefaultGroupFocus(isDefaultGroupFocus);
     }
 
-    bool IsFocusOnTouch() const
+    std::optional<bool> IsFocusOnTouch() const
     {
-        return focusCallbackEvents_ ? focusCallbackEvents_->IsFocusOnTouch() : false;
+        return focusCallbackEvents_ ? focusCallbackEvents_->IsFocusOnTouch() : std::nullopt;
     }
     void SetIsFocusOnTouch(bool isFocusOnTouch);
 
@@ -699,13 +710,31 @@ public:
         getInnerFocusRectFunc_ = callback;
     }
 
+    void SetLastWeakFocusNode(const WeakPtr<FocusHub>& focusHub)
+    {
+        lastWeakFocusNode_ = focusHub;
+    }
+    WeakPtr<FocusHub> GetLastWeakFocusNode() const
+    {
+        return lastWeakFocusNode_;
+    }
+
+    static inline bool IsFocusStepVertical(FocusStep step)
+    {
+        return (static_cast<uint32_t>(step) & 0x1) == 0;
+    }
+    static inline bool IsFocusStepForward(FocusStep step)
+    {
+        return (static_cast<uint32_t>(step) & MASK_FOCUS_STEP_FORWARD) != 0;
+    }
+
 protected:
     bool OnKeyEvent(const KeyEvent& keyEvent);
     bool OnKeyEventNode(const KeyEvent& keyEvent);
     bool OnKeyEventScope(const KeyEvent& keyEvent);
 
     bool CalculateRect(const RefPtr<FocusHub>& childNode, RectF& rect) const;
-    bool RequestNextFocus(bool vertical, bool reverse, const RectF& rect);
+    bool RequestNextFocus(FocusStep moveStep, const RectF& rect);
 
     void OnFocus();
     void OnFocusNode();
@@ -725,6 +754,8 @@ private:
 
     void SetScopeFocusAlgorithm();
 
+    void CheckFocusStateStyle(bool onFocus);
+
     OnFocusFunc onFocusInternal_;
     OnBlurFunc onBlurInternal_;
     OnBlurReasonFunc onBlurReasonInternal_;
@@ -737,8 +768,6 @@ private:
 
     WeakPtr<EventHub> eventHub_;
 
-    std::list<RefPtr<FocusHub>> focusNodes_;
-    std::list<RefPtr<FocusHub>>::iterator itLastFocusNode_ { focusNodes_.end() };
     WeakPtr<FocusHub> lastWeakFocusNode_ { nullptr };
 
     bool focusable_ { true };

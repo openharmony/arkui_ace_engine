@@ -26,6 +26,7 @@ build_component_ng("event_ng") {
     "long_press_event.cpp",
     "pan_event.cpp",
     "scrollable_event.cpp",
+    "state_style_manager.cpp",
     "touch_event.cpp",
   ]
 }

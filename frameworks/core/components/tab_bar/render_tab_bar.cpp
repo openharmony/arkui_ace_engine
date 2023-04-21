@@ -284,7 +284,13 @@ void RenderTabBar::SetScrollIndicator(double percent, int32_t newIndex, bool nee
     if (isVertical_) {
         return;
     }
-
+    if (tabsWidth_.empty()) {
+        return;
+    }
+    auto maxIndex = static_cast<int32_t>(tabsWidth_.size()) - 1;
+    if (newIndex > maxIndex || newIndex < 0 || index_ > maxIndex || index_ < 0) {
+        return;
+    }
     double newItemsWidth = tabsWidth_[newIndex];
     double curItemsWidth = tabsWidth_[index_];
     indicatorPlusX_ = curItemsWidth * percent;

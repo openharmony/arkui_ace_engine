@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,4 +23,28 @@ void Scrollable::OnFlushTouchEventsBegin() {}
 void Scrollable::OnFlushTouchEventsEnd() {}
 
 void Scrollable::Initialize(const WeakPtr<PipelineBase>& context) {}
+
+bool Scrollable::Idle() const
+{
+    return false;
+}
+
+bool Scrollable::IsStopped() const
+{
+    return true;
+}
+
+void Scrollable::StopScrollable() {}
+
+void Scrollable::StartSpringMotion(
+    double mainPosition, double mainVelocity, const ExtentPair& extent, const ExtentPair& initExtent)
+{}
+
+void Scrollable::SetAxis(Axis axis)
+{}
+
+bool Scrollable::IsSpringStopped() const
+{
+    return true;
+}
 } // namespace OHOS::Ace

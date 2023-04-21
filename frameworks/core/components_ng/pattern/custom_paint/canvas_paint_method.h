@@ -26,14 +26,9 @@ class CanvasPaintMethod : public CustomPaintPaintMethod {
     DECLARE_ACE_TYPE(CanvasPaintMethod, CustomPaintPaintMethod)
 public:
     CanvasPaintMethod() = default;
-    explicit CanvasPaintMethod(const RefPtr<PipelineBase> context)
+    explicit CanvasPaintMethod(const WeakPtr<PipelineBase> context)
     {
         context_ = context;
-        auto* currentDartState = flutter::UIDartState::Current();
-        CHECK_NULL_VOID(currentDartState);
-        renderTaskHolder_ = MakeRefPtr<FlutterRenderTaskHolder>(currentDartState->GetSkiaUnrefQueue(),
-            currentDartState->GetIOManager(), currentDartState->GetTaskRunners().GetIOTaskRunner());
-
         InitImageCallbacks();
     }
 
@@ -86,7 +81,6 @@ private:
 
     void PaintText(
         const OffsetF& offset, const SizeF& contentSize, double x, double y, bool isStroke, bool hasShadow = false);
-    double GetAlignOffset(TextAlign align, std::unique_ptr<txt::Paragraph>& paragraph);
     double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph);
     bool UpdateParagraph(const OffsetF& offset, const std::string& text, bool isStroke, bool hasShadow = false);
     void UpdateTextStyleForeground(const OffsetF& offset, bool isStroke, txt::TextStyle& txtStyle, bool hasShadow);

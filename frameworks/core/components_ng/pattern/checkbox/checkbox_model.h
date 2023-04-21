@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,6 +29,10 @@ public:
         const std::string& tagName);
     virtual void SetSelect(bool isSelected);
     virtual void SetSelectedColor(const Color& color);
+    virtual void SetUnSelectedColor(const Color& color) {}
+    virtual void SetCheckMarkColor(const Color& color) {}
+    virtual void SetCheckMarkSize(const Dimension& size) {}
+    virtual void SetCheckMarkWidth(const Dimension& width) {}
     virtual void SetOnChange(NG::ChangeEvent&& onChange);
     virtual void SetWidth(const Dimension& width);
     virtual void SetHeight(const Dimension& height);

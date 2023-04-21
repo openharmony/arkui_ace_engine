@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,6 +34,7 @@
 #include "core/components/common/properties/clip_path.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/motion_path_option.h"
+#include "core/components/common/properties/placement.h"
 #include "core/components/common/properties/popup_param.h"
 #include "core/components/common/properties/shared_transition_option.h"
 #include "core/components_ng/event/gesture_event_hub.h"
@@ -43,15 +44,41 @@
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/overlay_property.h"
 #include "core/components_ng/property/transition_property.h"
+#include "core/components_ng/property/progress_mask_property.h"
 
 namespace OHOS::Ace::NG {
+struct OptionParam {
+    std::string value;
+    std::string icon;
+    std::function<void()> action;
 
-using OptionParam = std::pair<std::string, std::function<void()>>;
+    OptionParam() = default;
+    OptionParam(
+        const std::string& valueParam, const std::string& iconParam, const std::function<void()>& actionParam)
+        : value(valueParam),
+          icon(iconParam),
+          action(actionParam) {}
+    OptionParam(const std::string& valueParam, const std::function<void()>& actionParam)
+        : value(valueParam),
+          icon(""),
+          action(actionParam) {}
+
+    ~OptionParam() = default;
+};
+
+struct MenuParam {
+    std::string title;
+    OffsetF positionOffset;
+    std::optional<Placement> placement;
+    std::function<void()> onAppear;
+    std::function<void()> onDisappear;
+};
 
 class ACE_EXPORT ViewAbstract {
 public:
     static void SetWidth(const CalcLength& width);
     static void SetHeight(const CalcLength& height);
+    static void ClearWidthOrHeight(bool isWidth);
     static void SetMinWidth(const CalcLength& minWidth);
     static void SetMinHeight(const CalcLength& minHeight);
     static void SetMaxWidth(const CalcLength& maxWidth);
@@ -66,7 +93,10 @@ public:
     static void SetBackgroundImageRepeat(const ImageRepeat& imageRepeat);
     static void SetBackgroundImageSize(const BackgroundImageSize& bgImgSize);
     static void SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition);
-    static void SetBackgroundBlurStyle(const BlurStyle& bgBlurStyle);
+    static void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle);
+    static void SetSphericalEffect(double radio);
+    static void SetPixelStretchEffect(PixStretchEffectOption& option);
+    static void SetLightUpEffect(double radio);
     static void SetPadding(const CalcLength& value);
     static void SetPadding(const PaddingProperty& value);
     static void SetMargin(const CalcLength& value);
@@ -80,6 +110,7 @@ public:
     static void SetBorderStyle(const BorderStyle& value);
     static void SetBorderStyle(const BorderStyleProperty& value);
     static void SetOpacity(double opacity);
+    static void SetAllowDrop(const std::set<std::string>& allowDrop);
 
     static void SetBorderImage(const RefPtr<BorderImage>& borderImage);
     static void SetBorderImageSource(const std::string& bdImageSrc);
@@ -127,7 +158,7 @@ public:
     // transform
     static void SetScale(const NG::VectorF& value);
     static void SetPivot(const DimensionOffset& value);
-    static void SetTranslate(const NG::Vector3F& value);
+    static void SetTranslate(const NG::TranslateOptions& value);
     static void SetRotate(const NG::Vector4F& value);
 
     static void SetTransformMatrix(const Matrix4& matrix);
@@ -138,6 +169,7 @@ public:
     static void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc);
     static void SetOnHover(OnHoverEventFunc&& onHoverEventFunc);
     static void SetHoverEffect(HoverEffectType hoverEffect);
+    static void SetHoverEffectAuto(HoverEffectType hoverEffect);
     static void SetEnabled(bool enabled);
     static void SetFocusable(bool focusable);
     static void SetOnFocus(OnFocusFunc&& onFocusCallback);
@@ -157,6 +189,7 @@ public:
     static void SetResponseRegion(const std::vector<DimensionRect>& responseRegion);
     static void SetTouchable(bool touchable);
     static void SetHitTestMode(HitTestMode hitTestMode);
+    static void SetDraggable(bool draggable);
     static void SetOnDragStart(
         std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragStart);
     static void SetOnDragEnter(
@@ -167,27 +200,36 @@ public:
         std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragMove);
     static void SetOnDrop(std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDrop);
 
+    static void SetOnDragEnd(std::function<void(const RefPtr<OHOS::Ace::DragEvent>&)>&& onDragEnd);
+
     // flex properties
     static void SetAlignSelf(FlexAlign value);
     static void SetFlexShrink(float value);
     static void SetFlexGrow(float value);
     static void SetFlexBasis(const Dimension& value);
     static void SetDisplayIndex(int32_t value);
+    static void SetKeyboardShortcut(
+        const std::string& value, const std::vector<CtrlKey>& keys, std::function<void()>&& onKeyboardShortcutAction);
 
     // Bind properties
     static void BindPopup(
         const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode, const RefPtr<UINode>& customNode);
     static void BindMenuWithItems(std::vector<OptionParam>&& params, const RefPtr<FrameNode>& targetNode,
-        const NG::OffsetF& offset);
+        const NG::OffsetF& offset, const MenuParam& menuParam);
     static void BindMenuWithCustomNode(const RefPtr<UINode>& customNode, const RefPtr<FrameNode>& targetNode,
-        bool isContextMenu, const NG::OffsetF& offset);
+        bool isContextMenu, const NG::OffsetF& offset, const MenuParam& menuParam);
     static void ShowMenu(int32_t targetId, const NG::OffsetF& offset, bool isContextMenu = false);
     // inspector
     static void SetInspectorId(const std::string& inspectorId);
+    // inspector debugLine
+    static void SetDebugLine(const std::string& line);
     // transition
     static void SetTransition(const TransitionOptions& options);
+    static void SetChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect);
     // sharedTransition
     static void SetSharedTransition(const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option);
+    // geometryTransition
+    static void SetGeometryTransition(const std::string& id);
     // clip and mask
     static void SetClipShape(const RefPtr<BasicShape>& basicShape);
     static void SetClipEdge(bool isClip);
@@ -196,9 +238,19 @@ public:
     static void SetOverlay(const NG::OverlayOptions& overlay);
     // motionPath
     static void SetMotionPath(const MotionPathOption& motionPath);
+    // progress mask
+    static void SetProgressMask(const RefPtr<ProgressMaskProperty>& progress);
 
     static void Pop();
 
+    // foregroundColor
+    static void SetForegroundColor(const Color& color);
+    static void SetForegroundColorStrategy(const ForegroundColorStrategy& strategy);
+
+    // custom animatable property
+    static void CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
+        const std::function<void(float)>& onCallbackEvent);
+    static void UpdateAnimatablePropertyFloat(const std::string& propertyName, float value);
 private:
     static void AddDragFrameNodeToManager();
 };

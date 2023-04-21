@@ -18,9 +18,11 @@
 
 #include "core/common/ime/text_input_type.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/property/property.h"
+#include "core/image/image_source_info.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT TextFieldLayoutProperty : public LayoutProperty {
@@ -52,6 +54,20 @@ public:
         ResetShowPasswordIcon();
         ResetCopyOptions();
         ResetLastValue();
+        ResetNeedFireOnChangeWhenCreate();
+        ResetWidthAuto();
+        ResetCaretPosition();
+    }
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        LayoutProperty::ToJsonValue(json);
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
+        CHECK_NULL_VOID(textFieldTheme);
+        json->Put("caretPosition", std::to_string(propCaretPosition_.value_or(0)).c_str());
+        json->Put("showPasswordIcon", propShowPasswordIcon_.value_or(true));
     }
 
     ACE_DEFINE_PROPERTY_GROUP(FontStyle, FontStyle);
@@ -94,10 +110,18 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(InputFilter, std::string, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowPasswordIcon, bool, PROPERTY_UPDATE_MEASURE);
 
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(WidthAuto, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TypeChanged, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CopyOptions, CopyOptions, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PreferredLineHeightNeedToUpdate, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PreferredNewLineHeightNeedToUpdate, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PreferredTextLineHeightNeedToUpdate, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PreferredPlaceholderLineHeightNeedToUpdate, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(LastValue, std::string, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NeedFireOnChangeWhenCreate, bool, PROPERTY_UPDATE_MEASURE);
+
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowPasswordSourceInfo, ImageSourceInfo, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HidePasswordSourceInfo, ImageSourceInfo, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CaretPosition, int32_t, PROPERTY_UPDATE_MEASURE);
 
 protected:
     void Clone(RefPtr<LayoutProperty> property) const override
@@ -115,6 +139,8 @@ protected:
         value->propShowPasswordIcon_ = CloneShowPasswordIcon();
         value->propCopyOptions_ = CloneCopyOptions();
         value->propLastValue_ = CloneLastValue();
+        value->propNeedFireOnChangeWhenCreate_ = CloneNeedFireOnChangeWhenCreate();
+        value->propWidthAuto_ = CloneWidthAuto();
     }
 
 private:

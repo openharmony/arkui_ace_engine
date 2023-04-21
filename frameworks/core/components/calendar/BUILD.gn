@@ -24,7 +24,9 @@ build_component("calendar") {
     "render_calendar.cpp",
     "render_calendar_creator.cpp",
   ]
-
+  if (ace_use_new_skia) {
+    sources -= [ "flutter_render_calendar.cpp" ]
+  }
   rosen_sources = [ "rosen_render_calendar.cpp" ]
 
   component_deps = [

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,15 +40,17 @@ public:
     void OnDrag(int32_t x, int32_t y, OHOS::Rosen::DragEvent event) override;
 
     // override Rosen::IOccupiedAreaChangeListener virtual callback function
-    void OnSizeChange(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info) override;
+    void OnSizeChange(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info,
+        const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr) override;
 
     // override Rosen::IAceAbilityHandler virtual callback function
     void SetBackgroundColor(uint32_t color) override;
     uint32_t GetBackgroundColor() override;
 
     // override Rosen::IWindowChangeListener virtual callback function
-    void OnSizeChange(OHOS::Rosen::Rect rect, OHOS::Rosen::WindowSizeChangeReason reason) override;
-    void OnModeChange(OHOS::Rosen::WindowMode mode) override;
+    void OnSizeChange(OHOS::Rosen::Rect rect, OHOS::Rosen::WindowSizeChangeReason reason,
+        const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr) override;
+    void OnModeChange(OHOS::Rosen::WindowMode mode, bool hasDeco = true) override;
 
     // override Rosen::IInputEventConsumer virtual callback function
     bool OnInputEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const override;
@@ -86,11 +88,13 @@ public:
     void OnDrag(int32_t x, int32_t y, OHOS::Rosen::DragEvent event);
 
     // handle window Rosen::IWindowChangeListener
-    void OnSizeChange(const OHOS::Rosen::Rect& rect, OHOS::Rosen::WindowSizeChangeReason reason);
-    void OnModeChange(OHOS::Rosen::WindowMode mode);
+    void OnSizeChange(const OHOS::Rosen::Rect& rect, OHOS::Rosen::WindowSizeChangeReason reason,
+        const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr);
+    void OnModeChange(OHOS::Rosen::WindowMode mode, bool hasDeco = true);
 
     // handle window Rosen::IOccupiedAreaChangeListener
-    void OnSizeChange(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info);
+    void OnSizeChange(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info,
+        const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr);
 
     // handle window Rosen::IInputEventConsumer
     bool OnInputEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;
@@ -113,6 +117,7 @@ private:
     std::string remotePageUrl_;
     std::string remoteData_;
     std::string pageUrl_;
+    bool isFirstActive_ = true;
 };
 
 } // namespace OHOS::Ace

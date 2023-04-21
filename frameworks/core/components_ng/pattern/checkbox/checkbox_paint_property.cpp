@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,18 +16,31 @@
 #include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
 
 namespace OHOS::Ace::NG {
-
 namespace {
-
 const Color DEFAULT_SELECTED_COLOR = Color(0xFF007DFF);
-
+const Dimension DEFAULT_CHECKMARK_SIZE = Dimension(0, DimensionUnit::VP);
 } // namespace
 
 void CheckBoxPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto checkboxTheme = pipeline->GetTheme<CheckboxTheme>();
+    CHECK_NULL_VOID(checkboxTheme);
     PaintProperty::ToJsonValue(json);
     json->Put("isOn", GetCheckBoxSelect().value_or(false) ? "true" : "false");
     json->Put("selectedColor", GetCheckBoxSelectedColor().value_or(DEFAULT_SELECTED_COLOR).ColorToString().c_str());
+    json->Put("unselectedColor", GetCheckBoxUnSelectedColor().value_or(
+        checkboxTheme->GetInactiveColor()).ColorToString().c_str());
+    auto markJsValue = JsonUtil::Create(true);
+    markJsValue->Put("strokeColor", GetCheckBoxCheckMarkColor().value_or(
+        checkboxTheme->GetPointColor()).ColorToString().c_str());
+    markJsValue->Put("size", GetCheckBoxCheckMarkSize().value_or(
+        DEFAULT_CHECKMARK_SIZE).ToString().c_str());
+    markJsValue->Put("strokeWidth", GetCheckBoxCheckMarkWidth().value_or(
+        checkboxTheme->GetCheckStroke()).ToString().c_str());
+
+    json->Put("mark", markJsValue->ToString().c_str());
 }
 
 } // namespace OHOS::Ace::NG

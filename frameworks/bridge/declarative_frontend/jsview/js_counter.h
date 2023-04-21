@@ -38,6 +38,8 @@ public:
     static void JSStateChange(bool state);
     static void SetSize(const JSCallbackInfo& args);
     static void JsBackgroundColor(const JSCallbackInfo& args);
+    static void JsEnableDec(const JSCallbackInfo& args);
+    static void JsEnableInc(const JSCallbackInfo& args);
 };
 
 } // namespace OHOS::Ace::Framework

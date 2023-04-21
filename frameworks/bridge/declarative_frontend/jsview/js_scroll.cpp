@@ -20,6 +20,8 @@
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/scroll_model_impl.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/scroll/scrollable.h"
+#include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll/scroll_model.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 
@@ -119,6 +121,37 @@ void JSScroll::OnScrollBeginCallback(const JSCallbackInfo& args)
     args.SetReturnValue(args.This());
 }
 
+void JSScroll::OnScrollFrameBeginCallback(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto onScrollFrameBegin = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
+                                      const Dimension& offset, ScrollState state) -> ScrollFrameResult {
+            OHOS::Ace::ScrollFrameResult scrollRes { .offset = offset };
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, scrollRes);
+            auto params = ConvertToJSValues(offset, state);
+            auto result = func->Call(JSRef<JSObject>(), params.size(), params.data());
+            if (result.IsEmpty()) {
+                LOGE("Error calling onScrollBegin, result is empty.");
+                return scrollRes;
+            }
+
+            if (!result->IsObject()) {
+                LOGE("Error calling onScrollBegin, result is not object.");
+                return scrollRes;
+            }
+
+            auto resObj = JSRef<JSObject>::Cast(result);
+            auto dxRemainValue = resObj->GetProperty("offsetRemain");
+            if (dxRemainValue->IsNumber()) {
+                scrollRes.offset = Dimension(dxRemainValue->ToNumber<float>(), DimensionUnit::VP);
+            }
+            return scrollRes;
+        };
+        ScrollModel::GetInstance()->SetOnScrollFrameBegin(std::move(onScrollFrameBegin));
+    }
+    args.SetReturnValue(args.This());
+}
+
 void JSScroll::OnScrollCallback(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
@@ -159,6 +192,30 @@ void JSScroll::OnScrollEndCallback(const JSCallbackInfo& args)
     args.SetReturnValue(args.This());
 }
 
+void JSScroll::OnScrollStartCallback(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto scrollStart = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            func->Call(JSRef<JSObject>(), 0, nullptr);
+        };
+        ScrollModel::GetInstance()->SetOnScrollStart(std::move(scrollStart));
+    }
+    args.SetReturnValue(args.This());
+}
+
+void JSScroll::OnScrollStopCallback(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto scrollStop = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            func->Call(JSRef<JSObject>(), 0, nullptr);
+        };
+        ScrollModel::GetInstance()->SetOnScrollStop(std::move(scrollStop));
+    }
+    args.SetReturnValue(args.This());
+}
+
 void JSScroll::JSBind(BindingTarget globalObj)
 {
     JSClass<JSScroll>::Declare("Scroll");
@@ -166,9 +223,12 @@ void JSScroll::JSBind(BindingTarget globalObj)
     JSClass<JSScroll>::StaticMethod("create", &JSScroll::Create, opt);
     JSClass<JSScroll>::StaticMethod("scrollable", &JSScroll::SetScrollable, opt);
     JSClass<JSScroll>::StaticMethod("onScrollBegin", &JSScroll::OnScrollBeginCallback, opt);
+    JSClass<JSScroll>::StaticMethod("onScrollFrameBegin", &JSScroll::OnScrollFrameBeginCallback, opt);
     JSClass<JSScroll>::StaticMethod("onScroll", &JSScroll::OnScrollCallback, opt);
     JSClass<JSScroll>::StaticMethod("onScrollEdge", &JSScroll::OnScrollEdgeCallback, opt);
     JSClass<JSScroll>::StaticMethod("onScrollEnd", &JSScroll::OnScrollEndCallback, opt);
+    JSClass<JSScroll>::StaticMethod("onScrollStart", &JSScroll::OnScrollStartCallback, opt);
+    JSClass<JSScroll>::StaticMethod("onScrollStop", &JSScroll::OnScrollStopCallback, opt);
     JSClass<JSScroll>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSScroll>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSScroll>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
@@ -181,22 +241,42 @@ void JSScroll::JSBind(BindingTarget globalObj)
     JSClass<JSScroll>::StaticMethod("scrollBarColor", &JSScroll::SetScrollBarColor, opt);
     JSClass<JSScroll>::StaticMethod("scrollBarWidth", &JSScroll::SetScrollBarWidth, opt);
     JSClass<JSScroll>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
+    JSClass<JSScroll>::StaticMethod("width", &JSScroll::JsWidth);
+    JSClass<JSScroll>::StaticMethod("height", &JSScroll::JsHeight);
     JSClass<JSScroll>::Inherit<JSContainerBase>();
     JSClass<JSScroll>::Inherit<JSViewAbstract>();
     JSClass<JSScroll>::Bind<>(globalObj);
 }
 
-void JSScroll::SetScrollBar(int displayMode)
+void JSScroll::SetScrollBar(const JSCallbackInfo& args)
 {
+    if (args.Length() < 1) {
+        LOGE("args is invalid");
+        return;
+    }
+    int32_t displayMode;
+    if (args[0]->IsNull() || args[0]->IsUndefined() || !ParseJsInt32(args[0], displayMode)) {
+        displayMode = static_cast<int32_t>(NG::DisplayMode::AUTO);
+    }
     ScrollModel::GetInstance()->SetDisplayMode(displayMode);
 }
 
-void JSScroll::SetScrollBarWidth(const std::string& scrollBarWidth)
+void JSScroll::SetScrollBarWidth(const JSCallbackInfo& args)
 {
-    if (scrollBarWidth.empty()) {
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID_NOLOG(pipelineContext);
+    auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
+    CHECK_NULL_VOID_NOLOG(theme);
+    Dimension scrollBarWidth;
+    if (args.Length() < 1) {
+        LOGE("args is invalid");
         return;
     }
-    ScrollModel::GetInstance()->SetScrollBarWidth(StringUtils::StringToDimension(scrollBarWidth));
+    if (!ParseJsDimensionVp(args[0], scrollBarWidth) || args[0]->IsNull() || args[0]->IsUndefined() ||
+        (args[0]->IsString() && args[0]->ToString().empty()) || LessNotEqual(scrollBarWidth.Value(), 0.0)) {
+        scrollBarWidth = theme->GetNormalWidth();
+    }
+    ScrollModel::GetInstance()->SetScrollBarWidth(scrollBarWidth);
 }
 
 void JSScroll::SetScrollBarColor(const std::string& scrollBarColor)
@@ -204,12 +284,30 @@ void JSScroll::SetScrollBarColor(const std::string& scrollBarColor)
     if (scrollBarColor.empty()) {
         return;
     }
-    ScrollModel::GetInstance()->SetScrollBarColor(Color::FromString(scrollBarColor));
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID_NOLOG(pipelineContext);
+    auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
+    CHECK_NULL_VOID_NOLOG(theme);
+    Color color(theme->GetForegroundColor());
+    Color::ParseColorString(scrollBarColor, color);
+    ScrollModel::GetInstance()->SetScrollBarColor(color);
 }
 
 void JSScroll::SetEdgeEffect(int edgeEffect)
 {
     ScrollModel::GetInstance()->SetEdgeEffect(static_cast<EdgeEffect>(edgeEffect));
+}
+
+void JSScroll::JsWidth(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsWidth(info);
+    ScrollModel::GetInstance()->SetHasWidth(true);
+}
+
+void JSScroll::JsHeight(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsHeight(info);
+    ScrollModel::GetInstance()->SetHasHeight(true);
 }
 
 } // namespace OHOS::Ace::Framework

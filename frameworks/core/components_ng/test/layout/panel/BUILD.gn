@@ -13,9 +13,10 @@
 
 import("//build/test.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("panel_layout_test_ng") {
-  module_out_path = "$test_output_path/panel_layout"
+  module_out_path = layout_test_output_path
 
   sources = [ "panel_layout_test_ng.cpp" ]
 
@@ -38,10 +39,7 @@ ohos_unittest("panel_layout_test_ng") {
     ":config_panel_layout_test",
     "$ace_root:ace_config",
   ]
-  configs += [
-    "$ace_root:ace_test_coverage_config",
-    "//third_party/curl:curl_config",
-  ]
+  configs += [ "//third_party/curl:curl_config" ]
 }
 
 config("config_panel_layout_test") {

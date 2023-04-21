@@ -16,8 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DIALOG_FLUTTER_RENDER_DIALOG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DIALOG_FLUTTER_RENDER_DIALOG_H
 
-#include "flutter/lib/ui/ui_dart_state.h"
-
 #include "core/components/dialog/render_dialog.h"
 #include "core/pipeline/base/flutter_render_context.h"
 

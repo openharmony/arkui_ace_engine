@@ -412,6 +412,7 @@ void ViewStackProcessor::ClearPageTransitionComponent()
 
 void ViewStackProcessor::Push(const RefPtr<Component>& component, bool isCustomView)
 {
+    CHECK_NULL_VOID_NOLOG(component);
     std::unordered_map<std::string, RefPtr<Component>> wrappingComponentsMap;
     if (componentsStack_.size() > 1 && ShouldPopImmediately()) {
         Pop();
@@ -458,7 +459,7 @@ bool ViewStackProcessor::ShouldPopImmediately()
 
 void ViewStackProcessor::Pop()
 {
-    if (componentsStack_.size() == 1) {
+    if (componentsStack_.empty() || componentsStack_.size() == 1) {
         return;
     }
 
@@ -492,6 +493,9 @@ void ViewStackProcessor::Pop()
 
 RefPtr<Component> ViewStackProcessor::GetNewComponent()
 {
+    if (componentsStack_.empty()) {
+        return nullptr;
+    }
     auto component = WrapComponents().first;
     if (AceType::DynamicCast<ComposedComponent>(component)) {
         auto childComponent = AceType::DynamicCast<ComposedComponent>(component)->GetChild();
@@ -520,7 +524,7 @@ void ViewStackProcessor::PopContainer()
 
     while ((!componentGroup && !multiComposedComponent && !soleChildComponent) ||
            strcmp(type, AceType::TypeName<TextSpanComponent>()) == 0) {
-        if (componentsStack_.size() == 1) {
+        if (componentsStack_.size() <= 1) {
             break;
         }
         Pop();

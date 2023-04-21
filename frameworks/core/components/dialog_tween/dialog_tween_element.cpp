@@ -15,6 +15,7 @@
 
 #include "core/components/dialog_tween/dialog_tween_element.h"
 
+#include "core/components/common/properties/shadow_config.h"
 #include "core/components/dialog_tween/dialog_tween_component.h"
 #include "core/components/dialog_tween/render_dialog_tween.h"
 #include "core/components/transition/transition_element.h"
@@ -66,9 +67,30 @@ void DialogTweenElement::PerformBuild()
     RequestFocusImmediately();
 }
 
+void DialogTweenElement::OnFocus()
+{
+    LOGI("DialogTweenElement On Focus");
+    auto renderDialog = DynamicCast<RenderDialogTween>(renderNode_);
+    if (renderDialog) {
+        renderDialog->SetShadow(ShadowConfig::DefaultShadowL);
+    }
+    FocusGroup::OnFocus();
+}
+
+void DialogTweenElement::OnBlur()
+{
+    LOGI("DialogTweenElement On Blur");
+    auto renderDialog = DynamicCast<RenderDialogTween>(renderNode_);
+    if (renderDialog) {
+        renderDialog->SetShadow(ShadowConfig::DefaultShadowM);
+    }
+    FocusGroup::OnBlur();
+}
+
 bool DialogTweenElement::OnKeyEvent(const KeyEvent& keyEvent)
 {
-    if (keyEvent.code == KeyCode::KEY_BACK && keyEvent.action == KeyAction::UP) {
+    if ((keyEvent.code == KeyCode::KEY_BACK || keyEvent.code == KeyCode::KEY_ESCAPE) &&
+        keyEvent.action == KeyAction::UP) {
         const auto& dialog = AceType::DynamicCast<RenderDialogTween>(renderNode_);
         if (dialog) {
             return dialog->PopDialog();

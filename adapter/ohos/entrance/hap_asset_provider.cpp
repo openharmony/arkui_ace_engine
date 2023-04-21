@@ -20,8 +20,8 @@
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace {
-
-bool HapAssetProvider::Initialize(const std::string& hapPath, const std::vector<std::string>& assetBasePaths)
+bool HapAssetProvider::Initialize(const std::string& hapPath, const std::vector<std::string>& assetBasePaths,
+    bool useCache)
 {
     ACE_SCOPED_TRACE("Initialize");
     if (hapPath.empty() || assetBasePaths.empty()) {
@@ -29,12 +29,24 @@ bool HapAssetProvider::Initialize(const std::string& hapPath, const std::vector<
         return false;
     }
 
-    runtimeExtractor_ = AbilityBase::Extractor::Create(hapPath);
+    bool newCreate = false;
+    loadPath_ = AbilityBase::ExtractorUtil::GetLoadFilePath(hapPath);
+    if (!useCache) {
+        AbilityBase::ExtractorUtil::DeleteExtractor(loadPath_);
+    }
+    runtimeExtractor_ = AbilityBase::ExtractorUtil::GetExtractor(loadPath_, newCreate);
     CHECK_NULL_RETURN_NOLOG(runtimeExtractor_, false);
     assetBasePaths_ = assetBasePaths;
     hapPath_ = hapPath;
     LOGD("hapPath_:%{public}s", hapPath_.c_str());
     return true;
+}
+
+void HapAssetProvider::Reload()
+{
+    bool newCreate = false;
+    AbilityBase::ExtractorUtil::DeleteExtractor(loadPath_);
+    runtimeExtractor_ = AbilityBase::ExtractorUtil::GetExtractor(loadPath_, newCreate);
 }
 
 bool HapAssetProvider::IsValid() const
@@ -92,7 +104,7 @@ std::unique_ptr<fml::Mapping> HapAssetProvider::GetAsMapping(const std::string& 
     return nullptr;
 }
 
-std::string HapAssetProvider::GetAssetPath(const std::string& assetName)
+std::string HapAssetProvider::GetAssetPath(const std::string& assetName, bool isAddHapPath)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     for (const auto& basePath : assetBasePaths_) {
@@ -101,7 +113,7 @@ std::string HapAssetProvider::GetAssetPath(const std::string& assetName)
         if (!hasFile) {
             continue;
         }
-        return hapPath_ + "/" + basePath;
+        return isAddHapPath? (hapPath_ + "/" + basePath) : fileName;
     }
     LOGI("Cannot find base path of %{public}s", assetName.c_str());
     return "";
@@ -127,4 +139,20 @@ void HapAssetProvider::GetAssetList(const std::string& path, std::vector<std::st
     LOGI("Cannot Get File List from %{public}s", path.c_str());
 }
 
+bool HapAssetProvider::GetFileInfo(const std::string& fileName, MediaFileInfo& fileInfo) const
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    OHOS::AbilityBase::FileInfo fileInfoAbility;
+    auto state = runtimeExtractor_->GetFileInfo(fileName, fileInfoAbility);
+    if (!state) {
+        LOGE("GetFileInfo failed, fileName=%{public}s", fileName.c_str());
+        return false;
+    }
+    fileInfo.fileName = fileInfoAbility.fileName;
+    fileInfo.offset = fileInfoAbility.offset;
+    fileInfo.length = fileInfoAbility.length;
+    fileInfo.lastModTime = fileInfoAbility.lastModTime;
+    fileInfo.lastModDate = fileInfoAbility.lastModDate;
+    return true;
+}
 } // namespace OHOS::Ace

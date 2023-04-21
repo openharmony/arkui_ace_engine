@@ -15,7 +15,8 @@ import("//build/ohos.gni")
 
 platforms = []
 
-if (is_standard_system) {
+is_ohos_standard_system = is_standard_system && !build_cross_platform_version
+if (is_ohos_standard_system) {
   ohos_platform = {
     name = "ohos"
     config = {

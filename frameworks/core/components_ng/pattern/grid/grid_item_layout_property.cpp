@@ -26,12 +26,10 @@ void GridItemLayoutProperty::ResetGridLayoutInfoAndMeasure() const
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-
     auto uiNode = DynamicCast<UINode>(host);
     while (uiNode->GetTag() != V2::GRID_ETS_TAG) {
         uiNode = uiNode->GetParent();
-        CHECK_NULL_VOID(uiNode);
+        CHECK_NULL_VOID_NOLOG(uiNode);
     }
     auto grid = DynamicCast<FrameNode>(uiNode);
     CHECK_NULL_VOID(grid);
@@ -51,6 +49,38 @@ void GridItemLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 }
 
 int32_t GridItemLayoutProperty::GetCustomCrossIndex(Axis axis) const
+{
+    if (axis == Axis::VERTICAL) {
+        return propColumnStart_.value_or(-1);
+    }
+    return propRowStart_.value_or(-1);
+}
+
+int32_t GridItemLayoutProperty::GetMainSpan(Axis axis) const
+{
+    if (axis == Axis::VERTICAL) {
+        return std::max(propRowEnd_.value_or(-1) - propRowStart_.value_or(-1) + 1, 1);
+    }
+    return std::max(propColumnEnd_.value_or(-1) - propColumnStart_.value_or(-1) + 1, 1);
+}
+
+int32_t GridItemLayoutProperty::GetCrossSpan(Axis axis) const
+{
+    if (axis == Axis::VERTICAL) {
+        return std::max(propColumnEnd_.value_or(-1) - propColumnStart_.value_or(-1) + 1, 1);
+    }
+    return std::max(propRowEnd_.value_or(-1) - propRowStart_.value_or(-1) + 1, 1);
+}
+
+int32_t GridItemLayoutProperty::GetMainStart(Axis axis) const
+{
+    if (axis == Axis::VERTICAL) {
+        return propRowStart_.value_or(-1);
+    }
+    return propColumnStart_.value_or(-1);
+}
+
+int32_t GridItemLayoutProperty::GetCrossStart(Axis axis) const
 {
     if (axis == Axis::VERTICAL) {
         return propColumnStart_.value_or(-1);

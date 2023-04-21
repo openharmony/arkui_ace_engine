@@ -23,8 +23,6 @@
 #include "base/memory/memory_monitor.h"
 #include "base/thread/frame_trace_adapter.h"
 
-static const std::string BG_THREAD_NAME = "ui";
-
 namespace OHOS::Ace {
 namespace {
 
@@ -52,13 +50,19 @@ BackgroundTaskExecutor& BackgroundTaskExecutor::GetInstance()
 
 BackgroundTaskExecutor::BackgroundTaskExecutor() : maxThreadNum_(MAX_BACKGROUND_THREADS)
 {
-    if (maxThreadNum_ > 1) {
-        // Start other threads in the first created thread.
-        PostTask([this, num = maxThreadNum_ - 1]() { StartNewThreads(num); });
-    }
+    FrameTraceAdapter* ft = FrameTraceAdapter::GetInstance();
+    if (ft != nullptr && ft->IsEnabled()) {
+        LOGI("Use frame trace as bg threads pool.");
+    } else {
+        LOGI("Create ace bg threads pool.");
+        if (maxThreadNum_ > 1) {
+            // Start other threads in the first created thread.
+            PostTask([this, num = maxThreadNum_ - 1]() { StartNewThreads(num); });
+        }
 
-    // Make sure there is at least 1 thread in background thread pool.
-    StartNewThreads(1);
+        // Make sure there is at least 1 thread in background thread pool.
+        StartNewThreads(1);
+    }
 }
 
 BackgroundTaskExecutor::~BackgroundTaskExecutor()
@@ -88,7 +92,7 @@ bool BackgroundTaskExecutor::PostTask(Task&& task, BgTaskPriority priority)
         return false;
     }
     FrameTraceAdapter* ft = FrameTraceAdapter::GetInstance();
-    if (ft != nullptr && ft->EnableFrameTrace(BG_THREAD_NAME)) {
+    if (ft != nullptr && ft->IsEnabled()) {
         switch (priority) {
             case BgTaskPriority::LOW:
                 ft->QuickExecute(std::move(task));
@@ -122,7 +126,7 @@ bool BackgroundTaskExecutor::PostTask(const Task& task, BgTaskPriority priority)
         return false;
     }
     FrameTraceAdapter* ft = FrameTraceAdapter::GetInstance();
-    if (ft != nullptr && ft->EnableFrameTrace(BG_THREAD_NAME)) {
+    if (ft != nullptr && ft->IsEnabled()) {
         Task variableTask = task;
         switch (priority) {
             case BgTaskPriority::LOW:

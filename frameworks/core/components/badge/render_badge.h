@@ -57,7 +57,7 @@ protected:
     double height_ = 0.0;
     Size badgeSize_;
     std::string textData_;
-    bool showMessage_ = false;
+    bool showMessage_ = true;
     std::function<void()> onClick_;
     RefPtr<ClickRecognizer> clickRecognizer_;
     RefPtr<RenderText> badgeRenderText_;

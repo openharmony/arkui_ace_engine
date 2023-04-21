@@ -39,25 +39,29 @@ CanvasDrawFunction SearchPaintMethod::GetContentDrawFunction(PaintWrapper* paint
 
 void SearchPaintMethod::PaintSearch(RSCanvas& canvas, PaintWrapper* paintWrapper) const
 {
-    if (!searchButton_.empty()) {
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto searchTheme = pipelineContext->GetTheme<SearchTheme>();
+    if (isSearchButtonEnabled_) {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto searchTheme = pipeline->GetTheme<SearchTheme>();
         CHECK_NULL_VOID(searchTheme);
         auto iconHeight = searchTheme->GetIconHeight();
-        auto dividerSpace = searchTheme->GetDividerSpace();
-        auto searchDividerWidth = searchTheme->GetSearchDividerWidth();
+        auto dividerSpace = searchTheme->GetDividerSideSpace().ConvertToPx();
+        auto searchSpace = searchTheme->GetSearchButtonSpace().ConvertToPx();
+        auto searchDividerWidth = searchTheme->GetSearchDividerWidth().ConvertToPx();
         auto searchDividerColor = searchTheme->GetSearchDividerColor();
         auto searchSize = paintWrapper->GetGeometryNode()->GetFrameSize();
         // Paint divider.
         double dividerVerticalOffset = (searchSize.Height() - iconHeight.ConvertToPx()) / 2.0;
-        double dividerHorizontalOffset = searchSize.Width() - buttonSize_.Width() - dividerSpace;
+        double dividerHorizontalOffset =
+            searchSize.Width() - buttonSize_.Width() - dividerSpace - searchSpace - searchDividerWidth / 2;
+        dividerHorizontalOffset = std::max(dividerHorizontalOffset, 0.0);
         OffsetF dividerOffset = OffsetF(dividerHorizontalOffset, dividerVerticalOffset);
         float originX = dividerOffset.GetX();
         float originY = dividerOffset.GetY();
         RSRect rect(originX, originY, originX + searchDividerWidth, originY + iconHeight.ConvertToPx());
         canvas.Save();
         RSPen pen;
+        pen.SetWidth(searchDividerWidth);
         pen.SetColor(ToRSColor(searchDividerColor));
         canvas.AttachPen(pen);
         canvas.DrawRect(rect);

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_BRUSH_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_BRUSH_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_BRUSH_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_BRUSH_H
 
 #include <memory>
 
@@ -59,6 +59,7 @@ public:
     TestingBrush() = default;
     ~TestingBrush() = default;
     explicit TestingBrush(int rgba) noexcept {};
+    explicit TestingBrush(TestingColor color) {}
 
     virtual void SetAntiAlias(bool alias) {}
     virtual void SetWidth(float width) {}
@@ -68,6 +69,8 @@ public:
     virtual void SetFilter(const TestingFilter filter) {}
     virtual void SetBlendMode(BlendMode mode) {}
     virtual void SetAlpha(uint32_t alpha) {}
+    virtual void SetAlphaF(float a) {}
+    virtual void SetARGB(int r, int g, int b, int a) {}
 };
 } // namespace OHOS::Ace::Testing
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_BRUSH_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_BRUSH_H

@@ -48,6 +48,8 @@ public:
     virtual void AddGeometry(const RefPtr<OHOS::Render3D::SVGeometry>& shape) = 0;
     virtual void AddGLTFAnimation(const RefPtr<OHOS::Render3D::GLTFAnimation>& animation) = 0;
     virtual void AddCustomRender(const RefPtr<OHOS::Render3D::SVCustomRenderDescriptor>& customRender) = 0;
+    virtual void SetWidth(Dimension& width) = 0;
+    virtual void SetHeight(Dimension& height) = 0;
 
 private:
     static std::unique_ptr<ModelView> instance_;

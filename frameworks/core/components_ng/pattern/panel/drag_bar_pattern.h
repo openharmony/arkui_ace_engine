@@ -30,7 +30,7 @@
 
 namespace OHOS::Ace::NG {
 
-using DragBarBuilderFunc = std::function<void()>;
+using ClickArrowCallback = std::function<void()>;
 
 class DragBarPattern : public Pattern {
     DECLARE_ACE_TYPE(DragBarPattern, Pattern);
@@ -61,7 +61,7 @@ public:
         auto paintMethod = MakeRefPtr<DragBarPaintMethod>();
         paintMethod->SetIconOffset(iconOffset_);
         paintMethod->SetScaleWidth(scaleWidth_);
-        paintMethod->SetScaleIcon(scaleIcon_);
+        paintMethod->SetPanelMode(showMode_);
         return paintMethod;
     }
 
@@ -73,6 +73,16 @@ public:
     float GetStatusBarHeight() const
     {
         return statusBarHeight_.Value();
+    }
+
+    bool HasClickArrowCallback() const
+    {
+        return (clickArrowCallback_ != nullptr);
+    }
+
+    void SetClickArrowCallback(const ClickArrowCallback& callback)
+    {
+        clickArrowCallback_ = callback;
     }
 
     void InitProps();
@@ -91,11 +101,14 @@ private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
+    void InitClickEvent();
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void OnClick();
     void DoStyleAnimation(
         const OffsetT<Dimension>& left, const OffsetT<Dimension>& center, const OffsetT<Dimension>& right);
 
     RefPtr<TouchEventImpl> touchEvent_;
+    RefPtr<ClickEvent> clickListener_;
     OffsetF iconOffset_;
     OffsetF barLeftPoint_;
     OffsetF barCenterPoint_;
@@ -106,11 +119,11 @@ private:
     OffsetF downPoint_;
     float dragRangeX_ = 0.0f;
     float dragRangeY_ = 0.0f;
-    float scaleIcon_ = 1.0f;
     float scaleWidth_ = 1.0f;
 
     PanelMode showMode_ = PanelMode::HALF;
     bool isFirstUpdate_ = true;
+    ClickArrowCallback clickArrowCallback_;
 
     RefPtr<Animator> animator_;
     RefPtr<Animator> barTouchAnimator_;

@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_ABILITY_COMPONENT_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_ABILITY_COMPONENT_PATTERN_H
 
+#include "frameworks/base/geometry/rect.h"
 #include "frameworks/base/memory/referenced.h"
 #include "frameworks/core/common/window_ng/window_extension_connection_proxy_ng.h"
 #include "frameworks/core/components_ng/pattern/ability_component/ability_component_event_hub.h"
@@ -58,27 +59,53 @@ public:
     void FireConnect();
     void FireDisConnect();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
-
+    void OnAreaChangedInner() override;
 private:
     void OnActive() override
     {
-        if (adapter_) {
-            adapter_->Show();
+        if (!isActive_) {
+            if (adapter_) {
+                adapter_->Show();
+            }
+            isActive_ = true;
         }
-        isActive_ = true;
     }
 
     void OnInActive() override
     {
-        if (adapter_) {
-            adapter_->Hide();
+        if (isActive_) {
+            if (adapter_) {
+                adapter_->Hide();
+            }
+            isActive_ = false;
         }
-        isActive_ = false;
     }
+
+    void OnWindowShow() override
+    {
+        if (!isActive_) {
+            if (adapter_) {
+                adapter_->Show();
+            }
+            isActive_ = true;
+        }
+    }
+
+    void OnWindowHide() override
+    {
+        if (isActive_) {
+            if (adapter_) {
+                adapter_->Hide();
+            }
+            isActive_ = false;
+        }
+    }
+
     void UpdateWindowRect();
     bool isActive_ = false;
     bool hasConnectionToAbility_ = false;
     RefPtr<WindowExtensionConnectionAdapterNG> adapter_;
+    Rect lastRect_;
     ACE_DISALLOW_COPY_AND_MOVE(AbilityComponentPattern);
 };
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,31 +32,30 @@ public:
 
     void Draw(RSDrawingContext& context) const override
     {
-        CHECK_NULL_VOID(property_);
         std::shared_ptr<SkCanvas> skCanvas { context.canvas, [](SkCanvas* /*unused*/) {} };
         RSCanvas rsCanvas(&skCanvas);
-        CHECK_NULL_VOID(&rsCanvas);
-        paintTask_(property_->Get(), rsCanvas);
+        CHECK_NULL_VOID(paintTask_);
+        paintTask_(rsCanvas);
     }
 
-    void SetCustomData(const NG::Gradient& gradient)
-    {
-        if (property_ == nullptr) {
-            property_ = std::make_shared<Rosen::RSProperty<NG::Gradient>>(gradient);
-            AttachProperty(property_);
-        } else {
-            property_->Set(gradient);
-        }
-    }
-
-    void SetPaintTask(const std::function<void(const NG::Gradient&, RSCanvas&)>& paintTask)
+    void SetPaintTask(std::function<void(RSCanvas&)>&& paintTask)
     {
         paintTask_ = paintTask;
     }
 
+    void Modify()
+    {
+        if (!flag_) {
+            flag_ = std::make_shared<Rosen::RSProperty<bool>>(0);
+            AttachProperty(flag_);
+        } else {
+            flag_->Set(!flag_->Get());
+        }
+    }
+
 private:
-    std::shared_ptr<Rosen::RSProperty<NG::Gradient>> property_;
-    std::function<void(const NG::Gradient&, RSCanvas&)> paintTask_;
+    std::shared_ptr<Rosen::RSProperty<bool>> flag_;
+    std::function<void(RSCanvas&)> paintTask_;
 };
 
 } // namespace OHOS::Ace::NG

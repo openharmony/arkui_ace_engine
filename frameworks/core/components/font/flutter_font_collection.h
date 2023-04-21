@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,10 +17,10 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_FONT_FLUTTER_FONT_COLLECTION_H
 
 #include <future>
+#include <mutex>
 
 #include "flutter/common/task_runners.h"
 #include "flutter/lib/ui/text/font_collection.h"
-#include "flutter/lib/ui/window/window.h"
 
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
@@ -47,8 +47,6 @@ public:
     void UnloadFont();
 
 private:
-    flutter::WindowClient* GetFlutterEngineWindowClient();
-
     std::unique_ptr<flutter::FontCollection> fontCollection_;
     std::vector<std::string> families_;
 
@@ -58,6 +56,7 @@ private:
     bool isCompleted_ = false;
     bool isUseFlutterEngine = true;
     bool isZawgyiMyanmar_ = false;
+    std::once_flag fontFlag_;
 
     static FlutterFontCollection instance;
 };

@@ -83,10 +83,21 @@ void OnTextChangedListenerImpl::SendKeyEventFromInputMethod(const MiscServices::
 
 void OnTextChangedListenerImpl::SendKeyboardInfo(const MiscServices::KeyboardInfo& info)
 {
+    LOGI("[OnTextChangedListenerImpl] KeyboardStatus status: %{public}d", info.GetKeyboardStatus());
+    // this keyboard status means shown or hidden but attachment is not closed, should be distinguished from
+    // imeAttached_
+    HandleKeyboardStatus(info.GetKeyboardStatus());
     HandleFunctionKey(info.GetFunctionKey());
 }
 
-void OnTextChangedListenerImpl::HandleKeyboardStatus(MiscServices::KeyboardStatus status) {}
+void OnTextChangedListenerImpl::HandleKeyboardStatus(MiscServices::KeyboardStatus status)
+{
+    LOGI("[OnTextChangedListenerImpl] HandleKeyboardStatus status: %{public}d", status);
+    if (status == MiscServices::KeyboardStatus::NONE) {
+        return;
+    }
+    SetKeyboardStatus(status == MiscServices::KeyboardStatus::SHOW);
+}
 
 void OnTextChangedListenerImpl::HandleFunctionKey(MiscServices::FunctionKey functionKey)
 {
@@ -114,7 +125,7 @@ void OnTextChangedListenerImpl::HandleFunctionKey(MiscServices::FunctionKey func
 
 void OnTextChangedListenerImpl::MoveCursor(MiscServices::Direction direction)
 {
-    LOGI("[OnTextChangedListenerImpl] move cursor %{public}d", static_cast<int32_t>(direction));
+    LOGI("[OnTextChangedListenerImpl] move cursor direction %{public}d", static_cast<int32_t>(direction));
     auto task = [textField = pattern_, direction] {
         auto client = textField.Upgrade();
         CHECK_NULL_VOID_NOLOG(client);
@@ -136,6 +147,52 @@ void OnTextChangedListenerImpl::MoveCursor(MiscServices::Direction direction)
                 LOGE("direction is not support: %{public}d", direction);
                 break;
         }
+    };
+    PostTaskToUI(task);
+}
+
+void OnTextChangedListenerImpl::HandleSetSelection(int32_t start, int32_t end)
+{
+    LOGI("[OnTextChangedListenerImpl] HandleSetSelection, start %{public}d, end %{public}d", start, end);
+    auto task = [textField = pattern_, start, end] {
+        auto client = textField.Upgrade();
+        if (!client) {
+            LOGE("text field is null");
+            return;
+        }
+        ContainerScope scope(client->GetInstanceId());
+        client->HandleSetSelection(start, end);
+    };
+    PostTaskToUI(task);
+}
+
+void OnTextChangedListenerImpl::HandleExtendAction(int32_t action)
+{
+    LOGI("[OnTextChangedListenerImpl] HandleExtendAction %{public}d", action);
+    auto task = [textField = pattern_, action] {
+        auto client = textField.Upgrade();
+        if (!client) {
+            LOGE("text field is null");
+            return;
+        }
+        ContainerScope scope(client->GetInstanceId());
+        client->HandleExtendAction(action);
+    };
+    PostTaskToUI(task);
+}
+
+void OnTextChangedListenerImpl::HandleSelect(int32_t keyCode, int32_t cursorMoveSkip)
+{
+    LOGI("[OnTextChangedListenerImpl] HandleSelect, keycode %{public}d, cursor move skip %{public}d", keyCode,
+        cursorMoveSkip);
+    auto task = [textField = pattern_, keyCode, cursorMoveSkip] {
+        auto client = textField.Upgrade();
+        if (!client) {
+            LOGE("text field is null");
+            return;
+        }
+        ContainerScope scope(client->GetInstanceId());
+        client->HandleSelect(keyCode, cursorMoveSkip);
     };
     PostTaskToUI(task);
 }

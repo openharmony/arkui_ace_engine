@@ -79,6 +79,8 @@ public:
                     themeConstants->GetDimension(THEME_TEXT_OVERLAY_MENU_BUTTON_PADDING_RIGHT).Value(),
                     themeConstants->GetDimension(THEME_TEXT_OVERLAY_MENU_BUTTON_PADDING_BOTTOM).Value(),
                     themeConstants->GetDimension(THEME_TEXT_OVERLAY_MENU_PADDING_LEFT).Unit());
+            theme->backResourceId_ = themeConstants->GetResourceId(THEME_NAVIGATION_BAR_RESOURCE_ID_BACK);
+            theme->moreResourceId_ = themeConstants->GetResourceId(THEME_NAVIGATION_BAR_RESOURCE_ID_MORE);
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
         }
@@ -100,6 +102,10 @@ public:
                 theme->buttonClickedColor_ = pattern->GetAttr<Color>("button_bg_color_clicked", Color());
                 theme->menuButtonTextStyle_.SetTextColor(pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color()));
                 theme->menuButtonTextStyle_.SetFontSize(pattern->GetAttr<Dimension>(PATTERN_TEXT_SIZE, 0.0_fp));
+                theme->handleDiameter_ = pattern->GetAttr<Dimension>("handle_outer_diameter", 0.0_vp);
+                theme->handleDiameterInner_ = pattern->GetAttr<Dimension>("handle_inner_diameter", 0.0_vp);
+                theme->moreButtonHeight_ = pattern->GetAttr<Dimension>("more_button_height", 24.0_vp);
+                theme->selectOverlayMaxWidth_ = pattern->GetAttr<Dimension>("select_verlay_max_width", 280.0_vp);
             } else {
                 LOGW("find pattern of textoverlay fail");
             }
@@ -183,6 +189,16 @@ public:
         return menuButtonHeight_;
     }
 
+    const Dimension& GetMoreButtonHeight() const
+    {
+        return moreButtonHeight_;
+    }
+
+    const Dimension& GetSelectOverlayMaxWidth() const
+    {
+        return selectOverlayMaxWidth_;
+    }
+
     const TextStyle& GetMenuButtonTextStyle() const
     {
         return menuButtonTextStyle_;
@@ -205,7 +221,17 @@ public:
 
     Dimension GetHandleHotZoneRadius() const
     {
-        return 10.0_vp;
+        return handleDiameter_;
+    }
+
+    InternalResource::ResourceId GetBackResourceId() const
+    {
+        return backResourceId_;
+    }
+
+    InternalResource::ResourceId GetMoreResourceId() const
+    {
+        return moreResourceId_;
     }
 
 protected:
@@ -227,7 +253,12 @@ private:
     Dimension menuSpacingWithText_;
     Dimension menuButtonWidth_;
     Dimension menuButtonHeight_;
+    Dimension moreButtonHeight_;
+    Dimension selectOverlayMaxWidth_;
     TextStyle menuButtonTextStyle_;
+
+    InternalResource::ResourceId backResourceId_ = InternalResource::ResourceId::NO_ID;
+    InternalResource::ResourceId moreResourceId_ = InternalResource::ResourceId::NO_ID;
 };
 
 } // namespace OHOS::Ace

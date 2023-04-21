@@ -15,10 +15,12 @@
 
 #include "bridge/declarative_frontend/jsview/models/model_view_impl.h"
 
+#include "base/geometry/dimension.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components_ng/base/view_abstract_model.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -102,5 +104,35 @@ void ModelViewImpl::AddGLTFAnimation(const RefPtr<OHOS::Render3D::GLTFAnimation>
 void ModelViewImpl::AddCustomRender(const RefPtr<OHOS::Render3D::SVCustomRenderDescriptor>& customRender)
 {
     GET_COMPONENT_OR_RETURN()->AddCustomRender(customRender);
+}
+
+void ModelViewImpl::SetWidth(Dimension& width)
+{
+    LOGD("ModelViewImpl::SetWidth() %f", width.Value());
+    /*
+    Model's texture width & height to be updated in the backend during animation via RenderNode.
+    So Async animation shall be disabled.
+    */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto option = stack->GetImplicitAnimationOption();
+    option.SetAllowRunningAsynchronously(false);
+    stack->SetImplicitAnimationOption(option);
+    if (LessNotEqual(width.Value(), 0.0)) {
+        width.SetValue(0.0);
+    }
+    ViewAbstractModel::GetInstance()->SetWidth(width);
+}
+
+void ModelViewImpl::SetHeight(Dimension& height)
+{
+    LOGD("ModelViewImpl::SetHeight() %f", height.Value());
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto option = stack->GetImplicitAnimationOption();
+    option.SetAllowRunningAsynchronously(false);
+    stack->SetImplicitAnimationOption(option);
+    if (LessNotEqual(height.Value(), 0.0)) {
+        height.SetValue(0.0);
+    }
+    ViewAbstractModel::GetInstance()->SetHeight(height);
 }
 } // namespace OHOS::Ace::Framework

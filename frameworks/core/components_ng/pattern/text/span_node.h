@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,7 +23,6 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/text/text_styles.h"
-#include "core/components_ng/render/paragraph.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/gestures/gesture_info.h"
 
@@ -65,15 +64,41 @@ public:                                                                      \
 
 namespace OHOS::Ace::NG {
 
-struct SpanItem : public Referenced {
+class Paragraph;
+
+struct SpanItem : public AceType {
+    DECLARE_ACE_TYPE(SpanItem, AceType);
+
+public:
+    SpanItem() = default;
+    virtual ~SpanItem()
+    {
+        children.clear();
+    }
+    int32_t positon;
     std::string content;
     std::unique_ptr<FontStyle> fontStyle;
     GestureEventFunc onClick;
     std::list<RefPtr<SpanItem>> children;
+    int32_t placeHolderIndex = -1;
 
-    void UpdateParagraph(const RefPtr<Paragraph>& builder);
+    virtual int32_t UpdateParagraph(const RefPtr<Paragraph>& builder, double width = 0.0f, double height = 0.0f,
+        VerticalAlign verticalAlign = VerticalAlign::BASELINE);
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
+    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
+};
+
+struct ImageSpanItem : public SpanItem {
+    DECLARE_ACE_TYPE(ImageSpanItem, SpanItem);
+
+public:
+    ImageSpanItem() = default;
+    ~ImageSpanItem() override = default;
+    int32_t UpdateParagraph(
+        const RefPtr<Paragraph>& builder, double width, double height, VerticalAlign verticalAlign) override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override {};
+
+    ACE_DISALLOW_COPY_AND_MOVE(ImageSpanItem);
 };
 
 class ACE_EXPORT SpanNode : public UINode {
@@ -139,6 +164,11 @@ public:
     }
 
     void RequestTextFlushDirty();
+    // The function is only used for fast preview.
+    void FastPreviewUpdateChildDone() override
+    {
+        RequestTextFlushDirty();
+    }
 
 private:
     std::list<RefPtr<SpanNode>> spanChildren_;

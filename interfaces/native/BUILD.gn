@@ -39,7 +39,7 @@ ohos_shared_library("ace_ndk") {
     "native_interface_xcomponent.cpp",
   ]
 
-  deps = [ "//third_party/bounds_checking_function:libsec_static" ]
+  deps = [ "//third_party/bounds_checking_function:libsec_shared" ]
 
   cflags_cc = [ "-Wno-missing-braces" ]
 
@@ -52,7 +52,7 @@ ohos_shared_library("ace_ndk") {
         get_label_info(":libace_ndk", "name") + version_script_suffix
   } else if (target_os == "android") {
     sources += [ "$ace_root/adapter/android/osal/log_wrapper.cpp" ]
-    aosp_deps = [ "shared_library:liblog" ]
+    libs = [ "log" ]
   }
 
   subsystem_name = ace_engine_subsystem

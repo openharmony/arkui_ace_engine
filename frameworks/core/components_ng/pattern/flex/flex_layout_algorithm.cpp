@@ -32,6 +32,7 @@
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 
@@ -95,6 +96,11 @@ OptionalSizeF GetCalcSizeHelper(float mainAxisSize, float crossAxisSize, FlexDir
     return size;
 }
 
+bool IsHorizontal(FlexDirection direction)
+{
+    return direction == FlexDirection::ROW || direction == FlexDirection::ROW_REVERSE;
+}
+
 void UpdateChildLayoutConstrainByFlexBasis(
     FlexDirection direction, const RefPtr<LayoutWrapper>& child, LayoutConstraintF& layoutConstraint)
 {
@@ -105,11 +111,32 @@ void UpdateChildLayoutConstrainByFlexBasis(
     if (flexBasis->Unit() == DimensionUnit::AUTO || !flexBasis->IsValid()) {
         return;
     }
+    if (child->GetLayoutProperty()->GetCalcLayoutConstraint()) {
+        auto selfIdealSize = child->GetLayoutProperty()->GetCalcLayoutConstraint()->selfIdealSize;
+        if (child->GetHostTag() == V2::BLANK_ETS_TAG && selfIdealSize.has_value()) {
+            if (IsHorizontal(direction) && selfIdealSize->Width().has_value() &&
+                selfIdealSize->Width()->GetDimension().ConvertToPx() > flexBasis->ConvertToPx()) {
+                return;
+            } else if (!IsHorizontal(direction) && selfIdealSize->Height().has_value() &&
+                       selfIdealSize->Height()->GetDimension().ConvertToPx() > flexBasis->ConvertToPx()) {
+                return;
+            }
+        }
+    }
     if (direction == FlexDirection::ROW || direction == FlexDirection::ROW_REVERSE) {
         layoutConstraint.selfIdealSize.SetWidth(flexBasis->ConvertToPx());
     } else {
         layoutConstraint.selfIdealSize.SetHeight(flexBasis->ConvertToPx());
     }
+}
+
+float GetMainAxisMargin(const RefPtr<LayoutWrapper>& child, FlexDirection direction)
+{
+    float childMainAxisMargin = 0.0f;
+    if (child && child->GetGeometryNode() && child->GetGeometryNode()->GetMargin()) {
+        childMainAxisMargin = GetMainAxisSizeHelper(child->GetGeometryNode()->GetMargin()->Size(), direction);
+    }
+    return childMainAxisMargin;
 }
 
 } // namespace
@@ -135,8 +162,9 @@ float FlexLayoutAlgorithm::GetSelfCrossAxisSize(const RefPtr<LayoutWrapper>& lay
 
 void FlexLayoutAlgorithm::CheckSizeValidity(const RefPtr<LayoutWrapper>& layoutWrapper)
 {
-    if (layoutWrapper->GetHostNode()->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) ==
-        VisibleType::GONE) {
+    if (layoutWrapper && layoutWrapper->GetHostNode() &&
+        layoutWrapper->GetHostNode()->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) ==
+            VisibleType::GONE) {
         return;
     }
     ++validSizeCount_;
@@ -147,20 +175,16 @@ void FlexLayoutAlgorithm::CheckSizeValidity(const RefPtr<LayoutWrapper>& layoutW
  */
 void FlexLayoutAlgorithm::CheckBaselineProperties(const RefPtr<LayoutWrapper>& layoutWrapper)
 {
-    bool isChildBaselineAlign = false;
-    const auto& flexItemProperty = layoutWrapper->GetLayoutProperty()->GetFlexItemProperty();
-    isChildBaselineAlign =
-        flexItemProperty ? flexItemProperty->GetAlignSelf().value_or(crossAxisAlign_) == FlexAlign::BASELINE : false;
-    if (crossAxisAlign_ == FlexAlign::BASELINE || isChildBaselineAlign) {
-        float distance = layoutWrapper->GetBaselineDistance();
-        baselineProperties_.maxBaselineDistance = std::max(baselineProperties_.maxBaselineDistance, distance);
-        baselineProperties_.maxDistanceAboveBaseline = std::max(baselineProperties_.maxDistanceAboveBaseline, distance);
-        baselineProperties_.maxDistanceBelowBaseline =
-            std::max(baselineProperties_.maxDistanceBelowBaseline, GetSelfCrossAxisSize(layoutWrapper) - distance);
-        if (crossAxisAlign_ == FlexAlign::BASELINE) {
-            crossAxisSize_ =
-                baselineProperties_.maxDistanceAboveBaseline + baselineProperties_.maxDistanceBelowBaseline;
-        }
+    if (crossAxisAlign_ != FlexAlign::BASELINE && !childrenHasAlignSelfBaseLine_) {
+        return;
+    }
+    float distance = layoutWrapper->GetBaselineDistance();
+    baselineProperties_.maxBaselineDistance = std::max(baselineProperties_.maxBaselineDistance, distance);
+    baselineProperties_.maxDistanceAboveBaseline = std::max(baselineProperties_.maxDistanceAboveBaseline, distance);
+    baselineProperties_.maxDistanceBelowBaseline =
+        std::max(baselineProperties_.maxDistanceBelowBaseline, GetSelfCrossAxisSize(layoutWrapper) - distance);
+    if (crossAxisAlign_ == FlexAlign::BASELINE) {
+        crossAxisSize_ = baselineProperties_.maxDistanceAboveBaseline + baselineProperties_.maxDistanceBelowBaseline;
     }
 }
 
@@ -216,6 +240,7 @@ void FlexLayoutAlgorithm::TravelChildrenFlexProps(LayoutWrapper* layoutWrapper, 
     outOfLayoutChildren_.clear();
     magicNodes_.clear();
     magicNodeWeights_.clear();
+    childrenHasAlignSelfBaseLine_ = false;
     const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
@@ -231,7 +256,8 @@ void FlexLayoutAlgorithm::TravelChildrenFlexProps(LayoutWrapper* layoutWrapper, 
         node.layoutWrapper = child;
         node.layoutConstraint = childLayoutConstraint;
 
-        if (child->GetHostNode()->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::GONE) {
+        if (child && child->GetHostNode() && child->GetHostNode()->GetLayoutProperty() &&
+            child->GetHostNode()->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::GONE) {
             node.layoutConstraint.selfIdealSize = OptionalSize<float>(0.0f, 0.0f);
             continue;
         }
@@ -242,6 +268,10 @@ void FlexLayoutAlgorithm::TravelChildrenFlexProps(LayoutWrapper* layoutWrapper, 
         }
         if (childFlexItemProperty) {
             childDisplayPriority = childFlexItemProperty->GetDisplayIndex().value_or(1);
+            if (!childrenHasAlignSelfBaseLine_ &&
+                childFlexItemProperty->GetAlignSelf().value_or(FlexAlign::FLEX_START) == FlexAlign::BASELINE) {
+                childrenHasAlignSelfBaseLine_ = true;
+            }
         }
         if (!magicNodes_.count(childDisplayPriority)) {
             magicNodes_.insert(
@@ -302,17 +332,21 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(FlexItemProperties& flexItem
                     const auto& childMagicItemProperty =
                         childLayoutWrapper->GetLayoutProperty()->GetMagicItemProperty();
                     if (childMagicItemProperty) {
-                        childLayoutWeight = childMagicItemProperty->GetLayoutWeightValue();
+                        childLayoutWeight = childMagicItemProperty->GetLayoutWeight().value_or(0.0f);
                     }
                     if (LessOrEqual(childLayoutWeight, 0.0f)) {
-                        const auto& childLayoutProperty = childLayoutWrapper->GetLayoutProperty();
-                        if (childLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::GONE) {
+                        if (child.layoutWrapper && child.layoutWrapper->GetHostNode() &&
+                            child.layoutWrapper->GetHostNode()->GetLayoutProperty() &&
+                            child.layoutWrapper->GetHostNode()->GetLayoutProperty()->GetVisibilityValue(
+                                VisibleType::VISIBLE) == VisibleType::GONE) {
                             continue;
                         }
                         childLayoutWrapper->Measure(child.layoutConstraint);
                         UpdateAllocatedSize(childLayoutWrapper, crossAxisSize);
                         CheckSizeValidity(childLayoutWrapper);
                         CheckBaselineProperties(childLayoutWrapper);
+                    } else {
+                        allocatedSize_ += space_;
                     }
                 } else {
                     child.layoutWrapper->SetActive(false);
@@ -341,6 +375,7 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(FlexItemProperties& flexItem
                 firstLoopIter = ++loopIter;
             }
         }
+        allocatedSize_ -= space_;
         auto remainedMainAxisSize = mainAxisSize_ - allocatedSize_;
         auto spacePerWeight = remainedMainAxisSize / newTotalFlexWeight;
         auto secondIterLoop = magicNodes_.rbegin();
@@ -353,7 +388,7 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(FlexItemProperties& flexItem
                 float childLayoutWeight = 0.0f;
                 const auto& childMagicItemProperty = childLayoutWrapper->GetLayoutProperty()->GetMagicItemProperty();
                 if (childMagicItemProperty) {
-                    childLayoutWeight = childMagicItemProperty->GetLayoutWeightValue();
+                    childLayoutWeight = childMagicItemProperty->GetLayoutWeight().value_or(0.0f);
                 }
                 if (LessOrEqual(childLayoutWeight, 0.0)) {
                     continue;
@@ -397,7 +432,7 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(FlexItemProperties& flexItem
                 float childLayoutWeight = 0.0f;
                 const auto& childMagicItemProperty = childLayoutWrapper->GetLayoutProperty()->GetMagicItemProperty();
                 if (childMagicItemProperty) {
-                    childLayoutWeight = childMagicItemProperty->GetLayoutWeightValue();
+                    childLayoutWeight = childMagicItemProperty->GetLayoutWeight().value_or(0.0f);
                 }
                 secondaryMeasureList_.emplace_back(child);
                 if (LessOrEqual(childLayoutWeight, 0.0)) {
@@ -434,7 +469,7 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(FlexItemProperties& flexItem
                 CheckBaselineProperties(childLayoutWrapper);
                 const auto& flexItemProperty = childLayoutWrapper->GetLayoutProperty()->GetFlexItemProperty();
                 if (flexItemProperty && GreatNotEqual(flexItemProperty->GetFlexGrow().value_or(0.0f), 0.0f)) {
-                    flexItemProperties.totalGrow += flexItemProperty->GetFlexGrowValue();
+                    flexItemProperties.totalGrow += flexItemProperty->GetFlexGrow().value_or(0.0f);
                 }
                 secondaryMeasureList_.emplace_back(child);
             }
@@ -444,10 +479,11 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(FlexItemProperties& flexItem
                     allocatedSize_ -= GetChildMainAxisSize(child.layoutWrapper);
                     allocatedSize_ -= space_;
                     child.layoutWrapper->SetActive(false);
+                    --validSizeCount_;
                     child.layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF());
                     const auto& flexItemProperty = child.layoutWrapper->GetLayoutProperty()->GetFlexItemProperty();
                     if (flexItemProperty && GreatNotEqual(flexItemProperty->GetFlexGrow().value_or(0.0f), 0.0f)) {
-                        flexItemProperties.totalGrow -= flexItemProperty->GetFlexGrowValue();
+                        flexItemProperties.totalGrow -= flexItemProperty->GetFlexGrow().value_or(0.0f);
                     }
                     secondaryMeasureList_.pop_back();
                 }
@@ -462,12 +498,13 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(FlexItemProperties& flexItem
             auto childList = iter->second;
             for (auto& child : childList) {
                 const auto& childLayoutWrapper = child.layoutWrapper;
-                auto childLayoutConstraint = child.layoutConstraint;
-                UpdateChildLayoutConstrainByFlexBasis(direction_, childLayoutWrapper, childLayoutConstraint);
-                childLayoutWrapper->Measure(childLayoutConstraint);
+                UpdateChildLayoutConstrainByFlexBasis(direction_, childLayoutWrapper, child.layoutConstraint);
+                childLayoutWrapper->Measure(child.layoutConstraint);
                 UpdateAllocatedSize(childLayoutWrapper, crossAxisSize_);
-                const auto& childLayoutProperty = childLayoutWrapper->GetLayoutProperty();
-                if (childLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::GONE) {
+                if (child.layoutWrapper && child.layoutWrapper->GetHostNode() &&
+                    child.layoutWrapper->GetHostNode()->GetLayoutProperty() &&
+                    child.layoutWrapper->GetHostNode()->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) ==
+                        VisibleType::GONE) {
                     continue;
                 }
                 CheckSizeValidity(childLayoutWrapper);
@@ -481,12 +518,15 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(FlexItemProperties& flexItem
                         flexGrow = flexItemProperty->GetFlexGrow().value_or(flexGrow);
                     }
                     flexItemProperties.totalGrow += flexGrow;
-                    flexItemProperties.totalShrink += (flexShrink * GetChildMainAxisSize(childLayoutWrapper));
+                    flexItemProperties.totalShrink +=
+                        (flexShrink * (GetChildMainAxisSize(childLayoutWrapper) -
+                                          GetMainAxisMargin(childLayoutWrapper, direction_)));
                 }
                 secondaryMeasureList_.emplace_back(child);
             }
             ++iter;
         }
+        allocatedSize_ -= space_;
     }
 }
 
@@ -562,11 +602,13 @@ void FlexLayoutAlgorithm::SecondaryMeasureByProperty(
             needSecondaryLayout = true;
         }
         if (LessOrEqual(totalFlexWeight_, 0.0f) && !isInfiniteLayout_) {
+            float childMainAxisMargin = GetMainAxisMargin(childLayoutWrapper, direction_);
             float itemFlex = getFlex(child.layoutWrapper);
-            float flexSize = (child.layoutWrapper == lastChild) ? (remainSpace - allocatedFlexSpace)
-                             : GreatOrEqual(remainSpace, 0.0f) || GreatNotEqual(maxDisplayPriority_, 1)
-                                 ? spacePerFlex * itemFlex
-                                 : spacePerFlex * itemFlex * GetChildMainAxisSize(child.layoutWrapper);
+            float flexSize =
+                (child.layoutWrapper == lastChild) ? (remainSpace - allocatedFlexSpace)
+                : GreatOrEqual(remainSpace, 0.0f) || GreatNotEqual(maxDisplayPriority_, 1)
+                    ? spacePerFlex * itemFlex
+                    : spacePerFlex * itemFlex * (GetChildMainAxisSize(child.layoutWrapper) - childMainAxisMargin);
             if (!NearZero(flexSize)) {
                 flexSize += GetChildMainAxisSize(childLayoutWrapper);
                 UpdateLayoutConstraintOnMainAxis(child.layoutConstraint, flexSize);
@@ -706,9 +748,16 @@ void FlexLayoutAlgorithm::AdjustTotalAllocatedSize(LayoutWrapper* layoutWrapper)
     }
     allocatedSize_ = 0.0f;
     allocatedSize_ += space_ * (validSizeCount_ - 1);
+    // space is not valid when mainAxisAlign is SPACE_AROUND/SPACE_BETWEEN/SPACE_EVENLY
+    if (mainAxisAlign_ == FlexAlign::SPACE_AROUND || mainAxisAlign_ == FlexAlign::SPACE_BETWEEN ||
+        mainAxisAlign_ == FlexAlign::SPACE_EVENLY) {
+        allocatedSize_ = 0.0;
+    }
     for (const auto& child : children) {
         if (child->IsOutOfLayout() ||
-            child->GetHostNode()->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::GONE) {
+            (layoutWrapper && layoutWrapper->GetHostNode() && layoutWrapper->GetHostNode()->GetLayoutProperty() &&
+                child->GetHostNode()->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) ==
+                    VisibleType::GONE)) {
             continue;
         }
         allocatedSize_ += GetChildMainAxisSize(child);
@@ -804,13 +853,14 @@ void FlexLayoutAlgorithm::PlaceChildren(
     float childCrossPos = 0.0f;
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     for (const auto& child : children) {
-        if (child->IsOutOfLayout()) {
+        if (child->IsOutOfLayout() || !child->IsActive()) {
             // adjust by postion property.
             child->GetGeometryNode()->SetMarginFrameOffset({});
             child->Layout();
             continue;
         }
-        if (child->GetHostNode()->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::GONE) {
+        if (layoutWrapper && layoutWrapper->GetHostNode() && layoutWrapper->GetHostNode()->GetLayoutProperty() &&
+            child->GetHostNode()->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::GONE) {
             continue;
         }
         auto alignItem = GetSelfAlign(child);
@@ -866,7 +916,11 @@ void FlexLayoutAlgorithm::PlaceChildren(
 FlexAlign FlexLayoutAlgorithm::GetSelfAlign(const RefPtr<LayoutWrapper>& layoutWrapper) const
 {
     const auto& flexItemProperty = layoutWrapper->GetLayoutProperty()->GetFlexItemProperty();
-    return flexItemProperty ? flexItemProperty->GetAlignSelf().value_or(crossAxisAlign_) : crossAxisAlign_;
+    if (!flexItemProperty || !flexItemProperty->GetAlignSelf().has_value() ||
+        flexItemProperty->GetAlignSelf().value_or(crossAxisAlign_) == FlexAlign::AUTO) {
+        return crossAxisAlign_;
+    }
+    return flexItemProperty->GetAlignSelf().value_or(crossAxisAlign_);
 }
 
 } // namespace OHOS::Ace::NG

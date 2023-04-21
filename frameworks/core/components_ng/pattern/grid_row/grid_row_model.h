@@ -19,6 +19,7 @@
 #include <functional>
 #include <memory>
 
+#include "core/components/common/layout/constants.h"
 #include "frameworks/core/components_v2/grid_layout/grid_container_util_class.h"
 
 namespace OHOS::Ace {
@@ -32,6 +33,7 @@ public:
         const RefPtr<V2::BreakPoints>& breakpoints, V2::GridRowDirection direction) = 0;
     virtual void SetOnBreakPointChange(std::function<void(const std::string)>&& onChange) = 0;
     virtual void SetHeight() {}
+    virtual void SetAlignItems(FlexAlign alignItem) = 0;
 
 private:
     static std::unique_ptr<GridRowModel> instance_;

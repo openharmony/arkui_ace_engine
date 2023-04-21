@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_FONT_FONT_COLLECTION_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_FONT_FONT_COLLECTION_H
 
-#include "flutter/lib/ui/text/font_collection.h"
+#include "txt/font_collection.h"
 
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"

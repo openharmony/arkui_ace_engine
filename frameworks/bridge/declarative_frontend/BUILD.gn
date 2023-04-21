@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,7 +13,9 @@
 
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/build/ace_ext.gni")
 import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
+import("../../../build/uicast.gni")
 
 # declarative frontend source
 template("declarative_frontend") {
@@ -105,6 +107,9 @@ template("declarative_js_engine") {
         defines += [ "_ARM64_" ]
       }
     }
+    if (current_os == "ohos" && current_cpu == "x86_64") {
+      defines += [ "SIMULATOR_64" ]
+    }
 
     deps = []
     configs = [ "$ace_root:ace_config" ]
@@ -178,10 +183,12 @@ template("declarative_js_engine") {
       "jsview/js_if_else.cpp",
       "jsview/js_image.cpp",
       "jsview/js_image_animator.cpp",
+      "jsview/js_image_span.cpp",
       "jsview/js_indexer.cpp",
       "jsview/js_interactable_view.cpp",
       "jsview/js_lazy_foreach.cpp",
       "jsview/js_line.cpp",
+      "jsview/js_linear_gradient.cpp",
       "jsview/js_list.cpp",
       "jsview/js_list_item.cpp",
       "jsview/js_list_item_group.cpp",
@@ -189,6 +196,9 @@ template("declarative_js_engine") {
       "jsview/js_local_storage.cpp",
       "jsview/js_marquee.cpp",
       "jsview/js_matrix2d.cpp",
+      "jsview/js_menu.cpp",
+      "jsview/js_menu_item.cpp",
+      "jsview/js_menu_item_group.cpp",
       "jsview/js_navdestination.cpp",
       "jsview/js_navigation.cpp",
       "jsview/js_navigator.cpp",
@@ -274,6 +284,7 @@ template("declarative_js_engine") {
       "jsview/models/grid_item_model_impl.cpp",
       "jsview/models/grid_model_impl.cpp",
       "jsview/models/grid_row_model_impl.cpp",
+      "jsview/models/hyperlink_model_impl.cpp",
       "jsview/models/if_else_model_impl.cpp",
       "jsview/models/image_model_impl.cpp",
       "jsview/models/lazy_for_each_model_impl.cpp",
@@ -288,6 +299,7 @@ template("declarative_js_engine") {
       "jsview/models/page_transition_model_impl.cpp",
       "jsview/models/path_model_impl.cpp",
       "jsview/models/patternlock_model_impl.cpp",
+      "jsview/models/picker_model_impl.cpp",
       "jsview/models/polygon_model_impl.cpp",
       "jsview/models/progress_model_impl.cpp",
       "jsview/models/qrcode_model_impl.cpp",
@@ -296,6 +308,7 @@ template("declarative_js_engine") {
       "jsview/models/refresh_model_impl.cpp",
       "jsview/models/row_model_impl.cpp",
       "jsview/models/scroll_model_impl.cpp",
+      "jsview/models/search_model_impl.cpp",
       "jsview/models/shape_abstract_model_impl.cpp",
       "jsview/models/shape_model_impl.cpp",
       "jsview/models/slider_model_impl.cpp",
@@ -311,15 +324,30 @@ template("declarative_js_engine") {
       "jsview/models/text_field_model_impl.cpp",
       "jsview/models/text_model_impl.cpp",
       "jsview/models/text_timer_model_impl.cpp",
+      "jsview/models/textpicker_model_impl.cpp",
+      "jsview/models/timepicker_model_impl.cpp",
       "jsview/models/toggle_model_impl.cpp",
       "jsview/models/view_abstract_model_impl.cpp",
       "jsview/models/view_full_update_model_impl.cpp",
       "jsview/models/view_partial_update_model_impl.cpp",
+      "jsview/models/water_flow_item_model_impl.cpp",
+      "jsview/models/water_flow_model_impl.cpp",
     ]
+
+    defines += uicast_configs.uicast_defines
+    sources += uicast_configs.uicast_frontend_sources
 
     if (defined(config.model_component_support) &&
         config.model_component_support) {
       sources += [ "jsview/models/model_view_impl.cpp" ]
+    }
+
+    external_deps = []
+    if (defined(config.enable_drag_framework) && config.enable_drag_framework) {
+      external_deps += [
+        "udmf:udmf_client",
+        "udmf:udmf_data_napi",
+      ]
     }
 
     # rich components needed by phone and TV. wearable like watch do not need them
@@ -329,11 +357,24 @@ template("declarative_js_engine") {
         "jsview/js_camera.cpp",
         "jsview/js_piece.cpp",
         "jsview/js_rating.cpp",
-        "jsview/js_video.cpp",
-        "jsview/js_video_controller.cpp",
         "jsview/models/rating_model_impl.cpp",
-        "jsview/models/video_model_impl.cpp",
       ]
+      if (defined(config.video_components_support) &&
+          config.video_components_support) {
+        sources += [
+          "jsview/js_video.cpp",
+          "jsview/js_video_controller.cpp",
+          "jsview/models/video_model_impl.cpp",
+        ]
+      }
+      if (defined(config.video_support_jsstack) &&
+          config.video_support_jsstack) {
+        external_deps += [ "hiview:libxpower_event_js" ]
+      }
+    }
+
+    if (defined(vendor_configs.ace_engine_advanced)) {
+      sources += vendor_configs.ace_engine_advanced_jsview
     }
 
     if (defined(config.xcomponent_components_support) &&
@@ -374,9 +415,10 @@ template("declarative_js_engine") {
 
     if (defined(config.plugin_components_support) &&
         config.plugin_components_support) {
-      deps +=
-          [ "$ace_flutter_engine_root:third_party_flutter_engine_$platform" ]
-      sources += [ "jsview/js_plugin.cpp" ]
+      sources += [
+        "jsview/js_plugin.cpp",
+        "jsview/models/plugin_model_impl.cpp",
+      ]
     }
 
     if (defined(config.preview_support) && config.preview_support) {
@@ -399,7 +441,11 @@ template("declarative_js_engine") {
       deps += [ "$ace_root/build:libace" ]
       if (defined(config.build_container_scope_lib) &&
           config.build_container_scope_lib) {
-        deps += [ "$ace_napi:ace_container_scope" ]
+        if (is_cross_platform_build) {
+          deps += [ "$ace_napi:ace_container_scope_static" ]
+        } else {
+          deps += [ "$ace_napi:ace_container_scope" ]
+        }
       }
     }
 
@@ -410,7 +456,18 @@ template("declarative_js_engine") {
       ":gen_obj_src_js_proxyclass",
     ]
 
+    deps += uicast_configs.uicast_root_deps
+
     include_dirs = [ "//foundation/window/window_manager/interfaces/innerkits" ]
+    include_dirs += uicast_configs.uicast_root_include
+
+    # add for cross_platfrom_build temporarily, shall be removed after external_deps is supported
+    if (is_cross_platform_build) {
+      configs += [ "$ark_ets_path:ark_jsruntime_public_config" ]
+      deps += [ "$ark_ets_path:libark_jsruntime_static" ]
+    } else {
+      external_deps += [ "ets_runtime:libark_jsruntime" ]
+    }
 
     if (platform == "windows" || platform == "mac" || platform == "linux") {
       deps += [ ":gen_obj_src_js_mock_system_plugin" ]
@@ -418,16 +475,21 @@ template("declarative_js_engine") {
       if (defined(config.plugin_components_support) &&
           config.plugin_components_support) {
         if (!use_mingw_win && !use_mac && !use_linux) {
-          external_deps = [
+          external_deps += [
             "multimedia_image_framework:image",
             "multimedia_image_framework:image_native",
           ]
         }
       } else {
-        external_deps = [
+        external_deps += [
           "multimedia_image_framework:image",
           "multimedia_image_framework:image_native",
         ]
+      }
+
+      if (defined(config.window_scene_support) && config.window_scene_support) {
+        sources += [ "jsview/js_ui_extension.cpp" ]
+        deps += [ "$window_manager_path/window_scene/session:scene_session" ]
       }
     }
   }
@@ -445,6 +507,9 @@ template("declarative_js_engine_ng") {
       if (!is_mingw) {
         defines += [ "_ARM64_" ]
       }
+    }
+    if (current_os == "ohos" && current_cpu == "x86_64") {
+      defines += [ "SIMULATOR_64" ]
     }
 
     deps = []
@@ -491,6 +556,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_grid_item.cpp",
       "jsview/js_if_else.cpp",
       "jsview/js_image.cpp",
+      "jsview/js_image_span.cpp",
       "jsview/js_interactable_view.cpp",
       "jsview/js_lazy_foreach.cpp",
       "jsview/js_list.cpp",
@@ -507,14 +573,19 @@ template("declarative_js_engine_ng") {
       "jsview/js_tabs_controller.cpp",
       "jsview/js_text.cpp",
       "jsview/js_toggle.cpp",
-      "jsview/js_video.cpp",
       "jsview/js_view.cpp",
       "jsview/js_view_abstract.cpp",
+      "jsview/js_view_context.cpp",
     ]
 
     sources += [
       "$ace_root/frameworks/bridge/js_frontend/engine/common/js_engine.cpp",
     ]
+
+    if (defined(config.video_components_support) &&
+        config.video_components_support) {
+      sources += [ "jsview/js_video.cpp" ]
+    }
 
     if (defined(config.use_build_in_js_engine) &&
         config.use_build_in_js_engine) {
@@ -528,12 +599,31 @@ template("declarative_js_engine_ng") {
       }
     }
 
+    # add for cross_platfrom_build temporarily, shall be removed after external_deps is supported
+    external_deps = []
+    if (is_cross_platform_build) {
+      configs += [ "$ark_ets_path:ark_jsruntime_public_config" ]
+      deps += [ "$ark_ets_path:libark_jsruntime_static" ]
+    } else {
+      external_deps += [ "ets_runtime:libark_jsruntime" ]
+    }
+
+    defines += uicast_configs.uicast_defines
+    sources += uicast_configs.uicast_frontend_sources
+
     deps += [ "engine/$engine_path:declarative_js_engine_bridge_${engine_name}_$platform" ]
 
     deps += [
       ":gen_obj_src_js_enum_style",
       ":gen_obj_src_js_proxyclass",
     ]
+
+    if (defined(config.enable_drag_framework) && config.enable_drag_framework) {
+      external_deps += [
+        "udmf:udmf_client",
+        "udmf:udmf_data_napi",
+      ]
+    }
   }
 }
 

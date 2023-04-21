@@ -37,9 +37,12 @@ public:
     virtual RefPtr<ScrollProxy> CreateScrollBarProxy() = 0;
     virtual void SetAxis(Axis axis) = 0;
     virtual void SetOnScrollBegin(NG::ScrollBeginEvent&& event) = 0;
+    virtual void SetOnScrollFrameBegin(NG::ScrollFrameBeginEvent&& event) = 0;
     virtual void SetOnScroll(NG::OnScrollEvent&& event) = 0;
     virtual void SetOnScrollEdge(NG::ScrollEdgeEvent&& event) = 0;
     virtual void SetOnScrollEnd(NG::ScrollEndEvent&& event) = 0;
+    virtual void SetOnScrollStart(NG::ScrollStartEvent&& event) = 0;
+    virtual void SetOnScrollStop(NG::ScrollStopEvent&& event) = 0;
     virtual void SetScrollBarProxy(const RefPtr<ScrollProxy>& proxy) = 0;
     virtual void InitScrollBar(const RefPtr<ScrollBarTheme>& theme, const std::pair<bool, Color>& color,
         const std::pair<bool, Dimension>& width, EdgeEffect effect) = 0;
@@ -47,6 +50,8 @@ public:
     virtual void SetScrollBarWidth(const Dimension& dimension) = 0;
     virtual void SetScrollBarColor(const Color& color) = 0;
     virtual void SetEdgeEffect(EdgeEffect edgeEffect) = 0;
+    virtual void SetHasWidth(bool hasWidth) = 0;
+    virtual void SetHasHeight(bool hasHeight) = 0;
 
 private:
     static std::unique_ptr<ScrollModel> instance_;

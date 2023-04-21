@@ -47,7 +47,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<SelectOverlayLayoutAlgorithm>(info_);
+        return MakeRefPtr<SelectOverlayLayoutAlgorithm>(info_, defaultMenuEndOffset_);
     }
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
@@ -64,9 +64,21 @@ public:
 
     void UpdateSecondSelectHandleInfo(const SelectHandleInfo& info);
 
+    void UpdateFirstAndSecondHandleInfo(const SelectHandleInfo& firstInfo, const SelectHandleInfo& secondInfo);
+
     void UpdateSelectMenuInfo(const SelectMenuInfo& info);
 
     void UpdateShowArea(const RectF& area);
+
+    void SetSelectInfo(const std::string& selectInfo)
+    {
+        selectInfo_ = selectInfo;
+    }
+
+    const std::string& GetSelectInfo() const
+    {
+        return selectInfo_;
+    }
 
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -75,7 +87,8 @@ private:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
     void HandleOnClick(GestureEvent& info);
-
+    void HandleTouchEvent(const TouchEventInfo& info);
+    void HandleOnTouch(GestureEvent& info);
     void HandlePanStart(GestureEvent& info);
     void HandlePanMove(GestureEvent& info);
     void HandlePanEnd(GestureEvent& info);
@@ -86,12 +99,19 @@ private:
     std::shared_ptr<SelectOverlayInfo> info_;
     RefPtr<PanEvent> panEvent_;
     RefPtr<ClickEvent> clickEvent_;
+    RefPtr<TouchEventImpl> touchEvent_;
 
     RectF firstHandleRegion_;
     RectF secondHandleRegion_;
 
     bool firstHandleDrag_ = false;
     bool secondHandleDrag_ = false;
+
+    int32_t greatThanMaxWidthIndex_ = -1;
+
+    std::string selectInfo_;
+
+    OffsetF defaultMenuEndOffset_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayPattern);
 };

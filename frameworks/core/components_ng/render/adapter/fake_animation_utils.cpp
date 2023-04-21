@@ -29,5 +29,24 @@ bool AnimationUtils::CloseImplicitAnimation()
 void AnimationUtils::Animate(
     const AnimationOption& option, const PropertyCallback& callback, const FinishCallback& finishCallback)
 {}
+
+class AnimationUtils::Animation {
+};
+
+void AnimationUtils::AddKeyFrame(
+    float fraction, const RefPtr<Curve>& curve, const PropertyCallback& callback)
+{}
+
+void AnimationUtils::AddKeyFrame(float fraction, const PropertyCallback& callback)
+{}
+
+std::shared_ptr<AnimationUtils::Animation> AnimationUtils::StartAnimation(
+    const AnimationOption& option, const PropertyCallback& callback, const FinishCallback& finishCallback)
+{
+    return nullptr;
+}
+
+void AnimationUtils::StopAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation)
+{}
 #endif
 } // namespace OHOS::Ace

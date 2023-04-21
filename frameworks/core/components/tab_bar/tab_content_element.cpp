@@ -231,16 +231,11 @@ RefPtr<FocusNode> TabContentElement::GetCurrentFocusNode() const
         return nullptr;
     }
 
-    auto focusIndexIter = focusIndexMap_.find(controller_->GetIndex());
-    if (focusIndexIter == focusIndexMap_.end()) {
+    auto childIter = focusChildMap_.find(controller_->GetIndex());
+    if (childIter == focusChildMap_.end()) {
         return nullptr;
     }
-    auto pos = focusNodes_.begin();
-    std::advance(pos, *focusIndexIter);
-    if (pos == focusNodes_.end()) {
-        return nullptr;
-    }
-    return AceType::DynamicCast<FocusNode>(*pos);
+    return childIter->second;
 }
 
 RefPtr<Element> TabContentElement::GetTabContentChild(int32_t index) const

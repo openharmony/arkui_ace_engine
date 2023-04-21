@@ -41,8 +41,8 @@ RenderLayer FlutterRenderSingleChildScroll::GetRenderLayer()
 
 void FlutterRenderSingleChildScroll::Paint(RenderContext& context, const Offset& offset)
 {
-    auto maxWidth = viewPort_.Width();
-    auto maxHeight = viewPort_.Height();
+    auto maxWidth = GetLayoutSize().Width();
+    auto maxHeight = GetLayoutSize().Height();
     auto parent = GetParent().Upgrade();
     if (parent) {
         auto parentBox = AceType::DynamicCast<RenderBox>(parent);

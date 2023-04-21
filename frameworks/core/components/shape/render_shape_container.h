@@ -62,6 +62,20 @@ public:
         return viewBox_;
     }
 
+    std::vector<double> GetMesh() const
+    {
+        return mesh_;
+    }
+
+    int32_t GetRow() const
+    {
+        return row_;
+    }
+
+    int32_t GetColumn() const
+    {
+        return column_;
+    }
 protected:
     ShapeViewBox viewBox_;
     bool hasDefineWidth_ = false;

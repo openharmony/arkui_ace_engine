@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,8 @@
  */
 
 #include "core/components_ng/pattern/badge/badge_layout_property.h"
+#include "core/components/badge/badge_theme.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -30,6 +32,10 @@ const Dimension DEFAULT_CIRCLE_SIZE = 16.0_vp;
 
 void BadgeLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
+    CHECK_NULL_VOID(badgeTheme);
     auto position = BadgeLayoutProperty::GetBadgePosition();
     json->Put("position", GetBadgePositionString(position).c_str());
 
@@ -43,6 +49,11 @@ void BadgeLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     jsonValue->Put("fontSize", GetBadgeFontSize().value_or(DEFAULT_FONT_SIZE).ToString().c_str());
     jsonValue->Put("badgeColor", GetBadgeColor().value_or(DEFAULT_BADGE_COLOR).ColorToString().c_str());
     jsonValue->Put("badgeSize", GetBadgeCircleSize().value_or(DEFAULT_CIRCLE_SIZE).ToString().c_str());
+    jsonValue->Put("borderColor",
+        GetBadgeBorderColor().value_or(badgeTheme->GetBadgeBorderColor()).ColorToString().c_str());
+    jsonValue->Put("borderWidth", GetBadgeBorderWidth().value_or(badgeTheme->GetBadgeBorderWidth()).ToString().c_str());
+    jsonValue->Put(
+        "fontWeight", V2::ConvertWrapFontWeightToStirng(GetBadgeFontWeight().value_or(FontWeight::NORMAL)).c_str());
     json->Put("style", jsonValue->ToString().c_str());
 }
 

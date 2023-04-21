@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,9 +20,11 @@
 
 #include "core/components/rating/rating_theme.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/rating/rating_accessibility_property.h"
 #include "core/components_ng/pattern/rating/rating_event_hub.h"
 #include "core/components_ng/pattern/rating/rating_layout_algorithm.h"
 #include "core/components_ng/pattern/rating/rating_layout_property.h"
+#include "core/components_ng/pattern/rating/rating_modifier.h"
 #include "core/components_ng/pattern/rating/rating_render_property.h"
 #include "core/components_ng/render/canvas_image.h"
 
@@ -70,6 +72,11 @@ public:
         return MakeRefPtr<RatingEventHub>();
     }
 
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        return MakeRefPtr<RatingAccessibilityProperty>();
+    }
+
     // Called on main thread to check if need rerender of the content.
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
@@ -93,8 +100,10 @@ public:
 
 private:
     void OnModifyDone() override;
-
     void ConstrainsRatingScore();
+    void LoadForeground();
+    void LoadSecondary();
+    void LoadBackground();
     void OnImageDataReady(int32_t imageFlag);
     void OnImageLoadSuccess(int32_t imageFlag);
     void CheckImageInfoHasChangedOrNot(
@@ -145,17 +154,19 @@ private:
     RefPtr<ImageLoadingContext> secondaryImageLoadingCtx_;
     RefPtr<ImageLoadingContext> backgroundImageLoadingCtx_;
 
+    RefPtr<RatingModifier> ratingModifier_;
     RefPtr<CanvasImage> foregroundImageCanvas_;
     RefPtr<CanvasImage> secondaryImageCanvas_;
     RefPtr<CanvasImage> backgroundImageCanvas_;
-    ImagePaintConfig singleStarImagePaintConfig_;
-    RectF singleStarDstRect_;
-    RectF singleStarRect_;
+    ImagePaintConfig foregroundConfig_;
+    ImagePaintConfig secondaryConfig_;
+    ImagePaintConfig backgroundConfig_;
     int32_t imageReadyStateCode_ = 0;
     int32_t imageSuccessStateCode_ = 0;
     bool hasInit_ = false;
     bool isHover_ = false;
     double lastRatingScore_ = 0.0;
+    RatingModifier::RatingAnimationType state_;
 
     bool isForegroundImageInfoFromTheme_ = false;
     bool isSecondaryImageInfoFromTheme_ = false;

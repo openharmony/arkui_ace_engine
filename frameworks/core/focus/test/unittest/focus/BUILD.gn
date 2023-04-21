@@ -78,10 +78,10 @@ ohos_unittest("FocusTest") {
   ]
 
   deps = [
-    "$cjson_root:cjson_static",
+    "$cjson_root:cjson",
     "//third_party/googletest:gtest_main",
   ]
-  if (is_standard_system) {
+  if (is_ohos_standard_system) {
     external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
     deps += [ "$ace_flutter_engine_root/icu:ace_libicu_ohos" ]
   } else {

@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_ACE_ENGINE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_ACE_ENGINE_H
 
+#include <atomic>
 #include <memory>
 #include <mutex>
 #include <unordered_map>
@@ -32,9 +33,9 @@ namespace OHOS::Ace {
 
 class AcePage;
 
-class ACE_EXPORT AceEngine {
+class ACE_FORCE_EXPORT_WITH_PREVIEW AceEngine {
 public:
-    ~AceEngine() = default;
+    ~AceEngine();
 
     void AddContainer(int32_t instanceId, const RefPtr<Container>& container);
     void RemoveContainer(int32_t instanceId);
@@ -45,7 +46,6 @@ public:
     void DefusingBomb(int32_t instanceId);
     static AceEngine& Get();
     static void InitJsDumpHeadSignal();
-    void Dump(const std::vector<std::string>& params) const;
     void DumpJsHeap(bool isPrivate) const;
 
     void TriggerGarbageCollection();
@@ -57,7 +57,7 @@ private:
     mutable std::shared_mutex mutex_;
     std::unordered_map<int32_t, RefPtr<Container>> containerMap_;
     RefPtr<WatchDog> watchDog_;
-
+    static std::atomic<bool> isAlive_;
     ACE_DISALLOW_COPY_AND_MOVE(AceEngine);
 };
 

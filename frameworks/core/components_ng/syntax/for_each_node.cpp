@@ -18,6 +18,7 @@
 #include <list>
 #include <type_traits>
 
+#include "base/log/ace_performance_check.h"
 #include "base/log/ace_trace.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/property/property.h"
@@ -60,7 +61,6 @@ void ForEachNode::CreateTempItems()
 void ForEachNode::CompareAndUpdateChildren()
 {
     ACE_SCOPED_TRACE("ForEachNode::CompareAndUpdateChildren");
-
     LOGD("Local update for ForEachNode nodeId: %{public}d ....", GetId());
 
     // result of id gen function of most re-recent render
@@ -83,7 +83,7 @@ void ForEachNode::CompareAndUpdateChildren()
     std::map<std::string, RefPtr<UINode>> oldNodeByIdMap;
     MakeNodeMapById(tempChildren_, tempIds_, oldNodeByIdMap);
 
-    int additionalChildIndex = 0;
+    int32_t additionalChildIndex = 0;
     for (const auto& newId : ids_) {
         auto oldIdIt = oldIdsSet.find(newId);
         if (oldIdIt == oldIdsSet.end()) {
@@ -91,8 +91,10 @@ void ForEachNode::CompareAndUpdateChildren()
             // insert new child item.
             auto newCompsIter = additionalChildComps.begin();
             std::advance(newCompsIter, additionalChildIndex++);
-            // Call AddChild to execute AttachToMainTree of new child.
-            AddChild(*newCompsIter);
+            if (newCompsIter != additionalChildComps.end()) {
+                // Call AddChild to execute AttachToMainTree of new child.
+                AddChild(*newCompsIter);
+            }
         } else {
             auto iter = oldNodeByIdMap.find(newId);
             // the ID was used before, only need to update the child position.
@@ -136,7 +138,7 @@ void ForEachNode::FlushUpdateAndMarkDirty()
 {
     // mark parent dirty to flush measure.
     MarkNeedSyncRenderTree();
-    MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+    MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT | PROPERTY_UPDATE_BY_CHILD_REQUEST);
 }
 
 } // namespace OHOS::Ace::NG

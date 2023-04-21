@@ -32,12 +32,16 @@
 #include "frameworks/core/components/transform/transform_element.h"
 
 namespace OHOS::Ace {
-
 namespace {
 
 const int32_t THEME_ID_DEFAULT = 117440515;
 
 } // namespace
+
+SubContainer::~SubContainer()
+{
+    Destroy();
+}
 
 void SubContainer::Initialize()
 {
@@ -139,32 +143,48 @@ void SubContainer::UpdateSurfaceSize()
         TaskExecutor::TaskType::UI);
 }
 
-void SubContainer::RunCard(int64_t id, const std::string& path, const std::string& module, const std::string& data,
-    const std::map<std::string, sptr<AppExecFwk::FormAshmem>>& imageDataMap, const std::string& formSrc,
-    const FrontendType& cardType)
+void SubContainer::UpdateSurfaceSizeWithAnimathion()
 {
-    if (id == runningCardId_) {
+    CHECK_NULL_VOID(pipelineContext_);
+    pipelineContext_->OnSurfaceChanged(surfaceWidth_, surfaceHeight_);
+    pipelineContext_->FlushPipelineImmediately();
+}
+
+void SubContainer::RunCard(int64_t formId, const std::string& path, const std::string& module, const std::string& data,
+    const std::map<std::string, sptr<AppExecFwk::FormAshmem>>& imageDataMap, const std::string& formSrc,
+    const FrontendType& cardType, const FrontendType& uiSyntax)
+{
+    LOGI("SubContainer::RunCard RunCard!!! path = %{public}s formSrc = %{public}s", path.c_str(), formSrc.c_str());
+    if (formId == runningCardId_) {
         LOGE("the card is showing, no need run again");
         return;
     }
-    runningCardId_ = id;
-    cardType_ = cardType;
 
+    runningCardId_ = formId;
+    if (onFormAcquiredCallback_) {
+        onFormAcquiredCallback_(formId);
+    }
+
+    if (uiSyntax == FrontendType::ETS_CARD) {
+        // ArkTSCard: 确认Acquired事件时序
+        LOGI("Run Card in FRS");
+        uiSyntax_ = FrontendType::ETS_CARD;
+        return;
+    }
+
+    cardType_ = cardType;
     if (cardType_ == FrontendType::ETS_CARD) {
         frontend_ = AceType::MakeRefPtr<CardFrontendDeclarative>();
+        onFormVisibleCallback_();
     } else if (cardType_ == FrontendType::JS_CARD) {
         frontend_ = AceType::MakeRefPtr<CardFrontend>();
+        frontend_->AddFormVisiableCallback(onFormVisibleCallback_);
     } else {
         LOGE("Run Card failed, card type unknown");
         return;
     }
 
     frontend_->Initialize(cardType_, taskExecutor_);
-
-    if (onFormAcquiredCallback_) {
-        onFormAcquiredCallback_(id);
-    }
-
     frontend_->ResetPageLoadState();
     LOGI("run card path:%{private}s, module:%{private}s, data:%{private}s", path.c_str(), module.c_str(), data.c_str());
     RefPtr<FlutterAssetManager> flutterAssetManager;
@@ -191,9 +211,11 @@ void SubContainer::RunCard(int64_t id, const std::string& path, const std::strin
     } else {
         frontend_->SetFormSrc(formSrc);
     }
+    LOGI("RunCard formSrc = %{public}s", formSrc.c_str());
     frontend_->SetCardWindowConfig(GetWindowConfig());
     auto&& window = std::make_unique<FormWindow>(outSidePipelineContext_);
-
+    window->SetFormWindowId(nodeId_);
+    windowId_ = nodeId_;
     if (cardType_ == FrontendType::ETS_CARD) { // ETS Card : API9 only support New Pipeline
         pipelineContext_ = AceType::MakeRefPtr<NG::PipelineContext>(
             std::move(window), taskExecutor_, assetManager_, nullptr, frontend_, instanceId_);
@@ -201,7 +223,6 @@ void SubContainer::RunCard(int64_t id, const std::string& path, const std::strin
         pipelineContext_ = AceType::MakeRefPtr<PipelineContext>(
             std::move(window), taskExecutor_, assetManager_, nullptr, frontend_, instanceId_);
     }
-    pipelineContext_->SetImageCache(outSidePipelineContext_.Upgrade()->GetImageCache());
     ContainerScope scope(instanceId_);
     density_ = outSidePipelineContext_.Upgrade()->GetDensity();
     auto eventManager = outSidePipelineContext_.Upgrade()->GetEventManager();
@@ -210,7 +231,7 @@ void SubContainer::RunCard(int64_t id, const std::string& path, const std::strin
     UpdateRootElementSize();
     pipelineContext_->SetIsJsCard(true); // JSCard & eTSCard both use this flag
     if (cardType_ == FrontendType::ETS_CARD) {
-        pipelineContext_->SetIsEtsCard(true); // only eTSCard use this flag
+        pipelineContext_->SetIsFormRender(true); // only eTSCard use this flag
     }
 
     ResourceInfo cardResourceInfo;
@@ -274,7 +295,7 @@ void SubContainer::RunCard(int64_t id, const std::string& path, const std::strin
 
     frontend_->AttachPipelineContext(pipelineContext_);
     frontend_->SetLoadCardCallBack(outSidePipelineContext_);
-    frontend_->SetRunningCardId(runningCardId_);
+    frontend_->SetRunningCardId(nodeId_);
     frontend_->SetDensity(density_);
     UpdateSurfaceSize();
 
@@ -299,13 +320,11 @@ void SubContainer::RunCard(int64_t id, const std::string& path, const std::strin
         if (Container::IsCurrentUseNewPipeline()) {
             auto pattern = formPattern_.Upgrade();
             CHECK_NULL_VOID(pattern);
-            auto pipelineContext = DynamicCast<PipelineContext>(pipelineContext_);
-            if (!pipelineContext) {
-                LOGE("RunCard failed, pipeline context is nullptr");
-                return;
-            }
-            pipelineContext->SetDrawDelegate(pattern->GetDrawDelegate());
+            pipelineContext_->SetDrawDelegate(pattern->GetDrawDelegate());
             frontend_->RunPage(0, "", data);
+            if (onFormLoadCallback_) {
+                onFormLoadCallback_();
+            }
             return;
         }
 
@@ -324,13 +343,31 @@ void SubContainer::RunCard(int64_t id, const std::string& path, const std::strin
             LOGE("set draw delegate could not get render form");
             return;
         }
-        auto pipelineContext = AceType::DynamicCast<PipelineContext>(pipelineContext_);
-        pipelineContext->SetDrawDelegate(formRender->GetDrawDelegate());
+        pipelineContext_->SetDrawDelegate(formRender->GetDrawDelegate());
 
         frontend_->RunPage(0, "", data);
     } else {
         LOGE("SubContainer::RunCard card type error");
     }
+}
+
+void SubContainer::RunSameCard()
+{
+    LOGI("SubContainer::RunSameCard ");
+    if (onFormAcquiredCallback_) {
+        onFormAcquiredCallback_(runningCardId_);
+    }
+    auto pattern = formPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto pipelineContext = DynamicCast<PipelineContext>(pipelineContext_);
+    CHECK_NULL_VOID(pipelineContext);
+    UpdateRootElementSize();
+    pipelineContext_->OnSurfaceChanged(surfaceWidth_, surfaceHeight_);
+    auto delegeta = pattern->GetDrawDelegate();
+    pipelineContext->SetDrawDelegate(std::move(delegeta));
+    pipelineContext->MarkForcedRefresh();
+    pipelineContext_->FlushPipelineImmediately();
+    onFormVisibleCallback_();
 }
 
 void SubContainer::ProcessSharedImage(const std::map<std::string, sptr<AppExecFwk::FormAshmem>> imageDataMap)
@@ -470,5 +507,4 @@ bool SubContainer::Dump(const std::vector<std::string>& params)
     }
     return false;
 }
-
 } // namespace OHOS::Ace

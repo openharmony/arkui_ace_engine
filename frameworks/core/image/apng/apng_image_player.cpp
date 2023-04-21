@@ -20,21 +20,19 @@
 #include "base/log/log.h"
 #include "core/components/image/flutter_render_image.h"
 #include "core/image/image_provider.h"
-#include "third_party/skia/include/codec/SkCodecAnimation.h"
-#include "third_party/skia/include/core/SkPixelRef.h"
+#include "include/codec/SkCodecAnimation.h"
+#include "include/core/SkPixelRef.h"
 
 namespace OHOS::Ace {
 APngImagePlayer::APngImagePlayer(
     ImageSourceInfo source,
     UploadSuccessCallback successCallback,
     const WeakPtr<PipelineBase>& weakContext,
-    const fml::WeakPtr<flutter::IOManager>& ioManager,
-    const fml::RefPtr<flutter::SkiaUnrefQueue>& gpuQueue,
     const RefPtr<PNGImageDecoder>& decoder,
     int32_t dstWidth,
     int32_t dstHeight)
-    : imageSource_(source), successCallback_(successCallback), context_(weakContext), ioManager_(ioManager),
-      unrefQueue_(gpuQueue), apngDecoder_(decoder), dstWidth_(dstWidth), dstHeight_(dstHeight)
+    : imageSource_(source), successCallback_(successCallback), context_(weakContext),
+      apngDecoder_(decoder), dstWidth_(dstWidth), dstHeight_(dstHeight)
 {
     LOGD("animated image frameCount_ : %{public}d, repetitionCount_ : %{public}d", frameCount_, repetitionCount_);
     auto context = context_.Upgrade();
@@ -241,7 +239,6 @@ void APngImagePlayer::RenderFrame(const int32_t &index)
                     return;
                 }
 
-                auto canvasImage = flutter::CanvasImage::Create();
                 APngAnimatedFrameInfo *frameInfo = player->DecodeFrameImage(index);
                 if (!frameInfo || !frameInfo->image) {
                     return;
@@ -251,13 +248,11 @@ void APngImagePlayer::RenderFrame(const int32_t &index)
                 if (dstWidth > 0 && dstHeight > 0) {
                     skImage = ImageProvider::ApplySizeToSkImage(skImage, dstWidth, dstHeight);
                 }
-
-                if (skImage) {
-                    canvasImage->set_image({skImage, player->unrefQueue_});
-                } else {
+                if (!skImage) {
                     LOGW("animated player cannot get the %{public}d skImage!", index);
                     return;
                 }
+                auto canvasImage = NG::CanvasImage::Create(&skImage);
 
                 taskExecutor->PostTask([callback = player->successCallback_, canvasImage,
                                                source = player->imageSource_] { callback(source, canvasImage); },

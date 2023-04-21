@@ -21,6 +21,7 @@
 #include "base/json/json_util.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/string_utils.h"
+#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
@@ -46,6 +47,11 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
+#ifdef ENABLE_DRAG_FRAMEWORK
+#include "video.h"
+#include "unified_data.h"
+#include "unified_record.h"
+#endif
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t SECONDS_PER_HOUR = 3600;
@@ -55,6 +61,10 @@ constexpr uint32_t SLIDER_POS = 2;
 constexpr uint32_t DURATION_POS = 3;
 constexpr uint32_t FULL_SCREEN_POS = 4;
 constexpr int32_t AVERAGE_VALUE = 2;
+
+// Default error, empty string.
+const std::string ERROR = "";
+
 enum SliderChangeMode {
     BEGIN = 0,
     MOVING,
@@ -113,27 +123,6 @@ SizeF CalculateFitScaleDown(const SizeF& videoSize, const SizeF& layoutSize)
     return CalculateFitContain(videoSize, layoutSize);
 }
 
-SizeF ConstraintSize(const SizeF& contentSize, const SizeF& layoutSize)
-{
-    if (contentSize.Width() <= layoutSize.Width() && contentSize.Height() <= layoutSize.Height()) {
-        return contentSize;
-    }
-
-    double widthRatio = contentSize.Width() / layoutSize.Width();
-    double heightRatio = contentSize.Height() / layoutSize.Height();
-    double rightRatio;
-    if (widthRatio <= 1) {
-        rightRatio = heightRatio;
-    } else if (heightRatio <= 1) {
-        rightRatio = widthRatio;
-    } else {
-        rightRatio = widthRatio > heightRatio ? heightRatio : heightRatio;
-    }
-
-    return { static_cast<float>(contentSize.Width() / rightRatio),
-        static_cast<float>(contentSize.Height() / rightRatio) };
-}
-
 SizeF MeasureVideoContentLayout(const SizeF& layoutSize, const RefPtr<VideoLayoutProperty>& layoutProperty)
 {
     if (!layoutProperty || !layoutProperty->HasVideoSize()) {
@@ -142,7 +131,7 @@ SizeF MeasureVideoContentLayout(const SizeF& layoutSize, const RefPtr<VideoLayou
     }
 
     auto videoSize = layoutProperty->GetVideoSizeValue(SizeF(0, 0));
-    LOGD("VideoSize = %{public}s", videoSize.ToString().c_str());
+    LOGD("Video original size before fitting is %{public}s", videoSize.ToString().c_str());
     auto imageFit = layoutProperty->GetObjectFitValue(ImageFit::COVER);
     SizeF contentSize = { 0.0, 0.0 };
     switch (imageFit) {
@@ -165,8 +154,9 @@ SizeF MeasureVideoContentLayout(const SizeF& layoutSize, const RefPtr<VideoLayou
             contentSize = CalculateFitContain(videoSize, layoutSize);
     }
 
-    // The video frame area should not be greater than the video component area.
-    return ConstraintSize(contentSize, layoutSize);
+    // Just return contentSize as the video frame area.
+    LOGD("Video contentSize after fitting is %{public}s", contentSize.ToString().c_str());
+    return contentSize;
 }
 } // namespace
 
@@ -183,7 +173,7 @@ void VideoPattern::UpdateMediaPlayer()
     if (!mediaPlayer_->IsMediaPlayerValid()) {
         mediaPlayer_->CreateMediaPlayer();
         if (!mediaPlayer_->IsMediaPlayerValid()) {
-            LOGE("create media player failed");
+            LOGE("Video create media player failed");
             return;
         }
     }
@@ -195,11 +185,13 @@ void VideoPattern::PrepareMediaPlayer()
     auto videoLayoutProperty = GetLayoutProperty<VideoLayoutProperty>();
     // src has not set/changed
     if (!videoLayoutProperty->HasVideoSource() || videoLayoutProperty->GetVideoSource() == src_) {
+        LOGW("Video source is null or the source has not changed.");
         return;
     }
 
     if (!mediaPlayer_->IsMediaPlayerValid()) {
-        LOGE("media player is invalid.");
+        LOGE("Video media player is invalid.");
+        OnError(ERROR);
         return;
     }
 
@@ -208,7 +200,8 @@ void VideoPattern::PrepareMediaPlayer()
     float volume = muted_ ? 0.0f : 1.0f;
     mediaPlayer_->SetVolume(volume, volume);
     if (!SetSourceForMediaPlayer()) {
-        LOGE("set source for mediaPlayer failed");
+        LOGE("Video set source for mediaPlayer failed.");
+        OnError(ERROR);
         return;
     }
 
@@ -247,7 +240,7 @@ void VideoPattern::RegisterMediaPlayerEvent()
         uiTaskExecutor.PostSyncTask([&videoPattern, status] {
             auto video = videoPattern.Upgrade();
             CHECK_NULL_VOID_NOLOG(video);
-            LOGD("OnPlayerStatus");
+            LOGI("OnPlayerStatus");
             video->OnPlayerStatus(status);
         });
     };
@@ -256,7 +249,7 @@ void VideoPattern::RegisterMediaPlayerEvent()
         uiTaskExecutor.PostTask([&videoPattern] {
             auto video = videoPattern.Upgrade();
             CHECK_NULL_VOID_NOLOG(video);
-            LOGD("OnError");
+            LOGW("OnError");
             video->OnError("");
         });
     };
@@ -275,7 +268,7 @@ void VideoPattern::RegisterMediaPlayerEvent()
 void VideoPattern::OnCurrentTimeChange(uint32_t currentPos)
 {
     isInitialState_ = isInitialState_ ? currentPos == 0 : false;
-    if (currentPos == currentPos_) {
+    if (currentPos == currentPos_ || isStop_) {
         return;
     }
 
@@ -347,11 +340,7 @@ void VideoPattern::OnPlayerStatus(PlaybackStatus status)
 
 void VideoPattern::OnError(const std::string& errorId)
 {
-#if defined(PREVIEW)
-    std::string errorcode = "This component is not supported on PC Preview.";
-#else
     std::string errorcode = Localization::GetInstance()->GetErrorDescription(errorId);
-#endif
     auto json = JsonUtil::Create(true);
     json->Put("error", "");
     auto param = json->ToString();
@@ -472,14 +461,34 @@ void VideoPattern::OnVisibleChange(bool isVisible)
 void VideoPattern::UpdateLooping()
 {
     if (mediaPlayer_->IsMediaPlayerValid()) {
-        mediaPlayer_->SetLooping(loop_);
+        LOGI("Video media player set the loop.");
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
+        platformTask.PostTask([weak = WeakClaim(RawPtr(mediaPlayer_)), loop = loop_] {
+            auto mediaPlayer = weak.Upgrade();
+            CHECK_NULL_VOID(mediaPlayer);
+            mediaPlayer->SetLooping(loop);
+        });
+    } else {
+        LOGW("Video media player is invalid.");
     }
 }
 
 void VideoPattern::SetSpeed()
 {
     if (mediaPlayer_->IsMediaPlayerValid()) {
-        mediaPlayer_->SetPlaybackSpeed(static_cast<float>(progressRate_));
+        LOGI("Video media player set the speed.");
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
+        platformTask.PostTask([weak = WeakClaim(RawPtr(mediaPlayer_)), progress = progressRate_] {
+            auto mediaPlayer = weak.Upgrade();
+            CHECK_NULL_VOID(mediaPlayer);
+            mediaPlayer->SetPlaybackSpeed(static_cast<float>(progress));
+        });
+    } else {
+        LOGW("Video media player is invalid.");
     }
 }
 
@@ -487,7 +496,17 @@ void VideoPattern::UpdateMuted()
 {
     if (mediaPlayer_->IsMediaPlayerValid()) {
         float volume = muted_ ? 0.0f : 1.0f;
-        mediaPlayer_->SetVolume(volume, volume);
+        LOGI("Video media player set the volume.");
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
+        platformTask.PostTask([weak = WeakClaim(RawPtr(mediaPlayer_)), videoVolume = volume] {
+            auto mediaPlayer = weak.Upgrade();
+            CHECK_NULL_VOID(mediaPlayer);
+            mediaPlayer->SetVolume(videoVolume, videoVolume);
+        });
+    } else {
+        LOGW("Video media player is invalid.");
     }
 }
 
@@ -533,13 +552,15 @@ void VideoPattern::PrepareSurface()
     if (renderSurface_->IsSurfaceValid()) {
         return;
     }
-    renderSurface_->SetRenderContext(renderContextForMediaPlayer_);
+    if (!SystemProperties::GetExtSurfaceEnabled()) {
+        renderSurface_->SetRenderContext(renderContextForMediaPlayer_);
+    }
     renderSurface_->InitSurface();
     mediaPlayer_->SetRenderSurface(renderSurface_);
     if (mediaPlayer_->SetSurface() != 0) {
         LOGE("Player SetVideoSurface failed");
         return;
-    };
+    }
 }
 
 void VideoPattern::OnAttachToFrameNode()
@@ -552,10 +573,12 @@ void VideoPattern::OnAttachToFrameNode()
     renderContextForMediaPlayer_->InitContext(false, "MediaPlayerSurface");
     renderContext->UpdateBackgroundColor(Color::BLACK);
     renderContextForMediaPlayer_->UpdateBackgroundColor(Color::BLACK);
+    renderContext->SetClipToBounds(true);
 }
 
 void VideoPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     if (!hiddenChangeEvent_) {
         SetHiddenChangeEvent([weak = WeakClaim(this)](bool hidden) {
             auto videoPattern = weak.Upgrade();
@@ -568,6 +591,14 @@ void VideoPattern::OnModifyDone()
     AddControlBarNodeIfNeeded();
     UpdateMediaPlayer();
     UpdateVideoProperty();
+    if (SystemProperties::GetExtSurfaceEnabled()) {
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        pipelineContext->AddOnAreaChangeNode(host->GetId());
+    }
+    EnableDrag();
 }
 
 void VideoPattern::AddPreviewNodeIfNeeded()
@@ -579,21 +610,29 @@ void VideoPattern::AddPreviewNodeIfNeeded()
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto children = host->GetChildren();
     bool isExist = false;
+    auto children = host->GetChildren();
+    auto posterSourceInfo = layoutProperty->GetPosterImageInfo().value();
+    auto imageFit = layoutProperty->GetObjectFitValue(ImageFit::COVER);
+
     for (const auto& child : children) {
         if (child->GetTag() == V2::IMAGE_ETS_TAG) {
             isExist = true;
+            auto image = AceType::DynamicCast<FrameNode>(child);
+            auto posterLayoutProperty = image->GetLayoutProperty<ImageLayoutProperty>();
+            posterLayoutProperty->UpdateImageSourceInfo(posterSourceInfo);
+            posterLayoutProperty->UpdateImageFit(imageFit);
+            image->MarkModifyDone();
             break;
         }
     }
 
     if (!isExist) {
-        auto posterSourceInfo = layoutProperty->GetPosterImageInfo().value();
         auto posterNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, -1, AceType::MakeRefPtr<ImagePattern>());
         CHECK_NULL_VOID(posterNode);
         auto posterLayoutProperty = posterNode->GetLayoutProperty<ImageLayoutProperty>();
         posterLayoutProperty->UpdateImageSourceInfo(posterSourceInfo);
+        posterLayoutProperty->UpdateImageFit(imageFit);
         host->AddChild(posterNode);
         posterNode->MarkModifyDone();
     }
@@ -610,6 +649,11 @@ void VideoPattern::AddControlBarNodeIfNeeded()
         for (const auto& child : children) {
             if (child->GetTag() == V2::ROW_ETS_TAG) {
                 isExist = true;
+                if (isDrag_) {
+                    host->RemoveChild(child);
+                    auto controlBar = CreateControlBar();
+                    host->AddChild(controlBar);
+                }
                 break;
             }
         }
@@ -681,6 +725,32 @@ bool VideoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     return false;
 }
 
+void VideoPattern::OnAreaChangedInner()
+{
+    if (SystemProperties::GetExtSurfaceEnabled()) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto geometryNode = host->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        auto videoNodeSize = geometryNode->GetContentSize();
+        auto videoNodeOffset = geometryNode->GetContentOffset();
+        auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        auto videoFrameSize = MeasureVideoContentLayout(videoNodeSize, layoutProperty);
+        auto transformRelativeOffset = host->GetTransformRelativeOffset();
+
+        Rect rect = Rect(transformRelativeOffset.GetX() + videoNodeOffset.GetX() +
+                             (videoNodeSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
+            transformRelativeOffset.GetY() + videoNodeOffset.GetY() +
+                (videoNodeSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE,
+            videoFrameSize.Width(), videoFrameSize.Height());
+        if (rect != lastBoundsRect_) {
+            renderSurface_->SetExtSurfaceBounds(rect.Left(), rect.Top(), rect.Width(), rect.Height());
+            lastBoundsRect_ = rect;
+        }
+    }
+}
+
 RefPtr<FrameNode> VideoPattern::CreateControlBar()
 {
     auto pipelineContext = PipelineBase::GetCurrentContext();
@@ -719,6 +789,7 @@ RefPtr<FrameNode> VideoPattern::CreateControlBar()
     controlBarLayoutProperty->UpdateMainAxisAlign(FlexAlign::SPACE_BETWEEN);
     return controlBar;
 }
+
 RefPtr<FrameNode> VideoPattern::CreateSlider()
 {
     auto pipelineContext = PipelineBase::GetCurrentContext();
@@ -880,12 +951,13 @@ void VideoPattern::SetMethodCall()
 
 void VideoPattern::Start()
 {
+    LOGI("Video start to play.");
     if (!mediaPlayer_->IsMediaPlayerValid()) {
         LOGE("media player is invalid.");
         return;
     }
 
-    if (isStop_ && mediaPlayer_->Prepare() != 0) {
+    if (isStop_ && mediaPlayer_->PrepareAsync() != 0) {
         LOGE("Player has not prepared");
         return;
     }
@@ -912,7 +984,6 @@ void VideoPattern::Start()
         ++iter;
     }
 
-    LOGD("Video Start");
     auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
     platformTask.PostTask([weak = WeakClaim(RawPtr(mediaPlayer_))] {
         auto mediaPlayer = weak.Upgrade();
@@ -1114,4 +1185,89 @@ bool VideoPattern::OnBackPressed()
     return true;
 }
 
+void VideoPattern::EnableDrag()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
+    std::string videoSrcBefore = src_;
+    std::string imageSrcBefore = "";
+    if (layoutProperty->HasPosterImageInfo()) {
+        imageSrcBefore = layoutProperty->GetPosterImageInfo().value().GetSrc();
+    }
+#ifdef ENABLE_DRAG_FRAMEWORK
+    auto dragEnd = [this, videoSrcBefore](
+        const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
+        auto videoLayoutProperty = this->GetLayoutProperty<VideoLayoutProperty>();
+        std::shared_ptr<UDMF::UnifiedData> unifiedData = event->GetData();
+        std::string videoSrc = "";
+        if (unifiedData != nullptr) {
+            auto records = unifiedData->GetRecords();
+            if (records.size() == 0 || records[0]->GetType() != UDMF::UDType::VIDEO) {
+                LOGE("unifiedRecords is empty");
+            }
+            auto video = reinterpret_cast<UDMF::Video *>(records[0].get());
+            videoSrc = video->GetUri();
+        } else {
+            auto json = JsonUtil::ParseJsonString(extraParams);
+            std::string key = "extraInfo";
+            videoSrc = json->GetString(key);
+        }
+
+        bool isInitialState = this->isInitialState_;
+        if (videoSrc == videoSrcBefore) {
+            return;
+        }
+
+        videoLayoutProperty->UpdateVideoSource(videoSrc);
+
+        if (!isInitialState) {
+            this->SetIsStop(true);
+        }
+        auto frameNode = this->GetHost();
+        frameNode->MarkModifyDone();
+    };
+#else
+    auto dragEnd = [this, videoSrcBefore, imageSrcBefore](
+        const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
+        if (extraParams.empty()) {
+            LOGE("extraParams is empty");
+        }
+        auto videoLayoutProperty = this->GetLayoutProperty<VideoLayoutProperty>();
+        auto json = JsonUtil::ParseJsonString(extraParams);
+        std::string key = "extraInfo";
+        std::string extraInfo = json->GetString(key);
+        int index = extraInfo.find("::");
+        if (index == extraInfo.length() - 2) {
+            LOGE("video source is empty");
+        }
+        std::string videoSrc = extraInfo.substr(index + 2); // 2 :the length of "::"
+        std::string imageSrc = "";
+        if (index != 0) {
+            imageSrc = extraInfo.substr(0, index);
+        }
+        
+        bool isInitialState = this->isInitialState_;
+        if ((!isInitialState && videoSrc == videoSrcBefore) ||
+            (isInitialState && videoSrc == videoSrcBefore && imageSrc == imageSrcBefore)) {
+            return;
+        }
+
+        videoLayoutProperty->UpdateVideoSource(videoSrc);
+        ImageSourceInfo imageSourceInfo = ImageSourceInfo(imageSrc);
+        videoLayoutProperty->UpdatePosterImageInfo(imageSourceInfo);
+
+        if (!isInitialState) {
+            this->SetIsStop(true);
+        }
+        this->SetIsDrag(true);
+        auto frameNode = this->GetHost();
+        frameNode->MarkModifyDone();
+        this->SetIsDrag(false);
+    };
+#endif
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDrop(std::move(dragEnd));
+}
 } // namespace OHOS::Ace::NG

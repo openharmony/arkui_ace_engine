@@ -40,7 +40,9 @@ void RosenRenderXComponent::Update(const RefPtr<Component>& component)
 
 void RosenRenderXComponent::Paint(RenderContext& context, const Offset& offset)
 {
-    SyncGeometryProperties();
+    if (!SystemProperties::GetExtSurfaceEnabled()) {
+        SyncGeometryProperties();
+    }
     RenderXComponent::Paint(context, offset);
 }
 

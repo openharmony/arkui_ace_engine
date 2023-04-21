@@ -17,7 +17,7 @@
 
 #include <vector>
 
-#include "frameworks/base/utils/string_utils.h"
+#include "base/utils/string_utils.h"
 
 namespace OHOS::Ace {
 namespace {

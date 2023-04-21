@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #define private public
 #include "gtest/gtest.h"
 
@@ -201,6 +202,13 @@ HWTEST_F(AbilityComponentPatternTestNg, AbilityComponentTest004, TestSize.Level1
     EXPECT_NE(layoutWrapper, nullptr);
     DirtySwapConfig config;
     config.frameOffsetChange = true;
+    config.frameSizeChange = true;
+    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    config.frameSizeChange = false;
+    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    config.frameOffsetChange = false;
+    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    config.frameSizeChange = true;
     pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     pattern->FireConnect();
     EXPECT_EQ(flagConnect, true);

@@ -21,6 +21,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/button/toggle_button_model_ng.h"
 #include "core/components_ng/pattern/button/toggle_button_pattern.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
@@ -30,13 +31,14 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
+#include "core/components/toggle/toggle_theme.h"
 
 namespace OHOS::Ace::NG {
 
 void ToggleModelNG::Create(NG::ToggleType toggleType, bool isOn)
 {
     auto* stack = ViewStackProcessor::GetInstance();
-    int nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
+    int nodeId = stack->ClaimNodeId();
     auto childFrameNode = FrameNode::GetFrameNode(V2::TOGGLE_ETS_TAG, nodeId);
     if (!childFrameNode) {
         switch (toggleType) {
@@ -141,23 +143,45 @@ void ToggleModelNG::Create(NG::ToggleType toggleType, bool isOn)
     }
 }
 
-void ToggleModelNG::SetSelectedColor(const Color& selectedColor)
+void ToggleModelNG::SetSelectedColor(const std::optional<Color>& selectedColor)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     CHECK_NULL_VOID(stack);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    Color color;
+    if (selectedColor.has_value()) {
+        color = selectedColor.value();
+    }
+
     auto checkboxPattern = stack->GetMainFrameNodePattern<CheckBoxPattern>();
     if (checkboxPattern) {
+        if (!selectedColor.has_value()) {
+            auto theme = pipeline->GetTheme<CheckboxTheme>();
+            CHECK_NULL_VOID(theme);
+            color = theme->GetActiveColor();
+        }
         CheckBoxModelNG checkBoxModelNG;
-        checkBoxModelNG.SetSelectedColor(selectedColor);
+        checkBoxModelNG.SetSelectedColor(color);
         return;
     }
     auto buttonPattern = stack->GetMainFrameNodePattern<ToggleButtonPattern>();
     if (buttonPattern) {
-        ToggleButtonModelNG::SetSelectedColor(selectedColor);
+        if (!selectedColor.has_value()) {
+            auto theme = pipeline->GetTheme<ToggleTheme>();
+            CHECK_NULL_VOID(theme);
+            color = theme->GetCheckedColor();
+        }
+        ToggleButtonModelNG::SetSelectedColor(color);
         return;
     }
 
-    ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, SelectedColor, selectedColor);
+    if (!selectedColor.has_value()) {
+        auto theme = pipeline->GetTheme<SwitchTheme>();
+        CHECK_NULL_VOID(theme);
+        color = theme->GetActiveColor();
+    }
+    ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, SelectedColor, color);
 }
 
 void ToggleModelNG::SetSwitchPointColor(const Color& switchPointColor)
@@ -227,6 +251,7 @@ void ToggleModelNG::CreateButton(int32_t nodeId)
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::TOGGLE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ToggleButtonPattern>(); });
     stack->Push(frameNode);
+    NG::ViewAbstract::SetHoverEffectAuto(HoverEffectType::SCALE);
 }
 
 void ToggleModelNG::AddNewChild(const RefPtr<UINode>& parentFrame, int32_t nodeId, int32_t index)

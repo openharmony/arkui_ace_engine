@@ -17,10 +17,6 @@
 
 #include "base/utils/macros.h"
 
-#ifdef USE_V8_ENGINE
-#include "frameworks/bridge/declarative_frontend/engine/v8/v8_declarative_engine.h"
-#endif
-
 #ifdef USE_ARK_ENGINE
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #endif
@@ -32,9 +28,6 @@ DeclarativeEngineLoader::~DeclarativeEngineLoader() = default;
 
 RefPtr<JsEngine> DeclarativeEngineLoader::CreateJsEngine(int32_t instanceId) const
 {
-#ifdef USE_V8_ENGINE
-    return AceType::MakeRefPtr<V8DeclarativeEngine>(instanceId);
-#endif
 
 #ifdef USE_ARK_ENGINE
     return AceType::MakeRefPtr<JsiDeclarativeEngine>(instanceId);
@@ -44,7 +37,7 @@ RefPtr<JsEngine> DeclarativeEngineLoader::CreateJsEngine(int32_t instanceId) con
 RefPtr<JsEngine> DeclarativeEngineLoader::CreateJsEngineUsingSharedRuntime(int32_t instanceId, void* runtime) const
 {
 #ifdef USE_ARK_ENGINE
-    LOGD("CreateJsEngineUsingSharedRuntime id:%{public}d runtime:%{public}p", instanceId, runtime);
+    LOGD("CreateJsEngineUsingSharedRuntime id:%{public}d", instanceId);
     return AceType::MakeRefPtr<JsiDeclarativeEngine>(instanceId, runtime);
 #else
     return nullptr;
@@ -67,7 +60,7 @@ JsEngineLoader& JsEngineLoader::GetDeclarative(const char*)
     return DeclarativeEngineLoader::GetInstance();
 }
 #else
-extern "C" ACE_EXPORT void* OHOS_ACE_GetJsEngineLoader()
+extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_GetJsEngineLoader()
 {
     return &DeclarativeEngineLoader::GetInstance();
 }

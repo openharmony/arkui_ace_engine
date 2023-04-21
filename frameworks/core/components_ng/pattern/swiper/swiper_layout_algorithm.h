@@ -101,6 +101,17 @@ private:
     void InitInActiveItems(float translateLength);
     int32_t ClampIndex(int32_t index);
 
+    void PlaceDigitChild(const RefPtr<LayoutWrapper>& indicatorWrapper, const RefPtr<LayoutProperty>& layoutProperty);
+    double GetValidEdgeLength(float swiperLength, float indicatorLength, const Dimension& edge);
+    void LayoutOffScreen(LayoutWrapper* layoutWrapper, Axis axis) const;
+    void LoopMeasure(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis,
+        float& crossSize, float& mainSize);
+    void LoopLayout(LayoutWrapper* layoutWrapper);
+    void NonLoopLayout(LayoutWrapper* layoutWrapper);
+    void SortItems(std::list<int32_t>& preItems, std::list<int32_t>& nextItems, int32_t displayCount);
+    void LayoutItems(
+        LayoutWrapper* layoutWrapper, const std::list<int32_t>& preItems, const std::list<int32_t>& nextItems);
+
     bool isLoop_ = true;
     int32_t currentIndex_ = 0;
     int32_t startIndex_;
@@ -109,6 +120,8 @@ private:
     float currentOffset_ = 0.0f;
     int32_t totalCount_ = 0;
     int32_t displayCount_ = 0;
+    float prevMargin_ = 0.0f;
+    float nextMargin_ = 0.0f;
     std::set<int32_t> itemRange_;
     std::set<int32_t> preItemRange_;
     std::vector<int32_t> inActiveItems_;

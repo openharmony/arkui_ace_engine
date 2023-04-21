@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -57,11 +57,14 @@ template("build_component") {
       deps += extra_deps
       deps += [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
 
-      if (enable_ng_build) {
+      if (ace_use_new_skia) {
+        include_dirs =
+            [ "//third_party/skia/third_party/externals/harfbuzz/src" ]
         deps += [
-          "$ace_flutter_engine_root_new:third_party_flutter_engine_dev_$platform",
-          "$ace_flutter_engine_root_new/third_party/skia:ace_skia_dev_$platform",
+          "$ace_flutter_engine_root/libtxt:thirdparty_lib_txt_$platform",
+          "$skia_root_new:skia",
         ]
+        configs += [ "$ace_flutter_engine_root:flutter_config" ]
       } else {
         deps += [
           "$ace_flutter_engine_root:third_party_flutter_engine_$platform",
@@ -72,11 +75,6 @@ template("build_component") {
       if (defined(invoker.public_configs)) {
         public_configs = []
         public_configs += invoker.public_configs
-      }
-
-      if (defined(invoker.aosp_deps)) {
-        aosp_deps = []
-        aosp_deps += invoker.aosp_deps
       }
 
       if (defined(invoker.external_deps)) {
@@ -118,7 +116,7 @@ template("build_component") {
       }
 
       if (defined(config.web_components_support) &&
-          config.web_components_support && is_standard_system) {
+          config.web_components_support && is_ohos_standard_system) {
         if (defined(invoker.standard_web_configs)) {
           configs += invoker.standard_web_configs
         }
@@ -134,7 +132,11 @@ template("build_component") {
       if (defined(config.enable_rosen_backend) && config.enable_rosen_backend &&
           defined(invoker.rosen_sources)) {
         sources += invoker.rosen_sources
-        configs += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:render_service_client_config" ]
+        if (is_cross_platform_build) {
+          deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static" ]
+        } else {
+          deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
+        }
       }
       part_name = ace_engine_part
       subsystem_name = ace_engine_subsystem

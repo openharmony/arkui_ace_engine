@@ -17,9 +17,10 @@
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
+#include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/common/properties/shadow_config.h"
-#include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/toast/toast_theme.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -30,6 +31,22 @@
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+float GetTextHeight(const RefPtr<FrameNode>& textNode)
+{
+    auto textlayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textlayoutProperty, 0.0f);
+    auto layoutConstraint = textlayoutProperty->GetLayoutConstraint();
+
+    auto textLayoutWrapper = textNode->CreateLayoutWrapper();
+    CHECK_NULL_RETURN(textLayoutWrapper, 0.0f);
+    textLayoutWrapper->Measure(layoutConstraint);
+    auto textGeometry = textLayoutWrapper->GetGeometryNode();
+    CHECK_NULL_RETURN(textGeometry, 0.0f);
+    auto textSize = textGeometry->GetMarginFrameSize();
+    return textSize.Height();
+}
+} // namespace
 
 RefPtr<FrameNode> ToastView::CreateToastNode(const std::string& message, const std::string& bottom, bool isRightToLeft)
 {
@@ -63,8 +80,8 @@ RefPtr<FrameNode> ToastView::CreateToastNode(const std::string& message, const s
     auto rootWidth = Dimension(context->GetRootWidth());
     toastProperty->UpdateUserDefinedIdealSize(CalcSize(NG::CalcLength(rootWidth), std::nullopt));
 
-    auto bottomPosition = Dimension(StringUtils::StringToDimensionWithThemeValue(bottom, true,
-        toastTheme->GetBottom()).ConvertToPx());
+    auto bottomPosition =
+        Dimension(StringUtils::StringToDimensionWithThemeValue(bottom, true, toastTheme->GetBottom()).ConvertToPx());
     Color textColor;
     Color toastBackgroundColor;
     Dimension fontSize;
@@ -72,7 +89,7 @@ RefPtr<FrameNode> ToastView::CreateToastNode(const std::string& message, const s
     Dimension maxWidth;
     Dimension minHeight;
     FontWeight fontWeight;
-    Dimension toastbottom;
+    Dimension toastBottom;
     BorderRadiusProperty borderRadius;
     PaddingProperty paddings;
 
@@ -81,17 +98,23 @@ RefPtr<FrameNode> ToastView::CreateToastNode(const std::string& message, const s
     textColor = toastTheme->GetTextStyle().GetTextColor();
     fontSize = toastTheme->GetTextStyle().GetFontSize();
     minWidth = Dimension(toastTheme->GetMinWidth().ConvertToPx());
-    maxWidth = Dimension(toastTheme->GetMaxWidth().ConvertToPx());
     minHeight = Dimension(toastTheme->GetMinHeight().ConvertToPx());
-    toastbottom = Dimension(
+    toastBottom = Dimension(
         GreatOrEqual(bottomPosition.Value(), 0.0) ? bottomPosition.Value() : toastTheme->GetBottom().ConvertToPx());
     auto radius = toastTheme->GetRadius();
-    borderRadius.SetRadius(Dimension(radius.GetX().Value()));
+    borderRadius.SetRadius(Dimension(radius.GetX().ConvertToPx()));
     auto padding = toastTheme->GetPadding();
-    paddings.top = NG::CalcLength(Dimension(padding.Top().Value()));
-    paddings.bottom = NG::CalcLength(Dimension(padding.Bottom().Value()));
-    paddings.left = NG::CalcLength(Dimension(padding.Left().Value()));
-    paddings.right = NG::CalcLength(Dimension(padding.Right().Value()));
+    paddings.top = NG::CalcLength(padding.Top());
+    paddings.bottom = NG::CalcLength(padding.Bottom());
+    paddings.left = NG::CalcLength(padding.Left());
+    paddings.right = NG::CalcLength(padding.Right());
+
+    auto gridColumnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::TOAST);
+    auto parent = gridColumnInfo->GetParent();
+    if (parent) {
+        parent->BuildColumnWidth(context->GetRootWidth());
+    }
+    maxWidth = Dimension(gridColumnInfo->GetMaxWidth());
 
     textlayoutProperty->UpdateContent(message);
     textlayoutProperty->UpdateTextColor(textColor);
@@ -106,9 +129,10 @@ RefPtr<FrameNode> ToastView::CreateToastNode(const std::string& message, const s
     textContext->UpdateBackgroundColor(toastBackgroundColor);
     textContext->UpdateBorderRadius(borderRadius);
     textContext->UpdateBackShadow(ShadowConfig::DefaultShadowL);
+    toastNode->MarkModifyDone();
 
     toastContext->UpdateOffset(
-        OffsetT<Dimension>(0.0_px, rootHeight - Dimension(CONTAINER_TITLE_HEIGHT.ConvertToPx()) - toastbottom));
+        OffsetT<Dimension>(0.0_px, rootHeight - toastBottom - Dimension(GetTextHeight(textNode))));
 
     textNode->MountToParent(toastNode);
     return toastNode;

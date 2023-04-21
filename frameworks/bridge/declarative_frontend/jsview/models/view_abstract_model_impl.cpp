@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -328,10 +328,13 @@ void ViewAbstractModelImpl::SetBackgroundImagePosition(const BackgroundImagePosi
     decoration->SetImage(image);
 }
 
-void ViewAbstractModelImpl::SetBackgroundBlurStyle(const BlurStyle& bgBlurStyle)
+void ViewAbstractModelImpl::SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle)
 {
     auto decoration = GetBackDecoration();
     decoration->SetBlurStyle(bgBlurStyle);
+    double radius = 0.0;
+    Dimension dimensionRadius(radius, DimensionUnit::PX);
+    decoration->SetBlurRadius(ToAnimatableDimension(dimensionRadius));
 }
 
 void ViewAbstractModelImpl::SetPadding(const Dimension& value)
@@ -649,7 +652,7 @@ void ViewAbstractModelImpl::SetScale(float x, float y, float z)
     transform->Scale(x, y, z, option);
 }
 
-void ViewAbstractModelImpl::SetPivot(const Dimension& x, const Dimension& y)
+void ViewAbstractModelImpl::SetPivot(const Dimension& x, const Dimension& y, const Dimension& /* z */)
 {
     RefPtr<TransformComponent> transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
     transform->SetOriginDimension(DimensionOffset(x, y));
@@ -923,6 +926,7 @@ void ViewAbstractModelImpl::SetBackdropBlur(const Dimension& radius)
 {
     auto decoration = GetBackDecoration();
     decoration->SetBlurRadius(ToAnimatableDimension(radius));
+    decoration->SetBlurStyle(BlurStyleOption());
 }
 
 void ViewAbstractModelImpl::SetFrontBlur(const Dimension& radius)
@@ -1149,6 +1153,12 @@ void ViewAbstractModelImpl::SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter)
 {
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
     box->SetOnDragEnterId(onDragEnter);
+}
+
+void ViewAbstractModelImpl::SetOnDragEnd(OnNewDragFunc&& onDragEnd)
+{
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    box->SetOnDragEndId(onDragEnd);
 }
 
 void ViewAbstractModelImpl::SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave)
@@ -1431,13 +1441,14 @@ GestureEventFunc CreateMenuEventWithParams(
                 continue;
             }
             auto optionComponent = AceType::MakeRefPtr<OHOS::Ace::OptionComponent>(optionTheme);
-            auto textComponent = AceType::MakeRefPtr<OHOS::Ace::TextComponent>(param.first);
+            auto textComponent = AceType::MakeRefPtr<OHOS::Ace::TextComponent>(param.value);
 
             optionComponent->SetTextStyle(optionTheme->GetOptionTextStyle());
             optionComponent->SetTheme(optionTheme);
             optionComponent->SetText(textComponent);
-            optionComponent->SetValue(param.first);
-            optionComponent->SetCustomizedCallback(param.second);
+            optionComponent->SetValue(param.value);
+            optionComponent->SetCustomizedCallback(param.action);
+            optionComponent->SetSelectedBackgroundColor(optionTheme->GetSelectedColor());
             menuComponent->AppendOption(optionComponent);
         }
 
@@ -1484,7 +1495,8 @@ GestureEventFunc CreateMenuEventWithBuilder(
     };
 }
 
-void ViewAbstractModelImpl::BindMenu(std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc)
+void ViewAbstractModelImpl::BindMenu(
+    std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const NG::MenuParam&)
 {
     ViewStackProcessor::GetInstance()->GetCoverageComponent();
     auto menuComponent = ViewStackProcessor::GetInstance()->GetMenuComponent(true);
@@ -1505,7 +1517,7 @@ void ViewAbstractModelImpl::BindMenu(std::vector<NG::OptionParam>&& params, std:
     click->SetOnClick(tapGesture);
 }
 
-void ViewAbstractModelImpl::BindContextMenu(ResponseType type, std::function<void()>&& buildFunc)
+void ViewAbstractModelImpl::BindContextMenu(ResponseType type, std::function<void()>&& buildFunc, const NG::MenuParam&)
 {
     ViewStackProcessor::GetInstance()->GetCoverageComponent();
     auto menuComponent = ViewStackProcessor::GetInstance()->GetMenuComponent(true);

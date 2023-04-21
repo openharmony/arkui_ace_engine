@@ -23,7 +23,7 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT ToggleModelNG : public OHOS::Ace::ToggleModel {
 public:
     void Create(ToggleType toggleType, bool isOn) override;
-    void SetSelectedColor(const Color& selectedColor) override;
+    void SetSelectedColor(const std::optional<Color>& selectedColor) override;
     void SetSwitchPointColor(const Color& switchPointColor) override;
     void OnChange(ChangeEvent&& onChange) override;
     void SetWidth(const Dimension& width) override;

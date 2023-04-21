@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -223,7 +223,11 @@ public:
 
     // FrontendDelegate overrides.
     void Push(const std::string& uri, const std::string& params) override;
+    void PushWithCallback(const std::string& uri, const std::string& params,
+        const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode = 0) override;
     void Replace(const std::string& uri, const std::string& params) override;
+    void ReplaceWithCallback(const std::string& uri, const std::string& params,
+        const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode = 0) override;
     void Back(const std::string& uri, const std::string& params) override;
     void PostponePageTransition() override;
     void LaunchPageTransition() override;
@@ -246,6 +250,7 @@ public:
     bool IsWebFeature();
 
     double MeasureText(const MeasureContext& context) override;
+    Size MeasureTextSize(const MeasureContext& context) override;
 
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom) override;
     void ShowDialog(const std::string& title, const std::string& message, const std::vector<ButtonInfo>& buttons,
@@ -301,6 +306,10 @@ public:
 
     SingleTaskExecutor GetUiTask() override;
 
+    void GetSnapshot(const std::string& componentId,
+        std::function<void(std::shared_ptr<Media::PixelMap>, int32_t)>&& callback) override
+    {}
+
     void LoadResourceConfiguration(std::map<std::string, std::string>& sortedResourcePath,
         std::unique_ptr<JsonValue>& currentResourceData) override;
 
@@ -323,7 +332,6 @@ public:
 
     RefPtr<JsAcePage> GetPage(int32_t pageId) const override;
 
-
     WeakPtr<JsAcePage> GetCurrentReadyPage() const
     {
         return currentReadyPage_;
@@ -339,6 +347,10 @@ public:
     void CallNativeHandler(const std::string& event, const std::string& params) override;
 
 private:
+    void Push(const std::string& uri, const std::string& params,
+        const std::function<void(const std::string&, int32_t)>& errorCallback);
+    void Replace(const std::string& uri, const std::string& params,
+        const std::function<void(const std::string&, int32_t)>& errorCallback);
     int32_t GenerateNextPageId();
     void RecyclePageId(int32_t pageId);
 

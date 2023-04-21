@@ -1512,12 +1512,13 @@ void DOMNode::UpdateBoxComponent()
         }
     }
     SetDisplayType();
-
+    auto& sizeStyle = static_cast<CommonSizeStyle&>(declaration_->GetStyle(StyleTag::COMMON_SIZE_STYLE));
+    if (sizeStyle.IsValid()) {
+        boxComponent_->SetAspectRatio(sizeStyle.aspectRatio);
+    }
     if (flexItemComponent_) {
         boxComponent_->SetDeliverMinToChild(false);
-        auto& sizeStyle = static_cast<CommonSizeStyle&>(declaration_->GetStyle(StyleTag::COMMON_SIZE_STYLE));
         if (sizeStyle.IsValid()) {
-            boxComponent_->SetAspectRatio(sizeStyle.aspectRatio);
             boxComponent_->SetMinWidth(sizeStyle.minWidth);
             boxComponent_->SetMinHeight(sizeStyle.minHeight);
             boxComponent_->SetMaxWidth(sizeStyle.maxWidth);

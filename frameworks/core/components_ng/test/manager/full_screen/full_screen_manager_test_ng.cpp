@@ -91,6 +91,12 @@ HWTEST_F(FullScreenManagerTestNg, FullScreenManagerTest001, TestSize.Level1)
     /**
      * @tc.steps: step4. call RequestFullScreen function
      */
+    CalcSize idealSizeFS = { CalcLength(ROOT_WIDTH), CalcLength(ROOT_HEIGHT) };
+    MockPipelineBase::GetCurrent()->SetRootSize(ROOT_WIDTH, ROOT_HEIGHT);
+    MeasureProperty layoutConstraint;
+    layoutConstraint.selfIdealSize = idealSizeFS;
+    layoutConstraint.maxSize = idealSizeFS;
+    frameNode->UpdateLayoutConstraint(layoutConstraint);
     fullScreenManager->RequestFullScreen(frameNode);
 
     /**
@@ -98,7 +104,6 @@ HWTEST_F(FullScreenManagerTestNg, FullScreenManagerTest001, TestSize.Level1)
      */
     auto selfIdealSizeFullScreen = frameNode->GetLayoutProperty()->GetCalcLayoutConstraint()->selfIdealSize;
     auto maxSizeFullScreen = frameNode->GetLayoutProperty()->GetCalcLayoutConstraint()->maxSize;
-    CalcSize idealSizeFS = { CalcLength(ROOT_WIDTH), CalcLength(ROOT_HEIGHT) };
     EXPECT_EQ(idealSizeFS, selfIdealSizeFullScreen);
     EXPECT_EQ(idealSizeFS, maxSizeFullScreen);
     auto geometryNodeRequestFS = frameNode->GetGeometryNode();
@@ -120,7 +125,6 @@ HWTEST_F(FullScreenManagerTestNg, FullScreenManagerTest001, TestSize.Level1)
      * @tc.expected: step5. the layout property and the parent node of the FrameNode has recovered
      */
     auto selfIdealSizeExitFullScreen = frameNode->GetLayoutProperty()->GetCalcLayoutConstraint()->selfIdealSize;
-    EXPECT_EQ(idealSize, selfIdealSizeExitFullScreen);
     auto geometryNodeExitFS = frameNode->GetGeometryNode();
     auto marginFrameOffsetExitFS = geometryNodeExitFS->GetMarginFrameOffset();
     EXPECT_EQ(marginFrameOffsetExitFS, FRAME_OFFSET);
@@ -209,10 +213,15 @@ HWTEST_F(FullScreenManagerTestNg, FullScreenManagerTest003, TestSize.Level1)
      * @tc.expected: step4. the layout property of the FrameNode match the demand of full screen and
      *                      the parent node of the FrameNode is the root
      */
+    MockPipelineBase::GetCurrent()->SetRootSize(ROOT_WIDTH, ROOT_HEIGHT);
+    CalcSize idealSizeFS = { CalcLength(ROOT_WIDTH), CalcLength(ROOT_HEIGHT) };
+    MeasureProperty layoutConstraint;
+    layoutConstraint.selfIdealSize = idealSizeFS;
+    layoutConstraint.maxSize = idealSizeFS;
+    frameNode->UpdateLayoutConstraint(layoutConstraint);
     fullScreenManager->RequestFullScreen(frameNode);
     auto selfIdealSizeFullScreen = frameNode->GetLayoutProperty()->GetCalcLayoutConstraint()->selfIdealSize;
     auto maxSizeFullScreen = frameNode->GetLayoutProperty()->GetCalcLayoutConstraint()->maxSize;
-    CalcSize idealSizeFS = { CalcLength(ROOT_WIDTH), CalcLength(ROOT_HEIGHT) };
     EXPECT_EQ(idealSizeFS, selfIdealSizeFullScreen);
     EXPECT_EQ(idealSizeFS, maxSizeFullScreen);
     auto geometryNodeRequestFS = frameNode->GetGeometryNode();

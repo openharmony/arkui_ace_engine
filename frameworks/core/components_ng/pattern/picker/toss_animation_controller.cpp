@@ -75,30 +75,18 @@ bool TossAnimationController::Play()
     auto weak = AceType::WeakClaim(this);
     toss_ = AceType::MakeRefPtr<PickerAnimation>(pipeline_, 0.0, time, 0, nTime, Curves::LINEAR, [weak](double value) {
         auto ref = weak.Upgrade();
-        if (!ref) {
-            LOGE("toss ref is null.");
-            return;
-        }
+        CHECK_NULL_VOID(ref);
         auto column = AceType::DynamicCast<DatePickerColumnPattern>(ref->column_.Upgrade());
-        if (!column) {
-            LOGE("toss column is null.");
-            return;
-        }
+        CHECK_NULL_VOID(column);
         double distance = std::pow(DRAG, value);
         distance = (distance - 1.0) * ref->speed_ / std::log(DRAG);
         column->UpdateToss(ref->yEnd_ + distance);
     });
     toss_->AddStopCallback([weak] {
         auto ref = weak.Upgrade();
-        if (!ref) {
-            LOGE("toss ref is null when stop.");
-            return;
-        }
+        CHECK_NULL_VOID(ref);
         auto column = AceType::DynamicCast<DatePickerColumnPattern>(ref->column_.Upgrade());
-        if (!column) {
-            LOGE("column is null when stop.");
-            return;
-        }
+        CHECK_NULL_VOID(column);
         column->TossStoped();
     });
     toss_->Play();

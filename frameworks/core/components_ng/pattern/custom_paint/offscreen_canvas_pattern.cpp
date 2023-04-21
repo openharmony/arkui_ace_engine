@@ -208,6 +208,11 @@ void OffscreenCanvasPattern::SetLineDash(const std::vector<double>& segments)
     offscreenPaintMethod_->SetLineDash(segments);
 }
 
+void OffscreenCanvasPattern::SetTextDirection(TextDirection direction)
+{
+    offscreenPaintMethod_->SetTextDirection(direction);
+}
+
 void OffscreenCanvasPattern::Save()
 {
     offscreenPaintMethod_->Save();
@@ -316,6 +321,11 @@ void OffscreenCanvasPattern::SetShadowOffsetY(double y)
 void OffscreenCanvasPattern::SetSmoothingEnabled(bool enabled)
 {
     offscreenPaintMethod_->SetSmoothingEnabled(enabled);
+}
+
+void OffscreenCanvasPattern::SetSmoothingQuality(const std::string& quality)
+{
+    offscreenPaintMethod_->SetSmoothingQuality(quality);
 }
 
 void OffscreenCanvasPattern::SetLineDashOffset(double offset)

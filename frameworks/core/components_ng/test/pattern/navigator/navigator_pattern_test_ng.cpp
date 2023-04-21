@@ -15,9 +15,12 @@
 
 #include "gtest/gtest.h"
 
+#define private public
+
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/navigator/navigator_event_hub.h"
 #include "core/components_ng/pattern/navigator/navigator_model.h"
+#include "core/components_ng/pattern/navigator/navigator_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -268,5 +271,36 @@ HWTEST_F(NavigatorPatternTestNg, NavigatorFrameNodeActive, TestSize.Level1)
     RefPtr<FrameNode> frameNode = CreateNavigator(testProperty);
     EXPECT_TRUE(frameNode);
     // should navigate immediately
+}
+
+/**
+ * @tc.name: NavigatorModifyDone
+ * @tc.desc: Test OnModifyDone.
+ * @tc.type: FUNC
+ * @tc.author: zhoutianer
+ */
+HWTEST_F(NavigatorPatternTestNg, NavigatorModifyDone, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigator
+     */
+    TestProperty testProperty;
+    testProperty.typeValue = std::make_optional(NavigatorType::PUSH);
+    testProperty.params = std::make_optional(PARAMS_VALUE);
+    testProperty.url = std::make_optional(URL_VALUE);
+    testProperty.active = std::make_optional(false);
+
+    RefPtr<FrameNode> frameNode = CreateNavigator(testProperty);
+    EXPECT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<NavigatorPattern>();
+    EXPECT_TRUE(pattern);
+
+    // mark modify done multiple times
+    frameNode->MarkModifyDone();
+    frameNode->MarkModifyDone();
+    // assert only one click event is created
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    auto events = gestureHub->clickEventActuator_->clickEvents_;
+    EXPECT_EQ(events.size(), 1);
 }
 } // namespace OHOS::Ace::NG

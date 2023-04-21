@@ -54,7 +54,8 @@ HWTEST_F(WebViewTestNg, WebFrameNodeCreator001, TestSize.Level1)
     RefPtr<WebController> controller = AceType::MakeRefPtr<WebController>();
     WebView::Create("page/index", controller);
     SetWebIdCallback setWebIdCallback = [](int32_t) {};
-    WebView::Create("page/index", std::move(setWebIdCallback));
+    SetHapPathCallback setHapPathCallback = [](const std::string&) {};
+    WebView::Create("page/index", std::move(setWebIdCallback), std::move(setHapPathCallback));
     OnWebSyncFunc onCommonDialogImpl = [](const std::shared_ptr<BaseEventInfo>& info) ->bool {return true;};
     DialogEventType dialogEventType = DialogEventType::DIALOG_EVENT_ALERT;
     WebView::SetOnCommonDialogImpl(std::move(onCommonDialogImpl), dialogEventType);
@@ -172,6 +173,43 @@ HWTEST_F(WebViewTestNg, WebFrameNodeCreator003, TestSize.Level1)
     WebView::SetMultiWindowAccessEnabled(true);
     JsProxyCallback jsProxyCallback = []() {};
     WebView::SetJsProxyCallback(std::move(jsProxyCallback));
+#endif
+}
+
+/**
+ * @tc.name: SetWindowNewEvent004
+ * @tc.desc: Test web_view.cpp.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebViewTestNg, SetWindowNewEvent004, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    OnWebAsyncFunc renderExitedId = [](const std::shared_ptr<BaseEventInfo>& info) {};
+    WebView::SetWindowNewEvent(std::move(renderExitedId));
+    WebView::SetWindowExitEventId(std::move(renderExitedId));
+    WebView::SetMultiWindowAccessEnabled(true);
+    WebView::SetWebCursiveFont("test");
+    WebView::SetWebFantasyFont("test");
+    WebView::SetWebSansSerifFont("test");
+    WebView::SetWebSerifFont("test");
+    WebView::SetWebStandardFont("test");
+    WebView::SetDefaultFixedFontSize(0);
+    WebView::SetDefaultFontSize(0);
+    WebView::SetMinFontSize(0);
+    WebView::SetMinLogicalFontSize(0);
+    WebView::SetWebFixedFont("test");
+    WebView::SetBlockNetwork(true);
+    WebView::SetPageVisibleId(std::move(renderExitedId));
+    std::function<bool(KeyEventInfo& keyEventInfo)> keyEvent = [](KeyEventInfo& keyEventInfo) {return true;};
+    WebView::SetOnInterceptKeyEventCallback(std::move(keyEvent));
+    WebView::SetDataResubmittedId(std::move(renderExitedId));
+    WebView::SetFaviconReceivedId(std::move(renderExitedId));
+    WebView::SetTouchIconUrlId(std::move(renderExitedId));
+    WebView::SetDarkMode(WebDarkMode::On);
+    WebView::SetForceDarkAccess(true);
+    WebView::SetAllowWindowOpenMethod(true);
+    WebView::SetAudioResumeInterval(0);
+    WebView::SetAudioExclusive(true);
 #endif
 }
 } // namespace OHOS::Ace::NG

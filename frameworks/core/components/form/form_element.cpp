@@ -246,13 +246,13 @@ void FormElement::Prepare(const WeakPtr<Element>& parent)
         formManagerBridge_->AddFormAcquireCallback(
             [weak = WeakClaim(this), instanceID](int64_t id, std::string path, std::string module, std::string data,
                 std::map<std::string, sptr<AppExecFwk::FormAshmem>> imageDataMap, AppExecFwk::FormJsInfo formJsInfo,
-                const FrontendType& frontendType) {
+                const FrontendType& frontendType, const FrontendType& uiSyntax) {
                 ContainerScope scope(instanceID);
                 auto element = weak.Upgrade();
                 auto uiTaskExecutor = SingleTaskExecutor::Make(
                     element->GetContext().Upgrade()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
                 uiTaskExecutor.PostTask([id, path, module, data, imageDataMap, formJsInfo, weak,
-                                        instanceID, frontendType] {
+                                        instanceID, frontendType, uiSyntax] {
                     ContainerScope scope(instanceID);
                     auto form = weak.Upgrade();
                     if (form) {
@@ -260,7 +260,8 @@ void FormElement::Prepare(const WeakPtr<Element>& parent)
                         if (container) {
                             container->SetWindowConfig(
                                 { formJsInfo.formWindow.designWidth, formJsInfo.formWindow.autoDesignWidth });
-                            container->RunCard(id, path, module, data, imageDataMap, formJsInfo.formSrc, frontendType);
+                            container->RunCard(id, path, module, data, imageDataMap,
+                                               formJsInfo.formSrc, frontendType, uiSyntax);
                         }
                     }
                 });
@@ -381,9 +382,6 @@ void FormElement::CreateCardContainer()
         LOGE("form component is null when try adding nonmatched container to form manager.");
         return;
     }
-    auto info = form->GetFormRequestInfo();
-    auto key = info.ToString();
-    FormManager::GetInstance().AddNonmatchedContainer(key, subContainer_);
 
     auto formNode = AceType::DynamicCast<RenderForm>(renderNode_);
     if (!formNode) {

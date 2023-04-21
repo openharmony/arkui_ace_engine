@@ -37,9 +37,11 @@ public:
     {
         return ListItemGroupElement::TypeId();
     }
-    void AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent) override;
-    void UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent) override;
-    void DeleteChildWithSlot(int32_t slot) override;
+    RefPtr<Element> GetElementChildBySlot(const RefPtr<Element>& element, int32_t& slot) const override;
+    RefPtr<Element> GetRenderElement() const override
+    {
+        return GetContentElement<ListItemGroupElement>(ListItemGroupElement::TypeId());
+    }
 };
 
 } // namespace OHOS::Ace::V2

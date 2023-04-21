@@ -74,14 +74,19 @@ constexpr uint32_t SYS_RES_ID_DIMENSION = 117440513;
 constexpr uint32_t SYS_RES_ID_DOUBLE = 117440514;
 constexpr uint32_t SYS_RES_ID_INT = 117440515;
 constexpr uint32_t SYS_RES_ID_STRING = 117440516;
+const std::string SYS_RES_NAME_COLOR = "sys.color.test_color";
+const std::string SYS_RES_NAME_DIMENSION = "sys.float.test_dimension";
+const std::string SYS_RES_NAME_DOUBLE = "sys.double.test_double";
+const std::string SYS_RES_NAME_INT = "sys.integer.test_int";
+const std::string SYS_RES_NAME_STRING = "sys.string.test_string";
+const std::string SYS_RES_NAME_MEDIA_PATH = "sys.string.test_media_path";
+const std::string SYS_RES_NAME_ERROR_PATH = "sys.error.test_error";
 const Color SYS_VALUE_COLOR = Color(0xffffffff);
 const Dimension SYS_VALUE_DIMENSION = Dimension(10.0, DimensionUnit::VP);
 constexpr double SYS_VALUE_DOUBLE = 10.0;
 constexpr int32_t SYS_VALUE_INT = -10;
 const std::string SYS_VALUE_STRING = "sans-serif";
-#ifndef WEARABLE_PRODUCT
-const Color COLOR_CONTROL_ACTIVATED_TV = Color(0xff266efb);
-#endif
+const std::string SYS_VALUE_MEDIA_PATH = "./user/a.png";
 
 } // namespace
 
@@ -145,7 +150,7 @@ HWTEST_F(ThemeConstantsTest, PlatformConstants002, TestSize.Level1)
      * @tc.expected: step2. Color is 0xff266efb.
      */
     auto color = g_themeConstants->GetColor(THEME_OHOS_COLOR_CONTROL_ACTIVATED);
-    EXPECT_EQ(color.GetValue(), COLOR_CONTROL_ACTIVATED_TV.GetValue());
+    EXPECT_EQ(color.GetValue(), COLOR_CONTROL_ACTIVATED_PHONE.GetValue());
 }
 #endif
 
@@ -511,7 +516,7 @@ HWTEST_F(ThemeConstantsTest, ThemeResourceRead002, TestSize.Level1)
      */
     auto dimension = themeConstants->GetDimension(SYS_RES_ID_COLOR);
     EXPECT_TRUE(NearEqual(dimension.Value(), 0.0));
-    EXPECT_EQ(dimension.Unit(), DimensionUnit::VP);
+    EXPECT_EQ(dimension.Unit(), DimensionUnit::PX);
     auto doubleValue = themeConstants->GetDouble(SYS_RES_ID_DIMENSION);
     EXPECT_TRUE(NearEqual(doubleValue, 0.0));
     auto intValue = themeConstants->GetInt(SYS_RES_ID_DOUBLE);
@@ -578,6 +583,70 @@ HWTEST_F(ThemeConstantsTest, ParseIdStyle001, TestSize.Level1)
      */
     Color correctColor = Color(0xff5434ff);
     EXPECT_EQ(correctColor.GetValue(), parseColor.GetValue());
+}
+
+/**
+ * @tc.name: ThemeResourceReadByName001
+ * @tc.desc: Read theme resource by name correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ThemeConstantsTest, ThemeResourceReadByName001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct theme constants with mock adapter, load theme resource.
+     */
+    auto resAdapter = AceType::MakeRefPtr<ResourceAdapterMock>();
+    auto themeConstants = AceType::MakeRefPtr<ThemeConstants>(resAdapter);
+
+    /**
+     * @tc.steps: step2. Get different type of resources from themeConstants.
+     * @tc.expected: step2. Resource value is same with ResourceAdapterMock.
+     */
+    auto color = themeConstants->GetColorByName(SYS_RES_NAME_COLOR);
+    EXPECT_EQ(color.GetValue(), SYS_VALUE_COLOR.GetValue());
+    auto dimension = themeConstants->GetDimensionByName(SYS_RES_NAME_DIMENSION);
+    EXPECT_TRUE(NearEqual(dimension.Value(), SYS_VALUE_DIMENSION.Value()));
+    EXPECT_EQ(dimension.Unit(), SYS_VALUE_DIMENSION.Unit());
+    auto doubleValue = themeConstants->GetDoubleByName(SYS_RES_NAME_DOUBLE);
+    EXPECT_TRUE(NearEqual(doubleValue, SYS_VALUE_DOUBLE));
+    auto intValue = themeConstants->GetIntByName(SYS_RES_NAME_INT);
+    EXPECT_EQ(intValue, SYS_VALUE_INT);
+    auto str = themeConstants->GetStringByName(SYS_RES_NAME_STRING);
+    EXPECT_EQ(str, SYS_VALUE_STRING);
+    auto mediaPath = themeConstants->GetMediaPathByName(SYS_RES_NAME_MEDIA_PATH);
+    EXPECT_EQ(mediaPath, SYS_VALUE_MEDIA_PATH);
+}
+
+/**
+ * @tc.name: ThemeResourceReadByName002
+ * @tc.desc: Read theme resource by name with wrong type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ThemeConstantsTest, ThemeResourceReadByName002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct theme constants with mock adapter, load theme resource.
+     */
+    auto resAdapter = AceType::MakeRefPtr<ResourceAdapterMock>();
+    auto themeConstants = AceType::MakeRefPtr<ThemeConstants>(resAdapter);
+
+    /**
+     * @tc.steps: step2. Get value from themeConstants use wrong interface.
+     * @tc.expected: step2. Resource value is same with error value.
+     */
+    auto dimension = themeConstants->GetDimensionByName(SYS_RES_NAME_ERROR_PATH);
+    EXPECT_TRUE(NearEqual(dimension.Value(), 0.0));
+    EXPECT_EQ(dimension.Unit(), DimensionUnit::PX);
+    auto doubleValue = themeConstants->GetDoubleByName(SYS_RES_NAME_ERROR_PATH);
+    EXPECT_TRUE(NearEqual(doubleValue, 0.0));
+    auto intValue = themeConstants->GetIntByName(SYS_RES_NAME_ERROR_PATH);
+    EXPECT_EQ(intValue, 0);
+    auto str = themeConstants->GetStringByName(SYS_RES_NAME_ERROR_PATH);
+    EXPECT_EQ(str, "");
+    auto color = themeConstants->GetColorByName(SYS_RES_NAME_ERROR_PATH);
+    EXPECT_EQ(color.GetValue(), Color().GetValue());
+    auto mediaPath = themeConstants->GetMediaPathByName(SYS_RES_NAME_ERROR_PATH);
+    EXPECT_EQ(mediaPath, "");
 }
 
 } // namespace OHOS::Ace

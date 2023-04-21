@@ -35,7 +35,8 @@ public:
     NavDestinationGroupNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
         : GroupNode(tag, nodeId, pattern) {}
     ~NavDestinationGroupNode() override = default;
-    void AddChildToGroup(const RefPtr<UINode>& child) override;
+    void AddChildToGroup(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT) override;
+    void DeleteChildFromGroup(int32_t slot = DEFAULT_NODE_SLOT) override;
     static RefPtr<NavDestinationGroupNode> GetOrCreateGroupNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
 
@@ -108,6 +109,8 @@ public:
     void OnTitleNodeOperationUpdate(ChildNodeOperation value) {}
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(SubtitleNodeOperation, ChildNodeOperation);
     void OnSubtitleNodeOperationUpdate(ChildNodeOperation value) {}
+
+    void OnAttachToMainTree(bool recursive) override;
 
 private:
     RefPtr<UINode> title_;

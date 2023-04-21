@@ -20,6 +20,9 @@
 #include <sstream>
 
 #include "base/log/log.h"
+#include "base/mousestyle/mouse_style.h"
+#include "base/utils/linear_map.h"
+#include "base/utils/utils.h"
 #include "core/common/manager_interface.h"
 #include "core/components/positioned/positioned_component.h"
 #include "core/components/web/resource/web_resource.h"
@@ -27,20 +30,74 @@
 #include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
+namespace {
+const LinearEnumMapNode<OHOS::NWeb::CursorType, MouseFormat> g_cursorTypeMap[] = {
+    { OHOS::NWeb::CursorType::CT_CROSS, MouseFormat::CROSS },
+    { OHOS::NWeb::CursorType::CT_HAND, MouseFormat::HAND_POINTING },
+    { OHOS::NWeb::CursorType::CT_IBEAM, MouseFormat::TEXT_CURSOR },
+    { OHOS::NWeb::CursorType::CT_HELP, MouseFormat::HELP },
+    { OHOS::NWeb::CursorType::CT_EASTRESIZE, MouseFormat::WEST_EAST },
+    { OHOS::NWeb::CursorType::CT_NORTHRESIZE, MouseFormat::NORTH_SOUTH },
+    { OHOS::NWeb::CursorType::CT_NORTHEASTRESIZE, MouseFormat::NORTH_EAST_SOUTH_WEST },
+    { OHOS::NWeb::CursorType::CT_NORTHWESTRESIZE, MouseFormat::NORTH_WEST_SOUTH_EAST },
+    { OHOS::NWeb::CursorType::CT_SOUTHRESIZE, MouseFormat::NORTH_SOUTH },
+    { OHOS::NWeb::CursorType::CT_SOUTHEASTRESIZE, MouseFormat::NORTH_WEST_SOUTH_EAST },
+    { OHOS::NWeb::CursorType::CT_SOUTHWESTRESIZE, MouseFormat::NORTH_EAST_SOUTH_WEST },
+    { OHOS::NWeb::CursorType::CT_WESTRESIZE, MouseFormat::WEST_EAST },
+    { OHOS::NWeb::CursorType::CT_NORTHSOUTHRESIZE, MouseFormat::NORTH_SOUTH },
+    { OHOS::NWeb::CursorType::CT_EASTWESTRESIZE, MouseFormat::WEST_EAST },
+    { OHOS::NWeb::CursorType::CT_NORTHEASTSOUTHWESTRESIZE, MouseFormat::NORTH_EAST_SOUTH_WEST },
+    { OHOS::NWeb::CursorType::CT_NORTHWESTSOUTHEASTRESIZE, MouseFormat::NORTH_WEST_SOUTH_EAST },
+    { OHOS::NWeb::CursorType::CT_COLUMNRESIZE, MouseFormat::RESIZE_LEFT_RIGHT },
+    { OHOS::NWeb::CursorType::CT_ROWRESIZE, MouseFormat::RESIZE_UP_DOWN },
+    { OHOS::NWeb::CursorType::CT_MIDDLEPANNING, MouseFormat::MIDDLE_BTN_NORTH_SOUTH_WEST_EAST },
+    { OHOS::NWeb::CursorType::CT_EASTPANNING, MouseFormat::MIDDLE_BTN_EAST },
+    { OHOS::NWeb::CursorType::CT_NORTHPANNING, MouseFormat::MIDDLE_BTN_NORTH },
+    { OHOS::NWeb::CursorType::CT_NORTHEASTPANNING, MouseFormat::MIDDLE_BTN_NORTH_EAST },
+    { OHOS::NWeb::CursorType::CT_NORTHWESTPANNING, MouseFormat::MIDDLE_BTN_NORTH_WEST },
+    { OHOS::NWeb::CursorType::CT_SOUTHPANNING, MouseFormat::MIDDLE_BTN_SOUTH },
+    { OHOS::NWeb::CursorType::CT_SOUTHEASTPANNING, MouseFormat::MIDDLE_BTN_SOUTH_EAST },
+    { OHOS::NWeb::CursorType::CT_SOUTHWESTPANNING, MouseFormat::MIDDLE_BTN_SOUTH_WEST },
+    { OHOS::NWeb::CursorType::CT_WESTPANNING, MouseFormat::MIDDLE_BTN_WEST },
+    { OHOS::NWeb::CursorType::CT_MOVE, MouseFormat::CURSOR_MOVE },
+    { OHOS::NWeb::CursorType::CT_NODROP, MouseFormat::CURSOR_FORBID },
+    { OHOS::NWeb::CursorType::CT_COPY, MouseFormat::CURSOR_COPY },
+    { OHOS::NWeb::CursorType::CT_NOTALLOWED, MouseFormat::CURSOR_FORBID },
+    { OHOS::NWeb::CursorType::CT_ZOOMIN, MouseFormat::ZOOM_IN },
+    { OHOS::NWeb::CursorType::CT_ZOOMOUT, MouseFormat::ZOOM_OUT },
+    { OHOS::NWeb::CursorType::CT_GRAB, MouseFormat::HAND_OPEN },
+    { OHOS::NWeb::CursorType::CT_GRABBING, MouseFormat::HAND_GRABBING },
+    { OHOS::NWeb::CursorType::CT_MIDDLE_PANNING_VERTICAL, MouseFormat::MIDDLE_BTN_NORTH_SOUTH },
+    { OHOS::NWeb::CursorType::CT_MIDDLE_PANNING_HORIZONTAL, MouseFormat::MIDDLE_BTN_NORTH_SOUTH_WEST_EAST },
+};
+} // namespace
 
 constexpr int32_t SINGLE_CLICK_NUM = 1;
 constexpr int32_t DOUBLE_CLICK_NUM = 2;
 constexpr int32_t DEFAULT_NUMS_ONE = 1;
 constexpr double DEFAULT_DBCLICK_INTERVAL = 0.5f;
+constexpr double DEFAULT_AXIS_RATIO = -0.06f;
+
 RenderWeb::RenderWeb() : RenderNode(true)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    InitEnhanceSurfaceFlag();
     Initialize();
 #endif
 }
 
+void RenderWeb::InitEnhanceSurfaceFlag()
+{
+    if (SystemProperties::GetExtSurfaceEnabled()) {
+        isEnhanceSurface_ = true;
+    } else {
+        isEnhanceSurface_ = false;
+    }
+}
+
 void RenderWeb::OnAttachContext()
 {
+    LOGI("OnAttachContext");
     auto pipelineContext = context_.Upgrade();
     if (!pipelineContext) {
         LOGE("OnAttachContext context null");
@@ -52,8 +109,10 @@ void RenderWeb::OnAttachContext()
         drawSizeCache_ = drawSize_;
         position_ = Offset(0, 0);
         delegate_->SetEnhanceSurfaceFlag(isEnhanceSurface_);
-#ifndef OHOS_STANDARD_SYSTEM
         delegate_->SetDrawSize(drawSize_);
+#ifdef OHOS_STANDARD_SYSTEM
+        delegate_->InitOHOSWeb(context_);
+#else
         delegate_->CreatePlatformResource(drawSize_, position_, context_);
 #endif
     }
@@ -89,7 +148,11 @@ void RenderWeb::Update(const RefPtr<Component>& component)
 
     onMouse_ = web->GetOnMouseEventCallback();
     onKeyEvent_ = web->GetOnKeyEventCallback();
+    onPreKeyEvent_ = web->GetOnInterceptKeyEventCallback();
     RegistVirtualKeyBoardListener();
+#ifdef OHOS_STANDARD_SYSTEM
+    InitPanEvent();
+#endif
     web_ = web;
     if (delegate_) {
         delegate_->SetComponent(web);
@@ -110,6 +173,7 @@ void RenderWeb::Update(const RefPtr<Component>& component)
         delegate_->UpdateMediaPlayGestureAccess(web->IsMediaPlayGestureAccess());
         delegate_->UpdatePinchSmoothModeEnabled(web->GetPinchSmoothModeEnabled());
         delegate_->UpdateMultiWindowAccess(web->GetMultiWindowAccessEnabled());
+        delegate_->UpdateAllowWindowOpenMethod(web->GetAllowWindowOpenMethod());
         auto userAgent = web->GetUserAgent();
         if (!userAgent.empty()) {
             delegate_->UpdateUserAgent(userAgent);
@@ -139,7 +203,7 @@ bool RenderWeb::ProcessVirtualKeyBoard(int32_t width, int32_t height, double key
         if (!isFocus_) {
             if (isVirtualKeyBoardShow_ == VkState::VK_SHOW) {
                 drawSize_.SetSize(drawSizeCache_);
-                delegate_->Resize(drawSize_.Width(), drawSize_.Height());
+                delegate_->SetBoundsOrResize(drawSize_, GetGlobalOffset());
                 SyncGeometryProperties();
                 SetRootView(width, height, 0);
                 isVirtualKeyBoardShow_ = VkState::VK_HIDE;
@@ -148,7 +212,7 @@ bool RenderWeb::ProcessVirtualKeyBoard(int32_t width, int32_t height, double key
         }
         if (NearZero(keyboard)) {
             drawSize_.SetSize(drawSizeCache_);
-            delegate_->Resize(drawSize_.Width(), drawSize_.Height());
+            delegate_->SetBoundsOrResize(drawSize_, GetGlobalOffset());
             SyncGeometryProperties();
             SetRootView(width, height, 0);
             isVirtualKeyBoardShow_ = VkState::VK_HIDE;
@@ -159,8 +223,11 @@ bool RenderWeb::ProcessVirtualKeyBoard(int32_t width, int32_t height, double key
                 isVirtualKeyBoardShow_ = VkState::VK_SHOW;
                 return true;
             }
+            if (height - GetCoordinatePoint().GetY() < keyboard) {
+                return true;
+            }
             drawSize_.SetHeight(height - keyboard - GetCoordinatePoint().GetY());
-            delegate_->Resize(drawSize_.Width(), drawSize_.Height());
+            delegate_->SetBoundsOrResize(drawSize_, GetGlobalOffset());
             SyncGeometryProperties();
             SetRootView(width, height, DEFAULT_NUMS_ONE);
             isVirtualKeyBoardShow_ = VkState::VK_SHOW;
@@ -231,7 +298,7 @@ void RenderWeb::OnMouseEvent(const MouseEvent& event)
     }
 
     auto localLocation = event.GetOffset() - Offset(GetCoordinatePoint().GetX(), GetCoordinatePoint().GetY());
-    if (!HandleDoubleClickEvent(event)) { 
+    if (!HandleDoubleClickEvent(event)) {
         delegate_->OnMouseEvent(localLocation.GetX(), localLocation.GetY(), event.button, event.action, SINGLE_CLICK_NUM);
     }
 
@@ -270,14 +337,16 @@ bool RenderWeb::HandleMouseEvent(const MouseEvent& event)
     return info.IsStopPropagation();
 }
 
-void RenderWeb::HandleKeyEvent(const KeyEvent& keyEvent)
+bool RenderWeb::HandleKeyEvent(const KeyEvent& keyEvent)
 {
-    if (!onKeyEvent_) {
-        LOGW("RenderWeb::HandleKeyEvent, key event callback is null");
-        return;
-    }
     KeyEventInfo info(keyEvent);
-    onKeyEvent_(info);
+    if (onKeyEvent_) {
+        onKeyEvent_(info);
+    }
+    if (onPreKeyEvent_) {
+        return onPreKeyEvent_(info);
+    }
+    return false;
 }
 
 void RenderWeb::PerformLayout()
@@ -334,9 +403,14 @@ void RenderWeb::OnSizeChanged()
         LOGE("size is invalid");
         return;
     }
+    auto context = context_.Upgrade();
+    if (!context) {
+        LOGE("context is nullptr");
+        return;
+    }
     UpdateGlobalPos();
-    if (!isUrlLoaded_) {
-        delegate_->Resize(drawSize_.Width(), drawSize_.Height());
+    if (delegate_ && !isUrlLoaded_) {
+        delegate_->SetBoundsOrResize(drawSize_, GetGlobalOffset());
         if (!delegate_->LoadDataWithRichText()) {
             LOGI("RenderWeb::Paint start LoadUrl");
             delegate_->LoadUrl();
@@ -374,6 +448,39 @@ void RenderWeb::Initialize()
     });
 }
 
+void RenderWeb::InitPanEvent()
+{
+    auto context = context_.Upgrade();
+    if (panRecognizer_ || !context) {
+        return;
+    }
+    PanDirection panDirection;
+    panDirection.type = PanDirection::VERTICAL;
+    panRecognizer_ = AceType::MakeRefPtr<PanRecognizer>(
+        context, DEFAULT_PAN_FINGER, panDirection, DEFAULT_PAN_DISTANCE);
+    panRecognizer_->SetOnActionUpdate([weakItem = AceType::WeakClaim(this)](const GestureEvent& event) {
+        auto item = weakItem.Upgrade();
+        if (item) {
+            item->HandleDragMove(event);
+        }
+    });
+}
+
+void RenderWeb::HandleDragMove(const GestureEvent& event)
+{
+    if (event.GetInputEventType() == InputEventType::AXIS) {
+        if (!delegate_) {
+            LOGE("HandleDragMove delegate_ is nullptr");
+            return;
+        }
+        auto localLocation = event.GetLocalLocation();
+        delegate_->HandleAxisEvent(
+            localLocation.GetX(), localLocation.GetY(),
+            event.GetDelta().GetX() * DEFAULT_AXIS_RATIO,
+            event.GetDelta().GetY() * DEFAULT_AXIS_RATIO);
+    }
+}
+
 void RenderWeb::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
 {
     if (!delegate_) {
@@ -392,7 +499,7 @@ void RenderWeb::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
             touchPoint.y -= GetGlobalOffset().GetY() + offsetFix_;
         }
         touchOffset = Offset(touchPoint.x, touchPoint.y);
-        delegate_->HandleTouchDown(touchPoint.id, touchPoint.x, touchPoint.y);
+        delegate_->HandleTouchDown(touchPoint.id, touchPoint.x, touchPoint.y, fromOverlay);
     }
     // clear the recording position, for not move content when virtual keyboard popup when web get focused.
     auto context = GetContext().Upgrade();
@@ -417,7 +524,7 @@ void RenderWeb::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
             touchPoint.x -= GetGlobalOffset().GetX();
             touchPoint.y -= GetGlobalOffset().GetY() + offsetFix_;
         }
-        delegate_->HandleTouchUp(touchPoint.id, touchPoint.x, touchPoint.y);
+        delegate_->HandleTouchUp(touchPoint.id, touchPoint.x, touchPoint.y, fromOverlay);
     }
     if (web_ && !touchInfos.empty()) {
         web_->RequestFocus();
@@ -444,7 +551,7 @@ void RenderWeb::HandleTouchMove(const TouchEventInfo& info, bool fromOverlay)
             touchPoint.x -= GetGlobalOffset().GetX();
             touchPoint.y -= GetGlobalOffset().GetY() + offsetFix_;
         }
-        delegate_->HandleTouchMove(touchPoint.id, touchPoint.x, touchPoint.y);
+        delegate_->HandleTouchMove(touchPoint.id, touchPoint.x, touchPoint.y, fromOverlay);
     }
 }
 
@@ -522,6 +629,11 @@ void RenderWeb::OnTouchTestHit(const Offset& coordinateOffset, const TouchRestri
         MarkIsNotSiblingAddRecognizerToResult(true);
     }
 
+    if (panRecognizer_) {
+        panRecognizer_->SetCoordinateOffset(coordinateOffset);
+        result.emplace_back(panRecognizer_);
+    }
+
     if (!touchRecognizer_) {
         LOGE("TouchTestHit touchRecognizer_ is nullptr");
         return;
@@ -538,16 +650,6 @@ void RenderWeb::OnTouchTestHit(const Offset& coordinateOffset, const TouchRestri
 bool RenderWeb::IsAxisScrollable(AxisDirection direction)
 {
     return true;
-}
-
-void RenderWeb::HandleAxisEvent(const AxisEvent& event)
-{
-    if (!delegate_) {
-        LOGE("Delegate_ is nullptr");
-        return;
-    }
-    auto localLocation = Offset(event.x, event.y) - Offset(GetCoordinatePoint().GetX(), GetCoordinatePoint().GetY());
-    delegate_->HandleAxisEvent(localLocation.GetX(), localLocation.GetY(), event.horizontalAxis, event.verticalAxis);
 }
 
 WeakPtr<RenderNode> RenderWeb::CheckAxisNode()
@@ -897,6 +999,31 @@ void RenderWeb::OnTouchSelectionChanged(
     }
 }
 
+bool RenderWeb::OnCursorChange(const OHOS::NWeb::CursorType& type, const OHOS::NWeb::NWebCursorInfo& info)
+{
+    (void)info;
+    auto context = GetContext().Upgrade();
+    if (!context) {
+        return false;
+    }
+    auto windowId = context->GetWindowId();
+    auto mouseStyle = MouseStyle::CreateMouseStyle();
+    int32_t curPointerStyle = 0;
+    if (mouseStyle->GetPointerStyle(windowId, curPointerStyle) == -1) {
+        LOGE("OnCursorChange GetPointerStyle failed");
+        return false;
+    }
+    MouseFormat pointStyle = MouseFormat::DEFAULT;
+    int64_t idx = BinarySearchFindIndex(g_cursorTypeMap, ArraySize(g_cursorTypeMap), type);
+    if (idx >= 0) {
+        pointStyle = g_cursorTypeMap[idx].value;
+    }
+    if ((int32_t)pointStyle != curPointerStyle) {
+        mouseStyle->SetPointerStyle(windowId, pointStyle);
+    }
+    return true;
+}
+
 DragItemInfo RenderWeb::GenerateDragItemInfo(const RefPtr<PipelineContext>& context, const GestureEvent& info)
 {
     DragItemInfo itemInfo;
@@ -996,7 +1123,6 @@ void RenderWeb::OnDragWindowMoveEvent(RefPtr<PipelineContext> pipelineContext, c
 {
     int32_t globalX = static_cast<int32_t>(info.GetGlobalPoint().GetX());
     int32_t globalY = static_cast<int32_t>(info.GetGlobalPoint().GetY());
-    LOGD("drag window position update, x = %{public}d, y = %{public}d", globalX, globalY);
     dragWindow_->MoveTo(globalX, globalY);
     if (isW3cDragEvent_ && delegate_) {
         LOGD("w3c drag update");
@@ -1165,6 +1291,75 @@ void RenderWeb::UpdateGlobalPos()
     if (delegate_) {
         delegate_->SetWebRendeGlobalPos(position);
     }
+}
+
+RefPtr<OptionComponent> RenderWeb::BuildSelectMenu(const std::string& value)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return nullptr;
+    }
+    if (!themeManager_) {
+        themeManager_ = context->GetThemeManager();
+    }
+    if (!accessibilityManager_) {
+        accessibilityManager_ = context->GetAccessibilityManager();
+    }
+    auto optionComponent = AceType::MakeRefPtr<OptionComponent>();
+    if (!optionComponent) {
+        return nullptr;
+    }
+    optionComponent->SetNeedDrawDividerLine(false);
+    auto textComponent = AceType::MakeRefPtr<TextComponent>(value);
+    optionComponent->SetText(textComponent);
+    optionComponent->SetValue(value);
+    optionComponent->InitTheme(themeManager_);
+    optionComponent->Initialize(accessibilityManager_);
+    return optionComponent;
+}
+
+void RenderWeb::OnSelectPopupMenu(
+    std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params,
+    std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback)
+{
+    auto context = context_.Upgrade();
+    if (!context || !params || !callback) {
+        return;
+    }
+    const auto pipeline = context_.Upgrade();
+    if (!pipeline) {
+        return;
+    }
+    auto stackElement = pipeline->GetLastStack();
+    if (!stackElement) {
+        return;
+    }
+    popup_ = AceType::MakeRefPtr<SelectPopupComponent>();
+    auto themeManager = context->GetThemeManager();
+    popup_->InitTheme(themeManager);
+    for (size_t index = 0; index < params->menuItems.size(); index++) {
+        RefPtr<OptionComponent> option = BuildSelectMenu(params->menuItems[index].label);
+        if (!option) {
+            continue;
+        }
+        popup_->AppendSelectOption(option);
+        if (index == params->selectedItem) {
+            option->SetSelected(true);
+        }
+    }
+    popup_->SetOptionClickedCallback([callback](std::size_t index) {
+        std::vector<int32_t> indices { static_cast<int32_t>(index) };
+        callback->Continue(indices);
+    });
+    popup_->SetPopupCanceledCallback([callback]() {
+        callback->Cancel();
+    });
+
+    Offset leftTop = { params->bounds.x + GetGlobalOffset().GetX(),
+                       params->bounds.y + GetGlobalOffset().GetY() };
+    Offset rightBottom = { params->bounds.x + GetGlobalOffset().GetX() + params->bounds.width,
+                           params->bounds.y + GetGlobalOffset().GetY() + params->bounds.height };
+    popup_->ShowDialog(stackElement, leftTop, rightBottom, false);
 }
 #endif
 } // namespace OHOS::Ace

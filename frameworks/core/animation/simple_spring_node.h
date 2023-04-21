@@ -27,7 +27,7 @@ class SimpleSpringNode : public SpringNode {
     DECLARE_ACE_TYPE(SimpleSpringNode, SpringNode);
 
 public:
-    SimpleSpringNode(const WeakPtr<PipelineContext>& context, int32_t index, double value);
+    SimpleSpringNode(const WeakPtr<PipelineBase>& context, int32_t index, double value);
     ~SimpleSpringNode() override = default;
 
     void EndToValue(double endValue, double velocity) override;
@@ -71,7 +71,7 @@ protected:
     RefPtr<SpringMotion> spring_;
     RefPtr<SpringProperty> springProperty_;
     RefPtr<Scheduler> scheduler_;
-    const WeakPtr<PipelineContext> context_;
+    const WeakPtr<PipelineBase> context_;
     double value_ = 0.0;
     double velocity_ = 0.0;
     double valueAccuracy_ = DEFAULT_CHAIN_VALUE_ACCURACY;

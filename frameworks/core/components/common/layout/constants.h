@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -198,9 +198,10 @@ enum class WhiteSpace {
 };
 
 enum class TextOverflow {
+    NONE,
     CLIP,
     ELLIPSIS,
-    NONE,
+    MARQUEE,
 };
 
 enum class TextDirection {
@@ -216,6 +217,12 @@ enum class TextDecoration {
     OVERLINE,
     LINE_THROUGH,
     INHERIT,
+};
+
+enum class TextHeightAdaptivePolicy {
+    MAX_LINES_FIRST,
+    MIN_FONT_SIZE_FIRST,
+    LAYOUT_CONSTRAINT_FIRST,
 };
 
 enum class MarqueeDirection {
@@ -238,6 +245,7 @@ enum class ImageFit {
     FITHEIGHT,
     NONE,
     SCALE_DOWN,
+    TOP_LEFT,
 };
 
 enum class ImageRenderMode {
@@ -562,6 +570,34 @@ inline constexpr uint32_t STATE_DISABLED = 1 << 3;
 inline constexpr uint32_t STATE_WAITING = 1 << 4;
 inline constexpr uint32_t STATE_HOVERED = 1 << 5;
 inline constexpr uint32_t STATE_ACTIVE = 1 << 6;
+
+enum class TabBarStyle {
+    NOSTYLE = 0,
+    SUBTABBATSTYLE,
+    BOTTOMTABBATSTYLE,
+};
+
+enum class CtrlKey {
+    CTRL = 0,
+    SHIFT = 1,
+    ALT = 2,
+};
+
+enum class FunctionKey {
+    ESC = 0,
+    F1 = 1,
+    F2 = 2,
+    F3 = 3,
+    F4 = 4,
+    F5 = 5,
+    F6 = 6,
+    F7 = 7,
+    F8 = 8,
+    F9 = 9,
+    F10 = 10,
+    F11 = 11,
+    F12 = 12,
+};
 
 } // namespace OHOS::Ace
 

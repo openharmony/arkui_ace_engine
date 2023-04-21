@@ -17,8 +17,8 @@
 #define protected public
 #include <algorithm>
 
-#include "third_party/skia/include/core/SkBitmap.h"
-#include "third_party/skia/include/core/SkPictureRecorder.h"
+#include "include/core/SkBitmap.h"
+#include "include/core/SkPictureRecorder.h"
 
 #include "base/log/ace_trace.h"
 #include "base/memory/ace_type.h"
@@ -46,7 +46,6 @@
 #include "frameworks/core/components_ng/render/adapter/skia_decoration_painter.h"
 #include "frameworks/core/components_ng/render/adapter/svg_canvas_image.h"
 #include "frameworks/core/components_ng/render/border_image_painter.h"
-#include "frameworks/core/components_ng/render/canvas.h"
 #include "frameworks/core/components_ng/render/render_context.h"
 #include "frameworks/core/components_ng/test/mock/render/mock_render_context.h"
 #undef priate

@@ -15,8 +15,7 @@
 
 #include "core/components/progress/flutter_render_loading_progress.h"
 
-#include "flutter/lib/ui/ui_dart_state.h"
-#include "third_party/skia/include/core/SkMaskFilter.h"
+#include "include/core/SkMaskFilter.h"
 
 #include "base/log/log.h"
 #include "base/utils/utils.h"

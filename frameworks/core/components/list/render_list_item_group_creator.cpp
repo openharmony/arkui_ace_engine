@@ -12,8 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#ifndef NEW_SKIA
 #include "core/components/list/flutter_render_list_item_group.h"
+#endif
 #include "core/components/list/rosen_render_list_item_group.h"
 
 namespace OHOS::Ace {
@@ -27,7 +28,11 @@ RefPtr<RenderNode> RenderListItemGroup::Create()
         return nullptr;
 #endif
     } else {
+#ifndef NEW_SKIA
         return AceType::MakeRefPtr<FlutterRenderListItemGroup>();
+#else
+        return nullptr;
+#endif
     }
 }
 

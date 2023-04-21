@@ -269,8 +269,16 @@ void JSCalendar::SetOffDays(int32_t offDays)
     component->SetOffDays(result);
 }
 
-void JSCalendar::SetShowHoliday(bool showHoliday)
+void JSCalendar::SetShowHoliday(const JSCallbackInfo& info)
 {
+    bool showHoliday = true;
+    if (info.Length() < 1) {
+        LOGE("The info is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
+    if (info[0]->IsBoolean()) {
+        showHoliday = info[0]->ToBoolean();
+    }
     if (Container::IsCurrentUseNewPipeline()) {
         NG::CalendarView::SetShowHoliday(showHoliday);
         return;
@@ -280,8 +288,16 @@ void JSCalendar::SetShowHoliday(bool showHoliday)
     component->SetShowHoliday(showHoliday);
 }
 
-void JSCalendar::SetShowLunar(bool showLunar)
+void JSCalendar::SetShowLunar(const JSCallbackInfo& info)
 {
+    bool showLunar = false;
+    if (info.Length() < 1) {
+        LOGE("The info is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
+    if (info[0]->IsBoolean()) {
+        showLunar = info[0]->ToBoolean();
+    }
     if (Container::IsCurrentUseNewPipeline()) {
         NG::CalendarView::SetShowLunar(showLunar);
         return;
@@ -313,8 +329,16 @@ void JSCalendar::SetStartOfWeek(const JSCallbackInfo& info)
     }
 }
 
-void JSCalendar::SetNeedSlide(bool needSlide)
+void JSCalendar::SetNeedSlide(const JSCallbackInfo& info)
 {
+    bool needSlide = false;
+    if (info.Length() < 1) {
+        LOGE("The info is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
+    if (info[0]->IsBoolean()) {
+        needSlide = info[0]->ToBoolean();
+    }
     if (Container::IsCurrentUseNewPipeline()) {
         NG::CalendarView::SetNeedSlide(needSlide);
         return;
@@ -347,6 +371,10 @@ RefPtr<CalendarComponentV2> JSCalendar::GetComponent()
 
 void JSCalendar::JsOnSelectedChange(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 argument.");
+        return;
+    }
     if (Container::IsCurrentUseNewPipeline()) {
         auto selectedChangeFuc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
         auto selectedChange = [execCtx = info.GetExecutionContext(), func = std::move(selectedChangeFuc)](
@@ -375,6 +403,10 @@ void JSCalendar::JsOnSelectedChange(const JSCallbackInfo& info)
 
 void JSCalendar::JsOnRequestData(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 argument.");
+        return;
+    }
     if (Container::IsCurrentUseNewPipeline()) {
         auto requestDataFuc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
         auto requestData = [execCtx = info.GetExecutionContext(), func = std::move(requestDataFuc)](

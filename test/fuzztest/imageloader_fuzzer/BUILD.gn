@@ -35,7 +35,7 @@ ohos_fuzztest("ImageLoaderFuzzTest") {
     "$ace_flutter_engine_root/skia:ace_skia_ohos",
     "$ace_root/frameworks/base/resource:ace_resource",
     "$ace_root/frameworks/core/components/theme:build_theme_code",
-    "$cjson_root:cjson_static",
+    "$cjson_root:cjson",
 
     #    "//third_party/googletest:gtest_main",
   ]
@@ -79,9 +79,6 @@ ohos_fuzztest("ImageLoaderFuzzTest") {
     # event
     "$ace_root/frameworks/core/common/test/mock/mock_watch_dog.cpp",
     "$ace_root/frameworks/core/event/back_end_event_manager.cpp",
-
-    #"theme_constants_test.cpp",
-    "$ace_root/frameworks/core/components/test/unittest/theme/theme_mock.cpp",
 
     # mock
     #"$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
@@ -133,7 +130,7 @@ ohos_fuzztest("ImageLoaderFuzzTest") {
     "$ace_root:ace_test_config",
   ]
 
-  if (is_standard_system) {
+  if (is_ohos_standard_system) {
     external_deps = [
       "hiviewdfx_hilog_native:libhilog",
       "init:libbegetutil",
@@ -147,7 +144,6 @@ ohos_fuzztest("ImageLoaderFuzzTest") {
   }
   external_deps += [ "c_utils:utils" ]
   sources += [
-    "$ace_root/adapter/ohos/osal/frame_trace_adapter_impl.cpp",
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
     "$ace_root/frameworks/core/components/test/mock/mock_resource_adapter.cpp",
   ]
@@ -165,13 +161,19 @@ ohos_fuzztest("ImageLoaderFuzzTest") {
     "$ace_root/frameworks/base/log",
     "$ace_root/frameworks",
     "$ace_root",
-    "//foundation/resourceschedule/frame_aware_sched/interfaces/innerkits/frameintf",
     "//third_party/flutter/engine/flutter/assets",
     "//third_party/flutter/engine",
     "//third_party",
     "//commonlibrary/c_utils/base/include",
   ]
-  deps += [ "//foundation/resourceschedule/frame_aware_sched/interfaces/innerkits/frameintf:frame_trace_intf" ]
+  if (frame_trace_support) {
+    deps += [ "//foundation/resourceschedule/frame_aware_sched/interfaces/innerkits/frameintf:frame_trace_intf" ]
+    include_dirs += [ "//foundation/resourceschedule/frame_aware_sched/interfaces/innerkits/frameintf" ]
+    sources += [ "$ace_root/adapter/ohos/osal/frame_trace_adapter_impl.cpp" ]
+  } else {
+    sources +=
+        [ "$ace_root/adapter/ohos/osal/frame_trace_adapter_fake_impl.cpp" ]
+  }
 }
 
 ###############################################################################

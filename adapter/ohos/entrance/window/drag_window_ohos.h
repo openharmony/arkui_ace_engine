@@ -35,12 +35,14 @@ public:
     ~DragWindowOhos() = default;
 
     void MoveTo(int32_t x, int32_t y) const override;
+    void TextDragWindowMove(double x, double y) const override;
     void Destroy() const override;
     void DrawPixelMap(const RefPtr<PixelMap>& pixelMap) override;
     void DrawFrameNode(const RefPtr<NG::FrameNode>& rootNode) override;
     void DrawImage(void* skImage) override;
-    void DrawText(std::shared_ptr<txt::Paragraph> paragraph,
-        const Offset& offset, const RefPtr<RenderText>& renderText) override;
+    void DrawText(
+        std::shared_ptr<txt::Paragraph> paragraph, const Offset& offset, const RefPtr<RenderText>& renderText) override;
+    void DrawTextNG(const RefPtr<NG::Paragraph>& paragraph, const RefPtr<NG::TextPattern>& textPattern) override;
 
 private:
     OHOS::sptr<Rosen::Window> dragWindow_;

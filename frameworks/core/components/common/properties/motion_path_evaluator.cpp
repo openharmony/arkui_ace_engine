@@ -16,7 +16,11 @@
 #include "core/components/common/properties/motion_path_evaluator.h"
 
 #include "base/utils/utils.h"
+#ifndef NEW_SKIA
 #include "frameworks/core/components/common/painter/flutter_svg_painter.h"
+#else
+#include "frameworks/core/components/common/painter/rosen_svg_painter.h"
+#endif
 
 namespace OHOS::Ace {
 namespace {
@@ -66,9 +70,13 @@ MotionPathPosition MotionPathEvaluator::Evaluate(float fraction)
         return MotionPathPosition { .offset = startPoint_ * (1.0f - fraction) + endPoint_ * fraction, .rotate = 0.0f };
     }
     auto progress = motionPathOption_.GetBegin() * (1.0f - fraction) + motionPathOption_.GetEnd() * fraction;
-#ifndef NG_BUILD
+#ifndef FLUTTER_2_5
     MotionPathPosition position;
+#ifndef NEW_SKIA
     if (FlutterSvgPainter::GetMotionPathPosition(motionPathOption_.GetPath(), progress, position)) {
+#else
+    if (RosenSvgPainter::GetMotionPathPosition(motionPathOption_.GetPath(), progress, position)) {
+#endif
         if (positionType_ == PositionType::PTOFFSET) {
             position.offset += startPoint_;
         }

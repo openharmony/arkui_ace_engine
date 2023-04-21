@@ -40,6 +40,11 @@ public:
         return executeDeepRenderDone_;
     }
 
+    void MarkIsExecuteDeepRenderDone(bool executeDeepRenderDone)
+    {
+        executeDeepRenderDone_ = executeDeepRenderDone;
+    }
+
     RefPtr<UINode> ExecuteDeepRender()
     {
         CHECK_NULL_RETURN(deepRenderFunc_, nullptr);

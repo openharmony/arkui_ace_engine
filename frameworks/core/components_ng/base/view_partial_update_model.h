@@ -38,9 +38,13 @@ struct NodeInfoPU {
     std::function<void(NG::LayoutWrapper*)> measureFunc;
     std::function<void(NG::LayoutWrapper*)> layoutFunc;
     std::function<void(bool)> reloadFunc;
+    std::function<RefPtr<AceType>()> completeReloadFunc;
+    std::function<void(int32_t)> nodeUpdateFunc;
 
     bool hasMeasureOrLayout = false;
     bool isStatic = false;
+
+    std::string jsViewName;
 };
 
 using UpdateTask = std::tuple<int32_t, RefPtr<AceType>, RefPtr<AceType>>;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,53 +18,97 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
+#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_modifier.h"
+#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_property.h"
 #include "core/components_ng/pattern/radio/radio_paint_method.h"
-#include "core/components_ng/render/canvas.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/node_paint_method.h"
 
 namespace OHOS::Ace::NG {
+constexpr float CHECKBOXGROUP_MARK_STROKEWIDTH_LIMIT_RATIO = 0.25f;
 
 class CheckBoxGroupPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(CheckBoxGroupPaintMethod, NodePaintMethod)
 
 public:
-    CheckBoxGroupPaintMethod(bool enabled, bool isTouch, bool isHover, float shapeScale, UIStatus uiStatus)
-        : enabled_(enabled), isTouch_(isTouch), isHover_(isHover), shapeScale_(shapeScale), uiStatus_(uiStatus) {};
+    CheckBoxGroupPaintMethod(bool enabled, bool isTouch, bool isHover, float shapeScale, UIStatus uiStatus,
+        const RefPtr<CheckBoxGroupModifier>& checkboxGroupModifier)
+        : enabled_(enabled), isTouch_(isTouch), isHover_(isHover),
+        shapeScale_(shapeScale), uiStatus_(uiStatus), checkboxGroupModifier_(checkboxGroupModifier)
+    {};
 
     ~CheckBoxGroupPaintMethod() override = default;
 
-    CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
+    RefPtr<Modifier> GetContentModifier(PaintWrapper* paintWrapper) override
+    {
+        CHECK_NULL_RETURN(checkboxGroupModifier_, nullptr);
+        return checkboxGroupModifier_;
+    }
+    
+    void UpdateContentModifier(PaintWrapper* paintWrapper) override
+    {
+        CHECK_NULL_VOID(checkboxGroupModifier_);
+        CHECK_NULL_VOID(paintWrapper);
+        auto paintProperty = DynamicCast<CheckBoxGroupPaintProperty>(paintWrapper->GetPaintProperty());
+        auto size = paintWrapper->GetContentSize();
+        auto offset = paintWrapper->GetContentOffset();
+        float strokePaintSize = size.Width();
+        if (paintProperty->GetCheckBoxGroupSelectedColor().has_value()) {
+            checkboxGroupModifier_->SetActiveColor(paintProperty->GetCheckBoxGroupSelectedColor().value());
+        }
+        if (paintProperty->GetCheckBoxGroupUnSelectedColor().has_value()) {
+            checkboxGroupModifier_->SetInactiveColor(paintProperty->GetCheckBoxGroupUnSelectedColor().value());
+        }
+        if (paintProperty->GetCheckBoxGroupCheckMarkColor().has_value()) {
+            checkboxGroupModifier_->SetPointColor(paintProperty->GetCheckBoxGroupCheckMarkColor().value());
+        }
+        if (paintProperty->GetCheckBoxGroupCheckMarkSize().has_value()) {
+            if (paintProperty->GetCheckBoxGroupCheckMarkSizeValue().ConvertToPx() >= 0) {
+                strokePaintSize = paintProperty->GetCheckBoxGroupCheckMarkSizeValue().ConvertToPx();
+            }
+            if (strokePaintSize > size.Width()) {
+                strokePaintSize = size.Width();
+            }
+        }
+        checkboxGroupModifier_->SetCheckMarkPaintSize(strokePaintSize);
+        if (paintProperty->GetCheckBoxGroupCheckMarkWidth().has_value()) {
+            auto strokeWidth = paintProperty->GetCheckBoxGroupCheckMarkWidthValue().ConvertToPx();
+            auto strokeLimitByMarkSize = strokePaintSize * CHECKBOXGROUP_MARK_STROKEWIDTH_LIMIT_RATIO;
+            if (strokeWidth > strokeLimitByMarkSize) {
+                strokeWidth = strokeLimitByMarkSize;
+            }
+            checkboxGroupModifier_->SetCheckStroke(strokeWidth);
+        }
+        auto selectStatus = paintProperty->GetSelectStatus();
+
+        checkboxGroupModifier_->SetEnabled(enabled_);
+        checkboxGroupModifier_->SetIsTouch(isTouch_);
+        checkboxGroupModifier_->SetIsHover(isHover_);
+        checkboxGroupModifier_->SetShapeScale(shapeScale_);
+        checkboxGroupModifier_->SetUiStatus(uiStatus_);
+        checkboxGroupModifier_->SetSelectStatus(selectStatus);
+        checkboxGroupModifier_->SetOffset(offset);
+        checkboxGroupModifier_->SetSize(size);
+    }
+
+    void SetHotZoneOffset(OffsetF& hotZoneOffset)
+    {
+        hotZoneOffset_ = hotZoneOffset;
+    }
+
+    void SetHotZoneSize(SizeF& hotZoneSize)
+    {
+        hotZoneSize_ = hotZoneSize;
+    }
 
 private:
-    void InitializeParam();
-    void PaintCheckBox(RSCanvas& canvas, PaintWrapper* paintWrapper) const;
-    void DrawUnselected(RSCanvas& canvas, const OffsetF& origin, RSPen& pen, RSBrush& brush, SizeF& paintSize) const;
-    void DrawActiveBorder(RSCanvas& canvas, const OffsetF& paintOffset, RSBrush& brush, const SizeF& paintSize) const;
-    void DrawPart(RSCanvas& canvas, const OffsetF& origin, RSPen& pen, const SizeF& paintSize) const;
-    void DrawTouchBoard(RSCanvas& canvas, const SizeF& contentSize, const OffsetF& offset) const;
-    void DrawHoverBoard(RSCanvas& canvas, const SizeF& contentSize, const OffsetF& offset) const;
-    void DrawAnimationOffToOn(RSCanvas& canvas, const OffsetF& origin, RSPen& pen, const SizeF& paintSize) const;
-    void DrawAnimationOnToOff(RSCanvas& canvas, const OffsetF& origin, RSPen& pen, const SizeF& paintSize) const;
-
-    float borderWidth_ = 0.0f;
-    float borderRadius_ = 0.0f;
-    float checkStroke_ = 0.0f;
-    Color pointColor_ = Color::WHITE;
-    Color activeColor_ = Color::BLUE;
-    Color inactiveColor_ = Color::GRAY;
-    Color shadowColor_ = Color::WHITE;
-    Color clickEffectColor_ = Color::WHITE;
-    Color hoverColor_ = Color::WHITE;
-    Dimension hoverRadius_ = 8.0_vp;
-    Dimension hotZoneHorizontalPadding_ = 11.0_vp;
-    Dimension hotZoneVerticalPadding_ = 11.0_vp;
-
     bool enabled_ = true;
     bool isTouch_ = false;
     bool isHover_ = false;
     float shapeScale_ = 1.0f;
     UIStatus uiStatus_ = UIStatus::UNSELECTED;
+    OffsetF hotZoneOffset_;
+    SizeF hotZoneSize_;
+    RefPtr<CheckBoxGroupModifier> checkboxGroupModifier_;
 };
 } // namespace OHOS::Ace::NG
 

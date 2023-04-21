@@ -20,6 +20,7 @@
 
 #include "base/i18n/localization.h"
 #include "base/utils/utils.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
@@ -114,14 +115,16 @@ void TextTimerPattern::OnModifyDone()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto layoutProperty = host->GetLayoutProperty();
-    CHECK_NULL_VOID(layoutProperty);
-    if (layoutProperty->GetPositionProperty()) {
-        layoutProperty->UpdateAlignment(
-            layoutProperty->GetPositionProperty()->GetAlignment().value_or(Alignment::CENTER));
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->UpdateTextOverflow(TextOverflow::NONE);
+    if (textLayoutProperty->GetPositionProperty()) {
+        textLayoutProperty->UpdateAlignment(
+            textLayoutProperty->GetPositionProperty()->GetAlignment().value_or(Alignment::CENTER));
     } else {
-        layoutProperty->UpdateAlignment(Alignment::CENTER);
+        textLayoutProperty->UpdateAlignment(Alignment::CENTER);
     }
+    textLayoutProperty->UpdateTextOverflow(TextOverflow::NONE);
 
     isCountDown_ = GetIsCountDown();
     inputCount_ = GetInputCount();

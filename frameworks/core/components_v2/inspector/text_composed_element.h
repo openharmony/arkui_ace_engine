@@ -53,9 +53,10 @@ public:
     std::string GetTextFontSize() const;
     std::string GetWidth() const override;
     std::string GetHeight() const override;
-    void AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent) override;
-    void UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent) override;
-    void DeleteChildWithSlot(int32_t slot) override;
+    RefPtr<Element> GetRenderElement() const override
+    {
+        return GetContentElement<TextElement>(TextElement::TypeId());
+    }
 
 private:
     RefPtr<RenderText> GetRenderText() const;

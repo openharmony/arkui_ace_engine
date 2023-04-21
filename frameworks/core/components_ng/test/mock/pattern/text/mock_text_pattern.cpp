@@ -16,8 +16,6 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
-void TextPattern::OnAttachToFrameNode() {}
-
 void TextPattern::OnDetachFromFrameNode(FrameNode* node) {}
 
 void TextPattern::HandleLongPress(GestureEvent& info) {}
@@ -38,6 +36,8 @@ bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
 }
 
 void TextPattern::BeforeCreateLayoutWrapper() {}
+
+void TextPattern::OnVisibleChange(bool isVisible) {}
 
 void TextPattern::DumpInfo() {}
 } // namespace OHOS::Ace::NG

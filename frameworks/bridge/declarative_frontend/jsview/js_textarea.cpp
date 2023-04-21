@@ -64,7 +64,10 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSTextArea>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSTextArea>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSTextArea>::StaticMethod("onEditChange", &JSTextField::SetOnEditChanged);
     JSClass<JSTextArea>::StaticMethod("copyOption", &JSTextField::SetCopyOption);
+    JSClass<JSTextArea>::StaticMethod("textMenuOptions", &JSTextField::JsMenuOptionsExtension);
+    JSClass<JSTextArea>::StaticMethod("foregroundColor", &JSTextField::SetForegroundColor);
     JSClass<JSTextArea>::Inherit<JSViewAbstract>();
     JSClass<JSTextArea>::Bind(globalObj);
 }
@@ -78,6 +81,7 @@ void JSTextAreaController::JSBind(BindingTarget globalObj)
 {
     JSClass<JSTextAreaController>::Declare("TextAreaController");
     JSClass<JSTextAreaController>::Method("caretPosition", &JSTextAreaController::CaretPosition);
+    JSClass<JSTextAreaController>::Method("setTextSelection", &JSTextAreaController::SetTextSelection);
     JSClass<JSTextAreaController>::Bind(globalObj, JSTextAreaController::Constructor, JSTextAreaController::Destructor);
 }
 
@@ -97,8 +101,17 @@ void JSTextAreaController::Destructor(JSTextAreaController* scroller)
 
 void JSTextAreaController::CaretPosition(int32_t caretPosition)
 {
-    if (controller_) {
-        controller_->CaretPosition(caretPosition);
+    auto controller = controllerWeak_.Upgrade();
+    if (controller) {
+        controller->CaretPosition(caretPosition);
+    }
+}
+
+void JSTextAreaController::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
+{
+    auto controller = controllerWeak_.Upgrade();
+    if (controller) {
+        controller->SetTextSelection(selectionStart, selectionEnd);
     }
 }
 

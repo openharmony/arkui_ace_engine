@@ -74,7 +74,8 @@ void RenderSceneViewer::HandleEvent(const OHOS::Render3D::SceneViewerTouchEvent&
         case OHOS::Ace::TouchType::CANCEL:
             touchCount_--;
             break;
-        case OHOS::Ace::TouchType::UNKNOWN:
+        default:
+            LOGW("Unknown touch type.");
             break;
     }
 
@@ -172,7 +173,6 @@ void RenderSceneViewer::RenderWithContext(RenderContext& context, const Offset& 
             delegate->sceneViewerAdapter_.SetEngine(std::move(engine));
             LOGD("ACE-3D init Engine this %d %d", delegate->GetKey(), __LINE__);
         });
-        LOGD("ACE-3D RenderSceneViewer::RenderWithContext get eglcontext %pX", eglContext);
     }
 
     if (needsSceneSetup_) {
@@ -262,7 +262,8 @@ void RenderSceneViewer::Paint(RenderContext& context, const Offset& offset)
         LOGE("ACE-3D RenderSceneViewer::Paint() GetContext failed.");
     }
 
-    PaintTextureLayer(context, offset);
+    // Texture layer position is (0,0) w.r.t to RenderNode.
+    PaintTextureLayer(context, Offset(0.0, 0.0));
     RenderNode::Paint(context, offset);
 
     if ((animating_ || handlesNotReady_) && pipeline_context) {
@@ -553,8 +554,8 @@ void RenderSceneViewer::HandleLightsUpdate(const RefPtr<SceneViewerComponent>& s
         lights_ = svComponent->GetLights();
         for (auto& light : lights_) {
             light->SetContextAndCallback(
-            context_,
-            std::bind(&RenderSceneViewer::PerformLightUpdate, this));
+                context_,
+                std::bind(&RenderSceneViewer::PerformLightUpdate, this));
         }
         PerformLightUpdate();
         return;

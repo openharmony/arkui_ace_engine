@@ -16,7 +16,11 @@
 #ifndef FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_SUBWINDOW_OHOS_H
 #define FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_SUBWINDOW_OHOS_H
 
+#include "event_handler.h"
+#include "event_runner.h"
+#include "resource_manager.h"
 #include "wm/window.h"
+
 #include "adapter/ohos/entrance/platform_event_callback.h"
 #include "base/resource/asset_manager.h"
 #include "base/subwindow/subwindow.h"
@@ -29,11 +33,9 @@
 #include "core/components/stack/stack_element.h"
 #include "core/components/tween/tween_component.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/pipeline_ng/pipeline_context.h"
-#include "event_handler.h"
-#include "event_runner.h"
-#include "resource_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
+#include "core/pipeline/pipeline_base.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Rosen {
 class Window;
@@ -51,6 +53,8 @@ public:
     ~SubwindowOhos() = default;
 
     void InitContainer() override;
+    void ResizeWindow() override;
+    NG::RectF GetRect() override;
     void ShowMenu(const RefPtr<Component>& newComponent) override;
     void ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t targetId, const NG::OffsetF& offset) override;
     void HideMenuNG(int32_t targetId) override;
@@ -59,19 +63,26 @@ public:
     void ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo) override;
     void HidePopupNG(int32_t targetId) override;
     void HidePopupNG() override;
+    void GetPopupInfoNG(int32_t targetId, NG::PopupInfo& popupInfo) override;
     bool CancelPopup(const std::string& id) override;
     void CloseMenu() override;
     void ClearMenu() override;
     void ClearMenuNG() override;
+    RefPtr<NG::FrameNode> ShowDialogNG(
+        const DialogProperties& dialogProps, const RefPtr<NG::UINode>& customNode) override;
+    void HideSubWindowNG() override;
 
     void SetHotAreas(const std::vector<Rect>& rects) override;
 
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom) override;
-    void ShowDialog(const std::string& title, const std::string& message,
-        const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
+    void ShowDialog(const std::string& title, const std::string& message, const std::vector<ButtonInfo>& buttons,
+        bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
         const std::set<std::string>& callbacks) override;
-    void ShowActionMenu(const std::string& title,
-        const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback) override;
+    void ShowActionMenu(const std::string& title, const std::vector<ButtonInfo>& button,
+        std::function<void(int32_t, int32_t)>&& callback) override;
+    void CloseDialog(int32_t instanceId) override;
+    const RefPtr<NG::OverlayManager> GetOverlayManager() override;
+
     int32_t GetChildContainerId() const
     {
         return childContainerId_;
@@ -89,6 +100,8 @@ public:
         isToastWindow_ = isToastWindow;
     }
 
+    void UpdateAceView(int32_t width, int32_t height, float density, int32_t containerId);
+
 private:
     RefPtr<StackElement> GetStack();
     void AddMenu(const RefPtr<Component>& newComponent);
@@ -103,7 +116,26 @@ private:
         int32_t& width, int32_t& height, int32_t& posX, int32_t& posY, float& density) const;
     bool InitToastDialogWindow(int32_t width, int32_t height, int32_t posX, int32_t posY, bool isToast = false);
     bool InitToastDialogView(int32_t width, int32_t height, float density);
+    void ShowToastForAbility(const std::string& message, int32_t duration, const std::string& bottom);
+    void ShowToastForService(const std::string& message, int32_t duration, const std::string& bottom);
+    void ShowDialogForAbility(const std::string& title, const std::string& message,
+        const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
+        const std::set<std::string>& callbacks);
+    void ShowDialogForService(const std::string& title, const std::string& message,
+        const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
+        const std::set<std::string>& callbacks);
+    void ShowActionMenuForAbility(const std::string& title, const std::vector<ButtonInfo>& button,
+        std::function<void(int32_t, int32_t)>&& callback);
+    void ShowActionMenuForService(const std::string& title, const std::vector<ButtonInfo>& button,
+        std::function<void(int32_t, int32_t)>&& callback);
 
+    RefPtr<PipelineBase> GetChildPipelineContext() const;
+
+#ifdef ENABLE_DRAG_FRAMEWORK
+    void HideFilter();
+    void HidePixelMap(bool startDrag = false, double x = 0, double y = 0);
+    void HideEventColumn();
+#endif // ENABLE_DRAG_FRAMEWORK
     static int32_t id_;
     int32_t windowId_ = 0;
     int32_t parentContainerId_ = -1;

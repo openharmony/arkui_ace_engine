@@ -21,8 +21,8 @@
 #include "core/components/font/constants_converter.h"
 #include "core/components/stack/stack_element.h"
 #include "core/components/text_overlay/text_overlay_component.h"
-#include "flutter/third_party/txt/src/txt/paragraph_txt.h"
-#include "third_party/skia/include/core/SkCanvas.h"
+#include "txt/paragraph_txt.h"
+#include "include/core/SkCanvas.h"
 
 namespace OHOS::Ace {
 
@@ -395,7 +395,7 @@ void TextOverlayBase::PaintSelection(SkCanvas* canvas, const Offset& globalOffse
 void TextOverlayBase::InitSelection(const Offset& pos, const Offset& globalOffset)
 {
     int32_t extend = GetCursorPositionForClick(pos, globalOffset);
-    int32_t extendEnd = extend + GetGraphemeClusterLength(extend, false); 
+    int32_t extendEnd = extend + GetGraphemeClusterLength(extend, false);
     textValue_.UpdateSelection(extend, extendEnd);
 }
 
@@ -449,6 +449,7 @@ const RefPtr<RenderNode> TextOverlayManager::GetTargetNode() const
 
 void TextOverlayManager::PopTextOverlay()
 {
+    coordinateOffset_ = Offset();
     const auto& stackElement = stackElement_.Upgrade();
     if (stackElement) {
         stackElement->PopTextOverlay();

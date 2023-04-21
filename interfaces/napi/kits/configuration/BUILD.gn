@@ -29,7 +29,12 @@ template("napi_configuration_static") {
 
     sources = [ "js_configuration.cpp" ]
 
-    deps = [ "//foundation/arkui/napi/:ace_napi" ]
+    deps = []
+    if (platform != "" && is_cross_platform_build) {
+      deps += [ "//plugins/libs/napi:napi_$platform" ]
+    } else {
+      deps += [ "//foundation/arkui/napi/:ace_napi" ]
+    }
 
     if (defined(config.libace_target)) {
       deps += [ config.libace_target ]
@@ -44,6 +49,7 @@ foreach(item, ace_platforms) {
   napi_configuration_static("configuration_static_" + item.name) {
     defines = []
     cflags_cc = []
+    platform = item.name
     config = {
     }
 

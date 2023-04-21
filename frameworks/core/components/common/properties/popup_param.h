@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_PROPERTIES_POPUP_PARAM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_PROPERTIES_POPUP_PARAM_H
 
+#include <optional>
 #include <string>
 
 #include "base/geometry/dimension.h"
@@ -188,6 +189,16 @@ public:
         enableArrow_ = enableArrow;
     }
 
+    bool IsBlockEvent() const
+    {
+        return blockEvent_;
+    }
+
+    void SetBlockEvent(bool blockEvent)
+    {
+        blockEvent_ = blockEvent;
+    }
+
     bool IsUseCustom() const
     {
         return useCustom_;
@@ -198,7 +209,7 @@ public:
         useCustom_ = useCustom;
     }
 
-    const Dimension& GetTargetSpace() const
+    const std::optional<Dimension>& GetTargetSpace() const
     {
         return targetSpace_;
     }
@@ -278,6 +289,36 @@ public:
         return targetOffset_;
     }
 
+    void SetTextColor(const Color& textColor)
+    {
+        textColor_ = textColor;
+    }
+
+    const std::optional<Color>& GetTextColor() const
+    {
+        return textColor_;
+    }
+
+    void SetFontSize(const Dimension& fontSize)
+    {
+        fontSize_ = fontSize;
+    }
+
+    const std::optional<Dimension>& GetFontSize() const
+    {
+        return fontSize_;
+    }
+
+    void SetFontWeight(const FontWeight& fontWeight)
+    {
+        fontWeight_ = fontWeight;
+    }
+
+    const std::optional<FontWeight>& GetFontWeight() const
+    {
+        return fontWeight_;
+    }
+
 private:
     bool isShow_ = true;
     bool hasAction_ = false;
@@ -286,6 +327,7 @@ private:
     bool isBackgroundColorSetted_ = false;
     bool useCustom_ = false;
     bool isShowInSubWindow_ = false;
+    bool blockEvent_ = true;
     Color maskColor_;
     Color backgroundColor_;
     Placement placement_ = Placement::BOTTOM;
@@ -296,10 +338,13 @@ private:
     Border border_;
     std::optional<Dimension> arrowOffset_;
     ComposeId targetId_;
-    Dimension targetSpace_;
+    std::optional<Dimension> targetSpace_;
     std::string message_;
     Offset targetOffset_;
     Size targetSize_;
+    std::optional<FontWeight> fontWeight_;
+    std::optional<Color> textColor_;
+    std::optional<Dimension> fontSize_;
 
     // Used in NG mode
     StateChangeFunc onStateChange_;

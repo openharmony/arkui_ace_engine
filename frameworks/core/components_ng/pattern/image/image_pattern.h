@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,9 @@
 #include <memory>
 
 #include "base/memory/referenced.h"
+#include "base/utils/utils.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components_ng/event/click_event.h"
 #include "core/components_ng/pattern/image/image_event_hub.h"
 #include "core/components_ng/pattern/image/image_layout_algorithm.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
@@ -26,6 +29,8 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/canvas_image.h"
+#include "core/image/image_source_info.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -70,17 +75,26 @@ public:
     void OnNotifyMemoryLevel(int32_t level) override;
     void OnWindowHide() override;
     void OnWindowShow() override;
+    void OnVisibleChange(bool isVisible) override;
+
+    void EnableDrag();
+
+    void SetCopyOption(CopyOptions value)
+    {
+        copyOption_ = value;
+    }
+
+    void SetSyncLoad(bool value)
+    {
+        syncLoad_ = value;
+    }
+
+    void BeforeCreatePaintWrapper() override;
+    void DumpInfo() override;
 
 private:
     void OnAttachToFrameNode() override;
-    void OnDetachFromFrameNode(FrameNode* frameNode) override
-    {
-        auto id = frameNode->GetId();
-        auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
-        CHECK_NULL_VOID(pipeline);
-        pipeline->RemoveWindowStateChangedCallback(id);
-        pipeline->RemoveNodesToNotifyMemoryLevel(id);
-    }
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
     void OnModifyDone() override;
 
@@ -89,10 +103,23 @@ private:
     void OnImageDataReady();
     void OnImageLoadFail();
     void OnImageLoadSuccess();
-    void CacheImageObject();
     void SetImagePaintConfig(
-        const RefPtr<CanvasImage>& canvasImage, const RectF& lastSrcRect_, const RectF& lastDstRect_, bool isSvg);
+        const RefPtr<CanvasImage>& canvasImage, const RectF& srcRect, const RectF& dstRect, bool isSvg);
     void UpdateInternalResource(ImageSourceInfo& sourceInfo);
+
+    void PrepareAnimation();
+    void SetRedrawCallback();
+    void RegisterVisibleAreaChange();
+
+    void InitCopy();
+    void HandleCopy();
+    void OpenSelectOverlay();
+    void CloseSelectOverlay();
+
+    void UpdateFillColorIfForegroundColor();
+    void UpdateDragEvent(const RefPtr<OHOS::Ace::DragEvent>& event);
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
     DataReadyNotifyTask CreateDataReadyCallback();
     LoadSuccessNotifyTask CreateLoadSuccessCallback();
@@ -102,18 +129,27 @@ private:
     LoadSuccessNotifyTask CreateLoadSuccessCallbackForAlt();
     LoadFailNotifyTask CreateLoadFailCallbackForAlt();
 
-    RefPtr<ImageLoadingContext> loadingCtx_;
-    RefPtr<CanvasImage> lastCanvasImage_;
-    RectF lastDstRect_;
-    RectF lastSrcRect_;
 
+    CopyOptions copyOption_ = CopyOptions::None;
+    bool syncLoad_ = false;
     bool isShow_ = true; // TODO: remove it later when use [isActive_] to determine image data management
+
+    RefPtr<ImageLoadingContext> loadingCtx_;
+    RefPtr<CanvasImage> image_;
+    RectF dstRect_;
+    RectF srcRect_;
 
     // clear alt data after [OnImageLoadSuccess] being called
     RefPtr<ImageLoadingContext> altLoadingCtx_;
-    RefPtr<CanvasImage> lastAltCanvasImage_;
-    std::unique_ptr<RectF> lastAltDstRect_;
-    std::unique_ptr<RectF> lastAltSrcRect_;
+    RefPtr<CanvasImage> altImage_;
+    std::unique_ptr<RectF> altDstRect_;
+    std::unique_ptr<RectF> altSrcRect_;
+
+    RefPtr<LongPressEvent> longPressEvent_;
+    RefPtr<ClickEvent> clickEvent_;
+    RefPtr<InputEvent> mouseEvent_;
+    RefPtr<Clipboard> clipboard_;
+    RefPtr<SelectOverlayProxy> selectOverlay_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ImagePattern);
 };

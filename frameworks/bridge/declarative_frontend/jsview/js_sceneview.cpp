@@ -18,6 +18,7 @@
 #include "base/geometry/quaternion.h"
 #include "base/geometry/vec3.h"
 #include "bridge/declarative_frontend/jsview/models/model_view_impl.h"
+#include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/model/model_view_ng.h"
 #include "core/components/scene_viewer/scene_viewer_component.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
@@ -126,7 +127,8 @@ void JSSceneView::JSCamera(const JSCallbackInfo& info)
     }
 
     // Using single/same animation option for both Position and Rotation currently.
-    AnimationOption animOption = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
+    AnimationOption animOption = ViewStackModel::GetInstance()->GetImplicitAnimationOption();
+    LOGD("JSCamera() animOption: %d", animOption.GetDuration());
 
     // Default Camera zNear, zFar, fovDegrees.
     auto zNear = 0.5f;
@@ -264,7 +266,9 @@ void JSSceneView::JSLight(const JSCallbackInfo& info)
         return;
     }
 
-    AnimationOption animOption = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
+    AnimationOption animOption = ViewStackModel::GetInstance()->GetImplicitAnimationOption();
+    LOGD("JSLight() animOption: %d", animOption.GetDuration());
+
     auto type = argsPtrItem->GetInt("type", 1);
     auto intensity = argsPtrItem->GetDouble("intensity", 10.0);
     auto shadow = argsPtrItem->GetBool("shadow", false);
@@ -487,6 +491,42 @@ void JSSceneView::JSAddCustomRender(const JSCallbackInfo& info)
     ModelView::GetInstance()->AddCustomRender(desc);
 }
 
+void JSSceneView::JsWidth(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
+
+    Dimension value;
+    if (!ParseJsDimensionVp(info[0], value)) {
+        return;
+    }
+
+    if (LessNotEqual(value.Value(), 0.0)) {
+        value.SetValue(0.0);
+    }
+    ModelView::GetInstance()->SetWidth(value);
+}
+
+void JSSceneView::JsHeight(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
+
+    Dimension value;
+    if (!ParseJsDimensionVp(info[0], value)) {
+        return;
+    }
+
+    if (LessNotEqual(value.Value(), 0.0)) {
+        value.SetValue(0.0);
+    }
+    ModelView::GetInstance()->SetHeight(value);
+}
+
 void JSSceneView::JSBind(BindingTarget globalObj)
 {
     LOGD("JSSceneView::JSBind()");
@@ -504,6 +544,8 @@ void JSSceneView::JSBind(BindingTarget globalObj)
     JSClass<JSSceneView>::StaticMethod("addCone", &JSSceneView::JSAddCone);
     JSClass<JSSceneView>::StaticMethod("glTFAnimation", &JSSceneView::JSGLTFAnimation);
     JSClass<JSSceneView>::StaticMethod("addCustomRender", &JSSceneView::JSAddCustomRender);
+    JSClass<JSSceneView>::StaticMethod("width", &JSSceneView::JsWidth);
+    JSClass<JSSceneView>::StaticMethod("height", &JSSceneView::JsHeight);
     JSClass<JSSceneView>::Inherit<JSViewAbstract>();
     JSClass<JSSceneView>::Bind<>(globalObj);
 }

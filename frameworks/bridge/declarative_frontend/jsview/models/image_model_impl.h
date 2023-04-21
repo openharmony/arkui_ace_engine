@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,13 +27,14 @@ public:
     void SetBorder(const Border& border) override;
     void SetBackBorder() override;
     void SetBlur(double blur) override;
-    void SetImageFit(int32_t value) override;
+    void SetImageFit(ImageFit value) override;
     void SetMatchTextDirection(bool value) override;
     void SetFitOriginSize(bool value) override;
     void SetOnComplete(std::function<void(const LoadImageSuccessEvent& info)>&& callback) override;
     void SetOnError(std::function<void(const LoadImageFailEvent& info)>&& callback) override;
     void SetSvgAnimatorFinishEvent(std::function<void()>&& callback) override;
-    void Create(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap) override;
+    void Create(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap, const std::string& bundleName,
+        const std::string& moduleName) override;
     void SetImageSourceSize(const std::pair<Dimension, Dimension>& size) override;
     void SetImageFill(const Color& color) override;
     void SetImageInterpolation(ImageInterpolation iterpolation) override;
@@ -43,8 +44,9 @@ public:
     void SetAutoResize(bool autoResize) override;
     void SetSyncMode(bool syncMode) override;
     void SetColorFilterMatrix(const std::vector<float>& matrix) override;
+    void SetDraggable(bool draggable) override {}
     void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override;
-    void SetOnDragEnter(NG::OnDragDropFunc&&  onDragEnter) override;
+    void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) override;
     void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) override;
     void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) override;
     void SetOnDrop(NG::OnDragDropFunc&& onDrop) override;

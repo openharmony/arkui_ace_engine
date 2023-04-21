@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,9 +17,11 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CHECKBOXGROUP_CHECKBOXGROUP_PAINT_PROPERTY_H
 
 #include "core/animation/curve.h"
+#include "core/components/checkable/checkable_theme.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/render/paint_property.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -36,6 +38,10 @@ public:
         paintProperty->UpdatePaintProperty(this);
         paintProperty->propCheckBoxGroupSelect_ = CloneCheckBoxGroupSelect();
         paintProperty->propCheckBoxGroupSelectedColor_ = CloneCheckBoxGroupSelectedColor();
+        paintProperty->propCheckBoxGroupUnSelectedColor_ = CloneCheckBoxGroupUnSelectedColor();
+        paintProperty->propCheckBoxGroupCheckMarkColor_ = CloneCheckBoxGroupCheckMarkColor();
+        paintProperty->propCheckBoxGroupCheckMarkSize_ = CloneCheckBoxGroupCheckMarkSize();
+        paintProperty->propCheckBoxGroupCheckMarkWidth_ = CloneCheckBoxGroupCheckMarkWidth();
         paintProperty->propStatus_ = propStatus_;
 
         return paintProperty;
@@ -46,6 +52,10 @@ public:
         PaintProperty::Reset();
         ResetCheckBoxGroupSelect();
         ResetCheckBoxGroupSelectedColor();
+        ResetCheckBoxGroupUnSelectedColor();
+        ResetCheckBoxGroupCheckMarkColor();
+        ResetCheckBoxGroupCheckMarkSize();
+        ResetCheckBoxGroupCheckMarkWidth();
 
         propStatus_ = SelectStatus::NONE;
     }
@@ -80,6 +90,10 @@ public:
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CheckBoxGroupSelect, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CheckBoxGroupSelectedColor, Color, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CheckBoxGroupUnSelectedColor, Color, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CheckBoxGroupCheckMarkColor, Color, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CheckBoxGroupCheckMarkSize, Dimension, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CheckBoxGroupCheckMarkWidth, Dimension, PROPERTY_UPDATE_RENDER);
 
 private:
     SelectStatus propStatus_ = SelectStatus::NONE;

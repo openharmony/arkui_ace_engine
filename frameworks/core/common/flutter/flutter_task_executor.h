@@ -27,9 +27,9 @@
 
 #include "base/thread/task_executor.h"
 #include "base/utils/macros.h"
+#include "core/common/flutter/flutter_thread_model.h"
 
 namespace OHOS::Ace {
-
 class ACE_EXPORT FlutterTaskExecutor final : public TaskExecutor {
     DECLARE_ACE_TYPE(FlutterTaskExecutor, TaskExecutor);
 
@@ -39,9 +39,10 @@ public:
     FlutterTaskExecutor() = default;
     ~FlutterTaskExecutor() final;
     // Must call this method on platform thread
-    void InitPlatformThread(bool useCurrentEventRunner = false);
+    void InitPlatformThread(bool useCurrentEventRunner = false, bool isStageModel = false);
     void InitJsThread(bool newThread = true);
     void InitOtherThreads(const flutter::TaskRunners& taskRunners);
+    void InitOtherThreads(FlutterThreadModel* threadModel);
 
     void AddTaskObserver(Task&& callback) override;
     void RemoveTaskObserver() override;
@@ -92,7 +93,5 @@ private:
     fml::RefPtr<fml::TaskRunner> jsRunner_;
     fml::RefPtr<fml::TaskRunner> gpuRunner_;
 };
-
 } // namespace OHOS::Ace
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_COMMON_FLUTTER_FLUTTER_TASK_EXECUTOR_H

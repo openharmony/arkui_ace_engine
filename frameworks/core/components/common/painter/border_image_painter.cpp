@@ -231,7 +231,11 @@ void BorderImagePainter::FillBorderImageCenter(const Offset& offset, SkCanvas* c
     SkRect srcRectCenter = SkRect::MakeXYWH(leftSlice_, topSlice_, imageCenterWidth_, imageCenterHeight_);
     SkRect desRectCenter = SkRect::MakeXYWH(destLeftOffset, destTopOffset,
         borderCenterWidth_ + EXTRA_OFFSET * 2, borderCenterHeight_ + EXTRA_OFFSET * 2);
+#ifndef NEW_SKIA
     canvas->drawImageRect(image_, srcRectCenter, desRectCenter, &paint);
+#else
+    canvas->drawImageRect(image_, srcRectCenter, desRectCenter, SkSamplingOptions(), &paint, SkCanvas::kStrict_SrcRectConstraint);
+#endif
 }
 
 void BorderImagePainter::PaintBorderImageCorners(const Offset& offset, SkCanvas* canvas, SkPaint& paint)
@@ -255,24 +259,38 @@ void BorderImagePainter::PaintBorderImageCorners(const Offset& offset, SkCanvas*
     // left top
     SkRect desRectLeftTop = SkRect::MakeXYWH(offsetLeftX, offsetTopY,
         leftWidth_ + EXTRA_OFFSET, topWidth_ + EXTRA_OFFSET);
+#ifndef NEW_SKIA
     canvas->drawImageRect(image_, srcRectLeftTop, desRectLeftTop, &paint);
-
+#else
+    canvas->drawImageRect(image_, srcRectLeftTop, desRectLeftTop, SkSamplingOptions(), &paint, SkCanvas::kStrict_SrcRectConstraint);
+#endif
     // right top
     SkRect desRectRightTop = SkRect::MakeXYWH(offsetRightX - rightWidth_ - EXTRA_OFFSET, offsetTopY,
         rightWidth_ + EXTRA_OFFSET, topWidth_ + EXTRA_OFFSET);
+#ifndef NEW_SKIA
     canvas->drawImageRect(image_, srcRectRightTop, desRectRightTop, &paint);
-
+#else
+    canvas->drawImageRect(image_, srcRectRightTop, desRectRightTop, SkSamplingOptions(), &paint, SkCanvas::kStrict_SrcRectConstraint);
+#endif
     // left bottom
     SkRect desRectLeftBottom =
         SkRect::MakeXYWH(offsetLeftX, offsetBottomY - bottomWidth_ - EXTRA_OFFSET,
             leftWidth_ + EXTRA_OFFSET, bottomWidth_ + EXTRA_OFFSET);
+#ifndef NEW_SKIA
     canvas->drawImageRect(image_, srcRectLeftBottom, desRectLeftBottom, &paint);
+#else
+    canvas->drawImageRect(image_, srcRectLeftBottom, desRectLeftBottom, SkSamplingOptions(), &paint, SkCanvas::kStrict_SrcRectConstraint);
+#endif
 
     // right bottom
     SkRect desRectRightBottom =
         SkRect::MakeXYWH(offsetRightX - rightWidth_ - EXTRA_OFFSET, offsetBottomY - bottomWidth_ - EXTRA_OFFSET,
             rightWidth_ + EXTRA_OFFSET, bottomWidth_ + EXTRA_OFFSET);
+#ifndef NEW_SKIA
     canvas->drawImageRect(image_, srcRectRightBottom, desRectRightBottom, &paint);
+#else
+    canvas->drawImageRect(image_, srcRectRightBottom, desRectRightBottom, SkSamplingOptions(), &paint, SkCanvas::kStrict_SrcRectConstraint);
+#endif
 }
 
 void BorderImagePainter::PaintBorderImageStretch(const Offset& offset, SkCanvas* canvas, SkPaint& paint)
@@ -284,21 +302,35 @@ void BorderImagePainter::PaintBorderImageStretch(const Offset& offset, SkCanvas*
 
     SkRect desRectLeft =
         SkRect::MakeXYWH(offsetLeftX, offsetTopY + topWidth_, leftWidth_, borderCenterHeight_);
+#ifndef NEW_SKIA
     canvas->drawImageRect(image_, srcRectLeft_, desRectLeft, &paint);
+#else
+    canvas->drawImageRect(image_, srcRectLeft_, desRectLeft, SkSamplingOptions(), &paint, SkCanvas::kStrict_SrcRectConstraint);
+#endif
 
     SkRect desRectRight =
         SkRect::MakeXYWH(offsetRightX - rightWidth_, offsetTopY + topWidth_, rightWidth_, borderCenterHeight_);
+#ifndef NEW_SKIA
     canvas->drawImageRect(image_, srcRectRight_, desRectRight, &paint);
-
+#else
+    canvas->drawImageRect(image_, srcRectRight_, desRectRight, SkSamplingOptions(), &paint, SkCanvas::kStrict_SrcRectConstraint);
+#endif
     SkRect desRectTop =
         SkRect::MakeXYWH(offsetLeftX + leftWidth_, offsetTopY,
             paintSize_.Width() - leftWidth_ - rightWidth_ + leftOutset_ + rightOutset_, topWidth_);
+#ifndef NEW_SKIA
     canvas->drawImageRect(image_, srcRectTop_, desRectTop, &paint);
-
+#else
+    canvas->drawImageRect(image_, srcRectTop_, desRectTop, SkSamplingOptions(), &paint, SkCanvas::kStrict_SrcRectConstraint);
+#endif
     SkRect desRectBottom =
         SkRect::MakeXYWH(offsetLeftX + leftWidth_, offsetBottomY - bottomWidth_,
             paintSize_.Width() - leftWidth_ - rightWidth_ + leftOutset_ + rightOutset_, bottomWidth_);
+#ifndef NEW_SKIA
     canvas->drawImageRect(image_, srcRectBottom_, desRectBottom, &paint);
+#else
+    canvas->drawImageRect(image_, srcRectBottom_, desRectBottom, SkSamplingOptions(), &paint, SkCanvas::kStrict_SrcRectConstraint);
+#endif
 }
 
 void BorderImagePainter::PaintBorderImageRound(const Offset& offset, SkCanvas* canvas, SkPaint& paint)
@@ -330,11 +362,19 @@ void BorderImagePainter::PaintBorderImageRound(const Offset& offset, SkCanvas* c
         // top
         SkRect desRectTopRound =
             SkRect::MakeXYWH(roundStartHorizontal, offsetTopY, roundImageWidth, topWidth_);
+#ifndef NEW_SKIA
         canvas->drawImageRect(image_, srcRectTop_, desRectTopRound, &paint);
+#else
+        canvas->drawImageRect(image_, srcRectTop_, desRectTopRound, SkSamplingOptions(), &paint, SkCanvas::kStrict_SrcRectConstraint);
+#endif
         // bottom
         SkRect desRectBottomRound =
             SkRect::MakeXYWH(roundStartHorizontal, offsetBottomY - bottomWidth_, roundImageWidth, bottomWidth_);
+#ifndef NEW_SKIA
         canvas->drawImageRect(image_, srcRectBottom_, desRectBottomRound, &paint);
+#else
+        canvas->drawImageRect(image_, srcRectBottom_, desRectBottomRound, SkSamplingOptions(), &paint, SkCanvas::kStrict_SrcRectConstraint);
+#endif
         roundStartHorizontal += roundImageWidth;
     }
     double roundStartVertical = offsetTopY + topWidth_;
@@ -343,11 +383,19 @@ void BorderImagePainter::PaintBorderImageRound(const Offset& offset, SkCanvas* c
         // left
         SkRect desRectLeftRound =
             SkRect::MakeXYWH(offsetLeftX, roundStartVertical, leftWidth_, roundImageHeight);
+#ifndef NEW_SKIA
         canvas->drawImageRect(image_, srcRectLeft_, desRectLeftRound, &paint);
+#else
+        canvas->drawImageRect(image_, srcRectLeft_, desRectLeftRound, SkSamplingOptions(), &paint, SkCanvas::kStrict_SrcRectConstraint);
+#endif
         // right
         SkRect desRectRightRound =
             SkRect::MakeXYWH(offsetRightX- rightWidth_, roundStartVertical, rightWidth_, roundImageHeight);
+#ifndef NEW_SKIA
         canvas->drawImageRect(image_, srcRectRight_, desRectRightRound, &paint);
+#else
+        canvas->drawImageRect(image_, srcRectRight_, desRectRightRound, SkSamplingOptions(), &paint, SkCanvas::kStrict_SrcRectConstraint);
+#endif
         roundStartVertical += roundImageHeight;
     }
 }
@@ -378,12 +426,19 @@ void BorderImagePainter::PaintBorderImageSpace(const Offset& offset, SkCanvas* c
         // top
         SkRect desRectTopRound =
             SkRect::MakeXYWH(roundStartHorizontal, offsetTopY, imageCenterWidth_, topWidth_);
+#ifndef NEW_SKIA
         canvas->drawImageRect(image_, srcRectTop_, desRectTopRound, &paint);
+#else
+        canvas->drawImageRect(image_, srcRectTop_, desRectTopRound, SkSamplingOptions(), &paint, SkCanvas::kStrict_SrcRectConstraint);
+#endif
         // bottom
         SkRect desRectBottomRound =
             SkRect::MakeXYWH(roundStartHorizontal, offsetBottomY - bottomWidth_, imageCenterWidth_, bottomWidth_);
+#ifndef NEW_SKIA
         canvas->drawImageRect(image_, srcRectBottom_, desRectBottomRound, &paint);
-
+#else
+        canvas->drawImageRect(image_, srcRectBottom_, desRectBottomRound, SkSamplingOptions(), &paint, SkCanvas::kStrict_SrcRectConstraint);
+#endif
         roundStartHorizontal += imageCenterWidth_ + blankHorizontalSize;
     }
 
@@ -392,11 +447,19 @@ void BorderImagePainter::PaintBorderImageSpace(const Offset& offset, SkCanvas* c
         // left
         SkRect desRectLeftRound =
             SkRect::MakeXYWH(offsetLeftX, roundStartVertical, leftWidth_, imageCenterHeight_);
+#ifndef NEW_SKIA
         canvas->drawImageRect(image_, srcRectLeft_, desRectLeftRound, &paint);
+#else
+        canvas->drawImageRect(image_, srcRectLeft_, desRectLeftRound, SkSamplingOptions(), &paint, SkCanvas::kStrict_SrcRectConstraint);
+#endif
         // right
         SkRect desRectRightRound =
             SkRect::MakeXYWH(offsetRightX - rightWidth_, roundStartVertical, rightWidth_, imageCenterHeight_);
+#ifndef NEW_SKIA
         canvas->drawImageRect(image_, srcRectRight_, desRectRightRound, &paint);
+#else
+        canvas->drawImageRect(image_, srcRectRight_, desRectRightRound, SkSamplingOptions(), &paint, SkCanvas::kStrict_SrcRectConstraint);
+#endif
         roundStartVertical += imageCenterHeight_ + blankVerticalSize;
     }
 }
@@ -417,7 +480,11 @@ void BorderImagePainter::PaintBorderImageRepeat(const Offset& offset, SkCanvas* 
                 borderCenterWidth_, topSlice_);
             SkRect desRectTop =
                 SkRect::MakeXYWH(offsetLeftX + leftWidth_, offsetTopY, borderCenterWidth_, topWidth_);
+#ifndef NEW_SKIA
             canvas->drawImageRect(image_, srcRectTop, desRectTop, &paint);
+#else
+            canvas->drawImageRect(image_, srcRectTop, desRectTop, SkSamplingOptions(), &paint, SkCanvas::kStrict_SrcRectConstraint);
+#endif
 
             SkRect srcRectBottom =
                 SkRect::MakeXYWH(halfSurplusImageCenterWidth + leftSlice_, imageHeight_ - bottomSlice_,
@@ -426,7 +493,11 @@ void BorderImagePainter::PaintBorderImageRepeat(const Offset& offset, SkCanvas* 
                 SkRect::MakeXYWH(offsetLeftX + leftWidth_,
                     offset.GetY() + paintSize_.Height() - bottomWidth_ + bottomOutset_,
                     borderCenterWidth_, bottomWidth_);
+#ifndef NEW_SKIA
             canvas->drawImageRect(image_, srcRectBottom, desRectBottom, &paint);
+#else
+            canvas->drawImageRect(image_, srcRectBottom, desRectBottom, SkSamplingOptions(), &paint, SkCanvas::kStrict_SrcRectConstraint);
+#endif
         } else if (GreatNotEqual(widthFactor, 1.0)) {
             double halfSurplusHorizontalLength = 0;
             halfSurplusHorizontalLength = (borderCenterWidth_ - (int)(widthFactor) * imageCenterWidth_) / 2;
@@ -434,39 +505,62 @@ void BorderImagePainter::PaintBorderImageRepeat(const Offset& offset, SkCanvas* 
                 halfSurplusHorizontalLength, topSlice_);
             SkRect desRectTopLeftEnd =
                 SkRect::MakeXYWH(offsetLeftX + leftWidth_, offsetTopY, halfSurplusHorizontalLength, topWidth_);
+#ifndef NEW_SKIA
             canvas->drawImageRect(image_, srcRectTopLeft, desRectTopLeftEnd, &paint);
+#else
+            canvas->drawImageRect(image_, srcRectTopLeft, desRectTopLeftEnd, SkSamplingOptions(), &paint, SkCanvas::kStrict_SrcRectConstraint);
+#endif
 
             SkRect srcRectTopRight = SkRect::MakeXYWH(leftSlice_, 0, halfSurplusHorizontalLength, topSlice_);
             SkRect desRectTopRightEnd =
                 SkRect::MakeXYWH(offsetLeftX + leftWidth_ + borderCenterWidth_ - halfSurplusHorizontalLength,
                     offsetTopY, halfSurplusHorizontalLength, topWidth_);
+#ifndef NEW_SKIA
             canvas->drawImageRect(image_, srcRectTopRight, desRectTopRightEnd, &paint);
-
+#else
+            canvas->drawImageRect(image_, srcRectTopRight, desRectTopRightEnd, SkSamplingOptions(), &paint, SkCanvas::kStrict_SrcRectConstraint);
+#endif
             SkRect srcRectBottomLeft = SkRect::MakeXYWH(imageWidth_ - rightSlice_ - halfSurplusHorizontalLength,
                 imageHeight_ - bottomSlice_, halfSurplusHorizontalLength, bottomSlice_);
             SkRect desRectBottomLeftEnd =
                 SkRect::MakeXYWH(offsetLeftX + leftWidth_, offsetBottomY - bottomWidth_,
                     halfSurplusHorizontalLength, bottomWidth_);
+#ifndef NEW_SKIA
             canvas->drawImageRect(image_, srcRectBottomLeft, desRectBottomLeftEnd, &paint);
+#else
+            canvas->drawImageRect(image_, srcRectBottomLeft, desRectBottomLeftEnd, SkSamplingOptions(), &paint, SkCanvas::kStrict_SrcRectConstraint);
+#endif
 
             SkRect srcRectBottomRight =  SkRect::MakeXYWH(leftSlice_, imageHeight_ - bottomSlice_,
                 halfSurplusHorizontalLength, bottomSlice_);
             SkRect desRectBottomRightEnd =
                 SkRect::MakeXYWH(offsetLeftX + leftWidth_ + borderCenterWidth_ - halfSurplusHorizontalLength,
                     offsetBottomY - bottomWidth_, halfSurplusHorizontalLength, bottomWidth_);
+#ifndef NEW_SKIA
             canvas->drawImageRect(image_, srcRectBottomRight, desRectBottomRightEnd, &paint);
+#else
+            canvas->drawImageRect(image_, srcRectBottomRight, desRectBottomRightEnd, SkSamplingOptions(), &paint, SkCanvas::kStrict_SrcRectConstraint);
+#endif
 
             double repeatHorizontalStart = offsetLeftX + leftWidth_ + halfSurplusHorizontalLength;
             for (int32_t i = 0; i < static_cast<int32_t>(widthFactor); i++) {
                 // top
                 SkRect desRectTopRepeat = SkRect::MakeXYWH(repeatHorizontalStart, offsetTopY,
                     imageCenterWidth_, topWidth_);
+#ifndef NEW_SKIA
                 canvas->drawImageRect(image_, srcRectTop_, desRectTopRepeat, &paint);
+#else
+                canvas->drawImageRect(image_, srcRectTop_, desRectTopRepeat, SkSamplingOptions(), &paint, SkCanvas::kStrict_SrcRectConstraint);
+#endif
 
                 // bottom
                 SkRect desRectBottomRepeat = SkRect::MakeXYWH(repeatHorizontalStart, offsetBottomY - bottomWidth_,
                     imageCenterWidth_, bottomWidth_);
+#ifndef NEW_SKIA
                 canvas->drawImageRect(image_, srcRectBottom_, desRectBottomRepeat, &paint);
+#else
+                canvas->drawImageRect(image_, srcRectBottom_, desRectBottomRepeat, SkSamplingOptions(), &paint, SkCanvas::kStrict_SrcRectConstraint);
+#endif
 
                 repeatHorizontalStart += imageCenterWidth_;
             }
@@ -483,7 +577,11 @@ void BorderImagePainter::PaintBorderImageRepeat(const Offset& offset, SkCanvas* 
                 SkRect::MakeXYWH(0, topSlice_ + halfSurplusImageCenterHeight, leftSlice_, borderCenterHeight_);
             SkRect desRectLeft =
                 SkRect::MakeXYWH(offsetLeftX, destTopOffsetY, leftWidth_, borderCenterHeight_);
+#ifndef NEW_SKIA
             canvas->drawImageRect(image_, srcRectLeft, desRectLeft, &paint);
+#else
+            canvas->drawImageRect(image_, srcRectLeft, desRectLeft, SkSamplingOptions(), &paint, SkCanvas::kStrict_SrcRectConstraint);
+#endif
 
             SkRect srcRectRight =
                 SkRect::MakeXYWH(imageWidth_ - rightSlice_, topSlice_ + halfSurplusImageCenterHeight, rightSlice_,
@@ -491,7 +589,11 @@ void BorderImagePainter::PaintBorderImageRepeat(const Offset& offset, SkCanvas* 
             SkRect desRectRight =
                 SkRect::MakeXYWH(offset.GetX() + paintSize_.Width() - rightWidth_ + rightOutset_,
                     destTopOffsetY, rightWidth_, borderCenterHeight_);
+#ifndef NEW_SKIA
             canvas->drawImageRect(image_, srcRectRight, desRectRight, &paint);
+#else
+            canvas->drawImageRect(image_, srcRectRight, desRectRight, SkSamplingOptions(), &paint, SkCanvas::kStrict_SrcRectConstraint);
+#endif
         } else if (GreatNotEqual(heightFactor, 1.0)) {
             double halfSurplusVerticalLength = 0;
             halfSurplusVerticalLength = (borderCenterHeight_ - (int)(heightFactor) * imageCenterHeight_) / 2;
@@ -500,7 +602,11 @@ void BorderImagePainter::PaintBorderImageRepeat(const Offset& offset, SkCanvas* 
                     leftSlice_, halfSurplusVerticalLength);
             SkRect desRectLeftTopStart =
                 SkRect::MakeXYWH(offsetLeftX, destTopOffsetY, leftWidth_, halfSurplusVerticalLength);
+#ifndef NEW_SKIA
             canvas->drawImageRect(image_, srcRectLeftTop, desRectLeftTopStart, &paint);
+#else
+            canvas->drawImageRect(image_, srcRectLeftTop, desRectLeftTopStart, SkSamplingOptions(), &paint, SkCanvas::kStrict_SrcRectConstraint);
+#endif
 
             SkRect srcRectRightTop =
                 SkRect::MakeXYWH(imageWidth_ - rightSlice_, imageHeight_ - bottomSlice_ - halfSurplusVerticalLength,
@@ -508,30 +614,50 @@ void BorderImagePainter::PaintBorderImageRepeat(const Offset& offset, SkCanvas* 
             SkRect desRectRightTopStart =
                 SkRect::MakeXYWH(offsetRightX - rightWidth_, destTopOffsetY,
                     rightWidth_, halfSurplusVerticalLength);
+#ifndef NEW_SKIA
             canvas->drawImageRect(image_, srcRectRightTop, desRectRightTopStart, &paint);
+#else
+            canvas->drawImageRect(image_, srcRectRightTop, desRectRightTopStart, SkSamplingOptions(), &paint, SkCanvas::kStrict_SrcRectConstraint);
+#endif
 
             SkRect srcRectLeftBottom = SkRect::MakeXYWH(0, topSlice_, leftSlice_, halfSurplusVerticalLength);
             SkRect desRectLeftBottomEnd = SkRect::MakeXYWH(offsetLeftX,
                 offsetBottomY - bottomWidth_ - halfSurplusVerticalLength, leftWidth_, halfSurplusVerticalLength);
+#ifndef NEW_SKIA
             canvas->drawImageRect(image_, srcRectLeftBottom, desRectLeftBottomEnd, &paint);
+#else
+            canvas->drawImageRect(image_, srcRectLeftBottom, desRectLeftBottomEnd, SkSamplingOptions(), &paint, SkCanvas::kStrict_SrcRectConstraint);
+#endif
 
             SkRect srcRectRightBottom =
                 SkRect::MakeXYWH(imageWidth_ - rightSlice_, topSlice_, rightSlice_, halfSurplusVerticalLength);
             SkRect desRectRightBottomEnd = SkRect::MakeXYWH(offsetRightX - rightWidth_,
                 offsetBottomY - bottomWidth_ - halfSurplusVerticalLength, rightWidth_, halfSurplusVerticalLength);
+#ifndef NEW_SKIA
             canvas->drawImageRect(image_, srcRectRightBottom, desRectRightBottomEnd, &paint);
+#else
+            canvas->drawImageRect(image_, srcRectRightBottom, desRectRightBottomEnd, SkSamplingOptions(), &paint, SkCanvas::kStrict_SrcRectConstraint);
+#endif       
 
             double repeatVerticalStart = destTopOffsetY + halfSurplusVerticalLength;
             for (int32_t i = 0; i < static_cast<int32_t>(heightFactor); i++) {
                 // left
                 SkRect desRectLeftRepeat =
                     SkRect::MakeXYWH(offsetLeftX, repeatVerticalStart, leftWidth_, imageCenterHeight_);
+#ifndef NEW_SKIA
                 canvas->drawImageRect(image_, srcRectLeft_, desRectLeftRepeat, &paint);
+#else
+                canvas->drawImageRect(image_, srcRectLeft_, desRectLeftRepeat, SkSamplingOptions(), &paint, SkCanvas::kStrict_SrcRectConstraint);
+#endif
 
                 // right
                 SkRect desRectRightRepeat =
                     SkRect::MakeXYWH(offsetRightX - rightWidth_, repeatVerticalStart, rightWidth_, imageCenterHeight_);
+#ifndef NEW_SKIA
                 canvas->drawImageRect(image_, srcRectRight_, desRectRightRepeat, &paint);
+#else
+                canvas->drawImageRect(image_, srcRectRight_, desRectRightRepeat, SkSamplingOptions(), &paint, SkCanvas::kStrict_SrcRectConstraint);
+#endif
 
                 repeatVerticalStart += imageCenterHeight_;
             }

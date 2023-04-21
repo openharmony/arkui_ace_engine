@@ -18,6 +18,7 @@
 
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/stepper/stepper_item_layout_property.h"
+#include "core/components_ng/pattern/stepper/stepper_node.h"
 
 namespace OHOS::Ace::NG {
 
@@ -38,7 +39,41 @@ public:
         return false;
     }
 
+    void OnModifyDone() override
+    {
+        Pattern::OnModifyDone();
+        if (isFirstCreate) {
+            isFirstCreate = false;
+        } else {
+            auto hostNode = DynamicCast<FrameNode>(GetHost());
+            CHECK_NULL_VOID(hostNode);
+            auto swiperNode = DynamicCast<FrameNode>(hostNode->GetParent());
+            auto stepperNode = DynamicCast<StepperNode>(swiperNode->GetParent());
+            stepperNode->MarkModifyDone();
+        }
+    }
+
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::SCOPE, true };
+    }
+
+    // This function is now for fast previews
+    void OnMountToParentDone() override
+    {
+        auto hostNode = DynamicCast<FrameNode>(GetHost());
+        CHECK_NULL_VOID(hostNode);
+        auto swiperNode = DynamicCast<FrameNode>(hostNode->GetParent());
+        CHECK_NULL_VOID(swiperNode);
+        auto stepperNode = DynamicCast<StepperNode>(swiperNode->GetParent());
+        CHECK_NULL_VOID(stepperNode);
+        auto stepperPattern = stepperNode->GetPattern<StepperPattern>();
+        CHECK_NULL_VOID(stepperPattern);
+        stepperPattern->OnModifyDone();
+    }
+
 private:
+    bool isFirstCreate = true;
     ACE_DISALLOW_COPY_AND_MOVE(StepperItemPattern);
 };
 

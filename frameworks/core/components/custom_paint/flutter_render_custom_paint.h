@@ -19,8 +19,8 @@
 #include "base/utils/measure_util.h"
 #include "flutter/fml/memory/ref_ptr.h"
 #include "flutter/lib/ui/painting/path.h"
-#include "flutter/third_party/txt/src/txt/paragraph.h"
-#include "third_party/skia/include/core/SkPath.h"
+#include "txt/paragraph.h"
+#include "include/core/SkPath.h"
 
 #include "core/components/custom_paint/offscreen_canvas.h"
 #include "core/components/custom_paint/render_custom_paint.h"
@@ -134,7 +134,6 @@ private:
     SkBitmap webglBitmap_;
     std::unique_ptr<SkCanvas> skCanvas_;
     std::unique_ptr<SkCanvas> cacheCanvas_;
-    RefPtr<FlutterRenderTaskHolder> renderTaskHolder_;
     Size lastLayoutSize_;
 };
 

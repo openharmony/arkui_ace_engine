@@ -16,6 +16,7 @@
 #include "bridge/declarative_frontend/jsview/models/checkbox_model_impl.h"
 
 #include <utility>
+#include "base/memory/referenced.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
@@ -38,11 +39,15 @@ void CheckBoxModelImpl::Create(
     if (groupName.has_value()) {
         const auto& checkboxGroup = groupName.value();
         checkboxComponent->SetBelongGroup(checkboxGroup);
-        auto checkboxGroupmap = ViewStackProcessor::GetInstance()->GetCheckboxGroupComponent();
-        auto item = checkboxGroupmap->find(checkboxGroup);
-        if (item != checkboxGroupmap->end()) {
+        auto& checkboxGroupmap = CheckboxComponent::GetCheckboxGroupComponent();
+        auto item = checkboxGroupmap.find(checkboxGroup);
+        if (item != checkboxGroupmap.end()) {
             item->second->AddCheckbox(checkboxComponent);
             checkboxComponent->SetGroup(item->second);
+        } else {
+            auto& ungroupedCheckboxs = CheckboxComponent::GetUngroupedCheckboxs();
+            auto retPair = ungroupedCheckboxs.try_emplace(checkboxGroup, std::list<WeakPtr<CheckboxComponent>>());
+            retPair.first->second.push_back(checkboxComponent);
         }
     }
 

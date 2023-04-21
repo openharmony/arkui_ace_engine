@@ -39,7 +39,6 @@ private:
 #ifdef OHOS_STANDARD_SYSTEM
     OHOS::sptr<OHOS::Surface> GetSurface();
 #endif
-    bool needUpdateWeb_ = true;
     Offset globalOffset_;
 };
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,12 +18,32 @@
 #include "base/geometry/dimension.h"
 #include "base/log/ace_scoring_log.h"
 #include "base/log/log_wrapper.h"
+#include "bridge/declarative_frontend/jsview/models/plugin_model_impl.h"
+#include "core/components/common/properties/clip_path.h"
+#include "core/components_ng/pattern/plugin/plugin_model.h"
+#include "core/components_ng/pattern/plugin/plugin_model_ng.h"
 #include "core/components_ng/pattern/plugin/plugin_pattern.h"
-#include "core/components_ng/pattern/plugin/plugin_view.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 #include "frameworks/core/components/box/box_component.h"
 #include "frameworks/core/components/plugin/plugin_component.h"
 
+namespace OHOS::Ace {
+PluginModel* PluginModel::GetInstance()
+{
+#ifdef NG_BUILD
+    static NG::PluginModelNG model;
+    return &model;
+#else
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::PluginModelNG model;
+        return &model;
+    } else {
+        static Framework::PluginModelImpl model;
+        return &model;
+    }
+#endif
+}
+} // namespace OHOS::Ace
 namespace OHOS::Ace::Framework {
 void JSPlugin::Create(const JSCallbackInfo& info)
 {
@@ -43,35 +63,32 @@ void JSPlugin::Create(const JSCallbackInfo& info)
             pluginInfo.pluginName = sourceVal->ToString();
         }
         auto abilityVal = jstemplateObj->GetProperty("ability");
-        if (abilityVal->IsString()) {
+        if (!abilityVal->IsEmpty() && abilityVal->IsString()) {
             pluginInfo.bundleName = abilityVal->ToString();
         }
-        LOGD("JSPlugin::Create: source=%{public}s ability=%{public}s", pluginInfo.pluginName.c_str(),
+
+        auto bundleValue = jstemplateObj->GetProperty("bundleName");
+        if (!bundleValue->IsEmpty() && bundleValue->IsString()) {
+            pluginInfo.bundleName = bundleValue->ToString();
+        }
+        LOGD("JSPlugin::Create: source=%{public}s bundleName=%{public}s", pluginInfo.pluginName.c_str(),
             pluginInfo.bundleName.c_str());
     }
-
+    if (pluginInfo.bundleName.size() > PATH_MAX || pluginInfo.pluginName.size() > PATH_MAX) {
+        LOGE("the source path or the bundleName is too long");
+        return;
+    }
     // Parse data
     auto dataValue = obj->GetProperty("data");
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::PluginView::Create(pluginInfo);
-        return;
-    }
-
-    RefPtr<PluginComponent> plugin = AceType::MakeRefPtr<OHOS::Ace::PluginComponent>();
+    PluginModel::GetInstance()->Create(pluginInfo);
     if (dataValue->IsObject()) {
-        plugin->SetData(dataValue->ToString());
+        PluginModel::GetInstance()->SetData(dataValue->ToString());
     }
-    plugin->SetPluginRequestInfo(pluginInfo);
-    ViewStackProcessor::GetInstance()->Push(plugin, false);
 }
 
 void JSPlugin::JsSize(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        JSViewAbstract::JsSize(info);
-        return;
-    }
     if (info.Length() == 0) {
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
@@ -95,39 +112,59 @@ void JSPlugin::JsSize(const JSCallbackInfo& info)
         LOGE("ParseJsDimensionVp height is error.");
         return;
     }
+    PluginModel::GetInstance()->SetPluginSize(width.IsValid() ? width : 0.0_vp, height.IsValid() ? height : 0.0_vp);
+}
 
-    auto plugin = AceType::DynamicCast<PluginComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (plugin) {
-        plugin->SetPluginSize(width.IsValid() ? width : 0.0_vp, height.IsValid() ? height : 0.0_vp);
+void JSPlugin::JsWidth(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
+        return;
     }
+
+    Dimension value;
+    if (!ParseJsDimensionVp(info[0], value)) {
+        return;
+    }
+
+    if (LessNotEqual(value.Value(), 0.0)) {
+        value.SetValue(0.0);
+    }
+
+    PluginModel::GetInstance()->SetWidth(value.IsValid() ? value : 0.0_vp);
+}
+
+void JSPlugin::JsHeight(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
+
+    Dimension value;
+    if (!ParseJsDimensionVp(info[0], value)) {
+        return;
+    }
+
+    if (LessNotEqual(value.Value(), 0.0)) {
+        value.SetValue(0.0);
+    }
+
+    PluginModel::GetInstance()->SetHeight(value.IsValid() ? value : 0.0_vp);
 }
 
 void JSPlugin::JsOnComplete(const JSCallbackInfo& info)
 {
 #if defined(PLUGIN_COMPONENT_SUPPORTED)
-    if (Container::IsCurrentUseNewPipeline()) {
+    if (info[0]->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
         auto OnComplete = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            LOGD("onComplete send");
             ACE_SCORING_EVENT("Plugin.OnComplete");
             func->Execute();
         };
-        NG::PluginView::SetOnComplete(std::move(OnComplete));
-        return;
-    }
-
-    if (info[0]->IsFunction()) {
-        RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-        auto plugin = AceType::DynamicCast<PluginComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-
-        auto onCompleteId =
-            EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
-                JAVASCRIPT_EXECUTION_SCOPE(execCtx);
-                LOGD("onComplete send");
-                ACE_SCORING_EVENT("Plugin.onComplete");
-                func->Execute();
-            });
-        plugin->SetOnCompleteEventId(onCompleteId);
+        PluginModel::GetInstance()->SetOnComplete(std::move(OnComplete));
     }
 #endif
 }
@@ -135,32 +172,16 @@ void JSPlugin::JsOnComplete(const JSCallbackInfo& info)
 void JSPlugin::JsOnError(const JSCallbackInfo& info)
 {
 #if defined(PLUGIN_COMPONENT_SUPPORTED)
-    if (Container::IsCurrentUseNewPipeline()) {
+    if (info[0]->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
         auto onError = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            LOGD("onError send");
             ACE_SCORING_EVENT("Plugin.OnComplete");
             std::vector<std::string> keys = { "errcode", "msg" };
             func->Execute(keys, param);
         };
-        NG::PluginView::SetOnError(std::move(onError));
-        return;
-    }
-
-    if (info[0]->IsFunction()) {
-        RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-        auto plugin = AceType::DynamicCast<PluginComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-
-        auto onErrorId =
-            EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
-                JAVASCRIPT_EXECUTION_SCOPE(execCtx);
-                std::vector<std::string> keys = { "errcode", "msg" };
-                LOGD("onError send");
-                ACE_SCORING_EVENT("Plugin.onError");
-                func->Execute(keys, param);
-            });
-
-        plugin->SetOnErrorEventId(onErrorId);
+        PluginModel::GetInstance()->SetOnError(std::move(onError));
     }
 #endif
 }
@@ -171,7 +192,8 @@ void JSPlugin::JSBind(BindingTarget globalObj)
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSPlugin>::StaticMethod("create", &JSPlugin::Create, opt);
     JSClass<JSPlugin>::StaticMethod("size", &JSPlugin::JsSize, opt);
-
+    JSClass<JSPlugin>::StaticMethod("width", &JSPlugin::JsWidth);
+    JSClass<JSPlugin>::StaticMethod("height", &JSPlugin::JsHeight);
     JSClass<JSPlugin>::StaticMethod("onComplete", &JSPlugin::JsOnComplete);
     JSClass<JSPlugin>::StaticMethod("onError", &JSPlugin::JsOnError);
     JSClass<JSPlugin>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);

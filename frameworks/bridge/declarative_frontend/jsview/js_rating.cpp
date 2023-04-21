@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,7 +42,11 @@ RatingModel* RatingModel::GetInstance()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
-
+namespace {
+constexpr double RATING_SCORE_DEFAULT = 0;
+constexpr int32_t STARS_DEFAULT = 5;
+constexpr double STEPS_DEFAULT = 0.5;
+} // namespace
 void JSRating::Create(const JSCallbackInfo& info)
 {
     double rating = 0;
@@ -56,15 +60,17 @@ void JSRating::Create(const JSCallbackInfo& info)
         } else {
             LOGE("create rating fail because the rating is not value");
         }
+        if (rating < 0) {
+            LOGW("rating number is invalid, and it will use 0 by default.");
+            rating = RATING_SCORE_DEFAULT;
+        }
         if (getIndicator->IsBoolean()) {
             indicator = getIndicator->ToBoolean();
         } else {
             LOGE("create rating fail because the indicator is not value");
         }
     }
-    RatingModel::GetInstance()->Create();
-    RatingModel::GetInstance()->SetRatingScore(rating);
-    RatingModel::GetInstance()->SetIndicator(indicator);
+    RatingModel::GetInstance()->Create(rating, indicator);
 }
 
 void JSRating::SetStars(const JSCallbackInfo& info)
@@ -79,7 +85,12 @@ void JSRating::SetStars(const JSCallbackInfo& info)
         return;
     }
 
-    RatingModel::GetInstance()->SetStars(info[0]->ToNumber<int32_t>());
+    auto stars = info[0]->ToNumber<int32_t>();
+    if (stars <= 0) {
+        LOGW("stars is invalid, and it will use 5 by default.");
+        stars = STARS_DEFAULT;
+    }
+    RatingModel::GetInstance()->SetStars(stars);
 }
 
 void JSRating::SetStepSize(const JSCallbackInfo& info)
@@ -94,7 +105,12 @@ void JSRating::SetStepSize(const JSCallbackInfo& info)
         return;
     }
 
-    RatingModel::GetInstance()->SetStepSize(info[0]->ToNumber<double>());
+    auto steps = info[0]->ToNumber<double>();
+    if (steps <= 0) {
+        LOGW("steps is invalid, and it will use 0.5 by default.");
+        steps = STEPS_DEFAULT;
+    }
+    RatingModel::GetInstance()->SetStepSize(steps);
 }
 
 void JSRating::SetStarStyle(const JSCallbackInfo& info)
@@ -109,29 +125,30 @@ void JSRating::SetStarStyle(const JSCallbackInfo& info)
     auto getForegroundUri = paramObject->GetProperty("foregroundUri");
     auto getSecondaryUri = paramObject->GetProperty("secondaryUri");
     std::string backgroundUri;
-    std::string foregroundUri;
-    std::string secondaryUri;
     if (getBackgroundUri->IsString()) {
         backgroundUri = getBackgroundUri->ToString();
+        RatingModel::GetInstance()->SetBackgroundSrc(backgroundUri, false);
     } else {
-        LOGE("backgroundUri error , because the backgroundUri is not string");
+        LOGE("backgroundUri error, because the backgroundUri is not string, and will load default star.");
+        RatingModel::GetInstance()->SetBackgroundSrc("", true);
     }
 
     if (getForegroundUri->IsString()) {
-        foregroundUri = getForegroundUri->ToString();
+        RatingModel::GetInstance()->SetForegroundSrc(getForegroundUri->ToString(), false);
     } else {
-        LOGE("foregroundUri error , because the foregroundUri is not string");
+        LOGE("foregroundUri error, because the foregroundUri is not string, and will load default star");
+        RatingModel::GetInstance()->SetForegroundSrc("", true);
     }
 
     if (getSecondaryUri->IsString()) {
-        secondaryUri = getSecondaryUri->ToString();
+        RatingModel::GetInstance()->SetSecondarySrc(getSecondaryUri->ToString(), false);
+    } else if (getBackgroundUri->IsString()) {
+        LOGE("secondaryUri error, because the secondaryUri is not string, and will load backgroundUri");
+        RatingModel::GetInstance()->SetSecondarySrc(backgroundUri, false);
     } else {
-        secondaryUri = backgroundUri;
+        LOGE("secondaryUri error, because the secondaryUri is not string, and will load default star");
+        RatingModel::GetInstance()->SetSecondarySrc("", true);
     }
-
-    RatingModel::GetInstance()->SetForegroundSrc(foregroundUri);
-    RatingModel::GetInstance()->SetSecondarySrc(secondaryUri);
-    RatingModel::GetInstance()->SetBackgroundSrc(backgroundUri);
 }
 
 void JSRating::SetOnChange(const JSCallbackInfo& info)
@@ -171,5 +188,4 @@ void JSRating::JSBind(BindingTarget globalObj)
     JSClass<JSRating>::Inherit<JSViewAbstract>();
     JSClass<JSRating>::Bind<>(globalObj);
 }
-
 } // namespace OHOS::Ace::Framework

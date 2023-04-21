@@ -65,6 +65,24 @@ HWTEST_F(WebPatternTestNg, WebPatternTestNg_001, TestSize.Level1)
     webpattern.OnGeolocationAccessEnabledUpdate(true);
     webpattern.OnUserAgentUpdate("chrome");
     webpattern.OnCacheModeUpdate(WebCacheMode::DEFAULT);
+    webpattern.OnWebCursiveFontUpdate("test");
+    webpattern.OnWebFantasyFontUpdate("test");
+    webpattern.OnWebSansSerifFontUpdate("test");
+    webpattern.OnWebSerifFontUpdate("test");
+    webpattern.OnWebStandardFontUpdate("test");
+    webpattern.OnDefaultFixedFontSizeUpdate(0);
+    webpattern.OnDefaultFontSizeUpdate(0);
+    webpattern.OnMinFontSizeUpdate(0);
+    webpattern.OnMinLogicalFontSizeUpdate(0);
+    webpattern.OnWebFixedFontUpdate("test");
+    webpattern.OnBlockNetworkUpdate(true);
+    webpattern.OnDarkModeUpdate(WebDarkMode::On);
+    webpattern.OnForceDarkAccessUpdate(true);
+    webpattern.OnAllowWindowOpenMethodUpdate(true);
+    webpattern.OnHorizontalScrollBarAccessEnabledUpdate(true);
+    webpattern.OnVerticalScrollBarAccessEnabledUpdate(true);
+    webpattern.OnAudioResumeIntervalUpdate(0);
+    webpattern.OnAudioExclusiveUpdate(true);
 #endif
 }
 
@@ -88,6 +106,9 @@ HWTEST_F(WebPatternTestNg, WebPatternTestNg_002, TestSize.Level1)
     webPattern->HandleFocusEvent();
     webPattern->OnWebSrcUpdate();
     webPattern->OnWebDataUpdate();
+    webPattern->isUrlLoaded_ = true;
+    webPattern->OnWebSrcUpdate();
+    webPattern->OnWebDataUpdate();
     webPattern->OnJsEnabledUpdate(true);
     webPattern->OnMediaPlayGestureAccessUpdate(true);
     webPattern->OnFileAccessEnabledUpdate(true);
@@ -99,6 +120,49 @@ HWTEST_F(WebPatternTestNg, WebPatternTestNg_002, TestSize.Level1)
     webPattern->OnGeolocationAccessEnabledUpdate(true);
     webPattern->OnUserAgentUpdate("chrome");
     webPattern->OnCacheModeUpdate(WebCacheMode::DEFAULT);
+    webPattern->OnWebCursiveFontUpdate("test");
+    webPattern->OnWebFantasyFontUpdate("test");
+    webPattern->OnWebSansSerifFontUpdate("test");
+    webPattern->OnWebSerifFontUpdate("test");
+    webPattern->OnWebStandardFontUpdate("test");
+    webPattern->OnDefaultFixedFontSizeUpdate(0);
+    webPattern->OnDefaultFontSizeUpdate(0);
+    webPattern->OnMinFontSizeUpdate(0);
+    webPattern->OnMinLogicalFontSizeUpdate(0);
+    webPattern->OnWebFixedFontUpdate("test");
+    webPattern->OnBlockNetworkUpdate(true);
+    webPattern->OnAllowWindowOpenMethodUpdate(true);
+    webPattern->OnHorizontalScrollBarAccessEnabledUpdate(true);
+    webPattern->OnVerticalScrollBarAccessEnabledUpdate(true);
+#endif
+}
+
+/**
+ * @tc.name: WebPatternTestNg_003
+ * @tc.desc: Test webPattern.cpp.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, WebPatternTestNg_003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    EXPECT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    EXPECT_NE(webPattern->delegate_, nullptr);
+    GestureEvent event;
+    event.SetInputEventType(InputEventType::TOUCH_SCREEN);
+    webPattern->HandleDragMove(event);
+    event.SetInputEventType(InputEventType::AXIS);
+    webPattern->HandleDragMove(event);
+    webPattern->OnDarkModeUpdate(WebDarkMode::On);
+    webPattern->OnForceDarkAccessUpdate(true);
+    webPattern->OnAudioResumeIntervalUpdate(0);
+    webPattern->OnAudioExclusiveUpdate(true);
 #endif
 }
 } // namespace OHOS::Ace::NG

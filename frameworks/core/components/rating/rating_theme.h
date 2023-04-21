@@ -23,7 +23,11 @@
 #include "core/components/theme/theme_constants_defines.h"
 
 namespace OHOS::Ace {
-
+namespace {
+constexpr Dimension BORDER_RADIUS = 4.0_vp;
+constexpr Color STAR_PRESS_COLOR = Color(0x19182431);
+constexpr Color STAR_HOVER_COLOR = Color(0x0c182431);
+} // namespace
 /**
  * RatingTheme defines color and styles of RatingComponent. RatingTheme should be built
  * using RatingTheme::Builder.
@@ -60,19 +64,23 @@ public:
             theme->backgroundMiniResourceId_ = themeConstants->GetResourceId(THEME_RATING_RESOURCE_ID_MINI_OFF);
             theme->designedStarAspectRatio_ = themeConstants->GetDouble(THEME_RATING_DESIGNED_STAR_ASPECT_RATIO);
             theme->focusBorderWidth_ = themeConstants->GetDimension(THEME_RATING_FOCUS_BORDER_WIDTH);
-            theme->focusBorderRadius_ = themeConstants->GetDimension(THEME_RATING_FOCUS_BORDER_RADIUS);
             theme->hoverColor_ = themeConstants->GetColor(THEME_RATING_HOVER_COLOR);
             theme->starColorActive_ = themeConstants->GetColor(THEME_RATING_STAR_COLOR_ACTIVE);
             theme->starColorInactive_ = themeConstants->GetColor(THEME_RATING_STAR_COLOR_INACTIVE);
+            theme->borderRadius_ = themeConstants->GetDimension(THEME_RATING_FOCUS_BORDER_RADIUS);
             auto themeStyle = themeConstants->GetThemeStyle();
             if (!themeStyle) {
                 return theme;
             }
             auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_RATING, nullptr);
             if (pattern) {
-                theme->hoverColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_HOVERED, Color::RED);
+                theme->hoverColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_HOVERED, STAR_HOVER_COLOR);
+                theme->pressColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_PRESSED, STAR_PRESS_COLOR);
                 theme->starColorActive_ = pattern->GetAttr<Color>("icon_color_active", Color::RED);
-                theme->starColorInactive_ = pattern->GetAttr<Color>("icon_color_inactive", Color::RED);
+                theme->starColorInactive_ = pattern->GetAttr<Color>("icon_color_inactive", Color::GRAY);
+                theme->borderRadius_ = pattern->GetAttr<Dimension>("hover_radius_size", BORDER_RADIUS);
+                theme->hoverAnimationDuration_ = pattern->GetAttr<double>("hover_animation_duration", 0.0);
+                theme->pressAnimationDuration_ = pattern->GetAttr<double>("press_animation_duration", 0.0);
             } else {
                 LOGW("find pattern of rating fail");
             }
@@ -169,12 +177,17 @@ public:
 
     const Dimension& GetFocusBorderRadius() const
     {
-        return focusBorderRadius_;
+        return borderRadius_;
     }
 
     const Color& GetHoverColor() const
     {
         return hoverColor_;
+    }
+
+    const Color& GetPressColor() const
+    {
+        return pressColor_;
     }
 
     const Color& GetStarColorActive() const
@@ -185,6 +198,16 @@ public:
     const Color& GetStarColorInactive() const
     {
         return starColorInactive_;
+    }
+
+    double GetHoverAnimationDuration() const
+    {
+        return hoverAnimationDuration_;
+    }
+
+    double GetPressAnimationDuration() const
+    {
+        return pressAnimationDuration_;
     }
 
 protected:
@@ -201,6 +224,8 @@ private:
     double ratingScore_ = 0.0;
     double ratingMiniScore_ = 0.0;
     double designedStarAspectRatio_ = 1.0;
+    double hoverAnimationDuration_ = 0.0;
+    double pressAnimationDuration_ = 0.0;
     InternalResource::ResourceId foregroundResourceId_ = InternalResource::ResourceId::RATE_STAR_BIG_ON_SVG;
     InternalResource::ResourceId secondaryResourceId_ = InternalResource::ResourceId::RATE_STAR_BIG_OFF_SVG;
     InternalResource::ResourceId backgroundResourceId_ = InternalResource::ResourceId::RATE_STAR_BIG_OFF_SVG;
@@ -210,10 +235,11 @@ private:
 
     // properties for phone platform
     Color hoverColor_;
+    Color pressColor_;
     Color starColorActive_;
     Color starColorInactive_;
     Dimension focusBorderWidth_;
-    Dimension focusBorderRadius_;
+    Dimension borderRadius_;
 };
 
 } // namespace OHOS::Ace

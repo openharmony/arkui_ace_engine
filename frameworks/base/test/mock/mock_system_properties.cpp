@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,11 +17,14 @@
 
 namespace OHOS::Ace {
 DeviceType SystemProperties::deviceType_ = DeviceType::UNKNOWN;
+DeviceOrientation SystemProperties::orientation_ { DeviceOrientation::PORTRAIT };
 bool SystemProperties::isHookModeEnabled_ = false;
 bool SystemProperties::rosenBackendEnabled_ = true;
 bool SystemProperties::windowAnimationEnabled_ = true;
 double SystemProperties::resolution_ = 0.0;
 constexpr float defaultAnimationScale = 1.0f;
+bool SystemProperties::extSurfaceEnabled_ = false;
+uint32_t SystemProperties::dumpFrameCount_ = 0;
 
 float SystemProperties::GetFontWeightScale()
 {
@@ -42,5 +45,10 @@ bool SystemProperties::GetDebugEnabled()
 float SystemProperties::GetAnimationScale()
 {
     return defaultAnimationScale;
+}
+
+bool SystemProperties::GetIsUseMemoryMonitor()
+{
+    return false;
 }
 } // namespace OHOS::Ace

@@ -21,12 +21,10 @@
 
 #include "base/log/log.h"
 #include "core/common/container_scope.h"
-
+#include "surface_delegate.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "surface.h"
-// #include "surface_delegate.h"
 #endif
-// #define SURFACE_DELEGATE void*
 
 namespace OHOS::Ace {
 class WebDelegate;
@@ -58,13 +56,13 @@ public:
 
     void ReleaseSurface() override;
 
-    // void SetSurfaceDelegate(const sptr<SURFACE_DELEGATE> &surfaceDelegate)
-    // {
-    //     surfaceDelegate_ = surfaceDelegate;
-    // }
+    void SetSurfaceDelegate(const sptr<OHOS::SurfaceDelegate> &surfaceDelegate)
+    {
+        surfaceDelegate_ = surfaceDelegate;
+    }
 
 private:
-    // sptr<SURFACE_DELEGATE> surfaceDelegate_ = nullptr;
+    sptr<OHOS::SurfaceDelegate> surfaceDelegate_ = nullptr;
     int32_t instanceId_ = -1;
 };
 class FindListenerImpl : public OHOS::NWeb::NWebFindCallback {
@@ -105,7 +103,7 @@ public:
     void OnFullScreenExit() override;
     void OnFullScreenEnter(std::shared_ptr<NWeb::NWebFullScreenExitHandler> handler) override;
     void OnGeolocationShow(const std::string& origin,
-        OHOS::NWeb::NWebGeolocationCallbackInterface* callback) override;
+        std::shared_ptr<OHOS::NWeb::NWebGeolocationCallbackInterface> callback) override;
 
     bool OnAlertDialogByJS(const std::string &url,
                            const std::string &message,
@@ -132,7 +130,7 @@ public:
     void OnRefreshAccessedHistory(const std::string& url, bool isReload) override;
     std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> OnHandleInterceptRequest(
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request) override;
-    bool OnHandleInterceptUrlLoading(const std::string& url) override;
+    bool OnHandleInterceptUrlLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request) override;
     void OnResource(const std::string& url) override;
     void OnScaleChanged(float oldScaleFactor, float newScaleFactor) override;
     void OnScroll(double xOffset, double yOffset) override;
@@ -163,6 +161,23 @@ public:
         bool isUserTrigger,
         std::shared_ptr<NWeb::NWebControllerHandler> handler) override;
     void OnWindowExitByJS() override;
+    void OnPageVisible(const std::string& url) override;
+    void OnDataResubmission(std::shared_ptr<NWeb::NWebDataResubmissionCallback> handler) override;
+    void OnPageIcon(
+        const void* data,
+        size_t width,
+        size_t height,
+        NWeb::ImageColorType colorType,
+        NWeb::ImageAlphaType alphaType) override;
+    void OnDesktopIconUrl(const std::string& icon_url, bool precomposed) override;
+    bool OnCursorChange(const NWeb::CursorType& type, const NWeb::NWebCursorInfo& info) override;
+    void OnSelectPopupMenu(std::shared_ptr<NWeb::NWebSelectPopupMenuParam> params,
+                           std::shared_ptr<NWeb::NWebSelectPopupMenuCallback> callback) override;
+    void OnAudioStateChanged(bool playing) override;
+    void OnFirstContentfulPaint(long navigationStartTick, long firstContentfulPaintMs) override;
+    void OnCompleteSwapWithNewSize() override;
+    void OnResizeNotWork() override;
+    void OnGetTouchHandleHotZone(NWeb::TouchHandleHotZone& hotZone) override;
 
     void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
     {

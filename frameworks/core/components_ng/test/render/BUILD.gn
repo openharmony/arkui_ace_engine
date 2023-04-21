@@ -13,5 +13,5 @@
 
 group("render_unittest") {
   testonly = true
-  deps = [ "adapter:rosen_border_image_painter_test" ]
+  deps = []
 }

@@ -29,14 +29,24 @@ RefPtr<TitleBarNode> TitleBarNode::GetOrCreateTitleBarNode(
     const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
 {
     auto frameNode = GetFrameNode(tag, nodeId);
-    if (frameNode) {
-        return AceType::DynamicCast<TitleBarNode>(frameNode);
-    }
+    CHECK_NULL_RETURN_NOLOG(!frameNode, AceType::DynamicCast<TitleBarNode>(frameNode));
     auto pattern = patternCreator ? patternCreator() : MakeRefPtr<Pattern>();
     auto titleBarNode = AceType::MakeRefPtr<TitleBarNode>(tag, nodeId, pattern);
     titleBarNode->InitializePatternAndContext();
     ElementRegister::GetInstance()->AddUINode(titleBarNode);
     return titleBarNode;
+}
+
+// The function is only used for fast preview.
+void TitleBarNode::FastPreviewUpdateChild(int32_t slot, const RefPtr<UINode>& newChild)
+{
+    auto oldChild = GetChildAtIndex(slot);
+    if (title_ == oldChild) {
+        title_ = newChild;
+    } else if (menu_ == oldChild) {
+        menu_ = newChild;
+    }
+    UINode::FastPreviewUpdateChild(slot, newChild);
 }
 
 } // namespace OHOS::Ace::NG

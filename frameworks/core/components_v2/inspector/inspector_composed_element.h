@@ -105,7 +105,7 @@ public:
         return nullptr;
     }
 
-    RefPtr<Element> GetElementChildBySlot(const RefPtr<Element>& element, int32_t& slot) const;
+    virtual RefPtr<Element> GetElementChildBySlot(const RefPtr<Element>& element, int32_t& slot) const;
     RefPtr<Element> GetInspectorComposedElementParent(const RefPtr<Element>& element) const;
 
     // dimension settings
@@ -225,20 +225,13 @@ public:
     // bindcontextmenu
     std::string GetBindContextMenu() const override;
 
-    virtual void AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
+    virtual RefPtr<Element> GetRenderElement() const
     {
-        LOGW("inspector AddChildWithSlot");
+        return nullptr;
     }
-
-    virtual void UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
-    {
-        LOGW("inspector UpdateChildWithSlot");
-    }
-
-    virtual void DeleteChildWithSlot(int32_t slot)
-    {
-        LOGW("inspector DeleteChildWithSlot");
-    }
+    virtual void AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent);
+    virtual void UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent);
+    virtual void DeleteChildWithSlot(int32_t slot);
 
     void UpdateEventTarget(BaseEventInfo& info) const override;
 

@@ -17,7 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_XCOMPONENT_FLUTTER_RENDER_XCOMPONENT_H
 
 #include "flutter/fml/memory/ref_counted.h"
-#include "third_party/skia/include/core/SkCanvas.h"
+#include "include/core/SkCanvas.h"
 
 #include "core/components/common/properties/color.h"
 #include "core/components/xcomponent/render_xcomponent.h"

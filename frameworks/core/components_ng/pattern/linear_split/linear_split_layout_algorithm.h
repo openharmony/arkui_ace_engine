@@ -30,7 +30,8 @@ class ACE_EXPORT LinearSplitLayoutAlgorithm : public BoxLayoutAlgorithm {
     DECLARE_ACE_TYPE(LinearSplitLayoutAlgorithm, BoxLayoutAlgorithm);
 
 public:
-    explicit LinearSplitLayoutAlgorithm(SplitType splitType) : splitType_(splitType) {};
+    explicit LinearSplitLayoutAlgorithm(SplitType splitType, std::vector<float> dragSplitOffset, bool isOverParent)
+        : splitType_(splitType), dragSplitOffset_(std::move(dragSplitOffset)), isOverParent_(isOverParent) {};
     ~LinearSplitLayoutAlgorithm() override = default;
 
     void OnReset() override {}
@@ -47,11 +48,30 @@ public:
         return splitLength_;
     }
 
+    std::vector<Rect> GetSplitRects() const
+    {
+        return splitRects_;
+    }
+
+    OffsetF GetParentOffset() const
+    {
+        return parentOffset_;
+    }
+
+    bool GetIsOverParent() const
+    {
+        return isOverParent_;
+    }
+
 private:
     SplitType splitType_;
     std::set<RefPtr<LayoutWrapper>> displayNodes_;
     std::vector<OffsetF> childrenOffset_;
+    std::vector<Rect> splitRects_;
+    std::vector<float> dragSplitOffset_;
+    OffsetF parentOffset_;
     float splitLength_ = 0.0f;
+    bool isOverParent_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(LinearSplitLayoutAlgorithm);
 };

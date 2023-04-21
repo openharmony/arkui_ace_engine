@@ -681,6 +681,16 @@ const Offset& TextOverlayComponent::GetEndHandleOffset() const
     return endHandleOffset_;
 }
 
+void TextOverlayComponent::SetMouseOffset(const Offset& mouseOffset)
+{
+    mouseOffset_ = mouseOffset;
+}
+
+const Offset& TextOverlayComponent::GetMouseOffset() const
+{
+    return mouseOffset_;
+}
+
 void TextOverlayComponent::SetOnStartHandleMove(const StartHandleMoveCallback& onStartHandleMove)
 {
     onStartHandleMove_ = onStartHandleMove;

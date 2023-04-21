@@ -34,7 +34,7 @@ public:
     {
         LOGD("Destroy: JsClickFunction");
     };
-    void Execute();
+    void Execute() override;
     void Execute(const ClickInfo& info);
     void Execute(const GestureEvent& info);
     void Execute(MouseInfo& info);

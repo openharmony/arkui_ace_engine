@@ -92,8 +92,17 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
         // Process cancel function.
         JSRef<JSVal> cancelCallback = constructorArg->GetProperty("cancel");
         if (!cancelCallback->IsUndefined() && cancelCallback->IsFunction()) {
-            instance->jsCancelFunction_ =
-                AceType::MakeRefPtr<JsFunction>(ownerObj, JSRef<JSFunc>::Cast(cancelCallback));
+            auto jsCancelFunction = AceType::MakeRefPtr<JsFunction>(ownerObj, JSRef<JSFunc>::Cast(cancelCallback));
+            instance->jsCancelFunction_ = jsCancelFunction;
+
+            if (Container::IsCurrentUseNewPipeline()) {
+                auto onCancel = [execCtx = info.GetExecutionContext(), func = std::move(jsCancelFunction)]() {
+                    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                    ACE_SCORING_EVENT("onCancel");
+                    func->Execute();
+                };
+                instance->dialogProperties_.onCancel = onCancel;
+            }
         }
 
         // Parses autoCancel.
@@ -127,6 +136,8 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
             Dimension dy;
             auto dyValue = offsetObj->GetProperty("dy");
             JSViewAbstract::ParseJsDimensionVp(dyValue, dy);
+            dx.ResetInvalidValue();
+            dy.ResetInvalidValue();
             instance->dialogProperties_.offset = DimensionOffset(dx, dy);
         }
 
@@ -134,6 +145,38 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
         auto gridCountValue = constructorArg->GetProperty("gridCount");
         if (gridCountValue->IsNumber()) {
             instance->dialogProperties_.gridCount = gridCountValue->ToNumber<int32_t>();
+        }
+
+        // Parse maskColor.
+        auto maskColorValue = constructorArg->GetProperty("maskColor");
+        Color maskColor;
+        if (JSViewAbstract::ParseJsColor(maskColorValue, maskColor)) {
+            instance->dialogProperties_.maskColor = maskColor;
+        }
+
+        auto execContext = info.GetExecutionContext();
+        // Parse openAnimation.
+        auto openAnimationValue = constructorArg->GetProperty("openAnimation");
+        AnimationOption openAnimation;
+        if (ParseAnimation(execContext, openAnimationValue, openAnimation)) {
+            instance->dialogProperties_.openAnimation = openAnimation;
+        }
+
+        // Parse closeAnimation.
+        auto closeAnimationValue = constructorArg->GetProperty("closeAnimation");
+        AnimationOption closeAnimation;
+        if (ParseAnimation(execContext, closeAnimationValue, closeAnimation)) {
+            instance->dialogProperties_.closeAnimation = closeAnimation;
+        }
+
+        auto showInSubWindowValue = constructorArg->GetProperty("showInSubWindow");
+        if (showInSubWindowValue->IsBoolean()) {
+#if defined(PREVIEW)
+            LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Perform this operation on the "
+                 "emulator or a real device instead.");
+#else
+            instance->dialogProperties_.isShowInSubWindow = showInSubWindowValue->ToBoolean();
+#endif
         }
 
         info.SetReturnValue(instance);

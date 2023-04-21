@@ -18,6 +18,7 @@
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/utils/noncopyable.h"
+#include "core/components_ng/pattern/marquee/marquee_accessibility_property.h"
 #include "core/components_ng/pattern/marquee/marquee_event_hub.h"
 #include "core/components_ng/pattern/marquee/marquee_layout_algorithm.h"
 #include "core/components_ng/pattern/marquee/marquee_layout_property.h"
@@ -53,6 +54,11 @@ public:
         auto marqueeLayoutAlgorithm = MakeRefPtr<MarqueeLayoutAlgorithm>();
         marqueeLayoutAlgorithm->SetChildOffset(childOffset_);
         return marqueeLayoutAlgorithm;
+    }
+
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        return MakeRefPtr<MarqueeAccessibilityProperty>();
     }
 
     float CheckAndAdjustPosition(LayoutWrapper* layoutWrapper);

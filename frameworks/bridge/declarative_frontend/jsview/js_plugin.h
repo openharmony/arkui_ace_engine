@@ -26,6 +26,8 @@ public:
     static void JSBind(BindingTarget globalObj);
 
     static void JsSize(const JSCallbackInfo& info);
+    static void JsWidth(const JSCallbackInfo& info);
+    static void JsHeight(const JSCallbackInfo& info);
     static void JsOnComplete(const JSCallbackInfo& info);
     static void JsOnError(const JSCallbackInfo& info);
 };

@@ -112,6 +112,7 @@ const char NAVIGATION_CONTENT_ETS_TAG[] = "NavigationContent";
 const char TOOL_BAR_ETS_TAG[] = "ToolBar";
 const char NAVIGATION_MENU_ETS_TAG[] = "NavigationMenu";
 const char BACK_BUTTON_ETS_TAG[] = "BackButton";
+const char BACK_BUTTON_IMAGE_ETS_TAG[] = "BackButtonImage";
 const char NAVBAR_CONTENT_ETS_TAG[] = "NavBarContent";
 const char NAVBAR_ETS_TAG[] = "NavBar";
 
@@ -360,11 +361,11 @@ const char GRIDCONTAINER_ETS_TAG[] = "GridContainer";
 
 // gridCol
 const char GRID_COL_COMPONENT_TAG[] = "GridColComponent";
-const char GRID_COL_ETS_TAG[] = "GridColComponent";
+const char GRID_COL_ETS_TAG[] = "GridCol";
 
 // gridRow
 const char GRID_ROW_COMPONENT_TAG[] = "GridRowComponent";
-const char GRID_ROW_ETS_TAG[] = "GridRowComponent";
+const char GRID_ROW_ETS_TAG[] = "GridRow";
 
 // relativeContainer
 const char RELATIVE_CONTAINER_COMPONENT_TAG[] = "RelativeContainerComponent";
@@ -374,11 +375,16 @@ const char RELATIVE_CONTAINER_ETS_TAG[] = "RelativeContainer";
 const char MENU_COMPONENT_TAG[] = "MenuComponent";
 const char MENU_TAG[] = "menu";
 const char MENU_ETS_TAG[] = "Menu";
+const char MENU_ITEM_ETS_TAG[] = "MenuItem";
+const char MENU_ITEM_GROUP_ETS_TAG[] = "MenuItemGroup";
 const char MENU_WRAPPER_ETS_TAG[] = "MenuWrapper";
 
 // textarea
 const char TEXTAREA_COMPONENT_TAG[] = "TextFieldComponent";
 const char TEXTAREA_ETS_TAG[] = "TextArea";
+
+// textdrag
+const char TEXTDRAG_ETS_TAG[] = "TextDrag";
 
 // textinput
 const char TEXTINPUT_COMPONENT_TAG[] = "TextInput";
@@ -473,7 +479,14 @@ const char POPUP_ETS_TAG[] = "Popup";
 const char REMOTE_WINDOW_ETS_TAG[] = "RemoteWindow";
 
 // Model
-ACE_EXPORT extern const char MODEL_COMPONENT_TAG[] = "ModelComponent";
-ACE_EXPORT extern const char MODEL_ETS_TAG[] = "Model";
+const char MODEL_COMPONENT_TAG[] = "ModelComponent";
+const char MODEL_ETS_TAG[] = "Model";
+
+// window scene
+const char WINDOW_SCENE_ETS_TAG[] = "WindowScene";
+
+// ui_extension_component
+const char UI_EXTENSION_COMPONENT_TAG[] = "UIExtensionComponent";
+const char UI_EXTENSION_COMPONENT_ETS_TAG[] = "UIExtensionComponent";
 
 } // namespace OHOS::Ace::V2

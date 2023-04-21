@@ -15,11 +15,10 @@
 
 #include "core/components/bubble/flutter_render_bubble.h"
 
-#include "flutter/lib/ui/ui_dart_state.h"
-#include "third_party/skia/include/core/SkMaskFilter.h"
-#include "third_party/skia/include/effects/Sk1DPathEffect.h"
-#include "third_party/skia/include/effects/SkDashPathEffect.h"
-#include "third_party/skia/include/effects/SkGradientShader.h"
+#include "include/core/SkMaskFilter.h"
+#include "include/effects/Sk1DPathEffect.h"
+#include "include/effects/SkDashPathEffect.h"
+#include "include/effects/SkGradientShader.h"
 
 #include "core/components/common/painter/flutter_decoration_painter.h"
 #include "core/components/common/properties/placement.h"

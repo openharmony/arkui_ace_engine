@@ -55,6 +55,7 @@ void ScrollableActuator::InitializeScrollable()
     for (const auto& [axis, event] : scrollableEvents_) {
         auto scrollable = MakeRefPtr<Scrollable>(event->GetScrollPositionCallback(), axis);
         scrollable->SetOnScrollBegin(event->GetScrollBeginCallback());
+        scrollable->SetOnScrollFrameBegin(event->GetScrollFrameBeginCallback());
         scrollable->SetScrollEndCallback(event->GetScrollEndCallback());
         if (scrollEffects_.count(axis)) {
             auto scrollEffect = scrollEffects_[axis];
@@ -62,6 +63,7 @@ void ScrollableActuator::InitializeScrollable()
             scrollEffect->InitialEdgeEffect();
         }
         scrollable->Initialize(host->GetContext());
+        scrollable->SetMouseLeftButtonScroll(event->GetMouseLeftButtonScroll());
         event->SetScrollable(scrollable);
     }
     initialized_ = true;

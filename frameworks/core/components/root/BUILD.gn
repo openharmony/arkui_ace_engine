@@ -22,5 +22,8 @@ build_component("root") {
     "root_component.cpp",
     "root_element.cpp",
   ]
+  if (ace_use_new_skia) {
+    sources -= [ "flutter_render_root.cpp" ]
+  }
   rosen_sources = [ "rosen_render_root.cpp" ]
 }

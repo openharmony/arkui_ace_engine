@@ -14,14 +14,42 @@
  */
 
 #include "core/components_ng/pattern/list/list_item_layout_property.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components_v2/list/list_properties.h"
 
 namespace OHOS::Ace::NG {
 
 void ListItemLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     LayoutProperty::ToJsonValue(json);
-
-    json->Put("sticky", "Sticky.None");
-    json->Put("editMode", "true");
+    auto sticky = propStickyMode_.value_or(V2::StickyMode::NONE);
+    if (sticky == V2::StickyMode::NORMAL) {
+        json->Put("sticky", "Sticky.Normal");
+    } else if (sticky == V2::StickyMode::OPACITY) {
+        json->Put("sticky", "Sticky.Opacity");
+    } else {
+        json->Put("sticky", "Sticky.None");
+    }
+    auto editMode = propEditMode_.value_or(V2::EditMode::SHAM);
+    if (editMode == V2::EditMode::NONE) {
+        json->Put("editMode", "EditMode.None");
+    } else if (editMode == V2::EditMode::MOVABLE) {
+        json->Put("editMode", "EditMode.Movable");
+    } else if (editMode == V2::EditMode::DELETABLE) {
+        json->Put("editMode", "EditMode.Deletable");
+    } else if (editMode == (V2::EditMode::DELETABLE | V2::EditMode::MOVABLE)) {
+        json->Put("editMode", true);
+    } else {
+        json->Put("editMode", false);
+    }
+    if (propEdgeEffect_.has_value()) {
+        auto swipeAction = JsonUtil::Create(true);
+        swipeAction->Put("edgeEffect", propEdgeEffect_.value() == V2::SwipeEdgeEffect::Spring ?
+            "SwipeEdgeEffect.Spring" : "SwipeEdgeEffect.Node");
+        json->Put("swipeAction", swipeAction);
+    } else {
+        auto swipeAction = JsonUtil::Create(true);
+        json->Put("swipeAction", swipeAction);
+    }
 }
 }

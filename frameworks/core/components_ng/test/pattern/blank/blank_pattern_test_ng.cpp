@@ -14,8 +14,10 @@
  */
 
 #include <optional>
+
 #include "gtest/gtest.h"
 
+#define private public
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/layout/layout_wrapper.h"
@@ -23,334 +25,498 @@
 #include "core/components_ng/pattern/blank/blank_pattern.h"
 #include "core/components_ng/pattern/blank/blank_view.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 using namespace testing;
 using namespace testing::ext;
-
 namespace OHOS::Ace::NG {
 namespace {
-const int32_t BLANK_MIN = 10;
-const float RK356_WIDTH = 720.0f;
-const float RK356_HEIGHT = 1136.0f;
-const SizeF CONTAINER_SIZE(RK356_WIDTH, RK356_HEIGHT);
-const float ZERO = 0.0f;
-const float SMALL_ITEM_WIDTH = 150.0f;
-const float SMALL_ITEM_HEIGHT = 60.0f;
-const float NOPADDING = 0.0f;
-const float ROW_HEIGHT = 120.0f;
+constexpr float COLUMN_HEIGHT = 200.0f;
+constexpr float FULL_SCREEN_WIDTH = 720.0f;
+constexpr float FULL_SCREEN_HEIGHT = 1136.0f;
+constexpr float ZERO = 0.0f;
+constexpr float ROW_HEIGHT = 120.0f;
+constexpr float SMALL_ITEM_WIDTH = 150.0f;
+constexpr float SMALL_ITEM_HEIGHT = 60.0f;
+
+constexpr Dimension BLANK_MIN(10.0f);
+constexpr Dimension SMALL_BLANK_HEIGHT(5.0f);
+constexpr Dimension LARGE_BLANK_HEIGHT(20.0f);
+
+const OffsetF ORIGIN_POINT(ZERO, ZERO);
+const SizeF SMALL_ITEM_SIZE(SMALL_ITEM_WIDTH, SMALL_ITEM_HEIGHT);
 const std::string COLOR_WHITE = "#FFFFFFFF";
+const SizeF CONTAINER_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 } // namespace
 
 class BlankPatternTestNg : public testing::Test {
 public:
     static void SetUpTestSuite() {};
     static void TearDownTestSuite() {};
+
 protected:
+    std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapper>> CreateRow();
+    std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapper>> CreateColumn();
+    std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapper>> CreateFlexRow();
+    std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapper>> CreateFlexColumn();
+    PaddingProperty CreatePadding(float left, float top, float right, float bottom);
 };
+
+std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapper>> BlankPatternTestNg::CreateRow()
+{
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto rowFrameNode =
+        FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, nodeId, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    EXPECT_NE(rowFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapper> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(rowFrameNode, geometryNode, rowFrameNode->GetLayoutProperty());
+
+    auto rowLayoutPattern = rowFrameNode->GetPattern<LinearLayoutPattern>();
+    EXPECT_NE(rowLayoutPattern, nullptr);
+    auto rowLayoutProperty = rowLayoutPattern->GetLayoutProperty<LinearLayoutProperty>();
+    EXPECT_NE(rowLayoutProperty, nullptr);
+
+    layoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(FULL_SCREEN_WIDTH), CalcLength(ROW_HEIGHT)));
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
+    parentLayoutConstraint.percentReference = CONTAINER_SIZE;
+
+    PaddingProperty noPadding = CreatePadding(ZERO, ZERO, ZERO, ZERO);
+    layoutWrapper->GetLayoutProperty()->UpdatePadding(noPadding);
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+
+    return { rowFrameNode, layoutWrapper };
+}
+
+std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapper>> BlankPatternTestNg::CreateColumn()
+{
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto columnFrameNode =
+        FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, nodeId, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    EXPECT_NE(columnFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapper> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(columnFrameNode, geometryNode, columnFrameNode->GetLayoutProperty());
+
+    auto columnLayoutPattern = columnFrameNode->GetPattern<LinearLayoutPattern>();
+    EXPECT_NE(columnLayoutPattern, nullptr);
+    auto rowLayoutProperty = columnLayoutPattern->GetLayoutProperty<LinearLayoutProperty>();
+    EXPECT_NE(rowLayoutProperty, nullptr);
+
+    layoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(FULL_SCREEN_WIDTH), CalcLength(COLUMN_HEIGHT)));
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
+    parentLayoutConstraint.percentReference = CONTAINER_SIZE;
+
+    PaddingProperty noPadding = CreatePadding(ZERO, ZERO, ZERO, ZERO);
+    layoutWrapper->GetLayoutProperty()->UpdatePadding(noPadding);
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+
+    return { columnFrameNode, layoutWrapper };
+}
+
+std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapper>> BlankPatternTestNg::CreateFlexRow()
+{
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto rowFrameNode =
+        FrameNode::CreateFrameNode(V2::FLEX_ETS_TAG, nodeId, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    EXPECT_NE(rowFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapper> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(rowFrameNode, geometryNode, rowFrameNode->GetLayoutProperty());
+    auto rowLayoutPattern = rowFrameNode->GetPattern<LinearLayoutPattern>();
+    EXPECT_NE(rowLayoutPattern, nullptr);
+    auto rowLayoutProperty = rowLayoutPattern->GetLayoutProperty<LinearLayoutProperty>();
+    EXPECT_NE(rowLayoutProperty, nullptr);
+    rowLayoutProperty->UpdateFlexDirection(FlexDirection::ROW);
+    rowLayoutProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
+    auto rowLayoutAlgorithm = rowLayoutPattern->CreateLayoutAlgorithm();
+    EXPECT_NE(rowLayoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(rowLayoutAlgorithm));
+    layoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(FULL_SCREEN_WIDTH), CalcLength(ROW_HEIGHT)));
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
+    parentLayoutConstraint.percentReference = CONTAINER_SIZE;
+
+    PaddingProperty noPadding = CreatePadding(ZERO, ZERO, ZERO, ZERO);
+    layoutWrapper->GetLayoutProperty()->UpdatePadding(noPadding);
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+
+    return { rowFrameNode, layoutWrapper };
+}
+
+std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapper>> BlankPatternTestNg::CreateFlexColumn()
+{
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto columnFrameNode =
+        FrameNode::CreateFrameNode(V2::FLEX_ETS_TAG, nodeId, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    EXPECT_NE(columnFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapper> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(columnFrameNode, geometryNode, columnFrameNode->GetLayoutProperty());
+    auto columnLayoutPattern = columnFrameNode->GetPattern<LinearLayoutPattern>();
+    EXPECT_NE(columnLayoutPattern, nullptr);
+    auto columnLayoutProperty = columnLayoutPattern->GetLayoutProperty<LinearLayoutProperty>();
+    EXPECT_NE(columnLayoutProperty, nullptr);
+    columnLayoutProperty->UpdateFlexDirection(FlexDirection::COLUMN);
+    columnLayoutProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
+    auto columnLayoutAlgorithm = columnLayoutPattern->CreateLayoutAlgorithm();
+    EXPECT_NE(columnLayoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(columnLayoutAlgorithm));
+    layoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(FULL_SCREEN_WIDTH), CalcLength(COLUMN_HEIGHT)));
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
+    parentLayoutConstraint.percentReference = CONTAINER_SIZE;
+
+    PaddingProperty noPadding = CreatePadding(ZERO, ZERO, ZERO, ZERO);
+    layoutWrapper->GetLayoutProperty()->UpdatePadding(noPadding);
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+
+    return { columnFrameNode, layoutWrapper };
+}
+
+PaddingProperty BlankPatternTestNg::CreatePadding(float left, float top, float right, float bottom)
+{
+    PaddingProperty padding;
+    padding.left = CalcLength(left);
+    padding.right = CalcLength(right);
+    padding.top = CalcLength(top);
+    padding.bottom = CalcLength(bottom);
+    return padding;
+}
 
 /**
  * @tc.name: BlankFrameNodeCreator001
- * @tc.desc: Test all the properties of Blank.
+ * @tc.desc: Test blankMin of Blank.
  * @tc.type: FUNC
  * @tc.author:
  */
 HWTEST_F(BlankPatternTestNg, BlankFrameNodeCreator001, TestSize.Level1)
 {
     BlankView blank;
-    Dimension blankMin;
     blank.Create();
-    blankMin.SetValue(10);
-    blank.SetBlankMin(blankMin);
-    blank.SetBlankMin(blankMin);
-    EXPECT_EQ(blankMin.Value(), BLANK_MIN);
+    blank.SetBlankMin(BLANK_MIN);
 
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(frameNode == nullptr);
+    EXPECT_NE(frameNode, nullptr);
     auto blankLayoutProperty = frameNode->GetLayoutProperty<BlankLayoutProperty>();
-    EXPECT_FALSE(blankLayoutProperty == nullptr);
+    EXPECT_NE(blankLayoutProperty, nullptr);
+    EXPECT_EQ(blankLayoutProperty->GetMinSize().value_or(Dimension()), BLANK_MIN);
 }
 
 /**
  * @tc.name: BlankFrameNodeCreator002
- * @tc.desc: Test all the properties of Blank.
+ * @tc.desc: Test height of Blank.
  * @tc.type: FUNC
  * @tc.author:
  */
 HWTEST_F(BlankPatternTestNg, BlankFrameNodeCreator002, TestSize.Level1)
 {
     BlankView blank;
-    Dimension blankMin;
     blank.Create();
-    blankMin.SetValue(10);
-    blank.SetBlankMin(blankMin);
-    blank.SetBlankMin(blankMin);
-    EXPECT_EQ(blankMin.Value(), BLANK_MIN);
+    blank.SetHeight(SMALL_BLANK_HEIGHT);
 
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(frameNode == nullptr);
+    EXPECT_NE(frameNode, nullptr);
     auto blankLayoutProperty = frameNode->GetLayoutProperty<BlankLayoutProperty>();
-    EXPECT_FALSE(blankLayoutProperty == nullptr);
+    EXPECT_NE(blankLayoutProperty, nullptr);
+    EXPECT_EQ(blankLayoutProperty->GetHeight(), SMALL_BLANK_HEIGHT);
 
     auto blankPattern = frameNode->GetPattern<BlankPattern>();
-    EXPECT_FALSE(blankPattern == nullptr);
+    EXPECT_NE(blankPattern, nullptr);
     auto layoutProperty = blankPattern->CreateLayoutProperty();
-    EXPECT_FALSE(layoutProperty == nullptr);
-    auto paintProperty = blankPattern->CreatePaintProperty();
-    EXPECT_FALSE(paintProperty == nullptr);
+    EXPECT_NE(layoutProperty, nullptr);
 }
 
 /**
- * @tc.name: BlankFrameNodeCreator003
- * @tc.desc: Test ROW_ETS_TAG of Blank.
+ * @tc.name: BlankPatternTest001
+ * @tc.desc: Test Blank layout: parent = Row.
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(BlankPatternTestNg, BlankFrameNodeCreator003, TestSize.Level1)
+HWTEST_F(BlankPatternTestNg, BlankPatternTest001, TestSize.Level1)
 {
-    BlankView blank;
-    Dimension blankMin;
-    PaddingProperty noPadding;
+    auto row = CreateRow();
+    auto rowFrameNode = row.first;
+    EXPECT_NE(rowFrameNode, nullptr);
+    auto rowLayoutWrapper = row.second;
 
-    auto rowFrameNode = FrameNode::CreateFrameNode(
-        V2::ROW_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
-    EXPECT_FALSE(rowFrameNode == nullptr);
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    EXPECT_FALSE(geometryNode == nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(rowFrameNode, geometryNode, rowFrameNode->GetLayoutProperty());
-    auto rowLayoutPattern = rowFrameNode->GetPattern<LinearLayoutPattern>();
-    EXPECT_FALSE(rowLayoutPattern == nullptr);
-    auto rowLayoutProperty = rowLayoutPattern->GetLayoutProperty<LinearLayoutProperty>();
-    EXPECT_FALSE(rowLayoutProperty == nullptr);
-    rowLayoutProperty->UpdateFlexDirection(FlexDirection::ROW);
-    rowLayoutProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
-    auto rowLayoutAlgorithm = rowLayoutPattern->CreateLayoutAlgorithm();
-    EXPECT_FALSE(rowLayoutAlgorithm == nullptr);
-    layoutWrapper->SetLayoutAlgorithm(
-        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(rowLayoutAlgorithm));
-    layoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(RK356_WIDTH), CalcLength(ROW_HEIGHT)));
-    LayoutConstraintF parentLayoutConstraint;
-    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
-    parentLayoutConstraint.percentReference = CONTAINER_SIZE;
-
-    noPadding.left = CalcLength(NOPADDING);
-    noPadding.right = CalcLength(NOPADDING);
-    noPadding.top = CalcLength(NOPADDING);
-    noPadding.bottom = CalcLength(NOPADDING);
-    layoutWrapper->GetLayoutProperty()->UpdatePadding(noPadding);
-    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
-    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
-
-    auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    auto childLayoutConstraint = rowLayoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     childLayoutConstraint.maxSize = CONTAINER_SIZE;
     childLayoutConstraint.minSize = SizeF(ZERO, ZERO);
 
+    // create child
+    BlankView blank;
     blank.Create();
-    blankMin.SetValue(10);
-    blank.SetBlankMin(blankMin);
+    blank.SetBlankMin(BLANK_MIN);
+    blank.SetHeight(SMALL_BLANK_HEIGHT);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(frameNode == nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::BLANK_ETS_TAG);
+    EXPECT_NE(frameNode, nullptr);
+    auto blankLayoutProperty = frameNode->GetLayoutProperty<BlankLayoutProperty>();
+    EXPECT_NE(blankLayoutProperty, nullptr);
+    auto blankPattern = frameNode->GetPattern<BlankPattern>();
+    EXPECT_NE(blankPattern, nullptr);
     RefPtr<GeometryNode> firstGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     RefPtr<LayoutWrapper> firstLayoutWrapper =
         AceType::MakeRefPtr<LayoutWrapper>(frameNode, firstGeometryNode, frameNode->GetLayoutProperty());
     firstLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
     firstLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(SMALL_ITEM_WIDTH), CalcLength(SMALL_ITEM_HEIGHT)));
+    PaddingProperty noPadding = CreatePadding(ZERO, ZERO, ZERO, ZERO);
     firstLayoutWrapper->GetLayoutProperty()->UpdatePadding(noPadding);
     auto blankLayoutAlgorithm = frameNode->GetPattern<BlankPattern>()->CreateLayoutAlgorithm();
-    EXPECT_FALSE(blankLayoutAlgorithm == nullptr);
+    EXPECT_NE(blankLayoutAlgorithm, nullptr);
     firstLayoutWrapper->SetLayoutAlgorithm(
         AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(blankLayoutAlgorithm));
-    rowFrameNode->AddChild(frameNode);
-    layoutWrapper->AppendChild(firstLayoutWrapper);
 
-    frameNode->GetPattern<BlankPattern>()->OnMountToParentDone();
+    rowFrameNode->AddChild(frameNode);
+    rowLayoutWrapper->AppendChild(firstLayoutWrapper);
+    blankPattern->OnMountToParentDone();
     auto parent = frameNode->GetParent();
-    EXPECT_TRUE(parent->GetTag() == V2::ROW_ETS_TAG);
+    EXPECT_EQ(parent->GetTag(), V2::ROW_ETS_TAG);
+    LinearLayoutUtils::Measure(AccessibilityManager::RawPtr(rowLayoutWrapper), false);
+    LinearLayoutUtils::Layout(
+        AccessibilityManager::RawPtr(rowLayoutWrapper), false, FlexAlign::FLEX_START, FlexAlign::FLEX_START);
+
+    EXPECT_EQ(firstLayoutWrapper->GetGeometryNode()->GetFrameSize(), SMALL_ITEM_SIZE);
+    EXPECT_EQ(firstLayoutWrapper->GetGeometryNode()->GetFrameOffset(), ORIGIN_POINT);
+
+    blankLayoutProperty->UpdateHeight(LARGE_BLANK_HEIGHT);
+    blankPattern->OnModifyDone();
+    blankPattern->OnMountToParentDone();
+
+    LinearLayoutUtils::Measure(AccessibilityManager::RawPtr(rowLayoutWrapper), false);
+    LinearLayoutUtils::Layout(
+        AccessibilityManager::RawPtr(rowLayoutWrapper), false, FlexAlign::FLEX_START, FlexAlign::FLEX_START);
 }
 
 /**
- * @tc.name: BlankFrameNodeCreator004
- * @tc.desc: Test FLEX_ETS_TAG of Blank.
+ * @tc.name: BlankPatternTest002
+ * @tc.desc: Test Blank layout: parent = Column.
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(BlankPatternTestNg, BlankFrameNodeCreator004, TestSize.Level1)
+HWTEST_F(BlankPatternTestNg, BlankPatternTest002, TestSize.Level1)
 {
-    BlankView blank;
-    Dimension blankMin;
-    PaddingProperty noPadding;
+    auto column = CreateColumn();
+    auto columnFrameNode = column.first;
+    auto columnLayoutWrapper = column.second;
 
-    auto rowFrameNode = FrameNode::CreateFrameNode(
-        V2::FLEX_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
-    EXPECT_FALSE(rowFrameNode == nullptr);
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    EXPECT_FALSE(geometryNode == nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(rowFrameNode, geometryNode, rowFrameNode->GetLayoutProperty());
-    auto rowLayoutPattern = rowFrameNode->GetPattern<LinearLayoutPattern>();
-    EXPECT_FALSE(rowLayoutPattern == nullptr);
-    auto rowLayoutProperty = rowLayoutPattern->GetLayoutProperty<LinearLayoutProperty>();
-    EXPECT_FALSE(rowLayoutProperty == nullptr);
-    rowLayoutProperty->UpdateFlexDirection(FlexDirection::ROW);
-    rowLayoutProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
-    auto rowLayoutAlgorithm = rowLayoutPattern->CreateLayoutAlgorithm();
-    EXPECT_FALSE(rowLayoutAlgorithm == nullptr);
-    layoutWrapper->SetLayoutAlgorithm(
-        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(rowLayoutAlgorithm));
-    layoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(RK356_WIDTH), CalcLength(ROW_HEIGHT)));
-    LayoutConstraintF parentLayoutConstraint;
-    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
-    parentLayoutConstraint.percentReference = CONTAINER_SIZE;
-
-    noPadding.left = CalcLength(NOPADDING);
-    noPadding.right = CalcLength(NOPADDING);
-    noPadding.top = CalcLength(NOPADDING);
-    noPadding.bottom = CalcLength(NOPADDING);
-    layoutWrapper->GetLayoutProperty()->UpdatePadding(noPadding);
-    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
-    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
-
-    auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    auto childLayoutConstraint = columnLayoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     childLayoutConstraint.maxSize = CONTAINER_SIZE;
     childLayoutConstraint.minSize = SizeF(ZERO, ZERO);
 
+    BlankView blank;
     blank.Create();
-    blankMin.SetValue(10);
-    blank.SetBlankMin(blankMin);
+    blank.SetBlankMin(BLANK_MIN);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(frameNode == nullptr);
+    EXPECT_NE(frameNode, nullptr);
+    auto blankLayoutProperty = frameNode->GetLayoutProperty<BlankLayoutProperty>();
+    EXPECT_NE(blankLayoutProperty, nullptr);
+    auto blankPattern = frameNode->GetPattern<BlankPattern>();
+    EXPECT_NE(blankPattern, nullptr);
     RefPtr<GeometryNode> firstGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     RefPtr<LayoutWrapper> firstLayoutWrapper =
         AceType::MakeRefPtr<LayoutWrapper>(frameNode, firstGeometryNode, frameNode->GetLayoutProperty());
     firstLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
     firstLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(SMALL_ITEM_WIDTH), CalcLength(SMALL_ITEM_HEIGHT)));
+    PaddingProperty noPadding = CreatePadding(ZERO, ZERO, ZERO, ZERO);
     firstLayoutWrapper->GetLayoutProperty()->UpdatePadding(noPadding);
     auto blankLayoutAlgorithm = frameNode->GetPattern<BlankPattern>()->CreateLayoutAlgorithm();
-    EXPECT_FALSE(blankLayoutAlgorithm == nullptr);
+    EXPECT_NE(blankLayoutAlgorithm, nullptr);
     firstLayoutWrapper->SetLayoutAlgorithm(
         AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(blankLayoutAlgorithm));
-    rowFrameNode->AddChild(frameNode);
-    layoutWrapper->AppendChild(firstLayoutWrapper);
+    columnFrameNode->AddChild(frameNode);
+    columnLayoutWrapper->AppendChild(firstLayoutWrapper);
 
-    frameNode->GetPattern<BlankPattern>()->OnMountToParentDone();
+    blankPattern->OnMountToParentDone();
     auto parent = frameNode->GetParent();
-    EXPECT_TRUE(parent->GetTag() == V2::FLEX_ETS_TAG);
+    EXPECT_EQ(parent->GetTag(), V2::COLUMN_ETS_TAG);
+
+    LinearLayoutUtils::Measure(AccessibilityManager::RawPtr(columnLayoutWrapper), true);
+    LinearLayoutUtils::Layout(
+        AccessibilityManager::RawPtr(columnLayoutWrapper), false, FlexAlign::FLEX_START, FlexAlign::FLEX_START);
+    EXPECT_EQ(firstLayoutWrapper->GetGeometryNode()->GetFrameSize(), SMALL_ITEM_SIZE);
+    EXPECT_EQ(firstLayoutWrapper->GetGeometryNode()->GetFrameOffset(), ORIGIN_POINT);
+
+    blankLayoutProperty->UpdateHeight(LARGE_BLANK_HEIGHT);
+    blankPattern->OnModifyDone();
+    blankPattern->OnMountToParentDone();
+
+    LinearLayoutUtils::Measure(AccessibilityManager::RawPtr(columnLayoutWrapper), false);
+    LinearLayoutUtils::Layout(
+        AccessibilityManager::RawPtr(columnLayoutWrapper), false, FlexAlign::FLEX_START, FlexAlign::FLEX_START);
 }
 
 /**
- * @tc.name: BlankFrameNodeCreator005
- * @tc.desc: Test COLUMN_ETS_TAG of Blank.
+ * @tc.name: BlankPatternTest003
+ * @tc.desc: Test Blank layout: parent = Flex_Row.
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(BlankPatternTestNg, BlankFrameNodeCreator005, TestSize.Level1)
+HWTEST_F(BlankPatternTestNg, BlankPatternTest003, TestSize.Level1)
 {
-    BlankView blank;
-    Dimension blankMin;
-    PaddingProperty noPadding;
+    auto flexRow = CreateFlexRow();
+    auto flexRowFrameNode = flexRow.first;
+    auto flexRowLayoutWrapper = flexRow.second;
 
-    auto rowFrameNode = FrameNode::CreateFrameNode(
-        V2::COLUMN_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
-    EXPECT_FALSE(rowFrameNode == nullptr);
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    EXPECT_FALSE(geometryNode == nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(rowFrameNode, geometryNode, rowFrameNode->GetLayoutProperty());
-    auto rowLayoutPattern = rowFrameNode->GetPattern<LinearLayoutPattern>();
-    EXPECT_FALSE(rowLayoutPattern == nullptr);
-    auto rowLayoutProperty = rowLayoutPattern->GetLayoutProperty<LinearLayoutProperty>();
-    EXPECT_FALSE(rowLayoutProperty == nullptr);
-    rowLayoutProperty->UpdateFlexDirection(FlexDirection::ROW);
-    rowLayoutProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
-    auto rowLayoutAlgorithm = rowLayoutPattern->CreateLayoutAlgorithm();
-    EXPECT_FALSE(rowLayoutAlgorithm == nullptr);
-    layoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(rowLayoutAlgorithm));
-    layoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(RK356_WIDTH), CalcLength(ROW_HEIGHT)));
-    LayoutConstraintF parentLayoutConstraint;
-    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
-    parentLayoutConstraint.percentReference = CONTAINER_SIZE;
-
-    noPadding.left = CalcLength(NOPADDING);
-    noPadding.right = CalcLength(NOPADDING);
-    noPadding.top = CalcLength(NOPADDING);
-    noPadding.bottom = CalcLength(NOPADDING);
-    layoutWrapper->GetLayoutProperty()->UpdatePadding(noPadding);
-    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
-    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
-
-    auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    auto childLayoutConstraint = flexRowLayoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     childLayoutConstraint.maxSize = CONTAINER_SIZE;
     childLayoutConstraint.minSize = SizeF(ZERO, ZERO);
 
+    BlankView blank;
     blank.Create();
-    blankMin.SetValue(10);
-    blank.SetBlankMin(blankMin);
+    blank.SetBlankMin(BLANK_MIN);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(frameNode == nullptr);
+    EXPECT_NE(frameNode, nullptr);
+    auto blankLayoutProperty = frameNode->GetLayoutProperty<BlankLayoutProperty>();
+    EXPECT_NE(blankLayoutProperty, nullptr);
+    auto blankPattern = frameNode->GetPattern<BlankPattern>();
+    EXPECT_NE(blankPattern, nullptr);
     RefPtr<GeometryNode> firstGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     RefPtr<LayoutWrapper> firstLayoutWrapper =
         AceType::MakeRefPtr<LayoutWrapper>(frameNode, firstGeometryNode, frameNode->GetLayoutProperty());
     firstLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
     firstLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(SMALL_ITEM_WIDTH), CalcLength(SMALL_ITEM_HEIGHT)));
+    PaddingProperty noPadding = CreatePadding(ZERO, ZERO, ZERO, ZERO);
     firstLayoutWrapper->GetLayoutProperty()->UpdatePadding(noPadding);
     auto blankLayoutAlgorithm = frameNode->GetPattern<BlankPattern>()->CreateLayoutAlgorithm();
-    EXPECT_FALSE(blankLayoutAlgorithm == nullptr);
+    EXPECT_NE(blankLayoutAlgorithm, nullptr);
     firstLayoutWrapper->SetLayoutAlgorithm(
         AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(blankLayoutAlgorithm));
-    rowFrameNode->AddChild(frameNode);
-    layoutWrapper->AppendChild(firstLayoutWrapper);
+    flexRowFrameNode->AddChild(frameNode);
+    flexRowLayoutWrapper->AppendChild(firstLayoutWrapper);
 
-    frameNode->GetPattern<BlankPattern>()->OnMountToParentDone();
+    blankPattern->OnMountToParentDone();
     auto parent = frameNode->GetParent();
-    EXPECT_TRUE(parent->GetTag() == V2::COLUMN_ETS_TAG);
+    EXPECT_EQ(parent->GetTag(), V2::FLEX_ETS_TAG);
+
+    LinearLayoutUtils::Measure(AccessibilityManager::RawPtr(flexRowLayoutWrapper), false);
+    LinearLayoutUtils::Layout(
+        AccessibilityManager::RawPtr(flexRowLayoutWrapper), false, FlexAlign::FLEX_START, FlexAlign::FLEX_START);
+    EXPECT_EQ(firstLayoutWrapper->GetGeometryNode()->GetFrameSize(), SMALL_ITEM_SIZE);
+    EXPECT_EQ(firstLayoutWrapper->GetGeometryNode()->GetFrameOffset(), ORIGIN_POINT);
+
+    blankLayoutProperty->UpdateHeight(LARGE_BLANK_HEIGHT);
+    blankPattern->OnModifyDone();
+    blankPattern->OnMountToParentDone();
+
+    LinearLayoutUtils::Measure(AccessibilityManager::RawPtr(flexRowLayoutWrapper), false);
+    LinearLayoutUtils::Layout(
+        AccessibilityManager::RawPtr(flexRowLayoutWrapper), false, FlexAlign::FLEX_START, FlexAlign::FLEX_START);
 }
 
 /**
- * @tc.name: BlankFrameNodeCreator006
+ * @tc.name: BlankPatternTest004
+ * @tc.desc: Test Blank layout: parent = Flex_Column.
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(BlankPatternTestNg, BlankPatternTest004, TestSize.Level1)
+{
+    auto flexColumn = CreateFlexColumn();
+    auto flexColumnFrameNode = flexColumn.first;
+    auto flexColumnLayoutWrapper = flexColumn.second;
+
+    auto childLayoutConstraint = flexColumnLayoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    childLayoutConstraint.maxSize = CONTAINER_SIZE;
+    childLayoutConstraint.minSize = SizeF(ZERO, ZERO);
+
+    BlankView blank;
+    blank.Create();
+    blank.SetBlankMin(BLANK_MIN);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+    auto blankLayoutProperty = frameNode->GetLayoutProperty<BlankLayoutProperty>();
+    EXPECT_NE(blankLayoutProperty, nullptr);
+    auto blankPattern = frameNode->GetPattern<BlankPattern>();
+    EXPECT_NE(blankPattern, nullptr);
+    RefPtr<GeometryNode> firstGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapper> firstLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(frameNode, firstGeometryNode, frameNode->GetLayoutProperty());
+    firstLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
+    firstLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(SMALL_ITEM_WIDTH), CalcLength(SMALL_ITEM_HEIGHT)));
+    PaddingProperty noPadding = CreatePadding(ZERO, ZERO, ZERO, ZERO);
+    firstLayoutWrapper->GetLayoutProperty()->UpdatePadding(noPadding);
+    auto blankLayoutAlgorithm = frameNode->GetPattern<BlankPattern>()->CreateLayoutAlgorithm();
+    EXPECT_NE(blankLayoutAlgorithm, nullptr);
+    firstLayoutWrapper->SetLayoutAlgorithm(
+        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(blankLayoutAlgorithm));
+    flexColumnFrameNode->AddChild(frameNode);
+    flexColumnLayoutWrapper->AppendChild(firstLayoutWrapper);
+
+    blankPattern->OnMountToParentDone();
+    auto parent = frameNode->GetParent();
+    EXPECT_EQ(parent->GetTag(), V2::FLEX_ETS_TAG);
+
+    LinearLayoutUtils::Measure(AccessibilityManager::RawPtr(flexColumnLayoutWrapper), true);
+    LinearLayoutUtils::Layout(
+        AccessibilityManager::RawPtr(flexColumnLayoutWrapper), false, FlexAlign::FLEX_START, FlexAlign::FLEX_START);
+    EXPECT_EQ(firstLayoutWrapper->GetGeometryNode()->GetFrameSize(), SMALL_ITEM_SIZE);
+    EXPECT_EQ(firstLayoutWrapper->GetGeometryNode()->GetFrameOffset(), ORIGIN_POINT);
+
+    blankLayoutProperty->UpdateHeight(LARGE_BLANK_HEIGHT);
+    blankPattern->OnModifyDone();
+    blankPattern->OnMountToParentDone();
+
+    LinearLayoutUtils::Measure(AccessibilityManager::RawPtr(flexColumnLayoutWrapper), true);
+    LinearLayoutUtils::Layout(
+        AccessibilityManager::RawPtr(flexColumnLayoutWrapper), false, FlexAlign::FLEX_START, FlexAlign::FLEX_START);
+}
+
+/**
+ * @tc.name: BlankPatternTest005
  * @tc.desc: Test invalid tag of Blank.
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(BlankPatternTestNg, BlankFrameNodeCreator006, TestSize.Level1)
+HWTEST_F(BlankPatternTestNg, BlankPatternTest005, TestSize.Level1)
 {
     BlankView blank;
     Dimension blankMin;
-    PaddingProperty noPadding;
 
-    auto rowFrameNode = FrameNode::CreateFrameNode(
-        V2::BADGE_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
-    EXPECT_FALSE(rowFrameNode == nullptr);
+    auto rowFrameNode =
+        FrameNode::CreateFrameNode(V2::BADGE_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    EXPECT_NE(rowFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    EXPECT_FALSE(geometryNode == nullptr);
+    EXPECT_NE(geometryNode, nullptr);
     RefPtr<LayoutWrapper> layoutWrapper =
         AceType::MakeRefPtr<LayoutWrapper>(rowFrameNode, geometryNode, rowFrameNode->GetLayoutProperty());
     auto rowLayoutPattern = rowFrameNode->GetPattern<LinearLayoutPattern>();
-    EXPECT_FALSE(rowLayoutPattern == nullptr);
+    EXPECT_NE(rowLayoutPattern, nullptr);
     auto rowLayoutProperty = rowLayoutPattern->GetLayoutProperty<LinearLayoutProperty>();
-    EXPECT_FALSE(rowLayoutProperty == nullptr);
+    EXPECT_NE(rowLayoutProperty, nullptr);
     rowLayoutProperty->UpdateFlexDirection(FlexDirection::ROW);
     rowLayoutProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
     auto rowLayoutAlgorithm = rowLayoutPattern->CreateLayoutAlgorithm();
-    EXPECT_FALSE(rowLayoutAlgorithm == nullptr);
+    EXPECT_NE(rowLayoutAlgorithm, nullptr);
     layoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(rowLayoutAlgorithm));
     layoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(RK356_WIDTH), CalcLength(ROW_HEIGHT)));
+        CalcSize(CalcLength(FULL_SCREEN_WIDTH), CalcLength(ROW_HEIGHT)));
     LayoutConstraintF parentLayoutConstraint;
     parentLayoutConstraint.maxSize = CONTAINER_SIZE;
     parentLayoutConstraint.percentReference = CONTAINER_SIZE;
 
-    noPadding.left = CalcLength(NOPADDING);
-    noPadding.right = CalcLength(NOPADDING);
-    noPadding.top = CalcLength(NOPADDING);
-    noPadding.bottom = CalcLength(NOPADDING);
+    PaddingProperty noPadding = CreatePadding(ZERO, ZERO, ZERO, ZERO);
     layoutWrapper->GetLayoutProperty()->UpdatePadding(noPadding);
     layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
     layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
@@ -363,7 +529,7 @@ HWTEST_F(BlankPatternTestNg, BlankFrameNodeCreator006, TestSize.Level1)
     blankMin.SetValue(10);
     blank.SetBlankMin(blankMin);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(frameNode == nullptr);
+    EXPECT_NE(frameNode, nullptr);
     RefPtr<GeometryNode> firstGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     RefPtr<LayoutWrapper> firstLayoutWrapper =
         AceType::MakeRefPtr<LayoutWrapper>(frameNode, firstGeometryNode, frameNode->GetLayoutProperty());
@@ -372,7 +538,7 @@ HWTEST_F(BlankPatternTestNg, BlankFrameNodeCreator006, TestSize.Level1)
         CalcSize(CalcLength(SMALL_ITEM_WIDTH), CalcLength(SMALL_ITEM_HEIGHT)));
     firstLayoutWrapper->GetLayoutProperty()->UpdatePadding(noPadding);
     auto blankLayoutAlgorithm = frameNode->GetPattern<BlankPattern>()->CreateLayoutAlgorithm();
-    EXPECT_FALSE(blankLayoutAlgorithm == nullptr);
+    EXPECT_NE(blankLayoutAlgorithm, nullptr);
     firstLayoutWrapper->SetLayoutAlgorithm(
         AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(blankLayoutAlgorithm));
     rowFrameNode->AddChild(frameNode);
@@ -380,48 +546,43 @@ HWTEST_F(BlankPatternTestNg, BlankFrameNodeCreator006, TestSize.Level1)
 
     frameNode->GetPattern<BlankPattern>()->OnMountToParentDone();
     auto parent = frameNode->GetParent();
-    EXPECT_TRUE(parent->GetTag() == V2::BADGE_ETS_TAG);
+    EXPECT_EQ(parent->GetTag(), V2::BADGE_ETS_TAG);
 }
 
 /**
- * @tc.name: BlankFrameNodeCreator007
+ * @tc.name: BlankPatternTest006
  * @tc.desc: Test invalid flexDirection of Blank.
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(BlankPatternTestNg, BlankFrameNodeCreator007, TestSize.Level1)
+HWTEST_F(BlankPatternTestNg, BlankPatternTest006, TestSize.Level1)
 {
     BlankView blank;
     Dimension blankMin;
-    PaddingProperty noPadding;
 
-    auto rowFrameNode = FrameNode::CreateFrameNode(
-        V2::FLEX_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
-    EXPECT_FALSE(rowFrameNode == nullptr);
+    auto rowFrameNode =
+        FrameNode::CreateFrameNode(V2::FLEX_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    EXPECT_NE(rowFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    EXPECT_FALSE(geometryNode == nullptr);
+    EXPECT_NE(geometryNode, nullptr);
     RefPtr<LayoutWrapper> layoutWrapper =
         AceType::MakeRefPtr<LayoutWrapper>(rowFrameNode, geometryNode, rowFrameNode->GetLayoutProperty());
     auto rowLayoutPattern = rowFrameNode->GetPattern<LinearLayoutPattern>();
-    EXPECT_FALSE(rowLayoutPattern == nullptr);
+    EXPECT_NE(rowLayoutPattern, nullptr);
     auto rowLayoutProperty = rowLayoutPattern->GetLayoutProperty<LinearLayoutProperty>();
-    EXPECT_FALSE(rowLayoutProperty == nullptr);
+    EXPECT_NE(rowLayoutProperty, nullptr);
     rowLayoutProperty->UpdateFlexDirection(FlexDirection::COLUMN);
     rowLayoutProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
     auto rowLayoutAlgorithm = rowLayoutPattern->CreateLayoutAlgorithm();
-    EXPECT_FALSE(rowLayoutAlgorithm == nullptr);
-    layoutWrapper->SetLayoutAlgorithm(
-        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(rowLayoutAlgorithm));
+    EXPECT_NE(rowLayoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(rowLayoutAlgorithm));
     layoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(RK356_WIDTH), CalcLength(ROW_HEIGHT)));
+        CalcSize(CalcLength(FULL_SCREEN_WIDTH), CalcLength(ROW_HEIGHT)));
     LayoutConstraintF parentLayoutConstraint;
     parentLayoutConstraint.maxSize = CONTAINER_SIZE;
     parentLayoutConstraint.percentReference = CONTAINER_SIZE;
 
-    noPadding.left = CalcLength(NOPADDING);
-    noPadding.right = CalcLength(NOPADDING);
-    noPadding.top = CalcLength(NOPADDING);
-    noPadding.bottom = CalcLength(NOPADDING);
+    PaddingProperty noPadding = CreatePadding(ZERO, ZERO, ZERO, ZERO);
     layoutWrapper->GetLayoutProperty()->UpdatePadding(noPadding);
     layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
     layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
@@ -434,7 +595,7 @@ HWTEST_F(BlankPatternTestNg, BlankFrameNodeCreator007, TestSize.Level1)
     blankMin.SetValue(10);
     blank.SetBlankMin(blankMin);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(frameNode == nullptr);
+    EXPECT_NE(frameNode, nullptr);
     RefPtr<GeometryNode> firstGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     RefPtr<LayoutWrapper> firstLayoutWrapper =
         AceType::MakeRefPtr<LayoutWrapper>(frameNode, firstGeometryNode, frameNode->GetLayoutProperty());
@@ -443,7 +604,7 @@ HWTEST_F(BlankPatternTestNg, BlankFrameNodeCreator007, TestSize.Level1)
         CalcSize(CalcLength(SMALL_ITEM_WIDTH), CalcLength(SMALL_ITEM_HEIGHT)));
     firstLayoutWrapper->GetLayoutProperty()->UpdatePadding(noPadding);
     auto blankLayoutAlgorithm = frameNode->GetPattern<BlankPattern>()->CreateLayoutAlgorithm();
-    EXPECT_FALSE(blankLayoutAlgorithm == nullptr);
+    EXPECT_NE(blankLayoutAlgorithm, nullptr);
     firstLayoutWrapper->SetLayoutAlgorithm(
         AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(blankLayoutAlgorithm));
     rowFrameNode->AddChild(frameNode);
@@ -451,25 +612,25 @@ HWTEST_F(BlankPatternTestNg, BlankFrameNodeCreator007, TestSize.Level1)
 
     frameNode->GetPattern<BlankPattern>()->OnMountToParentDone();
     auto parent = frameNode->GetParent();
-    EXPECT_TRUE(parent->GetTag() == V2::FLEX_ETS_TAG);
+    EXPECT_EQ(parent->GetTag(), V2::FLEX_ETS_TAG);
 }
 
 /**
- * @tc.name: BlankFrameNodeCreator008
+ * @tc.name: BlankPatternTest007
  * @tc.desc: Test invalid minsize of Blank.
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(BlankPatternTestNg, BlankFrameNodeCreator008, TestSize.Level1)
+HWTEST_F(BlankPatternTestNg, BlankPatternTest007, TestSize.Level1)
 {
     BlankView blank;
     blank.Create();
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(frameNode == nullptr);
+    EXPECT_NE(frameNode, nullptr);
     auto blankLayoutProperty = frameNode->GetLayoutProperty<BlankLayoutProperty>();
-    EXPECT_FALSE(blankLayoutProperty == nullptr);
+    EXPECT_NE(blankLayoutProperty, nullptr);
     frameNode->GetPattern<BlankPattern>()->OnMountToParentDone();
-    EXPECT_FALSE(blankLayoutProperty->HasMinSize() == true);
+    EXPECT_NE(blankLayoutProperty->HasMinSize(), true);
 }
 
 /**
@@ -481,17 +642,13 @@ HWTEST_F(BlankPatternTestNg, BlankFrameNodeCreator008, TestSize.Level1)
 HWTEST_F(BlankPatternTestNg, ToJsonValue001, TestSize.Level1)
 {
     BlankView blank;
-    Dimension blankMin;
     blank.Create();
-    blankMin.SetValue(10);
-    blank.SetBlankMin(blankMin);
-    blank.SetBlankMin(blankMin);
-    EXPECT_EQ(blankMin.Value(), BLANK_MIN);
+    blank.SetBlankMin(BLANK_MIN);
 
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(frameNode == nullptr);
+    EXPECT_NE(frameNode, nullptr);
     auto blankLayoutProperty = frameNode->GetLayoutProperty<BlankLayoutProperty>();
-    EXPECT_FALSE(blankLayoutProperty == nullptr);
+    EXPECT_NE(blankLayoutProperty, nullptr);
 
     std::string colorString = frameNode->GetPattern<BlankPattern>()->GetColorString();
     EXPECT_EQ(colorString.c_str(), COLOR_WHITE);

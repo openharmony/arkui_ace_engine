@@ -27,7 +27,7 @@ void MarqueeModelNG::Create()
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::MARQUEE_COMPONENT_TAG, nodeId, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
+        V2::MARQUEE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
     if (frameNode->GetChildren().empty()) {
         auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<TextPattern>());
         auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
@@ -45,7 +45,7 @@ void MarqueeModelNG::Create()
 
 void MarqueeModelNG::SetValue(const std::string& value)
 {
-    auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     ACE_DCHECK(!frameNode->GetChildren().empty());
     auto textChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
@@ -84,7 +84,7 @@ void MarqueeModelNG::SetAllowScale(bool allowScale)
 
 void MarqueeModelNG::SetTextColor(const Color& textColor)
 {
-    auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     ACE_DCHECK(!frameNode->GetChildren().empty());
     auto textChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
@@ -92,6 +92,8 @@ void MarqueeModelNG::SetTextColor(const Color& textColor)
     auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateTextColor(textColor);
+    auto textRenderContext = textChild->GetRenderContext();
+    textRenderContext->UpdateForegroundColor(textColor);
 }
 
 void MarqueeModelNG::SetFontSize(const Dimension& fontSize)

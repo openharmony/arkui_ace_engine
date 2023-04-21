@@ -25,8 +25,8 @@
 #include "core/common/container.h"
 #include "core/common/frontend.h"
 #include "core/common/js_message_dispatcher.h"
-#include "frameworks/bridge/plugin_frontend/plugin_frontend_delegate.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
+#include "frameworks/bridge/plugin_frontend/plugin_frontend_delegate.h"
 
 namespace OHOS::Ace {
 // PluginFrontend is the unique entrance from ACE backend to frontend.
@@ -40,6 +40,8 @@ class PluginFrontend : public Frontend {
     DECLARE_ACE_TYPE(PluginFrontend, Frontend);
 
 public:
+    using onPluginUpdateWithValueParams = std::function<void(const std::string&)>;
+
     PluginFrontend() = default;
     ~PluginFrontend() override;
 
@@ -180,6 +182,20 @@ public:
 
     void UpdatePlugin(const std::string& content);
 
+    void SetDeclarativeOnUpdateWithValueParamsCallback(onPluginUpdateWithValueParams&& callback)
+    {
+        if (delegate_) {
+            delegate_->SetDeclarativeOnUpdateWithValueParamsCallback(std::move(callback));
+        }
+    }
+
+    void FireDeclarativeOnUpdateWithValueParamsCallback(const std::string& params) const
+    {
+        if (delegate_) {
+            delegate_->FireDeclarativeOnUpdateWithValueParamsCallback(params);
+        }
+    }
+
 private:
     void InitializeFrontendDelegate(const RefPtr<TaskExecutor>& taskExecutor);
 
@@ -196,8 +212,7 @@ private:
 
 class PluginEventHandler : public AceEventHandler {
 public:
-    explicit PluginEventHandler(const RefPtr<Framework::PluginFrontendDelegate>& delegate)
-        : delegate_(delegate)
+    explicit PluginEventHandler(const RefPtr<Framework::PluginFrontendDelegate>& delegate) : delegate_(delegate)
     {
         ACE_DCHECK(delegate_);
     }

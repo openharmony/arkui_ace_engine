@@ -45,10 +45,25 @@ public:
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-        host->GetRenderContext()->UpdateBackgroundColor(PipelineContext::GetCurrentContext()->GetAppBgColor());
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        host->GetRenderContext()->UpdateBackgroundColor(pipeline->GetAppBgColor());
+    }
+
+    void OnRebuildFrame() override
+    {
+        if (onRebuildFrameCallback_) {
+            onRebuildFrameCallback_();
+        }
+    }
+
+    void SetOnRebuildFrameCallback(std::function<void()>&& callback)
+    {
+        onRebuildFrameCallback_ = std::move(callback);
     }
 
 private:
+    std::function<void()> onRebuildFrameCallback_;
     int32_t currentPageIndex_ = 0;
     friend class StageManager;
 

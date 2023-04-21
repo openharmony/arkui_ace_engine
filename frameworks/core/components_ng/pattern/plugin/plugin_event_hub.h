@@ -22,7 +22,6 @@
 #include "core/components_ng/event/event_hub.h"
 
 namespace OHOS::Ace::NG {
-
 using PluginCallback = std::function<void(const std::string&)>;
 
 class PluginEventHub : public EventHub {
@@ -59,7 +58,8 @@ public:
 private:
     PluginCallback onError_;
     PluginCallback OnComplete_;
-};
 
+    ACE_DISALLOW_COPY_AND_MOVE(PluginEventHub);
+};
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PLUGIN_PLUGIN_EVENT_HUB_H

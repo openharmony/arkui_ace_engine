@@ -42,7 +42,7 @@ public:
     using RenderNodeAnimationCallback = std::function<void()>;
 
     void SetContextAndCallbacks(
-      const WeakPtr<PipelineContext>& context,
+      const WeakPtr<PipelineBase>& context,
       RenderNodeAnimationCallback&& callback)
     {
         x_.SetContextAndCallback(context, std::forward<RenderNodeAnimationCallback>(callback));

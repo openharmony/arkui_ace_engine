@@ -36,6 +36,7 @@ public:
 
     RefPtr<DragDropProxy> CreateAndShowDragWindow(const RefPtr<PixelMap>& pixelMap, const GestureEvent& info);
     RefPtr<DragDropProxy> CreateAndShowDragWindow(const RefPtr<UINode>& customNode, const GestureEvent& info);
+    RefPtr<DragDropProxy> CreateTextDragDropProxy();
 
     void AddDragFrameNode(const WeakPtr<FrameNode>& dragFrameNode)
     {
@@ -52,10 +53,16 @@ public:
         listDragFrameNodes_.insert(dragFrameNode);
     }
 
+    void AddTextFieldDragFrameNode(const WeakPtr<FrameNode>& dragFrameNode)
+    {
+        textFieldDragFrameNodes_.insert(dragFrameNode);
+    }
+
     void UpdateDragWindowPosition(int32_t globalX, int32_t globalY);
     void OnDragStart(float globalX, float globalY, const RefPtr<FrameNode>& frameNode);
     void OnDragMove(float globalX, float globalY, const std::string& extraInfo);
     void OnDragEnd(float globalX, float globalY, const std::string& extraInfo);
+    void OnTextDragEnd(float globalX, float globalY, const std::string& extraInfo);
     void onDragCancel();
     void OnItemDragStart(float globalX, float globalY, const RefPtr<FrameNode>& frameNode);
     void OnItemDragMove(float globalX, float globalY, int32_t draggedIndex, DragType dragType);
@@ -65,7 +72,21 @@ public:
     void GetExtraInfoFromClipboard(std::string& extraInfo);
     void RestoreClipboardData();
     void DestroyDragWindow();
-
+#ifdef ENABLE_DRAG_FRAMEWORK
+    void UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode);
+    void RequireSummary();
+    void ClearSummary();
+    void SetSummaryMap(const std::map<std::string, int64_t>& summaryMap)
+    {
+        summaryMap_ = summaryMap;
+    }
+    RefPtr<DragDropProxy> CreateFrameworkDragDropProxy();
+    void UpdatePixelMapPosition(int32_t globalX, int32_t globalY);
+    std::string GetExtraInfo();
+    void SetExtraInfo(const std::string& extraInfo);
+    void ClearExtraInfo();
+#endif // ENABLE_DRAG_FRAMEWORK
+    void UpdateDragEvent(RefPtr<OHOS::Ace::DragEvent>& event, float globalX, float globalY);
     bool CheckDragDropProxy(int64_t id) const;
 
     bool IsDragged() const
@@ -75,20 +96,26 @@ public:
 
 private:
     RefPtr<FrameNode> FindDragFrameNodeByPosition(float globalX, float globalY, DragType dragType);
-    void FireOnDragEvent(const RefPtr<FrameNode>& frameNode, const Point& point,
-        DragEventType type, const std::string& extraInfo);
+    std::map<int32_t, RefPtr<FrameNode>> FindDragFrameNodeMapByPosition(
+        float globalX, float globalY, DragType dragType);
+    void FireOnDragEvent(
+        const RefPtr<FrameNode>& frameNode, const Point& point, DragEventType type, const std::string& extraInfo);
     void FireOnItemDragEvent(const RefPtr<FrameNode>& frameNode, DragType dragType,
-        const OHOS::Ace::ItemDragInfo& itemDragInfo, DragEventType type,
-        int32_t draggedIndex, int32_t insertIndex = 0);
+        const ItemDragInfo& itemDragInfo, DragEventType type, int32_t draggedIndex, int32_t insertIndex = 0);
+    bool FireOnItemDropEvent(const RefPtr<FrameNode>& frameNode, DragType dragType,
+        const ItemDragInfo& itemDragInfo, int32_t draggedIndex, int32_t insertIndex, bool isSuccess);
+    int32_t GetItemIndex(const RefPtr<FrameNode>& frameNode, DragType dragType, float globalX, float globalY);
     void CreateDragWindow(const GestureEvent& info, uint32_t width, uint32_t height);
     RefPtr<FrameNode> CreateDragRootNode(const RefPtr<UINode>& customNode);
 
     std::set<WeakPtr<FrameNode>> dragFrameNodes_;
     std::set<WeakPtr<FrameNode>> gridDragFrameNodes_;
     std::set<WeakPtr<FrameNode>> listDragFrameNodes_;
+    std::set<WeakPtr<FrameNode>> textFieldDragFrameNodes_;
     RefPtr<DragWindow> dragWindow_;
     RefPtr<FrameNode> draggedFrameNode_;
     RefPtr<FrameNode> preTargetFrameNode_;
+    RefPtr<FrameNode> draggedGridFrameNode_;
     RefPtr<FrameNode> preGridTargetFrameNode_;
     RefPtr<FrameNode> dragWindowRootNode_;
     RefPtr<Clipboard> clipboard_;
@@ -96,7 +123,10 @@ private:
     std::function<void(const std::string&)> getDataCallback_ = nullptr;
     std::function<void(const std::string&)> deleteDataCallback_ = nullptr;
     std::string extraInfo_;
-
+    std::unique_ptr<JsonValue> newData_ = nullptr;
+#ifdef ENABLE_DRAG_FRAMEWORK
+    std::map<std::string, int64_t> summaryMap_;
+#endif // ENABLE_DRAG_FRAMEWORK
     int64_t currentId_ = -1;
 
     bool isDragged_ = false;

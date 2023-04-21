@@ -526,7 +526,7 @@ Offset RenderTransform::GetGlobalOffsetExternal() const
     auto offset = renderNode ? GetPosition() + renderNode->GetGlobalOffsetExternal() : GetPosition();
 
     // transformPaint_[12] is translation of x,transformPaint_[13] is translation of y.
-    offset += Offset(transformPaint_[12], transformPaint_[13]);
+    offset += Offset(transform_[12], transform_[13]);
     return offset;
 }
 

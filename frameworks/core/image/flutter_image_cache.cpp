@@ -15,7 +15,7 @@
 
 #include "core/image/flutter_image_cache.h"
 
-#include "third_party/skia/include/core/SkGraphics.h"
+#include "include/core/SkGraphics.h"
 
 #include "core/components_ng/image_provider/image_object.h"
 
@@ -28,7 +28,7 @@ RefPtr<ImageCache> ImageCache::Create()
 
 void FlutterImageCache::Clear()
 {
-    std::scoped_lock clearLock(cacheListMutex_, imageCacheMutex_, dataCacheListMutex_, imageDataCacheMutex_);
+    std::scoped_lock clearLock(imageCacheMutex_, dataCacheListMutex_, imageDataCacheMutex_);
     cacheList_.clear();
     imageCache_.clear();
     dataCacheList_.clear();

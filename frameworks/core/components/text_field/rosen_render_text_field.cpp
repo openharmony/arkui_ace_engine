@@ -17,12 +17,11 @@
 
 #include <cmath>
 
-#include "flutter/lib/ui/text/font_collection.h"
-#include "flutter/lib/ui/text/paragraph_builder.h"
-#include "flutter/third_party/icu/source/common/unicode/uchar.h"
-#include "flutter/third_party/txt/src/txt/paragraph_txt.h"
+#include "txt/paragraph_builder.h"
+#include "txt/paragraph_txt.h"
 #include "render_service_client/core/ui/rs_node.h"
-#include "third_party/skia/include/effects/SkGradientShader.h"
+#include "include/effects/SkGradientShader.h"
+#include "unicode/uchar.h"
 
 #include "base/i18n/localization.h"
 #include "base/utils/string_utils.h"
@@ -44,7 +43,6 @@ namespace {
 
 constexpr char16_t NEWLINE_CODE = u'\n';
 // pixel for how far the caret to the top of paint rect. Sometimes may leave some space for the floor.
-constexpr Dimension INLINE_STYLE_CORNER_RADIUS = 4.0_vp;
 constexpr Color INLINE_STYLE_SELECTED_COLOR = Color(0x1A0A59F7);
 constexpr double CARET_HEIGHT_OFFSET = -2.0;
 constexpr Dimension CURSOR_WIDTH = 1.5_vp;
@@ -74,10 +72,9 @@ Rect RosenRenderTextField::GetInnerRect(const Decoration& decoration, const Rect
         rightWidth += paddingHorizonForSearch_;
     }
     double iconSpacing = iconImage_ ? NormalizeToPx(iconHotZoneSizeInDimension_) : 0.0;
-    double passwordIconSpacing =
-        (keyboard_ == TextInputType::VISIBLE_PASSWORD && IsSelectiveDevice())
-            ? NormalizeToPx(iconHotZoneSizeInDimension_)
-            : 0.0;
+    double passwordIconSpacing = (keyboard_ == TextInputType::VISIBLE_PASSWORD && IsSelectiveDevice())
+                                     ? NormalizeToPx(iconHotZoneSizeInDimension_)
+                                     : 0.0;
     if (textDirection_ == TextDirection::RTL) {
         return Rect(outer.Left() + leftWidth + passwordIconSpacing, outer.Top() + topWidth,
             outer.Right() - rightWidth - leftWidth - iconSpacing - passwordIconSpacing,
@@ -259,8 +256,7 @@ void RosenRenderTextField::PaintSelection(SkCanvas* canvas) const
         return;
     }
     using namespace Constants;
-
-    if (!paragraph_ || (canvas == nullptr)) {
+    if (!paragraph_ || (canvas == nullptr) || !canPaintSelection_) {
         return;
     }
     const auto& selection = GetEditingValue().selection;
@@ -293,16 +289,14 @@ void RosenRenderTextField::PaintSelection(SkCanvas* canvas) const
                 LOGE("Unknown textinput style");
                 break;
         }
-        auto rect = SkRect::MakeLTRB(selectionRect.Right(), selectionRect.Top(), selectionRect.Left(),
-            selectionRect.Bottom());
-        
+        auto rect =
+            SkRect::MakeLTRB(selectionRect.Right(), selectionRect.Top(), selectionRect.Left(), selectionRect.Bottom());
+
         if (box.direction == txt::TextDirection::ltr) {
-            rect = SkRect::MakeLTRB(selectionRect.Left(), selectionRect.Top(), selectionRect.Right(),
-                selectionRect.Bottom());
+            rect = SkRect::MakeLTRB(
+                selectionRect.Left(), selectionRect.Top(), selectionRect.Right(), selectionRect.Bottom());
         }
-        SkRRect rRect = SkRRect::MakeRectXY(rect, NormalizeToPx(INLINE_STYLE_CORNER_RADIUS),
-            NormalizeToPx(INLINE_STYLE_CORNER_RADIUS));
-        canvas->drawRRect(rRect, paint);
+        canvas->drawRect(rect, paint);
     }
     canvas->restore();
 }
@@ -419,9 +413,9 @@ void RosenRenderTextField::PaintFocus(const Offset& offset, const Size& widthHei
     paint.setAntiAlias(true);
 
     SkRect skRect = SkRect::MakeXYWH(offset.GetX() + NormalizeToPx(DEFAULT_FOCUS_BORDER_WIDTH) * HALF,
-                                     offset.GetY() + NormalizeToPx(DEFAULT_FOCUS_BORDER_WIDTH) * HALF,
-                                     widthHeight.Width() - NormalizeToPx(DEFAULT_FOCUS_BORDER_WIDTH),
-                                     widthHeight.Height() - NormalizeToPx(DEFAULT_FOCUS_BORDER_WIDTH));
+        offset.GetY() + NormalizeToPx(DEFAULT_FOCUS_BORDER_WIDTH) * HALF,
+        widthHeight.Width() - NormalizeToPx(DEFAULT_FOCUS_BORDER_WIDTH),
+        widthHeight.Height() - NormalizeToPx(DEFAULT_FOCUS_BORDER_WIDTH));
     SkRRect rrect = SkRRect::MakeEmpty();
     SkVector fRadii[4] = { { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 } };
     fRadii[SkRRect::kUpperLeft_Corner] = GetSkRadii(decoration_->GetBorder().TopLeftRadius());
@@ -474,7 +468,8 @@ void RosenRenderTextField::Paint(RenderContext& context, const Offset& offset)
     magnifierCanvas_->scale(1.0 / (viewScale * MAGNIFIER_GAIN), 1.0 / (viewScale * MAGNIFIER_GAIN));
 
     if ((SystemProperties::GetDeviceType() == DeviceType::PHONE ||
-        SystemProperties::GetDeviceType() == DeviceType::TABLET) && hasFocus_) {
+            SystemProperties::GetDeviceType() == DeviceType::TABLET) &&
+        hasFocus_) {
         PaintFocus(offset, GetPaintRect().GetSize(), context);
     }
 }
@@ -683,39 +678,7 @@ void RosenRenderTextField::ComputeOffsetAfterLayout()
             caretRect_ += ComputeVerticalOffsetForCenter(innerRect_.Height(), paragraph_->GetHeight());
         }
     }
-
-#if defined(ENABLE_STANDARD_INPUT)
-    auto globalOffset = GetGlobalOffset();
-    MiscServices::CursorInfo cursorInfo {
-        .left = caretRect_.Left() + globalOffset.GetX(),
-        .top = caretRect_.Top() + globalOffset.GetY(),
-        .width = caretRect_.Width(),
-        .height = caretRect_.Height()
-    };
-    auto context = context_.Upgrade();
-    if (!context) {
-        LOGE("context is nullptr");
-        return;
-    }
-    auto manager = context->GetTextFieldManager();
-    if (!manager) {
-        LOGE("manager is nullptr");
-        return;
-    }
-    auto textFieldManager = AceType::DynamicCast<TextFieldManager>(manager);
-    if (!textFieldManager) {
-        LOGE("textFieldmanager is nullptr");
-        return;
-    }
-    auto weakFocusedTextField = textFieldManager->GetOnFocusTextField();
-    auto focusedTextField = weakFocusedTextField.Upgrade();
-    if (focusedTextField && focusedTextField == AceType::Claim(this)) {
-        MiscServices::InputMethodController::GetInstance()->OnCursorUpdate(cursorInfo);
-        auto value = GetEditingValue();
-        MiscServices::InputMethodController::GetInstance()->OnSelectionChange(
-            StringUtils::Str8ToStr16(value.text), value.selection.GetStart(), value.selection.GetEnd());
-    }
-#endif
+    RenderTextField::UpdateCaretInfoToController();
 }
 
 Offset RosenRenderTextField::ComputeVerticalOffsetForCenter(double outerHeight, double innerHeight) const
@@ -1066,7 +1029,7 @@ Offset RosenRenderTextField::MakeEmptyOffset() const
                     return Offset::Zero();
                 }
                 case TextDirection::LTR:
-                default:{
+                default: {
                     return Offset(innerRect_.Width(), 0.0);
                 }
             }
@@ -1079,7 +1042,7 @@ Offset RosenRenderTextField::MakeEmptyOffset() const
                     return Offset(innerRect_.Width(), 0.0);
                 }
                 case TextDirection::LTR:
-                default:{
+                default: {
                     return Offset::Zero();
                 }
             }
@@ -1130,8 +1093,10 @@ int32_t RosenRenderTextField::GetCursorPositionForMoveUp()
         return 0;
     }
     double verticalOffset = -textOffsetForShowCaret_.GetY() - PreferredLineHeight();
-    return static_cast<int32_t>(paragraph_->GetGlyphPositionAtCoordinateWithCluster(
-        caretRect_.Left() - innerRect_.Left(), caretRect_.Top() + verticalOffset).position);
+    return static_cast<int32_t>(paragraph_
+                                    ->GetGlyphPositionAtCoordinateWithCluster(
+                                        caretRect_.Left() - innerRect_.Left(), caretRect_.Top() + verticalOffset)
+                                    .position);
 }
 
 int32_t RosenRenderTextField::GetCursorPositionForMoveDown()
@@ -1140,8 +1105,10 @@ int32_t RosenRenderTextField::GetCursorPositionForMoveDown()
         return 0;
     }
     double verticalOffset = -textOffsetForShowCaret_.GetY() + PreferredLineHeight();
-    return static_cast<int32_t>(paragraph_->GetGlyphPositionAtCoordinateWithCluster(
-        caretRect_.Left() - innerRect_.Left(), caretRect_.Top() + verticalOffset).position);
+    return static_cast<int32_t>(paragraph_
+                                    ->GetGlyphPositionAtCoordinateWithCluster(
+                                        caretRect_.Left() - innerRect_.Left(), caretRect_.Top() + verticalOffset)
+                                    .position);
 }
 
 int32_t RosenRenderTextField::GetCursorPositionForClick(const Offset& offset)
@@ -1174,9 +1141,9 @@ int32_t RosenRenderTextField::AdjustCursorAndSelection(int32_t currentCursorPosi
     double leftBoundary = GetBoundaryOfParagraph(true);
     double rightBoundary = GetBoundaryOfParagraph(false);
     if ((realTextDirection_ == TextDirection::LTR &&
-        (NearEqual(tempRect.Left(), rightBoundary) || NearEqual(tempRect.Right(), rightBoundary))) ||
+            (NearEqual(tempRect.Left(), rightBoundary) || NearEqual(tempRect.Right(), rightBoundary))) ||
         (realTextDirection_ == TextDirection::RTL &&
-        (NearEqual(tempRect.Left(), leftBoundary) || NearEqual(tempRect.Right(), leftBoundary)))) {
+            (NearEqual(tempRect.Left(), leftBoundary) || NearEqual(tempRect.Right(), leftBoundary)))) {
         result = maxPosition;
         cursorPositionType_ = CursorPositionType::END;
         return result;

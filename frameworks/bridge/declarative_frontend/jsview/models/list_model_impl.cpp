@@ -144,6 +144,10 @@ void ListModelImpl::SetOnScrollBegin(OnScrollBeginEvent&& onScrollBegin)
     JSViewSetProperty(&V2::ListComponent::SetOnScrollBegin, std::move(onScrollBegin));
 }
 
+void ListModelImpl::SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& onScrollFrameBegin)
+{
+}
+
 void ListModelImpl::SetOnScrollStop(OnScrollStopEvent&& onScrollStop)
 {
     JSViewSetProperty(&V2::ListComponent::SetOnScrollStop, std::move(onScrollStop));

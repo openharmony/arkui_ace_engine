@@ -44,8 +44,8 @@ struct FlexItemProperty {
         static const char* ITEM_ALIGN[] = { "ItemAlign.Auto", "ItemAlign.Start", "ItemAlign.Center", "ItemAlign.End",
             "ItemAlign.Stretch", "ItemAlign.Baseline" };
         json->Put("flexBasis", propFlexBasis.has_value() ? propFlexBasis.value().ToString().c_str() : "auto");
-        json->Put("flexGrow", propFlexGrow.value_or(0.0));
-        json->Put("flexShrink", propFlexShrink.value_or(1));
+        json->Put("flexGrow", round(static_cast<double>(propFlexGrow.value_or(0.0)) * 100) / 100);
+        json->Put("flexShrink", round(static_cast<double>(propFlexShrink.value_or(1)) * 100) / 100);
         json->Put("alignSelf", ITEM_ALIGN[static_cast<int32_t>(propAlignSelf.value_or(FlexAlign::AUTO))]);
         json->Put("displayPriority", propDisplayIndex.value_or(1));
     }
@@ -66,16 +66,16 @@ struct FlexItemProperty {
     {
         static const std::unordered_map<AlignDirection, void (*)(float, FlexItemProperty&)> operators = {
             { AlignDirection::LEFT,
-                [](float inMapvalue, FlexItemProperty& item) { item.UpdateAlignLeft(inMapvalue); } },
+                [](float inMapValue, FlexItemProperty& item) { item.UpdateAlignLeft(inMapValue); } },
             { AlignDirection::RIGHT,
-                [](float inMapvalue, FlexItemProperty& item) { item.UpdateAlignRight(inMapvalue); } },
+                [](float inMapValue, FlexItemProperty& item) { item.UpdateAlignRight(inMapValue); } },
             { AlignDirection::MIDDLE,
-                [](float inMapvalue, FlexItemProperty& item) { item.UpdateAlignMiddle(inMapvalue); } },
-            { AlignDirection::TOP, [](float inMapvalue, FlexItemProperty& item) { item.UpdateAlignTop(inMapvalue); } },
+                [](float inMapValue, FlexItemProperty& item) { item.UpdateAlignMiddle(inMapValue); } },
+            { AlignDirection::TOP, [](float inMapValue, FlexItemProperty& item) { item.UpdateAlignTop(inMapValue); } },
             { AlignDirection::BOTTOM,
-                [](float inMapvalue, FlexItemProperty& item) { item.UpdateAlignBottom(inMapvalue); } },
+                [](float inMapValue, FlexItemProperty& item) { item.UpdateAlignBottom(inMapValue); } },
             { AlignDirection::CENTER,
-                [](float inMapvalue, FlexItemProperty& item) { item.UpdateAlignCenter(inMapvalue); } },
+                [](float inMapValue, FlexItemProperty& item) { item.UpdateAlignCenter(inMapValue); } },
         };
         auto operatorIter = operators.find(alignDirection);
         if (operatorIter != operators.end()) {

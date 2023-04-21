@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,14 +19,13 @@
 
 namespace OHOS::Ace {
 namespace {
-
 constexpr int32_t ORIENTATION_PORTRAIT = 0;
 constexpr int32_t ORIENTATION_LANDSCAPE = 1;
-const char PROPERTY_DEVICE_TYPE_PHONE[] = "phone";
-const char PROPERTY_DEVICE_TYPE_TV[] = "tv";
-const char PROPERTY_DEVICE_TYPE_TABLET[] = "tablet";
-const char PROPERTY_DEVICE_TYPE_WEARABLE[] = "wearable";
-const char PROPERTY_DEVICE_TYPE_CAR[] = "car";
+constexpr char PROPERTY_DEVICE_TYPE_PHONE[] = "phone";
+constexpr char PROPERTY_DEVICE_TYPE_TV[] = "tv";
+constexpr char PROPERTY_DEVICE_TYPE_TABLET[] = "tablet";
+constexpr char PROPERTY_DEVICE_TYPE_WEARABLE[] = "wearable";
+constexpr char PROPERTY_DEVICE_TYPE_CAR[] = "car";
 
 static constexpr char UNDEFINED_PARAM[] = "undefined parameter";
 
@@ -36,8 +35,46 @@ void Swap(int32_t& deviceWidth, int32_t& deviceHeight)
     deviceWidth = deviceHeight;
     deviceHeight = temp;
 }
-
 } // namespace
+
+bool SystemProperties::traceEnabled_ = false;
+bool SystemProperties::svgTraceEnable_ = false;
+bool SystemProperties::accessibilityEnabled_ = false;
+bool SystemProperties::isRound_ = false;
+bool SystemProperties::isDeviceAccess_ = false;
+int32_t SystemProperties::deviceWidth_ = 0;
+int32_t SystemProperties::deviceHeight_ = 0;
+double SystemProperties::resolution_ = 1.0;
+DeviceType SystemProperties::deviceType_ { DeviceType::PHONE };
+DeviceOrientation SystemProperties::orientation_ { DeviceOrientation::PORTRAIT };
+std::string SystemProperties::brand_ = UNDEFINED_PARAM;
+std::string SystemProperties::manufacturer_ = UNDEFINED_PARAM;
+std::string SystemProperties::model_ = UNDEFINED_PARAM;
+std::string SystemProperties::product_ = UNDEFINED_PARAM;
+std::string SystemProperties::apiVersion_ = "9";
+std::string SystemProperties::releaseType_ = UNDEFINED_PARAM;
+std::string SystemProperties::paramDeviceType_ = UNDEFINED_PARAM;
+int32_t SystemProperties::mcc_ = MCC_UNDEFINED;
+int32_t SystemProperties::mnc_ = MNC_UNDEFINED;
+ColorMode SystemProperties::colorMode_ = ColorMode::LIGHT;
+ScreenShape SystemProperties::screenShape_ { ScreenShape::NOT_ROUND };
+LongScreenType SystemProperties::LongScreen_ { LongScreenType::NOT_LONG };
+bool SystemProperties::unZipHap_ = true;
+bool SystemProperties::windowAnimationEnabled_ = false;
+bool SystemProperties::debugBoundaryEnabled_ = false;
+bool SystemProperties::gpuUploadEnabled_ = false;
+bool SystemProperties::isHookModeEnabled_ = false;
+bool SystemProperties::astcEnabled_ = false;
+int SystemProperties::astcMax_ = 0;
+int SystemProperties::astcPsnr_ = 0;
+bool SystemProperties::extSurfaceEnabled_ = false;
+uint32_t SystemProperties::dumpFrameCount_ = 0;
+PerformancePtr SystemProperties::performanceProps_ = nullptr;
+#ifndef ENABLE_ROSEN_BACKEND
+bool SystemProperties::rosenBackendEnabled_ = false;
+#else
+bool SystemProperties::rosenBackendEnabled_ = true;
+#endif
 
 void SystemProperties::InitDeviceType(DeviceType type)
 {
@@ -60,40 +97,9 @@ void SystemProperties::InitDeviceType(DeviceType type)
     }
 }
 
-bool SystemProperties::traceEnabled_ = false;
-bool SystemProperties::accessibilityEnabled_ = false;
-bool SystemProperties::isRound_ = false;
-bool SystemProperties::isDeviceAccess_ = false;
-int32_t SystemProperties::deviceWidth_ = 0;
-int32_t SystemProperties::deviceHeight_ = 0;
-double SystemProperties::resolution_ = 1.0;
-DeviceType SystemProperties::deviceType_ { DeviceType::PHONE };
-DeviceOrientation SystemProperties::orientation_ { DeviceOrientation::PORTRAIT };
-std::string SystemProperties::brand_ = UNDEFINED_PARAM;
-std::string SystemProperties::manufacturer_ = UNDEFINED_PARAM;
-std::string SystemProperties::model_ = UNDEFINED_PARAM;
-std::string SystemProperties::product_ = UNDEFINED_PARAM;
-std::string SystemProperties::apiVersion_ = "9";
-std::string SystemProperties::releaseType_ = UNDEFINED_PARAM;
-std::string SystemProperties::paramDeviceType_ = UNDEFINED_PARAM;
-int32_t SystemProperties::mcc_ = MCC_UNDEFINED;
-int32_t SystemProperties::mnc_ = MNC_UNDEFINED;
-ColorMode SystemProperties::colorMode_ = ColorMode::LIGHT;
-ScreenShape SystemProperties::screenShape_ { ScreenShape::NOT_ROUND };
-LongScreenType SystemProperties::LongScreen_ { LongScreenType::NOT_LONG };
-bool SystemProperties::unZipHap_ = true;
-bool SystemProperties::rosenBackendEnabled_ = false;
-bool SystemProperties::windowAnimationEnabled_ = false;
-bool SystemProperties::debugBoundaryEnabled_ = false;
-bool SystemProperties::gpuUploadEnabled_ = false;
-bool SystemProperties::isHookModeEnabled_ = false;
-bool SystemProperties::astcEnabled_ = false;
-int SystemProperties::astcMax_ = 0;
-int SystemProperties::astcPsnr_ = 0;
-
-bool SystemProperties::GetDebugBoundaryEnabled()
+uint32_t SystemProperties::GetPerformanceParameterWithType(PerformanceParameterType /* type */)
 {
-    return false;
+    return -1;
 }
 
 DeviceType SystemProperties::GetDeviceType()
@@ -181,19 +187,34 @@ std::string SystemProperties::GetRegion()
 std::string SystemProperties::GetPartialUpdatePkg()
 {
     // TODO: add support for pc preview.
-    return "";
+    return {};
 }
 
 std::string SystemProperties::GetNewPipePkg()
 {
     // TODO: add support for pc preview.
-    return "";
+    return {};
 }
 
 int32_t SystemProperties::GetSvgMode()
 {
-    // TODO: add support for pc preview.
-    return 0;
+    return 1;
 }
 
+bool SystemProperties::GetIsUseMemoryMonitor()
+{
+    return false;
+}
+
+bool SystemProperties::IsPerformanceCheckEnabled()
+{
+    return false;
+}
+
+void SystemProperties::InitPerformanceParameters() {}
+
+bool SystemProperties::IsFormAnimationLimited()
+{
+    return true;
+}
 } // namespace OHOS::Ace

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,6 +52,11 @@ public:
         ViewAbstract::SetHeight(NG::CalcLength(height));
     }
 
+    void ClearWidthOrHeight(bool isWidth) override
+    {
+        ViewAbstract::ClearWidthOrHeight(isWidth);
+    }
+
     void SetMinWidth(const Dimension& minWidth) override
     {
         ViewAbstract::SetMinWidth(NG::CalcLength(minWidth));
@@ -97,9 +102,22 @@ public:
         ViewAbstract::SetBackgroundImagePosition(bgImgPosition);
     }
 
-    void SetBackgroundBlurStyle(const BlurStyle& bgBlurStyle) override
+    void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle) override
     {
         ViewAbstract::SetBackgroundBlurStyle(bgBlurStyle);
+    }
+
+    void SetSphericalEffect(double radio) override
+    {
+        ViewAbstract::SetSphericalEffect(radio);
+    }
+    void SetPixelStretchEffect(PixStretchEffectOption& option) override
+    {
+        ViewAbstract::SetPixelStretchEffect(option);
+    }
+    void SetLightUpEffect(double radio) override
+    {
+        ViewAbstract::SetLightUpEffect(radio);
     }
 
     void SetPadding(const Dimension& value) override
@@ -301,21 +319,13 @@ public:
         ViewAbstract::MarkAnchor({ x, y });
     }
 
-    void SetScale(float x, float y, float z) override
-    {
-        VectorF scale(x, y);
-        ViewAbstract::SetScale(scale);
-    }
+    void SetScale(float x, float y, float z) override;
 
-    void SetPivot(const Dimension& x, const Dimension& y) override
-    {
-        DimensionOffset center(x, y);
-        ViewAbstract::SetPivot(center);
-    }
+    void SetPivot(const Dimension& x, const Dimension& y, const Dimension& z) override;
 
     void SetTranslate(const Dimension& x, const Dimension& y, const Dimension& z) override
     {
-        ViewAbstract::SetTranslate(NG::Vector3F(x.ConvertToPx(), y.ConvertToPx(), z.ConvertToPx()));
+        ViewAbstract::SetTranslate(TranslateOptions(x, y, z));
     }
 
     void SetRotate(float x, float y, float z, float angle) override
@@ -338,6 +348,11 @@ public:
     void SetTransition(const NG::TransitionOptions& transitionOptions, bool passThrough = false) override
     {
         ViewAbstract::SetTransition(transitionOptions);
+    }
+
+    void SetChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect, bool passThrough = false) override
+    {
+        ViewAbstract::SetChainedTransition(effect);
     }
 
     void SetOverlay(const std::string& text, const std::optional<Alignment>& align,
@@ -365,7 +380,10 @@ public:
         ViewAbstract::SetSharedTransition(shareId, option);
     }
 
-    void SetGeometryTransition(const std::string& id) override {}
+    void SetGeometryTransition(const std::string& id) override
+    {
+        ViewAbstract::SetGeometryTransition(id);
+    }
 
     void SetMotionPath(const MotionPathOption& option) override
     {
@@ -425,6 +443,11 @@ public:
     void SetMask(const RefPtr<BasicShape>& shape) override
     {
         ViewAbstract::SetMask(shape);
+    }
+
+    void SetProgressMask(const RefPtr<NG::ProgressMaskProperty>& progress) override
+    {
+        ViewAbstract::SetProgressMask(progress);
     }
 
     void SetBackdropBlur(const Dimension& radius) override
@@ -539,6 +562,11 @@ public:
         ViewAbstract::SetOnBlur(std::move(onBlurCallback));
     }
 
+    void SetDraggable(bool draggable) override
+    {
+        ViewAbstract::SetDraggable(draggable);
+    }
+
     void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override
     {
         auto dragStart = [dragStartFunc = std::move(onDragStart)](const RefPtr<OHOS::Ace::DragEvent>& event,
@@ -558,6 +586,11 @@ public:
         ViewAbstract::SetOnDragEnter(std::move(onDragEnter));
     }
 
+    void SetOnDragEnd(OnNewDragFunc&& onDragEnd) override
+    {
+        ViewAbstract::SetOnDragEnd(std::move(onDragEnd));
+    }
+
     void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) override
     {
         ViewAbstract::SetOnDragLeave(std::move(onDragLeave));
@@ -566,6 +599,10 @@ public:
     void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) override
     {
         ViewAbstract::SetOnDragMove(std::move(onDragMove));
+    }
+    void SetAllowDrop(const std::set<std::string>& allowDrop) override
+    {
+        ViewAbstract::SetAllowDrop(allowDrop);
     }
 
     void SetOnVisibleChange(
@@ -641,7 +678,10 @@ public:
 
     void SetRestoreId(int32_t restoreId) override {}
 
-    void SetDebugLine(const std::string& line) override {}
+    void SetDebugLine(const std::string& line) override
+    {
+        ViewAbstract::SetDebugLine(line);
+    }
 
     void SetHoverEffect(HoverEffectType hoverEffect) override
     {
@@ -653,21 +693,58 @@ public:
         ViewAbstract::SetHitTestMode(hitTestMode);
     }
 
+    void SetKeyboardShortcut(const std::string& value, const std::vector<CtrlKey>& keys,
+        std::function<void()>&& onKeyboardShortcutAction) override
+    {
+        ViewAbstract::SetKeyboardShortcut(value, keys, std::move(onKeyboardShortcutAction));
+    }
+
     void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) override
     {
         auto targetNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+#ifdef ENABLE_DRAG_FRAMEWORK
+        ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true);
+#endif // ENABLE_DRAG_FRAMEWORK
         ViewAbstract::BindPopup(param, targetNode, AceType::DynamicCast<UINode>(customNode));
     }
 
-    void BindMenu(std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc) override;
+    void BindMenu(
+        std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const MenuParam& menuParam) override;
 
-    void BindContextMenu(ResponseType type, std::function<void()>&& buildFunc) override;
+    void BindContextMenu(ResponseType type, std::function<void()>&& buildFunc, const MenuParam& menuParam) override;
+
+    void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
+        std::function<void()>&& buildFunc, int32_t type) override;
 
     void SetAccessibilityGroup(bool accessible) override {}
     void SetAccessibilityText(const std::string& text) override {}
     void SetAccessibilityDescription(const std::string& description) override {}
     void SetAccessibilityImportance(const std::string& importance) override {}
 
+    void SetForegroundColor(const Color& color) override
+    {
+        ViewAbstract::SetForegroundColor(color);
+    }
+
+    void SetForegroundColorStrategy(const ForegroundColorStrategy& strategy) override
+    {
+        ViewAbstract::SetForegroundColorStrategy(strategy);
+    }
+private:
+    void RegisterMenuAppearCallback(
+        std::vector<NG::OptionParam>& params, std::function<void()>&& buildFunc, const MenuParam& menuParam);
+    void RegisterMenuDisappearCallback(std::function<void()>&& buildFunc, const MenuParam& menuParam);
+    void RegisterContextMenuAppearCallback(ResponseType type, const MenuParam& menuParam);
+    void RegisterContextMenuDisappearCallback(const MenuParam& menuParam);
+
+    void CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
+        const std::function<void(float)>& onCallbackEvent) override {
+        ViewAbstract::CreateAnimatablePropertyFloat(propertyName, value, onCallbackEvent);
+    }
+
+    void UpdateAnimatablePropertyFloat(const std::string& propertyName, float value) override {
+        ViewAbstract::UpdateAnimatablePropertyFloat(propertyName, value);
+    }
 };
 } // namespace OHOS::Ace::NG
 

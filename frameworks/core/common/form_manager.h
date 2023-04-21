@@ -33,10 +33,7 @@ class ACE_EXPORT FormManager final : public Singleton<FormManager> {
 public:
     void AddSubContainer(int64_t formId, const RefPtr<SubContainer>& subContainer);
     void RemoveSubContainer(int64_t formId);
-    void AddNonmatchedContainer(const std::string& cardKey, const RefPtr<SubContainer>& subContainer);
     RefPtr<SubContainer> GetSubContainer(int64_t formId);
-    RefPtr<SubContainer> MatchSubContainerWithFormId(int64_t formId, const std::string& cardKey);
-    void Dump(const std::vector<std::string>& params);
     void SetFormUtils(const std::shared_ptr<FormUtils>& formUtils);
     std::shared_ptr<FormUtils> GetFormUtils();
 

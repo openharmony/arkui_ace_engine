@@ -30,6 +30,9 @@
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t DEFAULT_DURATION = 200;
+} // namespace
 void SwitchPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
@@ -44,11 +47,26 @@ bool SwitchPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     if (isOn_.value()) {
         currentOffset_ = GetSwitchWidth();
     }
+
+    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
+    CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
+    auto switchLayoutAlgorithm = DynamicCast<SwitchLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_RETURN(switchLayoutAlgorithm, false);
+
+    auto height = switchLayoutAlgorithm->GetHeight();
+    auto width = switchLayoutAlgorithm->GetWidth();
+
+    width_ = width;
+    height_ = height;
+    auto geometryNode = dirty->GetGeometryNode();
+    offset_ = geometryNode->GetContentOffset();
+    size_ = geometryNode->GetContentSize();
     return true;
 }
 
 void SwitchPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<EventHub>();
@@ -61,14 +79,29 @@ void SwitchPattern::OnModifyDone()
     CHECK_NULL_VOID(switchTheme);
     auto layoutProperty = host->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    if (!layoutProperty->GetMarginProperty()) {
-        MarginProperty margin;
-        margin.left = CalcLength(switchTheme->GetHotZoneHorizontalPadding().Value());
-        margin.right = CalcLength(switchTheme->GetHotZoneHorizontalPadding().Value());
-        margin.top = CalcLength(switchTheme->GetHotZoneVerticalPadding().Value());
-        margin.bottom = CalcLength(switchTheme->GetHotZoneVerticalPadding().Value());
-        layoutProperty->UpdateMargin(margin);
+    MarginProperty margin;
+    margin.left = CalcLength(switchTheme->GetHotZoneHorizontalPadding().Value());
+    margin.right = CalcLength(switchTheme->GetHotZoneHorizontalPadding().Value());
+    margin.top = CalcLength(switchTheme->GetHotZoneVerticalPadding().Value());
+    margin.bottom = CalcLength(switchTheme->GetHotZoneVerticalPadding().Value());
+    auto& setMargin = layoutProperty->GetMarginProperty();
+    if (setMargin) {
+        if (setMargin->left.has_value()) {
+            margin.left = setMargin->left;
+        }
+        if (setMargin->right.has_value()) {
+            margin.right = setMargin->right;
+        }
+        if (setMargin->top.has_value()) {
+            margin.top = setMargin->top;
+        }
+        if (setMargin->bottom.has_value()) {
+            margin.bottom = setMargin->bottom;
+        }
     }
+    layoutProperty->UpdateMargin(margin);
+    hotZoneHorizontalPadding_ = switchTheme->GetHotZoneHorizontalPadding();
+    hotZoneVerticalPadding_ = switchTheme->GetHotZoneVerticalPadding();
     if (layoutProperty->GetPositionProperty()) {
         layoutProperty->UpdateAlignment(
             layoutProperty->GetPositionProperty()->GetAlignment().value_or(Alignment::CENTER));
@@ -84,6 +117,7 @@ void SwitchPattern::OnModifyDone()
         isOn_ = switchPaintProperty->GetIsOnValue();
     }
     auto isOn = switchPaintProperty->GetIsOnValue();
+    isOnBeforeAnimate_ = isOn;
     if (isOn != isOn_.value()) {
         OnChange();
     }
@@ -111,7 +145,7 @@ void SwitchPattern::PlayTranslateAnimation(float startPos, float endPos)
     CHECK_NULL_VOID(host);
     auto curve = GetCurve();
     if (!curve) {
-        curve = Curves::LINEAR;
+        curve = Curves::FAST_OUT_SLOW_IN;
     }
 
     // If animation is still running, stop it before play new animation.
@@ -152,29 +186,12 @@ void SwitchPattern::PlayTranslateAnimation(float startPos, float endPos)
                 switchPattern->UpdateChangeEvent();
             }
         }
+        switchPattern->isOnBeforeAnimate_ = switchPattern->isOn_;
+        switchPattern->GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     });
     controller_->SetDuration(GetDuration());
     controller_->AddInterpolator(translate);
     controller_->Play();
-}
-
-bool SwitchPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
-{
-    if (config.skipMeasure && config.skipLayout) {
-        return false;
-    }
-
-    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
-    CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
-    auto switchLayoutAlgorithm = DynamicCast<SwitchLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
-    CHECK_NULL_RETURN(switchLayoutAlgorithm, false);
-
-    auto height = switchLayoutAlgorithm->GetHeight();
-    auto width = switchLayoutAlgorithm->GetWidth();
-
-    width_ = width;
-    height_ = height;
-    return true;
 }
 
 RefPtr<Curve> SwitchPattern::GetCurve() const
@@ -186,7 +203,6 @@ RefPtr<Curve> SwitchPattern::GetCurve() const
 
 int32_t SwitchPattern::GetDuration() const
 {
-    const int32_t DEFAULT_DURATION = 250;
     auto switchPaintProperty = GetPaintProperty<SwitchPaintProperty>();
     CHECK_NULL_RETURN(switchPaintProperty, DEFAULT_DURATION);
     return switchPaintProperty->GetDuration().value_or(DEFAULT_DURATION);
@@ -208,10 +224,11 @@ void SwitchPattern::OnChange()
     auto translateOffset = GetSwitchWidth();
     StopTranslateAnimation();
     changeFlag_ = true;
+    isOnBeforeAnimate_ = !isOn_.value();
     if (!isOn_.value()) {
-        PlayTranslateAnimation(0, translateOffset);
+        PlayTranslateAnimation(0.0f, translateOffset);
     } else {
-        PlayTranslateAnimation(translateOffset, 0);
+        PlayTranslateAnimation(translateOffset, 0.0f);
     }
 }
 
@@ -249,16 +266,6 @@ void SwitchPattern::OnTouchDown()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     isTouch_ = true;
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    auto originalPaintRect = renderContext->GetPaintRectWithoutTransform();
-    auto frameSize = geometryNode->GetFrameSize();
-    if (originalPaintRect.GetSize() == frameSize) {
-        originalPaintRect = GetHotZoneRect(true);
-    }
-    renderContext->SyncGeometryProperties(originalPaintRect);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -267,16 +274,6 @@ void SwitchPattern::OnTouchUp()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     isTouch_ = false;
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    auto paintRect = renderContext->GetPaintRectWithoutTransform();
-    auto frameSize = geometryNode->GetFrameSize();
-    if (paintRect.GetSize() != frameSize && !isHover_) {
-        paintRect = GetHotZoneRect(false);
-    }
-    renderContext->SyncGeometryProperties(paintRect);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -393,6 +390,15 @@ void SwitchPattern::InitMouseEvent()
 
 void SwitchPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 {
+    auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
+        auto pattern = wp.Upgrade();
+        if (!pattern) {
+            return false;
+        }
+        return pattern->OnKeyEvent(event);
+    };
+    focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
+
     auto getInnerPaintRectCallback = [wp = WeakClaim(this)](RoundRect& paintRect) {
         auto pattern = wp.Upgrade();
         if (pattern) {
@@ -400,6 +406,18 @@ void SwitchPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
         }
     };
     focusHub->SetInnerFocusPaintRectCallback(getInnerPaintRectCallback);
+}
+
+bool SwitchPattern::OnKeyEvent(const KeyEvent& event)
+{
+    if (event.action != KeyAction::DOWN) {
+        return false;
+    }
+    if (event.code == KeyCode::KEY_ENTER) {
+        OnClick();
+        return true;
+    }
+    return false;
 }
 
 void SwitchPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
@@ -413,7 +431,7 @@ void SwitchPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     auto height = height_ + focusPaintPadding * 2;
     auto width = width_ + focusPaintPadding * 2;
     auto radio = height / 2.0;
-    auto Rect = RectF(-focusPaintPadding, -focusPaintPadding, width, height);
+    auto Rect = RectF(offset_.GetX() - focusPaintPadding, offset_.GetY() - focusPaintPadding, width, height);
 
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, radio, radio);
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS, radio, radio);
@@ -424,22 +442,10 @@ void SwitchPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 
 void SwitchPattern::HandleMouseEvent(bool isHover)
 {
-    isHover_ = isHover;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     isTouch_ = false;
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    auto originalPaintRect = renderContext->GetPaintRectWithoutTransform();
-    auto frameSize = geometryNode->GetFrameSize();
-    if (isHover_ && originalPaintRect.GetSize() == frameSize) {
-        originalPaintRect = GetHotZoneRect(true);
-    } else if (!isHover_ && originalPaintRect.GetSize() != frameSize) {
-        originalPaintRect = GetHotZoneRect(false);
-    }
-    renderContext->SyncGeometryProperties(originalPaintRect);
+    isHover_ = isHover;
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -483,40 +489,25 @@ bool SwitchPattern::IsOutOfBoundary(double mainOffset) const
     return mainOffset < 0 || mainOffset > GetSwitchWidth();
 }
 
-RectF SwitchPattern::GetHotZoneRect(bool isOriginal) const
+// Set the default hot zone for the component.
+void SwitchPattern::AddHotZoneRect()
 {
+    hotZoneOffset_.SetX(offset_.GetX() - hotZoneHorizontalPadding_.ConvertToPx());
+    hotZoneOffset_.SetY(offset_.GetY() - hotZoneVerticalPadding_.ConvertToPx());
+    hotZoneSize_.SetWidth(size_.Width() + 2 * hotZoneHorizontalPadding_.ConvertToPx());
+    hotZoneSize_.SetHeight(size_.Height() + 2 * hotZoneVerticalPadding_.ConvertToPx());
+    DimensionRect hotZoneRegion;
+    hotZoneRegion.SetSize(DimensionSize(Dimension(hotZoneSize_.Width()), Dimension(hotZoneSize_.Height())));
+    hotZoneRegion.SetOffset(DimensionOffset(Dimension(hotZoneOffset_.GetX()), Dimension(hotZoneOffset_.GetY())));
     auto host = GetHost();
-    CHECK_NULL_RETURN(host, {});
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, {});
-    auto switchTheme = pipeline->GetTheme<SwitchTheme>();
-    CHECK_NULL_RETURN(switchTheme, {});
-    auto defaultWidth = switchTheme->GetDefaultWidth().ConvertToPx();
-    auto defaultHeight = switchTheme->GetDefaultHeight().ConvertToPx();
-    auto defaultWidthGap =
-        defaultWidth - (switchTheme->GetWidth() - switchTheme->GetHotZoneHorizontalPadding() * 2).ConvertToPx();
-    auto defaultHeightGap =
-        defaultHeight - (switchTheme->GetHeight() - switchTheme->GetHotZoneVerticalPadding() * 2).ConvertToPx();
-    auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, {});
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_RETURN(renderContext, {});
-    auto originalPaintRect = renderContext->GetPaintRectWithoutTransform();
-    auto offset = originalPaintRect.GetOffset();
-    double actualWidth = 0.0;
-    double actualHeight = 0.0;
-    if (isOriginal) {
-        actualWidth = geometryNode->GetFrameSize().Width() + defaultWidthGap;
-        actualHeight = geometryNode->GetFrameSize().Height() + defaultHeightGap;
-        offset.SetX(offset.GetX() - defaultWidthGap / 2);
-        offset.SetY(offset.GetY() - defaultHeightGap / 2);
-    } else {
-        actualWidth = geometryNode->GetFrameSize().Width();
-        actualHeight = geometryNode->GetFrameSize().Height();
-        offset.SetX(offset.GetX() + defaultWidthGap / 2);
-        offset.SetY(offset.GetY() + defaultHeightGap / 2);
-    }
-    return RectF(offset, SizeF(actualWidth, actualHeight));
+    CHECK_NULL_VOID(host);
+    host->AddHotZoneRect(hotZoneRegion);
 }
 
+void SwitchPattern::RemoveLastHotZoneRect() const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->RemoveLastHotZoneRect();
+}
 } // namespace OHOS::Ace::NG

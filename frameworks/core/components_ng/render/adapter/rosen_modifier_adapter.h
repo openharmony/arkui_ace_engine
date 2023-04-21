@@ -41,9 +41,12 @@ using RSAnimationTimingCurve = Rosen::RSAnimationTimingCurve;
 template<typename T>
 using RSAnimatableProperty = Rosen::RSAnimatableProperty<T>;
 template<typename T>
+using RSProperty = Rosen::RSProperty<T>;
+template<typename T>
 using RSAnimatableArithmetic = Rosen::RSAnimatableArithmetic<T>;
 using RSContentStyleModifier = Rosen::RSContentStyleModifier;
 using RSOverlayStyleModifier = Rosen::RSOverlayStyleModifier;
+using RSNodeModifier = Rosen::RSNodeModifier;
 using RSDrawingContext = Rosen::RSDrawingContext;
 using RSPropertyBase = Rosen::RSPropertyBase;
 
@@ -60,13 +63,48 @@ public:
     void AttachProperties();
 
 private:
-    RefPtr<ContentModifier> modifier_;
+    WeakPtr<ContentModifier> modifier_;
     std::vector<std::shared_ptr<RSPropertyBase>> attachedProperties_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ContentModifierAdapter);
 };
 
-std::shared_ptr<RSModifier> ConvertModifier(const RefPtr<Modifier>& modifier);
+std::shared_ptr<RSModifier> ConvertContentModifier(const RefPtr<Modifier>& modifier);
+std::shared_ptr<RSModifier> ConvertOverlayModifier(const RefPtr<Modifier>& modifier);
+
+class OverlayModifierAdapter : public RSOverlayStyleModifier {
+public:
+    OverlayModifierAdapter() = default;
+    explicit OverlayModifierAdapter(const RefPtr<Modifier>& modifier)
+        : modifier_(AceType::DynamicCast<OverlayModifier>(modifier))
+    {}
+    ~OverlayModifierAdapter() override = default;
+
+    void Draw(RSDrawingContext& context) const override;
+
+    void AttachProperties();
+
+private:
+    WeakPtr<OverlayModifier> modifier_;
+    std::vector<std::shared_ptr<RSPropertyBase>> attachedProperties_;
+
+    ACE_DISALLOW_COPY_AND_MOVE(OverlayModifierAdapter);
+};
+
+class RSNodeModifierImpl : public RSNodeModifier, public ModifierImpl {
+public:
+    RSNodeModifierImpl() = default;
+    virtual ~RSNodeModifierImpl() = default;
+
+    void Modify(RSNode& target) const override {}
+
+    void AddProperty(const RefPtr<PropertyBase>& property);
+
+private:
+    std::shared_ptr<RSPropertyBase> attachedProperty_;
+
+    ACE_DISALLOW_COPY_AND_MOVE(RSNodeModifierImpl);
+};
 
 } // namespace OHOS::Ace::NG
 

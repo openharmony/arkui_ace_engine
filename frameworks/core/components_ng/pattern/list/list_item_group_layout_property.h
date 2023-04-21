@@ -37,15 +37,7 @@ public:
         auto value = MakeRefPtr<ListItemGroupLayoutProperty>();
         value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
         value->propSpace_ = CloneSpace();
-        value->propListDirection_ = CloneListDirection();
         value->propDivider_ = CloneDivider();
-        value->propLanes_ = CloneLanes();
-        value->propLaneMinLength_ = CloneLaneMinLength();
-        value->propLaneMaxLength_ = CloneLaneMaxLength();
-        value->propListItemAlign_ = CloneListItemAlign();
-        value->propCachedCount_ = CloneCachedCount();
-        value->propStickyStyle_ = CloneStickyStyle();
-        value->propListMainSize_ = CloneListMainSize();
         return value;
     }
 
@@ -53,27 +45,28 @@ public:
     {
         LayoutProperty::Reset();
         ResetSpace();
-        ResetListDirection();
         ResetDivider();
-        ResetLanes();
-        ResetLaneMinLength();
-        ResetLaneMaxLength();
-        ResetListItemAlign();
-        ResetCachedCount();
-        ResetStickyStyle();
-        ResetListMainSize();
+    }
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        LayoutProperty::ToJsonValue(json);
+        json->Put("space", propSpace_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
+        if (propDivider_.has_value()) {
+            auto divider = JsonUtil::Create(true);
+            divider->Put("strokeWidth", propDivider_.value().strokeWidth.ToString().c_str());
+            divider->Put("startMargin", propDivider_.value().startMargin.ToString().c_str());
+            divider->Put("endMargin", propDivider_.value().endMargin.ToString().c_str());
+            divider->Put("color", propDivider_.value().color.ColorToString().c_str());
+            json->Put("divider", divider);
+        } else {
+            auto divider = JsonUtil::Create(true);
+            json->Put("divider", divider);
+        }
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Space, Dimension, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ListDirection, Axis, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Divider, V2::ItemDivider, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Lanes, int32_t, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(LaneMinLength, float, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(LaneMaxLength, float, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ListItemAlign, V2::ListItemAlign, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CachedCount, int32_t, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StickyStyle, V2::StickyStyle, PROPERTY_UPDATE_LAYOUT);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ListMainSize, float, PROPERTY_UPDATE_LAYOUT);
 };
 } // namespace OHOS::Ace::NG
 

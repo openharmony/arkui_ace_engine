@@ -112,6 +112,14 @@ Color ThemeConstants::GetColor(uint32_t key) const
     return colorPair.second;
 }
 
+Color ThemeConstants::GetColorByName(const std::string& resName) const
+{
+    if (!resAdapter_) {
+        return ERROR_VALUE_COLOR;
+    }
+    return resAdapter_->GetColorByName(resName);
+}
+
 Dimension ThemeConstants::GetDimension(uint32_t key) const
 {
     if (IsGlobalResource(key)) {
@@ -135,6 +143,18 @@ Dimension ThemeConstants::GetDimension(uint32_t key) const
     return dimensionPair.second;
 }
 
+Dimension ThemeConstants::GetDimensionByName(const std::string& resName) const
+{
+    if (!resAdapter_) {
+        return ERROR_VALUE_DIMENSION;
+    }
+    auto result = resAdapter_->GetDimensionByName(resName);
+    if (NearZero(result.Value())) {
+        result = StringUtils::StringToDimension(resAdapter_->GetStringByName(resName));
+    }
+    return result;
+}
+
 int32_t ThemeConstants::GetInt(uint32_t key) const
 {
     if (IsGlobalResource(key)) {
@@ -152,6 +172,14 @@ int32_t ThemeConstants::GetInt(uint32_t key) const
         LOGE("GetInt error: %{public}u, type: %{public}u", key, valueWrapper.type);
     }
     return intPair.second;
+}
+
+int32_t ThemeConstants::GetIntByName(const std::string& resName) const
+{
+    if (!resAdapter_) {
+        return ERROR_VALUE_INT;
+    }
+    return resAdapter_->GetIntByName(resName);
 }
 
 double ThemeConstants::GetDouble(uint32_t key) const
@@ -173,6 +201,14 @@ double ThemeConstants::GetDouble(uint32_t key) const
     return doublePair.second;
 }
 
+double ThemeConstants::GetDoubleByName(const std::string& resName) const
+{
+    if (!resAdapter_) {
+        return ERROR_VALUE_DOUBLE;
+    }
+    return resAdapter_->GetDoubleByName(resName);
+}
+
 std::string ThemeConstants::GetString(uint32_t key) const
 {
     if (IsGlobalResource(key)) {
@@ -190,6 +226,14 @@ std::string ThemeConstants::GetString(uint32_t key) const
         LOGE("GetString error: %{public}u, type: %{public}u", key, valueWrapper.type);
     }
     return stringPair.second;
+}
+
+std::string ThemeConstants::GetStringByName(const std::string& resName) const
+{
+    if (!resAdapter_) {
+        return "";
+    }
+    return resAdapter_->GetStringByName(resName);
 }
 
 std::string ThemeConstants::GetPluralString(uint32_t key, int count) const
@@ -211,6 +255,14 @@ std::string ThemeConstants::GetPluralString(uint32_t key, int count) const
     return stringPair.second;
 }
 
+std::string ThemeConstants::GetPluralStringByName(const std::string& resName, int count) const
+{
+    if (!resAdapter_) {
+        return "";
+    }
+    return resAdapter_->GetPluralStringByName(resName, count);
+}
+
 std::vector<std::string> ThemeConstants::GetStringArray(uint32_t key) const
 {
     if (IsGlobalResource(key)) {
@@ -220,6 +272,14 @@ std::vector<std::string> ThemeConstants::GetStringArray(uint32_t key) const
         return resAdapter_->GetStringArray(key);
     }
     return {};
+}
+
+std::vector<std::string> ThemeConstants::GetStringArrayByName(const std::string& resName) const
+{
+    if (!resAdapter_) {
+        return {};
+    }
+    return resAdapter_->GetStringArrayByName(resName);
 }
 
 std::string ThemeConstants::GetMediaPath(uint32_t key) const
@@ -233,12 +293,36 @@ std::string ThemeConstants::GetMediaPath(uint32_t key) const
     return "";
 }
 
+std::string ThemeConstants::GetMediaPathByName(const std::string& resName) const
+{
+    if (!resAdapter_) {
+        return "";
+    }
+    return resAdapter_->GetMediaPathByName(resName);
+}
+
 std::string ThemeConstants::GetRawfile(const std::string& fileName) const
 {
     if (!resAdapter_) {
         return "";
     }
     return resAdapter_->GetRawfile(fileName);
+}
+
+bool ThemeConstants::GetRawFileDescription(const std::string& rawfileName, RawfileDescription& rawfileDescription) const
+{
+    if (!resAdapter_) {
+        return false;
+    }
+    return resAdapter_->GetRawFileDescription(rawfileName, rawfileDescription);
+}
+
+bool ThemeConstants::GetMediaById(const int32_t& resId, std::string& mediaPath) const
+{
+    if (!resAdapter_) {
+        return false;
+    }
+    return resAdapter_->GetMediaById(resId, mediaPath);
 }
 
 bool ThemeConstants::GetBoolean(uint32_t key) const
@@ -252,6 +336,14 @@ bool ThemeConstants::GetBoolean(uint32_t key) const
     return false;
 }
 
+bool ThemeConstants::GetBooleanByName(const std::string& resName) const
+{
+    if (!resAdapter_) {
+        return false;
+    }
+    return resAdapter_->GetBooleanByName(resName);
+}
+
 std::vector<uint32_t> ThemeConstants::GetIntArray(uint32_t key) const
 {
     if (IsGlobalResource(key)) {
@@ -261,6 +353,14 @@ std::vector<uint32_t> ThemeConstants::GetIntArray(uint32_t key) const
         return resAdapter_->GetIntArray(key);
     }
     return {};
+}
+
+std::vector<uint32_t> ThemeConstants::GetIntArrayByName(const std::string& resName) const
+{
+    if (!resAdapter_) {
+        return {};
+    }
+    return resAdapter_->GetIntArrayByName(resName);
 }
 
 bool ThemeConstants::GetResourceIdByName(const std::string& resName, const std::string& resType, uint32_t& resId) const

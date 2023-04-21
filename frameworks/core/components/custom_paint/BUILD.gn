@@ -23,11 +23,14 @@ build_component("custom_paint") {
     "render_custom_paint_creator.cpp",
     "render_offscreen_canvas_creator.cpp",
   ]
+  if (ace_use_new_skia) {
+    sources -= [
+      "flutter_render_custom_paint.cpp",
+      "flutter_render_offscreen_canvas.cpp",
+    ]
+  }
   rosen_sources = [
     "rosen_render_custom_paint.cpp",
     "rosen_render_offscreen_canvas.cpp",
   ]
-  if (is_standard_system && !use_mingw_win && !use_mac && !use_linux) {
-    deps = [ "$ace_root/frameworks/core/common/graphic:graphic" ]
-  }
 }

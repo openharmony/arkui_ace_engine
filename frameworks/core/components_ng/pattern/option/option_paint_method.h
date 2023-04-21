@@ -23,7 +23,6 @@
 #include "core/components/common/properties/border.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components_ng/render/canvas_image.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/render/paint_wrapper.h"
 

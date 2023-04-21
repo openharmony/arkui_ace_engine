@@ -1,0 +1,100 @@
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "core/components_ng/pattern/plugin/plugin_model_ng.h"
+
+#include "base/memory/ace_type.h"
+#include "base/utils/utils.h"
+#include "core/components/plugin/plugin_sub_container.h"
+#include "core/components/plugin/resource/plugin_manager_delegate.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/plugin/plugin_layout_property.h"
+#include "core/components_ng/pattern/plugin/plugin_node.h"
+#include "core/components_ng/pattern/plugin/plugin_pattern.h"
+#include "core/components_ng/property/calc_length.h"
+#include "core/components_ng/property/measure_property.h"
+#include "core/components_v2/inspector/inspector_constants.h"
+
+namespace OHOS::Ace::NG {
+void PluginModelNG::Create(const RequestPluginInfo& pluginInfo)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto frameNode = PluginNode::GetOrCreatePluginNode(
+        V2::PLUGIN_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<PluginPattern>(); });
+    stack->Push(frameNode);
+    ACE_UPDATE_LAYOUT_PROPERTY(PluginLayoutProperty, RequestPluginInfo, pluginInfo);
+};
+
+void PluginModelNG::SetOnComplete(std::function<void(const std::string&)>&& OnComplete)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<PluginEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnComplete(std::move(OnComplete));
+};
+
+void PluginModelNG::SetOnError(std::function<void(const std::string&)>&& OnError)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<PluginEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnError(std::move(OnError));
+};
+
+void PluginModelNG::SetPluginSize(const Dimension& width, const Dimension& height)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pluginLayoutProperty = frameNode->GetLayoutProperty<PluginLayoutProperty>();
+    CHECK_NULL_VOID(pluginLayoutProperty);
+    auto pluginInfo = pluginLayoutProperty->GetRequestPluginInfo().value_or(RequestPluginInfo());
+    pluginInfo.width = width;
+    pluginInfo.height = height;
+    pluginLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(width), CalcLength(height)));
+    ACE_UPDATE_LAYOUT_PROPERTY(PluginLayoutProperty, RequestPluginInfo, pluginInfo);
+};
+
+void PluginModelNG::SetWidth(const Dimension& width)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pluginLayoutProperty = frameNode->GetLayoutProperty<PluginLayoutProperty>();
+    CHECK_NULL_VOID(pluginLayoutProperty);
+    auto pluginInfo = pluginLayoutProperty->GetRequestPluginInfo().value_or(RequestPluginInfo());
+    pluginInfo.width = width;
+    pluginLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(width), std::nullopt));
+    ACE_UPDATE_LAYOUT_PROPERTY(PluginLayoutProperty, RequestPluginInfo, pluginInfo);
+};
+
+void PluginModelNG::SetHeight(const Dimension& height)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pluginLayoutProperty = frameNode->GetLayoutProperty<PluginLayoutProperty>();
+    CHECK_NULL_VOID(pluginLayoutProperty);
+    auto pluginInfo = pluginLayoutProperty->GetRequestPluginInfo().value_or(RequestPluginInfo());
+    pluginInfo.height = height;
+    pluginLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(height)));
+    ACE_UPDATE_LAYOUT_PROPERTY(PluginLayoutProperty, RequestPluginInfo, pluginInfo);
+};
+
+void PluginModelNG::SetData(const std::string& data)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(PluginLayoutProperty, Data, data);
+};
+} // namespace OHOS::Ace::NG

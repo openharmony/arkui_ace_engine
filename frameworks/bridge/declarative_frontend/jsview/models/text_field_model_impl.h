@@ -33,13 +33,17 @@ public:
     {
         return nullptr;
     }
-
+    void RequestKeyboardOnFocus(bool needToRequest) override {};
+    void SetWidthAuto(bool isAuto) override {};
     void SetType(TextInputType value) override;
     void SetPlaceholderColor(const Color& value) override;
     void SetPlaceholderFont(const Font& value) override;
     void SetEnterKeyType(TextInputAction value) override;
     void SetTextAlign(TextAlign value) override;
     void SetCaretColor(const Color& value) override;
+    void SetCaretStyle(const CaretStyle& value) override;
+    void SetCaretPosition(const int32_t& value) override;
+    void SetSelectedBackgroundColor(const Color& value) override;
     void SetMaxLength(uint32_t value) override;
     void SetMaxLines(uint32_t value) override;
     void SetFontSize(const Dimension& value) override;
@@ -57,7 +61,10 @@ public:
     void SetOnCut(std::function<void(const std::string&)>&& func) override;
     void SetOnPaste(std::function<void(const std::string&)>&& func) override;
     void SetCopyOption(CopyOptions copyOption) override;
+    void SetMenuOptionItems(std::vector<NG::MenuOptionsParam>&& menuOptionsItems) override;
+    void ResetMaxLength() override {};
     static void InitTextInputDefaultStyle();
+    void SetForegroundColor(const Color& value) override {};
 };
 
 } // namespace OHOS::Ace::Framework

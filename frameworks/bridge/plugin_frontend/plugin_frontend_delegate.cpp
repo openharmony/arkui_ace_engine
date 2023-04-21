@@ -23,8 +23,8 @@
 #include "base/log/event_report.h"
 #include "base/resource/ace_res_config.h"
 #include "base/thread/background_task_executor.h"
-#include "base/utils/utils.h"
 #include "base/utils/measure_util.h"
+#include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
 #include "core/common/platform_bridge.h"
@@ -920,6 +920,11 @@ double PluginFrontendDelegate::MeasureText(const MeasureContext& context)
     return MeasureUtil::MeasureText(context);
 }
 
+Size PluginFrontendDelegate::MeasureTextSize(const MeasureContext& context)
+{
+    return MeasureUtil::MeasureTextSize(context);
+}
+
 void PluginFrontendDelegate::ShowToast(const std::string& message, int32_t duration, const std::string& bottom)
 {
     int32_t durationTime = std::clamp(duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
@@ -1260,8 +1265,12 @@ void PluginFrontendDelegate::OnPushPageSuccess(
 {
     std::lock_guard<std::mutex> lock(mutex_);
     AddPageLocked(page);
-    pageRouteStack_.emplace_back(PageInfo { page->GetPageId(), url});
-    page->FireDeclarativeOnUpdateWithValueParamsCallback(page->GetPluginComponentJsonData());
+    pageRouteStack_.emplace_back(PageInfo { page->GetPageId(), url });
+    if (Container::IsCurrentUseNewPipeline()) {
+        FireDeclarativeOnUpdateWithValueParamsCallback(page->GetPluginComponentJsonData());
+    } else {
+        page->FireDeclarativeOnUpdateWithValueParamsCallback(page->GetPluginComponentJsonData());
+    }
     if (pageRouteStack_.size() >= MAX_ROUTER_STACK) {
         isRouteStackFull_ = true;
         EventReport::SendPageRouterException(PageRouterExcepType::PAGE_STACK_OVERFLOW_ERR, page->GetUrl());
@@ -1726,6 +1735,10 @@ void PluginFrontendDelegate::UpdatePlugin(const std::string& content)
 {
     auto pageId = GetRunningPageId();
     auto page = GetPage(pageId);
+    if (Container::IsCurrentUseNewPipeline()) {
+        FireDeclarativeOnUpdateWithValueParamsCallback(content);
+        return;
+    }
     if (page) {
         page->FireDeclarativeOnUpdateWithValueParamsCallback(content);
     }

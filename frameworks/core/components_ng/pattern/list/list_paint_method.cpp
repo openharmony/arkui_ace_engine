@@ -19,77 +19,58 @@
 #include "core/components_ng/render/divider_painter.h"
 
 namespace OHOS::Ace::NG {
-void ListPaintMethod::PaintDivider(const DividerInfo& dividerInfo, const PositionMap& itemPosition, RSCanvas& canvas)
+void ListPaintMethod::PaintScrollBar(RSCanvas& canvas)
 {
-    float laneLen = dividerInfo.crossSize / dividerInfo.lanes - dividerInfo.startMargin - dividerInfo.endMargin;
-    float crossLen = dividerInfo.crossSize - dividerInfo.startMargin - dividerInfo.endMargin;
-    DividerPainter dividerPainter(dividerInfo.constrainStrokeWidth, crossLen,
-        dividerInfo.isVertical, dividerInfo.color, LineCap::SQUARE);
-
-    int32_t lanes = dividerInfo.lanes;
-    int32_t laneIdx = 0;
-    bool lastIsItemGroup = false;
-    bool isFirstItem = (itemPosition.begin()->first == 0);
-    std::list<int32_t> lastLineIndex;
-
-    for (const auto& child : itemPosition) {
-        if (!isFirstItem) {
-            float mainPos = child.second.startPos - dividerInfo.halfSpaceWidth + dividerInfo.mainPadding;
-            float crossPos = dividerInfo.startMargin + dividerInfo.crossPadding;
-            if (lanes > 1 && !lastIsItemGroup && !child.second.isGroup) {
-                crossPos += laneIdx * dividerInfo.crossSize / dividerInfo.lanes;
-                dividerPainter.SetDividerLength(laneLen);
-            } else {
-                dividerPainter.SetDividerLength(crossLen);
-            }
-            OffsetF offset = dividerInfo.isVertical ? OffsetF(mainPos, crossPos) : OffsetF(crossPos, mainPos);
-            dividerPainter.DrawLine(canvas, offset);
-        }
-        if (laneIdx == 0) {
-            lastLineIndex.clear();
-        }
-        lastLineIndex.emplace_back(child.first);
-        lastIsItemGroup = child.second.isGroup;
-        laneIdx = (lanes <= 1 || (laneIdx + 1) >= lanes || child.second.isGroup) ? 0 : laneIdx + 1;
-        isFirstItem = isFirstItem ? laneIdx > 0 : false;
-    }
-    if (!lastLineIndex.empty() && *lastLineIndex.rbegin() < dividerInfo.totalItemCount - 1) {
-        int32_t laneIdx = 0;
-        for (auto index : lastLineIndex) {
-            float mainPos = itemPosition.at(index).endPos + dividerInfo.halfSpaceWidth + dividerInfo.mainPadding;
-            float crossPos = dividerInfo.startMargin + dividerInfo.crossPadding;
-            if (lanes > 1 && !itemPosition.at(index).isGroup) {
-                crossPos += laneIdx * dividerInfo.crossSize / dividerInfo.lanes;
-                dividerPainter.SetDividerLength(laneLen);
-            } else {
-                dividerPainter.SetDividerLength(crossLen);
-            }
-            OffsetF offset = dividerInfo.isVertical ? OffsetF(mainPos, crossPos) : OffsetF(crossPos, mainPos);
-            dividerPainter.DrawLine(canvas, offset);
-            laneIdx++;
-        }
+    auto scrollBar = scrollBar_.Upgrade();
+    CHECK_NULL_VOID_NOLOG(scrollBar);
+    if (scrollBar->NeedPaint()) {
+        ScrollBarPainter::PaintRectBar(canvas, scrollBar);
     }
 }
 
-static void PaintScrollBar(const WeakPtr<ScrollBar>& weakScrollBar, RSCanvas& canvas)
+void ListPaintMethod::PaintEdgeEffect(PaintWrapper* paintWrapper, RSCanvas& canvas)
 {
-    auto scrollBar = weakScrollBar.Upgrade();
-    CHECK_NULL_VOID(scrollBar);
-    ScrollBarPainter::PaintRectBar(canvas, scrollBar, UINT8_MAX);
+    auto edgeEffect = edgeEffect_.Upgrade();
+    CHECK_NULL_VOID_NOLOG(edgeEffect);
+    CHECK_NULL_VOID(paintWrapper);
+    auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
+    edgeEffect->Paint(canvas, frameSize, { 0.0f, 0.0f });
 }
 
 CanvasDrawFunction ListPaintMethod::GetForegroundDrawFunction(PaintWrapper* paintWrapper)
 {
+    auto paintFunc = [weak = WeakClaim(this), paintWrapper](RSCanvas& canvas) {
+        auto painter = weak.Upgrade();
+        CHECK_NULL_VOID(painter);
+        painter->PaintScrollBar(canvas);
+        painter->PaintEdgeEffect(paintWrapper, canvas);
+    };
+    return paintFunc;
+}
+
+void ListPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
+{
+    CHECK_NULL_VOID(listContentModifier_);
     const auto& geometryNode = paintWrapper->GetGeometryNode();
     auto frameSize = geometryNode->GetPaddingSize();
     OffsetF paddingOffset = geometryNode->GetPaddingOffset() - geometryNode->GetFrameOffset();
-    Axis axis = vertical_ ? Axis::VERTICAL : Axis::HORIZONTAL;
+    auto renderContext = paintWrapper->GetRenderContext();
+    bool clip = !renderContext || renderContext->GetClipEdge().value_or(true);
+    listContentModifier_->SetClipOffset(paddingOffset);
+    listContentModifier_->SetClipSize(frameSize);
+    listContentModifier_->SetClip(clip);
+
+    if (!divider_.strokeWidth.IsValid() || totalItemCount_ <= 0) {
+        listContentModifier_->ResetDividerInfo();
+        return;
+    }
+    Axis axis = vertical_ ? Axis::HORIZONTAL : Axis::VERTICAL;
     DividerInfo dividerInfo = {
         .constrainStrokeWidth = divider_.strokeWidth.ConvertToPx(),
         .crossSize = vertical_ ? frameSize.Height() : frameSize.Width(),
         .startMargin = divider_.startMargin.ConvertToPx(),
         .endMargin = divider_.endMargin.ConvertToPx(),
-        .halfSpaceWidth = space_ / 2.0f, /* 2.0f half */
+        .space = space_,
         .mainPadding = paddingOffset.GetMainOffset(axis),
         .crossPadding = paddingOffset.GetCrossOffset(axis),
         .isVertical = vertical_,
@@ -97,10 +78,7 @@ CanvasDrawFunction ListPaintMethod::GetForegroundDrawFunction(PaintWrapper* pain
         .totalItemCount = totalItemCount_,
         .color = divider_.color
     };
-
-    return [dividerInfo, itemPosition = std::move(itemPosition_), scrollBar = scrollBar_](RSCanvas& canvas) {
-        PaintDivider(dividerInfo, itemPosition, canvas);
-        PaintScrollBar(scrollBar, canvas);
-    };
+    listContentModifier_->SetDividerInfo(std::move(dividerInfo));
+    listContentModifier_->FlushDivider();
 }
 } // namespace OHOS::Ace::NG

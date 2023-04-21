@@ -44,6 +44,7 @@ AceScopedTracker::AceScopedTracker(const std::string& tag) : tag_(tag)
         markTime_ = GetMicroTickCount();
     }
 }
+
 AceScopedTracker::~AceScopedTracker()
 {
     if (AceTracker::trackInfo_) {

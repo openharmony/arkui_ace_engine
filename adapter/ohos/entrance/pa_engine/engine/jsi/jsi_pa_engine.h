@@ -28,83 +28,16 @@
 #include "values_bucket.h"
 #include "want.h"
 
-#include "adapter/ohos/entrance/pa_engine/backend_delegate.h"
 #include "adapter/ohos/entrance/pa_engine/engine/common/js_backend_engine.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
 #include "core/common/js_message_dispatcher.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/js_runtime.h"
+#include "js_backend_asset_manager.h"
+#include "js_runtime.h"
 
 namespace OHOS::Ace {
-
 using namespace OHOS::Ace::Framework;
-
-// Each JsFrontend holds only one JsiPaEngineInstance.
-class JsiPaEngineInstance final : public AceType, public JsBackendEngineInstance {
-public:
-    explicit JsiPaEngineInstance(const RefPtr<BackendDelegate>& delegate, int32_t instanceId)
-        : backendDelegate_(delegate), instanceId_(instanceId)
-    {}
-    ~JsiPaEngineInstance() override;
-
-    bool InitJsEnv(bool debuggerMode, const std::unordered_map<std::string, void*>& extraNativeObject);
-    void CallJs(const std::string& callbackId, const std::string& args, bool keepAlive = false, bool isGlobal = false);
-    bool FireJsEvent(const std::string& eventId);
-    bool CallPlatformFunction(const std::string& channel, std::vector<uint8_t>&& data, int32_t id);
-    bool PluginErrorCallback(int32_t callbackId, int32_t errorCode, std::string&& errorMessage);
-
-    RefPtr<BackendDelegate> GetDelegate() const;
-    std::shared_ptr<JsRuntime> GetJsRuntime() const;
-    void SetJsMessageDispatcher(const RefPtr<JsMessageDispatcher>& dispatcher);
-    void SetArkNativeEngine(ArkNativeEngine* nativeEngine);
-    ArkNativeEngine* GetArkNativeEngine() const;
-
-    // add Console object to worker
-    void RegisterConsoleModule(ArkNativeEngine* engine);
-
-    bool GetBlockWaiting() const
-    {
-        return blockWaiting_;
-    }
-
-    void SetBlockWaiting(bool blockWaiting)
-    {
-        blockWaiting_ = blockWaiting;
-    }
-
-    shared_ptr<JsValue> GetAsyncResult() const
-    {
-        return asyncResult_;
-    }
-
-    void SetAsyncResult(shared_ptr<JsValue> asyncResult)
-    {
-        asyncResult_ = asyncResult;
-    }
-
-    void SetDebugMode(bool isDebugMode)
-    {
-        isDebugMode_ = isDebugMode;
-    }
-
-private:
-    void RegisterPaModule();
-    void RegisterConsoleModule();
-    void EvaluateJsCode();
-    void SetDebuggerPostTask();
-
-    std::shared_ptr<JsRuntime> runtime_;
-    RefPtr<BackendDelegate> backendDelegate_;
-    int32_t instanceId_ = 0;
-    WeakPtr<JsMessageDispatcher> dispatcher_;
-    ArkNativeEngine* nativeEngine_ = nullptr;
-    bool blockWaiting_ = false;
-    shared_ptr<JsValue> asyncResult_ = nullptr;
-    bool isDebugMode_ = true;
-
-    ACE_DISALLOW_COPY_AND_MOVE(JsiPaEngineInstance);
-};
-
 using RdbValueBucketNewInstance = napi_value (*)(napi_env env, OHOS::NativeRdb::ValuesBucket& valueBucket);
 using RdbValueBucketGetNativeObject = OHOS::NativeRdb::ValuesBucket* (*)(napi_env env, napi_value& value);
 using RdbResultSetProxyNewInstance = napi_value (*)(napi_env env, OHOS::NativeRdb::AbsSharedResultSet* resultSet);
@@ -120,20 +53,14 @@ public:
     explicit JsiPaEngine(int32_t instanceId) : instanceId_(instanceId) {}
     ~JsiPaEngine() override;
 
-    bool Initialize(const RefPtr<BackendDelegate>& delegate) override;
+    bool Initialize(const RefPtr<TaskExecutor>& taskExecutor, BackendType type) override;
+    void SetAssetManager(const RefPtr<AssetManager>& assetManager) override;
+
     // Load and initialize a JS bundle into the JS Framework
     void LoadJs(const std::string& url, const OHOS::AAFwk::Want& want) override;
-    // Fire AsyncEvent on JS
-    void FireAsyncEvent(const std::string& eventId, const std::string& param) override;
-    // Fire SyncEvent on JS
-    void FireSyncEvent(const std::string& eventId, const std::string& param) override;
-
-    RefPtr<GroupJsBridge> GetGroupJsBridge() override;
-    void SetJsMessageDispatcher(const RefPtr<JsMessageDispatcher>& dispatcher) override;
 
     // destroy application instance according packageName
     void DestroyApplication(const std::string& packageName) override;
-    void OnCommandApplication(const std::string& intent, int startId) override;
 
     // data
     int32_t Insert(const Uri& uri, const OHOS::NativeRdb::ValuesBucket& value, const CallingInfo& callingInfo) override;
@@ -171,7 +98,34 @@ public:
     void OnVisibilityChanged(const std::map<int64_t, int32_t>& formEventsMap) override;
     int32_t OnAcquireFormState(const OHOS::AAFwk::Want& want) override;
     bool OnShare(int64_t formId, OHOS::AAFwk::WantParams& wantParams) override;
-    void DumpHeapSnapshot(bool isPrivate) override;
+
+    std::shared_ptr<JsRuntime> GetJsRuntime() const;
+    NativeEngine* GetNativeEngine() const;
+
+    bool GetBlockWaiting() const
+    {
+        return blockWaiting_;
+    }
+
+    void SetBlockWaiting(bool blockWaiting)
+    {
+        blockWaiting_ = blockWaiting;
+    }
+
+    shared_ptr<JsValue> GetAsyncResult() const
+    {
+        return asyncResult_;
+    }
+
+    void SetAsyncResult(shared_ptr<JsValue> asyncResult)
+    {
+        asyncResult_ = asyncResult;
+    }
+
+    void SetDebugMode(bool isDebugMode)
+    {
+        isDebugMode_ = isDebugMode;
+    }
 
 private:
     void SetPostTask(NativeEngine* nativeEngine);
@@ -196,6 +150,15 @@ private:
     void RegisterWorker();
     void RegisterInitWorkerFunc();
     void RegisterAssetFunc();
+    bool InitJsEnv(bool debuggerMode, const std::unordered_map<std::string, void*>& extraNativeObject);
+    void RegisterPaModule();
+    void RegisterConsoleModule();
+    void RegisterConsoleModule(ArkNativeEngine* engine);
+    void EvaluateJsCode();
+    void SetDebuggerPostTask();
+    panda::ecmascript::EcmaVM* GetEcmaVm() const;
+    void InitJsRuntimeOptions(AbilityRuntime::Runtime::Options& options);
+    bool CreateJsRuntime(const AbilityRuntime::Runtime::Options& options);
 
     std::string ExcludeTag(const std::string& jsonString, const std::string& tagString);
     std::string IncludeTag(const std::string& jsonString, const std::string& tagString);
@@ -206,8 +169,14 @@ private:
     std::vector<std::string> ConvertStringVector(napi_env env, napi_value jsValue);
 
     int32_t instanceId_ = 0;
-    ArkNativeEngine* nativeEngine_ = nullptr;
-    RefPtr<JsiPaEngineInstance> engineInstance_;
+    std::unique_ptr<AbilityRuntime::JsRuntime> jsAbilityRuntime_ = nullptr;
+    std::shared_ptr<JsRuntime> runtime_ = nullptr;
+    RefPtr<TaskExecutor> taskExecutor_ = nullptr;
+    RefPtr<JsBackendAssetManager> jsBackendAssetManager_ = nullptr;
+    BackendType type_ = BackendType::SERVICE;
+    bool blockWaiting_ = false;
+    shared_ptr<JsValue> asyncResult_ = nullptr;
+    bool isDebugMode_ = true;
 
     void* libRdb_ = nullptr;
     void* libDataAbility_ = nullptr;

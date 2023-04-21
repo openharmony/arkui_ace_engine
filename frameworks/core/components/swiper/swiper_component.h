@@ -104,6 +104,10 @@ public:
 
     const EventMarker& GetChangeEventId() const;
     void SetChangeEventId(const EventMarker& changeEventId);
+    const EventMarker& GetAnimationStartEventId() const;
+    void SetAnimationStartEventId(const EventMarker& startAnimationEventId);
+    const EventMarker& GetAnimationEndEventId() const;
+    void SetAnimationEndEventId(const EventMarker& animationEndEventId);
     const EventMarker& GetRotationEventId() const;
     void SetRotationEventId(const EventMarker& rotationEventId);
     const EventMarker& GetClickEventId() const;
