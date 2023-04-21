@@ -88,16 +88,23 @@ void HostWindowPattern::InitContent()
         context->SetRSNode(surfaceNode);
     }
 
-    LOGI("Session state is %{public}u.", session_->GetSessionState());
-    if (session_->GetSessionState() == Rosen::SessionState::STATE_DISCONNECT) {
-        CreateStartingNode();
-    } else if (session_->GetSessionState() == Rosen::SessionState::STATE_BACKGROUND) {
-        CreateSnapshotNode();
-    } else {
-        LOGW("Unexpected session state: %{public}u.", session_->GetSessionState());
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        host->AddChild(contentNode_);
+    auto state = session_->GetSessionState();
+    LOGI("Session state is %{public}u.", state);
+    switch (state) {
+        case Rosen::SessionState::STATE_DISCONNECT: {
+            CreateStartingNode();
+            break;
+        }
+        case Rosen::SessionState::STATE_BACKGROUND: {
+            CreateSnapshotNode();
+            break;
+        }
+        default: {
+            auto host = GetHost();
+            CHECK_NULL_VOID(host);
+            host->AddChild(contentNode_);
+            break;
+        }
     }
 }
 
@@ -141,6 +148,7 @@ void HostWindowPattern::CreateSnapshotNode()
 
 void HostWindowPattern::OnConnect()
 {
+    ContainerScope scope(instanceId_);
     CHECK_NULL_VOID(session_);
     auto surfaceNode = session_->GetSurfaceNode();
     CHECK_NULL_VOID(surfaceNode);
@@ -150,16 +158,14 @@ void HostWindowPattern::OnConnect()
     CHECK_NULL_VOID(context);
     context->SetRSNode(surfaceNode);
 
-    if (!HasStartingPage()) {
-        ContainerScope scope(instanceId_);
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->AddChild(contentNode_, 0);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
-        host->AddChild(contentNode_);
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    if (!HasStartingPage()) {
         return;
     }
-
     surfaceNode->SetBufferAvailableCallback([weak = WeakClaim(this)]() {
         LOGI("RSSurfaceNode buffer available callback");
         auto hostWindowPattern = weak.Upgrade();
@@ -177,8 +183,6 @@ void HostWindowPattern::BufferAvailableCallback()
 
     host->RemoveChild(startingNode_);
     startingNode_.Reset();
-
-    host->AddChild(contentNode_);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
