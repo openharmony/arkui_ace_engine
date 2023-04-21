@@ -1053,6 +1053,14 @@ void ViewAbstract::SetInspectorId(const std::string& inspectorId)
     }
 }
 
+void ViewAbstract::SetRestoreId(int32_t restoreId)
+{
+    auto uiNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    if (uiNode) {
+        uiNode->SetRestoreId(restoreId);
+    }
+}
+
 void ViewAbstract::SetDebugLine(const std::string& line)
 {
 #ifdef PREVIEW

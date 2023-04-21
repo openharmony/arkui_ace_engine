@@ -1574,4 +1574,55 @@ void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task)
     taskScheduler_.AddAfterLayoutTask(std::move(task));
 }
 
+void PipelineContext::RestoreNodeInfo(std::unique_ptr<JsonValue> nodeInfo)
+{
+    if (!nodeInfo->IsObject()) {
+        LOGW("restore nodeInfo is invalid");
+    }
+    auto child = nodeInfo->GetChild();
+    while (child->IsObject()) {
+        auto key = child->GetKey();
+        auto value = child->GetString();
+        restoreNodeInfo_.try_emplace(StringUtils::StringToInt(key), value);
+        child = child->GetNext();
+    }
+}
+
+std::unique_ptr<JsonValue> PipelineContext::GetStoredNodeInfo()
+{
+    auto jsonNodeInfo = JsonUtil::Create(false);
+    auto iter = storeNode_.begin();
+    while (iter != storeNode_.end()) {
+        auto node = (iter->second).Upgrade();
+        if (node) {
+            std::string info = node->ProvideRestoreInfo();
+            if (!info.empty()) {
+                jsonNodeInfo->Put(std::to_string(iter->first).c_str(), info.c_str());
+            }
+        }
+        ++iter;
+    }
+    return jsonNodeInfo;
+}
+
+void PipelineContext::StoreNode(int32_t restoreId, const WeakPtr<FrameNode>& node)
+{
+    auto ret = storeNode_.try_emplace(restoreId, node);
+    if (!ret.second) {
+        LOGW("update restore node, id = %{public}d", restoreId);
+        storeNode_[restoreId] = node;
+    }
+}
+
+std::string PipelineContext::GetRestoreInfo(int32_t restoreId)
+{
+    auto iter = restoreNodeInfo_.find(restoreId);
+    if (iter != restoreNodeInfo_.end()) {
+        std::string restoreNodeInfo = iter->second;
+        restoreNodeInfo_.erase(iter);
+        return restoreNodeInfo;
+    }
+    return "";
+}
+
 } // namespace OHOS::Ace::NG
