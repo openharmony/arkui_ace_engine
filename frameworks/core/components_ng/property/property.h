@@ -46,6 +46,8 @@ inline constexpr PropertyChangeFlag PROPERTY_UPDATE_RENDER_BY_CHILD_REQUEST = 1 
 
 inline constexpr PropertyChangeFlag PROPERTY_UPDATE_EVENT = 1 << 8;
 
+inline constexpr PropertyChangeFlag PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD = 1 << 9;
+
 bool CheckNeedRender(PropertyChangeFlag propertyChangeFlag);
 
 bool CheckNeedRequestMeasureAndLayout(PropertyChangeFlag propertyChangeFlag);
@@ -65,6 +67,8 @@ bool CheckLayoutFlag(PropertyChangeFlag propertyChangeFlag);
 bool CheckMeasureSelfFlag(PropertyChangeFlag propertyChangeFlag);
 
 bool CheckMeasureSelfAndParentFlag(PropertyChangeFlag propertyChangeFlag);
+
+bool CheckMeasureSelfAndChildFlag(PropertyChangeFlag propertyChangeFlag);
 
 bool CheckUpdateByChildRequest(PropertyChangeFlag propertyChangeFlag);
 
