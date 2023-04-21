@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_ADAPTER_WINDOW_PREVIEWER_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_ADAPTER_WINDOW_PREVIEWER_H
+#ifndef FOUNDATION_ACE_ADAPTER_PREVIEW_EXTERNAL_WINDOW_WINDOW_PREVIEWER_H
+#define FOUNDATION_ACE_ADAPTER_PREVIEW_EXTERNAL_WINDOW_WINDOW_PREVIEWER_H
 
 #include <chrono>
 #include <condition_variable>
@@ -26,7 +26,6 @@
 #include <ui/rs_surface_node.h>
 #include <vector>
 
-#include "adapter/preview/entrance/rs_ace_view.h"
 #include "base/thread/sem_queue.h"
 #include "base/utils/time_util.h"
 #include "core/common/window.h"
@@ -95,6 +94,8 @@ public:
             vsyncCallbacks_.clear();
         }
     }
+
+private:
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
     std::vector<std::shared_ptr<VsyncCallback>> vsyncCallbacks_;
     std::vector<std::shared_ptr<VsyncCallback>> pendingVsyncCallbacks_;
@@ -105,4 +106,4 @@ public:
 
 } // namespace Rosen
 } // namespace OHOS
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_ADAPTER_WINDOW_PREVIEWER_H
+#endif // FOUNDATION_ACE_ADAPTER_PREVIEW_EXTERNAL_WINDOW_WINDOW_PREVIEWER_H
