@@ -1085,23 +1085,24 @@ bool PipelineContext::RequestDefaultFocus()
     auto mainFocusHub = mainNode->GetFocusHub();
     CHECK_NULL_RETURN(mainFocusHub, false);
     if (mainFocusHub->IsDefaultHasFocused()) {
-        LOGD("RequestDefaultFocus: %{public}s/%{public}d 's default focus node has be focused.",
-            mainNode->GetTag().c_str(), mainNode->GetId());
-        return false;
-    }
-    auto defaultFocusNode = mainFocusHub->GetChildFocusNodeByType();
-    if (!defaultFocusNode) {
-        LOGD("RequestDefaultFocus: %{public}s/%{public}d do not has default focus node.", mainNode->GetTag().c_str(),
+        LOGD("MainNode: %{public}s/%{public}d 's default focus node has be focused.", mainNode->GetTag().c_str(),
             mainNode->GetId());
         return false;
     }
+    auto defaultFocusNodeWeak = mainFocusHub->GetDefaultFocusNode();
+    auto defaultFocusNode = defaultFocusNodeWeak.Upgrade();
+    if (!defaultFocusNode) {
+        return false;
+    }
     if (!defaultFocusNode->IsFocusableWholePath()) {
-        LOGD("RequestDefaultFocus: %{public}s/%{public}d 's default focus node is not focusable.",
-            mainNode->GetTag().c_str(), mainNode->GetId());
+        LOGD("MainNode: %{public}s/%{public}d 's default focus node is not focusable.", mainNode->GetTag().c_str(),
+            mainNode->GetId());
         return false;
     }
     mainFocusHub->SetIsDefaultHasFocused(true);
-    LOGD("Focus: request default focus node %{public}s", defaultFocusNode->GetFrameName().c_str());
+    LOGD("MainNode: %{public}s/%{public}d request default focus node: %{public}s/%{public}d",
+        mainNode->GetTag().c_str(), mainNode->GetId(), defaultFocusNode->GetFrameName().c_str(),
+        defaultFocusNode->GetFrameId());
     return defaultFocusNode->RequestFocusImmediately();
 }
 
@@ -1271,10 +1272,11 @@ void PipelineContext::OnHide()
 
 void PipelineContext::WindowFocus(bool isFocus)
 {
+    LOGI("WindowFocus: windowId: %{public}d, onFocus: %{public}d, onShow: %{public}d.", windowId_, onFocus_, onShow_);
     CHECK_RUN_ON(UI);
     onFocus_ = isFocus;
     if (!isFocus) {
-        LOGD("WindowFocus: isFocus_ is %{public}d. Lost all focus.", onFocus_);
+        LOGD("WindowFocus: onFocus_ is %{public}d. Lost all focus.", onFocus_);
         RootLostFocus(BlurReason::WINDOW_BLUR);
         NotifyPopupDismiss();
         OnVirtualKeyboardAreaChange(Rect());
@@ -1282,8 +1284,6 @@ void PipelineContext::WindowFocus(bool isFocus)
     if (onFocus_ && onShow_) {
         LOGD("WindowFocus: onFocus_ and onShow_ are both true. Do FlushFocus().");
         FlushFocus();
-    } else {
-        LOGD("WindowFocus: onFocus_ is %{public}d, onShow_ is %{public}d.", onFocus_, onShow_);
     }
     FlushWindowFocusChangedCallback(isFocus);
 }
