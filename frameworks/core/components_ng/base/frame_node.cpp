@@ -73,6 +73,8 @@ FrameNode::~FrameNode()
     if (pipeline) {
         pipeline->RemoveOnAreaChangeNode(GetId());
         pipeline->RemoveVisibleAreaChangeNode(GetId());
+        pipeline->ChangeMouseStyle(GetId(), MouseFormat::DEFAULT);
+        pipeline->FreeMouseStyleHoldNode(GetId());
     }
 }
 
