@@ -385,27 +385,14 @@ void ImagePattern::OnNotifyMemoryLevel(int32_t level)
     if (isShow_) {
         return;
     }
-    // TODO: clean cache data when cache mechanism is ready
-    // Step1: drive stateMachine to reset loading procedure
-    if (altLoadingCtx_) {
-        altLoadingCtx_->ResetLoading();
-    }
-    if (loadingCtx_) {
-        loadingCtx_->ResetLoading();
-    }
 
-    // Step2: clean data and reset params
-    // clear src data
+    // clean image data
+    loadingCtx_ = nullptr;
     image_ = nullptr;
-    srcRect_ = RectF();
-    dstRect_ = RectF();
-    // clear alt data
     altLoadingCtx_ = nullptr;
     altImage_ = nullptr;
-    altDstRect_.reset();
-    altSrcRect_.reset();
 
-    // Step3: clean rs node to release the sk_sp<SkImage> held by it
+    // clean rs node to release the sk_sp<SkImage> held by it
     // TODO: release PixelMap resource when use PixelMap resource to draw image
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
