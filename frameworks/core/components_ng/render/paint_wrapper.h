@@ -85,6 +85,8 @@ public:
         return geometryNode_->GetContentOffset();
     }
 
+    void FlushOverlayModifier();
+
 private:
     WeakPtr<RenderContext> renderContext_;
     RefPtr<GeometryNode> geometryNode_;

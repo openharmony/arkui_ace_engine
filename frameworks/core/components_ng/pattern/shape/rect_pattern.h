@@ -33,7 +33,10 @@ public:
     ~RectPattern() override = default;
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        return MakeRefPtr<RectPaintMethod>(GetAncestorPaintProperty());
+        if (!shapeOverlayModifier_) {
+            shapeOverlayModifier_ = MakeRefPtr<ShapeOverlayModifier>();
+        }
+        return MakeRefPtr<RectPaintMethod>(GetAncestorPaintProperty(), shapeOverlayModifier_);
     }
     RefPtr<PaintProperty> CreatePaintProperty() override
     {
