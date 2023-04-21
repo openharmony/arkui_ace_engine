@@ -57,7 +57,7 @@
 #include "pixel_map_napi.h"
 #endif
 
-#ifndef OHOS_PALTFORM
+#ifndef OHOS_PLATFORM
 extern const char _binary_strip_native_min_abc_start[];
 extern const char _binary_strip_native_min_abc_end[];
 #endif
