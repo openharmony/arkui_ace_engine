@@ -171,7 +171,7 @@ void JSProgress::SetCircularStyle(const JSCallbackInfo& info)
 
     auto jsScaleCount = paramObject->GetProperty("scaleCount");
     auto scaleCount = jsScaleCount->IsNumber() ? jsScaleCount->ToNumber<int32_t>() : theme->GetScaleNumber();
-    if (scaleCount > 0.0) {
+    if (scaleCount > 1.0) {
         ProgressModel::GetInstance()->SetScaleCount(scaleCount);
     } else {
         ProgressModel::GetInstance()->SetScaleCount(theme->GetScaleNumber());

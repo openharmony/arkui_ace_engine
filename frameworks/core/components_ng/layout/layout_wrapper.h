@@ -90,19 +90,11 @@ public:
         return layoutAlgorithm_;
     }
 
-    // Called before layout, perform additional layout constraints or other layout parameters modifications to adjust
-    // the layout as needed.
-    void WillLayout();
-
     // This will call child and self measure process.
     void Measure(const std::optional<LayoutConstraintF>& parentConstraint);
 
     // Called to perform layout children.
     void Layout();
-
-    // Called after layout, perform final portion of additional layout-related tasks, such as final adjustments of
-    // geometry position, clean up temporary changes.
-    void DidLayout(const RefPtr<LayoutWrapper>& root);
 
     const RefPtr<GeometryNode>& GetGeometryNode() const
     {
@@ -230,11 +222,6 @@ public:
 
     void BuildLazyItem();
 
-    void RegisterFinishCallback(std::function<void()>&& finishCallback)
-    {
-        finishCallbacks_.emplace_back(finishCallback);
-    }
-
     std::pair<int32_t, int32_t> GetLazyBuildRange();
 
 private:
@@ -265,8 +252,6 @@ private:
 
     // When the location property is set, it departs from the layout flow.
     bool outOfLayout_ = false;
-
-    std::list<std::function<void()>> finishCallbacks_;
 
     ACE_DISALLOW_COPY_AND_MOVE(LayoutWrapper);
 };

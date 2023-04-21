@@ -41,7 +41,9 @@ class MenuPattern : public Pattern {
     DECLARE_ACE_TYPE(MenuPattern, Pattern);
 
 public:
-    explicit MenuPattern(int32_t targetId, MenuType type) : targetId_(targetId), type_(type) {}
+    MenuPattern(int32_t targetId, const std::string& tag, MenuType type)
+        : targetId_(targetId), targetTag_(tag), type_(type)
+    {}
     ~MenuPattern() override = default;
 
     bool IsAtomicNode() const override
@@ -72,7 +74,8 @@ public:
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         RefPtr<MenuLayoutAlgorithm> navigationMenu = MakeRefPtr<NavigationMenuLayoutAlgorithm>();
-        return (type_ == MenuType::NAVIGATION_MENU) ? navigationMenu : MakeRefPtr<MenuLayoutAlgorithm>();
+        return (type_ == MenuType::NAVIGATION_MENU) ? navigationMenu
+                                                    : MakeRefPtr<MenuLayoutAlgorithm>(targetId_, targetTag_);
     }
 
     bool IsContextMenu() const
@@ -169,6 +172,7 @@ private:
     RefPtr<TouchEventImpl> onTouch_;
     std::optional<Offset> lastTouchOffset_;
     int32_t targetId_ = -1;
+    std::string targetTag_ = "";
     MenuType type_ = MenuType::MENU;
 
     RefPtr<FrameNode> parentMenuItem_;

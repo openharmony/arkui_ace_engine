@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TEXT_OVERLAY_FLUTTER_RENDER_TEXT_OVERLAY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TEXT_OVERLAY_FLUTTER_RENDER_TEXT_OVERLAY_H
 
-#include "third_party/skia/include/core/SkCanvas.h"
+#include "include/core/SkCanvas.h"
 
 #include "core/components/text_overlay/render_text_overlay.h"
 #include "core/pipeline/base/flutter_render_context.h"

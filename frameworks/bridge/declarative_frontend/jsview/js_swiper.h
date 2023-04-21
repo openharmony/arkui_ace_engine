@@ -57,6 +57,7 @@ public:
     static void GetFontContent(const JSRef<JSVal>& font, bool isSelected, SwiperDigitalParameters& digitalParameters);
     static SwiperParameters GetDotIndicatorInfo(const JSRef<JSObject>& obj);
     static SwiperDigitalParameters GetDigitIndicatorInfo(const JSRef<JSObject>& obj);
+    static void SetIsIndicatorCustomSize(const Dimension& dimPosition, bool parseOk);
 };
 
 class JSSwiperController final : public Referenced {

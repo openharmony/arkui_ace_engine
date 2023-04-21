@@ -20,7 +20,7 @@
 #include <regex>
 #include <string>
 
-#include "third_party/skia/include/core/SkImage.h"
+#include "include/core/SkImage.h"
 
 #include "base/geometry/size.h"
 #include "base/memory/ace_type.h"

@@ -18,7 +18,7 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 pattern_test_output_path = "ace_engine/components"
 gestures_test_output_path = "ace_engine/gestures"
 event_test_output_path = "ace_engine/evnets"
-base_test_outout_path = "ace_engine/infrastrues"
+base_test_output_path = "ace_engine/base"
 syntax_test_output_path = "ace_engine/syntaxs"
 image_test_output_path = "ace_engine/image"
 basic_test_output_path = "ace_engine/basic"
@@ -26,6 +26,8 @@ manager_test_output_path = "ace_engine/manager"
 interface_test_output_path = "ace_engine/interfaces"
 accessibility_test_output_path = "ace_engine/accessibility"
 property_test_output_path = "ace_engine/property"
+layout_test_output_path = "ace_engine/layout"
+svg_test_output_path = "ace_engine/svg"
 
 test_pattern_sources = [
   # base
@@ -215,6 +217,8 @@ template("ace_unittest") {
   } else if (type == "manager") {
   } else if (type == "interface") {
   } else if (type == "accessibility") {
+  } else if (type == "layout") {
+  } else if (type == "svg") {
   } else {
     assert(false)
   }

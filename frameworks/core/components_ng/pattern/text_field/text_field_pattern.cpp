@@ -176,6 +176,9 @@ TextFieldPattern::~TextFieldPattern()
         LOGI("Destruction of text field, close input method.");
         MiscServices::InputMethodController::GetInstance()->HideTextInput();
         MiscServices::InputMethodController::GetInstance()->Close();
+#else
+        connection_->Close(GetInstanceId());
+        connection_ = nullptr;
 #endif
     }
 }
@@ -276,6 +279,14 @@ void TextFieldPattern::UpdateCaretInfoToController() const
     MiscServices::InputMethodController::GetInstance()->OnSelectionChange(
         StringUtils::Str8ToStr16(value.text), textSelector_.GetStart(), textSelector_.GetEnd());
 
+#else
+    if (HasConnection()) {
+        TextEditingValue value;
+        value.text = textEditingValue_.text;
+        value.hint = GetPlaceHolder();
+        value.selection.Update(textSelector_.baseOffset, textSelector_.destinationOffset);
+        connection_->SetEditingState(value, GetInstanceId());
+    }
 #endif
 }
 
@@ -928,6 +939,7 @@ void TextFieldPattern::AdjustTextSelectionRectOffsetX()
         }
     }
     textRect_.SetLeft(textRect_.GetX() + dx);
+    return;
 }
 
 void TextFieldPattern::HandleExtendAction(int32_t action)
@@ -1235,6 +1247,24 @@ void TextFieldPattern::HandleOnPaste()
     CHECK_NULL_VOID(clipboard_);
     clipboard_->GetData(pasteCallback);
 #endif
+}
+
+void TextFieldPattern::StripNextLine(std::wstring& data)
+{
+    CHECK_NULL_VOID(!(data.empty() || IsTextArea()));
+    std::wstring result;
+    bool dataChanged = false;
+    int32_t dataPtr = 0;
+    while (dataPtr < static_cast<int32_t>(data.length())) {
+        if (data[dataPtr] != WIDE_NEWLINE[0]) {
+            result += data[dataPtr];
+        } else {
+            dataChanged = true;
+        }
+        dataPtr++;
+    }
+    CHECK_NULL_VOID(dataChanged);
+    data = result;
 }
 
 void TextFieldPattern::HandleOnCut()
@@ -2394,17 +2424,39 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
             LOGE("Request open soft keyboard failed because input method is null.");
             return false;
         }
-        if (context) {
-            LOGI("RequestKeyboard set calling window id is : %{public}d", context->GetWindowId());
-            inputMethod->SetCallingWindow(context->GetWindowId());
-        }
         MiscServices::InputAttribute inputAttribute;
         inputAttribute.inputPattern = (int32_t)keyboard_;
         inputAttribute.enterKeyType = (int32_t)GetTextInputActionValue(TextInputAction::DONE);
         inputMethod->Attach(textChangeListener_, needShowSoftKeyboard, inputAttribute);
+        if (context) {
+            LOGI("RequestKeyboard set calling window id is : %{public}d", context->GetWindowId());
+            inputMethod->SetCallingWindow(context->GetWindowId());
+        }
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
         imeAttached_ = true;
 #endif
+#else
+        if (!HasConnection()) {
+            TextInputConfiguration config;
+            config.type = keyboard_;
+            config.action = GetTextInputActionValue();
+            config.obscureText = textObscured_;
+            LOGI("Request keyboard configuration: type=%{private}d action=%{private}d obscureText=%{private}d",
+                keyboard_, action_, textObscured_);
+            connection_ = TextInputProxy::GetInstance().Attach(
+                WeakClaim(this), config, context->GetTaskExecutor(), GetInstanceId());
+
+            if (!HasConnection()) {
+                LOGE("Get TextInput connection error");
+                return false;
+            }
+            TextEditingValue value;
+            value.text = textEditingValue_.text;
+            value.hint = GetPlaceHolder();
+            value.selection.Update(textSelector_.baseOffset, textSelector_.destinationOffset);
+            connection_->SetEditingState(value, GetInstanceId());
+        }
+        connection_->Show(isFocusViewChanged, GetInstanceId());
 #endif
     }
     return true;
@@ -2431,6 +2483,11 @@ bool TextFieldPattern::CloseKeyboard(bool forceClose)
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
         imeAttached_ = false;
 #endif
+#else
+        if (HasConnection()) {
+            connection_->Close(GetInstanceId());
+            connection_ = nullptr;
+        }
 #endif
         return true;
     }
@@ -2941,6 +2998,39 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
     eventHub->FireOnSubmit(static_cast<int32_t>(action));
     CloseKeyboard(forceCloseKeyboard);
+}
+
+void TextFieldPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent)
+{
+    textEditingValue_.text = value->text;
+    textEditingValue_.caretPosition = value->selection.baseOffset;
+    SetEditingValueToProperty(textEditingValue_.text);
+    UpdateEditingValueToRecord();
+    caretUpdateType_ = CaretUpdateType::INPUT;
+    selectionMode_ = SelectionMode::NONE;
+    CloseSelectOverlay();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    // If the parent node is a Search, the Search callback is executed.
+    if (IsSearchParentNode()) {
+        auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
+        auto eventHub = parentFrameNode->GetEventHub<SearchEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->UpdateChangeEvent(textEditingValue_.text);
+        parentFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        return;
+    }
+
+    if (needFireChangeEvent) {
+        auto eventHub = host->GetEventHub<TextFieldEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->FireOnChange(textEditingValue_.text);
+    }
+
+    auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
+                                                                                 : PROPERTY_UPDATE_MEASURE);
 }
 
 void TextFieldPattern::OnValueChanged(bool needFireChangeEvent, bool needFireSelectChangeEvent) {}

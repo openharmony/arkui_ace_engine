@@ -25,12 +25,14 @@
 #include "core/components_ng/test/mock/rosen/testing_color_matrix.h"
 #include "core/components_ng/test/mock/rosen/testing_filter.h"
 #include "core/components_ng/test/mock/rosen/testing_font_collection.h"
+#include "core/components_ng/test/mock/rosen/testing_image.h"
 #include "core/components_ng/test/mock/rosen/testing_mask_filter.h"
 #include "core/components_ng/test/mock/rosen/testing_path.h"
 #include "core/components_ng/test/mock/rosen/testing_path_effect.h"
 #include "core/components_ng/test/mock/rosen/testing_pen.h"
 #include "core/components_ng/test/mock/rosen/testing_point.h"
 #include "core/components_ng/test/mock/rosen/testing_point3.h"
+#include "core/components_ng/test/mock/rosen/testing_sampling_options.h"
 #include "core/components_ng/test/mock/rosen/testing_shader_effect.h"
 #include "core/components_ng/test/mock/rosen/testing_shadowflags.h"
 #include "core/components_ng/test/mock/rosen/testing_text_style.h"
@@ -43,6 +45,7 @@ using RSCanvas = Testing::TestingCanvas;
 using RSPen = Testing::TestingPen;
 using RSBrush = Testing::TestingBrush;
 using RSPath = Testing::TestingPath;
+using RSImage = Testing::TestingImage;
 using RSShaderEffect = Testing::TestingShaderEffect;
 using RSPathDashStyle = Testing::TestingPathDashStyle;
 using RSPathDirection = Testing::TestingPathDirection;
@@ -52,6 +55,7 @@ using RSColor = Testing::TestingColor;
 using RSMaskFilter = Testing::TestingMaskFilter;
 using RSBlurType = Testing::BlurType;
 using RSTileMode = Testing::TileMode;
+using RSRRect = Testing::TestingRect;
 using RSBitmap = Testing::TestingBitmap;
 using RSBitmapFormat = Testing::BitmapFormat;
 using RSColorType = Testing::ColorType;
@@ -61,6 +65,7 @@ using RSCamera3D = Testing::TestingCamera;
 using RSMatrix = Testing::TestingMatrix;
 using RSClipOp = Testing::ClipOp;
 using RSPoint = Testing::TestingPoint;
+using RSRPoint = Testing::TestingPoint;
 using RSPoint3 = Testing::TestingPoint3;
 using RSShadowFlags = Testing::TestingShadowFlags;
 using RSRect = Testing::TestingRect;
@@ -80,6 +85,7 @@ using RSFontCollection = Testing::TestingFontCollection;
 using RSFontWeight = Testing::TestingFontWeight;
 using RSTextDecoration = Testing::TestingTextDecoration;
 using RSTextDecorationStyle = Testing::TestingTextDecorationStyle;
+using RSSamplingOptions = Testing::TestingSamplingOptions;
 using RSFontStyle = Testing::TestingFontStyle;
 using RSTextBaseline = Testing::TestingTextBaseline;
 using RSColorFilter = Testing::TestingColorFilter;

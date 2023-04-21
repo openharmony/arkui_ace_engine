@@ -16,18 +16,22 @@
 
 #include <cstdint>
 
-#include "flutter/third_party/txt/src/txt/paragraph_builder.h"
-#include "flutter/third_party/txt/src/txt/paragraph_style.h"
+#include "txt/paragraph_builder.h"
+#include "txt/paragraph_style.h"
 
-#include "third_party/skia/include/core/SkPaint.h"
-#include "third_party/skia/include/core/SkPoint.h"
-#include "third_party/skia/include/core/SkRRect.h"
+#include "include/core/SkPaint.h"
+#include "include/core/SkPoint.h"
+#include "include/core/SkRRect.h"
 
 #include "base/i18n/localization.h"
 #include "base/utils/string_utils.h"
 #include "core/components/calendar/rosen_render_calendar.h"
 #include "core/components/font/constants_converter.h"
+#ifndef NEW_SKIA
 #include "core/components/font/flutter_font_collection.h"
+#else
+#include "core/components/font/rosen_font_collection.h"
+#endif
 #include "core/pipeline/base/rosen_render_context.h"
 
 namespace OHOS::Ace {
@@ -84,7 +88,11 @@ void RosenRenderMultimodal::UpdateParagraph(const Offset& offset, const std::str
     txt::ParagraphStyle style;
     style.max_lines = 1;
     style.ellipsis = StringUtils::Str8ToStr16(ELLIPSIS);
+#ifndef NEW_SKIA
     auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
+#else
+    auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
+#endif
     if (!fontCollection) {
         LOGW("UpdateParagraph: fontCollection is null");
         return;

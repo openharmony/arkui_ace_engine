@@ -73,9 +73,9 @@ const Color DEFAULT_MASK_COLOR = Color::FromARGB(0, 0, 0, 0);
 // dialog animation params
 const RefPtr<Curve> SHOW_SCALE_ANIMATION_CURVE = AceType::MakeRefPtr<CubicCurve>(0.38f, 1.33f, 0.6f, 1.0f);
 
-void OnDialogCloseEvent(const RefPtr<UINode>& root, const RefPtr<FrameNode>& node)
+void OnDialogCloseEvent(const RefPtr<FrameNode>& node)
 {
-    CHECK_NULL_VOID(root && node);
+    CHECK_NULL_VOID(node);
     auto dialogPattern = node->GetPattern<DialogPattern>();
     CHECK_NULL_VOID(dialogPattern);
     auto option = dialogPattern->GetCloseAnimation().value_or(AnimationOption());
@@ -90,6 +90,8 @@ void OnDialogCloseEvent(const RefPtr<UINode>& root, const RefPtr<FrameNode>& nod
         onFinish();
     }
 
+    auto root = node->GetParent();
+    CHECK_NULL_VOID(root);
     root->RemoveChild(node);
     root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     auto lastChild = AceType::DynamicCast<FrameNode>(root->GetLastChild());
@@ -120,6 +122,7 @@ void OverlayManager::OpenDialogAnimation(const RefPtr<FrameNode>& node)
     CHECK_NULL_VOID(root && node);
     node->MountToParent(root);
     root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FocusOverlayNode(node);
 
     AnimationOption option;
     // default opacity animation params
@@ -137,8 +140,6 @@ void OverlayManager::OpenDialogAnimation(const RefPtr<FrameNode>& node)
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(node && overlayManager);
             ContainerScope scope(id);
-            overlayManager->FocusOverlayNode(node);
-
             if (onFinish != nullptr) {
                 onFinish();
             }
@@ -165,6 +166,8 @@ void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(theme);
+    // blur dialog node, set focus to last page
+    BlurOverlayNode();
 
     // default opacity animation params
     AnimationOption option;
@@ -176,19 +179,12 @@ void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
     auto dialogPattern = node->GetPattern<DialogPattern>();
     option = dialogPattern->GetCloseAnimation().value_or(option);
 
-    option.SetOnFinishEvent([rootWk = rootNodeWeak_, nodeWk = WeakClaim(RawPtr(node)), id = Container::CurrentId()] {
+    option.SetOnFinishEvent([nodeWk = WeakClaim(RawPtr(node)), id = Container::CurrentId()] {
         ContainerScope scope(id);
-        auto root = rootWk.Upgrade();
         auto node = nodeWk.Upgrade();
-        CHECK_NULL_VOID(root && node);
+        CHECK_NULL_VOID(node);
 
-        OnDialogCloseEvent(root, node);
-
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto overlayManager = pipeline->GetOverlayManager();
-        CHECK_NULL_VOID(overlayManager);
-        overlayManager->BlurOverlayNode();
+        OnDialogCloseEvent(node);
     });
     auto ctx = node->GetRenderContext();
     CHECK_NULL_VOID(ctx);
@@ -219,6 +215,7 @@ void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu, bool isInS
             CHECK_NULL_VOID_NOLOG(menu && overlayManager);
             ContainerScope scope(id);
             overlayManager->FocusOverlayNode(menu, isInSubWindow);
+            overlayManager->CallOnShowMenuCallback();
         });
 
     auto context = menu->GetRenderContext();
@@ -249,15 +246,19 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu)
     option.SetCurve(Curves::FAST_OUT_SLOW_IN);
     option.SetDuration(MENU_ANIMATION_DURATION);
     option.SetFillMode(FillMode::FORWARDS);
-    option.SetOnFinishEvent([rootWeak = rootNodeWeak_, menuWK = WeakClaim(RawPtr(menu)), id = Container::CurrentId()] {
+    option.SetOnFinishEvent([rootWeak = rootNodeWeak_, menuWK = WeakClaim(RawPtr(menu)), id = Container::CurrentId(),
+                                weak = WeakClaim(this)] {
         auto menu = menuWK.Upgrade();
         auto root = rootWeak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(menu && root);
+        auto overlayManager = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(menu && root && overlayManager);
+        overlayManager->CallOnHideMenuCallback();
+
         ContainerScope scope(id);
         auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
         // clear contextMenu then return
         if (menuWrapperPattern && menuWrapperPattern->IsContextMenu()) {
-            SubwindowManager::GetInstance()->ClearMenuNG();
+            SubwindowManager::GetInstance()->ClearMenuNG(id);
             return;
         }
         root->RemoveChild(menu);
@@ -440,7 +441,7 @@ void OverlayManager::UpdatePopupNode(int32_t targetId, const PopupInfo& popupInf
     if (iter != rootChildren.end()) {
         // Pop popup
         CHECK_NULL_VOID_NOLOG(popupInfo.isCurrentOnShow);
-        LOGI("OverlayManager: popup begin pop");
+        LOGI("OverlayManager: Popup begin pop");
         popupInfo.popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
         rootNode->RemoveChild(popupMap_[targetId].popupNode);
 #ifdef ENABLE_DRAG_FRAMEWORK
@@ -451,7 +452,7 @@ void OverlayManager::UpdatePopupNode(int32_t targetId, const PopupInfo& popupInf
     } else {
         // Push popup
         CHECK_NULL_VOID_NOLOG(!popupInfo.isCurrentOnShow);
-        LOGI("OverlayManager: popup begin push");
+        LOGI("OverlayManager: Popup begin push");
         popupInfo.popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(true);
         auto hub = popupInfo.popupNode->GetEventHub<BubbleEventHub>();
         if (!popupInfo.isBlockEvent && hub) {
@@ -496,7 +497,7 @@ void OverlayManager::RemoveIndexerPopup()
 
 void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
 {
-    LOGI("begin pop");
+    LOGI("OverlayManager:: Hide Popup");
     popupMap_[targetId] = popupInfo;
     CHECK_NULL_VOID_NOLOG(popupInfo.markNeedUpdate);
     popupMap_[targetId].markNeedUpdate = false;
@@ -611,7 +612,13 @@ void OverlayManager::ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPt
 // subwindow only contains one menu instance.
 void OverlayManager::ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu)
 {
-    if (!ShowMenuHelper(menu, targetId, offset)) {
+    auto menuOffset = offset;
+    auto currentSubwindow = SubwindowManager::GetInstance()->GetCurrentWindow();
+    if (currentSubwindow) {
+        auto subwindowRect = currentSubwindow->GetRect();
+        menuOffset -= subwindowRect.GetOffset();
+    }
+    if (!ShowMenuHelper(menu, targetId, menuOffset)) {
         LOGW("show menu failed");
         return;
     }
@@ -660,9 +667,6 @@ void OverlayManager::HideMenu(int32_t targetId)
         return;
     }
     PopMenuAnimation(menuMap_[targetId]);
-    if (onHideMenuCallback_) {
-        onHideMenuCallback_();
-    }
     BlurOverlayNode();
 }
 
@@ -674,9 +678,10 @@ void OverlayManager::HideAllMenus()
         return;
     }
     auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(rootNode);
     for (const auto& child : rootNode->GetChildren()) {
         auto node = DynamicCast<FrameNode>(child);
-        if (node->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
+        if (node && node->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
             PopMenuAnimation(node);
             BlurOverlayNode();
         }
@@ -893,7 +898,7 @@ void OverlayManager::FocusOverlayNode(const RefPtr<FrameNode>& overlayNode, bool
     CHECK_NULL_VOID(overlayNode);
     auto focusHub = overlayNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->RequestFocusImmediately();
+    focusHub->RequestFocus();
 
     if (isInSubWindow) {
         // no need to set page lost focus in sub window.

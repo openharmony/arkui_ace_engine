@@ -15,7 +15,7 @@
 
 #include "core/components/progress/flutter_render_bubble_progress.h"
 
-#include "third_party/skia/include/core/SkMaskFilter.h"
+#include "include/core/SkMaskFilter.h"
 
 #include "core/pipeline/base/scoped_canvas_state.h"
 #include "core/pipeline/layers/offset_layer.h"

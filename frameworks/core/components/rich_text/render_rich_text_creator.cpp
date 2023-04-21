@@ -12,8 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#ifndef NEW_SKIA
 #include "core/components/rich_text/flutter_render_rich_text.h"
+#endif
 #include "core/components/rich_text/rosen_render_rich_text.h"
 
 namespace OHOS::Ace {
@@ -27,7 +28,11 @@ RefPtr<RenderNode> RenderRichText::Create()
         return nullptr;
 #endif
     } else {
+#ifndef NEW_SKIA
         return AceType::MakeRefPtr<FlutterRenderRichText>();
+#else
+        return nullptr;
+#endif
     }
 }
 

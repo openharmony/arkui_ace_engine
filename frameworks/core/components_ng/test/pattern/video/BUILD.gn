@@ -13,9 +13,10 @@
 
 import("//build/test.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("video_pattern_test_ng") {
-  module_out_path = "$test_output_path/video"
+  module_out_path = pattern_test_output_path
 
   include_dirs = [
     "//commonlibrary/c_utils/base/include",
@@ -163,6 +164,7 @@ ohos_unittest("video_pattern_test_ng") {
     # mock
 
     "$ace_root/frameworks/base/test/mock/mock_drag_window.cpp",
+    "$ace_root/frameworks/base/test/mock/mock_pixel_map.cpp",
     "$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
     "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/animation/mock_geometry_transition.cpp",

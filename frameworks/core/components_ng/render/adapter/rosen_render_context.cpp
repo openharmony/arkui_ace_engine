@@ -15,9 +15,6 @@
 
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 
-#include <memory>
-#include <string>
-
 #include "include/utils/SkParsePath.h"
 #include "render_service_base/include/property/rs_properties_def.h"
 #include "render_service_client/core/modifier/rs_property_modifier.h"
@@ -72,7 +69,9 @@ namespace {
 RefPtr<PixelMap> g_pixelMap {};
 std::mutex g_mutex;
 std::condition_variable thumbnailGet;
-float ConvertDimensionToScaleBySize(const Dimension& dimension, float size)
+} // namespace
+
+float RosenRenderContext::ConvertDimensionToScaleBySize(const Dimension& dimension, float size)
 {
     if (dimension.Unit() == DimensionUnit::PERCENT) {
         return static_cast<float>(dimension.Value());
@@ -80,7 +79,6 @@ float ConvertDimensionToScaleBySize(const Dimension& dimension, float size)
     const float defaultPivot = 0.5f;
     return size > 0.0f ? static_cast<float>(dimension.ConvertToPx() / size) : defaultPivot;
 }
-} // namespace
 
 RosenRenderContext::~RosenRenderContext()
 {
@@ -103,7 +101,7 @@ void RosenRenderContext::StopRecordingIfNeeded()
     }
 }
 
-void RosenRenderContext::OnNodeAppear()
+void RosenRenderContext::OnNodeAppear(bool recursive)
 {
     isDisappearing_ = false;
     // because when call this function, the size of frameNode is not calculated. We need frameNode size
@@ -111,10 +109,14 @@ void RosenRenderContext::OnNodeAppear()
     if (!propTransitionAppearing_ && !transitionEffect_) {
         return;
     }
+
+    // pending transition in animation, will start on first layout
     firstTransitionIn_ = true;
+    // only start transition on the break point of render node tree.
+    transitionWithAnimation_ = !recursive;
 }
 
-void RosenRenderContext::OnNodeDisappear()
+void RosenRenderContext::OnNodeDisappear(bool recursive)
 {
     isDisappearing_ = true;
     if (!propTransitionDisappearing_ && !transitionEffect_) {
@@ -122,7 +124,10 @@ void RosenRenderContext::OnNodeDisappear()
     }
     CHECK_NULL_VOID(rsNode_);
     auto rect = GetPaintRectWithoutTransform();
-    NotifyTransitionInner(rect.GetSize(), false);
+    // only start transition on the break point of render node tree.
+    if (recursive == false) {
+        NotifyTransitionInner(rect.GetSize(), false);
+    }
 }
 
 void RosenRenderContext::SetPivot(float xPivot, float yPivot)
@@ -200,7 +205,11 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
 
     if (firstTransitionIn_) {
         // need to perform transitionIn early so not influence the following SetPivot
-        NotifyTransitionInner(paintRect.GetSize(), true);
+        if (transitionWithAnimation_) {
+            NotifyTransitionInner(paintRect.GetSize(), true);
+        } else {
+            RSNode::ExecuteWithoutAnimation([this, &paintRect]() { NotifyTransitionInner(paintRect.GetSize(), true); });
+        }
         firstTransitionIn_ = false;
     }
 
@@ -757,6 +766,12 @@ void RosenRenderContext::OnAccessibilityFocusUpdate(bool isAccessibilityFocus)
     }
     uiNode->OnAccessibilityEvent(isAccessibilityFocus ? AccessibilityEventType::ACCESSIBILITY_FOCUSED
                                                       : AccessibilityEventType::ACCESSIBILITY_FOCUS_CLEARED);
+}
+
+void RosenRenderContext::OnFreezeUpdate(bool isFreezed)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetFreeze(isFreezed);
 }
 
 void RosenRenderContext::PaintAccessibilityFocus()
@@ -1708,14 +1723,14 @@ void RosenRenderContext::PaintProgressMask()
         moonProgressModifier_ = std::make_shared<MoonProgressModifier>();
         rsNode_->AddModifier(moonProgressModifier_);
     }
-    auto prgress = GetProgressMaskValue();
+    auto progress = GetProgressMaskValue();
     moonProgressModifier_->InitRatio();
-    moonProgressModifier_->SetMaskColor(LinearColor(prgress->GetColor()));
-    moonProgressModifier_->SetMaxValue(prgress->GetMaxValue());
-    if (prgress->GetValue() > moonProgressModifier_->GetMaxValue()) {
-        prgress->SetValue(moonProgressModifier_->GetMaxValue());
+    moonProgressModifier_->SetMaskColor(LinearColor(progress->GetColor()));
+    moonProgressModifier_->SetMaxValue(progress->GetMaxValue());
+    if (progress->GetValue() > moonProgressModifier_->GetMaxValue()) {
+        progress->SetValue(moonProgressModifier_->GetMaxValue());
     }
-    moonProgressModifier_->SetValue(prgress->GetValue());
+    moonProgressModifier_->SetValue(progress->GetValue());
 }
 
 void RosenRenderContext::SetClipBoundsWithCommands(const std::string& commands)
@@ -1767,7 +1782,7 @@ void RosenRenderContext::OnClipMaskUpdate(const RefPtr<BasicShape>& /*basicShape
     RequestNextFrame();
 }
 
-void RosenRenderContext::OnProgressMaskUpdate(const RefPtr<ProgressMaskProperty>& prgress)
+void RosenRenderContext::OnProgressMaskUpdate(const RefPtr<ProgressMaskProperty>&)
 {
     PaintProgressMask();
     CHECK_NULL_VOID(rsNode_);
@@ -2083,18 +2098,22 @@ void RosenRenderContext::MarkDrivenRenderFramePaintState(bool flag)
 void RosenRenderContext::UpdateChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect)
 {
     if (transitionEffect_) {
-        transitionEffect_->OnDetach(Claim(this));
+        // use effect to update rosenTransitionEffect activeValue
+        if (RosenTransitionEffect::UpdateRosenTransitionEffect(transitionEffect_, effect)) {
+            return;
+        }
+        LOGW("transition effect struct changed");
+        transitionEffect_->Detach(Claim(this));
     }
-    // [[PLANNING]]: if the struct of effect not changed, we can change the params in effect directly
     transitionEffect_ = RosenTransitionEffect::ConvertToRosenTransitionEffect(effect);
     CHECK_NULL_VOID(transitionEffect_);
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     bool isOnTheTree = frameNode->IsOnMainTree();
     // transition effects should be initialized without animation.
-    RSNode::ExecuteWithoutAnimation([this, isOnTheTree]() {
+    RSNode::ExecuteWithoutAnimation([this, isOnTheTree, &frameNode]() {
         // transitionIn effects should be initialized as active if currently not on the tree.
-        transitionEffect_->OnAttach(Claim(this), !isOnTheTree);
+        transitionEffect_->Attach(Claim(this), !isOnTheTree);
     });
 }
 
@@ -2102,29 +2121,56 @@ void RosenRenderContext::NotifyTransition(bool isTransitionIn)
 {
     CHECK_NULL_VOID(transitionEffect_);
 
-    LOGI("notifyTransition, transition:%{public}s", isTransitionIn ? "in" : "out");
-    RSNode::ExecuteWithoutAnimation([this]() {
-        auto frameNode = GetHost();
-        CHECK_NULL_VOID(frameNode);
-        const auto& size = frameNode->GetGeometryNode()->GetFrameSize();
-        transitionEffect_->UpdateFrameSize(size);
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    LOGD("RosenTransitionEffect::NotifyTransition transition BEGIN, node %{public}d, isTransitionIn: %{public}d",
+        frameNode->GetId(), isTransitionIn);
+
+    RSNode::ExecuteWithoutAnimation([this, &frameNode]() {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        SizeF rootSize(pipeline->GetRootWidth(), pipeline->GetRootHeight());
+        auto parentOffset = frameNode->GetPaintRectOffset(true);
+        auto rect = GetPaintRectWithoutTransform();
+        // Do not consider the position after its own transform, as the transition modifier also affects the transform
+        rect.SetOffset(parentOffset + rect.GetOffset());
+
+        transitionEffect_->UpdateTransitionContext(Claim(this), rect, rootSize);
     });
 
     if (isTransitionIn) {
-        transitionEffect_->Appear();
-        return;
+        // Isolate the animation callback function, to avoid changing the callback timing of current implicit animation.
+        AnimationUtils::AnimateWithCurrentOptions([this]() { transitionEffect_->Appear(); },
+            [nodeId = frameNode->GetId()]() {
+                LOGD("RosenTransitionEffect::NotifyTransition transition END, node %{public}d, isTransitionIn: IN",
+                    nodeId);
+            },
+            false);
     } else {
-        // copy current implicit animation params and replace the finish callback function.
-        RSNode::Animate(
-            [isTransitionIn, this]() {
+        // Re-use current implicit animation timing params, only replace the finish callback function.
+        // The finish callback function will perform all the necessary cleanup work.
+        // Important Note on timing:
+        // 1. If any transition animations are created, the finish callback function will only be called when ALL
+        //    animations have finished. This is accomplished by sharing the same shared_ptr<AnimationFinishCallback>
+        //    among all animations.
+        // 2. If no transition animations are created, the finish callback function will be called IMMEDIATELY. This
+        //    is accomplished by setting the last param (timing sensitive) to false, which avoids creating an empty
+        //    'timer' animation.
+        AnimationUtils::AnimateWithCurrentOptions(
+            [this]() {
                 transitionEffect_->Disappear();
+                // update transition out count
                 ++disappearingTransitionCount_;
             },
-            [weakThis = WeakClaim(this)]() {
+            [weakThis = WeakClaim(this), nodeId = frameNode->GetId()]() {
                 auto context = weakThis.Upgrade();
                 CHECK_NULL_VOID(context);
+                LOGD("RosenTransitionEffect::NotifyTransition transition END, node %{public}d, isTransitionIn: OUT",
+                    nodeId);
+                // update transition out count
                 context->OnTransitionOutFinish();
-            });
+            },
+            false);
     }
 }
 
@@ -2133,28 +2179,39 @@ void RosenRenderContext::OnTransitionOutFinish()
     // update transition out count
     --disappearingTransitionCount_;
     if (disappearingTransitionCount_ < 0) {
-        LOGE("disappearingTransitionCount_ should not be less than 0");
+        LOGE("RosenTransitionEffect: disappearingTransitionCount_ should not be less than 0");
         disappearingTransitionCount_ = 0;
     }
-    // if all transition out effects are finished, do clean up.
-    if (disappearingTransitionCount_ <= 0) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto parent = host->GetParent();
-        // clean up related status.
-        host->UINode::OnRemoveFromParent();
-        // try to remove self from disappearing nodes of parent.
-        if (parent && parent->RemoveDisappearingChild(host)) {
-            // if success, tell parent to rebuild render tree.
-            parent->MarkNeedSyncRenderTree();
-            parent->RebuildRenderContextTree();
-        }
-        if (isModalRootNode_ && parent->GetChildren().empty()) {
-            auto grandParent = parent->GetParent();
-            CHECK_NULL_VOID(grandParent);
-            grandParent->RemoveChild(parent);
-            grandParent->RebuildRenderContextTree();
-        }
+    // make sure we are the last transition out animation, if not, return.
+    if (disappearingTransitionCount_ > 0) {
+        LOGD("RosenTransitionEffect: disappearingTransitionCount_ is %{public}d, not the last transition out animation",
+            disappearingTransitionCount_);
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    // if the node is not disappearing (reappear?), return.
+    if (!host->IsDisappearing()) {
+        LOGD("RosenTransitionEffect: node is not disappearing, skip");
+        return;
+    }
+    LOGD("RosenTransitionEffect: transition out finish, remove node %{public}d", host->GetId());
+
+    // should get parent before onRemoveFromParent function because it will reset parent
+    auto parent = host->GetParent();
+    // clean up related status.
+    host->UINode::OnRemoveFromParent();
+    // try to remove self from parent's disappearing children.
+    if (parent && parent->RemoveDisappearingChild(host)) {
+        // if success, tell parent to rebuild render tree.
+        parent->MarkNeedSyncRenderTree();
+        parent->RebuildRenderContextTree();
+    }
+    if (isModalRootNode_ && parent->GetChildren().empty()) {
+        auto grandParent = parent->GetParent();
+        CHECK_NULL_VOID(grandParent);
+        grandParent->RemoveChild(parent);
+        grandParent->RebuildRenderContextTree();
     }
 }
 

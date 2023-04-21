@@ -19,7 +19,7 @@
 #include "unicode/putil.h"
 #endif
 
-#include "third_party/skia/include/core/SkFontMgr.h"
+#include "include/core/SkFontMgr.h"
 
 #include "adapter/preview/entrance/ace_application_info.h"
 #include "adapter/preview/entrance/ace_container.h"
@@ -324,7 +324,7 @@ void AceAbility::InitEnv()
             container->SetPageProfile((runArgs_.pageProfile.empty() ? "" : runArgs_.pageProfile + ".json"));
         }
     }
-    AceContainer::SetResourcesPathAndThemeStyle(ACE_INSTANCE_ID, runArgs_.systemResourcesPath,
+    AceContainer::SetResourcesPathAndThemeStyle(ACE_INSTANCE_ID, runArgs_.systemResourcesPath + "/entry",
         runArgs_.appResourcesPath, runArgs_.themeId, runArgs_.deviceConfig.colorMode);
 
     auto view = new RSAceView(ACE_INSTANCE_ID);

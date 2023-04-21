@@ -22,5 +22,8 @@ build_component("piece") {
     "render_piece.cpp",
     "render_piece_creator.cpp",
   ]
+  if (ace_use_new_skia) {
+    sources -= [ "flutter_render_piece.cpp" ]
+  }
   rosen_sources = [ "rosen_render_piece.cpp" ]
 }

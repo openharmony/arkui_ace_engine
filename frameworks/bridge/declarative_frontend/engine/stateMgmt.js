@@ -187,7 +187,7 @@ class LocalStorage extends NativeLocalStorage {
      */
     setOrCreate(propName, newValue) {
         if (newValue == undefined) {
-            stateMgmtConsole.debug(`${this.constructor.name}: setOrCreate('${propName}') with newValue == undefined not allowed.`);
+            stateMgmtConsole.warn(`${this.constructor.name}: setOrCreate('${propName}') with newValue == undefined not allowed.`);
             return false;
         }
         var p = this.storage_.get(propName);
@@ -379,7 +379,7 @@ class LocalStorage extends NativeLocalStorage {
             p.aboutToBeDeleted();
         }
         this.storage_.clear();
-
+        
         return true;
     }
     /**
@@ -1804,6 +1804,38 @@ SubscribableHandler.IS_OBSERVED_OBJECT = Symbol("_____is_observed_object__");
 SubscribableHandler.RAW_OBJECT = Symbol("_____raw_object__");
 SubscribableHandler.SUBSCRIBE = Symbol("_____subscribe__");
 SubscribableHandler.UNSUBSCRIBE = Symbol("_____unsubscribe__");
+class SubscribableDateHandler extends SubscribableHandler {
+    constructor(owningProperty) {
+        super(owningProperty);
+    }
+    /**
+     * Get trap for Date type proxy
+     * Functions that modify Date in-place are intercepted and replaced with a function
+     * that executes the original function and notifies the handler of a change.
+     * @param target Original Date object
+     * @param property
+     * @returns
+     */
+    get(target, property) {
+        const dateSetFunctions = new Set(["setFullYear", "setMonth", "setDate", "setHours", "setMinutes", "setSeconds",
+            "setMilliseconds", "setTime", "setUTCFullYear", "setUTCMonth", "setUTCDate", "setUTCHours", "setUTCMinutes",
+            "setUTCSeconds", "setUTCMilliseconds"]);
+        let ret = super.get(target, property);
+        if (typeof ret === "function" && property.toString() && dateSetFunctions.has(property.toString())) {
+            const self = this;
+            return function () {
+                // execute original function with given arguments
+                let result = ret.apply(this, arguments);
+                self.notifyPropertyHasChanged(property.toString(), this);
+                return result;
+            }.bind(target); // bind "this" to target inside the function
+        }
+        else if (typeof ret === "function") {
+            ret = ret.bind(target);
+        }
+        return ret;
+    }
+}
 class ExtendableProxy {
     constructor(obj, handler) {
         return new Proxy(obj, handler);
@@ -1875,7 +1907,8 @@ class ObservedObject extends ExtendableProxy {
         if (ObservedObject.IsObservedObject(obj)) {
             throw new Error("Invalid constructor argument error: ObservableObject contructor called with an ObservedObject as parameer");
         }
-        let handler = new SubscribableHandler(objectOwningProperty);
+        let handler = (obj instanceof Date) ? new SubscribableDateHandler(objectOwningProperty)
+            : new SubscribableHandler(objectOwningProperty);
         super(obj, handler);
         if (ObservedObject.IsObservedObject(obj)) {
             stateMgmtConsole.error("ObservableOject constructor: INTERNAL ERROR: after jsObj is observedObject already");
@@ -1957,7 +1990,7 @@ class ObservedPropertyAbstract extends SubscribedAbstractProperty {
                 }
             }
             else {
-                stateMgmtConsole.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged: unknown subscriber ID '${subscribedId}' error!`);
+                stateMgmtConsole.warn(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged: unknown subscriber ID '${subscribedId}' error!`);
             }
         });
     }
@@ -3204,12 +3237,15 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
     }
     setWrapperValue(value) {
         let rawValue = ObservedObject.GetRawObject(value);
+        let copy;
         if (rawValue instanceof Array) {
-            this.wrappedValue_ = ObservedObject.createNew([...rawValue], this);
+            copy = ObservedObject.createNew([...rawValue], this);
         }
         else {
-            this.wrappedValue_ = ObservedObject.createNew(Object.assign({}, rawValue), this);
+            copy = ObservedObject.createNew(Object.assign({}, rawValue), this);
         }
+        Object.setPrototypeOf(copy, Object.getPrototypeOf(rawValue));
+        this.wrappedValue_ = copy;
     }
 }
 /*
@@ -3704,9 +3740,10 @@ class ViewPU extends NativeViewPartialUpdate {
         // do not process an Element that has been marked to be deleted
         const updateFunc = this.updateFuncByElmtId.get(elmtId);
         if ((updateFunc == undefined) || (typeof updateFunc !== "function")) {
-            stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: update function of ElementId ${elmtId} not found, internal error!`);
+            stateMgmtConsole.error(`${this.constructor.name}[${this.id__()}]: update function of ElementId ${elmtId} not found, internal error!`);
         }
         else {
+            
             updateFunc(elmtId, /* isFirstRender */ false);
             // continue in native JSView
             // Finish the Update in JSView::JsFinishUpdateFunc

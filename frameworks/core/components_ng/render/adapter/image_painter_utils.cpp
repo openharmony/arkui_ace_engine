@@ -14,8 +14,8 @@
  */
 #include "image_painter_utils.h"
 
-#include "third_party/skia/include/core/SkColorFilter.h"
-#include "third_party/skia/include/core/SkRRect.h"
+#include "include/core/SkColorFilter.h"
+#include "include/core/SkRRect.h"
 
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing.h"

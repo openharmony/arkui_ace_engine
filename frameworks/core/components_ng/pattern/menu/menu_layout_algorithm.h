@@ -20,15 +20,19 @@
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/referenced.h"
+#include "core/components/common/properties/placement.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/layout/layout_algorithm.h"
+#include "core/components_ng/pattern/menu/menu_layout_property.h"
 
 namespace OHOS::Ace::NG {
+class MenuLayoutProperty;
 class MenuLayoutAlgorithm : public BoxLayoutAlgorithm {
     DECLARE_ACE_TYPE(MenuLayoutAlgorithm, BoxLayoutAlgorithm)
 public:
+    MenuLayoutAlgorithm(int32_t id, const std::string& tag);
     MenuLayoutAlgorithm() = default;
-    ~MenuLayoutAlgorithm() override = default;
+    ~MenuLayoutAlgorithm() override;
 
     // override measureSelf and measureChildren.
     void Measure(LayoutWrapper* layoutWrapper) override;
@@ -43,6 +47,11 @@ protected:
     OffsetF positionOffset_;
 
 private:
+    enum class ErrorPositionType {
+        NORMAL = 0,
+        TOP_LEFT_ERROR,
+        BOTTOM_RIGHT_ERROR,
+    };
     void Initialize(LayoutWrapper* layoutWrapper);
     LayoutConstraintF CreateChildConstraint(LayoutWrapper* layoutWrapper);
     void UpdateConstraintWidth(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint);
@@ -60,6 +69,30 @@ private:
     // get option LayoutWrapper for measure get max width
     std::list<RefPtr<LayoutWrapper>> GetOptionsLayoutWrappper(LayoutWrapper* layoutWrapper);
 
+    OffsetF GetPositionWithPlacement(const SizeF& childSize, const OffsetF& topPosition, const OffsetF& bottomPosition);
+    void InitTargetSizeAndPosition(const RefPtr<MenuLayoutProperty>& layoutProp);
+    OffsetF GetChildPosition(const SizeF& childSize, const RefPtr<MenuLayoutProperty>& layoutProp);
+    ErrorPositionType GetErrorPositionType(const OffsetF& childOffset, const SizeF& childSize);
+    OffsetF FitToScreen(const OffsetF& fitPosition, const SizeF& childSize);
+
+    OffsetF GetPositionWithPlacementTop(const SizeF&, const OffsetF&, const OffsetF&);
+    OffsetF GetPositionWithPlacementTopLeft(const SizeF&, const OffsetF&, const OffsetF&);
+    OffsetF GetPositionWithPlacementTopRight(const SizeF&, const OffsetF&, const OffsetF&);
+    OffsetF GetPositionWithPlacementBottom(const SizeF&, const OffsetF&, const OffsetF&);
+    OffsetF GetPositionWithPlacementBottomLeft(const SizeF&, const OffsetF&, const OffsetF&);
+    OffsetF GetPositionWithPlacementBottomRight(const SizeF&, const OffsetF&, const OffsetF&);
+    OffsetF GetPositionWithPlacementLeft(const SizeF&, const OffsetF&, const OffsetF&);
+    OffsetF GetPositionWithPlacementLeftTop(const SizeF&, const OffsetF&, const OffsetF&);
+    OffsetF GetPositionWithPlacementLeftBottom(const SizeF&, const OffsetF&, const OffsetF&);
+    OffsetF GetPositionWithPlacementRight(const SizeF&, const OffsetF&, const OffsetF&);
+    OffsetF GetPositionWithPlacementRightTop(const SizeF&, const OffsetF&, const OffsetF&);
+    OffsetF GetPositionWithPlacementRightBottom(const SizeF&, const OffsetF&, const OffsetF&);
+
+    OffsetF targetOffset_;
+    SizeF targetSize_;
+    Placement placement_ = Placement::BOTTOM;
+    int32_t targetNodeId_ = -1;
+    std::string targetTag_;
     SizeF wrapperSize_;
 
     // current page offset relative to window.
@@ -71,6 +104,9 @@ private:
 
     float margin_ = 0.0f;
     float optionPadding_ = 0.0f;
+
+    using PlacementFunc = OffsetF (MenuLayoutAlgorithm::*)(const SizeF&, const OffsetF&, const OffsetF&);
+    std::map<Placement, PlacementFunc> placementFuncMap_;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuLayoutAlgorithm);
 };

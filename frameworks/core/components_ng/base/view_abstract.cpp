@@ -894,7 +894,7 @@ void ViewAbstract::BindPopup(
         if (!isUseCustom) {
             BubbleView::UpdatePopupParam(popupId, param, targetNode);
             popupNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-            LOGI("Update normal PopUp node.");
+            LOGI("Update normal Popup node.");
         } else {
             BubbleView::UpdateCustomPopupParam(popupId, param);
             popupNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -926,7 +926,7 @@ void ViewAbstract::BindPopup(
         CHECK_NULL_VOID(overlay);
         overlay->ErasePopup(targetId);
     };
-    LOGI("begin to update popup node.");
+    LOGI("begin to update Popup node.");
     targetNode->PushDestroyCallback(destroyCallback);
     overlayManager->UpdatePopupNode(targetId, popupInfo);
 }
@@ -940,7 +940,8 @@ void ViewAbstract::BindMenuWithItems(std::vector<OptionParam>&& params,
         LOGD("menu params is empty");
         return;
     }
-    auto menuNode = MenuView::Create(std::move(params), targetNode->GetId(), MenuType::MENU, menuParam);
+    auto menuNode =
+        MenuView::Create(std::move(params), targetNode->GetId(), targetNode->GetTag(), MenuType::MENU, menuParam);
     BindMenu(menuNode, targetNode->GetId(), offset);
 }
 
@@ -955,7 +956,7 @@ void ViewAbstract::BindMenuWithCustomNode(const RefPtr<UINode>& customNode, cons
     isContextMenu = false;
 #endif
     auto type = isContextMenu ? MenuType::CONTEXT_MENU : MenuType::MENU;
-    auto menuNode = MenuView::Create(customNode, targetNode->GetId(), type, menuParam);
+    auto menuNode = MenuView::Create(customNode, targetNode->GetId(), targetNode->GetTag(), type, menuParam);
     if (isContextMenu) {
         SubwindowManager::GetInstance()->ShowMenuNG(menuNode, targetNode->GetId(), offset);
         return;
@@ -1346,4 +1347,18 @@ void ViewAbstract::SetKeyboardShortcut(
     eventManager->AddKeyboardShortcutNode(WeakPtr<NG::FrameNode>(frameNode));
 }
 
+void ViewAbstract::CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
+    const std::function<void(float)>& onCallbackEvent)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->CreateAnimatablePropertyFloat(propertyName, value, onCallbackEvent);
+}
+
+void ViewAbstract::UpdateAnimatablePropertyFloat(const std::string& propertyName, float value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->UpdateAnimatablePropertyFloat(propertyName, value);
+}
 } // namespace OHOS::Ace::NG

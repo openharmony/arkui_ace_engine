@@ -92,6 +92,7 @@ private:
     void OnLoadFail();
 
     // round up int to the nearest 2-fold proportion of image width
+    // REQUIRE: value > 0, image width > 0
     int32_t RoundUp(int32_t value);
     static SizeF CalculateTargetSize(const SizeF& srcSize, const SizeF& dstSize, const SizeF& rawImageSize);
 

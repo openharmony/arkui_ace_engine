@@ -251,6 +251,7 @@ void IndexerPattern::MoveIndexByOffset(const Offset& offset)
     childPressIndex_ = nextSelectIndex;
     selected_ = nextSelectIndex;
     lastSelected_ = nextSelectIndex;
+    FireOnSelect(selected_, true);
     if (isHover_ && childPressIndex_ >= 0) {
         IndexerPressInAnimation();
     }
@@ -372,12 +373,7 @@ void IndexerPattern::OnSelect(bool changed)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto indexerEventHub = host->GetEventHub<IndexerEventHub>();
-    CHECK_NULL_VOID(indexerEventHub);
-    auto onSelected = indexerEventHub->GetOnSelected();
-    if (onSelected && (selected_ >= 0) && (selected_ < itemCount_)) {
-        onSelected(selected_);
-    }
+    FireOnSelect(selected_, false);
     animateSelected_ = selected_;
     if (animateSelected_ >= 0) {
         auto selectedFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(animateSelected_));
@@ -494,8 +490,8 @@ void IndexerPattern::ShowBubble()
         popupNode_ = CreatePopupNode();
         AddPopupTouchListener(popupNode_);
         UpdatePopupOpacity(0.0f);
-        overlayManager->ShowIndexerPopup(host->GetId(), popupNode_);
     }
+    overlayManager->ShowIndexerPopup(host->GetId(), popupNode_);
     UpdateBubbleView();
     StartBubbleAppearAnimation();
 }
@@ -1107,5 +1103,21 @@ bool IndexerPattern::NeedShowPopupView()
 int32_t IndexerPattern::GenerateAnimationId()
 {
     return (++animationId_) % TOTAL_NUMBER;
+}
+
+void IndexerPattern::FireOnSelect(int32_t selectIndex, bool fromPress)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto indexerEventHub = host->GetEventHub<IndexerEventHub>();
+    CHECK_NULL_VOID(indexerEventHub);
+    if (fromPress || lastIndexFromPress_ == fromPress || lastFireSelectIndex_ != selectIndex) {
+        auto onSelected = indexerEventHub->GetOnSelected();
+        if (onSelected && (selectIndex >= 0) && (selectIndex < itemCount_)) {
+            onSelected(selectIndex);
+        }
+    }
+    lastFireSelectIndex_ = selectIndex;
+    lastIndexFromPress_ = fromPress;
 }
 } // namespace OHOS::Ace::NG

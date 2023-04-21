@@ -16,8 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SVG_ROSEN_RENDER_SVG_FILTER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SVG_ROSEN_RENDER_SVG_FILTER_H
 
-#include "third_party/skia/include/core/SkImageFilter.h"
-#include "third_party/skia/include/core/SkPaint.h"
+#include "include/core/SkImageFilter.h"
+#include "include/core/SkPaint.h"
 
 #include "frameworks/core/components/svg/render_svg_fe.h"
 #include "frameworks/core/components/svg/render_svg_filter.h"

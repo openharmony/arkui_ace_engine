@@ -214,9 +214,10 @@ public:
 
     // popup and menu
     virtual void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) = 0;
-    virtual void BindMenu(std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc,
-        const NG::MenuParam& menuParam) = 0;
-    virtual void BindContextMenu(ResponseType type, std::function<void()>&& buildFunc) = 0;
+    virtual void BindMenu(
+        std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const NG::MenuParam& menuParam) = 0;
+    virtual void BindContextMenu(
+        ResponseType type, std::function<void()>&& buildFunc, const NG::MenuParam& menuParam) = 0;
     virtual void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<void()>&& buildFunc, int32_t type) = 0;
 
@@ -232,6 +233,10 @@ public:
     virtual void SetForegroundColor(const Color& color) = 0;
     virtual void SetForegroundColorStrategy(const ForegroundColorStrategy& strategy) = 0;
 
+    // custom animation properties
+    virtual void CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
+        const std::function<void(float)>& onCallbackEvent) = 0;
+    virtual void UpdateAnimatablePropertyFloat(const std::string& propertyName, float value) = 0;
 private:
     static std::unique_ptr<ViewAbstractModel> instance_;
 };

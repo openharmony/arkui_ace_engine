@@ -17,10 +17,10 @@
 
 #include "flutter/common/task_runners.h"
 #include "render_service_client/core/ui/rs_node.h"
-#include "third_party/skia/include/core/SkClipOp.h"
-#include "third_party/skia/include/core/SkColorFilter.h"
-#include "third_party/skia/include/core/SkRect.h"
-#include "third_party/skia/include/core/SkShader.h"
+#include "include/core/SkClipOp.h"
+#include "include/core/SkColorFilter.h"
+#include "include/core/SkRect.h"
+#include "include/core/SkShader.h"
 
 #include "base/image/pixel_map.h"
 #include "base/log/ace_trace.h"
@@ -125,7 +125,6 @@ void RosenRenderImage::InitializeCallbacks()
         }
         renderImage->ImageObjFailed(errorMsg);
     };
-
     uploadSuccessCallback_ = [weak = AceType::WeakClaim(this)](
                                  ImageSourceInfo sourceInfo, const RefPtr<NG::CanvasImage>& image) {
         LOGD("paint success info %{public}s", sourceInfo.ToString().c_str());
@@ -741,6 +740,7 @@ void RosenRenderImage::ApplyColorFilter(SkPaint& paint)
 
 void RosenRenderImage::ApplyInterpolation(SkPaint& paint)
 {
+#ifndef NEW_SKIA
     auto skFilterQuality = SkFilterQuality::kNone_SkFilterQuality;
     switch (imageInterpolation_) {
         case ImageInterpolation::LOW:
@@ -757,6 +757,23 @@ void RosenRenderImage::ApplyInterpolation(SkPaint& paint)
             break;
     }
     paint.setFilterQuality(skFilterQuality);
+#else
+    options_ = SkSamplingOptions(SkFilterMode::kNearest, SkMipmapMode::kNone);
+    switch (imageInterpolation_) {
+        case ImageInterpolation::LOW:
+            options_ = SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kNone);
+            break;
+        case ImageInterpolation::MEDIUM:
+            options_ = SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kLinear);
+            break;
+        case ImageInterpolation::HIGH:
+            options_ = SkSamplingOptions(SkCubicResampler { 1 / 3.0f, 1 / 3.0f });
+            break;
+        case ImageInterpolation::NONE:
+        default:
+            break;
+    }
+#endif
 }
 
 void RosenRenderImage::CanvasDrawImageRect(
@@ -801,11 +818,15 @@ void RosenRenderImage::CanvasDrawImageRect(
         DrawImageOnCanvas(scaledSrcRect, realDstRect, paint, canvas);
         return;
     }
-    auto skSrcRect =
+    auto skSrcRect = 
         SkRect::MakeXYWH(scaledSrcRect.Left(), scaledSrcRect.Top(), scaledSrcRect.Width(), scaledSrcRect.Height());
     auto skDstRect = SkRect::MakeXYWH(realDstRect.Left() - imageRenderPosition_.GetX(),
         realDstRect.Top() - imageRenderPosition_.GetY(), realDstRect.Width(), realDstRect.Height());
+#ifndef NEW_SKIA
     canvas->drawImageRect(skImage->GetImage(), skSrcRect, skDstRect, &paint);
+#else
+    canvas->drawImageRect(skImage->GetImage(), skSrcRect, skDstRect, options_, &paint, SkCanvas::kFast_SrcRectConstraint);
+#endif
     LOGD("dstRect params: %{public}s", realDstRect.ToString().c_str());
     LOGD("scaledSrcRect params: %{public}s", scaledSrcRect.ToString().c_str());
 }
@@ -815,8 +836,13 @@ void RosenRenderImage::DrawImageOnCanvas(
 {
 #ifdef OHOS_PLATFORM
     auto recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(canvas);
-    auto skSrcRect =
+#ifndef NEW_SKIA
+    auto skSrcRect = 
         SkIRect::MakeXYWH(Round(srcRect.Left()), Round(srcRect.Top()), Round(srcRect.Width()), Round(srcRect.Height()));
+#else
+    auto skSrcRect =
+        SkRect::MakeXYWH(Round(srcRect.Left()), Round(srcRect.Top()), Round(srcRect.Width()), Round(srcRect.Height()));
+#endif
     // only transform one time, set skDstRect.top and skDstRect.left to 0.
     auto skDstRect = SkRect::MakeXYWH(0, 0, dstRect.Width(), dstRect.Height());
 
@@ -841,8 +867,13 @@ void RosenRenderImage::DrawImageOnCanvas(
     recordingCanvas->concat(sampleMatrix);
     auto skImage = AceType::DynamicCast<NG::SkiaImage>(image_);
     if (skImage && skImage->GetImage()) {
+#ifndef NEW_SKIA
         recordingCanvas->drawImageRect(
             skImage->GetImage(), skSrcRect, skDstRect, &paint, SkCanvas::kFast_SrcRectConstraint);
+#else
+        recordingCanvas->drawImageRect(
+            skImage->GetImage(), skSrcRect, skDstRect, options_, &paint, SkCanvas::kFast_SrcRectConstraint);
+#endif
     }
     recordingCanvas->restore();
 #endif

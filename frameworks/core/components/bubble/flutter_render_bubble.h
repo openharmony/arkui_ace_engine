@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "third_party/skia/include/core/SkCanvas.h"
+#include "include/core/SkCanvas.h"
 
 #include "core/components/bubble/render_bubble.h"
 #include "core/pipeline/base/flutter_render_context.h"

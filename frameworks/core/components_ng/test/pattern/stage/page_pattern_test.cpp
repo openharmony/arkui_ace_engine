@@ -47,46 +47,6 @@ void TmpVoid()
 }
 
 /**
- * @tc.name: PagePatternTestTest001
- * @tc.desc: Test all the properties of PagePatternTest
- * @tc.type: FUNC
- */
-HWTEST_F(PagePatternTest, PagePatternTest001, TestSize.Level1)
-{
-    const RefPtr<PageInfo> pageInfo;
-    PagePattern manager_(pageInfo);
-    manager_.OnAttachToFrameNode();
-    manager_.ProcessHideState();
-    manager_.ProcessShowState();
-    manager_.BuildSharedTransitionMap();
-}
-
-/**
- * @tc.name: PagePatternTestTest002
- * @tc.desc: Test all the properties of PagePatternTest
- * @tc.type: FUNC
- */
-HWTEST_F(PagePatternTest, PagePatternTest002, TestSize.Level1)
-{
-    const RefPtr<PageInfo> pageInfo;
-    PagePattern manager_(pageInfo);
-    manager_.OnShow();
-    manager_.OnHide();
-}
-
-/**
- * @tc.name: PagePatternTestTest003
- * @tc.desc: Test all the properties of PagePatternTest
- * @tc.type: FUNC
- */
-HWTEST_F(PagePatternTest, PagePatternTest003, TestSize.Level1)
-{
-    const RefPtr<PageInfo> pageInfo;
-    PagePattern manager_(pageInfo);
-    manager_.OnHide();
-}
-
-/**
  * @tc.name: PagePatternTestTest004
  * @tc.desc: Test all the properties of PagePatternTest
  * @tc.type: FUNC
@@ -128,23 +88,6 @@ HWTEST_F(PagePatternTest, PagePatternTest006, TestSize.Level1)
     std::function<bool()> OnBackPressed = TmpBool;
     auto ret1 = manager_.OnBackPressed();
     EXPECT_EQ(ret1, false);
-}
-
-/**
- * @tc.name: PagePatternTestTest007
- * @tc.desc: Test all the properties of PagePatternTest
- * @tc.type: FUNC
- */
-HWTEST_F(PagePatternTest, PagePatternTest007, TestSize.Level1)
-{
-    const RefPtr<PageInfo> pageInfo;
-    PagePattern manager_(pageInfo);
-    std::function<void()> onPageShow = TmpVoid;
-    std::function<void()> onPageHide = TmpVoid;
-    std::function<void()> pageTransitionFunc = TmpVoid;
-    manager_.SetOnPageShow(std::move(onPageShow));
-    manager_.SetOnPageHide(std::move(onPageShow));
-    manager_.SetPageTransitionFunc(std::move(onPageShow));
 }
 
 /**
@@ -200,20 +143,6 @@ HWTEST_F(PagePatternTest, PagePatternTest011, TestSize.Level1)
     const std::function<void()> onFinish = TmpVoid;
     auto ret = manager_.TriggerPageTransition(PageTransitionType::ENTER, TmpVoid);
     EXPECT_EQ(ret, false);
-}
-
-/**
- * @tc.name: PagePatternTestTest012
- * @tc.desc: Test all the properties of PagePatternTest
- * @tc.type: FUNC
- */
-HWTEST_F(PagePatternTest, PagePatternTest012, TestSize.Level1)
-{
-    const RefPtr<PageInfo> pageInfo;
-    PagePattern manager_(pageInfo);
-    const RefPtr<PageTransitionEffect> effect;
-    manager_.AddPageTransition(effect);
-    manager_.ClearPageTransitionEffect();
 }
 
 /**

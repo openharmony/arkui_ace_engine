@@ -64,7 +64,7 @@ FrameNode::~FrameNode()
     }
     pattern_->DetachFromFrameNode(this);
     if (IsOnMainTree()) {
-        OnDetachFromMainTree();
+        OnDetachFromMainTree(false);
     }
     TriggerVisibleAreaChangeCallback(true);
     visibleAreaUserCallbacks_.clear();
@@ -128,11 +128,9 @@ void FrameNode::ProcessOffscreenNode(const RefPtr<FrameNode>& node)
     CHECK_NULL_VOID(layoutWrapper);
     layoutWrapper->SetActive();
     layoutWrapper->SetRootMeasureNode();
-    layoutWrapper->WillLayout();
     layoutWrapper->Measure(node->GetLayoutConstraint());
     layoutWrapper->Layout();
     layoutWrapper->MountToHostOnMainThread();
-    layoutWrapper->DidLayout(layoutWrapper);
     auto paintProperty = node->GetPaintProperty<PaintProperty>();
     auto wrapper = node->CreatePaintWrapper();
     CHECK_NULL_VOID(wrapper);
@@ -288,11 +286,11 @@ void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("id", propInspectorId_.value_or("").c_str());
 }
 
-void FrameNode::OnAttachToMainTree()
+void FrameNode::OnAttachToMainTree(bool recursive)
 {
-    UINode::OnAttachToMainTree();
+    UINode::OnAttachToMainTree(recursive);
     eventHub_->FireOnAppear();
-    renderContext_->OnNodeAppear();
+    renderContext_->OnNodeAppear(recursive);
     if (IsResponseRegion() || HasPositionProp()) {
         auto parent = GetParent();
         while (parent) {
@@ -322,10 +320,10 @@ void FrameNode::OnVisibleChange(bool isVisible)
     TriggerVisibleAreaChangeCallback(true);
 }
 
-void FrameNode::OnDetachFromMainTree()
+void FrameNode::OnDetachFromMainTree(bool recursive)
 {
     eventHub_->FireOnDisappear();
-    renderContext_->OnNodeDisappear();
+    renderContext_->OnNodeDisappear(recursive);
 }
 
 void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& dirty)
@@ -352,9 +350,10 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     SetGeometryNode(dirty->GetGeometryNode());
 
     const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
-    bool skipSync = geometryTransition != nullptr && geometryTransition->IsRunning();
-    if (!skipSync && (frameSizeChange || frameOffsetChange || HasPositionProp() ||
-                         (pattern_->GetSurfaceNodeName().has_value() && contentSizeChange))) {
+    if (geometryTransition != nullptr && geometryTransition->IsRunning()) {
+        geometryTransition->DidLayout(WeakClaim(this));
+    } else if (frameSizeChange || frameOffsetChange || HasPositionProp() ||
+               (pattern_->GetSurfaceNodeName().has_value() && contentSizeChange)) {
         if (pattern_->NeedOverridePaintRect()) {
             renderContext_->SyncGeometryProperties(pattern_->GetOverridePaintRect().value_or(RectF()));
         } else {
@@ -600,7 +599,6 @@ std::optional<UITask> FrameNode::CreateLayoutTask(bool forceUseMainThread)
     auto task = [layoutWrapper, layoutConstraint = GetLayoutConstraint(), forceUseMainThread]() {
         layoutWrapper->SetActive();
         layoutWrapper->SetRootMeasureNode();
-        layoutWrapper->WillLayout();
         {
             ACE_SCOPED_TRACE("LayoutWrapper::Measure");
             layoutWrapper->Measure(layoutConstraint);
@@ -613,15 +611,11 @@ std::optional<UITask> FrameNode::CreateLayoutTask(bool forceUseMainThread)
             ACE_SCOPED_TRACE("LayoutWrapper::MountToHostOnMainThread");
             if (forceUseMainThread || layoutWrapper->CheckShouldRunOnMain()) {
                 layoutWrapper->MountToHostOnMainThread();
-                layoutWrapper->DidLayout(layoutWrapper);
                 return;
             }
             auto host = layoutWrapper->GetHostNode();
             CHECK_NULL_VOID(host);
-            host->PostTask([layoutWrapper]() {
-                layoutWrapper->MountToHostOnMainThread();
-                layoutWrapper->DidLayout(layoutWrapper);
-            });
+            host->PostTask([layoutWrapper]() { layoutWrapper->MountToHostOnMainThread(); });
         }
     };
     if (forceUseMainThread || layoutWrapper->CheckShouldRunOnMain()) {
@@ -715,9 +709,9 @@ RefPtr<LayoutWrapper> FrameNode::UpdateLayoutWrapper(
     if (layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::GONE) {
         if (!layoutWrapper) {
             layoutWrapper =
-                MakeRefPtr<LayoutWrapper>(WeakClaim(this), MakeRefPtr<GeometryNode>(), MakeRefPtr<LayoutProperty>());
+                MakeRefPtr<LayoutWrapper>(WeakClaim(this), geometryNode_->Clone(), layoutProperty_->Clone());
         } else {
-            layoutWrapper->Update(WeakClaim(this), MakeRefPtr<GeometryNode>(), MakeRefPtr<LayoutProperty>());
+            layoutWrapper->Update(WeakClaim(this), geometryNode_->Clone(), layoutProperty_->Clone());
         }
         layoutWrapper->SetLayoutAlgorithm(MakeRefPtr<LayoutAlgorithmWrapper>(nullptr, true, true));
         isLayoutDirtyMarked_ = false;
@@ -1526,5 +1520,46 @@ RefPtr<FrameNode> FrameNode::FindChildByPosition(float x, float y)
     }
 
     return hitFrameNodes.rbegin()->second;
+}
+
+void FrameNode::CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
+    const std::function<void(float)>& onCallbackEvent)
+{
+    auto context = GetRenderContext();
+    CHECK_NULL_VOID(context);
+    auto iter = nodeAnimatablePropertyMap_.find(propertyName);
+    if (iter != nodeAnimatablePropertyMap_.end()) {
+        LOGW("AnimatableProperty already exists!");
+        return;
+    }
+    auto property = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(value, std::move(onCallbackEvent));
+    context->AttachNodeAnimatableProperty(property);
+    nodeAnimatablePropertyMap_.emplace(propertyName, property);
+}
+
+void FrameNode::UpdateAnimatablePropertyFloat(const std::string& propertyName, float value)
+{
+    auto iter = nodeAnimatablePropertyMap_.find(propertyName);
+    if (iter == nodeAnimatablePropertyMap_.end()) {
+        LOGW("AnimatableProperty not exists!");
+        return;
+    }
+    auto property = AceType::DynamicCast<NodeAnimatablePropertyFloat>(iter->second);
+    CHECK_NULL_VOID(property);
+    property->Set(value);
+}
+
+void FrameNode::OnAddDisappearingChild()
+{
+    auto context = GetRenderContext();
+    CHECK_NULL_VOID(context);
+    context->UpdateFreeze(true);
+}
+
+void FrameNode::OnRemoveDisappearingChild()
+{
+    auto context = GetRenderContext();
+    CHECK_NULL_VOID(context);
+    context->UpdateFreeze(false);
 }
 } // namespace OHOS::Ace::NG

@@ -23,6 +23,7 @@
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/transaction/rs_transaction.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
+
 #include "core/components_ng/render/adapter/rosen_window.h"
 #endif
 
@@ -191,7 +192,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     FlushAnimation(GetTimeFromExternalTimer());
     FlushTouchEvents();
     FlushBuild();
-    if (isFormRender_ && drawDelegate_) {
+    if (isFormRender_ && drawDelegate_ && rootNode_) {
         auto renderContext = AceType::DynamicCast<NG::RenderContext>(rootNode_->GetRenderContext());
         drawDelegate_->DrawRSFrame(renderContext);
         drawDelegate_ = nullptr;
@@ -332,9 +333,7 @@ void PipelineContext::RegisterRootEvent()
     // use an empty longPress event placeholder in the EtsCard scenario
     auto hub = rootNode_->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(hub);
-    auto event = [](const GestureEvent& info) mutable {
-        LOGD("Not Support LongPress");
-    };
+    auto event = [](const GestureEvent& info) mutable { LOGD("Not Support LongPress"); };
     auto longPress = AceType::MakeRefPtr<NG::LongPressEvent>(std::move(event));
     hub->SetLongPressEvent(longPress, false, true);
 }
@@ -669,7 +668,9 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
             positionY, (rootSize.Height() - keyboardHeight), offsetFix, keyboardHeight);
         if (NearZero(keyboardHeight)) {
             SetRootRect(rootSize.Width(), rootSize.Height(), 0);
-        } else if (positionY > (rootSize.Height() - keyboardHeight) && offsetFix > 0.0) {
+        } else if (LessOrEqual(rootSize.Height() - positionY - height, height)) {
+            SetRootRect(rootSize.Width(), rootSize.Height(), -keyboardHeight);
+        } else if (positionY + height > (rootSize.Height() - keyboardHeight) && offsetFix > 0.0) {
             SetRootRect(rootSize.Width(), rootSize.Height(), -offsetFix);
         } else if ((positionY + height > rootSize.Height() - keyboardHeight &&
                        positionY < rootSize.Height() - keyboardHeight && height < keyboardHeight / 2.0f) &&
@@ -1404,12 +1405,12 @@ void PipelineContext::AddBuildFinishCallBack(std::function<void()>&& callback)
 
 void PipelineContext::AddWindowStateChangedCallback(int32_t nodeId)
 {
-    onWindowStateChangedCallbacks_.emplace_back(nodeId);
+    onWindowStateChangedCallbacks_.emplace(nodeId);
 }
 
 void PipelineContext::RemoveWindowStateChangedCallback(int32_t nodeId)
 {
-    onWindowStateChangedCallbacks_.remove(nodeId);
+    onWindowStateChangedCallbacks_.erase(nodeId);
 }
 
 void PipelineContext::FlushWindowStateChangedCallback(bool isShow)

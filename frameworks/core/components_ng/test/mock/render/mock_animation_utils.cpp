@@ -46,6 +46,11 @@ void AnimationUtils::AddKeyFrame(float fraction, const RefPtr<Curve>& curve, con
 
 void AnimationUtils::AddKeyFrame(float fraction, const PropertyCallback& callback) {}
 
+void AnimationUtils::AnimateWithCurrentOptions(
+    const PropertyCallback& callback, const FinishCallback& finishCallback, bool timingSensitive)
+{}
+void AnimationUtils::AnimateWithCurrentCallback(const AnimationOption& option, const PropertyCallback& callback) {}
+
 std::shared_ptr<AnimationUtils::Animation> AnimationUtils::StartAnimation(
     const AnimationOption& option, const PropertyCallback& callback, const FinishCallback& finishCallback)
 {

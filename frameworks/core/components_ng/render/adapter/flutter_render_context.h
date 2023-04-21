@@ -18,9 +18,9 @@
 
 #include <memory>
 
-#include "third_party/skia/include/core/SkCanvas.h"
-#include "third_party/skia/include/core/SkPictureRecorder.h"
-#include "third_party/skia/include/core/SkRefCnt.h"
+#include "include/core/SkCanvas.h"
+#include "include/core/SkPictureRecorder.h"
+#include "include/core/SkRefCnt.h"
 
 #include "core/components_ng/render/adapter/flutter_node.h"
 #include "core/components_ng/render/render_context.h"

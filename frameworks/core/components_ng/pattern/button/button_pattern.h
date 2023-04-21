@@ -125,21 +125,17 @@ public:
         fontJsValue->Put("weight",
             V2::ConvertWrapFontWeightToStirng(layoutProperty->GetFontWeight().value_or(FontWeight::NORMAL)).c_str());
         fontJsValue->Put("family", fontFamily.c_str());
-        fontJsValue->Put(
-            "style", layoutProperty->GetFontStyle().value_or(Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL
-                         ? "FontStyle.Normal"
-                         : "FontStyle.Italic");
+        fontJsValue->Put("style", layoutProperty->GetFontStyle().value_or(
+            Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL ? "FontStyle.Normal" : "FontStyle.Italic");
         auto labelJsValue = JsonUtil::Create(true);
-        labelJsValue->Put("overflow",
-            V2::ConvertWrapTextOverflowToString(layoutProperty->GetTextOverflow().value_or(TextOverflow::CLIP))
-                .c_str());
-        labelJsValue->Put("maxLines", std::to_string(layoutProperty->GetMaxLines().value_or(DEFAULT_MAXLINES)).c_str());
+        labelJsValue->Put("overflow", V2::ConvertWrapTextOverflowToString(
+            layoutProperty->GetTextOverflow().value_or(TextOverflow::CLIP)).c_str());
+        labelJsValue->Put("maxLines", std::to_string(layoutProperty->GetMaxLines().value_or(
+            DEFAULT_MAXLINES)).c_str());
         labelJsValue->Put("minFontSize", layoutProperty->GetMinFontSizeValue(Dimension(0)).ToString().c_str());
         labelJsValue->Put("maxFontSize", layoutProperty->GetMaxFontSizeValue(Dimension(0)).ToString().c_str());
-        labelJsValue->Put("heightAdaptivePolicy",
-            V2::ConvertWrapTextHeightAdaptivePolicyToString(
-                layoutProperty->GetHeightAdaptivePolicy().value_or(TextHeightAdaptivePolicy::MAX_LINES_FIRST))
-                .c_str());
+        labelJsValue->Put("heightAdaptivePolicy", V2::ConvertWrapTextHeightAdaptivePolicyToString(
+            layoutProperty->GetHeightAdaptivePolicy().value_or(TextHeightAdaptivePolicy::MAX_LINES_FIRST)).c_str());
         labelJsValue->Put("font", fontJsValue->ToString().c_str());
         json->Put("labelStyle", labelJsValue->ToString().c_str());
     }
@@ -176,8 +172,8 @@ protected:
 
 private:
     static void SetDefaultAttributes(const RefPtr<FrameNode>& buttonNode, const RefPtr<PipelineBase>& pipeline);
-    static void UpdateTextLayoutProperty(
-        RefPtr<ButtonLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty);
+    static void UpdateTextLayoutProperty(RefPtr<ButtonLayoutProperty> layoutProperty,
+        RefPtr<TextLayoutProperty> textLayoutProperty);
     Color backgroundColor_;
     Color FocusBorderColor_;
     bool isSetClickedColor_ = false;

@@ -21,6 +21,9 @@
 namespace OHOS::Ace::NG {
 class ACE_EXPORT WaterFlowPositionController : public ScrollController {
     DECLARE_ACE_TYPE(WaterFlowPositionController, ScrollController);
+
+public:
+    void JumpTo(int32_t index, int32_t source) override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_POSITION_CONTROLLER_H

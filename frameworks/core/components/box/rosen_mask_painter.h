@@ -19,7 +19,11 @@
 #include "core/components/box/mask.h"
 #include "core/image/image_provider.h"
 #include "core/pipeline/pipeline_context.h"
+#ifndef NEW_SKIA
 #include "experimental/svg/model/SkSVGDOM.h"
+#else
+#include "modules/svg/include/SkSVGDOM.h"
+#endif
 
 namespace OHOS::Rosen {
     class RSMask;

@@ -63,26 +63,10 @@ public:
         return bottom_ - top_;
     }
 
-    virtual void SetLeft(float pos)
-    {
-        left_ = pos;
-    }
-
-    virtual void SetTop(float pos)
-    {
-        top_ = pos;
-    }
-
-    virtual void SetRight(float pos)
-    {
-        right_ = pos;
-    }
-
-    virtual void SetBottom(float pos)
-    {
-        bottom_ = pos;
-    }
-
+    virtual void SetLeft(float pos) {}
+    virtual void SetTop(float pos) {}
+    virtual void SetRight(float pos) {}
+    virtual void SetBottom(float pos) {}
     virtual void Offset(float dx, float dy) {}
 
 private:

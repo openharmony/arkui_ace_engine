@@ -15,7 +15,7 @@
 
 #include "core/components/piece/flutter_render_piece.h"
 
-#include "third_party/skia/include/core/SkCanvas.h"
+#include "include/core/SkCanvas.h"
 
 #include "core/components/box/render_box.h"
 #include "core/pipeline/base/scoped_canvas_state.h"

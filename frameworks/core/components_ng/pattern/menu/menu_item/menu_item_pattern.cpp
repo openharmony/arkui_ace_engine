@@ -187,7 +187,7 @@ void MenuItemPattern::ShowSubMenu()
         NG::ScopedViewStackProcessor builderViewStackProcessor;
         buildFunc();
         auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
-        auto subMenu = MenuView::Create(customNode, host->GetId(), MenuType::SUB_MENU);
+        auto subMenu = MenuView::Create(customNode, host->GetId(), host->GetTag(), MenuType::SUB_MENU);
         auto menuPattern = subMenu->GetPattern<MenuPattern>();
         menuPattern->SetParentMenuItem(host);
         subMenuId_ = subMenu->GetId();

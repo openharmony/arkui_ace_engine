@@ -2386,6 +2386,8 @@ void WebDelegate::InitWebViewWithSurface()
                 initArgs.web_engine_args_to_add.push_back(
                     std::string("--ohos-custom-scheme=").append(customScheme));
             }
+            initArgs.web_engine_args_to_add.push_back(
+                std::string("--init-background-color=").append(std::to_string(delegate->backgroundColor_)));
             if (isEnhanceSurface) {
                 LOGI("Create webview with isEnhanceSurface");
                 delegate->nweb_ = OHOS::NWeb::NWebAdapterHelper::Instance().CreateNWeb(
