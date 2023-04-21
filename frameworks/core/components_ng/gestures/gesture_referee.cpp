@@ -19,11 +19,10 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/gestures/recognizers/recognizer_group.h"
+#include "core/event/mouse_event.h"
 
 namespace OHOS::Ace::NG {
 
-constexpr int32_t SOURCE_TYPE_MOUSE_BEG = 1000;
-constexpr int32_t SOURCE_TYPE_MOUSE_END = 2000;
 
 void GestureScope::AddMember(const RefPtr<NGGestureRecognizer>& recognizer)
 {
@@ -207,7 +206,7 @@ bool GestureReferee::QueryAllDone(size_t touchId)
 bool GestureReferee::CheckDeviceChange(size_t id)
 {
     for (auto iter = gestureScopes_.begin(); iter != gestureScopes_.end(); iter++) {
-        if ((id+iter->first > SOURCE_TYPE_MOUSE_BEG) && (id+iter->first < SOURCE_TYPE_MOUSE_END)) {
+        if (id+iter->first > OHOS::Ace::MOUSE_BASE_ID) {
             return true;
         }
     }
