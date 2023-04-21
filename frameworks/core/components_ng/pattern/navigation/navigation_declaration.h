@@ -146,5 +146,11 @@ enum class TitleBarParentType {
     NAVBAR,
     NAV_DESTINATION
 };
+
+enum class NavRouteMode {
+    PUSH_WITH_RECREATE = 0,
+    PUSH,
+    REPLACE,
+};
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DECLARATION_NAVIGATION_NAVIGATION_DECLARATION_H
