@@ -184,6 +184,7 @@ private:
     WeakPtr<FocusHub> SearchFocusableChildInCross(int32_t mainIndex, int32_t crossIndex, int32_t maxCrossCount);
     WeakPtr<FocusHub> GetChildFocusNodeByIndex(int32_t tarMainIndex, int32_t tarCrossIndex);
     void ScrollToFocusNode(const WeakPtr<FocusHub>& focusNode);
+    void FlushCurrentFocus();
     void FlushFocusOnScroll(const GridLayoutInfo& gridLayoutInfo);
     std::pair<FocusStep, FocusStep> GetFocusSteps(
         int32_t curCrossIndex, int32_t curMaxCrossCount, FocusStep step) const;
@@ -211,6 +212,9 @@ private:
     bool scrollable_ = true;
     int32_t scrollState_ = SCROLL_FROM_NONE;
     bool mousePressed_ = false;
+
+    int32_t lastFocusItemMainIndex_ = 0;
+    int32_t lastFocusItemCrossIndex_ = 0;
 
     OffsetF mouseStartOffset_;
     OffsetF mouseEndOffset_;

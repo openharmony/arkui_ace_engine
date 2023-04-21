@@ -373,8 +373,6 @@ void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType t
 {
     auto pageNode = DynamicCast<FrameNode>(node);
     CHECK_NULL_VOID(pageNode);
-    auto pagePattern = pageNode->GetPattern<PagePattern>();
-    CHECK_NULL_VOID(pagePattern);
     auto layoutProperty = pageNode->GetLayoutProperty();
     auto pipeline = PipelineBase::GetCurrentContext();
     const static int32_t PLATFORM_VERSION_TEN = 10;
@@ -382,14 +380,17 @@ void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType t
         layoutProperty) {
         layoutProperty->SetSafeArea(pipeline->GetCurrentViewSafeArea());
     }
-    pagePattern->OnShow();
-    // With or without a page transition, we need to make the coming page visible first
-    pagePattern->ProcessShowState();
 
     auto pageFocusHub = pageNode->GetFocusHub();
     CHECK_NULL_VOID(pageFocusHub);
     pageFocusHub->SetParentFocusable(true);
     pageFocusHub->RequestFocus();
+
+    auto pagePattern = pageNode->GetPattern<PagePattern>();
+    CHECK_NULL_VOID(pagePattern);
+    pagePattern->OnShow();
+    // With or without a page transition, we need to make the coming page visible first
+    pagePattern->ProcessShowState();
 
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID_NOLOG(context);
