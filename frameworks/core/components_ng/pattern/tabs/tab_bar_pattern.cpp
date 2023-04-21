@@ -665,11 +665,11 @@ void TabBarPattern::PlayPressAnimation(int32_t index, const Color& pressColor, A
     option.SetDelay(0);
 
     option.SetCurve(animationType == AnimationType::PRESS   ? AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f)
-                    : animationType == AnimationType::HOVER ? Curves::FRICTION : Curves::SHARP);
+                    : animationType == AnimationType::HOVER ? Curves::FRICTION
+                                                            : Curves::SHARP);
     option.SetFillMode(FillMode::FORWARDS);
     Color color = pressColor;
     auto layoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
     if (color == Color::TRANSPARENT && tabBarStyles_[index] == TabBarStyle::SUBTABBATSTYLE
         && selectedModes_[index] == SelectedMode::BOARD && layoutProperty->GetAxis() == Axis::HORIZONTAL) {
         color = indicatorStyles_[index].color;

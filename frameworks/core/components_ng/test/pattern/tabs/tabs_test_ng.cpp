@@ -821,6 +821,16 @@ HWTEST_F(TabsTestNg, TabBarPatternUpdateSubTabBoard001, TestSize.Level1)
     tabBarPattern->SetIndicatorStyle(style, 1);
     tabBarPattern->UpdateSubTabBoard();
     EXPECT_EQ(tabBarPattern->indicator_, 1);
+
+    auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
+    ASSERT_NE(tabBarLayoutProperty, nullptr);
+    tabBarLayoutProperty->UpdateAxis(Axis::VERTICAL);
+    tabBarPattern->UpdateSubTabBoard();
+    EXPECT_EQ(tabBarPattern->indicator_, 1);
+
+    tabBarLayoutProperty->UpdateAxis(Axis::HORIZONTAL);
+    tabBarPattern->UpdateSubTabBoard();
+    EXPECT_EQ(tabBarPattern->indicator_, 1);
 }
 
 /**
@@ -1051,6 +1061,8 @@ HWTEST_F(TabsTestNg, TabBarPatternPlayPressAnimation001, TestSize.Level1)
 
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
     tabBarPattern->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE, 0);
+    IndicatorStyle indicatorStyle;
+    tabBarPattern->SetIndicatorStyle(indicatorStyle, 0);
     EXPECT_EQ(tabBarPattern->tabBarStyles_[0], TabBarStyle::SUBTABBATSTYLE);
     tabBarPattern->SetSelectedMode(SelectedMode::BOARD, 0);
     EXPECT_EQ(tabBarPattern->selectedModes_[0], SelectedMode::BOARD);
@@ -1059,6 +1071,33 @@ HWTEST_F(TabsTestNg, TabBarPatternPlayPressAnimation001, TestSize.Level1)
     tabBarPattern->SetSelectedMode(SelectedMode::INDICATOR, 0);
     EXPECT_EQ(tabBarPattern->selectedModes_[0], SelectedMode::INDICATOR);
     tabBarPattern->PlayPressAnimation(0, Color::BLACK, AnimationType::PRESS);
+    EXPECT_EQ(tabBarPattern->indicator_, 0);
+
+    auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
+    ASSERT_NE(tabBarLayoutProperty, nullptr);
+
+    tabBarLayoutProperty->UpdateAxis(Axis::HORIZONTAL);
+    tabBarPattern->SetSelectedMode(SelectedMode::BOARD, 0);
+    EXPECT_EQ(tabBarPattern->selectedModes_[0], SelectedMode::BOARD);
+    tabBarPattern->PlayPressAnimation(0, Color::TRANSPARENT, AnimationType::PRESS);
+    EXPECT_EQ(tabBarPattern->indicator_, 0);
+
+    tabBarLayoutProperty->UpdateAxis(Axis::HORIZONTAL);
+    tabBarPattern->SetSelectedMode(SelectedMode::BOARD, 0);
+    EXPECT_EQ(tabBarPattern->selectedModes_[0], SelectedMode::BOARD);
+    tabBarPattern->PlayPressAnimation(0, Color::BLACK, AnimationType::PRESS);
+    EXPECT_EQ(tabBarPattern->indicator_, 0);
+
+    tabBarLayoutProperty->UpdateAxis(Axis::HORIZONTAL);
+    tabBarPattern->SetSelectedMode(SelectedMode::INDICATOR, 0);
+    EXPECT_EQ(tabBarPattern->selectedModes_[0], SelectedMode::INDICATOR);
+    tabBarPattern->PlayPressAnimation(0, Color::TRANSPARENT, AnimationType::PRESS);
+    EXPECT_EQ(tabBarPattern->indicator_, 0);
+
+    tabBarLayoutProperty->UpdateAxis(Axis::VERTICAL);
+    tabBarPattern->SetSelectedMode(SelectedMode::BOARD, 0);
+    EXPECT_EQ(tabBarPattern->selectedModes_[0], SelectedMode::BOARD);
+    tabBarPattern->PlayPressAnimation(0, Color::TRANSPARENT, AnimationType::PRESS);
     EXPECT_EQ(tabBarPattern->indicator_, 0);
 }
 
