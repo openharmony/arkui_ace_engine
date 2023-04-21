@@ -1402,10 +1402,11 @@ void TextFieldPattern::AnimatePressAndHover(RefPtr<RenderContext>& renderContext
 #ifdef ENABLE_DRAG_FRAMEWORK
 std::function<void(Offset)> TextFieldPattern::GetThumbnailCallback()
 {
-    auto callback = [frameNode = GetHost()](Offset point) {
-        CHECK_NULL_VOID(frameNode);
-        auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    auto callback = [weak = WeakClaim(this)](const Offset& point) {
+        auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        auto frameNode = pattern->GetHost();
+        CHECK_NULL_VOID(frameNode);
         if (pattern->BetweenSelectedPosition(point)) {
             TextDragPattern::CreateDragNode(frameNode);
             FrameNode::ProcessOffscreenNode(pattern->GetDragNode());
@@ -1424,7 +1425,7 @@ void TextFieldPattern::InitDragDropEvent()
     auto gestureHub = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->InitDragDropEvent();
-    gestureHub->SetTextFieldDraggable(true);
+    gestureHub->SetTextDraggable(true);
     auto callback = GetThumbnailCallback();
     gestureHub->SetThumbnailCallback(std::move(callback));
     auto eventHub = host->GetEventHub<EventHub>();

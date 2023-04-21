@@ -164,7 +164,7 @@ void DragDropManager::UpdatePixelMapPosition(int32_t globalX, int32_t globalY)
         CHECK_NULL_VOID(draggedFrameNode_);
         auto hub = draggedFrameNode_->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(hub);
-        if (!hub->GetTextFieldDraggable()) {
+        if (!hub->GetTextDraggable()) {
             hub = columnNode->GetOrCreateGestureEventHub();
             CHECK_NULL_VOID(hub);
         }

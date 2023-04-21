@@ -17,10 +17,9 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_DRAG_TEXT_DRAG_PATTERN_H
 
 #include "base/memory/referenced.h"
-
+#include "core/components_ng/pattern/text_drag/text_drag_base.h"
 #include "core/components_ng/pattern/text_drag/text_drag_overlay_modifier.h"
 #include "core/components_ng/pattern/text_drag/text_drag_paint_method.h"
-#include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
@@ -31,8 +30,9 @@ constexpr uint32_t TEXT_DRAG_COLOR_BG = 0xf2ffffff;
 
 struct SelectPositionInfo {
     SelectPositionInfo() {}
-    SelectPositionInfo(float startX, float startY, float endX, float endY) : startX_(startX), startY_(startY),
-        endX_(endX), endY_(endY) {}
+    SelectPositionInfo(float startX, float startY, float endX, float endY)
+        : startX_(startX), startY_(startY), endX_(endX), endY_(endY)
+    {}
 
     float startX_ = 0;
     float startY_ = 0;
@@ -45,7 +45,8 @@ struct TextDragData {
     TextDragData(RectF textRect, float frameWidth, float frameHeight, float lineHeight, SelectPositionInfo position,
         bool oneLineSelected)
         : textRect_(textRect), frameWidth_(frameWidth), frameHeight_(frameHeight), lineHeight_(lineHeight),
-        selectPosition_(position), oneLineSelected_(oneLineSelected) {}
+          selectPosition_(position), oneLineSelected_(oneLineSelected)
+    {}
 
     RectF textRect_;
     float frameWidth_ = 0;
@@ -72,7 +73,7 @@ public:
 
     static void CreateDragNode(RefPtr<FrameNode> hostNode);
 
-    void Initialize(const std::shared_ptr<RSParagraph>& paragraph, const TextDragData& data)
+    void Initialize(const ParagraphT& paragraph, const TextDragData& data)
     {
         paragraph_ = paragraph;
         textDragData_ = data;
@@ -86,7 +87,7 @@ public:
         return MakeRefPtr<TextDragPaintMethod>(WeakClaim(this), overlayModifier_);
     }
 
-    const std::shared_ptr<RSParagraph>& GetParagraph() const
+    const ParagraphT& GetParagraph() const
     {
         return paragraph_;
     }
@@ -143,16 +144,16 @@ public:
     }
 
     std::shared_ptr<RSPath> GenerateBackgroundPath(float offset);
+
 private:
-    static TextDragData CalculateTextDragData(RefPtr<TextFieldPattern>& hostPattern,
-        RefPtr<RenderContext>& dragContext);
+    static TextDragData CalculateTextDragData(RefPtr<TextDragBase>& hostPattern, RefPtr<RenderContext>& dragContext);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     std::shared_ptr<RSPath> GenerateClipPath();
     void GenerateBackgroundPoints(std::vector<TextPoint>& points, float offset);
     void CalculateLineAndArc(std::vector<TextPoint>& points, std::shared_ptr<RSPath>& path);
 
     RefPtr<TextDragOverlayModifier> overlayModifier_;
-    std::shared_ptr<RSParagraph> paragraph_;
+    ParagraphT paragraph_;
     TextDragData textDragData_;
     std::shared_ptr<RSPath> clipPath_;
     std::shared_ptr<RSPath> backGroundPath_;

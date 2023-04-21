@@ -33,14 +33,15 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_overlay_modifier.h"
 #include "core/components_ng/pattern/text/text_paint_method.h"
+#include "core/components_ng/pattern/text_drag/text_drag_base.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/property/property.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 // TextPattern is the base class for text render node to perform paint text.
-class TextPattern : public Pattern {
-    DECLARE_ACE_TYPE(TextPattern, Pattern);
+class TextPattern : public Pattern, public TextDragBase {
+    DECLARE_ACE_TYPE(TextPattern, Pattern, TextDragBase);
 
 public:
     TextPattern() = default;
@@ -118,7 +119,7 @@ public:
 
     void GetGlobalOffset(Offset& offset);
 
-    const RectF& GetTextContentRect() const
+    const RectF& GetTextContentRect() const override
     {
         return contentRect_;
     }
@@ -145,6 +146,49 @@ public:
 
     void OnVisibleChange(bool isVisible) override;
 
+// ===========================================================
+// TextDragBase implementations
+
+    bool IsTextArea() const override
+    {
+        return false;
+    }
+
+    const RectF& GetTextRect() override
+    {
+        return contentRect_;
+    }
+    float GetLineHeight() const override;
+
+    std::vector<RSTypographyProperties::TextBox> GetTextBoxes() override;
+    OffsetF GetParentGlobalOffset() const override;
+
+    void SetDragNode(const RefPtr<FrameNode>& dragNode) override
+    {
+        dragNode_ = dragNode;
+    }
+    const RefPtr<FrameNode>& GetDragNode() const override
+    {
+        return dragNode_;
+    }
+
+    ParagraphT GetDragParagraph() const override
+    {
+        return { paragraph_ };
+    }
+
+    bool CloseKeyboard(bool /* forceClose */) override
+    {
+        return true;
+    }
+    void CloseSelectOverlay() override;
+    void CreateHandles() override;
+
+    bool BetweenSelectedPosition(const Offset& globalOffset) override;
+
+// end of TextDragBase implementations
+// ===========================================================
+
 private:
     void OnDetachFromFrameNode(FrameNode* node) override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -165,11 +209,19 @@ private:
     void HandlePanUpdate(const GestureEvent& info);
     void HandlePanEnd(const GestureEvent& info);
 
+#ifdef ENABLE_DRAG_FRAMEWORK
+    DragDropInfo OnDragStart(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams);
+    void InitDragEvent();
+    std::function<void(Offset)> GetThumbnailCallback();
+#endif
+
     void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle);
     void InitSelection(const Offset& pos);
-    void CalcuateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
+    void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
 
-    bool IsDraggable(const Offset& offset);
+    inline RSTypographyProperties::TextBox ConvertRect(const Rect& rect);
+
+    bool IsDraggable(const Offset& localOffset);
 
     int32_t GetGraphemeClusterLength(int32_t extend) const;
     OffsetF CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight);
@@ -185,6 +237,7 @@ private:
     RefPtr<Clipboard> clipboard_;
     RefPtr<DragWindow> dragWindow_;
     RefPtr<DragDropProxy> dragDropProxy_;
+    RefPtr<FrameNode> dragNode_;
     CopyOptions copyOption_ = CopyOptions::None;
     TextSelector textSelector_;
     OffsetF contentOffset_;
@@ -193,7 +246,6 @@ private:
     bool clickEventInitialized_ = false;
     bool mouseEventInitialized_ = false;
     bool panEventInitialized_ = false;
-    bool draggable_ = false;
     std::optional<TextStyle> textStyle_;
 
     RefPtr<TextContentModifier> textContentModifier_;

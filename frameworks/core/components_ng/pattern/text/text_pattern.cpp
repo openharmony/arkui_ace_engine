@@ -22,22 +22,32 @@
 #include "base/log/dump_log.h"
 #include "base/utils/utils.h"
 #include "base/window/drag_window.h"
-#if !defined(ACE_UNITTEST)
-#include "core/common/ace_engine_ext.h"
-#endif
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
+#include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
 #include "core/components_ng/property/property.h"
 #include "core/gestures/gesture_info.h"
 #include "core/pipeline/base/render_context.h"
 
+#ifdef ENABLE_DRAG_FRAMEWORK
+#include "text.h"
+#include "unified_data.h"
+
+#include "core/common/ace_engine_ext.h"
+#endif
+
 namespace OHOS::Ace::NG {
 
 void TextPattern::OnDetachFromFrameNode(FrameNode* node)
+{
+    CloseSelectOverlay();
+}
+
+void TextPattern::CloseSelectOverlay()
 {
     if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
         selectOverlayProxy_->Close();
@@ -80,7 +90,7 @@ OffsetF TextPattern::CalcCursorOffsetByPosition(int32_t position, float& selectL
     return OffsetF(static_cast<float>(metrics.offset.GetX()), static_cast<float>(metrics.offset.GetY()));
 }
 
-void TextPattern::CalcuateHandleOffsetAndShowOverlay(bool isUsingMouse)
+void TextPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -119,12 +129,16 @@ void TextPattern::HandleLongPress(GestureEvent& info)
     if (copyOption_ == CopyOptions::None) {
         return;
     }
+    if (IsDraggable(info.GetLocalLocation())) {
+        // prevent long press event from being triggered when dragging
+        return;
+    }
     auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
     Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
         info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
 
     InitSelection(textOffset);
-    CalcuateHandleOffsetAndShowOverlay();
+    CalculateHandleOffsetAndShowOverlay();
     ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -179,7 +193,7 @@ void TextPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle)
 
 void TextPattern::OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle)
 {
-    CalcuateHandleOffsetAndShowOverlay();
+    CalculateHandleOffsetAndShowOverlay();
     if (selectOverlayProxy_) {
         SelectHandleInfo handleInfo;
         if (isFirstHandle) {
@@ -269,9 +283,7 @@ void TextPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secon
     }
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
-        selectOverlayProxy_->Close();
-    }
+    CloseSelectOverlay();
     selectOverlayProxy_ = pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo);
     CHECK_NULL_VOID_NOLOG(selectOverlayProxy_);
     auto start = textSelector_.GetTextStart();
@@ -283,7 +295,7 @@ void TextPattern::HandleOnSelectAll()
 {
     auto textSize = GetWideText().length();
     textSelector_.Update(0, textSize);
-    CalcuateHandleOffsetAndShowOverlay();
+    CalculateHandleOffsetAndShowOverlay();
     if (selectOverlayProxy_) {
         SelectHandleInfo firstHandleInfo;
         SelectHandleInfo secondHandleInfo;
@@ -315,9 +327,7 @@ void TextPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub)
 
 void TextPattern::OnHandleTouchUp()
 {
-    if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
-        selectOverlayProxy_->Close();
-    }
+    CloseSelectOverlay();
     textSelector_.Update(-1, -1);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -328,9 +338,7 @@ void TextPattern::HandleClickEvent(GestureEvent& info)
 {
     if (textSelector_.IsValid()) {
         textSelector_.Update(-1, -1);
-        if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
-            selectOverlayProxy_->Close();
-        }
+        CloseSelectOverlay();
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -405,7 +413,7 @@ void TextPattern::HandleMouseEvent(const MouseInfo& info)
         Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
             info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
         InitSelection(textOffset);
-        CalcuateHandleOffsetAndShowOverlay(true);
+        CalculateHandleOffsetAndShowOverlay(true);
         ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
         auto host = GetHost();
         CHECK_NULL_VOID(host);
@@ -464,7 +472,7 @@ void TextPattern::HandlePanStart(const GestureEvent& info)
             static_cast<int32_t>(contentRect_.Width() + contentRect_.GetX()),
             contentRect_.Height() + contentRect_.GetY());
         if (dragWindow_) {
-#if !defined(ACE_UNITTEST)
+#ifdef ENABLE_DRAG_FRAMEWORK
             AceEngineExt::GetInstance().DragStartExt();
 #endif
             dragWindow_->SetOffset(static_cast<int32_t>(host->GetPaintRectOffset().GetX() + rect.Left()),
@@ -484,7 +492,9 @@ void TextPattern::HandlePanStart(const GestureEvent& info)
 
 bool TextPattern::IsDraggable(const Offset& offset)
 {
-    if (copyOption_ != CopyOptions::None && draggable_ &&
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    if (copyOption_ != CopyOptions::None && host->IsDraggable() &&
         GreatNotEqual(textSelector_.GetTextEnd(), textSelector_.GetTextStart())) {
         // Determine if the pan location is in the selected area
         std::vector<Rect> selectedRects;
@@ -527,6 +537,117 @@ void TextPattern::HandlePanEnd(const GestureEvent& info)
     }
 }
 
+#ifdef ENABLE_DRAG_FRAMEWORK
+DragDropInfo TextPattern::OnDragStart(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams)
+{
+    LOGI("OnDragStart");
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, {});
+
+    DragDropInfo itemInfo;
+    auto selectedStr = GetSelectedText(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
+    itemInfo.extraInfo = selectedStr;
+    UDMF::UDVariant udmfValue(selectedStr);
+    UDMF::UDDetails udmfDetails = { { "value", udmfValue } };
+    auto record = std::make_shared<UDMF::Text>(udmfDetails);
+    auto unifiedData = std::make_shared<UDMF::UnifiedData>();
+    unifiedData->AddRecord(record);
+    event->SetData(unifiedData);
+
+    AceEngineExt::GetInstance().DragStartExt();
+    return itemInfo;
+}
+
+void TextPattern::InitDragEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    if (eventHub->HasOnDragStart()) {
+        LOGD("drag event has already been initialized");
+        return;
+    }
+
+    auto gestureHub = host->GetOrCreateGestureEventHub();
+    gestureHub->InitDragDropEvent();
+    gestureHub->SetTextDraggable(true);
+    gestureHub->SetThumbnailCallback(GetThumbnailCallback());
+    auto onDragStart = [weakPtr = WeakClaim(this)](
+                           const RefPtr<Ace::DragEvent>& event, const std::string& extraParams) -> DragDropInfo {
+        auto pattern = weakPtr.Upgrade();
+        CHECK_NULL_RETURN(pattern, {});
+        return pattern->OnDragStart(event, extraParams);
+    };
+    if (!eventHub->HasOnDragStart()) {
+        eventHub->SetOnDragStart(std::move(onDragStart));
+    }
+}
+
+std::function<void(Offset)> TextPattern::GetThumbnailCallback()
+{
+    return [wk = WeakClaim(this)](const Offset& point) {
+        auto pattern = wk.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (pattern->BetweenSelectedPosition(point)) {
+            TextDragPattern::CreateDragNode(pattern->GetHost());
+            FrameNode::ProcessOffscreenNode(pattern->GetDragNode());
+        }
+    };
+}
+#endif // ENABLE_DRAG_FRAMEWORK
+
+// ===========================================================
+// TextDragBase implementations
+float TextPattern::GetLineHeight() const
+{
+    std::vector<Rect> selectedRects;
+    paragraph_->GetRectsForRange(textSelector_.GetTextStart(), textSelector_.GetTextEnd(), selectedRects);
+    CHECK_NULL_RETURN(selectedRects.size(), {});
+    return selectedRects.front().Height();
+}
+
+RSTypographyProperties::TextBox TextPattern::ConvertRect(const Rect& rect)
+{
+    return { RSRect(rect.Left(), rect.Top(), rect.Right(), rect.Bottom()), RSTextDirection::LTR };
+}
+
+std::vector<RSTypographyProperties::TextBox> TextPattern::GetTextBoxes()
+{
+    std::vector<Rect> selectedRects;
+    paragraph_->GetRectsForRange(textSelector_.GetTextStart(), textSelector_.GetTextEnd(), selectedRects);
+    std::vector<RSTypographyProperties::TextBox> res;
+    res.reserve(selectedRects.size());
+    for (auto&& rect : selectedRects) {
+        res.emplace_back(ConvertRect(rect));
+    }
+    return res;
+}
+
+OffsetF TextPattern::GetParentGlobalOffset() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, {});
+    return host->GetPaintRectOffset();
+}
+
+void TextPattern::CreateHandles()
+{
+    ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
+}
+
+bool TextPattern::BetweenSelectedPosition(const Offset& globalOffset)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto offset = host->GetPaintRectOffset();
+    auto localOffset = globalOffset - Offset(offset.GetX(), offset.GetY());
+    return IsDraggable(localOffset);
+}
+
+// end of TextDragBase implementations
+// ===========================================================
+
 void TextPattern::OnModifyDone()
 {
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
@@ -544,7 +665,6 @@ void TextPattern::OnModifyDone()
 
     textForDisplay_ = textLayoutProperty->GetContent().value_or("");
     copyOption_ = textLayoutProperty->GetCopyOption().value_or(CopyOptions::None);
-    draggable_ = textLayoutProperty->GetDraggable().value_or(false);
     if (copyOption_ != CopyOptions::None) {
         auto context = host->GetContext();
         CHECK_NULL_VOID(context);
@@ -553,8 +673,10 @@ void TextPattern::OnModifyDone()
         }
         auto gestureEventHub = host->GetOrCreateGestureEventHub();
         InitLongPressEvent(gestureEventHub);
-        if (draggable_) {
-            InitPanEvent(gestureEventHub);
+        if (host->IsDraggable()) {
+#ifdef ENABLE_DRAG_FRAMEWORK
+            InitDragEvent();
+#endif
         }
         InitClickEvent(gestureEventHub);
         InitMouseEvent();
@@ -663,9 +785,7 @@ void TextPattern::OnVisibleChange(bool isVisible)
     if (!isVisible) {
         if (textSelector_.IsValid()) {
             textSelector_.Update(-1, -1);
-            if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
-                selectOverlayProxy_->Close();
-            }
+            CloseSelectOverlay();
             auto host = GetHost();
             CHECK_NULL_VOID(host);
             host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
