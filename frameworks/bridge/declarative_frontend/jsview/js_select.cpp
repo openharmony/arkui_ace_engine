@@ -136,6 +136,7 @@ void JSSelect::JSBind(BindingTarget globalObj)
     JSClass<JSSelect>::StaticMethod("onSelect", &JSSelect::OnSelected, opt);
     JSClass<JSSelect>::StaticMethod("space", &JSSelect::SetSpace, opt);
     JSClass<JSSelect>::StaticMethod("arrowPosition", &JSSelect::SetArrowPosition, opt);
+    JSClass<JSSelect>::StaticMethod("menuAlign", &JSSelect::SetMenuAlign, opt);
 
     // API7 onSelected deprecated
     JSClass<JSSelect>::StaticMethod("onSelected", &JSSelect::OnSelected, opt);
@@ -954,24 +955,53 @@ void JSSelect::SetSpace(const JSCallbackInfo& info)
 void JSSelect::SetArrowPosition(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGI("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
 
     int32_t direction = 0;
     if (!ParseJsInt32(info[0], direction)) {
-        LOGI("direction is wrong");
         direction = 0;
     }
 
     if (static_cast<NG::ArrowPosition>(direction) != NG::ArrowPosition::START &&
         static_cast<NG::ArrowPosition>(direction) != NG::ArrowPosition::END) {
-            LOGI("direction is unused FlexDirection");
-            direction = 0;
-        }
+        direction = 0;
+    }
 
     if (Container::IsCurrentUseNewPipeline()) {
         NG::SelectView::SetArrowPosition(static_cast<NG::ArrowPosition>(direction));
+    }
+}
+
+void JSSelect::SetMenuAlign(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+
+    if (!info[0]->IsNumber()) {
+        return;
+    }
+
+    NG::MenuAlign menuAlignObj;
+    menuAlignObj.alignType = static_cast<NG::MenuAlignType>(info[0]->ToNumber<int32_t>());
+
+    if (info.Length() > 1) {
+        if (!info[1]->IsObject()) {
+            return;
+        }
+        auto offsetObj = JSRef<JSObject>::Cast(info[1]);
+        Dimension dx;
+        auto dxValue = offsetObj->GetProperty("dx");
+        ParseJsDimensionVp(dxValue, dx);
+        Dimension dy;
+        auto dyValue = offsetObj->GetProperty("dy");
+        ParseJsDimensionVp(dyValue, dy);
+        menuAlignObj.offset = DimensionOffset(dx, dy);
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::SelectView::SetMenuAlign(menuAlignObj);
     }
 }
 } // namespace OHOS::Ace::Framework
