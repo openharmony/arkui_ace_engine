@@ -13,5 +13,8 @@
 
 group("core_pattern_unittest") {
   testonly = true
-  deps = [ "ui_extension:ui_extension_pattern_test_ng" ]
+  deps = [ 
+    "navrouter:navrouter_pattern_test_ng",
+    "ui_extension:ui_extension_pattern_test_ng" ,
+  ]
 }

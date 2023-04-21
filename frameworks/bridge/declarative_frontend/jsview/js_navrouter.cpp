@@ -16,24 +16,38 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_navrouter.h"
 
 #include "base/log/ace_scoring_log.h"
+#include "bridge/declarative_frontend/jsview/models/navrouter_model_impl.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/navrouter/navrouter_model_ng.h"
 #include "core/components_ng/pattern/navrouter/navrouter_view.h"
 
-namespace OHOS::Ace::Framework {
+namespace OHOS::Ace {
+std::unique_ptr<NavRouterModel> NavRouterModel::instance_ = nullptr;
+NavRouterModel* NavRouterModel::GetInstance()
+{
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance_.reset(new NG::NavRouterModelNG());
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::NavRouterModelNG());
+        } else {
+            instance_.reset(new Framework::NavRouterModelImpl());
+        }
+#endif
+    }
+    return instance_.get();
+}
+} // namespace OHOS::Ace
 
+namespace OHOS::Ace::Framework {
 void JSNavRouter::Create()
 {
-    if (!Container::IsCurrentUseNewPipeline()) {
-        return;
-    }
-    NG::NavRouterView::Create();
+    NavRouterModel::GetInstance()->Create();
 }
 
 void JSNavRouter::SetOnStateChange(const JSCallbackInfo& info)
 {
-    if (!Container::IsCurrentUseNewPipeline()) {
-        return;
-    }
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have at least one argument");
         return;
@@ -47,10 +61,8 @@ void JSNavRouter::SetOnStateChange(const JSCallbackInfo& info)
             JSRef<JSVal> param = JSRef<JSVal>::Make(ToJSValue(isActivated));
             func->ExecuteJS(1, &param);
         };
-        NG::NavRouterView::SetOnStateChange(std::move(onStateChange));
-        return;
+        NavRouterModel::GetInstance()->SetOnStateChange(std::move(onStateChange));
     }
-    info.ReturnSelf();
 }
 
 void JSNavRouter::JSBind(BindingTarget globalObj)
@@ -62,5 +74,4 @@ void JSNavRouter::JSBind(BindingTarget globalObj)
     JSClass<JSNavRouter>::Inherit<JSViewAbstract>();
     JSClass<JSNavRouter>::Bind<>(globalObj);
 }
-
 } // namespace OHOS::Ace::Framework
