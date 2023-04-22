@@ -44,7 +44,7 @@ ohos_unittest("shared_overlay_manager_test_ng") {
     "$ace_root/frameworks/core/components_ng/property/property.cpp",
 
     # mock
-
+    "$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
     "$ace_root/frameworks/core/animation/test/mock/mock_animator.cpp",
     "$ace_root/frameworks/core/animation/test/mock/mock_scheduler.cpp",
     "$ace_root/frameworks/core/components/common/properties/test/mock/mock_motion_path_evaluator.cpp",

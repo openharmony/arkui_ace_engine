@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,7 +41,6 @@ public:
     bool PopPage(bool needShowNext = true, bool needTransition = true);
     bool PopPageToIndex(int32_t index, bool needShowNext = true, bool needTransition = true);
     bool CleanPageStack();
-
     bool MovePageToFront(const RefPtr<FrameNode>& node, bool needHideLast = true, bool needTransition = true);
 
     void StartTransition(const RefPtr<FrameNode>& srcPage, const RefPtr<FrameNode>& destPage, RouteType type);
@@ -54,7 +53,9 @@ public:
     void ReloadStage();
 
 private:
+    void CheckNodeCountAndDepth(const RefPtr<FrameNode>& pageNode);
     void StopPageTransition();
+
     RefPtr<FrameNode> stageNode_;
     RefPtr<StagePattern> stagePattern_;
     WeakPtr<FrameNode> destPageNode_;

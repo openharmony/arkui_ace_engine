@@ -11,7 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/test.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("picker_test_ng") {
@@ -147,6 +146,7 @@ ohos_unittest("picker_test_ng") {
     "$ace_root/frameworks/base/test/mock/mock_animatable_dimension.cpp",
     "$ace_root/frameworks/base/test/mock/mock_drag_window.cpp",
     "$ace_root/frameworks/base/test/mock/mock_ressched_report.cpp",
+    "$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
     "$ace_root/frameworks/core/animation/test/mock/mock_animator.cpp",
     "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
     "$ace_root/frameworks/core/components/test/unittest/mock/mock_icon_theme.cpp",

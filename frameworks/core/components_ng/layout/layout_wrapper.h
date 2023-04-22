@@ -22,6 +22,7 @@
 #include <unordered_map>
 
 #include "base/geometry/offset.h"
+#include "base/log/ace_performance_check.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/thread/cancelable_callback.h"
@@ -38,6 +39,7 @@
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/position_property.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 class FrameNode;
@@ -213,6 +215,17 @@ public:
         outOfLayout_ = outOfLayout;
     }
 
+    // performance check
+    CheckNodeMap GetChildrenFlexLayouts(const std::unordered_map<int32_t, RefPtr<LayoutWrapper>>& childrenMap);
+    int32_t GetFlexLayouts() const
+    {
+        return flexLayouts_;
+    }
+
+    // performance check
+    bool IsHostParentFlex();
+    bool IsHostFlex();
+
     // Check the flag attribute with descendant node
     bool CheckNeedForceMeasureAndLayout();
 
@@ -249,6 +262,9 @@ private:
     std::optional<bool> needForceMeasureAndLayout_;
 
     LazyBuildFunction lazyBuildFunction_;
+
+    // performance check
+    int32_t flexLayouts_ = 0;
 
     // When the location property is set, it departs from the layout flow.
     bool outOfLayout_ = false;
