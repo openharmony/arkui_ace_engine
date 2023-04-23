@@ -17,6 +17,8 @@
 
 #define private public
 #define protected public
+
+#include "core/components/text/text_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -534,7 +536,7 @@ HWTEST_F(ImageTestNg, ImagePaintMethod001, TestSize.Level1)
     ASSERT_NE(imagePattern, nullptr);
     imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
     imagePattern->image_->SetPaintConfig(ImagePaintConfig());
-    ImagePaintMethod imagePaintMethod(imagePattern->image_);
+    ImagePaintMethod imagePaintMethod(imagePattern->image_, true);
     /**
      * @tc.steps: step3. ImagePaintMethod GetContentDrawFunction.
      */
@@ -556,6 +558,21 @@ HWTEST_F(ImageTestNg, ImagePaintMethod001, TestSize.Level1)
     EXPECT_EQ(config->imageRepeat_, IMAGE_REPEAT_DEFAULT);
     EXPECT_EQ(config->needFlipCanvasHorizontally_, MATCHTEXTDIRECTION_DEFAULT);
     EXPECT_EQ(*config->colorFilter_, COLOR_FILTER_DEFAULT);
+
+    /**
+     * @tc.steps: step4. ImagePaintMethod GetOverlayDrawFunction
+     */
+
+    // create mock theme manager
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<TextTheme>()));
+
+    auto overlayPaintMethod = imagePaintMethod.GetOverlayDrawFunction(&paintWrapper);
+    EXPECT_TRUE(overlayPaintMethod);
+    EXPECT_TRUE(imagePaintMethod.selected_);
+
+    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
