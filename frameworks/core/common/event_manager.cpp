@@ -80,6 +80,9 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
     // collect
     TouchTestResult hitTestResult;
     const NG::PointF point { touchPoint.x, touchPoint.y };
+    if (refereeNG_->CheckSourceTypeChange(touchPoint.sourceType)) {
+        refereeNG_->CleanAll();
+    }
     if (refereeNG_->QueryAllDone(touchPoint.id)) {
         refereeNG_->CleanGestureScope(touchPoint.id);
     }
@@ -103,7 +106,10 @@ void EventManager::TouchTest(
     const AxisEvent& event, const RefPtr<NG::FrameNode>& frameNode, const TouchRestrict& touchRestrict)
 {
     ContainerScope scope(instanceId_);
-
+    
+    if (refereeNG_->CheckSourceTypeChange(event.sourceType, true)) {
+        refereeNG_->CleanAll();
+    }
     ACE_FUNCTION_TRACE();
     CHECK_NULL_VOID(frameNode);
     // collect
