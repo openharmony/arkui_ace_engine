@@ -13,19 +13,20 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WATERFLOW_WATER_FLOW_ITEM_PATTERN_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WATERFLOW_WATER_FLOW_ITEM_PATTERN_H
 
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/waterflow/water_flow_item_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
-void WaterFlowItemModelNG::Create()
-{
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::FLOW_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WaterFlowItemPattern>(); });
-    stack->Push(frameNode);
-}
+class ACE_EXPORT WaterFlowItemPattern : public Pattern {
+    DECLARE_ACE_TYPE(WaterFlowItemPattern, Pattern);
+
+public:
+    bool IsAtomicNode() const override
+    {
+        return false;
+    }
+};
 } // namespace OHOS::Ace::NG
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WATERFLOW_WATER_FLOW_ITEM_PATTERN_H
