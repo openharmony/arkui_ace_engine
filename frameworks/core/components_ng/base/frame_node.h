@@ -368,6 +368,8 @@ public:
         const std::function<void(float)>& onCallbackEvent);
     void UpdateAnimatablePropertyFloat(const std::string& propertyName, float value);
 
+    std::string ProvideRestoreInfo();
+
 private:
     void MarkNeedRender(bool isRenderBoundary);
     bool IsNeedRequestParentMeasure() const;
@@ -462,6 +464,8 @@ private:
     bool userSet_ = false;
 
     std::map<std::string, RefPtr<NodeAnimatablePropertyBase>> nodeAnimatablePropertyMap_;
+
+    bool isRestoreInfoUsed_ = false;
 
     friend class RosenRenderContext;
     friend class RenderContext;

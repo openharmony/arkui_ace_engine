@@ -676,7 +676,10 @@ public:
         ViewAbstract::SetInspectorId(inspectorId);
     }
 
-    void SetRestoreId(int32_t restoreId) override {}
+    void SetRestoreId(int32_t restoreId) override
+    {
+        ViewAbstract::SetRestoreId(restoreId);
+    }
 
     void SetDebugLine(const std::string& line) override
     {

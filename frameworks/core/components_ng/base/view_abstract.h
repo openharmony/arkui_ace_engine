@@ -221,6 +221,8 @@ public:
     static void ShowMenu(int32_t targetId, const NG::OffsetF& offset, bool isContextMenu = false);
     // inspector
     static void SetInspectorId(const std::string& inspectorId);
+    // restore
+    static void SetRestoreId(int32_t restoreId);
     // inspector debugLine
     static void SetDebugLine(const std::string& line);
     // transition

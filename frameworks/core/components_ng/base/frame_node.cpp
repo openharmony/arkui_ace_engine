@@ -75,6 +75,7 @@ FrameNode::~FrameNode()
         pipeline->RemoveVisibleAreaChangeNode(GetId());
         pipeline->ChangeMouseStyle(GetId(), MouseFormat::DEFAULT);
         pipeline->FreeMouseStyleHoldNode(GetId());
+        pipeline->RemoveStoredNode(GetRestoreId());
     }
 }
 
@@ -826,6 +827,18 @@ void FrameNode::RebuildRenderContextTree()
 void FrameNode::MarkModifyDone()
 {
     pattern_->OnModifyDone();
+    // restore info will overwrite the first setted attribute
+    if (!isRestoreInfoUsed_) {
+        isRestoreInfoUsed_ = true;
+        auto pipeline = PipelineContext::GetCurrentContext();
+        int32_t restoreId = GetRestoreId();
+        if (pipeline && restoreId >= 0) {
+            // store distribute node
+            pipeline->StoreNode(restoreId, AceType::WeakClaim(this));
+            // restore distribute node info
+            pattern_->OnRestoreInfo(pipeline->GetRestoreInfo(restoreId));
+        }
+    }
     eventHub_->MarkModifyDone();
     if (IsResponseRegion() || HasPositionProp()) {
         auto parent = GetParent();
@@ -1563,5 +1576,10 @@ void FrameNode::OnRemoveDisappearingChild()
     auto context = GetRenderContext();
     CHECK_NULL_VOID(context);
     context->UpdateFreeze(false);
+}
+
+std::string FrameNode::ProvideRestoreInfo()
+{
+    return pattern_->ProvideRestoreInfo();
 }
 } // namespace OHOS::Ace::NG
