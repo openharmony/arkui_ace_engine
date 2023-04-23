@@ -297,8 +297,13 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest006, TestSize.Level1)
      * @tc.expected: step3. Check the CheckBox pattern value
      */
     pattern->isTouch_ = true;
+    pattern->isHover_ = false;
     pattern->OnTouchUp();
     EXPECT_EQ(pattern->isTouch_, false);
+    EXPECT_EQ(pattern->touchHoverType_, TouchHoverAnimationType::NONE);
+    pattern->isHover_ = true;
+    pattern->OnTouchUp();
+    EXPECT_EQ(pattern->touchHoverType_, TouchHoverAnimationType::PRESS_TO_HOVER);
 }
 
 /**
@@ -327,8 +332,13 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest007, TestSize.Level1)
      * @tc.expected: step3. Check the CheckBox pattern value
      */
     pattern->isTouch_ = false;
+    pattern->isHover_ = false;
     pattern->OnTouchDown();
     EXPECT_EQ(pattern->isTouch_, true);
+    EXPECT_EQ(pattern->touchHoverType_, TouchHoverAnimationType::PRESS);
+    pattern->isHover_ = true;
+    pattern->OnTouchDown();
+    EXPECT_EQ(pattern->touchHoverType_, TouchHoverAnimationType::HOVER_TO_PRESS);
 }
 
 /**
@@ -394,8 +404,10 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest009, TestSize.Level1)
     pattern->isTouch_ = true;
     pattern->isHover_ = false;
     pattern->HandleMouseEvent(true);
-    EXPECT_EQ(pattern->isHover_, true);
+    EXPECT_EQ(pattern->touchHoverType_, TouchHoverAnimationType::HOVER);
     EXPECT_EQ(pattern->isTouch_, true);
+    pattern->HandleMouseEvent(false);
+    EXPECT_EQ(pattern->touchHoverType_, TouchHoverAnimationType::NONE);
 }
 
 /**
@@ -803,7 +815,8 @@ HWTEST_F(CheckBoxTestNG, CheckBoxMeasureTest024, TestSize.Level1)
  */
 HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest025, TestSize.Level1)
 {
-    CheckBoxModelNG checkBoxModelNG;;
+    CheckBoxModelNG checkBoxModelNG;
+    ;
     checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_NE(frameNode, nullptr);
@@ -824,11 +837,11 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest025, TestSize.Level1)
     checkBoxPattern->OnModifyDone();
     EXPECT_EQ(layoutProperty->GetMarginProperty()->left.value(), CalcLength(CHECK_MARK_SIZE.ConvertToPx()));
     EXPECT_EQ(layoutProperty->GetMarginProperty()->right.value(),
-              CalcLength(checkBoxTheme->GetHotZoneHorizontalPadding().Value()));
+        CalcLength(checkBoxTheme->GetHotZoneHorizontalPadding().Value()));
     EXPECT_EQ(layoutProperty->GetMarginProperty()->top.value(),
-              CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().Value()));
+        CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().Value()));
     EXPECT_EQ(layoutProperty->GetMarginProperty()->bottom.value(),
-              CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().Value()));
+        CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().Value()));
 
     MarginProperty margin1;
     margin1.right = CalcLength(CHECK_MARK_SIZE.ConvertToPx());
@@ -836,13 +849,12 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest025, TestSize.Level1)
 
     checkBoxPattern->OnModifyDone();
     EXPECT_EQ(layoutProperty->GetMarginProperty()->left.value(),
-              CalcLength(checkBoxTheme->GetHotZoneHorizontalPadding().Value()));
-    EXPECT_EQ(layoutProperty->GetMarginProperty()->right.value(),
-              CalcLength(CHECK_MARK_SIZE.ConvertToPx()));
+        CalcLength(checkBoxTheme->GetHotZoneHorizontalPadding().Value()));
+    EXPECT_EQ(layoutProperty->GetMarginProperty()->right.value(), CalcLength(CHECK_MARK_SIZE.ConvertToPx()));
     EXPECT_EQ(layoutProperty->GetMarginProperty()->top.value(),
-              CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().Value()));
+        CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().Value()));
     EXPECT_EQ(layoutProperty->GetMarginProperty()->bottom.value(),
-              CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().Value()));
+        CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().Value()));
 }
 
 /**
@@ -910,9 +922,7 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintMethodTest002, TestSize.Level1)
     EXPECT_EQ(checkBoxPaintMethod.checkboxModifier_->pointColor_, CHECK_MARK_COLOR);
     EXPECT_EQ(
         checkBoxPaintMethod.checkboxModifier_->strokeSize_->Get(), static_cast<float>(CHECK_MARK_SIZE.ConvertToPx()));
-    auto checkStroke = static_cast<float>(CHECK_MARK_SIZE.ConvertToPx() * 0.2);
-    EXPECT_EQ(
-        checkBoxPaintMethod.checkboxModifier_->checkStroke_->Get(), checkStroke);
+    EXPECT_EQ(checkBoxPaintMethod.checkboxModifier_->checkStroke_->Get(), 2.5);
 }
 
 /**
@@ -971,6 +981,35 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintMethodTest004, TestSize.Level1)
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DrawRoundRect(_)).Times(3);
     checkBoxPaintMethod.checkboxModifier_->PaintCheckBox(canvas, CONTENT_OFFSET, CONTENT_SIZE);
+}
+
+/**
+ * @tc.name: CheckBoxPaintMethodTest005
+ * @tc.desc: Test CheckBox UpdateAnimatableProperty and SetBoardColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxTestNG, CheckBoxPaintMethodTest005, TestSize.Level1)
+{
+    auto checkboxModifier =
+        AceType::MakeRefPtr<CheckBoxModifier>(false, BOARD_COLOR, CHECK_COLOR, BORDER_COLOR, SHADOW_COLOR);
+    checkboxModifier->hoverColor_ = Color::RED;
+    checkboxModifier->clickEffectColor_ = Color::BLUE;
+    checkboxModifier->touchHoverType_ = TouchHoverAnimationType::HOVER;
+    checkboxModifier->UpdateAnimatableProperty();
+    checkboxModifier->animateTouchHoverColor_ =
+        AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::TRANSPARENT));
+    checkboxModifier->touchHoverType_ = TouchHoverAnimationType::PRESS_TO_HOVER;
+    checkboxModifier->UpdateAnimatableProperty();
+    EXPECT_EQ(checkboxModifier->animateTouchHoverColor_->Get(), LinearColor(Color::RED));
+    checkboxModifier->touchHoverType_ = TouchHoverAnimationType::NONE;
+    checkboxModifier->UpdateAnimatableProperty();
+    EXPECT_EQ(checkboxModifier->animateTouchHoverColor_->Get(), LinearColor(Color::RED.BlendOpacity(0)));
+    checkboxModifier->touchHoverType_ = TouchHoverAnimationType::HOVER_TO_PRESS;
+    checkboxModifier->UpdateAnimatableProperty();
+    EXPECT_EQ(checkboxModifier->animateTouchHoverColor_->Get(), LinearColor(Color::BLUE));
+    checkboxModifier->touchHoverType_ = TouchHoverAnimationType::PRESS;
+    checkboxModifier->UpdateAnimatableProperty();
+    EXPECT_EQ(checkboxModifier->animateTouchHoverColor_->Get(), LinearColor(Color::BLUE));
 }
 
 /**
