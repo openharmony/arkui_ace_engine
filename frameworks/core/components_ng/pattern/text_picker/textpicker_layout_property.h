@@ -28,7 +28,7 @@ class ACE_EXPORT TextPickerLayoutProperty : public LinearLayoutProperty {
     DECLARE_ACE_TYPE(TextPickerLayoutProperty, LinearLayoutProperty);
 
 public:
-    TextPickerLayoutProperty() : LinearLayoutProperty(true) {};
+    TextPickerLayoutProperty() : LinearLayoutProperty(false) {};
     ~TextPickerLayoutProperty() override = default;
 
     RefPtr<LayoutProperty> Clone() const override
@@ -38,6 +38,8 @@ public:
         value->propDefaultPickerItemHeight_ = CloneDefaultPickerItemHeight();
         value->propSelected_ = CloneSelected();
         value->propValue_ = CloneValue();
+        value->propSelecteds_ = CloneSelecteds();
+        value->propValues_ = CloneValues();
         value->propDisappearTextStyle_ = CloneDisappearTextStyle();
         value->propTextStyle_ = CloneTextStyle();
         value->propSelectedTextStyle_ = CloneSelectedTextStyle();
@@ -50,6 +52,8 @@ public:
         ResetDefaultPickerItemHeight();
         ResetSelected();
         ResetValue();
+        ResetSelecteds();
+        ResetValues();
         ResetDisappearTextStyle();
         ResetTextStyle();
         ResetSelectedTextStyle();
@@ -62,6 +66,22 @@ public:
         json->Put("defaultPickerItemHeight", GetDefaultPickerItemHeightValue(Dimension(0)).ToString().c_str());
         json->Put("selected", std::to_string(GetSelectedValue(0)).c_str());
         json->Put("value", GetValueValue("").c_str());
+
+        auto jsonArraySelected = JsonUtil::CreateArray(true);
+        auto arraySelected = CloneSelecteds().value_or(std::vector<uint32_t>());
+        for (uint32_t i = 0; i < arraySelected.size(); i++) {
+            auto index = std::to_string(i);
+            jsonArraySelected->Put(index.c_str(), std::to_string(arraySelected[i]).c_str());
+        }
+        json->Put("selecteds", jsonArraySelected);
+
+        auto jsonArrayValue = JsonUtil::CreateArray(true);
+        auto arrayValue = CloneValues().value_or(std::vector<std::string>());
+        for (uint32_t i = 0; i < arrayValue.size(); i++) {
+            auto index = std::to_string(i);
+            jsonArrayValue->Put(index.c_str(), arrayValue[i].c_str());
+        }
+        json->Put("values", jsonArrayValue);
 
         auto disappearFont = JsonUtil::Create(true);
         disappearFont->Put("size", GetDisappearFontSizeValue(Dimension(0)).ToString().c_str());
@@ -93,6 +113,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DefaultPickerItemHeight, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Selected, uint32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Value, std::string, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Selecteds, std::vector<uint32_t>, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Values, std::vector<std::string>, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_GROUP(DisappearTextStyle, FontStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
         DisappearTextStyle, FontSize, DisappearFontSize, Dimension, PROPERTY_UPDATE_MEASURE);

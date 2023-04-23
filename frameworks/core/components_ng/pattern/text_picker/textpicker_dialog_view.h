@@ -29,7 +29,17 @@ public:
     static RefPtr<FrameNode> Show(const DialogProperties& dialogProperties, const TextPickerSettingData& settingData,
         std::map<std::string, NG::DialogTextEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
+    static RefPtr<FrameNode> RangeShow(const DialogProperties& dialogProperties,
+        const TextPickerSettingData& settingData, std::map<std::string, NG::DialogTextEvent> dialogEvent,
+        std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
+    static RefPtr<FrameNode> OptionsShow(const DialogProperties& dialogProperties,
+        const TextPickerSettingData& settingData, std::map<std::string, NG::DialogTextEvent> dialogEvent,
+        std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
     static void SetSelected(const RefPtr<TextPickerPattern>& textPickerPattern, uint32_t value = 0);
+    static void SetSelectedValues(const RefPtr<TextPickerPattern>& textPickerPattern,
+        const std::vector<uint32_t>& values);
+    static void SetValues(const RefPtr<TextPickerPattern>& textPickerPattern,
+        const std::vector<std::string>& values);
     static void SetRange(const RefPtr<TextPickerPattern>& textPickerPattern,
         const std::vector<NG::RangeContent>& value);
     static void SetDialogChange(const RefPtr<FrameNode>& frameNode, DialogTextEvent&& onChange);
@@ -48,6 +58,12 @@ private:
     static RefPtr<FrameNode> CreateColumnNode(uint32_t columnKind, uint32_t showCount);
     static void SetTextProperties(const RefPtr<PickerTheme>& pickerTheme,
         const PickerTextProperties& properties);
+    static void OptionsCreateNode(const RefPtr<TextPickerPattern>& textPickerPattern,
+        const TextPickerSettingData& settingData, const RefPtr<FrameNode>& textPickerNode,
+        const uint32_t showCount, const uint32_t columnCount);
+    static void OptionsShowInternal(const RefPtr<TextPickerPattern>& textPickerPattern,
+        const TextPickerSettingData& settingData, const RefPtr<FrameNode>& textPickerNode,
+        const uint32_t showCount);
 };
 } // namespace OHOS::Ace::NG
 

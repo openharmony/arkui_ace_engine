@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace::NG {
 
-using TextChangeEvent = std::function<void(const std::string&, double)>;
+using TextChangeEvent = std::function<void(const std::vector<std::string>&, std::vector<double>)>;
 using DialogTextEvent = std::function<void(const std::string&)>;
 using DialogCancelEvent = std::function<void()>;
 using DialogGestureEvent = std::function<void(const GestureEvent& info)>;
@@ -38,7 +38,7 @@ public:
         TextChangeEvent_ = std::move(TextChangeEvent);
     }
 
-    void FireChangeEvent(const std::string& value, double index) const
+    void FireChangeEvent(const std::vector<std::string>& value, std::vector<double> index) const
     {
         if (TextChangeEvent_) {
             TextChangeEvent_(value, index);
