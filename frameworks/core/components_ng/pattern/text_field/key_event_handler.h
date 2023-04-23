@@ -87,7 +87,7 @@ public:
 
 private:
     bool HandleShiftPressedEvent(const KeyEvent& event);
-    void HandleDirectionalKey(const KeyEvent& keyEvent);
+    bool HandleDirectionalKey(const KeyEvent& keyEvent);
     void ParseAppendValue(KeyCode keycode, std::string& appendElement);
     WeakPtr<Pattern> weakPattern_;
     ACE_DISALLOW_COPY_AND_MOVE(KeyEventHandler);

@@ -38,7 +38,6 @@ namespace {
 
 constexpr int32_t ANIMATION_BASE_DURATION = 256;
 constexpr Dimension BLANK_MIN_HEIGHT = 8.0_vp;
-constexpr Dimension DRAG_BAR_HEIGHT = 8.0_vp;
 constexpr Dimension DRAG_UP_THRESHOLD = 48.0_vp;
 constexpr double VELOCITY_THRESHOLD = 1000.0; // Move 1000px per second.
 
@@ -56,7 +55,6 @@ void SlidingPanelPattern::OnModifyDone()
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     InitPanEvent(gestureHub);
-    Update();
     if (layoutProperty->GetHasDragBarValue(true)) {
         auto dragBar = GetDragBarNode();
         CHECK_NULL_VOID(dragBar);
@@ -94,6 +92,7 @@ bool SlidingPanelPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& 
     auto layoutAlgorithm = DynamicCast<SlidingPanelLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithm, false);
     InitializeLayoutProps();
+    Update();
     isFirstLayout_ = layoutAlgorithm->GetIsFirstLayout();
     fullHeight_ = layoutAlgorithm->GetFullHeight();
     halfHeight_ = layoutAlgorithm->GetHalfHeight();
@@ -267,7 +266,7 @@ void SlidingPanelPattern::CheckHeightValidity()
     CHECK_NULL_VOID(host);
     auto geometryNode = host->GetGeometryNode();
 
-    auto maxBlank = geometryNode->GetFrameSize().Height() - DRAG_BAR_HEIGHT.ConvertToPx();
+    auto maxBlank = static_cast<double>(geometryNode->GetFrameSize().Height());
     defaultBlankHeights_[PanelMode::MINI] = std::clamp(defaultBlankHeights_[PanelMode::MINI], minBlank, maxBlank);
     defaultBlankHeights_[PanelMode::HALF] = std::clamp(defaultBlankHeights_[PanelMode::HALF], minBlank, maxBlank);
     defaultBlankHeights_[PanelMode::FULL] = std::clamp(defaultBlankHeights_[PanelMode::FULL], minBlank, maxBlank);

@@ -2671,6 +2671,7 @@ void FrontendDelegateDeclarative::AttachSubPipelineContext(const RefPtr<Pipeline
         return;
     }
     jsAccessibilityManager_->AddSubPipelineContext(context);
+    jsAccessibilityManager_->RegisterSubWindowInteractionOperation(context->GetWindowId());
 }
 
 RefPtr<PipelineBase> FrontendDelegateDeclarative::GetPipelineContext()
@@ -2688,9 +2689,12 @@ std::string FrontendDelegateDeclarative::RestoreRouterStack(const std::string& c
     }
     // restore node info
     auto jsonNodeInfo = jsonContentInfo->GetValue("nodeInfo");
-    auto pipelineContext = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
+    auto pipelineContext = pipelineContextHolder_.Get();
     CHECK_NULL_RETURN(pipelineContext, "");
     pipelineContext->RestoreNodeInfo(std::move(jsonNodeInfo));
+    if (Container::IsCurrentUseNewPipeline()) {
+        return "";
+    }
     // restore stack info
     std::lock_guard<std::mutex> lock(mutex_);
     auto routerStack = jsonContentInfo->GetValue("stackInfo");
@@ -2717,7 +2721,7 @@ std::string FrontendDelegateDeclarative::GetContentInfo()
 {
     auto jsonContentInfo = JsonUtil::Create(true);
 
-    {
+    if (!Container::IsCurrentUseNewPipeline()) {
         std::lock_guard<std::mutex> lock(mutex_);
         auto jsonRouterStack = JsonUtil::CreateArray(false);
         for (size_t index = 0; index < pageRouteStack_.size(); ++index) {
@@ -2726,7 +2730,7 @@ std::string FrontendDelegateDeclarative::GetContentInfo()
         jsonContentInfo->Put("stackInfo", jsonRouterStack);
     }
 
-    auto pipelineContext = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
+    auto pipelineContext = pipelineContextHolder_.Get();
     CHECK_NULL_RETURN(pipelineContext, jsonContentInfo->ToString());
     jsonContentInfo->Put("nodeInfo", pipelineContext->GetStoredNodeInfo());
 

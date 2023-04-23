@@ -15,7 +15,7 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_fe_gaussian_blur.h"
 
-#include "third_party/skia/include/effects/SkBlurImageFilter.h"
+#include "include/effects/SkBlurImageFilter.h"
 
 #include "base/utils/utils.h"
 #include "frameworks/core/components/declaration/svg/svg_fe_gaussianblur_declaration.h"

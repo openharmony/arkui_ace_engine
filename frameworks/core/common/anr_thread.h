@@ -17,6 +17,7 @@
 #define FOUNDATION_ARKUI_FRAMEWORKS_CORE_COMMON_ANR_THREAD_H
 
 #include <functional>
+#include <stdint.h>
 
 namespace OHOS::Ace {
 class AnrThread {

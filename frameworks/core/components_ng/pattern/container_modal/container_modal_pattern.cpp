@@ -221,14 +221,11 @@ void ContainerModalPattern::WindowFocus(bool isFocus)
     CHECK_NULL_VOID(windowManager);
 
     // update normal title
-    if (windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
-        auto columnNode = AceType::DynamicCast<FrameNode>(containerNode->GetChildren().front());
-        CHECK_NULL_VOID(columnNode);
-        auto titleNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
-        CHECK_NULL_VOID(titleNode);
-        ChangeTitle(titleNode, isFocus);
-        return;
-    }
+    auto columnNode = AceType::DynamicCast<FrameNode>(containerNode->GetChildren().front());
+    CHECK_NULL_VOID(columnNode);
+    auto titleNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
+    CHECK_NULL_VOID(titleNode);
+    ChangeTitle(titleNode, isFocus);
 
     // update floating title
     auto floatingTitleNode = AceType::DynamicCast<FrameNode>(containerNode->GetChildren().back());

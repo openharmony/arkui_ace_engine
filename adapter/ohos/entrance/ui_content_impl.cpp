@@ -47,6 +47,7 @@
 #include "adapter/ohos/osal/page_url_checker_ohos.h"
 #include "adapter/ohos/osal/pixel_map_ohos.h"
 #include "base/geometry/rect.h"
+#include "base/i18n/localization.h"
 #include "base/log/ace_performance_check.h"
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"
@@ -253,6 +254,7 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runti
     CHECK_NULL_VOID(applicationInfo);
     minCompatibleVersionCode_ = applicationInfo->minCompatibleVersionCode;
     isBundle_ = (hapModuleInfo->compileMode == AppExecFwk::CompileMode::JS_BUNDLE);
+    SetConfiguration(context->GetConfiguration());
     const auto& obj = context->GetBindingObject();
     CHECK_NULL_VOID(obj);
     auto ref = obj->Get<NativeReference>();
@@ -418,9 +420,8 @@ void UIContentImpl::CommonInitializeForm(
         LOGI("UIContent: deviceWidth: %{public}d, deviceHeight: %{public}d, default density: %{public}f", deviceWidth,
             deviceHeight, density);
     }
-    SystemProperties::InitDeviceInfo(deviceWidth, deviceHeight, deviceHeight >= deviceWidth ? 0 : 1, density, false);
-    SystemProperties::SetColorMode(ColorMode::LIGHT);
 
+    SystemProperties::InitDeviceInfo(deviceWidth, deviceHeight, deviceHeight >= deviceWidth ? 0 : 1, density, false);
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
     if (context) {
         auto resourceManager = context->GetResourceManager();
@@ -445,12 +446,6 @@ void UIContentImpl::CommonInitializeForm(
             SystemProperties::SetDeviceAccess(
                 resConfig->GetInputDevice() == Global::Resource::InputDevice::INPUTDEVICE_POINTINGDEVICE);
         }
-    } else {
-        LOGI("Context is nullptr, set localeInfo to default");
-        UErrorCode status = U_ZERO_ERROR;
-        icu::Locale locale = icu::Locale::forLanguageTag(Global::I18n::LocaleConfig::GetSystemLanguage(), status);
-        AceApplicationInfo::GetInstance().SetLocale(locale.getLanguage(), locale.getCountry(), locale.getScript(), "");
-        SystemProperties::SetColorMode(ColorMode::LIGHT);
     }
 
     auto abilityContext = OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(context);
@@ -806,6 +801,48 @@ void UIContentImpl::CommonInitializeForm(
     LayoutInspector::SetCallback(instanceId_);
 }
 
+void UIContentImpl::SetConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config)
+{
+    if (config == nullptr) {
+        LOGI("config is nullptr, set localeInfo to default");
+        UErrorCode status = U_ZERO_ERROR;
+        icu::Locale locale = icu::Locale::forLanguageTag(Global::I18n::LocaleConfig::GetSystemLanguage(), status);
+        AceApplicationInfo::GetInstance().SetLocale(locale.getLanguage(), locale.getCountry(), locale.getScript(), "");
+        SystemProperties::SetColorMode(ColorMode::LIGHT);
+        return;
+    }
+
+    LOGI("SetConfiguration");
+    auto colorMode = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+    auto deviceAccess = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
+    auto languageTag = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
+    if (!colorMode.empty()) {
+        LOGI("SetConfiguration colorMode: %{public}s", colorMode.c_str());
+        if (colorMode == "dark") {
+            SystemProperties::SetColorMode(ColorMode::DARK);
+        } else {
+            SystemProperties::SetColorMode(ColorMode::LIGHT);
+        }
+    }
+
+    if (!deviceAccess.empty()) {
+        // Event of accessing mouse or keyboard
+        LOGI("SetConfiguration deviceAccess: %{public}s", deviceAccess.c_str());
+        SystemProperties::SetDeviceAccess(deviceAccess == "true");
+    }
+
+    if (!languageTag.empty()) {
+        LOGI("SetConfiguration languageTag: %{public}s", languageTag.c_str());
+        std::string language;
+        std::string script;
+        std::string region;
+        Localization::ParseLocaleTag(languageTag, language, script, region, false);
+        if (!language.empty() || !script.empty() || !region.empty()) {
+            AceApplicationInfo::GetInstance().SetLocale(language, region, script, "");
+        }
+    }
+}
+
 std::shared_ptr<Rosen::RSSurfaceNode> UIContentImpl::GetFormRootNode()
 {
     return Platform::AceContainer::GetFormSurfaceNode(instanceId_);
@@ -1139,6 +1176,8 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     container->SetAssetManager(flutterAssetManager);
     container->SetBundlePath(context->GetBundleCodeDir());
     container->SetFilesDataPath(context->GetFilesDir());
+    container->SetModuleName(hapModuleInfo->moduleName);
+    container->SetIsBundle(hapModuleInfo->compileMode == AppExecFwk::CompileMode::JS_BUNDLE);
     // for atomic service
     container->SetInstallationFree(hapModuleInfo && hapModuleInfo->installationFree);
     if (hapModuleInfo->installationFree) {
@@ -1227,7 +1266,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
 
     Platform::AceViewOhos::SurfaceChanged(aceView, 0, 0, deviceHeight >= deviceWidth ? 0 : 1);
     auto pipeline = container->GetPipelineContext();
-    if (pipeline) {
+    if (pipeline && window_) {
         auto rsConfig = window_->GetKeyboardAnimationConfig();
         KeyboardAnimationConfig config = { rsConfig.curveType_, rsConfig.curveParams_, rsConfig.durationIn_,
             rsConfig.durationOut_ };
@@ -1449,7 +1488,9 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
             if (pipelineContext) {
                 pipelineContext->SetDisplayWindowRectInfo(
                     Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())));
-                pipelineContext->SetIsLayoutFullScreen(rsWindow->IsLayoutFullScreen());
+                if (rsWindow) {
+                    pipelineContext->SetIsLayoutFullScreen(rsWindow->IsLayoutFullScreen());
+                }
             }
             auto aceView = static_cast<Platform::AceViewOhos*>(container->GetAceView());
             CHECK_NULL_VOID(aceView);

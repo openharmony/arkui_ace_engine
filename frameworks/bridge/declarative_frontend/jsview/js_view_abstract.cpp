@@ -101,6 +101,9 @@ constexpr double ROUND_UNIT = 360.0;
 constexpr double VISIBLE_RATIO_MIN = 0.0;
 constexpr double VISIBLE_RATIO_MAX = 1.0;
 constexpr int32_t MIN_ROTATE_VECTOR_Z = 9;
+constexpr int32_t PARAMETER_LENGTH_FIRST = 1;
+constexpr int32_t PARAMETER_LENGTH_SECOND = 2;
+constexpr int32_t PARAMETER_LENGTH_THIRD = 3;
 
 bool CheckJSCallbackInfo(
     const std::string& callerName, const JSCallbackInfo& info, std::vector<JSCallbackInfoType>& infoTypes)
@@ -782,7 +785,7 @@ void ParseCustomPopupParam(
     auto placementValue = popupObj->GetProperty("placement");
     if (placementValue->IsNumber()) {
         auto placement = placementValue->ToNumber<int32_t>();
-        if (placement >= 0 && placement <= static_cast<int32_t>(PLACEMENT.size())) {
+        if (placement >= 0 && placement < static_cast<int32_t>(PLACEMENT.size())) {
             popupParam->SetPlacement(PLACEMENT[placement]);
         }
     }
@@ -2085,10 +2088,8 @@ std::vector<NG::OptionParam> ParseBindOptionParam(const JSCallbackInfo& info)
     return params;
 }
 
-void ParseBindOptionParam(const JSCallbackInfo& info, NG::MenuParam& menuParam)
+void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
 {
-    auto menuOptions = JSRef<JSObject>::Cast(info[1]);
-    JSViewAbstract::ParseJsString(menuOptions->GetProperty("title"), menuParam.title);
     auto offsetVal = menuOptions->GetProperty("offset");
     if (offsetVal->IsObject()) {
         auto offsetObj = JSRef<JSObject>::Cast(offsetVal);
@@ -2103,12 +2104,59 @@ void ParseBindOptionParam(const JSCallbackInfo& info, NG::MenuParam& menuParam)
             menuParam.positionOffset.SetY(dy.ConvertToPx());
         }
     }
+
+    auto placementValue = menuOptions->GetProperty("placement");
+    if (placementValue->IsNumber()) {
+        auto placement = placementValue->ToNumber<int32_t>();
+        if (placement >= 0 && placement < static_cast<int32_t>(PLACEMENT.size())) {
+            menuParam.placement = PLACEMENT[placement];
+        }
+    }
+
+    auto onAppearValue = menuOptions->GetProperty("onAppear");
+    if (onAppearValue->IsFunction()) {
+        RefPtr<JsFunction> jsOnAppearFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onAppearValue));
+        auto onAppear = [execCtx = info.GetExecutionContext(), func = std::move(jsOnAppearFunc)]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            LOGI("About to call onAppear method on js");
+            ACE_SCORING_EVENT("onAppear");
+            func->Execute();
+        };
+        menuParam.onAppear = std::move(onAppear);
+    }
+
+    auto onDisappearValue = menuOptions->GetProperty("onDisappear");
+    if (onDisappearValue->IsFunction()) {
+        RefPtr<JsFunction> jsOnDisAppearFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onDisappearValue));
+        auto onDisappear = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDisAppearFunc)]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            LOGI("About to call onAppear method on js");
+            ACE_SCORING_EVENT("onDisappear");
+            func->Execute();
+        };
+        menuParam.onDisappear = std::move(onDisappear);
+    }
+}
+
+void ParseBindOptionParam(const JSCallbackInfo& info, NG::MenuParam& menuParam)
+{
+    auto menuOptions = JSRef<JSObject>::Cast(info[1]);
+    JSViewAbstract::ParseJsString(menuOptions->GetProperty("title"), menuParam.title);
+    ParseMenuParam(info, menuOptions, menuParam);
+}
+
+void ParseBindContentOptionParam(const JSCallbackInfo& info, const JSRef<JSVal>& args, NG::MenuParam& menuParam)
+{
+    auto menuContentOptions = JSRef<JSObject>::Cast(args);
+    ParseMenuParam(info, menuContentOptions, menuParam);
 }
 
 void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
 {
     NG::MenuParam menuParam;
-    if (info.Length() > 1 && info[1]->IsObject()) {
+    if (info.Length() > PARAMETER_LENGTH_FIRST && info[1]->IsObject()) {
         ParseBindOptionParam(info, menuParam);
     }
     if (info[0]->IsArray()) {
@@ -4369,8 +4417,17 @@ void JSViewAbstract::JsKey(const std::string& key)
     ViewAbstractModel::GetInstance()->SetInspectorId(key);
 }
 
-void JSViewAbstract::JsId(const std::string& id)
+void JSViewAbstract::JsId(const JSCallbackInfo& info)
 {
+    if (!info[0]->IsString() || info[0]->IsNull() || info[0]->IsUndefined()) {
+        LOGE("Param is wrong, it is supposed to be a string");
+        return;
+    }
+    std::string id = info[0]->ToString();
+    if (id.empty()) {
+        LOGE("string is empty");
+        return;
+    }
     JsKey(id);
 }
 
@@ -4474,7 +4531,7 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
     CHECK_NULL_VOID(builderFunc);
 
     ResponseType responseType = ResponseType::LONG_PRESS;
-    if (info.Length() == 2 && info[1]->IsNumber()) {
+    if (info.Length() >= PARAMETER_LENGTH_SECOND && info[1]->IsNumber()) {
         auto response = info[1]->ToNumber<int32_t>();
         LOGI("Set the responseType is %{public}d.", response);
         responseType = static_cast<ResponseType>(response);
@@ -4484,7 +4541,13 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
         ACE_SCORING_EVENT("BuildContextMenu");
         func->Execute();
     };
-    ViewAbstractModel::GetInstance()->BindContextMenu(responseType, std::move(buildFunc));
+
+    NG::MenuParam menuParam;
+    if (info.Length() >= PARAMETER_LENGTH_THIRD && info[2]->IsObject()) {
+        ParseBindContentOptionParam(info, info[2], menuParam);
+    }
+
+    ViewAbstractModel::GetInstance()->BindContextMenu(responseType, std::move(buildFunc), menuParam);
 }
 
 void JSViewAbstract::JsBindContentCover(const JSCallbackInfo& info)
@@ -4528,6 +4591,59 @@ void JSViewAbstract::JsBindContentCover(const JSCallbackInfo& info)
     // parse ModalTransition
     auto type = (info.Length() == 3 && info[2]->IsNumber()) ? info[2]->ToNumber<int32_t>() : 0;
     ViewAbstractModel::GetInstance()->BindContentCover(isShow, std::move(callback), std::move(buildFunc), type);
+}
+
+void JSViewAbstract::JSCreateAnimatableProperty(const JSCallbackInfo& info)
+{
+    if (info.Length() < 3 || !info[0]->IsString()) { /* 3:args number */
+        LOGE("JSCreateAnimatableProperty: The arg is invalid.");
+        return;
+    }
+
+    JSRef<JSVal> callback = info[2]; /* 2:args index */
+    if (!callback->IsFunction()) {
+        LOGE("JSCreateAnimatableProperty: callback function type is invalid.");
+        return;
+    }
+
+    std::string propertyName = info[0]->ToString();
+    if (info[1]->IsNumber()) {
+        float numValue = info[1]->ToNumber<float>();
+        std::function<void(float)> onCallbackEvent;
+        RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(callback));
+        onCallbackEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
+                            id = Container::CurrentId()](const float val) {
+            ContainerScope scope(id);
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            LOGD("onCallbackEvent(number) execute js func. val: %f", val);
+            auto newJSVal = JSRef<JSVal>::Make(ToJSValue(val));
+            func->ExecuteJS(1, &newJSVal);
+        };
+        ViewAbstractModel::GetInstance()->CreateAnimatablePropertyFloat(propertyName, numValue, onCallbackEvent);
+    } else if (info[1]->IsObject()) {
+        LOGD("Object type (AnimatableArithmetic) to be handled.");
+    } else {
+        LOGE("JSCreateAnimatableProperty: The value param type is invalid.");
+    }
+}
+
+void JSViewAbstract::JSUpdateAnimatableProperty(const JSCallbackInfo& info)
+{
+    if (info.Length() < 2 || !info[0]->IsString()) { /* 2:args number */
+        LOGE("JSUpdateAnimatableProperty: The arg is invalid.");
+        return;
+    }
+
+    std::string propertyName = info[0]->ToString();
+    float numValue = 0.0;
+    if (info[1]->IsNumber()) {
+        numValue = info[1]->ToNumber<float>();
+        ViewAbstractModel::GetInstance()->UpdateAnimatablePropertyFloat(propertyName, numValue);
+    } else if (info[1]->IsObject()) {
+        LOGD("Object type (RSAnimatableArithmetic) to be handled");
+    } else {
+        LOGE("JSUpdateAnimatableProperty: The value param type is invalid.");
+    }
 }
 
 void JSViewAbstract::JSBind()
@@ -4674,6 +4790,9 @@ void JSViewAbstract::JSBind()
     JSClass<JSViewAbstract>::StaticMethod("hitTestBehavior", &JSViewAbstract::JsHitTestBehavior);
     JSClass<JSViewAbstract>::StaticMethod("keyboardShortcut", &JSViewAbstract::JsKeyboardShortcut);
     JSClass<JSViewAbstract>::StaticMethod("allowDrop", &JSViewAbstract::JsAllowDrop);
+
+    JSClass<JSViewAbstract>::StaticMethod("createAnimatableProperty", &JSViewAbstract::JSCreateAnimatableProperty);
+    JSClass<JSViewAbstract>::StaticMethod("updateAnimatableProperty", &JSViewAbstract::JSUpdateAnimatableProperty);
 }
 void JSViewAbstract::JsAllowDrop(const JSCallbackInfo& info)
 {

@@ -30,6 +30,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 const Dimension DEFALT_RING_DIAMETER = 72.0_vp;
+const Dimension DEFALT_CAPSULE_WIDTH = 28.0_vp;
 } // namespace
 ProgressLayoutAlgorithm::ProgressLayoutAlgorithm() = default;
 
@@ -68,11 +69,14 @@ std::optional<SizeF> ProgressLayoutAlgorithm::MeasureContent(
         }
     }
     if (type_ == ProgressType::CAPSULE) {
-        if (!contentConstraint.selfIdealSize.Height()) {
-            height_ = diameter;
+        if (contentConstraint.selfIdealSize.Width() && !contentConstraint.selfIdealSize.Height()) {
+            height_ = DEFALT_CAPSULE_WIDTH.ConvertToPx();
         }
-        if (!contentConstraint.selfIdealSize.Width()) {
-            width_ = diameter;
+        if (!contentConstraint.selfIdealSize.Width() && contentConstraint.selfIdealSize.Height()) {
+            width_ = DEFALT_CAPSULE_WIDTH.ConvertToPx();
+        }
+        if (!contentConstraint.selfIdealSize.Width() && !contentConstraint.selfIdealSize.Height()) {
+            height_ = DEFALT_CAPSULE_WIDTH.ConvertToPx();
         }
     }
     height_ = std::min(height_, static_cast<float>(contentConstraint.maxSize.Height()));

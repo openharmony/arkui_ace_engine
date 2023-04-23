@@ -17,8 +17,8 @@
 #define protected public
 #include <algorithm>
 
-#include "third_party/skia/include/core/SkBitmap.h"
-#include "third_party/skia/include/core/SkPictureRecorder.h"
+#include "include/core/SkBitmap.h"
+#include "include/core/SkPictureRecorder.h"
 
 #include "base/log/ace_trace.h"
 #include "base/memory/ace_type.h"

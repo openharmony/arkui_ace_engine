@@ -15,8 +15,8 @@
 
 #include "core/components/progress/rosen_render_loading_progress.h"
 
-#include "third_party/skia/include/core/SkMaskFilter.h"
-#include "third_party/skia/include/core/SkPaint.h"
+#include "include/core/SkMaskFilter.h"
+#include "include/core/SkPaint.h"
 
 #include "base/log/log.h"
 #include "base/utils/utils.h"

@@ -20,8 +20,8 @@
 #include "animation/rs_animation_timing_protocol.h"
 #include "flutter/common/task_runners.h"
 #include "render_service_client/core/ui/rs_node.h"
-#include "third_party/skia/include/effects/SkGradientShader.h"
-#include "third_party/skia/include/utils/SkParsePath.h"
+#include "include/effects/SkGradientShader.h"
+#include "include/utils/SkParsePath.h"
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -406,9 +406,65 @@ void RosenRenderBox::Paint(RenderContext& context, const Offset& offset)
 #endif
 }
 
+/* TODO.lx flutter对应实现中定义了该函数，去除flutter后，找不到对应实现，先这么改，后面实现在rosen中 */
+#ifndef NEW_SKIA
 SkColorType ConvertToSkColorType(PixelFormat pixelFormat);
-
 SkAlphaType ConvertToSkAlphaType(AlphaType alphaType);
+#else
+SkColorType ConvertToSkColorType(PixelFormat pixelFormat)
+{
+    SkColorType colorType = kUnknown_SkColorType;
+    switch (pixelFormat) {
+        case PixelFormat::ALPHA_8: {
+            colorType = kAlpha_8_SkColorType;
+            break;
+        }
+        case PixelFormat::RGB_565: {
+            colorType = kRGB_565_SkColorType;
+            break;
+        }
+        case PixelFormat::RGBA_F16: {
+            colorType = kRGBA_F16_SkColorType;
+            break;
+        }
+        case PixelFormat::RGBA_8888:
+        case PixelFormat::BGRA_8888: {
+            colorType = kN32_SkColorType;
+            break;
+        }
+        default: {
+            LOGE("pixel format not supported.");
+            break;
+        }
+    }
+
+    return colorType;
+}
+
+SkAlphaType ConvertToSkAlphaType(AlphaType alphaType)
+{
+    SkAlphaType skAlphaType = kUnknown_SkAlphaType;
+    switch (alphaType) {
+        case AlphaType::IMAGE_ALPHA_TYPE_OPAQUE: {
+            skAlphaType = kOpaque_SkAlphaType;
+            break;
+        }
+        case AlphaType::IMAGE_ALPHA_TYPE_PREMUL: {
+            skAlphaType = kPremul_SkAlphaType;
+            break;
+        }
+        case AlphaType::IMAGE_ALPHA_TYPE_UNPREMUL: {
+            skAlphaType = kUnpremul_SkAlphaType;
+            break;
+        }
+        default: {
+            LOGE("alpha type not supported.");
+            break;
+        }
+    }
+    return skAlphaType;
+}
+#endif
 
 void RosenRenderBox::PaintAccessibilityFocus(const SkRect& focusRect, RenderContext& context)
 {

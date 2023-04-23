@@ -15,7 +15,7 @@
 
 #include "core/components/text_overlay/flutter_render_text_overlay.h"
 
-#include "third_party/skia/include/core/SkMaskFilter.h"
+#include "include/core/SkMaskFilter.h"
 
 #include "core/components/common/painter/flutter_decoration_painter.h"
 #include "core/components/common/properties/shadow_config.h"

@@ -12,8 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#ifndef NEW_SKIA
 #include "core/components/chart/flutter_render_chart.h"
+#endif
 #include "core/components/chart/rosen_render_chart.h"
 
 namespace OHOS::Ace {
@@ -26,7 +27,11 @@ RefPtr<RenderNode> RenderChart::Create()
         return nullptr;
 #endif
     } else {
+#ifndef NEW_SKIA
         return AceType::MakeRefPtr<FlutterRenderChart>();
+#else
+        return nullptr;
+#endif
     }
 }
 } // namespace OHOS::Ace

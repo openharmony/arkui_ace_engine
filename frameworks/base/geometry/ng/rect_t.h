@@ -278,6 +278,12 @@ public:
                  LessNotEqual(other.Bottom(), Top()) || GreatNotEqual(other.Top(), Bottom()));
     }
 
+    bool IsInnerIntersectWith(const RectT& other) const
+    {
+        return !(LessOrEqual(other.Right(), Left()) || GreatOrEqual(other.Left(), Right()) ||
+                 LessOrEqual(other.Bottom(), Top()) || GreatOrEqual(other.Top(), Bottom()));
+    }
+
     RectT IntersectRectT(const RectT& other) const
     {
         T left = std::max(Left(), other.Left());

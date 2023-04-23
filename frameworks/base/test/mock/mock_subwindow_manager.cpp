@@ -37,4 +37,9 @@ void SubwindowManager::HideMenuNG(int32_t targetId) {}
 void SubwindowManager::HideMenuNG() {}
 
 void SubwindowManager::SetHotAreas(const std::vector<Rect>& rects) {}
+
+const RefPtr<Subwindow>& SubwindowManager::GetCurrentWindow()
+{
+    return nullptr;
+}
 } // namespace OHOS::Ace

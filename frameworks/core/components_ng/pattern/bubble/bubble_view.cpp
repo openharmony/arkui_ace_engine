@@ -115,6 +115,7 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
     popupProp->UpdateEnableArrow(param->EnableArrow());
     popupProp->UpdatePlacement(param->GetPlacement());
     popupProp->UpdateShowInSubWindow(param->IsShowInSubWindow());
+    popupProp->UpdateBlockEvent(param->IsBlockEvent());
     if (param->GetTargetSpace().has_value()) {
         popupProp->UpdateTargetSpace(param->GetTargetSpace().value());
     }
@@ -186,6 +187,7 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
     layoutProps->UpdateEnableArrow(param->EnableArrow());
     layoutProps->UpdatePlacement(param->GetPlacement());
     layoutProps->UpdateShowInSubWindow(param->IsShowInSubWindow());
+    layoutProps->UpdateBlockEvent(param->IsBlockEvent());
     auto displayWindowOffset = GetDisplayWindowRectOffset();
     layoutProps->UpdateDisplayWindowOffset(displayWindowOffset);
     if (param->GetTargetSpace().has_value()) {
@@ -271,6 +273,7 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
         popupPaintProp->UpdateArrowOffset(param->GetArrowOffset().value());
     }
     popupLayoutProp->UpdateShowInSubWindow(param->IsShowInSubWindow());
+    popupLayoutProp->UpdateBlockEvent(param->IsBlockEvent());
     if (param->IsMaskColorSetted()) {
         popupPaintProp->UpdateMaskColor(param->GetMaskColor());
     }

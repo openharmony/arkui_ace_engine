@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SVG_ROSEN_RENDER_SVG_FE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SVG_ROSEN_RENDER_SVG_FE_H
 
-#include "third_party/skia/include/core/SkImageFilter.h"
+#include "include/core/SkImageFilter.h"
 
 #include "base/memory/ace_type.h"
 

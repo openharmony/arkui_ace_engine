@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SWITCH_SWITCH_PAINT_METHOD_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SWITCH_SWITCH_PAINT_METHOD_H
 
+#include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/pattern/toggle/switch_modifier.h"
 #include "core/components_ng/pattern/toggle/switch_paint_property.h"
 #include "core/components_ng/render/canvas_image.h"
@@ -54,9 +55,20 @@ public:
         switchModifier_->SetOffset(offset);
         switchModifier_->SetEnabled(enabled_);
         switchModifier_->SetIsSelect(isSelect_);
-        switchModifier_->SetIsHover(isHover_);
+        switchModifier_->SetTouchHoverAnimationType(touchHoverType_);
         switchModifier_->SetMainDelta(mainDelta_);
         switchModifier_->UpdateAnimatableProperty();
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto switchTheme = pipeline->GetTheme<SwitchTheme>();
+        auto horizontalPadding = switchTheme->GetHotZoneHorizontalPadding().ConvertToPx();
+        auto verticalPadding = switchTheme->GetHotZoneVerticalPadding().ConvertToPx();
+        float boundsRectOriginX = offset.GetX() - horizontalPadding;
+        float boundsRectOriginY = offset.GetY() - verticalPadding;
+        float boundsRectWidth = size.Width() + 2 * horizontalPadding;
+        float boundsRectHeight = size.Height() + 2 * verticalPadding;
+        RectF boundsRect(boundsRectOriginX, boundsRectOriginY, boundsRectWidth, boundsRectHeight);
+        switchModifier_->SetBoundsRect(boundsRect);
     }
 
     void SetHotZoneOffset(OffsetF& hotZoneOffset)
@@ -94,6 +106,11 @@ public:
         isHover_ = isHover;
     }
 
+    void SetTouchHoverAnimationType(const TouchHoverAnimationType touchHoverType)
+    {
+        touchHoverType_ = touchHoverType;
+    }
+
 private:
     float mainDelta_ = 0.0f;
     float hoverPercent_ = 0.0f;
@@ -107,6 +124,7 @@ private:
     bool isHover_ = false;
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
+    TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
 
     RefPtr<SwitchModifier> switchModifier_;
 

@@ -216,7 +216,7 @@ public:
     static void JsMask(const JSCallbackInfo& info);
 
     static void JsKey(const std::string& key);
-    static void JsId(const std::string& id);
+    static void JsId(const JSCallbackInfo& info);
 
     static void JsFocusable(const JSCallbackInfo& info);
     static void JsOnFocusMove(const JSCallbackInfo& args);
@@ -239,6 +239,9 @@ public:
     static void JsAccessibilityDescription(const std::string& description);
     static void JsAccessibilityImportance(const std::string& importance);
     static void JsAllowDrop(const JSCallbackInfo& info);
+
+    static void JSCreateAnimatableProperty(const JSCallbackInfo& info);
+    static void JSUpdateAnimatableProperty(const JSCallbackInfo& info);
 
     static void ParseMenuOptions(
         const JSCallbackInfo& info, const JSRef<JSArray>& jsArray, std::vector<NG::MenuOptionsParam>& items);

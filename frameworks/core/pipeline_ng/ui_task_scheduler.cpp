@@ -141,9 +141,6 @@ void UITaskScheduler::FlushRenderTask(bool forceUseMainThread)
 
 bool UITaskScheduler::NeedAdditionalLayout()
 {
-    // if dirtynodes still exist after layout done as new dirty nodes are added during layout,
-    // we need to initiate the additional layout, under normal build layout workflow the additional
-    // layout will not be excuted.
     bool ret = false;
     for (auto&& pageNodes : dirtyLayoutNodes_) {
         for (auto&& node : pageNodes.second) {
@@ -154,22 +151,23 @@ bool UITaskScheduler::NeedAdditionalLayout()
             if (!geometryTransition || !geometryTransition->IsNodeInAndActive(node)) {
                 continue;
             }
-            node->GetLayoutProperty()->CleanDirty();
-            node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
-            LOGD("GeometryTransition needs additional layout, node%{public}d is marked dirty", node->GetId());
+            // if nodes with geometry transitions are added during layout, we need to initiate the additional layout
+            // in current frame, while under normal build layout workflow the additional layout is unnecessary.
             auto parent = node->GetParent();
             while (parent) {
-                auto frameNode = AceType::DynamicCast<FrameNode>(parent);
-                if (frameNode) {
-                    frameNode->GetLayoutProperty()->CleanDirty();
-                    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
-                    LOGD("GeometryTransition needs additional layout, parent node%{public}d is marked dirty",
-                        frameNode->GetId());
+                auto parentNode = AceType::DynamicCast<FrameNode>(parent);
+                if (parentNode) {
+                    node->GetLayoutProperty()->CleanDirty();
+                    node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+                    parentNode->GetLayoutProperty()->CleanDirty();
+                    parentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+                    ret = true;
+                    LOGD("GeometryTransition needs additional layout, node%{public}d, parent node%{public}d is"
+                        "marked dirty", node->GetId(), parentNode->GetId());
                     break;
                 }
                 parent = parent->GetParent();
             }
-            ret = true;
         }
     }
     return ret;

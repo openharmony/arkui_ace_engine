@@ -15,9 +15,9 @@
 
 #include "core/components/checkable/rosen_render_checkbox.h"
 
-#include "third_party/skia/include/core/SkMaskFilter.h"
-#include "third_party/skia/include/core/SkPaint.h"
-#include "third_party/skia/include/core/SkPath.h"
+#include "include/core/SkMaskFilter.h"
+#include "include/core/SkPaint.h"
+#include "include/core/SkPath.h"
 
 #include "core/components/checkable/checkable_component.h"
 #include "core/components/common/painter/rosen_checkable_painter.h"

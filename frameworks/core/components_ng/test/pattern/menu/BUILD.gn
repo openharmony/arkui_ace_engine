@@ -17,7 +17,7 @@ import(
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("menu_layout_algorithm_test_ng") {
-  module_out_path = "$pattern_test_output_path/menu"
+  module_out_path = pattern_test_output_path
 
   include_dirs = [
     "//commonlibrary/c_utils/base/include",

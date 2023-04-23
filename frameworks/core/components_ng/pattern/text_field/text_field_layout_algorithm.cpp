@@ -119,8 +119,17 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     auto isPasswordType =
         textFieldLayoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::VISIBLE_PASSWORD;
     auto disableTextAlign = !pattern->IsTextArea() && textFieldLayoutProperty->GetWidthAutoValue(false);
-    CreateParagraph(textStyle, textContent,
-        isPasswordType && pattern->GetTextObscured() && !showPlaceHolder, disableTextAlign);
+    if (pattern->IsDragging()) {
+        TextStyle dragTextStyle = textStyle;
+        Color color = textStyle.GetTextColor().ChangeAlpha(TEXT_DRAG_OPACITY);
+        dragTextStyle.SetTextColor(color);
+        std::vector<TextStyle> textStyles { textStyle, dragTextStyle, textStyle };
+        CreateParagraph(textStyles, pattern->GetDragContents(), textContent,
+            isPasswordType && pattern->GetTextObscured() && !showPlaceHolder, disableTextAlign);
+    } else {
+        CreateParagraph(textStyle, textContent,
+            isPasswordType && pattern->GetTextObscured() && !showPlaceHolder, disableTextAlign);
+    }
     if (textStyle.GetMaxLines() == 1 && !showPlaceHolder) {
         // for text input case, need to measure in one line without constraint.
         paragraph_->Layout(std::numeric_limits<double>::infinity());
@@ -364,6 +373,45 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::
             TextFieldPattern::CreateObscuredText(static_cast<int32_t>(StringUtils::ToWstring(content).length())));
     } else {
         builder->AddText(StringUtils::Str8ToStr16(content));
+    }
+    builder->Pop();
+
+    auto paragraph = builder->Build();
+    paragraph_.reset(paragraph.release());
+}
+
+void TextFieldLayoutAlgorithm::CreateParagraph(const std::vector<TextStyle>& textStyles,
+    const std::vector<std::string>& contents, const std::string& content, bool needObscureText, bool disableTextAlign)
+{
+    auto textStyle = textStyles.begin();
+    RSParagraphStyle paraStyle;
+    paraStyle.textDirection_ = ToRSTextDirection(GetTextDirection(content));
+    if (!disableTextAlign) {
+        paraStyle.textAlign_ = ToRSTextAlign(textStyle->GetTextAlign());
+    }
+    paraStyle.maxLines_ = textStyle->GetMaxLines();
+    paraStyle.locale_ = Localization::GetInstance()->GetFontLocale();
+    paraStyle.wordBreakType_ = ToRSWordBreakType(textStyle->GetWordBreak());
+    paraStyle.fontSize_ = textStyle->GetFontSize().ConvertToPx();
+    paraStyle.fontFamily_ = textStyle->GetFontFamilies().at(0);
+    if (textStyle->GetTextOverflow() == TextOverflow::ELLIPSIS) {
+        paraStyle.ellipsis_ = StringUtils::Str8ToStr16(StringUtils::ELLIPSIS);
+    }
+    auto builder = RSParagraphBuilder::CreateRosenBuilder(paraStyle, RSFontCollection::GetInstance(false));
+    for (size_t i = 0; i < contents.size(); i++) {
+        std::string splitStr = contents[i];
+        if (splitStr.empty()) {
+            continue;
+        }
+        auto &style = textStyles[i];
+        builder->PushStyle(ToRSTextStyle(PipelineContext::GetCurrentContext(), style));
+        StringUtils::TransformStrCase(splitStr, static_cast<int32_t>(style.GetTextCase()));
+        if (needObscureText) {
+            builder->AddText(
+                TextFieldPattern::CreateObscuredText(static_cast<int32_t>(StringUtils::ToWstring(splitStr).length())));
+        } else {
+            builder->AddText(StringUtils::Str8ToStr16(splitStr));
+        }
     }
     builder->Pop();
 

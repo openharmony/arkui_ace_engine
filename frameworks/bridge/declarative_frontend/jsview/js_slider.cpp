@@ -199,7 +199,9 @@ void JSSlider::SetBlockColor(const JSCallbackInfo& info)
     }
     Color colorVal;
     if (!ParseJsColor(info[0], colorVal)) {
-        return;
+        auto theme = GetTheme<SliderTheme>();
+        CHECK_NULL_VOID(theme);
+        colorVal = theme->GetBlockColor();
     }
     SliderModel::GetInstance()->SetBlockColor(colorVal);
 }
@@ -212,7 +214,9 @@ void JSSlider::SetTrackColor(const JSCallbackInfo& info)
     }
     Color colorVal;
     if (!ParseJsColor(info[0], colorVal)) {
-        return;
+        auto theme = GetTheme<SliderTheme>();
+        CHECK_NULL_VOID(theme);
+        colorVal = theme->GetTrackBgColor();
     }
     SliderModel::GetInstance()->SetTrackBackgroundColor(colorVal);
 }
@@ -225,7 +229,9 @@ void JSSlider::SetSelectedColor(const JSCallbackInfo& info)
     }
     Color colorVal;
     if (!ParseJsColor(info[0], colorVal)) {
-        return;
+        auto theme = GetTheme<SliderTheme>();
+        CHECK_NULL_VOID(theme);
+        colorVal = theme->GetTrackSelectedColor();
     }
     SliderModel::GetInstance()->SetSelectColor(colorVal);
 }

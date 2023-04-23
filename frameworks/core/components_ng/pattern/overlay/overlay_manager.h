@@ -22,6 +22,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
+#include "core/components/common/properties/placement.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/picker/picker_data.h"
 #include "core/components_ng/base/ui_node.h"
@@ -113,6 +114,25 @@ public:
         onHideMenuCallback_ = callback;
     }
 
+    void RegisterOnShowMenu(const std::function<void()>& callback)
+    {
+        onShowMenuCallback_ = callback;
+    }
+
+    void CallOnShowMenuCallback()
+    {
+        if (onShowMenuCallback_) {
+            onShowMenuCallback_();
+        }
+    }
+
+    void CallOnHideMenuCallback()
+    {
+        if (onHideMenuCallback_) {
+            onHideMenuCallback_();
+        }
+    }
+
     void SetBackPressEvent(std::function<bool()> event)
     {
         backPressEvent_ = event;
@@ -147,11 +167,38 @@ public:
         hasFilter_ = hasFilter;
     }
 
-    void MountToRootNode(const RefPtr<FrameNode>& imageNode);
+    bool GetHasEvent()
+    {
+        return hasEvent_;
+    }
+
+    void SetHasEvent(bool hasEvent)
+    {
+        hasEvent_ = hasEvent;
+    }
+
+    bool GetIsOnAnimation()
+    {
+        return isOnAnimation_;
+    }
+
+    void SetIsOnAnimation(bool isOnAnimation)
+    {
+        isOnAnimation_ = isOnAnimation;
+    }
+
+    void SetFilterColumnNode(const RefPtr<FrameNode>& columnNode)
+    {
+        filterColumnNodeWeak_ = columnNode;
+    }
+
+    void MountPixelmapToRootNode(const RefPtr<FrameNode>& columnNode);
+    void MountEventToRootNode(const RefPtr<FrameNode>& columnNode);
     void RemovePixelMap();
-    void RemovePixelMapAnimation(bool startDrag, double localX, double localY);
+    void RemovePixelMapAnimation(bool startDrag, double x, double y);
     void UpdatePixelMapScale(float& scale);
     void RemoveFilter();
+    void RemoveEventColumn();
 #endif // ENABLE_DRAG_FRAMEWORK
     void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<RefPtr<UINode>()>&& buildNodeFunc, int32_t type, int32_t targetId);
@@ -195,10 +242,15 @@ private:
 #ifdef ENABLE_DRAG_FRAMEWORK
     bool hasPixelMap_ {false};
     bool hasFilter_ {false};
-    WeakPtr<FrameNode> columnNodeWeak_;
+    bool hasEvent_ {false};
+    bool isOnAnimation_ {false};
+    WeakPtr<FrameNode> pixelmapColumnNodeWeak_;
+    WeakPtr<FrameNode> filterColumnNodeWeak_;
+    WeakPtr<FrameNode> eventColumnNodeWeak_;
 #endif // ENABLE_DRAG_FRAMEWORK
 
     std::function<void()> onHideMenuCallback_ = nullptr;
+    std::function<void()> onShowMenuCallback_;
     CancelableCallback<void()> continuousTask_;
     std::function<bool()> backPressEvent_ = nullptr;
 

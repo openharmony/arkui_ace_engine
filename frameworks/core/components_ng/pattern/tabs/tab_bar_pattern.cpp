@@ -758,19 +758,19 @@ void TabBarPattern::UpdateGradientRegions()
     auto frameRect = geometryNode->GetFrameRect();
 
     std::fill(gradientRegions_.begin(), gradientRegions_.end(), false);
-    if (barMode == TabBarMode::SCROLLABLE) {
+    if (barMode == TabBarMode::SCROLLABLE && !tabItemOffsets_.empty()) {
         if (axis == Axis::HORIZONTAL) {
             if (LessNotEqual(tabItemOffsets_.front().GetX(), 0.0f)) {
                 gradientRegions_[LEFT_GRADIENT] = true;
             }
-            if (tabItemOffsets_.front().GetX() + childrenMainSize_ > frameRect.Width()) {
+            if (GreatNotEqual(tabItemOffsets_.front().GetX() + childrenMainSize_, frameRect.Width())) {
                 gradientRegions_[RIGHT_GRADIENT] = true;
             }
         } else if (axis == Axis::VERTICAL) {
             if (LessNotEqual(tabItemOffsets_.front().GetY(), 0.0f)) {
                 gradientRegions_[TOP_GRADIENT] = true;
             }
-            if (tabItemOffsets_.front().GetY() + childrenMainSize_ > frameRect.Height()) {
+            if (GreatNotEqual(tabItemOffsets_.front().GetY() + childrenMainSize_, frameRect.Height())) {
                 gradientRegions_[BOTTOM_GRADIENT] = true;
             }
         }

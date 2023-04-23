@@ -86,6 +86,7 @@ window_manager_path = "//foundation/window/window_manager"
 graphic_standard_path = "//foundation/graphic/graphic_2d"
 ark_ets_path = "//arkcompiler/ets_runtime"
 crossplatform_plugin_root = "//plugins"
+skia_root_new = "//third_party/skia"
 
 # Config toolchain
 windows_buildtool = "//build/toolchain/mingw:mingw_x86_64"
@@ -170,6 +171,12 @@ if (enable_ace_instance_log) {
 
 if (enable_dump_drawcmd) {
   ace_common_defines += [ "DUMP_DRAW_CMD" ]
+}
+
+ace_use_new_skia = false
+if (defined(use_new_skia) && use_new_skia) {
+  ace_use_new_skia = true
+  ace_common_defines += [ "NEW_SKIA" ]
 }
 
 if (enable_ng_build) {

@@ -65,7 +65,7 @@ FrameNode::~FrameNode()
     }
     pattern_->DetachFromFrameNode(this);
     if (IsOnMainTree()) {
-        OnDetachFromMainTree();
+        OnDetachFromMainTree(false);
     }
     TriggerVisibleAreaChangeCallback(true);
     visibleAreaUserCallbacks_.clear();
@@ -74,6 +74,9 @@ FrameNode::~FrameNode()
     if (pipeline) {
         pipeline->RemoveOnAreaChangeNode(GetId());
         pipeline->RemoveVisibleAreaChangeNode(GetId());
+        pipeline->ChangeMouseStyle(GetId(), MouseFormat::DEFAULT);
+        pipeline->FreeMouseStyleHoldNode(GetId());
+        pipeline->RemoveStoredNode(GetRestoreId());
     }
 }
 
@@ -119,6 +122,27 @@ RefPtr<FrameNode> FrameNode::CreateFrameNode(
     frameNode->InitializePatternAndContext();
     ElementRegister::GetInstance()->AddUINode(frameNode);
     return frameNode;
+}
+
+void FrameNode::ProcessOffscreenNode(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_VOID(node);
+    node->UpdateLayoutPropertyFlag();
+    auto layoutWrapper = node->CreateLayoutWrapper();
+    CHECK_NULL_VOID(layoutWrapper);
+    layoutWrapper->SetActive();
+    layoutWrapper->SetRootMeasureNode();
+    layoutWrapper->Measure(node->GetLayoutConstraint());
+    layoutWrapper->Layout();
+    layoutWrapper->MountToHostOnMainThread();
+    auto paintProperty = node->GetPaintProperty<PaintProperty>();
+    auto wrapper = node->CreatePaintWrapper();
+    CHECK_NULL_VOID(wrapper);
+    wrapper->FlushRender();
+    paintProperty->CleanDirty();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->FlushMessages();
 }
 
 void FrameNode::InitializePatternAndContext()
@@ -266,11 +290,11 @@ void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("id", propInspectorId_.value_or("").c_str());
 }
 
-void FrameNode::OnAttachToMainTree()
+void FrameNode::OnAttachToMainTree(bool recursive)
 {
-    UINode::OnAttachToMainTree();
+    UINode::OnAttachToMainTree(recursive);
     eventHub_->FireOnAppear();
-    renderContext_->OnNodeAppear();
+    renderContext_->OnNodeAppear(recursive);
     if (IsResponseRegion() || HasPositionProp()) {
         auto parent = GetParent();
         while (parent) {
@@ -300,10 +324,10 @@ void FrameNode::OnVisibleChange(bool isVisible)
     TriggerVisibleAreaChangeCallback(true);
 }
 
-void FrameNode::OnDetachFromMainTree()
+void FrameNode::OnDetachFromMainTree(bool recursive)
 {
     eventHub_->FireOnDisappear();
-    renderContext_->OnNodeDisappear();
+    renderContext_->OnNodeDisappear(recursive);
 }
 
 void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& dirty)
@@ -330,9 +354,10 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     SetGeometryNode(dirty->GetGeometryNode());
 
     const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
-    bool skipSync = geometryTransition != nullptr && geometryTransition->IsRunning();
-    if (!skipSync && (frameSizeChange || frameOffsetChange || HasPositionProp() ||
-                         (pattern_->GetSurfaceNodeName().has_value() && contentSizeChange))) {
+    if (geometryTransition != nullptr && geometryTransition->IsRunning()) {
+        geometryTransition->DidLayout(WeakClaim(this));
+    } else if (frameSizeChange || frameOffsetChange || HasPositionProp() ||
+               (pattern_->GetSurfaceNodeName().has_value() && contentSizeChange)) {
         if (pattern_->NeedOverridePaintRect()) {
             renderContext_->SyncGeometryProperties(pattern_->GetOverridePaintRect().value_or(RectF()));
         } else {
@@ -583,7 +608,6 @@ std::optional<UITask> FrameNode::CreateLayoutTask(bool forceUseMainThread)
     auto task = [layoutWrapper, layoutConstraint = GetLayoutConstraint(), forceUseMainThread]() {
         layoutWrapper->SetActive();
         layoutWrapper->SetRootMeasureNode();
-        layoutWrapper->WillLayout();
         {
             ACE_SCOPED_TRACE("LayoutWrapper::Measure");
             layoutWrapper->Measure(layoutConstraint);
@@ -596,15 +620,11 @@ std::optional<UITask> FrameNode::CreateLayoutTask(bool forceUseMainThread)
             ACE_SCOPED_TRACE("LayoutWrapper::MountToHostOnMainThread");
             if (forceUseMainThread || layoutWrapper->CheckShouldRunOnMain()) {
                 layoutWrapper->MountToHostOnMainThread();
-                layoutWrapper->DidLayout(layoutWrapper);
                 return;
             }
             auto host = layoutWrapper->GetHostNode();
             CHECK_NULL_VOID(host);
-            host->PostTask([layoutWrapper]() {
-                layoutWrapper->MountToHostOnMainThread();
-                layoutWrapper->DidLayout(layoutWrapper);
-            });
+            host->PostTask([layoutWrapper]() { layoutWrapper->MountToHostOnMainThread(); });
         }
     };
     if (forceUseMainThread || layoutWrapper->CheckShouldRunOnMain()) {
@@ -698,9 +718,9 @@ RefPtr<LayoutWrapper> FrameNode::UpdateLayoutWrapper(
     if (layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::GONE) {
         if (!layoutWrapper) {
             layoutWrapper =
-                MakeRefPtr<LayoutWrapper>(WeakClaim(this), MakeRefPtr<GeometryNode>(), MakeRefPtr<LayoutProperty>());
+                MakeRefPtr<LayoutWrapper>(WeakClaim(this), MakeRefPtr<GeometryNode>(), layoutProperty_->Clone());
         } else {
-            layoutWrapper->Update(WeakClaim(this), MakeRefPtr<GeometryNode>(), MakeRefPtr<LayoutProperty>());
+            layoutWrapper->Update(WeakClaim(this), MakeRefPtr<GeometryNode>(), layoutProperty_->Clone());
         }
         layoutWrapper->SetLayoutAlgorithm(MakeRefPtr<LayoutAlgorithmWrapper>(nullptr, true, true));
         isLayoutDirtyMarked_ = false;
@@ -813,6 +833,18 @@ void FrameNode::RebuildRenderContextTree()
 void FrameNode::MarkModifyDone()
 {
     pattern_->OnModifyDone();
+    // restore info will overwrite the first setted attribute
+    if (!isRestoreInfoUsed_) {
+        isRestoreInfoUsed_ = true;
+        auto pipeline = PipelineContext::GetCurrentContext();
+        int32_t restoreId = GetRestoreId();
+        if (pipeline && restoreId >= 0) {
+            // store distribute node
+            pipeline->StoreNode(restoreId, AceType::WeakClaim(this));
+            // restore distribute node info
+            pattern_->OnRestoreInfo(pipeline->GetRestoreInfo(restoreId));
+        }
+    }
     eventHub_->MarkModifyDone();
     if (IsResponseRegion() || HasPositionProp()) {
         auto parent = GetParent();
@@ -1509,5 +1541,51 @@ RefPtr<FrameNode> FrameNode::FindChildByPosition(float x, float y)
     }
 
     return hitFrameNodes.rbegin()->second;
+}
+
+void FrameNode::CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
+    const std::function<void(float)>& onCallbackEvent)
+{
+    auto context = GetRenderContext();
+    CHECK_NULL_VOID(context);
+    auto iter = nodeAnimatablePropertyMap_.find(propertyName);
+    if (iter != nodeAnimatablePropertyMap_.end()) {
+        LOGW("AnimatableProperty already exists!");
+        return;
+    }
+    auto property = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(value, std::move(onCallbackEvent));
+    context->AttachNodeAnimatableProperty(property);
+    nodeAnimatablePropertyMap_.emplace(propertyName, property);
+}
+
+void FrameNode::UpdateAnimatablePropertyFloat(const std::string& propertyName, float value)
+{
+    auto iter = nodeAnimatablePropertyMap_.find(propertyName);
+    if (iter == nodeAnimatablePropertyMap_.end()) {
+        LOGW("AnimatableProperty not exists!");
+        return;
+    }
+    auto property = AceType::DynamicCast<NodeAnimatablePropertyFloat>(iter->second);
+    CHECK_NULL_VOID(property);
+    property->Set(value);
+}
+
+void FrameNode::OnAddDisappearingChild()
+{
+    auto context = GetRenderContext();
+    CHECK_NULL_VOID(context);
+    context->UpdateFreeze(true);
+}
+
+void FrameNode::OnRemoveDisappearingChild()
+{
+    auto context = GetRenderContext();
+    CHECK_NULL_VOID(context);
+    context->UpdateFreeze(false);
+}
+
+std::string FrameNode::ProvideRestoreInfo()
+{
+    return pattern_->ProvideRestoreInfo();
 }
 } // namespace OHOS::Ace::NG

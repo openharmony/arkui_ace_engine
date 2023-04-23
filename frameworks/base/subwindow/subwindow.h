@@ -18,6 +18,7 @@
 
 #include <set>
 
+#include "base/geometry/ng/rect_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components/dialog/dialog_properties.h"
@@ -35,6 +36,7 @@ public:
 
     virtual void InitContainer() = 0;
     virtual void ResizeWindow() = 0;
+    virtual NG::RectF GetRect() = 0;
     virtual void ShowMenu(const RefPtr<Component>& newComponent) = 0;
     virtual void ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t targetId, const NG::OffsetF& offset) = 0;
     virtual void HideMenuNG(int32_t targetId) = 0;
@@ -72,6 +74,7 @@ public:
     virtual void ShowActionMenu(const std::string& title, const std::vector<ButtonInfo>& button,
         std::function<void(int32_t, int32_t)>&& callback) = 0;
     virtual void CloseDialog(int32_t instanceId) = 0;
+    virtual const RefPtr<NG::OverlayManager> GetOverlayManager() = 0;
 
 private:
     int32_t subwindowId_ = 0;

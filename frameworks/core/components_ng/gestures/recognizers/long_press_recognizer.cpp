@@ -56,33 +56,23 @@ void LongPressRecognizer::OnRejected()
     refereeState_ = RefereeState::FAIL;
 }
 
-void LongPressRecognizer::SetThumbnailPixelMap()
-{
-    if (refereeState_ == RefereeState::DETECTING) {
-        auto gestureHub = gestureHub_.Upgrade();
-        CHECK_NULL_VOID(gestureHub);
-        auto frameNode = gestureHub->GetFrameNode();
-        CHECK_NULL_VOID(frameNode);
-        auto context = frameNode->GetRenderContext();
-        CHECK_NULL_VOID(context);
-        auto pixelMap = context->GetThumbnailPixelMap();
-        gestureHub->SetPixelMap(pixelMap);
-    } else {
-        LOGW("the state is not detecting for accept long press gesture");
-    }
-}
-
 void LongPressRecognizer::ThumbnailTimer(int32_t time)
 {
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-
-    auto&& callback = [weakPtr = AceType::WeakClaim(this)]() {
+    if (!callback_) {
+        return;
+    }
+    auto&& callback = [weakPtr = AceType::WeakClaim(this), customCallback = callback_]() {
         auto refPtr = weakPtr.Upgrade();
-        if (refPtr) {
-            refPtr->SetThumbnailPixelMap();
-        } else {
+        if (!refPtr) {
             LOGI("fail to get thumbnail pixelMap due to context is nullptr");
+            return;
+        }
+        if (refPtr->refereeState_ == RefereeState::DETECTING) {
+            customCallback(Offset(refPtr->globalPoint_.GetX(), refPtr->globalPoint_.GetY()));
+        } else {
+            LOGW("the state is not detecting for accept long press gesture");
         }
     };
     thumbnailTimer_.Reset(callback);

@@ -23,15 +23,15 @@
 #include "include/core/SkColor.h"
 #include "include/core/SkShader.h"
 #include "third_party/bounds_checking_function/include/securec.h"
-#include "third_party/skia/include/core/SkBlendMode.h"
-#include "third_party/skia/include/core/SkCanvas.h"
-#include "third_party/skia/include/core/SkColor.h"
-#include "third_party/skia/include/core/SkImage.h"
-#include "third_party/skia/include/core/SkPoint.h"
-#include "third_party/skia/include/core/SkSurface.h"
-#include "third_party/skia/include/effects/SkDashPathEffect.h"
-#include "third_party/skia/include/effects/SkGradientShader.h"
-#include "third_party/skia/include/utils/SkParsePath.h"
+#include "include/core/SkBlendMode.h"
+#include "include/core/SkCanvas.h"
+#include "include/core/SkColor.h"
+#include "include/core/SkImage.h"
+#include "include/core/SkPoint.h"
+#include "include/core/SkSurface.h"
+#include "include/effects/SkDashPathEffect.h"
+#include "include/effects/SkGradientShader.h"
+#include "include/utils/SkParsePath.h"
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/json/json_util.h"
@@ -188,6 +188,22 @@ void CustomPaintPaintMethod::UpdatePaintShader(const Ace::Pattern& pattern, SkPa
                      : ImageProvider::GetSkImage(pattern.GetImgSrc(), context_);
     CHECK_NULL_VOID(image);
     static const LinearMapNode<void (*)(sk_sp<SkImage>, SkPaint&)> staticPattern[] = {
+        { "clamp",
+            [](sk_sp<SkImage> image, SkPaint& paint) {
+#ifdef USE_SYSTEM_SKIA
+                paint.setShader(image->makeShader(SkShader::kClamp_TileMode, SkShader::kClamp_TileMode, nullptr));
+#else
+                paint.setShader(image->makeShader(SkTileMode::kClamp, SkTileMode::kClamp, nullptr));
+#endif
+            } },
+        { "mirror",
+            [](sk_sp<SkImage> image, SkPaint& paint) {
+#ifdef USE_SYSTEM_SKIA
+                paint.setShader(image->makeShader(SkShader::kClamp_TileMode, SkShader::kClamp_TileMode, nullptr));
+#else
+                paint.setShader(image->makeShader(SkTileMode::kMirror, SkTileMode::kMirror, nullptr));
+#endif
+            } },
         { "no-repeat",
             [](sk_sp<SkImage> image, SkPaint& paint) {
 #ifdef USE_SYSTEM_SKIA

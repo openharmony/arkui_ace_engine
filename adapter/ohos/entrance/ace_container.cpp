@@ -1337,7 +1337,7 @@ void AceContainer::InitializeSubContainer(int32_t parentContainerId)
 void AceContainer::InitWindowCallback()
 {
     LOGD("AceContainer InitWindowCallback");
-    if (!pipelineContext_) {
+    if (!pipelineContext_ || !uiWindow_) {
         return;
     }
     auto& windowManager = pipelineContext_->GetWindowManager();

@@ -17,13 +17,17 @@
 #define protected public
 #define private public
 
+#include "test/mock/base/mock_pixel_map.h"
+
+#include "core/components_ng/image_provider/adapter/skia_image_data.h"
+#include "core/components_ng/image_provider/animated_image_object.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/image_provider/image_provider.h"
 #include "core/components_ng/image_provider/image_state_manager.h"
 #include "core/components_ng/image_provider/pixel_map_image_object.h"
+#include "core/components_ng/image_provider/static_image_object.h"
 #include "core/components_ng/test/mock/image_provider/mock_image_loader.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
-#include "test/mock/base/mock_pixel_map.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -32,6 +36,10 @@ namespace {
 const char* SRC_JPG = "file://data/data/com.example.test/res/exampleAlt.jpg";
 const char* SRC_THUMBNAIL = "datashare:///media/9/thumbnail/300/300";
 constexpr int32_t LENGTH_100 = 100;
+constexpr int32_t LENGTH_65 = 65;
+constexpr int32_t LENGTH_64 = 64;
+constexpr int32_t LENGTH_63 = 63;
+constexpr int32_t LENGTH_128 = 128;
 } // namespace
 namespace OHOS::Ace::NG {
 class ImageProviderTestNg : public testing::Test {
@@ -146,5 +154,92 @@ HWTEST_F(ImageProviderTestNg, ImageProviderTestNg004, TestSize.Level1)
     EXPECT_EQ(ctx->stateManager_->state_, ImageLoadingState::DATA_READY);
     EXPECT_TRUE(ctx->NeedAlt());
     EXPECT_EQ(ctx->GetImageSize(), size);
+}
+
+/**
+ * @tc.name: ImageProviderTestNg005
+ * @tc.desc: Test ImageProvider resize condition
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, ImageProviderTestNg005, TestSize.Level1)
+{
+    auto ctx =
+        AceType::MakeRefPtr<ImageLoadingContext>(ImageSourceInfo(), LoadNotifier(nullptr, nullptr, nullptr), true);
+    ctx->stateManager_->state_ = ImageLoadingState::DATA_READY;
+    ctx->imageObj_ =
+        AceType::MakeRefPtr<NG::StaticImageObject>(ImageSourceInfo(SRC_JPG), SizeF(LENGTH_128, LENGTH_128), nullptr);
+    SizeF dstSize(LENGTH_100, LENGTH_100);
+    auto res = ctx->MakeCanvasImageIfNeed(dstSize, true, ImageFit::COVER);
+    EXPECT_TRUE(res);
+    EXPECT_EQ(ctx->dstSize_, SizeF(LENGTH_100, LENGTH_100));
+    EXPECT_EQ(ctx->stateManager_->state_, ImageLoadingState::LOAD_SUCCESS);
+
+    // call MakeCanvasSize with dstSize in the same level
+    res = ctx->MakeCanvasImageIfNeed(SizeF(LENGTH_65, LENGTH_65), true, ImageFit::COVER);
+    EXPECT_TRUE(res);
+    EXPECT_EQ(ctx->sizeLevel_, LENGTH_128);
+
+    res = ctx->MakeCanvasImageIfNeed(SizeF(LENGTH_128, LENGTH_128), true, ImageFit::COVER);
+    EXPECT_FALSE(res);
+
+    res = ctx->MakeCanvasImageIfNeed(SizeF(LENGTH_64, LENGTH_64), true, ImageFit::COVER);
+    EXPECT_TRUE(res);
+    EXPECT_EQ(ctx->sizeLevel_, LENGTH_64);
+
+    res = ctx->MakeCanvasImageIfNeed(SizeF(LENGTH_63, LENGTH_63), true, ImageFit::COVER);
+    EXPECT_FALSE(res);
+    EXPECT_EQ(ctx->sizeLevel_, LENGTH_64);
+}
+
+/**
+ * @tc.name: ImageProviderTestNg006
+ * @tc.desc: Test BuildImageObject and frame count check
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, ImageProviderTestNg006, TestSize.Level1)
+{
+    auto src = ImageSourceInfo(SRC_JPG);
+    EXPECT_FALSE(ImageProvider::BuildImageObject(src, nullptr));
+
+    auto data = AceType::MakeRefPtr<SkiaImageData>(nullptr, 0);
+    auto imageObject = ImageProvider::BuildImageObject(src, data);
+    EXPECT_TRUE(AceType::DynamicCast<StaticImageObject>(imageObject));
+
+    data = AceType::MakeRefPtr<SkiaImageData>(nullptr, 2);
+    imageObject = ImageProvider::BuildImageObject(src, data);
+    EXPECT_TRUE(AceType::DynamicCast<AnimatedImageObject>(imageObject));
+
+    // thumbnail src with mismatched data
+    src = ImageSourceInfo(SRC_THUMBNAIL);
+    EXPECT_FALSE(ImageProvider::BuildImageObject(src, data));
+}
+
+/**
+ * @tc.name: RoundUp001
+ * @tc.desc: Test RoundUp with invalid input (infinite loop)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, RoundUp001, TestSize.Level1)
+{
+    auto ctx =
+        AceType::MakeRefPtr<ImageLoadingContext>(ImageSourceInfo(), LoadNotifier(nullptr, nullptr, nullptr), true);
+    ctx->imageObj_ = AceType::MakeRefPtr<NG::StaticImageObject>(ImageSourceInfo(SRC_JPG), SizeF(-1, -1), nullptr);
+    EXPECT_EQ(ctx->RoundUp(-1), -1);
+
+    ctx->imageObj_ = AceType::MakeRefPtr<NG::StaticImageObject>(ImageSourceInfo(SRC_JPG), SizeF(0, 0), nullptr);
+    EXPECT_EQ(ctx->RoundUp(0), -1);
+
+    ctx->imageObj_ = AceType::MakeRefPtr<NG::StaticImageObject>(ImageSourceInfo(SRC_JPG), SizeF(-1, -1), nullptr);
+    EXPECT_EQ(ctx->RoundUp(0), -1);
+
+    ctx->imageObj_ = AceType::MakeRefPtr<NG::StaticImageObject>(ImageSourceInfo(SRC_JPG), SizeF(0, 0), nullptr);
+    EXPECT_EQ(ctx->RoundUp(-1), -1);
+
+    ctx->imageObj_ =
+        AceType::MakeRefPtr<NG::StaticImageObject>(ImageSourceInfo(SRC_JPG), SizeF(LENGTH_128, LENGTH_128), nullptr);
+    EXPECT_EQ(ctx->RoundUp(0), -1);
+
+    ctx->imageObj_ = AceType::MakeRefPtr<NG::StaticImageObject>(ImageSourceInfo(SRC_JPG), SizeF(0, 0), nullptr);
+    EXPECT_EQ(ctx->RoundUp(LENGTH_128), -1);
 }
 } // namespace OHOS::Ace::NG

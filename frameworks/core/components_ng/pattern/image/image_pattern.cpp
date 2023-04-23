@@ -19,9 +19,6 @@
 
 #include "base/log/dump_log.h"
 #include "base/utils/utils.h"
-#if !defined(ACE_UNITTEST)
-#include "core/common/ace_engine_ext.h"
-#endif
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
@@ -33,8 +30,11 @@
 
 #ifdef ENABLE_DRAG_FRAMEWORK
 #include "image.h"
+#include "system_defined_pixelmap.h"
 #include "unified_data.h"
 #include "unified_record.h"
+
+#include "core/common/ace_engine_ext.h"
 #endif
 
 namespace OHOS::Ace::NG {
@@ -151,7 +151,7 @@ void ImagePattern::OnImageLoadSuccess()
 
     SetImagePaintConfig(image_, srcRect_, dstRect_, loadingCtx_->GetSourceInfo().IsSvg());
     PrepareAnimation();
-    if (draggable_) {
+    if (host->IsDraggable()) {
         EnableDrag();
     }
     // clear alt data
@@ -384,27 +384,14 @@ void ImagePattern::OnNotifyMemoryLevel(int32_t level)
     if (isShow_) {
         return;
     }
-    // TODO: clean cache data when cache mechanism is ready
-    // Step1: drive stateMachine to reset loading procedure
-    if (altLoadingCtx_) {
-        altLoadingCtx_->ResetLoading();
-    }
-    if (loadingCtx_) {
-        loadingCtx_->ResetLoading();
-    }
 
-    // Step2: clean data and reset params
-    // clear src data
+    // clean image data
+    loadingCtx_ = nullptr;
     image_ = nullptr;
-    srcRect_ = RectF();
-    dstRect_ = RectF();
-    // clear alt data
     altLoadingCtx_ = nullptr;
     altImage_ = nullptr;
-    altDstRect_.reset();
-    altSrcRect_.reset();
 
-    // Step3: clean rs node to release the sk_sp<SkImage> held by it
+    // clean rs node to release the sk_sp<SkImage> held by it
     // TODO: release PixelMap resource when use PixelMap resource to draw image
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
@@ -461,50 +448,20 @@ void ImagePattern::EnableDrag()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto size = host->GetGeometryNode()->GetContentSize();
-    auto dragStart = [imageWk = WeakClaim(RawPtr(image_)), ctxWk = WeakClaim(RawPtr(loadingCtx_)), size](
-                         const RefPtr<OHOS::Ace::DragEvent>& event,
+    auto dragStart = [weak = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& event,
                          const std::string& /*extraParams*/) -> DragDropInfo {
         DragDropInfo info;
-        auto image = imageWk.Upgrade();
-        auto ctx = ctxWk.Upgrade();
-        CHECK_NULL_RETURN(image && ctx, info);
+        auto imagePattern = weak.Upgrade();
+        CHECK_NULL_RETURN(imagePattern && imagePattern->loadingCtx_, info);
 
-#if !defined(ACE_UNITTEST)
+#ifdef ENABLE_DRAG_FRAMEWORK
         AceEngineExt::GetInstance().DragStartExt();
 #endif
-#ifdef ENABLE_DRAG_FRAMEWORK
-        if (ctx->GetSourceInfo().IsPixmap()) {
-            LOGI("ImagePattern default dragStart image source is pixelmap");
-        } else {
-            std::shared_ptr<UDMF::UnifiedRecord> record = std::make_shared<UDMF::Image>(ctx->GetSourceInfo().GetSrc());
-            auto unifiedData = std::make_shared<UDMF::UnifiedData>();
-            unifiedData->AddRecord(record);
-            event->SetData(unifiedData);
-        }
-#endif
-        info.extraInfo = "image drag";
-        info.pixelMap = image->GetPixelMap();
-        if (info.pixelMap) {
-            LOGI("using pixmap onDrag");
-            return info;
-        }
-
-        auto node = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-            []() { return AceType::MakeRefPtr<ImagePattern>(); });
-        auto pattern = node->GetPattern<ImagePattern>();
-        pattern->image_ = image;
-        pattern->loadingCtx_ = ctx;
-
-        auto props = node->GetLayoutProperty<ImageLayoutProperty>();
-        props->UpdateImageSourceInfo(ctx->GetSourceInfo());
-        // set dragged image size to match this image
-        props->UpdateUserDefinedIdealSize(CalcSize(CalcLength(size.Width()), CalcLength(size.Height())));
-
-        info.customNode = node;
+        imagePattern->UpdateDragEvent(event);
+        info.extraInfo = imagePattern->loadingCtx_->GetSourceInfo().GetSrc();
         return info;
     };
-    auto eventHub = GetHost()->GetEventHub<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDragStart(std::move(dragStart));
 }
@@ -609,8 +566,6 @@ void ImagePattern::HandleCopy()
 
 void ImagePattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
-    json->Put("draggable", draggable_ ? "true" : "false");
-
     static const char* COPY_OPTIONS[] = { "CopyOptions.None", "CopyOptions.InApp", "CopyOptions.Local",
         "CopyOptions.Distributed" };
     json->Put("copyOption", COPY_OPTIONS[static_cast<int32_t>(copyOption_)]);
@@ -644,5 +599,27 @@ void ImagePattern::DumpInfo()
     if (layoutProp->GetImageSourceInfo().has_value()) {
         DumpLog::GetInstance().AddDesc(std::string("url: ").append(layoutProp->GetImageSourceInfo()->ToString()));
     }
+}
+
+void ImagePattern::UpdateDragEvent(const RefPtr<OHOS::Ace::DragEvent>& event)
+{
+#ifdef ENABLE_DRAG_FRAMEWORK
+    std::shared_ptr<UDMF::UnifiedRecord> record = nullptr;
+    CHECK_NULL_VOID(loadingCtx_ && image_);
+    if (loadingCtx_->GetSourceInfo().IsPixmap()) {
+        auto pixelMap = image_->GetPixelMap();
+        CHECK_NULL_VOID(pixelMap);
+        const uint8_t* pixels = pixelMap->GetPixels();
+        CHECK_NULL_VOID(pixels);
+        int32_t length = pixelMap->GetByteCount();
+        std::vector<uint8_t> data(pixels, pixels + length);
+        record = std::make_shared<UDMF::SystemDefinedPixelMap>(data);
+    } else {
+        record = std::make_shared<UDMF::Image>(loadingCtx_->GetSourceInfo().GetSrc());
+    }
+    auto unifiedData = std::make_shared<UDMF::UnifiedData>();
+    unifiedData->AddRecord(record);
+    event->SetData(unifiedData);
+#endif
 }
 } // namespace OHOS::Ace::NG

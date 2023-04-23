@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,9 +16,9 @@
 #include <algorithm>
 #include <cstddef>
 #include <optional>
+#include <utility>
 
 #include "gtest/gtest.h"
-#include "core/components_ng/pattern/text/text_styles.h"
 
 #define protected public
 #define private public
@@ -27,16 +27,23 @@
 #include "base/memory/referenced.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/pattern/button/button_accessibility_property.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/button/button_view.h"
+#include "core/components_ng/pattern/button/toggle_button_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
+#include "core/event/touch_event.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
+#include "core/pipeline_ng/ui_task_scheduler.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -71,6 +78,9 @@ const SizeF CONTAINER_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 const SizeF BUTTON_ONLY_HAS_WIDTH_SIZE(BUTTON_ONLY_HAS_WIDTH_VALUE, BUTTON_ONLY_HAS_WIDTH_VALUE);
 const Dimension DEFAULT_HEIGTH = 40.0_vp;
 const uint32_t MAX_LINE_VALUE = 10;
+const float START_OPACITY = 1.0f;
+const float END_OPACITY = 0.1f;
+const int32_t DURATION = 100;
 } // namespace
 
 struct TestProperty {
@@ -279,9 +289,9 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest001, TestSize.Level1)
     testProperty.typeValue = std::make_optional(BUTTON_TYPE_CAPSULE_VALUE);
 
     RefPtr<FrameNode> frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
-    EXPECT_EQ(frameNode == nullptr, false);
+    ASSERT_NE(frameNode, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
-    EXPECT_EQ(layoutProperty == nullptr, false);
+    ASSERT_NE(layoutProperty, nullptr);
     EXPECT_EQ(layoutProperty->GetTypeValue(), BUTTON_TYPE_CAPSULE_VALUE);
 }
 
@@ -300,14 +310,14 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest002, TestSize.Level1)
     ButtonView::SetType(testProperty.typeValue.value());
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
-    EXPECT_EQ(frameNode == nullptr, false);
+    ASSERT_NE(frameNode, nullptr);
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
-    EXPECT_EQ(buttonPattern == nullptr, false);
+    ASSERT_NE(buttonPattern, nullptr);
     buttonPattern->InitButtonLabel();
     RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
-    EXPECT_EQ(layoutProperty == nullptr, false);
+    ASSERT_NE(layoutProperty, nullptr);
     RefPtr<ButtonLayoutProperty> buttonLayoutProperty = AceType::DynamicCast<ButtonLayoutProperty>(layoutProperty);
-    EXPECT_EQ(buttonLayoutProperty == nullptr, false);
+    ASSERT_NE(buttonLayoutProperty, nullptr);
     EXPECT_EQ(buttonLayoutProperty->GetTypeValue(), BUTTON_TYPE_CUSTOM_VALUE);
 }
 
@@ -324,11 +334,11 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest003, TestSize.Level1)
     testProperty.fontSizeValue = std::make_optional(BUTTON_FONT_SIZE_VALUE);
     testProperty.fontWeightValue = std::make_optional(BUTTON_BOLD_FONT_WEIGHT_VALUE);
     RefPtr<FrameNode> frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
-    EXPECT_EQ(frameNode == nullptr, false);
+    ASSERT_NE(frameNode, nullptr);
     RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
-    EXPECT_EQ(layoutProperty == nullptr, false);
+    ASSERT_NE(layoutProperty, nullptr);
     RefPtr<ButtonLayoutProperty> buttonLayoutProperty = AceType::DynamicCast<ButtonLayoutProperty>(layoutProperty);
-    EXPECT_EQ(buttonLayoutProperty == nullptr, false);
+    ASSERT_NE(buttonLayoutProperty, nullptr);
     EXPECT_EQ(buttonLayoutProperty->GetTypeValue(), BUTTON_TYPE_DOWNLOAD_VALUE);
     EXPECT_EQ(buttonLayoutProperty->GetFontSizeValue(), BUTTON_FONT_SIZE_VALUE);
     EXPECT_EQ(buttonLayoutProperty->GetFontWeightValue(), BUTTON_BOLD_FONT_WEIGHT_VALUE);
@@ -349,12 +359,12 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest004, TestSize.Level1)
     testProperty.fontStyleValue = std::make_optional(BUTTON_ITALIC_FONT_STYLE_VALUE);
     testProperty.fontFamilyValue = std::make_optional(FONT_FAMILY_VALUE);
     auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
-    EXPECT_EQ(frameNode == nullptr, false);
+    ASSERT_NE(frameNode, nullptr);
 
     RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
-    EXPECT_EQ(layoutProperty == nullptr, false);
+    ASSERT_NE(layoutProperty, nullptr);
     RefPtr<ButtonLayoutProperty> buttonLayoutProperty = AceType::DynamicCast<ButtonLayoutProperty>(layoutProperty);
-    EXPECT_EQ(buttonLayoutProperty == nullptr, false);
+    ASSERT_NE(buttonLayoutProperty, nullptr);
     EXPECT_EQ(buttonLayoutProperty->GetTypeValue(), BUTTON_TYPE_CIRCLE_VALUE);
     EXPECT_EQ(buttonLayoutProperty->GetFontColorValue(), BUTTON_TEXT_COLOR_VALUE);
     EXPECT_EQ(buttonLayoutProperty->GetLabelValue(), CREATE_VALUE);
@@ -376,16 +386,16 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest005, TestSize.Level1)
     testProperty.borderRadius = std::make_optional(BORDER_RADIUS);
     testProperty.stateEffectValue = std::make_optional(STATE_EFFECT);
     auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
-    EXPECT_FALSE(frameNode == nullptr);
+    ASSERT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::BUTTON_ETS_TAG);
 
     /**
      * @tc.steps: step2.get switch property and check whether the property value is correct.
      */
     auto pattern = AceType::DynamicCast<ButtonPattern>(frameNode->GetPattern());
-    EXPECT_FALSE(pattern == nullptr);
+    ASSERT_NE(pattern, nullptr);
     auto layoutProperty = pattern->GetLayoutProperty<ButtonLayoutProperty>();
-    EXPECT_FALSE(layoutProperty == nullptr);
+    ASSERT_NE(layoutProperty, nullptr);
     auto buttonEventHub = frameNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEventHub);
 
@@ -406,7 +416,7 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest006, TestSize.Level1)
     TestProperty testProperty;
     testProperty.borderRadius = std::make_optional(BORDER_RADIUS);
     auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
-    EXPECT_FALSE(frameNode == nullptr);
+    ASSERT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::BUTTON_ETS_TAG);
 
     /**
@@ -414,10 +424,10 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest006, TestSize.Level1)
      * @tc.expected: step2. related function is called.
      */
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
-    EXPECT_FALSE(buttonPattern == nullptr);
+    ASSERT_NE(buttonPattern, nullptr);
     buttonPattern->OnModifyDone();
     auto buttonLayoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
-    EXPECT_FALSE(buttonLayoutProperty == nullptr);
+    ASSERT_NE(buttonLayoutProperty, nullptr);
     // update layout property
     buttonLayoutProperty->UpdateType(BUTTON_TYPE_CAPSULE_VALUE);
     buttonLayoutProperty->UpdateFontSize(BUTTON_FONT_SIZE_VALUE);
@@ -437,9 +447,9 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest006, TestSize.Level1)
     buttonPattern->touchListener_ = touchEvent;
     buttonPattern->OnModifyDone();
     auto text = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
-    EXPECT_FALSE(text == nullptr);
+    ASSERT_NE(text, nullptr);
     auto textLayoutProp = text->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_FALSE(textLayoutProp == nullptr);
+    ASSERT_NE(textLayoutProp, nullptr);
 
     EXPECT_EQ(textLayoutProp->GetContent(), CREATE_VALUE);
     EXPECT_EQ(textLayoutProp->GetFontSize(), BUTTON_FONT_SIZE_VALUE);
@@ -460,14 +470,14 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest007, TestSize.Level1)
      */
     TestProperty testProperty;
     auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
-    EXPECT_FALSE(frameNode == nullptr);
+    ASSERT_NE(frameNode, nullptr);
 
     /**
      * @tc.steps: test buttonPattern OnTouchDown OnTouchUp function.
      * @tc.expected: step3. check whether the function is executed.
      */
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
-    EXPECT_FALSE(buttonPattern == nullptr);
+    ASSERT_NE(buttonPattern, nullptr);
     buttonPattern->OnTouchDown();
     buttonPattern->OnTouchUp();
 
@@ -495,21 +505,21 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest008, TestSize.Level1)
     testProperty.typeValue = std::make_optional(ButtonType::CIRCLE);
     testProperty.stateEffectValue = std::make_optional(STATE_EFFECT);
     auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
-    EXPECT_FALSE(frameNode == nullptr);
+    ASSERT_NE(frameNode, nullptr);
 
     /**
      * @tc.steps: step2. get layout property, layoutAlgorithm and create layoutWrapper.
      * @tc.expected: step2. related function is called.
      */
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    EXPECT_FALSE(geometryNode == nullptr);
+    ASSERT_NE(geometryNode, nullptr);
     auto layoutWrapper = frameNode->CreateLayoutWrapper();
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
-    EXPECT_FALSE(buttonPattern == nullptr);
+    ASSERT_NE(buttonPattern, nullptr);
     auto buttonLayoutProperty = buttonPattern->GetLayoutProperty<ButtonLayoutProperty>();
-    EXPECT_FALSE(buttonLayoutProperty == nullptr);
+    ASSERT_NE(buttonLayoutProperty, nullptr);
     auto buttonLayoutAlgorithm = buttonPattern->CreateLayoutAlgorithm();
-    EXPECT_FALSE(buttonLayoutAlgorithm == nullptr);
+    ASSERT_NE(buttonLayoutAlgorithm, nullptr);
     layoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(buttonLayoutAlgorithm));
 
     /**
@@ -561,21 +571,21 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest009, TestSize.Level1)
     testProperty.typeValue = std::make_optional(ButtonType::CAPSULE);
     testProperty.stateEffectValue = std::make_optional(STATE_EFFECT);
     auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
-    EXPECT_FALSE(frameNode == nullptr);
+    ASSERT_NE(frameNode, nullptr);
 
     /**
      * @tc.steps: step2. get layout property, layoutAlgorithm and create layoutWrapper.
      * @tc.expected: step2. related function is called.
      */
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    EXPECT_FALSE(geometryNode == nullptr);
+    ASSERT_NE(geometryNode, nullptr);
     auto layoutWrapper = frameNode->CreateLayoutWrapper();
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
-    EXPECT_FALSE(buttonPattern == nullptr);
+    ASSERT_NE(buttonPattern, nullptr);
     auto buttonLayoutProperty = buttonPattern->GetLayoutProperty<ButtonLayoutProperty>();
-    EXPECT_FALSE(buttonLayoutProperty == nullptr);
+    ASSERT_NE(buttonLayoutProperty, nullptr);
     auto buttonLayoutAlgorithm = buttonPattern->CreateLayoutAlgorithm();
-    EXPECT_FALSE(buttonLayoutAlgorithm == nullptr);
+    ASSERT_NE(buttonLayoutAlgorithm, nullptr);
     layoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(buttonLayoutAlgorithm));
 
     /**
@@ -618,19 +628,19 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest0010, TestSize.Level1)
     testProperty.stateEffectValue = std::make_optional(STATE_EFFECT);
     testProperty.borderRadius = std::make_optional(BORDER_RADIUS);
     auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
-    EXPECT_FALSE(frameNode == nullptr);
+    ASSERT_NE(frameNode, nullptr);
 
     /**
      * @tc.steps: step2. get layout property, layoutAlgorithm and create layoutWrapper.
      * @tc.expected: step2. related function is called.
      */
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    EXPECT_FALSE(geometryNode == nullptr);
+    ASSERT_NE(geometryNode, nullptr);
     auto layoutWrapper = frameNode->CreateLayoutWrapper();
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
-    EXPECT_FALSE(buttonPattern == nullptr);
+    ASSERT_NE(buttonPattern, nullptr);
     auto buttonLayoutAlgorithm = buttonPattern->CreateLayoutAlgorithm();
-    EXPECT_FALSE(buttonLayoutAlgorithm == nullptr);
+    ASSERT_NE(buttonLayoutAlgorithm, nullptr);
     layoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(buttonLayoutAlgorithm));
 
     /**
@@ -891,7 +901,7 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest015, TestSize.Level1)
     testProperty.typeValue = std::make_optional(ButtonType::CIRCLE);
     testProperty.stateEffectValue = std::make_optional(STATE_EFFECT);
     auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
 
     /**
      * @tc.steps: step2. get layout property, layoutAlgorithm and create layoutWrapper.
@@ -899,10 +909,10 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest015, TestSize.Level1)
      */
     auto layoutWrapper = frameNode->CreateLayoutWrapper();
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
-    EXPECT_NE(buttonPattern, nullptr);
+    ASSERT_NE(buttonPattern, nullptr);
     auto buttonLayoutAlgorithm =
         AccessibilityManager::DynamicCast<ButtonLayoutAlgorithm>(buttonPattern->CreateLayoutAlgorithm());
-    EXPECT_NE(buttonLayoutAlgorithm, nullptr);
+    ASSERT_NE(buttonLayoutAlgorithm, nullptr);
     layoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(buttonLayoutAlgorithm));
 
     /**
@@ -998,5 +1008,119 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest016, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetFontWeightValue(), FontWeight::MEDIUM);
     EXPECT_EQ(layoutProperty->GetFontFamilyValue(), FONT_FAMILY_VALUE);
     EXPECT_EQ(layoutProperty->GetFontStyleValue(), Ace::FontStyle::NORMAL);
+}
+
+/**
+ * @tc.name: ButtonPatternTest017
+ * @tc.desc: Test touch event callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonPatternTestNg, ButtonPatternTest017, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.typeValue = std::make_optional(ButtonType::CIRCLE);
+    testProperty.stateEffectValue = std::make_optional(STATE_EFFECT);
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    buttonPattern->InitTouchEvent();
+    auto gesture = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gesture, nullptr);
+    auto touchListener = gesture->touchEventActuator_->touchEvents_.back();
+    ASSERT_NE(touchListener, nullptr);
+    auto touchCallback = touchListener->callback_;
+
+    buttonPattern->isSetClickedColor_ = true;
+    buttonPattern->clickedColor_ = Color::RED;
+    auto renderContext = frameNode->GetRenderContext();
+    renderContext->UpdateBackgroundColor(Color::BLUE);
+
+    TouchEventInfo info("onTouch");
+    TouchLocationInfo touchLocationInfo(1);
+    touchLocationInfo.SetTouchType(TouchType::DOWN);
+    info.AddTouchLocationInfo(std::move(touchLocationInfo));
+    touchCallback(info);
+    EXPECT_EQ(buttonPattern->backgroundColor_, Color::BLUE);
+    EXPECT_EQ(renderContext->GetBackgroundColorValue(), Color::RED);
+
+    touchLocationInfo.SetTouchType(TouchType::UP);
+    info.touches_.clear();
+    info.AddTouchLocationInfo(std::move(touchLocationInfo));
+    touchCallback(info);
+    EXPECT_EQ(renderContext->GetBackgroundColorValue(), Color::BLUE);
+}
+
+/**
+ * @tc.name: ButtonPatternTest018
+ * @tc.desc: Test HandleEnable disable
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonPatternTestNg, ButtonPatternTest018, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.typeValue = std::make_optional(ButtonType::CIRCLE);
+    testProperty.stateEffectValue = std::make_optional(STATE_EFFECT);
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    eventHub->SetEnabled(false);
+    frameNode->eventHub_ = eventHub;
+
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<ButtonTheme>();
+    ASSERT_NE(theme, nullptr);
+    auto alpha = theme->GetBgDisabledAlpha();
+    auto backgroundColor = renderContext->GetBackgroundColor().value_or(theme->GetBgColor());
+    buttonPattern->HandleEnabled();
+    EXPECT_EQ(buttonPattern->backgroundColor_, backgroundColor.BlendOpacity(alpha));
+}
+
+/**
+ * @tc.name: ButtonPatternTest019
+ * @tc.desc: Test AnimateTouchEffectBoard with ToggleButtonPattern
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonPatternTestNg, ButtonPatternTest019, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        "toggle", stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<ToggleButtonPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+
+    auto buttonPattern = frameNode->GetPattern<ToggleButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    buttonPattern->AnimateTouchEffectBoard(START_OPACITY, END_OPACITY, DURATION, Curves::SHARP);
+    EXPECT_TRUE(buttonPattern->isOn_);
+}
+
+/**
+ * @tc.name: ButtonAccessibilityPropertyTest001
+ * @tc.desc: Test button accessibility property
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonPatternTestNg, ButtonAccessibilityPropertyTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create button and get frameNode.
+     */
+    ButtonView::CreateWithLabel(CREATE_VALUE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get button accessibility property.
+     * @tc.expected: step2. check whether the properties is correct.
+     */
+    auto buttonAccessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(buttonAccessibilityProperty, nullptr);
+    EXPECT_EQ(buttonAccessibilityProperty->GetText(), CREATE_VALUE);
 }
 } // namespace OHOS::Ace::NG

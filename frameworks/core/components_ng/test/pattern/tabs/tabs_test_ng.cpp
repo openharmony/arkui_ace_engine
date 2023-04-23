@@ -1050,6 +1050,8 @@ HWTEST_F(TabsTestNg, TabBarPatternPlayPressAnimation001, TestSize.Level1)
     EXPECT_EQ(tabBarPaintProperty->GetFadingEdgeValue(), fadingEdge);
 
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    tabBarPattern->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE, 0);
+    EXPECT_EQ(tabBarPattern->tabBarStyles_[0], TabBarStyle::SUBTABBATSTYLE);
     tabBarPattern->SetSelectedMode(SelectedMode::BOARD, 0);
     EXPECT_EQ(tabBarPattern->selectedModes_[0], SelectedMode::BOARD);
     tabBarPattern->PlayPressAnimation(0, Color::BLACK, AnimationType::PRESS);

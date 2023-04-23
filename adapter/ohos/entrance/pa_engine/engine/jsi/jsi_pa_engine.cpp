@@ -185,6 +185,7 @@ void JsiPaEngine::RegisterConsoleModule()
 void JsiPaEngine::RegisterConsoleModule(ArkNativeEngine* engine)
 {
     ACE_SCOPED_TRACE("JsiPaEngine::RegisterConsoleModule");
+    CHECK_NULL_VOID(engine);
     NativeValue* global = engine->GetGlobal();
     if (global->TypeOf() != NATIVE_OBJECT) {
         LOGE("global is not NativeObject");
@@ -466,6 +467,7 @@ bool JsiPaEngine::Initialize(const RefPtr<TaskExecutor>& taskExecutor, BackendTy
     CHECK_NULL_RETURN(nativeEngine, false);
     taskExecutor->AddTaskObserver([nativeEngine, id = instanceId_]() {
         ContainerScope scope(id);
+        CHECK_NULL_VOID(nativeEngine);
         nativeEngine->Loop(LOOP_NOWAIT);
     });
     JsBackendTimerModule::GetInstance()->InitTimerModule(nativeEngine, taskExecutor);
@@ -493,18 +495,25 @@ void JsiPaEngine::SetAssetManager(const RefPtr<AssetManager>& assetManager)
 void JsiPaEngine::SetPostTask(NativeEngine* nativeEngine)
 {
     LOGD("SetPostTask");
+    CHECK_NULL_VOID(nativeEngine);
     auto weak = AceType::WeakClaim(AceType::RawPtr(taskExecutor_));
-    auto&& postTask = [weak, nativeEngine, id = instanceId_](bool needSync) {
+    auto&& postTask = [weak, weakEngine = AceType::WeakClaim(this), id = instanceId_](bool needSync) {
         auto taskExecutor = weak.Upgrade();
         if (taskExecutor == nullptr) {
             LOGE("taskExecutor is nullptr");
             return;
         }
-        taskExecutor->PostTask([nativeEngine, needSync, id]() {
-                ContainerScope scope(id);
+        taskExecutor->PostTask([weakEngine, needSync, id]() {
+                auto paEngine = weakEngine.Upgrade();
+                if (paEngine == nullptr) {
+                    LOGW("PaEngine is nullptr");
+                    return;
+                }
+                auto nativeEngine = paEngine->GetNativeEngine();
                 if (nativeEngine == nullptr) {
                     return;
                 }
+                ContainerScope scope(id);
                 nativeEngine->Loop(LOOP_NOWAIT, needSync);
             }, TaskExecutor::TaskType::JS);
     };

@@ -15,7 +15,7 @@
 
 #include "core/components/button/flutter_render_button.h"
 
-#include "third_party/skia/include/core/SkMaskFilter.h"
+#include "include/core/SkMaskFilter.h"
 
 #include "core/components/box/render_box.h"
 #include "core/components/transform/flutter_render_transform.h"

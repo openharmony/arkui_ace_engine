@@ -15,9 +15,9 @@
 
 #include "core/components/shadow/flutter_render_shadow.h"
 
-#include "third_party/skia/include/core/SkCanvas.h"
-#include "third_party/skia/include/core/SkColor.h"
-#include "third_party/skia/include/core/SkMaskFilter.h"
+#include "include/core/SkCanvas.h"
+#include "include/core/SkColor.h"
+#include "include/core/SkMaskFilter.h"
 
 #include "core/pipeline/base/scoped_canvas_state.h"
 

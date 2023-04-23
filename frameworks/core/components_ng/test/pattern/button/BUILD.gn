@@ -15,7 +15,7 @@ import("//build/test.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("button_pattern_test_ng") {
-  module_out_path = "$pattern_test_output_path/button"
+  module_out_path = pattern_test_output_path
 
   sources = [
     "$ace_root/frameworks/base/geometry/matrix4.cpp",

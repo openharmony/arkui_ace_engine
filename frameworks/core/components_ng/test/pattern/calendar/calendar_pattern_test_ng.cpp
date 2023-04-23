@@ -67,6 +67,18 @@ const std::string LUNAR_DAY_VALUE = "初五";
 const std::string DAY_MARK = "MARK";
 const std::string DAY_MARK_VALUE = "MARK_VALUE";
 const std::string OFF_DAYS_VALUE = "OFF_DAYS";
+
+// Day width and Height.
+const Dimension DAY_HEIGHT = 48.0_vp;
+const Dimension DAY_WIDTH = 48.0_vp;
+
+// GregorianDay YAxis Offset and Height.
+const Dimension GREGORIAN_DAY_HEIGHT = 20.0_vp;
+const Dimension GREGORIAN_DAY_OFFSET = 4.0_vp;
+
+// Lunar YAxis Offset and Height.
+const Dimension LUNAR_DAY_HEIGHT = 10.0_vp;
+const Dimension LUNAR_DAY_OFFSET = 2.0_vp;
 } // namespace
 
 class CalendarPatternTestNg : public testing::Test {
@@ -682,5 +694,69 @@ HWTEST_F(CalendarPatternTestNg, CalendarTest007, TestSize.Level1)
     paintMethod->SetDayTextStyle(dateTextStyle, lunarTextStyle, obtainedMonth.days[1]);
     EXPECT_EQ(dateTextStyle.color_, RSColor(0xff000000));
     EXPECT_EQ(lunarTextStyle.color_, RSColor(0xff000000));
+}
+
+/**
+ * @tc.name: CalendarTest008
+ * @tc.desc: Create calendar, and check the gregorianDayYAxisOffset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPatternTestNg, CalendarTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Calendar
+     * @tc.expected: step1. Create Calendar successfully.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
+
+    // Today style.
+    TodayStyle todayStyle;
+    Color focusedDayColor = Color::WHITE;
+    todayStyle.UpdateFocusedDayColor(focusedDayColor);
+    Color focusedLunarColor = Color::WHITE;
+    todayStyle.UpdateFocusedLunarColor(focusedLunarColor);
+    Color focusedAreaBackgroundColor = Color::BLUE;
+    todayStyle.UpdateFocusedAreaBackgroundColor(focusedAreaBackgroundColor);
+    Dimension focusedAreaRadius = Dimension(DEFAULT_FOCUS_RADIUS, DimensionUnit::VP);
+    todayStyle.UpdateFocusedAreaRadius(focusedAreaRadius);
+
+    // Day style of current month.
+    CurrentDayStyle dayStyle;
+    dayStyle.UpdateDayColor(Color::BLACK);
+    dayStyle.UpdateLunarColor(COLOR_VALUE);
+    dayStyle.UpdateDayHeight(DAY_HEIGHT);
+    dayStyle.UpdateDayWidth(DAY_WIDTH);
+    dayStyle.UpdateGregorianCalendarHeight(GREGORIAN_DAY_HEIGHT);
+    dayStyle.UpdateDayYAxisOffset(GREGORIAN_DAY_OFFSET);
+    dayStyle.UpdateLunarDayYAxisOffset(LUNAR_DAY_OFFSET);
+    dayStyle.UpdateLunarHeight(LUNAR_DAY_HEIGHT);
+
+    CalendarData calendarData;
+    auto calendarControllerNg = AceType::MakeRefPtr<CalendarControllerNg>();
+    calendarData.controller = calendarControllerNg;
+    CalendarView::Create(calendarData);
+    CalendarView::SetTodayStyle(todayStyle);
+    CalendarView::SetCurrentDayStyle(dayStyle);
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_ETS_TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    auto calendarPattern = frameNode->GetPattern<CalendarPattern>();
+    auto swiperNode = frameNode->GetChildren().front();
+    auto calendarFrameNode = AceType::DynamicCast<FrameNode>(swiperNode->GetChildren().front());
+    auto calendarPaintProperty = calendarFrameNode->GetPaintProperty<CalendarPaintProperty>();
+
+    /**
+     * @tc.steps: step1. Check the offset and height.
+     * @tc.expected: step1. Get the offset and height successfully.
+     */
+    EXPECT_EQ(calendarPaintProperty->GetDayHeightValue(SIZE_VALUE), DAY_HEIGHT);
+    EXPECT_EQ(calendarPaintProperty->GetDayWidthValue(SIZE_VALUE), DAY_WIDTH);
+    EXPECT_EQ(calendarPaintProperty->GetGregorianCalendarHeightValue(SIZE_VALUE), GREGORIAN_DAY_HEIGHT);
+    EXPECT_EQ(calendarPaintProperty->GetDayYAxisOffsetValue(SIZE_VALUE), GREGORIAN_DAY_OFFSET);
+    EXPECT_EQ(calendarPaintProperty->GetLunarDayYAxisOffsetValue(SIZE_VALUE), LUNAR_DAY_OFFSET);
+    EXPECT_EQ(calendarPaintProperty->GetLunarHeightValue(SIZE_VALUE), LUNAR_DAY_HEIGHT);
 }
 } // namespace OHOS::Ace::NG

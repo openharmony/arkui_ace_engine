@@ -26,6 +26,12 @@ build_component("box") {
     "render_box_base.cpp",
     "render_box_creator.cpp",
   ]
+  if (ace_use_new_skia) {
+    sources -= [
+      "flutter_mask_painter.cpp",
+      "flutter_render_box.cpp",
+    ]
+  }
   rosen_sources = [
     "rosen_mask_painter.cpp",
     "rosen_render_box.cpp",

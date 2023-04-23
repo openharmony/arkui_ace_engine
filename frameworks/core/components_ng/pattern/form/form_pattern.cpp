@@ -151,10 +151,6 @@ bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
                 subContainer_->UpdateSurfaceSizeWithAnimathion();
             }
         }
-        if (isLoaded_) {
-            auto visible = layoutProperty->GetVisibleType().value_or(VisibleType::VISIBLE);
-            layoutProperty->UpdateVisibility(visible);
-        }
         return false;
     }
     CreateCardContainer();

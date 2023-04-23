@@ -17,7 +17,9 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_RATING_ROSEN_RENDER_RATING_H
 
 #include "core/components/rating/render_rating.h"
+#ifndef NEW_SKIA
 #include "core/pipeline/base/scoped_canvas_state.h"
+#endif
 
 namespace OHOS::Ace {
 

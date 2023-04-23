@@ -19,8 +19,8 @@
 #include <memory>
 #include <utility>
 
-#include "third_party/skia/include/codec/SkCodec.h"
-#include "third_party/skia/include/core/SkImage.h"
+#include "include/codec/SkCodec.h"
+#include "include/core/SkImage.h"
 
 #include "core/components_ng/image_provider/image_data.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
@@ -62,9 +62,11 @@ private:
 
     // ensure frames decode serially, protect bitmap
     std::mutex decodeMtx_;
-
-    sk_sp<SkImage> currentFrame_;
     SkBitmap requiredFrame_;
+
+    // protect currentFrame_
+    mutable std::mutex frameMtx_;
+    sk_sp<SkImage> currentFrame_;
 
     std::function<void()> redraw_;
     RefPtr<Animator> animator_;

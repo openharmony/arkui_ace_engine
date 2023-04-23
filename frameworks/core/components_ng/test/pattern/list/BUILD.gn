@@ -13,6 +13,7 @@
 
 import("//build/test.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 common_sources = [
   # inner
@@ -163,7 +164,7 @@ common_sources = [
 ]
 
 ohos_unittest("list_test_ng") {
-  module_out_path = "$test_output_path/list"
+  module_out_path = pattern_test_output_path
 
   test_sources = [ "list_test_ng.cpp" ]
 

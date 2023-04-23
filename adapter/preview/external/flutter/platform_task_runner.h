@@ -12,12 +12,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "core/components_ng/image_provider/image_provider.h"
-namespace OHOS::Ace::NG {
-void ImageProvider::MakeCanvasImage(const WeakPtr<ImageObject>& objWp, const WeakPtr<ImageLoadingContext>& ctxWp,
-    const SizeF& targetSize, bool forceResize, bool sync)
-{}
 
-RefPtr<CanvasImage> ImageProvider::QueryCanvasImageFromCache(const ImageSourceInfo& src, const SizeF& targetSize)
-{return nullptr;}
-} // namespace OHOS::Ace::NG
+#ifndef FOUNDATION_ACE_ADAPTER_PREVIEW_EXTERNAL_EVENT_LOOP_PLATFORM_TASK_RUNNER_H
+#define FOUNDATION_ACE_ADAPTER_PREVIEW_EXTERNAL_EVENT_LOOP_PLATFORM_TASK_RUNNER_H
+
+#include "flutter/fml/message_loop_impl.h"
+#include "flutter/fml/message_loop_task_queues.h"
+
+namespace flutter {
+
+class PlatformTaskRunner {
+public:
+    static fml::RefPtr<fml::TaskRunner> CurrentTaskRunner(bool useCurrentEventRunner = false);
+};
+
+} // namespace flutter
+
+#endif // FOUNDATION_ACE_ADAPTER_PREVIEW_EXTERNAL_EVENT_LOOP_PLATFORM_TASK_RUNNER_H

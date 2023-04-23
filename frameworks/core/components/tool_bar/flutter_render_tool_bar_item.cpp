@@ -15,7 +15,7 @@
 
 #include "core/components/tool_bar/flutter_render_tool_bar_item.h"
 
-#include "third_party/skia/include/core/SkMaskFilter.h"
+#include "include/core/SkMaskFilter.h"
 
 #include "core/components/transform/flutter_render_transform.h"
 #include "core/pipeline/base/flutter_render_context.h"

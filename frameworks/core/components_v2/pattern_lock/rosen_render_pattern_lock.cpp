@@ -14,9 +14,9 @@
  */
 #include "core/components_v2/pattern_lock/rosen_render_pattern_lock.h"
 
-#include "third_party/skia/include/core/SkPaint.h"
-#include "third_party/skia/include/core/SkPath.h"
-#include "third_party/skia/include/effects/SkGradientShader.h"
+#include "include/core/SkPaint.h"
+#include "include/core/SkPath.h"
+#include "include/effects/SkGradientShader.h"
 
 #include "core/pipeline/base/rosen_render_context.h"
 

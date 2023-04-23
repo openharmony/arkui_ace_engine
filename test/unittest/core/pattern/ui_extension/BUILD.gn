@@ -15,7 +15,7 @@ import("//build/test.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("ui_extension_pattern_test_ng") {
-  module_out_path = "$pattern_test_output_path/ui_extension"
+  module_out_path = pattern_test_output_path
 
   sources = [
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_layout_algorithm.cpp",

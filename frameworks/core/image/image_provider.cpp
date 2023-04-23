@@ -17,8 +17,8 @@
 
 #include "experimental/svg/model/SkSVGDOM.h"
 #include "image_compressor.h"
-#include "third_party/skia/include/core/SkGraphics.h"
-#include "third_party/skia/include/core/SkStream.h"
+#include "include/core/SkGraphics.h"
+#include "include/core/SkStream.h"
 
 #include "base/log/ace_trace.h"
 #include "base/thread/background_task_executor.h"
@@ -482,7 +482,10 @@ sk_sp<SkImage> ImageProvider::ApplySizeToSkImage(
         const double RESIZE_MAX_PROPORTION = ImageCompressor::GetInstance()->CanCompress() ? 1.0 : 0.25;
         bool needCacheResizedImageFile =
             (1.0 * dstWidth * dstHeight) / (rawImage->width() * rawImage->height()) < RESIZE_MAX_PROPORTION;
-        if (needCacheResizedImageFile && !srcKey.empty()) {
+        auto context = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(context, scaledImage);
+        // card doesn't encode and cache image file.
+        if (needCacheResizedImageFile && !srcKey.empty() && !context->IsFormRender()) {
             BackgroundTaskExecutor::GetInstance().PostTask(
                 [srcKey, scaledImage]() {
                     LOGI("write png cache file: %{private}s", srcKey.c_str());

@@ -30,6 +30,7 @@
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/geometry_node.h"
+#include "core/components_ng/base/modifier.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/focus_hub.h"
@@ -69,6 +70,7 @@ public:
     // get element with nodeId from node map.
     static RefPtr<FrameNode> GetFrameNode(const std::string& tag, int32_t nodeId);
 
+    static void ProcessOffscreenNode(const RefPtr<FrameNode>& node);
     // avoid use creator function, use CreateFrameNode
     FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot = false);
 
@@ -283,8 +285,8 @@ public:
     void OnAccessibilityEvent(AccessibilityEventType eventType) const;
     void MarkNeedRenderOnly();
 
-    void OnDetachFromMainTree() override;
-    void OnAttachToMainTree() override;
+    void OnDetachFromMainTree(bool recursive) override;
+    void OnAttachToMainTree(bool recursive) override;
 
     void OnVisibleChange(bool isVisible) override;
 
@@ -357,6 +359,12 @@ public:
 
     RefPtr<FrameNode> FindChildByPosition(float x, float y);
 
+    void CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
+        const std::function<void(float)>& onCallbackEvent);
+    void UpdateAnimatablePropertyFloat(const std::string& propertyName, float value);
+
+    std::string ProvideRestoreInfo();
+
 private:
     void MarkNeedRender(bool isRenderBoundary);
     bool IsNeedRequestParentMeasure() const;
@@ -375,6 +383,9 @@ private:
     void OnGenerateOneDepthVisibleFrameWithTransition(
         std::list<RefPtr<FrameNode>>& visibleList, uint32_t index) override;
     void OnGenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& allList) override;
+
+    void OnAddDisappearingChild() override;
+    void OnRemoveDisappearingChild() override;
 
     bool IsMeasureBoundary();
     bool IsRenderBoundary();
@@ -445,6 +456,10 @@ private:
 
     bool draggable_ = false;
     bool userSet_ = false;
+
+    std::map<std::string, RefPtr<NodeAnimatablePropertyBase>> nodeAnimatablePropertyMap_;
+
+    bool isRestoreInfoUsed_ = false;
 
     friend class RosenRenderContext;
     friend class RenderContext;

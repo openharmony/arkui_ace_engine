@@ -353,10 +353,12 @@ void BubblePaintMethod::PaintBottomBubble(RSCanvas& canvas)
 
 void BubblePaintMethod::PaintDefaultBubble(RSCanvas& canvas)
 {
-    auto rrect = MakeRRect();
+    auto rect = MakeRRect();
+    path_.AddRoundRect(
+        rect.GetRect(), border_.TopLeftRadius().GetX().ConvertToPx(), border_.TopRightRadius().GetX().ConvertToPx());
     PaintShadow(path_, ShadowConfig::DefaultShadowM, canvas);
-    canvas.DrawRoundRect(rrect);
-    canvas.ClipRoundRect(rrect, RSClipOp::INTERSECT);
+    canvas.DrawRoundRect(rect);
+    canvas.ClipRoundRect(rect, RSClipOp::INTERSECT);
 }
 
 RSRoundRect BubblePaintMethod::MakeRRect()

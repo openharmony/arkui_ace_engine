@@ -21,6 +21,8 @@
 #include "napi/native_engine/native_value.h"
 #include "securec.h"
 
+#include "core/common/container.h"
+
 namespace OHOS::Ace::Napi {
 constexpr int NAPI_ACE_ERR_NO_ERROR = 0;
 constexpr int ACE_ARGS_TWO = 2;
@@ -700,7 +702,7 @@ bool AceIsSameFuncFromJS(ACECallbackInfo& left, ACECallbackInfo& right)
     if (left.env == nullptr && right.env == nullptr) {
         return true;
     }
-    if (left.env != right.env) {
+    if (left.env != right.env || left.containerId != right.containerId) {
         return false;
     }
     if (left.callback == nullptr && right.callback == nullptr) {
@@ -922,10 +924,12 @@ ACEAsyncJSCallbackInfo* AceCreateAsyncJSCallbackInfo(napi_env env)
         NAPI_CALL(env, napi_get_value_external(env, abilityObj, (void**)&ability));
     }
 
+    auto containerId = Container::CurrentId();
     ACEAsyncJSCallbackInfo* asyncCallbackInfo = new (std::nothrow) ACEAsyncJSCallbackInfo {
         .cbInfo = {
             .env = env,
             .callback = nullptr,
+            .containerId = containerId,
         },
         .ability = ability,
         .asyncWork = nullptr,
