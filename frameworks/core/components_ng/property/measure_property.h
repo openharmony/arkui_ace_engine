@@ -229,6 +229,21 @@ struct MeasureProperty {
         jsonSize->Put("width", width.c_str());
         jsonSize->Put("height", height.c_str());
         json->Put("size", jsonSize);
+#else
+        auto jsonSize = JsonUtil::Create(true);
+        if (selfIdealSize.has_value()) {
+            if (selfIdealSize.value().Width().has_value()) {
+                auto widthStr = selfIdealSize.value().Width().value().ToString();
+                json->Put("width", widthStr.c_str());
+                jsonSize->Put("width", widthStr.c_str());
+            }
+            if (selfIdealSize.value().Height().has_value()) {
+                auto heightStr = selfIdealSize.value().Height().value().ToString();
+                json->Put("height", heightStr.c_str());
+                jsonSize->Put("height", heightStr.c_str());
+            }
+        }
+        json->Put("size", jsonSize);
 #endif
 
         auto jsonConstraintSize = JsonUtil::Create(true);
