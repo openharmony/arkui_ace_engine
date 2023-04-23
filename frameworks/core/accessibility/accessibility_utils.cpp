@@ -103,13 +103,13 @@ static double MajorAxisDistanceToFarEdge(const Rect& nodeRect, const Rect& itemR
             distance = nodeRect.Left() - itemRect.Left();
             break;
         case FOCUS_DIRECTION_RIGHT:
-            distance = nodeRect.Right() - itemRect.Right();
+            distance = itemRect.Right() - nodeRect.Right();
             break;
         case FOCUS_DIRECTION_UP:
             distance = nodeRect.Top() - itemRect.Top();
             break;
         case FOCUS_DIRECTION_DOWN:
-            distance = nodeRect.Bottom() - itemRect.Bottom();
+            distance = itemRect.Bottom() - nodeRect.Bottom();
             break;
         default:
             break;
@@ -126,13 +126,13 @@ static double MajorAxisDistance(const Rect& nodeRect, const Rect& itemRect, cons
             distance = nodeRect.Left() - itemRect.Right();
             break;
         case FOCUS_DIRECTION_RIGHT:
-            distance = nodeRect.Right() - itemRect.Left();
+            distance = itemRect.Left() - nodeRect.Right();
             break;
         case FOCUS_DIRECTION_UP:
             distance = nodeRect.Top() - itemRect.Bottom();
             break;
         case FOCUS_DIRECTION_DOWN:
-            distance = nodeRect.Bottom() - itemRect.Top();
+            distance = itemRect.Top() - nodeRect.Bottom();
             break;
         default:
             break;
@@ -147,11 +147,11 @@ static double MinorAxisDistance(const Rect& nodeRect, const Rect& itemRect, cons
     switch (direction) {
         case FOCUS_DIRECTION_LEFT:
         case FOCUS_DIRECTION_RIGHT:
-            distance = (nodeRect.Top() + nodeRect.Bottom()) / 2 - (itemRect.Top() + itemRect.Bottom()) / 2;
+            distance = fabs((nodeRect.Top() + nodeRect.Bottom()) / 2 - (itemRect.Top() + itemRect.Bottom()) / 2);
             break;
         case FOCUS_DIRECTION_UP:
         case FOCUS_DIRECTION_DOWN:
-            distance = (nodeRect.Left() + nodeRect.Right()) / 2 - (itemRect.Left() + itemRect.Right()) / 2;
+            distance = fabs((nodeRect.Left() + nodeRect.Right()) / 2 - (itemRect.Left() + itemRect.Right()) / 2);
             break;
         default:
             break;
