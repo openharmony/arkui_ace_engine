@@ -27,7 +27,6 @@ ohos_unittest("DomCardClockTest") {
   configs = [
     ":config_domnode_test",
     "$ace_root:ace_test_config",
-    "//commonlibrary/c_utils/base:static_utils_config",
   ]
 
   deps = [ "$ace_root/build:ace_ohos_unittest_base" ]
@@ -43,6 +42,4 @@ config("config_domnode_test") {
 group("unittest") {
   testonly = true
   deps = []
-
-  #deps += [ ":DomCardClockTest" ]
 }

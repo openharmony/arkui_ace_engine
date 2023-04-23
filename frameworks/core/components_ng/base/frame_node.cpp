@@ -73,6 +73,8 @@ FrameNode::~FrameNode()
     if (pipeline) {
         pipeline->RemoveOnAreaChangeNode(GetId());
         pipeline->RemoveVisibleAreaChangeNode(GetId());
+        pipeline->ChangeMouseStyle(GetId(), MouseFormat::DEFAULT);
+        pipeline->FreeMouseStyleHoldNode(GetId());
     }
 }
 
@@ -709,9 +711,9 @@ RefPtr<LayoutWrapper> FrameNode::UpdateLayoutWrapper(
     if (layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::GONE) {
         if (!layoutWrapper) {
             layoutWrapper =
-                MakeRefPtr<LayoutWrapper>(WeakClaim(this), geometryNode_->Clone(), layoutProperty_->Clone());
+                MakeRefPtr<LayoutWrapper>(WeakClaim(this), MakeRefPtr<GeometryNode>(), layoutProperty_->Clone());
         } else {
-            layoutWrapper->Update(WeakClaim(this), geometryNode_->Clone(), layoutProperty_->Clone());
+            layoutWrapper->Update(WeakClaim(this), MakeRefPtr<GeometryNode>(), layoutProperty_->Clone());
         }
         layoutWrapper->SetLayoutAlgorithm(MakeRefPtr<LayoutAlgorithmWrapper>(nullptr, true, true));
         isLayoutDirtyMarked_ = false;

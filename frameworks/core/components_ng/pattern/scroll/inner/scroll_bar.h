@@ -211,7 +211,10 @@ public:
 
     void SetNormalWidth(const Dimension& normalWidth)
     {
-        normalWidth_ = normalWidth;
+        if (normalWidth_ != normalWidth) {
+            normalWidthUpdate_ = true;
+            normalWidth_ = normalWidth;
+        }
     }
 
     const Rect& GetActiveRect() const
@@ -400,6 +403,7 @@ private:
     bool isHover_ = false;
     bool inSpring = false; // whether bar in the spring state
     bool positionModeUpdate_ = false;
+    bool normalWidthUpdate_ = false;
 
     Offset paintOffset_;
     Size viewPortSize_;

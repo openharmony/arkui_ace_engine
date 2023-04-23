@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,23 +13,15 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/event/focus_hub.h"
+#include "adapter/preview/external/flutter/platform_task_runner.h"
 
-namespace OHOS::Ace::NG {
-void FocusHub::RemoveSelf() {}
+#include "adapter/preview/external/flutter/platform_task_runner_adapter.h"
 
-bool FocusHub::IsEnabled() const
+namespace flutter {
+
+fml::RefPtr<fml::TaskRunner> PlatformTaskRunner::CurrentTaskRunner(bool useCurrentEventRunner)
 {
-    return false;
+    return PlatformTaskRunnerAdapter::CurrentTaskRunner(useCurrentEventRunner);
 }
 
-bool FocusHub::IsFocusable()
-{
-    return false;
-}
-
-bool FocusHub::RequestFocusImmediately()
-{
-    return true;
-}
-} // namespace OHOS::Ace::NG
+} // namespace flutter

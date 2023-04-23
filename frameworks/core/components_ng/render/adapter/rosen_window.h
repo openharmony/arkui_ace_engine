@@ -29,7 +29,7 @@
 #include "adapter/android/entrance/java/jni/virtual_rs_window.h"
 #endif
 #else
-#include "window_prviewer.h"
+#include "adapter/preview/external/window/window_preview.h"
 #endif
 
 #include "base/thread/task_executor.h"

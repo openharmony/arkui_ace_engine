@@ -307,6 +307,16 @@ public:
     virtual void NotifyConfigurationChange(bool) {}
     virtual void HotReload() {}
 
+    void SetIsBundle(bool isBundle)
+    {
+        isBundle_ = isBundle;
+    }
+
+    bool IsBundle() const
+    {
+        return isBundle_;
+    }
+
 protected:
     std::chrono::time_point<std::chrono::high_resolution_clock> createTime_;
     bool firstUpdateData_ = true;
@@ -323,6 +333,7 @@ private:
     bool usePartialUpdate_ = false;
     Settings settings_;
     RefPtr<PageUrlChecker> pageUrlChecker_;
+    bool isBundle_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(Container);
 };
 

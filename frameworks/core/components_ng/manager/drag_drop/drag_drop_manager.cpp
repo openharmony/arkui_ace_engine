@@ -284,7 +284,7 @@ bool DragDropManager::CheckDragDropProxy(int64_t id) const
 void DragDropManager::UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode)
 {
     const auto& dragFrameNodeAllowDrop = dragFrameNode->GetAllowDrop();
-    if (dragFrameNodeAllowDrop.empty()) {
+    if (dragFrameNodeAllowDrop.empty() || summaryMap_.empty()) {
         InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::DEFAULT);
         return;
     }
