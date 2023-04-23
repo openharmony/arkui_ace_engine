@@ -226,6 +226,7 @@ build_component_ng("pattern_ng") {
     "panel/sliding_panel_pattern.cpp",
     "patternlock/patternlock_layout_algorithm.cpp",
     "patternlock/patternlock_model_ng.cpp",
+    "patternlock/patternlock_modifier.cpp",
     "patternlock/patternlock_paint_method.cpp",
     "patternlock/patternlock_pattern.cpp",
     "picker/date_time_animation_controller.cpp",
