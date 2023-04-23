@@ -19,7 +19,6 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/gestures/recognizers/recognizer_group.h"
-#include "core/event/mouse_event.h"
 
 namespace OHOS::Ace::NG {
 
@@ -202,14 +201,17 @@ bool GestureReferee::QueryAllDone(size_t touchId)
     return ret;
 }
 
-bool GestureReferee::CheckDeviceChange(size_t id)
+bool GestureReferee::CheckSourceTypeChange(SourceType type, bool isAxis_)
 {
-    for (auto iter = gestureScopes_.begin(); iter != gestureScopes_.end(); iter++) {
-        if (id+iter->first > OHOS::Ace::MOUSE_BASE_ID) {
-            return true;
-        }
+    bool ret = false;
+    if (type != lastSourceType_) {
+        ret = true;
+        lastSourceType_ = type;
+    }else if(isAxis_ && !lastIsAxis_){
+        ret = true;
     }
-    return false;
+    lastIsAxis_ = isAxis_;
+    return ret;
 }
 
 void GestureReferee::CleanAll()
