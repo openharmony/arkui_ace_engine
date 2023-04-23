@@ -1301,18 +1301,18 @@ OffsetF FrameNode::GetOffsetRelativeToWindow() const
     auto parent = GetAncestorNodeOfFrame();
     if (renderContext_ && renderContext_->GetPositionProperty()) {
         if (renderContext_->GetPositionProperty()->HasPosition()) {
-            offset.SetX(static_cast<float>(renderContext_->GetPositionProperty()->GetPosition()->GetX().Value()));
-            offset.SetY(static_cast<float>(renderContext_->GetPositionProperty()->GetPosition()->GetY().Value()));
+            offset.SetX(static_cast<float>(renderContext_->GetPositionProperty()->GetPosition()->GetX().ConvertToPx()));
+            offset.SetY(static_cast<float>(renderContext_->GetPositionProperty()->GetPosition()->GetY().ConvertToPx()));
         }
     }
     while (parent) {
         auto parentRenderContext = parent->GetRenderContext();
         if (parentRenderContext && parentRenderContext->GetPositionProperty()) {
             if (parentRenderContext->GetPositionProperty()->HasPosition()) {
-                offset.AddX(
-                    static_cast<float>(parentRenderContext->GetPositionProperty()->GetPosition()->GetX().Value()));
-                offset.AddY(
-                    static_cast<float>(parentRenderContext->GetPositionProperty()->GetPosition()->GetY().Value()));
+                offset.AddX(static_cast<float>(
+                    parentRenderContext->GetPositionProperty()->GetPosition()->GetX().ConvertToPx()));
+                offset.AddY(static_cast<float>(
+                    parentRenderContext->GetPositionProperty()->GetPosition()->GetY().ConvertToPx()));
                 parent = parent->GetAncestorNodeOfFrame();
                 continue;
             }
