@@ -327,6 +327,10 @@ public:
         return inactiveDirtyNodes_.find(id) != inactiveDirtyNodes_.end();
     }
 
+    void EraseInactiveDirtyNode(int32_t id) {
+        inactiveDirtyNodes_.erase(id);
+    }
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);

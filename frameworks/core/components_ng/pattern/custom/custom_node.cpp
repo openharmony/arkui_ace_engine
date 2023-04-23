@@ -36,6 +36,12 @@ CustomNode::CustomNode(int32_t nodeId, const std::string& viewKey)
     : UINode(V2::JS_VIEW_ETS_TAG, nodeId, MakeRefPtr<CustomNodePattern>()), viewKey_(viewKey)
 {}
 
+CustomNode::~CustomNode()
+{
+    auto context = PipelineContext::GetCurrentContext();
+    context->EraseInactiveDirtyNode(GetId());
+}
+
 void CustomNode::Build()
 {
     Render();
