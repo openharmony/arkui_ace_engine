@@ -65,7 +65,7 @@
   ],
   "compilerOptions": {
     "module": "none",
-    "target": "ES6",
+    "target": "ES2016",
     "outDir": "./dist/",
     "outFile": "./dist/stateMgmt.js",
     "rootDir": "./src/",
@@ -73,7 +73,7 @@
     "noEmitOnError": true,
     "experimentalDecorators": true,
     "lib": [
-      "ES6"
+      "ES2016"
     ],
   }
 }
