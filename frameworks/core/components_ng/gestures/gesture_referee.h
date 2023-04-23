@@ -115,7 +115,7 @@ public:
         queryStateFunc_ = queryStateFunc;
     }
     bool QueryAllDone(size_t touchId);
-    bool CheckDeviceChange(size_t id);
+    bool CheckSourceTypeChange(SourceType type, bool isAxis = false);
     void CleanAll();
 private:
     void HandleAcceptDisposal(const RefPtr<NGGestureRecognizer>& recognizer);
@@ -126,6 +126,8 @@ private:
     std::unordered_map<size_t, RefPtr<GestureScope>> gestureScopes_;
 
     std::function<void(size_t)> queryStateFunc_;
+    SourceType lastSourceType_ = SourceType::NONE;
+    bool lastIsAxis_ = false;
 };
 
 } // namespace OHOS::Ace::NG
