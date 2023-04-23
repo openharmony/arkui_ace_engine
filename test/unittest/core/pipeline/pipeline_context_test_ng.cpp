@@ -144,6 +144,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg001, TestSize.Level1)
      */
     ASSERT_NE(context_, nullptr);
     bool flagUpdate = false;
+    customNode_->isActive_ = true;
     customNode_->SetUpdateFunction([&flagUpdate]() { flagUpdate = true; });
     context_->AddDirtyCustomNode(customNode_);
 
@@ -153,6 +154,14 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg001, TestSize.Level1)
      */
     context_->FlushDirtyNodeUpdate();
     EXPECT_TRUE(flagUpdate);
+
+    /**
+     * @tc.steps3: Pass a inactive custom node into AddDirtyCustomNode.
+     * @tc.expected: Add custom node to inactive dirty node list.
+     */
+    customNode_->isActive_ = false;
+    context_->AddDirtyCustomNode(customNode_);
+    EXPECT_NE(context_->inactiveDirtyNodes_.find(customNode_->GetId()), context_->inactiveDirtyNodes_.end());
 }
 
 /**

@@ -36,6 +36,12 @@ CustomNode::CustomNode(int32_t nodeId, const std::string& viewKey)
     : UINode(V2::JS_VIEW_ETS_TAG, nodeId, MakeRefPtr<CustomNodePattern>()), viewKey_(viewKey)
 {}
 
+CustomNode::~CustomNode()
+{
+    auto context = PipelineContext::GetCurrentContext();
+    context->EraseInactiveDirtyNode(GetId());
+}
+
 void CustomNode::Build()
 {
     Render();
@@ -69,6 +75,15 @@ void CustomNode::FlushReload()
     Clean();
     renderFunction_ = completeReloadFunc_;
     Render();
+}
+
+void CustomNode::SetActive(bool active, bool isSubtreeRoot)
+{
+    isActive_ = active;
+    if (IsActive() && PipelineContext::GetCurrentContext()->FindInactiveDirtyNodeActive(GetId())) {
+        PipelineContext::GetCurrentContext()->AddDirtyCustomNode(AceType::DynamicCast<UINode>(Claim(this)));
+    }
+    UINode::SetActive(active, isSubtreeRoot);
 }
 
 void CustomNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool forceMeasure, bool forceLayout)

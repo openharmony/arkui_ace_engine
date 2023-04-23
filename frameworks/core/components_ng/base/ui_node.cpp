@@ -521,10 +521,10 @@ void UINode::Build()
     }
 }
 
-void UINode::SetActive(bool active)
+void UINode::SetActive(bool active, bool isSubtreeRoot)
 {
     for (const auto& child : children_) {
-        child->SetActive(active);
+        child->SetActive(active, isSubtreeRoot);
     }
 }
 

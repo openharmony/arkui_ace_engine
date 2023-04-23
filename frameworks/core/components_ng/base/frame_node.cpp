@@ -36,6 +36,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paint_wrapper.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
@@ -563,8 +564,12 @@ void FrameNode::OnVisibleAreaChangeCallback(
     }
 }
 
-void FrameNode::SetActive(bool active)
+void FrameNode::SetActive(bool active, bool isSubtreeRoot)
 {
+    if (!isSubtreeRoot) {
+        UINode::SetActive(active, false);
+        return;
+    }
     bool activeChanged = false;
     if (active && !isActive_) {
         pattern_->OnActive();
@@ -581,6 +586,7 @@ void FrameNode::SetActive(bool active)
         if (parent) {
             parent->MarkNeedSyncRenderTree();
         }
+        UINode::SetActive(active, false);
     }
 }
 

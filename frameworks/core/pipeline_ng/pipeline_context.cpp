@@ -116,9 +116,15 @@ void PipelineContext::AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode)
 {
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(dirtyNode);
-    dirtyNodes_.emplace(dirtyNode);
-    hasIdleTasks_ = true;
-    RequestFrame();
+    auto customNode = AceType::DynamicCast<CustomNodeBase>(dirtyNode);
+    if (dirtyNode->IsActive()) {
+        inactiveDirtyNodes_.erase(dirtyNode->GetId());
+        dirtyNodes_.emplace(dirtyNode);
+        hasIdleTasks_ = true;
+        RequestFrame();
+        return;
+    }
+    inactiveDirtyNodes_.emplace(dirtyNode->GetId());
 }
 
 void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)

@@ -42,7 +42,7 @@ void UINode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool f
 void UINode::GenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList) {}
 void UINode::GenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& allList) {}
 void UINode::Build() {}
-void UINode::SetActive(bool active) {}
+void UINode::SetActive(bool active, bool isSubtreeRoot) {}
 void UINode::OnVisibleChange(bool isVisible) {}
 
 void UINode::AddChild(const RefPtr<UINode>& child, int32_t /* slot */, bool /*silently*/)
