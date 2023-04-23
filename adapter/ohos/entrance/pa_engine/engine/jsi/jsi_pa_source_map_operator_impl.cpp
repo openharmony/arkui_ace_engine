@@ -72,12 +72,12 @@ std::string JsiPaSourceMapOperatorImpl::TranslateBySourceMap(const std::string& 
 
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
         std::string showStackInsertedWithTagStr = "";
-        size_t lastPosOfNextLine = -1;
-        size_t currPosOfNextLine = 0;
+        std::size_t lastPosOfNextLine = -1;
+        std::size_t currPosOfNextLine = 0;
         while (true) {
             lastPosOfNextLine++; // Become the next position at which we start to find the target charactor.
             currPosOfNextLine = showStack.find_first_of("\n", lastPosOfNextLine);
-            if (currPosOfNextLine == -1) {
+            if (currPosOfNextLine == std::string::npos) {
                 break;
             }
             showStackInsertedWithTagStr.append("[Engine Log]")
