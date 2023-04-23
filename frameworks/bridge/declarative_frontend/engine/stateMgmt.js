@@ -1688,7 +1688,7 @@ class DistributedStorage {
 }
 ;
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1701,32 +1701,91 @@ class DistributedStorage {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
 /**
-* @Observed Decorator function, use
+* @Observed class decorator
+*
+* usage:
 *    @Observed class ClassA { ... }
-* when defining ClassA
 *
-* Can also be used to create a new Object and wrap it in
-* ObservedObject by calling
-*   obsObj = Observed(ClassA)(params to ClassA constructor)
+* Causes every instance of decorated clss to be automatically wrapped inside an ObservedObject.
 *
-* Note this works only for classes, not for ClassA[]
-* Also does not work for classes with genetics it seems
-* In that case use factory function
-*   obsObj = ObservedObject.createNew<ClassA[]>([])
+* Implemented by extending the decroaetd class by class named 'ObservableObjectClass'.
+*
+* It is permisstable to decorate the base and the extended class like thisNote: I
+*   @Observed class ClassA { ...}
+*   @Observed class ClassB extends ClassA { ... }
+* and use
+*   a = new ClassA();
+*   b = new ClassB();
+* Only one ES6 Proxy is added.
+*
+*
+* Take note the decorator implementation extends the prototype chain.
+*
+* The prototype chain of a in above example is
+*  - ObservableObjectClass prototype
+*  - ClassA prototype
+*  - Object prototype
+*
+* Snd the prototype chain of b is
+*  - ObservableObjectClass prototype
+*  - ClassB prototype
+*  - ObservableObjectClass prototype
+*  - ClassA prototype
+*  - Object prototype
+*
+* The @Observed decorator is public, part of the SDK, starting from API 9.
+*
 */
-function Observed(target) {
-    var original = target;
-    // the new constructor behaviour
-    var f = function (...args) {
-        
-        return ObservedObject.createNew(new original(...args), undefined);
-        //    return new ObservedObject<C>(new original(...args), undefined);
+// define just once to get just one Symbol
+const __IS_OBSERVED_PROXIED = Symbol("_____is_observed_proxied__");
+function Observed(constructor_, _) {
+    
+    let ObservedClass = class extends constructor_ {
+        constructor(...args) {
+            super(...args);
+            
+            let isProxied = Reflect.has(this, __IS_OBSERVED_PROXIED);
+            Object.defineProperty(this, __IS_OBSERVED_PROXIED, {
+                value: true,
+                enumerable: false,
+                configurable: false,
+                writable: false
+            });
+            if (isProxied) {
+                
+                return this;
+            }
+            else {
+                
+                return ObservedObject.createNewInternal(this, undefined);
+            }
+        }
     };
-    Object.setPrototypeOf(f, Object.getPrototypeOf(original));
-    // return new constructor (will override original)
-    return f;
+    return ObservedClass;
 }
+// force tsc to generate the __decorate data structure needed for @Observed
+// tsc will not generate unless the @Observed class decorator is used at least once
+let __IGNORE_FORCE_decode_GENERATION__ = class __IGNORE_FORCE_decode_GENERATION__ {
+};
+__IGNORE_FORCE_decode_GENERATION__ = __decorate([
+    Observed
+], __IGNORE_FORCE_decode_GENERATION__);
+/**
+ * class ObservedObject and supporting Handler classes,
+ * Extends from ES6 Proxy. In adding to 'get' and 'set'
+ * the clasess manage subscribers that receive notification
+ * about proxies object being 'read' or 'changed'.
+ *
+ * These classes are framework internal / non-SDK
+ *
+ */
 class SubscribableHandler {
     constructor(owningProperty) {
         this.owningProperties_ = new Set();
@@ -1771,9 +1830,13 @@ class SubscribableHandler {
             }
         });
     }
-    get(target, property) {
-        return (property === SubscribableHandler.IS_OBSERVED_OBJECT) ? true :
-            (property === SubscribableHandler.RAW_OBJECT) ? target : target[property];
+    has(target, property) {
+        
+        return (property === ObservedObject.__IS_OBSERVED_OBJECT) ? true : Reflect.has(target, property);
+    }
+    get(target, property, receiver) {
+        
+        return (property === ObservedObject.__OBSERVED_OBJECT_RAW_OBJECT) ? target : Reflect.get(target, property, receiver);
     }
     set(target, property, newValue) {
         switch (property) {
@@ -1783,15 +1846,16 @@ class SubscribableHandler {
                 return true;
                 break;
             case SubscribableHandler.UNSUBSCRIBE:
-                // assignment obsObj[SubscribableHandler.UN_SUBSCRCRIBE] = subscriber
+                // assignment obsObj[SubscribableHandler.UNSUBSCRCRIBE] = subscriber
                 this.removeOwningProperty(newValue);
                 return true;
                 break;
             default:
-                if (target[property] == newValue) {
+                if (Reflect.get(target, property) == newValue) {
                     return true;
                 }
-                target[property] = newValue;
+                
+                Reflect.set(target, property, newValue);
                 this.notifyPropertyHasChanged(property.toString(), newValue);
                 return true;
                 break;
@@ -1800,8 +1864,6 @@ class SubscribableHandler {
         return false;
     }
 }
-SubscribableHandler.IS_OBSERVED_OBJECT = Symbol("_____is_observed_object__");
-SubscribableHandler.RAW_OBJECT = Symbol("_____raw_object__");
 SubscribableHandler.SUBSCRIBE = Symbol("_____subscribe__");
 SubscribableHandler.UNSUBSCRIBE = Symbol("_____unsubscribe__");
 class SubscribableDateHandler extends SubscribableHandler {
@@ -1843,6 +1905,23 @@ class ExtendableProxy {
 }
 class ObservedObject extends ExtendableProxy {
     /**
+     * To create a new ObservableObject use CreateNew function
+     *
+     * constructor create a new ObservableObject and subscribe its owner to propertyHasChanged
+     * notifications
+     * @param obj  raw Object, if obj is a ObservableOject throws an error
+     * @param objectOwner
+     */
+    constructor(obj, handler, objectOwningProperty) {
+        super(obj, handler);
+        if (ObservedObject.IsObservedObject(obj)) {
+            stateMgmtConsole.error("ObservableOject constructor: INTERNAL ERROR: after jsObj is observedObject already");
+        }
+        if (objectOwningProperty != undefined) {
+            this[SubscribableHandler.SUBSCRIBE] = objectOwningProperty;
+        }
+    } // end of constructor
+    /**
      * Factory function for ObservedObjects /
      *  wrapping of objects for proxying
      *
@@ -1855,15 +1934,62 @@ class ObservedObject extends ExtendableProxy {
     static createNew(rawObject, owningProperty) {
         if (rawObject === null || rawObject === undefined) {
             stateMgmtConsole.error(`ObservedObject.CreateNew, input object must not be null or undefined.`);
-            return null;
+            return rawObject;
         }
         if (ObservedObject.IsObservedObject(rawObject)) {
             ObservedObject.addOwningProperty(rawObject, owningProperty);
             return rawObject;
         }
-        else {
-            return new ObservedObject(rawObject, owningProperty);
-        }
+        return ObservedObject.createNewInternal(rawObject, owningProperty);
+    }
+    static createNewInternal(rawObject, owningProperty) {
+        let proxiedObject = new ObservedObject(rawObject, Array.isArray(rawObject) ? new class extends SubscribableHandler {
+            constructor(owningProperty) {
+                super(owningProperty);
+                // In-place array modification functions
+                // splice is also in-place modifying function, but we need to handle separately
+                this.inPlaceModifications = new Set(["copyWithin", "fill", "reverse", "sort"]);
+            }
+            get(target, property, receiver) {
+                let ret = super.get(target, property, receiver);
+                if (ret && typeof ret === "function") {
+                    const self = this;
+                    const prop = property.toString();
+                    // prop is the function name here
+                    if (prop == "splice") {
+                        // 'splice' self modifies the array, but returns a result different from the array
+                        return function () {
+                            const result = ret.apply(target, arguments);
+                            // prop is the function name here
+                            // and result is the function return value
+                            // functinon modifies none or more properties
+                            self.notifyPropertyHasChanged(prop, target);
+                            return result;
+                        }.bind(proxiedObject);
+                    }
+                    if (self.inPlaceModifications.has(prop)) {
+                        // in place modfication function result == target, the raw array modified
+                        return function () {
+                            const result = ret.apply(target, arguments);
+                            // 'result' is the unproxied object               
+                            // functinon modifies none or more properties
+                            self.notifyPropertyHasChanged(prop, result);
+                            // returning the 'proxiedObject' ensures that when chain calls also 2nd function call
+                            // operates on the proxied object.
+                            return proxiedObject;
+                        }.bind(proxiedObject);
+                    }
+                    // binding the proxiedObject ensures that modifying functions like push() operate on the 
+                    // proxied array and each array change is notified.
+                    return ret.bind(proxiedObject);
+                }
+                return ret;
+            }
+        }(owningProperty) // SubscribableArrayHandlerAnonymous
+            : (rawObject instanceof Date)
+                ? new SubscribableDateHandler(owningProperty)
+                : new SubscribableHandler(owningProperty), owningProperty);
+        return proxiedObject;
     }
     /*
       Return the unproxied object 'inside' the ObservedObject / the ES6 Proxy
@@ -1871,7 +1997,7 @@ class ObservedObject extends ExtendableProxy {
       Use with caution, do not store any references
     */
     static GetRawObject(obj) {
-        return !ObservedObject.IsObservedObject(obj) ? obj : obj[SubscribableHandler.RAW_OBJECT];
+        return !ObservedObject.IsObservedObject(obj) ? obj : obj[ObservedObject.__OBSERVED_OBJECT_RAW_OBJECT];
     }
     /**
      *
@@ -1881,10 +2007,18 @@ class ObservedObject extends ExtendableProxy {
      * this static function instead.
      */
     static IsObservedObject(obj) {
-        return obj ? (obj[SubscribableHandler.IS_OBSERVED_OBJECT] === true) : false;
+        return (obj && (typeof obj === "object") && Reflect.has(obj, ObservedObject.__IS_OBSERVED_OBJECT));
     }
+    /**
+     * add a subscriber to given ObservedObject
+     * due to the proxy nature this static method approach needs to be used instead of a member
+     * function
+     * @param obj
+     * @param subscriber
+     * @returns false if given object is not an ObservedObject
+     */
     static addOwningProperty(obj, subscriber) {
-        if (!ObservedObject.IsObservedObject(obj)) {
+        if (!ObservedObject.IsObservedObject(obj) || subscriber == undefined) {
             return false;
         }
         obj[SubscribableHandler.SUBSCRIBE] = subscriber;
@@ -1898,23 +2032,53 @@ class ObservedObject extends ExtendableProxy {
         return true;
     }
     /**
-     * Create a new ObservableObject and subscribe its owner to propertyHasChanged
-     * ntifications
-     * @param obj  raw Object, if obj is a ObservableOject throws an error
-     * @param objectOwner
+     * Utility function for debugging the prototype chain of given Object
+     * The given object can be any Object, it is not required to be an ObservedObject
+     * @param object
+     * @returns multi-line string containing info about the prototype chain
+     * on class in class hiararchy per line
      */
-    constructor(obj, objectOwningProperty) {
-        if (ObservedObject.IsObservedObject(obj)) {
-            throw new Error("Invalid constructor argument error: ObservableObject contructor called with an ObservedObject as parameer");
+    static tracePrototypeChainOfObject(object) {
+        let proto = Object.getPrototypeOf(object);
+        let result = "";
+        let sepa = "";
+        while (proto) {
+            result += `${sepa}${ObservedObject.tracePrototype(proto)}`;
+            proto = Object.getPrototypeOf(proto);
+            sepa = ",\n";
         }
-        let handler = (obj instanceof Date) ? new SubscribableDateHandler(objectOwningProperty)
-            : new SubscribableHandler(objectOwningProperty);
-        super(obj, handler);
-        if (ObservedObject.IsObservedObject(obj)) {
-            stateMgmtConsole.error("ObservableOject constructor: INTERNAL ERROR: after jsObj is observedObject already");
+        return result;
+    }
+    /**
+     * Utility function for debugging all functions of given Prototype.
+     * @returns string containing containing names of all functions and members of given Prototype
+     */
+    static tracePrototype(proto) {
+        if (!proto) {
+            return "";
         }
-    } // end of constructor
+        let result = `${proto.constructor && proto.constructor.name ? proto.constructor.name : '<no class>'}: `;
+        let sepa = "";
+        for (let name of Object.getOwnPropertyNames(proto)) {
+            result += `${sepa}${name}`;
+            sepa = ", ";
+        }
+        ;
+        return result;
+    }
+    /**
+     * @Observed  decorator extends the decorated class. This function returns the prototype of the decorated class
+     * @param proto
+     * @returns prototype of the @Observed decorated class or 'proto' parameter if not  @Observed decorated
+     */
+    static getPrototypeOfObservedClass(proto) {
+        return (proto.constructor && proto.constructor.name == "ObservedClass")
+            ? Object.getPrototypeOf(proto.constructor.prototype)
+            : proto;
+    }
 }
+ObservedObject.__IS_OBSERVED_OBJECT = Symbol("_____is_observed_object__");
+ObservedObject.__OBSERVED_OBJECT_RAW_OBJECT = Symbol("_____raw_object__");
 /*
  * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -3238,6 +3402,7 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
     setWrapperValue(value) {
         let rawValue = ObservedObject.GetRawObject(value);
         let copy;
+        // FIXME: Proper object deep copy missing here!
         if (rawValue instanceof Array) {
             copy = ObservedObject.createNew([...rawValue], this);
         }
