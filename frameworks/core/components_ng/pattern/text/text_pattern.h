@@ -227,6 +227,7 @@ private:
     OffsetF CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight);
     std::string GetSelectedText(int32_t start, int32_t end) const;
     std::wstring GetWideText() const;
+    void UpdateChildProperty(const RefPtr<SpanNode>& child) const;
 
     std::list<RefPtr<SpanItem>> spanItemChildren_;
     std::string textForDisplay_;

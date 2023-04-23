@@ -750,6 +750,7 @@ void TextPattern::BeforeCreateLayoutWrapper()
         auto spanNode = DynamicCast<SpanNode>(current);
         if (spanNode) {
             spanNode->CleanSpanItemChildren();
+            UpdateChildProperty(spanNode);
             spanNode->MountToParagraph();
             textForDisplay_.append(spanNode->GetSpanItem()->content);
             if (spanNode->GetSpanItem()->onClick) {
@@ -820,4 +821,58 @@ void TextPattern::DumpInfo()
         std::string("FontSize: ").append(textLayoutProp->GetFontSize().value_or(16.0_fp).ToString()));
 }
 
+void TextPattern::UpdateChildProperty(const RefPtr<SpanNode>& child) const
+{
+    CHECK_NULL_VOID(child);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textLayoutProp = host->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProp);
+
+    if (!child->HasFontSize() && textLayoutProp->HasFontSize()) {
+        child->UpdateFontSizeWithoutFlushDirty(textLayoutProp->GetFontSize().value());
+    }
+
+    if (!child->HasItalicFontStyle() && textLayoutProp->HasItalicFontStyle()) {
+        child->UpdateItalicFontStyleWithoutFlushDirty(
+            textLayoutProp->GetItalicFontStyle().value());
+    }
+    if (!child->HasFontWeight() && textLayoutProp->HasFontWeight()) {
+        child->UpdateFontWeightWithoutFlushDirty(textLayoutProp->GetFontWeight().value());
+    }
+
+    if (!child->HasTextDecoration() && textLayoutProp->HasTextDecoration()) {
+        child->UpdateTextDecorationWithoutFlushDirty(textLayoutProp->GetTextDecoration().value());
+        if (textLayoutProp->HasTextDecorationColor()) {
+            child->UpdateTextDecorationColorWithoutFlushDirty(
+                textLayoutProp->GetTextDecorationColor().value());
+        }
+    }
+    if (!child->HasTextCase() && textLayoutProp->HasTextCase()) {
+        child->UpdateTextCaseWithoutFlushDirty(textLayoutProp->GetTextCase().value());
+    }
+    if (!child->HasLetterSpacing() && textLayoutProp->HasLetterSpacing()) {
+        child->UpdateLetterSpacingWithoutFlushDirty(textLayoutProp->GetLetterSpacing().value());
+    }
+    if (!child->HasLineHeight() && textLayoutProp->HasLineHeight()) {
+        child->UpdateLineHeightWithoutFlushDirty(textLayoutProp->GetLineHeight().value());
+    }
+    // SpanNode does not hold RenderContext, use FontColor property
+    auto renderContext = host->GetRenderContext();
+    if (!child->HasTextColor()) {
+        if (textLayoutProp->HasTextColor() && renderContext->HasForegroundColor()) {
+            if (renderContext->GetForegroundColor().value() == textLayoutProp->GetTextColor().value()) {
+                child->UpdateTextColorWithoutFlushDirty(textLayoutProp->GetTextColor().value());
+            } else {
+                child->UpdateTextColorWithoutFlushDirty(Color::FOREGROUND);
+            }
+        } else if (renderContext->HasForegroundColorStrategy()) {
+            child->UpdateTextColorWithoutFlushDirty(Color::FOREGROUND);
+        } else if (textLayoutProp->HasTextColor()) {
+            child->UpdateTextColorWithoutFlushDirty(textLayoutProp->GetTextColor().value());
+        } else if (renderContext->HasForegroundColor()) {
+            child->UpdateTextColorWithoutFlushDirty(renderContext->GetForegroundColor().value());
+        }
+    }
+}
 } // namespace OHOS::Ace::NG
