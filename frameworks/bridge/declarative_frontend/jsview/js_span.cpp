@@ -229,6 +229,19 @@ void JSSpan::JsRemoteMessage(const JSCallbackInfo& info)
 #endif
 }
 
+void JSSpan::SetLineHeight(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGI("The argv is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    Dimension value;
+    if (!ParseJsDimensionFp(info[0], value)) {
+        return;
+    }
+    SpanModel::GetInstance()->SetLineHeight(value);
+}
+
 void JSSpan::JSBind(BindingTarget globalObj)
 {
     JSClass<JSSpan>::Declare("Span");
@@ -248,6 +261,7 @@ void JSSpan::JSBind(BindingTarget globalObj)
     JSClass<JSSpan>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSSpan>::StaticMethod("remoteMessage", &JSSpan::JsRemoteMessage);
     JSClass<JSSpan>::StaticMethod("onClick", &JSSpan::JsOnClick);
+    JSClass<JSSpan>::StaticMethod("lineHeight", &JSSpan::SetLineHeight, opt);
     JSClass<JSSpan>::Inherit<JSContainerBase>();
     JSClass<JSSpan>::Inherit<JSViewAbstract>();
     JSClass<JSSpan>::Bind<>(globalObj);
