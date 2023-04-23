@@ -60,8 +60,7 @@ void SelectView::Create(const std::vector<SelectParam>& params)
         pattern->AddOptionNode(option);
     }
 
-    // delete menu when select node is deleted
-    auto eventHub = select->GetEventHub<NG::EventHub>();
+    // delete menu when select node destroy
     auto destructor = [id = select->GetId()]() {
         auto pipeline = NG::PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
@@ -69,7 +68,7 @@ void SelectView::Create(const std::vector<SelectParam>& params)
         CHECK_NULL_VOID(overlayManager);
         overlayManager->DeleteMenu(id);
     };
-    eventHub->SetOnDisappear(destructor);
+    select->PushDestroyCallback(destructor);
 }
 
 void SelectView::SetSelected(int32_t idx)

@@ -523,9 +523,9 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
 
 void OverlayManager::HideAllPopups()
 {
-    LOGI("OverlayManager::HideAllPopups");
+    LOGD("OverlayManager::HideAllPopups");
     if (popupMap_.empty()) {
-        LOGW("OverlayManager: popupMap is empty");
+        LOGD("OverlayManager: popupMap is empty");
         return;
     }
     for (const auto& popup : popupMap_) {
@@ -677,11 +677,7 @@ void OverlayManager::HideMenu(int32_t targetId)
 
 void OverlayManager::HideAllMenus()
 {
-    LOGI("OverlayManager::HideAllMenus");
-    if (menuMap_.empty()) {
-        LOGW("OverlayManager: menuMap is empty");
-        return;
-    }
+    LOGD("OverlayManager::HideAllMenus");
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
     for (const auto& child : rootNode->GetChildren()) {

@@ -73,8 +73,7 @@ void ViewAbstractModelNG::BindMenu(
 
     RegisterMenuDisappearCallback(std::move(buildFunc), menuParam);
 
-    // delete menu when target node is removed from render tree
-    auto eventHub = targetNode->GetEventHub<NG::EventHub>();
+    // delete menu when target node destroy
     auto destructor = [id = targetNode->GetId()]() {
         auto pipeline = NG::PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
@@ -82,7 +81,7 @@ void ViewAbstractModelNG::BindMenu(
         CHECK_NULL_VOID(overlayManager);
         overlayManager->DeleteMenu(id);
     };
-    eventHub->SetOnDisappear(destructor);
+    targetNode->PushDestroyCallback(destructor);
 }
 
 void ViewAbstractModelNG::BindContextMenu(
