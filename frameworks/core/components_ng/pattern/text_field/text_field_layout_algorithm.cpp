@@ -196,7 +196,8 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     }
     preferredHeight = std::min(static_cast<float>(paragraph_->GetHeight()), idealHeight);
     textRect_.SetSize(SizeF(static_cast<float>(paragraph_->GetLongestLine()), static_cast<float>(preferredHeight)));
-    return SizeF(idealWidth - imageSize, std::min(idealHeight, preferredHeight));
+    auto imageHotZoneWidth = imageSize + pattern->GetIconRightOffset();
+    return SizeF(idealWidth - imageHotZoneWidth, std::min(idealHeight, preferredHeight));
 }
 
 void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
