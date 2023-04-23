@@ -229,4 +229,23 @@ void ViewAbstractModelNG::RegisterContextMenuDisappearCallback(const MenuParam& 
         }
     });
 }
+
+void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
+    std::function<void()>&& buildFunc, NG::SheetStyle& sheetStyle)
+{
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(targetNode);
+    auto buildNodeFunc = [buildFunc]() -> RefPtr<UINode> {
+        NG::ScopedViewStackProcessor builderViewStackProcess;
+        buildFunc();
+        auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
+        return customNode;
+    };
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+
+    overlayManager->BindSheet(isShow, std::move(callback), std::move(buildNodeFunc), sheetStyle, targetNode->GetId());
+}
 } // namespace OHOS::Ace::NG
