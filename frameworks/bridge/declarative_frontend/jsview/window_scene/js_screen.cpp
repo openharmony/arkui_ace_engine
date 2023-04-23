@@ -15,6 +15,9 @@
 
 #include "bridge/declarative_frontend/jsview/window_scene/js_screen.h"
 
+#include "session/screen/include/screen_session.h"
+#include "session_manager/include/screen_session_manager.h"
+
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "core/components_ng/pattern/window_scene/screen/screen_model.h"
 
@@ -44,7 +47,18 @@ void JSScreen::Create(const JSCallbackInfo& info)
         return;
     }
 
-    auto screenSession = CreateScreenSessionFromNapiValue(info[0]);
+    if (!info[0]->IsNumber()) {
+        LOGE("The arg is not a number");
+        return;
+    }
+
+    auto screenId = static_cast<Rosen::ScreenId>(info[0]->ToNumber<double>());
+    auto screenSession = Rosen::ScreenSessionManager::GetInstance().GetScreenSession(screenId);
+    if (screenSession == nullptr) {
+        LOGE("screenSession is nullptr");
+        return;
+    }
+
     NG::ScreenModel::Create(screenSession);
 }
 } // namespace OHOS::Ace::Framework

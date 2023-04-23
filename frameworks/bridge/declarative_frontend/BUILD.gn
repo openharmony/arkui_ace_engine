@@ -506,10 +506,10 @@ template("declarative_js_engine") {
           "jsview/window_scene/js_screen.cpp",
         ]
         external_deps += [
-          "input:libmmi-client",
           "window_manager:scene_session",
+          "window_manager:scene_session_manager",
           "window_manager:screen_session",
-          "window_manager:window_scene_napi_packages",
+          "window_manager:screen_session_manager",
         ]
       }
     }
