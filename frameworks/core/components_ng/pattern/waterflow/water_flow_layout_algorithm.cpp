@@ -51,11 +51,13 @@ void WaterFlowLayoutAlgorithm::InitialItemsCrossSize(
     auto padding = layoutProperty->CreatePaddingAndBorder();
     crossPaddingOffset_ = axis_ == Axis::HORIZONTAL ? padding.top.value_or(0) : padding.left.value_or(0);
 
+    auto contentSize = frameSize;
+    MinusPaddingToSize(padding, contentSize);
     std::vector<float> crossLens;
     if (axis_ == Axis::VERTICAL) {
-        crossLens = GridUtils::ParseArgs(columnsTemplate, frameSize.Width(), columnsGap);
+        crossLens = GridUtils::ParseArgs(columnsTemplate, contentSize.Width(), columnsGap);
     } else {
-        crossLens = GridUtils::ParseArgs(rowsTemplate, frameSize.Height(), rowsGap);
+        crossLens = GridUtils::ParseArgs(rowsTemplate, contentSize.Height(), rowsGap);
     }
 
     int32_t index = 0;
@@ -130,7 +132,7 @@ void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto layoutProperty = AceType::DynamicCast<WaterFlowLayoutProperty>(layoutWrapper->GetLayoutProperty());
     for (const auto& mainPositions : layoutInfo_.waterFlowItems_) {
         for (const auto& item : mainPositions.second) {
-            if (item.first < layoutInfo_.startIndex_ || item.first >= layoutInfo_.endIndex_) {
+            if (item.first < layoutInfo_.startIndex_ || item.first > layoutInfo_.endIndex_) {
                 continue;
             }
 

@@ -22,6 +22,16 @@
 #include "frameworks/core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+bool CheckTemplate(const std::string& value)
+{
+    std::vector<std::string> strs;
+    StringUtils::StringSplitter(value, ' ', strs);
+    std::regex reg(R"(\d+(\.\d+)?fr)");
+    return std::all_of(strs.begin(), strs.end(), [reg](const std::string& str) { return std::regex_match(str, reg); });
+}
+} // namespace
+
 void WaterFlowModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -67,11 +77,21 @@ void WaterFlowModelNG::SetScroller(RefPtr<ScrollControllerBase> scroller, RefPtr
 
 void WaterFlowModelNG::SetColumnsTemplate(const std::string& value)
 {
+    if (!CheckTemplate(value) || value.empty()) {
+        LOGE("Columns Template [%{public}s] is not valid.", value.c_str());
+        ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ColumnsTemplate, "1fr");
+        return;
+    }
     ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ColumnsTemplate, value);
 }
 
 void WaterFlowModelNG::SetRowsTemplate(const std::string& value)
 {
+    if (!CheckTemplate(value) || value.empty()) {
+        LOGE("Rows Template [%{public}s] is not valid.", value.c_str());
+        ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, RowsTemplate, "1fr");
+        return;
+    }
     ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, RowsTemplate, value);
 }
 
