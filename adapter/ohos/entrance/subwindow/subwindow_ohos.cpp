@@ -178,6 +178,11 @@ void SubwindowOhos::ResizeWindow()
     LOGI("SubwindowOhos::ResizeWindow");
     auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
     CHECK_NULL_VOID(defaultDisplay);
+    auto ret = window_->Resize(defaultDisplay->GetWidth(), defaultDisplay->GetHeight());
+    if (ret != Rosen::WMError::WM_OK) {
+        LOGE("Resize window by default display failed with errCode: %{public}d", static_cast<int32_t>(ret));
+        return;
+    }
     auto pipeline = GetChildPipelineContext();
     CHECK_NULL_VOID(pipeline);
     SafeAreaEdgeInserts safeArea = pipeline->GetCurrentViewSafeArea();
@@ -546,6 +551,7 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNG(
     auto overlay = context->GetOverlayManager();
     CHECK_NULL_RETURN(overlay, nullptr);
     ShowWindow();
+    ResizeWindow();
     ContainerScope scope(childContainerId_);
     return overlay->ShowDialog(dialogProps, customNode);
 }

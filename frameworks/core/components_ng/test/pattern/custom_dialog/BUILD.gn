@@ -109,8 +109,8 @@ ohos_unittest("custom_dialog_test_ng") {
     "$ace_root/frameworks/core/components_ng/gestures/recognizers/gesture_recognizer.cpp",
 
     # mock
-
     "$ace_root/frameworks/base/test/mock/mock_animatable_dimension.cpp",
+    "$ace_root/frameworks/base/test/mock/mock_subwindow_manager.cpp",
     "$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
     "$ace_root/frameworks/core/animation/test/mock/mock_animator.cpp",
     "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
