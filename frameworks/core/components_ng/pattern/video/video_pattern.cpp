@@ -125,6 +125,7 @@ SizeF CalculateFitScaleDown(const SizeF& videoSize, const SizeF& layoutSize)
 
 SizeF MeasureVideoContentLayout(const SizeF& layoutSize, const RefPtr<VideoLayoutProperty>& layoutProperty)
 {
+    LOGD("Video start measure video content layout.");
     if (!layoutProperty || !layoutProperty->HasVideoSize()) {
         LOGW("VideoSize has not set");
         return layoutSize;
@@ -178,6 +179,14 @@ void VideoPattern::UpdateMediaPlayer()
         }
     }
     PrepareMediaPlayer();
+    UpdateSpeed();
+    UpdateLooping();
+    UpdateMuted();
+    if (isInitialState_ && autoPlay_) {
+        // When video is autoPlay, start playing the video when it is initial state.
+        LOGI("Video set autoPlay, begin start.");
+        Start();
+    }
 }
 
 void VideoPattern::PrepareMediaPlayer()
@@ -191,17 +200,19 @@ void VideoPattern::PrepareMediaPlayer()
 
     if (!mediaPlayer_->IsMediaPlayerValid()) {
         LOGE("Video media player is invalid.");
-        OnError(ERROR);
+
+        // It need post on ui thread.
+        FireError();
         return;
     }
 
     ResetStatus();
     mediaPlayer_->ResetMediaPlayer();
-    float volume = muted_ ? 0.0f : 1.0f;
-    mediaPlayer_->SetVolume(volume, volume);
     if (!SetSourceForMediaPlayer()) {
         LOGE("Video set source for mediaPlayer failed.");
-        OnError(ERROR);
+        
+        // It need post on ui thread.
+        FireError();
         return;
     }
 
@@ -217,6 +228,7 @@ bool VideoPattern::SetSourceForMediaPlayer()
     auto videoLayoutProperty = GetLayoutProperty<VideoLayoutProperty>();
     auto videoSrc = videoLayoutProperty->GetVideoSource().value();
     src_ = videoSrc;
+    LOGI("Video Set src for media, it is : %{public}s", videoSrc.c_str());
     return mediaPlayer_->SetSource(videoSrc);
 }
 
@@ -408,7 +420,7 @@ void VideoPattern::OnPrepared(double width, double height, uint32_t duration, ui
         eventHub->FirePreparedEvent(param);
     }
     UpdateLooping();
-    SetSpeed();
+    UpdateSpeed();
 
     if (isStop_) {
         isStop_ = false;
@@ -475,7 +487,7 @@ void VideoPattern::UpdateLooping()
     }
 }
 
-void VideoPattern::SetSpeed()
+void VideoPattern::UpdateSpeed()
 {
     if (mediaPlayer_->IsMediaPlayerValid()) {
         LOGI("Video media player set the speed.");
@@ -589,8 +601,16 @@ void VideoPattern::OnModifyDone()
     AddPreviewNodeIfNeeded();
     // Create the control bar
     AddControlBarNodeIfNeeded();
-    UpdateMediaPlayer();
-    UpdateVideoProperty();
+
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
+    platformTask.PostTask([weak = WeakClaim(this)] {
+        auto video = weak.Upgrade();
+        CHECK_NULL_VOID(video);
+        video->UpdateMediaPlayer();
+    });
+
     if (SystemProperties::GetExtSurfaceEnabled()) {
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
@@ -683,7 +703,7 @@ void VideoPattern::UpdateVideoProperty()
         Start();
     }
 
-    SetSpeed();
+    UpdateSpeed();
     UpdateLooping();
     UpdateMuted();
 }
@@ -704,6 +724,7 @@ void VideoPattern::OnRebuildFrame()
 bool VideoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     if (config.skipMeasure || dirty->SkipMeasureContent()) {
+        LOGD("Video skill measure.");
         return false;
     }
 
@@ -713,9 +734,16 @@ bool VideoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     auto videoNodeOffset = geometryNode->GetContentOffset();
     auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
+    LOGD("Video node offset is %{public}s, size is %{public}s", videoNodeOffset.ToString().c_str(),
+        videoNodeSize.ToString().c_str());
     auto videoFrameSize = MeasureVideoContentLayout(videoNodeSize, layoutProperty);
     // Change the surface layout for drawing video frames
     renderContextForMediaPlayer_->SetBounds(
+        videoNodeOffset.GetX() + (videoNodeSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
+        videoNodeOffset.GetY() + (videoNodeSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE,
+        videoFrameSize.Width(), videoFrameSize.Height());
+    LOGD("Video renderContext for mediaPlayer position x is %{public}lf,y is %{public}lf,width is %{public}lf,height "
+         "is %{public}lf.",
         videoNodeOffset.GetX() + (videoNodeSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
         videoNodeOffset.GetY() + (videoNodeSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE,
         videoFrameSize.Width(), videoFrameSize.Height());
@@ -1020,6 +1048,20 @@ void VideoPattern::Stop()
     LOGD("Video Stop");
     mediaPlayer_->Stop();
     isStop_ = true;
+}
+
+void VideoPattern::FireError()
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+
+    // OnError function must be excuted on ui, so get the uiTaskExecutor.
+    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    uiTaskExecutor.PostTask([weak = WeakClaim(this)] {
+        auto videoPattern = weak.Upgrade();
+        CHECK_NULL_VOID(videoPattern);
+        videoPattern->OnError("");
+    });
 }
 
 void VideoPattern::ChangePlayButtonTag()
