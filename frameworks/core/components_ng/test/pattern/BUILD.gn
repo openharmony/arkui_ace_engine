@@ -31,7 +31,7 @@ group("pattern_unittest") {
     "dialog:dialog_pattern_test_ng",
     "divider:divider_pattern_test_ng",
     "dragBar:dragBar_pattern_test_ng",
-    "flex:flex_pattern_unit_test",
+    "flex:flex_test_ng",
     "focusHub:focusHub_pattern_test_ng",
     "form:form_pattern_test_ng",
     "gauge:gauge_pattern_test_ng",
