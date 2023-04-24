@@ -26,12 +26,9 @@ void JSScreen::JSBind(BindingTarget globalObj)
 {
     JSClass<JSScreen>::Declare("Screen");
     JSClass<JSScreen>::StaticMethod("create", &JSScreen::Create, MethodOptions::NONE);
-    JSClass<JSScreen>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
-    JSClass<JSScreen>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
-    JSClass<JSScreen>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
-    JSClass<JSScreen>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
-    JSClass<JSScreen>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+
     JSClass<JSScreen>::Inherit<JSViewAbstract>();
+    JSClass<JSScreen>::Inherit<JSInteractableView>();
     JSClass<JSScreen>::Bind(globalObj);
 }
 

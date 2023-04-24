@@ -57,7 +57,7 @@ build_component_ng("window_scene") {
       "ipc:ipc_core",
       "window_manager:scene_session",
       "window_manager:scene_session_manager",
-      "window_manager:screen_session"
+      "window_manager:screen_session",
     ]
   }
 }

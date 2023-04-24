@@ -18,7 +18,6 @@
 #include "session/container/include/extension_session_stage.h"
 
 namespace OHOS::Ace::NG {
-
 extern "C" ACE_EXPORT void* OHOS_ACE_CreateWindowExtension(const std::shared_ptr<AbilityRuntime::Context>& context,
     const sptr<Rosen::ISession>& iSession)
 {
@@ -33,5 +32,4 @@ WindowExtension::WindowExtension(const std::shared_ptr<AbilityRuntime::Context>&
 {
     sessionStage_ = new Rosen::ExtensionSessionStage(iSession);
 }
-
 } // namespace OHOS::Ace::NG

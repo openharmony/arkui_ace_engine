@@ -21,7 +21,6 @@
 #include "core/components_ng/pattern/window_scene/scene/container/window_pattern.h"
 
 namespace OHOS::Ace::NG {
-
 class RootScene : public WindowPattern {
     DECLARE_ACE_TYPE(RootScene, WindowPattern);
 
@@ -46,7 +45,6 @@ private:
 
     ACE_DISALLOW_COPY_AND_MOVE(RootScene);
 };
-
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_ROOT_SCENE_H

@@ -19,7 +19,6 @@
 #include "core/components_ng/pattern/window_scene/scene/host/host_window_pattern.h"
 
 namespace OHOS::Ace::NG {
-
 class HostWindowExtension : public HostWindowPattern {
     DECLARE_ACE_TYPE(HostWindowExtension, HostWindowPattern);
 
@@ -50,7 +49,6 @@ protected:
 private:
     ACE_DISALLOW_COPY_AND_MOVE(HostWindowExtension);
 };
-
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_HOST_WINDOW_EXTENSION_H

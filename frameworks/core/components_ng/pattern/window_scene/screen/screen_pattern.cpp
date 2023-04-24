@@ -15,7 +15,6 @@
 
 #include "core/components_ng/pattern/window_scene/screen/screen_pattren.h"
 
-#include "display_info.h"
 #include "input_manager.h"
 #include "ipc_skeleton.h"
 #include "ui/rs_display_node.h"
@@ -101,13 +100,14 @@ void ScreenPattern::UpdateDisplayInfo()
         .flags = 0  // touchable
     };
 
+    constexpr int32_t dpi = 240; // to get dpi
     MMI::DisplayInfo displayInfo = {
         .id = screenId,
         .x = screenBounds.rect_.left_,
         .y = screenBounds.rect_.top_,
         .width = screenBounds.rect_.width_,
         .height = screenBounds.rect_.height_,
-        .dpi = 240, // TODO: get dpi
+        .dpi = dpi,
         .name = "display" + std::to_string(screenId),
         .uniq = "default" + std::to_string(screenId),
         .direction = ConvertDegreeToMMIRotation(screenRotation)

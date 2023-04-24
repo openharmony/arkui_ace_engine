@@ -193,8 +193,8 @@ void WindowPattern::UpdateViewportConfig(const Rect& rect, Rosen::WindowSizeChan
     ViewportConfig config;
     config.SetPosition(rect.Left(), rect.Top());
     config.SetSize(rect.Width(), rect.Height());
-    // TODO: get display density
-    config.SetDensity(1.5);
+    constexpr float density = 1.5; // to get display density
+    config.SetDensity(density);
     CHECK_NULL_VOID(uiContent_);
     uiContent_->UpdateViewportConfig(config, reason);
 }

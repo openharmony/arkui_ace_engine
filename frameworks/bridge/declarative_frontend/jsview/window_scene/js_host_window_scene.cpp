@@ -26,12 +26,9 @@ void JSHostWindowScene::JSBind(BindingTarget globalObj)
 {
     JSClass<JSHostWindowScene>::Declare("HostWindowScene");
     JSClass<JSHostWindowScene>::StaticMethod("create", &JSHostWindowScene::Create, MethodOptions::NONE);
-    JSClass<JSHostWindowScene>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
-    JSClass<JSHostWindowScene>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
-    JSClass<JSHostWindowScene>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
-    JSClass<JSHostWindowScene>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
-    JSClass<JSHostWindowScene>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+
     JSClass<JSHostWindowScene>::Inherit<JSViewAbstract>();
+    JSClass<JSHostWindowScene>::Inherit<JSInteractableView>();
     JSClass<JSHostWindowScene>::Bind(globalObj);
 }
 

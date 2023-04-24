@@ -21,7 +21,6 @@
 #include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
-
 class ACE_EXPORT HostWindowNode : public FrameNode {
     DECLARE_ACE_TYPE(HostWindowNode, FrameNode);
 
@@ -39,6 +38,6 @@ public:
 
     void DispatchPointerEvent(const TouchEvent& point) const;
 };
-
 } // namespace OHOS::Ace::NG
+
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_SCENE_HOST_WINDOW_NODE_H

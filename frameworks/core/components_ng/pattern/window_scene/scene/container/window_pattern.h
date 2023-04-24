@@ -22,8 +22,6 @@
 #include "ui/rs_ui_director.h"
 #include "ui_window.h"
 
-#include "session/container/include/session_stage.h"
-
 #include "core/common/window.h"
 #include "core/components_ng/pattern/pattern.h"
 

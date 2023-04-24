@@ -19,7 +19,6 @@
 #include "core/components_ng/pattern/window_scene/scene/container/window_pattern.h"
 
 namespace OHOS::Ace::NG {
-
 class WindowExtension : public WindowPattern {
     DECLARE_ACE_TYPE(WindowExtension, WindowPattern);
 
@@ -31,7 +30,6 @@ public:
 private:
     ACE_DISALLOW_COPY_AND_MOVE(WindowExtension);
 };
-
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_EXTENSION_H
