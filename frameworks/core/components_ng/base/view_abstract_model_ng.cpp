@@ -36,7 +36,9 @@ void ViewAbstractModelNG::BindMenu(
 #ifdef ENABLE_DRAG_FRAMEWORK
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true);
 #endif // ENABLE_DRAG_FRAMEWORK
-    auto overlayManager = NG::PipelineContext::GetCurrentContext()->GetOverlayManager();
+    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto overlayManager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     RegisterMenuAppearCallback(params, std::move(buildFunc), menuParam);
 
@@ -182,7 +184,9 @@ void ViewAbstractModelNG::BindContentCover(
 void ViewAbstractModelNG::RegisterMenuAppearCallback(
     std::vector<NG::OptionParam>& params, std::function<void()>&& buildFunc, const MenuParam& menuParam)
 {
-    auto overlayManager = NG::PipelineContext::GetCurrentContext()->GetOverlayManager();
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     if (!params.empty() || buildFunc) {
         overlayManager->RegisterOnShowMenu([menuParam]() {
@@ -195,14 +199,15 @@ void ViewAbstractModelNG::RegisterMenuAppearCallback(
 
 void ViewAbstractModelNG::RegisterMenuDisappearCallback(std::function<void()>&& buildFunc, const MenuParam& menuParam)
 {
-    auto overlayManager = NG::PipelineContext::GetCurrentContext()->GetOverlayManager();
-    if (overlayManager) {
-        overlayManager->RegisterOnHideMenu([menuParam]() {
-            if (menuParam.onDisappear) {
-                menuParam.onDisappear();
-            }
-        });
-    }
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->RegisterOnHideMenu([menuParam]() {
+        if (menuParam.onDisappear) {
+            menuParam.onDisappear();
+        }
+    });
 }
 
 void ViewAbstractModelNG::RegisterContextMenuAppearCallback(ResponseType type, const MenuParam& menuParam)
