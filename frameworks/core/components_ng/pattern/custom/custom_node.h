@@ -33,7 +33,7 @@ public:
     static RefPtr<CustomNode> CreateCustomNode(int32_t nodeId, const std::string& viewKey);
 
     CustomNode(int32_t nodeId, const std::string& viewKey);
-    ~CustomNode() override;
+    ~CustomNode() override = default;
 
     void AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool forceMeasure, bool forceLayout) override;
 
@@ -63,8 +63,6 @@ public:
         completeReloadFunc_ = std::move(func);
     }
     void FlushReload();
-
-    void SetActive(bool active, bool isSubtreeRoot = true) override;
 
 private:
     std::string viewKey_;

@@ -41,7 +41,7 @@ bool FrameNode::OnRemoveFromParent()
     return false;
 }
 void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& dirty) {}
-void FrameNode::SetActive(bool active, bool isSubtreeRoot)
+void FrameNode::SetActive(bool active)
 {
     isActive_ = active;
 }
