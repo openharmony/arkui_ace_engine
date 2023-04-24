@@ -224,4 +224,11 @@ void SelectView::SetArrowPosition(const ArrowPosition value)
     CHECK_NULL_VOID(pattern);
     pattern->SetArrowPosition(value);
 }
+
+void SelectView::SetMenuAlign(const MenuAlign& menuAlign)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetMenuAlign(menuAlign);
+}
 } // namespace OHOS::Ace::NG

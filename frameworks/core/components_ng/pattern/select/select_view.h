@@ -24,12 +24,22 @@
 #include "core/components_ng/pattern/select/select_event_hub.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 
-
 namespace OHOS::Ace::NG {
 
 enum class ArrowPosition {
     END = 0,
     START,
+};
+
+enum class MenuAlignType {
+    START = 0,
+    CENTER,
+    END,
+};
+
+struct MenuAlign {
+    MenuAlignType alignType = MenuAlignType::START;
+    DimensionOffset offset = DimensionOffset(Dimension(0, DimensionUnit::VP), Dimension(0, DimensionUnit::VP));
 };
 
 // pair<value, icon>
@@ -64,6 +74,7 @@ public:
     static void SetOnSelect(SelectEvent&& onSelect);
     static void SetSpace(const Dimension& value);
     static void SetArrowPosition(const ArrowPosition value);
+    static void SetMenuAlign(const MenuAlign& menuAlign);
 };
 
 } // namespace OHOS::Ace::NG

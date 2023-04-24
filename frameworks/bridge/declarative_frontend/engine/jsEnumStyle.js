@@ -1484,3 +1484,10 @@ var ImageSpanAlignment;
   ImageSpanAlignment[ImageSpanAlignment["BOTTOM"] = 3] = "BOTTOM";
   ImageSpanAlignment[ImageSpanAlignment["BASELINE"] = 4] = "BASELINE";
 })(ImageSpanAlignment || (ImageSpanAlignment = {}));
+
+var MenuAlignType ;
+(function (MenuAlignType ) {
+  MenuAlignType[MenuAlignType["START"] = 0] = "START";
+  MenuAlignType[MenuAlignType["CENTER"] = 1] = "CENTER";
+  MenuAlignType[MenuAlignType["END"] = 2] = "END";
+})(MenuAlignType  || (MenuAlignType  = {}));

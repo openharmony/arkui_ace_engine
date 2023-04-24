@@ -732,6 +732,28 @@ void SelectPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         json->Put("optionFont", optionPattern->InspectorGetFont().c_str());
         json->Put("optionFontColor", optionPattern->GetFontColor().ColorToString().c_str());
     }
+    ToJsonOptionAlign(json);
+}
+
+void SelectPattern::ToJsonOptionAlign(std::unique_ptr<JsonValue>& json) const
+{
+    auto optionAlignJson = JsonUtil::Create(true);
+    std::string alignTypeString = "MenuAlignType.Start";
+    if (menuAlign_.alignType == MenuAlignType::START) {
+        alignTypeString = "MenuAlignType.Start";
+    } else if (menuAlign_.alignType == MenuAlignType::CENTER) {
+        alignTypeString = "MenuAlignType.Center";
+    } else if (menuAlign_.alignType == MenuAlignType::END) {
+        alignTypeString = "MenuAlignType.End";
+    }
+    optionAlignJson->Put("alignType", alignTypeString.c_str());
+
+    auto offsetValueJson = JsonUtil::Create(true);
+    offsetValueJson->Put("dX", menuAlign_.offset.GetX().Value());
+    offsetValueJson->Put("dY", menuAlign_.offset.GetY().Value());
+    optionAlignJson->Put("offset", offsetValueJson);
+
+    json->Put("menuAlign", optionAlignJson);
 }
 
 std::string SelectPattern::InspectorGetOptions() const
@@ -813,5 +835,16 @@ std::string SelectPattern::GetValue()
     auto textProps = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textProps, "");
     return textProps->GetContentValue("");
+}
+
+void SelectPattern::SetMenuAlign(const MenuAlign& menuAlign)
+{
+    menuAlign_ = menuAlign;
+    auto menu = GetMenuNode();
+    CHECK_NULL_VOID(menu);
+    auto menuLayoutProps = menu->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(menuLayoutProps);
+    menuLayoutProps->UpdateAlignType(menuAlign.alignType);
+    menuLayoutProps->UpdateOffset(menuAlign.offset);
 }
 } // namespace OHOS::Ace::NG
