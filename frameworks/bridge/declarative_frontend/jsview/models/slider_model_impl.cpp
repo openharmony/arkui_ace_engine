@@ -108,7 +108,7 @@ void SliderModelImpl::SetShowSteps(bool value)
     CHECK_NULL_VOID(slider);
     slider->SetShowSteps(value);
 }
-void SliderModelImpl::SetShowTips(bool value)
+void SliderModelImpl::SetShowTips(bool value, const std::optional<std::string>& content)
 {
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto slider = AceType::DynamicCast<SliderComponent>(component);

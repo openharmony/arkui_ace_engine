@@ -44,14 +44,22 @@ public:
         auto paintParameters = UpdateContentParameters();
         if (!sliderContentModifier_) {
             sliderContentModifier_ =
-                AceType::MakeRefPtr<SliderContentModifier>(paintParameters, [this]() { LayoutImageNode(); });
+                AceType::MakeRefPtr<SliderContentModifier>(paintParameters, [weak = WeakClaim(this)]() {
+                    auto pattern = weak.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    pattern->LayoutImageNode();
+                });
         }
-        SliderPaintMethod::TipParameters tipParameters { bubbleSize_, bubbleOffset_, textOffset_, bubbleFlag_ };
+        SliderPaintMethod::TipParameters tipParameters { bubbleFlag_, circleCenter_ };
         if (!sliderTipModifier_ && bubbleFlag_) {
-            sliderTipModifier_ = AceType::MakeRefPtr<SliderTipModifier>();
+            sliderTipModifier_ = AceType::MakeRefPtr<SliderTipModifier>([weak = WeakClaim(this)]() {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_RETURN(pattern, OffsetF());
+                return pattern->GetBlockCenter();
+            });
         }
-        return MakeRefPtr<SliderPaintMethod>(sliderContentModifier_, paintParameters, sliderLength_, borderBlank_,
-            sliderTipModifier_, paragraph_, tipParameters);
+        return MakeRefPtr<SliderPaintMethod>(
+            sliderContentModifier_, paintParameters, sliderLength_, borderBlank_, sliderTipModifier_, tipParameters);
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -180,10 +188,6 @@ private:
 
     // tip Parameters
     bool bubbleFlag_ = false;
-    RefPtr<Paragraph> paragraph_;
-    SizeF bubbleSize_;
-    OffsetF bubbleOffset_;
-    OffsetF textOffset_;
     RefPtr<SliderTipModifier> sliderTipModifier_;
 
     RefPtr<FrameNode> imageFrameNode_;
