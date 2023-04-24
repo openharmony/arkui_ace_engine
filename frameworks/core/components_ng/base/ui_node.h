@@ -217,11 +217,6 @@ public:
         return isInDestroying_;
     }
 
-    bool IsActive() const
-    {
-        return isActive_;
-    }
-
     void SetChildrenInDestroying();
 
     virtual HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
@@ -271,7 +266,7 @@ public:
 
     virtual void OnNotifyMemoryLevel(int32_t level) {}
 
-    virtual void SetActive(bool active, bool isSubtreeRoot = true);
+    virtual void SetActive(bool active);
 
     virtual void OnVisibleChange(bool isVisible);
 
@@ -399,7 +394,6 @@ protected:
     virtual void OnDetachFromMainTree(bool recursive = false);
 
     bool isRemoving_ = false;
-    bool isActive_ = false;
     // return value: return true if node has disappearing transition
     virtual bool OnRemoveFromParent();
 

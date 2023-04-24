@@ -107,8 +107,6 @@ void PipelineContext::SetRootRect(double width, double height, double offset) {}
 
 void PipelineContext::SetGetViewSafeAreaImpl(std::function<SafeAreaEdgeInserts()>&& callback) {}
 
-void PipelineContext::AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode) {}
-
 SafeAreaEdgeInserts PipelineContext::GetCurrentViewSafeArea() const
 {
     return {};
