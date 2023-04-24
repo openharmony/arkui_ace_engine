@@ -145,6 +145,18 @@ void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentN
     contentRenderContext->SetClipToBounds(true);
 }
 
+RefPtr<FrameNode> CreateDialogScroll()
+{
+    auto scroll = FrameNode::CreateFrameNode(
+        V2::SCROLL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ScrollPattern>());
+    CHECK_NULL_RETURN(scroll, nullptr);
+    auto props = scroll->GetLayoutProperty<ScrollLayoutProperty>();
+    props->UpdateAxis(Axis::VERTICAL);
+    props->UpdateAlignment(Alignment::CENTER_LEFT);
+
+    return scroll;
+}
+
 void DialogPattern::BuildChild(const DialogProperties& props)
 {
     LOGI("build dialog child");
@@ -177,7 +189,12 @@ void DialogPattern::BuildChild(const DialogProperties& props)
     if (!props.content.empty()) {
         auto content = BuildContent(props);
         CHECK_NULL_VOID(content);
-        contentColumn->AddChild(content);
+        // create a scroll
+        auto scroll = CreateDialogScroll();
+        CHECK_NULL_VOID(scroll);
+        content->MountToParent(scroll);
+        scroll->MountToParent(contentColumn);
+        scroll->MarkModifyDone();
     }
 
     if (!props.customStyle) {
@@ -199,6 +216,7 @@ void DialogPattern::BuildChild(const DialogProperties& props)
         auto sheetContainer = BuildSheet(props.sheetsInfo);
         CHECK_NULL_VOID(sheetContainer);
         sheetContainer->MountToParent(contentColumn);
+        // scrollable
         sheetContainer->MarkModifyDone();
     }
 
