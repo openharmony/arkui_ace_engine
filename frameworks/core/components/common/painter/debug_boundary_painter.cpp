@@ -56,7 +56,7 @@ void DebugBoundaryPainter::PaintDebugMargin(SkCanvas* canvas, const Offset& offs
     auto verticalRectHeight = layoutSize.Height() - margin.TopPx() - margin.BottomPx();
     skpaint.setColor(BOUNDARY_MARGIN_COLOR);
     skpaint.setStyle(SkPaint::Style::kFill_Style);
-    
+
     auto layoutRect = SkRect::MakeXYWH(startPointX, startPointY,
         layoutSize.Width(), margin.TopPx());
     canvas->drawRect(layoutRect, skpaint);

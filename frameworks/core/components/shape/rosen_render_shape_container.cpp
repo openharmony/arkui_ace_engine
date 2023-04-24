@@ -16,7 +16,7 @@
 #include "frameworks/core/components/shape/rosen_render_shape_container.h"
 
 #include "render_service_client/core/ui/rs_node.h"
-#include "third_party/bounds_checking_function/include/securec.h"
+#include "securec.h"
 
 #include "frameworks/core/components/transform/rosen_render_transform.h"
 
@@ -259,7 +259,7 @@ void RosenRenderShapeContainer::DrawBitmapMesh(SkBitmap& bitmap, int column, int
     sk_sp<SkImage> image = SkImage::MakeFromBitmap(bitmap);
 #ifdef USE_SYSTEM_SKIA
     shader = image->makeShader(SkShader::kClamp_TileMode, SkShader::kClamp_TileMode);
-#elif defined NEW_SKIA
+#elif defined(NEW_SKIA)
     shader = image->makeShader(SkTileMode::kClamp, SkTileMode::kClamp, SkSamplingOptions());
 #else
     shader = image->makeShader(SkTileMode::kClamp, SkTileMode::kClamp);

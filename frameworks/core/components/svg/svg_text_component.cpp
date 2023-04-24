@@ -15,7 +15,7 @@
 
 #include "frameworks/core/components/svg/svg_text_component.h"
 
-#include "frameworks/core/components/svg/flutter_render_svg_text.h"
+#include "frameworks/core/components/svg/render_svg_text.h"
 #include "frameworks/core/components/svg/svg_text_element.h"
 
 namespace OHOS::Ace {

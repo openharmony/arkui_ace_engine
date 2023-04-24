@@ -15,7 +15,11 @@
 
 #include "core/image/image_provider.h"
 
+#ifdef NEW_SKIA
+#include "modules/svg/include/SkSVGDOM.h"
+#else
 #include "experimental/svg/model/SkSVGDOM.h"
+#endif
 #include "image_compressor.h"
 #include "include/core/SkGraphics.h"
 #include "include/core/SkStream.h"
@@ -464,7 +468,7 @@ sk_sp<SkImage> ImageProvider::ApplySizeToSkImage(
             srcKey.c_str(), dstWidth, dstHeight, rawImage->width(), rawImage->height());
         return rawImage;
     }
-#ifdef FLUTTER_2_5
+#if defined(NEW_SKIA) || defined(FLUTTER_2_5)
     if (!rawImage->scalePixels(scaledBitmap.pixmap(), SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kNone),
             SkImage::kDisallow_CachingHint)) {
 #else

@@ -16,10 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_IMAGE_ROSEN_RENDER_IMAGE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_IMAGE_ROSEN_RENDER_IMAGE_H
 
-#ifndef NEW_SKIA
-#include "experimental/svg/model/SkSVGDOM.h"
-#else
+#ifdef NEW_SKIA
 #include "modules/svg/include/SkSVGDOM.h"
+#else
+#include "experimental/svg/model/SkSVGDOM.h"
 #endif
 
 #include "core/components/image/render_image.h"
@@ -90,7 +90,7 @@ protected:
     bool MaybeRelease() override;
     void ClearRenderObject() override;
     void LayoutImageObject() override;
-    void* GetSkImage() override 
+    void* GetSkImage() override
     {
         return reinterpret_cast<void *>(&image_);
     }

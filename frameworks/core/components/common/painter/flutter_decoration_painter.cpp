@@ -25,7 +25,7 @@
 #ifndef NEW_SKIA
 #include "include/effects/SkBlurImageFilter.h"
 #else
-#include "third_party/skia/include/effects/SkImageFilters.h"
+#include "include/effects/SkImageFilters.h"
 #endif
 #include "include/effects/SkDashPathEffect.h"
 #include "include/effects/SkGradientShader.h"
@@ -764,7 +764,7 @@ void FlutterDecorationPainter::PaintBorderImage(SkPaint& paint, const Offset& of
             return;
         }
         canvas->save();
-        
+
         BorderImagePainter borderImagePainter(paintSize_, decoration_, image, dipScale_);
         borderImagePainter.InitPainter();
         borderImagePainter.PaintBorderImage(offset + margin_.GetOffsetInPx(dipScale_), canvas, paint);

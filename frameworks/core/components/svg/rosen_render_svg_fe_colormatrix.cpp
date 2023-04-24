@@ -15,9 +15,12 @@
 
 #include "frameworks/core/components/svg/rosen_render_svg_fe_colormatrix.h"
 
-#include "include/effects/SkColorFilterImageFilter.h"
-#include "include/core/SkColorFilter.h"
 #include "include/effects/SkImageFilters.h"
+#ifndef NEW_SKIA
+#include "include/effects/SkColorFilterImageFilter.h"
+#else
+#include "include/core/SkColorFilter.h"
+#endif
 
 namespace OHOS::Ace {
 

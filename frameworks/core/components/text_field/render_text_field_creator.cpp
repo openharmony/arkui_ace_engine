@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
+#ifndef NEW_SKIA
 #include "flutter_render_text_field.h"
+#endif
 #include "rosen_render_text_field.h"
 
 namespace OHOS::Ace {
@@ -26,7 +28,11 @@ RefPtr<RenderNode> RenderTextField::Create()
         return nullptr;
 #endif
     } else {
+#ifndef NEW_SKIA
         return AceType::MakeRefPtr<FlutterRenderTextField>();
+#else
+        return nullptr;
+#endif
     }
 }
 } // namespace OHOS::Ace

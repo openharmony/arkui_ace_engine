@@ -172,7 +172,11 @@ bool RosenRenderSvgPolygon::GetPath(SkPath* out)
         }
     }
     if (fillState_.IsEvenodd()) {
+#ifndef NEW_SKIA
         out->setFillType(SkPath::FillType::kEvenOdd_FillType);
+#else
+        out->setFillType(SkPathFillType::kEvenOdd);
+#endif
     }
     return true;
 }
@@ -189,7 +193,11 @@ bool RosenRenderSvgPolygon::GetPathWithoutAnimate(SkPath* out)
     }
     out->addPoly(&skPoints[0], skPoints.size(), isClose_);
     if (fillState_.IsEvenodd()) {
+#ifndef NEW_SKIA
         out->setFillType(SkPath::FillType::kEvenOdd_FillType);
+#else
+        out->setFillType(SkPathFillType::kEvenOdd);
+#endif
     }
     return true;
 }

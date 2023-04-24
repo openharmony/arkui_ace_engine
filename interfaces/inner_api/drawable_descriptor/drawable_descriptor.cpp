@@ -18,11 +18,14 @@
 #include <cstddef>
 #include <memory>
 
-#include "SkBlendMode.h"
-#include "SkCanvas.h"
-#include "SkImage.h"
-#include "SkPaint.h"
-#include "SkRect.h"
+#include "include/core/SkBlendMode.h"
+#include "include/core/SkCanvas.h"
+#ifdef NEW_SKIA
+#include "include/core/SkSamplingOptions.h"
+#endif
+#include "include/core/SkImage.h"
+#include "include/core/SkPaint.h"
+#include "include/core/SkRect.h"
 #include "cJSON.h"
 #include "image_source.h"
 
@@ -250,14 +253,23 @@ bool LayeredDrawableDescriptor::CreatePixelMap()
     auto rect2 = SkRect::MakeXYWH(0, 0, static_cast<float>(background->width()),
         static_cast<float>(background->height()));
     paint.setBlendMode(SkBlendMode::kDstATop);
+#ifndef NEW_SKIA
     bitmapCanvas.drawImageRect(SkImage::MakeFromBitmap(*mask), rect1, rect2, &paint);
-
+#else
+    bitmapCanvas.drawImageRect(SkImage::MakeFromBitmap(*mask), rect1, rect2, SkSamplingOptions(),
+        &paint, SkCanvas::kFast_SrcRectConstraint);
+#endif
     rect1 = SkRect::MakeWH(static_cast<float>(foreground->width()), static_cast<float>(foreground->height()));
     auto x = static_cast<float>((background->width() - foreground->width()) / 2);
     auto y = static_cast<float>((background->height() - foreground->height()) / 2);
     rect2 = SkRect::MakeXYWH(x, y, static_cast<float>(foreground->width()), static_cast<float>(foreground->height()));
     paint.setBlendMode(SkBlendMode::kSrcATop);
+#ifndef NEW_SKIA
     bitmapCanvas.drawImageRect(SkImage::MakeFromBitmap(*foreground), rect1, rect2, &paint);
+#else
+    bitmapCanvas.drawImageRect(SkImage::MakeFromBitmap(*foreground), rect1, rect2, SkSamplingOptions(),
+        &paint, SkCanvas::kFast_SrcRectConstraint);
+#endif
     SkBitmap result;
     result.allocPixels(background->info());
     bitmapCanvas.readPixels(result, 0, 0);
