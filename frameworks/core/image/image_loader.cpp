@@ -614,8 +614,7 @@ sk_sp<SkData> SharedMemoryImageLoader::LoadImageData(
     CHECK_RUN_ON(BG);
     auto pipeline = pipelineWk.Upgrade();
     CHECK_NULL_RETURN(pipeline, nullptr);
-    auto manager = pipeline->GetSharedImageManager();
-    CHECK_NULL_RETURN(manager, nullptr);
+    auto manager = pipeline->GetOrCreateSharedImageManager();
     auto id = RemovePathHead(src.GetSrc());
     bool found = manager->FindImageInSharedImageMap(id, AceType::WeakClaim(this));
     // image data not ready yet, wait for data
@@ -625,6 +624,7 @@ sk_sp<SkData> SharedMemoryImageLoader::LoadImageData(
         std::unique_lock<std::mutex> lock(mtx_);
         auto status = cv_.wait_for(lock, TIMEOUT_DURATION);
         if (status == std::cv_status::timeout) {
+            LOGW("load SharedMemoryImage timeout! %{public}s", src.ToString().c_str());
             return nullptr;
         }
     }
