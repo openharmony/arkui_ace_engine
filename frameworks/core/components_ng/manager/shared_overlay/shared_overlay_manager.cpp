@@ -286,7 +286,7 @@ bool SharedOverlayManager::AboardShuttle(const RefPtr<SharedTransitionEffect>& e
 void SharedOverlayManager::GetOffShuttle(const RefPtr<SharedTransitionEffect>& effect)
 {
     CHECK_NULL_VOID(effect);
-    LOGD("get off shuttle. id: %{public}s", effect->GetShareId().c_str());
+    LOGI("get off shuttle. id: %{public}s", effect->GetShareId().c_str());
     auto passenger = effect->GetPassengerNode().Upgrade();
     CHECK_NULL_VOID(passenger);
     sharedManager_->RemoveChild(passenger);
