@@ -1206,8 +1206,7 @@ bool JsiDeclarativeEngine::LoadJsWithModule(std::string& urlName,
 {
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, false);
-
-    if (!container->IsBundle()) {
+    if (container->IsModule()) {
         const std::string assetPath = ASSET_PATH_PREFIX +
             container->GetModuleName() + "/" + FORM_ES_MODULE_PATH;
         auto runtime = std::static_pointer_cast<ArkJSRuntime>(engineInstance_->GetJsRuntime());
