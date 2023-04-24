@@ -26,19 +26,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<ListItemGroupModel> ListItemGroupModel::instance_ = nullptr;
+std::mutex ListItemGroupModel::mutex_;
 
 ListItemGroupModel* ListItemGroupModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::ListItemModelNG());
+            instance_.reset(new NG::ListItemModelNG());
 #else
-        if (Container::IsCurrentUseNewPipeline()) {
-            instance_.reset(new NG::ListItemGroupModelNG());
-        } else {
-            instance_.reset(new Framework::ListItemGroupModelImpl());
-        }
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::ListItemGroupModelNG());
+            } else {
+                instance_.reset(new Framework::ListItemGroupModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }

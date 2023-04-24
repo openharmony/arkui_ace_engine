@@ -26,19 +26,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<SliderModel> SliderModel::instance_ = nullptr;
+std::mutex SliderModel::mutex_;
 
 SliderModel* SliderModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::SliderModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::SliderModelNG());
-        } else {
-            instance_.reset(new Framework::SliderModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::SliderModelNG());
+            } else {
+                instance_.reset(new Framework::SliderModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }

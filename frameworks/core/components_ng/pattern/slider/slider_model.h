@@ -18,6 +18,7 @@
 
 #include <functional>
 #include <memory>
+#include <mutex>
 
 #include "base/geometry/axis.h"
 #include "base/geometry/size.h"
@@ -69,6 +70,7 @@ public:
 
 private:
     static std::unique_ptr<SliderModel> instance_;
+    static std::mutex mutex_;
 };
 
 } // namespace OHOS::Ace

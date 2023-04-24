@@ -30,19 +30,23 @@ constexpr int FOR_DIMENSION_BOX_CALCULATE_MULTIPLY_TWO = 2;
 } // namespace
 
 std::unique_ptr<RadioModel> RadioModel::instance_ = nullptr;
+std::mutex RadioModel::mutex_;
 
 RadioModel* RadioModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::RadioModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::RadioModelNG());
-        } else {
-            instance_.reset(new Framework::RadioModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::RadioModelNG());
+            } else {
+                instance_.reset(new Framework::RadioModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }

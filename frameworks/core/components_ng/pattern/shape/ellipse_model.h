@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_ELLIPSE_ELLIPSE_MODEL_H
 
 #include <memory>
+#include <mutex>
 
 namespace OHOS::Ace {
 class EllipseModel {
@@ -28,6 +29,7 @@ public:
 
 private:
     static std::unique_ptr<EllipseModel> instance_;
+    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_ELLIPSE_ELLIPSE_MODEL_H

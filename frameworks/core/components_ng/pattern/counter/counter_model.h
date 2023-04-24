@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_COUNTER_COUNTER_MODEL_H
 
 #include <functional>
+#include <mutex>
 
 #include "base/geometry/dimension.h"
 #include "base/utils/macros.h"
@@ -44,6 +45,7 @@ public:
 
 private:
     static std::unique_ptr<CounterModel> instance_;
+    static std::mutex mutex_;
 };
 
 } // namespace OHOS::Ace

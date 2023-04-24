@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
+#include <mutex>
 #include <optional>
 #include <vector>
 
@@ -239,6 +240,7 @@ public:
     virtual void UpdateAnimatablePropertyFloat(const std::string& propertyName, float value) = 0;
 private:
     static std::unique_ptr<ViewAbstractModel> instance_;
+    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
 

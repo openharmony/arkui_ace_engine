@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LINEAR_SPLIT_LINEAR_SPLIT_MODEL_H
 
 #include <memory>
+#include <mutex>
 
 #include "base/memory/referenced.h"
 
@@ -41,6 +42,7 @@ public:
 
 private:
     static std::unique_ptr<LinearSplitModel> instance_;
+    static std::mutex mutex_;
 };
 
 } // namespace OHOS::Ace

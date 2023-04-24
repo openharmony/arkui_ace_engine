@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_RECT_RECT_MODEL_H
 
 #include <memory>
+#include <mutex>
 
 #include "core/components/common/properties/clip_path.h"
 #include "core/components/shape/shape_component.h"
@@ -41,6 +42,7 @@ protected:
 
 private:
     static std::unique_ptr<RectModel> instance_;
+    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_RECT_RECT_MODEL_H

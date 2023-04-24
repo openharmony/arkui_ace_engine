@@ -30,19 +30,23 @@ namespace {
 constexpr float CHECK_BOX_GROUP_MARK_SIZE_INVALID_VALUE = -1.0f;
 }
 std::unique_ptr<CheckBoxGroupModel> CheckBoxGroupModel::instance_ = nullptr;
+std::mutex CheckBoxGroupModel::mutex_;
 
 CheckBoxGroupModel* CheckBoxGroupModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::CheckBoxGroupModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::CheckBoxGroupModelNG());
-        } else {
-            instance_.reset(new Framework::CheckBoxGroupModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::CheckBoxGroupModelNG());
+            } else {
+                instance_.reset(new Framework::CheckBoxGroupModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }
