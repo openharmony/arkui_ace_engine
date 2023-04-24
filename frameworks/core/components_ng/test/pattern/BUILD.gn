@@ -57,7 +57,7 @@ group("pattern_unittest") {
     "patternlock:patternlock_pattern_test_ng",
     "picker:picker_test_ng",
     "plugin:plugin_pattern_test_ng",
-    "progress:progress_pattern_test_ng",
+    "progress:progress_test_ng",
     "qrcode:qrcode_pattern_test_ng",
     "radio:radio_test_ng",
     "rating:rating_pattern_test_ng",
