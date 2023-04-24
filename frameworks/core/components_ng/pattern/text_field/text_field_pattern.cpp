@@ -480,10 +480,6 @@ void TextFieldPattern::UpdateCaretPositionByTextEdit()
         SetCaretOffsetForEmptyTextOrPositionZero();
         return;
     }
-    if (textEditingValue_.caretPosition == 0) {
-        SetCaretOffsetForEmptyTextOrPositionZero();
-        return;
-    }
     UpdateCaretRectByPosition(textEditingValue_.caretPosition);
     UpdateSelection(textEditingValue_.caretPosition);
 }
