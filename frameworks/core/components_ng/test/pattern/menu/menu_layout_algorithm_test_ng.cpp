@@ -37,6 +37,12 @@ namespace {
 constexpr float FULL_SCREEN_WIDTH = 720.0f;
 constexpr float FULL_SCREEN_HEIGHT = 1136.0f;
 constexpr float POSITION_OFFSET = 100.0f;
+constexpr float TARGET_SIZE_WIDTH = 100.0f;
+constexpr float TARGET_SIZE_HEIGHT = 100.0f;
+constexpr float MENU_SIZE_WIDTH = 150.0f;
+constexpr float MENU_SIZE_HEIGHT = 150.0f;
+constexpr double MENU_OFFSET_X = 10.0;
+constexpr double MENU_OFFSET_Y = 10.0;
 const SizeF FULL_SCREEN_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 
 class MenuLayoutAlgorithmTestNg : public testing::Test {
@@ -299,7 +305,7 @@ HWTEST_F(MenuLayoutAlgorithmTestNg, MenuLayoutAlgorithmTestNg012, TestSize.Level
     std::vector<OptionParam> optionParams;
     optionParams.emplace_back("MenuItem1", "", nullptr);
     optionParams.emplace_back("MenuItem2", "", nullptr);
-    MenuParam menuParam = {"", {POSITION_OFFSET, POSITION_OFFSET}};
+    MenuParam menuParam = { "", { POSITION_OFFSET, POSITION_OFFSET } };
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
@@ -331,6 +337,145 @@ HWTEST_F(MenuLayoutAlgorithmTestNg, MenuLayoutAlgorithmTestNg012, TestSize.Level
     EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
     layoutAlgorithm->Layout(&layoutWrapper);
     EXPECT_EQ(geometryNode->GetMarginFrameOffset(), OffsetF(POSITION_OFFSET, POSITION_OFFSET));
+}
+
+/**
+ * @tc.name: MenuLayoutAlgorithmTestNg013
+ * @tc.desc: Verify ComputeMenuPositionByAlignType.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayoutAlgorithmTestNg, MenuLayoutAlgorithmTestNg013, TestSize.Level1)
+{
+    std::vector<SelectParam> selectParams;
+    selectParams.emplace_back(std::make_pair("MenuItem1", "Icon1"));
+    selectParams.emplace_back(std::make_pair("MenuItem2", "Icon2"));
+
+    auto menuWrapperNode = MenuView::Create(std::move(selectParams), 1);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto property = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    SizeF targetSize(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT);
+    property->UpdateTargetSize(targetSize);
+
+    RefPtr<MenuLayoutAlgorithm> menuLayoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
+    ASSERT_NE(menuLayoutAlgorithm, nullptr);
+
+    SizeF menuSize(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT);
+    menuLayoutAlgorithm->position_ = OffsetF(0, 0);
+    property->UpdateAlignType(MenuAlignType::START);
+    menuLayoutAlgorithm->ComputeMenuPositionByAlignType(property, menuSize);
+    EXPECT_EQ(menuLayoutAlgorithm->position_.GetX(), 0);
+
+    menuLayoutAlgorithm->position_ = OffsetF(0, 0);
+    property->UpdateAlignType(MenuAlignType::CENTER);
+    menuLayoutAlgorithm->ComputeMenuPositionByAlignType(property, menuSize);
+    float expectResult = -25.0f;
+    EXPECT_EQ(menuLayoutAlgorithm->position_.GetX(), expectResult);
+
+    menuLayoutAlgorithm->position_ = OffsetF(0, 0);
+    property->UpdateAlignType(MenuAlignType::END);
+    menuLayoutAlgorithm->ComputeMenuPositionByAlignType(property, menuSize);
+    expectResult = -50.0f;
+    EXPECT_EQ(menuLayoutAlgorithm->position_.GetX(), expectResult);
+}
+
+/**
+ * @tc.name: MenuLayoutAlgorithmTestNg014
+ * @tc.desc: Verify ComputeMenuPositionByOffset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayoutAlgorithmTestNg, MenuLayoutAlgorithmTestNg014, TestSize.Level1)
+{
+    std::vector<SelectParam> selectParams;
+    selectParams.emplace_back(std::make_pair("MenuItem1", "Icon1"));
+    selectParams.emplace_back(std::make_pair("MenuItem2", "Icon2"));
+
+    auto menuWrapperNode = MenuView::Create(std::move(selectParams), 1);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto property = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = FULL_SCREEN_SIZE;
+    parentLayoutConstraint.percentReference = FULL_SCREEN_SIZE;
+    parentLayoutConstraint.selfIdealSize.SetSize(SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    property->UpdateLayoutConstraint(parentLayoutConstraint);
+
+    RefPtr<MenuLayoutAlgorithm> menuLayoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
+    ASSERT_NE(menuLayoutAlgorithm, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT));
+
+    property->UpdateOffset(
+        DimensionOffset(Dimension(MENU_OFFSET_X, DimensionUnit::VP), Dimension(MENU_OFFSET_Y, DimensionUnit::VP)));
+    auto resultOffset = menuLayoutAlgorithm->ComputeMenuPositionByOffset(property, geometryNode);
+    EXPECT_EQ(resultOffset, OffsetF(MENU_OFFSET_X, MENU_OFFSET_Y));
+
+    resultOffset = menuLayoutAlgorithm->ComputeMenuPositionByOffset(nullptr, geometryNode);
+    EXPECT_EQ(resultOffset, OffsetF(0.0, 0.0));
+
+    resultOffset = menuLayoutAlgorithm->ComputeMenuPositionByOffset(property, nullptr);
+    EXPECT_EQ(resultOffset, OffsetF(0.0, 0.0));
+}
+
+/**
+ * @tc.name: MenuLayoutAlgorithmTestNg015
+ * @tc.desc: Verify ComputeMenuPositionByOffset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayoutAlgorithmTestNg, MenuLayoutAlgorithmTestNg015, TestSize.Level1)
+{
+    std::vector<SelectParam> selectParams;
+    selectParams.emplace_back(std::make_pair("MenuItem1", "Icon1"));
+    selectParams.emplace_back(std::make_pair("MenuItem2", "Icon2"));
+
+    auto menuWrapperNode = MenuView::Create(std::move(selectParams), 1);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto property = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = FULL_SCREEN_SIZE;
+    parentLayoutConstraint.percentReference = FULL_SCREEN_SIZE;
+    parentLayoutConstraint.selfIdealSize.SetSize(SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    property->UpdateLayoutConstraint(parentLayoutConstraint);
+
+    RefPtr<MenuLayoutAlgorithm> menuLayoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
+    ASSERT_NE(menuLayoutAlgorithm, nullptr);
+
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    menuPattern->isSelectMenu_ = true;
+    SizeF size(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT);
+
+    auto resultOffset = menuLayoutAlgorithm->MenuLayoutAvoidAlgorithm(nullptr, menuPattern, size);
+    EXPECT_EQ(resultOffset, OffsetF(0.0, 0.0));
+
+    resultOffset = menuLayoutAlgorithm->MenuLayoutAvoidAlgorithm(property, nullptr, size);
+    EXPECT_EQ(resultOffset, OffsetF(0.0, 0.0));
+
+    property->UpdateMenuPlacement(Placement::RIGHT);
+    menuLayoutAlgorithm->targetSize_ = SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT);
+    resultOffset = menuLayoutAlgorithm->MenuLayoutAvoidAlgorithm(property, menuPattern, size);
+    float expectOffsetX = -150.0f;
+    float expectOffsetY = -150.0f;
+    EXPECT_EQ(resultOffset, OffsetF(expectOffsetX, expectOffsetY));
+
+    property->ResetMenuPlacement();
+    resultOffset = menuLayoutAlgorithm->MenuLayoutAvoidAlgorithm(property, menuPattern, size);
+    EXPECT_EQ(resultOffset, OffsetF(expectOffsetX, expectOffsetY));
+
+    menuPattern->type_ = MenuType::CONTEXT_MENU;
+    resultOffset = menuLayoutAlgorithm->MenuLayoutAvoidAlgorithm(property, menuPattern, size);
+    EXPECT_EQ(resultOffset, OffsetF(expectOffsetX, expectOffsetY));
 }
 } // namespace
 } // namespace OHOS::Ace::NG
