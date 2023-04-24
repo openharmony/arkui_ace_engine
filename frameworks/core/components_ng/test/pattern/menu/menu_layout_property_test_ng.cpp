@@ -220,13 +220,12 @@ HWTEST_F(MenuLayoutPropertyTestNg, MenuLayoutPropertyTestNg009, TestSize.Level1)
 
     auto json = JsonUtil::Create(true);
     property.ToJsonValue(json);
+    auto fontJsonObject = json->GetObject("font");
     EXPECT_EQ(json->GetString("title"), "title");
     EXPECT_EQ(json->GetString("offset"), OffsetF(25.0f, 30.0f).ToString());
     EXPECT_EQ(json->GetString("fontSize"), Dimension(25.0f).ToString());
     EXPECT_EQ(json->GetString("fontColor"), Color::RED.ColorToString());
-    std::unique_ptr<JsonValue> fontPtr = json->GetValue("font");
-    ASSERT_NE(fontPtr.get(), nullptr);
-    EXPECT_EQ(fontPtr->GetString("weight"), V2::ConvertWrapFontWeightToStirng(FontWeight::BOLD));
+    EXPECT_EQ(fontJsonObject->GetString("weight"), V2::ConvertWrapFontWeightToStirng(FontWeight::BOLD));
 }
 
 /**
@@ -272,6 +271,9 @@ HWTEST_F(MenuLayoutPropertyTestNg, MenuLayoutPropertyTestNg011, TestSize.Level1)
 {
     MenuLayoutProperty property;
     EXPECT_FALSE(property.GetAlignType().has_value());
+    /**
+     * @tc.cases: case1. verify the alignType property.
+     */
     property.UpdateAlignType(MenuAlignType::CENTER);
     ASSERT_TRUE(property.GetAlignType().has_value());
     EXPECT_EQ(property.GetAlignType().value(), MenuAlignType::CENTER);
@@ -287,6 +289,9 @@ HWTEST_F(MenuLayoutPropertyTestNg, MenuLayoutPropertyTestNg012, TestSize.Level1)
     MenuLayoutProperty property;
     EXPECT_FALSE(property.GetOffset().has_value());
     DimensionOffset offset(Dimension(MENU_OFFSET_X, DimensionUnit::VP), Dimension(MENU_OFFSET_Y, DimensionUnit::VP));
+    /**
+     * @tc.cases: case1. verify the offset property.
+     */
     property.UpdateOffset(offset);
     ASSERT_TRUE(property.GetOffset().has_value());
     EXPECT_EQ(property.GetOffset().value(), offset);

@@ -282,6 +282,9 @@ void ScrollablePattern::SetScrollBar(const std::unique_ptr<ScrollBarProperty>& p
             scrollBar_->SetNormalWidth(barWidth.value());
             scrollBar_->SetActiveWidth(barWidth.value());
             scrollBar_->SetTouchWidth(barWidth.value());
+            scrollBar_->SetIsUserNormalWidth(true);
+        } else {
+            scrollBar_->SetIsUserNormalWidth(false);
         }
     }
 }

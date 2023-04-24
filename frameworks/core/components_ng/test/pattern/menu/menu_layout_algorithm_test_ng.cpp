@@ -349,7 +349,7 @@ HWTEST_F(MenuLayoutAlgorithmTestNg, MenuLayoutAlgorithmTestNg013, TestSize.Level
     std::vector<SelectParam> selectParams;
     selectParams.emplace_back(std::make_pair("MenuItem1", "Icon1"));
     selectParams.emplace_back(std::make_pair("MenuItem2", "Icon2"));
-
+    // create select menu
     auto menuWrapperNode = MenuView::Create(std::move(selectParams), 1);
     ASSERT_NE(menuWrapperNode, nullptr);
     ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
@@ -363,18 +363,27 @@ HWTEST_F(MenuLayoutAlgorithmTestNg, MenuLayoutAlgorithmTestNg013, TestSize.Level
     RefPtr<MenuLayoutAlgorithm> menuLayoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
     ASSERT_NE(menuLayoutAlgorithm, nullptr);
 
+    /**
+     * @tc.cases: case1. the menu align type is start.
+     */
     SizeF menuSize(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT);
     menuLayoutAlgorithm->position_ = OffsetF(0, 0);
     property->UpdateAlignType(MenuAlignType::START);
     menuLayoutAlgorithm->ComputeMenuPositionByAlignType(property, menuSize);
     EXPECT_EQ(menuLayoutAlgorithm->position_.GetX(), 0);
 
+    /**
+     * @tc.cases: case2. the menu align type is center.
+     */
     menuLayoutAlgorithm->position_ = OffsetF(0, 0);
     property->UpdateAlignType(MenuAlignType::CENTER);
     menuLayoutAlgorithm->ComputeMenuPositionByAlignType(property, menuSize);
     float expectResult = -25.0f;
     EXPECT_EQ(menuLayoutAlgorithm->position_.GetX(), expectResult);
 
+    /**
+     * @tc.cases: case3. the menu align type is end.
+     */
     menuLayoutAlgorithm->position_ = OffsetF(0, 0);
     property->UpdateAlignType(MenuAlignType::END);
     menuLayoutAlgorithm->ComputeMenuPositionByAlignType(property, menuSize);
@@ -392,7 +401,7 @@ HWTEST_F(MenuLayoutAlgorithmTestNg, MenuLayoutAlgorithmTestNg014, TestSize.Level
     std::vector<SelectParam> selectParams;
     selectParams.emplace_back(std::make_pair("MenuItem1", "Icon1"));
     selectParams.emplace_back(std::make_pair("MenuItem2", "Icon2"));
-
+    // create select menu
     auto menuWrapperNode = MenuView::Create(std::move(selectParams), 1);
     ASSERT_NE(menuWrapperNode, nullptr);
     ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
@@ -412,14 +421,23 @@ HWTEST_F(MenuLayoutAlgorithmTestNg, MenuLayoutAlgorithmTestNg014, TestSize.Level
     ASSERT_NE(geometryNode, nullptr);
     geometryNode->SetFrameSize(SizeF(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT));
 
+    /**
+     * @tc.cases: case1. parameter is valid, return the valid offset.
+     */
     property->UpdateOffset(
         DimensionOffset(Dimension(MENU_OFFSET_X, DimensionUnit::VP), Dimension(MENU_OFFSET_Y, DimensionUnit::VP)));
     auto resultOffset = menuLayoutAlgorithm->ComputeMenuPositionByOffset(property, geometryNode);
     EXPECT_EQ(resultOffset, OffsetF(MENU_OFFSET_X, MENU_OFFSET_Y));
 
+    /**
+     * @tc.cases: case2. parameter property is nullptr, return OffsetF(0.0, 0.0).
+     */
     resultOffset = menuLayoutAlgorithm->ComputeMenuPositionByOffset(nullptr, geometryNode);
     EXPECT_EQ(resultOffset, OffsetF(0.0, 0.0));
 
+    /**
+     * @tc.cases: case3. parameter geometryNode is nullptr, return OffsetF(0.0, 0.0).
+     */
     resultOffset = menuLayoutAlgorithm->ComputeMenuPositionByOffset(property, nullptr);
     EXPECT_EQ(resultOffset, OffsetF(0.0, 0.0));
 }
@@ -435,6 +453,7 @@ HWTEST_F(MenuLayoutAlgorithmTestNg, MenuLayoutAlgorithmTestNg015, TestSize.Level
     selectParams.emplace_back(std::make_pair("MenuItem1", "Icon1"));
     selectParams.emplace_back(std::make_pair("MenuItem2", "Icon2"));
 
+    // create select menu
     auto menuWrapperNode = MenuView::Create(std::move(selectParams), 1);
     ASSERT_NE(menuWrapperNode, nullptr);
     ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
@@ -456,12 +475,21 @@ HWTEST_F(MenuLayoutAlgorithmTestNg, MenuLayoutAlgorithmTestNg015, TestSize.Level
     menuPattern->isSelectMenu_ = true;
     SizeF size(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT);
 
+    /**
+     * @tc.cases: case1. parameter property is nullptr, return OffsetF(0.0, 0.0).
+     */
     auto resultOffset = menuLayoutAlgorithm->MenuLayoutAvoidAlgorithm(nullptr, menuPattern, size);
     EXPECT_EQ(resultOffset, OffsetF(0.0, 0.0));
 
+    /**
+     * @tc.cases: case2. parameter menuPattern is nullptr, return OffsetF(0.0, 0.0).
+     */
     resultOffset = menuLayoutAlgorithm->MenuLayoutAvoidAlgorithm(property, nullptr, size);
     EXPECT_EQ(resultOffset, OffsetF(0.0, 0.0));
 
+    /**
+     * @tc.cases: case3. menu property has placement value and has targetSize.
+     */
     property->UpdateMenuPlacement(Placement::RIGHT);
     menuLayoutAlgorithm->targetSize_ = SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT);
     resultOffset = menuLayoutAlgorithm->MenuLayoutAvoidAlgorithm(property, menuPattern, size);
@@ -469,10 +497,16 @@ HWTEST_F(MenuLayoutAlgorithmTestNg, MenuLayoutAlgorithmTestNg015, TestSize.Level
     float expectOffsetY = -150.0f;
     EXPECT_EQ(resultOffset, OffsetF(expectOffsetX, expectOffsetY));
 
+    /**
+     * @tc.cases: case4. menu property not has placement value and is select menu.
+     */
     property->ResetMenuPlacement();
     resultOffset = menuLayoutAlgorithm->MenuLayoutAvoidAlgorithm(property, menuPattern, size);
     EXPECT_EQ(resultOffset, OffsetF(expectOffsetX, expectOffsetY));
 
+    /**
+     * @tc.cases: case5. menu property not has placement value and is context menu.
+     */
     menuPattern->type_ = MenuType::CONTEXT_MENU;
     resultOffset = menuLayoutAlgorithm->MenuLayoutAvoidAlgorithm(property, menuPattern, size);
     EXPECT_EQ(resultOffset, OffsetF(expectOffsetX, expectOffsetY));

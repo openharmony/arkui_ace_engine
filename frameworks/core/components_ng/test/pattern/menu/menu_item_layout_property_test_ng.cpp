@@ -326,21 +326,19 @@ HWTEST_F(MenuItemLayoutPropertyTestNg, MenuItemLayoutPropertyTestNg015, TestSize
 
     auto json = JsonUtil::Create(true);
     property.ToJsonValue(json);
+    auto labelFontJson = json->GetObject("labelFont");
+    auto contentFontJson = json->GetObject("contentFont");
     EXPECT_EQ(json->GetString("startIcon"), "start.png");
     EXPECT_EQ(json->GetString("content"), "content");
     EXPECT_EQ(json->GetString("endIcon"), "end.png");
     EXPECT_EQ(json->GetString("labelInfo"), "label");
     EXPECT_EQ(json->GetString("selectIcon"), "select.png");
-    std::unique_ptr<JsonValue> contentFontPtr = json->GetValue("contentFont");
-    ASSERT_NE(contentFontPtr.get(), nullptr);
-    EXPECT_EQ(contentFontPtr->GetString("size"), Dimension(25.0f).ToString());
-    EXPECT_EQ(contentFontPtr->GetString("weight"), V2::ConvertWrapFontWeightToStirng(FontWeight::BOLD));
+    EXPECT_EQ(contentFontJson->GetString("size"), Dimension(25.0f).ToString());
     EXPECT_EQ(json->GetString("contentFontColor"), Color::RED.ColorToString());
-    std::unique_ptr<JsonValue> labelFontPtr = json->GetValue("labelFont");
-    ASSERT_NE(labelFontPtr.get(), nullptr);
-    EXPECT_EQ(labelFontPtr->GetString("size"), Dimension(35.0f).ToString());
-    EXPECT_EQ(labelFontPtr->GetString("weight"), V2::ConvertWrapFontWeightToStirng(FontWeight::LIGHTER));
+    EXPECT_EQ(contentFontJson->GetString("weight"), V2::ConvertWrapFontWeightToStirng(FontWeight::BOLD));
+    EXPECT_EQ(labelFontJson->GetString("size"), Dimension(35.0f).ToString());
     EXPECT_EQ(json->GetString("labelFontColor"), Color::BLUE.ColorToString());
+    EXPECT_EQ(labelFontJson->GetString("weight"), V2::ConvertWrapFontWeightToStirng(FontWeight::LIGHTER));
 }
 
 /**

@@ -160,10 +160,11 @@ HWTEST_F(SelectPropertyTestNg, SelectLayoutPropertyTest003, TestSize.Level1)
  */
 HWTEST_F(SelectPropertyTestNg, SelectSetMenuAlign001, TestSize.Level1)
 {
+    // create mock themeManager
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
-
+    // create select
     std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT, INTERNAL_SOURCE },
         { OPTION_TEXT_2, INTERNAL_SOURCE } };
     SelectView::Create(params);
@@ -174,6 +175,9 @@ HWTEST_F(SelectPropertyTestNg, SelectSetMenuAlign001, TestSize.Level1)
     EXPECT_TRUE(select && select->GetTag() == V2::SELECT_ETS_TAG);
     auto selectPattern = select->GetPattern<SelectPattern>();
     ASSERT_NE(selectPattern, nullptr);
+    /**
+     * @tc.cases: case1. verify the SetMenuAlign function.
+     */
     selectPattern->SetMenuAlign(menuAlign);
     auto menuAlign2 = selectPattern->menuAlign_.alignType;
     auto menuAlign3 = selectPattern->menuAlign_.offset;

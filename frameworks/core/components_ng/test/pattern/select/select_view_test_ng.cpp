@@ -214,14 +214,18 @@ HWTEST_F(SelectViewTestNg, CreateMenu001, TestSize.Level1)
  */
 HWTEST_F(SelectViewTestNg, SelectSetMenuAlign001, TestSize.Level1)
 {
+    // create mock themeManager
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
-
+    // create select
     std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT, INTERNAL_SOURCE },
         { OPTION_TEXT_2, INTERNAL_SOURCE } };
     SelectView::Create(params);
     MenuAlign menuAlign;
+    /**
+     * @tc.cases: case1. verify the SetMenuAlign function.
+     */
     SelectView::SetMenuAlign(menuAlign);
     auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_TRUE(select->GetChildren().empty());
