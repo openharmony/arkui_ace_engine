@@ -2728,6 +2728,7 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
         auto eventHub = parentFrameNode->GetEventHub<SearchEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->UpdateSubmitEvent(textEditingValue_.text);
+        CloseKeyboard(forceCloseKeyboard);
         return;
     }
 
