@@ -232,11 +232,13 @@ void TextPattern::HandleOnCopy()
 {
     CHECK_NULL_VOID(clipboard_);
     if (textSelector_.IsValid() && textSelector_.GetTextStart() == textSelector_.GetTextEnd()) {
+        textSelector_.Update(-1, -1);
         LOGW("Nothing to select");
         return;
     }
     auto value = GetSelectedText(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
     if (value.empty()) {
+        textSelector_.Update(-1, -1);
         LOGW("Copy value is empty");
         return;
     }

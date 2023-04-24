@@ -367,9 +367,15 @@ bool SelectOverlayPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
-    auto textLayoutAlgorithm = DynamicCast<SelectOverlayLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
-    CHECK_NULL_RETURN(textLayoutAlgorithm, false);
-    defaultMenuEndOffset_ = textLayoutAlgorithm->GetDefaultMenuEndOffset();
+    auto selectOverlayLayoutAlgorithm =
+        DynamicCast<SelectOverlayLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_RETURN(selectOverlayLayoutAlgorithm, false);
+    defaultMenuEndOffset_ = selectOverlayLayoutAlgorithm->GetDefaultMenuEndOffset();
+    auto meanuWidth = selectOverlayLayoutAlgorithm->GetMenuWidth();
+    if (meanuWidth.has_value()) {
+        meanuWidth_ = meanuWidth.value();
+    }
+    hasExtensitonMenu_ = selectOverlayLayoutAlgorithm->GetHasExtensitonMenu();
     return true;
 }
 

@@ -35,7 +35,7 @@
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
-enum class MenuType { MENU, CONTEXT_MENU, NAVIGATION_MENU, MULTI_MENU, SUB_MENU };
+enum class MenuType { MENU, CONTEXT_MENU, NAVIGATION_MENU, MULTI_MENU, SUB_MENU, SELECT_OVERLAY_EXTENSION_MENU };
 
 class MenuPattern : public Pattern {
     DECLARE_ACE_TYPE(MenuPattern, Pattern);
@@ -96,6 +96,11 @@ public:
     bool IsSubMenu() const
     {
         return type_ == MenuType::SUB_MENU;
+    }
+
+    bool IsSelectOverlayExtensionMenu() const
+    {
+        return type_ == MenuType::SELECT_OVERLAY_EXTENSION_MENU;
     }
 
     void SetParentMenuItem(const RefPtr<FrameNode>& parentMenuItem)

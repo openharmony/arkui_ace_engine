@@ -104,17 +104,27 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
-    margin_ = static_cast<float>(theme->GetOutPadding().ConvertToPx());
-    optionPadding_ = margin_;
+    if (!menuPattern->IsSelectOverlayExtensionMenu()) {
+        margin_ = static_cast<float>(theme->GetOutPadding().ConvertToPx());
+        optionPadding_ = margin_;
+    } else {
+        optionPadding_ = static_cast<float>(theme->GetOutPadding().ConvertToPx());
+    }
 
     auto constraint = props->GetLayoutConstraint();
     auto wrapperIdealSize =
         CreateIdealSize(constraint.value(), Axis::FREE, props->GetMeasureType(MeasureType::MATCH_PARENT), true);
     wrapperSize_ = wrapperIdealSize;
-    topSpace_ = position_.GetY() - targetSize.Height() - margin_ * 2.0f;
-    bottomSpace_ = wrapperSize_.Height() - position_.GetY() - margin_ * 2.0f;
-    leftSpace_ = position_.GetX();
-    rightSpace_ = wrapperSize_.Width() - leftSpace_;
+    if (menuPattern->IsSelectOverlayExtensionMenu()) {
+        topSpace_ = 0.0f;
+        bottomSpace_ = constraint->maxSize.Height() - position_.GetY();
+        leftSpace_ = Infinity<float>();
+    } else {
+        topSpace_ = position_.GetY() - targetSize.Height() - margin_ * 2.0f;
+        bottomSpace_ = wrapperSize_.Height() - position_.GetY() - margin_ * 2.0f;
+        leftSpace_ = position_.GetX();
+        rightSpace_ = wrapperSize_.Width() - leftSpace_;
+    }
 
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
@@ -296,6 +306,9 @@ void MenuLayoutAlgorithm::UpdateConstraintWidth(LayoutWrapper* layoutWrapper, La
     columnInfo->GetParent()->BuildColumnWidth();
     float minWidth = static_cast<float>(columnInfo->GetWidth(MIN_GRID_COUNTS));
     auto menuPattern = layoutWrapper->GetHostNode()->GetPattern<MenuPattern>();
+    if (menuPattern->IsSelectOverlayExtensionMenu() && minWidth > constraint.maxSize.Width()) {
+        minWidth = constraint.maxSize.Width();
+    }
     constraint.minSize.SetWidth(minWidth);
 
     // set max width
@@ -352,6 +365,12 @@ void MenuLayoutAlgorithm::UpdateConstraintBaseOnOptions(LayoutWrapper* layoutWra
         optionWrapper->Measure(optionConstraint);
         auto childSize = optionWrapper->GetGeometryNode()->GetMarginFrameSize();
         maxChildrenWidth = std::max(maxChildrenWidth, childSize.Width());
+    }
+    if (menuPattern->IsSelectOverlayExtensionMenu()) {
+        maxChildrenWidth = std::min(maxChildrenWidth, optionConstraint.maxSize.Width());
+        UpdateOptionConstraint(optionsLayoutWrapper, maxChildrenWidth);
+        constraint.minSize.SetWidth(maxChildrenWidth);
+        return;
     }
     UpdateOptionConstraint(optionsLayoutWrapper, maxChildrenWidth);
     constraint.minSize.SetWidth(maxChildrenWidth + optionPadding_ * 2.0f);
