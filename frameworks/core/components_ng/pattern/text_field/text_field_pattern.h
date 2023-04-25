@@ -67,7 +67,6 @@ namespace OHOS::Ace::NG {
 
 constexpr Dimension CURSOR_WIDTH = 1.5_vp;
 constexpr Dimension SCROLL_BAR_MIN_HEIGHT = 4.0_vp;
-constexpr uint32_t TEXT_DRAG_OPACITY = 0x66;
 
 enum class SelectionMode { SELECT, SELECT_ALL, NONE };
 

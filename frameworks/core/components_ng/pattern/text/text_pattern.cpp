@@ -28,10 +28,10 @@
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
 #include "core/components_ng/property/property.h"
 #include "core/gestures/gesture_info.h"
-#include "core/pipeline/base/render_context.h"
 
 #ifdef ENABLE_DRAG_FRAMEWORK
 #include "text.h"
@@ -49,9 +49,13 @@ void TextPattern::OnDetachFromFrameNode(FrameNode* node)
 
 void TextPattern::CloseSelectOverlay()
 {
+    textSelector_.Update(-1, -1);
     if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
         selectOverlayProxy_->Close();
     }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 int32_t TextPattern::GetGraphemeClusterLength(int32_t extend) const
@@ -328,20 +332,12 @@ void TextPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub)
 void TextPattern::OnHandleTouchUp()
 {
     CloseSelectOverlay();
-    textSelector_.Update(-1, -1);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void TextPattern::HandleClickEvent(GestureEvent& info)
 {
     if (textSelector_.IsValid()) {
-        textSelector_.Update(-1, -1);
         CloseSelectOverlay();
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
 
     RectF textContentRect = contentRect_;
@@ -355,7 +351,7 @@ void TextPattern::HandleClickEvent(GestureEvent& info)
         CHECK_NULL_VOID(paragraph_);
         auto position = paragraph_->GetHandlePositionForClick(textOffset);
         for (const auto& item : spanItemChildren_) {
-            if (item && position < item->positon) {
+            if (item && position < item->position) {
                 CHECK_NULL_VOID_NOLOG(item->onClick);
                 GestureEvent spanClickinfo = info;
                 EventTarget target = info.GetTarget();
@@ -472,9 +468,6 @@ void TextPattern::HandlePanStart(const GestureEvent& info)
             static_cast<int32_t>(contentRect_.Width() + contentRect_.GetX()),
             contentRect_.Height() + contentRect_.GetY());
         if (dragWindow_) {
-#ifdef ENABLE_DRAG_FRAMEWORK
-            AceEngineExt::GetInstance().DragStartExt();
-#endif
             dragWindow_->SetOffset(static_cast<int32_t>(host->GetPaintRectOffset().GetX() + rect.Left()),
                 static_cast<int32_t>(host->GetPaintRectOffset().GetY() + rect.Top()));
             // draw select text on drag window
@@ -555,6 +548,7 @@ DragDropInfo TextPattern::OnDragStart(const RefPtr<Ace::DragEvent>& event, const
     event->SetData(unifiedData);
 
     AceEngineExt::GetInstance().DragStartExt();
+
     return itemInfo;
 }
 
@@ -676,6 +670,8 @@ void TextPattern::OnModifyDone()
         if (host->IsDraggable()) {
 #ifdef ENABLE_DRAG_FRAMEWORK
             InitDragEvent();
+#else
+            InitPanEvent(gestureEventHub);
 #endif
         }
         InitClickEvent(gestureEventHub);
@@ -785,11 +781,7 @@ void TextPattern::OnVisibleChange(bool isVisible)
 {
     if (!isVisible) {
         if (textSelector_.IsValid()) {
-            textSelector_.Update(-1, -1);
             CloseSelectOverlay();
-            auto host = GetHost();
-            CHECK_NULL_VOID(host);
-            host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         }
     }
 }

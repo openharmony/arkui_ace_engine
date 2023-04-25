@@ -20,6 +20,8 @@
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/paragraph.h"
 
+constexpr uint32_t DRAGGED_TEXT_OPACITY = 0x66;
+
 namespace OHOS::Ace::NG {
 using ParagraphT = std::variant<std::shared_ptr<RSParagraph>, RefPtr<Paragraph>>;
 
