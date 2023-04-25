@@ -74,14 +74,14 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
     auto menuHeight = menuItem->GetGeometryNode()->GetMarginFrameSize().Height();
 
     if (!menuPattern->GetIsVertical()) {
-        const auto& firstHandleRect = info_->firstHandle.paintRect;
+        const auto& secondHandleRect = info_->secondHandle.paintRect;
         if (info_->isSingleHandle) {
             double menuSpacing = menuSpacingBetweenText;
-            menuPosition = OffsetF((firstHandleRect.Left() + firstHandleRect.Right() - menuWidth) / 2.0f,
-                static_cast<float>(firstHandleRect.Top() - menuSpacing - menuHeight));
+            menuPosition = OffsetF((secondHandleRect.Left() + secondHandleRect.Right() - menuWidth) / 2.0f,
+                static_cast<float>(secondHandleRect.Top() - menuSpacing - menuHeight));
         } else {
             double menuSpacing = menuSpacingBetweenText + menuSpacingBetweenHandle;
-            const auto& secondHandleRect = info_->secondHandle.paintRect;
+            const auto& firstHandleRect = info_->firstHandle.paintRect;
             menuPosition = OffsetF((firstHandleRect.Left() + secondHandleRect.Left() - menuWidth) / 2.0f,
                 static_cast<float>(firstHandleRect.Top() - menuSpacing - menuHeight));
         }
@@ -96,7 +96,7 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
         }
         if (LessNotEqual(menuPosition.GetY(), menuHeight)) {
             menuPosition.SetY(
-                static_cast<float>(firstHandleRect.Bottom() + menuSpacingBetweenText + menuSpacingBetweenHandle));
+                static_cast<float>(secondHandleRect.Bottom() + menuSpacingBetweenText + menuSpacingBetweenHandle));
         }
         auto node = layoutWrapper->GetHostNode();
         auto selectOverlayNode = DynamicCast<SelectOverlayNode>(node);
