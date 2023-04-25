@@ -23,9 +23,9 @@
 #include "core/components_ng/event/input_event.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_event_hub.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_ext_surface_callback_client.h"
+#include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
-#include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -71,6 +71,45 @@ OH_NativeXComponent_TouchPointToolType ConvertNativeXComponentTouchToolType(cons
         default:
             return OH_NativeXComponent_TouchPointToolType::OH_NATIVEXCOMPONENT_TOOL_TYPE_UNKNOWN;
     }
+}
+
+OH_NativeXComponent_KeyAction ConvertNativeXComponentKeyAction(const KeyAction& keyAction)
+{
+    switch (keyAction) {
+        case KeyAction::DOWN:
+            return OH_NativeXComponent_KeyAction::OH_NATIVEXCOMPONENT_KEY_ACTION_DOWN;
+        case KeyAction::UP:
+            return OH_NativeXComponent_KeyAction::OH_NATIVEXCOMPONENT_KEY_ACTION_UP;
+        default:
+            return OH_NativeXComponent_KeyAction::OH_NATIVEXCOMPONENT_KEY_ACTION_UNKNOWN;
+    }
+}
+
+OH_NativeXComponent_EventSourceType ConvertNativeXComponentEventSourceType(const SourceType& sourceType)
+{
+    switch (sourceType) {
+        case SourceType::MOUSE:
+            return OH_NativeXComponent_EventSourceType::OH_NATIVEXCOMPONENT_SOURCE_TYPE_MOUSE;
+        case SourceType::TOUCH:
+            return OH_NativeXComponent_EventSourceType::OH_NATIVEXCOMPONENT_SOURCE_TYPE_TOUCHSCREEN;
+        case SourceType::TOUCH_PAD:
+            return OH_NativeXComponent_EventSourceType::OH_NATIVEXCOMPONENT_SOURCE_TYPE_TOUCHPAD;
+        case SourceType::KEYBOARD:
+            return OH_NativeXComponent_EventSourceType::OH_NATIVEXCOMPONENT_SOURCE_TYPE_KEYBOARD;
+        default:
+            return OH_NativeXComponent_EventSourceType::OH_NATIVEXCOMPONENT_SOURCE_TYPE_UNKNOWN;
+    }
+}
+
+OH_NativeXComponent_KeyEvent ConvertNativeXComponentKeyEvent(const KeyEvent& event)
+{
+    OH_NativeXComponent_KeyEvent nativeKeyEvent;
+    nativeKeyEvent.action = ConvertNativeXComponentKeyAction(event.action);
+    nativeKeyEvent.code = static_cast<OH_NativeXComponent_KeyCode>(event.code);
+    nativeKeyEvent.sourceType = ConvertNativeXComponentEventSourceType(event.sourceType);
+    nativeKeyEvent.deviceId = event.deviceId;
+    nativeKeyEvent.timeStamp = event.timeStamp.time_since_epoch().count();
+    return nativeKeyEvent;
 }
 } // namespace
 
@@ -341,6 +380,67 @@ void XComponentPattern::InitEvent()
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     InitMouseEvent(inputHub);
     InitMouseHoverEvent(inputHub);
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    InitFocusEvent(focusHub);
+}
+
+void XComponentPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
+{
+    auto onFocusEvent = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(pattern);
+        return pattern->HandleFocusEvent();
+    };
+    focusHub->SetOnFocusInternal(std::move(onFocusEvent));
+
+    auto onKeyEvent = [weak = WeakClaim(this)](const KeyEvent& event) -> bool {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN_NOLOG(pattern, false);
+        return pattern->HandleKeyEvent(event);
+    };
+    focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
+
+    auto onBlurEvent = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(pattern);
+        return pattern->HandleBlurEvent();
+    };
+    focusHub->SetOnBlurInternal(std::move(onBlurEvent));
+}
+void XComponentPattern::HandleFocusEvent()
+{
+    CHECK_NULL_VOID(nativeXComponent_);
+    CHECK_NULL_VOID(nativeXComponentImpl_);
+    auto* surface = const_cast<void*>(nativeXComponentImpl_->GetSurface());
+    const auto focusEventCallback = nativeXComponentImpl_->GetFocusEventCallback();
+    CHECK_NULL_VOID_NOLOG(focusEventCallback);
+    focusEventCallback(nativeXComponent_.get(), surface);
+}
+
+bool XComponentPattern::HandleKeyEvent(const KeyEvent& event)
+{
+    CHECK_NULL_RETURN(nativeXComponent_, false);
+    CHECK_NULL_RETURN(nativeXComponentImpl_, false);
+
+    OH_NativeXComponent_KeyEvent keyEvent = ConvertNativeXComponentKeyEvent(event);
+    nativeXComponentImpl_->SetKeyEvent(keyEvent);
+
+    auto* surface = const_cast<void*>(nativeXComponentImpl_->GetSurface());
+    const auto keyEventCallback = nativeXComponentImpl_->GetKeyEventCallback();
+    CHECK_NULL_RETURN_NOLOG(keyEventCallback, false);
+    keyEventCallback(nativeXComponent_.get(), surface);
+    return false;
+}
+
+void XComponentPattern::HandleBlurEvent()
+{
+    CHECK_NULL_VOID(nativeXComponent_);
+    CHECK_NULL_VOID(nativeXComponentImpl_);
+    auto* surface = const_cast<void*>(nativeXComponentImpl_->GetSurface());
+    const auto blurEventCallback = nativeXComponentImpl_->GetBlurEventCallback();
+    CHECK_NULL_VOID_NOLOG(blurEventCallback);
+    blurEventCallback(nativeXComponent_.get(), surface);
 }
 
 void XComponentPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
