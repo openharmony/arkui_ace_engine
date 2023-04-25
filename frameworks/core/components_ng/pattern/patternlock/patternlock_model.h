@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_PATTERNLOCK_PATTERNLOCK_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_PATTERNLOCK_PATTERNLOCK_MODEL_H
 
+#include <mutex>
+
 #include "core/components_ng/pattern/patternlock/patternlock_event_hub.h"
 #include "core/components_v2/pattern_lock/pattern_lock_controller.h"
 
@@ -39,6 +41,7 @@ public:
 
 private:
     static std::unique_ptr<PatternLockModel> instance_;
+    static std::mutex mutex_;
 };
 
 } // namespace OHOS::Ace

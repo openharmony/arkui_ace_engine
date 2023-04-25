@@ -25,7 +25,11 @@
 #include "include/core/SkImage.h"
 #include "include/core/SkMaskFilter.h"
 #include "include/effects/Sk1DPathEffect.h"
+#ifndef NEW_SKIA
 #include "include/effects/SkBlurImageFilter.h"
+#else
+#include "include/effects/SkImageFilters.h"
+#endif
 #include "include/effects/SkDashPathEffect.h"
 #include "include/effects/SkGradientShader.h"
 #include "include/utils/SkShadowUtils.h"
@@ -772,8 +776,13 @@ void RosenDecorationPainter::PaintBorderImage(RefPtr<OHOS::Ace::Decoration>& dec
             return;
         }
         canvas->save();
+#ifndef NEW_SKIA
         SkSize skPaintSize = SkSize::Make(SkDoubleToMScalar(paintSize.Width()),
             SkDoubleToMScalar(paintSize.Height()));
+#else
+        SkSize skPaintSize = SkSize::Make(paintSize.Width(),
+            paintSize.Height());
+#endif
         auto shader = CreateGradientShader(gradient, skPaintSize, dipScale);
         paint.setShader(std::move(shader));
 
@@ -1785,7 +1794,11 @@ bool RosenDecorationPainter::GetGradientPaint(SkPaint& paint)
         return false;
     }
 
+#ifndef NEW_SKIA
     SkSize skPaintSize = SkSize::Make(SkDoubleToMScalar(paintSize_.Width()), SkDoubleToMScalar(paintSize_.Height()));
+#else
+    SkSize skPaintSize = SkSize::Make(paintSize_.Width(), paintSize_.Height());
+#endif
     auto shader = CreateGradientShader(gradient, skPaintSize);
     paint.setShader(std::move(shader));
     return true;

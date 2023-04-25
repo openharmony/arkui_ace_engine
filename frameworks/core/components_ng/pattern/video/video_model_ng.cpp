@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,6 +30,7 @@ void VideoModelNG::Create(const RefPtr<VideoControllerV2>& videoController)
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::VIDEO_ETS_TAG, nodeId, [videoController]() { return AceType::MakeRefPtr<VideoPattern>(videoController); });
     stack->Push(frameNode);
+    AddDragFrameNodeToManager();
 }
 
 void VideoModelNG::SetSrc(const std::string& src)
@@ -48,6 +49,12 @@ void VideoModelNG::SetProgressRate(double progressRate)
 void VideoModelNG::SetPosterSourceInfo(const std::string& posterUrl)
 {
     ImageSourceInfo posterSourceInfo(posterUrl);
+    ACE_UPDATE_LAYOUT_PROPERTY(VideoLayoutProperty, PosterImageInfo, posterSourceInfo);
+}
+
+void VideoModelNG::SetPosterSourceByPixelMap(RefPtr<PixelMap>& pixMap)
+{
+    ImageSourceInfo posterSourceInfo(pixMap);
     ACE_UPDATE_LAYOUT_PROPERTY(VideoLayoutProperty, PosterImageInfo, posterSourceInfo);
 }
 
@@ -164,5 +171,17 @@ void VideoModelNG::SetOnFullScreenChange(VideoEventFunc&& onFullScreenChange)
     auto eventHub = frameNode->GetEventHub<VideoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnFullScreenChange(std::move(onFullScreenChange));
+}
+
+void VideoModelNG::AddDragFrameNodeToManager() const
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+
+    dragDropManager->AddDragFrameNode(frameNode);
 }
 } // namespace OHOS::Ace::NG

@@ -15,7 +15,11 @@
 
 #include "frameworks/core/components/svg/rosen_render_svg_fe_composite.h"
 
+#ifndef NEW_SKIA
 #include "include/effects/SkArithmeticImageFilter.h"
+#else
+#include "third_party/skia/include/effects/SkImageFilters.h"
+#endif
 
 namespace OHOS::Ace {
 
@@ -23,8 +27,13 @@ void RosenRenderSvgFeComposite::OnAsImageFilter(const sk_sp<SkImageFilter>& back
     const sk_sp<SkImageFilter>& foreImageFilter, sk_sp<SkImageFilter>& imageFilter) const
 {
     if (operatorType_ == FeOperatorType::FE_ARITHMETIC) {
+#ifndef NEW_SKIA
         imageFilter =
             SkArithmeticImageFilter::Make(k1_, k2_, k3_, k4_, true, backImageFilter, foreImageFilter, nullptr);
+#else
+        imageFilter =
+            SkImageFilters::Arithmetic(k1_, k2_, k3_, k4_, true, backImageFilter, foreImageFilter, nullptr);
+#endif
     } else {
         LOGD("this version skia not support SkBlendImageFilters");
     }

@@ -96,6 +96,8 @@ public:
     MOCK_METHOD1(SetContainerWindow, void(bool isShow));
     MOCK_METHOD1(SetTouchPipeline, void(const WeakPtr<PipelineBase>& context));
     MOCK_METHOD2(AddEtsCardTouchEventCallback, void(int32_t ponitId, EtsCardTouchEventCallback&& callback));
+    MOCK_METHOD1(RestoreNodeInfo, void(std::unique_ptr<JsonValue> nodeInfo));
+    MOCK_METHOD0(GetStoredNodeInfo, std::unique_ptr<JsonValue>());
 
     static RefPtr<MockPipelineBase> pipeline_;
 

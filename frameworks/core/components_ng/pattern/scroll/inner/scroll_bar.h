@@ -211,7 +211,10 @@ public:
 
     void SetNormalWidth(const Dimension& normalWidth)
     {
-        normalWidth_ = normalWidth;
+        if (normalWidth_ != normalWidth) {
+            normalWidthUpdate_ = true;
+            normalWidth_ = normalWidth;
+        }
     }
 
     const Rect& GetActiveRect() const
@@ -345,6 +348,16 @@ public:
         return mouseEvent_;
     }
 
+    void SetIsUserNormalWidth(bool isUserNormalWidth)
+    {
+        isUserNormalWidth_ = isUserNormalWidth;
+    }
+
+    bool GetIsUserNormalWidth() const
+    {
+        return isUserNormalWidth_;
+    }
+
     void SetGestureEvent();
     void SetMouseEvent();
     void FlushBarWidth();
@@ -400,6 +413,8 @@ private:
     bool isHover_ = false;
     bool inSpring = false; // whether bar in the spring state
     bool positionModeUpdate_ = false;
+    bool normalWidthUpdate_ = false;
+    bool isUserNormalWidth_ = false;
 
     Offset paintOffset_;
     Size viewPortSize_;

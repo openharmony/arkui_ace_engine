@@ -15,7 +15,11 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_fe_gaussian_blur.h"
 
-#include "third_party/skia/include/effects/SkBlurImageFilter.h"
+#ifndef NEW_SKIA
+#include "include/effects/SkBlurImageFilter.h"
+#else
+#include "include/effects/SkImageFilters.h"
+#endif
 
 #include "base/utils/utils.h"
 #include "frameworks/core/components/declaration/svg/svg_fe_gaussianblur_declaration.h"
@@ -40,8 +44,13 @@ void SvgFeGaussianBlur::OnAsImageFilter(sk_sp<SkImageFilter>& imageFilter,
     auto declaration = AceType::DynamicCast<SvgFeGaussianBlurDeclaration>(declaration_);
     CHECK_NULL_VOID_NOLOG(declaration);
     imageFilter = MakeImageFilter(declaration->GetIn(), imageFilter);
+#ifndef NEW_SKIA
     imageFilter = SkBlurImageFilter::Make(
         declaration->GetStdDeviation(), declaration->GetStdDeviation(), imageFilter, nullptr);
+#else
+    imageFilter = SkImageFilters::Blur(
+        declaration->GetStdDeviation(), declaration->GetStdDeviation(), imageFilter, nullptr);
+#endif
     ConverImageFilterColor(imageFilter, srcColor, currentColor);
 }
 

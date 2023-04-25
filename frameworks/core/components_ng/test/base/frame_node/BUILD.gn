@@ -15,7 +15,7 @@ import("//build/test.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("frame_node_test_ng") {
-  module_out_path = base_test_outout_path
+  module_out_path = base_test_output_path
 
   sources = [
     # old

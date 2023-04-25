@@ -110,7 +110,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(SubtitleNodeOperation, ChildNodeOperation);
     void OnSubtitleNodeOperationUpdate(ChildNodeOperation value) {}
 
-    void OnAttachToMainTree() override;
+    void OnAttachToMainTree(bool recursive) override;
 
 private:
     RefPtr<UINode> title_;

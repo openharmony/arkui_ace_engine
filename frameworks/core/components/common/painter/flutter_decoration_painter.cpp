@@ -22,7 +22,11 @@
 #include "include/core/SkColor.h"
 #include "include/core/SkMaskFilter.h"
 #include "include/effects/Sk1DPathEffect.h"
+#ifndef NEW_SKIA
 #include "include/effects/SkBlurImageFilter.h"
+#else
+#include "include/effects/SkImageFilters.h"
+#endif
 #include "include/effects/SkDashPathEffect.h"
 #include "include/effects/SkGradientShader.h"
 #include "include/utils/SkShadowUtils.h"
@@ -760,7 +764,7 @@ void FlutterDecorationPainter::PaintBorderImage(SkPaint& paint, const Offset& of
             return;
         }
         canvas->save();
-        
+
         BorderImagePainter borderImagePainter(paintSize_, decoration_, image, dipScale_);
         borderImagePainter.InitPainter();
         borderImagePainter.PaintBorderImage(offset + margin_.GetOffsetInPx(dipScale_), canvas, paint);
@@ -776,8 +780,13 @@ void FlutterDecorationPainter::PaintBorderImage(SkPaint& paint, const Offset& of
             return;
         }
         canvas->save();
+#ifndef NEW_SKIA
         SkSize skPaintSize = SkSize::Make(SkDoubleToMScalar(paintSize_.Width()),
             SkDoubleToMScalar(paintSize_.Height()));
+#else
+        SkSize skPaintSize = SkSize::Make(paintSize_.Width(),
+            paintSize_.Height());
+#endif
         auto shader = CreateGradientShader(gradient, skPaintSize);
         paint.setShader(std::move(shader));
 
@@ -1107,7 +1116,11 @@ void FlutterDecorationPainter::PaintBlur(
 #else
             paint.setColorFilter(SkColorFilters::Blend(color.GetValue(), SkBlendMode::kDstOver));
 #endif
+#ifndef NEW_SKIA
             paint.setImageFilter(SkBlurImageFilter::Make(radius, radius, nullptr));
+#else
+            paint.setImageFilter(SkImageFilters::Blur(radius, radius, nullptr));
+#endif
             SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
             canvas->saveLayer(slr);
         }
@@ -1833,8 +1846,11 @@ bool FlutterDecorationPainter::GetGradientPaint(SkPaint& paint)
     if (NearZero(paintSize_.Width()) || NearZero(paintSize_.Height()) || !gradient.IsValid()) {
         return false;
     }
-
+#ifndef NEW_SKIA
     SkSize skPaintSize = SkSize::Make(SkDoubleToMScalar(paintSize_.Width()), SkDoubleToMScalar(paintSize_.Height()));
+#else
+    SkSize skPaintSize = SkSize::Make(paintSize_.Width(), paintSize_.Height());
+#endif
     auto shader = CreateGradientShader(gradient, skPaintSize);
     paint.setShader(std::move(shader));
     return true;
@@ -1850,15 +1866,27 @@ void FlutterDecorationPainter::PaintGradient(const Offset& offset, SkCanvas* can
         return;
     }
 
+#ifndef NEW_SKIA
     SkSize skPaintSize = SkSize::Make(SkDoubleToMScalar(paintSize_.Width()), SkDoubleToMScalar(paintSize_.Height()));
+#else
+    SkSize skPaintSize = SkSize::Make(paintSize_.Width(), paintSize_.Height());
+#endif
     SkAutoCanvasRestore restore(canvas, true);
     auto shader = CreateGradientShader(gradient, skPaintSize);
     paint.setShader(std::move(shader));
+#ifndef NEW_SKIA
     canvas->translate(SkDoubleToMScalar(offset.GetX() + NormalizeToPx(margin_.Left())),
         SkDoubleToMScalar(offset.GetY() + NormalizeToPx(margin_.Top())));
     canvas->drawRect(
         SkRect::MakeXYWH(0.0f, 0.0f, SkDoubleToMScalar(paintSize_.Width()), SkDoubleToMScalar(paintSize_.Height())),
         paint);
+#else
+    canvas->translate(offset.GetX() + NormalizeToPx(margin_.Left()),
+        offset.GetY() + NormalizeToPx(margin_.Top()));
+    canvas->drawRect(
+        SkRect::MakeXYWH(0.0f, 0.0f, paintSize_.Width(), paintSize_.Height()),
+        paint);
+#endif
     // reset shader;
     paint.setShader(nullptr);
 }

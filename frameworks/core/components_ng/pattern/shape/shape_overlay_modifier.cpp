@@ -12,12 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "core/components_ng/image_provider/image_provider.h"
-namespace OHOS::Ace::NG {
-void ImageProvider::MakeCanvasImage(const WeakPtr<ImageObject>& objWp, const WeakPtr<ImageLoadingContext>& ctxWp,
-    const SizeF& targetSize, bool forceResize, bool sync)
-{}
 
-RefPtr<CanvasImage> ImageProvider::QueryCanvasImageFromCache(const ImageSourceInfo& src, const SizeF& targetSize)
-{return nullptr;}
+#include "core/components_ng/pattern/shape/shape_overlay_modifier.h"
+#include "core/components_ng/render/drawing.h"
+
+namespace OHOS::Ace::NG {
+void ShapeOverlayModifier::onDraw(DrawingContext& drawingContext)
+{}
 } // namespace OHOS::Ace::NG

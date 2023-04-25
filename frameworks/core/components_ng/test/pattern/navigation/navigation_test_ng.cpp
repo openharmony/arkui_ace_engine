@@ -262,7 +262,6 @@ HWTEST_F(NavigationTestNg, NavigationTestNg002, TestSize.Level1)
     int32_t nodeId = TEST_DATA;
     auto patternCreator = AceType::MakeRefPtr<OHOS::Ace::NG::Pattern>();
     NavigationGroupNode navigationGroupNode(TEST_TAG, nodeId, patternCreator);
-    navigationGroupNode.isFirstNavDestination_ = false;
     std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
     json->isRoot_ = true;
     ASSERT_NE(json, nullptr);
@@ -285,7 +284,6 @@ HWTEST_F(NavigationTestNg, NavigationTestNg003, TestSize.Level1)
     int32_t nodeId = TEST_DATA;
     auto patternCreator = AceType::MakeRefPtr<OHOS::Ace::NG::Pattern>();
     NavigationGroupNode navigationGroupNode(TEST_TAG, nodeId, patternCreator);
-    navigationGroupNode.isFirstNavDestination_ = false;
     RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     RefPtr<NavigationPattern> pattern = frameNode->GetPattern<NavigationPattern>();
     navigationGroupNode.pattern_ = pattern;

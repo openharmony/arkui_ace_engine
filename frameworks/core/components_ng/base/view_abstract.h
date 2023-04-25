@@ -34,6 +34,7 @@
 #include "core/components/common/properties/clip_path.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/motion_path_option.h"
+#include "core/components/common/properties/placement.h"
 #include "core/components/common/properties/popup_param.h"
 #include "core/components/common/properties/shared_transition_option.h"
 #include "core/components_ng/event/gesture_event_hub.h"
@@ -68,6 +69,9 @@ struct OptionParam {
 struct MenuParam {
     std::string title;
     OffsetF positionOffset;
+    std::optional<Placement> placement;
+    std::function<void()> onAppear;
+    std::function<void()> onDisappear;
 };
 
 class ACE_EXPORT ViewAbstract {
@@ -204,8 +208,8 @@ public:
     static void SetFlexGrow(float value);
     static void SetFlexBasis(const Dimension& value);
     static void SetDisplayIndex(int32_t value);
-    static void SetKeyboardShortcut(
-        const std::string& value, const std::vector<CtrlKey>& keys, std::function<void()>&& onKeyboardShortcutAction);
+    static void SetKeyboardShortcut(const std::string& value, const std::vector<ModifierKey>& keys,
+        std::function<void()>&& onKeyboardShortcutAction);
 
     // Bind properties
     static void BindPopup(
@@ -217,6 +221,8 @@ public:
     static void ShowMenu(int32_t targetId, const NG::OffsetF& offset, bool isContextMenu = false);
     // inspector
     static void SetInspectorId(const std::string& inspectorId);
+    // restore
+    static void SetRestoreId(int32_t restoreId);
     // inspector debugLine
     static void SetDebugLine(const std::string& line);
     // transition
@@ -243,6 +249,10 @@ public:
     static void SetForegroundColor(const Color& color);
     static void SetForegroundColorStrategy(const ForegroundColorStrategy& strategy);
 
+    // custom animatable property
+    static void CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
+        const std::function<void(float)>& onCallbackEvent);
+    static void UpdateAnimatablePropertyFloat(const std::string& propertyName, float value);
 private:
     static void AddDragFrameNodeToManager();
 };

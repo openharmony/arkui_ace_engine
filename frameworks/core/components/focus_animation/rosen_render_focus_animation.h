@@ -16,8 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_FOCUS_ANIMATION_ROSEN_RENDER_FOCUS_ANIMATION_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_FOCUS_ANIMATION_ROSEN_RENDER_FOCUS_ANIMATION_H
 
-#include "third_party/skia/include/core/SkCanvas.h"
-#include "third_party/skia/include/core/SkPaint.h"
+#include "include/core/SkCanvas.h"
+#include "include/core/SkPaint.h"
 
 #include "core/components/focus_animation/render_focus_animation.h"
 

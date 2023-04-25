@@ -22,19 +22,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<RatingModel> RatingModel::instance_ = nullptr;
+std::mutex RatingModel::mutex_;
 
 RatingModel* RatingModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::RatingModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::RatingModelNG());
-        } else {
-            instance_.reset(new Framework::RatingModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::RatingModelNG());
+            } else {
+                instance_.reset(new Framework::RatingModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }

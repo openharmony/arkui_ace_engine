@@ -18,7 +18,7 @@
 
 #include "base/memory/ace_type.h"
 
-#include "third_party/skia/include/core/SkImageFilter.h"
+#include "include/core/SkImageFilter.h"
 
 namespace OHOS::Ace {
 

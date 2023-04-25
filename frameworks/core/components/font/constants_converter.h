@@ -16,11 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_FONT_CONSTANTS_CONVERTER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_FONT_CONSTANTS_CONVERTER_H
 
-#include "flutter/third_party/txt/src/txt/placeholder_run.h"
-#include "flutter/third_party/txt/src/txt/text_baseline.h"
-#include "flutter/third_party/txt/src/txt/text_decoration.h"
-#include "flutter/third_party/txt/src/txt/text_style.h"
-#include "third_party/skia/include/core/SkColor.h"
+#include "txt/placeholder_run.h"
+#include "txt/text_baseline.h"
+#include "txt/text_decoration.h"
+#include "txt/text_style.h"
+#include "include/core/SkColor.h"
 
 #include "core/components/common/properties/text_style.h"
 #include "core/pipeline/pipeline_base.h"

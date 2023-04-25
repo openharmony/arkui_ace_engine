@@ -170,6 +170,7 @@ public:
     void PlayBgColorAnimation(bool isHoverChange = true);
     void SetSpace(const Dimension& value);
     void SetArrowPosition(const ArrowPosition value);
+    void SetMenuAlign(const MenuAlign& menuAlign);
 
     std::string GetValue();
 
@@ -261,6 +262,7 @@ private:
     std::optional<Color> selectedBgColor_;
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonOptionAlign(std::unique_ptr<JsonValue>& json) const;
     // XTS inspector helper functions
     std::string InspectorGetOptions() const;
     std::string InspectorGetSelectedFont() const;
@@ -271,6 +273,8 @@ private:
 
     Color bgBlendColor_ = Color::TRANSPARENT;
     bool isHover_ = false;
+
+    MenuAlign menuAlign_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectPattern);
 };

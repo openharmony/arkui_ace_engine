@@ -73,6 +73,7 @@ void SliderPattern::OnModifyDone()
     auto focusHub = hub->GetFocusHub();
     CHECK_NULL_VOID_NOLOG(focusHub);
     InitOnKeyEvent(focusHub);
+    InitializeBubble();
 }
 
 void SliderPattern::CancelExceptionValue(float& min, float& max, float& step)
@@ -171,17 +172,63 @@ void SliderPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
     gestureHub->AddTouchEvent(touchEvent_);
 }
 
+bool SliderPattern::AtMousePanArea(const Offset& offsetInFrame)
+{
+    const auto& content = GetHost()->GetGeometryNode()->GetContent();
+    CHECK_NULL_RETURN(content, false);
+    auto contentOffset = content->GetRect().GetOffset();
+    auto offset = Offset(offsetInFrame.GetX() - contentOffset.GetX(), offsetInFrame.GetY() - contentOffset.GetY());
+    double distanceCircle = std::min(blockSize_.Width(), blockSize_.Height()) * HALF + hotBlockShadowWidth_;
+    auto diffX = circleCenter_.GetX() - offset.GetX();
+    auto diffY = circleCenter_.GetY() - offset.GetY();
+    return diffX * diffX + diffY * diffY <= distanceCircle * distanceCircle;
+}
+
+bool SliderPattern::AtTouchPanArea(const Offset& offsetInFrame)
+{
+    const auto& content = GetHost()->GetGeometryNode()->GetContent();
+    CHECK_NULL_RETURN(content, false);
+    auto contentOffset = content->GetRect().GetOffset();
+    auto offset = Offset(offsetInFrame.GetX() - contentOffset.GetX(), offsetInFrame.GetY() - contentOffset.GetY());
+    float sideHotSize = blockHotSize_ * HALF;
+    return !(circleCenter_.GetX() - sideHotSize > offset.GetX() ||
+        circleCenter_.GetY() - sideHotSize > offset.GetY() ||
+        circleCenter_.GetX() + sideHotSize < offset.GetX() ||
+        circleCenter_.GetY() + sideHotSize < offset.GetY());
+}
+
+bool SliderPattern::AtPanArea(const Offset& offset, const SourceType& sourceType)
+{
+    bool flag = false;
+    switch (sourceType) {
+        case SourceType::MOUSE:
+            flag = AtMousePanArea(offset);
+            break;
+        case SourceType::TOUCH:
+            flag = AtTouchPanArea(offset);
+            break;
+        case SourceType::NONE:
+        default:
+            break;
+    }
+    return flag;
+}
+
 void SliderPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
     auto touchList = info.GetChangedTouches();
     CHECK_NULL_VOID(!touchList.empty());
-    auto touchType = touchList.front().GetTouchType();
+    auto touchInfo = touchList.front();
+    auto touchType = touchInfo.GetTouchType();
     if (touchType == TouchType::DOWN) {
         hotFlag_ = true;
-        UpdateValueByLocalLocation(touchList.front().GetLocalLocation());
+        // when Touch Down area is at Pan Area, value is unchanged.
+        if (!AtPanArea(touchInfo.GetLocalLocation(), info.GetSourceDevice())) {
+            UpdateValueByLocalLocation(touchInfo.GetLocalLocation());
+        }
         if (showTips_) {
             bubbleFlag_ = true;
-            InitializeBubble();
+            UpdateBubble();
         }
         mousePressedFlag_ = true;
         FireChangeEvent(SliderChangeMode::Begin);
@@ -201,7 +248,7 @@ void SliderPattern::HandleTouchEvent(const TouchEventInfo& info)
 
 void SliderPattern::InitializeBubble()
 {
-    CHECK_NULL_VOID(bubbleFlag_);
+    CHECK_NULL_VOID_NOLOG(showTips_);
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -215,13 +262,13 @@ void SliderPattern::InitializeBubble()
     sliderPaintProperty->UpdateTextColor(sliderTheme->GetTipTextColor());
     sliderPaintProperty->UpdateFontSize(sliderTheme->GetTipFontSize());
     sliderPaintProperty->UpdateContent(content);
-    UpdateBubble();
 }
 
 void SliderPattern::HandlingGestureEvent(const GestureEvent& info)
 {
     if (info.GetInputEventType() == InputEventType::AXIS) {
-        info.GetMainDelta() > 0.0 ? MoveStep(-1) : MoveStep(1);
+        auto offset = NearZero(info.GetOffsetX()) ? info.GetOffsetY() : info.GetOffsetX();
+        offset > 0.0 ? MoveStep(-1) : MoveStep(1);
     } else {
         UpdateValueByLocalLocation(info.GetLocalLocation());
         UpdateBubble();
@@ -337,10 +384,10 @@ void SliderPattern::UpdateBubbleSizeAndLayout()
 
 void SliderPattern::UpdateBubble()
 {
-    CHECK_NULL_VOID_NOLOG(showTips_);
+    CHECK_NULL_VOID_NOLOG(bubbleFlag_);
+    // update the tip value according to the slider value, update the tip position according to current block position
     UpdateTipsValue();
     CreateParagraphFunc();
-    UpdateCircleCenterOffset();
     UpdateBubbleSizeAndLayout();
     UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -462,8 +509,8 @@ void SliderPattern::GetOutsetInnerFocusPaintRect(RoundRect& paintRect)
 
 void SliderPattern::GetInsetInnerFocusPaintRect(RoundRect& paintRect)
 {
-    auto frameSize = GetHostFrameSize();
-    CHECK_NULL_VOID(frameSize);
+    const auto& content = GetHost()->GetGeometryNode()->GetContent();
+    CHECK_NULL_VOID(content);
     auto theme = PipelineBase::GetCurrentContext()->GetTheme<SliderTheme>();
     CHECK_NULL_VOID(theme);
     auto focusSideDistance = theme->GetFocusSideDistance();
@@ -471,19 +518,20 @@ void SliderPattern::GetInsetInnerFocusPaintRect(RoundRect& paintRect)
     CHECK_NULL_VOID(appTheme);
     auto paintWidth = appTheme->GetFocusWidthVp();
     auto focusDistance = paintWidth * HALF + focusSideDistance;
-    float offsetX = 0;
-    float offsetY = 0;
-    float width = frameSize->Width();
-    float height = frameSize->Height();
+    // use content area
+    float offsetX = content->GetRect().GetX();
+    float offsetY = content->GetRect().GetY();
+    float width = content->GetRect().Width();
+    float height = content->GetRect().Height();
     float focusRadius = trackThickness_ + static_cast<float>(focusDistance.ConvertToPx()) / HALF;
     if (direction_ == Axis::HORIZONTAL) {
-        offsetX = borderBlank_ - trackThickness_ * HALF - static_cast<float>(focusDistance.ConvertToPx());
-        offsetY = (frameSize->Height() - trackThickness_) * HALF - static_cast<float>(focusDistance.ConvertToPx());
+        offsetX += borderBlank_ - trackThickness_ * HALF - static_cast<float>(focusDistance.ConvertToPx());
+        offsetY += (height - trackThickness_) * HALF - static_cast<float>(focusDistance.ConvertToPx());
         width = sliderLength_ + trackThickness_ + static_cast<float>(focusDistance.ConvertToPx()) / HALF;
         height = trackThickness_ + static_cast<float>(focusDistance.ConvertToPx()) / HALF;
     } else {
-        offsetX = (frameSize->Width() - trackThickness_) * HALF - static_cast<float>(focusDistance.ConvertToPx());
-        offsetY = borderBlank_ - trackThickness_ * HALF - static_cast<float>(focusDistance.ConvertToPx());
+        offsetX += (width - trackThickness_) * HALF - static_cast<float>(focusDistance.ConvertToPx());
+        offsetY += borderBlank_ - trackThickness_ * HALF - static_cast<float>(focusDistance.ConvertToPx());
         width = trackThickness_ + static_cast<float>(focusDistance.ConvertToPx()) / HALF;
         height = sliderLength_ + trackThickness_ + static_cast<float>(focusDistance.ConvertToPx()) / HALF;
     }
@@ -547,6 +595,7 @@ bool SliderPattern::MoveStep(int32_t stepCount)
     }
     value_ = nextValue;
     valueRatio_ = (value_ - min) / (max - min);
+    FireChangeEvent(SliderChangeMode::End);
     LOGD("Move %{public}d steps, Value change to %{public}f", stepCount, value_);
     UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
     return true;
@@ -586,10 +635,8 @@ void SliderPattern::HandleHoverEvent(bool isHover)
 void SliderPattern::HandleMouseEvent(const MouseInfo& info)
 {
     UpdateCircleCenterOffset();
-    auto mouseToCenterDistanceX = static_cast<float>(std::abs(info.GetLocalLocation().GetX() - circleCenter_.GetX()));
-    auto mouseToCenterDistanceY = static_cast<float>(std::abs(info.GetLocalLocation().GetY() - circleCenter_.GetY()));
-    float mouseToCenterDistance = std::max(mouseToCenterDistanceX, mouseToCenterDistanceY);
-    mouseHoverFlag_ = LessOrEqual(mouseToCenterDistance, blockHotSize_ * HALF);
+    // MouseInfo's LocalLocation is relative to the frame area, circleCenter_ is relative to the content area
+    mouseHoverFlag_ = AtMousePanArea(info.GetLocalLocation());
     UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 

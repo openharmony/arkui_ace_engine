@@ -16,10 +16,12 @@ import(
 
 build_component("texttimer") {
   sources = [
-    "flutter_render_texttimer.cpp",
     "render_texttimer.cpp",
     "render_texttimer_creator.cpp",
     "texttimer_component.cpp",
   ]
+  if (!ace_use_new_skia) {
+    sources += [ "flutter_render_texttimer.cpp" ]
+  }
   rosen_sources = [ "rosen_render_texttimer.cpp" ]
 }

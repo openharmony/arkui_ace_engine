@@ -15,7 +15,7 @@
 
 #include "core/components/watch_slider/flutter_render_watch_slider.h"
 
-#include "third_party/skia/include/core/SkRRect.h"
+#include "include/core/SkRRect.h"
 
 #include "base/geometry/dimension.h"
 #include "core/pipeline/base/scoped_canvas_state.h"

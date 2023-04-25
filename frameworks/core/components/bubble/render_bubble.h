@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "third_party/skia/include/core/SkPath.h"
+#include "include/core/SkPath.h"
 
 #include "base/geometry/dimension.h"
 #include "base/subwindow/subwindow_manager.h"

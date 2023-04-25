@@ -15,10 +15,10 @@
 
 #include "constants_converter.h"
 
-#include "flutter/third_party/txt/src/txt/font_style.h"
-#include "flutter/third_party/txt/src/txt/font_weight.h"
-#include "flutter/third_party/txt/src/txt/paragraph_style.h"
-#include "flutter/third_party/txt/src/txt/text_decoration.h"
+#include "txt/font_style.h"
+#include "txt/font_weight.h"
+#include "txt/paragraph_style.h"
+#include "txt/text_decoration.h"
 
 #include "base/i18n/localization.h"
 #include "core/components/common/properties/color.h"
@@ -223,7 +223,7 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
         txtShadow.color = spanShadow.GetColor().GetValue();
         txtShadow.offset.fX = static_cast<SkScalar>(spanShadow.GetOffset().GetX());
         txtShadow.offset.fY = static_cast<SkScalar>(spanShadow.GetOffset().GetY());
-#ifdef FLUTTER_2_5
+#if defined (FLUTTER_2_5) || defined (NEW_SKIA)
         txtShadow.blur_sigma = spanShadow.GetBlurRadius();
 #else
         txtShadow.blur_radius = spanShadow.GetBlurRadius();

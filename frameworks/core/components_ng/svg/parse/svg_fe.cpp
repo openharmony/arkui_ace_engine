@@ -15,8 +15,13 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_fe.h"
 
-#include "third_party/skia/include/effects/SkColorFilterImageFilter.h"
-#include "third_party/skia/include/effects/SkColorMatrix.h"
+#ifndef NEW_SKIA
+#include "include/effects/SkColorFilterImageFilter.h"
+#else
+#include "include/core/SkColorFilter.h"
+#include "include/effects/SkImageFilters.h"
+#endif
+#include "include/effects/SkColorMatrix.h"
 
 #include "base/utils/utils.h"
 
@@ -53,13 +58,21 @@ void SvgFe::ConverImageFilterColor(
 #ifdef USE_SYSTEM_SKIA
         imageFilter = SkColorFilterImageFilter::Make(SkColorFilter::MakeSRGBToLinearGamma(), imageFilter);
 #else
+#ifndef NEW_SKIA
         imageFilter = SkColorFilterImageFilter::Make(SkColorFilters::SRGBToLinearGamma(), imageFilter);
+#else
+        imageFilter = SkImageFilters::ColorFilter(SkColorFilters::SRGBToLinearGamma(), imageFilter);
+#endif
 #endif
     } else if (dst == ColorInterpolationType::SRGB && srcColor == ColorInterpolationType::LINEAR_RGB) {
 #ifdef USE_SYSTEM_SKIA
         imageFilter = SkColorFilterImageFilter::Make(SkColorFilter::MakeLinearToSRGBGamma(), imageFilter);
 #else
+#ifndef NEW_SKIA
         imageFilter = SkColorFilterImageFilter::Make(SkColorFilters::LinearToSRGBGamma(), imageFilter);
+#else
+        imageFilter = SkImageFilters::ColorFilter(SkColorFilters::LinearToSRGBGamma(), imageFilter);
+#endif
 #endif
     }
 }
@@ -69,14 +82,19 @@ sk_sp<SkImageFilter> SvgFe::MakeImageFilter(const FeInType& in, sk_sp<SkImageFil
     switch (in) {
         case FeInType::SOURCE_GRAPHIC:
             return nullptr;
-        case FeInType::SOURCE_ALPHA:
+        case FeInType::SOURCE_ALPHA: {
             SkColorMatrix m;
             m.setScale(0, 0, 0, 1.0f);
 #ifdef USE_SYSTEM_SKIA
             return SkColorFilterImageFilter::Make(SkColorFilter::MakeMatrixFilterRowMajor255(m.fMat), nullptr);
 #else
+#ifndef NEW_SKIA
             return SkColorFilterImageFilter::Make(SkColorFilters::Matrix(m), nullptr);
+#else
+            return SkImageFilters::ColorFilter(SkColorFilters::Matrix(m), nullptr);
 #endif
+#endif
+        }
         case FeInType::BACKGROUND_IMAGE:
             break;
         case FeInType::BACKGROUND_ALPHA:

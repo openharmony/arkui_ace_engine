@@ -16,8 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CHART_ROSEN_RENDER_CHART_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CHART_ROSEN_RENDER_CHART_H
 
-#include "third_party/skia/include/core/SkPaint.h"
-#include "third_party/skia/include/core/SkPath.h"
+#include "include/core/SkPaint.h"
+#include "include/core/SkPath.h"
 
 #include "base/geometry/offset.h"
 #include "base/geometry/rect.h"

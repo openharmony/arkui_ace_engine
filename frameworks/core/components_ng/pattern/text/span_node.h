@@ -60,6 +60,77 @@ public:                                                                      \
         }                                                                    \
         spanItem_->fontStyle->Update##name(value);                           \
         RequestTextFlushDirty();                                             \
+    }                                                                        \
+    void Reset##name()                                                       \
+    {                                                                        \
+        if (spanItem_->fontStyle) {                                          \
+            return spanItem_->fontStyle->Reset##name();                      \
+        }                                                                    \
+    }                                                                        \
+    void Update##name##WithoutFlushDirty(const type& value)                  \
+    {                                                                        \
+        if (!spanItem_->fontStyle) {                                         \
+            spanItem_->fontStyle = std::make_unique<FontStyle>();            \
+        }                                                                    \
+        if (spanItem_->fontStyle->Check##name(value)) {                      \
+            LOGD("the %{public}s is same, just ignore", #name);              \
+            return;                                                          \
+        }                                                                    \
+        spanItem_->fontStyle->Update##name(value);                           \
+    }                                                                        \
+
+
+#define DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(name, type)                             \
+public:                                                                          \
+    std::optional<type> Get##name() const                                        \
+    {                                                                            \
+        if (spanItem_->textLineStyle) {                                          \
+            return spanItem_->textLineStyle->Get##name();                        \
+        }                                                                        \
+        return std::nullopt;                                                     \
+    }                                                                            \
+    bool Has##name() const                                                       \
+    {                                                                            \
+        if (spanItem_->textLineStyle) {                                          \
+            return spanItem_->textLineStyle->Has##name();                        \
+        }                                                                        \
+        return false;                                                            \
+    }                                                                            \
+    type Get##name##Value(const type& defaultValue) const                        \
+    {                                                                            \
+        if (spanItem_->textLineStyle) {                                          \
+            return spanItem_->textLineStyle->Get##name().value_or(defaultValue); \
+        }                                                                        \
+        return defaultValue;                                                     \
+    }                                                                            \
+    void Update##name(const type& value)                                         \
+    {                                                                            \
+        if (!spanItem_->textLineStyle) {                                         \
+            spanItem_->textLineStyle = std::make_unique<TextLineStyle>();        \
+        }                                                                        \
+        if (spanItem_->textLineStyle->Check##name(value)) {                      \
+            LOGD("the %{public}s is same, just ignore", #name);                  \
+            return;                                                              \
+        }                                                                        \
+        spanItem_->textLineStyle->Update##name(value);                           \
+        RequestTextFlushDirty();                                                 \
+    }                                                                            \
+    void Reset##name()                                                           \
+    {                                                                            \
+        if (spanItem_->textLineStyle) {                                          \
+            return spanItem_->textLineStyle->Reset##name();                      \
+        }                                                                        \
+    }                                                                            \
+    void Update##name##WithoutFlushDirty(const type& value)                      \
+    {                                                                            \
+        if (!spanItem_->textLineStyle) {                                         \
+            spanItem_->textLineStyle = std::make_unique<TextLineStyle>();        \
+        }                                                                        \
+        if (spanItem_->textLineStyle->Check##name(value)) {                      \
+            LOGD("the %{public}s is same, just ignore", #name);                  \
+            return;                                                              \
+        }                                                                        \
+        spanItem_->textLineStyle->Update##name(value);                           \
     }
 
 namespace OHOS::Ace::NG {
@@ -78,6 +149,7 @@ public:
     int32_t positon;
     std::string content;
     std::unique_ptr<FontStyle> fontStyle;
+    std::unique_ptr<TextLineStyle> textLineStyle;
     GestureEventFunc onClick;
     std::list<RefPtr<SpanItem>> children;
     int32_t placeHolderIndex = -1;
@@ -144,6 +216,8 @@ public:
     DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationColor, Color);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextCase, TextCase);
     DEFINE_SPAN_FONT_STYLE_ITEM(LetterSpacing, Dimension);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineHeight, Dimension);
+
 
     // Mount to the previous Span node or Text node.
     void MountToParagraph();

@@ -208,11 +208,12 @@ HWTEST_F(MenuLayoutPropertyTestNg, MenuLayoutPropertyTestNg009, TestSize.Level1)
 
     auto json = JsonUtil::Create(true);
     property.ToJsonValue(json);
+    auto fontJsonObject = json->GetObject("font");
     EXPECT_EQ(json->GetString("title"), "title");
     EXPECT_EQ(json->GetString("offset"), OffsetF(25.0f, 30.0f).ToString());
     EXPECT_EQ(json->GetString("fontSize"), Dimension(25.0f).ToString());
     EXPECT_EQ(json->GetString("fontColor"), Color::RED.ColorToString());
-    EXPECT_EQ(json->GetString("fontWeight"), V2::ConvertWrapFontWeightToStirng(FontWeight::BOLD));
+    EXPECT_EQ(fontJsonObject->GetString("weight"), V2::ConvertWrapFontWeightToStirng(FontWeight::BOLD));
 }
 
 /**
@@ -229,7 +230,7 @@ HWTEST_F(MenuLayoutPropertyTestNg, MenuLayoutPropertyTestNg010, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
-    auto menuWrapperNode = MenuView::Create(std::move(optionParams), TARGET_ID, TYPE, menuParam);
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), TARGET_ID, "", TYPE, menuParam);
     ASSERT_NE(menuWrapperNode, nullptr);
     ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));

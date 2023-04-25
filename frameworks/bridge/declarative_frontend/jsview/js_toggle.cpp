@@ -30,19 +30,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<ToggleModel> ToggleModel::instance_ = nullptr;
+std::mutex ToggleModel::mutex_;
 
 ToggleModel* ToggleModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::ToggleModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::ToggleModelNG());
-        } else {
-            instance_.reset(new Framework::ToggleModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::ToggleModelNG());
+            } else {
+                instance_.reset(new Framework::ToggleModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }

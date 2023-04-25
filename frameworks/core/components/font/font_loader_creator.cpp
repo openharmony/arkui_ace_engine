@@ -17,7 +17,9 @@
 
 #include "core/common/font_loader.h"
 #ifndef NG_BUILD
+#ifndef NEW_SKIA
 #include "core/components/font/flutter_font_loader.h"
+#endif
 #endif
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components/font/rosen_font_loader.h"
@@ -40,7 +42,11 @@ RefPtr<FontLoader> FontLoader::Create(const std::string& familyName, const std::
         // TODO: adapt to flutter fontloader for ng
         return nullptr;
 #else
+#ifndef NEW_SKIA
         return AceType::MakeRefPtr<FlutterFontLoader>(familyName, familySrc);
+#else
+        return nullptr;
+#endif
 #endif
     }
 }

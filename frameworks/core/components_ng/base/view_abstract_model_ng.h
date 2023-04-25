@@ -676,7 +676,10 @@ public:
         ViewAbstract::SetInspectorId(inspectorId);
     }
 
-    void SetRestoreId(int32_t restoreId) override {}
+    void SetRestoreId(int32_t restoreId) override
+    {
+        ViewAbstract::SetRestoreId(restoreId);
+    }
 
     void SetDebugLine(const std::string& line) override
     {
@@ -693,7 +696,7 @@ public:
         ViewAbstract::SetHitTestMode(hitTestMode);
     }
 
-    void SetKeyboardShortcut(const std::string& value, const std::vector<CtrlKey>& keys,
+    void SetKeyboardShortcut(const std::string& value, const std::vector<ModifierKey>& keys,
         std::function<void()>&& onKeyboardShortcutAction) override
     {
         ViewAbstract::SetKeyboardShortcut(value, keys, std::move(onKeyboardShortcutAction));
@@ -711,7 +714,7 @@ public:
     void BindMenu(
         std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const MenuParam& menuParam) override;
 
-    void BindContextMenu(ResponseType type, std::function<void()>&& buildFunc) override;
+    void BindContextMenu(ResponseType type, std::function<void()>&& buildFunc, const MenuParam& menuParam) override;
 
     void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<void()>&& buildFunc, int32_t type) override;
@@ -729,6 +732,21 @@ public:
     void SetForegroundColorStrategy(const ForegroundColorStrategy& strategy) override
     {
         ViewAbstract::SetForegroundColorStrategy(strategy);
+    }
+private:
+    void RegisterMenuAppearCallback(
+        std::vector<NG::OptionParam>& params, std::function<void()>&& buildFunc, const MenuParam& menuParam);
+    void RegisterMenuDisappearCallback(std::function<void()>&& buildFunc, const MenuParam& menuParam);
+    void RegisterContextMenuAppearCallback(ResponseType type, const MenuParam& menuParam);
+    void RegisterContextMenuDisappearCallback(const MenuParam& menuParam);
+
+    void CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
+        const std::function<void(float)>& onCallbackEvent) override {
+        ViewAbstract::CreateAnimatablePropertyFloat(propertyName, value, onCallbackEvent);
+    }
+
+    void UpdateAnimatablePropertyFloat(const std::string& propertyName, float value) override {
+        ViewAbstract::UpdateAnimatablePropertyFloat(propertyName, value);
     }
 };
 } // namespace OHOS::Ace::NG

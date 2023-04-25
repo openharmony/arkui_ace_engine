@@ -21,9 +21,9 @@
 #include <optional>
 
 #include "render_service_client/core/ui/rs_node.h"
-#include "third_party/skia/include/core/SkCanvas.h"
-#include "third_party/skia/include/core/SkPictureRecorder.h"
-#include "third_party/skia/include/core/SkRefCnt.h"
+#include "include/core/SkCanvas.h"
+#include "include/core/SkPictureRecorder.h"
+#include "include/core/SkRefCnt.h"
 
 #include "base/geometry/dimension_offset.h"
 #include "base/geometry/ng/offset_t.h"
@@ -148,8 +148,8 @@ public:
     {
         return propTransitionDisappearing_ != nullptr;
     }
-    void OnNodeAppear() override;
-    void OnNodeDisappear() override;
+    void OnNodeAppear(bool recursive) override;
+    void OnNodeDisappear(bool recursive) override;
     void ClipWithRect(const RectF& rectF) override;
 
     bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish) override;
@@ -164,6 +164,8 @@ public:
     // if translate params use percent dimension, frameSize should be given correctly
     static std::shared_ptr<Rosen::RSTransitionEffect> GetRSTransitionWithoutType(
         const TransitionOptions& options, const SizeF& frameSize = SizeF());
+
+    static float ConvertDimensionToScaleBySize(const Dimension& dimension, float size);
 
     void FlushContentModifier(const RefPtr<Modifier>& modifier) override;
     void FlushOverlayModifier(const RefPtr<Modifier>& modifier) override;
@@ -185,7 +187,7 @@ public:
 
     void PaintAccessibilityFocus() override;
 
-    virtual void ClearAccessibilityFocus() override;
+    void ClearAccessibilityFocus() override;
 
     void OnAccessibilityFocusUpdate(bool isAccessibilityFocus) override;
 
@@ -249,7 +251,7 @@ private:
     void OnClipEdgeUpdate(bool isClip) override;
     void OnClipMaskUpdate(const RefPtr<BasicShape>& basicShape) override;
 
-    void OnProgressMaskUpdate(const RefPtr<ProgressMaskProperty>& prgress) override;
+    void OnProgressMaskUpdate(const RefPtr<ProgressMaskProperty>& progress) override;
 
     void OnLinearGradientUpdate(const NG::Gradient& value) override;
     void OnSweepGradientUpdate(const NG::Gradient& value) override;
@@ -268,6 +270,7 @@ private:
     void OnOverlayTextUpdate(const OverlayOptions& overlay) override;
     void OnMotionPathUpdate(const MotionPathOption& motionPath) override;
 
+    void OnFreezeUpdate(bool isFreezed) override;
     void ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
 
     void NotifyTransitionInner(const SizeF& frameSize, bool isTransitionIn);
@@ -339,6 +342,7 @@ private:
     bool isPositionChanged_ = false;
     bool isSynced_ = false;
     bool firstTransitionIn_ = false;
+    bool transitionWithAnimation_ = false;
     bool isBackBlurChanged_ = false;
     bool needDebugBoundary_ = false;
     bool isDisappearing_ = false;
@@ -369,7 +373,8 @@ private:
     std::shared_ptr<ColorBlendModifier> colorBlendModifier_;
 
     template<typename Modifier, typename PropertyType>
-    friend class PropertyTransitionEffectImpl;
+    friend class PropertyTransitionEffectTemplate;
+    friend class RosenPivotTransitionEffect;
 
     ACE_DISALLOW_COPY_AND_MOVE(RosenRenderContext);
 };

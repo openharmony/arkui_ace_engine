@@ -22,6 +22,16 @@
 #include "frameworks/core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+bool CheckTemplate(const std::string& value)
+{
+    std::vector<std::string> strs;
+    StringUtils::StringSplitter(value, ' ', strs);
+    std::regex reg(R"(\d+(\.\d+)?fr)");
+    return std::all_of(strs.begin(), strs.end(), [reg](const std::string& str) { return std::regex_match(str, reg); });
+}
+} // namespace
+
 void WaterFlowModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -30,25 +40,147 @@ void WaterFlowModelNG::Create()
         V2::WATERFLOW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WaterFlowPattern>(); });
     stack->Push(frameNode);
 }
-void WaterFlowModelNG::SetFooter(std::function<void()>&& footer) {}
+
+void WaterFlowModelNG::SetFooter(std::function<void()>&& footer)
+{
+    RefPtr<NG::UINode> footerNode;
+    if (footer) {
+        NG::ScopedViewStackProcessor builderViewStackProcessor;
+        footer();
+        footerNode = NG::ViewStackProcessor::GetInstance()->Finish();
+    }
+    CHECK_NULL_VOID_NOLOG(footerNode);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<WaterFlowPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->AddFooter(footerNode);
+}
+
 RefPtr<ScrollControllerBase> WaterFlowModelNG::CreateScrollController()
 {
     return AceType::MakeRefPtr<WaterFlowPositionController>();
 }
+
 RefPtr<ScrollProxy> WaterFlowModelNG::CreateScrollBarProxy()
 {
     return AceType::MakeRefPtr<NG::ScrollBarProxy>();
 }
-void WaterFlowModelNG::SetScroller(RefPtr<ScrollControllerBase> scroller, RefPtr<ScrollProxy> proxy) {}
-void WaterFlowModelNG::SetColumnsTemplate(const std::string& value) {}
-void WaterFlowModelNG::SetRowsTemplate(const std::string& value) {}
-void WaterFlowModelNG::SetItemMinWidth(const Dimension& minWidth) {}
-void WaterFlowModelNG::SetItemMinHeight(const Dimension& minHeight) {}
-void WaterFlowModelNG::SetItemMaxWidth(const Dimension& maxWidth) {}
-void WaterFlowModelNG::SetItemMaxHeight(const Dimension& maxHeight) {}
-void WaterFlowModelNG::SetColumnsGap(const Dimension& value) {}
-void WaterFlowModelNG::SetRowsGap(const Dimension& value) {}
-void WaterFlowModelNG::SetLayoutDirection(FlexDirection value) {}
-void WaterFlowModelNG::SetOnReachStart(OnReachEvent&& onReachStart) {}
-void WaterFlowModelNG::SetOnReachEnd(OnReachEvent&& onReachEnd) {}
+
+void WaterFlowModelNG::SetScroller(RefPtr<ScrollControllerBase> scroller, RefPtr<ScrollProxy> proxy)
+{
+    auto waterFlow = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WaterFlowPattern>();
+    CHECK_NULL_VOID(waterFlow);
+    waterFlow->SetPositionController(AceType::DynamicCast<WaterFlowPositionController>(scroller));
+    waterFlow->SetScrollBarProxy(AceType::DynamicCast<ScrollBarProxy>(proxy));
+}
+
+void WaterFlowModelNG::SetColumnsTemplate(const std::string& value)
+{
+    if (!CheckTemplate(value) || value.empty()) {
+        LOGE("Columns Template [%{public}s] is not valid.", value.c_str());
+        ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ColumnsTemplate, "1fr");
+        return;
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ColumnsTemplate, value);
+}
+
+void WaterFlowModelNG::SetRowsTemplate(const std::string& value)
+{
+    if (!CheckTemplate(value) || value.empty()) {
+        LOGE("Rows Template [%{public}s] is not valid.", value.c_str());
+        ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, RowsTemplate, "1fr");
+        return;
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, RowsTemplate, value);
+}
+
+void WaterFlowModelNG::SetItemMinWidth(const Dimension& minWidth)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<WaterFlowLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateItemMinSize(CalcSize(CalcLength(minWidth), std::nullopt));
+}
+
+void WaterFlowModelNG::SetItemMinHeight(const Dimension& minHeight)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<WaterFlowLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateItemMinSize(CalcSize(std::nullopt, CalcLength(minHeight)));
+}
+
+void WaterFlowModelNG::SetItemMaxWidth(const Dimension& maxWidth)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<WaterFlowLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateItemMaxSize(CalcSize(CalcLength(maxWidth), std::nullopt));
+}
+
+void WaterFlowModelNG::SetItemMaxHeight(const Dimension& maxHeight)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<WaterFlowLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateItemMaxSize(CalcSize(std::nullopt, CalcLength(maxHeight)));
+}
+
+void WaterFlowModelNG::SetColumnsGap(const Dimension& value)
+{
+    if (value.IsNonNegative()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ColumnsGap, value);
+    }
+}
+
+void WaterFlowModelNG::SetRowsGap(const Dimension& value)
+{
+    if (value.IsNonNegative()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, RowsGap, value);
+    }
+}
+
+void WaterFlowModelNG::SetLayoutDirection(FlexDirection value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, WaterflowDirection, value);
+}
+
+void WaterFlowModelNG::SetOnReachStart(OnReachEvent&& onReachStart)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<WaterFlowEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnReachStart(std::move(onReachStart));
+}
+
+void WaterFlowModelNG::SetOnReachEnd(OnReachEvent&& onReachEnd)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<WaterFlowEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnReachEnd(std::move(onReachEnd));
+}
 } // namespace OHOS::Ace::NG

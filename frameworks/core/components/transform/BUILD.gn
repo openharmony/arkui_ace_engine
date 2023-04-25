@@ -17,11 +17,13 @@ import(
 build_component("transform") {
   sources = [
     "click_spring_effect.cpp",
-    "flutter_render_transform.cpp",
     "render_transform.cpp",
     "render_transform_creator.cpp",
     "transform_component.cpp",
     "transform_element.cpp",
   ]
+  if (!ace_use_new_skia) {
+    sources += [ "flutter_render_transform.cpp" ]
+  }
   rosen_sources = [ "rosen_render_transform.cpp" ]
 }

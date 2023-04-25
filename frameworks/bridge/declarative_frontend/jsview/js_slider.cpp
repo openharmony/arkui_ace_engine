@@ -26,19 +26,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<SliderModel> SliderModel::instance_ = nullptr;
+std::mutex SliderModel::mutex_;
 
 SliderModel* SliderModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::SliderModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::SliderModelNG());
-        } else {
-            instance_.reset(new Framework::SliderModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::SliderModelNG());
+            } else {
+                instance_.reset(new Framework::SliderModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -199,7 +203,9 @@ void JSSlider::SetBlockColor(const JSCallbackInfo& info)
     }
     Color colorVal;
     if (!ParseJsColor(info[0], colorVal)) {
-        return;
+        auto theme = GetTheme<SliderTheme>();
+        CHECK_NULL_VOID(theme);
+        colorVal = theme->GetBlockColor();
     }
     SliderModel::GetInstance()->SetBlockColor(colorVal);
 }
@@ -212,7 +218,9 @@ void JSSlider::SetTrackColor(const JSCallbackInfo& info)
     }
     Color colorVal;
     if (!ParseJsColor(info[0], colorVal)) {
-        return;
+        auto theme = GetTheme<SliderTheme>();
+        CHECK_NULL_VOID(theme);
+        colorVal = theme->GetTrackBgColor();
     }
     SliderModel::GetInstance()->SetTrackBackgroundColor(colorVal);
 }
@@ -225,7 +233,9 @@ void JSSlider::SetSelectedColor(const JSCallbackInfo& info)
     }
     Color colorVal;
     if (!ParseJsColor(info[0], colorVal)) {
-        return;
+        auto theme = GetTheme<SliderTheme>();
+        CHECK_NULL_VOID(theme);
+        colorVal = theme->GetTrackSelectedColor();
     }
     SliderModel::GetInstance()->SetSelectColor(colorVal);
 }

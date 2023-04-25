@@ -24,7 +24,7 @@ namespace {
 constexpr int DEFAULT_MAXLINES = 1;
 } // namespace
 
-void TabContentNode::OnAttachToMainTree()
+void TabContentNode::OnAttachToMainTree(bool recursive)
 {
     auto tabs = TabContentModelNG::FindTabsNode(Referenced::Claim(this));
     CHECK_NULL_VOID(tabs);
@@ -34,7 +34,7 @@ void TabContentNode::OnAttachToMainTree()
     TabContentModelNG::AddTabBarItem(Referenced::Claim(this), myIndex);
 }
 
-void TabContentNode::OnDetachFromMainTree()
+void TabContentNode::OnDetachFromMainTree(bool recursive)
 {
     auto tabs = TabContentModelNG::FindTabsNode(Referenced::Claim(this));
     CHECK_NULL_VOID(tabs);

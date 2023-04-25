@@ -25,19 +25,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<ProgressModel> ProgressModel::instance_ = nullptr;
+std::mutex ProgressModel::mutex_;
 
 ProgressModel* ProgressModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::ProgressModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::ProgressModelNG());
-        } else {
-            instance_.reset(new Framework::ProgressModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::ProgressModelNG());
+            } else {
+                instance_.reset(new Framework::ProgressModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -171,7 +175,7 @@ void JSProgress::SetCircularStyle(const JSCallbackInfo& info)
 
     auto jsScaleCount = paramObject->GetProperty("scaleCount");
     auto scaleCount = jsScaleCount->IsNumber() ? jsScaleCount->ToNumber<int32_t>() : theme->GetScaleNumber();
-    if (scaleCount > 0.0) {
+    if (scaleCount > 1.0) {
         ProgressModel::GetInstance()->SetScaleCount(scaleCount);
     } else {
         ProgressModel::GetInstance()->SetScaleCount(theme->GetScaleNumber());

@@ -16,10 +16,12 @@ import(
 
 build_component("text_clock") {
   sources = [
-    "flutter_render_text_clock.cpp",
     "render_text_clock.cpp",
     "render_text_clock_creator.cpp",
     "rosen_render_text_clock.cpp",
     "text_clock_component.cpp",
   ]
+  if (!ace_use_new_skia) {
+    sources += [ "flutter_render_text_clock.cpp" ]
+  }
 }

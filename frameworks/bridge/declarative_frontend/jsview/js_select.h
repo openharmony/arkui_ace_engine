@@ -47,6 +47,7 @@ public:
     static void SetPaddingRight(const JSCallbackInfo& info);
     static void SetSpace(const JSCallbackInfo& info);
     static void SetArrowPosition(const JSCallbackInfo& info);
+    static void SetMenuAlign(const JSCallbackInfo& info);
 };
 } // namespace OHOS::Ace::Framework
 #endif

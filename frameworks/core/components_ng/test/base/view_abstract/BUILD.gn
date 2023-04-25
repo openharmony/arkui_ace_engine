@@ -14,10 +14,8 @@
 import("//build/test.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-#import("//build/toolchain/ohos:ohos_clang_arm")
-
 ohos_unittest("view_abstract_test") {
-  module_out_path = "$test_output_path/base"
+  module_out_path = base_test_output_path
 
   sources = [
     "$ace_root/frameworks/base/geometry/dimension.cpp",
@@ -61,6 +59,7 @@ ohos_unittest("view_abstract_test") {
     "$ace_root/frameworks/core/components_ng/syntax/for_each_node.cpp",
 
     # mock
+    "$ace_root/frameworks/base/test/mock/mock_mouse_style.cpp",
     "$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_drawing_convertor.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_context_creator.cpp",

@@ -165,13 +165,14 @@ public:
     void SetDebugLine(const std::string& line) override;
     void SetHoverEffect(HoverEffectType hoverEffect) override;
     void SetHitTestMode(NG::HitTestMode hitTestMode) override;
-    void SetKeyboardShortcut(const std::string& value, const std::vector<CtrlKey>& keys,
+    void SetKeyboardShortcut(const std::string& value, const std::vector<ModifierKey>& keys,
         std::function<void()>&& onKeyboardShortcutAction) override {};
 
     void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) override;
     void BindMenu(std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc,
         const NG::MenuParam& menuParam) override;
-    void BindContextMenu(ResponseType type, std::function<void()>&& buildFunc) override;
+
+    void BindContextMenu(ResponseType type, std::function<void()>&& buildFunc, const NG::MenuParam& menuParam) override;
     void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<void()>&& buildFunc, int32_t type) override {}
 
@@ -184,6 +185,10 @@ public:
     void SetForegroundColor(const Color& color) override {}
     void SetForegroundColorStrategy(const ForegroundColorStrategy& strategy) override {}
     void SetAllowDrop(const std::set<std::string>& allowDrop) override {}
+
+    void CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
+        const std::function<void(float)>& onCallbackEvent) override {};
+    void UpdateAnimatablePropertyFloat(const std::string& propertyName, float value) override {};
 };
 
 } // namespace OHOS::Ace::Framework

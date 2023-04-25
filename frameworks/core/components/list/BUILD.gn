@@ -37,7 +37,12 @@ build_component("list") {
     "render_list_item_group_creator.cpp",
     "tv_interactive_effect.cpp",
   ]
-
+  if (ace_use_new_skia) {
+    sources -= [
+      "flutter_render_list.cpp",
+      "flutter_render_list_item.cpp",
+    ]
+  }
   rosen_sources = [
     "rosen_render_list.cpp",
     "rosen_render_list_item.cpp",

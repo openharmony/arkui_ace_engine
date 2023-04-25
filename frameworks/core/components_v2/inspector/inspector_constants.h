@@ -397,6 +397,9 @@ ACE_EXPORT extern const char MENU_WRAPPER_ETS_TAG[];
 ACE_EXPORT extern const char TEXTAREA_COMPONENT_TAG[];
 ACE_EXPORT extern const char TEXTAREA_ETS_TAG[];
 
+// textdrag
+ACE_EXPORT extern const char TEXTDRAG_ETS_TAG[];
+
 // textinput
 ACE_EXPORT extern const char TEXTINPUT_COMPONENT_TAG[];
 ACE_EXPORT extern const char TEXTINPUT_ETS_TAG[];

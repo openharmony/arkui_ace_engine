@@ -12,8 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#ifndef NEW_SKIA
 #include "core/components/multimodal/flutter_render_multimodal.h"
+#endif
 #include "core/components/multimodal/rosen_render_multimodal.h"
 
 namespace OHOS::Ace {
@@ -26,7 +27,11 @@ RefPtr<RenderNode> RenderMultimodal::Create()
         return nullptr;
 #endif
     } else {
+#ifndef NEW_SKIA
         return AceType::MakeRefPtr<FlutterRenderMultimodal>();
+#else
+        return nullptr;
+#endif
     }
 }
 } // namespace OHOS::Ace

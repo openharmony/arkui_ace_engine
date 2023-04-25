@@ -23,6 +23,7 @@
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/transaction/rs_transaction.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
+
 #include "core/components_ng/render/adapter/rosen_window.h"
 #endif
 
@@ -191,7 +192,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     FlushAnimation(GetTimeFromExternalTimer());
     FlushTouchEvents();
     FlushBuild();
-    if (isFormRender_ && drawDelegate_) {
+    if (isFormRender_ && drawDelegate_ && rootNode_) {
         auto renderContext = AceType::DynamicCast<NG::RenderContext>(rootNode_->GetRenderContext());
         drawDelegate_->DrawRSFrame(renderContext);
         drawDelegate_ = nullptr;
@@ -332,9 +333,7 @@ void PipelineContext::RegisterRootEvent()
     // use an empty longPress event placeholder in the EtsCard scenario
     auto hub = rootNode_->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(hub);
-    auto event = [](const GestureEvent& info) mutable {
-        LOGD("Not Support LongPress");
-    };
+    auto event = [](const GestureEvent& info) mutable { LOGD("Not Support LongPress"); };
     auto longPress = AceType::MakeRefPtr<NG::LongPressEvent>(std::move(event));
     hub->SetLongPressEvent(longPress, false, true);
 }
@@ -669,7 +668,9 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
             positionY, (rootSize.Height() - keyboardHeight), offsetFix, keyboardHeight);
         if (NearZero(keyboardHeight)) {
             SetRootRect(rootSize.Width(), rootSize.Height(), 0);
-        } else if (positionY > (rootSize.Height() - keyboardHeight) && offsetFix > 0.0) {
+        } else if (LessOrEqual(rootSize.Height() - positionY - height, height)) {
+            SetRootRect(rootSize.Width(), rootSize.Height(), -keyboardHeight);
+        } else if (positionY + height > (rootSize.Height() - keyboardHeight) && offsetFix > 0.0) {
             SetRootRect(rootSize.Width(), rootSize.Height(), -offsetFix);
         } else if ((positionY + height > rootSize.Height() - keyboardHeight &&
                        positionY < rootSize.Height() - keyboardHeight && height < keyboardHeight / 2.0f) &&
@@ -1084,23 +1085,24 @@ bool PipelineContext::RequestDefaultFocus()
     auto mainFocusHub = mainNode->GetFocusHub();
     CHECK_NULL_RETURN(mainFocusHub, false);
     if (mainFocusHub->IsDefaultHasFocused()) {
-        LOGD("RequestDefaultFocus: %{public}s/%{public}d 's default focus node has be focused.",
-            mainNode->GetTag().c_str(), mainNode->GetId());
-        return false;
-    }
-    auto defaultFocusNode = mainFocusHub->GetChildFocusNodeByType();
-    if (!defaultFocusNode) {
-        LOGD("RequestDefaultFocus: %{public}s/%{public}d do not has default focus node.", mainNode->GetTag().c_str(),
+        LOGD("MainNode: %{public}s/%{public}d 's default focus node has be focused.", mainNode->GetTag().c_str(),
             mainNode->GetId());
         return false;
     }
+    auto defaultFocusNodeWeak = mainFocusHub->GetDefaultFocusNode();
+    auto defaultFocusNode = defaultFocusNodeWeak.Upgrade();
+    if (!defaultFocusNode) {
+        return false;
+    }
     if (!defaultFocusNode->IsFocusableWholePath()) {
-        LOGD("RequestDefaultFocus: %{public}s/%{public}d 's default focus node is not focusable.",
-            mainNode->GetTag().c_str(), mainNode->GetId());
+        LOGD("MainNode: %{public}s/%{public}d 's default focus node is not focusable.", mainNode->GetTag().c_str(),
+            mainNode->GetId());
         return false;
     }
     mainFocusHub->SetIsDefaultHasFocused(true);
-    LOGD("Focus: request default focus node %{public}s", defaultFocusNode->GetFrameName().c_str());
+    LOGD("MainNode: %{public}s/%{public}d request default focus node: %{public}s/%{public}d",
+        mainNode->GetTag().c_str(), mainNode->GetId(), defaultFocusNode->GetFrameName().c_str(),
+        defaultFocusNode->GetFrameId());
     return defaultFocusNode->RequestFocusImmediately();
 }
 
@@ -1270,10 +1272,11 @@ void PipelineContext::OnHide()
 
 void PipelineContext::WindowFocus(bool isFocus)
 {
+    LOGI("WindowFocus: windowId: %{public}d, onFocus: %{public}d, onShow: %{public}d.", windowId_, onFocus_, onShow_);
     CHECK_RUN_ON(UI);
     onFocus_ = isFocus;
     if (!isFocus) {
-        LOGD("WindowFocus: isFocus_ is %{public}d. Lost all focus.", onFocus_);
+        LOGD("WindowFocus: onFocus_ is %{public}d. Lost all focus.", onFocus_);
         RootLostFocus(BlurReason::WINDOW_BLUR);
         NotifyPopupDismiss();
         OnVirtualKeyboardAreaChange(Rect());
@@ -1281,8 +1284,6 @@ void PipelineContext::WindowFocus(bool isFocus)
     if (onFocus_ && onShow_) {
         LOGD("WindowFocus: onFocus_ and onShow_ are both true. Do FlushFocus().");
         FlushFocus();
-    } else {
-        LOGD("WindowFocus: onFocus_ is %{public}d, onShow_ is %{public}d.", onFocus_, onShow_);
     }
     FlushWindowFocusChangedCallback(isFocus);
 }
@@ -1404,12 +1405,12 @@ void PipelineContext::AddBuildFinishCallBack(std::function<void()>&& callback)
 
 void PipelineContext::AddWindowStateChangedCallback(int32_t nodeId)
 {
-    onWindowStateChangedCallbacks_.emplace_back(nodeId);
+    onWindowStateChangedCallbacks_.emplace(nodeId);
 }
 
 void PipelineContext::RemoveWindowStateChangedCallback(int32_t nodeId)
 {
-    onWindowStateChangedCallbacks_.remove(nodeId);
+    onWindowStateChangedCallbacks_.erase(nodeId);
 }
 
 void PipelineContext::FlushWindowStateChangedCallback(bool isShow)
@@ -1487,26 +1488,33 @@ void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
 {
     auto manager = GetDragDropManager();
     CHECK_NULL_VOID(manager);
+#ifdef ENABLE_DRAG_FRAMEWORK
+    if (action == DragEventAction::DRAG_EVENT_OUT) {
+        manager->ClearSummary();
+        manager->ClearExtraInfo();
+    }
+#endif // ENABLE_DRAG_FRAMEWORK
     if (manager->IsDragged() && action != DragEventAction::DRAG_EVENT_END) {
         LOGI("current context is the source of drag");
         return;
     }
 
     std::string extraInfo;
-    manager->GetExtraInfoFromClipboard(extraInfo);
 
+#ifdef ENABLE_DRAG_FRAMEWORK
+    if (action == DragEventAction::DRAG_EVENT_START) {
+        manager->RequireSummary();
+        manager->GetExtraInfoFromClipboard(extraInfo);
+        manager->SetExtraInfo(extraInfo);
+    }
+#else
+    manager->GetExtraInfoFromClipboard(extraInfo);
+#endif // ENABLE_DRAG_FRAMEWORK
     if (action == DragEventAction::DRAG_EVENT_END) {
         manager->OnDragEnd(static_cast<float>(x), static_cast<float>(y), extraInfo);
         manager->RestoreClipboardData();
         return;
     }
-#ifdef ENABLE_DRAG_FRAMEWORK
-    if (action == DragEventAction::DRAG_EVENT_START) {
-        manager->RequireSummary();
-    } else if (action == DragEventAction::DRAG_EVENT_OUT) {
-        manager->ClearSummary();
-    }
-#endif // ENABLE_DRAG_FRAMEWORK
     manager->OnDragMove(static_cast<float>(x), static_cast<float>(y), extraInfo);
 }
 
@@ -1564,6 +1572,57 @@ void PipelineContext::Finish(bool /*autoFinish*/) const
 void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task)
 {
     taskScheduler_.AddAfterLayoutTask(std::move(task));
+}
+
+void PipelineContext::RestoreNodeInfo(std::unique_ptr<JsonValue> nodeInfo)
+{
+    if (!nodeInfo->IsObject()) {
+        LOGW("restore nodeInfo is invalid");
+    }
+    auto child = nodeInfo->GetChild();
+    while (child->IsObject()) {
+        auto key = child->GetKey();
+        auto value = child->GetString();
+        restoreNodeInfo_.try_emplace(StringUtils::StringToInt(key), value);
+        child = child->GetNext();
+    }
+}
+
+std::unique_ptr<JsonValue> PipelineContext::GetStoredNodeInfo()
+{
+    auto jsonNodeInfo = JsonUtil::Create(false);
+    auto iter = storeNode_.begin();
+    while (iter != storeNode_.end()) {
+        auto node = (iter->second).Upgrade();
+        if (node) {
+            std::string info = node->ProvideRestoreInfo();
+            if (!info.empty()) {
+                jsonNodeInfo->Put(std::to_string(iter->first).c_str(), info.c_str());
+            }
+        }
+        ++iter;
+    }
+    return jsonNodeInfo;
+}
+
+void PipelineContext::StoreNode(int32_t restoreId, const WeakPtr<FrameNode>& node)
+{
+    auto ret = storeNode_.try_emplace(restoreId, node);
+    if (!ret.second) {
+        LOGW("update restore node, id = %{public}d", restoreId);
+        storeNode_[restoreId] = node;
+    }
+}
+
+std::string PipelineContext::GetRestoreInfo(int32_t restoreId)
+{
+    auto iter = restoreNodeInfo_.find(restoreId);
+    if (iter != restoreNodeInfo_.end()) {
+        std::string restoreNodeInfo = iter->second;
+        restoreNodeInfo_.erase(iter);
+        return restoreNodeInfo;
+    }
+    return "";
 }
 
 } // namespace OHOS::Ace::NG

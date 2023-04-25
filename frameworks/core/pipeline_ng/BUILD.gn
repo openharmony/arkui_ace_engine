@@ -32,12 +32,16 @@ template("ace_core_pipeline_ng_source_set") {
 
     configs += [ "$ace_root:ace_config" ]
 
-    deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
-
-    deps += [
+    deps = [
       "$ace_flutter_engine_root:third_party_flutter_engine_$platform",
-      "$ace_flutter_engine_root/skia:ace_skia_$platform",
+      "$ace_root/frameworks/core/components/theme:build_theme_code",
     ]
+
+    if (ace_use_new_skia) {
+      deps += [ "$skia_root_new:skia_$platform" ]
+    } else {
+      deps += [ "$ace_flutter_engine_root/skia:ace_skia_$platform" ]
+    }
 
     if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {
       if (is_cross_platform_build) {

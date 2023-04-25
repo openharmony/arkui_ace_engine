@@ -18,7 +18,7 @@
 namespace OHOS::Ace::NG {
     void GeometryTransition::Build(const WeakPtr<FrameNode>& frameNode, bool isNodeIn) {}
     void GeometryTransition::WillLayout(const RefPtr<LayoutWrapper>& layoutWrapper) {}
-    void GeometryTransition::DidLayout(const RefPtr<LayoutWrapper>& root, const WeakPtr<FrameNode>& frameNode) {}
+    void GeometryTransition::DidLayout(const WeakPtr<FrameNode>& frameNode) {}
 
     bool GeometryTransition::Update(const WeakPtr<FrameNode>& which, const WeakPtr<FrameNode>& value)
     {
@@ -35,7 +35,7 @@ namespace OHOS::Ace::NG {
         return false;
     }
 
-    bool GeometryTransition::IsInvalid() const
+    bool GeometryTransition::IsInAndOutEmpty() const
     {
         return true;
     }

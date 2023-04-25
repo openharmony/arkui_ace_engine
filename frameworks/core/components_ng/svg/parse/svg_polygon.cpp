@@ -53,7 +53,11 @@ SkPath SvgPolygon::AsPath(const Size& viewPort) const
     }
     path.addPoly(&skPoints[0], skPoints.size(), isClose_);
     if (declaration->GetClipState().IsEvenodd()) {
+#ifndef NEW_SKIA
         path.setFillType(SkPath::FillType::kEvenOdd_FillType);
+#else
+        path.setFillType(SkPathFillType::kEvenOdd);
+#endif
     }
     return path;
 }

@@ -26,19 +26,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<QRCodeModel> QRCodeModel::instance_ = nullptr;
+std::mutex QRCodeModel::mutex_;
 
 QRCodeModel* QRCodeModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::ImageModelNG());
+            instance_.reset(new NG::ImageModelNG());
 #else
-        if (Container::IsCurrentUseNewPipeline()) {
-            instance_.reset(new NG::QRCodeModelNG());
-        } else {
-            instance_.reset(new Framework::QRCodeModelImpl());
-        }
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::QRCodeModelNG());
+            } else {
+                instance_.reset(new Framework::QRCodeModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }

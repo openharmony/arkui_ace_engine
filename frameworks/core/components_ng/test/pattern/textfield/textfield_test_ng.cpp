@@ -1269,10 +1269,10 @@ HWTEST_F(TextFieldPatternTestNg, PaintSelection003, TestSize.Level1)
     pattern->selectionMode_ = SelectionMode::SELECT;
     pattern->textSelector_.baseOffset = 1;
     pattern->textSelector_.destinationOffset = 0;
-    std::vector<RSTypographyProperties::TextBox> textBoxs;
+    std::vector<RSTypographyProperties::TextBox> textBoxes;
     RSTypographyProperties::TextBox textBox;
-    textBoxs.emplace_back(textBox);
-    pattern->textBoxes_ = textBoxs;
+    textBoxes.emplace_back(textBox);
+    pattern->textBoxes_ = textBoxes;
     auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
     EdgeEffect edgeEffect;
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);

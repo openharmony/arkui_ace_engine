@@ -35,11 +35,9 @@ public:
     ImageLoadingContext(const ImageSourceInfo& src, LoadNotifier&& loadNotifier, bool syncLoad = false);
     ~ImageLoadingContext() override;
 
-    static SizeF CalculateTargetSize(const SizeF& srcSize, const SizeF& dstSize, const SizeF& rawImageSize);
-    void MakeCanvasImageIfNeed(const SizeF& dstSize, bool incomingNeedResize, ImageFit incomingImageFit,
+    // return true if calling MakeCanvasImage is necessary
+    bool MakeCanvasImageIfNeed(const SizeF& dstSize, bool autoResize, ImageFit imageFit,
         const std::optional<SizeF>& sourceSize = std::nullopt);
-
-    void RegisterStateChangeCallbacks();
 
     /* interfaces to drive image loading */
     void LoadImageData();
@@ -93,6 +91,16 @@ private:
     void OnLoadSuccess();
     void OnLoadFail();
 
+    // round up int to the nearest 2-fold proportion of image width
+    // REQUIRE: value > 0, image width > 0
+    int32_t RoundUp(int32_t value);
+    static SizeF CalculateTargetSize(const SizeF& srcSize, const SizeF& dstSize, const SizeF& rawImageSize);
+
+    inline bool SizeChanging(const SizeF& dstSize)
+    {
+        return dstSize_.IsPositive() && dstSize != dstSize_;
+    }
+    
     const ImageSourceInfo src_;
     RefPtr<ImageStateManager> stateManager_;
     RefPtr<ImageObject> imageObj_;
@@ -107,6 +115,9 @@ private:
     RectF srcRect_;
     RectF dstRect_;
     SizeF dstSize_;
+    // to determine whether the image needs to be reloaded
+    int32_t sizeLevel_ = -1;
+
     ImageFit imageFit_ = ImageFit::COVER;
     std::unique_ptr<SizeF> sourceSizePtr_ = nullptr;
     std::function<void()> updateParamsCallback_ = nullptr;

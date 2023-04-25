@@ -23,19 +23,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<RowModel> RowModel::instance_ = nullptr;
+std::mutex RowModel::mutex_;
 
 RowModel* RowModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::RowModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::RowModelNG());
-        } else {
-            instance_.reset(new Framework::RowModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::RowModelNG());
+            } else {
+                instance_.reset(new Framework::RowModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }

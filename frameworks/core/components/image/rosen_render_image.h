@@ -16,7 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_IMAGE_ROSEN_RENDER_IMAGE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_IMAGE_ROSEN_RENDER_IMAGE_H
 
+#ifdef NEW_SKIA
+#include "modules/svg/include/SkSVGDOM.h"
+#else
 #include "experimental/svg/model/SkSVGDOM.h"
+#endif
 
 #include "core/components/image/render_image.h"
 #include "core/image/image_provider.h"
@@ -88,7 +92,7 @@ protected:
     void LayoutImageObject() override;
     void* GetSkImage() override
     {
-        return reinterpret_cast<void*>(&image_);
+        return reinterpret_cast<void *>(&image_);
     }
 
     RefPtr<PixelMap> GetPixmapFromSkImage() override;
@@ -126,6 +130,9 @@ private:
     std::function<void()> GenerateThumbnailLoadTask();
 
     RefPtr<ImageObject> imageObj_;
+#ifdef NEW_SKIA
+    SkSamplingOptions options_;
+#endif
     sk_sp<SkSVGDOM> skiaDom_;
     RefPtr<SvgDom> svgDom_;
     RefPtr<NG::CanvasImage> image_;

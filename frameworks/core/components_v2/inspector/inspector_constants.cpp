@@ -386,6 +386,9 @@ const char MENU_WRAPPER_ETS_TAG[] = "MenuWrapper";
 const char TEXTAREA_COMPONENT_TAG[] = "TextFieldComponent";
 const char TEXTAREA_ETS_TAG[] = "TextArea";
 
+// textdrag
+const char TEXTDRAG_ETS_TAG[] = "TextDrag";
+
 // textinput
 const char TEXTINPUT_COMPONENT_TAG[] = "TextInput";
 const char TEXTINPUT_ETS_TAG[] = "TextInput";

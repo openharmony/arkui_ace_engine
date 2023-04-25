@@ -24,5 +24,8 @@ build_component("rich_text") {
     "rich_text_component.cpp",
     "rich_text_element.cpp",
   ]
+  if (ace_use_new_skia) {
+    sources -= [ "flutter_render_rich_text.cpp" ]
+  }
   rosen_sources = [ "rosen_render_rich_text.cpp" ]
 }

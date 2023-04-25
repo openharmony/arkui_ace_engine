@@ -46,19 +46,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<TextFieldModel> TextFieldModel::instance_ = nullptr;
+std::mutex TextFieldModel::mutex_;
 
 TextFieldModel* TextFieldModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::TextFieldModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::TextFieldModelNG());
-        } else {
-            instance_.reset(new Framework::TextFieldModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::TextFieldModelNG());
+            } else {
+                instance_.reset(new Framework::TextFieldModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }

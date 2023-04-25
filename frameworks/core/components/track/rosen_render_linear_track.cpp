@@ -15,13 +15,13 @@
 
 #include "core/components/track/rosen_render_linear_track.h"
 
-#include "third_party/skia/include/core/SkCanvas.h"
-#include "third_party/skia/include/core/SkMaskFilter.h"
-#include "third_party/skia/include/core/SkPaint.h"
-#include "third_party/skia/include/core/SkPath.h"
-#include "third_party/skia/include/core/SkRRect.h"
-#include "third_party/skia/include/core/SkShader.h"
-#include "third_party/skia/include/effects/SkGradientShader.h"
+#include "include/core/SkCanvas.h"
+#include "include/core/SkMaskFilter.h"
+#include "include/core/SkPaint.h"
+#include "include/core/SkPath.h"
+#include "include/core/SkRRect.h"
+#include "include/core/SkShader.h"
+#include "include/effects/SkGradientShader.h"
 
 #include "core/components/slider/render_slider.h"
 #include "core/components/track/render_track.h"

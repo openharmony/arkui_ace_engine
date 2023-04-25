@@ -33,7 +33,7 @@
 #include "core/components_ng/pattern/progress/progress_modifier.h"
 
 namespace OHOS::Ace::NG {
-constexpr Dimension DEFAULT_BORDER_WIDTH = 1.0_vp;
+constexpr float DEFAULT_BORDER_WIDTH = 1.0f;
 
 class ACE_EXPORT ProgressPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(ProgressPaintMethod, NodePaintMethod)
@@ -92,7 +92,7 @@ private:
     int32_t scaleCount_ = 0;
     float maxValue_ = 100.0f;
     float value_ = 0.0f;
-    Dimension capsuleBorderWidth_ = DEFAULT_BORDER_WIDTH;
+    Dimension capsuleBorderWidth_ = Dimension(DEFAULT_BORDER_WIDTH,  DimensionUnit::VP);
 
     ProgressType progressType_ = ProgressType::LINEAR;
     RefPtr<ProgressModifier> progressModifier_;

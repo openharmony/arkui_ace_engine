@@ -13,8 +13,11 @@
  * limitations under the License.
  */
 
+#ifndef NEW_SKIA
 #include "flutter_render_slider.h"
+#endif
 #include "rosen_render_slider.h"
+
 
 namespace OHOS::Ace {
 RefPtr<RenderNode> RenderSlider::Create()
@@ -26,7 +29,11 @@ RefPtr<RenderNode> RenderSlider::Create()
         return nullptr;
 #endif
     } else {
+#ifndef NEW_SKIA
         return AceType::MakeRefPtr<FlutterRenderSlider>();
+#else
+        return nullptr;
+#endif
     }
 }
 } // namespace OHOS::Ace

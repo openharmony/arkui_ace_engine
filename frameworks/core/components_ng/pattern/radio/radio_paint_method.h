@@ -74,6 +74,14 @@ public:
         radioModifier_->SetUIStatus(uiStatus_);
         radioModifier_->SetTouchHoverAnimationType(touchHoverType_);
         radioModifier_->UpdateAnimatableProperty();
+        auto horizontalPadding = radioTheme->GetHotZoneHorizontalPadding().ConvertToPx();
+        auto verticalPadding = radioTheme->GetHotZoneVerticalPadding().ConvertToPx();
+        float boundsRectOriginX = offset.GetX() - horizontalPadding;
+        float boundsRectOriginY = offset.GetY() - verticalPadding;
+        float boundsRectWidth = size.Width() + 2 * horizontalPadding;
+        float boundsRectHeight = size.Height() + 2 * verticalPadding;
+        RectF boundsRect(boundsRectOriginX, boundsRectOriginY, boundsRectWidth, boundsRectHeight);
+        radioModifier_->SetBoundsRect(boundsRect);
     }
 
     void SetHotZoneOffset(const OffsetF& hotZoneOffset)

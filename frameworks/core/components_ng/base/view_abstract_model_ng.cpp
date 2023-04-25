@@ -36,13 +36,20 @@ void ViewAbstractModelNG::BindMenu(
 #ifdef ENABLE_DRAG_FRAMEWORK
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true);
 #endif // ENABLE_DRAG_FRAMEWORK
+    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto overlayManager = pipelineContext->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    RegisterMenuAppearCallback(params, std::move(buildFunc), menuParam);
+
     GestureEventFunc showMenu;
     auto weakTarget = AceType::WeakClaim(AceType::RawPtr(targetNode));
     if (!params.empty()) {
         showMenu = [params, weakTarget, menuParam](GestureEvent& info) mutable {
             auto targetNode = weakTarget.Upgrade();
             CHECK_NULL_VOID(targetNode);
-            NG::OffsetF menuPosition { info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY() };
+            NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() + menuParam.positionOffset.GetX(),
+                info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
             // menu already created
             if (params.empty()) {
                 NG::ViewAbstract::ShowMenu(targetNode->GetId(), menuPosition);
@@ -55,7 +62,8 @@ void ViewAbstractModelNG::BindMenu(
         showMenu = [builderFunc = std::move(buildFunc), weakTarget, menuParam](const GestureEvent& info) mutable {
             auto targetNode = weakTarget.Upgrade();
             CHECK_NULL_VOID(targetNode);
-            NG::OffsetF menuPosition { info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY() };
+            NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() + menuParam.positionOffset.GetX(),
+                info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
             CreateCustomMenu(builderFunc, targetNode, false, menuPosition, menuParam);
         };
     } else {
@@ -65,8 +73,9 @@ void ViewAbstractModelNG::BindMenu(
     auto gestureHub = targetNode->GetOrCreateGestureEventHub();
     gestureHub->BindMenu(std::move(showMenu));
 
-    // delete menu when target node is removed from render tree
-    auto eventHub = targetNode->GetEventHub<NG::EventHub>();
+    RegisterMenuDisappearCallback(std::move(buildFunc), menuParam);
+
+    // delete menu when target node destroy
     auto destructor = [id = targetNode->GetId()]() {
         auto pipeline = NG::PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
@@ -74,30 +83,34 @@ void ViewAbstractModelNG::BindMenu(
         CHECK_NULL_VOID(overlayManager);
         overlayManager->DeleteMenu(id);
     };
-    eventHub->SetOnDisappear(destructor);
+    targetNode->PushDestroyCallback(destructor);
 }
 
-void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void()>&& buildFunc)
+void ViewAbstractModelNG::BindContextMenu(
+    ResponseType type, std::function<void()>&& buildFunc, const MenuParam& menuParam)
 {
     auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(targetNode);
 #ifdef ENABLE_DRAG_FRAMEWORK
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true);
 #endif // ENABLE_DRAG_FRAMEWORK
+    RegisterContextMenuAppearCallback(type, menuParam);
+
     auto hub = targetNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(hub);
     auto weakTarget = AceType::WeakClaim(AceType::RawPtr(targetNode));
     if (type == ResponseType::RIGHT_CLICK) {
-        OnMouseEventFunc event = [builder = std::move(buildFunc), weakTarget](MouseInfo& info) mutable {
+        OnMouseEventFunc event = [builder = std::move(buildFunc), weakTarget, menuParam](MouseInfo& info) mutable {
             auto targetNode = weakTarget.Upgrade();
             CHECK_NULL_VOID(targetNode);
-            NG::OffsetF menuPosition { info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY() };
+            NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() + menuParam.positionOffset.GetX(),
+                info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
             auto pipelineContext = NG::PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(pipelineContext);
             auto windowRect = pipelineContext->GetDisplayWindowRectInfo();
             menuPosition += NG::OffsetF { windowRect.Left(), windowRect.Top() };
             if (info.GetButton() == MouseButton::RIGHT_BUTTON && info.GetAction() == MouseAction::RELEASE) {
-                CreateCustomMenu(builder, targetNode, true, menuPosition);
+                CreateCustomMenu(builder, targetNode, true, menuPosition, menuParam);
                 info.SetStopPropagation(true);
             }
         };
@@ -106,15 +119,16 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
         inputHub->BindContextMenu(std::move(event));
     } else if (type == ResponseType::LONG_PRESS) {
         // create or show menu on long press
-        auto event = [builder = std::move(buildFunc), weakTarget](const GestureEvent& info) mutable {
+        auto event = [builder = std::move(buildFunc), weakTarget, menuParam](const GestureEvent& info) mutable {
             auto targetNode = weakTarget.Upgrade();
             CHECK_NULL_VOID(targetNode);
-            NG::OffsetF menuPosition { info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY() };
+            NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() + menuParam.positionOffset.GetX(),
+                info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
             auto pipelineContext = NG::PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(pipelineContext);
             auto windowRect = pipelineContext->GetDisplayWindowRectInfo();
             menuPosition += NG::OffsetF { windowRect.Left(), windowRect.Top() };
-            CreateCustomMenu(builder, targetNode, true, menuPosition);
+            CreateCustomMenu(builder, targetNode, true, menuPosition, menuParam);
         };
         auto longPress = AceType::MakeRefPtr<NG::LongPressEvent>(std::move(event));
 
@@ -123,6 +137,8 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
         LOGE("The arg responseType is invalid.");
         return;
     }
+
+    RegisterContextMenuDisappearCallback(menuParam);
 }
 
 void ViewAbstractModelNG::SetPivot(const Dimension& x, const Dimension& y, const Dimension& z)
@@ -163,5 +179,54 @@ void ViewAbstractModelNG::BindContentCover(
     CHECK_NULL_VOID(overlayManager);
 
     overlayManager->BindContentCover(isShow, std::move(callback), std::move(buildNodeFunc), type, targetNode->GetId());
+}
+
+void ViewAbstractModelNG::RegisterMenuAppearCallback(
+    std::vector<NG::OptionParam>& params, std::function<void()>&& buildFunc, const MenuParam& menuParam)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    if (!params.empty() || buildFunc) {
+        overlayManager->RegisterOnShowMenu([menuParam]() {
+            if (menuParam.onAppear) {
+                menuParam.onAppear();
+            }
+        });
+    }
+}
+
+void ViewAbstractModelNG::RegisterMenuDisappearCallback(std::function<void()>&& buildFunc, const MenuParam& menuParam)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->RegisterOnHideMenu([menuParam]() {
+        if (menuParam.onDisappear) {
+            menuParam.onDisappear();
+        }
+    });
+}
+
+void ViewAbstractModelNG::RegisterContextMenuAppearCallback(ResponseType type, const MenuParam& menuParam)
+{
+    if (type == ResponseType::RIGHT_CLICK || type == ResponseType::LONG_PRESS) {
+        SubwindowManager::GetInstance()->RegisterOnShowMenu([menuParam]() {
+            if (menuParam.onAppear) {
+                menuParam.onAppear();
+            }
+        });
+    }
+}
+
+void ViewAbstractModelNG::RegisterContextMenuDisappearCallback(const MenuParam& menuParam)
+{
+    SubwindowManager::GetInstance()->RegisterOnHideMenu([menuParam]() {
+        if (menuParam.onDisappear) {
+            menuParam.onDisappear();
+        }
+    });
 }
 } // namespace OHOS::Ace::NG

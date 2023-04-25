@@ -178,6 +178,8 @@ public:
 
     SafeAreaEdgeInserts viewSafeArea_;
 
+    virtual void SetKeepScreenOn(bool keepScreenOn) {};
+
 protected:
     bool isRequestVsync_ = false;
     bool onShow_ = true;

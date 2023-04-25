@@ -15,23 +15,32 @@
 
 #include "core/components_ng/pattern/custom_paint/offscreen_canvas_paint_method.h"
 
-#include "flutter/third_party/txt/src/txt/paragraph_builder.h"
-#include "flutter/third_party/txt/src/txt/paragraph_style.h"
-#include "third_party/skia/include/core/SkMaskFilter.h"
-#include "third_party/skia/include/effects/SkBlurImageFilter.h"
-#include "third_party/skia/include/encode/SkJpegEncoder.h"
-#include "third_party/skia/include/encode/SkPngEncoder.h"
-#include "third_party/skia/include/encode/SkWebpEncoder.h"
-#include "third_party/skia/include/utils/SkBase64.h"
+#include "txt/paragraph_builder.h"
+#include "txt/paragraph_style.h"
+#include "include/core/SkMaskFilter.h"
+#ifndef NEW_SKIA
+#include "include/effects/SkBlurImageFilter.h"
+#else
+#include "include/core/SkColorFilter.h"
+#include "include/effects/SkImageFilters.h"
+#endif
+#include "include/encode/SkJpegEncoder.h"
+#include "include/encode/SkPngEncoder.h"
+#include "include/encode/SkWebpEncoder.h"
+#include "include/utils/SkBase64.h"
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/i18n/localization.h"
 #include "base/image/pixel_map.h"
 #include "base/utils/utils.h"
+#ifndef NEW_SKIA
 #include "core/components/common/painter/flutter_decoration_painter.h"
+#endif
 #include "core/components/common/painter/rosen_decoration_painter.h"
 #include "core/components/font/constants_converter.h"
+#ifndef NEW_SKIA
 #include "core/components/font/flutter_font_collection.h"
+#endif
 #include "core/components/font/rosen_font_collection.h"
 
 namespace OHOS::Ace::NG {
@@ -249,7 +258,11 @@ void OffscreenCanvasPaintMethod::SetContrastFilter(const std::string& percent)
 
 void OffscreenCanvasPaintMethod::SetBlurFilter(const std::string& percent)
 {
+#ifndef NEW_SKIA
     imagePaint_.setImageFilter(SkBlurImageFilter::Make(BlurStrToDouble(percent), BlurStrToDouble(percent), nullptr));
+#else
+    imagePaint_.setImageFilter(SkImageFilters::Blur(BlurStrToDouble(percent), BlurStrToDouble(percent), nullptr));
+#endif
 }
 
 void OffscreenCanvasPaintMethod::SetDropShadowFilter(const std::string& percent)
@@ -457,7 +470,7 @@ void OffscreenCanvasPaintMethod::DrawImage(
         SkRect skRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
         SkPath path;
         path.addRect(skRect);
-        FlutterDecorationPainter::PaintShadow(path, imageShadow_, skCanvas);
+        RosenDecorationPainter::PaintShadow(path, imageShadow_, skCanvas);
     }
     switch (canvasImage.flag) {
         case 0:
@@ -465,7 +478,11 @@ void OffscreenCanvasPaintMethod::DrawImage(
             break;
         case 1: {
             SkRect rect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
+#ifndef NEW_SKIA
             skCanvas->drawImageRect(image, rect, &imagePaint_);
+#else
+            skCanvas->drawImageRect(image, rect, SkSamplingOptions(), &imagePaint_);
+#endif
             break;
         }
         case 2: {
@@ -473,14 +490,23 @@ void OffscreenCanvasPaintMethod::DrawImage(
                 SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
             SkRect srcRect =
                 SkRect::MakeXYWH(canvasImage.sx, canvasImage.sy, canvasImage.sWidth, canvasImage.sHeight);
+#ifndef NEW_SKIA
             skCanvas->drawImageRect(image, srcRect, dstRect, &imagePaint_);
+#else
+            skCanvas->drawImageRect(
+                image, srcRect, dstRect, SkSamplingOptions(), &imagePaint_, SkCanvas::kFast_SrcRectConstraint);
+#endif
             break;
         }
         default:
             break;
     }
     if (globalState_.GetType() != CompositeOperation::SOURCE_OVER) {
+#ifndef NEW_SKIA
         skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
+#else
+        skCanvas_->drawImage(cacheBitmap_.asImage(), 0, 0, SkSamplingOptions(), &cachePaint_);
+#endif
         cacheBitmap_.eraseColor(0);
     }
 }
@@ -507,7 +533,11 @@ void OffscreenCanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const A
             break;
         case 1: {
             SkRect rect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
+#ifndef NEW_SKIA
             skCanvas->drawImageRect(image, rect, &imagePaint_);
+#else
+            skCanvas->drawImageRect(image, rect, SkSamplingOptions(), &imagePaint_);
+#endif
             break;
         }
         case 2: {
@@ -515,14 +545,23 @@ void OffscreenCanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const A
                 SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
             SkRect srcRect =
                 SkRect::MakeXYWH(canvasImage.sx, canvasImage.sy, canvasImage.sWidth, canvasImage.sHeight);
+#ifndef NEW_SKIA
             skCanvas->drawImageRect(image, srcRect, dstRect, &imagePaint_);
+#else
+            skCanvas->drawImageRect(
+                image, srcRect, dstRect, SkSamplingOptions(), &imagePaint_, SkCanvas::kFast_SrcRectConstraint);
+#endif
             break;
         }
         default:
             break;
     }
     if (globalState_.GetType() != CompositeOperation::SOURCE_OVER) {
+#ifndef NEW_SKIA
         skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
+#else
+        skCanvas_->drawImage(cacheBitmap_.asImage(), 0, 0, SkSamplingOptions(), &cachePaint_);
+#endif
         cacheBitmap_.eraseColor(0);
     }
 }
@@ -544,7 +583,11 @@ void OffscreenCanvasPaintMethod::SetPaintImage()
 #endif
 
     imagePaint_.setMaskFilter(SkMaskFilter::MakeBlur(SkBlurStyle::kNormal_SkBlurStyle, 0));
+#ifndef NEW_SKIA
     imagePaint_.setImageFilter(SkBlurImageFilter::Make(0, 0, nullptr));
+#else
+    imagePaint_.setImageFilter(SkImageFilters::Blur(0, 0, nullptr));
+#endif
 
     SetDropShadowFilter("0px 0px 0px black");
     std::string filterType, filterParam;
@@ -577,7 +620,7 @@ std::unique_ptr<Ace::ImageData> OffscreenCanvasPaintMethod::GetImageData(
     SkBitmap tempCache;
     tempCache.allocPixels(imageInfo);
     SkCanvas tempCanvas(tempCache);
-#ifdef USE_SYSTEM_SKIA_S
+#if defined(USE_SYSTEM_SKIA_S) || defined (NEW_SKIA)
     tempCanvas.drawImageRect(
         canvasCache_.asImage(), srcRect, dstRect, SkSamplingOptions(), nullptr, SkCanvas::kFast_SrcRectConstraint);
 #else
@@ -629,7 +672,7 @@ double OffscreenCanvasPaintMethod::MeasureText(const std::string& text, const Pa
     txt::ParagraphStyle style;
     style.text_align = ConvertTxtTextAlign(state.GetTextAlign());
     style.text_direction = ConvertTxtTextDirection(state.GetOffTextDirection());
-    auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
+    auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
     CHECK_NULL_RETURN(fontCollection, 0.0);
     std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
     txt::TextStyle txtStyle;
@@ -648,7 +691,7 @@ double OffscreenCanvasPaintMethod::MeasureTextHeight(const std::string& text, co
     txt::ParagraphStyle style;
     style.text_align = ConvertTxtTextAlign(state.GetTextAlign());
     style.text_direction = ConvertTxtTextDirection(state.GetOffTextDirection());
-    auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
+    auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
     CHECK_NULL_RETURN(fontCollection, 0.0);
     std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
     txt::TextStyle txtStyle;
@@ -668,7 +711,7 @@ TextMetrics OffscreenCanvasPaintMethod::MeasureTextMetrics(const std::string& te
     txt::ParagraphStyle style;
     style.text_align = ConvertTxtTextAlign(state.GetTextAlign());
     style.text_direction = ConvertTxtTextDirection(state.GetOffTextDirection());
-    auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
+    auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
     CHECK_NULL_RETURN(fontCollection, textMetrics);
     std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
     txt::TextStyle txtStyle;
@@ -756,7 +799,7 @@ bool OffscreenCanvasPaintMethod::UpdateOffParagraph(const std::string& text, boo
         style.text_direction = txt::TextDirection::rtl;
     }
     style.text_align = GetEffectiveAlign(style.text_align, style.text_direction);
-    auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
+    auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
     CHECK_NULL_RETURN(fontCollection, false);
     std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
     txt::TextStyle txtStyle;
@@ -765,7 +808,11 @@ bool OffscreenCanvasPaintMethod::UpdateOffParagraph(const std::string& text, boo
         txtShadow.color = shadow_.GetColor().GetValue();
         txtShadow.offset.fX = shadow_.GetOffset().GetX();
         txtShadow.offset.fY = shadow_.GetOffset().GetY();
+#ifndef NEW_SKIA
         txtShadow.blur_radius = shadow_.GetBlurRadius();
+#else
+        txtShadow.blur_sigma = shadow_.GetBlurRadius();
+#endif
         txtStyle.text_shadows.emplace_back(txtShadow);
     }
     txtStyle.locale = Localization::GetInstance()->GetFontLocale();
@@ -813,7 +860,7 @@ void OffscreenCanvasPaintMethod::UpdateTextStyleForeground(bool isStroke, txt::T
         if (hasShadow) {
             paint.setColor(shadow_.GetColor().GetValue());
             paint.setMaskFilter(SkMaskFilter::MakeBlur(SkBlurStyle::kNormal_SkBlurStyle,
-                FlutterDecorationPainter::ConvertRadiusToSigma(shadow_.GetBlurRadius())));
+                NG::SkiaDecorationPainter::ConvertRadiusToSigma(shadow_.GetBlurRadius())));
         }
         txtStyle.foreground = paint;
         txtStyle.has_foreground = true;
@@ -822,7 +869,7 @@ void OffscreenCanvasPaintMethod::UpdateTextStyleForeground(bool isStroke, txt::T
 
 void OffscreenCanvasPaintMethod::PaintShadow(const SkPath& path, const Shadow& shadow, SkCanvas* canvas)
 {
-    FlutterDecorationPainter::PaintShadow(path, shadow, canvas);
+    RosenDecorationPainter::PaintShadow(path, shadow, canvas);
 }
 
 void OffscreenCanvasPaintMethod::Path2DRect(const OffsetF& offset, const PathArgs& args)
@@ -858,7 +905,7 @@ std::string OffscreenCanvasPaintMethod::ToDataURL(const std::string& type, const
     double viewScale = context->GetViewScale();
     tempCanvas.clear(SK_ColorTRANSPARENT);
     tempCanvas.scale(1.0 / viewScale, 1.0 / viewScale);
-#ifdef USE_SYSTEM_SKIA_S
+#if defined(USE_SYSTEM_SKIA_S) || defined (NEW_SKIA)
     //The return value of the dual framework interface has no alpha
     tempCanvas.drawImage(canvasCache_.asImage(), 0.0f, 0.0f);
 #else

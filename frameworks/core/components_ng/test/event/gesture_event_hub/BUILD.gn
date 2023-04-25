@@ -15,7 +15,7 @@ import("//build/test.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("gesture_event_hub_test_ng") {
-  module_out_path = "$test_output_path/event/gesture_event_hub"
+  module_out_path = event_test_output_path
 
   sources = [
     # inner

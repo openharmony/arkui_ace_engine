@@ -114,6 +114,10 @@ private:
     void UpdateBubble();
     void InitializeBubble();
 
+    bool AtMousePanArea(const Offset& offsetInFrame);
+    bool AtTouchPanArea(const Offset& offsetInFrame);
+    bool AtPanArea(const Offset& offset, const SourceType& sourceType);
+
     void UpdateMarkDirtyNode(const PropertyChangeFlag& Flag);
     Axis GetDirection() const;
 
@@ -160,7 +164,7 @@ private:
     float sliderLength_ = 0.0f;
     float borderBlank_ = 0.0f;
     float hotBlockShadowWidth_ = 0.0f;
-    OffsetF circleCenter_ = { 0, 0 };
+    OffsetF circleCenter_ = { 0.0f, 0.0f }; // Relative to the content area
 
     float trackThickness_ = 0.0f;
     float blockHotSize_ = 0.0f;

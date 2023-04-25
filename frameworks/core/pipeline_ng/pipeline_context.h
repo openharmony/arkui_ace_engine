@@ -323,6 +323,16 @@ public:
         }
     }
 
+    // restore
+    void RestoreNodeInfo(std::unique_ptr<JsonValue> nodeInfo) override;
+    std::unique_ptr<JsonValue> GetStoredNodeInfo() override;
+    void StoreNode(int32_t restoreId, const WeakPtr<FrameNode>& node);
+    std::string GetRestoreInfo(int32_t restoreId);
+    void RemoveStoredNode(int32_t restoreId)
+    {
+        storeNode_.erase(restoreId);
+    }
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -379,7 +389,7 @@ private:
     std::list<std::function<void()>> buildFinishCallbacks_;
 
     // window on show or on hide
-    std::list<int32_t> onWindowStateChangedCallbacks_;
+    std::set<int32_t> onWindowStateChangedCallbacks_;
     // window on focused or on unfocused
     std::list<int32_t> onWindowFocusChangedCallbacks_;
     // window on drag
@@ -415,11 +425,13 @@ private:
     bool onShow_ = false;
     bool onFocus_ = true;
 
+    std::unordered_map<int32_t, WeakPtr<FrameNode>> storeNode_;
+    std::unordered_map<int32_t, std::string> restoreNodeInfo_;
+
     std::list<FrameInfo> dumpFrameInfos_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };
-
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_PIPELINE_NG_CONTEXT_H

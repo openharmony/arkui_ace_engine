@@ -23,16 +23,21 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/option/option_pattern.h"
+#include "core/components_ng/pattern/select/select_pattern.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/utils.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
-
 namespace OHOS::Ace::NG {
 struct MenuItemFontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontSize, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontColor, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontWeight, FontWeight);
+};
+
+struct SelectMenuAlignOption {
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(AlignType, MenuAlignType);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(Offset, DimensionOffset);
 };
 
 class ACE_EXPORT MenuLayoutProperty : public LayoutProperty {
@@ -52,6 +57,8 @@ public:
         value->propPositionOffset_ = ClonePositionOffset();
         value->propMenuItemFontStyle_ = CloneMenuItemFontStyle();
         value->propTitle_ = CloneTitle();
+        value->propMenuPlacement_ = CloneMenuPlacement();
+        value->propSelectMenuAlignOption_ = CloneSelectMenuAlignOption();
         return value;
     }
 
@@ -63,6 +70,8 @@ public:
         ResetPositionOffset();
         ResetMenuItemFontStyle();
         ResetTitle();
+        ResetMenuPlacement();
+        ResetSelectMenuAlignOption();
     }
 
     // target frameNode that this menu belongs to
@@ -75,10 +84,17 @@ public:
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Title, std::string, PROPERTY_UPDATE_LAYOUT);
 
+    // placement to menu
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MenuPlacement, Placement, PROPERTY_UPDATE_LAYOUT);
+
     ACE_DEFINE_PROPERTY_GROUP(MenuItemFontStyle, MenuItemFontStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(MenuItemFontStyle, FontSize, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(MenuItemFontStyle, FontColor, Color, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(MenuItemFontStyle, FontWeight, FontWeight, PROPERTY_UPDATE_MEASURE);
+
+    ACE_DEFINE_PROPERTY_GROUP(SelectMenuAlignOption, SelectMenuAlignOption);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SelectMenuAlignOption, AlignType, MenuAlignType, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SelectMenuAlignOption, Offset, DimensionOffset, PROPERTY_UPDATE_MEASURE);
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 

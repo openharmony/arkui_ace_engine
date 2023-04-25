@@ -669,8 +669,9 @@ void TabBarPattern::PlayPressAnimation(int32_t index, const Color& pressColor, A
                                                             : Curves::SHARP);
     option.SetFillMode(FillMode::FORWARDS);
     Color color = pressColor;
+    auto layoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
     if (color == Color::TRANSPARENT && tabBarStyles_[index] == TabBarStyle::SUBTABBATSTYLE
-        && selectedModes_[index] == SelectedMode::BOARD) {
+        && selectedModes_[index] == SelectedMode::BOARD && layoutProperty->GetAxis() == Axis::HORIZONTAL) {
         color = indicatorStyles_[index].color;
     }
     AnimationUtils::Animate(option, [weak = AceType::WeakClaim(this), selectedIndex = index, color = color]() {
@@ -758,19 +759,19 @@ void TabBarPattern::UpdateGradientRegions()
     auto frameRect = geometryNode->GetFrameRect();
 
     std::fill(gradientRegions_.begin(), gradientRegions_.end(), false);
-    if (barMode == TabBarMode::SCROLLABLE) {
+    if (barMode == TabBarMode::SCROLLABLE && !tabItemOffsets_.empty()) {
         if (axis == Axis::HORIZONTAL) {
             if (LessNotEqual(tabItemOffsets_.front().GetX(), 0.0f)) {
                 gradientRegions_[LEFT_GRADIENT] = true;
             }
-            if (tabItemOffsets_.front().GetX() + childrenMainSize_ > frameRect.Width()) {
+            if (GreatNotEqual(tabItemOffsets_.front().GetX() + childrenMainSize_, frameRect.Width())) {
                 gradientRegions_[RIGHT_GRADIENT] = true;
             }
         } else if (axis == Axis::VERTICAL) {
             if (LessNotEqual(tabItemOffsets_.front().GetY(), 0.0f)) {
                 gradientRegions_[TOP_GRADIENT] = true;
             }
-            if (tabItemOffsets_.front().GetY() + childrenMainSize_ > frameRect.Height()) {
+            if (GreatNotEqual(tabItemOffsets_.front().GetY() + childrenMainSize_, frameRect.Height())) {
                 gradientRegions_[BOTTOM_GRADIENT] = true;
             }
         }
@@ -812,7 +813,11 @@ void TabBarPattern::UpdateTextColor(int32_t indicator)
 
 void TabBarPattern::UpdateSubTabBoard()
 {
-    if (indicator_ >= static_cast<int32_t>(indicatorStyles_.size()) ||
+    auto layoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto axis = layoutProperty->GetAxis().value_or(Axis::HORIZONTAL);
+
+    if (axis == Axis::VERTICAL || indicator_ >= static_cast<int32_t>(indicatorStyles_.size()) ||
         indicator_ >= static_cast<int32_t>(selectedModes_.size())) {
         return;
     }

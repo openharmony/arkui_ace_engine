@@ -45,6 +45,7 @@ public:
     void SetDisplayCount(int32_t displayCount) override;
     void SetShowIndicator(bool showIndicator) override;
     void SetIndicatorType(SwiperIndicatorType indicatorType) override;
+    void SetIsIndicatorCustomSize(bool isCustomSize) override;
     void SetItemSpace(const Dimension& itemSpace) override;
     void SetCachedCount(int32_t cachedCount) override;
     void SetOnChange(std::function<void(const BaseEventInfo* info)>&& onChange) override;

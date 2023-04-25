@@ -60,7 +60,7 @@ CheckBoxModifier::CheckBoxModifier(
         AceType::MakeRefPtr<AnimatablePropertyFloat>(static_cast<float>(checkBoxTheme->GetCheckStroke().ConvertToPx()));
     strokeSize_ =
         AceType::MakeRefPtr<AnimatablePropertyFloat>(static_cast<float>(checkBoxTheme->GetWidth().ConvertToPx()));
-    animateHoverColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::TRANSPARENT));
+    animateTouchHoverColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::TRANSPARENT));
     isSelect_ = AceType::MakeRefPtr<PropertyBool>(isSelect);
     isHover_ = AceType::MakeRefPtr<PropertyBool>(false);
     offset_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF());
@@ -71,7 +71,7 @@ CheckBoxModifier::CheckBoxModifier(
     AttachProperty(animatableCheckColor_);
     AttachProperty(animatableBorderColor_);
     AttachProperty(animatableShadowColor_);
-    AttachProperty(animateHoverColor_);
+    AttachProperty(animateTouchHoverColor_);
     AttachProperty(checkStroke_);
     AttachProperty(strokeSize_);
     AttachProperty(isSelect_);
@@ -113,7 +113,7 @@ void CheckBoxModifier::PaintCheckBox(RSCanvas& canvas, const OffsetF& paintOffse
     RSBrush brush;
     pen.SetWidth(borderWidth_);
     pen.SetAntiAlias(true);
-    DrawHoverBoard(canvas, contentSize, paintOffset);
+    DrawTouchAndHoverBoard(canvas, contentSize, paintOffset);
     RSPen shadowPen = RSPen(pen);
     brush.SetColor(ToRSColor(animatableBoardColor_->Get()));
     brush.SetAntiAlias(true);
@@ -137,10 +137,10 @@ void CheckBoxModifier::PaintCheckBox(RSCanvas& canvas, const OffsetF& paintOffse
     DrawCheck(canvas, paintOffset, pen, shadowPen, contentSize);
 }
 
-void CheckBoxModifier::DrawHoverBoard(RSCanvas& canvas, const SizeF& size, const OffsetF& offset) const
+void CheckBoxModifier::DrawTouchAndHoverBoard(RSCanvas& canvas, const SizeF& size, const OffsetF& offset) const
 {
     RSBrush brush;
-    brush.SetColor(ToRSColor(animateHoverColor_->Get()));
+    brush.SetColor(ToRSColor(animateTouchHoverColor_->Get()));
     brush.SetAntiAlias(true);
     float originX = offset.GetX() - hotZoneHorizontalPadding_.ConvertToPx();
     float originY = offset.GetY() - hotZoneVerticalPadding_.ConvertToPx();

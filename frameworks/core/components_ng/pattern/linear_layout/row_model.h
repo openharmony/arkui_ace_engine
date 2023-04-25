@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LINEAR_LAYOUT_ROW_MODEL_H
 
 #include <memory>
+#include <mutex>
 #include <optional>
 #include <string>
 
@@ -40,6 +41,7 @@ public:
 
 private:
     static std::unique_ptr<RowModel> instance_;
+    static std::mutex mutex_;
 };
 
 } // namespace OHOS::Ace

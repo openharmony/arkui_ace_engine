@@ -21,8 +21,8 @@
 #include <regex>
 #include <string_view>
 
-#include "third_party/skia/include/codec/SkCodec.h"
-#include "third_party/skia/include/utils/SkBase64.h"
+#include "include/codec/SkCodec.h"
+#include "include/utils/SkBase64.h"
 
 #include "base/image/image_source.h"
 #include "base/log/ace_trace.h"
@@ -406,7 +406,7 @@ sk_sp<SkData> Base64ImageLoader::LoadImageData(
         return nullptr;
     }
 
-#ifdef FLUTTER_2_5
+#if defined(FLUTTER_2_5) || defined(NEW_SKIA)
     size_t outputLen;
     SkBase64::Error error = SkBase64::Decode(base64Code.data(), base64Code.size(), nullptr, &outputLen);
     if (error != SkBase64::Error::kNoError) {
