@@ -186,8 +186,9 @@ void JSPatternLock::SetCircleRadius(const JSCallbackInfo& info)
     if (!ParseJsDimensionVp(info[0], radius)) {
         return;
     }
-
-    PatternLockModel::GetInstance()->SetCircleRadius(radius);
+    if (radius.IsNonNegative()) {
+        PatternLockModel::GetInstance()->SetCircleRadius(radius);
+    }
 }
 void JSPatternLock::SetSideLength(const JSCallbackInfo& info)
 {
