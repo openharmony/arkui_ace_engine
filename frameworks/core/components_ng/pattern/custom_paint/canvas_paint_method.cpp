@@ -30,7 +30,9 @@
 #include "base/utils/utils.h"
 #include "core/components/common/painter/rosen_decoration_painter.h"
 #include "core/components/font/constants_converter.h"
+#ifndef NEW_SKIA
 #include "core/components/font/flutter_font_collection.h"
+#endif
 #include "core/components/font/rosen_font_collection.h"
 #include "core/components_ng/image_provider/image_object.h"
 #include "core/components_ng/render/drawing.h"
@@ -358,7 +360,11 @@ double CanvasPaintMethod::MeasureText(const std::string& text, const PaintState&
     using namespace Constants;
     txt::ParagraphStyle style;
     style.text_align = ConvertTxtTextAlign(state.GetTextAlign());
+#ifndef NEW_SKIA
     auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
+#else
+    auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
+#endif
     CHECK_NULL_RETURN(fontCollection, 0.0);
     std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
     txt::TextStyle txtStyle;
@@ -376,7 +382,11 @@ double CanvasPaintMethod::MeasureTextHeight(const std::string& text, const Paint
     using namespace Constants;
     txt::ParagraphStyle style;
     style.text_align = ConvertTxtTextAlign(state.GetTextAlign());
+#ifndef NEW_SKIA
     auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
+#else
+    auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
+#endif
     CHECK_NULL_RETURN(fontCollection, 0.0);
     std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
     txt::TextStyle txtStyle;
@@ -395,7 +405,11 @@ TextMetrics CanvasPaintMethod::MeasureTextMetrics(const std::string& text, const
     TextMetrics textMetrics = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
     txt::ParagraphStyle style;
     style.text_align = ConvertTxtTextAlign(state.GetTextAlign());
+#ifndef NEW_SKIA
     auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
+#else
+    auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
+#endif
     CHECK_NULL_RETURN(fontCollection, textMetrics);
     std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
     txt::TextStyle txtStyle;
@@ -486,7 +500,11 @@ bool CanvasPaintMethod::UpdateParagraph(const OffsetF& offset, const std::string
         style.text_direction = txt::TextDirection::rtl;
     }
     style.text_align = GetEffectiveAlign(style.text_align, style.text_direction);
+#ifndef NEW_SKIA
     auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
+#else
+    auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
+#endif
     CHECK_NULL_RETURN(fontCollection, false);
     std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
     txt::TextStyle txtStyle;
