@@ -42,6 +42,10 @@
 namespace {
 constexpr double VISIBLE_RATIO_MIN = 0.0;
 constexpr double VISIBLE_RATIO_MAX = 1.0;
+#if defined(PREVIEW)
+constexpr int32_t SUBSTR_LENGTH = 3;
+const char DIMENSION_UNIT_VP[] = "vp";
+#endif
 } // namespace
 namespace OHOS::Ace::NG {
 FrameNode::FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
@@ -241,6 +245,40 @@ void FrameNode::TouchToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("responseRegion", jsArr);
 }
 
+void FrameNode::GeometryNodeToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+#if defined(PREVIEW)
+    bool hasIdealWidth = false;
+    bool hasIdealHeight = false;
+    if (layoutProperty_ && layoutProperty_->GetCalcLayoutConstraint()) {
+        auto selfIdealSize = layoutProperty_->GetCalcLayoutConstraint()->selfIdealSize;
+        hasIdealWidth = selfIdealSize.has_value() && selfIdealSize.value().Width().has_value();
+        hasIdealHeight = selfIdealSize.has_value() && selfIdealSize.value().Height().has_value();
+    }
+
+    auto jsonSize = json->GetValue("size");
+    if (!hasIdealWidth) {
+        auto idealWidthVpStr = std::to_string(Dimension(geometryNode_->GetFrameSize().Width()).ConvertToVp());
+        auto widthStr =
+            (idealWidthVpStr.substr(0, idealWidthVpStr.find(".") + SUBSTR_LENGTH) + DIMENSION_UNIT_VP).c_str();
+        json->Put("width", widthStr);
+        if (jsonSize) {
+            jsonSize->Put("width", widthStr);
+        }
+    }
+
+    if (!hasIdealHeight) {
+        auto idealHeightVpStr = std::to_string(Dimension(geometryNode_->GetFrameSize().Height()).ConvertToVp());
+        auto heightStr =
+            (idealHeightVpStr.substr(0, idealHeightVpStr.find(".") + SUBSTR_LENGTH) + DIMENSION_UNIT_VP).c_str();
+        json->Put("height", heightStr);
+        if (jsonSize) {
+            jsonSize->Put("height", heightStr);
+        }
+    }
+#endif
+}
+
 void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     if (renderContext_) {
@@ -251,13 +289,13 @@ void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     ACE_PROPERTY_TO_JSON_VALUE(layoutProperty_, LayoutProperty);
     ACE_PROPERTY_TO_JSON_VALUE(paintProperty_, PaintProperty);
     ACE_PROPERTY_TO_JSON_VALUE(pattern_, Pattern);
-    ACE_PROPERTY_TO_JSON_VALUE(geometryNode_, Pattern);
     if (eventHub_) {
         eventHub_->ToJsonValue(json);
     }
     FocusToJsonValue(json);
     MouseToJsonValue(json);
     TouchToJsonValue(json);
+    GeometryNodeToJsonValue(json);
     json->Put("id", propInspectorId_.value_or("").c_str());
 }
 
