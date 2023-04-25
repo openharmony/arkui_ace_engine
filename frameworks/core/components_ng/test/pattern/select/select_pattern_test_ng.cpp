@@ -37,6 +37,8 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
+const int32_t OFFSETX = 10;
+const int32_t OFFSETY = 20;
 const std::string OPTION_TEXT = "aaa";
 const std::string OPTION_TEXT_2 = "BBB";
 const std::string OPTION_TEXT_3 = "CCC";
@@ -151,4 +153,35 @@ HWTEST_F(SelectPropertyTestNg, SelectLayoutPropertyTest003, TestSize.Level1)
     EXPECT_EQ(size.Width(), static_cast<float>(expectWidth));
 }
 
+/**
+ * @tc.name: SelectSetMenuAlign001
+ * @tc.desc: Test SelectSetMenuAlign
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPropertyTestNg, SelectSetMenuAlign001, TestSize.Level1)
+{
+    // create mock themeManager
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    // create select
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT, INTERNAL_SOURCE },
+        { OPTION_TEXT_2, INTERNAL_SOURCE } };
+    SelectView::Create(params);
+    MenuAlign menuAlign;
+    menuAlign.alignType = MenuAlignType::END;
+    menuAlign.offset = DimensionOffset(Dimension(OFFSETX, DimensionUnit::VP), Dimension(OFFSETY, DimensionUnit::VP));
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_TRUE(select && select->GetTag() == V2::SELECT_ETS_TAG);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    /**
+     * @tc.cases: case1. verify the SetMenuAlign function.
+     */
+    selectPattern->SetMenuAlign(menuAlign);
+    auto menuAlign2 = selectPattern->menuAlign_.alignType;
+    auto menuAlign3 = selectPattern->menuAlign_.offset;
+    ASSERT_EQ(menuAlign.alignType, menuAlign2);
+    ASSERT_EQ(menuAlign.offset, menuAlign3);
+}
 } // namespace OHOS::Ace::NG
