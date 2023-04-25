@@ -13,24 +13,30 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_TEST_UNITTEST_CORE_COMMON_PLUGIN_MOCK_PLUGIN_TUILS_H
-#define FOUNDATION_ACE_TEST_UNITTEST_CORE_COMMON_PLUGIN_MOCK_PLUGIN_TUILS_H
+#ifndef FOUNDATION_ACE_TEST_UNITTEST_CORE_COMMON_FORM_MOCK_FORM_TUILS_H
+#define FOUNDATION_ACE_TEST_UNITTEST_CORE_COMMON_FORM_MOCK_FORM_TUILS_H
 
 #include <string>
 
-#include "core/common/plugin_utils.h"
+#include "core/components/form/resource/form_utils.h"
 
 namespace OHOS::Ace {
-class MockPluginUtils final : public PluginUtils {
+class MockFormUtils final : public FormUtils {
 public:
-    MockPluginUtils() = default;
-    ~MockPluginUtils() = default;
+    MockFormUtils() = default;
+    ~MockFormUtils() = default;
 
-    int32_t StartAbility(
-        const std::string& bundleName, const std::string& abilityName, const std::string& params) override
+    int32_t RouterEvent(const int64_t formId, const std::string& action, const int32_t contianerId,
+        const std::string& defualtbundleName)
+    {
+        return 1;
+    }
+
+    int32_t BackgroundEvent(const int64_t formId, const std::string& action, const int32_t contianerId,
+        const std::string& defualtbundleName)
     {
         return 1;
     }
 };
 } // namespace OHOS::Ace
-#endif // FOUNDATION_ACE_TEST_UNITTEST_CORE_COMMON_PLUGIN_MOCK_PLUGIN_TUILS_H
+#endif // FOUNDATION_ACE_TEST_UNITTEST_CORE_COMMON_FORM_MOCK_FORM_TUILS_H
