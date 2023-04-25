@@ -49,8 +49,8 @@ RefPtr<FrameNode> TextPickerDialogView::Show(const DialogProperties& dialogPrope
 }
 
 RefPtr<FrameNode> TextPickerDialogView::RangeShow(const DialogProperties& dialogProperties,
-    const TextPickerSettingData& settingData, std::map<std::string, NG::DialogTextEvent> dialogEvent,
-    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
+    const TextPickerSettingData& settingData, std::map<std::string, NG::DialogTextEvent>& dialogEvent,
+    std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent)
 {
     auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
@@ -89,7 +89,9 @@ RefPtr<FrameNode> TextPickerDialogView::RangeShow(const DialogProperties& dialog
     };
     for (const auto& child : contentRow->GetChildren()) {
         auto firstChild = AceType::DynamicCast<FrameNode>(child);
+        CHECK_NULL_RETURN(firstChild, nullptr);
         auto gesturHub = firstChild->GetOrCreateGestureEventHub();
+        CHECK_NULL_RETURN(gesturHub, nullptr);
         auto onClick = AceType::MakeRefPtr<NG::ClickEvent>(event);
         gesturHub->AddClickEvent(onClick);
     }
@@ -101,7 +103,7 @@ RefPtr<FrameNode> TextPickerDialogView::RangeShow(const DialogProperties& dialog
 
 void TextPickerDialogView::OptionsCreateNode(
     const RefPtr<TextPickerPattern>& textPickerPattern, const TextPickerSettingData& settingData,
-    const RefPtr<FrameNode>& textPickerNode, const uint32_t showCount, const uint32_t columnCount)
+    const RefPtr<FrameNode>& textPickerNode, uint32_t showCount, uint32_t columnCount)
 {
     if (textPickerNode->GetChildren().empty()) {
         for (size_t i = 0; i < columnCount; i++) {
@@ -128,7 +130,7 @@ void TextPickerDialogView::OptionsCreateNode(
 
 void TextPickerDialogView::OptionsShowInternal(
     const RefPtr<TextPickerPattern>& textPickerPattern, const TextPickerSettingData& settingData,
-    const RefPtr<FrameNode>& textPickerNode, const uint32_t showCount)
+    const RefPtr<FrameNode>& textPickerNode, uint32_t showCount)
 {
     textPickerPattern->SetIsCascade(settingData.isCascade);
     textPickerPattern->SetColumnsKind(settingData.columnKind);
@@ -162,8 +164,8 @@ void TextPickerDialogView::OptionsShowInternal(
 
 RefPtr<FrameNode> TextPickerDialogView::OptionsShow(const DialogProperties& dialogProperties,
     const TextPickerSettingData& settingData,
-    std::map<std::string, NG::DialogTextEvent> dialogEvent,
-    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
+    std::map<std::string, NG::DialogTextEvent>& dialogEvent,
+    std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent)
 {
     auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
@@ -180,10 +182,6 @@ RefPtr<FrameNode> TextPickerDialogView::OptionsShow(const DialogProperties& dial
     auto pickerTheme = themeManager->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(pickerTheme, nullptr);
     uint32_t showCount = pickerTheme->GetShowOptionCount();
-    if (SystemProperties::GetDeviceType() == DeviceType::PHONE &&
-        SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
-        showCount = OPTION_COUNT_PHONE_LANDSCAPE;
-    }
     OptionsShowInternal(textPickerPattern, settingData, textPickerNode, showCount);
     SetDefaultPickerItemHeight(settingData.height);
     SetTextProperties(pickerTheme, settingData.properties);
@@ -201,7 +199,9 @@ RefPtr<FrameNode> TextPickerDialogView::OptionsShow(const DialogProperties& dial
     };
     for (const auto& child : contentRow->GetChildren()) {
         auto firstChild = AceType::DynamicCast<FrameNode>(child);
+        CHECK_NULL_RETURN(firstChild, nullptr);
         auto gesturHub = firstChild->GetOrCreateGestureEventHub();
+        CHECK_NULL_RETURN(gesturHub, nullptr);
         auto onClick = AceType::MakeRefPtr<NG::ClickEvent>(event);
         gesturHub->AddClickEvent(onClick);
     }

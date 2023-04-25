@@ -87,12 +87,19 @@ private:
     double focusedAreaRadius_ = 0.0;
     double topPadding_ = 0.0;
     double weekAndDayRowSpace_ = 0.0;
-    double gregorianCalendarHeight_ = 0.0;
+    
     double workStateWidth_ = 0.0;
     double workStateHorizontalMovingDistance_ = 0.0;
     double workStateVerticalMovingDistance_ = 0.0;
     double touchCircleStrokeWidth_ = 0.0;
-    double lunarHeight_ = 0.0;
+    
+    // GregorianDay YAxis Offset and Height.
+    double gregorianDayYAxisOffset_ = 0.0;
+    double gregorianDayHeight_ = 0.0;
+
+    // LunarDay YAxis Offset and Height.
+    double lunarDayYAxisOffset_ = 0.0;
+    double lunarDayHeight_ = 0.0;
 
     // Space for days of calendar, when the days cross 5 weeks, it needs 6 rows.
     // So use dailyFiveRowSpace_ for 5 rows and dailySixRowSpace_ for 6 rows.

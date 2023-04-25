@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_HYPERLINK_HYPERLINK_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_HYPERLINK_HYPERLINK_MODEL_H
 
+#include <mutex>
+
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
@@ -33,6 +35,7 @@ public:
 
 private:
     static std::unique_ptr<HyperlinkModel> instance_;
+    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
 

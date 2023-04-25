@@ -80,8 +80,19 @@ public:
         checkboxModifier_->SetSize(size);
         checkboxModifier_->SetOffset(offset);
         checkboxModifier_->SetEnabled(enabled_);
-        checkboxModifier_->SetIsHover(isHover_);
+        checkboxModifier_->SetTouchHoverAnimationType(touchHoverType_);
         checkboxModifier_->UpdateAnimatableProperty();
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto checkboxTheme = pipeline->GetTheme<CheckboxTheme>();
+        auto horizontalPadding = checkboxTheme->GetHotZoneHorizontalPadding().ConvertToPx();
+        auto verticalPadding = checkboxTheme->GetHotZoneVerticalPadding().ConvertToPx();
+        float boundsRectOriginX = offset.GetX() - horizontalPadding;
+        float boundsRectOriginY = offset.GetY() - verticalPadding;
+        float boundsRectWidth = size.Width() + 2 * horizontalPadding;
+        float boundsRectHeight = size.Height() + 2 * verticalPadding;
+        RectF boundsRect(boundsRectOriginX, boundsRectOriginY, boundsRectWidth, boundsRectHeight);
+        checkboxModifier_->SetBoundsRect(boundsRect);
     }
 
     void SetHotZoneOffset(OffsetF& hotZoneOffset)
@@ -114,6 +125,11 @@ public:
         pointScale_ = pointScale;
     }
 
+    void SetTouchHoverAnimationType(const TouchHoverAnimationType touchHoverType)
+    {
+        touchHoverType_ = touchHoverType;
+    }
+
 private:
     bool enabled_ = true;
     bool isHover_ = false;
@@ -121,6 +137,7 @@ private:
     float pointScale_ = 0.5f;
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
+    TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
 
     RefPtr<CheckBoxModifier> checkboxModifier_;
 };

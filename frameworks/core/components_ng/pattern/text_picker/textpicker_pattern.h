@@ -182,14 +182,18 @@ public:
         }
     }
 
-    uint32_t GetCascadeOptionCount()
+    uint32_t GetCascadeOptionCount() const
     {
         return cascadeOptions_.size();
     }
 
     uint32_t GetOptionCount(const RefPtr<FrameNode>& frmeNode)
     {
-        return optionsWithNode_[frmeNode].size();
+        uint32_t count = 0;
+        if (optionsWithNode_.find(frmeNode) != optionsWithNode_.end()) {
+            count = optionsWithNode_[frmeNode].size();
+        }
+        return count;
     }
 
     void SetIsCascade(bool isCascade)
@@ -197,7 +201,7 @@ public:
         isCascade_ = isCascade;
     }
 
-    bool GetIsCascade()
+    bool GetIsCascade() const
     {
         return isCascade_;
     }
@@ -244,7 +248,7 @@ private:
     void OnColumnsBuildingUnCascade();
     void OnColumnsBuildingCascade();
     std::string GetSelectedObjectMulti(const std::vector<std::string>& values,
-        const std::vector<uint32_t> indexs, int32_t status) const;
+        const std::vector<uint32_t>& indexs, int32_t status) const;
     void SupplementOption(const std::vector<NG::TextCascadePickerOptions>& reOptions,
         std::vector<NG::RangeContent>& rangeContents, uint32_t patterIndex);
 

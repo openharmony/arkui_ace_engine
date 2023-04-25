@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SYNTAX_FOR_EACH_FOR_EACH_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SYNTAX_FOR_EACH_FOR_EACH_MODEL_H
 
+#include <mutex>
+
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -40,6 +42,7 @@ public:
 
 private:
     static std::unique_ptr<LazyForEachModel> instance_;
+    static std::mutex mutex_;
 };
 
 } // namespace OHOS::Ace

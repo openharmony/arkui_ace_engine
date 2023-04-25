@@ -835,6 +835,13 @@ public:
         return ignoreViewSafeArea_;
     }
 
+    // restore
+    virtual void RestoreNodeInfo(std::unique_ptr<JsonValue> nodeInfo) {}
+    virtual std::unique_ptr<JsonValue> GetStoredNodeInfo()
+    {
+        return nullptr;
+    }
+
 protected:
     void TryCallNextFrameLayoutCallback()
     {

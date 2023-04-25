@@ -27,7 +27,11 @@ RefPtr<RenderNode> RenderButton::Create()
         return nullptr;
 #endif
     } else {
+#ifndef NEW_SKIA
         return AceType::MakeRefPtr<FlutterRenderButton>();
+#else
+        return nullptr;
+#endif
     }
 }
 } // namespace OHOS::Ace

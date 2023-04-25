@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_REFRESH_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_REFRESH_MODEL_H
 
+#include <mutex>
 #include <string>
 
 #include "frameworks/base/geometry/dimension.h"
@@ -55,6 +56,7 @@ public:
     virtual void SetCustomBuilder(const RefPtr<NG::UINode>& customBuilder) = 0;
 private:
     static std::unique_ptr<RefreshModel> instance_;
+    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
 

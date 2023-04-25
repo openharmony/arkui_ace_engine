@@ -73,6 +73,9 @@ FrameNode::~FrameNode()
     if (pipeline) {
         pipeline->RemoveOnAreaChangeNode(GetId());
         pipeline->RemoveVisibleAreaChangeNode(GetId());
+        pipeline->ChangeMouseStyle(GetId(), MouseFormat::DEFAULT);
+        pipeline->FreeMouseStyleHoldNode(GetId());
+        pipeline->RemoveStoredNode(GetRestoreId());
     }
 }
 
@@ -709,9 +712,9 @@ RefPtr<LayoutWrapper> FrameNode::UpdateLayoutWrapper(
     if (layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::GONE) {
         if (!layoutWrapper) {
             layoutWrapper =
-                MakeRefPtr<LayoutWrapper>(WeakClaim(this), geometryNode_->Clone(), layoutProperty_->Clone());
+                MakeRefPtr<LayoutWrapper>(WeakClaim(this), MakeRefPtr<GeometryNode>(), layoutProperty_->Clone());
         } else {
-            layoutWrapper->Update(WeakClaim(this), geometryNode_->Clone(), layoutProperty_->Clone());
+            layoutWrapper->Update(WeakClaim(this), MakeRefPtr<GeometryNode>(), layoutProperty_->Clone());
         }
         layoutWrapper->SetLayoutAlgorithm(MakeRefPtr<LayoutAlgorithmWrapper>(nullptr, true, true));
         isLayoutDirtyMarked_ = false;
@@ -824,6 +827,18 @@ void FrameNode::RebuildRenderContextTree()
 void FrameNode::MarkModifyDone()
 {
     pattern_->OnModifyDone();
+    // restore info will overwrite the first setted attribute
+    if (!isRestoreInfoUsed_) {
+        isRestoreInfoUsed_ = true;
+        auto pipeline = PipelineContext::GetCurrentContext();
+        int32_t restoreId = GetRestoreId();
+        if (pipeline && restoreId >= 0) {
+            // store distribute node
+            pipeline->StoreNode(restoreId, AceType::WeakClaim(this));
+            // restore distribute node info
+            pattern_->OnRestoreInfo(pipeline->GetRestoreInfo(restoreId));
+        }
+    }
     eventHub_->MarkModifyDone();
     if (IsResponseRegion() || HasPositionProp()) {
         auto parent = GetParent();
@@ -1319,18 +1334,18 @@ OffsetF FrameNode::GetOffsetRelativeToWindow() const
     auto parent = GetAncestorNodeOfFrame();
     if (renderContext_ && renderContext_->GetPositionProperty()) {
         if (renderContext_->GetPositionProperty()->HasPosition()) {
-            offset.SetX(static_cast<float>(renderContext_->GetPositionProperty()->GetPosition()->GetX().Value()));
-            offset.SetY(static_cast<float>(renderContext_->GetPositionProperty()->GetPosition()->GetY().Value()));
+            offset.SetX(static_cast<float>(renderContext_->GetPositionProperty()->GetPosition()->GetX().ConvertToPx()));
+            offset.SetY(static_cast<float>(renderContext_->GetPositionProperty()->GetPosition()->GetY().ConvertToPx()));
         }
     }
     while (parent) {
         auto parentRenderContext = parent->GetRenderContext();
         if (parentRenderContext && parentRenderContext->GetPositionProperty()) {
             if (parentRenderContext->GetPositionProperty()->HasPosition()) {
-                offset.AddX(
-                    static_cast<float>(parentRenderContext->GetPositionProperty()->GetPosition()->GetX().Value()));
-                offset.AddY(
-                    static_cast<float>(parentRenderContext->GetPositionProperty()->GetPosition()->GetY().Value()));
+                offset.AddX(static_cast<float>(
+                    parentRenderContext->GetPositionProperty()->GetPosition()->GetX().ConvertToPx()));
+                offset.AddY(static_cast<float>(
+                    parentRenderContext->GetPositionProperty()->GetPosition()->GetY().ConvertToPx()));
                 parent = parent->GetAncestorNodeOfFrame();
                 continue;
             }
@@ -1561,5 +1576,10 @@ void FrameNode::OnRemoveDisappearingChild()
     auto context = GetRenderContext();
     CHECK_NULL_VOID(context);
     context->UpdateFreeze(false);
+}
+
+std::string FrameNode::ProvideRestoreInfo()
+{
+    return pattern_->ProvideRestoreInfo();
 }
 } // namespace OHOS::Ace::NG

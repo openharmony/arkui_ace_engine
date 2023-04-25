@@ -81,13 +81,17 @@ void OnTextChangedListenerImpl::SetKeyboardStatus(bool status)
 
 void OnTextChangedListenerImpl::SendKeyEventFromInputMethod(const MiscServices::KeyEvent& event) {}
 
-void OnTextChangedListenerImpl::SendKeyboardInfo(const MiscServices::KeyboardInfo& info)
+void OnTextChangedListenerImpl::SendKeyboardStatus(const MiscServices::KeyboardStatus& keyboardStatus)
 {
-    LOGI("[OnTextChangedListenerImpl] KeyboardStatus status: %{public}d", info.GetKeyboardStatus());
+    LOGI("[OnTextChangedListenerImpl] SendKeyboardStatus status: %{public}d", static_cast<int>(keyboardStatus));
     // this keyboard status means shown or hidden but attachment is not closed, should be distinguished from
     // imeAttached_
-    HandleKeyboardStatus(info.GetKeyboardStatus());
-    HandleFunctionKey(info.GetFunctionKey());
+    HandleKeyboardStatus(keyboardStatus);
+}
+
+void OnTextChangedListenerImpl::SendFunctionKey(const MiscServices::FunctionKey& functionKey)
+{
+    HandleFunctionKey(functionKey);
 }
 
 void OnTextChangedListenerImpl::HandleKeyboardStatus(MiscServices::KeyboardStatus status)
@@ -101,12 +105,13 @@ void OnTextChangedListenerImpl::HandleKeyboardStatus(MiscServices::KeyboardStatu
 
 void OnTextChangedListenerImpl::HandleFunctionKey(MiscServices::FunctionKey functionKey)
 {
-    LOGI("[OnTextChangedListenerImpl] Handle function key %{public}d", static_cast<int32_t>(functionKey));
+    LOGI("[OnTextChangedListenerImpl] Handle function key %{public}d",
+        static_cast<int32_t>(functionKey.GetEnterKeyType()));
     auto task = [textField = pattern_, functionKey] {
         auto client = textField.Upgrade();
         CHECK_NULL_VOID(client);
         ContainerScope scope(client->GetInstanceId());
-        TextInputAction action = static_cast<TextInputAction>(functionKey);
+        TextInputAction action = static_cast<TextInputAction>(functionKey.GetEnterKeyType());
         switch (action) {
             case TextInputAction::DONE:
             case TextInputAction::NEXT:

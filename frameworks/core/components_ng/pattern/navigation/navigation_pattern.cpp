@@ -60,18 +60,18 @@ RefPtr<RenderContext> NavigationPattern::GetTitleBarRenderContext()
     }
 }
 
-void NavigationPattern::DoAnimation()
+void NavigationPattern::DoAnimation(NavigationMode currentMode)
 {
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
     auto layoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto currentMode = layoutProperty->GetUsrNavigationModeValue(NavigationMode::AUTO);
+    auto usrNavigationMode = layoutProperty->GetUsrNavigationModeValue(NavigationMode::AUTO);
 
     auto lastMode = navigationMode_;
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    layoutProperty->UpdateUsrNavigationMode(navigationMode_);
+    layoutProperty->UpdateUsrNavigationMode(lastMode);
     hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     AnimationOption option = AnimationOption();
     option.SetDuration(NAVIMODE_CHANGE_ANIMATION_DURATION);
@@ -87,16 +87,15 @@ void NavigationPattern::DoAnimation()
     layoutProperty->UpdateUsrNavigationMode(currentMode);
     hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     context->FlushUITasks();
-    if (navigationMode_ != lastMode) {
-        if (currentMode == NavigationMode::STACK || navigationMode_ == NavigationMode::STACK) {
-            optionAlpha.SetDuration(OPACITY_ANIMATION_DURATION_DISAPPEAR);
-            renderContext->OpacityAnimation(optionAlpha, 1, 0);
-        } else if (currentMode == NavigationMode::SPLIT || navigationMode_ == NavigationMode::SPLIT) {
-            optionAlpha.SetDuration(OPACITY_ANIMATION_DURATION_APPEAR);
-            renderContext->OpacityAnimation(optionAlpha, 0, 1);
-        }
+    if (currentMode == NavigationMode::STACK || lastMode == NavigationMode::SPLIT) {
+        optionAlpha.SetDuration(OPACITY_ANIMATION_DURATION_DISAPPEAR);
+        renderContext->OpacityAnimation(optionAlpha, 1, 0);
+    } else if (currentMode == NavigationMode::SPLIT || lastMode == NavigationMode::STACK) {
+        optionAlpha.SetDuration(OPACITY_ANIMATION_DURATION_APPEAR);
+        renderContext->OpacityAnimation(optionAlpha, 0, 1);
     }
     context->CloseImplicitAnimation();
+    layoutProperty->UpdateUsrNavigationMode(usrNavigationMode);
 }
 
 void NavigationPattern::OnModifyDone()
@@ -112,8 +111,9 @@ void NavigationPattern::OnModifyDone()
     auto layoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto currentMode = layoutProperty->GetUsrNavigationModeValue(NavigationMode::AUTO);
-    if ((navigationMode_ != NavigationMode::AUTO) && (navigationMode_ != currentMode)) {
-        DoAnimation();
+    if (currentMode != NavigationMode::AUTO && navigationMode_ != currentMode &&
+        navigationMode_ != NavigationMode::AUTO) {
+        DoAnimation(currentMode);
     }
 }
 
@@ -131,6 +131,15 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     CHECK_NULL_RETURN(hostNode, false);
     auto navigationLayoutProperty = AceType::DynamicCast<NavigationLayoutProperty>(hostNode->GetLayoutProperty());
     CHECK_NULL_RETURN(navigationLayoutProperty, false);
+    if (config.frameSizeChange) {
+        if (navigationLayoutProperty->GetUsrNavigationModeValue(NavigationMode::AUTO) == NavigationMode::AUTO) {
+            auto currentMode = navigationLayoutAlgorithm->GetNavigationMode();
+            if (navigationMode_ != NavigationMode::AUTO && navigationMode_ != currentMode) {
+                DoAnimation(currentMode);
+            }
+            navigationMode_ = currentMode;
+        }
+    }
     navigationLayoutProperty->UpdateNavigationMode(navigationLayoutAlgorithm->GetNavigationMode());
 
     auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
@@ -186,7 +195,6 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
             hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
     }
-
     return false;
 }
 

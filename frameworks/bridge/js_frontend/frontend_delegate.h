@@ -21,8 +21,8 @@
 #include "base/geometry/size.h"
 #include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
-#include "base/utils/noncopyable.h"
 #include "base/utils/measure_util.h"
+#include "base/utils/noncopyable.h"
 #include "core/event/ace_event_helper.h"
 #include "core/pipeline/pipeline_base.h"
 #include "frameworks/bridge/common/media_query/media_query_info.h"
@@ -59,12 +59,14 @@ public:
     virtual void Push(const std::string& uri, const std::string& params) = 0;
     virtual void PushWithMode(const std::string& uri, const std::string& params, uint32_t routerMode) {}
     virtual void PushWithCallback(const std::string& uri, const std::string& params,
-        const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode = 0) {}
+        const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode = 0)
+    {}
     // Jump to the specified page, but current page will be removed from the stack.
     virtual void Replace(const std::string& uri, const std::string& params) = 0;
     virtual void ReplaceWithMode(const std::string& uri, const std::string& params, uint32_t routerMode) {}
     virtual void ReplaceWithCallback(const std::string& uri, const std::string& params,
-        const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode = 0) {}
+        const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode = 0)
+    {}
     // Back to specified page or the previous page if url not set.
     virtual void Back(const std::string& uri, const std::string& params = "") = 0;
     // Postpone page transition after Begin called, usually to wait some async operation
@@ -163,7 +165,9 @@ public:
     virtual void CancelAnimationFrame(const std::string& callbackId) = 0;
 
     virtual void GetSnapshot(
-        const std::string& componentId, std::function<void(std::shared_ptr<Media::PixelMap>, int32_t)>&& callback) = 0;
+        const std::string& componentId, std::function<void(std::shared_ptr<Media::PixelMap>, int32_t)>&& callback) {}
+    virtual void CreateSnapshot(std::function<void()>&& customBuilder,
+        std::function<void(std::shared_ptr<Media::PixelMap>, int32_t)>&& callback) {}
 
     virtual bool GetAssetContent(const std::string& url, std::string& content) = 0;
     virtual bool GetAssetContent(const std::string& url, std::vector<uint8_t>& content) = 0;

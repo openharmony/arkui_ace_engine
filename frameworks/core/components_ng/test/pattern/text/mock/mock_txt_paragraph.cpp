@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/test/pattern/text/mock/mock_txt_paragraph.h"
+
 #include "core/components_ng/render/adapter/txt_font_collection.h"
 #include "core/components_ng/render/adapter/txt_paragraph.h"
-
-#include "core/components_ng/test/pattern/text/mock/mock_txt_paragraph.h"
 
 namespace OHOS::Ace::NG {
 namespace LayoutWidth {
@@ -25,7 +25,7 @@ float layoutWidth = 0.0f;
 namespace {
 bool textParapraphCanConstruct = true;
 std::vector<bool> textParapraphDidExceedMaxLines;
-}
+} // namespace
 
 void MockTxtParagraph::SetCanConstruct(bool canConstruct)
 {
@@ -124,7 +124,10 @@ int32_t TxtParagraph::GetHandlePositionForClick(const Offset& offset)
     return 0;
 }
 
-void TxtParagraph::GetRectsForRange(int32_t start, int32_t end, std::vector<Rect>& selectedRects) {}
+void TxtParagraph::GetRectsForRange(int32_t start, int32_t end, std::vector<Rect>& selectedRects)
+{
+    selectedRects = { Rect(start, start, end - start, end - start) };
+}
 
 bool TxtParagraph::ComputeOffsetForCaretDownstream(int32_t extent, CaretMetrics& result)
 {

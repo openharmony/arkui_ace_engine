@@ -87,6 +87,11 @@ void SpanModelNG::SetLetterSpacing(const Dimension& value)
     ACE_UPDATE_SPAN_PROPERTY(LetterSpacing, value);
 }
 
+void SpanModelNG::SetLineHeight(const Dimension& value)
+{
+    ACE_UPDATE_SPAN_PROPERTY(LineHeight, value);
+}
+
 void SpanModelNG::SetOnClick(std::function<void(const BaseEventInfo* info)>&& click)
 {
     auto clickFunc = [func = std::move(click)](GestureEvent& info) { func(&info); };

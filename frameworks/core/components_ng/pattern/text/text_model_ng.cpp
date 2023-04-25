@@ -163,7 +163,9 @@ void TextModelNG::SetCopyOption(CopyOptions copyOption)
 
 void TextModelNG::SetDraggable(bool draggable)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, Draggable, draggable);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetDraggable(draggable);
 }
 
 void TextModelNG::SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOptionsItems)

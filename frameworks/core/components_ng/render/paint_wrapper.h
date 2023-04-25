@@ -103,6 +103,8 @@ public:
         return renderContext->GetForegroundColor().value_or(Color::FOREGROUND);
     }
 
+    void FlushOverlayModifier();
+
 private:
     WeakPtr<RenderContext> renderContext_;
     RefPtr<GeometryNode> geometryNode_;

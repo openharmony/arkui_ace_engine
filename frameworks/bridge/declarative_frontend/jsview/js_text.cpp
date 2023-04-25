@@ -41,19 +41,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<TextModel> TextModel::instance_ = nullptr;
+std::mutex TextModel::mutex_;
 
 TextModel* TextModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::TextModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::TextModelNG());
-        } else {
-            instance_.reset(new Framework::TextModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::TextModelNG());
+            } else {
+                instance_.reset(new Framework::TextModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }

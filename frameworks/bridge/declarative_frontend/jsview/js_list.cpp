@@ -30,19 +30,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<ListModel> ListModel::instance_ = nullptr;
+std::mutex ListModel::mutex_;
 
 ListModel* ListModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::ListModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::ListModelNG());
-        } else {
-            instance_.reset(new Framework::ListModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::ListModelNG());
+            } else {
+                instance_.reset(new Framework::ListModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }

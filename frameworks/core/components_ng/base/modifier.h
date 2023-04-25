@@ -19,6 +19,7 @@
 #include <atomic>
 #include <cstdint>
 #include <functional>
+#include <optional>
 #include <vector>
 
 #include "base/memory/ace_type.h"
@@ -150,8 +151,19 @@ public:
         return attachedProperties_;
     }
 
+    const std::optional<RectF>& GetBoundsRect()
+    {
+        return rect_;
+    }
+
+    void SetBoundsRect(const std::optional<RectF>& rect)
+    {
+        rect_ = rect;
+    }
+
 private:
     std::vector<RefPtr<PropertyBase>> attachedProperties_;
+    std::optional<RectF> rect_;
     ACE_DISALLOW_COPY_AND_MOVE(ContentModifier);
 };
 

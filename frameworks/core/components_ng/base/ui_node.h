@@ -349,6 +349,16 @@ public:
     }
 #endif
 
+    void SetRestoreId(int32_t restoreId)
+    {
+        restoreId_ = restoreId;
+    }
+
+    int32_t GetRestoreId()
+    {
+        return restoreId_;
+    }
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -408,6 +418,7 @@ private:
 
     int32_t childrenUpdatedFrom_ = -1;
     static thread_local int32_t currentAccessibilityId_;
+    int32_t restoreId_ = -1;
 
 #ifdef PREVIEW
     std::string debugLine_;

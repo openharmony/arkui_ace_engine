@@ -18,6 +18,7 @@
 
 #include <functional>
 #include <memory>
+#include <mutex>
 
 #include "base/utils/macros.h"
 
@@ -40,6 +41,7 @@ public:
 
 private:
     static std::unique_ptr<StepperModel> instance_;
+    static std::mutex mutex_;
 };
 
 } // namespace OHOS::Ace

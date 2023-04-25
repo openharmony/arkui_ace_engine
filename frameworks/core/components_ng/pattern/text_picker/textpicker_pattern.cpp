@@ -427,11 +427,11 @@ void TextPickerPattern::SetChangeCallback(ColumnChangeCallback&& value)
 size_t TextPickerPattern::ProcessCascadeOptionDepth(const NG::TextCascadePickerOptions& option)
 {
     size_t depth = 1;
-    if (option.children.size() == 0) {
+    if (option.children.empty()) {
         return depth;
     }
 
-    for (auto&& pos : option.children) {
+    for (auto& pos : option.children) {
         size_t tmpDep = 1;
         tmpDep += ProcessCascadeOptionDepth(pos);
         if (tmpDep > depth) {
@@ -471,13 +471,15 @@ void TextPickerPattern::ProcessCascadeOptions(const std::vector<NG::TextCascadeP
     for (size_t i = 0; i < options.size(); i++) {
         rangeResultValue.emplace_back(options[i].rangeResult[0]);
     }
-
     option.rangeResult = rangeResultValue;
+    if (selecteds_[index] < 0 && selecteds_[index] > options.size()) {
+        selecteds_[index] = 0;
+    }
     for (size_t i = 0; i < options.size(); i++) {
-        if (selecteds_[index] == i) {
-            option.children = options[i].children;
+        if (selecteds_[index] != 0) {
+            option.children = options[selecteds_[index]].children;
             reOptions.emplace_back(option);
-            return ProcessCascadeOptions(options[i].children, reOptions, index + 1);
+            return ProcessCascadeOptions(options[selecteds_[index]].children, reOptions, index + 1);
         }
         if (values_[index] != "") {
             auto valueIterator = std::find(rangeResultValue.begin(), rangeResultValue.end(), values_[index]);
@@ -579,7 +581,7 @@ bool TextPickerPattern::HandleDirectionKey(KeyCode code)
 }
 
 std::string TextPickerPattern::GetSelectedObjectMulti(const std::vector<std::string>& values,
-    const std::vector<uint32_t> indexs, int32_t status) const
+    const std::vector<uint32_t>& indexs, int32_t status) const
 {
     std::string result = "";
     result = std::string("{\"value\":") + "[";
@@ -611,10 +613,12 @@ std::string TextPickerPattern::GetSelectedObject(bool isColumnChange, int32_t st
     auto host = GetHost();
     CHECK_NULL_RETURN(host, "");
     auto children = host->GetChildren();
-    for (auto iter = children.begin(); iter != children.end(); iter++) {
-        CHECK_NULL_RETURN(*iter, "");
-        auto stackNode = DynamicCast<FrameNode>(*iter);
+    for (const auto& child : children) {
+        CHECK_NULL_RETURN(child, "");
+        auto stackNode = DynamicCast<FrameNode>(child);
+        CHECK_NULL_RETURN(stackNode, "");
         auto currentNode = DynamicCast<FrameNode>(stackNode->GetLastChild());
+        CHECK_NULL_RETURN(currentNode, "");
         auto textPickerColumnPattern = currentNode->GetPattern<TextPickerColumnPattern>();
         CHECK_NULL_RETURN(textPickerColumnPattern, "");
         if (isColumnChange) {
@@ -646,13 +650,13 @@ void TextPickerPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     if (!range_.empty()) {
         json->Put("range", GetRangeStr().c_str());
     } else {
-        if (!cascadeOptions_.empty()) {
+        if (!cascadeOriginptions_.empty()) {
             if (!isCascade_) {
                 json->Put("range", GetOptionsMultiStr().c_str());
             } else {
-                json->Put("range", GetOptionsCascadeStr(cascadeOptions_).c_str());
+                json->Put("range", GetOptionsCascadeStr(cascadeOriginptions_).c_str());
             }
-        } 
+        }
     }
 }
 
@@ -685,7 +689,7 @@ std::string TextPickerPattern::GetOptionsCascadeStr(
         result += std::string("{\"text\":\"");
         result += options[i].rangeResult[0];
         result += "\"";
-        if(options[i].children.size() > 0) {
+        if (options[i].children.size() > 0) {
             result += std::string(", \"children\":");
             result += GetOptionsCascadeStr(options[i].children);
         }
@@ -695,7 +699,7 @@ std::string TextPickerPattern::GetOptionsCascadeStr(
             result += "}]";
         }
     }
-	return result;
+    return result;
 }
 
 std::string TextPickerPattern::GetOptionsMultiStrInternal() const

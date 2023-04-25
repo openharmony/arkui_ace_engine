@@ -21,10 +21,12 @@
 #include "bridge/declarative_frontend/jsview/models/tab_content_model_impl.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
+#include "core/components/tab_bar/tab_theme.h"
 
 namespace OHOS::Ace {
 
 std::unique_ptr<TabContentModel> TabContentModel::instance_ = nullptr;
+std::mutex TabContentModel::mutex_;
 
 const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
     TextOverflow::MARQUEE };
@@ -35,15 +37,18 @@ const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICIES = { TextHei
 TabContentModel* TabContentModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::TabContentModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::TabContentModelNG());
-        } else {
-            instance_.reset(new Framework::TabContentModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::TabContentModelNG());
+            } else {
+                instance_.reset(new Framework::TabContentModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -243,7 +248,7 @@ void JSTabContent::GetFontContent(const JSRef<JSVal> font, LabelStyle& labelStyl
     }
     
     JSRef<JSVal> weight = obj->GetProperty("weight");
-    if (weight->IsString()) {
+    if (weight->IsString() || weight->IsNumber()) {
         labelStyle.fontWeight = ConvertStrToFontWeight(weight->ToString());
     }
 
@@ -310,7 +315,43 @@ void JSTabContent::SetLabelStyle(const JSRef<JSVal>& info)
         TextStyle textStyle;
         GetFontContent(font, labelStyle);
     }
+    CompleteParameters(labelStyle);
     TabContentModel::GetInstance()->SetLabelStyle(labelStyle);
+}
+
+void JSTabContent::CompleteParameters(LabelStyle& labelStyle)
+{
+    auto tabTheme = GetTheme<TabTheme>();
+    if (!tabTheme) {
+        return;
+    }
+    if (!labelStyle.maxLines.has_value()) {
+        labelStyle.maxLines = 1;
+    }
+    if (!labelStyle.minFontSize.has_value()) {
+        labelStyle.minFontSize = 0.0_vp;
+    }
+    if (!labelStyle.maxFontSize.has_value()) {
+        labelStyle.maxFontSize = 0.0_vp;
+    }
+    if (!labelStyle.fontSize.has_value()) {
+        labelStyle.fontSize = tabTheme->GetSubTabTextDefaultFontSize();
+    }
+    if (!labelStyle.fontWeight.has_value()) {
+        labelStyle.fontWeight = FontWeight::NORMAL;
+    }
+    if (!labelStyle.fontStyle.has_value()) {
+        labelStyle.fontStyle = FontStyle::NORMAL;
+    }
+    if (!labelStyle.fontFamily.has_value()) {
+        labelStyle.fontFamily = {"HarmonyOS Sans"};
+    }
+    if (!labelStyle.heightAdaptivePolicy.has_value()) {
+        labelStyle.heightAdaptivePolicy = TextHeightAdaptivePolicy::MAX_LINES_FIRST;
+    }
+    if (!labelStyle.textOverflow.has_value()) {
+        labelStyle.textOverflow = TextOverflow::ELLIPSIS;
+    }
 }
 
 void JSTabContent::SetSubTabBarStyle(const JSRef<JSObject>& paramObject)

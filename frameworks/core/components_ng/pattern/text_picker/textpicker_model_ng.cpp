@@ -251,10 +251,6 @@ void TextPickerModelNG::MultiInit(const RefPtr<PickerTheme> pickerTheme)
 
     CHECK_NULL_VOID(pickerTheme);
     showCount_ = pickerTheme->GetShowOptionCount();
-    if (SystemProperties::GetDeviceType() == DeviceType::PHONE &&
-        SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
-        showCount_ = OPTION_COUNT_PHONE_LANDSCAPE;
-    }
     stack->Push(textPickerNode);
 }
 
@@ -263,6 +259,7 @@ void TextPickerModelNG::SetIsCascade(bool isCascade)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
     isCascade_ = isCascade;
     textPickerPattern->SetIsCascade(isCascade_);
 }
@@ -375,6 +372,7 @@ void TextPickerModelNG::SetValues(const std::vector<std::string>& values)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
     textPickerPattern->SetValues(values);
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Values, values);
 }
@@ -384,6 +382,7 @@ void TextPickerModelNG::SetSelecteds(const std::vector<uint32_t>& values)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
     textPickerPattern->SetSelecteds(values);
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Selecteds, values);
 }

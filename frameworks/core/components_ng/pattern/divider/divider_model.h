@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_DIVIDER_DIVIDER_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_DIVIDER_DIVIDER_MODEL_H
 
+#include <mutex>
+
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
@@ -35,6 +37,7 @@ public:
 
 private:
     static std::unique_ptr<DividerModel> instance_;
+    static std::mutex mutex_;
 };
 
 } // namespace OHOS::Ace

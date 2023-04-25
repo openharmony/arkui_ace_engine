@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "adapter/preview/entrance/flutter_ace_view.h"
+#include "adapter/preview/entrance/ace_view_preview.h"
 
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
@@ -26,86 +26,51 @@
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
 #include "core/image/image_cache.h"
-#include "core/pipeline/layers/flutter_scene_builder.h"
 
 namespace OHOS::Ace::Platform {
-
-void FlutterAceView::RegisterTouchEventCallback(TouchEventCallback&& callback)
+AceViewPreview* AceViewPreview::CreateView(int32_t instanceId, bool useCurrentEventRunner, bool usePlatformThread)
 {
-    ACE_DCHECK(callback);
-    touchEventCallback_ = std::move(callback);
-}
-
-void FlutterAceView::RegisterKeyEventCallback(KeyEventCallback&& callback)
-{
-    ACE_DCHECK(callback);
-    keyEventCallback_ = std::move(callback);
-}
-
-void FlutterAceView::RegisterMouseEventCallback(MouseEventCallback&& callback)
-{
-    ACE_DCHECK(callback);
-    mouseEventCallback_ = std::move(callback);
-}
-
-void FlutterAceView::RegisterAxisEventCallback(AxisEventCallback&& callback)
-{
-    ACE_DCHECK(callback);
-    axisEventCallback_ = std::move(callback);
-}
-
-void FlutterAceView::RegisterRotationEventCallback(RotationEventCallBack&& callback)
-{
-    ACE_DCHECK(callback);
-    rotationEventCallBack_ = std::move(callback);
-}
-
-void FlutterAceView::Launch()
-{
-}
-
-bool FlutterAceView::Dump(const std::vector<std::string>& params)
-{
-    return false;
-}
-
-void FlutterAceView::ProcessIdleEvent(int64_t deadline)
-{
-    if (idleCallback_) {
-        idleCallback_(deadline);
+    auto* aceView = new AceViewPreview(instanceId, FlutterThreadModel::CreateThreadModel(
+        useCurrentEventRunner, !usePlatformThread, !SystemProperties::GetRosenBackendEnabled()));
+    if (aceView != nullptr) {
+        aceView->IncRefCount();
     }
+    return aceView;
 }
 
-bool FlutterAceView::HandleTouchEvent(const TouchEvent& touchEvent)
+AceViewPreview::AceViewPreview(int32_t instanceId, std::unique_ptr<FlutterThreadModel> threadModel)
+    : instanceId_(instanceId), threadModel_(std::move(threadModel))
+{}
+
+void AceViewPreview::NotifySurfaceChanged(int32_t width, int32_t height,
+    WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
+    width_ = width;
+    height_ = height;
+    CHECK_NULL_VOID(viewChangeCallback_);
+    viewChangeCallback_(width, height, type, rsTransaction);
+}
+
+bool AceViewPreview::HandleTouchEvent(const TouchEvent& touchEvent)
+{
+    LOGD("Event: [x, y, size] = [%{public}lf, %{public}lf, %{public}lf]", touchEvent.x, touchEvent.y, touchEvent.size);
     if (touchEvent.type == TouchType::UNKNOWN) {
         LOGW("Unknown event.");
         return false;
     }
-
-    LOGD("HandleTouchEvent touchEvent.x: %lf, touchEvent.y: %lf, touchEvent.size: %lf",
-        touchEvent.x, touchEvent.y, touchEvent.size);
+    CHECK_NULL_RETURN(touchEventCallback_, true);
     auto event = touchEvent.UpdatePointers();
-    if (touchEventCallback_) {
-        touchEventCallback_(event, nullptr);
-    }
-
+    touchEventCallback_(event, nullptr);
     return true;
 }
 
-bool FlutterAceView::HandleKeyEvent(const KeyEvent& keyEvent)
-{
-    if (!keyEventCallback_) {
-        return false;
-    }
-
-    return keyEventCallback_(keyEvent);
-}
-
-std::unique_ptr<DrawDelegate> FlutterAceView::GetDrawDelegate()
+std::unique_ptr<DrawDelegate> AceViewPreview::GetDrawDelegate()
 {
     auto drawDelegate = std::make_unique<DrawDelegate>();
 
+#ifdef ENABLE_ROSEN_BACKEND
+    drawDelegate->SetDrawRSFrameCallback([](std::shared_ptr<Rosen::RSNode>& node, const Rect& rect) {});
+#else
     drawDelegate->SetDrawFrameCallback([this](RefPtr<Flutter::Layer>& layer, const Rect& dirty) {
         if (!layer) {
             return;
@@ -122,17 +87,8 @@ std::unique_ptr<DrawDelegate> FlutterAceView::GetDrawDelegate()
             window->client()->Render(scene_.get());
         }
     });
+#endif
 
     return drawDelegate;
-}
-
-std::unique_ptr<PlatformWindow> FlutterAceView::GetPlatformWindow()
-{
-    return nullptr;
-}
-
-const void* FlutterAceView::GetNativeWindowById(uint64_t textureId)
-{
-    return nullptr;
 }
 } // namespace OHOS::Ace::Platform

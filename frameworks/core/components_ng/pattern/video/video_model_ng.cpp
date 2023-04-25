@@ -30,6 +30,7 @@ void VideoModelNG::Create(const RefPtr<VideoControllerV2>& videoController)
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::VIDEO_ETS_TAG, nodeId, [videoController]() { return AceType::MakeRefPtr<VideoPattern>(videoController); });
     stack->Push(frameNode);
+    AddDragFrameNodeToManager();
 }
 
 void VideoModelNG::SetSrc(const std::string& src)
@@ -170,5 +171,17 @@ void VideoModelNG::SetOnFullScreenChange(VideoEventFunc&& onFullScreenChange)
     auto eventHub = frameNode->GetEventHub<VideoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnFullScreenChange(std::move(onFullScreenChange));
+}
+
+void VideoModelNG::AddDragFrameNodeToManager() const
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+
+    dragDropManager->AddDragFrameNode(frameNode);
 }
 } // namespace OHOS::Ace::NG

@@ -30,11 +30,11 @@ public:
         std::map<std::string, NG::DialogTextEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
     static RefPtr<FrameNode> RangeShow(const DialogProperties& dialogProperties,
-        const TextPickerSettingData& settingData, std::map<std::string, NG::DialogTextEvent> dialogEvent,
-        std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
+        const TextPickerSettingData& settingData, std::map<std::string, NG::DialogTextEvent>& dialogEvent,
+        std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent);
     static RefPtr<FrameNode> OptionsShow(const DialogProperties& dialogProperties,
-        const TextPickerSettingData& settingData, std::map<std::string, NG::DialogTextEvent> dialogEvent,
-        std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
+        const TextPickerSettingData& settingData, std::map<std::string, NG::DialogTextEvent>& dialogEvent,
+        std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent);
     static void SetSelected(const RefPtr<TextPickerPattern>& textPickerPattern, uint32_t value = 0);
     static void SetSelectedValues(const RefPtr<TextPickerPattern>& textPickerPattern,
         const std::vector<uint32_t>& values);
@@ -60,10 +60,10 @@ private:
         const PickerTextProperties& properties);
     static void OptionsCreateNode(const RefPtr<TextPickerPattern>& textPickerPattern,
         const TextPickerSettingData& settingData, const RefPtr<FrameNode>& textPickerNode,
-        const uint32_t showCount, const uint32_t columnCount);
+        uint32_t showCount, uint32_t columnCount);
     static void OptionsShowInternal(const RefPtr<TextPickerPattern>& textPickerPattern,
         const TextPickerSettingData& settingData, const RefPtr<FrameNode>& textPickerNode,
-        const uint32_t showCount);
+        uint32_t showCount);
 };
 } // namespace OHOS::Ace::NG
 

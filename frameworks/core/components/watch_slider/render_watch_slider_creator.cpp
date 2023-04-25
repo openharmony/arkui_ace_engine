@@ -12,11 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "core/components/watch_slider/flutter_render_watch_slider.h"
-#include "core/components/watch_slider/rosen_render_watch_slider.h"
+
+#ifndef NEW_SKIA
+#include "flutter_render_watch_slider.h"
+#endif
+#include "rosen_render_watch_slider.h"
 
 namespace OHOS::Ace {
-
 RefPtr<RenderNode> RenderWatchSlider::Create()
 {
     if (SystemProperties::GetRosenBackendEnabled()) {
@@ -26,7 +28,11 @@ RefPtr<RenderNode> RenderWatchSlider::Create()
         return nullptr;
 #endif
     } else {
+#ifndef NEW_SKIA
         return AceType::MakeRefPtr<FlutterRenderWatchSlider>();
+#else
+        return nullptr;
+#endif
     }
 }
 } // namespace OHOS:: Ace
