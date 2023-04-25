@@ -171,6 +171,8 @@ uint32_t PipelineContext::AddScheduleTask(const RefPtr<ScheduleTask>& task)
     return 0;
 }
 
+void PipelineContext::RemoveScheduleTask(uint32_t id) {}
+
 void PipelineContext::AddOnAreaChangeNode(int32_t nodeId) {}
 
 bool PipelineContext::OnKeyEvent(const KeyEvent& event)
