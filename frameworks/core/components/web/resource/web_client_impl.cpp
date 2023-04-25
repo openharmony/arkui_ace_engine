@@ -41,6 +41,14 @@ public:
         nwebResponse_->PutResponseData(data);
     }
 
+    void HandleResourceUrl(std::string& url) override
+    {
+        if (nwebResponse_ == nullptr) {
+            return;
+        }
+        nwebResponse_->PutResponseResourceUrl(url);
+    }
+
     void HandleHeadersVal(const std::map<std::string, std::string>& response_headers) override
     {
         if (nwebResponse_ == nullptr) {
@@ -358,12 +366,23 @@ std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> WebClientImpl::OnHandleInte
     LOGI("intercept GetMimeType %{public}s",  webResponse->GetMimeType().c_str());
     LOGI("intercept GetStatusCode %{public}d",  webResponse->GetStatusCode());
     LOGI("intercept GetReason %{public}s",  webResponse->GetReason().c_str());
+    LOGI("intercept GetDataType %{public}d",  webResponse->GetDataType());
     std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> nwebResponse =
         std::make_shared<OHOS::NWeb::NWebUrlResourceResponse>(webResponse->GetMimeType(), webResponse->GetEncoding(),
         webResponse->GetStatusCode(), webResponse->GetReason(), webResponse->GetHeaders(), data);
-    if (webResponse->IsFileHandle() == true) {
-        nwebResponse->PutResponseFileHandle(webResponse->GetFileHandle());
-    }
+    switch (webResponse->GetDataType()) {
+        case WebResponseDataType::STRING_TYPE:
+            nwebResponse->PutResponseData(data);
+            break;
+        case WebResponseDataType::FILE_TYPE:
+            nwebResponse->PutResponseFileHandle(webResponse->GetFileHandle());
+            break;
+        case WebResponseDataType::RESOURCE_URL_TYPE:
+            nwebResponse->PutResponseResourceUrl(webResponse->GetResourceUrl());
+            break;
+        default:
+            break;
+     }
     if (webResponse->GetResponseStatus() == false) {
         LOGI("intercept response async Handle");
         std::shared_ptr<NWebResponseAsyncHandle> asyncHandle = std::make_shared<NWebResponseAsyncHandle>(nwebResponse);

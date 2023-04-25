@@ -861,6 +861,19 @@ public:
             response_->SetData(data);
             return;
         }
+        if (args[0]->IsObject()) {
+            std::string resourceUrl;
+            std::string url;
+            if (!JSViewAbstract::ParseJsMedia(args[0], resourceUrl)) {
+                LOGE("intercept failed to parse url object");
+                return;
+            }
+            auto np = resourceUrl.find_first_of("/");
+            url = (np == std::string::npos) ? resourceUrl : resourceUrl.erase(np, 1);
+            response_->SetResourceUrl(url);
+            LOGI("intercept set data url %{public}s", url.c_str());
+            return;
+        }
     }
 
     void SetResponseEncoding(const JSCallbackInfo& args)
