@@ -24,6 +24,9 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
 
 namespace OHOS::Ace {
+namespace {
+constexpr int SLIDER_SHOW_TIPS_MAX_PARAMS = 2;
+} // namespace
 
 std::unique_ptr<SliderModel> SliderModel::instance_ = nullptr;
 std::mutex SliderModel::mutex_;
@@ -293,7 +296,16 @@ void JSSlider::SetShowTips(const JSCallbackInfo& info)
         LOGE("arg is not bool.");
         return;
     }
-    SliderModel::GetInstance()->SetShowTips(info[0]->ToBoolean());
+
+    std::optional<std::string> content;
+    if (info.Length() == SLIDER_SHOW_TIPS_MAX_PARAMS) {
+        std::string str;
+        if (ParseJsString(info[1], str)) {
+            content = str;
+        }
+    }
+
+    SliderModel::GetInstance()->SetShowTips(info[0]->ToBoolean(), content);
 }
 
 void JSSlider::SetBlockBorderColor(const JSCallbackInfo& info)

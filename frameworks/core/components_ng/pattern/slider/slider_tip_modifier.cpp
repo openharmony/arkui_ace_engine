@@ -16,6 +16,10 @@
 #include "core/components_ng/pattern/slider/slider_tip_modifier.h"
 
 #include "base/geometry/ng/offset_t.h"
+#include "base/i18n/localization.h"
+#include "core/components/common/layout/grid_system_manager.h"
+#include "core/components/slider/slider_theme.h"
+#include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 
 namespace OHOS::Ace::NG {
@@ -28,32 +32,58 @@ constexpr Dimension BEZIER_VERTICAL_OFFSET_FIRST = 0.1_vp;
 constexpr Dimension BEZIER_VERTICAL_OFFSET_SECOND = 3.0_vp;
 constexpr Dimension BEZIER_VERTICAL_OFFSET_THIRD = 8.0_vp;
 constexpr Dimension ARROW_HEIGHT = 8.0_vp;
+constexpr Dimension ARROW_WIDTH = 32.0_vp;
 constexpr float HALF = 0.5f;
+
+constexpr float BUBBLE_SIZE_MIN_SCALE = 0.6f;
+constexpr float BUBBLE_SIZE_MAX_SCALE = 1.0f;
+constexpr float BUBBLE_OPACITY_MIN_SCALE = 0.0f;
+constexpr float BUBBLE_OPACITY_MAX_SCALE = 1.0f;
+constexpr int32_t BUBBLE_DISPLAY_SIZE_CHANGE_TIMER = 250;
+constexpr int32_t BUBBLE_DISPLAY_OPACITY_CHANGE_TIMER = 150;
+constexpr int32_t BUBBLE_DISAPPEAR_SIZE_CHANGE_TIMER = 250;
+constexpr int32_t BUBBLE_DISAPPEAR_OPACITY_CHANGE_TIMER = 250;
+constexpr Dimension BUBBLE_TEXT_OFFSET = 8.0_vp;
+constexpr int32_t MAX_COLUMNS_OF_BUBBLE = 6;
 } // namespace
 
-SliderTipModifier::SliderTipModifier()
+SliderTipModifier::SliderTipModifier(std::function<OffsetF()> getBlockCenterFunc)
     : tipFlag_(AceType::MakeRefPtr<PropertyBool>(false)),
       contentOffset_(AceType::MakeRefPtr<PropertyOffsetF>(OffsetF())),
-      bubbleSize_(AceType::MakeRefPtr<PropertySizeF>(SizeF())),
-      bubbleOffset_(AceType::MakeRefPtr<PropertyOffsetF>(OffsetF())),
-      textOffset_(AceType::MakeRefPtr<PropertyOffsetF>(OffsetF()))
+      contentSize_(AceType::MakeRefPtr<PropertySizeF>(SizeF())),
+      sizeScale_(AceType::MakeRefPtr<AnimatablePropertyFloat>(BUBBLE_SIZE_MIN_SCALE)),
+      opacityScale_(AceType::MakeRefPtr<AnimatablePropertyFloat>(BUBBLE_OPACITY_MIN_SCALE)),
+      content_(AceType::MakeRefPtr<PropertyString>("")), blockCenter_(AceType::MakeRefPtr<PropertyOffsetF>(OffsetF())),
+      getBlockCenterFunc_(std::move(getBlockCenterFunc))
 {
     AttachProperty(tipFlag_);
     AttachProperty(contentOffset_);
-    AttachProperty(bubbleSize_);
-    AttachProperty(bubbleOffset_);
-    AttachProperty(textOffset_);
+    AttachProperty(sizeScale_);
+    AttachProperty(opacityScale_);
+    AttachProperty(content_);
+    AttachProperty(blockCenter_);
 }
+
+SliderTipModifier::~SliderTipModifier()
+{}
 
 void SliderTipModifier::PaintTip(DrawingContext& context)
 {
-    auto textOffset = textOffset_->Get() + contentOffset_->Get();
+    auto sizeScale = sizeScale_->Get();
+    auto vertex = GetBubbleVertex();
+    context.canvas.Save();
+    context.canvas.Translate(vertex.GetX(), vertex.GetY());
+    context.canvas.Scale(sizeScale, sizeScale);
+    context.canvas.Translate(vertex.GetX() * -1.0, vertex.GetY() * -1.0);
     PaintBubble(context);
     CHECK_NULL_VOID(paragraph_);
+    auto textOffset = textOffset_ + contentOffset_->Get();
     paragraph_->Paint(context.canvas, textOffset.GetX(), textOffset.GetY());
+    context.canvas.Restore();
 }
 
-void PaintBezier(bool isLeft, Axis axis, RSPath& path, const OffsetF& arrowCenter, const OffsetF& arrowEdge)
+void SliderTipModifier::PaintBezier(
+    bool isLeft, Axis axis, RSPath& path, const OffsetF& arrowCenter, const OffsetF& arrowEdge)
 {
     if (isLeft) {
         path.MoveTo(arrowCenter.GetX(), arrowCenter.GetY());
@@ -105,9 +135,10 @@ void PaintBezier(bool isLeft, Axis axis, RSPath& path, const OffsetF& arrowCente
 
 void SliderTipModifier::PaintBubble(DrawingContext& context)
 {
+    auto opacityScale = opacityScale_->Get();
     auto contentOffset = contentOffset_->Get();
-    auto offset = bubbleOffset_->Get() + contentOffset;
-    auto bubbleSize = bubbleSize_->Get();
+    auto offset = bubbleOffset_ + contentOffset;
+    auto bubbleSize = bubbleSize_;
     auto arrowHeight = static_cast<float>(ARROW_HEIGHT.ConvertToPx());
     RSPath path;
     OffsetF arrowCenter;
@@ -134,24 +165,208 @@ void SliderTipModifier::PaintBubble(DrawingContext& context)
         clockwiseFourthPoint = { offset.GetX() + circularRadius * 2, clockwiseThirdPoint.GetY() };
     }
     path.MoveTo(arrowCenter.GetX(), arrowCenter.GetY());
-    PaintBezier(
-        true, axis_, path, arrowCenter, clockwiseFirstPoint);
+    PaintBezier(true, axis_, path, arrowCenter, clockwiseFirstPoint);
     path.ArcTo(circularRadius, circularRadius, 0.0f, RSPathDirection::CW_DIRECTION, clockwiseSecondPoint.GetX(),
         clockwiseSecondPoint.GetY());
     path.LineTo(clockwiseThirdPoint.GetX(), clockwiseThirdPoint.GetY());
     path.ArcTo(circularRadius, circularRadius, 0.0f, RSPathDirection::CW_DIRECTION, clockwiseFourthPoint.GetX(),
         clockwiseFourthPoint.GetY());
-    PaintBezier(
-        false, axis_, path, arrowCenter, clockwiseFourthPoint);
+    PaintBezier(false, axis_, path, arrowCenter, clockwiseFourthPoint);
     RSPen pen;
-    pen.SetColor(ToRSColor(tipColor_));
+    pen.SetColor(ToRSColor(tipColor_.ChangeAlpha(std::round(tipColor_.GetAlpha() * opacityScale))));
     pen.SetAntiAlias(true);
     RSBrush brush;
-    brush.SetColor(ToRSColor(tipColor_));
+    brush.SetColor(ToRSColor(tipColor_.ChangeAlpha(std::round(tipColor_.GetAlpha() * opacityScale))));
     auto& canvas = context.canvas;
     canvas.AttachPen(pen);
     canvas.AttachBrush(brush);
     canvas.DrawPath(path);
     canvas.ClipPath(path, RSClipOp::INTERSECT, true);
+}
+
+void SliderTipModifier::onDraw(DrawingContext& context)
+{
+    if (tipFlag_->Get() || GreatNotEqual(sizeScale_->Get(), BUBBLE_SIZE_MIN_SCALE)) {
+        BuildParagraph();
+        UpdateBubbleSize();
+        SetBoundsRect(UpdateOverlayRect());
+        PaintTip(context);
+    }
+}
+
+void SliderTipModifier::SetBubbleDisplayAnimation()
+{
+    auto weak = AceType::WeakClaim(this);
+    AnimationOption option = AnimationOption();
+    option.SetDuration(BUBBLE_DISPLAY_SIZE_CHANGE_TIMER);
+    option.SetCurve(Curves::FRICTION);
+    AnimationUtils::Animate(option, [weak]() {
+        auto self = weak.Upgrade();
+        CHECK_NULL_VOID(self);
+        self->sizeScale_->Set(BUBBLE_SIZE_MAX_SCALE);
+    });
+
+    option.SetDuration(BUBBLE_DISPLAY_OPACITY_CHANGE_TIMER);
+    option.SetCurve(Curves::SHARP);
+    AnimationUtils::Animate(option, [weak]() {
+        auto self = weak.Upgrade();
+        CHECK_NULL_VOID(self);
+        self->opacityScale_->Set(BUBBLE_OPACITY_MAX_SCALE);
+    });
+}
+
+void SliderTipModifier::SetBubbleDisappearAnimation()
+{
+    auto weak = AceType::WeakClaim(this);
+    AnimationOption option = AnimationOption();
+    option.SetDuration(BUBBLE_DISAPPEAR_SIZE_CHANGE_TIMER);
+    option.SetCurve(Curves::FRICTION);
+    AnimationUtils::Animate(option, [weak]() {
+        auto self = weak.Upgrade();
+        CHECK_NULL_VOID(self);
+        self->sizeScale_->Set(BUBBLE_SIZE_MIN_SCALE);
+    });
+
+    option.SetDuration(BUBBLE_DISAPPEAR_OPACITY_CHANGE_TIMER);
+    option.SetCurve(Curves::SHARP);
+    AnimationUtils::Animate(option, [weak]() {
+        auto self = weak.Upgrade();
+        CHECK_NULL_VOID(self);
+        self->opacityScale_->Set(BUBBLE_OPACITY_MIN_SCALE);
+    });
+}
+
+void SliderTipModifier::SetTipFlag(bool flag)
+{
+    CHECK_NULL_VOID(tipFlag_);
+    if (tipFlag_->Get() == flag) {
+        return;
+    }
+    if (flag) {
+        SetBubbleDisplayAnimation();
+    } else {
+        SetBubbleDisappearAnimation();
+    }
+    tipFlag_->Set(flag);
+}
+
+void SliderTipModifier::BuildParagraph()
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto fontStyle = std::make_unique<NG::FontStyle>();
+    CHECK_NULL_VOID(fontStyle);
+    fontStyle->UpdateTextColor(textColor_.ChangeAlpha(std::round(textColor_.GetAlpha() * opacityScale_->Get())));
+    fontStyle->UpdateFontSize(textFontSize_);
+    TextStyle textStyle = CreateTextStyleUsingTheme(fontStyle, nullptr, pipeline->GetTheme<TextTheme>());
+    auto content = content_->Get();
+    CreateParagraphAndLayout(textStyle, content);
+}
+
+void SliderTipModifier::CreateParagraphAndLayout(const TextStyle& textStyle, const std::string& content)
+{
+    if (!CreateParagraph(textStyle, content)) {
+        return;
+    }
+    CHECK_NULL_VOID(paragraph_);
+    auto gridColumnType = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::BUBBLE_TYPE);
+    auto bubbleMaxWidth = static_cast<float>(gridColumnType->GetWidth(MAX_COLUMNS_OF_BUBBLE));
+    auto maxWidth = bubbleMaxWidth - BUBBLE_TEXT_OFFSET.ConvertToPx() * 2;
+    paragraph_->Layout(maxWidth);
+}
+
+bool SliderTipModifier::CreateParagraph(const TextStyle& textStyle, std::string content)
+{
+    ParagraphStyle paraStyle = { .direction = TextDirection::LTR,
+        .align = textStyle.GetTextAlign(),
+        .maxLines = textStyle.GetMaxLines(),
+        .fontLocale = Localization::GetInstance()->GetFontLocale(),
+        .wordBreak = textStyle.GetWordBreak(),
+        .textOverflow = textStyle.GetTextOverflow() };
+    paragraph_ = Paragraph::Create(paraStyle, FontCollection::Current());
+    CHECK_NULL_RETURN(paragraph_, false);
+    paragraph_->PushStyle(textStyle);
+    StringUtils::TransformStrCase(content, static_cast<int32_t>(textStyle.GetTextCase()));
+    paragraph_->AddText(StringUtils::Str8ToStr16(content));
+    paragraph_->Build();
+    return true;
+}
+
+OffsetF SliderTipModifier::GetBubbleVertex()
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, OffsetF());
+    auto theme = pipeline->GetTheme<SliderTheme>();
+    CHECK_NULL_RETURN(theme, OffsetF());
+
+    OffsetF vertex;
+    auto blockCenter = blockCenter_->Get();
+    if (axis_ == Axis::HORIZONTAL) {
+        vertex.SetX(blockCenter.GetX());
+        vertex.SetY(blockCenter.GetY() - static_cast<float>(theme->GetBubbleToCircleCenterDistance().ConvertToPx()));
+    } else {
+        vertex.SetX(blockCenter.GetX() - static_cast<float>(theme->GetBubbleToCircleCenterDistance().ConvertToPx()));
+        vertex.SetY(blockCenter.GetY());
+    }
+
+    return vertex;
+}
+
+void SliderTipModifier::UpdateBubbleSize()
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SliderTheme>();
+    CHECK_NULL_VOID(theme);
+    if (getBlockCenterFunc_) {
+        SetCircleCenter(getBlockCenterFunc_());
+    }
+    SizeF textSize = { 0, 0 };
+    if (paragraph_) {
+        textSize = SizeF(paragraph_->GetTextWidth(), paragraph_->GetHeight());
+    }
+    OffsetF textOffsetInBubble = { 0, 0 };
+    auto padding = static_cast<float>(theme->GetTipTextPadding().ConvertToPx());
+    float bubbleSizeHeight = textSize.Height() + padding + padding;
+    float bubbleSizeWidth = textSize.Width() + padding + padding;
+    if (axis_ == Axis::HORIZONTAL) {
+        bubbleSizeWidth = std::max(static_cast<float>(ARROW_WIDTH.ConvertToPx()) + bubbleSizeHeight, bubbleSizeWidth);
+        bubbleSize_ = SizeF(bubbleSizeWidth, bubbleSizeHeight + static_cast<float>(ARROW_HEIGHT.ConvertToPx()));
+        textOffsetInBubble.SetX((bubbleSize_.Width() - textSize.Width()) * HALF);
+        textOffsetInBubble.SetY(padding);
+        auto vertex = GetBubbleVertex();
+        bubbleOffset_.SetX(vertex.GetX() - bubbleSize_.Width() * HALF);
+        bubbleOffset_.SetY(vertex.GetY() - bubbleSize_.Height());
+    } else {
+        bubbleSizeHeight = std::max(static_cast<float>(ARROW_WIDTH.ConvertToPx()) + bubbleSizeWidth, bubbleSizeHeight);
+        bubbleSize_ = SizeF(bubbleSizeWidth + static_cast<float>(ARROW_HEIGHT.ConvertToPx()), bubbleSizeHeight);
+        textOffsetInBubble.SetX(padding);
+        textOffsetInBubble.SetY((bubbleSize_.Height() - textSize.Height()) * HALF);
+        auto vertex = GetBubbleVertex();
+        bubbleOffset_.SetX(vertex.GetX() - bubbleSize_.Width());
+        bubbleOffset_.SetY(vertex.GetY() - bubbleSize_.Height() * HALF);
+    }
+    textOffset_ = bubbleOffset_ + textOffsetInBubble;
+}
+
+RectF SliderTipModifier::UpdateOverlayRect()
+{
+    auto contentSize = contentSize_->Get();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, RectF());
+    auto theme = pipeline->GetTheme<SliderTheme>();
+    CHECK_NULL_RETURN(theme, RectF());
+    auto distance = static_cast<float>(theme->GetBubbleToCircleCenterDistance().ConvertToPx());
+    RectF rect;
+    if (axis_ == Axis::HORIZONTAL) {
+        rect.SetOffset(OffsetF(-bubbleSize_.Width(), -bubbleSize_.Height() - distance));
+        rect.SetSize(SizeF(contentSize.Width() + bubbleSize_.Width() / HALF,
+            contentSize.Height() * HALF + bubbleSize_.Height() + distance));
+    } else {
+        rect.SetOffset(OffsetF(-bubbleSize_.Width() - distance, -bubbleSize_.Height()));
+        rect.SetSize(SizeF(contentSize.Width() * HALF + bubbleSize_.Width() + distance,
+            contentSize.Height() + bubbleSize_.Height() / HALF));
+    }
+    return rect;
 }
 } // namespace OHOS::Ace::NG
