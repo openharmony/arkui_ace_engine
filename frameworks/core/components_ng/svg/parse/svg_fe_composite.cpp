@@ -15,8 +15,11 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_fe_composite.h"
 
+#ifdef NEW_SKIA
+#include "include/effects/SkImageFilters.h"
+#else
 #include "include/effects/SkArithmeticImageFilter.h"
-
+#endif
 #include "base/utils/utils.h"
 #include "frameworks/core/components/declaration/svg/svg_fe_composite_declaration.h"
 
@@ -48,10 +51,15 @@ void SvgFeComposite::OnAsImageFilter(sk_sp<SkImageFilter>& imageFilter,
     auto backImageFilter = MakeImageFilter(declaration->GetIn2(), imageFilter);
     ConverImageFilterColor(foreImageFilter, srcColor, currentColor);
     ConverImageFilterColor(backImageFilter, srcColor, currentColor);
-
+#ifndef NEW_SKIA
     imageFilter = SkArithmeticImageFilter::Make(
         declaration->GetK1(), declaration->GetK2(), declaration->GetK3(), declaration->GetK4(),
         true, backImageFilter, foreImageFilter, nullptr);
+#else
+    imageFilter = SkImageFilters::Arithmetic(
+        declaration->GetK1(), declaration->GetK2(), declaration->GetK3(), declaration->GetK4(),
+        true, backImageFilter, foreImageFilter, nullptr);
+#endif
 
     ConverImageFilterColor(imageFilter, srcColor, currentColor);
 }

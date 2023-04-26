@@ -421,7 +421,7 @@ void RosenRenderImage::FetchImageObject()
 
 void RosenRenderImage::UpdateSharedMemoryImage(const RefPtr<PipelineContext>& context)
 {
-    auto sharedImageManager = context->GetSharedImageManager();
+    auto sharedImageManager = context->GetOrCreateSharedImageManager();
     if (!sharedImageManager) {
         LOGE("sharedImageManager is null when image try loading memory image, sourceInfo_: %{private}s",
             sourceInfo_.ToString().c_str());

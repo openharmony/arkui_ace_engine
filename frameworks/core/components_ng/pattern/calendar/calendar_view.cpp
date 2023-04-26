@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -135,7 +135,9 @@ void CalendarView::SetCalendarDay(const CalendarDay& calendarDay)
 void CalendarView::SetShowLunar(bool showLunar)
 {
     auto* stack = ViewStackProcessor::GetInstance();
-    auto swiperNode = stack->GetMainFrameNode()->GetChildren().front();
+    auto frameNode = stack->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto swiperNode = frameNode->GetChildren().front();
     CHECK_NULL_VOID(swiperNode);
     for (const auto& calendarNode : swiperNode->GetChildren()) {
         auto calendarFrameNode = AceType::DynamicCast<FrameNode>(calendarNode);
@@ -149,7 +151,9 @@ void CalendarView::SetShowLunar(bool showLunar)
 void CalendarView::SetShowHoliday(bool showHoliday)
 {
     auto* stack = ViewStackProcessor::GetInstance();
-    auto swiperNode = stack->GetMainFrameNode()->GetChildren().front();
+    auto frameNode = stack->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto swiperNode = frameNode->GetChildren().front();
     CHECK_NULL_VOID(swiperNode);
     for (const auto& calendarNode : swiperNode->GetChildren()) {
         auto calendarFrameNode = AceType::DynamicCast<FrameNode>(calendarNode);
@@ -163,7 +167,9 @@ void CalendarView::SetShowHoliday(bool showHoliday)
 void CalendarView::SetNeedSlide(bool needSlide)
 {
     auto* stack = ViewStackProcessor::GetInstance();
-    auto swiperNode = stack->GetMainFrameNode()->GetChildren().front();
+    auto frameNode = stack->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto swiperNode = frameNode->GetChildren().front();
     CHECK_NULL_VOID(swiperNode);
     auto swiperFrameNode = AceType::DynamicCast<FrameNode>(swiperNode);
     CHECK_NULL_VOID(swiperFrameNode);
@@ -176,7 +182,9 @@ void CalendarView::SetNeedSlide(bool needSlide)
 void CalendarView::SetStartOfWeek(Week startOfWeek)
 {
     auto* stack = ViewStackProcessor::GetInstance();
-    auto swiperNode = stack->GetMainFrameNode()->GetChildren().front();
+    auto frameNode = stack->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto swiperNode = frameNode->GetChildren().front();
     CHECK_NULL_VOID(swiperNode);
     for (const auto& calendarNode : swiperNode->GetChildren()) {
         auto calendarFrameNode = AceType::DynamicCast<FrameNode>(calendarNode);
@@ -190,7 +198,9 @@ void CalendarView::SetStartOfWeek(Week startOfWeek)
 void CalendarView::SetOffDays(const std::string& offDays)
 {
     auto* stack = ViewStackProcessor::GetInstance();
-    auto swiperNode = stack->GetMainFrameNode()->GetChildren().front();
+    auto frameNode = stack->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto swiperNode = frameNode->GetChildren().front();
     CHECK_NULL_VOID(swiperNode);
     for (const auto& calendarNode : swiperNode->GetChildren()) {
         auto calendarFrameNode = AceType::DynamicCast<FrameNode>(calendarNode);
@@ -204,7 +214,9 @@ void CalendarView::SetOffDays(const std::string& offDays)
 void CalendarView::SetDirection(Axis direction)
 {
     auto* stack = ViewStackProcessor::GetInstance();
-    auto swiperNode = stack->GetMainFrameNode()->GetChildren().front();
+    auto frameNode = stack->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto swiperNode = frameNode->GetChildren().front();
     CHECK_NULL_VOID(swiperNode);
     auto swiperFrameNode = AceType::DynamicCast<FrameNode>(swiperNode);
     CHECK_NULL_VOID(swiperFrameNode);
@@ -217,7 +229,9 @@ void CalendarView::SetDirection(Axis direction)
 void CalendarView::SetCurrentDayStyle(const CurrentDayStyle& currentDayStyle)
 {
     auto* stack = ViewStackProcessor::GetInstance();
-    auto swiperNode = stack->GetMainFrameNode()->GetChildren().front();
+    auto frameNode = stack->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto swiperNode = frameNode->GetChildren().front();
     CHECK_NULL_VOID(swiperNode);
     for (const auto& calendarNode : swiperNode->GetChildren()) {
         auto calendarFrameNode = AceType::DynamicCast<FrameNode>(calendarNode);
@@ -299,7 +313,9 @@ void CalendarView::SetCurrentDayStyle(const CurrentDayStyle& currentDayStyle)
 void CalendarView::SetNonCurrentDayStyle(const NonCurrentDayStyle& nonCurrentDayStyle)
 {
     auto* stack = ViewStackProcessor::GetInstance();
-    auto swiperNode = stack->GetMainFrameNode()->GetChildren().front();
+    auto frameNode = stack->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto swiperNode = frameNode->GetChildren().front();
     CHECK_NULL_VOID(swiperNode);
     for (const auto& calendarNode : swiperNode->GetChildren()) {
         auto calendarFrameNode = AceType::DynamicCast<FrameNode>(calendarNode);
@@ -327,7 +343,9 @@ void CalendarView::SetNonCurrentDayStyle(const NonCurrentDayStyle& nonCurrentDay
 void CalendarView::SetTodayStyle(const TodayStyle& todayStyle)
 {
     auto* stack = ViewStackProcessor::GetInstance();
-    auto swiperNode = stack->GetMainFrameNode()->GetChildren().front();
+    auto frameNode = stack->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto swiperNode = frameNode->GetChildren().front();
     CHECK_NULL_VOID(swiperNode);
     for (const auto& calendarNode : swiperNode->GetChildren()) {
         auto calendarFrameNode = AceType::DynamicCast<FrameNode>(calendarNode);
@@ -352,7 +370,9 @@ void CalendarView::SetTodayStyle(const TodayStyle& todayStyle)
 void CalendarView::SetWeekStyle(const WeekStyle& weekStyle)
 {
     auto* stack = ViewStackProcessor::GetInstance();
-    auto swiperNode = stack->GetMainFrameNode()->GetChildren().front();
+    auto frameNode = stack->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto swiperNode = frameNode->GetChildren().front();
     CHECK_NULL_VOID(swiperNode);
     for (const auto& calendarNode : swiperNode->GetChildren()) {
         auto calendarFrameNode = AceType::DynamicCast<FrameNode>(calendarNode);
@@ -386,7 +406,9 @@ void CalendarView::SetWeekStyle(const WeekStyle& weekStyle)
 void CalendarView::SetWorkStateStyle(const WorkStateStyle& workStateStyle)
 {
     auto* stack = ViewStackProcessor::GetInstance();
-    auto swiperNode = stack->GetMainFrameNode()->GetChildren().front();
+    auto frameNode = stack->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto swiperNode = frameNode->GetChildren().front();
     CHECK_NULL_VOID(swiperNode);
     for (const auto& calendarNode : swiperNode->GetChildren()) {
         auto calendarFrameNode = AceType::DynamicCast<FrameNode>(calendarNode);

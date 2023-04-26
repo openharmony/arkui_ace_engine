@@ -27,19 +27,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<VideoModel> VideoModel::instance_ = nullptr;
+std::mutex VideoModel::mutex_;
 
 VideoModel* VideoModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::VideoModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::VideoModelNG());
-        } else {
-            instance_.reset(new Framework::VideoModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::VideoModelNG());
+            } else {
+                instance_.reset(new Framework::VideoModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }

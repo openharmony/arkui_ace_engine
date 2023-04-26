@@ -148,6 +148,11 @@ void CheckBoxPattern::InitMouseEvent()
 void CheckBoxPattern::HandleMouseEvent(bool isHover)
 {
     isHover_ = isHover;
+    if (isHover) {
+        touchHoverType_ = TouchHoverAnimationType::HOVER;
+    } else {
+        touchHoverType_ = TouchHoverAnimationType::NONE;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -171,6 +176,11 @@ void CheckBoxPattern::OnClick()
 
 void CheckBoxPattern::OnTouchDown()
 {
+    if (isHover_) {
+        touchHoverType_ = TouchHoverAnimationType::HOVER_TO_PRESS;
+    } else {
+        touchHoverType_ = TouchHoverAnimationType::PRESS;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     isTouch_ = true;
@@ -179,6 +189,11 @@ void CheckBoxPattern::OnTouchDown()
 
 void CheckBoxPattern::OnTouchUp()
 {
+    if (isHover_) {
+        touchHoverType_ = TouchHoverAnimationType::PRESS_TO_HOVER;
+    } else {
+        touchHoverType_ = TouchHoverAnimationType::NONE;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     isTouch_ = false;

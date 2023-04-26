@@ -36,19 +36,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<SearchModel> SearchModel::instance_ = nullptr;
+std::mutex SearchModel::mutex_;
 
 SearchModel* SearchModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::SearchModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::SearchModelNG());
-        } else {
-            instance_.reset(new Framework::SearchModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::SearchModelNG());
+            } else {
+                instance_.reset(new Framework::SearchModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }

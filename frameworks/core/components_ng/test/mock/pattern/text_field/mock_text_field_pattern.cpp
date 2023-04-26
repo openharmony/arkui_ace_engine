@@ -124,5 +124,19 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info) {}
 
 void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyboard) {}
 void TextFieldPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent) {}
+int32_t TextFieldPattern::ConvertTouchOffsetToCaretPosition(const Offset& localOffset)
+{
+    return {};
+}
+bool TextFieldPattern::CloseKeyboard(bool forceClose)
+{
+    return {};
+}
+void TextFieldPattern::CloseSelectOverlay() {}
+bool TextFieldPattern::IsTextArea() const
+{
+    return {};
+}
+void TextFieldPattern::CreateHandles() {}
 
 } // namespace OHOS::Ace::NG

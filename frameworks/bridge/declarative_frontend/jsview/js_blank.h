@@ -22,7 +22,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 namespace OHOS::Ace::Framework {
-
 class JSBlank : public JSViewAbstract, public JSInteractableView {
 public:
     static void SetBlankColor(const JSCallbackInfo& info);
@@ -31,6 +30,5 @@ public:
     static void Create(const JSCallbackInfo& info);
     static void Height(const JSCallbackInfo& info);
 };
-
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_DIVIDER_H

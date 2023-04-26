@@ -24,19 +24,23 @@
 
 namespace OHOS::Ace {
 std::unique_ptr<WaterFlowModel> WaterFlowModel::instance_ = nullptr;
+std::mutex WaterFlowModel::mutex_;
 
 WaterFlowModel* WaterFlowModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::WaterFlowModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::WaterFlowModelNG());
-        } else {
-            instance_.reset(new Framework::WaterFlowModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::WaterFlowModelNG());
+            } else {
+                instance_.reset(new Framework::WaterFlowModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -142,10 +146,21 @@ void JSWaterFlow::SetRowsGap(const JSCallbackInfo& info)
     WaterFlowModel::GetInstance()->SetRowsGap(rowGap);
 }
 
-void JSWaterFlow::SetLayoutDirection(int32_t value)
+void JSWaterFlow::SetLayoutDirection(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
+        return;
+    }
+    auto value = static_cast<int32_t>(FlexDirection::COLUMN);
+    auto jsValue = info[0];
+    if (!jsValue->IsUndefined()) {
+        ParseJsInteger<int32_t>(jsValue, value);
+    }
     if (value >= 0 && value < static_cast<int32_t>(LAYOUT_DIRECTION.size())) {
         WaterFlowModel::GetInstance()->SetLayoutDirection(LAYOUT_DIRECTION[value]);
+    } else {
+        WaterFlowModel::GetInstance()->SetLayoutDirection(FlexDirection::COLUMN);
     }
 }
 

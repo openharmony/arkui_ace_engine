@@ -21,7 +21,11 @@
 #include "include/core/SkColor.h"
 #include "include/core/SkColorFilter.h"
 #include "include/core/SkMaskFilter.h"
+#ifndef NEW_SKIA
 #include "include/effects/SkBlurImageFilter.h"
+#else
+#include "include/effects/SkImageFilters.h"
+#endif
 
 #include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
@@ -196,7 +200,12 @@ void FlutterRenderTexture::AddGaussianFuzzy(RenderContext& context, const Offset
 #else
     paint.setColorFilter(SkColorFilters::Blend(colorValue_.GetValue(), SkBlendMode::kDstOver));
 #endif
+
+#ifdef NEW_SKIA
+    paint.setImageFilter(SkImageFilters::Blur(gaussianFuzzySize_.Width(), gaussianFuzzySize_.Height(), nullptr));
+#else
     paint.setImageFilter(SkBlurImageFilter::Make(gaussianFuzzySize_.Width(), gaussianFuzzySize_.Height(), nullptr));
+#endif
     SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
     skCanvas->saveLayer(slr);
 }

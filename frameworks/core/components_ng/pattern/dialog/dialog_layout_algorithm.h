@@ -47,6 +47,8 @@ public:
     }
 
 private:
+    LayoutConstraintF CreateScrollConstraint(LayoutWrapper* layoutWrapper, float scrollHeight, float scrollWidth);
+
     void ComputeInnerLayoutParam(LayoutConstraintF& innerLayout);
     double GetMaxWidthBasedOnGridType(const RefPtr<GridColumnInfo>& info, GridSizeType type, DeviceType deviceType);
 

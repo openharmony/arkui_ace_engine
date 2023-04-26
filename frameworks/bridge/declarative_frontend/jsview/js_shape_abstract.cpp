@@ -25,19 +25,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<ShapeAbstractModel> ShapeAbstractModel::instance_ = nullptr;
+std::mutex ShapeAbstractModel::mutex_;
 
 ShapeAbstractModel* ShapeAbstractModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::ShapeAbstractModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::ShapeAbstractModelNG());
-        } else {
-            instance_.reset(new Framework::ShapeAbstractModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::ShapeAbstractModelNG());
+            } else {
+                instance_.reset(new Framework::ShapeAbstractModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }

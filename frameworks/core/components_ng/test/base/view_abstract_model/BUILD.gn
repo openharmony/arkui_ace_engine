@@ -59,6 +59,9 @@ ohos_unittest("view_abstract_model_test_ng") {
     "$ace_root/frameworks/core/components_ng/property/property.cpp",
     "$ace_root/frameworks/core/components_ng/syntax/for_each_node.cpp",
 
+    # mock
+    "$ace_root/frameworks/base/test/mock/mock_mouse_style.cpp",
+
     # self
     "$ace_root/adapter/ohos/osal/ace_engine_ext.cpp",
     "$ace_root/adapter/ohos/osal/frame_trace_adapter_fake_impl.cpp",

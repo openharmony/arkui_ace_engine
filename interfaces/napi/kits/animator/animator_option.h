@@ -109,6 +109,8 @@ public:
 
     void ApplyOption();
 
+    void Destroy(napi_env env);
+
 private:
     RefPtr<Animator> animator_;
     std::shared_ptr<AnimatorOption> option_;

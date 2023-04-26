@@ -67,21 +67,35 @@ public:
 
     void UpdateAnimatableProperty()
     {
-        AnimationOption option = AnimationOption();
-        option.SetDuration(hoverDuration_);
-        option.SetCurve(Curves::FRICTION);
-        AnimationUtils::Animate(option, [&]() {
-            switch (touchHoverType_) {
-                case TouchHoverAnimationType::HOVER:
-                    animateTouchHoverColor_->Set(LinearColor(hoverColor_));
-                    break;
-                case TouchHoverAnimationType::NONE:
-                    animateTouchHoverColor_->Set(LinearColor(hoverColor_.BlendOpacity(0)));
-                    break;
-                default:
-                    break;
-            }
-        });
+        switch (touchHoverType_) {
+            case TouchHoverAnimationType::HOVER:
+                SetBoardColor(LinearColor(hoverColor_), hoverDuration_, Curves::FRICTION);
+                break;
+            case TouchHoverAnimationType::PRESS_TO_HOVER:
+                SetBoardColor(LinearColor(hoverColor_), hoverToTouchDuration_, Curves::SHARP);
+                break;
+            case TouchHoverAnimationType::NONE:
+                SetBoardColor(LinearColor(hoverColor_.BlendOpacity(0)), hoverDuration_, Curves::FRICTION);
+                break;
+            case TouchHoverAnimationType::HOVER_TO_PRESS:
+                SetBoardColor(LinearColor(clickEffectColor_), hoverToTouchDuration_, Curves::SHARP);
+                break;
+            case TouchHoverAnimationType::PRESS:
+                SetBoardColor(LinearColor(clickEffectColor_), hoverDuration_, Curves::FRICTION);
+                break;
+            default:
+                break;
+        }
+    }
+
+    void SetBoardColor(LinearColor color, int32_t duratuion, const RefPtr<CubicCurve>& curve)
+    {
+        if (animateTouchHoverColor_) {
+            AnimationOption option = AnimationOption();
+            option.SetDuration(duratuion);
+            option.SetCurve(curve);
+            AnimationUtils::Animate(option, [&]() { animateTouchHoverColor_->Set(color); });
+        }
     }
 
     void InitializeParam();

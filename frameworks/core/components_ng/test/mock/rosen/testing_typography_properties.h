@@ -50,6 +50,8 @@ public:
     struct TextBox {
         TextDirection direction_;
         TestingRect rect_;
+        TextBox() = default;
+        TextBox(TestingRect rect, TextDirection direction) : direction_(direction), rect_(rect) {}
     };
 
     struct PositionAndAffinity {

@@ -29,19 +29,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<TextClockModel> TextClockModel::instance_ = nullptr;
+std::mutex TextClockModel::mutex_;
 
 TextClockModel* TextClockModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::TextClockModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::TextClockModelNG());
-        } else {
-            instance_.reset(new Framework::TextClockModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::TextClockModelNG());
+            } else {
+                instance_.reset(new Framework::TextClockModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }

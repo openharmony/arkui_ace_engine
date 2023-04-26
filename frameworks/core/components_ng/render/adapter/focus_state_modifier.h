@@ -47,10 +47,6 @@ public:
 
     void SetRoundRect(const RoundRect& rect, float borderWidth)
     {
-        std::shared_ptr<Rosen::RectF> overlayRect = std::make_shared<Rosen::RectF>(
-            rect.GetRect().Left() - borderWidth / 2, rect.GetRect().Top() - borderWidth / 2,
-            rect.GetRect().Width() + borderWidth, rect.GetRect().Height() + borderWidth);
-        RSOverlayStyleModifier::SetOverlayBounds(overlayRect);
         roundRect_.SetRect(
             rosen::Rect(rect.GetRect().Left(), rect.GetRect().Top(), rect.GetRect().Right(), rect.GetRect().Bottom()));
         roundRect_.SetCornerRadius(rosen::RoundRect::CornerPos::TOP_LEFT_POS,

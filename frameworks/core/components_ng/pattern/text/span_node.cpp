@@ -68,6 +68,9 @@ void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         }
         json->Put("fontFamily", fontFamily.c_str());
     }
+    if (textLineStyle) {
+        json->Put("lineHeight", textLineStyle->GetLineHeight().value_or(Dimension()).ToString().c_str());
+    }
 }
 
 RefPtr<SpanNode> SpanNode::GetOrCreateSpanNode(int32_t nodeId)
@@ -125,10 +128,11 @@ int32_t SpanItem::UpdateParagraph(
     const RefPtr<Paragraph>& builder, double /* width */, double /* height */, VerticalAlign /* verticalAlign */)
 {
     CHECK_NULL_RETURN(builder, -1);
-    if (fontStyle) {
+    if (fontStyle || textLineStyle) {
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_RETURN(pipelineContext, -1);
-        TextStyle textStyle = CreateTextStyleUsingTheme(fontStyle, nullptr, pipelineContext->GetTheme<TextTheme>());
+        TextStyle textStyle =
+            CreateTextStyleUsingTheme(fontStyle, textLineStyle, pipelineContext->GetTheme<TextTheme>());
         builder->PushStyle(textStyle);
     }
     auto displayText = content;
@@ -140,7 +144,7 @@ int32_t SpanItem::UpdateParagraph(
             child->UpdateParagraph(builder);
         }
     }
-    if (fontStyle) {
+    if (fontStyle || textLineStyle) {
         builder->PopStyle();
     }
     return -1;

@@ -56,6 +56,13 @@ void BuildTitle(
 void BuildSubtitle(
     const RefPtr<NavDestinationGroupNode>& navDestinationNode, const RefPtr<TitleBarNode>& titleBarNode)
 {
+    if (!navDestinationNode->GetSubtitle() && titleBarNode->GetSubtitle()) {
+        auto subtitleNode = titleBarNode->GetSubtitle();
+        titleBarNode->SetSubtitle(nullptr);
+        titleBarNode->RemoveChild(subtitleNode);
+        titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        return;
+    }
     CHECK_NULL_VOID_NOLOG(navDestinationNode->GetSubtitle());
     if (navDestinationNode->GetSubtitleNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::NONE) {
         return;

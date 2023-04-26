@@ -23,19 +23,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<ColumnModel> ColumnModel::instance_ = nullptr;
+std::mutex ColumnModel::mutex_;
 
 ColumnModel* ColumnModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::ColumnModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::ColumnModelNG());
-        } else {
-            instance_.reset(new Framework::ColumnModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::ColumnModelNG());
+            } else {
+                instance_.reset(new Framework::ColumnModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }

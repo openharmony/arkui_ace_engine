@@ -40,6 +40,7 @@
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/text/text_menu_extension.h"
+#include "core/components_ng/pattern/text_drag/text_drag_base.h"
 #include "core/components_ng/pattern/text_field/text_editing_value_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_accessibility_property.h"
 #include "core/components_ng/pattern/text_field/text_field_controller.h"
@@ -66,7 +67,6 @@ namespace OHOS::Ace::NG {
 
 constexpr Dimension CURSOR_WIDTH = 1.5_vp;
 constexpr Dimension SCROLL_BAR_MIN_HEIGHT = 4.0_vp;
-constexpr uint32_t TEXT_DRAG_OPACITY = 0x66;
 
 enum class SelectionMode { SELECT, SELECT_ALL, NONE };
 
@@ -108,8 +108,11 @@ struct CaretMetricsF {
     }
 };
 
-class TextFieldPattern : public ScrollablePattern, public ValueChangeObserver, public TextInputClient {
-    DECLARE_ACE_TYPE(TextFieldPattern, ScrollablePattern, ValueChangeObserver, TextInputClient);
+class TextFieldPattern : public ScrollablePattern,
+                         public TextDragBase,
+                         public ValueChangeObserver,
+                         public TextInputClient {
+    DECLARE_ACE_TYPE(TextFieldPattern, ScrollablePattern, TextDragBase, ValueChangeObserver, TextInputClient);
 
 public:
     TextFieldPattern();
@@ -206,7 +209,7 @@ public:
     void UpdateCaretOffsetByEvent();
 
     bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard);
-    bool CloseKeyboard(bool forceClose);
+    bool CloseKeyboard(bool forceClose) override;
 
     FocusPattern GetFocusPattern() const override
     {
@@ -332,7 +335,7 @@ public:
         return utilPadding_.top.value_or(0.0f) + utilPadding_.bottom.value_or(0.0f);
     }
 
-    const RectF& GetTextRect()
+    const RectF& GetTextRect() override
     {
         return textRect_;
     }
@@ -377,7 +380,7 @@ public:
     void HandleExtendAction(int32_t action);
     void HandleSelect(int32_t keyCode, int32_t cursorMoveSkip);
 
-    const std::vector<RSTypographyProperties::TextBox>& GetTextBoxes()
+    std::vector<RSTypographyProperties::TextBox> GetTextBoxes() override
     {
         return textBoxes_;
     }
@@ -391,7 +394,7 @@ public:
     }
 
     bool SelectOverlayIsOn();
-    void CloseSelectOverlay();
+    void CloseSelectOverlay() override;
     void SetInputMethodStatus(bool keyboardShown)
     {
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
@@ -445,7 +448,7 @@ public:
     }
 
     static std::u16string CreateObscuredText(int32_t len);
-    bool IsTextArea() const;
+    bool IsTextArea() const override;
     const RectF& GetImageRect()
     {
         return imageRect_;
@@ -567,32 +570,32 @@ public:
 
     double GetScrollBarWidth();
 
-    double GetLineHeight() const
+    float GetLineHeight() const override
     {
         return caretRect_.Height();
     }
 
-    const OffsetF& GetParentGlobalOffset() const
+    OffsetF GetParentGlobalOffset() const override
     {
         return parentGlobalOffset_;
     }
 
-    void SetDragNode(const RefPtr<FrameNode>& dragNode)
+    void SetDragNode(const RefPtr<FrameNode>& dragNode) override
     {
         dragNode_ = dragNode;
     }
 
-    const RectF& GetTextContentRect() const
+    const RectF& GetTextContentRect() const override
     {
         return contentRect_;
     }
 
-    const std::shared_ptr<RSParagraph>& GetDragParagraph() const
+    ParagraphT GetDragParagraph() const override
     {
-        return dragParagraph_;
+        return { dragParagraph_ };
     }
 
-    const RefPtr<FrameNode>& GetDragNode()
+    const RefPtr<FrameNode>& GetDragNode() const override
     {
         return dragNode_;
     }
@@ -611,24 +614,24 @@ public:
         dragDropManager->AddDragFrameNode(AceType::WeakClaim(AceType::RawPtr(frameNode)));
     }
 
-    void CreateHandles();
+    void CreateHandles() override;
 
     bool IsDragging() const
     {
         return dragStatus_ == DragStatus::DRAGGING;
     }
 
-    bool BetweenSelectedPosition(const Offset& globalOffset)
+    bool BetweenSelectedPosition(const Offset& globalOffset) override
     {
         if (!InSelectMode()) {
             return false;
         }
         Offset offset = globalOffset - Offset(textRect_.GetX(), textRect_.GetY()) -
-            Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY());
+                        Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY());
         auto position = ConvertTouchOffsetToCaretPosition(offset);
         auto selectStart = std::min(textSelector_.GetStart(), textSelector_.GetEnd());
         auto selectEnd = std::max(textSelector_.GetStart(), textSelector_.GetEnd());
-        return (position >= selectStart) && (position < selectEnd) ;
+        return (position >= selectStart) && (position < selectEnd);
     }
 
     // xts

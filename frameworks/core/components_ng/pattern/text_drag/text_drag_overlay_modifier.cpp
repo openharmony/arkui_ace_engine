@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/text_drag/text_drag_overlay_modifier.h"
+#include <variant>
 
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
@@ -43,7 +44,14 @@ void TextDragOverlayModifier::onDraw(DrawingContext& context)
         canvas.DrawPath(*pattern->GenerateBackgroundPath(backgroundOffset_->Get()));
     }
     canvas.ClipPath(*pattern->GetClipPath(), RSClipOp::INTERSECT, true);
-    pattern->GetParagraph()->Paint(&canvas, pattern->GetTextRect().GetX(), pattern->GetTextRect().GetY());
+    auto&& paragraph = pattern->GetParagraph();
+    if (std::holds_alternative<RefPtr<Paragraph>>(paragraph)) {
+        auto paragraphPtr = std::get<RefPtr<Paragraph>>(paragraph);
+        paragraphPtr->Paint(canvas, pattern->GetTextRect().GetX(), pattern->GetTextRect().GetY());
+    } else {
+        auto rsParagraph = std::get<std::shared_ptr<RSParagraph>>(paragraph);
+        rsParagraph->Paint(&canvas, pattern->GetTextRect().GetX(), pattern->GetTextRect().GetY());
+    }
 }
 
 void TextDragOverlayModifier::StartAnimate()

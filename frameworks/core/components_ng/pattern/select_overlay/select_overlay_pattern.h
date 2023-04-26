@@ -106,6 +106,8 @@ private:
 
     bool firstHandleDrag_ = false;
     bool secondHandleDrag_ = false;
+    // Used to record the original menu display status when the handle is moved.
+    bool orignMenuIsShow_ = false;
 
     int32_t greatThanMaxWidthIndex_ = -1;
 

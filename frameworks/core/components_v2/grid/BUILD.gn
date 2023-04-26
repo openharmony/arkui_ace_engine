@@ -16,7 +16,6 @@ import(
 
 build_component("grid_v2") {
   sources = [
-    "flutter_render_grid_scroll.cpp",
     "grid_element.cpp",
     "grid_event.cpp",
     "grid_position_controller.cpp",
@@ -24,5 +23,8 @@ build_component("grid_v2") {
     "render_grid_scroll.cpp",
     "render_grid_scroll_creator.cpp",
   ]
+  if (!ace_use_new_skia) {
+    sources += [ "flutter_render_grid_scroll.cpp" ]
+  }
   rosen_sources = [ "rosen_render_grid_scroll.cpp" ]
 }

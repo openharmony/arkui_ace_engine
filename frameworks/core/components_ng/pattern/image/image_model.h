@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_H
 
+#include <mutex>
+
 #include "base/geometry/dimension.h"
 #include "base/image/pixel_map.h"
 #include "base/memory/referenced.h"
@@ -65,6 +67,7 @@ public:
 
 private:
     static std::unique_ptr<ImageModel> instance_;
+    static std::mutex mutex_;
 };
 
 } // namespace OHOS::Ace

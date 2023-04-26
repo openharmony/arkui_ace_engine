@@ -150,6 +150,12 @@ public:
 
     void SetIsHover(bool isInBarRegion);
 
+    void StopScrollEndAnimator()
+    {
+        if (scrollEndAnimator_ && !scrollEndAnimator_->IsStopped()) {
+            scrollEndAnimator_->Stop();
+        }
+    }
     void OnFlushTouchEventsBegin() override;
     void OnFlushTouchEventsEnd() override;
 

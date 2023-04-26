@@ -21,7 +21,9 @@
 #include "txt/paragraph_style.h"
 #include "txt/paragraph_txt.h"
 #include "render_service_client/core/ui/rs_node.h"
-#include "third_party/bounds_checking_function/include/securec.h"
+
+#include "securec.h"
+
 #include "include/core/SkBlendMode.h"
 #include "include/core/SkCanvas.h"
 #include "include/core/SkColor.h"
@@ -1670,7 +1672,7 @@ void RosenRenderCustomPaint::UpdatePaintShader(const Pattern& pattern, SkPaint& 
             [](sk_sp<SkImage> image, SkPaint& paint) {
 #ifdef USE_SYSTEM_SKIA
                 paint.setShader(image->makeShader(SkShader::kDecal_TileMode, SkShader::kDecal_TileMode, nullptr));
-#elif defined NEW_SKIA
+#elif defined(NEW_SKIA)
                 paint.setShader(image->makeShader(SkTileMode::kDecal, SkTileMode::kDecal, SkSamplingOptions(), nullptr));
 #else
                 paint.setShader(image->makeShader(SkTileMode::kDecal, SkTileMode::kDecal, nullptr));
@@ -1680,7 +1682,7 @@ void RosenRenderCustomPaint::UpdatePaintShader(const Pattern& pattern, SkPaint& 
             [](sk_sp<SkImage> image, SkPaint& paint) {
 #ifdef USE_SYSTEM_SKIA
                 paint.setShader(image->makeShader(SkShader::kRepeat_TileMode, SkShader::kRepeat_TileMode, nullptr));
-#elif defined NEW_SKIA
+#elif defined(NEW_SKIA)
                 paint.setShader(image->makeShader(SkTileMode::kRepeat, SkTileMode::kRepeat, SkSamplingOptions(), nullptr));
 #else
                 paint.setShader(image->makeShader(SkTileMode::kRepeat, SkTileMode::kRepeat, nullptr));
@@ -1690,7 +1692,7 @@ void RosenRenderCustomPaint::UpdatePaintShader(const Pattern& pattern, SkPaint& 
             [](sk_sp<SkImage> image, SkPaint& paint) {
 #ifdef USE_SYSTEM_SKIA
                 paint.setShader(image->makeShader(SkShader::kRepeat_TileMode, SkShader::kDecal_TileMode, nullptr));
-#elif defined NEW_SKIA
+#elif defined(NEW_SKIA)
                 paint.setShader(image->makeShader(SkTileMode::kRepeat, SkTileMode::kDecal, SkSamplingOptions(), nullptr));
 #else
                 paint.setShader(image->makeShader(SkTileMode::kRepeat, SkTileMode::kDecal, nullptr));
@@ -1700,7 +1702,7 @@ void RosenRenderCustomPaint::UpdatePaintShader(const Pattern& pattern, SkPaint& 
             [](sk_sp<SkImage> image, SkPaint& paint) {
 #ifdef USE_SYSTEM_SKIA
                 paint.setShader(image->makeShader(SkShader::kDecal_TileMode, SkShader::kRepeat_TileMode, nullptr));
-#elif defined NEW_SKIA
+#elif defined(NEW_SKIA)
                 paint.setShader(image->makeShader(SkTileMode::kDecal, SkTileMode::kRepeat, SkSamplingOptions(), nullptr));
 #else
                 paint.setShader(image->makeShader(SkTileMode::kDecal, SkTileMode::kRepeat, nullptr));
@@ -1767,7 +1769,8 @@ std::unique_ptr<ImageData> RosenRenderCustomPaint::GetImageData(double left, dou
 #ifndef NEW_SKIA
         tempCanvas.drawBitmapRect(canvasCache_, srcRect, dstRect, nullptr);
 #else
-        tempCanvas.drawImageRect(canvasCache_.asImage(), srcRect, dstRect, options_, nullptr, SkCanvas::kFast_SrcRectConstraint);
+        tempCanvas.drawImageRect(
+            canvasCache_.asImage(), srcRect, dstRect, options_, nullptr, SkCanvas::kFast_SrcRectConstraint);
 #endif
     }
     pixels = tempCache.pixmap().addr8();
@@ -1947,7 +1950,7 @@ void RosenRenderCustomPaint::Mesh(
     sk_sp<SkImage> image = SkImage::MakeFromBitmap(bitmap);
 #ifdef USE_SYSTEM_SKIA
     shader = image->makeShader(SkShader::kClamp_TileMode, SkShader::kClamp_TileMode);
-#elif defined NEW_SKIA
+#elif defined(NEW_SKIA)
     shader = image->makeShader(SkTileMode::kClamp, SkTileMode::kClamp, SkSamplingOptions());
 #else
     shader = image->makeShader(SkTileMode::kClamp, SkTileMode::kClamp);

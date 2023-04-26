@@ -93,8 +93,8 @@ void ScrollBar::UpdateScrollBarRegion(
     const Offset& offset, const Size& size, const Offset& lastOffset, double estimatedHeight)
 {
     // return if nothing changes to avoid changing opacity
-    if (!positionModeUpdate_ && paintOffset_ == offset && viewPortSize_ == size && lastOffset_ == lastOffset &&
-        NearEqual(estimatedHeight_, estimatedHeight, 0.000001f)) {
+    if (!positionModeUpdate_ && !normalWidthUpdate_ && paintOffset_ == offset && viewPortSize_ == size &&
+        lastOffset_ == lastOffset && NearEqual(estimatedHeight_, estimatedHeight, 0.000001f)) {
         return;
     }
     if (!NearZero(estimatedHeight)) {
@@ -110,6 +110,7 @@ void ScrollBar::UpdateScrollBarRegion(
             SetRoundTrickRegion(offset, size, lastOffset, estimatedHeight);
         }
         positionModeUpdate_ = false;
+        normalWidthUpdate_ = false;
     }
     OnScrollEnd();
 }
@@ -195,7 +196,11 @@ void ScrollBar::SetRectTrickRegion(
             } else {
                 activeRect_ = Rect(-NormalizeToPx(position_), activeMainOffset, normalWidth, activeSize) + offset;
             }
-            touchRegion_ = activeRect_ + Size(NormalizeToPx(touchWidth_), 0);
+            if (isUserNormalWidth_) {
+                touchRegion_ = activeRect_;
+            } else {
+                touchRegion_ = activeRect_ + Size(NormalizeToPx(touchWidth_), 0);
+            }
         } else if (positionMode_ == PositionMode::RIGHT) {
             inactiveSize = activeRect_.Height();
             inactiveMainOffset = activeRect_.Top();
@@ -206,11 +211,15 @@ void ScrollBar::SetRectTrickRegion(
                 activeRect_ = Rect(x, activeMainOffset, normalWidth, activeSize) + offset;
             }
             // Update the hot region
-            touchRegion_ =
-                activeRect_ -
-                Offset(
-                    NormalizeToPx(touchWidth_) - NormalizeToPx(normalWidth_) - NormalizeToPx(padding_.Right()), 0.0) +
-                Size(NormalizeToPx(touchWidth_) - NormalizeToPx(normalWidth_), 0);
+            if (isUserNormalWidth_) {
+                touchRegion_ = activeRect_;
+            } else {
+                touchRegion_ =
+                    activeRect_ -
+                    Offset(NormalizeToPx(touchWidth_) - NormalizeToPx(normalWidth_) - NormalizeToPx(padding_.Right()),
+                        0.0) +
+                    Size(NormalizeToPx(touchWidth_) - NormalizeToPx(normalWidth_), 0);
+            }
         } else if (positionMode_ == PositionMode::BOTTOM) {
             inactiveSize = activeRect_.Width();
             inactiveMainOffset = activeRect_.Left();
@@ -220,10 +229,14 @@ void ScrollBar::SetRectTrickRegion(
             } else {
                 activeRect_ = Rect(activeMainOffset, positionY, activeSize, normalWidth) + offset;
             }
-            auto hotRegionOffset = Offset(
-                0.0, NormalizeToPx(touchWidth_) - NormalizeToPx(normalWidth_) - NormalizeToPx(padding_.Bottom()));
-            auto hotRegionSize = Size(0, NormalizeToPx(touchWidth_) - NormalizeToPx(normalWidth_));
-            touchRegion_ = activeRect_ - hotRegionOffset + hotRegionSize;
+            if (isUserNormalWidth_) {
+                touchRegion_ = activeRect_;
+            } else {
+                auto hotRegionOffset = Offset(
+                    0.0, NormalizeToPx(touchWidth_) - NormalizeToPx(normalWidth_) - NormalizeToPx(padding_.Bottom()));
+                auto hotRegionSize = Size(0, NormalizeToPx(touchWidth_) - NormalizeToPx(normalWidth_));
+                touchRegion_ = activeRect_ - hotRegionOffset + hotRegionSize;
+            }
         }
         // If the scrollBar length changes, start the adaptation animation
         if (!NearZero(inactiveSize) && !NearEqual(activeSize, inactiveSize, BAR_ADAPT_EPSLION) && canUseAnimation) {
@@ -297,10 +310,15 @@ void ScrollBar::SetGestureEvent()
             auto touch = info.GetTouches().front();
             if (touch.GetTouchType() == TouchType::DOWN) {
                 Point point(touch.GetLocalLocation().GetX(), touch.GetLocalLocation().GetY());
-                bool inTouchRegion = scrollBar->InBarTouchRegion(point);
-                scrollBar->SetPressed(inTouchRegion);
-                scrollBar->SetDriving(inTouchRegion);
-                if (inTouchRegion && !scrollBar->IsHover()) {
+                bool inRegion = false;
+                if (info.GetSourceDevice() == SourceType::TOUCH) {
+                    inRegion = scrollBar->InBarTouchRegion(point);
+                } else if (info.GetSourceDevice() == SourceType::MOUSE) {
+                    inRegion = scrollBar->InBarActiveRegion(point);
+                }
+                scrollBar->SetPressed(inRegion);
+                scrollBar->SetDriving(inRegion);
+                if (inRegion && !scrollBar->IsHover()) {
                     scrollBar->PlayGrowAnimation();
                 }
                 if (scrollBar->scrollEndAnimator_ && !scrollBar->scrollEndAnimator_->IsStopped()) {

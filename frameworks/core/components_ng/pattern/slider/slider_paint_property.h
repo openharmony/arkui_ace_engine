@@ -88,6 +88,9 @@ public:
             SLIDER_BLOCK_TYPE_TO_STRING.at(static_cast<int>(GetBlockTypeValue(SliderModelNG::BlockStyleType::DEFAULT)))
                 .c_str());
         json->Put("stepSize", GetStepSizeValue(theme->GetMarkerSize()).ToString().c_str());
+        if (GetCustomContent().has_value()) {
+            json->Put("content", GetCustomContent().value().c_str());
+        }
     }
 
     ACE_DEFINE_PROPERTY_GROUP(SliderPaintStyle, SliderPaintStyle)
@@ -119,6 +122,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderTipStyle, FontSize, Dimension, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderTipStyle, TextColor, Color, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderTipStyle, TipColor, Color, PROPERTY_UPDATE_RENDER)
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderTipStyle, CustomContent, std::string, PROPERTY_UPDATE_RENDER)
 private:
     ACE_DISALLOW_COPY_AND_MOVE(SliderPaintProperty);
 };

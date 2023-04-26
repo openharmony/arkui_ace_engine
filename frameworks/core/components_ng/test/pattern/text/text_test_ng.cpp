@@ -24,19 +24,19 @@
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 #include "core/components_ng/pattern/text/text_accessibility_property.h"
 #include "core/components_ng/pattern/text/text_content_modifier.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text/text_paint_method.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/render/drawing.h"
+#include "core/components_ng/render/adapter/txt_paragraph.h"
 #include "core/components_ng/render/paragraph.h"
 #include "core/components_ng/test/mock/rosen/mock_canvas.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
@@ -2664,5 +2664,65 @@ HWTEST_F(TextTestNg, AddChildSpanItem001, TestSize.Level1)
     pattern->AddChildSpanItem(element);
     auto ret = rowLayoutAlgorithm->CreateParagraph(textStyle, "", nullptr);
     EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: IsDraggable001
+ * @tc.desc: test text_pattern.h Draggable function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, IsDraggable001, TestSize.Level1)
+{
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    pattern->AttachToFrameNode(frameNode);
+
+    pattern->copyOption_ = CopyOptions::Distributed;
+    pattern->paragraph_ = AceType::MakeRefPtr<TxtParagraph>(ParagraphStyle {}, nullptr);
+    frameNode->draggable_ = true;
+    // set selected rect to [0, 0] - [20, 20]
+    pattern->textSelector_.Update(0, 20);
+    EXPECT_TRUE(pattern->IsDraggable(Offset(1, 1)));
+    EXPECT_FALSE(pattern->IsDraggable(Offset(21, 21)));
+
+    // text not selected
+    pattern->textSelector_.Update(-1);
+    EXPECT_FALSE(pattern->IsDraggable(Offset(1, 1)));
+}
+
+/**
+ * @tc.name: DragBase001
+ * @tc.desc: test text_pattern.h DragBase function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, DragBase001, TestSize.Level1)
+{
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    pattern->AttachToFrameNode(frameNode);
+
+    // test CloseSelectOverlay should reset textSelector
+    pattern->CreateHandles();
+    pattern->textSelector_.Update(0, 20);
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 20);
+    pattern->CloseSelectOverlay();
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), -1);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), -1);
+
+    // test GetTextBoxes and GetLineHeight
+    pattern->paragraph_ = AceType::MakeRefPtr<TxtParagraph>(ParagraphStyle {}, nullptr);
+    pattern->textSelector_.Update(0, 20);
+    auto boxes = pattern->GetTextBoxes();
+    EXPECT_EQ(boxes.size(), 1);
+    EXPECT_EQ(boxes[0].rect_.GetLeft(), 0);
+    EXPECT_EQ(boxes[0].rect_.GetRight(), 20);
+
+    auto height = pattern->GetLineHeight();
+    EXPECT_EQ(height, 20);
 }
 } // namespace OHOS::Ace::NG

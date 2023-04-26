@@ -17,9 +17,10 @@
 
 #include <cmath>
 
+#include "securec.h"
 #include "txt/paragraph_builder.h"
 #include "txt/paragraph_style.h"
-#include "third_party/bounds_checking_function/include/securec.h"
+
 #include "include/core/SkBlendMode.h"
 #include "include/core/SkCanvas.h"
 #include "include/core/SkColor.h"

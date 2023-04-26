@@ -27,9 +27,10 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-
 namespace {
+constexpr int32_t PATTERN_LOCK_COL_COUNT = 3;
 constexpr int32_t RADIUS_TO_DIAMETER = 2;
+// the scale of selected circle radius and normal circle radius
 constexpr float SCALE_SELECTED_CIRCLE_RADIUS = 26.00 / 14.00;
 } // namespace
 
@@ -61,9 +62,6 @@ void PatternLockPattern::InitTouchEvent(RefPtr<GestureEventHub>& gestureHub, Ref
         CHECK_NULL_VOID(pattern);
         pattern->HandleTouchEvent(info);
     };
-    if (touchDownListener) {
-        gestureHub->RemoveTouchEvent(touchDownListener);
-    }
     touchDownListener = MakeRefPtr<TouchEventImpl>(std::move(touchDownTask));
     gestureHub->AddTouchEvent(touchDownListener);
 }
@@ -89,7 +87,7 @@ void PatternLockPattern::HandleTouchEvent(const TouchEventInfo& info)
     }
 }
 
-bool PatternLockPattern::AddChoosePoint(const OffsetF& offset, int16_t x, int16_t y)
+bool PatternLockPattern::AddChoosePoint(const OffsetF& offset, int32_t x, int32_t y)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -101,7 +99,7 @@ bool PatternLockPattern::AddChoosePoint(const OffsetF& offset, int16_t x, int16_
         circleRadius_ = patternLockPaintProperty->GetCircleRadiusValue();
     }
 
-    const int16_t scale = RADIUS_TO_DIAMETER;
+    const int32_t scale = RADIUS_TO_DIAMETER;
     float offsetX = sideLength_.ConvertToPx() / PATTERN_LOCK_COL_COUNT / scale * (scale * x - 1);
     float offsetY = sideLength_.ConvertToPx() / PATTERN_LOCK_COL_COUNT / scale * (scale * y - 1);
     OffsetF centerOffset;
@@ -120,7 +118,7 @@ bool PatternLockPattern::AddChoosePoint(const OffsetF& offset, int16_t x, int16_
     return false;
 }
 
-bool PatternLockPattern::CheckChoosePoint(int16_t x, int16_t y) const
+bool PatternLockPattern::CheckChoosePoint(int32_t x, int32_t y) const
 {
     for (auto it : choosePoint_) {
         if (it.GetColumn() == x && it.GetRow() == y) {
@@ -130,20 +128,20 @@ bool PatternLockPattern::CheckChoosePoint(int16_t x, int16_t y) const
     return false;
 }
 
-void PatternLockPattern::AddPassPoint(int16_t x, int16_t y)
+void PatternLockPattern::AddPassPoint(int32_t x, int32_t y)
 {
     if (choosePoint_.empty()) {
         return;
     }
     passPointCount_ = 0;
     PatternLockCell lastCell = choosePoint_.back();
-    int16_t lastX = lastCell.GetColumn();
-    int16_t lastY = lastCell.GetRow();
-    int16_t lastCode = lastCell.GetCode();
-    int16_t nowCode = PATTERN_LOCK_COL_COUNT * (y - 1) + (x - 1);
+    int32_t lastX = lastCell.GetColumn();
+    int32_t lastY = lastCell.GetRow();
+    int32_t lastCode = lastCell.GetCode();
+    int32_t nowCode = PATTERN_LOCK_COL_COUNT * (y - 1) + (x - 1);
     std::vector<PatternLockCell> passPointVec;
-    for (int16_t i = 1; i <= PATTERN_LOCK_COL_COUNT; i++) {
-        for (int16_t j = 1; j <= PATTERN_LOCK_COL_COUNT; j++) {
+    for (int32_t i = 1; i <= PATTERN_LOCK_COL_COUNT; i++) {
+        for (int32_t j = 1; j <= PATTERN_LOCK_COL_COUNT; j++) {
             PatternLockCell passPoint = PatternLockCell(i, j);
             if ((passPoint.GetCode() >= nowCode && passPoint.GetCode() >= lastCode) ||
                 (passPoint.GetCode() <= nowCode && passPoint.GetCode() <= lastCode)) {
@@ -163,7 +161,7 @@ void PatternLockPattern::AddPassPoint(int16_t x, int16_t y)
     if (passPointLength == 0) {
         return;
     }
-    passPointCount_ = static_cast<int16_t>(passPointLength);
+    passPointCount_ = static_cast<int32_t>(passPointLength);
     if (nowCode > lastCode) {
         choosePoint_.emplace_back(passPointVec.front());
         if (passPointLength > 1) {
@@ -213,8 +211,8 @@ void PatternLockPattern::OnTouchDown(const TouchEventInfo& info)
     HandleReset();
     cellCenter_ = touchPoint;
     bool isAdd = false;
-    for (int16_t i = 0; i < PATTERN_LOCK_COL_COUNT && !isAdd; i++) {
-        for (int16_t j = 0; j < PATTERN_LOCK_COL_COUNT && !isAdd; j++) {
+    for (int32_t i = 0; i < PATTERN_LOCK_COL_COUNT && !isAdd; i++) {
+        for (int32_t j = 0; j < PATTERN_LOCK_COL_COUNT && !isAdd; j++) {
             isAdd = AddChoosePoint(touchPoint, i + 1, j + 1);
         }
     }
@@ -239,8 +237,8 @@ void PatternLockPattern::OnTouchMove(const TouchEventInfo& info)
     }
     cellCenter_ = touchPoint;
     bool isAdd = false;
-    for (int16_t i = 0; i < PATTERN_LOCK_COL_COUNT && !isAdd; i++) {
-        for (int16_t j = 0; j < PATTERN_LOCK_COL_COUNT && !isAdd; j++) {
+    for (int32_t i = 0; i < PATTERN_LOCK_COL_COUNT && !isAdd; i++) {
+        for (int32_t j = 0; j < PATTERN_LOCK_COL_COUNT && !isAdd; j++) {
             isAdd = AddChoosePoint(touchPoint, i + 1, j + 1);
         }
     }
@@ -269,5 +267,4 @@ void PatternLockPattern::OnTouchUp()
 
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
-
 } // namespace OHOS::Ace::NG
