@@ -28,8 +28,9 @@ class SynchedPropertySimpleOneWayPU<T> extends ObservedPropertySimpleAbstractPU<
   constructor(source: ObservedPropertyAbstract<T> | T, subscribeMe?: IPropertySubscriber, thisPropertyName?: PropertyInfo) {
     super(subscribeMe, thisPropertyName);
 
-    if (!source) {
-      stateMgmtConsole.error(`SynchedPropertySimpleOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: constructor @Prop source must not be undefined. Application error!`);
+    if (source == undefined || source == null) {
+      stateMgmtConsole.error(`SynchedPropertySimpleOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: constructor @Prop value must not be undefined or null. Application error!`);
+      this.source_ = undefined;
       return;
     }
 
@@ -61,6 +62,12 @@ class SynchedPropertySimpleOneWayPU<T> extends ObservedPropertySimpleAbstractPU<
   }
 
   public syncPeerHasChanged(eventSource: ObservedPropertyAbstractPU<T>) {
+    if (this.source_ == undefined) {
+      stateMgmtConsole.warn(`SynchedPropertySimpleOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: \
+       syncPeerHasChanged peer '${eventSource ? eventSource.info() : "no eventSource info"}' but source_ undefned. Internal error.`);
+      return;
+    }
+    
     if (eventSource && (eventSource == this.source_)) {
       // defensive, should always be the case
       stateMgmtConsole.debug(`SynchedPropertySimpleOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: \
@@ -72,7 +79,7 @@ class SynchedPropertySimpleOneWayPU<T> extends ObservedPropertySimpleAbstractPU<
 
   public getUnmonitored(): T {
     stateMgmtConsole.debug(`SynchedPropertySimpleOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: getUnmonitored returns '${JSON.stringify(this.wrappedValue_)}' .`);
-    // unmonitored get access , no call to otifyPropertyRead !
+    // unmonitored get access, no call to notifyPropertyRead !
     return this.wrappedValue_;
   }
 
@@ -97,7 +104,10 @@ class SynchedPropertySimpleOneWayPU<T> extends ObservedPropertySimpleAbstractPU<
   public reset(sourceChangedValue: T): void {
     stateMgmtConsole.debug(`SynchedPropertySimpleOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: reset from '${this.wrappedValue_} to '${sourceChangedValue}'.`);
     // if set causes an actual change, then, ObservedPropertySimple source_ will call hasChanged
-    this.source_.set(sourceChangedValue);
+    if (this.source_ !== undefined) {
+      // if set causes an actual change, then, ObservedPropertySimple source_ will call hasChanged
+      this.source_.set(sourceChangedValue);
+    }
   }
 
   private setWrappedValue(newValue: T): void {
