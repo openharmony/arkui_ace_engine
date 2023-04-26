@@ -46,13 +46,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
   implements IViewPropertiesChangeSubscriber {
 
   // Array.sort() converts array items to string to compare them, sigh!
-  readonly compareNumber = (a: number, b: number): number => {
-    if (this.hasRecycleManager()) {
-      stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: sort by RecycleManager order`);
-      let ta = this.getRecycleManager().getRecycleNodeCurrentElmtId(a);
-      let tb = this.getRecycleManager().getRecycleNodeCurrentElmtId(b);
-      return (ta < tb) ? -1 : (ta > tb) ? 1 : 0;
-    }
+  static readonly compareNumber = (a: number, b: number): number => {
     return (a < b) ? -1 : (a > b) ? 1 : 0;
   };
 
@@ -147,6 +141,10 @@ abstract class ViewPU extends NativeViewPartialUpdate
     return this.id_;
   }
 
+  updateId(elmtId: number): void {
+    this.id_ = elmtId;
+  }
+
   // inform the subscribed property
   // that the View and thereby all properties
   // are about to be deleted
@@ -159,12 +157,6 @@ abstract class ViewPU extends NativeViewPartialUpdate
     // because after the deletion, can no longer clean the RemoveIds cache on the C++ side through the
     // updateDirtyElements function.
     let removedElmtIds: number[] = [];
-
-    if (this.hasRecycleManager()) {
-      this.getRecycleManager().purgeAllCachedRecycleNode(removedElmtIds);
-      stateMgmtConsole.debug(`ViewPU('${this.constructor.name}', ${this.id__()}).aboutToBeDeletedInternal: purgeAllCachedRecycleNode ${removedElmtIds.length}`);
-    }
-
     this.updateFuncByElmtId.forEach((value: UpdateFunc, key: number) => {
       this.purgeVariableDependenciesOnElmtId(key);
       removedElmtIds.push(key);
@@ -233,6 +225,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
   protected abstract purgeVariableDependenciesOnElmtId(removedElmtId: number);
   protected abstract initialRender(): void;
   protected abstract rerender(): void;
+  protected abstract updateRecycleElmtId(oldElmtId: number, newElmtId: number): void;
   protected updateStateVars(params: {}) : void {
     stateMgmtConsole.warn("ViewPU.updateStateVars unimplemented. Pls upgrade to latest eDSL transpiler version.")
   }
@@ -276,7 +269,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
     // and clean up all book keeping for them
     this.purgeDeletedElmtIds(deletedElmtIds);
 
-    Array.from(this.updateFuncByElmtId.keys()).sort(this.compareNumber).forEach(elmtId => this.UpdateElement(elmtId));
+    Array.from(this.updateFuncByElmtId.keys()).sort(ViewPU.compareNumber).forEach(elmtId => this.UpdateElement(elmtId));
 
     if (deep) {
       this.childrenWeakrefMap_.forEach((weakRefChild: WeakRef<ViewPU>) => {
@@ -425,7 +418,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
    */
   public updateDirtyElements() {
     do {
-        stateMgmtConsole.debug(`View ${this.constructor.name} elmtId ${this.id__()}:  updateDirtyElements: sorted dirty elmtIds: ${JSON.stringify(Array.from(this.dirtDescendantElementIds_).sort(this.compareNumber))}, starting ....`);
+        stateMgmtConsole.debug(`View ${this.constructor.name} elmtId ${this.id__()}:  updateDirtyElements: sorted dirty elmtIds: ${JSON.stringify(Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber))}, starting ....`);
 
         // request list of all (gloabbly) deleteelmtIds;
         let deletedElmtIds: number[] = [];
@@ -438,7 +431,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
         // process all elmtIds marked as needing update in ascending order.
         // ascending order ensures parent nodes will be updated before their children
         // prior cleanup ensure no already deleted Elements have their update func executed
-        Array.from(this.dirtDescendantElementIds_).sort(this.compareNumber).forEach(elmtId => {
+        Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber).forEach(elmtId => {
             this.UpdateElement(elmtId);
             this.dirtDescendantElementIds_.delete(elmtId);
         });
@@ -525,12 +518,18 @@ abstract class ViewPU extends NativeViewPartialUpdate
       this.observeComponentCreation(compilerAssignedUpdateFunc);
       return;
     }
-    const currentElmtId: number = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
-    const elmtId: number =  node.id__();
+
+    // if there is a suitable recycle node, run a recycle update function.
+    const newElmtId: number = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
+    const oldElmtId: number = node.id__();
     // store the current id and origin id, used for dirty element sort in {compareNumber}
-    this.getRecycleManager().setRecycleNodeCurrentElmtId(elmtId, currentElmtId);
-    recycleUpdateFunc(elmtId, /* is first render */ true, node);
-    this.updateFuncByElmtId.set(elmtId, compilerAssignedUpdateFunc);
+    // this.getRecycleManager().setRecycleNodeCurrentElmtId(elmtId, currentElmtId);
+    recycleUpdateFunc(newElmtId, /* is first render */ true, node);
+    this.updateFuncByElmtId.delete(oldElmtId);
+    this.updateFuncByElmtId.set(newElmtId, compilerAssignedUpdateFunc);
+    node.updateId(newElmtId);
+    node.updateRecycleElmtId(oldElmtId, newElmtId);
+    SubscriberManager.UpdateRecycleElmtId(oldElmtId, newElmtId);
   }
 
   // add current JS object to it's parent recycle manager

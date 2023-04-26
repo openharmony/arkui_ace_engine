@@ -25,13 +25,9 @@ class RecycleManager {
   // key: recycle node name
   // value: recycle node JS object
   private cachedRecycleNodes: Map<string, Array<ViewPU>> = undefined
-  // key: recycle node element ID
-  // value: current assigned ID, used for sort rerender dirty element nodes
-  private recycleElmtIdMap: Map<number, number> = undefined
 
   constructor() {
     this.cachedRecycleNodes = new Map<string, Array<ViewPU>>();
-    this.recycleElmtIdMap = new Map<number, number>();
   }
 
   public pushRecycleNode(name: string, node: ViewPU): void {
@@ -45,17 +41,6 @@ class RecycleManager {
     return this.cachedRecycleNodes.get(name)?.pop();
   }
 
-  public setRecycleNodeCurrentElmtId(recycleElmtId: number, currentElmtId: number): void {
-    this.recycleElmtIdMap.set(recycleElmtId, currentElmtId);
-  }
-
-  public getRecycleNodeCurrentElmtId(recycleElmtId: number): number {
-    if (this.recycleElmtIdMap.has(recycleElmtId)) {
-      return this.recycleElmtIdMap.get(recycleElmtId);
-    }
-    return recycleElmtId;
-  }
-
   // When parent JS View is deleted, release all cached nodes
   public purgeAllCachedRecycleNode(removedElmtIds: number[]): void {
     this.cachedRecycleNodes.forEach((nodes, _) => {
@@ -65,6 +50,5 @@ class RecycleManager {
       })
     })
     this.cachedRecycleNodes.clear();
-    this.recycleElmtIdMap.clear();
   }
 }

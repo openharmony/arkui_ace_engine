@@ -77,6 +77,13 @@ abstract class ObservedPropertyAbstract<T> extends SubscribedAbstractProperty<T>
 
   public abstract set(newValue: T): void;
 
+  // update the element id for recycle custom component
+  public updateElmtId(oldElmtId: number, newElmtId: number): void {
+    if (this.subscribers_.has(oldElmtId)) {
+      this.subscribers_.delete(oldElmtId);
+      this.subscribers_.add(newElmtId);
+    }
+  }
 
   public subscribeMe(subscriber: ISinglePropertyChangeSubscriber<T>): void {
     stateMgmtConsole.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: subscribeMe: Property new subscriber '${subscriber.id__()}'`);
