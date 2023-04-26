@@ -18,7 +18,6 @@
 
 #include "core/components/text_clock/render_text_clock.h"
 #include "core/pipeline/base/rosen_render_context.h"
-#include "core/pipeline/layers/offset_layer.h"
 
 namespace OHOS::Ace {
 class RosenRenderTextClock final : public RenderTextClock {

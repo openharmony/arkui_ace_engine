@@ -1064,12 +1064,12 @@ var ModalTransition;
   ModalTransition[ModalTransition["ALPHA"] = 2] = "ALPHA";
 })(ModalTransition || (ModalTransition = {}));
 
-var CtrlKey;
-(function (CtrlKey) {
-  CtrlKey[CtrlKey["CTRL"] = 0] = "CTRL";
-  CtrlKey[CtrlKey["SHIFT"] = 1] = "SHIFT";
-  CtrlKey[CtrlKey["ALT"] = 2] = "ALT";
-})(CtrlKey || (CtrlKey = {}));
+var ModifierKey;
+(function (ModifierKey) {
+  ModifierKey[ModifierKey["CTRL"] = 0] = "CTRL";
+  ModifierKey[ModifierKey["SHIFT"] = 1] = "SHIFT";
+  ModifierKey[ModifierKey["ALT"] = 2] = "ALT";
+})(ModifierKey || (ModifierKey = {}));
 
 var FunctionKey;
 (function (FunctionKey) {
@@ -1484,3 +1484,10 @@ var ImageSpanAlignment;
   ImageSpanAlignment[ImageSpanAlignment["BOTTOM"] = 3] = "BOTTOM";
   ImageSpanAlignment[ImageSpanAlignment["BASELINE"] = 4] = "BASELINE";
 })(ImageSpanAlignment || (ImageSpanAlignment = {}));
+
+var MenuAlignType ;
+(function (MenuAlignType ) {
+  MenuAlignType[MenuAlignType["START"] = 0] = "START";
+  MenuAlignType[MenuAlignType["CENTER"] = 1] = "CENTER";
+  MenuAlignType[MenuAlignType["END"] = 2] = "END";
+})(MenuAlignType  || (MenuAlignType  = {}));

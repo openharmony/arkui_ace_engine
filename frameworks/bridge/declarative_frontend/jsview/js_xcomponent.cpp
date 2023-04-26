@@ -27,19 +27,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<XComponentModel> XComponentModel::instance_ = nullptr;
+std::mutex XComponentModel::mutex_;
 
 XComponentModel* XComponentModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::XComponentModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::XComponentModelNG());
-        } else {
-            instance_.reset(new Framework::XComponentModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::XComponentModelNG());
+            } else {
+                instance_.reset(new Framework::XComponentModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }

@@ -1426,10 +1426,11 @@ void TextFieldPattern::AnimatePressAndHover(RefPtr<RenderContext>& renderContext
 #ifdef ENABLE_DRAG_FRAMEWORK
 std::function<void(Offset)> TextFieldPattern::GetThumbnailCallback()
 {
-    auto callback = [frameNode = GetHost()](Offset point) {
-        CHECK_NULL_VOID(frameNode);
-        auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    auto callback = [weak = WeakClaim(this)](const Offset& point) {
+        auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        auto frameNode = pattern->GetHost();
+        CHECK_NULL_VOID(frameNode);
         if (pattern->BetweenSelectedPosition(point)) {
             TextDragPattern::CreateDragNode(frameNode);
             FrameNode::ProcessOffscreenNode(pattern->GetDragNode());
@@ -1448,7 +1449,7 @@ void TextFieldPattern::InitDragDropEvent()
     auto gestureHub = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->InitDragDropEvent();
-    gestureHub->SetTextFieldDraggable(true);
+    gestureHub->SetTextDraggable(true);
     auto callback = GetThumbnailCallback();
     gestureHub->SetThumbnailCallback(std::move(callback));
     auto eventHub = host->GetEventHub<EventHub>();
@@ -2913,7 +2914,11 @@ bool TextFieldPattern::CursorMoveUp()
     auto originCaretPosition = textEditingValue_.caretPosition;
     float verticalOffset = caretRect_.GetY() - PreferredLineHeight();
     textEditingValue_.caretPosition = static_cast<int32_t>(
+#ifndef NEW_SKIA
         paragraph_->GetGlyphPositionAtCoordinateWithCluster(caretRect_.GetX(), verticalOffset).pos_);
+#else
+        paragraph_->GetGlyphPositionAtCoordinate(caretRect_.GetX(), verticalOffset).pos_);
+#endif
     OnCursorMoveDone();
     if (originCaretPosition == textEditingValue_.caretPosition) {
         return false;
@@ -2928,7 +2933,11 @@ bool TextFieldPattern::CursorMoveDown()
     auto originCaretPosition = textEditingValue_.caretPosition;
     float verticalOffset = caretRect_.GetY() + PreferredLineHeight();
     textEditingValue_.caretPosition = static_cast<int32_t>(
+#ifndef NEW_SKIA
         paragraph_->GetGlyphPositionAtCoordinateWithCluster(caretRect_.GetX(), verticalOffset).pos_);
+#else
+        paragraph_->GetGlyphPositionAtCoordinate(caretRect_.GetX(), verticalOffset).pos_);
+#endif
     OnCursorMoveDone();
     if (originCaretPosition == textEditingValue_.caretPosition) {
         return false;
@@ -3219,7 +3228,11 @@ void TextFieldPattern::HandleSelectionUp()
     }
     auto newOffsetY = caretRect_.GetY() - PreferredLineHeight() * 0.5 - textRect_.GetY();
     textEditingValue_.caretPosition =
+#ifndef NEW_SKIA
         static_cast<int32_t>(paragraph_->GetGlyphPositionAtCoordinateWithCluster(caretRect_.GetX(), newOffsetY).pos_);
+#else
+        static_cast<int32_t>(paragraph_->GetGlyphPositionAtCoordinate(caretRect_.GetX(), newOffsetY).pos_);
+#endif
     textSelector_.destinationOffset = textEditingValue_.caretPosition;
     selectionMode_ = SelectionMode::SELECT;
     if (textSelector_.baseOffset == textSelector_.destinationOffset) {
@@ -3240,7 +3253,11 @@ void TextFieldPattern::HandleSelectionDown()
     }
     auto newOffsetY = caretRect_.GetY() + PreferredLineHeight() * 1.5 - textRect_.GetY();
     textEditingValue_.caretPosition =
+#ifndef NEW_SKIA
         static_cast<int32_t>(paragraph_->GetGlyphPositionAtCoordinateWithCluster(caretRect_.GetX(), newOffsetY).pos_);
+#else
+        static_cast<int32_t>(paragraph_->GetGlyphPositionAtCoordinate(caretRect_.GetX(), newOffsetY).pos_);
+#endif
     textSelector_.destinationOffset = textEditingValue_.caretPosition;
     selectionMode_ = SelectionMode::SELECT;
     if (textSelector_.baseOffset == textSelector_.destinationOffset) {

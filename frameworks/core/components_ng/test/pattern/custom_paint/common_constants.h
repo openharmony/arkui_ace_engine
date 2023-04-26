@@ -95,7 +95,11 @@ extern const std::vector<LineJoinStyle> CANDIDATE_LINE_JOIN_STYLES;
 
 extern const std::vector<CanvasFillRule> CANDIDATE_CANVAS_FILL_RULES;
 
+#ifndef NEW_SKIA
 extern const std::vector<SkPath::FillType> CANDIDATE_SKPATH_FILL_TYPES;
+#else
+extern const std::vector<SkPathFillType> CANDIDATE_SKPATH_FILL_TYPES;
+#endif
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_PATTERN_CUSTOM_PAINT_COMMON_CONSTANTS_H

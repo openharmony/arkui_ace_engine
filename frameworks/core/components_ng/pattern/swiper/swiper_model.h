@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_SWIPER_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_SWIPER_MODEL_H
 
+#include <mutex>
+
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
 #include "base/memory/referenced.h"
@@ -95,6 +97,7 @@ public:
     virtual void SetNextMargin(const Dimension& nextMargin) {}
 private:
     static std::unique_ptr<SwiperModel> instance_;
+    static std::mutex mutex_;
 };
 
 } // namespace OHOS::Ace

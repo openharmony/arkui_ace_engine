@@ -21,10 +21,10 @@ namespace OHOS::Ace::NG {
 RefPtr<NodePaintMethod> ImagePattern::CreateNodePaintMethod()
 {
     if (image_) {
-        return MakeRefPtr<ImagePaintMethod>(image_);
+        return MakeRefPtr<ImagePaintMethod>(image_, AceType::MakeRefPtr<ImageModifier>(), false);
     }
     if (altImage_ && altDstRect_ && altSrcRect_) {
-        return MakeRefPtr<ImagePaintMethod>(altImage_);
+        return MakeRefPtr<ImagePaintMethod>(altImage_, AceType::MakeRefPtr<ImageModifier>(), false);
     }
     return nullptr;
 }

@@ -23,13 +23,13 @@
 namespace OHOS::Ace {
 class WebConfigurationObserver : public OHOS::AppExecFwk::ConfigurationObserverStub {
 public:
-    explicit WebConfigurationObserver(RefPtr<WebDelegate> delegate) : delegate_(delegate) {}
+    explicit WebConfigurationObserver(WeakPtr<WebDelegate> delegate) : delegate_(delegate) {}
     ~WebConfigurationObserver() override = default;
 
     void OnConfigurationUpdated(const OHOS::AppExecFwk::Configuration& configuration) override;
 
 private:
-    RefPtr<WebDelegate> delegate_ = nullptr;
+    WeakPtr<WebDelegate> delegate_ = nullptr;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_WEB_CONFIGURATION_OBSERVER_H

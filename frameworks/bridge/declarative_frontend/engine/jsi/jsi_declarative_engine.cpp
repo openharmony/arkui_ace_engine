@@ -88,7 +88,6 @@ const std::string FORM_ES_MODULE_PATH = "ets/modules.abc";
 const std::string ASSET_PATH_PREFIX = "/data/storage/el1/bundle/";
 
 constexpr uint32_t PREFIX_LETTER_NUMBER = 4;
-std::mutex loadFormMutex_;
 
 // native implementation for js function: perfutil.print()
 shared_ptr<JsValue> JsPerfPrint(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
@@ -1091,7 +1090,6 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
         }
         LOGI("JsiDeclarativeEngine::ExecuteCardAbc abcPath = %{public}s", abcPath.c_str());
         {
-            std::lock_guard<std::mutex> lock(loadFormMutex_);
             if (!arkRuntime->ExecuteModuleBuffer(content.data(), content.size(), abcPath, true)) {
                 LOGE("ExecuteCardAbc ExecuteModuleBuffer \"%{public}s\" failed.", fileName.c_str());
                 return false;
@@ -1208,8 +1206,7 @@ bool JsiDeclarativeEngine::LoadJsWithModule(std::string& urlName,
 {
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, false);
-
-    if (!container->IsBundle()) {
+    if (container->IsModule()) {
         const std::string assetPath = ASSET_PATH_PREFIX +
             container->GetModuleName() + "/" + FORM_ES_MODULE_PATH;
         auto runtime = std::static_pointer_cast<ArkJSRuntime>(engineInstance_->GetJsRuntime());

@@ -27,6 +27,7 @@
 
 namespace OHOS::Ace::NG {
 class MenuLayoutProperty;
+class MenuPattern;
 class MenuLayoutAlgorithm : public BoxLayoutAlgorithm {
     DECLARE_ACE_TYPE(MenuLayoutAlgorithm, BoxLayoutAlgorithm)
 public:
@@ -59,6 +60,12 @@ private:
     void UpdateConstraintBaseOnOptions(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint);
     void UpdateOptionConstraint(std::list<RefPtr<LayoutWrapper>>& options, float width);
     void UpdateConstraintBaseOnMenuItems(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint);
+
+    void ComputeMenuPositionByAlignType(const RefPtr<MenuLayoutProperty>& menuProp, const SizeF& menuSize);
+    OffsetF ComputeMenuPositionByOffset(
+        const RefPtr<MenuLayoutProperty>& menuProp, const RefPtr<GeometryNode>& geometryNode);
+    OffsetF MenuLayoutAvoidAlgorithm(
+        const RefPtr<MenuLayoutProperty>& menuProp, const RefPtr<MenuPattern>& menuPattern, const SizeF& size);
 
     void LayoutSubMenu(LayoutWrapper* layoutWrapper);
     float VerticalLayoutSubMenu(const SizeF& size, float position, const SizeF& menuItemSize);

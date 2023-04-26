@@ -162,7 +162,7 @@ void NavDestinationView::SetHideTitleBar(bool hideTitleBar)
     ACE_UPDATE_LAYOUT_PROPERTY(NavDestinationLayoutProperty, HideTitleBar, hideTitleBar);
 }
 
-void NavDestinationView::SetTitle(const std::string& title)
+void NavDestinationView::SetTitle(const std::string& title, bool hasSubTitle)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
@@ -179,6 +179,14 @@ void NavDestinationView::SetTitle(const std::string& title)
             break;
         }
         auto titleProperty = titleNode->GetLayoutProperty<TextLayoutProperty>();
+        if (!hasSubTitle) {
+            if (navDestinationNode->GetSubtitle()) {
+                navDestinationNode->SetSubtitle(nullptr);
+            }
+            titleProperty->UpdateMaxLines(2);
+        } else {
+            titleProperty->UpdateMaxLines(1);
+        }
         // previous title is not a text node and might be custom, we remove it and create a new node
         if (!titleProperty) {
             navDestinationNode->UpdateTitleNodeOperation(ChildNodeOperation::REPLACE);
@@ -207,6 +215,11 @@ void NavDestinationView::SetTitle(const std::string& title)
     textLayoutProperty->UpdateFontSize(theme->GetTitleFontSize());
     textLayoutProperty->UpdateTextColor(theme->GetTitleColor());
     textLayoutProperty->UpdateFontWeight(FontWeight::BOLD);
+    if (!hasSubTitle) {
+        textLayoutProperty->UpdateMaxLines(2);
+    } else {
+        textLayoutProperty->UpdateMaxLines(1);
+    }
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     navDestinationNode->SetTitle(titleNode);
     navDestinationNode->UpdatePrevTitleIsCustom(false);
@@ -250,6 +263,7 @@ void NavDestinationView::SetSubtitle(const std::string& subtitle)
     textLayoutProperty->UpdateTextColor(SUBTITLE_COLOR);
     textLayoutProperty->UpdateFontWeight(FontWeight::REGULAR);
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+    textLayoutProperty->UpdateMaxLines(1);
     navDestinationNode->SetSubtitle(subtitleNode);
 }
 

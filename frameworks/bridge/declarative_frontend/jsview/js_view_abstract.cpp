@@ -67,20 +67,24 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<ViewAbstractModel> ViewAbstractModel::instance_ = nullptr;
+std::mutex ViewAbstractModel::mutex_;
 using DoubleBindCallback = std::function<void(const std::string&)>;
 
 ViewAbstractModel* ViewAbstractModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::ViewAbstractModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::ViewAbstractModelNG());
-        } else {
-            instance_.reset(new Framework::ViewAbstractModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::ViewAbstractModelNG());
+            } else {
+                instance_.reset(new Framework::ViewAbstractModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -5374,7 +5378,7 @@ void JSViewAbstract::JsKeyboardShortcut(const JSCallbackInfo& info)
     }
     if ((!info[0]->IsString() && !info[0]->IsNumber()) || !info[1]->IsArray()) {
         LOGE("JsKeyboardShortcut: The param type is invalid.");
-        ViewAbstractModel::GetInstance()->SetKeyboardShortcut("", std::vector<CtrlKey>(), nullptr);
+        ViewAbstractModel::GetInstance()->SetKeyboardShortcut("", std::vector<ModifierKey>(), nullptr);
         return;
     }
 
@@ -5383,7 +5387,7 @@ void JSViewAbstract::JsKeyboardShortcut(const JSCallbackInfo& info)
         value = info[0]->ToString();
         if (value.empty() || value.size() > 1) {
             LOGE("KeyboardShortcut value arg is wrong, return");
-            ViewAbstractModel::GetInstance()->SetKeyboardShortcut("", std::vector<CtrlKey>(), nullptr);
+            ViewAbstractModel::GetInstance()->SetKeyboardShortcut("", std::vector<ModifierKey>(), nullptr);
             return;
         }
     } else {
@@ -5393,12 +5397,12 @@ void JSViewAbstract::JsKeyboardShortcut(const JSCallbackInfo& info)
 
     auto keysArray = JSRef<JSArray>::Cast(info[1]);
     size_t size = keysArray->Length();
-    std::vector<CtrlKey> keys(size);
+    std::vector<ModifierKey> keys(size);
     keys.clear();
     for (size_t i = 0; i < size; i++) {
         JSRef<JSVal> key = keysArray->GetValueAt(i);
         if (key->IsNumber()) {
-            keys.emplace_back(static_cast<CtrlKey>(key->ToNumber<int32_t>()));
+            keys.emplace_back(static_cast<ModifierKey>(key->ToNumber<int32_t>()));
         }
     }
 

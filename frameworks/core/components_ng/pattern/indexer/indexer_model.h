@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_INDEXER_INDEXER_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_INDEXER_INDEXER_MODEL_H
 
+#include <mutex>
+
 #include "core/components_ng/pattern/indexer/indexer_event_hub.h"
 #include "core/components_ng/pattern/indexer/indexer_theme.h"
 #include "core/components_ng/pattern/indexer/indexer_view.h"
@@ -66,6 +68,7 @@ public:
     virtual void SetOnPopupSelected(std::function<void(const int32_t selected)>&& onPopupSelected) = 0;
 private:
     static std::unique_ptr<IndexerModel> instance_;
+    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
 

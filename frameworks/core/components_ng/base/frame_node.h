@@ -368,6 +368,8 @@ public:
         const std::function<void(float)>& onCallbackEvent);
     void UpdateAnimatablePropertyFloat(const std::string& propertyName, float value);
 
+    std::string ProvideRestoreInfo();
+
 private:
     void MarkNeedRender(bool isRenderBoundary);
     bool IsNeedRequestParentMeasure() const;
@@ -399,6 +401,7 @@ private:
     void FocusToJsonValue(std::unique_ptr<JsonValue>& json) const;
     void MouseToJsonValue(std::unique_ptr<JsonValue>& json) const;
     void TouchToJsonValue(std::unique_ptr<JsonValue>& json) const;
+    void GeometryNodeToJsonValue(std::unique_ptr<JsonValue>& json) const;
 
     HitTestMode GetHitTestMode() const override;
     bool GetTouchable() const;
@@ -462,6 +465,8 @@ private:
     bool userSet_ = false;
 
     std::map<std::string, RefPtr<NodeAnimatablePropertyBase>> nodeAnimatablePropertyMap_;
+
+    bool isRestoreInfoUsed_ = false;
 
     friend class RosenRenderContext;
     friend class RenderContext;

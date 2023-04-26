@@ -32,6 +32,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr int32_t DEFAULT_CLICK_DISTANCE = 15;
+
 void UpdateMenuItemTextNode(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<MenuItemLayoutProperty>& itemProperty,
     RefPtr<MenuItemPattern>& itemPattern)
 {
@@ -151,7 +153,9 @@ void MenuPattern::OnTouchEvent(const TouchEventInfo& info)
     if (touchType == TouchType::DOWN) {
         lastTouchOffset_ = info.GetTouches().front().GetLocalLocation();
     } else if (touchType == TouchType::UP) {
-        if (lastTouchOffset_.has_value() && info.GetTouches().front().GetLocalLocation() == lastTouchOffset_) {
+        auto touchUpOffset = info.GetTouches().front().GetLocalLocation();
+        if (lastTouchOffset_.has_value() &&
+            (touchUpOffset - lastTouchOffset_.value()).GetDistance() <= DEFAULT_CLICK_DISTANCE) {
             HideMenu();
         }
         lastTouchOffset_.reset();

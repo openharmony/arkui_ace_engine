@@ -16,7 +16,12 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CUSTOM_PAINT_CUSTOM_PAINT_PAINT_METHOD_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CUSTOM_PAINT_CUSTOM_PAINT_PAINT_METHOD_H
 
+#ifdef NEW_SKIA
+#include "include/core/SkSamplingOptions.h"
+#include "modules/svg/include/SkSVGDOM.h"
+#else
 #include "experimental/svg/model/SkSVGDOM.h"
+#endif
 #include "txt/paragraph.h"
 #include "include/core/SkCanvas.h"
 #include "include/core/SkPath.h"
@@ -315,6 +320,9 @@ protected:
     SkPath skPath_;
     SkPath skPath2d_;
     SkPaint imagePaint_;
+#ifdef NEW_SKIA
+    SkSamplingOptions options_;
+#endif
     SkPaint cachePaint_;
     SkBitmap cacheBitmap_;
     SkBitmap canvasCache_;

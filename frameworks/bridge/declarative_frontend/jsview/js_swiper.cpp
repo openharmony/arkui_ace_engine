@@ -34,19 +34,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<SwiperModel> SwiperModel::instance_ = nullptr;
+std::mutex SwiperModel::mutex_;
 
 SwiperModel* SwiperModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::SwiperModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::SwiperModelNG());
-        } else {
-            instance_.reset(new Framework::SwiperModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::SwiperModelNG());
+            } else {
+                instance_.reset(new Framework::SwiperModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }

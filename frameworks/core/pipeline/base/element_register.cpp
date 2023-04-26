@@ -26,11 +26,15 @@
 
 namespace OHOS::Ace {
 thread_local ElementRegister* ElementRegister::instance_ = nullptr;
+std::mutex ElementRegister::mutex_;
 
 ElementRegister* ElementRegister::GetInstance()
 {
     if (ElementRegister::instance_ == nullptr) {
-        ElementRegister::instance_ = new ElementRegister();
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!ElementRegister::instance_) {
+            ElementRegister::instance_ = new ElementRegister();
+        }
     }
     return (ElementRegister::instance_);
 }

@@ -1053,6 +1053,14 @@ void ViewAbstract::SetInspectorId(const std::string& inspectorId)
     }
 }
 
+void ViewAbstract::SetRestoreId(int32_t restoreId)
+{
+    auto uiNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    if (uiNode) {
+        uiNode->SetRestoreId(restoreId);
+    }
+}
+
 void ViewAbstract::SetDebugLine(const std::string& line)
 {
 #ifdef PREVIEW
@@ -1319,7 +1327,7 @@ void ViewAbstract::SetForegroundColorStrategy(const ForegroundColorStrategy& str
 }
 
 void ViewAbstract::SetKeyboardShortcut(
-    const std::string& value, const std::vector<CtrlKey>& keys, std::function<void()>&& onKeyboardShortcutAction)
+    const std::string& value, const std::vector<ModifierKey>& keys, std::function<void()>&& onKeyboardShortcutAction)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);

@@ -24,19 +24,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<PatternLockModel> PatternLockModel::instance_ = nullptr;
+std::mutex PatternLockModel::mutex_;
 
 PatternLockModel* PatternLockModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::PatternLockModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::PatternLockModelNG());
-        } else {
-            instance_.reset(new Framework::PatternLockModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::PatternLockModelNG());
+            } else {
+                instance_.reset(new Framework::PatternLockModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -186,8 +190,9 @@ void JSPatternLock::SetCircleRadius(const JSCallbackInfo& info)
     if (!ParseJsDimensionVp(info[0], radius)) {
         return;
     }
-
-    PatternLockModel::GetInstance()->SetCircleRadius(radius);
+    if (radius.IsNonNegative()) {
+        PatternLockModel::GetInstance()->SetCircleRadius(radius);
+    }
 }
 void JSPatternLock::SetSideLength(const JSCallbackInfo& info)
 {

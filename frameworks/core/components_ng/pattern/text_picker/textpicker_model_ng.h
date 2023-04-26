@@ -28,12 +28,39 @@ public:
     void SetSelected(uint32_t value) override;
     void SetRange(const std::vector<NG::RangeContent>& value) override;
     void SetValue(const std::string& value) override;
-    void SetOnChange(TextChangeEvent&& onChange) override;
+    void SetOnChange(OHOS::Ace::TextChangeEvent&& onChange) override;
     void SetDefaultPickerItemHeight(const Dimension& value) override;
     void SetDefaultAttributes(const RefPtr<PickerTheme>& pickerTheme) override;
     void SetDisappearTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value) override;
     void SetNormalTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value) override;
     void SetSelectedTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value) override;
+    void MultiInit(const RefPtr<PickerTheme> pickerTheme) override {};
+    void SetColumns(const std::vector<NG::TextCascadePickerOptions>& options) override {};
+    void SetIsCascade(bool isCascade) override {};
+    void SetOnCascadeChange(TextCascadeChangeEvent&& onChange) override {};
+    void SetValues(const std::vector<std::string>& values) override {};
+    void SetSelecteds(const std::vector<uint32_t>& values) override {};
+    bool IsSingle() override
+    {
+        return true;
+    }
+    bool GetSingleRange(std::vector<NG::RangeContent>& rangeValue) override
+    {
+        return false;
+    }
+    bool IsCascade() override
+    {
+        return false;
+    }
+    uint32_t GetMaxCount() override
+    {
+        return 0;
+    }
+    void SetMaxCount(uint32_t maxCount) override {};
+    bool GetMultiOptions(std::vector<NG::TextCascadePickerOptions>& options) override
+    {
+        return false;
+    }
 private:
     static RefPtr<FrameNode> CreateStackNode();
     static RefPtr<FrameNode> CreateButtonNode();

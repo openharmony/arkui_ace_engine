@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_CLIPBOARD_CLIPBOARD_PROXY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_CLIPBOARD_CLIPBOARD_PROXY_H
 
+#include <mutex>
+
 #include "base/utils/singleton.h"
 #include "core/common/clipboard/clipboard_interface.h"
 

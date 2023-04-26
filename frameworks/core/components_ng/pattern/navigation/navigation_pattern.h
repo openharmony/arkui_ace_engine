@@ -65,7 +65,7 @@ public:
 
 private:
     RefPtr<RenderContext> GetTitleBarRenderContext();
-    void DoAnimation();
+    void DoAnimation(NavigationMode currentMode);
     NavigationMode navigationMode_ = NavigationMode::AUTO;
 };
 

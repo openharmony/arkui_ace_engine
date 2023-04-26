@@ -280,9 +280,15 @@ int32_t TextOverlayBase::GetCursorPositionForClick(const Offset& offset, const O
     // Solve can't select right boundary of RTL language.
     double rightBoundary = GetBoundaryOfParagraph(false);
     if (GreatOrEqual(clickOffset_.GetX(), rightBoundary)) {
+#ifndef NEW_SKIA
         int32_t rightBoundaryPosition =
             static_cast<int32_t>(paragraph_->GetGlyphPositionAtCoordinateWithCluster(
                 rightBoundary - cursorWidth_, clickOffset_.GetY()).position);
+#else
+        int32_t rightBoundaryPosition =
+            static_cast<int32_t>(paragraph_->GetGlyphPositionAtCoordinate(
+                rightBoundary - cursorWidth_, clickOffset_.GetY()).position);
+#endif
         return realTextDirection_ == TextDirection::RTL ? 0 : rightBoundaryPosition;
     }
 

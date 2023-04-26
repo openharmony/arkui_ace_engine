@@ -247,8 +247,8 @@ static napi_value JSUpdate(napi_env env, napi_callback_info info)
 
 static napi_value JSPlay(napi_env env, napi_callback_info info)
 {
-    LOGI("JsAnimator: JSPlay");
     auto animator = GetAnimatorInResult(env, info);
+    LOGI("JsAnimator: JSPlay, id:%{public}d", animator ? animator->GetId() : -1);
     if (!animator) {
         LOGE("animator is null");
         return nullptr;
@@ -264,8 +264,8 @@ static napi_value JSPlay(napi_env env, napi_callback_info info)
 
 static napi_value JSFinish(napi_env env, napi_callback_info info)
 {
-    LOGI("JsAnimator: JSFinish");
     auto animator = GetAnimatorInResult(env, info);
+    LOGI("JsAnimator: JSFinish, id:%{public}d", animator ? animator->GetId() : -1);
     if (!animator) {
         LOGE("animator is null");
         return nullptr;
@@ -278,8 +278,8 @@ static napi_value JSFinish(napi_env env, napi_callback_info info)
 
 static napi_value JSPause(napi_env env, napi_callback_info info)
 {
-    LOGI("JsAnimator: JSPause");
     auto animator = GetAnimatorInResult(env, info);
+    LOGI("JsAnimator: JSPause, id:%{public}d", animator ? animator->GetId() : -1);
     if (!animator) {
         LOGE("animator is null");
         return nullptr;
@@ -292,8 +292,8 @@ static napi_value JSPause(napi_env env, napi_callback_info info)
 
 static napi_value JSCancel(napi_env env, napi_callback_info info)
 {
-    LOGI("JsAnimator: JSCancel");
     auto animator = GetAnimatorInResult(env, info);
+    LOGI("JsAnimator: JSCancel, id:%{public}d", animator ? animator->GetId() : -1);
     if (!animator) {
         LOGE("animator is null");
         return nullptr;
@@ -306,8 +306,8 @@ static napi_value JSCancel(napi_env env, napi_callback_info info)
 
 static napi_value JSReverse(napi_env env, napi_callback_info info)
 {
-    LOGI("JsAnimator: JSReverse");
     auto animator = GetAnimatorInResult(env, info);
+    LOGI("JsAnimator: JSReverse, id:%{public}d", animator ? animator->GetId() : -1);
     if (!animator) {
         LOGE("animator is null");
         return nullptr;
@@ -535,22 +535,7 @@ static napi_value JSCreate(napi_env env, napi_callback_info info)
         [](napi_env env, void* data, void* hint) {
             AnimatorResult* animatorResult = (AnimatorResult*)data;
             // release four references(onFunc) before releasing animatorResult
-            napi_ref onframeRef = animatorResult->GetOnframeRef();
-            napi_ref onfinishRef = animatorResult->GetOnfinishRef();
-            napi_ref oncancelRef = animatorResult->GetOncancelRef();
-            napi_ref onrepeatRef = animatorResult->GetOnrepeatRef();
-            if (onframeRef != nullptr) {
-                napi_delete_reference(env, onframeRef);
-            }
-            if (onfinishRef != nullptr) {
-                napi_delete_reference(env, onfinishRef);
-            }
-            if (oncancelRef != nullptr) {
-                napi_delete_reference(env, oncancelRef);
-            }
-            if (onrepeatRef != nullptr) {
-                napi_delete_reference(env, onrepeatRef);
-            }
+            animatorResult->Destroy(env);
             delete animatorResult;
         },
         nullptr, nullptr);
@@ -614,6 +599,30 @@ void AnimatorResult::ApplyOption()
     animator_->SetStartDelay(option_->delay);
     animator_->SetFillMode(StringToFillMode(option_->fill));
     animator_->SetAnimationDirection(StringToAnimationDirection(option_->direction));
+}
+
+void AnimatorResult::Destroy(napi_env env)
+{
+    if (animator_) {
+        LOGI("JsAnimator: animator object start destroying, isStopped:%{public}d, id:%{public}d",
+            animator_->IsStopped(), animator_->GetId());
+        if (!animator_->IsStopped()) {
+            animator_->Stop();
+            LOGW("JsAnimator: animator force stopping done, id:%{public}d", animator_->GetId());
+        }
+    }
+    if (onframe_ != nullptr) {
+        napi_delete_reference(env, onframe_);
+    }
+    if (onfinish_ != nullptr) {
+        napi_delete_reference(env, onfinish_);
+    }
+    if (oncancel_ != nullptr) {
+        napi_delete_reference(env, oncancel_);
+    }
+    if (onrepeat_ != nullptr) {
+        napi_delete_reference(env, onrepeat_);
+    }
 }
 
 } // namespace OHOS::Ace::Napi
