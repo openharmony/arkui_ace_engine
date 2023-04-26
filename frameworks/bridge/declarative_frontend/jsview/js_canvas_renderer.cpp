@@ -27,7 +27,7 @@
 #endif
 namespace OHOS::Ace::Framework {
 std::unordered_map<int32_t, std::shared_ptr<Pattern>> JSCanvasRenderer::pattern_;
-int32_t JSCanvasRenderer::patternCount_ = 0;
+unsigned int JSCanvasRenderer::patternCount_ = 0;
 namespace {
 
 const std::set<std::string> FONT_WEIGHTS = {
@@ -689,6 +689,16 @@ void JSCanvasRenderer::JsSetFillStyle(const JSCallbackInfo& info)
         ParseFillGradient(info);
     } else if (type == "pattern") {
         ParseFillPattern(info);
+    }
+    if (info[0]->IsNumber()) {
+        auto color = Color(ColorAlphaAdapt(info[0]->ToNumber<uint32_t>()));
+        if (Container::IsCurrentUseNewPipeline()) {
+            if (isOffscreen_) {
+                offscreenCanvasPattern_->SetFillColor(color);
+            } else {
+                customPaintPattern_->UpdateFillColor(color);
+            }
+        }
     } else {
         LOGW("unsupported function for fill style.");
     }
@@ -784,6 +794,16 @@ void JSCanvasRenderer::JsSetStrokeStyle(const JSCallbackInfo& info)
         ParseStorkeGradient(info);
     } else if (type == "pattern") {
         ParseStrokePattern(info);
+    }
+    if (info[0]->IsNumber()) {
+        auto color = Color(ColorAlphaAdapt(info[0]->ToNumber<uint32_t>()));
+        if (Container::IsCurrentUseNewPipeline()) {
+            if (isOffscreen_) {
+                offscreenCanvasPattern_->SetStrokeColor(color);
+            } else {
+                customPaintPattern_->UpdateStrokeColor(color);
+            }
+        }
     } else {
         LOGW("unsupported function for stroke style.");
     }
@@ -2651,7 +2671,7 @@ void JSCanvasRenderer::JsSetLineDash(const JSCallbackInfo& info)
     }
 }
 
-Pattern JSCanvasRenderer::GetPattern(int32_t id)
+Pattern JSCanvasRenderer::GetPattern(unsigned int id)
 {
     if (id < 0 || id >= pattern_.size()) {
         return Pattern();
@@ -2667,7 +2687,7 @@ std::weak_ptr<Ace::Pattern> JSCanvasRenderer::GetPatternNG(int32_t id)
     return pattern_[id];
 }
 
-void JSCanvasRenderer::SetTransform(int32_t id, const TransformParam& transform)
+void JSCanvasRenderer::SetTransform(unsigned int id, const TransformParam& transform)
 {
     if (id >= 0 && id <= patternCount_) {
         pattern_[id]->SetScaleX(transform.scaleX);

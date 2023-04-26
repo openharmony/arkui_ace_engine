@@ -181,7 +181,7 @@ public:
         return anti_;
     }
 
-    void SetTransform(int32_t id, const TransformParam&);
+    void SetTransform(unsigned int id, const TransformParam&);
     
     ACE_DISALLOW_COPY_AND_MOVE(JSCanvasRenderer);
 
@@ -205,9 +205,9 @@ private:
     PaintState paintState_;
     TextStyle style_;
     static std::unordered_map<int32_t, std::shared_ptr<Pattern>> pattern_;
-    static int32_t patternCount_;
+    static unsigned int patternCount_;
     std::weak_ptr<Ace::Pattern> GetPatternNG(int32_t id);
-    Pattern GetPattern(int32_t id);
+    Pattern GetPattern(unsigned int id);
     std::vector<uint32_t> lineDash_;
     ImageData imageData_;
     bool isOffscreen_ = false;
