@@ -1203,7 +1203,7 @@ void VideoPattern::EnableDrag()
         std::string videoSrc = "";
         if (unifiedData != nullptr) {
             auto records = unifiedData->GetRecords();
-            if (records.size() == 0 || records[0]->GetType() != UDMF::UDType::VIDEO) {
+            if (records.size() == 0) {
                 LOGE("unifiedRecords is empty");
             }
             auto video = reinterpret_cast<UDMF::Video *>(records[0].get());
@@ -1232,14 +1232,20 @@ void VideoPattern::EnableDrag()
         const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
         if (extraParams.empty()) {
             LOGE("extraParams is empty");
+            return;
         }
         auto videoLayoutProperty = this->GetLayoutProperty<VideoLayoutProperty>();
         auto json = JsonUtil::ParseJsonString(extraParams);
         std::string key = "extraInfo";
         std::string extraInfo = json->GetString(key);
+        if (extraInfo.empty()) {
+            LOGE("extraInfo is empty");
+            return;
+        }
         int index = extraInfo.find("::");
-        if (index == extraInfo.length() - 2) {
+        if (index < 0 || index == extraInfo.length() - 2) {
             LOGE("video source is empty");
+            return;
         }
         std::string videoSrc = extraInfo.substr(index + 2); // 2 :the length of "::"
         std::string imageSrc = "";

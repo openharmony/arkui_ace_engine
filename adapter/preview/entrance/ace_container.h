@@ -35,11 +35,7 @@
 #include "adapter/preview/external/ability/fa/fa_context.h"
 #include "adapter/preview/external/ability/stage/stage_context.h"
 
-#ifndef ENABLE_ROSEN_BACKEND
-#include "adapter/preview/entrance/flutter_ace_view.h"
-#else
-#include "adapter/preview/entrance/rs_ace_view.h"
-#endif
+#include "adapter/preview/entrance/ace_view_preview.h"
 
 namespace OHOS::Ace::Platform {
 
@@ -56,7 +52,8 @@ class AceContainer : public Container, public JsMessageDispatcher {
     DECLARE_ACE_TYPE(AceContainer, Container, JsMessageDispatcher);
 
 public:
-    static void CreateContainer(int32_t instanceId, FrontendType type, const AceRunArgs& runArgs);
+    static void CreateContainer(
+        int32_t instanceId, FrontendType type, const AceRunArgs& runArgs, bool useCurrentEventRunner = false);
     static void DestroyContainer(int32_t instanceId);
 
     static void AddAssetPath(int32_t instanceId, const std::string& packagePath, const std::vector<std::string>& paths);
@@ -64,9 +61,10 @@ public:
         const std::string& appResourcesPath, const int32_t& themeId, const ColorMode& colorMode);
 
 #ifndef ENABLE_ROSEN_BACKEND
-    static void SetView(FlutterAceView* view, double density, int32_t width, int32_t height);
+    static void SetView(AceViewPreview* view, double density, int32_t width, int32_t height);
 #else
-    static void SetView(RSAceView* view, double density, int32_t width, int32_t height, SendRenderDataCallback onRender);
+    static void SetView(
+        AceViewPreview* view, double density, int32_t width, int32_t height, SendRenderDataCallback onRender);
 #endif
 
     static void InitDeviceInfo(int32_t instanceId, const AceRunArgs& runArgs);
@@ -75,7 +73,7 @@ public:
     static void AddRouterChangeCallback(int32_t instanceId, const OnRouterChangeCallback& onRouterChangeCallback);
     static void NativeOnConfigurationUpdated(int32_t instanceId);
 
-    AceContainer(int32_t instanceId, FrontendType type, RefPtr<Context> context);
+    AceContainer(int32_t instanceId, FrontendType type, RefPtr<Context> context, bool useCurrentEventRunner = false);
     ~AceContainer() override = default;
 
     void Initialize() override;
@@ -151,17 +149,10 @@ public:
 
     void SetWindowId(uint32_t windowId) override {}
 
-#ifndef ENABLE_ROSEN_BACKEND
-    FlutterAceView* GetAceView() const
+    AceViewPreview* GetAceView() const
     {
         return aceView_;
     }
-#else
-    RSAceView* GetAceView() const
-    {
-        return aceView_;
-    }
-#endif
 
     void* GetView() const override
     {
@@ -266,18 +257,13 @@ private:
 
 #ifndef ENABLE_ROSEN_BACKEND
     void AttachView(
-        std::unique_ptr<Window> window, FlutterAceView* view, double density, int32_t width, int32_t height);
+        std::unique_ptr<Window> window, AceViewPreview* view, double density, int32_t width, int32_t height);
 #else
-    void AttachView(
-        std::unique_ptr<Window> window, RSAceView* view, double density, int32_t width, int32_t height, SendRenderDataCallback onRender);
+    void AttachView(std::unique_ptr<Window> window,
+        AceViewPreview* view, double density, int32_t width, int32_t height, SendRenderDataCallback onRender);
 #endif
 
-#ifndef ENABLE_ROSEN_BACKEND
-    FlutterAceView* aceView_ = nullptr;
-#else
-    RSAceView* aceView_ = nullptr;
-#endif
-
+    AceViewPreview* aceView_ = nullptr;
     int32_t instanceId_;
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<AssetManager> assetManager_;

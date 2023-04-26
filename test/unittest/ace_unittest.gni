@@ -114,7 +114,7 @@ template("ace_unittest") {
   ace_unittest_out_path = "ace_engine/$type"
   ace_unittest_name = target_name
   ace_unittest_config = [ "$ace_root/test/unittest:ace_unittest_config" ]
-
+  flutter_sources = []
   ace_unittest_deps = [
     "$ace_root/frameworks/base:ace_memory_monitor_ohos",
     "$ace_root/test/unittest:ace_unittest_log",
@@ -166,10 +166,25 @@ template("ace_unittest") {
   }
 
   if (flutter_skia) {
-    ace_unittest_deps += [
-      "$ace_flutter_engine_root:third_party_flutter_engine_ohos",
-      "$ace_flutter_engine_root/skia:ace_skia_ohos",
-    ]
+    if (ace_use_new_skia) {
+      flutter_sources += [
+        "$flutter_root/engine/flutter/runtime/window_manager.cc",
+        "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner.cc",
+        "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner_adapter.cc",
+      ]
+      ace_unittest_deps += [
+        "$ace_flutter_engine_root:flutter_engine_common_ohos",
+        "$ace_flutter_engine_root:flutter_engine_fml_ohos",
+        "$ace_flutter_engine_root/libtxt:thirdparty_lib_txt_ohos",
+        "$skia_root_new:skia_ohos",
+      ]
+      ace_unittest_config += [ "$ace_flutter_engine_root:flutter_config" ]
+    } else {
+      ace_unittest_deps += [
+        "$ace_flutter_engine_root:third_party_flutter_engine_ohos",
+        "$ace_flutter_engine_root/skia:ace_skia_ohos",
+      ]
+    }
   }
 
   if (defined(invoker.extra_deps)) {
@@ -182,7 +197,7 @@ template("ace_unittest") {
       sources = []
       sources += invoker.sources
       sources += ace_mock_sources
-
+      sources += flutter_sources
       deps = ace_unittest_deps
       deps += [
         "$ace_root/frameworks/core/components/theme:build_theme_code",

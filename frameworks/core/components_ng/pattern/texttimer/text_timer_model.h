@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_TIMER_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_TIMER_MODEL_H
 
+#include <mutex>
+
 #include "base/geometry/dimension.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
@@ -40,6 +42,7 @@ public:
 
 private:
     static std::unique_ptr<TextTimerModel> instance_;
+    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
 

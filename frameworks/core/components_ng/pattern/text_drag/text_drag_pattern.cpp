@@ -16,6 +16,9 @@
 #include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/text_drag/text_drag_base.h"
+#include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/components_ng/render/drawing.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -27,10 +30,10 @@ bool TextDragPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirt
 void TextDragPattern::CreateDragNode(RefPtr<FrameNode> hostNode)
 {
     CHECK_NULL_VOID(hostNode);
-    auto hostPattern = hostNode->GetPattern<TextFieldPattern>();
+    auto hostPattern = hostNode->GetPattern<TextDragBase>();
     const auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto dragNode = FrameNode::GetOrCreateFrameNode(V2::TEXTDRAG_ETS_TAG, nodeId,
-        []() { return AceType::MakeRefPtr<TextDragPattern>(); });
+    auto dragNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXTDRAG_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextDragPattern>(); });
     auto dragContext = dragNode->GetRenderContext();
     auto hostContext = hostNode->GetRenderContext();
     if (hostContext->HasForegroundColor()) {
@@ -43,22 +46,24 @@ void TextDragPattern::CreateDragNode(RefPtr<FrameNode> hostNode)
     CHECK_NULL_VOID(dragPattern);
     auto data = CalculateTextDragData(hostPattern, dragContext);
     dragPattern->Initialize(hostPattern->GetDragParagraph(), data);
+
     CalcSize size(NG::CalcLength(dragPattern->GetFrameWidth()), NG::CalcLength(dragPattern->GetFrameHeight()));
     dragNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(size);
     hostPattern->SetDragNode(dragNode);
 }
 
-TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextFieldPattern>& hostPattern,
-    RefPtr<RenderContext>& dragContext)
+TextDragData TextDragPattern::CalculateTextDragData(
+    RefPtr<TextDragBase>& hostPattern, RefPtr<RenderContext>& dragContext)
 {
     float textStartX = hostPattern->GetTextRect().GetX();
-    float textStartY = hostPattern->IsTextArea() ? hostPattern->GetTextRect().GetY() :
-        hostPattern->GetTextContentRect().GetY();
+    float textStartY =
+        hostPattern->IsTextArea() ? hostPattern->GetTextRect().GetY() : hostPattern->GetTextContentRect().GetY();
     auto contentRect = hostPattern->GetTextContentRect();
     float lineHeight = hostPattern->GetLineHeight();
     float minWidth = TEXT_DRAG_MIN_WIDTH.ConvertToPx();
     float bothOffset = TEXT_DRAG_OFFSET.ConvertToPx() * 2; // 2 : double
     auto boxes = hostPattern->GetTextBoxes();
+    CHECK_NULL_RETURN(!boxes.empty(), {});
     auto boxFirst = boxes.front();
     auto boxLast = boxes.back();
     float leftHandleX = boxFirst.rect_.GetLeft() + textStartX;
@@ -99,12 +104,11 @@ TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextFieldPattern>& ho
         width = contentRect.Width();
     }
     dragContext->UpdatePosition(OffsetT<Dimension>(Dimension(globalX), Dimension(globalY)));
-    RectF dragTextRect(textStartX + hostGlobalOffset.GetX() - globalX, textStartY + hostGlobalOffset.GetY() - globalY,
-        width, height);
+    RectF dragTextRect(
+        textStartX + hostGlobalOffset.GetX() - globalX, textStartY + hostGlobalOffset.GetY() - globalY, width, height);
     SelectPositionInfo info(leftHandleX + hostGlobalOffset.GetX() - globalX,
-                            leftHandleY + hostGlobalOffset.GetY() - globalY,
-                            rightHandleX + hostGlobalOffset.GetX() - globalX,
-                            rightHandleY + hostGlobalOffset.GetY() - globalY);
+        leftHandleY + hostGlobalOffset.GetY() - globalY, rightHandleX + hostGlobalOffset.GetX() - globalX,
+        rightHandleY + hostGlobalOffset.GetY() - globalY);
     TextDragData data(dragTextRect, width + bothOffset, height + bothOffset, lineHeight, info, oneLineSelected);
     return data;
 }
@@ -166,7 +170,7 @@ void TextDragPattern::GenerateBackgroundPoints(std::vector<TextPoint>& points, f
         if ((endX - startX) + bothOffset < minWidth) {
             float delta = minWidth - ((endX - startX) + bothOffset);
             startX -= delta / 2.0f; // 2 : half
-            endX += delta / 2.0f; // 2 : half
+            endX += delta / 2.0f;   // 2 : half
         }
         points.push_back(TextPoint(startX - offset, endY - offset));
         points.push_back(TextPoint(endX + offset, endY - offset));
@@ -210,15 +214,15 @@ void TextDragPattern::CalculateLineAndArc(std::vector<TextPoint>& points, std::s
         if (crossPoint.y == firstPoint.y) {
             int directionX = (crossPoint.x - firstPoint.x) > 0 ? 1 : -1;
             int directionY = (secondPoint.y - crossPoint.y) > 0 ? 1 : -1;
-            auto direction = (directionX * directionY > 0) ? RSPathDirection::CW_DIRECTION :
-                RSPathDirection::CCW_DIRECTION;
+            auto direction =
+                (directionX * directionY > 0) ? RSPathDirection::CW_DIRECTION : RSPathDirection::CCW_DIRECTION;
             path->LineTo(crossPoint.x - radius * directionX, crossPoint.y);
             path->ArcTo(radius, radius, 0.0f, direction, crossPoint.x, crossPoint.y + radius * directionY);
         } else {
             int directionX = (secondPoint.x - crossPoint.x) > 0 ? 1 : -1;
             int directionY = (crossPoint.y - firstPoint.y) > 0 ? 1 : -1;
-            auto direction = (directionX * directionY < 0) ? RSPathDirection::CW_DIRECTION :
-                RSPathDirection::CCW_DIRECTION;
+            auto direction =
+                (directionX * directionY < 0) ? RSPathDirection::CW_DIRECTION : RSPathDirection::CCW_DIRECTION;
             path->LineTo(crossPoint.x, crossPoint.y - radius * directionY);
             path->ArcTo(radius, radius, 0.0f, direction, crossPoint.x + radius * directionX, secondPoint.y);
         }

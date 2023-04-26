@@ -18,13 +18,14 @@
 #include "interfaces/napi/kits/utils/napi_utils.h"
 #include "js_native_api.h"
 #include "js_native_api_types.h"
+#include "napi/native_common.h"
 #include "node_api_types.h"
-
 #ifdef PIXEL_MAP_SUPPORTED
 #include "pixel_map.h"
 #include "pixel_map_napi.h"
 #endif
 
+#include "node_api.h"
 #include "uv.h"
 
 #include "bridge/common/utils/utils.h"
@@ -207,20 +208,23 @@ static napi_value JSSnapshotFromBuilder(napi_env env, napi_callback_info info)
     napi_escapable_handle_scope scope = nullptr;
     napi_open_escapable_handle_scope(env, &scope);
 
-    napi_value result = nullptr;
-
     JsComponentSnapshot helper(env, info);
     if (!helper.CheckArgs(napi_valuetype::napi_function)) {
         napi_close_escapable_handle_scope(env, scope);
-        return result;
+        return nullptr;
     }
 
     auto delegate = EngineHelper::GetCurrentDelegate();
     if (!delegate) {
         NapiThrow(env, "ace engine delegate is null", Framework::ERROR_CODE_INTERNAL_ERROR);
         napi_close_escapable_handle_scope(env, scope);
-        return result;
+        return nullptr;
     }
+
+    // create builder closure
+    auto builder = [build = helper.GetArgv(0), env] { napi_call_function(env, nullptr, build, 0, nullptr, nullptr); };
+    napi_value result = nullptr;
+    delegate->CreateSnapshot(builder, helper.CreateCallback(&result));
 
     napi_escape_handle(env, scope, result, &result);
     napi_close_escapable_handle_scope(env, scope);

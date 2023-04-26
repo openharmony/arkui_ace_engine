@@ -24,19 +24,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<RectModel> RectModel::instance_ = nullptr;
+std::mutex RectModel::mutex_;
 
 RectModel* RectModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::RectModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::RectModelNG());
-        } else {
-            instance_.reset(new Framework::RectModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::RectModelNG());
+            } else {
+                instance_.reset(new Framework::RectModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }

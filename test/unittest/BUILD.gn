@@ -62,6 +62,10 @@ config("ace_unittest_config") {
   }
 
   defines += [ "ACE_UNITTEST" ]
+
+  if (ace_use_new_skia) {
+    defines += [ "NEW_SKIA" ]
+  }
 }
 
 # ace unittest log

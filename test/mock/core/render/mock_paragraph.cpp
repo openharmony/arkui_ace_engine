@@ -18,8 +18,25 @@
 #include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace::NG {
+RefPtr<MockParagraph> MockParagraph::paragraph_;
+
 RefPtr<Paragraph> Paragraph::Create(const ParagraphStyle& paraStyle, const RefPtr<FontCollection>& fontCollection)
 {
-    return AceType::MakeRefPtr<MockParagraph>();
+    return MockParagraph::paragraph_;
+}
+
+RefPtr<MockParagraph> MockParagraph::GetOrCreateMockParagraph()
+{
+    if (!paragraph_) {
+        paragraph_ = AceType::MakeRefPtr<MockParagraph>();
+    }
+    return paragraph_;
+}
+
+void MockParagraph::TearDown()
+{
+    if (paragraph_) {
+        paragraph_ = nullptr;
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -64,6 +64,8 @@ void IndexerPattern::OnModifyDone()
     if (layoutProperty->GetArrayValue().has_value()) {
         arrayValue_ = layoutProperty->GetArrayValue().value();
         itemCount_ = static_cast<int32_t>(arrayValue_.size());
+    } else {
+        itemCount_ = 0;
     }
     auto propSelect = layoutProperty->GetSelected().value();
     propSelect = (propSelect >= 0 && propSelect < itemCount_) ? propSelect : 0;
@@ -154,6 +156,10 @@ void IndexerPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 
 void IndexerPattern::OnHover(bool isHover)
 {
+    if (itemCount_ <= 0) {
+        LOGE("AlphabetIndexer arrayValue size is less than 0");
+        return;
+    }
     if (isHover_ == isHover) {
         return;
     }
@@ -217,11 +223,19 @@ void IndexerPattern::InitChildInputEvent()
 
 void IndexerPattern::OnTouchDown(const TouchEventInfo& info)
 {
+    if (itemCount_ <= 0) {
+        LOGE("AlphabetIndexer arrayValue size is less than 0");
+        return;
+    }
     MoveIndexByOffset(info.GetTouches().front().GetLocalLocation());
 }
 
 void IndexerPattern::OnTouchUp(const TouchEventInfo& info)
 {
+    if (itemCount_ <= 0) {
+        LOGE("AlphabetIndexer arrayValue size is less than 0");
+        return;
+    }
     childPressIndex_ = -1;
     if (isHover_) {
         IndexerPressOutAnimation();

@@ -18,6 +18,7 @@
 #include "base/geometry/dimension.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
 #include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::NG {
@@ -25,6 +26,9 @@ void WaterFlowLayoutProperty::ResetWaterflowLayoutInfoAndMeasure() const
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<WaterFlowPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetLayoutInfo();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
 }
 

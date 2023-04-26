@@ -167,35 +167,41 @@ void ProgressModifier::PaintLinear(RSCanvas& canvas, const OffsetF& offset, cons
     brush.SetColor(ToRSColor(bgColor_->Get()));
     double radius = strokeWidth_->Get() / INT32_TWO;
     if (contentSize.Width() >= contentSize.Height()) {
-        double dateLength = contentSize.Width() * value_->Get() / maxValue_->Get();
+        double barLength = contentSize.Width() - radius * INT32_TWO;
+        CHECK_NULL_VOID(!NearEqual(barLength, 0.0));
+        double dateLength = barLength * value_->Get() / maxValue_->Get();
+        CHECK_NULL_VOID(!NearEqual(dateLength, 0.0));
         canvas.AttachBrush(brush);
         auto offsetY = offset.GetY() + (contentSize.Height() - strokeWidth_->Get()) / INT32_TWO;
         canvas.DrawRoundRect(
             { { offset.GetX(), offsetY, contentSize.Width() + offset.GetX(),
                                    strokeWidth_->Get() + offsetY },
             radius, radius });
+        // progress selected part
         brush.SetColor(ToRSColor((color_->Get())));
         canvas.AttachBrush(brush);
-        if (!NearEqual(dateLength, 0.0)) {
-            canvas.DrawRoundRect(
-                { { offset.GetX(), offsetY, dateLength + offset.GetX(), strokeWidth_->Get() + offsetY },
-                    radius, radius });
-        }
+        canvas.DrawRoundRect(
+            { { offset.GetX(), offsetY, dateLength + offset.GetX() + strokeWidth_->Get(),
+                                   strokeWidth_->Get() + offsetY },
+            radius, radius });
     } else {
-        double dateLength = contentSize.Height() * value_->Get() / maxValue_->Get();
+        double barLength = contentSize.Height() - radius * INT32_TWO;
+        CHECK_NULL_VOID(!NearEqual(barLength, 0.0));
+        double dateLength = barLength * value_->Get() / maxValue_->Get();
+        CHECK_NULL_VOID(!NearEqual(dateLength, 0.0));
         canvas.AttachBrush(brush);
         auto offsetX = offset.GetX() + (contentSize.Width() - strokeWidth_->Get()) / INT32_TWO;
         canvas.DrawRoundRect(
             { { offsetX, offset.GetY(), strokeWidth_->Get() + offsetX,
                                    contentSize.Height() + offset.GetY() },
             radius, radius });
+        // progress selected part
         brush.SetColor(ToRSColor((color_->Get())));
         canvas.AttachBrush(brush);
-        if (!NearEqual(dateLength, 0.0)) {
-            canvas.DrawRoundRect(
-                { { offsetX, offset.GetY(), strokeWidth_->Get() + offsetX, dateLength + offset.GetY() },
-                    radius, radius });
-        }
+        canvas.DrawRoundRect(
+            { { offsetX, offset.GetY(), strokeWidth_->Get() + offsetX,
+                                   dateLength + offset.GetY() + strokeWidth_->Get() },
+            radius, radius });
     }
 }
 
@@ -217,6 +223,7 @@ void ProgressModifier::PaintRing(RSCanvas& canvas, const OffsetF& offset, const 
     pen.SetColor(ToRSColor(bgColor_->Get()));
     canvas.AttachPen(pen);
     canvas.DrawCircle(ToRSPoint(centerPt), radius);
+    // progress selected part
     pen.SetColor(ToRSColor((color_->Get())));
     canvas.AttachPen(pen);
     double angle = (value_->Get() / maxValue_->Get()) * totalDegree;

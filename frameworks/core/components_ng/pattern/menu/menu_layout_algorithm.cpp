@@ -187,27 +187,23 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         return;
     }
 
-    auto size = layoutWrapper->GetGeometryNode()->GetMarginFrameSize();
-    float x = 0.0f;
-    float y = 0.0f;
-    if (menuProp->GetMenuPlacement().has_value() && (targetSize_.Width() > 0.0 || targetSize_.Height() > 0.0)) {
-        auto childOffset = GetChildPosition(size, menuProp);
-        x = childOffset.GetX() + positionOffset_.GetX();
-        y = childOffset.GetY() + positionOffset_.GetY();
-    } else {
-        x = HorizontalLayout(size, position_.GetX(), menuPattern->IsSelectMenu()) + positionOffset_.GetX();
-        y = VerticalLayout(size, position_.GetY()) + positionOffset_.GetY();
-        if (!menuPattern->IsContextMenu()) {
-            x -= pageOffset_.GetX();
-            y -= pageOffset_.GetY();
-        }
-    }
-    x = std::clamp(x, 0.0f, wrapperSize_.Width() - size.Width() - margin_ * 2.0f);
-    y = std::clamp(y, 0.0f, wrapperSize_.Height() - size.Height() - margin_ * 2.0f);
-
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    geometryNode->SetFrameOffset(NG::OffsetF(x, y));
+    auto size = geometryNode->GetMarginFrameSize();
+    if (menuPattern->IsSelectMenu()) {
+        ComputeMenuPositionByAlignType(menuProp, size);
+    }
+
+    auto menuPosition = MenuLayoutAvoidAlgorithm(menuProp, menuPattern, size);
+    if (menuPattern->IsSelectMenu()) {
+        auto offset = ComputeMenuPositionByOffset(menuProp, geometryNode);
+        menuPosition += offset;
+        position_ = menuPosition;
+        menuPosition = MenuLayoutAvoidAlgorithm(menuProp, menuPattern, size);
+    }
+
+    LOGD("Menu layout, offset = %{public}s", menuPosition.ToString().c_str());
+    geometryNode->SetFrameOffset(menuPosition);
 
     // translate each option by the height of previous options
     OffsetF translate;
@@ -226,6 +222,70 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         rects.emplace_back(rect);
         SubwindowManager::GetInstance()->SetHotAreas(rects);
     }
+}
+
+void MenuLayoutAlgorithm::ComputeMenuPositionByAlignType(
+    const RefPtr<MenuLayoutProperty>& menuProp, const SizeF& menuSize)
+{
+    auto alignType = menuProp->GetAlignType().value_or(MenuAlignType::START);
+    auto targetSize = menuProp->GetTargetSizeValue(SizeF());
+    switch (alignType) {
+        case MenuAlignType::CENTER: {
+            position_.AddX(targetSize.Width() / 2.0f - menuSize.Width() / 2.0f);
+            break;
+        }
+        case MenuAlignType::END: {
+            position_.AddX(targetSize.Width() - menuSize.Width());
+            break;
+        }
+        default:
+            break;
+    }
+}
+
+OffsetF MenuLayoutAlgorithm::ComputeMenuPositionByOffset(
+    const RefPtr<MenuLayoutProperty>& menuProp, const RefPtr<GeometryNode>& geometryNode)
+{
+    CHECK_NULL_RETURN(menuProp, OffsetF(0, 0));
+    CHECK_NULL_RETURN(geometryNode, OffsetF(0, 0));
+
+    const auto& layoutConstraint = menuProp->GetLayoutConstraint();
+    CHECK_NULL_RETURN(layoutConstraint, OffsetF(0, 0));
+    auto menuAlignOffset = menuProp->GetOffset().value_or(
+        DimensionOffset(Dimension(0, DimensionUnit::VP), Dimension(0, DimensionUnit::VP)));
+
+    auto menuSize = geometryNode->GetFrameSize();
+    auto menuTrimOffsetX =
+        ConvertToPx(CalcLength(menuAlignOffset.GetX()), layoutConstraint->scaleProperty, menuSize.Width());
+    auto menuTrimOffsetY =
+        ConvertToPx(CalcLength(menuAlignOffset.GetY()), layoutConstraint->scaleProperty, menuSize.Height());
+    OffsetF menuTrimOffset = OffsetF(menuTrimOffsetX.value_or(0.0), menuTrimOffsetY.value_or(0.0));
+    return menuTrimOffset;
+}
+
+OffsetF MenuLayoutAlgorithm::MenuLayoutAvoidAlgorithm(
+    const RefPtr<MenuLayoutProperty>& menuProp, const RefPtr<MenuPattern>& menuPattern, const SizeF& size)
+{
+    CHECK_NULL_RETURN(menuProp, OffsetF(0, 0));
+    CHECK_NULL_RETURN(menuPattern, OffsetF(0, 0));
+    float x = 0.0f;
+    float y = 0.0f;
+    if (menuProp->GetMenuPlacement().has_value() && (targetSize_.Width() > 0.0 || targetSize_.Height() > 0.0)) {
+        auto childOffset = GetChildPosition(size, menuProp);
+        x = childOffset.GetX() + positionOffset_.GetX();
+        y = childOffset.GetY() + positionOffset_.GetY();
+    } else {
+        x = HorizontalLayout(size, position_.GetX(), menuPattern->IsSelectMenu()) + positionOffset_.GetX();
+        y = VerticalLayout(size, position_.GetY()) + positionOffset_.GetY();
+        if (!menuPattern->IsContextMenu()) {
+            x -= pageOffset_.GetX();
+            y -= pageOffset_.GetY();
+        }
+    }
+    x = std::clamp(x, 0.0f, wrapperSize_.Width() - size.Width() - margin_ * 2.0f);
+    y = std::clamp(y, 0.0f, wrapperSize_.Height() - size.Height() - margin_ * 2.0f);
+
+    return OffsetF(x, y);
 }
 
 void MenuLayoutAlgorithm::UpdateConstraintWidth(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint)

@@ -251,6 +251,20 @@ bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format)
 {
     return true;
 }
+
+void PipelineContext::RestoreNodeInfo(std::unique_ptr<JsonValue> nodeInfo) {}
+
+std::unique_ptr<JsonValue> PipelineContext::GetStoredNodeInfo()
+{
+    return nullptr;
+}
+
+void PipelineContext::StoreNode(int32_t restoreId, const WeakPtr<FrameNode>& node) {}
+
+std::string PipelineContext::GetRestoreInfo(int32_t restoreId)
+{
+    return "";
+}
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace {

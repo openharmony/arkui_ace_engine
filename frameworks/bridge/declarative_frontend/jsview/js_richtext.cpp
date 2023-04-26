@@ -29,26 +29,28 @@
 
 namespace OHOS::Ace {
 std::unique_ptr<RichTextModel> RichTextModel::instance_ = nullptr;
-
+std::mutex RichTextModel::mutex_;
 RichTextModel* RichTextModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::RichTextModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::RichTextModelNG());
-        } else {
-            instance_.reset(new Framework::RichTextModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::RichTextModelNG());
+            } else {
+                instance_.reset(new Framework::RichTextModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
-
 void JSRichText::Create(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {

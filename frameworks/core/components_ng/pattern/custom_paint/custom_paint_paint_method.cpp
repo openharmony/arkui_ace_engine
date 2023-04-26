@@ -18,11 +18,12 @@
 #include <cmath>
 #include <unistd.h>
 
+#include "securec.h"
+
 #include "drawing/engine_adapter/skia_adapter/skia_canvas.h"
 #include "include/core/SkCanvas.h"
 #include "include/core/SkColor.h"
 #include "include/core/SkShader.h"
-#include "third_party/bounds_checking_function/include/securec.h"
 #include "include/core/SkBlendMode.h"
 #include "include/core/SkCanvas.h"
 #include "include/core/SkColor.h"
@@ -40,7 +41,9 @@
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "core/components/calendar/rosen_render_calendar.h"
+#ifndef NEW_SKIA
 #include "core/components/common/painter/flutter_decoration_painter.h"
+#endif
 #include "core/components/common/painter/rosen_decoration_painter.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components_ng/render/drawing.h"
@@ -193,7 +196,12 @@ void CustomPaintPaintMethod::UpdatePaintShader(const Ace::Pattern& pattern, SkPa
 #ifdef USE_SYSTEM_SKIA
                 paint.setShader(image->makeShader(SkShader::kClamp_TileMode, SkShader::kClamp_TileMode, nullptr));
 #else
+#ifdef NEW_SKIA
+                paint.setShader(
+                    image->makeShader(SkTileMode::kClamp, SkTileMode::kClamp, SkSamplingOptions(), nullptr));
+#else
                 paint.setShader(image->makeShader(SkTileMode::kClamp, SkTileMode::kClamp, nullptr));
+#endif
 #endif
             } },
         { "mirror",
@@ -201,7 +209,12 @@ void CustomPaintPaintMethod::UpdatePaintShader(const Ace::Pattern& pattern, SkPa
 #ifdef USE_SYSTEM_SKIA
                 paint.setShader(image->makeShader(SkShader::kClamp_TileMode, SkShader::kClamp_TileMode, nullptr));
 #else
+#ifdef NEW_SKIA
+                paint.setShader(
+                    image->makeShader(SkTileMode::kMirror, SkTileMode::kMirror, SkSamplingOptions(), nullptr));
+#else
                 paint.setShader(image->makeShader(SkTileMode::kMirror, SkTileMode::kMirror, nullptr));
+#endif
 #endif
             } },
         { "no-repeat",
@@ -209,7 +222,12 @@ void CustomPaintPaintMethod::UpdatePaintShader(const Ace::Pattern& pattern, SkPa
 #ifdef USE_SYSTEM_SKIA
                 paint.setShader(image->makeShader(SkShader::kDecal_TileMode, SkShader::kDecal_TileMode, nullptr));
 #else
+#ifdef NEW_SKIA
+                paint.setShader(
+                    image->makeShader(SkTileMode::kDecal, SkTileMode::kDecal, SkSamplingOptions(), nullptr));
+#else
                 paint.setShader(image->makeShader(SkTileMode::kDecal, SkTileMode::kDecal, nullptr));
+#endif
 #endif
             } },
         { "repeat",
@@ -217,7 +235,12 @@ void CustomPaintPaintMethod::UpdatePaintShader(const Ace::Pattern& pattern, SkPa
 #ifdef USE_SYSTEM_SKIA
                 paint.setShader(image->makeShader(SkShader::kRepeat_TileMode, SkShader::kRepeat_TileMode, nullptr));
 #else
+#ifdef NEW_SKIA
+                paint.setShader(
+                    image->makeShader(SkTileMode::kRepeat, SkTileMode::kRepeat, SkSamplingOptions(), nullptr));
+#else
                 paint.setShader(image->makeShader(SkTileMode::kRepeat, SkTileMode::kRepeat, nullptr));
+#endif
 #endif
             } },
         { "repeat-x",
@@ -225,7 +248,12 @@ void CustomPaintPaintMethod::UpdatePaintShader(const Ace::Pattern& pattern, SkPa
 #ifdef USE_SYSTEM_SKIA
                 paint.setShader(image->makeShader(SkShader::kRepeat_TileMode, SkShader::kDecal_TileMode, nullptr));
 #else
+#ifdef NEW_SKIA
+                paint.setShader(
+                    image->makeShader(SkTileMode::kRepeat, SkTileMode::kDecal, SkSamplingOptions(), nullptr));
+#else
                 paint.setShader(image->makeShader(SkTileMode::kRepeat, SkTileMode::kDecal, nullptr));
+#endif
 #endif
             } },
         { "repeat-y",
@@ -233,7 +261,12 @@ void CustomPaintPaintMethod::UpdatePaintShader(const Ace::Pattern& pattern, SkPa
 #ifdef USE_SYSTEM_SKIA
                 paint.setShader(image->makeShader(SkShader::kDecal_TileMode, SkShader::kRepeat_TileMode, nullptr));
 #else
+#ifdef NEW_SKIA
+                paint.setShader(
+                    image->makeShader(SkTileMode::kDecal, SkTileMode::kRepeat, SkSamplingOptions(), nullptr));
+#else
                 paint.setShader(image->makeShader(SkTileMode::kDecal, SkTileMode::kRepeat, nullptr));
+#endif
 #endif
             } },
     };
@@ -284,6 +317,7 @@ SkPaint CustomPaintPaintMethod::GetStrokePaint()
 
 void CustomPaintPaintMethod::InitImagePaint()
 {
+#ifndef NEW_SKIA
     if (smoothingEnabled_) {
         if (smoothingQuality_ == "low") {
             imagePaint_.setFilterQuality(SkFilterQuality::kLow_SkFilterQuality);
@@ -297,6 +331,21 @@ void CustomPaintPaintMethod::InitImagePaint()
     } else {
         imagePaint_.setFilterQuality(SkFilterQuality::kNone_SkFilterQuality);
     }
+#else
+    if (smoothingEnabled_) {
+        if (smoothingQuality_ == "low") {
+            options_ = SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kNone);
+        } else if (smoothingQuality_ == "medium") {
+            options_ = SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kLinear);
+        } else if (smoothingQuality_ == "high") {
+            options_ = SkSamplingOptions(SkCubicResampler::Mitchell());
+        } else {
+            LOGE("Unsupported Quality type:%{public}s", smoothingQuality_.c_str());
+        }
+    } else {
+        options_ = SkSamplingOptions(SkFilterMode::kNearest, SkMipmapMode::kNone);
+    }
+#endif
     SetPaintImage();
 }
 
@@ -392,7 +441,11 @@ void CustomPaintPaintMethod::PutImageData(PaintWrapper* paintWrapper, const Ace:
     skBitmap.allocPixels(imageInfo);
     skBitmap.setPixels(data);
     auto contentOffset = GetContentOffset(paintWrapper);
+#ifndef NEW_SKIA
     skCanvas_->drawBitmap(skBitmap, imageData.x + contentOffset.GetX(), imageData.y + contentOffset.GetY());
+#else
+    skCanvas_->drawImage(skBitmap.asImage(), imageData.x + contentOffset.GetX(), imageData.y + contentOffset.GetY());
+#endif
     delete[] data;
 }
 
@@ -424,7 +477,11 @@ void CustomPaintPaintMethod::FillRect(PaintWrapper* paintWrapper, const Rect& re
     } else {
         InitPaintBlend(cachePaint_);
         cacheCanvas_->drawRect(skRect, paint);
+#ifndef NEW_SKIA
         skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
+#else
+        skCanvas_->drawImage(cacheBitmap_.asImage(), 0, 0, SkSamplingOptions(), &cachePaint_);
+#endif
         cacheBitmap_.eraseColor(0);
     }
 }
@@ -452,7 +509,11 @@ void CustomPaintPaintMethod::StrokeRect(PaintWrapper* paintWrapper, const Rect& 
     } else {
         InitPaintBlend(cachePaint_);
         cacheCanvas_->drawRect(skRect, paint);
+#ifndef NEW_SKIA
         skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
+#else
+        skCanvas_->drawImage(cacheBitmap_.asImage(), 0, 0, SkSamplingOptions(), &cachePaint_);
+#endif
         cacheBitmap_.eraseColor(0);
     }
 }
@@ -471,18 +532,34 @@ void CustomPaintPaintMethod::ClearRect(PaintWrapper* paintWrapper, const Rect& r
 void CustomPaintPaintMethod::SetFillRuleForPath(const CanvasFillRule& rule)
 {
     if (rule == CanvasFillRule::NONZERO) {
+#ifndef NEW_SKIA
         skPath_.setFillType(SkPath::FillType::kWinding_FillType);
+#else
+        skPath_.setFillType(SkPathFillType::kWinding);
+#endif
     } else if (rule == CanvasFillRule::EVENODD) {
+#ifndef NEW_SKIA
         skPath_.setFillType(SkPath::FillType::kEvenOdd_FillType);
+#else
+        skPath_.setFillType(SkPathFillType::kEvenOdd);
+#endif
     }
 }
 
 void CustomPaintPaintMethod::SetFillRuleForPath2D(const CanvasFillRule& rule)
 {
     if (rule == CanvasFillRule::NONZERO) {
+#ifndef NEW_SKIA
         skPath2d_.setFillType(SkPath::FillType::kWinding_FillType);
+#else
+        skPath2d_.setFillType(SkPathFillType::kWinding);
+#endif
     } else if (rule == CanvasFillRule::EVENODD) {
+#ifndef NEW_SKIA
         skPath2d_.setFillType(SkPath::FillType::kEvenOdd_FillType);
+#else
+        skPath2d_.setFillType(SkPathFillType::kEvenOdd);
+#endif
     }
 }
 
@@ -510,7 +587,11 @@ void CustomPaintPaintMethod::Fill(PaintWrapper* paintWrapper)
     } else {
         InitPaintBlend(cachePaint_);
         cacheCanvas_->drawPath(skPath_, paint);
-        skCanvas_->drawBitmap(cacheBitmap_, 0.0f, 0.0f, &cachePaint_);
+#ifndef NEW_SKIA
+        skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
+#else
+        skCanvas_->drawImage(cacheBitmap_.asImage(), 0, 0, SkSamplingOptions(), &cachePaint_);
+#endif
         cacheBitmap_.eraseColor(0);
     }
 }
@@ -547,7 +628,11 @@ void CustomPaintPaintMethod::Path2DFill(const OffsetF& offset)
     } else {
         InitPaintBlend(cachePaint_);
         cacheCanvas_->drawPath(skPath2d_, paint);
+#ifndef NEW_SKIA
         skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
+#else
+        skCanvas_->drawImage(cacheBitmap_.asImage(), 0, 0, SkSamplingOptions(), &cachePaint_);
+#endif
         cacheBitmap_.eraseColor(0);
     }
 }
@@ -571,7 +656,11 @@ void CustomPaintPaintMethod::Stroke(PaintWrapper* paintWrapper)
     } else {
         InitPaintBlend(cachePaint_);
         cacheCanvas_->drawPath(skPath_, paint);
+#ifndef NEW_SKIA
         skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
+#else
+        skCanvas_->drawImage(cacheBitmap_.asImage(), 0, 0, SkSamplingOptions(), &cachePaint_);
+#endif
         cacheBitmap_.eraseColor(0);
     }
 }
@@ -603,7 +692,11 @@ void CustomPaintPaintMethod::Path2DStroke(const OffsetF& offset)
     } else {
         InitPaintBlend(cachePaint_);
         cacheCanvas_->drawPath(skPath2d_, paint);
+#ifndef NEW_SKIA
         skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
+#else
+        skCanvas_->drawImage(cacheBitmap_.asImage(), 0, 0, SkSamplingOptions(), &cachePaint_);
+#endif
         cacheBitmap_.eraseColor(0);
     }
 }

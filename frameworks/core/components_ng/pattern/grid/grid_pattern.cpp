@@ -441,6 +441,7 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     UpdateScrollBarOffset();
     CheckRestartSpring();
     CheckScrollable();
+    FlushCurrentFocus();
     return false;
 }
 
@@ -454,6 +455,38 @@ void GridPattern::CheckScrollable()
     }
 
     SetScrollEnable(scrollable_);
+}
+
+void GridPattern::FlushCurrentFocus()
+{
+    auto gridFrame = GetHost();
+    CHECK_NULL_VOID(gridFrame);
+    auto gridFocus = gridFrame->GetFocusHub();
+    CHECK_NULL_VOID(gridFocus);
+    if (!gridFocus->IsCurrentFocus()) {
+        return;
+    }
+    auto childFocusList = gridFocus->GetChildren();
+    for (const auto& childFocus : childFocusList) {
+        if (childFocus->IsCurrentFocus()) {
+            auto curFrame = childFocus->GetFrameNode();
+            CHECK_NULL_VOID(curFrame);
+            auto curPattern = curFrame->GetPattern();
+            CHECK_NULL_VOID(curPattern);
+            auto curItemPattern = AceType::DynamicCast<GridItemPattern>(curPattern);
+            CHECK_NULL_VOID(curItemPattern);
+
+            lastFocusItemMainIndex_ = curItemPattern->GetMainIndex();
+            lastFocusItemCrossIndex_ = curItemPattern->GetCrossIndex();
+            return;
+        }
+    }
+    auto curCrossNum = static_cast<int32_t>(gridLayoutInfo_.gridMatrix_.at(lastFocusItemMainIndex_).size());
+    auto weakChild = SearchFocusableChildInCross(lastFocusItemMainIndex_, lastFocusItemCrossIndex_, curCrossNum);
+    auto child = weakChild.Upgrade();
+    if (child) {
+        child->RequestFocusImmediately();
+    }
 }
 
 void GridPattern::FlushFocusOnScroll(const GridLayoutInfo& gridLayoutInfo)

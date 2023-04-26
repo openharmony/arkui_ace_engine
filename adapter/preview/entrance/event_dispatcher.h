@@ -22,7 +22,9 @@
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
 #include "core/common/clipboard/clipboard_proxy.h"
+#ifndef ENABLE_ROSEN_BACKEND
 #include "flutter/shell/platform/glfw/public/flutter_glfw.h"
+#endif
 
 namespace OHOS::Ace::Platform {
 
@@ -32,7 +34,6 @@ class ACE_FORCE_EXPORT_WITH_PREVIEW EventDispatcher : public Singleton<EventDisp
     DECLARE_SINGLETON(EventDispatcher);
 public:
     void Initialize();
-    void SetGlfwWindowController(const FlutterDesktopWindowControllerRef& controller);
     void DispatchIdleEvent(int64_t deadline);
     bool DispatchTouchEvent(const TouchEvent& event);
     bool DispatchBackPressedEvent();
@@ -40,13 +41,21 @@ public:
     bool DispatchKeyEvent(const KeyEvent& event);
     void RegisterCallbackGetCapsLockStatus(CallbackGetKeyboardStatus callback);
     void RegisterCallbackGetNumLockStatus(CallbackGetKeyboardStatus callback);
+#ifndef ENABLE_ROSEN_BACKEND
+    void SetGlfwWindowController(const FlutterDesktopWindowControllerRef& controller)
+    {
+        controller_ = controller;
+    }
+#endif
 
 private:
     // Process all printable characters. If the input method is used, this function is invalid.
     bool HandleTextKeyEvent(const KeyEvent& event);
-    FlutterDesktopWindowControllerRef controller_ = nullptr;
     CallbackGetKeyboardStatus callbackGetCapsLockStatus_;
     CallbackGetKeyboardStatus callbackGetNumLockStatus_;
+#ifndef ENABLE_ROSEN_BACKEND
+    FlutterDesktopWindowControllerRef controller_ = nullptr;
+#endif
 };
 
 } // namespace OHOS::Ace::Platform

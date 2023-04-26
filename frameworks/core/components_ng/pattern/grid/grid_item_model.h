@@ -18,6 +18,7 @@
 
 #include <functional>
 #include <memory>
+#include <mutex>
 
 namespace OHOS::Ace {
 
@@ -38,6 +39,7 @@ public:
 
 private:
     static std::unique_ptr<GridItemModel> instance_;
+    static std::mutex mutex_;
 };
 
 } // namespace OHOS::Ace

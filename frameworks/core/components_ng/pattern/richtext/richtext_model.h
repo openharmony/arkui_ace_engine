@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WEB_RICHTEXT_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WEB_RICHTEXT_MODEL_H
 
+#include <mutex>
 #include <string>
 
 #include "core/common/container.h"
@@ -35,6 +36,7 @@ public:
 
 private:
     static std::unique_ptr<RichTextModel> instance_;
+    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
 

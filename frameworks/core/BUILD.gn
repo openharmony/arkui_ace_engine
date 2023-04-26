@@ -241,7 +241,7 @@ template("ace_core_source_set") {
         "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner_adapter.cc",
       ]
       configs += [ "$ace_flutter_engine_root:flutter_config" ]
-      deps += [ "$skia_root_new:skia" ]
+      deps += [ "$skia_root_new:skia_$platform" ]
     } else {
       deps += [
         "$ace_flutter_engine_root:third_party_flutter_engine_$platform",

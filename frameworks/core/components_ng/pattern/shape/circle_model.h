@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CIRCLE_CIRCLE_MODEL_H
 
 #include <memory>
+#include <mutex>
 
 namespace OHOS::Ace {
 class CircleModel {
@@ -28,6 +29,7 @@ public:
 
 private:
     static std::unique_ptr<CircleModel> instance_;
+    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CIRCLE_CIRCLE_MODEL_H

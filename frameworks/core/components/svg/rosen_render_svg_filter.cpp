@@ -15,7 +15,12 @@
 
 #include "frameworks/core/components/svg/rosen_render_svg_filter.h"
 
+#ifndef NEW_SKIA
 #include "include/effects/SkColorFilterImageFilter.h"
+#else
+#include "include/core/SkColorFilter.h"
+#include "include/effects/SkImageFilters.h"
+#endif
 #include "include/effects/SkColorMatrix.h"
 
 #include "frameworks/core/components/svg/rosen_render_svg_fe_colormatrix.h"
@@ -107,14 +112,17 @@ sk_sp<SkImageFilter> RosenRenderSvgFilter::MakeImageFilter(const FeInType& in, s
     switch (in) {
         case FeInType::SOURCE_GRAPHIC:
             return nullptr;
-        case FeInType::SOURCE_ALPHA:
+        case FeInType::SOURCE_ALPHA: {
             SkColorMatrix m;
             m.setScale(0, 0, 0, 1.0f);
 #ifdef USE_SYSTEM_SKIA
             return SkColorFilterImageFilter::Make(SkColorFilter::MakeMatrixFilterRowMajor255(m.fMat), nullptr);
-#else
+#elif !defined(NEW_SKIA)
             return SkColorFilterImageFilter::Make(SkColorFilters::Matrix(m), nullptr);
+#else
+            return SkImageFilters::ColorFilter(SkColorFilters::Matrix(m), nullptr);
 #endif
+        }
         case FeInType::BACKGROUND_IMAGE:
             break;
         case FeInType::BACKGROUND_ALPHA:
@@ -138,13 +146,21 @@ void RosenRenderSvgFilter::ConverImageFilterColor(
 #ifdef USE_SYSTEM_SKIA
         imageFilter = SkColorFilterImageFilter::Make(SkColorFilter::MakeSRGBToLinearGamma(), imageFilter);
 #else
+#ifndef NEW_SKIA
         imageFilter = SkColorFilterImageFilter::Make(SkColorFilters::SRGBToLinearGamma(), imageFilter);
+#else
+        imageFilter = SkImageFilters::ColorFilter(SkColorFilters::SRGBToLinearGamma(), imageFilter);
+#endif
 #endif
     } else if (dst == ColorInterpolationType::SRGB && src == ColorInterpolationType::LINEAR_RGB) {
 #ifdef USE_SYSTEM_SKIA
         imageFilter = SkColorFilterImageFilter::Make(SkColorFilter::MakeLinearToSRGBGamma(), imageFilter);
 #else
+#ifndef NEW_SKIA
         imageFilter = SkColorFilterImageFilter::Make(SkColorFilters::LinearToSRGBGamma(), imageFilter);
+#else
+        imageFilter = SkImageFilters::ColorFilter(SkColorFilters::LinearToSRGBGamma(), imageFilter);
+#endif
 #endif
     }
 }

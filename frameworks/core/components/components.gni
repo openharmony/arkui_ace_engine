@@ -58,11 +58,9 @@ template("build_component") {
       deps += [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
 
       if (ace_use_new_skia) {
-        include_dirs =
-            [ "//third_party/skia/third_party/externals/harfbuzz/src" ]
         deps += [
           "$ace_flutter_engine_root/libtxt:thirdparty_lib_txt_$platform",
-          "$skia_root_new:skia",
+          "$skia_root_new:skia_$platform",
         ]
         configs += [ "$ace_flutter_engine_root:flutter_config" ]
       } else {

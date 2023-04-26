@@ -26,20 +26,24 @@
 
 namespace OHOS::Ace {
 std::unique_ptr<UIExtensionModel> UIExtensionModel::instance_ = nullptr;
+std::mutex UIExtensionModel::mutex_;
 
 UIExtensionModel* UIExtensionModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::UIExtensionModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::UIExtensionModelNG());
-        } else {
-            LOGE("The old frameworks does not support UIExtensionComponent");
-            return nullptr;
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::UIExtensionModelNG());
+            } else {
+                LOGE("The old frameworks does not support UIExtensionComponent");
+                return nullptr;
+            }
 #endif
+        }
     }
     return instance_.get();
 }

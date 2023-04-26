@@ -16,13 +16,16 @@ import(
 
 build_component("text_field") {
   sources = [
-    "flutter_render_text_field.cpp",
     "render_text_field.cpp",
     "render_text_field_creator.cpp",
     "text_field_component.cpp",
     "text_field_controller.cpp",
     "text_field_element.cpp",
   ]
+
+  if (!ace_use_new_skia) {
+    sources += [ "flutter_render_text_field.cpp" ]
+  }
 
   rosen_sources = [ "rosen_render_text_field.cpp" ]
 

@@ -47,6 +47,7 @@ var TextAlign;
   TextAlign[TextAlign["Center"] = 1] = "Center";
   TextAlign[TextAlign["End"] = 2] = "End";
   TextAlign[TextAlign["Justify"] = 3] = "Justify";
+  TextAlign[TextAlign["JUSTIFY"] = 3] = "JUSTIFY";
 })(TextAlign || (TextAlign = {}));
 
 var DataPanelType;
@@ -242,6 +243,7 @@ var TextOverflow;
   TextOverflow[TextOverflow["Clip"] = 1] = "Clip";
   TextOverflow[TextOverflow["Ellipsis"] = 2] = "Ellipsis";
   TextOverflow[TextOverflow["Marquee"] = 3] = "Marquee";
+  TextOverflow[TextOverflow["MARQUEE"] = 3] = "MARQUEE";
 })(TextOverflow || (TextOverflow = {}));
 
 var TextDecorationType;
@@ -672,6 +674,8 @@ var SwiperDisplayMode;
 (function (SwiperDisplayMode) {
   SwiperDisplayMode[SwiperDisplayMode["Stretch"] = 0] = "Stretch";
   SwiperDisplayMode[SwiperDisplayMode["AutoLinear"] = 1] = "AutoLinear";
+  SwiperDisplayMode[SwiperDisplayMode["STRETCH"] = 0] = "STRETCH";
+  SwiperDisplayMode[SwiperDisplayMode["AUTO_LINEAR"] = 1] = "AUTO_LINEAR";
 })(SwiperDisplayMode || (SwiperDisplayMode = {}));
 
 var EdgeEffect;
@@ -935,6 +939,10 @@ var BlurStyle;
   BlurStyle[BlurStyle["BackgroundRegular"] = 5] = "BackgroundRegular";
   BlurStyle[BlurStyle["BackgroundThick"] = 6] = "BackgroundThick";
   BlurStyle[BlurStyle["BackgroundUltraThick"] = 7] = "BackgroundUltraThick";
+  BlurStyle[BlurStyle["BACKGROUND_THIN"] = 4] = "BACKGROUND_THIN";
+  BlurStyle[BlurStyle["BACKGROUND_REGULAR"] = 5] = "BACKGROUND_REGULAR";
+  BlurStyle[BlurStyle["BACKGROUND_THICK"] = 6] = "BACKGROUND_THICK";
+  BlurStyle[BlurStyle["BACKGROUND_ULTRA_THICK"] = 7] = "BACKGROUND_ULTRA_THICK";
 })(BlurStyle || (BlurStyle = {}));
 
 var ThemeColorMode;
@@ -942,12 +950,17 @@ var ThemeColorMode;
   ThemeColorMode[ThemeColorMode["System"] = 0] = "System";
   ThemeColorMode[ThemeColorMode["Light"] = 1] = "Light";
   ThemeColorMode[ThemeColorMode["Dark"] = 2] = "Dark";
+  ThemeColorMode[ThemeColorMode["SYSTEM"] = 0] = "SYSTEM";
+  ThemeColorMode[ThemeColorMode["LIGHT"] = 1] = "LIGHT";
+  ThemeColorMode[ThemeColorMode["DARK"] = 2] = "DARK";
 })(ThemeColorMode || (ThemeColorMode = {}));
 
 var AdaptiveColor;
 (function (AdaptiveColor) {
   AdaptiveColor[AdaptiveColor["Default"] = 0] = "Default";
   AdaptiveColor[AdaptiveColor["Average"] = 1] = "Average";
+  AdaptiveColor[AdaptiveColor["DEFAULT"] = 0] = "DEFAULT";
+  AdaptiveColor[AdaptiveColor["AVERAGE"] = 1] = "AVERAGE";
 })(AdaptiveColor || (AdaptiveColor = {}));
 
 var ShadowStyle;
@@ -958,6 +971,12 @@ var ShadowStyle;
   ShadowStyle[ShadowStyle["OuterDefaultLG"] = 3] = "OuterDefaultLG";
   ShadowStyle[ShadowStyle["OuterFloatingSM"] = 4] = "OuterFloatingSM";
   ShadowStyle[ShadowStyle["OuterFloatingMD"] = 5] = "OuterFloatingMD";
+  ShadowStyle[ShadowStyle["OUTERDEFAULT_XS"] = 0] = "OUTERDEFAULT_XS";
+  ShadowStyle[ShadowStyle["OUTERDEFAULT_SM"] = 1] = "OUTERDEFAULT_SM";
+  ShadowStyle[ShadowStyle["OUTERDEFAULT_MD"] = 2] = "OuterDefault_MD";
+  ShadowStyle[ShadowStyle["OUTERDEFAULT_LG"] = 3] = "OUTERDEFAULT_LG";
+  ShadowStyle[ShadowStyle["OUTERFLOATING_SM"] = 4] = "OUTERFLOATING_SM";
+  ShadowStyle[ShadowStyle["OUTERFLOATING_MD"] = 5] = "OUTERFLOATING_MD";
 })(ShadowStyle || (ShadowStyle = {}));
 
 var BreakpointsReference;
@@ -1040,14 +1059,17 @@ var ModalTransition;
   ModalTransition[ModalTransition["Default"] = 0] = "Default";
   ModalTransition[ModalTransition["None"] = 1] = "None";
   ModalTransition[ModalTransition["Alpha"] = 2] = "Alpha";
+  ModalTransition[ModalTransition["DEFAULT"] = 0] = "DEFAULT";
+  ModalTransition[ModalTransition["NONE"] = 1] = "NONE";
+  ModalTransition[ModalTransition["ALPHA"] = 2] = "ALPHA";
 })(ModalTransition || (ModalTransition = {}));
 
-var CtrlKey;
-(function (CtrlKey) {
-  CtrlKey[CtrlKey["CTRL"] = 0] = "CTRL";
-  CtrlKey[CtrlKey["SHIFT"] = 1] = "SHIFT";
-  CtrlKey[CtrlKey["ALT"] = 2] = "ALT";
-})(CtrlKey || (CtrlKey = {}));
+var ModifierKey;
+(function (ModifierKey) {
+  ModifierKey[ModifierKey["CTRL"] = 0] = "CTRL";
+  ModifierKey[ModifierKey["SHIFT"] = 1] = "SHIFT";
+  ModifierKey[ModifierKey["ALT"] = 2] = "ALT";
+})(ModifierKey || (ModifierKey = {}));
 
 var FunctionKey;
 (function (FunctionKey) {
@@ -1330,6 +1352,130 @@ var ContentTextStyle;
   ContentTextStyle[ContentTextStyle["ThreeLines"] = 2] = "ThreeLines";
 })(ContentTextStyle || (ContentTextStyle = {}));
 
+class NavPathInfo {
+  constructor(name, param) {
+      this.name = name;
+      this.param = param;
+  }
+}
+
+class NavPathStack {
+  constructor() {
+      this.pathArray = [];                                                                                                                                  
+      // indicate class has changed.
+      this.changeFlag = 0;
+      this.type = this.constructor.name;
+  }
+  pushName(name, param) {
+      this.pathArray.push(new NavPathInfo(name, param));
+      this.changeFlag = this.changeFlag + 1;
+  }
+  push(info) {
+      this.pathArray.push(info);
+      this.changeFlag = this.changeFlag + 1;
+  }
+  pop() {
+      if (this.pathArray.length === 0) {
+          return undefined;
+      }
+      let pathInfo = this.pathArray.pop();
+      this.changeFlag = this.changeFlag + 1;
+      return pathInfo;
+  }
+  popTo(name) {
+      let index = this.pathArray.findIndex(element => element.name === name);
+      if (index === -1) {
+          return -1;
+      }
+      this.pathArray.splice(index + 1);
+      this.changeFlag = this.changeFlag + 1;
+      return index;
+  }
+  popToIndex(index) {
+      if (index >= this.pathArray.length) {
+          return;
+      }
+      this.pathArray.splice(index + 1);
+      this.changeFlag = this.changeFlag + 1;
+  }
+  moveToTop(name) {
+      let index = this.pathArray.findIndex(element => element.name === name);
+      if (index === -1) {
+          return -1;
+      }
+      let info = this.pathArray.splice(index, 1);
+      this.pathArray.push(info[0]);
+      this.changeFlag = this.changeFlag + 1;
+      return index;
+  }
+  moveIndexToTop(index) {
+      if (index >= this.pathArray.length) {
+          return;
+      }
+      let info = this.pathArray.splice(index, 1);
+      this.pathArray.push(info[0]);
+      this.changeFlag = this.changeFlag + 1;
+  }
+  clear() {
+      this.pathArray.splice(0);
+      this.changeFlag = this.changeFlag + 1;
+  }
+  removeName(name) {
+      var removed = false;
+      for (var i = 0; i < this.pathArray.length; i++) {
+          if (this.pathArray[i].name === name) {
+              this.pathArray.splice(i, 1);
+              removed = true;
+          }
+      }
+      if (removed) {
+          this.changeFlag = this.changeFlag + 1;
+      }
+  }
+  getAllPathName() {
+      let array = this.pathArray.flatMap(element => element.name);
+      return array;
+  }
+  getParamByIndex(index) {
+      let item = this.pathArray[index];
+      if (item === undefined) {
+          return undefined;
+      }
+      return item.param;
+  }
+  getParamByName(name) {
+      let array = new Array();
+      this.pathArray.forEach((element) => {
+          if (element.name === name) {
+              array.push(element.param);
+          }
+      });
+      return array;
+  }
+  getIndexByName(name) {
+      let array = new Array();
+      this.pathArray.forEach((element, index) => {
+          if (element.name === name) {
+              array.push(index);
+          }
+      });
+      return array;
+  }
+  getNameByIndex(index) {
+      if (index >= this.pathArray.length) {
+          return;
+      }
+      this.pathArray.forEach((element, i) => {
+          if (i == index) {
+              return element.name;
+          }
+      });
+  }
+  size() {
+      return this.pathArray.length;
+  }
+}
+
 var ImageSpanAlignment;
 (function (ImageSpanAlignment) {
   ImageSpanAlignment[ImageSpanAlignment["NONE"] = 0] = "NONE";
@@ -1338,3 +1484,10 @@ var ImageSpanAlignment;
   ImageSpanAlignment[ImageSpanAlignment["BOTTOM"] = 3] = "BOTTOM";
   ImageSpanAlignment[ImageSpanAlignment["BASELINE"] = 4] = "BASELINE";
 })(ImageSpanAlignment || (ImageSpanAlignment = {}));
+
+var MenuAlignType ;
+(function (MenuAlignType ) {
+  MenuAlignType[MenuAlignType["START"] = 0] = "START";
+  MenuAlignType[MenuAlignType["CENTER"] = 1] = "CENTER";
+  MenuAlignType[MenuAlignType["END"] = 2] = "END";
+})(MenuAlignType  || (MenuAlignType  = {}));

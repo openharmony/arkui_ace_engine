@@ -27,13 +27,14 @@
 #include <ui/rs_surface_node.h>
 #include <ui/rs_ui_director.h>
 
-#include "flutter/lib/ui/ui_dart_state.h"
 #include "adapter/preview/entrance/rs_dir_asset_provider.h"
-#include "core/common/rosen/rosen_asset_manager.h"
 #include "core/common/flutter/flutter_task_executor.h"
+#include "core/common/rosen/rosen_asset_manager.h"
 #endif
 
+#include "adapter/ohos/entrance/ace_new_pipe_judgement.h"
 #include "adapter/preview/entrance/ace_application_info.h"
+#include "adapter/preview/external/window/window_preview.h"
 #include "adapter/preview/osal/stage_card_parser.h"
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
@@ -59,11 +60,9 @@
 #include "core/components/theme/theme_manager_impl.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
-#include "core/components_ng/render/adapter/window_prviewer.h"
 #include "core/pipeline/base/element.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "adapter/ohos/entrance/ace_new_pipe_judgement.h"
 
 namespace OHOS::Ace::Platform {
 namespace {
@@ -78,17 +77,27 @@ const char LOCALE_KEY[] = "locale";
 
 std::once_flag AceContainer::onceFlag_;
 
-AceContainer::AceContainer(int32_t instanceId, FrontendType type, RefPtr<Context> context)
+AceContainer::AceContainer(int32_t instanceId, FrontendType type, RefPtr<Context> context, bool useCurrentEventRunner)
     : instanceId_(instanceId), messageBridge_(AceType::MakeRefPtr<PlatformBridge>()), type_(type), context_(context)
 {
     ThemeConstants::InitDeviceType();
-
+#ifndef ENABLE_ROSEN_BACKEND
     auto state = flutter::UIDartState::Current()->GetStateById(instanceId);
-    auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>(state->GetTaskRunners());
+    auto flutterTaskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>(state->GetTaskRunners());
     if (type_ != FrontendType::DECLARATIVE_JS && type_ != FrontendType::ETS_CARD) {
-        taskExecutor->InitJsThread();
+        flutterTaskExecutor->InitJsThread();
     }
-    taskExecutor_ = taskExecutor;
+#else
+    auto flutterTaskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    flutterTaskExecutor->InitPlatformThread(useCurrentEventRunner);
+    // No need to create JS Thread for DECLARATIVE_JS
+    if (type_ != FrontendType::DECLARATIVE_JS && type_ != FrontendType::ETS_CARD) {
+        flutterTaskExecutor->InitJsThread();
+    } else {
+        GetSettings().useUIAsJSThread = true;
+    }
+#endif
+    taskExecutor_ = flutterTaskExecutor;
 }
 
 void AceContainer::Initialize()
@@ -113,8 +122,8 @@ void AceContainer::Initialize()
         if (type_ == FrontendType::DECLARATIVE_JS) {
             installationFree_ = appInfo->IsInstallationFree();
         }
-        useNewPipe = AceNewPipeJudgement::QueryAceNewPipeEnabledStage("", compatibleVersion, targetVersion,
-            releaseType, !enablePartialUpdate);
+        useNewPipe = AceNewPipeJudgement::QueryAceNewPipeEnabledStage(
+            "", compatibleVersion, targetVersion, releaseType, !enablePartialUpdate);
     } else if (faContext) {
         auto appInfo = faContext->GetAppInfo();
         CHECK_NULL_VOID(appInfo);
@@ -376,8 +385,8 @@ void AceContainer::InitializeCallback()
     };
     aceView_->RegisterCardViewAccessibilityParamsCallback(cardViewParamsCallback);
 
-    auto&& viewChangeCallback = [weak, id = instanceId_](int32_t width, int32_t height,
-        WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) {
+    auto&& viewChangeCallback = [weak, id = instanceId_](int32_t width, int32_t height, WindowSizeChangeReason type,
+                                    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) {
         ContainerScope scope(id);
         auto context = weak.Upgrade();
         if (context == nullptr) {
@@ -445,13 +454,14 @@ void AceContainer::InitializeCallback()
     aceView_->RegisterIdleCallback(idleCallback);
 }
 
-void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, const AceRunArgs& runArgs)
+void AceContainer::CreateContainer(
+    int32_t instanceId, FrontendType type, const AceRunArgs& runArgs, bool useCurrentEventRunner)
 {
     // for ohos container use newPipeline
     SystemProperties::SetExtSurfaceEnabled(!runArgs.containerSdkPath.empty());
 
     auto context = Context::CreateContext(runArgs.projectModel == ProjectModel::STAGE, runArgs.appResourcesPath);
-    auto aceContainer = AceType::MakeRefPtr<AceContainer>(instanceId, type, context);
+    auto aceContainer = AceType::MakeRefPtr<AceContainer>(instanceId, type, context, useCurrentEventRunner);
     AceEngine::Get().AddContainer(aceContainer->GetInstanceId(), aceContainer);
     aceContainer->Initialize();
     ContainerScope scope(instanceId);
@@ -774,7 +784,7 @@ void AceContainer::UpdateDeviceConfig(const DeviceConfig& deviceConfig)
 }
 
 #ifndef ENABLE_ROSEN_BACKEND
-void AceContainer::SetView(FlutterAceView* view, double density, int32_t width, int32_t height)
+void AceContainer::SetView(AceViewPreview* view, double density, int32_t width, int32_t height)
 {
     if (view == nullptr) {
         return;
@@ -795,7 +805,7 @@ void AceContainer::SetView(FlutterAceView* view, double density, int32_t width, 
 }
 #else
 void AceContainer::SetView(
-    RSAceView* view, double density, int32_t width, int32_t height, SendRenderDataCallback onRender)
+    AceViewPreview* view, double density, int32_t width, int32_t height, SendRenderDataCallback onRender)
 {
     CHECK_NULL_VOID(view);
     auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(view->GetInstanceId()));
@@ -810,7 +820,7 @@ void AceContainer::SetView(
 
 #ifndef ENABLE_ROSEN_BACKEND
 void AceContainer::AttachView(
-    std::unique_ptr<Window> window, FlutterAceView* view, double density, int32_t width, int32_t height)
+    std::unique_ptr<Window> window, AceViewPreview* view, double density, int32_t width, int32_t height)
 {
     ContainerScope scope(instanceId_);
     aceView_ = view;
@@ -894,24 +904,19 @@ void AceContainer::AttachView(
     AceEngine::Get().RegisterToWatchDog(instanceId, taskExecutor_, GetSettings().useUIAsJSThread);
 }
 #else
-void AceContainer::AttachView(std::unique_ptr<Window> window, RSAceView* view, double density, int32_t width,
+void AceContainer::AttachView(std::unique_ptr<Window> window, AceViewPreview* view, double density, int32_t width,
     int32_t height, SendRenderDataCallback onRender)
 {
     ContainerScope scope(instanceId_);
     aceView_ = view;
     auto instanceId = aceView_->GetInstanceId();
 
-    auto state = flutter::UIDartState::Current()->GetStateById(instanceId);
-    ACE_DCHECK(state != nullptr);
-    auto rsTaskExecutor = AceType::DynamicCast<FlutterTaskExecutor>(taskExecutor_);
-    if (!rsTaskExecutor) {
-        LOGI("RsTaskExecutor is nullptr!");
-        return;
-    }
-    rsTaskExecutor->InitOtherThreads(state->GetTaskRunners());
+    auto flutterTaskExecutor = AceType::DynamicCast<FlutterTaskExecutor>(taskExecutor_);
+    CHECK_NULL_VOID(flutterTaskExecutor);
+    flutterTaskExecutor->InitOtherThreads(aceView_->GetThreadModel());
     if (type_ == FrontendType::DECLARATIVE_JS || type_ == FrontendType::ETS_CARD) {
         // For DECLARATIVE_JS frontend display UI in JS thread temporarily.
-        rsTaskExecutor->InitJsThread(false);
+        flutterTaskExecutor->InitJsThread(false);
         InitializeFrontend();
         auto front = GetFrontend();
         if (front) {

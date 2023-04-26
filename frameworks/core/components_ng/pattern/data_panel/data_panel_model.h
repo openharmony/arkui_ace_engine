@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_DATA_PANEL_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_DATA_PANEL_MODEL_H
 
+#include <mutex>
+
 #include "base/geometry/dimension.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/data_panel/data_panel_paint_property.h"
@@ -36,6 +38,7 @@ public:
     virtual void SetShadowOption(const OHOS::Ace::NG::DataPanelShadow& shadowOption) = 0;
 private:
     static std::unique_ptr<DataPanelModel> instance_;
+    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
 
