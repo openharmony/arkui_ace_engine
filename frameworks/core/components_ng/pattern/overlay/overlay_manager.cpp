@@ -136,13 +136,18 @@ void OverlayManager::OpenDialogAnimation(const RefPtr<FrameNode>& node)
 
     option.SetOnFinishEvent(
         [weak = WeakClaim(this), nodeWK = WeakClaim(RawPtr(node)), id = Container::CurrentId(), onFinish] {
-            auto node = nodeWK.Upgrade();
-            auto overlayManager = weak.Upgrade();
-            CHECK_NULL_VOID(node && overlayManager);
             ContainerScope scope(id);
-            if (onFinish != nullptr) {
-                onFinish();
-            }
+            auto context = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID_NOLOG(context);
+            auto taskExecutor = context->GetTaskExecutor();
+            CHECK_NULL_VOID_NOLOG(taskExecutor);
+            taskExecutor->PostTask(
+                [id, onFinish]() {
+                    ContainerScope scope(id);
+                    CHECK_NULL_VOID(onFinish);
+                    onFinish();
+                },
+                TaskExecutor::TaskType::UI);
         });
     auto ctx = node->GetRenderContext();
     CHECK_NULL_VOID(ctx);
@@ -181,10 +186,20 @@ void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
 
     option.SetOnFinishEvent([nodeWk = WeakClaim(RawPtr(node)), id = Container::CurrentId()] {
         ContainerScope scope(id);
-        auto node = nodeWk.Upgrade();
-        CHECK_NULL_VOID(node);
-
-        OnDialogCloseEvent(node);
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID_NOLOG(context);
+        auto taskExecutor = context->GetTaskExecutor();
+        CHECK_NULL_VOID_NOLOG(taskExecutor);
+        // animation finish event should be posted to UI thread.
+        taskExecutor->PostTask(
+            [nodeWk, id]() {
+                ContainerScope scope(id);
+                LOGI("Execute dialog OnDialogCloseEvent");
+                auto node = nodeWk.Upgrade();
+                CHECK_NULL_VOID(node);
+                OnDialogCloseEvent(node);
+            },
+            TaskExecutor::TaskType::UI);
     });
     auto ctx = node->GetRenderContext();
     CHECK_NULL_VOID(ctx);
@@ -518,9 +533,9 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
 
 void OverlayManager::HideAllPopups()
 {
-    LOGI("OverlayManager::HideAllPopups");
+    LOGD("OverlayManager::HideAllPopups");
     if (popupMap_.empty()) {
-        LOGW("OverlayManager: popupMap is empty");
+        LOGD("OverlayManager: popupMap is empty");
         return;
     }
     for (const auto& popup : popupMap_) {
@@ -672,11 +687,7 @@ void OverlayManager::HideMenu(int32_t targetId)
 
 void OverlayManager::HideAllMenus()
 {
-    LOGI("OverlayManager::HideAllMenus");
-    if (menuMap_.empty()) {
-        LOGW("OverlayManager: menuMap is empty");
-        return;
-    }
+    LOGD("OverlayManager::HideAllMenus");
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
     for (const auto& child : rootNode->GetChildren()) {
@@ -726,8 +737,7 @@ void OverlayManager::ShowCustomDialog(const RefPtr<FrameNode>& customNode)
 }
 
 void OverlayManager::ShowDateDialog(const DialogProperties& dialogProps, const DatePickerSettingData& settingData,
-    std::map<std::string, NG::DialogEvent> dialogEvent,
-    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
+    std::map<std::string, NG::DialogEvent> dialogEvent, std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
 {
     LOGI("OverlayManager::ShowDateDialogPicker");
     auto dialogNode = DatePickerDialogView::Show(
@@ -741,8 +751,8 @@ void OverlayManager::ShowTimeDialog(const DialogProperties& dialogProps, const T
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
 {
     LOGI("OverlayManager::ShowTimeDialogPicker");
-    auto dialogNode = TimePickerDialogView::Show(dialogProps, settingData, std::move(timePickerProperty),
-        std::move(dialogEvent), std::move(dialogCancelEvent));
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProps, settingData, std::move(timePickerProperty), std::move(dialogEvent), std::move(dialogCancelEvent));
     AdaptToSafeArea(dialogNode);
     OpenDialogAnimation(dialogNode);
 }
@@ -752,8 +762,8 @@ void OverlayManager::ShowTextDialog(const DialogProperties& dialogProps, const T
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
 {
     LOGI("OverlayManager::ShowTextDialogPicker");
-    auto dialogNode = TextPickerDialogView::Show(dialogProps, settingData,
-        std::move(dialogEvent), std::move(dialogCancelEvent));
+    auto dialogNode =
+        TextPickerDialogView::Show(dialogProps, settingData, std::move(dialogEvent), std::move(dialogCancelEvent));
     AdaptToSafeArea(dialogNode);
     OpenDialogAnimation(dialogNode);
 }
@@ -1037,31 +1047,30 @@ void OverlayManager::PlayDefaultModalTransition(const RefPtr<FrameNode>& modalNo
     if (isTransitionIn) {
         DefaultModalTransition(true);
         context->OnTransformTranslateUpdate({ 0.0f, pageHeight, 0.0f });
-        AnimationUtils::Animate(
-            option,
-            [context]() {
-                if (context) {
-                    context->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
-                }
-            });
+        AnimationUtils::Animate(option, [context]() {
+            if (context) {
+                context->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
+            }
+        });
     } else {
         DefaultModalTransition(false);
-        option.SetOnFinishEvent([rootWeak = rootNodeWeak_, modalWK = WeakClaim(RawPtr(modalNode)),
-            id = Container::CurrentId()] {
-            auto modal = modalWK.Upgrade();
-            auto root = rootWeak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(modal && root);
-            ContainerScope scope(id);
-            root->RemoveChild(modal);
-            root->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
-        });
+        option.SetOnFinishEvent(
+            [rootWeak = rootNodeWeak_, modalWK = WeakClaim(RawPtr(modalNode)), id = Container::CurrentId()] {
+                auto modal = modalWK.Upgrade();
+                auto root = rootWeak.Upgrade();
+                CHECK_NULL_VOID_NOLOG(modal && root);
+                ContainerScope scope(id);
+                root->RemoveChild(modal);
+                root->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+            });
         AnimationUtils::Animate(
             option,
             [context, pageHeight]() {
                 if (context) {
                     context->OnTransformTranslateUpdate({ 0.0f, pageHeight, 0.0f });
                 }
-            }, option.GetOnFinishEvent());
+            },
+            option.GetOnFinishEvent());
     }
 }
 
@@ -1078,14 +1087,14 @@ void OverlayManager::DefaultModalTransition(bool isTransitionIn)
     CHECK_NULL_VOID(context);
     // scale animation
     isTransitionIn ? context->ScaleAnimation(option, 1.0, 0.94) : // 0.94: scale end value
-        context->ScaleAnimation(option, 0.94, 1.0); // 0.94: scale initial value
+        context->ScaleAnimation(option, 0.94, 1.0);               // 0.94: scale initial value
 
     // mask animation
     AnimationUtils::Animate(option, [context, isTransitionIn]() {
-            if (context) {
-                context->SetActualForegroundColor(isTransitionIn ? MASK_COLOR : DEFAULT_MASK_COLOR);
-            }
-        });
+        if (context) {
+            context->SetActualForegroundColor(isTransitionIn ? MASK_COLOR : DEFAULT_MASK_COLOR);
+        }
+    });
 }
 
 void OverlayManager::PlayAlphaModalTransition(const RefPtr<FrameNode>& modalNode, bool isTransitionIn)
@@ -1111,15 +1120,15 @@ void OverlayManager::PlayAlphaModalTransition(const RefPtr<FrameNode>& modalNode
         lastModalContext->OpacityAnimation(option, 0, 1);
 
         // current modal page animation
-        option.SetOnFinishEvent([rootWeak = rootNodeWeak_, modalWK = WeakClaim(RawPtr(modalNode)),
-            id = Container::CurrentId()] {
-            auto modal = modalWK.Upgrade();
-            auto root = rootWeak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(modal && root);
-            ContainerScope scope(id);
-            root->RemoveChild(modal);
-            root->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
-        });
+        option.SetOnFinishEvent(
+            [rootWeak = rootNodeWeak_, modalWK = WeakClaim(RawPtr(modalNode)), id = Container::CurrentId()] {
+                auto modal = modalWK.Upgrade();
+                auto root = rootWeak.Upgrade();
+                CHECK_NULL_VOID_NOLOG(modal && root);
+                ContainerScope scope(id);
+                root->RemoveChild(modal);
+                root->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+            });
         context->OpacityAnimation(option, 1, 0);
     }
 }
@@ -1206,8 +1215,7 @@ void OverlayManager::RemovePixelMapAnimation(bool startDrag, double x, double y)
             auto color = shadow->GetColor();
             auto newColor = Color::FromARGB(1, color.GetRed(), color.GetGreen(), color.GetBlue());
             if (startDrag) {
-                imageContext->UpdatePosition(OffsetT<Dimension>(
-                    Dimension(x - width * PIXELMAP_ANIMATION_WIDTH_RATE),
+                imageContext->UpdatePosition(OffsetT<Dimension>(Dimension(x - width * PIXELMAP_ANIMATION_WIDTH_RATE),
                     Dimension(y - height * PIXELMAP_ANIMATION_HEIGHT_RATE)));
                 imageContext->UpdateTransformScale({ scale, scale });
                 imageContext->OnModifyDone();
@@ -1231,9 +1239,9 @@ void OverlayManager::UpdatePixelMapScale(float& scale)
     CHECK_NULL_VOID(pixelMap);
     if (pixelMap->GetWidth() > Msdp::DeviceStatus::MAX_PIXEL_MAP_WIDTH ||
         pixelMap->GetHeight() > Msdp::DeviceStatus::MAX_PIXEL_MAP_HEIGHT) {
-            float scaleWidth = static_cast<float>(Msdp::DeviceStatus::MAX_PIXEL_MAP_WIDTH) / pixelMap->GetWidth();
-            float scaleHeight = static_cast<float>(Msdp::DeviceStatus::MAX_PIXEL_MAP_HEIGHT) / pixelMap->GetHeight();
-            scale = std::min(scaleWidth, scaleHeight);
+        float scaleWidth = static_cast<float>(Msdp::DeviceStatus::MAX_PIXEL_MAP_WIDTH) / pixelMap->GetWidth();
+        float scaleHeight = static_cast<float>(Msdp::DeviceStatus::MAX_PIXEL_MAP_HEIGHT) / pixelMap->GetHeight();
+        scale = std::min(scaleWidth, scaleHeight);
     }
 }
 
@@ -1249,7 +1257,7 @@ void OverlayManager::RemoveFilter()
     auto children = columnNode->GetChildren();
     rootNode->RemoveChild(columnNode);
     int32_t slot = 0;
-    for (auto& child: children) {
+    for (auto& child : children) {
         columnNode->RemoveChild(child);
         child->MountToParent(rootNode, slot);
         slot++;

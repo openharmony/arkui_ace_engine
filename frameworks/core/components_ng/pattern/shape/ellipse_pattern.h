@@ -34,7 +34,10 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        return MakeRefPtr<EllipsePaintMethod>(GetAncestorPaintProperty());
+        if (!shapeOverlayModifier_) {
+            shapeOverlayModifier_ = MakeRefPtr<ShapeOverlayModifier>();
+        }
+        return MakeRefPtr<EllipsePaintMethod>(GetAncestorPaintProperty(), shapeOverlayModifier_);
     }
 
 private:

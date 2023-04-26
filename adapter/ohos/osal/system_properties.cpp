@@ -18,6 +18,7 @@
 #include <memory>
 #include <mutex>
 #include <shared_mutex>
+#include <string>
 #include <unistd.h>
 
 #include "parameter.h"
@@ -404,13 +405,13 @@ void SystemProperties::InitDeviceInfo(
     resolution_ = resolution;
     deviceWidth_ = deviceWidth;
     deviceHeight_ = deviceHeight;
-    brand_ = system::GetParameter("const.product.brand", INVALID_PARAM);
-    manufacturer_ = system::GetParameter("const.product.manufacturer", INVALID_PARAM);
-    model_ = system::GetParameter("const.product.model", INVALID_PARAM);
-    product_ = system::GetParameter("const.product.name", INVALID_PARAM);
-    apiVersion_ = system::GetParameter("const.ohos.apiversion", INVALID_PARAM);
-    releaseType_ = system::GetParameter("const.ohos.releasetype", INVALID_PARAM);
-    paramDeviceType_ = system::GetParameter("const.product.devicetype", INVALID_PARAM);
+    brand_ = ::GetBrand();
+    manufacturer_ = ::GetManufacture();
+    model_ = ::GetProductModel();
+    product_ = ::GetMarketName();
+    apiVersion_ = std::to_string(::GetSdkApiVersion());
+    releaseType_ = ::GetOsReleaseType();
+    paramDeviceType_ = ::GetDeviceType();
 
     debugEnabled_ = IsDebugEnabled();
     traceEnabled_ = IsTraceEnabled();

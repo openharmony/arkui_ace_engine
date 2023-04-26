@@ -42,7 +42,7 @@ SwitchModifier::SwitchModifier(bool isSelect, const Color& boardColor, float mai
     auto switchTheme = pipeline->GetTheme<SwitchTheme>();
     CHECK_NULL_VOID(switchTheme);
     animatableBoardColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(boardColor));
-    animateHoverColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::TRANSPARENT));
+    animateTouchHoverColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::TRANSPARENT));
     animatePointColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(switchTheme->GetPointColor()));
     mainDelta_ = AceType::MakeRefPtr<PropertyFloat>(mainDelta);
     isSelect_ = AceType::MakeRefPtr<PropertyBool>(isSelect);
@@ -52,7 +52,7 @@ SwitchModifier::SwitchModifier(bool isSelect, const Color& boardColor, float mai
     enabled_ = AceType::MakeRefPtr<PropertyBool>(true);
 
     AttachProperty(animatableBoardColor_);
-    AttachProperty(animateHoverColor_);
+    AttachProperty(animateTouchHoverColor_);
     AttachProperty(animatePointColor_);
     AttachProperty(mainDelta_);
     AttachProperty(isSelect_);
@@ -112,7 +112,7 @@ void SwitchModifier::PaintSwitch(RSCanvas& canvas, const OffsetF& contentOffset,
     OffsetF hoverBoardOffset;
     hoverBoardOffset.SetX(xOffset - (actualWidth_ - width) / 2.0);
     hoverBoardOffset.SetY(yOffset - (actualHeight_ - height) / 2.0);
-    DrawHoverBoard(canvas, hoverBoardOffset);
+    DrawTouchAndHoverBoard(canvas, hoverBoardOffset);
     RSRect rect;
     rect.SetLeft(xOffset);
     rect.SetTop(yOffset);
@@ -142,10 +142,10 @@ void SwitchModifier::PaintSwitch(RSCanvas& canvas, const OffsetF& contentOffset,
     canvas.DrawCircle(point, pointRadius_);
 }
 
-void SwitchModifier::DrawHoverBoard(RSCanvas& canvas, const OffsetF& offset) const
+void SwitchModifier::DrawTouchAndHoverBoard(RSCanvas& canvas, const OffsetF& offset) const
 {
     RSBrush brush;
-    brush.SetColor(ToRSColor(animateHoverColor_->Get()));
+    brush.SetColor(ToRSColor(animateTouchHoverColor_->Get()));
     brush.SetAntiAlias(true);
     auto rightBottomX = offset.GetX() + actualWidth_;
     auto rightBottomY = offset.GetY() + actualHeight_;

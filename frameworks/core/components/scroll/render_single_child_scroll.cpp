@@ -140,6 +140,10 @@ bool RenderSingleChildScroll::CalculateMainScrollExtent(const Size& itemSize)
 
     if (scrollBar_) {
         scrollBar_->SetScrollable(isScrollable);
+        auto barController = scrollBar_->GetController();
+        if (!isScrollable && barController) {
+            barController->StopScrollEndAnimator();
+        }
     }
 
     return isScrollable;

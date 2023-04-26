@@ -45,13 +45,26 @@ public:
 
     void UpdateAnimatableProperty()
     {
+        switch (touchHoverType_) {
+            case TouchHoverAnimationType::HOVER:
+                SetBoardColor(LinearColor(hoverColor_), hoverDuration_, Curves::FRICTION);
+                break;
+            case TouchHoverAnimationType::PRESS_TO_HOVER:
+                SetBoardColor(LinearColor(hoverColor_), hoverToTouchDuration_, Curves::SHARP);
+                break;
+            case TouchHoverAnimationType::NONE:
+                SetBoardColor(LinearColor(hoverColor_.BlendOpacity(0)), hoverDuration_, Curves::FRICTION);
+                break;
+            case TouchHoverAnimationType::HOVER_TO_PRESS:
+                SetBoardColor(LinearColor(clickEffectColor_), hoverToTouchDuration_, Curves::SHARP);
+                break;
+            case TouchHoverAnimationType::PRESS:
+                SetBoardColor(LinearColor(clickEffectColor_), hoverDuration_, Curves::FRICTION);
+                break;
+            default:
+                break;
+        }
         AnimationOption option = AnimationOption();
-        option.SetDuration(hoverDuration_);
-        option.SetCurve(Curves::FRICTION);
-        AnimationUtils::Animate(option, [&]() {
-            animateHoverColor_->Set(isHover_->Get() ? LinearColor(hoverColor_) : LinearColor(Color::TRANSPARENT));
-        });
-
         option.SetDuration(colorAnimationDuration_);
         option.SetCurve(Curves::FAST_OUT_SLOW_IN);
         AnimationUtils::Animate(option, [&]() {
@@ -59,9 +72,19 @@ public:
         });
     }
 
+    void SetBoardColor(LinearColor color, int32_t duratuion, const RefPtr<CubicCurve>& curve)
+    {
+        if (animateTouchHoverColor_) {
+            AnimationOption option = AnimationOption();
+            option.SetDuration(duratuion);
+            option.SetCurve(curve);
+            AnimationUtils::Animate(option, [&]() { animateTouchHoverColor_->Set(color); });
+        }
+    }
+
     void InitializeParam();
     void PaintSwitch(RSCanvas& canvas, const OffsetF& contentOffset, const SizeF& contentSize);
-    void DrawHoverBoard(RSCanvas& canvas, const OffsetF& offset) const;
+    void DrawTouchAndHoverBoard(RSCanvas& canvas, const OffsetF& offset) const;
     float GetSwitchWidth(const SizeF& contentSize) const;
 
     void SetUserActiveColor(const Color& color)
@@ -127,6 +150,11 @@ public:
         }
     }
 
+    void SetTouchHoverAnimationType(const TouchHoverAnimationType touchHoverType)
+    {
+        touchHoverType_ = touchHoverType;
+    }
+
 private:
     float actualWidth_ = 0.0f;
     float actualHeight_ = 0.0f;
@@ -145,9 +173,10 @@ private:
 
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
+    TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
 
     RefPtr<AnimatablePropertyColor> animatableBoardColor_;
-    RefPtr<AnimatablePropertyColor> animateHoverColor_;
+    RefPtr<AnimatablePropertyColor> animateTouchHoverColor_;
     RefPtr<AnimatablePropertyColor> animatePointColor_;
     RefPtr<PropertyFloat> mainDelta_;
     RefPtr<PropertyBool> isSelect_;

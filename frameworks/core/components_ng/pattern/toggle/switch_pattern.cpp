@@ -61,6 +61,10 @@ bool SwitchPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     auto geometryNode = dirty->GetGeometryNode();
     offset_ = geometryNode->GetContentOffset();
     size_ = geometryNode->GetContentSize();
+    if (isFirstAddhotZoneRect_) {
+        AddHotZoneRect();
+        isFirstAddhotZoneRect_ = false;
+    }
     return true;
 }
 
@@ -263,6 +267,11 @@ void SwitchPattern::OnClick()
 
 void SwitchPattern::OnTouchDown()
 {
+    if (isHover_) {
+        touchHoverType_ = TouchHoverAnimationType::HOVER_TO_PRESS;
+    } else {
+        touchHoverType_ = TouchHoverAnimationType::PRESS;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     isTouch_ = true;
@@ -271,6 +280,11 @@ void SwitchPattern::OnTouchDown()
 
 void SwitchPattern::OnTouchUp()
 {
+    if (isHover_) {
+        touchHoverType_ = TouchHoverAnimationType::PRESS_TO_HOVER;
+    } else {
+        touchHoverType_ = TouchHoverAnimationType::NONE;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     isTouch_ = false;
@@ -442,10 +456,14 @@ void SwitchPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 
 void SwitchPattern::HandleMouseEvent(bool isHover)
 {
+    isHover_ = isHover;
+    if (isHover) {
+        touchHoverType_ = TouchHoverAnimationType::HOVER;
+    } else {
+        touchHoverType_ = TouchHoverAnimationType::NONE;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    isTouch_ = false;
-    isHover_ = isHover;
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 

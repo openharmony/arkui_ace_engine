@@ -37,24 +37,18 @@ const std::vector<NG::AlignStyle> NG_ALIGN_STYLE = {NG::AlignStyle::LEFT, NG::Al
 void JSIndexer::Create(const JSCallbackInfo& args)
 {
     if (args.Length() >= 1 && args[0]->IsObject()) {
+        size_t length = 0;
+        int32_t selectedVal = 0;
         auto param = JsonUtil::ParseJsonString(args[0]->ToString());
-        if (!param || param->IsNull()) {
-            LOGE("JSIndexer::Create param is null");
-            return;
+        std::unique_ptr<JsonValue> arrayVal;
+        if (param && !param->IsNull()) {
+            arrayVal = param->GetValue("arrayValue");
+            if (arrayVal && arrayVal->IsArray()) {
+                length = static_cast<uint32_t>(arrayVal->GetArraySize());
+            }
+            selectedVal = param->GetInt("selected", 0);
         }
         std::vector<std::string> indexerArray;
-
-        auto arrayVal = param->GetValue("arrayValue");
-        if (!arrayVal || !arrayVal->IsArray()) {
-            LOGW("info is invalid");
-            return;
-        }
-
-        size_t length = static_cast<uint32_t>(arrayVal->GetArraySize());
-        if (length <= 0) {
-            LOGE("info is invalid");
-            return;
-        }
         for (size_t i = 0; i < length; i++) {
             auto value = arrayVal->GetArrayItem(i);
             if (!value) {
@@ -62,16 +56,15 @@ void JSIndexer::Create(const JSCallbackInfo& args)
             }
             indexerArray.emplace_back(value->GetString());
         }
-
-        auto selectedVal = param->GetInt("selected", 0);
-
         if (Container::IsCurrentUseNewPipeline()) {
             NG::IndexerView::Create(indexerArray, selectedVal);
             return;
         }
-
-        auto indexerComponent =
-            AceType::MakeRefPtr<V2::IndexerComponent>(indexerArray, selectedVal);
+        if (length <= 0) {
+            LOGE("info is invalid");
+            return;
+        }
+        auto indexerComponent = AceType::MakeRefPtr<V2::IndexerComponent>(indexerArray, selectedVal);
         ViewStackProcessor::GetInstance()->ClaimElementId(indexerComponent);
         ViewStackProcessor::GetInstance()->Push(indexerComponent);
         JSInteractableView::SetFocusable(true);

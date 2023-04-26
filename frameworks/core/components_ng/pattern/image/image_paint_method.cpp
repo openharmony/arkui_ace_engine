@@ -110,4 +110,30 @@ void ImagePaintMethod::UpdatePaintConfig(const RefPtr<ImageRenderProperty>& rend
         UpdateBorderRadius(paintWrapper);
     }
 }
+
+CanvasDrawFunction ImagePaintMethod::GetOverlayDrawFunction(PaintWrapper* paintWrapper)
+{
+    // draw selected mask effect
+    CHECK_NULL_RETURN_NOLOG(selected_, {});
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, {});
+    auto theme = pipeline->GetTheme<TextTheme>();
+    CHECK_NULL_RETURN(theme, {});
+    auto selectedColor = theme->GetSelectedColor();
+    return [selectedColor, size = paintWrapper->GetContentSize(), offset = paintWrapper->GetContentOffset()](
+               RSCanvas& canvas) {
+        canvas.Save();
+        RSBrush brush;
+        brush.SetAntiAlias(true);
+        brush.SetColor(selectedColor.GetValue());
+        canvas.AttachBrush(brush);
+
+        canvas.DrawRect(
+            RSRect(offset.GetX(), offset.GetY(), offset.GetX() + size.Width(), offset.GetY() + size.Height()));
+
+        canvas.DetachBrush();
+        canvas.Restore();
+    };
+}
 } // namespace OHOS::Ace::NG

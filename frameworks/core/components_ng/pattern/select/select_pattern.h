@@ -32,7 +32,7 @@
 #include "core/components_ng/pattern/select/select_accessibility_property.h"
 #include "core/components_ng/pattern/select/select_event_hub.h"
 #include "core/components_ng/pattern/select/select_layout_algorithm.h"
-#include "core/components_ng/pattern/select/select_view.h"
+#include "core/components_ng/pattern/select/select_model.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 
 namespace OHOS::Ace::NG {
@@ -170,6 +170,7 @@ public:
     void PlayBgColorAnimation(bool isHoverChange = true);
     void SetSpace(const Dimension& value);
     void SetArrowPosition(const ArrowPosition value);
+    void SetMenuAlign(const MenuAlign& menuAlign);
 
     std::string GetValue();
 
@@ -261,6 +262,7 @@ private:
     std::optional<Color> selectedBgColor_;
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonOptionAlign(std::unique_ptr<JsonValue>& json) const;
     // XTS inspector helper functions
     std::string InspectorGetOptions() const;
     std::string InspectorGetSelectedFont() const;
@@ -271,6 +273,8 @@ private:
 
     Color bgBlendColor_ = Color::TRANSPARENT;
     bool isHover_ = false;
+
+    MenuAlign menuAlign_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectPattern);
 };

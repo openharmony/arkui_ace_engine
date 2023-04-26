@@ -19,7 +19,9 @@
 
 #include "base/log/dump_log.h"
 #include "core/components/common/layout/constants.h"
+#ifndef NEW_SKIA
 #include "core/components/slider/flutter_render_slider.h"
+#endif
 #include "core/components/slider/slider_element.h"
 #include "core/components_v2/inspector/utils.h"
 
@@ -167,6 +169,7 @@ std::string SliderComposedElement::GetThickness() const
 
 std::string SliderComposedElement::GetBlockColor() const
 {
+#ifndef NEW_SKIA
     auto renderSlider = GetRenderSlider();
     auto flutterRenderSlider = AceType::DynamicCast<FlutterRenderSlider>(renderSlider);
     if (flutterRenderSlider) {
@@ -176,11 +179,13 @@ std::string SliderComposedElement::GetBlockColor() const
         }
         return "";
     }
+#endif
     return "";
 }
 
 std::string SliderComposedElement::GetTrackColor() const
 {
+#ifndef NEW_SKIA
     auto renderSlider = GetRenderSlider();
     auto flutterRenderSlider = AceType::DynamicCast<FlutterRenderSlider>(renderSlider);
     if (flutterRenderSlider) {
@@ -190,11 +195,13 @@ std::string SliderComposedElement::GetTrackColor() const
         }
         return "";
     }
+#endif
     return "";
 }
 
 std::string SliderComposedElement::GetSelectedColor() const
 {
+#ifndef NEW_SKIA
     auto renderSlider = GetRenderSlider();
     auto flutterRenderSlider = AceType::DynamicCast<FlutterRenderSlider>(renderSlider);
     if (flutterRenderSlider) {
@@ -204,6 +211,7 @@ std::string SliderComposedElement::GetSelectedColor() const
         }
         return "";
     }
+#endif
     return "";
 }
 

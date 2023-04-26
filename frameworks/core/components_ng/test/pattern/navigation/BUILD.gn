@@ -165,8 +165,13 @@ ohos_unittest("navigation_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/navigation/title_bar_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navigation/title_bar_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navigation/title_bar_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/navrouter/navdestination_group_node.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/navrouter/navdestination_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/navrouter/navdestination_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/navrouter/navdestination_view.cpp",
     "bar_item_test_ng.cpp",
     "nav_bar_test_ng.cpp",
+    "navdestination_test_ng.cpp",
     "navigation_test_ng.cpp",
     "title_bar_test_ng.cpp",
   ]

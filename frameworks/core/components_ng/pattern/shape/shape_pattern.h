@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/shape/shape_container_pattern.h"
 #include "core/components_ng/pattern/shape/shape_layout_algorithm.h"
+#include "core/components_ng/pattern/shape/shape_overlay_modifier.h"
 #include "core/components_ng/pattern/shape/shape_paint_property.h"
 #include "core/components_ng/pattern/shape/shape_view_box.h"
 
@@ -87,6 +88,8 @@ protected:
             }
         }
     }
+
+    RefPtr<ShapeOverlayModifier> shapeOverlayModifier_;
 
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override

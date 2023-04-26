@@ -326,6 +326,7 @@ void SubwindowOhos::ShowWindow()
     std::vector<Rect> rects;
     rects.emplace_back(MIN_WINDOW_HOT_AREA);
     SetHotAreas(rects);
+    window_->SetNeedDefaultAnimation(false);
     OHOS::Rosen::WMError ret = window_->Show();
 
     if (ret != OHOS::Rosen::WMError::WM_OK) {

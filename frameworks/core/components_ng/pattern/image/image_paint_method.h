@@ -37,6 +37,7 @@ public:
 
     RefPtr<Modifier> GetContentModifier(PaintWrapper* paintWrapper) override;
     void UpdateContentModifier(PaintWrapper* paintWrapper) override;
+    CanvasDrawFunction GetOverlayDrawFunction(PaintWrapper* paintWrapper) override;
 
 private:
     void UpdatePaintConfig(const RefPtr<ImageRenderProperty>& renderProps, PaintWrapper* paintWrapper);

@@ -39,20 +39,25 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<ViewFullUpdateModel> ViewFullUpdateModel::instance_ = nullptr;
+std::mutex ViewFullUpdateModel::mutex_;
 std::unique_ptr<ViewPartialUpdateModel> ViewPartialUpdateModel::instance_ = nullptr;
+std::mutex ViewPartialUpdateModel::mutex_;
 
 ViewFullUpdateModel* ViewFullUpdateModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::ViewFullUpdateModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::ViewFullUpdateModelNG());
-        } else {
-            instance_.reset(new Framework::ViewFullUpdateModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::ViewFullUpdateModelNG());
+            } else {
+                instance_.reset(new Framework::ViewFullUpdateModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -60,15 +65,18 @@ ViewFullUpdateModel* ViewFullUpdateModel::GetInstance()
 ViewPartialUpdateModel* ViewPartialUpdateModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::ViewPartialUpdateModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::ViewPartialUpdateModelNG());
-        } else {
-            instance_.reset(new Framework::ViewPartialUpdateModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::ViewPartialUpdateModelNG());
+            } else {
+                instance_.reset(new Framework::ViewPartialUpdateModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }

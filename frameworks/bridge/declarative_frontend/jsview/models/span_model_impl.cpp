@@ -167,4 +167,6 @@ void SpanModelImpl::SetOnClick(std::function<void(const BaseEventInfo*)>&& click
     }
 }
 
+void SpanModelImpl::SetLineHeight(const Dimension& value) {}
+
 } // namespace OHOS::Ace::Framework

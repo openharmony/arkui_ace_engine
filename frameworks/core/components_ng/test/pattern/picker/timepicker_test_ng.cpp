@@ -64,6 +64,7 @@ const int CURRENT_VALUE1 = 3;
 const int CURRENT_VALUE2 = 10;
 const int MIDDLE_OF_COUNTS = 2;
 const int SHOW_COUNT = 5;
+const int DEFAULT_INDEX = -1;
 const std::string AM = "上午";
 const std::string PM = "下午";
 const std::string COLON = ":";
@@ -586,6 +587,10 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg001, Test
     auto accessibilityProperty = minuteColumnNode->GetAccessibilityProperty<TimePickerColumnAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetCollectionItemCounts(), static_cast<int32_t>(DEFAULT_VALUE.size()));
+
+    options.erase(minuteColumnNode);
+    minuteColumnPattern->SetOptions(options);
+    EXPECT_EQ(accessibilityProperty->GetCollectionItemCounts(), 0);
 }
 
 /**
@@ -609,6 +614,12 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg002, Test
     auto accessibilityProperty = minuteColumn->GetAccessibilityProperty<TimePickerColumnAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_TRUE(accessibilityProperty->IsScrollable());
+
+    auto minuteColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
+    auto options = minuteColumnPattern->GetOptions();
+    options[minuteColumn].clear();
+    minuteColumnPattern->SetOptions(options);
+    EXPECT_FALSE(accessibilityProperty->IsScrollable());
 }
 
 /**
@@ -636,8 +647,23 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg003, Test
     minuteColumnPattern->SetShowCount(SHOW_COUNT);
     minuteColumnPattern->SetCurrentIndex(CURRENT_VALUE1);
     EXPECT_EQ(accessibilityProperty->GetCurrentIndex(), CURRENT_VALUE1);
-    EXPECT_EQ(accessibilityProperty->GetBeginIndex(), CURRENT_VALUE1 - SHOW_COUNT / MIDDLE_OF_COUNTS);
-    EXPECT_EQ(accessibilityProperty->GetEndIndex(), CURRENT_VALUE1 + SHOW_COUNT / MIDDLE_OF_COUNTS);
+
+    auto itemCount = accessibilityProperty->GetCollectionItemCounts();
+    EXPECT_EQ(accessibilityProperty->GetBeginIndex(),
+        (itemCount + CURRENT_VALUE1 - SHOW_COUNT / MIDDLE_OF_COUNTS) % itemCount);
+    EXPECT_EQ(
+        accessibilityProperty->GetEndIndex(), (itemCount + CURRENT_VALUE1 + SHOW_COUNT / MIDDLE_OF_COUNTS) % itemCount);
+
+    minuteColumnPattern->SetShowCount(itemCount + itemCount);
+    EXPECT_EQ(accessibilityProperty->GetBeginIndex(), 0);
+    EXPECT_EQ(accessibilityProperty->GetEndIndex(), itemCount - 1);
+
+    auto options = minuteColumnPattern->GetOptions();
+    options[minuteColumn].clear();
+    minuteColumnPattern->SetOptions(options);
+
+    EXPECT_EQ(accessibilityProperty->GetBeginIndex(), DEFAULT_INDEX);
+    EXPECT_EQ(accessibilityProperty->GetEndIndex(), DEFAULT_INDEX);
 }
 
 /**
@@ -662,13 +688,20 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg004, Test
 
     auto options = minuteColumnPattern->GetOptions();
     options[minuteColumnNode].clear();
+    minuteColumnPattern->SetOptions(options);
+    auto accessibilityProperty = minuteColumnNode->GetAccessibilityProperty<TimePickerColumnAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(), "");
+
     for (auto& Value : DEFAULT_VALUE) {
         options[minuteColumnNode].emplace_back(std::to_string(Value));
     }
     minuteColumnPattern->SetOptions(options);
-    auto accessibilityProperty = minuteColumnNode->GetAccessibilityProperty<TimePickerColumnAccessibilityProperty>();
-    ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(DEFAULT_VALUE.at(CURRENT_VALUE1)));
+
+    options.erase(minuteColumnNode);
+    minuteColumnPattern->SetOptions(options);
+    EXPECT_EQ(accessibilityProperty->GetText(), "");
 }
 
 /**

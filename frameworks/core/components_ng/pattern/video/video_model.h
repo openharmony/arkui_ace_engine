@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_VIDEO_VIDEO_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_VIDEO_VIDEO_MODEL_H
 
+#include <mutex>
+
 #include "base/image/pixel_map.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/video/video_controller_v2.h"
@@ -50,6 +52,7 @@ public:
 
 private:
     static std::unique_ptr<VideoModel> instance_;
+    static std::mutex mutex_;
 };
 
 } // namespace OHOS::Ace

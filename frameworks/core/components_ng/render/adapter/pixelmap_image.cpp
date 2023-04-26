@@ -77,13 +77,24 @@ void PixelMapImage::DrawToRSCanvas(
     }
     SkPaint paint;
     auto config = GetPaintConfig();
+#ifndef NEW_SKIA
     ImagePainterUtils::AddFilter(paint, config);
+#else
+    SkSamplingOptions options;
+    ImagePainterUtils::AddFilter(paint, options, config);
+#endif
     auto radii = ImagePainterUtils::ToSkRadius(radiusXY);
     recordingCanvas->ClipAdaptiveRRect(radii.get());
     recordingCanvas->scale(config.scaleX_, config.scaleY_);
 
     Rosen::RsImageInfo rsImageInfo((int)(config.imageFit_), (int)(config.imageRepeat_), radii.get(), 1.0, 0, 0, 0);
+
+#ifndef NEW_SKIA
     recordingCanvas->DrawPixelMapWithParm(pixelMap_->GetPixelMapSharedPtr(), rsImageInfo, paint);
+#else
+    // TODO:Haw to set SamplingOptions?
+    recordingCanvas->DrawPixelMapWithParm(pixelMap_->GetPixelMapSharedPtr(), rsImageInfo, paint);
+#endif
 #endif
 }
 

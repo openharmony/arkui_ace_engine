@@ -24,14 +24,18 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<PreviewMockModel> PreviewMockModel::instance_ = nullptr;
+std::mutex PreviewMockModel::mutex_;
 
 PreviewMockModel* PreviewMockModel::GetInstance()
 {
     if (!instance_) {
-        if (Container::IsCurrentUseNewPipeline()) {
-            instance_.reset(new NG::PreviewMockModelNG());
-        } else {
-            instance_.reset(new Framework::PreviewMockModelImpl());
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::PreviewMockModelNG());
+            } else {
+                instance_.reset(new Framework::PreviewMockModelImpl());
+            }
         }
     }
     return instance_.get();

@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RADIO_RADIO_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RADIO_RADIO_MODEL_H
 
+#include <mutex>
+
 #include "core/components_ng/pattern/radio/radio_event_hub.h"
 
 namespace OHOS::Ace {
@@ -37,6 +39,7 @@ public:
 
 private:
     static std::unique_ptr<RadioModel> instance_;
+    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
 

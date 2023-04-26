@@ -249,15 +249,22 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg004, TestSize
      */
     CanvasFillRule rule = CanvasFillRule::NONZERO;
     paintMethod->SetFillRuleForPath(rule);
+#ifndef NEW_SKIA
     EXPECT_EQ(paintMethod->skPath_.getFillType(), SkPath::FillType::kWinding_FillType);
-
+#else
+    EXPECT_EQ(paintMethod->skPath_.getFillType(), SkPathFillType::kWinding);
+#endif
     /**
      * @tc.steps2: Test the function SetFillRuleForPath with rule = CanvasFillRule::EVENODD.
      * @tc.expected: The value of getFillType is SkPath::FillType::kEvenOdd_FillType.
      */
     rule = CanvasFillRule::EVENODD;
     paintMethod->SetFillRuleForPath(rule);
+#ifndef NEW_SKIA
     EXPECT_EQ(paintMethod->skPath_.getFillType(), SkPath::FillType::kEvenOdd_FillType);
+#else
+    EXPECT_EQ(paintMethod->skPath_.getFillType(), SkPathFillType::kEvenOdd);
+#endif
 }
 
 /**
@@ -282,7 +289,11 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg005, TestSize
      */
     CanvasFillRule rule = CanvasFillRule::NONZERO;
     paintMethod->SetFillRuleForPath2D(rule);
+#ifndef NEW_SKIA
     EXPECT_EQ(paintMethod->skPath2d_.getFillType(), SkPath::FillType::kWinding_FillType);
+#else
+    EXPECT_EQ(paintMethod->skPath2d_.getFillType(), SkPathFillType::kWinding);
+#endif
 
     /**
      * @tc.steps2: Test the function SetFillRuleForPath2D with rule = CanvasFillRule::EVENODD.
@@ -290,7 +301,11 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg005, TestSize
      */
     rule = CanvasFillRule::EVENODD;
     paintMethod->SetFillRuleForPath2D(rule);
+#ifndef NEW_SKIA
     EXPECT_EQ(paintMethod->skPath2d_.getFillType(), SkPath::FillType::kEvenOdd_FillType);
+#else
+    EXPECT_EQ(paintMethod->skPath2d_.getFillType(), SkPathFillType::kEvenOdd);
+#endif
 }
 
 /**
@@ -560,7 +575,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg012, TestSize
      */
 
     PaintWrapper* paintWrapper;
-  
+
     paintMethod->globalState_.SetAlpha(DEFAULT_DOUBLE10);
     paintMethod->Fill(paintWrapper);
     EXPECT_TRUE(paintMethod->globalState_.HasGlobalAlpha());

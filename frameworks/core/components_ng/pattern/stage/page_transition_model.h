@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_STAGE_PAGE_TRANSITION_MODEL_H
 
 #include <functional>
+#include <mutex>
 
 #include "frameworks/core/animation/page_transition_common.h"
 #include "frameworks/core/components_ng/property/transition_property.h"
@@ -41,6 +42,7 @@ public:
 
 private:
     static std::unique_ptr<PageTransitionModel> instance_;
+    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
 
