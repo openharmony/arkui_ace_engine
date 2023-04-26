@@ -14,12 +14,12 @@
  */
 
 #include "gtest/gtest.h"
-#include "base/geometry/dimension.h"
-#include "base/utils/utils.h"
-#include "gmock/gmock-spec-builders.h"
 
 #define private public
 #define protected public
+#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/render/mock_paragraph.h"
+
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/point.h"
@@ -44,8 +44,6 @@
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
-#include "core/pipeline_ng/test/mock/mock_task_executor.h"
-#include "test/mock/core/render/mock_paragraph.h"
 
 using namespace testing;
 using namespace testing::ext;
