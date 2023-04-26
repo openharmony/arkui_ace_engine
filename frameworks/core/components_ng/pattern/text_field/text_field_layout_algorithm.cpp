@@ -78,13 +78,13 @@ void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                 calcLayoutConstraint->maxSize.value().Height().has_value()) {
                 frameSize.SetHeight(std::max(layoutConstraint->maxSize.Height(), layoutConstraint->minSize.Height()));
             } else if (!calcLayoutConstraint || NearZero(layoutConstraint->minSize.Height())) {
-            
             // calcLayoutConstraint initialized once when setting width, set minHeight=0,
             // so add "minHeight=0" to the constraint.
                 frameSize.SetHeight(
                     std::min(layoutConstraint->maxSize.Height(), contentHeight + pattern->GetVerticalPaddingSum()));
             } else {
-                frameSize.SetHeight(layoutConstraint->minSize.Height());
+                frameSize.SetHeight(
+                    std::max(layoutConstraint->minSize.Height(), contentHeight + pattern->GetVerticalPaddingSum()));
             }
         }
 
