@@ -89,7 +89,7 @@ class SynchedPropertyObjectTwoWayPU<C extends Object>
   }
 
   public getUnmonitored(): C {
-    stateMgmtConsole.debug(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: getUnmonitored returns '${(this.source_ ? JSON.stringify(this.source_.getUnmonitored()) : "undefined")}' .`);
+    stateMgmtConsole.debug(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: getUnmonitored.`);
     // unmonitored get access , no call to otifyPropertyRead !
     return (this.source_ ? this.source_.getUnmonitored() : undefined);
   }
@@ -104,7 +104,7 @@ class SynchedPropertyObjectTwoWayPU<C extends Object>
   // set 'writes through` to the ObservedProperty
   public set(newValue: C): void {
     if (this.getUnmonitored() == newValue) {
-      stateMgmtConsole.debug(`SynchedPropertyObjectTwoWayPU[${this.id__()}IP, '${this.info() || "unknown"}']: set with unchanged value '${newValue}'- ignoring.`);
+      stateMgmtConsole.debug(`SynchedPropertyObjectTwoWayPU[${this.id__()}IP, '${this.info() || "unknown"}']: set with unchanged value  - nothing to do.`);
       return;
     }
 
@@ -120,12 +120,12 @@ class SynchedPropertyObjectTwoWayPU<C extends Object>
 
   private setObject(newValue: C): void {
     if (!this.source_) {
-        stateMgmtConsole.warn(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: setObject, no linked parent property.`);
+        stateMgmtConsole.warn(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: setObject (assign a new value), @Link/@Consume: no linked parent property. Likely a consequence of earlier application error.`);
         return;
     }
 
     let oldValueObject = this.getUnmonitored();
-    if (oldValueObject) {
+    if (oldValueObject != undefined && oldValueObject != null) {
       ObservedObject.removeOwningProperty(oldValueObject, this);
     }
     this.source_.set(newValue)
