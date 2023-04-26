@@ -19,35 +19,42 @@
 #include "base/geometry/ng/size_t.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/pattern/shape/path_paint_property.h"
+#include "core/components_ng/pattern/shape/shape_paint_method.h"
 #include "core/components_ng/pattern/shape/shape_paint_property.h"
+#include "core/components_ng/pattern/shape/shape_overlay_modifier.h"
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/render/path_painter.h"
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT PathPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(PathPaintMethod, NodePaintMethod)
+class ACE_EXPORT PathPaintMethod : public ShapePaintMethod {
+    DECLARE_ACE_TYPE(PathPaintMethod, ShapePaintMethod)
 public:
     PathPaintMethod() = default;
-    explicit PathPaintMethod(const RefPtr<ShapePaintProperty>& shapePaintProperty)
-        : propertiesFromAncestor_(shapePaintProperty)
+    PathPaintMethod(
+        const RefPtr<ShapePaintProperty>& shapePaintProperty,
+        const RefPtr<ShapeOverlayModifier>& shapeOverlayModifier)
+        : ShapePaintMethod(shapePaintProperty, shapeOverlayModifier)
     {}
     ~PathPaintMethod() override = default;
 
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override
     {
+        CHECK_NULL_RETURN_NOLOG(paintWrapper, nullptr);
         auto shapePaintProperty = DynamicCast<PathPaintProperty>(paintWrapper->GetPaintProperty()->Clone());
-        if (!shapePaintProperty) {
-            return nullptr;
-        }
+        CHECK_NULL_RETURN_NOLOG(shapePaintProperty, nullptr);
+
         if (propertiesFromAncestor_) {
             shapePaintProperty->UpdateShapeProperty(propertiesFromAncestor_);
         }
-        return [shapePaintProperty](RSCanvas& canvas) { PathPainter::DrawPath(canvas, *shapePaintProperty); };
+        return [shapePaintProperty, paintWrapper](RSCanvas& canvas) {
+                    PathPainter::DrawPath(canvas, *shapePaintProperty);
+                    if (paintWrapper) {
+                        paintWrapper->FlushOverlayModifier();
+                    }
+                };
     }
 
-private:
-    RefPtr<ShapePaintProperty> propertiesFromAncestor_;
     ACE_DISALLOW_COPY_AND_MOVE(PathPaintMethod);
 };
 

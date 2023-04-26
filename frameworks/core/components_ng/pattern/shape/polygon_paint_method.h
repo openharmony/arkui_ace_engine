@@ -19,37 +19,45 @@
 #include "base/geometry/ng/size_t.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/pattern/shape/polygon_paint_property.h"
+#include "core/components_ng/pattern/shape/shape_paint_method.h"
+#include "core/components_ng/pattern/shape/shape_overlay_modifier.h"
 #include "core/components_ng/pattern/shape/shape_paint_property.h"
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/render/polygon_painter.h"
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT PolygonPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(PolygonPaintMethod, NodePaintMethod)
+class ACE_EXPORT PolygonPaintMethod : public ShapePaintMethod {
+    DECLARE_ACE_TYPE(PolygonPaintMethod, ShapePaintMethod)
 public:
     PolygonPaintMethod() = default;
-    explicit PolygonPaintMethod(const RefPtr<ShapePaintProperty>& shapePaintProperty, bool isClose)
-        : isClose_(isClose), propertiesFromAncestor_(shapePaintProperty)
+    PolygonPaintMethod(
+        bool isClose,
+        const RefPtr<ShapePaintProperty>& shapePaintProperty,
+        const RefPtr<ShapeOverlayModifier>& shapeOverlayModifier)
+        : ShapePaintMethod(shapePaintProperty, shapeOverlayModifier), isClose_(isClose)
     {}
     ~PolygonPaintMethod() override = default;
 
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override
     {
+        CHECK_NULL_RETURN_NOLOG(paintWrapper, nullptr);
         auto shapePaintProperty = DynamicCast<PolygonPaintProperty>(paintWrapper->GetPaintProperty()->Clone());
-        if (!shapePaintProperty) {
-            return nullptr;
-        }
+        CHECK_NULL_RETURN_NOLOG(shapePaintProperty, nullptr);
+
         if (propertiesFromAncestor_) {
             shapePaintProperty->UpdateShapeProperty(propertiesFromAncestor_);
         }
-        return [shapePaintProperty, isClose = isClose_](
-                   RSCanvas& canvas) { PolygonPainter::DrawPolygon(canvas, *shapePaintProperty, isClose); };
+        return [shapePaintProperty, isClose = isClose_, paintWrapper](RSCanvas& canvas) {
+                    PolygonPainter::DrawPolygon(canvas, *shapePaintProperty, isClose);
+                    if (paintWrapper) {
+                        paintWrapper->FlushOverlayModifier();
+                    }
+                };
     }
 
 private:
     bool isClose_;
-    RefPtr<ShapePaintProperty> propertiesFromAncestor_;
     ACE_DISALLOW_COPY_AND_MOVE(PolygonPaintMethod);
 };
 

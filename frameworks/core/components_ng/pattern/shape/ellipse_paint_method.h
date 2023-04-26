@@ -19,27 +19,31 @@
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "core/components_ng/base/geometry_node.h"
+#include "core/components_ng/pattern/shape/shape_paint_method.h"
+#include "core/components_ng/pattern/shape/shape_overlay_modifier.h"
 #include "core/components_ng/pattern/shape/shape_paint_property.h"
 #include "core/components_ng/render/ellipse_painter.h"
 #include "core/components_ng/render/node_paint_method.h"
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT EllipsePaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(EllipsePaintMethod, NodePaintMethod)
+class ACE_EXPORT EllipsePaintMethod : public ShapePaintMethod {
+    DECLARE_ACE_TYPE(EllipsePaintMethod, ShapePaintMethod)
 public:
     EllipsePaintMethod() = default;
-    explicit EllipsePaintMethod(const RefPtr<ShapePaintProperty>& shapePaintProperty)
-        : propertiesFromAncestor_(shapePaintProperty)
+    EllipsePaintMethod(
+        const RefPtr<ShapePaintProperty>& shapePaintProperty,
+        const RefPtr<ShapeOverlayModifier>& shapeOverlayModifier)
+        : ShapePaintMethod(shapePaintProperty, shapeOverlayModifier)
     {}
     ~EllipsePaintMethod() override = default;
 
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override
     {
+        CHECK_NULL_RETURN_NOLOG(paintWrapper, nullptr);
         auto shapePaintProperty = DynamicCast<ShapePaintProperty>(paintWrapper->GetPaintProperty()->Clone());
-        if (!shapePaintProperty) {
-            return nullptr;
-        }
+        CHECK_NULL_RETURN_NOLOG(shapePaintProperty, nullptr);
+
         if (propertiesFromAncestor_) {
             shapePaintProperty->UpdateShapeProperty(propertiesFromAncestor_);
         }
@@ -48,12 +52,14 @@ public:
         float dx = paintWrapper->GetContentOffset().GetX();
         float dy = paintWrapper->GetContentOffset().GetY();
         RectF rect(dx, dy, width, height);
-        return [rect, shapePaintProperty](
-                   RSCanvas& canvas) { EllipsePainter::DrawEllipse(canvas, rect, *shapePaintProperty); };
+        return [rect, shapePaintProperty, paintWrapper](RSCanvas& canvas) {
+                    EllipsePainter::DrawEllipse(canvas, rect, *shapePaintProperty);
+                    if (paintWrapper) {
+                        paintWrapper->FlushOverlayModifier();
+                    }
+                };
     }
 
-private:
-    RefPtr<ShapePaintProperty> propertiesFromAncestor_;
     ACE_DISALLOW_COPY_AND_MOVE(EllipsePaintMethod);
 };
 

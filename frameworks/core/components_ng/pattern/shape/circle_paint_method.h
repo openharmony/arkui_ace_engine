@@ -18,27 +18,30 @@
 
 #include "base/geometry/ng/size_t.h"
 #include "core/components_ng/base/geometry_node.h"
+#include "core/components_ng/pattern/shape/shape_paint_method.h"
+#include "core/components_ng/pattern/shape/shape_overlay_modifier.h"
 #include "core/components_ng/pattern/shape/shape_paint_property.h"
 #include "core/components_ng/render/circle_painter.h"
 #include "core/components_ng/render/node_paint_method.h"
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT CirclePaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(CirclePaintMethod, NodePaintMethod)
+class ACE_EXPORT CirclePaintMethod : public ShapePaintMethod {
+    DECLARE_ACE_TYPE(CirclePaintMethod, ShapePaintMethod)
 public:
     CirclePaintMethod() = default;
-    explicit CirclePaintMethod(const RefPtr<ShapePaintProperty>& shapePaintProperty)
-        : propertiesFromAncestor_(shapePaintProperty)
+    CirclePaintMethod(
+        const RefPtr<ShapePaintProperty>& shapePaintProperty,
+        const RefPtr<ShapeOverlayModifier>& shapeOverlayModifier)
+        : ShapePaintMethod(shapePaintProperty, shapeOverlayModifier)
     {}
     ~CirclePaintMethod() override = default;
 
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override
     {
+        CHECK_NULL_RETURN_NOLOG(paintWrapper, nullptr);
         auto shapePaintProperty = DynamicCast<ShapePaintProperty>(paintWrapper->GetPaintProperty()->Clone());
-        if (!shapePaintProperty) {
-            return nullptr;
-        }
+        CHECK_NULL_RETURN_NOLOG(shapePaintProperty, nullptr);
 
         if (propertiesFromAncestor_) {
             shapePaintProperty->UpdateShapeProperty(propertiesFromAncestor_);
@@ -47,12 +50,15 @@ public:
         float width = paintWrapper->GetContentSize().Width();
         float radius = (width > height ? height : width) * 0.5;
         return
-            [radiusValue = radius, offsetValue = paintWrapper->GetContentOffset(), shapePaintProperty](
-                RSCanvas& canvas) { CirclePainter::DrawCircle(canvas, radiusValue, offsetValue, *shapePaintProperty); };
+            [radiusValue = radius, offsetValue = paintWrapper->GetContentOffset(), shapePaintProperty, paintWrapper](
+                RSCanvas& canvas) {
+                    CirclePainter::DrawCircle(canvas, radiusValue, offsetValue, *shapePaintProperty);
+                    if (paintWrapper) {
+                        paintWrapper->FlushOverlayModifier();
+                    }
+                };
     }
 
-private:
-    RefPtr<ShapePaintProperty> propertiesFromAncestor_;
     ACE_DISALLOW_COPY_AND_MOVE(CirclePaintMethod);
 };
 

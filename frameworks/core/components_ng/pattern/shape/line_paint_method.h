@@ -20,24 +20,28 @@
 
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/shape/line_paint_property.h"
+#include "core/components_ng/pattern/shape/shape_paint_method.h"
+#include "core/components_ng/pattern/shape/shape_overlay_modifier.h"
 #include "core/components_ng/render/line_painter.h"
 #include "core/components_ng/render/node_paint_method.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT LinePaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(LinePaintMethod, NodePaintMethod)
+class ACE_EXPORT LinePaintMethod : public ShapePaintMethod {
+    DECLARE_ACE_TYPE(LinePaintMethod, ShapePaintMethod)
 public:
     LinePaintMethod() = default;
-    explicit LinePaintMethod(const RefPtr<ShapePaintProperty>& shapePaintProperty)
-        : propertiesFromAncestor_(shapePaintProperty)
+    LinePaintMethod(
+        const RefPtr<ShapePaintProperty>& shapePaintProperty,
+        const RefPtr<ShapeOverlayModifier>& shapeOverlayModifier)
+        : ShapePaintMethod(shapePaintProperty, shapeOverlayModifier)
     {}
     ~LinePaintMethod() override = default;
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override
     {
+        CHECK_NULL_RETURN_NOLOG(paintWrapper, nullptr);
         auto linePaintProperty = DynamicCast<LinePaintProperty>(paintWrapper->GetPaintProperty()->Clone());
-        if (!linePaintProperty) {
-            return nullptr;
-        }
+        CHECK_NULL_RETURN_NOLOG(linePaintProperty, nullptr);
+
         if (propertiesFromAncestor_) {
             linePaintProperty->UpdateShapeProperty(propertiesFromAncestor_);
         }
@@ -45,12 +49,14 @@ public:
             return nullptr;
         }
         auto offset = paintWrapper->GetContentOffset();
-        return [linePaintProperty, offset](RSCanvas& canvas) {
-            LinePainter::DrawLine(canvas, *linePaintProperty, offset); };
+        return [linePaintProperty, offset, paintWrapper](RSCanvas& canvas) {
+                    LinePainter::DrawLine(canvas, *linePaintProperty, offset);
+                    if (paintWrapper) {
+                        paintWrapper->FlushOverlayModifier();
+                    }
+                };
     }
 
-private:
-    RefPtr<ShapePaintProperty> propertiesFromAncestor_;
     ACE_DISALLOW_COPY_AND_MOVE(LinePaintMethod);
 };
 } // namespace OHOS::Ace::NG
