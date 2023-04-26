@@ -16,12 +16,10 @@
 #include "frameworks/core/components_ng/pattern/custom_paint/matrix2d.h"
 #include "include/core/SkMatrix.h"
 #include "include/core/SkScalar.h"
-#include "third_party/skia/include/core/SkMatrix.h"
 
 namespace OHOS::Ace::NG {
-
 constexpr double OHOS_PI = 3.141592653589793;
-
+constexpr double OHOS_SEMI_CIRCLE_ANGEL = 180.0;
 void ConvertToMatrix(const TransformParam& param, SkMatrix& skMatrix)
 {
     double scaleX = param.scaleX;
@@ -83,7 +81,7 @@ void Matrix2D::Rotate(TransformParam& param, double degree, double rx, double ry
     SkMatrix skMatrix;
     ConvertToMatrix(param, skMatrix);
     // convert from radians to degree.
-    degree = degree * 180 / OHOS_PI;
+    degree = degree * OHOS_SEMI_CIRCLE_ANGEL / OHOS_PI;
     skMatrix = skMatrix.preRotate(degree, rx, ry);
     ConvertToTransformParam(param, skMatrix);
 }

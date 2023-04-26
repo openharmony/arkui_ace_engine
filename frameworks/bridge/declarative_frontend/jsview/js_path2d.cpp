@@ -18,7 +18,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 
 namespace OHOS::Ace::Framework {
-
+constexpr int JS_PATH2D_PARAMETER_COUNTS = 2;
 JSPath2D::JSPath2D()
 {
 }
@@ -68,7 +68,7 @@ void JSPath2D::JsPath2DAddPath(const JSCallbackInfo& args)
     }
     auto canvasPath2D = jsPath2d->GetCanvasPath2d();
     path2d_->AddPath(canvasPath2D);
-    if (args.Length() == 2) {
+    if (args.Length() == JS_PATH2D_PARAMETER_COUNTS) {
         auto* jsMatrix2d = JSRef<JSObject>::Cast(args[1])->Unwrap<JSMatrix2d>();
         if (jsMatrix2d != nullptr) {
             path2d_->SetTransform(jsMatrix2d->JsGetScaleX(), jsMatrix2d->JsGetRotateX(), jsMatrix2d->JsGetRotateY(),

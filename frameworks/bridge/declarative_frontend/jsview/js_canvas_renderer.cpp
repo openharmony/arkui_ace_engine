@@ -14,7 +14,6 @@
  */
 
 #include "bridge/declarative_frontend/jsview/js_canvas_renderer.h"
-
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/bindings.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
@@ -635,10 +634,6 @@ void JSCanvasRenderer::ParseFillPattern(const JSCallbackInfo& info)
     int32_t id = jSCanvasPattern->GetId();
     if (Container::IsCurrentUseNewPipeline()) {
         if (isOffscreen_ && offscreenCanvasPattern_) {
-            std::shared_ptr<Ace::Pattern> p = GetPatternNG(id).lock();
-            LOGE("fjy : JSCanvasRenderer::ParseFillPattern matrix[ id = %{public}d, scaleX = %{public}f, scaleY = %{public}f, rotateX = %{public}f, rotateY = %{public}f, translateX = %{public}f, translateY = %{public}f",
-            id, p->GetScaleX(), p->GetScaleY(), p->GetSkewX(),
-            p->GetSkewY(), p->GetTranslateX(), p->GetTranslateY());
             offscreenCanvasPattern_->SetFillPattern(GetPatternNG(id));
             return;
         }

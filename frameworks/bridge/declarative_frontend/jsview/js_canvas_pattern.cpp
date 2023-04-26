@@ -20,9 +20,7 @@
 #include "frameworks/core/components_ng/pattern/custom_paint/matrix2d.h"
 
 namespace OHOS::Ace::Framework {
-
 constexpr int SET_TRANSFORM_PARAMETER_SIZE = 1;
-
 void JSCanvasPattern::Constructor(const JSCallbackInfo& info)
 {
     auto canvasPattern = Referenced::MakeRefPtr<JSCanvasPattern>();
@@ -46,7 +44,6 @@ void JSCanvasPattern::JSBind(BindingTarget globalObj)
 
 void JSCanvasPattern::JSSetTransform(const JSCallbackInfo& info)
 {
-
     if (info.Length() != SET_TRANSFORM_PARAMETER_SIZE || !info[0]->IsObject()) {
         LOGE("The argument of the function is not object or the number of the argument must be only one parameter.");
         return;

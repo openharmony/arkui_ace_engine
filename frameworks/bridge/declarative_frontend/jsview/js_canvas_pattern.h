@@ -24,7 +24,6 @@
 #include "frameworks/core/components/common/properties/paint_state.h"
 
 namespace OHOS::Ace::Framework {
-
 class JSCanvasPattern : public Referenced {
 public:
     JSCanvasPattern() = default;
