@@ -30,13 +30,6 @@ class ObservedPropertySimplePU<T> extends ObservedPropertySimpleAbstractPU<T>
 
   constructor(localInitValue: T, owningView: IPropertySubscriber, propertyName: PropertyInfo) {
     super(owningView, propertyName);
-    if (!localInitValue) {
-      stateMgmtConsole.error(`ObservedPropertySimplePU[${this.id__()}, '${this.info() || "unknown"}']: constructor @State/@Provide initial value must not be undefined. Application error!`);
-      return;
-    }
-    if (typeof localInitValue === "object") {
-      throw new SyntaxError("ObservedPropertySimple value must not be an object")!
-    }
     this.setValueInternal(localInitValue);
   }
 
@@ -62,7 +55,16 @@ class ObservedPropertySimplePU<T> extends ObservedPropertySimpleAbstractPU<T>
     and also notify with this.aboutToChange();
   */
   private setValueInternal(newValue: T): boolean {
-    stateMgmtConsole.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}'] new value is of simple type`);
+    if (newValue==undefined || newValue==null) {
+      stateMgmtConsole.error(`ObservedPropertySimplePU[${this.id__()}, '${this.info() || "unknown"}']:  @State/@Provide value must not be undefined or null. Application error!`);
+      // TODO enable support for undefined value
+      return false;
+    }
+    if (!(typeof newValue == "number" || typeof newValue == "string" || typeof newValue == "boolean")) {
+      throw new SyntaxError(`ObservedPropertySimplePU[${this.id__()}, '${this.info() || "unknown"}']:  @State/@Provide value must be number, string, or boolean!`)!
+    }
+        
+    stateMgmtConsole.debug(`ObservedPropertySimplePU[${this.id__()}, '${this.info() || "unknown"}'] set new value`);
     if (this.wrappedValue_ != newValue) {
       this.wrappedValue_ = newValue;
       return true;
@@ -71,13 +73,13 @@ class ObservedPropertySimplePU<T> extends ObservedPropertySimpleAbstractPU<T>
   }
 
   public getUnmonitored(): T {
-    stateMgmtConsole.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}']: getUnmonitored returns '${JSON.stringify(this.wrappedValue_)}' .`);
+    stateMgmtConsole.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}']: getUnmonitored.`);
     // unmonitored get access , no call to otifyPropertyRead !
     return this.wrappedValue_;
   }
 
   public get(): T {
-    stateMgmtConsole.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}']: get returns '${JSON.stringify(this.wrappedValue_)}' .`);
+    stateMgmtConsole.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}']: get.`);
     this.notifyPropertyHasBeenReadPU()
     return this.wrappedValue_;
   }
@@ -87,7 +89,7 @@ class ObservedPropertySimplePU<T> extends ObservedPropertySimpleAbstractPU<T>
       stateMgmtConsole.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}']: set with unchanged value - ignoring.`);
       return;
     }
-    stateMgmtConsole.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}']: set, changed from '${JSON.stringify(this.wrappedValue_)}' to '${JSON.stringify(newValue)}.`);
+    stateMgmtConsole.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}']: set changed value.`);
     if (this.setValueInternal(newValue)) {
       this.notifyPropertyHasChangedPU();
     }
