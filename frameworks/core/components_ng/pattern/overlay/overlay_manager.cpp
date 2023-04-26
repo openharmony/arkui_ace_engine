@@ -225,12 +225,21 @@ void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu, bool isInS
     option.SetFillMode(FillMode::FORWARDS);
     option.SetOnFinishEvent(
         [weak = WeakClaim(this), menuWK = WeakClaim(RawPtr(menu)), id = Container::CurrentId(), isInSubWindow] {
-            auto menu = menuWK.Upgrade();
-            auto overlayManager = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(menu && overlayManager);
             ContainerScope scope(id);
-            overlayManager->FocusOverlayNode(menu, isInSubWindow);
-            overlayManager->CallOnShowMenuCallback();
+            auto pipeline = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID_NOLOG(pipeline);
+            auto taskExecutor = pipeline->GetTaskExecutor();
+            CHECK_NULL_VOID_NOLOG(taskExecutor);
+            taskExecutor->PostTask(
+                [weak, menuWK, id, isInSubWindow]() {
+                    auto menu = menuWK.Upgrade();
+                    auto overlayManager = weak.Upgrade();
+                    CHECK_NULL_VOID_NOLOG(menu && overlayManager);
+                    ContainerScope scope(id);
+                    overlayManager->FocusOverlayNode(menu, isInSubWindow);
+                    overlayManager->CallOnShowMenuCallback();
+                },
+                TaskExecutor::TaskType::UI);
         });
 
     auto context = menu->GetRenderContext();
@@ -263,21 +272,29 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu)
     option.SetFillMode(FillMode::FORWARDS);
     option.SetOnFinishEvent([rootWeak = rootNodeWeak_, menuWK = WeakClaim(RawPtr(menu)), id = Container::CurrentId(),
                                 weak = WeakClaim(this)] {
-        auto menu = menuWK.Upgrade();
-        auto root = rootWeak.Upgrade();
-        auto overlayManager = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(menu && root && overlayManager);
-        overlayManager->CallOnHideMenuCallback();
-
         ContainerScope scope(id);
-        auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
-        // clear contextMenu then return
-        if (menuWrapperPattern && menuWrapperPattern->IsContextMenu()) {
-            SubwindowManager::GetInstance()->ClearMenuNG(id);
-            return;
-        }
-        root->RemoveChild(menu);
-        root->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID_NOLOG(pipeline);
+        auto taskExecutor = pipeline->GetTaskExecutor();
+        CHECK_NULL_VOID_NOLOG(taskExecutor);
+        taskExecutor->PostTask(
+            [rootWeak, menuWK, id, weak]() {
+                auto menu = menuWK.Upgrade();
+                auto root = rootWeak.Upgrade();
+                auto overlayManager = weak.Upgrade();
+                CHECK_NULL_VOID_NOLOG(menu && root && overlayManager);
+                ContainerScope scope(id);
+                overlayManager->CallOnHideMenuCallback();
+                auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
+                // clear contextMenu then return
+                if (menuWrapperPattern && menuWrapperPattern->IsContextMenu()) {
+                    SubwindowManager::GetInstance()->ClearMenuNG(id);
+                    return;
+                }
+                root->RemoveChild(menu);
+                root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            },
+            TaskExecutor::TaskType::UI);
     });
 
     auto context = menu->GetRenderContext();
