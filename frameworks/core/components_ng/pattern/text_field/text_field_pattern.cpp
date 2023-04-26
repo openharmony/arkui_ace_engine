@@ -3667,7 +3667,7 @@ void TextFieldPattern::UpdateScrollBarOffset()
         return;
     }
     Size size(contentRect_.Width(), contentRect_.Height());
-    UpdateScrollBarRegion(std::abs(textRect_.GetY()) - currentOffset_, textRect_.Height(), size);
+    UpdateScrollBarRegion(std::abs(textRect_.GetY()) - currentOffset_, textRect_.Height(), size, Offset(0.0, 0.0));
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
