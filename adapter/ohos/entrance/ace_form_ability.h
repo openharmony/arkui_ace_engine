@@ -107,12 +107,19 @@ public:
 
     bool OnShare(int64_t formId, OHOS::AAFwk::WantParams &wantParams) override;
 
+    /**
+     * @brief Acquire a form provider remote object.
+     * @return Returns form provider remote object.
+     */
+    sptr<IRemoteObject> GetFormRemoteObject();
+
 private:
     void LoadFormEnv(const OHOS::AAFwk::Want& want);
 
     static int32_t instanceId_;
     static const std::string START_PARAMS_KEY;
     static const std::string URI;
+    sptr<IRemoteObject> formProviderRemoteObject_;
 };
 
 } // namespace OHOS::Ace
