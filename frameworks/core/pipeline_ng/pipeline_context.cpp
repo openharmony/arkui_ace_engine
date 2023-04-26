@@ -180,6 +180,12 @@ uint32_t PipelineContext::AddScheduleTask(const RefPtr<ScheduleTask>& task)
     return nextScheduleTaskId_;
 }
 
+void PipelineContext::RemoveScheduleTask(uint32_t id)
+{
+    CHECK_RUN_ON(UI);
+    scheduleTasks_.erase(id);
+}
+
 void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
 {
     CHECK_RUN_ON(UI);
