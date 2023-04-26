@@ -401,14 +401,13 @@ public:
 
     RefPtr<ImageCache> GetImageCache() const;
 
-    const RefPtr<SharedImageManager>& GetSharedImageManager() const
+    const RefPtr<SharedImageManager>& GetOrCreateSharedImageManager()
     {
+        std::scoped_lock<std::shared_mutex> lock(imageMutex_);
+        if (!sharedImageManager_) {
+            sharedImageManager_ = MakeRefPtr<SharedImageManager>(taskExecutor_);
+        }
         return sharedImageManager_;
-    }
-
-    void SetSharedImageManager(const RefPtr<SharedImageManager>& sharedImageManager)
-    {
-        sharedImageManager_ = sharedImageManager;
     }
 
     Window* GetWindow()
@@ -910,7 +909,7 @@ protected:
     RefPtr<EventManager> eventManager_;
     RefPtr<ImageCache> imageCache_;
     RefPtr<SharedImageManager> sharedImageManager_;
-    mutable std::shared_mutex imageCacheMutex_;
+    mutable std::shared_mutex imageMutex_;
     RefPtr<ThemeManager> themeManager_;
     RefPtr<DataProviderManagerInterface> dataProviderManager_;
     RefPtr<FontManager> fontManager_;
