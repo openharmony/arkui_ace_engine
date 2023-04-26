@@ -528,7 +528,7 @@ void JSIndexer::SetSelected(const JSCallbackInfo& args)
 void JSIndexer::SetPopupPosition(const JSCallbackInfo& args)
 {
     if (Container::IsCurrentUseNewPipeline()) {
-        if (args.Length() >= 1) {
+        if (args.Length() >= 1 && args[0]->IsObject()) {
             JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
             float positionX = 0.0f;
             float positionY = 0.0f;

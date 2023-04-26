@@ -1022,7 +1022,7 @@ void JSCanvasRenderer::JsCreateImageData(const JSCallbackInfo& info)
 
 void JSCanvasRenderer::JsPutImageData(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
+    if (info.Length() < 1 || !info[0]->IsObject()) {
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
