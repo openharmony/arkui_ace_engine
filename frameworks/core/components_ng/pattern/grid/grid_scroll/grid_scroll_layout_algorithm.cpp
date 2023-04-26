@@ -461,7 +461,9 @@ void GridScrollLayoutAlgorithm::GetTargetIndexInfoWithBenchMark(
         /* go through a new line */
         while ((crossGridReserve > 0) && (currentIndex <= targetIndex)) {
             auto currentWrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex, false);
+            CHECK_NULL_VOID(currentWrapper);
             auto layoutProperty = DynamicCast<GridItemLayoutProperty>(currentWrapper->GetLayoutProperty());
+            CHECK_NULL_VOID(layoutProperty);
             auto gridSpan = layoutProperty->GetCrossSpan(gridLayoutInfo_.axis_);
             if (crossGridReserve >= gridSpan) {
                 crossGridReserve -= gridSpan;
