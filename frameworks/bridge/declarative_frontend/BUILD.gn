@@ -405,7 +405,10 @@ template("declarative_js_engine") {
 
     if (defined(config.form_components_support) &&
         config.form_components_support) {
-      sources += [ "jsview/js_form.cpp" ]
+      sources += [
+        "jsview/js_form.cpp",
+        "jsview/models/form_model_impl.cpp",
+      ]
     }
 
     if (defined(config.remote_window_support) && config.remote_window_support) {
