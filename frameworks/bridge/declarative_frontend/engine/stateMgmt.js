@@ -3065,7 +3065,7 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
         this.dependentElementIds_ = new Set();
     }
     notifyPropertyRead() {
-        stateMgmtConsole.error(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: \
+        stateMgmtConsole.error(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: \
         notifyPropertyRead, DO NOT USE with PU. Use notifyPropertyHasBeenReadPU`);
     }
     notifyPropertyHasBeenReadPU() {
@@ -3092,7 +3092,7 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
                     subscriber.syncPeerHasChanged(this);
                 }
                 else {
-                    stateMgmtConsole.warn(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyPropertryHasChangedPU: unknown subscriber ID '${subscribedId}' error!`);
+                    stateMgmtConsole.warn(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: notifyPropertryHasChangedPU: unknown subscriber ID '${subscribedId}' error!`);
                 }
             }
         });
@@ -3100,7 +3100,7 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
     markDependentElementsDirty(view) {
         // TODO ace-ets2bundle, framework, compilated apps need to update together
         // this function will be removed after a short transiition periode
-        stateMgmtConsole.warn(`markDependentElementsDirty no longer supported. App will work ok, but
+        stateMgmtConsole.warn(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: markDependentElementsDirty no longer supported. App will work ok, but
         please update your ace-ets2bundle and recompile your application!`);
     }
     /**
@@ -3151,7 +3151,7 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
       ObservedPropertyAbstract. Need to overwrite these functions to do nothing for PU
       */
     notifyHasChanged(_) {
-        stateMgmtConsole.error(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: \
+        stateMgmtConsole.error(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: \
           notifyHasChanged, DO NOT USE with PU. Use syncPeerHasChanged() or objectPropertyHasChangedPU()`);
     }
     hasChanged(_) {
@@ -3246,10 +3246,6 @@ class ObservedPropertySimpleAbstractPU extends ObservedPropertyAbstractPU {
 class ObservedPropertyObjectPU extends ObservedPropertyObjectAbstractPU {
     constructor(localInitValue, owningView, propertyName) {
         super(owningView, propertyName);
-        if (!localInitValue) {
-            stateMgmtConsole.error(`ObservedPropertyObjectPU[${this.id__()}, '${this.info() || "unknown"}']: constructor @State/@Provide initial value must not be undefined. Application error!`);
-            return;
-        }
         this.setValueInternal(localInitValue);
     }
     aboutToBeDeleted(unsubscribeMe) {
@@ -3296,8 +3292,14 @@ class ObservedPropertyObjectPU extends ObservedPropertyObjectAbstractPU {
       and also notify with this.aboutToChange();
     */
     setValueInternal(newValue) {
+        if (newValue == undefined || newValue == null) {
+            stateMgmtConsole.error(`ObservedPropertyObjectPU[${this.id__()}, '${this.info() || "unknown"}']: constructor @State/@Provide value must not be undefined or null. Application error!`);
+            // TODO enable support for undefined and null
+            // unsubscribe old value, set wrappedValue_ to null/undefined
+            return false;
+        }
         if (typeof newValue !== 'object') {
-            stateMgmtConsole.error(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}'] new value is NOT an object. Application error. Ignoring set.`);
+            stateMgmtConsole.error(`ObservedPropertyObjectPU[${this.id__()}, '${this.info() || "unknown"}'] new value is NOT an object. Application error. Ignoring set.`);
             return false;
         }
         if (newValue == this.wrappedValue_) {
@@ -3328,7 +3330,7 @@ class ObservedPropertyObjectPU extends ObservedPropertyObjectAbstractPU {
     }
     getUnmonitored() {
         
-        // unmonitored get access , no call to otifyPropertyRead !
+        // unmonitored get access , no call to notifyPropertyRead !
         return this.wrappedValue_;
     }
     set(newValue) {
@@ -3369,13 +3371,6 @@ class ObservedPropertyObjectPU extends ObservedPropertyObjectAbstractPU {
 class ObservedPropertySimplePU extends ObservedPropertySimpleAbstractPU {
     constructor(localInitValue, owningView, propertyName) {
         super(owningView, propertyName);
-        if (!localInitValue) {
-            stateMgmtConsole.error(`ObservedPropertySimplePU[${this.id__()}, '${this.info() || "unknown"}']: constructor @State/@Provide initial value must not be undefined. Application error!`);
-            return;
-        }
-        if (typeof localInitValue === "object") {
-            throw new SyntaxError("ObservedPropertySimple value must not be an object");
-        }
         this.setValueInternal(localInitValue);
     }
     aboutToBeDeleted(unsubscribeMe) {
@@ -3398,6 +3393,14 @@ class ObservedPropertySimplePU extends ObservedPropertySimpleAbstractPU {
       and also notify with this.aboutToChange();
     */
     setValueInternal(newValue) {
+        if (newValue == undefined || newValue == null) {
+            stateMgmtConsole.error(`ObservedPropertySimplePU[${this.id__()}, '${this.info() || "unknown"}']:  @State/@Provide value must not be undefined or null. Application error!`);
+            // TODO enable support for undefined value
+            return false;
+        }
+        if (!(typeof newValue == "number" || typeof newValue == "string" || typeof newValue == "boolean")) {
+            throw new SyntaxError(`ObservedPropertySimplePU[${this.id__()}, '${this.info() || "unknown"}']:  @State/@Provide value must be number, string, or boolean!`);
+        }
         
         if (this.wrappedValue_ != newValue) {
             this.wrappedValue_ = newValue;
@@ -3440,11 +3443,58 @@ class ObservedPropertySimplePU extends ObservedPropertySimpleAbstractPU {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * SynchedPropertyObjectOneWayPU
+ * implementatio  of @Prop decorated variables of type class object
+ *
+ * all definitions in this file are framework internal
+ *
+ */
+/**
+ * Initialisation scenarios:
+ * -------------------------
+ *
+ * 1 - no local initialization, source provided (its ObservedObject value)
+ *     wrap the ObservedObject into an ObservedPropertyObjectPU
+ *     deep copy the ObservedObject into localCopyObservedObject
+ *
+ * 2 - local initialization, no source provided
+ *     app transpiled code calls set
+ *     leave source_ undefined
+ *     no deep copy needed, but provided local init might need wrapping inside an ObservedObject to set to
+ *     localCopyObservedObject
+ *
+ * 3  local initialization,  source provided (its ObservedObject value)
+ *    current app transpiled code is not optional
+ *    sets source in constrcutor, as in case 1
+ *    calls set() to set the source value, but this will not deepcopy
+ *
+ * Update scenarios:
+ * -----------------
+ *
+ * 1- assignment of a new Object value: this.aProp = new ClassA()
+ *    rhs can be ObservedObject because of @Observed decoration or now
+ *    notifyPropertryHasChangedPU
+ *
+ * 2- local ObservedObject member property change
+ *    objectPropertyHasChangedPU called, eventSource is the ObservedObject stored in localCopyObservedObject
+ *    no need to copy, notifyPropertryHasChangedPU
+ *
+ * 3- Rerender of the custom component triggered from the parent
+ *    reset() is called (code generated by the transpiler), set the valow of source_ ,  if that causes a change will call syncPeerHasChanged
+ *    syncPeerHasChanged need to deep copy the ObservedObject from source to localCopyObservedObject
+ *    notifyPropertryHasChangedPU
+ *
+ * 4- source_ ObservedObject member property change
+ *     objectPropertyHasChangedPU called, eventSource is the ObservedObject stored source_.getUnmonitores
+ *     notifyPropertryHasChangedPU
+ */
 class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
     constructor(source, owningChildView, thisPropertyName) {
         super(owningChildView, thisPropertyName);
-        if (!source) {
-            stateMgmtConsole.error(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: constructor @Prop source must not be undefined. Application error!`);
+        if (source == undefined) {
+            
+            this.source_ = undefined;
             return;
         }
         if ((typeof (source) === "object") && ("subscribeMe" in source)) {
@@ -3459,10 +3509,10 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
                 stateMgmtConsole.warn(`@Prop ${this.info()}  Provided source object's class 
            lacks @Observed class decorator. Object property changes will not be observed.`);
             }
-            this.source_ = new ObservedPropertyObjectPU(source, this, thisPropertyName);
+            
+            this.source_ = new ObservedPropertyObjectPU(source, this, this.getSourceObservedPropertyFakeName());
         }
-        // deep copy source Object and wrap it
-        this.setWrappedValue(this.source_.get());
+        this.resetLocalValue(this.source_.get(), /* needCopyObject */ true);
         
     }
     /*
@@ -3476,19 +3526,25 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
         }
         super.aboutToBeDeleted();
     }
+    getSourceObservedPropertyFakeName() {
+        return `${this.info()}_source`;
+    }
     syncPeerHasChanged(eventSource) {
-        if (eventSource && this.source_ == eventSource) {
+        if (this.source_ == undefined) {
+            stateMgmtConsole.warn(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: \
+       @Prop syncPeerHasChanged peer '${eventSource ? eventSource.info() : "no eventSource info"}' but source_ undefned. Internal error.`);
+            return;
+        }
+        if (this.source_ == eventSource) {
             // defensive programming: should always be the case!
             
-            const newValue = this.source_.getUnmonitored();
-            if (typeof newValue == "object") {
-                
-                this.setWrappedValue(newValue);
+            
+            if (this.resetLocalValue(this.source_.getUnmonitored(), /* needCopyObject */ true)) {
                 this.notifyPropertyHasChangedPU();
             }
         }
         else {
-            stateMgmtConsole.warn(`SynchedPropertyNesedObjectPU[${this.id__()}]: syncPeerHasChanged Unexpected situation. Ignorning event.`);
+            stateMgmtConsole.warn(`SynchedPropertyObjectOneWayPU[${this.id__()}]: syncPeerHasChanged Unexpected situation. Ignorning event.`);
         }
     }
     /**
@@ -3496,9 +3552,23 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
      * @param souceObject
      * @param changedPropertyName
      */
-    objectPropertyHasChangedPU(souceObject, changedPropertyName) {
-        
+    objectPropertyHasChangedPU(sourceObject, changedPropertyName) {
+        if (sourceObject == this.localCopyObservedObject) {
+            
+        }
+        else {
+            stateMgmtConsole.warn(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: objectPropertyHasChangedPU '${changedPropertyName}' has changed.  But the event does not come from localCopyObservedObject. Internal error`);
+        }
         this.notifyPropertyHasChangedPU();
+        /* The non-reverted ToT has this code, which seems wrong:
+        if (this.source_ && souceObject == this.source_.getUnmonitored()) {
+          
+          this.resetLocalValue(souceObject as C, true);
+        } else {
+          
+        }
+        this.notifyPropertryHasChangedPU();
+        */
     }
     objectPropertyHasBeenReadPU(souceObject, changedPropertyName) {
         
@@ -3507,35 +3577,82 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
     getUnmonitored() {
         
         // unmonitored get access , no call to notifyPropertyRead !
-        return this.wrappedValue_;
+        return this.localCopyObservedObject;
     }
     // get 'read through` from the ObservedObject
     get() {
         
         this.notifyPropertyHasBeenReadPU();
-        return this.wrappedValue_;
+        return this.localCopyObservedObject;
     }
     // assignment to local variable in the form of this.aProp = <object value>
     // set 'writes through` to the ObservedObject
     set(newValue) {
-        if (this.wrappedValue_ == newValue) {
+        if (this.localCopyObservedObject == newValue) {
             
             return;
         }
         
         if (!ObservedObject.IsObservedObject(newValue)) {
             stateMgmtConsole.warn(`@Prop ${this.info()} Set: Provided new object's class 
-         lacks @Observed class decorator. Object property changes will not be observed.`);
+         lacks '@Observed' class decorator. Object property changes will not be observed.`);
         }
-        this.setWrappedValue(newValue);
-        this.notifyPropertyHasChangedPU();
+        if (this.resetLocalValue(newValue, /* needCopyObject */ false)) {
+            this.notifyPropertyHasChangedPU();
+        }
     }
     reset(sourceChangedValue) {
         
-        // if set causes an actual change, then, ObservedPropertyObject source_ will call syncPeerHasChanged
-        this.source_.set(sourceChangedValue);
+        if (this.source_ !== undefined) {
+            // if set causes an actual change, then, ObservedPropertyObject source_ will call syncPeerHasChanged
+            this.source_.set(sourceChangedValue);
+        }
+        else {
+            stateMgmtConsole.error(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: reset @Prop --- No source_. Internal error!`);
+        }
     }
-    setWrappedValue(value) {
+    /*
+      unsubscribe from previous wrappped ObjectObject
+      take a shallow or (TODO) deep copy
+      copied Object might already be an ObservedObject (e.g. becuse of @Observed decroator) or might be raw
+      Therefore, conditionally wrap the object, then subscribe
+      return value true only if localCopyObservedObject has been changed
+    */
+    resetLocalValue(newObservedObjectValue, needCopyObject) {
+        // note: We can not test for newObservedObjectValue == this.localCopyObservedObject
+        // here because the object might still be the same, but some property of it has changed
+        if (newObservedObjectValue != undefined && newObservedObjectValue != null
+            && typeof newObservedObjectValue !== "object") {
+            // if not undefined or null, then the provided newObservedObjectValue must be an Object 
+            stateMgmtConsole.error(`SynchedPropertyOneWayObjectPU[${this.id__()}]: setLocalValue new value must be an Object. Not setting.`);
+            return false;
+        }
+        // unsubscribe from old wrappedValue ObservedOject  
+        ObservedObject.removeOwningProperty(this.localCopyObservedObject, this);
+        if (newObservedObjectValue == undefined || newObservedObjectValue == null) {
+            stateMgmtConsole.error(`@Prop ${this.info()} set to undefined or null value. Application error`);
+            // case: newObservedObjectValue undefined
+            this.localCopyObservedObject = undefined;
+            return true;
+        }
+        // deep copy value 
+        // needed whenever newObservedObjectValue comes from source
+        // not needed on a local set (aka when called from set() method)
+        let copy = needCopyObject ? this.copyObject(newObservedObjectValue, this.info_) : newObservedObjectValue;
+        if (ObservedObject.IsObservedObject(copy)) {
+            // case: new ObservedObject
+            this.localCopyObservedObject = copy;
+            ObservedObject.addOwningProperty(this.localCopyObservedObject, this);
+        }
+        else {
+            // wrap newObservedObjectValue raw object as ObservedObject and subscribe to it
+            stateMgmtConsole.warn(`@Prop ${this.info()}  Provided source object's class \
+            lacks @Observed class decorator. Object property changes will not be observed.`);
+            this.localCopyObservedObject = ObservedObject.createNew(copy, this);
+        }
+        return true;
+    }
+    copyObject(value, propName) {
         let rawValue = ObservedObject.GetRawObject(value);
         let copy;
         // FIXME: Proper object deep copy missing here!
@@ -3543,11 +3660,11 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
             copy = ObservedObject.createNew([...rawValue], this);
         }
         else {
+            // FIXME Date copy to be added
             copy = ObservedObject.createNew(Object.assign({}, rawValue), this);
         }
         Object.setPrototypeOf(copy, Object.getPrototypeOf(rawValue));
-        ObservedObject.addOwningProperty(this.wrappedValue_, this);
-        this.wrappedValue_ = copy;
+        return copy;
     }
 }
 /*
@@ -3650,11 +3767,11 @@ class SynchedPropertyObjectTwoWayPU extends ObservedPropertyObjectAbstractPU {
     }
     setObject(newValue) {
         if (!this.source_) {
-            stateMgmtConsole.warn(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: setObject, no linked parent property.`);
+            stateMgmtConsole.warn(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: setObject (assign a new value), @Link/@Consume: no linked parent property. Likely a consequence of earlier application error.`);
             return;
         }
         let oldValueObject = this.getUnmonitored();
-        if (oldValueObject) {
+        if (oldValueObject != undefined && oldValueObject != null) {
             ObservedObject.removeOwningProperty(oldValueObject, this);
         }
         this.source_.set(newValue);
@@ -3683,8 +3800,9 @@ class SynchedPropertyObjectTwoWayPU extends ObservedPropertyObjectAbstractPU {
 class SynchedPropertySimpleOneWayPU extends ObservedPropertySimpleAbstractPU {
     constructor(source, subscribeMe, thisPropertyName) {
         super(subscribeMe, thisPropertyName);
-        if (!source) {
-            stateMgmtConsole.error(`SynchedPropertySimpleOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: constructor @Prop source must not be undefined. Application error!`);
+        if (source == undefined || source == null) {
+            stateMgmtConsole.error(`SynchedPropertySimpleOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: constructor @Prop value must not be undefined or null. Application error!`);
+            this.source_ = undefined;
             return;
         }
         if ((typeof (source) === "object") && ("notifyHasChanged" in source) && ("subscribeMe" in source)) {
@@ -3713,6 +3831,11 @@ class SynchedPropertySimpleOneWayPU extends ObservedPropertySimpleAbstractPU {
         super.aboutToBeDeleted();
     }
     syncPeerHasChanged(eventSource) {
+        if (this.source_ == undefined) {
+            stateMgmtConsole.warn(`SynchedPropertySimpleOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: \
+       syncPeerHasChanged peer '${eventSource ? eventSource.info() : "no eventSource info"}' but source_ undefned. Internal error.`);
+            return;
+        }
         if (eventSource && (eventSource == this.source_)) {
             // defensive, should always be the case
             
@@ -3722,7 +3845,7 @@ class SynchedPropertySimpleOneWayPU extends ObservedPropertySimpleAbstractPU {
     }
     getUnmonitored() {
         
-        // unmonitored get access , no call to otifyPropertyRead !
+        // unmonitored get access, no call to notifyPropertyRead !
         return this.wrappedValue_;
     }
     // get 'read through` from the ObservedProperty
@@ -3743,7 +3866,10 @@ class SynchedPropertySimpleOneWayPU extends ObservedPropertySimpleAbstractPU {
     reset(sourceChangedValue) {
         
         // if set causes an actual change, then, ObservedPropertySimple source_ will call hasChanged
-        this.source_.set(sourceChangedValue);
+        if (this.source_ !== undefined) {
+            // if set causes an actual change, then, ObservedPropertySimple source_ will call hasChanged
+            this.source_.set(sourceChangedValue);
+        }
     }
     setWrappedValue(newValue) {
         this.wrappedValue_ = newValue;
@@ -3866,8 +3992,9 @@ class SynchedPropertyNesedObjectPU extends ObservedPropertyObjectAbstractPU {
      */
     constructor(obsObject, owningChildView, propertyName) {
         super(owningChildView, propertyName);
-        if (!obsObject) {
-            stateMgmtConsole.error(`SynchedPropertyNesedObjectPU[${this.id__()}, '${this.info() || "unknown"}']: constructor @ObjectLink wrapped object must not be undefined!.`);
+        if (obsObject == undefined || obsObject == null || typeof obsObject != "object") {
+            stateMgmtConsole.error(`SynchedPropertyNesedObjectPU[${this.id__()}, '${this.info() || "unknown"}']: constructor @ObjectLink value must be an object, and it must not be undefined or null!.`);
+            // TODO enable support for undefined and null
             return;
         }
         this.obsObject_ = obsObject;
@@ -3892,19 +4019,23 @@ class SynchedPropertyNesedObjectPU extends ObservedPropertyObjectAbstractPU {
         this.notifyPropertyHasBeenReadPU();
     }
     getUnmonitored() {
-        // 
+        
         // unmonitored get access , no call to otifyPropertyRead !
         return this.obsObject_;
     }
     // get 'read through` from the ObservedProperty
     get() {
         
-        // this.notifyPropertyRead();
         this.notifyPropertyHasBeenReadPU();
         return this.obsObject_;
     }
     // set 'writes through` to the ObservedProperty
     set(newValue) {
+        if (newValue == undefined || newValue == null || typeof newValue != "object") {
+            stateMgmtConsole.error(`SynchedPropertyNesedObjectPU[${this.id__()}, '${this.info() || "unknown"}']: set: @ObjectLink value must be an object, and it must not be undefined or null!.`);
+            // TODO enable support for undefined and null
+            return;
+        }
         if (this.obsObject_ == newValue) {
             
             return;

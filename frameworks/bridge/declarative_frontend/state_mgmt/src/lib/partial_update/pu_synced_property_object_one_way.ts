@@ -138,18 +138,25 @@ class SynchedPropertyObjectOneWayPU<C extends Object>
    * @param souceObject 
    * @param changedPropertyName 
    */
-  public objectPropertyHasChangedPU(souceObject: ObservedObject<C>, changedPropertyName : string) {
+  public objectPropertyHasChangedPU(sourceObject: ObservedObject<C>, changedPropertyName : string) {
+    if (sourceObject == this.localCopyObservedObject) {
+      stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: objectPropertyHasChangedPU '${changedPropertyName}' has changed.`);
+    } else {
+      stateMgmtConsole.warn(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: objectPropertyHasChangedPU '${changedPropertyName}' has changed.  But the event does not come from localCopyObservedObject. Internal error`);
+    }
+    this.notifyPropertyHasChangedPU();
+
+    /* The non-reverted ToT has this code, which seems wrong:
     if (this.source_ && souceObject == this.source_.getUnmonitored()) {
       stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: \
-        objectPropertyHasChangedPU: @Prop local value containing ObservedObject '${changedPropertyName}' has changed.`)
-    // Question / TODO: non-rrverted calles, this seems unnecessary because sourceObject == this.source_
-    //       this.resetLocalValue(souceObject as C, /* needCopyObject */ true);
-    this.notifyPropertyHasChangedPU();
+      objectPropertyHasChangedPU: member property '${changedPropertyName}' of source ObservedObject '${this.source_.info()}' has changed.`);
+      this.resetLocalValue(souceObject as C, true);
     } else {
-      stateMgmtConsole.warn(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: \
-      objectPropertyHasChangedPU: @Prop local value containing ObservedObject is undefined, \
-      do not know how to handle signaled object property '${changedPropertyName}' change.`);
+      stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: \
+        objectPropertyHasChangedPU: contained ObservedObject member property '${changedPropertyName}' has changed.`);
     }
+    this.notifyPropertryHasChangedPU();
+    */
   }
 
   public objectPropertyHasBeenReadPU(souceObject: ObservedObject<C>, changedPropertyName : string) {
@@ -256,6 +263,7 @@ class SynchedPropertyObjectOneWayPU<C extends Object>
     if (rawValue instanceof Array) {
       copy = ObservedObject.createNew([...rawValue], this) as unknown as C;
     } else {
+      // FIXME Date copy to be added
       copy = ObservedObject.createNew({ ...rawValue }, this);
     }
     Object.setPrototypeOf(copy, Object.getPrototypeOf(rawValue));
