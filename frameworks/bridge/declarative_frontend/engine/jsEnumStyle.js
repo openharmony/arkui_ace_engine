@@ -1491,3 +1491,10 @@ var MenuAlignType ;
   MenuAlignType[MenuAlignType["CENTER"] = 1] = "CENTER";
   MenuAlignType[MenuAlignType["END"] = 2] = "END";
 })(MenuAlignType  || (MenuAlignType  = {}));
+
+var ToolbarItemStatus;
+(function (ToolbarItemStatus) {
+  ToolbarItemStatus[ToolbarItemStatus["ENABLE_TOOLBAR_ITEM"] = 0] = "ENABLE_TOOLBAR_ITEM";
+  ToolbarItemStatus[ToolbarItemStatus["DISABLE_TOOLBAR_ITEM"] = 1] = "DISABLE_TOOLBAR_ITEM";
+  ToolbarItemStatus[ToolbarItemStatus["ACTIVATE_TOOLBAR_ITEM"] = 2] = "ACTIVATE_TOOLBAR_ITEM";
+})(ToolbarItemStatus || (ToolbarItemStatus = {}));
