@@ -175,7 +175,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     auto disableTextAlign = !pattern->IsTextArea() && textFieldLayoutProperty->GetWidthAutoValue(false);
     if (pattern->IsDragging()) {
         TextStyle dragTextStyle = textStyle;
-        Color color = textStyle.GetTextColor().ChangeAlpha(TEXT_DRAG_OPACITY);
+        Color color = textStyle.GetTextColor().ChangeAlpha(DRAGGED_TEXT_OPACITY);
         dragTextStyle.SetTextColor(color);
         std::vector<TextStyle> textStyles { textStyle, dragTextStyle, textStyle };
         CreateParagraph(textStyles, pattern->GetDragContents(), textContent,

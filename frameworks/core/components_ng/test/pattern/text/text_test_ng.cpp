@@ -2691,4 +2691,38 @@ HWTEST_F(TextTestNg, IsDraggable001, TestSize.Level1)
     pattern->textSelector_.Update(-1);
     EXPECT_FALSE(pattern->IsDraggable(Offset(1, 1)));
 }
+
+/**
+ * @tc.name: DragBase001
+ * @tc.desc: test text_pattern.h DragBase function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, DragBase001, TestSize.Level1)
+{
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    pattern->AttachToFrameNode(frameNode);
+
+    // test CloseSelectOverlay should reset textSelector
+    pattern->CreateHandles();
+    pattern->textSelector_.Update(0, 20);
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 20);
+    pattern->CloseSelectOverlay();
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), -1);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), -1);
+
+    // test GetTextBoxes and GetLineHeight
+    pattern->paragraph_ = AceType::MakeRefPtr<TxtParagraph>(ParagraphStyle {}, nullptr);
+    pattern->textSelector_.Update(0, 20);
+    auto boxes = pattern->GetTextBoxes();
+    EXPECT_EQ(boxes.size(), 1);
+    EXPECT_EQ(boxes[0].rect_.GetLeft(), 0);
+    EXPECT_EQ(boxes[0].rect_.GetRight(), 20);
+
+    auto height = pattern->GetLineHeight();
+    EXPECT_EQ(height, 20);
+}
 } // namespace OHOS::Ace::NG
