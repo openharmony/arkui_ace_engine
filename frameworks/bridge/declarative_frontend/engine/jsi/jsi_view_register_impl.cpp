@@ -38,6 +38,7 @@
 #include "bridge/declarative_frontend/jsview/js_canvas.h"
 #include "bridge/declarative_frontend/jsview/js_canvas_gradient.h"
 #include "bridge/declarative_frontend/jsview/js_canvas_path.h"
+#include "bridge/declarative_frontend/jsview/js_canvas_pattern.h"
 #include "bridge/declarative_frontend/jsview/js_checkbox.h"
 #include "bridge/declarative_frontend/jsview/js_checkboxgroup.h"
 #include "bridge/declarative_frontend/jsview/js_circle.h"
@@ -77,6 +78,7 @@
 #include "bridge/declarative_frontend/jsview/js_loading_progress.h"
 #include "bridge/declarative_frontend/jsview/js_local_storage.h"
 #include "bridge/declarative_frontend/jsview/js_marquee.h"
+#include "bridge/declarative_frontend/jsview/js_matrix2d.h"
 #include "bridge/declarative_frontend/jsview/js_menu.h"
 #include "bridge/declarative_frontend/jsview/js_menu_item.h"
 #include "bridge/declarative_frontend/jsview/js_menu_item_group.h"
@@ -571,6 +573,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "ImageData", JSCanvasImageData::JSBind },
     { "Path2D", JSPath2D::JSBind },
     { "RenderingContextSettings", JSRenderingContextSettings::JSBind },
+    { "Matrix2D", JSMatrix2d::JSBind },
+    { "CanvasPattern", JSCanvasPattern::JSBind },
 #ifdef VIDEO_SUPPORTED
     { "VideoController", JSVideoController::JSBind },
 #endif

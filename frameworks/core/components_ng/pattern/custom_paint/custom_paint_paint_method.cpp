@@ -182,6 +182,14 @@ void CustomPaintPaintMethod::UpdatePaintShader(const OffsetF& offset, SkPaint& p
     paint.setShader(skShader);
 }
 
+SkMatrix CustomPaintPaintMethod::GetMatrixFromPattern(const Ace::Pattern& pattern)
+{
+    SkMatrix matrix;
+    matrix.setAll(pattern.GetScaleX(), pattern.GetSkewX(), pattern.GetTranslateX(), pattern.GetSkewY(),
+        pattern.GetScaleY(), pattern.GetTranslateY(), 0.0f, 0.0f, 1.0f);
+    return matrix;
+}
+
 void CustomPaintPaintMethod::UpdatePaintShader(const Ace::Pattern& pattern, SkPaint& paint)
 {
     auto width = pattern.GetImageWidth();
@@ -190,82 +198,88 @@ void CustomPaintPaintMethod::UpdatePaintShader(const Ace::Pattern& pattern, SkPa
                      ? ImageProvider::GetSkImage(pattern.GetImgSrc(), context_, Size(width, height))
                      : ImageProvider::GetSkImage(pattern.GetImgSrc(), context_);
     CHECK_NULL_VOID(image);
-    static const LinearMapNode<void (*)(sk_sp<SkImage>, SkPaint&)> staticPattern[] = {
+    SkMatrix* matrix = nullptr;
+    SkMatrix tempMatrix;
+    if (pattern.IsTransformable()) {
+        tempMatrix = GetMatrixFromPattern(pattern);
+        matrix = &tempMatrix;
+    }
+    static const LinearMapNode<void (*)(sk_sp<SkImage>, SkPaint&, SkMatrix*)> staticPattern[] = {
         { "clamp",
-            [](sk_sp<SkImage> image, SkPaint& paint) {
+            [](sk_sp<SkImage> image, SkPaint& paint, SkMatrix* matrix) {
 #ifdef USE_SYSTEM_SKIA
-                paint.setShader(image->makeShader(SkShader::kClamp_TileMode, SkShader::kClamp_TileMode, nullptr));
+                paint.setShader(image->makeShader(SkShader::kClamp_TileMode, SkShader::kClamp_TileMode, matrix));
 #else
 #ifdef NEW_SKIA
                 paint.setShader(
-                    image->makeShader(SkTileMode::kClamp, SkTileMode::kClamp, SkSamplingOptions(), nullptr));
+                    image->makeShader(SkTileMode::kClamp, SkTileMode::kClamp, SkSamplingOptions(), matrix));
 #else
-                paint.setShader(image->makeShader(SkTileMode::kClamp, SkTileMode::kClamp, nullptr));
+                paint.setShader(image->makeShader(SkTileMode::kClamp, SkTileMode::kClamp, matrix));
 #endif
 #endif
             } },
         { "mirror",
-            [](sk_sp<SkImage> image, SkPaint& paint) {
+            [](sk_sp<SkImage> image, SkPaint& paint, SkMatrix* matrix) {
 #ifdef USE_SYSTEM_SKIA
-                paint.setShader(image->makeShader(SkShader::kClamp_TileMode, SkShader::kClamp_TileMode, nullptr));
+                paint.setShader(image->makeShader(SkShader::kClamp_TileMode, SkShader::kClamp_TileMode, matrix));
 #else
 #ifdef NEW_SKIA
                 paint.setShader(
-                    image->makeShader(SkTileMode::kMirror, SkTileMode::kMirror, SkSamplingOptions(), nullptr));
+                    image->makeShader(SkTileMode::kMirror, SkTileMode::kMirror, SkSamplingOptions(), matrix));
 #else
-                paint.setShader(image->makeShader(SkTileMode::kMirror, SkTileMode::kMirror, nullptr));
+                paint.setShader(image->makeShader(SkTileMode::kMirror, SkTileMode::kMirror, matrix));
 #endif
 #endif
             } },
         { "no-repeat",
-            [](sk_sp<SkImage> image, SkPaint& paint) {
+            [](sk_sp<SkImage> image, SkPaint& paint, SkMatrix* matrix) {
 #ifdef USE_SYSTEM_SKIA
-                paint.setShader(image->makeShader(SkShader::kDecal_TileMode, SkShader::kDecal_TileMode, nullptr));
+                paint.setShader(image->makeShader(SkShader::kDecal_TileMode, SkShader::kDecal_TileMode, matrix));
 #else
 #ifdef NEW_SKIA
                 paint.setShader(
-                    image->makeShader(SkTileMode::kDecal, SkTileMode::kDecal, SkSamplingOptions(), nullptr));
+                    image->makeShader(SkTileMode::kDecal, SkTileMode::kDecal, SkSamplingOptions(), matrix));
 #else
-                paint.setShader(image->makeShader(SkTileMode::kDecal, SkTileMode::kDecal, nullptr));
+                paint.setShader(image->makeShader(SkTileMode::kDecal, SkTileMode::kDecal, matrix));
 #endif
 #endif
             } },
         { "repeat",
-            [](sk_sp<SkImage> image, SkPaint& paint) {
+            [](sk_sp<SkImage> image, SkPaint& paint, SkMatrix* matrix) {
 #ifdef USE_SYSTEM_SKIA
-                paint.setShader(image->makeShader(SkShader::kRepeat_TileMode, SkShader::kRepeat_TileMode, nullptr));
+                paint.setShader(image->makeShader(SkShader::kRepeat_TileMode, SkShader::kRepeat_TileMode, matrix));
 #else
 #ifdef NEW_SKIA
                 paint.setShader(
-                    image->makeShader(SkTileMode::kRepeat, SkTileMode::kRepeat, SkSamplingOptions(), nullptr));
+                    image->makeShader(SkTileMode::kRepeat, SkTileMode::kRepeat, SkSamplingOptions(), matrix));
 #else
-                paint.setShader(image->makeShader(SkTileMode::kRepeat, SkTileMode::kRepeat, nullptr));
+                paint.setShader(image->makeShader(SkTileMode::kRepeat, SkTileMode::kRepeat, matrix));
 #endif
 #endif
             } },
         { "repeat-x",
-            [](sk_sp<SkImage> image, SkPaint& paint) {
+            [](sk_sp<SkImage> image, SkPaint& paint, SkMatrix* matrix) {
 #ifdef USE_SYSTEM_SKIA
-                paint.setShader(image->makeShader(SkShader::kRepeat_TileMode, SkShader::kDecal_TileMode, nullptr));
+                paint.setShader(image->makeShader(SkShader::kRepeat_TileMode, SkShader::kDecal_TileMode, matrix));
 #else
 #ifdef NEW_SKIA
                 paint.setShader(
-                    image->makeShader(SkTileMode::kRepeat, SkTileMode::kDecal, SkSamplingOptions(), nullptr));
+                    image->makeShader(SkTileMode::kRepeat, SkTileMode::kDecal, SkSamplingOptions(), matrix));
 #else
-                paint.setShader(image->makeShader(SkTileMode::kRepeat, SkTileMode::kDecal, nullptr));
+                paint.setShader(image->makeShader(SkTileMode::kRepeat, SkTileMode::kDecal, matrix));
 #endif
 #endif
             } },
         { "repeat-y",
-            [](sk_sp<SkImage> image, SkPaint& paint) {
+            [](sk_sp<SkImage> image, SkPaint& paint, SkMatrix* matrix) {
 #ifdef USE_SYSTEM_SKIA
-                paint.setShader(image->makeShader(SkShader::kDecal_TileMode, SkShader::kRepeat_TileMode, nullptr));
+                paint.setShader(image->makeShader(SkShader::kDecal_TileMode, SkShader::kRepeat_TileMode, matrix));
 #else
 #ifdef NEW_SKIA
                 paint.setShader(
-                    image->makeShader(SkTileMode::kDecal, SkTileMode::kRepeat, SkSamplingOptions(), nullptr));
+                    image->makeShader(SkTileMode::kDecal, SkTileMode::kRepeat, SkSamplingOptions(), matrix));
 #else
-                paint.setShader(image->makeShader(SkTileMode::kDecal, SkTileMode::kRepeat, nullptr));
+                paint.setShader(image->makeShader(SkTileMode::kDecal, SkTileMode::kRepeat, matrix));
 #endif
 #endif
             } },
@@ -273,7 +287,7 @@ void CustomPaintPaintMethod::UpdatePaintShader(const Ace::Pattern& pattern, SkPa
     auto operatorIter = BinarySearchFindIndex(staticPattern, ArraySize(staticPattern),
         pattern.GetRepetition().c_str());
     if (operatorIter != -1) {
-        staticPattern[operatorIter].value(image, paint);
+        staticPattern[operatorIter].value(image, paint, matrix);
     }
 }
 
@@ -466,8 +480,8 @@ void CustomPaintPaintMethod::FillRect(PaintWrapper* paintWrapper, const Rect& re
     if (fillState_.GetGradient().IsValid()) {
         UpdatePaintShader(offset, paint, fillState_.GetGradient());
     }
-    if (fillState_.GetPattern().IsValid()) {
-        UpdatePaintShader(fillState_.GetPattern(), paint);
+    if (fillState_.GetPatternValue().IsValid()) {
+        UpdatePaintShader(fillState_.GetPatternValue(), paint);
     }
     if (globalState_.HasGlobalAlpha()) {
         paint.setAlphaf(globalState_.GetAlpha()); // update the global alpha after setting the color
@@ -501,8 +515,8 @@ void CustomPaintPaintMethod::StrokeRect(PaintWrapper* paintWrapper, const Rect& 
     if (strokeState_.GetGradient().IsValid()) {
         UpdatePaintShader(offset, paint, strokeState_.GetGradient());
     }
-    if (strokeState_.GetPattern().IsValid()) {
-        UpdatePaintShader(strokeState_.GetPattern(), paint);
+    if (strokeState_.GetPatternValue().IsValid()) {
+        UpdatePaintShader(strokeState_.GetPatternValue(), paint);
     }
     if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
         skCanvas_->drawRect(skRect, paint);
@@ -576,8 +590,8 @@ void CustomPaintPaintMethod::Fill(PaintWrapper* paintWrapper)
     if (fillState_.GetGradient().IsValid()) {
         UpdatePaintShader(offset, paint, fillState_.GetGradient());
     }
-    if (fillState_.GetPattern().IsValid()) {
-        UpdatePaintShader(fillState_.GetPattern(), paint);
+    if (fillState_.GetPatternValue().IsValid()) {
+        UpdatePaintShader(fillState_.GetPatternValue(), paint);
     }
     if (globalState_.HasGlobalAlpha()) {
         paint.setAlphaf(globalState_.GetAlpha());
@@ -617,8 +631,8 @@ void CustomPaintPaintMethod::Path2DFill(const OffsetF& offset)
     if (fillState_.GetGradient().IsValid()) {
         UpdatePaintShader(offset, paint, fillState_.GetGradient());
     }
-    if (fillState_.GetPattern().IsValid()) {
-        UpdatePaintShader(fillState_.GetPattern(), paint);
+    if (fillState_.GetPatternValue().IsValid()) {
+        UpdatePaintShader(fillState_.GetPatternValue(), paint);
     }
     if (globalState_.HasGlobalAlpha()) {
         paint.setAlphaf(globalState_.GetAlpha());
@@ -648,8 +662,8 @@ void CustomPaintPaintMethod::Stroke(PaintWrapper* paintWrapper)
     if (strokeState_.GetGradient().IsValid()) {
         UpdatePaintShader(offset, paint, strokeState_.GetGradient());
     }
-    if (strokeState_.GetPattern().IsValid()) {
-        UpdatePaintShader(strokeState_.GetPattern(), paint);
+    if (strokeState_.GetPatternValue().IsValid()) {
+        UpdatePaintShader(strokeState_.GetPatternValue(), paint);
     }
     if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
         skCanvas_->drawPath(skPath_, paint);
@@ -684,8 +698,8 @@ void CustomPaintPaintMethod::Path2DStroke(const OffsetF& offset)
     if (strokeState_.GetGradient().IsValid()) {
         UpdatePaintShader(offset, paint, strokeState_.GetGradient());
     }
-    if (strokeState_.GetPattern().IsValid()) {
-        UpdatePaintShader(strokeState_.GetPattern(), paint);
+    if (strokeState_.GetPatternValue().IsValid()) {
+        UpdatePaintShader(strokeState_.GetPatternValue(), paint);
     }
     if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
         skCanvas_->drawPath(skPath2d_, paint);

@@ -540,10 +540,10 @@ void CustomPaintPattern::UpdateTextBaseline(TextBaseline baseline)
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-void CustomPaintPattern::UpdateStrokePattern(const Ace::Pattern& pattern)
+void CustomPaintPattern::UpdateStrokePattern(const std::weak_ptr<Ace::Pattern>& pattern)
 {
     auto task = [pattern](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
-        paintMethod.SetStrokePattern(pattern);
+        paintMethod.SetStrokePatternNG(pattern);
         paintMethod.SetStrokeGradient(Ace::Gradient());
         paintMethod.SetStrokeColor(Color());
     };
@@ -649,10 +649,10 @@ void CustomPaintPattern::UpdateFillGradient(const Ace::Gradient& gradient)
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-void CustomPaintPattern::UpdateFillPattern(const Ace::Pattern& pattern)
+void CustomPaintPattern::UpdateFillPattern(const std::weak_ptr<Ace::Pattern>& pattern)
 {
     auto task = [pattern](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
-        paintMethod.SetFillPattern(pattern);
+        paintMethod.SetFillPatternNG(pattern);
         paintMethod.SetFillGradient(Ace::Gradient());
         paintMethod.SetFillColor(Color());
     };

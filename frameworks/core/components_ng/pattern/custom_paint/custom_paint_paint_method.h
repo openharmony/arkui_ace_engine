@@ -90,6 +90,11 @@ public:
         fillState_.SetPattern(pattern);
     }
 
+    void SetFillPatternNG(const std::weak_ptr<Ace::Pattern>& pattern)
+    {
+        fillState_.SetPatternNG(pattern);
+    }
+
     void SetFillGradient(const Ace::Gradient& gradient)
     {
         fillState_.SetGradient(gradient);
@@ -114,6 +119,11 @@ public:
     void SetStrokeColor(const Color& color)
     {
         strokeState_.SetColor(color);
+    }
+
+    void SetStrokePatternNG(const std::weak_ptr<Ace::Pattern>& pattern)
+    {
+        strokeState_.SetPatternNG(pattern);
     }
 
     void SetStrokePattern(const Ace::Pattern& pattern)
@@ -282,6 +292,7 @@ protected:
     void Path2DBezierCurveTo(const OffsetF& offset, const PathArgs& args);
     void Path2DQuadraticCurveTo(const OffsetF& offset, const PathArgs& args);
     void Path2DSetTransform(const OffsetF& offset, const PathArgs& args);
+    SkMatrix GetMatrixFromPattern(const Ace::Pattern& pattern);
 
     void InitImagePaint();
     void InitImageCallbacks();
