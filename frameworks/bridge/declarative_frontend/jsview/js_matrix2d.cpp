@@ -47,12 +47,6 @@ void JSMatrix2d::JSBind(BindingTarget globalObj)
     JSClass<JSMatrix2d>::CustomProperty("scaleY", &JSMatrix2d::JsGetScaleY, &JSMatrix2d::JsSetScaleY);
     JSClass<JSMatrix2d>::CustomProperty("translateX", &JSMatrix2d::JsGetTranslateX, &JSMatrix2d::JsSetTranslateX);
     JSClass<JSMatrix2d>::CustomProperty("translateY", &JSMatrix2d::JsGetTranslateY, &JSMatrix2d::JsSetTranslateY);
-    JSClass<JSMatrix2d>::CustomMethod("scaleX", &JSMatrix2d::JsSetScaleX);
-    JSClass<JSMatrix2d>::CustomMethod("rotateY", &JSMatrix2d::JsSetRotateY);
-    JSClass<JSMatrix2d>::CustomMethod("rotateX", &JSMatrix2d::JsSetRotateX);
-    JSClass<JSMatrix2d>::CustomMethod("scaleY", &JSMatrix2d::JsSetScaleY);
-    JSClass<JSMatrix2d>::CustomMethod("translateX", &JSMatrix2d::JsSetTranslateX);
-    JSClass<JSMatrix2d>::CustomMethod("translateY", &JSMatrix2d::JsSetTranslateY);
     JSClass<JSMatrix2d>::CustomMethod("identity", &JSMatrix2d::JsIdentity);
     JSClass<JSMatrix2d>::CustomMethod("invert", &JSMatrix2d::JsInvert);
     JSClass<JSMatrix2d>::CustomMethod("rotate", &JSMatrix2d::JsRotate);
@@ -147,42 +141,48 @@ void JSMatrix2d::JsSetTranslateY(const JSCallbackInfo& info)
 
 void JSMatrix2d::JsGetScaleX(const JSCallbackInfo& info)
 {
-    auto returnValue = JSVal(ToJSValue(transform_.scaleX));
+    double scaleX = SystemProperties::Px2Vp(transform_.scaleX);
+    auto returnValue = JSVal(ToJSValue(scaleX));
     auto returnPtr = JSRef<JSVal>::Make(returnValue);
     info.SetReturnValue(returnPtr);
 }
 
 void JSMatrix2d::JsGetRotateY(const JSCallbackInfo& info)
 {
-    auto returnValue = JSVal(ToJSValue(transform_.skewY));
+    double skewY = SystemProperties::Px2Vp(transform_.skewY);
+    auto returnValue = JSVal(ToJSValue(skewY));
     auto returnPtr = JSRef<JSVal>::Make(returnValue);
     info.SetReturnValue(returnPtr);
 }
 
 void JSMatrix2d::JsGetRotateX(const JSCallbackInfo& info)
 {
-    auto returnValue = JSVal(ToJSValue(transform_.skewX));
+    double skewX = SystemProperties::Px2Vp(transform_.skewX);
+    auto returnValue = JSVal(ToJSValue(skewX));
     auto returnPtr = JSRef<JSVal>::Make(returnValue);
     info.SetReturnValue(returnPtr);
 }
 
 void JSMatrix2d::JsGetScaleY(const JSCallbackInfo& info)
 {
-    auto returnValue = JSVal(ToJSValue(transform_.scaleY));
+    double scaleY = SystemProperties::Px2Vp(transform_.scaleY);
+    auto returnValue = JSVal(ToJSValue(scaleY));
     auto returnPtr = JSRef<JSVal>::Make(returnValue);
     info.SetReturnValue(returnPtr);
 }
 
 void JSMatrix2d::JsGetTranslateX(const JSCallbackInfo& info)
 {
-    auto returnValue = JSVal(ToJSValue(transform_.translateX));
+    double translateX = SystemProperties::Px2Vp(transform_.translateX);
+    auto returnValue = JSVal(ToJSValue(translateX));
     auto returnPtr = JSRef<JSVal>::Make(returnValue);
     info.SetReturnValue(returnPtr);
 }
 
 void JSMatrix2d::JsGetTranslateY(const JSCallbackInfo& info)
 {
-    auto returnValue = JSVal(ToJSValue(transform_.translateY));
+    double translateY = SystemProperties::Px2Vp(transform_.translateY);
+    auto returnValue = JSVal(ToJSValue(translateY));
     auto returnPtr = JSRef<JSVal>::Make(returnValue);
     info.SetReturnValue(returnPtr);
 }

@@ -658,7 +658,7 @@ void JSCanvasRenderer::JsSetFillStyle(const JSCallbackInfo& info)
         return;
     }
     if (info[0]->IsString()) {
-        std::string colorStr;
+        std::string colorStr = "";
         JSViewAbstract::ParseJsString(info[0], colorStr);
         auto color = Color::FromString(colorStr);
 
@@ -683,7 +683,7 @@ void JSCanvasRenderer::JsSetFillStyle(const JSCallbackInfo& info)
     }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> typeValue = obj->GetProperty("__type");
-    std::string type;
+    std::string type = "";
     JSViewAbstract::ParseJsString(typeValue, type);
     if (type == "gradient") {
         ParseFillGradient(info);
