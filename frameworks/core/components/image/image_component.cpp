@@ -173,10 +173,17 @@ void ImageComponent::SetImageSourceSize(const std::pair<Dimension, Dimension>& s
     imageSourceSize_ = sourceSize;
 }
 
+#ifndef USE_ROSEN_DRAWING
 void ImageComponent::SetUseSkiaSvg(bool useSkiaSvg)
 {
     useSkiaSvg_ = useSkiaSvg;
 }
+#else
+void ImageComponent::SetUseDrawingSvg(bool useDrawingSvg)
+{
+    useDrawingSvg_ = useDrawingSvg;
+}
+#endif
 
 void ImageComponent::SetAutoResize(bool autoResize)
 {
@@ -207,7 +214,11 @@ RefPtr<ImageComponent> ImageComponent::MakeFromOtherWithoutSourceAndEvent(const 
     imageComponent->SetImageRenderMode(other->GetImageRenderMode());
     imageComponent->SetImageRepeat(other->GetImageRepeat());
     imageComponent->SetImageSourceSize(other->GetImageSourceSize());
+#ifndef USE_ROSEN_DRAWING
     imageComponent->SetUseSkiaSvg(other->GetUseSkiaSvg());
+#else
+    imageComponent->SetUseDrawingSvg(other->GetUseDrawingSvg());
+#endif
     imageComponent->SetAutoResize(other->GetAutoResize());
     return imageComponent;
 }
@@ -247,10 +258,17 @@ const std::pair<Dimension, Dimension>& ImageComponent::GetImageSourceSize() cons
     return imageSourceSize_;
 }
 
+#ifndef USE_ROSEN_DRAWING
 bool ImageComponent::GetUseSkiaSvg() const
 {
     return useSkiaSvg_;
 }
+#else
+bool ImageComponent::GetUseDrawingSvg() const
+{
+    return useDrawingSvg_;
+}
+#endif
 
 bool ImageComponent::GetAutoResize() const
 {
