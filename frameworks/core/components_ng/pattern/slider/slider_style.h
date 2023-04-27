@@ -28,7 +28,7 @@ struct SliderLayoutStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Thickness, Dimension)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ShowTips, bool)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Reverse, bool)
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(BlockSize, SizeF)
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(BlockSize, SizeT<Dimension>)
 };
 struct SliderPaintStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Value, float)
@@ -45,7 +45,7 @@ struct SliderPaintStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BlockBorderWidth, Dimension)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(StepColor, Color)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TrackBorderRadius, Dimension)
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(BlockSize, SizeF)
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(BlockSize, SizeT<Dimension>)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BlockType, SliderModel::BlockStyleType)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BlockImage, std::string)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BlockShape, RefPtr<BasicShape>)

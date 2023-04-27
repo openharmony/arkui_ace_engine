@@ -65,20 +65,12 @@ public:
         json->Put("selectedColor", GetSelectColor().value_or(theme->GetTrackSelectedColor()).ColorToString().c_str());
         json->Put("showSteps", GetShowSteps().value_or(false) ? "true" : "false");
         json->Put("showTips", GetShowTips().value_or(false) ? "true" : "false");
-        auto sliderMode = GetSliderModeValue(SliderModelNG::SliderMode::OUTSET);
         json->Put("blockBorderColor", GetBlockBorderColorValue(Color::TRANSPARENT).ColorToString().c_str());
         json->Put("blockBorderWidth", GetBlockBorderWidthValue(Dimension()).ToString().c_str());
         json->Put("stepColor", GetStepColorValue(theme->GetMarkerColor()).ColorToString().c_str());
         if (GetTrackBorderRadius().has_value()) {
             json->Put("trackBorderRadius", GetTrackBorderRadius().value().ToString().c_str());
         }
-        auto themeBlockSize =
-            sliderMode == SliderModelNG::SliderMode::OUTSET ? theme->GetOutsetBlockSize() : theme->GetInsetBlockSize();
-        json->Put("blockSizeWidth", GetBlockSize().has_value() ? std::to_string(GetBlockSize().value().Width()).c_str()
-                                                               : themeBlockSize.ToString().c_str());
-        json->Put("blockSizeHeight", GetBlockSize().has_value()
-                                         ? std::to_string(GetBlockSize().value().Height()).c_str()
-                                         : themeBlockSize.ToString().c_str());
         static const std::array<std::string, 3> SLIDER_BLOCK_TYPE_TO_STRING = {
             "BlockStyleType.DEFAULT",
             "BlockStyleType.IMAGE",
@@ -88,6 +80,18 @@ public:
             SLIDER_BLOCK_TYPE_TO_STRING.at(static_cast<int>(GetBlockTypeValue(SliderModelNG::BlockStyleType::DEFAULT)))
                 .c_str());
         json->Put("stepSize", GetStepSizeValue(theme->GetMarkerSize()).ToString().c_str());
+    }
+
+    SizeF GetBlockSizeValue(const SizeF& defaultValue)
+    {
+        auto& groupProperty = GetSliderPaintStyle();
+        if (groupProperty) {
+            if (groupProperty->HasBlockSize()) {
+                return SizeF(groupProperty->GetBlockSizeValue().Width().ConvertToPx(),
+                    groupProperty->GetBlockSizeValue().Height().ConvertToPx());
+            }
+        }
+        return defaultValue;
     }
 
     ACE_DEFINE_PROPERTY_GROUP(SliderPaintStyle, SliderPaintStyle)
@@ -105,7 +109,6 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, BlockBorderWidth, Dimension, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, StepColor, Color, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, TrackBorderRadius, Dimension, PROPERTY_UPDATE_RENDER)
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, BlockSize, SizeF, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
         SliderPaintStyle, BlockType, SliderModel::BlockStyleType, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, BlockImage, std::string, PROPERTY_UPDATE_RENDER)

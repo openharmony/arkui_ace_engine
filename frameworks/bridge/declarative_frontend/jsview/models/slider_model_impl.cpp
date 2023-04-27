@@ -126,7 +126,7 @@ void SliderModelImpl::SetBlockBorderColor(const Color& value) {}
 void SliderModelImpl::SetBlockBorderWidth(const Dimension& value) {}
 void SliderModelImpl::SetStepColor(const Color& value) {}
 void SliderModelImpl::SetTrackBorderRadius(const Dimension& value) {}
-void SliderModelImpl::SetBlockSize(const Size& value) {}
+void SliderModelImpl::SetBlockSize(const Dimension& width, const Dimension& height) {}
 void SliderModelImpl::SetBlockType(BlockStyleType value) {}
 void SliderModelImpl::SetBlockImage(const std::string& value) {}
 void SliderModelImpl::SetBlockShape(const RefPtr<BasicShape>& value) {}
