@@ -19,6 +19,7 @@
 #include "gtest/gtest.h"
 
 #include "base/geometry/dimension.h"
+#include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 
@@ -49,9 +50,15 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr float FIRST_ITEM_WIDTH = 100.0f;
-constexpr float FIRST_ITEM_HEIGHT = 50.0f;
+constexpr float FIRST_ITEM_WIDTH = 800.0f;
+constexpr float FIRST_ITEM_HEIGHT = 800.0f;
 const SizeF FIRST_ITEM_SIZE(FIRST_ITEM_WIDTH, FIRST_ITEM_HEIGHT);
+constexpr float INFINITY_NUM = 1000000.0f;
+const SizeF INFINITY_SIZE(INFINITY_NUM, INFINITY_NUM);
+constexpr float NEGTIVE_NUM = -100.0f;
+const SizeF NEGTIVE_SIZE(NEGTIVE_NUM, NEGTIVE_NUM);
+constexpr float TABBAR_WIDTH = 50.0f;
+constexpr float SWIPER_WIDTH = 750.0f;
 const double DEFAULT_OFFSET = -1.0f;
 const int DEFAULT_ITEMCOUNT = 1;
 const int DEFAULT_INDEX = -1;
@@ -254,6 +261,356 @@ HWTEST_F(TabsTestNg, TabsModelMeasure001, TestSize.Level1)
     dividerOffect = dividerLayoutWrapper->GetGeometryNode()->GetMarginFrameOffset();
     EXPECT_EQ(dividerOffect.GetX(), layoutSize);
     EXPECT_EQ(dividerOffect.GetY(), 0);
+}
+
+/**
+ * @tc.name: TabsModelMeasure002
+ * @tc.desc: Test Tabs Measure and Layout.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabsModelMeasure002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize all properties of tabs.
+     */
+    MockPipelineContextGetTheme();
+
+    TabsModelNG instance;
+    instance.Create(BarPosition::START, 1, nullptr, nullptr);
+
+    /**
+     * @tc.steps: step2. Get tabs pattern to create layoutAlgorithm, and call measure and layout functions.
+     * @tc.expected: related function is called.
+     */
+    auto tabsFrameNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(tabsFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto pattern = tabsFrameNode->GetPattern<TabsPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto tabsLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    ASSERT_NE(tabsLayoutAlgorithm, nullptr);
+    LayoutWrapper layoutWrapper = LayoutWrapper(tabsFrameNode, geometryNode, tabsFrameNode->GetLayoutProperty());
+    LayoutConstraintF layoutConstrain;
+    layoutConstrain.maxSize = FIRST_ITEM_SIZE;
+    layoutConstrain.percentReference = FIRST_ITEM_SIZE;
+    AceType::DynamicCast<TabsLayoutProperty>(layoutWrapper.GetLayoutProperty())
+        ->UpdateLayoutConstraint(layoutConstrain);
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tabsLayoutAlgorithm));
+    layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
+    auto childLayoutConstraint = layoutWrapper.GetLayoutProperty()->CreateChildConstraint();
+    childLayoutConstraint.maxSize = SizeF(FIRST_ITEM_SIZE);
+    childLayoutConstraint.minSize = SizeF(0.0f, 0.0f);
+
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildAtIndex(0));
+    ASSERT_NE(tabBarNode, nullptr);
+    RefPtr<GeometryNode> tabbarGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapper> tabBarLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(tabBarNode, tabbarGeometryNode, tabBarNode->GetLayoutProperty());
+
+    auto tabbarLayoutAlgorithm = tabBarNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
+    ASSERT_NE(tabbarLayoutAlgorithm, nullptr);
+    tabBarLayoutWrapper->SetLayoutAlgorithm(
+        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(tabbarLayoutAlgorithm));
+
+    tabBarLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
+    tabBarLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(FIRST_ITEM_WIDTH), CalcLength(TABBAR_WIDTH)));
+    layoutWrapper.AppendChild(tabBarLayoutWrapper);
+    auto dividerNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildAtIndex(1));
+    ASSERT_NE(dividerNode, nullptr);
+    RefPtr<GeometryNode> dividerGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapper> dividerLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(dividerNode, dividerGeometryNode, dividerNode->GetLayoutProperty());
+    
+    auto dividerLayoutAlgorithm = dividerNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
+    ASSERT_NE(dividerLayoutAlgorithm, nullptr);
+    dividerLayoutWrapper->SetLayoutAlgorithm(
+        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(dividerLayoutAlgorithm));
+
+    dividerLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
+    dividerLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(FIRST_ITEM_WIDTH), CalcLength(0.0f)));
+    layoutWrapper.AppendChild(dividerLayoutWrapper);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildAtIndex(2));
+    ASSERT_NE(swiperNode, nullptr);
+    RefPtr<GeometryNode> swiperGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapper> swiperLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(swiperNode, swiperGeometryNode, swiperNode->GetLayoutProperty());
+    
+    auto swipeLayoutAlgorithm = swiperNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
+    ASSERT_NE(swipeLayoutAlgorithm, nullptr);
+    swiperLayoutWrapper->SetLayoutAlgorithm(
+        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(swipeLayoutAlgorithm));
+
+    swiperLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
+    swiperLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(FIRST_ITEM_WIDTH), CalcLength(SWIPER_WIDTH)));
+    layoutWrapper.AppendChild(swiperLayoutWrapper);
+    tabsLayoutAlgorithm->Measure(&layoutWrapper);
+    tabsLayoutAlgorithm->Layout(&layoutWrapper);
+
+    auto tabbarOffset = tabBarLayoutWrapper->GetGeometryNode()->GetMarginFrameOffset();
+    EXPECT_EQ(tabbarOffset.GetX(), 0.0f);
+    EXPECT_EQ(tabbarOffset.GetY(), 0.0f);
+
+    auto tabBarSize = tabBarLayoutWrapper->GetGeometryNode()->GetFrameSize();
+    EXPECT_EQ(tabBarSize.Width(), FIRST_ITEM_WIDTH);
+    EXPECT_EQ(tabBarSize.Height(), TABBAR_WIDTH);
+
+    auto swiperOffset = swiperLayoutWrapper->GetGeometryNode()->GetMarginFrameOffset();
+    EXPECT_EQ(swiperOffset.GetX(), 0.0f);
+    EXPECT_EQ(swiperOffset.GetY(), TABBAR_WIDTH);
+
+    auto swiperSize = swiperLayoutWrapper->GetGeometryNode()->GetFrameSize();
+    EXPECT_EQ(swiperSize.Width(), FIRST_ITEM_WIDTH);
+    EXPECT_EQ(swiperSize.Height(), SWIPER_WIDTH);
+
+    tabsFrameNode->GetLayoutProperty<TabsLayoutProperty>()->UpdateTabBarPosition(BarPosition::END);
+    tabsLayoutAlgorithm->Layout(&layoutWrapper);
+
+    tabbarOffset = tabBarLayoutWrapper->GetGeometryNode()->GetMarginFrameOffset();
+    EXPECT_EQ(tabbarOffset.GetX(), 0.0f);
+    EXPECT_EQ(tabbarOffset.GetY(), SWIPER_WIDTH);
+
+    swiperOffset = swiperLayoutWrapper->GetGeometryNode()->GetMarginFrameOffset();
+    EXPECT_EQ(swiperOffset.GetX(), 0.0f);
+    EXPECT_EQ(swiperOffset.GetY(), 0.0f);
+}
+
+/**
+ * @tc.name: TabsModelMeasure003
+ * @tc.desc: Test Tabs Measure and Layout when is vertical.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabsModelMeasure003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize all properties of tabs.
+     */
+    MockPipelineContextGetTheme();
+
+    TabsModelNG instance;
+    instance.Create(BarPosition::START, 1, nullptr, nullptr);
+    instance.SetIsVertical(true);
+
+    /**
+     * @tc.steps: step2. Get tabs pattern to create layoutAlgorithm, and call measure and layout functions.
+     * @tc.expected: related function is called.
+     */
+    auto tabsFrameNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(tabsFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto pattern = tabsFrameNode->GetPattern<TabsPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto tabsLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    ASSERT_NE(tabsLayoutAlgorithm, nullptr);
+    LayoutWrapper layoutWrapper = LayoutWrapper(tabsFrameNode, geometryNode, tabsFrameNode->GetLayoutProperty());
+    LayoutConstraintF layoutConstrain;
+    layoutConstrain.maxSize = FIRST_ITEM_SIZE;
+    layoutConstrain.percentReference = FIRST_ITEM_SIZE;
+    AceType::DynamicCast<TabsLayoutProperty>(layoutWrapper.GetLayoutProperty())
+        ->UpdateLayoutConstraint(layoutConstrain);
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tabsLayoutAlgorithm));
+    layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
+    auto childLayoutConstraint = layoutWrapper.GetLayoutProperty()->CreateChildConstraint();
+    childLayoutConstraint.maxSize = SizeF(FIRST_ITEM_SIZE);
+    childLayoutConstraint.minSize = SizeF(0.0f, 0.0f);
+
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildAtIndex(0));
+    ASSERT_NE(tabBarNode, nullptr);
+    RefPtr<GeometryNode> tabbarGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapper> tabBarLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(tabBarNode, tabbarGeometryNode, tabBarNode->GetLayoutProperty());
+
+    auto tabbarLayoutAlgorithm = tabBarNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
+    ASSERT_NE(tabbarLayoutAlgorithm, nullptr);
+    tabBarLayoutWrapper->SetLayoutAlgorithm(
+        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(tabbarLayoutAlgorithm));
+
+    tabBarLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
+    tabBarLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(TABBAR_WIDTH), CalcLength(FIRST_ITEM_WIDTH)));
+    layoutWrapper.AppendChild(tabBarLayoutWrapper);
+    auto dividerNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildAtIndex(1));
+    ASSERT_NE(dividerNode, nullptr);
+    RefPtr<GeometryNode> dividerGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapper> dividerLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(dividerNode, dividerGeometryNode, dividerNode->GetLayoutProperty());
+    
+    auto dividerLayoutAlgorithm = dividerNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
+    ASSERT_NE(dividerLayoutAlgorithm, nullptr);
+    dividerLayoutWrapper->SetLayoutAlgorithm(
+        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(dividerLayoutAlgorithm));
+
+    dividerLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
+    dividerLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(0.0f), CalcLength(FIRST_ITEM_WIDTH)));
+    layoutWrapper.AppendChild(dividerLayoutWrapper);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildAtIndex(2));
+    ASSERT_NE(swiperNode, nullptr);
+    RefPtr<GeometryNode> swiperGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapper> swiperLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(swiperNode, swiperGeometryNode, swiperNode->GetLayoutProperty());
+    
+    auto swipeLayoutAlgorithm = swiperNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
+    ASSERT_NE(swipeLayoutAlgorithm, nullptr);
+    swiperLayoutWrapper->SetLayoutAlgorithm(
+        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(swipeLayoutAlgorithm));
+
+    swiperLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
+    swiperLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(SWIPER_WIDTH), CalcLength(FIRST_ITEM_WIDTH)));
+    layoutWrapper.AppendChild(swiperLayoutWrapper);
+    tabsLayoutAlgorithm->Measure(&layoutWrapper);
+    tabsLayoutAlgorithm->Layout(&layoutWrapper);
+
+    auto tabbarOffset = tabBarLayoutWrapper->GetGeometryNode()->GetMarginFrameOffset();
+    EXPECT_EQ(tabbarOffset.GetX(), 0.0f);
+    EXPECT_EQ(tabbarOffset.GetY(), 0.0f);
+
+    auto tabBarSize = tabBarLayoutWrapper->GetGeometryNode()->GetFrameSize();
+    EXPECT_EQ(tabBarSize.Width(), TABBAR_WIDTH);
+    EXPECT_EQ(tabBarSize.Height(), FIRST_ITEM_WIDTH);
+
+    auto swiperOffset = swiperLayoutWrapper->GetGeometryNode()->GetMarginFrameOffset();
+    EXPECT_EQ(swiperOffset.GetX(), TABBAR_WIDTH);
+    EXPECT_EQ(swiperOffset.GetY(), 0.0f);
+
+    auto swiperSize = swiperLayoutWrapper->GetGeometryNode()->GetFrameSize();
+    EXPECT_EQ(swiperSize.Width(), SWIPER_WIDTH);
+    EXPECT_EQ(swiperSize.Height(), FIRST_ITEM_WIDTH);
+
+    tabsFrameNode->GetLayoutProperty<TabsLayoutProperty>()->UpdateTabBarPosition(BarPosition::END);
+    tabsLayoutAlgorithm->Layout(&layoutWrapper);
+
+    tabbarOffset = tabBarLayoutWrapper->GetGeometryNode()->GetMarginFrameOffset();
+    EXPECT_EQ(tabbarOffset.GetX(), SWIPER_WIDTH);
+    EXPECT_EQ(tabbarOffset.GetY(), 0.0f);
+
+    swiperOffset = swiperLayoutWrapper->GetGeometryNode()->GetMarginFrameOffset();
+    EXPECT_EQ(swiperOffset.GetX(), 0.0f);
+    EXPECT_EQ(swiperOffset.GetY(), 0.0f);
+}
+
+/**
+ * @tc.name: TabsModelMeasure004
+ * @tc.desc: Test Tabs Measure and Layout when the ideaSize is infinity.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabsModelMeasure004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize all properties of tabs.
+     */
+    MockPipelineContextGetTheme();
+
+    TabsModelNG instance;
+    instance.Create(BarPosition::START, 1, nullptr, nullptr);
+    instance.SetIsVertical(true);
+
+    /**
+     * @tc.steps: step2. Get tabs pattern to create layoutAlgorithm, and call measure and layout functions.
+     * @tc.expected: related function is called.
+     */
+    auto tabsFrameNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(tabsFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto pattern = tabsFrameNode->GetPattern<TabsPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto tabsLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    ASSERT_NE(tabsLayoutAlgorithm, nullptr);
+    LayoutWrapper layoutWrapper = LayoutWrapper(tabsFrameNode, geometryNode, tabsFrameNode->GetLayoutProperty());
+    LayoutConstraintF layoutConstrain;
+    layoutConstrain.selfIdealSize.SetSize(SizeF(FIRST_ITEM_WIDTH, INFINITY_NUM));
+    AceType::DynamicCast<TabsLayoutProperty>(layoutWrapper.GetLayoutProperty())
+        ->UpdateLayoutConstraint(layoutConstrain);
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tabsLayoutAlgorithm));
+    layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
+    tabsLayoutAlgorithm->Measure(&layoutWrapper);
+    tabsLayoutAlgorithm->Layout(&layoutWrapper);
+
+    auto tabsSize = layoutWrapper.GetGeometryNode()->GetFrameSize();
+    EXPECT_EQ(tabsSize.Width(), 0.0f);
+    EXPECT_EQ(tabsSize.Height(), 0.0f);
+
+    layoutConstrain.selfIdealSize.SetSize(SizeF(INFINITY_NUM, FIRST_ITEM_HEIGHT));
+    AceType::DynamicCast<TabsLayoutProperty>(layoutWrapper.GetLayoutProperty())
+        ->UpdateLayoutConstraint(layoutConstrain);
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tabsLayoutAlgorithm));
+
+    tabsLayoutAlgorithm->Measure(&layoutWrapper);
+    tabsLayoutAlgorithm->Layout(&layoutWrapper);
+
+    tabsSize = layoutWrapper.GetGeometryNode()->GetFrameSize();
+    EXPECT_EQ(tabsSize.Width(), 0.0f);
+    EXPECT_EQ(tabsSize.Height(), 0.0f);
+
+    layoutConstrain.selfIdealSize.SetSize(NEGTIVE_SIZE);
+    AceType::DynamicCast<TabsLayoutProperty>(layoutWrapper.GetLayoutProperty())
+        ->UpdateLayoutConstraint(layoutConstrain);
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tabsLayoutAlgorithm));
+
+    tabsLayoutAlgorithm->Measure(&layoutWrapper);
+    tabsLayoutAlgorithm->Layout(&layoutWrapper);
+
+    auto tabsOffset = layoutWrapper.GetGeometryNode()->GetMarginFrameOffset();
+    EXPECT_EQ(tabsOffset.GetX(), 0.0f);
+    EXPECT_EQ(tabsOffset.GetY(), 0.0f);
+
+    layoutConstrain.selfIdealSize.SetSize(FIRST_ITEM_SIZE);
+    AceType::DynamicCast<TabsLayoutProperty>(layoutWrapper.GetLayoutProperty())
+        ->UpdateLayoutConstraint(layoutConstrain);
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tabsLayoutAlgorithm));
+
+    auto childLayoutConstraint = layoutWrapper.GetLayoutProperty()->CreateChildConstraint();
+    childLayoutConstraint.maxSize = SizeF(FIRST_ITEM_SIZE);
+    childLayoutConstraint.minSize = SizeF(0.0f, 0.0f);
+
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildAtIndex(0));
+    ASSERT_NE(tabBarNode, nullptr);
+    RefPtr<GeometryNode> tabbarGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapper> tabBarLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(tabBarNode, tabbarGeometryNode, tabBarNode->GetLayoutProperty());
+
+    auto tabbarLayoutAlgorithm = tabBarNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
+    ASSERT_NE(tabbarLayoutAlgorithm, nullptr);
+    tabBarLayoutWrapper->SetLayoutAlgorithm(
+        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(tabbarLayoutAlgorithm));
+
+    tabBarLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
+    tabBarLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(TABBAR_WIDTH), CalcLength(FIRST_ITEM_HEIGHT)));
+    layoutWrapper.AppendChild(tabBarLayoutWrapper);
+
+    tabsLayoutAlgorithm->Measure(&layoutWrapper);
+    tabsLayoutAlgorithm->Layout(&layoutWrapper);
+
+    tabsOffset = layoutWrapper.GetGeometryNode()->GetMarginFrameOffset();
+    EXPECT_EQ(tabsOffset.GetX(), 0.0f);
+    EXPECT_EQ(tabsOffset.GetY(), 0.0f);
+
+    auto dividerNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildAtIndex(1));
+    ASSERT_NE(dividerNode, nullptr);
+    RefPtr<GeometryNode> dividerGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapper> dividerLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(dividerNode, dividerGeometryNode, dividerNode->GetLayoutProperty());
+    
+    auto dividerLayoutAlgorithm = dividerNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
+    ASSERT_NE(dividerLayoutAlgorithm, nullptr);
+    dividerLayoutWrapper->SetLayoutAlgorithm(
+        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(dividerLayoutAlgorithm));
+
+    dividerLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
+    dividerLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(0.0f), CalcLength(FIRST_ITEM_HEIGHT)));
+    layoutWrapper.AppendChild(dividerLayoutWrapper);
+
+    tabsLayoutAlgorithm->Measure(&layoutWrapper);
+    tabsLayoutAlgorithm->Layout(&layoutWrapper);
+
+    tabsOffset = layoutWrapper.GetGeometryNode()->GetMarginFrameOffset();
+    EXPECT_EQ(tabsOffset.GetX(), 0.0f);
+    EXPECT_EQ(tabsOffset.GetY(), 0.0f);
 }
 
 /**
