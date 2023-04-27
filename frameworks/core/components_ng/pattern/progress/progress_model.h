@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PROGRESS_PROGRESS_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PROGRESS_PROGRESS_MODEL_H
 
+#include <mutex>
+
 #include "base/geometry/dimension.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/properties/color.h"
@@ -38,6 +40,7 @@ public:
     virtual void SetBorderColor(const Color& value) = 0;
 private:
     static std::unique_ptr<ProgressModel> instance_;
+    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PROGRESS_PROGRESS_MODEL_H

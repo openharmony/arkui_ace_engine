@@ -79,7 +79,7 @@ public:
     uint32_t AddScheduleTask(const RefPtr<ScheduleTask>& task) override;
 
     // remove schedule task by id.
-    void RemoveScheduleTask(uint32_t id) override {}
+    void RemoveScheduleTask(uint32_t id) override;
 
     // Called by view when touch event received.
     void OnTouchEvent(const TouchEvent& point, bool isSubPipe = false) override;
@@ -333,14 +333,6 @@ public:
         storeNode_.erase(restoreId);
     }
 
-    bool FindInactiveDirtyNodeActive(int32_t id) {
-        return inactiveDirtyNodes_.find(id) != inactiveDirtyNodes_.end();
-    }
-
-    void EraseInactiveDirtyNode(int32_t id) {
-        inactiveDirtyNodes_.erase(id);
-    }
-
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -394,7 +386,6 @@ private:
 
     std::unordered_map<uint32_t, WeakPtr<ScheduleTask>> scheduleTasks_;
     std::set<RefPtr<UINode>, NodeCompare<RefPtr<UINode>>> dirtyNodes_;
-    std::set<int32_t> inactiveDirtyNodes_;
     std::list<std::function<void()>> buildFinishCallbacks_;
 
     // window on show or on hide

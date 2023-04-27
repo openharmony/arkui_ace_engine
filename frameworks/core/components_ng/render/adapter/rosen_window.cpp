@@ -179,4 +179,18 @@ float RosenWindow::GetRefreshRate() const
     return GetDisplayRefreshRate();
 }
 
+void RosenWindow::SetKeepScreenOn(bool keepScreenOn)
+{
+#ifdef OHOS_PLATFORM
+    if (rsWindow_) {
+        LOGD("Rosenwindow SetKeepScreenOn switch = %{public}d", keepScreenOn);
+        rsWindow_->SetKeepScreenOn(keepScreenOn);
+    } else {
+        LOGE("SetKeepScreenOn Rosenwindow is null");
+    }
+#else
+    LOGD("Rosenwindow unsupports the SetKeepScreenOn");
+#endif
+}
+
 } // namespace OHOS::Ace::NG

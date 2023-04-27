@@ -85,7 +85,7 @@ private:
     ProviderMapToReload providerMapToReload_;
     std::function<void()> clearImageDataCallback_;
     std::unordered_map<std::string, CancelableCallback<void()>> cancelableCallbackMap_;
-    RefPtr<TaskExecutor> taskExecutor_;
+    WeakPtr<TaskExecutor> taskExecutor_;
 };
 
 class ImageProviderLoader : public virtual AceType {

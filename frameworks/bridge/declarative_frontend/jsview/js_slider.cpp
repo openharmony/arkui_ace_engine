@@ -24,21 +24,28 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
 
 namespace OHOS::Ace {
+namespace {
+constexpr int SLIDER_SHOW_TIPS_MAX_PARAMS = 2;
+} // namespace
 
 std::unique_ptr<SliderModel> SliderModel::instance_ = nullptr;
+std::mutex SliderModel::mutex_;
 
 SliderModel* SliderModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::SliderModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::SliderModelNG());
-        } else {
-            instance_.reset(new Framework::SliderModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::SliderModelNG());
+            } else {
+                instance_.reset(new Framework::SliderModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -289,7 +296,16 @@ void JSSlider::SetShowTips(const JSCallbackInfo& info)
         LOGE("arg is not bool.");
         return;
     }
-    SliderModel::GetInstance()->SetShowTips(info[0]->ToBoolean());
+
+    std::optional<std::string> content;
+    if (info.Length() == SLIDER_SHOW_TIPS_MAX_PARAMS) {
+        std::string str;
+        if (ParseJsString(info[1], str)) {
+            content = str;
+        }
+    }
+
+    SliderModel::GetInstance()->SetShowTips(info[0]->ToBoolean(), content);
 }
 
 void JSSlider::SetBlockBorderColor(const JSCallbackInfo& info)

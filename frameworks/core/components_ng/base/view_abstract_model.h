@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
+#include <mutex>
 #include <optional>
 #include <vector>
 
@@ -30,6 +31,7 @@
 #include "core/components/common/properties/shared_transition_option.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/event/ace_events.h"
@@ -209,7 +211,7 @@ public:
     virtual void SetDebugLine(const std::string& line) = 0;
     virtual void SetHoverEffect(HoverEffectType hoverEffect) = 0;
     virtual void SetHitTestMode(NG::HitTestMode hitTestMode) = 0;
-    virtual void SetKeyboardShortcut(const std::string& value, const std::vector<CtrlKey>& keys,
+    virtual void SetKeyboardShortcut(const std::string& value, const std::vector<ModifierKey>& keys,
         std::function<void()>&& onKeyboardShortcutAction) = 0;
 
     // popup and menu
@@ -220,6 +222,8 @@ public:
         ResponseType type, std::function<void()>&& buildFunc, const NG::MenuParam& menuParam) = 0;
     virtual void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<void()>&& buildFunc, int32_t type) = 0;
+    virtual void BindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
+        std::function<void()>&& buildFunc, NG::SheetStyle& sheetStyle) = 0;
 
     // accessibility
     virtual void SetAccessibilityGroup(bool accessible) = 0;
@@ -239,6 +243,7 @@ public:
     virtual void UpdateAnimatablePropertyFloat(const std::string& propertyName, float value) = 0;
 private:
     static std::unique_ptr<ViewAbstractModel> instance_;
+    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
 

@@ -32,17 +32,20 @@ bool ParseCommonTitle(const JSRef<JSVal>& jsValue)
     }
 
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-    JSRef<JSVal> title = jsObj->GetProperty("main");
     bool isCommonTitle = false;
-    if (title->IsString()) {
-        NG::NavDestinationView::SetTitle(title->ToString());
-        isCommonTitle = true;
-    }
+    bool hasSubTitle = false;
     JSRef<JSVal> subtitle = jsObj->GetProperty("sub");
     if (subtitle->IsString()) {
         NG::NavDestinationView::SetSubtitle(subtitle->ToString());
         isCommonTitle = true;
+        hasSubTitle = true;
     }
+    JSRef<JSVal> title = jsObj->GetProperty("main");
+    if (title->IsString()) {
+        NG::NavDestinationView::SetTitle(title->ToString(), hasSubTitle);
+        isCommonTitle = true;
+    }
+    
     return isCommonTitle;
 }
 
@@ -98,7 +101,7 @@ void JSNavDestination::SetTitle(const JSCallbackInfo& info)
     }
 
     if (info[0]->IsString()) {
-        NG::NavDestinationView::SetTitle(info[0]->ToString());
+        NG::NavDestinationView::SetTitle(info[0]->ToString(), false);
     } else if (info[0]->IsObject()) {
         if (ParseCommonTitle(info[0])) {
             return;
@@ -123,18 +126,22 @@ void JSNavDestination::SetTitle(const JSCallbackInfo& info)
         if (height->IsNumber()) {
             if (height->ToNumber<int32_t>() == 0) {
                 NG::NavDestinationView::SetTitleHeight(NG::FULL_SINGLE_LINE_TITLEBAR_HEIGHT);
+                return;
             }
             if (height->ToNumber<int32_t>() == 1) {
                 NG::NavDestinationView::SetTitleHeight(NG::FULL_DOUBLE_LINE_TITLEBAR_HEIGHT);
+                return;
             }
             Dimension titleHeight;
             if (!JSContainerBase::ParseJsDimensionVp(height, titleHeight)) {
                 return;
             }
             NG::NavDestinationView::SetTitleHeight(titleHeight);
+            return;
         }
     } else {
         LOGE("arg is not [String|Function].");
+        NG::NavDestinationView::SetTitle("", false);
     }
 }
 

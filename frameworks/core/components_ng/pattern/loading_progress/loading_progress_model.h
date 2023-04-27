@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PROGRESS_LOADING_PROGRESS_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PROGRESS_LOADING_PROGRESS_MODEL_H
 
+#include <mutex>
+
 #include "core/components/common/properties/color.h"
 
 namespace OHOS::Ace {
@@ -29,6 +31,7 @@ public:
     
 private:
     static std::unique_ptr<LoadingProgressModel> instance_;
+    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
 

@@ -1064,12 +1064,18 @@ var ModalTransition;
   ModalTransition[ModalTransition["ALPHA"] = 2] = "ALPHA";
 })(ModalTransition || (ModalTransition = {}));
 
-var CtrlKey;
-(function (CtrlKey) {
-  CtrlKey[CtrlKey["CTRL"] = 0] = "CTRL";
-  CtrlKey[CtrlKey["SHIFT"] = 1] = "SHIFT";
-  CtrlKey[CtrlKey["ALT"] = 2] = "ALT";
-})(CtrlKey || (CtrlKey = {}));
+var ModifierKey;
+(function (ModifierKey) {
+  ModifierKey[ModifierKey["CTRL"] = 0] = "CTRL";
+  ModifierKey[ModifierKey["SHIFT"] = 1] = "SHIFT";
+  ModifierKey[ModifierKey["ALT"] = 2] = "ALT";
+})(ModifierKey || (ModifierKey = {}));
+
+var SheetSize;
+(function (SheetSize) {
+  SheetSize['MEDIUM'] = "MEDIUM";
+  SheetSize['LARGE'] = "LARGE";
+})(SheetSize || (SheetSize = {}));
 
 var FunctionKey;
 (function (FunctionKey) {

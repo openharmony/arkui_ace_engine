@@ -24,19 +24,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<CircleModel> CircleModel::instance_ = nullptr;
+std::mutex CircleModel::mutex_;
 
 CircleModel* CircleModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::CircleModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::CircleModelNG());
-        } else {
-            instance_.reset(new Framework::CircleModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::CircleModelNG());
+            } else {
+                instance_.reset(new Framework::CircleModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }

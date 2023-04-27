@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TABS_TAB_CONTENT_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TABS_TAB_CONTENT_MODEL_H
 
+#include <mutex>
+
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
 #include "base/image/pixel_map.h"
@@ -111,6 +113,7 @@ public:
 
 private:
     static std::unique_ptr<TabContentModel> instance_;
+    static std::mutex mutex_;
 };
 
 } // namespace OHOS::Ace

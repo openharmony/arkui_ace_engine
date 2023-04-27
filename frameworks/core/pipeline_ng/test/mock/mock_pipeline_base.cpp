@@ -107,8 +107,6 @@ void PipelineContext::SetRootRect(double width, double height, double offset) {}
 
 void PipelineContext::SetGetViewSafeAreaImpl(std::function<SafeAreaEdgeInserts()>&& callback) {}
 
-void PipelineContext::AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode) {}
-
 SafeAreaEdgeInserts PipelineContext::GetCurrentViewSafeArea() const
 {
     return {};
@@ -172,6 +170,8 @@ uint32_t PipelineContext::AddScheduleTask(const RefPtr<ScheduleTask>& task)
 {
     return 0;
 }
+
+void PipelineContext::RemoveScheduleTask(uint32_t id) {}
 
 void PipelineContext::AddOnAreaChangeNode(int32_t nodeId) {}
 

@@ -60,7 +60,7 @@ void SlidingPanelLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // Calculate child layout constraint.
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
     auto childIdeaSize = idealSize;
-    childIdeaSize.SetHeight(static_cast<float>(idealSize.Height() - BLANK_MIN_HEIGHT.ConvertToPx()));
+    childIdeaSize.SetHeight(static_cast<float>(idealSize.Height() - currentOffset_));
     childLayoutConstraint.selfIdealSize = OptionalSizeF(childIdeaSize);
     childLayoutConstraint.parentIdealSize = OptionalSizeF(idealSize);
 

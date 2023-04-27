@@ -17,6 +17,8 @@
 
 #define private public
 #define protected public
+
+#include "core/components/text/text_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -25,6 +27,7 @@
 #include "core/components_ng/pattern/image/image_paint_method.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/test/mock/render/mock_canvas_image.h"
+#include "core/components_ng/test/mock/rosen/mock_canvas.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
@@ -58,6 +61,8 @@ constexpr ImageRenderMode IMAGE_RENDERMODE_DEFAULT = ImageRenderMode::ORIGINAL;
 constexpr bool MATCHTEXTDIRECTION_DEFAULT = true;
 const Color SVG_FILL_COLOR_DEFAULT = Color::BLUE;
 const std::vector<float> COLOR_FILTER_DEFAULT = { 1.0, 2.0, 3.0 };
+const SizeF CONTENT_SIZE = SizeF(400.0, 500.0);
+const OffsetF CONTENT_OFFSET = OffsetF(50.0, 60.0);
 constexpr bool SYNCMODE_DEFAULT = false;
 constexpr CopyOptions COPYOPTIONS_DEFAULT = CopyOptions::None;
 constexpr bool AUTORESIZE_DEFAULT = true;
@@ -498,6 +503,7 @@ HWTEST_F(ImageTestNg, ImagePatternCreateNodePaintMethod001, TestSize.Level1)
      */
     imagePattern->image_ = imagePattern->loadingCtx_->MoveCanvasImage();
     EXPECT_TRUE(imagePattern->CreateNodePaintMethod() != nullptr);
+    ASSERT_NE(imagePattern->imageModifier_, nullptr);
     /**
      * @tc.cases: case3. When AltImage load successfully and altImage Rect is valid, it will Create AltImage's
      *                   NodePaintMethod.
@@ -512,11 +518,12 @@ HWTEST_F(ImageTestNg, ImagePatternCreateNodePaintMethod001, TestSize.Level1)
     EXPECT_EQ(imagePattern->CreateNodePaintMethod(), nullptr);
     imagePattern->altDstRect_ = std::make_unique<RectF>(RectF());
     EXPECT_NE(imagePattern->CreateNodePaintMethod(), nullptr);
+    ASSERT_NE(imagePattern->altImageModifier_, nullptr);
 }
 
 /**
  * @tc.name: ImagePaintMethod001
- * @tc.desc: ImagePaintMethod can get ContentDrawFunction and UpdatePaintConfig correctly.
+ * @tc.desc: ImagePaintMethod can get GetContentModifier UpdateContentModifier.
  * @tc.type: FUNC
  */
 HWTEST_F(ImageTestNg, ImagePaintMethod001, TestSize.Level1)
@@ -534,9 +541,10 @@ HWTEST_F(ImageTestNg, ImagePaintMethod001, TestSize.Level1)
     ASSERT_NE(imagePattern, nullptr);
     imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
     imagePattern->image_->SetPaintConfig(ImagePaintConfig());
-    ImagePaintMethod imagePaintMethod(imagePattern->image_);
+    imagePattern->imageModifier_ = AceType::MakeRefPtr<ImageModifier>();
+    ImagePaintMethod imagePaintMethod(imagePattern->image_, imagePattern->imageModifier_, true);
     /**
-     * @tc.steps: step3. ImagePaintMethod GetContentDrawFunction.
+     * @tc.steps: step3. ImagePaintMethod GetContentModifier.
      */
     auto imageRenderProperty = imagePattern->GetPaintProperty<ImageRenderProperty>();
     ASSERT_NE(imageRenderProperty, nullptr);
@@ -546,9 +554,13 @@ HWTEST_F(ImageTestNg, ImagePaintMethod001, TestSize.Level1)
     PaintWrapper paintWrapper(nullptr, geometryNode, imageRenderProperty);
     auto pipeLine = PipelineBase::GetCurrentContext();
     pipeLine->SetIsRightToLeft(true);
-    auto paintMethod = imagePaintMethod.GetContentDrawFunction(&paintWrapper);
     ASSERT_NE(imagePaintMethod.canvasImage_, nullptr);
-    ASSERT_NE(paintMethod, nullptr);
+    ASSERT_NE(imagePaintMethod.imageModifier_, nullptr);
+    ASSERT_NE(imagePaintMethod.GetContentModifier(&paintWrapper), nullptr);
+    /**
+     * @tc.steps: step4. ImagePaintMethod UpdatePaintConfig
+     */
+    imagePaintMethod.UpdateContentModifier(&paintWrapper);
     auto& config = imagePaintMethod.canvasImage_->paintConfig_;
     EXPECT_EQ(config->imageFit_, IMAGE_FIT_DEFAULT);
     EXPECT_EQ(config->renderMode_, IMAGE_RENDERMODE_DEFAULT);
@@ -556,6 +568,21 @@ HWTEST_F(ImageTestNg, ImagePaintMethod001, TestSize.Level1)
     EXPECT_EQ(config->imageRepeat_, IMAGE_REPEAT_DEFAULT);
     EXPECT_EQ(config->needFlipCanvasHorizontally_, MATCHTEXTDIRECTION_DEFAULT);
     EXPECT_EQ(*config->colorFilter_, COLOR_FILTER_DEFAULT);
+
+    /**
+     * @tc.steps: step4. ImagePaintMethod GetOverlayDrawFunction
+     */
+
+    // create mock theme manager
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<TextTheme>()));
+
+    auto overlayPaintMethod = imagePaintMethod.GetOverlayDrawFunction(&paintWrapper);
+    EXPECT_TRUE(overlayPaintMethod);
+    EXPECT_TRUE(imagePaintMethod.selected_);
+
+    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -622,6 +649,7 @@ HWTEST_F(ImageTestNg, ImageCreator002, TestSize.Level1)
     ASSERT_NE(imageRenderProperty, nullptr);
     EXPECT_EQ(imageRenderProperty->GetImagePaintStyle(), nullptr);
     EXPECT_EQ(imageRenderProperty->GetNeedBorderRadius(), std::nullopt);
+    EXPECT_EQ(imageRenderProperty->GetImageFit(), std::nullopt);
 }
 
 /**
@@ -672,6 +700,7 @@ HWTEST_F(ImageTestNg, ImageCreator003, TestSize.Level1)
     EXPECT_EQ(imageRenderProperty->GetImageRepeat().value(), IMAGE_NO_REPEAT);
     EXPECT_EQ(imageRenderProperty->GetMatchTextDirection().value(), MATCHTEXTDIRECTION_DEFAULT);
     EXPECT_TRUE(imageRenderProperty->GetNeedBorderRadiusValue());
+    EXPECT_EQ(imageRenderProperty->GetImageFitValue(), IMAGE_FIT_DEFAULT);
 }
 
 /**
@@ -1369,5 +1398,196 @@ HWTEST_F(ImageTestNg, CopyOption001, TestSize.Level1)
     pattern->SetCopyOption(CopyOptions::Distributed);
     frameNode->MarkModifyDone();
     EXPECT_TRUE(gestureHub->longPressEventActuator_->longPressEvent_);
+}
+
+/**
+ * @tc.name: ImageModifier001
+ * @tc.desc: Test ImageModifier UpdateImageData and SetImageFit
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, ImageModifier001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode
+     */
+    auto frameNode = ImageTestNg::CreateImageNodeWithDefaultProp(IMAGE_SRC_URL, ALT_SRC_URL, nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    /**
+     * @tc.steps: step2. create ImagePaintMethod
+     */
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
+    imagePattern->image_->SetPaintConfig(ImagePaintConfig());
+    imagePattern->imageModifier_ = AceType::MakeRefPtr<ImageModifier>();
+    ImagePaintMethod imagePaintMethod(imagePattern->image_, imagePattern->imageModifier_, true);
+    /**
+     * @tc.steps: step3. ImagePaintMethod GetContentModifier
+     */
+    auto imageRenderProperty = imagePattern->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(imageRenderProperty, nullptr);
+    imageRenderProperty->UpdateImageFit(IMAGE_FIT_DEFAULT);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetContentSize(CONTENT_SIZE);
+    geometryNode->SetContentOffset(CONTENT_OFFSET);
+    PaintWrapper paintWrapper(nullptr, geometryNode, imageRenderProperty);
+    ASSERT_NE(imagePaintMethod.GetContentModifier(&paintWrapper), nullptr);
+    /**
+     * @tc.steps: step4. ImagePaintMethod UpdateContentModifier
+     * @tc.expected: step4. Check the imageModifier member variable value
+     */
+    imagePaintMethod.UpdateContentModifier(&paintWrapper);
+    auto imageModifier = imagePaintMethod.imageModifier_;
+    auto canvasImage = imageModifier->canvasImage_.Upgrade();
+    ASSERT_NE(canvasImage, nullptr);
+    EXPECT_EQ(imageModifier->contentSize_, CONTENT_SIZE);
+    EXPECT_EQ(imageModifier->offset_, CONTENT_OFFSET);
+    EXPECT_EQ(imageModifier->imageFit_->Get(), static_cast<float>(IMAGE_FIT_DEFAULT));
+}
+
+/**
+ * @tc.name: ImageModifier002
+ * @tc.desc: Test ImageModifier UpdatePaintConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, ImageModifier002, TestSize.Level1)
+{
+    RefPtr<ImageModifier> imageMoidifier = AceType::MakeRefPtr<ImageModifier>();
+    RefPtr<CanvasImage> canvasImage = AceType::MakeRefPtr<MockCanvasImage>();
+    canvasImage->SetPaintConfig(ImagePaintConfig());
+    auto config = canvasImage->GetPaintConfig();
+    config.dstRect_ = { 0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT };
+    SizeF contentSize(IMAGE_COMPONENTSIZE_WIDTH, IMAGE_COMPONENTSIZE_HEIGHT);
+    OffsetF offset(IMAGE_COMPONENTSIZE_WIDTH, IMAGE_COMPONENTSIZE_HEIGHT);
+    auto canvas = AceType::WeakClaim(AceType::RawPtr(canvasImage));
+    imageMoidifier->UpdateImageData(canvas, offset, contentSize);
+    imageMoidifier->UpdatePaintConfig(1.0f);
+    EXPECT_EQ(config.dstRect_, RectF(0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT));
+}
+
+/**
+ * @tc.name: ImageModifier003
+ * @tc.desc: Test ImageModifier onDraw
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, ImageModifier003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ImagePaintMethod.
+     */
+    RefPtr<ImageModifier> imageMoidifier = AceType::MakeRefPtr<ImageModifier>();
+    RefPtr<CanvasImage> canvasImage = AceType::MakeRefPtr<MockCanvasImage>();
+    canvasImage->SetPaintConfig(ImagePaintConfig());
+    ImagePaintMethod imagePaintMethod(canvasImage, imageMoidifier, true);
+    /**
+     * @tc.steps: step2. ImagePaintMethod GetContentModifier
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(CONTENT_SIZE);
+    geometryNode->SetContentOffset(CONTENT_OFFSET);
+    auto imageRenderProperty = AceType::MakeRefPtr<ImageRenderProperty>();
+    ASSERT_NE(imageRenderProperty, nullptr);
+    PaintWrapper paintWrapper(nullptr, geometryNode, imageRenderProperty);
+    ASSERT_NE(imagePaintMethod.GetContentModifier(&paintWrapper), nullptr);
+    /**
+     * @tc.steps: step3. ImagePaintMethod UpdateContentModifier
+     */
+    imagePaintMethod.UpdateContentModifier(&paintWrapper);
+    ASSERT_NE(imagePaintMethod.imageModifier_, nullptr);
+    /**
+     * @tc.steps: step4. ImageModifier onDraw
+     */
+    Testing::MockCanvas canvas;
+    DrawingContext context { canvas, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT };
+    imagePaintMethod.imageModifier_->onDraw(context);
+    imagePaintMethod.imageModifier_->isFirst_ = false;
+    imagePaintMethod.imageModifier_->onDraw(context);
+    imagePaintMethod.imageModifier_->isFirst_ = true;
+    imagePaintMethod.imageModifier_->onDraw(context);
+    auto imageCanvas = imagePaintMethod.imageModifier_->canvasImage_.Upgrade();
+    ASSERT_NE(imageCanvas, nullptr);
+    auto paintConfig = imageCanvas->GetPaintConfig();
+    paintConfig.isSvg_ = true;
+    imagePaintMethod.imageModifier_->onDraw(context);
+    paintConfig.isSvg_ = false;
+    imagePaintMethod.imageModifier_->onDraw(context);
+}
+
+/**
+ * @tc.name: ImageModifier004
+ * @tc.desc: Test ImageModifier DrawImageWithAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, ImageModifier004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ImagePaintMethod.
+     */
+    RefPtr<ImageModifier> imageMoidifier = AceType::MakeRefPtr<ImageModifier>();
+    RefPtr<CanvasImage> canvasImage = AceType::MakeRefPtr<MockCanvasImage>();
+    canvasImage->SetPaintConfig(ImagePaintConfig());
+    ImagePaintMethod imagePaintMethod(canvasImage, imageMoidifier, true);
+    /**
+     * @tc.steps: step2. ImagePaintMethod GetContentModifier
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(CONTENT_SIZE);
+    geometryNode->SetContentOffset(CONTENT_OFFSET);
+    auto imageRenderProperty = AceType::MakeRefPtr<ImageRenderProperty>();
+    ASSERT_NE(imageRenderProperty, nullptr);
+    PaintWrapper paintWrapper(nullptr, geometryNode, imageRenderProperty);
+    ASSERT_NE(imagePaintMethod.GetContentModifier(&paintWrapper), nullptr);
+    /**
+     * @tc.steps: step3. ImagePaintMethod UpdateContentModifier
+     */
+    imagePaintMethod.UpdateContentModifier(&paintWrapper);
+    ASSERT_NE(imagePaintMethod.imageModifier_, nullptr);
+    /**
+     * @tc.steps: step4. ImageModifier DrawImageWithAnimation
+     */
+    Testing::MockCanvas canvas;
+    DrawingContext context { canvas, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT };
+    imagePaintMethod.imageModifier_->DrawImageWithAnimation(context);
+}
+
+/**
+ * @tc.name: ImageModifier005
+ * @tc.desc: Test ImageModifier DrawImageWithoutAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, ImageModifier005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ImagePaintMethod.
+     */
+    RefPtr<ImageModifier> imageMoidifier = AceType::MakeRefPtr<ImageModifier>();
+    RefPtr<CanvasImage> canvasImage = AceType::MakeRefPtr<MockCanvasImage>();
+    canvasImage->SetPaintConfig(ImagePaintConfig());
+    ImagePaintMethod imagePaintMethod(canvasImage, imageMoidifier, true);
+    /**
+     * @tc.steps: step2. ImagePaintMethod GetContentModifier
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(CONTENT_SIZE);
+    geometryNode->SetContentOffset(CONTENT_OFFSET);
+    auto imageRenderProperty = AceType::MakeRefPtr<ImageRenderProperty>();
+    ASSERT_NE(imageRenderProperty, nullptr);
+    PaintWrapper paintWrapper(nullptr, geometryNode, imageRenderProperty);
+    ASSERT_NE(imagePaintMethod.GetContentModifier(&paintWrapper), nullptr);
+    /**
+     * @tc.steps: step3. ImagePaintMethod UpdateContentModifier
+     */
+    imagePaintMethod.UpdateContentModifier(&paintWrapper);
+    ASSERT_NE(imagePaintMethod.imageModifier_, nullptr);
+    /**
+     * @tc.steps: step4. ImageModifier DrawImageWithoutAnimation
+     */
+    Testing::MockCanvas canvas;
+    DrawingContext context { canvas, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT };
+    imagePaintMethod.imageModifier_->DrawImageWithoutAnimation(context);
 }
 } // namespace OHOS::Ace::NG

@@ -307,14 +307,14 @@ public:
     virtual void NotifyConfigurationChange(bool) {}
     virtual void HotReload() {}
 
-    void SetIsBundle(bool isBundle)
+    void SetIsModule(bool isModule)
     {
-        isBundle_ = isBundle;
+        isModule_ = isModule;
     }
 
-    bool IsBundle() const
+    bool IsModule() const
     {
-        return isBundle_;
+        return isModule_;
     }
 
 protected:
@@ -333,7 +333,7 @@ private:
     bool usePartialUpdate_ = false;
     Settings settings_;
     RefPtr<PageUrlChecker> pageUrlChecker_;
-    bool isBundle_ = false;
+    bool isModule_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(Container);
 };
 

@@ -244,8 +244,6 @@ bool StageManager::PopPageToIndex(int32_t index, bool needShowNext, bool needTra
         return true;
     }
 
-    // log for cppCrash
-    LOGI("PopPageToIndex, to index:%{public}d, children size:%{public}zu", index, children.size());
     if (needTransition) {
         pipeline->FlushPipelineImmediately();
     }
@@ -273,10 +271,8 @@ bool StageManager::PopPageToIndex(int32_t index, bool needShowNext, bool needTra
         LOGI("PopPageToIndex, before pageTransition, to index:%{public}d, children size:%{public}zu, "
              "stage children size:%{public}zu",
             index, children.size(), stageNode_->GetChildren().size());
-        iter = children.rbegin();
-        ++iter;
         for (int32_t current = 1; current < popSize; ++current) {
-            auto pageNode = *(iter++);
+            auto pageNode = *(++children.rbegin());
             stageNode_->RemoveChild(pageNode);
         }
         stageNode_->RebuildRenderContextTree();

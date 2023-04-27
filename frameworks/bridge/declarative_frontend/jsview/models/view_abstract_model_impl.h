@@ -165,7 +165,7 @@ public:
     void SetDebugLine(const std::string& line) override;
     void SetHoverEffect(HoverEffectType hoverEffect) override;
     void SetHitTestMode(NG::HitTestMode hitTestMode) override;
-    void SetKeyboardShortcut(const std::string& value, const std::vector<CtrlKey>& keys,
+    void SetKeyboardShortcut(const std::string& value, const std::vector<ModifierKey>& keys,
         std::function<void()>&& onKeyboardShortcutAction) override {};
 
     void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) override;
@@ -175,6 +175,8 @@ public:
     void BindContextMenu(ResponseType type, std::function<void()>&& buildFunc, const NG::MenuParam& menuParam) override;
     void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<void()>&& buildFunc, int32_t type) override {}
+    void BindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
+        std::function<void()>&& buildFunc, NG::SheetStyle& sheetStyle) override {}
 
     void SetAccessibilityGroup(bool accessible) override;
     void SetAccessibilityText(const std::string& text) override;

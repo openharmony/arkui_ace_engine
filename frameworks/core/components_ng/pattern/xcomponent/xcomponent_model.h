@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_XCOMPONENT_XCOMPONENT_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_XCOMPONENT_XCOMPONENT_MODEL_H
 
+#include <mutex>
 #include <set>
 
 #include "core/components/xcomponent/xcomponent_controller.h"
@@ -36,6 +37,7 @@ public:
 
 private:
     static std::unique_ptr<XComponentModel> instance_;
+    static std::mutex mutex_;
 };
 
 } // namespace OHOS::Ace

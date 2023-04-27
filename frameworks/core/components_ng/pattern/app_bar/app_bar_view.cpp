@@ -39,9 +39,11 @@ RefPtr<FrameNode> AppBarView::Create(RefPtr<FrameNode>& content)
     auto column = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto titleBar = BuildBarTitle();
+    column->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
     column->AddChild(titleBar);
     column->AddChild(content);
     content->GetLayoutProperty()->UpdateLayoutWeight(1.0f);
+    content->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
     auto stagePattern = content->GetPattern<StagePattern>();
     if (stagePattern) {
         stagePattern->SetOnRebuildFrameCallback([titleBar, content]() {
@@ -118,6 +120,8 @@ RefPtr<FrameNode> AppBarView::BuildBarTitle()
         },
         true));
     appBarRow->AddChild(titleLabel);
+
+#ifndef IS_EMULATOR
     if (SystemProperties::GetExtSurfaceEnabled()) {
         appBarRow->AddChild(BuildIconButton(
             InternalResource::ResourceId::APP_BAR_FA_SVG,
@@ -135,6 +139,7 @@ RefPtr<FrameNode> AppBarView::BuildBarTitle()
             },
             false));
     }
+#endif
 
     return appBarRow;
 }

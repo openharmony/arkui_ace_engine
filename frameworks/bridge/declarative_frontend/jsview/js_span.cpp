@@ -41,19 +41,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<SpanModel> SpanModel::instance_ = nullptr;
+std::mutex SpanModel::mutex_;
 
 SpanModel* SpanModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::SpanModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::SpanModelNG());
-        } else {
-            instance_.reset(new Framework::SpanModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::SpanModelNG());
+            } else {
+                instance_.reset(new Framework::SpanModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }

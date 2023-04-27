@@ -442,8 +442,9 @@ void RosenRenderText::ApplyIndents(double width)
         indents.push_back(0.0);
         indents.push_back(-indent);
     }
-    auto* paragraphTxt = static_cast<txt::ParagraphTxt*>(paragraph_.get());
 #ifndef NEW_SKIA
+    // TODO SetIndents need must
+    auto* paragraphTxt = static_cast<txt::ParagraphTxt*>(paragraph_.get());
     if (paragraphTxt != nullptr) {
         paragraphTxt->SetIndents(indents);
     }

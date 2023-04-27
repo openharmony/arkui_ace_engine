@@ -35,19 +35,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<ImageModel> ImageModel::instance_ = nullptr;
+std::mutex ImageModel::mutex_;
 
 ImageModel* ImageModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::ImageModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::ImageModelNG());
-        } else {
-            instance_.reset(new Framework::ImageModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::ImageModelNG());
+            } else {
+                instance_.reset(new Framework::ImageModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }

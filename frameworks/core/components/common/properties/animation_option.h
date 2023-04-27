@@ -142,7 +142,6 @@ private:
     float tempo_ = 1.0f;
     FillMode fillMode_ = FillMode::FORWARDS;
     bool allowRunningAsynchronously_ = false;
-
     RefPtr<Curve> curve_;
     std::function<void()> onFinishEvent_;
     AnimationDirection direction_ = AnimationDirection::NORMAL;

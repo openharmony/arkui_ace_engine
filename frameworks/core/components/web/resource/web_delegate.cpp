@@ -563,6 +563,7 @@ WebDelegate::~WebDelegate()
 {
     ReleasePlatformResource();
     if (nweb_) {
+        nweb_->UnRegisterScreenLockFunction(GetRosenWindowId());
         nweb_->OnDestroy();
     }
     UnregisterSurfacePositionChangedCallback();
@@ -2355,9 +2356,10 @@ std::string WebDelegate::GetCustomScheme()
 void WebDelegate::InitWebViewWithSurface()
 {
     auto context = context_.Upgrade();
-    if (!context) {
-        return;
-    }
+    CHECK_NULL_VOID(context);
+    auto window = context->GetWindow();
+    CHECK_NULL_VOID(window);
+    rosenWindowId_ = window->GetWindowId();
     LOGI("Init WebView With Surface");
     context->GetTaskExecutor()->PostTask(
         [weak = WeakClaim(this)]() {
@@ -2415,7 +2417,13 @@ void WebDelegate::InitWebViewWithSurface()
             downloadListenerImpl->SetWebDelegate(weak);
             delegate->nweb_->SetNWebHandler(nweb_handler);
             delegate->nweb_->PutDownloadCallback(downloadListenerImpl);
-
+#ifdef OHOS_STANDARD_SYSTEM
+            delegate->nweb_->RegisterScreenLockFunction(delegate->GetRosenWindowId(), [weak](bool key) {
+                auto delegate = weak.Upgrade();
+                CHECK_NULL_VOID(delegate);
+                delegate->SetKeepScreenOn(key);
+            });
+#endif
             auto findListenerImpl = std::make_shared<FindListenerImpl>(Container::CurrentId());
             findListenerImpl->SetWebDelegate(weak);
             delegate->nweb_->PutFindCallback(findListenerImpl);
@@ -2427,6 +2435,15 @@ void WebDelegate::InitWebViewWithSurface()
             delegate->nweb_->PutReleaseSurfaceCallback(releaseSurfaceListenerImpl);
         },
         TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::SetKeepScreenOn(bool key)
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto window = context->GetWindow();
+    CHECK_NULL_VOID(window);
+    window->SetKeepScreenOn(key);
 }
 
 void WebDelegate::UpdateUserAgent(const std::string& userAgent)

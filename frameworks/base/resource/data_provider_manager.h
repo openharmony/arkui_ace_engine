@@ -23,6 +23,7 @@
 #include <string>
 #include <type_traits>
 #include <vector>
+#include <mutex>
 
 #include "base/memory/ace_type.h"
 #include "base/resource/data_ability_helper.h"

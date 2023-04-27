@@ -116,15 +116,9 @@ void PipelineContext::AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode)
 {
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(dirtyNode);
-    auto customNode = AceType::DynamicCast<CustomNodeBase>(dirtyNode);
-    if (dirtyNode->IsActive()) {
-        inactiveDirtyNodes_.erase(dirtyNode->GetId());
-        dirtyNodes_.emplace(dirtyNode);
-        hasIdleTasks_ = true;
-        RequestFrame();
-        return;
-    }
-    inactiveDirtyNodes_.emplace(dirtyNode->GetId());
+    dirtyNodes_.emplace(dirtyNode);
+    hasIdleTasks_ = true;
+    RequestFrame();
 }
 
 void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
@@ -184,6 +178,12 @@ uint32_t PipelineContext::AddScheduleTask(const RefPtr<ScheduleTask>& task)
     scheduleTasks_.try_emplace(++nextScheduleTaskId_, task);
     RequestFrame();
     return nextScheduleTaskId_;
+}
+
+void PipelineContext::RemoveScheduleTask(uint32_t id)
+{
+    CHECK_RUN_ON(UI);
+    scheduleTasks_.erase(id);
 }
 
 void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
@@ -397,7 +397,6 @@ void PipelineContext::SetupRootElement()
         auto overlay = weakOverlayManger.Upgrade();
         CHECK_NULL_VOID(overlay);
         overlay->HideAllMenus();
-        overlay->HideAllPopups();
     };
     rootNode_->SetOnAreaChangeCallback(std::move(onAreaChangedFunc));
     AddOnAreaChangeNode(rootNode_->GetId());

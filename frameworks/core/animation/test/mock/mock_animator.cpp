@@ -48,11 +48,22 @@ bool Animator::HasScheduler() const
     return scheduler_ != nullptr;
 }
 
-void Animator::AddInterpolator(const RefPtr<Interpolator>& animation) {}
+void Animator::AddInterpolator(const RefPtr<Interpolator>& animation)
+{
+    if (animation) {
+        interpolators_.emplace_back(animation);
+    }
+}
 
-void Animator::RemoveInterpolator(const RefPtr<Interpolator>& animation) {}
+void Animator::RemoveInterpolator(const RefPtr<Interpolator>& animation)
+{
+    interpolators_.remove(animation);
+}
 
-void Animator::ClearInterpolators() {}
+void Animator::ClearInterpolators()
+{
+    interpolators_.clear();
+}
 
 void Animator::AddProxyController(const RefPtr<Animator>& proxy) {}
 

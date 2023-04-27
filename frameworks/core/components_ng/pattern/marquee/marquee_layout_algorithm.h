@@ -28,20 +28,10 @@ public:
     MarqueeLayoutAlgorithm() = default;
 
     ~MarqueeLayoutAlgorithm() override = default;
-
-    void SetChildOffset(float offset)
-    {
-        childOffset_ = offset;
-    }
-
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
 
-    void OnReset() override {}
-
 private:
-    float childOffset_ = 0.0f;
-
     ACE_DISALLOW_COPY_AND_MOVE(MarqueeLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG
