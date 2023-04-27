@@ -60,8 +60,10 @@
 #ifndef OHOS_PLATFORM
 extern const uint8_t _binary_strip_native_min_abc_start[];
 extern const uint8_t* _binary_strip_native_min_abc_end;
+#if defined(PREVIEW)
 extern const uint8_t _binary_jsMockSystemPlugin_abc_start[];
 extern const uint8_t* _binary_jsMockSystemPlugin_abc_end;
+#endif
 #endif
 
 namespace OHOS::Ace::Framework {
@@ -2993,12 +2995,14 @@ bool JsiEngineInstance::InitJsEnv(bool debugger_mode, const std::unordered_map<s
         return false;
     }
 #else
+#if defined(PREVIEW)
     bool mockResult = runtime_->EvaluateJsCode((uint8_t*)_binary_jsMockSystemPlugin_abc_start,
         _binary_strip_native_min_abc_end - _binary_jsMockSystemPlugin_abc_start);
     if (!mockResult) {
         LOGE("Failed to load js mock api!");
         return false;
     }
+#endif
     bool jsfwkResult = runtime_->EvaluateJsCode((uint8_t*)_binary_strip_native_min_abc_start,
         _binary_strip_native_min_abc_end - _binary_strip_native_min_abc_start);
     if (!jsfwkResult) {
