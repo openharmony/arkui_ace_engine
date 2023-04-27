@@ -126,18 +126,22 @@ void JSNavDestination::SetTitle(const JSCallbackInfo& info)
         if (height->IsNumber()) {
             if (height->ToNumber<int32_t>() == 0) {
                 NG::NavDestinationView::SetTitleHeight(NG::FULL_SINGLE_LINE_TITLEBAR_HEIGHT);
+                return;
             }
             if (height->ToNumber<int32_t>() == 1) {
                 NG::NavDestinationView::SetTitleHeight(NG::FULL_DOUBLE_LINE_TITLEBAR_HEIGHT);
+                return;
             }
             Dimension titleHeight;
             if (!JSContainerBase::ParseJsDimensionVp(height, titleHeight)) {
                 return;
             }
             NG::NavDestinationView::SetTitleHeight(titleHeight);
+            return;
         }
     } else {
         LOGE("arg is not [String|Function].");
+        NG::NavDestinationView::SetTitle("", false);
     }
 }
 
