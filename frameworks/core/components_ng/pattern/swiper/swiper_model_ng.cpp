@@ -231,4 +231,11 @@ void SwiperModelNG::SetNextMargin(const Dimension& nextMargin)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, NextMargin, nextMargin);
 }
+
+void SwiperModelNG::SetArrowStyle(const SwiperArrowParameters& swiperArrowParameters) {}
+
+void SwiperModelNG::SetDisplayArrow(bool displayArrow) {}
+
+void SwiperModelNG::SetHoverShow(bool hoverShow) {}
+
 } // namespace OHOS::Ace::NG

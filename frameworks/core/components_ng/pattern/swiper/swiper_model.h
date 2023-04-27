@@ -58,6 +58,15 @@ struct SwiperDigitalParameters {
     std::optional<FontWeight> selectedFontWeight;
 };
 
+struct SwiperArrowParameters {
+    std::optional<bool> isShowBoard;
+    std::optional<bool> isSiderMiddle;
+    std::optional<Dimension> boardSize;
+    std::optional<Color> boardColor;
+    std::optional<Dimension> arrowSize;
+    std::optional<Color> arrowColor;
+};
+
 class ACE_EXPORT SwiperModel {
 public:
     static SwiperModel* GetInstance();
@@ -95,6 +104,9 @@ public:
     virtual void SetDigitIndicatorStyle(const SwiperDigitalParameters& swiperDigitalParameters) {}
     virtual void SetPreviousMargin(const Dimension& prevMargin) {}
     virtual void SetNextMargin(const Dimension& nextMargin) {}
+    virtual void SetArrowStyle(const SwiperArrowParameters& swiperArrowParameters) {}
+    virtual void SetDisplayArrow(bool displayArrow) {}
+    virtual void SetHoverShow(bool hoverShow) {}
 private:
     static std::unique_ptr<SwiperModel> instance_;
     static std::mutex mutex_;
