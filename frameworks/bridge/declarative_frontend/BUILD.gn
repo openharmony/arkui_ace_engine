@@ -85,13 +85,16 @@ gen_obj("js_enum_style") {
   snapshot_dep = []
 }
 
-gen_obj("js_mock_system_plugin") {
-  input = "$root_out_dir/obj/ide/tools/previewer/automock/dist/jsMockSystemPlugin.js"
-  if (use_mac || use_mingw_win || use_linux || target_os == "ios") {
-    jsmocksystemplugin_obj_path = base_output_path + "/js_mock_system_plugin.c"
+if (!is_cross_platform_build) {
+  gen_obj("js_mock_system_plugin") {
+    input = "$root_out_dir/obj/ide/tools/previewer/automock/dist/jsMockSystemPlugin.js"
+    if (use_mac || use_mingw_win || use_linux || target_os == "ios") {
+      jsmocksystemplugin_obj_path =
+          base_output_path + "/js_mock_system_plugin.c"
+    }
+    output = jsmocksystemplugin_obj_path
+    snapshot_dep = [ "//ide/tools/previewer/automock:gen_snapshot_jsmock" ]
   }
-  output = jsmocksystemplugin_obj_path
-  snapshot_dep = [ "//ide/tools/previewer/automock:gen_snapshot_jsmock" ]
 }
 
 # build declarative javascript engine source

@@ -43,16 +43,19 @@ ts2abc_gen_abc("gen_jsEnumStyle_abc") {
   out_puts = [ base_output_path + "/jsEnumStyle.abc" ]
 }
 
-ts2abc_gen_abc("gen_js_mock_system_plugin_abc") {
-  extra_visibility = [ ":*" ]  # Only targets in this file can depend on this.
-  src_js = rebase_path(
-          "$root_out_dir/obj/ide/tools/previewer/automock/dist/jsMockSystemPlugin.js")
-  dst_file = rebase_path(base_output_path + "/jsMockSystemPlugin.abc")
+if (!is_cross_platform_build) {
+  ts2abc_gen_abc("gen_js_mock_system_plugin_abc") {
+    extra_visibility = [ ":*" ]  # Only targets in this file can depend on this.
+    src_js = rebase_path(
+            "$root_out_dir/obj/ide/tools/previewer/automock/dist/jsMockSystemPlugin.js")
+    dst_file = rebase_path(base_output_path + "/jsMockSystemPlugin.abc")
 
-  in_puts = [ rebase_path(
-          "$root_out_dir/obj/ide/tools/previewer/automock/dist/jsMockSystemPlugin.js") ]
-  out_puts = [ base_output_path + "/jsMockSystemPlugin.abc" ]
-  extra_dependencies = [ "//ide/tools/previewer/automock:gen_snapshot_jsmock" ]
+    in_puts = [ rebase_path(
+            "$root_out_dir/obj/ide/tools/previewer/automock/dist/jsMockSystemPlugin.js") ]
+    out_puts = [ base_output_path + "/jsMockSystemPlugin.abc" ]
+    extra_dependencies =
+        [ "//ide/tools/previewer/automock:gen_snapshot_jsmock" ]
+  }
 }
 
 gen_obj("abc_proxyclass") {
@@ -73,13 +76,16 @@ gen_obj("abc_enum_style") {
   snapshot_dep = [ ":gen_jsEnumStyle_abc" ]
 }
 
-gen_obj("abc_mock_system_plugin") {
-  input = base_output_path + "/jsMockSystemPlugin.abc"
-  if (use_mac || use_mingw_win || use_linux) {
-    jsmocksystemplugin_obj_path = base_output_path + "/js_mock_system_plugin.c"
+if (!is_cross_platform_build) {
+  gen_obj("abc_mock_system_plugin") {
+    input = base_output_path + "/jsMockSystemPlugin.abc"
+    if (use_mac || use_mingw_win || use_linux) {
+      jsmocksystemplugin_obj_path =
+          base_output_path + "/js_mock_system_plugin.c"
+    }
+    output = jsmocksystemplugin_obj_path
+    snapshot_dep = [ ":gen_js_mock_system_plugin_abc" ]
   }
-  output = jsmocksystemplugin_obj_path
-  snapshot_dep = [ ":gen_js_mock_system_plugin_abc" ]
 }
 
 template("declarative_js_engine_ark") {
