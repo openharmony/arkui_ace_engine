@@ -4597,6 +4597,97 @@ void JSViewAbstract::JsBindContentCover(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->BindContentCover(isShow, std::move(callback), std::move(buildFunc), type);
 }
 
+void JSViewAbstract::JsBindSheet(const JSCallbackInfo& info)
+{
+    if (info.Length() != 2 && info.Length() != 3) {
+        LOGE("BindSheet params number are not correct.");
+        return;
+    }
+
+    // parse isShow
+    bool isShow = false;
+    DoubleBindCallback callback = nullptr;
+    if (info[0]->IsBoolean()) {
+        isShow = info[0]->ToBoolean();
+    } else if (info[0]->IsObject()) {
+        JSRef<JSObject> callbackObj = JSRef<JSObject>::Cast(info[0]);
+        callback = ParseDoubleBindCallback(info, callbackObj);
+        auto isShowObj = callbackObj->GetProperty("value");
+        isShow = isShowObj->IsBoolean() ? isShowObj->ToBoolean() : false;
+    }
+
+    // parse builder
+    if (!info[1]->IsObject()) {
+        LOGE("builder is invalid.");
+        return;
+    }
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[1]);
+    auto builder = obj->GetProperty("builder");
+    if (!builder->IsFunction()) {
+        LOGE("builder param is not a function.");
+        return;
+    }
+    auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+    CHECK_NULL_VOID(builderFunc);
+    auto buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc)]() {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("BindSheet");
+        func->Execute();
+    };
+
+    // parse SheetStyle
+    NG::SheetStyle sheetStyle;
+    if (info.Length() == 3) { // 3 : parameter total
+        ParseSheetStyle(info[2], sheetStyle); // 2 : The last parameter
+    }
+    ViewAbstractModel::GetInstance()->BindSheet(isShow, std::move(callback), std::move(buildFunc), sheetStyle);
+}
+
+void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle)
+{
+    auto height = paramObj->GetProperty("height");
+    auto showDragIndicator = paramObj->GetProperty("showDragIndicator");
+    if (showDragIndicator->IsNull() || showDragIndicator->IsUndefined()) {
+        sheetStyle.showDragIndicator = true;
+    } else {
+        if (showDragIndicator->IsBoolean()) {
+            sheetStyle.showDragIndicator = showDragIndicator->ToBoolean();
+        } else {
+            LOGW("show drag indicator failed.");
+        }
+    }
+
+    if (height->IsNull() || height->IsUndefined()) {
+        sheetStyle.sheetMode = NG::SheetMode::LARGE;
+        sheetStyle.height.reset();
+    } else {
+        if (height->IsString()) {
+            std::string heightStr = height->ToString();
+            // Remove all " ".
+            heightStr.erase(std::remove(heightStr.begin(), heightStr.end(), ' '), heightStr.end());
+            std::transform(heightStr.begin(), heightStr.end(), heightStr.begin(), ::tolower);
+            if (heightStr.compare("medium") == 0) {
+                sheetStyle.sheetMode = NG::SheetMode::MEDIUM;
+                sheetStyle.height.reset();
+            } else if (heightStr.compare("large") == 0) {
+                sheetStyle.sheetMode = NG::SheetMode::LARGE;
+                sheetStyle.height.reset();
+            } else {
+                LOGI("sheet height is not default mode.");
+            }
+        }
+        Dimension sheetHeight;
+        if (!ParseJsDimensionVp(height, sheetHeight)) {
+            sheetStyle.sheetMode = NG::SheetMode::LARGE;
+            sheetStyle.height.reset();
+            LOGW("Parse to dimension VP failed, set defalt mode.");
+        } else {
+            sheetStyle.height = sheetHeight;
+            sheetStyle.sheetMode.reset();
+        }
+    }
+}
+
 void JSViewAbstract::JSCreateAnimatableProperty(const JSCallbackInfo& info)
 {
     if (info.Length() < 3 || !info[0]->IsString()) { /* 3:args number */
@@ -4736,6 +4827,7 @@ void JSViewAbstract::JSBind()
     JSClass<JSViewAbstract>::StaticMethod("bindMenu", &JSViewAbstract::JsBindMenu);
     JSClass<JSViewAbstract>::StaticMethod("bindContextMenu", &JSViewAbstract::JsBindContextMenu);
     JSClass<JSViewAbstract>::StaticMethod("bindContentCover", &JSViewAbstract::JsBindContentCover);
+    JSClass<JSViewAbstract>::StaticMethod("bindSheet", &JSViewAbstract::JsBindSheet);
     JSClass<JSViewAbstract>::StaticMethod("draggable", &JSViewAbstract::JsSetDraggable);
     JSClass<JSViewAbstract>::StaticMethod("onDragStart", &JSViewAbstract::JsOnDragStart);
     JSClass<JSViewAbstract>::StaticMethod("onDragEnter", &JSViewAbstract::JsOnDragEnter);

@@ -1071,6 +1071,12 @@ var ModifierKey;
   ModifierKey[ModifierKey["ALT"] = 2] = "ALT";
 })(ModifierKey || (ModifierKey = {}));
 
+var SheetSize;
+(function (SheetSize) {
+  SheetSize['MEDIUM'] = "MEDIUM";
+  SheetSize['LARGE'] = "LARGE";
+})(SheetSize || (SheetSize = {}));
+
 var FunctionKey;
 (function (FunctionKey) {
   FunctionKey[FunctionKey["ESC"] = 0] = "ESC";
