@@ -68,6 +68,15 @@ private:
     void SetBackButtonVisible(const RefPtr<UINode>& navDestination);
     void GetOpsForNavRouteMode(NavRouteMode mode, bool& stackOp, bool& mapOp);
 
+    void NavTransitionInAnimation(const RefPtr<FrameNode>& navigationNode,
+        const RefPtr<FrameNode>& navBarNode, const RefPtr<FrameNode>& navigationContentNode);
+    void NavTransitionOutAnimation(const RefPtr<UINode>& navigationNode, const RefPtr<FrameNode>& navBarNode,
+        const RefPtr<FrameNode>& navigationContentNode);
+    void TitleTransitionInAnimation(const RefPtr<FrameNode>& navigationNode,
+        const RefPtr<FrameNode>& titleBarNode, const RefPtr<FrameNode>& destinationTitleBarNode);
+    void TitleTransitionOutAnimation(const RefPtr<FrameNode>& navigationNode,
+        const RefPtr<FrameNode>& titleBarNode, const RefPtr<FrameNode>& destinationTitleBarNode);
+    void backButtonAnimation(const RefPtr<FrameNode>& backButtonNode, bool isTransitionIn);
     RefPtr<UINode> navDestinationNode_;
 };
 
