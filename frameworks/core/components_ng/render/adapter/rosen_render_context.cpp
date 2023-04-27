@@ -1003,7 +1003,7 @@ RectF RosenRenderContext::AdjustPaintRect()
     Dimension parentPaddingLeft;
     Dimension parentPaddingTop;
     // Position properties take precedence over offset locations.
-    if (HasPosition()) {
+    if (HasPosition() && IsUsingPosition(frameNode)) {
         GetPaddingOfFirstFrameNodeParent(parentPaddingLeft, parentPaddingTop);
         auto position = GetPositionValue({}) + OffsetT<Dimension>(parentPaddingLeft, parentPaddingTop);
         auto posX = ConvertToPx(position.GetX(), ScaleProperty::CreateScaleProperty(), widthPercentReference);
@@ -1024,6 +1024,16 @@ RectF RosenRenderContext::AdjustPaintRect()
     rect.SetLeft(rect.GetX() - anchorX.value_or(0));
     rect.SetTop(rect.GetY() - anchorY.value_or(0));
     return rect;
+}
+
+bool RosenRenderContext::IsUsingPosition(const RefPtr<FrameNode>& frameNode)
+{
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    bool isUsingPosition = true;
+    if (layoutProperty) {
+        isUsingPosition = layoutProperty->IsUsingPosition();
+    }
+    return isUsingPosition;
 }
 
 void RosenRenderContext::GetPaddingOfFirstFrameNodeParent(Dimension& parentPaddingLeft, Dimension& parentPaddingTop)
