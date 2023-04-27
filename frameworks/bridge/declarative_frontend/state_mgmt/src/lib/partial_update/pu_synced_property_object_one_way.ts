@@ -138,25 +138,13 @@ class SynchedPropertyObjectOneWayPU<C extends Object>
    * @param souceObject 
    * @param changedPropertyName 
    */
-  public objectPropertyHasChangedPU(sourceObject: ObservedObject<C>, changedPropertyName : string) {
+  public objectPropertyHasChangedPU(sourceObject: ObservedObject<C>, changedPropertyName: string) {
     if (sourceObject == this.localCopyObservedObject) {
       stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: objectPropertyHasChangedPU '${changedPropertyName}' has changed.`);
     } else {
       stateMgmtConsole.warn(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: objectPropertyHasChangedPU '${changedPropertyName}' has changed.  But the event does not come from localCopyObservedObject. Internal error`);
     }
     this.notifyPropertyHasChangedPU();
-
-    /* The non-reverted ToT has this code, which seems wrong:
-    if (this.source_ && souceObject == this.source_.getUnmonitored()) {
-      stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: \
-      objectPropertyHasChangedPU: member property '${changedPropertyName}' of source ObservedObject '${this.source_.info()}' has changed.`);
-      this.resetLocalValue(souceObject as C, true);
-    } else {
-      stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: \
-        objectPropertyHasChangedPU: contained ObservedObject member property '${changedPropertyName}' has changed.`);
-    }
-    this.notifyPropertryHasChangedPU();
-    */
   }
 
   public objectPropertyHasBeenReadPU(souceObject: ObservedObject<C>, changedPropertyName : string) {
@@ -261,9 +249,12 @@ class SynchedPropertyObjectOneWayPU<C extends Object>
 
     // FIXME: Proper object deep copy missing here!
     if (rawValue instanceof Array) {
-      copy = ObservedObject.createNew([...rawValue], this) as unknown as C;
+      copy = ObservedObject.createNew([...rawValue] as unknown as C, this);
+    } else if (rawValue instanceof Date) {
+      let d = new Date();
+      d.setTime((rawValue as Date).getTime());
+      copy = ObservedObject.createNew(d as unknown as C, this);
     } else {
-      // FIXME Date copy to be added
       copy = ObservedObject.createNew({ ...rawValue }, this);
     }
     Object.setPrototypeOf(copy, Object.getPrototypeOf(rawValue));

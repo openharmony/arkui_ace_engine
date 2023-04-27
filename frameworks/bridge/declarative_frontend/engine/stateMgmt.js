@@ -3560,15 +3560,6 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
             stateMgmtConsole.warn(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: objectPropertyHasChangedPU '${changedPropertyName}' has changed.  But the event does not come from localCopyObservedObject. Internal error`);
         }
         this.notifyPropertyHasChangedPU();
-        /* The non-reverted ToT has this code, which seems wrong:
-        if (this.source_ && souceObject == this.source_.getUnmonitored()) {
-          
-          this.resetLocalValue(souceObject as C, true);
-        } else {
-          
-        }
-        this.notifyPropertryHasChangedPU();
-        */
     }
     objectPropertyHasBeenReadPU(souceObject, changedPropertyName) {
         
@@ -3659,8 +3650,12 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
         if (rawValue instanceof Array) {
             copy = ObservedObject.createNew([...rawValue], this);
         }
+        else if (rawValue instanceof Date) {
+            let d = new Date();
+            d.setTime(rawValue.getTime());
+            copy = ObservedObject.createNew(d, this);
+        }
         else {
-            // FIXME Date copy to be added
             copy = ObservedObject.createNew(Object.assign({}, rawValue), this);
         }
         Object.setPrototypeOf(copy, Object.getPrototypeOf(rawValue));
