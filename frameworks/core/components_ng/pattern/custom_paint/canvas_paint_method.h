@@ -29,6 +29,7 @@ public:
     explicit CanvasPaintMethod(const WeakPtr<PipelineBase> context)
     {
         context_ = context;
+        imageShadow_ = std::make_unique<Shadow>();
         InitImageCallbacks();
     }
 
@@ -77,7 +78,6 @@ private:
     void ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj) override;
     void ImageObjFailed() override;
     sk_sp<SkImage> GetImage(const std::string& src) override;
-    void SetPaintImage() override {};
 
     void PaintText(
         const OffsetF& offset, const SizeF& contentSize, double x, double y, bool isStroke, bool hasShadow = false);

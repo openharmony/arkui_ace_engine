@@ -131,6 +131,7 @@ public:
     void UpdateStrokeGradient(const Ace::Gradient& grad);
 
     void SetTextDirection(TextDirection direction);
+    void SetFilterParam(const std::string& filterStr);
     
 private:
     void OnAttachToFrameNode() override;

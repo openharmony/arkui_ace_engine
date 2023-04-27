@@ -1326,9 +1326,30 @@ void JSCanvasRenderer::JsDrawBitmapMesh(const JSCallbackInfo& info)
     }
 }
 
-void JSCanvasRenderer::JsFilter(const JSCallbackInfo& info)
+void JSCanvasRenderer::JsGetFilter(const JSCallbackInfo& info)
 {
     return;
+}
+
+void JSCanvasRenderer::JsSetFilter(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsString()) {
+        return;
+    }
+    std::string filterStr;
+    JSViewAbstract::ParseJsString(info[0], filterStr);
+    // null and undefined are the same.
+    if (filterStr == "") {
+        LOGE("invalid filter string");
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (isOffscreen_ && offscreenCanvasPattern_) {
+            offscreenCanvasPattern_->SetFilterParam(filterStr);
+        } else if (!isOffscreen_ && customPaintPattern_) {
+            customPaintPattern_->SetFilterParam(filterStr);
+        }
+    }
 }
 
 void JSCanvasRenderer::JsGetDirection(const JSCallbackInfo& info)
