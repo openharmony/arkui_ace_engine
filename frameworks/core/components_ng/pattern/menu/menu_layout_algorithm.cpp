@@ -270,10 +270,20 @@ OffsetF MenuLayoutAlgorithm::MenuLayoutAvoidAlgorithm(
     CHECK_NULL_RETURN(menuPattern, OffsetF(0, 0));
     float x = 0.0f;
     float y = 0.0f;
+    float windowsOffsetX = 0.0f;
+    float windowsOffsetY = 0.0f;
     if (menuProp->GetMenuPlacement().has_value() && (targetSize_.Width() > 0.0 || targetSize_.Height() > 0.0)) {
         auto childOffset = GetChildPosition(size, menuProp);
         x = childOffset.GetX() + positionOffset_.GetX();
         y = childOffset.GetY() + positionOffset_.GetY();
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        if (pipelineContext) {
+            auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
+            windowsOffsetX = windowGlobalRect.GetOffset().GetX();
+            windowsOffsetY = windowGlobalRect.GetOffset().GetY();
+            x += windowsOffsetX;
+            y += windowsOffsetY;
+        }
     } else {
         x = HorizontalLayout(size, position_.GetX(), menuPattern->IsSelectMenu()) + positionOffset_.GetX();
         y = VerticalLayout(size, position_.GetY()) + positionOffset_.GetY();
@@ -282,8 +292,8 @@ OffsetF MenuLayoutAlgorithm::MenuLayoutAvoidAlgorithm(
             y -= pageOffset_.GetY();
         }
     }
-    x = std::clamp(x, 0.0f, wrapperSize_.Width() - size.Width() - margin_ * 2.0f);
-    y = std::clamp(y, 0.0f, wrapperSize_.Height() - size.Height() - margin_ * 2.0f);
+    x = std::clamp(x, windowsOffsetX, wrapperSize_.Width() - size.Width() - margin_ * 2.0f + windowsOffsetX);
+    y = std::clamp(y, windowsOffsetY, wrapperSize_.Height() - size.Height() - margin_ * 2.0f + windowsOffsetY);
 
     return OffsetF(x, y);
 }
@@ -566,6 +576,18 @@ OffsetF MenuLayoutAlgorithm::FitToScreen(const OffsetF& fitPosition, const SizeF
 {
     float x = fitPosition.GetX() + positionOffset_.GetX();
     float y = fitPosition.GetY() + positionOffset_.GetY();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    if (pipelineContext) {
+        auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
+        float windowsOffsetX = windowGlobalRect.GetOffset().GetX();
+        float windowsOffsetY = windowGlobalRect.GetOffset().GetY();
+        x += windowsOffsetX;
+        y += windowsOffsetY;
+        x = std::clamp(x, windowsOffsetX, wrapperSize_.Width() - childSize.Width() - margin_ * 2.0f + windowsOffsetX);
+        y = std::clamp(y, windowsOffsetY, wrapperSize_.Height() - childSize.Height() - margin_ * 2.0f + windowsOffsetY);
+
+        return OffsetF(x, y);
+    }
     x = std::clamp(x, 0.0f, wrapperSize_.Width() - childSize.Width() - margin_ * 2.0f);
     y = std::clamp(y, 0.0f, wrapperSize_.Height() - childSize.Height() - margin_ * 2.0f);
 
