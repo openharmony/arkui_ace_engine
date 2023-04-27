@@ -327,6 +327,10 @@ protected:
     virtual void OnGenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList)
     {
         for (const auto& child : children_) {
+            if (!child) {
+                LOGW("Child node invalid");
+                continue;
+            }
             child->OnGenerateOneDepthVisibleFrame(visibleList);
         }
     }
