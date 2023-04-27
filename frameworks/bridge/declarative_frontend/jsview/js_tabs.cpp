@@ -219,6 +219,9 @@ void JSTabs::SetFadingEdge(const JSCallbackInfo& info)
 void JSTabs::SetDivider(const JSCallbackInfo& info)
 {
     TabsItemDivider divider;
+    RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
+    CHECK_NULL_VOID (tabTheme);
+    
     if (info.Length() < 1) {
         LOGW("Invalid params");
     } else {
@@ -231,12 +234,8 @@ void JSTabs::SetDivider(const JSCallbackInfo& info)
                 divider.strokeWidth.Reset();
             }
             if (!info[0]->IsObject() || !ConvertFromJSValue(obj->GetProperty("color"), divider.color)) {
-                RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
-                if (tabTheme) {
-                    divider.color = tabTheme->GetDividerColor();
-                }
+                divider.color = tabTheme->GetDividerColor();
             }
-
             if (!info[0]->IsObject() || !ConvertFromJSValue(obj->GetProperty("startMargin"), divider.startMargin) ||
                 divider.startMargin.Value() < 0.0f) {
                 divider.startMargin.Reset();

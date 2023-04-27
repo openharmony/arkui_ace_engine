@@ -208,7 +208,6 @@ float TabsLayoutAlgorithm::MeasureDivider(const RefPtr<TabsLayoutProperty>& layo
     auto dividerStrokeWidth = divider.strokeWidth.ConvertToPx();
     auto dividerStartMargin = divider.startMargin.ConvertToPx();
     auto dividerEndMargin = divider.endMargin.ConvertToPx();
-    auto dividerIsNull = divider.isNull;
 
     if (axis == Axis::VERTICAL) {
         dividerIdealSize.SetWidth(dividerStrokeWidth);
@@ -222,10 +221,6 @@ float TabsLayoutAlgorithm::MeasureDivider(const RefPtr<TabsLayoutProperty>& layo
     dividerLayoutConstraint.selfIdealSize = OptionalSizeF(dividerIdealSize);
     dividerWrapper->Measure(dividerLayoutConstraint);
 
-    if (dividerIsNull) {
-        return 0.0f;
-    }
-
-    return dividerStrokeWidth;
+    return divider.isNull ? 0.0f : dividerStrokeWidth;
 }
 } // namespace OHOS::Ace::NG
