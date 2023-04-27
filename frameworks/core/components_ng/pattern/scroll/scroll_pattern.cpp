@@ -530,7 +530,7 @@ void ScrollPattern::UpdateScrollBarOffset()
     }
     Size size(viewPort_.Width(), viewPort_.Height());
     auto estimatedHeight = (GetAxis() == Axis::HORIZONTAL) ? viewPortExtent_.Width() : viewPortExtent_.Height();
-    UpdateScrollBarRegion(-currentOffset_, estimatedHeight, size);
+    UpdateScrollBarRegion(-currentOffset_, estimatedHeight, size, Offset(0.0, 0.0));
 }
 
 } // namespace OHOS::Ace::NG

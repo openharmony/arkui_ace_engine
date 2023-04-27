@@ -936,8 +936,9 @@ void GridPattern::UpdateScrollBarOffset()
     }
 
     float offset = info.startIndex_ * averageHeight_ - info.currentOffset_;
-    Size mainSize = { viewScopeSize.Width(), viewScopeSize.Height() };
-    UpdateScrollBarRegion(offset, estimatedHeight, mainSize);
+    auto viewSize = geometryNode->GetFrameSize();
+    Size mainSize = { viewSize.Width(), viewSize.Height() };
+    UpdateScrollBarRegion(offset, estimatedHeight, mainSize, Offset(0.0, 0.0));
 }
 
 RefPtr<PaintProperty> GridPattern::CreatePaintProperty()
