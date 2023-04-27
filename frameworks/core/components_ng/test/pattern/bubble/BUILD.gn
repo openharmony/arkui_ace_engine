@@ -19,6 +19,7 @@ ohos_unittest("bubble_pattern_test_ng") {
 
   sources = [
     # inner
+    "$ace_root/frameworks/base/geometry/animatable_dimension.cpp",
     "$ace_root/frameworks/core/animation/anticipate_curve.cpp",
     "$ace_root/frameworks/core/animation/cubic_curve.cpp",
     "$ace_root/frameworks/core/animation/curves.cpp",
@@ -31,7 +32,6 @@ ohos_unittest("bubble_pattern_test_ng") {
     "$ace_root/frameworks/core/components/common/properties/shadow_config.cpp",
 
     # mock
-    "$ace_root/frameworks/base/test/mock/mock_animatable_dimension.cpp",
     "$ace_root/frameworks/base/test/mock/mock_subwindow_manager.cpp",
     "$ace_root/frameworks/core/animation/test/mock/mock_animator.cpp",
     "$ace_root/frameworks/core/animation/test/mock/mock_scheduler.cpp",

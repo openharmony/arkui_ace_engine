@@ -39,9 +39,7 @@ bool BubblePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto bubbleLayoutAlgorithm = DynamicCast<BubbleLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(bubbleLayoutAlgorithm, false);
-    showTopArrow_ = bubbleLayoutAlgorithm->ShowTopArrow();
-    showBottomArrow_ = bubbleLayoutAlgorithm->ShowBottomArrow();
-    showCustomArrow_ = bubbleLayoutAlgorithm->ShowCustomArrow();
+    showArrow_ = bubbleLayoutAlgorithm->ShowArrow();
     arrowPosition_ = bubbleLayoutAlgorithm->GetArrowPosition();
     childOffset_ = bubbleLayoutAlgorithm->GetChildOffset();
     childSize_ = bubbleLayoutAlgorithm->GetChildSize();
