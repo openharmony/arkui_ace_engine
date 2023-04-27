@@ -861,7 +861,7 @@ void GridPattern::ScrollPage(bool reverse)
     }
 }
 
-bool GridPattern::UpdateStartIndex(uint32_t index)
+bool GridPattern::UpdateStartIndex(int32_t index)
 {
     if (!isConfigScrollable_) {
         return false;
@@ -954,15 +954,6 @@ RefPtr<PaintProperty> GridPattern::CreatePaintProperty()
     // default "scrollBar" attribute of Grid is BarState.Off
     property->UpdateScrollBarMode(defaultDisplayMode);
     return property;
-}
-
-int32_t GridPattern::GetInsertPosition(float x, float y) const
-{
-    if (gridLayoutInfo_.currentRect_.IsInRegion(PointF(x, y))) {
-        return gridLayoutInfo_.GetOriginalIndex();
-    }
-
-    return -1;
 }
 
 int32_t GridPattern::GetOriginalIndex() const
