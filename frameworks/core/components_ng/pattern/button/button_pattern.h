@@ -89,7 +89,10 @@ public:
         CHECK_NULL_VOID(host);
         auto layoutProperty = host->GetLayoutProperty<ButtonLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
-        json->Put("type", ConvertButtonTypeToString(layoutProperty->GetType().value_or(ButtonType::CAPSULE)).c_str());
+        json->Put(
+            "type", host->GetTag() == "Toggle"
+                        ? "ToggleType.Button"
+                        : ConvertButtonTypeToString(layoutProperty->GetType().value_or(ButtonType::CAPSULE)).c_str());
         json->Put("fontSize", layoutProperty->GetFontSizeValue(Dimension(0)).ToString().c_str());
         json->Put("fontWeight",
             V2::ConvertWrapFontWeightToStirng(layoutProperty->GetFontWeight().value_or(FontWeight::NORMAL)).c_str());
