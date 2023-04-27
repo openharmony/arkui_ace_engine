@@ -263,6 +263,14 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     auto labelStyle = tabContentPattern->GetLabelStyle();
     UpdateLabelStyle(labelStyle, textLayoutProperty);
     ImageSourceInfo imageSourceInfo(tabBarParam.GetIcon());
+    if (imageSourceInfo.IsSvg()) {
+        if (myIndex == indicator) {
+            imageSourceInfo.SetFillColor(tabTheme->GetBottomTabIconOn());
+        } else {
+            imageSourceInfo.SetFillColor(tabTheme->GetBottomTabIconOff());
+        }
+    }
+    
     imageProperty->UpdateImageSourceInfo(imageSourceInfo);
     columnNode->MarkModifyDone();
     textNode->MarkModifyDone();

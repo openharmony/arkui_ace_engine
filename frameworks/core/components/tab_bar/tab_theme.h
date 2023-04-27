@@ -87,6 +87,8 @@ public:
                     pattern->GetAttr<Dimension>("bottom_tab_horizontal_padding", 0.0_vp);
                 theme->bottomTabTextOn_ = pattern->GetAttr<Color>("bottom_tab_text_on", Color::WHITE);
                 theme->bottomTabTextOff_ = pattern->GetAttr<Color>("bottom_tab_text_off", Color::WHITE);
+                theme->bottomTabIconOn_ = pattern->GetAttr<Color>("bottom_tab_icon", Color::WHITE);
+                theme->bottomTabIconOff_ = pattern->GetAttr<Color>("bottom_tab_icon_off", Color::WHITE);
                 theme->bottomTabImageSize_ = pattern->GetAttr<Dimension>("bottom_tab_image_size", 0.0_vp);
                 theme->bottomTabTextSize_ = pattern->GetAttr<Dimension>("bottom_tab_text_size", 0.0_vp);
                 theme->defaultTabBarName_ = pattern->GetAttr<std::string>("default_tab_bar_name", "");
@@ -251,6 +253,16 @@ public:
         return bottomTabTextOff_;
     }
 
+    const Color& GetBottomTabIconOn() const
+    {
+        return bottomTabIconOn_;
+    }
+
+    const Color& GetBottomTabIconOff() const
+    {
+        return bottomTabIconOff_;
+    }
+
     const Dimension& GetBottomTabImageSize() const
     {
         return bottomTabImageSize_;
@@ -347,6 +359,8 @@ private:
     Dimension bottomTabHorizontalPadding_;
     Color bottomTabTextOn_;
     Color bottomTabTextOff_;
+    Color bottomTabIconOn_;
+    Color bottomTabIconOff_;
     Dimension bottomTabImageSize_;
     Dimension bottomTabTextSize_;
     std::string defaultTabBarName_;
