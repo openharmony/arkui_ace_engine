@@ -285,9 +285,12 @@ void TextPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secon
     if (!menuOptionItems_.empty()) {
         selectInfo.menuOptionItems = GetMenuOptionItems();
     }
+
+    if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
+        selectOverlayProxy_->Close();
+    }
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    CloseSelectOverlay();
     selectOverlayProxy_ = pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo);
     CHECK_NULL_VOID_NOLOG(selectOverlayProxy_);
     auto start = textSelector_.GetTextStart();
@@ -826,8 +829,7 @@ void TextPattern::UpdateChildProperty(const RefPtr<SpanNode>& child) const
     }
 
     if (!child->HasItalicFontStyle() && textLayoutProp->HasItalicFontStyle()) {
-        child->UpdateItalicFontStyleWithoutFlushDirty(
-            textLayoutProp->GetItalicFontStyle().value());
+        child->UpdateItalicFontStyleWithoutFlushDirty(textLayoutProp->GetItalicFontStyle().value());
     }
     if (!child->HasFontWeight() && textLayoutProp->HasFontWeight()) {
         child->UpdateFontWeightWithoutFlushDirty(textLayoutProp->GetFontWeight().value());
@@ -836,8 +838,7 @@ void TextPattern::UpdateChildProperty(const RefPtr<SpanNode>& child) const
     if (!child->HasTextDecoration() && textLayoutProp->HasTextDecoration()) {
         child->UpdateTextDecorationWithoutFlushDirty(textLayoutProp->GetTextDecoration().value());
         if (textLayoutProp->HasTextDecorationColor()) {
-            child->UpdateTextDecorationColorWithoutFlushDirty(
-                textLayoutProp->GetTextDecorationColor().value());
+            child->UpdateTextDecorationColorWithoutFlushDirty(textLayoutProp->GetTextDecorationColor().value());
         }
     }
     if (!child->HasTextCase() && textLayoutProp->HasTextCase()) {
