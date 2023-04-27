@@ -818,7 +818,9 @@ void TextPattern::DumpInfo()
     DumpLog::GetInstance().AddDesc(
         std::string("FontColor: ").append(textLayoutProp->GetTextColor().value_or(Color::BLACK).ColorToString()));
     DumpLog::GetInstance().AddDesc(
-        std::string("FontSize: ").append(textLayoutProp->GetFontSize().value_or(16.0_fp).ToString()));
+        std::string("FontSize: ")
+            .append(
+                (textStyle_.has_value() ? textStyle_->GetFontSize() : Dimension(16.0, DimensionUnit::FP)).ToString()));
 }
 
 void TextPattern::UpdateChildProperty(const RefPtr<SpanNode>& child) const
