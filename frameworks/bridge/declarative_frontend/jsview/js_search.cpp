@@ -380,6 +380,9 @@ void JSSearch::SetPlaceholderColor(const JSCallbackInfo& info)
 
 void JSSearch::SetPlaceholderFont(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        return;
+    }
     auto param = JSRef<JSObject>::Cast(info[0]);
     Font font;
     auto fontSize = param->GetProperty("size");
@@ -422,6 +425,9 @@ void JSSearch::SetPlaceholderFont(const JSCallbackInfo& info)
 
 void JSSearch::SetTextFont(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        return;
+    }
     auto param = JSRef<JSObject>::Cast(info[0]);
     Font font;
     auto fontSize = param->GetProperty("size");

@@ -250,7 +250,7 @@ public:
             theme->focusRadius_ = checkboxPattern->GetAttr<Dimension>("focus_border_radius", 0.0_vp);
             theme->focusPaintPadding_ = checkboxPattern->GetAttr<Dimension>("focus_paint_padding", 0.0_vp);
             theme->hoverDuration_ = checkboxPattern->GetAttr<double>("hover_animation_duration", 0.0);
-            theme->hoverToTouchDuration_ = checkboxPattern->GetAttr<double>("hover_to_touch_animation_duration", 0.0);
+            theme->hoverToTouchDuration_ = checkboxPattern->GetAttr<double>("hover_to_press_animation_duration", 0.0);
             theme->touchDuration_ = checkboxPattern->GetAttr<double>("touch_animation_duration", 0.0);
             theme->colorAnimationDuration_ = checkboxPattern->GetAttr<double>("color_animation_duration", 0.0);
 
@@ -348,7 +348,7 @@ public:
             theme->clickEffectColor_ = switchPattern->GetAttr<Color>("click_effect_color", Color::RED);
             theme->focusPaintPadding_ = switchPattern->GetAttr<Dimension>("focus_paint_padding", 0.0_vp);
             theme->hoverDuration_ = switchPattern->GetAttr<double>("hover_animation_duration", 0.0);
-            theme->hoverToTouchDuration_ = switchPattern->GetAttr<double>("hover_to_touch_animation_duration", 0.0);
+            theme->hoverToTouchDuration_ = switchPattern->GetAttr<double>("hover_to_press_animation_duration", 0.0);
             theme->touchDuration_ = switchPattern->GetAttr<double>("touch_animation_duration", 0.0);
             theme->colorAnimationDuration_ = switchPattern->GetAttr<double>("color_animation_duration", 0.0);
 
@@ -434,7 +434,7 @@ public:
             theme->clickEffectColor_ = radioPattern->GetAttr<Color>("click_effect_color", Color::RED);
             theme->focusPaintPadding_ = radioPattern->GetAttr<Dimension>("focus_paint_padding", 0.0_vp);
             theme->hoverDuration_ = radioPattern->GetAttr<double>("hover_animation_duration", 0.0);
-            theme->hoverToTouchDuration_ = radioPattern->GetAttr<double>("hover_to_touch_animation_duration", 0.0);
+            theme->hoverToTouchDuration_ = radioPattern->GetAttr<double>("hover_to_press_animation_duration", 0.0);
             theme->touchDuration_ = radioPattern->GetAttr<double>("touch_animation_duration", 0.0);
             if (SystemProperties::GetDeviceType() != DeviceType::CAR) {
                 return;

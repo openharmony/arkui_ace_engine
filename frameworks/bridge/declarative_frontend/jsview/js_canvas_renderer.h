@@ -133,7 +133,8 @@ public:
     void JsGetPixelMap(const JSCallbackInfo& info);
     void JsSetPixelMap(const JSCallbackInfo& info);
     void JsDrawBitmapMesh(const JSCallbackInfo& info);
-    void JsFilter(const JSCallbackInfo& info);
+    void JsGetFilter(const JSCallbackInfo& info);
+    void JsSetFilter(const JSCallbackInfo& info);
     void JsGetDirection(const JSCallbackInfo& info);
     void JsSetDirection(const JSCallbackInfo& info);
 

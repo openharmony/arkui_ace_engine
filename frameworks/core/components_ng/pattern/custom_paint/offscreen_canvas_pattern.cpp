@@ -213,6 +213,11 @@ void OffscreenCanvasPattern::SetTextDirection(TextDirection direction)
     offscreenPaintMethod_->SetTextDirection(direction);
 }
 
+void OffscreenCanvasPattern::SetFilterParam(const std::string& filterStr)
+{
+    offscreenPaintMethod_->SetFilterParam(filterStr);
+}
+
 void OffscreenCanvasPattern::Save()
 {
     offscreenPaintMethod_->Save();

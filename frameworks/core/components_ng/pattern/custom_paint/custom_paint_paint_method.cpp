@@ -30,6 +30,7 @@
 #include "include/core/SkImage.h"
 #include "include/core/SkPoint.h"
 #include "include/core/SkSurface.h"
+#include "include/effects/SkBlurImageFilter.h"
 #include "include/effects/SkDashPathEffect.h"
 #include "include/effects/SkGradientShader.h"
 #include "include/utils/SkParsePath.h"
@@ -58,7 +59,6 @@ constexpr double HALF_CIRCLE_ANGLE = 180.0;
 constexpr double FULL_CIRCLE_ANGLE = 360.0;
 constexpr double CONIC_START_ANGLE = 0.0;
 constexpr double CONIC_END_ANGLE = 359.9;
-constexpr double DOUBLE_TWO = 2.0;
 
 const LinearEnumMapNode<CompositeOperation, SkBlendMode> SK_BLEND_MODE_TABLE[] = {
     { CompositeOperation::SOURCE_OVER, SkBlendMode::kSrcOver },
@@ -77,6 +77,13 @@ constexpr size_t BLEND_MODE_SIZE = ArraySize(SK_BLEND_MODE_TABLE);
 
 template<typename T, typename N>
 N ConvertEnumToSkEnum(T key, const LinearEnumMapNode<T, N>* map, size_t length, N defaultValue)
+{
+    int64_t index = BinarySearchFindIndex(map, length, key);
+    return index != -1 ? map[index].value : defaultValue;
+}
+
+template<typename T>
+inline T ConvertStrToEnum(const char* key, const LinearMapNode<T>* map, size_t length, T defaultValue)
 {
     int64_t index = BinarySearchFindIndex(map, length, key);
     return index != -1 ? map[index].value : defaultValue;
@@ -360,6 +367,7 @@ void CustomPaintPaintMethod::InitImagePaint()
         options_ = SkSamplingOptions(SkFilterMode::kNearest, SkMipmapMode::kNone);
     }
 #endif
+    ClearPaintImage();
     SetPaintImage();
 }
 
@@ -813,10 +821,10 @@ void CustomPaintPaintMethod::Ellipse(PaintWrapper* paintWrapper, const EllipsePa
 {
     OffsetF offset = GetContentOffset(paintWrapper);
     // Init the start and end angle, then calculated the sweepAngle.
-    double startAngle = std::fmod(param.startAngle, M_PI * DOUBLE_TWO);
-    double endAngle = std::fmod(param.endAngle, M_PI * DOUBLE_TWO);
-    startAngle = (startAngle < 0.0 ? startAngle + M_PI * DOUBLE_TWO : startAngle) * HALF_CIRCLE_ANGLE / M_PI;
-    endAngle = (endAngle < 0.0 ? endAngle + M_PI * DOUBLE_TWO : endAngle) * HALF_CIRCLE_ANGLE / M_PI;
+    double startAngle = std::fmod(param.startAngle, M_PI * 2.0);
+    double endAngle = std::fmod(param.endAngle, M_PI * 2.0);
+    startAngle = (startAngle < 0.0 ? startAngle + M_PI * 2.0 : startAngle) * HALF_CIRCLE_ANGLE / M_PI;
+    endAngle = (endAngle < 0.0 ? endAngle + M_PI * 2.0 : endAngle) * HALF_CIRCLE_ANGLE / M_PI;
     if (NearEqual(param.startAngle, param.endAngle)) {
         return; // Just return when startAngle is same as endAngle.
     }
@@ -1003,11 +1011,11 @@ void CustomPaintPaintMethod::Path2DEllipse(const OffsetF& offset, const PathArgs
     double rx = args.para3;
     double ry = args.para4;
     double rotation = args.para5 * HALF_CIRCLE_ANGLE / M_PI;
-    double startAngle = std::fmod(args.para6, M_PI * DOUBLE_TWO);
-    double endAngle = std::fmod(args.para7, M_PI * DOUBLE_TWO);
+    double startAngle = std::fmod(args.para6, M_PI * 2.0);
+    double endAngle = std::fmod(args.para7, M_PI * 2.0);
     bool anticlockwise = NearZero(args.para8) ? false : true;
-    startAngle = (startAngle < 0.0 ? startAngle + M_PI * DOUBLE_TWO : startAngle) * HALF_CIRCLE_ANGLE / M_PI;
-    endAngle = (endAngle < 0.0 ? endAngle + M_PI * DOUBLE_TWO : endAngle) * HALF_CIRCLE_ANGLE / M_PI;
+    startAngle = (startAngle < 0.0 ? startAngle + M_PI * 2.0 : startAngle) * HALF_CIRCLE_ANGLE / M_PI;
+    endAngle = (endAngle < 0.0 ? endAngle + M_PI * 2.0 : endAngle) * HALF_CIRCLE_ANGLE / M_PI;
     double sweepAngle = endAngle - startAngle;
     if (anticlockwise) {
         if (sweepAngle > 0.0) { // Make sure the sweepAngle is negative when anticlockwise.
@@ -1130,7 +1138,7 @@ double CustomPaintPaintMethod::GetAlignOffset(TextAlign align, std::unique_ptr<t
             x = (textDirection == TextDirection::LTR) ? -paragraph->GetMaxIntrinsicWidth() : 0.0;
             break;
         case TextAlign::CENTER:
-            x = -paragraph->GetMaxIntrinsicWidth() / DOUBLE_TWO;
+            x = -paragraph->GetMaxIntrinsicWidth() / 2.0;
             break;
         default:
             x = 0.0;
@@ -1150,5 +1158,378 @@ txt::TextAlign CustomPaintPaintMethod::GetEffectiveAlign(txt::TextAlign align, t
     } else {
         return align;
     }
+}
+
+void CustomPaintPaintMethod::ClearPaintImage()
+{
+    float matrix[20] = { 0.0f };
+    matrix[0] = matrix[6] = matrix[12] = matrix[18] = 1.0f;
+#ifdef USE_SYSTEM_SKIA
+    imagePaint_.setColorFilter(SkColorFilter::MakeMatrixFilterRowMajor255(matrix));
+#else
+    imagePaint_.setColorFilter(SkColorFilters::Matrix(matrix));
+#endif
+    imagePaint_.setMaskFilter(SkMaskFilter::MakeBlur(SkBlurStyle::kNormal_SkBlurStyle, 0));
+    imagePaint_.setImageFilter(SkBlurImageFilter::Make(0, 0, nullptr));
+}
+
+void CustomPaintPaintMethod::SetPaintImage()
+{
+    FilterType filterType;
+    std::string filterParam;
+    if (!GetFilterType(filterType, filterParam)) {
+        return;
+    }
+    switch (filterType) {
+        case FilterType::NONE:
+            break;
+        case FilterType::GRAYSCALE:
+            SetGrayFilter(filterParam);
+            break;
+        case FilterType::SEPIA:
+            SetSepiaFilter(filterParam);
+            break;
+        case FilterType::SATURATE:
+            SetSaturateFilter(filterParam);
+            break;
+        case FilterType::HUE_ROTATE:
+            SetHueRotateFilter(filterParam);
+            break;
+        case FilterType::INVERT:
+            SetInvertFilter(filterParam);
+            break;
+        case FilterType::OPACITY:
+            SetOpacityFilter(filterParam);
+            break;
+        case FilterType::BRIGHTNESS:
+            SetBrightnessFilter(filterParam);
+            break;
+        case FilterType::CONTRAST:
+            SetContrastFilter(filterParam);
+            break;
+        case FilterType::BLUR:
+            SetBlurFilter(filterParam);
+            break;
+        case FilterType::DROP_SHADOW:
+            LOGW("Dropshadow is not supported yet.");
+            break;
+        default:
+            LOGE("invalid type of filter");
+    }
+}
+
+// https://drafts.fxtf.org/filter-effects/#grayscaleEquivalent
+void CustomPaintPaintMethod::SetGrayFilter(const std::string& percent)
+{
+    float percentNum = PercentStrToFloat(percent);
+    if (percentNum > 1) {
+        percentNum = 1;
+    }
+
+    float matrix[20] = { 0.0f };
+    float value = 1 - percentNum;
+
+    matrix[0] = LUMR + (1 - LUMR) * value;
+    matrix[5] = LUMR - LUMR * value;
+    matrix[10] = LUMR - LUMR * value;
+
+    matrix[1] = LUMG - LUMG * value;
+    matrix[6] = LUMG + (1 - LUMG) * value;
+    matrix[11] = LUMG - LUMG * value;
+
+    matrix[2] = LUMB - LUMB * value;
+    matrix[7] = LUMB - LUMB * value;
+    matrix[12] = LUMB + (1 - LUMB) * value;
+
+    matrix[18] = 1.0f;
+    SetColorFilter(matrix);
+}
+
+// https://drafts.fxtf.org/filter-effects/#sepiaEquivalent
+void CustomPaintPaintMethod::SetSepiaFilter(const std::string& percent)
+{
+    float percentNum = PercentStrToFloat(percent);
+    if (percentNum > 1) {
+        percentNum = 1;
+    }
+    float matrix[20] = { 0.0f };
+    matrix[0] = 1.0f - percentNum * 0.607f;
+    matrix[1] = percentNum * 0.769f;
+    matrix[2] = percentNum * 0.189f;
+
+    matrix[5] = percentNum * 0.349f;
+    matrix[6] = 1.0f - percentNum * 0.314f;
+    matrix[7] = percentNum * 0.168f;
+
+    matrix[10] = percentNum * 0.272f;
+    matrix[11] = percentNum * 0.534f;
+    matrix[12] = 1.0f - percentNum * 0.869f;
+
+    matrix[18] = 1.0f;
+    SetColorFilter(matrix);
+}
+
+// https://drafts.fxtf.org/filter-effects/#saturateEquivalent
+void CustomPaintPaintMethod::SetSaturateFilter(const std::string& percent)
+{
+    float percentNum = PercentStrToFloat(percent);
+    float matrix[20] = { 0.0f };
+
+    matrix[0] = LUMR + (1 - LUMR) * percentNum;
+    matrix[5] = LUMR - LUMR * percentNum;
+    matrix[10] = LUMR - LUMR * percentNum;
+
+    matrix[1] = LUMG - LUMG * percentNum;
+    matrix[6] = LUMG + (1 - LUMG) * percentNum;
+    matrix[11] = LUMG - LUMG * percentNum;
+
+    matrix[2] = LUMB - LUMB * percentNum;
+    matrix[7] = LUMB - LUMB * percentNum;
+    matrix[12] = LUMB + (1 - LUMB) * percentNum;
+
+    matrix[18] = 1.0f;
+    SetColorFilter(matrix);
+}
+
+// https://drafts.fxtf.org/filter-effects/#huerotateEquivalent
+void CustomPaintPaintMethod::SetHueRotateFilter(const std::string& filterParam)
+{
+    std::string percent = filterParam;
+    float rad = 0.0f;
+    if (percent.find("deg") != std::string::npos) {
+        size_t index = percent.find("deg");
+        percent = percent.substr(0, index);
+        std::istringstream iss(percent);
+        iss >> rad;
+        rad = rad / HALF_CIRCLE_ANGLE * M_PI;
+    }
+    if (percent.find("turn") != std::string::npos) {
+        size_t index = percent.find("turn");
+        percent = percent.substr(0, index);
+        std::istringstream iss(percent);
+        iss >> rad;
+        rad = rad * 2 * M_PI;
+    }
+    if (percent.find("rad") != std::string::npos) {
+        size_t index = percent.find("rad");
+        percent = percent.substr(0, index);
+        std::istringstream iss(percent);
+        iss >> rad;
+    }
+
+    float cosValue = std::cos(rad);
+    float sinValue = std::sin(rad);
+    float matrix[20] = { 0.0f };
+
+    matrix[0] = LUMR + cosValue * (1 - LUMR) + sinValue * (-LUMR);
+    matrix[5] = LUMR + cosValue * (-LUMR) + sinValue * 0.143f;
+    matrix[10] = LUMR + cosValue * (-LUMR) + sinValue * (LUMR - 1);
+
+    matrix[1] = LUMG + cosValue * (-LUMG) + sinValue * (-LUMG);
+    matrix[6] = LUMG + cosValue * (1 - LUMG) + sinValue * 0.140f;
+    matrix[11] = LUMG + cosValue * (-LUMG) + sinValue * LUMG;
+
+    matrix[2] = LUMB + cosValue * (-LUMB) + sinValue * (1 - LUMB);
+    matrix[7] = LUMB + cosValue * (-LUMB) + sinValue * (-0.283f);
+    matrix[12] = LUMB + cosValue * (1 - LUMB) + sinValue * LUMB;
+
+    matrix[18] = 1.0f;
+    SetColorFilter(matrix);
+}
+
+/*
+ * https://drafts.fxtf.org/filter-effects/#invertEquivalent
+ * Example for R in RGB:
+ * v0 = percentNum, v1 = 1 - percentNum, n = 1
+ * If 0 <= R < 1,
+ * k / n <= R < (k + 1) / n => R * n - 1 < k <= R * n => k = 0
+ * R' = funcR(R) = v0 + (R - k / n) * n * (v1 - v0) = percentNum + (1 - 2 * percentNum) * R
+ * If R==1, R' = v1 = 1 - percentNum = percentNum + (1 - 2 * percentNum) * R
+ * so R' = funcR(R) = percentNum + (1 - 2 * percentNum) * R, where 0 <= R <= 1.
+ */
+void CustomPaintPaintMethod::SetInvertFilter(const std::string& percent)
+{
+    float percentNum = PercentStrToFloat(percent);
+    if (percentNum > 1) {
+        percentNum = 1;
+    }
+    float matrix[20] = { 0.0f };
+    matrix[0] = matrix[6] = matrix[12] = 1.0 - 2.0 * percentNum;
+    matrix[4] = matrix[9] = matrix[14] = percentNum;
+    matrix[18] = 1.0f;
+    SetColorFilter(matrix);
+}
+
+/*
+ * https://drafts.fxtf.org/filter-effects/#opacityEquivalent
+ * A is short for Alpha:
+ * v0 = 0, v1 = percentNum, n = 1
+ * If 0 <= A < 1, k = 0. reference：SetInvertFilter.
+ * A' = funcR(A) = v0 + (A - k / n) * n * (v1 - v0) = percentNum * A
+ * If A==1, A' = v1 = percentNum = percentNum * A
+ * so A' = funcR(A) = percentNum * A, where 0 <= A <= 1.
+ */
+void CustomPaintPaintMethod::SetOpacityFilter(const std::string& percent)
+{
+    float percentNum = PercentStrToFloat(percent);
+    if (percentNum > 1) {
+        percentNum = 1;
+    }
+    float matrix[20] = { 0.0f };
+    matrix[0] = matrix[6] = matrix[12] = 1.0f;
+    matrix[18] = percentNum;
+    SetColorFilter(matrix);
+}
+
+/*
+ * https://drafts.fxtf.org/filter-effects/#brightnessEquivalent
+ * Example for R in RGB:
+ * R' = funcR(R) = slope * R + intercept
+ * where: slope = percentNum, intercept = 0
+ */
+void CustomPaintPaintMethod::SetBrightnessFilter(const std::string& percent)
+{
+    float percentNum = PercentStrToFloat(percent);
+    if (percentNum < 0) {
+        return;
+    }
+    float matrix[20] = { 0.0f };
+    matrix[0] = matrix[6] = matrix[12] = percentNum;
+    matrix[18] = 1.0f;
+    SetColorFilter(matrix);
+}
+
+/*
+ * https://drafts.fxtf.org/filter-effects/#contrastEquivalent
+ * Example for R in RGB:
+ * R' = funcR(R) = slope * R + intercept
+ * where: slope = percentNum, intercept = 0.5 * (1 - percentNum)
+ */
+void CustomPaintPaintMethod::SetContrastFilter(const std::string& percent)
+{
+    float percentNum = PercentStrToFloat(percent);
+    float matrix[20] = { 0.0f };
+    matrix[0] = matrix[6] = matrix[12] = percentNum;
+    matrix[4] = matrix[9] = matrix[14] = 0.5f * (1 - percentNum);
+    matrix[18] = 1;
+    SetColorFilter(matrix);
+}
+
+// https://drafts.fxtf.org/filter-effects/#blurEquivalent
+void CustomPaintPaintMethod::SetBlurFilter(const std::string& percent)
+{
+    imagePaint_.setImageFilter(SkBlurImageFilter::Make(BlurStrToDouble(percent), BlurStrToDouble(percent), nullptr));
+}
+
+void CustomPaintPaintMethod::SetColorFilter(float matrix[20])
+{
+#ifdef USE_SYSTEM_SKIA
+    matrix[4] *= 255;
+    matrix[9] *= 255;
+    matrix[14] *= 255;
+    matrix[19] *= 255;
+    imagePaint_.setColorFilter(SkColorFilter::MakeMatrixFilterRowMajor255(matrix));
+#else
+    imagePaint_.setColorFilter(SkColorFilters::Matrix(matrix));
+#endif
+}
+
+bool CustomPaintPaintMethod::GetFilterType(FilterType& filterType, std::string& filterParam)
+{
+    std::string paramData = filterParam_;
+    size_t index = paramData.find("(");
+    if (index == std::string::npos) {
+        return false;
+    }
+    filterType = FilterStrToFilterType(paramData.substr(0, index));
+    filterParam = paramData.substr(index + 1);
+    size_t endIndex = filterParam.find(")");
+    if (endIndex  == std::string::npos) {
+        return false;
+    }
+    filterParam.erase(endIndex, 1);
+    return true;
+}
+
+bool CustomPaintPaintMethod::IsPercentStr(std::string& percent)
+{
+    if (percent.find("%") != std::string::npos) {
+        size_t index = percent.find("%");
+        percent = percent.substr(0, index);
+        return true;
+    }
+    return false;
+}
+
+double CustomPaintPaintMethod::PxStrToDouble(const std::string& str)
+{
+    double ret = 0;
+    size_t index = str.find("px");
+    if (index != std::string::npos) {
+        std::string result = str.substr(0, index);
+        std::istringstream iss(result);
+        iss >> ret;
+    }
+    return ret;
+}
+
+double CustomPaintPaintMethod::BlurStrToDouble(const std::string& str)
+{
+    double ret = 0;
+    size_t index = str.find("px");
+    size_t index1 = str.find("rem");
+    size_t demIndex = std::string::npos;
+    if (index != std::string::npos) {
+        demIndex = index;
+    }
+    if (index1 != std::string::npos) {
+        demIndex = index1;
+    }
+    if (demIndex != std::string::npos) {
+        std::string result = str.substr(0, demIndex);
+        std::istringstream iss(result);
+        iss >> ret;
+    }
+    if (str.find("rem") != std::string::npos) {
+        return ret * 15;
+    }
+    return ret;
+}
+
+float CustomPaintPaintMethod::PercentStrToFloat(const std::string& percentStr)
+{
+    std::string percentage = percentStr;
+    bool hasPercent = IsPercentStr(percentage);
+    float percentNum = 0.0f;
+    std::istringstream iss(percentage);
+    iss >> percentNum;
+    if (hasPercent) {
+        percentNum = percentNum / 100;
+    }
+    return percentNum;
+}
+
+FilterType CustomPaintPaintMethod::FilterStrToFilterType(const std::string& filterStr)
+{
+    const LinearMapNode<FilterType> filterTypeTable[] = {
+        { "blur", FilterType::BLUR },
+        { "brightness", FilterType::BRIGHTNESS },
+        { "contrast", FilterType::CONTRAST },
+        { "drop-shadow", FilterType::DROP_SHADOW },
+        { "grayscale", FilterType::GRAYSCALE },
+        { "hue-rotate", FilterType::HUE_ROTATE },
+        { "invert", FilterType::INVERT },
+        { "none", FilterType::NONE },
+        { "opacity", FilterType::OPACITY },
+        { "saturate", FilterType::SATURATE },
+        { "sepia", FilterType::SEPIA },
+    };
+    return ConvertStrToEnum(filterStr.c_str(), filterTypeTable, ArraySize(filterTypeTable), FilterType::NONE);
+}
+
+bool CustomPaintPaintMethod::HasImageShadow() const
+{
+    return !(NearZero(imageShadow_->GetOffset().GetX()) && NearZero(imageShadow_->GetOffset().GetY()) &&
+         NearZero(imageShadow_->GetBlurRadius()));
 }
 } // namespace OHOS::Ace::NG

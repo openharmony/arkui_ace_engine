@@ -19,7 +19,7 @@
 #include <string>
 
 #include "base/memory/ace_type.h"
-#include "core/pipeline/pipeline_context.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
 
@@ -41,7 +41,7 @@ public:
     using ErrorCallback = std::function<void(const std::string&, const std::string&)>;
     using Method = std::string;
 
-    Resource(const std::string& type, const WeakPtr<PipelineContext>& context, ErrorCallback&& onError)
+    Resource(const std::string& type, const WeakPtr<PipelineBase>& context, ErrorCallback&& onError)
         : type_(type), context_(context), onError_(std::move(onError))
     {}
     virtual ~Resource() = default;
@@ -76,7 +76,7 @@ protected:
     int64_t id_ = INVALID_ID;
     std::string hash_;
     std::string type_;
-    WeakPtr<PipelineContext> context_;
+    WeakPtr<PipelineBase> context_;
     ErrorCallback onError_;
 };
 

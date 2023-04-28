@@ -14,13 +14,17 @@
  */
 
 #include "gtest/gtest.h"
-
 #include "base/geometry/dimension.h"
 #include "base/utils/utils.h"
+#include "gmock/gmock-spec-builders.h"
+
 #define private public
 #define protected public
-#include "test/mock/core/render/mock_paragraph.h"
-
+#include "base/geometry/axis.h"
+#include "base/geometry/dimension.h"
+#include "base/geometry/point.h"
+#include "base/memory/ace_type.h"
+#include "base/utils/utils.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_wrapper.h"
@@ -35,6 +39,7 @@
 #include "core/components_ng/pattern/slider/slider_paint_property.h"
 #include "core/components_ng/pattern/slider/slider_pattern.h"
 #include "core/components_ng/pattern/slider/slider_style.h"
+#include "core/components_ng/render/drawing_mock.h"
 #include "core/components_ng/test/mock/rosen/mock_canvas.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -107,6 +112,7 @@ class SliderPatternTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
+
 private:
     void SetSliderContentModifier(SliderContentModifier& sliderContentModifier);
     void MockCanvasFunction(Testing::MockCanvas& canvas);
@@ -2349,5 +2355,109 @@ HWTEST_F(SliderPatternTestNg, SliderTipModifierTest001, TestSize.Level1)
     MockParagraph::TearDown();
     sliderTipModifier->CreateParagraphAndLayout(TextStyle(), "");
     ASSERT_EQ(sliderTipModifier->paragraph_, nullptr);
+}
+
+/**
+ * @tc.name: SliderContentModifierTest013
+ * @tc.desc: Test DrawStep while not show step
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderContentModifierTest013, TestSize.Level1)
+{
+    SliderContentModifier::Parameters parameters;
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
+
+    auto isShowStep = AceType::MakeRefPtr<PropertyBool>(false);
+    sliderContentModifier.isShowStep_ = isShowStep;
+    Testing::MockCanvas canvas;
+    DrawingContext context { canvas, SLIDER_WIDTH, SLIDER_HEIGHT };
+    sliderContentModifier.DrawStep(context);
+    EXPECT_FALSE(sliderContentModifier.isShowStep_->Get());
+}
+
+/**
+ * @tc.name: SliderContentModifierTest014
+ * @tc.desc: Test JudgeNeedAimate
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderContentModifierTest014, TestSize.Level1)
+{
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(VALUE, STEP, MIN, MAX);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
+    SliderContentModifier::Parameters parameters;
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
+
+    sliderContentModifier.reverse_ = true;
+    sliderContentModifier.JudgeNeedAimate(sliderPaintProperty);
+    EXPECT_FALSE(sliderContentModifier.needAnimate_);
+    EXPECT_FALSE(sliderContentModifier.reverse_);
+}
+
+/**
+ * @tc.name: SliderContentModifierTest015
+ * @tc.desc: Test SetSelectSize while need needAnimate
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderContentModifierTest015, TestSize.Level1)
+{
+    SliderContentModifier::Parameters parameters;
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
+    ASSERT_NE(sliderContentModifier.selectEnd_, nullptr);
+
+    sliderContentModifier.needAnimate_ = true;
+    sliderContentModifier.SetSelectSize(POINTF_START, POINTF_END);
+    EXPECT_EQ(sliderContentModifier.selectEnd_->Get(), POINTF_END - PointF());
+}
+
+/**
+ * @tc.name: SliderContentModifierTest016
+ * @tc.desc: Test SetCircleCenter while needAnimate
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderContentModifierTest016, TestSize.Level1)
+{
+    SliderContentModifier::Parameters parameters;
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
+    ASSERT_NE(sliderContentModifier.blockCenterX_, nullptr);
+    ASSERT_NE(sliderContentModifier.blockCenterY_, nullptr);
+
+    sliderContentModifier.needAnimate_ = true;
+    PointF center(FRAME_WIDTH, FRAME_HEIGHT);
+    sliderContentModifier.directionAxis_->Set(static_cast<int>(Axis::HORIZONTAL));
+    sliderContentModifier.SetCircleCenter(center);
+    EXPECT_EQ(sliderContentModifier.blockCenterX_->Get(), FRAME_WIDTH);
+    EXPECT_EQ(sliderContentModifier.blockCenterY_->Get(), FRAME_HEIGHT);
+
+    sliderContentModifier.directionAxis_->Set(static_cast<int>(Axis::VERTICAL));
+    sliderContentModifier.SetCircleCenter(center);
+    EXPECT_EQ(sliderContentModifier.blockCenterX_->Get(), FRAME_WIDTH);
+    EXPECT_EQ(sliderContentModifier.blockCenterY_->Get(), FRAME_HEIGHT);
+}
+
+/**
+ * @tc.name: SliderContentModifierTest017
+ * @tc.desc: Test DrawBlock while blockType is image
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderContentModifierTest017, TestSize.Level1)
+{
+    SliderContentModifier::Parameters parameters;
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
+    ASSERT_NE(sliderContentModifier.blockType_, nullptr);
+    auto updateImageFunc = [&]() {
+        sliderContentModifier.blockType_->Set(static_cast<int>(SliderModelNG::BlockStyleType::DEFAULT));
+    };
+    sliderContentModifier.updateImageFunc_ = std::move(updateImageFunc);
+
+    sliderContentModifier.blockType_->Set(static_cast<int>(SliderModelNG::BlockStyleType::IMAGE));
+    Testing::MockCanvas canvas;
+    DrawingContext context { canvas, SLIDER_WIDTH, SLIDER_HEIGHT };
+    sliderContentModifier.DrawBlock(context);
+    EXPECT_EQ(sliderContentModifier.blockType_->Get(), static_cast<int>(SliderModelNG::BlockStyleType::DEFAULT));
 }
 } // namespace OHOS::Ace::NG

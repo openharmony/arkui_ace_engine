@@ -46,7 +46,6 @@ RefPtr<FrameNode> Create(int32_t index)
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
-    renderContext->UpdateBackgroundColor(theme->GetBackgroundColor());
     BorderRadiusProperty border;
     border.SetRadius(theme->GetInnerBorderRadius());
     renderContext->UpdateBorderRadius(border);

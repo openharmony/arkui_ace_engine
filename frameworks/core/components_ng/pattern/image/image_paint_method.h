@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
+#include "core/components_ng/pattern/image/image_modifier.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/render/paint_wrapper.h"
@@ -28,18 +29,21 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT ImagePaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(ImagePaintMethod, NodePaintMethod)
 public:
-    explicit ImagePaintMethod(const RefPtr<CanvasImage>& canvasImage, bool selected)
-        : canvasImage_(canvasImage), selected_(selected)
+    explicit ImagePaintMethod(
+        const RefPtr<CanvasImage>& canvasImage, const RefPtr<ImageModifier>& imageModifier, bool selected)
+        : canvasImage_(canvasImage), imageModifier_(imageModifier), selected_(selected)
     {}
     ~ImagePaintMethod() override = default;
 
-    CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
+    RefPtr<Modifier> GetContentModifier(PaintWrapper* paintWrapper) override;
+    void UpdateContentModifier(PaintWrapper* paintWrapper) override;
     CanvasDrawFunction GetOverlayDrawFunction(PaintWrapper* paintWrapper) override;
 
 private:
     void UpdatePaintConfig(const RefPtr<ImageRenderProperty>& renderProps, PaintWrapper* paintWrapper);
     void UpdateBorderRadius(PaintWrapper* paintWrapper);
     RefPtr<CanvasImage> canvasImage_;
+    RefPtr<ImageModifier> imageModifier_;
     bool selected_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(ImagePaintMethod);

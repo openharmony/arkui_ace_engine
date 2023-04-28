@@ -823,4 +823,15 @@ void CustomPaintPattern::SetTextDirection(TextDirection direction)
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
+
+void CustomPaintPattern::SetFilterParam(const std::string& filterStr)
+{
+    auto task = [filterStr](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.SetFilterParam(filterStr);
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
 } // namespace OHOS::Ace::NG

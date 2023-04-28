@@ -97,6 +97,7 @@ public:
     void SetLineDash(const std::vector<double>& segments);
 
     void SetTextDirection(TextDirection direction);
+    void SetFilterParam(const std::string& filterStr);
 
     void Save();
     void Restore();
