@@ -17,7 +17,7 @@
 
 #include "bridge/declarative_frontend/jsview/js_matrix2d.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "frameworks/core/components_ng/pattern/custom_paint/matrix2d.h"
+#include "frameworks/core/components_ng/render/adapter/matrix2d.h"
 
 namespace OHOS::Ace::Framework {
 constexpr int SET_TRANSFORM_PARAMETER_SIZE = 1;
@@ -50,7 +50,7 @@ void JSCanvasPattern::JSSetTransform(const JSCallbackInfo& info)
     }
     auto* matrix = JSRef<JSObject>::Cast(info[0])->Unwrap<JSMatrix2d>();
     if (matrix) {
-        auto canvasRenderer = canvasRenderWeak.Upgrade();
+        auto canvasRenderer = canvasRenderWeak_.Upgrade();
         if (canvasRenderer) {
             canvasRenderer->SetTransform(GetId(), matrix->GetTransform());
         }

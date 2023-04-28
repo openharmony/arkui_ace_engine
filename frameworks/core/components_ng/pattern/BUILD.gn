@@ -72,7 +72,6 @@ build_component_ng("pattern_ng") {
     "custom_paint/custom_paint_paint_method.cpp",
     "custom_paint/custom_paint_pattern.cpp",
     "custom_paint/custom_paint_view.cpp",
-    "custom_paint/matrix2d.cpp",
     "custom_paint/offscreen_canvas_paint_method.cpp",
     "custom_paint/offscreen_canvas_pattern.cpp",
     "data_panel/data_panel_layout_algorithm.cpp",

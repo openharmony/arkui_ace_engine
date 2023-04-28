@@ -16,7 +16,7 @@
 #include "bridge/declarative_frontend/jsview/js_matrix2d.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "core/components/common/properties/paint_state.h"
-#include "frameworks/core/components_ng/pattern/custom_paint/matrix2d.h"
+#include "frameworks/core/components_ng/render/adapter/matrix2d.h"
 
 namespace OHOS::Ace::Framework {
 constexpr int JS_MATRIX2D_PARAMETER_COUNTS_0 = 0;
@@ -63,9 +63,9 @@ void JSMatrix2d::JsSetScaleX(const JSCallbackInfo& info)
         LOGE("The argv is wrong.");
         return;
     }
-    if (info[0]->IsNumber()) {
+    if (info[JS_MATRIX2D_PARAMETER_COUNTS_0]->IsNumber()) {
         double scaleX = 0;
-        JSViewAbstract::ParseJsDouble(info[0], scaleX);
+        JSViewAbstract::ParseJsDouble(info[JS_MATRIX2D_PARAMETER_COUNTS_0], scaleX);
         transform_.scaleX = scaleX;
     }
 }
@@ -76,10 +76,9 @@ void JSMatrix2d::JsSetRotateY(const JSCallbackInfo& info)
         LOGE("The argv is wrong.");
         return;
     }
-    if (info[0]->IsNumber()) {
+    if (info[JS_MATRIX2D_PARAMETER_COUNTS_0]->IsNumber()) {
         double rotateY = 0;
-        JSViewAbstract::ParseJsDouble(info[0], rotateY);
-        rotateY = SystemProperties::Vp2Px(rotateY);
+        JSViewAbstract::ParseJsDouble(info[JS_MATRIX2D_PARAMETER_COUNTS_0], rotateY);
         transform_.skewY = rotateY;
     }
 }
@@ -90,10 +89,9 @@ void JSMatrix2d::JsSetRotateX(const JSCallbackInfo& info)
         LOGE("The argv is wrong.");
         return;
     }
-    if (info[0]->IsNumber()) {
+    if (info[JS_MATRIX2D_PARAMETER_COUNTS_0]->IsNumber()) {
         double rotateX = 0;
-        JSViewAbstract::ParseJsDouble(info[0], rotateX);
-        rotateX = SystemProperties::Vp2Px(rotateX);
+        JSViewAbstract::ParseJsDouble(info[JS_MATRIX2D_PARAMETER_COUNTS_0], rotateX);
         transform_.skewX = rotateX;
     }
 }
@@ -104,9 +102,9 @@ void JSMatrix2d::JsSetScaleY(const JSCallbackInfo& info)
         LOGE("The argv is wrong.");
         return;
     }
-    if (info[0]->IsNumber()) {
+    if (info[JS_MATRIX2D_PARAMETER_COUNTS_0]->IsNumber()) {
         double scaleY = 0;
-        JSViewAbstract::ParseJsDouble(info[0], scaleY);
+        JSViewAbstract::ParseJsDouble(info[JS_MATRIX2D_PARAMETER_COUNTS_0], scaleY);
         transform_.scaleY = scaleY;
     }
 }
@@ -117,9 +115,9 @@ void JSMatrix2d::JsSetTranslateX(const JSCallbackInfo& info)
         LOGE("The argv is wrong.");
         return;
     }
-    if (info[0]->IsNumber()) {
+    if (info[JS_MATRIX2D_PARAMETER_COUNTS_0]->IsNumber()) {
         double translateX = 0;
-        JSViewAbstract::ParseJsDouble(info[0], translateX);
+        JSViewAbstract::ParseJsDouble(info[JS_MATRIX2D_PARAMETER_COUNTS_0], translateX);
         translateX = SystemProperties::Vp2Px(translateX);
         transform_.translateX = translateX;
     }
@@ -131,9 +129,9 @@ void JSMatrix2d::JsSetTranslateY(const JSCallbackInfo& info)
         LOGE("The argv is wrong.");
         return;
     }
-    if (info[0]->IsNumber()) {
+    if (info[JS_MATRIX2D_PARAMETER_COUNTS_0]->IsNumber()) {
         double translateY = 0;
-        JSViewAbstract::ParseJsDouble(info[0], translateY);
+        JSViewAbstract::ParseJsDouble(info[JS_MATRIX2D_PARAMETER_COUNTS_0], translateY);
         translateY = SystemProperties::Vp2Px(translateY);
         transform_.translateY = translateY;
     }
@@ -141,32 +139,28 @@ void JSMatrix2d::JsSetTranslateY(const JSCallbackInfo& info)
 
 void JSMatrix2d::JsGetScaleX(const JSCallbackInfo& info)
 {
-    double scaleX = SystemProperties::Px2Vp(transform_.scaleX);
-    auto returnValue = JSVal(ToJSValue(scaleX));
+    auto returnValue = JSVal(ToJSValue(transform_.scaleX));
     auto returnPtr = JSRef<JSVal>::Make(returnValue);
     info.SetReturnValue(returnPtr);
 }
 
 void JSMatrix2d::JsGetRotateY(const JSCallbackInfo& info)
 {
-    double skewY = SystemProperties::Px2Vp(transform_.skewY);
-    auto returnValue = JSVal(ToJSValue(skewY));
+    auto returnValue = JSVal(ToJSValue(transform_.skewY));
     auto returnPtr = JSRef<JSVal>::Make(returnValue);
     info.SetReturnValue(returnPtr);
 }
 
 void JSMatrix2d::JsGetRotateX(const JSCallbackInfo& info)
 {
-    double skewX = SystemProperties::Px2Vp(transform_.skewX);
-    auto returnValue = JSVal(ToJSValue(skewX));
+    auto returnValue = JSVal(ToJSValue(transform_.skewX));
     auto returnPtr = JSRef<JSVal>::Make(returnValue);
     info.SetReturnValue(returnPtr);
 }
 
 void JSMatrix2d::JsGetScaleY(const JSCallbackInfo& info)
 {
-    double scaleY = SystemProperties::Px2Vp(transform_.scaleY);
-    auto returnValue = JSVal(ToJSValue(scaleY));
+    auto returnValue = JSVal(ToJSValue(transform_.scaleY));
     auto returnPtr = JSRef<JSVal>::Make(returnValue);
     info.SetReturnValue(returnPtr);
 }
@@ -224,15 +218,15 @@ void JSMatrix2d::JsRotate(const JSCallbackInfo& info)
     double degree = 0;
     double rx = 0;
     double ry = 0;
-    if (info.Length() > JS_MATRIX2D_PARAMETER_COUNTS_0 && info[0]->IsNumber()) {
-        JSViewAbstract::ParseJsDouble(info[0], degree);
+    if (info.Length() > JS_MATRIX2D_PARAMETER_COUNTS_0 && info[JS_MATRIX2D_PARAMETER_COUNTS_0]->IsNumber()) {
+        JSViewAbstract::ParseJsDouble(info[JS_MATRIX2D_PARAMETER_COUNTS_0], degree);
     }
-    if (info.Length() > JS_MATRIX2D_PARAMETER_COUNTS_1 && info[1]->IsNumber()) {
-        JSViewAbstract::ParseJsDouble(info[1], rx);
+    if (info.Length() > JS_MATRIX2D_PARAMETER_COUNTS_1 && info[JS_MATRIX2D_PARAMETER_COUNTS_1]->IsNumber()) {
+        JSViewAbstract::ParseJsDouble(info[JS_MATRIX2D_PARAMETER_COUNTS_1], rx);
         rx = SystemProperties::Vp2Px(rx);
     }
-    if (info.Length() > JS_MATRIX2D_PARAMETER_COUNTS_2 && info[2]->IsNumber()) {
-        JSViewAbstract::ParseJsDouble(info[2], ry);
+    if (info.Length() > JS_MATRIX2D_PARAMETER_COUNTS_2 && info[JS_MATRIX2D_PARAMETER_COUNTS_2]->IsNumber()) {
+        JSViewAbstract::ParseJsDouble(info[JS_MATRIX2D_PARAMETER_COUNTS_2], ry);
         ry = SystemProperties::Vp2Px(ry);
     }
     NG::Matrix2D::Rotate(transform_, degree, rx, ry);
@@ -247,12 +241,12 @@ void JSMatrix2d::JsTranslate(const JSCallbackInfo& info)
     }
     double tx = 0;
     double ty = 0;
-    if (info.Length() > JS_MATRIX2D_PARAMETER_COUNTS_1 && info[0]->IsNumber()) {
-        JSViewAbstract::ParseJsDouble(info[0], tx);
+    if (info.Length() > JS_MATRIX2D_PARAMETER_COUNTS_1 && info[JS_MATRIX2D_PARAMETER_COUNTS_0]->IsNumber()) {
+        JSViewAbstract::ParseJsDouble(info[JS_MATRIX2D_PARAMETER_COUNTS_0], tx);
         tx = SystemProperties::Vp2Px(tx);
     }
-    if (info.Length() == JS_MATRIX2D_PARAMETER_COUNTS_2 && info[1]->IsNumber()) {
-        JSViewAbstract::ParseJsDouble(info[1], ty);
+    if (info.Length() == JS_MATRIX2D_PARAMETER_COUNTS_2 && info[JS_MATRIX2D_PARAMETER_COUNTS_1]->IsNumber()) {
+        JSViewAbstract::ParseJsDouble(info[JS_MATRIX2D_PARAMETER_COUNTS_1], ty);
         ty = SystemProperties::Vp2Px(ty);
     }
     NG::Matrix2D::Translate(transform_, tx, ty);
@@ -267,11 +261,11 @@ void JSMatrix2d::JsScale(const JSCallbackInfo& info)
     }
     double sx = 0;
     double sy = 0;
-    if (info.Length() > JS_MATRIX2D_PARAMETER_COUNTS_1 && info[0]->IsNumber()) {
-        JSViewAbstract::ParseJsDouble(info[0], sx);
+    if (info.Length() > JS_MATRIX2D_PARAMETER_COUNTS_1 && info[JS_MATRIX2D_PARAMETER_COUNTS_0]->IsNumber()) {
+        JSViewAbstract::ParseJsDouble(info[JS_MATRIX2D_PARAMETER_COUNTS_0], sx);
     }
     if (info.Length() == JS_MATRIX2D_PARAMETER_COUNTS_2 && info[1]->IsNumber()) {
-        JSViewAbstract::ParseJsDouble(info[1], sy);
+        JSViewAbstract::ParseJsDouble(info[JS_MATRIX2D_PARAMETER_COUNTS_1], sy);
     }
     NG::Matrix2D::Scale(transform_, sx, sy);
     info.SetReturnValue(info.This());

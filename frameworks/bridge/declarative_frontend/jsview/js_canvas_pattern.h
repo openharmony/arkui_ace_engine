@@ -40,7 +40,7 @@ public:
 
     void SetCanvasRenderer(const WeakPtr<JSCanvasRenderer>& canvasRenderer)
     {
-        canvasRenderWeak = canvasRenderer;
+        canvasRenderWeak_ = canvasRenderer;
     }
 
     void SetId(int32_t id)
@@ -58,7 +58,7 @@ public:
 private:
     int32_t id_ = 0;
     TransformParam transform_;
-    WeakPtr<JSCanvasRenderer> canvasRenderWeak;
+    WeakPtr<JSCanvasRenderer> canvasRenderWeak_;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_CANVAS_PATTERN_H
