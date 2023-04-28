@@ -192,8 +192,14 @@ void CustomPaintPaintMethod::UpdatePaintShader(const OffsetF& offset, SkPaint& p
 SkMatrix CustomPaintPaintMethod::GetMatrixFromPattern(const Ace::Pattern& pattern)
 {
     SkMatrix matrix;
-    matrix.setAll(pattern.GetScaleX(), pattern.GetSkewX(), pattern.GetTranslateX(), pattern.GetSkewY(),
-        pattern.GetScaleY(), pattern.GetTranslateY(), 0.0f, 0.0f, 1.0f);
+    double viewScale = 1.0;
+    auto context = context_.Upgrade();
+    if (context) {
+        viewScale = context->GetViewScale();
+    }
+    matrix.setAll(pattern.GetScaleX() * viewScale, pattern.GetSkewX() * viewScale, pattern.GetTranslateX() * viewScale,
+        pattern.GetSkewY() * viewScale, pattern.GetScaleY() * viewScale, pattern.GetTranslateY() * viewScale, 0.0f,
+        0.0f, 1.0f);
     return matrix;
 }
 
