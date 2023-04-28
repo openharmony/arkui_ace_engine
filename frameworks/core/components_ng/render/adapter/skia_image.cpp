@@ -164,13 +164,11 @@ void SkiaImage::DrawToRSCanvas(
 {
     auto image = GetImage();
     CHECK_NULL_VOID(image || GetCompressData());
-    if (isDrawAnimate_) {
+    if (!DrawWithRecordingCanvas(canvas, srcRect, dstRect, radiusXY)) {
         RSImage rsImage(&image);
         RSSamplingOptions options;
         ClipRRect(canvas, dstRect, radiusXY);
         canvas.DrawImageRect(rsImage, srcRect, dstRect, options);
-    } else {
-        DrawWithRecordingCanvas(canvas, srcRect, dstRect, radiusXY);
     }
 }
 
