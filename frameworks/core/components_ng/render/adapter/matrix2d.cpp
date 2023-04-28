@@ -85,3 +85,4 @@ void Matrix2D::Rotate(TransformParam& param, double degree, double rx, double ry
     ConvertToTransformParam(param, skMatrix);
 }
 } // namespace OHOS::Ace::NG
+

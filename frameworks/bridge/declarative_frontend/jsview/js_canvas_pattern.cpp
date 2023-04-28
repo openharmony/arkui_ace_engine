@@ -59,3 +59,4 @@ void JSCanvasPattern::JSSetTransform(const JSCallbackInfo& info)
     }
 }
 } // namespace OHOS::Ace::Framework
+

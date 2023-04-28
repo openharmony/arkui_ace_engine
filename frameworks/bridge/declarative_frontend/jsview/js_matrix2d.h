@@ -96,3 +96,4 @@ private:
 
 } // OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_MATRIX2D_H
+
