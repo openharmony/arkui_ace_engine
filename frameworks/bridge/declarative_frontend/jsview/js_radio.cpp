@@ -109,8 +109,20 @@ void JSRadio::Checked(bool checked)
 
 void JSRadio::Checked(const JSCallbackInfo& info)
 {
-    if (info[0]->IsBoolean()) {
+    if (info.Length() < 1 || info.Length() > 2) {
+        LOGE("The arg is wrong, it is supposed to have 1 or 2 arguments");
+        return;
+    }
+
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
         RadioModel::GetInstance()->SetChecked(info[0]->ToBoolean());
+    } else {
+        RadioModel::GetInstance()->SetChecked(false);
+    }
+
+    if (info.Length() > 1 && info[1]->IsObject()) {
+        JSRef<JSVal> checkedObj = JSRef<JSObject>::Cast(info[1]);
+        ParseCheckedObject(info, checkedObj);
     }
 }
 
