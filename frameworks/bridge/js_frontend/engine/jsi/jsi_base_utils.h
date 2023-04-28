@@ -87,7 +87,8 @@ private:
     static void ExtractEachInfo(const std::string& tempStack, std::vector<std::string>& res);
     static void GetPosInfo(const std::string& temp, int32_t start, std::string& line, std::string& column);
     static std::string GetSourceInfo(const std::string& line, const std::string& column,
-        const RefPtr<RevSourceMap>& pageMap, const RefPtr<RevSourceMap>& appMap, bool isAppPage, const AceType* data);
+        const RefPtr<RevSourceMap>& pageMap, const RefPtr<RevSourceMap>& appMap, bool isAppPage, const AceType* data,
+        const bool isBundle = true);
     static std::string GetRelativePath(const std::string& sources, std::string splitStr = "/\\");
 
     // native aceTraceObject
