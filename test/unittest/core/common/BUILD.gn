@@ -13,6 +13,7 @@
 
 group("core_common_unittest") {
   testonly = true
+<<<<<<< HEAD
   deps = [
     "clipboard:clip_board_test",
     "environment:environment_test",
@@ -27,4 +28,22 @@ group("core_common_unittest") {
     "storage:storage_test",
     "vibrator:vibrator_test",
   ]
+=======
+  deps = []
+  if (!is_wearable_product) {
+    deps += [
+      "clipboard:clip_board_test",
+      "connect_server:ace_connect_server_manager_test",
+      "environment:environment_test",
+      "flutter:flutter_test",
+      "ime:ime_test",
+      "plugin:plugin_manager_test",
+      "register:register_test",
+      "rosen:rosen_test",
+      "sharedata:share_data_test",
+      "storage:storage_test",
+      "vibrator:vibrator_test",
+    ]
+  }
+>>>>>>> [tdd]add test suite ace_connect_server_manager_test
 }
