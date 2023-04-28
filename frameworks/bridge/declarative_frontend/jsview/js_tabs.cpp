@@ -223,29 +223,32 @@ void JSTabs::SetFadingEdge(const JSCallbackInfo& info)
 void JSTabs::SetDivider(const JSCallbackInfo& info)
 {
     TabsItemDivider divider;
+    RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
+    CHECK_NULL_VOID (tabTheme);
+    
     if (info.Length() < 1) {
         LOGW("Invalid params");
     } else {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
-        if (!info[0]->IsObject() || !ConvertFromJSValue(obj->GetProperty("strokeWidth"), divider.strokeWidth) ||
-            divider.strokeWidth.Value() < 0.0f) {
-            divider.strokeWidth.Reset();
-        }
-        if (!info[0]->IsObject() || !ConvertFromJSValue(obj->GetProperty("color"), divider.color)) {
-            RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
-            if (tabTheme) {
+        if (info[0]->IsNull()) {
+            divider.isNull = true;
+        } else {
+            if (!info[0]->IsObject() || !ConvertFromJSValue(obj->GetProperty("strokeWidth"), divider.strokeWidth) ||
+                divider.strokeWidth.Value() < 0.0f) {
+                divider.strokeWidth.Reset();
+            }
+            if (!info[0]->IsObject() || !ConvertFromJSValue(obj->GetProperty("color"), divider.color)) {
                 divider.color = tabTheme->GetDividerColor();
             }
-        }
-
-        if (!info[0]->IsObject() || !ConvertFromJSValue(obj->GetProperty("startMargin"), divider.startMargin) ||
-            divider.startMargin.Value() < 0.0f) {
-            divider.startMargin.Reset();
-        }
-        
-        if (!info[0]->IsObject() || !ConvertFromJSValue(obj->GetProperty("endMargin"), divider.endMargin) ||
-            divider.endMargin.Value() < 0.0f) {
-            divider.endMargin.Reset();
+            if (!info[0]->IsObject() || !ConvertFromJSValue(obj->GetProperty("startMargin"), divider.startMargin) ||
+                divider.startMargin.Value() < 0.0f) {
+                divider.startMargin.Reset();
+            }
+            
+            if (!info[0]->IsObject() || !ConvertFromJSValue(obj->GetProperty("endMargin"), divider.endMargin) ||
+                divider.endMargin.Value() < 0.0f) {
+                divider.endMargin.Reset();
+            }
         }
     }
     TabsModel::GetInstance()->SetDivider(divider);

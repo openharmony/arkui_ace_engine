@@ -37,6 +37,7 @@ struct TabsItemDivider final {
     Dimension startMargin = 0.0_vp;
     Dimension endMargin = 0.0_vp;
     Color color = Color::BLACK;
+    bool isNull = false;
     TabsItemDivider()
     {
         auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -52,7 +53,7 @@ struct TabsItemDivider final {
     bool operator==(const TabsItemDivider& itemDivider) const
     {
         return (strokeWidth == itemDivider.strokeWidth) && (startMargin == itemDivider.startMargin) &&
-               (endMargin == itemDivider.endMargin) && (color == itemDivider.color);
+               (endMargin == itemDivider.endMargin) && (color == itemDivider.color) && (isNull == itemDivider.isNull);
     }
 };
 

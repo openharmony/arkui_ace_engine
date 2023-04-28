@@ -242,7 +242,24 @@ void TabsModelNG::SetOnChange(std::function<void(const BaseEventInfo*)>&& onChan
 
 void TabsModelNG::SetDivider(const TabsItemDivider& divider)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, Divider, divider);
+    auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(tabsNode);
+    auto dividerNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(1));
+    CHECK_NULL_VOID(dividerNode);
+    auto dividerRenderContext = dividerNode->GetRenderContext();
+    CHECK_NULL_VOID(dividerRenderContext);
+    if (divider.isNull) {
+        dividerRenderContext->UpdateOpacity(0.0f);
+        auto tabsLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
+        CHECK_NULL_VOID(tabsLayoutProperty);
+        auto currentDivider = tabsLayoutProperty->GetDivider().value_or(TabsItemDivider());
+        currentDivider.strokeWidth = Dimension(1.0f);
+        currentDivider.isNull = true;
+        ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, Divider, currentDivider);
+    } else {
+        dividerRenderContext->UpdateOpacity(1.0f);
+        ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, Divider, divider);
+    }
 }
 
 RefPtr<TabBarLayoutProperty> TabsModelNG::GetTabBarLayoutProperty()
