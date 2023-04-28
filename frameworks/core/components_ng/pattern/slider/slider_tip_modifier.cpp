@@ -47,21 +47,21 @@ constexpr Dimension BUBBLE_TEXT_OFFSET = 8.0_vp;
 constexpr int32_t MAX_COLUMNS_OF_BUBBLE = 6;
 } // namespace
 
-SliderTipModifier::SliderTipModifier(std::function<OffsetF()> getBlockCenterFunc)
+SliderTipModifier::SliderTipModifier(std::function<OffsetF()> getBubbleVertexFunc)
     : tipFlag_(AceType::MakeRefPtr<PropertyBool>(false)),
       contentOffset_(AceType::MakeRefPtr<PropertyOffsetF>(OffsetF())),
       contentSize_(AceType::MakeRefPtr<PropertySizeF>(SizeF())),
       sizeScale_(AceType::MakeRefPtr<AnimatablePropertyFloat>(BUBBLE_SIZE_MIN_SCALE)),
       opacityScale_(AceType::MakeRefPtr<AnimatablePropertyFloat>(BUBBLE_OPACITY_MIN_SCALE)),
-      content_(AceType::MakeRefPtr<PropertyString>("")), blockCenter_(AceType::MakeRefPtr<PropertyOffsetF>(OffsetF())),
-      getBlockCenterFunc_(std::move(getBlockCenterFunc))
+      content_(AceType::MakeRefPtr<PropertyString>("")), bubbleVertex_(AceType::MakeRefPtr<PropertyOffsetF>(OffsetF())),
+      getBubbleVertexFunc_(std::move(getBubbleVertexFunc))
 {
     AttachProperty(tipFlag_);
     AttachProperty(contentOffset_);
     AttachProperty(sizeScale_);
     AttachProperty(opacityScale_);
     AttachProperty(content_);
-    AttachProperty(blockCenter_);
+    AttachProperty(bubbleVertex_);
 }
 
 SliderTipModifier::~SliderTipModifier()
@@ -77,8 +77,7 @@ void SliderTipModifier::PaintTip(DrawingContext& context)
     context.canvas.Translate(vertex.GetX() * -1.0, vertex.GetY() * -1.0);
     PaintBubble(context);
     CHECK_NULL_VOID(paragraph_);
-    auto textOffset = textOffset_ + contentOffset_->Get();
-    paragraph_->Paint(context.canvas, textOffset.GetX(), textOffset.GetY());
+    paragraph_->Paint(context.canvas, textOffset_.GetX(), textOffset_.GetY());
     context.canvas.Restore();
 }
 
@@ -136,8 +135,7 @@ void SliderTipModifier::PaintBezier(
 void SliderTipModifier::PaintBubble(DrawingContext& context)
 {
     auto opacityScale = opacityScale_->Get();
-    auto contentOffset = contentOffset_->Get();
-    auto offset = bubbleOffset_ + contentOffset;
+    auto offset = bubbleOffset_;
     auto bubbleSize = bubbleSize_;
     auto arrowHeight = static_cast<float>(ARROW_HEIGHT.ConvertToPx());
     RSPath path;
@@ -294,22 +292,8 @@ bool SliderTipModifier::CreateParagraph(const TextStyle& textStyle, std::string 
 
 OffsetF SliderTipModifier::GetBubbleVertex()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, OffsetF());
-    auto theme = pipeline->GetTheme<SliderTheme>();
-    CHECK_NULL_RETURN(theme, OffsetF());
-
-    OffsetF vertex;
-    auto blockCenter = blockCenter_->Get();
-    if (axis_ == Axis::HORIZONTAL) {
-        vertex.SetX(blockCenter.GetX());
-        vertex.SetY(blockCenter.GetY() - static_cast<float>(theme->GetBubbleToCircleCenterDistance().ConvertToPx()));
-    } else {
-        vertex.SetX(blockCenter.GetX() - static_cast<float>(theme->GetBubbleToCircleCenterDistance().ConvertToPx()));
-        vertex.SetY(blockCenter.GetY());
-    }
-
-    return vertex;
+    CHECK_NULL_RETURN(getBubbleVertexFunc_, bubbleVertex_->Get());
+    return getBubbleVertexFunc_();
 }
 
 void SliderTipModifier::UpdateBubbleSize()
@@ -318,9 +302,7 @@ void SliderTipModifier::UpdateBubbleSize()
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SliderTheme>();
     CHECK_NULL_VOID(theme);
-    if (getBlockCenterFunc_) {
-        SetCircleCenter(getBlockCenterFunc_());
-    }
+
     SizeF textSize = { 0, 0 };
     if (paragraph_) {
         textSize = SizeF(paragraph_->GetTextWidth(), paragraph_->GetHeight());
