@@ -115,8 +115,10 @@ class SynchedPropertyObjectOneWayPU<C extends Object>
   private setWrapperValue(value: C): void {
     let rawValue = ObservedObject.GetRawObject(value);
     let copy: C;
+    
+    // FIXME: Proper object deep copy missing here!
     if (rawValue instanceof Array) {
-      copy = ObservedObject.createNew([ ...rawValue ], this);
+      copy = ObservedObject.createNew([ ...rawValue ], this) as unknown as C;
     } else {
       copy = ObservedObject.createNew({ ...rawValue }, this);
     }
