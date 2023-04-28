@@ -102,9 +102,8 @@ void DatePickerColumnPattern::InitMouseAndPressEvent()
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     auto mouseTask = [weak = WeakClaim(this)](bool isHover) {
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleMouseEvent(isHover);
-        }
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleMouseEvent(isHover);
     };
     mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
     inputHub->AddOnHoverEvent(mouseEvent_);
@@ -178,9 +177,8 @@ void DatePickerColumnPattern::PlayPressAnimation(const Color& pressColor)
     option.SetFillMode(FillMode::FORWARDS);
     AnimationUtils::Animate(option, [weak = AceType::WeakClaim(this), pressColor]() {
         auto picker = weak.Upgrade();
-        if (picker) {
-            picker->SetButtonBackgroundColor(pressColor);
-        }
+        CHECK_NULL_VOID(picker);
+        picker->SetButtonBackgroundColor(pressColor);
     });
 }
 
@@ -192,9 +190,8 @@ void DatePickerColumnPattern::PlayHoverAnimation(const Color& color)
     option.SetFillMode(FillMode::FORWARDS);
     AnimationUtils::Animate(option, [weak = AceType::WeakClaim(this), color]() {
         auto picker = weak.Upgrade();
-        if (picker) {
-            picker->SetButtonBackgroundColor(color);
-        }
+        CHECK_NULL_VOID(picker);
+        picker->SetButtonBackgroundColor(color);
     });
 }
 
