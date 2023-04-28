@@ -673,7 +673,8 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
             positionY, (rootSize.Height() - keyboardHeight), offsetFix, keyboardHeight);
         if (NearZero(keyboardHeight)) {
             SetRootRect(rootSize.Width(), rootSize.Height(), 0);
-        } else if (LessOrEqual(rootSize.Height() - positionY - height, height)) {
+        } else if (LessOrEqual(rootSize.Height() - positionY - height, height) &&
+                   LessOrEqual(rootSize.Height() - positionY, keyboardHeight)) {
             SetRootRect(rootSize.Width(), rootSize.Height(), -keyboardHeight);
         } else if (positionY + height > (rootSize.Height() - keyboardHeight) && offsetFix > 0.0) {
             SetRootRect(rootSize.Width(), rootSize.Height(), -offsetFix);
