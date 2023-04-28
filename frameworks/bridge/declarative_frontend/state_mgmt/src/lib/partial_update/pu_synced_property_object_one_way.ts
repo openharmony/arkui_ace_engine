@@ -13,9 +13,21 @@
  * limitations under the License.
  */
 
+/**
+ * SynchedPropertyObjectOneWayPU
+ * implementatio  of @Prop decorated variables of type class object
+ * 
+ * all definitions in this file are framework internal
+ * 
+ */
+
+
+type SyncSourceHasChangedCb<T> = (source : ObservedPropertyAbstract<T>) => void;
+
 class SynchedPropertyObjectOneWayPU<C extends Object>
   extends ObservedPropertyObjectAbstractPU<C>
-  implements ISinglePropertyChangeSubscriber<C>, IMultiPropertiesChangeSubscriber {
+  implements PeerChangeEventReceiverPU<C>,
+  ObservedObjectEventsPUReceiver<C> {
 
   private wrappedValue_: C;
   private source_: ObservedPropertyAbstract<C>;
@@ -29,9 +41,9 @@ class SynchedPropertyObjectOneWayPU<C extends Object>
     thisPropertyName: PropertyInfo) {
     super(owningChildView, thisPropertyName);
 
-    if (source && (typeof (source) === "object") && ("notifyHasChanged" in source) && ("subscribeMe" in source)) {
-      // code path for @(Local)StorageProp
-      this.source_ = source as ObservedPropertyAbstract<C>;
+    if (source && (typeof (source) === "object") && ("subscribeMe" in source)) {
+      // code path for @(Local)StorageProp, the souce is a ObservedPropertyObject in aLocalStorage)
+      this.source_ = source as ObservedPropertyAbstractPU<C>;
       this.sourceIsOwnObject = false;
       // subscribe to receive value change updates from LocalStorage source property
       this.source_.subscribeMe(this);
@@ -47,7 +59,8 @@ class SynchedPropertyObjectOneWayPU<C extends Object>
     }
 
     // deep copy source Object and wrap it
-    this.setWrapperValue(this.source_.get());
+    this.setWrappedValue(this.source_.get());
+
     stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: constructor ready with wrappedValue '${JSON.stringify(this.wrappedValue_)}'.`);
   }
 
@@ -68,22 +81,36 @@ class SynchedPropertyObjectOneWayPU<C extends Object>
     super.aboutToBeDeleted();
   }
 
-
-  // this object is subscriber to this.source_
-  // when source notifies a property change, copy its value to local backing store
-  // the guard for newValue being an Object is needed because also property changes of wrappedValue_ 
-  // are notified via this function. We ignore those, these are handled correctly by propertyHasChanged
-  public hasChanged(newValue: C): void {
-    if (typeof newValue == "object") {
-      stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: hasChanged:  newValue '${JSON.stringify(newValue)}'.`);
-      this.setWrapperValue(newValue);
-      this.notifyHasChanged(ObservedObject.GetRawObject(this.wrappedValue_));
+  public syncPeerHasChanged(eventSource: ObservedPropertyAbstractPU<C>) {
+    if (eventSource && this.source_ == eventSource) {
+      // defensive programming: should always be the case!
+      stateMgmtConsole.debug(`SynchedPropertyNesedObjectPU[${this.id__()}]: syncPeerHasChanged(): Source '${eventSource.info()}' has changed'.`)
+      const newValue = this.source_.getUnmonitored();
+      if (typeof newValue == "object") {
+        stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: hasChanged:  newValue '${JSON.stringify(newValue)}'.`);
+        this.setWrappedValue(newValue);
+        this.notifyPropertyHasChangedPU();
+      }
+    } else {
+      stateMgmtConsole.warn(`SynchedPropertyNesedObjectPU[${this.id__()}]: syncPeerHasChanged Unexpected situation. Ignorning event.`)
     }
   }
 
-  public propertyHasChanged(propName : string) : void {
-    stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: propertyHasChanged '${propName}'.`);
-    this.notifyHasChanged(ObservedObject.GetRawObject(this.wrappedValue_));
+  /**
+   * event emited by wrapped ObservedObject, when one of its property values changes
+   * @param souceObject 
+   * @param changedPropertyName 
+   */
+  public objectPropertyHasChangedPU(souceObject: ObservedObject<C>, changedPropertyName : string) {
+    stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: \
+        objectPropertyHasChangedPU: contained ObservedObject property '${changedPropertyName}' has changed.`)
+    this.notifyPropertyHasChangedPU();
+  }
+
+  public objectPropertyHasBeenReadPU(souceObject: ObservedObject<C>, changedPropertyName : string) {
+    stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: \
+    objectPropertyHasBeenReadPU: contained ObservedObject property '${changedPropertyName}' has been read.`);
+    this.notifyPropertyHasBeenReadPU();
   }
 
   public getUnmonitored(): C {
@@ -95,7 +122,7 @@ class SynchedPropertyObjectOneWayPU<C extends Object>
   // get 'read through` from the ObservedObject
   public get(): C {
     stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: get returning ${JSON.stringify(this.wrappedValue_)}.`)
-    this.notifyPropertyRead();
+    this.notifyPropertyHasBeenReadPU()
     return this.wrappedValue_;
   }
 
@@ -113,17 +140,17 @@ class SynchedPropertyObjectOneWayPU<C extends Object>
          lacks @Observed class decorator. Object property changes will not be observed.`);
     }
 
-    this.setWrapperValue(newValue);
-    this.notifyHasChanged(this.wrappedValue_);
+    this.setWrappedValue(newValue);
+    this.notifyPropertyHasChangedPU();
   }
 
   public reset(sourceChangedValue: C): void {
     stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: reset from '${JSON.stringify(this.wrappedValue_)}' to '${JSON.stringify(sourceChangedValue)}'.`);
-    // if set causes an actual change, then, ObservedPropertyObject source_ will call hasChanged
+    // if set causes an actual change, then, ObservedPropertyObject source_ will call syncPeerHasChanged
     this.source_.set(sourceChangedValue);
   }
 
-  private setWrapperValue(value: C): void {
+  private setWrappedValue(value: C): void {
     let rawValue = ObservedObject.GetRawObject(value);
     let copy: C;
     
@@ -134,6 +161,7 @@ class SynchedPropertyObjectOneWayPU<C extends Object>
       copy = ObservedObject.createNew({ ...rawValue }, this);
     }
     Object.setPrototypeOf(copy, Object.getPrototypeOf(rawValue));
+    ObservedObject.addOwningProperty(this.wrappedValue_, this);
     this.wrappedValue_ = copy;
   }
 }
