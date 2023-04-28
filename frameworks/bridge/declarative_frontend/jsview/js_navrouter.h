@@ -23,8 +23,10 @@ namespace OHOS::Ace::Framework {
 class JSNavRouter : public JSContainerBase {
 public:
     static void Create();
-    static void JSBind(BindingTarget globalObj);
+    static void Create(const JSCallbackInfo& info);
     static void SetOnStateChange(const JSCallbackInfo& info);
+    static void SetNavRouteMode(const JSCallbackInfo& info);
+    static void JSBind(BindingTarget globalObj);
 };
 
 } // namespace OHOS::Ace::Framework
