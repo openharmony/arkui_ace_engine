@@ -15,9 +15,14 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_navigation.h"
 
+#include <vector>
+
 #include "base/log/ace_scoring_log.h"
 #include "base/memory/referenced.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
+#include "bridge/declarative_frontend/engine/js_ref_ptr.h"
+#include "bridge/declarative_frontend/engine/js_types.h"
+#include "bridge/declarative_frontend/jsview/js_navigation_stack.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
@@ -35,6 +40,7 @@ constexpr int32_t TITLE_MODE_RANGE = 2;
 constexpr int32_t NAVIGATION_MODE_RANGE = 2;
 constexpr int32_t NAV_BAR_POSITION_RANGE = 1;
 constexpr int32_t DEFAULT_NAV_BAR_WIDTH = 200;
+
 JSRef<JSVal> TitleModeChangeEventToJSValue(const NavigationTitleModeChangeEvent& eventInfo)
 {
     return JSRef<JSVal>::Make(ToJSValue(eventInfo.IsMiniBar() ? static_cast<int32_t>(NavigationTitleMode::MINI)
@@ -144,21 +150,38 @@ bool JSNavigation::ParseCommonTitle(const JSRef<JSVal>& jsValue)
     return isCommonTitle;
 }
 
-void JSNavigation::Create()
+void JSNavigation::Create(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::NavigationView::Create();
+    if (!Container::IsCurrentUseNewPipeline()) {
+        auto navigationContainer = AceType::MakeRefPtr<NavigationContainerComponent>();
+        ViewStackProcessor::GetInstance()->Push(navigationContainer);
         return;
     }
-    auto navigationContainer = AceType::MakeRefPtr<NavigationContainerComponent>();
-    ViewStackProcessor::GetInstance()->Push(navigationContainer);
+    if (info.Length() <= 0) {
+        NG::NavigationView::Create();
+        NG::NavigationView::SetNavigationStack();
+        return;
+    }
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    auto obj = JSRef<JSObject>::Cast(info[0]);
+    auto value = obj->GetProperty("type");
+    if (value->ToString() != "NavPathStack") {
+        return;
+    }
+
+    NG::NavigationView::Create();
+    auto navigationStack = AceType::MakeRefPtr<JSNavigationStack>();
+    navigationStack->SetDataSourceObj(obj);
+    NG::NavigationView::SetNavigationStack(std::move(navigationStack));
 }
 
 void JSNavigation::JSBind(BindingTarget globalObj)
 {
     JSClass<JSNavigation>::Declare("Navigation");
     MethodOptions opt = MethodOptions::NONE;
-    JSClass<JSNavigation>::StaticMethod("create", &JSNavigation::Create, opt);
+    JSClass<JSNavigation>::StaticMethod("create", &JSNavigation::Create);
     JSClass<JSNavigation>::StaticMethod("title", &JSNavigation::SetTitle, opt);
     JSClass<JSNavigation>::StaticMethod("subTitle", &JSNavigation::SetSubTitle, opt);
     JSClass<JSNavigation>::StaticMethod("titleMode", &JSNavigation::SetTitleMode, opt);
@@ -175,6 +198,7 @@ void JSNavigation::JSBind(BindingTarget globalObj)
     JSClass<JSNavigation>::StaticMethod("hideNavBar", &JSNavigation::SetHideNavBar);
     JSClass<JSNavigation>::StaticMethod("backButtonIcon", &JSNavigation::SetBackButtonIcon);
     JSClass<JSNavigation>::StaticMethod("onNavBarStateChange", &JSNavigation::SetOnNavBarStateChange);
+    JSClass<JSNavigation>::StaticMethod("navDestination", &JSNavigation::SetNavDestination);
     JSClass<JSNavigation>::Inherit<JSContainerBase>();
     JSClass<JSNavigation>::Inherit<JSViewAbstract>();
     JSClass<JSNavigation>::Bind(globalObj);
@@ -617,6 +641,31 @@ void JSNavigation::SetOnNavBarStateChange(const JSCallbackInfo& info)
         NG::NavigationView::SetOnNavBarStateChange(std::move(onNavBarStateChange));
     }
     info.ReturnSelf();
+}
+
+void JSNavigation::SetNavDestination(const JSCallbackInfo& info)
+{
+    if (!Container::IsCurrentUseNewPipeline()) {
+        return;
+    }
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+    auto builder = obj->GetProperty("builder");
+    if (!builder->IsFunction()) {
+        LOGE("JSNavigation::SetNavDestination builder param is not a function.");
+        return;
+    }
+
+    auto navigationStack = NG::NavigationView::GetNavigationStack();
+    auto jsNavigationStack = AceType::DynamicCast<JSNavigationStack>(navigationStack);
+    if (jsNavigationStack) {
+        jsNavigationStack->SetJSExecutionContext(info.GetExecutionContext());
+        jsNavigationStack->SetNavDestBuilderFunc(JSRef<JSFunc>::Cast(builder));
+    }
 }
 
 } // namespace OHOS::Ace::Framework
