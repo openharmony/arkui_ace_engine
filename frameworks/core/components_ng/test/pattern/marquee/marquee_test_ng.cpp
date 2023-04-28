@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/pipeline_ng/ui_task_scheduler.h"
 #define private public
 #include <cstddef>
 #include <optional>
@@ -160,11 +162,11 @@ HWTEST_F(MarqueeTestNg, MarqueeTest001, TestSize.Level1)
     EXPECT_EQ(marqueeLayoutProperty->GetDirection(), MarqueeDirection::LEFT);
     EXPECT_EQ(marqueeLayoutProperty->GetPlayerStatus(), false);
     EXPECT_EQ(marqueeLayoutProperty->GetScrollAmount(), MARQUEE_SCROLL_AMOUNT);
-    EXPECT_EQ(textLayoutProperty->GetContent(), MARQUEE_SRC);
-    EXPECT_EQ(textLayoutProperty->GetFontSize(), FONT_SIZE_VALUE);
-    EXPECT_EQ(textLayoutProperty->GetTextColor(), TEXT_COLOR_VALUE);
-    EXPECT_EQ(textLayoutProperty->GetFontFamily(), FONT_FAMILY_VALUE);
-    EXPECT_EQ(textLayoutProperty->GetFontWeight(), FONT_WEIGHT_VALUE);
+    EXPECT_EQ(marqueeLayoutProperty->GetSrc(), MARQUEE_SRC);
+    EXPECT_EQ(marqueeLayoutProperty->GetFontSize(), FONT_SIZE_VALUE);
+    EXPECT_EQ(marqueeLayoutProperty->GetFontColor(), TEXT_COLOR_VALUE);
+    EXPECT_EQ(marqueeLayoutProperty->GetFontFamily(), FONT_FAMILY_VALUE);
+    EXPECT_EQ(marqueeLayoutProperty->GetFontWeight(), FONT_WEIGHT_VALUE);
 }
 
 /**
@@ -792,7 +794,7 @@ HWTEST_F(MarqueeTestNg, MarqueeTest009, TestSize.Level1)
 }
 
 /**
- * @tc.name: MarqueeTest001
+ * @tc.name: MarqueeTest010
  * @tc.desc: Test Text property of marquee.
  * @tc.type: FUNC
  */
@@ -806,5 +808,61 @@ HWTEST_F(MarqueeTestNg, MarqueeTest0010, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto accessibility = frameNode->GetAccessibilityProperty<MarqueeAccessibilityProperty>();
     EXPECT_EQ(accessibility->GetText(), MARQUEE_SRC);
+}
+
+/**
+ * @tc.name: MarqueeTest011
+ * @tc.desc: Test Marquee property ChangeFlag.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueeTestNg, MarqueeTest0011, TestSize.Level1)
+{
+    MarqueeModelNG marqueeModel;
+    marqueeModel.Create();
+    marqueeModel.SetValue(MARQUEE_SRC);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<MarqueePattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto marqueeLayoutProperty = AceType::DynamicCast<MarqueeLayoutProperty>(frameNode->GetLayoutProperty());
+    ASSERT_NE(marqueeLayoutProperty, nullptr);
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    pattern->OnModifyDone();
+    EXPECT_TRUE(CheckMeasureFlag(marqueeLayoutProperty->GetPropertyChangeFlag()));
+    EXPECT_TRUE(CheckMeasureFlag(textLayoutProperty->GetPropertyChangeFlag()));
+}
+
+/**
+ * @tc.name: MarqueeTest012
+ * @tc.desc: Test Stop Animation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueeTestNg, MarqueeTest0012, TestSize.Level1)
+{
+    MarqueeModelNG marqueeModel;
+    marqueeModel.Create();
+    marqueeModel.SetValue(MARQUEE_SRC);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<MarqueePattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->lastStartStatus_ = false;
+    pattern->StopMarqueeAnimation(false, true);
+    EXPECT_TRUE(!pattern->lastStartStatus_);
+
+    pattern->lastStartStatus_ = true;
+    pattern->StopMarqueeAnimation(false, false);
+    EXPECT_TRUE(pattern->lastStartStatus_);
+
+    pattern->lastStartStatus_ = true;
+    pattern->StopMarqueeAnimation(true, false);
+    EXPECT_TRUE(pattern->lastStartStatus_);
+
+    pattern->lastStartStatus_ = true;
+    pattern->StopMarqueeAnimation(true, true);
+    EXPECT_TRUE(pattern->lastStartStatus_);
 }
 } // namespace OHOS::Ace::NG
