@@ -83,6 +83,15 @@ class LocalStorage extends NativeLocalStorage {
             this.initializeProps(initializingProperties);
         }
     }
+    /*
+      get access to provded LocalStorage instance thru Stake model
+      @StageModelOnly
+      @form
+      @since 10
+    */
+    static getShared() {
+        return LocalStorage.GetShared();
+    }
     /**
      * clear storage and init with given properties
      * @param initializingProperties
@@ -447,7 +456,7 @@ class LocalStorage extends NativeLocalStorage {
     }
 }
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -472,26 +481,26 @@ class LocalStorage extends NativeLocalStorage {
  */
 class AppStorage extends LocalStorage {
     /** singleton class, app can not create instances
-     *
-     * not a public / sdk function
+    *
+    * not a public / sdk function
     */
     constructor(initializingProperties) {
         super(initializingProperties);
     }
     /**
-     * create and initialize singleton
-     * initialzie with all properties and their values that Object.keys(params) returns
-     * Property values must not be undefined.
-     *
-     * not a public / sdk function
-     */
-    static CreateSingleton(initializingPropersties) {
-        if (!AppStorage.Instance_) {
+    * create and initialize singleton
+    * initialzie with all properties and their values that Object.keys(params) returns
+    * Property values must not be undefined.
+    *
+    * not a public / sdk function
+    */
+    static createSingleton(initializingPropersties) {
+        if (!AppStorage.instance_) {
             
-            AppStorage.Instance_ = new AppStorage(initializingPropersties);
+            AppStorage.instance_ = new AppStorage(initializingPropersties);
         }
         else {
-            stateMgmtConsole.error("AppStorage.CreateNewInstance(..): instance exists already, internal error!");
+            stateMgmtConsole.error("AppStorage.createNewInstance(..): instance exists already, internal error!");
         }
     }
     /**
@@ -500,20 +509,28 @@ class AppStorage extends LocalStorage {
     * Same as @see LocalStorage.link()
     *
     * @param propName name of source property in AppStorage
-     * @param linkUser IPropertySubscriber to be notified when source changes,
-     * @param subscribersName the linkUser (subscriber) uses this name for the property
-     *      this name will be used in propertyChange(propName) callback of IMultiPropertiesChangeSubscriber
-     * @returns  SynchedPropertyTwoWay{Simple|Object| object with given LocalStoage prop as its source.
-     *           Apps can use SDK functions of base class SubscribedAbstractProperty<S>
-     *           return undefiend if named property does not already exist in AppStorage
-     *
-     * @since 7
-     */
-    static Link(key, linkUser, subscribersName) {
-        return AppStorage.GetOrCreate().link(key, linkUser, subscribersName);
+    * @param linkUser IPropertySubscriber to be notified when source changes,
+    * @param subscribersName the linkUser (subscriber) uses this name for the property
+    *      this name will be used in propertyChange(propName) callback of IMultiPropertiesChangeSubscriber
+    * @returns  SynchedPropertyTwoWay{Simple|Object| object with given LocalStoage prop as its source.
+    *           Apps can use SDK functions of base class SubscribedAbstractProperty<S>
+    *           return undefiend if named property does not already exist in AppStorage
+    *
+    * @since 10
+    */
+    static link(key, linkUser, subscribersName) {
+        return AppStorage.getOrCreate().link(key, linkUser, subscribersName);
     }
     /**
-    * Like @see link(), but will create and initialize a new source property in LocalStorge if missing
+    * @see link
+    * @since 7
+    * @deprecated
+    */
+    static Link(key, linkUser, subscribersName) {
+        return AppStorage.getOrCreate().link(key, linkUser, subscribersName);
+    }
+    /**
+    * Like @see link(), but will create and initialize a new source property in LocalStorage if missing
     *
     * Same as @see LocalStorage.setAndLink()
     *
@@ -526,79 +543,121 @@ class AppStorage extends LocalStorage {
     * @returns SynchedPropertyTwoWay{Simple|Object| object with given LocalStoage prop as  its source.
     *          Apps can use SDK functions of base class SubscribedAbstractProperty<S>
     *
+    * @since 10
+    */
+    static setAndLink(key, defaultValue, linkUser, subscribersName) {
+        return AppStorage.getOrCreate().setAndLink(key, defaultValue, linkUser, subscribersName);
+    }
+    /**
+    * @see setAndLink
     * @since 7
+    * @deprecated
     */
     static SetAndLink(key, defaultValue, linkUser, subscribersName) {
-        return AppStorage.GetOrCreate().setAndLink(key, defaultValue, linkUser, subscribersName);
+        return AppStorage.getOrCreate().setAndLink(key, defaultValue, linkUser, subscribersName);
     }
     /**
-   * create and return a one-way sync ('prop') to named property
-   *
-   * Same as @see LocalStorage.prop()
-   *
-   * @param propName name of source property in AppStorage
-   * @param propUser IPropertySubscriber to be notified when source changes,
-   * @param subscribersName the linkUser (subscriber) uses this name for the property
-   *      this name will be used in propertyChange(propName) callback of IMultiPropertiesChangeSubscriber
-   * @returns  SynchedPropertyOneWay{Simple|Object| object with given LocalStoage prop as  its source.
-   *           Apps can use SDK functions of base class SubscribedAbstractProperty<S>
-   *           return undefiend if named property does not already exist in AppStorage.
-   * @since 7
-   */
+    * create and return a one-way sync ('prop') to named property
+    *
+    * Same as @see LocalStorage.prop()
+    *
+    * @param propName name of source property in AppStorage
+    * @param propUser IPropertySubscriber to be notified when source changes,
+    * @param subscribersName the linkUser (subscriber) uses this name for the property
+    *      this name will be used in propertyChange(propName) callback of IMultiPropertiesChangeSubscriber
+    * @returns  SynchedPropertyOneWay{Simple|Object| object with given LocalStoage prop as  its source.
+    *           Apps can use SDK functions of base class SubscribedAbstractProperty<S>
+    *           return undefiend if named property does not already exist in AppStorage.
+    * @since 10
+    */
+    static prop(propName, propUser, subscribersName) {
+        return AppStorage.getOrCreate().prop(propName, propUser, subscribersName);
+    }
+    /**
+    * @see prop
+    * @since 7
+    * @deprecated
+    */
     static Prop(propName, propUser, subscribersName) {
-        return AppStorage.GetOrCreate().prop(propName, propUser, subscribersName);
+        return AppStorage.getOrCreate().prop(propName, propUser, subscribersName);
     }
     /**
-   * Like @see prop(), will create and initialize a new source property in AppStorage if missing
-   *
-   * Same as @see LocalStorage.setAndProp()
-   *
-   * @param propName name of source property in AppStorage
-   * @param defaultValue value to be used for initializing if new creating new property in AppStorage.
-   *        default value must be of type S, must not be undefined or null.
-   * @param propUser IPropertySubscriber to be notified when returned 'prop' changes,
-   * @param subscribersName the propUser (subscriber) uses this name for the property
-   *      this name will be used in propertyChange(propName) callback of IMultiPropertiesChangeSubscriber
-   * @returns  SynchedPropertyOneWay{Simple|Object| object with given LocalStoage prop as its source.
-   *           Apps can use SDK functions of base class SubscribedAbstractProperty<S>
-   *
-   * @since 7
-   */
+    * Like @see prop(), will create and initialize a new source property in AppStorage if missing
+    *
+    * Same as @see LocalStorage.setAndProp()
+    *
+    * @param propName name of source property in AppStorage
+    * @param defaultValue value to be used for initializing if new creating new property in AppStorage.
+    *        default value must be of type S, must not be undefined or null.
+    * @param propUser IPropertySubscriber to be notified when returned 'prop' changes,
+    * @param subscribersName the propUser (subscriber) uses this name for the property
+    *      this name will be used in propertyChange(propName) callback of IMultiPropertiesChangeSubscriber
+    * @returns  SynchedPropertyOneWay{Simple|Object| object with given LocalStoage prop as its source.
+    *           Apps can use SDK functions of base class SubscribedAbstractProperty<S>
+    *
+    * @since 10
+    */
+    static setAndProp(key, defaultValue, propUser, subscribersName) {
+        return AppStorage.getOrCreate().setAndProp(key, defaultValue, propUser, subscribersName);
+    }
+    /**
+    * @see setAndProp
+    * @since 7
+    * @deprecated
+    */
     static SetAndProp(key, defaultValue, propUser, subscribersName) {
-        return AppStorage.GetOrCreate().setAndProp(key, defaultValue, propUser, subscribersName);
+        return AppStorage.getOrCreate().setAndProp(key, defaultValue, propUser, subscribersName);
     }
     /**
-     * Check if AppStorge has a property with given name
-     * return true if prooperty with given name exists
-     * same as ES6 Map.prototype.has()
-     *
-     * Same as @see LocalStorage.has()
-     *
-     * @param propName searched property
-     * @returns true if property with such name exists in AppStorage
-     *
-     * @since 7
-     */
+    * Check if AppStorage has a property with given name
+    * return true if property with given name exists
+    * same as ES6 Map.prototype.has()
+    *
+    * Same as @see LocalStorage.has()
+    *
+    * @param propName searched property
+    * @returns true if property with such name exists in AppStorage
+    *
+    * @since 10
+    */
+    static has(key) {
+        return AppStorage.getOrCreate().has(key);
+    }
+    /**
+   * @see has()
+   * @since 7
+   * @deprecated
+   */
     static Has(key) {
-        return AppStorage.GetOrCreate().has(key);
+        return AppStorage.getOrCreate().has(key);
     }
     /**
     * Returns value of given property
     * return undefined if no property with this name
-    *
     *
     * @Same as see LocalStorage.get()
     *
     * @param propName
     * @returns property value if found or undefined
     *
+    * @since 10
+    *
+    */
+    static get(key) {
+        return AppStorage.getOrCreate().get(key);
+    }
+    /**
+    * @see get
+    * @since 7
+    * @deprecated
+    *
     */
     static Get(key) {
-        return AppStorage.GetOrCreate().get(key);
+        return AppStorage.getOrCreate().get(key);
     }
     /**
     * Set value of given property in AppStorage
-    * Methosd sets nothing and returns false if property with this name does not exist
+    * Method sets nothing and returns false if property with this name does not exist
     * or if newValue is `undefined` or `null` (`undefined`, `null` value are not allowed for state variables).
     *
     * Same as @see LocalStorage.set
@@ -607,10 +666,18 @@ class AppStorage extends LocalStorage {
     * @param newValue must be of type T and must not be undefined or null
     * @returns true on success, i.e. when above conditions are satisfied, otherwise false
     *
+    * @since 10
+    */
+    static set(key, newValue) {
+        return AppStorage.getOrCreate().set(key, newValue);
+    }
+    /**
+    * @see set
     * @since 7
+    * @deprecated
     */
     static Set(key, newValue) {
-        return AppStorage.GetOrCreate().set(key, newValue);
+        return AppStorage.getOrCreate().set(key, newValue);
     }
     /**
    * Set value of given property, if it exists, @see set() .
@@ -624,35 +691,51 @@ class AppStorage extends LocalStorage {
    * @param newValue must be of type T and must not be undefined or null
    * @returns true on success, i.e. when above conditions are satisfied, otherwise false
    *
-   * @since 7
+   * @since 10
    */
-    static SetOrCreate(key, newValue) {
-        AppStorage.GetOrCreate().setOrCreate(key, newValue);
+    static setOrCreate(key, newValue) {
+        AppStorage.getOrCreate().setOrCreate(key, newValue);
     }
     /**
-     * Delete property from StorageBase
-     * Use with caution:
-     * Before deleting a prop from AppStorage all its subscribers need to
-     * unsubscribe from the property.
-     * This method fails and returns false if given property still has subscribers
-     * Another reason for failing is unkmown property.
-     *
-     * Developer advise:
-     * Subscribers are created with @see link(), @see prop()
-     * and also via @LocalStorageLink and @LocalStorageProp state variable decorators.
-     * That means as long as their is a @Component instance that uses such decorated variable
-     * or a sync relationship with a SubscribedAbstractProperty variable the property can nit
-     * (and also should not!) be deleted from AppStorage.
-     *
-     * Same as @see LocalStorage.delete()
-     *
-     * @param propName
-     * @returns false if method failed
-     *
-     * @since 7
+    * @see setOrCreate
+    * @since 7
+    * @deprecated
+    */
+    static SetOrCreate(key, newValue) {
+        AppStorage.getOrCreate().setOrCreate(key, newValue);
+    }
+    /**
+    * Delete property from StorageBase
+    * Use with caution:
+    * Before deleting a prop from AppStorage all its subscribers need to
+    * unsubscribe from the property.
+    * This method fails and returns false if given property still has subscribers
+    * Another reason for failing is unkmown property.
+    *
+    * Developer advise:
+    * Subscribers are created with @see link(), @see prop()
+    * and also via @LocalStorageLink and @LocalStorageProp state variable decorators.
+    * That means as long as their is a @Component instance that uses such decorated variable
+    * or a sync relationship with a SubscribedAbstractProperty variable the property can nit
+    * (and also should not!) be deleted from AppStorage.
+    *
+    * Same as @see LocalStorage.delete()
+    *
+    * @param propName
+    * @returns false if method failed
+    *
+    * @since 10
+    */
+    static delete(key) {
+        return AppStorage.getOrCreate().delete(key);
+    }
+    /**
+    * @see delete
+    * @since 7
+    * @deprecated
     */
     static Delete(key) {
-        return AppStorage.GetOrCreate().delete(key);
+        return AppStorage.getOrCreate().delete(key);
     }
     /**
     * Provide names of all properties in AppStorage
@@ -662,53 +745,77 @@ class AppStorage extends LocalStorage {
     *
     * @returns return a Map Iterator
     *
-    * @since 7
+    * @since 10
    */
+    static keys() {
+        return AppStorage.getOrCreate().keys();
+    }
+    /**
+    * @see keys
+    * @since 7
+    * @deprecated
+    */
     static Keys() {
-        return AppStorage.GetOrCreate().keys();
+        return AppStorage.getOrCreate().keys();
     }
     /**
-     * Returns number of properties in AppStorage
-     * same as Map.prototype.size()
-     *
-     * Same as @see LocalStorage.size()
-     *
-     * @param propName
-     * @returns return number of properties
-     *
-     * @since 7
-     */
+    * Returns number of properties in AppStorage
+    * same as Map.prototype.size()
+    *
+    * Same as @see LocalStorage.size()
+    *
+    * @param propName
+    * @returns return number of properties
+    *
+    * @since 10
+    */
+    static size() {
+        return AppStorage.getOrCreate().size();
+    }
+    /**
+    * @see size
+    * @since 7
+    * @deprecated
+    */
     static Size() {
-        return AppStorage.GetOrCreate().size();
+        return AppStorage.getOrCreate().size();
     }
     /**
-     * delete all properties from the AppStorage
-     *
-     * @see delete(), same as @see LocalStorage.clear()
-     *
-     * precondition is that there are no subscribers.
-     * method returns false and deletes no poperties if there is any property
-     * that still has subscribers
-     *
-     * @since 7
-     */
+    * delete all properties from the AppStorage
+    *
+    * @see delete(), same as @see LocalStorage.clear()
+    *
+    * precondition is that there are no subscribers.
+    * method returns false and deletes no poperties if there is any property
+    * that still has subscribers
+    *
+    * @since 10
+    */
+    static clear() {
+        return AppStorage.getOrCreate().clear();
+    }
+    /**
+    * @see clear
+    * @since 7
+    * @deprecated
+    */
     static Clear() {
-        return AppStorage.GetOrCreate().clear();
+        return AppStorage.getOrCreate().clear();
     }
     /**
-     * Same as @see Clear().
-     *
-     * @since 7, depreciated, used Clear() instead!
-     *
-     */
+    * Same as @see clear().
+    *
+    * @since 7, deprecated, used clear() instead!
+    *
+    */
     static StaticClear() {
-        return AppStorage.Clear();
+        return AppStorage.clear();
     }
     /**
     * not a public / sdk function
     */
-    static AboutToBeDeleted() {
-        AppStorage.GetOrCreate().aboutToBeDeleted();
+    static aboutToBeDeleted() {
+        AppStorage.getOrCreate().aboutToBeDeleted();
     }
     /**
      * return number of subscribers to named property
@@ -716,8 +823,8 @@ class AppStorage extends LocalStorage {
      *
      * not a public / sdk function
     */
-    static NumberOfSubscribersTo(propName) {
-        return AppStorage.GetOrCreate().numberOfSubscrbersTo(propName);
+    static numberOfSubscribersTo(propName) {
+        return AppStorage.getOrCreate().numberOfSubscrbersTo(propName);
     }
     /**
     * Subscribe to value change notifications of named property
@@ -732,52 +839,68 @@ class AppStorage extends LocalStorage {
     * @param subscriber object that implements ISinglePropertyChangeSubscriber interface
     * @returns false if named property does not exist
     *
+    * @since 10
+    */
+    static subscribeToChangesOf(propName, subscriber) {
+        return AppStorage.getOrCreate().subscribeToChangesOf(propName, subscriber);
+    }
+    /**
+    * @see subscribeToChangesOf
     * @since 7
+    * @deprecated
     */
     static SubscribeToChangesOf(propName, subscriber) {
-        return AppStorage.GetOrCreate().subscribeToChangesOf(propName, subscriber);
+        return AppStorage.getOrCreate().subscribeToChangesOf(propName, subscriber);
     }
     /**
-     * inverse of @see SubscribeToChangesOf,
-     * same as @see LocalStorage.subscribeToChangesOf()
-     *
-     * @param propName property in AppStorage to subscribe to
-     * @param subscriberId id of the subscrber passed to @see subscribeToChangesOf
-     * @returns false if named property does not exist
-     *
-     * @since 7
-     */
+    * inverse of @see SubscribeToChangesOf,
+    * same as @see LocalStorage.subscribeToChangesOf()
+    *
+    * @param propName property in AppStorage to subscribe to
+    * @param subscriberId id of the subscrber passed to @see subscribeToChangesOf
+    * @returns false if named property does not exist
+    *
+    * @since 10
+    */
+    static unsubscribeFromChangesOf(propName, subscriberId) {
+        return AppStorage.getOrCreate().unsubscribeFromChangesOf(propName, subscriberId);
+    }
+    /**
+    * @see unsubscribeFromChangesOf
+    * @since 7
+    * @deprecated
+    */
     static UnsubscribeFromChangesOf(propName, subscriberId) {
-        return AppStorage.GetOrCreate().unsubscribeFromChangesOf(propName, subscriberId);
+        return AppStorage.getOrCreate().unsubscribeFromChangesOf(propName, subscriberId);
     }
     /**
-     * Unimplemenrted, currently all properties of AppStorage are mutable.
+     * Unimplemented, currently all properties of AppStorage are mutable.
      *
-     * @since 7, depreciated
+     * @since 7, deprecated
      */
     static IsMutable(key) {
         return true;
     }
     /**
-     * not a public / sdk function
-     */
-    static __CreateSync(storagePropName, defaultValue, factoryFunc) {
-        return AppStorage.GetOrCreate().__createSync(storagePropName, defaultValue, factoryFunc);
+    * not a public / sdk function
+    */
+    static __createSync(storagePropName, defaultValue, factoryFunc) {
+        return AppStorage.getOrCreate().__createSync(storagePropName, defaultValue, factoryFunc);
     }
     /**
-     * not a public / sdk function
-     */
-    static GetOrCreate() {
-        if (!AppStorage.Instance_) {
-            stateMgmtConsole.warn("AppStorage instance missing. Use AppStorage.CreateInstance(initObj). Creating instance without any initialization.");
-            AppStorage.Instance_ = new AppStorage({});
+    * not a public / sdk function
+    */
+    static getOrCreate() {
+        if (!AppStorage.instance_) {
+            stateMgmtConsole.warn("AppStorage instance missing. Use AppStorage.createInstance(initObj). Creating instance without any initialization.");
+            AppStorage.instance_ = new AppStorage({});
         }
-        return AppStorage.Instance_;
+        return AppStorage.instance_;
     }
 }
 // instance functions below:
 // Should all be protected, but TS lang does not allow access from static member to protected member
-AppStorage.Instance_ = undefined;
+AppStorage.instance_ = undefined;
 /*
  * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -1162,7 +1285,7 @@ class SubscribaleAbstract {
     }
 }
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1199,83 +1322,111 @@ class PersistentStorage {
      * internal function, not part of the SDK
      *
      */
-    static ConfigureBackend(storage) {
-        PersistentStorage.Storage_ = storage;
+    static configureBackend(storage) {
+        PersistentStorage.storage_ = storage;
     }
     /**
      * private, use static functions!
      */
-    static GetOrCreate() {
-        if (PersistentStorage.Instance_) {
+    static getOrCreate() {
+        if (PersistentStorage.instance_) {
             // already initialized
-            return PersistentStorage.Instance_;
+            return PersistentStorage.instance_;
         }
-        PersistentStorage.Instance_ = new PersistentStorage();
-        return PersistentStorage.Instance_;
+        PersistentStorage.instance_ = new PersistentStorage();
+        return PersistentStorage.instance_;
     }
     /**
      *
      * internal function, not part of the SDK
      */
-    static AboutToBeDeleted() {
-        if (!PersistentStorage.Instance_) {
+    static aboutToBeDeleted() {
+        if (!PersistentStorage.instance_) {
             return;
         }
-        PersistentStorage.GetOrCreate().aboutToBeDeleted();
-        PersistentStorage.Instance_ = undefined;
+        PersistentStorage.getOrCreate().aboutToBeDeleted();
+        PersistentStorage.instance_ = undefined;
     }
     /**
      * Add property 'key' to AppStorage properties whose current value will be
-     * persistemt.
+     * persistent.
      * If AppStorage does not include this property it will be added and initializes
      * with given value
      *
-     * @since 9
+     * @since 10
      *
      * @param key property name
      * @param defaultValue If AppStorage does not include this property it will be initialized with this value
      *
      */
-    static PersistProp(key, defaultValue) {
-        PersistentStorage.GetOrCreate().persistProp(key, defaultValue);
+    static persistProp(key, defaultValue) {
+        PersistentStorage.getOrCreate().persistProp(key, defaultValue);
     }
     /**
-     * Reverse of @see PersistProp
+     * @see persistProp
+     * @deprecated
+     */
+    static PersistProp(key, defaultValue) {
+        PersistentStorage.getOrCreate().persistProp(key, defaultValue);
+    }
+    /**
+     * Reverse of @see persistProp
      * @param key no longer persist the property named key
      *
-     * @since 9
+     * @since 10
+     */
+    static deleteProp(key) {
+        PersistentStorage.getOrCreate().deleteProp(key);
+    }
+    /**
+     * @see deleteProp
+     * @deprecated
      */
     static DeleteProp(key) {
-        PersistentStorage.GetOrCreate().deleteProp(key);
+        PersistentStorage.getOrCreate().deleteProp(key);
     }
     /**
      * Persist given AppStorage properties with given names.
      * If a property does not exist in AppStorage, add it and initialize it with given value
-     * works as @see PersistProp for multiple properties.
+     * works as @see persistProp for multiple properties.
      *
      * @param properties
      *
-     * @since 9
+     * @since 10
      *
      */
+    static persistProps(properties) {
+        PersistentStorage.getOrCreate().persistProps(properties);
+    }
+    /**
+     * @see persistProps
+     * @deprecated
+     */
     static PersistProps(properties) {
-        PersistentStorage.GetOrCreate().persistProps(properties);
+        PersistentStorage.getOrCreate().persistProps(properties);
     }
     /**
      * Inform persisted AppStorage property names
      * @returns array of AppStorage keys
      *
-     * @since 9
+     * @since 10
      */
-    static Keys() {
+    static keys() {
         let result = [];
-        const it = PersistentStorage.GetOrCreate().keys();
+        const it = PersistentStorage.getOrCreate().keys();
         let val = it.next();
         while (!val.done) {
             result.push(val.value);
             val = it.next();
         }
         return result;
+    }
+    /**
+     * @see keys
+     * @deprecated
+     */
+    static Keys() {
+        return PersistentStorage.keys();
     }
     /**
       * This methid offers a way to force writing the property value with given
@@ -1287,12 +1438,20 @@ class PersistentStorage {
       *
       * @param key property that has changed
       *
-      * @since 9
+      * @since 10
       *
       */
+    static notifyHasChanged(propName) {
+        
+        PersistentStorage.storage_.set(propName, PersistentStorage.getOrCreate().links_.get(propName).get());
+    }
+    /**
+     * @see notifyHasChanged
+     * @deprecated
+     */
     static NotifyHasChanged(propName) {
         
-        PersistentStorage.Storage_.set(propName, PersistentStorage.GetOrCreate().links_.get(propName).get());
+        PersistentStorage.storage_.set(propName, PersistentStorage.getOrCreate().links_.get(propName).get());
     }
     keys() {
         return this.links_.keys();
@@ -1301,7 +1460,7 @@ class PersistentStorage {
         if (this.persistProp1(propName, defaultValue)) {
             // persist new prop
             
-            PersistentStorage.Storage_.set(propName, this.links_.get(propName).get());
+            PersistentStorage.storage_.set(propName, this.links_.get(propName).get());
         }
     }
     // helper function to persist a property
@@ -1315,13 +1474,13 @@ class PersistentStorage {
             stateMgmtConsole.warn(`PersistentStorage: persistProp: ${propName} is already persisted`);
             return false;
         }
-        let link = AppStorage.Link(propName, this);
+        let link = AppStorage.link(propName, this);
         if (link) {
             
             this.links_.set(propName, link);
         }
         else {
-            let newValue = PersistentStorage.Storage_.get(propName);
+            let newValue = PersistentStorage.storage_.get(propName);
             let returnValue;
             if (!newValue) {
                 
@@ -1330,7 +1489,7 @@ class PersistentStorage {
             else {
                 returnValue = newValue;
             }
-            link = AppStorage.SetAndLink(propName, returnValue, this);
+            link = AppStorage.setAndLink(propName, returnValue, this);
             this.links_.set(propName, link);
             
         }
@@ -1345,7 +1504,7 @@ class PersistentStorage {
         if (link) {
             link.aboutToBeDeleted();
             this.links_.delete(propName);
-            PersistentStorage.Storage_.delete(propName);
+            PersistentStorage.storage_.delete(propName);
             
         }
         else {
@@ -1355,7 +1514,7 @@ class PersistentStorage {
     write() {
         this.links_.forEach((link, propName, map) => {
             
-            PersistentStorage.Storage_.set(propName, link.get());
+            PersistentStorage.storage_.set(propName, link.get());
         });
     }
     propertyHasChanged(info) {
@@ -1375,16 +1534,16 @@ class PersistentStorage {
         });
         this.links_.clear();
         SubscriberManager.Delete(this.id__());
-        PersistentStorage.Storage_.clear();
+        PersistentStorage.storage_.clear();
     }
     id__() {
         return this.id_;
     }
 }
-PersistentStorage.Instance_ = undefined;
+PersistentStorage.instance_ = undefined;
 ;
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1406,37 +1565,72 @@ PersistentStorage.Instance_ = undefined;
 class Environment {
     constructor() {
         this.props_ = new Map();
-        Environment.EnvBackend_.onValueChanged(this.onValueChanged.bind(this));
+        Environment.envBackend_.onValueChanged(this.onValueChanged.bind(this));
     }
-    static GetOrCreate() {
-        if (Environment.Instance_) {
+    static getOrCreate() {
+        if (Environment.instance_) {
             // already initialized
-            return Environment.Instance_;
+            return Environment.instance_;
         }
-        Environment.Instance_ = new Environment();
-        return Environment.Instance_;
+        Environment.instance_ = new Environment();
+        return Environment.instance_;
     }
+    static configureBackend(envBackend) {
+        Environment.envBackend_ = envBackend;
+    }
+    /**
+     * @see configureBackend
+     * @deprecated
+     */
     static ConfigureBackend(envBackend) {
-        Environment.EnvBackend_ = envBackend;
+        Environment.envBackend_ = envBackend;
     }
-    static AboutToBeDeleted() {
-        if (!Environment.Instance_) {
+    static aboutToBeDeleted() {
+        if (!Environment.instance_) {
             return;
         }
-        Environment.GetOrCreate().aboutToBeDeleted();
-        Environment.Instance_ = undefined;
+        Environment.getOrCreate().aboutToBeDeleted();
+        Environment.instance_ = undefined;
     }
+    /**
+     * @see aboutToBeDeleted
+     * @deprecated
+     */
+    static AboutToBeDeleted() {
+        Environment.aboutToBeDeleted();
+    }
+    static envProp(key, value) {
+        return Environment.getOrCreate().envProp(key, value);
+    }
+    /**
+     * @see envProp
+     * @deprecated
+     */
     static EnvProp(key, value) {
-        return Environment.GetOrCreate().envProp(key, value);
+        return Environment.getOrCreate().envProp(key, value);
     }
+    static envProps(props) {
+        Environment.getOrCreate().envProps(props);
+    }
+    /**
+     * @see envProps
+     * @deprecated
+     */
     static EnvProps(props) {
-        Environment.GetOrCreate().envProps(props);
+        Environment.getOrCreate().envProps(props);
     }
+    static keys() {
+        return Environment.getOrCreate().keys();
+    }
+    /**
+     * @see keys
+     * @deprecated
+     */
     static Keys() {
-        return Environment.GetOrCreate().keys();
+        return Environment.getOrCreate().keys();
     }
     envProp(key, value) {
-        let prop = AppStorage.Prop(key);
+        let prop = AppStorage.prop(key);
         if (prop) {
             stateMgmtConsole.warn(`Environment: envProp '${key}': Property already exists in AppStorage. Not using environment property.`);
             return false;
@@ -1444,27 +1638,27 @@ class Environment {
         let tmp;
         switch (key) {
             case "accessibilityEnabled":
-                tmp = Environment.EnvBackend_.getAccessibilityEnabled();
+                tmp = Environment.envBackend_.getAccessibilityEnabled();
                 break;
             case "colorMode":
-                tmp = Environment.EnvBackend_.getColorMode();
+                tmp = Environment.envBackend_.getColorMode();
                 break;
             case "fontScale":
-                tmp = Environment.EnvBackend_.getFontScale();
+                tmp = Environment.envBackend_.getFontScale();
                 break;
             case "fontWeightScale":
-                tmp = Environment.EnvBackend_.getFontWeightScale().toFixed(2);
+                tmp = Environment.envBackend_.getFontWeightScale().toFixed(2);
                 break;
             case "layoutDirection":
-                tmp = Environment.EnvBackend_.getLayoutDirection();
+                tmp = Environment.envBackend_.getLayoutDirection();
                 break;
             case "languageCode":
-                tmp = Environment.EnvBackend_.getLanguageCode();
+                tmp = Environment.envBackend_.getLanguageCode();
                 break;
             default:
                 tmp = value;
         }
-        prop = AppStorage.SetAndProp(key, tmp);
+        prop = AppStorage.setAndProp(key, tmp);
         this.props_.set(key, prop);
         
         return true;
@@ -1486,7 +1680,7 @@ class Environment {
         return result;
     }
     onValueChanged(key, value) {
-        let ok = AppStorage.Set(key, value);
+        let ok = AppStorage.set(key, value);
         if (ok) {
             
         }
@@ -1497,11 +1691,11 @@ class Environment {
     aboutToBeDeleted() {
         this.props_.forEach((val, key, map) => {
             val.aboutToBeDeleted();
-            AppStorage.Delete(key);
+            AppStorage.delete(key);
         });
     }
 }
-Environment.Instance_ = undefined;
+Environment.instance_ = undefined;
 /*
  * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -1548,7 +1742,7 @@ class stateMgmtTrace {
     }
 }
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1596,7 +1790,7 @@ class DistributedStorage {
             stateMgmtConsole.warn(`DistributedStorage: linkProp: ${propName} is already exist`);
             return false;
         }
-        let link = AppStorage.Link(propName, this);
+        let link = AppStorage.link(propName, this);
         if (link) {
             
             this.links_.set(propName, link);
@@ -1614,7 +1808,7 @@ class DistributedStorage {
                     returnValue = newValue;
                 }
             }
-            link = AppStorage.SetAndLink(propName, returnValue, this);
+            link = AppStorage.setAndLink(propName, returnValue, this);
             this.links_.set(propName, link);
             
         }
@@ -3660,6 +3854,7 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
         // ViewStackProcessor.getApiVersion function is not present in API9 
         // therefore shallowCopyObject will always be used in API version 9 and before
         // but the code in this file is the same regardless of API version
+        
         return ((typeof ViewStackProcessor["getApiVersion"] == "function") &&
             (ViewStackProcessor["getApiVersion"]() >= 10))
             ? this.deepCopyObject(value, propName)
@@ -4152,7 +4347,7 @@ class SynchedPropertyNesedObjectPU extends ObservedPropertyObjectAbstractPU {
     }
 }
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -4710,14 +4905,14 @@ class ViewPU extends NativeViewPartialUpdate {
        * @returns SynchedPropertySimple/ObjectTwoWay/PU
        */
     createStorageLink(storagePropName, defaultValue, viewVariableName) {
-        return AppStorage.__CreateSync(storagePropName, defaultValue, (source) => (source === undefined)
+        return AppStorage.__createSync(storagePropName, defaultValue, (source) => (source === undefined)
             ? undefined
             : (source instanceof ObservedPropertySimple)
                 ? new SynchedPropertySimpleTwoWayPU(source, this, viewVariableName)
                 : new SynchedPropertyObjectTwoWayPU(source, this, viewVariableName));
     }
     createStorageProp(storagePropName, defaultValue, viewVariableName) {
-        return AppStorage.__CreateSync(storagePropName, defaultValue, (source) => (source === undefined)
+        return AppStorage.__createSync(storagePropName, defaultValue, (source) => (source === undefined)
             ? undefined
             : (source instanceof ObservedPropertySimple)
                 ? new SynchedPropertySimpleOneWayPU(source, this, viewVariableName)
@@ -4870,7 +5065,7 @@ function makeBuilderParameterProxy(builderName, source) {
     }); // new Proxy
 }
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -4884,6 +5079,6 @@ function makeBuilderParameterProxy(builderName, source) {
  * limitations under the License.
  */
 
-PersistentStorage.ConfigureBackend(new Storage());
-Environment.ConfigureBackend(new EnvironmentSetting());
+PersistentStorage.configureBackend(new Storage());
+Environment.configureBackend(new EnvironmentSetting());
 
