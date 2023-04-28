@@ -74,6 +74,7 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void OnChange(const JSCallbackInfo& info);
     static void UseMilitaryTime(bool isUseMilitaryTime);
+    static void PickerBackgroundColor(const JSCallbackInfo& info);
 
     static void SetDisappearTextStyle(const JSCallbackInfo& info);
     static void SetTextStyle(const JSCallbackInfo& info);

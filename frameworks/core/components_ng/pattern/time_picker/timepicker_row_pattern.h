@@ -54,6 +54,7 @@ public:
     {
         auto paintMethod = MakeRefPtr<TimePickerPaintMethod>();
         paintMethod->SetEnabled(enabled_);
+        paintMethod->SetBackgroundColor(backgroundColor_);
         return paintMethod;
     }
 
@@ -249,6 +250,11 @@ public:
         timePickerColumns_.emplace_back(value);
     }
 
+    void SetBackgroundColor(const Color& color)
+    {
+        backgroundColor_ = color;
+    }
+
     bool IsAmHour(uint32_t hourOf24) const;
 
     uint32_t GetAmPmHour(uint32_t hourOf24) const;
@@ -303,6 +309,7 @@ private:
     int32_t focusKeyID_ = 0;
     std::map<RefPtr<FrameNode>, std::vector<std::string>> options_;
     uint32_t showCount_ = 0;
+    Color backgroundColor_ = Color::WHITE;
     // true, use 24 hours style; false, use 12 hours style.
     bool hour24_ = !Localization::GetInstance()->IsAmPmHour();
     PickerTime selectedTime_ = PickerTime::Current();
