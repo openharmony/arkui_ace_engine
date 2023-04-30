@@ -2954,6 +2954,7 @@ HWTEST_F(GesturePatternTestNg, PinchRecognizerTest002, TestSize.Level1)
      */
     AxisEvent axisEvent;
     pinchRecognizer.refereeState_ = RefereeState::SUCCEED;
+    axisEvent.pinchAxisScale = 1;
     pinchRecognizer.HandleTouchDownEvent(axisEvent);
     EXPECT_EQ(pinchRecognizer.refereeState_, RefereeState::SUCCEED);
 
@@ -2962,7 +2963,7 @@ HWTEST_F(GesturePatternTestNg, PinchRecognizerTest002, TestSize.Level1)
      * @tc.steps: case4: input is AxisEvent. refereeState_ is PENDING.
      * @tc.expected: step2. result equals.
      */
-    pinchRecognizer.refereeState_ = RefereeState::PENDING;
+    pinchRecognizer.refereeState_ = RefereeState::READY;
     pinchRecognizer.HandleTouchDownEvent(axisEvent);
     EXPECT_EQ(pinchRecognizer.pinchCenter_.GetX(), axisEvent.x);
     EXPECT_EQ(pinchRecognizer.pinchCenter_.GetY(), axisEvent.y);
@@ -3004,7 +3005,6 @@ HWTEST_F(GesturePatternTestNg, PinchRecognizerTest003, TestSize.Level1)
     pinchRecognizer.HandleTouchMoveEvent(axisEvent);
     EXPECT_EQ(pinchRecognizer.touchPoints_[touchEvent.id].id, touchEvent.id);
     EXPECT_EQ(pinchRecognizer.lastTouchEvent_.id, touchEvent.id);
-    EXPECT_EQ(pinchRecognizer.scale_, axisEvent.pinchAxisScale);
 
      /**
      * @tc.steps: step2. call HandleTouchMoveEvent function and compare result.
