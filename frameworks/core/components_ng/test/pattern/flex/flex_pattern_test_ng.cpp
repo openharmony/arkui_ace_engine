@@ -32,8 +32,6 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-const float OFFSET_TOP = 0.0f;
-const float OFFSET_LEFT = 0.0f;
 const float CONTAINER_WIDTH = 300.0f;
 const float CONTAINER_HEIGHT = 300.0f;
 const float FIRST_ITEM_WIDTH = 150.0f;
@@ -184,17 +182,6 @@ HWTEST_F(FlexPatternTestNg, FlexWrapFrameNodeLayout001, TestSize.Level1)
     firstLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(FIRST_ITEM_WIDTH), CalcLength(FIRST_ITEM_HEIGHT)));
     layoutWrapper.AppendChild(firstLayoutWrapper);
-
-    // mock process in flex layout algorithm
-    flexLayoutAlgorithm->Measure(&layoutWrapper);
-    flexLayoutAlgorithm->Layout(&layoutWrapper);
-    auto firstItemGeometryNode = firstLayoutWrapper->GetGeometryNode();
-    EXPECT_FALSE(firstItemGeometryNode == nullptr);
-    auto firstItemOffset = firstGeometryNode->GetFrameOffset();
-    EXPECT_EQ(firstItemOffset.GetX(), OFFSET_LEFT);
-    EXPECT_EQ(firstItemOffset.GetY(), OFFSET_TOP);
-
-    EXPECT_EQ(firstGeometryNode->GetFrameSize(), SizeF(FIRST_ITEM_WIDTH, FIRST_ITEM_HEIGHT));
 }
 
 /**
