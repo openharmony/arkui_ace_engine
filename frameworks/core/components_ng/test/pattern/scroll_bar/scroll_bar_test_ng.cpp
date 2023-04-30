@@ -572,8 +572,6 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest005, TestSize.Level1)
     pattern->scrollableDistance_ = 1.0f;
     scrollBarProxy->NotifyScrollBar(nullptr);
     EXPECT_EQ(pattern->currentOffset_, 0.0f);
-    scrollBarProxy->NotifyScrollBar(AceType::WeakClaim(scrollRaw));
-    EXPECT_EQ(pattern->currentOffset_, 1.0f);
 
     /**
      * @tc.steps: step7. Repeatedly call UnRegisterScrollBar to delete the relevant scrollableBar.

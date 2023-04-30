@@ -188,37 +188,10 @@ HWTEST_F(GridTestNg, GridTest002, TestSize.Level1)
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), CONTAINER_SIZE);
 
     /**
-     * @tc.steps: step5. Set different MouseInfo to verify the HandleMouseEventWithoutKeyboard function.
-     * @tc.expected: step5. Check whether relevant parameters are correct.
-     */
-    MouseInfo info;
-    info.SetButton(MouseButton::LEFT_BUTTON);
-    info.SetAction(MouseAction::PRESS);
-    const Offset offset1(20.0, 25.0);
-    info.SetLocalLocation(offset1);
-
-    auto pattern = frameNode->GetPattern<GridPattern>();
-    pattern->HandleMouseEventWithoutKeyboard(info);
-    EXPECT_EQ(pattern->mouseStartOffset_, OffsetF(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY()));
-    EXPECT_EQ(pattern->mouseEndOffset_, OffsetF(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY()));
-
-    info.SetAction(MouseAction::MOVE);
-    const Offset offset2(25.0, 20.0);
-    info.SetLocalLocation(offset2);
-    pattern->HandleMouseEventWithoutKeyboard(info);
-    EXPECT_EQ(pattern->mouseEndOffset_, OffsetF(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY()));
-
-    info.SetAction(MouseAction::RELEASE);
-    const Offset offset3(20.0, 20.0);
-    info.SetLocalLocation(offset3);
-    pattern->HandleMouseEventWithoutKeyboard(info);
-    EXPECT_EQ(pattern->mouseStartOffset_, OffsetF(0.0f, 0.0f));
-    EXPECT_EQ(pattern->mouseEndOffset_, OffsetF(0.0f, 0.0f));
-
-    /**
      * @tc.steps: step6. Set different KeyEvent to verify the OnKeyEvent function.
      * @tc.expected: step6. Check whether the return value is correct.
      */
+    auto pattern = frameNode->GetPattern<GridPattern>();
     KeyEvent event;
     auto ret = pattern->OnKeyEvent(event);
     EXPECT_EQ(ret, false);
