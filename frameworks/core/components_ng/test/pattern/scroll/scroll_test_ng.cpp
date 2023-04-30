@@ -1371,6 +1371,7 @@ HWTEST_F(ScrollTestNg, ScrollTest0014, TestSize.Level1)
      *            function.
      * @tc.expected: step2. Check whether relevant parameters are correct.
      */
+    scrollBar->positionModeUpdate_ = true;
     scrollBar->positionMode_ = PositionMode::BOTTOM;
     scrollBar->SetOutBoundary(1.0);
     scrollBar->UpdateScrollBarRegion(SCROLL_OFFSET_ZERO, SCROLL_SIZE_100, SCROLL_OFFSET_ONE, 1.0);
@@ -1383,6 +1384,7 @@ HWTEST_F(ScrollTestNg, ScrollTest0014, TestSize.Level1)
      * @tc.steps: step3. When the ShapeMode is RECT and DisplayMode is RIGHT, verify the UpdateScrollBarRegion function.
      * @tc.expected: step3. Check whether relevant parameters are correct.
      */
+    scrollBar->positionModeUpdate_ = true;
     scrollBar->positionMode_ = PositionMode::RIGHT;
     scrollBar->UpdateScrollBarRegion(SCROLL_OFFSET_ZERO, SCROLL_SIZE_100, SCROLL_OFFSET_ONE, 1.0);
     barRect = Rect(100.0, 0.0, 0.0, 100.0) + SCROLL_OFFSET_ZERO;
@@ -1394,6 +1396,7 @@ HWTEST_F(ScrollTestNg, ScrollTest0014, TestSize.Level1)
      * @tc.steps: step4. When the ShapeMode is ROUND and DisplayMode is LEFT, verify the UpdateScrollBarRegion function.
      * @tc.expected: step4. Check whether relevant parameters are correct.
      */
+    scrollBar->positionModeUpdate_ = true;
     scrollBar->shapeMode_ = ShapeMode::ROUND;
     scrollBar->positionMode_ = PositionMode::LEFT;
     scrollBar->UpdateScrollBarRegion(SCROLL_OFFSET_ZERO, SCROLL_SIZE_100, SCROLL_OFFSET_ONE, 1.0);
@@ -1405,6 +1408,7 @@ HWTEST_F(ScrollTestNg, ScrollTest0014, TestSize.Level1)
      *                   function.
      * @tc.expected: step5. Check whether relevant parameters are correct.
      */
+    scrollBar->positionModeUpdate_ = true;
     scrollBar->positionMode_ = PositionMode::RIGHT;
     scrollBar->UpdateScrollBarRegion(SCROLL_OFFSET_ZERO, SCROLL_SIZE_100, SCROLL_OFFSET_ONE, 1.0);
     EXPECT_EQ(scrollBar->trickStartAngle_, 30);
@@ -1414,6 +1418,7 @@ HWTEST_F(ScrollTestNg, ScrollTest0014, TestSize.Level1)
      * @tc.steps: step6. When the ShapeMode is ROUND and DisplayMode is LEFT, verify the UpdateScrollBarRegion function.
      * @tc.expected: step6. Check whether relevant parameters are correct.
      */
+    scrollBar->positionModeUpdate_ = true;
     scrollBar->positionMode_ = PositionMode::LEFT;
     scrollBar->bottomAngle_ = SCROLL_FLOAT_50;
     scrollBar->topAngle_ = SCROLL_DOUBLE_100;
