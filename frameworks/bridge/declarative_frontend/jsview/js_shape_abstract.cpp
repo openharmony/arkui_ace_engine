@@ -25,19 +25,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<ShapeAbstractModel> ShapeAbstractModel::instance_ = nullptr;
+std::mutex ShapeAbstractModel::mutex_;
 
 ShapeAbstractModel* ShapeAbstractModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::ShapeAbstractModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::ShapeAbstractModelNG());
-        } else {
-            instance_.reset(new Framework::ShapeAbstractModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::ShapeAbstractModelNG());
+            } else {
+                instance_.reset(new Framework::ShapeAbstractModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -166,6 +170,7 @@ void JSShapeAbstract::SetStrokeOpacity(const JSCallbackInfo& info)
     ShapeAbstractModel::GetInstance()->SetStrokeOpacity(strokeOpacity);
 }
 
+// https://svgwg.org/svg2-draft/painting.html#FillOpacity
 void JSShapeAbstract::SetFillOpacity(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -174,6 +179,12 @@ void JSShapeAbstract::SetFillOpacity(const JSCallbackInfo& info)
     }
     double fillOpacity = DEFAULT_OPACITY;
     ParseJsDouble(info[0], fillOpacity);
+    if (GreatOrEqual(fillOpacity, DEFAULT_OPACITY)) {
+        fillOpacity = DEFAULT_OPACITY;
+    }
+    if (LessOrEqual(fillOpacity, MIN_OPACITY)) {
+        fillOpacity = MIN_OPACITY;
+    }
     ShapeAbstractModel::GetInstance()->SetFillOpacity(fillOpacity);
 }
 

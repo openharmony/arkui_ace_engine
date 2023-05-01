@@ -30,12 +30,12 @@
 #include "core/components_ng/pattern/menu/navigation_menu_layout_algorithm.h"
 #include "core/components_ng/pattern/option/option_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/select/select_view.h"
+#include "core/components_ng/pattern/select/select_model.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
-enum class MenuType { MENU, CONTEXT_MENU, NAVIGATION_MENU, MULTI_MENU, SUB_MENU };
+enum class MenuType { MENU, CONTEXT_MENU, NAVIGATION_MENU, MULTI_MENU, SUB_MENU, SELECT_OVERLAY_EXTENSION_MENU };
 
 class MenuPattern : public Pattern {
     DECLARE_ACE_TYPE(MenuPattern, Pattern);
@@ -96,6 +96,11 @@ public:
     bool IsSubMenu() const
     {
         return type_ == MenuType::SUB_MENU;
+    }
+
+    bool IsSelectOverlayExtensionMenu() const
+    {
+        return type_ == MenuType::SELECT_OVERLAY_EXTENSION_MENU;
     }
 
     void SetParentMenuItem(const RefPtr<FrameNode>& parentMenuItem)

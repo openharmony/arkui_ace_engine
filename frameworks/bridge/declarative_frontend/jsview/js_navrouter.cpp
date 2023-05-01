@@ -16,10 +16,17 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_navrouter.h"
 
 #include "base/log/ace_scoring_log.h"
+#include "base/memory/ace_type.h"
+#include "base/utils/utils.h"
+#include "bridge/declarative_frontend/jsview/js_navigation_stack.h"
 #include "bridge/declarative_frontend/jsview/models/navrouter_model_impl.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/navigation/navigation_group_node.h"
+#include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navrouter/navrouter_model_ng.h"
+#include "core/components_ng/pattern/navrouter/navrouter_pattern.h"
 #include "core/components_ng/pattern/navrouter/navrouter_view.h"
+
 
 namespace OHOS::Ace {
 std::unique_ptr<NavRouterModel> NavRouterModel::instance_ = nullptr;
@@ -49,7 +56,7 @@ void JSNavRouter::Create()
 void JSNavRouter::SetOnStateChange(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least one argument");
+        LOGW("The arg is wrong, it is supposed to have at least one argument");
         return;
     }
     if (info[0]->IsFunction()) {
@@ -65,11 +72,28 @@ void JSNavRouter::SetOnStateChange(const JSCallbackInfo& info)
     }
 }
 
+void JSNavRouter::SetNavRouteMode(const JSCallbackInfo& info)
+{
+    if (!Container::IsCurrentUseNewPipeline()) {
+        return;
+    }
+    if (!info[0]->IsNumber()) {
+        return;
+    }
+    auto value = info[0]->ToNumber<int32_t>();
+    if (value >= 0 && value <= NAV_ROUTE_MODE_RANGE) {
+        NG::NavRouterView::SetNavRouteMode(static_cast<NG::NavRouteMode>(value));
+    } else {
+        LOGW("invalid value for navRouteMode");
+    }
+}
+
 void JSNavRouter::JSBind(BindingTarget globalObj)
 {
     JSClass<JSNavRouter>::Declare("NavRouter");
     JSClass<JSNavRouter>::StaticMethod("create", &JSNavRouter::Create);
     JSClass<JSNavRouter>::StaticMethod("onStateChange", &JSNavRouter::SetOnStateChange);
+    JSClass<JSNavRouter>::StaticMethod("mode", &JSNavRouter::SetNavRouteMode);
     JSClass<JSNavRouter>::Inherit<JSContainerBase>();
     JSClass<JSNavRouter>::Inherit<JSViewAbstract>();
     JSClass<JSNavRouter>::Bind<>(globalObj);

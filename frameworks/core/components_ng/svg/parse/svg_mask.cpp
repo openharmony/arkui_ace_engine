@@ -17,7 +17,11 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#ifndef NEW_SKIA
 #include "frameworks/core/components/common/painter/flutter_svg_painter.h"
+#else
+#include "frameworks/core/components/common/painter/rosen_svg_painter.h"
+#endif
 #include "frameworks/core/components/declaration/svg/svg_mask_declaration.h"
 
 namespace OHOS::Ace::NG {
@@ -45,7 +49,11 @@ void SvgMask::OnDrawTraversedBefore(RSCanvas& canvas, const Size& viewPort, cons
     skCanvas_->saveLayer(maskBounds_, nullptr);
     // ready to render mask content
     canvasLayerCount_ = skCanvas_->getSaveCount();
+#ifndef NEW_SKIA
     FlutterSvgPainter::SetMask(skCanvas_);
+#else
+    RosenSvgPainter::SetMask(skCanvas_);
+#endif
 }
 
 void SvgMask::OnDrawTraversedAfter(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color)
@@ -85,5 +93,4 @@ double SvgMask::ParseUnitsAttr(const Dimension& attr, double value)
     }
     return attr.Value();
 }
-
 } // namespace OHOS::Ace::NG

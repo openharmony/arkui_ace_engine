@@ -64,9 +64,20 @@ public:
     {
         return shallowBuilder_;
     }
+    
+    void SetName(const std::string& name)
+    {
+        name_ = name;
+    }
+
+    const std::string& GetName()
+    {
+        return name_;
+    }
 
 private:
     RefPtr<ShallowBuilder> shallowBuilder_;
+    std::string name_;
 };
 
 } // namespace OHOS::Ace::NG

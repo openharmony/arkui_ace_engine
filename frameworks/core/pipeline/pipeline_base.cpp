@@ -124,7 +124,7 @@ void PipelineBase::ClearImageCache()
 
 void PipelineBase::SetImageCache(const RefPtr<ImageCache>& imageChache)
 {
-    std::lock_guard<std::shared_mutex> lock(imageCacheMutex_);
+    std::lock_guard<std::shared_mutex> lock(imageMutex_);
     if (imageChache) {
         imageCache_ = imageChache;
     }
@@ -132,7 +132,7 @@ void PipelineBase::SetImageCache(const RefPtr<ImageCache>& imageChache)
 
 RefPtr<ImageCache> PipelineBase::GetImageCache() const
 {
-    std::shared_lock<std::shared_mutex> lock(imageCacheMutex_);
+    std::shared_lock<std::shared_mutex> lock(imageMutex_);
     return imageCache_;
 }
 
@@ -652,7 +652,7 @@ void PipelineBase::Destroy()
     drawDelegate_.reset();
     eventManager_->ClearResults();
     {
-        std::unique_lock<std::shared_mutex> lock(imageCacheMutex_);
+        std::unique_lock<std::shared_mutex> lock(imageMutex_);
         imageCache_.Reset();
     }
     fontManager_.Reset();

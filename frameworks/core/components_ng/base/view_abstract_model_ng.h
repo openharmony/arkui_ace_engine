@@ -676,7 +676,10 @@ public:
         ViewAbstract::SetInspectorId(inspectorId);
     }
 
-    void SetRestoreId(int32_t restoreId) override {}
+    void SetRestoreId(int32_t restoreId) override
+    {
+        ViewAbstract::SetRestoreId(restoreId);
+    }
 
     void SetDebugLine(const std::string& line) override
     {
@@ -693,7 +696,7 @@ public:
         ViewAbstract::SetHitTestMode(hitTestMode);
     }
 
-    void SetKeyboardShortcut(const std::string& value, const std::vector<CtrlKey>& keys,
+    void SetKeyboardShortcut(const std::string& value, const std::vector<ModifierKey>& keys,
         std::function<void()>&& onKeyboardShortcutAction) override
     {
         ViewAbstract::SetKeyboardShortcut(value, keys, std::move(onKeyboardShortcutAction));
@@ -715,6 +718,9 @@ public:
 
     void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<void()>&& buildFunc, int32_t type) override;
+
+    void BindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
+        std::function<void()>&& buildFunc, NG::SheetStyle& sheetStyle) override;
 
     void SetAccessibilityGroup(bool accessible) override {}
     void SetAccessibilityText(const std::string& text) override {}

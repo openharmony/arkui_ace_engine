@@ -260,8 +260,11 @@ bool GridEventHub::FireOnItemDrop(const ItemDragInfo& dragInfo, int32_t itemInde
     CHECK_NULL_RETURN(host, false);
     auto pattern = AceType::DynamicCast<GridPattern>(host->GetPattern());
     CHECK_NULL_RETURN(pattern, false);
-    insertIndex = (itemIndex == -1 || insertIndex == -1) ? insertIndex : pattern->GetOriginalIndex();
-    pattern->ClearDragState();
+    if (pattern->SupportAnimation()) {
+        insertIndex = (itemIndex == -1 || insertIndex == -1) ? insertIndex : pattern->GetOriginalIndex();
+        pattern->ClearDragState();
+    }
+
     if (draggingItem_) {
         draggingItem_->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
     }
@@ -287,6 +290,9 @@ void GridEventHub::MoveItems(int32_t itemIndex, int32_t insertIndex) const
     CHECK_NULL_VOID(host);
     auto pattern = AceType::DynamicCast<GridPattern>(host->GetPattern());
     CHECK_NULL_VOID(pattern);
+    if (!pattern->SupportAnimation()) {
+        return;
+    }
     constexpr float ANIMATION_CURVE_VELOCITY = 0.0f;    // The move animation spring curve velocity is 0.0
     constexpr float ANIMATION_CURVE_MASS = 1.0f;        // The move animation spring curve mass is 1.0
     constexpr float ANIMATION_CURVE_STIFFNESS = 400.0f; // The move animation spring curve stiffness is 110.0

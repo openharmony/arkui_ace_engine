@@ -201,6 +201,27 @@ bool GestureReferee::QueryAllDone(size_t touchId)
     return ret;
 }
 
+bool GestureReferee::CheckSourceTypeChange(SourceType type, bool isAxis_)
+{
+    bool ret = false;
+    if (type != lastSourceType_) {
+        ret = true;
+        lastSourceType_ = type;
+    } else if (isAxis_ && !lastIsAxis_) {
+        ret = true;
+    }
+    lastIsAxis_ = isAxis_;
+    return ret;
+}
+
+void GestureReferee::CleanAll()
+{
+    for (auto iter = gestureScopes_.begin(); iter != gestureScopes_.end(); iter++) {
+        iter->second->Close();
+        gestureScopes_.erase(iter);
+    }
+}
+
 void GestureReferee::Adjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)
 {
     CHECK_NULL_VOID(recognizer);

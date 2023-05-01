@@ -18,6 +18,7 @@
 
 #include "base/geometry/ng/size_t.h"
 #include "core/components_ng/base/geometry_node.h"
+#include "core/components_ng/pattern/select_overlay/select_overlay_modifier.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/shape/shape_paint_property.h"
 #include "core/components_ng/render/circle_painter.h"
@@ -28,17 +29,35 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT SelectOverlayPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(SelectOverlayPaintMethod, NodePaintMethod)
 public:
-    explicit SelectOverlayPaintMethod(std::shared_ptr<SelectOverlayInfo> info) : info_(std::move(info)) {}
+    SelectOverlayPaintMethod(const RefPtr<SelectOverlayModifier>& selectOverlayModifier,
+        std::shared_ptr<SelectOverlayInfo> info, const OffsetF& offset, bool hasExtensitonMenu)
+        : selectOverlayModifier_(selectOverlayModifier), info_(std::move(info)), defaultMenuEndOffset_(offset),
+          hasExtensitonMenu_(hasExtensitonMenu)
+    {}
     ~SelectOverlayPaintMethod() override = default;
 
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
+
+    RefPtr<Modifier> GetOverlayModifier(PaintWrapper* paintWrapper) override
+    {
+        CHECK_NULL_RETURN(selectOverlayModifier_, nullptr);
+        return selectOverlayModifier_;
+    }
+
+    void UpdateOverlayModifier(PaintWrapper* paintWrapper) override;
 
 private:
     static void DrawHandles(const std::shared_ptr<SelectOverlayInfo>& info, RSCanvas& canvas);
 
     static void PaintHandle(RSCanvas& canvas, const RectF& handleRect, bool handleOnTop);
 
+    RefPtr<SelectOverlayModifier> selectOverlayModifier_;
+
     std::shared_ptr<SelectOverlayInfo> info_;
+
+    OffsetF defaultMenuEndOffset_;
+
+    bool hasExtensitonMenu_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayPaintMethod);
 };

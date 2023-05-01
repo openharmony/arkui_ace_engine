@@ -38,6 +38,8 @@ const std::set<std::string> FONT_STYLES = { "italic", "oblique", "normal" };
 const std::set<std::string> FONT_FAMILIES = { "sans-serif", "serif", "monospace" };
 const std::set<std::string> QUALITY_TYPE = { "low", "medium", "high" }; // Default value is low.
 constexpr double DEFAULT_QUALITY = 0.92;
+constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
+constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
 template<typename T>
 inline T ConvertStrToEnum(const char* key, const LinearMapNode<T>* map, size_t length, T defaultValue)
 {
@@ -135,6 +137,14 @@ const LinearMapNode<TextBaseline> BASELINE_TABLE[] = {
     { "top", TextBaseline::TOP },
 };
 
+uint32_t ColorAlphaAdapt(uint32_t origin)
+{
+    uint32_t result = origin;
+    if ((origin >> COLOR_ALPHA_OFFSET) == 0) {
+        result = origin | COLOR_ALPHA_VALUE;
+    }
+    return result;
+}
 } // namespace
 
 JSCanvasRenderer::JSCanvasRenderer()
@@ -670,6 +680,16 @@ void JSCanvasRenderer::JsSetFillStyle(const JSCallbackInfo& info)
         if (!isOffscreen_ && pool_) {
             pool_->UpdateFillPattern(pattern);
         }
+    }
+    if (info[0]->IsNumber()) {
+        auto color = Color(ColorAlphaAdapt(info[0]->ToNumber<uint32_t>()));
+        if (Container::IsCurrentUseNewPipeline()) {
+            if (isOffscreen_) {
+                offscreenCanvasPattern_->SetFillColor(color);
+            } else {
+                customPaintPattern_->UpdateFillColor(color);
+            }
+        }
     } else {
         LOGW("unsupported function for fill style.");
     }
@@ -755,6 +775,16 @@ void JSCanvasRenderer::JsSetStrokeStyle(const JSCallbackInfo& info)
         }
         if (!isOffscreen_ && pool_) {
             pool_->UpdateStrokePattern(pattern);
+        }
+    }
+    if (info[0]->IsNumber()) {
+        auto color = Color(ColorAlphaAdapt(info[0]->ToNumber<uint32_t>()));
+        if (Container::IsCurrentUseNewPipeline()) {
+            if (isOffscreen_) {
+                offscreenCanvasPattern_->SetStrokeColor(color);
+            } else {
+                customPaintPattern_->UpdateStrokeColor(color);
+            }
         }
     } else {
         LOGW("unsupported function for stroke style.");
@@ -1296,9 +1326,30 @@ void JSCanvasRenderer::JsDrawBitmapMesh(const JSCallbackInfo& info)
     }
 }
 
-void JSCanvasRenderer::JsFilter(const JSCallbackInfo& info)
+void JSCanvasRenderer::JsGetFilter(const JSCallbackInfo& info)
 {
     return;
+}
+
+void JSCanvasRenderer::JsSetFilter(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsString()) {
+        return;
+    }
+    std::string filterStr;
+    JSViewAbstract::ParseJsString(info[0], filterStr);
+    // null and undefined are the same.
+    if (filterStr == "") {
+        LOGE("invalid filter string");
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (isOffscreen_ && offscreenCanvasPattern_) {
+            offscreenCanvasPattern_->SetFilterParam(filterStr);
+        } else if (!isOffscreen_ && customPaintPattern_) {
+            customPaintPattern_->SetFilterParam(filterStr);
+        }
+    }
 }
 
 void JSCanvasRenderer::JsGetDirection(const JSCallbackInfo& info)

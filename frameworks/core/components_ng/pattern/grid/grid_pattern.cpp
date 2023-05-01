@@ -441,6 +441,7 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     UpdateScrollBarOffset();
     CheckRestartSpring();
     CheckScrollable();
+    FlushCurrentFocus();
     return false;
 }
 
@@ -454,6 +455,42 @@ void GridPattern::CheckScrollable()
     }
 
     SetScrollEnable(scrollable_);
+}
+
+void GridPattern::FlushCurrentFocus()
+{
+    auto gridFrame = GetHost();
+    CHECK_NULL_VOID(gridFrame);
+    auto gridFocus = gridFrame->GetFocusHub();
+    CHECK_NULL_VOID(gridFocus);
+    if (!gridFocus->IsCurrentFocus()) {
+        return;
+    }
+    auto childFocusList = gridFocus->GetChildren();
+    for (const auto& childFocus : childFocusList) {
+        if (childFocus->IsCurrentFocus()) {
+            auto curFrame = childFocus->GetFrameNode();
+            CHECK_NULL_VOID(curFrame);
+            auto curPattern = curFrame->GetPattern();
+            CHECK_NULL_VOID(curPattern);
+            auto curItemPattern = AceType::DynamicCast<GridItemPattern>(curPattern);
+            CHECK_NULL_VOID(curItemPattern);
+
+            lastFocusItemMainIndex_ = curItemPattern->GetMainIndex();
+            lastFocusItemCrossIndex_ = curItemPattern->GetCrossIndex();
+            return;
+        }
+    }
+    if (gridLayoutInfo_.gridMatrix_.find(lastFocusItemMainIndex_) == gridLayoutInfo_.gridMatrix_.end()) {
+        LOGE("Can not find last focus item main index: %{public}d", lastFocusItemMainIndex_);
+        return;
+    }
+    auto curCrossNum = static_cast<int32_t>(gridLayoutInfo_.gridMatrix_.at(lastFocusItemMainIndex_).size());
+    auto weakChild = SearchFocusableChildInCross(lastFocusItemMainIndex_, lastFocusItemCrossIndex_, curCrossNum);
+    auto child = weakChild.Upgrade();
+    if (child) {
+        child->RequestFocusImmediately();
+    }
 }
 
 void GridPattern::FlushFocusOnScroll(const GridLayoutInfo& gridLayoutInfo)
@@ -529,6 +566,10 @@ WeakPtr<FocusHub> GridPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
         LOGE("can't find focused child.");
         return nullptr;
     }
+    if (gridLayoutInfo_.gridMatrix_.find(curMainIndex) == gridLayoutInfo_.gridMatrix_.end()) {
+        LOGE("Can not find current main index: %{public}d", curMainIndex);
+        return nullptr;
+    }
     auto curMaxCrossCount = static_cast<int32_t>((gridLayoutInfo_.gridMatrix_[curMainIndex]).size());
     LOGD("Current focused item(%{public}d,%{public}d)-[%{public}d,%{public}d]'s cross count is %{public}d.",
         curMainIndex, curCrossIndex, curMainSpan, curCrossSpan, curMaxCrossCount);
@@ -548,6 +589,10 @@ WeakPtr<FocusHub> GridPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
     auto nextMainIndex = indexes.first;
     auto nextCrossIndex = indexes.second;
     while (nextMainIndex >= 0 && nextCrossIndex >= 0) {
+        if (gridLayoutInfo_.gridMatrix_.find(nextMainIndex) == gridLayoutInfo_.gridMatrix_.end()) {
+            LOGE("Can not find next main index: %{public}d", nextMainIndex);
+            return nullptr;
+        }
         auto nextMaxCrossCount = static_cast<int32_t>((gridLayoutInfo_.gridMatrix_[nextMainIndex]).size());
         auto weakChild = SearchFocusableChildInCross(nextMainIndex, nextCrossIndex, nextMaxCrossCount);
         auto child = weakChild.Upgrade();
@@ -572,6 +617,10 @@ std::pair<int32_t, int32_t> GridPattern::GetNextIndexByStep(
     auto curChildStartIndex = gridLayoutInfo_.startIndex_;
     auto curChildEndIndex = gridLayoutInfo_.endIndex_;
     auto childrenCount = gridLayoutInfo_.childrenCount_;
+    if (gridLayoutInfo_.gridMatrix_.find(curMainIndex) == gridLayoutInfo_.gridMatrix_.end()) {
+        LOGE("Can not find current main index: %{public}d", curMainIndex);
+        return { -1, -1 };
+    }
     auto curMaxCrossCount = static_cast<int32_t>((gridLayoutInfo_.gridMatrix_[curMainIndex]).size());
     LOGD("Current main index start-end: %{public}d-%{public}d, Current cross count: %{public}d, Current child "
          "index start-end: %{public}d-%{public}d, Total children count: %{public}d",
@@ -647,6 +696,10 @@ std::pair<int32_t, int32_t> GridPattern::GetNextIndexByStep(
     }
     if (nextCrossIndex < 0) {
         LOGW("Return: Error. Next cross index is less than 0.");
+        return { -1, -1 };
+    }
+    if (gridLayoutInfo_.gridMatrix_.find(nextMainIndex) == gridLayoutInfo_.gridMatrix_.end()) {
+        LOGE("Can not find next main index: %{public}d", nextMainIndex);
         return { -1, -1 };
     }
     auto nextMaxCrossCount = static_cast<int32_t>((gridLayoutInfo_.gridMatrix_[nextMainIndex]).size());
@@ -735,6 +788,10 @@ void GridPattern::ScrollToFocusNode(const WeakPtr<FocusHub>& focusNode)
     CHECK_NULL_VOID(nextItemPattern);
     auto nextMainIndex = nextItemPattern->GetMainIndex();
     auto nextCrossIndex = nextItemPattern->GetCrossIndex();
+    if (gridLayoutInfo_.gridMatrix_.find(nextMainIndex) == gridLayoutInfo_.gridMatrix_.end()) {
+        LOGE("Can not find next main index: %{public}d", nextMainIndex);
+        return;
+    }
     auto nextIndex = gridLayoutInfo_.gridMatrix_[nextMainIndex][nextCrossIndex];
     UpdateStartIndex(nextIndex);
 }
@@ -804,7 +861,7 @@ void GridPattern::ScrollPage(bool reverse)
     }
 }
 
-bool GridPattern::UpdateStartIndex(uint32_t index)
+bool GridPattern::UpdateStartIndex(int32_t index)
 {
     if (!isConfigScrollable_) {
         return false;
@@ -879,8 +936,9 @@ void GridPattern::UpdateScrollBarOffset()
     }
 
     float offset = info.startIndex_ * averageHeight_ - info.currentOffset_;
-    Size mainSize = { viewScopeSize.Width(), viewScopeSize.Height() };
-    UpdateScrollBarRegion(offset, estimatedHeight, mainSize);
+    auto viewSize = geometryNode->GetFrameSize();
+    Size mainSize = { viewSize.Width(), viewSize.Height() };
+    UpdateScrollBarRegion(offset, estimatedHeight, mainSize, Offset(0.0, 0.0));
 }
 
 RefPtr<PaintProperty> GridPattern::CreatePaintProperty()
@@ -896,15 +954,6 @@ RefPtr<PaintProperty> GridPattern::CreatePaintProperty()
     // default "scrollBar" attribute of Grid is BarState.Off
     property->UpdateScrollBarMode(defaultDisplayMode);
     return property;
-}
-
-int32_t GridPattern::GetInsertPosition(float x, float y) const
-{
-    if (gridLayoutInfo_.currentRect_.IsInRegion(PointF(x, y))) {
-        return gridLayoutInfo_.GetOriginalIndex();
-    }
-
-    return -1;
 }
 
 int32_t GridPattern::GetOriginalIndex() const

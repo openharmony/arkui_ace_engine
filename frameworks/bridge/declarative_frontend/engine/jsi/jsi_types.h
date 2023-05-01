@@ -93,6 +93,11 @@ public:
     template<typename T>
     T ToNumber() const;
 
+    static JsiRef<JsiValue> Undefined();
+    static JsiRef<JsiValue> Null();
+    static JsiRef<JsiValue> True();
+    static JsiRef<JsiValue> False();
+
     FAKE_PTR_FOR_FUNCTION_ACCESS(JsiValue)
 };
 

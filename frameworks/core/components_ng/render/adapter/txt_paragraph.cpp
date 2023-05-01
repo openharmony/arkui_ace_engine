@@ -49,7 +49,7 @@ void TxtParagraph::CreateBuilder()
     if (paraStyle_.textOverflow == TextOverflow::ELLIPSIS) {
         style.ellipsis = ELLIPSIS;
     }
-#ifndef FLUTTER_2_5
+#if !defined(FLUTTER_2_5) && !defined(NEW_SKIA)
     // keep WordBreak define same with WordBreakType in minikin
     style.word_break_type = static_cast<minikin::WordBreakType>(paraStyle_.wordBreak);
 #endif
@@ -293,9 +293,11 @@ void TxtParagraph::GetRectsForPlaceholders(std::vector<Rect>& selectedRects)
 
 void TxtParagraph::SetIndents(const std::vector<float>& indents)
 {
+#ifndef NEW_SKIA
     auto* paragraphTxt = static_cast<txt::ParagraphTxt*>(paragraph_.get());
     CHECK_NULL_VOID(paragraphTxt);
     paragraphTxt->SetIndents(indents);
+#endif
 }
 
 } // namespace OHOS::Ace::NG

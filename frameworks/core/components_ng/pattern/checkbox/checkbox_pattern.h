@@ -75,7 +75,7 @@ public:
         CHECK_NULL_RETURN(eventHub, nullptr);
         auto enabled = eventHub->IsEnabled();
         paintMethod->SetEnabled(enabled);
-        paintMethod->SetIsHover(isHover_);
+        paintMethod->SetTouchHoverAnimationType(touchHoverType_);
         return paintMethod;
     }
 
@@ -85,6 +85,10 @@ public:
         auto geometryNode = dirty->GetGeometryNode();
         offset_ = geometryNode->GetContentOffset();
         size_ = geometryNode->GetContentSize();
+        if (isFirstAddhotZoneRect_) {
+            AddHotZoneRect();
+            isFirstAddhotZoneRect_ = false;
+        }
         return true;
     }
 
@@ -182,6 +186,8 @@ private:
     SizeF size_;
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
+    bool isFirstAddhotZoneRect_ = true;
+    TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
 
     RefPtr<CheckBoxModifier> checkboxModifier_;
 

@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #ifndef NEW_SKIA
 #include "flutter_render_display.h"
 #endif

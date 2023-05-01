@@ -15,6 +15,7 @@
 
 #include "core/components/text_overlay/rosen_render_text_overlay.h"
 
+#include "include/core/SkImage.h"
 #include "include/core/SkMaskFilter.h"
 #include "include/core/SkPath.h"
 
@@ -190,12 +191,20 @@ void RosenRenderTextOverlay::PaintMagnifier(RenderContext& context)
     paint.setColor(SK_ColorWHITE);
     paint.setAntiAlias(true);
     canvas->drawRRect(ScaleRrect, paint);
-
+#ifndef NEW_SKIA
     canvas->drawBitmapRect(bitmap,
         SkRect::MakeXYWH(x * viewScale * MAGNIFIER_GAIN + FIXED_OFFSET, y * viewScale * MAGNIFIER_GAIN + FIXED_OFFSET,
             NormalizeToPx(MAGNIFIER_WIDTH) * viewScale, NormalizeToPx(MAGNIFIER_WIDTH) * viewScale),
         SkRect::MakeXYWH(globalX * viewScale, globalY * viewScale, NormalizeToPx(MAGNIFIER_WIDTH) * viewScale,
             NormalizeToPx(MAGNIFIER_WIDTH) * viewScale), nullptr);
+#else
+    canvas->drawImageRect(bitmap.asImage(),
+        SkRect::MakeXYWH(x * viewScale * MAGNIFIER_GAIN + FIXED_OFFSET, y * viewScale * MAGNIFIER_GAIN + FIXED_OFFSET,
+            NormalizeToPx(MAGNIFIER_WIDTH) * viewScale, NormalizeToPx(MAGNIFIER_WIDTH) * viewScale),
+        SkRect::MakeXYWH(globalX * viewScale, globalY * viewScale, NormalizeToPx(MAGNIFIER_WIDTH) * viewScale,
+            NormalizeToPx(MAGNIFIER_WIDTH) * viewScale),
+            SkSamplingOptions(), nullptr, SkCanvas::kStrict_SrcRectConstraint);
+#endif
     canvas->restore();
 }
 

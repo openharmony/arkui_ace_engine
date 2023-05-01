@@ -31,21 +31,25 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<ModelView> ModelView::instance_ = nullptr;
+std::mutex ModelView::mutex_;
 
 ModelView* ModelView::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::ModelViewNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
-            LOGD("ModelView::GetInstance() NG Pipeline");
             instance_.reset(new NG::ModelViewNG());
-        } else {
-            LOGD("ModelView::GetInstance() NOT NG Pipeline");
-            instance_.reset(new Framework::ModelViewImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                LOGD("ModelView::GetInstance() NG Pipeline");
+                instance_.reset(new NG::ModelViewNG());
+            } else {
+                LOGD("ModelView::GetInstance() NOT NG Pipeline");
+                instance_.reset(new Framework::ModelViewImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }

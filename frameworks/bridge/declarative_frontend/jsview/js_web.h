@@ -23,6 +23,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
 
 namespace OHOS::Ace::Framework {
+using JSwebEventCallback = std::function<void()>;
 class JSWeb : public JSContainerBase {
 public:
     static void JSBind(BindingTarget globalObj);
@@ -130,10 +131,10 @@ public:
     static void OnAudioStateChanged(const JSCallbackInfo& args);
     static void MediaOptions(const JSCallbackInfo& args);
     static void OnFirstContentfulPaint(const JSCallbackInfo& args);
-
+    static void OnControllerAttached(const JSCallbackInfo& args);
     // Enable or disable debugging of web content
     static bool webDebuggingAccess_;
-
+    static JSwebEventCallback OnControllerAttachedCallback_;
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);
 };

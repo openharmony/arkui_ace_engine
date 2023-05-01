@@ -43,19 +43,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<LazyForEachModel> LazyForEachModel::instance_ = nullptr;
+std::mutex LazyForEachModel::mutex_;
 
 LazyForEachModel* LazyForEachModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::LazyForEachModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::LazyForEachModelNG());
-        } else {
-            instance_.reset(new Framework::LazyForEachModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::LazyForEachModelNG());
+            } else {
+                instance_.reset(new Framework::LazyForEachModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }

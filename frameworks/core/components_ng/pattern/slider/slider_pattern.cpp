@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/slider/slider_pattern.h"
 
-#include <valarray>
-
 #include "base/geometry/offset.h"
 #include "base/i18n/localization.h"
 #include "base/utils/utils.h"
@@ -36,8 +34,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float HALF = 0.5;
-constexpr Dimension ARROW_WIDTH = 32.0_vp;
-constexpr Dimension ARROW_HEIGHT = 8.0_vp;
 constexpr float SLIDER_MIN = .0f;
 constexpr float SLIDER_MAX = 100.0f;
 } // namespace
@@ -73,6 +69,7 @@ void SliderPattern::OnModifyDone()
     auto focusHub = hub->GetFocusHub();
     CHECK_NULL_VOID_NOLOG(focusHub);
     InitOnKeyEvent(focusHub);
+    InitializeBubble();
 }
 
 void SliderPattern::CancelExceptionValue(float& min, float& max, float& step)
@@ -171,17 +168,63 @@ void SliderPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
     gestureHub->AddTouchEvent(touchEvent_);
 }
 
+bool SliderPattern::AtMousePanArea(const Offset& offsetInFrame)
+{
+    const auto& content = GetHost()->GetGeometryNode()->GetContent();
+    CHECK_NULL_RETURN(content, false);
+    auto contentOffset = content->GetRect().GetOffset();
+    auto offset = Offset(offsetInFrame.GetX() - contentOffset.GetX(), offsetInFrame.GetY() - contentOffset.GetY());
+    double distanceCircle = std::min(blockSize_.Width(), blockSize_.Height()) * HALF + hotBlockShadowWidth_;
+    auto diffX = circleCenter_.GetX() - offset.GetX();
+    auto diffY = circleCenter_.GetY() - offset.GetY();
+    return diffX * diffX + diffY * diffY <= distanceCircle * distanceCircle;
+}
+
+bool SliderPattern::AtTouchPanArea(const Offset& offsetInFrame)
+{
+    const auto& content = GetHost()->GetGeometryNode()->GetContent();
+    CHECK_NULL_RETURN(content, false);
+    auto contentOffset = content->GetRect().GetOffset();
+    auto offset = Offset(offsetInFrame.GetX() - contentOffset.GetX(), offsetInFrame.GetY() - contentOffset.GetY());
+    float sideHotSize = blockHotSize_ * HALF;
+    return !(circleCenter_.GetX() - sideHotSize > offset.GetX() ||
+        circleCenter_.GetY() - sideHotSize > offset.GetY() ||
+        circleCenter_.GetX() + sideHotSize < offset.GetX() ||
+        circleCenter_.GetY() + sideHotSize < offset.GetY());
+}
+
+bool SliderPattern::AtPanArea(const Offset& offset, const SourceType& sourceType)
+{
+    bool flag = false;
+    switch (sourceType) {
+        case SourceType::MOUSE:
+            flag = AtMousePanArea(offset);
+            break;
+        case SourceType::TOUCH:
+            flag = AtTouchPanArea(offset);
+            break;
+        case SourceType::NONE:
+        default:
+            break;
+    }
+    return flag;
+}
+
 void SliderPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
     auto touchList = info.GetChangedTouches();
     CHECK_NULL_VOID(!touchList.empty());
-    auto touchType = touchList.front().GetTouchType();
+    auto touchInfo = touchList.front();
+    auto touchType = touchInfo.GetTouchType();
     if (touchType == TouchType::DOWN) {
         hotFlag_ = true;
-        UpdateValueByLocalLocation(touchList.front().GetLocalLocation());
+        // when Touch Down area is at Pan Area, value is unchanged.
+        if (!AtPanArea(touchInfo.GetLocalLocation(), info.GetSourceDevice())) {
+            UpdateValueByLocalLocation(touchInfo.GetLocalLocation());
+        }
         if (showTips_) {
             bubbleFlag_ = true;
-            InitializeBubble();
+            UpdateBubble();
         }
         mousePressedFlag_ = true;
         FireChangeEvent(SliderChangeMode::Begin);
@@ -201,7 +244,7 @@ void SliderPattern::HandleTouchEvent(const TouchEventInfo& info)
 
 void SliderPattern::InitializeBubble()
 {
-    CHECK_NULL_VOID(bubbleFlag_);
+    CHECK_NULL_VOID_NOLOG(showTips_);
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -215,7 +258,6 @@ void SliderPattern::InitializeBubble()
     sliderPaintProperty->UpdateTextColor(sliderTheme->GetTipTextColor());
     sliderPaintProperty->UpdateFontSize(sliderTheme->GetTipFontSize());
     sliderPaintProperty->UpdateContent(content);
-    UpdateBubble();
 }
 
 void SliderPattern::HandlingGestureEvent(const GestureEvent& info)
@@ -223,6 +265,10 @@ void SliderPattern::HandlingGestureEvent(const GestureEvent& info)
     if (info.GetInputEventType() == InputEventType::AXIS) {
         auto offset = NearZero(info.GetOffsetX()) ? info.GetOffsetY() : info.GetOffsetX();
         offset > 0.0 ? MoveStep(-1) : MoveStep(1);
+        if (showTips_) {
+            bubbleFlag_ = true;
+            InitializeBubble();
+        }
     } else {
         UpdateValueByLocalLocation(info.GetLocalLocation());
         UpdateBubble();
@@ -233,6 +279,9 @@ void SliderPattern::HandlingGestureEvent(const GestureEvent& info)
 void SliderPattern::HandledGestureEvent()
 {
     hotFlag_ = false;
+    if (bubbleFlag_) {
+        bubbleFlag_ = false;
+    }
     UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -258,6 +307,7 @@ void SliderPattern::UpdateValueByLocalLocation(const std::optional<Offset>& loca
     valueRatio_ = NearEqual(valueRatio_, 1) ? 1 : std::round(valueRatio_ / stepRatio_) * stepRatio_;
     float oldValue = value_;
     value_ = valueRatio_ * (max - min) + min;
+    sliderPaintProperty->UpdateValue(value_);
     valueChangeFlag_ = !NearEqual(oldValue, value_);
     UpdateCircleCenterOffset();
 }
@@ -295,54 +345,11 @@ void SliderPattern::UpdateCircleCenterOffset()
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
-void SliderPattern::UpdateBubbleSizeAndLayout()
-{
-    auto paintProperty = GetPaintProperty<SliderPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SliderTheme>();
-    CHECK_NULL_VOID(theme);
-    SizeF textSize = { 0, 0 };
-    if (paragraph_) {
-        textSize = SizeF(paragraph_->GetMaxIntrinsicWidth(), paragraph_->GetHeight());
-    }
-    OffsetF textOffsetInBubble = { 0, 0 };
-    auto padding = static_cast<float>(paintProperty->GetPadding().value_or(0.0_vp).ConvertToPx());
-    float bubbleSizeHeight = textSize.Height() + padding + padding;
-    float bubbleSizeWidth = textSize.Width();
-    if (paintProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL) {
-        bubbleSizeWidth = std::max(static_cast<float>(ARROW_WIDTH.ConvertToPx()), bubbleSizeWidth);
-        bubbleSize_ = SizeF(
-            bubbleSizeWidth + bubbleSizeHeight, bubbleSizeHeight + static_cast<float>(ARROW_HEIGHT.ConvertToPx()));
-        textOffsetInBubble.SetX((bubbleSize_.Width() - textSize.Width()) * HALF);
-        textOffsetInBubble.SetY(padding);
-
-        bubbleOffset_.SetX(circleCenter_.GetX() - bubbleSize_.Width() * HALF);
-        bubbleOffset_.SetY(circleCenter_.GetY() -
-                           static_cast<float>(theme->GetBubbleToCircleCenterDistance().ConvertToPx()) -
-                           bubbleSize_.Height());
-    } else {
-        bubbleSizeHeight = std::max(static_cast<float>(ARROW_WIDTH.ConvertToPx()), bubbleSizeHeight);
-        bubbleSize_ =
-            SizeF(bubbleSizeWidth + static_cast<float>(ARROW_HEIGHT.ConvertToPx()), bubbleSizeHeight + bubbleSizeWidth);
-        textOffsetInBubble.SetY((bubbleSize_.Height() - textSize.Height()) * HALF);
-
-        bubbleOffset_.SetY(circleCenter_.GetY() - bubbleSize_.Height() * HALF);
-        bubbleOffset_.SetX(circleCenter_.GetX() -
-                           static_cast<float>(theme->GetBubbleToCircleCenterDistance().ConvertToPx()) -
-                           bubbleSize_.Width());
-    }
-    textOffset_ = bubbleOffset_ + textOffsetInBubble;
-}
-
 void SliderPattern::UpdateBubble()
 {
-    CHECK_NULL_VOID_NOLOG(showTips_);
+    CHECK_NULL_VOID_NOLOG(bubbleFlag_);
+    // update the tip value according to the slider value, update the tip position according to current block position
     UpdateTipsValue();
-    CreateParagraphFunc();
-    UpdateCircleCenterOffset();
-    UpdateBubbleSizeAndLayout();
     UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -509,18 +516,34 @@ void SliderPattern::PaintFocusState()
 
 bool SliderPattern::OnKeyEvent(const KeyEvent& event)
 {
-    if (event.action != KeyAction::DOWN) {
-        return false;
-    }
-    if ((direction_ == Axis::HORIZONTAL && event.code == KeyCode::KEY_DPAD_LEFT) ||
-        (direction_ == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_UP)) {
-        MoveStep(-1);
+    if (event.action == KeyAction::DOWN) {
+        if ((direction_ == Axis::HORIZONTAL && event.code == KeyCode::KEY_DPAD_LEFT) ||
+            (direction_ == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_UP)) {
+            MoveStep(-1);
+            if (showTips_) {
+                bubbleFlag_ = true;
+                InitializeBubble();
+            }
+            PaintFocusState();
+            FireChangeEvent(SliderChangeMode::Begin);
+        }
+        if ((direction_ == Axis::HORIZONTAL && event.code == KeyCode::KEY_DPAD_RIGHT) ||
+            (direction_ == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_DOWN)) {
+            MoveStep(1);
+            if (showTips_) {
+                bubbleFlag_ = true;
+                InitializeBubble();
+            }
+            PaintFocusState();
+            FireChangeEvent(SliderChangeMode::Begin);
+        }
+    } else if (event.action == KeyAction::UP) {
+        if (bubbleFlag_) {
+            bubbleFlag_ = false;
+        }
         PaintFocusState();
-    }
-    if ((direction_ == Axis::HORIZONTAL && event.code == KeyCode::KEY_DPAD_RIGHT) ||
-        (direction_ == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_DOWN)) {
-        MoveStep(1);
-        PaintFocusState();
+        FireChangeEvent(SliderChangeMode::Click);
+        FireChangeEvent(SliderChangeMode::End);
     }
     return false;
 }
@@ -548,6 +571,7 @@ bool SliderPattern::MoveStep(int32_t stepCount)
         return false;
     }
     value_ = nextValue;
+    sliderPaintProperty->UpdateValue(value_);
     valueRatio_ = (value_ - min) / (max - min);
     FireChangeEvent(SliderChangeMode::End);
     LOGD("Move %{public}d steps, Value change to %{public}f", stepCount, value_);
@@ -589,10 +613,8 @@ void SliderPattern::HandleHoverEvent(bool isHover)
 void SliderPattern::HandleMouseEvent(const MouseInfo& info)
 {
     UpdateCircleCenterOffset();
-    auto mouseToCenterDistanceX = static_cast<float>(std::abs(info.GetLocalLocation().GetX() - circleCenter_.GetX()));
-    auto mouseToCenterDistanceY = static_cast<float>(std::abs(info.GetLocalLocation().GetY() - circleCenter_.GetY()));
-    float mouseToCenterDistance = std::max(mouseToCenterDistanceX, mouseToCenterDistanceY);
-    mouseHoverFlag_ = LessOrEqual(mouseToCenterDistance, blockHotSize_ * HALF);
+    // MouseInfo's LocalLocation is relative to the frame area, circleCenter_ is relative to the content area
+    mouseHoverFlag_ = AtMousePanArea(info.GetLocalLocation());
     UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -625,52 +647,6 @@ Axis SliderPattern::GetDirection() const
 RefPtr<AccessibilityProperty> SliderPattern::CreateAccessibilityProperty()
 {
     return MakeRefPtr<SliderAccessibilityProperty>();
-}
-
-void SliderPattern::CreateParagraphFunc()
-{
-    auto paintProperty = GetPaintProperty<SliderPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto sliderTheme = pipeline->GetTheme<SliderTheme>();
-    CHECK_NULL_VOID(sliderTheme);
-    auto fontStyle = std::make_unique<NG::FontStyle>();
-    fontStyle->UpdateTextColor(paintProperty->GetTextColor().value_or(sliderTheme->GetTipTextColor()));
-    TextStyle textStyle = CreateTextStyleUsingTheme(fontStyle, nullptr, pipeline->GetTheme<TextTheme>());
-    auto layoutProperty = GetLayoutProperty<SliderLayoutProperty>();
-    auto contentSize = layoutProperty->CreateContentConstraint();
-    CreateParagraphAndLayout(textStyle, paintProperty->GetContent().value_or(""), contentSize);
-}
-
-void SliderPattern::CreateParagraphAndLayout(
-    const TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint)
-{
-    if (!CreateParagraph(textStyle, content)) {
-        return;
-    }
-    CHECK_NULL_VOID(paragraph_);
-    auto size = contentConstraint.selfIdealSize;
-    size.UpdateIllegalSizeWithCheck(contentConstraint.maxSize);
-    auto maxSize = size.ConvertToSizeT();
-    paragraph_->Layout(maxSize.Width());
-}
-
-bool SliderPattern::CreateParagraph(const TextStyle& textStyle, std::string content)
-{
-    ParagraphStyle paraStyle = { .direction = TextDirection::LTR,
-        .align = textStyle.GetTextAlign(),
-        .maxLines = textStyle.GetMaxLines(),
-        .fontLocale = Localization::GetInstance()->GetFontLocale(),
-        .wordBreak = textStyle.GetWordBreak(),
-        .textOverflow = textStyle.GetTextOverflow() };
-    paragraph_ = Paragraph::Create(paraStyle, FontCollection::Current());
-    CHECK_NULL_RETURN(paragraph_, false);
-    paragraph_->PushStyle(textStyle);
-    StringUtils::TransformStrCase(content, static_cast<int32_t>(textStyle.GetTextCase()));
-    paragraph_->AddText(StringUtils::Str8ToStr16(content));
-    paragraph_->Build();
-    return true;
 }
 
 SliderContentModifier::Parameters SliderPattern::UpdateContentParameters()

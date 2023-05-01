@@ -81,7 +81,7 @@ constexpr char16_t OBSCURING_CHARACTER = u'•';
 constexpr char16_t OBSCURING_CHARACTER_FOR_AR = u'*';
 const std::string NEWLINE = "\n";
 const std::wstring WIDE_NEWLINE = StringUtils::ToWstring(NEWLINE);
-const std::string DIGIT_WHITE_LIST = "^[0-9]*$";
+const std::string DIGIT_WHITE_LIST = "[0-9]";
 const std::string PHONE_WHITE_LIST = "[\\d\\-\\+\\*\\#]+";
 const std::string EMAIL_WHITE_LIST = "[\\w.]";
 const std::string URL_WHITE_LIST = "[a-zA-z]+://[^\\s]*";
@@ -361,19 +361,19 @@ float TextFieldPattern::GetIconRightOffset()
 
 void TextFieldPattern::CreateSingleHandle()
 {
-    RectF firstHandle;
-    auto firstHandleMetrics = CalcCursorOffsetByPosition(textEditingValue_.caretPosition);
+    RectF secondHandle;
+    auto secondHandleMetrics = CalcCursorOffsetByPosition(textEditingValue_.caretPosition);
     OffsetF emptyOffset;
 #if defined(PREVIEW)
     emptyOffset = MakeEmptyOffset();
 #endif
-    OffsetF firstHandleOffset(firstHandleMetrics.offset.GetX() + parentGlobalOffset_.GetX() + emptyOffset.GetX(),
-        firstHandleMetrics.offset.GetY() + parentGlobalOffset_.GetY() + emptyOffset.GetY());
-    textSelector_.firstHandleOffset_ = firstHandleOffset;
+    OffsetF secondHandleOffset(secondHandleMetrics.offset.GetX() + parentGlobalOffset_.GetX() + emptyOffset.GetX(),
+        secondHandleMetrics.offset.GetY() + parentGlobalOffset_.GetY() + emptyOffset.GetY());
+    textSelector_.secondHandleOffset_ = secondHandleOffset;
     SizeF handlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), caretRect_.Height() };
-    firstHandle.SetOffset(firstHandleOffset);
-    firstHandle.SetSize(handlePaintSize);
-    ShowSelectOverlay(firstHandle, std::nullopt);
+    secondHandle.SetOffset(secondHandleOffset);
+    secondHandle.SetSize(handlePaintSize);
+    ShowSelectOverlay(std::nullopt, secondHandle);
     selectionMode_ = SelectionMode::NONE;
     StopTwinkling();
 }
@@ -497,10 +497,10 @@ void TextFieldPattern::UpdateSelectionOffset()
         if (SelectOverlayIsOn()) {
             SizeF handlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), caretRect_.Height() };
             auto textBoxLocalOffsetBegin =
-                OffsetF(textBoxes_.begin()->rect_.GetLeft() + (IsTextArea() ? textRect_.GetX() : contentRect_.GetX()),
+                OffsetF(textBoxes_.begin()->rect_.GetLeft() + (IsTextArea() ? contentRect_.GetX() : textRect_.GetX()),
                     textBoxes_.begin()->rect_.GetTop() + (IsTextArea() ? textRect_.GetY() : contentRect_.GetY()));
             auto textBoxLocalOffsetEnd =
-                OffsetF(textBoxes_.rbegin()->rect_.GetRight() + (IsTextArea() ? textRect_.GetX() : contentRect_.GetX()),
+                OffsetF(textBoxes_.rbegin()->rect_.GetRight() + (IsTextArea() ? contentRect_.GetX() : textRect_.GetX()),
                     textBoxes_.rbegin()->rect_.GetTop() + (IsTextArea() ? textRect_.GetY() : contentRect_.GetY()));
             if (GreatOrEqual(textBoxLocalOffsetBegin.GetX(), contentRect_.GetX()) &&
                 LessOrEqual(textBoxLocalOffsetBegin.GetX(), contentRect_.GetX() + contentRect_.Width())) {
@@ -1198,8 +1198,13 @@ void TextFieldPattern::HandleOnPaste()
             start = value.caretPosition;
             end = value.caretPosition;
         }
+        std::string result;
+        std::string valueToUpdate(data);
+        textfield->EditingValueFilter(valueToUpdate, result);
+        LOGD("After filter paste value is %{private}s", result.c_str());
+        CHECK_NULL_VOID_NOLOG(!result.empty());
         std::wstring pasteData;
-        std::wstring wData = StringUtils::ToWstring(data);
+        std::wstring wData = StringUtils::ToWstring(result);
         textfield->StripNextLine(wData);
         if (wData.length() + valueLength > textfield->GetMaxLength()) {
             pasteData = wData.substr(0, textfield->GetMaxLength() - valueLength);
@@ -1421,10 +1426,11 @@ void TextFieldPattern::AnimatePressAndHover(RefPtr<RenderContext>& renderContext
 #ifdef ENABLE_DRAG_FRAMEWORK
 std::function<void(Offset)> TextFieldPattern::GetThumbnailCallback()
 {
-    auto callback = [frameNode = GetHost()](Offset point) {
-        CHECK_NULL_VOID(frameNode);
-        auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    auto callback = [weak = WeakClaim(this)](const Offset& point) {
+        auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        auto frameNode = pattern->GetHost();
+        CHECK_NULL_VOID(frameNode);
         if (pattern->BetweenSelectedPosition(point)) {
             TextDragPattern::CreateDragNode(frameNode);
             FrameNode::ProcessOffscreenNode(pattern->GetDragNode());
@@ -1443,7 +1449,7 @@ void TextFieldPattern::InitDragDropEvent()
     auto gestureHub = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->InitDragDropEvent();
-    gestureHub->SetTextFieldDraggable(true);
+    gestureHub->SetTextDraggable(true);
     auto callback = GetThumbnailCallback();
     gestureHub->SetThumbnailCallback(std::move(callback));
     auto eventHub = host->GetEventHub<EventHub>();
@@ -2908,7 +2914,11 @@ bool TextFieldPattern::CursorMoveUp()
     auto originCaretPosition = textEditingValue_.caretPosition;
     float verticalOffset = caretRect_.GetY() - PreferredLineHeight();
     textEditingValue_.caretPosition = static_cast<int32_t>(
+#ifndef NEW_SKIA
         paragraph_->GetGlyphPositionAtCoordinateWithCluster(caretRect_.GetX(), verticalOffset).pos_);
+#else
+        paragraph_->GetGlyphPositionAtCoordinate(caretRect_.GetX(), verticalOffset).pos_);
+#endif
     OnCursorMoveDone();
     if (originCaretPosition == textEditingValue_.caretPosition) {
         return false;
@@ -2923,7 +2933,11 @@ bool TextFieldPattern::CursorMoveDown()
     auto originCaretPosition = textEditingValue_.caretPosition;
     float verticalOffset = caretRect_.GetY() + PreferredLineHeight();
     textEditingValue_.caretPosition = static_cast<int32_t>(
+#ifndef NEW_SKIA
         paragraph_->GetGlyphPositionAtCoordinateWithCluster(caretRect_.GetX(), verticalOffset).pos_);
+#else
+        paragraph_->GetGlyphPositionAtCoordinate(caretRect_.GetX(), verticalOffset).pos_);
+#endif
     OnCursorMoveDone();
     if (originCaretPosition == textEditingValue_.caretPosition) {
         return false;
@@ -2981,6 +2995,7 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
         auto eventHub = parentFrameNode->GetEventHub<SearchEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->UpdateSubmitEvent(textEditingValue_.text);
+        CloseKeyboard(forceCloseKeyboard);
         return;
     }
 
@@ -3214,7 +3229,11 @@ void TextFieldPattern::HandleSelectionUp()
     }
     auto newOffsetY = caretRect_.GetY() - PreferredLineHeight() * 0.5 - textRect_.GetY();
     textEditingValue_.caretPosition =
+#ifndef NEW_SKIA
         static_cast<int32_t>(paragraph_->GetGlyphPositionAtCoordinateWithCluster(caretRect_.GetX(), newOffsetY).pos_);
+#else
+        static_cast<int32_t>(paragraph_->GetGlyphPositionAtCoordinate(caretRect_.GetX(), newOffsetY).pos_);
+#endif
     textSelector_.destinationOffset = textEditingValue_.caretPosition;
     selectionMode_ = SelectionMode::SELECT;
     if (textSelector_.baseOffset == textSelector_.destinationOffset) {
@@ -3235,7 +3254,11 @@ void TextFieldPattern::HandleSelectionDown()
     }
     auto newOffsetY = caretRect_.GetY() + PreferredLineHeight() * 1.5 - textRect_.GetY();
     textEditingValue_.caretPosition =
+#ifndef NEW_SKIA
         static_cast<int32_t>(paragraph_->GetGlyphPositionAtCoordinateWithCluster(caretRect_.GetX(), newOffsetY).pos_);
+#else
+        static_cast<int32_t>(paragraph_->GetGlyphPositionAtCoordinate(caretRect_.GetX(), newOffsetY).pos_);
+#endif
     textSelector_.destinationOffset = textEditingValue_.caretPosition;
     selectionMode_ = SelectionMode::SELECT;
     if (textSelector_.baseOffset == textSelector_.destinationOffset) {
@@ -3645,7 +3668,7 @@ void TextFieldPattern::UpdateScrollBarOffset()
         return;
     }
     Size size(contentRect_.Width(), contentRect_.Height());
-    UpdateScrollBarRegion(std::abs(textRect_.GetY()) - currentOffset_, textRect_.Height(), size);
+    UpdateScrollBarRegion(std::abs(textRect_.GetY()) - currentOffset_, textRect_.Height(), size, Offset(0.0, 0.0));
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 

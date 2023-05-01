@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_ANIMATOR_ANIMATOR_MODEL_H
 
 #include <functional>
+#include <mutex>
 
 #include "core/animation/animator_info.h"
 
@@ -37,6 +38,7 @@ public:
 
 private:
     static std::unique_ptr<AnimatorModel> instance_;
+    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
 

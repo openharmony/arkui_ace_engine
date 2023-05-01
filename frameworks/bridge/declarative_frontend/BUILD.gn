@@ -85,13 +85,16 @@ gen_obj("js_enum_style") {
   snapshot_dep = []
 }
 
-gen_obj("js_mock_system_plugin") {
-  input = "$root_out_dir/obj/third_party/jsframework/dist/jsMockSystemPlugin.js"
-  if (use_mac || use_mingw_win || use_linux || target_os == "ios") {
-    jsmocksystemplugin_obj_path = base_output_path + "/js_mock_system_plugin.c"
+if (!is_cross_platform_build) {
+  gen_obj("js_mock_system_plugin") {
+    input = "$root_out_dir/obj/ide/tools/previewer/automock/dist/jsMockSystemPlugin.js"
+    if (use_mac || use_mingw_win || use_linux || target_os == "ios") {
+      jsmocksystemplugin_obj_path =
+          base_output_path + "/js_mock_system_plugin.c"
+    }
+    output = jsmocksystemplugin_obj_path
+    snapshot_dep = [ "//ide/tools/previewer/automock:gen_snapshot_jsmock" ]
   }
-  output = jsmocksystemplugin_obj_path
-  snapshot_dep = [ "//third_party/jsframework:gen_snapshot" ]
 }
 
 # build declarative javascript engine source
@@ -201,6 +204,7 @@ template("declarative_js_engine") {
       "jsview/js_menu_item_group.cpp",
       "jsview/js_navdestination.cpp",
       "jsview/js_navigation.cpp",
+      "jsview/js_navigation_stack.cpp",
       "jsview/js_navigator.cpp",
       "jsview/js_navrouter.cpp",
       "jsview/js_offscreen_canvas.cpp",
@@ -267,6 +271,7 @@ template("declarative_js_engine") {
 
       # Models implemenations for classic fw
       "jsview/models/animator_model_impl.cpp",
+      "jsview/models/blank_model_impl.cpp",
       "jsview/models/checkbox_model_impl.cpp",
       "jsview/models/checkboxgroup_model_impl.cpp",
       "jsview/models/circle_model_impl.cpp",
@@ -309,6 +314,7 @@ template("declarative_js_engine") {
       "jsview/models/row_model_impl.cpp",
       "jsview/models/scroll_model_impl.cpp",
       "jsview/models/search_model_impl.cpp",
+      "jsview/models/select_model_impl.cpp",
       "jsview/models/shape_abstract_model_impl.cpp",
       "jsview/models/shape_model_impl.cpp",
       "jsview/models/slider_model_impl.cpp",

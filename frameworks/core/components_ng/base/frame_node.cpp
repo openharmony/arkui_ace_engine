@@ -42,6 +42,10 @@
 namespace {
 constexpr double VISIBLE_RATIO_MIN = 0.0;
 constexpr double VISIBLE_RATIO_MAX = 1.0;
+#if defined(PREVIEW)
+constexpr int32_t SUBSTR_LENGTH = 3;
+const char DIMENSION_UNIT_VP[] = "vp";
+#endif
 } // namespace
 namespace OHOS::Ace::NG {
 FrameNode::FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
@@ -73,6 +77,9 @@ FrameNode::~FrameNode()
     if (pipeline) {
         pipeline->RemoveOnAreaChangeNode(GetId());
         pipeline->RemoveVisibleAreaChangeNode(GetId());
+        pipeline->ChangeMouseStyle(GetId(), MouseFormat::DEFAULT);
+        pipeline->FreeMouseStyleHoldNode(GetId());
+        pipeline->RemoveStoredNode(GetRestoreId());
     }
 }
 
@@ -266,6 +273,40 @@ void FrameNode::TouchToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("responseRegion", jsArr);
 }
 
+void FrameNode::GeometryNodeToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+#if defined(PREVIEW)
+    bool hasIdealWidth = false;
+    bool hasIdealHeight = false;
+    if (layoutProperty_ && layoutProperty_->GetCalcLayoutConstraint()) {
+        auto selfIdealSize = layoutProperty_->GetCalcLayoutConstraint()->selfIdealSize;
+        hasIdealWidth = selfIdealSize.has_value() && selfIdealSize.value().Width().has_value();
+        hasIdealHeight = selfIdealSize.has_value() && selfIdealSize.value().Height().has_value();
+    }
+
+    auto jsonSize = json->GetValue("size");
+    if (!hasIdealWidth) {
+        auto idealWidthVpStr = std::to_string(Dimension(geometryNode_->GetFrameSize().Width()).ConvertToVp());
+        auto widthStr =
+            (idealWidthVpStr.substr(0, idealWidthVpStr.find(".") + SUBSTR_LENGTH) + DIMENSION_UNIT_VP).c_str();
+        json->Put("width", widthStr);
+        if (jsonSize) {
+            jsonSize->Put("width", widthStr);
+        }
+    }
+
+    if (!hasIdealHeight) {
+        auto idealHeightVpStr = std::to_string(Dimension(geometryNode_->GetFrameSize().Height()).ConvertToVp());
+        auto heightStr =
+            (idealHeightVpStr.substr(0, idealHeightVpStr.find(".") + SUBSTR_LENGTH) + DIMENSION_UNIT_VP).c_str();
+        json->Put("height", heightStr);
+        if (jsonSize) {
+            jsonSize->Put("height", heightStr);
+        }
+    }
+#endif
+}
+
 void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     if (renderContext_) {
@@ -276,13 +317,13 @@ void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     ACE_PROPERTY_TO_JSON_VALUE(layoutProperty_, LayoutProperty);
     ACE_PROPERTY_TO_JSON_VALUE(paintProperty_, PaintProperty);
     ACE_PROPERTY_TO_JSON_VALUE(pattern_, Pattern);
-    ACE_PROPERTY_TO_JSON_VALUE(geometryNode_, Pattern);
     if (eventHub_) {
         eventHub_->ToJsonValue(json);
     }
     FocusToJsonValue(json);
     MouseToJsonValue(json);
     TouchToJsonValue(json);
+    GeometryNodeToJsonValue(json);
     json->Put("id", propInspectorId_.value_or("").c_str());
 }
 
@@ -709,9 +750,9 @@ RefPtr<LayoutWrapper> FrameNode::UpdateLayoutWrapper(
     if (layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::GONE) {
         if (!layoutWrapper) {
             layoutWrapper =
-                MakeRefPtr<LayoutWrapper>(WeakClaim(this), geometryNode_->Clone(), layoutProperty_->Clone());
+                MakeRefPtr<LayoutWrapper>(WeakClaim(this), MakeRefPtr<GeometryNode>(), layoutProperty_->Clone());
         } else {
-            layoutWrapper->Update(WeakClaim(this), geometryNode_->Clone(), layoutProperty_->Clone());
+            layoutWrapper->Update(WeakClaim(this), MakeRefPtr<GeometryNode>(), layoutProperty_->Clone());
         }
         layoutWrapper->SetLayoutAlgorithm(MakeRefPtr<LayoutAlgorithmWrapper>(nullptr, true, true));
         isLayoutDirtyMarked_ = false;
@@ -824,6 +865,18 @@ void FrameNode::RebuildRenderContextTree()
 void FrameNode::MarkModifyDone()
 {
     pattern_->OnModifyDone();
+    // restore info will overwrite the first setted attribute
+    if (!isRestoreInfoUsed_) {
+        isRestoreInfoUsed_ = true;
+        auto pipeline = PipelineContext::GetCurrentContext();
+        int32_t restoreId = GetRestoreId();
+        if (pipeline && restoreId >= 0) {
+            // store distribute node
+            pipeline->StoreNode(restoreId, AceType::WeakClaim(this));
+            // restore distribute node info
+            pattern_->OnRestoreInfo(pipeline->GetRestoreInfo(restoreId));
+        }
+    }
     eventHub_->MarkModifyDone();
     if (IsResponseRegion() || HasPositionProp()) {
         auto parent = GetParent();
@@ -1319,18 +1372,18 @@ OffsetF FrameNode::GetOffsetRelativeToWindow() const
     auto parent = GetAncestorNodeOfFrame();
     if (renderContext_ && renderContext_->GetPositionProperty()) {
         if (renderContext_->GetPositionProperty()->HasPosition()) {
-            offset.SetX(static_cast<float>(renderContext_->GetPositionProperty()->GetPosition()->GetX().Value()));
-            offset.SetY(static_cast<float>(renderContext_->GetPositionProperty()->GetPosition()->GetY().Value()));
+            offset.SetX(static_cast<float>(renderContext_->GetPositionProperty()->GetPosition()->GetX().ConvertToPx()));
+            offset.SetY(static_cast<float>(renderContext_->GetPositionProperty()->GetPosition()->GetY().ConvertToPx()));
         }
     }
     while (parent) {
         auto parentRenderContext = parent->GetRenderContext();
         if (parentRenderContext && parentRenderContext->GetPositionProperty()) {
             if (parentRenderContext->GetPositionProperty()->HasPosition()) {
-                offset.AddX(
-                    static_cast<float>(parentRenderContext->GetPositionProperty()->GetPosition()->GetX().Value()));
-                offset.AddY(
-                    static_cast<float>(parentRenderContext->GetPositionProperty()->GetPosition()->GetY().Value()));
+                offset.AddX(static_cast<float>(
+                    parentRenderContext->GetPositionProperty()->GetPosition()->GetX().ConvertToPx()));
+                offset.AddY(static_cast<float>(
+                    parentRenderContext->GetPositionProperty()->GetPosition()->GetY().ConvertToPx()));
                 parent = parent->GetAncestorNodeOfFrame();
                 continue;
             }
@@ -1561,5 +1614,10 @@ void FrameNode::OnRemoveDisappearingChild()
     auto context = GetRenderContext();
     CHECK_NULL_VOID(context);
     context->UpdateFreeze(false);
+}
+
+std::string FrameNode::ProvideRestoreInfo()
+{
+    return pattern_->ProvideRestoreInfo();
 }
 } // namespace OHOS::Ace::NG

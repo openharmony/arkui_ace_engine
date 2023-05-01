@@ -171,6 +171,8 @@ uint32_t PipelineContext::AddScheduleTask(const RefPtr<ScheduleTask>& task)
     return 0;
 }
 
+void PipelineContext::RemoveScheduleTask(uint32_t id) {}
+
 void PipelineContext::AddOnAreaChangeNode(int32_t nodeId) {}
 
 bool PipelineContext::OnKeyEvent(const KeyEvent& event)
@@ -250,6 +252,20 @@ void PipelineContext::RemoveVisibleAreaChangeNode(int32_t nodeId) {}
 bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format)
 {
     return true;
+}
+
+void PipelineContext::RestoreNodeInfo(std::unique_ptr<JsonValue> nodeInfo) {}
+
+std::unique_ptr<JsonValue> PipelineContext::GetStoredNodeInfo()
+{
+    return nullptr;
+}
+
+void PipelineContext::StoreNode(int32_t restoreId, const WeakPtr<FrameNode>& node) {}
+
+std::string PipelineContext::GetRestoreInfo(int32_t restoreId)
+{
+    return "";
 }
 } // namespace OHOS::Ace::NG
 

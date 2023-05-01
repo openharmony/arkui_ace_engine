@@ -949,6 +949,8 @@ void WebPattern::OnModifyDone()
             delegate_->SetDrawSize(drawSize);
             delegate_->InitOHOSWeb(PipelineContext::GetCurrentContext());
         } else {
+            auto drawSize = Size(1, 1);
+            delegate_->SetDrawSize(drawSize);
             renderSurface_->SetRenderContext(host->GetRenderContext());
             renderSurface_->InitSurface();
             delegate_->InitOHOSWeb(PipelineContext::GetCurrentContext(), renderSurface_);

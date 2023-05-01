@@ -267,6 +267,7 @@ void SearchPattern::OnClickButtonAndImage()
     CHECK_NULL_VOID(textFieldPattern);
     auto text = textFieldPattern->GetEditingValue();
     searchEventHub->UpdateSubmitEvent(text.text);
+    textFieldPattern->CloseKeyboard(true);
 }
 
 void SearchPattern::OnClickCancelButton()

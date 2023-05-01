@@ -24,19 +24,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<GaugeModel> GaugeModel::instance_ = nullptr;
+std::mutex GaugeModel::mutex_;
 
 GaugeModel* GaugeModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::GaugeModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::GaugeModelNG());
-        } else {
-            instance_.reset(new Framework::GaugeModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::GaugeModelNG());
+            } else {
+                instance_.reset(new Framework::GaugeModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }
