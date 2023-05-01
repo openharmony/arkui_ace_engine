@@ -797,7 +797,14 @@ void ListPattern::UpdateScrollBarOffset()
     Offset scrollOffset = { currentOffset, currentOffset }; // fit for w/h switched.
     auto estimatedHeight = itemsSize / itemPosition_.size() * (maxListItemIndex_ + 1);
 
-    UpdateScrollBarRegion(currentOffset, estimatedHeight, size);
+    // calculate padding offset of list
+    auto host = GetHost();
+    CHECK_NULL_VOID_NOLOG(host);
+    auto layoutPriority = host->GetLayoutProperty();
+    CHECK_NULL_VOID_NOLOG(layoutPriority);
+    auto paddingOffset = layoutPriority->CreatePaddingAndBorder().Offset();
+    Offset viewOffset = { paddingOffset.GetX(), paddingOffset.GetY() };
+    UpdateScrollBarRegion(currentOffset, estimatedHeight, size, viewOffset);
 }
 
 void ListPattern::SetChainAnimation(bool enable)

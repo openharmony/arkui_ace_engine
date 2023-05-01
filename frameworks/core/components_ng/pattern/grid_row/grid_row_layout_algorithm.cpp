@@ -188,11 +188,15 @@ void GridRowLayoutAlgorithm::CalcCrossAxisAlignment(LayoutWrapper* layoutWrapper
             continue;
         }
         auto alignSelf = FlexAlign::FLEX_START;
+        auto gridRowAlignItem = layoutProperty->GetAlignItemsValue(FlexAlign::FLEX_START);
         if (childLayoutProperty->GetFlexItemProperty()) {
-            alignSelf = childLayoutProperty->GetFlexItemProperty()->GetAlignSelf().value_or(
-                layoutProperty->GetAlignItemsValue(FlexAlign::FLEX_START));
+            alignSelf = childLayoutProperty->GetFlexItemProperty()->GetAlignSelf().value_or(gridRowAlignItem);
+            if (alignSelf == FlexAlign::AUTO) {
+                alignSelf = gridRowAlignItem;
+            }
+
         } else {
-            alignSelf = layoutProperty->GetAlignItemsValue(FlexAlign::FLEX_START);
+            alignSelf = gridRowAlignItem;
         }
         if (alignSelf == FlexAlign::STRETCH) {
             // this child has height close to row height, not necessary to stretch

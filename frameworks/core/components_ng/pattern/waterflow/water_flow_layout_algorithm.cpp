@@ -256,7 +256,7 @@ void WaterFlowLayoutAlgorithm::FillViewport(float mainSize, LayoutWrapper* layou
     LOGI("start:%{public}d, end:%{public}d", layoutInfo_.startIndex_, end);
     auto layoutProperty = AceType::DynamicCast<WaterFlowLayoutProperty>(layoutWrapper->GetLayoutProperty());
     auto currentIndex = layoutInfo_.startIndex_;
-    for (; GetChildIndexWithFooter(currentIndex) < end; ++currentIndex) {
+    for (; currentIndex < end; ++currentIndex) {
         auto itemWrapper = layoutWrapper->GetOrCreateChildByIndex(GetChildIndexWithFooter(currentIndex));
         if (!itemWrapper) {
             break;

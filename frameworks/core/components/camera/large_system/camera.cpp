@@ -225,7 +225,7 @@ void Camera::OnError(const std::string& param)
 
 void Camera::OpenCamera()
 {
-    auto context = context_.Upgrade();
+    auto context = AceType::DynamicCast<PipelineContext>(context_.Upgrade());
     if (!context) {
         LOGE("fail to get context");
         return;

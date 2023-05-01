@@ -29,6 +29,26 @@ CanvasDrawFunction SelectOverlayPaintMethod::GetContentDrawFunction(PaintWrapper
     return [info = info_](RSCanvas& canvas) { SelectOverlayPaintMethod::DrawHandles(info, canvas); };
 }
 
+void SelectOverlayPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
+{
+    CHECK_NULL_VOID(paintWrapper);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
+    CHECK_NULL_VOID(textOverlayTheme);
+
+    const auto& padding = textOverlayTheme->GetMenuPadding();
+    auto right = padding.Right().ConvertToPx();
+    auto top = padding.Top().ConvertToPx();
+    auto sideWidth = textOverlayTheme->GetMenuToolbarHeight().ConvertToPx() - padding.Top().ConvertToPx() -
+                                padding.Bottom().ConvertToPx();
+    auto buttonRadius = sideWidth / 2.0;             
+
+    auto offset = defaultMenuEndOffset_ + OffsetF(-buttonRadius - right, buttonRadius + top);
+    selectOverlayModifier_->SetMenuOptionOffset(offset);
+    selectOverlayModifier_->SetHasExtensitonMenu(hasExtensitonMenu_);
+}
+
 void SelectOverlayPaintMethod::DrawHandles(const std::shared_ptr<SelectOverlayInfo>& info, RSCanvas& canvas)
 {
     if (!SelectOverlayLayoutAlgorithm::CheckInShowArea(info)) {
@@ -38,8 +58,8 @@ void SelectOverlayPaintMethod::DrawHandles(const std::shared_ptr<SelectOverlayIn
     LOGD("paint handles");
     if (info->isSingleHandle) {
         // Paint one handle.
-        if (info->firstHandle.isShow) {
-            PaintHandle(canvas, info->firstHandle.paintRect, false);
+        if (info->secondHandle.isShow) {
+            PaintHandle(canvas, info->secondHandle.paintRect, false);
         }
     } else {
         if (info->firstHandle.isShow) {

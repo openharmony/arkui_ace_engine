@@ -36,6 +36,25 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+enum class FilterType {
+    NONE,
+    GRAYSCALE,
+    SEPIA,
+    INVERT,
+    OPACITY,
+    BRIGHTNESS,
+    CONTRAST,
+    BLUR,
+    DROP_SHADOW,
+    SATURATE,
+    HUE_ROTATE
+};
+
+// BT.709
+constexpr float LUMR = 0.2126f;
+constexpr float LUMG = 0.7152f;
+constexpr float LUMB = 0.0722f;
+
 class CustomPaintPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(CustomPaintPaintMethod, NodePaintMethod)
 public:
@@ -73,6 +92,11 @@ public:
     void ResetTransform();
     void Transform(const TransformParam& param);
     void Translate(double x, double y);
+
+    void SetFilterParam(const std::string& filterStr)
+    {
+        filterParam_ = filterStr;
+    }
 
     void SetAntiAlias(bool isEnabled)
     {
@@ -283,9 +307,32 @@ protected:
     void Path2DQuadraticCurveTo(const OffsetF& offset, const PathArgs& args);
     void Path2DSetTransform(const OffsetF& offset, const PathArgs& args);
 
+    void SetGrayFilter(const std::string& percent);
+    void SetSepiaFilter(const std::string& percent);
+    void SetSaturateFilter(const std::string& percent);
+    void SetHueRotateFilter(const std::string& percent);
+    void SetInvertFilter(const std::string& percent);
+    void SetOpacityFilter(const std::string& percent);
+    void SetBrightnessFilter(const std::string& percent);
+    void SetContrastFilter(const std::string& percent);
+    void SetBlurFilter(const std::string& percent);
+
+    void SetColorFilter(float matrix[20]);
+
+    bool GetFilterType(FilterType& filterType, std::string& filterParam);
+    bool IsPercentStr(std::string& percentStr);
+    double PxStrToDouble(const std::string& str);
+    double BlurStrToDouble(const std::string& str);
+
     void InitImagePaint();
     void InitImageCallbacks();
-    virtual void SetPaintImage() = 0;
+
+    void SetPaintImage();
+    void ClearPaintImage();
+    float PercentStrToFloat(const std::string& percentStr);
+    FilterType FilterStrToFilterType(const std::string& filterStr);
+    bool HasImageShadow() const;
+
     virtual void ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj) = 0;
     virtual void ImageObjFailed() = 0;
     virtual sk_sp<SkImage> GetImage(const std::string& src) = 0;
@@ -331,6 +378,8 @@ protected:
 
     sk_sp<SkSVGDOM> skiaDom_ = nullptr;
     Ace::CanvasImage canvasImage_;
+    std::string filterParam_ = "";
+    std::unique_ptr<Shadow> imageShadow_;
 
     ImageSourceInfo currentSource_;
     ImageSourceInfo loadingSource_;

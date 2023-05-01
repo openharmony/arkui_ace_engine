@@ -170,6 +170,7 @@ void JSShapeAbstract::SetStrokeOpacity(const JSCallbackInfo& info)
     ShapeAbstractModel::GetInstance()->SetStrokeOpacity(strokeOpacity);
 }
 
+// https://svgwg.org/svg2-draft/painting.html#FillOpacity
 void JSShapeAbstract::SetFillOpacity(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -178,6 +179,12 @@ void JSShapeAbstract::SetFillOpacity(const JSCallbackInfo& info)
     }
     double fillOpacity = DEFAULT_OPACITY;
     ParseJsDouble(info[0], fillOpacity);
+    if (GreatOrEqual(fillOpacity, DEFAULT_OPACITY)) {
+        fillOpacity = DEFAULT_OPACITY;
+    }
+    if (LessOrEqual(fillOpacity, MIN_OPACITY)) {
+        fillOpacity = MIN_OPACITY;
+    }
     ShapeAbstractModel::GetInstance()->SetFillOpacity(fillOpacity);
 }
 

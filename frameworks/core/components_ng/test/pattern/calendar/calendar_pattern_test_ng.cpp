@@ -16,30 +16,41 @@
 #include <cstddef>
 #include <optional>
 #include <string>
+#include <utility>
 
 #include "gtest/gtest.h"
 
 #define private public
 #define protected public
-
+#include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
+#include "base/geometry/ng/size_t.h"
+#include "base/geometry/offset.h"
+#include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
 #include "core/components/calendar/calendar_data_adapter.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/calendar/calendar_month_pattern.h"
 #include "core/components_ng/pattern/calendar/calendar_paint_method.h"
 #include "core/components_ng/pattern/calendar/calendar_paint_property.h"
 #include "core/components_ng/pattern/calendar/calendar_pattern.h"
 #include "core/components_ng/pattern/calendar/calendar_view.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_property.h"
+#include "core/components_ng/pattern/swiper/swiper_pattern.h"
+#include "core/components_ng/render/drawing_mock.h"
+#include "core/components_ng/test/mock/rosen/mock_canvas.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/gestures/gesture_info.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
+#undef private
+#undef protected
 
 using namespace testing;
 using namespace testing::ext;
@@ -67,6 +78,11 @@ const std::string LUNAR_DAY_VALUE = "初五";
 const std::string DAY_MARK = "MARK";
 const std::string DAY_MARK_VALUE = "MARK_VALUE";
 const std::string OFF_DAYS_VALUE = "OFF_DAYS";
+const double OFFSET_X = 6.0;
+const double OFFSET_Y = 8.0;
+const float VALID_LENGTH = 10;
+const std::string WORK_DAY_MARK = "work";
+const std::string OFF_DAY_MARK = "off";
 
 // Day width and Height.
 const Dimension DAY_HEIGHT = 48.0_vp;
@@ -758,5 +774,636 @@ HWTEST_F(CalendarPatternTestNg, CalendarTest008, TestSize.Level1)
     EXPECT_EQ(calendarPaintProperty->GetDayYAxisOffsetValue(SIZE_VALUE), GREGORIAN_DAY_OFFSET);
     EXPECT_EQ(calendarPaintProperty->GetLunarDayYAxisOffsetValue(SIZE_VALUE), LUNAR_DAY_OFFSET);
     EXPECT_EQ(calendarPaintProperty->GetLunarHeightValue(SIZE_VALUE), LUNAR_DAY_HEIGHT);
+}
+
+/**
+ * @tc.name: CalendarPatternTest001
+ * @tc.desc: Test CalendarPattern OnDirtyLayoutWrapperSwap
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPatternTestNg, CalendarPatternTest001, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarPattern>(); });
+    auto calendarPattern = frameNode->GetPattern<CalendarPattern>();
+    ASSERT_NE(calendarPattern, nullptr);
+
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+        frameNode, AceType::MakeRefPtr<GeometryNode>(), AceType::MakeRefPtr<LayoutProperty>());
+    EXPECT_FALSE(calendarPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, true));
+}
+
+/**
+ * @tc.name: CalendarPatternTest002
+ * @tc.desc: Test CalendarPattern OnModifyDone ChangeDoneEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPatternTestNg, CalendarPatternTest002, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CALENDAR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CalendarPattern>(); });
+    auto swiperNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    swiperNode->MountToParent(frameNode);
+    for (int i = 0; i < 3; i++) {
+        auto monthNode =
+            FrameNode::GetOrCreateFrameNode(V2::CALENDAR_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                []() { return AceType::MakeRefPtr<CalendarMonthPattern>(); });
+        monthNode->MountToParent(swiperNode);
+    }
+    auto calendarPattern = frameNode->GetPattern<CalendarPattern>();
+    ASSERT_NE(calendarPattern, nullptr);
+
+    auto swiperFrameNode = AceType::DynamicCast<FrameNode>(swiperNode);
+    ASSERT_NE(swiperFrameNode, nullptr);
+    auto swiperEventHub = swiperFrameNode->GetEventHub<SwiperEventHub>();
+    ASSERT_NE(swiperEventHub, nullptr);
+    auto calendarEventHub = frameNode->GetEventHub<CalendarEventHub>();
+    ASSERT_NE(calendarEventHub, nullptr);
+
+    calendarPattern->initialize_ = true;
+    calendarPattern->currentMonth_.days.clear();
+    auto currentMonth = calendarPattern->calendarDay_.month;
+    std::string infoDetail;
+    auto initRequestDataEvent = [&](std::string info) { infoDetail = std::move(info); };
+    calendarEventHub->SetOnRequestDataEvent(initRequestDataEvent);
+    calendarPattern->OnModifyDone();
+    auto json = JsonUtil::ParseJsonString(infoDetail);
+    EXPECT_EQ(json->GetInt("currentYear"), currentMonth.year);
+    EXPECT_EQ(json->GetInt("currentMonth"), currentMonth.month);
+    EXPECT_EQ(json->GetInt("year"), currentMonth.year);
+    EXPECT_EQ(json->GetInt("month"), currentMonth.month);
+    EXPECT_EQ(json->GetInt("MonthState"), 0);
+
+    swiperEventHub->FireChangeDoneEvent(true);
+    json = JsonUtil::ParseJsonString(infoDetail);
+    EXPECT_EQ(json->GetInt("MonthState"), 2);
+    EXPECT_EQ(json->GetInt("year"), calendarPattern->nextMonth_.year);
+    EXPECT_EQ(json->GetInt("month"), calendarPattern->nextMonth_.month);
+    EXPECT_EQ(json->GetInt("currentYear"), currentMonth.year);
+    EXPECT_EQ(json->GetInt("currentMonth"), currentMonth.month);
+    EXPECT_EQ(calendarPattern->GetMoveDirection(), NG::Direction::NEXT);
+
+    swiperEventHub->FireChangeDoneEvent(false);
+    json = JsonUtil::ParseJsonString(infoDetail);
+    EXPECT_EQ(json->GetInt("MonthState"), 1);
+    EXPECT_EQ(json->GetInt("year"), calendarPattern->preMonth_.year);
+    EXPECT_EQ(json->GetInt("month"), calendarPattern->preMonth_.month);
+    EXPECT_EQ(json->GetInt("currentYear"), currentMonth.year);
+    EXPECT_EQ(json->GetInt("currentMonth"), currentMonth.month);
+    EXPECT_EQ(calendarPattern->GetMoveDirection(), NG::Direction::PRE);
+
+    swiperFrameNode->children_.clear();
+    calendarPattern->OnModifyDone();
+}
+
+/**
+ * @tc.name: CalendarPatternTest003
+ * @tc.desc: Test CalendarPattern OnModifyDone currentIndex switch
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPatternTestNg, CalendarPatternTest003, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CALENDAR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CalendarPattern>(); });
+    auto swiperNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    swiperNode->MountToParent(frameNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    for (int i = 0; i < 3; i++) {
+        auto monthNode =
+            FrameNode::GetOrCreateFrameNode(V2::CALENDAR_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                []() { return AceType::MakeRefPtr<CalendarMonthPattern>(); });
+        monthNode->MountToParent(swiperNode);
+    }
+    auto calendarPattern = frameNode->GetPattern<CalendarPattern>();
+    ASSERT_NE(calendarPattern, nullptr);
+
+    auto preFrameNode = AceType::DynamicCast<FrameNode>(swiperNode->GetChildren().front());
+    ASSERT_NE(preFrameNode, nullptr);
+    auto prePattern = preFrameNode->GetPattern<CalendarMonthPattern>();
+    ASSERT_NE(prePattern, nullptr);
+    auto iterator = swiperNode->GetChildren().begin();
+    auto currentFrameNode = AceType::DynamicCast<FrameNode>(*(++iterator));
+    ASSERT_NE(currentFrameNode, nullptr);
+    auto currentPattern = currentFrameNode->GetPattern<CalendarMonthPattern>();
+    ASSERT_NE(currentPattern, nullptr);
+    auto nextFrameNode = AceType::DynamicCast<FrameNode>(swiperNode->GetChildren().back());
+    ASSERT_NE(nextFrameNode, nullptr);
+    auto nextPattern = nextFrameNode->GetPattern<CalendarMonthPattern>();
+    ASSERT_NE(nextPattern, nullptr);
+
+    calendarPattern->backToToday_ = true;
+    calendarPattern->goTo_ = true;
+    CalendarDay calendarDay;
+    calendarDay.month.year = calendarPattern->goToCalendarYear_;
+    calendarDay.month.month = calendarPattern->goToCalendarMonth_;
+    calendarDay.day = calendarPattern->goToCalendarDay_;
+    CalendarDay calendarDay2;
+    calendarDay2.day = calendarPattern->goToCalendarDay_ + 1;
+    calendarPattern->currentMonth_.days.clear();
+    calendarPattern->currentMonth_.days.emplace_back(calendarDay);
+    calendarPattern->currentMonth_.days.emplace_back(calendarDay2);
+
+    swiperPattern->currentIndex_ = 0;
+    calendarPattern->initialize_ = false;
+    calendarPattern->OnModifyDone();
+    EXPECT_TRUE(calendarPattern->currentMonth_.days.front().focused);
+    EXPECT_FALSE(calendarPattern->currentMonth_.days.back().focused);
+    EXPECT_EQ(prePattern->obtainedMonth_.firstDayIndex, calendarPattern->currentMonth_.firstDayIndex);
+    EXPECT_EQ(prePattern->monthState_, MonthState::CUR_MONTH);
+    EXPECT_EQ(currentPattern->obtainedMonth_.firstDayIndex, calendarPattern->nextMonth_.firstDayIndex);
+    EXPECT_EQ(currentPattern->monthState_, MonthState::NEXT_MONTH);
+    EXPECT_EQ(nextPattern->obtainedMonth_.firstDayIndex, calendarPattern->preMonth_.firstDayIndex);
+    EXPECT_EQ(nextPattern->monthState_, MonthState::PRE_MONTH);
+    EXPECT_EQ(prePattern->GetCalendarDay().day, calendarPattern->GetCalendarDay().day);
+
+    calendarPattern->OnModifyDone();
+    EXPECT_EQ(prePattern->obtainedMonth_.firstDayIndex, calendarPattern->currentMonth_.firstDayIndex);
+    EXPECT_EQ(prePattern->monthState_, MonthState::CUR_MONTH);
+    EXPECT_EQ(currentPattern->obtainedMonth_.firstDayIndex, calendarPattern->nextMonth_.firstDayIndex);
+    EXPECT_EQ(currentPattern->monthState_, MonthState::NEXT_MONTH);
+    EXPECT_EQ(nextPattern->obtainedMonth_.firstDayIndex, calendarPattern->preMonth_.firstDayIndex);
+    EXPECT_EQ(nextPattern->monthState_, MonthState::PRE_MONTH);
+
+    swiperPattern->currentIndex_ = 1;
+    calendarPattern->backToToday_ = true;
+    calendarPattern->goTo_ = true;
+    calendarPattern->OnModifyDone();
+    EXPECT_EQ(prePattern->obtainedMonth_.firstDayIndex, calendarPattern->preMonth_.firstDayIndex);
+    EXPECT_EQ(prePattern->monthState_, MonthState::PRE_MONTH);
+    EXPECT_EQ(currentPattern->obtainedMonth_.firstDayIndex, calendarPattern->currentMonth_.firstDayIndex);
+    EXPECT_EQ(currentPattern->monthState_, MonthState::CUR_MONTH);
+    EXPECT_EQ(nextPattern->obtainedMonth_.firstDayIndex, calendarPattern->nextMonth_.firstDayIndex);
+    EXPECT_EQ(nextPattern->monthState_, MonthState::NEXT_MONTH);
+    EXPECT_EQ(currentPattern->GetCalendarDay().day, calendarPattern->GetCalendarDay().day);
+
+    calendarPattern->OnModifyDone();
+    EXPECT_EQ(prePattern->obtainedMonth_.firstDayIndex, calendarPattern->preMonth_.firstDayIndex);
+    EXPECT_EQ(prePattern->monthState_, MonthState::PRE_MONTH);
+    EXPECT_EQ(currentPattern->obtainedMonth_.firstDayIndex, calendarPattern->currentMonth_.firstDayIndex);
+    EXPECT_EQ(currentPattern->monthState_, MonthState::CUR_MONTH);
+    EXPECT_EQ(nextPattern->obtainedMonth_.firstDayIndex, calendarPattern->nextMonth_.firstDayIndex);
+    EXPECT_EQ(nextPattern->monthState_, MonthState::NEXT_MONTH);
+
+    swiperPattern->currentIndex_ = 2;
+    calendarPattern->backToToday_ = true;
+    calendarPattern->goTo_ = true;
+    calendarPattern->OnModifyDone();
+    EXPECT_EQ(prePattern->obtainedMonth_.firstDayIndex, calendarPattern->nextMonth_.firstDayIndex);
+    EXPECT_EQ(prePattern->monthState_, MonthState::NEXT_MONTH);
+    EXPECT_EQ(currentPattern->obtainedMonth_.firstDayIndex, calendarPattern->preMonth_.firstDayIndex);
+    EXPECT_EQ(currentPattern->monthState_, MonthState::PRE_MONTH);
+    EXPECT_EQ(nextPattern->obtainedMonth_.firstDayIndex, calendarPattern->currentMonth_.firstDayIndex);
+    EXPECT_EQ(nextPattern->monthState_, MonthState::CUR_MONTH);
+    EXPECT_EQ(nextPattern->GetCalendarDay().day, calendarPattern->GetCalendarDay().day);
+
+    calendarPattern->OnModifyDone();
+    EXPECT_EQ(prePattern->obtainedMonth_.firstDayIndex, calendarPattern->nextMonth_.firstDayIndex);
+    EXPECT_EQ(prePattern->monthState_, MonthState::NEXT_MONTH);
+    EXPECT_EQ(currentPattern->obtainedMonth_.firstDayIndex, calendarPattern->preMonth_.firstDayIndex);
+    EXPECT_EQ(currentPattern->monthState_, MonthState::PRE_MONTH);
+    EXPECT_EQ(nextPattern->obtainedMonth_.firstDayIndex, calendarPattern->currentMonth_.firstDayIndex);
+    EXPECT_EQ(nextPattern->monthState_, MonthState::CUR_MONTH);
+    EXPECT_EQ(nextPattern->GetCalendarDay().day, calendarPattern->GetCalendarDay().day);
+
+    swiperPattern->currentIndex_ = 3;
+    calendarPattern->backToToday_ = true;
+    calendarPattern->goTo_ = true;
+    calendarPattern->OnModifyDone();
+    calendarPattern->OnModifyDone();
+}
+
+/**
+ * @tc.name: CalendarPatternTest004
+ * @tc.desc: Test CalendarPattern FlushFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPatternTestNg, CalendarPatternTest004, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CALENDAR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CalendarPattern>(); });
+    auto calendarPattern = frameNode->GetPattern<CalendarPattern>();
+    ASSERT_NE(calendarPattern, nullptr);
+
+    ObtainedMonth obtainedMonth;
+    CalendarDay calendarDay;
+    calendarDay.month.year = calendarPattern->calendarDay_.month.year;
+    calendarDay.month.month = calendarPattern->calendarDay_.month.month;
+    calendarDay.day = calendarPattern->calendarDay_.day;
+    calendarDay.focused = false;
+    obtainedMonth.days.emplace_back(calendarDay);
+    calendarPattern->FlushFocus(obtainedMonth);
+    EXPECT_TRUE(obtainedMonth.days[0].focused);
+
+    calendarDay.month.year = calendarPattern->calendarDay_.month.year + 1;
+    calendarDay.focused = false;
+    calendarPattern->FlushFocus(obtainedMonth);
+    EXPECT_TRUE(obtainedMonth.days[0].focused);
+}
+
+/**
+ * @tc.name: CalendarPatternTest005
+ * @tc.desc: Test CalendarPattern ToJsonValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPatternTestNg, CalendarPatternTest005, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CALENDAR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CalendarPattern>(); });
+    auto swiperNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    swiperNode->MountToParent(frameNode);
+    auto calendarPattern = frameNode->GetPattern<CalendarPattern>();
+    ASSERT_NE(calendarPattern, nullptr);
+
+    auto json = JsonUtil::Create(true);
+    auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
+    ASSERT_NE(swiperLayoutProperty, nullptr);
+    auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
+    ASSERT_NE(swiperPaintProperty, nullptr);
+
+    swiperPaintProperty->UpdateDisableSwipe(true);
+    swiperLayoutProperty->UpdateDirection(Axis::VERTICAL);
+    calendarPattern->ToJsonValue(json);
+    EXPECT_EQ(json->GetString("needSlide"), "false");
+    EXPECT_EQ(json->GetString("direction"), "0");
+
+    swiperPaintProperty->UpdateDisableSwipe(false);
+    swiperLayoutProperty->UpdateDirection(Axis::HORIZONTAL);
+    json = JsonUtil::Create(true);
+    calendarPattern->ToJsonValue(json);
+    EXPECT_EQ(json->GetString("needSlide"), "true");
+    EXPECT_EQ(json->GetString("direction"), "1");
+
+    std::optional<bool> disableSwipe;
+    std::optional<Axis> direction;
+    swiperPaintProperty->propDisableSwipe_ = disableSwipe;
+    swiperLayoutProperty->propDirection_ = direction;
+    json = JsonUtil::Create(true);
+    calendarPattern->ToJsonValue(json);
+    EXPECT_EQ(json->GetString("needSlide"), "true");
+    EXPECT_EQ(json->GetString("direction"), "1");
+}
+
+/**
+ * @tc.name: CalendarMonthPatternTest001
+ * @tc.desc: Test CalendarMonthPattern OnDirtyLayoutWrapperSwap
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPatternTestNg, CalendarMonthPatternTest001, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarMonthPattern>(); });
+    auto calendarMonthPattern = frameNode->GetPattern<CalendarMonthPattern>();
+    ASSERT_NE(calendarMonthPattern, nullptr);
+
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+        frameNode, AceType::MakeRefPtr<GeometryNode>(), AceType::MakeRefPtr<LayoutProperty>());
+    DirtySwapConfig config;
+    config.skipMeasure = true;
+    layoutWrapper->skipMeasureContent_ = std::make_optional<bool>(true);
+    EXPECT_FALSE(calendarMonthPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+
+    config.skipMeasure = false;
+    layoutWrapper->skipMeasureContent_ = std::make_optional<bool>(false);
+    auto layoutAlgorithm = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(AceType::MakeRefPtr<LayoutAlgorithm>());
+    layoutAlgorithm->skipMeasure_ = false;
+    layoutWrapper->layoutAlgorithm_ = layoutAlgorithm;
+    EXPECT_TRUE(calendarMonthPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+}
+
+/**
+ * @tc.name: CalendarMonthPatternTest002
+ * @tc.desc: Test CalendarMonthPattern ClickCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPatternTestNg, CalendarMonthPatternTest002, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarMonthPattern>(); });
+    auto calendarMonthEventHub = frameNode->GetEventHub<CalendarEventHub>();
+    ASSERT_NE(calendarMonthEventHub, nullptr);
+    auto calendarMonthPattern = frameNode->GetPattern<CalendarMonthPattern>();
+    ASSERT_NE(calendarMonthPattern, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<CalendarPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+
+    auto gesture = frameNode->GetOrCreateGestureEventHub();
+    calendarMonthPattern->OnModifyDone();
+    auto clickCallback = gesture->clickEventActuator_->clickEvents_.back()->callback_;
+
+    std::string infoDetail;
+    auto initRequestDataEvent = [&](std::string info) { infoDetail = std::move(info); };
+    calendarMonthEventHub->SetSelectedChangeEvent(initRequestDataEvent);
+    calendarMonthPattern->OnModifyDone();
+
+    ObtainedMonth obtainedMonth;
+    calendarMonthPattern->obtainedMonth_ = obtainedMonth;
+    GestureEvent gestureEvent;
+    FingerInfo fingerInfo;
+    fingerInfo.localLocation_ = Offset(OFFSET_X, OFFSET_Y);
+    gestureEvent.fingerList_.emplace_back(fingerInfo);
+    clickCallback(gestureEvent);
+    EXPECT_TRUE(obtainedMonth.days.empty());
+
+    for (int i = 0; i < 3; i++) {
+        CalendarDay calendarDay;
+        calendarDay.focused = true;
+        obtainedMonth.days.emplace_back(calendarDay);
+    }
+    calendarMonthPattern->obtainedMonth_ = obtainedMonth;
+    gestureEvent.fingerList_.clear();
+    gestureEvent.fingerList_.emplace_back(fingerInfo);
+    frameNode->geometryNode_->SetFrameSize(SizeF(VALID_LENGTH, VALID_LENGTH));
+    paintProperty->UpdateDayHeight(Dimension(VALID_LENGTH));
+    paintProperty->UpdateDayWidth(Dimension(VALID_LENGTH));
+    clickCallback(gestureEvent);
+    EXPECT_TRUE(calendarMonthPattern->obtainedMonth_.days[0].focused);
+    EXPECT_FALSE(calendarMonthPattern->obtainedMonth_.days[1].focused);
+    EXPECT_FALSE(calendarMonthPattern->obtainedMonth_.days[2].focused);
+    auto json = JsonUtil::ParseJsonString(infoDetail);
+    for (int i = 0; i < 3; i++) {
+        EXPECT_EQ(json->GetInt("day"), obtainedMonth.days[i].day);
+        EXPECT_EQ(json->GetInt("month"), obtainedMonth.days[i].month.month);
+        EXPECT_EQ(json->GetInt("year"), obtainedMonth.days[i].month.year);
+    }
+}
+
+/**
+ * @tc.name: CalendarMonthPatternTest003
+ * @tc.desc: Test CalendarMonthPattern JudgeArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPatternTestNg, CalendarMonthPatternTest003, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarMonthPattern>(); });
+    auto calendarMonthPattern = frameNode->GetPattern<CalendarMonthPattern>();
+    ASSERT_NE(calendarMonthPattern, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<CalendarPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+
+    for (int i = 0; i < 4; i++) {
+        double offsetX = 0.0;
+        double offsetY = 0.0;
+        float maxWidth = VALID_LENGTH;
+        float maxHeight = VALID_LENGTH;
+        if (i == 0) {
+            offsetX = OFFSET_X;
+        } else if (i == 1) {
+            offsetX = -1;
+        } else if (i == 2) {
+            offsetX = VALID_LENGTH + 1.0;
+        } else {
+            maxWidth = -VALID_LENGTH;
+            offsetX = -VALID_LENGTH + 1.0;
+        }
+
+        for (int j = 0; j < 4; j++) {
+            if (j == 0) {
+                maxHeight = VALID_LENGTH;
+                offsetY = OFFSET_Y;
+            } else if (j == 1) {
+                offsetY = -1;
+            } else if (j == 2) {
+                offsetY = VALID_LENGTH + 1.0;
+            } else {
+                maxHeight = -VALID_LENGTH;
+                offsetY = -VALID_LENGTH + 1.0;
+            }
+
+            for (int k = 3; k >= 0; k--) {
+                if (k == 3) {
+                    frameNode->geometryNode_->SetFrameSize(SizeF(maxWidth, maxHeight));
+                    paintProperty->UpdateDayHeight(Dimension(0.0));
+                    paintProperty->UpdateDayWidth(Dimension(0.0));
+                    EXPECT_EQ(calendarMonthPattern->JudgeArea(Offset(offsetX, offsetY)), -1);
+                } else if (k == 2) {
+                    frameNode->geometryNode_->SetFrameSize(SizeF(maxWidth, maxHeight));
+                    paintProperty->UpdateDayHeight(Dimension(VALID_LENGTH));
+                    paintProperty->UpdateDayWidth(Dimension(0.0));
+                    EXPECT_EQ(calendarMonthPattern->JudgeArea(Offset(offsetX, offsetY)), -1);
+                } else if (k == 1) {
+                    frameNode->geometryNode_->SetFrameSize(SizeF(maxWidth, maxHeight));
+                    paintProperty->UpdateDayHeight(Dimension(0.0));
+                    paintProperty->UpdateDayWidth(Dimension(VALID_LENGTH));
+                    EXPECT_EQ(calendarMonthPattern->JudgeArea(Offset(offsetX, offsetY)), -1);
+                } else {
+                    frameNode->geometryNode_->SetFrameSize(SizeF(maxWidth, maxHeight));
+                    paintProperty->UpdateDayHeight(Dimension(VALID_LENGTH));
+                    paintProperty->UpdateDayWidth(Dimension(VALID_LENGTH));
+                    if (i == 0 && j == 0) {
+                        EXPECT_EQ(calendarMonthPattern->JudgeArea(Offset(offsetX, offsetY)), 0);
+                    } else {
+                        EXPECT_EQ(calendarMonthPattern->JudgeArea(Offset(offsetX, offsetY)), -1);
+                    }
+                }
+            }
+        }
+    }
+
+    frameNode->geometryNode_->SetFrameSize(SizeF(VALID_LENGTH, VALID_LENGTH));
+    paintProperty->UpdateDayHeight(Dimension(VALID_LENGTH));
+    paintProperty->UpdateDayWidth(Dimension(VALID_LENGTH));
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    EXPECT_EQ(calendarMonthPattern->JudgeArea(Offset(OFFSET_X, OFFSET_Y)), 6);
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+    EXPECT_EQ(calendarMonthPattern->JudgeArea(Offset(OFFSET_X, OFFSET_Y)), 0);
+}
+
+/**
+ * @tc.name: CalendarLayoutAlgorithmTest001
+ * @tc.desc: Test CalendarLayoutAlgorithm MeasureContent
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPatternTestNg, CalendarLayoutAlgorithmTest001, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarPattern>(); });
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+        frameNode, AceType::MakeRefPtr<GeometryNode>(), AceType::MakeRefPtr<LayoutProperty>());
+    auto pipeline = frameNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->rootWidth_ = OFFSET_X;
+    pipeline->rootHeight_ = OFFSET_Y;
+
+    CalendarLayoutAlgorithm calendarLayoutAlgorithm;
+    LayoutConstraintF contentConstraint;
+    EXPECT_EQ(
+        calendarLayoutAlgorithm.MeasureContent(contentConstraint, AceType::RawPtr(layoutWrapper))->Width(), OFFSET_X);
+    EXPECT_EQ(
+        calendarLayoutAlgorithm.MeasureContent(contentConstraint, AceType::RawPtr(layoutWrapper))->Height(), OFFSET_Y);
+
+    contentConstraint.maxSize.SetWidth(VALID_LENGTH);
+    contentConstraint.maxSize.SetHeight(Infinity<float>());
+    EXPECT_EQ(
+        calendarLayoutAlgorithm.MeasureContent(contentConstraint, AceType::RawPtr(layoutWrapper))->Width(), OFFSET_X);
+    EXPECT_EQ(
+        calendarLayoutAlgorithm.MeasureContent(contentConstraint, AceType::RawPtr(layoutWrapper))->Height(), OFFSET_Y);
+
+    contentConstraint.maxSize.SetWidth(Infinity<float>());
+    contentConstraint.maxSize.SetHeight(VALID_LENGTH);
+    EXPECT_EQ(
+        calendarLayoutAlgorithm.MeasureContent(contentConstraint, AceType::RawPtr(layoutWrapper))->Width(), OFFSET_X);
+    EXPECT_EQ(
+        calendarLayoutAlgorithm.MeasureContent(contentConstraint, AceType::RawPtr(layoutWrapper))->Height(), OFFSET_Y);
+
+    contentConstraint.maxSize.SetWidth(VALID_LENGTH);
+    contentConstraint.maxSize.SetHeight(VALID_LENGTH);
+    EXPECT_EQ(calendarLayoutAlgorithm.MeasureContent(contentConstraint, AceType::RawPtr(layoutWrapper))->Width(),
+        VALID_LENGTH);
+    EXPECT_EQ(calendarLayoutAlgorithm.MeasureContent(contentConstraint, AceType::RawPtr(layoutWrapper))->Height(),
+        VALID_LENGTH);
+}
+
+/**
+ * @tc.name: CalendarPaintMethodTest001
+ * @tc.desc: Test CalendarPaintMethod GetContentDrawFunction
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPatternTestNg, CalendarPaintMethodTest001, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarPattern>(); });
+    auto calendarPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
+    ASSERT_NE(calendarPaintProperty, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto* paintWrapper = new PaintWrapper(renderContext, geometryNode, calendarPaintProperty);
+    ASSERT_NE(paintWrapper, nullptr);
+
+    ObtainedMonth obtainedMonth;
+    CalendarDay calendarDay;
+    CalendarPaintMethod calendarPaintMethod(obtainedMonth, calendarDay);
+    auto paintFunc = calendarPaintMethod.GetContentDrawFunction(paintWrapper);
+    EXPECT_EQ(calendarPaintMethod.frameSize_, geometryNode->GetFrameSize());
+}
+
+/**
+ * @tc.name: CalendarPaintMethodTest002
+ * @tc.desc: Test CalendarPaintMethod PaintContent
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPatternTestNg, CalendarPaintMethodTest002, TestSize.Level1)
+{
+    auto calendarPaintProperty = AceType::MakeRefPtr<CalendarPaintProperty>();
+    ASSERT_NE(calendarPaintProperty, nullptr);
+    ObtainedMonth obtainedMonth;
+    CalendarDay calendarDay;
+    CalendarPaintMethod calendarPaintMethod(obtainedMonth, calendarDay);
+    RSCanvas rsCanvas;
+    calendarPaintMethod.PaintContent(rsCanvas, calendarPaintProperty);
+    EXPECT_TRUE(calendarPaintMethod.obtainedMonth_.days.empty());
+    EXPECT_TRUE(calendarPaintMethod.calendarDays_.empty());
+}
+
+/**
+ * @tc.name: CalendarPaintMethodTest003
+ * @tc.desc: Test CalendarPaintMethod DrawCalendar
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPatternTestNg, CalendarPaintMethodTest003, TestSize.Level1)
+{
+    ObtainedMonth obtainedMonth;
+    CalendarDay calendarDay;
+    CalendarMonth calendarMonth;
+    calendarDay.month = calendarMonth;
+    CalendarPaintMethod calendarPaintMethod(obtainedMonth, calendarDay);
+    calendarPaintMethod.currentMonth_ = calendarMonth;
+
+    RSCanvas rsCanvas;
+    calendarDay.focused = true;
+    calendarPaintMethod.DrawCalendar(
+        rsCanvas, Offset(OFFSET_X, OFFSET_Y), Offset(VALID_LENGTH, VALID_LENGTH), calendarDay);
+    EXPECT_TRUE(calendarDay.focused && calendarDay.month.month == calendarPaintMethod.currentMonth_.month);
+    EXPECT_TRUE(calendarPaintMethod.IsToday(calendarDay));
+
+    calendarPaintMethod.calendarDay_.day = calendarDay.day + 1;
+    calendarPaintMethod.DrawCalendar(
+        rsCanvas, Offset(OFFSET_X, OFFSET_Y), Offset(VALID_LENGTH, VALID_LENGTH), calendarDay);
+    EXPECT_FALSE(calendarPaintMethod.IsToday(calendarDay));
+
+    calendarPaintMethod.showLunar_ = false;
+    calendarDay.lunarDay.clear();
+    calendarPaintMethod.DrawCalendar(
+        rsCanvas, Offset(OFFSET_X, OFFSET_Y), Offset(VALID_LENGTH, VALID_LENGTH), calendarDay);
+    EXPECT_FALSE(calendarPaintMethod.showLunar_ && !calendarDay.lunarDay.empty());
+
+    calendarPaintMethod.showLunar_ = false;
+    calendarDay.lunarDay = LUNAR_DAY_VALUE;
+    calendarPaintMethod.DrawCalendar(
+        rsCanvas, Offset(OFFSET_X, OFFSET_Y), Offset(VALID_LENGTH, VALID_LENGTH), calendarDay);
+    EXPECT_FALSE(calendarPaintMethod.showLunar_ && !calendarDay.lunarDay.empty());
+
+    calendarPaintMethod.showLunar_ = true;
+    calendarDay.lunarDay.clear();
+    calendarPaintMethod.DrawCalendar(
+        rsCanvas, Offset(OFFSET_X, OFFSET_Y), Offset(VALID_LENGTH, VALID_LENGTH), calendarDay);
+    EXPECT_FALSE(calendarPaintMethod.showLunar_ && !calendarDay.lunarDay.empty());
+
+    calendarPaintMethod.showLunar_ = true;
+    calendarDay.lunarDay = LUNAR_DAY_VALUE;
+    calendarPaintMethod.DrawCalendar(
+        rsCanvas, Offset(OFFSET_X, OFFSET_Y), Offset(VALID_LENGTH, VALID_LENGTH), calendarDay);
+    EXPECT_TRUE(calendarPaintMethod.showLunar_ && !calendarDay.lunarDay.empty());
+}
+
+/**
+ * @tc.name: CalendarPaintMethodTest004
+ * @tc.desc: Test CalendarPaintMethod PaintDay
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPatternTestNg, CalendarPaintMethodTest004, TestSize.Level1)
+{
+    ObtainedMonth obtainedMonth;
+    CalendarDay calendarDay;
+    CalendarMonth calendarMonth;
+    calendarDay.month = calendarMonth;
+    CalendarPaintMethod calendarPaintMethod(obtainedMonth, calendarDay);
+    calendarPaintMethod.currentMonth_ = calendarMonth;
+
+    RSCanvas rsCanvas;
+    RSTextStyle rsTextStyle;
+    calendarDay.dayMark.clear();
+    calendarPaintMethod.showHoliday_ = false;
+    calendarPaintMethod.PaintDay(rsCanvas, Offset(OFFSET_X, OFFSET_Y), calendarDay, rsTextStyle);
+    EXPECT_FALSE(!calendarDay.dayMark.empty() && calendarPaintMethod.showHoliday_);
+
+    calendarDay.dayMark = WORK_DAY_MARK;
+    calendarPaintMethod.PaintDay(rsCanvas, Offset(OFFSET_X, OFFSET_Y), calendarDay, rsTextStyle);
+    EXPECT_FALSE(!calendarDay.dayMark.empty() && calendarPaintMethod.showHoliday_);
+
+    calendarPaintMethod.showHoliday_ = true;
+    calendarPaintMethod.PaintDay(rsCanvas, Offset(OFFSET_X, OFFSET_Y), calendarDay, rsTextStyle);
+    EXPECT_TRUE(!calendarDay.dayMark.empty() && calendarPaintMethod.showHoliday_);
+
+    calendarDay.dayMark = OFF_DAY_MARK;
+    calendarPaintMethod.PaintDay(rsCanvas, Offset(OFFSET_X, OFFSET_Y), calendarDay, rsTextStyle);
+
+    calendarPaintMethod.currentMonth_.month = calendarDay.month.month + 1;
+    calendarDay.focused = true;
+    calendarPaintMethod.PaintDay(rsCanvas, Offset(OFFSET_X, OFFSET_Y), calendarDay, rsTextStyle);
+
+    calendarDay.dayMark = WORK_DAY_MARK;
+    calendarDay.touched = true;
+    calendarPaintMethod.PaintDay(rsCanvas, Offset(OFFSET_X, OFFSET_Y), calendarDay, rsTextStyle);
 }
 } // namespace OHOS::Ace::NG

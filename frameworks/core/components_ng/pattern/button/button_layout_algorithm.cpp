@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/button/button_layout_algorithm.h"
 
+#include "base/utils/utils.h"
 #include "core/components/button/button_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper.h"
@@ -71,6 +72,7 @@ void ButtonLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                 textLayoutProperty->UpdateAdaptMinFontSize(
                     buttonLayoutProperty->GetMinFontSize().value_or(buttonTheme->GetMinFontSize()));
                 childWrapper->Measure(layoutConstraint);
+                childSize_ = childWrapper->GetGeometryNode()->GetContentSize();
             }
         }
     }
@@ -143,20 +145,28 @@ void ButtonLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
         buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE) == ButtonType::CIRCLE) {
         HandleLabelCircleButtonFrameSize(layoutConstraint, frameSize);
     }
-    if (isNeedToSetDefaultHeight_) {
+    const auto& padding = buttonLayoutProperty->GetPaddingProperty();
+    if (isNeedToSetDefaultHeight_ && padding) {
         auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
         CHECK_NULL_VOID(buttonTheme);
-        auto defaultHeight = buttonTheme->GetHeight().ConvertToPx();
+        auto defaultHeight = static_cast<float>(buttonTheme->GetHeight().ConvertToPx());
         auto layoutContraint = buttonLayoutProperty->GetLayoutConstraint();
         CHECK_NULL_VOID(layoutContraint);
         auto maxHeight = layoutContraint->maxSize.Height();
-        frameSize.SetHeight(maxHeight > defaultHeight ? defaultHeight : maxHeight);
+        auto topPadding = padding->top.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
+        auto bottomPadding = padding->bottom.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
+        auto actualHeight = static_cast<float>(childSize_.Height() + topPadding + bottomPadding);
+        actualHeight = std::min(actualHeight, maxHeight);
+        frameSize.SetHeight(maxHeight > defaultHeight ? std::max(defaultHeight, actualHeight) : maxHeight);
         layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
     }
     // Determine if the button needs to fit the font size.
-    if (buttonLayoutProperty->HasFontSize()) {
-        if (GreatOrEqual(childSize_.Height(), frameSize.Height())) {
-            frameSize = SizeF(frameSize.Width(), childSize_.Height());
+    if (buttonLayoutProperty->HasLabel() && buttonLayoutProperty->HasFontSize() && padding) {
+        auto topPadding = padding->top.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
+        auto bottomPadding = padding->bottom.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
+        if (GreatOrEqual(childSize_.Height() + topPadding + bottomPadding, frameSize.Height())) {
+            frameSize = SizeF(frameSize.Width(), childSize_.Height() + topPadding + bottomPadding);
+
             layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
         }
     }

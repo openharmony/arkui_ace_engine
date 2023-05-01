@@ -50,22 +50,6 @@
           "HarmonyOS-Sans-Digit": 0
         }
       ]
-    },
-    {
-      "family": "Noto Sans KR",
-      "alias": [
-        {
-          "Noto-Sans-KR": 0
-        }
-      ]
-    },
-    {
-      "family": "Noto Sans JP",
-      "alias": [
-        {
-          "Noto-Sans-JP": 0
-        }
-      ]
     }
   ],
   "fallback": [
@@ -79,6 +63,12 @@
         },
         {
           "und-Arab": "HarmonyOS Sans Naskh Arabic UI"
+        },
+        {
+          "ja": "Noto Sans JP"
+        },
+        {
+          "ko": "Noto Sans KR"
         }
       ]
     }

@@ -1071,6 +1071,12 @@ var ModifierKey;
   ModifierKey[ModifierKey["ALT"] = 2] = "ALT";
 })(ModifierKey || (ModifierKey = {}));
 
+var SheetSize;
+(function (SheetSize) {
+  SheetSize['MEDIUM'] = "MEDIUM";
+  SheetSize['LARGE'] = "LARGE";
+})(SheetSize || (SheetSize = {}));
+
 var FunctionKey;
 (function (FunctionKey) {
   FunctionKey[FunctionKey["ESC"] = 0] = "ESC";
@@ -1491,3 +1497,10 @@ var MenuAlignType ;
   MenuAlignType[MenuAlignType["CENTER"] = 1] = "CENTER";
   MenuAlignType[MenuAlignType["END"] = 2] = "END";
 })(MenuAlignType  || (MenuAlignType  = {}));
+
+var ToolbarItemStatus;
+(function (ToolbarItemStatus) {
+  ToolbarItemStatus[ToolbarItemStatus["ENABLE_TOOLBAR_ITEM"] = 0] = "ENABLE_TOOLBAR_ITEM";
+  ToolbarItemStatus[ToolbarItemStatus["DISABLE_TOOLBAR_ITEM"] = 1] = "DISABLE_TOOLBAR_ITEM";
+  ToolbarItemStatus[ToolbarItemStatus["ACTIVATE_TOOLBAR_ITEM"] = 2] = "ACTIVATE_TOOLBAR_ITEM";
+})(ToolbarItemStatus || (ToolbarItemStatus = {}));

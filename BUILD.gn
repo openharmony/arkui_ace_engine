@@ -16,8 +16,6 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 
 # Common config for Ability Cross-platform Environment(ACE) source
 config("ace_config") {
-  visibility = [ "./*" ]
-  visibility += [ "./../napi/*" ]
   include_dirs = [
     "$ace_root",
     "$ace_root/frameworks",
