@@ -63,7 +63,7 @@ void Matrix2D::Scale(TransformParam& param, double sx, double sy)
 {
     SkMatrix skMatrix;
     ConvertToMatrix(param, skMatrix);
-    skMatrix = skMatrix.postScale(sx, sy);
+    skMatrix = skMatrix.preScale(sx, sy);
     ConvertToTransformParam(param, skMatrix);
 }
 
