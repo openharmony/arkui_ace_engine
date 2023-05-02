@@ -1042,6 +1042,10 @@ void PageRouterManager::CleanPageOverlay()
     CHECK_NULL_VOID(overlayManager);
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID_NOLOG(taskExecutor);
+    auto sharedManager = context->GetSharedOverlayManager();
+    if (sharedManager) {
+        sharedManager->StopSharedTransition();
+    }
 
     if (overlayManager->RemoveOverlay()) {
         LOGI("clean page overlay.");
