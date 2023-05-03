@@ -373,6 +373,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Button", JSButton::JSBind },
     { "Canvas", JSCanvas::JSBind },
     { "OffscreenCanvas", JSOffscreenCanvas::JSBind },
+    { "Matrix2D", JSMatrix2d::JSBind },
+    { "CanvasPattern", JSCanvasPattern::JSBind },
     { "List", JSList::JSBind },
     { "ListItem", JSListItem::JSBind },
     { "LoadingProgress", JSLoadingProgress::JSBind },
