@@ -259,8 +259,8 @@ void JSMatrix2d::JsScale(const JSCallbackInfo& info)
         LOGE("The argv is wrong, it is supposed to have at most 2 arguments.");
         return;
     }
-    double sx = 0;
-    double sy = 0;
+    double sx = 1.0f;
+    double sy = 1.0f;
     if (info.Length() > JS_MATRIX2D_PARAMETER_COUNTS_1 && info[JS_MATRIX2D_PARAMETER_COUNTS_0]->IsNumber()) {
         JSViewAbstract::ParseJsDouble(info[JS_MATRIX2D_PARAMETER_COUNTS_0], sx);
     }
