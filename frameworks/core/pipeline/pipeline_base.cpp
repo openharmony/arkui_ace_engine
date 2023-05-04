@@ -586,7 +586,7 @@ RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const
 void PipelineBase::SendEventToAccessibility(const AccessibilityEvent& accessibilityEvent)
 {
     auto accessibilityManager = GetAccessibilityManager();
-    if (!accessibilityManager) {
+    if (!accessibilityManager || !AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
         return;
     }
     accessibilityManager->SendAccessibilityAsyncEvent(accessibilityEvent);

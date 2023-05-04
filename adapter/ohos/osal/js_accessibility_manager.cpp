@@ -588,8 +588,12 @@ void FillEventInfo(const RefPtr<NG::FrameNode>& node, AccessibilityEventInfo& ev
 {
     eventInfo.SetComponentType(node->GetTag());
     eventInfo.SetPageId(node->GetPageId());
-    eventInfo.AddContent(node->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetText());
-    eventInfo.SetLatestContent(node->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetText());
+    auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    eventInfo.AddContent(accessibilityProperty->GetText());
+    eventInfo.SetItemCounts(accessibilityProperty->GetCollectionItemCounts());
+    eventInfo.SetBeginIndex(accessibilityProperty->GetBeginIndex());
+    eventInfo.SetEndIndex(accessibilityProperty->GetEndIndex());
 }
 
 void FillEventInfo(const RefPtr<AccessibilityNode>& node, AccessibilityEventInfo& eventInfo)
@@ -1243,6 +1247,12 @@ bool JsAccessibilityManager::SendAccessibilitySyncEvent(
         return false;
     }
 
+    eventInfo.SetTimeStamp(GetMicroTickCount());
+    eventInfo.SetBeforeText(accessibilityEvent.beforeText);
+    eventInfo.SetLatestContent(accessibilityEvent.latestContent);
+    eventInfo.SetWindowChangeTypes(static_cast<Accessibility::WindowUpdateType>(accessibilityEvent.windowChangeTypes));
+    eventInfo.SetWindowContentChangeTypes(
+        static_cast<Accessibility::WindowsContentChangeTypes>(accessibilityEvent.windowContentChangeTypes));
     eventInfo.SetSource(accessibilityEvent.nodeId);
     eventInfo.SetEventType(type);
     eventInfo.SetCurrentIndex(static_cast<int>(accessibilityEvent.currentItemIndex));
@@ -1273,8 +1283,11 @@ void JsAccessibilityManager::SendAccessibilityAsyncEvent(const AccessibilityEven
         CHECK_NULL_VOID_NOLOG(node);
         FillEventInfo(node, eventInfo);
     }
-    eventInfo.SetWindowId(windowId);
-
+    if (accessibilityEvent.type != AccessibilityEventType::PAGE_CHANGE) {
+        eventInfo.SetWindowId(windowId);
+    } else {
+        eventInfo.SetWindowId(accessibilityEvent.windowId);
+    }
     context->GetTaskExecutor()->PostTask(
         [weak = WeakClaim(this), accessibilityEvent, eventInfo] {
             auto jsAccessibilityManager = weak.Upgrade();

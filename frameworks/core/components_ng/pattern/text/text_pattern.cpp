@@ -329,6 +329,15 @@ void TextPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub)
     };
     longPressEvent_ = MakeRefPtr<LongPressEvent>(std::move(longPressCallback));
     gestureHub->SetLongPressEvent(longPressEvent_);
+
+    auto onTextSelectorChange = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto frameNode = pattern->GetHost();
+        CHECK_NULL_VOID(frameNode);
+        frameNode->OnAccessibilityEvent(AccessibilityEventType::TEXT_SELECTION_UPDATE);
+    };
+    textSelector_.SetOnAccessibility(std::move(onTextSelectorChange));
 }
 
 void TextPattern::OnHandleTouchUp()
@@ -659,7 +668,11 @@ void TextPattern::OnModifyDone()
     bool shouldClipToContent = textLayoutProperty->GetTextOverflow().value_or(TextOverflow::CLIP) == TextOverflow::CLIP;
     host->GetRenderContext()->SetClipToFrame(shouldClipToContent);
 
+    std::string textCache = textForDisplay_;
     textForDisplay_ = textLayoutProperty->GetContent().value_or("");
+    if (textCache != textForDisplay_) {
+        host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, textForDisplay_);
+    }
     copyOption_ = textLayoutProperty->GetCopyOption().value_or(CopyOptions::None);
     if (copyOption_ != CopyOptions::None) {
         auto context = host->GetContext();
@@ -733,7 +746,9 @@ void TextPattern::BeforeCreateLayoutWrapper()
         nodes.push(*iter);
     }
 
+    std::string textCache;
     if (!nodes.empty()) {
+        textCache = textForDisplay_;
         textForDisplay_.clear();
     }
 
@@ -761,6 +776,9 @@ void TextPattern::BeforeCreateLayoutWrapper()
         for (auto iter = nextChildren.rbegin(); iter != nextChildren.rend(); ++iter) {
             nodes.push(*iter);
         }
+    }
+    if (textCache != textForDisplay_) {
+        host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, textForDisplay_);
     }
     if (isSpanHasClick) {
         auto gestureEventHub = host->GetOrCreateGestureEventHub();

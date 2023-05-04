@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,8 @@
 
 namespace OHOS::Ace::NG {
 
+using OnAccessibilityCallback = std::function<void()>;
+
 enum class CaretUpdateType {
     PRESSED,
     LONG_PRESSED,
@@ -44,8 +46,27 @@ struct TextSelector {
     TextSelector() = default;
     TextSelector(int32_t base, int32_t destination) : baseOffset(base), destinationOffset(destination) {}
 
+    void SetOnAccessibility(OnAccessibilityCallback&& onAccessibilityCallback)
+    {
+        if (onAccessibilityCallback) {
+            onAccessibilityCallback_ = std::move(onAccessibilityCallback);
+        }
+    }
+
+    void FireAccessibilityCallback()
+    {
+        if (onAccessibilityCallback_) {
+            onAccessibilityCallback_();
+        }
+    }
+
     void Update(int32_t base, int32_t destination)
     {
+        if ((baseOffset != base) || (destinationOffset != destination)) {
+            if ((baseOffset != destinationOffset) || (base != destination)) {
+                FireAccessibilityCallback();
+            }
+        }
         baseOffset = base;
         destinationOffset = destination;
     }
@@ -53,6 +74,11 @@ struct TextSelector {
     // Usually called when none is selected.
     void Update(int32_t both)
     {
+        if ((baseOffset != both) || (destinationOffset != both)) {
+            if (baseOffset != destinationOffset) {
+                FireAccessibilityCallback();
+            }
+        }
         baseOffset = both;
         destinationOffset = both;
     }
@@ -137,6 +163,7 @@ struct TextSelector {
     RectF secondHandle;
     OffsetF firstHandleOffset_;
     OffsetF secondHandleOffset_;
+    OnAccessibilityCallback onAccessibilityCallback_;
 };
 
 } // namespace OHOS::Ace::NG

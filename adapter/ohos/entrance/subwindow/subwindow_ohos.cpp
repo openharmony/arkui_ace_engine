@@ -335,6 +335,15 @@ void SubwindowOhos::ShowWindow()
     }
     window_->RequestFocus();
     LOGI("Show the subwindow successfully.");
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    CHECK_NULL_VOID(aceContainer);
+    auto context = aceContainer->GetPipelineContext();
+    CHECK_NULL_VOID(context);
+    AccessibilityEvent event;
+    event.type = AccessibilityEventType::PAGE_CHANGE;
+    event.windowId = context->GetWindowId();
+    event.windowChangeTypes = WINDOW_UPDATE_ADDED;
+    context->SendEventToAccessibility(event);
     isShowed_ = true;
     SubwindowManager::GetInstance()->SetCurrentSubwindow(AceType::Claim(this));
 }
@@ -380,6 +389,13 @@ void SubwindowOhos::HideWindow()
     }
     isShowed_ = false;
     LOGI("Hide the subwindow successfully.");
+    auto context = aceContainer->GetPipelineContext();
+    CHECK_NULL_VOID(context);
+    AccessibilityEvent event;
+    event.type = AccessibilityEventType::PAGE_CHANGE;
+    event.windowId = context->GetWindowId();
+    event.windowChangeTypes = WINDOW_UPDATE_REMOVED;
+    context->SendEventToAccessibility(event);
 }
 
 void SubwindowOhos::AddMenu(const RefPtr<Component>& newComponent)

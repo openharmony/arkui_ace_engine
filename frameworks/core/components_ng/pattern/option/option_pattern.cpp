@@ -78,6 +78,7 @@ void OptionPattern::OnSelectProcess()
         LOGI("selecting option %d", index_);
         onSelect(index_);
     }
+    host->OnAccessibilityEvent(AccessibilityEventType::SELECTED);
     // hide menu when option is clicked
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
