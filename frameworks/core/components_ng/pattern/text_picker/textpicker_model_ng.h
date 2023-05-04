@@ -40,6 +40,7 @@ public:
     void SetOnCascadeChange(TextCascadeChangeEvent&& onChange) override {};
     void SetValues(const std::vector<std::string>& values) override {};
     void SetSelecteds(const std::vector<uint32_t>& values) override {};
+    void SetBackgroundColor(const Color& color) override;
     bool IsSingle() override
     {
         return true;

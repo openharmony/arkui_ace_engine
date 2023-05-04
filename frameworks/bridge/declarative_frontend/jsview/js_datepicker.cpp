@@ -416,6 +416,19 @@ void JSDatePicker::PickerBackgroundColor(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsBackgroundColor(info);
 
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (info.Length() < 1) {
+            LOGI("The arg(PickerBackgroundColor) is wrong, it is supposed to have at least 1 argument");
+            return;
+        }
+        Color backgroundColor;
+        if (!ParseJsColor(info[0], backgroundColor)) {
+            LOGI("the info[0] is null");
+            return;
+        }
+        DatePickerModel::GetInstance()->SetBackgroundColor(backgroundColor);
+    }
+
     auto pickerBase = AceType::DynamicCast<PickerBaseComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (!pickerBase) {
         LOGE("PickerBaseComponent is null");
@@ -792,7 +805,7 @@ void JSTimePicker::JSBind(BindingTarget globalObj)
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSTimePicker>::StaticMethod("create", &JSTimePicker::Create, opt);
     JSClass<JSTimePicker>::StaticMethod("onChange", &JSTimePicker::OnChange);
-    JSClass<JSTimePicker>::StaticMethod("backgroundColor", &JSDatePicker::PickerBackgroundColor);
+    JSClass<JSTimePicker>::StaticMethod("backgroundColor", &JSTimePicker::PickerBackgroundColor);
     JSClass<JSTimePicker>::StaticMethod("useMilitaryTime", &JSTimePicker::UseMilitaryTime);
     JSClass<JSTimePicker>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSTimePicker>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
@@ -819,6 +832,32 @@ void JSTimePicker::Create(const JSCallbackInfo& info)
 void JSTimePicker::UseMilitaryTime(bool isUseMilitaryTime)
 {
     TimePickerModel::GetInstance()->SetHour24(isUseMilitaryTime);
+}
+
+void JSTimePicker::PickerBackgroundColor(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsBackgroundColor(info);
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (info.Length() < 1) {
+            LOGI("The arg(PickerBackgroundColor) is wrong, it is supposed to have at least 1 argument");
+            return;
+        }
+        Color backgroundColor;
+        if (!ParseJsColor(info[0], backgroundColor)) {
+            LOGI("the info[0] is null");
+            return;
+        }
+        TimePickerModel::GetInstance()->SetBackgroundColor(backgroundColor);
+    }
+
+    auto pickerBase = AceType::DynamicCast<PickerBaseComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (!pickerBase) {
+        LOGE("PickerBaseComponent is null");
+        return;
+    }
+
+    pickerBase->SetHasBackgroundColor(true);
 }
 
 void JSTimePicker::SetDisappearTextStyle(const JSCallbackInfo& info)

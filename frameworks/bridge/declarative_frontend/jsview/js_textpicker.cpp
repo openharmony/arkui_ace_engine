@@ -67,7 +67,7 @@ void JSTextPicker::JSBind(BindingTarget globalObj)
     JSClass<JSTextPicker>::StaticMethod("onAccept", &JSTextPicker::OnAccept);
     JSClass<JSTextPicker>::StaticMethod("onCancel", &JSTextPicker::OnCancel);
     JSClass<JSTextPicker>::StaticMethod("onChange", &JSTextPicker::OnChange);
-    JSClass<JSTextPicker>::StaticMethod("backgroundColor", &JSDatePicker::PickerBackgroundColor);
+    JSClass<JSTextPicker>::StaticMethod("backgroundColor", &JSTextPicker::PickerBackgroundColor);
     JSClass<JSTextPicker>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSTextPicker>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSTextPicker>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
@@ -76,6 +76,32 @@ void JSTextPicker::JSBind(BindingTarget globalObj)
     JSClass<JSTextPicker>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSTextPicker>::Inherit<JSViewAbstract>();
     JSClass<JSTextPicker>::Bind(globalObj);
+}
+
+void JSTextPicker::PickerBackgroundColor(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsBackgroundColor(info);
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (info.Length() < 1) {
+            LOGI("The arg(PickerBackgroundColor) is wrong, it is supposed to have at least 1 argument");
+            return;
+        }
+        Color backgroundColor;
+        if (!ParseJsColor(info[0], backgroundColor)) {
+            LOGI("the info[0] is null");
+            return;
+        }
+        TextPickerModel::GetInstance()->SetBackgroundColor(backgroundColor);
+    }
+
+    auto pickerBase = AceType::DynamicCast<PickerBaseComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (!pickerBase) {
+        LOGE("PickerBaseComponent is null");
+        return;
+    }
+
+    pickerBase->SetHasBackgroundColor(true);
 }
 
 size_t JSTextPicker::ProcessCascadeOptionDepth(const NG::TextCascadePickerOptions& option)
