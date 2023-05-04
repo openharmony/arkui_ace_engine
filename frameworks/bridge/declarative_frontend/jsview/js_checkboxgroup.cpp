@@ -105,14 +105,40 @@ void JSCheckboxGroup::Create(const JSCallbackInfo& info)
     CheckBoxGroupModel::GetInstance()->Create(checkboxGroupName);
 }
 
+void ParseSelectAllObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
+{
+    CHECK_NULL_VOID(changeEventVal->IsFunction());
+
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
+    auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        const auto* eventInfo = TypeInfoHelper::DynamicCast<CheckboxGroupResult>(info);
+        if (eventInfo) {
+            if (eventInfo->GetStatus() == 0) {
+                auto newJSVal = JSRef<JSVal>::Make(ToJSValue(true));
+                func->ExecuteJS(1, &newJSVal);
+            } else {
+                auto newJSVal = JSRef<JSVal>::Make(ToJSValue(false));
+                func->ExecuteJS(1, &newJSVal);
+            }
+        }
+    };
+    CheckBoxGroupModel::GetInstance()->SetChangeEvent(std::move(changeEvent));
+}
+
 void JSCheckboxGroup::SetSelectAll(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsBoolean()) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments, arg is not a bool");
+    if (info.Length() < 1 || info.Length() > 2) {
+        LOGE("The arg is wrong, it is supposed to have 1 or 2 arguments");
         return;
     }
 
-    CheckBoxGroupModel::GetInstance()->SetSelectAll(info[0]->ToBoolean());
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        CheckBoxGroupModel::GetInstance()->SetSelectAll(info[0]->ToBoolean());
+    }
+    if (info.Length() > 1 && info[1]->IsFunction()) {
+        ParseSelectAllObject(info, info[1]);
+    }
 }
 
 void JSCheckboxGroup::SetOnChange(const JSCallbackInfo& args)

@@ -90,4 +90,13 @@ void CheckBoxGroupModelNG::SetPadding(const NG::PaddingPropertyF& args, const NG
 {
     NG::ViewAbstract::SetPadding(newArgs);
 }
+
+void CheckBoxGroupModelNG::SetChangeEvent(GroupChangeEvent&& changeEvent)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<CheckBoxGroupEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetChangeEvent(std::move(changeEvent));
+}
 } // namespace OHOS::Ace::NG
