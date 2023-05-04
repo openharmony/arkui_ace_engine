@@ -44,6 +44,7 @@ const std::string TAG = "CHECKBOX_TAG";
 const Dimension WIDTH = 50.0_vp;
 const Dimension HEIGHT = 50.0_vp;
 const NG::PaddingPropertyF PADDING = NG::PaddingPropertyF();
+const NG::PaddingProperty newArgs = NG::PaddingProperty();
 const bool SELECTED = true;
 const Color SELECTED_COLOR = Color::BLUE;
 const Color BOARD_COLOR = Color::BLUE;
@@ -97,6 +98,8 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintPropertyTest001, TestSize.Level1)
     CheckBoxModelNG checkBoxModelNG;
     checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
 
+    bool flag = false;
+
     /**
      * @tc.steps: step2. Set parameters to CheckBox property
      */
@@ -104,7 +107,7 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintPropertyTest001, TestSize.Level1)
     checkBoxModelNG.SetSelectedColor(SELECTED_COLOR);
     checkBoxModelNG.SetWidth(WIDTH);
     checkBoxModelNG.SetHeight(HEIGHT);
-    checkBoxModelNG.SetPadding(PADDING);
+    checkBoxModelNG.SetPadding(PADDING, newArgs, flag);
 
     /**
      * @tc.steps: step3. Get paint property and get CheckBox property
@@ -130,6 +133,7 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintPropertyTest002, TestSize.Level1)
      */
     CheckBoxModelNG checkBoxModelNG;
     checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    bool flag = false;
 
     /**
      * @tc.steps: step2. Set parameters to CheckBox property
@@ -138,7 +142,7 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintPropertyTest002, TestSize.Level1)
     checkBoxModelNG.SetSelectedColor(SELECTED_COLOR);
     checkBoxModelNG.SetWidth(WIDTH);
     checkBoxModelNG.SetHeight(HEIGHT);
-    checkBoxModelNG.SetPadding(PADDING);
+    checkBoxModelNG.SetPadding(PADDING, newArgs, flag);
 
     /**
      * @tc.steps: step3. Get paint property
@@ -1118,7 +1122,9 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintMethodTest002, TestSize.Level1)
     EXPECT_EQ(checkBoxPaintMethod.checkboxModifier_->pointColor_, CHECK_MARK_COLOR);
     EXPECT_EQ(
         checkBoxPaintMethod.checkboxModifier_->strokeSize_->Get(), static_cast<float>(CHECK_MARK_SIZE.ConvertToPx()));
-    EXPECT_EQ(checkBoxPaintMethod.checkboxModifier_->checkStroke_->Get(), 2.5);
+    auto checkStroke = static_cast<float>(CHECK_MARK_SIZE.ConvertToPx() * 0.25);
+    EXPECT_EQ(
+        checkBoxPaintMethod.checkboxModifier_->checkStroke_->Get(), checkStroke);
 }
 
 /**
