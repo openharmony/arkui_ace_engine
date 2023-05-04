@@ -2532,4 +2532,26 @@ HWTEST_F(SliderPatternTestNg, SliderContentModifierTest017, TestSize.Level1)
     sliderContentModifier.DrawBlock(context);
     EXPECT_EQ(sliderContentModifier.blockType_->Get(), static_cast<int>(SliderModelNG::BlockStyleType::DEFAULT));
 }
+
+/**
+ * @tc.name: SliderPatternChangeEventTestNg001
+ * @tc.desc: Test the Text property of Slider
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderPatternChangeEventTestNg001, TestSize.Level1)
+{
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(VALUE, STEP, MIN, MAX);
+    std::function<void(float)> eventOnChange = [](float floatValue) { EXPECT_EQ(floatValue, 1.0); };
+    sliderModelNG.SetOnChangeEvent(std::move(eventOnChange));
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto sliderEventHub = frameNode->GetEventHub<NG::SliderEventHub>();
+    ASSERT_NE(sliderEventHub, nullptr);
+    sliderEventHub->SetOnChangeEvent(std::move(eventOnChange));
+    ASSERT_NE(sliderEventHub->onChangeEvent_, nullptr);
+    sliderEventHub->FireChangeEvent(1.0, 1);
+    sliderEventHub->SetOnChangeEvent(nullptr);
+    ASSERT_EQ(sliderEventHub->onChangeEvent_, nullptr);
+}
 } // namespace OHOS::Ace::NG
