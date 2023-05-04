@@ -45,6 +45,19 @@ public:
     {
         return std::move(task);
     }
+    uint32_t GetTotalTaskNum(TaskType type) override
+    {
+        switch (type) {
+            case TaskType::PLATFORM:
+            case TaskType::UI:
+            case TaskType::IO:
+            case TaskType::GPU:
+            case TaskType::JS:
+            case TaskType::BACKGROUND:
+            default:
+                return 10;
+        }
+    }
 
 private:
     bool OnPostTask(Task&& task, TaskType type, uint32_t delayTime) const final
