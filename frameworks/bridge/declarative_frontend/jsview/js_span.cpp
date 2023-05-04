@@ -78,7 +78,7 @@ void JSSpan::SetFontSize(const JSCallbackInfo& info)
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension fontSize;
+    CalcDimension fontSize;
     if (!ParseJsDimensionFp(info[0], fontSize)) {
         return;
     }
@@ -134,7 +134,7 @@ void JSSpan::SetLetterSpacing(const JSCallbackInfo& info)
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionFp(info[0], value)) {
         return;
     }
@@ -239,7 +239,7 @@ void JSSpan::SetLineHeight(const JSCallbackInfo& info)
         LOGI("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionFp(info[0], value)) {
         return;
     }

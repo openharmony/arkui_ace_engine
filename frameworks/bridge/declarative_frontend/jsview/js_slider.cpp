@@ -191,7 +191,7 @@ void JSSlider::SetThickness(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         return;
     }
@@ -329,7 +329,7 @@ void JSSlider::SetBlockBorderWidth(const JSCallbackInfo& info)
         return;
     }
 
-    Dimension blockBorderWidth;
+    CalcDimension blockBorderWidth;
     if (!ParseJsDimensionVp(info[0], blockBorderWidth)) {
         return;
     }
@@ -360,7 +360,7 @@ void JSSlider::SetTrackBorderRadius(const JSCallbackInfo& info)
         return;
     }
 
-    Dimension trackBorderRadius;
+    CalcDimension trackBorderRadius;
     if (!ParseJsDimensionVp(info[0], trackBorderRadius)) {
         return;
     }
@@ -382,7 +382,7 @@ void JSSlider::SetBlockSize(const JSCallbackInfo& info)
     }
     JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
 
-    Dimension width;
+    CalcDimension width;
     JSRef<JSVal> jsWidth = sizeObj->GetProperty("width");
     if (!ParseJsDimensionVp(jsWidth, width)) {
         width.SetValue(0.0);
@@ -391,7 +391,7 @@ void JSSlider::SetBlockSize(const JSCallbackInfo& info)
         width.SetValue(0.0);
     }
 
-    Dimension height;
+    CalcDimension height;
     JSRef<JSVal> jsHeight = sizeObj->GetProperty("height");
     if (!ParseJsDimensionVp(jsHeight, height)) {
         height.SetValue(0.0);
@@ -450,7 +450,7 @@ void JSSlider::SetStepSize(const JSCallbackInfo& info)
         return;
     }
 
-    Dimension stepSize;
+    CalcDimension stepSize;
     if (!ParseJsDimensionVp(info[0], stepSize)) {
         return;
     }

@@ -130,7 +130,7 @@ void JSRadio::JsWidth(const JSCallbackInfo& info)
 
 void JSRadio::JsWidth(const JSRef<JSVal>& jsValue)
 {
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(jsValue, value)) {
         return;
     }
@@ -155,7 +155,7 @@ void JSRadio::JsHeight(const JSCallbackInfo& info)
 
 void JSRadio::JsHeight(const JSRef<JSVal>& jsValue)
 {
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(jsValue, value)) {
         return;
     }
@@ -209,10 +209,10 @@ void JSRadio::JsPadding(const JSCallbackInfo& info)
         }
         if (argsPtrItem->Contains("top") || argsPtrItem->Contains("bottom") || argsPtrItem->Contains("left") ||
             argsPtrItem->Contains("right")) {
-            Dimension topDimen = Dimension(0.0, DimensionUnit::VP);
-            Dimension leftDimen = Dimension(0.0, DimensionUnit::VP);
-            Dimension rightDimen = Dimension(0.0, DimensionUnit::VP);
-            Dimension bottomDimen = Dimension(0.0, DimensionUnit::VP);
+            CalcDimension topDimen = CalcDimension(0.0, DimensionUnit::VP);
+            CalcDimension leftDimen = CalcDimension(0.0, DimensionUnit::VP);
+            CalcDimension rightDimen = CalcDimension(0.0, DimensionUnit::VP);
+            CalcDimension bottomDimen = CalcDimension(0.0, DimensionUnit::VP);
             ParseJsonDimensionVp(argsPtrItem->GetValue("top"), topDimen);
             ParseJsonDimensionVp(argsPtrItem->GetValue("left"), leftDimen);
             ParseJsonDimensionVp(argsPtrItem->GetValue("right"), rightDimen);
@@ -235,7 +235,7 @@ void JSRadio::JsPadding(const JSCallbackInfo& info)
             return;
         }
     }
-    Dimension length;
+    CalcDimension length;
     if (!ParseJsDimensionVp(info[0], length)) {
         return;
     }
@@ -273,7 +273,7 @@ void JSRadio::JsRadioStyle(const JSCallbackInfo& info)
     }
 }
 
-void JSRadio::SetPadding(const Dimension& topDimen, const Dimension& leftDimen)
+void JSRadio::SetPadding(const CalcDimension& topDimen, const CalcDimension& leftDimen)
 {
     auto stack = ViewStackProcessor::GetInstance();
     auto radioComponent = AceType::DynamicCast<RadioComponent<std::string>>(stack->GetMainComponent());

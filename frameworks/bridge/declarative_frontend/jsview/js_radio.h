@@ -35,7 +35,7 @@ public:
     static void JsSize(const JSCallbackInfo& args);
     static void JsOnClick(const JSCallbackInfo& args);
     static void OnChange(const JSCallbackInfo& info);
-    static void SetPadding(const Dimension& topDimen, const Dimension& leftDimen);
+    static void SetPadding(const CalcDimension& topDimen, const CalcDimension& leftDimen);
     static void Checked(bool checked);
 
 };

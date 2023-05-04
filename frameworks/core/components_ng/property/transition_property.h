@@ -22,7 +22,7 @@
 #include <sstream>
 #include <string>
 
-#include "base/geometry/dimension.h"
+#include "base/geometry/calc_dimension.h"
 #include "core/animation/animation_pub.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components_ng/property/property.h"
@@ -31,11 +31,11 @@
 namespace OHOS::Ace::NG {
 
 struct TranslateOptions {
-    Dimension x;
-    Dimension y;
-    Dimension z;
+    CalcDimension x;
+    CalcDimension y;
+    CalcDimension z;
     TranslateOptions() = default;
-    TranslateOptions(const Dimension& x, const Dimension& y, const Dimension& z) : x(x), y(y), z(z) {}
+    TranslateOptions(const CalcDimension& x, const CalcDimension& y, const CalcDimension& z) : x(x), y(y), z(z) {}
     // for inner construct, default unit is PX
     TranslateOptions(float x, float y, float z) : x(x), y(y), z(z) {}
     bool operator==(const TranslateOptions& other) const
@@ -51,9 +51,9 @@ struct ScaleOptions {
     float xScale = 1.0f;
     float yScale = 1.0f;
     float zScale = 1.0f;
-    Dimension centerX;
-    Dimension centerY;
-    ScaleOptions(float xScale, float yScale, float zScale, const Dimension& centerX, const Dimension& centerY)
+    CalcDimension centerX;
+    CalcDimension centerY;
+    ScaleOptions(float xScale, float yScale, float zScale, const CalcDimension& centerX, const CalcDimension& centerY)
         : xScale(xScale), yScale(yScale), zScale(zScale), centerX(centerX), centerY(centerY)
     {}
     ScaleOptions() = default;
@@ -74,11 +74,11 @@ struct RotateOptions {
     float zDirection = 0.0f;
     // angle in degree unit
     float angle = 0.0f;
-    Dimension centerX;
-    Dimension centerY;
-    Dimension centerZ;
-    RotateOptions(float xDirection, float yDirection, float zDirection, float angle, const Dimension& centerX,
-        const Dimension& centerY)
+    CalcDimension centerX;
+    CalcDimension centerY;
+    CalcDimension centerZ;
+    RotateOptions(float xDirection, float yDirection, float zDirection, float angle, const CalcDimension& centerX,
+        const CalcDimension& centerY)
         : xDirection(xDirection), yDirection(yDirection), zDirection(zDirection), angle(angle), centerX(centerX),
           centerY(centerY)
     {}

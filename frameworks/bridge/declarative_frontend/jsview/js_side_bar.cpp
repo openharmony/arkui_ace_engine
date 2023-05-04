@@ -63,7 +63,7 @@ void ParseAndSetWidth(const JSCallbackInfo& info, WidthType widthType)
         return;
     }
 
-    Dimension value;
+    CalcDimension value;
     if (!JSViewAbstract::ParseJsDimensionVp(info[0], value)) {
         return;
     }
@@ -196,7 +196,7 @@ void JSSideBar::JsControlButton(const JSCallbackInfo& info)
         JSRef<JSVal> icons = value->GetProperty("icons");
 
         if (!width->IsNull() && width->IsNumber()) {
-            auto controlButtonWidth = Dimension(width->ToNumber<double>(), DimensionUnit::VP);
+            auto controlButtonWidth = CalcDimension(width->ToNumber<double>(), DimensionUnit::VP);
             if (LessNotEqual(controlButtonWidth.Value(), 0.0)) {
                 controlButtonWidth = DEFAULT_CONTROL_BUTTON_WIDTH;
             }
@@ -204,7 +204,7 @@ void JSSideBar::JsControlButton(const JSCallbackInfo& info)
         }
 
         if (!height->IsNull() && height->IsNumber()) {
-            auto controlButtonHeight = Dimension(height->ToNumber<double>(), DimensionUnit::VP);
+            auto controlButtonHeight = CalcDimension(height->ToNumber<double>(), DimensionUnit::VP);
             if (LessNotEqual(controlButtonHeight.Value(), 0.0)) {
                 controlButtonHeight = DEFAULT_CONTROL_BUTTON_HEIGHT;
             }

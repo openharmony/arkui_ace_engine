@@ -190,7 +190,7 @@ void JSDataPanel::StrokeWidth(const JSCallbackInfo& info)
     }
 
     RefPtr<DataPanelTheme> theme = GetTheme<DataPanelTheme>();
-    Dimension strokeWidthDimension;
+    CalcDimension strokeWidthDimension;
     if (!ParseJsDimensionVp(info[0], strokeWidthDimension)) {
         strokeWidthDimension = theme->GetThickness();
     }

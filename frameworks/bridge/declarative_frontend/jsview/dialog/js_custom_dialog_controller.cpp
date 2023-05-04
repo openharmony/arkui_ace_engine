@@ -108,10 +108,10 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
         auto offsetValue = constructorArg->GetProperty("offset");
         if (offsetValue->IsObject()) {
             auto offsetObj = JSRef<JSObject>::Cast(offsetValue);
-            Dimension dx;
+            CalcDimension dx;
             auto dxValue = offsetObj->GetProperty("dx");
             JSViewAbstract::ParseJsDimensionVp(dxValue, dx);
-            Dimension dy;
+            CalcDimension dy;
             auto dyValue = offsetObj->GetProperty("dy");
             JSViewAbstract::ParseJsDimensionVp(dyValue, dy);
             dx.ResetInvalidValue();
