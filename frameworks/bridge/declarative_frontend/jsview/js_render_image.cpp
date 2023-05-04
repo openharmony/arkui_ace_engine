@@ -106,7 +106,14 @@ void JSRenderImage::JsGetHeight(const JSCallbackInfo& info)
 
 void JSRenderImage::JsClose(const JSCallbackInfo& info)
 {
-    return;
+    for (const auto& closeCallback : closeCallbacks_) {
+        if (!closeCallback) {
+            continue;
+        }
+        closeCallback();
+    }
+    width_ = 0;
+    height_ = 0;
 }
 
 double JSRenderImage::GetWidth()
@@ -119,4 +126,8 @@ double JSRenderImage::GetHeight()
     return height_;
 }
 
+void JSRenderImage::SetCloseCallback(std::function<void()>&& callback)
+{
+    closeCallbacks_.emplace_back(std::move(callback));
+}
 } // namespace OHOS::Ace::Framework

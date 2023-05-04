@@ -57,6 +57,7 @@ public:
         return lastLayoutSize_.Height();
     }
 
+    void CloseImageBitmap(const std::string& src);
     void DrawImage(PaintWrapper* paintWrapper, const Ace::CanvasImage& canvasImage, double width, double height);
     void DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& canvasImage);
     std::unique_ptr<Ace::ImageData> GetImageData(double left, double top, double width, double height);
