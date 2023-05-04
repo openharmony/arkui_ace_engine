@@ -29,33 +29,39 @@
 #include <optional>
 #include <string>
 
-#include "resource_manager.h"
-#include "image_converter.h"
-#include "base/memory/ace_type.h"
 #include "foundation/arkui/ace_engine/interfaces/inner_api/form_render/include/form_renderer_hilog.h"
+#include "image_converter.h"
+#include "resource_manager.h"
+
+#include "base/memory/ace_type.h"
 
 namespace OHOS::Ace::Napi {
 
 class ACE_EXPORT DrawableDescriptor {
 public:
+    enum class DrawableType {
+        BASE,
+        LAYERED,
+    };
     DrawableDescriptor() = default;
     explicit DrawableDescriptor(std::shared_ptr<Media::PixelMap> pixelMap) : pixelMap_(std::move(pixelMap)) {};
-    DrawableDescriptor(std::unique_ptr<uint8_t[]> jsonBuf, size_t len) : jsonBuf_(std::move(jsonBuf)), len_(len) {};
+    DrawableDescriptor(std::unique_ptr<uint8_t[]> mediaData, size_t len)
+        : mediaData_(std::move(mediaData)), len_(len) {};
     virtual ~DrawableDescriptor() = default;
     virtual std::shared_ptr<Media::PixelMap> GetPixelMap();
 
 private:
     bool GetPixelMapFromBuffer();
 
-    std::unique_ptr<uint8_t[]> jsonBuf_;
+    std::unique_ptr<uint8_t[]> mediaData_;
     size_t len_ = 0;
     std::optional<std::shared_ptr<Media::PixelMap>> pixelMap_;
 };
 
 class ACE_EXPORT LayeredDrawableDescriptor : public DrawableDescriptor {
 public:
-    LayeredDrawableDescriptor(std::unique_ptr<uint8_t[]> jsonBuf, size_t len,
-        std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr)
+    LayeredDrawableDescriptor(
+        std::unique_ptr<uint8_t[]> jsonBuf, size_t len, std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr)
         : jsonBuf_(std::move(jsonBuf)), len_(len), resourceMgr_(std::move(resourceMgr)) {};
     ~LayeredDrawableDescriptor() override = default;
     std::unique_ptr<DrawableDescriptor> GetForeground();
@@ -77,14 +83,14 @@ private:
     std::optional<std::shared_ptr<Media::PixelMap>> foreground_;
     std::optional<std::shared_ptr<Media::PixelMap>> background_;
     std::optional<std::shared_ptr<Media::PixelMap>> mask_;
-    std::optional<std::shared_ptr<Media::PixelMap>> pixelMap_;
+    std::optional<std::shared_ptr<Media::PixelMap>> layeredPixelMap_;
 };
 
 class DrawableDescriptorFactory {
 public:
-    static std::unique_ptr<DrawableDescriptor> Create(
-        int32_t id, std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr,
-        Global::Resource::RState &state, uint32_t density)
+    static std::unique_ptr<DrawableDescriptor> Create(int32_t id,
+        std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr, Global::Resource::RState& state,
+        DrawableDescriptor::DrawableType& drawableType, uint32_t density)
     {
         std::string type;
         size_t len;
@@ -96,19 +102,21 @@ public:
         }
         if (type == "json") {
             HILOG_DEBUG("Create LayeredDrawableDescriptor object");
+            drawableType = DrawableDescriptor::DrawableType::LAYERED;
             return std::make_unique<LayeredDrawableDescriptor>(std::move(jsonBuf), len, resourceMgr);
         }
         if (type == "png" || type == "jpg" || type == "bmp" || type == "svg" || type == "gif") {
             HILOG_DEBUG("Create DrawableDescriptor object");
+            drawableType = DrawableDescriptor::DrawableType::BASE;
             return std::make_unique<DrawableDescriptor>(std::move(jsonBuf), len);
         }
         HILOG_ERROR("unknow resource type: %{public}s", type.c_str());
         return nullptr;
     }
 
-    static std::unique_ptr<DrawableDescriptor> Create(
-        const char* name, std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr,
-        Global::Resource::RState &state, uint32_t density)
+    static std::unique_ptr<DrawableDescriptor> Create(const char* name,
+        std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr, Global::Resource::RState& state,
+        DrawableDescriptor::DrawableType& drawableType, uint32_t density)
     {
         std::string type;
         size_t len;
@@ -120,10 +128,12 @@ public:
         }
         if (type == "json") {
             HILOG_DEBUG("Create LayeredDrawableDescriptor object");
+            drawableType = DrawableDescriptor::DrawableType::LAYERED;
             return std::make_unique<LayeredDrawableDescriptor>(std::move(jsonBuf), len, resourceMgr);
         }
         if (type == "png" || type == "jpg" || type == "bmp" || type == "svg" || type == "gif") {
             HILOG_DEBUG("Create DrawableDescriptor object");
+            drawableType = DrawableDescriptor::DrawableType::BASE;
             return std::make_unique<DrawableDescriptor>(std::move(jsonBuf), len);
         }
         HILOG_ERROR("unknow resource type: %{public}s", type.c_str());
