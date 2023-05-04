@@ -246,6 +246,17 @@ public:
     {}
 };
 
+class JsiDate : public JsiType<panda::DateRef> {
+public:
+    JsiDate() = default;
+    explicit JsiDate(panda::Local<panda::DateRef> val);
+    explicit JsiDate(const panda::CopyableGlobal<panda::DateRef>& val);
+    ~JsiDate() override = default;
+
+    static JsiRef<JsiValue> New(double value);
+    FAKE_PTR_FOR_FUNCTION_ACCESS(JsiDate)
+};
+
 class JsiException {
 public:
     template<typename... Args>
