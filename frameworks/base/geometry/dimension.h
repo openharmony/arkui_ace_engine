@@ -28,6 +28,14 @@ namespace OHOS::Ace {
 
 enum class DimensionUnit {
     /*
+     * Unit is invalid.
+     */
+    INVALID = -2,
+    /*
+     * Unit is empty.
+     */
+    NONE = -1,
+    /*
      * Logical pixel used in Ace1.0. It's based on frontend design width.
      * For example, when a frontend with 750px design width running on a
      * device with 1080 pixels width, 1px represents 1.44 pixels.
@@ -59,6 +67,14 @@ enum class DimensionUnit {
      * The value is expression.
      */
     CALC,
+    /*
+     * The value is viewport width.
+     */
+    VW,
+    /*
+     * The value is viewport height.
+     */
+    VH,
 };
 
 /*

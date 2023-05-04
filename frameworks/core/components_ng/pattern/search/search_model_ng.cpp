@@ -466,6 +466,11 @@ void SearchModelNG::SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOptio
     textFieldPattern->SetMenuOptionItems(std::move(menuOptionsItems));
 }
 
+void SearchModelNG::SetHeight(const Dimension& height)
+{
+    NG::ViewAbstract::SetHeight(NG::CalcLength(height));
+}
+
 void SearchModelNG::SetOnSubmit(std::function<void(const std::string&)>&& onSubmit)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

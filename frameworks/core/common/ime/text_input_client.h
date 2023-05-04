@@ -18,10 +18,9 @@
 
 #include "base/memory/ace_type.h"
 #include "core/common/ime/text_input_action.h"
+#include "core/common/ime/text_editing_value.h"
 
 namespace OHOS::Ace {
-
-struct TextEditingValue;
 
 class TextInputClient : public virtual AceType {
     DECLARE_ACE_TYPE(TextInputClient, AceType);
@@ -35,7 +34,10 @@ public:
     virtual void PerformAction(TextInputAction action, bool forceCloseKeyboard = false) = 0;
  
 #if defined(IOS_PLATFORM)
-    virtual const TextEditingValue& GetEditingValue() const {};
+    virtual const TextEditingValue& GetInputEditingValue() const {
+        static TextEditingValue value;
+        return value;
+    };
 #endif
 
     // Requests that this client Y point.

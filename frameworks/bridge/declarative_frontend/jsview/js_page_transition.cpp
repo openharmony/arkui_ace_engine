@@ -99,7 +99,7 @@ void JSPageTransition::Translate(const JSCallbackInfo& info)
 
         NG::TranslateOptions option;
 
-        Dimension length;
+        CalcDimension length;
         if (JSViewAbstract::ParseJsonDimensionVp(args->GetValue("x"), length)) {
             option.x = length;
         }
@@ -131,11 +131,11 @@ void JSPageTransition::Scale(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsonDouble(args->GetValue("y"), scaleY);
         JSViewAbstract::ParseJsonDouble(args->GetValue("z"), scaleZ);
         // default centerX, centerY 50% 50%;
-        Dimension centerX = 0.5_pct;
-        Dimension centerY = 0.5_pct;
+        CalcDimension centerX = 0.5_pct;
+        CalcDimension centerY = 0.5_pct;
 
         // if specify centerX
-        Dimension length;
+        CalcDimension length;
         if (JSViewAbstract::ParseJsonDimensionVp(args->GetValue("centerX"), length)) {
             centerX = length;
         }

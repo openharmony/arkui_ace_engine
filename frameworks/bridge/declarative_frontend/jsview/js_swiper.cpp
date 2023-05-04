@@ -274,7 +274,7 @@ void JSSwiper::GetFontContent(const JSRef<JSVal>& font, bool isSelected, SwiperD
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_VOID(swiperIndicatorTheme);
     // set font size, unit FP
-    Dimension fontSize;
+    CalcDimension fontSize;
     if (!size->IsUndefined() && !size->IsNull() && ParseJsDimensionFp(size, fontSize)) {
         if (LessOrEqual(fontSize.Value(), 0.0) || LessOrEqual(size->ToNumber<double>(), 0.0)) {
             fontSize = swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontSize();
@@ -337,7 +337,7 @@ SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
     CHECK_NULL_RETURN(swiperIndicatorTheme, SwiperParameters());
     bool parseOk = false;
     SwiperParameters swiperParameters;
-    Dimension dimPosition;
+    CalcDimension dimPosition;
     parseOk = ParseJsDimensionPx(leftValue, dimPosition);
     swiperParameters.dimLeft = parseOk ? dimPosition : 0.0_vp;
     parseOk = ParseJsDimensionPx(topValue, dimPosition);
@@ -387,7 +387,7 @@ SwiperDigitalParameters JSSwiper::GetDigitIndicatorInfo(const JSRef<JSObject>& o
     CHECK_NULL_RETURN(swiperIndicatorTheme, SwiperDigitalParameters());
     bool parseOk = false;
     SwiperDigitalParameters digitalParameters;
-    Dimension dimPosition;
+    CalcDimension dimPosition;
     parseOk = ParseJsDimensionPx(dotLeftValue, dimPosition);
     digitalParameters.dimLeft = parseOk ? dimPosition : 0.0_vp;
     parseOk = ParseJsDimensionPx(dotTopValue, dimPosition);
@@ -464,7 +464,7 @@ void JSSwiper::SetIndicatorStyle(const JSCallbackInfo& info)
         CHECK_NULL_VOID(pipelineContext);
         auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
         CHECK_NULL_VOID(swiperIndicatorTheme);
-        Dimension dimPosition;
+        CalcDimension dimPosition;
         bool parseOk = ParseJsDimensionPx(leftValue, dimPosition);
         swiperParameters.dimLeft = parseOk ? dimPosition : 0.0_vp;
         parseOk = ParseJsDimensionPx(topValue, dimPosition);
@@ -502,7 +502,7 @@ void JSSwiper::SetItemSpace(const JSCallbackInfo& info)
         return;
     }
 
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         return;
     }
@@ -521,7 +521,7 @@ void JSSwiper::SetPreviousMargin(const JSCallbackInfo& info)
         return;
     }
 
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         return;
     }
@@ -539,7 +539,7 @@ void JSSwiper::SetNextMargin(const JSCallbackInfo& info)
         return;
     }
 
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         return;
     }

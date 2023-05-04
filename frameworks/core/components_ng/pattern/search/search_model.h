@@ -56,6 +56,10 @@ public:
     virtual void SetTextAlign(const TextAlign& textAlign);
     virtual void SetCopyOption(const CopyOptions& copyOptions);
     virtual void SetMenuOptionItems(std::vector<NG::MenuOptionsParam>&& menuOptionsItems) = 0;
+    virtual void SetFocusable(bool focusable) {};
+    virtual void SetFocusNode(bool isFocusNode) {};
+    virtual void SetHeight(const Dimension& height);
+    virtual void SetBackBorder() {};
     virtual void SetOnSubmit(std::function<void(const std::string&)>&& onSubmit);
     virtual void SetOnChange(std::function<void(const std::string&)>&& onChange);
     virtual void SetOnCopy(std::function<void(const std::string&)>&& func);

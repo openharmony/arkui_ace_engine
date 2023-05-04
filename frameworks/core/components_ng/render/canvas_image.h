@@ -78,11 +78,6 @@ public:
         paintConfig_ = std::make_unique<ImagePaintConfig>(config);
     }
 
-    void SetIsDrawAnimate(bool isDrawAnimate)
-    {
-        isDrawAnimate_ = isDrawAnimate;
-    }
-
     inline ImagePaintConfig& GetPaintConfig()
     {
         if (!paintConfig_) {
@@ -100,9 +95,6 @@ public:
     virtual void ControlAnimation(bool play) {}
 
     virtual void SetRawCompressData(void* dataPtr, int32_t w, int32_t h) {}
-
-protected:
-    bool isDrawAnimate_ = false;
 
 private:
     std::unique_ptr<ImagePaintConfig> paintConfig_;

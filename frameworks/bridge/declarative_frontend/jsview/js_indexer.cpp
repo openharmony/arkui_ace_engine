@@ -248,7 +248,7 @@ void JSIndexer::GetFontContent(const JSCallbackInfo& args, TextStyle& textStyle)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
     JSRef<JSVal> size = obj->GetProperty("size");
-    Dimension fontSize;
+    CalcDimension fontSize;
     if (ParseJsDimensionVp(size, fontSize)) {
         textStyle.SetFontSize(fontSize);
     }
@@ -275,9 +275,23 @@ void JSIndexer::GetFontContent(const JSCallbackInfo& args, TextStyle& textStyle)
 
 void JSIndexer::SetItemSize(const JSCallbackInfo& args)
 {
-    Dimension value;
-    if (ParseJsDimensionVp(args[0], value)) {
-        IndexerModel::GetInstance()->SetItemSize(value);
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (args.Length() >= 1) {
+            CalcDimension value;
+            if (ParseJsDimensionVp(args[0], value)) {
+                NG::IndexerView::SetItemSize(value);
+            }
+        }
+    }
+    if (args.Length() >= 1) {
+        CalcDimension value;
+        if (ParseJsDimensionVp(args[0], value)) {
+            auto indexerComponent =
+                AceType::DynamicCast<V2::IndexerComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+            if (indexerComponent) {
+                indexerComponent->SetItemSize(value);
+            }
+        }
     }
 }
 
@@ -333,7 +347,7 @@ void JSIndexer::SetPopupSelectedColor(const JSCallbackInfo& args)
         if (ParseJsColor(args[0], color)) {
             selectedColor = color;
         }
-        Dimension popupHorizontalSpace(-1.0);
+        CalcDimension popupHorizontalSpace(-1.0);
         if (args.Length() > 1) {
             ParseJsDimensionVp(args[1], popupHorizontalSpace);
         }
@@ -359,7 +373,7 @@ void JSIndexer::SetPopupUnselectedColor(const JSCallbackInfo& args)
 
 void JSIndexer::SetPopupItemFont(const JSCallbackInfo& args)
 {
-    Dimension fontSize;
+    CalcDimension fontSize;
     std::string weight;
     if (args.Length() < 1 || !args[0]->IsObject()) {
         LOGW("The argv is wrong, it is supposed to have at least 1 object argument");

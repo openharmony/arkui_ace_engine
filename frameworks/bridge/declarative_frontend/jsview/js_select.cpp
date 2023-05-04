@@ -150,7 +150,7 @@ void JSSelect::Font(const JSCallbackInfo& info)
     auto param = JSRef<JSObject>::Cast(info[0]);
     auto size = param->GetProperty("size");
     if (!size->IsNull()) {
-        Dimension fontSize;
+        CalcDimension fontSize;
         if (ParseJsDimensionFp(size, fontSize)) {
             SelectModel::GetInstance()->SetFontSize(fontSize);
         }
@@ -237,7 +237,7 @@ void JSSelect::SelectedOptionFont(const JSCallbackInfo& info)
 
     auto size = param->GetProperty("size");
     if (!size->IsNull()) {
-        Dimension fontSize;
+        CalcDimension fontSize;
         if (ParseJsDimensionFp(size, fontSize)) {
             SelectModel::GetInstance()->SetSelectedOptionFontSize(fontSize);
         }
@@ -310,7 +310,7 @@ void JSSelect::OptionFont(const JSCallbackInfo& info)
 
     auto size = param->GetProperty("size");
     if (!size->IsNull()) {
-        Dimension fontSize;
+        CalcDimension fontSize;
         if (ParseJsDimensionFp(size, fontSize)) {
             SelectModel::GetInstance()->SetOptionFontSize(fontSize);
         }
@@ -375,7 +375,7 @@ void JSSelect::JsWidth(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         return;
     }
@@ -390,7 +390,7 @@ void JSSelect::JsHeight(const JSCallbackInfo& info)
         return;
     }
 
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         return;
     }
@@ -457,12 +457,12 @@ void JSSelect::JsSize(const JSCallbackInfo& info)
 
     JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
 
-    Dimension width;
+    CalcDimension width;
     if (!ParseJsDimensionVp(sizeObj->GetProperty("width"), width)) {
         return;
     }
 
-    Dimension height;
+    CalcDimension height;
     if (!ParseJsDimensionVp(sizeObj->GetProperty("height"), height)) {
         return;
     }
@@ -478,32 +478,32 @@ void JSSelect::JsPadding(const JSCallbackInfo& info)
     }
 
     if (info[0]->IsObject()) {
-        std::optional<Dimension> left;
-        std::optional<Dimension> right;
-        std::optional<Dimension> top;
-        std::optional<Dimension> bottom;
+        std::optional<CalcDimension> left;
+        std::optional<CalcDimension> right;
+        std::optional<CalcDimension> top;
+        std::optional<CalcDimension> bottom;
         JSRef<JSObject> paddingObj = JSRef<JSObject>::Cast(info[0]);
 
-        Dimension leftDimen;
+        CalcDimension leftDimen;
         if (ParseJsDimensionVp(paddingObj->GetProperty("left"), leftDimen)) {
             left = leftDimen;
         }
-        Dimension rightDimen;
+        CalcDimension rightDimen;
         if (ParseJsDimensionVp(paddingObj->GetProperty("right"), rightDimen)) {
             right = rightDimen;
         }
-        Dimension topDimen;
+        CalcDimension topDimen;
         if (ParseJsDimensionVp(paddingObj->GetProperty("top"), topDimen)) {
             top = topDimen;
         }
-        Dimension bottomDimen;
+        CalcDimension bottomDimen;
         if (ParseJsDimensionVp(paddingObj->GetProperty("bottom"), bottomDimen)) {
             bottom = bottomDimen;
         }
         SelectModel::GetInstance()->SetPaddings(top, bottom, left, right);
     }
 
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         value.Reset();
     }
@@ -516,7 +516,7 @@ void JSSelect::SetPaddingLeft(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         return;
     }
@@ -529,7 +529,7 @@ void JSSelect::SetPaddingTop(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         return;
     }
@@ -542,7 +542,7 @@ void JSSelect::SetPaddingRight(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         return;
     }
@@ -555,7 +555,7 @@ void JSSelect::SetPaddingBottom(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         return;
     }
@@ -571,7 +571,7 @@ void JSSelect::SetSpace(const JSCallbackInfo& info)
 
     auto selectTheme = GetTheme<SelectTheme>();
 
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         LOGI("JSSelect set space value is mull");
         value = selectTheme->GetContentSpinnerPadding();
@@ -621,10 +621,10 @@ void JSSelect::SetMenuAlign(const JSCallbackInfo& info)
             return;
         }
         auto offsetObj = JSRef<JSObject>::Cast(info[1]);
-        Dimension dx;
+        CalcDimension dx;
         auto dxValue = offsetObj->GetProperty("dx");
         ParseJsDimensionVp(dxValue, dx);
-        Dimension dy;
+        CalcDimension dy;
         auto dyValue = offsetObj->GetProperty("dy");
         ParseJsDimensionVp(dyValue, dy);
         menuAlignObj.offset = DimensionOffset(dx, dy);

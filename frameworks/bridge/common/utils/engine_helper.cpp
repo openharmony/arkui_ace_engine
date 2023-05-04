@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,9 +13,14 @@
  * limitations under the License.
  */
 
-#include "frameworks/bridge/common/utils/engine_helper.h"
+#include "bridge/common/utils/engine_helper.h"
 
+#include <regex>
+
+#include "base/log/log_wrapper.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "base/utils/string_utils.h"
+#include "base/utils/system_properties.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 
@@ -78,4 +83,29 @@ ScopedDelegate EngineHelper::GetCurrentDelegate()
     return { engine ? engine->GetFrontend() : nullptr, container->GetInstanceId() };
 }
 
+std::pair<int32_t, int32_t> EngineHelper::StringToPair(const std::string& match)
+{
+    std::vector<std::string> arr;
+    std::pair<int32_t, int32_t> res;
+    StringUtils::SplitStr(match, ":", arr);
+    res.first = StringUtils::StringToInt(arr[0]);
+    res.second = StringUtils::StringToInt(arr[1]);
+    return res;
+}
+
+std::pair<int32_t, int32_t> EngineHelper::GetPositionOnJsCode()
+{
+    if (!SystemProperties::IsPerformanceCheckEnabled()) {
+        return { 0, 0 };
+    }
+    auto jsEngine = GetCurrentEngine();
+    std::string stack;
+    jsEngine->GetStackTrace(stack);
+    std::regex reg("\\d+:\\d+");
+    std::smatch match;
+    if (std::regex_search(stack, match, reg)) {
+        return StringToPair(match[0].str());
+    }
+    return { 0, 0 };
+}
 } // namespace OHOS::Ace

@@ -61,6 +61,7 @@ ohos_unittest("view_abstract_model_test_ng") {
 
     # mock
     "$ace_root/frameworks/base/test/mock/mock_mouse_style.cpp",
+    "$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
 
     # self
     "$ace_root/adapter/ohos/osal/ace_engine_ext.cpp",

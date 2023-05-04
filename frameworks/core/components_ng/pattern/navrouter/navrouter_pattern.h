@@ -16,9 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVROUTER_NAVROUTER_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVROUTER_NAVROUTER_PATTERN_H
 
-#include "core/components_ng/pattern/pattern.h"
-
+#include "core/components_ng/pattern/navigation/navigation_declaration.h"
+#include "core/components_ng/pattern/navigation/navigation_stack.h"
 #include "core/components_ng/pattern/navrouter/navrouter_event_hub.h"
+#include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -40,9 +41,41 @@ public:
     }
 
     void OnModifyDone() override;
+    void SetNavDestination(const std::string& name)
+    {
+        name_ = name;
+    }
+
+    const std::string& GetNavDestination() const
+    {
+        return name_;
+    }
+
+    void SetRouteInfo(const RefPtr<RouteInfo>& routeInfo)
+    {
+        routeInfo_ = routeInfo;
+    }
+
+    const RefPtr<RouteInfo>& GetRouteInfo()
+    {
+        return routeInfo_;
+    }
+
+    void SetNavRouteMode(NavRouteMode mode)
+    {
+        mode_ = mode;
+    }
+
+    NavRouteMode GetNavRouteMode()
+    {
+        return mode_;
+    }
 
 private:
     RefPtr<ClickEvent> clickListener_;
+    std::string name_;
+    RefPtr<RouteInfo> routeInfo_;
+    NavRouteMode mode_ = NavRouteMode::PUSH_WITH_RECREATE;
 };
 } // namespace OHOS::Ace::NG
 

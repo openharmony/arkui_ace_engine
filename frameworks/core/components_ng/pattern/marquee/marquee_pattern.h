@@ -69,11 +69,13 @@ private:
     void FireFinishEvent() const;
 
     void StartMarqueeAnimation();
-    void StopMarqueeAnimation();
+    void StopMarqueeAnimation(bool stopAndStart, bool statusChanged);
     void SetTextOffset(float offsetX);
     bool lastStartStatus_ = false;
     bool statusChanged_ = false;
+    bool forceStropAnimation_ = false;
     int32_t repeatCount_ = 0;
+    int32_t animationId_ = 0;
     ACE_DISALLOW_COPY_AND_MOVE(MarqueePattern);
 };
 } // namespace OHOS::Ace::NG

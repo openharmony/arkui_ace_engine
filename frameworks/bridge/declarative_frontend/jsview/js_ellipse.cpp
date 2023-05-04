@@ -67,12 +67,12 @@ void JSEllipse::ConstructorCallback(const JSCallbackInfo& info)
     auto ellipse = AceType::MakeRefPtr<Ellipse>();
     JSRef<JSObject> params = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> width = params->GetProperty("width");
-    Dimension dimWidth;
+    CalcDimension dimWidth;
     if (ParseJsDimensionVp(width, dimWidth)) {
         ellipse->SetWidth(dimWidth);
     }
     JSRef<JSVal> height = params->GetProperty("height");
-    Dimension dimHeight;
+    CalcDimension dimHeight;
     if (ParseJsDimensionVp(height, dimHeight)) {
         ellipse->SetHeight(dimHeight);
     }

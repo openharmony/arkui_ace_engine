@@ -82,12 +82,12 @@ void JSBadge::CreateNG(const JSCallbackInfo& info)
             badgeParameters.badgeTextColor = colorVal;
         }
 
-        Dimension fontSize;
+        CalcDimension fontSize;
         if (ParseJsDimensionFp(fontSizeValue, fontSize)) {
             badgeParameters.badgeFontSize = fontSize;
         }
 
-        Dimension badgeSize;
+        CalcDimension badgeSize;
         if (ParseJsDimensionFp(badgeSizeValue, badgeSize)) {
             auto badgeTheme = GetTheme<BadgeTheme>();
             if (!badgeTheme) {
@@ -106,7 +106,7 @@ void JSBadge::CreateNG(const JSCallbackInfo& info)
             badgeParameters.badgeColor = color;
         }
 
-        Dimension borderWidth;
+        CalcDimension borderWidth;
         if (ParseJsDimensionVp(borderWidthValue, borderWidth)) {
             badgeParameters.badgeBorderWidth = borderWidth;
         } else {
@@ -215,12 +215,12 @@ void JSBadge::SetCustomizedTheme(const JSRef<JSObject>& obj, OHOS::Ace::RefPtr<O
             badge->SetBadgeTextColor(colorVal);
         }
 
-        Dimension fontSize;
+        CalcDimension fontSize;
         if (ParseJsDimensionFp(fontSizeValue, fontSize)) {
             badge->SetBadgeFontSize(fontSize);
         }
 
-        Dimension badgeSize;
+        CalcDimension badgeSize;
         if (ParseJsDimensionFp(badgeSizeValue, badgeSize)) {
             if (badgeSize.IsNonNegative()) {
                 badge->SetBadgeCircleSize(badgeSize);
