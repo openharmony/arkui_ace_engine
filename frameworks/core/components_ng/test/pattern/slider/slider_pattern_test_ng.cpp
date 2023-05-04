@@ -2307,6 +2307,34 @@ HWTEST_F(SliderPatternTestNg, SliderAccessibilityPropertyTest002, TestSize.Level
 }
 
 /**
+ * @tc.name: SliderAccessibilityPropertyTest003
+ * @tc.desc: Test the IsScrollable and SupportAction properties of Slider
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderAccessibilityPropertyTest003, TestSize.Level1)
+{
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(VALUE, STEP, MIN, MAX);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto sliderAccessibilityProperty = frameNode->GetAccessibilityProperty<SliderAccessibilityProperty>();
+    ASSERT_NE(sliderAccessibilityProperty, nullptr);
+    EXPECT_TRUE(sliderAccessibilityProperty->IsScrollable());
+    
+    sliderAccessibilityProperty->ResetSupportAction();
+    std::unordered_set<AceAction> supportAceActions = sliderAccessibilityProperty->GetSupportAction();
+    uint64_t actions = 0, exptectActions = 0;
+    exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
+    exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
+    for (auto action : supportAceActions) {
+        actions |= 1UL << static_cast<uint32_t>(action);
+    }
+    EXPECT_EQ(actions, exptectActions);
+}
+
+
+/**
  * @tc.name: SliderTipModifierTest001
  * @tc.desc: Test the SliderTipModifier onDraw
  * @tc.type: FUNC
