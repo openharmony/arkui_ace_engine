@@ -20,6 +20,8 @@
 #include <regex>
 #include <unistd.h>
 
+#include "dfx_jsnapi.h"
+
 #include "base/utils/utils.h"
 #ifdef WINDOWS_PLATFORM
 #include <algorithm>
@@ -1754,6 +1756,21 @@ std::string JsiDeclarativeEngine::GetStacktraceMessage()
 
     auto runningPage = engineInstance_ ? engineInstance_->GetRunningPage() : nullptr;
     return JsiBaseUtils::TransSourceStack(runningPage, stack);
+}
+
+void JsiDeclarativeEngine::GetStackTrace(std::string& trace)
+{
+    auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+    if (!arkRuntime) {
+        LOGE("ArkJsRuntime is null and can not get current stack trace");
+        return;
+    }
+    auto vm = arkRuntime->GetEcmaVm();
+    if (!vm) {
+        LOGE("VM is null and can not get current stack trace");
+        return;
+    }
+    panda::DFXJSNApi::BuildJsStackTrace(vm, trace);
 }
 
 void JsiDeclarativeEngine::SetLocalStorage(int32_t instanceId, NativeReference* nativeValue)
