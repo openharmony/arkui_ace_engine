@@ -157,4 +157,11 @@ void MenuItemView::SetLabelFontWeight(Ace::FontWeight weight)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontWeight, weight);
 }
+
+void MenuItemView::SetSelectedChangeEvent(std::function<void(bool)>&& selectedChangeEvent)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<MenuItemEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetSelectedChangeEvent(selectedChangeEvent);
+}
 } // namespace OHOS::Ace::NG

@@ -570,5 +570,28 @@ HWTEST_F(MenuItemViewTestNg, MenuItemViewTestNgSetLabelFontColor003, TestSize.Le
     ASSERT_FALSE(itemProperty->GetLabelFontColor().has_value());
     ViewStackProcessor::GetInstance()->Finish();
 }
-} // namespace
+/**
+ * @tc.name: MenuItemSetSelectedChangeEvent001
+ * @tc.desc: Verify SetFontSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemViewTestNg, MenuItemSetSelectedChangeEvent001, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    bool isSelected = false;
+    auto changeEvent = [&isSelected](bool select) { isSelected = select; };
+    MenuItemProperties itemOption;
+    MenuItemView::SetSelectedChangeEvent(changeEvent);
+    MenuItemView::Create(itemOption);
+    
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(itemNode, nullptr);
+
+    auto itemProperty = itemNode->GetEventHub<NG::MenuItemEventHub>();
+    ASSERT_NE(itemProperty, nullptr);
+    EXPECT_TRUE(itemProperty->GetSelectedChangeEvent());
+}
+}
 } // namespace OHOS::Ace::NG

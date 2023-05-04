@@ -228,10 +228,15 @@ void MenuItemPattern::RegisterOnClick()
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<MenuItemEventHub>();
 
-    auto event = [onChange = hub->GetOnChange(), weak = WeakClaim(this)](GestureEvent& /* info */) {
+    auto event = [onChange = hub->GetOnChange(), selectedChangeEvent = hub->GetSelectedChangeEvent(),
+                     weak = WeakClaim(this)](GestureEvent& /* info */) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->SetChange();
+        if (selectedChangeEvent) {
+            LOGI("trigger onChangeEvent");
+            selectedChangeEvent(pattern->IsSelected());
+        }
         if (onChange) {
             LOGI("trigger onChange");
             onChange(pattern->IsSelected());
