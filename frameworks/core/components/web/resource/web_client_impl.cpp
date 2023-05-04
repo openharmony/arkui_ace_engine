@@ -331,22 +331,15 @@ std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> WebClientImpl::OnHandleInte
     std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request)
 {
     ContainerScope scope(instanceId_);
-
-    LOGI("OnHandleInterceptRequest url %{private}s", request->Url().c_str());
     auto delegate = webDelegate_.Upgrade();
-    if (!delegate) {
-        return nullptr;
-    }
-    if (delegate->IsEmptyOnInterceptRequest() == true) {
+    if (!delegate || (delegate->IsEmptyOnInterceptRequest() == true)) {
         LOGI("OnHandleInterceptRequest is empty");
         return nullptr;
     }
 
-    auto webRequest = AceType::MakeRefPtr<WebRequest>(request->RequestHeaders(),
-        request->Method(), request->Url(), request->FromGesture(),
-        request->IsAboutMainFrame(), request->IsRequestRedirect());
+    auto webRequest = AceType::MakeRefPtr<WebRequest>(request->RequestHeaders(), request->Method(), request->Url(),
+        request->FromGesture(), request->IsAboutMainFrame(), request->IsRequestRedirect());
     auto param = std::make_shared<OnInterceptRequestEvent>(webRequest);
-
     RefPtr<WebResponse> webResponse = nullptr;
     auto task = Container::CurrentTaskExecutor();
     if (task == nullptr) {
@@ -356,24 +349,17 @@ std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> WebClientImpl::OnHandleInte
     task->PostSyncTask([&delegate, &webResponse, &param] {
             webResponse = delegate->OnInterceptRequest(param);
         }, OHOS::Ace::TaskExecutor::TaskType::JS);
-
     if (webResponse == nullptr) {
         LOGI("webResponse is null");
         return nullptr;
     }
     std::string data = webResponse->GetData();
-    LOGI("intercept Encoding %{public}s",  webResponse->GetEncoding().c_str());
-    LOGI("intercept GetMimeType %{public}s",  webResponse->GetMimeType().c_str());
-    LOGI("intercept GetStatusCode %{public}d",  webResponse->GetStatusCode());
-    LOGI("intercept GetReason %{public}s",  webResponse->GetReason().c_str());
-    LOGI("intercept GetDataType %{public}d",  webResponse->GetDataType());
+    LOGI("intercept Encoding %{public}s, StatusCode %{public}d, DataType %{public}d",
+        webResponse->GetMimeType().c_str(), webResponse->GetStatusCode(), webResponse->GetDataType());
     std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> nwebResponse =
         std::make_shared<OHOS::NWeb::NWebUrlResourceResponse>(webResponse->GetMimeType(), webResponse->GetEncoding(),
-        webResponse->GetStatusCode(), webResponse->GetReason(), webResponse->GetHeaders(), data);
+        webResponse->GetStatusCode(), webResponse->GetReason(), webResponse->GetHeaders(),  data);
     switch (webResponse->GetDataType()) {
-        case WebResponseDataType::STRING_TYPE:
-            nwebResponse->PutResponseData(data);
-            break;
         case WebResponseDataType::FILE_TYPE:
             nwebResponse->PutResponseFileHandle(webResponse->GetFileHandle());
             break;
@@ -381,8 +367,9 @@ std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> WebClientImpl::OnHandleInte
             nwebResponse->PutResponseResourceUrl(webResponse->GetResourceUrl());
             break;
         default:
+            nwebResponse->PutResponseData(data);
             break;
-     }
+    }
     if (webResponse->GetResponseStatus() == false) {
         LOGI("intercept response async Handle");
         std::shared_ptr<NWebResponseAsyncHandle> asyncHandle = std::make_shared<NWebResponseAsyncHandle>(nwebResponse);
