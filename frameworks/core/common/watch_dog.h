@@ -16,13 +16,60 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_WATCH_DOG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_WATCH_DOG_H
 
+#include <shared_mutex>
 #include <unordered_map>
+#include <queue>
 
 #include "base/thread/task_executor.h"
+#include "base/utils/utils.h"
+#include "base/log/event_report.h"
+#include "base/log/log.h"
 
 namespace OHOS::Ace {
+namespace {
 
-class ThreadWatcher;
+enum class State { NORMAL, WARNING, FREEZE };
+}
+class ThreadWatcher final : public Referenced {
+public:
+    ThreadWatcher(int32_t instanceId, TaskExecutor::TaskType type, bool useUIAsJSThread = false);
+    ~ThreadWatcher() override;
+
+    void SetTaskExecutor(const RefPtr<TaskExecutor>& taskExecutor);
+
+    void BuriedBomb(uint64_t bombId);
+    void DefusingBomb();
+
+private:
+    void InitThreadName();
+    void CheckAndResetIfNeeded();
+    bool IsThreadStuck();
+    void HiviewReport() const;
+    void RawReport(RawEventType type) const;
+    void PostCheckTask();
+    void TagIncrease();
+    void Check();
+    void ShowDialog() const;
+    void DefusingTopBomb();
+    void DetonatedBomb();
+
+    mutable std::shared_mutex mutex_;
+    int32_t instanceId_ = 0;
+    TaskExecutor::TaskType type_;
+    std::string threadName_;
+    int32_t loopTime_ = 0;
+    int32_t threadTag_ = 0;
+    int32_t lastLoopTime_ = 0;
+    int32_t lastThreadTag_ = 0;
+    int32_t freezeCount_ = 0;
+    int64_t lastTaskId_ = -1;
+    State state_ = State::NORMAL;
+    WeakPtr<TaskExecutor> taskExecutor_;
+    std::queue<uint64_t> inputTaskIds_;
+    bool canShowDialog_ = true;
+    int32_t showDialogCount_ = 0;
+    bool useUIAsJSThread_ = false;
+};
 
 struct Watchers {
     RefPtr<ThreadWatcher> jsWatcher;

@@ -19,6 +19,7 @@ group("core_common_unittest") {
   deps = []
   if (!is_wearable_product) {
     deps += [
+      "ace_engine:ace_engine_test",
       "clipboard:clip_board_test",
       "environment:environment_test",
       "flutter:flutter_test",
@@ -29,6 +30,7 @@ group("core_common_unittest") {
       "sharedata:share_data_test",
       "storage:storage_test",
       "vibrator:vibrator_test",
+      "watch_dog:watch_dog_test",
     ]
   }
 }
