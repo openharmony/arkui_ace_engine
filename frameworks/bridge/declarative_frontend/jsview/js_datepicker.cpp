@@ -243,11 +243,11 @@ void JSDatePicker::Create(const JSCallbackInfo& info)
     }
     switch (pickerType) {
         case DatePickerType::TIME: {
-            CreateTimePicker(paramObject);
+            CreateTimePicker(info, paramObject);
             break;
         }
         case DatePickerType::DATE: {
-            CreateDatePicker(paramObject);
+            CreateDatePicker(info, paramObject);
             break;
         }
         default: {
@@ -482,7 +482,55 @@ PickerTime JSDatePicker::ParseTime(const JSRef<JSVal>& timeVal)
     return pickerTime;
 }
 
-void JSDatePicker::CreateDatePicker(const JSRef<JSObject>& paramObj)
+void ParseSelectedDateTimeObject(const JSCallbackInfo& info, const JSRef<JSObject>& selectedObject, bool isDatePicker)
+{
+    JSRef<JSVal> changeEventVal = selectedObject->GetProperty("changeEvent");
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
+    auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("DatePicker.SelectedDateTimeChangeEvent");
+        const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(info);
+        CHECK_NULL_VOID(eventInfo);
+        auto selectedStr = eventInfo->GetSelectedStr();
+        auto sourceJson = JsonUtil::ParseJsonString(selectedStr);
+        if (!sourceJson || sourceJson->IsNull()) {
+            LOGE("invalid selected date value.");
+            return;
+        }
+
+        std::tm dateTime = { 0 };
+        auto year = sourceJson->GetValue("year");
+        if (year && year->IsNumber()) {
+            dateTime.tm_year = year->GetInt() - 1900; // local date start from 1900
+        }
+        auto month = sourceJson->GetValue("month");
+        if (month && month->IsNumber()) {
+            dateTime.tm_mon = month->GetInt();
+        }
+        auto day = sourceJson->GetValue("day");
+        if (day && day->IsNumber()) {
+            dateTime.tm_mday = day->GetInt();
+        }
+        auto hour = sourceJson->GetValue("hour");
+        if (hour && hour->IsNumber()) {
+            dateTime.tm_hour = hour->GetInt();
+        }
+        auto minute = sourceJson->GetValue("minute");
+        if (minute && minute->IsNumber()) {
+            dateTime.tm_min = minute->GetInt();
+        }
+        auto milliseconds = Date::GetMilliSecondsByDateTime(dateTime);
+        auto dateObj = JSDate::New(milliseconds);
+        func->ExecuteJS(1, &dateObj);
+    };
+    if (isDatePicker) {
+        DatePickerModel::GetInstance()->SetChangeEvent(std::move(changeEvent));
+    } else {
+        TimePickerModel::GetInstance()->SetChangeEvent(std::move(changeEvent));
+    }
+}
+
+void JSDatePicker::CreateDatePicker(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj)
 {
     JSRef<JSVal> startDate;
     JSRef<JSVal> endDate;
@@ -494,13 +542,6 @@ void JSDatePicker::CreateDatePicker(const JSRef<JSObject>& paramObj)
     }
     auto parseStartDate = ParseDate(startDate);
     auto parseEndDate = ParseDate(endDate);
-    auto parseSelectedDate = ParseDate(selectedDate);
-    auto startDays = parseStartDate.ToDays();
-    auto endDays = parseEndDate.ToDays();
-    auto selectedDays = parseSelectedDate.ToDays();
-    if (startDays > endDays || selectedDays < startDays || selectedDays > endDays) {
-        LOGE("date error");
-    }
     auto theme = GetTheme<PickerTheme>();
     if (!theme) {
         LOGE("datePicker Theme is null");
@@ -514,6 +555,21 @@ void JSDatePicker::CreateDatePicker(const JSRef<JSObject>& paramObj)
         DatePickerModel::GetInstance()->SetEndDate(parseEndDate);
     }
     if (selectedDate->IsObject()) {
+        JSRef<JSObject> selectedDateObj = JSRef<JSObject>::Cast(selectedDate);
+        JSRef<JSVal> changeEventVal = selectedDateObj->GetProperty("changeEvent");
+        PickerDate parseSelectedDate;
+        if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
+            ParseSelectedDateTimeObject(info, selectedDateObj, true);
+            parseSelectedDate = ParseDate(selectedDateObj->GetProperty("value"));
+        } else {
+            parseSelectedDate = ParseDate(selectedDate);
+        }
+        auto startDays = parseStartDate.ToDays();
+        auto endDays = parseEndDate.ToDays();
+        auto selectedDays = parseSelectedDate.ToDays();
+        if (startDays > endDays || selectedDays < startDays || selectedDays > endDays) {
+            LOGE("date error");
+        }
         DatePickerModel::GetInstance()->SetSelectedDate(parseSelectedDate);
     }
     SetDefaultAttributes();
@@ -546,7 +602,7 @@ void JSDatePicker::SetDefaultAttributes()
     DatePickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
 }
 
-void JSDatePicker::CreateTimePicker(const JSRef<JSObject>& paramObj)
+void JSDatePicker::CreateTimePicker(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj)
 {
     auto theme = GetTheme<PickerTheme>();
     if (!theme) {
@@ -556,7 +612,15 @@ void JSDatePicker::CreateTimePicker(const JSRef<JSObject>& paramObj)
     DatePickerModel::GetInstance()->CreateTimePicker(theme);
     auto selectedTime = paramObj->GetProperty("selected");
     if (selectedTime->IsObject()) {
-        DatePickerModel::GetInstance()->SetSelectedTime(ParseTime(selectedTime));
+        JSRef<JSObject> selectedTimeObj = JSRef<JSObject>::Cast(selectedTime);
+        JSRef<JSVal> changeEventVal = selectedTimeObj->GetProperty("changeEvent");
+        if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
+            ParseSelectedDateTimeObject(info, selectedTimeObj, true);
+            auto parseSelectedTime = ParseTime(selectedTimeObj->GetProperty("value"));
+            DatePickerModel::GetInstance()->SetSelectedTime(parseSelectedTime);
+        } else {
+            DatePickerModel::GetInstance()->SetSelectedTime(ParseTime(selectedTime));
+        }
     }
 }
 
@@ -826,7 +890,7 @@ void JSTimePicker::Create(const JSCallbackInfo& info)
     if (info.Length() >= 1 && info[0]->IsObject()) {
         paramObject = JSRef<JSObject>::Cast(info[0]);
     }
-    CreateTimePicker(paramObject);
+    CreateTimePicker(info, paramObject);
 }
 
 void JSTimePicker::UseMilitaryTime(bool isUseMilitaryTime)
@@ -908,7 +972,7 @@ void JSTimePicker::SetSelectedTextStyle(const JSCallbackInfo& info)
     TimePickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
 }
 
-void JSTimePicker::CreateTimePicker(const JSRef<JSObject>& paramObj)
+void JSTimePicker::CreateTimePicker(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj)
 {
     auto selectedTime = paramObj->GetProperty("selected");
     auto theme = GetTheme<PickerTheme>();
@@ -918,7 +982,15 @@ void JSTimePicker::CreateTimePicker(const JSRef<JSObject>& paramObj)
     }
     TimePickerModel::GetInstance()->CreateTimePicker(theme);
     if (selectedTime->IsObject()) {
-        TimePickerModel::GetInstance()->SetSelectedTime(ParseTime(selectedTime));
+        JSRef<JSObject> selectedTimeObj = JSRef<JSObject>::Cast(selectedTime);
+        JSRef<JSVal> changeEventVal = selectedTimeObj->GetProperty("changeEvent");
+        if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
+            ParseSelectedDateTimeObject(info, selectedTimeObj, false);
+            auto parseSelectedTime = ParseTime(selectedTimeObj->GetProperty("value"));
+            TimePickerModel::GetInstance()->SetSelectedTime(parseSelectedTime);
+        } else {
+            TimePickerModel::GetInstance()->SetSelectedTime(ParseTime(selectedTime));
+        }
     }
     SetDefaultAttributes();
 }

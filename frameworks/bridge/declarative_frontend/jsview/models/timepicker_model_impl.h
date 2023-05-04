@@ -32,6 +32,7 @@ public:
     void SetNormalTextStyle(const RefPtr<PickerTheme>& theme, const NG::PickerTextStyle& value) override {};
     void SetSelectedTextStyle(const RefPtr<PickerTheme>& theme, const NG::PickerTextStyle& value) override {};
     void SetBackgroundColor(const Color& color) override {};
+    void SetChangeEvent(ChangeEvent&& onChange) override {};
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_TIMEPICKER_MODEL_IMPL_H
