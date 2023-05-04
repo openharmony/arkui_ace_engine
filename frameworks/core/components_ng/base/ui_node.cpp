@@ -140,13 +140,9 @@ void UINode::Clean(bool cleanDirectly)
     bool needSyncRenderTree = false;
     int32_t index = 0;
     for (const auto& child : children_) {
+        // traverse down the child subtree to mark removing and find needs to hold subtree, if found add it to pending
         if (!cleanDirectly && child->MarkRemoving()) {
-            // pending remove child is removed from tree but not cleaned completely, we'll keep reference of it
-            // and hold its tree integrity temporarily for transition use, of course the pending remove tree is
-            // unavailable for ui operations but some nodes in the tree may also be marked dirty as needed to
-            // perform transition's layout.
             ElementRegister::GetInstance()->AddPendingRemoveNode(child);
-            LOGD("GeometryTransition: pending remove child: %{public}d, parent: %{public}d", child->GetId(), GetId());
         }
         // If the child is undergoing a disappearing transition, rather than simply removing it, we should move it to
         // the disappearing children. This ensures that the child remains alive and the tree hierarchy is preserved
@@ -605,7 +601,6 @@ void UINode::AddDisappearingChild(const RefPtr<UINode>& child, uint32_t index)
     } else {
         // mark child as disappearing before adding to disappearingChildren_
         child->isDisappearing_ = true;
-        child->OnAddDisappearingChild();
     }
     disappearingChildren_.emplace_back(child, index);
 }
@@ -623,7 +618,6 @@ bool UINode::RemoveDisappearingChild(const RefPtr<UINode>& child)
     }
     disappearingChildren_.erase(it);
     child->isDisappearing_ = false;
-    child->OnRemoveDisappearingChild();
     return true;
 }
 

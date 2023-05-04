@@ -217,6 +217,15 @@ void ElementRegister::DumpGeometryTransition()
     }
 }
 
+void ElementRegister::ReSyncGeometryTransition()
+{
+    for (const auto& [itemId, item] : geometryTransitionMap_) {
+        if (item && item->IsInAndOutValid()) {
+            item->OnReSync();
+        }
+    }
+}
+
 void ElementRegister::AddPendingRemoveNode(const RefPtr<NG::UINode>& node)
 {
     pendingRemoveNodes_.emplace_back(node);

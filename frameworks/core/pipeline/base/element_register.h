@@ -102,6 +102,8 @@ public:
                                                                  const WeakPtr<NG::FrameNode>& frameNode);
     void DumpGeometryTransition();
 
+    void ReSyncGeometryTransition();
+
     void AddPendingRemoveNode(const RefPtr<NG::UINode>& node);
     void ClearPendingRemoveNodes();
 

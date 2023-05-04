@@ -351,7 +351,7 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
 
     const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
     if (geometryTransition != nullptr && geometryTransition->IsRunning()) {
-        geometryTransition->DidLayout(WeakClaim(this));
+        geometryTransition->DidLayout(dirty);
     } else if (frameSizeChange || frameOffsetChange || HasPositionProp() ||
                (pattern_->GetSurfaceNodeName().has_value() && contentSizeChange)) {
         if (pattern_->NeedOverridePaintRect()) {
@@ -769,6 +769,11 @@ void FrameNode::UpdateChildrenLayoutWrapper(const RefPtr<LayoutWrapper>& self, b
 void FrameNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool forceMeasure, bool forceLayout)
 {
     ACE_DCHECK(parent);
+    CHECK_NULL_VOID(layoutProperty_);
+    const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
+    if (geometryTransition != nullptr && geometryTransition->IsNodeOutAndActive(WeakClaim(this))) {
+        return;
+    }
     auto layoutWrapper = CreateLayoutWrapper(forceMeasure, forceLayout);
     parent->AppendChild(layoutWrapper);
 }
@@ -1396,6 +1401,21 @@ OffsetF FrameNode::GetPaintRectOffset(bool excludeSelf) const
         auto renderContext = parent->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, OffsetF());
         offset += renderContext->GetPaintRectWithTransform().GetOffset();
+        parent = parent->GetAncestorNodeOfFrame();
+    }
+    return offset;
+}
+
+OffsetF FrameNode::GetPaintRectOffsetWithoutTransform(bool excludeSelf) const
+{
+    auto context = GetRenderContext();
+    CHECK_NULL_RETURN(context, OffsetF());
+    OffsetF offset = excludeSelf ? OffsetF() : context->GetPaintRectWithoutTransform().GetOffset();
+    auto parent = GetAncestorNodeOfFrame();
+    while (parent) {
+        auto renderContext = parent->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, OffsetF());
+        offset += renderContext->GetPaintRectWithoutTransform().GetOffset();
         parent = parent->GetAncestorNodeOfFrame();
     }
     return offset;
