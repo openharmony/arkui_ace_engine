@@ -51,7 +51,6 @@ group("pattern_unittest") {
     "menu:menu_layout_algorithm_test_ng",
     "navigation:navigation_test_ng",
     "navigator:navigator_event_hub_test_ng",
-    "navrouter:navrouter_pattern_test_ng",
     "option:panel_option_test_ng",
     "overlay:overlay_manager_test_ng",
     "panel:panel_test_ng",

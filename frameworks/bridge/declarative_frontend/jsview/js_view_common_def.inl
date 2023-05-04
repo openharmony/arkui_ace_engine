@@ -34,7 +34,7 @@ JSRef<JSVal> ConvertToJSValue(T&& value)
         return JSRef<JSVal>::Make(ToJSValue(std::forward<T>(value)));
     } else if constexpr (std::is_enum_v<ValueType>) {
         return JSRef<JSVal>::Make(ToJSValue(static_cast<std::make_signed_t<ValueType>>(value)));
-    } else if constexpr (std::is_same_v<ValueType, Dimension>) {
+    } else if constexpr (std::is_same_v<ValueType, Dimension> || std::is_same_v<ValueType, CalcDimension>) {
         if (value.Unit() == DimensionUnit::VP) {
             return JSRef<JSVal>::Make(ToJSValue(value.Value()));
         } else {
@@ -90,6 +90,11 @@ bool ConvertFromJSValue(const JSRef<JSVal>& jsValue, T& result)
             return true;
         }
     } else if constexpr (std::is_same_v<T, Dimension>) {
+        CalcDimension calc;
+        bool ret = JSViewAbstract::ParseJsDimensionVp(jsValue, calc);
+        result = calc;
+        return ret;
+    } else if constexpr (std::is_same_v<T, CalcDimension>) {
         return JSViewAbstract::ParseJsDimensionVp(jsValue, result);
     } else if constexpr (std::is_same_v<T, Color>) {
         return JSViewAbstract::ParseJsColor(jsValue, result);

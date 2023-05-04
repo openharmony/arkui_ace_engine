@@ -186,7 +186,7 @@ void JSPatternLock::SetCircleRadius(const JSCallbackInfo& info)
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension radius;
+    CalcDimension radius;
     if (!ParseJsDimensionVp(info[0], radius)) {
         return;
     }
@@ -200,7 +200,7 @@ void JSPatternLock::SetSideLength(const JSCallbackInfo& info)
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension sideLength;
+    CalcDimension sideLength;
     if (!ParseJsDimensionVp(info[0], sideLength)) {
         return;
     }
@@ -215,7 +215,7 @@ void JSPatternLock::SetPathStrokeWidth(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension lineWidth;
+    CalcDimension lineWidth;
     if (!ParseJsDimensionVp(info[0], lineWidth)) {
         return;
     }

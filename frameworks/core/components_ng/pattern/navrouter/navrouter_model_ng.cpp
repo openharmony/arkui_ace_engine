@@ -30,7 +30,6 @@
 namespace OHOS::Ace::NG {
 void NavRouterModelNG::Create()
 {
-    // NG::NavRouterView::Create();
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = stack->ClaimNodeId();
     auto navRouterNode = NavRouterGroupNode::GetOrCreateGroupNode(
@@ -44,5 +43,10 @@ void NavRouterModelNG::SetOnStateChange(std::function<void(bool isActivated)>&& 
     auto navRouterEventHub = AceType::DynamicCast<NavRouterEventHub>(frameNode->GetEventHub<EventHub>());
     CHECK_NULL_VOID(navRouterEventHub);
     navRouterEventHub->SetOnStateChange(std::move(onStateChange));
+}
+
+void NavRouterModelNG::SetNavRouteMode(int32_t value)
+{
+    NG::NavRouterView::SetNavRouteMode(static_cast<NG::NavRouteMode>(value));
 }
 } // namespace OHOS::Ace::NG

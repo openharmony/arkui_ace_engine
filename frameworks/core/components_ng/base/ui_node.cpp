@@ -16,16 +16,30 @@
 #include "core/components_ng/base/ui_node.h"
 
 #include "base/geometry/ng/point_t.h"
+#include "base/log/ace_performance_check.h"
 #include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
 #include "base/memory/referenced.h"
+#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#include "bridge/common/utils/engine_helper.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
 thread_local int32_t UINode::currentAccessibilityId_ = 0;
+
+UINode::UINode(const std::string& tag, int32_t nodeId, bool isRoot)
+    : tag_(tag), nodeId_(nodeId), accessibilityId_(currentAccessibilityId_++), isRoot_(isRoot)
+{
+    if (SystemProperties::IsPerformanceCheckEnabled()) {
+        auto pos = EngineHelper::GetPositionOnJsCode();
+        row_ = pos.first;
+        col_ = pos.second;
+    }
+}
 
 UINode::~UINode()
 {
@@ -480,6 +494,55 @@ int32_t UINode::TotalChildCount() const
     return count;
 }
 
+void UINode::GetAllChildCount(int32_t& count, CheckNodeMap& nodeMap, CheckNodeMap& itemMap)
+{
+    count++;
+    // record current node
+    CheckNodeInfo node;
+    node.col = col_;
+    node.row = row_;
+    node.tag = tag_;
+    nodeMap.insert(std::make_pair(node, children_.size()));
+    if (tag_ == V2::JS_FOR_EACH_ETS_TAG) {
+        for (const auto& child : children_) {
+            // get syntax item's children
+            GetSyntaxItemTag(child, itemMap);
+        }
+    }
+    for (const auto& child : children_) {
+        // recursion children
+        child->GetAllChildCount(count, nodeMap, itemMap);
+    }
+}
+
+void UINode::GetSyntaxItemTag(const RefPtr<UINode>& sytaxItem, CheckNodeMap& itemMap)
+{
+    auto itemChildren = sytaxItem->GetChildren();
+    for (const auto& child : itemChildren) {
+        auto iter = itemMap.find({ child->GetRow(), child->GetCol(), child->GetTag() });
+        if (iter != itemMap.end()) {
+            iter->second++;
+        } else {
+            CheckNodeInfo node;
+            node.col = child->GetCol();
+            node.row = child->GetRow();
+            node.tag = child->GetTag();
+            itemMap.insert(std::make_pair(node, 1));
+        }
+    }
+}
+
+void UINode::GetChildMaxDepth(int32_t& maxDepth)
+{
+    for (const auto& child : children_) {
+        auto depth = child->GetDepth();
+        if (depth > maxDepth) {
+            maxDepth = depth;
+        }
+        child->GetChildMaxDepth(maxDepth);
+    }
+}
+
 int32_t UINode::GetChildIndexById(int32_t id)
 {
     int32_t pos = 0;
@@ -538,27 +601,27 @@ void UINode::OnVisibleChange(bool isVisible)
 std::pair<bool, int32_t> UINode::GetChildFlatIndex(int32_t id)
 {
     if (GetId() == id) {
-        return {true, 0};
+        return { true, 0 };
     }
 
     const auto& node = ElementRegister::GetInstance()->GetUINodeById(id);
     if (!node) {
-        return {false, 0};
+        return { false, 0 };
     }
 
     if (node && (node->GetTag() == GetTag())) {
-        return {false, 1};
+        return { false, 1 };
     }
 
     int32_t count = 0;
     for (const auto& child : GetChildren()) {
         auto res = child->GetChildFlatIndex(id);
         if (res.first) {
-            return {true, count + res.second};
+            return { true, count + res.second };
         }
         count += res.second;
     }
-    return {false, count};
+    return { false, count };
 }
 
 // for Grid refresh GridItems
@@ -627,8 +690,7 @@ bool UINode::RemoveDisappearingChild(const RefPtr<UINode>& child)
     return true;
 }
 
-void UINode::OnGenerateOneDepthVisibleFrameWithTransition(
-    std::list<RefPtr<FrameNode>>& visibleList, uint32_t index)
+void UINode::OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList, uint32_t index)
 {
     // populating with visible children
     for (const auto& child : children_) {

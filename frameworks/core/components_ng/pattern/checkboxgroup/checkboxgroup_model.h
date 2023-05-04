@@ -21,7 +21,6 @@
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_event_hub.h"
 
 namespace OHOS::Ace {
-
 class CheckBoxGroupModel {
 public:
     static CheckBoxGroupModel* GetInstance();
@@ -37,13 +36,11 @@ public:
     virtual void SetOnChange(NG::GroupChangeEvent&& onChange);
     virtual void SetWidth(const Dimension& width);
     virtual void SetHeight(const Dimension& height);
-    virtual void SetPadding(const NG::PaddingPropertyF& args);
+    virtual void SetPadding(const NG::PaddingPropertyF& args, const NG::PaddingProperty& newArgs, bool flag);
 
 private:
     static std::unique_ptr<CheckBoxGroupModel> instance_;
     static std::mutex mutex_;
 };
-
 } // namespace OHOS::Ace
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CHECKBOXGROUP_CHECKBOXGROUP_MODEL_H

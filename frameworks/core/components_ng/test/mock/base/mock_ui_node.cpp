@@ -31,8 +31,7 @@ void UINode::MarkNeedSyncRenderTree() {}
 void UINode::RebuildRenderContextTree() {}
 void UINode::OnDetachFromMainTree(bool) {}
 void UINode::OnAttachToMainTree(bool) {}
-void UINode::OnGenerateOneDepthVisibleFrameWithTransition(
-    std::list<RefPtr<FrameNode>>& visibleList, uint32_t index) {}
+void UINode::OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList, uint32_t index) {}
 bool UINode::OnRemoveFromParent()
 {
     return false;
@@ -79,6 +78,8 @@ int32_t UINode::RemoveChildAndReturnIndex(const RefPtr<UINode>& child)
 {
     return 1;
 }
+
+UINode::UINode(const std::string& tag, int32_t nodeId, bool isRoot) : tag_(tag), nodeId_(nodeId), isRoot_(isRoot) {}
 
 void UINode::RemoveChildAtIndex(int32_t index) {}
 

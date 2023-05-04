@@ -156,6 +156,7 @@ template("declarative_js_engine") {
       "jsview/js_canvas_gradient.cpp",
       "jsview/js_canvas_image_data.cpp",
       "jsview/js_canvas_path.cpp",
+      "jsview/js_canvas_pattern.cpp",
       "jsview/js_canvas_renderer.cpp",
       "jsview/js_checkbox.cpp",
       "jsview/js_checkboxgroup.cpp",
@@ -300,7 +301,6 @@ template("declarative_js_engine") {
       "jsview/models/loading_progress_model_impl.cpp",
       "jsview/models/marquee_model_impl.cpp",
       "jsview/models/navigator_model_impl.cpp",
-      "jsview/models/navrouter_model_impl.cpp",
       "jsview/models/page_transition_model_impl.cpp",
       "jsview/models/path_model_impl.cpp",
       "jsview/models/patternlock_model_impl.cpp",
@@ -317,6 +317,7 @@ template("declarative_js_engine") {
       "jsview/models/select_model_impl.cpp",
       "jsview/models/shape_abstract_model_impl.cpp",
       "jsview/models/shape_model_impl.cpp",
+      "jsview/models/side_bar_container_model_impl.cpp",
       "jsview/models/slider_model_impl.cpp",
       "jsview/models/sliding_panel_model_impl.cpp",
       "jsview/models/span_model_impl.cpp",
@@ -412,7 +413,10 @@ template("declarative_js_engine") {
 
     if (defined(config.form_components_support) &&
         config.form_components_support) {
-      sources += [ "jsview/js_form.cpp" ]
+      sources += [
+        "jsview/js_form.cpp",
+        "jsview/models/form_model_impl.cpp",
+      ]
     }
 
     if (defined(config.remote_window_support) && config.remote_window_support) {

@@ -24,6 +24,7 @@ class ACE_EXPORT NavRouterModelNG : public OHOS::Ace::NavRouterModel {
 public:
     void Create() override;
     void SetOnStateChange(std::function<void(bool isActivated)>&& onStateChange) override;
+    void SetNavRouteMode(int32_t value) override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_NAVROUTER_NAVROUTER_MODEL_NG_H

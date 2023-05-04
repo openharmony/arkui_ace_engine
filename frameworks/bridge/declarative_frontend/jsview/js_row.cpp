@@ -49,11 +49,11 @@ namespace OHOS::Ace::Framework {
 
 void JSRow::Create(const JSCallbackInfo& info)
 {
-    std::optional<Dimension> space;
+    std::optional<CalcDimension> space;
     if (info.Length() > 0 && info[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
         JSRef<JSVal> spaceVal = obj->GetProperty("space");
-        Dimension value;
+        CalcDimension value;
         if (ParseJsDimensionVp(spaceVal, value)) {
             space = value;
         }
