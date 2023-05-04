@@ -182,7 +182,7 @@ void CanvasPaintMethod::DrawImage(
 
     auto image = GetImage(canvasImage.src);
     CHECK_NULL_VOID(image);
-    InitImagePaint();
+    InitImagePaint(imagePaint_);
     InitPaintBlend(imagePaint_);
     const auto skCanvas =
         globalState_.GetType() == CompositeOperation::SOURCE_OVER ? skCanvas_.get() : cacheCanvas_.get();
@@ -232,7 +232,7 @@ void CanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::Canva
     sk_sp<SkImage> image =
         SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
     CHECK_NULL_VOID(image);
-    InitImagePaint();
+    InitImagePaint(imagePaint_);
     InitPaintBlend(imagePaint_);
     switch (canvasImage.flag) {
         case 0:
@@ -546,6 +546,7 @@ void CanvasPaintMethod::UpdateTextStyleForeground(
         ConvertTxtStyle(fillState_.GetTextStyle(), context_, txtStyle);
         if (fillState_.GetGradient().IsValid()) {
             SkPaint paint;
+            InitImagePaint(paint);
             paint.setStyle(SkPaint::Style::kFill_Style);
             UpdatePaintShader(offset, paint, fillState_.GetGradient());
             txtStyle.foreground = paint;
@@ -557,6 +558,7 @@ void CanvasPaintMethod::UpdateTextStyleForeground(
                 txtStyle.foreground.setAlphaf(globalState_.GetAlpha()); // set alpha after color
             } else {
                 SkPaint paint;
+                InitImagePaint(paint);
                 paint.setColor(fillState_.GetColor().GetValue());
                 paint.setAlphaf(globalState_.GetAlpha()); // set alpha after color
                 InitPaintBlend(paint);
