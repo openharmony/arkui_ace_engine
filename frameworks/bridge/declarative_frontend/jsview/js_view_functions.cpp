@@ -13,19 +13,21 @@
  * limitations under the License.
  */
 
-#include "frameworks/bridge/declarative_frontend/jsview/js_view_functions.h"
+#include "bridge/declarative_frontend/jsview/js_view_functions.h"
 
 #include <memory>
+#include <string>
 
+#include "base/log/ace_performance_check.h"
 #include "base/log/ace_trace.h"
+#include "bridge/declarative_frontend/engine/js_execution_scope_defines.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
+#include "bridge/declarative_frontend/jsview/js_view.h"
+#include "bridge/declarative_frontend/jsview/js_view_measure_layout.h"
+#include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/pipeline/base/composed_element.h"
-#include "frameworks/bridge/declarative_frontend/engine/js_execution_scope_defines.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_view.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_view_measure_layout.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -506,6 +508,8 @@ void ViewFunctions::ExecuteFunction(JSWeak<JSFunc>& func, const char* debugInfo)
     }
     ACE_SCOPED_TRACE("%s", debugInfo);
     JSRef<JSVal> jsObject = jsObject_.Lock();
+    std::string functionName(debugInfo);
+    AceScopedPerformanceCheck scoped(functionName);
     func.Lock()->Call(jsObject);
 }
 
@@ -518,6 +522,8 @@ JSRef<JSVal> ViewFunctions::ExecuteFunctionWithReturn(JSWeak<JSFunc>& func, cons
     }
     ACE_SCOPED_TRACE("%s", debugInfo);
     JSRef<JSVal> jsObject = jsObject_.Lock();
+    std::string functionName(debugInfo);
+    AceScopedPerformanceCheck scoped(functionName);
     JSRef<JSVal> result = func.Lock()->Call(jsObject);
     if (result.IsEmpty()) {
         LOGE("Error calling %{public}s", debugInfo);

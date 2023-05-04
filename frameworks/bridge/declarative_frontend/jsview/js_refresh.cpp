@@ -122,7 +122,7 @@ void JSRefresh::Create(const JSCallbackInfo& info)
         ParseRefreshingObject(info, refreshingObj);
         RefreshModel::GetInstance()->SetRefreshing(refreshingObj->GetProperty("value")->ToBoolean());
     }
-    Dimension offset;
+    CalcDimension offset;
     if (ParseJsDimensionVp(jsOffset, offset)) {
         if (LessNotEqual(offset.Value(), 0.0) || offset.Unit() == DimensionUnit::PERCENT) {
             RefreshModel::GetInstance()->SetRefreshDistance(theme->GetRefreshDistance());

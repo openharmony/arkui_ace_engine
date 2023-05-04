@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text_picker/textpicker_accessibility_property.h"
 #include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
 #include "core/components_ng/pattern/text_picker/textpicker_layout_algorithm.h"
 #include "core/components_ng/pattern/text_picker/textpicker_layout_property.h"
@@ -31,6 +32,7 @@
 
 namespace OHOS::Ace::NG {
 using EventCallback = std::function<void(bool)>;
+using ColumnChangeCallback = std::function<void(const RefPtr<FrameNode>&, bool, uint32_t, bool)>;
 
 struct TextProperties {
     Dimension upFontSize;
@@ -67,7 +69,8 @@ public:
         return MakeRefPtr<LinearLayoutProperty>(true);
     }
 
-    void FlushCurrentOptions(bool isDown = false, bool isUpateTextContentOnly = false);
+    void FlushCurrentOptions(bool isDown = false,
+        bool isUpateTextContentOnly = false, bool isDirectlyClear = false);
 
     void InitilaScorllEvent();
 
@@ -152,6 +155,11 @@ public:
         }
     }
 
+    void ClearOptions()
+    {
+        options_.clear();
+    }
+
     void SetColumnKind(int32_t kind)
     {
         columnkind_ = kind;
@@ -207,6 +215,25 @@ public:
 
     void UpdateScrollDelta(double delta);
 
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        return MakeRefPtr<TextPickerAccessibilityProperty>();
+    }
+
+    void SetChangeCallback(ColumnChangeCallback&& value)
+    {
+        changeCallback_ = value;
+    }
+
+    void HandleChangeCallback(bool isAdd, bool needNotify)
+    {
+        if (changeCallback_) {
+            changeCallback_(GetHost(), isAdd, GetCurrentIndex(), needNotify);
+        } else {
+            LOGE("change callback is null.");
+        }
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -230,7 +257,7 @@ private:
     void SetButtonBackgroundColor(const Color& pressColor);
     void PlayPressAnimation(const Color& pressColor);
     void FlushCurrentTextOptions(const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty,
-        bool isUpateTextContentOnly);
+        bool isUpateTextContentOnly, bool isDirectlyClear);
     void FlushCurrentImageOptions();
     void FlushCurrentMixtureOptions(const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty,
         bool isUpateTextContentOnly);
@@ -252,6 +279,8 @@ private:
         uint32_t index, uint32_t showCount, bool isDown, double scale);
     void FlushAnimationTextProperties(bool isDown);
     Dimension LinearFontSize(const Dimension& startFontSize, const Dimension& endFontSize, double percent);
+    void ClearCurrentTextOptions(const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty,
+        bool isUpateTextContentOnly, bool isDirectlyClear);
 
     float localDownDistance_ = 0.0f;
     Color pressColor_;
@@ -292,6 +321,8 @@ private:
         AceType::MakeRefPtr<TextPickerTossAnimationController>();
     std::vector<TextProperties> animationProperties_;
     bool isJump_ = false;
+
+    ColumnChangeCallback changeCallback_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextPickerColumnPattern);
 };

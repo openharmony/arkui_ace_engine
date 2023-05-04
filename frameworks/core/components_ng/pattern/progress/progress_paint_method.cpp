@@ -34,8 +34,13 @@ void ProgressPaintMethod::GetThemeDate()
     CHECK_NULL_VOID(pipeline);
     auto progressTheme = pipeline->GetTheme<ProgressTheme>();
     CHECK_NULL_VOID(progressTheme);
-    color_ = progressTheme->GetTrackSelectedColor();
-    bgColor_ = progressTheme->GetTrackBgColor();
+    if (progressType_ == ProgressType::CAPSULE) {
+        color_ = progressTheme->GetCapsuleSelectColor();
+        bgColor_ = progressTheme->GetCapsuleBgColor();
+    } else {
+        color_ = progressTheme->GetTrackSelectedColor();
+        bgColor_ = progressTheme->GetTrackBgColor();
+    }
     scaleWidth_ = progressTheme->GetScaleWidth().ConvertToPx();
     scaleCount_ = progressTheme->GetScaleNumber();
     borderColor_ = progressTheme->GetBorderColor();

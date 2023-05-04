@@ -130,7 +130,7 @@ void JSSlidingPanel::ParsePanelRadius(const JSRef<JSVal>& args, BorderRadius& bo
         return;
     }
 
-    Dimension radius;
+    CalcDimension radius;
     if (ParseJsDimensionVp(args, radius)) {
         borderRadius.radiusTopLeft = radius;
         borderRadius.radiusTopRight = radius;
@@ -204,7 +204,7 @@ void JSSlidingPanel::JsPanelBorderWidth(const JSCallbackInfo& info)
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension borderWidth;
+    CalcDimension borderWidth;
     if (!ParseJsDimensionVp(info[0], borderWidth)) {
         return;
     }
@@ -232,7 +232,7 @@ void JSSlidingPanel::JsPanelBorder(const JSCallbackInfo& info)
     }
 
     auto argsPtrItem = JSRef<JSObject>::Cast(info[0]);
-    Dimension width = Dimension(0.0, DimensionUnit::VP);
+    CalcDimension width = CalcDimension(0.0, DimensionUnit::VP);
     ParseJsDimensionVp(argsPtrItem->GetProperty("width"), width);
     SlidingPanelModel::GetInstance()->SetBorderWidth(width);
 
@@ -358,7 +358,7 @@ void JSSlidingPanel::SetMiniHeight(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension miniHeight;
+    CalcDimension miniHeight;
     if (!ParseJsDimensionVp(info[0], miniHeight)) {
         return;
     }
@@ -372,7 +372,7 @@ void JSSlidingPanel::SetHalfHeight(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension halfHeight;
+    CalcDimension halfHeight;
     if (!ParseJsDimensionVp(info[0], halfHeight)) {
         return;
     }
@@ -385,7 +385,7 @@ void JSSlidingPanel::SetFullHeight(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension fullHeight;
+    CalcDimension fullHeight;
     if (!ParseJsDimensionVp(info[0], fullHeight)) {
         return;
     }

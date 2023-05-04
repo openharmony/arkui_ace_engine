@@ -66,11 +66,14 @@ public:
         value_ = paintProperty->GetValue().value_or(value_);
         scaleCount_ = paintProperty->GetScaleCount().value_or(scaleCount_);
         scaleWidth_ = paintProperty->GetScaleWidth().value_or(Dimension(scaleWidth_)).ConvertToPx();
+        capsuleBorderWidth_ = paintProperty->GetBorderWidth().value_or(capsuleBorderWidth_);
+        sweepEffect_ = paintProperty->GetEnableScanEffect().value_or(false);
         progressModifier_->SetContentOffset(paintWrapper->GetContentOffset());
         progressModifier_->SetContentSize(paintWrapper->GetContentSize());
         CalculateStrokeWidth(paintWrapper->GetContentSize());
+        progressModifier_->SetSweepEffect(sweepEffect_);
         progressModifier_->SetStrokeWidth(strokeWidth_);
-        progressModifier_->SetBorderWidth(capsuleBorderWidth_);
+        progressModifier_->SetBorderWidth(capsuleBorderWidth_.ConvertToPx());
         progressModifier_->SetColor(LinearColor(color_));
         progressModifier_->SetBackgroundColor(LinearColor(bgColor_));
         progressModifier_->SetBorderColor(LinearColor(borderColor_));
@@ -96,6 +99,7 @@ private:
 
     ProgressType progressType_ = ProgressType::LINEAR;
     RefPtr<ProgressModifier> progressModifier_;
+    bool sweepEffect_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(ProgressPaintMethod);
 };

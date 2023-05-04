@@ -197,6 +197,14 @@ public:
     }
 
     const TextEditingValueNG& GetEditingValue() const;
+
+#if defined(IOS_PLATFORM)
+    const TextEditingValue& GetInputEditingValue() const override {
+        static TextEditingValue value;
+	return value;
+    };
+#endif
+
     void UpdateEditingValue(std::string value, int32_t caretPosition)
     {
         textEditingValue_.text = std::move(value);

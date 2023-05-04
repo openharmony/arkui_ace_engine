@@ -40,8 +40,8 @@ public:
 
 private:
     template<class T>
-    static void SetRadiusValue(const RefPtr<T>& component, const Dimension& radiusX,
-        const Dimension& radiusY, int32_t index);
+    static void SetRadiusValue(const RefPtr<T>& component, const CalcDimension& radiusX,
+        const CalcDimension& radiusY, int32_t index);
     template<class T>
     static void SetRadiusWithArrayValue(const RefPtr<T>& component,
         const JSRef<JSVal>& jsVal);

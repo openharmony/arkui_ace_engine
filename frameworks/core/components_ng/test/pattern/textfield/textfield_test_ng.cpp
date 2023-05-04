@@ -205,7 +205,6 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldDeleteForwardValue001, TestSize.Level1
     EXPECT_EQ(pattern->GetEditingValue().caretPosition, static_cast<int32_t>(TEXT_VALUE.size()));
     pattern->DeleteForward(DELETE_LENGTH_1);
     EXPECT_EQ(pattern->GetEditingValue().text, TEXT_VALUE.substr(0, TEXT_VALUE.size()));
-    LOGI("Lee: %{public}s", pattern->GetEditingValue().text.c_str());
     EXPECT_EQ(pattern->GetEditingValue().caretPosition, TEXT_VALUE.size());
 }
 

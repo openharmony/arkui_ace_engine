@@ -152,7 +152,7 @@ float GridRowLayoutAlgorithm::MeasureChildren(LayoutWrapper* layoutWrapper, doub
             currentRowHeight = child->GetGeometryNode()->GetFrameSize().Height();
         } else {
             newLineOffset.offset += offset;
-            auto childHeight = child->GetGeometryNode()->GetFrameSize().Height();
+            auto childHeight = child->GetGeometryNode()->GetMarginFrameSize().Height();
             currentRowHeight = std::max(currentRowHeight, childHeight);
         }
 
@@ -181,6 +181,7 @@ void GridRowLayoutAlgorithm::CalcCrossAxisAlignment(LayoutWrapper* layoutWrapper
     for (auto& child : row) {
         auto childNode = child.first->GetHostNode();
         auto childSize = child.first->GetGeometryNode()->GetFrameSize();
+        const auto& childMargin = child.first->GetGeometryNode()->GetMargin();
         auto childLayoutProperty = child.first->GetLayoutProperty();
         if (!childLayoutProperty) {
             LOGD("Child %{public}d, tag %{public}s, has no layout property, continue", childNode->GetId(),
@@ -209,9 +210,12 @@ void GridRowLayoutAlgorithm::CalcCrossAxisAlignment(LayoutWrapper* layoutWrapper
         } else {
             float extraOffset = 0.0f;
             if (alignSelf == FlexAlign::CENTER) {
-                extraOffset = (currentRowHeight - childSize.Height()) * 0.5f;
+                extraOffset = (currentRowHeight - childSize.Height() - childMargin->top.value_or(0) -
+                                  childMargin->bottom.value_or(0.0f)) *
+                              0.5f;
             } else if (alignSelf == FlexAlign::FLEX_END) {
-                extraOffset = currentRowHeight - childSize.Height();
+                extraOffset = currentRowHeight - childSize.Height() - childMargin->bottom.value_or(0.0f) -
+                              childMargin->top.value_or(0.0f);
             }
             if (!NearZero(extraOffset)) {
                 child.second.offsetY += extraOffset;

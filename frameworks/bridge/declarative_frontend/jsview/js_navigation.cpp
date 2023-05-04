@@ -285,7 +285,7 @@ void JSNavigation::SetTitle(const JSCallbackInfo& info)
                 NG::NavigationView::SetTitleHeight(NG::FULL_DOUBLE_LINE_TITLEBAR_HEIGHT);
                 return;
             }
-            Dimension titleHeight;
+            CalcDimension titleHeight;
             if (!JSContainerBase::ParseJsDimensionVp(height, titleHeight)) {
                 return;
             }
@@ -606,7 +606,7 @@ void JSNavigation::SetNavBarWidth(const JSCallbackInfo& info)
         return;
     }
 
-    Dimension navBarWidth;
+    CalcDimension navBarWidth;
     if (!ParseJsDimensionVp(info[0], navBarWidth)) {
         return;
     }

@@ -126,7 +126,7 @@ void JSWaterFlow::SetColumnsGap(const JSCallbackInfo& info)
         LOGW("Arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension colGap;
+    CalcDimension colGap;
     if (!ParseJsDimensionVp(info[0], colGap) || colGap.Value() < 0) {
         colGap.SetValue(0.0);
     }
@@ -139,7 +139,7 @@ void JSWaterFlow::SetRowsGap(const JSCallbackInfo& info)
         LOGW("Arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension rowGap;
+    CalcDimension rowGap;
     if (!ParseJsDimensionVp(info[0], rowGap) || rowGap.Value() < 0) {
         rowGap.SetValue(0.0);
     }
@@ -179,25 +179,25 @@ void JSWaterFlow::SetItemConstraintSize(const JSCallbackInfo& info)
     JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
 
     JSRef<JSVal> minWidthValue = sizeObj->GetProperty("minWidth");
-    Dimension minWidth;
+    CalcDimension minWidth;
     if (ParseJsDimensionVp(minWidthValue, minWidth)) {
         WaterFlowModel::GetInstance()->SetItemMinWidth(minWidth);
     }
 
     JSRef<JSVal> maxWidthValue = sizeObj->GetProperty("maxWidth");
-    Dimension maxWidth;
+    CalcDimension maxWidth;
     if (ParseJsDimensionVp(maxWidthValue, maxWidth)) {
         WaterFlowModel::GetInstance()->SetItemMaxWidth(maxWidth);
     }
 
     JSRef<JSVal> minHeightValue = sizeObj->GetProperty("minHeight");
-    Dimension minHeight;
+    CalcDimension minHeight;
     if (ParseJsDimensionVp(minHeightValue, minHeight)) {
         WaterFlowModel::GetInstance()->SetItemMinHeight(minHeight);
     }
 
     JSRef<JSVal> maxHeightValue = sizeObj->GetProperty("maxHeight");
-    Dimension maxHeight;
+    CalcDimension maxHeight;
     if (ParseJsDimensionVp(maxHeightValue, maxHeight)) {
         WaterFlowModel::GetInstance()->SetItemMaxHeight(maxHeight);
     }

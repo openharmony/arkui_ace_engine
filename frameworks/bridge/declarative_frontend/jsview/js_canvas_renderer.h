@@ -182,7 +182,15 @@ public:
         return anti_;
     }
 
+    void SetTransform(unsigned int id, const TransformParam&);
+    
     ACE_DISALLOW_COPY_AND_MOVE(JSCanvasRenderer);
+
+protected:
+    void ParseFillGradient(const JSCallbackInfo& info);
+    void ParseFillPattern(const JSCallbackInfo& info);
+    void ParseStorkeGradient(const JSCallbackInfo& info);
+    void ParseStrokePattern(const JSCallbackInfo& info);
 
 protected:
     RefPtr<CanvasTaskPool> pool_;
@@ -197,9 +205,10 @@ private:
         const double& left, const double& top, const double& width, const double& height);
     PaintState paintState_;
     TextStyle style_;
-    static std::unordered_map<int32_t, Pattern> pattern_;
-    static int32_t patternCount_;
-    Pattern GetPattern(int32_t id);
+    static std::unordered_map<int32_t, std::shared_ptr<Pattern>> pattern_;
+    static unsigned int patternCount_;
+    std::weak_ptr<Ace::Pattern> GetPatternNG(int32_t id);
+    Pattern GetPattern(unsigned int id);
     std::vector<uint32_t> lineDash_;
     ImageData imageData_;
     bool isOffscreen_ = false;

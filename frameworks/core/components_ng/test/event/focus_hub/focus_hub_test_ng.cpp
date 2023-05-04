@@ -36,12 +36,7 @@
 
 using namespace testing;
 using namespace testing::ext;
-namespace OHOS::Ace {
-bool SystemProperties::GetDebugEnabled()
-{
-    return false;
-}
-} // namespace OHOS::Ace
+
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t FOCUS_NODE_SIZE = 2;
