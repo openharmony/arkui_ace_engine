@@ -283,6 +283,16 @@ sk_sp<SkImage> CanvasPaintMethod::GetImage(const std::string& src)
     return rasterizedImage;
 }
 
+
+void CanvasPaintMethod::CloseImageBitmap(const std::string& src)
+{
+    CHECK_NULL_VOID(imageCache_);
+    auto cacheImage = imageCache_->GetCacheImage(src);
+    if (cacheImage && cacheImage->imagePtr) {
+        imageCache_->ClearCacheImage(src);
+    }
+}
+
 std::unique_ptr<Ace::ImageData> CanvasPaintMethod::GetImageData(
     double left, double top, double width, double height)
 {
