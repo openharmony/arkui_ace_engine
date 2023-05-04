@@ -71,8 +71,6 @@ public:
 
             theme->bubbleRadius_ = themeConstants->GetDimension(THEME_BUBBLE_PROGRESS_RADIUS);
             theme->bubbleDiameter_ = themeConstants->GetDimension(THEME_BUBBLE_PROGRESS_DIAMETER);
-            theme->progressHeight_ = themeConstants->GetDimension(THEME_BUTTON_DOWNLOAD_HEIGHT);
-            
             // Read style from system.
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
@@ -91,7 +89,6 @@ public:
             }
             const double defaultCachedAlpha = 0.4;
             const double defaultLoadBGAlpha = 0.6;
-            Color defaultColor = Color::FromRGBO(18, 24, 31, 1.0);
             theme->trackBgColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR, Color::RED);
             theme->trackSelectedColor_ = pattern->GetAttr<Color>(PATTERN_FG_COLOR, Color::RED);
             theme->trackCachedColor_ = theme->trackSelectedColor_
@@ -107,17 +104,6 @@ public:
             theme->borderColor_ = pattern->GetAttr<Color>("progress_border_color", Color::RED);
             theme->maskColor_ = pattern->GetAttr<Color>("progress_mask_color", Color::RED);
             theme->borderWidth_ = pattern->GetAttr<Dimension>("progress_border_width", 1.0_vp);
-
-            theme->textColor_ = pattern->GetAttr<Color>("progress_text_color", defaultColor);
-            theme->textSize_ = pattern->GetAttr<Dimension>("progress_text_size", 12.0_fp);
-            theme->capsuleSelectColor_ = pattern->GetAttr<Color>("capsule_progress_select_color", Color::RED);
-            theme->selectColorAlpha_ = pattern->GetAttr<double>("capsule_progress_default_alpha", 1.0);
-            theme->capsuleSelectColor_ = theme->capsuleSelectColor_.BlendOpacity(theme->selectColorAlpha_);
-            theme->borderColor_ = theme->capsuleSelectColor_;
-            theme->progressDisable_ = pattern->GetAttr<double>("progress_disabled_alpha", 1.0);
-            theme->clickEffect_ = pattern->GetAttr<Color>("progress_click_effect", Color::RED);
-            theme->capsuleBgColor_ = pattern->GetAttr<Color>("capsule_progress_bg_color", Color::RED)
-                .BlendOpacity(pattern->GetAttr<double>("capsule_progress_bg_alpha", 1.0));
         }
     };
 
@@ -253,51 +239,6 @@ public:
         return maskColor_;
     }
 
-    const Color& GetTextColor() const
-    {
-        return textColor_;
-    }
-
-    const Dimension& GetTextSize() const
-    {
-        return textSize_;
-    }
-
-    const Dimension& GetProgressHeight() const
-    {
-        return progressHeight_;
-    }
-
-    const Color& GetCapsuleSelectColor() const
-    {
-        return capsuleSelectColor_;
-    }
-
-    const float& GetProgressDisable() const
-    {
-        return progressDisable_;
-    }
-
-    const Color& GetClickEffect() const
-    {
-        return clickEffect_;
-    }
-
-    const float& GetSelectColorAlpha() const
-    {
-        return selectColorAlpha_;
-    }
-
-    const Dimension& GetTextMargin() const
-    {
-        return textMargin_;
-    }
-
-    const Color& GetCapsuleBgColor() const
-    {
-        return capsuleBgColor_;
-    }
-
 protected:
     ProgressTheme() = default;
 
@@ -335,15 +276,6 @@ private:
     Color borderColor_;
     Dimension borderWidth_;
     Color maskColor_;
-    Color textColor_;
-    Dimension textSize_;
-    Dimension progressHeight_;
-    Color capsuleSelectColor_;
-    float progressDisable_ = 0.4;
-    Color clickEffect_;
-    float selectColorAlpha_ = 1.0;
-    const Dimension textMargin_ = 8.0_vp;
-    Color capsuleBgColor_;
 };
 
 } // namespace OHOS::Ace

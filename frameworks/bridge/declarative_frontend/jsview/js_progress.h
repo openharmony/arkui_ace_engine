@@ -39,10 +39,6 @@ public:
     static void SetCircularStyle(const JSCallbackInfo& info);
     static void JsBackgroundColor(const JSCallbackInfo& info);
     static void JsBorderColor(const JSCallbackInfo& info);
-    static void JsSetCapsuleStyle(const JSCallbackInfo& info);
-    static void JsSetFontStyle(const JSCallbackInfo& info);
-    static void JsSetFontDefault();
-    static void JsSetFont(const JSRef<JSObject>& info);
 };
 
 } // namespace OHOS::Ace::Framework
