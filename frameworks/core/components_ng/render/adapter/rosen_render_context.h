@@ -151,6 +151,7 @@ public:
     void OnNodeAppear(bool recursive) override;
     void OnNodeDisappear(bool recursive) override;
     void ClipWithRect(const RectF& rectF) override;
+    void ClipWithRRect(const RectF& rectF, const RadiusF& radiusF) override;
 
     bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish) override;
 
