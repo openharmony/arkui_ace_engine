@@ -82,7 +82,7 @@ void AceFormAbility::LoadFormEnv(const OHOS::AAFwk::Want& want)
     // init form ability
     BackendType backendType = BackendType::FORM;
 
-    Platform::PaContainer::CreateContainer(instanceId_, backendType, this,
+    Platform::PaContainer::CreateContainer(instanceId_, backendType, this, moduleInfo->hapPath,
         std::make_unique<FormPlatformEventCallback>([this]() { TerminateAbility(); }));
 
     std::shared_ptr<AbilityInfo> info = GetAbilityInfo();
