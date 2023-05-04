@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_PROGRESS_PROGRESS_PAINT_PROPERTY_H
 
 #include "base/geometry/dimension.h"
-#include "core/components/common/properties/text_style.h"
 #include "core/components_ng/pattern/progress/progress_date.h"
 #include "core/components_ng/render/paint_property.h"
 
@@ -54,22 +53,12 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
     std::string ProgressOptions() const;
-    void ToJsonValueForCapsule(std::unique_ptr<JsonValue>& json) const;
 
     ACE_DEFINE_PROPERTY_GROUP(ProgressPaintDate, ProgressDate);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ProgressPaintDate, MaxValue, double, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ProgressPaintDate, Value, double, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ProgressPaintDate, ScaleCount, int32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ProgressPaintDate, ScaleWidth, Dimension, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ProgressPaintDate, BorderWidth, Dimension, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ProgressPaintDate, TextSize, Dimension, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ProgressPaintDate, Text, std::string, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ProgressPaintDate, EnableScanEffect, bool, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ProgressPaintDate, FontWeight, FontWeight, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ProgressPaintDate, FontFamily, std::vector<std::string>,
-        PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ProgressPaintDate, ItalicFontStyle, Ace::FontStyle, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ProgressPaintDate, TextColor, Color, PROPERTY_UPDATE_MEASURE);
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Color, Color, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BackgroundColor, Color, PROPERTY_UPDATE_MEASURE);
