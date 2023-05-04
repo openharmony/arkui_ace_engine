@@ -99,12 +99,22 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::Bind(globalObj);
 }
 
+void ParseSearchValueObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
+{
+    CHECK_NULL_VOID(changeEventVal->IsFunction());
+
+    JsEventCallback<void(const std::string&)> onChangeEvent(
+        info.GetExecutionContext(), JSRef<JSFunc>::Cast(changeEventVal));
+    SearchModel::GetInstance()->SetOnChangeEvent(std::move(onChangeEvent));
+}
+
 void JSSearch::Create(const JSCallbackInfo& info)
 {
     std::optional<std::string> key;
     std::optional<std::string> tip;
     std::optional<std::string> src;
     JSSearchController* jsController = nullptr;
+    JSRef<JSVal> changeEventVal;
     if (info[0]->IsObject()) {
         auto param = JSRef<JSObject>::Cast(info[0]);
         std::string placeholder;
@@ -115,11 +125,18 @@ void JSSearch::Create(const JSCallbackInfo& info)
             tip = placeholder;
         }
         std::string text;
-        if (param->GetProperty("value")->IsUndefined()) {
-            key = "";
-        }
-        if (ParseJsString(param->GetProperty("value"), text)) {
-            key = text;
+        key = "";
+        if (param->GetProperty("value")->IsObject()) {
+            JSRef<JSObject> valueObj = JSRef<JSObject>::Cast(param->GetProperty("value"));
+            changeEventVal = valueObj->GetProperty("changeEvent");
+            auto valueProperty = valueObj->GetProperty("value");
+            if (ParseJsString(valueProperty, text)) {
+                key = text;
+            }
+        } else {
+            if (ParseJsString(param->GetProperty("value"), text)) {
+                key = text;
+            }
         }
         std::string icon;
         if (ParseJsString(param->GetProperty("icon"), icon)) {
@@ -136,6 +153,9 @@ void JSSearch::Create(const JSCallbackInfo& info)
     }
     SearchModel::GetInstance()->SetFocusable(true);
     SearchModel::GetInstance()->SetFocusNode(true);
+    if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
+        ParseSearchValueObject(info, changeEventVal);
+    }
 }
 
 void JSSearch::RequestKeyboardOnFocus(bool needToRequest)
