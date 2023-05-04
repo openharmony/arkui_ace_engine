@@ -99,14 +99,33 @@ void JSCheckbox::JSBind(BindingTarget globalObj)
     JSClass<JSCheckbox>::Bind<>(globalObj);
 }
 
+void ParseSelectObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
+{
+    CHECK_NULL_VOID(changeEventVal->IsFunction());
+
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
+    auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](bool param) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("CheckBox.ChangeEvent");
+        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(param));
+        func->ExecuteJS(1, &newJSVal);
+    };
+    CheckBoxModel::GetInstance()->SetChangeEvent(std::move(changeEvent));
+}
+
 void JSCheckbox::SetSelect(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsBoolean()) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments, arg is not a bool");
+    if (info.Length() < 1 || info.Length() > 2) {
+        LOGE("The arg is wrong, it is supposed to have 1 or 2 arguments");
         return;
     }
 
-    CheckBoxModel::GetInstance()->SetSelect(info[0]->ToBoolean());
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        CheckBoxModel::GetInstance()->SetSelect(info[0]->ToBoolean());
+    }
+    if (info.Length() > 1 && info[1]->IsFunction()) {
+        ParseSelectObject(info, info[1]);
+    }
 }
 
 void JSCheckbox::SetOnChange(const JSCallbackInfo& args)
