@@ -47,6 +47,10 @@ public:
 
     void FireSizeChangeEvent(PanelMode mode, float width, float height) const
     {
+        if (modeChangeEvent_) {
+            auto modeChangEvent = std::make_shared<SlidingPanelSizeChangeEvent>(mode, width, height);
+            modeChangeEvent_(modeChangEvent.get());
+        }
         if (changeEvent_) {
             auto changEvent = std::make_shared<SlidingPanelSizeChangeEvent>(mode, width, height);
             changeEvent_(changEvent.get());
@@ -60,9 +64,15 @@ public:
         }
     }
 
+    void SetModeChangeEvent(ChangeEvent&& modeChangeEvent)
+    {
+        modeChangeEvent_ = std::move(modeChangeEvent);
+    }
+
 private:
     ChangeEvent changeEvent_;
     HeightChangeEvent heightChangeEvent_;
+    ChangeEvent modeChangeEvent_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SlidingPanelEventHub);
 };
