@@ -64,6 +64,8 @@ void JSXComponent::JSBind(BindingTarget globalObj)
     JSClass<JSXComponent>::StaticMethod("onKeyEvent", &JSXComponent::OmitEvent);
     JSClass<JSXComponent>::StaticMethod("onMouse", &JSXComponent::OmitEvent);
     JSClass<JSXComponent>::StaticMethod("onHover", &JSXComponent::OmitEvent);
+    JSClass<JSXComponent>::StaticMethod("onFocus", &JSXComponent::OmitEvent);
+    JSClass<JSXComponent>::StaticMethod("onBlur", &JSXComponent::OmitEvent);
     JSClass<JSXComponent>::Inherit<JSViewAbstract>();
     JSClass<JSXComponent>::Bind(globalObj);
 }
