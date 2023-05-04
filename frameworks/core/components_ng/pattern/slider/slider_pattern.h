@@ -50,12 +50,16 @@ public:
                     pattern->LayoutImageNode();
                 });
         }
-        SliderPaintMethod::TipParameters tipParameters { bubbleFlag_, circleCenter_ };
+        SliderPaintMethod::TipParameters tipParameters { bubbleFlag_,
+            GetBubbleVertexPosition(circleCenter_, trackThickness_, blockSize_) };
         if (!sliderTipModifier_ && bubbleFlag_) {
             sliderTipModifier_ = AceType::MakeRefPtr<SliderTipModifier>([weak = WeakClaim(this)]() {
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_RETURN(pattern, OffsetF());
-                return pattern->GetBlockCenter();
+                auto blockCenter = pattern->sliderContentModifier_->GetBlockCenter();
+                auto trackThickness = pattern->sliderContentModifier_->GetTrackThickness();
+                auto blockSize = pattern->sliderContentModifier_->GetBlockSize();
+                return pattern->GetBubbleVertexPosition(blockCenter, trackThickness, blockSize);
             });
         }
         return MakeRefPtr<SliderPaintMethod>(
@@ -157,6 +161,7 @@ private:
     void GetCirclePosition(SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset);
     void UpdateBlock();
     void LayoutImageNode();
+    OffsetF GetBubbleVertexPosition(const OffsetF& blockCenter, float trackThickness, const SizeF& blockSize);
 
     Axis direction_ = Axis::HORIZONTAL;
     enum SliderChangeMode { Begin = 0, Moving = 1, End = 2, Click = 3 };

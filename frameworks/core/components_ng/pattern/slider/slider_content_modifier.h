@@ -210,6 +210,16 @@ public:
         return OffsetF(blockCenterX_->Get(), blockCenterY_->Get());
     }
 
+    float GetTrackThickness() const
+    {
+        return trackThickness_->Get();
+    }
+
+    SizeF GetBlockSize() const
+    {
+        return blockSize_->Get();
+    }
+
 private:
     void InitializeShapeProperty();
     RSRect GetTrackRect();
