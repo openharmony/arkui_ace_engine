@@ -24,8 +24,8 @@ public:
     static void Create(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
 
-    static void Selected(int value);
-    static void Value(const std::string& value);
+    static void Selected(const JSCallbackInfo& info);
+    static void Value(const JSCallbackInfo& info);
     static void Font(const JSCallbackInfo& info);
     static void FontColor(const JSCallbackInfo& info);
     static void SelectedOptionBgColor(const JSCallbackInfo& info);
