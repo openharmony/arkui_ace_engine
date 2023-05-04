@@ -167,11 +167,11 @@ void TextLayoutAlgorithm::UpdateParagraph(LayoutWrapper* layoutWrapper)
             auto width = geometryNode->GetMarginFrameSize().Width();
             auto height = geometryNode->GetMarginFrameSize().Height();
             child->placeHolderIndex = child->UpdateParagraph(paragraph_, width, height, verticalAlign);
-            child->positon += 1;
+            child->position += 1;
             iterItems++;
         } else {
             child->UpdateParagraph(paragraph_);
-            child->positon = spanTextLength + StringUtils::ToWstring(child->content).length();
+            child->position = spanTextLength + StringUtils::ToWstring(child->content).length();
             spanTextLength += StringUtils::ToWstring(child->content).length();
         }
     }

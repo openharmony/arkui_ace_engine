@@ -67,6 +67,7 @@ public:
         auto textPickerPaintMethod = MakeRefPtr<TextPickerPaintMethod>();
         textPickerPaintMethod->SetDefaultPickerItemHeight(CalculateHeight());
         textPickerPaintMethod->SetEnabled(enabled_);
+        textPickerPaintMethod->SetBackgroundColor(backgroundColor_);
         return textPickerPaintMethod;
     }
 
@@ -150,6 +151,11 @@ public:
             return "";
         }
         return options_[index].text_;
+    }
+
+    void SetBackgroundColor(const Color& color)
+    {
+        backgroundColor_ = color;
     }
 
     FocusPattern GetFocusPattern() const override
@@ -264,6 +270,8 @@ private:
     bool isCascade_ = false;
     std::vector<std::string> values_;
     std::vector<uint32_t> selecteds_;
+    Color backgroundColor_ = Color::WHITE;
+
     ACE_DISALLOW_COPY_AND_MOVE(TextPickerPattern);
 };
 } // namespace OHOS::Ace::NG

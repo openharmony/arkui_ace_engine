@@ -29,7 +29,8 @@ void MarqueeModelNG::Create()
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::MARQUEE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
     if (frameNode->GetChildren().empty()) {
-        auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<TextPattern>());
+        auto textNode = FrameNode::CreateFrameNode(
+            V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
         auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
         textLayoutProperty->UpdateContent(std::string(""));
         frameNode->AddChild(textNode);
@@ -45,16 +46,7 @@ void MarqueeModelNG::Create()
 
 void MarqueeModelNG::SetValue(const std::string& value)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    ACE_DCHECK(!frameNode->GetChildren().empty());
-    auto textChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    CHECK_NULL_VOID(textChild);
-    auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdateContent(value);
-    textChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    textChild->MarkModifyDone();
+    ACE_UPDATE_LAYOUT_PROPERTY(MarqueeLayoutProperty, Src, value);
 }
 
 void MarqueeModelNG::SetPlayerStatus(bool playerStatus)
@@ -84,52 +76,22 @@ void MarqueeModelNG::SetAllowScale(bool allowScale)
 
 void MarqueeModelNG::SetTextColor(const Color& textColor)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    ACE_DCHECK(!frameNode->GetChildren().empty());
-    auto textChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    CHECK_NULL_VOID(textChild);
-    auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdateTextColor(textColor);
-    auto textRenderContext = textChild->GetRenderContext();
-    textRenderContext->UpdateForegroundColor(textColor);
+    ACE_UPDATE_LAYOUT_PROPERTY(MarqueeLayoutProperty, FontColor, textColor);
 }
 
 void MarqueeModelNG::SetFontSize(const Dimension& fontSize)
 {
-    auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    ACE_DCHECK(!frameNode->GetChildren().empty());
-    auto textChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    CHECK_NULL_VOID(textChild);
-    auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdateFontSize(fontSize);
+    ACE_UPDATE_LAYOUT_PROPERTY(MarqueeLayoutProperty, FontSize, fontSize);
 }
 
 void MarqueeModelNG::SetFontWeight(const FontWeight& fontWeight)
 {
-    auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    ACE_DCHECK(!frameNode->GetChildren().empty());
-    auto textChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    CHECK_NULL_VOID(textChild);
-    auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdateFontWeight(fontWeight);
+    ACE_UPDATE_LAYOUT_PROPERTY(MarqueeLayoutProperty, FontWeight, fontWeight);
 }
 
 void MarqueeModelNG::SetFontFamily(const std::vector<std::string>& fontFamilies)
 {
-    auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    ACE_DCHECK(!frameNode->GetChildren().empty());
-    auto textChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    CHECK_NULL_VOID(textChild);
-    auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdateFontFamily(fontFamilies);
+    ACE_UPDATE_LAYOUT_PROPERTY(MarqueeLayoutProperty, FontFamily, fontFamilies);
 }
 
 void MarqueeModelNG::SetOnStart(std::function<void()>&& onChange)

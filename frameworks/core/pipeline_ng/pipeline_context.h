@@ -79,7 +79,7 @@ public:
     uint32_t AddScheduleTask(const RefPtr<ScheduleTask>& task) override;
 
     // remove schedule task by id.
-    void RemoveScheduleTask(uint32_t id) override {}
+    void RemoveScheduleTask(uint32_t id) override;
 
     // Called by view when touch event received.
     void OnTouchEvent(const TouchEvent& point, bool isSubPipe = false) override;

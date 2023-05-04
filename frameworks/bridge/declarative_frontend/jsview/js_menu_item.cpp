@@ -165,7 +165,7 @@ void JSMenuItem::ContentFont(const JSCallbackInfo& info)
         return;
     }
 
-    Dimension fontSize;
+    CalcDimension fontSize;
     std::string weight;
     if (info.Length() < 1 || !info[0]->IsObject()) {
         LOGW("The argv is wrong, it is supposed to have at least 1 object argument");
@@ -212,7 +212,7 @@ void JSMenuItem::LabelFont(const JSCallbackInfo& info)
         return;
     }
 
-    Dimension fontSize;
+    CalcDimension fontSize;
     std::string weight;
     if (info.Length() < 1 || !info[0]->IsObject()) {
         LOGW("The argv is wrong, it is supposed to have at least 1 object argument");

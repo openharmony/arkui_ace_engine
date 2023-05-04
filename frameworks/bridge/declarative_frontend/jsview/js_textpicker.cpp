@@ -67,7 +67,7 @@ void JSTextPicker::JSBind(BindingTarget globalObj)
     JSClass<JSTextPicker>::StaticMethod("onAccept", &JSTextPicker::OnAccept);
     JSClass<JSTextPicker>::StaticMethod("onCancel", &JSTextPicker::OnCancel);
     JSClass<JSTextPicker>::StaticMethod("onChange", &JSTextPicker::OnChange);
-    JSClass<JSTextPicker>::StaticMethod("backgroundColor", &JSDatePicker::PickerBackgroundColor);
+    JSClass<JSTextPicker>::StaticMethod("backgroundColor", &JSTextPicker::PickerBackgroundColor);
     JSClass<JSTextPicker>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSTextPicker>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSTextPicker>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
@@ -76,6 +76,32 @@ void JSTextPicker::JSBind(BindingTarget globalObj)
     JSClass<JSTextPicker>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSTextPicker>::Inherit<JSViewAbstract>();
     JSClass<JSTextPicker>::Bind(globalObj);
+}
+
+void JSTextPicker::PickerBackgroundColor(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsBackgroundColor(info);
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (info.Length() < 1) {
+            LOGI("The arg(PickerBackgroundColor) is wrong, it is supposed to have at least 1 argument");
+            return;
+        }
+        Color backgroundColor;
+        if (!ParseJsColor(info[0], backgroundColor)) {
+            LOGI("the info[0] is null");
+            return;
+        }
+        TextPickerModel::GetInstance()->SetBackgroundColor(backgroundColor);
+    }
+
+    auto pickerBase = AceType::DynamicCast<PickerBaseComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (!pickerBase) {
+        LOGE("PickerBaseComponent is null");
+        return;
+    }
+
+    pickerBase->SetHasBackgroundColor(true);
 }
 
 size_t JSTextPicker::ProcessCascadeOptionDepth(const NG::TextCascadePickerOptions& option)
@@ -623,7 +649,7 @@ void JSTextPickerParser::ParseTextStyle(const JSRef<JSObject>& paramObj, NG::Pic
     if (fontSize->IsNull() || fontSize->IsUndefined()) {
         textStyle.fontSize = Dimension(-1);
     } else {
-        Dimension size;
+        CalcDimension size;
         if (!ParseJsDimensionFp(fontSize, size) || size.Unit() == DimensionUnit::PERCENT) {
             textStyle.fontSize = Dimension(-1);
             LOGW("Parse to dimension FP failed.");
@@ -649,7 +675,7 @@ void JSTextPicker::SetDefaultPickerItemHeight(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have atleast 1 argument.");
         return;
     }
-    Dimension height;
+    CalcDimension height;
     if (info[0]->IsNumber() || info[0]->IsString()) {
         if (!ParseJsDimensionFp(info[0], height)) {
             return;
@@ -1045,7 +1071,7 @@ bool JSTextPickerDialog::ParseShowDataOptions(const JSRef<JSObject>& paramObject
 bool JSTextPickerDialog::ParseShowDataAttribute(const JSRef<JSObject>& paramObject,
     NG::TextPickerSettingData& settingData)
 {
-    Dimension height;
+    CalcDimension height;
     NG::PickerTextProperties textProperties;
     auto defaultHeight = paramObject->GetProperty("defaultPickerItemHeight");
     if (defaultHeight->IsNumber() || defaultHeight->IsString()) {
@@ -1274,7 +1300,7 @@ void JSTextPickerDialog::ParseText(RefPtr<PickerTextComponent>& component, const
         selectedValue = 0;
     }
 
-    Dimension height;
+    CalcDimension height;
     if (defaultHeight->IsNumber() || defaultHeight->IsString()) {
         if (!JSViewAbstract::ParseJsDimensionFp(defaultHeight, height)) {
             return;

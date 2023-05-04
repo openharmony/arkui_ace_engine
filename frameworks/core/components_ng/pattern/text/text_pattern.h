@@ -146,8 +146,8 @@ public:
 
     void OnVisibleChange(bool isVisible) override;
 
-// ===========================================================
-// TextDragBase implementations
+    // ===========================================================
+    // TextDragBase implementations
 
     bool IsTextArea() const override
     {
@@ -186,8 +186,8 @@ public:
 
     bool BetweenSelectedPosition(const Offset& globalOffset) override;
 
-// end of TextDragBase implementations
-// ===========================================================
+    // end of TextDragBase implementations
+    // ===========================================================
 
 private:
     void OnDetachFromFrameNode(FrameNode* node) override;

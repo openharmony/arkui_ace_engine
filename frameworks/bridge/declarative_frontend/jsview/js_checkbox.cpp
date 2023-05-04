@@ -54,11 +54,9 @@ CheckBoxModel* CheckBoxModel::GetInstance()
     }
     return instance_.get();
 }
-
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
-
 void JSCheckbox::Create(const JSCallbackInfo& info)
 {
     auto checkboxName = std::optional<std::string>();
@@ -139,14 +137,11 @@ void JSCheckbox::JsWidth(const JSCallbackInfo& info)
 
 void JSCheckbox::JsWidth(const JSRef<JSVal>& jsValue)
 {
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(jsValue, value)) {
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetWidth(NG::CalcLength(value));
-        return;
-    }
+
     CheckBoxModel::GetInstance()->SetWidth(value);
 }
 
@@ -162,14 +157,11 @@ void JSCheckbox::JsHeight(const JSCallbackInfo& info)
 
 void JSCheckbox::JsHeight(const JSRef<JSVal>& jsValue)
 {
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(jsValue, value)) {
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetHeight(NG::CalcLength(value));
-        return;
-    }
+
     CheckBoxModel::GetInstance()->SetHeight(value);
 }
 
@@ -241,7 +233,7 @@ void JSCheckbox::Mark(const JSCallbackInfo& info)
     CheckBoxModel::GetInstance()->SetCheckMarkColor(strokeColor);
 
     auto sizeValue = markObj->GetProperty("size");
-    Dimension size;
+    CalcDimension size;
     if ((ParseJsDimensionVp(sizeValue, size)) && (size.Unit() != DimensionUnit::PERCENT) &&
         (size.ConvertToVp() >= 0)) {
         CheckBoxModel::GetInstance()->SetCheckMarkSize(size);
@@ -250,7 +242,7 @@ void JSCheckbox::Mark(const JSCallbackInfo& info)
     }
     
     auto strokeWidthValue = markObj->GetProperty("strokeWidth");
-    Dimension strokeWidth;
+    CalcDimension strokeWidth;
     if ((ParseJsDimensionVp(strokeWidthValue, strokeWidth)) && (strokeWidth.Unit() != DimensionUnit::PERCENT) &&
         (strokeWidth.ConvertToVp() >= 0)) {
         CheckBoxModel::GetInstance()->SetCheckMarkWidth(strokeWidth);
@@ -270,23 +262,26 @@ void JSCheckbox::JsPadding(const JSCallbackInfo& info)
         return;
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        JSViewAbstract::JsPadding(info);
-        return;
-    }
+    NG::PaddingPropertyF oldPadding;
+    bool flag = GetOldPadding(info, oldPadding);
+    NG::PaddingProperty newPadding = GetNewPadding(info);
+    CheckBoxModel::GetInstance()->SetPadding(oldPadding, newPadding, flag);
+}
 
+bool JSCheckbox::GetOldPadding(const JSCallbackInfo& info, NG::PaddingPropertyF& padding)
+{
     if (info[0]->IsObject()) {
         auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
         if (!argsPtrItem || argsPtrItem->IsNull()) {
             LOGE("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
-            return;
+            return false;
         }
         if (argsPtrItem->Contains("top") || argsPtrItem->Contains("bottom") || argsPtrItem->Contains("left") ||
             argsPtrItem->Contains("right")) {
-            Dimension topDimen = Dimension(0.0, DimensionUnit::VP);
-            Dimension leftDimen = Dimension(0.0, DimensionUnit::VP);
-            Dimension rightDimen = Dimension(0.0, DimensionUnit::VP);
-            Dimension bottomDimen = Dimension(0.0, DimensionUnit::VP);
+            CalcDimension topDimen = CalcDimension(0.0, DimensionUnit::VP);
+            CalcDimension leftDimen = CalcDimension(0.0, DimensionUnit::VP);
+            CalcDimension rightDimen = CalcDimension(0.0, DimensionUnit::VP);
+            CalcDimension bottomDimen = CalcDimension(0.0, DimensionUnit::VP);
             ParseJsonDimensionVp(argsPtrItem->GetValue("top"), topDimen);
             ParseJsonDimensionVp(argsPtrItem->GetValue("left"), leftDimen);
             ParseJsonDimensionVp(argsPtrItem->GetValue("right"), rightDimen);
@@ -300,25 +295,75 @@ void JSCheckbox::JsPadding(const JSCallbackInfo& info)
             if (leftDimen == 0.0_vp) {
                 leftDimen = topDimen;
             }
-            NG::PaddingPropertyF padding;
+
             padding.left = leftDimen.ConvertToPx();
             padding.right = rightDimen.ConvertToPx();
             padding.top = topDimen.ConvertToPx();
             padding.bottom = bottomDimen.ConvertToPx();
-            CheckBoxModel::GetInstance()->SetPadding(padding);
-            return;
+            return true;
         }
     }
-    Dimension length;
-    if (!JSViewAbstract::ParseJsDimensionVp(info[0], length)) {
-        return;
+
+    CalcDimension length;
+    if (!ParseJsDimensionVp(info[0], length)) {
+        return false;
     }
-    NG::PaddingPropertyF padding;
+
     padding.left = length.ConvertToPx();
     padding.right = length.ConvertToPx();
     padding.top = length.ConvertToPx();
     padding.bottom = length.ConvertToPx();
-    CheckBoxModel::GetInstance()->SetPadding(padding);
+    return true;
 }
 
+NG::PaddingProperty JSCheckbox::GetNewPadding(const JSCallbackInfo& info)
+{
+    NG::PaddingProperty padding;
+    if (info[0]->IsObject()) {
+        std::optional<CalcDimension> left;
+        std::optional<CalcDimension> right;
+        std::optional<CalcDimension> top;
+        std::optional<CalcDimension> bottom;
+        JSRef<JSObject> paddingObj = JSRef<JSObject>::Cast(info[0]);
+
+        CalcDimension leftDimen;
+        if (ParseJsDimensionVp(paddingObj->GetProperty("left"), leftDimen)) {
+            left = leftDimen;
+            if (left.has_value()) {
+                padding.left = NG::CalcLength(left.value().IsNonNegative() ? left.value() : Dimension());
+            }
+        }
+        CalcDimension rightDimen;
+        if (ParseJsDimensionVp(paddingObj->GetProperty("right"), rightDimen)) {
+            right = rightDimen;
+            if (right.has_value()) {
+                padding.right = NG::CalcLength(right.value().IsNonNegative() ? right.value() : Dimension());
+            }
+        }
+        CalcDimension topDimen;
+        if (ParseJsDimensionVp(paddingObj->GetProperty("top"), topDimen)) {
+            top = topDimen;
+            if (top.has_value()) {
+                padding.top = NG::CalcLength(top.value().IsNonNegative() ? top.value() : Dimension());
+            }
+        }
+        CalcDimension bottomDimen;
+        if (ParseJsDimensionVp(paddingObj->GetProperty("bottom"), bottomDimen)) {
+            bottom = bottomDimen;
+            if (bottom.has_value()) {
+                padding.bottom = NG::CalcLength(bottom.value().IsNonNegative() ? bottom.value() : Dimension());
+            }
+        }
+
+        return padding;
+    }
+
+    CalcDimension length;
+    if (!ParseJsDimensionVp(info[0], length)) {
+        length.Reset();
+    }
+
+    padding.SetEdges(NG::CalcLength(length.IsNonNegative() ? length : Dimension()));
+    return padding;
+}
 } // namespace OHOS::Ace::Framework

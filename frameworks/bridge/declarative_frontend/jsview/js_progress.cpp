@@ -160,7 +160,7 @@ void JSProgress::SetCircularStyle(const JSCallbackInfo& info)
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
 
-    Dimension strokeWidthDimension;
+    CalcDimension strokeWidthDimension;
     auto jsStrokeWidth = paramObject->GetProperty("strokeWidth");
     if (!ParseJsDimensionVp(jsStrokeWidth, strokeWidthDimension)) {
         LOGI("circular Style error. now use default strokeWidth");
@@ -181,7 +181,7 @@ void JSProgress::SetCircularStyle(const JSCallbackInfo& info)
         ProgressModel::GetInstance()->SetScaleCount(theme->GetScaleNumber());
     }
 
-    Dimension scaleWidthDimension;
+    CalcDimension scaleWidthDimension;
     auto jsScaleWidth = paramObject->GetProperty("scaleWidth");
     if (!ParseJsDimensionVp(jsScaleWidth, scaleWidthDimension)) {
         LOGI("circular Style error. now use default scaleWidth");

@@ -73,7 +73,8 @@ void JSRenderingContext::JSBind(BindingTarget globalObj)
     JSClass<JSRenderingContext>::CustomMethod("getPixelMap", &JSCanvasRenderer::JsGetPixelMap);
     JSClass<JSRenderingContext>::CustomMethod("setPixelMap", &JSCanvasRenderer::JsSetPixelMap);
     JSClass<JSRenderingContext>::CustomMethod("drawBitmapMesh", &JSCanvasRenderer::JsDrawBitmapMesh);
-    JSClass<JSRenderingContext>::CustomMethod("filter", &JSCanvasRenderer::JsFilter);
+    JSClass<JSRenderingContext>::CustomProperty("filter", &JSCanvasRenderer::JsGetFilter,
+        &JSCanvasRenderer::JsSetFilter);
     JSClass<JSRenderingContext>::CustomProperty("direction", &JSCanvasRenderer::JsGetDirection,
         &JSCanvasRenderer::JsSetDirection);
 

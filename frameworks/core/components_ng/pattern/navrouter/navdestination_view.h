@@ -17,9 +17,13 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVROUTER_NAVDESTINATION_VIEW_H
 
 #include "base/memory/referenced.h"
+#include "bridge/declarative_frontend/engine/js_ref_ptr.h"
+#include "frameworks/bridge/declarative_frontend/engine/js_types.h"
 #include "core/components_ng/base/ui_node.h"
 
 namespace OHOS::Ace::NG {
+
+using namespace Framework;
 
 class ACE_EXPORT NavDestinationView {
 public:
@@ -30,6 +34,9 @@ public:
     static void SetSubtitle(const std::string& subtitle);
     static void SetCustomTitle(const RefPtr<UINode>& customTitle);
     static void SetTitleHeight(const Dimension& height);
+    static void SetOnShown(std::function<void()>&& onShown);
+    static void SetOnHidden(std::function<void()>&& onHidden);
+    static void SetOnBackPressed(std::function<bool()>&& onBackPressed);
 };
 
 } // namespace OHOS::Ace::NG

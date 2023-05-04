@@ -39,6 +39,7 @@ public:
     virtual void SetDisappearTextStyle(const RefPtr<PickerTheme>& theme, const NG::PickerTextStyle& value) = 0;
     virtual void SetNormalTextStyle(const RefPtr<PickerTheme>& theme, const NG::PickerTextStyle& value) = 0;
     virtual void SetSelectedTextStyle(const RefPtr<PickerTheme>& theme, const NG::PickerTextStyle& value) = 0;
+    virtual void SetBackgroundColor(const Color& color) = 0;
 private:
     static std::unique_ptr<DatePickerModel> datePickerInstance_;
 };

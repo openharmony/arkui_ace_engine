@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/side_bar/side_bar_container_view.h"
+#include "core/components_ng/pattern/side_bar/side_bar_container_model_ng.h"
 
 #include "base/geometry/dimension.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -26,14 +26,16 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-
 namespace {
 constexpr int32_t DEFAULT_MIN_CHILDREN_SIZE_WITHOUT_BUTTON_AND_DIVIDER = 1;
 constexpr Dimension DEFAULT_DIVIDER_STROKE_WIDTH = 1.0_vp;
 constexpr Color DEFAULT_DIVIDER_COLOR = Color(0x08000000);
+constexpr Dimension DEFAULT_SIDE_BAR_WIDTH = 200.0_vp;
+constexpr Dimension DEFAULT_MIN_SIDE_BAR_WIDTH = 200.0_vp;
+constexpr Dimension DEFAULT_MAX_SIDE_BAR_WIDTH = 280.0_vp;
 } // namespace
 
-void SideBarContainerView::Create()
+void SideBarContainerModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -45,7 +47,7 @@ void SideBarContainerView::Create()
     stack->Push(sideBarContainerNode);
 }
 
-void SideBarContainerView::Pop()
+void SideBarContainerModelNG::Pop()
 {
     auto sideBarContainerNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(sideBarContainerNode);
@@ -75,10 +77,11 @@ void SideBarContainerView::Pop()
 
     CreateAndMountDivider(sideBarContainerNode);
     CreateAndMountControlButton(sideBarContainerNode);
+    NG::ViewStackProcessor::GetInstance()->PopContainer();
 }
 
-void SideBarContainerView::InitSideBarContentEvent(const RefPtr<FrameNode>& parentNode,
-    const RefPtr<FrameNode>& sideBarContentFrameNode)
+void SideBarContainerModelNG::InitSideBarContentEvent(const RefPtr<NG::FrameNode>& parentNode,
+    const RefPtr<NG::FrameNode>& sideBarContentFrameNode)
 {
     CHECK_NULL_VOID(parentNode);
     CHECK_NULL_VOID(sideBarContentFrameNode);
@@ -90,7 +93,7 @@ void SideBarContainerView::InitSideBarContentEvent(const RefPtr<FrameNode>& pare
     sideBarContentFrameNode->MarkModifyDone();
 }
 
-void SideBarContainerView::CreateAndMountControlButton(const RefPtr<FrameNode>& parentNode)
+void SideBarContainerModelNG::CreateAndMountControlButton(const RefPtr<NG::FrameNode>& parentNode)
 {
     auto layoutProperty = parentNode->GetLayoutProperty<SideBarContainerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -132,7 +135,7 @@ void SideBarContainerView::CreateAndMountControlButton(const RefPtr<FrameNode>& 
     imgNode->MarkModifyDone();
 }
 
-void SideBarContainerView::CreateAndMountDivider(const RefPtr<FrameNode>& parentNode)
+void SideBarContainerModelNG::CreateAndMountDivider(const RefPtr<NG::FrameNode>& parentNode)
 {
     CHECK_NULL_VOID(parentNode);
     auto layoutProperty = parentNode->GetLayoutProperty<SideBarContainerLayoutProperty>();
@@ -166,105 +169,122 @@ void SideBarContainerView::CreateAndMountDivider(const RefPtr<FrameNode>& parent
     dividerNode->MarkModifyDone();
 }
 
-void SideBarContainerView::SetSideBarContainerType(SideBarContainerType type)
+void SideBarContainerModelNG::SetSideBarContainerType(SideBarContainerType type)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, SideBarContainerType, type);
 }
 
-void SideBarContainerView::SetShowSideBar(bool isShow)
+void SideBarContainerModelNG::SetShowSideBar(bool isShow)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ShowSideBar, isShow);
 }
 
-void SideBarContainerView::SetShowControlButton(bool showControlButton)
+void SideBarContainerModelNG::SetShowControlButton(bool showControlButton)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ShowControlButton, showControlButton);
 }
 
-void SideBarContainerView::SetSideBarWidth(const Dimension& sideBarWidth)
+void SideBarContainerModelNG::ParseAndSetWidth(WidthType widthType, Dimension& width)
+{
+    switch (widthType) {
+        case WidthType::SIDEBAR_WIDTH:
+            SetSideBarWidth(width.IsNonNegative() ? width : DEFAULT_SIDE_BAR_WIDTH);
+            break;
+        case WidthType::MIN_SIDEBAR_WIDTH:
+            SetMinSideBarWidth(width.IsNonNegative() ? width : DEFAULT_MIN_SIDE_BAR_WIDTH);
+            break;
+        case WidthType::MAX_SIDEBAR_WIDTH:
+            SetMaxSideBarWidth(width.IsNonNegative() ? width : DEFAULT_MAX_SIDE_BAR_WIDTH);
+            break;
+        default:
+            break;
+    }
+}
+
+void SideBarContainerModelNG::SetSideBarWidth(const Dimension& sideBarWidth)
 {
     MarkNeedInitRealSideBarWidth();
     ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, SideBarWidth, sideBarWidth);
 }
 
-void SideBarContainerView::SetMinSideBarWidth(const Dimension& minSideBarWidth)
+void SideBarContainerModelNG::SetMinSideBarWidth(const Dimension& minSideBarWidth)
 {
     MarkNeedInitRealSideBarWidth();
     ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, MinSideBarWidth, minSideBarWidth);
 }
 
-void SideBarContainerView::SetMaxSideBarWidth(const Dimension& maxSideBarWidth)
+void SideBarContainerModelNG::SetMaxSideBarWidth(const Dimension& maxSideBarWidth)
 {
     MarkNeedInitRealSideBarWidth();
     ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, MaxSideBarWidth, maxSideBarWidth);
 }
 
-void SideBarContainerView::SetAutoHide(bool autoHide)
+void SideBarContainerModelNG::SetAutoHide(bool autoHide)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, AutoHide, autoHide);
 }
 
-void SideBarContainerView::SetSideBarPosition(SideBarPosition sideBarPosition)
+void SideBarContainerModelNG::SetSideBarPosition(SideBarPosition sideBarPosition)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, SideBarPosition, sideBarPosition);
 }
 
-void SideBarContainerView::SetControlButtonWidth(const Dimension& width)
+void SideBarContainerModelNG::SetControlButtonWidth(const Dimension& width)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonWidth, width);
 }
 
-void SideBarContainerView::SetControlButtonHeight(const Dimension& height)
+void SideBarContainerModelNG::SetControlButtonHeight(const Dimension& height)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonHeight, height);
 }
 
-void SideBarContainerView::SetControlButtonLeft(const Dimension& left)
+void SideBarContainerModelNG::SetControlButtonLeft(const Dimension& left)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonLeft, left);
 }
 
-void SideBarContainerView::SetControlButtonTop(const Dimension& top)
+void SideBarContainerModelNG::SetControlButtonTop(const Dimension& top)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonTop, top);
 }
 
-void SideBarContainerView::SetControlButtonShowIconStr(const std::string& showIconStr)
+void SideBarContainerModelNG::SetControlButtonShowIconStr(const std::string& showIconStr)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonShowIconStr, showIconStr);
 }
 
-void SideBarContainerView::SetControlButtonHiddenIconStr(const std::string& hiddenIconStr)
+void SideBarContainerModelNG::SetControlButtonHiddenIconStr(const std::string& hiddenIconStr)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonHiddenIconStr, hiddenIconStr);
 }
 
-void SideBarContainerView::SetControlButtonSwitchingIconStr(const std::string& switchingIconStr)
+void SideBarContainerModelNG::SetControlButtonSwitchingIconStr(const std::string& switchingIconStr)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonSwitchingIconStr, switchingIconStr);
 }
 
-void SideBarContainerView::SetDividerStrokeWidth(const Dimension& strokeWidth)
+void SideBarContainerModelNG::SetDividerStrokeWidth(const Dimension& strokeWidth)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, DividerStrokeWidth, strokeWidth);
 }
 
-void SideBarContainerView::SetDividerColor(const Color& color)
+void SideBarContainerModelNG::SetDividerColor(const Color& color)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, DividerColor, color);
 }
 
-void SideBarContainerView::SetDividerStartMargin(const Dimension& startMargin)
+void SideBarContainerModelNG::SetDividerStartMargin(const Dimension& startMargin)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, DividerStartMargin, startMargin);
 }
 
-void SideBarContainerView::SetDividerEndMargin(const Dimension& endMargin)
+void SideBarContainerModelNG::SetDividerEndMargin(const Dimension& endMargin)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, DividerEndMargin, endMargin);
 }
 
-void SideBarContainerView::SetOnChange(ChangeEvent&& onChange)
+void SideBarContainerModelNG::SetOnChange(std::function<void(const bool)>&& onChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -273,7 +293,7 @@ void SideBarContainerView::SetOnChange(ChangeEvent&& onChange)
     eventHub->SetOnChange(std::move(onChange));
 }
 
-void SideBarContainerView::MarkNeedInitRealSideBarWidth()
+void SideBarContainerModelNG::MarkNeedInitRealSideBarWidth()
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -281,5 +301,4 @@ void SideBarContainerView::MarkNeedInitRealSideBarWidth()
     CHECK_NULL_VOID(pattern);
     pattern->MarkNeedInitRealSideBarWidth(true);
 }
-
 } // namespace OHOS::Ace::NG

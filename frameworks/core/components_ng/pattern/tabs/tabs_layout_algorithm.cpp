@@ -128,7 +128,7 @@ std::vector<OffsetF> TabsLayoutAlgorithm::LayoutOffsetList(LayoutWrapper* layout
     auto tabBarGeometryNode = tabBarWrapper->GetGeometryNode();
     CHECK_NULL_RETURN(tabBarGeometryNode, offsetList);
     auto tabBarFrameSize = tabBarGeometryNode->GetMarginFrameSize();
-    auto dividerStrokeWidth = divider.strokeWidth.ConvertToPx();
+    auto dividerStrokeWidth = divider.isNull ? 0.0f : divider.strokeWidth.ConvertToPx();
     auto dividerStartMargin = divider.startMargin.ConvertToPx();
     auto layoutProperty = DynamicCast<TabsLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(layoutProperty, offsetList);
@@ -221,6 +221,6 @@ float TabsLayoutAlgorithm::MeasureDivider(const RefPtr<TabsLayoutProperty>& layo
     dividerLayoutConstraint.selfIdealSize = OptionalSizeF(dividerIdealSize);
     dividerWrapper->Measure(dividerLayoutConstraint);
 
-    return dividerStrokeWidth;
+    return divider.isNull ? 0.0f : dividerStrokeWidth;
 }
 } // namespace OHOS::Ace::NG

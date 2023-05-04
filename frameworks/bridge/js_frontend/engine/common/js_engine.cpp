@@ -21,6 +21,8 @@
 #include "frameworks/bridge/js_frontend/engine/common/runtime_constants.h"
 #include "native_engine/native_engine.h"
 
+extern "C" void* OHOS_MEDIA_GetPixelMap(napi_env env, napi_value value);
+
 namespace OHOS::Ace::Framework {
 
 void JsEngine::RunNativeEngineLoop()
@@ -33,6 +35,9 @@ void JsEngine::RunNativeEngineLoop()
 #if !defined(PREVIEW)
 PixelMapNapiEntry JsEngine::GetPixelMapNapiEntry()
 {
+#if defined(IOS_PLATFORM) || defined(ANDROID_PLATFORM)
+    return reinterpret_cast<PixelMapNapiEntry>(&OHOS_MEDIA_GetPixelMap);
+#else
     static PixelMapNapiEntry pixelMapNapiEntry_ = nullptr;
     if (!pixelMapNapiEntry_) {
 #if defined(_ARM64_) || defined(SIMULATOR_64)
@@ -59,6 +64,7 @@ PixelMapNapiEntry JsEngine::GetPixelMapNapiEntry()
         }
     }
     return pixelMapNapiEntry_;
+#endif
 }
 #endif
 

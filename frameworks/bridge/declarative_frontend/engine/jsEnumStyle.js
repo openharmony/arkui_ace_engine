@@ -731,6 +731,13 @@ var NavigationMode;
   NavigationMode[NavigationMode["Auto"] = 2] = "Auto";
 })(NavigationMode || (NavigationMode = {}));
 
+var NavRouteMode;
+(function (NavRouteMode) {
+  NavRouteMode[NavRouteMode["PUSH_WITH_RECREATE"] = 0] = "PUSH_WITH_RECREATE";
+  NavRouteMode[NavRouteMode["PUSH"] = 1] = "PUSH";
+  NavRouteMode[NavRouteMode["REPLACE"] = 2] = "REPLACE";
+})(NavRouteMode || (NavRouteMode = {}));
+
 var NavBarPosition;
 (function (NavBarPosition) {
   NavBarPosition[NavBarPosition["Start"] = 0] = "Start";
@@ -1070,6 +1077,12 @@ var ModifierKey;
   ModifierKey[ModifierKey["SHIFT"] = 1] = "SHIFT";
   ModifierKey[ModifierKey["ALT"] = 2] = "ALT";
 })(ModifierKey || (ModifierKey = {}));
+
+var SheetSize;
+(function (SheetSize) {
+  SheetSize['MEDIUM'] = "MEDIUM";
+  SheetSize['LARGE'] = "LARGE";
+})(SheetSize || (SheetSize = {}));
 
 var FunctionKey;
 (function (FunctionKey) {
@@ -1491,3 +1504,10 @@ var MenuAlignType ;
   MenuAlignType[MenuAlignType["CENTER"] = 1] = "CENTER";
   MenuAlignType[MenuAlignType["END"] = 2] = "END";
 })(MenuAlignType  || (MenuAlignType  = {}));
+
+var ToolbarItemStatus;
+(function (ToolbarItemStatus) {
+  ToolbarItemStatus[ToolbarItemStatus["ENABLE_TOOLBAR_ITEM"] = 0] = "ENABLE_TOOLBAR_ITEM";
+  ToolbarItemStatus[ToolbarItemStatus["DISABLE_TOOLBAR_ITEM"] = 1] = "DISABLE_TOOLBAR_ITEM";
+  ToolbarItemStatus[ToolbarItemStatus["ACTIVATE_TOOLBAR_ITEM"] = 2] = "ACTIVATE_TOOLBAR_ITEM";
+})(ToolbarItemStatus || (ToolbarItemStatus = {}));

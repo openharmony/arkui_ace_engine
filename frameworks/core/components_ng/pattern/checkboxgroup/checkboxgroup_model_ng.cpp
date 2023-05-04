@@ -16,12 +16,13 @@
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_model_ng.h"
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_pattern.h"
+#include "core/components_ng/property/calc_length.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-
 void CheckBoxGroupModelNG::Create(const std::optional<std::string>& groupName)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -75,10 +76,18 @@ void CheckBoxGroupModelNG::SetOnChange(GroupChangeEvent&& onChange)
     eventHub->SetOnChange(std::move(onChange));
 }
 
-void CheckBoxGroupModelNG::SetWidth(const Dimension& width) {}
+void CheckBoxGroupModelNG::SetWidth(const Dimension& width)
+{
+    NG::ViewAbstract::SetWidth(NG::CalcLength(width));
+}
 
-void CheckBoxGroupModelNG::SetHeight(const Dimension& height) {}
+void CheckBoxGroupModelNG::SetHeight(const Dimension& height)
+{
+    NG::ViewAbstract::SetHeight(NG::CalcLength(height));
+}
 
-void CheckBoxGroupModelNG::SetPadding(const NG::PaddingPropertyF& args) {}
-
+void CheckBoxGroupModelNG::SetPadding(const NG::PaddingPropertyF& args, const NG::PaddingProperty& newArgs, bool flag)
+{
+    NG::ViewAbstract::SetPadding(newArgs);
+}
 } // namespace OHOS::Ace::NG

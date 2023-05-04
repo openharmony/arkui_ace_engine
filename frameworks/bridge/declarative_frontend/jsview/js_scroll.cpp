@@ -271,7 +271,7 @@ void JSScroll::SetScrollBarWidth(const JSCallbackInfo& args)
     CHECK_NULL_VOID_NOLOG(pipelineContext);
     auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
     CHECK_NULL_VOID_NOLOG(theme);
-    Dimension scrollBarWidth;
+    CalcDimension scrollBarWidth;
     if (args.Length() < 1) {
         LOGE("args is invalid");
         return;

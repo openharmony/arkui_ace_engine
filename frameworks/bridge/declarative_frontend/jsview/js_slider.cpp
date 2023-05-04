@@ -24,6 +24,9 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
 
 namespace OHOS::Ace {
+namespace {
+constexpr int SLIDER_SHOW_TIPS_MAX_PARAMS = 2;
+} // namespace
 
 std::unique_ptr<SliderModel> SliderModel::instance_ = nullptr;
 std::mutex SliderModel::mutex_;
@@ -188,7 +191,7 @@ void JSSlider::SetThickness(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         return;
     }
@@ -293,7 +296,16 @@ void JSSlider::SetShowTips(const JSCallbackInfo& info)
         LOGE("arg is not bool.");
         return;
     }
-    SliderModel::GetInstance()->SetShowTips(info[0]->ToBoolean());
+
+    std::optional<std::string> content;
+    if (info.Length() == SLIDER_SHOW_TIPS_MAX_PARAMS) {
+        std::string str;
+        if (ParseJsString(info[1], str)) {
+            content = str;
+        }
+    }
+
+    SliderModel::GetInstance()->SetShowTips(info[0]->ToBoolean(), content);
 }
 
 void JSSlider::SetBlockBorderColor(const JSCallbackInfo& info)
@@ -317,7 +329,7 @@ void JSSlider::SetBlockBorderWidth(const JSCallbackInfo& info)
         return;
     }
 
-    Dimension blockBorderWidth;
+    CalcDimension blockBorderWidth;
     if (!ParseJsDimensionVp(info[0], blockBorderWidth)) {
         return;
     }
@@ -348,7 +360,7 @@ void JSSlider::SetTrackBorderRadius(const JSCallbackInfo& info)
         return;
     }
 
-    Dimension trackBorderRadius;
+    CalcDimension trackBorderRadius;
     if (!ParseJsDimensionVp(info[0], trackBorderRadius)) {
         return;
     }
@@ -370,7 +382,7 @@ void JSSlider::SetBlockSize(const JSCallbackInfo& info)
     }
     JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
 
-    Dimension width;
+    CalcDimension width;
     JSRef<JSVal> jsWidth = sizeObj->GetProperty("width");
     if (!ParseJsDimensionVp(jsWidth, width)) {
         width.SetValue(0.0);
@@ -379,7 +391,7 @@ void JSSlider::SetBlockSize(const JSCallbackInfo& info)
         width.SetValue(0.0);
     }
 
-    Dimension height;
+    CalcDimension height;
     JSRef<JSVal> jsHeight = sizeObj->GetProperty("height");
     if (!ParseJsDimensionVp(jsHeight, height)) {
         height.SetValue(0.0);
@@ -438,7 +450,7 @@ void JSSlider::SetStepSize(const JSCallbackInfo& info)
         return;
     }
 
-    Dimension stepSize;
+    CalcDimension stepSize;
     if (!ParseJsDimensionVp(info[0], stepSize)) {
         return;
     }
