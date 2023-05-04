@@ -1434,7 +1434,7 @@ void CustomPaintPaintMethod::SetContrastFilter(const std::string& percent)
 void CustomPaintPaintMethod::SetBlurFilter(const std::string& percent)
 {
 #ifdef NEW_SKIA
-    imagePaint_.setImageFilter(SkImageFilter::Blur(BlurStrToDouble(percent), BlurStrToDouble(percent), nullptr));
+    imagePaint_.setImageFilter(SkImageFilters::Blur(BlurStrToDouble(percent), BlurStrToDouble(percent), nullptr));
 #else
     imagePaint_.setImageFilter(SkBlurImageFilter::Make(BlurStrToDouble(percent), BlurStrToDouble(percent), nullptr));
 #endif
