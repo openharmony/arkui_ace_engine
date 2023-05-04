@@ -65,6 +65,7 @@ void TextPickerModelNG::Create(RefPtr<PickerTheme> pickerTheme, uint32_t columnK
         stackNode->MountToParent(textPickerNode);
     }
     stack->Push(textPickerNode);
+    options_.clear();
 }
 
 void TextPickerModelNG::SetDefaultAttributes(const RefPtr<PickerTheme>& pickerTheme)
@@ -161,7 +162,10 @@ void TextPickerModelNG::SetSelected(uint32_t value)
     CHECK_NULL_VOID(frameNode);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     textPickerPattern->SetSelected(value);
+    std::vector<uint32_t> values;
+    values.emplace_back(value);
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Selected, value);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedIndex, values);
 }
 
 void TextPickerModelNG::SetRange(const std::vector<NG::RangeContent>& value)

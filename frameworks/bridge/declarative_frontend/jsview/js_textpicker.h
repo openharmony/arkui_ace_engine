@@ -90,8 +90,10 @@ private:
         std::vector<NG::TextCascadePickerOptions>& options, std::vector<uint32_t>& selecteds,
         std::vector<std::string>& values, bool& isCascade);
     static void SetSelectedIndexMulti(const JsiRef<JsiValue>& jsSelectedValue);
-    static void SetSelectedIndexMultiInternal(uint32_t count, std::vector<uint32_t>& selecteds);
-    static void SetSelectedInternal(uint32_t count, std::vector<uint32_t>& selecteds);
+    static void SetSelectedIndexMultiInternal(uint32_t count, std::vector<NG::TextCascadePickerOptions>& options,
+        std::vector<uint32_t>& selecteds);
+    static void SetSelectedInternal(uint32_t count, std::vector<NG::TextCascadePickerOptions>& options,
+        std::vector<uint32_t>& selecteds);
     static void SetSelectedIndexSingle(const JsiRef<JsiValue>& jsSelectedValue);
     static bool ProcessSingleRangeValue(const JSRef<JSObject>& paramObjec,
         std::vector<NG::RangeContent>& rangeResult, uint32_t& kind, uint32_t& selected, std::string& value);

@@ -228,7 +228,6 @@ bool JSTextPickerParser::GenerateCascadeOptionsInternal(const JSRef<JSObject>& j
         JSRef<JSArray> arrayChildren = JSRef<JSArray>::Cast(children);
         if (arrayChildren->Length() > 0) {
             if (!GenerateCascadeOptions(arrayChildren, option.children)) {
-                options.clear();
                 return false;
             }
         }
@@ -360,12 +359,16 @@ void JSTextPickerParser::ParseMultiTextArrayValueInternal(const std::vector<NG::
 {
     for (uint32_t i = 0; i < options.size(); i++) {
         if (i > values.size() - 1) {
-            values.emplace_back("");
+            if (options[i].rangeResult.size() > 0) {
+                values.emplace_back(options[i].rangeResult[0]);
+            } else {
+                values.emplace_back("");
+            }
         } else {
             auto valueIterator = std::find(options[i].rangeResult.begin(),
                 options[i].rangeResult.end(), values[i]);
             if (valueIterator == options[i].rangeResult.end()) {
-                values[i] = "";
+                values[i] = options[i].rangeResult.front();
             }
         }
     }
@@ -380,14 +383,14 @@ void JSTextPickerParser::ParseMultiTextArrayValueSingleInternal(
         if (valueIterator != options[0].rangeResult.end()) {
             values.emplace_back(value);
         } else {
-            values.emplace_back("");
+            values.emplace_back(options[0].rangeResult.front());
         }
         for (uint32_t i = 1; i < options.size(); i++) {
-            values.emplace_back("");
+            values.emplace_back(options[i].rangeResult.front());
         }
     } else {
         for (uint32_t i = 0; i < options.size(); i++) {
-            values.emplace_back("");
+            values.emplace_back(options[i].rangeResult.front());
         }
     }
 }
@@ -407,7 +410,7 @@ bool JSTextPickerParser::ParseMultiTextArrayValue(const JsiRef<JsiValue>& jsValu
             ParseMultiTextArrayValueSingleInternal(options, value, values);
         } else {
             for (uint32_t i = 0; i < options.size(); i++) {
-                values.emplace_back("");
+                values.emplace_back(options[i].rangeResult.front());
             }
         }
     }
@@ -455,11 +458,15 @@ bool JSTextPickerParser::ParseInternalArray(const JSRef<JSArray>& jsRangeValue, 
         }
     }
     if (index > values.size() - 1) {
-        values.emplace_back("");
+        if (resultStr.size() > 0) {
+            values.emplace_back(resultStr.front());
+        } else {
+            values.emplace_back("");
+        }
     } else {
         auto valueIterator = std::find(resultStr.begin(), resultStr.end(), values[index]);
         if (valueIterator == resultStr.end()) {
-            values[index] = "";
+            values[index] = resultStr.front();
         }
     }
 
@@ -710,7 +717,6 @@ void JSTextPicker::ProcessCascadeSelected(const std::vector<NG::TextCascadePicke
     uint32_t index, std::vector<uint32_t>& selectedValues)
 {
     std::vector<std::string> rangeResultValue;
-    NG::TextCascadePickerOptions option;
     for (size_t i = 0; i < options.size(); i++) {
         rangeResultValue.emplace_back(options[i].rangeResult[0]);
     }
@@ -718,7 +724,6 @@ void JSTextPicker::ProcessCascadeSelected(const std::vector<NG::TextCascadePicke
     if (index > selectedValues.size() - 1) {
         selectedValues.emplace_back(0);
     }
-
     if (selectedValues[index] < 0 || selectedValues[index] >= rangeResultValue.size()) {
         LOGW("selectedValue is out of range");
         selectedValues[index] = 0;
@@ -728,10 +733,9 @@ void JSTextPicker::ProcessCascadeSelected(const std::vector<NG::TextCascadePicke
     }
 }
 
-void JSTextPicker::SetSelectedInternal(uint32_t count, std::vector<uint32_t>& selectedValues)
+void JSTextPicker::SetSelectedInternal(uint32_t count,
+    std::vector<NG::TextCascadePickerOptions>& options, std::vector<uint32_t>& selectedValues)
 {
-    std::vector<NG::TextCascadePickerOptions> options;
-    TextPickerModel::GetInstance()->GetMultiOptions(options);
     for (uint32_t i = 0; i < count; i++) {
         if (i > selectedValues.size() - 1) {
             selectedValues.emplace_back(0);
@@ -744,13 +748,12 @@ void JSTextPicker::SetSelectedInternal(uint32_t count, std::vector<uint32_t>& se
     }
 }
 
-void JSTextPicker::SetSelectedIndexMultiInternal(uint32_t count, std::vector<uint32_t>& selectedValues)
+void JSTextPicker::SetSelectedIndexMultiInternal(uint32_t count, 
+    std::vector<NG::TextCascadePickerOptions>& options, std::vector<uint32_t>& selectedValues)
 {
     if (!TextPickerModel::GetInstance()->IsCascade()) {
-        SetSelectedInternal(count, selectedValues);
+        SetSelectedInternal(count, options, selectedValues);
     } else {
-        std::vector<NG::TextCascadePickerOptions> options;
-        TextPickerModel::GetInstance()->GetMultiOptions(options);
         ProcessCascadeSelected(options, 0, selectedValues);
         uint32_t maxCount = TextPickerModel::GetInstance()->GetMaxCount();
         if (selectedValues.size() < maxCount) {
@@ -791,18 +794,20 @@ void JSTextPicker::SetSelectedIndexMulti(const JsiRef<JsiValue>& jsSelectedValue
     if (jsSelectedValue->IsArray()) {
         if (!ParseJsIntegerArray(jsSelectedValue, selectedValues)) {
             LOGE("parse selectedValues array error.");
+            selectedValues.clear();
             for (uint32_t i = 0; i < count; i++) {
                 selectedValues.emplace_back(0);
             }
             TextPickerModel::GetInstance()->SetSelecteds(selectedValues);
             return;
         }
-        SetSelectedIndexMultiInternal(count, selectedValues);
+        SetSelectedIndexMultiInternal(count, options, selectedValues);
     } else {
         uint32_t selectedValue = 0;
         if (ParseJsInteger(jsSelectedValue, selectedValue)) {
             SetSelectedIndexSingleInternal(options, count, selectedValue, selectedValues);
         } else {
+            selectedValues.clear();
             for (uint32_t i = 0; i < count; i++) {
                 selectedValues.emplace_back(0);
             }

@@ -38,6 +38,7 @@ public:
         value->propDefaultPickerItemHeight_ = CloneDefaultPickerItemHeight();
         value->propSelected_ = CloneSelected();
         value->propValue_ = CloneValue();
+        value->propSelectedIndex_ = CloneSelectedIndex();
         value->propDisappearTextStyle_ = CloneDisappearTextStyle();
         value->propTextStyle_ = CloneTextStyle();
         value->propSelectedTextStyle_ = CloneSelectedTextStyle();
@@ -50,6 +51,7 @@ public:
         ResetDefaultPickerItemHeight();
         ResetSelected();
         ResetValue();
+        ResetSelectedIndex();
         ResetDisappearTextStyle();
         ResetTextStyle();
         ResetSelectedTextStyle();
@@ -62,6 +64,14 @@ public:
         json->Put("defaultPickerItemHeight", GetDefaultPickerItemHeightValue(Dimension(0)).ToString().c_str());
         json->Put("selected", std::to_string(GetSelectedValue(0)).c_str());
         json->Put("value", GetValueValue("").c_str());
+
+        auto jsonArraySelectedIndex = JsonUtil::CreateArray(true);
+        auto arraySelectedIndex = CloneSelecteds().value_or(std::vector<uint32_t>());
+        for (uint32_t i = 0; i < arraySelectedIndex.size(); i++) {
+            auto index = std::to_string(i);
+            jsonArraySelectedIndex->Put(index.c_str(), std::to_string(arraySelectedIndex[i]).c_str());
+        }
+        json->Put("selectedIndex", jsonArraySelectedIndex);
 
         auto disappearFont = JsonUtil::Create(true);
         disappearFont->Put("size", GetDisappearFontSizeValue(Dimension(0)).ToString().c_str());
@@ -93,6 +103,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DefaultPickerItemHeight, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Selected, uint32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Value, std::string, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectedIndex, std::vector<uint32_t>, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_GROUP(DisappearTextStyle, FontStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
         DisappearTextStyle, FontSize, DisappearFontSize, Dimension, PROPERTY_UPDATE_MEASURE);
