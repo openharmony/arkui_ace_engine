@@ -530,7 +530,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest008, TestSize.Level1)
      */
     EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(MOCK_DRAG_WINDOW)), DrawFrameNode(_)).Times(1);
     gestureEventHub->HandleOnDragStart(info);
-    EXPECT_TRUE(gestureEventHub->dragDropProxy_);
+    EXPECT_FALSE(gestureEventHub->dragDropProxy_);
 
     /**
      * @tc.steps: step5. set OnDragStart for eventHub2

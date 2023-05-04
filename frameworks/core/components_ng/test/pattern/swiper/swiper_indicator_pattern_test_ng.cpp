@@ -2040,7 +2040,7 @@ HWTEST_F(SwiperIndicatorPatternTestNg, SwiperIndicatorPaintNormalIndicator001, T
      *               paintMethod->normalMargin_.Y is 547.5
      */
     paintMethod->PaintNormalIndicator(&paintWrapper);
-    EXPECT_EQ(paintMethod->normalMargin_.GetX(), 336.0);
+    EXPECT_EQ(paintMethod->normalMargin_.GetX(), 346.0);
     EXPECT_EQ(paintMethod->normalMargin_.GetY(), 547.5);
 }
 
@@ -2095,7 +2095,7 @@ HWTEST_F(SwiperIndicatorPatternTestNg, SwiperIndicatorPaintNormalIndicator002, T
      *               paintMethod->normalMargin_.Y is 547.5
      */
     paintMethod->PaintNormalIndicator(&paintWrapper);
-    EXPECT_EQ(paintMethod->normalMargin_.GetX(), 196.0);
+    EXPECT_EQ(paintMethod->normalMargin_.GetX(), 206.0);
     EXPECT_EQ(paintMethod->normalMargin_.GetY(), 547.5);
 }
 

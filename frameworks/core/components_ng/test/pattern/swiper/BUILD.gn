@@ -17,7 +17,7 @@ import(
     "//foundation/arkui/ace_engine/frameworks/core/components_ng/components.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ohos_unittest("swiper_pattern_test_ng") {
+ohos_unittest("swiper_indicator_pattern_test_ng") {
   platform = "ohos"
   module_out_path = pattern_test_output_path
 
