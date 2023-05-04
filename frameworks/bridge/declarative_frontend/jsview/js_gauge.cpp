@@ -155,9 +155,9 @@ void JSGauge::SetStrokeWidth(const JSCallbackInfo& info)
         LOGE(" JSGauge::SetStrokeWidth::The info is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
-    Dimension strokeWidth;
+    CalcDimension strokeWidth;
     if (!ParseJsDimensionVp(info[0], strokeWidth)) {
-        strokeWidth = Dimension(0);
+        strokeWidth = CalcDimension(0);
     }
     GaugeModel::GetInstance()->SetStrokeWidth(strokeWidth);
 }

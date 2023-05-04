@@ -223,10 +223,10 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
     auto offsetValue = obj->GetProperty("offset");
     if (offsetValue->IsObject()) {
         auto offsetObj = JSRef<JSObject>::Cast(offsetValue);
-        Dimension dx;
+        CalcDimension dx;
         auto dxValue = offsetObj->GetProperty("dx");
         ParseJsDimensionVp(dxValue, dx);
-        Dimension dy;
+        CalcDimension dy;
         auto dyValue = offsetObj->GetProperty("dy");
         ParseJsDimensionVp(dyValue, dy);
         properties.offset = DimensionOffset(dx, dy);

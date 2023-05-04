@@ -177,7 +177,7 @@ void JSSearch::SetSearchButton(const JSCallbackInfo& info)
         auto param = JSRef<JSObject>::Cast(info[1]);
 
         // set button font size, unit FP
-        Dimension fontSize;
+        CalcDimension fontSize;
         auto fontSizeProp = param->GetProperty("fontSize");
         if (!fontSizeProp->IsUndefined() && !fontSizeProp->IsNull() && ParseJsDimensionFp(fontSizeProp, fontSize)) {
             if (LessNotEqual(fontSize.Value(), 0.0)) {
@@ -206,7 +206,7 @@ void JSSearch::SetSearchIcon(const JSCallbackInfo& info)
         CHECK_NULL_VOID_NOLOG(theme);
 
         // set icon size
-        Dimension size;
+        CalcDimension size;
         auto sizeProp = param->GetProperty("size");
         if (!sizeProp->IsUndefined() && !sizeProp->IsNull() && ParseJsDimensionVp(sizeProp, size)) {
             if (LessNotEqual(size.Value(), 0.0)) {
@@ -285,7 +285,7 @@ void JSSearch::SetIconStyle(const JSCallbackInfo& info)
     auto iconParam = JSRef<JSObject>::Cast(param->GetProperty("icon"));
 
     // set icon size
-    Dimension iconSize;
+    CalcDimension iconSize;
     auto iconSizeProp = iconParam->GetProperty("size");
     if (!iconSizeProp->IsUndefined() && !iconSizeProp->IsNull() && ParseJsDimensionVp(iconSizeProp, iconSize)) {
         if (LessNotEqual(iconSize.Value(), 0.0)) {
@@ -338,7 +338,7 @@ void JSSearch::SetCaret(const JSCallbackInfo& info)
         CHECK_NULL_VOID_NOLOG(textFieldTheme);
 
         // set caret width
-        Dimension caretWidth;
+        CalcDimension caretWidth;
         auto caretWidthProp = param->GetProperty("width");
         if (!caretWidthProp->IsUndefined() && !caretWidthProp->IsNull() &&
             ParseJsDimensionVp(caretWidthProp, caretWidth)) {
@@ -381,7 +381,7 @@ void JSSearch::SetPlaceholderFont(const JSCallbackInfo& info)
     if (fontSize->IsNull() || fontSize->IsUndefined()) {
         font.fontSize = Dimension(-1);
     } else {
-        Dimension size;
+        CalcDimension size;
         if (!ParseJsDimensionFp(fontSize, size) || size.Unit() == DimensionUnit::PERCENT) {
             font.fontSize = Dimension(-1);
             LOGW("Parse to dimension FP failed.");
@@ -426,7 +426,7 @@ void JSSearch::SetTextFont(const JSCallbackInfo& info)
     if (fontSize->IsNull() || fontSize->IsUndefined()) {
         font.fontSize = Dimension(-1);
     } else {
-        Dimension size;
+        CalcDimension size;
         if (!ParseJsDimensionFp(fontSize, size) || size.Unit() == DimensionUnit::PERCENT) {
             font.fontSize = Dimension(-1);
             LOGW("Parse to dimension FP failed.");
@@ -559,7 +559,7 @@ void JSSearch::SetHeight(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         LOGE("The arg is wrong, it is supposed to be a number arguments");
         return;

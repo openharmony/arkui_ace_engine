@@ -56,13 +56,13 @@ void JSRect::Create(const JSCallbackInfo& info)
     if (info.Length() > 0 && info[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
         JSRef<JSVal> radiusWidth = obj->GetProperty("radiusWidth");
-        Dimension widthValue;
+        CalcDimension widthValue;
         if (ParseJsDimensionVp(radiusWidth, widthValue)) {
             RectModel::GetInstance()->SetRadiusWidth(widthValue);
         }
 
         JSRef<JSVal> radiusHeight = obj->GetProperty("radiusHeight");
-        Dimension heightValue;
+        CalcDimension heightValue;
         if (ParseJsDimensionVp(radiusHeight, heightValue)) {
             RectModel::GetInstance()->SetRadiusHeight(heightValue);
         }
@@ -89,7 +89,7 @@ void JSRect::SetRadiusWidth(const JSCallbackInfo& info)
         LOGE("arg is not Number or String.");
         return;
     }
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         return;
     }
@@ -102,7 +102,7 @@ void JSRect::SetRadiusHeight(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         return;
     }
@@ -129,7 +129,7 @@ void JSRect::SetRadius(const JSCallbackInfo& info)
 template<class T>
 void JSRect::SetRadiusWithJsVal(const RefPtr<T>& component, const JSRef<JSVal>& jsVal)
 {
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(jsVal, value)) {
         return;
     }
@@ -164,8 +164,8 @@ void JSRect::SetRadiusWithArrayValue(const RefPtr<T>& component, const JSRef<JSV
         }
         JSRef<JSVal> radiusX = radiusArray->GetValueAt(0);
         JSRef<JSVal> radiusY = radiusArray->GetValueAt(1);
-        Dimension radiusXValue;
-        Dimension radiusYValue;
+        CalcDimension radiusXValue;
+        CalcDimension radiusYValue;
         if (ParseJsDimensionVp(radiusX, radiusXValue) && ParseJsDimensionVp(radiusY, radiusYValue)) {
             SetRadiusValue<T>(component, radiusXValue, radiusYValue, i);
         }
@@ -174,7 +174,7 @@ void JSRect::SetRadiusWithArrayValue(const RefPtr<T>& component, const JSRef<JSV
 
 template<class T>
 void JSRect::SetRadiusValue(
-    const RefPtr<T>& component, const Dimension& radiusX, const Dimension& radiusY, int32_t index)
+    const RefPtr<T>& component, const CalcDimension& radiusX, const CalcDimension& radiusY, int32_t index)
 {
     if (component) {
         RectModel::GetInstance()->SetCallbackRadius(component, radiusX, radiusY, index);
@@ -190,7 +190,7 @@ void JSRect::ObjectRadiusWidth(const JSCallbackInfo& info)
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         return;
     }
@@ -211,7 +211,7 @@ void JSRect::ObjectRadiusHeight(const JSCallbackInfo& info)
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         return;
     }
@@ -251,19 +251,19 @@ void JSRect::ConstructorCallback(const JSCallbackInfo& info)
     auto rect = AceType::MakeRefPtr<ShapeRect>();
     if (info.Length() > 0 && info[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
-        Dimension width;
+        CalcDimension width;
         if (ParseJsDimensionVp(obj->GetProperty("width"), width) && width.IsValid()) {
             rect->SetWidth(width);
         }
-        Dimension height;
+        CalcDimension height;
         if (ParseJsDimensionVp(obj->GetProperty("height"), height) && height.IsValid()) {
             rect->SetHeight(height);
         }
-        Dimension radiusWidth;
+        CalcDimension radiusWidth;
         if (ParseJsDimensionVp(obj->GetProperty("radiusWidth"), radiusWidth) && radiusWidth.IsValid()) {
             rect->SetRadiusWidth(radiusWidth);
         }
-        Dimension radiusHeight;
+        CalcDimension radiusHeight;
         if (ParseJsDimensionVp(obj->GetProperty("radiusHeight"), radiusHeight) && radiusHeight.IsValid()) {
             rect->SetRadiusHeight(radiusHeight);
         }

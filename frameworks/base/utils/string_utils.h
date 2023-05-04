@@ -194,6 +194,12 @@ inline bool StringToDouble(const std::string& value, double& result)
         if (std::strcmp(pEnd, "%") == 0) {
             result = res / PERCENT_VALUE;
             return true;
+        } else if (std::strcmp(pEnd, "vw") == 0) {
+            result = res / PERCENT_VALUE;
+            return true;
+        } else if (std::strcmp(pEnd, "vh") == 0) {
+            result = res / PERCENT_VALUE;
+            return true;
         } else if (std::strcmp(pEnd, "") == 0) {
             result = res;
             return true;
@@ -213,8 +219,8 @@ inline float StringToFloat(const std::string& value)
     }
 }
 
-inline Dimension StringToDimensionWithUnit(
-    const std::string& value, DimensionUnit defaultUnit = DimensionUnit::PX, float defaultValue = 0.0f)
+static Dimension StringToDimensionWithUnit(const std::string& value, DimensionUnit defaultUnit = DimensionUnit::PX,
+    float defaultValue = 0.0f, bool isCalc = false)
 {
     errno = 0;
     if (std::strcmp(value.c_str(), "auto") == 0) {
@@ -239,19 +245,36 @@ inline Dimension StringToDimensionWithUnit(
         if (std::strcmp(pEnd, "fp") == 0) {
             return Dimension(result, DimensionUnit::FP);
         }
-        if ((pEnd) && (std::strcmp(pEnd, "lpx") == 0)) {
+        if (std::strcmp(pEnd, "lpx") == 0) {
             return Dimension(result, DimensionUnit::LPX);
+        }
+        if (std::strcmp(pEnd, "vw") == 0) {
+            return Dimension(result / PERCENT_VALUE, DimensionUnit::VW);
+        }
+        if (std::strcmp(pEnd, "vh") == 0) {
+            return Dimension(result / PERCENT_VALUE, DimensionUnit::VH);
+        }
+        if ((std::strcmp(pEnd, "\0") == 0) && isCalc) {
+            return Dimension(result, DimensionUnit::NONE);
+        }
+        if (isCalc) {
+            return Dimension(result, DimensionUnit::INVALID);
         }
     }
     return Dimension(result, defaultUnit);
 }
 
-inline CalcDimension StringToCalcDimension(const std::string& value, bool useVp = false)
+inline CalcDimension StringToCalcDimension(
+    const std::string& value, bool useVp = false, DimensionUnit defaultUnit = DimensionUnit::PX)
 {
     if (value.find("calc") != std::string::npos) {
+        LOGI("StringToCalcDimension calc value = %{public}s", value.c_str());
         return CalcDimension(value, DimensionUnit::CALC);
     } else {
-        return StringToDimensionWithUnit(value, useVp ? DimensionUnit::VP : DimensionUnit::PX);
+        if (useVp) {
+            return StringToDimensionWithUnit(value, DimensionUnit::VP);
+        }
+        return StringToDimensionWithUnit(value, defaultUnit);
     }
 }
 

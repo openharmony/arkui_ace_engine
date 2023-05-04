@@ -148,7 +148,7 @@ void JSMarquee::SetFontSize(const JSCallbackInfo& info)
         return;
     }
 
-    Dimension fontSize;
+    CalcDimension fontSize;
     if (!ParseJsDimensionFp(info[0], fontSize)) {
         return;
     }

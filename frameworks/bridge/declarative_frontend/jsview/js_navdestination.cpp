@@ -140,7 +140,7 @@ void JSNavDestination::SetTitle(const JSCallbackInfo& info)
                 NG::NavDestinationView::SetTitleHeight(NG::FULL_DOUBLE_LINE_TITLEBAR_HEIGHT);
                 return;
             }
-            Dimension titleHeight;
+            CalcDimension titleHeight;
             if (!JSContainerBase::ParseJsDimensionVp(height, titleHeight)) {
                 return;
             }

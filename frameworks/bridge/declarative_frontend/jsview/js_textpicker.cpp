@@ -623,7 +623,7 @@ void JSTextPickerParser::ParseTextStyle(const JSRef<JSObject>& paramObj, NG::Pic
     if (fontSize->IsNull() || fontSize->IsUndefined()) {
         textStyle.fontSize = Dimension(-1);
     } else {
-        Dimension size;
+        CalcDimension size;
         if (!ParseJsDimensionFp(fontSize, size) || size.Unit() == DimensionUnit::PERCENT) {
             textStyle.fontSize = Dimension(-1);
             LOGW("Parse to dimension FP failed.");
@@ -649,7 +649,7 @@ void JSTextPicker::SetDefaultPickerItemHeight(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have atleast 1 argument.");
         return;
     }
-    Dimension height;
+    CalcDimension height;
     if (info[0]->IsNumber() || info[0]->IsString()) {
         if (!ParseJsDimensionFp(info[0], height)) {
             return;
@@ -1045,7 +1045,7 @@ bool JSTextPickerDialog::ParseShowDataOptions(const JSRef<JSObject>& paramObject
 bool JSTextPickerDialog::ParseShowDataAttribute(const JSRef<JSObject>& paramObject,
     NG::TextPickerSettingData& settingData)
 {
-    Dimension height;
+    CalcDimension height;
     NG::PickerTextProperties textProperties;
     auto defaultHeight = paramObject->GetProperty("defaultPickerItemHeight");
     if (defaultHeight->IsNumber() || defaultHeight->IsString()) {
@@ -1274,7 +1274,7 @@ void JSTextPickerDialog::ParseText(RefPtr<PickerTextComponent>& component, const
         selectedValue = 0;
     }
 
-    Dimension height;
+    CalcDimension height;
     if (defaultHeight->IsNumber() || defaultHeight->IsString()) {
         if (!JSViewAbstract::ParseJsDimensionFp(defaultHeight, height)) {
             return;
