@@ -1367,7 +1367,7 @@ class NavPathInfo {
 
 class NavPathStack {
   constructor() {
-      this.pathArray = [];                                                                                                                                  
+      this.pathArray = [];
       // indicate class has changed.
       this.changeFlag = 0;
       this.type = this.constructor.name;
@@ -1504,3 +1504,51 @@ var ToolbarItemStatus;
   ToolbarItemStatus[ToolbarItemStatus["DISABLE_TOOLBAR_ITEM"] = 1] = "DISABLE_TOOLBAR_ITEM";
   ToolbarItemStatus[ToolbarItemStatus["ACTIVATE_TOOLBAR_ITEM"] = 2] = "ACTIVATE_TOOLBAR_ITEM";
 })(ToolbarItemStatus || (ToolbarItemStatus = {}));
+
+var LocationIconStyle ;
+(function (LocationIconStyle ) {
+  LocationIconStyle[LocationIconStyle["FULL_FILLED"] = 0] = "FULL_FILLED";
+  LocationIconStyle[LocationIconStyle["LINES"] = 1] = "LINES";
+})(LocationIconStyle || (LocationIconStyle = {}));
+
+var BackgroundButtonType;
+(function (BackgroundButtonType) {
+  BackgroundButtonType[BackgroundButtonType["CAPSULE_BACKGROUND"] = 0] = "CAPSULE_BACKGROUND";
+  BackgroundButtonType[BackgroundButtonType["CIRCLE_BACKGROUND"] = 1] = "CIRCLE_BACKGROUND";
+  BackgroundButtonType[BackgroundButtonType["NORMAL_BACKGROUND"] = 2] = "NORMAL_BACKGROUND";
+})(BackgroundButtonType || (BackgroundButtonType = {}));
+
+var LocationDescription;
+(function (LocationDescription) {
+  LocationDescription[LocationDescription["CURRENT_LOCATION"] = 0] = "CURRENT_LOCATION";
+  LocationDescription[LocationDescription["ADD_LOCATION"] = 1] = "ADD_LOCATION";
+  LocationDescription[LocationDescription["SELECT_LOCATION"] = 2] = "SELECT_LOCATION";
+  LocationDescription[LocationDescription["SHARE_LOCATION"] = 3] = "SHARE_LOCATION";
+  LocationDescription[LocationDescription["SEND_LOCATION"] = 4] = "SEND_LOCATION";
+  LocationDescription[LocationDescription["LOCATING"] = 5] = "LOCATING";
+  LocationDescription[LocationDescription["LOCATION"] = 6] = "LOCATION";
+  LocationDescription[LocationDescription["SEND_CURRENT_LOCATION"] = 7] = "SEND_CURRENT_LOCATION";
+  LocationDescription[LocationDescription["RELOCATION"] = 8] = "RELOCATION";
+  LocationDescription[LocationDescription["PUNCH_IN"] = 9] = "PUNCH_IN";
+  LocationDescription[LocationDescription["CURRENT_POSITION"] = 10] = "CURRENT_POSITION";
+})(LocationDescription || (LocationDescription = {}));
+
+var SecLocationButtonLayoutDirection;
+(function (SecLocationButtonLayoutDirection) {
+  SecLocationButtonLayoutDirection[SecLocationButtonLayoutDirection["HORIZONTAL"] = 0] = "HORIZONTAL";
+  SecLocationButtonLayoutDirection[SecLocationButtonLayoutDirection["VERTICAL"] = 1] = "VERTICAL";
+})(SecLocationButtonLayoutDirection || (SecLocationButtonLayoutDirection = {}));
+
+var SecLocationButtonLayoutOrder;
+(function (SecLocationButtonLayoutOrder) {
+  SecLocationButtonLayoutOrder[SecLocationButtonLayoutOrder["ICON_FIRST"] = 0] = "ICON_FIRST";
+  SecLocationButtonLayoutOrder[SecLocationButtonLayoutOrder["TEXT_FIRST"] = 1] = "TEXT_FIRST ";
+})(SecLocationButtonLayoutOrder || (SecLocationButtonLayoutOrder = {}));
+
+var SecLocationButtonOnClickResult;
+(function (SecLocationButtonOnClickResult) {
+  SecLocationButtonOnClickResult[SecLocationButtonOnClickResult["LOCATION_BUTTON_CLICK_SUCCESS"] = 0] =
+    "LOCATION_BUTTON_CLICK_SUCCESS";
+  SecLocationButtonOnClickResult[SecLocationButtonOnClickResult["LOCATION_BUTTON_CLICK_GRANT_FAILED"] = 1] =
+    "LOCATION_BUTTON_CLICK_GRANT_FAILED ";
+})(SecLocationButtonOnClickResult || (SecLocationButtonOnClickResult = {}));

@@ -67,6 +67,7 @@ const char THEME_PATTERN_VIDEO[] = "video_pattern";
 const char THEME_PATTERN_INDEXER[] = "indexer_pattern";
 const char THEME_PATTERN_APP_BAR[] = "app_bar_pattern";
 const char THEME_PATTERN_ADVANCED_PATTERN[] = "advanced_pattern";
+const char THEME_PATTERN_SECURITY_COMPONENT[] = "security_component_pattern";
 
 // pattern general attributes
 const char PATTERN_FG_COLOR[] = "fg_color";

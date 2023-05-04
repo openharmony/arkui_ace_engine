@@ -435,6 +435,8 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components_ng/pattern/text_field:ace_core_components_text_field_pattern_ng_$platform",
     ]
 
+    deps += [ "$ace_root/frameworks/core/components_ng/pattern/security_component:ace_core_components_security_component_pattern_ng_$platform" ]
+
     # xcomponent components supports phone, TV and wearable except PC Preview
     if (defined(config.xcomponent_components_support) &&
         config.xcomponent_components_support) {
