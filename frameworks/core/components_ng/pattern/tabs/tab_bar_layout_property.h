@@ -45,6 +45,8 @@ public:
         value->propTabBarProperty_ = CloneTabBarProperty();
         value->propAxis_ = CloneAxis();
         value->propIndicator_ = CloneIndicator();
+        value->propSelectedMask_ = CloneSelectedMask();
+        value->propUnselectedMask_ = CloneUnselectedMask();
         return value;
     }
 
@@ -54,6 +56,8 @@ public:
         ResetTabBarProperty();
         ResetAxis();
         ResetIndicator();
+        ResetSelectedMask();
+        ResetUnselectedMask();
     }
 
     RectF GetIndicatorRect(int32_t index);
@@ -65,6 +69,9 @@ public:
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Axis, Axis, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Indicator, int32_t, PROPERTY_UPDATE_NORMAL);
+
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectedMask, int32_t, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(UnselectedMask, int32_t, PROPERTY_UPDATE_MEASURE);
 };
 
 } // namespace OHOS::Ace::NG
