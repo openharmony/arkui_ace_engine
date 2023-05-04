@@ -76,6 +76,13 @@ void RelativeContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             childWrapper->Measure(childConstraint);
             continue;
         }
+        const auto& flexItem = childWrapper->GetLayoutProperty()->GetFlexItemProperty();
+        auto alignRules = flexItem->GetAlignRulesValue();
+        auto frameNode = childWrapper->GetHostNode();
+        if (!alignRules.empty() && frameNode) {
+            // when child has alignRules and position, the position property do not work.
+            frameNode->GetLayoutProperty()->SetUsingPosition(false);
+        }
         CalcSizeParam(layoutWrapper, nodeName);
         CalcOffsetParam(layoutWrapper, nodeName);
     }
