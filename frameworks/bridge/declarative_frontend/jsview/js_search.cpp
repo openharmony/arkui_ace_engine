@@ -23,14 +23,8 @@
 #include "bridge/declarative_frontend/jsview/js_textinput.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/search_model_impl.h"
-#include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
-#include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/search/search_component.h"
 #include "core/components/search/search_theme.h"
-#include "core/components/text_field/text_field_component.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/search/search_model_ng.h"
 
 namespace OHOS::Ace {
@@ -140,10 +134,8 @@ void JSSearch::Create(const JSCallbackInfo& info)
     if (jsController) {
         jsController->SetController(controller);
     }
-    if (!Container::IsCurrentUseNewPipeline()) {
-        JSInteractableView::SetFocusable(true);
-        JSInteractableView::SetFocusNode(true);
-    }
+    SearchModel::GetInstance()->SetFocusable(true);
+    SearchModel::GetInstance()->SetFocusNode(true);
 }
 
 void JSSearch::RequestKeyboardOnFocus(bool needToRequest)
@@ -479,32 +471,12 @@ void JSSearch::SetTextAlign(int32_t value)
 
 void JSSearch::JsBorder(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        JSViewAbstract::JsBorder(info);
-        return;
-    }
+    JSViewAbstract::JsBorder(info);
     if (!info[0]->IsObject()) {
         LOGE("args is not a object. %s", info[0]->ToString().c_str());
         return;
     }
     RefPtr<Decoration> decoration = nullptr;
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto searchComponent = AceType::DynamicCast<SearchComponent>(component);
-    if (!searchComponent) {
-        LOGE("search component error");
-        return;
-    }
-    auto childComponent = searchComponent->GetChild();
-    if (!childComponent) {
-        LOGE("component error");
-        return;
-    }
-    auto textFieldComponent = AceType::DynamicCast<TextFieldComponent>(childComponent);
-    if (!textFieldComponent) {
-        LOGE("text component error");
-        return;
-    }
-    decoration = textFieldComponent->GetDecoration();
     JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
     auto valueWidth = object->GetProperty("width");
     if (!valueWidth->IsUndefined()) {
@@ -522,141 +494,48 @@ void JSSearch::JsBorder(const JSCallbackInfo& info)
     if (!valueStyle->IsUndefined()) {
         ParseBorderStyle(valueStyle);
     }
-    ViewAbstractModelImpl::SwapBackBorder(decoration);
-    textFieldComponent->SetOriginBorder(decoration->GetBorder());
+    SearchModel::GetInstance()->SetBackBorder();
     info.ReturnSelf();
 }
 
 void JSSearch::JsBorderWidth(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        JSViewAbstract::JsBorderWidth(info);
-        return;
-    }
+    JSViewAbstract::JsBorderWidth(info);
     if (!info[0]->IsObject() && !info[0]->IsString() && !info[0]->IsNumber()) {
         LOGE("args need a string or number or object");
         return;
     }
-    RefPtr<Decoration> decoration = nullptr;
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto searchComponent = AceType::DynamicCast<SearchComponent>(component);
-    if (!searchComponent) {
-        LOGE("search component error");
-        return;
-    }
-    auto childComponent = searchComponent->GetChild();
-    if (!childComponent) {
-        LOGE("component error");
-        return;
-    }
-    auto textFieldComponent = AceType::DynamicCast<TextFieldComponent>(childComponent);
-    if (!textFieldComponent) {
-        LOGE("text component error");
-        return;
-    }
-    decoration = textFieldComponent->GetDecoration();
-    JSViewAbstract::ParseBorderWidth(info[0]);
-    ViewAbstractModelImpl::SwapBackBorder(decoration);
-    textFieldComponent->SetOriginBorder(decoration->GetBorder());
+    SearchModel::GetInstance()->SetBackBorder();
 }
 
 void JSSearch::JsBorderColor(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        JSViewAbstract::JsBorderColor(info);
-        return;
-    }
+    JSViewAbstract::JsBorderColor(info);
     if (!info[0]->IsObject() && !info[0]->IsString() && !info[0]->IsNumber()) {
         LOGE("args need a string or number or object");
         return;
     }
-    RefPtr<Decoration> decoration = nullptr;
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto searchComponent = AceType::DynamicCast<SearchComponent>(component);
-    if (!searchComponent) {
-        LOGE("search component error");
-        return;
-    }
-    auto childComponent = searchComponent->GetChild();
-    if (!childComponent) {
-        LOGE("component error");
-        return;
-    }
-    auto textFieldComponent = AceType::DynamicCast<TextFieldComponent>(childComponent);
-    if (!textFieldComponent) {
-        LOGE("text component error");
-        return;
-    }
-    decoration = textFieldComponent->GetDecoration();
-    JSViewAbstract::ParseBorderColor(info[0]);
-    ViewAbstractModelImpl::SwapBackBorder(decoration);
-    textFieldComponent->SetOriginBorder(decoration->GetBorder());
+    SearchModel::GetInstance()->SetBackBorder();
 }
 
 void JSSearch::JsBorderStyle(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        JSViewAbstract::JsBorderStyle(info);
-        return;
-    }
+    JSViewAbstract::JsBorderStyle(info);
     if (!info[0]->IsObject() && !info[0]->IsNumber()) {
         LOGE("args need a string or number or object");
         return;
     }
-    RefPtr<Decoration> decoration = nullptr;
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto searchComponent = AceType::DynamicCast<SearchComponent>(component);
-    if (!searchComponent) {
-        LOGE("search component error");
-        return;
-    }
-    auto childComponent = searchComponent->GetChild();
-    if (!childComponent) {
-        LOGE("component error");
-        return;
-    }
-    auto textFieldComponent = AceType::DynamicCast<TextFieldComponent>(childComponent);
-    if (!textFieldComponent) {
-        LOGE("text component error");
-        return;
-    }
-    decoration = textFieldComponent->GetDecoration();
-    JSViewAbstract::ParseBorderStyle(info[0]);
-    ViewAbstractModelImpl::SwapBackBorder(decoration);
-    textFieldComponent->SetOriginBorder(decoration->GetBorder());
+    SearchModel::GetInstance()->SetBackBorder();
 }
 
 void JSSearch::JsBorderRadius(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        JSViewAbstract::JsBorderRadius(info);
-        return;
-    }
+    JSViewAbstract::JsBorderRadius(info);
     if (!info[0]->IsObject() && !info[0]->IsString() && !info[0]->IsNumber()) {
         LOGE("args need a string or number or object");
         return;
     }
-    RefPtr<Decoration> decoration = nullptr;
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto searchComponent = AceType::DynamicCast<SearchComponent>(component);
-    if (!searchComponent) {
-        LOGE("search component error");
-        return;
-    }
-    auto childComponent = searchComponent->GetChild();
-    if (!childComponent) {
-        LOGE("component error");
-        return;
-    }
-    auto textFieldComponent = AceType::DynamicCast<TextFieldComponent>(childComponent);
-    if (!textFieldComponent) {
-        LOGE("text component error");
-        return;
-    }
-    decoration = textFieldComponent->GetDecoration();
-    JSViewAbstract::ParseBorderRadius(info[0]);
-    ViewAbstractModelImpl::SwapBackBorder(decoration);
-    textFieldComponent->SetOriginBorder(decoration->GetBorder());
+    SearchModel::GetInstance()->SetBackBorder();
 }
 
 void JSSearch::OnSubmit(const JSCallbackInfo& info)
@@ -688,29 +567,7 @@ void JSSearch::SetHeight(const JSCallbackInfo& info)
     if (LessNotEqual(value.Value(), 0.0)) {
         value.SetValue(0.0);
     }
-
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetHeight(NG::CalcLength(value));
-        return;
-    }
-
-    auto stack = ViewStackProcessor::GetInstance();
-    auto searchComponent = AceType::DynamicCast<SearchComponent>(stack->GetMainComponent());
-    if (!searchComponent) {
-        LOGE("SearchComponent set height failed, SearchComponent is null.");
-        return;
-    }
-    auto childComponent = searchComponent->GetChild();
-    if (!childComponent) {
-        LOGE("component error");
-        return;
-    }
-    auto textFieldComponent = AceType::DynamicCast<TextFieldComponent>(childComponent);
-    if (!textFieldComponent) {
-        LOGE("text component error");
-        return;
-    }
-    textFieldComponent->SetHeight(value);
+    SearchModel::GetInstance()->SetHeight(value);
 }
 
 void JSSearch::SetOnCopy(const JSCallbackInfo& info)
@@ -749,14 +606,10 @@ void JSSearch::SetCopyOption(const JSCallbackInfo& info)
 
 void JSSearch::JsMenuOptionsExtension(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        if (info[0]->IsArray()) {
-            std::vector<NG::MenuOptionsParam> menuOptionsItems;
-            JSViewAbstract::ParseMenuOptions(info, JSRef<JSArray>::Cast(info[0]), menuOptionsItems);
-            SearchModel::GetInstance()->SetMenuOptionItems(std::move(menuOptionsItems));
-        }
-    } else {
-        LOGI("only newPipeline supply");
+    if (info[0]->IsArray()) {
+        std::vector<NG::MenuOptionsParam> menuOptionsItems;
+        JSViewAbstract::ParseMenuOptions(info, JSRef<JSArray>::Cast(info[0]), menuOptionsItems);
+        SearchModel::GetInstance()->SetMenuOptionItems(std::move(menuOptionsItems));
     }
 }
 
