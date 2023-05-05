@@ -96,6 +96,8 @@ private:
 
     bool firstHandleDrag_ = false;
     bool secondHandleDrag_ = false;
+    // Used to record the original menu display status when the handle is moved.
+    bool orignMenuIsShow_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayPattern);
 };

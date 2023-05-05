@@ -103,23 +103,23 @@ void SelectOverlayPattern::UpdateHandleHotZone()
     auto theme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(theme);
     auto hotZone = theme->GetHandleHotZoneRadius().ConvertToPx();
-    firstHandleRegion_.SetSize({ hotZone * 2, hotZone * 2 });
-    auto firstHandleOffsetX = (info_->firstHandle.paintRect.Left() + info_->firstHandle.paintRect.Right()) / 2;
+    secondHandleRegion_.SetSize({ hotZone * 2, hotZone * 2 });
+    auto sendHandleOffsetX = (info_->secondHandle.paintRect.Left() + info_->secondHandle.paintRect.Right()) / 2;
     std::vector<DimensionRect> responseRegion;
     if (info_->isSingleHandle) {
-        auto firstHandleOffsetY = info_->firstHandle.paintRect.Bottom();
-        firstHandleRegion_.SetOffset({ firstHandleOffsetX - hotZone, firstHandleOffsetY });
-        DimensionRect firstHandleRegion;
-        firstHandleRegion.SetSize(
-            { Dimension(firstHandleRegion_.GetSize().Width()), Dimension(firstHandleRegion_.GetSize().Height()) });
-        firstHandleRegion.SetOffset(
-            DimensionOffset(Offset(firstHandleRegion_.GetOffset().GetX(), firstHandleRegion_.GetOffset().GetY())));
-        responseRegion.emplace_back(firstHandleRegion);
+        auto secondHandleOffsetY = info_->secondHandle.paintRect.Bottom();
+        secondHandleRegion_.SetOffset({ sendHandleOffsetX - hotZone, secondHandleOffsetY });
+        DimensionRect secondHandleRegion;
+        secondHandleRegion.SetSize(
+            { Dimension(secondHandleRegion_.GetSize().Width()), Dimension(secondHandleRegion_.GetSize().Height()) });
+        secondHandleRegion.SetOffset(
+            DimensionOffset(Offset(secondHandleRegion_.GetOffset().GetX(), secondHandleRegion_.GetOffset().GetY())));
+        responseRegion.emplace_back(secondHandleRegion);
         host->GetOrCreateGestureEventHub()->SetResponseRegion(responseRegion);
         return;
     }
-    auto sendHandleOffsetX = (info_->secondHandle.paintRect.Left() + info_->secondHandle.paintRect.Right()) / 2;
-    secondHandleRegion_.SetSize({ hotZone * 2, hotZone * 2 });
+    auto firstHandleOffsetX = (info_->firstHandle.paintRect.Left() + info_->firstHandle.paintRect.Right()) / 2;
+    firstHandleRegion_.SetSize({ hotZone * 2, hotZone * 2 });
     if (info_->handleReverse) {
         auto firstHandleOffsetY = info_->firstHandle.paintRect.Bottom();
         firstHandleRegion_.SetOffset({ firstHandleOffsetX - hotZone, firstHandleOffsetY });
@@ -177,6 +177,7 @@ void SelectOverlayPattern::HandlePanStart(GestureEvent& info)
 {
     auto host = DynamicCast<SelectOverlayNode>(GetHost());
     CHECK_NULL_VOID(host);
+    orignMenuIsShow_ = info_->menuInfo.menuIsShow;
     if (info_->menuInfo.menuIsShow) {
         info_->menuInfo.menuIsShow = false;
         host->UpdateToolBar(false);
@@ -230,7 +231,7 @@ void SelectOverlayPattern::HandlePanEnd(GestureEvent& /*info*/)
     auto host = DynamicCast<SelectOverlayNode>(GetHost());
     CHECK_NULL_VOID(host);
     if (!info_->menuInfo.menuIsShow) {
-        info_->menuInfo.menuIsShow = true;
+        info_->menuInfo.menuIsShow = orignMenuIsShow_;
         host->UpdateToolBar(false);
     }
     if (firstHandleDrag_) {
@@ -297,10 +298,6 @@ void SelectOverlayPattern::UpdateFirstSelectHandleInfo(const SelectHandleInfo& i
     UpdateHandleHotZone();
     auto host = DynamicCast<SelectOverlayNode>(GetHost());
     CHECK_NULL_VOID(host);
-    if (!info_->menuInfo.menuIsShow) {
-        info_->menuInfo.menuIsShow = true;
-        host->UpdateToolBar(false);
-    }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -314,10 +311,6 @@ void SelectOverlayPattern::UpdateSecondSelectHandleInfo(const SelectHandleInfo& 
     UpdateHandleHotZone();
     auto host = DynamicCast<SelectOverlayNode>(GetHost());
     CHECK_NULL_VOID(host);
-    if (!info_->menuInfo.menuIsShow) {
-        info_->menuInfo.menuIsShow = true;
-        host->UpdateToolBar(false);
-    }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
