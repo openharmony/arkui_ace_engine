@@ -43,7 +43,7 @@ public:
 
     void HandleResourceUrl(std::string& url) override
     {
-        CHECK_NULL_VOID(nwebResponse_)
+        CHECK_NULL_VOID(nwebResponse_);
         nwebResponse_->PutResponseResourceUrl(url);
     }
 
