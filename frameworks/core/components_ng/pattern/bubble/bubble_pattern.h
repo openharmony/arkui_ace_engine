@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_BUBBLE_BUBBLE_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_BUBBLE_BUBBLE_PATTERN_H
 
+#include <optional>
+
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/referenced.h"
@@ -91,6 +93,10 @@ public:
         return MakeRefPtr<BubbleAccessibilityProperty>();
     }
 
+    void StartEnteringAnimation(std::function<void()> finish);
+    void StartExitingAnimation(std::function<void()> finish);
+    bool IsOnShow();
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -109,6 +115,10 @@ private:
     void Animation(RefPtr<RenderContext>& renderContext, const Color& endColor,
         int32_t duration, const RefPtr<Curve>& curve);
 
+    OffsetT<Dimension> GetInvisibleOffset();
+    RefPtr<RenderContext> GetRenderContext();
+    void ResetToInvisible();
+
     int32_t targetNodeId_ = -1;
     std::string targetTag_;
 
@@ -121,8 +131,20 @@ private:
     OffsetF arrowPosition_;
     SizeF childSize_;
     RectF touchRegion_;
+    std::optional<Placement> arrowPlacement_;
 
     bool showArrow_ = false;
+
+    enum class TransitionStatus {
+        INVISIABLE,
+        ENTERING,
+        NORMAL,
+        EXITING,
+    };
+
+    TransitionStatus transitionStatus_ = TransitionStatus::INVISIABLE;
+
+    bool delayShow_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(BubblePattern);
 };
