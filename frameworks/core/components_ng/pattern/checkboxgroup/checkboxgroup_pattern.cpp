@@ -16,29 +16,17 @@
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_pattern.h"
 
 #include "core/components/checkable/checkable_component.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/scroll/scrollable.h"
-#include "core/components/test/unittest/image/image_test_utils.h"
 #include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
-#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_layout_algorithm.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_property.h"
 #include "core/components_ng/pattern/stage/page_event_hub.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/touch_event.h"
-#include "core/pipeline/base/constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-
-namespace {
-constexpr int32_t DEFUALT_CHECKBOX_ANIMATION_DURATION = 150;
-constexpr float DEFAULT_MAX_CHECKBOX_SHAPE_SCALE = 1.0;
-constexpr float DEFAULT_MIN_CHECKBOX_SHAPE_SCALE = 0.0;
-} // namespace
-
 void CheckBoxGroupPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
@@ -159,6 +147,11 @@ void CheckBoxGroupPattern::InitMouseEvent()
 void CheckBoxGroupPattern::HandleMouseEvent(bool isHover)
 {
     isHover_ = isHover;
+    if (isHover) {
+        touchHoverType_ = TouchHoverAnimationType::HOVER;
+    } else {
+        touchHoverType_ = TouchHoverAnimationType::NONE;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -180,58 +173,26 @@ void CheckBoxGroupPattern::OnClick()
 
 void CheckBoxGroupPattern::OnTouchDown()
 {
+    if (isHover_) {
+        touchHoverType_ = TouchHoverAnimationType::HOVER_TO_PRESS;
+    } else {
+        touchHoverType_ = TouchHoverAnimationType::PRESS;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    isTouch_ = true;
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CheckBoxGroupPattern::OnTouchUp()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    isTouch_ = false;
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-}
-
-void CheckBoxGroupPattern::UpdateAnimation(bool check)
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    if (!controller_) {
-        controller_ = AceType::MakeRefPtr<Animator>(host->GetContext());
-        auto weak = AceType::WeakClaim(this);
-        controller_->AddStopListener(Animator::StatusCallback([weak]() {
-            auto checkBox = weak.Upgrade();
-            if (checkBox) {
-                checkBox->UpdateUnSelect();
-            }
-        }));
-    }
-    float from = 0.0;
-    float to = 0.0;
-    if (!check) {
-        from = DEFAULT_MAX_CHECKBOX_SHAPE_SCALE;
-        to = DEFAULT_MIN_CHECKBOX_SHAPE_SCALE;
+    if (isHover_) {
+        touchHoverType_ = TouchHoverAnimationType::PRESS_TO_HOVER;
     } else {
-        from = DEFAULT_MIN_CHECKBOX_SHAPE_SCALE;
-        to = DEFAULT_MAX_CHECKBOX_SHAPE_SCALE;
+        touchHoverType_ = TouchHoverAnimationType::NONE;
     }
-
-    if (translate_) {
-        controller_->RemoveInterpolator(translate_);
-    }
-    translate_ = AceType::MakeRefPtr<CurveAnimation<float>>(from, to, Curves::FRICTION);
-    auto weak = AceType::WeakClaim(this);
-    translate_->AddListener(Animation<float>::ValueCallback([weak](float value) {
-        auto checkBox = weak.Upgrade();
-        if (checkBox) {
-            checkBox->UpdateCheckBoxShape(value);
-        }
-    }));
-    controller_->SetDuration(DEFUALT_CHECKBOX_ANIMATION_DURATION);
-    controller_->AddInterpolator(translate_);
-    controller_->Play();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CheckBoxGroupPattern::UpdateUnSelect()
@@ -258,18 +219,6 @@ void CheckBoxGroupPattern::UpdateUIStatus(bool check)
     } else {
         uiStatus_ = check ? UIStatus::OFF_TO_ON : UIStatus::ON_TO_OFF;
     }
-    shapeScale_ = 1.0f;
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-}
-
-void CheckBoxGroupPattern::UpdateCheckBoxShape(const float value)
-{
-    if (value < DEFAULT_MIN_CHECKBOX_SHAPE_SCALE || value > DEFAULT_MAX_CHECKBOX_SHAPE_SCALE) {
-        return;
-    }
-    shapeScale_ = value;
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -343,7 +292,6 @@ void CheckBoxGroupPattern::UpdateGroupCheckStatus(const RefPtr<FrameNode>& frame
     auto pattern = frameNode->GetPattern<CheckBoxGroupPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->UpdateUIStatus(select);
-    pattern->UpdateAnimation(select);
     if (select) {
         paintProperty->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::ALL);
     } else {
@@ -439,7 +387,6 @@ void CheckBoxGroupPattern::UpdateRepeatedGroupStatus(const RefPtr<FrameNode>& fr
     auto pattern = frameNode->GetPattern<CheckBoxGroupPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->UpdateUIStatus(select);
-    pattern->UpdateAnimation(select);
     auto paintProperty = frameNode->GetPaintProperty<CheckBoxGroupPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     paintProperty->SetSelectStatus(
@@ -558,6 +505,8 @@ void CheckBoxGroupPattern::InitializeModifierParam(CheckBoxGroupModifier::Parame
     paintParameters.hotZoneVerticalPadding = checkBoxTheme->GetHotZoneVerticalPadding();
     paintParameters.shadowWidth = checkBoxTheme->GetShadowWidth();
     paintParameters.checkMarkPaintSize = checkBoxTheme->GetDefaultWidth().ConvertToPx();
+    paintParameters.hoverDuration = checkBoxTheme->GetHoverDuration();
+    paintParameters.hoverToTouchDuration = checkBoxTheme->GetHoverToTouchDuration();
     paintParameters.uiStatus = UIStatus::UNSELECTED;
     paintParameters.status = CheckBoxGroupPaintProperty::SelectStatus::NONE;
 }
@@ -589,8 +538,8 @@ void CheckBoxGroupPattern::UpdateModifierParam(CheckBoxGroupModifier::Parameters
         }
     }
     if (paintProperty->HasCheckBoxGroupCheckMarkWidth()) {
-        paintParameters.checkStroke = static_cast<float>(
-            paintProperty->GetCheckBoxGroupCheckMarkWidthValue().ConvertToPx());
+        paintParameters.checkStroke =
+            static_cast<float>(paintProperty->GetCheckBoxGroupCheckMarkWidthValue().ConvertToPx());
     }
 }
 } // namespace OHOS::Ace::NG

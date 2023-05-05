@@ -16,9 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CHECKBOXGROUP_CHECKBOXGROUP_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CHECKBOXGROUP_CHECKBOXGROUP_PATTERN_H
 
-#include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_accessibility_property.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_event_hub.h"
@@ -27,7 +25,6 @@
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_method.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_property.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -66,8 +63,10 @@ public:
             UpdateModifierParam(paintParameters);
             checkBoxGroupModifier_ = AceType::MakeRefPtr<CheckBoxGroupModifier>(paintParameters);
         }
-        auto paintMethod = MakeRefPtr<CheckBoxGroupPaintMethod>(enabled, isTouch_, isHover_,
-            shapeScale_, uiStatus_, checkBoxGroupModifier_);
+        auto paintMethod = MakeRefPtr<CheckBoxGroupPaintMethod>(checkBoxGroupModifier_);
+        paintMethod->SetEnabled(enabled);
+        paintMethod->SetUiStatus(uiStatus_);
+        paintMethod->SetTouchHoverAnimationType(touchHoverType_);
         paintMethod->SetHotZoneOffset(hotZoneOffset_);
         paintMethod->SetHotZoneSize(hotZoneSize_);
         return paintMethod;
@@ -132,7 +131,6 @@ public:
     }
 
     FocusPattern GetFocusPattern() const override;
-    void UpdateAnimation(bool check);
     void UpdateUIStatus(bool check);
     void UpdateModifierParam(CheckBoxGroupModifier::Parameters& paintParameters);
 
@@ -147,7 +145,6 @@ private:
     void OnTouchDown();
     void OnTouchUp();
     void HandleMouseEvent(bool isHover);
-    void UpdateCheckBoxShape(float value);
     void UpdateUnSelect();
     void UpdateState();
     void UpdateGroupCheckStatus(const RefPtr<FrameNode>& frameNode, bool select);
@@ -169,14 +166,10 @@ private:
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<CheckBoxGroupModifier> checkBoxGroupModifier_;
-    bool isTouch_ = false;
     bool isHover_ = false;
+    TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
     bool isClick_ = false;
     bool isFirstCreated_ = true;
-    // animation control
-    RefPtr<Animator> controller_;
-    RefPtr<CurveAnimation<float>> translate_;
-    float shapeScale_ = 1.0f;
     UIStatus uiStatus_ = UIStatus::UNSELECTED;
     Dimension hotZoneHorizontalPadding_;
     Dimension hotZoneVerticalPadding_;

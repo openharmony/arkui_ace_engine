@@ -35,6 +35,8 @@ public:
         float borderRadius;
         float checkStroke;
         float checkMarkPaintSize;
+        float hoverDuration;
+        float hoverToTouchDuration;
         Color pointColor;
         Color activeColor;
         Color inactiveColor;
@@ -50,26 +52,56 @@ public:
         CheckBoxGroupPaintProperty::SelectStatus status;
     };
 
-    CheckBoxGroupModifier(const Parameters& parameters);
+    explicit CheckBoxGroupModifier(const Parameters& parameters);
     ~CheckBoxGroupModifier() override = default;
     void onDraw(DrawingContext& context) override
     {
         PaintCheckBox(context, offset_->Get(), size_->Get());
     }
 
+    void UpdateAnimatableProperty()
+    {
+        switch (touchHoverType_) {
+            case TouchHoverAnimationType::HOVER:
+                SetBoardColor(LinearColor(hoverColor_), hoverDuration_, Curves::FRICTION);
+                break;
+            case TouchHoverAnimationType::PRESS_TO_HOVER:
+                SetBoardColor(LinearColor(hoverColor_), hoverToTouchDuration_, Curves::SHARP);
+                break;
+            case TouchHoverAnimationType::NONE:
+                SetBoardColor(LinearColor(hoverColor_.BlendOpacity(0)), hoverDuration_, Curves::FRICTION);
+                break;
+            case TouchHoverAnimationType::HOVER_TO_PRESS:
+                SetBoardColor(LinearColor(clickEffectColor_), hoverToTouchDuration_, Curves::SHARP);
+                break;
+            case TouchHoverAnimationType::PRESS:
+                SetBoardColor(LinearColor(clickEffectColor_), hoverDuration_, Curves::FRICTION);
+                break;
+            default:
+                break;
+        }
+    }
+
+    void SetBoardColor(LinearColor color, int32_t duratuion, const RefPtr<CubicCurve>& curve)
+    {
+        if (animateTouchHoverColor_) {
+            AnimationOption option = AnimationOption();
+            option.SetDuration(duratuion);
+            option.SetCurve(curve);
+            AnimationUtils::Animate(option, [&]() { animateTouchHoverColor_->Set(color); });
+        }
+    }
+
     void PaintCheckBox(DrawingContext& context, const OffsetF& paintOffset, const SizeF& contentSize) const;
-    void PaintCheckBoxGroupPartStatus(RSCanvas& canvas, const OffsetF& paintOffset, RSBrush& brush,
-        RSPen pen, const SizeF& paintSize) const;
+    void PaintCheckBoxGroupPartStatus(
+        RSCanvas& canvas, const OffsetF& paintOffset, RSBrush& brush, RSPen& pen, const SizeF& paintSize) const;
+    void DrawCheck(RSCanvas& canvas, const OffsetF& origin, RSPen& pen, RSPen& shadowPen, const SizeF& paintSize) const;
     void DrawUnselected(RSCanvas& canvas, const OffsetF& origin, RSPen& pen, const SizeF& paintSize) const;
     void DrawActiveBorder(RSCanvas& canvas, const OffsetF& paintOffset, RSBrush& brush, const SizeF& paintSize) const;
-    void DrawUnselectedBorder(RSCanvas& canvas, const OffsetF& paintOffset,
-        RSBrush& brush, const SizeF& paintSize) const;
-    void DrawMark(RSCanvas& canvas, RSPath& path, RSPen& pen) const;
+    void DrawUnselectedBorder(
+        RSCanvas& canvas, const OffsetF& paintOffset, RSBrush& brush, const SizeF& paintSize) const;
     void DrawPart(RSCanvas& canvas, const OffsetF& origin, RSPen& pen, const SizeF& paintSize) const;
-    void DrawTouchBoard(RSCanvas& canvas, const SizeF& contentSize, const OffsetF& offset) const;
-    void DrawHoverBoard(RSCanvas& canvas, const SizeF& contentSize, const OffsetF& offset) const;
-    void DrawAnimationOffToOn(RSCanvas& canvas, const OffsetF& origin, RSPen& pen, const SizeF& paintSize) const;
-    void DrawAnimationOnToOff(RSCanvas& canvas, const OffsetF& origin, RSPen& pen, const SizeF& paintSize) const;
+    void DrawTouchAndHoverBoard(RSCanvas& canvas, const SizeF& contentSize, const OffsetF& offset) const;
 
     void SetBorderWidth(float borderWidth)
     {
@@ -90,7 +122,7 @@ public:
     {
         checkMarkPaintSize_->Set(checkMarkPaintSize);
     }
-    
+
     void SetPointColor(Color pointColor)
     {
         pointColor_->Set(LinearColor(pointColor));
@@ -151,19 +183,9 @@ public:
         enabled_->Set(value);
     }
 
-    void SetIsTouch(bool value)
+    void SetTouchHoverAnimationType(const TouchHoverAnimationType touchHoverType)
     {
-        isTouch_->Set(value);
-    }
-
-    void SetIsHover(bool value)
-    {
-        isHover_->Set(value);
-    }
-
-    void SetShapeScale(float value)
-    {
-        shapeScale_->Set(value);
+        touchHoverType_ = touchHoverType;
     }
 
     void SetUiStatus(UIStatus uiStatus)
@@ -180,7 +202,7 @@ public:
         }
     }
 
-    float GetBorderWidth()
+    float GetBorderWidth() const
     {
         return borderWidth_;
     }
@@ -205,9 +227,8 @@ private:
     RefPtr<AnimatablePropertyColor> inactiveColor_;
     RefPtr<AnimatablePropertyFloat> checkMarkPaintSize_;
     RefPtr<AnimatablePropertyFloat> checkStroke_;
-    RefPtr<PropertyFloat> shapeScale_;
-    RefPtr<PropertyBool> isTouch_;
-    RefPtr<PropertyBool> isHover_;
+    RefPtr<AnimatablePropertyColor> animateTouchHoverColor_;
+    TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
     RefPtr<PropertyBool> enabled_;
     RefPtr<PropertyInt> uiStatus_;
     RefPtr<PropertyInt> status_;
@@ -223,6 +244,8 @@ private:
     Dimension hotZoneHorizontalPadding_;
     Dimension hotZoneVerticalPadding_;
     Dimension shadowWidth_;
+    float hoverDuration_ = 0.0f;
+    float hoverToTouchDuration_ = 0.0f;
     ACE_DISALLOW_COPY_AND_MOVE(CheckBoxGroupModifier);
 };
 } // namespace OHOS::Ace::NG
