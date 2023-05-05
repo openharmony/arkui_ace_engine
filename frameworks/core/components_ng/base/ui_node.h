@@ -397,9 +397,6 @@ protected:
         }
     }
 
-    virtual void OnAddDisappearingChild() {}
-    virtual void OnRemoveDisappearingChild() {}
-
     virtual void OnContextAttached() {}
     // dump self info.
     virtual void DumpInfo() {}
