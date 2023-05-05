@@ -421,4 +421,12 @@ RefPtr<TabsNode> TabsModelNG::GetOrCreateTabsNode(
     return tabsNode;
 }
 
+void TabsModelNG::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& onChangeEvent)
+{
+    auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(tabsNode);
+    auto tabPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabPattern);
+    tabPattern->SetOnIndexChangeEvent(std::move(onChangeEvent));
+}
 } // namespace OHOS::Ace::NG

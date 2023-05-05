@@ -1930,4 +1930,36 @@ HWTEST_F(TabsTestNg, TabsAccessibilityPropertyTestNg004, TestSize.Level1)
     }
     EXPECT_EQ(actions, exptectActions);
 }
+
+/**
+ * @tc.name: TabsEventHubChangeEvent001
+ * @tc.desc: Tabs OnChangeEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabsEventHubChangeEvent001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    TabsModelNG tabsModel;
+    TabsItemDivider divider;
+    Dimension strokeWidth = 10.0_vp;
+    Dimension startMargin = 3.0_vp;
+    Dimension endMargin = 4.0_vp;
+    Color color = Color::BLACK;
+
+    divider.strokeWidth = strokeWidth;
+    divider.startMargin = startMargin;
+    divider.endMargin = endMargin;
+    divider.color = color;
+    divider.isNull = false;
+
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
+    tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
+    tabsModel.SetOnChangeEvent([](const BaseEventInfo* info) {});
+    tabsModel.SetDivider(divider);
+    auto frameNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->onIndexChangeEvent_, nullptr);
+}
 } // namespace OHOS::Ace::NG
