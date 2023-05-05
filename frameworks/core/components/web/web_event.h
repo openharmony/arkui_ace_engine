@@ -180,7 +180,7 @@ public:
         dataType_ = WebResponseDataType::FILE_TYPE;
     }
 
-    void SetResourceUrl(std::string& url)
+    void SetResourceUrl(const std::string& url)
     {
         resourceUrl_ = url;
         dataType_ = WebResponseDataType::RESOURCE_URL_TYPE;

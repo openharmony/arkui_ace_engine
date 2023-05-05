@@ -43,9 +43,7 @@ public:
 
     void HandleResourceUrl(std::string& url) override
     {
-        if (nwebResponse_ == nullptr) {
-            return;
-        }
+        CHECK_NULL_VOID(nwebResponse_)
         nwebResponse_->PutResponseResourceUrl(url);
     }
 
@@ -332,7 +330,7 @@ std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> WebClientImpl::OnHandleInte
 {
     ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();
-    if (!delegate || (delegate->IsEmptyOnInterceptRequest() == true)) {
+    if (!delegate || (delegate->IsEmptyOnInterceptRequest())) {
         LOGI("OnHandleInterceptRequest is empty");
         return nullptr;
     }
