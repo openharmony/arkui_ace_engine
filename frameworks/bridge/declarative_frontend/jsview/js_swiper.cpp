@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_swiper.h"
 
 #include <algorithm>
+#include <cstdint>
 #include <iterator>
 
 #include "base/log/ace_scoring_log.h"
@@ -220,14 +221,45 @@ void JSSwiper::SetDuration(const JSCallbackInfo& info)
     SwiperModel::GetInstance()->SetDuration(duration);
 }
 
-void JSSwiper::SetIndex(int32_t index)
+void ParseSwiperIndexObject(const JSCallbackInfo& args, const JSRef<JSVal>& changeEventVal)
 {
+    CHECK_NULL_VOID(changeEventVal->IsFunction());
+
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
+    auto onIndex = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Swiper.onChangeEvent");
+        const auto* swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
+        if (!swiperInfo) {
+            LOGE("ParseSwiperIndexObject swiperInfo is nullptr");
+            return;
+        }
+        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(swiperInfo->GetIndex()));
+        func->ExecuteJS(1, &newJSVal);
+    };
+    SwiperModel::GetInstance()->SetOnChangeEvent(std::move(onIndex));
+}
+
+void JSSwiper::SetIndex(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || info.Length() > 2) {
+        LOGE("The arg is wrong, it is supposed to have 1 or 2 arguments");
+        return;
+    }
+
+    int32_t index = 0;
+    if (info.Length() > 0 && info[0]->IsNumber()) {
+        index = info[0]->ToNumber<int32_t>();
+    }
     if (index < 0) {
         LOGE("index is not valid: %{public}d", index);
         return;
     }
-
     SwiperModel::GetInstance()->SetIndex(index);
+
+    if (info.Length() > 1 && info[1]->IsFunction()) {
+        ParseSwiperIndexObject(info, info[1]);
+    }
 }
 
 void JSSwiper::SetInterval(const JSCallbackInfo& info)
