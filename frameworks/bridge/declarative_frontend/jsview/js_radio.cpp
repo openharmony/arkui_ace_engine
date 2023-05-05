@@ -134,6 +134,8 @@ void JSRadio::Checked(const JSCallbackInfo& info)
 
     if (info.Length() > 0 && info[0]->IsBoolean()) {
         RadioModel::GetInstance()->SetChecked(info[0]->ToBoolean());
+    } else {
+        RadioModel::GetInstance()->SetChecked(false);
     }
 
     if (info.Length() > 1 && info[1]->IsObject()) {

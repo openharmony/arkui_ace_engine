@@ -102,11 +102,13 @@ void JSToggle::Create(const JSCallbackInfo& info)
 
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto type = paramObject->GetProperty("type");
-    if (!type->IsNumber()) {
-        LOGE("toggle create error, type is non-valid");
-        return;
+    int32_t toggleTypeInt = 1;
+    if (type->IsNumber()) {
+        toggleTypeInt = type->ToNumber<int32_t>();
     }
-
+    if (toggleTypeInt < 0 || toggleTypeInt > 2) {
+        toggleTypeInt = 1;
+    }
     auto tempIsOn = paramObject->GetProperty("isOn");
     bool isOn = false;
     JSRef<JSVal> changeEventVal;
@@ -118,9 +120,6 @@ void JSToggle::Create(const JSCallbackInfo& info)
     } else {
         isOn = tempIsOn->IsBoolean() ? tempIsOn->ToBoolean() : false;
     }
-    auto toggleType = static_cast<ToggleType>(type->ToNumber<int32_t>());
-
-    auto toggleTypeInt = static_cast<int32_t>(toggleType);
     
     ToggleModel::GetInstance()->Create(NG::ToggleType(toggleTypeInt), isOn);
     if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
