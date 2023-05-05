@@ -301,4 +301,13 @@ void SideBarContainerModelNG::MarkNeedInitRealSideBarWidth()
     CHECK_NULL_VOID(pattern);
     pattern->MarkNeedInitRealSideBarWidth(true);
 }
+
+void SideBarContainerModelNG::SetOnChangeEvent(std::function<void(const bool)>&& onChangeEvent)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<SideBarContainerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnChangeEvent(std::move(onChangeEvent));
+}
 } // namespace OHOS::Ace::NG

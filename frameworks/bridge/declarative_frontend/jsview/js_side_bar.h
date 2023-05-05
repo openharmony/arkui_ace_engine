@@ -29,7 +29,7 @@ public:
     static void JsSideBarWidth(const JSCallbackInfo& info);
     static void JsMaxSideBarWidth(const JSCallbackInfo& info);
     static void JsMinSideBarWidth(const JSCallbackInfo& info);
-    static void JsShowSideBar(bool isShow);
+    static void JsShowSideBar(const JSCallbackInfo& info);
     static void JsControlButton(const JSCallbackInfo& info);
     static void JsDivider(const JSCallbackInfo& info);
     static void JsAutoHide(bool autoHide);
