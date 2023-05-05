@@ -55,6 +55,9 @@ AceTextCategory TextFieldAccessibilityProperty::GetTextInputType() const
         case TextInputType::NUMBER:
             ret = AceTextCategory::INPUT_TYPE_NUMBER;
             break;
+        case TextInputType::PHONE:
+            ret = AceTextCategory::INPUT_TYPE_PHONENUMBER;
+            break;
         case TextInputType::DATETIME:
             ret = AceTextCategory::INPUT_TYPE_DATE;
             break;
