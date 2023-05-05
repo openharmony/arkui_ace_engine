@@ -3573,6 +3573,11 @@ void JSWeb::JsOnDragStart(const JSCallbackInfo& info)
         return;
     }
 
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        LOGE("Param is invalid, it is not a function");
+        return;
+    }
+
     RefPtr<JsDragFunction> jsOnDragStartFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onDragStartId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc)](
                              const RefPtr<DragEvent>& info, const std::string& extraParams) -> DragItemInfo {
@@ -3615,6 +3620,11 @@ void JSWeb::JsOnDragEnter(const JSCallbackInfo& info)
         return;
     }
 
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        LOGE("Param is invalid, it is not a function");
+        return;
+    }
+
     RefPtr<JsDragFunction> jsOnDragEnterFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onDragEnterId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc)](
                              const RefPtr<DragEvent>& info, const std::string& extraParams) {
@@ -3632,6 +3642,11 @@ void JSWeb::JsOnDragMove(const JSCallbackInfo& info)
 {
     if (Container::IsCurrentUseNewPipeline()) {
         JSViewAbstract::JsOnDragMove(info);
+        return;
+    }
+
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        LOGE("Param is invalid, it is not a function");
         return;
     }
 
@@ -3655,6 +3670,11 @@ void JSWeb::JsOnDragLeave(const JSCallbackInfo& info)
         return;
     }
 
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        LOGE("Param is invalid, it is not a function");
+        return;
+    }
+
     RefPtr<JsDragFunction> jsOnDragLeaveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onDragLeaveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragLeaveFunc)](
                              const RefPtr<DragEvent>& info, const std::string& extraParams) {
@@ -3672,6 +3692,11 @@ void JSWeb::JsOnDrop(const JSCallbackInfo& info)
 {
     if (Container::IsCurrentUseNewPipeline()) {
         JSViewAbstract::JsOnDrop(info);
+        return;
+    }
+
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        LOGE("Param is invalid, it is not a function");
         return;
     }
 

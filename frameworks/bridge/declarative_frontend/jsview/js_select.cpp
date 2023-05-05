@@ -68,8 +68,12 @@ void JSSelect::Create(const JSCallbackInfo& info)
         for (size_t i = 0; i < size; i++) {
             std::string value;
             std::string icon;
-
-                auto indexObject = JSRef<JSObject>::Cast(paramArray->GetValueAt(i));
+                JSRef<JSVal> indexVal = paramArray->GetValueAt(i);
+                if (!indexVal->IsObject()) {
+                    LOGE("element of paramArray is not an object.");
+                    return;
+                }
+                auto indexObject = JSRef<JSObject>::Cast(indexVal);
                 auto selectValue = indexObject->GetProperty("value");
                 auto selectIcon = indexObject->GetProperty("icon");
                 if (!ParseJsString(selectValue, value)) {
@@ -409,6 +413,10 @@ void JSSelect::OptionFontColor(const JSCallbackInfo& info)
 
 void JSSelect::OnSelected(const JSCallbackInfo& info)
 {
+    if (!info[0]->IsFunction()) {
+        LOGE("info[0] is not a function.");
+        return;
+    }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     auto onSelect = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
                         int32_t index, const std::string& value) {
