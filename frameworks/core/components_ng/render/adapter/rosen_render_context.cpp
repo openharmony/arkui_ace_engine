@@ -736,6 +736,11 @@ void RosenRenderContext::NotifyTransitionInner(const SizeF& frameSize, bool isTr
         rsNode_->NotifyTransition(effect, isTransitionIn);
         return;
     }
+    // add default transition effect on the 'breaking point' of render tree, if no user-defined transition effect.
+    if (isBreakingPoint == true && transitionEffect_ == nullptr) {
+        // PLANNING: remove this after THIS transition ends.
+        transitionEffect_ = RosenTransitionEffect::CreateDefaultRosenTransitionEffect();
+    }
     NotifyTransition(isTransitionIn);
 }
 
@@ -2356,8 +2361,9 @@ void RosenRenderContext::OnTransitionOutFinish()
 
     // should get parent before onRemoveFromParent function because it will reset parent
     auto parent = host->GetParent();
-    // clean up related status.
-    host->UINode::OnRemoveFromParent();
+    // clean up related status, now this node has no transition out animation, so RemoveImmediately() will return true,
+    // and OnRemoveFromParent will do the necessary cleanup work.
+    host->OnRemoveFromParent();
     // try to remove self from parent's disappearing children.
     if (parent && parent->RemoveDisappearingChild(host)) {
         // if success, tell parent to rebuild render tree.
