@@ -846,47 +846,66 @@ void TextPattern::UpdateChildProperty(const RefPtr<SpanNode>& child) const
     auto textLayoutProp = host->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProp);
 
-    if (!child->HasFontSize() && textLayoutProp->HasFontSize()) {
-        child->UpdateFontSizeWithoutFlushDirty(textLayoutProp->GetFontSize().value());
-    }
-
-    if (!child->HasItalicFontStyle() && textLayoutProp->HasItalicFontStyle()) {
-        child->UpdateItalicFontStyleWithoutFlushDirty(textLayoutProp->GetItalicFontStyle().value());
-    }
-    if (!child->HasFontWeight() && textLayoutProp->HasFontWeight()) {
-        child->UpdateFontWeightWithoutFlushDirty(textLayoutProp->GetFontWeight().value());
-    }
-
-    if (!child->HasTextDecoration() && textLayoutProp->HasTextDecoration()) {
-        child->UpdateTextDecorationWithoutFlushDirty(textLayoutProp->GetTextDecoration().value());
-        if (textLayoutProp->HasTextDecorationColor()) {
-            child->UpdateTextDecorationColorWithoutFlushDirty(textLayoutProp->GetTextDecorationColor().value());
-        }
-    }
-    if (!child->HasTextCase() && textLayoutProp->HasTextCase()) {
-        child->UpdateTextCaseWithoutFlushDirty(textLayoutProp->GetTextCase().value());
-    }
-    if (!child->HasLetterSpacing() && textLayoutProp->HasLetterSpacing()) {
-        child->UpdateLetterSpacingWithoutFlushDirty(textLayoutProp->GetLetterSpacing().value());
-    }
-    if (!child->HasLineHeight() && textLayoutProp->HasLineHeight()) {
-        child->UpdateLineHeightWithoutFlushDirty(textLayoutProp->GetLineHeight().value());
-    }
-    // SpanNode does not hold RenderContext, use FontColor property
-    auto renderContext = host->GetRenderContext();
-    if (!child->HasTextColor()) {
-        if (textLayoutProp->HasTextColor() && renderContext->HasForegroundColor()) {
-            if (renderContext->GetForegroundColor().value() == textLayoutProp->GetTextColor().value()) {
-                child->UpdateTextColorWithoutFlushDirty(textLayoutProp->GetTextColor().value());
-            } else {
-                child->UpdateTextColorWithoutFlushDirty(Color::FOREGROUND);
-            }
-        } else if (renderContext->HasForegroundColorStrategy()) {
-            child->UpdateTextColorWithoutFlushDirty(Color::FOREGROUND);
-        } else if (textLayoutProp->HasTextColor()) {
-            child->UpdateTextColorWithoutFlushDirty(textLayoutProp->GetTextColor().value());
-        } else if (renderContext->HasForegroundColor()) {
-            child->UpdateTextColorWithoutFlushDirty(renderContext->GetForegroundColor().value());
+    auto inheritPropertyInfo = child->CaculateInheritPropertyInfo();
+    auto iter = inheritPropertyInfo.find(PropertyInfo::TEXTDECORATION);
+    for (const PropertyInfo& info : inheritPropertyInfo) {
+        switch (info) {
+            case PropertyInfo::FONTSIZE:
+                if (textLayoutProp->HasFontSize()) {
+                    child->UpdateFontSizeWithoutFlushDirty(textLayoutProp->GetFontSize().value());
+                }
+                break;
+            case PropertyInfo::FONTCOLOR:
+                if (textLayoutProp->HasTextColor()) {
+                    child->UpdateTextColorWithoutFlushDirty(textLayoutProp->GetTextColor().value());
+                }
+                break;
+            case PropertyInfo::FONTSTYLE:
+                if (textLayoutProp->HasItalicFontStyle()) {
+                    child->UpdateItalicFontStyleWithoutFlushDirty(textLayoutProp->GetItalicFontStyle().value());
+                }
+                break;
+            case PropertyInfo::FONTWEIGHT:
+                if (textLayoutProp->HasFontWeight()) {
+                    child->UpdateFontWeightWithoutFlushDirty(textLayoutProp->GetFontWeight().value());
+                }
+                break;
+            case PropertyInfo::FONTFAMILY:
+                if (textLayoutProp->HasFontFamily()) {
+                    child->UpdateFontFamilyWithoutFlushDirty(textLayoutProp->GetFontFamily().value());
+                }
+                break;
+            case PropertyInfo::TEXTDECORATION:
+                if (textLayoutProp->HasTextDecoration()) {
+                    child->UpdateTextDecorationWithoutFlushDirty(textLayoutProp->GetTextDecoration().value());
+                }
+                break;
+            case PropertyInfo::TEXTDECORATIONCOLOR:
+                if (iter != inheritPropertyInfo.end()) {
+                    if (textLayoutProp->HasTextDecorationColor()) {
+                        child->UpdateTextDecorationColorWithoutFlushDirty(
+                            textLayoutProp->GetTextDecorationColor().value());
+                    }
+                }
+                break;
+            case PropertyInfo::TEXTCASE:
+                if (textLayoutProp->HasTextCase()) {
+                    child->UpdateTextCaseWithoutFlushDirty(textLayoutProp->GetTextCase().value());
+                }
+                break;
+            case PropertyInfo::LETTERSPACE:
+                if (textLayoutProp->HasLetterSpacing()) {
+                    child->UpdateLetterSpacingWithoutFlushDirty(textLayoutProp->GetLetterSpacing().value());
+                }
+                break;
+            case PropertyInfo::LINEHEIGHT:
+                if (textLayoutProp->HasLineHeight()) {
+                    child->UpdateLineHeightWithoutFlushDirty(textLayoutProp->GetLineHeight().value());
+                }
+                break;
+            default:
+                LOGW("Inherited properties are not supported.");
+                break;
         }
     }
 }
