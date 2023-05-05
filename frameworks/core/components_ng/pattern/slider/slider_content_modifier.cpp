@@ -211,7 +211,7 @@ void SliderContentModifier::DrawSelect(DrawingContext& context)
         auto insetOffset = .0f;
         if (sliderMode == SliderModelNG::SliderMode::INSET) {
             insetOffset = direction == Axis::HORIZONTAL ? blockSize.Width() * HALF : blockSize.Height() * HALF;
-            insetOffset = std::min(insetOffset + hotCircleShadowWidth_, trackThickness * HALF);
+            insetOffset = trackThickness * HALF;
         }
         if (!reverse_) {
             if (direction == Axis::HORIZONTAL) {

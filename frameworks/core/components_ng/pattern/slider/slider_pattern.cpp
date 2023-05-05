@@ -342,8 +342,6 @@ void SliderPattern::UpdateCircleCenterOffset()
         circleCenter_.SetX(contentSize->Width() * HALF);
         circleCenter_.SetY(touchOffset);
     }
-
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void SliderPattern::UpdateBubble()
@@ -471,7 +469,9 @@ void SliderPattern::GetOutsetInnerFocusPaintRect(RoundRect& paintRect)
 
 void SliderPattern::GetInsetInnerFocusPaintRect(RoundRect& paintRect)
 {
-    const auto& content = GetHost()->GetGeometryNode()->GetContent();
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    const auto& content = frameNode->GetGeometryNode()->GetContent();
     CHECK_NULL_VOID(content);
     auto theme = PipelineBase::GetCurrentContext()->GetTheme<SliderTheme>();
     CHECK_NULL_VOID(theme);
@@ -485,7 +485,12 @@ void SliderPattern::GetInsetInnerFocusPaintRect(RoundRect& paintRect)
     float offsetY = content->GetRect().GetY();
     float width = content->GetRect().Width();
     float height = content->GetRect().Height();
-    float focusRadius = trackThickness_ + static_cast<float>(focusDistance.ConvertToPx()) / HALF;
+    float focusRadius = trackThickness_ * HALF + static_cast<float>(focusDistance.ConvertToPx());
+    auto paintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    if (paintProperty && paintProperty->GetTrackBorderRadius().has_value()) {
+        focusRadius = static_cast<float>(paintProperty->GetTrackBorderRadius().value().ConvertToPx()) +
+                      static_cast<float>(focusDistance.ConvertToPx());
+    }
     if (direction_ == Axis::HORIZONTAL) {
         offsetX += borderBlank_ - trackThickness_ * HALF - static_cast<float>(focusDistance.ConvertToPx());
         offsetY += (height - trackThickness_) * HALF - static_cast<float>(focusDistance.ConvertToPx());
