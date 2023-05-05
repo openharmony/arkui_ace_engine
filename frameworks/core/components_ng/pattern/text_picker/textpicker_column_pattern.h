@@ -42,6 +42,15 @@ struct TextProperties {
     Color currentColor;
     Color downColor;
 };
+    
+class EventParam : public virtual AceType {
+    DECLARE_ACE_TYPE(EventParam, AceType)
+
+public:
+    RefPtr<FrameNode> instance;
+    int32_t itemIndex;
+    int32_t itemTotalCounts;
+};
 
 class TextPickerColumnPattern : public LinearLayoutPattern {
     DECLARE_ACE_TYPE(TextPickerColumnPattern, LinearLayoutPattern);
@@ -76,13 +85,13 @@ public:
 
     void UpdateCurrentOffset(float offset);
 
-    void UpdateColumnChildPosition(double offsetY);
+    void UpdateColumnChildPosition(double offsetY, bool isUpatePropertiesOnly = true);
 
     bool CanMove(bool isDown) const;
 
     bool NotLoopOptions() const;
 
-    bool InnerHandleScroll(bool isDown, bool isUpatePropertiesOnly = false);
+    bool InnerHandleScroll(int32_t step, bool isUpatePropertiesOnly = false);
 
     void SetDefaultPickerItemHeight(double defaultPickerItemHeight)
     {
@@ -281,6 +290,16 @@ private:
     Dimension LinearFontSize(const Dimension& startFontSize, const Dimension& endFontSize, double percent);
     void ClearCurrentTextOptions(const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty,
         bool isUpateTextContentOnly, bool isDirectlyClear);
+
+    RefPtr<TextPickerLayoutProperty> GetParentLayout() const;
+    RefPtr<TouchEventImpl> CreateItemTouchEventListener(RefPtr<EventParam> param);
+    void OnAroundButtonClick(RefPtr<EventParam> param);
+    void OnMiddleButtonTouchDown(RefPtr<EventParam> param);
+    void OnMiddleButtonTouchMove(RefPtr<EventParam> param);
+    void OnMiddleButtonTouchUp(RefPtr<EventParam> param);
+    bool touchEventInit = false;
+    RefPtr<InputEvent> CreateMouseHoverEventListener(RefPtr<EventParam> param);
+    RefPtr<ClickEvent> CreateItemClickEventListener(RefPtr<EventParam> param);
 
     float localDownDistance_ = 0.0f;
     Color pressColor_;

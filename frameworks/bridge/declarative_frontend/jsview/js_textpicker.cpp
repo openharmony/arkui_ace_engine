@@ -60,6 +60,7 @@ void JSTextPicker::JSBind(BindingTarget globalObj)
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSTextPicker>::StaticMethod("create", &JSTextPicker::Create, opt);
     JSClass<JSTextPicker>::StaticMethod("defaultPickerItemHeight", &JSTextPicker::SetDefaultPickerItemHeight);
+    JSClass<JSTextPicker>::StaticMethod("canLoop", &JSTextPicker::SetCanLoop);
     JSClass<JSTextPicker>::StaticMethod("disappearTextStyle", &JSTextPicker::SetDisappearTextStyle);
     JSClass<JSTextPicker>::StaticMethod("textStyle", &JSTextPicker::SetTextStyle);
     JSClass<JSTextPicker>::StaticMethod("selectedTextStyle", &JSTextPicker::SetSelectedTextStyle);
@@ -683,6 +684,17 @@ void JSTextPicker::SetDefaultPickerItemHeight(const JSCallbackInfo& info)
     }
     TextPickerModel::GetInstance()->SetDefaultPickerItemHeight(height);
 }
+void JSTextPicker::SetCanLoop(const JSCallbackInfo& info)
+{
+    bool value = true;
+    if (info.Length() != 1 || !info[0]->IsBoolean()) {
+        LOGE("parse canLoop error.");
+    } else {
+        value = info[0]->ToBoolean();
+    }
+    
+    TextPickerModel::GetInstance()->SetCanLoop(value);
+}
 
 void JSTextPicker::SetDisappearTextStyle(const JSCallbackInfo& info)
 {
@@ -1088,6 +1100,21 @@ bool JSTextPickerDialog::ParseShowDataAttribute(const JSRef<JSObject>& paramObje
     }
     return true;
 }
+bool JSTextPickerDialog::ParseCanLoop(const JSRef<JSObject>& paramObject,
+    bool& canLoop)
+{
+    bool result = false;
+    auto prop = paramObject->GetProperty("canLoop");
+    bool value = false;
+    if (prop->IsBoolean() && JSViewAbstract::ParseJsBool(prop, value)) {
+        canLoop = value;
+        result = true;
+    } else {
+        canLoop = true;
+        result = false;
+    }
+    return result;
+}
 
 void JSTextPickerDialog::ParseShowDataMultiContent(const std::vector<NG::TextCascadePickerOptions>& options,
     const std::vector<uint32_t>& selectedValues, const std::vector<std::string>& values,
@@ -1106,7 +1133,8 @@ void JSTextPickerDialog::ParseShowDataMultiContent(const std::vector<NG::TextCas
     settingData.isCascade = isCascade;
 }
 
-bool JSTextPickerDialog::ParseShowData(const JSRef<JSObject>& paramObject, NG::TextPickerSettingData& settingData)
+bool JSTextPickerDialog::ParseShowData(
+    const JSRef<JSObject>& paramObject, NG::TextPickerSettingData& settingData)
 {
     std::vector<NG::RangeContent> rangeResult;
     uint32_t selectedValue = 0;
@@ -1142,6 +1170,9 @@ bool JSTextPickerDialog::ParseShowData(const JSRef<JSObject>& paramObject, NG::T
     }
     if (!ParseShowDataAttribute(paramObject, settingData)) {
         return false;
+    }
+    if (!ParseCanLoop(paramObject, settingData.canLoop)) {
+        LOGW("don't find property(canLoop), set default true");
     }
     if (rangeResult.size() > 0) {
         settingData.selected = selectedValue;
@@ -1278,6 +1309,7 @@ void JSTextPickerDialog::ParseText(RefPtr<PickerTextComponent>& component, const
 {
     auto getSelected = paramObj->GetProperty("selected");
     auto defaultHeight = paramObj->GetProperty("defaultPickerItemHeight");
+    auto canLoop = paramObj->GetProperty("canLoop");
     JSRef<JSArray> getRange = paramObj->GetProperty("range");
     std::vector<std::string> getRangeVector;
     if (!JSViewAbstract::ParseJsStrArray(getRange, getRangeVector)) {

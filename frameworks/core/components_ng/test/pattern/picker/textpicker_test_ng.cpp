@@ -161,6 +161,8 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions001, TestSi
     TextPickerModelNG::GetInstance()->SetSelected(SELECTED_INDEX_1);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(true);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     textPickerPattern->OnModifyDone();
     auto child = textPickerPattern->GetColumnNode();
@@ -206,6 +208,8 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScrollUp001, TestSi
     TextPickerModelNG::GetInstance()->SetSelectedTextStyle(theme, selectedTextStyle);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(true);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     textPickerPattern->OnModifyDone();
     auto child = textPickerPattern->GetColumnNode();
@@ -262,6 +266,8 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScrollDown001, Test
     TextPickerModelNG::GetInstance()->SetSelectedTextStyle(theme, selectedTextStyle);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(true);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     textPickerPattern->OnModifyDone();
     auto child = textPickerPattern->GetColumnNode();
@@ -310,6 +316,8 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions002, TestSi
     TextPickerModelNG::GetInstance()->SetSelected(SELECTED_INDEX_1);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(true);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     textPickerPattern->OnModifyDone();
     auto child = textPickerPattern->GetColumnNode();
@@ -347,6 +355,8 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScrollUp002, TestSi
     TextPickerModelNG::GetInstance()->SetSelected(SELECTED_INDEX_1);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(true);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     textPickerPattern->OnModifyDone();
     auto child = textPickerPattern->GetColumnNode();
@@ -390,6 +400,8 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScrollDown002, Test
     TextPickerModelNG::GetInstance()->SetSelected(SELECTED_INDEX_1);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(true);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     textPickerPattern->OnModifyDone();
     auto child = textPickerPattern->GetColumnNode();
@@ -432,6 +444,8 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions003, TestSi
     TextPickerModelNG::GetInstance()->SetSelected(SELECTED_INDEX_1);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(true);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     textPickerPattern->OnModifyDone();
     auto child = textPickerPattern->GetColumnNode();
@@ -512,6 +526,8 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions005, TestSi
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(true);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     textPickerPattern->OnModifyDone();
     auto child = textPickerPattern->GetColumnNode();
@@ -542,6 +558,8 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions006, TestSi
     TextPickerModelNG::GetInstance()->Create(theme, ICON);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(true);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     textPickerPattern->OnModifyDone();
     auto child = textPickerPattern->GetColumnNode();
@@ -575,6 +593,8 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions007, TestSi
     TextPickerModelNG::GetInstance()->Create(theme, MIXTURE);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(true);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     textPickerPattern->OnModifyDone();
     auto child = textPickerPattern->GetColumnNode();
@@ -612,6 +632,8 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions008, TestSi
     TextPickerModelNG::GetInstance()->SetSelected(SELECTED_INDEX_1);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(false);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     textPickerPattern->OnModifyDone();
     auto child = textPickerPattern->GetColumnNode();
@@ -648,6 +670,8 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions009, TestSi
     TextPickerModelNG::GetInstance()->SetSelected(SELECTED_INDEX_1);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(false);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     textPickerPattern->OnModifyDone();
     auto child = textPickerPattern->GetColumnNode();
@@ -685,6 +709,8 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions010, TestSi
     TextPickerModelNG::GetInstance()->SetSelected(SELECTED_INDEX_1);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(false);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     textPickerPattern->OnModifyDone();
     auto child = textPickerPattern->GetColumnNode();
@@ -722,6 +748,8 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions011, TestSi
     TextPickerModelNG::GetInstance()->SetSelected(SELECTED_INDEX_1);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(true);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     ASSERT_NE(textPickerPattern, nullptr);
     auto child = textPickerPattern->GetColumnNode();
@@ -759,6 +787,8 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions012, TestSi
     TextPickerModelNG::GetInstance()->SetSelected(SELECTED_INDEX_1);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(true);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     ASSERT_NE(textPickerPattern, nullptr);
     auto child = textPickerPattern->GetColumnNode();
@@ -799,6 +829,8 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions013, TestSi
     TextPickerModelNG::GetInstance()->SetSelected(SELECTED_INDEX_1);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(true);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     ASSERT_NE(textPickerPattern, nullptr);
     auto child = textPickerPattern->GetColumnNode();
@@ -840,6 +872,8 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions014, TestSi
     TextPickerModelNG::GetInstance()->SetSelected(SELECTED_INDEX_1);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(true);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     ASSERT_NE(textPickerPattern, nullptr);
     auto child = textPickerPattern->GetColumnNode();
@@ -894,6 +928,8 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions015, TestSi
     TextPickerModelNG::GetInstance()->SetSelectedTextStyle(theme, selectedTextStyle);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(true);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     textPickerPattern->OnModifyDone();
     auto child = textPickerPattern->GetColumnNode();
@@ -910,12 +946,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions015, TestSi
     EXPECT_EQ(Ace::FontWeight::BOLD, textLayoutProperty->GetFontWeight().value());
 }
 
-/**
- * @tc.name: TextPickerColumnPatternInnerHandleScrollUp003
- * @tc.desc: Test TextPickerColumnPattern InnerHandleScroll(kind:MIXTURE, move up).
- * @tc.type: FUNC
- */
-HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScrollUp003, TestSize.Level1)
+void InnerHandleScrollUp003Init()
 {
     auto pipeline = MockPipelineBase::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
@@ -936,8 +967,22 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScrollUp003, TestSi
     PickerTextStyle selectedTextStyle;
     selectedTextStyle.fontSize = Dimension(FONT_SIZE_20);
     TextPickerModelNG::GetInstance()->SetSelectedTextStyle(theme, selectedTextStyle);
+}
+
+/**
+ * @tc.name: TextPickerColumnPatternInnerHandleScrollUp003
+ * @tc.desc: Test TextPickerColumnPattern InnerHandleScroll(kind:MIXTURE, move up).
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScrollUp003, TestSize.Level1)
+{
+    InnerHandleScrollUp003Init();
+    auto pipeline = MockPipelineBase::GetCurrent();
+    auto theme = pipeline->GetTheme<PickerTheme>();
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(true);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     textPickerPattern->OnModifyDone();
     auto child = textPickerPattern->GetColumnNode();
@@ -945,13 +990,11 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScrollUp003, TestSi
     auto columnPattern = AceType::DynamicCast<FrameNode>(child)->GetPattern<TextPickerColumnPattern>();
     ASSERT_NE(columnPattern, nullptr);
     columnPattern->FlushCurrentOptions(false, false);
-
     double jump = theme->GetJumpInterval().ConvertToPx();
     double offset1 = 0 - jump * HALF;
     double offset2 = 0 - jump;
     columnPattern->UpdateColumnChildPosition(offset1);
     columnPattern->UpdateColumnChildPosition(offset2);
-
     auto linearLayoutNode = AceType::DynamicCast<FrameNode>(child->GetLastChild());
     ASSERT_NE(linearLayoutNode, nullptr);
     auto textNode = AceType::DynamicCast<FrameNode>(linearLayoutNode->GetLastChild());
@@ -996,6 +1039,8 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScrollUp004, TestSi
     TextPickerModelNG::GetInstance()->SetSelectedTextStyle(theme, selectedTextStyle);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(true);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     textPickerPattern->OnModifyDone();
     auto child = textPickerPattern->GetColumnNode();
@@ -1054,6 +1099,8 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScrollDown003, Test
     TextPickerModelNG::GetInstance()->SetSelectedTextStyle(theme, selectedTextStyle);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(true);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     textPickerPattern->OnModifyDone();
     auto child = textPickerPattern->GetColumnNode();
@@ -1099,6 +1146,8 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScroll001, TestSize
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(true);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     textPickerPattern->OnModifyDone();
     auto child = textPickerPattern->GetColumnNode();
@@ -1133,6 +1182,8 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScroll002, TestSize
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(true);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     textPickerPattern->OnModifyDone();
     auto child = textPickerPattern->GetColumnNode();
@@ -1170,6 +1221,8 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScroll003, TestSize
     TextPickerModelNG::GetInstance()->Create(theme, ICON);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(true);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     textPickerPattern->OnModifyDone();
     auto child = textPickerPattern->GetColumnNode();
@@ -1209,6 +1262,8 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScroll004, TestSize
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(true);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     auto child = textPickerPattern->GetColumnNode();
     ASSERT_NE(child, nullptr);
@@ -1248,6 +1303,8 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScroll005, TestSize
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(true);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     auto child = textPickerPattern->GetColumnNode();
     ASSERT_NE(child, nullptr);
@@ -1936,6 +1993,19 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGCreate002, TestSize.Level1)
 HWTEST_F(TextPickerTestNg, TextPickerModelNGSetDefaultAttributes001, TestSize.Level1)
 {
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+
+    theme->selectedOptionStyle_.SetTextColor(Color(0x007DFF));
+    theme->selectedOptionStyle_.SetFontSize(Dimension(20, DimensionUnit::VP));
+    theme->selectedOptionStyle_.SetFontWeight(FontWeight::MEDIUM);
+
+    theme->normalOptionStyle_.SetTextColor(Color(0xff182431));
+    theme->normalOptionStyle_.SetFontSize(Dimension(16, DimensionUnit::FP));
+    theme->normalOptionStyle_.SetFontWeight(FontWeight::REGULAR);
+
+    theme->disappearOptionStyle_.SetTextColor(Color(0xff182431));
+    theme->disappearOptionStyle_.SetFontSize(Dimension(14, DimensionUnit::FP));
+    theme->disappearOptionStyle_.SetFontWeight(FontWeight::REGULAR);
+
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     TextPickerModelNG::GetInstance()->SetDefaultAttributes(theme);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -1943,7 +2013,21 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetDefaultAttributes001, TestSize.Le
     auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
     ASSERT_TRUE(pickerProperty->HasSelectedColor());
-    EXPECT_EQ(Color::RED, pickerProperty->GetSelectedColor().value());
+
+    EXPECT_EQ(Color(0x007DFF), pickerProperty->GetSelectedColor().value());
+    double fontSize = pickerProperty->GetSelectedFontSize().value().Value();
+    EXPECT_EQ(20, fontSize);
+    EXPECT_EQ(FontWeight::MEDIUM, pickerProperty->GetSelectedWeight().value());
+
+    EXPECT_EQ(Color(0xff182431), pickerProperty->GetColor().value());
+    fontSize = pickerProperty->GetFontSize().value().Value();
+    EXPECT_EQ(16, fontSize);
+    EXPECT_EQ(FontWeight::REGULAR, pickerProperty->GetWeight().value());
+
+    EXPECT_EQ(Color(0xff182431), pickerProperty->GetDisappearColor().value());
+    fontSize = pickerProperty->GetDisappearFontSize().value().Value();
+    EXPECT_EQ(14, fontSize);
+    EXPECT_EQ(FontWeight::REGULAR, pickerProperty->GetDisappearWeight().value());
 }
 
 /**
@@ -2048,6 +2132,9 @@ HWTEST_F(TextPickerTestNg, TextPickerAccessibilityPropertyGetBeginIndex001, Test
     content.text_ = TEXT_PICKER_CONTENT;
     std::vector<NG::RangeContent> contents;
     contents.emplace_back(content);
+    auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(true);
+
     textPickerColumnPattern_->SetOptions(contents);
     textPickerColumnPattern_->SetCurrentIndex(0);
     EXPECT_EQ(textPickerAccessibilityProperty_->GetBeginIndex(), 0);
@@ -2075,6 +2162,9 @@ HWTEST_F(TextPickerTestNg, TextPickerAccessibilityPropertyGetEndIndex001, TestSi
     content.text_ = TEXT_PICKER_CONTENT;
     std::vector<NG::RangeContent> contents;
     contents.emplace_back(content);
+    auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(true);
+
     textPickerColumnPattern_->SetOptions(contents);
     textPickerColumnPattern_->SetCurrentIndex(1);
     EXPECT_EQ(textPickerAccessibilityProperty_->GetEndIndex(), 0);
@@ -2185,6 +2275,8 @@ HWTEST_F(TextPickerTestNg, TextPickerAccessibilityPropertySetSpecificSupportActi
     for (int index = 0; index <= HALF_INDEX_NUM; index++) {
         contents.emplace_back(content);
     }
+    auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(true);
     textPickerColumnPattern_->SetOptions(contents);
     textPickerColumnPattern_->SetCurrentIndex(1);
     textPickerAccessibilityProperty_->ResetSupportAction();
@@ -2464,5 +2556,454 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternTest002, TestSize.Level1)
     focusHub->onKeyEventInternal_(keyEventRight);
     propertyChangeFlag = pickerProperty->GetPropertyChangeFlag() | PROPERTY_UPDATE_RENDER;
     EXPECT_EQ(pickerProperty->GetPropertyChangeFlag(), propertyChangeFlag);
+}
+
+/**
+ * @tc.name: OnClickEventTest001
+ * @tc.desc: test OnTouchEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, OnClickEventTest001, TestSize.Level1)
+{
+    InitTextPickerTestNg();
+    textPickerColumnPattern_->InitMouseAndPressEvent();
+    std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
+    textPickerColumnPattern_->SetOptions(range);
+    
+    auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(true);
+    RefPtr<EventParam> param = AceType::MakeRefPtr<EventParam>();
+    uint32_t index = 0;
+
+    // current is 0, click up
+    textPickerColumnPattern_->SetCurrentIndex(0);
+    param->instance = nullptr;
+    param->itemIndex = 1;
+    param->itemTotalCounts = 5;
+    textPickerColumnPattern_->OnAroundButtonClick(param);
+    index = textPickerColumnPattern_->GetCurrentIndex();
+    EXPECT_EQ(index, 4);
+}
+
+/**
+ * @tc.name: OnClickEventTest002
+ * @tc.desc: test OnTouchEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, OnClickEventTest002, TestSize.Level1)
+{
+    InitTextPickerTestNg();
+    textPickerColumnPattern_->InitMouseAndPressEvent();
+    std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
+    textPickerColumnPattern_->SetOptions(range);
+    
+    auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(true);
+    RefPtr<EventParam> param = AceType::MakeRefPtr<EventParam>();
+    uint32_t index = 0;
+
+    // current is 0, click up
+    textPickerColumnPattern_->SetCurrentIndex(0);
+    param->instance = nullptr;
+    param->itemIndex = 0;
+    param->itemTotalCounts = 5;
+    textPickerColumnPattern_->OnAroundButtonClick(param);
+    index = textPickerColumnPattern_->GetCurrentIndex();
+    EXPECT_EQ(index, 3);
+}
+
+/**
+ * @tc.name: OnClickEventTest003
+ * @tc.desc: test OnTouchEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, OnClickEventTest003, TestSize.Level1)
+{
+    InitTextPickerTestNg();
+    textPickerColumnPattern_->InitMouseAndPressEvent();
+    std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
+    textPickerColumnPattern_->SetOptions(range);
+    
+    auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(true);
+    RefPtr<EventParam> param = AceType::MakeRefPtr<EventParam>();
+    uint32_t index = 0;
+
+    // current is 0, click down
+    textPickerColumnPattern_->SetCurrentIndex(0);
+    param->instance = nullptr;
+    param->itemIndex = 3;
+    param->itemTotalCounts = 5;
+    textPickerColumnPattern_->OnAroundButtonClick(param);
+    index = textPickerColumnPattern_->GetCurrentIndex();
+    EXPECT_EQ(index, 1);
+}
+
+/**
+ * @tc.name: OnClickEventTest004
+ * @tc.desc: test OnTouchEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, OnClickEventTest004, TestSize.Level1)
+{
+    InitTextPickerTestNg();
+    textPickerColumnPattern_->InitMouseAndPressEvent();
+    std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
+    textPickerColumnPattern_->SetOptions(range);
+    
+    auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(true);
+    RefPtr<EventParam> param = AceType::MakeRefPtr<EventParam>();
+    uint32_t index = 0;
+
+    // current is 0, click down
+    textPickerColumnPattern_->SetCurrentIndex(0);
+    param->instance = nullptr;
+    param->itemIndex = 4;
+    param->itemTotalCounts = 5;
+    textPickerColumnPattern_->OnAroundButtonClick(param);
+    index = textPickerColumnPattern_->GetCurrentIndex();
+    EXPECT_EQ(index, 2);
+}
+
+/**
+ * @tc.name: OnClickEventTest005
+ * @tc.desc: test OnTouchEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, OnClickEventTest005, TestSize.Level1)
+{
+    InitTextPickerTestNg();
+    textPickerColumnPattern_->InitMouseAndPressEvent();
+    std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
+    textPickerColumnPattern_->SetOptions(range);
+    
+    auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(true);
+    RefPtr<EventParam> param = AceType::MakeRefPtr<EventParam>();
+    uint32_t index = 0;
+
+    // current is 2, click up
+    textPickerColumnPattern_->SetCurrentIndex(2);
+    param->instance = nullptr;
+    param->itemIndex = 1;
+    param->itemTotalCounts = 5;
+    textPickerColumnPattern_->OnAroundButtonClick(param);
+    index = textPickerColumnPattern_->GetCurrentIndex();
+    EXPECT_EQ(index, 1);
+}
+
+/**
+ * @tc.name: OnClickEventTest006
+ * @tc.desc: test OnTouchEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, OnClickEventTest006, TestSize.Level1)
+{
+    InitTextPickerTestNg();
+    textPickerColumnPattern_->InitMouseAndPressEvent();
+    std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
+    textPickerColumnPattern_->SetOptions(range);
+    
+    auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(true);
+    RefPtr<EventParam> param = AceType::MakeRefPtr<EventParam>();
+    uint32_t index = 0;
+
+    // current is 2, click up
+    textPickerColumnPattern_->SetCurrentIndex(2);
+    param->instance = nullptr;
+    param->itemIndex = 0;
+    param->itemTotalCounts = 5;
+    textPickerColumnPattern_->OnAroundButtonClick(param);
+    index = textPickerColumnPattern_->GetCurrentIndex();
+    EXPECT_EQ(index, 0);
+}
+
+/**
+ * @tc.name: OnClickEventTest007
+ * @tc.desc: test OnTouchEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, OnClickEventTest007, TestSize.Level1)
+{
+    InitTextPickerTestNg();
+    textPickerColumnPattern_->InitMouseAndPressEvent();
+    std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
+    textPickerColumnPattern_->SetOptions(range);
+    
+    auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(true);
+    RefPtr<EventParam> param = AceType::MakeRefPtr<EventParam>();
+    uint32_t index = 0;
+
+    // current is 2, click down
+    textPickerColumnPattern_->SetCurrentIndex(2);
+    param->instance = nullptr;
+    param->itemIndex = 3;
+    param->itemTotalCounts = 5;
+    textPickerColumnPattern_->OnAroundButtonClick(param);
+    index = textPickerColumnPattern_->GetCurrentIndex();
+    EXPECT_EQ(index, 3);
+}
+
+/**
+ * @tc.name: OnClickEventTest008
+ * @tc.desc: test OnTouchEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, OnClickEventTest008, TestSize.Level1)
+{
+    InitTextPickerTestNg();
+    textPickerColumnPattern_->InitMouseAndPressEvent();
+    std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
+    textPickerColumnPattern_->SetOptions(range);
+    
+    auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(true);
+    RefPtr<EventParam> param = AceType::MakeRefPtr<EventParam>();
+    uint32_t index = 0;
+
+    // current is 2, click down
+    textPickerColumnPattern_->SetCurrentIndex(2);
+    param->instance = nullptr;
+    param->itemIndex = 4;
+    param->itemTotalCounts = 5;
+    textPickerColumnPattern_->OnAroundButtonClick(param);
+    index = textPickerColumnPattern_->GetCurrentIndex();
+    EXPECT_EQ(index, 4);
+}
+
+/**
+ * @tc.name: OnClickEventTest009
+ * @tc.desc: test OnTouchEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, OnClickEventTest009, TestSize.Level1)
+{
+    InitTextPickerTestNg();
+    textPickerColumnPattern_->InitMouseAndPressEvent();
+    std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
+    textPickerColumnPattern_->SetOptions(range);
+    
+    auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(true);
+    RefPtr<EventParam> param = AceType::MakeRefPtr<EventParam>();
+    uint32_t index = 0;
+
+    // current is 4, click up
+    textPickerColumnPattern_->SetCurrentIndex(4);
+    param->instance = nullptr;
+    param->itemIndex = 1;
+    param->itemTotalCounts = 5;
+    textPickerColumnPattern_->OnAroundButtonClick(param);
+    index = textPickerColumnPattern_->GetCurrentIndex();
+    EXPECT_EQ(index, 3);
+}
+
+/**
+ * @tc.name: OnClickEventTest010
+ * @tc.desc: test OnTouchEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, OnClickEventTest010, TestSize.Level1)
+{
+    InitTextPickerTestNg();
+    textPickerColumnPattern_->InitMouseAndPressEvent();
+    std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
+    textPickerColumnPattern_->SetOptions(range);
+    
+    auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(true);
+    RefPtr<EventParam> param = AceType::MakeRefPtr<EventParam>();
+    uint32_t index = 0;
+
+    // current is 4, click up
+    textPickerColumnPattern_->SetCurrentIndex(4);
+    param->instance = nullptr;
+    param->itemIndex = 0;
+    param->itemTotalCounts = 5;
+    textPickerColumnPattern_->OnAroundButtonClick(param);
+    index = textPickerColumnPattern_->GetCurrentIndex();
+    EXPECT_EQ(index, 2);
+}
+
+/**
+ * @tc.name: OnClickEventTest011
+ * @tc.desc: test OnTouchEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, OnClickEventTest011, TestSize.Level1)
+{
+    InitTextPickerTestNg();
+    textPickerColumnPattern_->InitMouseAndPressEvent();
+    std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
+    textPickerColumnPattern_->SetOptions(range);
+    
+    auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(true);
+    RefPtr<EventParam> param = AceType::MakeRefPtr<EventParam>();
+    uint32_t index = 0;
+
+    // current is 4, click down
+    textPickerColumnPattern_->SetCurrentIndex(4);
+    param->instance = nullptr;
+    param->itemIndex = 3;
+    param->itemTotalCounts = 5;
+    textPickerColumnPattern_->OnAroundButtonClick(param);
+    index = textPickerColumnPattern_->GetCurrentIndex();
+    EXPECT_EQ(index, 0);
+}
+
+/**
+ * @tc.name: OnClickEventTest012
+ * @tc.desc: test OnTouchEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, OnClickEventTest012, TestSize.Level1)
+{
+    InitTextPickerTestNg();
+    textPickerColumnPattern_->InitMouseAndPressEvent();
+    std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
+    textPickerColumnPattern_->SetOptions(range);
+    
+    auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(true);
+    RefPtr<EventParam> param = AceType::MakeRefPtr<EventParam>();
+    uint32_t index = 0;
+
+    // current is 4, click down
+    textPickerColumnPattern_->SetCurrentIndex(4);
+    param->instance = nullptr;
+    param->itemIndex = 4;
+    param->itemTotalCounts = 5;
+    textPickerColumnPattern_->OnAroundButtonClick(param);
+    index = textPickerColumnPattern_->GetCurrentIndex();
+    EXPECT_EQ(index, 1);
+    
+    // color is set = Color::xxx
+    param->instance = nullptr;
+    param->itemIndex = 2;
+    param->itemTotalCounts = 5;
+    textPickerColumnPattern_->OnMiddleButtonTouchDown(param);
+
+    // color is set = Color::TRANSPARENT
+    param->instance = nullptr;
+    param->itemIndex = 2;
+    param->itemTotalCounts = 5;
+    textPickerColumnPattern_->OnMiddleButtonTouchMove(param);
+
+    // color is set = Color::TRANSPARENT
+    param->instance = nullptr;
+    param->itemIndex = 2;
+    param->itemTotalCounts = 5;
+    textPickerColumnPattern_->OnMiddleButtonTouchUp(param);
+
+    textPickerColumnPattern_->HandleMouseEvent(false);
+    textPickerColumnPattern_->HandleMouseEvent(true);
+}
+
+/**
+ * @tc.name: CanLoopTest001
+ * @tc.desc: test CanLoop
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, CanLoopTest001, TestSize.Level1)
+{
+    InitTextPickerTestNg();
+    textPickerColumnPattern_->InitMouseAndPressEvent();
+    RefPtr<EventParam> param = AceType::MakeRefPtr<EventParam>();
+    
+    std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
+    textPickerColumnPattern_->SetOptions(range);
+    auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
+
+    // canLoop = false,click down, current isn't changed
+    param->instance = nullptr;
+    param->itemIndex = 3; // down
+    param->itemTotalCounts = 5;
+    textPickerColumnPattern_->SetCurrentIndex(4);
+    pickerNodeLayout->UpdateCanLoop(false);
+    textPickerColumnPattern_->OnAroundButtonClick(param);
+    uint32_t index = textPickerColumnPattern_->GetCurrentIndex();
+    EXPECT_EQ(index, 4);
+}
+
+/**
+ * @tc.name: CanLoopTest002
+ * @tc.desc: test CanLoop
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, CanLoopTest002, TestSize.Level1)
+{
+    InitTextPickerTestNg();
+    textPickerColumnPattern_->InitMouseAndPressEvent();
+    RefPtr<EventParam> param = AceType::MakeRefPtr<EventParam>();
+    
+    std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
+    textPickerColumnPattern_->SetOptions(range);
+    auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
+
+    // canLoop = false,click down, current isn't changed
+    param->instance = nullptr;
+    param->itemIndex = 4; // down
+    param->itemTotalCounts = 5;
+    textPickerColumnPattern_->SetCurrentIndex(4);
+    pickerNodeLayout->UpdateCanLoop(false);
+    textPickerColumnPattern_->OnAroundButtonClick(param);
+    uint32_t index = textPickerColumnPattern_->GetCurrentIndex();
+    EXPECT_EQ(index, 4);
+}
+
+/**
+ * @tc.name: CanLoopTest003
+ * @tc.desc: test CanLoop
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, CanLoopTest003, TestSize.Level1)
+{
+    InitTextPickerTestNg();
+    textPickerColumnPattern_->InitMouseAndPressEvent();
+    RefPtr<EventParam> param = AceType::MakeRefPtr<EventParam>();
+    
+    std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
+    textPickerColumnPattern_->SetOptions(range);
+    auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
+
+    // canLoop = false,click up, current isn't changed
+    param->instance = nullptr;
+    param->itemIndex = 1; // up
+    param->itemTotalCounts = 5;
+    textPickerColumnPattern_->SetCurrentIndex(0);
+    pickerNodeLayout->UpdateCanLoop(false);
+    textPickerColumnPattern_->OnAroundButtonClick(param);
+    uint32_t index = textPickerColumnPattern_->GetCurrentIndex();
+    EXPECT_EQ(index, 0);
+}
+
+/**
+ * @tc.name: CanLoopTest004
+ * @tc.desc: test CanLoop
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, CanLoopTest004, TestSize.Level1)
+{
+    InitTextPickerTestNg();
+    textPickerColumnPattern_->InitMouseAndPressEvent();
+    RefPtr<EventParam> param = AceType::MakeRefPtr<EventParam>();
+    
+    std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
+    textPickerColumnPattern_->SetOptions(range);
+    auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
+
+    // canLoop = false,click up, current isn't changed
+    param->instance = nullptr;
+    param->itemIndex = 0; // up
+    param->itemTotalCounts = 5;
+    textPickerColumnPattern_->SetCurrentIndex(0);
+    pickerNodeLayout->UpdateCanLoop(false);
+    textPickerColumnPattern_->OnAroundButtonClick(param);
+    uint32_t index = textPickerColumnPattern_->GetCurrentIndex();
+    EXPECT_EQ(index, 0);
 }
 } // namespace OHOS::Ace::NG

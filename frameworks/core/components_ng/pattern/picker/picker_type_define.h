@@ -71,6 +71,7 @@ struct TextPickerSettingData {
     uint32_t selected;
     uint32_t columnKind;
     Dimension height;
+    bool canLoop = true;
     PickerTextProperties properties;
     std::vector<uint32_t> selectedValues;
     std::vector<std::string> values;
