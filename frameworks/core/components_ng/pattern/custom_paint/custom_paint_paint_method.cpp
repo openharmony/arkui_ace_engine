@@ -1438,15 +1438,11 @@ void CustomPaintPaintMethod::SetContrastFilter(const std::string& percent, SkPai
 // https://drafts.fxtf.org/filter-effects/#blurEquivalent
 void CustomPaintPaintMethod::SetBlurFilter(const std::string& percent, SkPaint& paint)
 {
-<<<<<<< HEAD
 #ifdef NEW_SKIA
-    imagePaint_.setImageFilter(SkImageFilters::Blur(BlurStrToDouble(percent), BlurStrToDouble(percent), nullptr));
+    paint.setImageFilter(SkImageFilters::Blur(BlurStrToDouble(percent), BlurStrToDouble(percent), nullptr));
 #else
-    imagePaint_.setImageFilter(SkBlurImageFilter::Make(BlurStrToDouble(percent), BlurStrToDouble(percent), nullptr));
-#endif
-=======
     paint.setImageFilter(SkBlurImageFilter::Make(BlurStrToDouble(percent), BlurStrToDouble(percent), nullptr));
->>>>>>> upstream/master
+#endif
 }
 
 void CustomPaintPaintMethod::SetColorFilter(float matrix[20], SkPaint& paint)
