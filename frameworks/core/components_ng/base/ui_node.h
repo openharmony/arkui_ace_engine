@@ -406,8 +406,11 @@ protected:
     virtual void OnDetachFromMainTree(bool recursive = false);
 
     bool isRemoving_ = false;
-    // return value: return true if node has disappearing transition
+
+    // return value: true if the node can be removed immediately.
     virtual bool OnRemoveFromParent();
+    virtual bool RemoveImmediately() const;
+    void ResetParent();
 
 private:
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false);
@@ -441,6 +444,7 @@ private:
     std::string debugLine_;
     std::string viewId_;
 #endif
+    friend class RosenRenderContext;
     ACE_DISALLOW_COPY_AND_MOVE(UINode);
 };
 

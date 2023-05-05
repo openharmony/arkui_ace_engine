@@ -113,7 +113,7 @@ void RosenRenderContext::OnNodeAppear(bool recursive)
     // pending transition in animation, will start on first layout
     firstTransitionIn_ = true;
     // only start transition on the break point of render node tree.
-    transitionWithAnimation_ = !recursive;
+    isBreakingPoint_ = !recursive;
 }
 
 void RosenRenderContext::OnNodeDisappear(bool recursive)
@@ -125,9 +125,7 @@ void RosenRenderContext::OnNodeDisappear(bool recursive)
     CHECK_NULL_VOID(rsNode_);
     auto rect = GetPaintRectWithoutTransform();
     // only start transition on the break point of render node tree.
-    if (recursive == false) {
-        NotifyTransitionInner(rect.GetSize(), false);
-    }
+    NotifyTransitionInner(rect.GetSize(), false, !recursive);
 }
 
 void RosenRenderContext::SetPivot(float xPivot, float yPivot)
@@ -205,11 +203,7 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
 
     if (firstTransitionIn_) {
         // need to perform transitionIn early so not influence the following SetPivot
-        if (transitionWithAnimation_) {
-            NotifyTransitionInner(paintRect.GetSize(), true);
-        } else {
-            RSNode::ExecuteWithoutAnimation([this, &paintRect]() { NotifyTransitionInner(paintRect.GetSize(), true); });
-        }
+        NotifyTransitionInner(paintRect.GetSize(), true, !isBreakingPoint_);
         firstTransitionIn_ = false;
     }
 
@@ -670,19 +664,22 @@ RectF RosenRenderContext::GetPaintRectWithoutTransform()
     return rect;
 }
 
-void RosenRenderContext::NotifyTransitionInner(const SizeF& frameSize, bool isTransitionIn)
+void RosenRenderContext::NotifyTransitionInner(const SizeF& frameSize, bool isTransitionIn, bool isBreakingPoint)
 {
     CHECK_NULL_VOID(rsNode_);
-    if (transitionEffect_) {
-        NotifyTransition(isTransitionIn);
+    auto& transOptions = isTransitionIn ? propTransitionAppearing_ : propTransitionDisappearing_;
+    if (auto effect = GetRSTransitionWithoutType(transOptions, frameSize)) {
+        SetTransitionPivot(frameSize, isTransitionIn);
+        // notice that we have been in animateTo, so do not need to use Animation closure to notify transition.
+        rsNode_->NotifyTransition(effect, isTransitionIn);
         return;
     }
-    auto& transOptions = isTransitionIn ? propTransitionAppearing_ : propTransitionDisappearing_;
-    CHECK_NULL_VOID_NOLOG(transOptions);
-    SetTransitionPivot(frameSize, isTransitionIn);
-    auto effect = GetRSTransitionWithoutType(*transOptions, frameSize);
-    // notice that we have been in animateTo, so do not need to use Animation closure to notify transition.
-    rsNode_->NotifyTransition(effect, isTransitionIn);
+    // add default transition effect on the 'breaking point' of render tree, if no user-defined transition effect.
+    if (isBreakingPoint == true && transitionEffect_ == nullptr) {
+        // PLANNING: remove this after THIS transition ends.
+        transitionEffect_ = RosenTransitionEffect::CreateDefaultRosenTransitionEffect();
+    }
+    NotifyTransition(isTransitionIn);
 }
 
 void RosenRenderContext::OpacityAnimation(const AnimationOption& option, double begin, double end)
@@ -1650,24 +1647,27 @@ void RosenRenderContext::UpdateTransition(const TransitionOptions& options)
 }
 
 std::shared_ptr<Rosen::RSTransitionEffect> RosenRenderContext::GetRSTransitionWithoutType(
-    const TransitionOptions& options, const SizeF& frameSize)
+    const std::unique_ptr<TransitionOptions>& options, const SizeF& frameSize)
 {
-    std::shared_ptr<Rosen::RSTransitionEffect> effect = Rosen::RSTransitionEffect::Create();
-    if (options.HasOpacity()) {
-        effect = effect->Opacity(options.GetOpacityValue());
+    if (options == nullptr || options->IsEmpty()) {
+        return nullptr;
     }
-    if (options.HasTranslate()) {
-        const auto& translate = options.GetTranslateValue();
+    std::shared_ptr<Rosen::RSTransitionEffect> effect = Rosen::RSTransitionEffect::Create();
+    if (options->HasOpacity()) {
+        effect = effect->Opacity(options->GetOpacityValue());
+    }
+    if (options->HasTranslate()) {
+        const auto& translate = options->GetTranslateValue();
         effect = effect->Translate({ static_cast<float>(translate.x.ConvertToPxWithSize(frameSize.Width())),
             static_cast<float>(translate.y.ConvertToPxWithSize(frameSize.Height())),
             static_cast<float>(translate.z.ConvertToPx()) });
     }
-    if (options.HasScale()) {
-        const auto& scale = options.GetScaleValue();
+    if (options->HasScale()) {
+        const auto& scale = options->GetScaleValue();
         effect = effect->Scale({ scale.xScale, scale.yScale, scale.zScale });
     }
-    if (options.HasRotate()) {
-        const auto& rotate = options.GetRotateValue();
+    if (options->HasRotate()) {
+        const auto& rotate = options->GetRotateValue();
         effect = effect->Rotate({ rotate.xDirection, rotate.yDirection, rotate.zDirection, rotate.angle });
     }
     return effect;
@@ -2238,8 +2238,9 @@ void RosenRenderContext::OnTransitionOutFinish()
 
     // should get parent before onRemoveFromParent function because it will reset parent
     auto parent = host->GetParent();
-    // clean up related status.
-    host->UINode::OnRemoveFromParent();
+    // clean up related status, now this node has no transition out animation, so RemoveImmediately() will return true,
+    // and OnRemoveFromParent will do the necessary cleanup work.
+    host->OnRemoveFromParent();
     // try to remove self from parent's disappearing children.
     if (parent && parent->RemoveDisappearingChild(host)) {
         // if success, tell parent to rebuild render tree.

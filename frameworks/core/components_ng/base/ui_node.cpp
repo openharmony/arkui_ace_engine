@@ -84,12 +84,12 @@ std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& ch
     // disappearing children. This ensures that the child remains alive and the tree hierarchy is preserved until the
     // transition has finished. We can then perform the necessary cleanup after the transition is complete.
     if ((*iter)->OnRemoveFromParent()) {
-        // move child into disappearing children, skip syncing render tree
-        AddDisappearingChild(child, std::distance(children_.begin(), iter));
-    } else {
-        // remove the child and sync render tree
+        // OnRemoveFromParent returns true means the child can be removed from tree immediately.
         RemoveDisappearingChild(child);
         MarkNeedSyncRenderTree();
+    } else {
+        // else move child into disappearing children, skip syncing render tree
+        AddDisappearingChild(child, std::distance(children_.begin(), iter));
     }
     auto result = children_.erase(iter);
     return result;
@@ -167,10 +167,12 @@ void UINode::Clean(bool cleanDirectly)
         // until the transition has finished. We can then perform the necessary cleanup after the transition is
         // complete.
         if (child->OnRemoveFromParent()) {
-            AddDisappearingChild(child, index);
-        } else {
+            // OnRemoveFromParent returns true means the child can be removed from tree immediately.
             RemoveDisappearingChild(child);
             needSyncRenderTree = true;
+        } else {
+            // else move child into disappearing children, skip syncing render tree
+            AddDisappearingChild(child, index);
         }
         ++index;
     }
@@ -195,16 +197,14 @@ void UINode::MountToParent(const RefPtr<UINode>& parent, int32_t slot, bool sile
 bool UINode::OnRemoveFromParent()
 {
     DetachFromMainTree();
-    auto* frame = AceType::DynamicCast<FrameNode>(this);
-    if (frame) {
-        auto focusHub = frame->GetFocusHub();
-        if (focusHub) {
-            focusHub->RemoveSelf();
-        }
-    }
+    ResetParent();
+    return true;
+}
+
+void UINode::ResetParent()
+{
     parent_.Reset();
     depth_ = -1;
-    return false;
 }
 
 void UINode::DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently)
@@ -698,5 +698,11 @@ void UINode::OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<Frame
     for (const auto& [child, index] : disappearingChildren_) {
         child->OnGenerateOneDepthVisibleFrameWithTransition(visibleList, index);
     }
+}
+
+bool UINode::RemoveImmediately() const
+{
+    return std::all_of(
+        children_.begin(), children_.end(), [](const auto& child) { return child->RemoveImmediately(); });
 }
 } // namespace OHOS::Ace::NG
