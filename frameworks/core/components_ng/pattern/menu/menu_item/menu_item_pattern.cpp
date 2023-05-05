@@ -241,6 +241,9 @@ void MenuItemPattern::RegisterOnClick()
             LOGI("trigger onChange");
             onChange(pattern->IsSelected());
         }
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        host->OnAccessibilityEvent(AccessibilityEventType::SELECTED);
 
         if (pattern->GetSubBuilder() != nullptr) {
             pattern->ShowSubMenu();

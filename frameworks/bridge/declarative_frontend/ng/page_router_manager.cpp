@@ -54,6 +54,9 @@ void ExitToDesktop()
         [] {
             auto pipeline = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(pipeline);
+            AccessibilityEvent event;
+            event.type = AccessibilityEventType::PAGE_CHANGE;
+            pipeline->SendEventToAccessibility(event);
             pipeline->Finish(false);
         },
         TaskExecutor::TaskType::UI);
@@ -793,6 +796,8 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, c
         pageRouterStack_.pop_back();
         return;
     }
+    AccessibilityEventType type = AccessibilityEventType::CHANGE;
+    pageNode->OnAccessibilityEvent(type);
     LOGI("PageRouterManager LoadPage[%{public}d]: %{public}s. success", pageId, target.url.c_str());
 }
 

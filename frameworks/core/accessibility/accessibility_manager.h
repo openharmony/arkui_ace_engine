@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,8 +25,13 @@ namespace OHOS::Ace {
 
 struct AccessibilityEvent {
     int32_t nodeId = 0;
+    int32_t windowId = 0;
+    WindowsContentChangeTypes windowContentChangeTypes = CONTENT_CHANGE_TYPE_INVALID;
+    WindowUpdateType windowChangeTypes = WINDOW_UPDATE_INVALID;
     std::string eventType;
     std::string componentType;
+    std::string beforeText;
+    std::string latestContent;
     double currentItemIndex = 0.0;
     double itemCount = 0.0;
     AccessibilityEventType type = AccessibilityEventType::UNKNOWN;

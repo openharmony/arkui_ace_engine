@@ -928,6 +928,10 @@ void ViewAbstract::BindPopup(
     };
     LOGI("begin to update Popup node.");
     targetNode->PushDestroyCallback(destroyCallback);
+    if (!popupInfo.isCurrentOnShow) {
+        targetNode->OnAccessibilityEvent(
+            AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+    }
     overlayManager->UpdatePopupNode(targetId, popupInfo);
 }
 

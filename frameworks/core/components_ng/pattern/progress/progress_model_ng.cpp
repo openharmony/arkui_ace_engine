@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,6 +35,7 @@ void ProgressModelNG::Create(double min, double value, double cachedValue, doubl
     stack->Push(frameNode);
 
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, Value, value);
+    frameNode->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, MaxValue, max);
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, ProgressType, type);
     ACE_UPDATE_LAYOUT_PROPERTY(ProgressLayoutProperty, Type, type);
