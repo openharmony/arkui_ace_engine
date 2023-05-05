@@ -142,11 +142,6 @@ void JSRadio::Checked(const JSCallbackInfo& info)
         JSRef<JSVal> checkedObj = JSRef<JSObject>::Cast(info[1]);
         ParseCheckedObject(info, checkedObj);
     }
-
-    if (info.Length() > 1 && info[1]->IsObject()) {
-        JSRef<JSVal> checkedObj = JSRef<JSObject>::Cast(info[1]);
-        ParseCheckedObject(info, checkedObj);
-    }
 }
 
 void JSRadio::JsWidth(const JSCallbackInfo& info)
