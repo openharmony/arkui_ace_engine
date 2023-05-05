@@ -58,6 +58,14 @@ struct TestProperty {
     std::optional<Color> frontColor = std::nullopt;
     std::optional<Color> bgColor = std::nullopt;
     std::optional<Color> borderColor = std::nullopt;
+    std::optional<Dimension> borderWidth = std::nullopt;
+    std::optional<bool> sweepEffect = std::nullopt;
+    std::optional<Color> fontColor = std::nullopt;
+    std::optional<Dimension> fontSize = std::nullopt;
+    std::optional<std::optional<std::string>> content = std::nullopt;
+    std::optional<FontWeight> fontWeight = std::nullopt;
+    std::optional<std::vector<std::string>> fontFamily = std::nullopt;
+    std::optional<Ace::FontStyle> fontStyle = std::nullopt;
 };
 
 namespace {
@@ -110,6 +118,11 @@ constexpr Dimension DEFALUT_STROKE_WIDTH = 2.0_vp;
 const Color TEST_COLOR = Color::BLUE;
 const LinearColor TEST_LINEARCOLOR = LinearColor(TEST_COLOR);
 constexpr float VALUE_OF_SET_VALUE = 10.0f;
+constexpr Dimension BORDER_WIDTH = 2.0_vp;
+constexpr Dimension FONT_SIZE = 12.0_vp;
+const std::string FONT_CONTEXT = "start";
+const FontWeight FONT_WEIGHT = FontWeight::BOLDER;
+const std::vector<std::string> FONT_FAMILY = {"serif"};
 
 CreateProperty creatProperty;
 DirtySwapConfig config;
@@ -188,6 +201,40 @@ RefPtr<FrameNode> ProgressTestNg::CreateProgressParagraph(const TestProperty& te
         progressModel.SetBorderColor(testProperty.borderColor.value());
     }
 
+    if (testProperty.borderWidth.has_value()) {
+        progressModel.SetBorderWidth(testProperty.borderWidth.value());
+    }
+
+    if (testProperty.sweepEffect.has_value()) {
+        progressModel.SetSweepingEffect(testProperty.sweepEffect.value());
+    }
+
+    if (testProperty.fontColor.has_value()) {
+        progressModel.SetFontColor(testProperty.fontColor.value());
+    }
+
+    if (testProperty.fontSize.has_value()) {
+        progressModel.SetFontSize(testProperty.fontSize.value());
+    }
+
+    if (testProperty.content.has_value()) {
+        progressModel.SetText(testProperty.content.value());
+    } else {
+        progressModel.SetText(std::nullopt);
+    }
+
+    if (testProperty.fontWeight.has_value()) {
+        progressModel.SetFontWeight(testProperty.fontWeight.value());
+    }
+
+    if (testProperty.fontFamily.has_value()) {
+        progressModel.SetFontFamily(testProperty.fontFamily.value());
+    }
+
+    if (testProperty.fontStyle.has_value()) {
+        progressModel.SetItalicFontStyle(testProperty.fontStyle.value());
+    }
+
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
 
     return frameNode;
@@ -239,6 +286,22 @@ void ProgressTestNg::CheckValue(const RefPtr<FrameNode>& frameNode, const TestPr
 
     if (testProperty.borderColor.has_value() && progressLayoutProperty->GetType() == PROGRESS_TYPE_CAPSULE) {
         EXPECT_EQ(progresspaintProperty->GetBorderColor(), testProperty.borderColor.value());
+    }
+
+    if (testProperty.sweepEffect.has_value()) {
+        EXPECT_EQ(progresspaintProperty->GetEnableScanEffect(), testProperty.sweepEffect.value());
+    }
+
+    if (testProperty.fontColor.has_value()) {
+        EXPECT_EQ(progresspaintProperty->GetTextColor(), testProperty.fontColor.value());
+    }
+
+    if (testProperty.fontSize.has_value()) {
+        EXPECT_EQ(progresspaintProperty->GetTextSize(), testProperty.fontSize.value());
+    }
+
+    if (testProperty.content.has_value()) {
+        EXPECT_EQ(progresspaintProperty->GetText(), testProperty.content.value());
     }
 }
 
@@ -1135,7 +1198,6 @@ HWTEST_F(ProgressTestNg, ProgressPaintMethod001, TestSize.Level1)
     EXPECT_EQ(getProgressModifier->scaleCount_->Get(), SCALE_COUNT);
     EXPECT_EQ(getProgressModifier->maxValue_->Get(), PROGRESS_MODIFIER_MAX_VALUE);
     EXPECT_EQ(getProgressModifier->value_->Get(), PROGRESS_MODIFIER_VALUE);
-    MockPipelineBase::TearDown();
 }
 
 /**
@@ -1231,5 +1293,36 @@ HWTEST_F(ProgressTestNg, ProgressAccessibilityPropertyTestNg002, TestSize.Level1
     auto accessibilityProp = frameNode->GetAccessibilityProperty<ProgressAccessibilityProperty>();
     ASSERT_NE(accessibilityProp, nullptr);
     EXPECT_EQ(accessibilityProp->GetText(), std::to_string(VALUE_OF_PROGRESS));
+}
+
+/**
+ * @tc.name: ProgressModelTest001
+ * @tc.desc: Test set some value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressModelTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create testProperty and set properties of Capsule progress.
+     */
+    creatProperty.progressType = std::make_optional(PROGRESS_TYPE_CAPSULE);
+    TestProperty testProperty;
+    testProperty.borderColor = std::make_optional(Color::BLUE);
+    testProperty.borderWidth = std::make_optional(BORDER_WIDTH);
+    testProperty.sweepEffect = std::make_optional(true);
+    testProperty.fontColor = std::make_optional(Color::BLUE);
+    testProperty.fontSize = std::make_optional(FONT_SIZE);
+    testProperty.content = std::make_optional(FONT_CONTEXT);
+    testProperty.fontWeight = std::make_optional(FONT_WEIGHT);
+    testProperty.fontFamily = std::make_optional(FONT_FAMILY);
+    testProperty.fontStyle = std::make_optional(Ace::FontStyle::ITALIC);
+
+    /**
+     * @tc.steps: step2. create progress frameNode and check the proregss properties with expected value .
+     * @tc.expected: step2. get frameNode success and proregss properties equals expected value.
+     */
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(progressTheme));
+    RefPtr<FrameNode> frameNode = CreateProgressParagraph(testProperty);
+    CheckValue(frameNode, testProperty);
 }
 } // namespace OHOS::Ace::NG

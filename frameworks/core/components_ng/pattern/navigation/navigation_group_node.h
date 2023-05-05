@@ -74,6 +74,17 @@ public:
         return dividerNode_;
     }
 
+    bool GetIsOnAnimation() const
+    {
+        return isOnAnimation_;
+    }
+
+    void SetIsOnAnimation(bool isOnAnimation)
+    {
+        isOnAnimation_ = isOnAnimation;
+    }
+
+    bool isOnAnimation_ {false};
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
     static RefPtr<UINode> GetNavDestinationNode(RefPtr<UINode> uiNode);

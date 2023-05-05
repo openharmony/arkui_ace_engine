@@ -1763,6 +1763,21 @@ void RosenRenderContext::ClipWithRect(const RectF& rectF)
     rsNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(skPath));
 }
 
+void RosenRenderContext::ClipWithRRect(const RectF& rectF, const RadiusF& radiusF)
+{
+    CHECK_NULL_VOID(rsNode_);
+    Rosen::Vector4f rect;
+    Rosen::Vector4f radius;
+    rect.SetValues(rectF.GetX(), rectF.GetY(), rectF.GetX() + rectF.Width(), rectF.GetY() + rectF.Height());
+    radius.SetValues(
+        radiusF.GetCorner(RoundRect::CornerPos::TOP_LEFT_POS).x,
+        radiusF.GetCorner(RoundRect::CornerPos::TOP_RIGHT_POS).x,
+        radiusF.GetCorner(RoundRect::CornerPos::BOTTOM_LEFT_POS).x,
+        radiusF.GetCorner(RoundRect::CornerPos::BOTTOM_RIGHT_POS).x);
+    rsNode_->SetClipRRect(rect, radius);
+    RequestNextFrame();
+}
+
 void RosenRenderContext::OnClipShapeUpdate(const RefPtr<BasicShape>& /*basicShape*/)
 {
     RectF rect = GetPaintRectWithoutTransform();
