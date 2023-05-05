@@ -171,6 +171,7 @@ private:
     bool valueChangeFlag_ = false;
     bool mouseHoverFlag_ = false;
     bool mousePressedFlag_ = false;
+    bool focusFlag_ = false;
 
     float stepRatio_ = 1.0f / 100.0f;
     float valueRatio_ = 0.0f;
