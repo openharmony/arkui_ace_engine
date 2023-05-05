@@ -173,7 +173,8 @@ enum class AceTextCategory {
     INPUT_TYPE_DATE,
     INPUT_TYPE_TIME,
     INPUT_TYPE_NUMBER,
-    INPUT_TYPE_PASSWORD
+    INPUT_TYPE_PASSWORD,
+    INPUT_TYPE_PHONENUMBER
 };
 
 struct AceCollectionInfo {
