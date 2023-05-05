@@ -175,9 +175,36 @@ void JSSideBar::JsMinSideBarWidth(const JSCallbackInfo& info)
     ParseAndSetWidth(info, WidthType::MIN_SIDEBAR_WIDTH);
 }
 
-void JSSideBar::JsShowSideBar(bool isShow)
+void ParseShowSideBarObject(const JSCallbackInfo& args, const JSRef<JSVal>& changeEventVal)
 {
+    CHECK_NULL_VOID(changeEventVal->IsFunction());
+
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
+    auto onChangeEvent = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](bool isShow) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("SideBarContainer.onChangeEvent");
+        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(isShow));
+        func->ExecuteJS(1, &newJSVal);
+    };
+    SideBarContainerModel::GetInstance()->SetOnChangeEvent(std::move(onChangeEvent));
+}
+
+void JSSideBar::JsShowSideBar(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || info.Length() > 2) {
+        LOGE("The arg is wrong, it is supposed to have 1 or 2 arguments");
+        return;
+    }
+
+    bool isShow = false;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        isShow = info[0]->ToBoolean();
+    }
+
     SideBarContainerModel::GetInstance()->SetShowSideBar(isShow);
+    if (info.Length() > 1 && info[1]->IsFunction()) {
+        ParseShowSideBarObject(info, info[1]);
+    }
 }
 
 void JSSideBar::JsControlButton(const JSCallbackInfo& info)
