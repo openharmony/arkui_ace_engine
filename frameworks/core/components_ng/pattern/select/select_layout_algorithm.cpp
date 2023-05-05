@@ -42,30 +42,17 @@ void SelectLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     auto rowGeometry = rowWrapper->GetGeometryNode();
     CHECK_NULL_VOID(rowGeometry);
-    rowGeometry->SetFrameSize(
-        SizeF(textSize.Width() + space + spinnerSize.Width(), std::max(textSize.Height(), spinnerSize.Height())));
-    auto rowWidth = rowGeometry->GetMarginFrameSize().Width();
-    auto rowHeight = rowGeometry->GetMarginFrameSize().Height();
-
+    auto rowWidth = textSize.Width() + space + spinnerSize.Width();
+    auto rowHeight = std::max(textSize.Height(), spinnerSize.Height());
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
-    auto selectWidth = rowWidth;
-    auto defaultHeight = static_cast<float>(theme->GetSelectMinHeight().ConvertToPx());
-    auto selectHeight = std::max(defaultHeight, rowHeight);
+    rowHeight = std::max(rowHeight, static_cast<float>(theme->GetSelectMinHeight().ConvertToPx()));
+    rowGeometry->SetFrameSize(SizeF(rowWidth, rowHeight));
 
-    auto geometryNode = layoutWrapper->GetGeometryNode();
-    const auto& calcLayoutConstraint = layoutProps->GetCalcLayoutConstraint();
-    if (calcLayoutConstraint && calcLayoutConstraint->selfIdealSize.has_value()) {
-        auto selfIdealSize = calcLayoutConstraint->selfIdealSize;
-        auto selfIdealWidth = (selfIdealSize->Width().value_or(CalcLength(selectWidth))).GetDimension();
-        auto selfIdealHeight = (selfIdealSize->Height().value_or(CalcLength(selectHeight))).GetDimension();
-        geometryNode->SetFrameSize(
-            SizeF(static_cast<float>(selfIdealWidth.ConvertToPx()), static_cast<float>(selfIdealHeight.ConvertToPx())));
-    } else {
-        geometryNode->SetFrameSize(SizeF(selectWidth, selectHeight));
-    }
+    // Measure same as box, base on the child row.
+    BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);
 }
 
 SizeF SelectLayoutAlgorithm::MeasureAndGetSize(
