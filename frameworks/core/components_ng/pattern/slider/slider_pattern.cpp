@@ -36,6 +36,7 @@ namespace {
 constexpr float HALF = 0.5;
 constexpr float SLIDER_MIN = .0f;
 constexpr float SLIDER_MAX = 100.0f;
+constexpr Dimension BUBBLE_TO_SLIDER_DISTANCE = 10.0_vp;
 } // namespace
 
 void SliderPattern::OnModifyDone()
@@ -628,6 +629,14 @@ void SliderPattern::FireChangeEvent(int32_t mode)
     }
     sliderEventHub->FireChangeEvent(static_cast<float>(value_), mode);
     valueChangeFlag_ = false;
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (mode == SliderChangeMode::Begin) {
+        host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_START);
+    } else if (mode == SliderChangeMode::End) {
+        host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+    }
 }
 
 void SliderPattern::UpdateMarkDirtyNode(const PropertyChangeFlag& Flag)
@@ -782,5 +791,27 @@ void SliderPattern::CloseTranslateAnimation()
 {
     CHECK_NULL_VOID(sliderContentModifier_);
     sliderContentModifier_->SetNotAnimated();
+}
+
+OffsetF SliderPattern::GetBubbleVertexPosition(const OffsetF& blockCenter, float trackThickness, const SizeF& blockSize)
+{
+    OffsetF bubbleVertex = blockCenter;
+    auto sliderLayoutProperty = GetLayoutProperty<SliderLayoutProperty>();
+    CHECK_NULL_RETURN(sliderLayoutProperty, bubbleVertex);
+    auto sliderMode = sliderLayoutProperty->GetSliderModeValue(SliderModel::SliderMode::OUTSET);
+    if (sliderMode == SliderModel::SliderMode::OUTSET) {
+        if (direction_ == Axis::HORIZONTAL) {
+            bubbleVertex.AddY(0 - blockSize.Height() * HALF - BUBBLE_TO_SLIDER_DISTANCE.ConvertToPx());
+        } else {
+            bubbleVertex.AddX(0 - blockSize.Width() * HALF - BUBBLE_TO_SLIDER_DISTANCE.ConvertToPx());
+        }
+    } else {
+        if (direction_ == Axis::HORIZONTAL) {
+            bubbleVertex.AddY(0 - trackThickness * HALF - BUBBLE_TO_SLIDER_DISTANCE.ConvertToPx());
+        } else {
+            bubbleVertex.AddX(0 - trackThickness * HALF - BUBBLE_TO_SLIDER_DISTANCE.ConvertToPx());
+        }
+    }
+    return bubbleVertex;
 }
 } // namespace OHOS::Ace::NG

@@ -79,6 +79,20 @@ void JSToggle::JSBind(BindingTarget globalObj)
     JSClass<JSToggle>::Bind(globalObj);
 }
 
+void ParseToggleIsOnObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
+{
+    CHECK_NULL_VOID(changeEventVal->IsFunction());
+
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
+    auto onChangeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](bool isOn) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Toggle.onChangeEvent");
+        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(isOn));
+        func->ExecuteJS(1, &newJSVal);
+    };
+    ToggleModel::GetInstance()->OnChangeEvent(std::move(onChangeEvent));
+}
+
 void JSToggle::Create(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsObject()) {
@@ -94,12 +108,24 @@ void JSToggle::Create(const JSCallbackInfo& info)
     }
 
     auto tempIsOn = paramObject->GetProperty("isOn");
-    bool isOn = tempIsOn->IsBoolean() ? tempIsOn->ToBoolean() : false;
+    bool isOn = false;
+    JSRef<JSVal> changeEventVal;
+    if (tempIsOn->IsObject()) {
+        JSRef<JSObject> isOnObj = JSRef<JSObject>::Cast(tempIsOn);
+        changeEventVal = isOnObj->GetProperty("changeEvent");
+        auto isOnProperty = isOnObj->GetProperty("value");
+        isOn = isOnProperty->IsBoolean() ? isOnProperty->ToBoolean() : false;
+    } else {
+        isOn = tempIsOn->IsBoolean() ? tempIsOn->ToBoolean() : false;
+    }
     auto toggleType = static_cast<ToggleType>(type->ToNumber<int32_t>());
 
     auto toggleTypeInt = static_cast<int32_t>(toggleType);
     
     ToggleModel::GetInstance()->Create(NG::ToggleType(toggleTypeInt), isOn);
+    if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
+        ParseToggleIsOnObject(info, changeEventVal);
+    }
 }
 
 void JSToggle::JsWidth(const JSCallbackInfo& info)

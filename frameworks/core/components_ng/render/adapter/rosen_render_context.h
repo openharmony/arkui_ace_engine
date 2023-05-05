@@ -20,10 +20,10 @@
 #include <memory>
 #include <optional>
 
-#include "render_service_client/core/ui/rs_node.h"
 #include "include/core/SkCanvas.h"
 #include "include/core/SkPictureRecorder.h"
 #include "include/core/SkRefCnt.h"
+#include "render_service_client/core/ui/rs_node.h"
 
 #include "base/geometry/dimension_offset.h"
 #include "base/geometry/ng/offset_t.h"
@@ -151,6 +151,7 @@ public:
     void OnNodeAppear(bool recursive) override;
     void OnNodeDisappear(bool recursive) override;
     void ClipWithRect(const RectF& rectF) override;
+    void ClipWithRRect(const RectF& rectF, const RadiusF& radiusF) override;
 
     bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish) override;
 
@@ -330,6 +331,7 @@ private:
     void BdImagePaintTask(RSCanvas& canvas);
 
     void PaintDebugBoundary();
+    bool IsUsingPosition(const RefPtr<FrameNode>& frameNode);
 
     RefPtr<ImageLoadingContext> bgLoadingCtx_;
     RefPtr<CanvasImage> bgImage_;

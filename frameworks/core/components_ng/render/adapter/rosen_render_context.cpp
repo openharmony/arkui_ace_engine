@@ -1003,7 +1003,7 @@ RectF RosenRenderContext::AdjustPaintRect()
     Dimension parentPaddingLeft;
     Dimension parentPaddingTop;
     // Position properties take precedence over offset locations.
-    if (HasPosition()) {
+    if (HasPosition() && IsUsingPosition(frameNode)) {
         GetPaddingOfFirstFrameNodeParent(parentPaddingLeft, parentPaddingTop);
         auto position = GetPositionValue({}) + OffsetT<Dimension>(parentPaddingLeft, parentPaddingTop);
         auto posX = ConvertToPx(position.GetX(), ScaleProperty::CreateScaleProperty(), widthPercentReference);
@@ -1024,6 +1024,16 @@ RectF RosenRenderContext::AdjustPaintRect()
     rect.SetLeft(rect.GetX() - anchorX.value_or(0));
     rect.SetTop(rect.GetY() - anchorY.value_or(0));
     return rect;
+}
+
+bool RosenRenderContext::IsUsingPosition(const RefPtr<FrameNode>& frameNode)
+{
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    bool isUsingPosition = true;
+    if (layoutProperty) {
+        isUsingPosition = layoutProperty->IsUsingPosition();
+    }
+    return isUsingPosition;
 }
 
 void RosenRenderContext::GetPaddingOfFirstFrameNodeParent(Dimension& parentPaddingLeft, Dimension& parentPaddingTop)
@@ -1761,6 +1771,21 @@ void RosenRenderContext::ClipWithRect(const RectF& rectF)
     SkPath skPath;
     skPath.addRect(rectF.GetX(), rectF.GetY(), rectF.GetX() + rectF.Width(), rectF.GetY() + rectF.Height());
     rsNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(skPath));
+}
+
+void RosenRenderContext::ClipWithRRect(const RectF& rectF, const RadiusF& radiusF)
+{
+    CHECK_NULL_VOID(rsNode_);
+    Rosen::Vector4f rect;
+    Rosen::Vector4f radius;
+    rect.SetValues(rectF.GetX(), rectF.GetY(), rectF.GetX() + rectF.Width(), rectF.GetY() + rectF.Height());
+    radius.SetValues(
+        radiusF.GetCorner(RoundRect::CornerPos::TOP_LEFT_POS).x,
+        radiusF.GetCorner(RoundRect::CornerPos::TOP_RIGHT_POS).x,
+        radiusF.GetCorner(RoundRect::CornerPos::BOTTOM_LEFT_POS).x,
+        radiusF.GetCorner(RoundRect::CornerPos::BOTTOM_RIGHT_POS).x);
+    rsNode_->SetClipRRect(rect, radius);
+    RequestNextFrame();
 }
 
 void RosenRenderContext::OnClipShapeUpdate(const RefPtr<BasicShape>& /*basicShape*/)

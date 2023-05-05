@@ -328,6 +328,7 @@ SkPaint CustomPaintPaintMethod::GetStrokePaint()
         { LineCapStyle::SQUARE, SkPaint::Cap::kSquare_Cap },
     };
     SkPaint paint;
+    InitImagePaint(paint);
     paint.setColor(strokeState_.GetColor().GetValue());
     paint.setStyle(SkPaint::Style::kStroke_Style);
     paint.setStrokeJoin(ConvertEnumToSkEnum(
@@ -347,21 +348,21 @@ SkPaint CustomPaintPaintMethod::GetStrokePaint()
     return paint;
 }
 
-void CustomPaintPaintMethod::InitImagePaint()
+void CustomPaintPaintMethod::InitImagePaint(SkPaint& paint)
 {
 #ifndef NEW_SKIA
     if (smoothingEnabled_) {
         if (smoothingQuality_ == "low") {
-            imagePaint_.setFilterQuality(SkFilterQuality::kLow_SkFilterQuality);
+            paint.setFilterQuality(SkFilterQuality::kLow_SkFilterQuality);
         } else if (smoothingQuality_ == "medium") {
-            imagePaint_.setFilterQuality(SkFilterQuality::kMedium_SkFilterQuality);
+            paint.setFilterQuality(SkFilterQuality::kMedium_SkFilterQuality);
         } else if (smoothingQuality_ == "high") {
-            imagePaint_.setFilterQuality(SkFilterQuality::kHigh_SkFilterQuality);
+            paint.setFilterQuality(SkFilterQuality::kHigh_SkFilterQuality);
         } else {
             LOGE("Unsupported Quality type:%{public}s", smoothingQuality_.c_str());
         }
     } else {
-        imagePaint_.setFilterQuality(SkFilterQuality::kNone_SkFilterQuality);
+        paint.setFilterQuality(SkFilterQuality::kNone_SkFilterQuality);
     }
 #else
     if (smoothingEnabled_) {
@@ -378,8 +379,8 @@ void CustomPaintPaintMethod::InitImagePaint()
         options_ = SkSamplingOptions(SkFilterMode::kNearest, SkMipmapMode::kNone);
     }
 #endif
-    ClearPaintImage();
-    SetPaintImage();
+    ClearPaintImage(paint);
+    SetPaintImage(paint);
 }
 
 void CustomPaintPaintMethod::InitImageCallbacks()
@@ -486,6 +487,7 @@ void CustomPaintPaintMethod::FillRect(PaintWrapper* paintWrapper, const Rect& re
 {
     OffsetF offset = GetContentOffset(paintWrapper);
     SkPaint paint;
+    InitImagePaint(paint);
     paint.setAntiAlias(antiAlias_);
     paint.setColor(fillState_.GetColor().GetValue());
     paint.setStyle(SkPaint::Style::kFill_Style);
@@ -555,6 +557,7 @@ void CustomPaintPaintMethod::ClearRect(PaintWrapper* paintWrapper, const Rect& r
 {
     OffsetF offset = GetContentOffset(paintWrapper);
     SkPaint paint;
+    InitImagePaint(paint);
     paint.setAntiAlias(antiAlias_);
     paint.setBlendMode(SkBlendMode::kClear);
     auto skRect = SkRect::MakeLTRB(rect.Left() + offset.GetX(), rect.Top() + offset.GetY(),
@@ -600,6 +603,7 @@ void CustomPaintPaintMethod::Fill(PaintWrapper* paintWrapper)
 {
     OffsetF offset = GetContentOffset(paintWrapper);
     SkPaint paint;
+    InitImagePaint(paint);
     paint.setAntiAlias(antiAlias_);
     paint.setColor(fillState_.GetColor().GetValue());
     paint.setStyle(SkPaint::Style::kFill_Style);
@@ -641,6 +645,7 @@ void CustomPaintPaintMethod::Fill(PaintWrapper* paintWrapper, const RefPtr<Canva
 void CustomPaintPaintMethod::Path2DFill(const OffsetF& offset)
 {
     SkPaint paint;
+    InitImagePaint(paint);
     paint.setAntiAlias(antiAlias_);
     paint.setColor(fillState_.GetColor().GetValue());
     paint.setStyle(SkPaint::Style::kFill_Style);
@@ -1171,24 +1176,24 @@ txt::TextAlign CustomPaintPaintMethod::GetEffectiveAlign(txt::TextAlign align, t
     }
 }
 
-void CustomPaintPaintMethod::ClearPaintImage()
+void CustomPaintPaintMethod::ClearPaintImage(SkPaint& paint)
 {
     float matrix[20] = { 0.0f };
     matrix[0] = matrix[6] = matrix[12] = matrix[18] = 1.0f;
 #ifdef USE_SYSTEM_SKIA
-    imagePaint_.setColorFilter(SkColorFilter::MakeMatrixFilterRowMajor255(matrix));
+    paint.setColorFilter(SkColorFilter::MakeMatrixFilterRowMajor255(matrix));
 #else
-    imagePaint_.setColorFilter(SkColorFilters::Matrix(matrix));
+    paint.setColorFilter(SkColorFilters::Matrix(matrix));
 #endif
-    imagePaint_.setMaskFilter(SkMaskFilter::MakeBlur(SkBlurStyle::kNormal_SkBlurStyle, 0));
+    paint.setMaskFilter(SkMaskFilter::MakeBlur(SkBlurStyle::kNormal_SkBlurStyle, 0));
 #ifdef NEW_SKIA
     imagePaint_.setImageFilter(SkImageFilters::Blur(0, 0, nullptr));
 #else
-    imagePaint_.setImageFilter(SkBlurImageFilter::Make(0, 0, nullptr));
+    paint.setImageFilter(SkBlurImageFilter::Make(0, 0, nullptr));
 #endif
 }
 
-void CustomPaintPaintMethod::SetPaintImage()
+void CustomPaintPaintMethod::SetPaintImage(SkPaint& paint)
 {
     FilterType filterType;
     std::string filterParam;
@@ -1199,31 +1204,31 @@ void CustomPaintPaintMethod::SetPaintImage()
         case FilterType::NONE:
             break;
         case FilterType::GRAYSCALE:
-            SetGrayFilter(filterParam);
+            SetGrayFilter(filterParam, paint);
             break;
         case FilterType::SEPIA:
-            SetSepiaFilter(filterParam);
+            SetSepiaFilter(filterParam, paint);
             break;
         case FilterType::SATURATE:
-            SetSaturateFilter(filterParam);
+            SetSaturateFilter(filterParam, paint);
             break;
         case FilterType::HUE_ROTATE:
-            SetHueRotateFilter(filterParam);
+            SetHueRotateFilter(filterParam, paint);
             break;
         case FilterType::INVERT:
-            SetInvertFilter(filterParam);
+            SetInvertFilter(filterParam, paint);
             break;
         case FilterType::OPACITY:
-            SetOpacityFilter(filterParam);
+            SetOpacityFilter(filterParam, paint);
             break;
         case FilterType::BRIGHTNESS:
-            SetBrightnessFilter(filterParam);
+            SetBrightnessFilter(filterParam, paint);
             break;
         case FilterType::CONTRAST:
-            SetContrastFilter(filterParam);
+            SetContrastFilter(filterParam, paint);
             break;
         case FilterType::BLUR:
-            SetBlurFilter(filterParam);
+            SetBlurFilter(filterParam, paint);
             break;
         case FilterType::DROP_SHADOW:
             LOGW("Dropshadow is not supported yet.");
@@ -1234,7 +1239,7 @@ void CustomPaintPaintMethod::SetPaintImage()
 }
 
 // https://drafts.fxtf.org/filter-effects/#grayscaleEquivalent
-void CustomPaintPaintMethod::SetGrayFilter(const std::string& percent)
+void CustomPaintPaintMethod::SetGrayFilter(const std::string& percent, SkPaint& paint)
 {
     float percentNum = PercentStrToFloat(percent);
     if (percentNum > 1) {
@@ -1257,11 +1262,11 @@ void CustomPaintPaintMethod::SetGrayFilter(const std::string& percent)
     matrix[12] = LUMB + (1 - LUMB) * value;
 
     matrix[18] = 1.0f;
-    SetColorFilter(matrix);
+    SetColorFilter(matrix, paint);
 }
 
 // https://drafts.fxtf.org/filter-effects/#sepiaEquivalent
-void CustomPaintPaintMethod::SetSepiaFilter(const std::string& percent)
+void CustomPaintPaintMethod::SetSepiaFilter(const std::string& percent, SkPaint& paint)
 {
     float percentNum = PercentStrToFloat(percent);
     if (percentNum > 1) {
@@ -1281,11 +1286,11 @@ void CustomPaintPaintMethod::SetSepiaFilter(const std::string& percent)
     matrix[12] = 1.0f - percentNum * 0.869f;
 
     matrix[18] = 1.0f;
-    SetColorFilter(matrix);
+    SetColorFilter(matrix, paint);
 }
 
 // https://drafts.fxtf.org/filter-effects/#saturateEquivalent
-void CustomPaintPaintMethod::SetSaturateFilter(const std::string& percent)
+void CustomPaintPaintMethod::SetSaturateFilter(const std::string& percent, SkPaint& paint)
 {
     float percentNum = PercentStrToFloat(percent);
     float matrix[20] = { 0.0f };
@@ -1303,11 +1308,11 @@ void CustomPaintPaintMethod::SetSaturateFilter(const std::string& percent)
     matrix[12] = LUMB + (1 - LUMB) * percentNum;
 
     matrix[18] = 1.0f;
-    SetColorFilter(matrix);
+    SetColorFilter(matrix, paint);
 }
 
 // https://drafts.fxtf.org/filter-effects/#huerotateEquivalent
-void CustomPaintPaintMethod::SetHueRotateFilter(const std::string& filterParam)
+void CustomPaintPaintMethod::SetHueRotateFilter(const std::string& filterParam, SkPaint& paint)
 {
     std::string percent = filterParam;
     float rad = 0.0f;
@@ -1349,7 +1354,7 @@ void CustomPaintPaintMethod::SetHueRotateFilter(const std::string& filterParam)
     matrix[12] = LUMB + cosValue * (1 - LUMB) + sinValue * LUMB;
 
     matrix[18] = 1.0f;
-    SetColorFilter(matrix);
+    SetColorFilter(matrix, paint);
 }
 
 /*
@@ -1362,7 +1367,7 @@ void CustomPaintPaintMethod::SetHueRotateFilter(const std::string& filterParam)
  * If R==1, R' = v1 = 1 - percentNum = percentNum + (1 - 2 * percentNum) * R
  * so R' = funcR(R) = percentNum + (1 - 2 * percentNum) * R, where 0 <= R <= 1.
  */
-void CustomPaintPaintMethod::SetInvertFilter(const std::string& percent)
+void CustomPaintPaintMethod::SetInvertFilter(const std::string& percent, SkPaint& paint)
 {
     float percentNum = PercentStrToFloat(percent);
     if (percentNum > 1) {
@@ -1372,7 +1377,7 @@ void CustomPaintPaintMethod::SetInvertFilter(const std::string& percent)
     matrix[0] = matrix[6] = matrix[12] = 1.0 - 2.0 * percentNum;
     matrix[4] = matrix[9] = matrix[14] = percentNum;
     matrix[18] = 1.0f;
-    SetColorFilter(matrix);
+    SetColorFilter(matrix, paint);
 }
 
 /*
@@ -1384,7 +1389,7 @@ void CustomPaintPaintMethod::SetInvertFilter(const std::string& percent)
  * If A==1, A' = v1 = percentNum = percentNum * A
  * so A' = funcR(A) = percentNum * A, where 0 <= A <= 1.
  */
-void CustomPaintPaintMethod::SetOpacityFilter(const std::string& percent)
+void CustomPaintPaintMethod::SetOpacityFilter(const std::string& percent, SkPaint& paint)
 {
     float percentNum = PercentStrToFloat(percent);
     if (percentNum > 1) {
@@ -1393,7 +1398,7 @@ void CustomPaintPaintMethod::SetOpacityFilter(const std::string& percent)
     float matrix[20] = { 0.0f };
     matrix[0] = matrix[6] = matrix[12] = 1.0f;
     matrix[18] = percentNum;
-    SetColorFilter(matrix);
+    SetColorFilter(matrix, paint);
 }
 
 /*
@@ -1402,7 +1407,7 @@ void CustomPaintPaintMethod::SetOpacityFilter(const std::string& percent)
  * R' = funcR(R) = slope * R + intercept
  * where: slope = percentNum, intercept = 0
  */
-void CustomPaintPaintMethod::SetBrightnessFilter(const std::string& percent)
+void CustomPaintPaintMethod::SetBrightnessFilter(const std::string& percent, SkPaint& paint)
 {
     float percentNum = PercentStrToFloat(percent);
     if (percentNum < 0) {
@@ -1411,7 +1416,7 @@ void CustomPaintPaintMethod::SetBrightnessFilter(const std::string& percent)
     float matrix[20] = { 0.0f };
     matrix[0] = matrix[6] = matrix[12] = percentNum;
     matrix[18] = 1.0f;
-    SetColorFilter(matrix);
+    SetColorFilter(matrix, paint);
 }
 
 /*
@@ -1420,36 +1425,40 @@ void CustomPaintPaintMethod::SetBrightnessFilter(const std::string& percent)
  * R' = funcR(R) = slope * R + intercept
  * where: slope = percentNum, intercept = 0.5 * (1 - percentNum)
  */
-void CustomPaintPaintMethod::SetContrastFilter(const std::string& percent)
+void CustomPaintPaintMethod::SetContrastFilter(const std::string& percent, SkPaint& paint)
 {
     float percentNum = PercentStrToFloat(percent);
     float matrix[20] = { 0.0f };
     matrix[0] = matrix[6] = matrix[12] = percentNum;
     matrix[4] = matrix[9] = matrix[14] = 0.5f * (1 - percentNum);
     matrix[18] = 1;
-    SetColorFilter(matrix);
+    SetColorFilter(matrix, paint);
 }
 
 // https://drafts.fxtf.org/filter-effects/#blurEquivalent
-void CustomPaintPaintMethod::SetBlurFilter(const std::string& percent)
+void CustomPaintPaintMethod::SetBlurFilter(const std::string& percent, SkPaint& paint)
 {
+<<<<<<< HEAD
 #ifdef NEW_SKIA
     imagePaint_.setImageFilter(SkImageFilters::Blur(BlurStrToDouble(percent), BlurStrToDouble(percent), nullptr));
 #else
     imagePaint_.setImageFilter(SkBlurImageFilter::Make(BlurStrToDouble(percent), BlurStrToDouble(percent), nullptr));
 #endif
+=======
+    paint.setImageFilter(SkBlurImageFilter::Make(BlurStrToDouble(percent), BlurStrToDouble(percent), nullptr));
+>>>>>>> upstream/master
 }
 
-void CustomPaintPaintMethod::SetColorFilter(float matrix[20])
+void CustomPaintPaintMethod::SetColorFilter(float matrix[20], SkPaint& paint)
 {
 #ifdef USE_SYSTEM_SKIA
     matrix[4] *= 255;
     matrix[9] *= 255;
     matrix[14] *= 255;
     matrix[19] *= 255;
-    imagePaint_.setColorFilter(SkColorFilter::MakeMatrixFilterRowMajor255(matrix));
+    paint.setColorFilter(SkColorFilter::MakeMatrixFilterRowMajor255(matrix));
 #else
-    imagePaint_.setColorFilter(SkColorFilters::Matrix(matrix));
+    paint.setColorFilter(SkColorFilters::Matrix(matrix));
 #endif
 }
 

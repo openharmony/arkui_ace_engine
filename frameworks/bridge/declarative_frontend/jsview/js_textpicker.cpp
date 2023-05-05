@@ -899,7 +899,7 @@ void JSTextPicker::OnChange(const JSCallbackInfo& info)
         }
         auto jsFunc = JSRef<JSFunc>::Cast(info[0]);
         auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
-                            const std::vector<std::string>& value, std::vector<double> index) {
+                            const std::vector<std::string>& value, const std::vector<double>& index) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("TextPicker.onChange");
             if (value.size() == 1 && index.size() == 1) {

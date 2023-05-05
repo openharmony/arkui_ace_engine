@@ -102,6 +102,14 @@ double GetValue(double value, double max, double min)
     return value;
 }
 
+void ParseSliderValueObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
+{
+    CHECK_NULL_VOID(changeEventVal->IsFunction());
+
+    JsEventCallback<void(float)> onChangeEvent(info.GetExecutionContext(), JSRef<JSFunc>::Cast(changeEventVal));
+    SliderModel::GetInstance()->SetOnChangeEvent(std::move(onChangeEvent));
+}
+
 void JSSlider::Create(const JSCallbackInfo& info)
 {
     double value = 0; // value:Current progress value. The default value is 0.
@@ -125,9 +133,15 @@ void JSSlider::Create(const JSCallbackInfo& info)
     auto getStyle = paramObject->GetProperty("style");
     auto direction = paramObject->GetProperty("direction");
     auto isReverse = paramObject->GetProperty("reverse");
+    JSRef<JSVal> changeEventVal;
 
     if (!getValue->IsNull() && getValue->IsNumber()) {
         value = getValue->ToNumber<double>();
+    } else if (!getValue->IsNull() && getValue->IsObject()) {
+        JSRef<JSObject> valueObj = JSRef<JSObject>::Cast(getValue);
+        changeEventVal = valueObj->GetProperty("changeEvent");
+        auto valueProperty = valueObj->GetProperty("value");
+        value = valueProperty->ToNumber<double>();
     }
 
     if (!getMin->IsNull() && getMin->IsNumber()) {
@@ -183,6 +197,9 @@ void JSSlider::Create(const JSCallbackInfo& info)
     SliderModel::GetInstance()->SetSliderMode(sliderMode);
     SliderModel::GetInstance()->SetDirection(sliderDirection);
     SliderModel::GetInstance()->SetReverse(reverse);
+    if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
+        ParseSliderValueObject(info, changeEventVal);
+    }
 }
 
 void JSSlider::SetThickness(const JSCallbackInfo& info)
