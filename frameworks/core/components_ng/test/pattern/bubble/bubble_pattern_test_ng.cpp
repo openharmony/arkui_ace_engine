@@ -37,6 +37,7 @@
 #include "core/components_ng/pattern/bubble/bubble_view.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/test/mock/rosen/mock_canvas.h"
 #include "core/components_ng/test/mock/rosen/testing_canvas.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -78,6 +79,8 @@ const Dimension BUBBLE_PAINT_PROPERTY_FONT_SIZE = Dimension(20.1, DimensionUnit:
 const Ace::FontWeight BUBBLE_PAINT_PROPERTY_FONT_WEIGHT = Ace::FontWeight::W100;
 constexpr Dimension BUBBLE_PAINT_PROPERTY_ARROW_OFFSET = 20.0_px;
 constexpr Placement BUBBLE_LAYOUT_PROPERTY_PLACEMENT = Placement::LEFT;
+constexpr Dimension BORDER_EDGE = 1.0_px;
+constexpr Dimension BORDER_EDGE_LARGE = 20.0_px;
 } // namespace
 struct TestProperty {
     // layout property
@@ -591,5 +594,81 @@ HWTEST_F(BubblePatternTestNg, BubblePatternTest008, TestSize.Level1)
     popupParam->SetMessage(BUBBLE_NEW_MESSAGE);
     popupParam->SetHasAction(true);
     BubbleView::UpdatePopupParam(popupId, popupParam, targetNode);
+}
+
+/**
+ * @tc.name: BubblePaintMethod001
+ * @tc.desc: Test BubblePaintMethod PaintBorder PaintBubble.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubblePatternTestNg, BubblePaintMethod001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the BubblePaintMethod.
+     */
+    BubblePaintMethod bubblePaintMethod;
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, Restore()).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Translate(_, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DrawRoundRect(_)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, ClipPath(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, ClipRoundRect(_, _)).Times(AtLeast(1));
+
+    /**
+     * @tc.steps: step2. Create the GeometryNode and PaintWrapper.Set the progressPaintProperty.
+     * @tc.expected: step2. Check the GeometryNode and PaintWrapper were created successfully.
+     */
+    TestProperty testProperty;
+    RefPtr<FrameNode> frameNode = CreateBubbleNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+
+    auto bubblePaintProperty = frameNode->GetPaintProperty<BubbleRenderProperty>();
+    ASSERT_NE(bubblePaintProperty, nullptr);
+
+    WeakPtr<RenderContext> renderContext;
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, bubblePaintProperty);
+    ASSERT_NE(paintWrapper, nullptr);
+
+    /**
+     * @tc.steps: step3. Set the different properties.Call the function PaintBorder.
+     * @tc.expected: step3. Check the properties.
+     */
+    // PaintBorder border_.IsAllEqual, border_.HasValue.
+    bubblePaintMethod.border_.SetBorderEdge(BorderEdge(Color::BLACK, BORDER_EDGE, BorderStyle::SOLID));
+    bubblePaintMethod.PaintBorder(canvas, paintWrapper);
+    EXPECT_TRUE(bubblePaintMethod.border_.HasValue());
+    EXPECT_TRUE(bubblePaintMethod.border_.IsAllEqual());
+
+    // PaintBorder !border_.IsAllEqual, border_.HasValue.
+    bubblePaintMethod.border_.SetLeftEdge(BorderEdge(Color::BLUE, BORDER_EDGE_LARGE, BorderStyle::DOTTED));
+    ASSERT_FALSE(bubblePaintMethod.border_.IsAllEqual());
+    bubblePaintMethod.PaintBorder(canvas, paintWrapper);
+    bubblePaintMethod.border_.SetLeftEdge(BorderEdge(Color::BLUE, BORDER_EDGE_LARGE, BorderStyle::DASHED));
+    ASSERT_FALSE(bubblePaintMethod.border_.IsAllEqual());
+    bubblePaintMethod.PaintBorder(canvas, paintWrapper);
+    bubblePaintMethod.border_.SetLeftEdge(BorderEdge(Color::BLUE, BORDER_EDGE_LARGE, BorderStyle::NONE));
+    ASSERT_FALSE(bubblePaintMethod.border_.IsAllEqual());
+    bubblePaintMethod.PaintBorder(canvas, paintWrapper);
+    EXPECT_TRUE(bubblePaintMethod.border_.IsAllEqual());
+
+    /**
+     * @tc.steps: step4. Set the different properties.Call the function PaintBubble.
+     * @tc.expected: step4. Check the properties.
+     */
+    bubblePaintMethod.SetShowArrow(true);
+    bubblePaintMethod.enableArrow_ = true;
+    bubblePaintMethod.PaintBubble(canvas, paintWrapper);
+    EXPECT_TRUE(bubblePaintMethod.showArrow_);
+
+    bubblePaintMethod.SetShowArrow(false);
+    bubblePaintMethod.PaintBubble(canvas, paintWrapper);
+    ASSERT_FALSE(bubblePaintMethod.showArrow_);
 }
 } // namespace OHOS::Ace::NG

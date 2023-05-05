@@ -600,6 +600,14 @@ void SetPopupMessageOptions(const JSRef<JSObject> messageOptionsObj, const RefPt
     }
 }
 
+void SetPlacementOnTopVal(const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam)
+{
+    JSRef<JSVal> placementOnTopVal = popupObj->GetProperty("placementOnTop");
+    if (placementOnTopVal->IsBoolean() && popupParam) {
+        popupParam->SetPlacement(placementOnTopVal->ToBoolean() ? Placement::TOP : Placement::BOTTOM);
+    }
+}
+
 void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam)
 {
     JSRef<JSVal> messageVal = popupObj->GetProperty("message");
@@ -654,13 +662,14 @@ void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj
         }
     }
 
-    JSRef<JSVal> placementOnTopVal = popupObj->GetProperty("placementOnTop");
-    if (placementOnTopVal->IsBoolean()) {
-        if (popupParam) {
-            popupParam->SetPlacement(placementOnTopVal->ToBoolean() ? Placement::TOP : Placement::BOTTOM);
-        } else {
-            LOGI("Empty popup.");
+    auto placementValue = popupObj->GetProperty("placement");
+    if (placementValue->IsNumber()) {
+        auto placement = placementValue->ToNumber<int32_t>();
+        if (placement >= 0 && placement <= static_cast<int32_t>(PLACEMENT.size())) {
+            popupParam->SetPlacement(PLACEMENT[placement]);
         }
+    } else {
+        SetPlacementOnTopVal(popupObj, popupParam);
     }
 
     JSRef<JSVal> maskValue = popupObj->GetProperty("mask");

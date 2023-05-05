@@ -50,9 +50,7 @@ public:
         bubbleMethod->SetArrowPosition(arrowPosition_);
         bubbleMethod->SetChildOffset(childOffset_);
         bubbleMethod->SetChildSize(childSize_);
-        bubbleMethod->SetShowTopArrow(showTopArrow_);
-        bubbleMethod->SetShowBottomArrow(showBottomArrow_);
-        bubbleMethod->SetShowCustomArrow(showCustomArrow_);
+        bubbleMethod->SetShowArrow(showArrow_);
         return bubbleMethod;
     }
 
@@ -124,9 +122,7 @@ private:
     SizeF childSize_;
     RectF touchRegion_;
 
-    bool showTopArrow_ = true;
-    bool showBottomArrow_ = true;
-    bool showCustomArrow_ = false;
+    bool showArrow_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(BubblePattern);
 };
