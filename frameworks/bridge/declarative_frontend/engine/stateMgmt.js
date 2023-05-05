@@ -2260,8 +2260,10 @@ class SynchedPropertyObjectTwoWay extends ObservedPropertyObjectAbstract {
         super(owningChildView, thisPropertyName);
         this.changeNotificationIsOngoing_ = false;
         this.linkedParentProperty_ = linkSource;
-        // register to the parent property
-        this.linkedParentProperty_.subscribeMe(this);
+        if (this.linkedParentProperty_) {
+            // register to the parent property
+            this.linkedParentProperty_.subscribeMe(this);
+        }
         // register to the ObservedObject
         ObservedObject.addOwningProperty(this.getObject(), this);
     }
@@ -3216,13 +3218,13 @@ class SynchedPropertyObjectTwoWayPU extends ObservedPropertyObjectAbstractPU {
     constructor(linkSource, owningChildView, thisPropertyName) {
         super(owningChildView, thisPropertyName);
         this.changeNotificationIsOngoing_ = false;
-        if (linkSource) {
-            this.linkedParentProperty_ = linkSource;
+        this.linkedParentProperty_ = linkSource;
+        if (this.linkedParentProperty_) {
             // register to the parent property
             this.linkedParentProperty_.subscribeMe(this);
-            // register to the ObservedObject
-            ObservedObject.addOwningProperty(this.linkedParentProperty_.get(), this);
         }
+        // register to the ObservedObject
+        ObservedObject.addOwningProperty(this.linkedParentProperty_.get(), this);
     }
     /*
     like a destructor, need to call this before deleting
@@ -3922,8 +3924,16 @@ class ViewPU extends NativeViewPartialUpdate {
         }
         if (idGenFunc === undefined) {
             
-            idGenFunc = (item, index) => `${index}__${JSON.stringify(item)}`;
             idGenFuncUsesIndex = true;
+            // catch possible error caused by Stringify and re-throw an Error with a meaningful (!) error message
+            idGenFunc = (item, index) => {
+                try {
+                    return `${index}__${JSON.stringify(item)}`;
+                }
+                catch (e) {
+                    throw new Error(`${this.constructor.name}[${this.id__()}]: ForEach id ${elmtId}: use of default id generator function not possble on provided data structure. Need to specify id generator function (ForEach 3rd parameter).`);
+                }
+            };
         }
         let diffIndexArray = []; // New indexes compared to old one.
         let newIdArray = [];
