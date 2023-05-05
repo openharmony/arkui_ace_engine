@@ -1187,7 +1187,7 @@ void CustomPaintPaintMethod::ClearPaintImage(SkPaint& paint)
 #endif
     paint.setMaskFilter(SkMaskFilter::MakeBlur(SkBlurStyle::kNormal_SkBlurStyle, 0));
 #ifdef NEW_SKIA
-    imagePaint_.setImageFilter(SkImageFilters::Blur(0, 0, nullptr));
+    paint.setImageFilter(SkImageFilters::Blur(0, 0, nullptr));
 #else
     paint.setImageFilter(SkBlurImageFilter::Make(0, 0, nullptr));
 #endif
