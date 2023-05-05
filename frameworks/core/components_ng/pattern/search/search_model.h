@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SEARCH_SEARCH_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SEARCH_SEARCH_MODEL_H
 
+#include <mutex>
+
 #include "core/components_ng/pattern/search/search_event_hub.h"
 #include "core/components_ng/pattern/text_field/text_field_controller.h"
 
@@ -54,6 +56,10 @@ public:
     virtual void SetTextAlign(const TextAlign& textAlign);
     virtual void SetCopyOption(const CopyOptions& copyOptions);
     virtual void SetMenuOptionItems(std::vector<NG::MenuOptionsParam>&& menuOptionsItems) = 0;
+    virtual void SetFocusable(bool focusable) {};
+    virtual void SetFocusNode(bool isFocusNode) {};
+    virtual void SetHeight(const Dimension& height);
+    virtual void SetBackBorder() {};
     virtual void SetOnSubmit(std::function<void(const std::string&)>&& onSubmit);
     virtual void SetOnChange(std::function<void(const std::string&)>&& onChange);
     virtual void SetOnCopy(std::function<void(const std::string&)>&& func);
@@ -62,6 +68,7 @@ public:
 
 private:
     static std::unique_ptr<SearchModel> instance_;
+    static std::mutex mutex_;
 };
 
 } // namespace OHOS::Ace

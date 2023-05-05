@@ -194,6 +194,7 @@ public:
             CHECK_NULL_VOID(geometryTransition_);
             geometryTransition_->Build(host_, true);
         }
+        ElementRegister::GetInstance()->DumpGeometryTransition();
     }
 
     void UpdateAspectRatio(float ratio)
@@ -393,6 +394,16 @@ public:
         safeArea_ = safeArea;
     }
 
+    bool IsUsingPosition() const
+    {
+        return usingPosition_;
+    }
+
+    void SetUsingPosition(bool usingPosition)
+    {
+        usingPosition_ = usingPosition;
+    }
+
 protected:
     void UpdateLayoutProperty(const LayoutProperty* layoutProperty);
 
@@ -425,6 +436,7 @@ private:
     WeakPtr<FrameNode> host_;
 
     SafeAreaEdgeInserts safeArea_;
+    bool usingPosition_ = true;
     ACE_DISALLOW_COPY_AND_MOVE(LayoutProperty);
 };
 } // namespace OHOS::Ace::NG

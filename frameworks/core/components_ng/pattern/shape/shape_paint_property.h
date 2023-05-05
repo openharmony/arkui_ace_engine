@@ -31,13 +31,13 @@ class ACE_EXPORT ShapePaintProperty : public PaintProperty {
     DECLARE_ACE_TYPE(ShapePaintProperty, PaintProperty);
 
 public:
-    const double FILL_OPACITY_DEFAULT = 1.0f;
-    const double STOKE_MITERLIMIT_DEFAULT = 4.0f;
-    const double STOKE_OPACITY_DEFAULT = 1.0f;
-    const Dimension STOKE_WIDTH_DEFAULT = 1.0_vp;
-    const bool ANTIALIAS_DEFAULT = true;
-    const int SQUARE_CAP = 2;
-    const int DEFAULT_LINE_JOIN=0;
+    static constexpr double FILL_OPACITY_DEFAULT = 1.0f;
+    static constexpr double STOKE_MITERLIMIT_DEFAULT = 4.0f;
+    static constexpr double STOKE_OPACITY_DEFAULT = 1.0f;
+    static constexpr Dimension STOKE_WIDTH_DEFAULT = 1.0_vp;
+    static constexpr bool ANTIALIAS_DEFAULT = true;
+    static constexpr int SQUARE_CAP = 2;
+    static constexpr int DEFAULT_LINE_JOIN=0;
 
     ShapePaintProperty() = default;
     ~ShapePaintProperty() override = default;

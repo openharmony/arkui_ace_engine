@@ -15,7 +15,7 @@ import("//build/test.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("side_bar_pattern_test_ng") {
-  module_out_path = "$pattern_test_output_path/side_bar"
+  module_out_path = pattern_test_output_path
 
   include_dirs = [
     "//commonlibrary/c_utils/base/include",
@@ -57,8 +57,8 @@ ohos_unittest("side_bar_pattern_test_ng") {
 
     # self
     "$ace_root/frameworks/core/components_ng/pattern/side_bar/side_bar_container_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/side_bar/side_bar_container_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/side_bar/side_bar_container_pattern.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/side_bar/side_bar_container_view.cpp",
     "side_bar_layout_test_ng.cpp",
     "side_bar_pattern_test_ng.cpp",
     "side_bar_view_test_ng.cpp",

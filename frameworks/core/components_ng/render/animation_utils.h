@@ -24,6 +24,7 @@ namespace {
 
 using PropertyCallback = std::function<void()>;
 using FinishCallback = std::function<void()>;
+using RepeatCallback = std::function<void()>;
 
 } // namespace
 
@@ -35,12 +36,19 @@ public:
         const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& finishCallback);
     static bool CloseImplicitAnimation();
     static void Animate(const AnimationOption& option, const PropertyCallback& callback,
-        const FinishCallback& finishCallback = nullptr);
+        const FinishCallback& finishCallback = nullptr, const RepeatCallback& repeatCallback = nullptr);
     static void AddKeyFrame(float fraction, const RefPtr<Curve>& curve, const PropertyCallback& callback);
     static void AddKeyFrame(float fraction, const PropertyCallback& callback);
 
+    // Similar to Animate, but reuses current options and replaces callback
+    static void AnimateWithCurrentOptions(
+        const PropertyCallback& callback, const FinishCallback& finishCallback, bool timingSensitive = true);
+    // Similar to Animate, but reuses current callback and replaces options
+    static void AnimateWithCurrentCallback(const AnimationOption& option, const PropertyCallback& callback);
+
     static std::shared_ptr<AnimationUtils::Animation> StartAnimation(const AnimationOption& option,
-        const PropertyCallback& callback, const FinishCallback& finishCallback = nullptr);
+        const PropertyCallback& callback, const FinishCallback& finishCallback = nullptr,
+        const RepeatCallback& repeatCallback = nullptr);
     static void StopAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation);
 };
 } // namespace OHOS::Ace

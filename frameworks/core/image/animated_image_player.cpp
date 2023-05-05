@@ -15,8 +15,8 @@
 
 #include "core/image/animated_image_player.h"
 
-#include "third_party/skia/include/codec/SkCodecAnimation.h"
-#include "third_party/skia/include/core/SkPixelRef.h"
+#include "include/codec/SkCodecAnimation.h"
+#include "include/core/SkPixelRef.h"
 
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"

@@ -16,8 +16,8 @@
 #include "core/components/rating/flutter_render_rating.h"
 
 #include "flutter/common/task_runners.h"
-#include "third_party/skia/include/core/SkClipOp.h"
-#include "third_party/skia/include/core/SkMaskFilter.h"
+#include "include/core/SkClipOp.h"
+#include "include/core/SkMaskFilter.h"
 
 #include "core/components/align/render_align.h"
 #include "core/components/common/painter/flutter_universal_painter.h"

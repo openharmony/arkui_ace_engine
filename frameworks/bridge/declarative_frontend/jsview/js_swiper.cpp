@@ -34,19 +34,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<SwiperModel> SwiperModel::instance_ = nullptr;
+std::mutex SwiperModel::mutex_;
 
 SwiperModel* SwiperModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::SwiperModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::SwiperModelNG());
-        } else {
-            instance_.reset(new Framework::SwiperModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::SwiperModelNG());
+            } else {
+                instance_.reset(new Framework::SwiperModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -270,7 +274,7 @@ void JSSwiper::GetFontContent(const JSRef<JSVal>& font, bool isSelected, SwiperD
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_VOID(swiperIndicatorTheme);
     // set font size, unit FP
-    Dimension fontSize;
+    CalcDimension fontSize;
     if (!size->IsUndefined() && !size->IsNull() && ParseJsDimensionFp(size, fontSize)) {
         if (LessOrEqual(fontSize.Value(), 0.0) || LessOrEqual(size->ToNumber<double>(), 0.0)) {
             fontSize = swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontSize();
@@ -305,6 +309,15 @@ void JSSwiper::GetFontContent(const JSRef<JSVal>& font, bool isSelected, SwiperD
     }
 }
 
+void JSSwiper::SetIsIndicatorCustomSize(const Dimension& dimPosition, bool parseOk)
+{
+    if (parseOk && dimPosition > 0.0_vp) {
+        SwiperModel::GetInstance()->SetIsIndicatorCustomSize(true);
+    } else {
+        SwiperModel::GetInstance()->SetIsIndicatorCustomSize(false);
+    }
+}
+
 SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
 {
     JSRef<JSVal> leftValue = obj->GetProperty("left");
@@ -324,7 +337,7 @@ SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
     CHECK_NULL_RETURN(swiperIndicatorTheme, SwiperParameters());
     bool parseOk = false;
     SwiperParameters swiperParameters;
-    Dimension dimPosition;
+    CalcDimension dimPosition;
     parseOk = ParseJsDimensionPx(leftValue, dimPosition);
     swiperParameters.dimLeft = parseOk ? dimPosition : 0.0_vp;
     parseOk = ParseJsDimensionPx(topValue, dimPosition);
@@ -334,13 +347,17 @@ SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
     parseOk = ParseJsDimensionPx(bottomValue, dimPosition);
     swiperParameters.dimBottom = parseOk ? dimPosition : 0.0_vp;
     parseOk = ParseJsDimensionPx(itemWidthValue, dimPosition);
+    SetIsIndicatorCustomSize(dimPosition, parseOk);
     auto defaultSize = swiperIndicatorTheme->GetSize();
     swiperParameters.itemWidth = parseOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
     parseOk = ParseJsDimensionPx(itemHeightValue, dimPosition);
+    SetIsIndicatorCustomSize(dimPosition, parseOk);
     swiperParameters.itemHeight = parseOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
     parseOk = ParseJsDimensionPx(selectedItemWidthValue, dimPosition);
+    SetIsIndicatorCustomSize(dimPosition, parseOk);
     swiperParameters.selectedItemWidth = parseOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
     parseOk = ParseJsDimensionPx(selectedItemHeightValue, dimPosition);
+    SetIsIndicatorCustomSize(dimPosition, parseOk);
     swiperParameters.selectedItemHeight = parseOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
     if (maskValue->IsBoolean()) {
         auto mask = maskValue->ToBoolean();
@@ -370,7 +387,7 @@ SwiperDigitalParameters JSSwiper::GetDigitIndicatorInfo(const JSRef<JSObject>& o
     CHECK_NULL_RETURN(swiperIndicatorTheme, SwiperDigitalParameters());
     bool parseOk = false;
     SwiperDigitalParameters digitalParameters;
-    Dimension dimPosition;
+    CalcDimension dimPosition;
     parseOk = ParseJsDimensionPx(dotLeftValue, dimPosition);
     digitalParameters.dimLeft = parseOk ? dimPosition : 0.0_vp;
     parseOk = ParseJsDimensionPx(dotTopValue, dimPosition);
@@ -393,6 +410,10 @@ SwiperDigitalParameters JSSwiper::GetDigitIndicatorInfo(const JSRef<JSObject>& o
 
 void JSSwiper::SetIndicator(const JSCallbackInfo& info)
 {
+    if (info.Length() > 0 && info[0]->IsUndefined()) {
+        SwiperModel::GetInstance()->SetShowIndicator(true);
+        return;
+    }
     auto obj = JSRef<JSObject>::Cast(info[0]);
     if (info.Length() > 0 && info[0]->IsObject()) {
         JSRef<JSVal> typeParam = obj->GetProperty("type");
@@ -443,7 +464,7 @@ void JSSwiper::SetIndicatorStyle(const JSCallbackInfo& info)
         CHECK_NULL_VOID(pipelineContext);
         auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
         CHECK_NULL_VOID(swiperIndicatorTheme);
-        Dimension dimPosition;
+        CalcDimension dimPosition;
         bool parseOk = ParseJsDimensionPx(leftValue, dimPosition);
         swiperParameters.dimLeft = parseOk ? dimPosition : 0.0_vp;
         parseOk = ParseJsDimensionPx(topValue, dimPosition);
@@ -453,6 +474,7 @@ void JSSwiper::SetIndicatorStyle(const JSCallbackInfo& info)
         parseOk = ParseJsDimensionPx(bottomValue, dimPosition);
         swiperParameters.dimBottom = parseOk ? dimPosition : 0.0_vp;
         parseOk = ParseJsDimensionPx(sizeValue, dimPosition);
+        SwiperModel::GetInstance()->SetIsIndicatorCustomSize(false);
         swiperParameters.itemWidth = parseOk && dimPosition > 0.0_vp ? dimPosition : swiperIndicatorTheme->GetSize();
         swiperParameters.itemHeight = parseOk && dimPosition > 0.0_vp ? dimPosition : swiperIndicatorTheme->GetSize();
         swiperParameters.selectedItemWidth = parseOk && dimPosition > 0.0_vp ?
@@ -480,7 +502,7 @@ void JSSwiper::SetItemSpace(const JSCallbackInfo& info)
         return;
     }
 
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         return;
     }
@@ -499,7 +521,7 @@ void JSSwiper::SetPreviousMargin(const JSCallbackInfo& info)
         return;
     }
 
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         return;
     }
@@ -517,7 +539,7 @@ void JSSwiper::SetNextMargin(const JSCallbackInfo& info)
         return;
     }
 
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         return;
     }

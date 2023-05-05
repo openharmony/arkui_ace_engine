@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_FE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_FE_H
 
-#include "third_party/skia/include/core/SkImageFilter.h"
+#include "include/core/SkImageFilter.h"
 
 #include "frameworks/core/components/declaration/svg/svg_fe_declaration.h"
 #include "frameworks/core/components_ng/svg/parse/svg_node.h"

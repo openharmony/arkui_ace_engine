@@ -23,7 +23,7 @@
 #include "include/effects/SkLumaColorFilter.h"
 #include "include/utils/SkParsePath.h"
 #include "render_service_client/core/ui/rs_node.h"
-#include "third_party/skia/include/effects/SkGradientShader.h"
+#include "include/effects/SkGradientShader.h"
 
 #include "frameworks/core/components/svg/rosen_render_svg_pattern.h"
 #include "frameworks/core/components/transform/rosen_render_transform.h"

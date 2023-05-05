@@ -19,8 +19,6 @@
 #include "core/components/text/flutter_render_text.h"
 #include "core/components/text/text_component.h"
 #include "core/pipeline/base/constants.h"
-#include "core/pipeline/base/flutter_render_context.h"
-#include "core/pipeline/base/scoped_canvas_state.h"
 #include "flutter/common/task_runners.h"
 
 namespace OHOS::Ace {

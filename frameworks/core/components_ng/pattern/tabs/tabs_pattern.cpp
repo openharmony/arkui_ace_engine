@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/tabs/tab_bar_layout_property.h"
 #include "core/components_ng/pattern/tabs/tab_bar_paint_property.h"
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
+#include "core/components_ng/pattern/tabs/tabs_node.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
 #include "core/components_ng/pattern/divider/divider_render_property.h"
@@ -44,18 +45,27 @@ void TabsPattern::OnAttachToFrameNode()
 
 void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& event)
 {
-    auto tabsNode = GetHost();
+    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
     CHECK_NULL_VOID(tabsNode);
-    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(0));
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
     CHECK_NULL_VOID(tabBarNode);
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
     CHECK_NULL_VOID(tabBarPattern);
-    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildren().back());
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
     CHECK_NULL_VOID(swiperNode);
 
     ChangeEvent changeEvent([tabBarNode, tabBarPattern, jsEvent = std::move(event)](int32_t index) {
+        auto tabsNode = AceType::DynamicCast<TabsNode>(tabBarNode->GetParent());
+        CHECK_NULL_VOID(tabsNode);
+        auto tabsLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
+        CHECK_NULL_VOID(tabsLayoutProperty);
+        tabsLayoutProperty->UpdateIndex(index);
         auto tabBarLayoutProperty = tabBarPattern->GetLayoutProperty<TabBarLayoutProperty>();
         CHECK_NULL_VOID(tabBarLayoutProperty);
+        if (!tabBarPattern->IsMaskAnimationByCreate()) {
+            tabBarPattern->HandleBottomTabBarChange(index);
+        }
+        tabBarPattern->SetMaskAnimationByCreate(false);
         if (tabBarLayoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::FIXED) {
             tabBarPattern->SetIndicator(index);
         }
@@ -91,7 +101,7 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
 
 void TabsPattern::OnUpdateShowDivider()
 {
-    auto host = GetHost();
+    auto host = AceType::DynamicCast<TabsNode>(GetHost());
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<TabsLayoutProperty>();
     TabsItemDivider defaultDivider;
@@ -102,14 +112,8 @@ void TabsPattern::OnUpdateShowDivider()
         return;
     }
 
-    auto dividerNode = host->GetChildAtIndex(1);
-    CHECK_NULL_VOID(dividerNode);
-    if (dividerNode->GetTag() != V2::DIVIDER_ETS_TAG || !AceType::InstanceOf<FrameNode>(dividerNode)) {
-        LOGE("OnUpdateShowDivider: Get divider failed.");
-        return;
-    }
-
-    auto dividerFrameNode = AceType::DynamicCast<FrameNode>(dividerNode);
+    auto dividerFrameNode = AceType::DynamicCast<FrameNode>(host->GetDivider());
+    CHECK_NULL_VOID(dividerFrameNode);
     auto dividerRenderProperty = dividerFrameNode->GetPaintProperty<DividerRenderProperty>();
     CHECK_NULL_VOID(dividerRenderProperty);
     dividerRenderProperty->UpdateDividerColor(divider.color);

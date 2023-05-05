@@ -32,6 +32,12 @@ public:
         ROUND_CAP,
     };
 
+    enum class JoinStyle {
+        MITER_JOIN,
+        ROUND_JOIN,
+        BEVEL_JOIN,
+    };
+
     TestingPen() = default;
     ~TestingPen() = default;
 
@@ -42,8 +48,10 @@ public:
     virtual void SetColor(const TestingColor& color) {}
     virtual void SetColor(int color) {}
     virtual void SetFilter(const TestingFilter& filter) {}
-    virtual void SetShaderEffect(std::shared_ptr<TestingShaderEffect> effect) {}
-    virtual void SetPathEffect(std::shared_ptr<TestingPathEffect> effect) {}
+    virtual void SetShaderEffect(std::shared_ptr<TestingShaderEffect> /* effect */) {}
+    virtual void SetPathEffect(std::shared_ptr<TestingPathEffect> /* effect */) {}
+    virtual void SetJoinStyle(JoinStyle js) {}
+    virtual void SetMiterLimit(float limit) {}
 
     virtual std::shared_ptr<TestingShaderEffect> GetShaderEffect()
     {

@@ -37,24 +37,18 @@ const std::vector<NG::AlignStyle> NG_ALIGN_STYLE = {NG::AlignStyle::LEFT, NG::Al
 void JSIndexer::Create(const JSCallbackInfo& args)
 {
     if (args.Length() >= 1 && args[0]->IsObject()) {
+        size_t length = 0;
+        int32_t selectedVal = 0;
         auto param = JsonUtil::ParseJsonString(args[0]->ToString());
-        if (!param || param->IsNull()) {
-            LOGE("JSIndexer::Create param is null");
-            return;
+        std::unique_ptr<JsonValue> arrayVal;
+        if (param && !param->IsNull()) {
+            arrayVal = param->GetValue("arrayValue");
+            if (arrayVal && arrayVal->IsArray()) {
+                length = static_cast<uint32_t>(arrayVal->GetArraySize());
+            }
+            selectedVal = param->GetInt("selected", 0);
         }
         std::vector<std::string> indexerArray;
-
-        auto arrayVal = param->GetValue("arrayValue");
-        if (!arrayVal || !arrayVal->IsArray()) {
-            LOGW("info is invalid");
-            return;
-        }
-
-        size_t length = static_cast<uint32_t>(arrayVal->GetArraySize());
-        if (length <= 0) {
-            LOGE("info is invalid");
-            return;
-        }
         for (size_t i = 0; i < length; i++) {
             auto value = arrayVal->GetArrayItem(i);
             if (!value) {
@@ -62,16 +56,15 @@ void JSIndexer::Create(const JSCallbackInfo& args)
             }
             indexerArray.emplace_back(value->GetString());
         }
-
-        auto selectedVal = param->GetInt("selected", 0);
-
         if (Container::IsCurrentUseNewPipeline()) {
             NG::IndexerView::Create(indexerArray, selectedVal);
             return;
         }
-
-        auto indexerComponent =
-            AceType::MakeRefPtr<V2::IndexerComponent>(indexerArray, selectedVal);
+        if (length <= 0) {
+            LOGE("info is invalid");
+            return;
+        }
+        auto indexerComponent = AceType::MakeRefPtr<V2::IndexerComponent>(indexerArray, selectedVal);
         ViewStackProcessor::GetInstance()->ClaimElementId(indexerComponent);
         ViewStackProcessor::GetInstance()->Push(indexerComponent);
         JSInteractableView::SetFocusable(true);
@@ -408,7 +401,7 @@ void JSIndexer::GetFontContent(const JSCallbackInfo& args, TextStyle& textStyle)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
     JSRef<JSVal> size = obj->GetProperty("size");
-    Dimension fontSize;
+    CalcDimension fontSize;
     if (ParseJsDimensionVp(size, fontSize)) {
         textStyle.SetFontSize(fontSize);
     }
@@ -437,14 +430,14 @@ void JSIndexer::SetItemSize(const JSCallbackInfo& args)
 {
     if (Container::IsCurrentUseNewPipeline()) {
         if (args.Length() >= 1) {
-            Dimension value;
+            CalcDimension value;
             if (ParseJsDimensionVp(args[0], value)) {
                 NG::IndexerView::SetItemSize(value);
             }
         }
     }
     if (args.Length() >= 1) {
-        Dimension value;
+        CalcDimension value;
         if (ParseJsDimensionVp(args[0], value)) {
             auto indexerComponent =
                 AceType::DynamicCast<V2::IndexerComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
@@ -465,7 +458,7 @@ void JSIndexer::SetAlignStyle(const JSCallbackInfo& args)
         if (value >= 0 && value < static_cast<int32_t>(ALIGN_STYLE.size())) {
             NG::IndexerView::SetAlignStyle(NG_ALIGN_STYLE[value]);
         }
-        Dimension popupHorizontalSpace(-1.0);
+        CalcDimension popupHorizontalSpace(-1.0);
         if (args.Length() > 1) {
             ParseJsDimensionVp(args[1], popupHorizontalSpace);
         }
@@ -550,7 +543,7 @@ void JSIndexer::SetPopupItemFont(const JSCallbackInfo& args)
         return;
     }
 
-    Dimension fontSize;
+    CalcDimension fontSize;
     std::string weight;
     if (args.Length() < 1 || !args[0]->IsObject()) {
         LOGW("The argv is wrong, it is supposed to have at least 1 object argument");

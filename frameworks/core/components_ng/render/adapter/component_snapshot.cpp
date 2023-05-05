@@ -20,8 +20,10 @@
 #include "transaction/rs_interfaces.h"
 
 #include "bridge/common/utils/utils.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -57,15 +59,39 @@ std::shared_ptr<Rosen::RSNode> ComponentSnapshot::GetRsNode(const RefPtr<FrameNo
     return rsNode;
 }
 
-ComponentSnapshot::ComponentSnapshot(const string& componentId)
+void ComponentSnapshot::Get(const std::string& componentId, JsCallback&& callback)
 {
-    node_ = Inspector::GetFrameNodeByKey(componentId);
+    auto node = Inspector::GetFrameNodeByKey(componentId);
+    auto rsNode = GetRsNode(node);
+    auto& rsInterface = Rosen::RSInterfaces::GetInstance();
+    LOGI("TakeSurfaceCaptureForUI");
+    rsInterface.TakeSurfaceCaptureForUI(rsNode, std::make_shared<CustomizedCallback>(std::move(callback)));
 }
 
-void ComponentSnapshot::Get(JsCallback&& callback)
+void ComponentSnapshot::Create(const RefPtr<AceType>& customNode, JsCallback&& callback)
 {
-    auto rsNode = GetRsNode(node_.Upgrade());
-    auto& rsInterface = Rosen::RSInterfaces::GetInstance();
-    rsInterface.TakeSurfaceCaptureForUI(rsNode, std::make_shared<CustomizedCallback>(std::move(callback)));
+    auto node = AceType::DynamicCast<FrameNode>(customNode);
+    CHECK_NULL_VOID(node);
+    node->MarkModifyDone();
+    FrameNode::ProcessOffscreenNode(node);
+    LOGD("ProcessOffscreenNode finished, root size = %{public}s",
+        node->GetGeometryNode()->GetFrameSize().ToString().c_str());
+
+    // add delay to ensure Rosen has finished rendering
+    constexpr int32_t delayTime = 300;
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto executor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(executor);
+
+    executor->PostDelayedTask(
+        [callback, node]() mutable {
+            auto rsNode = GetRsNode(node);
+            LOGI("TakeSurfaceCaptureForUI rootNode = %{public}s", node->GetTag().c_str());
+            auto& rsInterface = Rosen::RSInterfaces::GetInstance();
+            rsInterface.TakeSurfaceCaptureForUI(rsNode, std::make_shared<CustomizedCallback>(std::move(callback)));
+        },
+        TaskExecutor::TaskType::UI, delayTime);
 }
 } // namespace OHOS::Ace::NG

@@ -98,14 +98,14 @@ void TextPickerTestNg::InitTextPickerTestNg()
     ASSERT_NE(frameNode_, nullptr);
     textPickerPattern_ = frameNode_->GetPattern<TextPickerPattern>();
     ASSERT_NE(textPickerPattern_, nullptr);
-    textPickerAccessibilityProperty_ = frameNode_->GetAccessibilityProperty<TextPickerAccessibilityProperty>();
-    ASSERT_NE(textPickerAccessibilityProperty_, nullptr);
     stackNode_ = FrameNode::GetOrCreateFrameNode(V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<StackPattern>(); });
     ASSERT_NE(stackNode_, nullptr);
     columnNode_ = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<TextPickerColumnPattern>(); });
     ASSERT_NE(columnNode_, nullptr);
+    textPickerAccessibilityProperty_ = columnNode_->GetAccessibilityProperty<TextPickerAccessibilityProperty>();
+    ASSERT_NE(textPickerAccessibilityProperty_, nullptr);
     textPickerColumnPattern_ = columnNode_->GetPattern<TextPickerColumnPattern>();
     ASSERT_NE(textPickerColumnPattern_, nullptr);
     columnNode_->MountToParent(stackNode_);
@@ -2347,7 +2347,7 @@ HWTEST_F(TextPickerTestNg, TextPickerPaintTest001, TestSize.Level1)
 {
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
-
+    theme->gradientHeight_ = Dimension(10.0);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     auto pickerPaintProperty = frameNode->GetPaintProperty<PaintProperty>();

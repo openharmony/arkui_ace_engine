@@ -23,6 +23,7 @@
 #include <set>
 #include <unordered_map>
 #include <utility>
+#include <thread>
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/offset.h"
@@ -755,12 +756,10 @@ public:
     void ProcessDragEventEnd(
         const RefPtr<RenderNode>& renderNode, const RefPtr<DragEvent>& event, const Point& globalPoint);
 
+    // restore
+    void RestoreNodeInfo(std::unique_ptr<JsonValue> nodeInfo) override;
+    std::unique_ptr<JsonValue> GetStoredNodeInfo() override;
     void StoreNode(int32_t restoreId, const WeakPtr<RenderElement>& node);
-
-    std::unique_ptr<JsonValue> GetStoredNodeInfo();
-
-    void RestoreNodeInfo(std::unique_ptr<JsonValue> nodeInfo);
-
     std::string GetRestoreInfo(int32_t restoreId);
 
     bool GetIsTabKeyPressed() const

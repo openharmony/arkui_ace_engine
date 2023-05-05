@@ -20,6 +20,8 @@
 #include <regex>
 #include <unistd.h>
 
+#include "dfx_jsnapi.h"
+
 #include "base/utils/utils.h"
 #ifdef WINDOWS_PLATFORM
 #include <algorithm>
@@ -31,6 +33,7 @@
 #include "base/i18n/localization.h"
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
+#include "base/log/exception_handler.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_view.h"
 #include "core/common/card_scope.h"
@@ -82,10 +85,10 @@ const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib/libark_debugger.z.so";
 #else
 const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib64/libark_debugger.z.so";
 #endif
-const std::string FORM_ES_MODULE_PATH = "ets/widgets.abc";
+const std::string FORM_ES_MODULE_CARD_PATH = "ets/widgets.abc";
+const std::string FORM_ES_MODULE_PATH = "ets/modules.abc";
+
 const std::string ASSET_PATH_PREFIX = "/data/storage/el1/bundle/";
-constexpr uint32_t PREFIX_LETTER_NUMBER = 4;
-std::mutex loadFormMutex_;
 
 // native implementation for js function: perfutil.print()
 shared_ptr<JsValue> JsPerfPrint(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
@@ -1020,7 +1023,7 @@ bool JsiDeclarativeEngine::ExecuteAbc(const std::string& fileName)
         LOGD("GetAssetContent \"%{public}s\" failed.", fileName.c_str());
         return true;
     }
-#ifdef OHOS_PLATFORM
+#if !defined(PREVIEW)
     const std::string abcPath = delegate->GetAssetPath(fileName).append(fileName);
 #else
     const std::string& abcPath = fileName;
@@ -1062,16 +1065,17 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
             }
             return true;
         }
-        if (!delegate->GetAssetContent(FORM_ES_MODULE_PATH, content)) {
-            LOGE("EvaluateJsCode GetAssetContent \"%{public}s\" failed.", FORM_ES_MODULE_PATH.c_str());
+        if (!delegate->GetAssetContent(FORM_ES_MODULE_CARD_PATH, content)) {
+            LOGE("EvaluateJsCode GetAssetContent \"%{public}s\" failed.", FORM_ES_MODULE_CARD_PATH.c_str());
             return false;
         }
         const std::string bundleName = frontEnd->GetBundleName();
-        const std::string moduleName = frontEnd->GetModuleName();
+        std::string moduleName = frontEnd->GetModuleName();
 #ifdef PREVIEW
-        const std::string assetPath = delegate->GetAssetPath(FORM_ES_MODULE_PATH).append(FORM_ES_MODULE_PATH);
+        const std::string assetPath = delegate->GetAssetPath(FORM_ES_MODULE_CARD_PATH).append(FORM_ES_MODULE_CARD_PATH);
 #else
-        const std::string assetPath = ASSET_PATH_PREFIX + bundleName + "/" + moduleName + "/" + FORM_ES_MODULE_PATH;
+        const std::string assetPath =
+            ASSET_PATH_PREFIX + bundleName + "/" + moduleName + "/" + FORM_ES_MODULE_CARD_PATH;
 #endif
         LOGI("bundleName = %{public}s, moduleName = %{public}s, assetPath = %{public}s", bundleName.c_str(),
             moduleName.c_str(), assetPath.c_str());
@@ -1083,11 +1087,12 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
         arkRuntime->SetModuleName(moduleName);
         abcPath = fileName;
         if (fileName.rfind("ets/", 0) == 0) {
-            abcPath = fileName.substr(PREFIX_LETTER_NUMBER);
+            abcPath = moduleName.append("/").append(fileName);
+        } else {
+            abcPath = moduleName.append("/ets/").append(fileName);
         }
         LOGI("JsiDeclarativeEngine::ExecuteCardAbc abcPath = %{public}s", abcPath.c_str());
         {
-            std::lock_guard<std::mutex> lock(loadFormMutex_);
             if (!arkRuntime->ExecuteModuleBuffer(content.data(), content.size(), abcPath, true)) {
                 LOGE("ExecuteCardAbc ExecuteModuleBuffer \"%{public}s\" failed.", fileName.c_str());
                 return false;
@@ -1199,12 +1204,17 @@ void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
     }
 }
 
-bool JsiDeclarativeEngine::LoadJsWithModule(const std::string& urlName,
+bool JsiDeclarativeEngine::LoadJsWithModule(std::string& urlName,
     const std::function<void(const std::string&, int32_t)>& errorCallback)
 {
-    auto runtime = engineInstance_->GetJsRuntime();
-    auto vm = const_cast<EcmaVM*>(std::static_pointer_cast<ArkJSRuntime>(runtime)->GetEcmaVm());
-    if (!JSNApi::IsBundle(vm)) {
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    if (container->IsModule()) {
+        const std::string assetPath = ASSET_PATH_PREFIX +
+            container->GetModuleName() + "/" + FORM_ES_MODULE_PATH;
+        auto runtime = std::static_pointer_cast<ArkJSRuntime>(engineInstance_->GetJsRuntime());
+        runtime->SetAssetPath(assetPath);
+        urlName = container->GetModuleName() + "/ets/" + urlName;
         if (!runtime->ExecuteJsBin(urlName, errorCallback)) {
             LOGE("ExecuteJsBin %{private}s failed.", urlName.c_str());
         }
@@ -1748,6 +1758,21 @@ std::string JsiDeclarativeEngine::GetStacktraceMessage()
     return JsiBaseUtils::TransSourceStack(runningPage, stack);
 }
 
+void JsiDeclarativeEngine::GetStackTrace(std::string& trace)
+{
+    auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+    if (!arkRuntime) {
+        LOGE("ArkJsRuntime is null and can not get current stack trace");
+        return;
+    }
+    auto vm = arkRuntime->GetEcmaVm();
+    if (!vm) {
+        LOGE("VM is null and can not get current stack trace");
+        return;
+    }
+    panda::DFXJSNApi::BuildJsStackTrace(vm, trace);
+}
+
 void JsiDeclarativeEngine::SetLocalStorage(int32_t instanceId, NativeReference* nativeValue)
 {
     LOGI("SetLocalStorage instanceId:%{public}d", instanceId);
@@ -1758,6 +1783,8 @@ void JsiDeclarativeEngine::SetLocalStorage(int32_t instanceId, NativeReference* 
         JSLocalStorage::AddStorage(instanceId, storage);
     } else {
         LOGI("SetLocalStorage instanceId:%{public}d invalid storage", instanceId);
+        delete nativeValue;
+        nativeValue = nullptr;
     }
 #endif
 }
@@ -1927,6 +1954,7 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_PreloadAceModuleCard(void* runtime)
 void JsiDeclarativeEngineInstance::PreloadAceModuleCard(void* runtime)
 {
     isUnique_ = true;
+    ExceptionHandler::formRenderServiceFlag_ = true;
     if (isModulePreloaded_ && !IsPlugin() && !isUnique_) {
         LOGE("PreloadAceModule already preloaded");
         return;

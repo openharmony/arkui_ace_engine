@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_PAINTER_ROSEN_UNIVERSAL_PAINTER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_PAINTER_ROSEN_UNIVERSAL_PAINTER_H
 
-#include "third_party/skia/include/core/SkCanvas.h"
+#include "include/core/SkCanvas.h"
 
 #include "core/pipeline/base/render_node.h"
 

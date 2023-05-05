@@ -26,6 +26,10 @@
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/navrouter/navrouter_event_hub.h"
 #include "core/components_ng/pattern/navrouter/navrouter_group_node.h"
+#include "core/components_ng/pattern/stack/stack_layout_property.h"
+#include "core/components_ng/pattern/stack/stack_model_ng.h"
+#include "core/components_ng/pattern/stack/stack_pattern.h"
+#include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
@@ -62,11 +66,53 @@ void NavigationGroupNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t s
     contentNode->AddChild(child);
 }
 
+void NavigationGroupNode::AddNavDestinationToNavigation(const RefPtr<UINode>& parent)
+{
+    auto pattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
+    CHECK_NULL_VOID(pattern);
+    auto navDestinationNodes = pattern->GetAllNavDestinationNodes();
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(parent);
+    CHECK_NULL_VOID(navigationNode);
+    auto navigationContentNode = AceType::DynamicCast<FrameNode>(navigationNode->GetContentNode());
+    CHECK_NULL_VOID(navigationContentNode);
+    auto navigationStack = pattern->GetNavigationStack();
+    for (auto iter = navDestinationNodes.rbegin(); iter != navDestinationNodes.rend(); ++iter) {
+        const auto& childNode = *iter;
+        auto uiNode = childNode.second;
+        auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(GetNavDestinationNode(uiNode));
+        navigationContentNode->AddChild(uiNode);
+    }
+}
+
 void NavigationGroupNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     FrameNode::ToJsonValue(json);
     auto navBarNode = DynamicCast<NavBarNode>(GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
     navBarNode->ToJsonValue(json);
+}
+
+RefPtr<UINode> NavigationGroupNode::GetNavDestinationNode(RefPtr<UINode> uiNode)
+{
+    while (uiNode) {
+        if (AceType::DynamicCast<FrameNode>(uiNode) && uiNode->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+            // this is a navDesination node
+            return AceType::DynamicCast<NavDestinationGroupNode>(uiNode);
+        }
+        if (AceType::DynamicCast<UINode>(uiNode)) {
+            // this is an UINode, go deep further for navDestination node
+            auto children = uiNode->GetChildren();
+            uiNode = children.front();
+            continue;
+        }
+    }
+    // this is an invalid node, just display blank content
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::STACK_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<StackPattern>(); });
+    auto stackLayoutProperty = frameNode->GetLayoutProperty();
+    stackLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    uiNode = AceType::DynamicCast<UINode>(frameNode);
+    return uiNode;
 }
 } // namespace OHOS::Ace::NG

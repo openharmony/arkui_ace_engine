@@ -60,9 +60,9 @@ void NavDestinationGroupNode::DeleteChildFromGroup(int32_t slot)
     navDestination->RemoveChildAtIndex(slot);
 }
 
-void NavDestinationGroupNode::OnAttachToMainTree()
+void NavDestinationGroupNode::OnAttachToMainTree(bool recursive)
 {
-    FrameNode::OnAttachToMainTree();
+    FrameNode::OnAttachToMainTree(recursive);
     auto navDestinationPattern = GetPattern<NavDestinationPattern>();
     CHECK_NULL_VOID(navDestinationPattern);
     auto shallowBuilder = navDestinationPattern->GetShallowBuilder();

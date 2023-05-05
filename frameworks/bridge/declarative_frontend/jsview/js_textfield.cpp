@@ -46,19 +46,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<TextFieldModel> TextFieldModel::instance_ = nullptr;
+std::mutex TextFieldModel::mutex_;
 
 TextFieldModel* TextFieldModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::TextFieldModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::TextFieldModelNG());
-        } else {
-            instance_.reset(new Framework::TextFieldModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::TextFieldModelNG());
+            } else {
+                instance_.reset(new Framework::TextFieldModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -269,7 +273,7 @@ void JSTextField::SetPlaceholderFont(const JSCallbackInfo& info)
     if (fontSize->IsNull() || fontSize->IsUndefined()) {
         font.fontSize = Dimension(-1);
     } else {
-        Dimension size;
+        CalcDimension size;
         if (fontSize->IsString()) {
             auto result = StringUtils::StringToDimensionWithThemeValue(fontSize->ToString(), true, Dimension(-1));
             font.fontSize = result;
@@ -376,7 +380,7 @@ void JSTextField::SetCaretStyle(const JSCallbackInfo& info)
     if (caretWidth->IsNull() || caretWidth->IsUndefined()) {
         caretStyle.caretWidth = theme->GetCursorWidth();
     } else {
-        Dimension width;
+        CalcDimension width;
         if (!ParseJsDimensionVp(caretWidth, width)) {
             caretStyle.caretWidth = theme->GetCursorWidth();
         }
@@ -462,7 +466,7 @@ void JSTextField::SetFontSize(const JSCallbackInfo& info)
         LOGI("JSTextField::SetFontSize The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension fontSize;
+    CalcDimension fontSize;
     if (!ParseJsDimensionFp(info[0], fontSize)) {
         LOGI("Parse to dimension FP failed!");
         return;
@@ -621,7 +625,7 @@ void JSTextField::JsHeight(const JSCallbackInfo& info)
         LOGI("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         LOGI("Parse to dimension VP failed!");
         return;
@@ -652,7 +656,7 @@ void JSTextField::JsWidth(const JSCallbackInfo& info)
     }
 
     TextFieldModel::GetInstance()->SetWidthAuto(false);
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         LOGW("Parse width fail");
         return;
@@ -680,7 +684,7 @@ void JSTextField::JsPadding(const JSCallbackInfo& info)
         if (info[0]->IsUndefined() || (info[0]->IsString() && CheckIsIllegalString(info[0]->ToString()))) {
             return;
         };
-        Dimension length;
+        CalcDimension length;
         ParseJsDimensionVp(info[0], length);
         if (length.IsNegative()) {
             return;
@@ -694,17 +698,17 @@ void JSTextField::JsPadding(const JSCallbackInfo& info)
     }
     Edge padding;
     if (info[0]->IsNumber() || info[0]->IsString()) {
-        Dimension edgeValue;
+        CalcDimension edgeValue;
         if (ParseJsDimensionVp(info[0], edgeValue)) {
             padding = Edge(edgeValue);
         }
     }
     if (info[0]->IsObject()) {
         JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
-        Dimension left = Dimension(0.0, DimensionUnit::VP);
-        Dimension top = Dimension(0.0, DimensionUnit::VP);
-        Dimension right = Dimension(0.0, DimensionUnit::VP);
-        Dimension bottom = Dimension(0.0, DimensionUnit::VP);
+        CalcDimension left = CalcDimension(0.0, DimensionUnit::VP);
+        CalcDimension top = CalcDimension(0.0, DimensionUnit::VP);
+        CalcDimension right = CalcDimension(0.0, DimensionUnit::VP);
+        CalcDimension bottom = CalcDimension(0.0, DimensionUnit::VP);
         ParseJsDimensionVp(object->GetProperty("left"), left);
         ParseJsDimensionVp(object->GetProperty("top"), top);
         ParseJsDimensionVp(object->GetProperty("right"), right);

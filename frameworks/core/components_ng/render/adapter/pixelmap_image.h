@@ -18,7 +18,7 @@
 
 #include <utility>
 
-#include "third_party/skia/include/core/SkImage.h"
+#include "include/core/SkImage.h"
 
 #include "core/components_ng/render/canvas_image.h"
 

@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_POLYGON_POLYGON_MODEL_H
 
 #include <memory>
+#include <mutex>
 
 #include "core/components/shape/shape_component.h"
 
@@ -31,6 +32,7 @@ public:
 
 private:
     static std::unique_ptr<PolygonModel> instance_;
+    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_POLYGON_POLYGON_MODEL_H

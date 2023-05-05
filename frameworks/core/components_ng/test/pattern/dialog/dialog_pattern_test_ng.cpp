@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #include "gtest/gtest.h"
 
 #define private public
+#define protected public
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/dialog/dialog_event_hub.h"
@@ -23,6 +24,7 @@
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -560,5 +562,49 @@ HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator0029, TestSize.Level1)
     dialogLayoutAlgorithm->alignment_ = DialogAlignment::BOTTOM_END;
     auto result = dialogLayoutAlgorithm->SetAlignmentSwitch(maxSize, childSize, topLeftPoint);
     EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: DialogAccessibilityProperty001
+ * @tc.desc: Test Action Sheet Accessibility Property
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternTestNg, DialogAccessibilityProperty001, TestSize.Level1)
+{
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> dialog = FrameNode::CreateFrameNode(
+        V2::ACTION_SHEET_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(dialog, nullptr);
+
+    auto pattern = dialog->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->title_ = TITLE;
+    pattern->message_ = MESSAGE;
+    auto accessibilityProperty = dialog->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(), TITLE + MESSAGE);
+}
+
+/**
+ * @tc.name: DialogAccessibilityProperty002
+ * @tc.desc: Test Alert Accessibility Property
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternTestNg, DialogAccessibilityProperty002, TestSize.Level1)
+{
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> dialog = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(dialog, nullptr);
+
+    auto pattern = dialog->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->title_ = TITLE;
+    pattern->message_ = MESSAGE;
+    auto accessibilityProperty = dialog->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(), TITLE + MESSAGE);
 }
 } // namespace OHOS::Ace::NG

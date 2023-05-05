@@ -309,6 +309,12 @@ public:
 
     virtual void OnAreaChangedInner() {}
     virtual void OnVisibleChange(bool isVisible) {}
+    virtual std::string ProvideRestoreInfo()
+    {
+        return "";
+    }
+
+    virtual void OnRestoreInfo(const std::string& restoreInfo) {}
 
 protected:
     virtual void OnAttachToFrameNode() {}

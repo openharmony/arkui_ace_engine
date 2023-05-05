@@ -15,7 +15,7 @@ import("//build/test.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("hyperlink_test_ng") {
-  module_out_path = "$pattern_test_output_path/hyperlink"
+  module_out_path = pattern_test_output_path
 
   sources = [
     # drag

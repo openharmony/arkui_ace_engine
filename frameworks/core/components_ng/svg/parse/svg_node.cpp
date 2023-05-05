@@ -20,7 +20,11 @@
 #include "include/utils/SkParsePath.h"
 
 #include "base/utils/utils.h"
+#ifndef NEW_SKIA
 #include "core/components/common/painter/flutter_svg_painter.h"
+#else
+#include "core/components/common/painter/rosen_svg_painter.h"
+#endif
 #include "core/components/common/properties/decoration.h"
 #include "core/components/transform/render_transform.h"
 #include "core/components_ng/render/drawing.h"
@@ -229,7 +233,11 @@ void SvgNode::OnTransform(RSCanvas& canvas, const Size& viewPort)
 {
     auto matrix = (animateTransform_.empty()) ? SvgTransform::CreateMatrix4(transform_)
                                               : SvgTransform::CreateMatrixFromMap(animateTransform_);
+#ifndef NEW_SKIA
     skCanvas_->concat(FlutterSvgPainter::ToSkMatrix(matrix));
+#else
+    skCanvas_->concat(RosenSvgPainter::ToSkMatrix(matrix));
+#endif
 }
 
 double SvgNode::ConvertDimensionToPx(const Dimension& value, const Size& viewPort, SvgLengthType type) const

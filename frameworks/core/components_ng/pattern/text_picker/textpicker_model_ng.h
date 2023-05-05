@@ -28,16 +28,50 @@ public:
     void SetSelected(uint32_t value) override;
     void SetRange(const std::vector<NG::RangeContent>& value) override;
     void SetValue(const std::string& value) override;
-    void SetOnChange(TextChangeEvent&& onChange) override;
+    void SetOnChange(OHOS::Ace::TextChangeEvent&& onChange) override {};
     void SetDefaultPickerItemHeight(const Dimension& value) override;
     void SetDefaultAttributes(const RefPtr<PickerTheme>& pickerTheme) override;
     void SetDisappearTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value) override;
     void SetNormalTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value) override;
     void SetSelectedTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value) override;
+    void MultiInit(const RefPtr<PickerTheme> pickerTheme) override;
+    void SetColumns(const std::vector<NG::TextCascadePickerOptions>& options) override;
+    void SetIsCascade(bool isCascade) override;
+    void SetOnCascadeChange(TextCascadeChangeEvent&& onChange) override;
+    void SetValues(const std::vector<std::string>& values) override;
+    void SetSelecteds(const std::vector<uint32_t>& values) override;
+    void SetBackgroundColor(const Color& color) override;
+    bool IsSingle() override;
+    bool GetSingleRange(std::vector<NG::RangeContent>& rangeValue) override;
+    bool IsCascade() override
+    {
+        return isCascade_;
+    }
+
+    void SetMaxCount(uint32_t maxCount) override
+    {
+        maxCount_ = maxCount;
+    }
+
+    uint32_t GetMaxCount() override
+    {
+        return maxCount_;
+    }
+
+    bool GetMultiOptions(std::vector<NG::TextCascadePickerOptions>& options) override;
 private:
     static RefPtr<FrameNode> CreateStackNode();
     static RefPtr<FrameNode> CreateButtonNode();
     RefPtr<FrameNode> CreateColumnNode(uint32_t columnKind, uint32_t showCount);
+    void SetUnCascadeColumns(const std::vector<NG::TextCascadePickerOptions>& options);
+    void SetCascadeColumns(const std::vector<NG::TextCascadePickerOptions>& options);
+
+    uint32_t showCount_ = 0;
+    std::vector<uint32_t> kinds_;
+    bool isCascade_ = false;
+    std::vector<NG::RangeContent> rangeValue_;
+    std::vector<NG::TextCascadePickerOptions> options_;
+    uint32_t maxCount_ = 0;
 };
 } // namespace OHOS::Ace::NG
 

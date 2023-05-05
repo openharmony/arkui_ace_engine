@@ -15,7 +15,7 @@
 
 #include "core/components/search/rosen_render_search.h"
 
-#include "third_party/skia/include/core/SkRRect.h"
+#include "include/core/SkRRect.h"
 
 #include "core/pipeline/base/rosen_render_context.h"
 

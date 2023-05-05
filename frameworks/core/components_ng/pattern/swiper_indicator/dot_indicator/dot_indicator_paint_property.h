@@ -30,6 +30,7 @@ struct DotIndicatorStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(IndicatorMask, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Color, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SelectedColor, Color);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(IsCustomSize, bool);
 };
 class DotIndicatorPaintProperty : public PaintProperty {
     DECLARE_ACE_TYPE(DotIndicatorPaintProperty, PaintProperty)
@@ -43,6 +44,7 @@ public:
         auto paintProperty = MakeRefPtr<DotIndicatorPaintProperty>();
         paintProperty->UpdatePaintProperty(this);
         paintProperty->propDotIndicatorStyle_ = CloneDotIndicatorStyle();
+        paintProperty->propIsCustomSize_ = CloneIsCustomSize();
         return paintProperty;
     }
 
@@ -50,6 +52,7 @@ public:
     {
         PaintProperty::Reset();
         ResetDotIndicatorStyle();
+        ResetIsCustomSize();
     }
     ACE_DEFINE_PROPERTY_GROUP(DotIndicatorStyle, DotIndicatorStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(DotIndicatorStyle, Size, Dimension, PROPERTY_UPDATE_RENDER);
@@ -60,6 +63,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(DotIndicatorStyle, IndicatorMask, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(DotIndicatorStyle, Color, Color, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(DotIndicatorStyle, SelectedColor, Color, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsCustomSize, bool, PROPERTY_UPDATE_RENDER);
     ACE_DISALLOW_COPY_AND_MOVE(DotIndicatorPaintProperty);
 };
 } // namespace OHOS::Ace::NG

@@ -63,7 +63,8 @@ HWTEST_F(ViewAbstractModelTestNg, ViewAbstractModelNgTest001, TestSize.Level1)
     };
 
     ViewAbstractModelNG viewAbstractModelNG;
-    viewAbstractModelNG.BindContextMenu(ResponseType::RIGHT_CLICK, CreateBuildFunc);
+    MenuParam menuParam;
+    viewAbstractModelNG.BindContextMenu(ResponseType::RIGHT_CLICK, CreateBuildFunc, menuParam);
     auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     /**
      * @tc.expected: step1. expect targetNode is null

@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 #include "js_plugin_callback.h"
+
+#include <memory>
 #include <mutex>
 
 #include "hilog_wrapper.h"
@@ -20,6 +22,7 @@
 #include "js_plugin_util.h"
 #include "js_plugin_want.h"
 
+#include "core/common/ace_engine.h"
 #include "core/components/plugin/plugin_component_manager.h"
 
 namespace OHOS::Ace::Napi {
@@ -49,13 +52,14 @@ bool AceJSPluginRequestParam::operator!=(const AceJSPluginRequestParam& param) c
     return !operator==(param);
 }
 
-JSPluginCallback::JSPluginCallback(CallBackType eventType,
-    ACECallbackInfo& cbInfo, ACEAsyncJSCallbackInfo* jsCallbackInfo) : eventType_(eventType),
-    asyncJSCallbackInfo_(jsCallbackInfo)
+JSPluginCallback::JSPluginCallback(
+    CallBackType eventType, ACECallbackInfo& cbInfo, ACEAsyncJSCallbackInfo* jsCallbackInfo)
+    : eventType_(eventType), asyncJSCallbackInfo_(jsCallbackInfo)
 {
     uuid_++;
     cbInfo_.env = cbInfo.env;
     cbInfo_.callback = cbInfo.callback;
+    cbInfo_.containerId = cbInfo.containerId;
 }
 
 JSPluginCallback::~JSPluginCallback()
@@ -73,6 +77,7 @@ void JSPluginCallback::DestroyAllResource(void)
     }
     cbInfo_.env = nullptr;
     cbInfo_.callback = nullptr;
+    cbInfo_.containerId = -1;
     asyncJSCallbackInfo_ = nullptr;
 }
 
@@ -228,8 +233,8 @@ void JSPluginCallback::OnPushEventInner(const OnPluginUvWorkData* workData)
     napi_close_handle_scope(cbInfo_.env, scope);
 }
 
-void JSPluginCallback::OnPushEvent(const AAFwk::Want& want,
-    const PluginComponentTemplate& pluginTemplate, const std::string& data, const std::string& extraData)
+void JSPluginCallback::OnPushEvent(const AAFwk::Want& want, const PluginComponentTemplate& pluginTemplate,
+    const std::string& data, const std::string& extraData)
 {
     HILOG_INFO("%{public}s called.", __func__);
     if (cbInfo_.env == nullptr || cbInfo_.callback == nullptr) {
@@ -237,36 +242,34 @@ void JSPluginCallback::OnPushEvent(const AAFwk::Want& want,
         return;
     }
 
-    uvWorkData_.that = (void *)this;
-    uvWorkData_.want = want;
-    uvWorkData_.sourceName = pluginTemplate.GetSource();
-    uvWorkData_.abilityName = pluginTemplate.GetAbility();
-    uvWorkData_.data = data;
-    uvWorkData_.extraData = extraData;
-
-    uv_loop_s* loop = nullptr;
-    napi_get_uv_event_loop(cbInfo_.env, &loop);
-    uv_work_t* work = new uv_work_t;
-    work->data = (void*)this;
-    int rev = uv_queue_work(
-        loop, work, [](uv_work_t* work) {},
-        [](uv_work_t* work, int status) {
-            if (work == nullptr) {
-                return;
-            }
-            JSPluginCallback* context = (JSPluginCallback*)work->data;
-            if (context) {
-                context->OnPushEventInner(&context->uvWorkData_);
-            }
-            delete work;
-            work = nullptr;
-        });
-    if (rev != 0) {
-        if (work != nullptr) {
-            delete work;
-            work = nullptr;
-        }
+    auto container = AceEngine::Get().GetContainer(cbInfo_.containerId);
+    if (!container) {
+        HILOG_INFO("%{public}s called, container is null. %{public}d", __func__, cbInfo_.containerId);
+        return;
     }
+
+    auto taskExecutor = container->GetTaskExecutor();
+    if (!taskExecutor) {
+        HILOG_INFO("%{public}s called, taskExecutor is null.", __func__);
+        return;
+    }
+    std::weak_ptr<PluginComponentCallBack> weak = weak_from_this();
+    taskExecutor->PostTask(
+        [weak, want, sourceName = pluginTemplate.GetSource(), abilityName = pluginTemplate.GetAbility(), data,
+            extraData]() {
+            OnPluginUvWorkData uvWorkData;
+            uvWorkData.want = want;
+            uvWorkData.sourceName = sourceName;
+            uvWorkData.abilityName = abilityName;
+            uvWorkData.data = data;
+            uvWorkData.extraData = extraData;
+            auto callBack = weak.lock();
+            if (callBack) {
+                auto jsCallback = std::static_pointer_cast<JSPluginCallback>(callBack);
+                jsCallback->OnPushEventInner(&uvWorkData);
+            }
+        },
+        TaskExecutor::TaskType::UI);
 }
 
 void JSPluginCallback::OnRequestEventInner(const OnPluginUvWorkData* workData)

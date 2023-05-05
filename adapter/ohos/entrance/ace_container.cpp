@@ -1337,7 +1337,7 @@ void AceContainer::InitializeSubContainer(int32_t parentContainerId)
 void AceContainer::InitWindowCallback()
 {
     LOGD("AceContainer InitWindowCallback");
-    if (!pipelineContext_) {
+    if (!pipelineContext_ || !uiWindow_) {
         return;
     }
     auto& windowManager = pipelineContext_->GetWindowManager();
@@ -1591,11 +1591,7 @@ void AceContainer::GetNamesOfSharedImage(std::vector<std::string>& picNameArray)
     }
     auto context = AceType::DynamicCast<NG::PipelineContext>(GetPipelineContext());
     CHECK_NULL_VOID(context);
-    RefPtr<SharedImageManager> sharedImageManager = context->GetSharedImageManager();
-    if (!sharedImageManager) {
-        sharedImageManager = AceType::MakeRefPtr<SharedImageManager>(context->GetTaskExecutor());
-        context->SetSharedImageManager(sharedImageManager);
-    }
+    auto sharedImageManager = context->GetOrCreateSharedImageManager();
     auto nameSize = picNameArray.size();
     for (uint32_t i = 0; i < nameSize; i++) {
         // get name of picture
@@ -1668,7 +1664,7 @@ void AceContainer::GetImageDataFromAshmem(
     }
     auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
     CHECK_NULL_VOID(context);
-    RefPtr<SharedImageManager> sharedImageManager = context->GetSharedImageManager();
+    RefPtr<SharedImageManager> sharedImageManager = context->GetOrCreateSharedImageManager();
     if (sharedImageManager) {
         // read image data from shared memory and save a copy to sharedImageManager
         sharedImageManager->AddSharedImage(picName, std::vector<uint8_t>(imageData, imageData + len));

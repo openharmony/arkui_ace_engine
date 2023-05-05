@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_FIELD_TEXT_FIELD_MODEL_H
 
 #include <functional>
+#include <mutex>
 #include <optional>
 #include <utility>
 #include <vector>
@@ -146,6 +147,7 @@ public:
 
 private:
     static std::unique_ptr<TextFieldModel> instance_;
+    static std::mutex mutex_;
 };
 
 } // namespace OHOS::Ace

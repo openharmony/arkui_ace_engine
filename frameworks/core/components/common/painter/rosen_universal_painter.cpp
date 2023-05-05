@@ -15,8 +15,8 @@
 
 #include "core/components/common/painter/rosen_universal_painter.h"
 
-#include "third_party/skia/include/core/SkPaint.h"
-#include "third_party/skia/include/core/SkRRect.h"
+#include "include/core/SkPaint.h"
+#include "include/core/SkRRect.h"
 
 namespace OHOS::Ace {
 

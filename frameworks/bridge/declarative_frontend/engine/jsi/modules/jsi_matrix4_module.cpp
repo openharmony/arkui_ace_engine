@@ -69,25 +69,6 @@ double ConvertToDouble(const shared_ptr<JsRuntime>& runtime, const shared_ptr<Js
 
 }
 
-shared_ptr<JsValue> Init(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
-    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
-{
-    if (argc != 1) {
-        LOGE("PagePush args count is invalid");
-        return runtime->NewNull();
-    }
-
-    int32_t length = argv[0]->GetArrayLength(runtime);
-    if (length != MATRIX_LENGTH) {
-        LOGE("matrix init array length %d not equal %d", length, MATRIX_LENGTH);
-        return runtime->NewNull();
-    }
-
-    auto matrix = ConvertToMatrix(runtime, argv[0]);
-    thisObj->SetProperty(runtime, MATRIX_4X4, ConvertToJSValue(runtime, matrix));
-    return thisObj;
-}
-
 shared_ptr<JsValue> Combine(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
@@ -251,6 +232,20 @@ shared_ptr<JsValue> TransformPoint(const shared_ptr<JsRuntime>& runtime, const s
 }
 
 shared_ptr<JsValue> Copy(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc);
+
+void AddCommonMatrixProperties(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& obj)
+{
+    obj->SetProperty(runtime, MATRIX_COPY, runtime->NewFunction(Copy));
+    obj->SetProperty(runtime, MATRIX_COMBINE, runtime->NewFunction(Combine));
+    obj->SetProperty(runtime, MATRIX_INVERT, runtime->NewFunction(Invert));
+    obj->SetProperty(runtime, MATRIX_TRANSLATE, runtime->NewFunction(Translate));
+    obj->SetProperty(runtime, MATRIX_SCALE, runtime->NewFunction(Scale));
+    obj->SetProperty(runtime, MATRIX_ROTATE, runtime->NewFunction(Rotate));
+    obj->SetProperty(runtime, MATRIX_TRANSFORM_POINT, runtime->NewFunction(TransformPoint));
+}
+
+shared_ptr<JsValue> Copy(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
     auto matrix = ConvertToMatrix(runtime, thisObj->GetProperty(runtime, MATRIX_4X4));
@@ -260,14 +255,23 @@ shared_ptr<JsValue> Copy(const shared_ptr<JsRuntime>& runtime, const shared_ptr<
     InitMatrix4Module(runtime, other);
     // update matrix4x4
     other->SetProperty(runtime, MATRIX_4X4, ConvertToJSValue(runtime, matrix));
-    other->SetProperty(runtime, MATRIX_COPY, runtime->NewFunction(Copy));
-    other->SetProperty(runtime, MATRIX_COMBINE, runtime->NewFunction(Combine));
-    other->SetProperty(runtime, MATRIX_INVERT, runtime->NewFunction(Invert));
-    other->SetProperty(runtime, MATRIX_TRANSLATE, runtime->NewFunction(Translate));
-    other->SetProperty(runtime, MATRIX_SCALE, runtime->NewFunction(Scale));
-    other->SetProperty(runtime, MATRIX_ROTATE, runtime->NewFunction(Rotate));
-    other->SetProperty(runtime, MATRIX_TRANSFORM_POINT, runtime->NewFunction(TransformPoint));
+    AddCommonMatrixProperties(runtime, other);
     return other;
+}
+
+shared_ptr<JsValue> Init(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    if (argc != 1) {
+        LOGE("PagePush args count is invalid");
+        return runtime->NewNull();
+    }
+
+    auto matrix = ConvertToMatrix(runtime, argv[0]);
+    shared_ptr<JsValue> matrixObj = runtime->NewObject();
+    matrixObj->SetProperty(runtime, MATRIX_4X4, ConvertToJSValue(runtime, matrix));
+    AddCommonMatrixProperties(runtime, matrixObj);
+    return matrixObj;
 }
 
 shared_ptr<JsValue> Identity(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
@@ -275,13 +279,7 @@ shared_ptr<JsValue> Identity(const shared_ptr<JsRuntime>& runtime, const shared_
 {
     shared_ptr<JsValue> matrixObj = runtime->NewObject();
     matrixObj->SetProperty(runtime, MATRIX_4X4, ConvertToJSValue(runtime, Matrix4::CreateIdentity()));
-    matrixObj->SetProperty(runtime, MATRIX_COPY, runtime->NewFunction(Copy));
-    matrixObj->SetProperty(runtime, MATRIX_COMBINE, runtime->NewFunction(Combine));
-    matrixObj->SetProperty(runtime, MATRIX_INVERT, runtime->NewFunction(Invert));
-    matrixObj->SetProperty(runtime, MATRIX_TRANSLATE, runtime->NewFunction(Translate));
-    matrixObj->SetProperty(runtime, MATRIX_SCALE, runtime->NewFunction(Scale));
-    matrixObj->SetProperty(runtime, MATRIX_ROTATE, runtime->NewFunction(Rotate));
-    matrixObj->SetProperty(runtime, MATRIX_TRANSFORM_POINT, runtime->NewFunction(TransformPoint));
+    AddCommonMatrixProperties(runtime, matrixObj);
     return matrixObj;
 }
 

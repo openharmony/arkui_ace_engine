@@ -894,4 +894,316 @@ HWTEST_F(TogglePatternTestNg, TogglePaintTest002, TestSize.Level1)
     switchModifier->UpdateAnimatableProperty();
     EXPECT_EQ(switchModifier->animateTouchHoverColor_->Get(), LinearColor(Color::BLUE));
 }
+
+/**
+ * @tc.name: TogglePaintTest004
+ * @tc.desc: Test SwitchPaintMethod GetContentModifier UpdateContentModifier.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TogglePatternTestNg, TogglePaintTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create switch and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
+    auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(switchFrameNode, nullptr);
+    auto switchModifier = AceType::MakeRefPtr<SwitchModifier>(IS_ON, SELECTED_COLOR, 0.0f);
+    SwitchPaintMethod switchPaintMethod = SwitchPaintMethod(switchModifier);
+    /**
+     * @tc.steps: step2. get paintWrapper
+     * @tc.expected: paintWrapper is not null
+     */
+    auto renderContext = switchFrameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto geometryNode = switchFrameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto paintProperty = switchFrameNode->GetPaintProperty<SwitchPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
+    ASSERT_NE(paintWrapper, nullptr);
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto switchTheme = AceType::MakeRefPtr<SwitchTheme>();
+    switchTheme->width_ = TOGGLE_WIDTH;
+    switchTheme->height_ = TOGGLE_HEIGH;
+    switchTheme->hotZoneHorizontalPadding_ = ZERO;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
+
+    EXPECT_EQ(switchModifier, switchPaintMethod.GetContentModifier(paintWrapper));
+    switchPaintMethod.UpdateContentModifier(paintWrapper);
+    EXPECT_EQ(switchModifier->activeColor_, switchTheme->GetActiveColor());
+}
+
+/**
+ * @tc.name: TogglePaintTest003
+ * @tc.desc: Test SwitchPaintMethod GetSwitchWidth.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TogglePatternTestNg, TogglePaintTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create switch and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
+    auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(switchFrameNode, nullptr);
+    auto switchModifier = AceType::MakeRefPtr<SwitchModifier>(IS_ON, SELECTED_COLOR, 0.0f);
+    SwitchPaintMethod switchPaintMethod = SwitchPaintMethod(switchModifier);
+    
+    auto switchTheme = MockPipelineBase::GetCurrent()->GetTheme<SwitchTheme>();
+    ASSERT_NE(switchTheme, nullptr);
+    switchTheme->height_ = TOGGLE_HEIGH;
+    switchTheme->hotZoneVerticalPadding_ = ZERO;
+
+    SizeF size(80.0f, 20.0f);
+    auto switchWidth = switchModifier->GetSwitchWidth(size);
+    EXPECT_EQ(switchWidth, 62.0f);
+}
+
+/**
+ * @tc.name: TogglePatternTest0017
+ * @tc.desc: Test toggle AddHotZoneRect RemoveLastHotZoneRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TogglePatternTestNg, TogglePatternTest0017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create switch and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
+    auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(switchFrameNode, nullptr);
+    auto switchPattern = switchFrameNode->GetPattern<SwitchPattern>();
+    ASSERT_NE(switchPattern, nullptr);
+    auto geometryNode = switchFrameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    OffsetF offsetF(0.0f, 0.0f);
+    SizeF sizeF(80.0f, 20.0f);
+    geometryNode->SetContentOffset(offsetF);
+    geometryNode->SetContentSize(sizeF);
+    auto layoutProperty = switchFrameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    RefPtr<LayoutWrapper> layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+        switchFrameNode, geometryNode, layoutProperty);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto switchLayoutAlgorithm = AceType::MakeRefPtr<SwitchLayoutAlgorithm>();
+    RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
+        AceType::MakeRefPtr<LayoutAlgorithmWrapper>(switchLayoutAlgorithm, false);
+    layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
+    bool result = switchPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
+    EXPECT_TRUE(result);
+    /**
+     * cover method AddHotZoneRect
+    */
+    switchPattern->AddHotZoneRect();
+    EXPECT_EQ(switchPattern->hotZoneOffset_.GetX(), 0.0f);
+    EXPECT_EQ(switchPattern->hotZoneSize_.Width(), 80.0f);
+    /**
+     * cover method RemoveLastHotZoneRect
+    */
+    switchPattern->RemoveLastHotZoneRect();
+    int count = switchFrameNode->GetOrCreateGestureEventHub()->responseRegion_.size();
+    for (size_t i = 0; i < count; i++)
+    {
+        switchPattern->RemoveLastHotZoneRect();
+    }
+    
+    EXPECT_EQ(switchFrameNode->GetOrCreateGestureEventHub()->isResponseRegion_, false);
+}
+
+/**
+ * @tc.name: TogglePatternTest0014
+ * @tc.desc: Test toggle clickCallback of InitClickEvent InitMouseEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TogglePatternTestNg, TogglePatternTest0014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create switch and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
+    auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(switchFrameNode, nullptr);
+    switchFrameNode->MarkModifyDone();
+
+    auto gesture = switchFrameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gesture, nullptr);
+    /**
+     * fire click event
+    */
+    gesture->ActClick();
+    /**
+     * fire mouse event
+    */
+    auto eventHub = switchFrameNode->GetEventHub<SwitchEventHub>();
+    auto inputHub = eventHub->GetOrCreateInputEventHub();
+    ASSERT_NE(inputHub, nullptr);
+    auto hoverEventActuator = inputHub->hoverEventActuator_;
+    ASSERT_NE(hoverEventActuator, nullptr);
+    auto mouseEvents = hoverEventActuator->inputEvents_;
+    ASSERT_NE(mouseEvents.size(), 0);
+    for (const auto& callback : mouseEvents) {
+        (*callback)(false);
+    }
+}
+
+/**
+ * @tc.name: TogglePatternTest0015
+ * @tc.desc: Test toggle clickCallback of InitOnKeyEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TogglePatternTestNg, TogglePatternTest0015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create switch and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
+    auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(switchFrameNode, nullptr);
+    switchFrameNode->MarkModifyDone();
+
+    auto eventHub = switchFrameNode->GetFocusHub();
+    ASSERT_NE(eventHub, nullptr);
+    /**
+     * test event.action != KeyAction::DOWN
+    */
+    KeyEvent keyEventOne(KeyCode::KEY_A, KeyAction::UP);
+    eventHub->onKeyEventInternal_(keyEventOne);
+    /**
+     * test event.action == KeyAction::DOWN and event.code == KeyCode::KEY_ENTER
+    */
+    KeyEvent keyEventTwo(KeyCode::KEY_A, KeyAction::DOWN);
+    eventHub->onKeyEventInternal_(keyEventTwo);
+    /**
+     * test event.action == KeyAction::DOWN and event.code != KeyCode::KEY_ENTER
+    */
+    KeyEvent keyEventThr(KeyCode::KEY_ENTER, KeyAction::DOWN);
+    eventHub->onKeyEventInternal_(keyEventThr);
+}
+
+/**
+ * @tc.name: TogglePatternTest0016
+ * @tc.desc: Test toggle GetInnerFocusPaintRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TogglePatternTestNg, TogglePatternTest0016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create switch and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
+    auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(switchFrameNode, nullptr);
+    switchFrameNode->MarkModifyDone();
+
+    auto eventHub = switchFrameNode->GetFocusHub();
+    ASSERT_NE(eventHub, nullptr);
+    RoundRect paintRect;
+    eventHub->getInnerFocusRectFunc_(paintRect);
+}
+
+/**
+ * @tc.name: ToggleModelTest001
+ * @tc.desc: Test toggle create.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TogglePatternTestNg, ToggleModelTest001, TestSize.Level1)
+{
+    const RefPtr<FrameNode> frameParent =
+    FrameNode::CreateFrameNode("parent", 0, AceType::MakeRefPtr<Pattern>(), true);
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
+    /**
+     * @tc.steps: step1. create switch and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
+    auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(switchFrameNode, nullptr);
+    EXPECT_EQ(switchFrameNode->GetId(), 100);
+    switchFrameNode->SetParent(frameParent);
+    /**
+     * Create again,cover all branches in function Create for switch
+    */
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
+    toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
+    toggleModelNG.Create(TOGGLE_TYPE[0], IS_ON);
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
+    toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
+    toggleModelNG.Create(TOGGLE_TYPE[1], IS_ON);
+}
+
+/**
+ * @tc.name: ToggleModelTest002
+ * @tc.desc: Test toggle create.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TogglePatternTestNg, ToggleModelTest002, TestSize.Level1)
+{
+    const RefPtr<FrameNode> frameParent =
+    FrameNode::CreateFrameNode("parent", 0, AceType::MakeRefPtr<Pattern>(), true);
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
+    /**
+     * @tc.steps: step1. create checkbox and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(TOGGLE_TYPE[0], IS_ON);
+    auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(switchFrameNode, nullptr);
+    EXPECT_EQ(switchFrameNode->GetId(), 100);
+    switchFrameNode->SetParent(frameParent);
+    /**
+     * Create again,cover all branches in function Create for checkbox
+    */
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
+    toggleModelNG.Create(TOGGLE_TYPE[0], IS_ON);
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
+    toggleModelNG.Create(TOGGLE_TYPE[1], IS_ON);
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
+    toggleModelNG.Create(TOGGLE_TYPE[0], IS_ON);
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
+    toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
+}
+
+/**
+ * @tc.name: ToggleModelTest003
+ * @tc.desc: Test toggle create.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TogglePatternTestNg, ToggleModelTest003, TestSize.Level1)
+{
+    const RefPtr<FrameNode> frameParent =
+    FrameNode::CreateFrameNode("parent", 0, AceType::MakeRefPtr<Pattern>(), true);
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
+    /**
+     * @tc.steps: step1. create ToggleButton and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(TOGGLE_TYPE[1], IS_ON);
+    auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(switchFrameNode, nullptr);
+    EXPECT_EQ(switchFrameNode->GetId(), 100);
+    switchFrameNode->SetParent(frameParent);
+    /**
+     * Create again,cover all branches in function Create for ToggleButton
+    */
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
+    toggleModelNG.Create(TOGGLE_TYPE[1], IS_ON);
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
+    toggleModelNG.Create(TOGGLE_TYPE[0], IS_ON);
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
+    toggleModelNG.Create(TOGGLE_TYPE[1], IS_ON);
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
+    toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
+}
 } // namespace OHOS::Ace::NG

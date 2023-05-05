@@ -20,9 +20,13 @@
 #include "core/pipeline/layers/layer.h"
 #include "core/pipeline/layers/offset_layer.h"
 #include "core/pipeline/layers/scene_builder.h"
+#ifdef NEW_SKIA
+#include "modules/svg/include/SkSVGDOM.h"
+#else
 #include "experimental/svg/model/SkSVGDOM.h"
-#include "third_party/skia/include/core/SkPaint.h"
-#include "third_party/skia/include/core/SkData.h"
+#endif
+#include "include/core/SkPaint.h"
+#include "include/core/SkData.h"
 
 namespace OHOS::Ace::Flutter {
 

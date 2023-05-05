@@ -15,7 +15,7 @@ import("//build/test.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("container_modal_test_ng") {
-  module_out_path = "$pattern_test_output_path/container_modal"
+  module_out_path = pattern_test_output_path
 
   sources = [
     "$ace_root/adapter/preview/osal/ressched_report.cpp",
@@ -95,6 +95,7 @@ ohos_unittest("container_modal_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/navigation/title_bar_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navigation/title_bar_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_property.cpp",

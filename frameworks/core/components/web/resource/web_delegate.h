@@ -390,6 +390,11 @@ public:
     void ShowWebView();
     void HideWebView();
     void Resize(const double& width, const double& height);
+    int32_t GetRosenWindowId()
+    {
+        return rosenWindowId_;
+    }
+    void SetKeepScreenOn(bool key);
     void UpdateUserAgent(const std::string& userAgent);
     void UpdateBackgroundColor(const int backgroundColor);
     void UpdateInitialScale(float scale);
@@ -465,6 +470,10 @@ public:
         std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params,
         std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback);
     void SetShouldFrameSubmissionBeforeDraw(bool should);
+    void SetBackgroundColor(int32_t backgroundColor)
+    {
+        backgroundColor_ = backgroundColor;
+    }
 #endif
     void OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error);
@@ -625,6 +634,7 @@ private:
     void NotifyPopupWindowResult(bool result);
 
     EventCallbackV2 GetAudioStateChangedCallback(bool useNewPipe, const RefPtr<NG::WebEventHub>& eventHub);
+
 #endif
 
     WeakPtr<WebComponent> webComponent_;
@@ -698,6 +708,8 @@ private:
     bool isPopup_ = false;
     int32_t parentNWebId_ = -1;
     bool needResizeAtFirst_ = false;
+    int32_t backgroundColor_ = 0xffffffff;
+    int32_t rosenWindowId_ = -1;
 #endif
 };
 

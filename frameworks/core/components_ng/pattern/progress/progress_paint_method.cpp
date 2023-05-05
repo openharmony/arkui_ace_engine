@@ -34,8 +34,13 @@ void ProgressPaintMethod::GetThemeDate()
     CHECK_NULL_VOID(pipeline);
     auto progressTheme = pipeline->GetTheme<ProgressTheme>();
     CHECK_NULL_VOID(progressTheme);
-    color_ = progressTheme->GetTrackSelectedColor();
-    bgColor_ = progressTheme->GetTrackBgColor();
+    if (progressType_ == ProgressType::CAPSULE) {
+        color_ = progressTheme->GetCapsuleSelectColor();
+        bgColor_ = progressTheme->GetCapsuleBgColor();
+    } else {
+        color_ = progressTheme->GetTrackSelectedColor();
+        bgColor_ = progressTheme->GetTrackBgColor();
+    }
     scaleWidth_ = progressTheme->GetScaleWidth().ConvertToPx();
     scaleCount_ = progressTheme->GetScaleNumber();
     borderColor_ = progressTheme->GetBorderColor();
@@ -48,11 +53,8 @@ void ProgressPaintMethod::CalculateStrokeWidth(const SizeF& contentSize)
     constexpr float HALF = 0.5;
     switch (progressType_) {
         case ProgressType::LINEAR:
-        case ProgressType::CAPSULE:
             strokeWidth_ = std::min(strokeWidth_, length);
-            strokeWidth_ = std::max(strokeWidth_, static_cast<float>(capsuleBorderWidth_.ConvertToPx()) / HALF);
             break;
-        case ProgressType::MOON:
         case ProgressType::RING:
         case ProgressType::SCALE:
             if (strokeWidth_ >= length * HALF) {
@@ -60,6 +62,8 @@ void ProgressPaintMethod::CalculateStrokeWidth(const SizeF& contentSize)
                 strokeWidth_ = length * HALF * HALF;
             }
             break;
+        case ProgressType::MOON:
+        case ProgressType::CAPSULE:
         default:
             break;
     }

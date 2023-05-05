@@ -92,6 +92,12 @@ abstract class SubscribaleAbstract {
     this.owningProperties_.forEach((subscribedId) => {
       var owningProperty: IPropertySubscriber = SubscriberManager.Find(subscribedId)
       if (owningProperty) {
+        if ('objectPropertyHasChangedPU' in owningProperty) {
+          // PU code path
+          (owningProperty as unknown as ObservedObjectEventsPUReceiver<any>).objectPropertyHasChangedPU(this, propName);
+        }
+
+        // FU code path
         if ('hasChanged' in owningProperty) {
           (owningProperty as ISinglePropertyChangeSubscriber<any>).hasChanged(newValue);
         }

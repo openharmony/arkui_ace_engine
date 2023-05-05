@@ -30,19 +30,23 @@ constexpr int32_t DEFAULT_FRICTION = 62;
 constexpr int32_t MAX_FRICTION = 100;
 } // namespace
 std::unique_ptr<RefreshModel> RefreshModel::instance_ = nullptr;
+std::mutex RefreshModel::mutex_;
 
 RefreshModel* RefreshModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::RefreshModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::RefreshModelNG());
-        } else {
-            instance_.reset(new Framework::RefreshModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::RefreshModelNG());
+            } else {
+                instance_.reset(new Framework::RefreshModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -118,7 +122,7 @@ void JSRefresh::Create(const JSCallbackInfo& info)
         ParseRefreshingObject(info, refreshingObj);
         RefreshModel::GetInstance()->SetRefreshing(refreshingObj->GetProperty("value")->ToBoolean());
     }
-    Dimension offset;
+    CalcDimension offset;
     if (ParseJsDimensionVp(jsOffset, offset)) {
         if (LessNotEqual(offset.Value(), 0.0) || offset.Unit() == DimensionUnit::PERCENT) {
             RefreshModel::GetInstance()->SetRefreshDistance(theme->GetRefreshDistance());

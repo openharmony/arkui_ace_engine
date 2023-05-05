@@ -24,14 +24,36 @@
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
-#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "core/components/option/option_component.h"
-#include "core/components/select/select_component.h"
-#include "core/components/select/select_theme.h"
-#include "core/components_ng/pattern/select/select_view.h"
+#include "bridge/declarative_frontend/jsview/models/select_model_impl.h"
+#include "core/components_ng/pattern/select/select_model.h"
+#include "core/components_ng/pattern/select/select_model_ng.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/pipeline_base.h"
+
+namespace OHOS::Ace {
+std::unique_ptr<SelectModel> SelectModel::instance_ = nullptr;
+std::mutex SelectModel::mutex_;
+
+SelectModel* SelectModel::GetInstance()
+{
+    if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
+#ifdef NG_BUILD
+            instance_.reset(new NG::SelectModelNG());
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::SelectModelNG());
+            } else {
+                instance_.reset(new Framework::SelectModelImpl());
+            }
+        }
+#endif
+    }
+    return instance_.get();
+}
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 void JSSelect::Create(const JSCallbackInfo& info)
@@ -39,15 +61,13 @@ void JSSelect::Create(const JSCallbackInfo& info)
     if (info.Length() < 0) {
         return;
     }
-
-    if (Container::IsCurrentUseNewPipeline()) {
-        if (info[0]->IsArray()) {
-            auto paramArray = JSRef<JSArray>::Cast(info[0]);
-            size_t size = paramArray->Length();
-            std::vector<NG::SelectParam> params(size);
-            for (size_t i = 0; i < size; i++) {
-                std::string value;
-                std::string icon;
+    if (info[0]->IsArray()) {
+        auto paramArray = JSRef<JSArray>::Cast(info[0]);
+        size_t size = paramArray->Length();
+        std::vector<SelectParam> params(size);
+        for (size_t i = 0; i < size; i++) {
+            std::string value;
+            std::string icon;
 
                 auto indexObject = JSRef<JSObject>::Cast(paramArray->GetValueAt(i));
                 auto selectValue = indexObject->GetProperty("value");
@@ -60,61 +80,10 @@ void JSSelect::Create(const JSCallbackInfo& info)
                     LOGI("selectIcon is null");
                 }
 
-                params[i] = { value, icon };
-            }
-            NG::SelectView::Create(params);
+            params[i] = { value, icon };
         }
-        return;
+        SelectModel::GetInstance()->Create(params);
     }
-
-    auto selectTheme = GetTheme<SelectTheme>();
-    auto selectComponent = AceType::MakeRefPtr<SelectComponent>();
-    selectComponent->SetTheme(selectTheme);
-
-    auto tipText = AceType::MakeRefPtr<TextComponent>("");
-    selectComponent->SetTipText(tipText);
-
-    if (info[0]->IsArray()) {
-        auto paramArray = JSRef<JSArray>::Cast(info[0]);
-        size_t size = paramArray->Length();
-        for (size_t i = 0; i < size; i++) {
-            std::string value;
-            std::string icon;
-
-            auto indexObject = JSRef<JSObject>::Cast(paramArray->GetValueAt(i));
-            auto selectValue = indexObject->GetProperty("value");
-            auto selectIcon = indexObject->GetProperty("icon");
-            if (!ParseJsString(selectValue, value)) {
-                LOGE("selectValue is null");
-                return;
-            }
-            if (!ParseJsMedia(selectIcon, icon)) {
-                LOGE("selectValue is null");
-            }
-
-            auto optionTheme = GetTheme<SelectTheme>();
-            if (!optionTheme) {
-                LOGE("JSSelect: Get option theme is null.");
-                continue;
-            }
-
-            auto optionComponent = AceType::MakeRefPtr<OHOS::Ace::OptionComponent>(optionTheme);
-            auto textComponent = AceType::MakeRefPtr<OHOS::Ace::TextComponent>(value);
-            if (!icon.empty()) {
-                optionComponent->SetIcon(AceType::MakeRefPtr<OHOS::Ace::ImageComponent>(icon));
-            }
-            optionComponent->SetTheme(optionTheme);
-            optionComponent->SetText(textComponent);
-            optionComponent->SetTextStyle(optionTheme->GetTitleStyle());
-            optionComponent->SetSelectedTextStyle(optionTheme->GetTitleStyle());
-            optionComponent->SetSelectedBackgroundColor(optionTheme->GetSelectedColor());
-            optionComponent->SetValue(value);
-            selectComponent->AppendSelectOption(optionComponent);
-        }
-    }
-
-    ViewStackProcessor::GetInstance()->ClaimElementId(selectComponent);
-    ViewStackProcessor::GetInstance()->Push(selectComponent);
 }
 
 void JSSelect::JSBind(BindingTarget globalObj)
@@ -136,6 +105,7 @@ void JSSelect::JSBind(BindingTarget globalObj)
     JSClass<JSSelect>::StaticMethod("onSelect", &JSSelect::OnSelected, opt);
     JSClass<JSSelect>::StaticMethod("space", &JSSelect::SetSpace, opt);
     JSClass<JSSelect>::StaticMethod("arrowPosition", &JSSelect::SetArrowPosition, opt);
+    JSClass<JSSelect>::StaticMethod("menuAlign", &JSSelect::SetMenuAlign, opt);
 
     // API7 onSelected deprecated
     JSClass<JSSelect>::StaticMethod("onSelected", &JSSelect::OnSelected, opt);
@@ -160,65 +130,15 @@ void JSSelect::JSBind(BindingTarget globalObj)
 
 void JSSelect::Selected(int value)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        if (value <= 0) {
-            value = 0;
-        }
-        NG::SelectView::SetSelected(value);
-        return;
-    }
-
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto selectComponent = AceType::DynamicCast<SelectComponent>(component);
-    if (!selectComponent) {
-        LOGE("search component error");
-        return;
-    }
-    auto popup = selectComponent->GetPopup();
-    if (!popup) {
-        LOGE("popup is null");
-        return;
-    }
-    auto option = popup->GetSelectOptions();
-    if (value < 0 || value >= static_cast<int32_t>(option.size())) {
-        LOGE("Input selected index error, use the default value");
+    if (value <= 0) {
         value = 0;
     }
-
-    auto tipText = selectComponent->GetTipText();
-    auto optionComponent = selectComponent->GetSelectOption(value);
-    if (!optionComponent) {
-        LOGE("optionComponent is null");
-        return;
-    }
-    optionComponent->SetSelected(true);
-
-    auto optionText = optionComponent->GetText();
-    if (!optionText) {
-        return;
-    }
-    if (!selectComponent->HasSetTipText()) {
-        tipText->SetData(optionText->GetData());
-    }
+    SelectModel::GetInstance()->SetSelected(value);
 }
 
 void JSSelect::Value(const std::string& value)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::SelectView::SetValue(value);
-        return;
-    }
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto selectComponent = AceType::DynamicCast<SelectComponent>(component);
-    if (!selectComponent) {
-        LOGE("search component error");
-        return;
-    }
-    auto tipText = selectComponent->GetTipText();
-    if (!value.empty()) {
-        selectComponent->SetTipText(true);
-    }
-    tipText->SetData(value);
+    SelectModel::GetInstance()->SetValue(value);
 }
 
 void JSSelect::Font(const JSCallbackInfo& info)
@@ -228,56 +148,13 @@ void JSSelect::Font(const JSCallbackInfo& info)
     }
 
     auto param = JSRef<JSObject>::Cast(info[0]);
-
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto size = param->GetProperty("size");
-        if (!size->IsNull()) {
-            Dimension fontSize;
-            if (ParseJsDimensionFp(size, fontSize)) {
-                NG::SelectView::SetFontSize(fontSize);
-            }
-        }
-        std::string weight;
-        auto fontWeight = param->GetProperty("weight");
-        if (!fontWeight->IsNull()) {
-            if (fontWeight->IsNumber()) {
-                weight = std::to_string(fontWeight->ToNumber<int32_t>());
-            } else {
-                ParseJsString(fontWeight, weight);
-            }
-            NG::SelectView::SetFontWeight(ConvertStrToFontWeight(weight));
-        }
-
-        auto family = param->GetProperty("family");
-        if (!family->IsNull() && family->IsString()) {
-            auto familyVal = family->ToString();
-            NG::SelectView::SetFontFamily(ConvertStrToFontFamilies(familyVal));
-        }
-
-        auto style = param->GetProperty("style");
-        if (!style->IsNull() && style->IsNumber()) {
-            auto styleVal = static_cast<FontStyle>(style->ToNumber<int32_t>());
-            NG::SelectView::SetItalicFontStyle(styleVal);
-        }
-        return;
-    }
-
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto selectComponent = AceType::DynamicCast<SelectComponent>(component);
-    if (!selectComponent) {
-        LOGE("search component error");
-        return;
-    }
-
     auto size = param->GetProperty("size");
-    TextStyle textStyle = selectComponent->GetSelectStyle();
     if (!size->IsNull()) {
-        Dimension fontSize;
+        CalcDimension fontSize;
         if (ParseJsDimensionFp(size, fontSize)) {
-            textStyle.SetFontSize(fontSize);
+            SelectModel::GetInstance()->SetFontSize(fontSize);
         }
     }
-
     std::string weight;
     auto fontWeight = param->GetProperty("weight");
     if (!fontWeight->IsNull()) {
@@ -286,21 +163,20 @@ void JSSelect::Font(const JSCallbackInfo& info)
         } else {
             ParseJsString(fontWeight, weight);
         }
-        textStyle.SetFontWeight(ConvertStrToFontWeight(weight));
+        SelectModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(weight));
     }
 
     auto family = param->GetProperty("family");
     if (!family->IsNull() && family->IsString()) {
         auto familyVal = family->ToString();
-        textStyle.SetFontFamilies(ConvertStrToFontFamilies(familyVal));
+        SelectModel::GetInstance()->SetFontFamily(ConvertStrToFontFamilies(familyVal));
     }
 
     auto style = param->GetProperty("style");
     if (!style->IsNull() && style->IsNumber()) {
-        FontStyle styleVal = static_cast<FontStyle>(style->ToNumber<int32_t>());
-        textStyle.SetFontStyle(styleVal);
+        auto styleVal = static_cast<FontStyle>(style->ToNumber<int32_t>());
+        SelectModel::GetInstance()->SetItalicFontStyle(styleVal);
     }
-    selectComponent->SetSelectStyle(std::move(textStyle));
 }
 
 void JSSelect::FontColor(const JSCallbackInfo& info)
@@ -323,20 +199,7 @@ void JSSelect::FontColor(const JSCallbackInfo& info)
         }
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::SelectView::SetFontColor(textColor);
-        return;
-    }
-
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto selectComponent = AceType::DynamicCast<SelectComponent>(component);
-    if (!selectComponent) {
-        LOGE("search component error");
-        return;
-    }
-    auto textStyle = selectComponent->GetSelectStyle();
-    textStyle.SetTextColor(textColor);
-    selectComponent->SetSelectStyle(std::move(textStyle));
+    SelectModel::GetInstance()->SetFontColor(textColor);
 }
 
 void JSSelect::SelectedOptionBgColor(const JSCallbackInfo& info)
@@ -357,29 +220,7 @@ void JSSelect::SelectedOptionBgColor(const JSCallbackInfo& info)
             return;
         }
     }
-
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::SelectView::SetSelectedOptionBgColor(bgColor);
-        return;
-    }
-
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto selectComponent = AceType::DynamicCast<SelectComponent>(component);
-    if (!selectComponent) {
-        LOGE("search component error");
-        return;
-    }
-    auto popup = selectComponent->GetPopup();
-    if (!popup) {
-        LOGE("popup is null");
-        return;
-    }
-    auto option = popup->GetSelectOptions();
-    for (auto& optionItem : option) {
-        if (optionItem) {
-            optionItem->SetSelectedBackgroundColor(bgColor);
-        }
-    }
+    SelectModel::GetInstance()->SetSelectedOptionBgColor(bgColor);
 }
 
 void JSSelect::SelectedOptionFont(const JSCallbackInfo& info)
@@ -389,90 +230,39 @@ void JSSelect::SelectedOptionFont(const JSCallbackInfo& info)
     }
     auto param = JSRef<JSObject>::Cast(info[0]);
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto size = param->GetProperty("size");
-        if (!size->IsNull()) {
-            Dimension fontSize;
-            if (ParseJsDimensionFp(size, fontSize)) {
-                NG::SelectView::SetSelectedOptionFontSize(fontSize);
-            }
-        }
-        std::string weight;
-        auto fontWeight = param->GetProperty("weight");
-        if (!fontWeight->IsNull()) {
-            if (fontWeight->IsNumber()) {
-                weight = std::to_string(fontWeight->ToNumber<int32_t>());
-            } else {
-                ParseJsString(fontWeight, weight);
-            }
-            NG::SelectView::SetSelectedOptionFontWeight(ConvertStrToFontWeight(weight));
-        }
-
-        auto family = param->GetProperty("family");
-        if (!family->IsNull() && family->IsString()) {
-            auto familyVal = family->ToString();
-            NG::SelectView::SetSelectedOptionFontFamily(ConvertStrToFontFamilies(familyVal));
-        }
-
-        auto style = param->GetProperty("style");
-        if (!style->IsNull() && style->IsNumber()) {
-            auto styleVal = static_cast<FontStyle>(style->ToNumber<int32_t>());
-            NG::SelectView::SetSelectedOptionItalicFontStyle(styleVal);
-        }
-        return;
-    }
-
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto selectComponent = AceType::DynamicCast<SelectComponent>(component);
-    if (!selectComponent) {
-        LOGE("search component error");
-        return;
-    }
-    auto popup = selectComponent->GetPopup();
-    if (!popup) {
-        LOGE("popup is null");
-        return;
-    }
-    auto option = popup->GetSelectOptions();
     if (info.Length() < 1) {
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    for (auto& optionItem : option) {
-        auto size = param->GetProperty("size");
-        TextStyle textStyle = optionItem->GetSelectedTextStyle();
 
-        if (!size->IsNull()) {
-            Dimension fontSize;
-            if (ParseJsDimensionFp(size, fontSize)) {
-                textStyle.SetFontSize(fontSize);
-            }
+    auto size = param->GetProperty("size");
+    if (!size->IsNull()) {
+        CalcDimension fontSize;
+        if (ParseJsDimensionFp(size, fontSize)) {
+            SelectModel::GetInstance()->SetSelectedOptionFontSize(fontSize);
         }
-
-        std::string weight;
-        auto fontWeight = param->GetProperty("weight");
-        if (!fontWeight->IsNull()) {
-            if (fontWeight->IsNumber()) {
-                weight = std::to_string(fontWeight->ToNumber<int32_t>());
-            } else {
-                ParseJsString(fontWeight, weight);
-            }
-            textStyle.SetFontWeight(ConvertStrToFontWeight(weight));
+    }
+    std::string weight;
+    auto fontWeight = param->GetProperty("weight");
+    if (!fontWeight->IsNull()) {
+        if (fontWeight->IsNumber()) {
+            weight = std::to_string(fontWeight->ToNumber<int32_t>());
+        } else {
+            ParseJsString(fontWeight, weight);
         }
+        SelectModel::GetInstance()->SetSelectedOptionFontWeight(ConvertStrToFontWeight(weight));
+    }
 
-        auto family = param->GetProperty("family");
-        if (!family->IsNull() && family->IsString()) {
-            auto familyVal = family->ToString();
-            textStyle.SetFontFamilies(ConvertStrToFontFamilies(familyVal));
-        }
+    auto family = param->GetProperty("family");
+    if (!family->IsNull() && family->IsString()) {
+        auto familyVal = family->ToString();
+        SelectModel::GetInstance()->SetSelectedOptionFontFamily(ConvertStrToFontFamilies(familyVal));
+    }
 
-        auto style = param->GetProperty("style");
-        if (!style->IsNull() && style->IsNumber()) {
-            FontStyle styleVal = static_cast<FontStyle>(style->ToNumber<int32_t>());
-            textStyle.SetFontStyle(styleVal);
-        }
-
-        optionItem->SetSelectedTextStyle(std::move(textStyle));
+    auto style = param->GetProperty("style");
+    if (!style->IsNull() && style->IsNumber()) {
+        auto styleVal = static_cast<FontStyle>(style->ToNumber<int32_t>());
+        SelectModel::GetInstance()->SetSelectedOptionItalicFontStyle(styleVal);
     }
 }
 
@@ -494,31 +284,7 @@ void JSSelect::SelectedOptionFontColor(const JSCallbackInfo& info)
             return;
         }
     }
-
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::SelectView::SetSelectedOptionFontColor(textColor);
-        return;
-    }
-
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto selectComponent = AceType::DynamicCast<SelectComponent>(component);
-    if (!selectComponent) {
-        LOGE("search component error");
-        return;
-    }
-    auto popup = selectComponent->GetPopup();
-    if (!popup) {
-        LOGE("popup is null");
-        return;
-    }
-    auto option = popup->GetSelectOptions();
-    for (auto& optionItem : option) {
-        if (optionItem) {
-            TextStyle textStyle = optionItem->GetSelectedTextStyle();
-            textStyle.SetTextColor(textColor);
-            optionItem->SetSelectedTextStyle(textStyle);
-        }
-    }
+    SelectModel::GetInstance()->SetSelectedOptionFontColor(textColor);
 }
 
 void JSSelect::OptionBgColor(const JSCallbackInfo& info)
@@ -532,28 +298,7 @@ void JSSelect::OptionBgColor(const JSCallbackInfo& info)
         return;
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::SelectView::SetOptionBgColor(bgColor);
-        return;
-    }
-
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto selectComponent = AceType::DynamicCast<SelectComponent>(component);
-    if (!selectComponent) {
-        LOGE("search component error");
-        return;
-    }
-    auto popup = selectComponent->GetPopup();
-    if (!popup) {
-        LOGE("popup is null");
-        return;
-    }
-    auto option = popup->GetSelectOptions();
-    for (auto& optionItem : option) {
-        if (optionItem) {
-            optionItem->SetBackgroundColor(bgColor);
-        }
-    }
+    SelectModel::GetInstance()->SetOptionBgColor(bgColor);
 }
 
 void JSSelect::OptionFont(const JSCallbackInfo& info)
@@ -563,89 +308,34 @@ void JSSelect::OptionFont(const JSCallbackInfo& info)
     }
     auto param = JSRef<JSObject>::Cast(info[0]);
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto size = param->GetProperty("size");
-        if (!size->IsNull()) {
-            Dimension fontSize;
-            if (ParseJsDimensionFp(size, fontSize)) {
-                NG::SelectView::SetOptionFontSize(fontSize);
-            }
+    auto size = param->GetProperty("size");
+    if (!size->IsNull()) {
+        CalcDimension fontSize;
+        if (ParseJsDimensionFp(size, fontSize)) {
+            SelectModel::GetInstance()->SetOptionFontSize(fontSize);
         }
-        std::string weight;
-        auto fontWeight = param->GetProperty("weight");
-        if (!fontWeight->IsNull()) {
-            if (fontWeight->IsNumber()) {
-                weight = std::to_string(fontWeight->ToNumber<int32_t>());
-            } else {
-                ParseJsString(fontWeight, weight);
-            }
-            NG::SelectView::SetOptionFontWeight(ConvertStrToFontWeight(weight));
+    }
+    std::string weight;
+    auto fontWeight = param->GetProperty("weight");
+    if (!fontWeight->IsNull()) {
+        if (fontWeight->IsNumber()) {
+            weight = std::to_string(fontWeight->ToNumber<int32_t>());
+        } else {
+            ParseJsString(fontWeight, weight);
         }
-
-        auto family = param->GetProperty("family");
-        if (!family->IsNull() && family->IsString()) {
-            auto familyVal = family->ToString();
-            NG::SelectView::SetOptionFontFamily(ConvertStrToFontFamilies(familyVal));
-        }
-
-        auto style = param->GetProperty("style");
-        if (!style->IsNull() && style->IsNumber()) {
-            auto styleVal = static_cast<FontStyle>(style->ToNumber<int32_t>());
-            NG::SelectView::SetOptionItalicFontStyle(styleVal);
-        }
-        return;
+        SelectModel::GetInstance()->SetOptionFontWeight(ConvertStrToFontWeight(weight));
     }
 
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto selectComponent = AceType::DynamicCast<SelectComponent>(component);
-    if (!selectComponent) {
-        LOGE("search component error");
-        return;
+    auto family = param->GetProperty("family");
+    if (!family->IsNull() && family->IsString()) {
+        auto familyVal = family->ToString();
+        SelectModel::GetInstance()->SetOptionFontFamily(ConvertStrToFontFamilies(familyVal));
     }
-    auto popup = selectComponent->GetPopup();
-    if (!popup) {
-        LOGE("popup is null");
-        return;
-    }
-    auto option = popup->GetSelectOptions();
-    if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
-    for (auto& optionItem : option) {
-        TextStyle textStyle = optionItem->GetTextStyle();
-        auto size = param->GetProperty("size");
-        if (!size->IsNull()) {
-            Dimension fontSize;
-            if (ParseJsDimensionFp(size, fontSize)) {
-                textStyle.SetFontSize(fontSize);
-            }
-        }
 
-        std::string weight;
-        auto fontWeight = param->GetProperty("weight");
-        if (!fontWeight->IsNull()) {
-            if (fontWeight->IsNumber()) {
-                weight = std::to_string(fontWeight->ToNumber<int32_t>());
-            } else {
-                ParseJsString(fontWeight, weight);
-            }
-            textStyle.SetFontWeight(ConvertStrToFontWeight(weight));
-        }
-
-        auto family = param->GetProperty("family");
-        if (!family->IsNull() && family->IsString()) {
-            auto familyVal = family->ToString();
-            textStyle.SetFontFamilies(ConvertStrToFontFamilies(familyVal));
-        }
-
-        auto style = param->GetProperty("style");
-        if (!style->IsNull() && style->IsNumber()) {
-            FontStyle styleVal = static_cast<FontStyle>(style->ToNumber<int32_t>());
-            textStyle.SetFontStyle(styleVal);
-        }
-
-        optionItem->SetTextStyle(std::move(textStyle));
+    auto style = param->GetProperty("style");
+    if (!style->IsNull() && style->IsNumber()) {
+        auto styleVal = static_cast<FontStyle>(style->ToNumber<int32_t>());
+        SelectModel::GetInstance()->SetOptionItalicFontStyle(styleVal);
     }
 }
 
@@ -660,125 +350,124 @@ void JSSelect::OptionFontColor(const JSCallbackInfo& info)
         return;
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::SelectView::SetOptionFontColor(textColor);
-        return;
-    }
-
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto selectComponent = AceType::DynamicCast<SelectComponent>(component);
-    if (!selectComponent) {
-        LOGE("search component error");
-        return;
-    }
-    auto popup = selectComponent->GetPopup();
-    if (!popup) {
-        LOGE("popup is null");
-        return;
-    }
-    auto option = popup->GetSelectOptions();
-    for (auto& optionItem : option) {
-        if (optionItem) {
-            TextStyle textStyle = optionItem->GetTextStyle();
-            textStyle.SetTextColor(textColor);
-            optionItem->SetTextStyle(textStyle);
-        }
-    }
+    SelectModel::GetInstance()->SetOptionFontColor(textColor);
 }
 
 void JSSelect::OnSelected(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-        auto onSelect = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
-                            int32_t index, const std::string& value) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("Select.onSelect");
-            JSRef<JSVal> params[2];
-            params[0] = JSRef<JSVal>::Make(ToJSValue(index));
-            params[1] = JSRef<JSVal>::Make(ToJSValue(value));
-            func->ExecuteJS(2, params);
-        };
-        NG::SelectView::SetOnSelect(onSelect);
-    } else if (!JSViewBindEvent(&SelectComponent::SetOnSelected, info)) {
-        LOGE("Failed to bind event");
-    }
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto onSelect = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
+                        int32_t index, const std::string& value) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Select.onSelect");
+        JSRef<JSVal> params[2];
+        params[0] = JSRef<JSVal>::Make(ToJSValue(index));
+        params[1] = JSRef<JSVal>::Make(ToJSValue(value));
+        func->ExecuteJS(2, params);
+    };
+    SelectModel::GetInstance()->SetOnSelect(std::move(onSelect));
     info.ReturnSelf();
 }
 
 void JSSelect::JsWidth(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        JSViewAbstract::JsWidth(info);
-        return;
-    }
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
-
-    Width(info[0]);
-}
-
-void JSSelect::Width(const JSRef<JSVal>& jsValue)
-{
-    Dimension value;
-    if (!ParseJsDimensionVp(jsValue, value)) {
+    CalcDimension value;
+    if (!ParseJsDimensionVp(info[0], value)) {
         return;
     }
-    auto stack = ViewStackProcessor::GetInstance();
-    auto selectComponent = AceType::DynamicCast<SelectComponent>(stack->GetMainComponent());
-    if (selectComponent) {
-        selectComponent->SetWidth(value);
-    }
+
+    SelectModel::GetInstance()->SetWidth(value);
 }
 
 void JSSelect::JsHeight(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        JSViewAbstract::JsHeight(info);
-        return;
-    }
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
-    Height(info[0]);
-}
-
-void JSSelect::Height(const JSRef<JSVal>& jsValue)
-{
-    Dimension value;
-    if (!ParseJsDimensionVp(jsValue, value)) {
+    CalcDimension value;
+    if (!ParseJsDimensionVp(info[0], value)) {
         return;
     }
-    auto stack = ViewStackProcessor::GetInstance();
-    auto selectComponent = AceType::DynamicCast<SelectComponent>(stack->GetMainComponent());
-    if (selectComponent) {
-        selectComponent->SetHeight(value);
+
+    SelectModel::GetInstance()->SetHeight(value);
+}
+
+bool CheckJSCallbackInfo(
+    const std::string& callerName, const JSCallbackInfo& info, std::vector<JSCallbackInfoType>& infoTypes)
+{
+    if (info.Length() < 1) {
+        LOGE("%{public}s: The arg is supposed to have at least one argument", callerName.c_str());
+        return false;
     }
+    bool typeVerified = false;
+    std::string unrecognizedType;
+    for (const auto& infoType : infoTypes) {
+        switch (infoType) {
+            case JSCallbackInfoType::STRING:
+                if (info[0]->IsString()) {
+                    typeVerified = true;
+                } else {
+                    unrecognizedType += "string|";
+                }
+                break;
+            case JSCallbackInfoType::NUMBER:
+                if (info[0]->IsNumber()) {
+                    typeVerified = true;
+                } else {
+                    unrecognizedType += "number|";
+                }
+                break;
+            case JSCallbackInfoType::OBJECT:
+                if (info[0]->IsObject()) {
+                    typeVerified = true;
+                } else {
+                    unrecognizedType += "object|";
+                }
+                break;
+            case JSCallbackInfoType::FUNCTION:
+                if (info[0]->IsFunction()) {
+                    typeVerified = true;
+                } else {
+                    unrecognizedType += "Function|";
+                }
+                break;
+            default:
+                break;
+        }
+    }
+    if (!typeVerified) {
+        LOGE("%{public}s: info[0] is not a [%{public}s]", callerName.c_str(),
+            unrecognizedType.substr(0, unrecognizedType.size() - 1).c_str());
+    }
+    return typeVerified || infoTypes.size() == 0;
 }
 
 void JSSelect::JsSize(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        JSViewAbstract::JsSize(info);
-        return;
-    }
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
-        return;
-    }
-
-    if (!info[0]->IsObject()) {
-        LOGE("arg is not Object or String.");
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
+    if (!CheckJSCallbackInfo("JsSize", info, checkList)) {
         return;
     }
 
     JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
-    Width(sizeObj->GetProperty("width"));
-    Height(sizeObj->GetProperty("height"));
+
+    CalcDimension width;
+    if (!ParseJsDimensionVp(sizeObj->GetProperty("width"), width)) {
+        return;
+    }
+
+    CalcDimension height;
+    if (!ParseJsDimensionVp(sizeObj->GetProperty("height"), height)) {
+        return;
+    }
+
+    SelectModel::GetInstance()->SetSize(width, height);
 }
 
 void JSSelect::JsPadding(const JSCallbackInfo& info)
@@ -788,143 +477,89 @@ void JSSelect::JsPadding(const JSCallbackInfo& info)
         return;
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        JSViewAbstract::JsPadding(info);
-        return;
+    if (info[0]->IsObject()) {
+        std::optional<CalcDimension> left;
+        std::optional<CalcDimension> right;
+        std::optional<CalcDimension> top;
+        std::optional<CalcDimension> bottom;
+        JSRef<JSObject> paddingObj = JSRef<JSObject>::Cast(info[0]);
+
+        CalcDimension leftDimen;
+        if (ParseJsDimensionVp(paddingObj->GetProperty("left"), leftDimen)) {
+            left = leftDimen;
+        }
+        CalcDimension rightDimen;
+        if (ParseJsDimensionVp(paddingObj->GetProperty("right"), rightDimen)) {
+            right = rightDimen;
+        }
+        CalcDimension topDimen;
+        if (ParseJsDimensionVp(paddingObj->GetProperty("top"), topDimen)) {
+            top = topDimen;
+        }
+        CalcDimension bottomDimen;
+        if (ParseJsDimensionVp(paddingObj->GetProperty("bottom"), bottomDimen)) {
+            bottom = bottomDimen;
+        }
+        SelectModel::GetInstance()->SetPaddings(top, bottom, left, right);
     }
 
-    if (info[0]->IsObject()) {
-        auto stack = ViewStackProcessor::GetInstance();
-        auto selectComponent = AceType::DynamicCast<SelectComponent>(stack->GetMainComponent());
-        if (!selectComponent) {
-            LOGE("search component error");
-            return;
-        }
-        auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
-        if (!argsPtrItem || argsPtrItem->IsNull()) {
-            LOGE("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
-            return;
-        }
-        if (argsPtrItem->Contains("top")) {
-            Dimension topDimen = Dimension(0.0, DimensionUnit::VP);
-            if (ParseJsonDimensionVp(argsPtrItem->GetValue("top"), topDimen)) {
-                selectComponent->SetTopPadding(topDimen);
-            }
-        }
-        if (argsPtrItem->Contains("left")) {
-            Dimension leftDimen = Dimension(0.0, DimensionUnit::VP);
-            if (ParseJsonDimensionVp(argsPtrItem->GetValue("left"), leftDimen)) {
-                selectComponent->SetLeftPadding(leftDimen);
-            }
-        }
-        if (argsPtrItem->Contains("right")) {
-            Dimension rightDimen = Dimension(0.0, DimensionUnit::VP);
-            if (ParseJsonDimensionVp(argsPtrItem->GetValue("right"), rightDimen)) {
-                selectComponent->SetRightPadding(rightDimen);
-            }
-        }
-        if (argsPtrItem->Contains("bottom")) {
-            Dimension bottomDimen = Dimension(0.0, DimensionUnit::VP);
-            if (ParseJsonDimensionVp(argsPtrItem->GetValue("bottom"), bottomDimen)) {
-                selectComponent->SetBottomPadding(bottomDimen);
-            }
-        }
+    CalcDimension value;
+    if (!ParseJsDimensionVp(info[0], value)) {
+        value.Reset();
     }
-    Dimension length;
-    if (ParseJsDimensionVp(info[0], length)) {
-        auto stack = ViewStackProcessor::GetInstance();
-        auto selectComponent = AceType::DynamicCast<SelectComponent>(stack->GetMainComponent());
-        if (selectComponent) {
-            selectComponent->SetLeftPadding(length);
-            selectComponent->SetTopPadding(length);
-            selectComponent->SetRightPadding(length);
-            selectComponent->SetBottomPadding(length);
-        }
-    }
+    SelectModel::GetInstance()->SetPadding(value);
 }
 
 void JSSelect::SetPaddingLeft(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        JSViewAbstract::SetPaddingLeft(info);
-        return;
-    }
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         return;
     }
-    auto stack = ViewStackProcessor::GetInstance();
-    auto selectComponent = AceType::DynamicCast<SelectComponent>(stack->GetMainComponent());
-    if (selectComponent) {
-        selectComponent->SetLeftPadding(value);
-    }
+    SelectModel::GetInstance()->SetPaddingLeft(value);
 }
 
 void JSSelect::SetPaddingTop(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        JSViewAbstract::SetPaddingTop(info);
-        return;
-    }
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         return;
     }
-    auto stack = ViewStackProcessor::GetInstance();
-    auto selectComponent = AceType::DynamicCast<SelectComponent>(stack->GetMainComponent());
-    if (selectComponent) {
-        selectComponent->SetTopPadding(value);
-    }
+    SelectModel::GetInstance()->SetPaddingTop(value);
 }
 
 void JSSelect::SetPaddingRight(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        JSViewAbstract::SetPaddingRight(info);
-        return;
-    }
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         return;
     }
-    auto stack = ViewStackProcessor::GetInstance();
-    auto selectComponent = AceType::DynamicCast<SelectComponent>(stack->GetMainComponent());
-    if (selectComponent) {
-        selectComponent->SetRightPadding(value);
-    }
+    SelectModel::GetInstance()->SetPaddingRight(value);
 }
 
 void JSSelect::SetPaddingBottom(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        JSViewAbstract::SetPaddingBottom(info);
-        return;
-    }
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         return;
     }
-    auto stack = ViewStackProcessor::GetInstance();
-    auto selectComponent = AceType::DynamicCast<SelectComponent>(stack->GetMainComponent());
-    if (selectComponent) {
-        selectComponent->SetBottomPadding(value);
-    }
+    SelectModel::GetInstance()->SetPaddingBottom(value);
 }
 
 void JSSelect::SetSpace(const JSCallbackInfo& info)
@@ -936,7 +571,7 @@ void JSSelect::SetSpace(const JSCallbackInfo& info)
 
     auto selectTheme = GetTheme<SelectTheme>();
 
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         LOGI("JSSelect set space value is mull");
         value = selectTheme->GetContentSpinnerPadding();
@@ -946,32 +581,55 @@ void JSSelect::SetSpace(const JSCallbackInfo& info)
         value = selectTheme->GetContentSpinnerPadding();
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::SelectView::SetSpace(value);
-    }
+    SelectModel::GetInstance()->SetSpace(value);
 }
 
 void JSSelect::SetArrowPosition(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGI("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
 
     int32_t direction = 0;
     if (!ParseJsInt32(info[0], direction)) {
-        LOGI("direction is wrong");
         direction = 0;
     }
 
-    if (static_cast<NG::ArrowPosition>(direction) != NG::ArrowPosition::START &&
-        static_cast<NG::ArrowPosition>(direction) != NG::ArrowPosition::END) {
-            LOGI("direction is unused FlexDirection");
-            direction = 0;
-        }
-
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::SelectView::SetArrowPosition(static_cast<NG::ArrowPosition>(direction));
+    if (static_cast<ArrowPosition>(direction) != ArrowPosition::START &&
+        static_cast<ArrowPosition>(direction) != ArrowPosition::END) {
+        direction = 0;
     }
+
+    SelectModel::GetInstance()->SetArrowPosition(static_cast<ArrowPosition>(direction));
+}
+
+void JSSelect::SetMenuAlign(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+
+    if (!info[0]->IsNumber()) {
+        return;
+    }
+
+    MenuAlign menuAlignObj;
+    menuAlignObj.alignType = static_cast<MenuAlignType>(info[0]->ToNumber<int32_t>());
+
+    if (info.Length() > 1) {
+        if (!info[1]->IsObject()) {
+            return;
+        }
+        auto offsetObj = JSRef<JSObject>::Cast(info[1]);
+        CalcDimension dx;
+        auto dxValue = offsetObj->GetProperty("dx");
+        ParseJsDimensionVp(dxValue, dx);
+        CalcDimension dy;
+        auto dyValue = offsetObj->GetProperty("dy");
+        ParseJsDimensionVp(dyValue, dy);
+        menuAlignObj.offset = DimensionOffset(dx, dy);
+    }
+
+    SelectModel::GetInstance()->SetMenuAlign(menuAlignObj);
 }
 } // namespace OHOS::Ace::Framework

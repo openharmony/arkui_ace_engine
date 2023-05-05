@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
+#ifndef NEW_SKIA
 #include "flutter_render_display.h"
+#endif
 #include "rosen_render_display.h"
 
 namespace OHOS::Ace {
@@ -26,7 +28,11 @@ RefPtr<RenderNode> RenderDisplay::Create()
         return nullptr;
 #endif
     } else {
+#ifndef NEW_SKIA
         return AceType::MakeRefPtr<FlutterRenderDisplay>();
+#else
+        return nullptr;
+#endif
     }
 }
 } // namespace OHOS::Ace

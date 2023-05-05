@@ -15,7 +15,7 @@
 
 #include "core/image/flutter_image_cache.h"
 
-#include "third_party/skia/include/core/SkGraphics.h"
+#include "include/core/SkGraphics.h"
 
 #include "core/components_ng/image_provider/image_object.h"
 

@@ -41,6 +41,7 @@
 #include "pixel_map_napi.h"
 
 namespace OHOS::Ace::Framework {
+JSwebEventCallback JSWeb::OnControllerAttachedCallback_ = nullptr;
 bool JSWeb::webDebuggingAccess_ = false;
 class JSWebDialog : public Referenced {
 public:
@@ -1537,6 +1538,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onAudioStateChanged", &JSWeb::OnAudioStateChanged);
     JSClass<JSWeb>::StaticMethod("mediaOptions", &JSWeb::MediaOptions);
     JSClass<JSWeb>::StaticMethod("onFirstContentfulPaint", &JSWeb::OnFirstContentfulPaint);
+    JSClass<JSWeb>::StaticMethod("onControllerAttached", &JSWeb::OnControllerAttached);
     JSClass<JSWeb>::Inherit<JSViewAbstract>();
     JSClass<JSWeb>::Bind(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -1805,6 +1807,9 @@ void JSWeb::CreateInNewPipeline(
                                  int32_t webId) {
             JSRef<JSVal> argv[] = { JSRef<JSVal>::Make(ToJSValue(webId)) };
             func->Call(webviewController, 1, argv);
+            if (JSWeb::OnControllerAttachedCallback_) {
+                JSWeb::OnControllerAttachedCallback_();
+            }
         };
         auto setHapPathFunction = controller->GetProperty("innerSetHapPath");
         NG::SetHapPathCallback setHapPathCallback = nullptr;
@@ -3790,6 +3795,7 @@ void JSWeb::OnWindowExit(const JSCallbackInfo& args)
             ContainerScope scope(instanceId);
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto* eventInfo = TypeInfoHelper::DynamicCast<WebWindowExitEvent>(info.get());
+            CHECK_NULL_VOID(func);
             func->Execute(*eventInfo);
         };
         NG::WebView::SetWindowExitEventId(std::move(uiCallback));
@@ -3799,6 +3805,7 @@ void JSWeb::OnWindowExit(const JSCallbackInfo& args)
         EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto eventInfo = TypeInfoHelper::DynamicCast<WebWindowExitEvent>(info);
+            CHECK_NULL_VOID(func);
             func->Execute(*eventInfo);
         });
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
@@ -4133,7 +4140,7 @@ void JSWeb::OnFaviconReceived(const JSCallbackInfo& args)
             ContainerScope scope(instanceId);
             auto context = PipelineBase::GetCurrentContext();
             CHECK_NULL_VOID(context);
-            context->PostAsyncEvent([execCtx, func = func, info]() {
+            context->PostSyncEvent([execCtx, func = func, info]() {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 auto* eventInfo = TypeInfoHelper::DynamicCast<FaviconReceivedEvent>(info.get());
                 func->Execute(*eventInfo);
@@ -4304,6 +4311,31 @@ void JSWeb::OnFirstContentfulPaint(const JSCallbackInfo& args)
             });
         };
         NG::WebView::SetFirstContentfulPaintId(std::move(uiCallback));
+        return;
+    }
+}
+
+void JSWeb::OnControllerAttached(const JSCallbackInfo& args)
+{
+    LOGI("JSWeb OnControllerAttached");
+
+    if (!args[0]->IsFunction()) {
+        LOGE("OnControllerAttached Param is invalid, it is not a function");
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(args[0]));
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto instanceId = Container::CurrentId();
+        auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId]() {
+            ContainerScope scope(instanceId);
+            auto context = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(context);
+            context->PostAsyncEvent([execCtx, func = func]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                func->Execute();
+            });
+        };
+        JSWeb::OnControllerAttachedCallback_ = std::move(uiCallback);
         return;
     }
 }

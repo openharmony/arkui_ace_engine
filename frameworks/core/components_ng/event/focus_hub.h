@@ -307,6 +307,15 @@ public:
         isDefaultGroupFocus_ = isDefaultGroupFocus;
     }
 
+    WeakPtr<FocusHub> GetDefaultFocusNode() const
+    {
+        return defaultFocusNode_;
+    }
+    void SetDefaultFocusNode(const WeakPtr<FocusHub>& node)
+    {
+        defaultFocusNode_ = node;
+    }
+
     std::optional<bool> IsFocusOnTouch() const
     {
         return isFocusOnTouch_;
@@ -339,6 +348,8 @@ private:
     OnBlurFunc onBlurCallback_;
     OnKeyCallbackFunc onKeyEventCallback_;
     GestureEventFunc onClickEventCallback_;
+
+    WeakPtr<FocusHub> defaultFocusNode_;
 
     std::optional<bool> isFocusOnTouch_;
     bool isDefaultFocus_ = { false };
@@ -498,6 +509,8 @@ public:
     }
     void SetParentFocusable(bool parentFocusable)
     {
+        LOGD("Set node: %{public}s/%{public}d parentFocusable from %{public}d to %{public}d", GetFrameName().c_str(),
+            GetFrameId(), parentFocusable_, parentFocusable);
         parentFocusable_ = parentFocusable;
     }
 
@@ -647,24 +660,24 @@ public:
     {
         return focusCallbackEvents_ ? focusCallbackEvents_->IsDefaultFocus() : false;
     }
-    void SetIsDefaultFocus(bool isDefaultFocus)
-    {
-        if (!focusCallbackEvents_) {
-            focusCallbackEvents_ = MakeRefPtr<FocusCallbackEvents>();
-        }
-        focusCallbackEvents_->SetIsDefaultFocus(isDefaultFocus);
-    }
+    void SetIsDefaultFocus(bool isDefaultFocus);
 
     bool IsDefaultGroupFocus() const
     {
         return focusCallbackEvents_ ? focusCallbackEvents_->IsDefaultGroupFocus() : false;
     }
-    void SetIsDefaultGroupFocus(bool isDefaultGroupFocus)
+    void SetIsDefaultGroupFocus(bool isDefaultGroupFocus);
+
+    WeakPtr<FocusHub> GetDefaultFocusNode() const
+    {
+        return focusCallbackEvents_ ? focusCallbackEvents_->GetDefaultFocusNode() : nullptr;
+    }
+    void SetDefaultFocusNode(const WeakPtr<FocusHub>& node)
     {
         if (!focusCallbackEvents_) {
             focusCallbackEvents_ = MakeRefPtr<FocusCallbackEvents>();
         }
-        focusCallbackEvents_->SetIsDefaultGroupFocus(isDefaultGroupFocus);
+        focusCallbackEvents_->SetDefaultFocusNode(node);
     }
 
     std::optional<bool> IsFocusOnTouch() const

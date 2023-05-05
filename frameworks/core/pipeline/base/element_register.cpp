@@ -26,11 +26,15 @@
 
 namespace OHOS::Ace {
 thread_local ElementRegister* ElementRegister::instance_ = nullptr;
+std::mutex ElementRegister::mutex_;
 
 ElementRegister* ElementRegister::GetInstance()
 {
     if (ElementRegister::instance_ == nullptr) {
-        ElementRegister::instance_ = new ElementRegister();
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!ElementRegister::instance_) {
+            ElementRegister::instance_ = new ElementRegister();
+        }
     }
     return (ElementRegister::instance_);
 }
@@ -194,24 +198,27 @@ RefPtr<NG::GeometryTransition> ElementRegister::GetOrCreateGeometryTransition(co
     }
     CHECK_NULL_RETURN(frameNode.Upgrade(), nullptr);
     RefPtr<NG::GeometryTransition> geometryTransition;
+    if (geometryTransitionMap_.find(id) == geometryTransitionMap_.end()) {
+        geometryTransition = AceType::MakeRefPtr<NG::GeometryTransition>(frameNode);
+        geometryTransitionMap_.emplace(id, geometryTransition);
+    } else {
+        geometryTransition = geometryTransitionMap_[id];
+    }
+    return geometryTransition;
+}
+
+void ElementRegister::DumpGeometryTransition()
+{
     auto iter = geometryTransitionMap_.begin();
     while (iter != geometryTransitionMap_.end()) {
         auto [itemId, item] = *iter;
-        if (!item || item->IsInvalid()) {
+        if (!item || item->IsInAndOutEmpty()) {
             iter = geometryTransitionMap_.erase(iter);
         } else {
-            if (itemId == id) {
-                geometryTransition = item;
-            }
             LOGD("GeometryTransition map item: id: %{public}s, %{public}s", itemId.c_str(), item->ToString().c_str());
             iter++;
         }
     }
-    if (geometryTransition == nullptr) {
-        geometryTransition = AceType::MakeRefPtr<NG::GeometryTransition>(frameNode);
-        geometryTransitionMap_.emplace(id, geometryTransition);
-    }
-    return geometryTransition;
 }
 
 void ElementRegister::AddPendingRemoveNode(const RefPtr<NG::UINode>& node)

@@ -11,13 +11,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/test.gni")
-import("//foundation/arkui/ace_engine/ace_config.gni")
-import(
-    "//foundation/arkui/ace_engine/frameworks/core/components_ng/components.gni")
+import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("touch_event_test_ng") {
-  module_out_path = "$test_output_path/event/touch_event"
+  module_out_path = event_test_output_path
 
   sources = [
     # inner
@@ -65,7 +62,4 @@ ohos_unittest("touch_event_test_ng") {
   ]
 
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
-
-  include_dirs =
-      [ "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include" ]
 }

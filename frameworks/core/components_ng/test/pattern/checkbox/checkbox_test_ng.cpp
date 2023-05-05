@@ -15,6 +15,9 @@
 
 #include "gtest/gtest.h"
 
+// Add the following two macro definitions to test the private and protected method.
+#define private public
+#define protected public
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/checkbox/checkbox_accessibility_property.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
@@ -25,11 +28,10 @@
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
-// Add the following two macro definitions to test the private and protected method.
-#define private public
-#define protected public
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
+#include "core/components_ng/pattern/stage/stage_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -42,6 +44,7 @@ const std::string TAG = "CHECKBOX_TAG";
 const Dimension WIDTH = 50.0_vp;
 const Dimension HEIGHT = 50.0_vp;
 const NG::PaddingPropertyF PADDING = NG::PaddingPropertyF();
+const NG::PaddingProperty newArgs = NG::PaddingProperty();
 const bool SELECTED = true;
 const Color SELECTED_COLOR = Color::BLUE;
 const Color BOARD_COLOR = Color::BLUE;
@@ -71,6 +74,10 @@ void CheckBoxTestNG::SetUpTestSuite()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CheckboxTheme>()));
+
+    RefPtr<FrameNode> stageNode = AceType::MakeRefPtr<FrameNode>("STAGE", -1, AceType::MakeRefPtr<Pattern>());
+    auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
+    MockPipelineBase::GetCurrent()->stageManager_ = stageManager;
 }
 
 void CheckBoxTestNG::TearDownTestSuite()
@@ -91,6 +98,8 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintPropertyTest001, TestSize.Level1)
     CheckBoxModelNG checkBoxModelNG;
     checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
 
+    bool flag = false;
+
     /**
      * @tc.steps: step2. Set parameters to CheckBox property
      */
@@ -98,7 +107,7 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintPropertyTest001, TestSize.Level1)
     checkBoxModelNG.SetSelectedColor(SELECTED_COLOR);
     checkBoxModelNG.SetWidth(WIDTH);
     checkBoxModelNG.SetHeight(HEIGHT);
-    checkBoxModelNG.SetPadding(PADDING);
+    checkBoxModelNG.SetPadding(PADDING, newArgs, flag);
 
     /**
      * @tc.steps: step3. Get paint property and get CheckBox property
@@ -124,6 +133,7 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintPropertyTest002, TestSize.Level1)
      */
     CheckBoxModelNG checkBoxModelNG;
     checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    bool flag = false;
 
     /**
      * @tc.steps: step2. Set parameters to CheckBox property
@@ -132,7 +142,7 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintPropertyTest002, TestSize.Level1)
     checkBoxModelNG.SetSelectedColor(SELECTED_COLOR);
     checkBoxModelNG.SetWidth(WIDTH);
     checkBoxModelNG.SetHeight(HEIGHT);
-    checkBoxModelNG.SetPadding(PADDING);
+    checkBoxModelNG.SetPadding(PADDING, newArgs, flag);
 
     /**
      * @tc.steps: step3. Get paint property
@@ -791,7 +801,8 @@ HWTEST_F(CheckBoxTestNG, CheckBoxMeasureTest024, TestSize.Level1)
     LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, frameNode->GetLayoutProperty());
     auto checkBoxPattern = frameNode->GetPattern<CheckBoxPattern>();
     ASSERT_NE(checkBoxPattern, nullptr);
-    auto checkBoxLayoutAlgorithm = checkBoxPattern->CreateLayoutAlgorithm();
+    auto checkBoxLayoutAlgorithm = AceType::DynamicCast<CheckBoxLayoutAlgorithm>(
+        checkBoxPattern->CreateLayoutAlgorithm());
     ASSERT_NE(checkBoxLayoutAlgorithm, nullptr);
     layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(checkBoxLayoutAlgorithm));
 
@@ -806,6 +817,46 @@ HWTEST_F(CheckBoxTestNG, CheckBoxMeasureTest024, TestSize.Level1)
     auto size = checkBoxLayoutAlgorithm->MeasureContent(layoutConstraintSize, &layoutWrapper);
     // Test the size set by codes.
     EXPECT_EQ(size, SizeF(WIDTH.ConvertToPx(), HEIGHT.ConvertToPx()));
+    /**
+     * Only set width
+    */
+    LayoutConstraintF layoutConstraintSize2;
+    layoutConstraintSize2.selfIdealSize.SetWidth(WIDTH.ConvertToPx());
+    layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraintSize2);
+    layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
+    auto size2 = checkBoxLayoutAlgorithm->MeasureContent(layoutConstraintSize2, &layoutWrapper);
+    EXPECT_EQ(size2->Width(), WIDTH.ConvertToPx());
+    /**
+     * Only set height
+    */
+    LayoutConstraintF layoutConstraintSize3;
+    layoutConstraintSize3.selfIdealSize.SetHeight(HEIGHT.ConvertToPx());
+    layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraintSize3);
+    layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
+    auto size3 = checkBoxLayoutAlgorithm->MeasureContent(layoutConstraintSize3, &layoutWrapper);
+    EXPECT_EQ(size3->Height(), HEIGHT.ConvertToPx());
+    /**
+     * Do not set width and height
+    */
+    LayoutConstraintF layoutConstraintSize4;
+    layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraintSize4);
+    layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
+    checkBoxLayoutAlgorithm->MeasureContent(layoutConstraintSize4, &layoutWrapper);
+    /**
+     * Do not set width and height, and !NearEqual(size.Width(), size.Height())
+    */
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
+    ASSERT_NE(checkBoxTheme, nullptr);
+    checkBoxTheme->defaultWidth_ = Dimension(50.0f);
+    checkBoxTheme->defaultHeight_ = Dimension(20.0f);
+    LayoutConstraintF layoutConstraintSize5;
+    layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraintSize5);
+    layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
+    auto size4 = checkBoxLayoutAlgorithm->MeasureContent(layoutConstraintSize5, &layoutWrapper);
+    EXPECT_EQ(size4->Width(), 20.0f);
+    EXPECT_EQ(size4->Height(), 20.0f);
 }
 
 /**
@@ -816,7 +867,6 @@ HWTEST_F(CheckBoxTestNG, CheckBoxMeasureTest024, TestSize.Level1)
 HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest025, TestSize.Level1)
 {
     CheckBoxModelNG checkBoxModelNG;
-    ;
     checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_NE(frameNode, nullptr);
@@ -855,6 +905,156 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest025, TestSize.Level1)
         CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().Value()));
     EXPECT_EQ(layoutProperty->GetMarginProperty()->bottom.value(),
         CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().Value()));
+}
+
+/**
+ * @tc.name: CheckBoxPatternTest026
+ * @tc.desc: Test CheckBox click event callback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest026, TestSize.Level1)
+{
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto gesture = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gesture, nullptr);
+    /**
+     * fire click event
+    */
+    gesture->ActClick();
+}
+
+/**
+ * @tc.name: CheckBoxPatternTest027
+ * @tc.desc: Test CheckBox AddHotZoneRect RemoveLastHotZoneRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest027, TestSize.Level1)
+{
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    OffsetF offsetF(0.0f, 0.0f);
+    SizeF sizeF(80.0f, 20.0f);
+    geometryNode->SetContentOffset(offsetF);
+    geometryNode->SetContentSize(sizeF);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    RefPtr<LayoutWrapper> layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+        frameNode, geometryNode, layoutProperty);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithm = AceType::MakeRefPtr<CheckBoxLayoutAlgorithm>();
+    RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
+        AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm, false);
+    layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
+    bool result = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
+    EXPECT_TRUE(result);
+    /**
+     * cover method AddHotZoneRect
+    */
+    pattern->AddHotZoneRect();
+    EXPECT_EQ(pattern->hotZoneOffset_.GetX(), 0.0f);
+    EXPECT_EQ(pattern->hotZoneSize_.Width(), 80.0f);
+    /**
+     * cover method RemoveLastHotZoneRect
+    */
+    int count = frameNode->GetOrCreateGestureEventHub()->responseRegion_.size();
+    for (size_t i = 0; i < count; i++)
+    {
+        pattern->RemoveLastHotZoneRect();
+    }
+    EXPECT_EQ(frameNode->GetOrCreateGestureEventHub()->isResponseRegion_, false);
+}
+
+/**
+ * @tc.name: CheckBoxPatternTest028
+ * @tc.desc: Test CheckBox InitOnKeyEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest028, TestSize.Level1)
+{
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto eventHub = frameNode->GetFocusHub();
+    ASSERT_NE(eventHub, nullptr);
+    /**
+     * test event.action != KeyAction::DOWN
+    */
+    KeyEvent keyEventOne(KeyCode::KEY_A, KeyAction::UP);
+    eventHub->onKeyEventInternal_(keyEventOne);
+    /**
+     * test event.action == KeyAction::DOWN and event.code != KeyCode::KEY_ENTER
+    */
+    KeyEvent keyEventTwo(KeyCode::KEY_A, KeyAction::DOWN);
+    eventHub->onKeyEventInternal_(keyEventTwo);
+    /**
+     * test event.action == KeyAction::DOWN and event.code == KeyCode::KEY_ENTER
+    */
+    KeyEvent keyEventThr(KeyCode::KEY_ENTER, KeyAction::DOWN);
+    eventHub->onKeyEventInternal_(keyEventThr);
+}
+
+/**
+ * @tc.name: CheckBoxPatternTest029
+ * @tc.desc: Test CheckBox GetInnerFocusPaintRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest029, TestSize.Level1)
+{
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto eventHub = frameNode->GetFocusHub();
+    ASSERT_NE(eventHub, nullptr);
+    RoundRect paintRect;
+    eventHub->getInnerFocusRectFunc_(paintRect);
+}
+
+/**
+ * @tc.name: CheckBoxPatternTest030
+ * @tc.desc: Test CheckBox onModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest030, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBox node
+     */
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+
+    /**
+     * @tc.steps: step2. Test CheckBox onModifyDone method
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto checkBoxPaintProperty = frameNode->GetPaintProperty<CheckBoxPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+    checkBoxPaintProperty->UpdateCheckBoxSelect(SELECT_STATE);
+    pattern->SetPreGroup(GROUP_NAME);
+    frameNode->MarkModifyDone();
+    pattern->SetPreGroup(GROUP_NAME_CHANGE);
+    frameNode->MarkModifyDone();
 }
 
 /**
@@ -922,7 +1122,9 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintMethodTest002, TestSize.Level1)
     EXPECT_EQ(checkBoxPaintMethod.checkboxModifier_->pointColor_, CHECK_MARK_COLOR);
     EXPECT_EQ(
         checkBoxPaintMethod.checkboxModifier_->strokeSize_->Get(), static_cast<float>(CHECK_MARK_SIZE.ConvertToPx()));
-    EXPECT_EQ(checkBoxPaintMethod.checkboxModifier_->checkStroke_->Get(), 2.5);
+    auto checkStroke = static_cast<float>(CHECK_MARK_SIZE.ConvertToPx() * 0.25);
+    EXPECT_EQ(
+        checkBoxPaintMethod.checkboxModifier_->checkStroke_->Get(), checkStroke);
 }
 
 /**
@@ -1068,5 +1270,25 @@ HWTEST_F(CheckBoxTestNG, CheckBoxAccessibilityPropertyTestNg003, TestSize.Level1
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<CheckBoxAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(), NAME);
+}
+
+/**
+ * @tc.name: CheckBoxUpdateChangeEventTest001
+ * @tc.desc: Test CheckBox onChange event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxTestNG, CheckBoxUpdateChangeEventTest001, TestSize.Level1)
+{
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    bool isSelected = false;
+    auto changeEvent = [&isSelected](bool select) { isSelected = select; };
+    checkBoxModelNG.SetChangeEvent(changeEvent);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->UpdateChangeEvent(true);
+    EXPECT_EQ(isSelected, true);
 }
 } // namespace OHOS::Ace::NG

@@ -52,7 +52,8 @@ constexpr int32_t END_YEAR = 2090;
 constexpr int32_t CURRENT_DAY = 5;
 
 const int YEARINDEX = 1;
-const int SHOWCOUNT = 5;
+const int BIG_SHOWCOUNT = 5;
+const int SMALL_SHOWCOUNT = 3;
 const int MIDDLE_OF_COUNTS = 2;
 const vector<int> DEFAULT_DATE = { 1999, 9, 9 };
 const std::string CONNECTER = "-";
@@ -836,14 +837,19 @@ HWTEST_F(DatePickerTestNg, DatePickerAccessibilityPropertyTestNg001, TestSize.Le
     ASSERT_NE(columnPattern, nullptr);
     auto options = columnPattern->GetOptions();
     options[columnNode].clear();
+
+    auto accessibilityProperty = columnNode->GetAccessibilityProperty<DatePickerColumnAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+
     for (auto& Value : DEFAULT_VALUE) {
         options[columnNode].emplace_back(std::to_string(Value));
     }
     columnPattern->SetOptions(options);
-
-    auto accessibilityProperty = columnNode->GetAccessibilityProperty<DatePickerColumnAccessibilityProperty>();
-    ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetCollectionItemCounts(), static_cast<int32_t>(DEFAULT_VALUE.size()));
+
+    options.erase(columnNode);
+    columnPattern->SetOptions(options);
+    EXPECT_EQ(accessibilityProperty->GetCollectionItemCounts(), 0);
 }
 
 /**
@@ -865,13 +871,17 @@ HWTEST_F(DatePickerTestNg, DatePickerAccessibilityPropertyTestNg002, TestSize.Le
     ASSERT_NE(columnPattern, nullptr);
     auto options = columnPattern->GetOptions();
     options[columnNode].clear();
+    columnPattern->SetOptions(options);
+
+    auto accessibilityProperty = columnNode->GetAccessibilityProperty<DatePickerColumnAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_FALSE(accessibilityProperty->IsScrollable());
+
     for (auto& Value : DEFAULT_VALUE) {
         options[columnNode].emplace_back(std::to_string(Value));
     }
     columnPattern->SetOptions(options);
 
-    auto accessibilityProperty = columnNode->GetAccessibilityProperty<DatePickerColumnAccessibilityProperty>();
-    ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_TRUE(accessibilityProperty->IsScrollable());
 }
 
@@ -892,15 +902,32 @@ HWTEST_F(DatePickerTestNg, DatePickerAccessibilityPropertyTestNg003, TestSize.Le
 
     auto columnPattern = columnNode->GetPattern<DatePickerColumnPattern>();
     ASSERT_NE(columnPattern, nullptr);
-    columnPattern->SetCurrentIndex(YEARINDEX);
+    auto options = columnPattern->GetOptions();
+    options[columnNode].clear();
+    columnPattern->SetOptions(options);
 
     auto accessibilityProperty = columnNode->GetAccessibilityProperty<DatePickerColumnAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
-    EXPECT_EQ(accessibilityProperty->GetCurrentIndex(), YEARINDEX);
+    EXPECT_EQ(accessibilityProperty->GetBeginIndex(), DEFAULT_INDEX);
+    EXPECT_EQ(accessibilityProperty->GetEndIndex(), DEFAULT_INDEX);
 
-    columnPattern->SetShowCount(SHOWCOUNT);
-    EXPECT_EQ(accessibilityProperty->GetBeginIndex(), YEARINDEX - SHOWCOUNT / MIDDLE_OF_COUNTS);
-    EXPECT_EQ(accessibilityProperty->GetEndIndex(), YEARINDEX + SHOWCOUNT / MIDDLE_OF_COUNTS);
+    for (auto& Value : DEFAULT_VALUE) {
+        options[columnNode].emplace_back(std::to_string(Value));
+    }
+    columnPattern->SetOptions(options);
+    columnPattern->SetShowCount(BIG_SHOWCOUNT);
+    columnPattern->SetCurrentIndex(YEARINDEX);
+
+    EXPECT_EQ(accessibilityProperty->GetCurrentIndex(), YEARINDEX);
+    EXPECT_EQ(accessibilityProperty->GetBeginIndex(), 0);
+    auto itemCount = DEFAULT_VALUE.size();
+    EXPECT_EQ(accessibilityProperty->GetEndIndex(), itemCount - 1);
+
+    columnPattern->SetShowCount(SMALL_SHOWCOUNT);
+    EXPECT_EQ(accessibilityProperty->GetBeginIndex(),
+        (itemCount + YEARINDEX - SMALL_SHOWCOUNT / MIDDLE_OF_COUNTS) % itemCount);
+    EXPECT_EQ(
+        accessibilityProperty->GetEndIndex(), (itemCount + YEARINDEX + SMALL_SHOWCOUNT / MIDDLE_OF_COUNTS) % itemCount);
 }
 
 /**
@@ -927,14 +954,20 @@ HWTEST_F(DatePickerTestNg, DatePickerAccessibilityPropertyTestNg004, TestSize.Le
 
     auto options = columnPattern->GetOptions();
     options[yearColumnNode].clear();
+    columnPattern->SetOptions(options);
+    auto accessibilityProperty = yearColumnNode->GetAccessibilityProperty<DatePickerColumnAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(), "");
+
     for (auto& Value : DEFAULT_VALUE) {
         options[yearColumnNode].emplace_back(std::to_string(Value));
     }
     columnPattern->SetOptions(options);
-
-    auto accessibilityProperty = yearColumnNode->GetAccessibilityProperty<DatePickerColumnAccessibilityProperty>();
-    ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(DEFAULT_VALUE.at(YEARINDEX)));
+
+    options.erase(yearColumnNode);
+    columnPattern->SetOptions(options);
+    EXPECT_EQ(accessibilityProperty->GetText(), "");
 }
 
 /**
@@ -1414,5 +1447,28 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow010, TestSize.Level1)
 
     datePickerPattern->SetShowLunar(false);
     columnPattern->HandleChangeCallback(true, true);
+}
+
+/**
+ * @tc.name: DatePickerFireChangeEventTest001
+ * @tc.desc: Test SetSelectedDate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerFireChangeEventTest001, TestSize.Level1)
+{
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModelNG::GetInstance()->CreateDatePicker(theme);
+
+    auto changeEvent = [](const BaseEventInfo* info) {
+        EXPECT_EQ(info->GetType(), "DatePickerChangeEvent");
+    };
+    DatePickerModelNG::GetInstance()->SetChangeEvent(std::move(changeEvent));
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+    datePickerPattern->FireChangeEvent(true);
 }
 } // namespace OHOS::Ace::NG

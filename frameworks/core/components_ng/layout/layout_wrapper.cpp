@@ -19,6 +19,7 @@
 
 #include "base/log/ace_trace.h"
 #include "base/memory/ace_type.h"
+#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
@@ -134,52 +135,6 @@ int32_t LayoutWrapper::GetHostDepth() const
     return host->GetDepth();
 }
 
-void LayoutWrapper::WillLayout()
-{
-    auto host = GetHostNode();
-    if (!layoutProperty_ || !geometryNode_ || !host) {
-        return;
-    }
-
-    const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
-    if (geometryTransition != nullptr) {
-        LOGD("GeometryTransition: node%{public}d will layout, priority: %{public}d", host->GetId(),
-            host->GetLayoutPriority());
-        geometryTransition->WillLayout(Claim(this));
-    }
-
-    for (const auto& child : children_) {
-        child->WillLayout();
-    }
-}
-
-void LayoutWrapper::DidLayout(const RefPtr<LayoutWrapper>& root)
-{
-    auto host = GetHostNode();
-    if (!layoutProperty_ || !geometryNode_ || !host) {
-        return;
-    }
-
-    const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
-    if (geometryTransition != nullptr) {
-        geometryTransition->DidLayout(root, hostNode_);
-        LOGD("GeometryTransition: node%{public}d did layout", host->GetId());
-    }
-
-    for (auto&& child : GetAllChildrenWithBuild(false)) {
-        child->DidLayout(root);
-    }
-
-    if (root == this && !finishCallbacks_.empty()) {
-        for (const auto& callback : finishCallbacks_) {
-            if (callback) {
-                callback();
-            }
-        }
-        finishCallbacks_.clear();
-    }
-}
-
 // This will call child and self measure process.
 void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstraint)
 {
@@ -192,6 +147,11 @@ void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstr
         LOGD("%{public}s, depth: %{public}d: the layoutAlgorithm skip measure", host->GetTag().c_str(),
             host->GetDepth());
         return;
+    }
+
+    const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
+    if (geometryTransition != nullptr) {
+        geometryTransition->WillLayout(Claim(this));
     }
 
     auto preConstraint = layoutProperty_->GetLayoutConstraint();
@@ -274,6 +234,9 @@ void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstr
 // Called to perform layout children.
 void LayoutWrapper::Layout()
 {
+    if (IsHostParentFlex()) {
+        flexLayouts_++;
+    }
     auto host = GetHostNode();
     CHECK_NULL_VOID(layoutProperty_);
     CHECK_NULL_VOID(geometryNode_);
@@ -309,8 +272,29 @@ void LayoutWrapper::Layout()
         layoutProperty_->UpdateContentConstraint();
     }
     layoutAlgorithm_->Layout(this);
+    if (IsHostFlex() && SystemProperties::IsPerformanceCheckEnabled()) {
+        PERFORMANCE_CHECK_FLEX_CHILDREN_LAYOUTS(GetChildrenFlexLayouts(childrenMap_));
+    }
     LOGD("On Layout Done: type: %{public}s, depth: %{public}d, Offset: %{public}s", host->GetTag().c_str(),
         host->GetDepth(), geometryNode_->GetFrameOffset().ToString().c_str());
+}
+
+CheckNodeMap LayoutWrapper::GetChildrenFlexLayouts(
+    const std::unordered_map<int32_t, RefPtr<LayoutWrapper>>& childrenMap)
+{
+    CheckNodeMap nodeMap;
+    for (auto&& child : childrenMap) {
+        if (child.second->GetFlexLayouts() >=
+            SystemProperties::GetPerformanceParameterWithType(PerformanceParameterType::FLEX_LAYOUTS)) {
+            auto node = child.second->GetHostNode();
+            CheckNodeInfo checkNode;
+            checkNode.col = node->GetCol();
+            checkNode.row = node->GetRow();
+            checkNode.tag = node->GetTag();
+            nodeMap.insert(std::make_pair(checkNode, child.second->GetFlexLayouts()));
+        }
+    }
+    return nodeMap;
 }
 
 bool LayoutWrapper::SkipMeasureContent() const
@@ -401,5 +385,17 @@ std::pair<int32_t, int32_t> LayoutWrapper::GetLazyBuildRange()
         return { start, end };
     }
     return { -1, 0 };
+}
+
+bool LayoutWrapper::IsHostParentFlex()
+{
+    auto parent = hostNode_.Upgrade()->GetParent();
+    CHECK_NULL_RETURN(parent, false);
+    return parent->GetTag() == V2::FLEX_ETS_TAG;
+}
+
+bool LayoutWrapper::IsHostFlex()
+{
+    return hostNode_.Upgrade()->GetTag() == V2::FLEX_ETS_TAG;
 }
 } // namespace OHOS::Ace::NG

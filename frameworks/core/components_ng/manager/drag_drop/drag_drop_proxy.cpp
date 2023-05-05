@@ -73,7 +73,6 @@ void DragDropProxy::OnDragEnd(const GestureEvent& info, bool isTextDragEnd)
     auto manager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(manager);
     CHECK_NULL_VOID(manager->CheckDragDropProxy(id_));
-
     std::string extraInfo;
     manager->GetExtraInfoFromClipboard(extraInfo);
     if (isTextDragEnd) {

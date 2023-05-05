@@ -38,11 +38,6 @@ class ACE_EXPORT GridPattern : public ScrollablePattern {
 public:
     GridPattern() = default;
 
-    bool IsAtomicNode() const override
-    {
-        return false;
-    }
-
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<GridLayoutProperty>();
@@ -152,19 +147,17 @@ public:
 
     void ScrollPage(bool reverse);
 
-    bool UpdateStartIndex(uint32_t index);
+    bool UpdateStartIndex(int32_t index);
 
     bool AnimateTo(float position, float duration, const RefPtr<Curve>& curve);
 
     bool OnScrollCallback(float offset, int32_t source) override;
 
-    int32_t GetInsertPosition(float x, float y) const;
     int32_t GetOriginalIndex() const;
     int32_t GetCrossCount() const;
     int32_t GetChildrenCount() const;
     void MoveItems(int32_t itemIndex, int32_t insertIndex);
     void ClearDragState();
-    void UpdateRectOfDraggedInItem(int32_t insertIndex);
 
 private:
     float GetMainGap();
@@ -184,6 +177,7 @@ private:
     WeakPtr<FocusHub> SearchFocusableChildInCross(int32_t mainIndex, int32_t crossIndex, int32_t maxCrossCount);
     WeakPtr<FocusHub> GetChildFocusNodeByIndex(int32_t tarMainIndex, int32_t tarCrossIndex);
     void ScrollToFocusNode(const WeakPtr<FocusHub>& focusNode);
+    void FlushCurrentFocus();
     void FlushFocusOnScroll(const GridLayoutInfo& gridLayoutInfo);
     std::pair<FocusStep, FocusStep> GetFocusSteps(
         int32_t curCrossIndex, int32_t curMaxCrossCount, FocusStep step) const;
@@ -198,6 +192,7 @@ private:
     RectF ComputeSelectedZone(const OffsetF& startOffset, const OffsetF& endOffset);
     void MultiSelectWithoutKeyboard(const RectF& selectedZone);
     void UpdateScrollBarOffset() override;
+    void UpdateRectOfDraggedInItem(int32_t insertIndex);
 
     GridLayoutInfo gridLayoutInfo_;
     RefPtr<GridPositionController> positionController_;
@@ -211,6 +206,9 @@ private:
     bool scrollable_ = true;
     int32_t scrollState_ = SCROLL_FROM_NONE;
     bool mousePressed_ = false;
+
+    int32_t lastFocusItemMainIndex_ = 0;
+    int32_t lastFocusItemCrossIndex_ = 0;
 
     OffsetF mouseStartOffset_;
     OffsetF mouseEndOffset_;

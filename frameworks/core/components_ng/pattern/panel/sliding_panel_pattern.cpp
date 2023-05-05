@@ -38,7 +38,6 @@ namespace {
 
 constexpr int32_t ANIMATION_BASE_DURATION = 256;
 constexpr Dimension BLANK_MIN_HEIGHT = 8.0_vp;
-constexpr Dimension DRAG_BAR_HEIGHT = 8.0_vp;
 constexpr Dimension DRAG_UP_THRESHOLD = 48.0_vp;
 constexpr double VELOCITY_THRESHOLD = 1000.0; // Move 1000px per second.
 
@@ -196,7 +195,7 @@ void SlidingPanelPattern::FirstLayout()
     auto rootHeight = PipelineContext::GetCurrentRootHeight();
     CheckPanelModeAndType();
     currentOffset_ = rootHeight;
-    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     isShow_ = false;
 }
 
@@ -267,7 +266,7 @@ void SlidingPanelPattern::CheckHeightValidity()
     CHECK_NULL_VOID(host);
     auto geometryNode = host->GetGeometryNode();
 
-    auto maxBlank = geometryNode->GetFrameSize().Height() - DRAG_BAR_HEIGHT.ConvertToPx();
+    auto maxBlank = static_cast<double>(geometryNode->GetFrameSize().Height());
     defaultBlankHeights_[PanelMode::MINI] = std::clamp(defaultBlankHeights_[PanelMode::MINI], minBlank, maxBlank);
     defaultBlankHeights_[PanelMode::HALF] = std::clamp(defaultBlankHeights_[PanelMode::HALF], minBlank, maxBlank);
     defaultBlankHeights_[PanelMode::FULL] = std::clamp(defaultBlankHeights_[PanelMode::FULL], minBlank, maxBlank);
@@ -362,7 +361,7 @@ void SlidingPanelPattern::HandleDragUpdate(const GestureEvent& info)
         return;
     }
     FireHeightChangeEvent();
-    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void SlidingPanelPattern::HandleDragEnd(float dragVelocity)
@@ -531,7 +530,7 @@ void SlidingPanelPattern::AppendBlankHeightAnimation(float targetLocation, Panel
             }
             panel->UpdateCurrentOffsetOnAnimate((end - start) * value + start);
             panel->FireHeightChangeEvent();
-            panel->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+            panel->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         });
     animator_->AddInterpolator(heightAnimation);
 }
@@ -576,7 +575,7 @@ void SlidingPanelPattern::UpdateCurrentOffset(float offset)
     currentOffset_ = currentOffset_ <= static_cast<float>(BLANK_MIN_HEIGHT.ConvertToPx())
                          ? static_cast<float>(BLANK_MIN_HEIGHT.ConvertToPx())
                          : currentOffset_;
-    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void SlidingPanelPattern::UpdateCurrentOffsetOnAnimate(float currentOffset)
@@ -587,7 +586,7 @@ void SlidingPanelPattern::UpdateCurrentOffsetOnAnimate(float currentOffset)
     currentOffset_ = currentOffset_ <= static_cast<float>(BLANK_MIN_HEIGHT.ConvertToPx())
                          ? static_cast<float>(BLANK_MIN_HEIGHT.ConvertToPx())
                          : currentOffset_;
-    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 PanelType SlidingPanelPattern::GetPanelType() const

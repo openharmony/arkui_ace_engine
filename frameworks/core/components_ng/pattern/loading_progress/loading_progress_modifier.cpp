@@ -194,11 +194,18 @@ void LoadingProgressModifier::DrawOrbit(
 
 void LoadingProgressModifier::StartRecycleRingAnimation()
 {
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
     auto previousStageCurve = AceType::MakeRefPtr<CubicCurve>(0.0f, 0.0f, 0.67f, 1.0f);
     AnimationOption option;
     option.SetDuration(LOADING_DURATION);
     option.SetCurve(previousStageCurve);
-    option.SetIteration(-1);
+    if (context->IsFormRender()) {
+        LOGI("LoadingProgress is restricted at runtime when form render");
+        option.SetIteration(1);
+    } else {
+        option.SetIteration(-1);
+    }
     AnimationUtils::OpenImplicitAnimation(option, previousStageCurve, nullptr);
     auto middleStageCurve = AceType::MakeRefPtr<CubicCurve>(0.33f, 0.0f, 0.67f, 1.0f);
     AnimationUtils::AddKeyFrame(
@@ -228,11 +235,19 @@ void LoadingProgressModifier::StartRecycleRingAnimation()
 
 void LoadingProgressModifier::StartRecycleCometAnimation()
 {
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
     auto curve = AceType::MakeRefPtr<LinearCurve>();
     AnimationOption option;
     option.SetDuration(LOADING_DURATION);
     option.SetCurve(curve);
-    option.SetIteration(-1);
+    if (context->IsFormRender()) {
+        LOGI("LoadingProgress is restricted at runtime when form render");
+        option.SetIteration(1);
+    } else {
+        option.SetIteration(-1);
+    }
+
     cometOpacity_->Set(OPACITY2);
     AnimationUtils::OpenImplicitAnimation(option, curve, nullptr);
     AnimationUtils::AddKeyFrame(STAGE1, curve,
@@ -331,6 +346,8 @@ uint32_t LoadingProgressModifier::GetCometNumber()
 
 void LoadingProgressModifier::StartRecycle()
 {
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
     if (isLoading_) {
         return;
     }
@@ -343,7 +360,12 @@ void LoadingProgressModifier::StartRecycle()
         option.SetDuration(LOADING_DURATION);
         option.SetDelay(0);
         option.SetCurve(curve);
-        option.SetIteration(-1);
+        if (context->IsFormRender()) {
+            LOGI("LoadingProgress is restricted at runtime when form render");
+            option.SetIteration(1);
+        } else {
+            option.SetIteration(-1);
+        }
         AnimationUtils::Animate(option, [weakDate = AceType::WeakClaim(AceType::RawPtr(date_))]() {
             auto date = weakDate.Upgrade();
             if (date) {

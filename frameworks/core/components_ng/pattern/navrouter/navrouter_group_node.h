@@ -17,10 +17,10 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVROUTER_NAVROUTER_GROUP_NODE_H
 
 #include <cstdint>
-#include <list>
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/group_node.h"
+#include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
@@ -52,13 +52,12 @@ public:
         return navDestinationNode_;
     }
 
-    void OnDetachFromMainTree() override;
-    void OnAttachToMainTree() override;
+    void OnDetachFromMainTree(bool recursive) override;
+    void OnAttachToMainTree(bool recursive) override;
 
 private:
     void AddNavDestinationToNavigation(const RefPtr<UINode>& parent);
     void SetDestinationChangeEvent(const RefPtr<UINode>& parent);
-    void InitNavigationContent(const RefPtr<UINode>& parent);
     void SetBackButtonEvent(const RefPtr<UINode>& parent);
     void SetOnStateChangeFalse(
         const RefPtr<UINode>& preNavDestination, const RefPtr<UINode>& navigation, bool isBackButton = false);
@@ -67,7 +66,17 @@ private:
     void AddBackButtonIconToNavDestination(const RefPtr<UINode>& parent);
     bool CleanNodeInNavigation(const RefPtr<UINode>& parent);
     void SetBackButtonVisible(const RefPtr<UINode>& navDestination);
+    void GetOpsForNavRouteMode(NavRouteMode mode, bool& stackOp, bool& mapOp);
 
+    void NavTransitionInAnimation(const RefPtr<FrameNode>& navigationNode,
+        const RefPtr<FrameNode>& navBarNode, const RefPtr<FrameNode>& navigationContentNode);
+    void NavTransitionOutAnimation(const RefPtr<UINode>& navigationNode, const RefPtr<FrameNode>& navBarNode,
+        const RefPtr<FrameNode>& navigationContentNode);
+    void TitleTransitionInAnimation(const RefPtr<FrameNode>& navigationNode,
+        const RefPtr<FrameNode>& titleBarNode, const RefPtr<FrameNode>& destinationTitleBarNode);
+    void TitleTransitionOutAnimation(const RefPtr<FrameNode>& navigationNode,
+        const RefPtr<FrameNode>& titleBarNode, const RefPtr<FrameNode>& destinationTitleBarNode);
+    void backButtonAnimation(const RefPtr<FrameNode>& backButtonNode, bool isTransitionIn);
     RefPtr<UINode> navDestinationNode_;
 };
 

@@ -29,6 +29,7 @@ public:
     explicit CanvasPaintMethod(const WeakPtr<PipelineBase> context)
     {
         context_ = context;
+        imageShadow_ = std::make_unique<Shadow>();
         InitImageCallbacks();
     }
 
@@ -56,6 +57,7 @@ public:
         return lastLayoutSize_.Height();
     }
 
+    void CloseImageBitmap(const std::string& src);
     void DrawImage(PaintWrapper* paintWrapper, const Ace::CanvasImage& canvasImage, double width, double height);
     void DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& canvasImage);
     std::unique_ptr<Ace::ImageData> GetImageData(double left, double top, double width, double height);
@@ -77,7 +79,6 @@ private:
     void ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj) override;
     void ImageObjFailed() override;
     sk_sp<SkImage> GetImage(const std::string& src) override;
-    void SetPaintImage() override {};
 
     void PaintText(
         const OffsetF& offset, const SizeF& contentSize, double x, double y, bool isStroke, bool hasShadow = false);

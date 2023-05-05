@@ -16,19 +16,16 @@
 #include <mutex>
 #include <utility>
 
-#include "third_party/skia/include/codec/SkCodec.h"
-#include "third_party/skia/include/core/SkGraphics.h"
+#include "include/codec/SkCodec.h"
+#include "include/core/SkGraphics.h"
 
 #include "base/log/ace_trace.h"
 #include "base/memory/referenced.h"
 #include "core/common/container.h"
-#include "core/common/container_scope.h"
-#include "core/common/thread_checker.h"
 #include "core/components_ng/image_provider/adapter/skia_image_data.h"
 #include "core/components_ng/image_provider/image_object.h"
 #include "core/components_ng/image_provider/image_provider.h"
 #include "core/components_ng/image_provider/image_utils.h"
-#include "core/components_ng/image_provider/svg_image_object.h"
 #include "core/components_ng/render/adapter/skia_image.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/image/flutter_image_cache.h"
@@ -39,68 +36,36 @@
 namespace OHOS::Ace::NG {
 namespace {
 
-sk_sp<SkImage> ApplySizeToSkImage(
-    const sk_sp<SkImage>& rawImage, int32_t dstWidth, int32_t dstHeight, const std::string& srcKey)
+sk_sp<SkImage> ApplySizeToSkImage(const std::unique_ptr<SkCodec>& codec, int32_t width, int32_t height)
 {
     ACE_FUNCTION_TRACE();
-    auto scaledImageInfo =
-        SkImageInfo::Make(dstWidth, dstHeight, rawImage->colorType(), rawImage->alphaType(), rawImage->refColorSpace());
-    SkBitmap scaledBitmap;
-    if (!scaledBitmap.tryAllocPixels(scaledImageInfo)) {
-        LOGE("Could not allocate bitmap when attempting to scale. srcKey: %{private}s, destination size: [%{public}d x"
-             " %{public}d], raw image size: [%{public}d x %{public}d]",
-            srcKey.c_str(), dstWidth, dstHeight, rawImage->width(), rawImage->height());
-        return rawImage;
-    }
-#ifdef FLUTTER_2_5
-    if (!rawImage->scalePixels(
-            scaledBitmap.pixmap(), SkSamplingOptions(SkFilterMode::kLinear), SkImage::kDisallow_CachingHint)) {
-#else
-    if (!rawImage->scalePixels(scaledBitmap.pixmap(), kLow_SkFilterQuality, SkImage::kDisallow_CachingHint)) {
-#endif
-        LOGE("Could not scale pixels srcKey: %{private}s, destination size: [%{public}d x"
-             " %{public}d], raw image size: [%{public}d x %{public}d]",
-            srcKey.c_str(), dstWidth, dstHeight, rawImage->width(), rawImage->height());
-        return rawImage;
-    }
-    // Marking this as immutable makes the MakeFromBitmap call share the pixels instead of copying.
-    scaledBitmap.setImmutable();
-    auto scaledImage = SkImage::MakeFromBitmap(scaledBitmap);
-    CHECK_NULL_RETURN(scaledImage, rawImage);
-    return scaledImage;
+    auto info = codec->getInfo();
+    info.makeWH(width, height);
+
+    SkBitmap bitmap;
+    bitmap.allocPixels(info);
+
+    auto res = codec->getPixels(info, bitmap.getPixels(), bitmap.rowBytes(), nullptr);
+    CHECK_NULL_RETURN(res == SkCodec::kSuccess, {});
+
+    bitmap.setImmutable();
+    return SkImage::MakeFromBitmap(bitmap);
 }
 
-static sk_sp<SkImage> ResizeSkImage(
-    const sk_sp<SkImage>& rawImage, const std::string& src, const SizeF& resizeTarget, bool forceResize)
+sk_sp<SkImage> ResizeSkImage(const sk_sp<SkData>& data, const SizeF& resizeTarget, bool forceResize)
 {
-    if (!resizeTarget.IsPositive()) {
-        LOGE("not valid size! resizeTarget: %{public}s, src: %{public}s", resizeTarget.ToString().c_str(), src.c_str());
-        return rawImage;
-    }
-    int32_t dstWidth = static_cast<int32_t>(resizeTarget.Width() + 0.5);
-    int32_t dstHeight = static_cast<int32_t>(resizeTarget.Height() + 0.5);
+    auto width = std::lround(resizeTarget.Width());
+    auto height = std::lround(resizeTarget.Height());
 
-    bool needResize = false;
+    auto codec = SkCodec::MakeFromData(data);
+    CHECK_NULL_RETURN(codec, {});
+    auto info = codec->getInfo();
 
-    if (!forceResize) {
-        if (rawImage->width() > dstWidth) {
-            needResize = true;
-        } else {
-            dstWidth = rawImage->width();
-        }
-        if (rawImage->height() > dstHeight) {
-            needResize = true;
-        } else {
-            dstHeight = rawImage->height();
-        }
+    if ((info.width() > width && info.height() > height) || forceResize) {
+        return ApplySizeToSkImage(codec, width, height);
     }
-
-    if (!needResize && !forceResize) {
-        return rawImage;
-    }
-    return ApplySizeToSkImage(rawImage, dstWidth, dstHeight, src);
+    return SkImage::MakeFromEncoded(data);
 }
-
 } // namespace
 
 RefPtr<CanvasImage> ImageProvider::QueryCanvasImageFromCache(const ImageSourceInfo& src, const SizeF& targetSize)
@@ -161,16 +126,18 @@ bool ImageProvider::MakeCanvasImageHelper(
     ACE_SCOPED_TRACE("MakeCanvasImage %s", obj->GetSourceInfo().ToString().c_str());
     CHECK_NULL_RETURN(PrepareImageData(obj), false);
 
-    auto skiaImageData = DynamicCast<SkiaImageData>(obj->GetData());
-    CHECK_NULL_RETURN(skiaImageData && skiaImageData->GetSkData(), false);
-    auto rawImage = SkImage::MakeFromEncoded(skiaImageData->GetSkData());
-    CHECK_NULL_RETURN(rawImage, false);
+    auto data = DynamicCast<SkiaImageData>(obj->GetData());
+    CHECK_NULL_RETURN(data, false);
+    auto skData = data->GetSkData();
+    CHECK_NULL_RETURN(skData, false);
 
     auto key = ImageUtils::GenerateImageKey(obj->GetSourceInfo(), targetSize);
     auto compressFileData = ImageLoader::LoadImageDataFromFileCache(key, ".astc");
-    sk_sp<SkImage> image = rawImage;
-    if (!compressFileData) {
-        image = ResizeSkImage(rawImage, obj->GetSourceInfo().GetSrc(), targetSize, forceResize);
+    sk_sp<SkImage> image;
+    if (!compressFileData && targetSize.IsPositive()) {
+        image = ResizeSkImage(skData, targetSize, forceResize);
+    } else {
+        image = SkImage::MakeFromEncoded(skData);
     }
     CHECK_NULL_RETURN(image, false);
     auto canvasImage = NG::CanvasImage::Create(&image);
@@ -184,8 +151,8 @@ bool ImageProvider::MakeCanvasImageHelper(
     return true;
 }
 
-bool ImageProvider::TryCompress(const RefPtr<CanvasImage>& image, const std::string& key,
-    const SizeF& resizeTarget, const RefPtr<ImageData>& data, bool syncLoad)
+bool ImageProvider::TryCompress(const RefPtr<CanvasImage>& image, const std::string& key, const SizeF& resizeTarget,
+    const RefPtr<ImageData>& data, bool syncLoad)
 {
 #ifdef UPLOAD_GPU_DISABLED
     // If want to dump draw command or gpu disabled, should use CPU image.

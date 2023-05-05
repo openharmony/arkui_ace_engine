@@ -34,6 +34,34 @@ public:
     void SetDisappearTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value) override {};
     void SetNormalTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value) override {};
     void SetSelectedTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value) override {};
+    void MultiInit(const RefPtr<PickerTheme> pickerTheme) override {};
+    void SetColumns(const std::vector<NG::TextCascadePickerOptions>& options) override {};
+    void SetIsCascade(bool isCascade) override {};
+    void SetOnCascadeChange(TextCascadeChangeEvent&& onChange) override {};
+    void SetValues(const std::vector<std::string>& values) override {};
+    void SetSelecteds(const std::vector<uint32_t>& values) override {};
+    void SetBackgroundColor(const Color& color) override {};
+    bool IsSingle() override
+    {
+        return true;
+    }
+    bool GetSingleRange(std::vector<NG::RangeContent>& rangeValue) override
+    {
+        return false;
+    }
+    bool IsCascade() override
+    {
+        return false;
+    }
+    uint32_t GetMaxCount() override
+    {
+        return 0;
+    }
+    void SetMaxCount(uint32_t maxCount) override {};
+    bool GetMultiOptions(std::vector<NG::TextCascadePickerOptions>& options) override
+    {
+        return false;
+    }
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_TEXTPICKER_MODEL_IMPL_H

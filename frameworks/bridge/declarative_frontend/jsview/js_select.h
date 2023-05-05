@@ -37,8 +37,6 @@ public:
     static void OnSelected(const JSCallbackInfo& info);
     static void JsWidth(const JSCallbackInfo& info);
     static void JsHeight(const JSCallbackInfo& info);
-    static void Width(const JSRef<JSVal>& jsValue);
-    static void Height(const JSRef<JSVal>& jsValue);
     static void JsSize(const JSCallbackInfo& info);
     static void JsPadding(const JSCallbackInfo& info);
     static void SetPaddingTop(const JSCallbackInfo& info);
@@ -47,6 +45,7 @@ public:
     static void SetPaddingRight(const JSCallbackInfo& info);
     static void SetSpace(const JSCallbackInfo& info);
     static void SetArrowPosition(const JSCallbackInfo& info);
+    static void SetMenuAlign(const JSCallbackInfo& info);
 };
 } // namespace OHOS::Ace::Framework
 #endif

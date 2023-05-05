@@ -16,9 +16,9 @@
 #include "core/components/track/flutter_render_arc_track.h"
 
 #include "flutter/lib/ui/painting/path.h"
-#include "third_party/skia/include/core/SkClipOp.h"
-#include "flutter/third_party/txt/src/txt/paragraph_builder.h"
-#include "flutter/third_party/txt/src/txt/paragraph_txt.h"
+#include "include/core/SkClipOp.h"
+#include "txt/paragraph_builder.h"
+#include "txt/paragraph_txt.h"
 
 #include "core/components/font/flutter_font_collection.h"
 #include "core/pipeline/base/scoped_canvas_state.h"

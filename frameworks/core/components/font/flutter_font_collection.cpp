@@ -15,8 +15,8 @@
 
 #include "core/components/font/flutter_font_collection.h"
 
-#include "flutter/third_party/txt/src/minikin/FontFamily.h"
-#include "flutter/third_party/txt/src/minikin/FontLanguageListCache.h"
+#include "txt/src/minikin/FontFamily.h"
+#include "txt/src/minikin/FontLanguageListCache.h"
 
 #include "base/i18n/localization.h"
 #include "base/log/ace_trace.h"
@@ -37,7 +37,6 @@ std::shared_ptr<txt::FontCollection> FlutterFontCollection::GetFontCollection()
         }
         return fontCollection_->GetFontCollection();
     }
-
     std::call_once(fontFlag_, [this]() {
         fontCollection_ = std::make_unique<flutter::FontCollection>();
         if (fontCollection_->GetFontCollection()) {

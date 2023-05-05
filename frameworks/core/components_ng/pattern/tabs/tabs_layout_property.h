@@ -68,10 +68,21 @@ public:
                                      : "BarPosition.End");
         if (propDivider_.has_value()) {
             auto divider = JsonUtil::Create(true);
-            divider->Put("strokeWidth", propDivider_.value().strokeWidth.ToString().c_str());
-            divider->Put("startMargin", propDivider_.value().startMargin.ToString().c_str());
-            divider->Put("endMargin", propDivider_.value().endMargin.ToString().c_str());
-            divider->Put("color", propDivider_.value().color.ColorToString().c_str());
+            if (!propDivider_.value().isNull) {
+                divider->Put("strokeWidth", propDivider_.value().strokeWidth.ToString().c_str());
+                divider->Put("startMargin", propDivider_.value().startMargin.ToString().c_str());
+                divider->Put("endMargin", propDivider_.value().endMargin.ToString().c_str());
+                divider->Put("color", propDivider_.value().color.ColorToString().c_str());
+            } else {
+                TabsItemDivider emptyDivider;
+                emptyDivider.strokeWidth.Reset();
+                emptyDivider.startMargin.Reset();
+                emptyDivider.endMargin.Reset();
+                divider->Put("strokeWidth", emptyDivider.strokeWidth.ToString().c_str());
+                divider->Put("startMargin", emptyDivider.startMargin.ToString().c_str());
+                divider->Put("endMargin", emptyDivider.endMargin.ToString().c_str());
+                divider->Put("color", emptyDivider.color.ColorToString().c_str());
+            }
             json->Put("divider", divider);
         } else {
             auto divider = JsonUtil::Create(true);
@@ -82,7 +93,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TabBarPosition, BarPosition, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Axis, Axis, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TabBarMode, TabBarMode, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Divider, TabsItemDivider, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Divider, TabsItemDivider, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BarWidth, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BarHeight, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Index, int32_t, PROPERTY_UPDATE_NORMAL);

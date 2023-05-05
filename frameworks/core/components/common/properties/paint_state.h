@@ -152,6 +152,13 @@ enum class CompositeOperation {
     XOR,
 };
 
+enum class PatternStyle {
+    NONE = 0,
+    Color,
+    Gradient,
+    ImagePattern
+};
+
 class PaintState {
 public:
     const Color& GetColor() const
@@ -161,6 +168,7 @@ public:
 
     void SetColor(const Color& color)
     {
+        patternStyle_ = PatternStyle::Color;
         color_ = color;
     }
 
@@ -171,6 +179,7 @@ public:
 
     void SetGradient(const Gradient& gradient)
     {
+        patternStyle_ = PatternStyle::Gradient;
         gradient_ = gradient;
     }
 
@@ -244,6 +253,29 @@ public:
         pattern_ = pattern;
     }
 
+    std::weak_ptr<Ace::Pattern> GetPatternNG() const
+    {
+        return patternNG_;
+    }
+
+    Ace::Pattern GetPatternValue() const
+    {
+        Pattern pattern;
+        if (!patternNG_.expired()) {
+            auto value = patternNG_.lock();
+            if (value) {
+                pattern = *value;
+            }
+        }
+        return pattern;
+    }
+
+    void SetPatternNG(const std::weak_ptr<Ace::Pattern>& pattern)
+    {
+        patternStyle_ = PatternStyle::ImagePattern;
+        patternNG_ = pattern;
+    }
+
     int32_t GetId() const
     {
         return id_;
@@ -254,6 +286,11 @@ public:
         id_ = id;
     }
 
+    PatternStyle GetPatternStyle() const
+    {
+        return patternStyle_;
+    }
+
 protected:
     Color color_ = Color::BLACK;
     Gradient gradient_;
@@ -261,8 +298,9 @@ protected:
     TextAlign textAlign_ = TextAlign::LEFT;
     TextDirection textDirection_ = TextDirection::LTR;
     int32_t id_ = 0;
-
+    PatternStyle patternStyle_ = PatternStyle::NONE;
     Pattern pattern_;
+    std::weak_ptr<Ace::Pattern> patternNG_;
 };
 
 class StrokePaintState : public PaintState {

@@ -15,16 +15,22 @@
 
 #include "core/components/bubble/flutter_render_bubble.h"
 
-#include "third_party/skia/include/core/SkMaskFilter.h"
-#include "third_party/skia/include/effects/Sk1DPathEffect.h"
-#include "third_party/skia/include/effects/SkDashPathEffect.h"
-#include "third_party/skia/include/effects/SkGradientShader.h"
+#include "include/core/SkMaskFilter.h"
+#include "include/effects/Sk1DPathEffect.h"
+#include "include/effects/SkDashPathEffect.h"
+#include "include/effects/SkGradientShader.h"
 
 #include "core/components/common/painter/flutter_decoration_painter.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/pipeline/base/flutter_render_context.h"
 #include "core/pipeline/base/scoped_canvas_state.h"
+
+#ifndef NEW_SKIA
+#define SkPathkCCWDirection SkPath::Direction::kCCW_Direction
+#else
+#define SkPathkCCWDirection SkPathDirection::kCCW
+#endif
 
 namespace OHOS::Ace {
 
@@ -165,24 +171,24 @@ void FlutterRenderBubble::PaintTopBubbleInJs(SkCanvas* skCanvas, const SkPaint& 
     path_.lineTo(arrowPosition_.GetX() + (childHalfWidth - NormalizeToPx(border_.BottomRightRadius().GetX())),
         arrowPosition_.GetY() - bubbleSpacing);
     path_.arcTo(NormalizeToPx(border_.BottomRightRadius().GetX()), NormalizeToPx(border_.BottomRightRadius().GetY()),
-        0.0f, SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCCW_Direction,
+        0.0f, SkPath::ArcSize::kSmall_ArcSize, SkPathkCCWDirection,
         arrowPosition_.GetX() + childHalfWidth,
         arrowPosition_.GetY() - bubbleSpacing - NormalizeToPx(border_.BottomRightRadius().GetY()));
     path_.lineTo(arrowPosition_.GetX() + childHalfWidth,
         arrowPosition_.GetY() - bubbleSpacing - (childHeight - NormalizeToPx(border_.TopRightRadius().GetY())));
     path_.arcTo(NormalizeToPx(border_.TopRightRadius().GetX()), NormalizeToPx(border_.TopRightRadius().GetY()), 0.0f,
-        SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCCW_Direction,
+        SkPath::ArcSize::kSmall_ArcSize, SkPathkCCWDirection,
         arrowPosition_.GetX() + childHalfWidth - NormalizeToPx(border_.TopRightRadius().GetX()),
         arrowPosition_.GetY() - bubbleSpacing - childHeight);
     path_.lineTo(arrowPosition_.GetX() - (childHalfWidth - NormalizeToPx(border_.TopLeftRadius().GetX())),
         arrowPosition_.GetY() - bubbleSpacing - childHeight);
     path_.arcTo(NormalizeToPx(border_.TopLeftRadius().GetX()), NormalizeToPx(border_.TopLeftRadius().GetY()), 0.0f,
-        SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCCW_Direction, arrowPosition_.GetX() - childHalfWidth,
+        SkPath::ArcSize::kSmall_ArcSize, SkPathkCCWDirection, arrowPosition_.GetX() - childHalfWidth,
         arrowPosition_.GetY() - bubbleSpacing - (childHeight - NormalizeToPx(border_.TopLeftRadius().GetY())));
     path_.lineTo(arrowPosition_.GetX() - childHalfWidth,
         arrowPosition_.GetY() - bubbleSpacing - NormalizeToPx(border_.BottomLeftRadius().GetY()));
     path_.arcTo(NormalizeToPx(border_.BottomLeftRadius().GetX()), NormalizeToPx(border_.BottomLeftRadius().GetY()),
-        0.0f, SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCCW_Direction,
+        0.0f, SkPath::ArcSize::kSmall_ArcSize, SkPathkCCWDirection,
         arrowPosition_.GetX() - (childHalfWidth - NormalizeToPx(border_.BottomLeftRadius().GetX())),
         arrowPosition_.GetY() - bubbleSpacing);
     path_.lineTo(arrowPosition_.GetX() - NormalizeToPx(BEZIER_HORIZON_OFFSET_FOURTH) + arrowOffset,
@@ -286,19 +292,19 @@ void FlutterRenderBubble::PaintTopBubble(SkCanvas* skCanvas, const SkPaint& pain
     path_.lineTo(
         childOffsetX + childWidth - NormalizeToPx(border_.BottomRightRadius().GetX()), childOffsetY + childHeight);
     path_.arcTo(NormalizeToPx(border_.BottomRightRadius().GetX()), NormalizeToPx(border_.BottomRightRadius().GetY()),
-        0.0f, SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCCW_Direction, childOffsetX + childWidth,
+        0.0f, SkPath::ArcSize::kSmall_ArcSize, SkPathkCCWDirection, childOffsetX + childWidth,
         childOffsetY + childHeight - NormalizeToPx(border_.BottomRightRadius().GetY()));
     path_.lineTo(childOffsetX + childWidth, childOffsetY + NormalizeToPx(border_.TopRightRadius().GetY()));
     path_.arcTo(NormalizeToPx(border_.TopRightRadius().GetX()), NormalizeToPx(border_.TopRightRadius().GetY()), 0.0f,
-        SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCCW_Direction,
+        SkPath::ArcSize::kSmall_ArcSize, SkPathkCCWDirection,
         childOffsetX + childWidth - NormalizeToPx(border_.TopRightRadius().GetX()), childOffsetY);
     path_.lineTo(childOffsetX + NormalizeToPx(border_.TopLeftRadius().GetX()), childOffsetY);
     path_.arcTo(NormalizeToPx(border_.TopLeftRadius().GetX()), NormalizeToPx(border_.TopLeftRadius().GetY()), 0.0f,
-        SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCCW_Direction, childOffsetX,
+        SkPath::ArcSize::kSmall_ArcSize, SkPathkCCWDirection, childOffsetX,
         childOffsetY + NormalizeToPx(border_.TopLeftRadius().GetY()));
     path_.lineTo(childOffsetX, childOffsetY + childHeight - NormalizeToPx(border_.BottomLeftRadius().GetY()));
     path_.arcTo(NormalizeToPx(border_.BottomLeftRadius().GetX()), NormalizeToPx(border_.BottomLeftRadius().GetY()),
-        0.0f, SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCCW_Direction,
+        0.0f, SkPath::ArcSize::kSmall_ArcSize, SkPathkCCWDirection,
         childOffsetX + NormalizeToPx(border_.BottomLeftRadius().GetX()), childOffsetY + childHeight);
     path_.lineTo(arrowPositionX - NormalizeToPx(BEZIER_HORIZON_OFFSET_FOURTH) + arrowOffset,
         arrowPositionY - NormalizeToPx(BEZIER_VERTICAL_OFFSET_THIRD));

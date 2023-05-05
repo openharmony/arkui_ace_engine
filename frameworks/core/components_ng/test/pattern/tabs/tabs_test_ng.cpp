@@ -105,6 +105,7 @@ HWTEST_F(TabsTestNg, TabsModelSetDivider001, TestSize.Level1)
     divider.startMargin = startMargin;
     divider.endMargin = endMargin;
     divider.color = color;
+    divider.isNull = false;
 
     ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -121,6 +122,7 @@ HWTEST_F(TabsTestNg, TabsModelSetDivider001, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetDivider()->strokeWidth.ToString(), strokeWidth.ToString());
     EXPECT_EQ(layoutProperty->GetDivider()->startMargin.ToString(), startMargin.ToString());
     EXPECT_EQ(layoutProperty->GetDivider()->endMargin.ToString(), endMargin.ToString());
+    EXPECT_EQ(layoutProperty->GetDivider()->isNull, false);
 
     auto clone = layoutProperty->Clone();
     clone.Reset();
@@ -136,6 +138,38 @@ HWTEST_F(TabsTestNg, TabsModelSetDivider001, TestSize.Level1)
 
     TabsItemDivider divider2;
     EXPECT_FALSE(divider == divider2);
+}
+
+/**
+ * @tc.name: TabsModelSetDivider002
+ * @tc.desc: test SetDivider
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabsModelSetDivider002, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    TabsModelNG tabsModel;
+    TabsItemDivider divider;
+    divider.isNull = true;
+
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
+    tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
+    tabsModel.SetDivider(divider);
+    auto tabsFrameNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(tabsFrameNode, nullptr);
+    EXPECT_EQ(tabsFrameNode->GetTag(), V2::TABS_ETS_TAG);
+    auto dividerNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildAtIndex(1));
+    ASSERT_NE(dividerNode, nullptr);
+    EXPECT_EQ(dividerNode->GetTag(), V2::DIVIDER_ETS_TAG);
+    auto layoutProperty = tabsFrameNode->GetLayoutProperty<TabsLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(layoutProperty->GetDivider()->isNull, true);
+
+    auto clone = layoutProperty->Clone();
+    clone.Reset();
+    std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
+    layoutProperty->ToJsonValue(json);
+    ASSERT_NE(json, nullptr);
 }
 
 /**
@@ -821,6 +855,16 @@ HWTEST_F(TabsTestNg, TabBarPatternUpdateSubTabBoard001, TestSize.Level1)
     tabBarPattern->SetIndicatorStyle(style, 1);
     tabBarPattern->UpdateSubTabBoard();
     EXPECT_EQ(tabBarPattern->indicator_, 1);
+
+    auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
+    ASSERT_NE(tabBarLayoutProperty, nullptr);
+    tabBarLayoutProperty->UpdateAxis(Axis::VERTICAL);
+    tabBarPattern->UpdateSubTabBoard();
+    EXPECT_EQ(tabBarPattern->indicator_, 1);
+
+    tabBarLayoutProperty->UpdateAxis(Axis::HORIZONTAL);
+    tabBarPattern->UpdateSubTabBoard();
+    EXPECT_EQ(tabBarPattern->indicator_, 1);
 }
 
 /**
@@ -1050,6 +1094,10 @@ HWTEST_F(TabsTestNg, TabBarPatternPlayPressAnimation001, TestSize.Level1)
     EXPECT_EQ(tabBarPaintProperty->GetFadingEdgeValue(), fadingEdge);
 
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    tabBarPattern->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE, 0);
+    IndicatorStyle indicatorStyle;
+    tabBarPattern->SetIndicatorStyle(indicatorStyle, 0);
+    EXPECT_EQ(tabBarPattern->tabBarStyles_[0], TabBarStyle::SUBTABBATSTYLE);
     tabBarPattern->SetSelectedMode(SelectedMode::BOARD, 0);
     EXPECT_EQ(tabBarPattern->selectedModes_[0], SelectedMode::BOARD);
     tabBarPattern->PlayPressAnimation(0, Color::BLACK, AnimationType::PRESS);
@@ -1057,6 +1105,33 @@ HWTEST_F(TabsTestNg, TabBarPatternPlayPressAnimation001, TestSize.Level1)
     tabBarPattern->SetSelectedMode(SelectedMode::INDICATOR, 0);
     EXPECT_EQ(tabBarPattern->selectedModes_[0], SelectedMode::INDICATOR);
     tabBarPattern->PlayPressAnimation(0, Color::BLACK, AnimationType::PRESS);
+    EXPECT_EQ(tabBarPattern->indicator_, 0);
+
+    auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
+    ASSERT_NE(tabBarLayoutProperty, nullptr);
+
+    tabBarLayoutProperty->UpdateAxis(Axis::HORIZONTAL);
+    tabBarPattern->SetSelectedMode(SelectedMode::BOARD, 0);
+    EXPECT_EQ(tabBarPattern->selectedModes_[0], SelectedMode::BOARD);
+    tabBarPattern->PlayPressAnimation(0, Color::TRANSPARENT, AnimationType::PRESS);
+    EXPECT_EQ(tabBarPattern->indicator_, 0);
+
+    tabBarLayoutProperty->UpdateAxis(Axis::HORIZONTAL);
+    tabBarPattern->SetSelectedMode(SelectedMode::BOARD, 0);
+    EXPECT_EQ(tabBarPattern->selectedModes_[0], SelectedMode::BOARD);
+    tabBarPattern->PlayPressAnimation(0, Color::BLACK, AnimationType::PRESS);
+    EXPECT_EQ(tabBarPattern->indicator_, 0);
+
+    tabBarLayoutProperty->UpdateAxis(Axis::HORIZONTAL);
+    tabBarPattern->SetSelectedMode(SelectedMode::INDICATOR, 0);
+    EXPECT_EQ(tabBarPattern->selectedModes_[0], SelectedMode::INDICATOR);
+    tabBarPattern->PlayPressAnimation(0, Color::TRANSPARENT, AnimationType::PRESS);
+    EXPECT_EQ(tabBarPattern->indicator_, 0);
+
+    tabBarLayoutProperty->UpdateAxis(Axis::VERTICAL);
+    tabBarPattern->SetSelectedMode(SelectedMode::BOARD, 0);
+    EXPECT_EQ(tabBarPattern->selectedModes_[0], SelectedMode::BOARD);
+    tabBarPattern->PlayPressAnimation(0, Color::TRANSPARENT, AnimationType::PRESS);
     EXPECT_EQ(tabBarPattern->indicator_, 0);
 }
 

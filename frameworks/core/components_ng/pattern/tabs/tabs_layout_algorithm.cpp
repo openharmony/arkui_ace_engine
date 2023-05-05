@@ -27,10 +27,10 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr int32_t TAB_BAR_INDEX = 0;
+constexpr int32_t SWIPER_INDEX = 0;
 constexpr int32_t DIVIDER_INDEX = 1;
-constexpr int32_t SWIPER_INDEX = 2;
-}
+constexpr int32_t TAB_BAR_INDEX = 2;
+} // namespace
 
 void TabsLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
@@ -105,14 +105,15 @@ void TabsLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
 
     auto offsetList = LayoutOffsetList(layoutWrapper, tabBarWrapper, frameSize);
-    tabBarWrapper->GetGeometryNode()->SetMarginFrameOffset(offsetList[TAB_BAR_INDEX]);
-    tabBarWrapper->Layout();
-
-    dividerWrapper->GetGeometryNode()->SetMarginFrameOffset(offsetList[DIVIDER_INDEX]);
-    dividerWrapper->Layout();
 
     swiperWrapper->GetGeometryNode()->SetMarginFrameOffset(offsetList[SWIPER_INDEX]);
     swiperWrapper->Layout();
+
+    dividerWrapper->GetGeometryNode()->SetMarginFrameOffset(offsetList[DIVIDER_INDEX]);
+    dividerWrapper->Layout();
+	
+    tabBarWrapper->GetGeometryNode()->SetMarginFrameOffset(offsetList[TAB_BAR_INDEX]);
+    tabBarWrapper->Layout();
 }
 
 std::vector<OffsetF> TabsLayoutAlgorithm::LayoutOffsetList(LayoutWrapper* layoutWrapper,
@@ -128,7 +129,7 @@ std::vector<OffsetF> TabsLayoutAlgorithm::LayoutOffsetList(LayoutWrapper* layout
     auto tabBarGeometryNode = tabBarWrapper->GetGeometryNode();
     CHECK_NULL_RETURN(tabBarGeometryNode, offsetList);
     auto tabBarFrameSize = tabBarGeometryNode->GetMarginFrameSize();
-    auto dividerStrokeWidth = divider.strokeWidth.ConvertToPx();
+    auto dividerStrokeWidth = divider.isNull ? 0.0f : divider.strokeWidth.ConvertToPx();
     auto dividerStartMargin = divider.startMargin.ConvertToPx();
     auto layoutProperty = DynamicCast<TabsLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(layoutProperty, offsetList);
@@ -165,9 +166,9 @@ std::vector<OffsetF> TabsLayoutAlgorithm::LayoutOffsetList(LayoutWrapper* layout
             swiperOffset = padding.Offset();
         }
     }
-    offsetList.emplace_back(tabBarOffset);
-    offsetList.emplace_back(dividerOffset);
     offsetList.emplace_back(swiperOffset);
+    offsetList.emplace_back(dividerOffset);
+    offsetList.emplace_back(tabBarOffset);
     return offsetList;
 }
 
@@ -221,6 +222,6 @@ float TabsLayoutAlgorithm::MeasureDivider(const RefPtr<TabsLayoutProperty>& layo
     dividerLayoutConstraint.selfIdealSize = OptionalSizeF(dividerIdealSize);
     dividerWrapper->Measure(dividerLayoutConstraint);
 
-    return dividerStrokeWidth;
+    return divider.isNull ? 0.0f : dividerStrokeWidth;
 }
 } // namespace OHOS::Ace::NG

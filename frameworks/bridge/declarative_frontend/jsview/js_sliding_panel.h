@@ -24,10 +24,10 @@
 
 namespace OHOS::Ace::Framework {
 struct BorderRadius {
-    Dimension radiusTopLeft;
-    Dimension radiusTopRight;
-    Dimension radiusBottomLeft;
-    Dimension radiusBottomRight;
+    CalcDimension radiusTopLeft;
+    CalcDimension radiusTopRight;
+    CalcDimension radiusBottomLeft;
+    CalcDimension radiusBottomRight;
 };
 
 class JSSlidingPanel : public JSContainerBase {
@@ -35,10 +35,10 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
     static void Pop();
-    static void SetHasDragBar(bool hasDragBar);
+    static void SetHasDragBar(const JSCallbackInfo& info);
     static void SetShow(bool isShow);
-    static void SetPanelMode(int32_t mode);
-    static void SetPanelType(int32_t type);
+    static void SetPanelMode(const JSCallbackInfo& info);
+    static void SetPanelType(const JSCallbackInfo& info);
     static void SetMiniHeight(const JSCallbackInfo& info);
     static void SetHalfHeight(const JSCallbackInfo& info);
     static void SetFullHeight(const JSCallbackInfo& info);

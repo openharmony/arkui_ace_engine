@@ -46,7 +46,8 @@ public:
     void SetScaleCount(int32_t value);
     void SetContentOffset(const OffsetF& offset);
     void SetContentSize(const SizeF& contentSize);
-    void SetBorderWidth(const Dimension& width);
+    void SetBorderWidth(float width);
+    void SetSweepEffect(bool value);
 
 private:
     void ContentDrawWithFunction(DrawingContext& context);
@@ -54,25 +55,26 @@ private:
     void PaintRing(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
     void PaintScaleRing(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
     void PaintMoon(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
-    void PaintCapsule(RSCanvas& canvas, const OffsetF& contentOffset, const SizeF& contentSize) const;
-    void PaintVerticalCapsule(RSCanvas& canvas, const OffsetF& contentOffset, const SizeF& contentSize) const;
+    void PaintCapsule(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
+    void PaintVerticalCapsule(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
 
     // Animatable
     RefPtr<AnimatablePropertyFloat> strokeWidth_; // After adjusting to the content width and height
     RefPtr<AnimatablePropertyColor> color_;
     RefPtr<AnimatablePropertyColor> bgColor_;
     RefPtr<AnimatablePropertyColor> borderColor_;
+    RefPtr<AnimatablePropertyFloat> capsuleDate_;
+    RefPtr<AnimatablePropertyFloat> value_;
 
     // no Animatable
     RefPtr<PropertyOffsetF> offset_;
     RefPtr<PropertySizeF> contentSize_;
     RefPtr<PropertyFloat> maxValue_;
-    RefPtr<PropertyFloat> value_;
     RefPtr<PropertyFloat> scaleWidth_;
     RefPtr<PropertyInt> scaleCount_;
     RefPtr<PropertyInt> progressType_;
-
-    Dimension capsuleBorderWidth_;
+    RefPtr<PropertyFloat> capsuleBorderWidth_;
+    RefPtr<PropertyBool> sweepEffect_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ProgressModifier);
 };

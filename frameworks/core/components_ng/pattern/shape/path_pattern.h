@@ -38,7 +38,10 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        return MakeRefPtr<PathPaintMethod>(GetAncestorPaintProperty());
+        if (!shapeOverlayModifier_) {
+            shapeOverlayModifier_ = MakeRefPtr<ShapeOverlayModifier>();
+        }
+        return MakeRefPtr<PathPaintMethod>(GetAncestorPaintProperty(), shapeOverlayModifier_);
     }
 
     RefPtr<PaintProperty> CreatePaintProperty() override

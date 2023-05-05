@@ -175,6 +175,8 @@ void ImageProvider::CreateImageObjHelper(const ImageSourceInfo& src, bool sync)
             }
             ctx->DataReadyCallback(imageObj);
         }
+        // ImageObject cache is only for saving image size info, clear data to save memory
+        imageObj->ClearData();
     };
     if (sync) {
         notifyDataReadyTask();
@@ -272,7 +274,7 @@ RefPtr<ImageObject> ImageProvider::BuildImageObject(const ImageSourceInfo& src, 
     auto skiaImageData = DynamicCast<SkiaImageData>(data);
     CHECK_NULL_RETURN(skiaImageData, nullptr);
     auto [size, frameCount] = skiaImageData->Parse();
-    CHECK_NULL_RETURN(size.IsPositive() && frameCount > 0, nullptr);
+    CHECK_NULL_RETURN(size.IsPositive() && frameCount >= 0, nullptr);
 
     if (frameCount > 1) {
         return MakeRefPtr<AnimatedImageObject>(src, size, data);

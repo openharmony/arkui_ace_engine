@@ -942,11 +942,15 @@ void WebPattern::OnModifyDone()
         delegate_->SetEnhanceSurfaceFlag(isEnhanceSurface_);
         delegate_->SetPopup(isPopup_);
         delegate_->SetParentNWebId(parentNWebId_);
+        delegate_->SetBackgroundColor(GetBackgroundColorValue(
+            static_cast<int32_t>(renderContext->GetBackgroundColor().value_or(Color::WHITE).GetValue())));
         if (isEnhanceSurface_) {
             auto drawSize = Size(1, 1);
             delegate_->SetDrawSize(drawSize);
             delegate_->InitOHOSWeb(PipelineContext::GetCurrentContext());
         } else {
+            auto drawSize = Size(1, 1);
+            delegate_->SetDrawSize(drawSize);
             renderSurface_->SetRenderContext(host->GetRenderContext());
             renderSurface_->InitSurface();
             delegate_->InitOHOSWeb(PipelineContext::GetCurrentContext(), renderSurface_);

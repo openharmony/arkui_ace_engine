@@ -53,7 +53,11 @@ void ShowPointEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 constexpr uint32_t DELAY_TIME_FOR_FORM_SUBCONTAINER_CACHE = 30000;
 } // namespace
 
-FormPattern::FormPattern() = default;
+FormPattern::FormPattern()
+{
+    ACE_SCOPED_TRACE("FormCreate");
+}
+
 FormPattern::~FormPattern() = default;
 
 void FormPattern::OnAttachToFrameNode()
@@ -495,6 +499,7 @@ void FormPattern::FireOnLoadEvent() const
 void FormPattern::OnLoadEvent()
 {
     LOGI("OnLoadEvent");
+    ACE_FUNCTION_TRACE();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto uiTaskExecutor = SingleTaskExecutor::Make(host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);

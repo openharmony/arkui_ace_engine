@@ -22,5 +22,8 @@ build_component("select_popup") {
     "select_popup_component.cpp",
     "select_popup_element.cpp",
   ]
+  if (ace_use_new_skia) {
+    sources -= [ "flutter_render_select_popup.cpp" ]
+  }
   rosen_sources = [ "rosen_render_select_popup.cpp" ]
 }

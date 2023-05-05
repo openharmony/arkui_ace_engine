@@ -18,6 +18,7 @@
 
 #include <cmath>
 #include <limits>
+#include <optional>
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"

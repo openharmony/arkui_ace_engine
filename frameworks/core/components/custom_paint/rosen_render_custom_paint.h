@@ -16,12 +16,16 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CUSTOM_PAINT_ROSEN_RENDER_CUSTOM_PAINT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CUSTOM_PAINT_ROSEN_RENDER_CUSTOM_PAINT_H
 
+#ifdef NEW_SKIA
+#include "modules/svg/include/SkSVGDOM.h"
+#else
 #include "experimental/svg/model/SkSVGDOM.h"
-#include "flutter/third_party/txt/src/txt/paragraph.h"
-#include "third_party/skia/include/core/SkBitmap.h"
-#include "third_party/skia/include/core/SkCanvas.h"
-#include "third_party/skia/include/core/SkPaint.h"
-#include "third_party/skia/include/core/SkPath.h"
+#endif
+#include "txt/paragraph.h"
+#include "include/core/SkBitmap.h"
+#include "include/core/SkCanvas.h"
+#include "include/core/SkPaint.h"
+#include "include/core/SkPath.h"
 
 #include "base/utils/measure_util.h"
 #include "core/components/custom_paint/offscreen_canvas.h"
@@ -142,6 +146,9 @@ private:
     SkPath skPath2d_;
     SkPaint imagePaint_;
     SkPaint cachePaint_;
+#ifdef NEW_SKIA
+    SkSamplingOptions options_;
+#endif
     SkBitmap cacheBitmap_;
     SkBitmap canvasCache_;
     SkBitmap webglBitmap_;

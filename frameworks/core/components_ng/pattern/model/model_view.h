@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_MODEL_MODEL_VIEW_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_MODEL_MODEL_VIEW_H
 
+#include <mutex>
+
 #include "base/geometry/animatable_float.h"
 #include "base/geometry/quaternion.h"
 #include "base/geometry/vec3.h"
@@ -53,6 +55,7 @@ public:
 
 private:
     static std::unique_ptr<ModelView> instance_;
+    static std::mutex mutex_;
 };
 
 } // namespace OHOS::Ace

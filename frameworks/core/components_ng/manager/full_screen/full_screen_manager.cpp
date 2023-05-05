@@ -34,6 +34,7 @@ void FullScreenManager::RequestFullScreen(const RefPtr<FrameNode>& frameNode)
         return;
     }
     frameNode->MountToParent(rootNode);
+    CHECK_NULL_VOID(parentNode);
     auto slot = parentNode->RemoveChildAndReturnIndex(frameNode);
     auto resultForParent = originalParent_.try_emplace(nodeId, parentNode, slot);
     if (!resultForParent.second) {
@@ -55,9 +56,9 @@ void FullScreenManager::RequestFullScreen(const RefPtr<FrameNode>& frameNode)
     parentLayoutConstraint.maxSize.SetHeight(static_cast<float>(rootHeight));
     geometryNode->SetParentLayoutConstraint(parentLayoutConstraint);
     frameNode->GetGeometryNode()->SetMarginFrameOffset(OffsetF { 0.0f, 0.0f });
-    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     rootNode->RebuildRenderContextTree();
-    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void FullScreenManager::ExitFullScreen(const RefPtr<FrameNode>& frameNode)

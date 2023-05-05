@@ -18,6 +18,7 @@
 #include <memory>
 #include <mutex>
 #include <shared_mutex>
+#include <string>
 #include <unistd.h>
 
 #include "parameter.h"
@@ -45,14 +46,14 @@ constexpr int32_t ORIENTATION_LANDSCAPE = 1;
 constexpr float DEFAULT_ANIMATION_SCALE = 1.0f;
 float animationScale_ = DEFAULT_ANIMATION_SCALE;
 std::shared_mutex mutex_;
-constexpr uint32_t PAGE_NODES = 1000;
-constexpr uint32_t PAGE_DEPTH = 30;
-constexpr uint32_t NODE_CHILDREN = 100;
-constexpr uint32_t FUNCTION_TIMEOUT = 15;
-constexpr uint32_t VSYNC_TIMEOUT = 500;
-constexpr uint32_t NODE_TIMEOUT = 15;
-constexpr uint32_t FOREACH_ITEMS = 50;
-constexpr uint32_t FLEX_LAYOUTS = 8;
+constexpr int32_t PAGE_NODES = 1000;
+constexpr int32_t PAGE_DEPTH = 30;
+constexpr int32_t NODE_CHILDREN = 100;
+constexpr int32_t FUNCTION_TIMEOUT = 15;
+constexpr int32_t VSYNC_TIMEOUT = 500;
+constexpr int32_t NODE_TIMEOUT = 15;
+constexpr int32_t FOREACH_ITEMS = 50;
+constexpr int32_t FLEX_LAYOUTS = 8;
 #ifdef ENABLE_ROSEN_BACKEND
 constexpr char DISABLE_ROSEN_FILE_PATH[] = "/etc/disablerosen";
 constexpr char DISABLE_WINDOW_ANIMATION_PATH[] = "/etc/disable_window_size_animation";
@@ -240,7 +241,7 @@ int32_t SystemProperties::astcMax_ = GetAstcMaxErrorProp();
 int32_t SystemProperties::astcPsnr_ = GetAstcPsnrProp();
 ACE_WEAK_SYM bool SystemProperties::extSurfaceEnabled_ = IsExtSurfaceEnabled();
 ACE_WEAK_SYM uint32_t SystemProperties::dumpFrameCount_ = GetSysDumpFrameCount();
-PerformancePtr SystemProperties::performanceProps_ = nullptr;
+ACE_WEAK_SYM PerformancePtr SystemProperties::performanceProps_ = nullptr;
 
 bool SystemProperties::IsSyscapExist(const char* cap)
 {
@@ -251,7 +252,7 @@ bool SystemProperties::IsSyscapExist(const char* cap)
 #endif
 }
 
-void SystemProperties::InitPerformanceParameters()
+ACE_WEAK_SYM void SystemProperties::InitPerformanceParameters()
 {
     auto enable = system::GetBoolParameter("arkui.performancecheck.enable", false);
     if (!enable) {
@@ -260,55 +261,55 @@ void SystemProperties::InitPerformanceParameters()
     }
     SystemProperties::performanceProps_ = std::make_unique<PerformanceCheckParameter>();
     SystemProperties::performanceProps_->pageNodes =
-        system::GetUintParameter<uint32_t>("arkui.performancecheck.9901.pagenodes", PAGE_NODES);
+        system::GetIntParameter<int>("arkui.performancecheck.9901.pagenodes", PAGE_NODES);
     SystemProperties::performanceProps_->pageDepth =
-        system::GetUintParameter<uint32_t>("arkui.performancecheck.9901.pagedepth", PAGE_DEPTH);
+        system::GetIntParameter<int>("arkui.performancecheck.9901.pagedepth", PAGE_DEPTH);
     SystemProperties::performanceProps_->nodeChildren =
-        system::GetUintParameter<uint32_t>("arkui.performancecheck.9901.nodechildren", NODE_CHILDREN);
+        system::GetIntParameter<int>("arkui.performancecheck.9901.nodechildren", NODE_CHILDREN);
     SystemProperties::performanceProps_->functionTimeout =
-        system::GetUintParameter<uint32_t>("arkui.performancecheck.9902.functiontimeout", FUNCTION_TIMEOUT);
+        system::GetIntParameter<int>("arkui.performancecheck.9902.functiontimeout", FUNCTION_TIMEOUT);
     SystemProperties::performanceProps_->vsyncTimeout =
-        system::GetUintParameter<uint32_t>("arkui.performancecheck.9903.vsynctimeout", VSYNC_TIMEOUT);
+        system::GetIntParameter<int>("arkui.performancecheck.9903.vsynctimeout", VSYNC_TIMEOUT);
     SystemProperties::performanceProps_->nodeTimeout =
-        system::GetUintParameter<uint32_t>("arkui.performancecheck.9903.nodetimeout", NODE_TIMEOUT);
+        system::GetIntParameter<int>("arkui.performancecheck.9903.nodetimeout", NODE_TIMEOUT);
     SystemProperties::performanceProps_->foreachItems =
-        system::GetUintParameter<uint32_t>("arkui.performancecheck.9904.foreachitems", FOREACH_ITEMS);
+        system::GetIntParameter<int>("arkui.performancecheck.9904.foreachitems", FOREACH_ITEMS);
     SystemProperties::performanceProps_->flexLayouts =
-        system::GetUintParameter<uint32_t>("arkui.performancecheck.9905.flexlayouts", FLEX_LAYOUTS);
+        system::GetIntParameter<int>("arkui.performancecheck.9905.flexlayouts", FLEX_LAYOUTS);
 }
 
-bool SystemProperties::IsPerformanceCheckEnabled()
+ACE_WEAK_SYM bool SystemProperties::IsPerformanceCheckEnabled()
 {
     return SystemProperties::performanceProps_ != nullptr;
 }
 
-uint32_t SystemProperties::GetPerformanceParameterWithType(PerformanceParameterType type)
+ACE_WEAK_SYM int32_t SystemProperties::GetPerformanceParameterWithType(PerformanceParameterType type)
 {
-    uint32_t result = 0;
+    int32_t result = 0;
     switch (type) {
         case PerformanceParameterType::PAGE_NODES:
-            result = performanceProps_->pageNodes;
+            result = SystemProperties::performanceProps_->pageNodes;
             break;
         case PerformanceParameterType::PAGE_DEPTH:
-            result = performanceProps_->pageDepth;
+            result = SystemProperties::performanceProps_->pageDepth;
             break;
         case PerformanceParameterType::NODE_CHILDREN:
-            result = performanceProps_->nodeChildren;
+            result = SystemProperties::performanceProps_->nodeChildren;
             break;
         case PerformanceParameterType::FUNCTION_TIMEOUT:
-            result = performanceProps_->functionTimeout;
+            result = SystemProperties::performanceProps_->functionTimeout;
             break;
         case PerformanceParameterType::VSYNC_TIMEOUT:
-            result = performanceProps_->vsyncTimeout;
+            result = SystemProperties::performanceProps_->vsyncTimeout;
             break;
         case PerformanceParameterType::NODE_TIMEOUT:
-            result = performanceProps_->nodeTimeout;
+            result = SystemProperties::performanceProps_->nodeTimeout;
             break;
         case PerformanceParameterType::FOREACH_ITEMS:
-            result = performanceProps_->foreachItems;
+            result = SystemProperties::performanceProps_->foreachItems;
             break;
         case PerformanceParameterType::FLEX_LAYOUTS:
-            result = performanceProps_->flexLayouts;
+            result = SystemProperties::performanceProps_->flexLayouts;
             break;
         default:
             result = -1;
@@ -404,13 +405,13 @@ void SystemProperties::InitDeviceInfo(
     resolution_ = resolution;
     deviceWidth_ = deviceWidth;
     deviceHeight_ = deviceHeight;
-    brand_ = system::GetParameter("const.product.brand", INVALID_PARAM);
-    manufacturer_ = system::GetParameter("const.product.manufacturer", INVALID_PARAM);
-    model_ = system::GetParameter("const.product.model", INVALID_PARAM);
-    product_ = system::GetParameter("const.product.name", INVALID_PARAM);
-    apiVersion_ = system::GetParameter("const.ohos.apiversion", INVALID_PARAM);
-    releaseType_ = system::GetParameter("const.ohos.releasetype", INVALID_PARAM);
-    paramDeviceType_ = system::GetParameter("const.product.devicetype", INVALID_PARAM);
+    brand_ = ::GetBrand();
+    manufacturer_ = ::GetManufacture();
+    model_ = ::GetProductModel();
+    product_ = ::GetMarketName();
+    apiVersion_ = std::to_string(::GetSdkApiVersion());
+    releaseType_ = ::GetOsReleaseType();
+    paramDeviceType_ = ::GetDeviceType();
 
     debugEnabled_ = IsDebugEnabled();
     traceEnabled_ = IsTraceEnabled();

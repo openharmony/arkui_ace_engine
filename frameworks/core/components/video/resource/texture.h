@@ -18,6 +18,7 @@
 
 #include "core/common/platform_res_register.h"
 #include "core/components/video/resource/resource.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
 
@@ -26,7 +27,7 @@ class ACE_EXPORT Texture : public Resource {
 public:
     using RefreshListener = std::function<void()>;
 
-    Texture(const WeakPtr<PipelineContext>& context, ErrorCallback&& onError)
+    Texture(const WeakPtr<PipelineBase>& context, ErrorCallback&& onError)
         : Resource("texture", context, std::move(onError)) {}
     ~Texture() override;
 

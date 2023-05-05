@@ -17,7 +17,10 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 if (!is_cross_platform_build) {
   ohos_ndk_headers("ace_header") {
     dest_dir = "$ndk_headers_out_dir/ace/xcomponent/"
-    sources = [ "native_interface_xcomponent.h" ]
+    sources = [
+      "native_interface_xcomponent.h",
+      "native_xcomponent_key_event.h",
+    ]
   }
 
   ohos_ndk_library("libace_ndk") {

@@ -15,7 +15,7 @@ import("//build/test.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("textfield_test_ng") {
-  module_out_path = "$pattern_test_output_path/textfield"
+  module_out_path = pattern_test_output_path
 
   sources = [
     "$ace_root/frameworks/base/geometry/animatable_dimension.cpp",
@@ -29,6 +29,7 @@ ohos_unittest("textfield_test_ng") {
     "$ace_root/frameworks/core/common/clipboard/clipboard_proxy.cpp",
     "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/frameworks/core/common/ime/text_editing_value.cpp",
+    "$ace_root/frameworks/core/common/ime/text_input_proxy.cpp",
     "$ace_root/frameworks/core/components/common/properties/shadow_config.cpp",
     "$ace_root/frameworks/core/components_ng/manager/select_overlay/select_overlay_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/select_overlay/select_overlay_proxy.cpp",
@@ -62,6 +63,7 @@ ohos_unittest("textfield_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/search/search_event_hub.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/search/search_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_pattern.cpp",

@@ -15,7 +15,7 @@ import("//build/test.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("search_test_ng") {
-  module_out_path = "$pattern_test_output_path/search"
+  module_out_path = pattern_test_output_path
 
   sources = [
     "$ace_root/frameworks/core/components_ng/pattern/image/image_layout_algorithm.cpp",
@@ -51,6 +51,7 @@ ohos_unittest("search_test_ng") {
     "$ace_root/frameworks/core/animation/anticipate_curve.cpp",
     "$ace_root/frameworks/core/animation/cubic_curve.cpp",
     "$ace_root/frameworks/core/animation/curves.cpp",
+    "$ace_root/frameworks/core/components_ng/base/view_abstract.cpp",
 
     # test-src
     "$ace_root/frameworks/core/components_ng/pattern/search/search_event_hub.cpp",
