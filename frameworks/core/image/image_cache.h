@@ -184,6 +184,8 @@ public:
 
     static void Purge();
 
+    void ClearCacheImage(const std::string& key);
+
 protected:
     static void ClearCacheFile(const std::vector<std::string>& removeFiles);
 

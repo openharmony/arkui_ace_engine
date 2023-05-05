@@ -97,7 +97,7 @@ void SystemProperties::InitDeviceType(DeviceType type)
     }
 }
 
-uint32_t SystemProperties::GetPerformanceParameterWithType(PerformanceParameterType /* type */)
+int32_t SystemProperties::GetPerformanceParameterWithType(PerformanceParameterType /* type */)
 {
     return -1;
 }

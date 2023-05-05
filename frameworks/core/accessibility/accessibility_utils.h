@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -105,6 +105,28 @@ enum class AccessibilityEventType : size_t {
     TEXT_MOVE_UNIT = 0x00020000,
     SCROLL_START = 0x01000000,
     UNKNOWN,
+};
+
+enum WindowUpdateType : int32_t {
+    WINDOW_UPDATE_INVALID = 0,
+    WINDOW_UPDATE_ACCESSIBILITY_FOCUSED = 0x00000001,
+    WINDOW_UPDATE_FOCUSED = 0x00000002,
+    WINDOW_UPDATE_ACTIVE = 0x00000004,
+    WINDOW_UPDATE_ADDED = 0x00000008,
+    WINDOW_UPDATE_REMOVED = 0x00000010,
+    WINDOW_UPDATE_BOUNDS = 0x00000020,
+    WINDOW_UPDATE_TITLE = 0x00000040,
+    WINDOW_UPDATE_LAYER = 0x00000080,
+    WINDOW_UPDATE_PARENT = 0x00000100,
+    WINDOW_UPDATE_CHILDREN = 0x00000200,
+    WINDOW_UPDATE_PIP = 0x00000400,
+};
+
+enum WindowsContentChangeTypes : int32_t {
+    CONTENT_CHANGE_TYPE_INVALID = 0,
+    CONTENT_CHANGE_TYPE_SUBTREE = 0x00000001,
+    CONTENT_CHANGE_TYPE_TEXT = 0x00000002,
+    CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION = 0x00000004,
 };
 
 struct OperableInfo {

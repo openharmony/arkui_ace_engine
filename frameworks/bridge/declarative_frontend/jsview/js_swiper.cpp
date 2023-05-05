@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_swiper.h"
 
 #include <algorithm>
+#include <cstdint>
 #include <iterator>
 
 #include "base/log/ace_scoring_log.h"
@@ -223,14 +224,45 @@ void JSSwiper::SetDuration(const JSCallbackInfo& info)
     SwiperModel::GetInstance()->SetDuration(duration);
 }
 
-void JSSwiper::SetIndex(int32_t index)
+void ParseSwiperIndexObject(const JSCallbackInfo& args, const JSRef<JSVal>& changeEventVal)
 {
+    CHECK_NULL_VOID(changeEventVal->IsFunction());
+
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
+    auto onIndex = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Swiper.onChangeEvent");
+        const auto* swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
+        if (!swiperInfo) {
+            LOGE("ParseSwiperIndexObject swiperInfo is nullptr");
+            return;
+        }
+        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(swiperInfo->GetIndex()));
+        func->ExecuteJS(1, &newJSVal);
+    };
+    SwiperModel::GetInstance()->SetOnChangeEvent(std::move(onIndex));
+}
+
+void JSSwiper::SetIndex(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || info.Length() > 2) {
+        LOGE("The arg is wrong, it is supposed to have 1 or 2 arguments");
+        return;
+    }
+
+    int32_t index = 0;
+    if (info.Length() > 0 && info[0]->IsNumber()) {
+        index = info[0]->ToNumber<int32_t>();
+    }
     if (index < 0) {
         LOGE("index is not valid: %{public}d", index);
         return;
     }
-
     SwiperModel::GetInstance()->SetIndex(index);
+
+    if (info.Length() > 1 && info[1]->IsFunction()) {
+        ParseSwiperIndexObject(info, info[1]);
+    }
 }
 
 void JSSwiper::SetInterval(const JSCallbackInfo& info)
@@ -277,7 +309,7 @@ void JSSwiper::GetFontContent(const JSRef<JSVal>& font, bool isSelected, SwiperD
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_VOID(swiperIndicatorTheme);
     // set font size, unit FP
-    Dimension fontSize;
+    CalcDimension fontSize;
     if (!size->IsUndefined() && !size->IsNull() && ParseJsDimensionFp(size, fontSize)) {
         if (LessOrEqual(fontSize.Value(), 0.0) || LessOrEqual(size->ToNumber<double>(), 0.0)) {
             fontSize = swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontSize();
@@ -340,7 +372,7 @@ SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
     CHECK_NULL_RETURN(swiperIndicatorTheme, SwiperParameters());
     bool parseOk = false;
     SwiperParameters swiperParameters;
-    Dimension dimPosition;
+    CalcDimension dimPosition;
     parseOk = ParseJsDimensionPx(leftValue, dimPosition);
     swiperParameters.dimLeft = parseOk ? dimPosition : 0.0_vp;
     parseOk = ParseJsDimensionPx(topValue, dimPosition);
@@ -390,7 +422,7 @@ SwiperDigitalParameters JSSwiper::GetDigitIndicatorInfo(const JSRef<JSObject>& o
     CHECK_NULL_RETURN(swiperIndicatorTheme, SwiperDigitalParameters());
     bool parseOk = false;
     SwiperDigitalParameters digitalParameters;
-    Dimension dimPosition;
+    CalcDimension dimPosition;
     parseOk = ParseJsDimensionPx(dotLeftValue, dimPosition);
     digitalParameters.dimLeft = parseOk ? dimPosition : 0.0_vp;
     parseOk = ParseJsDimensionPx(dotTopValue, dimPosition);
@@ -432,39 +464,35 @@ bool JSSwiper::GetArrowInfo(const JSRef<JSObject>& obj, SwiperArrowParameters& s
     Color color;
     if (swiperArrowParameters.isSiderMiddle.value()) {
         parseOk = ParseJsDimensionPx(boardSizeValue, dimension);
-        swiperArrowParameters.boardSize =
-            parseOk && GreatOrEqual(dimension.ConvertToVp(), Dimension(0.0_px).ConvertToVp())
-                ? dimension
-                : swiperIndicatorTheme->GetBigArrowBoardSize();
+        swiperArrowParameters.boardSize = parseOk && GreatOrEqual(dimension.ConvertToVp(), 0.0)
+                                              ? dimension
+                                              : swiperIndicatorTheme->GetBigArrowBoardSize();
         parseOk = ParseJsColor(boardColorValue, color);
         swiperArrowParameters.boardColor = parseOk ? color : swiperIndicatorTheme->GetBigArrowBoardColor();
         if (swiperArrowParameters.isShowBoard.value()) {
             swiperArrowParameters.arrowSize = swiperArrowParameters.boardSize.value() * ARROW_SIZE_COEFFICIENT;
         } else {
             parseOk = ParseJsDimensionPx(arrowSizeValue, dimension);
-            swiperArrowParameters.arrowSize =
-                parseOk && GreatOrEqual(dimension.ConvertToVp(), Dimension(0.0_px).ConvertToVp())
-                    ? dimension
-                    : swiperIndicatorTheme->GetBigArrowSize();
+            swiperArrowParameters.arrowSize = parseOk && GreatOrEqual(dimension.ConvertToVp(), 0.0)
+                                                  ? dimension
+                                                  : swiperIndicatorTheme->GetBigArrowSize();
         }
         parseOk = ParseJsColor(arrowColorValue, color);
         swiperArrowParameters.arrowColor = parseOk ? color : swiperIndicatorTheme->GetBigArrowColor();
     } else {
         parseOk = ParseJsDimensionPx(boardSizeValue, dimension);
-        swiperArrowParameters.boardSize =
-            parseOk && GreatOrEqual(dimension.ConvertToVp(), Dimension(0.0_px).ConvertToVp())
-                ? dimension
-                : swiperIndicatorTheme->GetSmallArrowBoardSize();
+        swiperArrowParameters.boardSize = parseOk && GreatOrEqual(dimension.ConvertToVp(), 0.0)
+                                              ? dimension
+                                              : swiperIndicatorTheme->GetSmallArrowBoardSize();
         parseOk = ParseJsColor(boardColorValue, color);
         swiperArrowParameters.boardColor = parseOk ? color : swiperIndicatorTheme->GetSmallArrowBoardColor();
         if (swiperArrowParameters.isShowBoard.value()) {
             swiperArrowParameters.arrowSize = swiperArrowParameters.boardSize.value() * ARROW_SIZE_COEFFICIENT;
         } else {
             parseOk = ParseJsDimensionPx(arrowSizeValue, dimension);
-            swiperArrowParameters.arrowSize =
-                parseOk && GreatOrEqual(dimension.ConvertToVp(), Dimension(0.0_px).ConvertToVp())
-                    ? dimension
-                    : swiperIndicatorTheme->GetSmallArrowSize();
+            swiperArrowParameters.arrowSize = parseOk && GreatOrEqual(dimension.ConvertToVp(), 0.0)
+                                                  ? dimension
+                                                  : swiperIndicatorTheme->GetSmallArrowSize();
         }
         parseOk = ParseJsColor(arrowColorValue, color);
         swiperArrowParameters.arrowColor = parseOk ? color : swiperIndicatorTheme->GetSmallArrowColor();
@@ -474,8 +502,8 @@ bool JSSwiper::GetArrowInfo(const JSRef<JSObject>& obj, SwiperArrowParameters& s
 
 void JSSwiper::SetDisplayArrow(const JSCallbackInfo& info)
 {
-    auto obj = JSRef<JSObject>::Cast(info[0]);
     if (info.Length() > 0 && info[0]->IsObject()) {
+        auto obj = JSRef<JSObject>::Cast(info[0]);
         SwiperArrowParameters swiperArrowParameters;
         if (!GetArrowInfo(obj, swiperArrowParameters)) {
             SwiperModel::GetInstance()->SetDisplayArrow(false);
@@ -571,7 +599,7 @@ void JSSwiper::SetIndicatorStyle(const JSCallbackInfo& info)
         CHECK_NULL_VOID(pipelineContext);
         auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
         CHECK_NULL_VOID(swiperIndicatorTheme);
-        Dimension dimPosition;
+        CalcDimension dimPosition;
         bool parseOk = ParseJsDimensionPx(leftValue, dimPosition);
         swiperParameters.dimLeft = parseOk ? dimPosition : 0.0_vp;
         parseOk = ParseJsDimensionPx(topValue, dimPosition);
@@ -609,7 +637,7 @@ void JSSwiper::SetItemSpace(const JSCallbackInfo& info)
         return;
     }
 
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         return;
     }
@@ -628,7 +656,7 @@ void JSSwiper::SetPreviousMargin(const JSCallbackInfo& info)
         return;
     }
 
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         return;
     }
@@ -646,7 +674,7 @@ void JSSwiper::SetNextMargin(const JSCallbackInfo& info)
         return;
     }
 
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         return;
     }

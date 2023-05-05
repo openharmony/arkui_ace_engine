@@ -36,6 +36,7 @@ namespace {
 constexpr float HALF = 0.5;
 constexpr float SLIDER_MIN = .0f;
 constexpr float SLIDER_MAX = 100.0f;
+constexpr Dimension BUBBLE_TO_SLIDER_DISTANCE = 10.0_vp;
 } // namespace
 
 void SliderPattern::OnModifyDone()
@@ -341,8 +342,6 @@ void SliderPattern::UpdateCircleCenterOffset()
         circleCenter_.SetX(contentSize->Width() * HALF);
         circleCenter_.SetY(touchOffset);
     }
-
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void SliderPattern::UpdateBubble()
@@ -470,7 +469,9 @@ void SliderPattern::GetOutsetInnerFocusPaintRect(RoundRect& paintRect)
 
 void SliderPattern::GetInsetInnerFocusPaintRect(RoundRect& paintRect)
 {
-    const auto& content = GetHost()->GetGeometryNode()->GetContent();
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    const auto& content = frameNode->GetGeometryNode()->GetContent();
     CHECK_NULL_VOID(content);
     auto theme = PipelineBase::GetCurrentContext()->GetTheme<SliderTheme>();
     CHECK_NULL_VOID(theme);
@@ -484,7 +485,12 @@ void SliderPattern::GetInsetInnerFocusPaintRect(RoundRect& paintRect)
     float offsetY = content->GetRect().GetY();
     float width = content->GetRect().Width();
     float height = content->GetRect().Height();
-    float focusRadius = trackThickness_ + static_cast<float>(focusDistance.ConvertToPx()) / HALF;
+    float focusRadius = trackThickness_ * HALF + static_cast<float>(focusDistance.ConvertToPx());
+    auto paintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    if (paintProperty && paintProperty->GetTrackBorderRadius().has_value()) {
+        focusRadius = static_cast<float>(paintProperty->GetTrackBorderRadius().value().ConvertToPx()) +
+                      static_cast<float>(focusDistance.ConvertToPx());
+    }
     if (direction_ == Axis::HORIZONTAL) {
         offsetX += borderBlank_ - trackThickness_ * HALF - static_cast<float>(focusDistance.ConvertToPx());
         offsetY += (height - trackThickness_) * HALF - static_cast<float>(focusDistance.ConvertToPx());
@@ -628,6 +634,14 @@ void SliderPattern::FireChangeEvent(int32_t mode)
     }
     sliderEventHub->FireChangeEvent(static_cast<float>(value_), mode);
     valueChangeFlag_ = false;
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (mode == SliderChangeMode::Begin) {
+        host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_START);
+    } else if (mode == SliderChangeMode::End) {
+        host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+    }
 }
 
 void SliderPattern::UpdateMarkDirtyNode(const PropertyChangeFlag& Flag)
@@ -782,5 +796,27 @@ void SliderPattern::CloseTranslateAnimation()
 {
     CHECK_NULL_VOID(sliderContentModifier_);
     sliderContentModifier_->SetNotAnimated();
+}
+
+OffsetF SliderPattern::GetBubbleVertexPosition(const OffsetF& blockCenter, float trackThickness, const SizeF& blockSize)
+{
+    OffsetF bubbleVertex = blockCenter;
+    auto sliderLayoutProperty = GetLayoutProperty<SliderLayoutProperty>();
+    CHECK_NULL_RETURN(sliderLayoutProperty, bubbleVertex);
+    auto sliderMode = sliderLayoutProperty->GetSliderModeValue(SliderModel::SliderMode::OUTSET);
+    if (sliderMode == SliderModel::SliderMode::OUTSET) {
+        if (direction_ == Axis::HORIZONTAL) {
+            bubbleVertex.AddY(0 - blockSize.Height() * HALF - BUBBLE_TO_SLIDER_DISTANCE.ConvertToPx());
+        } else {
+            bubbleVertex.AddX(0 - blockSize.Width() * HALF - BUBBLE_TO_SLIDER_DISTANCE.ConvertToPx());
+        }
+    } else {
+        if (direction_ == Axis::HORIZONTAL) {
+            bubbleVertex.AddY(0 - trackThickness * HALF - BUBBLE_TO_SLIDER_DISTANCE.ConvertToPx());
+        } else {
+            bubbleVertex.AddX(0 - trackThickness * HALF - BUBBLE_TO_SLIDER_DISTANCE.ConvertToPx());
+        }
+    }
+    return bubbleVertex;
 }
 } // namespace OHOS::Ace::NG

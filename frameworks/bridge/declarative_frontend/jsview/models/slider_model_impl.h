@@ -44,6 +44,7 @@ public:
     void SetBlockShape(const RefPtr<BasicShape>& value) override;
     void SetStepSize(const Dimension& value) override;
     void SetOnChange(std::function<void(float, int32_t)>&& eventOnChange) override;
+    void SetOnChangeEvent(std::function<void(float)>&& onChangeEvent) override {};
 };
 
 } // namespace OHOS::Ace::Framework

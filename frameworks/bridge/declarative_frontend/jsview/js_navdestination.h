@@ -17,17 +17,25 @@
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_NAVDESTINATION_H
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_navigation_stack.h"
 
 namespace OHOS::Ace::Framework {
 
-class JSNavDestination : public JSContainerBase {
+class JSNavDestination : public JSContainerBase, public JSNavigationStack {
 public:
     static void Create();
     static void Create(const JSCallbackInfo& info);
     static void SetHideTitleBar(bool hide);
     static void SetTitle(const JSCallbackInfo& info);
+    void SetOnShown(const JSCallbackInfo& info);
+    static void SetOnHidden(const JSCallbackInfo& info);
+    static void SetOnBackPressed(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
+
 private:
+    JSWeak<JSFunc> jsShownFunc_;
+    JSWeak<JSFunc> jsHiddenFunc_;
+    JSWeak<JSFunc> jsBackPressedFunc_;
     static void CreateForPartialUpdate(const JSCallbackInfo& info);
 };
 

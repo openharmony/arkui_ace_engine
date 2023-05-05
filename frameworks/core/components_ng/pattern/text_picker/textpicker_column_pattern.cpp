@@ -189,7 +189,7 @@ uint32_t TextPickerColumnPattern::GetShowOptionCount() const
     return showCount;
 }
 
-void TextPickerColumnPattern::FlushCurrentOptions(bool isDown, bool isUpateTextContentOnly)
+void TextPickerColumnPattern::FlushCurrentOptions(bool isDown, bool isUpateTextContentOnly, bool isDirectlyClear)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -204,7 +204,7 @@ void TextPickerColumnPattern::FlushCurrentOptions(bool isDown, bool isUpateTextC
         animationProperties_.clear();
     }
     if (columnkind_ == TEXT) {
-        FlushCurrentTextOptions(textPickerLayoutProperty, isUpateTextContentOnly);
+        FlushCurrentTextOptions(textPickerLayoutProperty, isUpateTextContentOnly, isDirectlyClear);
     } else if (columnkind_ == ICON) {
         FlushCurrentImageOptions();
     } else if (columnkind_ == MIXTURE) {
@@ -218,9 +218,33 @@ void TextPickerColumnPattern::FlushCurrentOptions(bool isDown, bool isUpateTextC
     }
 }
 
-void TextPickerColumnPattern::FlushCurrentTextOptions(const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty,
-    bool isUpateTextContentOnly)
+void TextPickerColumnPattern::ClearCurrentTextOptions(const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty,
+    bool isUpateTextContentOnly, bool isDirectlyClear)
 {
+    if (isDirectlyClear) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto child = host->GetChildren();
+        for (auto iter = child.begin(); iter != child.end(); iter++) {
+            auto textNode = DynamicCast<FrameNode>(*iter);
+            CHECK_NULL_VOID(textNode);
+            auto textPattern = textNode->GetPattern<TextPattern>();
+            CHECK_NULL_VOID(textPattern);
+            auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+            CHECK_NULL_VOID(textLayoutProperty);
+            textLayoutProperty->UpdateContent("");
+            textNode->GetRenderContext()->SetClipToFrame(true);
+            textNode->MarkModifyDone();
+            textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+        selectedIndex_ = 0;
+    }
+}
+
+void TextPickerColumnPattern::FlushCurrentTextOptions(const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty,
+    bool isUpateTextContentOnly, bool isDirectlyClear)
+{
+    ClearCurrentTextOptions(textPickerLayoutProperty, isUpateTextContentOnly, isDirectlyClear);
     uint32_t totalOptionCount = GetOptionCount();
     if (totalOptionCount == 0) {
         return;
@@ -682,6 +706,9 @@ void TextPickerColumnPattern::HandleDragStart(const GestureEvent& event)
     toss->SetStart(yOffset_);
     yLast_ = yOffset_;
     pressed_ = true;
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_START);
 }
 
 void TextPickerColumnPattern::HandleDragMove(const GestureEvent& event)
@@ -709,7 +736,10 @@ void TextPickerColumnPattern::HandleDragEnd()
     CHECK_NULL_VOID_NOLOG(GetHost());
     CHECK_NULL_VOID_NOLOG(GetToss());
     auto toss = GetToss();
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
     if (!NotLoopOptions() && toss->Play()) {
+        frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
         return;
     }
     yOffset_ = 0.0;
@@ -722,6 +752,7 @@ void TextPickerColumnPattern::HandleDragEnd()
     fromController_->ClearInterpolators();
     fromController_->AddInterpolator(curve);
     fromController_->Play();
+    frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
 }
 void TextPickerColumnPattern::CreateAnimation()
 {
@@ -902,6 +933,7 @@ bool TextPickerColumnPattern::InnerHandleScroll(bool isDown, bool isUpatePropert
         currentIndex = (totalOptionCount + currentIndex - 1) % totalOptionCount; // index reduce one
     }
     SetCurrentIndex(currentIndex);
+    HandleChangeCallback(isDown, true);
     FlushCurrentOptions(isDown, isUpatePropertiesOnly);
     return true;
 }

@@ -21,9 +21,16 @@
 #include "core/components/theme/theme_constants_defines.h"
 
 namespace OHOS::Ace {
-
-constexpr double SWIPER_ARROW_ALPHA_DISABLED = 0.4;
-
+namespace {
+constexpr float SWIPER_ARROW_ALPHA_DISABLED = 0.4f;
+constexpr Dimension SWIPER_ARROW_SCALE = 24.0_vp;
+constexpr Dimension SWIPER_ARROW_SMALL_ARROW_BOARD_SIZE = 24.0_vp;
+constexpr Dimension SWIPER_ARROW_SMALL_ARROW_SIZE = 18.0_vp;
+constexpr Dimension SWIPER_ARROW_BIG_ARROW_BOARD_SIZE = 32.0_vp;
+constexpr Dimension SWIPER_ARROW_BIG_ARROW_SIZE = 24.0_vp;
+constexpr Dimension SWIPER_ARROW_HORIZONTAL_MARGIN_DEFAULT = 8.0_vp;
+constexpr Dimension SWIPER_ARROW_VERTICAL_MARGIN_DEFAULT = 8.0_vp;
+} // namespace
 class SwiperIndicatorTheme : public virtual Theme {
     DECLARE_ACE_TYPE(SwiperIndicatorTheme, Theme);
 
@@ -96,15 +103,17 @@ public:
                 swiperPattern->GetAttr<Color>("arrow_color_primary_contrary", Color::TRANSPARENT);
             theme->arrowDisabledAlpha_ =
                 swiperPattern->GetAttr<double>("arrow_disabled_alpha", SWIPER_ARROW_ALPHA_DISABLED);
-            theme->arrowScale_ = Dimension(24.0_vp);
-            theme->arrowHorizontalMargin_ = swiperPattern->GetAttr<Dimension>("arrow_horizontal_margin", 8.0_vp);
-            theme->arrowVerticalMargin_ = swiperPattern->GetAttr<Dimension>("arrow_vertical_margin", 8.0_vp);
-            theme->smallArrowBoardSize_ = Dimension(24.0_vp);
-            theme->smallArrowSize_ = Dimension(18.0_vp);
+            theme->arrowScale_ = SWIPER_ARROW_SCALE;
+            theme->arrowHorizontalMargin_ =
+                swiperPattern->GetAttr<Dimension>("arrow_horizontal_margin", SWIPER_ARROW_HORIZONTAL_MARGIN_DEFAULT);
+            theme->arrowVerticalMargin_ =
+                swiperPattern->GetAttr<Dimension>("arrow_vertical_margin", SWIPER_ARROW_VERTICAL_MARGIN_DEFAULT);
+            theme->smallArrowBoardSize_ = SWIPER_ARROW_SMALL_ARROW_BOARD_SIZE;
+            theme->smallArrowSize_ = SWIPER_ARROW_SMALL_ARROW_SIZE;
             theme->smallArrowBoardColor_ = Color::TRANSPARENT;
             theme->smallArrowColor_ = swiperPattern->GetAttr<Color>("arrow_color_primary", Color::TRANSPARENT);
-            theme->bigArrowBoardSize_ = Dimension(32.0_vp);
-            theme->bigArrowSize_ = Dimension(24.0_vp);
+            theme->bigArrowBoardSize_ = SWIPER_ARROW_BIG_ARROW_BOARD_SIZE;
+            theme->bigArrowSize_ = SWIPER_ARROW_BIG_ARROW_SIZE;
             theme->bigArrowBoardColor_ =
                 swiperPattern->GetAttr<Color>("arrow_color_component_normal", Color::TRANSPARENT);
             theme->bigArrowColor_ = swiperPattern->GetAttr<Color>("arrow_color_primary", Color::TRANSPARENT);
@@ -344,7 +353,7 @@ private:
     Dimension bigArrowSize_;
     Color bigArrowBoardColor_;
     Color bigArrowColor_;
-    double arrowDisabledAlpha_ = 0.4;
+    float arrowDisabledAlpha_ = 0.4f;
     Dimension arrowScale_;
     Dimension arrowHorizontalMargin_;
     Dimension arrowVerticalMargin_;

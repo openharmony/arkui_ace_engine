@@ -1490,12 +1490,27 @@ int32_t FrameNode::GetAllDepthChildrenCount()
     return result;
 }
 
-void FrameNode::OnAccessibilityEvent(AccessibilityEventType eventType) const
+void FrameNode::OnAccessibilityEvent(
+    AccessibilityEventType eventType, WindowsContentChangeTypes windowsContentChangeType) const
+{
+    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
+        AccessibilityEvent event;
+        event.type = eventType;
+        event.windowContentChangeTypes = windowsContentChangeType;
+        event.nodeId = GetAccessibilityId();
+        PipelineContext::GetCurrentContext()->SendEventToAccessibility(event);
+    }
+}
+
+void FrameNode::OnAccessibilityEvent(
+    AccessibilityEventType eventType, std::string beforeText, std::string latestContent) const
 {
     if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
         AccessibilityEvent event;
         event.type = eventType;
         event.nodeId = GetAccessibilityId();
+        event.beforeText = beforeText;
+        event.latestContent = latestContent;
         PipelineContext::GetCurrentContext()->SendEventToAccessibility(event);
     }
 }

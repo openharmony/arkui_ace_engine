@@ -114,6 +114,11 @@ public:
         fillState_.SetPattern(pattern);
     }
 
+    void SetFillPatternNG(const std::weak_ptr<Ace::Pattern>& pattern)
+    {
+        fillState_.SetPatternNG(pattern);
+    }
+
     void SetFillGradient(const Ace::Gradient& gradient)
     {
         fillState_.SetGradient(gradient);
@@ -138,6 +143,11 @@ public:
     void SetStrokeColor(const Color& color)
     {
         strokeState_.SetColor(color);
+    }
+
+    void SetStrokePatternNG(const std::weak_ptr<Ace::Pattern>& pattern)
+    {
+        strokeState_.SetPatternNG(pattern);
     }
 
     void SetStrokePattern(const Ace::Pattern& pattern)
@@ -306,29 +316,30 @@ protected:
     void Path2DBezierCurveTo(const OffsetF& offset, const PathArgs& args);
     void Path2DQuadraticCurveTo(const OffsetF& offset, const PathArgs& args);
     void Path2DSetTransform(const OffsetF& offset, const PathArgs& args);
+    SkMatrix GetMatrixFromPattern(const Ace::Pattern& pattern);
 
-    void SetGrayFilter(const std::string& percent);
-    void SetSepiaFilter(const std::string& percent);
-    void SetSaturateFilter(const std::string& percent);
-    void SetHueRotateFilter(const std::string& percent);
-    void SetInvertFilter(const std::string& percent);
-    void SetOpacityFilter(const std::string& percent);
-    void SetBrightnessFilter(const std::string& percent);
-    void SetContrastFilter(const std::string& percent);
-    void SetBlurFilter(const std::string& percent);
+    void SetGrayFilter(const std::string& percent, SkPaint& paint);
+    void SetSepiaFilter(const std::string& percent, SkPaint& paint);
+    void SetSaturateFilter(const std::string& percent, SkPaint& paint);
+    void SetHueRotateFilter(const std::string& percent, SkPaint& paint);
+    void SetInvertFilter(const std::string& percent, SkPaint& paint);
+    void SetOpacityFilter(const std::string& percent, SkPaint& paint);
+    void SetBrightnessFilter(const std::string& percent, SkPaint& paint);
+    void SetContrastFilter(const std::string& percent, SkPaint& paint);
+    void SetBlurFilter(const std::string& percent, SkPaint& paint);
 
-    void SetColorFilter(float matrix[20]);
+    void SetColorFilter(float matrix[20], SkPaint& paint);
 
     bool GetFilterType(FilterType& filterType, std::string& filterParam);
     bool IsPercentStr(std::string& percentStr);
     double PxStrToDouble(const std::string& str);
     double BlurStrToDouble(const std::string& str);
 
-    void InitImagePaint();
+    void InitImagePaint(SkPaint& paint);
     void InitImageCallbacks();
 
-    void SetPaintImage();
-    void ClearPaintImage();
+    void SetPaintImage(SkPaint& paint);
+    void ClearPaintImage(SkPaint& paint);
     float PercentStrToFloat(const std::string& percentStr);
     FilterType FilterStrToFilterType(const std::string& filterStr);
     bool HasImageShadow() const;

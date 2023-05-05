@@ -17,6 +17,7 @@
 #include <optional>
 
 #include "gtest/gtest.h"
+#include "core/components_ng/base/geometry_node.h"
 
 #define private public
 #define protected public
@@ -2666,6 +2667,41 @@ HWTEST_F(TextTestNg, AddChildSpanItem001, TestSize.Level1)
     EXPECT_TRUE(ret);
 }
 
+std::pair<RefPtr<FrameNode>, RefPtr<TextPattern>> Init()
+{
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    frameNode->geometryNode_ = AceType::MakeRefPtr<GeometryNode>();
+    pattern->AttachToFrameNode(frameNode);
+    return { frameNode, pattern };
+}
+
+/**
+ * @tc.name: ShowSelectOverlay003
+ * @tc.desc: test text_pattern.h ShowSelectOverlay function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, ShowSelectOverlay003, TestSize.Level1)
+{
+    auto [frameNode, pattern] = Init();
+    GestureEvent info;
+    info.localLocation_ = Offset(1, 1);
+    // copyOption = None
+    pattern->HandleLongPress(info);
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), -1);
+
+    pattern->copyOption_ = CopyOptions::Distributed;
+    pattern->paragraph_ = AceType::MakeRefPtr<TxtParagraph>(ParagraphStyle {}, nullptr);
+    pattern->textForDisplay_ = "test";
+    pattern->textSelector_.Update(0, 20);
+
+    pattern->ShowSelectOverlay(pattern->textSelector_.firstHandle, pattern->textSelector_.secondHandle);
+    EXPECT_NE(pattern->textSelector_.GetTextStart(), -1);
+    EXPECT_NE(pattern->textSelector_.GetTextEnd(), -1);
+}
+
 /**
  * @tc.name: IsDraggable001
  * @tc.desc: test text_pattern.h Draggable function
@@ -2673,15 +2709,11 @@ HWTEST_F(TextTestNg, AddChildSpanItem001, TestSize.Level1)
  */
 HWTEST_F(TextTestNg, IsDraggable001, TestSize.Level1)
 {
-    TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
-    auto pattern = AceType::MakeRefPtr<TextPattern>();
-    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
-    pattern->AttachToFrameNode(frameNode);
+    auto [host, pattern] = Init();
 
     pattern->copyOption_ = CopyOptions::Distributed;
     pattern->paragraph_ = AceType::MakeRefPtr<TxtParagraph>(ParagraphStyle {}, nullptr);
-    frameNode->draggable_ = true;
+    host->draggable_ = true;
     // set selected rect to [0, 0] - [20, 20]
     pattern->textSelector_.Update(0, 20);
     EXPECT_TRUE(pattern->IsDraggable(Offset(1, 1)));
@@ -2699,11 +2731,7 @@ HWTEST_F(TextTestNg, IsDraggable001, TestSize.Level1)
  */
 HWTEST_F(TextTestNg, DragBase001, TestSize.Level1)
 {
-    TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
-    auto pattern = AceType::MakeRefPtr<TextPattern>();
-    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
-    pattern->AttachToFrameNode(frameNode);
+    auto [frameNode, pattern] = Init();
 
     // test CloseSelectOverlay should reset textSelector
     pattern->CreateHandles();

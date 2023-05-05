@@ -18,15 +18,18 @@
 
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_event_hub.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
 #include "core/components_ng/pattern/navigation/navigation_layout_algorithm.h"
 #include "core/components_ng/pattern/navigation/navigation_layout_property.h"
+#include "core/components_ng/pattern/navigation/navigation_stack.h"
 #include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
 
+using namespace Framework;
 class NavigationPattern : public Pattern {
     DECLARE_ACE_TYPE(NavigationPattern, Pattern);
 
@@ -67,11 +70,69 @@ public:
     {
         return { FocusType::SCOPE, true };
     }
+    
+    void SetNavDestination(std::function<void(std::string)>&& builder)
+    {
+        builder_ = std::move(builder);
+    }
+
+    void SetNavigationStack(RefPtr<NavigationStack>&& navigationStack)
+    {
+        navigationStack_ = std::move(navigationStack);
+    }
+
+    const RefPtr<NavigationStack>& GetNavigationStack()
+    {
+        return navigationStack_;
+    }
+
+    void AddNavDestinationNode(const std::string& name, const RefPtr<UINode>& navDestinationNode)
+    {
+        navigationStack_->Add(name, navDestinationNode);
+    }
+
+    void AddNavDestinationNode(const std::string& name, const RefPtr<UINode>& navDestinationNode, NavRouteMode mode)
+    {
+        navigationStack_->Add(name, navDestinationNode, mode);
+    }
+
+    void AddNavDestinationNode(const std::string& name, RefPtr<UINode> navDestinationNode, NavRouteMode mode,
+        const RefPtr<RouteInfo>& routeInfo)
+    {
+        navigationStack_->Add(name, navDestinationNode, mode, routeInfo);
+    }
+
+    RefPtr<UINode> GetNavDestinationNode(const std::string& name)
+    {
+        return navigationStack_->Get(name);
+    }
+
+    RefPtr<UINode> GetNavDestinationNode()
+    {
+        return navigationStack_->Get();
+    }
+
+    RefPtr<UINode> GetPreNavDestination(const std::string& current)
+    {
+        return navigationStack_->GetPre(current);
+    }
+
+    const std::vector<std::pair<std::string, RefPtr<UINode>>>& GetAllNavDestinationNodes()
+    {
+        return navigationStack_->GetAllNavDestinationNodes();
+    }
 
 private:
     RefPtr<RenderContext> GetTitleBarRenderContext();
     void DoAnimation(NavigationMode currentMode);
+    bool CheckExistPreStack(const std::string& name);
+    RefPtr<UINode> GetNodeAndRemoveByName(const std::string& name);
+    RefPtr<UINode> GenerateUINodeByIndex(int32_t index);
     NavigationMode navigationMode_ = NavigationMode::AUTO;
+    std::function<void(std::string)> builder_;
+    RefPtr<NavigationStack> navigationStack_;
+    NavPathList preNavPathList_;
+    NavPathList navPathList_;
 };
 
 } // namespace OHOS::Ace::NG

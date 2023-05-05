@@ -28,6 +28,7 @@ public:
     void SetOnChange(IndexCallbackEvent&& eventOnChange) override;
     void SetOnNext(IndexCallbackEvent&& eventOnNext) override;
     void SetOnPrevious(IndexCallbackEvent&& eventOnPrevious) override;
+    void SetOnChangeEvent(IndexChangeEvent&& onChangeEvent) override {};
 };
 
 } // namespace OHOS::Ace::Framework

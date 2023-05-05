@@ -28,7 +28,7 @@ public:
 
     static void SetAutoPlay(bool autoPlay);
     static void SetDuration(const JSCallbackInfo& info);
-    static void SetIndex(int32_t index);
+    static void SetIndex(const JSCallbackInfo& info);
     static void SetInterval(const JSCallbackInfo& info);
     static void SetLoop(bool loop);
     static void SetVertical(bool isVertical);

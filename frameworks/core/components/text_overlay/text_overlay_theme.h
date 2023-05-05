@@ -100,6 +100,7 @@ public:
                 theme->menuBackgroundColor_ = pattern->GetAttr<Color>("menu_bg_color", Color());
                 theme->buttonHoverColor_ = pattern->GetAttr<Color>("button_bg_color_hovered", Color());
                 theme->buttonClickedColor_ = pattern->GetAttr<Color>("button_bg_color_clicked", Color());
+                theme->moreOrBackIconColor_ = pattern->GetAttr<Color>("more_or_back_icon_color", Color());
                 theme->menuButtonTextStyle_.SetTextColor(pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color()));
                 theme->menuButtonTextStyle_.SetFontSize(pattern->GetAttr<Dimension>(PATTERN_TEXT_SIZE, 0.0_fp));
                 theme->handleDiameter_ = pattern->GetAttr<Dimension>("handle_outer_diameter", 0.0_vp);
@@ -152,6 +153,11 @@ public:
     const Color& GetMenuIconColor() const
     {
         return menuIconColor_;
+    }
+
+    const Color& GetMoreOrBackIconColor() const
+    {
+        return moreOrBackIconColor_;
     }
 
     const Edge& GetMenuPadding() const
@@ -246,6 +252,7 @@ private:
     Color handleColorInner_;
     Color buttonClickedColor_;
     Color buttonHoverColor_;
+    Color moreOrBackIconColor_;
     Edge menuPadding_;
     Edge menuButtonPadding_;
     Dimension handleDiameter_;

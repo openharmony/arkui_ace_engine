@@ -242,7 +242,7 @@ void JSTabContent::GetFontContent(const JSRef<JSVal> font, LabelStyle& labelStyl
 {
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(font);
     JSRef<JSVal> size = obj->GetProperty("size");
-    Dimension fontSize;
+    CalcDimension fontSize;
     if (ParseJsDimensionFp(size, fontSize)) {
         labelStyle.fontSize = fontSize;
     }
@@ -291,13 +291,13 @@ void JSTabContent::SetLabelStyle(const JSRef<JSVal>& info)
     }
 
     JSRef<JSVal> minFontSizeValue = obj->GetProperty("minFontSize");
-    Dimension minFontSize;
+    CalcDimension minFontSize;
     if (ParseJsDimensionFp(minFontSizeValue, minFontSize)) {
         labelStyle.minFontSize = minFontSize;
     }
 
     JSRef<JSVal> maxFontSizeValue = obj->GetProperty("maxFontSize");
-    Dimension maxFontSize;
+    CalcDimension maxFontSize;
     if (ParseJsDimensionFp(maxFontSizeValue, maxFontSize)) {
         labelStyle.maxFontSize = maxFontSize;
     }

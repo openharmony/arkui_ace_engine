@@ -38,6 +38,7 @@ public:
     void SetOnChange(std::function<void(const BaseEventInfo*)>&& onChange) override;
     void SetDivider(const TabsItemDivider& divider) override {};
     void SetFadingEdge(bool fadingEdge) override {};
+    void SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& onChangeEvent) override {};
 
 private:
     RefPtr<TabTheme> GetTheme() const;

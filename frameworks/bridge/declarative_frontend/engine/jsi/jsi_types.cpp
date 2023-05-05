@@ -357,5 +357,16 @@ JsiString JsiString::New(const char* str)
     return JsiString(str);
 }
 
+// -----------------------
+// Implementation of JsiDate
+// -----------------------
+JsiDate::JsiDate(const panda::CopyableGlobal<panda::DateRef>& val) : JsiType(val) {}
+JsiDate::JsiDate(panda::Local<panda::DateRef> val) : JsiType(val) {}
+
+JsiRef<JsiValue> JsiDate::New(double value)
+{
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+    return JsiRef<JsiValue>::Make(panda::DateRef::New(runtime->GetEcmaVm(), value));
+}
 
 } // namespace OHOS::Ace::Framework

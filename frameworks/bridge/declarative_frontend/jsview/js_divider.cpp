@@ -95,7 +95,7 @@ void JSDivider::SetStrokeWidth(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension strokeWidth;
+    CalcDimension strokeWidth;
     if (!ParseJsDimensionVp(info[0], strokeWidth)) {
         return;
     }

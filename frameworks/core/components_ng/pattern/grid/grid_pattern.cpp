@@ -859,9 +859,12 @@ void GridPattern::ScrollPage(bool reverse)
         LOGD("PgUp. Scroll offset is %{public}f", GetMainContentSize());
         UpdateCurrentOffset(GetMainContentSize(), SCROLL_FROM_JUMP);
     }
+    auto host = GetHost();
+    CHECK_NULL_VOID_NOLOG(host);
+    host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
 }
 
-bool GridPattern::UpdateStartIndex(uint32_t index)
+bool GridPattern::UpdateStartIndex(int32_t index)
 {
     if (!isConfigScrollable_) {
         return false;
@@ -870,6 +873,7 @@ bool GridPattern::UpdateStartIndex(uint32_t index)
     CHECK_NULL_RETURN(host, false);
     gridLayoutInfo_.jumpIndex_ = index;
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
     return true;
 }
 
@@ -898,6 +902,9 @@ bool GridPattern::AnimateTo(float position, float duration, const RefPtr<Curve>&
     animator_->AddInterpolator(animation);
     animator_->SetDuration(std::min(duration, SCROLL_MAX_TIME));
     animator_->Play();
+    auto host = GetHost();
+    CHECK_NULL_RETURN_NOLOG(host, false);
+    host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
     return true;
 }
 
@@ -954,15 +961,6 @@ RefPtr<PaintProperty> GridPattern::CreatePaintProperty()
     // default "scrollBar" attribute of Grid is BarState.Off
     property->UpdateScrollBarMode(defaultDisplayMode);
     return property;
-}
-
-int32_t GridPattern::GetInsertPosition(float x, float y) const
-{
-    if (gridLayoutInfo_.currentRect_.IsInRegion(PointF(x, y))) {
-        return gridLayoutInfo_.GetOriginalIndex();
-    }
-
-    return -1;
 }
 
 int32_t GridPattern::GetOriginalIndex() const

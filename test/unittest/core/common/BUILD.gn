@@ -22,6 +22,7 @@ group("core_common_unittest") {
       "clipboard:clip_board_test",
       "environment:environment_test",
       "flutter:flutter_test",
+      "form:form_manager_test",
       "ime:ime_test",
       "plugin:plugin_manager_test",
       "register:register_test",

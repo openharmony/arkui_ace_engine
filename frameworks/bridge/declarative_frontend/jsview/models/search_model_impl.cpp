@@ -176,7 +176,57 @@ void SearchModelImpl::SetCopyOption(const CopyOptions& copyOptions)
     JSViewSetProperty(&TextFieldComponent::SetCopyOption, copyOptions);
 }
 
-void SearchModelImpl::SetMenuOptionItems(std::vector<NG::MenuOptionsParam>&& menuOptionsItems) {}
+void SearchModelImpl::SetMenuOptionItems(std::vector<NG::MenuOptionsParam>&& menuOptionsItems)
+{
+    LOGI("only newPipeline supply");
+}
+
+void SearchModelImpl::SetFocusable(bool focusable)
+{
+    auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
+    CHECK_NULL_VOID(focusableComponent);
+    focusableComponent->SetFocusable(focusable);
+}
+
+void SearchModelImpl::SetFocusNode(bool isFocusNode)
+{
+    auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(false);
+    CHECK_NULL_VOID(focusableComponent);
+    focusableComponent->SetFocusNode(!isFocusNode);
+}
+
+void SearchModelImpl::SetHeight(const Dimension& value)
+{
+    auto stack = ViewStackProcessor::GetInstance();
+    auto searchComponent = AceType::DynamicCast<SearchComponent>(stack->GetMainComponent());
+    CHECK_NULL_VOID(searchComponent);
+    auto childComponent = searchComponent->GetChild();
+    CHECK_NULL_VOID(childComponent);
+    auto textFieldComponent = AceType::DynamicCast<TextFieldComponent>(childComponent);
+    CHECK_NULL_VOID(textFieldComponent);
+    textFieldComponent->SetHeight(value);
+}
+
+void SearchModelImpl::SetBackBorder()
+{
+    auto stack = ViewStackProcessor::GetInstance();
+    auto searchComponent = AceType::DynamicCast<SearchComponent>(stack->GetMainComponent());
+    CHECK_NULL_VOID(searchComponent);
+    auto childComponent = searchComponent->GetChild();
+    CHECK_NULL_VOID(childComponent);
+    auto textFieldComponent = AceType::DynamicCast<TextFieldComponent>(childComponent);
+    CHECK_NULL_VOID(textFieldComponent);
+    auto decoration = textFieldComponent->GetDecoration();
+    CHECK_NULL_VOID(decoration);
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    auto boxDecoration = box->GetBackDecoration();
+    if (boxDecoration) {
+        decoration->SetBorder(boxDecoration->GetBorder());
+        Border border = {};
+        boxDecoration->SetBorder(border);
+    }
+    textFieldComponent->SetOriginBorder(decoration->GetBorder());
+}
 
 void SearchModelImpl::SetOnSubmit(std::function<void(const std::string&)>&& onSubmit)
 {

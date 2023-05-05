@@ -32,7 +32,9 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-
+namespace {
+constexpr int8_t MASK_COUNT = 2;
+}
 void TabBarLayoutAlgorithm::UpdateChildConstraint(LayoutConstraintF& childConstraint,
     const RefPtr<TabBarLayoutProperty>& layoutProperty, const SizeF& ideaSize, int32_t childCount, Axis axis)
 {
@@ -110,10 +112,11 @@ void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     // Create layout constraint of children .
     auto childCount = layoutWrapper->GetTotalChildCount();
-    if (childCount <= 0) {
+    if (childCount <= MASK_COUNT) {
         LOGI("ChildCount is illegal.");
         return;
     }
+    childCount -= MASK_COUNT;
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
     UpdateChildConstraint(childLayoutConstraint, layoutProperty, idealSize.ConvertToSizeT(), childCount, axis);
 
@@ -242,7 +245,10 @@ void TabBarLayoutAlgorithm::LayoutChildren(
     CHECK_NULL_VOID(pipelineContext);
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
     CHECK_NULL_VOID(tabTheme);
-    auto childCount = layoutWrapper->GetTotalChildCount();
+    auto childCount = layoutWrapper->GetTotalChildCount() - MASK_COUNT;
+    if (childCount < 0) {
+        return;
+    }
     auto layoutProperty = AceType::DynamicCast<TabBarLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     for (int32_t index = 0; index < childCount; ++index) {
@@ -263,12 +269,42 @@ void TabBarLayoutAlgorithm::LayoutChildren(
             axis == Axis::HORIZONTAL ? OffsetF(childFrameSize.Width(), 0.0f) : OffsetF(0.0f, childFrameSize.Height());
     }
     tabItemOffset_.emplace_back(childOffset);
+    LayoutMask(layoutWrapper);
+}
+
+void TabBarLayoutAlgorithm::LayoutMask(LayoutWrapper* layoutWrapper)
+{
+    auto layoutProperty = AceType::DynamicCast<TabBarLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    auto childCount = layoutWrapper->GetTotalChildCount() - MASK_COUNT;
+    if (childCount < 0) {
+        return;
+    }
+    auto selectedMaskWrapper = layoutWrapper->GetOrCreateChildByIndex(childCount);
+    CHECK_NULL_VOID(selectedMaskWrapper);
+    auto unselectedMaskWrapper = layoutWrapper->GetOrCreateChildByIndex(childCount + 1);
+    CHECK_NULL_VOID(unselectedMaskWrapper);
+    for (int32_t i = 0; i < MASK_COUNT; i++) {
+        auto currentWrapper = (i == 0 ? selectedMaskWrapper : unselectedMaskWrapper);
+        auto currentMask = (i == 0 ? layoutProperty->GetSelectedMask().value_or(-1) :
+            layoutProperty->GetUnselectedMask().value_or(-1));
+        if (currentMask < 0) {
+            currentWrapper->GetGeometryNode()->SetFrameSize(SizeF());
+        } else {
+            auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(currentMask);
+            CHECK_NULL_VOID(childWrapper);
+            auto childOffset = childWrapper->GetGeometryNode()->GetMarginFrameOffset();
+            auto offset = currentWrapper->GetGeometryNode()->GetMarginFrameOffset();
+            currentWrapper->GetGeometryNode()->SetMarginFrameOffset(offset + childOffset);
+        }
+        currentWrapper->Layout();
+    }
 }
 
 float TabBarLayoutAlgorithm::CalculateBackChildrenMainSize(LayoutWrapper* layoutWrapper, int32_t indicator, Axis axis)
 {
     float backChildrenMainSize = 0.0f;
-    auto childCount = layoutWrapper->GetTotalChildCount();
+    auto childCount = layoutWrapper->GetTotalChildCount() - MASK_COUNT;
     for (int32_t index = indicator + 1; index < childCount; ++index) {
         auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
         if (!childWrapper) {

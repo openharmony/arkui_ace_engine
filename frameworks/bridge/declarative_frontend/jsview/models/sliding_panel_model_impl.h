@@ -39,6 +39,7 @@ public:
     void SetBorderWidth(const Dimension& borderWidth) override;
     void SetBorderStyle(const BorderStyle& borderStyle) override;
     void SetBorder(const BorderStyle& borderStyle, const Dimension& borderWidth) override;
+    void SetModeChangeEvent(std::function<void(const BaseEventInfo*)>&& modeChangeEvent) override {};
 
 protected:
     static RefPtr<BoxComponent> GetPanelBox();

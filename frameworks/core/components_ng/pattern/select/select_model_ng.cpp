@@ -316,5 +316,19 @@ void SelectModelNG::SetMenuAlign(const MenuAlign& menuAlign)
     CHECK_NULL_VOID(pattern);
     pattern->SetMenuAlign(menuAlign);
 }
+
+void SelectModelNG::SetSelectChangeEvent(NG::SelectChangeEvent&& selectChangeEvent)
+{
+    auto hub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<SelectEventHub>();
+    CHECK_NULL_VOID(hub);
+    hub->SetSelectChangeEvent(std::move(selectChangeEvent));
+}
+
+void SelectModelNG::SetValueChangeEvent(NG::ValueChangeEvent&& valueChangeEvent)
+{
+    auto hub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<SelectEventHub>();
+    CHECK_NULL_VOID(hub);
+    hub->SetValueChangeEvent(std::move(valueChangeEvent));
+}
 } // namespace OHOS::Ace::NG
 

@@ -60,7 +60,7 @@ private:
     static void SetTypeAndStateEffect(const JSRef<JSObject>& obj);
     static void GetFontContent(const JSRef<JSVal> obj, NG::ButtonView::ButtonParameters& buttonParameters);
     static void CompleteParameters(NG::ButtonView::ButtonParameters& buttonParameters);
-    static Dimension GetSizeValue(const JSCallbackInfo& info);
+    static CalcDimension GetSizeValue(const JSCallbackInfo& info);
     static RefPtr<TextComponent> GetTextComponent();
     static void ResetButtonHeight();
 };

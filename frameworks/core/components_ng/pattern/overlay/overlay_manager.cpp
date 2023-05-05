@@ -167,6 +167,7 @@ void OverlayManager::OpenDialogAnimation(const RefPtr<FrameNode>& node)
     option.SetCurve(SHOW_SCALE_ANIMATION_CURVE);
     option.SetDuration(theme->GetAnimationDurationIn());
     ctx->ScaleAnimation(option, theme->GetScaleStart(), theme->GetScaleEnd());
+    node->OnAccessibilityEvent(AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
 }
 
 void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
@@ -464,6 +465,10 @@ void OverlayManager::UpdatePopupNode(int32_t targetId, const PopupInfo& popupInf
         LOGI("OverlayManager: Popup begin pop");
         popupInfo.popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
         rootNode->RemoveChild(popupMap_[targetId].popupNode);
+        AccessibilityEvent event;
+        event.type = AccessibilityEventType::CHANGE;
+        event.windowContentChangeTypes = WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE;
+        PipelineContext::GetCurrentContext()->SendEventToAccessibility(event);
 #ifdef ENABLE_DRAG_FRAMEWORK
         RemoveEventColumn();
         RemovePixelMapAnimation(false, 0, 0);
@@ -627,6 +632,7 @@ void OverlayManager::ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPt
         menu->MarkModifyDone();
         LOGI("menuNode mounted");
     }
+    menu->OnAccessibilityEvent(AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
 }
 
 // subwindow only contains one menu instance.
@@ -688,6 +694,8 @@ void OverlayManager::HideMenu(int32_t targetId)
     }
     PopMenuAnimation(menuMap_[targetId]);
     BlurOverlayNode();
+    menuMap_[targetId]->OnAccessibilityEvent(
+        AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
 }
 
 void OverlayManager::HideAllMenus()
@@ -782,6 +790,8 @@ void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
     }
     dialogNode->MarkRemoving();
     CloseDialogAnimation(dialogNode);
+    dialogNode->OnAccessibilityEvent(
+        AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
 }
 
 bool OverlayManager::RemoveOverlay()

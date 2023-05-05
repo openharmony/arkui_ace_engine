@@ -95,7 +95,7 @@ void JSText::SetFontSize(const JSCallbackInfo& info)
         LOGI("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension fontSize;
+    CalcDimension fontSize;
     if (!ParseJsDimensionFp(info[0], fontSize)) {
         return;
     }
@@ -158,11 +158,11 @@ void JSText::SetTextShadow(const JSCallbackInfo& info)
     }
     Shadow shadow;
     shadow.SetBlurRadius(radius);
-    Dimension offsetX;
+    CalcDimension offsetX;
     if (ParseJsonDimensionVp(argsPtrItem->GetValue("offsetX"), offsetX)) {
         shadow.SetOffsetX(offsetX.Value());
     }
-    Dimension offsetY;
+    CalcDimension offsetY;
     if (ParseJsonDimensionVp(argsPtrItem->GetValue("offsetY"), offsetY)) {
         shadow.SetOffsetY(offsetY.Value());
     }
@@ -216,7 +216,7 @@ void JSText::SetTextIndent(const JSCallbackInfo& info)
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionFp(info[0], value)) {
         return;
     }
@@ -256,7 +256,7 @@ void JSText::SetLineHeight(const JSCallbackInfo& info)
         LOGI("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionFp(info[0], value)) {
         return;
     }
@@ -283,7 +283,7 @@ void JSText::SetMinFontSize(const JSCallbackInfo& info)
         LOGI("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension fontSize;
+    CalcDimension fontSize;
     if (!ParseJsDimensionFp(info[0], fontSize)) {
         return;
     }
@@ -296,7 +296,7 @@ void JSText::SetMaxFontSize(const JSCallbackInfo& info)
         LOGI("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension fontSize;
+    CalcDimension fontSize;
     if (!ParseJsDimensionFp(info[0], fontSize)) {
         return;
     }
@@ -309,7 +309,7 @@ void JSText::SetLetterSpacing(const JSCallbackInfo& info)
         LOGI("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionFp(info[0], value)) {
         return;
     }
@@ -331,7 +331,7 @@ void JSText::SetBaselineOffset(const JSCallbackInfo& info)
         LOGI("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionFp(info[0], value)) {
         return;
     }

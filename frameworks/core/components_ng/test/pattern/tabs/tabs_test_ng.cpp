@@ -105,6 +105,7 @@ HWTEST_F(TabsTestNg, TabsModelSetDivider001, TestSize.Level1)
     divider.startMargin = startMargin;
     divider.endMargin = endMargin;
     divider.color = color;
+    divider.isNull = false;
 
     ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -121,6 +122,7 @@ HWTEST_F(TabsTestNg, TabsModelSetDivider001, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetDivider()->strokeWidth.ToString(), strokeWidth.ToString());
     EXPECT_EQ(layoutProperty->GetDivider()->startMargin.ToString(), startMargin.ToString());
     EXPECT_EQ(layoutProperty->GetDivider()->endMargin.ToString(), endMargin.ToString());
+    EXPECT_EQ(layoutProperty->GetDivider()->isNull, false);
 
     auto clone = layoutProperty->Clone();
     clone.Reset();
@@ -136,6 +138,38 @@ HWTEST_F(TabsTestNg, TabsModelSetDivider001, TestSize.Level1)
 
     TabsItemDivider divider2;
     EXPECT_FALSE(divider == divider2);
+}
+
+/**
+ * @tc.name: TabsModelSetDivider002
+ * @tc.desc: test SetDivider
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabsModelSetDivider002, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    TabsModelNG tabsModel;
+    TabsItemDivider divider;
+    divider.isNull = true;
+
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
+    tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
+    tabsModel.SetDivider(divider);
+    auto tabsFrameNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(tabsFrameNode, nullptr);
+    EXPECT_EQ(tabsFrameNode->GetTag(), V2::TABS_ETS_TAG);
+    auto dividerNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildAtIndex(1));
+    ASSERT_NE(dividerNode, nullptr);
+    EXPECT_EQ(dividerNode->GetTag(), V2::DIVIDER_ETS_TAG);
+    auto layoutProperty = tabsFrameNode->GetLayoutProperty<TabsLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(layoutProperty->GetDivider()->isNull, true);
+
+    auto clone = layoutProperty->Clone();
+    clone.Reset();
+    std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
+    layoutProperty->ToJsonValue(json);
+    ASSERT_NE(json, nullptr);
 }
 
 /**
@@ -1895,5 +1929,37 @@ HWTEST_F(TabsTestNg, TabsAccessibilityPropertyTestNg004, TestSize.Level1)
         actions |= 1UL << static_cast<uint32_t>(action);
     }
     EXPECT_EQ(actions, exptectActions);
+}
+
+/**
+ * @tc.name: TabsEventHubChangeEvent001
+ * @tc.desc: Tabs OnChangeEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabsEventHubChangeEvent001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    TabsModelNG tabsModel;
+    TabsItemDivider divider;
+    Dimension strokeWidth = 10.0_vp;
+    Dimension startMargin = 3.0_vp;
+    Dimension endMargin = 4.0_vp;
+    Color color = Color::BLACK;
+
+    divider.strokeWidth = strokeWidth;
+    divider.startMargin = startMargin;
+    divider.endMargin = endMargin;
+    divider.color = color;
+    divider.isNull = false;
+
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
+    tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
+    tabsModel.SetOnChangeEvent([](const BaseEventInfo* info) {});
+    tabsModel.SetDivider(divider);
+    auto frameNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->onIndexChangeEvent_, nullptr);
 }
 } // namespace OHOS::Ace::NG

@@ -26,7 +26,11 @@ void FrameNode::OnWindowFocused() {}
 void FrameNode::OnWindowUnfocused() {}
 void FrameNode::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) {}
 void FrameNode::OnNotifyMemoryLevel(int32_t level) {}
-void FrameNode::OnAccessibilityEvent(AccessibilityEventType eventType) const {}
+void FrameNode::OnAccessibilityEvent(
+    AccessibilityEventType eventType, WindowsContentChangeTypes windowsContentChangeType) const
+{}
+void FrameNode::OnAccessibilityEvent(
+    AccessibilityEventType eventType, std::string beforeText, std::string latestContent) const {}
 void FrameNode::DumpInfo() {}
 void FrameNode::FocusToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 void FrameNode::MouseToJsonValue(std::unique_ptr<JsonValue>& json) const {}

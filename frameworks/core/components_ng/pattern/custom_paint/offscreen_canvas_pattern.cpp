@@ -258,9 +258,9 @@ void OffscreenCanvasPattern::Translate(double x, double y)
     offscreenPaintMethod_->Translate(x, y);
 }
 
-void OffscreenCanvasPattern::SetFillPattern(const Ace::Pattern& pattern)
+void OffscreenCanvasPattern::SetFillPattern(const std::weak_ptr<Ace::Pattern>& pattern)
 {
-    offscreenPaintMethod_->SetFillPattern(pattern);
+    offscreenPaintMethod_->SetFillPatternNG(pattern);
 }
 
 void OffscreenCanvasPattern::SetFillGradient(const Ace::Gradient& gradient)
@@ -343,9 +343,9 @@ void OffscreenCanvasPattern::SetShadowColor(const Color& color)
     offscreenPaintMethod_->SetShadowColor(color);
 }
 
-void OffscreenCanvasPattern::SetStrokePattern(const Ace::Pattern& pattern)
+void OffscreenCanvasPattern::SetStrokePattern(const std::weak_ptr<Ace::Pattern>& pattern)
 {
-    offscreenPaintMethod_->SetStrokePattern(pattern);
+    offscreenPaintMethod_->SetStrokePatternNG(pattern);
 }
 
 void OffscreenCanvasPattern::SetStrokeGradient(const Ace::Gradient& gradient)

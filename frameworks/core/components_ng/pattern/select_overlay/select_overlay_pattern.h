@@ -21,9 +21,11 @@
 #include "base/geometry/ng/rect_t.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
+#include "base/utils/utils.h"
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_layout_algorithm.h"
+#include "core/components_ng/pattern/select_overlay/select_overlay_modifier.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_paint_method.h"
 
 namespace OHOS::Ace::NG {
@@ -52,7 +54,11 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        return MakeRefPtr<SelectOverlayPaintMethod>(info_);
+        if (!selectOverlayModifier_) {
+            selectOverlayModifier_ = AceType::MakeRefPtr<SelectOverlayModifier>(defaultMenuEndOffset_);
+        }
+        return MakeRefPtr<SelectOverlayPaintMethod>(
+            selectOverlayModifier_, info_, defaultMenuEndOffset_, hasExtensitonMenu_);
     }
 
     const std::shared_ptr<SelectOverlayInfo>& GetSelectOverlayInfo() const
@@ -78,6 +84,21 @@ public:
     const std::string& GetSelectInfo() const
     {
         return selectInfo_;
+    }
+
+    const RefPtr<SelectOverlayModifier>& GetOverlayModifier()
+    {
+        return selectOverlayModifier_;
+    }
+
+    const OffsetF& GetDefaultMenuEndOffset()
+    {
+        return defaultMenuEndOffset_;
+    }
+
+    float GetMenuWidth() const
+    {
+        return meanuWidth_;
     }
 
 private:
@@ -108,12 +129,16 @@ private:
     bool secondHandleDrag_ = false;
     // Used to record the original menu display status when the handle is moved.
     bool orignMenuIsShow_ = false;
+    bool hasExtensitonMenu_ = false;
 
     int32_t greatThanMaxWidthIndex_ = -1;
+    float meanuWidth_ = 0.0f;
 
     std::string selectInfo_;
 
     OffsetF defaultMenuEndOffset_;
+
+    RefPtr<SelectOverlayModifier> selectOverlayModifier_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayPattern);
 };

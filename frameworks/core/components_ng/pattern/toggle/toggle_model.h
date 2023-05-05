@@ -50,6 +50,7 @@ public:
     virtual void SetBackgroundColor(const Color& color) = 0;
     virtual bool IsToggle() = 0;
     virtual void SetPadding(const NG::PaddingPropertyF& args) = 0;
+    virtual void OnChangeEvent(NG::ChangeEvent&& onChangeEvent) = 0;
 
 private:
     static std::unique_ptr<ToggleModel> instance_;

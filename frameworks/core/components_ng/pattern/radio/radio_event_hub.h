@@ -37,6 +37,9 @@ public:
 
     void UpdateChangeEvent(bool check) const
     {
+        if (checkedChangeEvent_) {
+            checkedChangeEvent_(check);
+        }
         if (changeEvent_) {
             changeEvent_(check);
         }
@@ -62,10 +65,16 @@ public:
         group_ = group;
     }
 
+    void SetOnChangeEvent(ChangeEvent&& checkedChangeEvent)
+    {
+        checkedChangeEvent_ = std::move(checkedChangeEvent);
+    }
+
 private:
     ChangeEvent changeEvent_;
     std::string value_;
     std::string group_;
+    ChangeEvent checkedChangeEvent_;
 };
 
 } // namespace OHOS::Ace::NG

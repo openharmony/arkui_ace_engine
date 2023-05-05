@@ -69,6 +69,7 @@ extern const char THEME_PATTERN_TEXT_OVERLAY[];
 extern const char THEME_PATTERN_VIDEO[];
 extern const char THEME_PATTERN_INDEXER[];
 extern const char THEME_PATTERN_APP_BAR[];
+extern const char THEME_PATTERN_ADVANCED_PATTERN[];
 
 // pattern general attributes
 extern const char PATTERN_FG_COLOR[];
@@ -150,5 +151,14 @@ extern const char BADGE_BORDER_WIDTH[];
 // swiper attributes
 extern const char INDICATOR_TEXT_FONT_SIZE[];
 extern const char INDICATOR_TEXT_FONT_COLOR[];
+// swiper attributes for arrow
+extern const char ARROW_COLOR_BOARDCOLOR_HOVER[];
+extern const char ARROW_COLOR_BOARDCOLOR_CLICK[];
+extern const char ARROW_COLOR_PRIMARY[];
+extern const char ARROW_COLOR_PRIMARY_CONTRARY[];
+extern const char ARROW_DISABLED_ALPHA[];
+extern const char ARROW_HORIZONTAL_MARGIN[];
+extern const char ARROW_VERTICAL_MARGIN[];
+extern const char ARROW_COLOR_COMPONENT_NORMAL[];
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_THEME_ATTRIBUTES_H

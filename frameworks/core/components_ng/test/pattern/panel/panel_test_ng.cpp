@@ -1020,4 +1020,25 @@ HWTEST_F(PanelTestNg, PanelTestNg0018, TestSize.Level1)
     EXPECT_EQ(height_2, FULL_SCREEN_HEIGHT - DEFAULT_BLANK_HEIGHT_MODE_HALF - DRAG_ICON_HEIGHT);
 }
 
+/**
+ * @tc.name: PanelChangeEventTestNg001
+ * @tc.desc: Test FireSizeChangeEvent and FireHeightChangeEvent function of slidingPanel with dragBar.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanelTestNg, PanelChangeEventTestNg001, TestSize.Level1)
+{
+    SlidingPanelModelNG slidingPanelModelNG;
+    slidingPanelModelNG.Create(SLIDING_PANEL_SHOW);
+    slidingPanelModelNG.SetHasDragBar(SLIDING_PANEL_HAS_DRAG_BAR_TRUE);
+    auto height_2 = HEIGHT_2;
+    PanelMode mode = PanelMode::MINI;
+    auto sizeChangeEvent = [&mode, &height_2](const BaseEventInfo* info) {
+        auto eventInfo = TypeInfoHelper::DynamicCast<SlidingPanelSizeChangeEvent>(info);
+        mode = eventInfo->GetMode();
+        height_2 = eventInfo->GetHeight();
+    };
+    slidingPanelModelNG.SetOnSizeChange(sizeChangeEvent);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+}
 } // namespace OHOS::Ace::NG
