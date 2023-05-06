@@ -30,8 +30,10 @@ using namespace OHOS::Ace::Framework;
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr float CURRENT_DISTANCE = -5.0f;
 constexpr float SCROLLABLE_DISTANCE = 10.0f;
+constexpr float CURRENT_DISTANCE = -5.0f;
+constexpr float CURRENT_DISTANCE_TOP = 0.0f;
+constexpr float CURRENT_DISTANCE_BOTTOM = -SCROLLABLE_DISTANCE;
 } // namespace
 class ScrollAccessibilityPropertyTestNg : public testing::Test {
 public:
@@ -86,6 +88,35 @@ HWTEST_F(ScrollAccessibilityPropertyTestNg, ScrollAccessibilityPropertyGetSuppor
     uint64_t actions = 0, expectActions = 0;
     expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
     expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
+    for (auto action : supportAceActions) {
+        actions |= 1UL << static_cast<uint32_t>(action);
+    }
+    EXPECT_EQ(actions, expectActions);
+
+    scrollPattern->currentOffset_ = CURRENT_DISTANCE_TOP;
+    scrollAccessibilityProperty->ResetSupportAction();
+    supportAceActions = scrollAccessibilityProperty->GetSupportAction();
+    actions = 0, expectActions = 0;
+    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
+    for (auto action : supportAceActions) {
+        actions |= 1UL << static_cast<uint32_t>(action);
+    }
+    EXPECT_EQ(actions, expectActions);
+
+    scrollPattern->currentOffset_ = CURRENT_DISTANCE_BOTTOM;
+    scrollAccessibilityProperty->ResetSupportAction();
+    supportAceActions = scrollAccessibilityProperty->GetSupportAction();
+    actions = 0, expectActions = 0;
+    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
+    for (auto action : supportAceActions) {
+        actions |= 1UL << static_cast<uint32_t>(action);
+    }
+    EXPECT_EQ(actions, expectActions);
+
+    scrollPattern->axis_ = Axis::NONE;
+    scrollAccessibilityProperty->ResetSupportAction();
+    supportAceActions = scrollAccessibilityProperty->GetSupportAction();
+    actions = 0, expectActions = 0;
     for (auto action : supportAceActions) {
         actions |= 1UL << static_cast<uint32_t>(action);
     }
