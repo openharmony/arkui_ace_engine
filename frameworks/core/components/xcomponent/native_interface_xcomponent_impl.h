@@ -37,7 +37,7 @@ struct OH_NativeXComponent_KeyEvent {
     OH_NativeXComponent_EventSourceType sourceType =
         OH_NativeXComponent_EventSourceType::OH_NATIVEXCOMPONENT_SOURCE_TYPE_UNKNOWN;
     int64_t deviceId {};
-    int64_t timeStamp {};
+    int64_t timestamp {};
 };
 
 namespace OHOS::Ace {
