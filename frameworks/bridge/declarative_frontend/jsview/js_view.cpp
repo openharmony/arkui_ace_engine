@@ -24,6 +24,7 @@
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "core/common/container.h"
+#include "core/common/container_scope.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_full_update_model.h"
 #include "core/components_ng/base/view_full_update_model_ng.h"
@@ -569,6 +570,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
     auto appearFunc = [weak = AceType::WeakClaim(this)]() {
         auto jsView = weak.Upgrade();
         CHECK_NULL_VOID(jsView);
+        ContainerScope scope(jsView->GetInstanceId());
         ACE_SCORING_EVENT("Component[" + jsView->viewId_ + "].Appear");
         if (jsView->jsViewFunction_) {
             jsView->jsViewFunction_->ExecuteAppear();
@@ -578,6 +580,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
     auto renderFunction = [weak = AceType::WeakClaim(this)]() -> RefPtr<AceType> {
         auto jsView = weak.Upgrade();
         CHECK_NULL_RETURN(jsView, nullptr);
+        ContainerScope scope(jsView->GetInstanceId());
         if (!jsView->isFirstRender_) {
             LOGW("the js view has already called initial render");
             return nullptr;
@@ -589,6 +592,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
     auto updateFunction = [weak = AceType::WeakClaim(this)]() -> void {
         auto jsView = weak.Upgrade();
         CHECK_NULL_VOID(jsView);
+        ContainerScope scope(jsView->GetInstanceId());
         if (!jsView->needsUpdate_) {
             LOGW("the js view does not need to update");
             return;
@@ -609,6 +613,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
         auto jsView = weak.Upgrade();
         CHECK_NULL_VOID(jsView);
         CHECK_NULL_VOID(jsView->jsViewFunction_);
+        ContainerScope scope(jsView->GetInstanceId());
         jsView->jsViewFunction_->ExecuteReload(deep);
     };
 
@@ -616,14 +621,15 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
     auto completeReloadFunc = [weak = AceType::WeakClaim(this)]() -> RefPtr<AceType> {
         auto jsView = weak.Upgrade();
         CHECK_NULL_RETURN(jsView, nullptr);
+        ContainerScope scope(jsView->GetInstanceId());
         return jsView->InitialRender();
     };
 
     auto pageTransitionFunction = [weak = AceType::WeakClaim(this)]() {
         auto jsView = weak.Upgrade();
-        if (!jsView || !jsView->jsViewFunction_) {
-            return;
-        }
+        CHECK_NULL_VOID_NOLOG(jsView);
+        CHECK_NULL_VOID_NOLOG(jsView->jsViewFunction_);
+        ContainerScope scope(jsView->GetInstanceId());
         {
             ACE_SCORING_EVENT("Component[" + jsView->viewId_ + "].Transition");
             jsView->jsViewFunction_->ExecuteTransition();
@@ -634,27 +640,29 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
         LOGD("call remove view function");
         auto jsView = weak.Upgrade();
         CHECK_NULL_VOID(jsView);
+        ContainerScope scope(jsView->GetInstanceId());
         jsView->Destroy(nullptr);
         jsView->viewNode_.Reset();
     };
 
     auto updateViewNodeFunction = [weak = AceType::WeakClaim(this)](const RefPtr<AceType>& node) {
         auto jsView = weak.Upgrade();
-        if (jsView) {
-            jsView->viewNode_ = node;
-        }
+        CHECK_NULL_VOID_NOLOG(jsView);
+        jsView->viewNode_ = node;
     };
 
     auto nodeUpdateFunc = [weak = AceType::WeakClaim(this)](int32_t nodeId) {
         auto jsView = weak.Upgrade();
         CHECK_NULL_VOID(jsView);
         CHECK_NULL_VOID(jsView->jsViewFunction_);
+        ContainerScope scope(jsView->GetInstanceId());
         jsView->jsViewFunction_->ExecuteForceNodeRerender(nodeId);
     };
 
     auto recycleCustomNode = [weak = AceType::WeakClaim(this)](const RefPtr<NG::CustomNodeBase>& recycleNode) -> void {
         auto jsView = weak.Upgrade();
         CHECK_NULL_VOID(jsView);
+        ContainerScope scope(jsView->GetInstanceId());
         recycleNode->ResetRecycle();
         AceType::DynamicCast<NG::UINode>(recycleNode)->SetActive(false);
         jsView->SetRecycleCustomNode(recycleNode);
@@ -679,6 +687,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
     auto measureFunc = [weak = AceType::WeakClaim(this)](NG::LayoutWrapper* layoutWrapper) -> void {
         auto jsView = weak.Upgrade();
         CHECK_NULL_VOID(jsView);
+        ContainerScope scope(jsView->GetInstanceId());
         jsView->jsViewFunction_->ExecuteMeasure(layoutWrapper);
     };
     if (jsViewFunction_->HasMeasure()) {
@@ -688,6 +697,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
     auto layoutFunc = [weak = AceType::WeakClaim(this)](NG::LayoutWrapper* layoutWrapper) -> void {
         auto jsView = weak.Upgrade();
         CHECK_NULL_VOID(jsView);
+        ContainerScope scope(jsView->GetInstanceId());
         jsView->jsViewFunction_->ExecuteLayout(layoutWrapper);
     };
     if (jsViewFunction_->HasLayout()) {
