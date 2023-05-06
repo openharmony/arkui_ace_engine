@@ -236,10 +236,17 @@ template("ace_core_source_set") {
     ]
 
     if (ace_use_new_skia) {
-      sources += [
-        "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner.cc",
-        "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner_adapter.cc",
-      ]
+      if (is_ohos) {
+        sources += [
+          "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner.cc",
+          "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner_adapter.cc",
+        ]
+      } else {
+        sources += [
+          "$flutter_root/engine/flutter/common/task_runners.cc",
+          "$flutter_root/engine/flutter/shell/common/thread_host.cc",
+        ]
+      }
       configs += [ "$ace_flutter_engine_root:flutter_config" ]
       deps += [ "$skia_root_new:skia_$platform" ]
     } else {
