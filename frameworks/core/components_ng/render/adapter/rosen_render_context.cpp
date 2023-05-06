@@ -1004,8 +1004,20 @@ RectF RosenRenderContext::AdjustPaintRect()
     Dimension parentPaddingTop;
     // Position properties take precedence over offset locations.
     if (HasPosition() && IsUsingPosition(frameNode)) {
+        Dimension selfMarginLeft;
+        Dimension selfMarginTop;
+        if (frameNode->GetLayoutProperty() && frameNode->GetLayoutProperty()->GetMarginProperty()) {
+            auto& margin = frameNode->GetLayoutProperty()->GetMarginProperty();
+            if (margin->left.has_value()) {
+                selfMarginLeft = margin->left.value().GetDimension();
+            }
+            if (margin->top.has_value()) {
+                selfMarginTop = margin->top.value().GetDimension();
+            }
+        }
         GetPaddingOfFirstFrameNodeParent(parentPaddingLeft, parentPaddingTop);
-        auto position = GetPositionValue({}) + OffsetT<Dimension>(parentPaddingLeft, parentPaddingTop);
+        auto position = GetPositionValue({}) +
+                        OffsetT<Dimension>(parentPaddingLeft + selfMarginTop, parentPaddingTop + selfMarginTop);
         auto posX = ConvertToPx(position.GetX(), ScaleProperty::CreateScaleProperty(), widthPercentReference);
         auto posY = ConvertToPx(position.GetY(), ScaleProperty::CreateScaleProperty(), heightPercentReference);
         rect.SetLeft(posX.value_or(0) - anchorX.value_or(0));
