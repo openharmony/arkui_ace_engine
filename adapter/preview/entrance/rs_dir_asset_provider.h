@@ -36,6 +36,7 @@
 #include "core/common/rosen/rosen_asset_manager.h"
 #include "base/resource/asset_manager.h"
 #include "base/utils/macros.h"
+#include "base/utils/utils.h"
 
 namespace OHOS::Ace {
 class ACE_EXPORT RSDirAssetProvider : public RSAssetProvider {
@@ -60,15 +61,9 @@ public:
         LOGI("GetAsset: %{private}s, %{private}s", assetName.c_str(), basePath_.c_str());
         std::string fileName = basePath_ + assetName;
         char realPath[PATH_MAX] = { 0x00 };
-#if defined(WINDOWS_PLATFORM)
-        if (!PathCanonicalize(realPath, fileName.c_str())) {
+        if (!RealPath(fileName, realPath)) {
             return nullptr;
         }
-#else
-        if (!realpath(fileName.c_str(), realPath)) {
-            return nullptr;
-        }
-#endif
         auto fp = std::fopen(realPath, "rb");
         if (!fp) {
             LOGE("[%{private}s] open file error %{public}s", fileName.c_str(), strerror(errno));
@@ -116,15 +111,9 @@ public:
     {
         std::string fileName = basePath_ + assetName;
         char realPath[PATH_MAX] = { 0x00 };
-#if defined(WINDOWS_PLATFORM)
-        if (!PathCanonicalize(realPath, fileName.c_str())) {
+        if (!RealPath(fileName, realPath)) {
             return nullptr;
         }
-#else
-        if (!realpath(fileName.c_str(), realPath)) {
-            return nullptr;
-        }
-#endif
         std::FILE* fp = std::fopen(realPath, "r");
         if (fp == nullptr) {
             return "";
