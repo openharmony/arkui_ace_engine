@@ -503,15 +503,15 @@ int32_t OH_NativeXComponent_GetKeyEventSourceType(
 int32_t OH_NativeXComponent_GetKeyEventDeviceId(OH_NativeXComponent_KeyEvent* keyEvent, int64_t* deviceId);
 
 /**
- * @brief Obtains the timeStamp of the key event.
+ * @brief Obtains the timestamp of the key event.
  *
  * @param keyEvent Indicates the pointer to this <b>OH_NativeXComponent_KeyEvent</b> instance.
- * @param timeStamp Indicates the timeStamp of the <b>OH_NativeXComponent_KeyEvent</b> instance.
+ * @param timestamp Indicates the timestamp of the <b>OH_NativeXComponent_KeyEvent</b> instance.
  * @return Returns the status code of the execution.
  * @since 10
  * @version 1.0
  */
-int32_t OH_NativeXComponent_GetKeyEventTimeStamp(OH_NativeXComponent_KeyEvent* keyEvent, int64_t* timeStamp);
+int32_t OH_NativeXComponent_GetKeyEventTimestamp(OH_NativeXComponent_KeyEvent* keyEvent, int64_t* timestamp);
 
 #ifdef __cplusplus
 };
