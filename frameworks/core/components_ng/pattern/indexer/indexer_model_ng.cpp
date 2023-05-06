@@ -18,17 +18,9 @@
 #include "base/geometry/dimension.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/indexer/indexer_event_hub.h"
 #include "core/components_ng/pattern/indexer/indexer_pattern.h"
-#include "core/components_ng/pattern/indexer/indexer_theme.h"
-#include "core/components_ng/pattern/indexer/indexer_view.h"
-#include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_v2/indexer/indexer_component.h"
-#include "core/components_v2/indexer/indexer_event_info.h"
-#include "core/components_v2/indexer/render_indexer.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 void IndexerModelNG::Create(std::vector<std::string>& arrayValue, int32_t selected)
@@ -187,7 +179,7 @@ void IndexerModelNG::SetFontSize(const Dimension& fontSize)
     }
 }
 
-void IndexerModelNG::SetFontWeight(FontWeight weight)
+void IndexerModelNG::SetFontWeight(const FontWeight weight)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, FontWeight, weight);
 }
@@ -218,5 +210,23 @@ void IndexerModelNG::SetOnPopupSelected(std::function<void(const int32_t selecte
     auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnPopupSelected(std::move(onPopupSelected));
+}
+
+void IndexerModelNG::SetChangeEvent(std::function<void(const int32_t selected)>&& changeEvent)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetChangeEvent(std::move(changeEvent));
+}
+
+void IndexerModelNG::SetCreatChangeEvent(std::function<void(const int32_t selected)>&& changeEvent)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetCreatChangeEvent(std::move(changeEvent));
 }
 } // namespace OHOS::Ace::NG

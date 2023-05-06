@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,13 +18,8 @@
 
 #include <mutex>
 
-#include "core/components_ng/pattern/indexer/indexer_event_hub.h"
 #include "core/components_ng/pattern/indexer/indexer_theme.h"
-#include "core/components_ng/pattern/indexer/indexer_view.h"
 #include "core/components_v2/indexer/indexer_component.h"
-#include "core/components_v2/indexer/indexer_event_info.h"
-#include "core/components_v2/indexer/render_indexer.h"
-#include "core/event/ace_event_handler.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -55,7 +50,7 @@ public:
     virtual void SetPopupSelectedColor(const std::optional<Color>& color) {};
     virtual void SetPopupUnselectedColor(const std::optional<Color>& color) {};
     virtual void SetFontSize(const Dimension& fontSize) {};
-    virtual void SetFontWeight(FontWeight weight) {};
+    virtual void SetFontWeight(const FontWeight weight) {};
     virtual void SetPopupPositionX(const Dimension& positionX) {};
     virtual void SetPopupPositionY(const Dimension& positionY) {};
 
@@ -66,6 +61,9 @@ public:
     virtual void SetOnRequestPopupData(
         std::function<std::vector<std::string>(const int32_t selected)>&& RequestPopupData) = 0;
     virtual void SetOnPopupSelected(std::function<void(const int32_t selected)>&& onPopupSelected) = 0;
+    virtual void SetChangeEvent(std::function<void(const int32_t selected)>&& changeEvent) {};
+    virtual void SetCreatChangeEvent(std::function<void(const int32_t selected)>&& changeEvent) {};
+
 private:
     static std::unique_ptr<IndexerModel> instance_;
     static std::mutex mutex_;

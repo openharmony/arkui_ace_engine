@@ -84,6 +84,7 @@ public:
     std::unique_ptr<Ace::ImageData> GetImageData(double left, double top, double width, double height);
     void PutImageData(const Ace::ImageData& imageData);
     void TransferFromImageBitmap(const RefPtr<OffscreenCanvasPattern>& offscreenCanvasPattern);
+    void CloseImageBitmap(const std::string& src);
 
     void UpdateFillColor(const Color& color);
     void UpdateFillRuleForPath(const CanvasFillRule rule);

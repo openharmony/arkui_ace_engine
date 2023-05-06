@@ -38,7 +38,7 @@ void TabsNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t slot)
     }
 
     swiperChildren_.emplace(child->GetId());
-    auto swiperNode = GetChildren().back();
+    auto swiperNode = GetTabs();
     if (swiperNode) {
         child->MountToParent(swiperNode);
     }

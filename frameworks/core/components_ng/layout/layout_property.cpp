@@ -471,7 +471,7 @@ void LayoutProperty::OnVisibilityUpdate(VisibleType visible)
     CHECK_NULL_VOID(host);
     // store the previous visibility value.
     auto preVisible = host->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE);
-    
+
     // update visibility value.
     propVisibility_ = visible;
     host->OnVisibleChange(visible == VisibleType::VISIBLE);

@@ -38,6 +38,8 @@ public:
     void SetNormalTextStyle(const RefPtr<PickerTheme>& theme, const PickerTextStyle& value) override;
     void SetSelectedTextStyle(const RefPtr<PickerTheme>& theme, const PickerTextStyle& value) override;
     void SetBackgroundColor(const Color& color) override;
+    void SetChangeEvent(DateChangeEvent&& onChange) override;
+
 private:
     static RefPtr<FrameNode> CreateStackNode();
     static RefPtr<FrameNode> CreateButtonNode();

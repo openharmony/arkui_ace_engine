@@ -44,7 +44,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr float DEFAULT_ROOT_WIDTH = 720.f;
 constexpr float DEFAULT_ROOT_HEIGHT = 1136.f;
-const std::vector<std::string> CREATE_ARRAY = {
+std::vector<std::string> CREATE_ARRAY = {
     "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
     "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"};
 std::vector<std::string> GetPopupData(int32_t)
@@ -559,7 +559,7 @@ HWTEST_F(IndexerTestNg, IndexerPattern002, TestSize.Level1)
     IndexerModelNG IndexerModelNG;
     IndexerModelNG.Create(CREATE_ARRAY, 2);
     IndexerModelNG.SetUsingPopup(true);
-    IndexerModelNG.SetAlignStyle(AlignStyle::LEFT);
+    IndexerModelNG.SetAlignStyle(0);
     IndexerModelNG.SetPopupUnselectedColor(Color(0x00000000));
     IndexerModelNG.SetOnRequestPopupData(GetPopupData);
     GetInstance();
@@ -1150,4 +1150,3 @@ HWTEST_F(IndexerTestNg, IndexerAlgorithmCoverage001, TestSize.Level1)
     EXPECT_TRUE(true);
 }
 } // namespace OHOS::Ace::NG
-

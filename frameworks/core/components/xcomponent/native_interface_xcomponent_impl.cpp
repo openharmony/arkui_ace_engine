@@ -70,7 +70,7 @@ int32_t OH_NativeXComponent::GetXComponentOffset(const void* window, double* x, 
     if (xcomponentImpl_ == nullptr) {
         return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
     }
-    auto surfaceWindow =  const_cast<void*>(xcomponentImpl_->GetSurface());
+    auto surfaceWindow = const_cast<void*>(xcomponentImpl_->GetSurface());
     if (window != surfaceWindow) {
         return OH_NATIVEXCOMPONENT_RESULT_FAILED;
     }
@@ -148,5 +148,41 @@ int32_t OH_NativeXComponent::RegisterMouseEventCallback(OH_NativeXComponent_Mous
         return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
     }
     xcomponentImpl_->SetMouseEventCallback(callback);
+    return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
+}
+
+int32_t OH_NativeXComponent::RegisterFocusEventCallback(void (*callback)(OH_NativeXComponent* component, void* window))
+{
+    if (xcomponentImpl_ == nullptr) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+    xcomponentImpl_->SetFocusEventCallback(callback);
+    return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
+}
+
+int32_t OH_NativeXComponent::RegisterKeyEventCallback(void (*callback)(OH_NativeXComponent* component, void* window))
+{
+    if (xcomponentImpl_ == nullptr) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+    xcomponentImpl_->SetKeyEventCallback(callback);
+    return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
+}
+
+int32_t OH_NativeXComponent::RegisterBlurEventCallback(void (*callback)(OH_NativeXComponent* component, void* window))
+{
+    if (xcomponentImpl_ == nullptr) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+    xcomponentImpl_->SetBlurEventCallback(callback);
+    return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
+}
+
+int32_t OH_NativeXComponent::GetKeyEvent(OH_NativeXComponent_KeyEvent** keyEvent)
+{
+    if (xcomponentImpl_ == nullptr) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+    (*keyEvent) = xcomponentImpl_->GetKeyEvent();
     return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
 }

@@ -199,4 +199,13 @@ void TimePickerModelNG::SetBackgroundColor(const Color& color)
     CHECK_NULL_VOID(timePickerRowPattern);
     timePickerRowPattern->SetBackgroundColor(color);
 }
+
+void TimePickerModelNG::SetChangeEvent(TimeChangeEvent&& onChange)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TimePickerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetChangeEvent(std::move(onChange));
+}
 } // namespace OHOS::Ace::NG

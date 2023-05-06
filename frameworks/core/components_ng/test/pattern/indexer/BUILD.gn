@@ -95,7 +95,6 @@ ohos_unittest("indexer_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/indexer/indexer_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/indexer/indexer_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/indexer/indexer_view.cpp",
-    "indexer_model_test_ng.cpp",
     "indexer_test_ng.cpp",
   ]
 

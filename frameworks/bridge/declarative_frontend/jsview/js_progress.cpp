@@ -247,7 +247,7 @@ void JSProgress::JsSetCapsuleStyle(const JSCallbackInfo& info)
     RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
 
     auto jsBorderWidth = paramObject->GetProperty("borderWidth");
-    Dimension borderWidth;
+    CalcDimension borderWidth;
     if (!ParseJsDimensionVp(jsBorderWidth, borderWidth)) {
         LOGI("JsProgress set Inner BorderWidth is mull");
         borderWidth = theme->GetBorderWidth();
@@ -323,7 +323,7 @@ void JSProgress::JsSetFont(const JSRef<JSObject>& textObject)
     RefPtr<TextTheme> textTheme = GetTheme<TextTheme>();
     CHECK_NULL_VOID(textTheme);
     auto size = textObject->GetProperty("size");
-    Dimension fontSize;
+    CalcDimension fontSize;
     if (!ParseJsDimensionFp(size, fontSize)) {
         LOGI("JsProgress set fontSize is mull");
         fontSize = theme->GetTextSize();

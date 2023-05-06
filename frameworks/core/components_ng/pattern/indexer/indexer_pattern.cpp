@@ -1126,6 +1126,14 @@ void IndexerPattern::FireOnSelect(int32_t selectIndex, bool fromPress)
     auto indexerEventHub = host->GetEventHub<IndexerEventHub>();
     CHECK_NULL_VOID(indexerEventHub);
     if (fromPress || lastIndexFromPress_ == fromPress || lastFireSelectIndex_ != selectIndex) {
+        auto onChangeEvent = indexerEventHub->GetChangeEvent();
+        if (onChangeEvent && (selected_ >= 0) && (selected_ < itemCount_)) {
+            onChangeEvent(selected_);
+        }
+        auto onCreatChangeEvent = indexerEventHub->GetCreatChangeEvent();
+        if (onCreatChangeEvent && (selected_ >= 0) && (selected_ < itemCount_)) {
+            onCreatChangeEvent(selected_);
+        }
         auto onSelected = indexerEventHub->GetOnSelected();
         if (onSelected && (selectIndex >= 0) && (selectIndex < itemCount_)) {
             onSelected(selectIndex);

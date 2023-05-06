@@ -1271,4 +1271,34 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupAccessibilityPropertyTestNg003, TestS
     ASSERT_NE(accessibility, nullptr);
     EXPECT_EQ(accessibility->GetCollectionItemCounts(), 0);
 }
+
+/**
+ * @tc.name: CheckBoxUpdateChangeEventTest001
+ * @tc.desc: Test CheckBoxGroup onChange event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxUpdateChangeEventTest001, TestSize.Level1)
+{
+    CheckBoxGroupModelNG checkBoxGroup;
+    checkBoxGroup.Create(GROUP_NAME);
+    std::vector<std::string> vec;
+    int status = 0;
+    CheckboxGroupResult groupResult(
+        std::vector<std::string> { NAME }, int(CheckBoxGroupPaintProperty::SelectStatus::ALL));
+    auto changeEvent = [&vec, &status](const BaseEventInfo* groupResult) {
+        const auto* eventInfo = TypeInfoHelper::DynamicCast<CheckboxGroupResult>(groupResult);
+        vec = eventInfo->GetNameList();
+        status = eventInfo->GetStatus();
+    };
+
+    checkBoxGroup.SetChangeEvent(changeEvent);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxGroupEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->UpdateChangeEvent(&groupResult);
+    EXPECT_FALSE(vec.empty());
+    EXPECT_EQ(vec.front(), NAME);
+    EXPECT_EQ(status, int(CheckBoxGroupPaintProperty::SelectStatus::ALL));
+}
 } // namespace OHOS::Ace::NG

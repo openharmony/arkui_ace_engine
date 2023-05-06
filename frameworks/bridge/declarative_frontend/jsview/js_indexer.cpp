@@ -16,18 +16,12 @@
 #include "bridge/declarative_frontend/jsview/js_indexer.h"
 
 #include "base/geometry/dimension.h"
+#include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_scroller.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/indexer_model_impl.h"
-#include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/components_ng/pattern/indexer/indexer_event_hub.h"
 #include "core/components_ng/pattern/indexer/indexer_model_ng.h"
-#include "core/components_ng/pattern/indexer/indexer_theme.h"
-#include "core/components_ng/pattern/indexer/indexer_view.h"
-#include "core/components_v2/indexer/indexer_component.h"
-#include "core/components_v2/indexer/indexer_event_info.h"
-#include "core/components_v2/indexer/render_indexer.h"
 
 namespace OHOS::Ace {
 std::unique_ptr<IndexerModel> IndexerModel::instance_ = nullptr;
@@ -59,6 +53,25 @@ const std::vector<V2::AlignStyle> ALIGN_STYLE = { V2::AlignStyle::LEFT, V2::Alig
 const std::vector<NG::AlignStyle> NG_ALIGN_STYLE = { NG::AlignStyle::LEFT, NG::AlignStyle::RIGHT };
 }; // namespace
 
+void JSIndexer::ParseIndexerSelectedObject(
+    const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal, bool isMethodProp = false)
+{
+    CHECK_NULL_VOID(changeEventVal->IsFunction());
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
+    auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const int32_t selected) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Indexer.SelectedChangeEvent");
+        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(selected));
+        func->ExecuteJS(1, &newJSVal);
+    };
+
+    if (isMethodProp) {
+        IndexerModel::GetInstance()->SetChangeEvent(changeEvent);
+    } else {
+        IndexerModel::GetInstance()->SetCreatChangeEvent(changeEvent);
+    }
+}
+
 void JSIndexer::Create(const JSCallbackInfo& args)
 {
     if (args.Length() >= 1 && args[0]->IsObject()) {
@@ -71,18 +84,40 @@ void JSIndexer::Create(const JSCallbackInfo& args)
             if (arrayVal && arrayVal->IsArray()) {
                 length = static_cast<uint32_t>(arrayVal->GetArraySize());
             }
-            selectedVal = param->GetInt("selected", 0);
         }
         std::vector<std::string> indexerArray;
         for (size_t i = 0; i < length; i++) {
             auto value = arrayVal->GetArrayItem(i);
-            if (!value) {
-                return;
+            if (value) {
+                indexerArray.emplace_back(value->GetString());
             }
-            indexerArray.emplace_back(value->GetString());
         }
 
+        JSRef<JSObject> paramObj = JSRef<JSObject>::Cast(args[0]);
+        JSRef<JSVal> selectedProperty = paramObj->GetProperty("selected");
+        if (selectedProperty->IsNumber()) {
+            selectedVal = selectedProperty->ToNumber<int32_t>();
+        }
         IndexerModel::GetInstance()->Create(indexerArray, selectedVal);
+        if (!selectedProperty->IsObject()) {
+            return;
+        }
+        JSRef<JSObject> selectedObj = JSRef<JSObject>::Cast(selectedProperty);
+        auto selectedValueProperty = selectedObj->GetProperty("value");
+        if (selectedValueProperty->IsNumber()) {
+            selectedVal = selectedValueProperty->ToNumber<int32_t>();
+        }
+        JSRef<JSVal> changeEventVal = selectedObj->GetProperty("changeEvent");
+        if (!changeEventVal.IsEmpty()) {
+            if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
+                ParseIndexerSelectedObject(args, changeEventVal);
+            }
+            return;
+        }
+        if (length <= 0) {
+            LOGE("info is invalid");
+            return;
+        }
         IndexerModel::GetInstance()->SetFocusable(true);
         IndexerModel::GetInstance()->SetFocusNode(true);
         args.ReturnSelf();
@@ -166,23 +201,29 @@ void JSIndexer::SetUsingPopup(bool state)
 
 void JSIndexer::SetSelectedFont(const JSCallbackInfo& args)
 {
-    TextStyle textStyle;
-    GetFontContent(args, textStyle);
-    IndexerModel::GetInstance()->SetSelectedFont(textStyle);
+    if (args.Length() >= 1 && args[0]->IsObject()) {
+        TextStyle textStyle;
+        GetFontContent(args, textStyle);
+        IndexerModel::GetInstance()->SetSelectedFont(textStyle);
+    }
 }
 
 void JSIndexer::SetPopupFont(const JSCallbackInfo& args)
 {
-    TextStyle textStyle;
-    GetFontContent(args, textStyle);
-    IndexerModel::GetInstance()->SetPopupFont(textStyle);
+    if (args.Length() >= 1 && args[0]->IsObject()) {
+        TextStyle textStyle;
+        GetFontContent(args, textStyle);
+        IndexerModel::GetInstance()->SetPopupFont(textStyle);
+    }
 }
 
 void JSIndexer::SetFont(const JSCallbackInfo& args)
 {
-    TextStyle textStyle;
-    GetFontContent(args, textStyle);
-    IndexerModel::GetInstance()->SetFont(textStyle);
+    if (args.Length() >= 1 && args[0]->IsObject()) {
+        TextStyle textStyle;
+        GetFontContent(args, textStyle);
+        IndexerModel::GetInstance()->SetFont(textStyle);
+    }
 }
 
 void JSIndexer::JsOnSelected(const JSCallbackInfo& args)
@@ -275,22 +316,10 @@ void JSIndexer::GetFontContent(const JSCallbackInfo& args, TextStyle& textStyle)
 
 void JSIndexer::SetItemSize(const JSCallbackInfo& args)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        if (args.Length() >= 1) {
-            CalcDimension value;
-            if (ParseJsDimensionVp(args[0], value)) {
-                NG::IndexerView::SetItemSize(value);
-            }
-        }
-    }
     if (args.Length() >= 1) {
         CalcDimension value;
         if (ParseJsDimensionVp(args[0], value)) {
-            auto indexerComponent =
-                AceType::DynamicCast<V2::IndexerComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-            if (indexerComponent) {
-                indexerComponent->SetItemSize(value);
-            }
+            IndexerModel::GetInstance()->SetItemSize(value);
         }
     }
 }
@@ -304,8 +333,7 @@ void JSIndexer::SetAlignStyle(const JSCallbackInfo& args)
     if (value >= 0 && value < static_cast<int32_t>(ALIGN_STYLE.size())) {
         IndexerModel::GetInstance()->SetAlignStyle(value);
     }
-
-    Dimension popupHorizontalSpace(-1.0);
+    CalcDimension popupHorizontalSpace(-1.0);
     if (args.Length() > 1) {
         ParseJsDimensionVp(args[1], popupHorizontalSpace);
     }
@@ -319,12 +347,15 @@ void JSIndexer::SetSelected(const JSCallbackInfo& args)
         if (ParseJsInteger<int32_t>(args[0], selected)) {
             IndexerModel::GetInstance()->SetSelected(selected);
         }
+        if (args.Length() > 1 && args[1]->IsFunction()) {
+            ParseIndexerSelectedObject(args, args[1], true);
+        }
     }
 }
 
 void JSIndexer::SetPopupPosition(const JSCallbackInfo& args)
 {
-    if (args.Length() >= 1) {
+    if (args.Length() >= 1 && args[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
         float positionX = 0.0f;
         float positionY = 0.0f;
@@ -351,7 +382,7 @@ void JSIndexer::SetPopupSelectedColor(const JSCallbackInfo& args)
         if (args.Length() > 1) {
             ParseJsDimensionVp(args[1], popupHorizontalSpace);
         }
-        NG::IndexerView::SetPopupHorizontalSpace(popupHorizontalSpace);
+        IndexerModel::GetInstance()->SetPopupHorizontalSpace(popupHorizontalSpace);
         return;
     }
     IndexerModel::GetInstance()->SetPopupSelectedColor(selectedColor);

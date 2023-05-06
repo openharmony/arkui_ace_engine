@@ -249,4 +249,13 @@ void DatePickerModelNG::SetBackgroundColor(const Color& color)
     CHECK_NULL_VOID(datePickerPattern);
     datePickerPattern->SetBackgroundColor(color);
 }
+
+void DatePickerModelNG::SetChangeEvent(DateChangeEvent&& onChange)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<DatePickerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetChangeEvent(std::move(onChange));
+}
 } // namespace OHOS::Ace::NG

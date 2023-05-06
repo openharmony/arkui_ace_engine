@@ -41,12 +41,14 @@ public:
     void SetPopupSelectedColor(const std::optional<Color>& color) override;
     void SetPopupUnselectedColor(const std::optional<Color>& color) override;
     void SetFontSize(const Dimension& fontSize) override;
-    void SetFontWeight(FontWeight weight) override;
+    void SetFontWeight(const FontWeight weight) override;
 
     void SetOnSelected(std::function<void(const int32_t selected)>&& onSelect) override;
     void SetOnRequestPopupData(
         std::function<std::vector<std::string>(const int32_t selected)>&& RequestPopupData) override;
     void SetOnPopupSelected(std::function<void(const int32_t selected)>&& onPopupSelected) override;
+    void SetChangeEvent(std::function<void(const int32_t selected)>&& changeEvent) override;
+    void SetCreatChangeEvent(std::function<void(const int32_t selected)>&& changeEvent) override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_INDEXER_INDEXER_MODEL_NG_H
