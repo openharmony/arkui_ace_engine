@@ -76,7 +76,7 @@ void ProgressModelNG::SetValue(double value)
     CHECK_NULL_VOID(progressPaintProperty);
     auto maxValue = progressPaintProperty->GetMaxValue();
     if (value > maxValue) {
-        LOGE("value is lager than total , set value euqals total");
+        LOGE("value is lager than total , set value equals total");
         value = maxValue.value_or(0);
     }
 
@@ -91,6 +91,11 @@ void ProgressModelNG::SetValue(double value)
 void ProgressModelNG::SetColor(const Color& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, Color, value);
+}
+
+void ProgressModelNG::SetGradientColor(const Gradient& value)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, GradientColor, value);
 }
 
 void ProgressModelNG::SetBackgroundColor(const Color& value)
@@ -257,5 +262,15 @@ void ProgressModelNG::SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, dou
     textProps->UpdateMargin(margin);
     textNode->MarkModifyDone();
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, Text, number);
+}
+
+void ProgressModelNG::SetPaintShadow(bool value)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, PaintShadow, value);
+}
+
+void ProgressModelNG::SetProgressStatus(ProgressStatus status)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, ProgressStatus, status);
 }
 } // namespace OHOS::Ace::NG

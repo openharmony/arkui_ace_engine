@@ -97,6 +97,8 @@ private:
     void InitTouchEvent();
     void OnPress(const TouchEventInfo& info);
     void HandleEnabled();
+    void ToJsonValueForRingStyleOptions(std::unique_ptr<JsonValue>& json) const;
+    static std::string ConvertProgressStatusToString(const ProgressStatus status);
 
     double strokeWidth_ = 2;
     RefPtr<ProgressModifier> progressModifier_;

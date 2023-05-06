@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_PROGRESS_PROGRESS_MODIFIER_H
 
 #include "base/memory/ace_type.h"
+#include "base/geometry/arc.h"
 #include "base/geometry/dimension.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/modifier.h"
@@ -27,6 +28,14 @@
 #include "core/components_ng/render/paint_wrapper.h"
 
 namespace OHOS::Ace::NG {
+struct RingProgressData {
+    PointF centerPt;
+    float radius = 0.0f;
+    float thickness = 0.0f;
+    float angle = 0.0f;
+    float shadowBlurSigma = 0.0f;
+};
+
 class ProgressModifier : public ContentModifier {
     DECLARE_ACE_TYPE(ProgressModifier, ContentModifier);
 
@@ -48,11 +57,16 @@ public:
     void SetContentSize(const SizeF& contentSize);
     void SetBorderWidth(float width);
     void SetSweepEffect(bool value);
+    void SetRingProgressColor(const Gradient& color);
+    void SetPaintShadow(bool paintShadow);
+    void SetProgressStatus(ProgressStatus status);
 
 private:
     void ContentDrawWithFunction(DrawingContext& context);
     void PaintLinear(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
     void PaintRing(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
+    void PaintRingBackground(RSCanvas& canvas, const RingProgressData& ringProgressData) const;
+    void PaintRingProgressOrShadow(RSCanvas& canvas, const RingProgressData& ringProgressData, bool isShadow) const;
     void PaintScaleRing(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
     void PaintMoon(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
     void PaintCapsule(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
@@ -65,6 +79,7 @@ private:
     RefPtr<AnimatablePropertyColor> borderColor_;
     RefPtr<AnimatablePropertyFloat> capsuleDate_;
     RefPtr<AnimatablePropertyFloat> value_;
+    RefPtr<AnimatablePropertyVectorColor> ringProgressColors_;
 
     // no Animatable
     RefPtr<PropertyOffsetF> offset_;
@@ -75,6 +90,8 @@ private:
     RefPtr<PropertyInt> progressType_;
     RefPtr<PropertyFloat> capsuleBorderWidth_;
     RefPtr<PropertyBool> sweepEffect_;
+    RefPtr<PropertyBool> paintShadow_;
+    RefPtr<PropertyInt> progressStatus_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ProgressModifier);
 };
