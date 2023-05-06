@@ -72,6 +72,9 @@ HWTEST_F(ScrollAccessibilityPropertyTestNg, ScrollAccessibilityPropertyIsScrolla
  */
 HWTEST_F(ScrollAccessibilityPropertyTestNg, ScrollAccessibilityPropertyGetSupportAction001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. create frameNode, scrollPattern, scrollAccessibilityProperty.
+     */
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::SCROLL_ETS_TAG,
         ViewStackProcessor::GetInstance()->ClaimNodeId(), []() { return AceType::MakeRefPtr<ScrollPattern>(); });
     ASSERT_NE(frameNode, nullptr);
@@ -79,10 +82,18 @@ HWTEST_F(ScrollAccessibilityPropertyTestNg, ScrollAccessibilityPropertyGetSuppor
     ASSERT_NE(scrollPattern, nullptr);
     auto scrollAccessibilityProperty = frameNode->GetAccessibilityProperty<ScrollAccessibilityProperty>();
     ASSERT_NE(scrollAccessibilityProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. set scrollPattern property for test.
+     */
     scrollPattern->axis_ = Axis::VERTICAL;
     scrollPattern->scrollableDistance_ = SCROLLABLE_DISTANCE;
     scrollPattern->currentOffset_ = CURRENT_DISTANCE;
 
+    /**
+     * @tc.steps: step3. callback ResetSupportAction then GetSupportAction, copy to actions. Contrast actions and expectActions.
+     * @tc.expected: expect actions equals to expectActions.
+     */
     scrollAccessibilityProperty->ResetSupportAction();
     std::unordered_set<AceAction> supportAceActions = scrollAccessibilityProperty->GetSupportAction();
     uint64_t actions = 0, expectActions = 0;
@@ -93,6 +104,10 @@ HWTEST_F(ScrollAccessibilityPropertyTestNg, ScrollAccessibilityPropertyGetSuppor
     }
     EXPECT_EQ(actions, expectActions);
 
+    /**
+     * @tc.steps: step4. change scrollPattern property and retrieve actions from updated SupportAction. Contrast actions and expectActions.
+     * @tc.expected: expect actions equals to expectActions.
+     */
     scrollPattern->currentOffset_ = CURRENT_DISTANCE_TOP;
     scrollAccessibilityProperty->ResetSupportAction();
     supportAceActions = scrollAccessibilityProperty->GetSupportAction();
@@ -103,6 +118,10 @@ HWTEST_F(ScrollAccessibilityPropertyTestNg, ScrollAccessibilityPropertyGetSuppor
     }
     EXPECT_EQ(actions, expectActions);
 
+    /**
+     * @tc.steps: step5. change scrollPattern property and retrieve actions from updated SupportAction. Contrast actions and expectActions.
+     * @tc.expected: expect actions equals to expectActions.
+     */
     scrollPattern->currentOffset_ = CURRENT_DISTANCE_BOTTOM;
     scrollAccessibilityProperty->ResetSupportAction();
     supportAceActions = scrollAccessibilityProperty->GetSupportAction();
@@ -113,6 +132,10 @@ HWTEST_F(ScrollAccessibilityPropertyTestNg, ScrollAccessibilityPropertyGetSuppor
     }
     EXPECT_EQ(actions, expectActions);
 
+    /**
+     * @tc.steps: step6. change scrollPattern property and retrieve actions from updated SupportAction. Contrast actions and expectActions.
+     * @tc.expected: expect actions equals to expectActions.
+     */
     scrollPattern->axis_ = Axis::NONE;
     scrollAccessibilityProperty->ResetSupportAction();
     supportAceActions = scrollAccessibilityProperty->GetSupportAction();
