@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
+#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_arrow_layout_property.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_utils.h"
 #include "core/components_ng/property/calc_length.h"
@@ -244,4 +245,47 @@ void SwiperModelNG::SetOnChangeEvent(std::function<void(const BaseEventInfo* inf
         event(&eventInfo);
     });
 }
+
+void SwiperModelNG::SetArrowStyle(const SwiperArrowParameters& swiperArrowParameters)
+{
+    if (swiperArrowParameters.isShowBoard.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, IsShowBoard, swiperArrowParameters.isShowBoard.value());
+        ACE_UPDATE_LAYOUT_PROPERTY(SwiperArrowLayoutProperty, IsShowBoard, swiperArrowParameters.isShowBoard.value());
+    }
+    if (swiperArrowParameters.boardSize.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, BoardSize, swiperArrowParameters.boardSize.value());
+        ACE_UPDATE_LAYOUT_PROPERTY(SwiperArrowLayoutProperty, BoardSize, swiperArrowParameters.boardSize.value());
+    }
+    if (swiperArrowParameters.boardColor.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, BoardColor, swiperArrowParameters.boardColor.value());
+        ACE_UPDATE_LAYOUT_PROPERTY(SwiperArrowLayoutProperty, BoardColor, swiperArrowParameters.boardColor.value());
+    }
+    if (swiperArrowParameters.arrowSize.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, ArrowSize, swiperArrowParameters.arrowSize.value());
+        ACE_UPDATE_LAYOUT_PROPERTY(SwiperArrowLayoutProperty, ArrowSize, swiperArrowParameters.arrowSize.value());
+    }
+    if (swiperArrowParameters.arrowColor.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, ArrowColor, swiperArrowParameters.arrowColor.value());
+        ACE_UPDATE_LAYOUT_PROPERTY(SwiperArrowLayoutProperty, ArrowColor, swiperArrowParameters.arrowColor.value());
+    }
+    if (swiperArrowParameters.isSiderMiddle.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(
+            SwiperLayoutProperty, IsSiderMiddle, swiperArrowParameters.isSiderMiddle.value());
+        ACE_UPDATE_LAYOUT_PROPERTY(
+            SwiperArrowLayoutProperty, IsSiderMiddle, swiperArrowParameters.isSiderMiddle.value());
+    }
+}
+
+void SwiperModelNG::SetDisplayArrow(bool displayArrow)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, DisplayArrow, displayArrow);
+    ACE_UPDATE_LAYOUT_PROPERTY(SwiperArrowLayoutProperty, DisplayArrow, displayArrow);
+}
+
+void SwiperModelNG::SetHoverShow(bool hoverShow)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, HoverShow, hoverShow);
+    ACE_UPDATE_LAYOUT_PROPERTY(SwiperArrowLayoutProperty, HoverShow, hoverShow);
+}
+
 } // namespace OHOS::Ace::NG

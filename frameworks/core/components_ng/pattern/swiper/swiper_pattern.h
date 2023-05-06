@@ -267,6 +267,72 @@ public:
         return endIndex_;
     }
 
+    bool HasIndicatorNode() const
+    {
+        return indicatorId_.has_value();
+    }
+
+    bool HasLeftButtonNode() const
+    {
+        return leftButtonId_.has_value();
+    }
+
+    bool HasRightButtonNode() const
+    {
+        return rightButtonId_.has_value();
+    }
+
+    int32_t GetIndicatorId()
+    {
+        if (!indicatorId_.has_value()) {
+            indicatorId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        }
+        return indicatorId_.value();
+    }
+
+    int32_t GetLeftButtonId()
+    {
+        if (!leftButtonId_.has_value()) {
+            leftButtonId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        }
+        return leftButtonId_.value();
+    }
+
+    int32_t GetRightButtonId()
+    {
+        if (!rightButtonId_.has_value()) {
+            rightButtonId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        }
+        return rightButtonId_.value();
+    }
+
+    void RemoveIndicatorNode()
+    {
+        CHECK_NULL_VOID_NOLOG(HasIndicatorNode());
+        auto swiperNode = GetHost();
+        CHECK_NULL_VOID(swiperNode);
+        swiperNode->RemoveChildAtIndex(swiperNode->GetChildIndexById(GetIndicatorId()));
+        indicatorId_ = std::nullopt;
+    }
+
+    void RemoveLeftButtonNode()
+    {
+        CHECK_NULL_VOID_NOLOG(HasLeftButtonNode());
+        auto swiperNode = GetHost();
+        CHECK_NULL_VOID(swiperNode);
+        swiperNode->RemoveChildAtIndex(swiperNode->GetChildIndexById(GetLeftButtonId()));
+        leftButtonId_ = std::nullopt;
+    }
+
+    void RemoveRightButtonNode()
+    {
+        CHECK_NULL_VOID_NOLOG(HasRightButtonNode());
+        auto swiperNode = GetHost();
+        CHECK_NULL_VOID(swiperNode);
+        swiperNode->RemoveChildAtIndex(swiperNode->GetChildIndexById(GetRightButtonId()));
+        rightButtonId_ = std::nullopt;
+    }
+
     SwiperIndicatorType GetIndicatorType() const;
 
     bool IsIndicatorCustomSize() const
@@ -282,6 +348,8 @@ public:
     std::shared_ptr<SwiperParameters> GetSwiperParameters() const;
     std::shared_ptr<SwiperDigitalParameters> GetSwiperDigitalParameters() const;
 
+    bool IsLoop() const;
+    bool IsEnabled() const;
     void OnWindowShow() override;
     void OnWindowHide() override;
 private:
@@ -306,6 +374,7 @@ private:
 
     // Init indicator
     void InitIndicator();
+    void InitArrow();
 
     void HandleDragStart();
     void HandleDragUpdate(const GestureEvent& info);
@@ -342,7 +411,6 @@ private:
     RefPtr<Curve> GetCurve() const;
     EdgeEffect GetEdgeEffect() const;
     bool IsAutoPlay() const;
-    bool IsLoop() const;
     bool IsDisableSwipe() const;
     bool IsShowIndicator() const;
     float GetTranslateLength() const;
@@ -354,6 +422,8 @@ private:
     void RegisterVisibleAreaChange();
     bool NeedAutoPlay() const;
     void OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay);
+    bool IsShowArrow() const;
+    void SaveArrowProperty();
     int32_t ComputeLoadCount(int32_t cacheCount);
 
     RefPtr<PanEvent> panEvent_;
@@ -405,6 +475,9 @@ private:
     WeakPtr<FrameNode> lastWeakShowNode_;
 
     CancelableCallback<void()> translateTask_;
+    std::optional<int32_t> indicatorId_;
+    std::optional<int32_t> leftButtonId_;
+    std::optional<int32_t> rightButtonId_;
 };
 } // namespace OHOS::Ace::NG
 
