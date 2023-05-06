@@ -65,7 +65,8 @@ void JSStepper::Create(const JSCallbackInfo& info)
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
         JSRef<JSVal> stepperValue = obj->GetProperty("index");
         if (stepperValue->IsNumber()) {
-            index = stepperValue->ToNumber<uint32_t>();
+            auto indexValue = stepperValue->ToNumber<int32_t>();
+            index = indexValue <= 0 ? 0 : static_cast<uint32_t>(indexValue);
         } else if (stepperValue->IsObject()) {
             JSRef<JSObject> stepperObj = JSRef<JSObject>::Cast(stepperValue);
             auto stepperValueProperty = stepperObj->GetProperty("value");
