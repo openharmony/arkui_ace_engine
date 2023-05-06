@@ -96,6 +96,7 @@ public:
     virtual void SetPreviousMargin(const Dimension& prevMargin) {}
     virtual void SetNextMargin(const Dimension& nextMargin) {}
     virtual void SetOnChangeEvent(std::function<void(const BaseEventInfo* info)>&& onChangeEvent);
+    virtual void SetIndicatorIsBoolean(bool isBoolean) {}
 private:
     static std::unique_ptr<SwiperModel> instance_;
     static std::mutex mutex_;

@@ -442,12 +442,18 @@ SwiperDigitalParameters JSSwiper::GetDigitIndicatorInfo(const JSRef<JSObject>& o
 
 void JSSwiper::SetIndicator(const JSCallbackInfo& info)
 {
-    if (info.Length() > 0 && info[0]->IsUndefined()) {
+    if (info.Length() < 1) {
+        return;
+    }
+
+    if (info[0]->IsUndefined()) {
         SwiperModel::GetInstance()->SetShowIndicator(true);
         return;
     }
     auto obj = JSRef<JSObject>::Cast(info[0]);
-    if (info.Length() > 0 && info[0]->IsObject()) {
+    if (info[0]->IsObject()) {
+        SwiperModel::GetInstance()->SetIndicatorIsBoolean(false);
+
         JSRef<JSVal> typeParam = obj->GetProperty("type");
         if (typeParam->IsString()) {
             auto type = typeParam->ToString();
