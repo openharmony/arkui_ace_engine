@@ -1360,6 +1360,7 @@ void SwiperPattern::OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay)
     if (NeedAutoPlay()) {
         PostTranslateTask(delayTime);
     }
+    host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
 }
 
 void SwiperPattern::OnWindowShow()

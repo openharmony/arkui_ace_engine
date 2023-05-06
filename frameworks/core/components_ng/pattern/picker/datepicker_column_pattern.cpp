@@ -584,6 +584,9 @@ void DatePickerColumnPattern::HandleDragStart(const GestureEvent& event)
     toss->SetStart(yOffset_);
     yLast_ = yOffset_;
     pressed_ = true;
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_START);
 }
 
 void DatePickerColumnPattern::HandleDragMove(const GestureEvent& event)
@@ -610,7 +613,10 @@ void DatePickerColumnPattern::HandleDragEnd()
     CHECK_NULL_VOID_NOLOG(GetHost());
     CHECK_NULL_VOID_NOLOG(GetToss());
     auto toss = GetToss();
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
     if (!NotLoopOptions() && toss->Play()) {
+        frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
         return;
     }
     yOffset_ = 0.0;
@@ -623,6 +629,7 @@ void DatePickerColumnPattern::HandleDragEnd()
     fromController_->ClearInterpolators();
     fromController_->AddInterpolator(curve);
     fromController_->Play();
+    frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
 }
 void DatePickerColumnPattern::CreateAnimation()
 {

@@ -229,6 +229,18 @@ public:
         }
     }
 
+    void UpdateOnChangeEvent(ChangeEvent&& event)
+    {
+        if (!onIndexChangeEvent_) {
+            onIndexChangeEvent_ = std::make_shared<ChangeEvent>(event);
+            auto eventHub = GetEventHub<SwiperEventHub>();
+            CHECK_NULL_VOID(eventHub);
+            eventHub->AddOnChangeEvent(onIndexChangeEvent_);
+        } else {
+            (*onIndexChangeEvent_).swap(event);
+        }
+    }
+
     void SetSwiperParameters(const SwiperParameters& swiperParameters)
     {
         swiperParameters_ = std::make_shared<SwiperParameters>(swiperParameters);
@@ -384,6 +396,7 @@ private:
     Axis direction_ = Axis::HORIZONTAL;
 
     ChangeEventPtr changeEvent_;
+    ChangeEventPtr onIndexChangeEvent_;
 
     mutable std::shared_ptr<SwiperParameters> swiperParameters_;
     mutable std::shared_ptr<SwiperDigitalParameters> swiperDigitalParameters_;

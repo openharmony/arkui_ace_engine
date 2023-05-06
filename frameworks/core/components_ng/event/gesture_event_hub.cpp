@@ -259,6 +259,17 @@ void GestureEventHub::UpdateGestureHierarchy()
             continue;
         }
         auto recognizer = gesture->CreateRecognizer();
+
+        auto clickRecognizer = AceType::DynamicCast<ClickRecognizer>(recognizer);
+        if (clickRecognizer) {
+            clickRecognizer->SetOnAccessibility(GetOnAccessibilityEventFunc());
+        }
+
+        auto longPressRecognizer = AceType::DynamicCast<LongPressRecognizer>(recognizer);
+        if (longPressRecognizer) {
+            longPressRecognizer->SetOnAccessibility(GetOnAccessibilityEventFunc());
+        }
+
         if (!recognizer) {
             continue;
         }

@@ -157,7 +157,7 @@ void JSProgress::SetColor(const JSCallbackInfo& info)
 
 void JSProgress::SetCircularStyle(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
+    if (info.Length() < 1 || !info[0]->IsObject()) {
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }

@@ -144,6 +144,7 @@ public:
     virtual void SetForegroundColor(const Color& value) = 0;
 
     virtual void SetMenuOptionItems(std::vector<NG::MenuOptionsParam>&& menuOptionsItems) = 0;
+    virtual void SetOnChangeEvent(std::function<void(const std::string&)>&& func) = 0;
 
 private:
     static std::unique_ptr<TextFieldModel> instance_;

@@ -2189,7 +2189,7 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldAccessibilityPropertyGetTextInputType0
     EXPECT_EQ(textFieldAccessibilityProperty->GetTextInputType(), AceTextCategory::INPUT_TYPE_NUMBER);
 
     textFieldLayoutProperty->UpdateTextInputType(TextInputType::PHONE);
-    EXPECT_EQ(textFieldAccessibilityProperty->GetTextInputType(), AceTextCategory::INPUT_TYPE_DEFAULT);
+    EXPECT_EQ(textFieldAccessibilityProperty->GetTextInputType(), AceTextCategory::INPUT_TYPE_PHONENUMBER);
 
     textFieldLayoutProperty->UpdateTextInputType(TextInputType::DATETIME);
     EXPECT_EQ(textFieldAccessibilityProperty->GetTextInputType(), AceTextCategory::INPUT_TYPE_DATE);

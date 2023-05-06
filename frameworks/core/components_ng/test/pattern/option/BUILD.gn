@@ -90,6 +90,7 @@ ohos_unittest("panel_option_test_ng") {
     # mock
 
     "$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
+    "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
     "$ace_root/frameworks/core/components_ng/test/event/mock/mock_long_press_event.cpp",
     "$ace_root/frameworks/core/components_ng/test/event/mock/mock_touch_event.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/animation/mock_geometry_transition.cpp",

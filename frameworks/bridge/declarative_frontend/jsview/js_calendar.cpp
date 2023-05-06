@@ -487,12 +487,11 @@ void JSCalendar::SetDirection(const JSCallbackInfo& info)
 
 void JSCalendar::SetCurrentDayStyle(const JSCallbackInfo& info)
 {
-    auto obj = JSRef<JSObject>::Cast(info[0]);
-
     if (info.Length() < 1 || !info[0]->IsObject()) {
         LOGW("Invalid params");
         return;
     }
+    auto obj = JSRef<JSObject>::Cast(info[0]);
     if (Container::IsCurrentUseNewPipeline()) {
         NG::CurrentDayStyle currentDayStyle;
         Color dayColor;

@@ -46,7 +46,7 @@ public:
     explicit SizeChangeListener(int32_t instanceId) : instanceId_(instanceId) {}
     virtual ~SizeChangeListener() = default;
 
-    void OnSizeChange(Rosen::WSRect rect, Rosen::SizeChangeReason reason) override
+    void OnSizeChange(const Rosen::WSRect& rect, Rosen::SizeChangeReason reason) override
     {
         ContainerScope scope(instanceId_);
         auto container = Container::Current();
@@ -76,10 +76,10 @@ private:
     int32_t instanceId_ = -1;
 };
 
-class PointerEventListener : public Rosen::IPointerEventListener {
+class InputEventListener : public Rosen::IInputEventListener {
 public:
-    explicit PointerEventListener(int32_t instanceId) : instanceId_(instanceId) {}
-    virtual ~PointerEventListener() = default;
+    explicit InputEventListener(int32_t instanceId) : instanceId_(instanceId) {}
+    virtual ~InputEventListener() = default;
 
     void OnPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent) override
     {
@@ -89,6 +89,26 @@ public:
         auto window = static_cast<WindowPattern*>(container->GetWindow());
         CHECK_NULL_VOID(window);
         window->ProcessPointerEvent(pointerEvent);
+    }
+
+    void OnKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent) override
+    {
+        ContainerScope scope(instanceId_);
+        auto container = Container::Current();
+        CHECK_NULL_VOID(container);
+        auto window = static_cast<WindowPattern*>(container->GetWindow());
+        CHECK_NULL_VOID(window);
+        window->ProcessKeyEvent(keyEvent);
+    }
+
+    void OnAxisEvent(const std::shared_ptr<OHOS::MMI::AxisEvent>& axisEvent) override
+    {
+        ContainerScope scope(instanceId_);
+        auto container = Container::Current();
+        CHECK_NULL_VOID(container);
+        auto window = static_cast<WindowPattern*>(container->GetWindow());
+        CHECK_NULL_VOID(window);
+        window->ProcessAxisEvent(axisEvent);
     }
 
 private:
@@ -155,6 +175,9 @@ void WindowPattern::LoadContent(
     uiContent_ = UIContent::Create(context_.get(), engine);
     CHECK_NULL_VOID(uiContent_);
     uiContent_->Initialize(std::shared_ptr<Window>(this), contentUrl, storage);
+
+    auto inputListener = std::make_shared<InputEventListener>(instanceId_);
+    RegisterInputEventListener(inputListener);
 }
 
 void WindowPattern::UpdateViewportConfig(const ViewportConfig& config, Rosen::WindowSizeChangeReason reason)
@@ -260,10 +283,10 @@ void WindowPattern::RegisterSizeChangeListener(const std::shared_ptr<Rosen::ISiz
     sessionStage_->RegisterSizeChangeListener(listener);
 }
 
-void WindowPattern::RegisterPointerEventListener(const std::shared_ptr<Rosen::IPointerEventListener>& listener)
+void WindowPattern::RegisterInputEventListener(const std::shared_ptr<Rosen::IInputEventListener>& listener)
 {
     CHECK_NULL_VOID(sessionStage_);
-    sessionStage_->RegisterPointerEventListener(listener);
+    sessionStage_->RegisterInputEventListener(listener);
 }
 
 void WindowPattern::ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent)
@@ -272,12 +295,22 @@ void WindowPattern::ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::Pointer
     uiContent_->ProcessPointerEvent(pointerEvent);
 }
 
+void WindowPattern::ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent)
+{
+    CHECK_NULL_VOID(uiContent_);
+    uiContent_->ProcessKeyEvent(keyEvent);
+}
+
+void WindowPattern::ProcessAxisEvent(const std::shared_ptr<OHOS::MMI::AxisEvent>& axisEvent)
+{
+    CHECK_NULL_VOID(uiContent_);
+    uiContent_->ProcessAxisEvent(axisEvent);
+}
+
 void WindowPattern::Connect()
 {
     auto sizeChangeListener = std::make_shared<SizeChangeListener>(instanceId_);
-    auto pointerListener = std::make_shared<PointerEventListener>(instanceId_);
     RegisterSizeChangeListener(sizeChangeListener);
-    RegisterPointerEventListener(pointerListener);
     CHECK_NULL_VOID(sessionStage_);
     sessionStage_->Connect();
 }

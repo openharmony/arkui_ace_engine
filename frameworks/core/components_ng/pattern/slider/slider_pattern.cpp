@@ -342,8 +342,6 @@ void SliderPattern::UpdateCircleCenterOffset()
         circleCenter_.SetX(contentSize->Width() * HALF);
         circleCenter_.SetY(touchOffset);
     }
-
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void SliderPattern::UpdateBubble()
@@ -410,6 +408,15 @@ void SliderPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
         return pattern->OnKeyEvent(event);
     };
     focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
+
+    auto onBlur = [wp = WeakClaim(this)]() {
+        auto pattern = wp.Upgrade();
+        CHECK_NULL_VOID_NOLOG(pattern);
+        pattern->bubbleFlag_ = false;
+        pattern->focusFlag_ = false;
+        pattern->UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    };
+    focusHub->SetOnBlurInternal(std::move(onBlur));
 }
 
 void SliderPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
@@ -471,7 +478,9 @@ void SliderPattern::GetOutsetInnerFocusPaintRect(RoundRect& paintRect)
 
 void SliderPattern::GetInsetInnerFocusPaintRect(RoundRect& paintRect)
 {
-    const auto& content = GetHost()->GetGeometryNode()->GetContent();
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    const auto& content = frameNode->GetGeometryNode()->GetContent();
     CHECK_NULL_VOID(content);
     auto theme = PipelineBase::GetCurrentContext()->GetTheme<SliderTheme>();
     CHECK_NULL_VOID(theme);
@@ -485,7 +494,12 @@ void SliderPattern::GetInsetInnerFocusPaintRect(RoundRect& paintRect)
     float offsetY = content->GetRect().GetY();
     float width = content->GetRect().Width();
     float height = content->GetRect().Height();
-    float focusRadius = trackThickness_ + static_cast<float>(focusDistance.ConvertToPx()) / HALF;
+    float focusRadius = trackThickness_ * HALF + static_cast<float>(focusDistance.ConvertToPx());
+    auto paintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    if (paintProperty && paintProperty->GetTrackBorderRadius().has_value()) {
+        focusRadius = static_cast<float>(paintProperty->GetTrackBorderRadius().value().ConvertToPx()) +
+                      static_cast<float>(focusDistance.ConvertToPx());
+    }
     if (direction_ == Axis::HORIZONTAL) {
         offsetX += borderBlank_ - trackThickness_ * HALF - static_cast<float>(focusDistance.ConvertToPx());
         offsetY += (height - trackThickness_) * HALF - static_cast<float>(focusDistance.ConvertToPx());
@@ -503,6 +517,7 @@ void SliderPattern::GetInsetInnerFocusPaintRect(RoundRect& paintRect)
 
 void SliderPattern::PaintFocusState()
 {
+    focusFlag_ = true;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     RoundRect focusRect;
@@ -522,7 +537,6 @@ bool SliderPattern::OnKeyEvent(const KeyEvent& event)
             (direction_ == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_UP)) {
             MoveStep(-1);
             if (showTips_) {
-                bubbleFlag_ = true;
                 InitializeBubble();
             }
             PaintFocusState();
@@ -532,15 +546,15 @@ bool SliderPattern::OnKeyEvent(const KeyEvent& event)
             (direction_ == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_DOWN)) {
             MoveStep(1);
             if (showTips_) {
-                bubbleFlag_ = true;
                 InitializeBubble();
             }
             PaintFocusState();
             FireChangeEvent(SliderChangeMode::Begin);
         }
     } else if (event.action == KeyAction::UP) {
-        if (bubbleFlag_) {
-            bubbleFlag_ = false;
+        if (showTips_) {
+            bubbleFlag_ = true;
+            InitializeBubble();
         }
         PaintFocusState();
         FireChangeEvent(SliderChangeMode::Click);
@@ -615,7 +629,18 @@ void SliderPattern::HandleMouseEvent(const MouseInfo& info)
 {
     UpdateCircleCenterOffset();
     // MouseInfo's LocalLocation is relative to the frame area, circleCenter_ is relative to the content area
-    mouseHoverFlag_ = AtMousePanArea(info.GetLocalLocation());
+    bool mouseHoverFlag = AtMousePanArea(info.GetLocalLocation());
+    if (!mouseHoverFlag_ && mouseHoverFlag) {
+        if (showTips_) {
+            bubbleFlag_ = true;
+            InitializeBubble();
+        }
+    }
+    mouseHoverFlag_ = mouseHoverFlag;
+    if (!mouseHoverFlag_ && !mousePressedFlag_ && !focusFlag_) {
+        bubbleFlag_ = false;
+    }
+
     UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 

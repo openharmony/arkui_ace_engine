@@ -49,6 +49,7 @@ public:
     static void SetLabelFontSize(const Dimension& fontSize);
     static void SetLabelFontColor(const std::optional<Color>& color);
     static void SetLabelFontWeight(FontWeight weight);
+    static void SetSelectedChangeEvent(std::function<void(bool)>&& selectedChangeEvent);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_ITEM_VIEW_H

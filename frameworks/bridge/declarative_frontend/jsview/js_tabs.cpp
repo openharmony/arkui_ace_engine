@@ -72,7 +72,7 @@ void JSTabs::SetOnChange(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
         const auto* tabsInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
         if (!tabsInfo) {
-            LOGE("HandleChangeEvent tabsInfo == nullptr");
+            LOGE("SetOnChange tabsInfo is nullptr");
             return;
         }
         ACE_SCORING_EVENT("Tabs.onChange");
@@ -81,12 +81,33 @@ void JSTabs::SetOnChange(const JSCallbackInfo& info)
     TabsModel::GetInstance()->SetOnChange(std::move(onChange));
 }
 
+void ParseTabsIndexObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
+{
+    CHECK_NULL_VOID(changeEventVal->IsFunction());
+
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
+    auto onChangeEvent = [executionContext = info.GetExecutionContext(), func = std::move(jsFunc)](
+                             const BaseEventInfo* info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
+        const auto* tabsInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
+        if (!tabsInfo) {
+            LOGE("ParseTabsIndexObject tabsInfo is nullptr");
+            return;
+        }
+        ACE_SCORING_EVENT("Tabs.onChangeEvent");
+        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(tabsInfo->GetIndex()));
+        func->ExecuteJS(1, &newJSVal);
+    };
+    TabsModel::GetInstance()->SetOnChangeEvent(std::move(onChangeEvent));
+}
+
 void JSTabs::Create(const JSCallbackInfo& info)
 {
     BarPosition barPosition = BarPosition::START;
     RefPtr<TabController> tabController;
     RefPtr<SwiperController> swiperController;
     int32_t index = 0;
+    JSRef<JSVal> changeEventVal;
     if (info[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
         JSRef<JSVal> val = obj->GetProperty("barPosition");
@@ -113,10 +134,20 @@ void JSTabs::Create(const JSCallbackInfo& info)
 #ifndef NG_BUILD
             tabController->SetInitialIndex(index);
 #endif
+        } else if (indexVal->IsObject()) {
+            JSRef<JSObject> indexObj = JSRef<JSObject>::Cast(indexVal);
+            auto indexValueProperty = indexObj->GetProperty("value");
+            if (indexValueProperty->IsNumber()) {
+                index = indexValueProperty->ToNumber<int32_t>();
+            }
+            changeEventVal = indexObj->GetProperty("changeEvent");
         }
     }
 
     TabsModel::GetInstance()->Create(barPosition, index, tabController, swiperController);
+    if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
+        ParseTabsIndexObject(info, changeEventVal);
+    }
 }
 
 void JSTabs::Pop()

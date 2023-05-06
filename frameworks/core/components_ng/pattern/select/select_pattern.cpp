@@ -220,6 +220,17 @@ void SelectPattern::CreateSelectedCallback()
 
         auto hub = host->GetEventHub<SelectEventHub>();
         CHECK_NULL_VOID(hub);
+        // execute change event callback
+        auto selectChangeEvent = hub->GetSelectChangeEvent();
+        if (selectChangeEvent) {
+            selectChangeEvent(index);
+        }
+        auto valueChangeEvent = hub->GetValueChangeEvent();
+        if (valueChangeEvent) {
+            auto newSelected = pattern->options_[index]->GetPattern<OptionPattern>();
+            CHECK_NULL_VOID(newSelected);
+            valueChangeEvent(newSelected->GetText());
+        }
         auto onSelect = hub->GetSelectEvent();
         // execute onSelect callback
         if (onSelect) {
