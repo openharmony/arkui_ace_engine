@@ -76,7 +76,7 @@ std::shared_ptr<UIWindow> UIWindow::CreateWindowScene(const std::shared_ptr<Abil
 }
 
 std::shared_ptr<UIWindow> UIWindow::CreateWindowExtension(const std::shared_ptr<AbilityRuntime::Context>& context,
-    const sptr<Rosen::ISession>& iSession)
+    const sptr<Rosen::ISession>& iSession, const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode)
 {
     void* handle = dlopen("libace.z.so", RTLD_LAZY);
     if (handle == nullptr) {
