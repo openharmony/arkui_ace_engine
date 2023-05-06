@@ -202,6 +202,7 @@ ohos_unittest("video_pattern_test_ng") {
 
   deps = [
     "$ace_root/frameworks/base:ace_memory_monitor_ohos",
+    "$ace_root/frameworks/core/components_ng/pattern/web:ace_core_components_web_pattern_ng_ohos",
     "$ace_root/test/unittest:ace_unittest_log",
     "$ace_root/test/unittest:ace_unittest_trace",
     "$cjson_root:cjson",

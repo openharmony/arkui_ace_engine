@@ -3782,6 +3782,7 @@ void WebDelegate::OnFullScreenEnter(std::shared_ptr<OHOS::NWeb::NWebFullScreenEx
                 auto webPattern = delegate->webPattern_.Upgrade();
                 CHECK_NULL_VOID(webPattern);
                 webPattern->RequestFullScreen();
+                webPattern->SetFullScreenExitHandler(param);
                 auto webEventHub = webPattern->GetWebEventHub();
                 CHECK_NULL_VOID(webEventHub);
                 auto propOnFullScreenEnterEvent = webEventHub->GetOnFullScreenEnterEvent();
