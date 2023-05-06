@@ -326,7 +326,7 @@ void WindowPattern::Connect()
     RegisterSizeChangeListener(sizeChangeListener);
 
     CHECK_NULL_VOID(sessionStage_);
-    sessionStage_->Connect();
+    sessionStage_->Connect(surfaceNode_);
 }
 
 void WindowPattern::Foreground()
