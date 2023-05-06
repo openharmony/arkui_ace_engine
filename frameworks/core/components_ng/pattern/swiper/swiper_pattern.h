@@ -102,6 +102,11 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
         Pattern::ToJsonValue(json);
+
+        if (indicatorIsBoolean_) {
+            return;
+        }
+
         auto indicatorType = GetIndicatorType();
         if (indicatorType == SwiperIndicatorType::DOT) {
             json->Put("indicator", GetDotIndicatorStyle().c_str());
@@ -279,6 +284,11 @@ public:
         IsCustomSize_ = IsCustomSize;
     }
 
+    void SetIndicatorIsBoolean(bool isBoolean)
+    {
+        indicatorIsBoolean_ = isBoolean;
+    }
+
     std::shared_ptr<SwiperParameters> GetSwiperParameters() const;
     std::shared_ptr<SwiperDigitalParameters> GetSwiperDigitalParameters() const;
 
@@ -392,6 +402,7 @@ private:
     bool hasVisibleChangeRegistered_ = false;
     bool isVisible_ = true;
     bool IsCustomSize_ = false;
+    bool indicatorIsBoolean_ = true;
 
     Axis direction_ = Axis::HORIZONTAL;
 
