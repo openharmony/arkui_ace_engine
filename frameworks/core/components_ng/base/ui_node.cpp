@@ -668,7 +668,6 @@ void UINode::AddDisappearingChild(const RefPtr<UINode>& child, uint32_t index)
     } else {
         // mark child as disappearing before adding to disappearingChildren_
         child->isDisappearing_ = true;
-        child->OnAddDisappearingChild();
     }
     disappearingChildren_.emplace_back(child, index);
 }
@@ -686,7 +685,6 @@ bool UINode::RemoveDisappearingChild(const RefPtr<UINode>& child)
     }
     disappearingChildren_.erase(it);
     child->isDisappearing_ = false;
-    child->OnRemoveDisappearingChild();
     return true;
 }
 
