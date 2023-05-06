@@ -21,6 +21,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 namespace OHOS::Ace::Framework {
+class JSCanvasRenderer;
 
 class JSRenderImage : public Referenced {
 public:
@@ -39,11 +40,13 @@ public:
     double GetWidth();
     double GetHeight();
     std::string GetSrc();
+    void SetCloseCallback(std::function<void()>&& callback);
 
     ACE_DISALLOW_COPY_AND_MOVE(JSRenderImage);
 
 private:
     std::string src_;
+    std::list<std::function<void()>> closeCallbacks_;
     double width_ = 0;
     double height_ = 0;
 };

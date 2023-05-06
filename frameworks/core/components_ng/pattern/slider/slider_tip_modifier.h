@@ -25,8 +25,7 @@ class SliderTipModifier : public OverlayModifier {
     DECLARE_ACE_TYPE(SliderTipModifier, OverlayModifier);
 
 public:
-    explicit SliderTipModifier(
-        std::function<OffsetF()> getBlockCenterFunc);
+    explicit SliderTipModifier(std::function<OffsetF()> getBubbleVertexFunc);
     ~SliderTipModifier() override;
 
     void PaintTip(DrawingContext& context);
@@ -39,10 +38,10 @@ public:
         paragraph_ = paragraph;
     }
 
-    void SetCircleCenter(const OffsetF& center)
+    void SetBubbleVertex(const OffsetF& bubbleVertex)
     {
-        if (blockCenter_) {
-            blockCenter_->Set(center);
+        if (bubbleVertex_) {
+            bubbleVertex_->Set(bubbleVertex);
         }
     }
 
@@ -125,7 +124,7 @@ private:
     RefPtr<AnimatablePropertyFloat> sizeScale_;
     RefPtr<AnimatablePropertyFloat> opacityScale_;
     RefPtr<PropertyString> content_;
-    RefPtr<PropertyOffsetF> blockCenter_;
+    RefPtr<PropertyOffsetF> bubbleVertex_;
 
     SizeF bubbleSize_;
     OffsetF bubbleOffset_;
@@ -134,7 +133,7 @@ private:
     Color tipColor_ = Color::BLACK;
     Color textColor_ = Color::TRANSPARENT;
     Dimension textFontSize_;
-    std::function<OffsetF()> getBlockCenterFunc_;
+    std::function<OffsetF()> getBubbleVertexFunc_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SliderTipModifier);
 };

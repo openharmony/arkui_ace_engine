@@ -112,7 +112,7 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (layoutProperty->GetPositionProperty() && layoutProperty->GetPositionProperty()->HasAlignment()) {
         scrollAlignment = layoutProperty->GetPositionProperty()->GetAlignment().value();
     }
-    auto alignmentPosition = Alignment::GetAlignPosition(viewPort_, viewPortExtent_, scrollAlignment);
+    auto alignmentPosition = Alignment::GetAlignPosition(size, viewPortExtent_, scrollAlignment);
     childGeometryNode->SetMarginFrameOffset(padding.Offset() + currentOffset + alignmentPosition);
     childWrapper->Layout();
 }

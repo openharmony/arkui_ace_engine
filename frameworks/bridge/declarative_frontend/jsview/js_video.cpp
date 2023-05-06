@@ -185,6 +185,10 @@ void JSVideo::JsOnStart(const JSCallbackInfo& args)
 
 void JSVideo::JsOnPause(const JSCallbackInfo& args)
 {
+    if (!args[0]->IsFunction()) {
+        LOGE("OnPause args need a function.");
+        return;
+    }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
     auto onPause = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -197,6 +201,10 @@ void JSVideo::JsOnPause(const JSCallbackInfo& args)
 
 void JSVideo::JsOnFinish(const JSCallbackInfo& args)
 {
+    if (!args[0]->IsFunction()) {
+        LOGE("OnFinish args need a function.");
+        return;
+    }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
     auto onFinish = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -209,6 +217,10 @@ void JSVideo::JsOnFinish(const JSCallbackInfo& args)
 
 void JSVideo::JsOnFullscreenChange(const JSCallbackInfo& args)
 {
+    if (!args[0]->IsFunction()) {
+        LOGE("OnFullscreenChange args need a function.");
+        return;
+    }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
     auto OnFullScreenChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](
                                   const std::string& param) {
@@ -222,6 +234,10 @@ void JSVideo::JsOnFullscreenChange(const JSCallbackInfo& args)
 
 void JSVideo::JsOnPrepared(const JSCallbackInfo& args)
 {
+    if (!args[0]->IsFunction()) {
+        LOGE("OnPrepared args need a function.");
+        return;
+    }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
     auto onPrepared = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -234,6 +250,10 @@ void JSVideo::JsOnPrepared(const JSCallbackInfo& args)
 
 void JSVideo::JsOnSeeking(const JSCallbackInfo& args)
 {
+    if (!args[0]->IsFunction()) {
+        LOGE("OnSeeking args need a function.");
+        return;
+    }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
     auto onSeeking = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -246,6 +266,10 @@ void JSVideo::JsOnSeeking(const JSCallbackInfo& args)
 
 void JSVideo::JsOnSeeked(const JSCallbackInfo& args)
 {
+    if (!args[0]->IsFunction()) {
+        LOGE("OnSeeked args need a function.");
+        return;
+    }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
     auto onSeeked = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -258,6 +282,10 @@ void JSVideo::JsOnSeeked(const JSCallbackInfo& args)
 
 void JSVideo::JsOnUpdate(const JSCallbackInfo& args)
 {
+    if (!args[0]->IsFunction()) {
+        LOGE("OnUpdate args need a function.");
+        return;
+    }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
     auto onUpdate = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -270,6 +298,10 @@ void JSVideo::JsOnUpdate(const JSCallbackInfo& args)
 
 void JSVideo::JsOnError(const JSCallbackInfo& args)
 {
+    if (!args[0]->IsFunction()) {
+        LOGE("OnError args need a function.");
+        return;
+    }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
     auto onError = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);

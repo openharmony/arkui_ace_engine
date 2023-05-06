@@ -141,11 +141,21 @@ void InitTextAreaDefaultStyle()
 
 } // namespace
 
+void ParseTextFieldTextObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
+{
+    CHECK_NULL_VOID(changeEventVal->IsFunction());
+
+    JsEventCallback<void(const std::string&)> onChangeEvent(
+        info.GetExecutionContext(), JSRef<JSFunc>::Cast(changeEventVal));
+    TextFieldModel::GetInstance()->SetOnChangeEvent(std::move(onChangeEvent));
+}
+
 void JSTextField::CreateTextInput(const JSCallbackInfo& info)
 {
     std::optional<std::string> placeholderSrc;
     std::optional<std::string> value;
     JSTextInputController* jsController = nullptr;
+    JSRef<JSVal> changeEventVal = JSRef<JSVal>::Make();
     if (info[0]->IsObject()) {
         auto paramObject = JSRef<JSObject>::Cast(info[0]);
         std::string placeholder;
@@ -153,8 +163,17 @@ void JSTextField::CreateTextInput(const JSCallbackInfo& info)
             placeholderSrc = placeholder;
         }
         std::string text;
-        if (ParseJsString(paramObject->GetProperty("text"), text)) {
-            value = text;
+        if (paramObject->GetProperty("text")->IsObject()) {
+            JSRef<JSObject> valueObj = JSRef<JSObject>::Cast(paramObject->GetProperty("text"));
+            changeEventVal = valueObj->GetProperty("changeEvent");
+            auto valueProperty = valueObj->GetProperty("value");
+            if (ParseJsString(valueProperty, text)) {
+                value = text;
+            }
+        } else {
+            if (ParseJsString(paramObject->GetProperty("text"), text)) {
+                value = text;
+            }
         }
         auto controllerObj = paramObject->GetProperty("controller");
         if (!controllerObj->IsUndefined() && !controllerObj->IsNull()) {
@@ -165,6 +184,9 @@ void JSTextField::CreateTextInput(const JSCallbackInfo& info)
     auto controller = TextFieldModel::GetInstance()->CreateTextInput(placeholderSrc, value);
     if (jsController) {
         jsController->SetController(controller);
+    }
+    if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
+        ParseTextFieldTextObject(info, changeEventVal);
     }
 
     if (!Container::IsCurrentUseNewPipeline()) {
@@ -178,6 +200,7 @@ void JSTextField::CreateTextArea(const JSCallbackInfo& info)
     std::optional<std::string> placeholderSrc;
     std::optional<std::string> value;
     JSTextAreaController* jsController = nullptr;
+    JSRef<JSVal> changeEventVal;
     if (info[0]->IsObject()) {
         auto paramObject = JSRef<JSObject>::Cast(info[0]);
         std::string placeholder;
@@ -185,8 +208,17 @@ void JSTextField::CreateTextArea(const JSCallbackInfo& info)
             placeholderSrc = placeholder;
         }
         std::string text;
-        if (ParseJsString(paramObject->GetProperty("text"), text)) {
-            value = text;
+        if (paramObject->GetProperty("text")->IsObject()) {
+            JSRef<JSObject> valueObj = JSRef<JSObject>::Cast(paramObject->GetProperty("text"));
+            changeEventVal = valueObj->GetProperty("changeEvent");
+            auto valueProperty = valueObj->GetProperty("value");
+            if (ParseJsString(valueProperty, text)) {
+                value = text;
+            }
+        } else {
+            if (ParseJsString(paramObject->GetProperty("text"), text)) {
+                value = text;
+            }
         }
         auto controllerObj = paramObject->GetProperty("controller");
         if (!controllerObj->IsUndefined() && !controllerObj->IsNull()) {
@@ -198,6 +230,9 @@ void JSTextField::CreateTextArea(const JSCallbackInfo& info)
         auto controller = TextFieldModel::GetInstance()->CreateTextArea(placeholderSrc, value);
         if (jsController) {
             jsController->SetController(controller);
+        }
+        if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
+            ParseTextFieldTextObject(info, changeEventVal);
         }
         return;
     }

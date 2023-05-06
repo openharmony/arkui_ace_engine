@@ -124,7 +124,7 @@ void PipelineBase::ClearImageCache()
 
 void PipelineBase::SetImageCache(const RefPtr<ImageCache>& imageChache)
 {
-    std::lock_guard<std::shared_mutex> lock(imageMutex_);
+    std::lock_guard<std::shared_mutex> lock(imageMtx_);
     if (imageChache) {
         imageCache_ = imageChache;
     }
@@ -132,7 +132,7 @@ void PipelineBase::SetImageCache(const RefPtr<ImageCache>& imageChache)
 
 RefPtr<ImageCache> PipelineBase::GetImageCache() const
 {
-    std::shared_lock<std::shared_mutex> lock(imageMutex_);
+    std::shared_lock<std::shared_mutex> lock(imageMtx_);
     return imageCache_;
 }
 
@@ -586,7 +586,7 @@ RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const
 void PipelineBase::SendEventToAccessibility(const AccessibilityEvent& accessibilityEvent)
 {
     auto accessibilityManager = GetAccessibilityManager();
-    if (!accessibilityManager) {
+    if (!accessibilityManager || !AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
         return;
     }
     accessibilityManager->SendAccessibilityAsyncEvent(accessibilityEvent);
@@ -652,11 +652,14 @@ void PipelineBase::Destroy()
     drawDelegate_.reset();
     eventManager_->ClearResults();
     {
-        std::unique_lock<std::shared_mutex> lock(imageMutex_);
+        std::unique_lock<std::shared_mutex> lock(imageMtx_);
         imageCache_.Reset();
     }
+    {
+        std::unique_lock<std::shared_mutex> lock(themeMtx_);
+        themeManager_.Reset();
+    }
     fontManager_.Reset();
-    themeManager_.Reset();
     window_->Destroy();
     touchPluginPipelineContext_.clear();
     virtualKeyBoardCallback_.clear();

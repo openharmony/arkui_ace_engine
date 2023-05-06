@@ -134,4 +134,28 @@ void TabsPattern::OnModifyDone()
     OnUpdateShowDivider();
 }
 
+void TabsPattern::SetOnIndexChangeEvent(std::function<void(const BaseEventInfo*)>&& event)
+{
+    auto tabsNode = GetHost();
+    CHECK_NULL_VOID(tabsNode);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildren().back());
+    CHECK_NULL_VOID(swiperNode);
+
+    ChangeEvent changeEvent([jsEvent = std::move(event)](int32_t index) {
+        /* js callback */
+        if (jsEvent) {
+            TabContentChangeEvent eventInfo(index);
+            jsEvent(&eventInfo);
+        }
+    });
+
+    if (onIndexChangeEvent_) {
+        (*onIndexChangeEvent_).swap(changeEvent);
+    } else {
+        onIndexChangeEvent_ = std::make_shared<ChangeEvent>(changeEvent);
+        auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->AddOnChangeEvent(onIndexChangeEvent_);
+    }
+}
 } // namespace OHOS::Ace::NG

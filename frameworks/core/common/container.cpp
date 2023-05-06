@@ -15,7 +15,6 @@
 
 #include "core/common/container.h"
 
-#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container_scope.h"

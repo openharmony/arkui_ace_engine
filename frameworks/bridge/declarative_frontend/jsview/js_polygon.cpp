@@ -87,7 +87,12 @@ void JSPolygon::JsPoints(const JSCallbackInfo& info)
         return;
     } else {
         for (size_t i = 0; i < pointsArray->Length(); i++) {
-            JSRef<JSArray> pointArray = pointsArray->GetValueAt(i);
+            JSRef<JSVal> val = pointsArray->GetValueAt(i);
+            if (!val->IsArray()) {
+                LOGE("point is not array.");
+                continue;
+            }
+            JSRef<JSArray> pointArray = JSRef<JSArray>::Cast(val);
             if (pointArray->GetValueAt(0)->IsNumber()) {
                 shapePoint.first = Dimension(pointArray->GetValueAt(0)->ToNumber<double>(), DimensionUnit::VP);
             } else if (pointArray->GetValueAt(0)->IsString()) {

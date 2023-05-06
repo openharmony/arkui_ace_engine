@@ -348,6 +348,10 @@ void JSImage::SetAutoResize(bool autoResize)
 
 void JSImage::SetSyncLoad(const JSCallbackInfo& info)
 {
+    if (!info[0]->IsBoolean()) {
+        LOGE("info[0] is not a Boolean.");
+        return;
+    }
     ImageModel::GetInstance()->SetSyncMode(info[0]->ToBoolean());
 }
 

@@ -1271,4 +1271,24 @@ HWTEST_F(CheckBoxTestNG, CheckBoxAccessibilityPropertyTestNg003, TestSize.Level1
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(), NAME);
 }
+
+/**
+ * @tc.name: CheckBoxUpdateChangeEventTest001
+ * @tc.desc: Test CheckBox onChange event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxTestNG, CheckBoxUpdateChangeEventTest001, TestSize.Level1)
+{
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    bool isSelected = false;
+    auto changeEvent = [&isSelected](bool select) { isSelected = select; };
+    checkBoxModelNG.SetChangeEvent(changeEvent);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->UpdateChangeEvent(true);
+    EXPECT_EQ(isSelected, true);
+}
 } // namespace OHOS::Ace::NG

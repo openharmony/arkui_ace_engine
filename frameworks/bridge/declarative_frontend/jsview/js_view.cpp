@@ -321,6 +321,10 @@ void JSViewFullUpdate::FindChildById(const JSCallbackInfo& info)
 
 void JSViewFullUpdate::FindChildByIdForPreview(const JSCallbackInfo& info)
 {
+    if (!info[0]->IsString()) {
+        LOGE("info[0] is not a string.");
+        return;
+    }
     std::string viewId = info[0]->ToString();
     if (viewId_ == viewId) {
         info.SetReturnValue(jsViewObject_);
@@ -825,7 +829,10 @@ void JSViewPartialUpdate::JsFinishUpdateFunc(int32_t elmtId)
 void JSViewPartialUpdate::JsGetDeletedElemtIds(const JSCallbackInfo& info)
 {
     LOGD("JSView, getting elmtIds of all deleted Elements from ElementRegister:");
-
+    if (!info[0]->IsArray()) {
+        LOGE("info[0] is not array.");
+        return;
+    }
     JSRef<JSArray> jsArr = JSRef<JSArray>::Cast(info[0]);
     std::unordered_set<int32_t>& removedElements = ElementRegister::GetInstance()->GetRemovedItems();
     size_t index = jsArr->Length();
@@ -838,6 +845,10 @@ void JSViewPartialUpdate::JsGetDeletedElemtIds(const JSCallbackInfo& info)
 
 void JSViewPartialUpdate::JsDeletedElmtIdsHaveBeenPurged(const JSCallbackInfo& info)
 {
+    if (!info[0]->IsArray()) {
+        LOGE("info[0] is not array.");
+        return;
+    }
     JSRef<JSArray> jsArr = JSRef<JSArray>::Cast(info[0]);
     for (size_t i = 0; i < jsArr->Length(); i++) {
         const JSRef<JSVal> strId = jsArr->GetValueAt(i);
@@ -880,6 +891,10 @@ void JSViewPartialUpdate::IsFirstRender(const JSCallbackInfo& info)
 void JSViewPartialUpdate::FindChildByIdForPreview(const JSCallbackInfo& info)
 {
     LOGD("JSViewPartialUpdate::FindChildByIdForPreview");
+    if (!info[0]->IsString()) {
+        LOGE("info[0] is not a string.");
+        return;
+    }
     std::string viewId = info[0]->ToString();
     JSRef<JSObject> targetView = Framework::JSViewStackProcessor::GetViewById(viewId);
     info.SetReturnValue(targetView);

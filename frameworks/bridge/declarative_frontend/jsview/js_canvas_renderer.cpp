@@ -840,6 +840,13 @@ void JSCanvasRenderer::JsDrawImage(const JSCallbackInfo& info)
         image.src = imageValue;
         imgWidth = jsImage->GetWidth();
         imgHeight = jsImage->GetHeight();
+
+        auto closeCallback = [weak = AceType::WeakClaim(this), imageValue]() {
+            auto jsCanvasRenderer = weak.Upgrade();
+            CHECK_NULL_VOID(jsCanvasRenderer);
+            jsCanvasRenderer->JsCloseImageBitmap(imageValue);
+        };
+        jsImage->SetCloseCallback(closeCallback);
     } else {
 #if !defined(PREVIEW)
         pixelMap = CreatePixelMapFromNapiValue(info[0]);
@@ -1015,7 +1022,7 @@ void JSCanvasRenderer::JsCreateImageData(const JSCallbackInfo& info)
 
 void JSCanvasRenderer::JsPutImageData(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
+    if (info.Length() < 1 || !info[0]->IsObject()) {
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
@@ -1108,6 +1115,17 @@ void JSCanvasRenderer::ParseImageData(const JSCallbackInfo& info, ImageData& ima
                                                 : std::min(width - imageData.dirtyX, imageData.dirtyWidth);
     imageData.dirtyHeight = imageData.dirtyY < 0 ? std::min(imageData.dirtyY + imageData.dirtyHeight, height)
                                                  : std::min(height - imageData.dirtyY, imageData.dirtyHeight);
+}
+
+void JSCanvasRenderer::JsCloseImageBitmap(const std::string& src)
+{
+    if (!Container::IsCurrentUseNewPipeline()) {
+        LOGE("JsCloseImageBitmap is not supported");
+        return;
+    }
+    if (!isOffscreen_ && customPaintPattern_) {
+        customPaintPattern_->CloseImageBitmap(src);
+    }
 }
 
 void JSCanvasRenderer::JsGetImageData(const JSCallbackInfo& info)

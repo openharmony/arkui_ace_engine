@@ -59,6 +59,7 @@ public:
     virtual void SetDividerColor(const Color& color);
     virtual void SetDividerStartMargin(const Dimension& startMargin);
     virtual void SetDividerEndMargin(const Dimension& endMargin);
+    virtual void SetOnChangeEvent(std::function<void(const bool)>&& onChangeEvent);
 
 private:
     static std::unique_ptr<SideBarContainerModel> instance_;

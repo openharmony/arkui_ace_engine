@@ -57,6 +57,7 @@ public:
     void SetOnCopy(std::function<void(const std::string&)>&& func) override;
     void SetOnCut(std::function<void(const std::string&)>&& func) override;
     void SetOnPaste(std::function<void(const std::string&)>&& func) override;
+    void SetOnChangeEvent(std::function<void(const std::string&)>&& onChangeEvent) override {};
 
 private:
     void InitializeDefaultValue(const RefPtr<BoxComponent>& boxComponent, const RefPtr<TextFieldComponent>& component,

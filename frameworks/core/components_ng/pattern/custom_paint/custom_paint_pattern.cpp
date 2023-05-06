@@ -375,6 +375,11 @@ void CustomPaintPattern::TransferFromImageBitmap(const RefPtr<OffscreenCanvasPat
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
+void CustomPaintPattern::CloseImageBitmap(const std::string& src)
+{
+    paintMethod_->CloseImageBitmap(src);
+}
+
 void CustomPaintPattern::UpdateGlobalAlpha(double alpha)
 {
     auto task = [alpha](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {

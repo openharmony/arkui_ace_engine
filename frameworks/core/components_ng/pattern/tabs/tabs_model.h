@@ -76,6 +76,7 @@ public:
     virtual void SetOnChange(std::function<void(const BaseEventInfo*)>&& onChange) = 0;
     virtual void SetDivider(const TabsItemDivider& divider) = 0;
     virtual void SetFadingEdge(bool fadingEdge) = 0;
+    virtual void SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& onChangeEvent) = 0;
 
 private:
     static std::unique_ptr<TabsModel> instance_;

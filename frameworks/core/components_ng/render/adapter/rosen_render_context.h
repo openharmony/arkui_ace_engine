@@ -20,10 +20,10 @@
 #include <memory>
 #include <optional>
 
-#include "render_service_client/core/ui/rs_node.h"
 #include "include/core/SkCanvas.h"
 #include "include/core/SkPictureRecorder.h"
 #include "include/core/SkRefCnt.h"
+#include "render_service_client/core/ui/rs_node.h"
 
 #include "base/geometry/dimension_offset.h"
 #include "base/geometry/ng/offset_t.h"
@@ -164,7 +164,7 @@ public:
 
     // if translate params use percent dimension, frameSize should be given correctly
     static std::shared_ptr<Rosen::RSTransitionEffect> GetRSTransitionWithoutType(
-        const TransitionOptions& options, const SizeF& frameSize = SizeF());
+        const std::unique_ptr<TransitionOptions>& options, const SizeF& frameSize = SizeF());
 
     static float ConvertDimensionToScaleBySize(const Dimension& dimension, float size);
 
@@ -331,6 +331,7 @@ private:
     void BdImagePaintTask(RSCanvas& canvas);
 
     void PaintDebugBoundary();
+    bool IsUsingPosition(const RefPtr<FrameNode>& frameNode);
 
     RefPtr<ImageLoadingContext> bgLoadingCtx_;
     RefPtr<CanvasImage> bgImage_;
@@ -343,7 +344,7 @@ private:
     bool isPositionChanged_ = false;
     bool isSynced_ = false;
     bool firstTransitionIn_ = false;
-    bool transitionWithAnimation_ = false;
+    bool isBreakingPoint_ = false;
     bool isBackBlurChanged_ = false;
     bool needDebugBoundary_ = false;
     bool isDisappearing_ = false;

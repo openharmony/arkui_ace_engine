@@ -382,7 +382,7 @@ HWTEST_F(BubbleLayoutTestNg, BubbleLayoutTest004, TestSize.Level1)
         }
         bubbleLayoutAlgorithm->arrowPlacement_ = BUBBLE_LAYOUT_PROPERTY_PLACEMENTS[i];
         bubbleLayoutAlgorithm->UpdateTouchRegion();
-        bubbleLayoutAlgorithm->UpdateCustomChildPosition(bubbleLayoutProperty);
+        bubbleLayoutAlgorithm->UpdateChildPosition(bubbleLayoutProperty);
     }
 }
 } // namespace OHOS::Ace::NG

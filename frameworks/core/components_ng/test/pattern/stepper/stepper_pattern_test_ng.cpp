@@ -686,4 +686,21 @@ HWTEST_F(StepperPatternTestNg, StepperAlgorithmTest003, TestSize.Level1)
     auto child = stepperFrameNode->GetFirstChild();
     EXPECT_EQ(child, nullptr);
 }
+
+/**
+ * @tc.name: StepperEventHubChangeEvent001
+ * @tc.desc: Test the change event of stepper.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StepperPatternTestNg, StepperEventHubChangeEvent001, TestSize.Level1)
+{
+    StepperModelNG().Create(INDEX);
+    StepperModelNG().SetOnChangeEvent([](int32_t index) { EXPECT_EQ(index, 1); });
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<StepperEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->FireChangeEvent(1, 1);
+}
 } // namespace OHOS::Ace::NG

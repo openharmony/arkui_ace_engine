@@ -133,7 +133,7 @@ void OffscreenCanvasPaintMethod::DrawImage(
     InitPaintBlend(cachePaint_);
     const auto skCanvas =
         globalState_.GetType() == CompositeOperation::SOURCE_OVER ? skCanvas_.get() : cacheCanvas_.get();
-    InitImagePaint();
+    InitImagePaint(imagePaint_);
     if (HasImageShadow()) {
         SkRect skRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
         SkPath path;
@@ -194,7 +194,7 @@ void OffscreenCanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const A
     InitPaintBlend(cachePaint_);
     const auto skCanvas =
         globalState_.GetType() == CompositeOperation::SOURCE_OVER ? skCanvas_.get() : cacheCanvas_.get();
-    InitImagePaint();
+    InitImagePaint(imagePaint_);
     switch (canvasImage.flag) {
         case 0:
             skCanvas->drawImage(image, canvasImage.dx, canvasImage.dy);
@@ -467,6 +467,7 @@ void OffscreenCanvasPaintMethod::UpdateTextStyleForeground(bool isStroke, txt::T
         ConvertTxtStyle(fillState_.GetTextStyle(), context_, txtStyle);
         if (fillState_.GetGradient().IsValid()) {
             SkPaint paint;
+            InitImagePaint(paint);
             paint.setStyle(SkPaint::Style::kFill_Style);
             UpdatePaintShader(OffsetF(0, 0), paint, fillState_.GetGradient());
             txtStyle.foreground = paint;
@@ -478,6 +479,7 @@ void OffscreenCanvasPaintMethod::UpdateTextStyleForeground(bool isStroke, txt::T
                 txtStyle.foreground.setAlphaf(globalState_.GetAlpha()); // set alpha after color
             } else {
                 SkPaint paint;
+                InitImagePaint(paint);
                 paint.setColor(fillState_.GetColor().GetValue());
                 paint.setAlphaf(globalState_.GetAlpha()); // set alpha after color
                 txtStyle.foreground = paint;

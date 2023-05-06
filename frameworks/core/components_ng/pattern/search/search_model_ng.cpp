@@ -727,4 +727,12 @@ RefPtr<SearchNode> SearchModelNG::GetOrCreateSearchNode(
     return searchNode;
 }
 
+void SearchModelNG::SetOnChangeEvent(std::function<void(const std::string&)>&& onChangeEvent)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<SearchEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnChangeEvent(std::move(onChangeEvent));
+}
 } // namespace OHOS::Ace::NG

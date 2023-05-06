@@ -49,6 +49,8 @@ public:
     static void SetFontWeight(FontWeight weight);
     static void SetPopupItemBackground(const std::optional<Color>& popupItemBackground);
     static void SetPopupHorizontalSpace(const Dimension& popupHorizontalSpace);
+    static void SetChangeEvent(OnSelectedEvent&& changeEvent);
+    static void SetCreatChangeEvent(OnSelectedEvent&& changeEvent);
 };
 
 } // namespace OHOS::Ace::NG

@@ -167,7 +167,7 @@ HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg002, 
     constexpr float matrix12 = LUMB + (1 - LUMB) * value;
     constexpr float matrix18 = 1.0f;
 
-    paintMethod->SetGrayFilter(percentStr);
+    paintMethod->SetGrayFilter(percentStr, paintMethod->imagePaint_);
     auto* skColorFilter1 = paintMethod->imagePaint_.getColorFilter();
     skColorFilter1->asAColorMatrix(matrixGet);
 
@@ -187,7 +187,7 @@ HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg002, 
      * @tc.expected: The values at the corresponding positions of the matrix1 are calculated correctly.
      */
     std::string nonPercentStr("2");
-    paintMethod->SetGrayFilter(nonPercentStr);
+    paintMethod->SetGrayFilter(nonPercentStr, paintMethod->imagePaint_);
     auto* skColorFilter2 = paintMethod->imagePaint_.getColorFilter();
     skColorFilter2->asAColorMatrix(matrixGet);
     EXPECT_DOUBLE_EQ(matrixGet[0], LUMR);
@@ -223,7 +223,7 @@ HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg003, 
      */
     std::string percentStr("50%");
     float percentNum = 0.5f;
-    paintMethod->SetSepiaFilter(percentStr);
+    paintMethod->SetSepiaFilter(percentStr, paintMethod->imagePaint_);
     auto* skColorFilter1 = paintMethod->imagePaint_.getColorFilter();
     skColorFilter1->asAColorMatrix(matrixGet);
     EXPECT_DOUBLE_EQ(matrixGet[0], 1.0f - percentNum * 0.607f);
@@ -245,7 +245,7 @@ HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg003, 
     constexpr float matrix1_100percent = 0.769f;
     constexpr float matrix5_100percent = 0.349f;
     constexpr float matrix11_100percent = 0.534f;
-    paintMethod->SetSepiaFilter(nonPercentStr);
+    paintMethod->SetSepiaFilter(nonPercentStr, paintMethod->imagePaint_);
     auto* skColorFilter2 = paintMethod->imagePaint_.getColorFilter();
     skColorFilter2->asAColorMatrix(matrixGet);
     EXPECT_DOUBLE_EQ(matrixGet[1], matrix1_100percent);
@@ -277,7 +277,7 @@ HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg004, 
     constexpr float matrix10 = 0.0;
     constexpr float matrix14 = 0.5;
     constexpr float matrix118 = 1.0;
-    paintMethod->SetInvertFilter(percentStr);
+    paintMethod->SetInvertFilter(percentStr, paintMethod->imagePaint_);
     auto* skColorFilter1 = paintMethod->imagePaint_.getColorFilter();
     skColorFilter1->asAColorMatrix(matrix1);
     EXPECT_DOUBLE_EQ(matrix1[0], matrix10);
@@ -292,7 +292,7 @@ HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg004, 
     constexpr float matrix20 = -1.0f;
     constexpr float matrix24 = 1.0f;
     constexpr float matrix218 = 1.0f;
-    paintMethod->SetInvertFilter(nonPercentStr);
+    paintMethod->SetInvertFilter(nonPercentStr, paintMethod->imagePaint_);
     auto* skColorFilter2 = paintMethod->imagePaint_.getColorFilter();
     skColorFilter2->asAColorMatrix(matrix1);
     EXPECT_DOUBLE_EQ(matrix1[0], matrix20);
@@ -322,7 +322,7 @@ HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg005, 
     std::string percentStr("50%");
     constexpr float matrix10 = 1.0;
     constexpr float matrix118 = 0.5;
-    paintMethod->SetOpacityFilter(percentStr);
+    paintMethod->SetOpacityFilter(percentStr, paintMethod->imagePaint_);
     auto* skColorFilter1 = paintMethod->imagePaint_.getColorFilter();
     skColorFilter1->asAColorMatrix(matrix1);
     EXPECT_DOUBLE_EQ(matrix1[0], matrix10);
@@ -335,7 +335,7 @@ HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg005, 
     std::string nonPercentStr("2.0");
     constexpr float matrix20 = 1.0;
     constexpr float matrix218 = 1.0;
-    paintMethod->SetOpacityFilter(nonPercentStr);
+    paintMethod->SetOpacityFilter(nonPercentStr, paintMethod->imagePaint_);
     auto* skColorFilter2 = paintMethod->imagePaint_.getColorFilter();
     skColorFilter2->asAColorMatrix(matrix1);
     EXPECT_DOUBLE_EQ(matrix1[0], matrix20);
@@ -364,7 +364,7 @@ HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg006, 
     std::string percentStr("50%");
     constexpr float matrix10 = 0.5;
     constexpr float matrix118 = 1.0;
-    paintMethod->SetBrightnessFilter(percentStr);
+    paintMethod->SetBrightnessFilter(percentStr, paintMethod->imagePaint_);
     auto* skColorFilter1 = paintMethod->imagePaint_.getColorFilter();
     skColorFilter1->asAColorMatrix(matrix1);
     EXPECT_DOUBLE_EQ(matrix1[0], matrix10);
@@ -375,7 +375,7 @@ HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg006, 
      * @tc.expected: The function does not work.
      */
     std::string nonPercentStr("-2.0");
-    paintMethod->SetBrightnessFilter(nonPercentStr);
+    paintMethod->SetBrightnessFilter(nonPercentStr, paintMethod->imagePaint_);
     auto* skColorFilter2 = paintMethod->imagePaint_.getColorFilter();
     skColorFilter2->asAColorMatrix(matrix1);
     EXPECT_DOUBLE_EQ(matrix1[0], matrix10);
@@ -404,7 +404,7 @@ HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg007, 
     constexpr float matrix10 = 0.5;
     constexpr float matrix14 = 0.5 * (1 - 0.5);
     constexpr float matrix118 = 1.0;
-    paintMethod->SetContrastFilter(percentStr);
+    paintMethod->SetContrastFilter(percentStr, paintMethod->imagePaint_);
     auto* skColorFilter1 = paintMethod->imagePaint_.getColorFilter();
     skColorFilter1->asAColorMatrix(matrix1);
     EXPECT_DOUBLE_EQ(matrix1[0], matrix10);
@@ -419,7 +419,7 @@ HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg007, 
     constexpr float matrix20 = 2.0;
     constexpr float matrix24 = 0.5 * (1 - 2.0);
     constexpr float matrix218 = 1.0;
-    paintMethod->SetContrastFilter(nonPercentStr);
+    paintMethod->SetContrastFilter(nonPercentStr, paintMethod->imagePaint_);
     auto* skColorFilter2 = paintMethod->imagePaint_.getColorFilter();
     skColorFilter2->asAColorMatrix(matrix1);
     EXPECT_DOUBLE_EQ(matrix1[0], matrix20);
@@ -448,7 +448,7 @@ HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg008, 
      */
     std::string percentStr("50%");
     float percentNum = 0.5f;
-    paintMethod->SetSaturateFilter(percentStr);
+    paintMethod->SetSaturateFilter(percentStr, paintMethod->imagePaint_);
     auto* skColorFilter1 = paintMethod->imagePaint_.getColorFilter();
     skColorFilter1->asAColorMatrix(matrixGet);
     EXPECT_DOUBLE_EQ(matrixGet[0], LUMR + (1 - LUMR) * percentNum);
@@ -468,7 +468,7 @@ HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg008, 
      */
     std::string nonPercentStr("2.0");
     percentNum = 2.0f;
-    paintMethod->SetSaturateFilter(nonPercentStr);
+    paintMethod->SetSaturateFilter(nonPercentStr, paintMethod->imagePaint_);
     auto* skColorFilter2 = paintMethod->imagePaint_.getColorFilter();
     skColorFilter2->asAColorMatrix(matrixGet);
     EXPECT_DOUBLE_EQ(matrixGet[0], LUMR + (1 - LUMR) * percentNum);
@@ -506,7 +506,7 @@ HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg009, 
     float radius = 660 / HALF_CIRCLE_ANGLE * M_PI;
     float cosValue = std::cos(radius);
     float sinValue = std::sin(radius);
-    paintMethod->SetHueRotateFilter(filterParam1);
+    paintMethod->SetHueRotateFilter(filterParam1, paintMethod->imagePaint_);
     auto* skColorFilter1 = paintMethod->imagePaint_.getColorFilter();
     skColorFilter1->asAColorMatrix(matrixGet);
     EXPECT_DOUBLE_EQ(matrixGet[0], LUMR + cosValue * (1 - LUMR) + sinValue * (-LUMR));
@@ -527,7 +527,7 @@ HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg009, 
     std::string filterParam2("3.14rad");
     cosValue = std::cos(3.14f);
     sinValue = std::sin(3.14f);
-    paintMethod->SetHueRotateFilter(filterParam2);
+    paintMethod->SetHueRotateFilter(filterParam2, paintMethod->imagePaint_);
     auto* skColorFilter2 = paintMethod->imagePaint_.getColorFilter();
     skColorFilter2->asAColorMatrix(matrixGet);
     EXPECT_DOUBLE_EQ(matrixGet[0], LUMR + cosValue * (1 - LUMR) + sinValue * (-LUMR));
@@ -544,7 +544,7 @@ HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg009, 
     std::string filterParam3("0.25turn");
     cosValue = std::cos(0.25f * 2 * M_PI);
     sinValue = std::sin(0.25f * 2 * M_PI);
-    paintMethod->SetHueRotateFilter(filterParam3);
+    paintMethod->SetHueRotateFilter(filterParam3, paintMethod->imagePaint_);
     auto* skColorFilter3 = paintMethod->imagePaint_.getColorFilter();
     skColorFilter3->asAColorMatrix(matrixGet);
     EXPECT_DOUBLE_EQ(matrixGet[5], LUMR + cosValue * (-LUMR) + sinValue * 0.143f);

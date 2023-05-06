@@ -64,10 +64,31 @@ public:
         return onPopupSelectedEvent_;
     }
 
+    void SetChangeEvent(OnSelectedEvent&& changeEvent)
+    {
+        selectedChangeEvent_ = std::move(changeEvent);
+    }
+
+    const OnSelectedEvent& GetChangeEvent() const
+    {
+        return selectedChangeEvent_;
+    }
+    void SetCreatChangeEvent(OnSelectedEvent&& changeEvent)
+    {
+        creatChangeEvent_ = std::move(changeEvent);
+    }
+
+    const OnSelectedEvent& GetCreatChangeEvent() const
+    {
+        return creatChangeEvent_;
+    }
+
 private:
     OnSelectedEvent onSelectedEvent_;
     OnRequestPopupDataEvent onRequestPopupDataEvent_;
     OnPopupSelectedEvent onPopupSelectedEvent_;
+    OnSelectedEvent selectedChangeEvent_;
+    OnSelectedEvent creatChangeEvent_;
 };
 
 } // namespace OHOS::Ace::NG

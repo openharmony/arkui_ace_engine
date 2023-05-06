@@ -86,6 +86,10 @@ public:
 
     void FireOnChange(const std::string& value)
     {
+        if (onValueChangeEvent_) {
+            LOGI("On change event %{private}s", value.c_str());
+            onValueChangeEvent_(value);
+        }
         if (onChange_) {
             LOGI("On change %{private}s", value.c_str());
             onChange_(value);
@@ -191,6 +195,11 @@ public:
         return onScrollIndexEvent_;
     }
 
+    void SetOnChangeEvent(std::function<void(const std::string&)>&& func)
+    {
+        onValueChangeEvent_ = std::move(func);
+    }
+
 private:
     OnScrollEvent onScrollEvent_;
     OnScrollBeginEvent onScrollBeginEvent_;
@@ -207,6 +216,7 @@ private:
     std::function<void(const std::string&)> onCopy_;
     std::function<void(const std::string&)> onCut_;
     std::function<void(const std::string&)> onPaste_;
+    std::function<void(const std::string&)> onValueChangeEvent_;
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldEventHub);
 };
 

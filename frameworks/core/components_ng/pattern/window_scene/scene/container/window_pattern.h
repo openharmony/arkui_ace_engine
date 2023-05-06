@@ -21,6 +21,8 @@
 #include "pointer_event.h"
 #include "ui_window.h"
 
+#include "session/container/include/session_stage.h"
+
 #include "core/common/window.h"
 #include "core/components_ng/pattern/pattern.h"
 
@@ -29,7 +31,6 @@ class RSUIDirector;
 struct VsyncCallback;
 class SessionStage;
 class ISizeChangeListener;
-class IPointerEventListener;
 enum class WindowSizeChangeReason : uint32_t;
 } // namespace OHOS::Rosen
 
@@ -103,9 +104,11 @@ public:
 
     void RegisterSessionStageStateListener(const std::shared_ptr<Rosen::ISessionStageStateListener>& listener) override;
     void RegisterSizeChangeListener(const std::shared_ptr<Rosen::ISizeChangeListener>& listener);
+    void RegisterInputEventListener(const std::shared_ptr<Rosen::IInputEventListener>& listener);
 
-    void RegisterPointerEventListener(const std::shared_ptr<Rosen::IPointerEventListener>& listener);
     void ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent);
+    void ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent);
+    void ProcessAxisEvent(const std::shared_ptr<OHOS::MMI::AxisEvent>& axisEvent);
 
     void Connect() override;
     void Foreground() override;
