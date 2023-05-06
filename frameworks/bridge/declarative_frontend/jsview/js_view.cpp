@@ -24,6 +24,7 @@
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "core/common/container.h"
+#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_full_update_model.h"
 #include "core/components_ng/base/view_full_update_model_ng.h"
 #include "core/components_ng/base/view_partial_update_model.h"
@@ -651,6 +652,16 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
         jsView->jsViewFunction_->ExecuteForceNodeRerender(nodeId);
     };
 
+    auto recycleCustomNode = [weak = AceType::WeakClaim(this)](const RefPtr<NG::CustomNodeBase>& recycleNode) -> void {
+        auto jsView = weak.Upgrade();
+        CHECK_NULL_VOID(jsView);
+        recycleNode->ResetRecycle();
+        AceType::DynamicCast<NG::UINode>(recycleNode)->SetActive(false);
+        jsView->SetRecycleCustomNode(recycleNode);
+        jsView->jsViewFunction_->ExecuteDisappear();
+        jsView->jsViewFunction_->ExecuteRecycle(jsView->GetRecycleCustomNodeName());
+    };
+
     NodeInfoPU info = { .appearFunc = std::move(appearFunc),
         .renderFunc = std::move(renderFunction),
         .updateFunc = std::move(updateFunction),
@@ -660,6 +671,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
         .reloadFunc = std::move(reloadFunction),
         .completeReloadFunc = std::move(completeReloadFunc),
         .nodeUpdateFunc = std::move(nodeUpdateFunc),
+        .recycleCustomNodeFunc = recycleCustomNode,
         .hasMeasureOrLayout = jsViewFunction_->HasMeasure() || jsViewFunction_->HasLayout(),
         .isStatic = IsStatic(),
         .jsViewName = GetJSViewName() };
@@ -681,6 +693,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
     if (jsViewFunction_->HasLayout()) {
         info.layoutFunc = std::move(layoutFunc);
     }
+
     auto node = ViewPartialUpdateModel::GetInstance()->CreateNode(std::move(info));
 #ifdef PREVIEW
     auto uiNode = AceType::DynamicCast<NG::UINode>(node);
@@ -751,6 +764,84 @@ void JSViewPartialUpdate::Create(const JSCallbackInfo& info)
     }
 }
 
+enum {
+    PARAM_VIEW_OBJ = 0,
+    PARAM_IS_RECYCLE,
+    PARAM_NODE_NAME,
+    PARAM_RECYCLE_UPDATE_FUNC,
+
+    PARAM_SIZE,
+};
+
+bool ParseRecycleParams(const JSCallbackInfo& info, JSRef<JSVal> (&params)[PARAM_SIZE])
+{
+    if (info.Length() != PARAM_SIZE) {
+        return false;
+    }
+    if (!info[PARAM_VIEW_OBJ]->IsObject()) {
+        return false;
+    }
+    if (!info[PARAM_IS_RECYCLE]->IsBoolean()) {
+        return false;
+    }
+    if (!info[PARAM_NODE_NAME]->IsString()) {
+        return false;
+    }
+    if (!info[PARAM_RECYCLE_UPDATE_FUNC]->IsFunction()) {
+        return false;
+    }
+
+    for (int32_t idx = PARAM_VIEW_OBJ; idx < PARAM_SIZE; ++idx) {
+        params[idx] = info[idx];
+    }
+    return true;
+}
+
+/**
+ * in JS ViewPU.createRecycle(...)
+ * create a recyclable custom node
+ */
+void JSViewPartialUpdate::CreateRecycle(const JSCallbackInfo& info)
+{
+    ACE_DCHECK(Container::IsCurrentUsePartialUpdate());
+
+    JSRef<JSVal> params[PARAM_SIZE];
+    if (!ParseRecycleParams(info, params)) {
+        LOGE("Invalid parameters");
+        return;
+    }
+
+    auto viewObj = JSRef<JSObject>::Cast(params[PARAM_VIEW_OBJ]);
+    auto* view = viewObj->Unwrap<JSViewPartialUpdate>();
+    if (!view) {
+        LOGE("Invalid JSView");
+        return;
+    }
+    auto recycle = params[PARAM_IS_RECYCLE]->ToBoolean();
+    auto nodeName = params[PARAM_NODE_NAME]->ToString();
+    auto jsRecycleUpdateFunc =
+        AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(params[PARAM_RECYCLE_UPDATE_FUNC]));
+    auto recycleUpdateFunc = [execCtx = info.GetExecutionContext(), func = std::move(jsRecycleUpdateFunc)]() -> void {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        func->ExecuteJS();
+    };
+
+    // update view and node property
+    view->SetRecycleCustomNodeName(nodeName);
+
+    // get or create recycle node
+    if (recycle) {
+        auto node = view->GetCachedRecycleNode();
+        node->SetRecycleRenderFunc(std::move(recycleUpdateFunc));
+        auto newElmtId = ViewStackModel::GetInstance()->GetElmtIdToAccountFor();
+        ElementRegister::GetInstance()->UpdateRecycleElmtId(AceType::DynamicCast<NG::UINode>(node)->GetId(), newElmtId);
+        AceType::DynamicCast<NG::UINode>(node)->UpdateRecycleElmtId(newElmtId);
+        ViewStackModel::GetInstance()->Push(node, true);
+    } else {
+        ViewStackModel::GetInstance()->Push(view->CreateViewNode(), true);
+    }
+}
+
 void JSViewPartialUpdate::JSBind(BindingTarget object)
 {
     LOGD("JSViewPartialUpdate::Bind");
@@ -758,6 +849,7 @@ void JSViewPartialUpdate::JSBind(BindingTarget object)
     MethodOptions opt = MethodOptions::NONE;
 
     JSClass<JSViewPartialUpdate>::StaticMethod("create", &JSViewPartialUpdate::Create, opt);
+    JSClass<JSViewPartialUpdate>::StaticMethod("createRecycle", &JSViewPartialUpdate::CreateRecycle, opt);
     JSClass<JSViewPartialUpdate>::Method("markNeedUpdate", &JSViewPartialUpdate::MarkNeedUpdate);
     JSClass<JSViewPartialUpdate>::Method("syncInstanceId", &JSViewPartialUpdate::SyncInstanceId);
     JSClass<JSViewPartialUpdate>::Method("restoreInstanceId", &JSViewPartialUpdate::RestoreInstanceId);
@@ -773,6 +865,8 @@ void JSViewPartialUpdate::JSBind(BindingTarget object)
     JSClass<JSViewPartialUpdate>::CustomMethod("isFirstRender", &JSViewPartialUpdate::IsFirstRender);
     JSClass<JSViewPartialUpdate>::CustomMethod(
         "findChildByIdForPreview", &JSViewPartialUpdate::FindChildByIdForPreview);
+    JSClass<JSViewPartialUpdate>::CustomMethod(
+        "resetRecycleCustomNode", &JSViewPartialUpdate::JSResetRecycleCustomNode);
     JSClass<JSViewPartialUpdate>::Inherit<JSViewAbstract>();
     JSClass<JSViewPartialUpdate>::Bind(object, ConstructorCallback, DestructorCallback);
 }

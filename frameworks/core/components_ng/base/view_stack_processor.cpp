@@ -90,6 +90,9 @@ void ViewStackProcessor::FlushRerenderTask()
 {
     auto node = Finish();
     CHECK_NULL_VOID_NOLOG(node);
+    if (predict_) {
+        return;
+    }
     node->FlushUpdateAndMarkDirty();
 }
 

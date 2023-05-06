@@ -372,6 +372,7 @@ void LayoutWrapper::BuildLazyItem()
     if (!lazyBuildFunction_) {
         return;
     }
+    ACE_FUNCTION_TRACE();
     lazyBuildFunction_(Claim(this));
     lazyBuildFunction_ = nullptr;
 }

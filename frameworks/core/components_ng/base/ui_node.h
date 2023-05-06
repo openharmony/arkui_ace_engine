@@ -374,6 +374,11 @@ public:
         return restoreId_;
     }
 
+    void UpdateRecycleElmtId(int32_t newElmtId)
+    {
+        nodeId_ = newElmtId;
+    }
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {

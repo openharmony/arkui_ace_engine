@@ -255,6 +255,9 @@ ACE_EXPORT extern const char BLANK_ETS_TAG[];
 ACE_EXPORT extern const char BUTTON_COMPONENT_TAG[];
 ACE_EXPORT extern const char BUTTON_ETS_TAG[];
 
+// recycle
+ACE_EXPORT extern const char RECYCLE_VIEW_ETS_TAG[];
+
 // common
 ACE_EXPORT extern const char COMMON_VIEW_ETS_TAG[];
 // option
