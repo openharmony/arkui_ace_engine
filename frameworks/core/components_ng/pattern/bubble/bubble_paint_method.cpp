@@ -182,7 +182,6 @@ void BubblePaintMethod::UpdateArrowOffset(const std::optional<Dimension>& offset
     }
 }
 
-
 void BubblePaintMethod::PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas& canvas)
 {
     canvas.Save();
@@ -229,8 +228,13 @@ void BubblePaintMethod::PaintBubbleWithArrow(RSCanvas& canvas, PaintWrapper* pai
 {
     BuildCompletePath(path_);
     PaintShadow(path_, ShadowConfig::DefaultShadowM, canvas);
+#ifdef NEW_SKIA
+    canvas.ClipPath(path_, RSClipOp::INTERSECT, true);
+    canvas.DrawPath(path_);
+#else
     canvas.DrawPath(path_);
     canvas.ClipPath(path_, RSClipOp::INTERSECT, true);
+#endif
 }
 
 void BubblePaintMethod::BuildCompletePath(RSPath& path)
