@@ -91,7 +91,7 @@ HWTEST_F(ScrollAccessibilityPropertyTestNg, ScrollAccessibilityPropertyGetSuppor
     scrollPattern->currentOffset_ = CURRENT_DISTANCE;
 
     /**
-     * @tc.steps: step3. callback ResetSupportAction then GetSupportAction, copy to actions. Contrast actions and expectActions.
+     * @tc.steps: step3. callback ResetSupportAction then GetSupportAction. Contrast actions and expectActions.
      * @tc.expected: expect actions equals to expectActions.
      */
     scrollAccessibilityProperty->ResetSupportAction();
@@ -105,7 +105,7 @@ HWTEST_F(ScrollAccessibilityPropertyTestNg, ScrollAccessibilityPropertyGetSuppor
     EXPECT_EQ(actions, expectActions);
 
     /**
-     * @tc.steps: step4. change scrollPattern property and retrieve actions from updated SupportAction. Contrast actions and expectActions.
+     * @tc.steps: step4. change scrollPattern property and retrieve actions. Contrast again.
      * @tc.expected: expect actions equals to expectActions.
      */
     scrollPattern->currentOffset_ = CURRENT_DISTANCE_TOP;
@@ -119,7 +119,7 @@ HWTEST_F(ScrollAccessibilityPropertyTestNg, ScrollAccessibilityPropertyGetSuppor
     EXPECT_EQ(actions, expectActions);
 
     /**
-     * @tc.steps: step5. change scrollPattern property and retrieve actions from updated SupportAction. Contrast actions and expectActions.
+     * @tc.steps: step5. change scrollPattern property and retrieve actions. Contrast again.
      * @tc.expected: expect actions equals to expectActions.
      */
     scrollPattern->currentOffset_ = CURRENT_DISTANCE_BOTTOM;
@@ -133,7 +133,7 @@ HWTEST_F(ScrollAccessibilityPropertyTestNg, ScrollAccessibilityPropertyGetSuppor
     EXPECT_EQ(actions, expectActions);
 
     /**
-     * @tc.steps: step6. change scrollPattern property and retrieve actions from updated SupportAction. Contrast actions and expectActions.
+     * @tc.steps: step6. change scrollPattern property and retrieve actions. Contrast again.
      * @tc.expected: expect actions equals to expectActions.
      */
     scrollPattern->axis_ = Axis::NONE;
