@@ -40,11 +40,7 @@ void FrameNode::OnAttachToMainTree(bool) {}
 void FrameNode::OnDetachFromMainTree(bool) {}
 bool FrameNode::OnRemoveFromParent()
 {
-    return true;
-}
-bool FrameNode::RemoveImmediately() const
-{
-    return true;
+    return false;
 }
 void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& dirty) {}
 void FrameNode::SetActive(bool active)

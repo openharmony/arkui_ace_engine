@@ -274,7 +274,7 @@ private:
     void OnFreezeUpdate(bool isFreezed) override;
     void ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
 
-    void NotifyTransitionInner(const SizeF& frameSize, bool isTransitionIn, bool isRecursive = true);
+    void NotifyTransitionInner(const SizeF& frameSize, bool isTransitionIn);
     void NotifyTransition(bool isTransitionIn);
     bool HasTransitionOutAnimation() const override
     {

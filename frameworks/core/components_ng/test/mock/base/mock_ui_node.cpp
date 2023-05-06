@@ -34,11 +34,7 @@ void UINode::OnAttachToMainTree(bool) {}
 void UINode::OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList, uint32_t index) {}
 bool UINode::OnRemoveFromParent()
 {
-    return true;
-}
-bool UINode::RemoveImmediately() const
-{
-    return true;
+    return false;
 }
 void UINode::DumpTree(int32_t depth) {}
 void UINode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool forceMeasure, bool forceLayout) {}

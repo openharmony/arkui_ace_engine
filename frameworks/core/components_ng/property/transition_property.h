@@ -110,10 +110,6 @@ struct TransitionOptions {
         options.UpdateOpacity(0.0f);
         return options;
     }
-    bool IsEmpty() const
-    {
-        return !HasOpacity() && !HasTranslate() && !HasScale() && !HasRotate();
-    }
     bool operator==(const TransitionOptions& other) const
     {
         return NearEqual(Type, other.Type) && NearEqual(propOpacity, other.propOpacity) &&

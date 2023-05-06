@@ -1555,16 +1555,12 @@ bool FrameNode::OnRemoveFromParent()
     DetachFromMainTree();
     auto context = GetRenderContext();
     CHECK_NULL_RETURN(context, false);
-    if (RemoveImmediately()) {
-        // directly remove, reset focusHub, parent and depth
-        if (auto focusHub = GetFocusHub()) {
-            focusHub->RemoveSelf();
-        }
-        ResetParent();
+    if (context->HasTransitionOutAnimation()) {
+        // pending remove, move self into disappearing children
         return true;
     } else {
-        // delayed remove, will move self into disappearing children
-        return false;
+        // directly remove, reset parent and depth
+        return UINode::OnRemoveFromParent();
     }
 }
 
@@ -1624,13 +1620,5 @@ void FrameNode::UpdateAnimatablePropertyFloat(const std::string& propertyName, f
 std::string FrameNode::ProvideRestoreInfo()
 {
     return pattern_->ProvideRestoreInfo();
-}
-
-bool FrameNode::RemoveImmediately() const
-{
-    auto context = GetRenderContext();
-    CHECK_NULL_RETURN(context, true);
-    // has transition out animation, need to wait for animation end
-    return !context->HasTransitionOutAnimation();
 }
 } // namespace OHOS::Ace::NG
