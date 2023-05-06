@@ -63,6 +63,7 @@ constexpr int32_t INDEX_GREATER_THAN_END_INDEX = 20;
 constexpr int32_t INDEX_LESS_THAN_START_INDEX = -1;
 constexpr int32_t INDEX_EQUAL_WITH_START_INDEX = 1;
 constexpr int32_t INDEX_EQUAL_WITH_START_INDEX_DELETED = -1;
+constexpr int32_t LAZY_FOR_EACH_NODE_ID = 1;
 } // namespace
 
 class LazyForEachSyntaxTestNg : public testing::Test {
@@ -491,6 +492,12 @@ HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxMoveDataFunctionTest008, TestSize
      */
     lazyForEachNode->OnDataMoved(INDEX_MIDDLE_2, INDEX_MIDDLE);
     EXPECT_EQ(lazyForEachNode->ids_.size(), LAZY_FOR_EACH_NODE_IDS.size());
+
+    /**
+     * @tc.steps: step6. From index is less than start index, and to index is in middle of range.
+     */
+    lazyForEachNode->OnDataMoved(INDEX_LESS_THAN_START_INDEX, INDEX_MIDDLE);
+    EXPECT_EQ(lazyForEachNode->ids_.size(), LAZY_FOR_EACH_NODE_IDS.size());
 }
 
 /**
@@ -535,6 +542,52 @@ HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxWrapperBuilderTest009, TestSize.L
     auto lazyLayoutWrapperBuilder =
         AceType::DynamicCast<LazyLayoutWrapperBuilder>(parentLayoutWrapper->layoutWrapperBuilder_);
     EXPECT_EQ(parentLayoutWrapper->GetTotalChildCount(), LAZY_FOR_EACH_NODE_IDS.size());
+    EXPECT_EQ(lazyLayoutWrapperBuilder->preNodeIds_, LAZY_FOR_EACH_NODE_IDS);
+}
+
+/**
+ * @tc.name: ForEachSyntaxWrapperBuilderTest010
+ * @tc.desc: Create LazyForEach, update its Items and update LazyLayoutWrapperBuilder layout range.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxWrapperBuilderTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Swiper and push it to view stack processor.
+     * @tc.expected: Make Swiper as LazyForEach parent.
+     */
+    auto frameNode = CreateNode(V2::SWIPER_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. Invoke lazyForEach Create function.
+     * @tc.expected: Create LazyForEachNode and can be pop from ViewStackProcessor.
+     */
+    LazyForEachModelNG lazyForEach;
+    const RefPtr<LazyForEachActuator> mockLazyForEachActuator =
+        AceType::MakeRefPtr<OHOS::Ace::Framework::MockLazyForEachBuilder>();
+    lazyForEach.Create(mockLazyForEachActuator);
+    auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(lazyForEachNode != nullptr && lazyForEachNode->GetTag() == V2::JS_LAZY_FOR_EACH_ETS_TAG);
+
+    UpdateItems(lazyForEachNode, mockLazyForEachActuator);
+
+    /**
+     * @tc.steps: step3. Create Parent LayoutWrapper.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    auto parentLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    /**
+     * @tc.steps: step4. Invoke AdjustLayoutWrapperTree, update lazyLayoutWrapperBuilder index range and its
+     * currentChildCount_.
+     * @tc.expected: lazyLayoutWrapperBuilder preNodeIds_ is equal with lazyForEachNode ids_.
+     */
+    lazyForEachNode->AdjustLayoutWrapperTree(parentLayoutWrapper, false, false);
+
+    auto lazyLayoutWrapperBuilder =
+        AceType::DynamicCast<LazyLayoutWrapperBuilder>(parentLayoutWrapper->layoutWrapperBuilder_);
+    EXPECT_EQ(parentLayoutWrapper->GetTotalChildCount(), static_cast<int32_t>(LAZY_FOR_EACH_NODE_IDS.size()));
     EXPECT_EQ(lazyLayoutWrapperBuilder->preNodeIds_, LAZY_FOR_EACH_NODE_IDS);
 }
 
@@ -694,5 +747,124 @@ HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxWrapperBuilderSwapDirtyAndUpdateB
     lazyLayoutWrapperBuilder2->SetCacheCount(CACHE_COUNT);
     lazyLayoutWrapperBuilder2->SwapDirtyAndUpdateBuildCache();
     EXPECT_EQ(lazyLayoutWrapperBuilder2->startIndex_.value_or(DEFAULT_INDEX), INDEX_3);
+}
+
+/**
+ * @tc.name: ForEachSyntaxWrapperBuilderOnGetOrCreateWrapperByIndexTest004
+ * @tc.desc: Create LazyForEach, and invoke OnGetOrCreateWrapperByIndex.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxWrapperBuilderOnGetOrCreateWrapperByIndexTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create lazyLayoutWrapperBuilder and invoke OnExpandChildLayoutWrapper when the childWrappers_
+     * is empty.
+     * @tc.expected: Create childWrapper and add it to childWrappers_.
+     */
+    auto lazyForEachNode = CreateLazyForEachNode();
+    auto lazyLayoutWrapperBuilder = AceType::MakeRefPtr<LazyLayoutWrapperBuilder>(
+        lazyForEachNode->builder_, AceType::WeakClaim(AceType::RawPtr(lazyForEachNode)));
+    lazyLayoutWrapperBuilder->OnExpandChildLayoutWrapper();
+
+    /**
+     * @tc.steps: step2. Invoke OnGetOrCreateWrapperByIndex when the index is invalid or not.
+     * @tc.expected: Return nullptr when index is invalid and return the corresponding wrapper when it is valid.
+     */
+    lazyLayoutWrapperBuilder->lazySwiper_ = false;
+    lazyLayoutWrapperBuilder->startIndex_ = std::nullopt;
+    EXPECT_NE(lazyLayoutWrapperBuilder->OnGetOrCreateWrapperByIndex(INDEX_2), nullptr);
+
+    /**
+     * @tc.steps: step3. Invoke OnGetOrCreateWrapperByIndex when the startIndex_ is null.
+     */
+    lazyLayoutWrapperBuilder->startIndex_ = INDEX_2;
+    EXPECT_NE(lazyLayoutWrapperBuilder->OnGetOrCreateWrapperByIndex(INDEX_2), nullptr);
+    EXPECT_EQ(lazyLayoutWrapperBuilder->OnGetOrCreateWrapperByIndex(DEFAULT_INDEX), nullptr);
+
+    /**
+     * @tc.steps: step4. Invoke OnGetOrCreateWrapperByIndex when the index is not in the range of the starIndex and
+     * endIndex.
+     */
+    lazyLayoutWrapperBuilder->lazySwiper_ = true;
+    lazyLayoutWrapperBuilder->startIndex_ = std::nullopt;
+    EXPECT_NE(lazyLayoutWrapperBuilder->OnGetOrCreateWrapperByIndex(INDEX_2), nullptr);
+    EXPECT_EQ(lazyLayoutWrapperBuilder->OnGetOrCreateWrapperByIndex(INDEX_0), nullptr);
+
+    /**
+     * @tc.steps: step5. Invoke OnGetOrCreateWrapperByIndex when the index is not in the range of the starIndex and
+     * endIndex.
+     */
+    lazyLayoutWrapperBuilder->lazySwiper_ = true;
+    lazyLayoutWrapperBuilder->startIndex_ = INDEX_2;
+    EXPECT_NE(lazyLayoutWrapperBuilder->OnGetOrCreateWrapperByIndex(INDEX_2), nullptr);
+    EXPECT_EQ(lazyLayoutWrapperBuilder->OnGetOrCreateWrapperByIndex(INDEX_0), nullptr);
+}
+
+/**
+ * @tc.name: ForEachSyntaxWrapperBuilderGetKeyByIndexFromPreNodesTest005
+ * @tc.desc: Create LazyForEach, and invoke GetKeyByIndexFromPreNodes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxWrapperBuilderGetKeyByIndexFromPreNodesTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create lazyLayoutWrapperBuilder and invoke SwapDirtyAndUpdateBuildCache when the childWrappers_
+     * is empty or not.
+     */
+    auto lazyForEachNode = CreateLazyForEachNode();
+    auto lazyLayoutWrapperBuilder = AceType::MakeRefPtr<LazyLayoutWrapperBuilder>(
+        lazyForEachNode->builder_, AceType::WeakClaim(AceType::RawPtr(lazyForEachNode)));
+    EXPECT_EQ(lazyLayoutWrapperBuilder->startIndex_.value_or(DEFAULT_INDEX), NEW_START_ID);
+    EXPECT_EQ(lazyLayoutWrapperBuilder->endIndex_.value_or(DEFAULT_INDEX), NEW_START_ID);
+
+    lazyLayoutWrapperBuilder->OnExpandChildLayoutWrapper();
+    lazyLayoutWrapperBuilder->SwapDirtyAndUpdateBuildCache();
+    EXPECT_EQ(lazyLayoutWrapperBuilder->startIndex_.value_or(DEFAULT_INDEX), START_ID);
+    EXPECT_EQ(lazyLayoutWrapperBuilder->endIndex_.value_or(DEFAULT_INDEX), NEW_END_ID);
+
+    /**
+     * @tc.steps: step1. Create lazyLayoutWrapperBuilder and invoke SwapDirtyAndUpdateBuildCache when cacheCount is not
+     * 0.
+     */
+    lazyLayoutWrapperBuilder->preStartIndex_ = START_ID;
+    lazyLayoutWrapperBuilder->preEndIndex_ = INDEX_5;
+    auto key = lazyLayoutWrapperBuilder->GetKeyByIndexFromPreNodes(NEW_END_ID);
+    EXPECT_EQ(key, std::nullopt);
+
+    key = lazyLayoutWrapperBuilder->GetKeyByIndexFromPreNodes(INDEX_8);
+    EXPECT_EQ(key, std::nullopt);
+
+    lazyLayoutWrapperBuilder->preEndIndex_ = INDEX_8;
+    key = lazyLayoutWrapperBuilder->GetKeyByIndexFromPreNodes(START_ID);
+    key = lazyLayoutWrapperBuilder->GetKeyByIndexFromPreNodes(NEW_END_ID);
+    EXPECT_EQ(key, std::nullopt);
+}
+
+/**
+ * @tc.name: LazyForEachSyntaxAbnormalCreateTest001
+ * @tc.desc: Create LazyForEach in abnormal condition.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachSyntaxAbnormalCreateTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Text and push it to view stack processor.
+     * @tc.expected: Make Text as LazyForEach parent.
+     */
+    const RefPtr<LazyForEachBuilder> mockLazyForEachBuilder =
+        AceType::MakeRefPtr<OHOS::Ace::Framework::MockLazyForEachBuilder>();
+    auto frameNode = LazyForEachNode::GetOrCreateLazyForEachNode(LAZY_FOR_EACH_NODE_ID, mockLazyForEachBuilder);
+    auto firstrFrameNode = LazyForEachNode::GetOrCreateLazyForEachNode(LAZY_FOR_EACH_NODE_ID, mockLazyForEachBuilder);
+    const RefPtr<LazyForEachBuilder> anothermockLazyForEachBuilder =
+        AceType::MakeRefPtr<OHOS::Ace::Framework::MockLazyForEachBuilder>();
+    auto secondFrameNode =
+        LazyForEachNode::GetOrCreateLazyForEachNode(LAZY_FOR_EACH_NODE_ID, anothermockLazyForEachBuilder);
+
+    /**
+     * @tc.steps: step2. Invoke lazyForEach Create function.
+     * @tc.expected: Create LazyForEachNode and can be pop from ViewStackProcessor.
+     */
+    EXPECT_TRUE(frameNode == firstrFrameNode);
+    EXPECT_TRUE(frameNode == secondFrameNode);
 }
 } // namespace OHOS::Ace::NG
