@@ -13,22 +13,16 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/window_scene/scene/host/host_window_extension.h"
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_HOST_WINDOW_SCENE_MODEL_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_HOST_WINDOW_SCENE_MODEL_H
+
+#include "core/components_ng/pattern/window_scene/scene/host/host_window_scene.h"
 
 namespace OHOS::Ace::NG {
-HostWindowExtension::HostWindowExtension(const std::string& /* bundleName */, const std::string& /* abilityName */) {}
-
-HostWindowExtension::~HostWindowExtension() = default;
-
-void HostWindowExtension::OnWindowShow() {}
-
-void HostWindowExtension::OnWindowHide() {}
-
-void HostWindowExtension::OnConnect() {}
-
-void HostWindowExtension::RequestExtensionSessionActivation() {}
-
-void HostWindowExtension::RequestExtensionSessionBackground() {}
-
-void HostWindowExtension::RequestExtensionSessionDestruction() {}
+class ACE_EXPORT HostWindowSceneModel {
+public:
+    static void Create(const sptr<Rosen::Session>& session);
+};
 } // namespace OHOS::Ace::NG
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_HOST_WINDOW_SCENE_MODEL_H

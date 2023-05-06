@@ -13,23 +13,23 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_EXTENSION_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_EXTENSION_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_SCENE_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_SCENE_H
 
 #include "core/components_ng/pattern/window_scene/scene/container/window_pattern.h"
 
 namespace OHOS::Ace::NG {
-class WindowExtension : public WindowPattern {
-    DECLARE_ACE_TYPE(WindowExtension, WindowPattern);
+class WindowScene : public WindowPattern {
+    DECLARE_ACE_TYPE(WindowScene, WindowPattern);
 
 public:
-    WindowExtension(const std::shared_ptr<AbilityRuntime::Context>& context,
+    WindowScene(const std::shared_ptr<AbilityRuntime::Context>& context,
         const sptr<Rosen::ISession>& iSession);
-    ~WindowExtension() override = default;
+    ~WindowScene() override = default;
 
 private:
-    ACE_DISALLOW_COPY_AND_MOVE(WindowExtension);
+    ACE_DISALLOW_COPY_AND_MOVE(WindowScene);
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_EXTENSION_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_SCENE_H

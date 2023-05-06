@@ -13,22 +13,17 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/window_scene/scene/host/host_window_extension.h"
+#include "core/components_ng/pattern/window_scene/root/root_scene_model.h"
+
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/window_scene/root/root_scene_node.h"
 
 namespace OHOS::Ace::NG {
-HostWindowExtension::HostWindowExtension(const std::string& /* bundleName */, const std::string& /* abilityName */) {}
-
-HostWindowExtension::~HostWindowExtension() = default;
-
-void HostWindowExtension::OnWindowShow() {}
-
-void HostWindowExtension::OnWindowHide() {}
-
-void HostWindowExtension::OnConnect() {}
-
-void HostWindowExtension::RequestExtensionSessionActivation() {}
-
-void HostWindowExtension::RequestExtensionSessionBackground() {}
-
-void HostWindowExtension::RequestExtensionSessionDestruction() {}
+void RootSceneModel::Create()
+{
+    auto stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto rootSceneNode = RootSceneNode::GetOrCreateRootSceneNode(nodeId);
+    stack->Push(rootSceneNode);
+}
 } // namespace OHOS::Ace::NG

@@ -13,22 +13,18 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/window_scene/scene/host/host_window_extension.h"
+#include "core/components_ng/pattern/window_scene/screen/screen_model.h"
+
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-HostWindowExtension::HostWindowExtension(const std::string& /* bundleName */, const std::string& /* abilityName */) {}
-
-HostWindowExtension::~HostWindowExtension() = default;
-
-void HostWindowExtension::OnWindowShow() {}
-
-void HostWindowExtension::OnWindowHide() {}
-
-void HostWindowExtension::OnConnect() {}
-
-void HostWindowExtension::RequestExtensionSessionActivation() {}
-
-void HostWindowExtension::RequestExtensionSessionBackground() {}
-
-void HostWindowExtension::RequestExtensionSessionDestruction() {}
+void ScreenModel::Create(const sptr<Rosen::ScreenSession>& screenSession)
+{
+    auto stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::SCREEN_ETS_TAG, nodeId,
+        [&screenSession]() { return AceType::MakeRefPtr<ScreenPattern>(screenSession); });
+    stack->Push(frameNode);
+}
 } // namespace OHOS::Ace::NG

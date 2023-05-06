@@ -203,6 +203,12 @@
 #include "bridge/declarative_frontend/jsview/js_camera.h"
 #endif
 
+#if defined(WINDOW_SCENE_SUPPORTED)
+#include "frameworks/bridge/declarative_frontend/jsview/window_scene/js_host_window_scene.h"
+#include "frameworks/bridge/declarative_frontend/jsview/window_scene/js_root_scene.h"
+#include "frameworks/bridge/declarative_frontend/jsview/window_scene/js_screen.h"
+#endif
+
 namespace OHOS::Ace::Framework {
 
 void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
@@ -617,6 +623,11 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
 #endif
 #if defined(MODEL_COMPONENT_SUPPORTED)
     { "Model", JSSceneView::JSBind },
+#endif
+#if defined(WINDOW_SCENE_SUPPORTED)
+    { "HostWindowScene", JSHostWindowScene::JSBind },
+    { "RootScene", JSRootScene::JSBind },
+    { "Screen", JSScreen::JSBind },
 #endif
 };
 

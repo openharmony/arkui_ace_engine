@@ -13,23 +13,23 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/window_scene/scene/container/window_extension.h"
+#include "core/components_ng/pattern/window_scene/scene/container/window_scene.h"
 
-#include "session/container/include/extension_session_stage.h"
+#include "session/container/include/scene_session_stage.h"
 
 namespace OHOS::Ace::NG {
-extern "C" ACE_EXPORT void* OHOS_ACE_CreateWindowExtension(const std::shared_ptr<AbilityRuntime::Context>& context,
+extern "C" ACE_EXPORT void* OHOS_ACE_CreateWindowScene(const std::shared_ptr<AbilityRuntime::Context>& context,
     const sptr<Rosen::ISession>& iSession)
 {
-    LOGI("Ace lib loaded, CreateWindowExtension.");
-    auto windowExtension = std::make_shared<WindowExtension>(context, iSession);
-    return new std::shared_ptr<UIWindow>(windowExtension);
+    LOGI("Ace lib loaded, CreateWindowScene.");
+    auto windowScene = std::make_shared<WindowScene>(context, iSession);
+    return new std::shared_ptr<UIWindow>(windowScene);
 }
 
-WindowExtension::WindowExtension(const std::shared_ptr<AbilityRuntime::Context>& context,
+WindowScene::WindowScene(const std::shared_ptr<AbilityRuntime::Context>& context,
     const sptr<Rosen::ISession>& iSession)
     : WindowPattern(context)
 {
-    sessionStage_ = new Rosen::ExtensionSessionStage(iSession);
+    sessionStage_ = new Rosen::SceneSessionStage(iSession);
 }
 } // namespace OHOS::Ace::NG
