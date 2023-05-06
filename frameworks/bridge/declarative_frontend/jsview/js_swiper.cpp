@@ -65,6 +65,7 @@ const std::vector<SwiperDisplayMode> DISPLAY_MODE = { SwiperDisplayMode::STRETCH
 const std::vector<SwiperIndicatorType> INDICATOR_TYPE = { SwiperIndicatorType::DOT, SwiperIndicatorType::DIGIT };
 const static int32_t DEFAULT_INTERVAL = 3000;
 const static int32_t DEFAULT_DURATION = 400;
+const static int32_t DEFAULT_DISPLAY_COUNT = 1;
 
 JSRef<JSVal> SwiperChangeEventToJSValue(const SwiperChangeEvent& eventInfo)
 {
@@ -192,7 +193,9 @@ void JSSwiper::SetDisplayCount(const JSCallbackInfo& info)
     if (info[0]->IsString() && info[0]->ToString() == "auto") {
         SwiperModel::GetInstance()->SetDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
     } else if (info[0]->IsNumber()) {
-        SwiperModel::GetInstance()->SetDisplayCount(info[0]->ToNumber<int32_t>());
+        auto displayCount = info[0]->ToNumber<int32_t>();
+        displayCount = displayCount < 0 ? DEFAULT_DISPLAY_COUNT : displayCount;
+        SwiperModel::GetInstance()->SetDisplayCount(displayCount);
     }
 }
 
@@ -251,10 +254,7 @@ void JSSwiper::SetIndex(const JSCallbackInfo& info)
     if (info.Length() > 0 && info[0]->IsNumber()) {
         index = info[0]->ToNumber<int32_t>();
     }
-    if (index < 0) {
-        LOGE("index is not valid: %{public}d", index);
-        return;
-    }
+    index = std::clamp(index, 0, index);
     SwiperModel::GetInstance()->SetIndex(index);
 
     if (info.Length() > 1 && info[1]->IsFunction()) {
