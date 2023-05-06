@@ -505,12 +505,6 @@ template("declarative_js_engine") {
           "jsview/window_scene/js_root_scene.cpp",
           "jsview/window_scene/js_screen.cpp",
         ]
-        external_deps += [
-          "window_manager:scene_session",
-          "window_manager:scene_session_manager",
-          "window_manager:screen_session",
-          "window_manager:screen_session_manager",
-        ]
       }
     }
   }
