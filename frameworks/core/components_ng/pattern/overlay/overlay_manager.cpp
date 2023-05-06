@@ -375,6 +375,8 @@ void OverlayManager::ShowToast(
             }
         },
         option.GetOnFinishEvent());
+    toastNode->OnAccessibilityEvent(
+        AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
 }
 
 void OverlayManager::PopToast(int32_t toastId)
@@ -445,6 +447,10 @@ void OverlayManager::PopToast(int32_t toastId)
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RequestFrame();
+    AccessibilityEvent event;
+    event.type = AccessibilityEventType::CHANGE;
+    event.windowContentChangeTypes = WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE;
+    pipeline->SendEventToAccessibility(event);
 }
 
 void OverlayManager::AdaptToSafeArea(const RefPtr<FrameNode>& node)
