@@ -78,10 +78,8 @@ void MarqueePattern::OnModifyDone()
     textLayoutProperty->UpdateFontWeight(layoutProperty->GetFontWeight().value_or(FontWeight::NORMAL));
     textLayoutProperty->UpdateFontFamily(
         layoutProperty->GetFontFamily().value_or(std::vector<std::string>({ "" })));
-    if (CheckMeasureFlag(textLayoutProperty->GetPropertyChangeFlag())) {
-        textChild->MarkModifyDone();
-        textChild->MarkDirtyNode();
-    }
+    textChild->MarkModifyDone();
+    textChild->MarkDirtyNode();
     if (CheckMeasureFlag(layoutProperty->GetPropertyChangeFlag())) {
         forceStropAnimation_ = true;
         host->MarkDirtyNode();
