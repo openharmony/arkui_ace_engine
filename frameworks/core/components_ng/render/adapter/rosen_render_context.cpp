@@ -443,6 +443,13 @@ void RosenRenderContext::UpdateBackBlurStyle(const BlurStyleOption& bgBlurStyle)
     isBackBlurChanged_ = true;
 }
 
+void RosenRenderContext::ResetBackBlurStyle()
+{
+    const auto& groupProperty = GetOrCreateBackground();
+    groupProperty->propBlurStyleOption.reset();
+    isBackBlurChanged_ = true;
+}
+
 void RosenRenderContext::OnSphericalEffectUpdate(double radio)
 {
     CHECK_NULL_VOID(rsNode_);
