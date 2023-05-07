@@ -275,8 +275,7 @@ void JSActionSheet::JSBind(BindingTarget globalObj)
 {
     JSClass<JSActionSheet>::Declare("ActionSheet");
     JSClass<JSActionSheet>::StaticMethod("show", &JSActionSheet::Show);
-    JSClass<JSActionSheet>::Inherit<JSViewAbstract>();
-    JSClass<JSActionSheet>::Bind<>(globalObj);
+    JSClass<JSActionSheet>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

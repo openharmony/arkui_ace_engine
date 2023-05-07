@@ -215,7 +215,6 @@ void JSRating::JSBind(BindingTarget globalObj)
     JSClass<JSRating>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSRating>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSRating>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
-    JSClass<JSRating>::Inherit<JSViewAbstract>();
-    JSClass<JSRating>::Bind<>(globalObj);
+    JSClass<JSRating>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 } // namespace OHOS::Ace::Framework

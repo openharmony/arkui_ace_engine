@@ -82,7 +82,6 @@ void JSImageSpan::JSBind(BindingTarget globalObj)
     JSClass<JSImageSpan>::StaticMethod("create", &JSImageSpan::Create, opt);
     JSClass<JSImageSpan>::StaticMethod("objectFit", &JSImageSpan::SetObjectFit, opt);
     JSClass<JSImageSpan>::StaticMethod("verticalAlign", &JSImageSpan::SetVerticalAlign);
-    JSClass<JSImageSpan>::Inherit<JSViewAbstract>();
-    JSClass<JSImageSpan>::Bind<>(globalObj);
+    JSClass<JSImageSpan>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 } // namespace OHOS::Ace::Framework

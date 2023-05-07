@@ -750,9 +750,9 @@ void JsRegisterModules(BindingTarget globalObj, std::string modules)
 
 void JsBindFormViews(BindingTarget globalObj)
 {
-    JSViewAbstract::JSBind();
-    JSContainerBase::JSBind();
-    JSShapeAbstract::JSBind();
+    JSViewAbstract::JSBind(globalObj);
+    JSContainerBase::JSBind(globalObj);
+    JSShapeAbstract::JSBind(globalObj);
     JSView::JSBind(globalObj);
     JSLocalStorage::JSBind(globalObj);
 
@@ -779,9 +779,9 @@ void JsBindFormViews(BindingTarget globalObj)
 
 void JsBindViews(BindingTarget globalObj)
 {
-    JSViewAbstract::JSBind();
-    JSContainerBase::JSBind();
-    JSShapeAbstract::JSBind();
+    JSViewAbstract::JSBind(globalObj);
+    JSContainerBase::JSBind(globalObj);
+    JSShapeAbstract::JSBind(globalObj);
     JSView::JSBind(globalObj);
     JSLocalStorage::JSBind(globalObj);
 

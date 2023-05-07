@@ -230,8 +230,7 @@ void JSAlertDialog::JSBind(BindingTarget globalObj)
     JSClass<JSAlertDialog>::Declare("AlertDialog");
     JSClass<JSAlertDialog>::StaticMethod("show", &JSAlertDialog::Show);
 
-    JSClass<JSAlertDialog>::Inherit<JSViewAbstract>();
-    JSClass<JSAlertDialog>::Bind<>(globalObj);
+    JSClass<JSAlertDialog>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

@@ -59,9 +59,7 @@ void JSImageAnimator::JSBind(BindingTarget globalObj)
     JSClass<JSImageAnimator>::StaticMethod("onCancel", &JSImageAnimator::OnCancel, opt);
     JSClass<JSImageAnimator>::StaticMethod("onFinish", &JSImageAnimator::OnFinish, opt);
 
-    JSClass<JSImageAnimator>::Inherit<JSContainerBase>();
-    JSClass<JSImageAnimator>::Inherit<JSViewAbstract>();
-    JSClass<JSImageAnimator>::Bind<>(globalObj);
+    JSClass<JSImageAnimator>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 void JSImageAnimator::SetImages(const JSCallbackInfo& info)

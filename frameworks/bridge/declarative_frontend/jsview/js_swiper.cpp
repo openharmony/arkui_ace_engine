@@ -130,9 +130,7 @@ void JSSwiper::JSBind(BindingTarget globalObj)
     JSClass<JSSwiper>::StaticMethod("height", &JSSwiper::SetHeight);
     JSClass<JSSwiper>::StaticMethod("width", &JSSwiper::SetWidth);
     JSClass<JSSwiper>::StaticMethod("size", &JSSwiper::SetSize);
-    JSClass<JSSwiper>::Inherit<JSContainerBase>();
-    JSClass<JSSwiper>::Inherit<JSViewAbstract>();
-    JSClass<JSSwiper>::Bind<>(globalObj);
+    JSClass<JSSwiper>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 void JSSwiper::SetAutoPlay(bool autoPlay)

@@ -259,9 +259,7 @@ void JSListItem::JSBind(BindingTarget globalObj)
     JSClass<JSListItem>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
     JSClass<JSListItem>::StaticMethod("onDragStart", &JSListItem::JsOnDragStart);
 
-    JSClass<JSListItem>::Inherit<JSContainerBase>();
-    JSClass<JSListItem>::Inherit<JSViewAbstract>();
-    JSClass<JSListItem>::Bind<>(globalObj);
+    JSClass<JSListItem>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

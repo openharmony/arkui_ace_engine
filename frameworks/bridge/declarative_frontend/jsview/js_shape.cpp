@@ -378,9 +378,7 @@ void JSShape::JSBind(BindingTarget globalObj)
     JSClass<JSShape>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSShape>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSShape>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
-    JSClass<JSShape>::Inherit<JSContainerBase>();
-    JSClass<JSShape>::Inherit<JSViewAbstract>();
-    JSClass<JSShape>::Bind<>(globalObj);
+    JSClass<JSShape>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

@@ -55,7 +55,6 @@ void JSRemoteWindow::JSBind(BindingTarget globalObj)
     JSClass<JSRemoteWindow>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSRemoteWindow>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
 
-    JSClass<JSRemoteWindow>::Inherit<JSViewAbstract>();
-    JSClass<JSRemoteWindow>::Bind<>(globalObj);
+    JSClass<JSRemoteWindow>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 } // namespace OHOS::Ace::Framework

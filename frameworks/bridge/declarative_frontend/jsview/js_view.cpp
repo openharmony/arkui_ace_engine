@@ -305,8 +305,7 @@ void JSViewFullUpdate::JSBind(BindingTarget object)
     JSClass<JSViewFullUpdate>::CustomMethod("getCardId", &JSViewFullUpdate::JsGetCardId);
     JSClass<JSViewFullUpdate>::CustomMethod("findChildById", &JSViewFullUpdate::FindChildById);
     JSClass<JSViewFullUpdate>::CustomMethod("findChildByIdForPreview", &JSViewFullUpdate::FindChildByIdForPreview);
-    JSClass<JSViewFullUpdate>::Inherit<JSViewAbstract>();
-    JSClass<JSViewFullUpdate>::Bind(object, ConstructorCallback, DestructorCallback);
+    JSClass<JSViewFullUpdate>::InheritAndBind<JSViewAbstract>(object, ConstructorCallback, DestructorCallback);
 }
 
 void JSViewFullUpdate::FindChildById(const JSCallbackInfo& info)
@@ -877,8 +876,7 @@ void JSViewPartialUpdate::JSBind(BindingTarget object)
         "findChildByIdForPreview", &JSViewPartialUpdate::FindChildByIdForPreview);
     JSClass<JSViewPartialUpdate>::CustomMethod(
         "resetRecycleCustomNode", &JSViewPartialUpdate::JSResetRecycleCustomNode);
-    JSClass<JSViewPartialUpdate>::Inherit<JSViewAbstract>();
-    JSClass<JSViewPartialUpdate>::Bind(object, ConstructorCallback, DestructorCallback);
+    JSClass<JSViewPartialUpdate>::InheritAndBind<JSViewAbstract>(object, ConstructorCallback, DestructorCallback);
 }
 
 void JSViewPartialUpdate::ConstructorCallback(const JSCallbackInfo& info)

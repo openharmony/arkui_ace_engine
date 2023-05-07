@@ -105,9 +105,7 @@ void JSSlidingPanel::JSBind(BindingTarget globalObj)
     JSClass<JSSlidingPanel>::StaticMethod("onChange", &JSSlidingPanel::SetOnSizeChange);
     JSClass<JSSlidingPanel>::StaticMethod("onHeightChange", &JSSlidingPanel::SetOnHeightChange);
 
-    JSClass<JSSlidingPanel>::Inherit<JSContainerBase>();
-    JSClass<JSSlidingPanel>::Inherit<JSViewAbstract>();
-    JSClass<JSSlidingPanel>::Bind<>(globalObj);
+    JSClass<JSSlidingPanel>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 void JSSlidingPanel::SetBackgroundMask(const JSCallbackInfo& info)

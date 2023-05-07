@@ -244,9 +244,7 @@ void JSNavDestination::JSBind(BindingTarget globalObj)
     JSClass<JSNavDestination>::CustomMethod("onShown", &JSNavDestination::SetOnShown);
     JSClass<JSNavDestination>::StaticMethod("onHidden", &JSNavDestination::SetOnHidden);
     JSClass<JSNavDestination>::StaticMethod("onBackPressed", &JSNavDestination::SetOnBackPressed);
-    JSClass<JSNavDestination>::Inherit<JSContainerBase>();
-    JSClass<JSNavDestination>::Inherit<JSViewAbstract>();
-    JSClass<JSNavDestination>::Bind<>(globalObj);
+    JSClass<JSNavDestination>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

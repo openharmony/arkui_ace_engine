@@ -95,8 +95,7 @@ void JSCheckbox::JSBind(BindingTarget globalObj)
     JSClass<JSCheckbox>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSCheckbox>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSCheckbox>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
-    JSClass<JSCheckbox>::Inherit<JSViewAbstract>();
-    JSClass<JSCheckbox>::Bind<>(globalObj);
+    JSClass<JSCheckbox>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void ParseSelectObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)

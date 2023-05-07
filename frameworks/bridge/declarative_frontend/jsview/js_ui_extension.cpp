@@ -74,8 +74,7 @@ void JSUIExtension::JSBind(BindingTarget globalObj)
     JSClass<JSUIExtension>::StaticMethod("onError", &JSUIExtension::SetOnError, opt);
     JSClass<JSUIExtension>::StaticMethod("onCall", &JSUIExtension::SetOnCall, opt);
     JSClass<JSUIExtension>::StaticMethod("onResult", &JSUIExtension::SetOnResult, opt);
-    JSClass<JSUIExtension>::Inherit<JSViewAbstract>();
-    JSClass<JSUIExtension>::Bind<>(globalObj);
+    JSClass<JSUIExtension>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSUIExtension::Create(const JSCallbackInfo& info)

@@ -93,9 +93,7 @@ void JSStepper::JSBind(BindingTarget globalObj)
     JSClass<JSStepper>::StaticMethod("onChange", &JSStepper::OnChange);
     JSClass<JSStepper>::StaticMethod("onNext", &JSStepper::OnNext);
     JSClass<JSStepper>::StaticMethod("onPrevious", &JSStepper::OnPrevious);
-    JSClass<JSStepper>::Inherit<JSContainerBase>();
-    JSClass<JSStepper>::Inherit<JSViewAbstract>();
-    JSClass<JSStepper>::Bind<>(globalObj);
+    JSClass<JSStepper>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 void JSStepper::OnFinish(const JSCallbackInfo& info)

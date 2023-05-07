@@ -80,7 +80,6 @@ void JSBlank::JSBind(BindingTarget globalObj)
     JSClass<JSBlank>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSBlank>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
 
-    JSClass<JSBlank>::Inherit<JSViewAbstract>();
-    JSClass<JSBlank>::Bind<>(globalObj);
+    JSClass<JSBlank>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 } // namespace OHOS::Ace::Framework

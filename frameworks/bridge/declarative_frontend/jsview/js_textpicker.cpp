@@ -74,8 +74,7 @@ void JSTextPicker::JSBind(BindingTarget globalObj)
     JSClass<JSTextPicker>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSTextPicker>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSTextPicker>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
-    JSClass<JSTextPicker>::Inherit<JSViewAbstract>();
-    JSClass<JSTextPicker>::Bind(globalObj);
+    JSClass<JSTextPicker>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSTextPicker::PickerBackgroundColor(const JSCallbackInfo& info)

@@ -66,8 +66,7 @@ void JSCounter::JSBind(BindingTarget globalObj)
     JSClass<JSCounter>::StaticMethod("controlWidth", &JSCounter::JSControlWidth);
     JSClass<JSCounter>::StaticMethod("state", &JSCounter::JSStateChange);
     JSClass<JSCounter>::StaticMethod("backgroundColor", &JSCounter::JsBackgroundColor);
-    JSClass<JSCounter>::Inherit<JSContainerBase>();
-    JSClass<JSCounter>::Bind(globalObj);
+    JSClass<JSCounter>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 void JSCounter::JsEnableDec(const JSCallbackInfo& args)

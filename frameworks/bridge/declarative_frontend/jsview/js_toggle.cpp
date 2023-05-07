@@ -75,8 +75,7 @@ void JSToggle::JSBind(BindingTarget globalObj)
     JSClass<JSToggle>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSToggle>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSToggle>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
-    JSClass<JSToggle>::Inherit<JSViewAbstract>();
-    JSClass<JSToggle>::Bind(globalObj);
+    JSClass<JSToggle>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void ParseToggleIsOnObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)

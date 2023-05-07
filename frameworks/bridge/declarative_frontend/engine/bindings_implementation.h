@@ -371,6 +371,17 @@ public:
     template<typename Base>
     static void Inherit();
 
+    /**
+     *  Inherit all bound methods and properties from \p Base
+     *  \note A binding for the base class must exist beforehand with
+     *  \code JSClassImpl<Base,Impl>::Declare("MyBaseClass") \endcode
+     *
+     *  \tparam Base A base class of C
+     */
+    template<typename Base>
+    static void InheritAndBind(
+        BindingTarget bindTarget, JSFunctionCallback ctor = nullptr, JSDestructorCallback<C> dtor= nullptr, JSGCMarkCallback<C> gcMark= nullptr);
+
     static IFunctionBinding* GetFunctionBinding(int id);
     static IFunctionBinding* GetGetFunctionBinding(int id);
     static IFunctionBinding* GetSetFunctionBinding(int id);
