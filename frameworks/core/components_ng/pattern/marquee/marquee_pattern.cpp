@@ -106,13 +106,13 @@ void MarqueePattern::StartMarqueeAnimation()
     }
     auto geoNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geoNode);
-    auto marqueeWidth = geoNode->GetFrameSize().Width();
+    auto marqueeSize = geoNode->GetFrameSize();
     auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
     CHECK_NULL_VOID(textNode);
     auto textGeoNode = textNode->GetGeometryNode();
     CHECK_NULL_VOID(textGeoNode);
     auto textWidth = textGeoNode->GetFrameSize().Width();
-    if (GreatOrEqual(marqueeWidth, textWidth)) {
+    if (GreatOrEqual(marqueeSize.Width(), textWidth)) {
         lastStartStatus_ = false;
         return;
     }
@@ -121,7 +121,9 @@ void MarqueePattern::StartMarqueeAnimation()
     auto direction = layoutProperty->GetDirection().value_or(MarqueeDirection::LEFT);
     auto end = -1 * textWidth;
     if (direction == MarqueeDirection::RIGHT) {
-        end = marqueeWidth;
+        const auto& padding = layoutProperty->CreatePaddingAndBorder();
+        MinusPaddingToSize(padding, marqueeSize);
+        end = marqueeSize.Width() >= textWidth ? marqueeSize.Width() : textWidth;
     }
     auto duration = static_cast<int32_t>(std::abs(end) * DEFAULT_MARQUEE_SCROLL_DELAY);
     if (GreatNotEqual(step, 0.0)) {
