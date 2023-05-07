@@ -1711,7 +1711,7 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow008, TestSize.Level1)
     settingData.columnKind = TEXT;
     settingData.height = Dimension(FONT_SIZE_10);
     settingData.selectedValues = {0, 0, 0};
-    settingData.isCascade = false;
+    settingData.attr.isCascade = false;
     /**
      * @tc.step: step1. create multi TextCascadePickerOptions of settingData
      */
@@ -1752,7 +1752,7 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow009, TestSize.Level1)
     settingData.columnKind = TEXT;
     settingData.height = Dimension(FONT_SIZE_10);
     settingData.selectedValues = {0, 0};
-    settingData.isCascade = true;
+    settingData.attr.isCascade = true;
     /**
      * @tc.step: step1. create cascade TextCascadePickerOptions of settingData
      */
@@ -1802,7 +1802,7 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow010, TestSize.Level1)
     settingData.columnKind = TEXT;
     settingData.height = Dimension(FONT_SIZE_10);
     settingData.selectedValues = {0, 0, 0};
-    settingData.isCascade = true;
+    settingData.attr.isCascade = true;
     /**
      * @tc.step: step1. create cascade TextCascadePickerOptions of settingData(Zero Child)
      */

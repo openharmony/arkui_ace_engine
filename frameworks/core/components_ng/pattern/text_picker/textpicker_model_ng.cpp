@@ -67,6 +67,7 @@ void TextPickerModelNG::Create(RefPtr<PickerTheme> pickerTheme, uint32_t columnK
         stackNode->MountToParent(textPickerNode);
     }
     stack->Push(textPickerNode);
+    options_.clear();
 }
 
 void TextPickerModelNG::SetDefaultAttributes(const RefPtr<PickerTheme>& pickerTheme)
@@ -163,7 +164,10 @@ void TextPickerModelNG::SetSelected(uint32_t value)
     CHECK_NULL_VOID(frameNode);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     textPickerPattern->SetSelected(value);
+    std::vector<uint32_t> values;
+    values.emplace_back(value);
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Selected, value);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedIndex, values);
 }
 
 void TextPickerModelNG::SetRange(const std::vector<NG::RangeContent>& value)
@@ -261,6 +265,7 @@ void TextPickerModelNG::MultiInit(const RefPtr<PickerTheme> pickerTheme)
     CHECK_NULL_VOID(pickerTheme);
     showCount_ = pickerTheme->GetShowOptionCount();
     stack->Push(textPickerNode);
+    rangeValue_.clear();
 }
 
 void TextPickerModelNG::SetIsCascade(bool isCascade)
@@ -271,6 +276,15 @@ void TextPickerModelNG::SetIsCascade(bool isCascade)
     CHECK_NULL_VOID(textPickerPattern);
     isCascade_ = isCascade;
     textPickerPattern->SetIsCascade(isCascade_);
+}
+
+void TextPickerModelNG::SetHasSelectAttr(bool value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    textPickerPattern->SetHasSelectAttr(value);
 }
 
 void TextPickerModelNG::SetUnCascadeColumns(const std::vector<NG::TextCascadePickerOptions>& options)
@@ -345,6 +359,7 @@ void TextPickerModelNG::SetCascadeColumns(const std::vector<NG::TextCascadePicke
 
 void TextPickerModelNG::SetColumns(const std::vector<NG::TextCascadePickerOptions>& options)
 {
+    options_.clear();
     for (auto& option : options) {
         options_.emplace_back(std::move(option));
     }
@@ -362,6 +377,7 @@ bool TextPickerModelNG::IsSingle()
 
 bool TextPickerModelNG::GetSingleRange(std::vector<NG::RangeContent>& rangeValue)
 {
+    rangeValue.clear();
     for (auto& item : rangeValue_) {
         rangeValue.emplace_back(std::move(item));
     }
@@ -370,6 +386,7 @@ bool TextPickerModelNG::GetSingleRange(std::vector<NG::RangeContent>& rangeValue
 
 bool TextPickerModelNG::GetMultiOptions(std::vector<NG::TextCascadePickerOptions>& options)
 {
+    options.clear();
     for (auto& item : options_) {
         options.emplace_back(std::move(item));
     }
@@ -394,5 +411,6 @@ void TextPickerModelNG::SetSelecteds(const std::vector<uint32_t>& values)
     CHECK_NULL_VOID(textPickerPattern);
     textPickerPattern->SetSelecteds(values);
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Selecteds, values);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedIndex, values);
 }
 } // namespace OHOS::Ace::NG

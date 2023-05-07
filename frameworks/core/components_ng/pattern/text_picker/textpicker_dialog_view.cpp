@@ -119,7 +119,7 @@ void TextPickerDialogView::OptionsCreateNode(
             stackNode->MountToParent(textPickerNode);
         }
     }
-    if (columnCount > 1) {
+    if (settingData.options.size() > 0) {
         SetSelectedValues(textPickerPattern, settingData.selectedValues);
         SetValues(textPickerPattern, settingData.values);
     } else {
@@ -132,9 +132,10 @@ void TextPickerDialogView::OptionsShowInternal(
     const RefPtr<TextPickerPattern>& textPickerPattern, const TextPickerSettingData& settingData,
     const RefPtr<FrameNode>& textPickerNode, uint32_t showCount)
 {
-    textPickerPattern->SetIsCascade(settingData.isCascade);
+    textPickerPattern->SetIsCascade(settingData.attr.isCascade);
+    textPickerPattern->SetHasSelectAttr(settingData.attr.isHasSelectAttr);
     textPickerPattern->SetColumnsKind(settingData.columnKind);
-    if (settingData.isCascade) {
+    if (settingData.attr.isCascade) {
         std::vector<NG::TextCascadePickerOptions> reOptions;
         uint32_t columnCount = settingData.options.empty()? 0 : 1;
         // Caculate max depth
