@@ -93,7 +93,7 @@ void ProgressPattern::HandleEnabled()
     RefPtr<ProgressTheme> progressTheme = pipeline->GetTheme<ProgressTheme>();
     CHECK_NULL_VOID(progressTheme);
     auto alpha = progressTheme->GetProgressDisable();
-    auto backgroundColor = paintProperty->GetBackgroundColor().value_or(progressTheme->GetTrackBgColor());
+    auto backgroundColor = paintProperty->GetBackgroundColor().value_or(progressTheme->GetCapsuleBgColor());
     auto selectColor = paintProperty->GetColor().value_or(progressTheme->GetCapsuleSelectColor());
     auto borderColor = paintProperty->GetBorderColor().value_or(progressTheme->GetBorderColor());
     if (!enabled) {
@@ -128,7 +128,7 @@ void ProgressPattern::OnPress(const TouchEventInfo& info)
     CHECK_NULL_VOID(textLayoutProperty);
     
     if (touchType == TouchType::DOWN) {
-        backgroundColor_ = paintProperty->GetBackgroundColor().value_or(theme->GetTrackBgColor());
+        backgroundColor_ = paintProperty->GetBackgroundColor().value_or(theme->GetCapsuleBgColor());
         selectColor_ = paintProperty->GetColor().value_or(theme->GetCapsuleSelectColor());
         borderColor_ = paintProperty->GetBorderColor().value_or(theme->GetBorderColor());
         fontColor_ = textLayoutProperty->GetTextColor().value_or(theme->GetTextColor());

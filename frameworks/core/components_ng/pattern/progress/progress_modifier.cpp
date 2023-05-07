@@ -71,6 +71,7 @@ ProgressModifier::ProgressModifier()
     AttachProperty(value_);
     AttachProperty(scaleWidth_);
     AttachProperty(scaleCount_);
+    AttachProperty(progressType_);
     AttachProperty(capsuleBorderWidth_);
     AttachProperty(sweepEffect_);
     AttachProperty(capsuleDate_);

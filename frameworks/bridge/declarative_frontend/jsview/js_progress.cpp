@@ -98,7 +98,7 @@ void JSProgress::Create(const JSCallbackInfo& info)
         g_progressType = ProgressType::SCALE;
     } else if (progressStyle == ProgressStyle::Capsule) {
         g_progressType = ProgressType::CAPSULE;
-    } else if (progressStyle == ProgressStyle::Linear) {
+    } else {
         g_progressType = ProgressType::LINEAR;
     }
 
