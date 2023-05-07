@@ -158,6 +158,12 @@ void SwiperPattern::OnModifyDone()
         }
     };
     swiperController_->SetAddSwiperEventCallback(std::move(addSwiperEventCallback));
+
+    if (IsAutoPlay()) {
+        StartAutoPlay();
+    } else {
+        translateTask_.Cancel();
+    }
 }
 
 void SwiperPattern::FlushFocus(const RefPtr<FrameNode>& curShowFrame)
@@ -1277,6 +1283,10 @@ void SwiperPattern::PostTranslateTask(uint32_t delayTime)
     CHECK_NULL_VOID(pipeline);
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
+
+    if (translateTask_) {
+        translateTask_.Cancel();
+    }
 
     auto weak = AceType::WeakClaim(this);
     translateTask_.Reset([weak, delayTime] {
