@@ -65,12 +65,6 @@ public:
     bool AddUINode(const RefPtr<NG::UINode>& node);
 
     bool Exists(ElementIdType elementId);
-
-    /**
-     * When a custom node is created from recycle, update its element id.
-     */
-    void UpdateRecycleElmtId(int32_t oldElmtId, int32_t newElmtId);
-
     /**
      * remove Element with given elmtId from the Map
      * means GetElementById on this elmtId no longer returns an Element

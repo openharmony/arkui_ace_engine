@@ -69,13 +69,6 @@ class SubscriberManager {
   }
 
   /**
-   * Update recycle custom node element id.
-   */
-  public static UpdateRecycleElmtId(oldId: number, newId: number): boolean {
-    return SubscriberManager.GetInstance().updateRecycleElmtId(oldId, newId);
-  }
-
-  /**
   * 
   * @returns a globally unique id to be assigned to a IPropertySubscriber objet
   * Use MakeId() to assign a IPropertySubscriber object an id before calling @see add() .
@@ -177,16 +170,6 @@ class SubscriberManager {
       return false;
     }
     this.subscriberById_.set(newSubsriber.id__(), newSubsriber);
-    return true;
-  }
-
-  public updateRecycleElmtId(oldId: number, newId: number): boolean {
-    if (!this.has(oldId)) {
-      return false;
-    }
-    const subscriber = this.get(oldId);
-    this.subscriberById_.delete(oldId);
-    this.subscriberById_.set(newId, subscriber);
     return true;
   }
 

@@ -32,5 +32,4 @@ declare class NativeViewPartialUpdate {
   isLazyItemRender(elmtId : number) : boolean;
   setCardId(cardId: number): void;
   getCardId(): number;
-  resetRecycleCustomNode(): void;
 }

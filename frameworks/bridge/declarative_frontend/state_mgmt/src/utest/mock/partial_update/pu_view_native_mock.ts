@@ -74,8 +74,4 @@ abstract class NativeViewPartialUpdate {
     console.warn("NativeViewPU(Mock).getCardId() -  unimplemented!");
     return -1;
   }
-
-  resetRecycleCustomNode(): void {
-    console.warn("NativeViewPU(Mock).resetRecycleCustomNode() -  unimplemented!");
-  }
 }

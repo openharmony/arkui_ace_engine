@@ -63,7 +63,6 @@ public:
     void ExecuteHide();
     void ExecuteInitiallyProvidedValue(const std::string& jsonData);
     void ExecuteUpdateWithValueParams(const std::string& jsonData);
-    void ExecuteRecycle(const std::string& viewName);
 #ifdef UICAST_COMPONENT_SUPPORTED
     void ExecuteCreateChildView(const std::string& jsonData);
     void ExecuteRouterHandle(const std::string& jsonData);
@@ -109,7 +108,6 @@ private:
     JSWeak<JSFunc> jsBackPressFunc_;
     JSWeak<JSFunc> jsUpdateWithValueParamsFunc_;
     JSWeak<JSFunc> jsSetInitiallyProvidedValueFunc_;
-    JSWeak<JSFunc> jsRecycleFunc_;
 #ifdef UICAST_COMPONENT_SUPPORTED
     JSWeak<JSFunc> jsCreateChildViewFunc_;
     JSWeak<JSFunc> jsRouterHandleFunc_;

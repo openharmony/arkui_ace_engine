@@ -60,9 +60,6 @@ void CustomNode::Render()
         }
         renderFunction_ = nullptr;
     }
-    {
-        FireRecycleRenderFunc();
-    }
 }
 
 // used in HotReload to update root view @Component
@@ -82,7 +79,7 @@ void CustomNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bo
         return;
     }
 
-    if (!renderFunction_ && !HasRecycleRenderFunc()) {
+    if (!renderFunction_) {
         UINode::AdjustLayoutWrapperTree(parent, forceMeasure, forceLayout);
         return;
     }

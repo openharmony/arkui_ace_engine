@@ -261,8 +261,6 @@ build_component_ng("pattern_ng") {
     "rating/rating_model_ng.cpp",
     "rating/rating_modifier.cpp",
     "rating/rating_pattern.cpp",
-    "recycle_view/recycle_dummy_node.cpp",
-    "recycle_view/recycle_view_model_ng.cpp",
     "refresh/refresh_accessibility_property.cpp",
     "refresh/refresh_layout_algorithm.cpp",
     "refresh/refresh_model_ng.cpp",
