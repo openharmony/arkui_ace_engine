@@ -280,19 +280,23 @@ OffsetF MenuLayoutAlgorithm::MenuLayoutAvoidAlgorithm(
     CHECK_NULL_RETURN(menuPattern, OffsetF(0, 0));
     float x = 0.0f;
     float y = 0.0f;
-    float windowsOffsetX = 0.0f;
-    float windowsOffsetY = 0.0f;
     if (menuProp->GetMenuPlacement().has_value() && (targetSize_.Width() > 0.0 || targetSize_.Height() > 0.0)) {
-        auto childOffset = GetChildPosition(size, menuProp);
+        auto childOffset = GetChildPosition(size, menuProp, menuPattern->IsContextMenu());
         x = childOffset.GetX() + positionOffset_.GetX();
         y = childOffset.GetY() + positionOffset_.GetY();
         auto pipelineContext = PipelineContext::GetCurrentContext();
-        if (pipelineContext) {
+        if (pipelineContext && menuPattern->IsContextMenu()) {
             auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
-            windowsOffsetX = windowGlobalRect.GetOffset().GetX();
-            windowsOffsetY = windowGlobalRect.GetOffset().GetY();
-            x += windowsOffsetX;
-            y += windowsOffsetY;
+            float windowsOffsetX = windowGlobalRect.GetOffset().GetX();
+            float windowsOffsetY = windowGlobalRect.GetOffset().GetY();
+            x += windowsOffsetX + pageOffset_.GetX();
+            y += windowsOffsetY + pageOffset_.GetY();
+            x = std::clamp(x, windowsOffsetX + pageOffset_.GetX(),
+                wrapperSize_.Width() - size.Width() - margin_ * 2.0f + windowsOffsetX + pageOffset_.GetX());
+            y = std::clamp(y, windowsOffsetY + pageOffset_.GetY(),
+                wrapperSize_.Height() - size.Height() - margin_ * 2.0f + windowsOffsetY + pageOffset_.GetY());
+
+            return OffsetF(x, y);
         }
     } else {
         x = HorizontalLayout(size, position_.GetX(), menuPattern->IsSelectMenu()) + positionOffset_.GetX();
@@ -302,8 +306,8 @@ OffsetF MenuLayoutAlgorithm::MenuLayoutAvoidAlgorithm(
             y -= pageOffset_.GetY();
         }
     }
-    x = std::clamp(x, windowsOffsetX, wrapperSize_.Width() - size.Width() - margin_ * 2.0f + windowsOffsetX);
-    y = std::clamp(y, windowsOffsetY, wrapperSize_.Height() - size.Height() - margin_ * 2.0f + windowsOffsetY);
+    x = std::clamp(x, 0.0f, wrapperSize_.Width() - size.Width() - margin_ * 2.0f);
+    y = std::clamp(y, 0.0f, wrapperSize_.Height() - size.Height() - margin_ * 2.0f);
 
     return OffsetF(x, y);
 }
@@ -591,19 +595,21 @@ MenuLayoutAlgorithm::ErrorPositionType MenuLayoutAlgorithm::GetErrorPositionType
     return ErrorPositionType::NORMAL;
 }
 
-OffsetF MenuLayoutAlgorithm::FitToScreen(const OffsetF& fitPosition, const SizeF& childSize)
+OffsetF MenuLayoutAlgorithm::FitToScreen(const OffsetF& fitPosition, const SizeF& childSize, bool isContextMenu)
 {
     float x = fitPosition.GetX() + positionOffset_.GetX();
     float y = fitPosition.GetY() + positionOffset_.GetY();
     auto pipelineContext = PipelineContext::GetCurrentContext();
-    if (pipelineContext) {
+    if (pipelineContext && isContextMenu) {
         auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
         float windowsOffsetX = windowGlobalRect.GetOffset().GetX();
         float windowsOffsetY = windowGlobalRect.GetOffset().GetY();
-        x += windowsOffsetX;
-        y += windowsOffsetY;
-        x = std::clamp(x, windowsOffsetX, wrapperSize_.Width() - childSize.Width() - margin_ * 2.0f + windowsOffsetX);
-        y = std::clamp(y, windowsOffsetY, wrapperSize_.Height() - childSize.Height() - margin_ * 2.0f + windowsOffsetY);
+        x += windowsOffsetX + pageOffset_.GetX();
+        y += windowsOffsetY + pageOffset_.GetY();
+        x = std::clamp(x, windowsOffsetX + pageOffset_.GetX(),
+            wrapperSize_.Width() - childSize.Width() - margin_ * 2.0f + windowsOffsetX + pageOffset_.GetX());
+        y = std::clamp(y, windowsOffsetY + pageOffset_.GetY(),
+            wrapperSize_.Height() - childSize.Height() - margin_ * 2.0f + windowsOffsetY + pageOffset_.GetY());
 
         return OffsetF(x, y);
     }
@@ -613,7 +619,8 @@ OffsetF MenuLayoutAlgorithm::FitToScreen(const OffsetF& fitPosition, const SizeF
     return OffsetF(x, y);
 }
 
-OffsetF MenuLayoutAlgorithm::GetChildPosition(const SizeF& childSize, const RefPtr<MenuLayoutProperty>& layoutProp)
+OffsetF MenuLayoutAlgorithm::GetChildPosition(
+    const SizeF& childSize, const RefPtr<MenuLayoutProperty>& layoutProp, bool isContextMenu)
 {
     OffsetF bottomPosition = OffsetF(targetOffset_.GetX() + (targetSize_.Width() - childSize.Width()) / 2.0,
         targetOffset_.GetY() + targetSize_.Height());
@@ -623,7 +630,7 @@ OffsetF MenuLayoutAlgorithm::GetChildPosition(const SizeF& childSize, const RefP
     OffsetF originOffset = GetPositionWithPlacement(childSize, topPosition, bottomPosition);
     OffsetF childPosition = originOffset;
     // Fit popup to screen range.
-    auto fitOffset = FitToScreen(childPosition, childSize);
+    auto fitOffset = FitToScreen(childPosition, childSize, isContextMenu);
     ErrorPositionType errorType = GetErrorPositionType(fitOffset, childSize);
     if (errorType == ErrorPositionType::NORMAL) {
         return childPosition;
@@ -633,7 +640,7 @@ OffsetF MenuLayoutAlgorithm::GetChildPosition(const SizeF& childSize, const RefP
     if (placement_ != Placement::BOTTOM) {
         placement_ = Placement::BOTTOM;
         childPosition = GetPositionWithPlacement(childSize, topPosition, bottomPosition);
-        fitOffset = FitToScreen(childPosition, childSize);
+        fitOffset = FitToScreen(childPosition, childSize, isContextMenu);
         if (GetErrorPositionType(fitOffset, childSize) == ErrorPositionType::NORMAL) {
             placement_ = placement;
             return childPosition;
@@ -643,7 +650,7 @@ OffsetF MenuLayoutAlgorithm::GetChildPosition(const SizeF& childSize, const RefP
     if (placement_ != Placement::TOP) {
         placement_ = Placement::TOP;
         childPosition = GetPositionWithPlacement(childSize, topPosition, bottomPosition);
-        fitOffset = FitToScreen(childPosition, childSize);
+        fitOffset = FitToScreen(childPosition, childSize, isContextMenu);
         if (GetErrorPositionType(fitOffset, childSize) == ErrorPositionType::NORMAL) {
             placement_ = placement;
             return childPosition;

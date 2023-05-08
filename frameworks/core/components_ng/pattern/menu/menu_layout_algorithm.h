@@ -78,9 +78,9 @@ private:
 
     OffsetF GetPositionWithPlacement(const SizeF& childSize, const OffsetF& topPosition, const OffsetF& bottomPosition);
     void InitTargetSizeAndPosition(const RefPtr<MenuLayoutProperty>& layoutProp);
-    OffsetF GetChildPosition(const SizeF& childSize, const RefPtr<MenuLayoutProperty>& layoutProp);
+    OffsetF GetChildPosition(const SizeF& childSize, const RefPtr<MenuLayoutProperty>& layoutProp, bool isContextMenu);
     ErrorPositionType GetErrorPositionType(const OffsetF& childOffset, const SizeF& childSize);
-    OffsetF FitToScreen(const OffsetF& fitPosition, const SizeF& childSize);
+    OffsetF FitToScreen(const OffsetF& fitPosition, const SizeF& childSize, bool isContextMenu);
 
     OffsetF GetPositionWithPlacementTop(const SizeF&, const OffsetF&, const OffsetF&);
     OffsetF GetPositionWithPlacementTopLeft(const SizeF&, const OffsetF&, const OffsetF&);
