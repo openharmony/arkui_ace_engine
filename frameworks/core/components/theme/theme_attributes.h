@@ -74,6 +74,7 @@ extern const char THEME_PATTERN_ADVANCED_PATTERN[];
 // pattern general attributes
 extern const char PATTERN_FG_COLOR[];
 extern const char PATTERN_BG_COLOR[];
+extern const char PATTERN_BRODER_COLOR[];
 extern const char PATTERN_BG_COLOR_HOVERED[];
 extern const char PATTERN_BG_COLOR_CLICKED[];
 extern const char PATTERN_BG_COLOR_PRESSED[];
@@ -86,6 +87,7 @@ extern const char PATTERN_TEXT_COLOR_ALPHA[];
 extern const char PATTERN_TEXT_COLOR_FOCUSED[];
 extern const char PATTERN_TEXT_COLOR_SELECTED[];
 extern const char PATTERN_TEXT_COLOR_DISABLED[];
+extern const char PATTERN_DISABLED_TEXT_COLOR[];
 extern const char PATTERN_TEXT_SIZE[];
 extern const char PATTERN_WIDTH[];
 extern const char PATTERN_HEIGHT[];
@@ -151,6 +153,12 @@ extern const char BADGE_BORDER_WIDTH[];
 // swiper attributes
 extern const char INDICATOR_TEXT_FONT_SIZE[];
 extern const char INDICATOR_TEXT_FONT_COLOR[];
+
+// textinput attributes
+extern const char ERROR_TEXT_UNDERLINE_COLOR[];
+extern const char OHOS_ID_COLOR_LIST_SEPARATOR[];
+extern const char OHOS_ID_COLOR_TEXT_HINT[];
+extern const char BORDER_RADIUS_SIZE[];
 // swiper attributes for arrow
 extern const char ARROW_COLOR_BOARDCOLOR_HOVER[];
 extern const char ARROW_COLOR_BOARDCOLOR_CLICK[];
