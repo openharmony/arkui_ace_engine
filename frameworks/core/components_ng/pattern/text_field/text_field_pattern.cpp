@@ -320,7 +320,7 @@ bool TextFieldPattern::UpdateCaretPosition()
     } else if (caretUpdateType_ == CaretUpdateType::EVENT || caretUpdateType_ == CaretUpdateType::DEL ||
                caretUpdateType_ == CaretUpdateType::ICON_PRESSED) {
         UpdateCaretOffsetByEvent();
-        if (!NeedShowPasswordIcon() && !needToRefreshSelectOverlay_) {
+        if (!NeedShowPasswordIcon() && !needToRefreshSelectOverlay_ && GetCursorVisible()) {
             StartTwinkling();
         }
     } else if (caretUpdateType_ == CaretUpdateType::NONE) {
@@ -1072,8 +1072,12 @@ void TextFieldPattern::HandleBlurEvent()
     StopTwinkling();
     CloseKeyboard(true);
     auto pos = static_cast<int32_t>(textEditingValue_.GetWideText().length());
-    UpdateSelection(pos);
+    isSelectedAreaRedraw_ = !isSelectedAreaRedraw_;
+    UpdateCaretPositionWithClamp(pos);
+    textEditingValue_.CursorMoveToPosition(pos);
+    textSelector_.Update(pos);
     selectionMode_ = SelectionMode::NONE;
+    caretUpdateType_ = CaretUpdateType::EVENT;
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
     eventHub->FireOnEditChanged(false);
     ResetBackgroundColor();
@@ -3434,6 +3438,8 @@ void TextFieldPattern::SetTextSelection(int32_t selectionStart, int32_t selectio
         client->HandleSetSelection(selectionStart, selectionEnd);
         client->SetInSelectMode(SelectionMode::SELECT);
         client->SetCaretUpdateType(CaretUpdateType::EVENT);
+        client->CloseSelectOverlay();
+        client->isSelectedAreaRedraw_ = !client->isSelectedAreaRedraw_;
         if (client->RequestKeyboard(false, true, true)) {
             auto textFieldFrameNode = client->GetHost();
             CHECK_NULL_VOID(textFieldFrameNode);
@@ -3441,13 +3447,19 @@ void TextFieldPattern::SetTextSelection(int32_t selectionStart, int32_t selectio
             CHECK_NULL_VOID(eventHub);
             eventHub->FireOnEditChanged(true);
         }
+        client->StopTwinkling();
     };
     taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
 }
 
 void TextFieldPattern::SetSelectionFlag(int32_t selectionStart, int32_t selectionEnd)
 {
+    if (!HasFocus()) {
+        return;
+    }
     setSelectionFlag_ = true;
+    cursorVisible_ = false;
+    isSelectedAreaRedraw_ = false;
     selectionStart_ = selectionStart;
     selectionEnd_ = selectionEnd;
     auto host = GetHost();
@@ -3851,4 +3863,8 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("style", GetInputStyleString().c_str());
 }
 
+bool TextFieldPattern::IsSelectedAreaRedraw() const
+{
+    return isSelectedAreaRedraw_;
+}
 } // namespace OHOS::Ace::NG
