@@ -494,4 +494,8 @@ ACE_EXPORT extern const char HOST_WINDOW_SCENE_ETS_TAG[] = "HostWindowScene";
 const char UI_EXTENSION_COMPONENT_TAG[] = "UIExtensionComponent";
 const char UI_EXTENSION_COMPONENT_ETS_TAG[] = "UIExtensionComponent";
 
+// SecLocationButton
+const char SEC_LOCATION_BUTTON_COMPONENT_TAG[] = "SecLocationButtonComponent";
+const char SEC_LOCATION_BUTTON_ETS_TAG[] = "SecLocationButton";
+
 } // namespace OHOS::Ace::V2
