@@ -617,6 +617,7 @@ void FlexLayoutAlgorithm::SecondaryMeasureByProperty(
         }
         if (needSecondaryLayout) {
             childLayoutWrapper->Measure(child.layoutConstraint);
+            crossAxisSize_ = std::max(crossAxisSize_, GetChildCrossAxisSize(childLayoutWrapper));
             CheckBaselineProperties(child.layoutWrapper);
         }
         ++iter;
