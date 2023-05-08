@@ -64,6 +64,9 @@ public:
     void SetNextMargin(const Dimension& nextMargin) override;
     void SetOnChangeEvent(std::function<void(const BaseEventInfo* info)>&& onChangeEvent) override;
     void SetIndicatorIsBoolean(bool isBoolean) override;
+    void SetArrowStyle(const SwiperArrowParameters& swiperArrowParameters) override;
+    void SetDisplayArrow(bool displayArrow) override;
+    void SetHoverShow(bool hoverShow) override;
 };
 
 } // namespace OHOS::Ace::NG
