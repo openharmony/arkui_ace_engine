@@ -639,6 +639,7 @@ void RosenRenderBox::UpdateBlurRRect(const SkRRect& rRect, const Offset& offset)
     windowBlurRRect_.SetRect(innerRect);
 }
 
+#ifndef USE_ROSEN_DRAWING
 bool RosenRenderBox::CreateSkPath(const RefPtr<BasicShape>& basicShape, GeometryBoxType geometryBoxType, SkPath* skPath)
 {
     Size size;
@@ -682,9 +683,61 @@ bool RosenRenderBox::CreateSkPath(const RefPtr<BasicShape>& basicShape, Geometry
     }
     return ret;
 }
+#else
+bool RosenRenderBox::CreatePath(
+    const RefPtr<BasicShape>& basicShape, GeometryBoxType geometryBoxType, RSPath* drawingPath)
+{
+    Size size;
+    Offset position;
+    GetSizeAndPosition(geometryBoxType, size, position);
+    if (basicShape == nullptr || basicShape->GetBasicShapeType() == BasicShapeType::NONE) {
+        drawingPath->AddRect(RSRect(position.GetX(), position.GetY(),
+            size.Width() + position.GetX(), size.Height() + position.GetY()));
+        return true;
+    }
+    bool ret = false;
+    switch (basicShape->GetBasicShapeType()) {
+        case BasicShapeType::INSET: {
+            ret = CreateInset(basicShape, size, position, drawingPath);
+            break;
+        }
+        case BasicShapeType::CIRCLE: {
+            ret = CreateCircle(basicShape, size, position, drawingPath);
+            break;
+        }
+        case BasicShapeType::ELLIPSE: {
+            ret = CreateEllipse(basicShape, size, position, drawingPath);
+            break;
+        }
+        case BasicShapeType::POLYGON: {
+            ret = CreatePolygon(basicShape, size, position, drawingPath);
+            break;
+        }
+        case BasicShapeType::PATH: {
+            ret = CreatePath(basicShape, size, position, drawingPath);
+            break;
+        }
+        case BasicShapeType::RECT: {
+            ret = CreateRect(basicShape, size, position, drawingPath);
+            break;
+        }
+        default: {
+            LOGE("invalid BasicShapeType");
+            ret = false;
+            break;
+        }
+    }
+    return ret;
+}
+#endif
 
+#ifndef USE_ROSEN_DRAWING
 bool RosenRenderBox::CreateInset(
     const RefPtr<BasicShape>& basicShape, const Size& size, const Offset& position, SkPath* skPath)
+#else
+bool RosenRenderBox::CreateInset(
+    const RefPtr<BasicShape>& basicShape, const Size& size, const Offset& position, RSPath* drawingPath)
+#endif
 {
     const auto& inset = AceType::DynamicCast<Inset>(basicShape);
     if (!inset) {
@@ -695,8 +748,13 @@ bool RosenRenderBox::CreateInset(
     double top = DimensionToPx(inset->GetTop(), size, LengthMode::VERTICAL) + position.GetY();
     double right = size.Width() - DimensionToPx(inset->GetRight(), size, LengthMode::HORIZONTAL) + position.GetX();
     double bottom = size.Height() - DimensionToPx(inset->GetBottom(), size, LengthMode::VERTICAL) + position.GetY();
+#ifndef USE_ROSEN_DRAWING
     SkRect rect = SkRect::MakeLTRB(left, top, right, bottom);
     auto radiusSize = Size(std::abs(rect.width()), std::abs(rect.height()));
+#else
+    RSRect rect = RSRect(left, top, right, bottom);
+    auto radiusSize = Size(std::abs(rect.GetWidth()), std::abs(rect.GetHeight()));
+#endif
     float topLeftRadiusX = DimensionToPx(inset->GetTopLeftRadius().GetX(), radiusSize, LengthMode::HORIZONTAL);
     float topLeftRadiusY = DimensionToPx(inset->GetTopLeftRadius().GetY(), radiusSize, LengthMode::VERTICAL);
     float topRightRadiusX = DimensionToPx(inset->GetTopRightRadius().GetX(), radiusSize, LengthMode::HORIZONTAL);
@@ -705,16 +763,31 @@ bool RosenRenderBox::CreateInset(
     float bottomRightRadiusY = DimensionToPx(inset->GetBottomRightRadius().GetY(), radiusSize, LengthMode::VERTICAL);
     float bottomLeftRadiusX = DimensionToPx(inset->GetBottomLeftRadius().GetX(), radiusSize, LengthMode::HORIZONTAL);
     float bottomLeftRadiusY = DimensionToPx(inset->GetBottomLeftRadius().GetY(), radiusSize, LengthMode::VERTICAL);
+#ifndef USE_ROSEN_DRAWING
     const SkVector fRadii[4] = { { topLeftRadiusX, topLeftRadiusY }, { topRightRadiusX, topRightRadiusY },
         { bottomRightRadiusX, bottomRightRadiusY }, { bottomLeftRadiusX, bottomLeftRadiusY } };
     SkRRect roundRect;
     roundRect.setRectRadii(rect, fRadii);
     skPath->addRRect(roundRect);
+#else
+    std::vector<RSPoint> fRadii;
+    fRadii.push_back(RSPoint(topLeftRadiusX, topLeftRadiusY));
+    fRadii.push_back(RSPoint(topRightRadiusX, topRightRadiusY));
+    fRadii.push_back(RSPoint(bottomRightRadiusX, bottomRightRadiusY));
+    fRadii.push_back(RSPoint(bottomLeftRadiusX, bottomLeftRadiusY));
+    RSRoundRect roundRect(rect, fRadii);
+    drawingPath->AddRoundRect(roundRect);
+#endif
     return true;
 }
 
+#ifndef USE_ROSEN_DRAWING
 bool RosenRenderBox::CreateCircle(
     const RefPtr<BasicShape>& basicShape, const Size& size, const Offset& position, SkPath* skPath)
+#else
+bool RosenRenderBox::CreateCircle(
+    const RefPtr<BasicShape>& basicShape, const Size& size, const Offset& position, RSPath* drawingPath)
+#endif
 {
     const auto& circle = AceType::DynamicCast<Circle>(basicShape);
     if (!circle) {
@@ -722,7 +795,11 @@ bool RosenRenderBox::CreateCircle(
         return false;
     }
     if (circle->GetRadius().IsValid()) {
+#ifndef USE_ROSEN_DRAWING
         skPath->addCircle(DimensionToPx(circle->GetAxisX(), size, LengthMode::HORIZONTAL) + position.GetX(),
+#else
+        drawingPath->AddCircle(DimensionToPx(circle->GetAxisX(), size, LengthMode::HORIZONTAL) + position.GetX(),
+#endif
             DimensionToPx(circle->GetAxisY(), size, LengthMode::VERTICAL) + position.GetY(),
             DimensionToPx(circle->GetRadius(), size, LengthMode::OTHER));
     } else {
@@ -730,14 +807,23 @@ bool RosenRenderBox::CreateCircle(
         float height = DimensionToPx(circle->GetHeight(), size, LengthMode::VERTICAL);
         float offsetX = DimensionToPx(circle->GetOffset().GetX(), size, LengthMode::HORIZONTAL) + position.GetX();
         float offsetY = DimensionToPx(circle->GetOffset().GetY(), size, LengthMode::VERTICAL) + position.GetY();
+#ifndef USE_ROSEN_DRAWING
         skPath->addCircle(width * 0.5 + offsetX, height * 0.5 + offsetY, std::min(width, height) * 0.5);
+#else
+        drawingPath->AddCircle(width * 0.5 + offsetX, height * 0.5 + offsetY, std::min(width, height) * 0.5);
+#endif
     }
 
     return true;
 }
 
+#ifndef USE_ROSEN_DRAWING
 bool RosenRenderBox::CreateEllipse(
     const RefPtr<BasicShape>& basicShape, const Size& size, const Offset& position, SkPath* skPath)
+#else
+bool RosenRenderBox::CreateEllipse(
+    const RefPtr<BasicShape>& basicShape, const Size& size, const Offset& position, RSPath* drawingPath)
+#endif
 {
     const auto& ellipse = AceType::DynamicCast<Ellipse>(basicShape);
     if (!ellipse) {
@@ -749,19 +835,30 @@ bool RosenRenderBox::CreateEllipse(
         float ry = DimensionToPx(ellipse->GetRadiusY(), size, LengthMode::VERTICAL);
         double x = DimensionToPx(ellipse->GetAxisX(), size, LengthMode::HORIZONTAL) + position.GetX() - rx;
         double y = DimensionToPx(ellipse->GetAxisY(), size, LengthMode::VERTICAL) + position.GetY() - ry;
+#ifndef USE_ROSEN_DRAWING
         SkRect rect = SkRect::MakeXYWH(x, y, rx + rx, ry + ry);
         skPath->addOval(rect);
+#else
+        RSRect rect = RSRect(x, y, rx + rx + x, ry + ry + y);
+        drawingPath->AddOval(rect);
+#endif
     } else {
         auto width = DimensionToPx(ellipse->GetWidth(), size, LengthMode::HORIZONTAL);
         auto height = DimensionToPx(ellipse->GetHeight(), size, LengthMode::VERTICAL);
         float x = DimensionToPx(ellipse->GetOffset().GetX(), size, LengthMode::HORIZONTAL) + position.GetX();
         float y = DimensionToPx(ellipse->GetOffset().GetY(), size, LengthMode::VERTICAL) + position.GetY();
+#ifndef USE_ROSEN_DRAWING
         SkRect rect = SkRect::MakeXYWH(x, y, width, height);
         skPath->addOval(rect);
+#else
+        RSRect rect = RSRect(x, y, width + x, height + y);
+        drawingPath->AddOval(rect);
+#endif
     }
     return true;
 }
 
+#ifndef USE_ROSEN_DRAWING
 bool RosenRenderBox::CreatePolygon(
     const RefPtr<BasicShape>& basicShape, const Size& size, const Offset& position, SkPath* skPath)
 {
@@ -782,9 +879,36 @@ bool RosenRenderBox::CreatePolygon(
     skPath->addPoly(&skPoints[0], skPoints.size(), true);
     return true;
 }
+#else
+bool RosenRenderBox::CreatePolygon(
+    const RefPtr<BasicShape>& basicShape, const Size& size, const Offset& position, RSPath* drawingPath)
+{
+    const auto& polygon = AceType::DynamicCast<Polygon>(basicShape);
+    if (!polygon) {
+        LOGE("polygon is null");
+        return false;
+    }
+    std::vector<RSPoint> drawingPoints;
+    for (auto [x, y] : polygon->GetPoints()) {
+        drawingPoints.emplace_back(RSPoint(DimensionToPx(x, size, LengthMode::HORIZONTAL) + position.GetX(),
+            DimensionToPx(y, size, LengthMode::VERTICAL) + position.GetX()));
+    }
+    if (drawingPoints.empty()) {
+        LOGW("points is null");
+        return false;
+    }
+    drawingPath->AddPoly(drawingPoints, drawingPoints.size(), true);
+    return true;
+}
+#endif
 
+#ifndef USE_ROSEN_DRAWING
 bool RosenRenderBox::CreatePath(
     const RefPtr<BasicShape>& basicShape, const Size& size, const Offset& position, SkPath* skPath)
+#else
+bool RosenRenderBox::CreatePath(
+    const RefPtr<BasicShape>& basicShape, const Size& size, const Offset& position, RSPath* drawingPath)
+#endif
 {
     const auto& path = AceType::DynamicCast<Path>(basicShape);
     if (!path) {
@@ -795,20 +919,34 @@ bool RosenRenderBox::CreatePath(
         LOGW("path value is null");
         return false;
     }
+#ifndef USE_ROSEN_DRAWING
     SkPath tmpPath;
     bool ret = SkParsePath::FromSVGString(path->GetValue().c_str(), &tmpPath);
+#else
+    RSRecordingPath tmpPath;
+    bool ret = RSParsePath::GetInstance()->FromSVGString(path->GetValue().c_str(), tmpPath);
+#endif
     if (!ret) {
         LOGW("path value is invalid");
         return false;
     }
     float offsetX = DimensionToPx(path->GetOffset().GetX(), size, LengthMode::HORIZONTAL) + position.GetX();
     float offsetY = DimensionToPx(path->GetOffset().GetY(), size, LengthMode::VERTICAL) + position.GetY();
+#ifndef USE_ROSEN_DRAWING
     skPath->addPath(tmpPath, offsetX, offsetY);
+#else
+    drawingPath->AddPath(tmpPath, offsetX, offsetY);
+#endif
     return true;
 }
 
+#ifndef USE_ROSEN_DRAWING
 bool RosenRenderBox::CreateRect(
     const RefPtr<BasicShape>& basicShape, const Size& size, const Offset& position, SkPath* skPath)
+#else
+bool RosenRenderBox::CreateRect(
+    const RefPtr<BasicShape>& basicShape, const Size& size, const Offset& position, RSPath* drawingPath)
+#endif
 {
     const auto& rect = AceType::DynamicCast<ShapeRect>(basicShape);
     if (!rect) {
@@ -819,7 +957,11 @@ bool RosenRenderBox::CreateRect(
     double top = DimensionToPx(rect->GetOffset().GetY(), size, LengthMode::VERTICAL) + position.GetY();
     double width = DimensionToPx(rect->GetWidth(), size, LengthMode::HORIZONTAL);
     double height = DimensionToPx(rect->GetHeight(), size, LengthMode::VERTICAL);
+#ifndef USE_ROSEN_DRAWING
     SkRect skRect = SkRect::MakeXYWH(left, top, width, height);
+#else
+    RSRect drawingRect = RSRect(left, top, width + left, height + top);
+#endif
     auto radiusSize = Size(width, height);
     float topLeftRadiusX = GetFloatRadiusValue(
         rect->GetTopLeftRadius().GetX(), rect->GetTopLeftRadius().GetY(), radiusSize, LengthMode::HORIZONTAL);
@@ -837,11 +979,21 @@ bool RosenRenderBox::CreateRect(
         rect->GetBottomLeftRadius().GetX(), rect->GetBottomLeftRadius().GetY(), radiusSize, LengthMode::HORIZONTAL);
     float bottomLeftRadiusY = GetFloatRadiusValue(
         rect->GetBottomLeftRadius().GetY(), rect->GetBottomLeftRadius().GetX(), radiusSize, LengthMode::VERTICAL);
+#ifndef USE_ROSEN_DRAWING
     const SkVector fRadii[4] = { { topLeftRadiusX, topLeftRadiusY }, { topRightRadiusX, topRightRadiusY },
         { bottomRightRadiusX, bottomRightRadiusY }, { bottomLeftRadiusX, bottomLeftRadiusY } };
     SkRRect roundRect;
     roundRect.setRectRadii(skRect, fRadii);
     skPath->addRRect(roundRect);
+#else
+    std::vector<RSPoint> fRadii;
+    fRadii.push_back(RSPoint(topLeftRadiusX, topLeftRadiusY));
+    fRadii.push_back(RSPoint(topRightRadiusX, topRightRadiusY));
+    fRadii.push_back(RSPoint(bottomRightRadiusX, bottomRightRadiusY));
+    fRadii.push_back(RSPoint(bottomLeftRadiusX, bottomLeftRadiusY));
+    RSRoundRect roundRect(drawingRect, fRadii);
+    drawingPath->AddRoundRect(roundRect);
+#endif
     return true;
 }
 
@@ -880,6 +1032,7 @@ void RosenRenderBox::GetSizeAndPosition(GeometryBoxType geometryBoxType, Size& s
     }
 }
 
+#ifndef USE_ROSEN_DRAWING
 float RosenRenderBox::DimensionToPx(const Dimension& value, const Size& size, LengthMode type) const
 {
     switch (value.Unit()) {
@@ -901,6 +1054,29 @@ float RosenRenderBox::DimensionToPx(const Dimension& value, const Size& size, Le
             return SkDoubleToScalar(NormalizeToPx(value));
     }
 }
+#else
+float RosenRenderBox::DimensionToPx(const Dimension& value, const Size& size, LengthMode type) const
+{
+    switch (value.Unit()) {
+        case DimensionUnit::PERCENT: {
+            if (type == LengthMode::HORIZONTAL) {
+                return DoubleToScalar(value.Value() * size.Width());
+            }
+            if (type == LengthMode::VERTICAL) {
+                return DoubleToScalar(value.Value() * size.Height());
+            }
+            if (type == LengthMode::OTHER) {
+                return DoubleToScalar(value.Value() * sqrt(size.Width() * size.Height()));
+            }
+            return 0.0f;
+        }
+        case DimensionUnit::PX:
+            return DoubleToScalar(value.Value());
+        default:
+            return DoubleToScalar(NormalizeToPx(value));
+    }
+}
+#endif
 
 void RosenRenderBox::CalculateAlignDeclaration()
 {
