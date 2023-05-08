@@ -136,9 +136,9 @@ void TabsPattern::OnModifyDone()
 
 void TabsPattern::SetOnIndexChangeEvent(std::function<void(const BaseEventInfo*)>&& event)
 {
-    auto tabsNode = GetHost();
+    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
     CHECK_NULL_VOID(tabsNode);
-    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildren().back());
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
     CHECK_NULL_VOID(swiperNode);
 
     ChangeEvent changeEvent([jsEvent = std::move(event)](int32_t index) {
