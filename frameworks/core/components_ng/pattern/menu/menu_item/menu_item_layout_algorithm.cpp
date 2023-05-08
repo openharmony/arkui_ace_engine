@@ -30,7 +30,8 @@ void MenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     verInterval_ = static_cast<float>(VERTICAL_INTERVAL.ConvertToPx());
-    horInterval_ = static_cast<float>(theme->GetMenuIconPadding().ConvertToPx());
+    horInterval_ = static_cast<float>(theme->GetMenuIconPadding().ConvertToPx()) -
+        static_cast<float>(theme->GetOutPadding().ConvertToPx());
     auto props = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(props);
     auto layoutConstraint = props->GetLayoutConstraint();
