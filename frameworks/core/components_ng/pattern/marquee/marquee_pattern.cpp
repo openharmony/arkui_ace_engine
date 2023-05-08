@@ -22,6 +22,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/animation_option.h"
+#include "core/components/common/properties/color.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/marquee/marquee_layout_property.h"
@@ -78,6 +79,7 @@ void MarqueePattern::OnModifyDone()
     textLayoutProperty->UpdateFontWeight(layoutProperty->GetFontWeight().value_or(FontWeight::NORMAL));
     textLayoutProperty->UpdateFontFamily(
         layoutProperty->GetFontFamily().value_or(std::vector<std::string>({ "" })));
+    textLayoutProperty->UpdateTextColor(layoutProperty->GetFontColor().value_or(Color()));
     textChild->MarkModifyDone();
     textChild->MarkDirtyNode();
     if (CheckMeasureFlag(layoutProperty->GetPropertyChangeFlag())) {
