@@ -26,10 +26,8 @@ GaugeLayoutAlgorithm::GaugeLayoutAlgorithm() = default;
 void GaugeLayoutAlgorithm::OnReset() {}
 
 std::optional<SizeF> GaugeLayoutAlgorithm::MeasureContent(
-    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+    const LayoutConstraintF& contentConstraint, FrameNode* frameNode)
 {
-    auto frameNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_RETURN(frameNode, std::nullopt);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, std::nullopt);
     auto gaugeTheme = pipeline->GetTheme<ProgressTheme>();

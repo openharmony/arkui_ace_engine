@@ -64,9 +64,9 @@ void ModelPattern::OnModifyDone()
     gestureHub->AddTouchEvent(touchListener_);
 }
 
-bool ModelPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+bool ModelPattern::OnDirtyLayoutWrapperSwap(FrameNode* frameNode, const DirtySwapConfig& config)
 {
-    bool measure = (config.skipMeasure || dirty->SkipMeasureContent()) ? false : true;
+    bool measure = (config.skipMeasure || frameNode->SkipMeasureContent()) ? false : true;
 
     CHECK_NULL_RETURN(modelAdapter_, measure);
     if (!modelAdapter_->IsInitialized()) {

@@ -20,6 +20,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/geometry/size.h"
+#include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
 #include "core/common/window.h"
 #include "core/components_ng/base/frame_node.h"
@@ -31,12 +32,14 @@
 
 namespace OHOS::Ace::NG {
 
-void BoxLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+void BoxLayoutAlgorithm::Measure(FrameNode* frameNode)
 {
-    auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    auto layoutConstraint = frameNode->GetLayoutProperty()->CreateChildConstraint();
+    ACE_SCOPED_TRACE(
+        "[%s-%d] BoxLayoutAlgorithm [%s]", frameNode->GetTag().c_str(), frameNode->GetId(), layoutConstraint.parentIdealSize.ToString().c_str());
     auto pipeline = OHOS::Ace::PipelineBase::GetCurrentContext();
     if (pipeline && pipeline->GetIsAppWindow() && pipeline->GetIsLayoutFullScreen()) {
-        auto layoutProperty = layoutWrapper->GetLayoutProperty();
+        auto layoutProperty = frameNode->GetLayoutProperty();
         if (layoutProperty) {
             auto safeArea = layoutProperty->GetSafeArea();
             SizeF maxSize { layoutConstraint.maxSize.Width() - safeArea.leftRect_.Width() - safeArea.rightRect_.Width(),
@@ -49,29 +52,27 @@ void BoxLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             layoutConstraint.UpdatePercentReference(percentReference);
         }
     }
-    for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
+    for (auto&& child : frameNode->GetAllFrameNodeChildren()) {
         child->Measure(layoutConstraint);
     }
-    PerformMeasureSelf(layoutWrapper);
+    PerformMeasureSelf(frameNode);
 }
 
-void BoxLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+void BoxLayoutAlgorithm::Layout(FrameNode* frameNode)
 {
-    PerformLayout(layoutWrapper);
-    for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
+    PerformLayout(frameNode);
+    for (auto&& child : frameNode->GetAllFrameNodeChildren()) {
         child->Layout();
     }
 }
 
 std::optional<SizeF> BoxLayoutAlgorithm::MeasureContent(
-    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+    const LayoutConstraintF& contentConstraint, FrameNode* frameNode)
 {
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_RETURN(host, std::nullopt);
-    if (!host->IsAtomicNode()) {
+    if (!frameNode->IsAtomicNode()) {
         return std::nullopt;
     }
-    const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
+    const auto& layoutProperty = frameNode->GetLayoutProperty();
     auto measureType = layoutProperty->GetMeasureType(MeasureType::MATCH_CONTENT);
     OptionalSizeF contentSize;
     do {
@@ -95,13 +96,13 @@ std::optional<SizeF> BoxLayoutAlgorithm::MeasureContent(
 }
 
 void BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(
-    LayoutWrapper* layoutWrapper, const std::list<RefPtr<LayoutWrapper>>& childList)
+    FrameNode* frameNode, const std::list<RefPtr<FrameNode>>& childList)
 {
-    const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
+    const auto& layoutConstraint = frameNode->GetLayoutProperty()->GetLayoutConstraint();
     const auto& minSize = layoutConstraint->minSize;
     const auto& maxSize = layoutConstraint->maxSize;
-    const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
-    auto measureType = layoutWrapper->GetLayoutProperty()->GetMeasureType();
+    const auto& padding = frameNode->GetLayoutProperty()->CreatePaddingAndBorder();
+    auto measureType = frameNode->GetLayoutProperty()->GetMeasureType();
     OptionalSizeF frameSize;
     do {
         // Use idea size first if it is valid.
@@ -118,7 +119,7 @@ void BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(
             }
         }
 
-        const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
+        const auto& content = frameNode->GetGeometryNode()->GetContent();
         if (content) {
             // use content size.
             auto contentSize = content->GetRect().GetSize();
@@ -153,7 +154,7 @@ void BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(
     } while (false);
     auto pipeline = OHOS::Ace::PipelineBase::GetCurrentContext();
     if (pipeline && pipeline->GetIsAppWindow() && pipeline->GetIsLayoutFullScreen()) {
-        auto layoutProperty = layoutWrapper->GetLayoutProperty();
+        auto layoutProperty = frameNode->GetLayoutProperty();
         if (layoutProperty) {
             auto safeArea = layoutProperty->GetSafeArea();
             frameSize.UpdateSizeWithCheck(
@@ -161,32 +162,32 @@ void BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(
                     frameSize.Height().value() - safeArea.topRect_.Height() - safeArea.bottomRect_.Height() });
         }
     }
-    layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
+    frameNode->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
 }
 
 // Called to perform measure current render node.
-void BoxLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
+void BoxLayoutAlgorithm::PerformMeasureSelf(FrameNode* frameNode)
 {
-    PerformMeasureSelfWithChildList(layoutWrapper, layoutWrapper->GetAllChildrenWithBuild());
+    PerformMeasureSelfWithChildList(frameNode, frameNode->GetAllFrameNodeChildren());
 }
 
 // Called to perform layout render node and child.
-void BoxLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
+void BoxLayoutAlgorithm::PerformLayout(FrameNode* frameNode)
 {
     // update child position.
-    auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
-    const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+    auto size = frameNode->GetGeometryNode()->GetFrameSize();
+    const auto& padding = frameNode->GetLayoutProperty()->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
     auto left = padding.left.value_or(0);
     auto top = padding.top.value_or(0);
     auto paddingOffset = OffsetF(left, top);
     auto align = Alignment::CENTER;
-    if (layoutWrapper->GetLayoutProperty()->GetPositionProperty()) {
-        align = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
+    if (frameNode->GetLayoutProperty()->GetPositionProperty()) {
+        align = frameNode->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
     }
     // Update child position.
     auto pipeline = OHOS::Ace::PipelineBase::GetCurrentContext();
-    for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
+    for (const auto& child : frameNode->GetAllFrameNodeChildren()) {
         SizeF childSize = child->GetGeometryNode()->GetMarginFrameSize();
         auto layoutProperty = child->GetLayoutProperty();
         SafeAreaEdgeInserts safeArea;
@@ -204,7 +205,7 @@ void BoxLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
         child->GetGeometryNode()->SetMarginFrameOffset(translate);
     }
     // Update content position.
-    const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
+    const auto& content = frameNode->GetGeometryNode()->GetContent();
     if (content) {
         auto translate = Alignment::GetAlignPosition(size, content->GetRect().GetSize(), align) + paddingOffset;
         content->SetOffset(translate);

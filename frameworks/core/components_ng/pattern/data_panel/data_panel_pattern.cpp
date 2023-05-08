@@ -23,9 +23,9 @@ namespace OHOS::Ace::NG {
 void DataPanelPattern::OnAttachToFrameNode() {}
 
 bool DataPanelPattern::OnDirtyLayoutWrapperSwap(
-    const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool /*skipLayout*/)
+    FrameNode* frameNode, bool skipMeasure, bool /*skipLayout*/)
 {
-    if (skipMeasure || dirty->SkipMeasureContent()) {
+    if (skipMeasure || frameNode->SkipMeasureContent()) {
         return false;
     }
     return true;

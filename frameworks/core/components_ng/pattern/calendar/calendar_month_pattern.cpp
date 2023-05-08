@@ -38,9 +38,9 @@ void CalendarMonthPattern::OnAttachToFrameNode()
     host->GetRenderContext()->SetClipToFrame(true);
 }
 
-bool CalendarMonthPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+bool CalendarMonthPattern::OnDirtyLayoutWrapperSwap(FrameNode* frameNode, const DirtySwapConfig& config)
 {
-    return !(config.skipMeasure || dirty->SkipMeasureContent());
+    return !(config.skipMeasure || frameNode->SkipMeasureContent());
 }
 
 void CalendarMonthPattern::OnModifyDone()

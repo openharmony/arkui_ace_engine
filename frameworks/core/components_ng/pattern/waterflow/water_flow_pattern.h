@@ -67,7 +67,7 @@ public:
 
 private:
     void OnModifyDone() override;
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    bool OnDirtyLayoutWrapperSwap(FrameNode* frameNode, const DirtySwapConfig& config) override;
     void OnAttachToFrameNode() override;
     WaterFlowLayoutInfo layoutInfo_;
     // just for hold WaterFlowPositionController

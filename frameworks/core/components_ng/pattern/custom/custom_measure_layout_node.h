@@ -45,16 +45,16 @@ public:
         }
     }
 
-    bool FireOnMeasure(LayoutWrapper* layoutWrapper);
+    bool FireOnMeasure(FrameNode* frameNode);
 
-    bool FireOnLayout(LayoutWrapper* layoutWrapper);
+    bool FireOnLayout(FrameNode* frameNode);
 
-    void SetLayoutFunction(std::function<void(LayoutWrapper* layoutWrapper)>&& layoutFunc)
+    void SetLayoutFunction(std::function<void(FrameNode* frameNode)>&& layoutFunc)
     {
         layoutFunc_ = std::move(layoutFunc);
     }
 
-    void SetMeasureFunction(std::function<void(LayoutWrapper* layoutWrapper)>&& measureFunc)
+    void SetMeasureFunction(std::function<void(FrameNode* frameNode)>&& measureFunc)
     {
         measureFunc_ = std::move(measureFunc);
     }
@@ -62,8 +62,8 @@ public:
 
 private:
     void BuildChildren(const RefPtr<FrameNode>& child);
-    std::function<void(LayoutWrapper* layoutWrapper)> layoutFunc_;
-    std::function<void(LayoutWrapper* layoutWrapper)> measureFunc_;
+    std::function<void(FrameNode* frameNode)> layoutFunc_;
+    std::function<void(FrameNode* frameNode)> measureFunc_;
     std::string viewKey_;
 };
 } // namespace OHOS::Ace::NG

@@ -35,14 +35,14 @@ public:
         : GridLayoutBaseAlgorithm(std::move(gridLayoutInfo)), crossCount_(crossCount), mainCount_(mainCount) {};
     ~GridLayoutAlgorithm() override = default;
 
-    void Measure(LayoutWrapper* layoutWrapper) override;
-    void Layout(LayoutWrapper* layoutWrapper) override;
+    void Measure(FrameNode* frameNode) override;
+    void Layout(FrameNode* frameNode) override;
 
 private:
-    void InitGridCeils(LayoutWrapper* layoutWrapper, const SizeF& idealSize);
+    void InitGridCeils(FrameNode* frameNode, const SizeF& idealSize);
     bool CheckGridPlaced(int32_t index, int32_t row, int32_t col, int32_t& rowSpan, int32_t& colSpan);
     void GetNextGrid(int32_t& curRow, int32_t& curCol) const;
-    OffsetF ComputeItemPosition(LayoutWrapper* layoutWrapper, int32_t row, int32_t col, int32_t& rowSpan,
+    OffsetF ComputeItemPosition(FrameNode* frameNode, int32_t row, int32_t col, int32_t& rowSpan,
         int32_t& colSpan, const RefPtr<LayoutProperty>& childLayoutProperty) const;
     LayoutConstraintF CreateChildConstraint(const SizeF& idealSize, const RefPtr<GridLayoutProperty>& layoutProperty,
         int32_t row, int32_t col, int32_t& rowSpan, int32_t& colSpan,

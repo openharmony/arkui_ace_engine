@@ -26,12 +26,11 @@
 
 namespace OHOS::Ace::NG {
 
-void StepperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+void StepperLayoutAlgorithm::Measure(FrameNode* frameNode)
 {
-    CHECK_NULL_VOID(layoutWrapper);
-    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    auto geometryNode = layoutWrapper->GetGeometryNode();
+    auto geometryNode = frameNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto constraint = layoutProperty->GetLayoutConstraint();
     const auto idealSize =
@@ -45,32 +44,32 @@ void StepperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
     childLayoutConstraint.parentIdealSize = OptionalSizeF(idealSize);
 
-    MeasureSwiper(layoutWrapper, childLayoutConstraint);
-    MeasureLeftButton(layoutWrapper, childLayoutConstraint);
-    MeasureRightButton(layoutWrapper, childLayoutConstraint);
+    MeasureSwiper(frameNode, childLayoutConstraint);
+    MeasureLeftButton(frameNode, childLayoutConstraint);
+    MeasureRightButton(frameNode, childLayoutConstraint);
 }
 
-void StepperLayoutAlgorithm::MeasureSwiper(LayoutWrapper* layoutWrapper, LayoutConstraintF swiperLayoutConstraint)
+void StepperLayoutAlgorithm::MeasureSwiper(FrameNode* frameNode, LayoutConstraintF swiperLayoutConstraint)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto stepperTheme = pipeline->GetTheme<StepperTheme>();
     CHECK_NULL_VOID(stepperTheme);
-    auto hostNode = AceType::DynamicCast<StepperNode>(layoutWrapper->GetHostNode());
+    auto hostNode = AceType::DynamicCast<StepperNode>(frameNode);
     CHECK_NULL_VOID(hostNode);
     auto index = hostNode->GetChildIndexById(hostNode->GetSwiperId());
-    auto swiperWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
-    CHECK_NULL_VOID(swiperWrapper);
+    auto swiper = frameNode->GetFrameNodeByIndex(index);
+    CHECK_NULL_VOID(swiper);
     auto swiperHeight = swiperLayoutConstraint.parentIdealSize.Height().value() -
                         static_cast<float>(stepperTheme->GetControlHeight().ConvertToPx());
     swiperLayoutConstraint.maxSize.SetHeight(swiperHeight);
     swiperLayoutConstraint.selfIdealSize.SetHeight(swiperHeight);
     swiperLayoutConstraint.selfIdealSize.SetWidth(swiperLayoutConstraint.parentIdealSize.Width());
-    swiperWrapper->Measure(swiperLayoutConstraint);
+    swiper->Measure(swiperLayoutConstraint);
 }
-void StepperLayoutAlgorithm::MeasureLeftButton(LayoutWrapper* layoutWrapper, LayoutConstraintF buttonLayoutConstraint)
+void StepperLayoutAlgorithm::MeasureLeftButton(FrameNode* frameNode, LayoutConstraintF buttonLayoutConstraint)
 {
-    auto hostNode = AceType::DynamicCast<StepperNode>(layoutWrapper->GetHostNode());
+    auto hostNode = AceType::DynamicCast<StepperNode>(frameNode);
     CHECK_NULL_VOID(hostNode);
     CHECK_NULL_VOID_NOLOG(hostNode->HasLeftButtonNode());
 
@@ -89,13 +88,13 @@ void StepperLayoutAlgorithm::MeasureLeftButton(LayoutWrapper* layoutWrapper, Lay
     buttonLayoutConstraint.selfIdealSize = OptionalSizeF(std::nullopt, buttonHeight);
 
     auto index = hostNode->GetChildIndexById(hostNode->GetLeftButtonId());
-    auto leftButtonWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
-    leftButtonWrapper->Measure(buttonLayoutConstraint);
-    MeasureText(leftButtonWrapper, buttonLayoutConstraint, true);
+    auto leftButton = frameNode->GetFrameNodeByIndex(index);
+    leftButton->Measure(buttonLayoutConstraint);
+    MeasureText(leftButton, buttonLayoutConstraint, true);
 }
-void StepperLayoutAlgorithm::MeasureRightButton(LayoutWrapper* layoutWrapper, LayoutConstraintF buttonLayoutConstraint)
+void StepperLayoutAlgorithm::MeasureRightButton(FrameNode* frameNode, LayoutConstraintF buttonLayoutConstraint)
 {
-    auto hostNode = AceType::DynamicCast<StepperNode>(layoutWrapper->GetHostNode());
+    auto hostNode = AceType::DynamicCast<StepperNode>(frameNode);
     CHECK_NULL_VOID(hostNode);
     CHECK_NULL_VOID_NOLOG(hostNode->HasRightButtonNode());
 
@@ -114,19 +113,19 @@ void StepperLayoutAlgorithm::MeasureRightButton(LayoutWrapper* layoutWrapper, La
     buttonLayoutConstraint.selfIdealSize = OptionalSizeF(std::nullopt, buttonHeight);
 
     auto index = hostNode->GetChildIndexById(hostNode->GetRightButtonId());
-    auto rightButtonWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
-    rightButtonWrapper->Measure(buttonLayoutConstraint);
-    MeasureText(rightButtonWrapper, buttonLayoutConstraint, false);
+    auto rightButton = frameNode->GetFrameNodeByIndex(index);
+    rightButton->Measure(buttonLayoutConstraint);
+    MeasureText(rightButton, buttonLayoutConstraint, false);
 }
 
 void StepperLayoutAlgorithm::MeasureText(
-    const RefPtr<LayoutWrapper>& layoutWrapper, const LayoutConstraintF& buttonLayoutConstraint, bool isLeft)
+    const RefPtr<FrameNode>& frameNode, const LayoutConstraintF& buttonLayoutConstraint, bool isLeft)
 {
-    CHECK_NULL_VOID_NOLOG(layoutWrapper->GetHostTag() == std::string(V2::BUTTON_ETS_TAG));
-    auto rowWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
-    CHECK_NULL_VOID_NOLOG(rowWrapper->GetHostTag() == std::string(V2::ROW_ETS_TAG));
-    auto textWrapper = rowWrapper->GetOrCreateChildByIndex(isLeft ? 1 : 0);
-    CHECK_NULL_VOID(textWrapper->GetHostTag() == std::string(V2::TEXT_ETS_TAG));
+    CHECK_NULL_VOID_NOLOG(frameNode->GetTag() == std::string(V2::BUTTON_ETS_TAG));
+    auto row = frameNode->GetFrameNodeByIndex(0);
+    CHECK_NULL_VOID_NOLOG(row->GetTag() == std::string(V2::ROW_ETS_TAG));
+    auto text = row->GetFrameNodeByIndex(isLeft ? 1 : 0);
+    CHECK_NULL_VOID(text->GetTag() == std::string(V2::TEXT_ETS_TAG));
 
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -141,87 +140,86 @@ void StepperLayoutAlgorithm::MeasureText(
     textLayoutConstraint.minSize = { 0, 0 };
     textLayoutConstraint.maxSize.SetWidth(textMaxWidth);
     textLayoutConstraint.selfIdealSize = OptionalSizeF(std::nullopt, std::nullopt);
-    textWrapper->Measure(textLayoutConstraint);
+    text->Measure(textLayoutConstraint);
 }
 
-void StepperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+void StepperLayoutAlgorithm::Layout(FrameNode* frameNode)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto stepperTheme = pipeline->GetTheme<StepperTheme>();
     CHECK_NULL_VOID(stepperTheme);
-    CHECK_NULL_VOID(layoutWrapper);
-    auto geometryNode = layoutWrapper->GetGeometryNode();
+    auto geometryNode = frameNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto frameSize = geometryNode->GetFrameSize();
     if (!frameSize.IsPositive()) {
         LOGW("Frame size is not positive.");
         return;
     }
-    LayoutSwiper(layoutWrapper);
-    LayoutLeftButton(layoutWrapper);
-    LayoutRightButton(layoutWrapper);
+    LayoutSwiper(frameNode);
+    LayoutLeftButton(frameNode);
+    LayoutRightButton(frameNode);
 }
 
-void StepperLayoutAlgorithm::LayoutSwiper(LayoutWrapper* layoutWrapper)
+void StepperLayoutAlgorithm::LayoutSwiper(FrameNode* frameNode)
 {
-    auto hostNode = AceType::DynamicCast<StepperNode>(layoutWrapper->GetHostNode());
+    auto hostNode = AceType::DynamicCast<StepperNode>(frameNode);
     CHECK_NULL_VOID(hostNode);
     auto index = hostNode->GetChildIndexById(hostNode->GetSwiperId());
-    auto swiperWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
-    CHECK_NULL_VOID(swiperWrapper);
+    auto swiper = frameNode->GetFrameNodeByIndex(index);
+    CHECK_NULL_VOID(swiper);
     OffsetF swiperOffset = { 0.0f, 0.0f };
-    swiperWrapper->GetGeometryNode()->SetMarginFrameOffset(swiperOffset);
-    swiperWrapper->Layout();
+    swiper->GetGeometryNode()->SetMarginFrameOffset(swiperOffset);
+    swiper->Layout();
 }
 
-void StepperLayoutAlgorithm::LayoutLeftButton(LayoutWrapper* layoutWrapper)
+void StepperLayoutAlgorithm::LayoutLeftButton(FrameNode* frameNode)
 {
-    auto hostNode = AceType::DynamicCast<StepperNode>(layoutWrapper->GetHostNode());
+    auto hostNode = AceType::DynamicCast<StepperNode>(frameNode);
     CHECK_NULL_VOID(hostNode);
     CHECK_NULL_VOID_NOLOG(hostNode->HasLeftButtonNode());
     auto index = hostNode->GetChildIndexById(hostNode->GetLeftButtonId());
-    auto leftButtonWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    auto leftButton = frameNode->GetFrameNodeByIndex(index);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto stepperTheme = pipeline->GetTheme<StepperTheme>();
     CHECK_NULL_VOID(stepperTheme);
     auto controlHeight = static_cast<float>(stepperTheme->GetControlHeight().ConvertToPx());
-    auto buttonHeight = leftButtonWrapper->GetGeometryNode()->GetFrameSize().Height();
-    auto buttonHeightOffset = layoutWrapper->GetGeometryNode()->GetFrameSize().Height() - controlHeight;
+    auto buttonHeight = leftButton->GetGeometryNode()->GetFrameSize().Height();
+    auto buttonHeightOffset = leftButton->GetGeometryNode()->GetFrameSize().Height() - controlHeight;
     buttonHeightOffset += (controlHeight - buttonHeight) / 2;
     auto padding = static_cast<float>(stepperTheme->GetDefaultPaddingStart().ConvertToPx());
     auto margin = static_cast<float>(stepperTheme->GetControlMargin().ConvertToPx());
     auto buttonWidthOffset = padding + margin;
     OffsetF buttonOffset = { buttonWidthOffset, buttonHeightOffset };
-    auto geometryNode = leftButtonWrapper->GetGeometryNode();
+    auto geometryNode = leftButton->GetGeometryNode();
     geometryNode->SetMarginFrameOffset(buttonOffset);
-    leftButtonWrapper->Layout();
+    leftButton->Layout();
 }
 
-void StepperLayoutAlgorithm::LayoutRightButton(LayoutWrapper* layoutWrapper)
+void StepperLayoutAlgorithm::LayoutRightButton(FrameNode* frameNode)
 {
-    auto hostNode = AceType::DynamicCast<StepperNode>(layoutWrapper->GetHostNode());
+    auto hostNode = AceType::DynamicCast<StepperNode>(frameNode);
     CHECK_NULL_VOID(hostNode);
     CHECK_NULL_VOID_NOLOG(hostNode->HasRightButtonNode());
     auto index = hostNode->GetChildIndexById(hostNode->GetRightButtonId());
-    auto rightButtonWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    auto rightButton = frameNode->GetFrameNodeByIndex(index);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto stepperTheme = pipeline->GetTheme<StepperTheme>();
     CHECK_NULL_VOID(stepperTheme);
-    auto frameSizeWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
-    auto rightButtonWidth = rightButtonWrapper->GetGeometryNode()->GetMarginFrameSize().Width();
+    auto frameSizeWidth = frameNode->GetGeometryNode()->GetFrameSize().Width();
+    auto rightButtonWidth = rightButton->GetGeometryNode()->GetMarginFrameSize().Width();
     auto padding = static_cast<float>(stepperTheme->GetDefaultPaddingEnd().ConvertToPx());
     auto margin = static_cast<float>(stepperTheme->GetControlMargin().ConvertToPx());
     auto buttonWidthOffset = frameSizeWidth - rightButtonWidth - padding - margin;
     auto controlHeight = static_cast<float>(stepperTheme->GetControlHeight().ConvertToPx());
-    auto buttonHeight = rightButtonWrapper->GetGeometryNode()->GetFrameSize().Height();
-    auto buttonHeightOffset = layoutWrapper->GetGeometryNode()->GetFrameSize().Height() - controlHeight;
+    auto buttonHeight = rightButton->GetGeometryNode()->GetFrameSize().Height();
+    auto buttonHeightOffset = frameNode->GetGeometryNode()->GetFrameSize().Height() - controlHeight;
     buttonHeightOffset += (controlHeight - buttonHeight) / 2;
     OffsetF buttonOffset = { buttonWidthOffset, buttonHeightOffset };
-    rightButtonWrapper->GetGeometryNode()->SetMarginFrameOffset(buttonOffset);
-    rightButtonWrapper->Layout();
+    rightButton->GetGeometryNode()->SetMarginFrameOffset(buttonOffset);
+    rightButton->Layout();
 }
 
 } // namespace OHOS::Ace::NG

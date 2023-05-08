@@ -32,11 +32,11 @@ public:
 
     void OnReset() override {}
 
-    void Measure(LayoutWrapper* layoutWrapper) override;
-    void Layout(LayoutWrapper* layoutWrapper) override;
-    void MeasureText(LayoutWrapper* layoutWrapper, const SizeF& size);
+    void Measure(FrameNode* frameNode) override;
+    void Layout(FrameNode* frameNode) override;
+    void MeasureText(FrameNode* frameNode, const SizeF& size);
     void ChangeAmPmTextStyle(uint32_t index, uint32_t showOptionCount, const SizeF& size,
-        const RefPtr<LayoutWrapper>& childLayoutWrapper, LayoutWrapper* layoutWrapper);
+        const RefPtr<FrameNode>& child, FrameNode* frameNode);
 
     float GetCurrentOffset() const
     {

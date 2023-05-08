@@ -23,9 +23,9 @@
 
 namespace OHOS::Ace::NG {
 
-void CustomNodeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+void CustomNodeLayoutAlgorithm::Measure(FrameNode* frameNode)
 {
-    auto host = DynamicCast<CustomMeasureLayoutNode>(layoutWrapper->GetHostNode());
+    auto host = DynamicCast<CustomMeasureLayoutNode>(frameNode);
     CHECK_NULL_VOID(host);
     if (renderFunction_ && host) {
         {
@@ -39,28 +39,28 @@ void CustomNodeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             renderFunction_ = nullptr;
             CHECK_NULL_VOID(child);
             buildItem_ = child;
-            child->AdjustLayoutWrapperTree(Claim(layoutWrapper), true, true);
+            // child->AdjustLayoutWrapperTree(Claim(frameNode), true, true);
         }
     }
 
     // call js measure
-    if (!host->FireOnMeasure(layoutWrapper)) {
+    if (!host->FireOnMeasure(frameNode)) {
         // use normal measure step.
-        auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
-        const auto& children = layoutWrapper->GetAllChildrenWithBuild();
+        auto layoutConstraint = frameNode->GetLayoutProperty()->CreateChildConstraint();
+        const auto& children = frameNode->GetAllFrameNodeChildren();
         for (auto&& child : children) {
             child->Measure(layoutConstraint);
         }
-        BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);
+        BoxLayoutAlgorithm::PerformMeasureSelf(frameNode);
     }
 }
 
-void CustomNodeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+void CustomNodeLayoutAlgorithm::Layout(FrameNode* frameNode)
 {
-    auto host = DynamicCast<CustomMeasureLayoutNode>(layoutWrapper->GetHostNode());
-    if (!host->FireOnLayout(layoutWrapper)) {
-        PerformLayout(layoutWrapper);
-        for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
+    auto host = DynamicCast<CustomMeasureLayoutNode>(frameNode);
+    if (!host->FireOnLayout(frameNode)) {
+        PerformLayout(frameNode);
+        for (auto&& child : frameNode->GetAllFrameNodeChildren()) {
             child->Layout();
         }
     }

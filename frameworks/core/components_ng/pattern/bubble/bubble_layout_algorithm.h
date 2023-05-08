@@ -35,9 +35,9 @@ public:
     BubbleLayoutAlgorithm(int32_t id, const std::string& tag) : targetNodeId_(id), targetTag_(tag) {}
     ~BubbleLayoutAlgorithm() override = default;
 
-    void Measure(LayoutWrapper* layoutWrapper) override;
+    void Measure(FrameNode* frameNode) override;
 
-    void Layout(LayoutWrapper* layoutWrapper) override;
+    void Layout(FrameNode* frameNode) override;
 
     SizeF GetTargetSize() const
     {

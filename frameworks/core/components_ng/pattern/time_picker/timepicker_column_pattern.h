@@ -202,7 +202,7 @@ public:
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    bool OnDirtyLayoutWrapperSwap(FrameNode* frameNode, const DirtySwapConfig& config) override;
     void SetDividerHeight(uint32_t showOptionCount);
     void ChangeTextStyle(uint32_t index, uint32_t showOptionCount,
         const RefPtr<TextLayoutProperty>& textLayoutProperty,

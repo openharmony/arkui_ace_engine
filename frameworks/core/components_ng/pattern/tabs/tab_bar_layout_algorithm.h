@@ -32,8 +32,8 @@ public:
     ~TabBarLayoutAlgorithm() override = default;
 
     void OnReset() override {}
-    void Measure(LayoutWrapper* layoutWrapper) override;
-    void Layout(LayoutWrapper* layoutWrapper) override;
+    void Measure(FrameNode* frameNode) override;
+    void Layout(FrameNode* frameNode) override;
 
     const std::vector<OffsetF>& GetTabItemOffset() const
     {
@@ -81,14 +81,14 @@ public:
     }
 
 private:
-    Axis GetAxis(LayoutWrapper* layoutWrapper) const;
+    Axis GetAxis(FrameNode* frameNode) const;
     void UpdateChildConstraint(LayoutConstraintF& childConstraint, const RefPtr<TabBarLayoutProperty>& layoutProperty,
         const SizeF& ideaSize, int32_t childCount, Axis axis);
-    float GetSpace(LayoutWrapper* layoutWrapper, int32_t indicator, const SizeF& frameSize, Axis axis);
-    float CalculateFrontChildrenMainSize(LayoutWrapper* layoutWrapper, int32_t indicator, Axis axis);
-    void LayoutChildren(LayoutWrapper* layoutWrapper, const SizeF& frameSize, Axis axis, OffsetF& childOffset);
-    void LayoutMask(LayoutWrapper* layoutWrapper);
-    float CalculateBackChildrenMainSize(LayoutWrapper* layoutWrapper, int32_t indicator, Axis axis);
+    float GetSpace(FrameNode* frameNode, int32_t indicator, const SizeF& frameSize, Axis axis);
+    float CalculateFrontChildrenMainSize(FrameNode* frameNode, int32_t indicator, Axis axis);
+    void LayoutChildren(FrameNode* frameNode, const SizeF& frameSize, Axis axis, OffsetF& childOffset);
+    void LayoutMask(FrameNode* frameNode);
+    float CalculateBackChildrenMainSize(FrameNode* frameNode, int32_t indicator, Axis axis);
 
     std::vector<OffsetF> tabItemOffset_;
     float currentOffset_ = 0.0f;

@@ -30,7 +30,7 @@ public:
     void OnReset() override;
 
     std::optional<SizeF> MeasureContent(
-        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
+        const LayoutConstraintF& contentConstraint, FrameNode* frameNode) override;
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(GaugeLayoutAlgorithm);

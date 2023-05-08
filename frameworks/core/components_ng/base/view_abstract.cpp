@@ -21,6 +21,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
+#include "base/log/ace_trace.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
@@ -76,7 +77,11 @@ void ViewAbstract::SetWidth(const CalcLength& width)
     if (layoutConstraint && layoutConstraint->selfIdealSize) {
         height = layoutConstraint->selfIdealSize->Height();
     }
-    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(width, height));
+    auto size = CalcSize(width, height);
+    ACE_SCOPED_TRACE("[%s-%d]UpdateUserDefinedIdealSize[SetWidth] %s", frameNode->GetTag().c_str(), frameNode->GetId(),
+        size.ToString().c_str());
+
+    layoutProperty->UpdateUserDefinedIdealSize(size);
 }
 
 void ViewAbstract::SetHeight(const CalcLength& height)
@@ -95,7 +100,10 @@ void ViewAbstract::SetHeight(const CalcLength& height)
     if (layoutConstraint && layoutConstraint->selfIdealSize) {
         width = layoutConstraint->selfIdealSize->Width();
     }
-    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(width, height));
+    auto size = CalcSize(width, height);
+    ACE_SCOPED_TRACE("[%s-%d]UpdateUserDefinedIdealSize[SetHeight] %s", frameNode->GetTag().c_str(), frameNode->GetId(),
+        size.ToString().c_str());
+    layoutProperty->UpdateUserDefinedIdealSize(size);
 }
 
 void ViewAbstract::ClearWidthOrHeight(bool isWidth)

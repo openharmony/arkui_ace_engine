@@ -18,8 +18,11 @@
 #ifdef FLUTTER_2_5
 #include "ace_shell/shell/common/window_manager.h"
 #endif
+
+#include "base/log/ace_trace.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -49,21 +52,26 @@ SizeF GetMaxSize(const SizeF& maxSize, float aspectRatio)
 } // namespace
 
 std::optional<SizeF> ImageLayoutAlgorithm::MeasureContent(
-    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+    const LayoutConstraintF& contentConstraint, FrameNode* frameNode)
 {
     // case 1: image component is set with valid size, return contentConstraint.selfIdealSize as component size
     if (contentConstraint.selfIdealSize.IsValid()) {
         return contentConstraint.selfIdealSize.ConvertToSizeT();
     }
+
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    CHECK_NULL_RETURN(pattern, std::nullopt);
+    auto loadingCtx = pattern->GetLoadingCtx();
+    auto altLoadingCtx = pattern->GetAltLoadingCtx();
     // case 2: image component is not set with size, use image source size to determine component size
     // if image data and altImage are both not ready, can not decide content size,
     // return std::nullopt and wait for next layout task triggered by [OnImageDataReady]
-    if ((!loadingCtx_ || !loadingCtx_->GetImageSize().IsPositive()) &&
-        (!altLoadingCtx_ || !altLoadingCtx_->GetImageSize().IsPositive())) {
+    if ((!loadingCtx || !loadingCtx->GetImageSize().IsPositive()) &&
+        (!altLoadingCtx || !altLoadingCtx->GetImageSize().IsPositive())) {
         return std::nullopt;
     }
     // if image data is valid, use image source, or use altImage data
-    auto imageLoadingContext = loadingCtx_ ? loadingCtx_ : altLoadingCtx_;
+    auto imageLoadingContext = loadingCtx ? loadingCtx : altLoadingCtx;
     auto rawImageSize = imageLoadingContext->GetImageSize();
     SizeF size(rawImageSize);
     do {
@@ -75,7 +83,7 @@ std::optional<SizeF> ImageLayoutAlgorithm::MeasureContent(
         // case 2.1: image component is not set with size, use image source size as image component size
         //          if fitOriginalSize is true, use image source size as image component size
         //          if fitOriginalSize is false, use the parent component LayoutConstraint size as image component size
-        const auto& props = DynamicCast<ImageLayoutProperty>(layoutWrapper->GetLayoutProperty());
+        const auto& props = DynamicCast<ImageLayoutProperty>(frameNode->GetLayoutProperty());
         bool fitOriginalSize = props->GetFitOriginalSize().value_or(false);
         if (contentConstraint.selfIdealSize.IsNull()) {
             if (!fitOriginalSize) {
@@ -105,24 +113,32 @@ std::optional<SizeF> ImageLayoutAlgorithm::MeasureContent(
     return contentConstraint.Constrain(size);
 }
 
-void ImageLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+void ImageLayoutAlgorithm::Layout(FrameNode* frameNode)
 {
-    BoxLayoutAlgorithm::Layout(layoutWrapper);
+    ACE_SCOPED_TRACE("ImageLayoutAlgorithm Layout");
+    BoxLayoutAlgorithm::Layout(frameNode);
     // if layout size has not decided yet, resize target can not be calculated
-    if (!layoutWrapper->GetGeometryNode()->GetContent()) {
+    if (!frameNode->GetGeometryNode()->GetContent()) {
+        ACE_SCOPED_TRACE("ImageLayoutAlgorithm skip");
         return;
     }
-    const auto& imageLayoutProperty = DynamicCast<ImageLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(pattern);
+    auto loadingCtx = pattern->GetLoadingCtx();
+    auto altLoadingCtx = pattern->GetAltLoadingCtx();
+
+    const auto& imageLayoutProperty = DynamicCast<ImageLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_VOID(imageLayoutProperty);
-    const auto& dstSize = layoutWrapper->GetGeometryNode()->GetContentSize();
+    const auto& dstSize = frameNode->GetGeometryNode()->GetContentSize();
     bool autoResize = imageLayoutProperty->GetAutoResize().value_or(true);
     ImageFit imageFit = imageLayoutProperty->GetImageFit().value_or(ImageFit::COVER);
     const std::optional<SizeF>& sourceSize = imageLayoutProperty->GetSourceSize();
-    if (loadingCtx_) {
-        loadingCtx_->MakeCanvasImageIfNeed(dstSize, autoResize, imageFit, sourceSize);
+    if (loadingCtx) {
+        ACE_SCOPED_TRACE("MakeCanvasImageIfNeed");
+        loadingCtx->MakeCanvasImageIfNeed(dstSize, autoResize, imageFit, sourceSize);
     }
-    if (altLoadingCtx_) {
-        altLoadingCtx_->MakeCanvasImageIfNeed(dstSize, true, imageFit, sourceSize);
+    if (altLoadingCtx) {
+        altLoadingCtx->MakeCanvasImageIfNeed(dstSize, true, imageFit, sourceSize);
     }
 }
 

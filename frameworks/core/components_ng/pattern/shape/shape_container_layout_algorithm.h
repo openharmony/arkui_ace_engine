@@ -27,10 +27,10 @@ public:
     ~ShapeContainerLayoutAlgorithm() override = default;
 
     std::optional<SizeF> MeasureContent(
-        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
+        const LayoutConstraintF& contentConstraint, FrameNode* frameNode) override;
 
 private:
-    SizeF GetChildrenSize(LayoutWrapper* layoutWrapper, SizeF maxSize);
+    SizeF GetChildrenSize(FrameNode* frameNode, SizeF maxSize);
     ACE_DISALLOW_COPY_AND_MOVE(ShapeContainerLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

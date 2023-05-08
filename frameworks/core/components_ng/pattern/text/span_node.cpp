@@ -18,6 +18,7 @@
 #include <optional>
 
 #include "base/utils/utils.h"
+#include "base/log/ace_trace.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/frame_node.h"
@@ -86,6 +87,7 @@ RefPtr<SpanNode> SpanNode::GetOrCreateSpanNode(int32_t nodeId)
 
 void SpanNode::MountToParagraph()
 {
+    ACE_SCOPED_TRACE("MountToParagraph");
     auto parent = GetParent();
     while (parent) {
         auto spanNode = DynamicCast<SpanNode>(parent);
@@ -97,6 +99,7 @@ void SpanNode::MountToParagraph()
         if (textNode) {
             auto textPattern = textNode->GetPattern<TextPattern>();
             if (textPattern) {
+                ACE_SCOPED_TRACE("AddChildSpanItem");
                 textPattern->AddChildSpanItem(Claim(this));
                 return;
             }

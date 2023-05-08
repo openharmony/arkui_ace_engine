@@ -108,12 +108,12 @@ void ScrollPattern::RegisterScrollEventTask()
     }
 }
 
-bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+bool ScrollPattern::OnDirtyLayoutWrapperSwap(FrameNode* frameNode, const DirtySwapConfig& config)
 {
     if (config.skipMeasure && config.skipLayout) {
         return false;
     }
-    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
+    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(frameNode->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto layoutAlgorithm = DynamicCast<ScrollLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithm, false);

@@ -31,19 +31,19 @@ public:
 
     void OnReset() override {}
 
-    void Measure(LayoutWrapper* layoutWrapper) override;
-    void Layout(LayoutWrapper* layoutWrapper) override;
+    void Measure(FrameNode* frameNode) override;
+    void Layout(FrameNode* frameNode) override;
 
 private:
-    void CancelImageMeasure(LayoutWrapper* layoutWrapper);
-    void CancelButtonMeasure(LayoutWrapper* layoutWrapper);
-    void TextFieldMeasure(LayoutWrapper* layoutWrapper);
-    void ImageMeasure(LayoutWrapper* layoutWrapper);
-    void SearchButtonMeasure(LayoutWrapper* layoutWrapper);
-    void SelfMeasure(LayoutWrapper* layoutWrapper);
-    bool IsFixedHeightMode(LayoutWrapper* layoutWrapper);
-    double CalcSearchAdaptHeight(LayoutWrapper* layoutWrapper);
-    void CalcChildrenHotZone(LayoutWrapper* layoutWrapper);
+    void CancelImageMeasure(FrameNode* frameNode);
+    void CancelButtonMeasure(FrameNode* frameNode);
+    void TextFieldMeasure(FrameNode* frameNode);
+    void ImageMeasure(FrameNode* frameNode);
+    void SearchButtonMeasure(FrameNode* frameNode);
+    void SelfMeasure(FrameNode* frameNode);
+    bool IsFixedHeightMode(FrameNode* frameNode);
+    double CalcSearchAdaptHeight(FrameNode* frameNode);
+    void CalcChildrenHotZone(FrameNode* frameNode);
 
     // children frame size
     SizeF searchIconSizeMeasure_;

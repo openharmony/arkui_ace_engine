@@ -29,6 +29,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/log/dump_log.h"
+#include "base/log/ace_trace.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
@@ -2239,21 +2240,23 @@ void RosenRenderContext::OnTransitionOutFinish()
     CHECK_NULL_VOID(host);
     // if the node is not disappearing (reappear?), return.
     if (!host->IsDisappearing()) {
-        LOGD("RosenTransitionEffect: node is not disappearing, skip");
+        LOGE("RosenTransitionEffect: node is not disappearing, skip");
         return;
     }
-    LOGD("RosenTransitionEffect: transition out finish, remove node %{public}d", host->GetId());
+    LOGE("RosenTransitionEffect: transition out finish, remove node %{public}d", host->GetId());
 
     // should get parent before onRemoveFromParent function because it will reset parent
     auto parent = host->GetParent();
     // clean up related status.
     host->UINode::OnRemoveFromParent();
+    LOGE(" before %{public}d %{public}d", host->GetId(), host->RefCount());
     // try to remove self from parent's disappearing children.
-    if (parent && parent->RemoveDisappearingChild(host)) {
-        // if success, tell parent to rebuild render tree.
-        parent->MarkNeedSyncRenderTree();
+    if (parent) {
+        parent->RemoveChild(host);
         parent->RebuildRenderContextTree();
+
     }
+    LOGE("done %{public}d %{public}d", host->GetId(), host->RefCount());
     if (isModalRootNode_ && parent->GetChildren().empty()) {
         auto grandParent = parent->GetParent();
         CHECK_NULL_VOID(grandParent);

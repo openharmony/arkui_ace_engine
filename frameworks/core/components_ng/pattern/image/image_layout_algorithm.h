@@ -26,26 +26,15 @@ class ACE_EXPORT ImageLayoutAlgorithm : public BoxLayoutAlgorithm {
     DECLARE_ACE_TYPE(ImageLayoutAlgorithm, BoxLayoutAlgorithm);
 
 public:
-    ImageLayoutAlgorithm(
-        const RefPtr<ImageLoadingContext>& loadingCtx, const RefPtr<ImageLoadingContext>& altLoadingCtx = nullptr)
-        : loadingCtx_(loadingCtx), altLoadingCtx_(altLoadingCtx)
-    {}
+    ImageLayoutAlgorithm() {}
     ~ImageLayoutAlgorithm() override = default;
 
-    void OnReset() override
-    {
-        loadingCtx_ = nullptr;
-        altLoadingCtx_ = nullptr;
-    }
-
     std::optional<SizeF> MeasureContent(
-        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
+        const LayoutConstraintF& contentConstraint, FrameNode* frameNode) override;
 
-    void Layout(LayoutWrapper* layoutWrapper) override;
+    void Layout(FrameNode* frameNode) override;
 
 private:
-    RefPtr<ImageLoadingContext> loadingCtx_;
-    RefPtr<ImageLoadingContext> altLoadingCtx_;
     ACE_DISALLOW_COPY_AND_MOVE(ImageLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

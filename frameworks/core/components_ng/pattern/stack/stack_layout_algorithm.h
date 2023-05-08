@@ -28,13 +28,13 @@ public:
     StackLayoutAlgorithm();
     ~StackLayoutAlgorithm() override = default;
 
-    void Layout(LayoutWrapper* layoutWrapper) override;
+    void Layout(FrameNode* frameNode) override;
 
 private:
     // calculate stack alignment
     static NG::OffsetF CalculateStackAlignment(
         const NG::SizeF& parentSize, const NG::SizeF& childSize, const Alignment& alignment);
-    static void PerformLayout(LayoutWrapper* layoutWrapper);
+    static void PerformLayout(FrameNode* frameNode);
     ACE_DISALLOW_COPY_AND_MOVE(StackLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

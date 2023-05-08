@@ -29,69 +29,69 @@
 
 namespace OHOS::Ace::NG {
 
-void BarItemLayoutAlgorithm::MeasureIcon(LayoutWrapper* layoutWrapper, const RefPtr<BarItemNode>& hostNode,
+void BarItemLayoutAlgorithm::MeasureIcon(FrameNode* frameNode, const RefPtr<BarItemNode>& hostNode,
     const RefPtr<LayoutProperty>& barItemLayoutProperty)
 {
     auto iconNode = hostNode->GetIconNode();
     CHECK_NULL_VOID(iconNode);
     auto index = hostNode->GetChildIndexById(iconNode->GetId());
-    auto iconWrapper = layoutWrapper->GetOrCreateChildByIndex((index));
-    CHECK_NULL_VOID(iconWrapper);
+    auto icon = frameNode->GetFrameNodeByIndex((index));
+    CHECK_NULL_VOID(icon);
     auto constraint = barItemLayoutProperty->CreateChildConstraint();
 
     constraint.selfIdealSize =
         OptionalSizeF(static_cast<float>(iconSize_.ConvertToPx()), static_cast<float>(iconSize_.ConvertToPx()));
-    iconWrapper->Measure(constraint);
+    icon->Measure(constraint);
 }
 
-void BarItemLayoutAlgorithm::MeasureText(LayoutWrapper* layoutWrapper, const RefPtr<BarItemNode>& hostNode,
+void BarItemLayoutAlgorithm::MeasureText(FrameNode* frameNode, const RefPtr<BarItemNode>& hostNode,
     const RefPtr<LayoutProperty>& barItemLayoutProperty)
 {
     auto textNode = hostNode->GetTextNode();
     CHECK_NULL_VOID(textNode);
     auto index = hostNode->GetChildIndexById(textNode->GetId());
-    auto textWrapper = layoutWrapper->GetOrCreateChildByIndex((index));
-    CHECK_NULL_VOID(textWrapper);
+    auto text = frameNode->GetFrameNodeByIndex((index));
+    CHECK_NULL_VOID(text);
     auto constraint = barItemLayoutProperty->CreateChildConstraint();
-    textWrapper->Measure(constraint);
+    text->Measure(constraint);
 }
 
-float BarItemLayoutAlgorithm::LayoutIcon(LayoutWrapper* layoutWrapper, const RefPtr<BarItemNode>& hostNode,
+float BarItemLayoutAlgorithm::LayoutIcon(FrameNode* frameNode, const RefPtr<BarItemNode>& hostNode,
     const RefPtr<LayoutProperty>& barItemLayoutProperty, float textHeight)
 {
     auto iconNode = hostNode->GetIconNode();
     CHECK_NULL_RETURN(iconNode, 0.0f);
     auto index = hostNode->GetChildIndexById(iconNode->GetId());
-    auto iconWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
-    CHECK_NULL_RETURN(iconWrapper, 0.0f);
-    auto geometryNode = iconWrapper->GetGeometryNode();
+    auto icon = frameNode->GetFrameNodeByIndex((index));
+    CHECK_NULL_RETURN(icon, 0.0f);
+    auto geometryNode = icon->GetGeometryNode();
 
     auto offset = OffsetF(0.0f, 0.0f);
     geometryNode->SetMarginFrameOffset(offset);
-    iconWrapper->Layout();
+    icon->Layout();
     return 0.0f;
 }
 
-void BarItemLayoutAlgorithm::LayoutText(LayoutWrapper* layoutWrapper, const RefPtr<BarItemNode>& hostNode,
+void BarItemLayoutAlgorithm::LayoutText(FrameNode* frameNode, const RefPtr<BarItemNode>& hostNode,
     const RefPtr<LayoutProperty>& barItemLayoutProperty, float iconOffsetY)
 {
     auto textNode = hostNode->GetTextNode();
     CHECK_NULL_VOID(textNode);
     auto index = hostNode->GetChildIndexById(textNode->GetId());
-    auto textWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
-    CHECK_NULL_VOID(textWrapper);
-    auto geometryNode = textWrapper->GetGeometryNode();
+    auto text = frameNode->GetFrameNodeByIndex((index));
+    CHECK_NULL_VOID(text);
+    auto geometryNode = text->GetGeometryNode();
     auto textOffsetY = iconSize_ + TEXT_TOP_PADDING;
     auto offset = OffsetF(0.0f, iconOffsetY + static_cast<float>(textOffsetY.ConvertToPx()));
     geometryNode->SetMarginFrameOffset(offset);
-    textWrapper->Layout();
+    text->Layout();
 }
 
-void BarItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+void BarItemLayoutAlgorithm::Measure(FrameNode* frameNode)
 {
-    auto hostNode = AceType::DynamicCast<BarItemNode>(layoutWrapper->GetHostNode());
+    auto hostNode = AceType::DynamicCast<BarItemNode>(Claim(frameNode));
     CHECK_NULL_VOID(hostNode);
-    auto barItemLayoutProperty = AceType::DynamicCast<LayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto barItemLayoutProperty = AceType::DynamicCast<LayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_VOID(barItemLayoutProperty);
     const auto& constraint = barItemLayoutProperty->GetLayoutConstraint();
     CHECK_NULL_VOID(constraint);
@@ -101,30 +101,30 @@ void BarItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(theme);
     iconSize_ = theme->GetMenuIconSize();
     auto size = SizeF(static_cast<float>(iconSize_.ConvertToPx()), static_cast<float>(iconSize_.ConvertToPx()));
-    MeasureIcon(layoutWrapper, hostNode, barItemLayoutProperty);
-    MeasureText(layoutWrapper, hostNode, barItemLayoutProperty);
-    layoutWrapper->GetGeometryNode()->SetFrameSize(size);
+    MeasureIcon(frameNode, hostNode, barItemLayoutProperty);
+    MeasureText(frameNode, hostNode, barItemLayoutProperty);
+    frameNode->GetGeometryNode()->SetFrameSize(size);
 }
 
-void BarItemLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+void BarItemLayoutAlgorithm::Layout(FrameNode* frameNode)
 {
-    auto hostNode = AceType::DynamicCast<BarItemNode>(layoutWrapper->GetHostNode());
+    auto hostNode = AceType::DynamicCast<BarItemNode>(Claim(frameNode));
     CHECK_NULL_VOID(hostNode);
-    auto barItemLayoutProperty = AceType::DynamicCast<LayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto barItemLayoutProperty = AceType::DynamicCast<LayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_VOID(barItemLayoutProperty);
 
     float textHeight = 0.0f;
     auto textNode = hostNode->GetTextNode();
     if (textNode) {
         auto index = hostNode->GetChildIndexById(textNode->GetId());
-        auto textWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
-        CHECK_NULL_VOID(textWrapper);
-        auto geometryNode = textWrapper->GetGeometryNode();
+        auto text = frameNode->GetFrameNodeByIndex((index));
+        CHECK_NULL_VOID(text);
+        auto geometryNode = text->GetGeometryNode();
         textHeight = geometryNode->GetFrameSize().Height();
     }
 
-    float iconOffsetY = LayoutIcon(layoutWrapper, hostNode, barItemLayoutProperty, textHeight);
-    LayoutText(layoutWrapper, hostNode, barItemLayoutProperty, iconOffsetY);
+    float iconOffsetY = LayoutIcon(frameNode, hostNode, barItemLayoutProperty, textHeight);
+    LayoutText(frameNode, hostNode, barItemLayoutProperty, iconOffsetY);
 }
 
 } // namespace OHOS::Ace::NG

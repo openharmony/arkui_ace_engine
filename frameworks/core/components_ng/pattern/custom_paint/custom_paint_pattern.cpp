@@ -38,9 +38,9 @@ RefPtr<NodePaintMethod> CustomPaintPattern::CreateNodePaintMethod()
     return paintMethod_;
 }
 
-bool CustomPaintPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+bool CustomPaintPattern::OnDirtyLayoutWrapperSwap(FrameNode* frameNode, const DirtySwapConfig& config)
 {
-    if (config.skipMeasure || dirty->SkipMeasureContent()) {
+    if (config.skipMeasure || frameNode->SkipMeasureContent()) {
         return false;
     }
     auto customPaintEventHub = GetEventHub<CustomPaintEventHub>();

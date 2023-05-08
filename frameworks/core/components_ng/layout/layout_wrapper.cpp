@@ -138,144 +138,144 @@ int32_t LayoutWrapper::GetHostDepth() const
 // This will call child and self measure process.
 void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstraint)
 {
-    auto host = GetHostNode();
-    CHECK_NULL_VOID(layoutProperty_);
-    CHECK_NULL_VOID(geometryNode_);
-    CHECK_NULL_VOID(host);
-    CHECK_NULL_VOID(layoutAlgorithm_);
-    if (layoutAlgorithm_->SkipMeasure()) {
-        LOGD("%{public}s, depth: %{public}d: the layoutAlgorithm skip measure", host->GetTag().c_str(),
-            host->GetDepth());
-        return;
-    }
+    // auto host = GetHostNode();
+    // CHECK_NULL_VOID(layoutProperty_);
+    // CHECK_NULL_VOID(geometryNode_);
+    // CHECK_NULL_VOID(host);
+    // CHECK_NULL_VOID(layoutAlgorithm_);
+    // if (layoutAlgorithm_->SkipMeasure()) {
+    //     LOGD("%{public}s, depth: %{public}d: the layoutAlgorithm skip measure", host->GetTag().c_str(),
+    //         host->GetDepth());
+    //     return;
+    // }
 
-    const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
-    if (geometryTransition != nullptr) {
-        geometryTransition->WillLayout(Claim(this));
-    }
+    // const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
+    // if (geometryTransition != nullptr) {
+    //     geometryTransition->WillLayout(Claim(this));
+    // }
 
-    auto preConstraint = layoutProperty_->GetLayoutConstraint();
-    auto contentConstraint = layoutProperty_->GetContentLayoutConstraint();
-    layoutProperty_->BuildGridProperty(host);
-    const auto& magicItemProperty = layoutProperty_->GetMagicItemProperty();
-    auto hasAspectRatio = magicItemProperty && magicItemProperty->HasAspectRatio();
-    if (parentConstraint) {
-        if (hasAspectRatio) {
-            auto useConstraint = parentConstraint.value();
-            useConstraint.ApplyAspectRatio(magicItemProperty->GetAspectRatioValue(),
-                layoutProperty_->GetCalcLayoutConstraint() ? layoutProperty_->GetCalcLayoutConstraint()->selfIdealSize
-                                                           : std::nullopt);
-            geometryNode_->SetParentLayoutConstraint(useConstraint);
-            layoutProperty_->UpdateLayoutConstraint(useConstraint);
-        } else {
-            geometryNode_->SetParentLayoutConstraint(parentConstraint.value());
-            layoutProperty_->UpdateLayoutConstraint(parentConstraint.value());
-        }
-    } else {
-        LayoutConstraintF layoutConstraint;
-        layoutConstraint.percentReference.SetWidth(PipelineContext::GetCurrentRootWidth());
-        if (hasAspectRatio) {
-            auto aspectRatio = magicItemProperty->GetAspectRatioValue();
-            if (Positive(aspectRatio)) {
-                auto height = PipelineContext::GetCurrentRootHeight() / aspectRatio;
-                layoutConstraint.percentReference.SetHeight(height);
-            }
-        } else {
-            layoutConstraint.percentReference.SetHeight(PipelineContext::GetCurrentRootHeight());
-        }
-        layoutProperty_->UpdateLayoutConstraint(layoutConstraint);
-    }
-    layoutProperty_->UpdateContentConstraint();
-    geometryNode_->UpdateMargin(layoutProperty_->CreateMargin());
-    geometryNode_->UpdatePaddingWithBorder(layoutProperty_->CreatePaddingAndBorder());
+    // auto preConstraint = layoutProperty_->GetLayoutConstraint();
+    // auto contentConstraint = layoutProperty_->GetContentLayoutConstraint();
+    // layoutProperty_->BuildGridProperty(host);
+    // const auto& magicItemProperty = layoutProperty_->GetMagicItemProperty();
+    // auto hasAspectRatio = magicItemProperty && magicItemProperty->HasAspectRatio();
+    // if (parentConstraint) {
+    //     if (hasAspectRatio) {
+    //         auto useConstraint = parentConstraint.value();
+    //         useConstraint.ApplyAspectRatio(magicItemProperty->GetAspectRatioValue(),
+    //             layoutProperty_->GetCalcLayoutConstraint() ? layoutProperty_->GetCalcLayoutConstraint()->selfIdealSize
+    //                                                        : std::nullopt);
+    //         geometryNode_->SetParentLayoutConstraint(useConstraint);
+    //         layoutProperty_->UpdateLayoutConstraint(useConstraint);
+    //     } else {
+    //         geometryNode_->SetParentLayoutConstraint(parentConstraint.value());
+    //         layoutProperty_->UpdateLayoutConstraint(parentConstraint.value());
+    //     }
+    // } else {
+    //     LayoutConstraintF layoutConstraint;
+    //     layoutConstraint.percentReference.SetWidth(PipelineContext::GetCurrentRootWidth());
+    //     if (hasAspectRatio) {
+    //         auto aspectRatio = magicItemProperty->GetAspectRatioValue();
+    //         if (Positive(aspectRatio)) {
+    //             auto height = PipelineContext::GetCurrentRootHeight() / aspectRatio;
+    //             layoutConstraint.percentReference.SetHeight(height);
+    //         }
+    //     } else {
+    //         layoutConstraint.percentReference.SetHeight(PipelineContext::GetCurrentRootHeight());
+    //     }
+    //     layoutProperty_->UpdateLayoutConstraint(layoutConstraint);
+    // }
+    // layoutProperty_->UpdateContentConstraint();
+    // geometryNode_->UpdateMargin(layoutProperty_->CreateMargin());
+    // geometryNode_->UpdatePaddingWithBorder(layoutProperty_->CreatePaddingAndBorder());
 
-    isConstraintNotChanged_ = preConstraint ? preConstraint == layoutProperty_->GetLayoutConstraint() : false;
-    if (!isConstraintNotChanged_) {
-        isConstraintNotChanged_ =
-            contentConstraint ? contentConstraint == layoutProperty_->GetContentLayoutConstraint() : false;
-    }
+    // isConstraintNotChanged_ = preConstraint ? preConstraint == layoutProperty_->GetLayoutConstraint() : false;
+    // if (!isConstraintNotChanged_) {
+    //     isConstraintNotChanged_ =
+    //         contentConstraint ? contentConstraint == layoutProperty_->GetContentLayoutConstraint() : false;
+    // }
 
-    LOGD("Measure: %{public}s, depth: %{public}d, Constraint: %{public}s", host->GetTag().c_str(), host->GetDepth(),
-        layoutProperty_->GetLayoutConstraint()->ToString().c_str());
+    // LOGD("Measure: %{public}s, depth: %{public}d, Constraint: %{public}s", host->GetTag().c_str(), host->GetDepth(),
+    //     layoutProperty_->GetLayoutConstraint()->ToString().c_str());
 
-    if (isConstraintNotChanged_ && !skipMeasureContent_) {
-        if (!CheckNeedForceMeasureAndLayout()) {
-            LOGD("%{public}s (depth: %{public}d) skip measure content", host->GetTag().c_str(), host->GetDepth());
-            skipMeasureContent_ = true;
-        }
-    }
+    // if (isConstraintNotChanged_ && !skipMeasureContent_) {
+    //     if (!CheckNeedForceMeasureAndLayout()) {
+    //         LOGD("%{public}s (depth: %{public}d) skip measure content", host->GetTag().c_str(), host->GetDepth());
+    //         skipMeasureContent_ = true;
+    //     }
+    // }
 
-    if (!skipMeasureContent_.value_or(false)) {
-        skipMeasureContent_ = false;
-        auto size = layoutAlgorithm_->MeasureContent(layoutProperty_->CreateContentConstraint(), this);
-        if (size.has_value()) {
-            geometryNode_->SetContentSize(size.value());
-        }
-        layoutAlgorithm_->Measure(this);
+    // if (!skipMeasureContent_.value_or(false)) {
+    //     skipMeasureContent_ = false;
+    //     auto size = layoutAlgorithm_->MeasureContent(layoutProperty_->CreateContentConstraint(), this);
+    //     if (size.has_value()) {
+    //         geometryNode_->SetContentSize(size.value());
+    //     }
+    //     layoutAlgorithm_->Measure(this);
 
-        // check aspect radio.
-        if (hasAspectRatio) {
-            auto aspectRatio = magicItemProperty->GetAspectRatioValue();
-            // Adjust by aspect ratio, firstly pick height based on width. It means that when width, height and
-            // aspectRatio are all set, the height is not used.
-            auto width = geometryNode_->GetFrameSize().Width();
-            LOGD("aspect ratio affects, origin width: %{public}f, height: %{public}f", width,
-                geometryNode_->GetFrameSize().Height());
-            auto height = width / aspectRatio;
-            LOGD("aspect ratio affects, new width: %{public}f, height: %{public}f", width, height);
-            geometryNode_->SetFrameSize(SizeF({ width, height }));
-        }
-    }
+    //     // check aspect radio.
+    //     if (hasAspectRatio) {
+    //         auto aspectRatio = magicItemProperty->GetAspectRatioValue();
+    //         // Adjust by aspect ratio, firstly pick height based on width. It means that when width, height and
+    //         // aspectRatio are all set, the height is not used.
+    //         auto width = geometryNode_->GetFrameSize().Width();
+    //         LOGD("aspect ratio affects, origin width: %{public}f, height: %{public}f", width,
+    //             geometryNode_->GetFrameSize().Height());
+    //         auto height = width / aspectRatio;
+    //         LOGD("aspect ratio affects, new width: %{public}f, height: %{public}f", width, height);
+    //         geometryNode_->SetFrameSize(SizeF({ width, height }));
+    //     }
+    // }
 
-    LOGD("on Measure Done: type: %{public}s, depth: %{public}d, Size: %{public}s", host->GetTag().c_str(),
-        host->GetDepth(), geometryNode_->GetFrameSize().ToString().c_str());
+    // LOGD("on Measure Done: type: %{public}s, depth: %{public}d, Size: %{public}s", host->GetTag().c_str(),
+    //     host->GetDepth(), geometryNode_->GetFrameSize().ToString().c_str());
 }
 
 // Called to perform layout children.
 void LayoutWrapper::Layout()
 {
-    // performace check
-    AddFlexLayouts();
-    auto host = GetHostNode();
-    CHECK_NULL_VOID(layoutProperty_);
-    CHECK_NULL_VOID(geometryNode_);
-    CHECK_NULL_VOID(host);
-    CHECK_NULL_VOID(layoutAlgorithm_);
+    // // performace check
+    // AddFlexLayouts();
+    // auto host = GetHostNode();
+    // CHECK_NULL_VOID(layoutProperty_);
+    // CHECK_NULL_VOID(geometryNode_);
+    // CHECK_NULL_VOID(host);
+    // CHECK_NULL_VOID(layoutAlgorithm_);
 
-    if (layoutAlgorithm_->SkipLayout()) {
-        LOGD(
-            "%{public}s, depth: %{public}d: the layoutAlgorithm skip layout", host->GetTag().c_str(), host->GetDepth());
-        return;
-    }
+    // if (layoutAlgorithm_->SkipLayout()) {
+    //     LOGD(
+    //         "%{public}s, depth: %{public}d: the layoutAlgorithm skip layout", host->GetTag().c_str(), host->GetDepth());
+    //     return;
+    // }
 
-    LOGD("On Layout begin: type: %{public}s, depth: %{public}d", host->GetTag().c_str(), host->GetDepth());
+    // LOGD("On Layout begin: type: %{public}s, depth: %{public}d", host->GetTag().c_str(), host->GetDepth());
 
-    if ((skipMeasureContent_ == true)) {
-        LOGD(
-            "%{public}s (depth: %{public}d) skip measure content and layout", host->GetTag().c_str(), host->GetDepth());
-        LOGD("On Layout Done: type: %{public}s, depth: %{public}d, Offset: %{public}s", host->GetTag().c_str(),
-            host->GetDepth(), geometryNode_->GetFrameOffset().ToString().c_str());
-        return;
-    }
+    // if ((skipMeasureContent_ == true)) {
+    //     LOGD(
+    //         "%{public}s (depth: %{public}d) skip measure content and layout", host->GetTag().c_str(), host->GetDepth());
+    //     LOGD("On Layout Done: type: %{public}s, depth: %{public}d, Offset: %{public}s", host->GetTag().c_str(),
+    //         host->GetDepth(), geometryNode_->GetFrameOffset().ToString().c_str());
+    //     return;
+    // }
 
-    if (!layoutProperty_->GetLayoutConstraint()) {
-        const auto& parentLayoutConstraint = geometryNode_->GetParentLayoutConstraint();
-        if (parentLayoutConstraint) {
-            layoutProperty_->UpdateLayoutConstraint(parentLayoutConstraint.value());
-        } else {
-            LayoutConstraintF layoutConstraint;
-            layoutConstraint.percentReference.SetWidth(PipelineContext::GetCurrentRootWidth());
-            layoutConstraint.percentReference.SetHeight(PipelineContext::GetCurrentRootHeight());
-            layoutProperty_->UpdateLayoutConstraint(layoutConstraint);
-        }
-        layoutProperty_->UpdateContentConstraint();
-    }
-    layoutAlgorithm_->Layout(this);
-    if (SystemProperties::IsPerformanceCheckEnabled() && IsHostFlex()) {
-        PERFORMANCE_CHECK_FLEX_CHILDREN_LAYOUTS(GetChildrenFlexLayouts(childrenMap_));
-    }
-    LOGD("On Layout Done: type: %{public}s, depth: %{public}d, Offset: %{public}s", host->GetTag().c_str(),
-        host->GetDepth(), geometryNode_->GetFrameOffset().ToString().c_str());
+    // if (!layoutProperty_->GetLayoutConstraint()) {
+    //     const auto& parentLayoutConstraint = geometryNode_->GetParentLayoutConstraint();
+    //     if (parentLayoutConstraint) {
+    //         layoutProperty_->UpdateLayoutConstraint(parentLayoutConstraint.value());
+    //     } else {
+    //         LayoutConstraintF layoutConstraint;
+    //         layoutConstraint.percentReference.SetWidth(PipelineContext::GetCurrentRootWidth());
+    //         layoutConstraint.percentReference.SetHeight(PipelineContext::GetCurrentRootHeight());
+    //         layoutProperty_->UpdateLayoutConstraint(layoutConstraint);
+    //     }
+    //     layoutProperty_->UpdateContentConstraint();
+    // }
+    // layoutAlgorithm_->Layout(this);
+    // if (SystemProperties::IsPerformanceCheckEnabled() && IsHostFlex()) {
+    //     PERFORMANCE_CHECK_FLEX_CHILDREN_LAYOUTS(GetChildrenFlexLayouts(childrenMap_));
+    // }
+    // LOGD("On Layout Done: type: %{public}s, depth: %{public}d, Offset: %{public}s", host->GetTag().c_str(),
+    //     host->GetDepth(), geometryNode_->GetFrameOffset().ToString().c_str());
 }
 
 CheckNodeMap LayoutWrapper::GetChildrenFlexLayouts(
@@ -333,38 +333,38 @@ void LayoutWrapper::MountToHostOnMainThread()
 
 void LayoutWrapper::SwapDirtyLayoutWrapperOnMainThread()
 {
-    if (GetHostTag() != V2::TAB_CONTENT_ITEM_ETS_TAG || isActive_) {
-        for (const auto& child : children_) {
-            if (!child) {
-                continue;
-            }
-            auto node = child->GetHostNode();
-            if (node && node->GetLayoutProperty()) {
-                const auto& geometryTransition = node->GetLayoutProperty()->GetGeometryTransition();
-                if (geometryTransition != nullptr && geometryTransition->IsNodeInAndActive(node)) {
-                    continue;
-                }
-            }
-            child->SwapDirtyLayoutWrapperOnMainThread();
-        }
+    // if (GetHostTag() != V2::TAB_CONTENT_ITEM_ETS_TAG || isActive_) {
+    //     for (const auto& child : children_) {
+    //         if (!child) {
+    //             continue;
+    //         }
+    //         auto node = child->GetHostNode();
+    //         if (node && node->GetLayoutProperty()) {
+    //             const auto& geometryTransition = node->GetLayoutProperty()->GetGeometryTransition();
+    //             if (geometryTransition != nullptr && geometryTransition->IsNodeInAndActive(node)) {
+    //                 continue;
+    //             }
+    //         }
+    //         child->SwapDirtyLayoutWrapperOnMainThread();
+    //     }
 
-        if (layoutWrapperBuilder_) {
-            layoutWrapperBuilder_->SwapDirtyAndUpdateBuildCache();
-        }
-    }
+    //     if (layoutWrapperBuilder_) {
+    //         layoutWrapperBuilder_->SwapDirtyAndUpdateBuildCache();
+    //     }
+    // }
 
-    auto host = hostNode_.Upgrade();
-    CHECK_NULL_VOID(host);
-    host->SwapDirtyLayoutWrapperOnMainThread(Claim(this));
+    // auto host = hostNode_.Upgrade();
+    // CHECK_NULL_VOID(host);
+    // host->SwapDirtyLayoutWrapperOnMainThread(Claim(this));
 
-    /* Adjust components' position which have been set grid properties */
-    for (const auto& child : children_) {
-        if (child && child->GetHostNode()) {
-            child->GetHostNode()->AdjustGridOffset();
-        }
-    }
-    CHECK_NULL_VOID_NOLOG(layoutWrapperBuilder_);
-    layoutWrapperBuilder_->AdjustGridOffset();
+    // /* Adjust components' position which have been set grid properties */
+    // for (const auto& child : children_) {
+    //     if (child && child->GetHostNode()) {
+    //         child->GetHostNode()->AdjustGridOffset();
+    //     }
+    // }
+    // CHECK_NULL_VOID_NOLOG(layoutWrapperBuilder_);
+    // layoutWrapperBuilder_->AdjustGridOffset();
 }
 
 void LayoutWrapper::BuildLazyItem()

@@ -20,12 +20,12 @@
 namespace OHOS::Ace::NG {
 
 bool LoadingProgressPattern::OnDirtyLayoutWrapperSwap(
-    const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
+    FrameNode* frameNode, bool skipMeasure, bool skipLayout)
 {
-    if (skipMeasure || dirty->SkipMeasureContent()) {
+    if (skipMeasure || frameNode->SkipMeasureContent()) {
         return false;
     }
-    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
+    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(frameNode->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
 
     auto lodingprogressLayoutAlgorithm =

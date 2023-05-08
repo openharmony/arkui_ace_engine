@@ -36,12 +36,12 @@ RefPtr<NodePaintMethod> ListItemGroupPattern::CreateNodePaintMethod()
     return MakeRefPtr<ListItemGroupPaintMethod>(divider, drawVertical, lanes_, spaceWidth_, itemPosition_);
 }
 
-bool ListItemGroupPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+bool ListItemGroupPattern::OnDirtyLayoutWrapperSwap(FrameNode* frameNode, const DirtySwapConfig& config)
 {
     if (config.skipMeasure && config.skipLayout) {
         return false;
     }
-    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
+    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(frameNode->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto layoutAlgorithm = DynamicCast<ListItemGroupLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithm, false);

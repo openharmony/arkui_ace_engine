@@ -25,16 +25,16 @@
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
-void OptionLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+void OptionLayoutAlgorithm::Measure(FrameNode* frameNode)
 {
-    CHECK_NULL_VOID(layoutWrapper);
+    CHECK_NULL_VOID(frameNode);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     horInterval_ = static_cast<float>(theme->GetMenuIconPadding().ConvertToPx()) -
                    static_cast<float>(theme->GetOutPadding().ConvertToPx());
-    auto props = layoutWrapper->GetLayoutProperty();
+    auto props = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(props);
     auto layoutConstraint = props->GetLayoutConstraint();
     CHECK_NULL_VOID(layoutConstraint);
@@ -49,7 +49,7 @@ void OptionLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // set self size based on childNode size;
     auto minOptionHeight = static_cast<float>(theme->GetOptionMinHeight().ConvertToPx());
     childConstraint.minSize.SetHeight(minOptionHeight);
-    auto child = layoutWrapper->GetOrCreateChildByIndex(0);
+    auto child = frameNode->GetFrameNodeByIndex(0);
     CHECK_NULL_VOID(child);
     child->Measure(childConstraint);
 
@@ -57,31 +57,30 @@ void OptionLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     childSize.AddWidth(horInterval_ * 2.0f);
     idealSize.UpdateSizeWithCheck(childSize);
 
-    auto idealWidth = GetIdealWidth(layoutWrapper);
+    auto idealWidth = GetIdealWidth(frameNode);
     if (idealWidth.has_value()) {
         idealSize.SetWidth(idealWidth.value());
     }
     LOGD("option frame size set to %{public}s", idealSize.ToString().c_str());
-    layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
+    frameNode->GetGeometryNode()->SetFrameSize(idealSize);
 }
 
-void OptionLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+void OptionLayoutAlgorithm::Layout(FrameNode* frameNode)
 {
-    CHECK_NULL_VOID(layoutWrapper);
-    auto optionSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    auto optionSize = frameNode->GetGeometryNode()->GetFrameSize();
     auto optionHeight = optionSize.Height();
 
-    auto child = layoutWrapper->GetOrCreateChildByIndex(0);
+    auto child = frameNode->GetFrameNodeByIndex(0);
     child->GetGeometryNode()->SetMarginFrameOffset(
         OffsetF(horInterval_, (optionHeight - child->GetGeometryNode()->GetFrameSize().Height()) / 2.0f));
     child->Layout();
 }
 
-std::optional<float> OptionLayoutAlgorithm::GetIdealWidth(LayoutWrapper* layoutWrapper)
+std::optional<float> OptionLayoutAlgorithm::GetIdealWidth(FrameNode* frameNode)
 {
-    CHECK_NULL_RETURN(layoutWrapper, std::nullopt);
+    CHECK_NULL_RETURN(frameNode, std::nullopt);
     // layout property not update in layoutWrapper when measure
-    auto optionProps = layoutWrapper->GetLayoutProperty();
+    auto optionProps = frameNode->GetLayoutProperty();
     CHECK_NULL_RETURN(optionProps, std::nullopt);
     CHECK_NULL_RETURN(optionProps->GetCalcLayoutConstraint(), std::nullopt);
     if (optionProps->GetCalcLayoutConstraint()->minSize->Width()->IsValid()) {

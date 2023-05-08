@@ -33,8 +33,8 @@ public:
     ~DigitIndicatorLayoutAlgorithm() override = default;
 
     void OnReset() override {}
-    void Measure(LayoutWrapper* layoutWrapper) override;
-    void Layout(LayoutWrapper* layoutWrapper) override;
+    void Measure(FrameNode* frameNode) override;
+    void Layout(FrameNode* frameNode) override;
 
     void SetIsHoverOrPress(bool isHoverOrPress)
     {

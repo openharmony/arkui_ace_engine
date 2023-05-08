@@ -27,21 +27,19 @@
 
 namespace OHOS::Ace::NG {
 
-void SelectOverlayLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+void SelectOverlayLayoutAlgorithm::Layout(FrameNode* frameNode)
 {
-    auto menu = layoutWrapper->GetOrCreateChildByIndex(0);
+    auto menu = frameNode->GetFrameNodeByIndex(0);
     CHECK_NULL_VOID(menu);
     if (!CheckInShowArea(info_)) {
-        LayoutWrapper::RemoveChildInRenderTree(menu);
+        menu->SetActive(false);
         return;
     }
-    auto menuOffset = ComputeSelectMenuPosition(layoutWrapper);
+    auto menuOffset = ComputeSelectMenuPosition(frameNode);
     menu->GetGeometryNode()->SetMarginFrameOffset(menuOffset);
     menu->Layout();
 
-    auto exetensionMenu = layoutWrapper->GetOrCreateChildByIndex(1);
-    CHECK_NULL_VOID(exetensionMenu);
-    auto menuNode = menu->GetHostNode();
+    auto menuNode = frameNode->GetFrameNodeByIndex(1);
     CHECK_NULL_VOID(menuNode);
     auto menuContext = menuNode->GetRenderContext();
     CHECK_NULL_VOID(menuContext);
@@ -56,15 +54,15 @@ void SelectOverlayLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     hasExtensitonMenu_ = true;
     // Adjust the constraint of extensionMenu
-    RemeasureExtensionMenu(layoutWrapper, offset);
-    auto extensionMenuOffset = ComputeExtensionMenuPosition(layoutWrapper, offset);
-    exetensionMenu->GetGeometryNode()->SetMarginFrameOffset(extensionMenuOffset);
-    exetensionMenu->Layout();
+    RemeasureExtensionMenu(frameNode, offset);
+    auto extensionMenuOffset = ComputeExtensionMenuPosition(frameNode, offset);
+    menuNode->GetGeometryNode()->SetMarginFrameOffset(extensionMenuOffset);
+    menuNode->Layout();
 }
 
-void SelectOverlayLayoutAlgorithm::RemeasureExtensionMenu(LayoutWrapper* layoutWrapper, const OffsetF& offset)
+void SelectOverlayLayoutAlgorithm::RemeasureExtensionMenu(FrameNode* frameNode, const OffsetF& offset)
 {
-    auto extensionItem = layoutWrapper->GetOrCreateChildByIndex(1);
+    auto extensionItem = frameNode->GetFrameNodeByIndex(1);
     CHECK_NULL_VOID(extensionItem);
 
     auto layoutConstraint = extensionItem->GetLayoutProperty()->GetLayoutConstraint();
@@ -87,9 +85,9 @@ bool SelectOverlayLayoutAlgorithm::CheckInShowArea(const std::shared_ptr<SelectO
            info->secondHandle.paintRect.IsWrappedBy(info->showArea);
 }
 
-OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* layoutWrapper)
+OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(FrameNode* frameNode)
 {
-    auto menuItem = layoutWrapper->GetOrCreateChildByIndex(0);
+    auto menuItem = frameNode->GetFrameNodeByIndex(0);
     CHECK_NULL_RETURN(menuItem, OffsetF());
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, OffsetF());
@@ -124,7 +122,7 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
             static_cast<float>(firstHandleRect.Top() - menuSpacing - menuHeight));
     }
 
-    auto overlayWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
+    auto overlayWidth = frameNode->GetGeometryNode()->GetFrameSize().Width();
 
     // Adjust position of overlay.
     if (LessOrEqual(menuPosition.GetX(), 0.0)) {
@@ -140,11 +138,9 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
     return menuPosition;
 }
 
-OffsetF SelectOverlayLayoutAlgorithm::ComputeExtensionMenuPosition(LayoutWrapper* layoutWrapper, const OffsetF& offset)
+OffsetF SelectOverlayLayoutAlgorithm::ComputeExtensionMenuPosition(FrameNode* frameNode, const OffsetF& offset)
 {
-    auto extensionItem = layoutWrapper->GetOrCreateChildByIndex(1);
-    CHECK_NULL_RETURN(extensionItem, OffsetF());
-    auto menu = extensionItem->GetHostNode();
+    auto menu = frameNode->GetFrameNodeByIndex(1);
     CHECK_NULL_RETURN(menu, OffsetF());
     auto menuPattern = menu->GetPattern<LinearLayoutPattern>();
     CHECK_NULL_RETURN(menuPattern, OffsetF());
@@ -153,7 +149,7 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeExtensionMenuPosition(LayoutWrapper
     if (visibility != VisibleType::VISIBLE) {
         return OffsetF();
     }
-    auto extensionWidth = extensionItem->GetGeometryNode()->GetMarginFrameSize().Width();
+    auto extensionWidth = menu->GetGeometryNode()->GetMarginFrameSize().Width();
     return (defaultMenuEndOffset_ - OffsetF(extensionWidth, 0.0f));
 }
 

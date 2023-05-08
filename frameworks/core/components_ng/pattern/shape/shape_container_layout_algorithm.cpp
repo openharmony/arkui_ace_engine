@@ -23,11 +23,9 @@
 
 namespace OHOS::Ace::NG {
 std::optional<SizeF> ShapeContainerLayoutAlgorithm::MeasureContent(
-    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+    const LayoutConstraintF& contentConstraint, FrameNode* frameNode)
 {
-    auto curFrameNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_RETURN(curFrameNode, std::nullopt);
-    auto paintProperty = curFrameNode->GetPaintProperty<ShapeContainerPaintProperty>();
+    auto paintProperty = frameNode->GetPaintProperty<ShapeContainerPaintProperty>();
     CHECK_NULL_RETURN(paintProperty, std::nullopt);
     double portWidth = 0.0;
     double portHeight = 0.0;
@@ -63,36 +61,34 @@ std::optional<SizeF> ShapeContainerLayoutAlgorithm::MeasureContent(
         auto newWidth = (selfHeight / portHeight) * portWidth;
         newSize = contentConstraint.Constrain(SizeF(newWidth, selfHeight));
     } else {
-        return contentConstraint.Constrain(GetChildrenSize(layoutWrapper, newSize));
+        return contentConstraint.Constrain(GetChildrenSize(frameNode, newSize));
     }
     return newSize;
 }
 
 // get the max child size and offset.
-SizeF ShapeContainerLayoutAlgorithm::GetChildrenSize(LayoutWrapper* layoutWrapper, SizeF maxSize)
+SizeF ShapeContainerLayoutAlgorithm::GetChildrenSize(FrameNode* frameNode, SizeF maxSize)
 {
     SizeF childFrame;
     float maxWidth = 0.0f;
     float maxHeight = 0.0f;
 
-    auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
-    for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
+    auto childLayoutConstraint = frameNode->GetLayoutProperty()->CreateChildConstraint();
+    for (auto&& child : frameNode->GetAllFrameNodeChildren()) {
         child->Measure(childLayoutConstraint);
     }
     // reference: BoxLayoutAlgorithm::PerformMeasureSelfWithChildList()
-    for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
+    for (const auto& child : frameNode->GetAllFrameNodeChildren()) {
         auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
         float offsetX = 0.0f;
         float offsetY = 0.0f;
         // reference: RosenRenderContext::AdjustPaintRect()
-        auto node = child->GetHostNode();
-        CHECK_NULL_RETURN(node, maxSize);
-        const auto& layoutConstraint = node->GetGeometryNode()->GetParentLayoutConstraint();
+        const auto& layoutConstraint = child->GetGeometryNode()->GetParentLayoutConstraint();
         auto widthPercentReference = layoutConstraint.has_value() ? layoutConstraint->percentReference.Width()
                                                                 : PipelineContext::GetCurrentRootWidth();
         auto heightPercentReference = layoutConstraint.has_value() ? layoutConstraint->percentReference.Height()
                                                                 : PipelineContext::GetCurrentRootHeight();
-        auto context = node->GetRenderContext();
+        auto context = child->GetRenderContext();
         CHECK_NULL_RETURN(context, maxSize);
         if (context->HasOffset()) {
             auto offset = context->GetOffsetValue({});

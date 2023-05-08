@@ -303,7 +303,7 @@ private:
     void RegistVirtualKeyBoardListener();
     bool ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard);
     void UpdateWebLayoutSize(int32_t width, int32_t height);
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    bool OnDirtyLayoutWrapperSwap(FrameNode* frameNode, const DirtySwapConfig& config) override;
 
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;

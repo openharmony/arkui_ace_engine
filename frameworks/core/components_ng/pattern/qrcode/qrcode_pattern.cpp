@@ -32,12 +32,12 @@ void QRCodePattern::OnAttachToFrameNode()
     host->GetRenderContext()->SetClipToFrame(true);
 }
 
-bool QRCodePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
+bool QRCodePattern::OnDirtyLayoutWrapperSwap(FrameNode* frameNode, bool skipMeasure, bool skipLayout)
 {
     if (skipMeasure && skipLayout) {
         return false;
     }
-    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
+    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(frameNode->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto layoutAlgorithm = DynamicCast<QRCodeLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithm, false);

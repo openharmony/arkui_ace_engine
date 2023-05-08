@@ -32,9 +32,9 @@ public:
     GridContainerLayoutAlgorithm() = default;
     ~GridContainerLayoutAlgorithm() override = default;
 
-    void Measure(LayoutWrapper* layoutWrapper) override
+    void Measure(FrameNode* frameNode) override
     {
-        const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
+        const auto& layoutProperty = frameNode->GetLayoutProperty();
         CHECK_NULL_VOID(layoutProperty);
         const auto& gridContainerLayoutProperty = DynamicCast<GridContainerLayoutProperty>(layoutProperty);
         CHECK_NULL_VOID(gridContainerLayoutProperty);
@@ -47,10 +47,10 @@ public:
         layoutConstraint.UpdateIllegalSelfIdealSizeWithCheck(optSize);
         layoutProperty->UpdateLayoutConstraint(layoutConstraint);
 
-        auto curLayoutProp = layoutWrapper->GetHostNode()->GetLayoutProperty<GridContainerLayoutProperty>();
+        auto curLayoutProp = frameNode->GetLayoutProperty<GridContainerLayoutProperty>();
         curLayoutProp->SetReserveObj(gridContainerLayoutProperty);
         curLayoutProp->UpdateContainerInfo(gridContainerLayoutProperty->GetContainerInfoValue());
-        LinearLayoutAlgorithm::Measure(layoutWrapper);
+        LinearLayoutAlgorithm::Measure(frameNode);
     }
 };
 } // namespace OHOS::Ace::NG

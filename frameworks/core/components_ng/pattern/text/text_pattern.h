@@ -191,7 +191,7 @@ public:
 
 private:
     void OnDetachFromFrameNode(FrameNode* node) override;
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    bool OnDirtyLayoutWrapperSwap(FrameNode* frameNode, const DirtySwapConfig& config) override;
 
     void HandleLongPress(GestureEvent& info);
     void HandleOnSelectAll();

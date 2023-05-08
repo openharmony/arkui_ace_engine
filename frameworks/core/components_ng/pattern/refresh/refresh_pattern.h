@@ -86,7 +86,7 @@ public:
     void FireRefreshing();
     void FireChangeEvent(const std::string& value);
     bool OnDirtyLayoutWrapperSwap(
-        const RefPtr<LayoutWrapper>& /* dirty */, const DirtySwapConfig& /* changeConfig */) override;
+        FrameNode* /*frameNode*/, const DirtySwapConfig& /* changeConfig */) override;
     void OnActive() override {}
     void CheckCoordinationEvent();
     RefPtr<FrameNode> FindScrollableChild();

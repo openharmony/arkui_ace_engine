@@ -801,9 +801,9 @@ std::string SelectPattern::InspectorGetSelectedFont() const
     return V2::GetTextStyleInJson(font);
 }
 
-bool SelectPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+bool SelectPattern::OnDirtyLayoutWrapperSwap(FrameNode* frameNode, const DirtySwapConfig& config)
 {
-    auto geometryNode = dirty->GetGeometryNode();
+    auto geometryNode = frameNode->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
     SetSelectSize(geometryNode->GetFrameSize());
     return false;

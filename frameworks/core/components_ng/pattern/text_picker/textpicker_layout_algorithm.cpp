@@ -29,7 +29,7 @@ const float PICKER_HEIGHT_HALF = 2.5f;
 const float ITEM_HEIGHT_HALF = 2.0f;
 const int32_t TEXT_PICKER_GRADIENT_CHILD_SIZE = 4;
 } // namespace
-void TextPickerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+void TextPickerLayoutAlgorithm::Measure(FrameNode* frameNode)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -38,9 +38,7 @@ void TextPickerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     SizeF frameSize = { -1.0f, -1.0f };
 
     float pickerHeight = 0.0f;
-    auto columnNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(columnNode);
-    auto stackNode = DynamicCast<FrameNode>(columnNode->GetParent());
+    auto stackNode = DynamicCast<FrameNode>(frameNode->GetParent());
     CHECK_NULL_VOID(stackNode);
     auto pickerNode = DynamicCast<FrameNode>(stackNode->GetParent());
     CHECK_NULL_VOID(pickerNode);
@@ -80,25 +78,25 @@ void TextPickerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     pickerItemHeight_ = pickerHeight;
     frameSize.SetWidth(pickerWidth);
     frameSize.SetHeight(pickerHeight);
-    layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
-    auto layoutChildConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
-    for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
+    frameNode->GetGeometryNode()->SetFrameSize(frameSize);
+    auto layoutChildConstraint = frameNode->GetLayoutProperty()->CreateChildConstraint();
+    for (auto&& child : frameNode->GetAllFrameNodeChildren()) {
         child->Measure(layoutChildConstraint);
     }
-    MeasureText(layoutWrapper, frameSize);
+    MeasureText(frameNode, frameSize);
 }
 
-void TextPickerLayoutAlgorithm::MeasureText(LayoutWrapper* layoutWrapper, const SizeF& size)
+void TextPickerLayoutAlgorithm::MeasureText(FrameNode* frameNode, const SizeF& size)
 {
-    auto totalChild = layoutWrapper->GetTotalChildCount();
+    auto totalChild = frameNode->TotalChildCount();
     for (int32_t index = 0; index < totalChild; index++) {
-        auto child = layoutWrapper->GetOrCreateChildByIndex(index);
-        ChangeTextStyle(index, totalChild, size, child, layoutWrapper);
+        auto child = frameNode->GetFrameNodeByIndex(index);
+        ChangeTextStyle(index, totalChild, size, child, frameNode);
     }
 }
 
 void TextPickerLayoutAlgorithm::ChangeTextStyle(uint32_t index, uint32_t showOptionCount, const SizeF& size,
-    const RefPtr<LayoutWrapper>& childLayoutWrapper, LayoutWrapper* layoutWrapper)
+    const RefPtr<FrameNode>& child, FrameNode* frameNode)
 {
     SizeF frameSize = { -1.0f, -1.0f };
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -107,7 +105,7 @@ void TextPickerLayoutAlgorithm::ChangeTextStyle(uint32_t index, uint32_t showOpt
     CHECK_NULL_VOID(pickerTheme);
     frameSize.SetWidth(size.Width());
     uint32_t selectedIndex = showOptionCount / 2; // the center option is selected.
-    auto layoutChildConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    auto layoutChildConstraint = frameNode->GetLayoutProperty()->CreateChildConstraint();
     if (isDefaultPickerItemHeight_) {
         frameSize.SetHeight(static_cast<float>(defaultPickerItemHeight_));
     } else {
@@ -118,24 +116,23 @@ void TextPickerLayoutAlgorithm::ChangeTextStyle(uint32_t index, uint32_t showOpt
         }
     }
     layoutChildConstraint.selfIdealSize = { frameSize.Width(), frameSize.Height() };
-    childLayoutWrapper->Measure(layoutChildConstraint);
+    child->Measure(layoutChildConstraint);
 }
 
-void TextPickerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+void TextPickerLayoutAlgorithm::Layout(FrameNode* frameNode)
 {
-    CHECK_NULL_VOID(layoutWrapper);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
-    auto layoutProperty = AceType::DynamicCast<LinearLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto layoutProperty = AceType::DynamicCast<LinearLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    auto geometryNode = layoutWrapper->GetGeometryNode();
+    auto geometryNode = frameNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto size = geometryNode->GetFrameSize();
     auto padding = layoutProperty->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
-    auto children = layoutWrapper->GetAllChildrenWithBuild();
+    auto children = frameNode->GetAllFrameNodeChildren();
     float childStartCoordinate = 0.0f;
 
     if (isDefaultPickerItemHeight_) {

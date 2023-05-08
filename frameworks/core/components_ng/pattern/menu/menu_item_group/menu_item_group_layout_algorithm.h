@@ -34,21 +34,21 @@ public:
     {}
     ~MenuItemGroupLayoutAlgorithm() override = default;
 
-    void Measure(LayoutWrapper* layoutWrapper) override;
+    void Measure(FrameNode* frameNode) override;
 
-    void Layout(LayoutWrapper* layoutWrapper) override;
+    void Layout(FrameNode* frameNode) override;
 
 private:
     bool NeedHeaderPadding(const RefPtr<FrameNode>& host);
     bool NeedFooterPadding(const RefPtr<FrameNode>& host);
 
-    void LayoutHeader(LayoutWrapper* layoutWrapper);
-    void LayoutFooter(LayoutWrapper* layoutWrapper);
-    void LayoutIndex(const RefPtr<LayoutWrapper>& wrapper, const OffsetF& offset);
-    void LayoutMenuItem(LayoutWrapper* layoutWrapper);
+    void LayoutHeader(FrameNode* frameNode);
+    void LayoutFooter(FrameNode* frameNode);
+    void LayoutIndex(const RefPtr<FrameNode>& frameNode, const OffsetF& offset);
+    void LayoutMenuItem(FrameNode* frameNode);
 
     float GetChildrenMaxWidth(
-        const std::list<RefPtr<LayoutWrapper>>& children, const LayoutConstraintF& layoutConstraint);
+        const std::list<RefPtr<FrameNode>>& children, const LayoutConstraintF& layoutConstraint);
 
     int32_t headerIndex_ = -1;
     int32_t footerIndex_ = -1;

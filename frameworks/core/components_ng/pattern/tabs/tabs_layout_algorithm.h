@@ -32,17 +32,17 @@ public:
     ~TabsLayoutAlgorithm() override = default;
 
     void OnReset() override {}
-    void Measure(LayoutWrapper* layoutWrapper) override;
-    void Layout(LayoutWrapper* layoutWrapper) override;
+    void Measure(FrameNode* frameNode) override;
+    void Layout(FrameNode* frameNode) override;
 
 private:
-    BarPosition GetBarPosition(LayoutWrapper* layoutWrapper) const;
-    Axis GetAxis(LayoutWrapper* layoutWrapper) const;
-    TabsItemDivider GetDivider(LayoutWrapper* layoutWrapper) const;
+    BarPosition GetBarPosition(FrameNode* frameNode) const;
+    Axis GetAxis(FrameNode* frameNode) const;
+    TabsItemDivider GetDivider(FrameNode* frameNode) const;
     float MeasureDivider(const RefPtr<TabsLayoutProperty>& layoutProperty,
-        const RefPtr<LayoutWrapper>& dividerWrapper, const SizeF& idealSize);
-    std::vector<OffsetF> LayoutOffsetList(LayoutWrapper* layoutWrapper,
-        const RefPtr<LayoutWrapper>& tabBarWrapper, const SizeF& frameSize) const;
+        const RefPtr<FrameNode>& dividerNode, const SizeF& idealSize);
+    std::vector<OffsetF> LayoutOffsetList(FrameNode* frameNode,
+        const RefPtr<FrameNode>& tabBar, const SizeF& frameSize) const;
 };
 
 } // namespace OHOS::Ace::NG

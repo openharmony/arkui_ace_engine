@@ -26,7 +26,7 @@ public:
     NavigationMenuLayoutAlgorithm() = default;
     ~NavigationMenuLayoutAlgorithm() override = default;
 
-    void Layout(LayoutWrapper* layoutWrapper) override;
+    void Layout(FrameNode* frameNode) override;
 
 private:
 

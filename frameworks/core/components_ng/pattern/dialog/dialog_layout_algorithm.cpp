@@ -44,10 +44,9 @@ constexpr double DIALOG_HEIGHT_RATIO_FOR_CAR = 0.95;
 
 } // namespace
 
-void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+void DialogLayoutAlgorithm::Measure(FrameNode* frameNode)
 {
-    CHECK_NULL_VOID(layoutWrapper);
-    auto dialogProp = AceType::DynamicCast<DialogLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto dialogProp = AceType::DynamicCast<DialogLayoutProperty>(frameNode->GetLayoutProperty());
     auto customSize = dialogProp->GetUseCustomStyle().value_or(false);
     gridCount_ = dialogProp->GetGridCount().value_or(-1);
     const auto& layoutConstraint = dialogProp->GetLayoutConstraint();
@@ -55,16 +54,16 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     OptionalSizeF realSize;
     // dialog size fit screen.
     realSize.UpdateIllegalSizeWithCheck(parentIdealSize);
-    layoutWrapper->GetGeometryNode()->SetFrameSize(realSize.ConvertToSizeT());
-    layoutWrapper->GetGeometryNode()->SetContentSize(realSize.ConvertToSizeT());
+    frameNode->GetGeometryNode()->SetFrameSize(realSize.ConvertToSizeT());
+    frameNode->GetGeometryNode()->SetContentSize(realSize.ConvertToSizeT());
     // update child layout constraint
-    auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    auto childLayoutConstraint = frameNode->GetLayoutProperty()->CreateChildConstraint();
     childLayoutConstraint.UpdateMaxSizeWithCheck(layoutConstraint->maxSize);
     // constraint child size unless developer is using customStyle
     if (!customSize) {
         ComputeInnerLayoutParam(childLayoutConstraint);
     }
-    const auto& children = layoutWrapper->GetAllChildrenWithBuild();
+    const auto& children = frameNode->GetAllFrameNodeChildren();
     if (children.empty()) {
         return;
     }
@@ -72,15 +71,15 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // childSize_ and childOffset_ is used in Layout.
     child->Measure(childLayoutConstraint);
 
-    RefPtr<LayoutWrapper> scroll;
+    RefPtr<FrameNode> scroll;
     float scrollHeight = 0.0f;
     float scrollWidth = 0.0f;
     // scroll for alert
-    for (const auto& children : layoutWrapper->GetAllChildrenWithBuild()) {
-        scrollWidth = children->GetGeometryNode()->GetMarginFrameSize().Width();
-        scrollHeight = children->GetGeometryNode()->GetMarginFrameSize().Height();
-        for (const auto& grandson : children->GetAllChildrenWithBuild()) {
-            if (grandson->GetHostTag() == V2::SCROLL_ETS_TAG) {
+    for (const auto& child : children) {
+        scrollWidth = child->GetGeometryNode()->GetMarginFrameSize().Width();
+        scrollHeight = child->GetGeometryNode()->GetMarginFrameSize().Height();
+        for (const auto& grandson : child->GetAllFrameNodeChildren()) {
+            if (grandson->GetTag() == V2::SCROLL_ETS_TAG) {
                 scroll = grandson;
             } else {
                 scrollHeight -= grandson->GetGeometryNode()->GetMarginFrameSize().Height();
@@ -88,15 +87,15 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
     }
     if (scroll != nullptr) {
-        auto childConstraint = CreateScrollConstraint(layoutWrapper, scrollHeight, scrollWidth);
+        auto childConstraint = CreateScrollConstraint(frameNode, scrollHeight, scrollWidth);
         scroll->Measure(childConstraint);
     }
 }
 
 LayoutConstraintF DialogLayoutAlgorithm::CreateScrollConstraint(
-    LayoutWrapper* layoutWrapper, float scrollHeight, float scrollWidth)
+    FrameNode* frameNode, float scrollHeight, float scrollWidth)
 {
-    auto childConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    auto childConstraint = frameNode->GetLayoutProperty()->CreateChildConstraint();
     childConstraint.maxSize.SetHeight(scrollHeight);
     childConstraint.percentReference.SetHeight(scrollHeight);
     childConstraint.maxSize.SetWidth(scrollWidth);
@@ -195,17 +194,14 @@ double DialogLayoutAlgorithm::GetMaxWidthBasedOnGridType(
     }
 }
 
-void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+void DialogLayoutAlgorithm::Layout(FrameNode* frameNode)
 {
-    CHECK_NULL_VOID(layoutWrapper);
-    auto frameNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(frameNode);
-    auto dialogProp = DynamicCast<DialogLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto dialogProp = DynamicCast<DialogLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_VOID(dialogProp);
     dialogOffset_ = dialogProp->GetDialogOffset().value_or(DimensionOffset());
     alignment_ = dialogProp->GetDialogAlignment().value_or(DialogAlignment::DEFAULT);
     auto selfSize = frameNode->GetGeometryNode()->GetFrameSize();
-    const auto& children = layoutWrapper->GetAllChildrenWithBuild();
+    const auto& children = frameNode->GetAllFrameNodeChildren();
     if (children.empty()) {
         return;
     }

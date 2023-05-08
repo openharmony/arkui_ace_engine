@@ -32,10 +32,10 @@ public:
     RefreshLayoutAlgorithm();
     ~RefreshLayoutAlgorithm() override = default;
 
-    void Layout(LayoutWrapper* layoutWrapper) override;
+    void Layout(FrameNode* frameNode) override;
 
 private:
-    static void PerformLayout(LayoutWrapper* layoutWrapper);
+    static void PerformLayout(FrameNode* frameNode);
     ACE_DISALLOW_COPY_AND_MOVE(RefreshLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

@@ -36,9 +36,9 @@ public:
     ~MenuLayoutAlgorithm() override;
 
     // override measureSelf and measureChildren.
-    void Measure(LayoutWrapper* layoutWrapper) override;
+    void Measure(FrameNode* frameNode) override;
 
-    void Layout(LayoutWrapper* layoutWrapper) override;
+    void Layout(FrameNode* frameNode) override;
 
 protected:
     float VerticalLayout(const SizeF& size, float clickPosition);
@@ -53,13 +53,13 @@ private:
         TOP_LEFT_ERROR,
         BOTTOM_RIGHT_ERROR,
     };
-    void Initialize(LayoutWrapper* layoutWrapper);
-    LayoutConstraintF CreateChildConstraint(LayoutWrapper* layoutWrapper);
-    void UpdateConstraintWidth(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint);
-    void UpdateConstraintHeight(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint);
-    void UpdateConstraintBaseOnOptions(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint);
-    void UpdateOptionConstraint(std::list<RefPtr<LayoutWrapper>>& options, float width);
-    void UpdateConstraintBaseOnMenuItems(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint);
+    void Initialize(FrameNode* frameNode);
+    LayoutConstraintF CreateChildConstraint(FrameNode* frameNode);
+    void UpdateConstraintWidth(FrameNode* frameNode, LayoutConstraintF& constraint);
+    void UpdateConstraintHeight(FrameNode* frameNode, LayoutConstraintF& constraint);
+    void UpdateConstraintBaseOnOptions(FrameNode* frameNode, LayoutConstraintF& constraint);
+    void UpdateOptionConstraint(std::list<RefPtr<FrameNode>>& options, float width);
+    void UpdateConstraintBaseOnMenuItems(FrameNode* frameNode, LayoutConstraintF& constraint);
 
     void ComputeMenuPositionByAlignType(const RefPtr<MenuLayoutProperty>& menuProp, const SizeF& menuSize);
     OffsetF ComputeMenuPositionByOffset(
@@ -67,14 +67,14 @@ private:
     OffsetF MenuLayoutAvoidAlgorithm(
         const RefPtr<MenuLayoutProperty>& menuProp, const RefPtr<MenuPattern>& menuPattern, const SizeF& size);
 
-    void LayoutSubMenu(LayoutWrapper* layoutWrapper);
+    void LayoutSubMenu(FrameNode* frameNode);
     float VerticalLayoutSubMenu(const SizeF& size, float position, const SizeF& menuItemSize);
     float HorizontalLayoutSubMenu(const SizeF& size, float position, const SizeF& menuItemSize);
 
-    float GetChildrenMaxWidth(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint);
+    float GetChildrenMaxWidth(FrameNode* frameNode, const LayoutConstraintF& layoutConstraint);
 
     // get option LayoutWrapper for measure get max width
-    std::list<RefPtr<LayoutWrapper>> GetOptionsLayoutWrappper(LayoutWrapper* layoutWrapper);
+    std::list<RefPtr<FrameNode>> GetOptionsLayoutWrappper(FrameNode* frameNode);
 
     OffsetF GetPositionWithPlacement(const SizeF& childSize, const OffsetF& topPosition, const OffsetF& bottomPosition);
     void InitTargetSizeAndPosition(const RefPtr<MenuLayoutProperty>& layoutProp);

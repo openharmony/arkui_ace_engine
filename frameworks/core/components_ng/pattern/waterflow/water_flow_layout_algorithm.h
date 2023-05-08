@@ -28,9 +28,9 @@ public:
     explicit WaterFlowLayoutAlgorithm(WaterFlowLayoutInfo layoutInfo) : layoutInfo_(std::move(layoutInfo)) {}
     ~WaterFlowLayoutAlgorithm() override = default;
 
-    void Measure(LayoutWrapper* layoutWrapper) override;
+    void Measure(FrameNode* frameNode) override;
 
-    void Layout(LayoutWrapper* layoutWrapper) override;
+    void Layout(FrameNode* frameNode) override;
 
     WaterFlowLayoutInfo GetLayoutInfo()
     {
@@ -38,8 +38,8 @@ public:
     }
 
 private:
-    void FillViewport(float mainSize, LayoutWrapper* layoutWrapper);
-    void ModifyCurrentOffsetWhenReachEnd(float mainSize, LayoutWrapper* layoutWrapper);
+    void FillViewport(float mainSize, FrameNode* frameNode);
+    void ModifyCurrentOffsetWhenReachEnd(float mainSize, FrameNode* frameNode);
     LayoutConstraintF CreateChildConstraint(int32_t crossIndex, const RefPtr<WaterFlowLayoutProperty>& layoutProperty);
     float ComputeCrossPosition(int32_t crossIndex) const;
     void InitialItemsCrossSize(
@@ -48,7 +48,7 @@ private:
     {
         return index + layoutInfo_.footerIndex_ + 1;
     }
-    float MeasuerFooter(LayoutWrapper* layoutWrapper);
+    float MeasuerFooter(FrameNode* frameNode);
 
     std::map<int32_t, float> itemsCrossSize_;
     std::map<int32_t, float> itemsCrossPosition_;

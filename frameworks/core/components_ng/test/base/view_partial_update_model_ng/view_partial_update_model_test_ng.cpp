@@ -121,14 +121,14 @@ HWTEST_F(ViewPartialUpdateModelTestNg, ViewPartialUpdateModelTestNg004, TestSize
      * @tc.expected: step1. info.measureFunc is not null and return expect value.
      */
     std::string viewIdStr;
-    NG::LayoutWrapper* testMeasureFun;
+    NG::FrameNode* testMeasureFun;
     ViewPartialUpdateModelNG TestViewPartialUpdateModelNG;
 
     auto updateViewNodeFunction = [&viewIdStr](std::string viewId = "testViewIdStr") {
         viewIdStr = viewId;
     };
-    auto measureFuncation = [&testMeasureFun](NG::LayoutWrapper* layoutWrapper = nullptr) {
-        testMeasureFun = layoutWrapper;
+    auto measureFuncation = [&testMeasureFun](NG::FrameNode* frameNode = nullptr) {
+        testMeasureFun = frameNode;
     };
 
     NodeInfoPU info = {
@@ -154,18 +154,18 @@ HWTEST_F(ViewPartialUpdateModelTestNg, ViewPartialUpdateModelTestNg005, TestSize
      * @tc.expected: step1. info.layoutFunc is not null and return expect value.
      */
     std::string viewIdStr;
-    NG::LayoutWrapper* testMeasureFun;
-    NG::LayoutWrapper* testLayoutFunc;
+    NG::FrameNode* testMeasureFun;
+    NG::FrameNode* testLayoutFunc;
 
     ViewPartialUpdateModelNG TestViewPartialUpdateModelNG;
 
     auto updateViewNodeFunction = [&viewIdStr](std::string viewId = "testViewIdStr") {
         viewIdStr = viewId;
     };
-    auto measureFuncation = [&testMeasureFun](NG::LayoutWrapper* layoutWrapper = nullptr) {
+    auto measureFuncation = [&testMeasureFun](NG::FrameNode* layoutWrapper = nullptr) {
         testMeasureFun = layoutWrapper;
     };
-    auto layoutFuncation = [&testLayoutFunc](NG::LayoutWrapper* layoutWrapper = nullptr) {
+    auto layoutFuncation = [&testLayoutFunc](NG::FrameNode* layoutWrapper = nullptr) {
         testLayoutFunc = layoutWrapper;
     };
 

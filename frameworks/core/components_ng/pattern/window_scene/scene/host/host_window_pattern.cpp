@@ -195,14 +195,14 @@ void HostWindowPattern::OnAttachToFrameNode()
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
-bool HostWindowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+bool HostWindowPattern::OnDirtyLayoutWrapperSwap(FrameNode* frameNode, const DirtySwapConfig& config)
 {
     if (!config.frameSizeChange) {
         LOGI("frame size not changed, just return");
         return false;
     }
-    CHECK_NULL_RETURN(dirty, false);
-    auto geometryNode = dirty->GetGeometryNode();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto geometryNode = frameNode->GetGeometryNode();
     auto windowRect = geometryNode->GetFrameRect();
     Rosen::WSRect rect = {
         .posX_ = std::round(windowRect.GetX()),

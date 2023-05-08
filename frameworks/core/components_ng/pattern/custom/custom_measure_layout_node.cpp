@@ -39,19 +39,19 @@ CustomMeasureLayoutNode::CustomMeasureLayoutNode(int32_t nodeId, const std::stri
     : FrameNode(V2::JS_VIEW_ETS_TAG, nodeId, MakeRefPtr<CustomNodePattern>()), viewKey_(viewKey)
 {}
 
-bool CustomMeasureLayoutNode::FireOnMeasure(NG::LayoutWrapper* layoutWrapper)
+bool CustomMeasureLayoutNode::FireOnMeasure(NG::FrameNode* frameNode)
 {
     if (measureFunc_) {
-        measureFunc_(layoutWrapper);
+        measureFunc_(frameNode);
         return true;
     }
     return false;
 }
 
-bool CustomMeasureLayoutNode::FireOnLayout(NG::LayoutWrapper* layoutWrapper)
+bool CustomMeasureLayoutNode::FireOnLayout(NG::FrameNode* frameNode)
 {
     if (layoutFunc_) {
-        layoutFunc_(layoutWrapper);
+        layoutFunc_(frameNode);
         return true;
     }
     return false;

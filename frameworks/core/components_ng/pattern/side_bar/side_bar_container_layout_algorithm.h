@@ -31,8 +31,8 @@ public:
     ~SideBarContainerLayoutAlgorithm() override = default;
 
     void OnReset() override {}
-    void Measure(LayoutWrapper* layoutWrapper) override;
-    void Layout(LayoutWrapper* layoutWrapper) override;
+    void Measure(FrameNode* frameNode) override;
+    void Layout(FrameNode* frameNode) override;
 
     void SetCurrentOffset(float offset)
     {
@@ -81,18 +81,18 @@ public:
 
 private:
     void MeasureControlButton(const RefPtr<SideBarContainerLayoutProperty>& layoutProperty,
-        const RefPtr<LayoutWrapper>& buttonLayoutWrapper, float parentWidth);
+        const RefPtr<FrameNode>& button, float parentWidth);
     void MeasureSideBar(const RefPtr<SideBarContainerLayoutProperty>& layoutProperty,
-        const RefPtr<LayoutWrapper>& sideBarLayoutWrapper);
+        const RefPtr<FrameNode>& sideBar);
     void MeasureSideBarContent(const RefPtr<SideBarContainerLayoutProperty>& layoutProperty,
-        const RefPtr<LayoutWrapper>& contentLayoutWrapper, float parentWidth);
+        const RefPtr<FrameNode>& content, float parentWidth);
     void MeasureDivider(const RefPtr<SideBarContainerLayoutProperty>& layoutProperty,
-        const RefPtr<LayoutWrapper>& dividerLayoutWrapper, float parentWidth);
-    void LayoutControlButton(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& buttonLayoutWrapper);
-    void LayoutSideBar(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& sideBarLayoutWrapper);
-    void LayoutSideBarContent(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& contentLayoutWrapper);
-    void LayoutDivider(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& dividerLayoutWrapper);
-    void InitRealSideBarWidth(LayoutWrapper* layoutWrapper, float parentWidth);
+        const RefPtr<FrameNode>& divider, float parentWidth);
+    void LayoutControlButton(FrameNode* frameNode, const RefPtr<FrameNode>& button);
+    void LayoutSideBar(FrameNode* frameNode, const RefPtr<FrameNode>& sideBar);
+    void LayoutSideBarContent(FrameNode* frameNode, const RefPtr<FrameNode>& content);
+    void LayoutDivider(FrameNode* frameNode, const RefPtr<FrameNode>& divider);
+    void InitRealSideBarWidth(FrameNode* frameNode, float parentWidth);
 
     float currentOffset_ = 0.0f;
     float realSideBarWidth_ = 0.0f;

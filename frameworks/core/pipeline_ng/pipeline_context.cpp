@@ -351,6 +351,7 @@ void PipelineContext::SetupRootElement()
         V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<RootPattern>());
     rootNode_->SetHostRootId(GetInstanceId());
     rootNode_->SetHostPageId(-1);
+    rootNode_->SetActive(true);
     RegisterRootEvent();
     CalcSize idealSize { CalcLength(rootWidth_), CalcLength(rootHeight_) };
     MeasureProperty layoutConstraint;
@@ -412,6 +413,7 @@ void PipelineContext::SetupSubRootElement()
         V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<RootPattern>());
     rootNode_->SetHostRootId(GetInstanceId());
     rootNode_->SetHostPageId(-1);
+    rootNode_->SetActive(true);
     CalcSize idealSize { CalcLength(rootWidth_), CalcLength(rootHeight_) };
     MeasureProperty layoutConstraint;
     layoutConstraint.selfIdealSize = idealSize;
@@ -603,6 +605,7 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
 void PipelineContext::SetRootRect(double width, double height, double offset)
 {
     LOGI("SetRootRect width %{public}f, height %{public}f, %{public}f", width, height, offset);
+    ACE_SCOPED_TRACE("SetRootRect %lf %lf", width, height);
     CHECK_RUN_ON(UI);
     UpdateRootSizeAndScale(width, height);
     CHECK_NULL_VOID(rootNode_);

@@ -721,14 +721,14 @@ void VideoPattern::OnRebuildFrame()
     renderContext->AddChild(renderContextForMediaPlayer_, 0);
 }
 
-bool VideoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+bool VideoPattern::OnDirtyLayoutWrapperSwap(FrameNode* frameNode, const DirtySwapConfig& config)
 {
-    if (config.skipMeasure || dirty->SkipMeasureContent()) {
+    if (config.skipMeasure || frameNode->SkipMeasureContent()) {
         LOGD("Video skill measure.");
         return false;
     }
 
-    auto geometryNode = dirty->GetGeometryNode();
+    auto geometryNode = frameNode->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
     auto videoNodeSize = geometryNode->GetContentSize();
     auto videoNodeOffset = geometryNode->GetContentOffset();

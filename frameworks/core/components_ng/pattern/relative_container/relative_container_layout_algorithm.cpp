@@ -38,30 +38,29 @@ inline bool IsAnchorContainer(const std::string& anchor)
 
 } // namespace
 
-void RelativeContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+void RelativeContainerLayoutAlgorithm::Measure(FrameNode* frameNode)
 {
-    CHECK_NULL_VOID(layoutWrapper);
-    if (layoutWrapper->GetAllChildrenWithBuild().empty()) {
+    if (frameNode->GetAllFrameNodeChildren().empty()) {
         LOGD("RelativeContainerLayoutAlgorithm: No child in Relative container");
         return;
     }
-    auto relativeContainerLayoutProperty = layoutWrapper->GetLayoutProperty();
+    auto relativeContainerLayoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(relativeContainerLayoutProperty);
     idNodeMap_.clear();
     reliedOnMap_.clear();
     incomingDegreeMap_.clear();
     auto layoutConstraint = relativeContainerLayoutProperty->GetLayoutConstraint();
     auto idealSize = CreateIdealSize(layoutConstraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT);
-    layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize.ConvertToSizeT());
-    CollectNodesById(layoutWrapper);
+    frameNode->GetGeometryNode()->SetFrameSize(idealSize.ConvertToSizeT());
+    CollectNodesById(frameNode);
     GetDependencyRelationship();
     if (!PreTopologicalLoopDetection()) {
-        const auto& childrenWrappers = layoutWrapper->GetAllChildrenWithBuild();
+        const auto& children = frameNode->GetAllFrameNodeChildren();
         auto constraint = relativeContainerLayoutProperty->CreateChildConstraint();
-        for (const auto& childrenWrapper : childrenWrappers) {
-            childrenWrapper->SetActive(false);
+        for (const auto& child : children) {
+            child->SetActive(false);
             constraint.selfIdealSize = OptionalSizeF(0.0f, 0.0f);
-            childrenWrapper->Measure(constraint);
+            child->Measure(constraint);
             constraint.Reset();
         }
         return;
@@ -71,77 +70,75 @@ void RelativeContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         if (idNodeMap_.find(nodeName) == idNodeMap_.end()) {
             continue;
         }
-        auto childWrapper = idNodeMap_[nodeName];
-        if (!childWrapper->IsActive()) {
+        auto child = idNodeMap_[nodeName];
+        if (!child->IsActive()) {
             continue;
         }
-        if (!childWrapper->GetLayoutProperty()->GetFlexItemProperty()) {
+        if (!child->GetLayoutProperty()->GetFlexItemProperty()) {
             auto childConstraint = relativeContainerLayoutProperty->CreateChildConstraint();
-            childWrapper->Measure(childConstraint);
+            child->Measure(childConstraint);
             continue;
         }
-        const auto& flexItem = childWrapper->GetLayoutProperty()->GetFlexItemProperty();
+        const auto& flexItem = child->GetLayoutProperty()->GetFlexItemProperty();
         auto alignRules = flexItem->GetAlignRulesValue();
-        auto frameNode = childWrapper->GetHostNode();
-        if (!alignRules.empty() && frameNode) {
+        if (!alignRules.empty()) {
             // when child has alignRules and position, the position property do not work.
-            frameNode->GetLayoutProperty()->SetUsingPosition(false);
+            child->GetLayoutProperty()->SetUsingPosition(false);
         }
-        CalcSizeParam(layoutWrapper, nodeName);
-        CalcOffsetParam(layoutWrapper, nodeName);
+        CalcSizeParam(frameNode, nodeName);
+        CalcOffsetParam(frameNode, nodeName);
     }
 }
 
-void RelativeContainerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+void RelativeContainerLayoutAlgorithm::Layout(FrameNode* frameNode)
 {
-    auto relativeContainerLayoutProperty = layoutWrapper->GetLayoutProperty();
+    auto relativeContainerLayoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(relativeContainerLayoutProperty);
-    const auto& childrenWrapper = layoutWrapper->GetAllChildrenWithBuild();
+    const auto& children = frameNode->GetAllFrameNodeChildren();
     auto left = padding_.left.value_or(0);
     auto top = padding_.top.value_or(0);
     auto paddingOffset = OffsetF(left, top);
-    for (const auto& childWrapper : childrenWrapper) {
-        if (!childWrapper->GetLayoutProperty()->GetFlexItemProperty()) {
-            childWrapper->GetGeometryNode()->SetMarginFrameOffset(OffsetF(0.0f, 0.0f) + paddingOffset);
+    for (const auto& child : children) {
+        if (!child->GetLayoutProperty()->GetFlexItemProperty()) {
+            child->GetGeometryNode()->SetMarginFrameOffset(OffsetF(0.0f, 0.0f) + paddingOffset);
             continue;
         }
-        if (!childWrapper->GetHostNode()->GetInspectorId().has_value()) {
+        if (!child->GetInspectorId().has_value()) {
             continue;
         }
-        auto curOffset = recordOffsetMap_[childWrapper->GetHostNode()->GetInspectorIdValue()];
-        childWrapper->GetGeometryNode()->SetMarginFrameOffset(curOffset + paddingOffset);
-        childWrapper->Layout();
+        auto curOffset = recordOffsetMap_[child->GetInspectorIdValue()];
+        child->GetGeometryNode()->SetMarginFrameOffset(curOffset + paddingOffset);
+        child->Layout();
     }
 }
 
-void RelativeContainerLayoutAlgorithm::CollectNodesById(LayoutWrapper* layoutWrapper)
+void RelativeContainerLayoutAlgorithm::CollectNodesById(FrameNode* frameNode)
 {
     idNodeMap_.clear();
-    auto relativeContainerLayoutProperty = layoutWrapper->GetLayoutProperty();
+    auto relativeContainerLayoutProperty = frameNode->GetLayoutProperty();
     auto left = padding_.left.value_or(0);
     auto top = padding_.top.value_or(0);
     auto paddingOffset = OffsetF(left, top);
     auto constraint = relativeContainerLayoutProperty->GetLayoutConstraint();
-    const auto& childrenWrappers = layoutWrapper->GetAllChildrenWithBuild();
-    for (const auto& childWrapper : childrenWrappers) {
-        auto childLayoutProperty = childWrapper->GetLayoutProperty();
-        auto childHostNode = childWrapper->GetHostNode();
-        childWrapper->SetActive();
-        if (childHostNode && childHostNode->GetInspectorId().has_value()) {
-            auto geometryNode = childWrapper->GetGeometryNode();
+    const auto& children = frameNode->GetAllFrameNodeChildren();
+    for (const auto& child : children) {
+        auto childLayoutProperty = child->GetLayoutProperty();
+        child->SetActive();
+        if (child->GetInspectorId().has_value()) {
+            auto geometryNode = child->GetGeometryNode();
             auto childConstraint = relativeContainerLayoutProperty->CreateChildConstraint();
-            if (childHostNode->GetInspectorId()->empty()) {
+            if (child->GetInspectorId()->empty()) {
                 // Component who does not have align Rules will have default offset and layout param
                 childConstraint.maxSize = SizeF(constraint->maxSize);
                 childConstraint.minSize = SizeF(0.0f, 0.0f);
-                childWrapper->Measure(childConstraint);
-                childWrapper->GetGeometryNode()->SetMarginFrameOffset(OffsetF(0.0f, 0.0f) + paddingOffset);
-                idNodeMap_.emplace(childHostNode->GetInspectorIdValue(), childWrapper);
+                child->Measure(childConstraint);
+                child->GetGeometryNode()->SetMarginFrameOffset(OffsetF(0.0f, 0.0f) + paddingOffset);
+                idNodeMap_.emplace(child->GetInspectorIdValue(), child);
             }
-            if (idNodeMap_.find(childHostNode->GetInspectorIdValue()) != idNodeMap_.end()) {
-                LOGE("Component %{public}s ID is duplicated", childHostNode->GetInspectorIdValue().c_str());
+            if (idNodeMap_.find(child->GetInspectorIdValue()) != idNodeMap_.end()) {
+                LOGE("Component %{public}s ID is duplicated", child->GetInspectorIdValue().c_str());
             }
-            idNodeMap_.emplace(childHostNode->GetInspectorIdValue(), childWrapper);
+            idNodeMap_.emplace(child->GetInspectorIdValue(), child);
         }
     }
 }
@@ -149,9 +146,8 @@ void RelativeContainerLayoutAlgorithm::CollectNodesById(LayoutWrapper* layoutWra
 void RelativeContainerLayoutAlgorithm::GetDependencyRelationship()
 {
     for (const auto& node : idNodeMap_) {
-        auto childWrapper = node.second;
-        const auto& flexItem = childWrapper->GetLayoutProperty()->GetFlexItemProperty();
-        auto childHostNode = childWrapper->GetHostNode();
+        auto child = node.second;
+        const auto& flexItem = child->GetLayoutProperty()->GetFlexItemProperty();
         if (!flexItem) {
             continue;
         }
@@ -165,15 +161,15 @@ void RelativeContainerLayoutAlgorithm::GetDependencyRelationship()
             auto anchorChildVisibility = anchorChildLayoutProp->GetVisibility();
             // when anchor component set VisibleType::GONE, the current component is not displayed.
             if (anchorChildVisibility == VisibleType::GONE) {
-                childWrapper->SetActive(false);
+                child->SetActive(false);
             }
             if (reliedOnMap_.count(alignRule.second.anchor) == 0) {
                 std::set<std::string> reliedList;
-                reliedList.insert(childHostNode->GetInspectorIdValue());
+                reliedList.insert(child->GetInspectorIdValue());
                 reliedOnMap_[alignRule.second.anchor] = reliedList;
                 continue;
             }
-            reliedOnMap_[alignRule.second.anchor].insert(childHostNode->GetInspectorIdValue());
+            reliedOnMap_[alignRule.second.anchor].insert(child->GetInspectorIdValue());
         }
     }
 }
@@ -184,9 +180,8 @@ bool RelativeContainerLayoutAlgorithm::PreTopologicalLoopDetection()
     std::queue<std::string> layoutQueue;
 
     for (const auto& node : idNodeMap_) {
-        auto childWrapper = node.second;
-        auto childHostNode = childWrapper->GetHostNode();
-        const auto& flexItem = childWrapper->GetLayoutProperty()->GetFlexItemProperty();
+        auto child = node.second;
+        const auto& flexItem = child->GetLayoutProperty()->GetFlexItemProperty();
         if (!flexItem) {
             visitedNode.push(node.first);
             continue;
@@ -202,9 +197,9 @@ bool RelativeContainerLayoutAlgorithm::PreTopologicalLoopDetection()
                 LOGE("Component %{public}s has dependency on itself", node.first.c_str());
             }
         }
-        incomingDegreeMap_[childHostNode->GetInspectorIdValue()] = anchorSet.size();
-        if (incomingDegreeMap_[childHostNode->GetInspectorIdValue()] == 0) {
-            layoutQueue.push(childHostNode->GetInspectorIdValue());
+        incomingDegreeMap_[child->GetInspectorIdValue()] = anchorSet.size();
+        if (incomingDegreeMap_[child->GetInspectorIdValue()] == 0) {
+            layoutQueue.push(child->GetInspectorIdValue());
         }
     }
     std::map<std::string, uint32_t> incomingDegreeMapCopy;
@@ -241,15 +236,14 @@ void RelativeContainerLayoutAlgorithm::TopologicalSort(std::list<std::string>& r
 {
     std::queue<std::string> layoutQueue;
     for (const auto& node : idNodeMap_) {
-        auto childWrapper = node.second;
-        auto childHostNode = childWrapper->GetHostNode();
-        const auto& flexItem = childWrapper->GetLayoutProperty()->GetFlexItemProperty();
+        auto child = node.second;
+        const auto& flexItem = child->GetLayoutProperty()->GetFlexItemProperty();
         if (!flexItem) {
             renderList.emplace_back(node.first);
             continue;
         }
-        if (incomingDegreeMap_[childHostNode->GetInspectorIdValue()] == 0) {
-            layoutQueue.push(childHostNode->GetInspectorIdValue());
+        if (incomingDegreeMap_[child->GetInspectorIdValue()] == 0) {
+            layoutQueue.push(child->GetInspectorIdValue());
         }
     }
     while (!layoutQueue.empty()) {
@@ -270,21 +264,21 @@ void RelativeContainerLayoutAlgorithm::TopologicalSort(std::list<std::string>& r
     }
 }
 
-void RelativeContainerLayoutAlgorithm::CalcSizeParam(LayoutWrapper* layoutWrapper, const std::string& nodeName)
+void RelativeContainerLayoutAlgorithm::CalcSizeParam(FrameNode* frameNode, const std::string& nodeName)
 {
-    auto childWrapper = idNodeMap_[nodeName];
-    auto relativeContainerLayoutProperty = layoutWrapper->GetLayoutProperty();
+    auto child = idNodeMap_[nodeName];
+    auto relativeContainerLayoutProperty = frameNode->GetLayoutProperty();
     auto childConstraint = relativeContainerLayoutProperty->CreateChildConstraint();
-    auto alignRules = childWrapper->GetLayoutProperty()->GetFlexItemProperty()->GetAlignRulesValue();
-    auto geometryNode = childWrapper->GetGeometryNode();
-    auto childLayoutProperty = childWrapper->GetLayoutProperty();
+    auto alignRules = child->GetLayoutProperty()->GetFlexItemProperty()->GetAlignRulesValue();
+    auto geometryNode = child->GetGeometryNode();
+    auto childLayoutProperty = child->GetLayoutProperty();
     const auto& childFlexItemProperty = childLayoutProperty->GetFlexItemProperty();
     float itemMaxWidth = 0.0f;
     float itemMaxHeight = 0.0f;
     float itemMinWidth = 0.0f;
     float itemMinHeight = 0.0f;
     padding_ = relativeContainerLayoutProperty->CreatePaddingAndBorder();
-    auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    auto frameSize = frameNode->GetGeometryNode()->GetFrameSize();
     MinusPaddingToSize(padding_, frameSize);
     childConstraint.maxSize = frameSize;
     childConstraint.minSize = SizeF(0.0f, 0.0f);
@@ -296,11 +290,11 @@ void RelativeContainerLayoutAlgorithm::CalcSizeParam(LayoutWrapper* layoutWrappe
         }
         if (static_cast<uint32_t>(alignRule.first) < DIRECTION_RANGE) {
             if (!childFlexItemProperty->GetTwoHorizontalDirectionAligned()) {
-                CalcHorizontalLayoutParam(alignRule.first, alignRule.second, layoutWrapper, nodeName);
+                CalcHorizontalLayoutParam(alignRule.first, alignRule.second, frameNode, nodeName);
             }
         } else {
             if (!childFlexItemProperty->GetTwoVerticalDirectionAligned()) {
-                CalcVerticalLayoutParam(alignRule.first, alignRule.second, layoutWrapper, nodeName);
+                CalcVerticalLayoutParam(alignRule.first, alignRule.second, frameNode, nodeName);
             }
         }
     }
@@ -383,15 +377,15 @@ void RelativeContainerLayoutAlgorithm::CalcSizeParam(LayoutWrapper* layoutWrappe
 
     childConstraint.maxSize = SizeF(itemMaxWidth, itemMaxHeight);
     childConstraint.minSize = SizeF(itemMinWidth, itemMinHeight);
-    childWrapper->Measure(childConstraint);
+    child->Measure(childConstraint);
 }
 
-void RelativeContainerLayoutAlgorithm::CalcOffsetParam(LayoutWrapper* layoutWrapper, const std::string& nodeName)
+void RelativeContainerLayoutAlgorithm::CalcOffsetParam(FrameNode* frameNode, const std::string& nodeName)
 {
-    auto childWrapper = idNodeMap_[nodeName];
-    auto containerSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    auto child = idNodeMap_[nodeName];
+    auto containerSize = frameNode->GetGeometryNode()->GetFrameSize();
     MinusPaddingToSize(padding_, containerSize);
-    auto alignRules = childWrapper->GetLayoutProperty()->GetFlexItemProperty()->GetAlignRulesValue();
+    auto alignRules = child->GetLayoutProperty()->GetFlexItemProperty()->GetAlignRulesValue();
     float offsetX = 0.0f;
     bool offsetXCalculated = false;
     float offsetY = 0.0f;
@@ -419,13 +413,13 @@ void RelativeContainerLayoutAlgorithm::CalcOffsetParam(LayoutWrapper* layoutWrap
 }
 
 void RelativeContainerLayoutAlgorithm::CalcHorizontalLayoutParam(AlignDirection alignDirection,
-    const AlignRule& alignRule, LayoutWrapper* layoutWrapper, const std::string& nodeName)
+    const AlignRule& alignRule, FrameNode* frameNode, const std::string& nodeName)
 {
-    auto childWrapper = idNodeMap_[nodeName];
-    auto childLayoutProperty = childWrapper->GetLayoutProperty();
+    auto child = idNodeMap_[nodeName];
+    auto childLayoutProperty = child->GetLayoutProperty();
     CHECK_NULL_VOID_NOLOG(childLayoutProperty);
     const auto& childFlexItemProperty = childLayoutProperty->GetFlexItemProperty();
-    auto parentSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    auto parentSize = frameNode->GetGeometryNode()->GetFrameSize();
     MinusPaddingToSize(padding_, parentSize);
     switch (alignRule.horizontal) {
         case HorizontalAlign::START:
@@ -453,13 +447,13 @@ void RelativeContainerLayoutAlgorithm::CalcHorizontalLayoutParam(AlignDirection 
 }
 
 void RelativeContainerLayoutAlgorithm::CalcVerticalLayoutParam(AlignDirection alignDirection,
-    const AlignRule& alignRule, LayoutWrapper* layoutWrapper, const std::string& nodeName)
+    const AlignRule& alignRule, FrameNode* frameNode, const std::string& nodeName)
 {
-    auto childWrapper = idNodeMap_[nodeName];
-    auto childLayoutProperty = childWrapper->GetLayoutProperty();
+    auto child = idNodeMap_[nodeName];
+    auto childLayoutProperty = child->GetLayoutProperty();
     CHECK_NULL_VOID_NOLOG(childLayoutProperty);
     const auto& childFlexItemProperty = childLayoutProperty->GetFlexItemProperty();
-    auto parentSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    auto parentSize = frameNode->GetGeometryNode()->GetFrameSize();
     MinusPaddingToSize(padding_, parentSize);
     switch (alignRule.vertical) {
         case VerticalAlign::TOP:
@@ -490,9 +484,9 @@ float RelativeContainerLayoutAlgorithm::CalcHorizontalOffset(
     AlignDirection alignDirection, const AlignRule& alignRule, float containerWidth, const std::string& nodeName)
 {
     float offsetX = 0.0f;
-    auto childWrapper = idNodeMap_[nodeName];
+    auto child = idNodeMap_[nodeName];
 
-    float flexItemWidth = childWrapper->GetGeometryNode()->GetMarginFrameSize().Width();
+    float flexItemWidth = child->GetGeometryNode()->GetMarginFrameSize().Width();
     float anchorWidth = IsAnchorContainer(alignRule.anchor)
                             ? containerWidth
                             : idNodeMap_[alignRule.anchor]->GetGeometryNode()->GetMarginFrameSize().Width();
@@ -553,9 +547,9 @@ float RelativeContainerLayoutAlgorithm::CalcVerticalOffset(
     AlignDirection alignDirection, const AlignRule& alignRule, float containerHeight, const std::string& nodeName)
 {
     float offsetY = 0.0f;
-    auto childWrapper = idNodeMap_[nodeName];
+    auto child = idNodeMap_[nodeName];
 
-    float flexItemHeight = childWrapper->GetGeometryNode()->GetMarginFrameSize().Height();
+    float flexItemHeight = child->GetGeometryNode()->GetMarginFrameSize().Height();
     float anchorHeight = IsAnchorContainer(alignRule.anchor)
                              ? containerHeight
                              : idNodeMap_[alignRule.anchor]->GetGeometryNode()->GetMarginFrameSize().Height();

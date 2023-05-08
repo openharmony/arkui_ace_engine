@@ -53,7 +53,7 @@ public:
 
 private:
     void OnAttachToFrameNode() override;
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
+    bool OnDirtyLayoutWrapperSwap(FrameNode* frameNode, bool skipMeasure, bool skipLayout) override;
 
     RefPtr<DataPanelModifier> dataPanelModifier_;
     ACE_DISALLOW_COPY_AND_MOVE(DataPanelPattern);

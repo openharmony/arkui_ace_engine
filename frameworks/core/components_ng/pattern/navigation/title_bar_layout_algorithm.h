@@ -30,8 +30,8 @@ class ACE_EXPORT TitleBarLayoutAlgorithm : public LayoutAlgorithm {
 public:
     TitleBarLayoutAlgorithm() = default;
     ~TitleBarLayoutAlgorithm() override = default;
-    void Measure(LayoutWrapper* layoutWrapper) override;
-    void Layout(LayoutWrapper* layoutWrapper) override;
+    void Measure(FrameNode* frameNode) override;
+    void Layout(FrameNode* frameNode) override;
 
     float GetInitialTitleOffsetY() const
     {
@@ -84,27 +84,27 @@ public:
     }
 
 private:
-    void MeasureBackButton(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
+    void MeasureBackButton(FrameNode* frameNode, const RefPtr<TitleBarNode>& titleBarNode,
         const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty);
 
-    void MeasureSubtitle(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
+    void MeasureSubtitle(FrameNode* frameNode, const RefPtr<TitleBarNode>& titleBarNode,
         const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty, const SizeF& titleBarSize, float menuWidth);
 
-    void MeasureTitle(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
+    void MeasureTitle(FrameNode* frameNode, const RefPtr<TitleBarNode>& titleBarNode,
         const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty, const SizeF& titleBarSize, float menuWidth);
 
-    float MeasureMenu(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
+    float MeasureMenu(FrameNode* frameNode, const RefPtr<TitleBarNode>& titleBarNode,
         const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty);
 
-    void LayoutBackButton(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
+    void LayoutBackButton(FrameNode* frameNode, const RefPtr<TitleBarNode>& titleBarNode,
         const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty);
 
-    void LayoutTitle(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
+    void LayoutTitle(FrameNode* frameNode, const RefPtr<TitleBarNode>& titleBarNode,
         const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty, float subtitleHeight);
 
-    void LayoutSubtitle(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
+    void LayoutSubtitle(FrameNode* frameNode, const RefPtr<TitleBarNode>& titleBarNode,
         const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty, float titleHeight);
-    void LayoutMenu(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
+    void LayoutMenu(FrameNode* frameNode, const RefPtr<TitleBarNode>& titleBarNode,
         const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty, float subtitleHeight);
 
     // set variables from theme

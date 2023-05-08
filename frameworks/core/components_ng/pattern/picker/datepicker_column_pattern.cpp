@@ -199,10 +199,10 @@ void DatePickerColumnPattern::PlayHoverAnimation(const Color& color)
 }
 
 bool DatePickerColumnPattern::OnDirtyLayoutWrapperSwap(
-    const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+    FrameNode* frameNode, const DirtySwapConfig& config)
 {
     CHECK_NULL_RETURN_NOLOG(config.frameSizeChange, false);
-    CHECK_NULL_RETURN(dirty, false);
+    CHECK_NULL_RETURN(frameNode, false);
     return true;
 }
 

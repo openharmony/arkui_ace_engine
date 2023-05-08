@@ -28,7 +28,7 @@ class ACE_EXPORT GridColLayoutAlgorithm : public BoxLayoutAlgorithm {
     DECLARE_ACE_TYPE(GridColLayoutAlgorithm, BoxLayoutAlgorithm);
 
 public:
-    void Layout(LayoutWrapper* layoutWrapper) override;
+    void Layout(FrameNode* frameNode) override;
 };
 } // namespace OHOS::Ace::NG
 

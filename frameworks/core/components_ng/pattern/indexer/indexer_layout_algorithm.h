@@ -35,12 +35,12 @@ public:
         return itemSizeRender_;
     }
 
-    void Measure(LayoutWrapper* layoutWrapper) override;
+    void Measure(FrameNode* frameNode) override;
 
-    void Layout(LayoutWrapper* layoutWrapper) override;
+    void Layout(FrameNode* frameNode) override;
 
 private:
-    void InitializeIndexer(LayoutWrapper* layoutWrapper);
+    void InitializeIndexer(FrameNode* frameNode);
 
     std::vector<std::string> arrayValue_;
     uint32_t popupSize_ = 0;

@@ -61,8 +61,11 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
     std::vector<RefPtr<FrameNode>> orderedNodes;
     bool hasNormalNode = false;
     bool hasPriorityNode = false;
+
     for (auto&& pageNodes : dirtyLayoutNodes) {
         for (auto&& node : pageNodes.second) {
+            ACE_SCOPED_TRACE("%d [%s-%d] %d %d", pageNodes.first, node->GetTag().c_str(), node->GetId(),
+                node->GetDepth(), node->GetLayoutPriority());
             if (!node || node->IsInDestroying()) {
                 continue;
             }
@@ -92,6 +95,8 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
             continue;
         }
         time = GetSysTimestamp();
+        ACE_SCOPED_TRACE(
+            "[%s-%d] %d %d", node->GetTag().c_str(), node->GetId(), node->GetDepth(), node->GetLayoutPriority());
         auto task = node->CreateLayoutTask(forceUseMainThread);
         if (task) {
             if (forceUseMainThread || (task->GetTaskThreadType() == MAIN_TASK)) {
@@ -185,9 +190,9 @@ void UITaskScheduler::FlushTask()
     GeometryTransition::OnLayout(true);
     FlushLayoutTask();
     GeometryTransition::OnLayout(false);
-    if (NeedAdditionalLayout()) {
-        FlushLayoutTask();
-    }
+    // if (NeedAdditionalLayout()) {
+    //     FlushLayoutTask();
+    // }
     if (!afterLayoutTasks_.empty()) {
         FlushAfterLayoutTask();
     }
@@ -228,6 +233,7 @@ void UITaskScheduler::AddAfterLayoutTask(std::function<void()>&& task)
 
 void UITaskScheduler::FlushAfterLayoutTask()
 {
+    ACE_SCOPED_TRACE("FlushAfterLayoutTask");
     decltype(afterLayoutTasks_) tasks(std::move(afterLayoutTasks_));
     for (const auto& task : tasks) {
         if (task) {

@@ -28,10 +28,10 @@ public:
 
     ~SelectLayoutAlgorithm() override = default;
 
-    void Measure(LayoutWrapper* layoutWrapper) override;
+    void Measure(FrameNode* frameNode) override;
 
 private:
-    SizeF MeasureAndGetSize(const RefPtr<LayoutWrapper>& childLayoutWrapper, const LayoutConstraintF& constraint);
+    SizeF MeasureAndGetSize(const RefPtr<FrameNode>& frameNode, const LayoutConstraintF& constraint);
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectLayoutAlgorithm);
 };

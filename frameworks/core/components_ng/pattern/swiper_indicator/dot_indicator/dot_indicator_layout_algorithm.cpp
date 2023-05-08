@@ -32,14 +32,11 @@ constexpr Dimension INDICATOR_ITEM_SPACE = 8.0_vp;
 constexpr Dimension INDICATOR_PADDING_HOVER = 12.0_vp;
 constexpr float INDICATOR_ZOOM_IN_SCALE = 1.33f;
 } // namespace
-void DotIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+void DotIndicatorLayoutAlgorithm::Measure(FrameNode* frameNode)
 {
-    CHECK_NULL_VOID(layoutWrapper);
-    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     const auto& layoutConstraint = layoutProperty->GetLayoutConstraint();
-    auto frameNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(frameNode);
     auto swiperNode = DynamicCast<FrameNode>(frameNode->GetParent());
     CHECK_NULL_VOID(swiperNode);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
@@ -97,14 +94,11 @@ void DotIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         frameSize.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize);
     } while (false);
 
-    layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
+    frameNode->GetGeometryNode()->SetFrameSize(frameSize);
 }
 
-void DotIndicatorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+void DotIndicatorLayoutAlgorithm::Layout(FrameNode* frameNode)
 {
-    CHECK_NULL_VOID(layoutWrapper);
-    auto frameNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(frameNode);
     auto swiperNode = DynamicCast<FrameNode>(frameNode->GetParent());
     CHECK_NULL_VOID(swiperNode);
 
@@ -139,7 +133,7 @@ void DotIndicatorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto top = layoutProperty->GetTop();
     auto bottom = layoutProperty->GetBottom();
 
-    const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
+    const auto& layoutConstraint = frameNode->GetLayoutProperty()->GetLayoutConstraint();
     auto swiperWidth = layoutConstraint->parentIdealSize.Width().value();
     auto swiperHeight = layoutConstraint->parentIdealSize.Height().value();
 
@@ -170,7 +164,7 @@ void DotIndicatorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
     }
     auto currentOffset = OffsetF {static_cast<float>(position.GetX()), static_cast<float>(position.GetY())};
-    layoutWrapper->GetGeometryNode()->SetMarginFrameOffset(currentOffset);
+    frameNode->GetGeometryNode()->SetMarginFrameOffset(currentOffset);
 }
 
 double DotIndicatorLayoutAlgorithm::GetValidEdgeLength(

@@ -62,9 +62,9 @@ void UpdateIdealSize(Axis axis, const SizeF& childSize, const OptionalSizeF& par
 
 } // namespace
 
-void ScrollBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+void ScrollBarLayoutAlgorithm::Measure(FrameNode* frameNode)
 {
-    auto layoutProperty = AceType::DynamicCast<ScrollBarLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto layoutProperty = AceType::DynamicCast<ScrollBarLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
 
     auto axis = layoutProperty->GetAxis().value_or(Axis::VERTICAL);
@@ -77,29 +77,29 @@ void ScrollBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     UpdateChildConstraint(axis, idealSize, childLayoutConstraint);
 
     // Measure child.
-    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
-    CHECK_NULL_VOID(childWrapper);
-    childWrapper->Measure(childLayoutConstraint);
+    auto child = frameNode->GetFrameNodeByIndex(0);
+    CHECK_NULL_VOID(child);
+    child->Measure(childLayoutConstraint);
 
     // Use child size when self idea size of scroll is not setted.
-    auto childSize = childWrapper->GetGeometryNode()->GetMarginFrameSize();
+    auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
     UpdateIdealSize(axis, childSize, parentSize, idealSize);
     auto selfSize = idealSize.ConvertToSizeT();
     selfSize.Constrain(constraint->minSize, constraint->maxSize);
-    layoutWrapper->GetGeometryNode()->SetFrameSize(selfSize);
+    frameNode->GetGeometryNode()->SetFrameSize(selfSize);
 }
 
-void ScrollBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+void ScrollBarLayoutAlgorithm::Layout(FrameNode* frameNode)
 {
-    CHECK_NULL_VOID(layoutWrapper);
-    auto layoutProperty = AceType::DynamicCast<ScrollBarLayoutProperty>(layoutWrapper->GetLayoutProperty());
+
+    auto layoutProperty = AceType::DynamicCast<ScrollBarLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     auto axis = layoutProperty->GetAxis().value_or(Axis::VERTICAL);
-    auto geometryNode = layoutWrapper->GetGeometryNode();
+    auto geometryNode = frameNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
-    CHECK_NULL_VOID(childWrapper);
-    auto childGeometryNode = childWrapper->GetGeometryNode();
+    auto child = frameNode->GetFrameNodeByIndex(0);
+    CHECK_NULL_VOID(child);
+    auto childGeometryNode = child->GetGeometryNode();
     CHECK_NULL_VOID(childGeometryNode);
     auto size = geometryNode->GetFrameSize();
 
@@ -107,7 +107,7 @@ void ScrollBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     MinusPaddingToSize(padding, size);
     auto childSize = childGeometryNode->GetMarginFrameSize();
     scrollableDistance_ = std::abs(GetMainAxisSize(size, axis) - GetMainAxisSize(childSize, axis));
-    auto scrollBarPattern = AceType::DynamicCast<ScrollBarPattern>(layoutWrapper->GetHostNode()->GetPattern());
+    auto scrollBarPattern = AceType::DynamicCast<ScrollBarPattern>(frameNode->GetPattern());
     auto controlDistance = scrollBarPattern->GetControlDistance();
     auto scrollOffset = scrollBarPattern->GetScrollOffset();
     float currentOffset = 0.0f;
@@ -123,7 +123,7 @@ void ScrollBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     scrollBarPattern->SetCurrentPosition(currentOffset_);
     auto currentAxisOffset = axis == Axis::VERTICAL ? OffsetF(0.0f, currentOffset_) : OffsetF(currentOffset_, 0.0f);
     childGeometryNode->SetMarginFrameOffset(padding.Offset() + currentAxisOffset);
-    childWrapper->Layout();
+    child->Layout();
 }
 
 } // namespace OHOS::Ace::NG

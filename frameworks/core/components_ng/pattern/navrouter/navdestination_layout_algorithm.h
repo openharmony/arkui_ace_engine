@@ -30,8 +30,8 @@ class ACE_EXPORT NavDestinationLayoutAlgorithm : public LayoutAlgorithm {
 public:
     NavDestinationLayoutAlgorithm() = default;
     ~NavDestinationLayoutAlgorithm() override = default;
-    void Measure(LayoutWrapper* layoutWrapper) override;
-    void Layout(LayoutWrapper* layoutWrapper) override;
+    void Measure(FrameNode* frameNode) override;
+    void Layout(FrameNode* frameNode) override;
     ACE_DISALLOW_COPY_AND_MOVE(NavDestinationLayoutAlgorithm);
 };
 

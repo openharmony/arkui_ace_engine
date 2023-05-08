@@ -23,6 +23,7 @@
 #include "base/geometry/dimension.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/grid/grid_item_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
@@ -30,9 +31,9 @@
 
 namespace OHOS::Ace::NG {
 
-void GridAdaptiveLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+void GridAdaptiveLayoutAlgorithm::Measure(FrameNode* frameNode)
 {
-    auto gridLayoutProperty = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto gridLayoutProperty = AceType::DynamicCast<GridLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_VOID(gridLayoutProperty);
     auto layoutDirection = gridLayoutProperty->GetGridDirection().value_or(FlexDirection::ROW);
     auto axis = (layoutDirection == FlexDirection::ROW || layoutDirection == FlexDirection::ROW_REVERSE)
@@ -43,11 +44,11 @@ void GridAdaptiveLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto padding = gridLayoutProperty->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, idealSize);
 
-    auto firstChildWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
-    CHECK_NULL_VOID(firstChildWrapper);
+    auto firstChild = frameNode->GetFrameNodeByIndex(0);
+    CHECK_NULL_VOID(firstChild);
     auto layoutConstraint = gridLayoutProperty->CreateChildConstraint();
-    firstChildWrapper->Measure(layoutConstraint);
-    auto firstChildSize = firstChildWrapper->GetGeometryNode()->GetMarginFrameSize();
+    firstChild->Measure(layoutConstraint);
+    auto firstChildSize = firstChild->GetGeometryNode()->GetMarginFrameSize();
 
     // Calculate grid cell size.
     gridCellSize_ = firstChildSize;
@@ -73,7 +74,7 @@ void GridAdaptiveLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto scale = gridLayoutProperty->GetLayoutConstraint()->scaleProperty;
     auto rowsGap = ConvertToPx(gridLayoutProperty->GetRowsGap().value_or(0.0_vp), scale, refHeight).value_or(0);
     auto columnsGap = ConvertToPx(gridLayoutProperty->GetColumnsGap().value_or(0.0_vp), scale, refWidth).value_or(0);
-    auto childrenCount = layoutWrapper->GetTotalChildCount();
+    auto childrenCount = frameNode->TotalChildCount();
     auto mainGap = (axis == Axis::HORIZONTAL) ? columnsGap : rowsGap;
     auto crossGap = (axis == Axis::HORIZONTAL) ? rowsGap : columnsGap;
     mainCount_ = std::floor((idealSize.MainSize(axis).value_or(maxSize.MainSize(axis)) + mainGap) /
@@ -95,7 +96,7 @@ void GridAdaptiveLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         OptionalSizeF(columnCount * gridCellSize_.Width() + (columnCount - 1) * columnsGap,
             rowCount * gridCellSize_.Height() + (rowCount - 1) * rowsGap));
     AddPaddingToSize(padding, idealSize);
-    layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize.ConvertToSizeT());
+    frameNode->GetGeometryNode()->SetFrameSize(idealSize.ConvertToSizeT());
 
     // Create child constraint.
     auto childLayoutConstraint = gridLayoutProperty->CreateChildConstraint();
@@ -103,29 +104,28 @@ void GridAdaptiveLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     // Measure children.
     for (int32_t index = 0; index < displayCount_; ++index) {
-        auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
-        if (!childWrapper) {
+        auto child = frameNode->GetFrameNodeByIndex(index);
+        if (!child) {
             continue;
         }
-        childWrapper->Measure(childLayoutConstraint);
+        child->Measure(childLayoutConstraint);
     }
 }
 
-void GridAdaptiveLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+void GridAdaptiveLayoutAlgorithm::Layout(FrameNode* frameNode)
 {
-    CHECK_NULL_VOID(layoutWrapper);
-    int32_t total = layoutWrapper->GetTotalChildCount();
+    int32_t total = frameNode->TotalChildCount();
     for (int32_t index = 0; index < total; ++index) {
         if (index < displayCount_) {
-            auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
-            if (!childWrapper) {
+            auto child = frameNode->GetFrameNodeByIndex(index);
+            if (!child) {
                 continue;
             }
             // TODO: add center position when grid item is less than ceil.
-            childWrapper->GetGeometryNode()->SetMarginFrameOffset(CalculateChildOffset(index, layoutWrapper));
-            childWrapper->Layout();
+            child->GetGeometryNode()->SetMarginFrameOffset(CalculateChildOffset(index, frameNode));
+            child->Layout();
         } else {
-            layoutWrapper->RemoveChildInRenderTree(index);
+            frameNode->RemoveChildInRenderTree(index);
         }
     }
 
@@ -137,12 +137,12 @@ void GridAdaptiveLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
                 continue;
             }
             itemIdex = crossLine.second;
-            auto wrapper = layoutWrapper->GetOrCreateChildByIndex(itemIdex);
-            if (!wrapper) {
+            auto child = frameNode->GetFrameNodeByIndex(itemIdex);
+            if (!child) {
                 LOGE("Layout item wrapper of index: %{public}d is null, please check.", itemIdex);
                 continue;
             }
-            auto layoutProperty = wrapper->GetLayoutProperty();
+            auto layoutProperty = child->GetLayoutProperty();
             CHECK_NULL_VOID(layoutProperty);
             auto gridItemLayoutProperty = AceType::DynamicCast<GridItemLayoutProperty>(layoutProperty);
             CHECK_NULL_VOID(gridItemLayoutProperty);
@@ -152,10 +152,10 @@ void GridAdaptiveLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
 }
 
-OffsetF GridAdaptiveLayoutAlgorithm::CalculateChildOffset(int32_t index, LayoutWrapper* layoutWrapper) const
+OffsetF GridAdaptiveLayoutAlgorithm::CalculateChildOffset(int32_t index, FrameNode* frameNode) const
 {
-    auto frameSize = layoutWrapper->GetGeometryNode()->GetMarginFrameSize();
-    auto layoutProperty = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto frameSize = frameNode->GetGeometryNode()->GetMarginFrameSize();
+    auto layoutProperty = AceType::DynamicCast<GridLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_RETURN(layoutProperty, OffsetF());
     auto padding = layoutProperty->CreatePaddingAndBorder();
     auto layoutDirection = layoutProperty->GetGridDirection().value_or(FlexDirection::ROW);

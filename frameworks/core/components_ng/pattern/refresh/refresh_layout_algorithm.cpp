@@ -27,13 +27,13 @@ namespace OHOS::Ace::NG {
 
 RefreshLayoutAlgorithm::RefreshLayoutAlgorithm() = default;
 
-void RefreshLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+void RefreshLayoutAlgorithm::Layout(FrameNode* frameNode)
 {
-    PerformLayout(layoutWrapper);
-    auto layoutProperty = AceType::DynamicCast<NG::RefreshLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    PerformLayout(frameNode);
+    auto layoutProperty = AceType::DynamicCast<NG::RefreshLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
 
-    for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
+    for (auto&& child : frameNode->GetAllFrameNodeChildren()) {
         if (!child) {
             continue;
         }
@@ -41,29 +41,28 @@ void RefreshLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
 }
 // Called to perform layout render node and child.
-void RefreshLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
+void RefreshLayoutAlgorithm::PerformLayout(FrameNode* frameNode)
 {
     // update child position.
-    auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
-    const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+    auto size = frameNode->GetGeometryNode()->GetFrameSize();
+    const auto& padding = frameNode->GetLayoutProperty()->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
     auto left = padding.left.value_or(0);
     auto top = padding.top.value_or(0);
     auto paddingOffset = OffsetF(left, top);
     auto align = Alignment::TOP_LEFT;
-    if (layoutWrapper->GetLayoutProperty()->GetPositionProperty()) {
-        align = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
+    if (frameNode->GetLayoutProperty()->GetPositionProperty()) {
+        align = frameNode->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
     }
-    auto layoutProperty = AceType::DynamicCast<NG::RefreshLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto layoutProperty = AceType::DynamicCast<NG::RefreshLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
 
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(host);
-    auto pattern = host->GetPattern<RefreshPattern>();
+
+    auto pattern = frameNode->GetPattern<RefreshPattern>();
     CHECK_NULL_VOID(pattern);
     // Update child position.
     int32_t index = 0;
-    for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
+    for (const auto& child : frameNode->GetAllFrameNodeChildren()) {
         if (!child) {
             index++;
             continue;
@@ -71,10 +70,10 @@ void RefreshLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
         auto paddingOffsetChild = paddingOffset;
         auto alignChild = align;
         if (!layoutProperty->GetIsCustomBuilderExistValue(false)) {
-            if (index == layoutWrapper->GetTotalChildCount() - 2) {
+            if (index == frameNode->TotalChildCount() - 2) {
                 paddingOffsetChild += layoutProperty->GetShowTimeOffsetValue();
                 alignChild = Alignment::TOP_CENTER;
-            } else if (index == layoutWrapper->GetTotalChildCount() - 1) {
+            } else if (index == frameNode->TotalChildCount() - 1) {
                 alignChild = Alignment::TOP_CENTER;
             }
         } else {

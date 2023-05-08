@@ -34,9 +34,9 @@ public:
     ListItemGroupLayoutAlgorithm(int32_t headerIndex, int32_t footerIndex, int32_t itemStartIndex)
         :headerIndex_(headerIndex), footerIndex_(footerIndex), itemStartIndex_(itemStartIndex) {}
 
-    void Measure(LayoutWrapper* layoutWrapper) override;
+    void Measure(FrameNode* frameNode) override;
 
-    void Layout(LayoutWrapper* layoutWrapper) override;
+    void Layout(FrameNode* frameNode) override;
 
     const PositionMap& GetItemPosition() const
     {
@@ -126,37 +126,33 @@ public:
         return totalItemCount_;
     }
 
-    float GetChildMaxCrossSize(LayoutWrapper* layoutWrapper, Axis axis);
-    void CheckRecycle(const RefPtr<LayoutWrapper>& layoutWrapper, float startPos, float endPos, float referencePos,
+    float GetChildMaxCrossSize(FrameNode* frameNode, Axis axis);
+    void CheckRecycle(const RefPtr<FrameNode>& frameNode, float startPos, float endPos, float referencePos,
         bool forwardLayout);
 
 private:
     float CalculateLaneCrossOffset(float crossSize, float childCrossSize);
     void UpdateListItemConstraint(const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
-    void LayoutListItem(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset, float crossSize);
-    void LayoutHeaderFooter(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset, float crossSize);
-    void LayoutIndex(const RefPtr<LayoutWrapper>& wrapper, const OffsetF& paddingOffset,
+    void LayoutListItem(FrameNode* frameNode, const OffsetF& paddingOffset, float crossSize);
+    void LayoutHeaderFooter(FrameNode* frameNode, const OffsetF& paddingOffset, float crossSize);
+    void LayoutIndex(const RefPtr<FrameNode>& frameNode, const OffsetF& paddingOffset,
         float crossSize, float startPos);
-    inline RefPtr<LayoutWrapper> GetListItem(LayoutWrapper* layoutWrapper, int32_t index) const
-    {
-        return layoutWrapper->GetOrCreateChildByIndex(index + itemStartIndex_);
-    }
     void CalculateLanes(const RefPtr<ListLayoutProperty>& layoutProperty,
         const LayoutConstraintF& layoutConstraint, std::optional<float> crossSizeOptional, Axis axis);
 
-    void MeasureListItem(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint);
-    int32_t MeasureALineForward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
+    void MeasureListItem(FrameNode* frameNode, const LayoutConstraintF& layoutConstraint);
+    int32_t MeasureALineForward(FrameNode* frameNode, const LayoutConstraintF& layoutConstraint,
         int32_t& currentIndex, float startPos, float& endPos);
-    int32_t MeasureALineBackward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
+    int32_t MeasureALineBackward(FrameNode* frameNode, const LayoutConstraintF& layoutConstraint,
         int32_t& currentIndex, float endPos, float& startPos);
     void MeasureForward(
-        LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t startIndex, float startPos);
+        FrameNode* frameNode, const LayoutConstraintF& layoutConstraint, int32_t startIndex, float startPos);
     void MeasureBackward(
-        LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t endIndex, float endPos);
+        FrameNode* frameNode, const LayoutConstraintF& layoutConstraint, int32_t endIndex, float endPos);
     void UpdateReferencePos(RefPtr<LayoutProperty> layoutProperty);
     bool NeedMeasureItem() const;
-    static void SetListItemIndex(const LayoutWrapper* groupLayoutWrapper,
-        const RefPtr<LayoutWrapper>& itemLayoutWrapper, int32_t indexInGroup);
+    static void SetListItemIndex(const FrameNode* groupNode,
+        const RefPtr<FrameNode>& item, int32_t indexInGroup);
 
     int32_t headerIndex_;
     int32_t footerIndex_;

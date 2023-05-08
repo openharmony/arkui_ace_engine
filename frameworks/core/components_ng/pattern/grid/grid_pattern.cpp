@@ -418,12 +418,12 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
     return true;
 }
 
-bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+bool GridPattern::OnDirtyLayoutWrapperSwap(FrameNode* frameNode, const DirtySwapConfig& config)
 {
     if (config.skipMeasure && config.skipLayout) {
         return false;
     }
-    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
+    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(frameNode->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto gridLayoutAlgorithm = DynamicCast<GridLayoutBaseAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(gridLayoutAlgorithm, false);
@@ -435,7 +435,7 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         FlushFocusOnScroll(gridLayoutInfo);
     }
     gridLayoutInfo_ = gridLayoutInfo;
-    gridLayoutInfo_.childrenCount_ = dirty->GetTotalChildCount();
+    gridLayoutInfo_.childrenCount_ = frameNode->TotalChildCount();
 
     SetScrollState(SCROLL_FROM_NONE);
     UpdateScrollBarOffset();

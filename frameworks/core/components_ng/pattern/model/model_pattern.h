@@ -62,7 +62,7 @@ private:
     uint32_t GetKey();
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* node) override;
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    bool OnDirtyLayoutWrapperSwap(FrameNode* frameNode, const DirtySwapConfig& config) override;
     bool NeedsRepaint();
     void HandleTouchEvent(const TouchEventInfo& info);
     void MarkDirtyNode(const PropertyChangeFlag flag);

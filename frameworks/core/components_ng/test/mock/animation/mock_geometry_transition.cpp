@@ -17,15 +17,15 @@
 
 namespace OHOS::Ace::NG {
     void GeometryTransition::Build(const WeakPtr<FrameNode>& frameNode, bool isNodeIn) {}
-    void GeometryTransition::WillLayout(const RefPtr<LayoutWrapper>& layoutWrapper) {}
-    void GeometryTransition::DidLayout(const WeakPtr<FrameNode>& frameNode) {}
+    void GeometryTransition::WillLayout(const RefPtr<FrameNode>& frameNode) {}
+    void GeometryTransition::DidLayout(const RefPtr<FrameNode>& frameNode) {}
 
     bool GeometryTransition::Update(const WeakPtr<FrameNode>& which, const WeakPtr<FrameNode>& value)
     {
         return false;
     }
 
-    bool GeometryTransition::IsNodeInAndActive(const WeakPtr<FrameNode>& frameNode) const
+    bool GeometryTransition::IsNodeInAndActive(const RefPtr<FrameNode>& frameNode) const
     {
         return false;
     }

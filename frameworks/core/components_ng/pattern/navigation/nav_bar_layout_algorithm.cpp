@@ -33,18 +33,18 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-float MeasureTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& hostNode,
+float MeasureTitleBar(FrameNode* frameNode, const RefPtr<NavBarNode>& hostNode,
     const RefPtr<NavBarLayoutProperty>& navBarLayoutProperty, const SizeF& navigationSize)
 {
     auto titleBarNode = hostNode->GetTitleBarNode();
     CHECK_NULL_RETURN(titleBarNode, 0.0f);
     auto index = hostNode->GetChildIndexById(titleBarNode->GetId());
-    auto titleBarWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
-    CHECK_NULL_RETURN(titleBarWrapper, 0.0f);
+    auto titleBar = frameNode->GetFrameNodeByIndex(index);
+    CHECK_NULL_RETURN(titleBar, 0.0f);
     auto constraint = navBarLayoutProperty->CreateChildConstraint();
     if (navBarLayoutProperty->GetHideTitleBar().value_or(false)) {
         constraint.selfIdealSize = OptionalSizeF(0.0f, 0.0f);
-        titleBarWrapper->Measure(constraint);
+        titleBar->Measure(constraint);
         return 0.0f;
     }
     auto titleBarFrameNode = AceType::DynamicCast<FrameNode>(titleBarNode);
@@ -54,7 +54,7 @@ float MeasureTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& ho
     if (titleBarLayoutProperty->HasTitleHeight()) {
         constraint.selfIdealSize.SetHeight(
             static_cast<float>(titleBarLayoutProperty->GetTitleHeightValue().ConvertToPx()));
-        titleBarWrapper->Measure(constraint);
+        titleBar->Measure(constraint);
         return titleBarLayoutProperty->GetTitleHeight()->ConvertToPx();
     }
 
@@ -64,13 +64,13 @@ float MeasureTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& ho
         if (hostNode->GetSubtitle()) {
             constraint.selfIdealSize =
                 OptionalSizeF(navigationSize.Width(), static_cast<float>(DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
-            titleBarWrapper->Measure(constraint);
+            titleBar->Measure(constraint);
             return static_cast<float>(DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
         }
 
         constraint.selfIdealSize =
             OptionalSizeF(navigationSize.Width(), static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
-        titleBarWrapper->Measure(constraint);
+        titleBar->Measure(constraint);
         return static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
     }
 
@@ -89,7 +89,7 @@ float MeasureTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& ho
             titleBarHeight = static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
         }
         constraint.selfIdealSize = OptionalSizeF(navigationSize.Width(), titleBarHeight);
-        titleBarWrapper->Measure(constraint);
+        titleBar->Measure(constraint);
         return titleBarHeight;
     }
 
@@ -98,24 +98,24 @@ float MeasureTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& ho
         titleBarHeight = static_cast<float>(FULL_SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
     }
     constraint.selfIdealSize = OptionalSizeF(navigationSize.Width(), titleBarHeight);
-    titleBarWrapper->Measure(constraint);
+    titleBar->Measure(constraint);
     return titleBarHeight;
 }
 
-float MeasureToolBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& hostNode,
+float MeasureToolBar(FrameNode* frameNode, const RefPtr<NavBarNode>& hostNode,
     const RefPtr<NavBarLayoutProperty>& navBarLayoutProperty, const SizeF& navigationSize)
 {
     auto toolBarNode = hostNode->GetToolBarNode();
     CHECK_NULL_RETURN(toolBarNode, 0.0f);
     auto index = hostNode->GetChildIndexById(toolBarNode->GetId());
-    auto toolBarWrapper = layoutWrapper->GetOrCreateChildByIndex((index));
-    CHECK_NULL_RETURN(toolBarWrapper, 0.0f);
+    auto toolBar = frameNode->GetFrameNodeByIndex(index);
+    CHECK_NULL_RETURN(toolBar, 0.0f);
     auto constraint = navBarLayoutProperty->CreateChildConstraint();
 
     if (navBarLayoutProperty->GetHideToolBar().value_or(false) ||
         toolBarNode->GetChildren().empty()) {
         constraint.selfIdealSize = OptionalSizeF(0.0f, 0.0f);
-        toolBarWrapper->Measure(constraint);
+        toolBar->Measure(constraint);
         return 0.0f;
     }
 
@@ -123,26 +123,26 @@ float MeasureToolBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& hos
     CHECK_NULL_RETURN(theme, 0.0f);
     auto toolbarHeight = theme->GetHeight();
     constraint.selfIdealSize = OptionalSizeF(navigationSize.Width(), static_cast<float>(toolbarHeight.ConvertToPx()));
-    toolBarWrapper->Measure(constraint);
+    toolBar->Measure(constraint);
     return static_cast<float>(toolbarHeight.ConvertToPx());
 }
 
-void MeasureContentChild(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& hostNode,
+void MeasureContentChild(FrameNode* frameNode, const RefPtr<NavBarNode>& hostNode,
     const RefPtr<NavBarLayoutProperty>& navBarLayoutProperty, const SizeF& navigationSize, float titleBarHeight,
     float toolBarHeight)
 {
     auto contentNode = hostNode->GetNavBarContentNode();
     CHECK_NULL_VOID(contentNode);
     auto index = hostNode->GetChildIndexById(contentNode->GetId());
-    auto contentWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
-    CHECK_NULL_VOID(contentWrapper);
+    auto content = frameNode->GetFrameNodeByIndex(index);
+    CHECK_NULL_VOID(content);
     auto constraint = navBarLayoutProperty->CreateChildConstraint();
     constraint.selfIdealSize =
         OptionalSizeF(navigationSize.Width(), navigationSize.Height() - titleBarHeight - toolBarHeight);
-    contentWrapper->Measure(constraint);
+    content->Measure(constraint);
 }
 
-float LayoutTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& hostNode,
+float LayoutTitleBar(FrameNode* frameNode, const RefPtr<NavBarNode>& hostNode,
     const RefPtr<NavBarLayoutProperty>& navBarLayoutProperty)
 {
     if (navBarLayoutProperty->GetHideTitleBar().value_or(false)) {
@@ -151,36 +151,36 @@ float LayoutTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& hos
     auto titleBarNode = hostNode->GetTitleBarNode();
     CHECK_NULL_RETURN(titleBarNode, 0.0f);
     auto index = hostNode->GetChildIndexById(titleBarNode->GetId());
-    auto titleBarWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
-    CHECK_NULL_RETURN(titleBarWrapper, 0.0f);
-    auto geometryNode = titleBarWrapper->GetGeometryNode();
+    auto titleBar = frameNode->GetFrameNodeByIndex(index);
+    CHECK_NULL_RETURN(titleBar, 0.0f);
+    auto geometryNode = titleBar->GetGeometryNode();
     auto titleBarOffset = OffsetF(0.0f, 0.0f);
     geometryNode->SetMarginFrameOffset(titleBarOffset);
-    titleBarWrapper->Layout();
+    titleBar->Layout();
     return geometryNode->GetFrameSize().Height();
 }
 
-void LayoutContent(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& hostNode,
+void LayoutContent(FrameNode* frameNode, const RefPtr<NavBarNode>& hostNode,
     const RefPtr<NavBarLayoutProperty>& navBarLayoutProperty, float titlebarHeight)
 {
     auto contentNode = hostNode->GetNavBarContentNode();
     CHECK_NULL_VOID(contentNode);
     auto index = hostNode->GetChildIndexById(hostNode->GetNavBarContentNode()->GetId());
-    auto contentWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
-    CHECK_NULL_VOID(contentWrapper);
-    auto geometryNode = contentWrapper->GetGeometryNode();
+    auto content = frameNode->GetFrameNodeByIndex(index);
+    CHECK_NULL_VOID(content);
+    auto geometryNode = content->GetGeometryNode();
     if (!navBarLayoutProperty->GetHideTitleBar().value_or(false)) {
         auto contentOffset = OffsetF(geometryNode->GetFrameOffset().GetX(), titlebarHeight);
         geometryNode->SetMarginFrameOffset(contentOffset);
-        contentWrapper->Layout();
+        content->Layout();
         return;
     }
     auto contentOffset = OffsetF(0.0f, 0.0f);
     geometryNode->SetMarginFrameOffset(contentOffset);
-    contentWrapper->Layout();
+    content->Layout();
 }
 
-void LayoutToolBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& hostNode,
+void LayoutToolBar(FrameNode* frameNode, const RefPtr<NavBarNode>& hostNode,
     const RefPtr<NavBarLayoutProperty>& navBarLayoutProperty)
 {
     if (navBarLayoutProperty->GetHideToolBar().value_or(false)) {
@@ -189,47 +189,47 @@ void LayoutToolBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& hostN
     auto toolBarNode = hostNode->GetToolBarNode();
     CHECK_NULL_VOID(toolBarNode);
     auto index = hostNode->GetChildIndexById(toolBarNode->GetId());
-    auto toolBarWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
-    CHECK_NULL_VOID(toolBarWrapper);
-    auto geometryNode = toolBarWrapper->GetGeometryNode();
+    auto toolBar = frameNode->GetFrameNodeByIndex(index);
+    CHECK_NULL_VOID(toolBar);
+    auto geometryNode = toolBar->GetGeometryNode();
 
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
-    auto toolBarOffsetY = layoutWrapper->GetGeometryNode()->GetFrameSize().Height() - theme->GetHeight().ConvertToPx();
+    auto toolBarOffsetY = frameNode->GetGeometryNode()->GetFrameSize().Height() - theme->GetHeight().ConvertToPx();
     auto toolBarOffset = OffsetF(geometryNode->GetFrameOffset().GetX(), static_cast<float>(toolBarOffsetY));
     geometryNode->SetMarginFrameOffset(toolBarOffset);
-    toolBarWrapper->Layout();
+    toolBar->Layout();
 }
 
 } // namespace
 
-void NavBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+void NavBarLayoutAlgorithm::Measure(FrameNode* frameNode)
 {
-    auto hostNode = AceType::DynamicCast<NavBarNode>(layoutWrapper->GetHostNode());
+    auto hostNode = AceType::DynamicCast<NavBarNode>(Claim(frameNode));
     CHECK_NULL_VOID(hostNode);
-    auto navBarLayoutProperty = AceType::DynamicCast<NavBarLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto navBarLayoutProperty = AceType::DynamicCast<NavBarLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_VOID(navBarLayoutProperty);
     const auto& constraint = navBarLayoutProperty->GetLayoutConstraint();
     CHECK_NULL_VOID(constraint);
-    auto geometryNode = layoutWrapper->GetGeometryNode();
+    auto geometryNode = frameNode->GetGeometryNode();
     auto size = CreateIdealSize(constraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT, true);
-    const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+    const auto& padding = frameNode->GetLayoutProperty()->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
-    float titleBarHeight = MeasureTitleBar(layoutWrapper, hostNode, navBarLayoutProperty, size);
-    float toolBarHeight = MeasureToolBar(layoutWrapper, hostNode, navBarLayoutProperty, size);
-    MeasureContentChild(layoutWrapper, hostNode, navBarLayoutProperty, size, titleBarHeight, toolBarHeight);
-    layoutWrapper->GetGeometryNode()->SetFrameSize(size);
+    float titleBarHeight = MeasureTitleBar(frameNode, hostNode, navBarLayoutProperty, size);
+    float toolBarHeight = MeasureToolBar(frameNode, hostNode, navBarLayoutProperty, size);
+    MeasureContentChild(frameNode, hostNode, navBarLayoutProperty, size, titleBarHeight, toolBarHeight);
+    frameNode->GetGeometryNode()->SetFrameSize(size);
 }
 
-void NavBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+void NavBarLayoutAlgorithm::Layout(FrameNode* frameNode)
 {
-    auto hostNode = AceType::DynamicCast<NavBarNode>(layoutWrapper->GetHostNode());
+    auto hostNode = AceType::DynamicCast<NavBarNode>(Claim(frameNode));
     CHECK_NULL_VOID(hostNode);
-    auto navBarLayoutProperty = AceType::DynamicCast<NavBarLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto navBarLayoutProperty = AceType::DynamicCast<NavBarLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_VOID(navBarLayoutProperty);
-    float titlebarHeight = LayoutTitleBar(layoutWrapper, hostNode, navBarLayoutProperty);
-    LayoutContent(layoutWrapper, hostNode, navBarLayoutProperty, titlebarHeight);
-    LayoutToolBar(layoutWrapper, hostNode, navBarLayoutProperty);
+    float titlebarHeight = LayoutTitleBar(frameNode, hostNode, navBarLayoutProperty);
+    LayoutContent(frameNode, hostNode, navBarLayoutProperty, titlebarHeight);
+    LayoutToolBar(frameNode, hostNode, navBarLayoutProperty);
 }
 
 } // namespace OHOS::Ace::NG

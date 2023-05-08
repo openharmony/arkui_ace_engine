@@ -17,52 +17,53 @@
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_item_layout_property.h"
 #include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
-void ListItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+void ListItemLayoutAlgorithm::Measure(FrameNode* frameNode)
 {
-    layoutWrapper->RemoveAllChildInRenderTree();
+    frameNode->SetActive(false);
 
-    std::list<RefPtr<LayoutWrapper>> childList;
-    auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
-    auto child = layoutWrapper->GetOrCreateChildByIndex(childNodeIndex_);
+    std::list<RefPtr<FrameNode>> childList;
+    auto layoutConstraint = frameNode->GetLayoutProperty()->CreateChildConstraint();
+    auto child = frameNode->GetFrameNodeByIndex(childNodeIndex_);
     if (child) {
         child->Measure(layoutConstraint);
         childList.push_back(child);
     }
-    PerformMeasureSelfWithChildList(layoutWrapper, childList);
-    auto mainSize = layoutWrapper->GetGeometryNode()->GetPaddingSize().MainSize(axis_);
+    PerformMeasureSelfWithChildList(frameNode, childList);
+    auto mainSize = frameNode->GetGeometryNode()->GetPaddingSize().MainSize(axis_);
     if (NonPositive(mainSize)) {
         curOffset_ = 0.0f;
         return;
     }
 
     if (Positive(curOffset_) && startNodeIndex_ >= 0) {
-        auto startLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+        auto startLayoutConstraint = frameNode->GetLayoutProperty()->CreateChildConstraint();
         if (!NearZero(startNodeSize_) && curOffset_ > startNodeSize_) {
             startLayoutConstraint.maxSize.SetCrossSize(curOffset_, axis_);
             startLayoutConstraint.minSize.SetCrossSize(curOffset_, axis_);
         }
         startLayoutConstraint.maxSize.SetMainSize(mainSize, axis_);
         startLayoutConstraint.percentReference.SetMainSize(mainSize, axis_);
-        auto startNode = layoutWrapper->GetOrCreateChildByIndex(startNodeIndex_);
+        auto startNode = frameNode->GetFrameNodeByIndex(startNodeIndex_);
         CHECK_NULL_VOID(startNode);
         startNode->Measure(startLayoutConstraint);
         if (NearZero(startNodeSize_)) {
             startNodeSize_ = startNode->GetGeometryNode()->GetMarginFrameSize().CrossSize(axis_);
         }
     } else if (Negative(curOffset_) && endNodeIndex_ >= 0) {
-        auto endLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+        auto endLayoutConstraint = frameNode->GetLayoutProperty()->CreateChildConstraint();
         if (!NearZero(endNodeSize_) && -curOffset_ > endNodeSize_) {
             endLayoutConstraint.maxSize.SetCrossSize(-curOffset_, axis_);
             endLayoutConstraint.minSize.SetCrossSize(-curOffset_, axis_);
         }
         endLayoutConstraint.maxSize.SetMainSize(mainSize, axis_);
         endLayoutConstraint.percentReference.SetMainSize(mainSize, axis_);
-        auto endNode = layoutWrapper->GetOrCreateChildByIndex(endNodeIndex_);
+        auto endNode = frameNode->GetFrameNodeByIndex(endNodeIndex_);
         CHECK_NULL_VOID(endNode);
         endNode->Measure(endLayoutConstraint);
         if (NearZero(endNodeSize_)) {
@@ -71,21 +72,21 @@ void ListItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 }
 
-void ListItemLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+void ListItemLayoutAlgorithm::Layout(FrameNode* frameNode)
 {
     // update child position.
-    auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
-    const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+    auto size = frameNode->GetGeometryNode()->GetFrameSize();
+    const auto& padding = frameNode->GetLayoutProperty()->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
     auto paddingOffset = padding.Offset();
     auto align = Alignment::CENTER;
-    if (layoutWrapper->GetLayoutProperty()->GetPositionProperty()) {
-        align = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
+    if (frameNode->GetLayoutProperty()->GetPositionProperty()) {
+        align = frameNode->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
     }
 
     // Update child position.
     if (Positive(curOffset_) && startNodeIndex_ >= 0) {
-        auto child = layoutWrapper->GetOrCreateChildByIndex(startNodeIndex_);
+        auto child = frameNode->GetFrameNodeByIndex(startNodeIndex_);
         CHECK_NULL_VOID(child);
         auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
         float crossOffset = curOffset_ - childSize.CrossSize(axis_);
@@ -94,7 +95,7 @@ void ListItemLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         child->GetGeometryNode()->SetMarginFrameOffset(paddingOffset + offset);
         child->Layout();
     } else if (Negative(curOffset_) && endNodeIndex_ >= 0) {
-        auto child = layoutWrapper->GetOrCreateChildByIndex(endNodeIndex_);
+        auto child = frameNode->GetFrameNodeByIndex(endNodeIndex_);
         CHECK_NULL_VOID(child);
         auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
         float crossOffset = size.CrossSize(axis_) + curOffset_;
@@ -103,7 +104,7 @@ void ListItemLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         child->GetGeometryNode()->SetMarginFrameOffset(paddingOffset + offset);
         child->Layout();
     }
-    auto child = layoutWrapper->GetOrCreateChildByIndex(childNodeIndex_);
+    auto child = frameNode->GetFrameNodeByIndex(childNodeIndex_);
     if (child) {
         auto translate =
             Alignment::GetAlignPosition(size, child->GetGeometryNode()->GetMarginFrameSize(), align) + paddingOffset;
@@ -113,7 +114,7 @@ void ListItemLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
 
     // Update content position.
-    const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
+    const auto& content = frameNode->GetGeometryNode()->GetContent();
     if (content) {
         auto translate = Alignment::GetAlignPosition(size, content->GetRect().GetSize(), align) + paddingOffset;
         content->SetOffset(translate);

@@ -31,7 +31,7 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
 }
 
 bool GridPattern::OnDirtyLayoutWrapperSwap(
-    const RefPtr<LayoutWrapper>& /* dirty */, const DirtySwapConfig& /* config */)
+    RefPtr<LayoutWrapper>& /* dirty */, const DirtySwapConfig& /* config */)
 {
     return false;
 }

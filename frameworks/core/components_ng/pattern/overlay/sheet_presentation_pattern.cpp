@@ -70,11 +70,10 @@ void SheetPresentationPattern::InitPageHeight()
     pageHeight_ = pageNode->GetGeometryNode()->GetFrameSize().Height();
 }
 
-bool SheetPresentationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
-    const DirtySwapConfig& config)
+bool SheetPresentationPattern::OnDirtyLayoutWrapperSwap(FrameNode* frameNode, const DirtySwapConfig& config)
 {
     InitialLayoutProps();
-    auto layoutProperty = DynamicCast<SheetPresentationProperty>(dirty->GetLayoutProperty());
+    auto layoutProperty = DynamicCast<SheetPresentationProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_RETURN(layoutProperty, false);
     auto showDragIndicator = layoutProperty->GetSheetStyleValue().showDragIndicator.value_or(true);
     auto host = GetHost();

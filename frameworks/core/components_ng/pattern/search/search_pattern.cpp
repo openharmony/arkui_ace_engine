@@ -82,21 +82,19 @@ void SearchPattern::UpdateChangeEvent(const std::string& value)
     imageHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
-bool SearchPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& /*config*/)
+bool SearchPattern::OnDirtyLayoutWrapperSwap(FrameNode* frameNode, const DirtySwapConfig& /*config*/)
 {
-    auto geometryNode = dirty->GetGeometryNode();
+    auto geometryNode = frameNode->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, true);
     searchSize_ = geometryNode->GetContentSize();
     searchOffset_ = geometryNode->GetContentOffset();
 
-    auto buttonLayoutWrapper = dirty->GetOrCreateChildByIndex(BUTTON_INDEX);
-    CHECK_NULL_RETURN(buttonLayoutWrapper, true);
-    auto buttonGeometryNode = buttonLayoutWrapper->GetGeometryNode();
+    auto buttonNode = frameNode->GetFrameNodeByIndex(BUTTON_INDEX);
+    CHECK_NULL_RETURN(buttonNode, true);
+    auto buttonGeometryNode = buttonNode->GetGeometryNode();
     CHECK_NULL_RETURN(buttonGeometryNode, true);
     buttonOffset_ = buttonGeometryNode->GetFrameOffset();
 
-    auto buttonNode = buttonLayoutWrapper->GetHostNode();
-    CHECK_NULL_RETURN(buttonNode, true);
     auto searchButtonEvent = buttonNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_RETURN(searchButtonEvent, true);
 
@@ -106,13 +104,11 @@ bool SearchPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         buttonSize_ = buttonGeometryNode->GetFrameSize();
     }
 
-    auto cancelButtonLayoutWrapper = dirty->GetOrCreateChildByIndex(CANCEL_BUTTON_INDEX);
-    CHECK_NULL_RETURN(cancelButtonLayoutWrapper, true);
-    auto cancelButtonGeometryNode = cancelButtonLayoutWrapper->GetGeometryNode();
+    auto cancelButtonNode = frameNode->GetFrameNodeByIndex(CANCEL_BUTTON_INDEX);
+    CHECK_NULL_RETURN(cancelButtonNode, true);
+    auto cancelButtonGeometryNode = cancelButtonNode->GetGeometryNode();
     CHECK_NULL_RETURN(cancelButtonGeometryNode, true);
 
-    auto cancelButtonNode = cancelButtonLayoutWrapper->GetHostNode();
-    CHECK_NULL_RETURN(cancelButtonNode, true);
     auto cancelButtonEvent = cancelButtonNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_RETURN(cancelButtonEvent, true);
     cancelButtonOffset_ = cancelButtonGeometryNode->GetFrameOffset();

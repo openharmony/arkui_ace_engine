@@ -30,7 +30,7 @@ public:
     ~PatternLockLayoutAlgorithm() override = default;
 
     std::optional<SizeF> MeasureContent(
-        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
+        const LayoutConstraintF& contentConstraint, FrameNode* frameNode) override;
 
 private:
     Dimension sideLength_;

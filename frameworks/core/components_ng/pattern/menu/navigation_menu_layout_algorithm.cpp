@@ -22,11 +22,10 @@
 
 namespace OHOS::Ace::NG {
 
-void NavigationMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+void NavigationMenuLayoutAlgorithm::Layout(FrameNode* frameNode)
 {
-    CHECK_NULL_VOID(layoutWrapper);
-    auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
-    auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto size = frameNode->GetGeometryNode()->GetFrameSize();
+    auto props = AceType::DynamicCast<MenuLayoutProperty>(frameNode->GetLayoutProperty());
     LOGD("MenuLayout: clickPosition = %{public}f, %{public}f", position_.GetX(), position_.GetY());
     CHECK_NULL_VOID(props);
 
@@ -37,16 +36,16 @@ void NavigationMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     auto outPadding = static_cast<float>(theme->GetOutPadding().ConvertToPx());
-    auto child = layoutWrapper->GetOrCreateChildByIndex(0, false);
+    auto child = frameNode->GetFrameNodeByIndex(0, false);
     float offsetX = 0.0;
     if (child) {
         offsetX = child->GetGeometryNode()->GetFrameSize().Width() + outPadding * 2;
     }
-    layoutWrapper->GetGeometryNode()->SetMarginFrameOffset(NG::OffsetF(x - offsetX, y));
+    frameNode->GetGeometryNode()->SetMarginFrameOffset(NG::OffsetF(x - offsetX, y));
 
     // translate each option by the height of previous options
     OffsetF translate(outPadding, outPadding);
-    for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
+    for (const auto& child : frameNode->GetAllFrameNodeChildren()) {
         LOGD("layout child at offset: %{public}f, %{public}f", translate.GetX(), translate.GetY());
         child->GetGeometryNode()->SetMarginFrameOffset(translate);
         child->Layout();

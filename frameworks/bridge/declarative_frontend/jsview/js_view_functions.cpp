@@ -67,10 +67,10 @@ JSRef<JSObject> GenEdgeWidths(const std::unique_ptr<NG::BorderWidthProperty>& ed
     return edgeWidths;
 }
 
-JSRef<JSObject> GenBorderInfo(const RefPtr<NG::LayoutWrapper>& layoutWrapper)
+JSRef<JSObject> GenBorderInfo(const RefPtr<NG::FrameNode>& frameNode)
 {
     JSRef<JSObject> borderInfo = JSRef<JSObject>::New();
-    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    auto layoutProperty = frameNode->GetLayoutProperty();
     if (!layoutProperty) {
         return borderInfo;
     }
@@ -89,25 +89,25 @@ JSRef<JSObject> GenBorderInfo(const RefPtr<NG::LayoutWrapper>& layoutWrapper)
     return borderInfo;
 }
 
-JSRef<JSObject> GenPositionInfo(const RefPtr<NG::LayoutWrapper>& layoutWrapper)
+JSRef<JSObject> GenPositionInfo(const RefPtr<NG::FrameNode>& frameNode)
 {
-    auto offset = layoutWrapper->GetGeometryNode()->GetFrameOffset();
+    auto offset = frameNode->GetGeometryNode()->GetFrameOffset();
     JSRef<JSObject> position = JSRef<JSObject>::New();
     position->SetProperty("x", offset.GetX());
     position->SetProperty("y", offset.GetY());
     return position;
 }
 
-void FillSubComponetProperty(JSRef<JSObject>& info, const RefPtr<NG::LayoutWrapper>& layoutWrapper, const size_t& index)
+void FillSubComponetProperty(JSRef<JSObject>& info, const RefPtr<NG::FrameNode>& frameNode, const size_t& index)
 {
-    info->SetProperty<std::string>("name", layoutWrapper->GetHostNode()->GetTag());
-    info->SetProperty<std::string>("id", std::to_string(layoutWrapper->GetHostNode()->GetId()));
-    info->SetPropertyObject("constraint", GenConstraint(layoutWrapper->GetLayoutProperty()->GetLayoutConstraint()));
-    info->SetPropertyObject("borderInfo", GenBorderInfo(layoutWrapper));
-    info->SetPropertyObject("position", GenPositionInfo(layoutWrapper));
+    info->SetProperty<std::string>("name", frameNode->GetTag());
+    info->SetProperty<std::string>("id", std::to_string(frameNode->GetId()));
+    info->SetPropertyObject("constraint", GenConstraint(frameNode->GetLayoutProperty()->GetLayoutConstraint()));
+    info->SetPropertyObject("borderInfo", GenBorderInfo(frameNode));
+    info->SetPropertyObject("position", GenPositionInfo(frameNode));
 }
 
-JSRef<JSArray> GenLayoutChildArray(std::list<RefPtr<NG::LayoutWrapper>> children)
+JSRef<JSArray> GenLayoutChildArray(std::list<RefPtr<NG::FrameNode>> children)
 {
     JSRef<JSArray> childInfo = JSRef<JSArray>::New();
     JSRef<JSFunc> layoutFunc = JSRef<JSFunc>::New<FunctionCallback>(ViewMeasureLayout::JSLayout);
@@ -123,7 +123,7 @@ JSRef<JSArray> GenLayoutChildArray(std::list<RefPtr<NG::LayoutWrapper>> children
     return childInfo;
 }
 
-JSRef<JSArray> GenMeasureChildArray(std::list<RefPtr<NG::LayoutWrapper>> children)
+JSRef<JSArray> GenMeasureChildArray(std::list<RefPtr<NG::FrameNode>> children)
 {
     JSRef<JSArray> childInfo = JSRef<JSArray>::New();
     JSRef<JSFunc> measureFunc = JSRef<JSFunc>::New<FunctionCallback>(ViewMeasureLayout::JSMeasure);
@@ -141,27 +141,27 @@ JSRef<JSArray> GenMeasureChildArray(std::list<RefPtr<NG::LayoutWrapper>> childre
 
 } // namespace
 
-void ViewFunctions::ExecuteLayout(NG::LayoutWrapper* layoutWrapper)
+void ViewFunctions::ExecuteLayout(NG::FrameNode* frameNode)
 {
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
     ACE_SCOPED_TRACE("ViewFunctions::ExecuteLayout");
-    auto children = layoutWrapper->GetAllChildrenWithBuild();
-    auto parentConstraint = layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint();
+    auto children = frameNode->GetAllFrameNodeChildren();
+    auto parentConstraint = frameNode->GetGeometryNode()->GetParentLayoutConstraint();
     auto constraint = GenConstraint(parentConstraint);
     auto childArray = GenLayoutChildArray(children);
     JSRef<JSVal> params[2] = { childArray, constraint };
 
-    ViewMeasureLayout::SetLayoutChildren(layoutWrapper->GetAllChildrenWithBuild());
+    ViewMeasureLayout::SetLayoutChildren(frameNode->GetAllFrameNodeChildren());
     ViewMeasureLayout::SetDefaultMeasureConstraint(parentConstraint.value());
     jsLayoutFunc_.Lock()->Call(jsObject_.Lock(), 2, params);
 }
 
-void ViewFunctions::ExecuteMeasure(NG::LayoutWrapper* layoutWrapper)
+void ViewFunctions::ExecuteMeasure(NG::FrameNode* frameNode)
 {
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
     ACE_SCOPED_TRACE("ViewFunctions::ExecuteMeasure");
-    auto children = layoutWrapper->GetAllChildrenWithBuild();
-    auto parentConstraint = layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint();
+    auto children = frameNode->GetAllFrameNodeChildren();
+    auto parentConstraint = frameNode->GetGeometryNode()->GetParentLayoutConstraint();
     auto constraint = GenConstraint(parentConstraint);
     auto childArray = GenMeasureChildArray(children);
     JSRef<JSVal> params[2];
@@ -217,9 +217,9 @@ void ViewFunctions::ExecuteRecycle(const std::string& viewName)
 
 #else
 
-void ViewFunctions::ExecuteLayout(NG::LayoutWrapper* layoutWrapper) {}
+void ViewFunctions::ExecuteLayout(NG::FrameNode* frameNode) {}
 
-void ViewFunctions::ExecuteMeasure(NG::LayoutWrapper* layoutWrapper) {}
+void ViewFunctions::ExecuteMeasure(NG::FrameNode* frameNode) {}
 
 void ViewFunctions::ExecuteReload(bool deep) {}
 

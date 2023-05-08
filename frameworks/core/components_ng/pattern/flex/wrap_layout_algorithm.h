@@ -31,14 +31,14 @@
 namespace OHOS::Ace::NG {
 
 struct ContentInfo {
-    ContentInfo(float main, float cross, int32_t total, const std::list<RefPtr<LayoutWrapper>>& nodeList)
+    ContentInfo(float main, float cross, int32_t total, const std::list<RefPtr<FrameNode>>& nodeList)
         : mainLength(main), crossLength(cross), count(total), itemList(nodeList)
     {}
 
     float mainLength = 0.0f;
     float crossLength = 0.0f;
     int32_t count = 0;
-    std::list<RefPtr<LayoutWrapper>> itemList;
+    std::list<RefPtr<FrameNode>> itemList;
     float spaceBetween = 0.0f;
     float maxBaselineDistance = 0.0f;
 
@@ -67,16 +67,16 @@ public:
     explicit WrapLayoutAlgorithm(bool stretch) : isDialogStretch_(stretch) {};
     ~WrapLayoutAlgorithm() override = default;
 
-    void Measure(LayoutWrapper* layoutWrapper) override;
+    void Measure(FrameNode* frameNode) override;
 
-    void Layout(LayoutWrapper* layoutWrapper) override;
+    void Layout(FrameNode* frameNode) override;
 
 private:
     void PerformLayoutInitialize(const RefPtr<LayoutProperty>& layoutProp);
     void HandleDialogStretch();
     SizeF GetLeftSize(float crossLength, float mainLeftLength, float crossLeftLength);
     void LayoutWholeWrap(
-        OffsetF& startPosition, OffsetF& spaceBetweenContentsOnCrossAxis, LayoutWrapper* layoutWrapper);
+        OffsetF& startPosition, OffsetF& spaceBetweenContentsOnCrossAxis, FrameNode* frameNode);
 
     float GetItemMainAxisLength(const RefPtr<GeometryNode>& item) const;
     float GetItemCrossAxisLength(const RefPtr<GeometryNode>& item) const;
@@ -92,7 +92,7 @@ private:
     float CalcItemCrossAxisOffset(
         const ContentInfo& content, const OffsetF& contentOffset, const RefPtr<GeometryNode>& node);
 
-    void StretchItemsInContent(LayoutWrapper* layoutWrapper, const ContentInfo& content);
+    void StretchItemsInContent(FrameNode* frameNode, const ContentInfo& content);
     void TraverseContent(const OffsetF& startPosition, const OffsetF& spaceBetweenContentsOnCrossAxis);
     OffsetF GetItemMainOffset(float mainSpace) const;
     void LayoutContent(const ContentInfo& content, const OffsetF& position);
@@ -101,7 +101,7 @@ private:
     void AddPaddingToStartPosition(OffsetF& startPosition) const;
     void GetFlexItemProperties(const ContentInfo& content, FlexItemProperties& flexItemProperties);
     void CalcFlexGrowLayout(
-        const RefPtr<LayoutWrapper>& itemWrapper, const FlexItemProperties& flexItemProperties, float remainSpace);
+        const RefPtr<FrameNode>& itemWrapper, const FlexItemProperties& flexItemProperties, float remainSpace);
 
     WrapDirection direction_ = WrapDirection::VERTICAL;
     WrapAlignment alignment_ = WrapAlignment::START;
@@ -128,7 +128,7 @@ private:
     float mainLengthLimit_ = 0.0f;
     float crossLengthLimit_ = 0.0f;
     float currentMainLength_ = 0.0f;
-    std::list<RefPtr<LayoutWrapper>> outOfLayoutChildren_;
+    std::list<RefPtr<FrameNode>> outOfLayoutChildren_;
 
     ACE_DISALLOW_COPY_AND_MOVE(WrapLayoutAlgorithm);
 };

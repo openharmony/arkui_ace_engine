@@ -761,7 +761,7 @@ float RefreshPattern::GetCustomBuilderOpacityRatio()
 }
 
 bool RefreshPattern::OnDirtyLayoutWrapperSwap(
-    const RefPtr<LayoutWrapper>& /* dirty */, const DirtySwapConfig& /* changeConfig */)
+    FrameNode* /*frameNode*/, const DirtySwapConfig& /* changeConfig */)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);

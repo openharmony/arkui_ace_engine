@@ -684,21 +684,21 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
         .isStatic = IsStatic(),
         .jsViewName = GetJSViewName() };
 
-    auto measureFunc = [weak = AceType::WeakClaim(this)](NG::LayoutWrapper* layoutWrapper) -> void {
+    auto measureFunc = [weak = AceType::WeakClaim(this)](NG::FrameNode* frameNode) -> void {
         auto jsView = weak.Upgrade();
         CHECK_NULL_VOID(jsView);
         ContainerScope scope(jsView->GetInstanceId());
-        jsView->jsViewFunction_->ExecuteMeasure(layoutWrapper);
+        jsView->jsViewFunction_->ExecuteMeasure(frameNode);
     };
     if (jsViewFunction_->HasMeasure()) {
         info.measureFunc = std::move(measureFunc);
     }
 
-    auto layoutFunc = [weak = AceType::WeakClaim(this)](NG::LayoutWrapper* layoutWrapper) -> void {
+    auto layoutFunc = [weak = AceType::WeakClaim(this)](NG::FrameNode* frameNode) -> void {
         auto jsView = weak.Upgrade();
         CHECK_NULL_VOID(jsView);
         ContainerScope scope(jsView->GetInstanceId());
-        jsView->jsViewFunction_->ExecuteLayout(layoutWrapper);
+        jsView->jsViewFunction_->ExecuteLayout(frameNode);
     };
     if (jsViewFunction_->HasLayout()) {
         info.layoutFunc = std::move(layoutFunc);

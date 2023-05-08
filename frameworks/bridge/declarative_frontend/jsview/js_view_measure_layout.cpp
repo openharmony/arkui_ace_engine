@@ -22,10 +22,10 @@ namespace OHOS::Ace::Framework {
 
 #ifdef USE_ARK_ENGINE
 
-thread_local std::list<RefPtr<NG::LayoutWrapper>> ViewMeasureLayout::measureChildren_;
-thread_local std::list<RefPtr<NG::LayoutWrapper>>::iterator ViewMeasureLayout::iterMeasureChildren_;
-thread_local std::list<RefPtr<NG::LayoutWrapper>> ViewMeasureLayout::layoutChildren_;
-thread_local std::list<RefPtr<NG::LayoutWrapper>>::iterator ViewMeasureLayout::iterLayoutChildren_;
+thread_local std::list<RefPtr<NG::FrameNode>> ViewMeasureLayout::measureChildren_;
+thread_local std::list<RefPtr<NG::FrameNode>>::iterator ViewMeasureLayout::iterMeasureChildren_;
+thread_local std::list<RefPtr<NG::FrameNode>> ViewMeasureLayout::layoutChildren_;
+thread_local std::list<RefPtr<NG::FrameNode>>::iterator ViewMeasureLayout::iterLayoutChildren_;
 thread_local NG::LayoutConstraintF ViewMeasureLayout::measureDefaultConstraint_;
 
 panda::Local<panda::JSValueRef> ViewMeasureLayout::JSMeasure(panda::JsiRuntimeCallInfo* runtimeCallInfo)

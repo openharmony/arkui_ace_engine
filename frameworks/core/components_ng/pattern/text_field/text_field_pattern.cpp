@@ -196,11 +196,11 @@ void TextFieldPattern::UpdateConfiguration()
 }
 #endif
 
-bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+bool TextFieldPattern::OnDirtyLayoutWrapperSwap(FrameNode* frameNode, const DirtySwapConfig& config)
 {
-    contentRect_ = dirty->GetGeometryNode()->GetContentRect();
-    frameRect_ = dirty->GetGeometryNode()->GetFrameRect();
-    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
+    contentRect_ = frameNode->GetGeometryNode()->GetContentRect();
+    frameRect_ = frameNode->GetGeometryNode()->GetFrameRect();
+    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(frameNode->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto textFieldLayoutAlgorithm = DynamicCast<TextFieldLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(textFieldLayoutAlgorithm, false);

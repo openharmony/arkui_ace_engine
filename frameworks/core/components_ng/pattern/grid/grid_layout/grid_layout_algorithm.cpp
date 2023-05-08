@@ -20,6 +20,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/grid/grid_item_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_utils.h"
@@ -70,9 +71,9 @@ LayoutConstraintF GridLayoutAlgorithm::CreateChildConstraint(const SizeF& idealS
     return layoutConstraint;
 }
 
-void GridLayoutAlgorithm::InitGridCeils(LayoutWrapper* layoutWrapper, const SizeF& idealSize)
+void GridLayoutAlgorithm::InitGridCeils(FrameNode* frameNode, const SizeF& idealSize)
 {
-    auto layoutProperty = DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto layoutProperty = DynamicCast<GridLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     auto scale = layoutProperty->GetLayoutConstraint()->scaleProperty;
     rowsGap_ = ConvertToPx(layoutProperty->GetRowsGap().value_or(0.0_vp), scale, idealSize.Height()).value_or(0);
@@ -166,12 +167,12 @@ void GridLayoutAlgorithm::GetNextGrid(int32_t& curRow, int32_t& curCol) const
     }
 }
 
-OffsetF GridLayoutAlgorithm::ComputeItemPosition(LayoutWrapper* layoutWrapper, int32_t row, int32_t col,
-    int32_t& rowSpan, int32_t& colSpan, const RefPtr<OHOS::Ace::NG::LayoutProperty>& childLayoutProperty) const
+OffsetF GridLayoutAlgorithm::ComputeItemPosition(FrameNode* frameNode, int32_t row, int32_t col, int32_t& rowSpan,
+    int32_t& colSpan, const RefPtr<OHOS::Ace::NG::LayoutProperty>& childLayoutProperty) const
 {
-    auto layoutProperty = DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto layoutProperty = DynamicCast<GridLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_RETURN(layoutProperty, OffsetF());
-    auto frameSize = layoutWrapper->GetGeometryNode()->GetMarginFrameSize();
+    auto frameSize = frameNode->GetGeometryNode()->GetMarginFrameSize();
 
     // Calculate the position for current child.
     float positionX = 0.0f;
@@ -211,9 +212,9 @@ OffsetF GridLayoutAlgorithm::ComputeItemPosition(LayoutWrapper* layoutWrapper, i
     return OffsetF(positionX, positionY);
 }
 
-void GridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+void GridLayoutAlgorithm::Measure(FrameNode* frameNode)
 {
-    auto gridLayoutProperty = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto gridLayoutProperty = AceType::DynamicCast<GridLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_VOID(gridLayoutProperty);
     Axis axis = gridLayoutInfo_.axis_;
     auto idealSize =
@@ -223,9 +224,9 @@ void GridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         return;
     }
 
-    layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
+    frameNode->GetGeometryNode()->SetFrameSize(idealSize);
     MinusPaddingToSize(gridLayoutProperty->CreatePaddingAndBorder(), idealSize);
-    InitGridCeils(layoutWrapper, idealSize);
+    InitGridCeils(frameNode, idealSize);
 
     int32_t rowIndex = 0;
     int32_t colIndex = 0;
@@ -233,11 +234,11 @@ void GridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     itemsPosition_.clear();
     gridLayoutInfo_.gridMatrix_.clear();
     for (int32_t index = 0; index < mainCount_ * crossCount_; ++index) {
-        auto childLayoutWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
-        if (!childLayoutWrapper) {
+        auto child = frameNode->GetFrameNodeByIndex(index);
+        if (!child) {
             break;
         }
-        auto layoutProperty = childLayoutWrapper->GetLayoutProperty();
+        auto layoutProperty = child->GetLayoutProperty();
         if (!layoutProperty) {
             break;
         }
@@ -256,10 +257,10 @@ void GridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
         if (itemRowStart >= 0 && itemRowStart < mainCount_ && itemColStart >= 0 && itemColStart < crossCount_ &&
             CheckGridPlaced(itemIndex, itemRowStart, itemColStart, itemRowSpan, itemColSpan)) {
-            childLayoutWrapper->Measure(CreateChildConstraint(idealSize, gridLayoutProperty, itemRowStart, itemColStart,
-                itemRowSpan, itemColSpan, childLayoutProperty));
-            itemsPosition_.try_emplace(index, ComputeItemPosition(layoutWrapper, itemRowStart, itemColStart,
-                itemRowSpan, itemColSpan, childLayoutProperty));
+            child->Measure(CreateChildConstraint(idealSize, gridLayoutProperty, itemRowStart, itemColStart, itemRowSpan,
+                itemColSpan, childLayoutProperty));
+            itemsPosition_.try_emplace(index, ComputeItemPosition(frameNode, itemRowStart, itemColStart, itemRowSpan,
+                                                  itemColSpan, childLayoutProperty));
         } else {
             while (!CheckGridPlaced(itemIndex, rowIndex, colIndex, itemRowSpan, itemColSpan)) {
                 GetNextGrid(rowIndex, colIndex);
@@ -270,27 +271,26 @@ void GridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             if (rowIndex >= mainCount_ || colIndex >= crossCount_) {
                 continue;
             }
-            childLayoutWrapper->Measure(CreateChildConstraint(
+            child->Measure(CreateChildConstraint(
                 idealSize, gridLayoutProperty, rowIndex, colIndex, itemRowSpan, itemColSpan, childLayoutProperty));
             itemsPosition_.try_emplace(index,
-                ComputeItemPosition(layoutWrapper, rowIndex, colIndex, itemRowSpan, itemColSpan, childLayoutProperty));
+                ComputeItemPosition(frameNode, rowIndex, colIndex, itemRowSpan, itemColSpan, childLayoutProperty));
         }
         ++itemIndex;
     }
 }
 
-void GridLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+void GridLayoutAlgorithm::Layout(FrameNode* frameNode)
 {
-    CHECK_NULL_VOID(layoutWrapper);
-    auto layoutProperty = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto layoutProperty = AceType::DynamicCast<GridLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    auto frameSize = frameNode->GetGeometryNode()->GetFrameSize();
     auto padding = layoutProperty->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, frameSize);
 
     for (int32_t index = 0; index < mainCount_ * crossCount_; ++index) {
-        auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
-        if (!childWrapper) {
+        auto child = frameNode->GetFrameNodeByIndex(index);
+        if (!child) {
             break;
         }
         OffsetF childOffset;
@@ -298,10 +298,10 @@ void GridLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         if (childPosition != itemsPosition_.end()) {
             childOffset = itemsPosition_.at(index);
             // TODO: add center position when grid item is less than ceil.
-            childWrapper->GetGeometryNode()->SetMarginFrameOffset(padding.Offset() + childOffset);
-            childWrapper->Layout();
+            child->GetGeometryNode()->SetMarginFrameOffset(padding.Offset() + childOffset);
+            child->Layout();
         } else {
-            LayoutWrapper::RemoveChildInRenderTree(childWrapper);
+            child->SetActive(false);
         }
     }
 
@@ -313,12 +313,12 @@ void GridLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
                 continue;
             }
             itemIndex = crossLine.second;
-            auto wrapper = layoutWrapper->GetOrCreateChildByIndex(itemIndex);
-            if (!wrapper) {
+            auto child = frameNode->GetFrameNodeByIndex(itemIndex);
+            if (!child) {
                 LOGE("Layout item wrapper of index: %{public}d is null, please check.", itemIndex);
                 break;
             }
-            auto layoutProperty = wrapper->GetLayoutProperty();
+            auto layoutProperty = child->GetLayoutProperty();
             CHECK_NULL_VOID(layoutProperty);
             auto gridItemLayoutProperty = AceType::DynamicCast<GridItemLayoutProperty>(layoutProperty);
             CHECK_NULL_VOID(gridItemLayoutProperty);

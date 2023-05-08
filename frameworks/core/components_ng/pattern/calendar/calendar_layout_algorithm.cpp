@@ -34,10 +34,10 @@ constexpr int32_t CALENDAR_MIN_HEIGHT = 230;
 } // namespace
 
 std::optional<SizeF> CalendarLayoutAlgorithm::MeasureContent(
-    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+    const LayoutConstraintF& contentConstraint, FrameNode* frameNode)
 {
     SizeF calendarMinSize(CALENDAR_MIN_WIDTH, CALENDAR_MIN_HEIGHT);
-    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, std::nullopt);
     auto maxSize = contentConstraint.maxSize;
     SizeF layoutSize;
@@ -50,10 +50,8 @@ std::optional<SizeF> CalendarLayoutAlgorithm::MeasureContent(
             std::max(maxSize.Width(), calendarMinSize.Width()), std::max(maxSize.Height(), calendarMinSize.Height()));
     }
     if (GreaterOrEqualToInfinity(maxSize.Width()) || GreaterOrEqualToInfinity(maxSize.Height())) {
-        auto frameNode = layoutWrapper->GetHostNode();
-        CHECK_NULL_RETURN(frameNode, std::nullopt);
         auto pipeline = frameNode->GetContext();
-        CHECK_NULL_RETURN(frameNode, std::nullopt);
+        CHECK_NULL_RETURN(pipeline, std::nullopt);
         maxWidth_ = pipeline->GetRootWidth();
         maxHeight_ = pipeline->GetRootHeight();
         return SizeF(static_cast<float>(pipeline->GetRootWidth()), static_cast<float>(pipeline->GetRootHeight()));

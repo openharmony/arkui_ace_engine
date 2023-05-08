@@ -31,11 +31,11 @@ public:
 
     void OnReset() override {}
 
-    void Measure(LayoutWrapper* layoutWrapper) override;
-    void Layout(LayoutWrapper* layoutWrapper) override;
+    void Measure(FrameNode* frameNode) override;
+    void Layout(FrameNode* frameNode) override;
 
 private:
-    void PerformMeasureSelf(LayoutWrapper* layoutWrapper);
+    void PerformMeasureSelf(FrameNode* frameNode);
 
     ACE_DISALLOW_COPY_AND_MOVE(BadgeLayoutAlgorithm);
 };

@@ -103,13 +103,13 @@ void FormPattern::OnRebuildFrame()
     renderContext->AddChild(externalRenderContext_, 0);
 }
 
-bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+bool FormPattern::OnDirtyLayoutWrapperSwap(FrameNode* frameNode, const DirtySwapConfig& config)
 {
     if (config.skipMeasure && config.skipLayout) {
         return false;
     }
 
-    auto size = dirty->GetGeometryNode()->GetFrameSize();
+    auto size = frameNode->GetGeometryNode()->GetFrameSize();
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto layoutProperty = host->GetLayoutProperty<FormLayoutProperty>();

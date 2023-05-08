@@ -87,13 +87,12 @@ MenuLayoutAlgorithm::~MenuLayoutAlgorithm()
     placementFuncMap_.clear();
 }
 
-void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
+void MenuLayoutAlgorithm::Initialize(FrameNode* frameNode)
 {
-    CHECK_NULL_VOID(layoutWrapper);
     // currently using click point as menu position
-    auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto props = AceType::DynamicCast<MenuLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_VOID(props);
-    auto menuPattern = layoutWrapper->GetHostNode()->GetPattern<MenuPattern>();
+    auto menuPattern = frameNode->GetPattern<MenuPattern>();
     auto targetSize = props->GetTargetSizeValue(SizeF());
     position_ = props->GetMenuOffset().value_or(OffsetF());
     positionOffset_ = props->GetPositionOffset().value_or(OffsetF());
@@ -139,13 +138,12 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
 }
 
 // Called to perform layout render node and child.
-void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+void MenuLayoutAlgorithm::Measure(FrameNode* frameNode)
 {
     // initialize screen size and menu position
-    CHECK_NULL_VOID(layoutWrapper);
-    Initialize(layoutWrapper);
+    Initialize(frameNode);
 
-    auto menuLayoutProperty = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto menuLayoutProperty = AceType::DynamicCast<MenuLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_VOID(menuLayoutProperty);
     const auto& constraint = menuLayoutProperty->GetLayoutConstraint();
     if (!constraint) {
@@ -158,13 +156,13 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     MinusPaddingToSize(padding, idealSize);
 
     // calculate menu main size
-    auto childConstraint = CreateChildConstraint(layoutWrapper);
+    auto childConstraint = CreateChildConstraint(frameNode);
     float idealHeight = 0.0f;
     float idealWidth = 0.0f;
-    for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
+    for (const auto& child : frameNode->GetAllFrameNodeChildren()) {
         child->Measure(childConstraint);
         auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
-        LOGD("child finish measure, child %{public}s size = %{public}s", child->GetHostTag().c_str(),
+        LOGD("child finish measure, child %{public}s size = %{public}s", child->GetTag().c_str(),
             child->GetGeometryNode()->GetMarginFrameSize().ToString().c_str());
         idealHeight += childSize.Height();
         idealWidth = std::max(idealWidth, childSize.Width());
@@ -173,31 +171,28 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     idealSize.SetWidth(idealWidth);
     AddPaddingToSize(padding, idealSize);
 
-    auto geometryNode = layoutWrapper->GetGeometryNode();
+    auto geometryNode = frameNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     LOGD("finish measure, menu size = %{public}f x %{public}f", idealSize.Width(), idealSize.Height());
     geometryNode->SetFrameSize(idealSize);
 }
 
-void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+void MenuLayoutAlgorithm::Layout(FrameNode* frameNode)
 {
-    CHECK_NULL_VOID(layoutWrapper);
-    auto menuProp = DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto menuProp = DynamicCast<MenuLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_VOID(menuProp);
     if (!targetTag_.empty()) {
         InitTargetSizeAndPosition(menuProp);
     }
 
-    auto menuNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(menuNode);
-    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    auto menuPattern = frameNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     if (menuPattern->IsSubMenu()) {
-        LayoutSubMenu(layoutWrapper);
+        LayoutSubMenu(frameNode);
         return;
     }
 
-    auto geometryNode = layoutWrapper->GetGeometryNode();
+    auto geometryNode = frameNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto size = geometryNode->GetMarginFrameSize();
     if (menuPattern->IsSelectMenu()) {
@@ -217,9 +212,9 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
     // translate each option by the height of previous options
     OffsetF translate;
-    for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
+    for (const auto& child : frameNode->GetAllFrameNodeChildren()) {
         LOGD("layout child at offset: %{public}s, tag %{public}s", translate.ToString().c_str(),
-            child->GetHostTag().c_str());
+            child->GetTag().c_str());
         child->GetGeometryNode()->SetMarginFrameOffset(translate);
         child->Layout();
         translate += OffsetF(0, child->GetGeometryNode()->GetFrameSize().Height());
@@ -227,7 +222,7 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
     if (menuPattern->IsContextMenu()) {
         std::vector<Rect> rects;
-        auto frameRect = layoutWrapper->GetGeometryNode()->GetFrameRect();
+        auto frameRect = frameNode->GetGeometryNode()->GetFrameRect();
         auto rect = Rect(frameRect.GetX(), frameRect.GetY(), frameRect.Width(), frameRect.Height());
         rects.emplace_back(rect);
         SubwindowManager::GetInstance()->SetHotAreas(rects);
@@ -308,21 +303,21 @@ OffsetF MenuLayoutAlgorithm::MenuLayoutAvoidAlgorithm(
     return OffsetF(x, y);
 }
 
-void MenuLayoutAlgorithm::UpdateConstraintWidth(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint)
+void MenuLayoutAlgorithm::UpdateConstraintWidth(FrameNode* frameNode, LayoutConstraintF& constraint)
 {
     // set min width
     RefPtr<GridColumnInfo> columnInfo;
     columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
     columnInfo->GetParent()->BuildColumnWidth();
     float minWidth = static_cast<float>(columnInfo->GetWidth(MIN_GRID_COUNTS));
-    auto menuPattern = layoutWrapper->GetHostNode()->GetPattern<MenuPattern>();
+    auto menuPattern = frameNode->GetPattern<MenuPattern>();
     if (menuPattern->IsSelectOverlayExtensionMenu() && minWidth > constraint.maxSize.Width()) {
         minWidth = constraint.maxSize.Width();
     }
     constraint.minSize.SetWidth(minWidth);
 
     // set max width
-    auto menuLayoutProperty = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto menuLayoutProperty = AceType::DynamicCast<MenuLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_VOID(menuLayoutProperty);
     const auto& padding = menuLayoutProperty->CreatePaddingAndBorder();
     auto maxHorizontalSpace = std::max(leftSpace_, rightSpace_) - 2.0f * padding.Width();
@@ -333,34 +328,34 @@ void MenuLayoutAlgorithm::UpdateConstraintWidth(LayoutWrapper* layoutWrapper, La
     constraint.percentReference.SetWidth(maxWidth);
 }
 
-void MenuLayoutAlgorithm::UpdateConstraintHeight(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint)
+void MenuLayoutAlgorithm::UpdateConstraintHeight(FrameNode* frameNode, LayoutConstraintF& constraint)
 {
     auto maxSpaceHeight = std::max(topSpace_, bottomSpace_);
     constraint.maxSize.SetHeight(maxSpaceHeight);
     constraint.percentReference.SetHeight(maxSpaceHeight);
 }
 
-LayoutConstraintF MenuLayoutAlgorithm::CreateChildConstraint(LayoutWrapper* layoutWrapper)
+LayoutConstraintF MenuLayoutAlgorithm::CreateChildConstraint(FrameNode* frameNode)
 {
-    auto menuLayoutProperty = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto menuLayoutProperty = AceType::DynamicCast<MenuLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_RETURN(menuLayoutProperty, LayoutConstraintF());
 
     auto childConstraint = menuLayoutProperty->CreateChildConstraint();
-    UpdateConstraintWidth(layoutWrapper, childConstraint);
-    UpdateConstraintHeight(layoutWrapper, childConstraint);
-    auto menuPattern = layoutWrapper->GetHostNode()->GetPattern<MenuPattern>();
+    UpdateConstraintWidth(frameNode, childConstraint);
+    UpdateConstraintHeight(frameNode, childConstraint);
+    auto menuPattern = frameNode->GetPattern<MenuPattern>();
     CHECK_NULL_RETURN(menuLayoutProperty, childConstraint);
     if (!menuPattern->IsMultiMenu()) {
-        UpdateConstraintBaseOnOptions(layoutWrapper, childConstraint);
+        UpdateConstraintBaseOnOptions(frameNode, childConstraint);
     } else {
-        UpdateConstraintBaseOnMenuItems(layoutWrapper, childConstraint);
+        UpdateConstraintBaseOnMenuItems(frameNode, childConstraint);
     }
     return childConstraint;
 }
 
-void MenuLayoutAlgorithm::UpdateConstraintBaseOnOptions(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint)
+void MenuLayoutAlgorithm::UpdateConstraintBaseOnOptions(FrameNode* frameNode, LayoutConstraintF& constraint)
 {
-    auto menuPattern = layoutWrapper->GetHostNode()->GetPattern<MenuPattern>();
+    auto menuPattern = frameNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     auto options = menuPattern->GetOptions();
     if (options.empty()) {
@@ -370,34 +365,34 @@ void MenuLayoutAlgorithm::UpdateConstraintBaseOnOptions(LayoutWrapper* layoutWra
     auto maxChildrenWidth = constraint.minSize.Width();
     auto optionConstraint = constraint;
     optionConstraint.maxSize.MinusWidth(optionPadding_ * 2.0f);
-    auto optionsLayoutWrapper = GetOptionsLayoutWrappper(layoutWrapper);
-    for (const auto& optionWrapper : optionsLayoutWrapper) {
-        optionWrapper->Measure(optionConstraint);
-        auto childSize = optionWrapper->GetGeometryNode()->GetMarginFrameSize();
+    auto optionsNode = GetOptionsLayoutWrappper(frameNode);
+    for (const auto& option : optionsNode) {
+        option->Measure(optionConstraint);
+        auto childSize = option->GetGeometryNode()->GetMarginFrameSize();
         maxChildrenWidth = std::max(maxChildrenWidth, childSize.Width());
     }
     if (menuPattern->IsSelectOverlayExtensionMenu()) {
         maxChildrenWidth = std::min(maxChildrenWidth, optionConstraint.maxSize.Width());
-        UpdateOptionConstraint(optionsLayoutWrapper, maxChildrenWidth);
+        UpdateOptionConstraint(optionsNode, maxChildrenWidth);
         constraint.minSize.SetWidth(maxChildrenWidth);
         return;
     }
-    UpdateOptionConstraint(optionsLayoutWrapper, maxChildrenWidth);
+    UpdateOptionConstraint(optionsNode, maxChildrenWidth);
     constraint.minSize.SetWidth(maxChildrenWidth + optionPadding_ * 2.0f);
 }
 
-std::list<RefPtr<LayoutWrapper>> MenuLayoutAlgorithm::GetOptionsLayoutWrappper(LayoutWrapper* layoutWrapper)
+std::list<RefPtr<FrameNode>> MenuLayoutAlgorithm::GetOptionsLayoutWrappper(FrameNode* frameNode)
 {
-    std::list<RefPtr<LayoutWrapper>> optionsWrapper;
-    auto scrollWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
-    CHECK_NULL_RETURN(scrollWrapper, optionsWrapper);
-    auto columnWrapper = scrollWrapper->GetOrCreateChildByIndex(0);
-    CHECK_NULL_RETURN(columnWrapper, optionsWrapper);
-    optionsWrapper = columnWrapper->GetAllChildrenWithBuild();
-    return optionsWrapper;
+    std::list<RefPtr<FrameNode>> options;
+    auto scroll = frameNode->GetFrameNodeByIndex(0);
+    CHECK_NULL_RETURN(scroll, options);
+    auto column = frameNode->GetFrameNodeByIndex(0);
+    CHECK_NULL_RETURN(column, options);
+    options = frameNode->GetAllFrameNodeChildren();
+    return options;
 }
 
-void MenuLayoutAlgorithm::UpdateOptionConstraint(std::list<RefPtr<LayoutWrapper>>& options, float width)
+void MenuLayoutAlgorithm::UpdateOptionConstraint(std::list<RefPtr<FrameNode>>& options, float width)
 {
     for (const auto& option : options) {
         auto optionLayoutProps = option->GetLayoutProperty();
@@ -406,21 +401,19 @@ void MenuLayoutAlgorithm::UpdateOptionConstraint(std::list<RefPtr<LayoutWrapper>
     }
 }
 
-void MenuLayoutAlgorithm::UpdateConstraintBaseOnMenuItems(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint)
+void MenuLayoutAlgorithm::UpdateConstraintBaseOnMenuItems(FrameNode* frameNode, LayoutConstraintF& constraint)
 {
     // multiMenu children are menuItem or menuItemGroup, constrain width is same as the menu
-    auto maxChildrenWidth = GetChildrenMaxWidth(layoutWrapper, constraint);
+    auto maxChildrenWidth = GetChildrenMaxWidth(frameNode, constraint);
     constraint.minSize.SetWidth(maxChildrenWidth);
 }
 
-void MenuLayoutAlgorithm::LayoutSubMenu(LayoutWrapper* layoutWrapper)
+void MenuLayoutAlgorithm::LayoutSubMenu(FrameNode* frameNode)
 {
-    auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
-    auto menuLayoutProperty = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto size = frameNode->GetGeometryNode()->GetFrameSize();
+    auto menuLayoutProperty = AceType::DynamicCast<MenuLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_VOID(menuLayoutProperty);
-    auto menuNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(menuNode);
-    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    auto menuPattern = frameNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     auto parentMenuItem = menuPattern->GetParentMenuItem();
     CHECK_NULL_VOID(parentMenuItem);
@@ -429,7 +422,7 @@ void MenuLayoutAlgorithm::LayoutSubMenu(LayoutWrapper* layoutWrapper)
     float x = HorizontalLayoutSubMenu(size, position_.GetX(), menuItemSize) - pageOffset_.GetX();
     float y = VerticalLayoutSubMenu(size, position_.GetY(), menuItemSize) - pageOffset_.GetY();
 
-    const auto& geometryNode = layoutWrapper->GetGeometryNode();
+    const auto& geometryNode = frameNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     geometryNode->SetMarginFrameOffset(NG::OffsetF(x, y));
 
@@ -440,7 +433,7 @@ void MenuLayoutAlgorithm::LayoutSubMenu(LayoutWrapper* layoutWrapper)
         parentPattern->AddHoverRegions(topLeftPoint, bottomRightPoint);
     }
 
-    auto child = layoutWrapper->GetOrCreateChildByIndex(0);
+    auto child = frameNode->GetFrameNodeByIndex(0);
     child->Layout();
 }
 
@@ -528,10 +521,10 @@ float MenuLayoutAlgorithm::HorizontalLayoutSubMenu(const SizeF& size, float posi
     return 0.0f;
 }
 
-float MenuLayoutAlgorithm::GetChildrenMaxWidth(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint)
+float MenuLayoutAlgorithm::GetChildrenMaxWidth(FrameNode* frameNode, const LayoutConstraintF& layoutConstraint)
 {
     float maxWidth = layoutConstraint.minSize.Width();
-    for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
+    for (const auto& child : frameNode->GetAllFrameNodeChildren()) {
         child->Measure(layoutConstraint);
         auto childSize = child->GetGeometryNode()->GetFrameSize();
         maxWidth = std::max(maxWidth, childSize.Width());

@@ -22,9 +22,9 @@ namespace OHOS::Ace::NG {
 ModelLayoutAlgorithm::ModelLayoutAlgorithm(const WeakPtr<ModelAdapterWrapper>& adapter) : modelAdapter_(adapter) {}
 
 std::optional<SizeF> ModelLayoutAlgorithm::MeasureContent(
-    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+    const LayoutConstraintF& contentConstraint, FrameNode* frameNode)
 {
-    auto modelLayoutProperty = DynamicCast<ModelLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto modelLayoutProperty = DynamicCast<ModelLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_RETURN(modelLayoutProperty, std::nullopt);
 
     // 1. Width and height are set properly - return content constraint as component size
@@ -40,7 +40,7 @@ std::optional<SizeF> ModelLayoutAlgorithm::MeasureContent(
     SizeF componentSize(0.0f, 0.0f);
     do {
         // 2.1 Width and height are not set. Determine size from parent.
-        const auto& modelLayoutProperty = DynamicCast<ModelLayoutProperty>(layoutWrapper->GetLayoutProperty());
+        const auto& modelLayoutProperty = DynamicCast<ModelLayoutProperty>(frameNode->GetLayoutProperty());
         SizeF layoutConstraintMaxSize = modelLayoutProperty->GetLayoutConstraint()->maxSize;
         if (contentConstraint.selfIdealSize.IsNull()) {
             componentSize.SetSizeT(layoutConstraintMaxSize);

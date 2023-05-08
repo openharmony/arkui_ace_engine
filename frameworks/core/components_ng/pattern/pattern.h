@@ -187,14 +187,14 @@ public:
 
     // TODO: for temp use, need to delete this.
     virtual bool OnDirtyLayoutWrapperSwap(
-        const RefPtr<LayoutWrapper>& /*dirty*/, bool /*skipMeasure*/, bool /*skipLayout*/)
+        FrameNode* /*frameNode*/, bool /*skipMeasure*/, bool /*skipLayout*/)
     {
         return false;
     }
 
     // Called on main thread to check if need rerender of the content.
     virtual bool OnDirtyLayoutWrapperSwap(
-        const RefPtr<LayoutWrapper>& /*dirty*/, const DirtySwapConfig& /*changeConfig*/)
+        FrameNode* /*frameNode*/, const DirtySwapConfig& /*changeConfig*/)
     {
         return false;
     }

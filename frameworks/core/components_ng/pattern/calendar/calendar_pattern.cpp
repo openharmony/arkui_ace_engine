@@ -35,7 +35,7 @@ void CalendarPattern::OnAttachToFrameNode()
     host->GetRenderContext()->SetClipToFrame(true);
 }
 
-bool CalendarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
+bool CalendarPattern::OnDirtyLayoutWrapperSwap(FrameNode* frameNode, bool skipMeasure, bool skipLayout)
 {
     return false;
 }

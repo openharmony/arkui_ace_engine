@@ -60,10 +60,10 @@ public:
         return itemPosition_;
     }
 
-    void SetItemsPosition(const PositionMap& itemPosition)
-    {
-        itemPosition_ = itemPosition;
-    }
+    // void SetItemsPosition(const PositionMap& itemPosition)
+    // {
+    //     itemPosition_ = itemPosition;
+    // }
 
     void SetOverScrollFeature()
     {
@@ -75,26 +75,26 @@ public:
         canOverScroll_ = canOverScroll;
     }
 
-    void SetIndex(int32_t index)
-    {
-        jumpIndex_ = index;
-    }
+    // void SetIndex(int32_t index)
+    // {
+    //     jumpIndex_ = index;
+    // }
 
-    void SetIndexInGroup(int32_t index)
-    {
-        jumpIndexInGroup_ = index;
-    }
+    // void SetIndexInGroup(int32_t index)
+    // {
+    //     jumpIndexInGroup_ = index;
+    // }
 
     void SetIndexAlignment(ScrollIndexAlignment align)
     {
         scrollIndexAlignment_ = align;
     }
 
-    void SetCurrentDelta(float offset)
-    {
-        currentDelta_ = offset;
-        currentOffset_ = offset;
-    }
+    // void SetCurrentDelta(float offset)
+    // {
+    //     currentDelta_ = offset;
+    //     currentOffset_ = offset;
+    // }
 
     float GetCurrentOffset() const
     {
@@ -183,15 +183,15 @@ public:
         return crossMatchChild_;
     }
 
-    float GetChildMaxCrossSize(LayoutWrapper* layoutWrapper, Axis axis) const;
+    float GetChildMaxCrossSize(FrameNode* frameNode, Axis axis) const;
 
-    void Measure(LayoutWrapper* layoutWrapper) override;
+    void Measure(FrameNode* frameNode) override;
 
-    void Layout(LayoutWrapper* layoutWrapper) override;
+    void Layout(FrameNode* frameNode) override;
 
-    void LayoutForward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis,
+    void LayoutForward(FrameNode* frameNode, const LayoutConstraintF& layoutConstraint, Axis axis,
         int32_t startIndex, float startPos);
-    void LayoutBackward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis,
+    void LayoutBackward(FrameNode* frameNode, const LayoutConstraintF& layoutConstraint, Axis axis,
         int32_t endIndex, float endPos);
 
     virtual int32_t GetLanes() const
@@ -202,46 +202,46 @@ public:
 protected:
     virtual void UpdateListItemConstraint(
         Axis axis, const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
-    virtual int32_t LayoutALineForward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
+    virtual int32_t LayoutALineForward(FrameNode* frameNode, const LayoutConstraintF& layoutConstraint,
         Axis axis, int32_t& currentIndex, float startPos, float& endPos);
-    virtual int32_t LayoutALineBackward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
+    virtual int32_t LayoutALineBackward(FrameNode* frameNode, const LayoutConstraintF& layoutConstraint,
         Axis axis, int32_t& currentIndex, float endPos, float& startPos);
     virtual float CalculateLaneCrossOffset(float crossSize, float childCrossSize);
     virtual void CalculateLanes(const RefPtr<ListLayoutProperty>& layoutProperty,
         const LayoutConstraintF& layoutConstraint, std::optional<float> crossSizeOptional, Axis axis) {};
-    virtual int32_t GetLanesFloor(LayoutWrapper* layoutWrapper, int32_t index)
+    virtual int32_t GetLanesFloor(FrameNode* frameNode, int32_t index)
     {
         return index;
     }
 
-    virtual void SetCacheCount(LayoutWrapper* layoutWrapper, int32_t cachedCount);
-    void SetListItemGroupParam(const RefPtr<LayoutWrapper>& layoutWrapper, float referencePos, bool forwardLayout,
+    virtual void SetCacheCount(FrameNode* frameNode, int32_t cachedCount);
+    void SetListItemGroupParam(const RefPtr<FrameNode>& frameNode, float referencePos, bool forwardLayout,
         const RefPtr<ListLayoutProperty>& layoutProperty);
-    static void SetListItemIndex(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t index);
+    static void SetListItemIndex(const RefPtr<FrameNode>& frameNode, int32_t index);
     void CheckListItemGroupRecycle(
-        LayoutWrapper* layoutWrapper, int32_t index, float referencePos, bool forwardLayout) const;
-    void AdjustPostionForListItemGroup(LayoutWrapper* layoutWrapper, Axis axis, int32_t index);
+        FrameNode* frameNode, int32_t index, float referencePos, bool forwardLayout) const;
+    void AdjustPostionForListItemGroup(FrameNode* frameNode, Axis axis, int32_t index);
     void SetItemInfo(int32_t index, ListItemInfo&& info)
     {
         itemPosition_[index] = info;
     }
 
 private:
-    void MeasureList(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
+    void MeasureList(FrameNode* frameNode, const LayoutConstraintF& layoutConstraint, Axis axis);
 
     void CalculateEstimateOffset();
 
     std::pair<int32_t, float> LayoutOrRecycleCachedItems(
-        LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
+        FrameNode* frameNode, const LayoutConstraintF& layoutConstraint, Axis axis);
 
-    std::pair<int32_t, float> RequestNewItemsForward(LayoutWrapper* layoutWrapper,
+    std::pair<int32_t, float> RequestNewItemsForward(FrameNode* frameNode,
         const LayoutConstraintF& layoutConstraint, int32_t startIndex, float startPos, Axis axis);
 
-    std::pair<int32_t, float> RequestNewItemsBackward(LayoutWrapper* layoutWrapper,
+    std::pair<int32_t, float> RequestNewItemsBackward(FrameNode* frameNode,
         const LayoutConstraintF& layoutConstraint, int32_t startIndex, float startPos, Axis axis);
 
-    void CreateItemGroupList(LayoutWrapper* layoutWrapper);
-    void OnSurfaceChanged(LayoutWrapper* layoutWrapper);
+    void CreateItemGroupList(FrameNode* frameNode);
+    void OnSurfaceChanged(FrameNode* frameNode);
 
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> jumpIndexInGroup_;

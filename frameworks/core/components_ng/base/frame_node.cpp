@@ -48,8 +48,183 @@ const char DIMENSION_UNIT_VP[] = "vp";
 #endif
 } // namespace
 namespace OHOS::Ace::NG {
+class FramePorxy {
+public:
+    struct FrameChildNode {
+        RefPtr<UINode> node;
+        uint32_t startIndex = 0;
+        uint32_t count = 0;
+    };
+
+    void AddChild(RefPtr<UINode> child, int32_t slot)
+    {
+        if (!child) {
+            return;
+        }
+        auto it = children_.begin();
+        std::advance(it, slot);
+        children_.insert(it, { child, 0, child->TotalChildCount() });
+        ResetChildren();
+    }
+
+    void RemoveChild(const RefPtr<UINode>& child)
+    {
+        auto it =
+            std::find_if(children_.begin(), children_.end(), [&child](const auto& pair) { return pair.node == child; });
+        if (it != children_.end()) {
+            children_.erase(it);
+            ResetChildren();
+        }
+    }
+
+    static void AddFrameNode(const RefPtr<UINode>& UiNode, std::list<RefPtr<FrameNode>>& allFrameNodeChildren,
+        std::map<uint32_t, RefPtr<FrameNode>>& partFrameNodeChildren)
+    {
+        auto frameNode = AceType::DynamicCast<FrameNode>(UiNode);
+        if (frameNode) {
+            uint32_t index = allFrameNodeChildren.size();
+            allFrameNodeChildren.emplace_back(frameNode);
+            partFrameNodeChildren[index] = frameNode;
+            return;
+        }
+        auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(UiNode);
+        if (lazyForEachNode) {
+            lazyForEachNode->BuildAllChildren();
+        } else {
+            auto customNode = AceType::DynamicCast<CustomNode>(UiNode);
+            if (customNode) {
+                customNode->Render();
+            }
+        }
+        for (const auto& child : UiNode->GetChildren()) {
+            auto frameNode = AceType::DynamicCast<FrameNode>(child);
+            if (frameNode) {
+                uint32_t index = allFrameNodeChildren.size();
+                // frameNode->SetSlotIndex(index);
+                allFrameNodeChildren.emplace_back(frameNode);
+                partFrameNodeChildren[index] = frameNode;
+                continue;
+            }
+            AddFrameNode(child, allFrameNodeChildren, partFrameNodeChildren);
+        }
+    }
+
+    std::list<RefPtr<FrameNode>>& GetAllFrameChildren()
+    {
+        if (!allFrameNodeChildren_.empty()) {
+            return allFrameNodeChildren_;
+        }
+        for (const auto& child : children_) {
+            AddFrameNode(child.node, allFrameNodeChildren_, partFrameNodeChildren_);
+        }
+        return allFrameNodeChildren_;
+    }
+
+    RefPtr<FrameNode> FindFrameNodeByIndex(uint32_t index)
+    {
+        uint32_t startIndex = 0;
+        while (cursor != children_.end()) {
+            if (cursor->startIndex > index) {
+                cursor--;
+                continue;
+            }
+            if (cursor->startIndex + cursor->count < index) {
+                startIndex = cursor->startIndex + cursor->count;
+                cursor++;
+                if (cursor != children_.end()) {
+                    cursor->startIndex = startIndex;
+                }
+                continue;
+            }
+            return AceType::DynamicCast<FrameNode>(cursor->node->GetFrameChildByIndex(index - cursor->startIndex));
+        }
+        return nullptr;
+    }
+
+    RefPtr<FrameNode> GetFrameNodeByIndex(uint32_t index)
+    {
+        if (index > totalCount_) {
+            return nullptr;
+        }
+        auto itor = partFrameNodeChildren_.find(index);
+        if (itor == partFrameNodeChildren_.end()) {
+            auto child = FindFrameNodeByIndex(index);
+            partFrameNodeChildren_[index] = child;
+            return child;
+        }
+        return itor->second;
+    }
+
+    void ResetChildren()
+    {
+        allFrameNodeChildren_.clear();
+        partFrameNodeChildren_.clear();
+        totalCount_ = 0;
+        cursor = children_.begin();
+    }
+
+    void Clean()
+    {
+        children_.clear();
+        ResetChildren();
+    }
+
+    uint32_t GetTotalCount()
+    {
+        return totalCount_;
+    }
+
+    void SetAllChildrenInActive()
+    {
+        for (const auto& child : partFrameNodeChildren_) {
+            child.second->SetActive(false);
+        }
+    }
+
+    void GetRenderFrameNodes(std::list<RefPtr<FrameNode>>& children)
+    {
+        if (partFrameNodeChildren_.empty()) {
+            GetAllFrameChildren();
+        }
+        for (const auto& child : partFrameNodeChildren_) {
+            // auto frameNode = child.second;
+            if (child.second && child.second->IsActive() && child.second->IsVisible()) {
+                children.emplace_back(child.second);
+            }
+        }
+    }
+
+    std::string Dump()
+    {
+        std::string info = "FrameChildNode:[";
+        for (const auto& child : children_) {
+            info += std::to_string(child.node->GetId());
+            info += "-";
+            info += std::to_string(child.startIndex);
+            info += "-";
+            info += std::to_string(child.count);
+            info += ",";
+        }
+        info += "] partFrameNodeChildren:[";
+        for (const auto& child : partFrameNodeChildren_) {
+            info += std::to_string(child.second->GetId());
+            info += ",";
+        }
+        info += "] TotalCount:";
+        info += std::to_string(totalCount_);
+        return info;
+    }
+
+private:
+    std::list<FrameChildNode> children_;
+    std::list<FrameChildNode>::iterator cursor = children_.begin();
+    std::list<RefPtr<FrameNode>> allFrameNodeChildren_;
+    std::map<uint32_t, RefPtr<FrameNode>> partFrameNodeChildren_;
+    uint32_t totalCount_ = 0;
+}; // namespace OHOS::Ace::NG
+
 FrameNode::FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
-    : UINode(tag, nodeId, isRoot), pattern_(pattern)
+    : UINode(tag, nodeId, isRoot), pattern_(pattern), frameProxy_(std::make_unique<FramePorxy>())
 {
     renderContext_->InitContext(IsRootNode(), pattern_->GetSurfaceNodeName(), pattern_->UseExternalRSNode());
     paintProperty_ = pattern->CreatePaintProperty();
@@ -169,6 +344,7 @@ void FrameNode::InitializePatternAndContext()
     if (pattern_->GetFocusPattern().GetFocusType() != FocusType::DISABLE) {
         GetOrCreateFocusHub();
     }
+    layoutAlgorithm_ = MakeRefPtr<LayoutAlgorithmWrapper>(pattern_->CreateLayoutAlgorithm());
 }
 
 void FrameNode::DumpInfo()
@@ -184,6 +360,7 @@ void FrameNode::DumpInfo()
                                        .append(std::to_string(GetOffsetRelativeToWindow().GetY()))
                                        .append(" left: ")
                                        .append(std::to_string(GetOffsetRelativeToWindow().GetX())));
+    DumpLog::GetInstance().AddDesc(std::string("Active: ").append(std::to_string(static_cast<int32_t>(IsActive()))));
     DumpLog::GetInstance().AddDesc(std::string("Visible: ")
                                        .append(std::to_string(static_cast<int32_t>(
                                            layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE)))));
@@ -206,6 +383,7 @@ void FrameNode::DumpInfo()
                                                    : "NA"));
     DumpLog::GetInstance().AddDesc(
         std::string("PaintRect: ").append(renderContext_->GetPaintRectWithTransform().ToString()));
+    DumpLog::GetInstance().AddDesc(std::string("FrameProxy: ").append(frameProxy_->Dump().c_str()));
     if (pattern_) {
         pattern_->DumpInfo();
     }
@@ -369,85 +547,85 @@ void FrameNode::OnDetachFromMainTree(bool recursive)
 
 void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& dirty)
 {
-    LOGD("SwapDirtyLayoutWrapperOnMainThread, %{public}s", GetTag().c_str());
-    CHECK_NULL_VOID(dirty);
+    // LOGD("SwapDirtyLayoutWrapperOnMainThread, %{public}s", GetTag().c_str());
+    // CHECK_NULL_VOID(dirty);
 
-    // update new layout constrain.
-    layoutProperty_->UpdateLayoutConstraint(dirty->GetLayoutProperty());
+    // // update new layout constrain.
+    // layoutProperty_->UpdateLayoutConstraint(dirty->GetLayoutProperty());
 
-    // active change flag judge.
-    SetActive(dirty->IsActive());
-    if (!isActive_) {
-        LOGD("current node is inactive, don't need to render");
-        return;
-    }
+    // // active change flag judge.
+    // SetActive(dirty->IsActive());
+    // if (!isActive_) {
+    //     LOGD("current node is inactive, don't need to render");
+    //     return;
+    // }
 
-    // update layout size.
-    bool frameSizeChange = geometryNode_->GetFrameSize() != dirty->GetGeometryNode()->GetFrameSize();
-    bool frameOffsetChange = geometryNode_->GetFrameOffset() != dirty->GetGeometryNode()->GetFrameOffset();
-    bool contentSizeChange = geometryNode_->GetContentSize() != dirty->GetGeometryNode()->GetContentSize();
-    bool contentOffsetChange = geometryNode_->GetContentOffset() != dirty->GetGeometryNode()->GetContentOffset();
+    // // update layout size.
+    // bool frameSizeChange = geometryNode_->GetFrameSize() != dirty->GetGeometryNode()->GetFrameSize();
+    // bool frameOffsetChange = geometryNode_->GetFrameOffset() != dirty->GetGeometryNode()->GetFrameOffset();
+    // bool contentSizeChange = geometryNode_->GetContentSize() != dirty->GetGeometryNode()->GetContentSize();
+    // bool contentOffsetChange = geometryNode_->GetContentOffset() != dirty->GetGeometryNode()->GetContentOffset();
 
-    SetGeometryNode(dirty->GetGeometryNode());
+    // SetGeometryNode(dirty->GetGeometryNode());
 
-    const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
-    if (geometryTransition != nullptr && geometryTransition->IsRunning()) {
-        geometryTransition->DidLayout(WeakClaim(this));
-    } else if (frameSizeChange || frameOffsetChange || HasPositionProp() ||
-               (pattern_->GetSurfaceNodeName().has_value() && contentSizeChange)) {
-        if (pattern_->NeedOverridePaintRect()) {
-            renderContext_->SyncGeometryProperties(pattern_->GetOverridePaintRect().value_or(RectF()));
-        } else {
-            renderContext_->SyncGeometryProperties(RawPtr(dirty->GetGeometryNode()));
-        }
-    }
+    // const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
+    // if (geometryTransition != nullptr && geometryTransition->IsRunning()) {
+    //     geometryTransition->DidLayout(WeakClaim(this));
+    // } else if (frameSizeChange || frameOffsetChange || HasPositionProp() ||
+    //            (pattern_->GetSurfaceNodeName().has_value() && contentSizeChange)) {
+    //     if (pattern_->NeedOverridePaintRect()) {
+    //         renderContext_->SyncGeometryProperties(pattern_->GetOverridePaintRect().value_or(RectF()));
+    //     } else {
+    //         renderContext_->SyncGeometryProperties(RawPtr(dirty->GetGeometryNode()));
+    //     }
+    // }
 
-    // clean layout flag.
-    layoutProperty_->CleanDirty();
-    DirtySwapConfig config { frameSizeChange, frameOffsetChange, contentSizeChange, contentOffsetChange };
-    // check if need to paint content.
-    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
-    CHECK_NULL_VOID(layoutAlgorithmWrapper);
-    config.skipMeasure = layoutAlgorithmWrapper->SkipMeasure() || dirty->SkipMeasureContent();
-    config.skipLayout = layoutAlgorithmWrapper->SkipLayout();
-    auto needRerender = pattern_->OnDirtyLayoutWrapperSwap(dirty, config);
-    // TODO: temp use and need to delete.
-    needRerender = needRerender || pattern_->OnDirtyLayoutWrapperSwap(dirty, config.skipMeasure, config.skipLayout);
-    if (needRerender || CheckNeedRender(paintProperty_->GetPropertyChangeFlag())) {
-        MarkDirtyNode(true, true, PROPERTY_UPDATE_RENDER);
-    }
+    // // clean layout flag.
+    // layoutProperty_->CleanDirty();
+    // DirtySwapConfig config { frameSizeChange, frameOffsetChange, contentSizeChange, contentOffsetChange };
+    // // check if need to paint content.
+    // auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
+    // CHECK_NULL_VOID(layoutAlgorithmWrapper);
+    // config.skipMeasure = layoutAlgorithmWrapper->SkipMeasure() || dirty->SkipMeasureContent();
+    // config.skipLayout = layoutAlgorithmWrapper->SkipLayout();
+    // auto needRerender = pattern_->OnDirtyLayoutWrapperSwap(dirty, config);
+    // // TODO: temp use and need to delete.
+    // needRerender = needRerender || pattern_->OnDirtyLayoutWrapperSwap(dirty, config.skipMeasure, config.skipLayout);
+    // if (needRerender || CheckNeedRender(paintProperty_->GetPropertyChangeFlag())) {
+    //     MarkDirtyNode(true, true, PROPERTY_UPDATE_RENDER);
+    // }
 
-    // update border.
-    if (layoutProperty_->GetBorderWidthProperty()) {
-        if (!renderContext_->HasBorderColor()) {
-            BorderColorProperty borderColorProperty;
-            borderColorProperty.SetColor(Color::BLACK);
-            renderContext_->UpdateBorderColor(borderColorProperty);
-        }
-        if (!renderContext_->HasBorderStyle()) {
-            BorderStyleProperty borderStyleProperty;
-            borderStyleProperty.SetBorderStyle(BorderStyle::SOLID);
-            renderContext_->UpdateBorderStyle(borderStyleProperty);
-        }
-        if (layoutProperty_->GetLayoutConstraint().has_value()) {
-            renderContext_->UpdateBorderWidthF(ConvertToBorderWidthPropertyF(layoutProperty_->GetBorderWidthProperty(),
-                ScaleProperty::CreateScaleProperty(),
-                layoutProperty_->GetLayoutConstraint()->percentReference.Width()));
-        } else {
-            renderContext_->UpdateBorderWidthF(ConvertToBorderWidthPropertyF(layoutProperty_->GetBorderWidthProperty(),
-                ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth()));
-        }
-    }
+    // // update border.
+    // if (layoutProperty_->GetBorderWidthProperty()) {
+    //     if (!renderContext_->HasBorderColor()) {
+    //         BorderColorProperty borderColorProperty;
+    //         borderColorProperty.SetColor(Color::BLACK);
+    //         renderContext_->UpdateBorderColor(borderColorProperty);
+    //     }
+    //     if (!renderContext_->HasBorderStyle()) {
+    //         BorderStyleProperty borderStyleProperty;
+    //         borderStyleProperty.SetBorderStyle(BorderStyle::SOLID);
+    //         renderContext_->UpdateBorderStyle(borderStyleProperty);
+    //     }
+    //     if (layoutProperty_->GetLayoutConstraint().has_value()) {
+    //         renderContext_->UpdateBorderWidthF(ConvertToBorderWidthPropertyF(layoutProperty_->GetBorderWidthProperty(),
+    //             ScaleProperty::CreateScaleProperty(),
+    //             layoutProperty_->GetLayoutConstraint()->percentReference.Width()));
+    //     } else {
+    //         renderContext_->UpdateBorderWidthF(ConvertToBorderWidthPropertyF(layoutProperty_->GetBorderWidthProperty(),
+    //             ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth()));
+    //     }
+    // }
 
-    // update focus state
-    auto focusHub = GetFocusHub();
-    if (focusHub && focusHub->IsCurrentFocus()) {
-        focusHub->ClearFocusState();
-        focusHub->PaintFocusState();
-    }
+    // // update focus state
+    // auto focusHub = GetFocusHub();
+    // if (focusHub && focusHub->IsCurrentFocus()) {
+    //     focusHub->ClearFocusState();
+    //     focusHub->PaintFocusState();
+    // }
 
-    // rebuild child render node.
-    RebuildRenderContextTree();
+    // // rebuild child render node.
+    // RebuildRenderContextTree();
 }
 
 void FrameNode::AdjustGridOffset()
@@ -632,37 +810,19 @@ std::optional<UITask> FrameNode::CreateLayoutTask(bool forceUseMainThread)
     if (!isLayoutDirtyMarked_) {
         return std::nullopt;
     }
-    ACE_SCOPED_TRACE("CreateLayoutTask:PrepareTask");
-    RefPtr<LayoutWrapper> layoutWrapper;
+    isLayoutRootNode_ = true;
     UpdateLayoutPropertyFlag();
-    layoutWrapper = CreateLayoutWrapper();
-    CHECK_NULL_RETURN_NOLOG(layoutWrapper, std::nullopt);
-    auto task = [layoutWrapper, layoutConstraint = GetLayoutConstraint(), forceUseMainThread]() {
-        layoutWrapper->SetActive();
-        layoutWrapper->SetRootMeasureNode();
-        {
-            ACE_SCOPED_TRACE("LayoutWrapper::Measure");
-            layoutWrapper->Measure(layoutConstraint);
-        }
-        {
-            ACE_SCOPED_TRACE("LayoutWrapper::Layout");
-            layoutWrapper->Layout();
-        }
-        {
-            ACE_SCOPED_TRACE("LayoutWrapper::MountToHostOnMainThread");
-            if (forceUseMainThread || layoutWrapper->CheckShouldRunOnMain()) {
-                layoutWrapper->MountToHostOnMainThread();
-                return;
-            }
-            auto host = layoutWrapper->GetHostNode();
-            CHECK_NULL_VOID(host);
-            host->PostTask([layoutWrapper]() { layoutWrapper->MountToHostOnMainThread(); });
-        }
-    };
-    if (forceUseMainThread || layoutWrapper->CheckShouldRunOnMain()) {
-        return UITask(std::move(task), MAIN_TASK);
+    {
+        ACE_SCOPED_TRACE("Measure");
+        LOGE("Measure %{public}d", GetId());
+        Measure(GetLayoutConstraint());
     }
-    return UITask(std::move(task), layoutWrapper->CanRunOnWhichThread());
+    {
+        ACE_SCOPED_TRACE("Layout");
+        Layout();
+    }
+    isLayoutRootNode_ = false;
+    return std::nullopt;
 }
 
 std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
@@ -854,9 +1014,11 @@ void FrameNode::RebuildRenderContextTree()
     }
     frameChildren_.clear();
     std::list<RefPtr<FrameNode>> children;
-    // generate full children list, including disappear children.
-    GenerateOneDepthVisibleFrameWithTransition(children);
+    frameProxy_->GetRenderFrameNodes(children);
     frameChildren_ = { children.begin(), children.end() };
+    // // generate full children list, including disappear children.
+    // GenerateOneDepthVisibleFrameWithTransition(children);
+    // frameChildren_ = { children.begin(), children.end() };
     renderContext_->RebuildFrame(this, children);
     pattern_->OnRebuildFrame();
     needSyncRenderTree_ = false;
@@ -1590,8 +1752,8 @@ RefPtr<FrameNode> FrameNode::FindChildByPosition(float x, float y)
     return hitFrameNodes.rbegin()->second;
 }
 
-void FrameNode::CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
-    const std::function<void(float)>& onCallbackEvent)
+void FrameNode::CreateAnimatablePropertyFloat(
+    const std::string& propertyName, float value, const std::function<void(float)>& onCallbackEvent)
 {
     auto context = GetRenderContext();
     CHECK_NULL_VOID(context);
@@ -1621,4 +1783,385 @@ std::string FrameNode::ProvideRestoreInfo()
 {
     return pattern_->ProvideRestoreInfo();
 }
+
+// This will call child and self measure process.
+void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint)
+{
+    pattern_->BeforeCreateLayoutWrapper();
+    layoutAlgorithm_ = MakeRefPtr<LayoutAlgorithmWrapper>(pattern_->CreateLayoutAlgorithm());
+    if (layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::GONE) {
+        layoutAlgorithm_->SetSkipMeasure();
+        layoutAlgorithm_->SetSkipLayout();
+        isLayoutDirtyMarked_ = false;
+    }
+
+    if (!isActive_) {
+        layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+    }
+
+    // auto flag = layoutProperty_->GetPropertyChangeFlag();
+    // // It is necessary to copy the layoutProperty property to prevent the layoutProperty property from being
+    // // modified during the layout process, resulting in the problem of judging whether the front-end setting value
+    // // changes the next time js is executed.
+    // do {
+    //     if (CheckNeedMeasure(flag)) {
+    //         break;
+    //     }
+    //     if (CheckNeedLayout(flag)) {
+    //         layoutAlgorithm_->SetSkipMeasure();
+    //         break;
+    //     }
+    //     layoutAlgorithm_->SetSkipMeasure();
+    //     layoutAlgorithm_->SetSkipLayout();
+    // } while (false);
+    ACE_SCOPED_TRACE(
+        "[%s-%d] Measure [%s]", GetTag().c_str(), GetId(), parentConstraint->parentIdealSize.ToString().c_str());
+    if (layoutAlgorithm_->SkipMeasure()) {
+        LOGD("%{public}s, depth: %{public}d: the layoutAlgorithm skip measure", GetTag().c_str(), GetDepth());
+        isLayoutDirtyMarked_ = false;
+        return;
+    }
+
+    const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
+    if (geometryTransition != nullptr) {
+        geometryTransition->WillLayout(Claim(this));
+    }
+
+    if (!oldGeometryNode_) {
+        oldGeometryNode_ = geometryNode_->Clone();
+    }
+
+    auto preConstraint = layoutProperty_->GetLayoutConstraint();
+    auto contentConstraint = layoutProperty_->GetContentLayoutConstraint();
+    layoutProperty_->BuildGridProperty(Claim(this));
+    const auto& magicItemProperty = layoutProperty_->GetMagicItemProperty();
+    auto hasAspectRatio = magicItemProperty && magicItemProperty->HasAspectRatio();
+    if (parentConstraint) {
+        if (hasAspectRatio) {
+            auto useConstraint = parentConstraint.value();
+            useConstraint.ApplyAspectRatio(magicItemProperty->GetAspectRatioValue(),
+                layoutProperty_->GetCalcLayoutConstraint() ? layoutProperty_->GetCalcLayoutConstraint()->selfIdealSize
+                                                           : std::nullopt);
+            geometryNode_->SetParentLayoutConstraint(useConstraint);
+            layoutProperty_->UpdateLayoutConstraint(useConstraint);
+        } else {
+            geometryNode_->SetParentLayoutConstraint(parentConstraint.value());
+            layoutProperty_->UpdateLayoutConstraint(parentConstraint.value());
+        }
+    } else {
+        LayoutConstraintF layoutConstraint;
+        layoutConstraint.percentReference.SetWidth(PipelineContext::GetCurrentRootWidth());
+        if (hasAspectRatio) {
+            auto aspectRatio = magicItemProperty->GetAspectRatioValue();
+            if (Positive(aspectRatio)) {
+                auto height = PipelineContext::GetCurrentRootHeight() / aspectRatio;
+                layoutConstraint.percentReference.SetHeight(height);
+            }
+        } else {
+            layoutConstraint.percentReference.SetHeight(PipelineContext::GetCurrentRootHeight());
+        }
+        layoutProperty_->UpdateLayoutConstraint(layoutConstraint);
+    }
+    layoutProperty_->UpdateContentConstraint();
+    geometryNode_->UpdateMargin(layoutProperty_->CreateMargin());
+    geometryNode_->UpdatePaddingWithBorder(layoutProperty_->CreatePaddingAndBorder());
+
+    isConstraintNotChanged_ = preConstraint ? preConstraint == layoutProperty_->GetLayoutConstraint() : false;
+    if (!isConstraintNotChanged_) {
+        isConstraintNotChanged_ =
+            contentConstraint ? contentConstraint == layoutProperty_->GetContentLayoutConstraint() : false;
+    }
+
+    LOGD("Measure: %{public}s, depth: %{public}d, Constraint: %{public}s", GetTag().c_str(), GetDepth(),
+        layoutProperty_->GetLayoutConstraint()->ToString().c_str());
+
+    if (isConstraintNotChanged_ && !skipMeasureContent_) {
+        if (!CheckNeedForceMeasureAndLayout()) {
+            LOGD("%{public}s (depth: %{public}d) skip measure content", GetTag().c_str(), GetDepth());
+            skipMeasureContent_ = true;
+        }
+    }
+
+    if (!skipMeasureContent_.value_or(false)) {
+        skipMeasureContent_ = false;
+        auto size = layoutAlgorithm_->MeasureContent(layoutProperty_->CreateContentConstraint(), this);
+        if (size.has_value()) {
+            geometryNode_->SetContentSize(size.value());
+        }
+        layoutAlgorithm_->Measure(this);
+        // check aspect radio.
+        if (hasAspectRatio) {
+            auto aspectRatio = magicItemProperty->GetAspectRatioValue();
+            // Adjust by aspect ratio, firstly pick height based on width. It means that when width, height and
+            // aspectRatio are all set, the height is not used.
+            auto width = geometryNode_->GetFrameSize().Width();
+            LOGD("aspect ratio affects, origin width: %{public}f, height: %{public}f", width,
+                geometryNode_->GetFrameSize().Height());
+            auto height = width / aspectRatio;
+            LOGD("aspect ratio affects, new width: %{public}f, height: %{public}f", width, height);
+            geometryNode_->SetFrameSize(SizeF({ width, height }));
+        }
+    }
+
+    LOGD("on Measure Done: type: %{public}s, depth: %{public}d, Size: %{public}s", GetTag().c_str(), GetDepth(),
+        geometryNode_->GetFrameSize().ToString().c_str());
+    isLayoutDirtyMarked_ = false;
+}
+
+// Called to perform layout children.
+void FrameNode::Layout()
+{
+    if (layoutAlgorithm_->SkipLayout()) {
+        LOGD("%{public}s, depth: %{public}d: the layoutAlgorithm skip layout", GetTag().c_str(), GetDepth());
+        layoutAlgorithm_.Reset();
+        return;
+    }
+    LOGD("On Layout begin: type: %{public}s, depth: %{public}d", GetTag().c_str(), GetDepth());
+
+    if ((skipMeasureContent_ == true)) {
+        LOGD("%{public}s (depth: %{public}d) skip measure content and layout", GetTag().c_str(), GetDepth());
+        LOGD("On Layout Done: type: %{public}s, depth: %{public}d, Offset: %{public}s", GetTag().c_str(), GetDepth(),
+            geometryNode_->GetFrameOffset().ToString().c_str());
+        ProcessAfterLayout();
+        return;
+    }
+
+    if (!layoutProperty_->GetLayoutConstraint()) {
+        const auto& parentLayoutConstraint = geometryNode_->GetParentLayoutConstraint();
+        if (parentLayoutConstraint) {
+            layoutProperty_->UpdateLayoutConstraint(parentLayoutConstraint.value());
+        } else {
+            LayoutConstraintF layoutConstraint;
+            layoutConstraint.percentReference.SetWidth(PipelineContext::GetCurrentRootWidth());
+            layoutConstraint.percentReference.SetHeight(PipelineContext::GetCurrentRootHeight());
+            layoutProperty_->UpdateLayoutConstraint(layoutConstraint);
+        }
+        layoutProperty_->UpdateContentConstraint();
+    }
+    layoutAlgorithm_->Layout(this);
+    LOGD("On Layout Done: type: %{public}s, depth: %{public}d, Offset: %{public}s", GetTag().c_str(), GetDepth(),
+        geometryNode_->GetFrameOffset().ToString().c_str());
+    ProcessAfterLayout();
+}
+
+void FrameNode::ProcessAfterLayout()
+{
+    const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
+    bool hasTransition = geometryTransition != nullptr && geometryTransition->IsRunning();
+
+    if (!isActive_ && !hasTransition) {
+        LOGD("current node is inactive, don't need to render");
+        return;
+    }
+
+    // update layout size.
+    bool frameSizeChange = false;
+    bool frameOffsetChange = false;
+    bool contentSizeChange = false;
+    bool contentOffsetChange = false;
+    if (oldGeometryNode_) {
+        frameSizeChange = geometryNode_->GetFrameSize() != oldGeometryNode_->GetFrameSize();
+        frameOffsetChange = geometryNode_->GetFrameOffset() != oldGeometryNode_->GetFrameOffset();
+        contentSizeChange = geometryNode_->GetContentSize() != oldGeometryNode_->GetContentSize();
+        contentOffsetChange = geometryNode_->GetContentOffset() != oldGeometryNode_->GetContentOffset();
+        oldGeometryNode_.Reset();
+    }
+
+    if (hasTransition) {
+        geometryTransition->DidLayout(Claim(this));
+    } else if (frameSizeChange || frameOffsetChange || HasPositionProp() ||
+               (pattern_->GetSurfaceNodeName().has_value() && contentSizeChange)) {
+        if (pattern_->NeedOverridePaintRect()) {
+            renderContext_->SyncGeometryProperties(pattern_->GetOverridePaintRect().value_or(RectF()));
+        } else {
+            renderContext_->SyncGeometryProperties(RawPtr(GetGeometryNode()));
+        }
+    }
+
+    // const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
+    // bool skipSync = geometryTransition != nullptr && geometryTransition->IsRunning();
+
+    // if (!skipSync && (frameSizeChange || frameOffsetChange || HasPositionProp() ||
+    //                      (pattern_->GetSurfaceNodeName().has_value() && contentSizeChange))) {
+    //     if (pattern_->NeedOverridePaintRect()) {
+    //         renderContext_->SyncGeometryProperties(pattern_->GetOverridePaintRect().value_or(RectF()));
+    //     } else {
+    //         renderContext_->SyncGeometryProperties(RawPtr(geometryNode_));
+    //     }
+    // }
+
+    // clean layout flag.
+    layoutProperty_->CleanDirty();
+    DirtySwapConfig config { frameSizeChange, frameOffsetChange, contentSizeChange, contentOffsetChange };
+    // check if need to paint content.
+    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(GetLayoutAlgorithm());
+    CHECK_NULL_VOID(layoutAlgorithmWrapper);
+    config.skipMeasure = layoutAlgorithmWrapper->SkipMeasure(); // || dirty->SkipMeasureContent();
+    config.skipLayout = layoutAlgorithmWrapper->SkipLayout();
+    auto needRerender = pattern_->OnDirtyLayoutWrapperSwap(this, config);
+    // TODO: temp use and need to delete.
+    needRerender = needRerender || pattern_->OnDirtyLayoutWrapperSwap(this, config.skipMeasure, config.skipLayout);
+    if (needRerender || CheckNeedRender(paintProperty_->GetPropertyChangeFlag())) {
+        MarkDirtyNode(true, true, PROPERTY_UPDATE_RENDER);
+    }
+
+    // update border.
+    if (layoutProperty_->GetBorderWidthProperty()) {
+        if (!renderContext_->HasBorderColor()) {
+            BorderColorProperty borderColorProperty;
+            borderColorProperty.SetColor(Color::BLACK);
+            renderContext_->UpdateBorderColor(borderColorProperty);
+        }
+        if (!renderContext_->HasBorderStyle()) {
+            BorderStyleProperty borderStyleProperty;
+            borderStyleProperty.SetBorderStyle(BorderStyle::SOLID);
+            renderContext_->UpdateBorderStyle(borderStyleProperty);
+        }
+        if (layoutProperty_->GetLayoutConstraint().has_value()) {
+            renderContext_->UpdateBorderWidthF(ConvertToBorderWidthPropertyF(layoutProperty_->GetBorderWidthProperty(),
+                ScaleProperty::CreateScaleProperty(),
+                layoutProperty_->GetLayoutConstraint()->percentReference.Width()));
+        } else {
+            renderContext_->UpdateBorderWidthF(ConvertToBorderWidthPropertyF(layoutProperty_->GetBorderWidthProperty(),
+                ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth()));
+        }
+    }
+
+    // update focus state
+    auto focusHub = GetFocusHub();
+    if (focusHub && focusHub->IsCurrentFocus()) {
+        focusHub->ClearFocusState();
+        focusHub->PaintFocusState();
+    }
+
+    // rebuild child render node.
+    RebuildRenderContextTree();
+
+    layoutAlgorithm_.Reset();
+    skipMeasureContent_.reset();
+    needForceMeasureAndLayout_.reset();
+    // layoutAlgorithm_->SetNeedMeasure();
+    // layoutAlgorithm_->SetNeedLayout();
+}
+
+RefPtr<FrameNode> FrameNode::GetFrameNodeByIndex(uint32_t index, bool addToRenderTree /* = true*/)
+{
+    auto children = frameProxy_->GetAllFrameChildren();
+    if (index < children.size()) {
+        auto insertIter = children.begin();
+        std::advance(insertIter, index);
+
+        if (addToRenderTree && *insertIter) {
+            (*insertIter)->SetActive(true);
+        }
+        return *insertIter;
+    }
+
+    return nullptr;
+}
+
+std::list<RefPtr<FrameNode>> FrameNode::GetAllFrameNodeChildren(bool addToRenderTree /* = true*/)
+{
+    auto children = frameProxy_->GetAllFrameChildren();
+    if (addToRenderTree) {
+        for (const auto& child : children) {
+            child->SetActive(true);
+        }
+    }
+
+    return children;
+}
+
+void FrameNode::RemoveAllChildInRenderTree()
+{
+    auto children = frameProxy_->GetAllFrameChildren();
+    for (const auto& child : children) {
+        child->SetActive(false);
+    }
+}
+
+void FrameNode::RemoveChildInRenderTree(uint32_t index)
+{
+    auto child = GetFrameNodeByIndex(index, false);
+    if (child) {
+        child->SetActive(false);
+    }
+}
+
+bool FrameNode::SkipMeasureContent() const
+{
+    return (skipMeasureContent_ == true) || layoutAlgorithm_->SkipMeasure();
+}
+
+bool FrameNode::CheckNeedForceMeasureAndLayout()
+{
+    if (needForceMeasureAndLayout_) {
+        return needForceMeasureAndLayout_.value();
+    }
+    PropertyChangeFlag flag = layoutProperty_->GetPropertyChangeFlag();
+    needForceMeasureAndLayout_ = CheckNeedMeasure(flag) || CheckNeedLayout(flag);
+    return needForceMeasureAndLayout_.value();
+}
+
+float FrameNode::GetBaselineDistance() const
+{
+    auto children = frameProxy_->GetAllFrameChildren();
+    if (children.empty()) {
+        return geometryNode_->GetBaselineDistance();
+    }
+    float distance = 0.0;
+    for (const auto& child : children) {
+        float childBaseline = child->GetBaselineDistance();
+        distance = NearZero(distance) ? childBaseline : std::min(distance, childBaseline);
+    }
+    return distance;
+}
+
+void FrameNode::DoAddChild(
+    std::list<RefPtr<UINode>>::iterator& it, int32_t slot, const RefPtr<UINode>& child, bool silently)
+{
+    UINode::DoAddChild(it, slot, child, silently);
+    frameProxy_->AddChild(child, slot);
+    needSyncRenderTree_ = true;
+    ACE_SCOPED_TRACE("[%s-%d]DoAddChild [%s-%d]", GetTag().c_str(), GetId(), child->GetTag().c_str(), child->GetId());
+}
+
+void FrameNode::DoRemoveChild(const RefPtr<UINode>& child)
+{
+    frameProxy_->RemoveChild(child);
+    needSyncRenderTree_ = true;
+}
+
+void FrameNode::DoCleanChild()
+{
+    frameProxy_->Clean();
+    needSyncRenderTree_ = true;
+}
+
+void FrameNode::MarkNeedSyncRenderTree(bool needRebuild)
+{
+    // ACE_SCOPED_TRACE("[%s-%d -%d] MarkNeedSyncRenderTree %d", GetTag().c_str(), GetId(), GetDepth(), needRebuild);
+    if (needRebuild) {
+        frameProxy_->ResetChildren();
+    }
+    needSyncRenderTree_ = true;
+}
+
+RefPtr<UINode> FrameNode::GetFrameChildByIndex(uint32_t index)
+{
+    if (index == 0) {
+        return Claim(this);
+    }
+    return nullptr;
+}
+
+const RefPtr<LayoutAlgorithmWrapper>& FrameNode::GetLayoutAlgorithm()
+{
+    if (!layoutAlgorithm_ && pattern_) {
+        layoutAlgorithm_ = MakeRefPtr<LayoutAlgorithmWrapper>(pattern_->CreateLayoutAlgorithm());
+    }
+
+    return layoutAlgorithm_;
+}
+
 } // namespace OHOS::Ace::NG

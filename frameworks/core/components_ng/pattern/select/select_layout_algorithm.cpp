@@ -21,26 +21,24 @@
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
-void SelectLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+void SelectLayoutAlgorithm::Measure(FrameNode* frameNode)
 {
-    CHECK_NULL_VOID(layoutWrapper);
-
-    auto layoutProps = layoutWrapper->GetLayoutProperty();
+    auto layoutProps = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProps);
     layoutProps->UpdateAlignment(Alignment::CENTER);
     auto childConstraint = layoutProps->CreateChildConstraint();
 
     // Measure child row to get row height and width.
-    auto rowWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
-    CHECK_NULL_VOID(rowWrapper);
-    auto spinnerSize = MeasureAndGetSize(rowWrapper->GetOrCreateChildByIndex(1), childConstraint);
-    auto rowProps = DynamicCast<FlexLayoutProperty>(rowWrapper->GetLayoutProperty());
+    auto row = frameNode->GetFrameNodeByIndex(0);
+    CHECK_NULL_VOID(row);
+    auto spinnerSize = MeasureAndGetSize(row->GetFrameNodeByIndex(1), childConstraint);
+    auto rowProps = DynamicCast<FlexLayoutProperty>(row->GetLayoutProperty());
     CHECK_NULL_VOID(rowProps);
     auto space = static_cast<float>(rowProps->GetSpaceValue(Dimension()).ConvertToPx());
     childConstraint.maxSize.MinusWidth(spinnerSize.Width() + space);
-    auto textSize = MeasureAndGetSize(rowWrapper->GetOrCreateChildByIndex(0), childConstraint);
+    auto textSize = MeasureAndGetSize(row->GetFrameNodeByIndex(0), childConstraint);
 
-    auto rowGeometry = rowWrapper->GetGeometryNode();
+    auto rowGeometry = row->GetGeometryNode();
     CHECK_NULL_VOID(rowGeometry);
     rowGeometry->SetFrameSize(
         SizeF(textSize.Width() + space + spinnerSize.Width(), std::max(textSize.Height(), spinnerSize.Height())));
@@ -55,7 +53,7 @@ void SelectLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto defaultHeight = static_cast<float>(theme->GetSelectMinHeight().ConvertToPx());
     auto selectHeight = std::max(defaultHeight, rowHeight);
 
-    auto geometryNode = layoutWrapper->GetGeometryNode();
+    auto geometryNode = frameNode->GetGeometryNode();
     const auto& calcLayoutConstraint = layoutProps->GetCalcLayoutConstraint();
     if (calcLayoutConstraint && calcLayoutConstraint->selfIdealSize.has_value()) {
         auto selfIdealSize = calcLayoutConstraint->selfIdealSize;
@@ -69,11 +67,11 @@ void SelectLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 }
 
 SizeF SelectLayoutAlgorithm::MeasureAndGetSize(
-    const RefPtr<LayoutWrapper>& childLayoutWrapper, const LayoutConstraintF& constraint)
+    const RefPtr<FrameNode>& frameNode, const LayoutConstraintF& constraint)
 {
-    CHECK_NULL_RETURN(childLayoutWrapper, SizeF());
-    childLayoutWrapper->Measure(constraint);
-    auto geometry = childLayoutWrapper->GetGeometryNode();
+    CHECK_NULL_RETURN(frameNode, SizeF());
+    frameNode->Measure(constraint);
+    auto geometry = frameNode->GetGeometryNode();
     CHECK_NULL_RETURN(geometry, SizeF());
     return geometry->GetMarginFrameSize();
 }

@@ -58,7 +58,7 @@ public:
     void OnModifyDone() override;
     void FireConnect();
     void FireDisConnect();
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    bool OnDirtyLayoutWrapperSwap(FrameNode* frameNode, const DirtySwapConfig& config) override;
     void OnAreaChangedInner() override;
 private:
     void OnActive() override

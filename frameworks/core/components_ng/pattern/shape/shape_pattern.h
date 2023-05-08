@@ -92,9 +92,9 @@ protected:
     RefPtr<ShapeOverlayModifier> shapeOverlayModifier_;
 
 private:
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override
+    bool OnDirtyLayoutWrapperSwap(FrameNode* frameNode, bool skipMeasure, bool skipLayout) override
     {
-        return !(skipMeasure || dirty->SkipMeasureContent());
+        return !(skipMeasure || frameNode->SkipMeasureContent());
     }
     ACE_DISALLOW_COPY_AND_MOVE(ShapePattern);
 };

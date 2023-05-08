@@ -41,7 +41,7 @@ public:
         renderFunction_ = renderFunction;
     }
 
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    bool OnDirtyLayoutWrapperSwap(FrameNode* frameNode, const DirtySwapConfig& config) override;
 
 private:
     RenderFunction renderFunction_;

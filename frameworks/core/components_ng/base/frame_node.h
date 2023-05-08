@@ -44,6 +44,7 @@
 #include "core/components_ng/render/paint_property.h"
 #include "core/components_ng/render/paint_wrapper.h"
 #include "core/components_ng/render/render_context.h"
+#include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_v2/inspector/inspector_node.h"
 
 namespace OHOS::Ace::NG {
@@ -51,6 +52,7 @@ class PipelineContext;
 class Pattern;
 class StateModifyTask;
 class UITask;
+class FramePorxy;
 
 // FrameNode will display rendering region in the screen.
 class ACE_EXPORT FrameNode : public UINode {
@@ -201,6 +203,11 @@ public:
         return layoutProperty_;
     }
 
+    void SetLayoutProperty(const RefPtr<LayoutProperty>& layoutProperty)
+    {
+        layoutProperty_ = layoutProperty;
+    }
+
     static void PostTask(std::function<void()>&& task, TaskExecutor::TaskType taskType = TaskExecutor::TaskType::UI);
 
     // If return true, will prevent TouchTest Bubbling to parent and brother nodes.
@@ -217,10 +224,7 @@ public:
 
     bool IsAtomicNode() const override;
 
-    void MarkNeedSyncRenderTree() override
-    {
-        needSyncRenderTree_ = true;
-    }
+    void MarkNeedSyncRenderTree(bool needRebuild = false) override;
 
     void RebuildRenderContextTree() override;
 
@@ -269,7 +273,7 @@ public:
 
     void AdjustGridOffset();
 
-    void SetActive(bool active) override;
+    void SetActive(bool active = true) override;
 
     bool IsActive() const
     {
@@ -371,11 +375,48 @@ public:
 
     RefPtr<FrameNode> FindChildByPosition(float x, float y);
 
-    void CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
-        const std::function<void(float)>& onCallbackEvent);
+    void CreateAnimatablePropertyFloat(
+        const std::string& propertyName, float value, const std::function<void(float)>& onCallbackEvent);
     void UpdateAnimatablePropertyFloat(const std::string& propertyName, float value);
 
     std::string ProvideRestoreInfo();
+    void Measure(const std::optional<LayoutConstraintF>& parentConstraint);
+
+    // Called to perform layout children.
+    void Layout();
+
+    RefPtr<FrameNode> GetFrameNodeByIndex(uint32_t index, bool addToRenderTree = true);
+
+    std::list<RefPtr<FrameNode>> GetAllFrameNodeChildren(bool addToRenderTree = true);
+
+    void RemoveChildInRenderTree(uint32_t index);
+
+    float GetBaselineDistance() const;
+
+    bool IsOutOfLayout() const
+    {
+        return renderContext_->HasPosition();
+    }
+
+    const RefPtr<LayoutAlgorithmWrapper>& GetLayoutAlgorithm();
+
+    void RemoveAllChildInRenderTree();
+
+    bool SkipMeasureContent() const;
+
+    void ProcessAfterLayout();
+
+    void DoAddChild(
+        std::list<RefPtr<UINode>>::iterator& it, int32_t slot, const RefPtr<UINode>& child, bool silently) override;
+    void DoRemoveChild(const RefPtr<UINode>& child) override;
+    void DoCleanChild() override;
+
+    RefPtr<UINode> GetFrameChildByIndex(uint32_t index) override;
+
+    bool IsRootMeasureNode() const
+    {
+        return isLayoutRootNode_;
+    }
 
 private:
     void MarkNeedRender(bool isRenderBoundary);
@@ -417,6 +458,8 @@ private:
     void OnVisibleAreaChangeCallback(VisibleCallbackInfo& callbackInfo, bool visibleType, double currentVisibleRatio);
     double CalculateCurrentVisibleRatio(const RectF& visibleRect, const RectF& renderRect);
 
+    bool CheckNeedForceMeasureAndLayout();
+
     struct ZIndexComparator {
         bool operator()(const RefPtr<FrameNode>& left, const RefPtr<FrameNode>& right) const
         {
@@ -444,6 +487,14 @@ private:
     std::unique_ptr<RectF> lastFrameRect_;
     std::unique_ptr<OffsetF> lastParentOffsetToWindow_;
     std::set<std::string> allowDrop_;
+
+    RefPtr<LayoutAlgorithmWrapper> layoutAlgorithm_;
+    RefPtr<GeometryNode> oldGeometryNode_;
+    std::optional<bool> skipMeasureContent_;
+    std::optional<bool> needForceMeasureAndLayout_;
+    bool isConstraintNotChanged_ = false;
+    std::unique_ptr<FramePorxy> frameProxy_;
+    bool isLayoutRootNode_ = false;
 
     bool needSyncRenderTree_ = false;
 

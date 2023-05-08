@@ -40,15 +40,13 @@
 
 namespace OHOS::Ace::NG {
 
-void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+void TextFieldLayoutAlgorithm::Measure(FrameNode* frameNode)
 {
-    const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
+    const auto& layoutConstraint = frameNode->GetLayoutProperty()->GetLayoutConstraint();
     OptionalSizeF frameSize =
         CreateIdealSize(layoutConstraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT_MAIN_AXIS);
-    const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
-    const auto& calcLayoutConstraint = layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint();
-    auto frameNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(frameNode);
+    const auto& content = frameNode->GetGeometryNode()->GetContent();
+    const auto& calcLayoutConstraint = frameNode->GetLayoutProperty()->GetCalcLayoutConstraint();
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     float contentWidth = 0.0f;
@@ -96,10 +94,10 @@ void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         if (layoutConstraint->maxSize.Width() < layoutConstraint->minSize.Width()) {
             frameSize.SetWidth(layoutConstraint->minSize.Width());
         }
-        layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
+        frameNode->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
 
         frameRect_ =
-            RectF(layoutWrapper->GetGeometryNode()->GetFrameOffset(), layoutWrapper->GetGeometryNode()->GetFrameSize());
+            RectF(frameNode->GetGeometryNode()->GetFrameOffset(), frameNode->GetGeometryNode()->GetFrameSize());
         return;
     }
     if (!frameSize.Height().has_value()) {
@@ -113,7 +111,7 @@ void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             frameSize.SetHeight(layoutConstraint->minSize.Height());
         }
     }
-    auto textfieldLayoutProperty = AceType::DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto textfieldLayoutProperty = AceType::DynamicCast<TextFieldLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_VOID(textfieldLayoutProperty);
 
     if (textfieldLayoutProperty->GetWidthAutoValue(false)) {
@@ -133,19 +131,17 @@ void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (layoutConstraint->maxSize.Width() < layoutConstraint->minSize.Width()) {
         frameSize.SetWidth(layoutConstraint->minSize.Width());
     }
-    layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
+    frameNode->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
     frameRect_ =
-        RectF(layoutWrapper->GetGeometryNode()->GetFrameOffset(), layoutWrapper->GetGeometryNode()->GetFrameSize());
+        RectF(frameNode->GetGeometryNode()->GetFrameOffset(), frameNode->GetGeometryNode()->GetFrameSize());
 }
 
 std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
-    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+    const LayoutConstraintF& contentConstraint, FrameNode* frameNode)
 {
-    auto frameNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_RETURN(frameNode, std::nullopt);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_RETURN(pipeline, std::nullopt);
-    auto textFieldLayoutProperty = DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto textFieldLayoutProperty = DynamicCast<TextFieldLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_RETURN(textFieldLayoutProperty, std::nullopt);
     auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_RETURN(textFieldTheme, std::nullopt);
@@ -159,7 +155,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     auto idealHeight = contentConstraint.selfIdealSize.Height().value_or(contentConstraint.maxSize.Height());
 
     if (!textFieldLayoutProperty->GetValueValue("").empty()) {
-        UpdateTextStyle(frameNode, textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled());
+        UpdateTextStyle(Claim(frameNode), textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled());
         textContent = textFieldLayoutProperty->GetValueValue("");
     } else {
         UpdatePlaceholderTextStyle(textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled());
@@ -254,27 +250,25 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     return SizeF(idealWidth - imageHotZoneWidth, std::min(idealHeight, preferredHeight));
 }
 
-void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+void TextFieldLayoutAlgorithm::Layout(FrameNode* frameNode)
 {
     // update child position.
-    auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
-    auto frameNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(frameNode);
+    auto size = frameNode->GetGeometryNode()->GetFrameSize();
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
-    const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
+    const auto& content = frameNode->GetGeometryNode()->GetContent();
     CHECK_NULL_VOID(content);
     auto contentSize = content->GetRect().GetSize();
-    auto layoutProperty = DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto layoutProperty = DynamicCast<TextFieldLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    auto context = layoutWrapper->GetHostNode()->GetContext();
+    auto context = frameNode->GetContext();
     CHECK_NULL_VOID(context);
-    parentGlobalOffset_ = layoutWrapper->GetHostNode()->GetPaintRectOffset() - context->GetRootRect().GetOffset();
+    parentGlobalOffset_ = frameNode->GetPaintRectOffset() - context->GetRootRect().GetOffset();
     auto align = Alignment::CENTER;
     bool hasAlign = false;
-    if (layoutWrapper->GetLayoutProperty()->GetPositionProperty()) {
-        align = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
-        hasAlign = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().has_value();
+    if (frameNode->GetLayoutProperty()->GetPositionProperty()) {
+        align = frameNode->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
+        hasAlign = frameNode->GetLayoutProperty()->GetPositionProperty()->GetAlignment().has_value();
     }
     // Update content position.
     OffsetF contentOffset = Alignment::GetAlignPosition(size, contentSize, align);
@@ -404,8 +398,8 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(const RefPtr<TextField
     textStyle.SetTextAlign(layoutProperty->GetTextAlignValue(TextAlign::START));
 }
 
-void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::string content,
-    bool needObscureText, bool disableTextAlign)
+void TextFieldLayoutAlgorithm::CreateParagraph(
+    const TextStyle& textStyle, std::string content, bool needObscureText, bool disableTextAlign)
 {
     RSParagraphStyle paraStyle;
     paraStyle.textDirection_ = ToRSTextDirection(GetTextDirection(content));

@@ -34,11 +34,11 @@ public:
         : GridLayoutBaseAlgorithm(std::move(gridLayoutInfo)) {};
     ~GridAdaptiveLayoutAlgorithm() override = default;
 
-    void Measure(LayoutWrapper* layoutWrapper) override;
-    void Layout(LayoutWrapper* layoutWrapper) override;
+    void Measure(FrameNode* frameNode) override;
+    void Layout(FrameNode* frameNode) override;
 
 private:
-    OffsetF CalculateChildOffset(int32_t index, LayoutWrapper* layoutWrapper) const;
+    OffsetF CalculateChildOffset(int32_t index, FrameNode* frameNode) const;
 
     // cell size of grid.
     SizeF gridCellSize_;

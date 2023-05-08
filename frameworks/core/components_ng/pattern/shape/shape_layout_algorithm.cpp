@@ -22,7 +22,7 @@
 namespace OHOS::Ace::NG {
 
 std::optional<SizeF> ShapeLayoutAlgorithm::MeasureContent(
-    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+    const LayoutConstraintF& contentConstraint, FrameNode* frameNode)
 {
     if (contentConstraint.selfIdealSize.IsValid()) {
         return contentConstraint.selfIdealSize.ConvertToSizeT();

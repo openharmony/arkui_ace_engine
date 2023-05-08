@@ -659,24 +659,6 @@ HWTEST_F(UINodeTestNg, UINodeTestNg019, TestSize.Level1)
 }
 
 /**
- * @tc.name: UINodeTestNg020
- * @tc.desc: Test ui node method
- * @tc.type: FUNC
- */
-HWTEST_F(UINodeTestNg, UINodeTestNg020, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. add one child for ZERO and call AdjustLayoutWrapperTree
-     * @tc.expected: step1. children_.size is 1 and the AdjustLayoutWrapperTree function is run ok
-     */
-    ZERO->AddChild(ONE, 1, false);
-    RefPtr<LayoutWrapper> retLayoutWrapper = ZERO->UINode::CreateLayoutWrapper(true, true);
-    ZERO->UINode::AdjustLayoutWrapperTree(retLayoutWrapper, true, true);
-    EXPECT_EQ(ZERO->children_.size(), 1);
-    ZERO->Clean();
-}
-
-/**
  * @tc.name: UINodeTestNg021
  * @tc.desc: Test ui node method
  * @tc.type: FUNC
@@ -1065,29 +1047,6 @@ HWTEST_F(UINodeTestNg, UINodeTestNg038, TestSize.Level1)
 }
 
 /**
- * @tc.name: UINodeTestNg039
- * @tc.desc: Test ui node method
- * @tc.type: FUNC
- */
-HWTEST_F(UINodeTestNg, UINodeTestNg039, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. call the CreateLayoutWrapper
-     * @tc.expected: step1. the return value is null
-     */
-    RefPtr<LayoutWrapper> retLayoutWrapper = ZERO->UINode::CreateLayoutWrapper(true, true);
-    EXPECT_EQ(retLayoutWrapper, nullptr);
-    /**
-     * @tc.steps: step1. add one child for ZERO and call CreateLayoutWrapper
-     * @tc.expected: step1. the return value is null
-     */
-    ZERO->AddChild(ONE, 1, false);
-    retLayoutWrapper = ZERO->UINode::CreateLayoutWrapper(true, true);
-    EXPECT_NE(retLayoutWrapper, nullptr);
-    ZERO->Clean();
-}
-
-/**
  * @tc.name: UINodeTestNg040
  * @tc.desc: Test ui node method
  * @tc.type: FUNC
@@ -1100,8 +1059,8 @@ HWTEST_F(UINodeTestNg, UINodeTestNg040, TestSize.Level1)
      */
     auto it = std::find(ZERO->children_.begin(), ZERO->children_.end(), ZERO);
     ZERO->onMainTree_ = true;
-    ZERO->DoAddChild(it, ONE, false);
-    ZERO->DoAddChild(it, TWO, true);
+    ZERO->DoAddChild(it, 0, ONE, false);
+    ZERO->DoAddChild(it, 1, TWO, true);
     EXPECT_EQ(ZERO->children_.size(), 2);
 }
 } // namespace OHOS::Ace::NG

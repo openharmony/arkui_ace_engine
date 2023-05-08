@@ -176,9 +176,9 @@ RefPtr<NodePaintMethod> RatingPattern::CreateNodePaintMethod()
     return MakeRefPtr<RatingPaintMethod>(ratingModifier_, starNum, state_);
 }
 
-bool RatingPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+bool RatingPattern::OnDirtyLayoutWrapperSwap(FrameNode* frameNode, const DirtySwapConfig& config)
 {
-    if (config.skipMeasure || dirty->SkipMeasureContent()) {
+    if (config.skipMeasure || frameNode->SkipMeasureContent()) {
         return false;
     }
     if (!foregroundImageCanvas_ || !secondaryImageCanvas_ || !backgroundImageCanvas_) {

@@ -29,14 +29,14 @@ public:
 
     ~ButtonLayoutAlgorithm() override = default;
 
-    void Measure(LayoutWrapper* layoutWrapper) override;
+    void Measure(FrameNode* frameNode) override;
     void OnReset() override {}
 
 private:
-    std::optional<SizeF> HandleLabelCircleButtonConstraint(LayoutWrapper* layoutWrapper);
-    void PerformMeasureSelf(LayoutWrapper* layoutWrapper);
+    std::optional<SizeF> HandleLabelCircleButtonConstraint(FrameNode* frameNode);
+    void PerformMeasureSelf(FrameNode* frameNode);
     void HandleLabelCircleButtonFrameSize(const LayoutConstraintF& layoutConstraint, SizeF& frameSize);
-    void MeasureCircleButton(LayoutWrapper* layoutWrapper);
+    void MeasureCircleButton(FrameNode* frameNode);
 
     SizeF childSize_;
     bool isNeedToSetDefaultHeight_ = false;

@@ -20,12 +20,10 @@
 
 namespace OHOS::Ace::NG {
 std::optional<SizeF> CustomPaintLayoutAlgorithm::MeasureContent(
-    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+    const LayoutConstraintF& contentConstraint, FrameNode* frameNoder)
 {
     std::optional<SizeF> canvasSize = contentConstraint.maxSize;
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_RETURN(host, canvasSize);
-    auto pattern = host->GetPattern<CustomPaintPattern>();
+    auto pattern = frameNoder->GetPattern<CustomPaintPattern>();
     CHECK_NULL_RETURN(pattern, canvasSize);
     if (contentConstraint.selfIdealSize.IsValid()) {
         canvasSize = contentConstraint.selfIdealSize.ConvertToSizeT();

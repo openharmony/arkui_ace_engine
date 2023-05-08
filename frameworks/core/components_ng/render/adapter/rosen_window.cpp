@@ -20,6 +20,7 @@
 #include "base/thread/task_executor.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
+#include "base/log/ace_trace.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/thread_checker.h"
@@ -46,6 +47,7 @@ namespace OHOS::Ace::NG {
 RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<TaskExecutor> taskExecutor, int32_t id)
     : rsWindow_(window), taskExecutor_(taskExecutor), id_(id)
 {
+    windowName_ = rsWindow_->GetWindowName();
     int64_t refreshPeriod = static_cast<int64_t>(ONE_SECOND_IN_NANO / GetDisplayRefreshRate());
     vsyncCallback_ = std::make_shared<OHOS::Rosen::VsyncCallback>();
     vsyncCallback_->onCallback = [weakTask = taskExecutor_, id = id_, refreshPeriod](int64_t timeStampNanos) {
@@ -57,6 +59,7 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
             CHECK_NULL_VOID(container);
             auto window = container->GetWindow();
             CHECK_NULL_VOID(window);
+            ACE_SCOPED_TRACE("OnVsyncEvent[%s] now:%" PRIu64 "", window->GetWindowName().c_str(),timeStampNanos);
             window->OnVsync(static_cast<uint64_t>(timeStampNanos), 0);
             auto pipeline = container->GetPipelineContext();
             CHECK_NULL_VOID_NOLOG(pipeline);

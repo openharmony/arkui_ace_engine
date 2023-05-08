@@ -39,11 +39,11 @@ public:
         return MakeRefPtr<GridContainerLayoutAlgorithm>();
     }
 
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& changeConfig) override
+    bool OnDirtyLayoutWrapperSwap(FrameNode* frameNode, const DirtySwapConfig& changeConfig) override
     {
         auto layoutProperty = GetLayoutProperty<GridContainerLayoutProperty>();
         layoutProperty->SetReserveObj(layoutProperty);
-        return LinearLayoutPattern::OnDirtyLayoutWrapperSwap(dirty, changeConfig);
+        return LinearLayoutPattern::OnDirtyLayoutWrapperSwap(frameNode, changeConfig);
     }
 };
 } // namespace OHOS::Ace::NG

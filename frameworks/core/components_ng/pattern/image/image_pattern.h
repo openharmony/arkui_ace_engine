@@ -55,7 +55,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<ImageLayoutAlgorithm>(loadingCtx_, altLoadingCtx_);
+        return MakeRefPtr<ImageLayoutAlgorithm>();
     }
 
     RefPtr<EventHub> CreateEventHub() override
@@ -63,8 +63,16 @@ public:
         return MakeRefPtr<ImageEventHub>();
     }
 
+    RefPtr<ImageLoadingContext> GetLoadingCtx() const {
+        return loadingCtx_;
+    }
+
+    RefPtr<ImageLoadingContext> GetAltLoadingCtx() const {
+        return altLoadingCtx_;
+    }
+
     // Called on main thread to check if need rerender of the content.
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    bool OnDirtyLayoutWrapperSwap(FrameNode* frameNode, const DirtySwapConfig& config) override;
 
     FocusPattern GetFocusPattern() const override
     {

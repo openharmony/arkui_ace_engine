@@ -56,6 +56,18 @@ void LazyForEachNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& paren
     parent->SetLayoutWrapperBuilder(lazyLayoutWrapperBuilder);
 }
 
+void LazyForEachNode::BuildAllChildren()
+{
+    needMarkParent = false;
+    for (int i = 0; i < FrameCount(); i++) {
+        auto node = builder_->CreateChildByIndex(i);
+        if (node.second) {
+            AddChild(node.second);
+        }
+    }
+    needMarkParent = true;
+}
+
 void LazyForEachNode::UpdateLazyForEachItems(int32_t newStartIndex, int32_t newEndIndex,
     std::list<std::optional<std::string>>&& nodeIds,
     std::unordered_map<int32_t, std::optional<std::string>>&& cachedItems)
@@ -273,5 +285,23 @@ void LazyForEachNode::NotifyDataCountChanged(int32_t index)
     if (parent) {
         parent->ChildrenUpdatedFrom(index);
     }
+}
+
+void LazyForEachNode::MarkNeedSyncRenderTree(bool needRebuild)
+{
+    if (needMarkParent) {
+        UINode::MarkNeedSyncRenderTree(needRebuild);
+    }
+}
+
+RefPtr<UINode> LazyForEachNode::GetFrameChildByIndex(uint32_t index)
+{
+    if (index < FrameCount()) {
+        auto child = builder_->CreateChildByIndex(index);
+        if (child.second) {
+            return child.second->GetFrameChildByIndex(0);
+        }
+    }
+    return nullptr;
 }
 } // namespace OHOS::Ace::NG

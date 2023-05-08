@@ -39,16 +39,16 @@ void SwitchPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
 }
 
-bool SwitchPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
+bool SwitchPattern::OnDirtyLayoutWrapperSwap(FrameNode* frameNode, bool skipMeasure, bool skipLayout)
 {
-    if (skipMeasure || dirty->SkipMeasureContent()) {
+    if (skipMeasure || frameNode->SkipMeasureContent()) {
         return false;
     }
     if (isOn_.value()) {
         currentOffset_ = GetSwitchWidth();
     }
 
-    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
+    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(frameNode->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto switchLayoutAlgorithm = DynamicCast<SwitchLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(switchLayoutAlgorithm, false);
@@ -58,7 +58,7 @@ bool SwitchPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
 
     width_ = width;
     height_ = height;
-    auto geometryNode = dirty->GetGeometryNode();
+    auto geometryNode = frameNode->GetGeometryNode();
     offset_ = geometryNode->GetContentOffset();
     size_ = geometryNode->GetContentSize();
     if (isFirstAddhotZoneRect_) {

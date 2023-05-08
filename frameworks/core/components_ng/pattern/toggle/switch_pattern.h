@@ -109,7 +109,7 @@ private:
     void OnModifyDone() override;
     void UpdateCurrentOffset(float offset);
     void OnAttachToFrameNode() override;
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
+    bool OnDirtyLayoutWrapperSwap(FrameNode* frameNode, bool skipMeasure, bool skipLayout) override;
     void PlayTranslateAnimation(float startPos, float endPos);
     RefPtr<Curve> GetCurve() const;
     int32_t GetDuration() const;

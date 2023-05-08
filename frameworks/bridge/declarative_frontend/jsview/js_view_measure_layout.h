@@ -38,13 +38,13 @@ public:
     static panda::Local<panda::JSValueRef> JSMeasure(panda::JsiRuntimeCallInfo* info);
     static panda::Local<panda::JSValueRef> JSLayout(panda::JsiRuntimeCallInfo* info);
 
-    static void SetMeasureChildren(std::list<RefPtr<NG::LayoutWrapper>> children)
+    static void SetMeasureChildren(std::list<RefPtr<NG::FrameNode>> children)
     {
         measureChildren_ = std::move(children);
         iterMeasureChildren_ = measureChildren_.begin();
     }
 
-    static void SetLayoutChildren(std::list<RefPtr<NG::LayoutWrapper>> children)
+    static void SetLayoutChildren(std::list<RefPtr<NG::FrameNode>> children)
     {
         layoutChildren_ = std::move(children);
         iterLayoutChildren_ = layoutChildren_.begin();
@@ -56,10 +56,10 @@ public:
     }
 
 private:
-    static thread_local std::list<RefPtr<NG::LayoutWrapper>> measureChildren_;
-    static thread_local std::list<RefPtr<NG::LayoutWrapper>>::iterator iterMeasureChildren_;
-    static thread_local std::list<RefPtr<NG::LayoutWrapper>> layoutChildren_;
-    static thread_local std::list<RefPtr<NG::LayoutWrapper>>::iterator iterLayoutChildren_;
+    static thread_local std::list<RefPtr<NG::FrameNode>> measureChildren_;
+    static thread_local std::list<RefPtr<NG::FrameNode>>::iterator iterMeasureChildren_;
+    static thread_local std::list<RefPtr<NG::FrameNode>> layoutChildren_;
+    static thread_local std::list<RefPtr<NG::FrameNode>>::iterator iterLayoutChildren_;
     static thread_local NG::LayoutConstraintF measureDefaultConstraint_;
 #endif
 };

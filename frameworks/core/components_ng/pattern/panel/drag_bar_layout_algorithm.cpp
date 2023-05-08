@@ -38,10 +38,9 @@ constexpr Dimension PADDING = 16.0_vp;
 } // namespace
 
 std::optional<SizeF> DragBarLayoutAlgorithm::MeasureContent(
-    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+    const LayoutConstraintF& contentConstraint, FrameNode* frameNode)
 {
-    CHECK_NULL_RETURN(layoutWrapper, std::nullopt);
-    auto layoutProperty = AceType::DynamicCast<DragBarLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto layoutProperty = AceType::DynamicCast<DragBarLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_RETURN(layoutProperty, std::nullopt);
     const auto& layoutConstraint = layoutProperty->GetLayoutConstraint();
     CHECK_NULL_RETURN(layoutConstraint, std::nullopt);

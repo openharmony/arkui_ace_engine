@@ -26,8 +26,8 @@ public:
     MenuItemLayoutAlgorithm() = default;
     ~MenuItemLayoutAlgorithm() override = default;
 
-    void Measure(LayoutWrapper* layoutWrapper) override;
-    void Layout(LayoutWrapper* layoutWrapper) override;
+    void Measure(FrameNode* frameNode) override;
+    void Layout(FrameNode* frameNode) override;
 
 private:
     float horInterval_ = 0.0f;

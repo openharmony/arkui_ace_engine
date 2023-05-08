@@ -33,7 +33,7 @@ void PagePattern::OnHide()
     isOnShow_ = false;
 }
 
-bool PagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& /*wrapper*/, const DirtySwapConfig& /*config*/)
+bool PagePattern::OnDirtyLayoutWrapperSwap( RefPtr<LayoutWrapper>& /*wrapper*/, const DirtySwapConfig& /*config*/)
 {
     return false;
 }

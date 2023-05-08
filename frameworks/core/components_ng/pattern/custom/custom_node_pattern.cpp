@@ -20,13 +20,13 @@
 namespace OHOS::Ace::NG {
 
 bool CustomNodePattern::OnDirtyLayoutWrapperSwap(
-    const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& /*config*/)
+    FrameNode* frameNode, const DirtySwapConfig& /*config*/)
 {
-    CHECK_NULL_RETURN(dirty, false);
+    CHECK_NULL_RETURN(frameNode, false);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto customNodeLayoutAlgorithm =
-        DynamicCast<CustomNodeLayoutAlgorithm>(dirty->GetLayoutAlgorithm()->GetLayoutAlgorithm());
+        DynamicCast<CustomNodeLayoutAlgorithm>(frameNode->GetLayoutAlgorithm()->GetLayoutAlgorithm());
     CHECK_NULL_RETURN_NOLOG(customNodeLayoutAlgorithm, false);
     auto uiNode = customNodeLayoutAlgorithm->MoveBuildItem();
     CHECK_NULL_RETURN_NOLOG(uiNode, false);

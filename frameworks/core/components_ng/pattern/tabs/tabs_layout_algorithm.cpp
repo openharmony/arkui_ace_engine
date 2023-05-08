@@ -24,6 +24,7 @@
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -32,11 +33,11 @@ constexpr int32_t DIVIDER_INDEX = 1;
 constexpr int32_t TAB_BAR_INDEX = 2;
 } // namespace
 
-void TabsLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+void TabsLayoutAlgorithm::Measure(FrameNode* frameNode)
 {
-    auto layoutProperty = AceType::DynamicCast<TabsLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto layoutProperty = AceType::DynamicCast<TabsLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    auto geometryNode = layoutWrapper->GetGeometryNode();
+    auto geometryNode = frameNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto axis = layoutProperty->GetAxis().value_or(Axis::HORIZONTAL);
     auto constraint = layoutProperty->GetLayoutConstraint();
@@ -53,22 +54,22 @@ void TabsLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     float dividerStrokeWidth = 0.0f;
 
     // Measure tab bar.
-    auto tabBarWrapper = layoutWrapper->GetOrCreateChildByIndex(TAB_BAR_INDEX);
+    auto tabBar = frameNode->GetFrameNodeByIndex(TAB_BAR_INDEX);
     SizeF tabBarSize;
-    if (tabBarWrapper) {
-        tabBarWrapper->Measure(childLayoutConstraint);
-        tabBarSize = tabBarWrapper->GetGeometryNode()->GetMarginFrameSize();
+    if (tabBar) {
+        tabBar->Measure(childLayoutConstraint);
+        tabBarSize = tabBar->GetGeometryNode()->GetMarginFrameSize();
     }
 
     // Measure divider.
-    auto dividerWrapper = layoutWrapper->GetOrCreateChildByIndex(DIVIDER_INDEX);
-    if (dividerWrapper) {
-        dividerStrokeWidth = MeasureDivider(layoutProperty, dividerWrapper, idealSize);
+    auto divider = frameNode->GetFrameNodeByIndex(DIVIDER_INDEX);
+    if (divider) {
+        dividerStrokeWidth = MeasureDivider(layoutProperty, divider, idealSize);
     }
 
     // Measure swiper.
-    auto swiperWrapper = layoutWrapper->GetOrCreateChildByIndex(SWIPER_INDEX);
-    if (swiperWrapper) {
+    auto swiper = frameNode->GetFrameNodeByIndex(SWIPER_INDEX);
+    if (swiper) {
         SizeF parentIdealSize = idealSize;
         if (axis == Axis::HORIZONTAL) {
             childLayoutConstraint.selfIdealSize.SetHeight(
@@ -82,14 +83,13 @@ void TabsLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             parentIdealSize.SetWidth(idealSize.Width() - tabBarSize.Width() - dividerStrokeWidth);
         }
         childLayoutConstraint.parentIdealSize = OptionalSizeF(parentIdealSize);
-        swiperWrapper->Measure(childLayoutConstraint);
+        swiper->Measure(childLayoutConstraint);
     }
 }
 
-void TabsLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+void TabsLayoutAlgorithm::Layout(FrameNode* frameNode)
 {
-    CHECK_NULL_VOID(layoutWrapper);
-    auto geometryNode = layoutWrapper->GetGeometryNode();
+    auto geometryNode = frameNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto frameSize = geometryNode->GetFrameSize();
     if (!frameSize.IsPositive()) {
@@ -97,41 +97,41 @@ void TabsLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         return;
     }
 
-    auto tabBarWrapper = layoutWrapper->GetOrCreateChildByIndex(TAB_BAR_INDEX);
-    auto dividerWrapper = layoutWrapper->GetOrCreateChildByIndex(DIVIDER_INDEX);
-    auto swiperWrapper = layoutWrapper->GetOrCreateChildByIndex(SWIPER_INDEX);
-    if (!tabBarWrapper || !dividerWrapper || !swiperWrapper) {
+    auto tabBar = frameNode->GetFrameNodeByIndex(TAB_BAR_INDEX);
+    auto divider = frameNode->GetFrameNodeByIndex(DIVIDER_INDEX);
+    auto swiper = frameNode->GetFrameNodeByIndex(SWIPER_INDEX);
+    if (!tabBar || !divider || !swiper) {
         return;
     }
 
-    auto offsetList = LayoutOffsetList(layoutWrapper, tabBarWrapper, frameSize);
+    auto offsetList = LayoutOffsetList(frameNode, tabBar, frameSize);
 
-    swiperWrapper->GetGeometryNode()->SetMarginFrameOffset(offsetList[SWIPER_INDEX]);
-    swiperWrapper->Layout();
+    swiper->GetGeometryNode()->SetMarginFrameOffset(offsetList[SWIPER_INDEX]);
+    swiper->Layout();
 
-    dividerWrapper->GetGeometryNode()->SetMarginFrameOffset(offsetList[DIVIDER_INDEX]);
-    dividerWrapper->Layout();
+    divider->GetGeometryNode()->SetMarginFrameOffset(offsetList[DIVIDER_INDEX]);
+    divider->Layout();
 	
-    tabBarWrapper->GetGeometryNode()->SetMarginFrameOffset(offsetList[TAB_BAR_INDEX]);
-    tabBarWrapper->Layout();
+    tabBar->GetGeometryNode()->SetMarginFrameOffset(offsetList[TAB_BAR_INDEX]);
+    tabBar->Layout();
 }
 
-std::vector<OffsetF> TabsLayoutAlgorithm::LayoutOffsetList(LayoutWrapper* layoutWrapper,
-    const RefPtr<LayoutWrapper>& tabBarWrapper, const SizeF& frameSize) const
+std::vector<OffsetF> TabsLayoutAlgorithm::LayoutOffsetList(FrameNode* frameNode,
+    const RefPtr<FrameNode>& tabBar, const SizeF& frameSize) const
 {
     std::vector<OffsetF> offsetList;
     OffsetF tabBarOffset;
     OffsetF dividerOffset;
     OffsetF swiperOffset;
-    auto axis = GetAxis(layoutWrapper);
-    auto barPosition = GetBarPosition(layoutWrapper);
-    auto divider = GetDivider(layoutWrapper);
-    auto tabBarGeometryNode = tabBarWrapper->GetGeometryNode();
+    auto axis = GetAxis(frameNode);
+    auto barPosition = GetBarPosition(frameNode);
+    auto divider = GetDivider(frameNode);
+    auto tabBarGeometryNode = tabBar->GetGeometryNode();
     CHECK_NULL_RETURN(tabBarGeometryNode, offsetList);
     auto tabBarFrameSize = tabBarGeometryNode->GetMarginFrameSize();
     auto dividerStrokeWidth = divider.isNull ? 0.0f : divider.strokeWidth.ConvertToPx();
     auto dividerStartMargin = divider.startMargin.ConvertToPx();
-    auto layoutProperty = DynamicCast<TabsLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto layoutProperty = DynamicCast<TabsLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_RETURN(layoutProperty, offsetList);
     auto padding = layoutProperty->CreatePaddingAndBorder();
 
@@ -172,30 +172,30 @@ std::vector<OffsetF> TabsLayoutAlgorithm::LayoutOffsetList(LayoutWrapper* layout
     return offsetList;
 }
 
-BarPosition TabsLayoutAlgorithm::GetBarPosition(LayoutWrapper* layoutWrapper) const
+BarPosition TabsLayoutAlgorithm::GetBarPosition(FrameNode* frameNode) const
 {
-    auto layoutProperty = AceType::DynamicCast<TabsLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto layoutProperty = AceType::DynamicCast<TabsLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_RETURN(layoutProperty, BarPosition::START);
     return layoutProperty->GetTabBarPosition().value_or(BarPosition::START);
 }
 
-Axis TabsLayoutAlgorithm::GetAxis(LayoutWrapper* layoutWrapper) const
+Axis TabsLayoutAlgorithm::GetAxis(FrameNode* frameNode) const
 {
-    auto layoutProperty = AceType::DynamicCast<TabsLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto layoutProperty = AceType::DynamicCast<TabsLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_RETURN(layoutProperty, Axis::HORIZONTAL);
     return layoutProperty->GetAxis().value_or(Axis::HORIZONTAL);
 }
 
-TabsItemDivider TabsLayoutAlgorithm::GetDivider(LayoutWrapper* layoutWrapper) const
+TabsItemDivider TabsLayoutAlgorithm::GetDivider(FrameNode* frameNode) const
 {
-    auto layoutProperty = AceType::DynamicCast<TabsLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto layoutProperty = AceType::DynamicCast<TabsLayoutProperty>(frameNode->GetLayoutProperty());
     TabsItemDivider divider;
     CHECK_NULL_RETURN(layoutProperty, divider);
     return layoutProperty->GetDivider().value_or(divider);
 }
 
 float TabsLayoutAlgorithm::MeasureDivider(const RefPtr<TabsLayoutProperty>& layoutProperty,
-    const RefPtr<LayoutWrapper>& dividerWrapper, const SizeF& idealSize)
+    const RefPtr<FrameNode>& dividerNode, const SizeF& idealSize)
 {
     auto constraint = layoutProperty->GetLayoutConstraint();
     
@@ -220,7 +220,7 @@ float TabsLayoutAlgorithm::MeasureDivider(const RefPtr<TabsLayoutProperty>& layo
 
     auto dividerLayoutConstraint = layoutProperty->CreateChildConstraint();
     dividerLayoutConstraint.selfIdealSize = OptionalSizeF(dividerIdealSize);
-    dividerWrapper->Measure(dividerLayoutConstraint);
+    dividerNode->Measure(dividerLayoutConstraint);
 
     return divider.isNull ? 0.0f : dividerStrokeWidth;
 }

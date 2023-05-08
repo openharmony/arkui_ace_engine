@@ -66,7 +66,7 @@ public:
     }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    bool OnDirtyLayoutWrapperSwap(FrameNode* frameNode, const DirtySwapConfig& config) override;
 
     RefPtr<EventHub> CreateEventHub() override
     {

@@ -26,7 +26,7 @@
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
-class LayoutWrapper;
+class FrameNode;
 
 class ACE_EXPORT LayoutAlgorithm : public virtual AceType {
     DECLARE_ACE_TYPE(LayoutAlgorithm, AceType);
@@ -41,14 +41,14 @@ public:
     }
 
     virtual std::optional<SizeF> MeasureContent(
-        const LayoutConstraintF& /*contentConstraint*/, LayoutWrapper* /*layoutWrapper*/)
+        const LayoutConstraintF& /*contentConstraint*/, FrameNode* /*frameNode*/)
     {
         return std::nullopt;
     }
 
-    virtual void Measure(LayoutWrapper* layoutWrapper) {}
+    virtual void Measure(FrameNode* frameNode) {}
 
-    virtual void Layout(LayoutWrapper* layoutWrapper) {}
+    virtual void Layout(FrameNode* frameNode) {}
 
     virtual bool SkipMeasure()
     {
@@ -89,28 +89,28 @@ public:
     }
 
     std::optional<SizeF> MeasureContent(
-        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override
+        const LayoutConstraintF& contentConstraint, FrameNode* frameNode) override
     {
         if (!layoutAlgorithm_) {
             return std::nullopt;
         }
-        return layoutAlgorithm_->MeasureContent(contentConstraint, layoutWrapper);
+        return layoutAlgorithm_->MeasureContent(contentConstraint, frameNode);
     }
 
-    void Measure(LayoutWrapper* layoutWrapper) override
+    void Measure(FrameNode* frameNode) override
     {
         if (!layoutAlgorithm_) {
             return;
         }
-        layoutAlgorithm_->Measure(layoutWrapper);
+        layoutAlgorithm_->Measure(frameNode);
     }
 
-    void Layout(LayoutWrapper* layoutWrapper) override
+    void Layout(FrameNode* frameNode) override
     {
         if (!layoutAlgorithm_) {
             return;
         }
-        layoutAlgorithm_->Layout(layoutWrapper);
+        layoutAlgorithm_->Layout(frameNode);
     }
 
     void SetNeedMeasure()
@@ -121,6 +121,16 @@ public:
     void SetNeedLayout()
     {
         skipLayout_ = false;
+    }
+
+    void SetSkipMeasure()
+    {
+        skipMeasure_ = true;
+    }
+
+    void SetSkipLayout()
+    {
+        skipLayout_ = true;
     }
 
     bool SkipMeasure() override

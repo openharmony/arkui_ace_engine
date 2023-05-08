@@ -80,9 +80,9 @@ public:
     }
 
     bool OnDirtyLayoutWrapperSwap(
-        const RefPtr<LayoutWrapper>& dirty, bool /*skipMeasure*/, bool /*skipLayout*/) override
+        FrameNode* frameNode, bool /*skipMeasure*/, bool /*skipLayout*/) override
     {
-        auto geometryNode = dirty->GetGeometryNode();
+        auto geometryNode = frameNode->GetGeometryNode();
         offset_ = geometryNode->GetContentOffset();
         size_ = geometryNode->GetContentSize();
         if (isFirstAddhotZoneRect_) {

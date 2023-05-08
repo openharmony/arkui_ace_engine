@@ -91,7 +91,7 @@ void SwiperIndicatorPattern::OnModifyDone()
     InitTouchEvent(gestureHub);
 }
 
-bool SwiperIndicatorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+bool SwiperIndicatorPattern::OnDirtyLayoutWrapperSwap(FrameNode* frameNode, const DirtySwapConfig& config)
 {
     CHECK_NULL_RETURN_NOLOG(config.frameSizeChange, false);
     return true;

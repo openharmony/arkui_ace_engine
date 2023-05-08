@@ -59,9 +59,9 @@ public:
             shallowBuilder_.Reset();
         }
     }
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override
+    bool OnDirtyLayoutWrapperSwap(FrameNode* frameNode, const DirtySwapConfig& config) override
     {
-        auto layoutProperty = dirty->GetLayoutProperty();
+        auto layoutProperty = frameNode->GetLayoutProperty();
         CHECK_NULL_RETURN(layoutProperty, false);
         auto gridItemLayoutProperty = AceType::DynamicCast<GridItemLayoutProperty>(layoutProperty);
         CHECK_NULL_RETURN(gridItemLayoutProperty, false);

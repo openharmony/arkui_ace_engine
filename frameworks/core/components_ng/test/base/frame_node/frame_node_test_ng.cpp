@@ -317,33 +317,6 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg009, TestSize.Level1)
 }
 
 /**
- * @tc.name: FrameNodeTestNg0010
- * @tc.desc: Test frame node method
- * @tc.type: FUNC
- */
-HWTEST_F(FrameNodeTestNg, FrameNodeTestNg0010, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. build a object to SwapDirtyLayoutWrapperOnMainThread
-     * @tc.expected: step1. expect The function is run ok.
-     */
-    RefPtr<LayoutWrapper> layoutWrapper = FRAME_NODE2->CreateLayoutWrapper(true, true);
-    /**
-     * @tc.expected: step2. expect layoutWrapper is not nullptr.
-     */
-    FRAME_NODE2->SwapDirtyLayoutWrapperOnMainThread(layoutWrapper);
-    EXPECT_NE(layoutWrapper, nullptr);
-    layoutWrapper->SetActive(true);
-    auto test = FRAME_NODE2->IsActive();
-
-    /**
-     * @tc.expected: step3. expect isActive_ is false.
-     */
-    FRAME_NODE2->SwapDirtyLayoutWrapperOnMainThread(layoutWrapper);
-    EXPECT_FALSE(test);
-}
-
-/**
  * @tc.name: FrameNodeTestNg0011
  * @tc.desc: Test frame node method
  * @tc.type: FUNC

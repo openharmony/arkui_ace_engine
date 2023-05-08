@@ -34,8 +34,8 @@ public:
         : GridLayoutBaseAlgorithm(std::move(gridLayoutInfo)), crossCount_(crossCount), mainCount_(mainCount) {};
     ~GridScrollLayoutAlgorithm() override = default;
 
-    void Measure(LayoutWrapper* layoutWrapper) override;
-    void Layout(LayoutWrapper* layoutWrapper) override;
+    void Measure(FrameNode* frameNode) override;
+    void Layout(FrameNode* frameNode) override;
 
     static void PrintGridMatrix(
         const std::map<int32_t, std::map<int32_t, int32_t>>& gridMatrix, const std::map<int32_t, float>& positions);
@@ -46,31 +46,31 @@ public:
     }
 
 private:
-    void FillGridViewportAndMeasureChildren(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
-    float MeasureRecordedItems(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
-    bool UseCurrentLines(float mainSize, float crossSize, LayoutWrapper* layoutWrapper, float& mainLength);
-    void SkipForwardLines(float mainSize, LayoutWrapper* layoutWrapper);
-    void SkipBackwardLines(float mainSize, LayoutWrapper* layoutWrapper);
+    void FillGridViewportAndMeasureChildren(float mainSize, float crossSize, FrameNode* frameNode);
+    float MeasureRecordedItems(float mainSize, float crossSize, FrameNode* frameNode);
+    bool UseCurrentLines(float mainSize, float crossSize, FrameNode* frameNode, float& mainLength);
+    void SkipForwardLines(float mainSize, FrameNode* frameNode);
+    void SkipBackwardLines(float mainSize, FrameNode* frameNode);
 
     // fill start of viewport
-    bool FillBlankAtStart(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
-    float FillNewLineForward(float crossSize, float mainSize, LayoutWrapper* layoutWrapper);
-    void AddForwardLines(int32_t currentIndex, float crossSize, float mainSize, LayoutWrapper* layoutWrapper);
+    bool FillBlankAtStart(float mainSize, float crossSize, FrameNode* frameNode);
+    float FillNewLineForward(float crossSize, float mainSize, FrameNode* frameNode);
+    void AddForwardLines(int32_t currentIndex, float crossSize, float mainSize, FrameNode* frameNode);
     void UpdateMatrixForAddedItems();
 
     // fill end of viewport
-    void FillBlankAtEnd(float mainSize, float crossSize, LayoutWrapper* layoutWrapper, float& mainLength);
-    float FillNewLineBackward(float crossSize, float mainSize, LayoutWrapper* layoutWrapper, bool reverse);
+    void FillBlankAtEnd(float mainSize, float crossSize, FrameNode* frameNode, float& mainLength);
+    float FillNewLineBackward(float crossSize, float mainSize, FrameNode* frameNode, bool reverse);
 
     // Measure grid item which not exist in grid matrix already, need to place it and save to grid matrix.
-    int32_t MeasureChild(const SizeF& frameSize, int32_t itemIndex, LayoutWrapper* layoutWrapper,
-        const RefPtr<LayoutWrapper>& childLayoutWrapper, bool reverse);
+    int32_t MeasureChild(const SizeF& frameSize, int32_t itemIndex, FrameNode* frameNode,
+        const RefPtr<FrameNode>& child, bool reverse);
     // Measure grid item which exist in grid matrix already, needn't to place it again.
     int32_t MeasureChildPlaced(const SizeF& frameSize, int32_t itemIndex, int32_t crossStart,
-        LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& childLayoutWrapper);
+        FrameNode* frameNode, const RefPtr<FrameNode>& child);
 
     // Compote position of grid item in cross axis.
-    float ComputeItemCrossPosition(LayoutWrapper* layoutWrapper, int32_t crossStart) const;
+    float ComputeItemCrossPosition(FrameNode* frameNode, int32_t crossStart) const;
     // Find next valid cell when current is not valid.
     void GetNextGrid(int32_t& curMain, int32_t& curCross, bool reverse) const;
     // Find a valid cell to place grid item and save to grid matrix.
@@ -80,14 +80,14 @@ private:
     void ModifyCurrentOffsetWhenReachEnd(float mainSize);
     void InitialItemsCrossSize(const RefPtr<GridLayoutProperty>& layoutProperty, const SizeF& frameSize);
     bool IsIndexInMatrix(int32_t index, int32_t& startLine);
-    void UpdateGridLayoutInfo(LayoutWrapper* layoutWrapper, float mainSize);
-    void GetTargetIndexInfoWithBenchMark(LayoutWrapper* layoutWrapper, bool isTargetBackward, int32_t targetIndex);
+    void UpdateGridLayoutInfo(FrameNode* frameNode, float mainSize);
+    void GetTargetIndexInfoWithBenchMark(FrameNode* frameNode, bool isTargetBackward, int32_t targetIndex);
 
-    void UpdateOffsetOnVirtualKeyboardHeightChange(LayoutWrapper* layoutWrapper, float mainSize);
-    void AdaptToChildMainSize(LayoutWrapper* layoutWrapper, RefPtr<GridLayoutProperty>& gridLayoutProperty,
+    void UpdateOffsetOnVirtualKeyboardHeightChange(FrameNode* frameNode, float mainSize);
+    void AdaptToChildMainSize(FrameNode* frameNode, RefPtr<GridLayoutProperty>& gridLayoutProperty,
         float mainSize, const SizeF& idealSize);
 
-    int32_t GetStartingItem(LayoutWrapper* layoutWrapper, int32_t currentIndex) const;
+    int32_t GetStartingItem(FrameNode* frameNode, int32_t currentIndex) const;
 
     uint32_t crossCount_ = 0;
     uint32_t mainCount_ = 0;

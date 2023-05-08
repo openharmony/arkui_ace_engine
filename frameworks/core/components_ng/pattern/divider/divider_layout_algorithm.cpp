@@ -24,9 +24,9 @@ namespace OHOS::Ace::NG {
 DividerLayoutAlgorithm::DividerLayoutAlgorithm() = default;
 
 std::optional<SizeF> DividerLayoutAlgorithm::MeasureContent(
-    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+    const LayoutConstraintF& contentConstraint, FrameNode* frameNode)
 {
-    auto dividerLayoutProperty = DynamicCast<DividerLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto dividerLayoutProperty = DynamicCast<DividerLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_RETURN(dividerLayoutProperty, std::nullopt);
 
     auto pipeline = PipelineBase::GetCurrentContext();

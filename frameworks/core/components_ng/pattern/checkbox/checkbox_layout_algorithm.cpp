@@ -33,7 +33,7 @@
 namespace OHOS::Ace::NG {
 
 std::optional<SizeF> CheckBoxLayoutAlgorithm::MeasureContent(
-    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+    const LayoutConstraintF& contentConstraint, FrameNode* frameNode)
 {
     InitializeParam();
     // Case 1: Width and height are set in the front end.

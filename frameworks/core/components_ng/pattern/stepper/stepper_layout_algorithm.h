@@ -27,19 +27,19 @@ public:
     explicit StepperLayoutAlgorithm(bool layoutLeftButton) : layoutLeftButton_(layoutLeftButton) {};
     ~StepperLayoutAlgorithm() override = default;
 
-    void Measure(LayoutWrapper* layoutWrapper) override;
-    void Layout(LayoutWrapper* layoutWrapper) override;
+    void Measure(FrameNode* frameNode) override;
+    void Layout(FrameNode* frameNode) override;
 
 private:
-    void MeasureSwiper(LayoutWrapper* layoutWrapper, LayoutConstraintF swiperLayoutConstraint);
-    void MeasureLeftButton(LayoutWrapper* layoutWrapper, LayoutConstraintF buttonLayoutConstraint);
-    void MeasureRightButton(LayoutWrapper* layoutWrapper, LayoutConstraintF buttonLayoutConstraint);
+    void MeasureSwiper(FrameNode* frameNode, LayoutConstraintF swiperLayoutConstraint);
+    void MeasureLeftButton(FrameNode* frameNode, LayoutConstraintF buttonLayoutConstraint);
+    void MeasureRightButton(FrameNode* frameNode, LayoutConstraintF buttonLayoutConstraint);
     void MeasureText(
-        const RefPtr<LayoutWrapper>& layoutWrapper, const LayoutConstraintF& buttonLayoutConstraint, bool isLeft);
+        const RefPtr<FrameNode>& frameNode, const LayoutConstraintF& buttonLayoutConstraint, bool isLeft);
     static LayoutConstraintF CreateButtonLayoutConstraint(const LayoutConstraintF& childLayoutConstraint, bool isLeft);
-    void LayoutSwiper(LayoutWrapper* layoutWrapper);
-    void LayoutLeftButton(LayoutWrapper* layoutWrapper);
-    void LayoutRightButton(LayoutWrapper* layoutWrapper);
+    void LayoutSwiper(FrameNode* frameNode);
+    void LayoutLeftButton(FrameNode* frameNode);
+    void LayoutRightButton(FrameNode* frameNode);
     bool layoutLeftButton_ = true;
     ACE_DISALLOW_COPY_AND_MOVE(StepperLayoutAlgorithm);
 };

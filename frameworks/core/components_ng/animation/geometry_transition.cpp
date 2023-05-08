@@ -16,9 +16,9 @@
 #include "core/components_ng/animation/geometry_transition.h"
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/property.h"
-#include "core/components_ng/layout/layout_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -45,19 +45,19 @@ bool GeometryTransition::IsRunning() const
     return IsInAndOutValid() && (hasInAnim_ || hasOutAnim_);
 }
 
-bool GeometryTransition::IsNodeInAndActive(const WeakPtr<FrameNode>& frameNode) const
+bool GeometryTransition::IsNodeInAndActive(const RefPtr<FrameNode>& frameNode) const
 {
-    return IsInAndOutValid() && hasInAnim_ && frameNode.Upgrade() == inNode_ && state_ == State::ACTIVE;
+    return IsInAndOutValid() && hasInAnim_ && frameNode == inNode_ && state_ == State::ACTIVE;
 }
 
-bool GeometryTransition::IsNodeInAndIdentity(const WeakPtr<FrameNode>& frameNode) const
+bool GeometryTransition::IsNodeInAndIdentity(const RefPtr<FrameNode>& frameNode) const
 {
-    return IsInAndOutValid() && hasInAnim_ && frameNode.Upgrade() == inNode_ && state_ == State::IDENTITY;
+    return IsInAndOutValid() && hasInAnim_ && frameNode == inNode_ && state_ == State::IDENTITY;
 }
 
-bool GeometryTransition::IsNodeOutAndActive(const WeakPtr<FrameNode>& frameNode) const
+bool GeometryTransition::IsNodeOutAndActive(const RefPtr<FrameNode>& frameNode) const
 {
-    return IsInAndOutValid() && hasOutAnim_ && frameNode.Upgrade() == outNode_;
+    return IsInAndOutValid() && hasOutAnim_ && frameNode == outNode_;
 }
 
 void GeometryTransition::SwapInAndOut(bool condition)
@@ -113,8 +113,8 @@ void GeometryTransition::Build(const WeakPtr<FrameNode>& frameNode, bool isNodeI
         // set relative low priority for outNode
         outNode->SetLayoutPriority(-1);
         outNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
-        LOGD("GeometryTransition: node%{public}d has out anim, matched target node: %{public}d",
-            outNode->GetId(), inNode->GetId());
+        LOGD("GeometryTransition: node%{public}d has out anim, matched target node: %{public}d", outNode->GetId(),
+            inNode->GetId());
     }
     if (hasInAnim_) {
         state_ = State::ACTIVE;
@@ -122,8 +122,8 @@ void GeometryTransition::Build(const WeakPtr<FrameNode>& frameNode, bool isNodeI
         // set relative high priority for inNode
         inNode->SetLayoutPriority(1);
         inNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
-        LOGD("GeometryTransition: node%{public}d has in anim, matched target node: %{public}d",
-            inNode->GetId(), outNode->GetId());
+        LOGD("GeometryTransition: node%{public}d has in anim, matched target node: %{public}d", inNode->GetId(),
+            outNode->GetId());
     }
 }
 
@@ -153,47 +153,51 @@ bool GeometryTransition::Update(const WeakPtr<FrameNode>& which, const WeakPtr<F
 
 // Called before layout, perform layout constraints match modifications in active state to
 // impact self and children's measure and layout.
-void GeometryTransition::WillLayout(const RefPtr<LayoutWrapper>& layoutWrapper)
+void GeometryTransition::WillLayout(const RefPtr<FrameNode>& frameNode)
 {
+    LOGE("WillLayout %{public}d, %{public}d-%{public}d", frameNode->GetId(), buildDuringLayout_,
+        GeometryTransition::layoutStarted_);
     if (buildDuringLayout_ && GeometryTransition::layoutStarted_) {
         return;
     }
-    CHECK_NULL_VOID(layoutWrapper);
-    auto hostNode = layoutWrapper->GetHostNode();
-    if (layoutWrapper->IsRootMeasureNode() && IsNodeInAndActive(hostNode)) {
-        ModifyLayoutConstraint(layoutWrapper, true);
+    CHECK_NULL_VOID(frameNode);
+    if (frameNode->IsRootMeasureNode() && IsNodeInAndActive(frameNode)) {
+        layoutProperty_ = frameNode->GetLayoutProperty()->Clone();
+        ModifyLayoutConstraint(frameNode, true);
         isInNodeLayoutModified_ = true;
-    } else if (IsNodeOutAndActive(hostNode)) {
-        ModifyLayoutConstraint(layoutWrapper, false);
+    } else if (IsNodeOutAndActive(frameNode)) {
+        ModifyLayoutConstraint(frameNode, false);
     }
 }
 
 // Called after layout, perform final adjustments of geometry position
-void GeometryTransition::DidLayout(const WeakPtr<FrameNode>& frameNode)
+void GeometryTransition::DidLayout(const RefPtr<FrameNode>& frameNode)
 {
+    LOGE("DidLayout %{public}d, %{public}d-%{public}d", frameNode->GetId(), buildDuringLayout_,
+        GeometryTransition::layoutStarted_);
     if (buildDuringLayout_ && GeometryTransition::layoutStarted_) {
         buildDuringLayout_ = false;
         return;
     }
-    auto node = frameNode.Upgrade();
-    CHECK_NULL_VOID(node);
     std::optional<bool> direction = std::nullopt;
 
     if (isInNodeLayoutModified_ && IsNodeInAndActive(frameNode)) {
-        LOGD("GeometryTransition: node%{public}d: in and active", node->GetId());
+        LOGE("GeometryTransition: node%{public}d: in and active", frameNode->GetId());
         state_ = State::IDENTITY;
         isInNodeLayoutModified_ = false;
-        auto geometryNode = node->GetGeometryNode();
+        auto geometryNode = frameNode->GetGeometryNode();
         CHECK_NULL_VOID(geometryNode);
         size_ = geometryNode->GetFrameSize();
+        frameNode->SetLayoutProperty(layoutProperty_);
+        layoutProperty_.Reset();
     } else if (IsNodeInAndIdentity(frameNode)) {
-        LOGD("GeometryTransition: node%{public}d: in and identity", node->GetId());
+        LOGE("GeometryTransition: node%{public}d: in and identity", frameNode->GetId());
         state_ = State::IDLE;
-        node->SetLayoutPriority(0);
+        frameNode->SetLayoutPriority(0);
         direction = true;
         hasInAnim_ = false;
     } else if (IsNodeOutAndActive(frameNode)) {
-        LOGD("GeometryTransition: node%{public}d: out and active", node->GetId());
+        LOGE("GeometryTransition: node%{public}d: out and active", frameNode->GetId());
         direction = false;
         hasOutAnim_ = false;
     }
@@ -209,7 +213,7 @@ void GeometryTransition::DidLayout(const WeakPtr<FrameNode>& frameNode)
     }
 }
 
-void GeometryTransition::ModifyLayoutConstraint(const RefPtr<LayoutWrapper>& layoutWrapper, bool isNodeIn)
+void GeometryTransition::ModifyLayoutConstraint(const RefPtr<FrameNode>& frameNode, bool isNodeIn)
 {
     // outNode's frame is the target frame for active inNode to match,
     // inNode's frame is the target frame for active outNode to match.
@@ -222,22 +226,22 @@ void GeometryTransition::ModifyLayoutConstraint(const RefPtr<LayoutWrapper>& lay
     CHECK_NULL_VOID(targetGeometryNode);
     auto targetRenderContext = target->GetRenderContext();
     CHECK_NULL_VOID(targetRenderContext);
-    auto size = isNodeIn ? targetRenderContext->GetPaintRectWithTransform().GetSize() :
-                           targetGeometryNode->GetFrameSize();
+    auto size =
+        isNodeIn ? targetRenderContext->GetPaintRectWithTransform().GetSize() : targetGeometryNode->GetFrameSize();
     auto targetSize = CalcSize(NG::CalcLength(size.Width()), NG::CalcLength(size.Height()));
-    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateUserDefinedIdealSize(targetSize);
-    LOGD("GeometryTransition: node%{public}d: modify size to: %{public}s",
-        self->GetId(), targetSize.ToString().c_str());
+    LOGE(
+        "GeometryTransition: node%{public}d: modify size to: %{public}s", self->GetId(), targetSize.ToString().c_str());
     // if node has aspect ratio we'll ignore it in active state, instead target's aspect ratio is respected
     const auto& magicItemProperty = layoutProperty->GetMagicItemProperty();
     auto hasAspectRatio = magicItemProperty ? magicItemProperty->HasAspectRatio() : false;
     if (hasAspectRatio && size.IsPositive()) {
         auto targetAspectRatio = size.Width() / size.Height();
         magicItemProperty->UpdateAspectRatio(targetAspectRatio);
-        LOGD("GeometryTransition: node%{public}d: modify aspect ratio to: %{public}f",
-            self->GetId(), targetAspectRatio);
+        LOGD(
+            "GeometryTransition: node%{public}d: modify aspect ratio to: %{public}f", self->GetId(), targetAspectRatio);
     }
 }
 
@@ -260,30 +264,32 @@ void GeometryTransition::SyncGeometry(bool isNodeIn)
     auto targetPos = target->IsRemoving() ? outNodePos_ : target->GetPaintRectOffset();
     // adjust self's position to match with target's position, here we only need to adjust node self,
     // its children's positions are still determined by layout process.
-    auto activeFrameRect = isNodeIn ? RectF(targetPos - parentPos, size_) :
-                                      RectF(targetPos - parentPos, geometryNode->GetFrameSize());
+    auto activeFrameRect =
+        isNodeIn ? RectF(targetPos - parentPos, size_) : RectF(targetPos - parentPos, geometryNode->GetFrameSize());
     auto identityFrameRect = geometryNode->GetFrameRect();
     auto cornerRadius = renderContext->GetBorderRadius().value_or(BorderRadiusProperty());
     auto targetCornerRadius = targetRenderContext->GetBorderRadius().value_or(BorderRadiusProperty());
     // sync geometry in active state
     renderContext->UpdateBorderRadius(targetCornerRadius);
     renderContext->SyncGeometryProperties(activeFrameRect);
+    LOGE("activeFrameRect %{public}s", activeFrameRect.ToString().c_str());
     // sync geometry in identity state for inNode
     if (isNodeIn) {
         renderContext->UpdateBorderRadius(cornerRadius);
         renderContext->SyncGeometryProperties(RawPtr(geometryNode));
+        LOGE("geometryNode %{public}s", geometryNode->GetFrameRect().ToString().c_str());
     }
-    LOGD("GeometryTransition: node%{public}d: %{public}s, target: %{public}s, "
-        "active frame: %{public}f %{public}f %{public}f %{public}f, "
-        "identity frame: %{public}f %{public}f %{public}f %{public}f",
-        self->GetId(), parentPos.ToString().c_str(), targetPos.ToString().c_str(),
-        activeFrameRect.GetX(), activeFrameRect.GetY(), activeFrameRect.Width(), activeFrameRect.Height(),
-        identityFrameRect.GetX(), identityFrameRect.GetY(), identityFrameRect.Width(), identityFrameRect.Height());
+    LOGE("GeometryTransition: node%{public}d: %{public}s, target: %{public}s, "
+         "active frame: %{public}f %{public}f %{public}f %{public}f, "
+         "identity frame: %{public}f %{public}f %{public}f %{public}f",
+        self->GetId(), parentPos.ToString().c_str(), targetPos.ToString().c_str(), activeFrameRect.GetX(),
+        activeFrameRect.GetY(), activeFrameRect.Width(), activeFrameRect.Height(), identityFrameRect.GetX(),
+        identityFrameRect.GetY(), identityFrameRect.Width(), identityFrameRect.Height());
 }
 
 std::string GeometryTransition::ToString() const
 {
     return std::string("in: ") + (inNode_.Upgrade() ? std::to_string(inNode_.Upgrade()->GetId()) : "null") +
-        std::string(", out: ") + (outNode_.Upgrade() ? std::to_string(outNode_.Upgrade()->GetId()) : "null");
+           std::string(", out: ") + (outNode_.Upgrade() ? std::to_string(outNode_.Upgrade()->GetId()) : "null");
 }
 } // namespace OHOS::Ace::NG

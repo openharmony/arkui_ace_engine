@@ -28,11 +28,11 @@ public:
     ListItemLayoutAlgorithm(int32_t startNodeIndex, int32_t endNodeIndex, int32_t childNodeIndex)
         :startNodeIndex_(startNodeIndex), endNodeIndex_(endNodeIndex), childNodeIndex_(childNodeIndex) {}
 
-    void Measure(LayoutWrapper* layoutWrapper) override;
+    void Measure(FrameNode* frameNode) override;
 
-    void Layout(LayoutWrapper* layoutWrapper) override;
+    void Layout(FrameNode* frameNode) override;
 
-    void PerformMeasureSelf(LayoutWrapper* layoutWrapper) const;
+    void PerformMeasureSelf(FrameNode* frameNode) const;
 
     void SetAxis(Axis axis)
     {

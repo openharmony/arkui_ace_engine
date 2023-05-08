@@ -14,18 +14,20 @@
  */
 
 #include "core/components_ng/pattern/xcomponent/xcomponent_layout_algorithm.h"
+
 #include "base/utils/utils.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_utils.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_layout_property.h"
 
 namespace OHOS::Ace::NG {
 std::optional<SizeF> XComponentLayoutAlgorithm::MeasureContent(
-    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+    const LayoutConstraintF& contentConstraint, FrameNode* frameNode)
 {
-    auto layoutProperty = DynamicCast<XComponentLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto layoutProperty = DynamicCast<XComponentLayoutProperty>(frameNode->GetLayoutProperty());
     auto xcomponentType = layoutProperty->GetXComponentType().value_or(XComponentType::SURFACE);
     if (xcomponentType == XComponentType::COMPONENT) {
-        return LayoutAlgorithm::MeasureContent(contentConstraint, layoutWrapper);
+        return LayoutAlgorithm::MeasureContent(contentConstraint, frameNode);
     }
     if (contentConstraint.selfIdealSize.IsValid()) {
         return contentConstraint.selfIdealSize.ConvertToSizeT();
@@ -33,29 +35,29 @@ std::optional<SizeF> XComponentLayoutAlgorithm::MeasureContent(
     return contentConstraint.maxSize;
 }
 
-void XComponentLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+void XComponentLayoutAlgorithm::Measure(FrameNode* frameNode)
 {
-    auto layoutProperty = DynamicCast<XComponentLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto layoutProperty = DynamicCast<XComponentLayoutProperty>(frameNode->GetLayoutProperty());
     auto xcomponentType = layoutProperty->GetXComponentType().value_or(XComponentType::SURFACE);
     if (xcomponentType == XComponentType::COMPONENT) {
-        LinearLayoutUtils::Measure(layoutWrapper, true);
+        LinearLayoutUtils::Measure(frameNode, true);
     } else {
-        BoxLayoutAlgorithm::Measure(layoutWrapper);
+        BoxLayoutAlgorithm::Measure(frameNode);
     }
 }
 
-void XComponentLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+void XComponentLayoutAlgorithm::Layout(FrameNode* frameNode)
 {
-    auto layoutProperty = DynamicCast<XComponentLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto layoutProperty = DynamicCast<XComponentLayoutProperty>(frameNode->GetLayoutProperty());
     auto xcomponentType = layoutProperty->GetXComponentType().value_or(XComponentType::SURFACE);
     if (xcomponentType == XComponentType::COMPONENT) {
-        LinearLayoutUtils::Layout(layoutWrapper, true, FlexAlign::CENTER, FlexAlign::FLEX_START);
-        auto children = layoutWrapper->GetAllChildrenWithBuild();
+        LinearLayoutUtils::Layout(frameNode, true, FlexAlign::CENTER, FlexAlign::FLEX_START);
+        auto children = frameNode->GetAllFrameNodeChildren();
         for (auto&& child : children) {
             child->Layout();
         }
     } else {
-        BoxLayoutAlgorithm::Layout(layoutWrapper);
+        BoxLayoutAlgorithm::Layout(frameNode);
     }
 }
 

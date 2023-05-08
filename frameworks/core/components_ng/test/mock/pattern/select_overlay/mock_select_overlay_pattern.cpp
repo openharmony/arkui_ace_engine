@@ -42,7 +42,7 @@ void SelectOverlayPattern::OnDetachFromFrameNode(FrameNode* frameNode) {}
 
 void SelectOverlayLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper) {}
 
-bool SelectOverlayPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+bool SelectOverlayPattern::OnDirtyLayoutWrapperSwap( RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     return firstHandleDrag_ && secondHandleDrag_ && false;
 }

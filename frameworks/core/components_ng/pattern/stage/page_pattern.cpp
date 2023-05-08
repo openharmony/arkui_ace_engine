@@ -51,7 +51,7 @@ void PagePattern::OnAttachToFrameNode()
     host->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
 }
 
-bool PagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& /*wrapper*/, const DirtySwapConfig& /*config*/)
+bool PagePattern::OnDirtyLayoutWrapperSwap(FrameNode* /*frameNode*/, const DirtySwapConfig& /*config*/)
 {
     if (isFirstLoad_) {
         isFirstLoad_ = false;

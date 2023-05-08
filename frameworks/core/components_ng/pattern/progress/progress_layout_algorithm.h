@@ -37,12 +37,12 @@ public:
     ~ProgressLayoutAlgorithm() override = default;
 
     std::optional<SizeF> MeasureContent(
-        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
+        const LayoutConstraintF& contentConstraint, FrameNode* frameNode) override;
 
     ProgressType GetType() const;
     float GetStrokeWidth() const;
-    float GetChildHeight(LayoutWrapper* layoutWrapper, float width) const;
-    void SetRadius(LayoutWrapper* layoutWrapper, float width, float height) const;
+    float GetChildHeight(FrameNode* frameNode, float width) const;
+    void SetRadius(FrameNode* frameNode, float width, float height) const;
 
 private:
     ProgressType type_ = ProgressType::LINEAR;

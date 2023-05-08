@@ -234,7 +234,7 @@ WeakPtr<FocusHub> SwiperPattern::GetNextFocusNode(FocusStep step, const WeakPtr<
     return nullptr;
 }
 
-bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+bool SwiperPattern::OnDirtyLayoutWrapperSwap(FrameNode* frameNode, const DirtySwapConfig& config)
 {
     if (isInit_) {
         isInit_ = false;
@@ -242,9 +242,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         OnIndexChange();
     }
 
-    auto curChild = dirty->GetOrCreateChildByIndex(currentIndex_);
-    CHECK_NULL_RETURN(curChild, false);
-    auto curChildFrame = curChild->GetHostNode();
+    auto curChildFrame = frameNode->GetFrameNodeByIndex(currentIndex_);
     CHECK_NULL_RETURN(curChildFrame, false);
     FlushFocus(curChildFrame);
 
@@ -252,7 +250,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         return false;
     }
 
-    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
+    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(frameNode->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto swiperLayoutAlgorithm = DynamicCast<SwiperLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(swiperLayoutAlgorithm, false);

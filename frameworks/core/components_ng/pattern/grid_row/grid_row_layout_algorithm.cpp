@@ -30,7 +30,7 @@ namespace OHOS::Ace::NG {
 using OHOS::Ace::V2::GridContainerUtils;
 using OHOS::Ace::V2::GridSizeType;
 using OHOS::Ace::V2::Gutter;
-using LayoutPair = std::pair<RefPtr<LayoutWrapper>, NewLineOffset>;
+using LayoutPair = std::pair<RefPtr<FrameNode>, NewLineOffset>;
 
 namespace {
 
@@ -81,25 +81,25 @@ void CalculateOffsetOfNewline(const RefPtr<GridColLayoutProperty>& gridCol, int3
 
 } // namespace
 
-void GridRowLayoutAlgorithm::MeasureSelf(LayoutWrapper* layoutWrapper, float childHeight)
+void GridRowLayoutAlgorithm::MeasureSelf(FrameNode* frameNode, float childHeight)
 {
-    const auto& layoutProperty = DynamicCast<GridRowLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    const auto& layoutProperty = DynamicCast<GridRowLayoutProperty>(frameNode->GetLayoutProperty());
     auto layoutConstraint = layoutProperty->GetLayoutConstraint();
     auto padding = layoutProperty->CreatePaddingAndBorder();
 
     auto idealSize = CreateIdealSize(layoutConstraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT);
     idealSize.SetHeight(childHeight + padding.Height());
     idealSize.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize);
-    layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize.ConvertToSizeT());
+    frameNode->GetGeometryNode()->SetFrameSize(idealSize.ConvertToSizeT());
 }
 
 /* Measure each child and return total height */
-float GridRowLayoutAlgorithm::MeasureChildren(LayoutWrapper* layoutWrapper, double columnUnitWidth,
+float GridRowLayoutAlgorithm::MeasureChildren(FrameNode* frameNode, double columnUnitWidth,
     double childHeightLimit, std::pair<double, double>& gutter, GridSizeType sizeType, int32_t columnNum)
 {
-    auto children = layoutWrapper->GetAllChildrenWithBuild();
-    children.sort([sizeType](const RefPtr<LayoutWrapper>& left, const RefPtr<LayoutWrapper>& right) {
-        if (left->GetHostTag() != V2::GRID_COL_ETS_TAG || right->GetHostTag() != V2::GRID_COL_ETS_TAG) {
+    auto children = frameNode->GetAllFrameNodeChildren();
+    children.sort([sizeType](const RefPtr<FrameNode>& left, const RefPtr<FrameNode>& right) {
+        if (left->GetTag() != V2::GRID_COL_ETS_TAG || right->GetTag() != V2::GRID_COL_ETS_TAG) {
             return false;
         }
         auto leftCol = AceType::DynamicCast<GridColLayoutProperty>(left->GetLayoutProperty());
@@ -115,7 +115,7 @@ float GridRowLayoutAlgorithm::MeasureChildren(LayoutWrapper* layoutWrapper, doub
     float currentRowHeight = 0.0;
     /* GridRow's child must be a GridCol */
     for (auto& child : children) {
-        if (child->GetHostTag() != V2::GRID_COL_ETS_TAG) {
+        if (child->GetTag() != V2::GRID_COL_ETS_TAG) {
             LOGE("Not a grid_col component");
             continue;
         }
@@ -139,7 +139,7 @@ float GridRowLayoutAlgorithm::MeasureChildren(LayoutWrapper* layoutWrapper, doub
 
         OptionalSize<float> ideaSize;
         ideaSize.SetWidth(columnUnitWidth * span + (span - 1) * gutter.first);
-        LayoutConstraintF parentConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+        LayoutConstraintF parentConstraint = frameNode->GetLayoutProperty()->CreateChildConstraint();
         parentConstraint.UpdateSelfMarginSizeWithCheck(ideaSize);
         // the max size need to minus the already allocated height.
         parentConstraint.maxSize.MinusHeight(totalHeight);
@@ -147,7 +147,7 @@ float GridRowLayoutAlgorithm::MeasureChildren(LayoutWrapper* layoutWrapper, doub
 
         if (newLineOffset.newLineCount > 0) {
             gridColChildrenRows_.emplace_back(gridColChildrenOfOneRow_);
-            CalcCrossAxisAlignment(layoutWrapper, *gridColChildrenRows_.rbegin(), currentRowHeight);
+            CalcCrossAxisAlignment(frameNode, *gridColChildrenRows_.rbegin(), currentRowHeight);
             gridColChildrenOfOneRow_.clear();
             currentRowHeight = child->GetGeometryNode()->GetFrameSize().Height();
         } else {
@@ -167,22 +167,22 @@ float GridRowLayoutAlgorithm::MeasureChildren(LayoutWrapper* layoutWrapper, doub
     }
     if (!gridColChildrenOfOneRow_.empty()) {
         gridColChildrenRows_.emplace_back(gridColChildrenOfOneRow_);
-        CalcCrossAxisAlignment(layoutWrapper, *gridColChildrenRows_.rbegin(), currentRowHeight);
+        CalcCrossAxisAlignment(frameNode, *gridColChildrenRows_.rbegin(), currentRowHeight);
         gridColChildrenOfOneRow_.clear();
     }
     return (totalHeight + currentRowHeight);
 }
 
-void GridRowLayoutAlgorithm::CalcCrossAxisAlignment(LayoutWrapper* layoutWrapper,
-    std::list<std::pair<RefPtr<LayoutWrapper>, NewLineOffset>>& row, float currentRowHeight)
+void GridRowLayoutAlgorithm::CalcCrossAxisAlignment(FrameNode* frameNode,
+    std::list<std::pair<RefPtr<FrameNode>, NewLineOffset>>& row, float currentRowHeight)
 {
-    const auto& layoutProperty = DynamicCast<GridRowLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    const auto& layoutProperty = DynamicCast<GridRowLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     for (auto& child : row) {
-        auto childNode = child.first->GetHostNode();
-        auto childSize = child.first->GetGeometryNode()->GetFrameSize();
-        const auto& childMargin = child.first->GetGeometryNode()->GetMargin();
-        auto childLayoutProperty = child.first->GetLayoutProperty();
+        auto childNode = child.first;
+        auto childSize = childNode->GetGeometryNode()->GetFrameSize();
+        auto childLayoutProperty = childNode->GetLayoutProperty();
+        const auto& childMargin = childNode->GetGeometryNode()->GetMargin();
         if (!childLayoutProperty) {
             LOGD("Child %{public}d, tag %{public}s, has no layout property, continue", childNode->GetId(),
                 childNode->GetTag().c_str());
@@ -204,9 +204,9 @@ void GridRowLayoutAlgorithm::CalcCrossAxisAlignment(LayoutWrapper* layoutWrapper
             if (NearEqual(currentRowHeight, childSize.Height())) {
                 continue;
             }
-            LayoutConstraintF parentConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+            LayoutConstraintF parentConstraint = frameNode->GetLayoutProperty()->CreateChildConstraint();
             parentConstraint.selfIdealSize = OptionalSizeF(childSize.Width(), currentRowHeight);
-            child.first->Measure(parentConstraint);
+            childNode->Measure(parentConstraint);
         } else {
             float extraOffset = 0.0f;
             if (alignSelf == FlexAlign::CENTER) {
@@ -224,11 +224,11 @@ void GridRowLayoutAlgorithm::CalcCrossAxisAlignment(LayoutWrapper* layoutWrapper
     }
 }
 
-void GridRowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+void GridRowLayoutAlgorithm::Measure(FrameNode* frameNode)
 {
     gridColChildrenRows_.clear();
     gridColChildrenOfOneRow_.clear();
-    const auto& layoutProperty = DynamicCast<GridRowLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    const auto& layoutProperty = DynamicCast<GridRowLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     auto maxSize = CreateIdealSize(layoutProperty->GetLayoutConstraint().value_or(LayoutConstraintF()),
         Axis::HORIZONTAL, MeasureType::MATCH_PARENT, true);
@@ -238,7 +238,7 @@ void GridRowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         layoutProperty->GetBreakPointsValue(), Size(maxSize.Width(), maxSize.Height()));
     if (layoutProperty->GetSizeTypeValue(V2::GridSizeType::UNDEFINED) != sizeType) {
         auto sizeTypeString = ConvertSizeTypeToString(sizeType);
-        layoutWrapper->GetHostNode()->GetEventHub<GridRowEventHub>()->FireChangeEvent(sizeTypeString);
+        frameNode->GetEventHub<GridRowEventHub>()->FireChangeEvent(sizeTypeString);
         layoutProperty->UpdateSizeType(sizeType);
     }
     auto gutter = GridContainerUtils::ProcessGutter(sizeType, layoutProperty->GetGutterValue());
@@ -247,30 +247,30 @@ void GridRowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     int32_t columnNum = GridContainerUtils::ProcessColumn(sizeType, layoutProperty->GetColumnsValue());
     columnUnitWidth_ = GridContainerUtils::ProcessColumnWidth(gutterInDouble_, columnNum, maxSize.Width());
     float childrenHeight =
-        MeasureChildren(layoutWrapper, columnUnitWidth_, maxSize.Height(), gutterInDouble_, sizeType, columnNum);
+        MeasureChildren(frameNode, columnUnitWidth_, maxSize.Height(), gutterInDouble_, sizeType, columnNum);
     LOGD("GridRowLayoutAlgorithm::Measure() columnNum=%{public}d, columnUnitWidth_=%{public}f, "
          "childrenHeight=%{public}f, sizeType=%{public}d",
         columnNum, columnUnitWidth_, childrenHeight, static_cast<int>(sizeType));
 
-    MeasureSelf(layoutWrapper, childrenHeight);
+    MeasureSelf(frameNode, childrenHeight);
 }
 
-void GridRowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+void GridRowLayoutAlgorithm::Layout(FrameNode* frameNode)
 {
     if (gridColChildrenRows_.empty()) {
         return;
     }
 
-    const auto& layoutProperty = DynamicCast<GridRowLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    const auto& layoutProperty = DynamicCast<GridRowLayoutProperty>(frameNode->GetLayoutProperty());
     auto directionVal = layoutProperty->GetDirectionValue();
-    auto width = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
+    auto width = frameNode->GetGeometryNode()->GetFrameSize().Width();
 
     auto padding = layoutProperty->CreatePaddingAndBorder();
     OffsetF paddingOffset = { padding.left.value_or(0.0f), padding.top.value_or(0.0f) };
 
     for (auto&& row : gridColChildrenRows_) {
         for (auto&& pair : row) {
-            auto childLayoutWrapper = pair.first;
+            auto child = pair.first;
             auto& newLineOffset = pair.second;
 
             float offsetWidth = 0.0;
@@ -283,8 +283,8 @@ void GridRowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             }
 
             OffsetF offset(offsetWidth, newLineOffset.offsetY);
-            childLayoutWrapper->GetGeometryNode()->SetMarginFrameOffset(offset + paddingOffset);
-            childLayoutWrapper->Layout();
+            child->GetGeometryNode()->SetMarginFrameOffset(offset + paddingOffset);
+            child->Layout();
         }
     }
 }

@@ -30,8 +30,8 @@ class ACE_EXPORT NavBarLayoutAlgorithm : public LayoutAlgorithm {
 public:
     NavBarLayoutAlgorithm() = default;
     ~NavBarLayoutAlgorithm() override = default;
-    void Measure(LayoutWrapper* layoutWrapper) override;
-    void Layout(LayoutWrapper* layoutWrapper) override;
+    void Measure(FrameNode* frameNode) override;
+    void Layout(FrameNode* frameNode) override;
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(NavBarLayoutAlgorithm);

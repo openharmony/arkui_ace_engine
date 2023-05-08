@@ -26,24 +26,24 @@
 
 namespace OHOS::Ace::NG {
 // set wrapper to full screen size
-void MenuWrapperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+void MenuWrapperLayoutAlgorithm::Measure(FrameNode* frameNode)
 {
-    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     auto constraint = layoutProperty->GetLayoutConstraint();
     auto idealSize = CreateIdealSize(
         constraint.value(), Axis::FREE, layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT), true);
-    layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
+    frameNode->GetGeometryNode()->SetFrameSize(idealSize);
 
-    auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
-    for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
+    auto layoutConstraint = frameNode->GetLayoutProperty()->CreateChildConstraint();
+    for (const auto& child : frameNode->GetAllFrameNodeChildren()) {
         child->Measure(layoutConstraint);
     }
 }
 
-void MenuWrapperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+void MenuWrapperLayoutAlgorithm::Layout(FrameNode* frameNode)
 {
-    for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
+    for (const auto& child : frameNode->GetAllFrameNodeChildren()) {
         child->Layout();
     }
 }

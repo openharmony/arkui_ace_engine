@@ -45,6 +45,7 @@ void CustomNode::Build()
 void CustomNode::Render()
 {
     if (renderFunction_) {
+        needMarkParent = false;
         {
             ACE_SCOPED_TRACE("CustomNode:OnAppear");
             FireOnAppear();
@@ -59,6 +60,7 @@ void CustomNode::Render()
             }
         }
         renderFunction_ = nullptr;
+        needMarkParent = true;
     }
     {
         FireRecycleRenderFunc();
@@ -118,6 +120,14 @@ RefPtr<LayoutWrapper> CustomNode::CreateLayoutWrapper(bool forceMeasure, bool fo
 {
     Build();
     return UINode::CreateLayoutWrapper(forceMeasure, forceLayout);
+}
+
+void CustomNode::MarkNeedSyncRenderTree(bool needRebuild)
+{
+    if (needMarkParent)
+    {
+        UINode::MarkNeedSyncRenderTree(needRebuild);
+    }
 }
 
 } // namespace OHOS::Ace::NG

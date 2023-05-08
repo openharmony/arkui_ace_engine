@@ -64,10 +64,13 @@ public:
     }
     void FlushReload();
 
+    void MarkNeedSyncRenderTree(bool needRebuild = false) override;
+
 private:
     std::string viewKey_;
     RenderFunction renderFunction_;
     RenderFunction completeReloadFunc_;
+    bool needMarkParent = true;
 };
 } // namespace OHOS::Ace::NG
 

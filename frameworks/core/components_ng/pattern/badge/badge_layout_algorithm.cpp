@@ -28,26 +28,24 @@
 
 namespace OHOS::Ace::NG {
 
-void BadgeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+void BadgeLayoutAlgorithm::Measure(FrameNode* frameNode)
 {
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(host);
-    auto children = host->GetChildren();
+    auto children = frameNode->GetChildren();
     if (children.empty()) {
         LOGW("Badge has no child node.");
         return;
     }
     auto childrenSize = children.size();
-    auto layoutProperty = AceType::DynamicCast<BadgeLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto layoutProperty = AceType::DynamicCast<BadgeLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
 
     auto textFirstLayoutConstraint = childLayoutConstraint;
     textFirstLayoutConstraint.maxSize = { Infinity<float>(), Infinity<float>() };
 
-    auto textWrapper = layoutWrapper->GetOrCreateChildByIndex(childrenSize - 1);
-    if (textWrapper) {
-        textWrapper->Measure(textFirstLayoutConstraint);
+    auto text = frameNode->GetFrameNodeByIndex(childrenSize - 1);
+    if (text) {
+        text->Measure(textFirstLayoutConstraint);
     }
 
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -68,9 +66,9 @@ void BadgeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto countLimit = layoutProperty->GetBadgeMaxCountValue();
     auto badgeCircleRadius = badgeCircleDiameter / 2;
 
-    auto textLayoutProperty = DynamicCast<TextLayoutProperty>(textWrapper->GetLayoutProperty());
+    auto textLayoutProperty = DynamicCast<TextLayoutProperty>(text->GetLayoutProperty());
     CHECK_NULL_VOID(textLayoutProperty);
-    auto textGeometryNode = textWrapper->GetGeometryNode();
+    auto textGeometryNode = text->GetGeometryNode();
     CHECK_NULL_VOID(textGeometryNode);
 
     std::string textData;
@@ -95,34 +93,31 @@ void BadgeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto textLayoutConstraint = textFirstLayoutConstraint;
     textLayoutConstraint.selfIdealSize = OptionalSize<float>(badgeWidth, badgeHeight);
 
-    textWrapper->Measure(textLayoutConstraint);
-    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(childrenSize - 2);
-    CHECK_NULL_VOID(childWrapper);
-    childWrapper->Measure(childLayoutConstraint);
+    text->Measure(textLayoutConstraint);
+    auto child = frameNode->GetFrameNodeByIndex(childrenSize - 2);
+    CHECK_NULL_VOID(child);
+    child->Measure(childLayoutConstraint);
 
-    PerformMeasureSelf(layoutWrapper);
+    PerformMeasureSelf(frameNode);
 }
 
-void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+void BadgeLayoutAlgorithm::Layout(FrameNode* frameNode)
 {
-    CHECK_NULL_VOID(layoutWrapper);
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(host);
-    auto children = host->GetChildren();
+    auto children = frameNode->GetChildren();
     if (children.empty()) {
         LOGW("Badge has no child node.");
         return;
     }
     auto childrenSize = children.size();
 
-    auto geometryNode = layoutWrapper->GetGeometryNode();
+    auto geometryNode = frameNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto parentSize = geometryNode->GetFrameSize();
     auto width = parentSize.Width();
     auto height = parentSize.Height();
     auto offset = geometryNode->GetFrameOffset();
 
-    auto layoutProperty = DynamicCast<BadgeLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto layoutProperty = DynamicCast<BadgeLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     auto badgePosition = layoutProperty->GetBadgePosition();
 
@@ -140,11 +135,11 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto countLimit =
         layoutProperty->HasBadgeMaxCount() ? layoutProperty->GetBadgeMaxCountValue() : badgeTheme->GetMaxCount();
 
-    auto textWrapper = layoutWrapper->GetOrCreateChildByIndex(childrenSize - 1);
-    CHECK_NULL_VOID(textWrapper);
-    auto textLayoutProperty = DynamicCast<TextLayoutProperty>(textWrapper->GetLayoutProperty());
+    auto text = frameNode->GetFrameNodeByIndex(childrenSize - 1);
+    CHECK_NULL_VOID(text);
+    auto textLayoutProperty = DynamicCast<TextLayoutProperty>(text->GetLayoutProperty());
     CHECK_NULL_VOID(textLayoutProperty);
-    auto textGeometryNode = textWrapper->GetGeometryNode();
+    auto textGeometryNode = text->GetGeometryNode();
     CHECK_NULL_VOID(textGeometryNode);
 
     std::string textData;
@@ -171,9 +166,7 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto borderWidth = layoutProperty->GetBadgeBorderWidthValue(badgeTheme->GetBadgeBorderWidth());
     OffsetF borderOffset(borderWidth.ConvertToPx(), borderWidth.ConvertToPx());
     radius.SetRadius(Dimension(badgeCircleRadius + borderWidth.ConvertToPx()));
-    auto textFrameNode = textWrapper->GetHostNode();
-    CHECK_NULL_VOID(textFrameNode);
-    auto textRenderContext = textFrameNode->GetRenderContext();
+    auto textRenderContext = text->GetRenderContext();
     CHECK_NULL_VOID(textRenderContext);
     textRenderContext->UpdateBorderRadius(radius);
 
@@ -207,19 +200,19 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto textFrameSize = textGeometryNode->GetFrameSize();
     textFrameSize += SizeF(borderWidth.ConvertToPx() * 2, borderWidth.ConvertToPx() * 2);
     textGeometryNode->SetFrameSize(textFrameSize);
-    textWrapper->Layout();
+    text->Layout();
 
-    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(childrenSize - 2);
-    CHECK_NULL_VOID(childWrapper);
-    childWrapper->Layout();
+    auto child = frameNode->GetFrameNodeByIndex(childrenSize - 2);
+    CHECK_NULL_VOID(child);
+    child->Layout();
 }
 
-void BadgeLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
+void BadgeLayoutAlgorithm::PerformMeasureSelf(FrameNode* frameNode)
 {
-    const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
+    const auto& layoutConstraint = frameNode->GetLayoutProperty()->GetLayoutConstraint();
     const auto& minSize = layoutConstraint->minSize;
     const auto& maxSize = layoutConstraint->maxSize;
-    const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+    const auto& padding = frameNode->GetLayoutProperty()->CreatePaddingAndBorder();
     OptionalSizeF frameSize;
     do {
         // Use idea size first if it is valid.
@@ -228,19 +221,18 @@ void BadgeLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
             break;
         }
         // use the last child size.
-        auto host = layoutWrapper->GetHostNode();
-        CHECK_NULL_VOID(host);
-        auto children = host->GetChildren();
+
+        auto children = frameNode->GetChildren();
         auto childrenSize = children.size();
         auto childFrame =
-            layoutWrapper->GetOrCreateChildByIndex(childrenSize - 2)->GetGeometryNode()->GetMarginFrameSize();
+            frameNode->GetFrameNodeByIndex(childrenSize - 2)->GetGeometryNode()->GetMarginFrameSize();
         AddPaddingToSize(padding, childFrame);
         frameSize.UpdateIllegalSizeWithCheck(childFrame);
         frameSize.Constrain(minSize, maxSize);
         frameSize.UpdateIllegalSizeWithCheck(SizeF { 0.0f, 0.0f });
     } while (false);
 
-    layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
+    frameNode->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
 }
 
 } // namespace OHOS::Ace::NG

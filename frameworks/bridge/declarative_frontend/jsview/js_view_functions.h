@@ -52,8 +52,8 @@ public:
     void ExecuteForceNodeRerender(int32_t elemId);
     void ExecuteAppear();
     void ExecuteDisappear();
-    void ExecuteMeasure(NG::LayoutWrapper* layoutWrapper);
-    void ExecuteLayout(NG::LayoutWrapper* layoutWrapper);
+    void ExecuteMeasure(NG::FrameNode* frameNode);
+    void ExecuteLayout(NG::FrameNode* frameNode);
     void ExecuteAboutToBeDeleted();
     void ExecuteAboutToRender();
     void ExecuteOnRenderDone();

@@ -46,7 +46,7 @@ void TextFieldPattern::InitCaretPosition(std::string content)
 
 void TextFieldPattern::OnModifyDone() {}
 
-bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+bool TextFieldPattern::OnDirtyLayoutWrapperSwap( RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     return false;
 }

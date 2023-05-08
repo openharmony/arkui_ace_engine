@@ -26,9 +26,9 @@ void GaugePattern::OnAttachToFrameNode()
     host->GetRenderContext()->SetClipToFrame(true);
 }
 
-bool GaugePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool /*skipLayout*/)
+bool GaugePattern::OnDirtyLayoutWrapperSwap(FrameNode* frameNode, bool skipMeasure, bool /*skipLayout*/)
 {
-    if (skipMeasure || dirty->SkipMeasureContent()) {
+    if (skipMeasure || frameNode->SkipMeasureContent()) {
         return false;
     }
     return true;

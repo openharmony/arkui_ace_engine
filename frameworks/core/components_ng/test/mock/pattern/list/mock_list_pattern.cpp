@@ -31,7 +31,7 @@ void ListPattern::OnModifyDone() {}
 void ListPattern::OnAttachToFrameNode() {}
 
 bool ListPattern::OnDirtyLayoutWrapperSwap(
-    const RefPtr<LayoutWrapper>& /* dirty */, const DirtySwapConfig& /* config */)
+    RefPtr<LayoutWrapper>& /* dirty */, const DirtySwapConfig& /* config */)
 {
     return false;
 }

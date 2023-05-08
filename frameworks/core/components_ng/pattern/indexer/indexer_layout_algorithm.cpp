@@ -33,9 +33,9 @@ namespace {
 constexpr float HALF = 0.5;
 }
 
-void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+void IndexerLayoutAlgorithm::Measure(FrameNode* frameNode)
 {
-    auto indexerLayoutProperty = AceType::DynamicCast<IndexerLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto indexerLayoutProperty = AceType::DynamicCast<IndexerLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_VOID(indexerLayoutProperty);
     LayoutConstraintF layoutConstraint;
     if (indexerLayoutProperty->GetLayoutConstraint().has_value()) {
@@ -48,7 +48,7 @@ void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     } else {
         itemSize_ = 0.0f;
     }
-    auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+    auto padding = frameNode->GetLayoutProperty()->CreatePaddingAndBorder();
     auto verticalPadding = (padding.top.value_or(0) + padding.bottom.value_or(0));
     auto horizontalPadding = padding.left.value_or(0.0f) + padding.right.value_or(0.0f);
     auto contentWidth = itemSize_ + horizontalPadding;
@@ -63,45 +63,45 @@ void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         GreatOrEqual(actualHeight - verticalPadding, 0.0f) ? (actualHeight - verticalPadding) / itemCount_ : 0.0f;
     auto childLayoutConstraint = indexerLayoutProperty->CreateChildConstraint();
     for (int32_t index = 0; index < itemCount_; index++) {
-        auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
-        CHECK_NULL_VOID(childWrapper);
-        auto childLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(childWrapper->GetLayoutProperty());
+        auto child = frameNode->GetFrameNodeByIndex(index);
+        CHECK_NULL_VOID(child);
+        auto childLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(child->GetLayoutProperty());
         CHECK_NULL_VOID(childLayoutProperty);
         childLayoutConstraint.UpdateSelfMarginSizeWithCheck(OptionalSizeF(itemWidth_, itemSizeRender_));
         childLayoutProperty->UpdateAlignment(Alignment::CENTER);
-        childWrapper->Measure(childLayoutConstraint);
+        child->Measure(childLayoutConstraint);
     }
-    layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(actualWidth, actualHeight));
+    frameNode->GetGeometryNode()->SetFrameSize(SizeF(actualWidth, actualHeight));
 }
 
-void IndexerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+void IndexerLayoutAlgorithm::Layout(FrameNode* frameNode)
 {
-    auto indexerLayoutProperty = AceType::DynamicCast<IndexerLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto indexerLayoutProperty = AceType::DynamicCast<IndexerLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_VOID(indexerLayoutProperty);
 
-    auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+    auto padding = frameNode->GetLayoutProperty()->CreatePaddingAndBorder();
     auto left = padding.left.value_or(0.0f);
     auto top = padding.top.value_or(0.0f);
 
-    auto indexerWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
-    auto indexerHeight = layoutWrapper->GetGeometryNode()->GetFrameSize().Height();
+    auto indexerWidth = frameNode->GetGeometryNode()->GetFrameSize().Width();
+    auto indexerHeight = frameNode->GetGeometryNode()->GetFrameSize().Height();
 
-    auto firstChildWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
-    CHECK_NULL_VOID(firstChildWrapper);
-    auto childWidth = firstChildWrapper->GetGeometryNode()->GetFrameSize().Width();
-    auto childHeight = firstChildWrapper->GetGeometryNode()->GetFrameSize().Height();
+    auto firstChild = frameNode->GetFrameNodeByIndex(0);
+    CHECK_NULL_VOID(firstChild);
+    auto childWidth = firstChild->GetGeometryNode()->GetFrameSize().Width();
+    auto childHeight = firstChild->GetGeometryNode()->GetFrameSize().Height();
     auto originMarginLeft = (indexerWidth - childWidth) * HALF;
     auto adjustMarginLeft = left < originMarginLeft ? originMarginLeft : left;
     auto originMarginTop = (indexerHeight - childHeight * itemCount_) * HALF;
     auto adjustMarginTop = top < originMarginTop ? originMarginTop : top;
     auto marginOffset = OffsetF(adjustMarginLeft, adjustMarginTop);
     for (int32_t index = 0; index < itemCount_; index++) {
-        auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
-        CHECK_NULL_VOID(childWrapper);
-        auto layoutProperty = childWrapper->GetLayoutProperty();
-        CHECK_NULL_VOID(childWrapper);
-        childWrapper->GetGeometryNode()->SetMarginFrameOffset(marginOffset);
-        childWrapper->Layout();
+        auto child = frameNode->GetFrameNodeByIndex(index);
+        CHECK_NULL_VOID(child);
+        auto layoutProperty = child->GetLayoutProperty();
+        CHECK_NULL_VOID(child);
+        child->GetGeometryNode()->SetMarginFrameOffset(marginOffset);
+        child->Layout();
         marginOffset = marginOffset + OffsetF(0, itemSizeRender_);
     }
 }

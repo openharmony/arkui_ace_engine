@@ -697,24 +697,24 @@ void TextPattern::OnModifyDone()
     }
 }
 
-bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+bool TextPattern::OnDirtyLayoutWrapperSwap(FrameNode* frameNode, const DirtySwapConfig& config)
 {
-    if (config.skipMeasure || dirty->SkipMeasureContent()) {
+    if (config.skipMeasure || frameNode->SkipMeasureContent()) {
         return false;
     }
-    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
+    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(frameNode->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto textLayoutAlgorithm = DynamicCast<TextLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(textLayoutAlgorithm, false);
     auto paragraph = textLayoutAlgorithm->GetParagraph();
     if (!paragraph) {
-        LOGD("on layout process, just return");
+        LOGE("on layout process, just return");
         return false;
     }
     paragraph_ = textLayoutAlgorithm->GetParagraph();
     baselineOffset_ = textLayoutAlgorithm->GetBaselineOffset();
-    contentRect_ = dirty->GetGeometryNode()->GetContentRect();
-    contentOffset_ = dirty->GetGeometryNode()->GetContentOffset();
+    contentRect_ = frameNode->GetGeometryNode()->GetContentRect();
+    contentOffset_ = frameNode->GetGeometryNode()->GetContentOffset();
     textStyle_ = textLayoutAlgorithm->GetTextStyle();
     return true;
 }

@@ -31,8 +31,8 @@ class ACE_EXPORT NavigationLayoutAlgorithm : public LayoutAlgorithm {
 public:
     NavigationLayoutAlgorithm() = default;
     ~NavigationLayoutAlgorithm() override = default;
-    void Measure(LayoutWrapper* layoutWrapper) override;
-    void Layout(LayoutWrapper* layoutWrapper) override;
+    void Measure(FrameNode* frameNode) override;
+    void Layout(FrameNode* frameNode) override;
 
     NavigationMode GetNavigationMode() const
     {

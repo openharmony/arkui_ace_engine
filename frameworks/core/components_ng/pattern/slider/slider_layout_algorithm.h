@@ -30,9 +30,9 @@ public:
     ~SliderLayoutAlgorithm() override = default;
 
     std::optional<SizeF> MeasureContent(
-        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
-    void Measure(LayoutWrapper* layoutWrapper) override;
-    void Layout(LayoutWrapper* layoutWrapper) override;
+        const LayoutConstraintF& contentConstraint, FrameNode* frameNode) override;
+    void Measure(FrameNode* frameNode) override;
+    void Layout(FrameNode* frameNode) override;
 
     float GetTrackThickness() const
     {
@@ -51,7 +51,7 @@ public:
 
 private:
     void CalculateBlockOffset(
-        LayoutWrapper* layoutWrapper, const SizeF& selfSize, float selectOffset, Axis axis, bool reverse);
+        FrameNode* frameNode, const SizeF& selfSize, float selectOffset, Axis axis, bool reverse);
 
 private:
     float trackThickness_ = 0.0f;

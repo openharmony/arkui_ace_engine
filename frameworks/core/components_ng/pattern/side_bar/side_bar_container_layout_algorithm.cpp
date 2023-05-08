@@ -41,25 +41,25 @@ constexpr static int INDEX_DIVIDER = 2;
 constexpr static int INDEX_SIDE_BAR = 3;
 } // namespace
 
-void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+void SideBarContainerLayoutAlgorithm::Measure(FrameNode* frameNode)
 {
-    const auto& children = layoutWrapper->GetAllChildrenWithBuild();
+    const auto& children = frameNode->GetAllFrameNodeChildren();
     if (children.size() < DEFAULT_MIN_CHILDREN_SIZE) {
         LOGE("SideBarContainerLayoutAlgorithm::Measure, children is less than 3.");
         return;
     }
 
-    auto layoutProperty = AceType::DynamicCast<SideBarContainerLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto layoutProperty = AceType::DynamicCast<SideBarContainerLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
 
     auto constraint = layoutProperty->GetLayoutConstraint();
     auto idealSize = CreateIdealSize(
         constraint.value(), Axis::HORIZONTAL, layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT), true);
-    layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
+    frameNode->GetGeometryNode()->SetFrameSize(idealSize);
 
     auto parentWidth = idealSize.Width();
     if (needInitRealSideBarWidth_) {
-        InitRealSideBarWidth(layoutWrapper, parentWidth);
+        InitRealSideBarWidth(frameNode, parentWidth);
     }
 
     /*
@@ -70,28 +70,28 @@ void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     for (auto it = children.rbegin(); it != children.rend(); ++it) {
         index++;
         if (index == INDEX_CONTRON_BUTTON) {
-            auto imgLayoutWrapper = (*it);
-            MeasureControlButton(layoutProperty, imgLayoutWrapper, parentWidth);
+            auto imgLayout = (*it);
+            MeasureControlButton(layoutProperty, imgLayout, parentWidth);
         } else if (index == INDEX_DIVIDER) {
-            auto dividerLayoutWrapper = (*it);
-            MeasureDivider(layoutProperty, dividerLayoutWrapper, parentWidth);
+            auto dividerLayout = (*it);
+            MeasureDivider(layoutProperty, dividerLayout, parentWidth);
         } else if (index == INDEX_SIDE_BAR) {
-            auto sideBarLayoutWrapper = (*it);
-            MeasureSideBar(layoutProperty, sideBarLayoutWrapper);
+            auto sideBarLayout = (*it);
+            MeasureSideBar(layoutProperty, sideBarLayout);
         } else { // other break
             break;
         }
     }
 
     if (children.size() > DEFAULT_MIN_CHILDREN_SIZE) { // when sidebar only add one component, content is not display
-        auto contentLayoutWrapper = children.front();
-        MeasureSideBarContent(layoutProperty, contentLayoutWrapper, parentWidth);
+        auto content = children.front();
+        MeasureSideBarContent(layoutProperty, content, parentWidth);
     }
 }
 
-void SideBarContainerLayoutAlgorithm::InitRealSideBarWidth(LayoutWrapper* layoutWrapper, float parentWidth)
+void SideBarContainerLayoutAlgorithm::InitRealSideBarWidth(FrameNode* frameNode, float parentWidth)
 {
-    auto layoutProperty = AceType::DynamicCast<SideBarContainerLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto layoutProperty = AceType::DynamicCast<SideBarContainerLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
 
     auto constraint = layoutProperty->GetLayoutConstraint();
@@ -118,7 +118,7 @@ void SideBarContainerLayoutAlgorithm::InitRealSideBarWidth(LayoutWrapper* layout
 }
 
 void SideBarContainerLayoutAlgorithm::MeasureSideBar(
-    const RefPtr<SideBarContainerLayoutProperty>& layoutProperty, const RefPtr<LayoutWrapper>& sideBarLayoutWrapper)
+    const RefPtr<SideBarContainerLayoutProperty>& layoutProperty, const RefPtr<FrameNode>& sideBar)
 {
     auto constraint = layoutProperty->GetLayoutConstraint();
     auto sideBarIdealSize = CreateIdealSize(
@@ -128,14 +128,14 @@ void SideBarContainerLayoutAlgorithm::MeasureSideBar(
     sideBarConstraint.selfIdealSize = OptionalSizeF(sideBarIdealSize);
 
     realSideBarHeight_ = sideBarIdealSize.Height();
-    sideBarLayoutWrapper->Measure(sideBarConstraint);
+    sideBar->Measure(sideBarConstraint);
 }
 
 void SideBarContainerLayoutAlgorithm::MeasureDivider(const RefPtr<SideBarContainerLayoutProperty>& layoutProperty,
-    const RefPtr<LayoutWrapper>& dividerLayoutWrapper, float parentWidth)
+    const RefPtr<FrameNode>& divider, float parentWidth)
 {
     CHECK_NULL_VOID(layoutProperty);
-    CHECK_NULL_VOID(dividerLayoutWrapper);
+    CHECK_NULL_VOID(divider);
     auto constraint = layoutProperty->GetLayoutConstraint();
     CHECK_NULL_VOID(constraint);
     auto scaleProperty = constraint->scaleProperty;
@@ -156,11 +156,11 @@ void SideBarContainerLayoutAlgorithm::MeasureDivider(const RefPtr<SideBarContain
 
     auto dividerLayoutConstraint = layoutProperty->CreateChildConstraint();
     dividerLayoutConstraint.selfIdealSize = OptionalSizeF(dividerIdealSize);
-    dividerLayoutWrapper->Measure(dividerLayoutConstraint);
+    divider->Measure(dividerLayoutConstraint);
 }
 
 void SideBarContainerLayoutAlgorithm::MeasureSideBarContent(
-    const RefPtr<SideBarContainerLayoutProperty>& layoutProperty, const RefPtr<LayoutWrapper>& contentLayoutWrapper,
+    const RefPtr<SideBarContainerLayoutProperty>& layoutProperty, const RefPtr<FrameNode>& content,
     float parentWidth)
 {
     auto type = layoutProperty->GetSideBarContainerType().value_or(SideBarContainerType::EMBED);
@@ -183,11 +183,11 @@ void SideBarContainerLayoutAlgorithm::MeasureSideBarContent(
     contentIdealSize.SetWidth(contentWidth);
     auto contentConstraint = layoutProperty->CreateChildConstraint();
     contentConstraint.selfIdealSize = OptionalSizeF(contentIdealSize);
-    contentLayoutWrapper->Measure(contentConstraint);
+    content->Measure(contentConstraint);
 }
 
 void SideBarContainerLayoutAlgorithm::MeasureControlButton(const RefPtr<SideBarContainerLayoutProperty>& layoutProperty,
-    const RefPtr<LayoutWrapper>& buttonLayoutWrapper, float parentWidth)
+    const RefPtr<FrameNode>& button, float parentWidth)
 {
     auto constraint = layoutProperty->GetLayoutConstraint();
     auto scaleProperty = constraint->scaleProperty;
@@ -200,12 +200,12 @@ void SideBarContainerLayoutAlgorithm::MeasureControlButton(const RefPtr<SideBarC
     auto controlButtonLayoutConstraint = layoutProperty->CreateChildConstraint();
     controlButtonLayoutConstraint.selfIdealSize.SetWidth(controlButtonWidthPx);
     controlButtonLayoutConstraint.selfIdealSize.SetHeight(controlButtonHeightPx);
-    buttonLayoutWrapper->Measure(controlButtonLayoutConstraint);
+    button->Measure(controlButtonLayoutConstraint);
 }
 
-void SideBarContainerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+void SideBarContainerLayoutAlgorithm::Layout(FrameNode* frameNode)
 {
-    const auto& children = layoutWrapper->GetAllChildrenWithBuild();
+    const auto& children = frameNode->GetAllFrameNodeChildren();
     if (children.size() < DEFAULT_MIN_CHILDREN_SIZE) {
         LOGE("SideBarContainerLayoutAlgorithm::Measure, children is less than 3.");
         return;
@@ -215,33 +215,32 @@ void SideBarContainerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     for (auto it = children.rbegin(); it != children.rend(); ++it) {
         index++;
         if (index == INDEX_CONTRON_BUTTON) {
-            auto controlButtonLayoutWrapper = (*it);
-            LayoutControlButton(layoutWrapper, controlButtonLayoutWrapper);
+            auto controlButton = (*it);
+            LayoutControlButton(frameNode, controlButton);
         } else if (index == INDEX_DIVIDER) {
-            auto dividerLayoutWrapper = (*it);
-            LayoutDivider(layoutWrapper, dividerLayoutWrapper);
+            auto divider = (*it);
+            LayoutDivider(frameNode, divider);
         } else if (index == INDEX_SIDE_BAR) {
-            auto sideBarLayoutWrapper = (*it);
-            LayoutSideBar(layoutWrapper, sideBarLayoutWrapper);
+            auto sideBar = (*it);
+            LayoutSideBar(frameNode, sideBar);
         } else { // other break
             break;
         }
     }
 
     if (children.size() > DEFAULT_MIN_CHILDREN_SIZE) { // when sidebar only add one component, content is not display
-        auto contentLayoutWrapper = children.front();
-        LayoutSideBarContent(layoutWrapper, contentLayoutWrapper);
+        auto content = children.front();
+        LayoutSideBarContent(frameNode, content);
     }
 }
 
 void SideBarContainerLayoutAlgorithm::LayoutControlButton(
-    LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& buttonLayoutWrapper)
+    FrameNode* frameNode, const RefPtr<FrameNode>& button)
 {
-    auto layoutProperty = AceType::DynamicCast<SideBarContainerLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto layoutProperty = AceType::DynamicCast<SideBarContainerLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
 
-    CHECK_NULL_VOID (layoutWrapper->GetGeometryNode());
-    auto parentWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
+    auto parentWidth = frameNode->GetGeometryNode()->GetFrameSize().Width();
     auto constraint = layoutProperty->GetLayoutConstraint();
     auto scaleProperty = constraint->scaleProperty;
 
@@ -279,18 +278,18 @@ void SideBarContainerLayoutAlgorithm::LayoutControlButton(
     }
 
     auto imgOffset = OffsetF(controlButtonLeftPx, controlButtonTopPx);
-    buttonLayoutWrapper->GetGeometryNode()->SetMarginFrameOffset(imgOffset);
-    buttonLayoutWrapper->Layout();
+    button->GetGeometryNode()->SetMarginFrameOffset(imgOffset);
+    button->Layout();
 }
 
 void SideBarContainerLayoutAlgorithm::LayoutSideBar(
-    LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& sideBarLayoutWrapper)
+    FrameNode* frameNode, const RefPtr<FrameNode>& sideBar)
 {
-    auto layoutProperty = AceType::DynamicCast<SideBarContainerLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto layoutProperty = AceType::DynamicCast<SideBarContainerLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
 
-    CHECK_NULL_VOID (layoutWrapper->GetGeometryNode());
-    auto parentWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
+    CHECK_NULL_VOID (frameNode->GetGeometryNode());
+    auto parentWidth = frameNode->GetGeometryNode()->GetFrameSize().Width();
     auto sideBarPosition = layoutProperty->GetSideBarPosition().value_or(SideBarPosition::START);
     float sideBarOffsetX = 0.0f;
 
@@ -319,14 +318,14 @@ void SideBarContainerLayoutAlgorithm::LayoutSideBar(
     }
 
     sideBarOffset_ = OffsetF(sideBarOffsetX, 0.0f);
-    sideBarLayoutWrapper->GetGeometryNode()->SetMarginFrameOffset(sideBarOffset_);
-    sideBarLayoutWrapper->Layout();
+    sideBar->GetGeometryNode()->SetMarginFrameOffset(sideBarOffset_);
+    sideBar->Layout();
 }
 
 void SideBarContainerLayoutAlgorithm::LayoutSideBarContent(
-    LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& contentLayoutWrapper)
+    FrameNode* frameNode, const RefPtr<FrameNode>& content)
 {
-    auto layoutProperty = AceType::DynamicCast<SideBarContainerLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto layoutProperty = AceType::DynamicCast<SideBarContainerLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
 
     auto type = layoutProperty->GetSideBarContainerType().value_or(SideBarContainerType::EMBED);
@@ -342,22 +341,20 @@ void SideBarContainerLayoutAlgorithm::LayoutSideBarContent(
     }
 
     auto contentOffset = OffsetF(contentOffsetX, 0.0f);
-    contentLayoutWrapper->GetGeometryNode()->SetMarginFrameOffset(contentOffset);
-    contentLayoutWrapper->Layout();
+    content->GetGeometryNode()->SetMarginFrameOffset(contentOffset);
+    content->Layout();
 }
 
 void SideBarContainerLayoutAlgorithm::LayoutDivider(
-    LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& dividerLayoutWrapper)
+    FrameNode* frameNode, const RefPtr<FrameNode>& divider)
 {
-    CHECK_NULL_VOID(layoutWrapper);
-    CHECK_NULL_VOID(dividerLayoutWrapper);
-    auto layoutProperty = AceType::DynamicCast<SideBarContainerLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto layoutProperty = AceType::DynamicCast<SideBarContainerLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
 
     auto sideBarPosition = layoutProperty->GetSideBarPosition().value_or(SideBarPosition::START);
 
-    CHECK_NULL_VOID(layoutWrapper->GetGeometryNode());
-    auto parentWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
+    CHECK_NULL_VOID(frameNode->GetGeometryNode());
+    auto parentWidth = frameNode->GetGeometryNode()->GetFrameSize().Width();
     auto constraint = layoutProperty->GetLayoutConstraint();
     CHECK_NULL_VOID(constraint);
     auto scaleProperty = constraint->scaleProperty;
@@ -393,8 +390,7 @@ void SideBarContainerLayoutAlgorithm::LayoutDivider(
     }
 
     auto dividerOffset = OffsetF(dividerOffsetX, dividerStartMarginPx);
-    CHECK_NULL_VOID(dividerLayoutWrapper->GetGeometryNode());
-    dividerLayoutWrapper->GetGeometryNode()->SetMarginFrameOffset(dividerOffset);
-    dividerLayoutWrapper->Layout();
+    divider->GetGeometryNode()->SetMarginFrameOffset(dividerOffset);
+    divider->Layout();
 }
 } // namespace OHOS::Ace::NG

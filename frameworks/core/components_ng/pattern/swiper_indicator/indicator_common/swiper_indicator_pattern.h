@@ -117,7 +117,7 @@ public:
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    bool OnDirtyLayoutWrapperSwap(FrameNode* frameNode, const DirtySwapConfig& config) override;
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleClick(const GestureEvent& info);
     void HandleMouseClick(const GestureEvent& info);

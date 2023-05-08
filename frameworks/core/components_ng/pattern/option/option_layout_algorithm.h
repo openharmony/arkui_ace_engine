@@ -28,12 +28,12 @@ public:
     OptionLayoutAlgorithm() = default;
     ~OptionLayoutAlgorithm() override = default;
 
-    void Measure(LayoutWrapper* layoutWrapper) override;
+    void Measure(FrameNode* frameNode) override;
 
-    void Layout(LayoutWrapper* layoutWrapper) override;
+    void Layout(FrameNode* frameNode) override;
 
 private:
-    std::optional<float> GetIdealWidth(LayoutWrapper* layoutWrapper);
+    std::optional<float> GetIdealWidth(FrameNode* frameNode);
     float horInterval_ = 0.0f;
 
     ACE_DISALLOW_COPY_AND_MOVE(OptionLayoutAlgorithm);

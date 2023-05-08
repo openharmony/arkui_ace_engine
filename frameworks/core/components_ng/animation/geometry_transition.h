@@ -23,6 +23,7 @@
 namespace OHOS::Ace::NG {
 class FrameNode;
 class LayoutWrapper;
+class LayoutProperty;
 
 class GeometryTransition : public AceType {
     DECLARE_ACE_TYPE(GeometryTransition, AceType);
@@ -31,14 +32,14 @@ public:
     GeometryTransition(const WeakPtr<FrameNode>& frameNode);
     ~GeometryTransition() override = default;
 
-    bool IsNodeInAndActive(const WeakPtr<FrameNode>& frameNode) const;
+    bool IsNodeInAndActive(const RefPtr<FrameNode>& frameNode) const;
     bool IsRunning() const;
     bool IsInAndOutEmpty() const;
     std::string ToString() const;
     void Build(const WeakPtr<FrameNode>& frameNode, bool isNodeIn);
     bool Update(const WeakPtr<FrameNode>& which, const WeakPtr<FrameNode>& value);
-    void WillLayout(const RefPtr<LayoutWrapper>& layoutWrapper);
-    void DidLayout(const WeakPtr<FrameNode>& frameNode);
+    void WillLayout(const RefPtr<FrameNode>& frameNode);
+    void DidLayout(const RefPtr<FrameNode>& frameNode);
 
     static void OnLayout(bool layoutStarted)
     {
@@ -53,11 +54,11 @@ private:
     };
 
     bool IsInAndOutValid() const;
-    bool IsNodeInAndIdentity(const WeakPtr<FrameNode>& frameNode) const;
-    bool IsNodeOutAndActive(const WeakPtr<FrameNode>& frameNode) const;
+    bool IsNodeInAndIdentity(const RefPtr<FrameNode>& frameNode) const;
+    bool IsNodeOutAndActive(const RefPtr<FrameNode>& frameNode) const;
     void SwapInAndOut(bool condition);
     std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> GetMatchedPair(bool isNodeIn) const;
-    void ModifyLayoutConstraint(const RefPtr<LayoutWrapper>& layoutWrapper, bool isNodeIn);
+    void ModifyLayoutConstraint(const RefPtr<FrameNode>& frameNode, bool isNodeIn);
     void SyncGeometry(bool isNodeIn);
 
     WeakPtr<FrameNode> inNode_;
@@ -68,6 +69,7 @@ private:
     bool buildDuringLayout_ = false;
     bool isInNodeLayoutModified_ = false;
     SizeF size_;
+    RefPtr<LayoutProperty> layoutProperty_;
     OffsetF outNodePos_;
     OffsetF outNodeParentPos_;
     static bool layoutStarted_;

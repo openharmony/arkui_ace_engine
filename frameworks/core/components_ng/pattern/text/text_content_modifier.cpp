@@ -18,6 +18,7 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "base/log/ace_trace.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -137,6 +138,7 @@ void TextContentModifier::SetDefaultBaselineOffset(const TextStyle& textStyle)
 void TextContentModifier::onDraw(DrawingContext& drawingContext)
 {
     CHECK_NULL_VOID_NOLOG(paragraph_);
+    ACE_SCOPED_TRACE("TextContentModifier::onDraw [%f-%f][%f-%f]", paintOffset_.GetX(), paintOffset_.GetY(),drawingContext.width, drawingContext.height);
     if (!textRacing_) {
         paragraph_->Paint(drawingContext.canvas, paintOffset_.GetX(), paintOffset_.GetY());
     } else {

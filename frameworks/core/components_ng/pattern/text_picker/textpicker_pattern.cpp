@@ -46,10 +46,10 @@ void TextPickerPattern::OnAttachToFrameNode()
     host->GetRenderContext()->SetClipToFrame(true);
 }
 
-bool TextPickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+bool TextPickerPattern::OnDirtyLayoutWrapperSwap(FrameNode* frameNode, const DirtySwapConfig& config)
 {
     CHECK_NULL_RETURN_NOLOG(config.frameSizeChange, false);
-    CHECK_NULL_RETURN(dirty, false);
+    CHECK_NULL_RETURN(frameNode, false);
     SetButtonIdeaSize();
     return true;
 }

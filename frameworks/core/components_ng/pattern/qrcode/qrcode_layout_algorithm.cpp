@@ -29,10 +29,9 @@
 namespace OHOS::Ace::NG {
 
 std::optional<SizeF> QRCodeLayoutAlgorithm::MeasureContent(
-    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+    const LayoutConstraintF& contentConstraint, FrameNode* frameNode)
 {
-    CHECK_NULL_RETURN(layoutWrapper, std::nullopt);
-    auto layoutProperty = AceType::DynamicCast<LayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto layoutProperty = AceType::DynamicCast<LayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_RETURN(layoutProperty, std::nullopt);
     auto idealSize = CreateIdealSize(contentConstraint, Axis::HORIZONTAL, layoutProperty->GetMeasureType(), true);
     if (LessNotEqual(idealSize.Width(), idealSize.Height())) {

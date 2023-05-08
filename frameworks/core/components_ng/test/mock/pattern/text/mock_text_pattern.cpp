@@ -30,7 +30,7 @@ void TextPattern::HandleOnSelectAll() {}
 
 void TextPattern::OnModifyDone() {}
 
-bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+bool TextPattern::OnDirtyLayoutWrapperSwap( RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     return true;
 }

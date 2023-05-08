@@ -29,15 +29,13 @@ const Dimension DEFAULT_STROKE_WIDTH(1, DimensionUnit::PX);
 } // namespace
 
 std::optional<SizeF> PathLayoutAlgorithm::MeasureContent(
-    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+    const LayoutConstraintF& contentConstraint, FrameNode* frameNode)
 {
     if (contentConstraint.selfIdealSize.IsValid()) {
         return contentConstraint.selfIdealSize.ConvertToSizeT();
     }
 
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_RETURN(host, std::nullopt);
-    auto paintProperty = host->GetPaintProperty<PathPaintProperty>();
+    auto paintProperty = frameNode->GetPaintProperty<PathPaintProperty>();
     CHECK_NULL_RETURN(paintProperty, std::nullopt);
     if (propertiesFromAncestor_) {
         paintProperty->UpdateShapeProperty(propertiesFromAncestor_);

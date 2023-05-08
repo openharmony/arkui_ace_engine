@@ -362,13 +362,13 @@ void LinearSplitPattern::OnModifyDone()
     InitMouseEvent(inputHub);
 }
 
-bool LinearSplitPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
+bool LinearSplitPattern::OnDirtyLayoutWrapperSwap(FrameNode* frameNode, bool skipMeasure, bool skipLayout)
 {
     CHECK_NULL_RETURN_NOLOG(!skipMeasure, false);
-    if (dirty->SkipMeasureContent()) {
+    if (frameNode->SkipMeasureContent()) {
         return false;
     }
-    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
+    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(frameNode->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto linearSplitLayoutAlgorithm =
         DynamicCast<LinearSplitLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());

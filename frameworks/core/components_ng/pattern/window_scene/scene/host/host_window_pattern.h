@@ -28,7 +28,7 @@ public:
     HostWindowPattern();
     ~HostWindowPattern() override = default;
 
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    bool OnDirtyLayoutWrapperSwap(FrameNode* frameNode, const DirtySwapConfig& config) override;
 
     void DispatchPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent);
     void DispatchKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent);

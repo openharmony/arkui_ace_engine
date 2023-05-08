@@ -17,7 +17,7 @@
 
 namespace OHOS::Ace::NG {
 std::optional<SizeF> UIExtensionLayoutAlgorithm::MeasureContent(
-    const LayoutConstraintF& contentConstraint, LayoutWrapper* /* layoutWrapper */)
+    const LayoutConstraintF& contentConstraint, FrameNode* /* frameNode */)
 {
     return contentConstraint.selfIdealSize.ConvertToSizeT();
 }

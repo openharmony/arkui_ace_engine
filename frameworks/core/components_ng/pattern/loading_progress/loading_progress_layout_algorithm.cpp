@@ -22,7 +22,7 @@ namespace OHOS::Ace::NG {
 LoadingProgressLayoutAlgorithm::LoadingProgressLayoutAlgorithm() = default;
 
 std::optional<SizeF> LoadingProgressLayoutAlgorithm::MeasureContent(
-    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+    const LayoutConstraintF& contentConstraint, FrameNode* frameNode)
 {
     float height_ = (contentConstraint.selfIdealSize.Height()) ? contentConstraint.selfIdealSize.Height().value()
                                                                : contentConstraint.maxSize.Height();

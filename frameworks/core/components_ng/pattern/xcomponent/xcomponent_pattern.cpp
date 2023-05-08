@@ -217,12 +217,12 @@ void XComponentPattern::ConfigSurface(uint32_t surfaceWidth, uint32_t surfaceHei
     renderSurface_->ConfigSurface(surfaceWidth, surfaceHeight);
 }
 
-bool XComponentPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+bool XComponentPattern::OnDirtyLayoutWrapperSwap(FrameNode* frameNode, const DirtySwapConfig& config)
 {
-    if (type_ == XComponentType::COMPONENT || config.skipMeasure || dirty->SkipMeasureContent()) {
+    if (type_ == XComponentType::COMPONENT || config.skipMeasure || frameNode->SkipMeasureContent()) {
         return false;
     }
-    auto geometryNode = dirty->GetGeometryNode();
+    auto geometryNode = frameNode->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
     auto drawSize = geometryNode->GetContentSize();
     if (drawSize.IsNonPositive()) {

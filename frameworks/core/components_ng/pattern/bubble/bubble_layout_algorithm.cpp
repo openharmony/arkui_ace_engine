@@ -50,13 +50,12 @@ constexpr Dimension BEZIER_WIDTH_HALF = 16.0_vp;
 
 } // namespace
 
-void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+void BubbleLayoutAlgorithm::Measure(FrameNode* frameNode)
 {
-    CHECK_NULL_VOID(layoutWrapper);
-    auto bubbleProp = DynamicCast<BubbleLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto bubbleProp = DynamicCast<BubbleLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_VOID(bubbleProp);
     InitProps(bubbleProp);
-    auto bubbleLayoutProperty = AceType::DynamicCast<BubbleLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto bubbleLayoutProperty = AceType::DynamicCast<BubbleLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_VOID(bubbleLayoutProperty);
 
     const auto& layoutConstraint = bubbleLayoutProperty->GetLayoutConstraint();
@@ -66,8 +65,8 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     bool useCustom = bubbleLayoutProperty->GetUseCustom().value_or(false);
     // bubble size fit screen.
-    layoutWrapper->GetGeometryNode()->SetFrameSize(layoutConstraint->maxSize);
-    layoutWrapper->GetGeometryNode()->SetContentSize(layoutConstraint->maxSize);
+    frameNode->GetGeometryNode()->SetFrameSize(layoutConstraint->maxSize);
+    frameNode->GetGeometryNode()->SetContentSize(layoutConstraint->maxSize);
 
     // update child layout constraint
     LayoutConstraintF childLayoutConstraint = bubbleLayoutProperty->CreateChildConstraint();
@@ -85,7 +84,7 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                     layoutConstraint->maxSize.Height()));
         }
     }
-    const auto& children = layoutWrapper->GetAllChildrenWithBuild();
+    const auto& children = frameNode->GetAllFrameNodeChildren();
     if (children.empty()) {
         return;
     }
@@ -94,7 +93,7 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     child->Measure(childLayoutConstraint);
     bool showInSubWindow = bubbleLayoutProperty->GetShowInSubWindowValue(false);
     if (useCustom && !showInSubWindow) {
-        auto context = layoutWrapper->GetHostNode()->GetContext();
+        auto context = frameNode->GetContext();
         float rootH = context->GetRootHeight();
         float rootW = context->GetRootWidth();
         auto childHeight = child->GetGeometryNode()->GetMarginFrameSize().Height();
@@ -106,8 +105,8 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         CHECK_NULL_VOID(geometryNode);
         auto targetSize = geometryNode->GetFrameSize();
         auto targetOffset = targetNode->GetPaintRectOffset();
-        auto constrainHeight = layoutWrapper->GetGeometryNode()->GetFrameSize().Height();
-        auto constrainWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
+        auto constrainHeight = frameNode->GetGeometryNode()->GetFrameSize().Height();
+        auto constrainWidth = frameNode->GetGeometryNode()->GetFrameSize().Width();
         auto placement = bubbleLayoutProperty->GetPlacement().value_or(Placement::BOTTOM);
         std::unordered_set<Placement> setHorizontal = { Placement::LEFT, Placement::LEFT_BOTTOM, Placement::LEFT_TOP,
             Placement::RIGHT, Placement::RIGHT_BOTTOM, Placement::RIGHT_TOP };
@@ -134,17 +133,16 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 }
 
-void BubbleLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+void BubbleLayoutAlgorithm::Layout(FrameNode* frameNode)
 {
-    CHECK_NULL_VOID(layoutWrapper);
-    auto bubbleProp = DynamicCast<BubbleLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto bubbleProp = DynamicCast<BubbleLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_VOID(bubbleProp);
     InitTargetSizeAndPosition(bubbleProp);
-    const auto& children = layoutWrapper->GetAllChildrenWithBuild();
+    const auto& children = frameNode->GetAllFrameNodeChildren();
     if (children.empty()) {
         return;
     }
-    selfSize_ = layoutWrapper->GetGeometryNode()->GetFrameSize(); // bubble's size
+    selfSize_ = frameNode->GetGeometryNode()->GetFrameSize(); // bubble's size
     auto child = children.front();
     childSize_ = child->GetGeometryNode()->GetMarginFrameSize(); // bubble's child's size
     childOffset_ = GetChildPosition(childSize_, bubbleProp);     // bubble's child's offset
@@ -153,9 +151,9 @@ void BubbleLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     UpdateTouchRegion();
     child->GetGeometryNode()->SetMarginFrameOffset(childOffset_);
     child->Layout();
-    auto childLayoutWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
-    CHECK_NULL_VOID(childLayoutWrapper);
-    const auto& columnChild = childLayoutWrapper->GetAllChildrenWithBuild();
+    auto childLayout = frameNode->GetFrameNodeByIndex(0);
+    CHECK_NULL_VOID(childLayout);
+    const auto& columnChild = childLayout->GetAllFrameNodeChildren();
     if (columnChild.size() > 1 && !useCustom) {
         auto buttonRow = columnChild.back();
         buttonRowSize_ = buttonRow->GetGeometryNode()->GetMarginFrameSize();

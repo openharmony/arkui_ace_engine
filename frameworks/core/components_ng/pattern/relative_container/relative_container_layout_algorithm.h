@@ -33,27 +33,27 @@ public:
     RelativeContainerLayoutAlgorithm() = default;
     ~RelativeContainerLayoutAlgorithm() override = default;
 
-    void Measure(LayoutWrapper* layoutWrapper) override;
-    void Layout(LayoutWrapper* layoutWrapper) override;
+    void Measure(FrameNode* frameNode) override;
+    void Layout(FrameNode* frameNode) override;
 
 private:
-    void CollectNodesById(LayoutWrapper* layoutWrapper);
+    void CollectNodesById(FrameNode* frameNode);
     void GetDependencyRelationship();
     bool PreTopologicalLoopDetection();
     void TopologicalSort(std::list<std::string>& renderList);
-    void CalcSizeParam(LayoutWrapper* layoutWrapper, const std::string& nodeName);
-    void CalcOffsetParam(LayoutWrapper* layoutWrapper, const std::string& nodeName);
+    void CalcSizeParam(FrameNode* frameNode, const std::string& nodeName);
+    void CalcOffsetParam(FrameNode* frameNode, const std::string& nodeName);
     void CalcHorizontalLayoutParam(AlignDirection alignDirection, const AlignRule& alignRule,
-        LayoutWrapper* layoutWrapper, const std::string& nodeName);
+        FrameNode* frameNode, const std::string& nodeName);
     void CalcVerticalLayoutParam(AlignDirection alignDirection, const AlignRule& alignRule,
-        LayoutWrapper* layoutWrapper, const std::string& nodeName);
+        FrameNode* frameNode, const std::string& nodeName);
     float CalcHorizontalOffset(
         AlignDirection alignDirection, const AlignRule& alignRule, float containerWidth, const std::string& nodeName);
     float CalcVerticalOffset(
         AlignDirection alignDirection, const AlignRule& alignRule, float containerHeight, const std::string& nodeName);
 
     std::list<std::string> renderList_;
-    std::map<std::string, RefPtr<LayoutWrapper>> idNodeMap_;
+    std::map<std::string, RefPtr<FrameNode>> idNodeMap_;
     std::map<std::string, uint32_t> incomingDegreeMap_;
     std::map<std::string, std::set<std::string>> reliedOnMap_;
     std::map<std::string, OffsetF> recordOffsetMap_;

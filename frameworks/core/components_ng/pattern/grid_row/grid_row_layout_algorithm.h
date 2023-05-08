@@ -43,20 +43,20 @@ struct NewLineOffset {
     }
 };
 
-using ChildrenRow = std::list<std::pair<RefPtr<LayoutWrapper>, NewLineOffset>>;
+using ChildrenRow = std::list<std::pair<RefPtr<FrameNode>, NewLineOffset>>;
 class ACE_EXPORT GridRowLayoutAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(GridRowLayoutAlgorithm, LayoutAlgorithm);
 
 public:
-    void Measure(LayoutWrapper* layoutWrapper) override;
-    void Layout(LayoutWrapper* layoutWrapper) override;
+    void Measure(FrameNode* frameNode) override;
+    void Layout(FrameNode* frameNode) override;
 
 private:
-    void MeasureSelf(LayoutWrapper* layoutWrapper, float childHeight);
-    float MeasureChildren(LayoutWrapper* layoutWrapper, double columnUnitWidth, double childHeightLimit,
+    void MeasureSelf(FrameNode* frameNode, float childHeight);
+    float MeasureChildren(FrameNode* frameNode, double columnUnitWidth, double childHeightLimit,
         std::pair<double, double>& gutter, V2::GridSizeType sizeType, int32_t columnNum);
-    void CalcCrossAxisAlignment(LayoutWrapper* layoutWrapper,
-        std::list<std::pair<RefPtr<LayoutWrapper>, NewLineOffset>>& row, float currentRowHeight);
+    void CalcCrossAxisAlignment(FrameNode* frameNode,
+        std::list<std::pair<RefPtr<FrameNode>, NewLineOffset>>& row, float currentRowHeight);
     std::pair<double, double> gutterInDouble_ { 0, 0 };
     double columnUnitWidth_ = 0;
     std::list<ChildrenRow> gridColChildrenRows_ {};

@@ -34,17 +34,14 @@ namespace {
 constexpr Dimension INDICATOR_PADDING = 8.0_vp;
 } // namespace
 
-void DigitIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+void DigitIndicatorLayoutAlgorithm::Measure(FrameNode* frameNode)
 {
-    CHECK_NULL_VOID(layoutWrapper);
-    auto frameNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(frameNode);
-    auto layoutPropertyConstraint = layoutWrapper->GetLayoutProperty();
+    auto layoutPropertyConstraint = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutPropertyConstraint);
     auto layoutConstraint = layoutPropertyConstraint->CreateChildConstraint();
     auto indicatorWidth = INDICATOR_PADDING.ConvertToPx() * 2;
     auto indicatorHeight = 0.0f;
-    for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
+    for (auto&& child : frameNode->GetAllFrameNodeChildren()) {
         child->Measure(layoutConstraint);
         auto textGeometryNode = child->GetGeometryNode();
         CHECK_NULL_VOID(textGeometryNode);
@@ -55,44 +52,40 @@ void DigitIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
     }
     SizeF frameSize = { indicatorWidth, indicatorHeight };
-    auto geometryNode = layoutWrapper->GetGeometryNode();
+    auto geometryNode = frameNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     geometryNode->SetFrameSize(frameSize);
 }
 
-void DigitIndicatorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+void DigitIndicatorLayoutAlgorithm::Layout(FrameNode* frameNode)
 {
-    CHECK_NULL_VOID(layoutWrapper);
-    auto frameNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(frameNode);
-
     auto children = frameNode->GetChildren();
     if (children.empty()) {
         LOGW("text has no child node.");
         return;
     }
-    auto textWrapperList = layoutWrapper->GetAllChildrenWithBuild();
-    auto frontTextWrapper = textWrapperList.front();
-    CHECK_NULL_VOID(frontTextWrapper);
-    auto frontTextGeometryNode = frontTextWrapper->GetGeometryNode();
+    auto textList = frameNode->GetAllFrameNodeChildren();
+    auto frontText = textList.front();
+    CHECK_NULL_VOID(frontText);
+    auto frontTextGeometryNode = frontText->GetGeometryNode();
     CHECK_NULL_VOID(frontTextGeometryNode);
-    auto layoutGeometryNode = layoutWrapper->GetGeometryNode();
+    auto layoutGeometryNode = frameNode->GetGeometryNode();
     CHECK_NULL_VOID(layoutGeometryNode);
     auto frontCurrentOffset = OffsetF{ INDICATOR_PADDING.ConvertToPx(),
         (layoutGeometryNode->GetMarginFrameSize().Height() - frontTextGeometryNode->GetMarginFrameSize().Height()) *
         0.5 };
     frontTextGeometryNode->SetMarginFrameOffset(frontCurrentOffset);
-    frontTextWrapper->Layout();
+    frontText->Layout();
 
-    auto backTextWrapper = textWrapperList.back();
-    CHECK_NULL_VOID(backTextWrapper);
-    auto backTextGeometryNode = backTextWrapper->GetGeometryNode();
+    auto backText = textList.back();
+    CHECK_NULL_VOID(backText);
+    auto backTextGeometryNode = backText->GetGeometryNode();
     CHECK_NULL_VOID(backTextGeometryNode);
     auto backTextCurrentOffset = OffsetF{ layoutGeometryNode->GetMarginFrameSize().Width() -
         backTextGeometryNode->GetMarginFrameSize().Width() - INDICATOR_PADDING.ConvertToPx(),
         (layoutGeometryNode->GetMarginFrameSize().Height() - backTextGeometryNode->GetMarginFrameSize().Height()) *
         0.5};
     backTextGeometryNode->SetMarginFrameOffset(backTextCurrentOffset);
-    backTextWrapper->Layout();
+    backText->Layout();
 }
 } // namespace OHOS::Ace::NG

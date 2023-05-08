@@ -24,7 +24,7 @@ DataPanelLayoutAlgorithm::DataPanelLayoutAlgorithm() = default;
 void DataPanelLayoutAlgorithm::OnReset() {}
 
 std::optional<SizeF> DataPanelLayoutAlgorithm::MeasureContent(
-    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+    const LayoutConstraintF& contentConstraint, FrameNode* frameNode)
 {
     if (contentConstraint.selfIdealSize.IsValid()) {
         return contentConstraint.selfIdealSize.ConvertToSizeT();

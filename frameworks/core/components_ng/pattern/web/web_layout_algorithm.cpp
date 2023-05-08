@@ -24,12 +24,10 @@ namespace OHOS::Ace::NG {
 WebLayoutAlgorithm::WebLayoutAlgorithm() = default;
 
 std::optional<SizeF> WebLayoutAlgorithm::MeasureContent(
-    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+    const LayoutConstraintF& contentConstraint, FrameNode* frameNode)
 {
-    CHECK_NULL_RETURN(layoutWrapper, std::nullopt);
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_RETURN(host, std::nullopt);
-    auto pattern = DynamicCast<WebPattern>(host->GetPattern());
+    CHECK_NULL_RETURN(frameNode, std::nullopt);
+    auto pattern = DynamicCast<WebPattern>(frameNode->GetPattern());
     CHECK_NULL_RETURN(pattern, std::nullopt);
     if (pattern->IsFullScreen()) {
         SizeF fullSize = { PipelineContext::GetCurrentRootWidth(), PipelineContext::GetCurrentRootHeight() };

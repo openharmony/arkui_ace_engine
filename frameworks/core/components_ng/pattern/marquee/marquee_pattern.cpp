@@ -45,7 +45,7 @@ void MarqueePattern::OnAttachToFrameNode()
 }
 
 bool MarqueePattern::OnDirtyLayoutWrapperSwap(
-    const RefPtr<LayoutWrapper>& /* dirty */, const DirtySwapConfig& /* config */)
+    FrameNode* /*frameNode*/, const DirtySwapConfig& /*config*/)
 {
     if (forceStropAnimation_) {
         forceStropAnimation_ = false;

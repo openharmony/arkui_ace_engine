@@ -16,6 +16,7 @@
 #include "frameworks/core/components_ng/pattern/stack/stack_layout_algorithm.h"
 
 #include "core/common/ace_application_info.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/stack/stack_layout_property.h"
 
@@ -23,21 +24,21 @@ namespace OHOS::Ace::NG {
 
 StackLayoutAlgorithm::StackLayoutAlgorithm() = default;
 
-void StackLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+void StackLayoutAlgorithm::Layout(FrameNode* frameNode)
 {
-    PerformLayout(layoutWrapper);
-    for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
+    PerformLayout(frameNode);
+    for (auto&& child : frameNode->GetAllFrameNodeChildren()) {
         child->Layout();
     }
 }
 
 // Called to perform layout render node and child.
-void StackLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
+void StackLayoutAlgorithm::PerformLayout(FrameNode* frameNode)
 {
     // update child position.
-    auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
-    const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
-    auto layoutDirection = layoutWrapper->GetLayoutProperty()->GetLayoutDirection();
+    auto size = frameNode->GetGeometryNode()->GetFrameSize();
+    const auto& padding = frameNode->GetLayoutProperty()->CreatePaddingAndBorder();
+    auto layoutDirection = frameNode->GetLayoutProperty()->GetLayoutDirection();
     if (layoutDirection == TextDirection::AUTO) {
         layoutDirection = AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR;
     }
@@ -46,7 +47,7 @@ void StackLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
     auto top = padding.top.value_or(0);
     auto paddingOffset = OffsetF(left, top);
     auto align = Alignment::CENTER;
-    auto layoutProperty = DynamicCast<StackLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto layoutProperty = DynamicCast<StackLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     if (layoutProperty->HasAlignmentContent()) {
         align = layoutProperty->GetAlignmentContent().value_or(Alignment::CENTER);
@@ -55,7 +56,7 @@ void StackLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
         align = layoutProperty->GetAlignment().value_or(Alignment::CENTER);
     }
     // Update child position.
-    for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
+    for (const auto& child : frameNode->GetAllFrameNodeChildren()) {
         auto translate =
             CalculateStackAlignment(size, child->GetGeometryNode()->GetMarginFrameSize(), align) + paddingOffset;
         if (layoutDirection == TextDirection::RTL) {
@@ -64,7 +65,7 @@ void StackLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
         child->GetGeometryNode()->SetMarginFrameOffset(translate);
     }
     // Update content position.
-    const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
+    const auto& content = frameNode->GetGeometryNode()->GetContent();
     if (content) {
         auto translate = CalculateStackAlignment(size, content->GetRect().GetSize(), align) + paddingOffset;
         if (layoutDirection == TextDirection::RTL) {

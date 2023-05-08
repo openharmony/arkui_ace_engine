@@ -466,9 +466,9 @@ void SideBarContainerPattern::UpdateControlButtonIcon()
 }
 
 bool SideBarContainerPattern::OnDirtyLayoutWrapperSwap(
-    const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+    FrameNode* frameNode, const DirtySwapConfig& config)
 {
-    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
+    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(frameNode->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto layoutAlgorithm = DynamicCast<SideBarContainerLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithm, false);

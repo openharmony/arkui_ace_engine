@@ -25,7 +25,7 @@ namespace OHOS::Ace::NG {
 namespace {
 const int32_t DIVIDER_SIZE = 2;
 } // namespace
-void DatePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+void DatePickerColumnLayoutAlgorithm::Measure(FrameNode* frameNode)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -35,9 +35,8 @@ void DatePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     auto height = static_cast<float>(
         pickerTheme->GetGradientHeight().ConvertToPx() * 4 + pickerTheme->GetDividerSpacing().ConvertToPx());
-    auto columnNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(columnNode);
-    auto layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
+
+    auto layoutConstraint = frameNode->GetLayoutProperty()->GetLayoutConstraint();
     CHECK_NULL_VOID(layoutConstraint);
     auto width = layoutConstraint->parentIdealSize.Width();
     float pickerWidth = 0.0f;
@@ -48,25 +47,25 @@ void DatePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     frameSize.SetWidth(pickerWidth);
     frameSize.SetHeight(height);
-    layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
-    auto layoutChildConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
-    for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
+    frameNode->GetGeometryNode()->SetFrameSize(frameSize);
+    auto layoutChildConstraint = frameNode->GetLayoutProperty()->CreateChildConstraint();
+    for (auto&& child : frameNode->GetAllFrameNodeChildren()) {
         child->Measure(layoutChildConstraint);
     }
-    MeasureText(layoutWrapper, frameSize);
+    MeasureText(frameNode, frameSize);
 }
 
-void DatePickerColumnLayoutAlgorithm::MeasureText(LayoutWrapper* layoutWrapper, const SizeF& size)
+void DatePickerColumnLayoutAlgorithm::MeasureText(FrameNode* frameNode, const SizeF& size)
 {
-    auto totalChild = layoutWrapper->GetTotalChildCount();
+    auto totalChild = frameNode->TotalChildCount();
     for (int32_t index = 0; index < totalChild; index++) {
-        auto child = layoutWrapper->GetOrCreateChildByIndex(index);
-        ChangeTextStyle(index, totalChild, size, child, layoutWrapper);
+        auto child = frameNode->GetFrameNodeByIndex(index);
+        ChangeTextStyle(index, totalChild, size, child, frameNode);
     }
 }
 
 void DatePickerColumnLayoutAlgorithm::ChangeTextStyle(uint32_t index, uint32_t showOptionCount, const SizeF& size,
-    const RefPtr<LayoutWrapper>& childLayoutWrapper, LayoutWrapper* layoutWrapper)
+    const RefPtr<FrameNode>& child, FrameNode* frameNode)
 {
     SizeF frameSize = { -1.0f, -1.0f };
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -74,7 +73,7 @@ void DatePickerColumnLayoutAlgorithm::ChangeTextStyle(uint32_t index, uint32_t s
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
     frameSize.SetWidth(size.Width());
-    auto layoutChildConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    auto layoutChildConstraint = frameNode->GetLayoutProperty()->CreateChildConstraint();
     uint32_t selectedIndex = showOptionCount / 2; // the center option is selected.
     if (index == selectedIndex) {
         frameSize.SetHeight(static_cast<float>(pickerTheme->GetDividerSpacing().ConvertToPx()));
@@ -82,21 +81,20 @@ void DatePickerColumnLayoutAlgorithm::ChangeTextStyle(uint32_t index, uint32_t s
         frameSize.SetHeight(static_cast<float>(pickerTheme->GetGradientHeight().ConvertToPx()));
     }
     layoutChildConstraint.selfIdealSize = { frameSize.Width(), frameSize.Height() };
-    childLayoutWrapper->Measure(layoutChildConstraint);
+    frameNode->Measure(layoutChildConstraint);
 }
 
-void DatePickerColumnLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+void DatePickerColumnLayoutAlgorithm::Layout(FrameNode* frameNode)
 {
-    CHECK_NULL_VOID(layoutWrapper);
-    auto layoutProperty = AceType::DynamicCast<DataPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto layoutProperty = AceType::DynamicCast<DataPickerLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    auto geometryNode = layoutWrapper->GetGeometryNode();
+    auto geometryNode = frameNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto size = geometryNode->GetFrameSize();
     auto padding = layoutProperty->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
 
-    auto children = layoutWrapper->GetAllChildrenWithBuild();
+    auto children = frameNode->GetAllFrameNodeChildren();
 
     float childStartCoordinate = 0.0;
     for (const auto& child : children) {

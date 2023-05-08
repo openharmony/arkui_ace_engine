@@ -69,7 +69,7 @@ public:
     void AttachToMainTree(bool recursive = false);
     void DetachFromMainTree(bool recursive = false);
 
-    int32_t TotalChildCount() const;
+    virtual int32_t TotalChildCount() const;
 
     // performance check get child count and depth
     void GetAllChildCount(int32_t& count, CheckNodeMap& nodeMap, CheckNodeMap& itemMap);
@@ -264,7 +264,7 @@ public:
         }
     }
 
-    virtual void MarkNeedSyncRenderTree();
+    virtual void MarkNeedSyncRenderTree(bool needRebuild = false);
 
     virtual void RebuildRenderContextTree();
 
@@ -342,6 +342,7 @@ public:
         newChild->MountToParent(AceType::Claim(this), slot, false);
     }
     virtual void FastPreviewUpdateChildDone() {}
+    virtual RefPtr<UINode> GetFrameChildByIndex(uint32_t index);
 
 #ifdef PREVIEW
     void SetDebugLine(const std::string& line)
@@ -414,9 +415,11 @@ protected:
     // return value: return true if node has disappearing transition
     virtual bool OnRemoveFromParent();
 
+    virtual void DoAddChild(
+        std::list<RefPtr<UINode>>::iterator& it, int32_t slot, const RefPtr<UINode>& child, bool silently);
+    virtual void DoRemoveChild(const RefPtr<UINode>& child) {}
+    virtual void DoCleanChild() {}
 private:
-    void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false);
-
     // performance check
     void GetSyntaxItemTag(const RefPtr<UINode>& sytaxItem, CheckNodeMap& itemMap);
 

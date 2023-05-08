@@ -533,9 +533,9 @@ FocusPattern RadioPattern::GetFocusPattern() const
     return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParam };
 }
 
-bool RadioPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& /*config*/)
+bool RadioPattern::OnDirtyLayoutWrapperSwap(FrameNode* frameNode, const DirtySwapConfig& /*config*/)
 {
-    auto geometryNode = dirty->GetGeometryNode();
+    auto geometryNode = frameNode->GetGeometryNode();
     offset_ = geometryNode->GetContentOffset();
     size_ = geometryNode->GetContentSize();
     if (isFirstAddhotZoneRect_) {

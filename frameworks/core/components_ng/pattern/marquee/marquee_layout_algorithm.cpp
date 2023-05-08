@@ -28,14 +28,14 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr double MULTIPLE = 2.0;
 }
-void MarqueeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+void MarqueeLayoutAlgorithm::Measure(FrameNode* frameNode)
 {
-    const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
+    const auto& layoutConstraint = frameNode->GetLayoutProperty()->GetLayoutConstraint();
     const auto& minSize = layoutConstraint->minSize;
     const auto& maxSize = layoutConstraint->maxSize;
-    const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
-    auto measureType = layoutWrapper->GetLayoutProperty()->GetMeasureType();
-    auto child = layoutWrapper->GetAllChildrenWithBuild().front();
+    const auto& padding = frameNode->GetLayoutProperty()->CreatePaddingAndBorder();
+    auto measureType = frameNode->GetLayoutProperty()->GetMeasureType();
+    auto child = frameNode->GetAllFrameNodeChildren().front();
     // measure child.
     LayoutConstraintF textLayoutConstraint;
     textLayoutConstraint.UpdateMaxSizeWithCheck(SizeF(Infinity<float>(), maxSize.Height()));
@@ -67,27 +67,25 @@ void MarqueeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
         frameSize.UpdateIllegalSizeWithCheck(SizeF { 0.0f, 0.0f });
     } while (false);
-    layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
+    frameNode->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
 }
 
-void MarqueeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+void MarqueeLayoutAlgorithm::Layout(FrameNode* frameNode)
 {
-    auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
-    const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+    auto size = frameNode->GetGeometryNode()->GetFrameSize();
+    const auto& padding = frameNode->GetLayoutProperty()->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
     auto left = padding.left.value_or(0);
     auto top = padding.top.value_or(0);
     auto paddingOffset = OffsetF(left, top);
     auto align = Alignment::CENTER;
-    if (layoutWrapper->GetLayoutProperty()->GetPositionProperty()) {
-        align = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
+    if (frameNode->GetLayoutProperty()->GetPositionProperty()) {
+        align = frameNode->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
     }
     // Update child position.
-    auto textNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(textNode);
-    auto textGeoNode = textNode->GetGeometryNode();
+    auto textGeoNode = frameNode->GetGeometryNode();
     CHECK_NULL_VOID(textGeoNode);
-    for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
+    for (const auto& child : frameNode->GetAllFrameNodeChildren()) {
         OffsetF translate;
         translate.SetX((1.0 + align.GetHorizontal()) *
                        (size.Width() - child->GetGeometryNode()->GetMarginFrameSize().Width()) / MULTIPLE);

@@ -38,12 +38,12 @@ const Dimension DEFALT_CAPSULE_WIDTH = 28.0_vp;
 ProgressLayoutAlgorithm::ProgressLayoutAlgorithm() = default;
 
 std::optional<SizeF> ProgressLayoutAlgorithm::MeasureContent(
-    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+    const LayoutConstraintF& contentConstraint, FrameNode* frameNode)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, std::nullopt);
     auto progressTheme = pipeline->GetTheme<ProgressTheme>();
-    auto progressLayoutProperty = DynamicCast<ProgressLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto progressLayoutProperty = DynamicCast<ProgressLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_RETURN(progressLayoutProperty, std::nullopt);
     type_ = progressLayoutProperty->GetType().value_or(ProgressType::LINEAR);
     strokeWidth_ = progressLayoutProperty->GetStrokeWidth()
@@ -73,15 +73,15 @@ std::optional<SizeF> ProgressLayoutAlgorithm::MeasureContent(
     }
     if (type_ == ProgressType::CAPSULE) {
         if (contentConstraint.selfIdealSize.Width() && !contentConstraint.selfIdealSize.Height()) {
-            height_ = GetChildHeight(layoutWrapper, width_);
+            height_ = GetChildHeight(frameNode, width_);
         }
         if (!contentConstraint.selfIdealSize.Width() && contentConstraint.selfIdealSize.Height()) {
             width_ = DEFALT_CAPSULE_WIDTH.ConvertToPx();
         }
         if (!contentConstraint.selfIdealSize.Width() && !contentConstraint.selfIdealSize.Height()) {
-            height_ = GetChildHeight(layoutWrapper, width_);
+            height_ = GetChildHeight(frameNode, width_);
         }
-        SetRadius(layoutWrapper, width_, height_);
+        SetRadius(frameNode, width_, height_);
     }
     height_ = std::min(height_, static_cast<float>(contentConstraint.maxSize.Height()));
     width_ = std::min(width_, static_cast<float>(contentConstraint.maxSize.Width()));
@@ -100,23 +100,23 @@ float ProgressLayoutAlgorithm::GetStrokeWidth() const
     return strokeWidth_;
 }
 
-float ProgressLayoutAlgorithm::GetChildHeight(LayoutWrapper* layoutWrapper, float width) const
+float ProgressLayoutAlgorithm::GetChildHeight(FrameNode* frameNode, float width) const
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, DEFALT_CAPSULE_WIDTH.ConvertToPx());
     auto progressTheme = pipeline->GetTheme<ProgressTheme>();
     Dimension margin = progressTheme->GetTextMargin();
-    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
-    CHECK_NULL_RETURN(childWrapper, DEFALT_CAPSULE_WIDTH.ConvertToPx());
-    auto layoutProperty = AceType::DynamicCast<ProgressLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto child = frameNode->GetFrameNodeByIndex(0);
+    CHECK_NULL_RETURN(child, DEFALT_CAPSULE_WIDTH.ConvertToPx());
+    auto layoutProperty = AceType::DynamicCast<ProgressLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_RETURN(layoutProperty, DEFALT_CAPSULE_WIDTH.ConvertToPx());
 
-    auto childLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(childWrapper->GetLayoutProperty());
+    auto childLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(child->GetLayoutProperty());
     CHECK_NULL_RETURN(childLayoutProperty, DEFALT_CAPSULE_WIDTH.ConvertToPx());
     auto childConstraint = layoutProperty->CreateChildConstraint();
     childConstraint.maxSize.SetWidth(width);
-    childWrapper->Measure(childConstraint);
-    auto childSize = childWrapper->GetGeometryNode()->GetContentSize();
+    child->Measure(childConstraint);
+    auto childSize = child->GetGeometryNode()->GetContentSize();
     if (childSize.Width() > (width - 2 * margin.ConvertToPx())) {
         CalcSize defaultCalcSize((CalcLength(width - 2 * margin.ConvertToPx())), std::nullopt);
         childLayoutProperty->UpdateUserDefinedIdealSize(defaultCalcSize);
@@ -128,12 +128,10 @@ float ProgressLayoutAlgorithm::GetChildHeight(LayoutWrapper* layoutWrapper, floa
     return childHeight;
 }
 
-void ProgressLayoutAlgorithm::SetRadius(LayoutWrapper* layoutWrapper, float width, float height) const
+void ProgressLayoutAlgorithm::SetRadius(FrameNode* frameNode, float width, float height) const
 {
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(host);
     Dimension radius;
-    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     auto& borderWidthProperty = layoutProperty->GetBorderWidthProperty();
     float borderWidth = 0;
@@ -143,6 +141,6 @@ void ProgressLayoutAlgorithm::SetRadius(LayoutWrapper* layoutWrapper, float widt
     auto minSize = std::min(height, width);
     radius.SetValue((minSize + 2 * borderWidth) / 2);
     BorderRadiusProperty borderRadius { radius, radius, radius, radius };
-    host->GetRenderContext()->UpdateBorderRadius(borderRadius);
+    frameNode->GetRenderContext()->UpdateBorderRadius(borderRadius);
 }
 } // namespace OHOS::Ace::NG

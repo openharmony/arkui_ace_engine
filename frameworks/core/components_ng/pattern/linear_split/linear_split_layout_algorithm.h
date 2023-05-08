@@ -35,8 +35,8 @@ public:
     ~LinearSplitLayoutAlgorithm() override = default;
 
     void OnReset() override {}
-    void Measure(LayoutWrapper* layoutWrapper) override;
-    void Layout(LayoutWrapper* layoutWrapper) override;
+    void Measure(FrameNode* frameNode) override;
+    void Layout(FrameNode* frameNode) override;
 
     const std::vector<OffsetF>& GetChildrenOffset() const
     {
@@ -65,7 +65,7 @@ public:
 
 private:
     SplitType splitType_;
-    std::set<RefPtr<LayoutWrapper>> displayNodes_;
+    std::set<RefPtr<FrameNode>> displayNodes_;
     std::vector<OffsetF> childrenOffset_;
     std::vector<Rect> splitRects_;
     std::vector<float> dragSplitOffset_;

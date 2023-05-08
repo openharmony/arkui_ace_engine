@@ -87,14 +87,14 @@ void ListPattern::OnModifyDone()
     InitOnKeyEvent(focusHub);
 }
 
-bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+bool ListPattern::OnDirtyLayoutWrapperSwap(FrameNode* frameNode, const DirtySwapConfig& config)
 {
     if (config.skipMeasure && config.skipLayout) {
         return false;
     }
     bool isJump = false;
     float jumpDistance = 0.0f;
-    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
+    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(frameNode->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto listLayoutAlgorithm = DynamicCast<ListLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(listLayoutAlgorithm, false);
@@ -146,7 +146,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     UpdateScrollBarOffset();
     CheckRestartSpring();
 
-    DrivenRender(dirty);
+    DrivenRender(frameNode);
 
     SetScrollState(SCROLL_FROM_NONE);
     isInitialized_ = true;
@@ -239,7 +239,7 @@ void ListPattern::ProcessEvent(
     }
 }
 
-void ListPattern::DrivenRender(const RefPtr<LayoutWrapper>& layoutWrapper)
+void ListPattern::DrivenRender(FrameNode* frameNode)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -260,11 +260,8 @@ void ListPattern::DrivenRender(const RefPtr<LayoutWrapper>& layoutWrapper)
         int32_t indexStep = 0;
         int32_t startIndex = itemPosition_.empty() ? 0 : itemPosition_.begin()->first;
         for (auto& pos : itemPosition_) {
-            auto wrapper = layoutWrapper->GetOrCreateChildByIndex(pos.first);
-            CHECK_NULL_VOID(wrapper);
-            auto itemHost = wrapper->GetHostNode();
-            CHECK_NULL_VOID(itemHost);
-            auto itemRenderContext = itemHost->GetRenderContext();
+            auto child = frameNode->GetFrameNodeByIndex(pos.first);
+            auto itemRenderContext = child->GetRenderContext();
             CHECK_NULL_VOID(itemRenderContext);
             itemRenderContext->MarkDrivenRenderItemIndex(startIndex + indexStep);
             indexStep++;
@@ -313,16 +310,16 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
     } else {
         listLayoutAlgorithm.Swap(MakeRefPtr<ListLayoutAlgorithm>());
     }
-    if (jumpIndex_) {
-        listLayoutAlgorithm->SetIndex(jumpIndex_.value());
-        listLayoutAlgorithm->SetIndexAlignment(scrollIndexAlignment_);
-    }
-    if (jumpIndexInGroup_) {
-        listLayoutAlgorithm->SetIndexInGroup(jumpIndexInGroup_.value());
-        jumpIndexInGroup_.reset();
-    }
-    listLayoutAlgorithm->SetCurrentDelta(currentDelta_);
-    listLayoutAlgorithm->SetItemsPosition(itemPosition_);
+    // if (jumpIndex_) {
+    //     listLayoutAlgorithm->SetIndex(jumpIndex_.value());
+    //     listLayoutAlgorithm->SetIndexAlignment(scrollIndexAlignment_);
+    // }
+    // if (jumpIndexInGroup_) {
+    //     listLayoutAlgorithm->SetIndexInGroup(jumpIndexInGroup_.value());
+    //     jumpIndexInGroup_.reset();
+    // }
+    // listLayoutAlgorithm->SetCurrentDelta(currentDelta_);
+    // listLayoutAlgorithm->SetItemsPosition(itemPosition_);
     listLayoutAlgorithm->SetPrevContentMainSize(contentMainSize_);
     if (IsOutOfBoundary(false) && scrollState_ != SCROLL_FROM_AXIS) {
         listLayoutAlgorithm->SetOverScrollFeature();

@@ -31,20 +31,20 @@ class ACE_EXPORT BarItemLayoutAlgorithm : public LayoutAlgorithm {
 public:
     BarItemLayoutAlgorithm() = default;
     ~BarItemLayoutAlgorithm() override = default;
-    void Measure(LayoutWrapper* layoutWrapper) override;
-    void Layout(LayoutWrapper* layoutWrapper) override;
+    void Measure(FrameNode* frameNode) override;
+    void Layout(FrameNode* frameNode) override;
 
 private:
-    void MeasureIcon(LayoutWrapper* layoutWrapper, const RefPtr<BarItemNode>& hostNode,
+    void MeasureIcon(FrameNode* frameNode, const RefPtr<BarItemNode>& hostNode,
         const RefPtr<LayoutProperty>& barItemLayoutProperty);
 
-    void MeasureText(LayoutWrapper* layoutWrapper, const RefPtr<BarItemNode>& hostNode,
+    void MeasureText(FrameNode* frameNode, const RefPtr<BarItemNode>& hostNode,
         const RefPtr<LayoutProperty>& barItemLayoutProperty);
 
-    float LayoutIcon(LayoutWrapper* layoutWrapper, const RefPtr<BarItemNode>& hostNode,
+    float LayoutIcon(FrameNode* frameNode, const RefPtr<BarItemNode>& hostNode,
         const RefPtr<LayoutProperty>& barItemLayoutProperty, float barItemHeight);
 
-    void LayoutText(LayoutWrapper* layoutWrapper, const RefPtr<BarItemNode>& hostNode,
+    void LayoutText(FrameNode* frameNode, const RefPtr<BarItemNode>& hostNode,
         const RefPtr<LayoutProperty>& barItemLayoutProperty, float iconOffsetY);
 
     Dimension iconSize_;

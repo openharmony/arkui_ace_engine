@@ -445,12 +445,12 @@ void TabBarPattern::OnModifyDone()
     swiperController_->SetAddTabBarEventCallback(std::move(addEventCallback));
 }
 
-bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+bool TabBarPattern::OnDirtyLayoutWrapperSwap(FrameNode* frameNode, const DirtySwapConfig& config)
 {
     if (config.skipMeasure && config.skipLayout) {
         return false;
     }
-    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
+    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(frameNode->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto tabBarLayoutAlgorithm = DynamicCast<TabBarLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(tabBarLayoutAlgorithm, false);
@@ -458,7 +458,7 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     currentOffset_ = tabBarLayoutAlgorithm->GetCurrentOffset();
     childrenMainSize_ = tabBarLayoutAlgorithm->GetChildrenMainSize();
     indicator_ = tabBarLayoutAlgorithm->GetIndicator();
-    auto layoutProperty = DynamicCast<TabBarLayoutProperty>(dirty->GetLayoutProperty());
+    auto layoutProperty = DynamicCast<TabBarLayoutProperty>(frameNode->GetLayoutProperty());
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto tabsFrameNode = AceType::DynamicCast<TabsNode>(host->GetParent());

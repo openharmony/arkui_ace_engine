@@ -23,13 +23,11 @@
 
 namespace OHOS::Ace::NG {
 std::optional<SizeF> SwitchLayoutAlgorithm::MeasureContent(
-    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+    const LayoutConstraintF& contentConstraint, FrameNode* frameNode)
 {
-    auto frameNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_RETURN(frameNode, std::nullopt);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, std::nullopt);
-    const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
+    const auto& layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, std::nullopt);
     float frameHeight = 0.0f;
     float frameWidth = 0.0f;

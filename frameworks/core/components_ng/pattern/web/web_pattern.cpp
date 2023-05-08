@@ -567,14 +567,14 @@ void WebPattern::WebRequestFocus()
     focusHub->RequestFocusImmediately();
 }
 
-bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+bool WebPattern::OnDirtyLayoutWrapperSwap(FrameNode* frameNode, const DirtySwapConfig& config)
 {
     if (!config.contentSizeChange || isInWindowDrag_) {
         return false;
     }
     CHECK_NULL_RETURN(delegate_, false);
-    CHECK_NULL_RETURN(dirty, false);
-    auto geometryNode = dirty->GetGeometryNode();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto geometryNode = frameNode->GetGeometryNode();
     auto drawSize = Size(geometryNode->GetContentSize().Width(), geometryNode->GetContentSize().Height());
     if (drawSize.IsInfinite() || drawSize.IsEmpty()) {
         LOGE("resize invalid %{public}f, %{public}f", drawSize.Width(), drawSize.Height());

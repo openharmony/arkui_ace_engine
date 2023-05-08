@@ -34,7 +34,7 @@ public:
     {}
     ~SelectOverlayLayoutAlgorithm() override = default;
 
-    void Layout(LayoutWrapper* layoutWrapper) override;
+    void Layout(FrameNode* frameNode) override;
 
     static bool CheckInShowArea(const std::shared_ptr<SelectOverlayInfo>& info);
 
@@ -54,9 +54,9 @@ public:
     }
 
 private:
-    OffsetF ComputeSelectMenuPosition(LayoutWrapper* layoutWrapper);
-    OffsetF ComputeExtensionMenuPosition(LayoutWrapper* layoutWrapper, const OffsetF& offset);
-    void RemeasureExtensionMenu(LayoutWrapper* layoutWrapper, const OffsetF& offset);
+    OffsetF ComputeSelectMenuPosition(FrameNode* frameNode);
+    OffsetF ComputeExtensionMenuPosition(FrameNode* frameNode, const OffsetF& offset);
+    void RemeasureExtensionMenu(FrameNode* frameNode, const OffsetF& offset);
 
     std::shared_ptr<SelectOverlayInfo> info_;
 

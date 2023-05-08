@@ -43,6 +43,7 @@ UINode::UINode(const std::string& tag, int32_t nodeId, bool isRoot)
 
 UINode::~UINode()
 {
+    LOGE("~UINode %{public}d", GetId());
     if (!removeSilently_) {
         ElementRegister::GetInstance()->RemoveItem(nodeId_);
     } else {
@@ -68,13 +69,13 @@ void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot, bool silently)
     RemoveDisappearingChild(child);
     it = children_.begin();
     std::advance(it, slot);
-    DoAddChild(it, child, silently);
+    DoAddChild(it, slot, child, silently);
 }
 
 std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& child)
 {
     CHECK_NULL_RETURN(child, children_.end());
-
+    LOGE("RemoveChild");
     auto iter = std::find(children_.begin(), children_.end(), child);
     if (iter == children_.end()) {
         LOGE("child is not exist.");
@@ -85,13 +86,21 @@ std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& ch
     // transition has finished. We can then perform the necessary cleanup after the transition is complete.
     if ((*iter)->OnRemoveFromParent()) {
         // move child into disappearing children, skip syncing render tree
-        AddDisappearingChild(child, std::distance(children_.begin(), iter));
+        // return std::distance(children_.begin(), iter);
+        // AddDisappearingChild(child, std::distance(children_.begin(), iter));
+        LOGE("disappearing");
+        child->isDisappearing_ = true;
+        return children_.end();
     } else {
+        LOGE("delete %{public}d", child->RefCount());
+
         // remove the child and sync render tree
-        RemoveDisappearingChild(child);
-        MarkNeedSyncRenderTree();
+        // RemoveDisappearingChild(child);
+        MarkNeedSyncRenderTree(true);
     }
+
     auto result = children_.erase(iter);
+    DoRemoveChild(child);
     return result;
 }
 
@@ -146,37 +155,45 @@ void UINode::ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& n
     }
 
     auto iter = RemoveChild(oldNode);
-    DoAddChild(iter, newNode);
+    uint32_t index = 0;
+
+    for (; iter != children_.begin(); index++, iter--)
+        DoAddChild(iter, index, newNode, false);
 }
 
 void UINode::Clean(bool cleanDirectly)
 {
+    LOGE("Clean");
     bool needSyncRenderTree = false;
-    int32_t index = 0;
-    for (const auto& child : children_) {
-        if (!cleanDirectly && child->MarkRemoving()) {
+    // int32_t index = 0;
+    auto child = children_.begin();
+    while (child != children_.end()) {
+        if (!cleanDirectly && (*child)->MarkRemoving()) {
             // pending remove child is removed from tree but not cleaned completely, we'll keep reference of it
             // and hold its tree integrity temporarily for transition use, of course the pending remove tree is
             // unavailable for ui operations but some nodes in the tree may also be marked dirty as needed to
             // perform transition's layout.
-            ElementRegister::GetInstance()->AddPendingRemoveNode(child);
-            LOGD("GeometryTransition: pending remove child: %{public}d, parent: %{public}d", child->GetId(), GetId());
+            ElementRegister::GetInstance()->AddPendingRemoveNode(*child);
+            LOGE(
+                "GeometryTransition: pending remove child: %{public}d, parent: %{public}d", (*child)->GetId(), GetId());
         }
-        // If the child is undergoing a disappearing transition, rather than simply removing it, we should move it to
-        // the disappearing children. This ensures that the child remains alive and the tree hierarchy is preserved
-        // until the transition has finished. We can then perform the necessary cleanup after the transition is
-        // complete.
-        if (child->OnRemoveFromParent()) {
-            AddDisappearingChild(child, index);
+        if ((*child)->OnRemoveFromParent()) {
+            // AddDisappearingChild(child, index);
+            LOGE("Clean disappearing %{public}d, %{public}d", (*child)->GetId(), (*child)->RefCount());
+            (*child)->isDisappearing_ = true;
+            child++;
         } else {
-            RemoveDisappearingChild(child);
+            LOGE("Clean ! %{public}d %{public}d", (*child)->GetId(), (*child)->RefCount());
+            child = children_.erase(child);
+            DoRemoveChild(*child);
             needSyncRenderTree = true;
         }
-        ++index;
     }
-    children_.clear();
+
+    // children_.clear();
+    // DoCleanChild();
     if (needSyncRenderTree) {
-        MarkNeedSyncRenderTree();
+        MarkNeedSyncRenderTree(true);
     }
 }
 
@@ -207,7 +224,8 @@ bool UINode::OnRemoveFromParent()
     return false;
 }
 
-void UINode::DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently)
+void UINode::DoAddChild(
+    std::list<RefPtr<UINode>>::iterator& it, int32_t slot, const RefPtr<UINode>& child, bool silently)
 {
     children_.insert(it, child);
 
@@ -216,7 +234,7 @@ void UINode::DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UI
     if (!silently && onMainTree_) {
         child->AttachToMainTree();
     }
-    MarkNeedSyncRenderTree();
+    MarkNeedSyncRenderTree(true);
 }
 
 RefPtr<FrameNode> UINode::GetFocusParent() const
@@ -327,7 +345,7 @@ void UINode::MovePosition(int32_t slot)
         children.remove(self);
     }
     children.insert(it, self);
-    parentNode->MarkNeedSyncRenderTree();
+    parentNode->MarkNeedSyncRenderTree(true);
 }
 
 void UINode::UpdateLayoutPropertyFlag()
@@ -359,11 +377,11 @@ void UINode::MarkNeedFrameFlushDirty(PropertyChangeFlag extraFlag)
     }
 }
 
-void UINode::MarkNeedSyncRenderTree()
+void UINode::MarkNeedSyncRenderTree(bool needRebuild)
 {
     auto parent = parent_.Upgrade();
     if (parent) {
-        parent->MarkNeedSyncRenderTree();
+        parent->MarkNeedSyncRenderTree(needRebuild);
     }
 }
 
@@ -698,5 +716,17 @@ void UINode::OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<Frame
     for (const auto& [child, index] : disappearingChildren_) {
         child->OnGenerateOneDepthVisibleFrameWithTransition(visibleList, index);
     }
+}
+
+RefPtr<UINode> UINode::GetFrameChildByIndex(uint32_t index)
+{
+    for (const auto& child : children_) {
+        uint32_t count = static_cast<uint32_t>(child->FrameCount());
+        if (count > index) {
+            return GetFrameChildByIndex(index);
+        }
+        index -= count;
+    }
+    return nullptr;
 }
 } // namespace OHOS::Ace::NG

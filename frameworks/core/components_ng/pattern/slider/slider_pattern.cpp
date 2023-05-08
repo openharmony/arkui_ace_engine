@@ -94,13 +94,13 @@ void SliderPattern::CancelExceptionValue(float& min, float& max, float& step)
     }
 }
 
-bool SliderPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool /*skipLayout*/)
+bool SliderPattern::OnDirtyLayoutWrapperSwap(FrameNode* frameNode, bool skipMeasure, bool /*skipLayout*/)
 {
-    if (skipMeasure || dirty->SkipMeasureContent()) {
+    if (skipMeasure || frameNode->SkipMeasureContent()) {
         return false;
     }
 
-    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
+    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(frameNode->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto sliderLayoutAlgorithm = DynamicCast<SliderLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(sliderLayoutAlgorithm, false);
@@ -139,7 +139,7 @@ bool SliderPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     // slider track length
     sliderLength_ = length >= borderBlank_ ? length - borderBlank_ : 1;
     borderBlank_ = (length - sliderLength_) * HALF;
-    auto children = dirty->GetAllChildrenWithBuild();
+    auto children = frameNode->GetAllFrameNodeChildren();
     if (!children.empty()) {
         CHECK_NULL_RETURN(imageFrameNode_, true);
         auto child = children.front();

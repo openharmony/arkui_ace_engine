@@ -64,7 +64,7 @@ public:
         return paintMethod;
     }
 
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override
+    bool OnDirtyLayoutWrapperSwap(FrameNode* /*frameNode*/, const DirtySwapConfig& /*config*/) override
     {
         return true;
     }

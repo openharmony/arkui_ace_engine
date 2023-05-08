@@ -143,7 +143,7 @@ public:
 
 private:
     void OnAttachToFrameNode() override;
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& wrapper, const DirtySwapConfig& config) override;
+    bool OnDirtyLayoutWrapperSwap(FrameNode* frameNode, const DirtySwapConfig& config) override;
     void FirePageTransitionFinish();
 
     RefPtr<PageInfo> pageInfo_;

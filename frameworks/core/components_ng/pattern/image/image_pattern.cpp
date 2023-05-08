@@ -52,7 +52,7 @@ DataReadyNotifyTask ImagePattern::CreateDataReadyCallback()
                 currentSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
-        LOGD("Image Data Ready %{private}s", sourceInfo.ToString().c_str());
+        LOGE("Image Data Ready %{private}s", sourceInfo.ToString().c_str());
         pattern->OnImageDataReady();
     };
     return task;
@@ -226,9 +226,10 @@ RefPtr<NodePaintMethod> ImagePattern::CreateNodePaintMethod()
     return nullptr;
 }
 
-bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+bool ImagePattern::OnDirtyLayoutWrapperSwap(FrameNode* frameNode, const DirtySwapConfig& config)
 {
-    if (config.skipMeasure || dirty->SkipMeasureContent()) {
+    ACE_SCOPED_TRACE("ImagePattern Swap [%d][%d][%d]",config.skipMeasure, frameNode->SkipMeasureContent(), image_? 0:1);
+    if (config.skipMeasure || frameNode->SkipMeasureContent()) {
         return false;
     }
     return image_;

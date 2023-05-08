@@ -67,10 +67,10 @@ void TextPickerColumnPattern::OnAttachToFrameNode()
 }
 
 bool TextPickerColumnPattern::OnDirtyLayoutWrapperSwap(
-    const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+    FrameNode* frameNode, const DirtySwapConfig& config)
 {
     CHECK_NULL_RETURN_NOLOG(config.frameSizeChange, false);
-    CHECK_NULL_RETURN(dirty, false);
+    CHECK_NULL_RETURN(frameNode, false);
     return true;
 }
 

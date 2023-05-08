@@ -23,9 +23,9 @@
 
 namespace OHOS::Ace::NG {
 bool ShapeContainerPattern::OnDirtyLayoutWrapperSwap(
-    const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
+    FrameNode* frameNode, bool skipMeasure, bool skipLayout)
 {
-    if (skipMeasure || dirty->SkipMeasureContent() || isShapeContainerInit_) {
+    if (skipMeasure || frameNode->SkipMeasureContent() || isShapeContainerInit_) {
         return false;
     }
     ViewPortTransform();

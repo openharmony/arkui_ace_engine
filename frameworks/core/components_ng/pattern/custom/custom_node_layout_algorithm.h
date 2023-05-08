@@ -43,12 +43,12 @@ public:
         renderFunction_ = nullptr;
     }
 
-    void Measure(LayoutWrapper* layoutWrapper) override;
+    void Measure(FrameNode* frameNode) override;
 
-    void Layout(LayoutWrapper* layoutWrapper) override;
+    void Layout(FrameNode* frameNode) override;
 
     std::optional<SizeF> MeasureContent(
-        const LayoutConstraintF& /*contentConstraint*/, LayoutWrapper* /*layoutWrapper*/) override
+        const LayoutConstraintF& /*contentConstraint*/, FrameNode* /*frameNode*/) override
     {
         return std::nullopt;
     }

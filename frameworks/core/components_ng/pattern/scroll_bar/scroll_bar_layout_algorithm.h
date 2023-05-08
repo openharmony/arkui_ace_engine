@@ -39,9 +39,9 @@ public:
         return scrollableDistance_;
     }
 
-    void Measure(LayoutWrapper* layoutWrapper) override;
+    void Measure(FrameNode* frameNode) override;
 
-    void Layout(LayoutWrapper* layoutWrapper) override;
+    void Layout(FrameNode* frameNode) override;
 
 private:
     float currentOffset_ = 0.0f;

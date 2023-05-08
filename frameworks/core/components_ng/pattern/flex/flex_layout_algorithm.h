@@ -26,13 +26,13 @@ namespace OHOS::Ace::NG {
 struct FlexItemProperties {
     float totalShrink = 0.0f;
     float totalGrow = 0.0f;
-    RefPtr<LayoutWrapper> lastShrinkChild;
-    RefPtr<LayoutWrapper> lastGrowChild;
+    RefPtr<FrameNode> lastShrinkChild;
+    RefPtr<FrameNode> lastGrowChild;
 };
 
 struct MagicLayoutNode {
     LayoutConstraintF layoutConstraint;
-    RefPtr<LayoutWrapper> layoutWrapper;
+    RefPtr<FrameNode> node;
     OptionalSizeF calcSize;
 };
 
@@ -56,9 +56,9 @@ public:
     FlexLayoutAlgorithm() = default;
     ~FlexLayoutAlgorithm() override = default;
 
-    void Measure(LayoutWrapper* layoutWrapper) override;
+    void Measure(FrameNode* frameNode) override;
 
-    void Layout(LayoutWrapper* layoutWrapper) override;
+    void Layout(FrameNode* frameNode) override;
 
     void SetLinearLayoutFeature()
     {
@@ -66,25 +66,25 @@ public:
     }
 
 private:
-    void InitFlexProperties(LayoutWrapper* layoutWrapper);
-    void TravelChildrenFlexProps(LayoutWrapper* layoutWrapper, const SizeF& realSize);
-    void UpdateAllocatedSize(const RefPtr<LayoutWrapper>& layoutWrapper, float& crossAxisSize);
-    float GetChildMainAxisSize(const RefPtr<LayoutWrapper>& layoutWrapper) const;
-    float GetChildCrossAxisSize(const RefPtr<LayoutWrapper>& layoutWrapper) const;
-    float GetSelfCrossAxisSize(const RefPtr<LayoutWrapper>& layoutWrapper) const;
-    void CheckSizeValidity(const RefPtr<LayoutWrapper>& layoutWrapper);
-    void CheckBaselineProperties(const RefPtr<LayoutWrapper>& layoutWrapper);
+    void InitFlexProperties(FrameNode* frameNode);
+    void TravelChildrenFlexProps(FrameNode* frameNode, const SizeF& realSize);
+    void UpdateAllocatedSize(const RefPtr<FrameNode>& frameNode, float& crossAxisSize);
+    float GetChildMainAxisSize(const RefPtr<FrameNode>& frameNode) const;
+    float GetChildCrossAxisSize(const RefPtr<FrameNode>& frameNode) const;
+    float GetSelfCrossAxisSize(const RefPtr<FrameNode>& frameNode) const;
+    void CheckSizeValidity(const RefPtr<FrameNode>& frameNode);
+    void CheckBaselineProperties(const RefPtr<FrameNode>& frameNode);
     void CalculateSpace(float remainSpace, float& frontSpace, float& betweenSpace) const;
     void PlaceChildren(
-        LayoutWrapper* layoutWrapper, float frontSpace, float betweenSpace, const OffsetF& paddingOffset);
-    FlexAlign GetSelfAlign(const RefPtr<LayoutWrapper>& layoutWrapper) const;
+        FrameNode* frameNode, float frontSpace, float betweenSpace, const OffsetF& paddingOffset);
+    FlexAlign GetSelfAlign(const RefPtr<FrameNode>& frameNode) const;
     float GetStretchCrossAxisLimit() const;
-    void MeasureOutOfLayoutChildren(LayoutWrapper* layoutWrapper);
+    void MeasureOutOfLayoutChildren(FrameNode* frameNode);
     void MeasureAndCleanMagicNodes(FlexItemProperties& flexItemProperties);
-    void SecondaryMeasureByProperty(FlexItemProperties& flexItemProperties, LayoutWrapper* layoutWrapper);
+    void SecondaryMeasureByProperty(FlexItemProperties& flexItemProperties, FrameNode* frameNode);
     void UpdateLayoutConstraintOnMainAxis(LayoutConstraintF& layoutConstraint, float size);
     void UpdateLayoutConstraintOnCrossAxis(LayoutConstraintF& layoutConstraint, float size);
-    void AdjustTotalAllocatedSize(LayoutWrapper* layoutWrapper);
+    void AdjustTotalAllocatedSize(FrameNode* frameNode);
 
     OptionalSizeF realSize_;
     float mainAxisSize_ = 0.0f;
@@ -101,7 +101,7 @@ private:
     std::map<int32_t, std::list<MagicLayoutNode>> magicNodes_;
     std::map<int32_t, float> magicNodeWeights_;
     std::list<MagicLayoutNode> secondaryMeasureList_;
-    std::list<RefPtr<LayoutWrapper>> outOfLayoutChildren_;
+    std::list<RefPtr<FrameNode>> outOfChildren_;
 
     FlexDirection direction_ = FlexDirection::ROW;
     friend class LinearLayoutUtils;

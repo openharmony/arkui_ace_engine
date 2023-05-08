@@ -21,9 +21,9 @@
 
 namespace OHOS::Ace::NG {
 
-void GridColLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+void GridColLayoutAlgorithm::Layout(FrameNode* frameNode)
 {
-    auto children = layoutWrapper->GetAllChildrenWithBuild();
+    auto children = frameNode->GetAllFrameNodeChildren();
     for (auto&& child : children) {
         child->Layout();
     }

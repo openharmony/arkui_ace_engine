@@ -89,7 +89,7 @@ public:
 
 private:
     void OnAttachToFrameNode() override;
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    bool OnDirtyLayoutWrapperSwap(FrameNode* frameNode, const DirtySwapConfig& config) override;
     void OnModifyDone() override;
     void OnClick(Offset& localLocation, const ObtainedMonth& obtainedMonth);
     int32_t JudgeArea(const Offset& offset);

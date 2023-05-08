@@ -66,7 +66,7 @@ public:
 private:
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
+    bool OnDirtyLayoutWrapperSwap(FrameNode* frameNode, bool skipMeasure, bool skipLayout) override;
 
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandlePanStart(const GestureEvent& info);

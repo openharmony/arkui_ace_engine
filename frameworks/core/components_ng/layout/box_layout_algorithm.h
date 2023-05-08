@@ -28,22 +28,22 @@ public:
     ~BoxLayoutAlgorithm() override = default;
 
     // override measureSelf and measureChildren.
-    void Measure(LayoutWrapper* layoutWrapper) override;
+    void Measure(FrameNode* frameNode) override;
 
-    void Layout(LayoutWrapper* layoutWrapper) override;
+    void Layout(FrameNode* frameNode) override;
 
     std::optional<SizeF> MeasureContent(
-        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
+        const LayoutConstraintF& contentConstraint, FrameNode* frameNode) override;
 
     // Called to perform measure current render node.
-    static void PerformMeasureSelf(LayoutWrapper* layoutWrapper);
+    static void PerformMeasureSelf(FrameNode* frameNode);
 
     // Called to perform layout render node.
-    static void PerformLayout(LayoutWrapper* layoutWrapper);
+    static void PerformLayout(FrameNode* frameNode);
 
     // Called to perform measure current render node.
     static void PerformMeasureSelfWithChildList(
-        LayoutWrapper* layoutWrapper, const std::list<RefPtr<LayoutWrapper>>& childList);
+        FrameNode* frameNode, const std::list<RefPtr<FrameNode>>& childList);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(BoxLayoutAlgorithm);

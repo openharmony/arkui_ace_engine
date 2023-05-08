@@ -59,7 +59,7 @@ void AbilityComponentPattern::FireDisConnect()
 }
 
 bool AbilityComponentPattern::OnDirtyLayoutWrapperSwap(
-    const RefPtr<LayoutWrapper>& /*dirty*/, const DirtySwapConfig& config)
+    FrameNode* /*frameNode*/, const DirtySwapConfig& config)
 {
     if (config.frameSizeChange || config.frameOffsetChange) {
         UpdateWindowRect();

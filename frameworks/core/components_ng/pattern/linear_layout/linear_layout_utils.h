@@ -28,14 +28,14 @@ struct LinearMeasureProperty {
     OptionalSizeF realSize;
     float crossSize = 0.0f;
     float allocatedSize = 0.0f;
-    std::list<RefPtr<LayoutWrapper>> relativeNodes;
-    std::list<RefPtr<LayoutWrapper>> weightNodes;
+    std::list<RefPtr<FrameNode>> relativeNodes;
+    std::list<RefPtr<FrameNode>> weightNodes;
     float totalFlexWeight = 0.0f;
     float space = 0.0f;
 };
 
 struct LayoutConditions {
-    LayoutWrapper* layoutWrapper = nullptr;
+    FrameNode* frameNode = nullptr;
     bool isVertical = true;
     FlexAlign crossAlign = FlexAlign::FLEX_START;
     FlexAlign mainAlign = FlexAlign::FLEX_START;
@@ -51,16 +51,16 @@ public:
     ~LinearLayoutUtils() = delete;
 
     // Called to perform measure current node and children.
-    static void Measure(LayoutWrapper* layoutWrapper, bool isVertical);
+    static void Measure(FrameNode* frameNode, bool isVertical);
 
     // Called to perform layout render node.
-    static void Layout(LayoutWrapper* layoutWrapper, bool isVertical, FlexAlign crossAlign, FlexAlign mainAlign);
+    static void Layout(FrameNode* frameNode, bool isVertical, FlexAlign crossAlign, FlexAlign mainAlign);
 
     static void LayoutCondition(
-        const std::list<RefPtr<LayoutWrapper>>& children, TextDirection direction, LayoutConditions& layoutConditions);
+        const std::list<RefPtr<FrameNode>>& children, TextDirection direction, LayoutConditions& layoutConditions);
 
     static OffsetF AdjustChildOnDirection(
-        const RefPtr<LayoutWrapper>& child, const OffsetF& offset, TextDirection direction, float parentWidth);
+        const RefPtr<FrameNode>& child, const OffsetF& offset, TextDirection direction, float parentWidth);
 };
 } // namespace OHOS::Ace::NG
 

@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::NG {
 std::optional<SizeF> RatingLayoutAlgorithm::MeasureContent(
-    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+    const LayoutConstraintF& contentConstraint, FrameNode* frameNode)
 {
     // case 1: rating component is set with valid size, return contentConstraint.selfIdealSize as component size
     if (contentConstraint.selfIdealSize.IsValid() && contentConstraint.selfIdealSize.IsNonNegative()) {
@@ -36,7 +36,7 @@ std::optional<SizeF> RatingLayoutAlgorithm::MeasureContent(
     CHECK_NULL_RETURN(ratingTheme, std::nullopt);
 
     SizeF componentSize;
-    auto ratingLayoutProperty = DynamicCast<RatingLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto ratingLayoutProperty = DynamicCast<RatingLayoutProperty>(frameNode->GetLayoutProperty());
     // case 2.1: Rating use the mini size specified in the theme, when it is used as indicator.
     bool indicator = ratingLayoutProperty->GetIndicator().value_or(false);
     auto stars =
@@ -48,13 +48,13 @@ std::optional<SizeF> RatingLayoutAlgorithm::MeasureContent(
     return contentConstraint.Constrain(componentSize);
 }
 
-void RatingLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+void RatingLayoutAlgorithm::Layout(FrameNode* frameNode)
 {
-    BoxLayoutAlgorithm::Layout(layoutWrapper);
+    BoxLayoutAlgorithm::Layout(frameNode);
     // if layout size has not decided yet, resize target can not be calculated
-    CHECK_NULL_VOID(layoutWrapper->GetGeometryNode()->GetContent());
-    const auto& ratingSize = layoutWrapper->GetGeometryNode()->GetContentSize();
-    auto ratingLayoutProperty = DynamicCast<RatingLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(frameNode->GetGeometryNode()->GetContent());
+    const auto& ratingSize = frameNode->GetGeometryNode()->GetContentSize();
+    auto ratingLayoutProperty = DynamicCast<RatingLayoutProperty>(frameNode->GetLayoutProperty());
 
     // step1: calculate single star size.
     float singleWidth =

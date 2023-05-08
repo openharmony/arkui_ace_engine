@@ -20,7 +20,7 @@
 #include <functional>
 #include <list>
 #include <set>
-#include <unordered_map>
+#include <map>
 
 #include "base/log/frame_info.h"
 #include "base/memory/referenced.h"
@@ -124,7 +124,7 @@ private:
     };
 
     using PageDirtySet = std::set<RefPtr<FrameNode>, NodeCompare<RefPtr<FrameNode>>>;
-    using RootDirtyMap = std::unordered_map<uint32_t, PageDirtySet>;
+    using RootDirtyMap = std::map<int32_t, PageDirtySet>;
 
     RootDirtyMap dirtyLayoutNodes_;
     RootDirtyMap dirtyRenderNodes_;

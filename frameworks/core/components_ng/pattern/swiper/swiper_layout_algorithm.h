@@ -36,8 +36,8 @@ public:
     ~SwiperLayoutAlgorithm() override = default;
 
     void OnReset() override {}
-    void Measure(LayoutWrapper* layoutWrapper) override;
-    void Layout(LayoutWrapper* layoutWrapper) override;
+    void Measure(FrameNode* frameNode) override;
+    void Layout(FrameNode* frameNode) override;
 
     void SetCurrentOffset(float offset)
     {
@@ -95,22 +95,22 @@ public:
     }
 
 private:
-    void InitItemRange(LayoutWrapper* layoutWrapper);
+    void InitItemRange(FrameNode* frameNode);
     void AddToItemRange(int32_t index);
     void LoadItemWithDrag(float translateLength);
     void InitInActiveItems(float translateLength);
     int32_t ClampIndex(int32_t index);
 
-    void PlaceDigitChild(const RefPtr<LayoutWrapper>& indicatorWrapper, const RefPtr<LayoutProperty>& layoutProperty);
+    void PlaceDigitChild(const RefPtr<FrameNode>& indicator, const RefPtr<LayoutProperty>& layoutProperty);
     double GetValidEdgeLength(float swiperLength, float indicatorLength, const Dimension& edge);
-    void LayoutOffScreen(LayoutWrapper* layoutWrapper, Axis axis) const;
-    void LoopMeasure(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis,
+    void LayoutOffScreen(FrameNode* frameNode, Axis axis) const;
+    void LoopMeasure(FrameNode* frameNode, const LayoutConstraintF& layoutConstraint, Axis axis,
         float& crossSize, float& mainSize);
-    void LoopLayout(LayoutWrapper* layoutWrapper);
-    void NonLoopLayout(LayoutWrapper* layoutWrapper);
+    void LoopLayout(FrameNode* frameNode);
+    void NonLoopLayout(FrameNode* frameNode);
     void SortItems(std::list<int32_t>& preItems, std::list<int32_t>& nextItems, int32_t displayCount);
     void LayoutItems(
-        LayoutWrapper* layoutWrapper, const std::list<int32_t>& preItems, const std::list<int32_t>& nextItems);
+        FrameNode* frameNode, const std::list<int32_t>& preItems, const std::list<int32_t>& nextItems);
 
     bool isLoop_ = true;
     int32_t currentIndex_ = 0;

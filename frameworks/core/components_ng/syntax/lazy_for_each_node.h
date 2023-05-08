@@ -59,6 +59,9 @@ public:
     void UpdateLazyForEachItems(int32_t newStartIndex, int32_t newEndIndex,
         std::list<std::optional<std::string>>&& nodeIds,
         std::unordered_map<int32_t, std::optional<std::string>>&& cachedItems);
+    void MarkNeedSyncRenderTree(bool needRebuild = false) override;
+
+    void BuildAllChildren();
 
     void OnDataReloaded() override;
     void OnDataAdded(size_t index) override;
@@ -67,6 +70,8 @@ public:
     void OnDataMoved(size_t from, size_t to) override;
 
     void PostIdleTask(std::list<int32_t>&& items);
+
+    RefPtr<UINode> GetFrameChildByIndex(uint32_t index) override;
 
 private:
     void OnAttachToMainTree(bool recursive) override
@@ -89,6 +94,7 @@ private:
     std::list<std::optional<std::string>> ids_;
     std::list<int32_t> predictItems_;
     bool needPredict = false;
+    bool needMarkParent = true;
 
     RefPtr<LazyForEachBuilder> builder_;
 

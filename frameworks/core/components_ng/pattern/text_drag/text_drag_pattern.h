@@ -147,7 +147,7 @@ public:
 
 private:
     static TextDragData CalculateTextDragData(RefPtr<TextDragBase>& hostPattern, RefPtr<RenderContext>& dragContext);
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    bool OnDirtyLayoutWrapperSwap(FrameNode* frameNode, const DirtySwapConfig& config) override;
     std::shared_ptr<RSPath> GenerateClipPath();
     void GenerateBackgroundPoints(std::vector<TextPoint>& points, float offset);
     void CalculateLineAndArc(std::vector<TextPoint>& points, std::shared_ptr<RSPath>& path);

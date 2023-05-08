@@ -35,16 +35,15 @@
 
 namespace OHOS::Ace::NG {
 
-void WrapLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+void WrapLayoutAlgorithm::Measure(FrameNode* frameNode)
 {
-    CHECK_NULL_VOID(layoutWrapper);
-    auto children = layoutWrapper->GetAllChildrenWithBuild();
+    auto children = frameNode->GetAllFrameNodeChildren();
     if (children.empty()) {
-        layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF());
+        frameNode->GetGeometryNode()->SetFrameSize(SizeF());
         return;
     }
     outOfLayoutChildren_.clear();
-    auto flexProp = AceType::DynamicCast<FlexLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto flexProp = AceType::DynamicCast<FlexLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_VOID(flexProp);
     direction_ = flexProp->GetWrapDirection().value_or(WrapDirection::HORIZONTAL);
     // alignment for alignContent, alignment when cross axis has extra space
@@ -59,8 +58,8 @@ void WrapLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     totalMainLength_ = 0.0f;
     totalCrossLength_ = 0.0f;
     auto realMaxSize = GetLeftSize(0.0f, mainLengthLimit_, crossLengthLimit_);
-    auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
-    padding_ = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+    auto childLayoutConstraint = frameNode->GetLayoutProperty()->CreateChildConstraint();
+    padding_ = frameNode->GetLayoutProperty()->CreatePaddingAndBorder();
     MinusPaddingToSize(padding_, realMaxSize);
     mainLengthLimit_ = GetMainAxisLengthOfSize(realMaxSize);
     crossLengthLimit_ = GetCrossAxisLengthOfSize(realMaxSize);
@@ -77,7 +76,7 @@ void WrapLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     int32_t currentItemCount = 0;
     float baselineDistance = 0.0f;
     contentList_.clear();
-    std::list<RefPtr<LayoutWrapper>> currentMainAxisItemsList;
+    std::list<RefPtr<FrameNode>> currentMainAxisItemsList;
     for (auto& item : children) {
         if (item->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::GONE) {
             continue;
@@ -106,7 +105,7 @@ void WrapLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             contentInfo.maxBaselineDistance = baselineDistance;
             // measure items again if cross axis alignment is stretch
             // and a item has main axis size differ than content height
-            StretchItemsInContent(layoutWrapper, contentInfo);
+            StretchItemsInContent(frameNode, contentInfo);
             contentList_.emplace_back(contentInfo);
             currentMainAxisItemsList.clear();
             // place current item on a new main axis
@@ -127,7 +126,7 @@ void WrapLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         auto contentInfo =
             ContentInfo(currentMainLength, currentCrossLength, currentItemCount, currentMainAxisItemsList);
         contentInfo.maxBaselineDistance = baselineDistance;
-        StretchItemsInContent(layoutWrapper, contentInfo);
+        StretchItemsInContent(frameNode, contentInfo);
         contentList_.emplace_back(contentInfo);
         totalMainLength_ = std::max(currentMainLength, totalMainLength_);
         totalCrossLength_ += currentCrossLength;
@@ -138,8 +137,8 @@ void WrapLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         frameSize_ = SizeF(hasIdealWidth_ ? crossLengthLimit_ : totalCrossLength_, mainLengthLimit_);
     }
     AddPaddingToSize(padding_, frameSize_);
-    layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize_);
-    frameOffset_ = layoutWrapper->GetGeometryNode()->GetFrameOffset();
+    frameNode->GetGeometryNode()->SetFrameSize(frameSize_);
+    frameOffset_ = frameNode->GetGeometryNode()->GetFrameOffset();
 }
 
 float WrapLayoutAlgorithm::GetMainAxisLengthOfSize(const SizeF& size) const
@@ -158,12 +157,12 @@ float WrapLayoutAlgorithm::GetCrossAxisLengthOfSize(const SizeF& size) const
     return size.Height();
 }
 
-void WrapLayoutAlgorithm::StretchItemsInContent(LayoutWrapper* layoutWrapper, const ContentInfo& content)
+void WrapLayoutAlgorithm::StretchItemsInContent(FrameNode* frameNode, const ContentInfo& content)
 {
     if (crossAlignment_ != WrapAlignment::STRETCH) {
         return;
     }
-    auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    auto childLayoutConstraint = frameNode->GetLayoutProperty()->CreateChildConstraint();
     for (const auto& item : content.itemList) {
         auto itemCrossAxisLength = GetItemCrossAxisLength(item->GetGeometryNode());
         // if content cross axis size is larger than item cross axis size,
@@ -179,16 +178,16 @@ void WrapLayoutAlgorithm::StretchItemsInContent(LayoutWrapper* layoutWrapper, co
     }
 }
 
-void WrapLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+void WrapLayoutAlgorithm::Layout(FrameNode* frameNode)
 {
-    auto children = layoutWrapper->GetAllChildrenWithBuild();
+    auto children = frameNode->GetAllFrameNodeChildren();
     if (children.empty()) {
         LOGE("WrapLayoutAlgorithm::Layout, children is empty");
         return;
     }
     OffsetF startPosition;
     OffsetF spaceBetweenContentsOnCrossAxis;
-    LayoutWholeWrap(startPosition, spaceBetweenContentsOnCrossAxis, layoutWrapper);
+    LayoutWholeWrap(startPosition, spaceBetweenContentsOnCrossAxis, frameNode);
     TraverseContent(startPosition, spaceBetweenContentsOnCrossAxis);
     for (const auto& child : children) {
         child->Layout();
@@ -290,7 +289,7 @@ void WrapLayoutAlgorithm::AddExtraSpaceToStartPosition(OffsetF& startPosition, f
 }
 
 void WrapLayoutAlgorithm::LayoutWholeWrap(
-    OffsetF& startPosition, OffsetF& spaceBetweenContentsOnCrossAxis, LayoutWrapper* layoutWrapper)
+    OffsetF& startPosition, OffsetF& spaceBetweenContentsOnCrossAxis, FrameNode* frameNode)
 {
     auto contentNum = static_cast<int32_t>(contentList_.size());
     if (contentNum == 0) {
@@ -298,7 +297,7 @@ void WrapLayoutAlgorithm::LayoutWholeWrap(
         return;
     }
 
-    const auto& layoutProp = layoutWrapper->GetLayoutProperty();
+    const auto& layoutProp = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProp);
     AddPaddingToStartPosition(startPosition);
     if (isReverse_) {
@@ -525,32 +524,32 @@ void WrapLayoutAlgorithm::LayoutContent(const ContentInfo& content, const Offset
     FlexItemProperties flexItemProperties;
     GetFlexItemProperties(content, flexItemProperties);
     float remainSpace = mainLengthLimit_ - currentMainLength_;
-    for (const auto& itemWrapper : content.itemList) {
-        auto item = itemWrapper->GetGeometryNode();
+    for (const auto& item : content.itemList) {
+        auto itemGeometryNode = item->GetGeometryNode();
         if (GreatNotEqual(remainSpace, 0.0f)) {
-            CalcFlexGrowLayout(itemWrapper, flexItemProperties, remainSpace);
+            CalcFlexGrowLayout(item, flexItemProperties, remainSpace);
         }
         // calc start position and between space
         auto itemMainAxisOffset = isHorizontal_ ? contentStartPosition.GetX() : contentStartPosition.GetY();
         if (isReverse_) {
-            itemMainAxisOffset -= GetItemMainAxisLength(item);
+            itemMainAxisOffset -= GetItemMainAxisLength(itemGeometryNode);
         }
-        auto itemCrossAxisOffset = CalcItemCrossAxisOffset(content, contentStartPosition, item);
+        auto itemCrossAxisOffset = CalcItemCrossAxisOffset(content, contentStartPosition, itemGeometryNode);
         OffsetF offset;
         float contentMainAxisSpan = 0.0f;
         if (isHorizontal_) {
             offset = OffsetF(itemMainAxisOffset, itemCrossAxisOffset);
-            contentMainAxisSpan = item->GetMarginFrameSize().Width() + static_cast<float>(spacing_.ConvertToPx()) +
+            contentMainAxisSpan = itemGeometryNode->GetMarginFrameSize().Width() + static_cast<float>(spacing_.ConvertToPx()) +
                                   spaceBetweenItemsOnMainAxis.GetX();
             contentStartPosition.AddX(isReverse_ ? -contentMainAxisSpan : contentMainAxisSpan);
         } else {
             offset = OffsetF(itemCrossAxisOffset, itemMainAxisOffset);
-            contentMainAxisSpan = item->GetMarginFrameSize().Height() + static_cast<float>(spacing_.ConvertToPx()) +
+            contentMainAxisSpan = itemGeometryNode->GetMarginFrameSize().Height() + static_cast<float>(spacing_.ConvertToPx()) +
                                   spaceBetweenItemsOnMainAxis.GetY();
             contentStartPosition.AddY(isReverse_ ? -contentMainAxisSpan : contentMainAxisSpan);
         }
-        itemWrapper->GetGeometryNode()->SetMarginFrameOffset(offset);
-        LOGD("Node %{public}s offset %{public}s", itemWrapper->GetHostTag().c_str(), offset.ToString().c_str());
+        itemGeometryNode->SetMarginFrameOffset(offset);
+        LOGD("Node %{public}s offset %{public}s", item->GetTag().c_str(), offset.ToString().c_str());
     }
 }
 
@@ -558,12 +557,12 @@ void WrapLayoutAlgorithm::GetFlexItemProperties(const ContentInfo& content, Flex
 {
     auto spacing = static_cast<float>(spacing_.ConvertToPx());
     currentMainLength_ = 0.0f;
-    for (const auto& itemWrapper : content.itemList) {
-        if (!itemWrapper) {
+    for (const auto& item : content.itemList) {
+        if (!item) {
             continue;
         }
-        currentMainLength_ += GetItemMainAxisLength(itemWrapper->GetGeometryNode()) + spacing;
-        auto layoutProperty = itemWrapper->GetLayoutProperty();
+        currentMainLength_ += GetItemMainAxisLength(item->GetGeometryNode()) + spacing;
+        auto layoutProperty = item->GetLayoutProperty();
         if (!layoutProperty) {
             continue;
         }
@@ -579,10 +578,9 @@ void WrapLayoutAlgorithm::GetFlexItemProperties(const ContentInfo& content, Flex
 }
 
 void WrapLayoutAlgorithm::CalcFlexGrowLayout(
-    const RefPtr<LayoutWrapper>& itemWrapper, const FlexItemProperties& flexItemProperties, float remainSpace)
+    const RefPtr<FrameNode>& item, const FlexItemProperties& flexItemProperties, float remainSpace)
 {
-    CHECK_NULL_VOID(itemWrapper);
-    auto layoutProperty = itemWrapper->GetLayoutProperty();
+    auto layoutProperty = item->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     auto& flexItemProperty = layoutProperty->GetFlexItemProperty();
     CHECK_NULL_VOID_NOLOG(flexItemProperty);
@@ -596,14 +594,14 @@ void WrapLayoutAlgorithm::CalcFlexGrowLayout(
     if (GreatNotEqual(itemFlex, 0.0f) && GreatNotEqual(remainSpace, 0.0f) &&
         GreatNotEqual(flexItemProperties.totalGrow, 0.0f)) {
         float flexSize = itemFlex * remainSpace / flexItemProperties.totalGrow;
-        flexSize += GetItemMainAxisLength(itemWrapper->GetGeometryNode());
+        flexSize += GetItemMainAxisLength(item->GetGeometryNode());
         OptionalSizeF& selfIdealSize = layoutConstraintValue.selfIdealSize;
         if (direction_ == WrapDirection::HORIZONTAL || direction_ == WrapDirection::HORIZONTAL_REVERSE) {
             selfIdealSize.SetWidth(flexSize);
         } else {
             selfIdealSize.SetHeight(flexSize);
         }
-        itemWrapper->Measure(layoutConstraintValue);
+        item->Measure(layoutConstraintValue);
     }
 }
 

@@ -37,9 +37,9 @@ public:
     DialogLayoutAlgorithm() = default;
     ~DialogLayoutAlgorithm() override = default;
 
-    void Measure(LayoutWrapper* layoutWrapper) override;
+    void Measure(FrameNode* frameNode) override;
 
-    void Layout(LayoutWrapper* layoutWrapper) override;
+    void Layout(FrameNode* frameNode) override;
 
     RectF GetTouchRegion() const
     {
@@ -47,7 +47,7 @@ public:
     }
 
 private:
-    LayoutConstraintF CreateScrollConstraint(LayoutWrapper* layoutWrapper, float scrollHeight, float scrollWidth);
+    LayoutConstraintF CreateScrollConstraint(FrameNode* frameNode, float scrollHeight, float scrollWidth);
 
     void ComputeInnerLayoutParam(LayoutConstraintF& innerLayout);
     double GetMaxWidthBasedOnGridType(const RefPtr<GridColumnInfo>& info, GridSizeType type, DeviceType deviceType);

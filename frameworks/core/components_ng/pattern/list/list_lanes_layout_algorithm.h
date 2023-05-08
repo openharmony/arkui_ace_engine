@@ -43,21 +43,21 @@ public:
 protected:
     void UpdateListItemConstraint(Axis axis, const OptionalSizeF& selfIdealSize,
         LayoutConstraintF& contentConstraint) override;
-    int32_t LayoutALineForward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
+    int32_t LayoutALineForward(FrameNode* frameNode, const LayoutConstraintF& layoutConstraint,
         Axis axis, int32_t& currentIndex, float startPos, float& endPos) override;
-    int32_t LayoutALineBackward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
+    int32_t LayoutALineBackward(FrameNode* frameNode, const LayoutConstraintF& layoutConstraint,
         Axis axis, int32_t& currentIndex, float endPos, float& startPos) override;
     float CalculateLaneCrossOffset(float crossSize, float childCrossSize) override;
     void CalculateLanes(const RefPtr<ListLayoutProperty>& layoutProperty,
         const LayoutConstraintF& layoutConstraint, std::optional<float> crossSizeOptional, Axis axis) override;
-    int32_t GetLanesFloor(LayoutWrapper* layoutWrapper, int32_t index) override;
-    void SetCacheCount(LayoutWrapper* layoutWrapper, int32_t cachedCount) override;
+    int32_t GetLanesFloor(FrameNode* frameNode, int32_t index) override;
+    void SetCacheCount(FrameNode* frameNode, int32_t cachedCount) override;
 
 private:
     static void ModifyLaneLength(
         std::optional<float>& minLaneLength, std::optional<float>& maxLaneLength, float crossSize);
-    int32_t FindLanesStartIndex(LayoutWrapper* layoutWrapper, int32_t index);
-    static int32_t FindLanesStartIndex(LayoutWrapper* layoutWrapper, int32_t startIndex, int32_t index);
+    int32_t FindLanesStartIndex(FrameNode* frameNode, int32_t index);
+    static int32_t FindLanesStartIndex(FrameNode* frameNode, int32_t startIndex, int32_t index);
 
     int32_t lanes_ = 1;
     bool lanesChanged_ = false;

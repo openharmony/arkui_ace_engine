@@ -352,13 +352,13 @@ void SelectOverlayPattern::UpdateShowArea(const RectF& area)
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
 
-bool SelectOverlayPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+bool SelectOverlayPattern::OnDirtyLayoutWrapperSwap(FrameNode* frameNode, const DirtySwapConfig& config)
 {
-    if (config.skipMeasure || dirty->SkipMeasureContent()) {
+    if (config.skipMeasure || frameNode->SkipMeasureContent()) {
         return false;
     }
     
-    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
+    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(frameNode->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto selectOverlayLayoutAlgorithm =
         DynamicCast<SelectOverlayLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());

@@ -195,7 +195,7 @@ private:
 
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    bool OnDirtyLayoutWrapperSwap(FrameNode* frameNode, const DirtySwapConfig& config) override;
 
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
@@ -223,7 +223,7 @@ private:
     RectF ComputeSelectedZone(const OffsetF& startOffset, const OffsetF& endOffset);
     void MultiSelectWithoutKeyboard(const RectF& selectedZone);
 
-    void DrivenRender(const RefPtr<LayoutWrapper>& layoutWrapper);
+    void DrivenRender(FrameNode* frameNode);
 
     RefPtr<ListContentModifier> listContentModifier_;
 

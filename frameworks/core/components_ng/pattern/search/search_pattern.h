@@ -63,7 +63,7 @@ public:
         return MakeRefPtr<SearchEventHub>();
     }
 
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& /*config*/) override;
+    bool OnDirtyLayoutWrapperSwap(FrameNode* frameNode, const DirtySwapConfig& /*config*/) override;
 
     const RefPtr<TextFieldController>& GetSearchController()
     {

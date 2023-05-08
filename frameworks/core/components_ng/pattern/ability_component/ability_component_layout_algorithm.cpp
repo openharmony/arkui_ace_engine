@@ -18,7 +18,7 @@
 namespace OHOS::Ace::NG {
 
 std::optional<SizeF> AbilityComponentLayoutAlgorithm::MeasureContent(
-    const LayoutConstraintF& contentConstraint, LayoutWrapper* /*layoutWrapper*/)
+    const LayoutConstraintF& contentConstraint, FrameNode* /*frameNode*/)
 {
     OptionalSizeF contentSize;
     do {

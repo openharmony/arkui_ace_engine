@@ -34,11 +34,9 @@ bool JudgeTrackness(Axis direction, float blockDiameter, float trackThickness, f
 } // namespace
 
 std::optional<SizeF> SliderLayoutAlgorithm::MeasureContent(
-    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+    const LayoutConstraintF& contentConstraint, FrameNode* frameNode)
 {
-    auto frameNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_RETURN(frameNode, std::nullopt);
-    auto sliderLayoutProperty = DynamicCast<SliderLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto sliderLayoutProperty = DynamicCast<SliderLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_RETURN(sliderLayoutProperty, std::nullopt);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, std::nullopt);
@@ -88,37 +86,35 @@ std::optional<SizeF> SliderLayoutAlgorithm::MeasureContent(
     return direction == Axis::HORIZONTAL ? SizeF(sliderLength, sliderWidth) : SizeF(sliderWidth, sliderLength);
 }
 
-void SliderLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+void SliderLayoutAlgorithm::Measure(FrameNode* frameNode)
 {
-    auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    auto layoutConstraint = frameNode->GetLayoutProperty()->CreateChildConstraint();
     layoutConstraint.UpdateSelfMarginSizeWithCheck(OptionalSizeF(blockSize_.Width(), blockSize_.Height()));
-    if (layoutWrapper->GetTotalChildCount() != 0) {
-        auto child = layoutWrapper->GetOrCreateChildByIndex(0);
+    if (frameNode->TotalChildCount() != 0) {
+        auto child = frameNode->GetFrameNodeByIndex(0);
         child->Measure(layoutConstraint);
     }
-    PerformMeasureSelf(layoutWrapper);
+    PerformMeasureSelf(frameNode);
 }
 
-void SliderLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+void SliderLayoutAlgorithm::Layout(FrameNode* frameNode)
 {
-    PerformLayout(layoutWrapper);
-    const auto& children = layoutWrapper->GetAllChildrenWithBuild();
+    PerformLayout(frameNode);
+    const auto& children = frameNode->GetAllFrameNodeChildren();
     if (children.empty()) {
         return;
     }
 
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(host);
-    auto pattern = DynamicCast<SliderPattern>(host->GetPattern());
+    auto pattern = DynamicCast<SliderPattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(pattern);
-    auto sliderLayoutProperty = host->GetLayoutProperty<SliderLayoutProperty>();
+    auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
     CHECK_NULL_VOID(sliderLayoutProperty);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SliderTheme>();
     CHECK_NULL_VOID(theme);
 
-    auto selfSize = layoutWrapper->GetGeometryNode()->GetContentSize();
+    auto selfSize = frameNode->GetGeometryNode()->GetContentSize();
     auto axis = sliderLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL);
     auto reverse = sliderLayoutProperty->GetReverseValue(false);
     auto mode = sliderLayoutProperty->GetSliderMode().value_or(SliderModel::SliderMode::OUTSET);
@@ -132,18 +128,16 @@ void SliderLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     borderBlank = (length - sliderLength) * HALF;
     auto selectOffset = borderBlank + pattern->GetValueRatio() * sliderLength;
 
-    CalculateBlockOffset(layoutWrapper, selfSize, selectOffset, axis, reverse);
+    CalculateBlockOffset(frameNode, selfSize, selectOffset, axis, reverse);
 }
 
 void SliderLayoutAlgorithm::CalculateBlockOffset(
-    LayoutWrapper* layoutWrapper, const SizeF& selfSize, float selectOffset, Axis axis, bool reverse)
+    FrameNode* frameNode, const SizeF& selfSize, float selectOffset, Axis axis, bool reverse)
 {
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(host);
-    auto pattern = DynamicCast<SliderPattern>(host->GetPattern());
+    auto pattern = DynamicCast<SliderPattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(pattern);
 
-    const auto& children = layoutWrapper->GetAllChildrenWithBuild();
+    const auto& children = frameNode->GetAllFrameNodeChildren();
     auto child = children.front();
     auto childSize_ = child->GetGeometryNode()->GetMarginFrameSize();
     OffsetF circleCenter;

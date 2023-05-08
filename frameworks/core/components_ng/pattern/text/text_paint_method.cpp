@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/text/text_paint_method.h"
 
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "base/log/ace_trace.h"
 
 namespace OHOS::Ace::NG {
 TextPaintMethod::TextPaintMethod(const WeakPtr<Pattern>& pattern, RefPtr<Paragraph> paragraph, float baselineOffset,
@@ -39,6 +40,7 @@ void TextPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 
     auto offset = paintWrapper->GetContentOffset();
     auto paintOffset = offset - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
+    ACE_SCOPED_TRACE("[%s]- [%s]", offset.ToString().c_str(), paintWrapper->GetContentSize().ToString().c_str());
     textContentModifier_->SetPrintOffset(paintOffset);
 
     auto textPattern = pattern_.Upgrade();

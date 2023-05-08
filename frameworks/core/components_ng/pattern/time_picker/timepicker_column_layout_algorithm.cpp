@@ -26,7 +26,7 @@ namespace {
 const int32_t DIVIDER_SIZE = 2;
 const int32_t CHILD_SIZE = 3;
 } // namespace
-void TimePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+void TimePickerColumnLayoutAlgorithm::Measure(FrameNode* frameNode)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -36,9 +36,7 @@ void TimePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     auto height = static_cast<float>(
         pickerTheme->GetGradientHeight().ConvertToPx() * 4 + pickerTheme->GetDividerSpacing().ConvertToPx());
-    auto columnNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(columnNode);
-    auto stackNode = DynamicCast<FrameNode>(columnNode->GetParent());
+    auto stackNode = DynamicCast<FrameNode>(frameNode->GetParent());
     CHECK_NULL_VOID(stackNode);
     auto pickerNode = DynamicCast<FrameNode>(stackNode->GetParent());
     CHECK_NULL_VOID(pickerNode);
@@ -54,25 +52,25 @@ void TimePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     frameSize.SetWidth(pickerWidth);
     frameSize.SetHeight(height);
-    layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
-    auto layoutChildConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
-    for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
+    frameNode->GetGeometryNode()->SetFrameSize(frameSize);
+    auto layoutChildConstraint = frameNode->GetLayoutProperty()->CreateChildConstraint();
+    for (auto&& child : frameNode->GetAllFrameNodeChildren()) {
         child->Measure(layoutChildConstraint);
     }
-    MeasureText(layoutWrapper, frameSize);
+    MeasureText(frameNode, frameSize);
 }
 
-void TimePickerColumnLayoutAlgorithm::MeasureText(LayoutWrapper* layoutWrapper, const SizeF& size)
+void TimePickerColumnLayoutAlgorithm::MeasureText(FrameNode* frameNode, const SizeF& size)
 {
-    auto totalChild = layoutWrapper->GetTotalChildCount();
+    auto totalChild = frameNode->TotalChildCount();
     for (int32_t index = 0; index < totalChild; index++) {
-        auto child = layoutWrapper->GetOrCreateChildByIndex(index);
-        ChangeAmPmTextStyle(index, totalChild, size, child, layoutWrapper);
+        auto child = frameNode->GetFrameNodeByIndex(index);
+        ChangeAmPmTextStyle(index, totalChild, size, child, frameNode);
     }
 }
 
 void TimePickerColumnLayoutAlgorithm::ChangeAmPmTextStyle(uint32_t index, uint32_t showOptionCount, const SizeF& size,
-    const RefPtr<LayoutWrapper>& childLayoutWrapper, LayoutWrapper* layoutWrapper)
+    const RefPtr<FrameNode>& child, FrameNode* frameNode)
 {
     SizeF frameSize = { -1.0f, -1.0f };
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -80,7 +78,7 @@ void TimePickerColumnLayoutAlgorithm::ChangeAmPmTextStyle(uint32_t index, uint32
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
     frameSize.SetWidth(size.Width());
-    auto layoutChildConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    auto layoutChildConstraint = frameNode->GetLayoutProperty()->CreateChildConstraint();
     uint32_t selectedIndex = showOptionCount / 2; // the center option is selected.
     if (index == selectedIndex) {
         frameSize.SetHeight(static_cast<float>(pickerTheme->GetDividerSpacing().ConvertToPx()));
@@ -88,20 +86,19 @@ void TimePickerColumnLayoutAlgorithm::ChangeAmPmTextStyle(uint32_t index, uint32
         frameSize.SetHeight(static_cast<float>(pickerTheme->GetGradientHeight().ConvertToPx()));
     }
     layoutChildConstraint.selfIdealSize = { frameSize.Width(), frameSize.Height() };
-    childLayoutWrapper->Measure(layoutChildConstraint);
+    child->Measure(layoutChildConstraint);
 }
 
-void TimePickerColumnLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+void TimePickerColumnLayoutAlgorithm::Layout(FrameNode* frameNode)
 {
-    CHECK_NULL_VOID(layoutWrapper);
-    auto layoutProperty = AceType::DynamicCast<LinearLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto layoutProperty = AceType::DynamicCast<LinearLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    auto geometryNode = layoutWrapper->GetGeometryNode();
+    auto geometryNode = frameNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto size = geometryNode->GetFrameSize();
     auto padding = layoutProperty->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
-    auto children = layoutWrapper->GetAllChildrenWithBuild();
+    auto children = frameNode->GetAllFrameNodeChildren();
     float childStartCoordinate = 0.0f;
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);

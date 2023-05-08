@@ -18,7 +18,7 @@
 namespace OHOS::Ace::NG {
 
 std::optional<SizeF> PatternLockLayoutAlgorithm::MeasureContent(
-    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+    const LayoutConstraintF& contentConstraint, FrameNode* frameNode)
 {
     if (contentConstraint.selfIdealSize.Width().has_value() && contentConstraint.selfIdealSize.IsNonNegative()) {
         auto length = contentConstraint.selfIdealSize.Width().value();

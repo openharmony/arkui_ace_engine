@@ -57,8 +57,7 @@ public:
     {
         return MakeRefPtr<MarqueeAccessibilityProperty>();
     }
-
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    bool OnDirtyLayoutWrapperSwap(FrameNode* frameNode, const DirtySwapConfig& config) override;
 
 private:
     void OnModifyDone() override;
