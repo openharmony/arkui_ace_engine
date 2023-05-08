@@ -18,11 +18,13 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components/progress/progress_theme.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/progress/progress_paint_property.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -38,8 +40,9 @@ constexpr int32_t DEFAULT_SCALE_COUNT = 100;
 constexpr double DEFAULT_CAPSULE_BORDER_WIDTH = 0.0;
 constexpr float FLOAT_ZERO_FIVE = 0.5f;
 constexpr float FLOAT_TWO_ZERO = 2.0f;
-constexpr float SPRING_MOTION_RESPONSE = 0.314f;
-constexpr float SPRING_MOTION_DAMPING_FRACTION = 0.95f;
+constexpr float SWEEPING_MOTION_RESPONSE = 1.62f;
+constexpr float SWEEPING_MOTION_DAMPING_RATIO = 0.98f;
+constexpr Dimension SWEEP_WIDTH = 80.0_vp;
 constexpr float RING_SHADOW_OFFSET_X = 5.0f;
 constexpr float RING_SHADOW_OFFSET_Y = 5.0f;
 constexpr float RING_SHADOW_BLUR_RADIUS_MIN = 5.0f;
@@ -50,8 +53,8 @@ ProgressModifier::ProgressModifier()
       bgColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor::GRAY)),
       borderColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(DEFAULT_BORDER_COLOR))),
       capsuleDate_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f)),
-      value_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f)),
       ringProgressColors_(AceType::MakeRefPtr<AnimatablePropertyVectorColor>(GradientArithmetic())),
+      value_(AceType::MakeRefPtr<PropertyFloat>(0.0f)),
       offset_(AceType::MakeRefPtr<PropertyOffsetF>(OffsetF())),
       contentSize_(AceType::MakeRefPtr<PropertySizeF>(SizeF())),
       maxValue_(AceType::MakeRefPtr<PropertyFloat>(DEFAULT_MAX_VALUE)),
@@ -115,6 +118,112 @@ void ProgressModifier::SetProgressType(ProgressType type)
     progressType_->Set(static_cast<int32_t>(type));
 }
 
+void ProgressModifier::StartLightSweepAnimation(ProgressType type, float value)
+{
+    switch (type) {
+        case ProgressType::RING:
+            break;
+        case ProgressType::CAPSULE:
+            StartCapsuleProgressLightSweep(value);
+            break;
+        default:
+            break;
+    }
+}
+
+void ProgressModifier::StartCapsuleProgressLightSweep(float value)
+{
+    float curLength = 0.0f;
+    auto contentSize = contentSize_->Get();
+    if (contentSize.Width() >= contentSize.Height()) {
+        curLength = (value / maxValue_->Get()) * contentSize_->Get().Width() + SWEEP_WIDTH.ConvertToPx();
+    } else {
+        curLength = (value / maxValue_->Get()) * contentSize_->Get().Height() + SWEEP_WIDTH.ConvertToPx();
+    }
+    
+    if (!isSweeping_ && sweepEffect_->Get() && isVisible_) {
+        StartCapsuleProgressLightSweepImpl(curLength);
+    } else if (!sweepEffect_->Get() || !isVisible_) {
+        isSweeping_ = false;
+        AnimationOption option = AnimationOption();
+        auto curve = AceType::MakeRefPtr<LinearCurve>();
+        option.SetCurve(curve);
+        option.SetDuration(0);
+        option.SetIteration(-1);
+        AnimationUtils::Animate(option, [&]() { capsuleDate_->Set(0.0f); });
+    } else {
+        capsuleDate_->Set(curLength);
+        if (!NearEqual(sweepingDateBackup_, curLength)) {
+            sweepingDateUpdated_ = true;
+        }
+    }
+    sweepingDateBackup_ = curLength;
+}
+
+void ProgressModifier::StartCapsuleProgressLightSweepImpl(float curLength)
+{
+    isSweeping_ = true;
+    capsuleDate_->Set(0.0f);
+    AnimationOption option = AnimationOption();
+    auto motion =
+        AceType::MakeRefPtr<ResponsiveSpringMotion>(SWEEPING_MOTION_RESPONSE, SWEEPING_MOTION_DAMPING_RATIO);
+    option.SetCurve(motion);
+    option.SetIteration(-1);
+
+    AnimationUtils::Animate(option,
+        [curLength, id = Container::CurrentId(), weak = WeakClaim(this)]() {
+            ContainerScope scope(id);
+            auto modifier = weak.Upgrade();
+            CHECK_NULL_VOID(modifier);
+            modifier->capsuleDate_->Set(curLength);
+        },
+        [id = Container::CurrentId(), weak = WeakClaim(this)]() {
+            ContainerScope scope(id);
+            auto context = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID_NOLOG(context);
+            auto taskExecutor = context->GetTaskExecutor();
+            CHECK_NULL_VOID_NOLOG(taskExecutor);
+            taskExecutor->PostTask(
+                [weak, id]() {
+                    ContainerScope scope(id);
+                    auto modifier = weak.Upgrade();
+                    CHECK_NULL_VOID_NOLOG(modifier);
+                    if (modifier->sweepEffect_->Get() && modifier->isVisible_) {
+                        if (modifier->sweepingDateUpdated_) {
+                            modifier->StartCapsuleProgressLightSweepImpl(modifier->sweepingDateBackup_);
+                        }
+                        modifier->sweepingDateUpdated_ = false;
+                    }
+                },
+                TaskExecutor::TaskType::UI);
+        },
+        [id = Container::CurrentId(), weak = WeakClaim(this)]() {
+            ContainerScope scope(id);
+            auto context = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID_NOLOG(context);
+            auto taskExecutor = context->GetTaskExecutor();
+            CHECK_NULL_VOID_NOLOG(taskExecutor);
+            taskExecutor->PostTask(
+                [weak, id]() {
+                    ContainerScope scope(id);
+                    auto modifier = weak.Upgrade();
+                    CHECK_NULL_VOID_NOLOG(modifier);
+                    if (modifier->sweepingDateUpdated_ || !modifier->isVisible_) {
+                        if (modifier->isSweeping_) {
+                            modifier->isSweeping_ = false;
+                            AnimationOption option = AnimationOption();
+                            auto curve = AceType::MakeRefPtr<LinearCurve>();
+                            option.SetCurve(curve);
+                            option.SetDuration(0);
+                            option.SetIteration(1);
+                            AnimationUtils::Animate(option, [modifier]() { modifier->capsuleDate_->Set(0.0f); });
+                        }
+                    }
+                },
+                TaskExecutor::TaskType::UI);
+        });
+}
+
 void ProgressModifier::SetRingProgressColor(const Gradient& color)
 {
     CHECK_NULL_VOID(ringProgressColors_);
@@ -142,15 +251,9 @@ void ProgressModifier::SetMaxValue(float value)
 void ProgressModifier::SetValue(float value)
 {
     CHECK_NULL_VOID(value_);
-    if (NearZero(value)) {
-        value_->Set(value);
-    } else {
-        AnimationOption option = AnimationOption();
-        auto motion =
-            AceType::MakeRefPtr<ResponsiveSpringMotion>(SPRING_MOTION_RESPONSE, SPRING_MOTION_DAMPING_FRACTION);
-        option.SetCurve(motion);
-        AnimationUtils::Animate(option, [&]() { value_->Set(value); });
-    }
+    value_->Set(value);
+
+    StartLightSweepAnimation(ProgressType(progressType_->Get()), value);
 }
 
 void ProgressModifier::SetScaleWidth(float value)
@@ -508,6 +611,8 @@ void ProgressModifier::PaintCapsule(RSCanvas& canvas, const OffsetF& offset, con
     }
     canvas.DrawPath(path);
     canvas.Restore();
+
+    PaintCapsuleLightSweep(canvas, capsuleSize, offset, path, false);
 }
 
 void ProgressModifier::PaintVerticalCapsule(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const
@@ -572,5 +677,79 @@ void ProgressModifier::PaintVerticalCapsule(RSCanvas& canvas, const OffsetF& off
     }
     canvas.DrawPath(path);
     canvas.Restore();
+
+    PaintCapsuleLightSweep(canvas, capsuleSize, offset, path, true);
+}
+
+void ProgressModifier::PaintCapsuleLightSweep(
+    RSCanvas& canvas, const SizeF& contentSize, const OffsetF& offset, const RSPath& path, bool isVertical) const
+{
+    RSPen pen;
+    pen.SetAntiAlias(true);
+    pen.SetWidth(1);
+    auto gradient = CreateGradient();
+    std::vector<RSColorQuad> colors;
+    std::vector<float> pos;
+    RSBrush brush;
+    auto gradientColors = gradient.GetColors();
+    for (size_t i = 0; i < gradientColors.size(); i++) {
+        colors.emplace_back(gradientColors[i].GetColor().GetValue());
+        pos.emplace_back(gradientColors[i].GetDimension().Value());
+    }
+
+    float endPos = capsuleDate_->Get();
+    if (isVertical) {
+        brush.SetShaderEffect(RSShaderEffect::CreateLinearGradient(
+            ToRSPoint(PointF(offset.GetX() + contentSize.Width() / 2,
+            offset.GetY() + endPos - SWEEP_WIDTH.ConvertToPx() + capsuleBorderWidth_->Get())),
+            ToRSPoint(PointF(offset.GetX() + contentSize.Width() / 2,
+            offset.GetY() + endPos - capsuleBorderWidth_->Get())),
+            colors, pos, RSTileMode::CLAMP));
+    } else {
+        brush.SetShaderEffect(RSShaderEffect::CreateLinearGradient(
+            ToRSPoint(PointF(offset.GetX() + endPos - SWEEP_WIDTH.ConvertToPx() + capsuleBorderWidth_->Get(),
+            offset.GetY() + contentSize.Height() / 2)),
+            ToRSPoint(PointF(offset.GetX() + endPos - capsuleBorderWidth_->Get(),
+            offset.GetY() + contentSize.Height() / 2)),
+            colors, pos, RSTileMode::CLAMP));
+    }
+    
+    auto offsetX = offset.GetX();
+    auto offsetY = offset.GetY();
+    canvas.Save();
+    canvas.ClipPath(path, RSClipOp::INTERSECT, true);
+    canvas.AttachBrush(brush);
+    if (isVertical) {
+        canvas.DrawRect(
+            { offsetX + capsuleBorderWidth_->Get(),
+            offsetY + endPos - SWEEP_WIDTH.ConvertToPx() + capsuleBorderWidth_->Get(),
+            offsetX + contentSize.Width() + capsuleBorderWidth_->Get(),
+            offsetY + endPos - capsuleBorderWidth_->Get()});
+    } else {
+        canvas.DrawRect(
+            { offsetX + endPos - SWEEP_WIDTH.ConvertToPx() + capsuleBorderWidth_->Get(),
+            offsetY + capsuleBorderWidth_->Get(), offsetX + endPos + capsuleBorderWidth_->Get(),
+            offsetY + contentSize.Height() + capsuleBorderWidth_->Get()});
+    }
+    canvas.DetachPen();
+    canvas.Restore();
+}
+
+Gradient ProgressModifier::CreateGradient() const
+{
+    Gradient gradient;
+    Color lightSweepColorBase = Color::WHITE;
+    Color lightSweepColorEnd = lightSweepColorBase.ChangeOpacity(0.0);
+    GradientColor gradientColorEnd;
+    gradientColorEnd.SetColor(lightSweepColorEnd);
+    gradientColorEnd.SetDimension(Dimension(0.0, DimensionUnit::VP));
+    gradient.AddColor(gradientColorEnd);
+
+    Color lightSweepColorMiddle = lightSweepColorBase.ChangeOpacity(0.2);
+    GradientColor gradientColorMiddle;
+    gradientColorMiddle.SetColor(lightSweepColorMiddle);
+    gradientColorMiddle.SetDimension(SWEEP_WIDTH);
+    gradient.AddColor(gradientColorMiddle);
+    return gradient;
 }
 } // namespace OHOS::Ace::NG

@@ -161,6 +161,7 @@ void ProgressPattern::OnModifyDone()
         HandleEnabled();
         InitTouchEvent();
     }
+    visibilityType_ = progressLayoutProperty->GetVisibility().value_or(VisibleType::VISIBLE);
 }
 
 void ProgressPattern::ToJsonValueForRingStyleOptions(std::unique_ptr<JsonValue>& json) const
