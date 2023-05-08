@@ -26,6 +26,7 @@ enum class ClipOp;
 class Pen;
 class Brush;
 class Path;
+enum class PathOp;
 } // namespace Drawing
 } // namespace OHOS::Rosen
 namespace OHOS::Ace {
@@ -36,6 +37,7 @@ using RSClipOp = Rosen::Drawing::ClipOp;
 using RSPen = Rosen::Drawing::Pen;
 using RSBrush = Rosen::Drawing::Brush;
 using RSPath = Rosen::Drawing::Path;
+using RSPathOp = Rosen::Drawing::PathOp;
 } // namespace OHOS::Ace
 #else
 #include "core/components_ng/render/drawing_mock.h"
