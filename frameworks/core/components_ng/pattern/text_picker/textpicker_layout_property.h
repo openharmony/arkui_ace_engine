@@ -44,6 +44,7 @@ public:
         value->propDisappearTextStyle_ = CloneDisappearTextStyle();
         value->propTextStyle_ = CloneTextStyle();
         value->propSelectedTextStyle_ = CloneSelectedTextStyle();
+        value->propCanLoop_ = CloneCanLoop();
         return value;
     }
 
@@ -59,6 +60,7 @@ public:
         ResetDisappearTextStyle();
         ResetTextStyle();
         ResetSelectedTextStyle();
+        ResetCanLoop();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -118,9 +120,12 @@ public:
         selectedTextStyle->Put("color", GetSelectedColor().value_or(Color::BLACK).ColorToString().c_str());
         selectedTextStyle->Put("font", selectedFont);
         json->Put("selectedTextStyle", selectedTextStyle);
+        auto canLoop = GetCanLoopValue();
+        json->Put("canLoop", canLoop ? "true" : "false");
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DefaultPickerItemHeight, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CanLoop, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Selected, uint32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Value, std::string, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Selecteds, std::vector<uint32_t>, PROPERTY_UPDATE_MEASURE);

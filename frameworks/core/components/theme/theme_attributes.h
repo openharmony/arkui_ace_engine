@@ -159,5 +159,14 @@ extern const char ERROR_TEXT_UNDERLINE_COLOR[];
 extern const char OHOS_ID_COLOR_LIST_SEPARATOR[];
 extern const char OHOS_ID_COLOR_TEXT_HINT[];
 extern const char BORDER_RADIUS_SIZE[];
+// swiper attributes for arrow
+extern const char ARROW_COLOR_BOARDCOLOR_HOVER[];
+extern const char ARROW_COLOR_BOARDCOLOR_CLICK[];
+extern const char ARROW_COLOR_PRIMARY[];
+extern const char ARROW_COLOR_PRIMARY_CONTRARY[];
+extern const char ARROW_DISABLED_ALPHA[];
+extern const char ARROW_HORIZONTAL_MARGIN[];
+extern const char ARROW_VERTICAL_MARGIN[];
+extern const char ARROW_COLOR_COMPONENT_NORMAL[];
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_THEME_ATTRIBUTES_H

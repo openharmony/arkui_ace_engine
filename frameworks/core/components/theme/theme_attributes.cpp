@@ -156,4 +156,13 @@ const char ERROR_TEXT_UNDERLINE_COLOR[] = "error_text_underline_color";
 const char OHOS_ID_COLOR_LIST_SEPARATOR[] = "ohos_id_color_list_separator";
 const char OHOS_ID_COLOR_TEXT_HINT[] = "ohos_id_color_text_hint";
 const char BORDER_RADIUS_SIZE[] = "border_radius_size";
+// swiper attributes for arrow
+const char ARROW_COLOR_BOARDCOLOR_HOVER[] = "arrow_color_boardColor_hover";
+const char ARROW_COLOR_BOARDCOLOR_CLICK[] = "arrow_color_boardColor_click";
+const char ARROW_COLOR_PRIMARY[] = "arrow_color_primary";
+const char ARROW_COLOR_PRIMARY_CONTRARY[] = "arrow_color_primary_contrary";
+const char ARROW_DISABLED_ALPHA[] = "arrow_disabled_alpha";
+const char ARROW_HORIZONTAL_MARGIN[] = "arrow_horizontal_margin";
+const char ARROW_VERTICAL_MARGIN[] = "arrow_vertical_margin";
+const char ARROW_COLOR_COMPONENT_NORMAL[] = "arrow_color_component_normal";
 } // namespace OHOS::Ace
