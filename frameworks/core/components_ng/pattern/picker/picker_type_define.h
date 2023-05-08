@@ -57,6 +57,11 @@ struct TextCascadePickerOptions {
     std::vector<TextCascadePickerOptions> children;
 };
 
+struct TextCascadePickerOptionsAttr {
+    bool isCascade = false;
+    bool isHasSelectAttr = false;
+};
+
 struct DatePickerSettingData {
     bool isLunar;
     bool showTime;
@@ -71,11 +76,12 @@ struct TextPickerSettingData {
     uint32_t selected;
     uint32_t columnKind;
     Dimension height;
+    bool canLoop = true;
     PickerTextProperties properties;
     std::vector<uint32_t> selectedValues;
     std::vector<std::string> values;
     std::vector<NG::TextCascadePickerOptions> options;
-    bool isCascade = false;
+    NG::TextCascadePickerOptionsAttr attr;
 };
 
 struct TimePickerSettingData {

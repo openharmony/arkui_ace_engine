@@ -17,7 +17,6 @@
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_NAVIGATION_VIEW_H
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
-
 #include "frameworks/core/components/navigation_bar/navigation_container_component.h"
 #include "frameworks/core/components_ng/pattern/navigation/navigation_declaration.h"
 
@@ -26,6 +25,7 @@ namespace OHOS::Ace::Framework {
 class JSNavigation : public JSContainerBase {
 public:
     static void Create();
+    static void Create(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
     static void SetTitleMode(int32_t value);
     static void SetTitle(const JSCallbackInfo& info);
@@ -43,13 +43,13 @@ public:
     static void SetHideNavBar(bool hide);
     static void SetBackButtonIcon(const JSCallbackInfo& info);
     static void SetOnNavBarStateChange(const JSCallbackInfo& info);
+    static void SetNavDestination(const JSCallbackInfo& info);
 
     static void ParseToolBarItems(const JSRef<JSArray>& jsArray, std::list<RefPtr<ToolBarItem>>& items);
     static void ParseBarItems(
         const JSCallbackInfo& info, const JSRef<JSArray>& jsArray, std::vector<NG::BarItem>& items);
     static bool ParseCommonTitle(const JSRef<JSVal>& jsValue);
 };
-
 } // namespace OHOS::Ace::Framework
 
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_NAVIGATION_VIEW_H

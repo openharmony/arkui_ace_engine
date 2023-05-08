@@ -41,6 +41,9 @@ public:
 
     void FireChangeEvent(const BaseEventInfo* info) const
     {
+        if (selectedChangeEvent_) {
+            selectedChangeEvent_(info);
+        }
         if (changeEvent_) {
             changeEvent_(info);
         }
@@ -70,10 +73,16 @@ public:
         }
     }
 
+    void SetChangeEvent(DateChangeEvent&& onChange)
+    {
+        selectedChangeEvent_ = std::move(onChange);
+    }
+
 private:
     DateChangeEvent changeEvent_;
     DialogEvent dialogChangeEvent_;
     DialogEvent dialogAcceptEvent_;
+    DateChangeEvent selectedChangeEvent_;
 
     ACE_DISALLOW_COPY_AND_MOVE(DatePickerEventHub);
 };

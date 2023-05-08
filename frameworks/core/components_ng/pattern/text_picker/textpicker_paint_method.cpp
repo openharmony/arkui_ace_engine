@@ -22,7 +22,6 @@
 namespace OHOS::Ace::NG {
 
 namespace {
-constexpr float DIVIDER_LINE_WIDTH = 1.0f;
 constexpr uint8_t ENABLED_ALPHA = 255;
 constexpr uint8_t DISABLED_ALPHA = 102;
 } // namespace
@@ -33,12 +32,13 @@ CanvasDrawFunction TextPickerPaintMethod::GetForegroundDrawFunction(PaintWrapper
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto theme = pipeline->GetTheme<PickerTheme>();
     auto dividerColor = theme->GetDividerColor();
+    auto dividerLineWidth = theme->GetDividerThickness().ConvertToPx();
     auto dividerSpacing = pipeline->NormalizeToPx(theme->GetDividerSpacing());
     auto pressColor = theme->GetPressColor();
     const auto& geometryNode = paintWrapper->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, nullptr);
     auto frameRect = geometryNode->GetFrameRect();
-    return [weak = WeakClaim(this), dividerLineWidth = DIVIDER_LINE_WIDTH, frameRect, dividerColor, dividerSpacing,
+    return [weak = WeakClaim(this), dividerLineWidth, frameRect, dividerColor, dividerSpacing,
                pressColor, enabled = enabled_](RSCanvas& canvas) {
         auto picker = weak.Upgrade();
         CHECK_NULL_VOID_NOLOG(picker);
@@ -77,8 +77,7 @@ void TextPickerPaintMethod::PaintGradient(RSCanvas& canvas, const RectF& frameRe
     RSPoint topEndPoint;
     topEndPoint.SetX(0.0f);
     topEndPoint.SetY(frameRect.Height());
-    auto backDecoration = theme->GetPopupDecoration(false);
-    Color endColor = backDecoration ? backDecoration->GetBackgroundColor() : Color::WHITE;
+    Color endColor = backgroundColor_;
     Color middleColor = endColor.ChangeAlpha(0);
     std::vector<float> topPos { 0.0f, height / frameRect.Bottom(), (frameRect.Bottom() - height) / frameRect.Bottom(),
         1.0f };

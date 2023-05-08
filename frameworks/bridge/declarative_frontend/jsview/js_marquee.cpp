@@ -30,7 +30,9 @@ namespace OHOS::Ace {
 
 std::unique_ptr<MarqueeModel> MarqueeModel::instance_ = nullptr;
 std::mutex MarqueeModel::mutex_;
-
+namespace {
+constexpr Dimension DEFAULT_STEP = 6.0_vp;
+}
 MarqueeModel* MarqueeModel::GetInstance()
 {
     if (!instance_) {
@@ -77,7 +79,7 @@ void JSMarquee::Create(const JSCallbackInfo& info)
     if (getStep->IsNumber()) {
         auto step = getStep->ToNumber<double>();
         MarqueeModel::GetInstance()->SetScrollAmount(
-            LessOrEqual(step, 0.0) ? 1.0 : Dimension(step, DimensionUnit::VP).ConvertToPx());
+            LessOrEqual(step, 0.0) ? DEFAULT_STEP.ConvertToPx() : Dimension(step, DimensionUnit::VP).ConvertToPx());
     }
 
     auto getLoop = paramObject->GetProperty("loop");
@@ -148,7 +150,7 @@ void JSMarquee::SetFontSize(const JSCallbackInfo& info)
         return;
     }
 
-    Dimension fontSize;
+    CalcDimension fontSize;
     if (!ParseJsDimensionFp(info[0], fontSize)) {
         return;
     }

@@ -50,6 +50,8 @@ public:
     static bool UpdateRosenTransitionEffect(
         const RefPtr<RosenTransitionEffect>& rosenEffect, const RefPtr<ChainedTransitionEffect>& chainedEffect);
 
+    static RefPtr<RosenTransitionEffect> CreateDefaultRosenTransitionEffect();
+
 protected:
     virtual void OnAttach(const RefPtr<RosenRenderContext>& context, bool activeTransition) {}
     virtual void OnDetach(const RefPtr<RosenRenderContext>& context) {}

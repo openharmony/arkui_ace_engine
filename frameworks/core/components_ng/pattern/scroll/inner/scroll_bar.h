@@ -270,7 +270,7 @@ public:
 
     void SetOutBoundary(double outBoundary)
     {
-        inSpring =  !NearEqual(outBoundary_, outBoundary, 0.000001f);
+        inSpring_ =  !NearEqual(outBoundary_, outBoundary, 0.000001f);
         outBoundary_ = outBoundary;
     }
 
@@ -411,7 +411,7 @@ private:
     bool isPressed_ = false;
     bool isDriving_ = false; // false: scroll driving; true: bar driving
     bool isHover_ = false;
-    bool inSpring = false; // whether bar in the spring state
+    bool inSpring_ = false; // whether bar in the spring state
     bool positionModeUpdate_ = false;
     bool normalWidthUpdate_ = false;
     bool isUserNormalWidth_ = false;

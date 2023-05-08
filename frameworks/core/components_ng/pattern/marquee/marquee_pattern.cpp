@@ -22,6 +22,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/animation_option.h"
+#include "core/components/text/text_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/marquee/marquee_layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -29,10 +30,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/components_ng/render/animation_utils.h"
-#include "core/pipeline/pipeline_base.h"
-#include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -49,13 +47,11 @@ void MarqueePattern::OnAttachToFrameNode()
 bool MarqueePattern::OnDirtyLayoutWrapperSwap(
     const RefPtr<LayoutWrapper>& /* dirty */, const DirtySwapConfig& /* config */)
 {
-    if (statusChanged_) {
+    if (forceStropAnimation_) {
+        forceStropAnimation_ = false;
+        auto statusChanged = statusChanged_;
         statusChanged_ = false;
-        if (lastStartStatus_) {
-            StartMarqueeAnimation();
-        } else {
-            StopMarqueeAnimation();
-        }
+        StopMarqueeAnimation(lastStartStatus_, statusChanged);
     }
     return false;
 }
@@ -67,6 +63,27 @@ void MarqueePattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<MarqueeLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+    auto textChild = DynamicCast<FrameNode>(host->GetFirstChild());
+    CHECK_NULL_VOID(textChild);
+    auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto src = layoutProperty->GetSrc().value_or("");
+    textLayoutProperty->UpdateContent(src);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID_NOLOG(pipelineContext);
+    auto theme = pipelineContext->GetTheme<TextTheme>();
+    CHECK_NULL_VOID_NOLOG(theme);
+    auto fontSize = layoutProperty->GetFontSize().value_or(theme->GetTextStyle().GetFontSize());
+    textLayoutProperty->UpdateFontSize(fontSize);
+    textLayoutProperty->UpdateFontWeight(layoutProperty->GetFontWeight().value_or(FontWeight::NORMAL));
+    textLayoutProperty->UpdateFontFamily(
+        layoutProperty->GetFontFamily().value_or(std::vector<std::string>({ "" })));
+    textChild->MarkModifyDone();
+    textChild->MarkDirtyNode();
+    if (CheckMeasureFlag(layoutProperty->GetPropertyChangeFlag())) {
+        forceStropAnimation_ = true;
+        host->MarkDirtyNode();
+    }
     auto startPlay = layoutProperty->GetPlayerStatus().value_or(false);
     if (startPlay != lastStartStatus_) {
         lastStartStatus_ = startPlay;
@@ -78,24 +95,33 @@ void MarqueePattern::StartMarqueeAnimation()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
     auto layoutProperty = host->GetLayoutProperty<MarqueeLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     repeatCount_ = layoutProperty->GetLoop().value_or(DEFAULT_MARQUEE_LOOP);
     if (repeatCount_ == 0) {
+        lastStartStatus_ = false;
+        return;
+    }
+    auto geoNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geoNode);
+    auto marqueeSize = geoNode->GetFrameSize();
+    auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
+    CHECK_NULL_VOID(textNode);
+    auto textGeoNode = textNode->GetGeometryNode();
+    CHECK_NULL_VOID(textGeoNode);
+    auto textWidth = textGeoNode->GetFrameSize().Width();
+    if (GreatOrEqual(marqueeSize.Width(), textWidth)) {
+        lastStartStatus_ = false;
         return;
     }
     FireStartEvent();
     auto step = layoutProperty->GetScrollAmount().value_or(DEFAULT_MARQUEE_SCROLL_AMOUNT);
     auto direction = layoutProperty->GetDirection().value_or(MarqueeDirection::LEFT);
-    auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
-    CHECK_NULL_VOID(textNode);
-    auto textGeoNode = textNode->GetGeometryNode();
-    CHECK_NULL_VOID(textGeoNode);
-    auto end = -1 * textGeoNode->GetFrameSize().Width();
+    auto end = -1 * textWidth;
     if (direction == MarqueeDirection::RIGHT) {
-        end = host->GetGeometryNode()->GetFrameSize().Width();
+        const auto& padding = layoutProperty->CreatePaddingAndBorder();
+        MinusPaddingToSize(padding, marqueeSize);
+        end = marqueeSize.Width() >= textWidth ? marqueeSize.Width() : textWidth;
     }
     auto duration = static_cast<int32_t>(std::abs(end) * DEFAULT_MARQUEE_SCROLL_DELAY);
     if (GreatNotEqual(step, 0.0)) {
@@ -106,6 +132,7 @@ void MarqueePattern::StartMarqueeAnimation()
     option.SetDuration(duration);
     option.SetIteration(repeatCount_);
     SetTextOffset(0.0f);
+    animationId_++;
     AnimationUtils::Animate(
         option,
         [weak = AceType::WeakClaim(this), end]() {
@@ -113,12 +140,14 @@ void MarqueePattern::StartMarqueeAnimation()
             CHECK_NULL_VOID(pattern);
             pattern->SetTextOffset(end);
         },
-        [weak = AceType::WeakClaim(this)]() {
+        [weak = AceType::WeakClaim(this), animationId = animationId_]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            pattern->FireFinishEvent();
-            pattern->SetTextOffset(0.0f);
-            pattern->lastStartStatus_ = false;
+            if (animationId == pattern->animationId_) {
+                pattern->FireFinishEvent();
+                pattern->SetTextOffset(0.0f);
+                pattern->lastStartStatus_ = false;
+            }
         },
         [weak = AceType::WeakClaim(this)]() {
             auto pattern = weak.Upgrade();
@@ -127,8 +156,11 @@ void MarqueePattern::StartMarqueeAnimation()
         });
 }
 
-void MarqueePattern::StopMarqueeAnimation()
+void MarqueePattern::StopMarqueeAnimation(bool stopAndStart, bool statusChanged)
 {
+    if (!statusChanged & !lastStartStatus_) {
+        return;
+    }
     AnimationOption option;
     option.SetCurve(Curves::LINEAR);
     option.SetDuration(0);
@@ -139,10 +171,15 @@ void MarqueePattern::StopMarqueeAnimation()
             CHECK_NULL_VOID(pattern);
             pattern->SetTextOffset(0.0f);
         },
-        [weak = AceType::WeakClaim(this)]() {
+        [weak = AceType::WeakClaim(this), restart = stopAndStart]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->FireFinishEvent();
+            if (restart) {
+                pattern->StartMarqueeAnimation();
+            } else {
+                pattern->lastStartStatus_ = false;
+            }
         });
 }
 

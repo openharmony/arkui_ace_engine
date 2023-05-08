@@ -37,13 +37,23 @@ public:
     using CompletionListener = std::function<void()>;
     using RefreshRenderListener = std::function<void()>;
 
-    Player(int64_t textureId, const std::string& src, const WeakPtr<PipelineContext>& context, ErrorCallback&& onError)
+    Player(int64_t textureId, const std::string& src, const WeakPtr<PipelineBase>& context, ErrorCallback&& onError)
         : Resource("video", context, std::move(onError)), textureId_(textureId), src_(src)
+    {}
+    Player(const WeakPtr<PipelineBase>& context, ErrorCallback&& onError)
+        : Resource("video", context, std::move(onError))
     {}
     ~Player() override = default;
 
     void Create(const std::function<void(int64_t)>& onCreate);
     void CreatePlayer(const std::function<void(int64_t)>& onCreate);
+
+    void SetSource(const std::string& src)
+    {
+        src_ = src;
+    }
+
+    void SetSurfaceId(int64_t id);
 
     uint32_t GetWidth() const
     {

@@ -149,4 +149,13 @@ const char BADGE_BORDER_WIDTH[] = "border_width";
 // swiper attributes
 const char INDICATOR_TEXT_FONT_SIZE[] = "indicator_text_font_size";
 const char INDICATOR_TEXT_FONT_COLOR[] = "indicator_text_font_color";
+// swiper attributes for arrow
+const char ARROW_COLOR_BOARDCOLOR_HOVER[] = "arrow_color_boardColor_hover";
+const char ARROW_COLOR_BOARDCOLOR_CLICK[] = "arrow_color_boardColor_click";
+const char ARROW_COLOR_PRIMARY[] = "arrow_color_primary";
+const char ARROW_COLOR_PRIMARY_CONTRARY[] = "arrow_color_primary_contrary";
+const char ARROW_DISABLED_ALPHA[] = "arrow_disabled_alpha";
+const char ARROW_HORIZONTAL_MARGIN[] = "arrow_horizontal_margin";
+const char ARROW_VERTICAL_MARGIN[] = "arrow_vertical_margin";
+const char ARROW_COLOR_COMPONENT_NORMAL[] = "arrow_color_component_normal";
 } // namespace OHOS::Ace

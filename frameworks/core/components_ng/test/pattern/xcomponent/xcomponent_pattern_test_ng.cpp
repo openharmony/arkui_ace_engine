@@ -68,6 +68,7 @@ const SizeF CHILD_SIZE(CHILD_WIDTH, CHILD_HEIGHT);
 const float CHILD_OFFSET_WIDTH = 50.0f;
 const float CHILD_OFFSET_HEIGHT = 0.0f;
 TestProperty testProperty;
+bool isFocus = false;
 
 TouchType ConvertXComponentTouchType(const OH_NativeXComponent_TouchEventType& type)
 {
@@ -84,6 +85,34 @@ TouchType ConvertXComponentTouchType(const OH_NativeXComponent_TouchEventType& t
             return TouchType::UNKNOWN;
         default:
             return TouchType::UNKNOWN;
+    }
+}
+
+OH_NativeXComponent_KeyAction ConvertNativeXComponentKeyAction(const KeyAction& keyAction)
+{
+    switch (keyAction) {
+        case KeyAction::DOWN:
+            return OH_NativeXComponent_KeyAction::OH_NATIVEXCOMPONENT_KEY_ACTION_DOWN;
+        case KeyAction::UP:
+            return OH_NativeXComponent_KeyAction::OH_NATIVEXCOMPONENT_KEY_ACTION_UP;
+        default:
+            return OH_NativeXComponent_KeyAction::OH_NATIVEXCOMPONENT_KEY_ACTION_UNKNOWN;
+    }
+}
+
+OH_NativeXComponent_EventSourceType ConvertNativeXComponentEventSourceType(const SourceType& sourceType)
+{
+    switch (sourceType) {
+        case SourceType::MOUSE:
+            return OH_NativeXComponent_EventSourceType::OH_NATIVEXCOMPONENT_SOURCE_TYPE_MOUSE;
+        case SourceType::TOUCH:
+            return OH_NativeXComponent_EventSourceType::OH_NATIVEXCOMPONENT_SOURCE_TYPE_TOUCHSCREEN;
+        case SourceType::TOUCH_PAD:
+            return OH_NativeXComponent_EventSourceType::OH_NATIVEXCOMPONENT_SOURCE_TYPE_TOUCHPAD;
+        case SourceType::KEYBOARD:
+            return OH_NativeXComponent_EventSourceType::OH_NATIVEXCOMPONENT_SOURCE_TYPE_KEYBOARD;
+        default:
+            return OH_NativeXComponent_EventSourceType::OH_NATIVEXCOMPONENT_SOURCE_TYPE_UNKNOWN;
     }
 }
 } // namespace
@@ -142,7 +171,7 @@ HWTEST_F(XComponentPropertyTestNg, XComponentPropertyTest001, TestSize.Level1)
     /**
      * @tc.steps: step2. call Create and SetSoPath
      *            case: type = XCOMPONENT_SURFACE_TYPE
-     * @tc.expected: step2. the properties are expected
+     * @tc.expected: the properties are expected
      */
     xComponent.Create(XCOMPONENT_ID, XCOMPONENT_SURFACE_TYPE, XCOMPONENT_LIBRARY_NAME, xComponentController);
     xComponent.SetSoPath(XCOMPONENT_SO_PATH);
@@ -164,7 +193,7 @@ HWTEST_F(XComponentPropertyTestNg, XComponentPropertyTest001, TestSize.Level1)
     /**
      * @tc.steps: step3. call Create and SetSoPath
      *            case: type = XCOMPONENT_COMPONENT_TYPE
-     * @tc.expected: step3. the properties are expected
+     * @tc.expected: the properties are expected
      */
     const RefPtr<XComponentController> xComponentController2;
     XComponentModelNG xComponent2;
@@ -193,7 +222,7 @@ HWTEST_F(XComponentPropertyTestNg, XComponentEventTest002, TestSize.Level1)
     /**
      * @tc.steps: step1. set the testProperty and CreateXComponentNode
      *            case: type = XCOMPONENT_SURFACE_TYPE
-     * @tc.expected: step1. frameNode create successfully
+     * @tc.expected: frameNode create successfully
      */
     std::string onLoadKey;
     std::string onDestroyKey;
@@ -209,7 +238,7 @@ HWTEST_F(XComponentPropertyTestNg, XComponentEventTest002, TestSize.Level1)
 
     /**
      * @tc.steps: step2. call FireLoadEvent, FireDestroyEvent
-     * @tc.expected: step2. three checkKeys has changed
+     * @tc.expected: three checkKeys has changed
      */
     auto xComponentEventHub = frameNode->GetEventHub<XComponentEventHub>();
     ASSERT_TRUE(xComponentEventHub);
@@ -221,7 +250,7 @@ HWTEST_F(XComponentPropertyTestNg, XComponentEventTest002, TestSize.Level1)
     /**
      * @tc.steps: step3. reset the testProperty and rerun step1&2
      *            case: type = XCOMPONENT_COMPONENT_TYPE
-     * @tc.expected: step3. three checkKeys has no change
+     * @tc.expected: three checkKeys has no change
      */
 
     auto onLoad2 = [&onLoadKey](const std::string& /* xComponentId */) { onLoadKey = ""; };
@@ -414,7 +443,7 @@ HWTEST_F(XComponentPropertyTestNg, XComponentLayoutAlgorithmTest006, TestSize.Le
 {
     /**
      * @tc.steps: step1. set type = XCOMPONENT_SURFACE_TYPE and call CreateXComponentNode
-     * @tc.expected: step1. frameNode create successfully
+     * @tc.expected: frameNode create successfully
      */
     testProperty.xcType = XCOMPONENT_SURFACE_TYPE;
     auto frameNode = CreateXComponentNode(testProperty);
@@ -423,7 +452,7 @@ HWTEST_F(XComponentPropertyTestNg, XComponentLayoutAlgorithmTest006, TestSize.Le
     /**
      * @tc.steps: step2. call OnDirtyLayoutWrapperSwap
      *            case: hasXComponentInit_ = false
-     * @tc.expected: step2. hasXComponentInit_ = true
+     * @tc.expected: hasXComponentInit_ = true
      */
     auto pattern = frameNode->GetPattern<XComponentPattern>();
     ASSERT_TRUE(pattern);
@@ -459,7 +488,7 @@ HWTEST_F(XComponentPropertyTestNg, XComponentLayoutAlgorithmTest006, TestSize.Le
     /**
      * @tc.steps: step3. call OnDirtyLayoutWrapperSwap adjust frameOffsetChanges, contentOffsetChanges and
      *                   contentSizeChanges
-     * @tc.expected: step3. OnDirtyLayoutWrapperSwap return false
+     * @tc.expected: OnDirtyLayoutWrapperSwap return false
      */
     bool frameOffsetChanges[2] = { false, true };
     bool contentOffsetChanges[2] = { false, true };
@@ -480,7 +509,7 @@ HWTEST_F(XComponentPropertyTestNg, XComponentLayoutAlgorithmTest006, TestSize.Le
     /**
      * @tc.steps: step4. call OnDirtyLayoutWrapperSwap
      *            case: type="component", config.skipMeasure = true, dirty->SkipMeasureContent() = true
-     * @tc.expected: step4. OnDirtyLayoutWrapperSwap return false
+     * @tc.expected: OnDirtyLayoutWrapperSwap return false
      */
     layoutWrapper->skipMeasureContent_ = true;
     flag = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
@@ -502,7 +531,7 @@ HWTEST_F(XComponentPropertyTestNg, XComponentMouseEventTest007, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. set type = XCOMPONENT_SURFACE_TYPE and call CreateXComponentNode
-     * @tc.expected: step1. xcomponent frameNode create successfully
+     * @tc.expected: xcomponent frameNode create successfully
      */
     testProperty.xcType = XCOMPONENT_SURFACE_TYPE;
     auto frameNode = CreateXComponentNode(testProperty);
@@ -527,7 +556,7 @@ HWTEST_F(XComponentPropertyTestNg, XComponentMouseEventTest007, TestSize.Level1)
 
     /**
      * @tc.steps: step3. call HandleMouseEvent
-     * @tc.expected: step3. no error happens
+     * @tc.expected: no error happens
      */
     for (MouseAction& action : mouseActions) {
         mouseInfo.SetAction(action);
@@ -548,7 +577,7 @@ HWTEST_F(XComponentPropertyTestNg, XComponentTouchEventTest008, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. set type = XCOMPONENT_SURFACE_TYPE and call CreateXComponentNode
-     * @tc.expected: step1. xcomponent frameNode create successfully
+     * @tc.expected: xcomponent frameNode create successfully
      */
     testProperty.xcType = XCOMPONENT_SURFACE_TYPE;
     auto frameNode = CreateXComponentNode(testProperty);
@@ -576,7 +605,7 @@ HWTEST_F(XComponentPropertyTestNg, XComponentTouchEventTest008, TestSize.Level1)
     /**
      * @tc.steps: step3. call HandleTouchEvent
      *            case: touchEventInfo.GetChangedTouches is empty
-     * @tc.expected: step3. pattern->touchEventPoint_.numPoints not change
+     * @tc.expected: pattern->touchEventPoint_.numPoints not change
      */
     TouchEventInfo touchEventInfoEmpty("onTouch");
     uint32_t numPoints = pattern->touchEventPoint_.numPoints;
@@ -586,7 +615,7 @@ HWTEST_F(XComponentPropertyTestNg, XComponentTouchEventTest008, TestSize.Level1)
     /**
      * @tc.steps: step4. call HandleTouchEvent
      *            case: different touchType
-     * @tc.expected: step4. touchType fit
+     * @tc.expected: touchType fit
      */
     for (TouchType& touchType : touchTypes) {
         TouchEventInfo touchEventInfo("onTouch");
@@ -601,7 +630,7 @@ HWTEST_F(XComponentPropertyTestNg, XComponentTouchEventTest008, TestSize.Level1)
     /**
      * @tc.steps: step5. call HandleTouchEvent
      *            case: different sourceType
-     * @tc.expected: step5. sourceType fit
+     * @tc.expected: sourceType fit
      */
     TouchEventInfo touchEventInfo("onTouch");
     TouchLocationInfo locationInfo(0);
@@ -629,7 +658,7 @@ HWTEST_F(XComponentPropertyTestNg, XComponentTouchEventTest009, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. set type = XCOMPONENT_SURFACE_TYPE and call CreateXComponentNode
-     * @tc.expected: step1. xcomponent frameNode create successfully
+     * @tc.expected: xcomponent frameNode create successfully
      */
     testProperty.xcType = XCOMPONENT_SURFACE_TYPE;
     auto frameNode = CreateXComponentNode(testProperty);
@@ -641,5 +670,72 @@ HWTEST_F(XComponentPropertyTestNg, XComponentTouchEventTest009, TestSize.Level1)
     ASSERT_TRUE(layoutPropertyTest);
     RefPtr<Property> propertyTest = frameNode->GetPaintProperty<Property>();
     ASSERT_TRUE(propertyTest);
+}
+
+/**
+ * @tc.name: XComponentKeyEventTest010
+ * @tc.desc: Test KeyEvent/FocusEvent/BlurEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentPropertyTestNg, XComponentKeyEventTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set type = XCOMPONENT_SURFACE_TYPE and call CreateXComponentNode
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    testProperty.xcType = XCOMPONENT_SURFACE_TYPE;
+    auto frameNode = CreateXComponentNode(testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps: step2. create focusHub & nativeXComponent instance
+     * @tc.expected: focusHub & nativeXComponent instance create successfully
+     */
+    auto host = pattern->GetHost();
+    ASSERT_TRUE(host);
+    auto focusHub = host->GetFocusHub();
+    ASSERT_TRUE(focusHub);
+    auto pair = pattern->GetNativeXComponent();
+    auto weakNativeXComponent = pair.second;
+    auto nativeXComponent = weakNativeXComponent.lock();
+    auto nativeXComponentImpl = pair.first;
+    ASSERT_TRUE(nativeXComponent);
+    ASSERT_TRUE(nativeXComponentImpl);
+
+    /**
+     * @tc.steps: step3. register focus & blur event for nativeXComponent instance
+     */
+    nativeXComponent->RegisterFocusEventCallback(
+        [](OH_NativeXComponent* /* nativeXComponent */, void* /* window */) { isFocus = true; });
+    nativeXComponent->RegisterBlurEventCallback(
+        [](OH_NativeXComponent* /* nativeXComponent */, void* /* window */) { isFocus = false; });
+
+    /**
+     * @tc.steps: step4. call focusHub's focus & blur event
+     * @tc.expected: the callbacks registered in step3 are called
+     */
+    focusHub->onFocusInternal_();
+    EXPECT_TRUE(isFocus);
+    focusHub->onBlurInternal_();
+    EXPECT_FALSE(isFocus);
+
+    /**
+     * @tc.steps: step5. call HandleKeyEvent
+     *            case: different sourceType & keyAction
+     * @tc.expected: sourceType & keyAction fit
+     */
+    std::vector<SourceType> sourceTypes { SourceType::NONE, SourceType::MOUSE, SourceType::TOUCH, SourceType::TOUCH_PAD,
+        SourceType::KEYBOARD };
+    std::vector<KeyAction> keyActions { KeyAction::UNKNOWN, KeyAction::DOWN, KeyAction::UP };
+    for (SourceType& sourceType : sourceTypes) {
+        for (KeyAction& keyAction : keyActions) {
+            KeyEvent keyEvent { KeyCode::KEY_0, keyAction, 0, 0, 0, sourceType };
+            focusHub->onKeyEventInternal_(keyEvent);
+            EXPECT_EQ(nativeXComponentImpl->keyEvent_.sourceType, ConvertNativeXComponentEventSourceType(sourceType));
+            EXPECT_EQ(nativeXComponentImpl->keyEvent_.action, ConvertNativeXComponentKeyAction(keyAction));
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

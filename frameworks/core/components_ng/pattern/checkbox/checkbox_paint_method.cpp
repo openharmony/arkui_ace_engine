@@ -62,7 +62,6 @@ CheckBoxModifier::CheckBoxModifier(
         AceType::MakeRefPtr<AnimatablePropertyFloat>(static_cast<float>(checkBoxTheme->GetWidth().ConvertToPx()));
     animateTouchHoverColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::TRANSPARENT));
     isSelect_ = AceType::MakeRefPtr<PropertyBool>(isSelect);
-    isHover_ = AceType::MakeRefPtr<PropertyBool>(false);
     offset_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF());
     size_ = AceType::MakeRefPtr<AnimatablePropertySizeF>(SizeF());
     enabled_ = AceType::MakeRefPtr<PropertyBool>(true);
@@ -75,7 +74,6 @@ CheckBoxModifier::CheckBoxModifier(
     AttachProperty(checkStroke_);
     AttachProperty(strokeSize_);
     AttachProperty(isSelect_);
-    AttachProperty(isHover_);
     AttachProperty(offset_);
     AttachProperty(size_);
     AttachProperty(enabled_);

@@ -80,6 +80,7 @@ private:
 enum class WebResponseDataType : int32_t {
     STRING_TYPE,
     FILE_TYPE,
+    RESOURCE_URL_TYPE,
 };
 
 class WebResponseAsyncHandle : public AceType {
@@ -90,6 +91,7 @@ public:
 
     virtual void HandleData(std::string& data) = 0;
     virtual void HandleFileFd(int32_t fd) = 0;
+    virtual void HandleResourceUrl(std::string& url) = 0;
     virtual void HandleHeadersVal(const std::map<std::string, std::string>& response_headers) = 0;
     virtual void HandleEncoding(std::string& encoding) = 0;
     virtual void HandleMimeType(std::string& mimeType) = 0;
@@ -149,6 +151,16 @@ public:
         return fd_;
     }
 
+    const std::string& GetResourceUrl() const
+    {
+        return resourceUrl_;
+    }
+
+    WebResponseDataType GetDataType() const
+    {
+        return dataType_;
+    }
+
     void SetHeadersVal(std::string& key, std::string& val)
     {
         headers_[key] = val;
@@ -166,6 +178,12 @@ public:
         fd_ = fd;
         data_.clear();
         dataType_ = WebResponseDataType::FILE_TYPE;
+    }
+
+    void SetResourceUrl(const std::string& url)
+    {
+        resourceUrl_ = url;
+        dataType_ = WebResponseDataType::RESOURCE_URL_TYPE;
     }
 
     void SetEncoding(std::string& encoding)
@@ -197,6 +215,8 @@ public:
         if (isReady_ == true) {
             if (dataType_ == WebResponseDataType::FILE_TYPE) {
                 handle_->HandleFileFd(fd_);
+            } else if (dataType_ == WebResponseDataType::RESOURCE_URL_TYPE) {
+                handle_->HandleResourceUrl(resourceUrl_);
             } else {
                 handle_->HandleData(data_);
             }
@@ -225,7 +245,8 @@ private:
     std::map<std::string, std::string> headers_;
     std::string data_;
     int32_t fd_;
-    WebResponseDataType dataType_;
+    std::string resourceUrl_;
+    WebResponseDataType dataType_ = WebResponseDataType::STRING_TYPE;
     std::string encoding_;
     std::string mimeType_;
     std::string reason_;

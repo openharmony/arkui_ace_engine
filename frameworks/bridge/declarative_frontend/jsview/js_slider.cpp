@@ -102,6 +102,14 @@ double GetValue(double value, double max, double min)
     return value;
 }
 
+void ParseSliderValueObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
+{
+    CHECK_NULL_VOID(changeEventVal->IsFunction());
+
+    JsEventCallback<void(float)> onChangeEvent(info.GetExecutionContext(), JSRef<JSFunc>::Cast(changeEventVal));
+    SliderModel::GetInstance()->SetOnChangeEvent(std::move(onChangeEvent));
+}
+
 void JSSlider::Create(const JSCallbackInfo& info)
 {
     double value = 0; // value:Current progress value. The default value is 0.
@@ -125,9 +133,15 @@ void JSSlider::Create(const JSCallbackInfo& info)
     auto getStyle = paramObject->GetProperty("style");
     auto direction = paramObject->GetProperty("direction");
     auto isReverse = paramObject->GetProperty("reverse");
+    JSRef<JSVal> changeEventVal;
 
     if (!getValue->IsNull() && getValue->IsNumber()) {
         value = getValue->ToNumber<double>();
+    } else if (!getValue->IsNull() && getValue->IsObject()) {
+        JSRef<JSObject> valueObj = JSRef<JSObject>::Cast(getValue);
+        changeEventVal = valueObj->GetProperty("changeEvent");
+        auto valueProperty = valueObj->GetProperty("value");
+        value = valueProperty->ToNumber<double>();
     }
 
     if (!getMin->IsNull() && getMin->IsNumber()) {
@@ -183,6 +197,9 @@ void JSSlider::Create(const JSCallbackInfo& info)
     SliderModel::GetInstance()->SetSliderMode(sliderMode);
     SliderModel::GetInstance()->SetDirection(sliderDirection);
     SliderModel::GetInstance()->SetReverse(reverse);
+    if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
+        ParseSliderValueObject(info, changeEventVal);
+    }
 }
 
 void JSSlider::SetThickness(const JSCallbackInfo& info)
@@ -191,7 +208,7 @@ void JSSlider::SetThickness(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         return;
     }
@@ -329,7 +346,7 @@ void JSSlider::SetBlockBorderWidth(const JSCallbackInfo& info)
         return;
     }
 
-    Dimension blockBorderWidth;
+    CalcDimension blockBorderWidth;
     if (!ParseJsDimensionVp(info[0], blockBorderWidth)) {
         return;
     }
@@ -360,7 +377,7 @@ void JSSlider::SetTrackBorderRadius(const JSCallbackInfo& info)
         return;
     }
 
-    Dimension trackBorderRadius;
+    CalcDimension trackBorderRadius;
     if (!ParseJsDimensionVp(info[0], trackBorderRadius)) {
         return;
     }
@@ -382,7 +399,7 @@ void JSSlider::SetBlockSize(const JSCallbackInfo& info)
     }
     JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
 
-    Dimension width;
+    CalcDimension width;
     JSRef<JSVal> jsWidth = sizeObj->GetProperty("width");
     if (!ParseJsDimensionVp(jsWidth, width)) {
         width.SetValue(0.0);
@@ -391,7 +408,7 @@ void JSSlider::SetBlockSize(const JSCallbackInfo& info)
         width.SetValue(0.0);
     }
 
-    Dimension height;
+    CalcDimension height;
     JSRef<JSVal> jsHeight = sizeObj->GetProperty("height");
     if (!ParseJsDimensionVp(jsHeight, height)) {
         height.SetValue(0.0);
@@ -450,7 +467,7 @@ void JSSlider::SetStepSize(const JSCallbackInfo& info)
         return;
     }
 
-    Dimension stepSize;
+    CalcDimension stepSize;
     if (!ParseJsDimensionVp(info[0], stepSize)) {
         return;
     }

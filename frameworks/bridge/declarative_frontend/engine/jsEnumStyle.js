@@ -731,6 +731,13 @@ var NavigationMode;
   NavigationMode[NavigationMode["Auto"] = 2] = "Auto";
 })(NavigationMode || (NavigationMode = {}));
 
+var NavRouteMode;
+(function (NavRouteMode) {
+  NavRouteMode[NavRouteMode["PUSH_WITH_RECREATE"] = 0] = "PUSH_WITH_RECREATE";
+  NavRouteMode[NavRouteMode["PUSH"] = 1] = "PUSH";
+  NavRouteMode[NavRouteMode["REPLACE"] = 2] = "REPLACE";
+})(NavRouteMode || (NavRouteMode = {}));
+
 var NavBarPosition;
 (function (NavBarPosition) {
   NavBarPosition[NavBarPosition["Start"] = 0] = "Start";
@@ -904,6 +911,12 @@ var ProgressType;
   ProgressType[ProgressType["ScaleRing"] = 3] = "ScaleRing";
   ProgressType[ProgressType["Capsule"] = 4] = "Capsule";
 })(ProgressType || (ProgressType = {}));
+
+var ProgressStatus;
+(function (ProgressStatus) {
+  ProgressStatus["LOADING"] = "LOADING";
+  ProgressStatus["PROGRESSING"] = "PROGRESSING";
+})(ProgressStatus || (ProgressStatus = {}));
 
 var MessageLevel
 (function (MessageLevel) {

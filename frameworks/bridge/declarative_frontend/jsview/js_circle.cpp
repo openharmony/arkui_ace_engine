@@ -68,12 +68,12 @@ void JSCircle::ConstructorCallback(const JSCallbackInfo& info)
     auto circle = AceType::MakeRefPtr<Circle>();
     JSRef<JSObject> params = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> width = params->GetProperty("width");
-    Dimension dimWidth;
+    CalcDimension dimWidth;
     if (ParseJsDimensionVp(width, dimWidth)) {
         circle->SetWidth(dimWidth);
     }
     JSRef<JSVal> height = params->GetProperty("height");
-    Dimension dimHeight;
+    CalcDimension dimHeight;
     if (ParseJsDimensionVp(height, dimHeight)) {
         circle->SetHeight(dimHeight);
     }

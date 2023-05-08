@@ -46,9 +46,17 @@ BlankModel* BlankModel::GetInstance()
 namespace OHOS::Ace::Framework {
 void JSBlank::Create(const JSCallbackInfo& info)
 {
-    Dimension blankMin;
+    CalcDimension blankMin;
     BlankModel::GetInstance()->Create();
-    if (info.Length() >= 1 && ParseJsDimensionVp(info[0], blankMin)) {
+    if (info.Length() < 1) {
+        LOGD("Blank min needs at least 1 param");
+        return;
+    }
+    if (info[0]->IsUndefined()) {
+        BlankModel::GetInstance()->SetBlankMin(blankMin);
+        return;
+    }
+    if (ParseJsDimensionVp(info[0], blankMin)) {
         BlankModel::GetInstance()->SetBlankMin(blankMin);
     }
 }
@@ -56,7 +64,7 @@ void JSBlank::Create(const JSCallbackInfo& info)
 void JSBlank::Height(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsHeight(info);
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         return;
     }

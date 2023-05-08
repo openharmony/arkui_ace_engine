@@ -154,13 +154,6 @@ public:
         }
     }
 
-    void SetIsHover(bool isHover)
-    {
-        if (isHover_) {
-            isHover_->Set(isHover);
-        }
-    }
-
     void SetStrokeWidth(float value)
     {
         if (checkStroke_) {
@@ -212,7 +205,6 @@ private:
     RefPtr<AnimatablePropertyFloat> checkStroke_;
     RefPtr<AnimatablePropertyFloat> strokeSize_;
     RefPtr<PropertyBool> isSelect_;
-    RefPtr<PropertyBool> isHover_;
     RefPtr<AnimatablePropertyOffsetF> offset_;
     RefPtr<AnimatablePropertySizeF> size_;
 

@@ -59,7 +59,7 @@ void OnComplete(SnapshotAsyncCtx* asyncCtx)
             napi_handle_scope scope = nullptr;
             napi_open_handle_scope(ctx->env, &scope);
 
-            // callback result format: [PixelMap, Error]
+            // callback result format: [Error, PixelMap]
             napi_value result[JsComponentSnapshot::ARGC_MAX] = { nullptr };
             napi_get_undefined(ctx->env, &result[0]);
             napi_get_undefined(ctx->env, &result[1]);
@@ -67,18 +67,17 @@ void OnComplete(SnapshotAsyncCtx* asyncCtx)
             if (ctx->errCode == Framework::ERROR_CODE_NO_ERROR) {
 #ifdef PIXEL_MAP_SUPPORTED
                 // convert pixelMap to napi value
-                result[0] = Media::PixelMapNapi::CreatePixelMap(ctx->env, ctx->pixmap);
+                result[1] = Media::PixelMapNapi::CreatePixelMap(ctx->env, ctx->pixmap);
 #endif
-            } else {
-                napi_create_int32(ctx->env, ctx->errCode, &result[1]);
             }
+            napi_create_int32(ctx->env, ctx->errCode, &result[0]);
 
             if (ctx->deferred) {
                 // promise
                 if (ctx->errCode == Framework::ERROR_CODE_NO_ERROR) {
-                    napi_resolve_deferred(ctx->env, ctx->deferred, result[0]);
+                    napi_resolve_deferred(ctx->env, ctx->deferred, result[1]);
                 } else {
-                    napi_reject_deferred(ctx->env, ctx->deferred, result[1]);
+                    napi_reject_deferred(ctx->env, ctx->deferred, result[0]);
                 }
             } else {
                 // callback

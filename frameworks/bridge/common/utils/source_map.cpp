@@ -19,6 +19,7 @@
 #include <fstream>
 
 #include "base/log/log.h"
+#include "base/log/log_wrapper.h"
 
 namespace OHOS::Ace::Framework {
 

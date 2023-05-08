@@ -167,6 +167,7 @@ void OverlayManager::OpenDialogAnimation(const RefPtr<FrameNode>& node)
     option.SetCurve(SHOW_SCALE_ANIMATION_CURVE);
     option.SetDuration(theme->GetAnimationDurationIn());
     ctx->ScaleAnimation(option, theme->GetScaleStart(), theme->GetScaleEnd());
+    node->OnAccessibilityEvent(AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
 }
 
 void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
@@ -230,12 +231,21 @@ void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu, bool isInS
     option.SetFillMode(FillMode::FORWARDS);
     option.SetOnFinishEvent(
         [weak = WeakClaim(this), menuWK = WeakClaim(RawPtr(menu)), id = Container::CurrentId(), isInSubWindow] {
-            auto menu = menuWK.Upgrade();
-            auto overlayManager = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(menu && overlayManager);
             ContainerScope scope(id);
-            overlayManager->FocusOverlayNode(menu, isInSubWindow);
-            overlayManager->CallOnShowMenuCallback();
+            auto pipeline = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID_NOLOG(pipeline);
+            auto taskExecutor = pipeline->GetTaskExecutor();
+            CHECK_NULL_VOID_NOLOG(taskExecutor);
+            taskExecutor->PostTask(
+                [weak, menuWK, id, isInSubWindow]() {
+                    auto menu = menuWK.Upgrade();
+                    auto overlayManager = weak.Upgrade();
+                    CHECK_NULL_VOID_NOLOG(menu && overlayManager);
+                    ContainerScope scope(id);
+                    overlayManager->FocusOverlayNode(menu, isInSubWindow);
+                    overlayManager->CallOnShowMenuCallback();
+                },
+                TaskExecutor::TaskType::UI);
         });
 
     auto context = menu->GetRenderContext();
@@ -268,21 +278,29 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu)
     option.SetFillMode(FillMode::FORWARDS);
     option.SetOnFinishEvent([rootWeak = rootNodeWeak_, menuWK = WeakClaim(RawPtr(menu)), id = Container::CurrentId(),
                                 weak = WeakClaim(this)] {
-        auto menu = menuWK.Upgrade();
-        auto root = rootWeak.Upgrade();
-        auto overlayManager = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(menu && root && overlayManager);
-        overlayManager->CallOnHideMenuCallback();
-
         ContainerScope scope(id);
-        auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
-        // clear contextMenu then return
-        if (menuWrapperPattern && menuWrapperPattern->IsContextMenu()) {
-            SubwindowManager::GetInstance()->ClearMenuNG(id);
-            return;
-        }
-        root->RemoveChild(menu);
-        root->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID_NOLOG(pipeline);
+        auto taskExecutor = pipeline->GetTaskExecutor();
+        CHECK_NULL_VOID_NOLOG(taskExecutor);
+        taskExecutor->PostTask(
+            [rootWeak, menuWK, id, weak]() {
+                auto menu = menuWK.Upgrade();
+                auto root = rootWeak.Upgrade();
+                auto overlayManager = weak.Upgrade();
+                CHECK_NULL_VOID_NOLOG(menu && root && overlayManager);
+                ContainerScope scope(id);
+                overlayManager->CallOnHideMenuCallback();
+                auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
+                // clear contextMenu then return
+                if (menuWrapperPattern && menuWrapperPattern->IsContextMenu()) {
+                    SubwindowManager::GetInstance()->ClearMenuNG(id);
+                    return;
+                }
+                root->RemoveChild(menu);
+                root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            },
+            TaskExecutor::TaskType::UI);
     });
 
     auto context = menu->GetRenderContext();
@@ -357,6 +375,8 @@ void OverlayManager::ShowToast(
             }
         },
         option.GetOnFinishEvent());
+    toastNode->OnAccessibilityEvent(
+        AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
 }
 
 void OverlayManager::PopToast(int32_t toastId)
@@ -427,6 +447,10 @@ void OverlayManager::PopToast(int32_t toastId)
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RequestFrame();
+    AccessibilityEvent event;
+    event.type = AccessibilityEventType::CHANGE;
+    event.windowContentChangeTypes = WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE;
+    pipeline->SendEventToAccessibility(event);
 }
 
 void OverlayManager::AdaptToSafeArea(const RefPtr<FrameNode>& node)
@@ -464,6 +488,10 @@ void OverlayManager::UpdatePopupNode(int32_t targetId, const PopupInfo& popupInf
         LOGI("OverlayManager: Popup begin pop");
         popupInfo.popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
         rootNode->RemoveChild(popupMap_[targetId].popupNode);
+        AccessibilityEvent event;
+        event.type = AccessibilityEventType::CHANGE;
+        event.windowContentChangeTypes = WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE;
+        PipelineContext::GetCurrentContext()->SendEventToAccessibility(event);
 #ifdef ENABLE_DRAG_FRAMEWORK
         RemoveEventColumn();
         RemovePixelMapAnimation(false, 0, 0);
@@ -627,6 +655,7 @@ void OverlayManager::ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPt
         menu->MarkModifyDone();
         LOGI("menuNode mounted");
     }
+    menu->OnAccessibilityEvent(AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
 }
 
 // subwindow only contains one menu instance.
@@ -688,6 +717,8 @@ void OverlayManager::HideMenu(int32_t targetId)
     }
     PopMenuAnimation(menuMap_[targetId]);
     BlurOverlayNode();
+    menuMap_[targetId]->OnAccessibilityEvent(
+        AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
 }
 
 void OverlayManager::HideAllMenus()
@@ -782,6 +813,8 @@ void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
     }
     dialogNode->MarkRemoving();
     CloseDialogAnimation(dialogNode);
+    dialogNode->OnAccessibilityEvent(
+        AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
 }
 
 bool OverlayManager::RemoveOverlay()

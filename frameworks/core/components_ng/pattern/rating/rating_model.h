@@ -39,6 +39,7 @@ public:
     virtual void SetSecondarySrc(const std::string& value, bool flag) = 0;
     virtual void SetBackgroundSrc(const std::string& value, bool flag) = 0;
     virtual void SetOnChange(ChangeEvent&& onChange) = 0;
+    virtual void SetOnChangeEvent(ChangeEvent&& onChangeEvent) = 0;
 
 private:
     static std::unique_ptr<RatingModel> instance_;

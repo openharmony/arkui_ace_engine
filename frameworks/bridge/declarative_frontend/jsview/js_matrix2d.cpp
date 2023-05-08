@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,126 +14,272 @@
  */
 
 #include "bridge/declarative_frontend/jsview/js_matrix2d.h"
-#include "bridge/declarative_frontend/jsview/js_rendering_context.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "core/components/common/properties/paint_state.h"
+#include "frameworks/core/components_ng/render/adapter/matrix2d.h"
 
 namespace OHOS::Ace::Framework {
+constexpr int JS_MATRIX2D_PARAMETER_COUNTS_0 = 0;
+constexpr int JS_MATRIX2D_PARAMETER_COUNTS_1 = 1;
+constexpr int JS_MATRIX2D_PARAMETER_COUNTS_2 = 2;
+constexpr int JS_MATRIX2D_PARAMETER_COUNTS_3 = 3;
 
-JSMatrix2d::JSMatrix2d()
+void JSMatrix2d::Constructor(const JSCallbackInfo& info)
 {
+    auto matrix2d = Referenced::MakeRefPtr<JSMatrix2d>();
+    matrix2d->IncRefCount();
+    info.SetReturnValue(Referenced::RawPtr(matrix2d));
 }
 
-void JSMatrix2d::Constructor(const JSCallbackInfo& args)
+void JSMatrix2d::Destructor(JSMatrix2d* matrix2d)
 {
-    auto jsCalendarController = Referenced::MakeRefPtr<JSMatrix2d>();
-    jsCalendarController->IncRefCount();
-    args.SetReturnValue(Referenced::RawPtr(jsCalendarController));
-}
-
-void JSMatrix2d::Destructor(JSMatrix2d* controller)
-{
-    if (controller != nullptr) {
-        controller->DecRefCount();
+    if (matrix2d != nullptr) {
+        matrix2d->DecRefCount();
     }
 }
 
 void JSMatrix2d::JSBind(BindingTarget globalObj)
 {
     JSClass<JSMatrix2d>::Declare("Matrix2D");
-    JSClass<JSMatrix2d>::CustomMethod("scaleX", &JSMatrix2d::JsSetScaleX);
-    JSClass<JSMatrix2d>::CustomMethod("rotateY", &JSMatrix2d::JsSetRotateY);
-    JSClass<JSMatrix2d>::CustomMethod("rotateX", &JSMatrix2d::JsSetRotateX);
-    JSClass<JSMatrix2d>::CustomMethod("scaleY", &JSMatrix2d::JsSetScaleY);
-    JSClass<JSMatrix2d>::CustomMethod("translateX", &JSMatrix2d::JsSetTranslateX);
-    JSClass<JSMatrix2d>::CustomMethod("translateY", &JSMatrix2d::JsSetTranslateY);
+    JSClass<JSMatrix2d>::CustomProperty("scaleX", &JSMatrix2d::JsGetScaleX, &JSMatrix2d::JsSetScaleX);
+    JSClass<JSMatrix2d>::CustomProperty("rotateY", &JSMatrix2d::JsGetRotateY, &JSMatrix2d::JsSetRotateY);
+    JSClass<JSMatrix2d>::CustomProperty("rotateX", &JSMatrix2d::JsGetRotateX, &JSMatrix2d::JsSetRotateX);
+    JSClass<JSMatrix2d>::CustomProperty("scaleY", &JSMatrix2d::JsGetScaleY, &JSMatrix2d::JsSetScaleY);
+    JSClass<JSMatrix2d>::CustomProperty("translateX", &JSMatrix2d::JsGetTranslateX, &JSMatrix2d::JsSetTranslateX);
+    JSClass<JSMatrix2d>::CustomProperty("translateY", &JSMatrix2d::JsGetTranslateY, &JSMatrix2d::JsSetTranslateY);
+    JSClass<JSMatrix2d>::CustomMethod("identity", &JSMatrix2d::JsIdentity);
+    JSClass<JSMatrix2d>::CustomMethod("invert", &JSMatrix2d::JsInvert);
+    JSClass<JSMatrix2d>::CustomMethod("rotate", &JSMatrix2d::JsRotate);
+    JSClass<JSMatrix2d>::CustomMethod("translate", &JSMatrix2d::JsTranslate);
+    JSClass<JSMatrix2d>::CustomMethod("scale", &JSMatrix2d::JsScale);
+    JSClass<JSMatrix2d>::CustomMethod("multiply", &JSMatrix2d::JSMultiply);
 
     JSClass<JSMatrix2d>::Bind(globalObj, JSMatrix2d::Constructor, JSMatrix2d::Destructor);
 }
 
 void JSMatrix2d::JsSetScaleX(const JSCallbackInfo& info)
 {
-    double scaleX;
-    if (info[0]->IsNumber()) {
-        JSViewAbstract::ParseJsDouble(info[0], scaleX);
-        scaleX_ = scaleX;
+    if (info.Length() != JS_MATRIX2D_PARAMETER_COUNTS_1) {
+        LOGE("The argv is wrong.");
+        return;
+    }
+    if (info[JS_MATRIX2D_PARAMETER_COUNTS_0]->IsNumber()) {
+        double scaleX = 0;
+        JSViewAbstract::ParseJsDouble(info[JS_MATRIX2D_PARAMETER_COUNTS_0], scaleX);
+        transform_.scaleX = scaleX;
     }
 }
 
 void JSMatrix2d::JsSetRotateY(const JSCallbackInfo& info)
 {
-    double rotateY;
-    if (info[0]->IsNumber()) {
-        JSViewAbstract::ParseJsDouble(info[0], rotateY);
-        rotateY_ = rotateY;
+    if (info.Length() != JS_MATRIX2D_PARAMETER_COUNTS_1) {
+        LOGE("The argv is wrong.");
+        return;
+    }
+    if (info[JS_MATRIX2D_PARAMETER_COUNTS_0]->IsNumber()) {
+        double rotateY = 0;
+        JSViewAbstract::ParseJsDouble(info[JS_MATRIX2D_PARAMETER_COUNTS_0], rotateY);
+        transform_.skewY = rotateY;
     }
 }
 
 void JSMatrix2d::JsSetRotateX(const JSCallbackInfo& info)
 {
-    double rotateX;
-    if (info[0]->IsNumber()) {
-        JSViewAbstract::ParseJsDouble(info[0], rotateX);
-        rotateX_ = rotateX;
+    if (info.Length() != JS_MATRIX2D_PARAMETER_COUNTS_1) {
+        LOGE("The argv is wrong.");
+        return;
+    }
+    if (info[JS_MATRIX2D_PARAMETER_COUNTS_0]->IsNumber()) {
+        double rotateX = 0;
+        JSViewAbstract::ParseJsDouble(info[JS_MATRIX2D_PARAMETER_COUNTS_0], rotateX);
+        transform_.skewX = rotateX;
     }
 }
 
 void JSMatrix2d::JsSetScaleY(const JSCallbackInfo& info)
 {
-    double scaleY;
-    if (info[0]->IsNumber()) {
-        JSViewAbstract::ParseJsDouble(info[0], scaleY);
-        scaleY_ = scaleY;
+    if (info.Length() != JS_MATRIX2D_PARAMETER_COUNTS_1) {
+        LOGE("The argv is wrong.");
+        return;
+    }
+    if (info[JS_MATRIX2D_PARAMETER_COUNTS_0]->IsNumber()) {
+        double scaleY = 0;
+        JSViewAbstract::ParseJsDouble(info[JS_MATRIX2D_PARAMETER_COUNTS_0], scaleY);
+        transform_.scaleY = scaleY;
     }
 }
 
 void JSMatrix2d::JsSetTranslateX(const JSCallbackInfo& info)
 {
-    double translateX;
-    if (info[0]->IsNumber()) {
-        JSViewAbstract::ParseJsDouble(info[0], translateX);
+    if (info.Length() != JS_MATRIX2D_PARAMETER_COUNTS_1) {
+        LOGE("The argv is wrong.");
+        return;
+    }
+    if (info[JS_MATRIX2D_PARAMETER_COUNTS_0]->IsNumber()) {
+        double translateX = 0;
+        JSViewAbstract::ParseJsDouble(info[JS_MATRIX2D_PARAMETER_COUNTS_0], translateX);
         translateX = SystemProperties::Vp2Px(translateX);
-        translateX_ = translateX;
+        transform_.translateX = translateX;
     }
 }
 
 void JSMatrix2d::JsSetTranslateY(const JSCallbackInfo& info)
 {
-    double translateY;
-    if (info[0]->IsNumber()) {
-        JSViewAbstract::ParseJsDouble(info[0], translateY);
+    if (info.Length() != JS_MATRIX2D_PARAMETER_COUNTS_1) {
+        LOGE("The argv is wrong.");
+        return;
+    }
+    if (info[JS_MATRIX2D_PARAMETER_COUNTS_0]->IsNumber()) {
+        double translateY = 0;
+        JSViewAbstract::ParseJsDouble(info[JS_MATRIX2D_PARAMETER_COUNTS_0], translateY);
         translateY = SystemProperties::Vp2Px(translateY);
-        translateY_ = translateY;
+        transform_.translateY = translateY;
     }
 }
 
-double JSMatrix2d::JsGetScaleX()
+void JSMatrix2d::JsGetScaleX(const JSCallbackInfo& info)
 {
-    return scaleX_;
+    auto returnValue = JSVal(ToJSValue(transform_.scaleX));
+    auto returnPtr = JSRef<JSVal>::Make(returnValue);
+    info.SetReturnValue(returnPtr);
 }
 
-double JSMatrix2d::JsGetRotateY()
+void JSMatrix2d::JsGetRotateY(const JSCallbackInfo& info)
 {
-    return rotateY_;
+    auto returnValue = JSVal(ToJSValue(transform_.skewY));
+    auto returnPtr = JSRef<JSVal>::Make(returnValue);
+    info.SetReturnValue(returnPtr);
 }
 
-double JSMatrix2d::JsGetRotateX()
+void JSMatrix2d::JsGetRotateX(const JSCallbackInfo& info)
 {
-    return rotateX_;
+    auto returnValue = JSVal(ToJSValue(transform_.skewX));
+    auto returnPtr = JSRef<JSVal>::Make(returnValue);
+    info.SetReturnValue(returnPtr);
 }
 
-double JSMatrix2d::JsGetScaleY()
+void JSMatrix2d::JsGetScaleY(const JSCallbackInfo& info)
 {
-    return scaleY_;
+    auto returnValue = JSVal(ToJSValue(transform_.scaleY));
+    auto returnPtr = JSRef<JSVal>::Make(returnValue);
+    info.SetReturnValue(returnPtr);
 }
 
-double JSMatrix2d::JsGetTranslateX()
+void JSMatrix2d::JsGetTranslateX(const JSCallbackInfo& info)
 {
-    return translateX_;
+    double translateX = SystemProperties::Px2Vp(transform_.translateX);
+    auto returnValue = JSVal(ToJSValue(translateX));
+    auto returnPtr = JSRef<JSVal>::Make(returnValue);
+    info.SetReturnValue(returnPtr);
 }
 
-double JSMatrix2d::JsGetTranslateY()
+void JSMatrix2d::JsGetTranslateY(const JSCallbackInfo& info)
 {
-    return translateY_;
+    double translateY = SystemProperties::Px2Vp(transform_.translateY);
+    auto returnValue = JSVal(ToJSValue(translateY));
+    auto returnPtr = JSRef<JSVal>::Make(returnValue);
+    info.SetReturnValue(returnPtr);
 }
 
+void JSMatrix2d::JsIdentity(const JSCallbackInfo& info)
+{
+    if (info.Length() > JS_MATRIX2D_PARAMETER_COUNTS_0) {
+        LOGE("The argv is wrong.");
+        return;
+    }
+    NG::Matrix2D::Identity(transform_);
+    info.SetReturnValue(info.This());
+}
+
+void JSMatrix2d::JsInvert(const JSCallbackInfo& info)
+{
+    if (info.Length() > JS_MATRIX2D_PARAMETER_COUNTS_0) {
+        LOGE("The argv is wrong.");
+        return;
+    }
+    bool retValue = NG::Matrix2D::Invert(transform_);
+    if (!retValue) {
+        transform_.scaleX = NAN;
+        transform_.scaleY = NAN;
+        transform_.skewX = NAN;
+        transform_.skewY = NAN;
+        transform_.translateX = NAN;
+        transform_.translateY = NAN;
+    }
+    info.SetReturnValue(info.This());
+}
+
+void JSMatrix2d::JsRotate(const JSCallbackInfo& info)
+{
+    if (info.Length() < JS_MATRIX2D_PARAMETER_COUNTS_1 || info.Length() > JS_MATRIX2D_PARAMETER_COUNTS_3) {
+        LOGE("The argv is wrong, it is supposed to have at least 1 argument, and less than 4 arguments");
+        return;
+    }
+    double degree = 0;
+    double rx = 0;
+    double ry = 0;
+    if (info.Length() > JS_MATRIX2D_PARAMETER_COUNTS_0 && info[JS_MATRIX2D_PARAMETER_COUNTS_0]->IsNumber()) {
+        JSViewAbstract::ParseJsDouble(info[JS_MATRIX2D_PARAMETER_COUNTS_0], degree);
+    }
+    if (info.Length() > JS_MATRIX2D_PARAMETER_COUNTS_1 && info[JS_MATRIX2D_PARAMETER_COUNTS_1]->IsNumber()) {
+        JSViewAbstract::ParseJsDouble(info[JS_MATRIX2D_PARAMETER_COUNTS_1], rx);
+        rx = SystemProperties::Vp2Px(rx);
+    }
+    if (info.Length() > JS_MATRIX2D_PARAMETER_COUNTS_2 && info[JS_MATRIX2D_PARAMETER_COUNTS_2]->IsNumber()) {
+        JSViewAbstract::ParseJsDouble(info[JS_MATRIX2D_PARAMETER_COUNTS_2], ry);
+        ry = SystemProperties::Vp2Px(ry);
+    }
+    NG::Matrix2D::Rotate(transform_, degree, rx, ry);
+    info.SetReturnValue(info.This());
+}
+
+void JSMatrix2d::JsTranslate(const JSCallbackInfo& info)
+{
+    if (info.Length() > JS_MATRIX2D_PARAMETER_COUNTS_2) {
+        LOGE("The argv is wrong, it is supposed to have at most 2 arguments.");
+        return;
+    }
+    double tx = 0;
+    double ty = 0;
+    if (info.Length() > JS_MATRIX2D_PARAMETER_COUNTS_1 && info[JS_MATRIX2D_PARAMETER_COUNTS_0]->IsNumber()) {
+        JSViewAbstract::ParseJsDouble(info[JS_MATRIX2D_PARAMETER_COUNTS_0], tx);
+        tx = SystemProperties::Vp2Px(tx);
+    }
+    if (info.Length() == JS_MATRIX2D_PARAMETER_COUNTS_2 && info[JS_MATRIX2D_PARAMETER_COUNTS_1]->IsNumber()) {
+        JSViewAbstract::ParseJsDouble(info[JS_MATRIX2D_PARAMETER_COUNTS_1], ty);
+        ty = SystemProperties::Vp2Px(ty);
+    }
+    NG::Matrix2D::Translate(transform_, tx, ty);
+    info.SetReturnValue(info.This());
+}
+
+void JSMatrix2d::JsScale(const JSCallbackInfo& info)
+{
+    if (info.Length() > JS_MATRIX2D_PARAMETER_COUNTS_2) {
+        LOGE("The argv is wrong, it is supposed to have at most 2 arguments.");
+        return;
+    }
+    double sx = 1.0f;
+    double sy = 1.0f;
+    if (info.Length() > JS_MATRIX2D_PARAMETER_COUNTS_1 && info[JS_MATRIX2D_PARAMETER_COUNTS_0]->IsNumber()) {
+        JSViewAbstract::ParseJsDouble(info[JS_MATRIX2D_PARAMETER_COUNTS_0], sx);
+    }
+    if (info.Length() == JS_MATRIX2D_PARAMETER_COUNTS_2 && info[1]->IsNumber()) {
+        JSViewAbstract::ParseJsDouble(info[JS_MATRIX2D_PARAMETER_COUNTS_1], sy);
+    }
+    NG::Matrix2D::Scale(transform_, sx, sy);
+    info.SetReturnValue(info.This());
+}
+
+std::string JSMatrix2d::ToString() const
+{
+    auto jsonValue = JsonUtil::Create(true);
+    jsonValue->Put("scaleX", transform_.scaleX);
+    jsonValue->Put("scaleY", transform_.scaleY);
+    jsonValue->Put("skewX", transform_.skewX);
+    jsonValue->Put("skewY", transform_.skewY);
+    jsonValue->Put("translateX", transform_.translateX);
+    jsonValue->Put("translateY", transform_.translateY);
+    return jsonValue->ToString();
+}
 } // namespace OHOS::Ace::Framework

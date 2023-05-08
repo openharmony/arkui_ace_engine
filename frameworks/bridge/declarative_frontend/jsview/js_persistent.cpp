@@ -60,7 +60,7 @@ void JSPersistent::Set(const JSCallbackInfo& args)
         "emulator or a real device instead.");
     return;
 #endif
-    if (args.Length() < 2) {
+    if (args.Length() < 2 || !args[0]->IsString() || !args[1]->IsString()) {
         LOGW("JSPersistent: Fail to set persistent data, args too few");
         return;
     }
@@ -92,7 +92,7 @@ void JSPersistent::Get(const JSCallbackInfo& args)
         "emulator or a real device instead.");
     return;
 #endif
-    if (args.Length() < 1) {
+    if (args.Length() < 1 || !args[0]->IsString()) {
         LOGW("JSPersistent: Failed to Get persistent data, args too few");
         return;
     }
@@ -120,7 +120,7 @@ void JSPersistent::Delete(const JSCallbackInfo& args)
         "emulator or a real device instead.");
     return;
 #endif
-    if (args.Length() < 1) {
+    if (args.Length() < 1 || !args[0]->IsString()) {
         LOGW("JSPersistent: Fail to Delete persistent data, args too few");
         return;
     }

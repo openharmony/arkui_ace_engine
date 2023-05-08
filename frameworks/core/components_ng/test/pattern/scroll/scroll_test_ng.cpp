@@ -753,7 +753,7 @@ HWTEST_F(ScrollTestNg, ScrollTest007, TestSize.Level1)
     EXPECT_EQ(pattern->animator_, nullptr);
     int32_t temp = 0;
     auto func = [&temp]() { temp = 1.0; };
-    pattern->AnimateTo(0.0f, 0.0f, Curves::LINEAR, true, func);
+    pattern->AnimateTo(0.0f, 0.0f, Curves::LINEAR, func);
     pattern->animator_->NotifyStopListener();
     EXPECT_EQ(temp, 1.0);
     positionController->ScrollPage(false, false);

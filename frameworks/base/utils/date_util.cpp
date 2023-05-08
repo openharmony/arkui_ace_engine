@@ -79,4 +79,20 @@ int32_t Date::CalculateWeekDay(int32_t year, int32_t month, int32_t day)
     return (day + 2 * month + 3 * (month + 1) / 5 + year + year / 4 - year / 100 + year / 400) % 7;
 }
 
+int64_t Date::GetMilliSecondsByDateTime(std::tm& dateTime)
+{
+    auto now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    auto local = std::localtime(&now);
+    CHECK_NULL_RETURN_NOLOG(local, 0);
+    if (dateTime.tm_year == 0) {
+        dateTime.tm_year = static_cast<uint32_t>(local->tm_year);
+    }
+    if (dateTime.tm_mday == 0) {
+        dateTime.tm_mday = static_cast<uint32_t>(local->tm_mday);
+    }
+    auto timestamp = std::chrono::system_clock::from_time_t(std::mktime(&dateTime));
+    auto duration = timestamp.time_since_epoch();
+    auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
+    return milliseconds;
+}
 } // namespace OHOS::Ace

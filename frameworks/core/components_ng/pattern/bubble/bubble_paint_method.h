@@ -50,19 +50,9 @@ public:
         };
     }
 
-    void SetShowTopArrow(bool flag)
+    void SetShowArrow(bool flag)
     {
-        showTopArrow_ = flag;
-    }
-
-    void SetShowBottomArrow(bool flag)
-    {
-        showBottomArrow_ = flag;
-    }
-
-    void SetShowCustomArrow(bool flag)
-    {
-        showCustomArrow_ = flag;
+        showArrow_ = flag;
     }
 
     void SetChildOffset(const OffsetF& offset)
@@ -118,9 +108,7 @@ private:
     OffsetF childOffset_;
     OffsetF arrowPosition_;
     SizeF childSize_;
-    bool showBottomArrow_ = true;
-    bool showTopArrow_ = true;
-    bool showCustomArrow_ = false;
+    bool showArrow_ = false;
 
     // Get from theme
     Border border_;

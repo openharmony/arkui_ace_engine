@@ -38,6 +38,7 @@
 #include "bridge/declarative_frontend/jsview/js_canvas.h"
 #include "bridge/declarative_frontend/jsview/js_canvas_gradient.h"
 #include "bridge/declarative_frontend/jsview/js_canvas_path.h"
+#include "bridge/declarative_frontend/jsview/js_canvas_pattern.h"
 #include "bridge/declarative_frontend/jsview/js_checkbox.h"
 #include "bridge/declarative_frontend/jsview/js_checkboxgroup.h"
 #include "bridge/declarative_frontend/jsview/js_circle.h"
@@ -77,6 +78,7 @@
 #include "bridge/declarative_frontend/jsview/js_loading_progress.h"
 #include "bridge/declarative_frontend/jsview/js_local_storage.h"
 #include "bridge/declarative_frontend/jsview/js_marquee.h"
+#include "bridge/declarative_frontend/jsview/js_matrix2d.h"
 #include "bridge/declarative_frontend/jsview/js_menu.h"
 #include "bridge/declarative_frontend/jsview/js_menu_item.h"
 #include "bridge/declarative_frontend/jsview/js_menu_item_group.h"
@@ -98,6 +100,7 @@
 #include "bridge/declarative_frontend/jsview/js_qrcode.h"
 #include "bridge/declarative_frontend/jsview/js_radio.h"
 #include "bridge/declarative_frontend/jsview/js_rect.h"
+#include "bridge/declarative_frontend/jsview/js_recycle_view.h"
 #include "bridge/declarative_frontend/jsview/js_refresh.h"
 #include "bridge/declarative_frontend/jsview/js_relative_container.h"
 #include "bridge/declarative_frontend/jsview/js_render_image.h"
@@ -199,6 +202,12 @@
 
 #ifndef WEARABLE_PRODUCT
 #include "bridge/declarative_frontend/jsview/js_camera.h"
+#endif
+
+#if defined(WINDOW_SCENE_SUPPORTED)
+#include "frameworks/bridge/declarative_frontend/jsview/window_scene/js_host_window_scene.h"
+#include "frameworks/bridge/declarative_frontend/jsview/window_scene/js_root_scene.h"
+#include "frameworks/bridge/declarative_frontend/jsview/window_scene/js_screen.h"
 #endif
 
 namespace OHOS::Ace::Framework {
@@ -372,6 +381,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Button", JSButton::JSBind },
     { "Canvas", JSCanvas::JSBind },
     { "OffscreenCanvas", JSOffscreenCanvas::JSBind },
+    { "Matrix2D", JSMatrix2d::JSBind },
+    { "CanvasPattern", JSCanvasPattern::JSBind },
     { "List", JSList::JSBind },
     { "ListItem", JSListItem::JSBind },
     { "LoadingProgress", JSLoadingProgress::JSBind },
@@ -573,6 +584,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "ImageData", JSCanvasImageData::JSBind },
     { "Path2D", JSPath2D::JSBind },
     { "RenderingContextSettings", JSRenderingContextSettings::JSBind },
+    { "Matrix2D", JSMatrix2d::JSBind },
+    { "CanvasPattern", JSCanvasPattern::JSBind },
 #ifdef VIDEO_SUPPORTED
     { "VideoController", JSVideoController::JSBind },
 #endif
@@ -595,6 +608,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "FlowItem", JSWaterFlowItem::JSBind },
     { "RelativeContainer", JSRelativeContainer::JSBind },
     { "__Common__", JSCommonView::JSBind },
+    { "__Recycle__", JSRecycleView::JSBind },
     { "LinearGradient", JSLinearGradient::JSBind },
     { "ImageSpan", JSImageSpan::JSBind },
 #ifdef PREVIEW
@@ -611,6 +625,11 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
 #endif
 #if defined(MODEL_COMPONENT_SUPPORTED)
     { "Model", JSSceneView::JSBind },
+#endif
+#if defined(WINDOW_SCENE_SUPPORTED)
+    { "HostWindowScene", JSHostWindowScene::JSBind },
+    { "RootScene", JSRootScene::JSBind },
+    { "Screen", JSScreen::JSBind },
 #endif
 };
 

@@ -50,8 +50,9 @@ void RelativeContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     idNodeMap_.clear();
     reliedOnMap_.clear();
     incomingDegreeMap_.clear();
-    auto parentIdealSize = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint()->selfIdealSize.ConvertToSizeT();
-    layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(parentIdealSize.Width(), parentIdealSize.Height()));
+    auto layoutConstraint = relativeContainerLayoutProperty->GetLayoutConstraint();
+    auto idealSize = CreateIdealSize(layoutConstraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT);
+    layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize.ConvertToSizeT());
     CollectNodesById(layoutWrapper);
     GetDependencyRelationship();
     if (!PreTopologicalLoopDetection()) {
@@ -71,10 +72,20 @@ void RelativeContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             continue;
         }
         auto childWrapper = idNodeMap_[nodeName];
+        if (!childWrapper->IsActive()) {
+            continue;
+        }
         if (!childWrapper->GetLayoutProperty()->GetFlexItemProperty()) {
             auto childConstraint = relativeContainerLayoutProperty->CreateChildConstraint();
             childWrapper->Measure(childConstraint);
             continue;
+        }
+        const auto& flexItem = childWrapper->GetLayoutProperty()->GetFlexItemProperty();
+        auto alignRules = flexItem->GetAlignRulesValue();
+        auto frameNode = childWrapper->GetHostNode();
+        if (!alignRules.empty() && frameNode) {
+            // when child has alignRules and position, the position property do not work.
+            frameNode->GetLayoutProperty()->SetUsingPosition(false);
         }
         CalcSizeParam(layoutWrapper, nodeName);
         CalcOffsetParam(layoutWrapper, nodeName);
@@ -148,6 +159,13 @@ void RelativeContainerLayoutAlgorithm::GetDependencyRelationship()
             if (IsAnchorContainer(alignRule.second.anchor) ||
                 idNodeMap_.find(alignRule.second.anchor) == idNodeMap_.end()) {
                 continue;
+            }
+            auto anchorChildWrapper = idNodeMap_[alignRule.second.anchor];
+            auto anchorChildLayoutProp = anchorChildWrapper->GetLayoutProperty();
+            auto anchorChildVisibility = anchorChildLayoutProp->GetVisibility();
+            // when anchor component set VisibleType::GONE, the current component is not displayed.
+            if (anchorChildVisibility == VisibleType::GONE) {
+                childWrapper->SetActive(false);
             }
             if (reliedOnMap_.count(alignRule.second.anchor) == 0) {
                 std::set<std::string> reliedList;

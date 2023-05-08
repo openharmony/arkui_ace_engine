@@ -826,32 +826,6 @@ HWTEST_F(GridTestNg, EventHub002, TestSize.Level1)
 }
 
 /**
- * @tc.name: Pattern001
- * @tc.desc: Test GetInsertPosition func
- * @tc.type: FUNC
- */
-HWTEST_F(GridTestNg, Pattern001, TestSize.Level1)
-{
-    GridModelNG gridModelNG;
-    gridModelNG.Create(nullptr, nullptr);
-    gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-    CreateGridItem(8);
-    GetInstance();
-    RunMeasureAndLayout();
-
-    /**
-     * @tc.steps: step1. Test GetInsertPosition func.
-     * @tc.expected: Verify return value.
-     */
-    pattern_->gridLayoutInfo_.currentRect_ = RectF(0, 0, 100, 100);
-    pattern_->gridLayoutInfo_.currentMovingItemPosition_ = 1;
-    int32_t insertPosition = pattern_->GetInsertPosition(50.f, 50.f);
-    EXPECT_EQ(insertPosition, 1);
-    insertPosition = pattern_->GetInsertPosition(200.f, 200.f);
-    EXPECT_EQ(insertPosition, -1);
-}
-
-/**
  * @tc.name: PositionController001
  * @tc.desc: Test positionController func in VERTICAL Grid
  * @tc.type: FUNC
@@ -1667,6 +1641,7 @@ HWTEST_F(GridTestNg, Drag002, TestSize.Level1)
     gridModelNG.Create(nullptr, nullptr);
     gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
     gridModelNG.SetEditable(true);
+    gridModelNG.SetSupportAnimation(true);
     CreateGridItem(8);
     GetInstance();
     RunMeasureAndLayout();

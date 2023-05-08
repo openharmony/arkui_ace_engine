@@ -39,13 +39,22 @@ public:
 
     void UpdateChangeEvent(bool select) const
     {
+        if (onChangeEvent_) {
+            onChangeEvent_(select);
+        }
         if (changeEvent_) {
             changeEvent_(select);
         }
     }
 
+    void SetOnChangeEvent(ChangeEvent&& onChangeEvent)
+    {
+        onChangeEvent_ = std::move(onChangeEvent);
+    }
+
 private:
     ChangeEvent changeEvent_;
+    ChangeEvent onChangeEvent_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ToggleButtonEventHub);
 };
