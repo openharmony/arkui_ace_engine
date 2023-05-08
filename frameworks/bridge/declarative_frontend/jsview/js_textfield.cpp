@@ -946,6 +946,17 @@ void JSTextField::JsMenuOptionsExtension(const JSCallbackInfo& info)
     }
 }
 
+void JSTextField::SetShowUnderline(const JSCallbackInfo& info)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (!info[0]->IsBoolean()) {
+            LOGI("The info is wrong, it is supposed to be an boolean");
+            return;
+        }
+        TextFieldModel::GetInstance()->SetShowUnderline(info[0]->ToBoolean());
+    }
+}
+
 void JSTextField::UpdateDecoration(const RefPtr<BoxComponent>& boxComponent,
     const RefPtr<TextFieldComponent>& component, const Border& boxBorder,
     const OHOS::Ace::RefPtr<OHOS::Ace::TextFieldTheme>& textFieldTheme)
@@ -982,6 +993,30 @@ void JSTextField::UpdateDecoration(const RefPtr<BoxComponent>& boxComponent,
         boxDecoration->SetBorderRadius(textFieldTheme->GetBorderRadius());
         boxComponent->SetBackDecoration(boxDecoration);
     }
+}
+
+void JSTextField::SetShowUnit(const JSCallbackInfo& info)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (!info[0]->IsFunction()) {
+            LOGI("fail to bind SetShowUnit event due to info is not object");
+            return;
+        }
+
+        auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(info[0]));
+        auto unitFunc = [builderFunc]() { builderFunc->Execute(); };
+        TextFieldModel::GetInstance()->SetShowUnit(std::move(unitFunc));
+    }
+}
+
+void JSTextField::SetShowCounter(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsBoolean()) {
+        LOGI("The info is wrong, it is supposed to be an boolean");
+        return;
+    }
+
+    TextFieldModel::GetInstance()->SetShowCounter(info[0]->ToBoolean());
 }
 
 } // namespace OHOS::Ace::Framework
