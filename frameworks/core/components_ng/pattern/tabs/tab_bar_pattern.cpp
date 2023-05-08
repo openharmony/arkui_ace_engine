@@ -1085,11 +1085,6 @@ void TabBarPattern::UpdateImageColor(int32_t indicator)
         CHECK_NULL_VOID(imageLayoutProperty);
         ImageSourceInfo info;
         auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(info);
-
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto tabTheme = pipelineContext->GetTheme<TabTheme>();
-        CHECK_NULL_VOID(tabTheme);
         imageSourceInfo.SetFillColor(columnNode->GetId() == selectedColumnId ? tabTheme->GetBottomTabIconOn() :
             tabTheme->GetBottomTabIconOff());
         imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
