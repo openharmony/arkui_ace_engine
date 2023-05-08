@@ -882,7 +882,7 @@ bool OverlayManager::RemoveModalInOverlay()
         auto modalTransition = topModalNode->GetPattern<ModalPresentationPattern>()->GetType();
         if (builder->GetRenderContext()->HasTransition()) {
             topModalNode->Clean();
-            topModalNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+            topModalNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
         if (modalTransition == ModalTransition::DEFAULT) {
             PlayDefaultModalTransition(topModalNode, false);
@@ -890,7 +890,7 @@ bool OverlayManager::RemoveModalInOverlay()
             PlayAlphaModalTransition(topModalNode, false);
         } else {
             rootNode->RemoveChild(topModalNode);
-            rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+            rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
     } else if (topModalNode->GetTag() == "SheetPage") {
         topModalNode->GetPattern<SheetPresentationPattern>()->FireCallback("false");
@@ -898,7 +898,7 @@ bool OverlayManager::RemoveModalInOverlay()
         CHECK_NULL_RETURN(topModalNode, false);
         if (builder->GetRenderContext()->HasTransition()) {
             topModalNode->Clean();
-            topModalNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+            topModalNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
         PlaySheetTransition(topModalNode, false);
     }
@@ -1039,7 +1039,7 @@ void OverlayManager::BindContentCover(bool isShow, std::function<void(const std:
             CHECK_NULL_VOID(topModalNode);
             if (topModalNode->GetTag() == "ModalPage") {
                 if (topModalNode->GetPattern<ModalPresentationPattern>()->GetTargetId() == targetId) {
-                    LOGW("current modal is existed.");
+                    topModalNode->GetPattern<ModalPresentationPattern>()->SetType(static_cast<ModalTransition>(type));
                     return;
                 }
             }
@@ -1057,7 +1057,7 @@ void OverlayManager::BindContentCover(bool isShow, std::function<void(const std:
         SaveLastModalNode();
         modalNode->MountToParent(rootNode);
         modalNode->AddChild(builder);
-        rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+        rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         if (modalTransition == ModalTransition::DEFAULT) {
             PlayDefaultModalTransition(modalNode, true);
         } else if (modalTransition == ModalTransition::ALPHA) {
@@ -1079,7 +1079,7 @@ void OverlayManager::BindContentCover(bool isShow, std::function<void(const std:
         CHECK_NULL_VOID(builder);
         if (builder->GetRenderContext()->HasTransition()) {
             topModalNode->Clean();
-            topModalNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+            topModalNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
         if (modalTransition == ModalTransition::DEFAULT) {
             PlayDefaultModalTransition(topModalNode, false);
@@ -1087,7 +1087,7 @@ void OverlayManager::BindContentCover(bool isShow, std::function<void(const std:
             PlayAlphaModalTransition(topModalNode, false);
         } else {
             rootNode->RemoveChild(topModalNode);
-            rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+            rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
         modalStack_.pop();
         SaveLastModalNode();
@@ -1119,12 +1119,20 @@ void OverlayManager::PlayDefaultModalTransition(const RefPtr<FrameNode>& modalNo
         DefaultModalTransition(false);
         option.SetOnFinishEvent(
             [rootWeak = rootNodeWeak_, modalWK = WeakClaim(RawPtr(modalNode)), id = Container::CurrentId()] {
-                auto modal = modalWK.Upgrade();
-                auto root = rootWeak.Upgrade();
-                CHECK_NULL_VOID_NOLOG(modal && root);
                 ContainerScope scope(id);
-                root->RemoveChild(modal);
-                root->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+                auto context = PipelineContext::GetCurrentContext();
+                CHECK_NULL_VOID_NOLOG(context);
+                auto taskExecutor = context->GetTaskExecutor();
+                CHECK_NULL_VOID_NOLOG(taskExecutor);
+                // animation finish event should be posted to UI thread.
+                taskExecutor->PostTask([rootWeak, modalWK, id]() {
+                    auto modal = modalWK.Upgrade();
+                    auto root = rootWeak.Upgrade();
+                    CHECK_NULL_VOID_NOLOG(modal && root);
+                    ContainerScope scope(id);
+                    root->RemoveChild(modal);
+                    root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+                    }, TaskExecutor::TaskType::UI);
             });
         AnimationUtils::Animate(
             option,
@@ -1185,12 +1193,20 @@ void OverlayManager::PlayAlphaModalTransition(const RefPtr<FrameNode>& modalNode
         // current modal page animation
         option.SetOnFinishEvent(
             [rootWeak = rootNodeWeak_, modalWK = WeakClaim(RawPtr(modalNode)), id = Container::CurrentId()] {
-                auto modal = modalWK.Upgrade();
-                auto root = rootWeak.Upgrade();
-                CHECK_NULL_VOID_NOLOG(modal && root);
                 ContainerScope scope(id);
-                root->RemoveChild(modal);
-                root->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+                auto context = PipelineContext::GetCurrentContext();
+                CHECK_NULL_VOID_NOLOG(context);
+                auto taskExecutor = context->GetTaskExecutor();
+                CHECK_NULL_VOID_NOLOG(taskExecutor);
+                // animation finish event should be posted to UI thread.
+                taskExecutor->PostTask([rootWeak, modalWK, id]() {
+                    auto modal = modalWK.Upgrade();
+                    auto root = rootWeak.Upgrade();
+                    CHECK_NULL_VOID_NOLOG(modal && root);
+                    ContainerScope scope(id);
+                    root->RemoveChild(modal);
+                    root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+                    }, TaskExecutor::TaskType::UI);
             });
         context->OpacityAnimation(option, 1, 0);
     }
@@ -1308,27 +1324,54 @@ void OverlayManager::PlaySheetTransition(RefPtr<FrameNode> sheetNode, bool isTra
     }
 }
 
-float OverlayManager::ComputeSheetOffset(NG::SheetStyle& sheetStyle)
+void OverlayManager::ComputeSheetOffset(NG::SheetStyle& sheetStyle)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, -1);
+    CHECK_NULL_VOID(pipeline);
     auto pageNode = pipeline->GetStageManager()->GetLastPage();
     auto pageHeight = pageNode->GetGeometryNode()->GetFrameSize().Height();
+    auto largeHeight = pageHeight - SHEET_BLANK_MINI_HEIGHT.ConvertToPx();
     if (sheetStyle.sheetMode.has_value()) {
         if (sheetStyle.sheetMode == SheetMode::MEDIUM) {
             sheetHeight_ = pageHeight / 2; // 2 : half
         } else if (sheetStyle.sheetMode == SheetMode::LARGE) {
-            sheetHeight_ = pageHeight - SHEET_BLANK_MINI_HEIGHT.ConvertToPx();
-        }
-    } else {
-        auto height = sheetStyle.height->ConvertToPx();
-        auto largeHeight = pageHeight - SHEET_BLANK_MINI_HEIGHT.ConvertToPx();
-        if (height > largeHeight) {
             sheetHeight_ = largeHeight;
         }
-        sheetHeight_ = sheetStyle.height->ConvertToPx();
+    } else {
+        double height = 0.0;
+        if (sheetStyle.height->Unit() == DimensionUnit::PERCENT) {
+            height = sheetStyle.height->ConvertToPxWithSize(pageHeight);
+        } else {
+            height = sheetStyle.height->ConvertToPx();
+        }
+        if (height > largeHeight) {
+            sheetHeight_ = largeHeight;
+        } else if (height < 0) {
+            sheetHeight_ = largeHeight;
+        } else {
+            sheetHeight_ = height;
+        }
     }
-    return sheetHeight_;
+}
+
+void OverlayManager::DestroySheet(const RefPtr<FrameNode>& sheetNode, int32_t targetId)
+{
+    auto topSheetNode = modalStack_.top().Upgrade();
+    CHECK_NULL_VOID(topSheetNode);
+    if (topSheetNode->GetTag() != "SheetPage") {
+        return;
+    }
+    if (topSheetNode->GetPattern<SheetPresentationPattern>()->GetTargetId() != targetId) {
+        return;
+    }
+    topSheetNode->GetPattern<SheetPresentationPattern>()->FireCallback("false");
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(rootNode);
+    auto root = DynamicCast<FrameNode>(rootNode);
+    root->RemoveChild(sheetNode);
+    root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    modalStack_.pop();
+    SaveLastModalNode();
 }
 
 #ifdef ENABLE_DRAG_FRAMEWORK

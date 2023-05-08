@@ -57,6 +57,11 @@ public:
         return type_;
     }
 
+    void SetType(ModalTransition type)
+    {
+        type_ = type;
+    }
+
     void FireCallback(const std::string& value)
     {
         if (callback_) {
