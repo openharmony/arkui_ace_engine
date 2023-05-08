@@ -53,6 +53,7 @@ public:
     void SetUnderlineColor(const Color& value);
     void SetUnderlineWidth(float underlineWidth);
     void SetShowCounter(bool value);
+    void SetSelectedAreaRedraw(bool value);
 
 private:
     void PaintSelection(DrawingContext& context) const;
@@ -71,6 +72,7 @@ private:
     RefPtr<PropertySizeF> contentSize_;
     RefPtr<PropertyOffsetF> contentOffset_;
     RefPtr<PropertyFloat> currentOffset_;
+    RefPtr<PropertyBool> isSelectedAreaRedraw_;
     RefPtr<PropertyFloat> underlineWidth_;
     RefPtr<PropertyColor> underlineColor_;
     InputStyle inputStyle_ = InputStyle::DEFAULT;
