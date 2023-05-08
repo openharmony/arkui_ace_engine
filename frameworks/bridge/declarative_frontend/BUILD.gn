@@ -273,6 +273,7 @@ template("declarative_js_engine") {
 
       # Models implemenations for classic fw
       "jsview/models/animator_model_impl.cpp",
+      "jsview/models/badge_model_impl.cpp",
       "jsview/models/blank_model_impl.cpp",
       "jsview/models/checkbox_model_impl.cpp",
       "jsview/models/checkboxgroup_model_impl.cpp",
