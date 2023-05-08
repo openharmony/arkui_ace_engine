@@ -27,9 +27,8 @@ void JSHostWindowScene::JSBind(BindingTarget globalObj)
     JSClass<JSHostWindowScene>::Declare("HostWindowScene");
     JSClass<JSHostWindowScene>::StaticMethod("create", &JSHostWindowScene::Create, MethodOptions::NONE);
 
-    JSClass<JSHostWindowScene>::Inherit<JSViewAbstract>();
     JSClass<JSHostWindowScene>::Inherit<JSInteractableView>();
-    JSClass<JSHostWindowScene>::Bind(globalObj);
+    JSClass<JSHostWindowScene>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSHostWindowScene::Create(const JSCallbackInfo& info)

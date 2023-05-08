@@ -151,14 +151,15 @@ void JSClassImpl<C, ImplDetail>::Inherit()
     ImplDetail<C>::template Inherit<Base>();
 }
 
-// template<typename C, template<typename> typename ImplDetail>
-// template<typename Base>
-// void JSClassImpl<C, ImplDetail>::InheritAndBind(
-//     typename ImplDetail<C>::BindingTarget bindTarget, JSDestructorCallback<C> dtor, JSGCMarkCallback<C> gcMark)
-// {
-//     static_assert(std::is_base_of_v<Base, C>, "Calling Inherit() on unrelated classes!");
-//     ImplDetail<C>::template InheritAndBind<Base>(bindTarget);
-// }
+template<typename C, template<typename> typename ImplDetail>
+template<typename Base>
+void JSClassImpl<C, ImplDetail>::InheritAndBind(
+    typename ImplDetail<C>::BindingTarget bindTarget, ImplDetail<C>::JSFunctionCallback ctor,
+    ImplDetail<C>::JSDestructorCallback dtor, ImplDetail<C>::JSGCMarkCallback gcMark)
+{
+    static_assert(std::is_base_of_v<Base, C>, "Calling Inherit() on unrelated classes!");
+    ImplDetail<C>::template InheritAndBind<Base>(bindTarget, ctor, dtor, gcMark);
+}
 
 template<typename C, template<typename> typename ImplDetail>
 IFunctionBinding* JSClassImpl<C, ImplDetail>::GetFunctionBinding(int id)

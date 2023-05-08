@@ -27,9 +27,8 @@ void JSScreen::JSBind(BindingTarget globalObj)
     JSClass<JSScreen>::Declare("Screen");
     JSClass<JSScreen>::StaticMethod("create", &JSScreen::Create, MethodOptions::NONE);
 
-    JSClass<JSScreen>::Inherit<JSViewAbstract>();
     JSClass<JSScreen>::Inherit<JSInteractableView>();
-    JSClass<JSScreen>::Bind(globalObj);
+    JSClass<JSScreen>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSScreen::Create(const JSCallbackInfo& info)

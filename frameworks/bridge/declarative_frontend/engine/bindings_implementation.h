@@ -380,7 +380,8 @@ public:
      */
     template<typename Base>
     static void InheritAndBind(
-        BindingTarget bindTarget, JSFunctionCallback ctor = nullptr, JSDestructorCallback<C> dtor= nullptr, JSGCMarkCallback<C> gcMark= nullptr);
+        BindingTarget bindTarget, JSFunctionCallback ctor = nullptr,
+        JSDestructorCallback<C> dtor = nullptr, JSGCMarkCallback<C> gcMark = nullptr);
 
     static IFunctionBinding* GetFunctionBinding(int id);
     static IFunctionBinding* GetGetFunctionBinding(int id);

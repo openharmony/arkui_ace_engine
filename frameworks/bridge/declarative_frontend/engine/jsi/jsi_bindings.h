@@ -85,7 +85,8 @@ public:
 
     template<typename Base>
     static void InheritAndBind(
-        BindingTarget t, JSFunctionCallback ctor = nullptr, JSDestructorCallback<C> dtor= nullptr, JSGCMarkCallback<C> gcMark= nullptr);
+        BindingTarget t, JSFunctionCallback ctor = nullptr,
+        JSDestructorCallback<C> dtor = nullptr, JSGCMarkCallback<C> gcMark = nullptr);
 
     template<typename Base>
     static void Inherit();

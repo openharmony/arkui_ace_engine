@@ -338,10 +338,10 @@ void JsiClass<C>::InheritAndBind(
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
     LocalScope scope(vm);
-    panda::Local<panda::JSValueRef> hasExitRef = t->Get(vm,
+    panda::Local<panda::JSValueRef> hasExistRef = t->Get(vm,
         panda::Local<panda::JSValueRef>(panda::StringRef::NewFromUtf8(vm, ThisJSClass::JSName())));
-    if (hasExitRef.IsEmpty()) {
-        LOGI("djc--hasExitRef InheritAndBind:  %{public}s;  %{public}s", ThisJSClass::JSName(), JSClassImpl<Base, JsiClass>::JSName());
+    if (hasExistRef.IsEmpty()) {
+        LOGI("InheritAndBind JSClass(%{public}s) has existed", ThisJSClass::JSName());
         return;
     }
 
@@ -351,29 +351,27 @@ void JsiClass<C>::InheritAndBind(
     classFunction_ = panda::Global<panda::FunctionRef>(
         vm, panda::FunctionRef::NewClassFunction(vm, JSConstructorInterceptor, nullptr, nullptr));
     classFunction_->SetName(vm, StringRef::NewFromUtf8(vm, className_.c_str()));
-    LOGI("djc--Create-InheritAndBind:  %{public}s;  %{public}s", ThisJSClass::JSName(), JSClassImpl<Base, JsiClass>::JSName());
 
-    //1、sonclassFunction->parentclassFunction
     panda::Local<panda::JSValueRef> getResult = t->Get(vm,
         panda::Local<panda::JSValueRef>(panda::StringRef::NewFromUtf8(vm, JSClassImpl<Base, JsiClass>::JSName())));
     if (getResult.IsEmpty()) {
-        LOGE("djc---InheritAndBind: father not exist  %{public}s;  %{public}s", ThisJSClass::JSName(), JSClassImpl<Base, JsiClass>::JSName());
+        LOGE("InheritAndBind: Base class(%{public}s) not exist %{public}s",
+            JSClassImpl<Base, JsiClass>::JSName(), ThisJSClass::JSName());
         return;
     }
+
     panda::Local<panda::FunctionRef> baseClassFunction(getResult);
     classFunction_->SetPrototype(vm, baseClassFunction);
-
-    //2、sonPrototype->baseClassPrototype
     auto prototype = panda::Local<panda::ObjectRef>(classFunction_->GetFunctionPrototype(vm));
     auto baseClassPrototype = panda::Local<panda::ObjectRef>(baseClassFunction->GetFunctionPrototype(vm));
     prototype->SetPrototype(vm, baseClassPrototype);
-
     prototype->Set(vm, panda::StringRef::NewFromUtf8(vm, "constructor"),
         panda::Local<panda::JSValueRef>(classFunction_.ToLocal()));
 
     for (const auto& [name, val] : staticFunctions_) {
         classFunction_->Set(vm, panda::StringRef::NewFromUtf8(vm, name.c_str()), val.ToLocal());
     }
+
     for (const auto& [name, val] : customFunctions_) {
         prototype->Set(vm, panda::StringRef::NewFromUtf8(vm, name.c_str()), val.ToLocal());
     }
