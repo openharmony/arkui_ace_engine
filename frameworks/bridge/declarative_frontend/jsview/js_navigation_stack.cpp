@@ -18,6 +18,7 @@
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/engine/js_execution_scope_defines.h"
+#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
@@ -58,6 +59,11 @@ void JSNavigationStack::SetNavDestBuilderFunc(const JSRef<JSFunc>& navDestBuilde
     navDestBuilderFunc_ = navDestBuilderFunc;
 }
 
+bool JSNavigationStack::IsEmpty()
+{
+    return dataSourceObj_->IsEmpty();
+}
+
 void JSNavigationStack::Pop()
 {
     if (dataSourceObj_->IsEmpty()) {
@@ -71,9 +77,6 @@ void JSNavigationStack::Push(const std::string& name, const RefPtr<NG::RouteInfo
 {
     // obtain param from NavPathStack
     JSRef<JSVal> param;
-    if (dataSourceObj_->IsEmpty()) {
-        return;
-    }
     if (routeInfo) {
         auto jsRouteInfo = AceType::DynamicCast<JSRouteInfo>(routeInfo);
         param = jsRouteInfo->GetParam();
@@ -93,9 +96,6 @@ void JSNavigationStack::Push(const std::string& name, const RefPtr<NG::RouteInfo
 void JSNavigationStack::PushName(const std::string& name, const JSRef<JSVal>& param)
 {
     // obtain param from routeInfo
-    if (dataSourceObj_->IsEmpty()) {
-        return;
-    }
     auto pushFunc = JSRef<JSFunc>::Cast(dataSourceObj_->GetProperty("pushName"));
     JSRef<JSVal> params[2];
     params[0] = JSRef<JSVal>::Make(ToJSValue(name));
@@ -103,16 +103,13 @@ void JSNavigationStack::PushName(const std::string& name, const JSRef<JSVal>& pa
     pushFunc->Call(dataSourceObj_, 2, params);
 }
 
-void JSNavigationStack::Push(int32_t index)
+void JSNavigationStack::Push(const std::string& name, int32_t index)
 {
-    if (dataSourceObj_->IsEmpty()) {
-        return;
-    }
     auto getFunc = JSRef<JSFunc>::Cast(dataSourceObj_->GetProperty("getParamByIndex"));
     auto param = JSRef<JSVal>::Cast(getFunc->Call(dataSourceObj_));
     auto pushFunc = JSRef<JSFunc>::Cast(dataSourceObj_->GetProperty("pushName"));
     JSRef<JSVal> params[2];
-    params[0] = JSRef<JSVal>::Make(ToJSValue(index));
+    params[0] = JSRef<JSVal>::Make(ToJSValue(name));
     params[1] = param;
     pushFunc->Call(dataSourceObj_, 2, params);
 }
@@ -125,6 +122,17 @@ void JSNavigationStack::RemoveName(const std::string& name)
     auto func = JSRef<JSFunc>::Cast(dataSourceObj_->GetProperty("removeName"));
     JSRef<JSVal> params[1];
     params[0] = JSRef<JSVal>::Make(ToJSValue(name));
+    func->Call(dataSourceObj_, 1, params);
+}
+
+void JSNavigationStack::RemoveIndex(int32_t index)
+{
+    if (dataSourceObj_->IsEmpty()) {
+        return;
+    }
+    auto func = JSRef<JSFunc>::Cast(dataSourceObj_->GetProperty("removeIndex"));
+    JSRef<JSVal> params[1];
+    params[0] = JSRef<JSVal>::Make(ToJSValue(index));
     func->Call(dataSourceObj_, 1, params);
 }
 
