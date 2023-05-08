@@ -562,6 +562,7 @@ HWTEST_F(CanvasPaintMethodTestNg, CanvasPaintMethodTestNg011, TestSize.Level1)
     EXPECT_DOUBLE_EQ(paint2.getAlphaf(), DEFAULT_DOUBLE1);
 }
 
+#ifndef NEW_SKIA
 /**
  * @tc.name: CanvasPaintMethodTestNg012
  * @tc.desc: Test the function InitImagePaint of CanvasPaintMethod.
@@ -619,6 +620,7 @@ HWTEST_F(CanvasPaintMethodTestNg, CanvasPaintMethodTestNg012, TestSize.Level1)
     paintMethod_->InitImagePaint(paintMethod_->imagePaint_);
     EXPECT_DOUBLE_EQ(paintMethod_->imagePaint_.getFilterQuality(), SkFilterQuality::kNone_SkFilterQuality);
 }
+#endif
 
 /**
  * @tc.name: CanvasPaintMethodTestNg014
