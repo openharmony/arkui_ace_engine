@@ -486,7 +486,7 @@ void TabBarPattern::HandleClick(const GestureEvent& info)
     auto layoutProperty = host->GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (layoutProperty->GetTabBarModeValue(TabBarMode::FIXED) == TabBarMode::SCROLLABLE &&
-        tabBarStyle_ == TabBarStyle::SUBTABBATSTYLE && layoutProperty->GetAxis() == Axis::HORIZONTAL) {
+        layoutProperty->GetAxis() == Axis::HORIZONTAL) {
         auto scrollable = scrollableEvent_->GetScrollable();
         if (scrollable && !scrollable->IsSpringStopped()) {
             if (IsOutOfBoundary()) {
@@ -1085,11 +1085,6 @@ void TabBarPattern::UpdateImageColor(int32_t indicator)
         CHECK_NULL_VOID(imageLayoutProperty);
         ImageSourceInfo info;
         auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(info);
-
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto tabTheme = pipelineContext->GetTheme<TabTheme>();
-        CHECK_NULL_VOID(tabTheme);
         imageSourceInfo.SetFillColor(columnNode->GetId() == selectedColumnId ? tabTheme->GetBottomTabIconOn() :
             tabTheme->GetBottomTabIconOff());
         imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);

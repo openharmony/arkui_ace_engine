@@ -157,10 +157,15 @@ void ProgressPattern::OnModifyDone()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto progressLayoutProperty = GetLayoutProperty<ProgressLayoutProperty>();
+    CHECK_NULL_VOID(progressLayoutProperty);
     if (progressLayoutProperty->GetType() == ProgressType::CAPSULE) {
         HandleEnabled();
         InitTouchEvent();
     }
+
+    auto visibilityProp = progressLayoutProperty->GetVisibility().value_or(VisibleType::VISIBLE);
+    visibilityProp_ = visibilityProp;
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void ProgressPattern::ToJsonValueForRingStyleOptions(std::unique_ptr<JsonValue>& json) const

@@ -47,8 +47,6 @@ constexpr Dimension MIN_TURN_PAGE_VELOCITY = 10.0_vp;
 constexpr Dimension MIN_DRAG_DISTANCE = 25.0_vp;
 constexpr Dimension INDICATOR_BORDER_RADIUS = 16.0_vp;
 
-constexpr int SWIPER_INDICATOR_NUM = 1;
-constexpr int SWIPER_ARROW_NUM = 2;
 // TODO define as common method
 float CalculateFriction(float gamma)
 {
@@ -1237,10 +1235,10 @@ int32_t SwiperPattern::TotalCount() const
     // last child is swiper indicator
     int num = 0;
     if (IsShowIndicator()) {
-        num += SWIPER_INDICATOR_NUM;
+        num += 1;
     }
     if (HasLeftButtonNode() && HasRightButtonNode()) {
-        num += SWIPER_ARROW_NUM;
+        num += 2;
     }
 
     return host->TotalChildCount() - num;
@@ -1462,6 +1460,7 @@ void SwiperPattern::SaveArrowProperty(const RefPtr<FrameNode>& arrowNode)
     CHECK_NULL_VOID(arrowLayoutProperty);
     arrowLayoutProperty->UpdateDirection(layoutProperty->GetDirection().value_or(Axis::HORIZONTAL));
     arrowLayoutProperty->UpdateIndex(layoutProperty->GetIndex().value_or(0));
+    arrowLayoutProperty->UpdateLoop(swiperPaintProperty->GetLoop().value_or(true));
     arrowLayoutProperty->UpdateDisplayArrow(layoutProperty->GetDisplayArrowValue());
     arrowLayoutProperty->UpdateHoverShow(layoutProperty->GetHoverShowValue());
     arrowLayoutProperty->UpdateIsShowBoard(layoutProperty->GetIsShowBoardValue());

@@ -2101,6 +2101,20 @@ std::vector<NG::OptionParam> ParseBindOptionParam(const JSCallbackInfo& info)
     return params;
 }
 
+void ParseMenuArrowParam(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+{
+    auto enableArrowValue = menuOptions->GetProperty("enableArrow");
+    if (enableArrowValue->IsBoolean()) {
+        menuParam.enableArrow = enableArrowValue->ToBoolean();
+    }
+
+    auto arrowOffset = menuOptions->GetProperty("arrowOffset");
+    CalcDimension offset;
+    if (JSViewAbstract::ParseJsDimensionVp(arrowOffset, offset)) {
+        menuParam.arrowOffset = offset;
+    }
+}
+
 void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
 {
     auto offsetVal = menuOptions->GetProperty("offset");
@@ -2151,6 +2165,8 @@ void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptio
         };
         menuParam.onDisappear = std::move(onDisappear);
     }
+
+    ParseMenuArrowParam(menuOptions, menuParam);
 }
 
 void ParseBindOptionParam(const JSCallbackInfo& info, NG::MenuParam& menuParam)

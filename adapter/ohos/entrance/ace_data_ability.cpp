@@ -82,7 +82,7 @@ void AceDataAbility::OnStart(const OHOS::AAFwk::Want& want)
     // init data ability
     BackendType backendType = BackendType::DATA;
 
-    Platform::PaContainer::CreateContainer(abilityId_, backendType, this,
+    Platform::PaContainer::CreateContainer(abilityId_, backendType, this, moduleInfo->hapPath,
         std::make_unique<DataPlatformEventCallback>([this]() { TerminateAbility(); }));
 
     AceEngine::InitJsDumpHeadSignal();

@@ -119,6 +119,16 @@ public:
         needDebugBreakPoint_ = value;
     }
 
+    void SetHapPath(std::string hapPath)
+    {
+        hapPath_ = hapPath;
+    }
+
+    std::string GetHapPath()
+    {
+        return hapPath_;
+    }
+
 private:
     std::string instanceName_;
     AppExecFwk::FormProviderData formProviderData_;
@@ -127,6 +137,7 @@ private:
     bool isDebugVersion_ = false;
     // if debug, '-D' means need debug breakpoint, by default, do not enter breakpoint.
     bool needDebugBreakPoint_ = false;
+    std::string hapPath_;
 };
 
 } // namespace OHOS::Ace

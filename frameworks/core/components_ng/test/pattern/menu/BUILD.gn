@@ -107,6 +107,7 @@ ohos_unittest("menu_layout_algorithm_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/menu/menu_view.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/navigation_menu_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/wrapper/menu_wrapper_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/menu/wrapper/menu_wrapper_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/property/accessibility_property.cpp",
     "menu_accessibility_property_test_ng.cpp",
@@ -119,6 +120,8 @@ ohos_unittest("menu_layout_algorithm_test_ng") {
     "menu_layout_property_test_ng.cpp",
     "menu_pattern_test_ng.cpp",
     "menu_view_test_ng.cpp",
+    "menu_wrapper_paint_method_test_ng.cpp",
+    "menu_wrapper_paint_property_test_ng.cpp",
   ]
 
   sources += [

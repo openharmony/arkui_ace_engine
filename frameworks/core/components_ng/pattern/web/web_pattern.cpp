@@ -408,7 +408,7 @@ void WebPattern::HandleDragStart(const GestureEvent& info)
     int32_t globalX = static_cast<int32_t>(info.GetGlobalPoint().GetX());
     int32_t globalY = static_cast<int32_t>(info.GetGlobalPoint().GetY());
     auto viewScale = pipelineContext->GetViewScale();
-    auto offset = GetHostFrameGlobalOffset();
+    auto offset = GetCoordinatePoint();
     int32_t localX = static_cast<int32_t>(globalX - offset.value_or(OffsetF()).GetX());
     int32_t localY = static_cast<int32_t>(globalY - offset.value_or(OffsetF()).GetY());
     delegate_->HandleDragEvent(localX * viewScale, localY * viewScale, DragAction::DRAG_ENTER);
@@ -430,7 +430,7 @@ void WebPattern::HandleDragUpdate(const GestureEvent& info)
     int32_t globalY = static_cast<int32_t>(info.GetGlobalPoint().GetY());
     LOGD("web drag position update, x = %{public}d, y = %{public}d", globalX, globalY);
     auto viewScale = pipelineContext->GetViewScale();
-    auto offset = GetHostFrameGlobalOffset();
+    auto offset = GetCoordinatePoint();
     int32_t localX = static_cast<int32_t>(globalX - offset.value_or(OffsetF()).GetX());
     int32_t localY = static_cast<int32_t>(globalY - offset.value_or(OffsetF()).GetY());
     delegate_->HandleDragEvent(localX * viewScale, localY * viewScale, DragAction::DRAG_OVER);
@@ -451,7 +451,7 @@ void WebPattern::HandleDragEnd(const GestureEvent& info)
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto viewScale = pipelineContext->GetViewScale();
-    auto offset = GetHostFrameGlobalOffset();
+    auto offset = GetCoordinatePoint();
     int32_t localX = static_cast<int32_t>(info.GetGlobalPoint().GetX() - offset.value_or(OffsetF()).GetX());
     int32_t localY = static_cast<int32_t>(info.GetGlobalPoint().GetY() - offset.value_or(OffsetF()).GetY());
     delegate_->HandleDragEvent(localX * viewScale, localY * viewScale, DragAction::DRAG_DROP);

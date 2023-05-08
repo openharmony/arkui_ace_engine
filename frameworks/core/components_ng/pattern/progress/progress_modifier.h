@@ -60,26 +60,57 @@ public:
     void SetRingProgressColor(const Gradient& color);
     void SetPaintShadow(bool paintShadow);
     void SetProgressStatus(ProgressStatus status);
+    void SetVisible(bool isVisible);
 
 private:
     void ContentDrawWithFunction(DrawingContext& context);
     void PaintLinear(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
+    void PaintLinearSweeping(RSCanvas& canvas, const OffsetF& offset, const RSPath& path, bool isHorizontal) const;
     void PaintRing(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
     void PaintRingBackground(RSCanvas& canvas, const RingProgressData& ringProgressData) const;
     void PaintRingProgressOrShadow(RSCanvas& canvas, const RingProgressData& ringProgressData, bool isShadow) const;
+    void PaintRingSweeping(RSCanvas& canvas, const RingProgressData& ringProgressData) const;
+    void PaintTrailing(RSCanvas& canvas, const RingProgressData& ringProgressData) const;
     void PaintScaleRing(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
     void PaintMoon(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
     void PaintCapsule(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
     void PaintVerticalCapsule(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
+    void PaintCapsuleLightSweep(RSCanvas& canvas, const SizeF& contentSize,
+        const OffsetF& offset, const RSPath& path, bool isVertical) const;
+
+    void ProcessSweepingAnimation(ProgressType type, float value);
+    void ProcessRingSweepingAnimation(float value);
+    void ProcessLinearSweepingAnimation(float value);
+    void StartRingSweepingAnimation(float value);
+    void StartRingSweepingAnimationImpl(float date);
+    void StartLinearSweepingAnimation(float value);
+    void StartLinearSweepingAnimationImpl(float date);
+    void StartCapsuleSweepingAnimation(float value);
+    void StartCapsuleSweepingAnimationImpl(float value);
+    void StopSweepingAnimation();
+    void StartRingLoadingAnimation();
+    void StartRingLoadingHeadAnimation();
+    void StartRingLoadingTailAnimation();
+    void StopRingLoadingHeadAnimation();
+    void StopRingLoadingTailAnimation();
+    float CalcRingProgressAdditionalAngle() const;
+    float TrailingCoefficient(float base, uint32_t index, uint32_t totalPoints) const;
+    Color GenerateTrailingPointColor(
+        const Color& headColor, const Color& tailColor, uint32_t index, uint32_t totalPoints) const;
+    void GenerateLinearSweepingGradientInfo(std::vector<RSColorQuad>& colors, std::vector<float>& pos) const;
+    void GenerateRingSweepingGradientInfo(std::vector<RSColorQuad>& colors, std::vector<float>& pos) const;
+    Gradient CreateCapsuleGradient() const;
 
     // Animatable
     RefPtr<AnimatablePropertyFloat> strokeWidth_; // After adjusting to the content width and height
     RefPtr<AnimatablePropertyColor> color_;
     RefPtr<AnimatablePropertyColor> bgColor_;
     RefPtr<AnimatablePropertyColor> borderColor_;
-    RefPtr<AnimatablePropertyFloat> capsuleDate_;
     RefPtr<AnimatablePropertyFloat> value_;
     RefPtr<AnimatablePropertyVectorColor> ringProgressColors_;
+    RefPtr<AnimatablePropertyFloat> sweepingDate_;
+    RefPtr<AnimatablePropertyFloat> trailingHeadDate_;
+    RefPtr<AnimatablePropertyFloat> trailingTailDate_;
 
     // no Animatable
     RefPtr<PropertyOffsetF> offset_;
@@ -93,7 +124,28 @@ private:
     RefPtr<PropertyBool> paintShadow_;
     RefPtr<PropertyInt> progressStatus_;
 
+    bool isVisible_  = true;
+    float valueBackup_ = 0.0f;
+    bool isLoading_ = false;
+    bool isSweeping_ = false;
+    float sweepingDateBackup_ = 0.0f;
+    bool sweepingDateUpdated_ = false;
+
     ACE_DISALLOW_COPY_AND_MOVE(ProgressModifier);
+};
+
+class TailingHeadCurve final : public Curve {
+    DECLARE_ACE_TYPE(TailingHeadCurve, Curve);
+
+public:
+    float MoveInternal(float time) override
+    {
+        // v = f(time) = sin(PI * time) + PI
+        // => F(v) = - cos(PI * t) / PI + PI * time + C
+        // => S = F(time) - F(0) = PI * time + 1 / PI - cos(PI * time) / PI
+        // After normalizing, S = (PI * time + 1 / PI - cos(PI * time) / PI) / (PI + 2 / PI)
+        return (PI_NUM * time + 1.0f / PI_NUM - std::cos(PI_NUM * time) / PI_NUM) / (PI_NUM + 2.0f / PI_NUM);
+    }
 };
 } // namespace OHOS::Ace::NG
 

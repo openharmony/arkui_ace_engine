@@ -65,6 +65,7 @@ public:
     void ResetMaxLength() override {};
     static void InitTextInputDefaultStyle();
     void SetForegroundColor(const Color& value) override {};
+    void SetShowUnit(std::function<void()>&& unitAction) override {};
     void SetOnChangeEvent(std::function<void(const std::string&)>&& func) override {};
 };
 

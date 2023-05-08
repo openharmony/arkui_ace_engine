@@ -2522,4 +2522,110 @@ HWTEST_F(TextFieldPatternTestNg, SetTextSelection001, TestSize.Level1)
     EXPECT_EQ(textFieldPattern->GetTextEditingValue().caretPosition, CARET_POSITION_2);
     EXPECT_EQ(textFieldPattern->GetEditingValue().caretPosition, CARET_POSITION_2);
 }
+
+/**
+ * @tc.name: SetUnderlineWidth
+ * @tc.desc: Verify that the SetUnderlineWidth interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SetUnderlineWidth, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFieldOverlayModifier.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
+    EdgeEffect edgeEffect;
+    auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
+    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollBar, scrollEdgeEffect);
+
+    /**
+     * @tc.steps: step2. call SetUnderlineWidth function.
+     * @tc.expected: The member variable value of textFieldOverlayModifier is the same as expected.
+     */
+    float value = 1.0f;
+    textFieldOverlayModifier.SetUnderlineWidth(value);
+    EXPECT_EQ(textFieldOverlayModifier.underlineWidth_->Get(), value);
+}
+
+/**
+ * @tc.name: SetUnderlineColor
+ * @tc.desc: Verify that the SetUnderlineColor interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SetUnderlineColor, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFieldOverlayModifier.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
+    EdgeEffect edgeEffect;
+    auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
+    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollBar, scrollEdgeEffect);
+
+    /**
+     * @tc.steps: step2. call SetUnderlineColor function.
+     * @tc.expected: The member variable value of textFieldOverlayModifier is the same as expected.
+     */
+    const Color value = Color::BLUE;
+    textFieldOverlayModifier.SetUnderlineColor(value);
+    EXPECT_EQ(textFieldOverlayModifier.underlineColor_->Get(), value);
+}
+
+/**
+ * @tc.name: SetShowUnderLine
+ * @tc.desc: Verify that the SetShowUnderLine interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SetShowUnderLine, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFieldPattern.
+     */
+    auto textFieldPattern = GetPattern();
+    ASSERT_NE(textFieldPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call SetShowUnderLine function.
+     * @tc.expected: The member variable value of textFieldPattern is the same as expected.
+     */
+    bool showUnderLine = false;
+    textFieldPattern->SetShowUnderLine(showUnderLine);
+    EXPECT_EQ(textFieldPattern->GetShowUnderLine(), showUnderLine);
+
+    showUnderLine = true;
+    textFieldPattern->SetShowUnderLine(showUnderLine);
+    EXPECT_EQ(textFieldPattern->GetShowUnderLine(), showUnderLine);
+}
+
+/**
+ * @tc.name: GetUnitWidth
+ * @tc.desc: Verify that the GetUnitWidth interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, GetUnitWidth, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFieldPattern.
+     */
+    auto textFieldPattern = GetPattern();
+    ASSERT_NE(textFieldPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call GetUnitWidth function.
+     * @tc.expected: The member variable value of textFieldPattern is the same as expected.
+     */
+    EXPECT_EQ(textFieldPattern->GetUnitWidth(), 0.0f);
+
+    float unitWidth = 1.0;
+    textFieldPattern->unitWidth_ = unitWidth;
+    EXPECT_EQ(textFieldPattern->GetUnitWidth(), unitWidth);
+}
 } // namespace OHOS::Ace::NG

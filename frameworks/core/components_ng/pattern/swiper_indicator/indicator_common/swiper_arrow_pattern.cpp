@@ -78,7 +78,7 @@ void SwiperArrowPattern::InitButtonEvent()
     auto buttonNode = DynamicCast<FrameNode>(host->GetFirstChild());
     CHECK_NULL_VOID(buttonNode);
 
-    auto leftGestureHub = buttonNode->GetOrCreateGestureEventHub();
+    auto arrowGestureHub = buttonNode->GetOrCreateGestureEventHub();
 
     auto touchCallback = [weak = WeakClaim(this), buttonNode](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
@@ -86,7 +86,7 @@ void SwiperArrowPattern::InitButtonEvent()
         pattern->ButtonTouchEvent(buttonNode, info.GetTouches().front().GetTouchType());
     };
     buttonTouchListenr_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
-    leftGestureHub->AddTouchEvent(buttonTouchListenr_);
+    arrowGestureHub->AddTouchEvent(buttonTouchListenr_);
 
     auto hoverCallback = [weak = WeakClaim(this), buttonNode](bool isHovered) {
         auto pattern = weak.Upgrade();
@@ -96,6 +96,35 @@ void SwiperArrowPattern::InitButtonEvent()
     buttonOnHoverListenr_ = MakeRefPtr<InputEvent>(std::move(hoverCallback));
     auto buttonInputHub = buttonNode->GetOrCreateInputEventHub();
     buttonInputHub->AddOnHoverEvent(buttonOnHoverListenr_);
+
+    auto clickCallback = [weak = WeakClaim(this)](const GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(pattern);
+        pattern->ButtonClickEvent();
+    };
+    if (buttonClickListenr_) {
+        arrowGestureHub->RemoveClickEvent(buttonClickListenr_);
+    }
+    buttonClickListenr_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
+    arrowGestureHub->AddClickEvent(buttonClickListenr_);
+}
+
+void SwiperArrowPattern::ButtonClickEvent()
+{
+    auto swiperNode = GetSwiperNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    auto swiperController = swiperPattern->GetSwiperController();
+    CHECK_NULL_VOID(swiperController);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (host->GetTag() == V2::SWIPER_LEFT_ARROW_ETS_TAG) {
+        swiperController->ShowPrevious();
+    }
+    if (host->GetTag() == V2::SWIPER_RIGHT_ARROW_ETS_TAG) {
+        swiperController->ShowNext();
+    }
 }
 
 void SwiperArrowPattern::InitNavigationArrow()
@@ -155,20 +184,6 @@ void SwiperArrowPattern::ButtonTouchEvent(RefPtr<FrameNode> buttonNode, TouchTyp
             renderContext->BlendBgColor(backgroundColor);
         } else {
             renderContext->ResetBlendBgColor();
-        }
-        auto swiperNode = GetSwiperNode();
-        CHECK_NULL_VOID(swiperNode);
-        auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-        CHECK_NULL_VOID(swiperPattern);
-        auto swiperController = swiperPattern->GetSwiperController();
-        CHECK_NULL_VOID(swiperController);
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        if (host->GetTag() == V2::SWIPER_LEFT_ARROW_ETS_TAG) {
-            swiperController->ShowPrevious();
-        }
-        if (host->GetTag() == V2::SWIPER_RIGHT_ARROW_ETS_TAG) {
-            swiperController->ShowNext();
         }
     }
 }

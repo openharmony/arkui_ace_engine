@@ -81,9 +81,10 @@ private:
     void InitButtonEvent();
     void UpdateButtonNode(int32_t index);
     void ButtonTouchEvent(RefPtr<FrameNode> buttonNode, TouchType touchType);
+    void ButtonClickEvent();
     void UpdateArrowContent();
     int32_t TotalCount() const;
-    RefPtr<ClickEvent> clickEvent_;
+    RefPtr<ClickEvent> buttonClickListenr_;
     RefPtr<TouchEventImpl> buttonTouchListenr_;
     RefPtr<InputEvent> buttonOnHoverListenr_;
     std::shared_ptr<ChangeEvent> swiperChangeEvent_;

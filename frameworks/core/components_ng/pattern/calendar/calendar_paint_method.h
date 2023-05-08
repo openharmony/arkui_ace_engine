@@ -49,6 +49,7 @@ private:
     void DrawFocusedArea(RSCanvas& canvas, const Offset& offset, double x, double y) const;
     void InitTextStyle(RSTextStyle& dateTextStyle, RSTextStyle& lunarTextStyle);
     void SetDayTextStyle(RSTextStyle& dateTextStyle, RSTextStyle& lunarTextStyle, const CalendarDay& day);
+    void SetOffWorkTextStyle(RSTextStyle& offWorkTextStyle, const CalendarDay& day) const;
     void PaintDay(RSCanvas& canvas, const Offset& offset, const CalendarDay& day, RSTextStyle& textStyle) const;
     void PaintLunarDay(
         RSCanvas& canvas, const Offset& offset, const CalendarDay& day, const RSTextStyle& textStyle) const;

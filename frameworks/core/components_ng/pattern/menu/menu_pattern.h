@@ -78,6 +78,11 @@ public:
                                                     : MakeRefPtr<MenuLayoutAlgorithm>(targetId_, targetTag_);
     }
 
+    MenuType GetMenuType() const
+    {
+        return type_;
+    }
+    
     bool IsContextMenu() const
     {
         return type_ == MenuType::CONTEXT_MENU;
@@ -91,6 +96,11 @@ public:
     bool IsMultiMenu() const
     {
         return type_ == MenuType::MULTI_MENU;
+    }
+
+    bool IsMenu() const
+    {
+        return type_ == MenuType::MENU;
     }
 
     bool IsSubMenu() const
@@ -159,6 +169,16 @@ public:
 
     RefPtr<FrameNode> GetMenuColumn() const;
 
+    void SetShowedSubMenu(const RefPtr<FrameNode>& subMenu)
+    {
+        showedSubMenu_ = subMenu;
+    }
+    const RefPtr<FrameNode>& GetShowedSubMenu() const
+    {
+        return showedSubMenu_;
+    }
+    void HideSubMenu();
+
 private:
     void OnModifyDone() override;
     void RegisterOnTouch();
@@ -181,6 +201,7 @@ private:
     MenuType type_ = MenuType::MENU;
 
     RefPtr<FrameNode> parentMenuItem_;
+    RefPtr<FrameNode> showedSubMenu_;
     std::vector<RefPtr<FrameNode>> options_;
 
     bool isSelectMenu_ = false;

@@ -178,7 +178,7 @@ bool OptionPattern::OnKeyEvent(const KeyEvent& event)
     if (event.action != KeyAction::DOWN) {
         return false;
     }
-    if (event.code == KeyCode::KEY_ENTER || event.code == KeyCode::KEY_SPACE) {
+    if (event.code == KeyCode::KEY_ENTER) {
         OnSelectProcess();
         return true;
     }

@@ -27,7 +27,6 @@
 #include "napi_remote_object.h"
 #include "source_map_operator.h"
 
-#include "adapter/ohos/entrance/pa_engine/engine/jsi/jsi_pa_source_map_operator_impl.h"
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
 #include "base/log/exception_handler.h"
@@ -266,6 +265,7 @@ void JsiPaEngine::InitJsRuntimeOptions(AbilityRuntime::Runtime::Options& options
     options.loadAce = false;
     options.preload = false;
     options.isStageModel = false;
+    options.hapPath = GetHapPath();
 }
 
 bool JsiPaEngine::CreateJsRuntime(const AbilityRuntime::Runtime::Options& options)
@@ -316,9 +316,6 @@ bool JsiPaEngine::InitJsEnv(bool debuggerMode, const std::unordered_map<std::str
     EvaluateJsCode();
 
     runtime_->SetEmbedderData(this);
-
-    auto operatorImpl = std::make_shared<JsiPaSourceMapOperatorImpl>(runtime_);
-    jsAbilityRuntime_->InitSourceMap(operatorImpl);
 
     RegisterUncaughtExceptionHandler();
     LOGI("InitJsEnv success");

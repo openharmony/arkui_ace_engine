@@ -207,7 +207,8 @@ void MenuPattern::RemoveParentHoverStyle()
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
-    menuItemPattern->UpdateBackgroundColor(theme->GetBackgroundColor());
+    menuItemPattern->SetBgBlendColor(Color::TRANSPARENT);
+    menuItemPattern->PlayBgColorAnimation();
 }
 
 void MenuPattern::UpdateMenuItemChildren(RefPtr<FrameNode>& host)
@@ -290,6 +291,30 @@ void MenuPattern::HideMenu() const
     CHECK_NULL_VOID(overlayManager);
     overlayManager->HideMenu(targetId_);
     LOGI("MenuPattern closing menu %{public}d", targetId_);
+}
+
+void MenuPattern::HideSubMenu()
+{
+    if (!showedSubMenu_) {
+        return;
+    }
+    auto subMenuPattern = showedSubMenu_->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(subMenuPattern);
+    subMenuPattern->RemoveParentHoverStyle();
+
+    auto menuItem = subMenuPattern->GetParentMenuItem();
+    CHECK_NULL_VOID(menuItem);
+    auto menuItemPattern = menuItem->GetPattern<MenuItemPattern>();
+    CHECK_NULL_VOID(menuItemPattern);
+    menuItemPattern->SetIsSubMenuShowed(false);
+    menuItemPattern->ClearHoverRegions();
+    menuItemPattern->ResetWrapperMouseEvent();
+
+    auto wrapper = GetMenuWrapper();
+    CHECK_NULL_VOID(wrapper);
+    wrapper->RemoveChild(showedSubMenu_);
+    wrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    showedSubMenu_.Reset();
 }
 
 RefPtr<FrameNode> MenuPattern::GetMenuWrapper() const

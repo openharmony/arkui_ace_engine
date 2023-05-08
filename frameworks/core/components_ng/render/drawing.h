@@ -50,6 +50,7 @@ using RSBlendMode = Rosen::Drawing::BlendMode;
 using RSSamplingOptions = Rosen::Drawing::SamplingOptions;
 using RSRoundRect = Rosen::Drawing::RoundRect;
 using RSPath = Rosen::Drawing::Path;
+using RSPathOp = Rosen::Drawing::PathOp;
 using RSBitmap = Rosen::Drawing::Bitmap;
 using RSBitmapFormat = Rosen::Drawing::BitmapFormat;
 using RSColorType = Rosen::Drawing::ColorType;
