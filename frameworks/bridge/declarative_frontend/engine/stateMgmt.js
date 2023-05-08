@@ -3451,6 +3451,7 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
         if (source && (typeof (source) === "object") && ("subscribeMe" in source)) {
             // code path for @(Local)StorageProp, the souce is a ObservedPropertyObject in aLocalStorage)
             this.source_ = source;
+            this.sourceIsOwnObject = false;
             // subscribe to receive value change updates from LocalStorage source property
             this.source_.subscribeMe(this);
         }
@@ -3460,7 +3461,9 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
                 stateMgmtConsole.warn(`@Prop ${this.info()}  Provided source object's class 
            lacks @Observed class decorator. Object property changes will not be observed.`);
             }
+            
             this.source_ = new ObservedPropertyObjectPU(source, this, thisPropertyName);
+            this.sourceIsOwnObject = true;
         }
         // deep copy source Object and wrap it
         this.setWrappedValue(this.source_.get());
@@ -3473,6 +3476,10 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
     aboutToBeDeleted() {
         if (this.source_) {
             this.source_.unlinkSuscriber(this.id__());
+            if (this.sourceIsOwnObject == true && this.source_.numberOfSubscrbers() == 0) {
+                
+                this.source_.aboutToBeDeleted();
+            }
             this.source_ = undefined;
         }
         super.aboutToBeDeleted();
@@ -3681,12 +3688,14 @@ class SynchedPropertySimpleOneWayPU extends ObservedPropertySimpleAbstractPU {
         if (source && (typeof (source) === "object") && ("notifyHasChanged" in source) && ("subscribeMe" in source)) {
             // code path for @(Local)StorageProp
             this.source_ = source;
+            this.sourceIsOwnObject = false;
             // subscribe to receive value chnage updates from LocalStorge source property
             this.source_.subscribeMe(this);
         }
         else {
             // code path for @Prop
             this.source_ = new ObservedPropertySimplePU(source, this, thisPropertyName);
+            this.sourceIsOwnObject = true;
         }
         // use own backing store for value to avoid
         // value changes to be propagated back to source
@@ -3699,7 +3708,12 @@ class SynchedPropertySimpleOneWayPU extends ObservedPropertySimpleAbstractPU {
     aboutToBeDeleted() {
         if (this.source_) {
             this.source_.unlinkSuscriber(this.id__());
+            if (this.sourceIsOwnObject == true && this.source_.numberOfSubscrbers() == 0) {
+                
+                this.source_.aboutToBeDeleted();
+            }
             this.source_ = undefined;
+            this.sourceIsOwnObject == false;
         }
         super.aboutToBeDeleted();
     }
