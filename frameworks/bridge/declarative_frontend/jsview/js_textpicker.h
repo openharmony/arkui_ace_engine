@@ -74,6 +74,7 @@ public:
     static void JSBind(BindingTarget globalObj);
 
     static void SetDefaultPickerItemHeight(const JSCallbackInfo& info);
+    static void SetCanLoop(const JSCallbackInfo& info);
 
     static void OnAccept(const JSCallbackInfo& info);
     static void OnCancel(const JSCallbackInfo& info);
@@ -125,6 +126,8 @@ private:
         NG::TextCascadePickerOptionsAttr& attr, NG::TextPickerSettingData& settingData);
     static bool ParseShowDataAttribute(const JSRef<JSObject>& paramObject,
         NG::TextPickerSettingData& settingData);
+    static bool ParseCanLoop(const JSRef<JSObject>& paramObject,
+        bool& canLoop);
     static bool ParseShowDataOptions(const JSRef<JSObject>& paramObject,
         std::vector<NG::TextCascadePickerOptions>& options, std::vector<uint32_t>& selecteds,
         std::vector<std::string>& values, NG::TextCascadePickerOptionsAttr& attr);
