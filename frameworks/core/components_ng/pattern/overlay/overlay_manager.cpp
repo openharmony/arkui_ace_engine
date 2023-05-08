@@ -491,7 +491,9 @@ void OverlayManager::UpdatePopupNode(int32_t targetId, const PopupInfo& popupInf
         AccessibilityEvent event;
         event.type = AccessibilityEventType::CHANGE;
         event.windowContentChangeTypes = WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE;
-        PipelineContext::GetCurrentContext()->SendEventToAccessibility(event);
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->SendEventToAccessibility(event);
 #ifdef ENABLE_DRAG_FRAMEWORK
         RemoveEventColumn();
         RemovePixelMapAnimation(false, 0, 0);
