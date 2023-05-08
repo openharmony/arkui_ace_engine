@@ -98,7 +98,6 @@ template("js_pa_engine_ark") {
       "$ace_root/frameworks/bridge/js_frontend/engine/jsi/jsi_base_utils.cpp",
       "jsi_pa_engine.cpp",
       "jsi_pa_engine_loader.cpp",
-      "jsi_pa_source_map_operator_impl.cpp",
     ]
 
     defines += [ "PA_SUPPORT" ]
