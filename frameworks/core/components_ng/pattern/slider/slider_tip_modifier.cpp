@@ -178,8 +178,13 @@ void SliderTipModifier::PaintBubble(DrawingContext& context)
     auto& canvas = context.canvas;
     canvas.AttachPen(pen);
     canvas.AttachBrush(brush);
+#ifdef NEW_SKIA
+    canvas.ClipPath(path, RSClipOp::INTERSECT, true);
+    canvas.DrawPath(path);
+#else
     canvas.DrawPath(path);
     canvas.ClipPath(path, RSClipOp::INTERSECT, true);
+#endif
 }
 
 void SliderTipModifier::onDraw(DrawingContext& context)

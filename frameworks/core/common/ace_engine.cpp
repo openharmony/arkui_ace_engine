@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,17 +18,14 @@
 #include <csignal>
 #include <cstdio>
 
-#include "base/log/dump_log.h"
 #include "base/log/log.h"
 #include "base/memory/memory_monitor.h"
 #include "base/thread/background_task_executor.h"
 #include "base/utils/utils.h"
-#include "core/common/ace_application_info.h"
-#include "core/common/ace_page.h"
+#include "core/image/image_cache.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/common/plugin_manager.h"
 #endif
-#include "core/image/image_cache.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -50,7 +47,7 @@ void HandleSignal(int signo)
     }
 }
 
-}
+} // namespace
 
 AceEngine::AceEngine()
 {

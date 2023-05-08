@@ -22,7 +22,10 @@
 
 #include "common_constants.h"
 #include "mock_schedule_task.h"
+#include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_frontend.h"
+#include "test/mock/core/common/mock_window.h"
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -40,9 +43,6 @@
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/pipeline_ng/test/mock/mock_frontend.h"
-#include "core/pipeline_ng/test/mock/mock_task_executor.h"
-#include "core/pipeline_ng/test/mock/mock_window.h"
 
 using namespace testing;
 using namespace testing::ext;

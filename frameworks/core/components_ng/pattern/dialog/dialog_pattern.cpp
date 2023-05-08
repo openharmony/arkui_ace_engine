@@ -49,6 +49,7 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/event/key_event.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -356,6 +357,20 @@ RefPtr<FrameNode> DialogPattern::CreateButton(const ButtonInfo& params, int32_t 
     } else {
         BindCloseCallBack(hub, -1);
     }
+
+    // register Register keyboard event
+    auto focusHub = buttonNode->GetOrCreateFocusHub();
+    auto onKeyEvent = [focusHub](const KeyEvent& event) -> bool {
+        if (event.action != KeyAction::DOWN) {
+            return false;
+        }
+        if (event.code == KeyCode::KEY_ENTER) {
+            focusHub->OnClick(event);
+            return true;
+        }
+        return false;
+    };
+    focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
 
     // add scale animation
     auto inputHub = buttonNode->GetOrCreateInputEventHub();

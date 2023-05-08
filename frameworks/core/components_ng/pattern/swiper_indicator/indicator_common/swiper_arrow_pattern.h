@@ -22,7 +22,6 @@
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
-#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_arrow_layout_algorithm.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_arrow_layout_property.h"
 
 namespace OHOS::Ace::NG {
@@ -59,7 +58,7 @@ public:
         CHECK_NULL_RETURN(swiperTheme, FocusPattern());
         FocusPaintParam paintParam;
         paintParam.SetPaintColor(swiperTheme->GetFocusedColor());
-        paintParam.SetPaintWidth(Dimension(2.0, DimensionUnit::VP));
+        paintParam.SetPaintWidth(Dimension(2.0_vp));
         return { FocusType::NODE, true, FocusStyleType::INNER_BORDER, paintParam };
     }
 

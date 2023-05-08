@@ -214,9 +214,15 @@ public:
 
     void SetValues(const std::vector<std::string>& values)
     {
+        values_.clear();
         for (auto& value : values) {
             values_.emplace_back(value);
         }
+    }
+
+    void SetHasSelectAttr(bool value)
+    {
+        isHasSelectAttr_ = value;
     }
 
     void SetSelecteds(const std::vector<uint32_t>& values);
@@ -257,6 +263,7 @@ private:
         const std::vector<uint32_t>& indexs, int32_t status) const;
     void SupplementOption(const std::vector<NG::TextCascadePickerOptions>& reOptions,
         std::vector<NG::RangeContent>& rangeContents, uint32_t patterIndex);
+    void ProcessCascadeOptionsValues(const std::vector<std::string>& rangeResultValue, uint32_t index);
 
     bool enabled_ = true;
     double defaultPickerItemHeight_;
@@ -268,6 +275,7 @@ private:
     std::map<RefPtr<FrameNode>, std::vector<NG::RangeContent>> optionsWithNode_;
     std::vector<NG::TextCascadePickerOptions> cascadeOriginptions_;
     bool isCascade_ = false;
+    bool isHasSelectAttr_ = false;
     std::vector<std::string> values_;
     std::vector<uint32_t> selecteds_;
     Color backgroundColor_ = Color::WHITE;

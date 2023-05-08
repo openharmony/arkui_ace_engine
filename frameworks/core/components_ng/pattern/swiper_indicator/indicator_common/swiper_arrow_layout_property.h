@@ -21,7 +21,6 @@
 #include "core/components_ng/layout/layout_property.h"
 
 namespace OHOS::Ace::NG {
-
 class ACE_EXPORT SwiperArrowLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(SwiperArrowLayoutProperty, LayoutProperty);
 
@@ -36,6 +35,8 @@ public:
         value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
         value->propDirection_ = CloneDirection();
         value->propIndex_ = CloneIndex();
+        value->propLoop_ = CloneLoop();
+        value->propEnabled_ = CloneEnabled();
         value->propDisplayArrow_ = CloneDisplayArrow();
         value->propHoverShow_ = CloneHoverShow();
         value->propIsShowBoard_ = CloneIsShowBoard();
@@ -52,6 +53,8 @@ public:
         LayoutProperty::Reset();
         ResetDirection();
         ResetIndex();
+        ResetLoop();
+        ResetEnabled();
         ResetDisplayArrow();
         ResetHoverShow();
         ResetIsShowBoard();
@@ -64,6 +67,8 @@ public:
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Direction, Axis, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Index, int32_t, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Loop, bool, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Enabled, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DisplayArrow, bool, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HoverShow, bool, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsShowBoard, bool, PROPERTY_UPDATE_MEASURE_SELF);

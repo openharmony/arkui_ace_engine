@@ -147,7 +147,7 @@ void JSScroller::ScrollEdge(const JSCallbackInfo& args)
 void JSScroller::ScrollToIndex(const JSCallbackInfo& args)
 {
     int32_t index = 0;
-    if (args.Length() < 1 || !ConvertFromJSValue(args[0], index)) {
+    if (args.Length() < 1 || !ConvertFromJSValue(args[0], index) || index < 0) {
         LOGW("Invalid params");
         return;
     }

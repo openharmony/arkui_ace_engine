@@ -130,6 +130,7 @@ public:
     void AnimateHoverEffectBoard(bool isHovered) override;
     void UpdateBackBlurRadius(const Dimension& radius) override;
     void UpdateBackBlurStyle(const BlurStyleOption& bgBlurStyle) override;
+    void ResetBackBlurStyle() override;
     void OnSphericalEffectUpdate(double radio) override;
     void OnPixelStretchEffectUpdate(const PixStretchEffectOption& option) override;
     void OnLightUpEffectUpdate(double radio) override;
@@ -164,7 +165,7 @@ public:
 
     // if translate params use percent dimension, frameSize should be given correctly
     static std::shared_ptr<Rosen::RSTransitionEffect> GetRSTransitionWithoutType(
-        const TransitionOptions& options, const SizeF& frameSize = SizeF());
+        const std::unique_ptr<TransitionOptions>& options, const SizeF& frameSize = SizeF());
 
     static float ConvertDimensionToScaleBySize(const Dimension& dimension, float size);
 
@@ -344,7 +345,7 @@ private:
     bool isPositionChanged_ = false;
     bool isSynced_ = false;
     bool firstTransitionIn_ = false;
-    bool transitionWithAnimation_ = false;
+    bool isBreakingPoint_ = false;
     bool isBackBlurChanged_ = false;
     bool needDebugBoundary_ = false;
     bool isDisappearing_ = false;

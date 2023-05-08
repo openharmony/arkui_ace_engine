@@ -108,7 +108,7 @@ OH_NativeXComponent_KeyEvent ConvertNativeXComponentKeyEvent(const KeyEvent& eve
     nativeKeyEvent.code = static_cast<OH_NativeXComponent_KeyCode>(event.code);
     nativeKeyEvent.sourceType = ConvertNativeXComponentEventSourceType(event.sourceType);
     nativeKeyEvent.deviceId = event.deviceId;
-    nativeKeyEvent.timeStamp = event.timeStamp.time_since_epoch().count();
+    nativeKeyEvent.timestamp = event.timeStamp.time_since_epoch().count();
     return nativeKeyEvent;
 }
 } // namespace

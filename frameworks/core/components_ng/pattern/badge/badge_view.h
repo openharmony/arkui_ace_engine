@@ -21,6 +21,8 @@
 #include "base/geometry/dimension.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/badge/badge_layout_property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -42,6 +44,7 @@ public:
     };
 
     static void Create(BadgeParameters& badgeParameters);
+    static void UpdateBadgeStyle(BadgeParameters& badgeParameters, const RefPtr<FrameNode>& frameNode);
 };
 
 } // namespace OHOS::Ace::NG

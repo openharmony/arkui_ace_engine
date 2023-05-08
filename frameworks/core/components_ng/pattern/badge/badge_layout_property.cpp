@@ -14,7 +14,9 @@
  */
 
 #include "core/components_ng/pattern/badge/badge_layout_property.h"
+
 #include "core/components/badge/badge_theme.h"
+#include "core/components/common/layout/constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -36,10 +38,9 @@ void BadgeLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     CHECK_NULL_VOID(pipeline);
     auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
     CHECK_NULL_VOID(badgeTheme);
-    auto position = BadgeLayoutProperty::GetBadgePosition();
-    json->Put("position", GetBadgePositionString(position).c_str());
 
     LayoutProperty::ToJsonValue(json);
+    json->Put("position", GetBadgePositionString(GetBadgePosition().value_or(badgeTheme->GetBadgePosition())).c_str());
     json->Put("count", std::to_string(GetBadgeCount().value_or(DEFAULT_COUNT)).c_str());
     json->Put("maxCount", std::to_string(GetBadgeMaxCount().value_or(DEFAULT_MAX_COUNT)).c_str());
     json->Put("value", GetBadgeValue().value_or("").c_str());

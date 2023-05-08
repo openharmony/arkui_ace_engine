@@ -35,6 +35,11 @@ enum class ProgressType {
     CAPSULE = 9,
 };
 
+enum class ProgressStatus {
+    PROGRESSING = 0,
+    LOADING
+};
+
 class ProgressTypeUtils {
 public:
     static std::string ConvertProgressTypeToString(ProgressType progressType)

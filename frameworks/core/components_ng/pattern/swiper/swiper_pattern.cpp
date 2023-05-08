@@ -553,21 +553,12 @@ void SwiperPattern::InitArrow()
         if (!IsShowArrow()) {
             RemoveLeftButtonNode();
             RemoveRightButtonNode();
-
             return;
         }
     }
-    auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    auto leftLayoutProperty = leftArrow->GetLayoutProperty<SwiperArrowLayoutProperty>();
-    CHECK_NULL_VOID(leftLayoutProperty);
-    leftLayoutProperty->UpdateDirection(layoutProperty->GetDirection().value_or(Axis::HORIZONTAL));
-    leftLayoutProperty->UpdateIndex(layoutProperty->GetIndex().value_or(0));
 
-    auto rightLayoutProperty = rightArrow->GetLayoutProperty<SwiperArrowLayoutProperty>();
-    CHECK_NULL_VOID(rightLayoutProperty);
-    rightLayoutProperty->UpdateDirection(layoutProperty->GetDirection().value_or(Axis::HORIZONTAL));
-    rightLayoutProperty->UpdateIndex(layoutProperty->GetIndex().value_or(0));
+    SaveArrowProperty(leftArrow);
+    SaveArrowProperty(rightArrow);
 
     leftArrow->MarkModifyDone();
     rightArrow->MarkModifyDone();
@@ -1459,5 +1450,25 @@ int32_t SwiperPattern::ComputeLoadCount(int32_t cacheCount)
     auto nextCount = std::min(cacheCount, TotalCount() - currentIndex_ - displayCount);
 
     return preCount + nextCount + displayCount;
+}
+
+void SwiperPattern::SaveArrowProperty(const RefPtr<FrameNode>& arrowNode)
+{
+    auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto swiperPaintProperty = GetPaintProperty<SwiperPaintProperty>();
+    CHECK_NULL_VOID(swiperPaintProperty);
+    auto arrowLayoutProperty = arrowNode->GetLayoutProperty<SwiperArrowLayoutProperty>();
+    CHECK_NULL_VOID(arrowLayoutProperty);
+    arrowLayoutProperty->UpdateDirection(layoutProperty->GetDirection().value_or(Axis::HORIZONTAL));
+    arrowLayoutProperty->UpdateIndex(layoutProperty->GetIndex().value_or(0));
+    arrowLayoutProperty->UpdateDisplayArrow(layoutProperty->GetDisplayArrowValue());
+    arrowLayoutProperty->UpdateHoverShow(layoutProperty->GetHoverShowValue());
+    arrowLayoutProperty->UpdateIsShowBoard(layoutProperty->GetIsShowBoardValue());
+    arrowLayoutProperty->UpdateBoardSize(layoutProperty->GetBoardSizeValue());
+    arrowLayoutProperty->UpdateBoardColor(layoutProperty->GetBoardColorValue());
+    arrowLayoutProperty->UpdateArrowSize(layoutProperty->GetArrowSizeValue());
+    arrowLayoutProperty->UpdateArrowColor(layoutProperty->GetArrowColorValue());
+    arrowLayoutProperty->UpdateIsSiderMiddle(layoutProperty->GetIsSiderMiddleValue());
 }
 } // namespace OHOS::Ace::NG

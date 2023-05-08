@@ -104,6 +104,8 @@ public:
                 theme->dividerColor_ = pattern->GetAttr<Color>("divider_color", Color::BLACK);
                 theme->tabBarShadowMargin_ = pattern->GetAttr<Dimension>("tab_bar_shadow_margin", 0.0_vp);
                 theme->tabBarGradientWidth_ = pattern->GetAttr<Dimension>("tab_bar_gradient_width", 0.0_vp);
+                theme->colorBottomTabSubBg_ = pattern->GetAttr<Color>("color_bottom_tab_sub_bg", Color::WHITE);
+                theme->colorBottomTabSubBgBlur_ = pattern->GetAttr<Color>("color_bottom_tab_sub_bg_blur", Color::WHITE);
             } else {
                 LOGW("find pattern of tab fail");
             }
@@ -327,6 +329,16 @@ public:
     {
         return tabBarGradientWidth_;
     }
+
+    const Color& GetColorBottomTabSubBg() const
+    {
+        return colorBottomTabSubBg_;
+    }
+
+    const Color& GetColorBottomTabSubBgBlur() const
+    {
+        return colorBottomTabSubBgBlur_;
+    }
 protected:
     TabTheme() = default;
 
@@ -374,6 +386,8 @@ private:
     Color dividerColor_;
     Dimension tabBarShadowMargin_;
     Dimension tabBarGradientWidth_;
+    Color colorBottomTabSubBg_;
+    Color colorBottomTabSubBgBlur_;
 };
 
 } // namespace OHOS::Ace

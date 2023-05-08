@@ -24,7 +24,6 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-
 void SwiperArrowPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -101,26 +100,20 @@ void SwiperArrowPattern::InitButtonEvent()
 
 void SwiperArrowPattern::InitNavigationArrow()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto swiperNode = GetSwiperNode();
-    CHECK_NULL_VOID(swiperNode);
-
     auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-
     auto swiperArrowLayoutProperty = GetSwiperArrowLayoutProperty();
     CHECK_NULL_VOID(swiperArrowLayoutProperty);
-
     RefPtr<FrameNode> imageNode;
     imageNode = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     BorderRadiusProperty radius;
     radius.SetRadius(swiperArrowLayoutProperty->GetBoardSizeValue());
     renderContext->UpdateBorderRadius(radius);
-
     host->AddChild(buttonNode);
     buttonNode->AddChild(imageNode);
     UpdateArrowContent();
@@ -219,24 +212,18 @@ void SwiperArrowPattern::SetButtonVisible(bool visible)
     CHECK_NULL_VOID(buttonNode);
     const auto& renderContext = buttonNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto swiperNode = GetSwiperNode();
-    CHECK_NULL_VOID(swiperNode);
-    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-    CHECK_NULL_VOID(swiperPattern);
+    auto swiperArrowLayoutProperty = GetSwiperArrowLayoutProperty();
+    CHECK_NULL_VOID(swiperArrowLayoutProperty);
+    auto isHoverShow = swiperArrowLayoutProperty->GetHoverShowValue(false);
     if ((host->GetTag() == V2::SWIPER_LEFT_ARROW_ETS_TAG && index_ == 0) ||
         (host->GetTag() == V2::SWIPER_RIGHT_ARROW_ETS_TAG && index_ == TotalCount())) {
-        if (swiperPattern->IsLoop()) {
-            renderContext->SetVisible(true);
-        } else {
+        if (!swiperArrowLayoutProperty->GetLoopValue(true)) {
             renderContext->SetVisible(false);
-        }
-    } else {
-        if (GetSwiperArrowLayoutProperty()->GetHoverShowValue(false)) {
-            renderContext->SetVisible(visible);
-        } else {
-            renderContext->SetVisible(true);
+            return;
         }
     }
+    visible = isHoverShow ? visible : true;
+    renderContext->SetVisible(visible);
 }
 
 void SwiperArrowPattern::UpdateArrowContent()
@@ -276,11 +263,7 @@ void SwiperArrowPattern::UpdateArrowContent()
         }
     }
     imageSourceInfo.SetFillColor(swiperArrowLayoutProperty->GetArrowColorValue());
-    auto swiperNode = GetSwiperNode();
-    CHECK_NULL_VOID(swiperNode);
-    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-    CHECK_NULL_VOID(swiperPattern);
-    if (!swiperPattern->IsEnabled()) {
+    if (!swiperArrowLayoutProperty->GetEnabledValue(true)) {
         auto pipelineContext = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID_NOLOG(pipelineContext);
         auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
@@ -296,5 +279,4 @@ void SwiperArrowPattern::UpdateArrowContent()
     imageNode->GetLayoutProperty<ImageLayoutProperty>()->UpdateSourceSize(sourceSize);
     imageNode->MarkModifyDone();
 }
-
 } // namespace OHOS::Ace::NG

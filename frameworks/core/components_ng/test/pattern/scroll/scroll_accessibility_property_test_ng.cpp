@@ -30,8 +30,10 @@ using namespace OHOS::Ace::Framework;
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr float CURRENT_DISTANCE = -5.0f;
 constexpr float SCROLLABLE_DISTANCE = 10.0f;
+constexpr float CURRENT_DISTANCE = -5.0f;
+constexpr float CURRENT_DISTANCE_TOP = 0.0f;
+constexpr float CURRENT_DISTANCE_BOTTOM = -SCROLLABLE_DISTANCE;
 } // namespace
 class ScrollAccessibilityPropertyTestNg : public testing::Test {
 public:
@@ -70,6 +72,9 @@ HWTEST_F(ScrollAccessibilityPropertyTestNg, ScrollAccessibilityPropertyIsScrolla
  */
 HWTEST_F(ScrollAccessibilityPropertyTestNg, ScrollAccessibilityPropertyGetSupportAction001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. create frameNode, scrollPattern, scrollAccessibilityProperty.
+     */
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::SCROLL_ETS_TAG,
         ViewStackProcessor::GetInstance()->ClaimNodeId(), []() { return AceType::MakeRefPtr<ScrollPattern>(); });
     ASSERT_NE(frameNode, nullptr);
@@ -77,15 +82,64 @@ HWTEST_F(ScrollAccessibilityPropertyTestNg, ScrollAccessibilityPropertyGetSuppor
     ASSERT_NE(scrollPattern, nullptr);
     auto scrollAccessibilityProperty = frameNode->GetAccessibilityProperty<ScrollAccessibilityProperty>();
     ASSERT_NE(scrollAccessibilityProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. set scrollPattern property for test.
+     */
     scrollPattern->axis_ = Axis::VERTICAL;
     scrollPattern->scrollableDistance_ = SCROLLABLE_DISTANCE;
     scrollPattern->currentOffset_ = CURRENT_DISTANCE;
 
+    /**
+     * @tc.steps: step3. callback ResetSupportAction then GetSupportAction. Contrast actions and expectActions.
+     * @tc.expected: expect actions equals to expectActions.
+     */
     scrollAccessibilityProperty->ResetSupportAction();
     std::unordered_set<AceAction> supportAceActions = scrollAccessibilityProperty->GetSupportAction();
     uint64_t actions = 0, expectActions = 0;
     expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
     expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
+    for (auto action : supportAceActions) {
+        actions |= 1UL << static_cast<uint32_t>(action);
+    }
+    EXPECT_EQ(actions, expectActions);
+
+    /**
+     * @tc.steps: step4. change scrollPattern property and retrieve actions. Contrast again.
+     * @tc.expected: expect actions equals to expectActions.
+     */
+    scrollPattern->currentOffset_ = CURRENT_DISTANCE_TOP;
+    scrollAccessibilityProperty->ResetSupportAction();
+    supportAceActions = scrollAccessibilityProperty->GetSupportAction();
+    actions = 0, expectActions = 0;
+    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
+    for (auto action : supportAceActions) {
+        actions |= 1UL << static_cast<uint32_t>(action);
+    }
+    EXPECT_EQ(actions, expectActions);
+
+    /**
+     * @tc.steps: step5. change scrollPattern property and retrieve actions. Contrast again.
+     * @tc.expected: expect actions equals to expectActions.
+     */
+    scrollPattern->currentOffset_ = CURRENT_DISTANCE_BOTTOM;
+    scrollAccessibilityProperty->ResetSupportAction();
+    supportAceActions = scrollAccessibilityProperty->GetSupportAction();
+    actions = 0, expectActions = 0;
+    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
+    for (auto action : supportAceActions) {
+        actions |= 1UL << static_cast<uint32_t>(action);
+    }
+    EXPECT_EQ(actions, expectActions);
+
+    /**
+     * @tc.steps: step6. change scrollPattern property and retrieve actions. Contrast again.
+     * @tc.expected: expect actions equals to expectActions.
+     */
+    scrollPattern->axis_ = Axis::NONE;
+    scrollAccessibilityProperty->ResetSupportAction();
+    supportAceActions = scrollAccessibilityProperty->GetSupportAction();
+    actions = 0, expectActions = 0;
     for (auto action : supportAceActions) {
         actions |= 1UL << static_cast<uint32_t>(action);
     }

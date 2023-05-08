@@ -19,6 +19,7 @@
 #include "base/geometry/dimension.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/pattern/progress/progress_date.h"
+#include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
@@ -38,6 +39,9 @@ public:
         paintProperty->propBackgroundColor_ = CloneBackgroundColor();
         paintProperty->propProgressType_ = CloneProgressType();
         paintProperty->propBorderColor_ = CloneBorderColor();
+        paintProperty->propGradientColor_ = CloneGradientColor();
+        paintProperty->propPaintShadow_ = ClonePaintShadow();
+        paintProperty->propProgressStatus_ = CloneProgressStatus();
         return paintProperty;
     }
 
@@ -49,12 +53,16 @@ public:
         ResetBackgroundColor();
         ResetProgressType();
         ResetBorderColor();
+        ResetGradientColor();
+        ResetPaintShadow();
+        ResetProgressStatus();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
     std::string ProgressOptions() const;
     void ToJsonValueForCapsule(std::unique_ptr<JsonValue>& json) const;
+    std::string ToJsonGradientColor() const;
 
     ACE_DEFINE_PROPERTY_GROUP(ProgressPaintDate, ProgressDate);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ProgressPaintDate, MaxValue, double, PROPERTY_UPDATE_MEASURE);
@@ -75,6 +83,9 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BackgroundColor, Color, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ProgressType, ProgressType, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BorderColor, Color, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(GradientColor, Gradient, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PaintShadow, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ProgressStatus, ProgressStatus, PROPERTY_UPDATE_MEASURE);
 };
 } // namespace OHOS::Ace::NG
 

@@ -15,9 +15,7 @@
 
 #include "core/components_ng/pattern/window_scene/scene/container/window_pattern.h"
 
-#include "include/vsync_station.h"
-#include "render_service_client/core/ui/rs_ui_director.h"
-#include "session/container/include/session_stage.h"
+#include "ability_context.h"
 
 #include "base/utils/time_util.h"
 #include "core/common/container.h"
@@ -40,29 +38,21 @@ float GetDisplayRefreshRate()
 } // namespace
 
 namespace OHOS::Ace::NG {
-
+namespace {
 class SizeChangeListener : public Rosen::ISizeChangeListener {
 public:
-    explicit SizeChangeListener(int32_t instanceId) : instanceId_(instanceId) {}
+    explicit SizeChangeListener(const std::weak_ptr<WindowPattern>& weakWindow) : weakWindow_(weakWindow) {}
     virtual ~SizeChangeListener() = default;
 
     void OnSizeChange(const Rosen::WSRect& rect, Rosen::SizeChangeReason reason) override
     {
-        ContainerScope scope(instanceId_);
-        auto container = Container::Current();
-        CHECK_NULL_VOID(container);
-        auto window = static_cast<WindowPattern*>(container->GetWindow());
+        LOGI("OnSizeChange window rect: [%{public}d, %{public}d, %{public}u, %{public}u]",
+            rect.posX_, rect.posY_, rect.width_, rect.height_);
+        auto window = weakWindow_.lock();
         CHECK_NULL_VOID(window);
-        window->SetWindowRect(Rect(rect.posX_, rect.posY_, rect.width_, rect.height_));
-
-        ViewportConfig config;
-        config.SetPosition(rect.posX_, rect.posY_);
-        config.SetSize(rect.width_, rect.height_);
-        // TODO: get display density
-        config.SetDensity(1.5);
-        LOGI("OnSizeChange window rect: [%{public}d, %{public}d, %{public}u, %{public}u]", rect.posX_, rect.posY_,
-            rect.width_, rect.height_);
-        window->UpdateViewportConfig(config, SESSION_TO_WINDOW_MAP.at(reason));
+        auto windowRect = Rect(rect.posX_, rect.posY_, rect.width_, rect.height_);
+        window->SetWindowRect(windowRect);
+        window->UpdateViewportConfig(windowRect, SESSION_TO_WINDOW_MAP.at(reason));
     }
 
 private:
@@ -73,7 +63,7 @@ private:
         { Rosen::SizeChangeReason::RECOVER, Rosen::WindowSizeChangeReason::RECOVER },
         { Rosen::SizeChangeReason::ROTATION, Rosen::WindowSizeChangeReason::ROTATION },
     };
-    int32_t instanceId_ = -1;
+    std::weak_ptr<WindowPattern> weakWindow_;
 };
 
 class InputEventListener : public Rosen::IInputEventListener {
@@ -114,11 +104,19 @@ public:
 private:
     int32_t instanceId_ = -1;
 };
+} // namespace
 
-WindowPattern::WindowPattern(
-    const std::shared_ptr<AbilityRuntime::Context>& context, const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode)
-    : surfaceNode_(surfaceNode), context_(context)
-{}
+WindowPattern::WindowPattern(const std::shared_ptr<AbilityRuntime::Context>& context)
+    : context_(context)
+{
+    ACE_DCHECK(context_);
+
+    auto name = context_->GetBundleName();
+    auto pos = name.find_last_of('.');
+    name = (pos == std::string::npos) ? name : name.substr(pos + 1); // skip '.'
+    windowName_ = name + std::to_string(windowId_);
+    surfaceNode_ = CreateSurfaceNode(windowName_);
+}
 
 void WindowPattern::Init()
 {
@@ -169,19 +167,34 @@ void WindowPattern::Destroy()
     callbacks_.clear();
 }
 
+std::shared_ptr<Rosen::RSSurfaceNode> WindowPattern::CreateSurfaceNode(const std::string& name)
+{
+    struct Rosen::RSSurfaceNodeConfig rsSurfaceNodeConfig;
+    rsSurfaceNodeConfig.SurfaceNodeName = name;
+    return Rosen::RSSurfaceNode::Create(rsSurfaceNodeConfig);
+}
+
 void WindowPattern::LoadContent(
     const std::string& contentUrl, NativeEngine* engine, NativeValue* storage, AbilityRuntime::Context* context)
 {
     uiContent_ = UIContent::Create(context_.get(), engine);
     CHECK_NULL_VOID(uiContent_);
-    uiContent_->Initialize(std::shared_ptr<Window>(this), contentUrl, storage);
+    uiContent_->Initialize(shared_from_this(), contentUrl, storage);
+
+    uiContent_->Foreground();
+    UpdateViewportConfig(GetWindowRect(), Rosen::WindowSizeChangeReason::UNDEFINED);
 
     auto inputListener = std::make_shared<InputEventListener>(instanceId_);
     RegisterInputEventListener(inputListener);
 }
 
-void WindowPattern::UpdateViewportConfig(const ViewportConfig& config, Rosen::WindowSizeChangeReason reason)
+void WindowPattern::UpdateViewportConfig(const Rect& rect, Rosen::WindowSizeChangeReason reason)
 {
+    ViewportConfig config;
+    config.SetPosition(rect.Left(), rect.Top());
+    config.SetSize(rect.Width(), rect.Height());
+    constexpr float density = 1.5; // to get display density
+    config.SetDensity(density);
     CHECK_NULL_VOID(uiContent_);
     uiContent_->UpdateViewportConfig(config, reason);
 }
@@ -309,32 +322,37 @@ void WindowPattern::ProcessAxisEvent(const std::shared_ptr<OHOS::MMI::AxisEvent>
 
 void WindowPattern::Connect()
 {
-    auto sizeChangeListener = std::make_shared<SizeChangeListener>(instanceId_);
+    auto sizeChangeListener = std::make_shared<SizeChangeListener>(weak_from_this());
     RegisterSizeChangeListener(sizeChangeListener);
+
     CHECK_NULL_VOID(sessionStage_);
     sessionStage_->Connect();
 }
 
 void WindowPattern::Foreground()
 {
-    CHECK_NULL_VOID(uiContent_);
-    uiContent_->Foreground();
+    if (uiContent_) {
+        uiContent_->Foreground();
+    }
     CHECK_NULL_VOID(sessionStage_);
     sessionStage_->Foreground();
 }
 
 void WindowPattern::Background()
 {
-    CHECK_NULL_VOID(uiContent_);
-    uiContent_->Background();
+    if (uiContent_) {
+        uiContent_->Background();
+    }
     CHECK_NULL_VOID(sessionStage_);
     sessionStage_->Background();
 }
 
 void WindowPattern::Disconnect()
 {
+    if (uiContent_) {
+        uiContent_->Destroy();
+    }
     CHECK_NULL_VOID(sessionStage_);
     sessionStage_->Disconnect();
 }
-
 } // namespace OHOS::Ace::NG

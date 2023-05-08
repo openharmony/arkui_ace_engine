@@ -30,7 +30,12 @@
 #include "include/core/SkImage.h"
 #include "include/core/SkPoint.h"
 #include "include/core/SkSurface.h"
+#ifdef NEW_SKIA
+#include "include/core/SkColorFilter.h"
+#include "include/effects/SkImageFilters.h"
+#else
 #include "include/effects/SkBlurImageFilter.h"
+#endif
 #include "include/effects/SkDashPathEffect.h"
 #include "include/effects/SkGradientShader.h"
 #include "include/utils/SkParsePath.h"
@@ -1181,7 +1186,11 @@ void CustomPaintPaintMethod::ClearPaintImage(SkPaint& paint)
     paint.setColorFilter(SkColorFilters::Matrix(matrix));
 #endif
     paint.setMaskFilter(SkMaskFilter::MakeBlur(SkBlurStyle::kNormal_SkBlurStyle, 0));
+#ifdef NEW_SKIA
+    paint.setImageFilter(SkImageFilters::Blur(0, 0, nullptr));
+#else
     paint.setImageFilter(SkBlurImageFilter::Make(0, 0, nullptr));
+#endif
 }
 
 void CustomPaintPaintMethod::SetPaintImage(SkPaint& paint)
@@ -1429,7 +1438,11 @@ void CustomPaintPaintMethod::SetContrastFilter(const std::string& percent, SkPai
 // https://drafts.fxtf.org/filter-effects/#blurEquivalent
 void CustomPaintPaintMethod::SetBlurFilter(const std::string& percent, SkPaint& paint)
 {
+#ifdef NEW_SKIA
+    paint.setImageFilter(SkImageFilters::Blur(BlurStrToDouble(percent), BlurStrToDouble(percent), nullptr));
+#else
     paint.setImageFilter(SkBlurImageFilter::Make(BlurStrToDouble(percent), BlurStrToDouble(percent), nullptr));
+#endif
 }
 
 void CustomPaintPaintMethod::SetColorFilter(float matrix[20], SkPaint& paint)

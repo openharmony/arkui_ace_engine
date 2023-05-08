@@ -84,6 +84,8 @@ public:
 
     static RefPtr<PipelineBase> GetCurrentContext();
 
+    static RefPtr<ThemeManager> CurrentThemeManager();
+
     virtual void SetupRootElement() = 0;
 
     virtual uint64_t GetTimeFromExternalTimer();

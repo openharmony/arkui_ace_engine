@@ -184,12 +184,12 @@ int32_t OH_NativeXComponent_GetKeyEventDeviceId(OH_NativeXComponent_KeyEvent* ke
     return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
 }
 
-int32_t OH_NativeXComponent_GetKeyEventTimeStamp(OH_NativeXComponent_KeyEvent* keyEvent, int64_t* timeStamp)
+int32_t OH_NativeXComponent_GetKeyEventTimestamp(OH_NativeXComponent_KeyEvent* keyEvent, int64_t* timestamp)
 {
-    if ((keyEvent == nullptr) || (timeStamp == nullptr)) {
+    if ((keyEvent == nullptr) || (timestamp == nullptr)) {
         return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
     }
-    (*timeStamp) = keyEvent->timeStamp;
+    (*timestamp) = keyEvent->timestamp;
     return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
 }
 #ifdef __cplusplus

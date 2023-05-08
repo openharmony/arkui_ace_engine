@@ -1617,20 +1617,6 @@ void FrameNode::UpdateAnimatablePropertyFloat(const std::string& propertyName, f
     property->Set(value);
 }
 
-void FrameNode::OnAddDisappearingChild()
-{
-    auto context = GetRenderContext();
-    CHECK_NULL_VOID(context);
-    context->UpdateFreeze(true);
-}
-
-void FrameNode::OnRemoveDisappearingChild()
-{
-    auto context = GetRenderContext();
-    CHECK_NULL_VOID(context);
-    context->UpdateFreeze(false);
-}
-
 std::string FrameNode::ProvideRestoreInfo()
 {
     return pattern_->ProvideRestoreInfo();

@@ -30,6 +30,7 @@ public:
     void SetValue(const std::string& value) override {}
     void SetOnChange(TextChangeEvent&& onChange) override;
     void SetDefaultPickerItemHeight(const Dimension& value) override;
+    void SetCanLoop(const bool value) override {};
     void SetDefaultAttributes(const RefPtr<PickerTheme>& pickerTheme) override {}
     void SetDisappearTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value) override {};
     void SetNormalTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value) override {};
@@ -62,6 +63,7 @@ public:
     {
         return false;
     }
+    void SetHasSelectAttr(bool value) override {};
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_TEXTPICKER_MODEL_IMPL_H
