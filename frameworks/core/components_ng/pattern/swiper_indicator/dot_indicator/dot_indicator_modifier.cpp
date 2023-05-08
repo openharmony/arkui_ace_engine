@@ -42,6 +42,10 @@ constexpr uint32_t ITEM_HALF_WIDTH = 0;
 constexpr uint32_t ITEM_HALF_HEIGHT = 1;
 constexpr uint32_t SELECTED_ITEM_HALF_WIDTH = 2;
 constexpr uint32_t SELECTED_ITEM_HALF_HEIGHT = 3;
+constexpr float TOUCH_BOTTOM_CURVE_VELOCITY = 0.1f;
+constexpr float TOUCH_BOTTOM_CURVE_MASS = 0.2f;
+constexpr float TOUCH_BOTTOM_CURVE_STIFFNESS = 0.48f;
+constexpr float TOUCH_BOTTOM_CURVE_DAMPING = 1.0f;
 } // namespace
 
 void DotIndicatorModifier::onDraw(DrawingContext& context)
@@ -86,6 +90,9 @@ void DotIndicatorModifier::PaintBackground(DrawingContext& context, const Conten
         rectHeight = contentProperty.indicatorPadding + selectedItemHeight + contentProperty.indicatorPadding;
     }
 
+    rectWidth = rectWidth * backgroundWidthDilateRatio_->Get();
+    auto heightChangeValue = (1.0f - backgroundHeightDilateRatio_->Get()) * rectHeight;
+
     // Property to get the rectangle offset
     float rectLeft =
         axis_ == Axis::HORIZONTAL ? contentProperty.indicatorMargin.GetX() : contentProperty.indicatorMargin.GetY();
@@ -94,6 +101,10 @@ void DotIndicatorModifier::PaintBackground(DrawingContext& context, const Conten
     // Adapter circle and rect
     float rectRight = rectLeft + (axis_ == Axis::HORIZONTAL ? rectWidth : rectHeight);
     float rectBottom = rectTop + (axis_ == Axis::HORIZONTAL ? rectHeight : rectWidth);
+
+    rectTop = rectTop + heightChangeValue * 0.5f;
+    rectBottom = rectBottom - heightChangeValue * 0.5f;
+    rectHeight -= heightChangeValue;
     // Paint background
     RSCanvas canvas = context.canvas;
     RSBrush brush;
@@ -429,5 +440,31 @@ void DotIndicatorModifier::UpdateAllPointCenterXAnimation(
         isForward ? LONG_POINT_LEFT_CENTER_BEZIER_CURVE_VELOCITY : LONG_POINT_RIGHT_CENTER_BEZIER_CURVE_VELOCITY,
         CENTER_BEZIER_CURVE_MASS, CENTER_BEZIER_CURVE_STIFFNESS, CENTER_BEZIER_CURVE_DAMPING));
     AnimationUtils::Animate(longPointRightOption, [&]() { longPointRightCenterX_->Set(longPointCenterX.second); });
+}
+
+void DotIndicatorModifier::UpdateTouchBottomAnimation(
+    bool isTouchBottom, const LinearVector<float>& vectorBlackPointCenterX)
+{
+    AnimationOption option;
+    option.SetDuration(POINT_HOVER_ANIMATION_DURATION);
+    option.SetCurve(AceType::MakeRefPtr<CubicCurve>(TOUCH_BOTTOM_CURVE_VELOCITY, TOUCH_BOTTOM_CURVE_MASS,
+        TOUCH_BOTTOM_CURVE_STIFFNESS, TOUCH_BOTTOM_CURVE_DAMPING));
+
+    auto backgroundWidthDilateRatio = 1.0f;
+    auto backgroundHeightDilateRatio = 1.0f;
+
+    if (isTouchBottom) {
+        backgroundWidthDilateRatio = 1.225f - 0.0125f * vectorBlackPointCenterX_->Get().size();
+        backgroundHeightDilateRatio = 0.8f;
+    }
+
+    AnimationUtils::Animate(option,
+        [weak = WeakClaim(this), backgroundWidthDilateRatio, backgroundHeightDilateRatio, vectorBlackPointCenterX]() {
+            auto modifier = weak.Upgrade();
+            CHECK_NULL_VOID(modifier);
+            modifier->backgroundWidthDilateRatio_->Set(backgroundWidthDilateRatio);
+            modifier->backgroundHeightDilateRatio_->Set(backgroundHeightDilateRatio);
+            modifier->vectorBlackPointCenterX_->Set(vectorBlackPointCenterX);
+        });
 }
 } // namespace OHOS::Ace::NG

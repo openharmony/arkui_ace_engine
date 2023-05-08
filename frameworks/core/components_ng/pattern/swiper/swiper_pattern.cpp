@@ -764,6 +764,10 @@ void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
         return;
     }
 
+    if (!IsOutOfIndicatorZone(dragPoint)) {
+        return;
+    }
+
     auto isOutOfBoundary = IsOutOfBoundary(mainDelta + currentOffset_);
     if (!IsLoop() && isOutOfBoundary) {
         auto edgeEffect = GetEdgeEffect();
@@ -1197,6 +1201,21 @@ bool SwiperPattern::IsOutOfHotRegion(const PointF& dragPoint) const
     auto host = GetHost();
     CHECK_NULL_RETURN(host, true);
     auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, true);
+
+    auto hotRegion = geometryNode->GetFrameRect();
+    return !hotRegion.IsInRegion(dragPoint + OffsetF(hotRegion.GetX(), hotRegion.GetY()));
+}
+
+bool SwiperPattern::IsOutOfIndicatorZone(const PointF& dragPoint) const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, true);
+    auto lastChild = host->GetLastChild();
+    CHECK_NULL_RETURN(lastChild, true);
+    auto indicatorNode = AceType::DynamicCast<FrameNode>(lastChild);
+    CHECK_NULL_RETURN(indicatorNode, true);
+    auto geometryNode = indicatorNode->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, true);
 
     auto hotRegion = geometryNode->GetFrameRect();
