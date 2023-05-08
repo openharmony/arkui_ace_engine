@@ -366,6 +366,7 @@ void RosenRenderChart::PaintLinearGraph(SkCanvas* canvas, const Rect& paintRect)
     }
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderChart::PaintLineEdge(
     SkCanvas* canvas, SkPath& path, const SegmentInfo segmentInfo, double thickness, bool drawGradient)
 {
@@ -411,7 +412,52 @@ void RosenRenderChart::PaintLineEdge(
     paint.setStyle(SkPaint::Style::kStroke_Style);
     canvas->drawPath(path, paint);
 }
+#else
+void RosenRenderChart::PaintLineEdge(RSCanvas* canvas, RSPath& path,
+    const SegmentInfo segmentInfo, double thickness, bool drawGradient)
+{
+    RSPen pen;
+    pen.SetAntiAlias(true);
+    pen.SetColor(segmentInfo.GetSegmentColor().GetValue());
+    if (segmentInfo.GetLineType() == LineType::DASHED) {
+        RSRecordingPath subPath;
+        subPath.AddRoundRect(RSRoundRect(
+            RSRect(0.0, -0.5 * thickness, segmentInfo.GetSolidWidth(), thickness - 0.5 * thickness),
+            0.5 * thickness, 0.5 * thickness));
+        pen.SetPathEffect(RSPathEffect::CreatePathDashEffect(subPath,
+            segmentInfo.GetSpaceWidth() + segmentInfo.GetSolidWidth(), 5.0f, RSPathDashStyle::MORPH));
+    } else {
+        pen.SetWidth(thickness);
+    }
+    if (wholeLineGradient_) {
+        double end = startGradientPoint_.GetX();
+        if (NearZero(end)) {
+            end = startOffset_.GetX() + paintWidth_;
+        }
+        std::vector<RSPoint> points = { RSPoint(startOffset_.GetX(), 0.0f),
+            RSPoint(end, 0.0f) };
+        std::vector<RSColorQuad> colors = { segmentInfo.GetSegmentColor().GetValue(),
+            targetColor_.GetValue() };
+        std::vector<RSscalar> pos = { 0.0f };
+        pen.SetShaderEffect(RSShaderEffect::CreateLinearGradient(
+            points.at(0), points.at(1), colors, pos, RSTileMode::CLAMP));
+    }
+    if (gradientOfLine_ && drawGradient) {
+        std::vector<RSPoint> points = { RSPoint(startGradientPoint_.GetX(), 0.0f),
+            RSPoint(endGradientPoint_.GetX(), 0.0f) };
+        std::vector<RSColorQuad> colors = { segmentInfo.GetSegmentColor().ChangeAlpha(0).GetValue(),
+            segmentInfo.GetSegmentColor().GetValue() };
+        std::vector<RSscalar> pos = { 0.0f };
+        pen.SetShaderEffect(RSShaderEffect::CreateLinearGradient(
+            points.at(0), points.at(1), colors, pos, RSTileMode::CLAMP));
+    }
+    canvas->AttachPen(pen);
+    canvas->DrawPath(path);
+    canvas->DetachPen();
+}
+#endif
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderChart::PaintLineGradient(
     SkCanvas* canvas, SkPath& path, const Rect& paintRect, Color fillColor, const PointInfo& peekPoint)
 {
@@ -422,7 +468,27 @@ void RosenRenderChart::PaintLineGradient(
     paint.setStyle(SkPaint::Style::kStrokeAndFill_Style);
     canvas->drawPath(path, paint);
 }
+#else
+void RosenRenderChart::PaintLineGradient(RSCanvas* canvas, RSPath& path,
+    const Rect& paintRect, Color fillColor, const PointInfo& peekPoint)
+{
+    RSPen pen;
+    RSBrush brush;
+    pen.SetAntiAlias(true);
+    brush.SetAntiAlias(true);
+    pen.SetShaderEffect(
+        CreateFillGradientShader(paintRect, fillColor, ConvertDataToPosition(paintRect, peekPoint).GetY()));
+    brush.SetShaderEffect(
+        CreateFillGradientShader(paintRect, fillColor, ConvertDataToPosition(paintRect, peekPoint).GetY()));
+    canvas->AttachPen(pen);
+    canvas->AttachBrush(brush);
+    canvas->DrawPath(path);
+    canvas->DetachPen();
+    canvas->DetachBrush();
+}
+#endif
 
+#ifndef USE_ROSEN_DRAWING
 sk_sp<SkShader> RosenRenderChart::CreateFillGradientShader(const Rect& paintRect, const Color& fillColor, double top)
 {
     SkPoint points[2] = { SkPoint::Make(paintRect.GetOffset().GetX(), top),
@@ -434,6 +500,19 @@ sk_sp<SkShader> RosenRenderChart::CreateFillGradientShader(const Rect& paintRect
     return SkGradientShader::MakeLinear(points, colors, nullptr, 2, SkTileMode::kClamp, 0, nullptr);
 #endif
 }
+#else
+std::shared_ptr<RSShaderEffect> RosenRenderChart::CreateFillGradientShader(
+    const Rect& paintRect, const Color& fillColor, double top)
+{
+    std::vector<RSPoint> points = { RSPoint(paintRect.GetOffset().GetX(), top),
+        RSPoint(paintRect.GetOffset().GetX(), paintRect.GetOffset().GetY() + paintRect.Height()) };
+    std::vector<RSColorQuad> colors = { fillColor.GetValue(), fillColor.ChangeAlpha(0).GetValue() };
+    std::vector<RSscalar> pos = { 0.0f };
+
+    return RSShaderEffect::CreateLinearGradient(
+        points.at(0), points.at(1), colors, pos, RSTileMode::CLAMP);
+}
+#endif
 
 Offset RosenRenderChart::CalculateControlA(const Offset& prev, const Offset& cur, const Offset& next)
 {
@@ -447,8 +526,13 @@ Offset RosenRenderChart::CalculateControlB(const Offset& cur, const Offset& next
         next.GetY() - (nextNext.GetY() - cur.GetY()) / BEZIER_CONSTANT);
 }
 
+#ifndef USE_ROSEN_DRAWING
 int32_t RosenRenderChart::PaintLine(
     uint32_t startIndex, const std::vector<LineInfo>& line, SkPath& path, const MainChart& data, const Rect& paintRect)
+#else
+int32_t RosenRenderChart::PaintLine(uint32_t startIndex, const std::vector<LineInfo>& line, RSPath& path,
+    const MainChart& data, const Rect& paintRect)
+#endif
 {
     uint32_t index = startIndex;
     startIndex_ = startIndex;
@@ -461,16 +545,26 @@ int32_t RosenRenderChart::PaintLine(
         }
         if (startPoint) {
             Offset position = ConvertDataToPosition(paintRect, point);
+#ifndef USE_ROSEN_DRAWING
             if (data.GetGradient() && !drawLine_) {
                 path.moveTo(position.GetX(), paintRect.GetOffset().GetY() + paintRect.GetSize().Height());
                 path.lineTo(position.GetX(), position.GetY());
             } else {
                 path.moveTo(position.GetX(), position.GetY());
             }
+#else
+            if (data.GetGradient() && !drawLine_) {
+                path.MoveTo(position.GetX(), paintRect.GetOffset().GetY() + paintRect.GetSize().Height());
+                path.LineTo(position.GetX(), position.GetY());
+            } else {
+                path.MoveTo(position.GetX(), position.GetY());
+            }
+#endif
             startPoint = false;
         } else if (index == line.size() - 1 ||
                    (data.GetHeadPointIndex() >= 0 && (index == static_cast<uint32_t>(data.GetHeadPointIndex())))) {
             Offset position = ConvertDataToPosition(paintRect, point);
+#ifndef USE_ROSEN_DRAWING
             if (data.GetSmoothFlag()) {
                 AddCubicPath(path, paintRect, line, index, true);
             } else {
@@ -479,6 +573,16 @@ int32_t RosenRenderChart::PaintLine(
             if (data.GetGradient() && !drawLine_) {
                 path.lineTo(position.GetX(), paintRect.GetOffset().GetY() + paintRect.GetSize().Height());
             }
+#else
+            if (data.GetSmoothFlag()) {
+                AddCubicPath(path, paintRect, line, index, true);
+            } else {
+                path.LineTo(position.GetX(), position.GetY());
+            }
+            if (data.GetGradient() && !drawLine_) {
+                path.LineTo(position.GetX(), paintRect.GetOffset().GetY() + paintRect.GetSize().Height());
+            }
+#endif
             index += 1;
             break;
         } else {
@@ -486,15 +590,24 @@ int32_t RosenRenderChart::PaintLine(
                 AddCubicPath(path, paintRect, line, index, false);
             } else {
                 Offset position = ConvertDataToPosition(paintRect, point);
+#ifndef USE_ROSEN_DRAWING
                 path.lineTo(position.GetX(), position.GetY());
+#else
+                path.LineTo(position.GetX(), position.GetY());
+#endif
             }
         }
     }
     return index;
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderChart::AddCubicPath(
     SkPath& path, const Rect& paintRect, const std::vector<LineInfo>& line, uint32_t index, bool isEnd)
+#else
+void RosenRenderChart::AddCubicPath(RSPath& path, const Rect& paintRect,
+    const std::vector<LineInfo>& line, uint32_t index, bool isEnd)
+#endif
 {
     // use control point A = [(Xi + (Xi+1 - Xi-1) / 4), (Yi + (Yi+1 - Yi-1) / 4)]
     // and control point B = [(Xi+1 - (Xi+2 - Xi) / 4), (Yi+1 - (Yi+2 - Yi) / 4)]
@@ -507,7 +620,11 @@ void RosenRenderChart::AddCubicPath(
             (isEnd || index + 1 >= line.size()) ? line[index].GetPointInfo() : line[index + 1].GetPointInfo());
         Offset controlA = CalculateControlA(prev, cur, next);
         Offset controlB = CalculateControlB(cur, next, nextNext);
+#ifndef USE_ROSEN_DRAWING
         path.cubicTo(controlA.GetX(), controlA.GetY(), controlB.GetX(), controlB.GetY(), next.GetX(), next.GetY());
+#else
+        path.CubicTo(controlA.GetX(), controlA.GetY(), controlB.GetX(), controlB.GetY(), next.GetX(), next.GetY());
+#endif
     } else {
         LOGW("index out of region");
     }
@@ -521,12 +638,18 @@ void RosenRenderChart::PaintHorizontalAxis(RenderContext& context, const Rect& p
         return;
     }
     const Offset offset = paintRect.GetOffset();
-
+#ifndef USE_ROSEN_DRAWING
     SkPaint paint;
     paint.setAntiAlias(true);
     paint.setColor(horizontal_.color.GetValue());
     paint.setStyle(SkPaint::Style::kStroke_Style);
     paint.setStrokeWidth(DEFAULT_AXIS_STROKE_WIDTH);
+#else
+    RSPen pen;
+    pen.SetAntiAlias(true);
+    pen.SetColor(horizontal_.color.GetValue());
+    pen.SetWidth(DEFAULT_AXIS_STROKE_WIDTH);
+#endif
 
     if ((horizontal_.tickNumber <= 0) || (horizontal_.tickNumber + 1 == 0)) {
         horizontal_.tickNumber = DEFAULT_AXISTICK;
@@ -538,6 +661,7 @@ void RosenRenderChart::PaintHorizontalAxis(RenderContext& context, const Rect& p
     }
 
     double tickPosition = EDGE_PADDING + tickHorizontalOffset_;
+#ifndef USE_ROSEN_DRAWING
     for (int32_t index = 0; index < horizontal_.tickNumber; index++) {
         canvas->drawLine(offset.GetX() + tickPosition, offset.GetY(), offset.GetX() + tickPosition,
             offset.GetY() + TICK_LENGTH, paint);
@@ -546,6 +670,18 @@ void RosenRenderChart::PaintHorizontalAxis(RenderContext& context, const Rect& p
 
     canvas->drawLine(offset.GetX(), offset.GetY() + 0.5 * TICK_LENGTH, offset.GetX() + paintRect.Width(),
         offset.GetY() + 0.5 * TICK_LENGTH, paint);
+#else
+    canvas->AttachPen(pen);
+    for (int32_t index = 0; index < horizontal_.tickNumber; index++) {
+        canvas->DrawLine(RSPoint(offset.GetX() + tickPosition, offset.GetY()),
+            RSPoint(offset.GetX() + tickPosition, offset.GetY() + TICK_LENGTH));
+        tickPosition += tickHorizontalOffset_;
+    }
+
+    canvas->DrawLine(RSPoint(offset.GetX(), offset.GetY() + 0.5 * TICK_LENGTH),
+        RSPoint(offset.GetX() + paintRect.Width(), offset.GetY() + 0.5 * TICK_LENGTH));
+    canvas->DetachPen();
+#endif
 }
 
 void RosenRenderChart::PaintVerticalAxis(RenderContext& context, const Offset& offset, const Rect& paintRect)
@@ -556,11 +692,18 @@ void RosenRenderChart::PaintVerticalAxis(RenderContext& context, const Offset& o
         return;
     }
 
+#ifndef USE_ROSEN_DRAWING
     SkPaint paint;
     paint.setAntiAlias(true);
     paint.setColor(vertical_.color.GetValue());
     paint.setStyle(SkPaint::Style::kStroke_Style);
     paint.setStrokeWidth(DEFAULT_AXIS_STROKE_WIDTH);
+#else
+    RSPen pen;
+    pen.SetAntiAlias(true);
+    pen.SetColor(vertical_.color.GetValue());
+    pen.SetWidth(DEFAULT_AXIS_STROKE_WIDTH);
+#endif
 
     if ((vertical_.tickNumber <= 0) || (vertical_.tickNumber + 1 == 0)) {
         vertical_.tickNumber = DEFAULT_AXISTICK;
@@ -572,6 +715,7 @@ void RosenRenderChart::PaintVerticalAxis(RenderContext& context, const Offset& o
     }
 
     double tickPosition = EDGE_PADDING + tickOffset_;
+#ifndef USE_ROSEN_DRAWING
     for (int32_t index = 0; index < vertical_.tickNumber; index++) {
         canvas->drawLine(offset.GetX() + paintRect.Width() - TICK_LENGTH, offset.GetY() + tickPosition,
             offset.GetX() + paintRect.Width(), offset.GetY() + tickPosition, paint);
@@ -580,10 +724,30 @@ void RosenRenderChart::PaintVerticalAxis(RenderContext& context, const Offset& o
 
     canvas->drawLine(offset.GetX() + paintRect.Width() - 0.5 * TICK_LENGTH, offset.GetY(),
         offset.GetX() + paintRect.Width() - 0.5 * TICK_LENGTH, offset.GetY() + paintRect.Height(), paint);
+#else
+    canvas->AttachPen(pen);
+    for (int32_t index = 0; index < vertical_.tickNumber; index++) {
+        canvas->DrawLine(
+            RSPoint(offset.GetX() + paintRect.Width() - TICK_LENGTH, offset.GetY() + tickPosition),
+            RSPoint(offset.GetX() + paintRect.Width(), offset.GetY() + tickPosition));
+        tickPosition += tickOffset_;
+    }
+
+    canvas->DrawLine(RSPoint(offset.GetX() + paintRect.Width() - 0.5 * TICK_LENGTH, offset.GetY()),
+        RSPoint(
+            offset.GetX() + paintRect.Width() - 0.5 * TICK_LENGTH, offset.GetY() + paintRect.Height()));
+    canvas->DetachPen();
+#endif
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderChart::PaintBar(SkCanvas* canvas, SkPaint& paint, const std::vector<LineInfo>& barGroupData,
     const Rect& paintRect, int32_t barGroupNum, int32_t barsAreaNum, int32_t barGroupIndex)
+#else
+void RosenRenderChart::PaintBar(RSCanvas* canvas, RSPen& pen, RSBrush brush,
+    const std::vector<LineInfo>& barGroupData, const Rect& paintRect, int32_t barGroupNum, int32_t barsAreaNum,
+    int32_t barGroupIndex)
+#endif
 {
     if (NearEqual(paintRect.Width(), 0.0) || NearEqual(paintRect.Height(), 0.0)) {
         LOGE("data paint region width:%{public}lf height:%{public}lf", paintRect.Width(), paintRect.Height());
@@ -608,10 +772,20 @@ void RosenRenderChart::PaintBar(SkCanvas* canvas, SkPaint& paint, const std::vec
         auto originX = barAreaPaintRect.GetOffset().GetX() + (BAR_INTERVAL_PROPORTION / 2) * barAreaPaintRect.Width();
         auto originY = position.GetY();
 
+#ifndef USE_ROSEN_DRAWING
         canvas->drawRect(
             SkRect::MakeLTRB(originX, originY, originX + barAreaPaintRect.Width() * (1 - BAR_INTERVAL_PROPORTION),
                 paintRect.GetOffset().GetY() + paintRect.Height()),
             paint);
+#else
+        canvas->AttachPen(pen);
+        canvas->AttachBrush(brush);
+        canvas->DrawRect(
+            RSRect(originX, originY, originX + barAreaPaintRect.Width() * (1 - BAR_INTERVAL_PROPORTION),
+                paintRect.GetOffset().GetY() + paintRect.Height()));
+        canvas->DetachPen();
+        canvas->DetachBrush();
+#endif
     }
 }
 
