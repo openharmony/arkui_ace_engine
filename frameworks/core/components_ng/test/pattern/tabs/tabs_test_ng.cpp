@@ -295,6 +295,13 @@ HWTEST_F(TabsTestNg, TabsModelMeasure001, TestSize.Level1)
     dividerOffect = dividerLayoutWrapper->GetGeometryNode()->GetMarginFrameOffset();
     EXPECT_EQ(dividerOffect.GetX(), layoutSize);
     EXPECT_EQ(dividerOffect.GetY(), 0);
+    tabsFrameNode->GetLayoutProperty<TabsLayoutProperty>()->UpdateBarOverlap(true);
+    tabsLayoutAlgorithm->Measure(&layoutWrapper);
+    EXPECT_TRUE(tabsFrameNode->GetLayoutProperty<TabsLayoutProperty>()->GetBarOverlap().value());
+
+    tabsFrameNode->GetLayoutProperty<TabsLayoutProperty>()->UpdateBarOverlap(false);
+    tabsLayoutAlgorithm->Measure(&layoutWrapper);
+    EXPECT_FALSE(tabsFrameNode->GetLayoutProperty<TabsLayoutProperty>()->GetBarOverlap().value());
 }
 
 /**
@@ -2286,6 +2293,48 @@ HWTEST_F(TabsTestNg, TabsAccessibilityPropertyTestNg004, TestSize.Level1)
         actions |= 1UL << static_cast<uint32_t>(action);
     }
     EXPECT_EQ(actions, exptectActions);
+}
+/**
+ * @tc.name: TabsModelSetBarOverlap001
+ * @tc.desc: test SetBarOverlap
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabsModelSetBarOverlap001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).WillRepeatedly(Return());
+
+    /**
+     * @tc.steps: steps1. Create tabsModel
+     */
+    TabsModelNG tabsModel;
+    tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(tabsNode, nullptr);
+
+    auto layoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+   
+    /**
+     * @tc.steps: steps2. SetBarOverlap true
+     * @tc.expected: steps2. Check the BarOverlap property value
+     */
+    tabsModel.SetBarOverlap(true);
+    EXPECT_TRUE(layoutProperty->GetBarOverlap().value());
+
+    tabsModel.SetBarOverlap(false);
+    EXPECT_FALSE(layoutProperty->GetBarOverlap().value());
+
+    auto tabsRenderContext = tabsNode->GetRenderContext();
+    ASSERT_NE(tabsRenderContext, nullptr);
+    tabsRenderContext->UpdateBackgroundColor(Color::RED);
+
+    tabsModel.SetBarOverlap(true);
+    EXPECT_TRUE(layoutProperty->GetBarOverlap().value());
+
+    tabsModel.SetBarOverlap(false);
+    EXPECT_FALSE(layoutProperty->GetBarOverlap().value());
 }
 
 /**

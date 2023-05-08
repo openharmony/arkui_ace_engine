@@ -267,6 +267,36 @@ void TabsModelNG::SetFadingEdge(bool fadingEdge)
     tabBarPaintProperty->UpdateFadingEdge(fadingEdge);
 }
 
+void TabsModelNG::SetBarOverlap(bool barOverlap)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, BarOverlap, barOverlap);
+    
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    CHECK_NULL_VOID(tabsNode);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    CHECK_NULL_VOID(tabBarNode);
+    auto tabBarRenderContext = tabBarNode->GetRenderContext();
+    CHECK_NULL_VOID(tabBarRenderContext);
+    if (barOverlap) {
+        BlurStyleOption option;
+        option.blurStyle = BlurStyle::REGULAR;
+        tabBarRenderContext->UpdateBackBlurStyle(option);
+    } else {
+        tabBarRenderContext->ResetBackBlurStyle();
+    }
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    CHECK_NULL_VOID(tabTheme);
+    auto defaultBgColorBlur = tabTheme->GetColorBottomTabSubBgBlur();
+
+    if (barOverlap) {
+        tabBarRenderContext->UpdateBackgroundColor(defaultBgColorBlur);
+    } else {
+        tabBarRenderContext->UpdateBackgroundColor(Color::BLACK.BlendOpacity(0.0f));
+    }
+}
+
 void TabsModelNG::SetOnChange(std::function<void(const BaseEventInfo*)>&& onChange)
 {
     auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
