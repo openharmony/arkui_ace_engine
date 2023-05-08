@@ -19,6 +19,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/security_component/security_component_accessibility_property.h"
+#include "core/components_ng/pattern/security_component/security_component_layout_algorithm.h"
 #include "core/components_ng/pattern/security_component/security_component_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
 
@@ -54,6 +55,11 @@ public:
         return MakeRefPtr<SecurityComponentLayoutProperty>();
     }
 
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
+    {
+        return MakeRefPtr<SecurityComponentLayoutAlgorithm>();
+    }
+
     RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
     {
         return MakeRefPtr<SecurityComponentAccessibilityProperty>();
@@ -62,9 +68,16 @@ public:
     int32_t scId_ = -1;
 protected:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
-
+    void OnModifyDone() override;
+    void SetNodeHitTestMode(RefPtr<FrameNode>& node, HitTestMode mode);
+    void InitSecurityComponentOnClick(RefPtr<FrameNode>& secCompNode, RefPtr<FrameNode>& icon,
+        RefPtr<FrameNode>& text, RefPtr<FrameNode>& button);
+    void RegisterOrUpdateSecurityComponent(RefPtr<FrameNode>& frameNode, int32_t& scId);
+    void UnregisterSecurityComponent();
+    void InitSecurityComponentAppearCallback(RefPtr<FrameNode>& frameNode);
 private:
-    RefPtr<ClickEvent> clickListener_;
+    RefPtr<ClickEvent> clickListener_ = nullptr;
+    bool isAppearCallback_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(SecurityComponentPattern);
 };
 } // namespace OHOS::Ace::NG

@@ -159,7 +159,7 @@ static ButtonType TransformSecCompBgType(SecurityComponentBackgroundType type)
             buttonType = ButtonType::NORMAL;
             break;
         default:
-            LOGE("Unknown button type");
+            LOGW("Unknown button type");
             break;
     }
     return buttonType;
@@ -300,7 +300,7 @@ void SecurityComponentModelNG::SetBackgroundPadding(const std::optional<Dimensio
     const std::optional<Dimension>& bottom)
 {
     if (GetCurSecCompChildNode(V2::BUTTON_ETS_TAG) == nullptr) {
-        LOGE("Can not set background padding without background");
+        LOGW("Can not set background padding without background");
         return;
     }
 
@@ -325,7 +325,7 @@ void SecurityComponentModelNG::SetTextIconPadding(const Dimension& value)
 {
     if ((GetCurSecCompChildNode(V2::TEXT_ETS_TAG) == nullptr) ||
         (GetCurSecCompChildNode(V2::IMAGE_ETS_TAG) == nullptr)) {
-        LOGE("Can not set text icon padding without text and icon");
+        LOGW("Can not set text icon padding without text and icon");
         return;
     }
     ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, TextIconPadding, value);
