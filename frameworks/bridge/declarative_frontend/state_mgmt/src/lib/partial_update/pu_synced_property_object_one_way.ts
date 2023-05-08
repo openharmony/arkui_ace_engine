@@ -20,6 +20,10 @@ class SynchedPropertyObjectOneWayPU<C extends Object>
   private wrappedValue_: C;
   private source_: ObservedPropertyAbstract<C>;
 
+  // true for @Prop code path, 
+  // false for @(Local)StorageProp
+  private sourceIsOwnObject : boolean;
+
   constructor(source: ObservedPropertyAbstract<C> | C,
     owningChildView: IPropertySubscriber,
     thisPropertyName: PropertyInfo) {
@@ -28,6 +32,7 @@ class SynchedPropertyObjectOneWayPU<C extends Object>
     if (source && (typeof (source) === "object") && ("notifyHasChanged" in source) && ("subscribeMe" in source)) {
       // code path for @(Local)StorageProp
       this.source_ = source as ObservedPropertyAbstract<C>;
+      this.sourceIsOwnObject = false;
       // subscribe to receive value change updates from LocalStorage source property
       this.source_.subscribeMe(this);
     } else {
@@ -36,8 +41,9 @@ class SynchedPropertyObjectOneWayPU<C extends Object>
         stateMgmtConsole.warn(`@Prop ${this.info()}  Provided source object's class 
            lacks @Observed class decorator. Object property changes will not be observed.`);
       }
-
+      stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: constructor @Prop wrapping source in a new ObservedPropertyObjectPU`);
       this.source_ = new ObservedPropertyObjectPU<C>(source as C, this, thisPropertyName);
+      this.sourceIsOwnObject = true;
     }
 
     // deep copy source Object and wrap it
@@ -52,6 +58,11 @@ class SynchedPropertyObjectOneWayPU<C extends Object>
   aboutToBeDeleted() {
     if (this.source_) {
       this.source_.unlinkSuscriber(this.id__());
+      if (this.sourceIsOwnObject == true && this.source_.numberOfSubscrbers()==0){
+        stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: aboutToBeDeleted. owning source_ ObservedPropertySimplePU, calling its aboutToBeDeleted`);
+        this.source_.aboutToBeDeleted();
+     }
+
       this.source_ = undefined;
     }
     super.aboutToBeDeleted();
