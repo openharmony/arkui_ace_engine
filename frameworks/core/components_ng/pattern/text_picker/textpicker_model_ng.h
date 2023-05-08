@@ -58,6 +58,7 @@ public:
         return maxCount_;
     }
 
+    void SetHasSelectAttr(bool value) override;
     bool GetMultiOptions(std::vector<NG::TextCascadePickerOptions>& options) override;
 private:
     static RefPtr<FrameNode> CreateStackNode();

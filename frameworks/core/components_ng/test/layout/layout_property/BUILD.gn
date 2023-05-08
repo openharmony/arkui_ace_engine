@@ -13,7 +13,7 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ohos_unittest("layout_property_test_ng") {
-  module_out_path = property_test_output_path
+  module_out_path = layout_test_output_path
 
   sources = [
     "$ace_root/frameworks/base/geometry/dimension.cpp",

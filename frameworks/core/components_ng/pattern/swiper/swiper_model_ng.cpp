@@ -245,6 +245,15 @@ void SwiperModelNG::SetOnChangeEvent(std::function<void(const BaseEventInfo* inf
     });
 }
 
+void SwiperModelNG::SetIndicatorIsBoolean(bool isBoolean)
+{
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIndicatorIsBoolean(isBoolean);
+}
+
 void SwiperModelNG::SetArrowStyle(const SwiperArrowParameters& swiperArrowParameters) {}
 
 void SwiperModelNG::SetDisplayArrow(bool displayArrow) {}

@@ -16,11 +16,11 @@
 #include "bridge/declarative_frontend/jsview/js_progress.h"
 
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "bridge/declarative_frontend/jsview/js_linear_gradient.h"
 #include "bridge/declarative_frontend/jsview/models/progress_model_impl.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/progress/progress_theme.h"
 #include "core/components/text/text_theme.h"
-#include "core/components_ng/pattern/progress/progress_model.h"
 #include "core/components_ng/pattern/progress/progress_model_ng.h"
 
 namespace OHOS::Ace {
@@ -98,6 +98,8 @@ void JSProgress::Create(const JSCallbackInfo& info)
         g_progressType = ProgressType::SCALE;
     } else if (progressStyle == ProgressStyle::Capsule) {
         g_progressType = ProgressType::CAPSULE;
+    } else {
+        g_progressType = ProgressType::LINEAR;
     }
 
     ProgressModel::GetInstance()->Create(0.0, value, 0.0, total, static_cast<NG::ProgressType>(g_progressType));
@@ -133,7 +135,7 @@ void JSProgress::SetValue(double value)
     }
 
     if (value < 0) {
-        LOGE("value is leses than zero , set value euqals zero");
+        LOGE("value is less than zero , set value equals zero");
         value = 0;
     }
 
@@ -143,16 +145,31 @@ void JSProgress::SetValue(double value)
 void JSProgress::SetColor(const JSCallbackInfo& info)
 {
     Color colorVal;
-    if (!ParseJsColor(info[0], colorVal)) {
-        RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
-        if (g_progressType == ProgressType::CAPSULE) {
-            colorVal = theme->GetCapsuleSelectColor();
-        } else {
-            colorVal = theme->GetTrackSelectedColor();
+    OHOS::Ace::NG::Gradient gradient;
+    RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
+    if (ConvertGradientColor(info[0], gradient)) {
+        ProgressModel::GetInstance()->SetGradientColor(gradient);
+    } else {
+        if (info[0]->IsNull() || info[0]->IsUndefined() || !ParseJsColor(info[0], colorVal)) {
+            if (g_progressType == ProgressType::RING) {
+                OHOS::Ace::NG::GradientColor endSideColor;
+                OHOS::Ace::NG::GradientColor beginSideColor;
+                endSideColor.SetLinearColor(LinearColor(theme->GetRingProgressEndSideColor()));
+                endSideColor.SetDimension(OHOS::Ace::Dimension(0.0f));
+                beginSideColor.SetLinearColor(LinearColor(theme->GetRingProgressBeginSideColor()));
+                beginSideColor.SetDimension(OHOS::Ace::Dimension(1.0f));
+                gradient.AddColor(endSideColor);
+                gradient.AddColor(beginSideColor);
+                ProgressModel::GetInstance()->SetGradientColor(gradient);
+                return;
+            } else if (g_progressType == ProgressType::CAPSULE) {
+                colorVal = theme->GetCapsuleSelectColor();
+            } else {
+                colorVal = theme->GetTrackSelectedColor();
+            }
         }
+        ProgressModel::GetInstance()->SetColor(colorVal);
     }
-
-    ProgressModel::GetInstance()->SetColor(colorVal);
 }
 
 void JSProgress::SetCircularStyle(const JSCallbackInfo& info)
@@ -162,11 +179,21 @@ void JSProgress::SetCircularStyle(const JSCallbackInfo& info)
         return;
     }
 
-    if (g_progressType == ProgressType::CAPSULE) {
-        JsSetCapsuleStyle(info);
-        return;
+    switch (g_progressType) {
+        case ProgressType::RING:
+            JsSetRingStyleOptions(info);
+            break;
+        case ProgressType::CAPSULE:
+            JsSetCapsuleStyle(info);
+            break;
+        default:
+            JsSetProgressStyleOptions(info);
+            break;
     }
+}
 
+void JSProgress::JsSetProgressStyleOptions(const JSCallbackInfo& info)
+{
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
 
@@ -206,6 +233,57 @@ void JSProgress::SetCircularStyle(const JSCallbackInfo& info)
     ProgressModel::GetInstance()->SetScaleWidth(scaleWidthDimension);
 }
 
+NG::ProgressStatus JSProgress::ConvertStrToProgressStatus(const std::string& value)
+{
+    
+    if (value.compare("LOADING") == 0) {
+        return NG::ProgressStatus::LOADING;
+    } else {
+        return NG::ProgressStatus::PROGRESSING;
+    }
+}
+
+void JSProgress::JsSetRingStyleOptions(const JSCallbackInfo& info)
+{
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
+
+    // Parse stroke width
+    CalcDimension strokeWidthDimension;
+    auto strokeWidth = paramObject->GetProperty("strokeWidth");
+    if (strokeWidth->IsUndefined() || strokeWidth->IsNull() ||
+        !ParseJsDimensionVp(strokeWidth, strokeWidthDimension)) {
+        strokeWidthDimension = theme->GetTrackThickness();
+    }
+
+    if (LessOrEqual(strokeWidthDimension.Value(), 0.0f) || strokeWidthDimension.Unit() == DimensionUnit::PERCENT) {
+        strokeWidthDimension = theme->GetTrackThickness();
+    }
+
+    ProgressModel::GetInstance()->SetStrokeWidth(strokeWidthDimension);
+
+    // Parse shadow
+    bool paintShadow = false;
+    auto shadow = paramObject->GetProperty("shadow");
+    if (shadow->IsUndefined() || shadow->IsNull() || !ParseJsBool(shadow, paintShadow)) {
+        paintShadow = false;
+    }
+
+    ProgressModel::GetInstance()->SetPaintShadow(paintShadow);
+
+    // Parse progress status
+    std::string statusStr;
+    NG::ProgressStatus progressStatus;
+    auto status = paramObject->GetProperty("status");
+    if (status->IsUndefined() || status->IsNull() || !ParseJsString(status, statusStr)) {
+        progressStatus = NG::ProgressStatus::PROGRESSING;
+    } else {
+        progressStatus = ConvertStrToProgressStatus(statusStr);
+    }
+
+    ProgressModel::GetInstance()->SetProgressStatus(static_cast<NG::ProgressStatus>(progressStatus));
+}
+
 void JSProgress::JsBackgroundColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -218,6 +296,8 @@ void JSProgress::JsBackgroundColor(const JSCallbackInfo& info)
         RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
         if (g_progressType == ProgressType::CAPSULE) {
             colorVal = theme->GetCapsuleBgColor();
+        } else if (g_progressType == ProgressType::RING) {
+            colorVal = theme->GetRingProgressBgColor();
         } else {
             colorVal = theme->GetTrackBgColor();
         }
@@ -363,4 +443,26 @@ void JSProgress::JsSetFont(const JSRef<JSObject>& textObject)
         ProgressModel::GetInstance()->SetItalicFontStyle(textTheme->GetTextStyle().GetFontStyle());
     }
 }
+
+bool JSProgress::ConvertGradientColor(const JsiRef<JsiValue>& param, OHOS::Ace::NG::Gradient& gradient)
+{
+    if (param->IsNull() || param->IsUndefined() || !param->IsObject()) {
+        return false;
+    }
+
+    JSLinearGradient* jsLinearGradient = JSRef<JSObject>::Cast(param)->Unwrap<JSLinearGradient>();
+    if (!jsLinearGradient) {
+        return false;
+    }
+
+    size_t colorLength = jsLinearGradient->GetGradient().size();
+    for (size_t colorIndex = 0; colorIndex < colorLength; colorIndex++) {
+        OHOS::Ace::NG::GradientColor gradientColor;
+        gradientColor.SetLinearColor(LinearColor(jsLinearGradient->GetGradient().at(colorIndex).first));
+        gradientColor.SetDimension(jsLinearGradient->GetGradient().at(colorIndex).second);
+        gradient.AddColor(gradientColor);
+    }
+    return true;
+}
+
 } // namespace OHOS::Ace::Framework

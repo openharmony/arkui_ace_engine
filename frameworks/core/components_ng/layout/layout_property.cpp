@@ -184,18 +184,18 @@ void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConst
     if (calcLayoutConstraint_) {
         if (calcLayoutConstraint_->maxSize.has_value()) {
             layoutConstraint_->UpdateMaxSizeWithCheck(ConvertToSize(calcLayoutConstraint_->maxSize.value(),
-                parentConstraint.scaleProperty, parentConstraint.percentReference));
+                layoutConstraint_->scaleProperty, layoutConstraint_->percentReference));
         }
         if (calcLayoutConstraint_->minSize.has_value()) {
             layoutConstraint_->UpdateMinSizeWithCheck(ConvertToSize(calcLayoutConstraint_->minSize.value(),
-                parentConstraint.scaleProperty, parentConstraint.percentReference));
+                layoutConstraint_->scaleProperty, layoutConstraint_->percentReference));
         }
         if (calcLayoutConstraint_->selfIdealSize.has_value()) {
             LOGD("CalcLayoutConstraint->selfIdealSize = %{public}s",
                 calcLayoutConstraint_->selfIdealSize.value().ToString().c_str());
             layoutConstraint_->UpdateIllegalSelfIdealSizeWithCheck(
-                ConvertToOptionalSize(calcLayoutConstraint_->selfIdealSize.value(), parentConstraint.scaleProperty,
-                    parentConstraint.percentReference));
+                ConvertToOptionalSize(calcLayoutConstraint_->selfIdealSize.value(), layoutConstraint_->scaleProperty,
+                    layoutConstraint_->percentReference));
         }
     }
 
@@ -329,12 +329,12 @@ void LayoutProperty::CheckSelfIdealSize()
     if (!calcLayoutConstraint_) {
         return;
     }
-    if (calcLayoutConstraint_->minSize.has_value()) {
-        layoutConstraint_->selfIdealSize.UpdateSizeWhenLarger(ConvertToSize(calcLayoutConstraint_->minSize.value(),
-            layoutConstraint_->scaleProperty, layoutConstraint_->percentReference));
-    }
     if (calcLayoutConstraint_->maxSize.has_value()) {
         layoutConstraint_->selfIdealSize.UpdateSizeWhenSmaller(ConvertToSize(calcLayoutConstraint_->maxSize.value(),
+            layoutConstraint_->scaleProperty, layoutConstraint_->percentReference));
+    }
+    if (calcLayoutConstraint_->minSize.has_value()) {
+        layoutConstraint_->selfIdealSize.UpdateSizeWhenLarger(ConvertToSize(calcLayoutConstraint_->minSize.value(),
             layoutConstraint_->scaleProperty, layoutConstraint_->percentReference));
     }
 }

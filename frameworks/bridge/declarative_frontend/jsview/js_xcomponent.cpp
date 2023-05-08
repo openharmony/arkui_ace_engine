@@ -122,6 +122,10 @@ void JSXComponent::JsOnLoad(const JSCallbackInfo& args)
 
 void JSXComponent::JsOnDestroy(const JSCallbackInfo& args)
 {
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 argument.");
+        return;
+    }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
     auto onDestroy = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);

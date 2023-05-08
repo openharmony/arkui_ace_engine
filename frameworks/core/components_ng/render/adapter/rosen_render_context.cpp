@@ -112,8 +112,8 @@ void RosenRenderContext::OnNodeAppear(bool recursive)
 
     // pending transition in animation, will start on first layout
     firstTransitionIn_ = true;
-    // only start transition on the break point of render node tree.
-    transitionWithAnimation_ = !recursive;
+    // only start default transition on the break point of render node tree. Not Impl yet.
+    isBreakingPoint_ = !recursive;
 }
 
 void RosenRenderContext::OnNodeDisappear(bool recursive)
@@ -124,10 +124,9 @@ void RosenRenderContext::OnNodeDisappear(bool recursive)
     }
     CHECK_NULL_VOID(rsNode_);
     auto rect = GetPaintRectWithoutTransform();
-    // only start transition on the break point of render node tree.
-    if (recursive == false) {
-        NotifyTransitionInner(rect.GetSize(), false);
-    }
+    // only start default transition on the break point of render node tree. Not Impl yet.
+    isBreakingPoint_ = !recursive;
+    NotifyTransitionInner(rect.GetSize(), false);
 }
 
 void RosenRenderContext::SetPivot(float xPivot, float yPivot)
@@ -205,11 +204,7 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
 
     if (firstTransitionIn_) {
         // need to perform transitionIn early so not influence the following SetPivot
-        if (transitionWithAnimation_) {
-            NotifyTransitionInner(paintRect.GetSize(), true);
-        } else {
-            RSNode::ExecuteWithoutAnimation([this, &paintRect]() { NotifyTransitionInner(paintRect.GetSize(), true); });
-        }
+        NotifyTransitionInner(paintRect.GetSize(), true);
         firstTransitionIn_ = false;
     }
 
@@ -673,16 +668,14 @@ RectF RosenRenderContext::GetPaintRectWithoutTransform()
 void RosenRenderContext::NotifyTransitionInner(const SizeF& frameSize, bool isTransitionIn)
 {
     CHECK_NULL_VOID(rsNode_);
-    if (transitionEffect_) {
-        NotifyTransition(isTransitionIn);
+    auto& transOptions = isTransitionIn ? propTransitionAppearing_ : propTransitionDisappearing_;
+    if (auto effect = GetRSTransitionWithoutType(transOptions, frameSize)) {
+        SetTransitionPivot(frameSize, isTransitionIn);
+        // notice that we have been in animateTo, so do not need to use Animation closure to notify transition.
+        rsNode_->NotifyTransition(effect, isTransitionIn);
         return;
     }
-    auto& transOptions = isTransitionIn ? propTransitionAppearing_ : propTransitionDisappearing_;
-    CHECK_NULL_VOID_NOLOG(transOptions);
-    SetTransitionPivot(frameSize, isTransitionIn);
-    auto effect = GetRSTransitionWithoutType(*transOptions, frameSize);
-    // notice that we have been in animateTo, so do not need to use Animation closure to notify transition.
-    rsNode_->NotifyTransition(effect, isTransitionIn);
+    NotifyTransition(isTransitionIn);
 }
 
 void RosenRenderContext::OpacityAnimation(const AnimationOption& option, double begin, double end)
@@ -1004,8 +997,20 @@ RectF RosenRenderContext::AdjustPaintRect()
     Dimension parentPaddingTop;
     // Position properties take precedence over offset locations.
     if (HasPosition() && IsUsingPosition(frameNode)) {
+        Dimension selfMarginLeft;
+        Dimension selfMarginTop;
+        if (frameNode->GetLayoutProperty() && frameNode->GetLayoutProperty()->GetMarginProperty()) {
+            auto& margin = frameNode->GetLayoutProperty()->GetMarginProperty();
+            if (margin->left.has_value()) {
+                selfMarginLeft = margin->left.value().GetDimension();
+            }
+            if (margin->top.has_value()) {
+                selfMarginTop = margin->top.value().GetDimension();
+            }
+        }
         GetPaddingOfFirstFrameNodeParent(parentPaddingLeft, parentPaddingTop);
-        auto position = GetPositionValue({}) + OffsetT<Dimension>(parentPaddingLeft, parentPaddingTop);
+        auto position = GetPositionValue({}) +
+                        OffsetT<Dimension>(parentPaddingLeft + selfMarginTop, parentPaddingTop + selfMarginTop);
         auto posX = ConvertToPx(position.GetX(), ScaleProperty::CreateScaleProperty(), widthPercentReference);
         auto posY = ConvertToPx(position.GetY(), ScaleProperty::CreateScaleProperty(), heightPercentReference);
         rect.SetLeft(posX.value_or(0) - anchorX.value_or(0));
@@ -1650,24 +1655,27 @@ void RosenRenderContext::UpdateTransition(const TransitionOptions& options)
 }
 
 std::shared_ptr<Rosen::RSTransitionEffect> RosenRenderContext::GetRSTransitionWithoutType(
-    const TransitionOptions& options, const SizeF& frameSize)
+    const std::unique_ptr<TransitionOptions>& options, const SizeF& frameSize)
 {
-    std::shared_ptr<Rosen::RSTransitionEffect> effect = Rosen::RSTransitionEffect::Create();
-    if (options.HasOpacity()) {
-        effect = effect->Opacity(options.GetOpacityValue());
+    if (options == nullptr) {
+        return nullptr;
     }
-    if (options.HasTranslate()) {
-        const auto& translate = options.GetTranslateValue();
+    std::shared_ptr<Rosen::RSTransitionEffect> effect = Rosen::RSTransitionEffect::Create();
+    if (options->HasOpacity()) {
+        effect = effect->Opacity(options->GetOpacityValue());
+    }
+    if (options->HasTranslate()) {
+        const auto& translate = options->GetTranslateValue();
         effect = effect->Translate({ static_cast<float>(translate.x.ConvertToPxWithSize(frameSize.Width())),
             static_cast<float>(translate.y.ConvertToPxWithSize(frameSize.Height())),
             static_cast<float>(translate.z.ConvertToPx()) });
     }
-    if (options.HasScale()) {
-        const auto& scale = options.GetScaleValue();
+    if (options->HasScale()) {
+        const auto& scale = options->GetScaleValue();
         effect = effect->Scale({ scale.xScale, scale.yScale, scale.zScale });
     }
-    if (options.HasRotate()) {
-        const auto& rotate = options.GetRotateValue();
+    if (options->HasRotate()) {
+        const auto& rotate = options->GetRotateValue();
         effect = effect->Rotate({ rotate.xDirection, rotate.yDirection, rotate.zDirection, rotate.angle });
     }
     return effect;
@@ -2158,7 +2166,7 @@ void RosenRenderContext::UpdateChainedTransition(const RefPtr<NG::ChainedTransit
 
 void RosenRenderContext::NotifyTransition(bool isTransitionIn)
 {
-    CHECK_NULL_VOID(transitionEffect_);
+    CHECK_NULL_VOID_NOLOG(transitionEffect_);
 
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);

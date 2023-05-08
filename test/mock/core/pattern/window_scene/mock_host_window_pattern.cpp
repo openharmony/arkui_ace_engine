@@ -20,7 +20,15 @@ HostWindowPattern::HostWindowPattern() = default;
 
 void HostWindowPattern::RegisterLifecycleListener() {}
 
+void HostWindowPattern::UnregisterLifecycleListener() {}
+
 void HostWindowPattern::InitContent() {}
+
+void HostWindowPattern::OnConnect() {}
+
+void HostWindowPattern::CreateStartingNode() {}
+
+void HostWindowPattern::CreateSnapshotNode() {}
 
 void HostWindowPattern::BufferAvailableCallback() {}
 
@@ -32,4 +40,6 @@ bool HostWindowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
 void HostWindowPattern::OnAttachToFrameNode() {}
 
 void HostWindowPattern::DispatchPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent) {}
+
+void HostWindowPattern::DispatchKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent) {}
 } // namespace OHOS::Ace::NG

@@ -95,28 +95,28 @@ public:
             theme->pressedColor_ = swiperPattern->GetAttr<Color>("indicator_color_pressed", Color::TRANSPARENT);
             theme->focusedColor_ = swiperPattern->GetAttr<Color>("indicator_color_focused", Color::TRANSPARENT);
             theme->arrowBoardColorHover_ =
-                swiperPattern->GetAttr<Color>("arrow_color_boardColor_hover", Color::TRANSPARENT);
+                swiperPattern->GetAttr<Color>(ARROW_COLOR_BOARDCOLOR_HOVER, Color::TRANSPARENT);
             theme->arrowBoardColorClick_ =
-                swiperPattern->GetAttr<Color>("arrow_color_boardColor_click", Color::TRANSPARENT);
-            theme->arrowColorPrimary_ = swiperPattern->GetAttr<Color>("arrow_color_primary", Color::TRANSPARENT);
+                swiperPattern->GetAttr<Color>(ARROW_COLOR_BOARDCOLOR_CLICK, Color::TRANSPARENT);
+            theme->arrowColorPrimary_ = swiperPattern->GetAttr<Color>(ARROW_COLOR_PRIMARY, Color::TRANSPARENT);
             theme->arrowColorPrimaryContrary_ =
-                swiperPattern->GetAttr<Color>("arrow_color_primary_contrary", Color::TRANSPARENT);
+                swiperPattern->GetAttr<Color>(ARROW_COLOR_PRIMARY_CONTRARY, Color::TRANSPARENT);
             theme->arrowDisabledAlpha_ =
-                swiperPattern->GetAttr<double>("arrow_disabled_alpha", SWIPER_ARROW_ALPHA_DISABLED);
+                swiperPattern->GetAttr<double>(ARROW_DISABLED_ALPHA, SWIPER_ARROW_ALPHA_DISABLED);
             theme->arrowScale_ = SWIPER_ARROW_SCALE;
             theme->arrowHorizontalMargin_ =
-                swiperPattern->GetAttr<Dimension>("arrow_horizontal_margin", SWIPER_ARROW_HORIZONTAL_MARGIN_DEFAULT);
+                swiperPattern->GetAttr<Dimension>(ARROW_HORIZONTAL_MARGIN, SWIPER_ARROW_HORIZONTAL_MARGIN_DEFAULT);
             theme->arrowVerticalMargin_ =
-                swiperPattern->GetAttr<Dimension>("arrow_vertical_margin", SWIPER_ARROW_VERTICAL_MARGIN_DEFAULT);
+                swiperPattern->GetAttr<Dimension>(ARROW_VERTICAL_MARGIN, SWIPER_ARROW_VERTICAL_MARGIN_DEFAULT);
             theme->smallArrowBoardSize_ = SWIPER_ARROW_SMALL_ARROW_BOARD_SIZE;
             theme->smallArrowSize_ = SWIPER_ARROW_SMALL_ARROW_SIZE;
             theme->smallArrowBoardColor_ = Color::TRANSPARENT;
-            theme->smallArrowColor_ = swiperPattern->GetAttr<Color>("arrow_color_primary", Color::TRANSPARENT);
+            theme->smallArrowColor_ = swiperPattern->GetAttr<Color>(ARROW_COLOR_PRIMARY, Color::TRANSPARENT);
             theme->bigArrowBoardSize_ = SWIPER_ARROW_BIG_ARROW_BOARD_SIZE;
             theme->bigArrowSize_ = SWIPER_ARROW_BIG_ARROW_SIZE;
             theme->bigArrowBoardColor_ =
-                swiperPattern->GetAttr<Color>("arrow_color_component_normal", Color::TRANSPARENT);
-            theme->bigArrowColor_ = swiperPattern->GetAttr<Color>("arrow_color_primary", Color::TRANSPARENT);
+                swiperPattern->GetAttr<Color>(ARROW_COLOR_COMPONENT_NORMAL, Color::TRANSPARENT);
+            theme->bigArrowColor_ = swiperPattern->GetAttr<Color>(ARROW_COLOR_PRIMARY, Color::TRANSPARENT);
         }
     };
 

@@ -105,6 +105,7 @@ public:
     virtual void SetPreviousMargin(const Dimension& prevMargin) {}
     virtual void SetNextMargin(const Dimension& nextMargin) {}
     virtual void SetOnChangeEvent(std::function<void(const BaseEventInfo* info)>&& onChangeEvent);
+    virtual void SetIndicatorIsBoolean(bool isBoolean) {}
     virtual void SetArrowStyle(const SwiperArrowParameters& swiperArrowParameters) {}
     virtual void SetDisplayArrow(bool displayArrow) {}
     virtual void SetHoverShow(bool hoverShow) {}

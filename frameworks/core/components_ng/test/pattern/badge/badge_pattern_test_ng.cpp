@@ -25,6 +25,7 @@
 #define protected public
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/badge/badge_theme.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/badge/badge_layout_algorithm.h"
 #include "core/components_ng/pattern/badge/badge_layout_property.h"
@@ -51,23 +52,9 @@ constexpr float FIRST_ITEM_HEIGHT = 50.0f;
 const SizeF CONTAINER_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 const SizeF FIRST_ITEM_SIZE(FIRST_ITEM_WIDTH, FIRST_ITEM_HEIGHT);
 
-const FontWeight FontWeights[] {
-    FontWeight::W100,
-    FontWeight::W200,
-    FontWeight::W300,
-    FontWeight::W400,
-    FontWeight::W500,
-    FontWeight::W600,
-    FontWeight::W700,
-    FontWeight::W800,
-    FontWeight::W900,
-    FontWeight::BOLD,
-    FontWeight::NORMAL,
-    FontWeight::BOLDER,
-    FontWeight::LIGHTER,
-    FontWeight::MEDIUM,
-    FontWeight::REGULAR
-};
+const FontWeight FontWeights[] { FontWeight::W100, FontWeight::W200, FontWeight::W300, FontWeight::W400,
+    FontWeight::W500, FontWeight::W600, FontWeight::W700, FontWeight::W800, FontWeight::W900, FontWeight::BOLD,
+    FontWeight::NORMAL, FontWeight::BOLDER, FontWeight::LIGHTER, FontWeight::MEDIUM, FontWeight::REGULAR };
 
 const Color Colors[] {
     Color::TRANSPARENT,
@@ -78,7 +65,7 @@ const Color Colors[] {
     Color::BLUE,
     Color::GRAY,
 };
-}  // namespace
+} // namespace
 
 class BadgePatternTestNg : public testing::Test {
 public:
@@ -318,16 +305,16 @@ HWTEST_F(BadgePatternTestNg, BadgePatternTest002, TestSize.Level1)
     badgeLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
 
     for (int32_t i = 0; i < 3; ++i) {
-        auto badgePosition = static_cast<BadgeLayoutProperty::BadgePosition>(i);
-        badgeLayoutProperty->SetBadgePosition(badgePosition);
+        auto badgePosition = static_cast<BadgePosition>(i);
+        badgeLayoutProperty->UpdateBadgePosition(badgePosition);
         badgeLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
         badgeLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
     }
 
     textLayoutProperty->UpdateContent(" ");
     for (int32_t i = 0; i < 3; ++i) {
-        auto badgePosition = static_cast<BadgeLayoutProperty::BadgePosition>(i);
-        badgeLayoutProperty->SetBadgePosition(badgePosition);
+        auto badgePosition = static_cast<BadgePosition>(i);
+        badgeLayoutProperty->UpdateBadgePosition(badgePosition);
         badgeLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
         badgeLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
     }

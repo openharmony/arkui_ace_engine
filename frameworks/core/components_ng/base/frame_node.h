@@ -396,9 +396,6 @@ private:
         std::list<RefPtr<FrameNode>>& visibleList, uint32_t index) override;
     void OnGenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& allList) override;
 
-    void OnAddDisappearingChild() override;
-    void OnRemoveDisappearingChild() override;
-
     bool IsMeasureBoundary();
     bool IsRenderBoundary();
 

@@ -374,6 +374,11 @@ public:
         return restoreId_;
     }
 
+    void UpdateRecycleElmtId(int32_t newElmtId)
+    {
+        nodeId_ = newElmtId;
+    }
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -396,9 +401,6 @@ protected:
             child->OnGenerateOneDepthAllFrame(allList);
         }
     }
-
-    virtual void OnAddDisappearingChild() {}
-    virtual void OnRemoveDisappearingChild() {}
 
     virtual void OnContextAttached() {}
     // dump self info.

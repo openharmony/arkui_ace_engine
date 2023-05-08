@@ -912,6 +912,12 @@ var ProgressType;
   ProgressType[ProgressType["Capsule"] = 4] = "Capsule";
 })(ProgressType || (ProgressType = {}));
 
+var ProgressStatus;
+(function (ProgressStatus) {
+  ProgressStatus["LOADING"] = "LOADING";
+  ProgressStatus["PROGRESSING"] = "PROGRESSING";
+})(ProgressStatus || (ProgressStatus = {}));
+
 var MessageLevel
 (function (MessageLevel) {
   MessageLevel[MessageLevel["Debug"] = 1] = "Debug";

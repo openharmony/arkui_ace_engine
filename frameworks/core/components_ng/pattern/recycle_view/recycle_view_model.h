@@ -13,32 +13,22 @@
  * limitations under the License.
  */
 
-#include "base/log/ace_trace.h"
-#include "base/log/log.h"
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_RECYCLE_VIEW_RECYCLE_VIEW_MODEL_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_RECYCLE_VIEW_RECYCLE_VIEW_MODEL_H
+
+#include <memory>
+#include "base/utils/macros.h"
 
 namespace OHOS::Ace {
-AceScopedTrace::AceScopedTrace(const char* /* format */, ...)
-{
-    if (traceEnabled_) {
-        LOGI("AceScopedTrace");
-    }
-}
+class ACE_EXPORT RecycleViewModel {
+public:
+    static RecycleViewModel* GetInstance();
+    virtual ~RecycleViewModel() = default;
 
-AceAsyncScopedTrace::AceAsyncScopedTrace(const char* /* format */, ...) : taskId_(0)
-{
-    if (asyncTraceEnabled_) {
-        LOGI("AceAsyncScopedTrace, taskId=%{public}d", taskId_);
-    }
-}
-
-AceAsyncScopedTrace::~AceAsyncScopedTrace() = default;
-
-AceScopedTrace::~AceScopedTrace() = default;
-
-bool AceTraceEnabled()
-{
-    return true;
-}
-void AceTraceEnd() {}
-void AceAsyncTraceEnd(int32_t taskId, const char* name) {}
+    virtual void Create() = 0;
+private:
+    static std::unique_ptr<RecycleViewModel> instance_;
+};
 } // namespace OHOS::Ace
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_RECYCLE_VIEW_RECYCLE_VIEW_MODEL_H

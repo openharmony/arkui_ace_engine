@@ -40,6 +40,7 @@ public:
         value->propValue_ = CloneValue();
         value->propSelecteds_ = CloneSelecteds();
         value->propValues_ = CloneValues();
+        value->propSelectedIndex_ = CloneSelectedIndex();
         value->propDisappearTextStyle_ = CloneDisappearTextStyle();
         value->propTextStyle_ = CloneTextStyle();
         value->propSelectedTextStyle_ = CloneSelectedTextStyle();
@@ -54,6 +55,7 @@ public:
         ResetValue();
         ResetSelecteds();
         ResetValues();
+        ResetSelectedIndex();
         ResetDisappearTextStyle();
         ResetTextStyle();
         ResetSelectedTextStyle();
@@ -74,6 +76,14 @@ public:
             jsonArraySelected->Put(index.c_str(), std::to_string(arraySelected[i]).c_str());
         }
         json->Put("selecteds", jsonArraySelected);
+
+        auto jsonArraySelectedIndex = JsonUtil::CreateArray(true);
+        auto arraySelectedIndex = CloneSelecteds().value_or(std::vector<uint32_t>());
+        for (uint32_t i = 0; i < arraySelectedIndex.size(); i++) {
+            auto index = std::to_string(i);
+            jsonArraySelectedIndex->Put(index.c_str(), std::to_string(arraySelectedIndex[i]).c_str());
+        }
+        json->Put("selectedIndex", jsonArraySelectedIndex);
 
         auto jsonArrayValue = JsonUtil::CreateArray(true);
         auto arrayValue = CloneValues().value_or(std::vector<std::string>());
@@ -115,6 +125,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Value, std::string, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Selecteds, std::vector<uint32_t>, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Values, std::vector<std::string>, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectedIndex, std::vector<uint32_t>, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_GROUP(DisappearTextStyle, FontStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
         DisappearTextStyle, FontSize, DisappearFontSize, Dimension, PROPERTY_UPDATE_MEASURE);

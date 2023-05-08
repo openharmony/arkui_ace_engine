@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BADGE_BADGE_THEME_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BADGE_BADGE_THEME_H
 
+#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
@@ -140,7 +141,7 @@ private:
     Color badgeTextColor_;
     Color badgeBorderColor_;
     int64_t messageCount_;
-    BadgePosition badgePosition_;
+    BadgePosition badgePosition_ = BadgePosition::RIGHT_TOP;
     bool showMessage_;
     Dimension badgeFontSize_;
     Dimension badgeBorderWidth_;

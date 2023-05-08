@@ -58,6 +58,7 @@ void ProgressPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     jsonValue->Put("scaleCount", std::to_string(paintProperty->GetScaleCountValue(theme->GetScaleNumber())).c_str());
     jsonValue->Put("scaleWidth", paintProperty->GetScaleWidthValue(theme->GetScaleWidth()).ToString().c_str());
     json->Put("style", jsonValue->ToString().c_str());
+    ToJsonValueForRingStyleOptions(json);
 }
 
 void ProgressPattern::InitTouchEvent()
@@ -92,7 +93,7 @@ void ProgressPattern::HandleEnabled()
     RefPtr<ProgressTheme> progressTheme = pipeline->GetTheme<ProgressTheme>();
     CHECK_NULL_VOID(progressTheme);
     auto alpha = progressTheme->GetProgressDisable();
-    auto backgroundColor = paintProperty->GetBackgroundColor().value_or(progressTheme->GetTrackBgColor());
+    auto backgroundColor = paintProperty->GetBackgroundColor().value_or(progressTheme->GetCapsuleBgColor());
     auto selectColor = paintProperty->GetColor().value_or(progressTheme->GetCapsuleSelectColor());
     auto borderColor = paintProperty->GetBorderColor().value_or(progressTheme->GetBorderColor());
     if (!enabled) {
@@ -127,7 +128,7 @@ void ProgressPattern::OnPress(const TouchEventInfo& info)
     CHECK_NULL_VOID(textLayoutProperty);
     
     if (touchType == TouchType::DOWN) {
-        backgroundColor_ = paintProperty->GetBackgroundColor().value_or(theme->GetTrackBgColor());
+        backgroundColor_ = paintProperty->GetBackgroundColor().value_or(theme->GetCapsuleBgColor());
         selectColor_ = paintProperty->GetColor().value_or(theme->GetCapsuleSelectColor());
         borderColor_ = paintProperty->GetBorderColor().value_or(theme->GetBorderColor());
         fontColor_ = textLayoutProperty->GetTextColor().value_or(theme->GetTextColor());
@@ -160,5 +161,37 @@ void ProgressPattern::OnModifyDone()
         HandleEnabled();
         InitTouchEvent();
     }
+}
+
+void ProgressPattern::ToJsonValueForRingStyleOptions(std::unique_ptr<JsonValue>& json) const
+{
+    auto layoutProperty = GetLayoutProperty<ProgressLayoutProperty>();
+    auto paintProperty = GetPaintProperty<ProgressPaintProperty>();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    auto theme = pipeline->GetTheme<ProgressTheme>();
+
+    auto jsonValue = JsonUtil::Create(true);
+    jsonValue->Put("strokeWidth", layoutProperty->GetStrokeWidthValue(theme->GetTrackThickness()).ToString().c_str());
+    jsonValue->Put("shadow", paintProperty->GetPaintShadowValue(false) ? "true" : "false");
+    jsonValue->Put("status",
+        ConvertProgressStatusToString(paintProperty->GetProgressStatusValue(ProgressStatus::PROGRESSING)).c_str());
+    json->Put("ringStyle", jsonValue);
+}
+
+std::string ProgressPattern::ConvertProgressStatusToString(const ProgressStatus status)
+{
+    std::string str;
+
+    switch (status) {
+        case ProgressStatus::LOADING:
+            str = "ProgressStatus.LOADING";
+            break;
+        case ProgressStatus::PROGRESSING:
+        default:
+            str = "ProgressStatus.PROGRESSING";
+            break;
+    }
+
+    return str;
 }
 } // namespace OHOS::Ace::NG

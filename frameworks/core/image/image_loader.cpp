@@ -496,14 +496,12 @@ sk_sp<SkData> ResourceImageLoader::LoadImageData(
     const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context)
 {
     auto uri = imageSourceInfo.GetSrc();
-    auto pipelineContext = context.Upgrade();
-    CHECK_NULL_RETURN(pipelineContext, nullptr);
-    auto themeManager = pipelineContext->GetThemeManager();
+
+    auto themeManager = PipelineBase::CurrentThemeManager();
     CHECK_NULL_RETURN(themeManager, nullptr);
     auto themeConstants =
         themeManager->GetThemeConstants(imageSourceInfo.GetBundleName(), imageSourceInfo.GetModuleName());
     CHECK_NULL_RETURN(themeConstants, nullptr);
-
     std::unique_ptr<uint8_t[]> data;
     size_t dataLen = 0;
     std::string rawFile;
