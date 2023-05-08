@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -194,7 +194,12 @@ bool SharedTransitionExchange::CreateSizeAnimation(const RefPtr<FrameNode>& src,
         if (setAspect) {
             src->GetLayoutProperty()->UpdateAspectRatio(size.Width() / size.Height());
         }
-        src->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        // When call listener callback, the passenger has mounted to overlay, only need to measure passenger
+        // for better performance. Notice that the parent has been changed, layoutConstraint is not correct if we
+        // don't measure from parent, otherwise the result may be wrong if passenger has aspectRatio.
+        src->GetGeometryNode()->ResetParentLayoutConstraint();
+        src->GetLayoutProperty()->CleanDirty();
+        src->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     };
     sizeAnimation->AddListener(sizeListener);
     controller_->AddInterpolator(sizeAnimation);
