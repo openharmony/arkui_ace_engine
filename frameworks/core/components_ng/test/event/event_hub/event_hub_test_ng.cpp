@@ -26,12 +26,7 @@
 
 using namespace testing;
 using namespace testing::ext;
-namespace OHOS::Ace {
-bool OHOS::Ace::SystemProperties::GetDebugEnabled()
-{
-    return false;
-}
-} // namespace OHOS::Ace
+
 namespace OHOS::Ace::NG {
 namespace {
 constexpr bool EVENT_HUB_ENABLE = false;

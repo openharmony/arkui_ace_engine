@@ -21,9 +21,11 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/navrouter/navdestination_event_hub.h"
 #include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
@@ -43,7 +45,10 @@ void NavDestinationView::Create()
     int32_t nodeId = stack->ClaimNodeId();
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
         V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(navDestinationPattern);
+    navDestinationPattern->SetName(std::to_string(nodeId));
+    
     // titleBar node
     if (!navDestinationNode->GetTitleBarNode()) {
         int32_t titleBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -112,7 +117,9 @@ void NavDestinationView::Create(std::function<void()>&& deepRenderFunc)
         [shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(std::move(deepRender))]() {
             return AceType::MakeRefPtr<NavDestinationPattern>(shallowBuilder);
         });
-
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(navDestinationPattern);
+    navDestinationPattern->SetName(std::to_string(nodeId));
     // titleBar node
     if (!navDestinationNode->GetTitleBarNode()) {
         int32_t titleBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -292,4 +299,27 @@ void NavDestinationView::SetTitleHeight(const Dimension& height)
     ACE_UPDATE_LAYOUT_PROPERTY(NavDestinationLayoutProperty, TitleBarHeight, height);
 }
 
+void NavDestinationView::SetOnShown(std::function<void()>&& onShow)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
+    CHECK_NULL_VOID(navDestinationEventHub);
+    navDestinationEventHub->SetOnShown(onShow);
+}
+
+void NavDestinationView::SetOnHidden(std::function<void()>&& onHidden)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
+    CHECK_NULL_VOID(navDestinationEventHub);
+    navDestinationEventHub->SetOnHidden(onHidden);
+}
+
+void NavDestinationView::SetOnBackPressed(std::function<bool()>&& onBackPressed)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
+    CHECK_NULL_VOID(navDestinationEventHub);
+    navDestinationEventHub->SetOnBackPressed(onBackPressed);
+}
 } // namespace OHOS::Ace::NG

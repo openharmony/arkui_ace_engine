@@ -17,10 +17,8 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_CHECKBOXGROUP_CHECKBOXGROUP_PAINT_METHOD_H
 
 #include "base/memory/ace_type.h"
-#include "base/utils/macros.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_modifier.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_property.h"
-#include "core/components_ng/pattern/radio/radio_paint_method.h"
 #include "core/components_ng/render/node_paint_method.h"
 
 namespace OHOS::Ace::NG {
@@ -30,20 +28,17 @@ class CheckBoxGroupPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(CheckBoxGroupPaintMethod, NodePaintMethod)
 
 public:
-    CheckBoxGroupPaintMethod(bool enabled, bool isTouch, bool isHover, float shapeScale, UIStatus uiStatus,
-        const RefPtr<CheckBoxGroupModifier>& checkboxGroupModifier)
-        : enabled_(enabled), isTouch_(isTouch), isHover_(isHover),
-        shapeScale_(shapeScale), uiStatus_(uiStatus), checkboxGroupModifier_(checkboxGroupModifier)
-    {};
+    explicit CheckBoxGroupPaintMethod(const RefPtr<CheckBoxGroupModifier>& checkboxGroupModifier)
+        : checkboxGroupModifier_(checkboxGroupModifier) {};
 
     ~CheckBoxGroupPaintMethod() override = default;
 
-    RefPtr<Modifier> GetContentModifier(PaintWrapper* paintWrapper) override
+    RefPtr<Modifier> GetContentModifier(PaintWrapper* /*paintWrapper*/) override
     {
         CHECK_NULL_RETURN(checkboxGroupModifier_, nullptr);
         return checkboxGroupModifier_;
     }
-    
+
     void UpdateContentModifier(PaintWrapper* paintWrapper) override
     {
         CHECK_NULL_VOID(checkboxGroupModifier_);
@@ -81,13 +76,38 @@ public:
         auto selectStatus = paintProperty->GetSelectStatus();
 
         checkboxGroupModifier_->SetEnabled(enabled_);
-        checkboxGroupModifier_->SetIsTouch(isTouch_);
-        checkboxGroupModifier_->SetIsHover(isHover_);
-        checkboxGroupModifier_->SetShapeScale(shapeScale_);
         checkboxGroupModifier_->SetUiStatus(uiStatus_);
         checkboxGroupModifier_->SetSelectStatus(selectStatus);
         checkboxGroupModifier_->SetOffset(offset);
         checkboxGroupModifier_->SetSize(size);
+        checkboxGroupModifier_->SetTouchHoverAnimationType(touchHoverType_);
+        checkboxGroupModifier_->UpdateAnimatableProperty();
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto checkboxTheme = pipeline->GetTheme<CheckboxTheme>();
+        auto horizontalPadding = checkboxTheme->GetHotZoneHorizontalPadding().ConvertToPx();
+        auto verticalPadding = checkboxTheme->GetHotZoneVerticalPadding().ConvertToPx();
+        float boundsRectOriginX = offset.GetX() - horizontalPadding;
+        float boundsRectOriginY = offset.GetY() - verticalPadding;
+        float boundsRectWidth = size.Width() + 2 * horizontalPadding;
+        float boundsRectHeight = size.Height() + 2 * verticalPadding;
+        RectF boundsRect(boundsRectOriginX, boundsRectOriginY, boundsRectWidth, boundsRectHeight);
+        checkboxGroupModifier_->SetBoundsRect(boundsRect);
+    }
+
+    void SetEnabled(bool enabled)
+    {
+        enabled_ = enabled;
+    }
+
+    void SetUiStatus(const UIStatus uiStatus)
+    {
+        uiStatus_ = uiStatus;
+    }
+
+    void SetTouchHoverAnimationType(const TouchHoverAnimationType touchHoverType)
+    {
+        touchHoverType_ = touchHoverType;
     }
 
     void SetHotZoneOffset(OffsetF& hotZoneOffset)
@@ -102,12 +122,10 @@ public:
 
 private:
     bool enabled_ = true;
-    bool isTouch_ = false;
-    bool isHover_ = false;
-    float shapeScale_ = 1.0f;
     UIStatus uiStatus_ = UIStatus::UNSELECTED;
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
+    TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
     RefPtr<CheckBoxGroupModifier> checkboxGroupModifier_;
 };
 } // namespace OHOS::Ace::NG

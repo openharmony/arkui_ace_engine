@@ -77,8 +77,7 @@ void TextPickerPaintMethod::PaintGradient(RSCanvas& canvas, const RectF& frameRe
     RSPoint topEndPoint;
     topEndPoint.SetX(0.0f);
     topEndPoint.SetY(frameRect.Height());
-    auto backDecoration = theme->GetPopupDecoration(false);
-    Color endColor = backDecoration ? backDecoration->GetBackgroundColor() : Color::WHITE;
+    Color endColor = backgroundColor_;
     Color middleColor = endColor.ChangeAlpha(0);
     std::vector<float> topPos { 0.0f, height / frameRect.Bottom(), (frameRect.Bottom() - height) / frameRect.Bottom(),
         1.0f };

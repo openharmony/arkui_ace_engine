@@ -21,10 +21,11 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/group_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/navrouter/navrouter_group_node.h"
+#include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navrouter/navrouter_event_hub.h"
+#include "core/components_ng/pattern/navrouter/navrouter_group_node.h"
 #include "core/components_ng/pattern/navrouter/navrouter_pattern.h"
+#include "core/components_ng/pattern/pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -46,4 +47,13 @@ void NavRouterView::SetOnStateChange(std::function<void(bool)>&& onStateChange)
     navRouterEventHub->SetOnStateChange(std::move(onStateChange));
 }
 
+void NavRouterView::SetNavRouteMode(NG::NavRouteMode mode)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navRouterGroupNode = AceType::DynamicCast<NavRouterGroupNode>(frameNode);
+    CHECK_NULL_VOID(navRouterGroupNode);
+    auto navRouterPattern = navRouterGroupNode->GetPattern<NavRouterPattern>();
+    CHECK_NULL_VOID(navRouterPattern);
+    navRouterPattern->SetNavRouteMode(mode);
+}
 } // namespace OHOS::Ace::NG

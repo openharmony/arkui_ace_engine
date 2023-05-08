@@ -82,6 +82,8 @@ public:
     virtual void SetSpace(const Dimension& value);
     virtual void SetArrowPosition(const ArrowPosition value);
     virtual void SetMenuAlign(const MenuAlign& menuAlign);
+    virtual void SetSelectChangeEvent(NG::SelectChangeEvent&& selectChangeEvent);
+    virtual void SetValueChangeEvent(NG::ValueChangeEvent&& valueChangeEvent);
 
 private:
     static std::unique_ptr<SelectModel> instance_;

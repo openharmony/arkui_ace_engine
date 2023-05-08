@@ -65,7 +65,7 @@ void JSShapeAbstract::SetStrokeDashArray(const JSCallbackInfo& info)
     std::vector<Dimension> dashArray;
     for (int32_t i = 0; i < length; i++) {
         JSRef<JSVal> value = array->GetValueAt(i);
-        Dimension dim;
+        CalcDimension dim;
         if (ParseJsDimensionVp(value, dim)) {
             dashArray.emplace_back(dim);
         }
@@ -121,7 +121,7 @@ void JSShapeAbstract::SetStrokeDashOffset(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension offset;
+    CalcDimension offset;
     if (!ParseJsDimensionVp(info[0], offset)) {
         return;
     }
@@ -170,6 +170,7 @@ void JSShapeAbstract::SetStrokeOpacity(const JSCallbackInfo& info)
     ShapeAbstractModel::GetInstance()->SetStrokeOpacity(strokeOpacity);
 }
 
+// https://svgwg.org/svg2-draft/painting.html#FillOpacity
 void JSShapeAbstract::SetFillOpacity(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -178,6 +179,12 @@ void JSShapeAbstract::SetFillOpacity(const JSCallbackInfo& info)
     }
     double fillOpacity = DEFAULT_OPACITY;
     ParseJsDouble(info[0], fillOpacity);
+    if (GreatOrEqual(fillOpacity, DEFAULT_OPACITY)) {
+        fillOpacity = DEFAULT_OPACITY;
+    }
+    if (LessOrEqual(fillOpacity, MIN_OPACITY)) {
+        fillOpacity = MIN_OPACITY;
+    }
     ShapeAbstractModel::GetInstance()->SetFillOpacity(fillOpacity);
 }
 
@@ -188,7 +195,7 @@ void JSShapeAbstract::SetStrokeWidth(const JSCallbackInfo& info)
         return;
     }
     // the default value is 1.0_vp
-    Dimension lineWidth = 1.0_vp;
+    CalcDimension lineWidth = 1.0_vp;
     if (info[0]->IsString()) {
         const std::string& value = info[0]->ToString();
         lineWidth = StringUtils::StringToDimensionWithUnit(value, DimensionUnit::VP, 1.0);
@@ -218,7 +225,7 @@ void JSShapeAbstract::JsWidth(const JSCallbackInfo& info)
 
 void JSShapeAbstract::SetWidth(const JSRef<JSVal>& jsValue)
 {
-    Dimension dimWidth;
+    CalcDimension dimWidth;
     if (!ParseJsDimensionVp(jsValue, dimWidth)) {
         return;
     }
@@ -237,7 +244,7 @@ void JSShapeAbstract::JsHeight(const JSCallbackInfo& info)
 
 void JSShapeAbstract::SetHeight(const JSRef<JSVal>& jsValue)
 {
-    Dimension dimHeight;
+    CalcDimension dimHeight;
     if (!ParseJsDimensionVp(jsValue, dimHeight)) {
         return;
     }
@@ -274,7 +281,7 @@ void JSShapeAbstract::ObjectWidth(const JSCallbackInfo& info)
 
 void JSShapeAbstract::ObjectWidth(const JSRef<JSVal>& jsValue)
 {
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(jsValue, value)) {
         return;
     }
@@ -300,7 +307,7 @@ void JSShapeAbstract::ObjectHeight(const JSCallbackInfo& info)
 
 void JSShapeAbstract::ObjectHeight(const JSRef<JSVal>& jsValue)
 {
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(jsValue, value)) {
         return;
     }
@@ -337,8 +344,8 @@ void JSShapeAbstract::ObjectOffset(const JSCallbackInfo& info)
         JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
         JSRef<JSVal> xVal = sizeObj->GetProperty("x");
         JSRef<JSVal> yVal = sizeObj->GetProperty("y");
-        Dimension x;
-        Dimension y;
+        CalcDimension x;
+        CalcDimension y;
         if (basicShape_ && ParseJsDimensionVp(xVal, x) && ParseJsDimensionVp(yVal, y)) {
             basicShape_->SetOffset(DimensionOffset(x, y));
         }
@@ -388,11 +395,11 @@ void JSShapeAbstract::SetSize(const JSCallbackInfo& info)
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
         JSRef<JSVal> width = obj->GetProperty("width");
         JSRef<JSVal> height = obj->GetProperty("height");
-        Dimension dimWidth;
+        CalcDimension dimWidth;
         if (ParseJsDimensionVp(width, dimWidth)) {
             ShapeAbstractModel::GetInstance()->SetWidth(dimWidth);
         }
-        Dimension dimHeight;
+        CalcDimension dimHeight;
         if (ParseJsDimensionVp(height, dimHeight)) {
             ShapeAbstractModel::GetInstance()->SetHeight(dimHeight);
         }
@@ -406,8 +413,8 @@ void JSShapeAbstract::ObjectPosition(const JSCallbackInfo& info)
         JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
         JSRef<JSVal> xVal = sizeObj->GetProperty("x");
         JSRef<JSVal> yVal = sizeObj->GetProperty("y");
-        Dimension x;
-        Dimension y;
+        CalcDimension x;
+        CalcDimension y;
         DimensionOffset position(x, y);
         CHECK_NULL_VOID(basicShape_);
         if (ParseJsDimensionVp(xVal, x)) {

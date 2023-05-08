@@ -40,6 +40,7 @@ public:
     void SetOnCascadeChange(TextCascadeChangeEvent&& onChange) override {};
     void SetValues(const std::vector<std::string>& values) override {};
     void SetSelecteds(const std::vector<uint32_t>& values) override {};
+    void SetBackgroundColor(const Color& color) override {};
     bool IsSingle() override
     {
         return true;
@@ -61,6 +62,7 @@ public:
     {
         return false;
     }
+    void SetHasSelectAttr(bool value) override {};
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_TEXTPICKER_MODEL_IMPL_H

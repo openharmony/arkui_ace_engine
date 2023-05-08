@@ -30,6 +30,7 @@ public:
     void SetOnChange(IndexCallbackEvent&& eventOnChange) override;
     void SetOnNext(IndexCallbackEvent&& eventOnNext) override;
     void SetOnPrevious(IndexCallbackEvent&& eventOnPrevious) override;
+    void SetOnChangeEvent(IndexChangeEvent&& onChangeEvent) override;
 
 private:
     static RefPtr<FrameNode> CreateSwiperChild(int32_t id, uint32_t index);

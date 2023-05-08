@@ -52,6 +52,7 @@ public:
     void SetAntiAlias();
 
     void ParseImageData(const JSCallbackInfo& info, ImageData& imageData, std::vector<uint32_t>& array);
+    void JsCloseImageBitmap(const std::string& src);
 
     void JsFillRect(const JSCallbackInfo& info);
     void JsStrokeRect(const JSCallbackInfo& info);
@@ -133,7 +134,8 @@ public:
     void JsGetPixelMap(const JSCallbackInfo& info);
     void JsSetPixelMap(const JSCallbackInfo& info);
     void JsDrawBitmapMesh(const JSCallbackInfo& info);
-    void JsFilter(const JSCallbackInfo& info);
+    void JsGetFilter(const JSCallbackInfo& info);
+    void JsSetFilter(const JSCallbackInfo& info);
     void JsGetDirection(const JSCallbackInfo& info);
     void JsSetDirection(const JSCallbackInfo& info);
 
@@ -181,7 +183,15 @@ public:
         return anti_;
     }
 
+    void SetTransform(unsigned int id, const TransformParam&);
+    
     ACE_DISALLOW_COPY_AND_MOVE(JSCanvasRenderer);
+
+protected:
+    void ParseFillGradient(const JSCallbackInfo& info);
+    void ParseFillPattern(const JSCallbackInfo& info);
+    void ParseStorkeGradient(const JSCallbackInfo& info);
+    void ParseStrokePattern(const JSCallbackInfo& info);
 
 protected:
     RefPtr<CanvasTaskPool> pool_;
@@ -196,9 +206,10 @@ private:
         const double& left, const double& top, const double& width, const double& height);
     PaintState paintState_;
     TextStyle style_;
-    static std::unordered_map<int32_t, Pattern> pattern_;
-    static int32_t patternCount_;
-    Pattern GetPattern(int32_t id);
+    static std::unordered_map<int32_t, std::shared_ptr<Pattern>> pattern_;
+    static unsigned int patternCount_;
+    std::weak_ptr<Ace::Pattern> GetPatternNG(int32_t id);
+    Pattern GetPattern(unsigned int id);
     std::vector<uint32_t> lineDash_;
     ImageData imageData_;
     bool isOffscreen_ = false;

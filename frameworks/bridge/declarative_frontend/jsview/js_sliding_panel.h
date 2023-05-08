@@ -24,10 +24,10 @@
 
 namespace OHOS::Ace::Framework {
 struct BorderRadius {
-    Dimension radiusTopLeft;
-    Dimension radiusTopRight;
-    Dimension radiusBottomLeft;
-    Dimension radiusBottomRight;
+    CalcDimension radiusTopLeft;
+    CalcDimension radiusTopRight;
+    CalcDimension radiusBottomLeft;
+    CalcDimension radiusBottomRight;
 };
 
 class JSSlidingPanel : public JSContainerBase {

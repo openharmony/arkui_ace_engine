@@ -123,6 +123,7 @@ public:
     void StartAnimator();
     void StopAnimator();
     void SetOpacity(uint8_t value);
+    void SendAccessibilityEvent(AccessibilityEventType eventType);
 
 private:
     void OnModifyDone() override;

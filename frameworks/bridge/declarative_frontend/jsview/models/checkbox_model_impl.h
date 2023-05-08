@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,6 @@
 #include "core/components_ng/pattern/checkbox/checkbox_model.h"
 
 namespace OHOS::Ace::Framework {
-
 class ACE_EXPORT CheckBoxModelImpl : public OHOS::Ace::CheckBoxModel {
 public:
     void Create(const std::optional<std::string>& name, const std::optional<std::string>& groupName,
@@ -29,9 +28,8 @@ public:
     void SetOnChange(NG::ChangeEvent&& onChange) override;
     void SetWidth(const Dimension& width) override;
     void SetHeight(const Dimension& height) override;
-    void SetPadding(const NG::PaddingPropertyF& args) override;
+    void SetPadding(const NG::PaddingPropertyF& args, const NG::PaddingProperty& newArgs, bool flag) override;
+    void SetChangeEvent(std::function<void(bool)>&& changeEvent) override {};
 };
-
 } // namespace OHOS::Ace::Framework
-
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_CHECKBOX_MODEL_IMPL_H

@@ -18,6 +18,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/utils.h"
+#include "core/components/progress/progress_theme.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/progress/progress_paint_property.h"
 #include "core/components_ng/render/drawing.h"
@@ -30,26 +31,37 @@ constexpr int32_t INT32_TWO = 2;
 constexpr int32_t ANGLE_90 = 90;
 constexpr int32_t ANGLE_180 = 180;
 constexpr int32_t ANGLE_270 = 270;
+constexpr int32_t ANGLE_360 = 360;
 constexpr float DEFAULT_MAX_VALUE = 100.0f;
 constexpr float DEFAULT_SCALE_WIDTH = 10.0f;
 constexpr int32_t DEFAULT_SCALE_COUNT = 100;
-constexpr double DEFAULT_CAPSULE_BORDER_WIDTH = 1.0;
+constexpr double DEFAULT_CAPSULE_BORDER_WIDTH = 0.0;
 constexpr float FLOAT_ZERO_FIVE = 0.5f;
 constexpr float FLOAT_TWO_ZERO = 2.0f;
+constexpr float SPRING_MOTION_RESPONSE = 0.314f;
+constexpr float SPRING_MOTION_DAMPING_FRACTION = 0.95f;
+constexpr float RING_SHADOW_OFFSET_X = 5.0f;
+constexpr float RING_SHADOW_OFFSET_Y = 5.0f;
+constexpr float RING_SHADOW_BLUR_RADIUS_MIN = 5.0f;
 } // namespace
 ProgressModifier::ProgressModifier()
     : strokeWidth_(AceType::MakeRefPtr<AnimatablePropertyFloat>(FLOAT_TWO_ZERO)),
       color_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor::BLUE)),
       bgColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor::GRAY)),
       borderColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(DEFAULT_BORDER_COLOR))),
+      capsuleDate_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f)),
+      value_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f)),
+      ringProgressColors_(AceType::MakeRefPtr<AnimatablePropertyVectorColor>(GradientArithmetic())),
       offset_(AceType::MakeRefPtr<PropertyOffsetF>(OffsetF())),
       contentSize_(AceType::MakeRefPtr<PropertySizeF>(SizeF())),
       maxValue_(AceType::MakeRefPtr<PropertyFloat>(DEFAULT_MAX_VALUE)),
-      value_(AceType::MakeRefPtr<PropertyFloat>(0.0f)),
       scaleWidth_(AceType::MakeRefPtr<PropertyFloat>(DEFAULT_SCALE_WIDTH)),
       scaleCount_(AceType::MakeRefPtr<PropertyInt>(DEFAULT_SCALE_COUNT)),
       progressType_(AceType::MakeRefPtr<PropertyInt>(static_cast<int32_t>(ProgressType::LINEAR))),
-      capsuleBorderWidth_(Dimension(DEFAULT_CAPSULE_BORDER_WIDTH, DimensionUnit::VP))
+      capsuleBorderWidth_(AceType::MakeRefPtr<PropertyFloat>(DEFAULT_CAPSULE_BORDER_WIDTH)),
+      sweepEffect_(AceType::MakeRefPtr<PropertyBool>(false)),
+      paintShadow_(AceType::MakeRefPtr<PropertyBool>(false)),
+      progressStatus_(AceType::MakeRefPtr<PropertyInt>(static_cast<int32_t>(ProgressStatus::PROGRESSING)))
 {
     AttachProperty(strokeWidth_);
     AttachProperty(color_);
@@ -59,6 +71,13 @@ ProgressModifier::ProgressModifier()
     AttachProperty(value_);
     AttachProperty(scaleWidth_);
     AttachProperty(scaleCount_);
+    AttachProperty(progressType_);
+    AttachProperty(capsuleBorderWidth_);
+    AttachProperty(sweepEffect_);
+    AttachProperty(capsuleDate_);
+    AttachProperty(ringProgressColors_);
+    AttachProperty(paintShadow_);
+    AttachProperty(progressStatus_);
 }
 
 void ProgressModifier::onDraw(DrawingContext& context)
@@ -96,6 +115,24 @@ void ProgressModifier::SetProgressType(ProgressType type)
     progressType_->Set(static_cast<int32_t>(type));
 }
 
+void ProgressModifier::SetRingProgressColor(const Gradient& color)
+{
+    CHECK_NULL_VOID(ringProgressColors_);
+    ringProgressColors_->Set(GradientArithmetic(color));
+}
+
+void ProgressModifier::SetPaintShadow(bool paintShadow)
+{
+    CHECK_NULL_VOID(paintShadow_);
+    paintShadow_->Set(paintShadow);
+}
+
+void ProgressModifier::SetProgressStatus(ProgressStatus status)
+{
+    CHECK_NULL_VOID(progressStatus_);
+    progressStatus_->Set(static_cast<int32_t>(status));
+}
+
 void ProgressModifier::SetMaxValue(float value)
 {
     CHECK_NULL_VOID(maxValue_);
@@ -105,7 +142,15 @@ void ProgressModifier::SetMaxValue(float value)
 void ProgressModifier::SetValue(float value)
 {
     CHECK_NULL_VOID(value_);
-    value_->Set(value);
+    if (NearZero(value)) {
+        value_->Set(value);
+    } else {
+        AnimationOption option = AnimationOption();
+        auto motion =
+            AceType::MakeRefPtr<ResponsiveSpringMotion>(SPRING_MOTION_RESPONSE, SPRING_MOTION_DAMPING_FRACTION);
+        option.SetCurve(motion);
+        AnimationUtils::Animate(option, [&]() { value_->Set(value); });
+    }
 }
 
 void ProgressModifier::SetScaleWidth(float value)
@@ -132,9 +177,14 @@ void ProgressModifier::SetContentSize(const SizeF& contentSize)
     contentSize_->Set(contentSize);
 }
 
-void ProgressModifier::SetBorderWidth(const Dimension& width)
+void ProgressModifier::SetBorderWidth(float width)
 {
-    capsuleBorderWidth_ = width;
+    capsuleBorderWidth_->Set(width);
+}
+
+void ProgressModifier::SetSweepEffect(bool value)
+{
+    sweepEffect_->Set(value);
 }
 
 void ProgressModifier::ContentDrawWithFunction(DrawingContext& context)
@@ -207,34 +257,123 @@ void ProgressModifier::PaintLinear(RSCanvas& canvas, const OffsetF& offset, cons
 
 void ProgressModifier::PaintRing(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const
 {
-    static int32_t totalDegree = 360;
-    PointF centerPt = PointF(contentSize.Width() / INT32_TWO, contentSize.Height() / INT32_TWO) + offset;
-    double radius = std::min(contentSize.Width() / INT32_TWO, contentSize.Height() / INT32_TWO);
+    auto centerPt = PointF(contentSize.Width() / 2, contentSize.Height() / 2) + offset;
+    auto radius = std::min(contentSize.Width() / 2, contentSize.Height() / 2);
+    auto angle = (value_->Get() / maxValue_->Get()) * ANGLE_360;
+    auto thickness = strokeWidth_->Get();
+    if (thickness >= radius) {
+        LOGI("strokeWidth is lager than radius,  auto set strokeWidth as half of radius");
+        thickness = radius / 2;
+    }
+    // The shadowBlurSigma is an empirical value. If it is greater than thickness / 5, the shadow will be cut by
+    // the canvas boundary.
+    auto shadowBlurSigma = std::max(thickness / 5, RING_SHADOW_BLUR_RADIUS_MIN);
+    auto shadowBlurOffset = thickness / 2 + std::max(RING_SHADOW_OFFSET_X, RING_SHADOW_OFFSET_Y);
+    radius = radius - thickness / 2 - shadowBlurOffset;
+
+    RingProgressData ringData;
+    ringData.centerPt = centerPt;
+    ringData.radius = radius;
+    ringData.angle = angle;
+    ringData.thickness = thickness;
+    ringData.shadowBlurSigma = shadowBlurSigma;
+
+    PaintRingBackground(canvas, ringData);
+
+    if (NearZero(angle)) {
+        return;
+    }
+
+    if (paintShadow_->Get()) {
+        PaintRingProgressOrShadow(canvas, ringData, true);
+    }
+
+    PaintRingProgressOrShadow(canvas, ringData, false);
+}
+
+void ProgressModifier::PaintRingBackground(RSCanvas& canvas, const RingProgressData& ringProgressData) const
+{
     RSPen pen;
     pen.SetAntiAlias(true);
-    double widthOfLine = strokeWidth_->Get();
-    if (widthOfLine >= radius) {
-        LOGI("strokeWidth is lager than radius,  auto set strokeWidth as half of radius");
-        widthOfLine = radius / INT32_TWO;
-    }
-    radius = radius - widthOfLine / INT32_TWO;
-    pen.SetWidth(widthOfLine);
+    pen.SetWidth(ringProgressData.thickness);
     pen.SetCapStyle(ToRSCapStyle(LineCap::ROUND));
     pen.SetColor(ToRSColor(bgColor_->Get()));
+
+    canvas.Save();
     canvas.AttachPen(pen);
-    canvas.DrawCircle(ToRSPoint(centerPt), radius);
-    // progress selected part
-    pen.SetColor(ToRSColor((color_->Get())));
+    canvas.DrawCircle(ToRSPoint(ringProgressData.centerPt), ringProgressData.radius);
+    canvas.DetachPen();
+    canvas.Restore();
+}
+
+void ProgressModifier::PaintRingProgressOrShadow(
+    RSCanvas& canvas, const RingProgressData& ringProgressData, bool isShadow) const
+{
+    PointF centerPt = ringProgressData.centerPt;
+    auto radius = ringProgressData.radius;
+    auto angle = ringProgressData.angle;
+    auto thickness = ringProgressData.thickness;
+    double halfThickness = thickness / 2;
+
+    std::vector<RSColorQuad> colors;
+    std::vector<float> pos;
+    auto gradientColors = ringProgressColors_->Get().GetGradient().GetColors();
+    for (size_t i = 0; i < gradientColors.size(); i++) {
+        colors.emplace_back(gradientColors[i].GetLinearColor().GetValue());
+        pos.emplace_back(gradientColors[i].GetDimension().Value());
+    }
+
+    RSPen pen;
+    pen.SetWidth(thickness);
+    RSBrush startCirclePaint;
+    startCirclePaint.SetAntiAlias(true);
+    startCirclePaint.SetColor(gradientColors.back().GetLinearColor().GetValue());
+    RSBrush endCirclePaint;
+    endCirclePaint.SetAntiAlias(true);
+    endCirclePaint.SetColor(gradientColors.front().GetLinearColor().GetValue());
+
+    if (isShadow) {
+        centerPt = centerPt + OffsetF(RING_SHADOW_OFFSET_X, RING_SHADOW_OFFSET_Y);
+        RSFilter filter;
+        filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(RSBlurType::NORMAL, ringProgressData.shadowBlurSigma));
+        pen.SetFilter(filter);
+        startCirclePaint.SetFilter(filter);
+        endCirclePaint.SetFilter(filter);
+    }
+
+    RSRect edgeRect(centerPt.GetX() - halfThickness, centerPt.GetY() - radius - halfThickness,
+        centerPt.GetX() + halfThickness, centerPt.GetY() - radius + halfThickness);
+    // Paint begin-side semicircle
+    canvas.Save();
+    canvas.Rotate(angle, centerPt.GetX(), centerPt.GetY());
+    canvas.AttachBrush(startCirclePaint);
+    canvas.DrawArc(edgeRect, -ANGLE_90, ANGLE_180);
+    canvas.DetachBrush();
+    canvas.Restore();
+
+    // Paint progress arc
+    canvas.Save();
+    canvas.Rotate(-ANGLE_90, centerPt.GetX(), centerPt.GetY());
+    pen.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
+        ToRSPoint(PointF(centerPt.GetX(), centerPt.GetY())), colors, pos, RSTileMode::CLAMP, 0, angle));
     canvas.AttachPen(pen);
-    double angle = (value_->Get() / maxValue_->Get()) * totalDegree;
     canvas.DrawArc(
-        { centerPt.GetX() - radius, centerPt.GetY() - radius, centerPt.GetX() + radius, centerPt.GetY() + radius },
-        ANGLE_270, angle);
+        { centerPt.GetX() - radius, centerPt.GetY() - radius,
+          centerPt.GetX() + radius, centerPt.GetY() + radius },
+        0, angle);
+    canvas.DetachPen();
+    canvas.Restore();
+
+    // Paint end-side semicircle
+    canvas.Save();
+    canvas.AttachBrush(endCirclePaint);
+    canvas.DrawArc(edgeRect, ANGLE_90, ANGLE_180);
+    canvas.DetachBrush();
+    canvas.Restore();
 }
 
 void ProgressModifier::PaintScaleRing(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const
 {
-    static int32_t totalDegree = 360;
     PointF centerPt = PointF(contentSize.Width() / INT32_TWO, contentSize.Height() / INT32_TWO) + offset;
     double radius = std::min(contentSize.Width() / INT32_TWO, contentSize.Height() / INT32_TWO);
     double lengthOfScale = strokeWidth_->Get();
@@ -258,11 +397,11 @@ void ProgressModifier::PaintScaleRing(RSCanvas& canvas, const OffsetF& offset, c
     canvas.AttachPen(pen);
     canvas.DrawArc(
         { centerPt.GetX() - radius, centerPt.GetY() - radius, centerPt.GetX() + radius, centerPt.GetY() + radius },
-        ANGLE_270, totalDegree);
+        ANGLE_270, ANGLE_360);
     // start to draw cur value progress
     pen.SetColor(ToRSColor((color_->Get())));
     canvas.AttachPen(pen);
-    double angle = (value_->Get() / maxValue_->Get()) * totalDegree;
+    double angle = (value_->Get() / maxValue_->Get()) * ANGLE_360;
     canvas.DrawArc(
         { centerPt.GetX() - radius, centerPt.GetY() - radius, centerPt.GetX() + radius, centerPt.GetY() + radius },
         ANGLE_270, angle);
@@ -309,31 +448,37 @@ void ProgressModifier::PaintMoon(RSCanvas& canvas, const OffsetF& offset, const 
 
 void ProgressModifier::PaintCapsule(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const
 {
+    auto borderWidth = capsuleBorderWidth_->Get();
+    if (GreatNotEqual(2 * borderWidth, contentSize.Height())) {
+        borderWidth = contentSize.Height() / 2;
+    }
     static int32_t totalDegree = 1;
     auto capsuleSize = contentSize;
-    double radiusBig = std::min((capsuleSize.Width() - capsuleBorderWidth_.ConvertToPx()) / INT32_TWO,
-        (capsuleSize.Height() - capsuleBorderWidth_.ConvertToPx()) / INT32_TWO);
-    double offsetXBig = offset.GetX() + capsuleBorderWidth_.ConvertToPx() / INT32_TWO;
-    double offsetYBig = offset.GetY() + capsuleBorderWidth_.ConvertToPx() / INT32_TWO;
-    capsuleSize.SetWidth(contentSize.Width() - capsuleBorderWidth_.ConvertToPx() * INT32_TWO);
-    capsuleSize.SetHeight(contentSize.Height() - capsuleBorderWidth_.ConvertToPx() * INT32_TWO);
+    double radiusBig = std::min((capsuleSize.Width() - borderWidth) / INT32_TWO,
+        (capsuleSize.Height() - borderWidth) / INT32_TWO);
+    double offsetXBig = offset.GetX() + borderWidth / INT32_TWO;
+    double offsetYBig = offset.GetY() + borderWidth / INT32_TWO;
+    capsuleSize.SetWidth(contentSize.Width() - borderWidth * INT32_TWO);
+    capsuleSize.SetHeight(contentSize.Height() - borderWidth * INT32_TWO);
     double radius = std::min(capsuleSize.Width() / INT32_TWO, capsuleSize.Height() / INT32_TWO);
-    double offsetX = offset.GetX() + capsuleBorderWidth_.ConvertToPx();
-    double offsetY = offset.GetY() + capsuleBorderWidth_.ConvertToPx();
+    double offsetX = offset.GetX() + borderWidth;
+    double offsetY = offset.GetY() + borderWidth;
     double progressWidth = (value_->Get() / maxValue_->Get()) * totalDegree * capsuleSize.Width();
     RSBrush brush;
     brush.SetAntiAlias(true);
     RSPen pen;
     brush.SetAlpha(true);
     brush.SetColor(ToRSColor(bgColor_->Get()));
-    pen.SetWidth(capsuleBorderWidth_.ConvertToPx());
+    pen.SetWidth(borderWidth);
     pen.SetAntiAlias(true);
     pen.SetColor(ToRSColor(borderColor_->Get()));
     canvas.AttachPen(pen);
-    canvas.DrawRoundRect(
-        { { offsetXBig, offsetYBig, contentSize.Width() - capsuleBorderWidth_.ConvertToPx() + offsetXBig,
-              contentSize.Height() - capsuleBorderWidth_.ConvertToPx() + offsetYBig },
-            radiusBig, radiusBig });
+    if (!NearZero(borderWidth)) {
+        canvas.DrawRoundRect(
+            { { offsetXBig, offsetYBig, contentSize.Width() - borderWidth + offsetXBig,
+                contentSize.Height() - borderWidth + offsetYBig },
+                radiusBig, radiusBig });
+    }
     canvas.DetachPen();
     RSPath path;
     canvas.AttachBrush(brush);
@@ -367,29 +512,35 @@ void ProgressModifier::PaintCapsule(RSCanvas& canvas, const OffsetF& offset, con
 
 void ProgressModifier::PaintVerticalCapsule(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const
 {
+    auto borderWidth = capsuleBorderWidth_->Get();
+    if (GreatNotEqual(2 * borderWidth, contentSize.Width())) {
+        borderWidth = contentSize.Width() / 2;
+    }
     static int32_t totalDegree = 1;
     SizeF capsuleSize = contentSize;
-    double radiusBig = std::min((capsuleSize.Width() - capsuleBorderWidth_.ConvertToPx()) / INT32_TWO,
-        (capsuleSize.Height() - capsuleBorderWidth_.ConvertToPx()) / INT32_TWO);
-    double offsetXBig = offset.GetX() + capsuleBorderWidth_.ConvertToPx() / INT32_TWO;
-    double offsetYBig = offset.GetY() + capsuleBorderWidth_.ConvertToPx() / INT32_TWO;
-    capsuleSize.SetWidth(contentSize.Width() - capsuleBorderWidth_.ConvertToPx() * INT32_TWO);
-    capsuleSize.SetHeight(contentSize.Height() - capsuleBorderWidth_.ConvertToPx() * INT32_TWO);
+    double radiusBig = std::min((capsuleSize.Width() - borderWidth) / INT32_TWO,
+        (capsuleSize.Height() - borderWidth) / INT32_TWO);
+    double offsetXBig = offset.GetX() + borderWidth / INT32_TWO;
+    double offsetYBig = offset.GetY() + borderWidth / INT32_TWO;
+    capsuleSize.SetWidth(contentSize.Width() - borderWidth * INT32_TWO);
+    capsuleSize.SetHeight(contentSize.Height() - borderWidth * INT32_TWO);
     double radius = std::min(capsuleSize.Width() / INT32_TWO, capsuleSize.Height() / INT32_TWO);
-    double offsetX = offset.GetX() + capsuleBorderWidth_.ConvertToPx();
-    double offsetY = offset.GetY() + capsuleBorderWidth_.ConvertToPx();
+    double offsetX = offset.GetX() + borderWidth;
+    double offsetY = offset.GetY() + borderWidth;
     double progressWidth = (value_->Get() / maxValue_->Get()) * totalDegree * capsuleSize.Height();
     RSBrush brush;
     brush.SetAntiAlias(true);
     RSPen pen;
-    pen.SetWidth(capsuleBorderWidth_.ConvertToPx());
+    pen.SetWidth(borderWidth);
     pen.SetAntiAlias(true);
     pen.SetColor(ToRSColor(borderColor_->Get()));
     canvas.AttachPen(pen);
-    canvas.DrawRoundRect(
-        { { offsetXBig, offsetYBig, contentSize.Width() - capsuleBorderWidth_.ConvertToPx() + offsetXBig,
-              contentSize.Height() - capsuleBorderWidth_.ConvertToPx() + offsetYBig },
-            radiusBig, radiusBig });
+    if (!NearZero(borderWidth)) {
+        canvas.DrawRoundRect(
+            { { offsetXBig, offsetYBig, contentSize.Width() - borderWidth + offsetXBig,
+                contentSize.Height() - borderWidth + offsetYBig },
+                radiusBig, radiusBig });
+    }
     canvas.DetachPen();
     brush.SetAlpha(true);
     brush.SetColor(ToRSColor(bgColor_->Get()));

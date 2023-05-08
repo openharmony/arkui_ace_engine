@@ -213,4 +213,22 @@ void IndexerView::SetPopupHorizontalSpace(const Dimension& popupHorizontalSpace)
         ACE_RESET_PAINT_PROPERTY(IndexerPaintProperty, PopupHorizontalSpace);
     }
 }
+
+void IndexerView::SetChangeEvent(OnSelectedEvent&& changeEvent)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetChangeEvent(std::move(changeEvent));
+}
+
+void IndexerView::SetCreatChangeEvent(OnSelectedEvent&& changeEvent)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetCreatChangeEvent(std::move(changeEvent));
+}
 } // namespace OHOS::Ace::NG

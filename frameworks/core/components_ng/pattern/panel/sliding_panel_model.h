@@ -50,6 +50,7 @@ public:
     virtual void SetBorderWidth(const Dimension& borderWidth);
     virtual void SetBorderStyle(const BorderStyle& borderStyle);
     virtual void SetBorder(const BorderStyle& borderStyle, const Dimension& borderWidth);
+    virtual void SetModeChangeEvent(std::function<void(const BaseEventInfo*)>&& modeChangeEvent) = 0;
 
 private:
     static std::unique_ptr<SlidingPanelModel> instance_;

@@ -265,6 +265,8 @@ void SwipeRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
     if (callback && *callback) {
         GestureEvent info;
         info.SetTimeStamp(time_);
+        UpdateFingerListInfo(coordinateOffset_);
+        info.SetFingerList(fingerList_);
         info.SetGlobalPoint(globalPoint_);
         if (deviceType_ == SourceType::MOUSE) {
             info.SetSpeed(0.0);

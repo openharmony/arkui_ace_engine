@@ -62,6 +62,8 @@ public:
     void SetDigitIndicatorStyle(const SwiperDigitalParameters& swiperDigitalParameters) override;
     void SetPreviousMargin(const Dimension& prevMargin) override;
     void SetNextMargin(const Dimension& nextMargin) override;
+    void SetOnChangeEvent(std::function<void(const BaseEventInfo* info)>&& onChangeEvent) override;
+    void SetIndicatorIsBoolean(bool isBoolean) override;
 };
 
 } // namespace OHOS::Ace::NG

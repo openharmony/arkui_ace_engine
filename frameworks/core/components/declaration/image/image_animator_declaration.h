@@ -25,10 +25,10 @@ namespace OHOS::Ace {
 
 struct ImageProperties {
     std::string src;
-    Dimension width;
-    Dimension height;
-    Dimension top;
-    Dimension left;
+    CalcDimension width;
+    CalcDimension height;
+    CalcDimension top;
+    CalcDimension left;
     int32_t duration = 0;
 };
 

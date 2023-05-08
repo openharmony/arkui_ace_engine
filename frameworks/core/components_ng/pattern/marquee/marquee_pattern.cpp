@@ -15,24 +15,26 @@
 
 #include "core/components_ng/pattern/marquee/marquee_pattern.h"
 
-#include <ctime>
-#include <string>
-#include <sys/time.h>
-
 #include "base/geometry/ng/offset_t.h"
+#include "base/geometry/offset.h"
+#include "base/utils/utils.h"
 #include "core/animation/curves.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/alignment.h"
+#include "core/components/common/properties/animation_option.h"
+#include "core/components/text/text_theme.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/marquee/marquee_layout_property.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/property.h"
-#include "core/pipeline/pipeline_base.h"
+#include "core/components_ng/property/transition_property.h"
+#include "core/components_ng/render/animation_utils.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
-inline constexpr double DEFAULT_MARQUEE_SCROLL_DELAY = 85.0; // Delay time between each jump.
-constexpr int32_t FORM_LOOP = 1;
-inline bool IsPlayingAnimation(const RefPtr<Animator>& animatorController_)
-{
-    return (animatorController_->GetStatus() == Animator::Status::RUNNING);
-}
+constexpr double DEFAULT_MARQUEE_SCROLL_DELAY = 85.0; // Delay time between each jump.
 } // namespace
 
 void MarqueePattern::OnAttachToFrameNode()
@@ -40,64 +42,16 @@ void MarqueePattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToFrame(true);
-    InitAnimatorController();
 }
 
-float MarqueePattern::GetTextChildOffset() const
+bool MarqueePattern::OnDirtyLayoutWrapperSwap(
+    const RefPtr<LayoutWrapper>& /* dirty */, const DirtySwapConfig& /* config */)
 {
-    float childOffset = 0.0f;
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, childOffset);
-    auto textChild = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
-    CHECK_NULL_RETURN(textChild, childOffset);
-    auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
-
-    auto textWidth = textChild->GetGeometryNode()->GetMarginFrameSize().Width();
-    auto marqueeWidth = GetHostFrameSize()->Width();
-    if (GreatOrEqual(textWidth, marqueeWidth)) {
-        return childOffset;
-    }
-
-    auto textAlign = textLayoutProperty->GetTextAlign();
-    if (textAlign == TextAlign::START) {
-        textAlign = TextAlign::LEFT;
-    }
-    if (textAlign == TextAlign::END) {
-        textAlign = TextAlign::RIGHT;
-    }
-
-    const static float HALF_DIVIDE = 2.0;
-    if (textAlign == TextAlign::CENTER) {
-        childOffset = (marqueeWidth - textWidth) / HALF_DIVIDE;
-    } else if (textAlign == TextAlign::RIGHT) {
-        childOffset = marqueeWidth - textWidth;
-    }
-    return childOffset;
-}
-
-float MarqueePattern::CheckAndAdjustPosition(LayoutWrapper* layoutWrapper)
-{
-    // Initialize child position.
-    auto child = layoutWrapper->GetAllChildrenWithBuild().front();
-    isNeedMarquee_ = child->GetGeometryNode()->GetMarginFrameSize().Width() >
-                     layoutWrapper->GetGeometryNode()->GetMarginFrameSize().Width();
-    if (isNeedMarquee_) {
-        childOffset_ = (direction_ == MarqueeDirection::LEFT)
-                           ? childOffset_ = layoutWrapper->GetGeometryNode()->GetMarginFrameSize().Width()
-                           : -(child->GetGeometryNode()->GetMarginFrameSize().Width());
-    } else {
-        startAfterLayout_ = false;
-        StopMarquee();
-        childOffset_ = GetTextChildOffset();
-    }
-    return childOffset_;
-}
-
-bool MarqueePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& /*dirty*/, const DirtySwapConfig& /*config*/)
-{
-    if (startAfterLayout_) {
-        startAfterLayout_ = false;
-        StartMarquee();
+    if (forceStropAnimation_) {
+        forceStropAnimation_ = false;
+        auto statusChanged = statusChanged_;
+        statusChanged_ = false;
+        StopMarqueeAnimation(lastStartStatus_, statusChanged);
     }
     return false;
 }
@@ -107,204 +61,126 @@ void MarqueePattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto layoutProperty = host->GetLayoutProperty();
+    auto layoutProperty = host->GetLayoutProperty<MarqueeLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (layoutProperty->GetPositionProperty()) {
-        layoutProperty->UpdateAlignment(
-            layoutProperty->GetPositionProperty()->GetAlignment().value_or(Alignment::CENTER));
-    } else {
-        layoutProperty->UpdateAlignment(Alignment::CENTER);
-    }
-
-    direction_ = GetDirection();
-    playStatus_ = GetPlayerStatus();
-    if (playStatus_) {
-        startAfterLayout_ = true;
-    }
-
-    scrollAmount_ = GetScrollAmount();
-    if (LessOrEqual(scrollAmount_, 0.0)) {
-        scrollAmount_ = DEFAULT_MARQUEE_SCROLL_AMOUNT;
-    }
-
-    loop_ = GetLoop();
-    if (loop_ <= 0) {
-        loop_ = ANIMATION_REPEAT_INFINITE;
-    }
-
-    auto context = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    if (context->IsFormRender()) {
-        loop_ = FORM_LOOP;
-    }
-
-    if (playStatus_ && animatorController_->GetStatus() == Animator::Status::PAUSED) {
-        StartMarquee();
-    } else if (!playStatus_ && IsPlayingAnimation(animatorController_)) {
-        StopMarquee();
-    } else if (playStatus_ && IsPlayingAnimation(animatorController_)) {
-        UpdateAnimation();
-    }
-}
-
-void MarqueePattern::OnInActive()
-{
-    isActive_ = false;
-    if (IsPlayingAnimation(animatorController_)) {
-        startAfterShowed_ = true;
-        animatorController_->Pause();
-    }
-}
-
-void MarqueePattern::OnActive()
-{
-    isActive_ = true;
-    if (startAfterShowed_) {
-        startAfterShowed_ = false;
-        StartMarquee();
-    }
-}
-
-void MarqueePattern::InitAnimatorController()
-{
-    if (!animatorController_) {
-        animatorController_ = AceType::MakeRefPtr<Animator>(PipelineBase::GetCurrentContext());
-        auto weak = AceType::WeakClaim(this);
-        animatorController_->AddStartListener(Animator::StatusCallback([weak]() {
-            auto marquee = weak.Upgrade();
-            if (marquee) {
-                marquee->OnStartAnimation();
-            }
-        }));
-        animatorController_->AddStopListener(Animator::StatusCallback([weak]() {
-            auto marquee = weak.Upgrade();
-            if (marquee) {
-                marquee->OnStopAnimation();
-            }
-        }));
-        animatorController_->AddRepeatListener(Animator::StatusCallback([weak]() {
-            auto marquee = weak.Upgrade();
-            if (marquee) {
-                marquee->OnRepeatAnimation();
-            }
-        }));
-    }
-}
-
-void MarqueePattern::StartMarquee()
-{
-    if (!isNeedMarquee_) {
-        LOGD("Needn't marquee");
-        return;
-    }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto textChild = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
-
-    if ((!textChild) || (!animatorController_)) {
-        startAfterLayout_ = true;
-        LOGD("child Node has not built yet, animation will start after layout.");
-        return;
-    }
-    if (!isActive_) {
-        startAfterShowed_ = true;
-        LOGD("Marquee is hidden, animation will start when showed.");
-        return;
-    }
-    if (animatorController_->GetStatus() == Animator::Status::PAUSED) {
-        animatorController_->Resume();
-    } else if (animatorController_->GetStatus() != Animator::Status::RUNNING) {
-        LOGD("Start loop.");
-        UpdateAnimation(); // Start loop.
-        if (needAnimation_) {
-            animatorController_->Play();
-        }
-    } else {
-        LOGD("Animation already started.");
-    }
-}
-
-void MarqueePattern::StopMarquee()
-{
-    startAfterShowed_ = false;
-    if (!animatorController_) {
-        LOGD("Animation controller has not initialized.");
-        return;
-    }
-    if (!IsPlayingAnimation(animatorController_)) {
-        LOGD("Animation is not playing, status=%{public}d", animatorController_->GetStatus());
-        return;
-    }
-    animatorController_->Pause();
-}
-
-void MarqueePattern::OnStartAnimation()
-{
-    LOGD("OnStart.");
-    FireStartEvent();
-}
-
-void MarqueePattern::OnRepeatAnimation()
-{
-    LOGD("OnBounce.");
-    FireBounceEvent();
-}
-
-void MarqueePattern::OnStopAnimation()
-{
-    LOGD("OnFinish.");
-    FireFinishEvent();
-}
-
-void MarqueePattern::UpdateAnimation()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto textChild = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
+    auto textChild = DynamicCast<FrameNode>(host->GetFirstChild());
     CHECK_NULL_VOID(textChild);
-    float start = 0.0;
-    float end = 0.0;
-    if (direction_ == MarqueeDirection::LEFT) {
-        start = GetHostFrameSize()->Width();
-        end = -(textChild->GetGeometryNode()->GetMarginFrameSize().Width());
-    } else {
-        start = -(textChild->GetGeometryNode()->GetMarginFrameSize().Width());
-        end = GetHostFrameSize()->Width();
+    auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto src = layoutProperty->GetSrc().value_or("");
+    textLayoutProperty->UpdateContent(src);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID_NOLOG(pipelineContext);
+    auto theme = pipelineContext->GetTheme<TextTheme>();
+    CHECK_NULL_VOID_NOLOG(theme);
+    auto fontSize = layoutProperty->GetFontSize().value_or(theme->GetTextStyle().GetFontSize());
+    textLayoutProperty->UpdateFontSize(fontSize);
+    textLayoutProperty->UpdateFontWeight(layoutProperty->GetFontWeight().value_or(FontWeight::NORMAL));
+    textLayoutProperty->UpdateFontFamily(
+        layoutProperty->GetFontFamily().value_or(std::vector<std::string>({ "" })));
+    textChild->MarkModifyDone();
+    textChild->MarkDirtyNode();
+    if (CheckMeasureFlag(layoutProperty->GetPropertyChangeFlag())) {
+        forceStropAnimation_ = true;
+        host->MarkDirtyNode();
     }
-
-    auto duration = static_cast<int32_t>(std::abs(end - start) * DEFAULT_MARQUEE_SCROLL_DELAY / scrollAmount_);
-    if (duration <= 0) {
-        needAnimation_ = false;
-        LOGD("Animation duration is negative, don't need animation.");
-        return;
+    auto startPlay = layoutProperty->GetPlayerStatus().value_or(false);
+    if (startPlay != lastStartStatus_) {
+        lastStartStatus_ = startPlay;
+        statusChanged_ = true;
     }
-    needAnimation_ = true;
-    if (translate_) {
-        animatorController_->RemoveInterpolator(translate_);
-    }
-    translate_ = MakeRefPtr<CurveAnimation<float>>(start, end, Curves::LINEAR);
-
-    auto weak = WeakClaim(this);
-    translate_->AddListener(Animation<float>::ValueCallback([weak](float offset) {
-        auto marquee = weak.Upgrade();
-        if (marquee) {
-            marquee->UpdateChildOffset(offset);
-        }
-    }));
-    LOGD("UpdateAnimation, start:%{public}lf, end:%{public}lf, scrollAmount:%{public}lf, duration:%{public}u, "
-         "loop:%{public}d",
-        start, end, scrollAmount_, duration, loop_);
-    animatorController_->SetDuration(duration);
-    animatorController_->SetIteration(loop_);
-    animatorController_->AddInterpolator(translate_);
 }
 
-void MarqueePattern::UpdateChildOffset(float offset)
+void MarqueePattern::StartMarqueeAnimation()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    childOffset_ = offset;
-    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    auto layoutProperty = host->GetLayoutProperty<MarqueeLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    repeatCount_ = layoutProperty->GetLoop().value_or(DEFAULT_MARQUEE_LOOP);
+    if (repeatCount_ == 0) {
+        lastStartStatus_ = false;
+        return;
+    }
+    auto geoNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geoNode);
+    auto marqueeSize = geoNode->GetFrameSize();
+    auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
+    CHECK_NULL_VOID(textNode);
+    auto textGeoNode = textNode->GetGeometryNode();
+    CHECK_NULL_VOID(textGeoNode);
+    auto textWidth = textGeoNode->GetFrameSize().Width();
+    if (GreatOrEqual(marqueeSize.Width(), textWidth)) {
+        lastStartStatus_ = false;
+        return;
+    }
+    FireStartEvent();
+    auto step = layoutProperty->GetScrollAmount().value_or(DEFAULT_MARQUEE_SCROLL_AMOUNT);
+    auto direction = layoutProperty->GetDirection().value_or(MarqueeDirection::LEFT);
+    auto end = -1 * textWidth;
+    if (direction == MarqueeDirection::RIGHT) {
+        const auto& padding = layoutProperty->CreatePaddingAndBorder();
+        MinusPaddingToSize(padding, marqueeSize);
+        end = marqueeSize.Width() >= textWidth ? marqueeSize.Width() : textWidth;
+    }
+    auto duration = static_cast<int32_t>(std::abs(end) * DEFAULT_MARQUEE_SCROLL_DELAY);
+    if (GreatNotEqual(step, 0.0)) {
+        duration = static_cast<int32_t>(duration / step);
+    }
+    AnimationOption option;
+    option.SetCurve(Curves::LINEAR);
+    option.SetDuration(duration);
+    option.SetIteration(repeatCount_);
+    SetTextOffset(0.0f);
+    animationId_++;
+    AnimationUtils::Animate(
+        option,
+        [weak = AceType::WeakClaim(this), end]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->SetTextOffset(end);
+        },
+        [weak = AceType::WeakClaim(this), animationId = animationId_]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            if (animationId == pattern->animationId_) {
+                pattern->FireFinishEvent();
+                pattern->SetTextOffset(0.0f);
+                pattern->lastStartStatus_ = false;
+            }
+        },
+        [weak = AceType::WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->FireBounceEvent();
+        });
+}
+
+void MarqueePattern::StopMarqueeAnimation(bool stopAndStart, bool statusChanged)
+{
+    if (!statusChanged & !lastStartStatus_) {
+        return;
+    }
+    AnimationOption option;
+    option.SetCurve(Curves::LINEAR);
+    option.SetDuration(0);
+    AnimationUtils::Animate(
+        option,
+        [weak = AceType::WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->SetTextOffset(0.0f);
+        },
+        [weak = AceType::WeakClaim(this), restart = stopAndStart]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->FireFinishEvent();
+            if (restart) {
+                pattern->StartMarqueeAnimation();
+            } else {
+                pattern->lastStartStatus_ = false;
+            }
+        });
 }
 
 void MarqueePattern::FireStartEvent() const
@@ -328,31 +204,14 @@ void MarqueePattern::FireFinishEvent() const
     marqueeEventHub->FireFinishEvent();
 }
 
-double MarqueePattern::GetScrollAmount() const
+void MarqueePattern::SetTextOffset(float offsetX)
 {
-    auto marqueeProperty = GetLayoutProperty<MarqueeLayoutProperty>();
-    CHECK_NULL_RETURN(marqueeProperty, DEFAULT_MARQUEE_SCROLL_AMOUNT);
-    return marqueeProperty->GetScrollAmount().value_or(DEFAULT_MARQUEE_SCROLL_AMOUNT);
-}
-
-int32_t MarqueePattern::GetLoop() const
-{
-    auto marqueeProperty = GetLayoutProperty<MarqueeLayoutProperty>();
-    CHECK_NULL_RETURN(marqueeProperty, DEFAULT_MARQUEE_LOOP);
-    return marqueeProperty->GetLoop().value_or(DEFAULT_MARQUEE_LOOP);
-}
-
-bool MarqueePattern::GetPlayerStatus() const
-{
-    auto marqueeProperty = GetLayoutProperty<MarqueeLayoutProperty>();
-    CHECK_NULL_RETURN(marqueeProperty, false);
-    return marqueeProperty->GetPlayerStatus().value_or(false);
-}
-
-MarqueeDirection MarqueePattern::GetDirection() const
-{
-    auto marqueeProperty = GetLayoutProperty<MarqueeLayoutProperty>();
-    CHECK_NULL_RETURN(marqueeProperty, MarqueeDirection::LEFT);
-    return marqueeProperty->GetDirection().value_or(MarqueeDirection::LEFT);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
+    CHECK_NULL_VOID(textNode);
+    auto renderContext = textNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateTransformTranslate({ offsetX, 0.0f, 0.0f });
 }
 } // namespace OHOS::Ace::NG

@@ -269,4 +269,28 @@ int32_t ToggleModelNG::RemoveNode(const RefPtr<FrameNode>& childFrameNode, int32
     return parentFrame->RemoveChildAndReturnIndex(childFrameNode);
 }
 
+void ToggleModelNG::OnChangeEvent(ChangeEvent&& onChangeEvent)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    CHECK_NULL_VOID(stack);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto checkboxPattern = stack->GetMainFrameNodePattern<CheckBoxPattern>();
+    if (checkboxPattern) {
+        auto eventHub = frameNode->GetEventHub<CheckBoxEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->SetChangeEvent(std::move(onChangeEvent));
+        return;
+    }
+    auto buttonPattern = stack->GetMainFrameNodePattern<ToggleButtonPattern>();
+    if (buttonPattern) {
+        auto eventHub = frameNode->GetEventHub<ToggleButtonEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->SetOnChangeEvent(std::move(onChangeEvent));
+        return;
+    }
+    auto eventHub = frameNode->GetEventHub<SwitchEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnChangeEvent(std::move(onChangeEvent));
+}
 } // namespace OHOS::Ace::NG

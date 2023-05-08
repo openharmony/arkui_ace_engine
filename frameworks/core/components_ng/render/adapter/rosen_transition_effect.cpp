@@ -527,7 +527,7 @@ void RosenScaleTransitionEffect::SetScaleEffect(const ScaleOptions& options)
 }
 
 template<>
-RosenOpacityTransitionEffect::PropertyTransitionEffectTemplate() : identityValue_(1.0f), activeValue_(1.0f)
+RosenOpacityTransitionEffect::PropertyTransitionEffectTemplate() : identityValue_(1.0f), activeValue_(0.0f)
 {}
 
 template<>
@@ -549,4 +549,9 @@ InternalTranslateEffect::PropertyTransitionEffectTemplate() : identityValue_(0.0
 template<>
 InternalScaleEffect::PropertyTransitionEffectTemplate() : identityValue_(1.0f, 1.0f), activeValue_(1.0f, 1.0f)
 {}
+
+RefPtr<RosenTransitionEffect> RosenTransitionEffect::CreateDefaultRosenTransitionEffect()
+{
+    return AceType::MakeRefPtr<RosenOpacityTransitionEffect>();
+}
 } // namespace OHOS::Ace::NG

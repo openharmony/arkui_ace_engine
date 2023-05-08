@@ -134,16 +134,16 @@ HWTEST_F(OffscreenCanvasPaintPatternTestNg, OffscreenCanvasPaintPatternTestNg002
         EXPECT_EQ(paintMethod->fillState_.GetTextStyle().GetTextColor(), color);
     }
 
-    Ace::Pattern imagePattern;
+    std::shared_ptr<Ace::Pattern> imagePattern;
     offscreenCanvasPattern->SetFillPattern(imagePattern);
     EXPECT_DOUBLE_EQ(paintMethod->fillState_.GetPattern().GetImageWidth(), DEFAULT_DOUBLE0);
     EXPECT_DOUBLE_EQ(paintMethod->fillState_.GetPattern().GetImageHeight(), DEFAULT_DOUBLE0);
     EXPECT_EQ(paintMethod->fillState_.GetPattern().GetImgSrc(), NULL_STR);
     EXPECT_EQ(paintMethod->fillState_.GetPattern().GetRepetition(), NULL_STR);
-    imagePattern.SetImageWidth(IDEAL_WIDTH);
-    imagePattern.SetImageHeight(IDEAL_HEIGHT);
-    imagePattern.SetImgSrc(IMAGE_SRC);
-    imagePattern.SetRepetition(REPETITION_STR);
+    imagePattern->SetImageWidth(IDEAL_WIDTH);
+    imagePattern->SetImageHeight(IDEAL_HEIGHT);
+    imagePattern->SetImgSrc(IMAGE_SRC);
+    imagePattern->SetRepetition(REPETITION_STR);
     offscreenCanvasPattern->SetFillPattern(imagePattern);
     EXPECT_DOUBLE_EQ(paintMethod->fillState_.GetPattern().GetImageWidth(), IDEAL_WIDTH);
     EXPECT_DOUBLE_EQ(paintMethod->fillState_.GetPattern().GetImageHeight(), IDEAL_HEIGHT);
@@ -212,16 +212,16 @@ HWTEST_F(OffscreenCanvasPaintPatternTestNg, OffscreenCanvasPaintPatternTestNg003
         EXPECT_EQ(paintMethod->strokeState_.GetColor(), color);
     }
 
-    Ace::Pattern imagePattern;
+    std::shared_ptr<Ace::Pattern> imagePattern;
     offscreenCanvasPattern->SetStrokePattern(imagePattern);
     EXPECT_DOUBLE_EQ(paintMethod->strokeState_.GetPattern().GetImageWidth(), DEFAULT_DOUBLE0);
     EXPECT_DOUBLE_EQ(paintMethod->strokeState_.GetPattern().GetImageHeight(), DEFAULT_DOUBLE0);
     EXPECT_EQ(paintMethod->strokeState_.GetPattern().GetImgSrc(), NULL_STR);
     EXPECT_EQ(paintMethod->strokeState_.GetPattern().GetRepetition(), NULL_STR);
-    imagePattern.SetImageWidth(IDEAL_WIDTH);
-    imagePattern.SetImageHeight(IDEAL_HEIGHT);
-    imagePattern.SetImgSrc(IMAGE_SRC);
-    imagePattern.SetRepetition(REPETITION_STR);
+    imagePattern->SetImageWidth(IDEAL_WIDTH);
+    imagePattern->SetImageHeight(IDEAL_HEIGHT);
+    imagePattern->SetImgSrc(IMAGE_SRC);
+    imagePattern->SetRepetition(REPETITION_STR);
     offscreenCanvasPattern->SetStrokePattern(imagePattern);
     EXPECT_DOUBLE_EQ(paintMethod->strokeState_.GetPattern().GetImageWidth(), IDEAL_WIDTH);
     EXPECT_DOUBLE_EQ(paintMethod->strokeState_.GetPattern().GetImageHeight(), IDEAL_HEIGHT);

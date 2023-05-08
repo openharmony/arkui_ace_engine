@@ -88,4 +88,13 @@ void RatingModelNG::SetOnChange(ChangeEvent&& onChange)
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(onChange));
 }
+
+void RatingModelNG::SetOnChangeEvent(ChangeEvent&& onChangeEvent)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RatingEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnChangeEvent(std::move(onChangeEvent));
+}
 } // namespace OHOS::Ace::NG

@@ -85,13 +85,16 @@ gen_obj("js_enum_style") {
   snapshot_dep = []
 }
 
-gen_obj("js_mock_system_plugin") {
-  input = "$root_out_dir/obj/ide/tools/previewer/automock/dist/jsMockSystemPlugin.js"
-  if (use_mac || use_mingw_win || use_linux || target_os == "ios") {
-    jsmocksystemplugin_obj_path = base_output_path + "/js_mock_system_plugin.c"
+if (!is_cross_platform_build) {
+  gen_obj("js_mock_system_plugin") {
+    input = "$root_out_dir/obj/ide/tools/previewer/automock/dist/jsMockSystemPlugin.js"
+    if (use_mac || use_mingw_win || use_linux || target_os == "ios") {
+      jsmocksystemplugin_obj_path =
+          base_output_path + "/js_mock_system_plugin.c"
+    }
+    output = jsmocksystemplugin_obj_path
+    snapshot_dep = [ "//ide/tools/previewer/automock:gen_snapshot_jsmock" ]
   }
-  output = jsmocksystemplugin_obj_path
-  snapshot_dep = [ "//ide/tools/previewer/automock:gen_snapshot_jsmock" ]
 }
 
 # build declarative javascript engine source
@@ -153,6 +156,7 @@ template("declarative_js_engine") {
       "jsview/js_canvas_gradient.cpp",
       "jsview/js_canvas_image_data.cpp",
       "jsview/js_canvas_path.cpp",
+      "jsview/js_canvas_pattern.cpp",
       "jsview/js_canvas_renderer.cpp",
       "jsview/js_checkbox.cpp",
       "jsview/js_checkboxgroup.cpp",
@@ -201,6 +205,7 @@ template("declarative_js_engine") {
       "jsview/js_menu_item_group.cpp",
       "jsview/js_navdestination.cpp",
       "jsview/js_navigation.cpp",
+      "jsview/js_navigation_stack.cpp",
       "jsview/js_navigator.cpp",
       "jsview/js_navrouter.cpp",
       "jsview/js_offscreen_canvas.cpp",
@@ -217,6 +222,7 @@ template("declarative_js_engine") {
       "jsview/js_qrcode.cpp",
       "jsview/js_radio.cpp",
       "jsview/js_rect.cpp",
+      "jsview/js_recycle_view.cpp",
       "jsview/js_refresh.cpp",
       "jsview/js_relative_container.cpp",
       "jsview/js_render_image.cpp",
@@ -312,6 +318,7 @@ template("declarative_js_engine") {
       "jsview/models/select_model_impl.cpp",
       "jsview/models/shape_abstract_model_impl.cpp",
       "jsview/models/shape_model_impl.cpp",
+      "jsview/models/side_bar_container_model_impl.cpp",
       "jsview/models/slider_model_impl.cpp",
       "jsview/models/sliding_panel_model_impl.cpp",
       "jsview/models/span_model_impl.cpp",
@@ -407,7 +414,10 @@ template("declarative_js_engine") {
 
     if (defined(config.form_components_support) &&
         config.form_components_support) {
-      sources += [ "jsview/js_form.cpp" ]
+      sources += [
+        "jsview/js_form.cpp",
+        "jsview/models/form_model_impl.cpp",
+      ]
     }
 
     if (defined(config.remote_window_support) && config.remote_window_support) {
@@ -489,8 +499,18 @@ template("declarative_js_engine") {
       }
 
       if (defined(config.window_scene_support) && config.window_scene_support) {
-        sources += [ "jsview/js_ui_extension.cpp" ]
-        deps += [ "$window_manager_path/window_scene/session:scene_session" ]
+        sources += [
+          "jsview/js_ui_extension.cpp",
+          "jsview/window_scene/js_host_window_scene.cpp",
+          "jsview/window_scene/js_root_scene.cpp",
+          "jsview/window_scene/js_screen.cpp",
+        ]
+        external_deps += [
+          "window_manager:scene_session",
+          "window_manager:scene_session_manager",
+          "window_manager:screen_session",
+          "window_manager:screen_session_manager",
+        ]
       }
     }
   }

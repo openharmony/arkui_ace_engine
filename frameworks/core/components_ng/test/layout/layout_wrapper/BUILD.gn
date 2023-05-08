@@ -19,8 +19,13 @@ ohos_unittest("layout_wrapper_test_ng") {
   sources = [
     "$ace_root/frameworks/base/geometry/dimension.cpp",
     "$ace_root/frameworks/base/json/json_util.cpp",
+    "$ace_root/frameworks/base/log/ace_performance_check.cpp",
+    "$ace_root/frameworks/base/subwindow/subwindow_manager.cpp",
     "$ace_root/frameworks/base/utils/string_expression.cpp",
     "$ace_root/frameworks/base/utils/time_util.cpp",
+    "$ace_root/frameworks/bridge/common/utils/engine_helper.cpp",
+    "$ace_root/frameworks/bridge/common/utils/source_map.cpp",
+    "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/frameworks/core/components/common/layout/grid_column_info.cpp",
     "$ace_root/frameworks/core/components/common/layout/grid_container_info.cpp",
     "$ace_root/frameworks/core/components/common/layout/grid_system_manager.cpp",
@@ -64,9 +69,12 @@ ohos_unittest("layout_wrapper_test_ng") {
 
     # mock
     "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/base/mock_localization.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/render/mock_animation_utils.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_context.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_context_creator.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_base.cpp",
+    "$ace_root/test/mock/core/common/mock_container.cpp",
 
     # self
     "layout_wrapper_test_ng.cpp",

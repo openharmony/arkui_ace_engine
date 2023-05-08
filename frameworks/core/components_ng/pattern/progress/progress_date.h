@@ -18,6 +18,7 @@
 
 #include "base/geometry/dimension.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
@@ -32,6 +33,11 @@ enum class ProgressType {
     MOON = 7,
     BUBBLE = 8,
     CAPSULE = 9,
+};
+
+enum class ProgressStatus {
+    PROGRESSING = 0,
+    LOADING
 };
 
 class ProgressTypeUtils {
@@ -68,6 +74,14 @@ struct ProgressDate {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(StrokeWidth, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ScaleCount, int32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ScaleWidth, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(BorderWidth, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextSize, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(Text, std::string);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(EnableScanEffect, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FontWeight, FontWeight);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FontFamily, std::vector<std::string>);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ItalicFontStyle,  Ace::FontStyle);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextColor, Color);
 };
 
 struct ProgressStyle {

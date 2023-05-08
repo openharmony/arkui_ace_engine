@@ -192,6 +192,8 @@ public:
         return "";
     }
 
+    virtual void GetStackTrace(std::string& trace) {}
+
     virtual void NotifyAppStorage(const std::string& key, const std::string& value) {}
 
     virtual RefPtr<GroupJsBridge> GetGroupJsBridge() = 0;
@@ -280,7 +282,7 @@ public:
     {
         return true;
     }
-    
+
     virtual void ReplaceJSContent(const std::string& url, const std::string componentName)
     {
         LOGE("Ark does not support replaceJSContent");

@@ -14,9 +14,11 @@
  */
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_marquee.h"
+#include <limits>
 
 #include "base/geometry/dimension.h"
 #include "base/log/ace_scoring_log.h"
+#include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/marquee_model_impl.h"
@@ -28,7 +30,9 @@ namespace OHOS::Ace {
 
 std::unique_ptr<MarqueeModel> MarqueeModel::instance_ = nullptr;
 std::mutex MarqueeModel::mutex_;
-
+namespace {
+constexpr Dimension DEFAULT_STEP = 6.0_vp;
+}
 MarqueeModel* MarqueeModel::GetInstance()
 {
     if (!instance_) {
@@ -73,12 +77,23 @@ void JSMarquee::Create(const JSCallbackInfo& info)
 
     auto getStep = paramObject->GetProperty("step");
     if (getStep->IsNumber()) {
-        MarqueeModel::GetInstance()->SetScrollAmount(getStep->ToNumber<double>());
+        auto step = getStep->ToNumber<double>();
+        MarqueeModel::GetInstance()->SetScrollAmount(
+            LessOrEqual(step, 0.0) ? DEFAULT_STEP.ConvertToPx() : Dimension(step, DimensionUnit::VP).ConvertToPx());
     }
 
     auto getLoop = paramObject->GetProperty("loop");
     if (getLoop->IsNumber()) {
-        MarqueeModel::GetInstance()->SetLoop(getLoop->ToNumber<int32_t>());
+        auto loopDouble = getLoop->ToNumber<double>();
+        int32_t loop = -1;
+
+        if (GreatOrEqual(loopDouble, 0.0)) {
+            loop = static_cast<int32_t>(loopDouble);
+            if (loop == std::numeric_limits<int32_t>::max()) {
+                loop = -1;
+            }
+        }
+        MarqueeModel::GetInstance()->SetLoop(loop < 0 ? -1 : loop);
     }
 
     auto getFromStart = paramObject->GetProperty("fromStart");
@@ -135,7 +150,7 @@ void JSMarquee::SetFontSize(const JSCallbackInfo& info)
         return;
     }
 
-    Dimension fontSize;
+    CalcDimension fontSize;
     if (!ParseJsDimensionFp(info[0], fontSize)) {
         return;
     }

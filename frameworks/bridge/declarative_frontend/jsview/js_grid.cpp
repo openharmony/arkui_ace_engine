@@ -124,7 +124,7 @@ void JSGrid::SetColumnsGap(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension colGap;
+    CalcDimension colGap;
 
     if (!ParseJsDimensionVp(info[0], colGap) || colGap.Value() < 0) {
         colGap.SetValue(0.0);
@@ -139,7 +139,7 @@ void JSGrid::SetRowsGap(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension rowGap;
+    CalcDimension rowGap;
 
     if (!ParseJsDimensionVp(info[0], rowGap) || rowGap.Value() < 0) {
         rowGap.SetValue(0.0);
@@ -155,7 +155,7 @@ void JSGrid::JsGridHeight(const JSCallbackInfo& info)
         return;
     }
 
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         LOGE("parse height fail for grid, please check.");
         return;

@@ -111,10 +111,36 @@ void JSRadio::Checked(bool checked)
     }
 }
 
+void ParseCheckedObject(const JSCallbackInfo& args, const JSRef<JSVal>& changeEventVal)
+{
+    CHECK_NULL_VOID(changeEventVal->IsFunction());
+
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
+    auto onChecked = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](bool check) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Radio.onChangeEvent");
+        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(check));
+        func->ExecuteJS(1, &newJSVal);
+    };
+    RadioModel::GetInstance()->SetOnChangeEvent(std::move(onChecked));
+}
+
 void JSRadio::Checked(const JSCallbackInfo& info)
 {
-    if (info[0]->IsBoolean()) {
+    if (info.Length() < 1 || info.Length() > 2) {
+        LOGE("The arg is wrong, it is supposed to have 1 or 2 arguments");
+        return;
+    }
+
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
         RadioModel::GetInstance()->SetChecked(info[0]->ToBoolean());
+    } else {
+        RadioModel::GetInstance()->SetChecked(false);
+    }
+
+    if (info.Length() > 1 && info[1]->IsObject()) {
+        JSRef<JSVal> checkedObj = JSRef<JSObject>::Cast(info[1]);
+        ParseCheckedObject(info, checkedObj);
     }
 }
 
@@ -130,7 +156,7 @@ void JSRadio::JsWidth(const JSCallbackInfo& info)
 
 void JSRadio::JsWidth(const JSRef<JSVal>& jsValue)
 {
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(jsValue, value)) {
         return;
     }
@@ -155,7 +181,7 @@ void JSRadio::JsHeight(const JSCallbackInfo& info)
 
 void JSRadio::JsHeight(const JSRef<JSVal>& jsValue)
 {
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(jsValue, value)) {
         return;
     }
@@ -209,10 +235,10 @@ void JSRadio::JsPadding(const JSCallbackInfo& info)
         }
         if (argsPtrItem->Contains("top") || argsPtrItem->Contains("bottom") || argsPtrItem->Contains("left") ||
             argsPtrItem->Contains("right")) {
-            Dimension topDimen = Dimension(0.0, DimensionUnit::VP);
-            Dimension leftDimen = Dimension(0.0, DimensionUnit::VP);
-            Dimension rightDimen = Dimension(0.0, DimensionUnit::VP);
-            Dimension bottomDimen = Dimension(0.0, DimensionUnit::VP);
+            CalcDimension topDimen = CalcDimension(0.0, DimensionUnit::VP);
+            CalcDimension leftDimen = CalcDimension(0.0, DimensionUnit::VP);
+            CalcDimension rightDimen = CalcDimension(0.0, DimensionUnit::VP);
+            CalcDimension bottomDimen = CalcDimension(0.0, DimensionUnit::VP);
             ParseJsonDimensionVp(argsPtrItem->GetValue("top"), topDimen);
             ParseJsonDimensionVp(argsPtrItem->GetValue("left"), leftDimen);
             ParseJsonDimensionVp(argsPtrItem->GetValue("right"), rightDimen);
@@ -235,7 +261,7 @@ void JSRadio::JsPadding(const JSCallbackInfo& info)
             return;
         }
     }
-    Dimension length;
+    CalcDimension length;
     if (!ParseJsDimensionVp(info[0], length)) {
         return;
     }
@@ -273,7 +299,7 @@ void JSRadio::JsRadioStyle(const JSCallbackInfo& info)
     }
 }
 
-void JSRadio::SetPadding(const Dimension& topDimen, const Dimension& leftDimen)
+void JSRadio::SetPadding(const CalcDimension& topDimen, const CalcDimension& leftDimen)
 {
     auto stack = ViewStackProcessor::GetInstance();
     auto radioComponent = AceType::DynamicCast<RadioComponent<std::string>>(stack->GetMainComponent());

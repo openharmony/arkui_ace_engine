@@ -191,7 +191,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg003, TestSize
      */
     paintMethod->SetSmoothingEnabled(true);
     paintMethod->smoothingQuality_ = qualityUndefined;
-    paintMethod->InitImagePaint();
+    paintMethod->InitImagePaint(paintMethod->imagePaint_);
     EXPECT_DOUBLE_EQ(paintMethod->imagePaint_.getFilterQuality(), SkFilterQuality::kNone_SkFilterQuality);
 
     /**
@@ -199,7 +199,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg003, TestSize
      * @tc.expected: The filterQuality of imagePaint_ is equal to kLow_SkFilterQuality.
      */
     paintMethod->smoothingQuality_ = qualityLow;
-    paintMethod->InitImagePaint();
+    paintMethod->InitImagePaint(paintMethod->imagePaint_);
     EXPECT_DOUBLE_EQ(paintMethod->imagePaint_.getFilterQuality(), SkFilterQuality::kLow_SkFilterQuality);
 
     /**
@@ -207,7 +207,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg003, TestSize
      * @tc.expected: The filterQuality of imagePaint_ is equal to kMedium_SkFilterQuality.
      */
     paintMethod->smoothingQuality_ = qualityMedium;
-    paintMethod->InitImagePaint();
+    paintMethod->InitImagePaint(paintMethod->imagePaint_);
     EXPECT_DOUBLE_EQ(paintMethod->imagePaint_.getFilterQuality(), SkFilterQuality::kMedium_SkFilterQuality);
 
     /**
@@ -215,7 +215,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg003, TestSize
      * @tc.expected: The filterQuality of imagePaint_ is equal to kHigh_SkFilterQuality.
      */
     paintMethod->smoothingQuality_ = qualityHigh;
-    paintMethod->InitImagePaint();
+    paintMethod->InitImagePaint(paintMethod->imagePaint_);
     EXPECT_DOUBLE_EQ(paintMethod->imagePaint_.getFilterQuality(), SkFilterQuality::kHigh_SkFilterQuality);
 
     /**
@@ -223,7 +223,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg003, TestSize
      * @tc.expected: The filterQuality of imagePaint_ is equal to kNone_SkFilterQuality.
      */
     paintMethod->SetSmoothingEnabled(false);
-    paintMethod->InitImagePaint();
+    paintMethod->InitImagePaint(paintMethod->imagePaint_);
     EXPECT_DOUBLE_EQ(paintMethod->imagePaint_.getFilterQuality(), SkFilterQuality::kNone_SkFilterQuality);
 }
 

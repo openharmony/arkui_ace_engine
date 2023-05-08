@@ -57,7 +57,6 @@ private:
     mutable std::shared_mutex mutex_;
     std::unordered_map<int32_t, RefPtr<Container>> containerMap_;
     RefPtr<WatchDog> watchDog_;
-    static std::atomic<bool> isAlive_;
     ACE_DISALLOW_COPY_AND_MOVE(AceEngine);
 };
 

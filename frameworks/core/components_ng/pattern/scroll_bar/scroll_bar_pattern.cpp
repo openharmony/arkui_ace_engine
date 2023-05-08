@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,6 +33,13 @@ void ScrollBarPattern::OnAttachToFrameNode()
     host->GetRenderContext()->SetClipToFrame(true);
 }
 
+void ScrollBarPattern::SendAccessibilityEvent(AccessibilityEventType eventType)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->OnAccessibilityEvent(eventType);
+}
+
 void ScrollBarPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -64,6 +71,7 @@ void ScrollBarPattern::OnModifyDone()
         CHECK_NULL_RETURN(pattern, false);
         if (source == SCROLL_FROM_START) {
             pattern->StopAnimator();
+            pattern->SendAccessibilityEvent(AccessibilityEventType::SCROLL_START);
             return true;
         }
         return pattern->UpdateCurrentOffset(offset, source);
@@ -74,6 +82,7 @@ void ScrollBarPattern::OnModifyDone()
         if (pattern->GetDisplayMode() == DisplayMode::AUTO) {
             pattern->StartAnimator();
         }
+        pattern->SendAccessibilityEvent(AccessibilityEventType::SCROLL_END);
     };
 
     auto hub = host->GetEventHub<EventHub>();

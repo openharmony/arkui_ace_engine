@@ -87,9 +87,15 @@ public:
         }
     }
 
+    void SetOnChangeEvent(ChangeAndSubmitEvent&& onChangeEvent)
+    {
+        onValueChangeEvent_ = std::move(onChangeEvent);
+    }
+
 private:
     ChangeAndSubmitEvent submitEvent_;
     ChangeAndSubmitEvent changeEvent_;
+    ChangeAndSubmitEvent onValueChangeEvent_;
 
     std::function<void(const std::string&)> onCopy_;
     std::function<void(const std::string&)> onCut_;

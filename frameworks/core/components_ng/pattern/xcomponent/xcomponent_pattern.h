@@ -27,8 +27,8 @@
 #include "core/common/thread_checker.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/xcomponent/native_interface_xcomponent_impl.h"
-#include "core/components/xcomponent/resource/native_texture.h"
 #include "core/components/xcomponent/xcomponent_controller.h"
+#include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/event/input_event.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_event_hub.h"
@@ -67,6 +67,11 @@ public:
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         return MakeRefPtr<XComponentLayoutAlgorithm>();
+    }
+
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::NODE, false };
     }
 
     std::pair<RefPtr<OHOS::Ace::NativeXComponentImpl>, std::weak_ptr<OH_NativeXComponent>> GetNativeXComponent()
@@ -147,6 +152,10 @@ private:
     void HandleMouseEvent(const MouseInfo& info);
     void InitMouseHoverEvent(const RefPtr<InputEventHub>& inputHub);
     void HandleMouseHoverEvent(bool isHover);
+    void InitFocusEvent(const RefPtr<FocusHub>& focusHub);
+    void HandleFocusEvent();
+    bool HandleKeyEvent(const KeyEvent& event);
+    void HandleBlurEvent();
     ExternalEvent CreateExternalEvent();
     void CreateSurface();
     void SetMethodCall();

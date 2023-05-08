@@ -110,11 +110,6 @@ public:
         enabled_ = enabled;
     }
 
-    void SetIsHover(bool isHover)
-    {
-        isHover_ = isHover;
-    }
-
     void SetTotalScale(float totalScale)
     {
         totalScale_ = totalScale;
@@ -132,7 +127,6 @@ public:
 
 private:
     bool enabled_ = true;
-    bool isHover_ = false;
     float totalScale_ = 1.0f;
     float pointScale_ = 0.5f;
     OffsetF hotZoneOffset_;

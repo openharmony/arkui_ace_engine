@@ -93,7 +93,7 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest001, TestSize.Level1)
 
     /**
      * @tc.steps: step3. call GetOrCreateChildByIndex and set input index is -1.
-     * @tc.expected: step3. the return value is null.
+     * @tc.expected: the return value is null.
      */
     testWrapper = layoutWrapper->GetOrCreateChildByIndex(-1, false);
     EXPECT_EQ(testWrapper, nullptr);

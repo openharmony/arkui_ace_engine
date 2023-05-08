@@ -45,6 +45,7 @@ public:
     void SetBlockShape(const RefPtr<BasicShape>& value) override;
     void SetStepSize(const Dimension& value) override;
     void SetOnChange(SliderOnChangeEvent&& eventOnChange) override;
+    void SetOnChangeEvent(SliderOnValueChangeEvent&& onChangeEvent) override;
 };
 
 } // namespace OHOS::Ace::NG
