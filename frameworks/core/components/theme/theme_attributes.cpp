@@ -71,6 +71,7 @@ const char THEME_PATTERN_ADVANCED_PATTERN[] = "advanced_pattern";
 // pattern general attributes
 const char PATTERN_FG_COLOR[] = "fg_color";
 const char PATTERN_BG_COLOR[] = "bg_color";
+const char PATTERN_BRODER_COLOR[] = "broder_color";
 const char PATTERN_BG_COLOR_HOVERED[] = "bg_color_hovered";
 const char PATTERN_BG_COLOR_CLICKED[] = "bg_color_clicked";
 const char PATTERN_BG_COLOR_PRESSED[] = "bg_color_pressed";
@@ -83,6 +84,7 @@ const char PATTERN_TEXT_COLOR_ALPHA[] = "text_color_alpha";
 const char PATTERN_TEXT_COLOR_FOCUSED[] = "text_color_focused";
 const char PATTERN_TEXT_COLOR_SELECTED[] = "text_color_selected";
 const char PATTERN_TEXT_COLOR_DISABLED[] = "text_color_disabled";
+const char PATTERN_DISABLED_TEXT_COLOR[] = "disabled_text_color";
 const char PATTERN_TEXT_SIZE[] = "text_font_size";
 const char PATTERN_WIDTH[] = "width";
 const char PATTERN_HEIGHT[] = "height";
@@ -148,6 +150,12 @@ const char BADGE_BORDER_WIDTH[] = "border_width";
 // swiper attributes
 const char INDICATOR_TEXT_FONT_SIZE[] = "indicator_text_font_size";
 const char INDICATOR_TEXT_FONT_COLOR[] = "indicator_text_font_color";
+
+// textinput attributes
+const char ERROR_TEXT_UNDERLINE_COLOR[] = "error_text_underline_color";
+const char OHOS_ID_COLOR_LIST_SEPARATOR[] = "ohos_id_color_list_separator";
+const char OHOS_ID_COLOR_TEXT_HINT[] = "ohos_id_color_text_hint";
+const char BORDER_RADIUS_SIZE[] = "border_radius_size";
 // swiper attributes for arrow
 const char ARROW_COLOR_BOARDCOLOR_HOVER[] = "arrow_color_boardColor_hover";
 const char ARROW_COLOR_BOARDCOLOR_CLICK[] = "arrow_color_boardColor_click";
