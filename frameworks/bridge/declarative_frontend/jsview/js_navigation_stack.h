@@ -49,11 +49,13 @@ public:
     void SetDataSourceObj(const JSRef<JSObject>& dataSourceObj);
     const JSRef<JSObject>& GetDataSourceObj();
     void SetNavDestBuilderFunc(const JSRef<JSFunc>& navDestBuilderFunc);
+    bool IsEmpty() override;
     void Pop() override;
     void Push(const std::string& name, const RefPtr<NG::RouteInfo>& routeInfo = nullptr) override;
+    void Push(const std::string& name, int32_t index) override;
     void PushName(const std::string& name, const JSRef<JSVal>& param);
-    void Push(int32_t index) override;
     void RemoveName(const std::string& name) override;
+    void RemoveIndex(int32_t index) override;
     void Clear() override;
     std::vector<std::string> GetAllPathName() override;
     RefPtr<NG::UINode> CreateNodeByIndex(int32_t index) override;

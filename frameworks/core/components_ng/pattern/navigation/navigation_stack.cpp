@@ -15,6 +15,9 @@
 
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
 
+#include <utility>
+
+#include "core/components_ng/pattern/navrouter/navrouter_group_node.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::NG {
@@ -92,7 +95,7 @@ void NavigationStack::Add(
     }
     navPathList_.emplace_back(std::make_pair(name, navDestinationNode));
     if (index != NOT_EXIST) {
-        Push(index);
+        Push(name, index);
     } else {
         Push(name, routeInfo);
     }
@@ -116,7 +119,7 @@ void NavigationStack::AddForDefault(
     navPathList_.emplace_back(std::make_pair(name, navDestinationNode));
     // push param into JSNavigationStack
     if (index != NOT_EXIST) {
-        Push(index);
+        Push(name, index);
     } else {
         Push(name, routeInfo);
     }
@@ -133,7 +136,7 @@ void NavigationStack::AddForReplace(
     int32_t index = NOT_EXIST;
     if (HasNode(name, navDestinationNode)) {
         index = FindIndex(name, navDestinationNode);
-        navPathList_.pop_back(); // destroy the old page
+        navPathList_.pop_back(); // move the old page
         Remove(name, navDestinationNode);
     } else {
         navPathList_.pop_back();
@@ -142,7 +145,7 @@ void NavigationStack::AddForReplace(
 
     Pop();
     if (index != NOT_EXIST) {
-        Push(index);
+        Push(name, index);
     } else {
         Push(name, routeInfo);
     }
@@ -210,17 +213,21 @@ const RefPtr<UINode>& NavigationStack::GetPre(const std::string& name)
         return nullptr;
     }
     auto it = navPathList_.rbegin();
-    for (; it != navPathList_.rend(); ++it) {
+    for (; it != navPathList_.rend() - 1; ++it) {
         if ((*it).first == name) {
             break;
         }
     }
-    ++it;
-    if (it == navPathList_.rend()) {
+    if (it == navPathList_.rend() - 1) {
         return nullptr;
     } else {
         return (*it).second;
     }
+}
+
+bool NavigationStack::IsEmpty()
+{
+    return false;
 }
 
 void NavigationStack::Pop() {}
@@ -239,7 +246,7 @@ std::vector<std::string> NavigationStack::GetAllPathName()
 
 void NavigationStack::Push(const std::string& name, const RefPtr<RouteInfo>& routeInfo) {}
 
-void NavigationStack::Push(int32_t index) {}
+void NavigationStack::Push(const std::string& name, int32_t index) {}
 
 void NavigationStack::RemoveName(const std::string& name)
 {

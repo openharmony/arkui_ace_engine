@@ -66,20 +66,21 @@ public:
     const RefPtr<UINode>& Get();
     const RefPtr<UINode>& Get(const std::string& name);
     const RefPtr<UINode>& GetPre(const std::string& name);
+    virtual bool IsEmpty();
     virtual std::vector<std::string> GetAllPathName();
     virtual void Pop();
     virtual void Push(const std::string& name, const RefPtr<RouteInfo>& routeInfo = nullptr);
-    virtual void Push(int32_t index);
+    virtual void Push(const std::string& name, int32_t index);
     virtual void RemoveName(const std::string& name);
     virtual void RemoveIndex(int32_t index);
     virtual void Clear();
     virtual RefPtr<UINode> CreateNodeByIndex(int32_t index);
     virtual RefPtr<UINode> CreateNodeByRouteInfo(const RefPtr<RouteInfo>& routeInfo);
+    int32_t FindIndex(const std::string& name, const RefPtr<UINode>& navDestinationNode);
 
 private:
     bool HasNode(const std::string& name, const RefPtr<UINode>& navDestinationNode);
     void MoveToTop(const std::string& name, const RefPtr<UINode>& navDestinationNode);
-    int32_t FindIndex(const std::string& name, const RefPtr<UINode>& navDestinationNode);
     void AddForDefault(const std::string& name, const RefPtr<UINode>& navDestinationNode,
         const RefPtr<RouteInfo>& routeInfo = nullptr);
     void AddForReplace(const std::string& name, const RefPtr<UINode>& navDestinationNode,
