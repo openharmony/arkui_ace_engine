@@ -21,6 +21,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/log/log_wrapper.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -50,6 +51,7 @@ public:
         if (!progressModifier_) {
             progressModifier_ = AceType::MakeRefPtr<ProgressModifier>();
         }
+        progressModifier_->SetVisible(visibilityType_ == VisibleType::VISIBLE);
         return MakeRefPtr<ProgressPaintMethod>(progressType_, strokeWidth_, progressModifier_);
     }
 
@@ -108,6 +110,7 @@ private:
     Color borderColor_;
     Color fontColor_;
     bool isTextFromUser_ = false;
+    VisibleType visibilityType_ = VisibleType::VISIBLE;
 
     ACE_DISALLOW_COPY_AND_MOVE(ProgressPattern);
 };

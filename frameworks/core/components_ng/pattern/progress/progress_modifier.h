@@ -57,6 +57,10 @@ public:
     void SetContentSize(const SizeF& contentSize);
     void SetBorderWidth(float width);
     void SetSweepEffect(bool value);
+    void SetVisible(bool visible)
+    {
+        isVisible_ = visible;
+    }
     void SetRingProgressColor(const Gradient& color);
     void SetPaintShadow(bool paintShadow);
     void SetProgressStatus(ProgressStatus status);
@@ -72,16 +76,23 @@ private:
     void PaintCapsule(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
     void PaintVerticalCapsule(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
 
+    void StartLightSweepAnimation(ProgressType type, float value);
+    void StartCapsuleProgressLightSweep(float value);
+    void StartCapsuleProgressLightSweepImpl(float value);
+    void PaintCapsuleLightSweep(RSCanvas& canvas, const SizeF& contentSize,
+        const OffsetF& offset, const RSPath& path, bool isVertical) const;
+    Gradient CreateGradient() const;
+
     // Animatable
     RefPtr<AnimatablePropertyFloat> strokeWidth_; // After adjusting to the content width and height
     RefPtr<AnimatablePropertyColor> color_;
     RefPtr<AnimatablePropertyColor> bgColor_;
     RefPtr<AnimatablePropertyColor> borderColor_;
     RefPtr<AnimatablePropertyFloat> capsuleDate_;
-    RefPtr<AnimatablePropertyFloat> value_;
     RefPtr<AnimatablePropertyVectorColor> ringProgressColors_;
 
     // no Animatable
+    RefPtr<PropertyFloat> value_;
     RefPtr<PropertyOffsetF> offset_;
     RefPtr<PropertySizeF> contentSize_;
     RefPtr<PropertyFloat> maxValue_;
@@ -92,6 +103,10 @@ private:
     RefPtr<PropertyBool> sweepEffect_;
     RefPtr<PropertyBool> paintShadow_;
     RefPtr<PropertyInt> progressStatus_;
+    float sweepingDateBackup_ = 0.0f;
+    bool sweepingDateUpdated_ = false;
+    bool isSweeping_ = false;
+    bool isVisible_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(ProgressModifier);
 };
