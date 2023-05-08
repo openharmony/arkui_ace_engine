@@ -82,7 +82,7 @@ void AceServiceAbility::OnStart(const OHOS::AAFwk::Want& want)
     // init service
     BackendType backendType = BackendType::SERVICE;
 
-    Platform::PaContainer::CreateContainer(abilityId_, backendType, this,
+    Platform::PaContainer::CreateContainer(abilityId_, backendType, this, moduleInfo->hapPath,
         std::make_unique<ServicePlatformEventCallback>([this]() { TerminateAbility(); }));
 
     AceEngine::InitJsDumpHeadSignal();

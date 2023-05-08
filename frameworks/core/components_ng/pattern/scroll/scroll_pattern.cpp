@@ -38,7 +38,6 @@ constexpr int32_t SCROLL_TOUCH_DOWN = 1;
 constexpr int32_t SCROLL_TOUCH_UP = 2;
 constexpr float SCROLL_RATIO = 0.52f;
 constexpr float SCROLL_BY_SPEED = 250.0f; // move 250 pixels per second
-constexpr float SCROLL_MAX_TIME = 300.0f; // Scroll Animate max time 0.3 second
 constexpr float UNIT_CONVERT = 1000.0f;    // 1s convert to 1000ms
 
 float CalculateFriction(float gamma)
@@ -401,8 +400,8 @@ void ScrollPattern::CreateOrStopAnimator()
     animator_->ClearInterpolators();
 }
 
-void ScrollPattern::AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool limitDuration,
-    const std::function<void()>& onFinish)
+void ScrollPattern::AnimateTo(
+    float position, float duration, const RefPtr<Curve>& curve, const std::function<void()>& onFinish)
 {
     LOGD("scroll pattern, from %{public}f to %{public}f", currentOffset_, position);
     if (!IsScrollableStopped()) {
@@ -420,7 +419,7 @@ void ScrollPattern::AnimateTo(float position, float duration, const RefPtr<Curve
         scroll->DoJump(value);
     });
     animator_->AddInterpolator(animation);
-    animator_->SetDuration(static_cast<int32_t>(limitDuration ? std::min(duration, SCROLL_MAX_TIME) : duration));
+    animator_->SetDuration(static_cast<int32_t>(duration));
     animator_->ClearStopListeners();
     animator_->Play();
     // TODO: expand stop listener
@@ -456,7 +455,7 @@ void ScrollPattern::ScrollBy(float pixelX, float pixelY, bool smooth, const std:
     }
     float position = currentOffset_ + distance;
     if (smooth) {
-        AnimateTo(position, fabs(distance) * UNIT_CONVERT / SCROLL_BY_SPEED, Curves::EASE_OUT, true, onFinish);
+        AnimateTo(position, fabs(distance) * UNIT_CONVERT / SCROLL_BY_SPEED, Curves::EASE_OUT, onFinish);
         return;
     }
     float cachePosition = currentOffset_;

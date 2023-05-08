@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/tabs/tab_bar_layout_algorithm.h"
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -106,6 +107,11 @@ TabBarMode TabsNode::GetTabBarMode() const
 
 Dimension TabsNode::GetBarWidth() const
 {
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, 0.0_vp);
+    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    CHECK_NULL_RETURN(tabTheme, 0.0_vp);
+
     if (!tabBarId_.has_value()) {
         return 0.0_vp;
     }
@@ -113,11 +119,16 @@ Dimension TabsNode::GetBarWidth() const
     CHECK_NULL_RETURN(tabBarNode, 0.0_vp);
     auto tabBarProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_RETURN(tabBarProperty, 0.0_vp);
-    return tabBarProperty->GetTabBarWidth().value_or(0.0_vp);
+    return tabBarProperty->GetTabBarWidth().value_or(tabTheme->GetTabBarDefaultWidth());
 }
 
 Dimension TabsNode::GetBarHeight() const
 {
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, 0.0_vp);
+    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    CHECK_NULL_RETURN(tabTheme, 0.0_vp);
+
     if (!tabBarId_.has_value()) {
         return 0.0_vp;
     }
@@ -125,7 +136,7 @@ Dimension TabsNode::GetBarHeight() const
     CHECK_NULL_RETURN(tabBarNode, 0.0_vp);
     auto tabBarProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_RETURN(tabBarProperty, 0.0_vp);
-    return tabBarProperty->GetTabBarHeight().value_or(0.0_vp);
+    return tabBarProperty->GetTabBarHeight().value_or(tabTheme->GetTabBarDefaultHeight());
 }
 
 bool TabsNode::GetFadingEdge() const

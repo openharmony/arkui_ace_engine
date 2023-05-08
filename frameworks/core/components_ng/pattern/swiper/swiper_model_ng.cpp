@@ -253,4 +253,11 @@ void SwiperModelNG::SetIndicatorIsBoolean(bool isBoolean)
     CHECK_NULL_VOID(pattern);
     pattern->SetIndicatorIsBoolean(isBoolean);
 }
+
+void SwiperModelNG::SetArrowStyle(const SwiperArrowParameters& swiperArrowParameters) {}
+
+void SwiperModelNG::SetDisplayArrow(bool displayArrow) {}
+
+void SwiperModelNG::SetHoverShow(bool hoverShow) {}
+
 } // namespace OHOS::Ace::NG
