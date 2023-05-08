@@ -22,7 +22,10 @@
 
 #include "common_constants.h"
 #include "mock_schedule_task.h"
+#include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_frontend.h"
+#include "test/mock/core/common/mock_window.h"
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -37,11 +40,9 @@
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/test/mock/render/mock_render_context.h"
+#include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/pipeline_ng/test/mock/mock_frontend.h"
-#include "core/pipeline_ng/test/mock/mock_task_executor.h"
-#include "core/pipeline_ng/test/mock/mock_window.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1279,5 +1280,33 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg028, TestSize.Level1)
     context_->designWidthScale_ = DEFAULT_DOUBLE1;
     context_->OnVirtualKeyboardHeightChange(DEFAULT_DOUBLE1);
     EXPECT_DOUBLE_EQ(context_->designWidthScale_, DEFAULT_DOUBLE1);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg029
+ * @tc.desc: Test ThemeManager and SharedImageManager multithread.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg029, TestSize.Level1)
+{
+    std::vector<std::thread> threads;
+    for (int i = 0; i < 20; ++i) {
+        threads.emplace_back(std::thread([]() { context_->GetOrCreateSharedImageManager(); }));
+    }
+    for (auto&& thread : threads) {
+        thread.join();
+    }
+
+    threads.clear();
+    for (int i = 0; i < 20; ++i) {
+        if (i == 10) {
+            context_->SetThemeManager(AceType::MakeRefPtr<MockThemeManager>());
+        } else {
+            threads.emplace_back(std::thread([]() { context_->GetThemeManager(); }));
+        }
+    }
+    for (auto&& thread : threads) {
+        thread.join();
+    }
 }
 } // namespace OHOS::Ace::NG

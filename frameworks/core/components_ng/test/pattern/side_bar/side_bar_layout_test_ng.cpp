@@ -27,9 +27,9 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_layout_algorithm.h"
+#include "core/components_ng/pattern/side_bar/side_bar_container_model_ng.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_layout_property.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_pattern.h"
-#include "core/components_ng/pattern/side_bar/side_bar_container_view.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -70,6 +70,7 @@ void SideBarLayoutTestNg::TearDownTestCase()
  */
 HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg001, TestSize.Level1)
 {
+    SideBarContainerModelNG SideBarContainerModelInstance;
     auto sideBarFrameNode =
         FrameNode::CreateFrameNode(V2::SIDE_BAR_ETS_TAG, 0, AceType::MakeRefPtr<SideBarContainerPattern>());
     EXPECT_FALSE(sideBarFrameNode == nullptr);
@@ -85,7 +86,7 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg001, TestSize.Level1)
     auto layoutAlgorithm = AceType::MakeRefPtr<SideBarContainerLayoutAlgorithm>();
     EXPECT_FALSE(layoutAlgorithm == nullptr);
     sideBarPattern->sideBarStatus_ = SideBarStatus::SHOW;
-    SideBarContainerView::SetSideBarContainerType(SideBarContainerType::EMBED);
+    SideBarContainerModelInstance.SetSideBarContainerType(SideBarContainerType::EMBED);
     layoutAlgorithm->LayoutSideBar(AccessibilityManager::RawPtr(sideBarLayoutWrapper), sideBarLayoutWrapper);
     EXPECT_EQ(layoutAlgorithm->sideBarOffset_.GetX(), 0);
 }
@@ -97,6 +98,7 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg001, TestSize.Level1)
  */
 HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg002, TestSize.Level1)
 {
+    SideBarContainerModelNG SideBarContainerModelInstance;
     auto sideBarFrameNode =
         FrameNode::CreateFrameNode(V2::SIDE_BAR_ETS_TAG, 0, AceType::MakeRefPtr<SideBarContainerPattern>());
     EXPECT_FALSE(sideBarFrameNode == nullptr);
@@ -112,7 +114,7 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg002, TestSize.Level1)
     auto layoutAlgorithm = AceType::MakeRefPtr<SideBarContainerLayoutAlgorithm>();
     EXPECT_FALSE(layoutAlgorithm == nullptr);
     sideBarPattern->sideBarStatus_ = SideBarStatus::HIDDEN;
-    SideBarContainerView::SetSideBarContainerType(SideBarContainerType::EMBED);
+    SideBarContainerModelInstance.SetSideBarContainerType(SideBarContainerType::EMBED);
     layoutAlgorithm->LayoutSideBar(AccessibilityManager::RawPtr(sideBarLayoutWrapper), sideBarLayoutWrapper);
     EXPECT_EQ(layoutAlgorithm->sideBarOffset_.GetX(), 0);
 }
@@ -124,6 +126,7 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg002, TestSize.Level1)
  */
 HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg003, TestSize.Level1)
 {
+    SideBarContainerModelNG SideBarContainerModelInstance;
     auto sideBarFrameNode =
         FrameNode::CreateFrameNode(V2::SIDE_BAR_ETS_TAG, 0, AceType::MakeRefPtr<SideBarContainerPattern>());
     EXPECT_FALSE(sideBarFrameNode == nullptr);
@@ -140,7 +143,7 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg003, TestSize.Level1)
     auto layoutAlgorithm = AceType::MakeRefPtr<SideBarContainerLayoutAlgorithm>();
     EXPECT_FALSE(layoutAlgorithm == nullptr);
     sideBarPattern->sideBarStatus_ = SideBarStatus::CHANGING;
-    SideBarContainerView::SetSideBarContainerType(SideBarContainerType::EMBED);
+    SideBarContainerModelInstance.SetSideBarContainerType(SideBarContainerType::EMBED);
     layoutAlgorithm->LayoutSideBar(AccessibilityManager::RawPtr(sideBarLayoutWrapper), sideBarLayoutWrapper);
     EXPECT_EQ(layoutAlgorithm->sideBarOffset_.GetX(), 0);
 }
@@ -152,6 +155,7 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg003, TestSize.Level1)
  */
 HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg004, TestSize.Level1)
 {
+    SideBarContainerModelNG SideBarContainerModelInstance;
     auto sideBarFrameNode =
         FrameNode::CreateFrameNode(V2::SIDE_BAR_ETS_TAG, 0, AceType::MakeRefPtr<SideBarContainerPattern>());
     EXPECT_FALSE(sideBarFrameNode == nullptr);
@@ -166,7 +170,7 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg004, TestSize.Level1)
     auto layoutAlgorithm = AceType::MakeRefPtr<SideBarContainerLayoutAlgorithm>();
     EXPECT_FALSE(layoutAlgorithm == nullptr);
     sideBarPattern->sideBarStatus_ = SideBarStatus::SHOW;
-    SideBarContainerView::SetSideBarContainerType(SideBarContainerType::EMBED);
+    SideBarContainerModelInstance.SetSideBarContainerType(SideBarContainerType::EMBED);
     layoutAlgorithm->LayoutSideBarContent(AccessibilityManager::RawPtr(sideBarLayoutWrapper), sideBarLayoutWrapper);
     EXPECT_EQ(layoutAlgorithm->realSideBarWidth_, 0);
 }
@@ -178,6 +182,7 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg004, TestSize.Level1)
  */
 HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg005, TestSize.Level1)
 {
+    SideBarContainerModelNG SideBarContainerModelInstance;
     auto sideBarFrameNode =
         FrameNode::CreateFrameNode(V2::SIDE_BAR_ETS_TAG, 0, AceType::MakeRefPtr<SideBarContainerPattern>());
     EXPECT_FALSE(sideBarFrameNode == nullptr);
@@ -197,7 +202,7 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg005, TestSize.Level1)
     auto layoutAlgorithm = AceType::MakeRefPtr<SideBarContainerLayoutAlgorithm>();
     EXPECT_FALSE(layoutAlgorithm == nullptr);
     sideBarPattern->sideBarStatus_ = SideBarStatus::SHOW;
-    SideBarContainerView::SetSideBarContainerType(SideBarContainerType::EMBED);
+    SideBarContainerModelInstance.SetSideBarContainerType(SideBarContainerType::EMBED);
     layoutAlgorithm->MeasureSideBarContent(sideBarLayoutProperty, layoutWrapper, parentWidth);
     EXPECT_NE(layoutWrapper->layoutProperty_, nullptr);
     EXPECT_NE(layoutWrapper->geometryNode_, nullptr);
@@ -210,6 +215,7 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg005, TestSize.Level1)
  */
 HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg006, TestSize.Level1)
 {
+    SideBarContainerModelNG SideBarContainerModelInstance;
     auto sideBarFrameNode =
         FrameNode::CreateFrameNode(V2::SIDE_BAR_ETS_TAG, 0, AceType::MakeRefPtr<SideBarContainerPattern>());
     EXPECT_FALSE(sideBarFrameNode == nullptr);
@@ -230,7 +236,7 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg006, TestSize.Level1)
     auto layoutAlgorithm = AceType::MakeRefPtr<SideBarContainerLayoutAlgorithm>();
     EXPECT_FALSE(layoutAlgorithm == nullptr);
     sideBarPattern->sideBarStatus_ = SideBarStatus::CHANGING;
-    SideBarContainerView::SetSideBarContainerType(SideBarContainerType::EMBED);
+    SideBarContainerModelInstance.SetSideBarContainerType(SideBarContainerType::EMBED);
     layoutAlgorithm->MeasureSideBarContent(sideBarLayoutProperty, layoutWrapper, parentWidth);
     EXPECT_NE(layoutWrapper->layoutProperty_, nullptr);
     EXPECT_NE(layoutWrapper->geometryNode_, nullptr);

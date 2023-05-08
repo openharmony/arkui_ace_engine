@@ -17,6 +17,9 @@
 
 #include "gtest/gtest.h"
 
+#define private public
+#define protected public
+
 #include "base/geometry/dimension.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/ui_node.h"
@@ -30,6 +33,7 @@
 #include "core/components_ng/pattern/shape/shape_model_ng.h"
 #include "core/components_ng/pattern/shape/shape_pattern.h"
 #include "core/components_ng/test/pattern/shape/base_shape_pattern_test_ng.h"
+#include "core/components_ng/pattern/shape/shape_container_layout_algorithm.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -211,5 +215,93 @@ HWTEST_F(ShapePatternTestNg, InheritedProperty001, TestSize.Level1)
     RSCanvas rsCavas(&canvas);
     contentDraw(rsCavas);
 }
+
+/**
+ * @tc.name: MeasureContent001
+ * @tc.desc: check ShapeContainerLayoutAlgorithm MeasureContent
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(ShapePatternTestNg, MeasureContent001, TestSize.Level1)
+{
+    auto shapeModel = ShapeModelNG();
+    shapeModel.Create();
+    shapeModel.SetBitmapMesh(MESH, COLUMN, ROW);
+    RefPtr<UINode> uiNode = ViewStackProcessor::GetInstance()->Finish();
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(uiNode);
+    EXPECT_TRUE(frameNode);
+    auto paintProperty = frameNode->GetPaintProperty<ShapeContainerPaintProperty>();
+    EXPECT_TRUE(paintProperty);
+    auto pattern = frameNode->GetPattern<ShapeContainerPattern>();
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_TRUE(geometryNode);
+    RefPtr<LayoutWrapper> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    LayoutConstraintF constrain;
+    auto layoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    auto newSize = layoutAlgorithm->MeasureContent(constrain, AccessibilityManager::RawPtr(layoutWrapper));
+    paintProperty->propShapeViewBox_ = std::nullopt;
+    layoutAlgorithm->MeasureContent(constrain, AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_TRUE(newSize);
+}
+
+/**
+ * @tc.name: GetChildrenSize
+ * @tc.desc: check ShapeContainerLayoutAlgorithm GetChildrenSize
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(ShapePatternTestNg, GetChildrenSize001, TestSize.Level1)
+{
+    auto shapeModel = ShapeModelNG();
+    shapeModel.Create();
+    shapeModel.SetBitmapMesh(MESH, COLUMN, ROW);
+    RefPtr<UINode> uiNode = ViewStackProcessor::GetInstance()->Finish();
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(uiNode);
+    EXPECT_TRUE(frameNode);
+    auto paintProperty = frameNode->GetPaintProperty<ShapeContainerPaintProperty>();
+    EXPECT_TRUE(paintProperty);
+    auto pattern = frameNode->GetPattern<ShapeContainerPattern>();
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_TRUE(geometryNode);
+    RefPtr<LayoutWrapper> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto layoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    auto shapeContainerLayoutAlgorithm = AceType::DynamicCast<ShapeContainerLayoutAlgorithm>(layoutAlgorithm);
+    auto childFrame =
+         shapeContainerLayoutAlgorithm->GetChildrenSize(AccessibilityManager::RawPtr(layoutWrapper), SizeF(0, 0));
+    EXPECT_TRUE(childFrame.IsNonNegative());
+}
+
+/**
+ * @tc.name: OnDirtyLayoutWrapperSwap
+ * @tc.desc: check ShapeContainerPattern OnDirtyLayoutWrapperSwap
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(ShapePatternTestNg, OnDirtyLayoutWrapperSwap001, TestSize.Level1)
+{
+    auto shapeModel = ShapeModelNG();
+    shapeModel.Create();
+    shapeModel.SetBitmapMesh(MESH, COLUMN, ROW);
+    RefPtr<UINode> uiNode = ViewStackProcessor::GetInstance()->Finish();
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(uiNode);
+    EXPECT_TRUE(frameNode);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_TRUE(geometryNode);
+    RefPtr<LayoutWrapper> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto pattern = frameNode->GetPattern<ShapeContainerPattern>();
+    auto flag = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, true);
+    EXPECT_TRUE(layoutWrapper);
+    auto paintProperty = frameNode->GetPaintProperty<ShapeContainerPaintProperty>();
+    EXPECT_TRUE(paintProperty);
+    pattern->ViewPortTransform();
+    paintProperty->propShapeViewBox_ = std::nullopt;
+    pattern->ViewPortTransform();
+    pattern->OnModifyDone();
+    EXPECT_FALSE(flag);
+}
+
 
 } // namespace OHOS::Ace::NG

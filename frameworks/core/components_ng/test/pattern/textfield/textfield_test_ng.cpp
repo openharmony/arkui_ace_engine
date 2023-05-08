@@ -205,7 +205,6 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldDeleteForwardValue001, TestSize.Level1
     EXPECT_EQ(pattern->GetEditingValue().caretPosition, static_cast<int32_t>(TEXT_VALUE.size()));
     pattern->DeleteForward(DELETE_LENGTH_1);
     EXPECT_EQ(pattern->GetEditingValue().text, TEXT_VALUE.substr(0, TEXT_VALUE.size()));
-    LOGI("Lee: %{public}s", pattern->GetEditingValue().text.c_str());
     EXPECT_EQ(pattern->GetEditingValue().caretPosition, TEXT_VALUE.size());
 }
 
@@ -2190,7 +2189,7 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldAccessibilityPropertyGetTextInputType0
     EXPECT_EQ(textFieldAccessibilityProperty->GetTextInputType(), AceTextCategory::INPUT_TYPE_NUMBER);
 
     textFieldLayoutProperty->UpdateTextInputType(TextInputType::PHONE);
-    EXPECT_EQ(textFieldAccessibilityProperty->GetTextInputType(), AceTextCategory::INPUT_TYPE_DEFAULT);
+    EXPECT_EQ(textFieldAccessibilityProperty->GetTextInputType(), AceTextCategory::INPUT_TYPE_PHONENUMBER);
 
     textFieldLayoutProperty->UpdateTextInputType(TextInputType::DATETIME);
     EXPECT_EQ(textFieldAccessibilityProperty->GetTextInputType(), AceTextCategory::INPUT_TYPE_DATE);
@@ -2478,21 +2477,50 @@ HWTEST_F(TextFieldPatternTestNg, AdjustTextSelectionRectOffsetX, TestSize.Level1
     textFieldPattern->textBoxes_.begin()->rect_.SetLeft(-20.0f);
     textFieldPattern->textBoxes_.begin()->rect_.SetRight(-10.0f);
     textFieldPattern->AdjustTextSelectionRectOffsetX();
-    EXPECT_EQ(textFieldPattern->textRect_.GetX(), 20.0f);
+    EXPECT_EQ(textFieldPattern->textRect_.GetX(), 0.0f);
     textFieldPattern->textBoxes_.begin()->rect_.SetLeft(0.0f);
     textFieldPattern->textRect_.SetLeft(0.0f);
     textFieldPattern->AdjustTextSelectionRectOffsetX();
-    EXPECT_EQ(textFieldPattern->textRect_.GetX(), 10.0f);
+    EXPECT_EQ(textFieldPattern->textRect_.GetX(), 0.0f);
 
     textFieldPattern->textBoxes_.begin()->rect_.SetLeft(100.0f);
     textFieldPattern->textBoxes_.begin()->rect_.SetRight(200.0f);
     textFieldPattern->textRect_.SetLeft(0.0f);
     textFieldPattern->AdjustTextSelectionRectOffsetX();
-    EXPECT_EQ(textFieldPattern->textRect_.GetX(), 100.0f);
+    EXPECT_EQ(textFieldPattern->textRect_.GetX(), 0.0f);
     textFieldPattern->textBoxes_.begin()->rect_.SetLeft(300.0f);
     textFieldPattern->textRect_.SetLeft(0.0f);
     textFieldPattern->AdjustTextSelectionRectOffsetX();
-    EXPECT_EQ(textFieldPattern->textRect_.GetX(), 200.0f);
+    EXPECT_EQ(textFieldPattern->textRect_.GetX(), 0.0f);
+}
+
+/**
+ * @tc.name: SetTextSelection001
+ * @tc.desc: test CaretPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SetTextSelection001, TestSize.Level1)
+{
+    int32_t caretPositionCallback = 0;
+
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXTINPUT_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+
+    auto textFieldController = AceType::MakeRefPtr<TextFieldController>();
+    ASSERT_NE(textFieldController, nullptr);
+
+    textFieldPattern->InitEditingValueText(TEXT_VALUE);
+    textFieldController->SetPattern(textFieldPattern);
+    textFieldController->SetCaretPosition(
+        [&caretPositionCallback](const int32_t caretPosition) { caretPositionCallback = caretPosition; });
+    textFieldPattern->SetTextSelection(TEXT_SELECTION_START, TEXT_SELECTION_END);
+    textFieldPattern->SetTextSelection(TEXT_SELECTION_ERR, TEXT_SELECTION_END);
+    textFieldPattern->SetTextSelection(TEXT_SELECTION_END, TEXT_SELECTION_END);
+    EXPECT_EQ(textFieldPattern->GetTextEditingValue().caretPosition, CARET_POSITION_2);
+    EXPECT_EQ(textFieldPattern->GetEditingValue().caretPosition, CARET_POSITION_2);
 }
 
 /**

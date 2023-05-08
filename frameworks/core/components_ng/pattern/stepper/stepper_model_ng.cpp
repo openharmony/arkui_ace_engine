@@ -100,4 +100,12 @@ RefPtr<FrameNode> StepperModelNG::CreateSwiperChild(int32_t id, uint32_t index)
     return swiperNode;
 }
 
+void StepperModelNG::SetOnChangeEvent(IndexChangeEvent&& onChangeEvent)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<StepperEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnChangeEvent(std::move(onChangeEvent));
+}
 } // namespace OHOS::Ace::NG

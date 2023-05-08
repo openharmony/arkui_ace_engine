@@ -38,5 +38,41 @@
     {
         "first_introduced": "9",
         "name": "OH_NativeXComponent_GetTouchPointTiltY"
+    },
+    {
+        "first_introduced": "10",
+        "name": "OH_NativeXComponent_RegisterFocusEventCallback"
+    },
+    {
+        "first_introduced": "10",
+        "name": "OH_NativeXComponent_RegisterKeyEventCallback"
+    },
+    {
+        "first_introduced": "10",
+        "name": "OH_NativeXComponent_RegisterBlurEventCallback"
+    },
+    {
+        "first_introduced": "10",
+        "name": "OH_NativeXComponent_GetKeyEvent"
+    },
+    {
+        "first_introduced": "10",
+        "name": "OH_NativeXComponent_GetKeyEventAction"
+    },
+    {
+        "first_introduced": "10",
+        "name": "OH_NativeXComponent_GetKeyEventCode"
+    },
+    {
+        "first_introduced": "10",
+        "name": "OH_NativeXComponent_GetKeyEventSourceType"
+    },
+    {
+        "first_introduced": "10",
+        "name": "OH_NativeXComponent_GetKeyEventDeviceId"
+    },
+    {
+        "first_introduced": "10",
+        "name": "OH_NativeXComponent_GetKeyEventTimestamp"
     }
 ]

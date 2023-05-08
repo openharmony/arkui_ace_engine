@@ -148,6 +148,7 @@ public:
 
     virtual void SetShowUnderline(bool showUnderLine) {};
     virtual void SetShowCounter(bool value) {};
+    virtual void SetOnChangeEvent(std::function<void(const std::string&)>&& func) = 0;
 
 private:
     static std::unique_ptr<TextFieldModel> instance_;

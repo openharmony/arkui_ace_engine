@@ -35,7 +35,7 @@ class ACE_EXPORT SliderPaintMethod : public NodePaintMethod {
 public:
     struct TipParameters {
         bool isDrawTip_ = false;
-        OffsetF circleCenter_;
+        OffsetF bubbleVertex_;
     };
     explicit SliderPaintMethod(const RefPtr<SliderContentModifier>& sliderContentModifier,
         const SliderContentModifier::Parameters& parameters, float sliderLength, float borderBlank,

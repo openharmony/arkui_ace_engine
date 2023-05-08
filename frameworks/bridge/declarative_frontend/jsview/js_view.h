@@ -308,6 +308,7 @@ public:
     RefPtr<AceType> CreateViewNode() override;
 
     static void Create(const JSCallbackInfo& info);
+    static void CreateRecycle(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
 
     static void ConstructorCallback(const JSCallbackInfo& args);
@@ -355,6 +356,13 @@ public:
 
     void JSGetProxiedItemRenderState(const JSCallbackInfo& info);
 
+    // Release the UINode hold on the JS object and trigger the delete phase.
+    void JSResetRecycleCustomNode(const JSCallbackInfo& info)
+    {
+        LOGI("JSResetRecycleCustomNode %d", recycleCustomNode_->RefCount());
+        recycleCustomNode_.Reset();
+    }
+
     bool isFullUpdate() const override
     {
         return false;
@@ -375,6 +383,27 @@ public:
     void ExecuteInitiallyProvidedValue(const std::string& jsonData) override
     {
         jsViewFunction_->ExecuteInitiallyProvidedValue(jsonData);
+    }
+    void SetRecycleCustomNode(const RefPtr<NG::CustomNodeBase>& recycleNode)
+    {
+        recycleCustomNode_ = recycleNode;
+    }
+
+    RefPtr<NG::CustomNodeBase> GetCachedRecycleNode()
+    {
+        auto node = RefPtr<NG::CustomNodeBase>(recycleCustomNode_);
+        recycleCustomNode_.Reset();
+        return node;
+    }
+
+    const std::string& GetRecycleCustomNodeName()
+    {
+        return recycleCustomNodeName_;
+    }
+
+    void SetRecycleCustomNodeName(const std::string& recycleCustomNodeName)
+    {
+        recycleCustomNodeName_ = recycleCustomNodeName;
     }
 
 private:
@@ -398,6 +427,13 @@ private:
     // GC -> JS View Object -> JSView C++ Object
     JSRef<JSObject> jsViewObject_;
 
+    // Restore the custom node related to the JSView object
+    // If the JSView object is GC by engine, this CustomNode will abe deleted
+    // If the JSView object is hold by RecycleManager, this CustomNode will be reused
+    RefPtr<NG::CustomNodeBase> recycleCustomNode_;
+
+    // Store the recycle nodes name as key
+    std::string recycleCustomNodeName_;
     std::string jsViewName_;
 };
 

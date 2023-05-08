@@ -66,24 +66,36 @@ public:
         value_ = paintProperty->GetValue().value_or(value_);
         scaleCount_ = paintProperty->GetScaleCount().value_or(scaleCount_);
         scaleWidth_ = paintProperty->GetScaleWidth().value_or(Dimension(scaleWidth_)).ConvertToPx();
+        capsuleBorderWidth_ = paintProperty->GetBorderWidth().value_or(capsuleBorderWidth_);
+        sweepEffect_ = paintProperty->GetEnableScanEffect().value_or(false);
+        bool paintShadow = paintProperty->GetPaintShadow().value_or(false);
+        ProgressStatus progressStatus = paintProperty->GetProgressStatus().value_or(ProgressStatus::PROGRESSING);
         progressModifier_->SetContentOffset(paintWrapper->GetContentOffset());
         progressModifier_->SetContentSize(paintWrapper->GetContentSize());
         CalculateStrokeWidth(paintWrapper->GetContentSize());
+        progressModifier_->SetSweepEffect(sweepEffect_);
         progressModifier_->SetStrokeWidth(strokeWidth_);
-        progressModifier_->SetBorderWidth(capsuleBorderWidth_);
+        progressModifier_->SetBorderWidth(capsuleBorderWidth_.ConvertToPx());
         progressModifier_->SetColor(LinearColor(color_));
         progressModifier_->SetBackgroundColor(LinearColor(bgColor_));
         progressModifier_->SetBorderColor(LinearColor(borderColor_));
         progressModifier_->SetProgressType(progressType_);
-        progressModifier_->SetMaxValue(maxValue_);
-        progressModifier_->SetValue(value_);
+        progressModifier_->SetProgressStatus(progressStatus);
         progressModifier_->SetScaleWidth(scaleWidth_);
         progressModifier_->SetScaleCount(scaleCount_);
+        auto ringProgressColor = GenerateRingProgressColor(paintWrapper);
+        progressModifier_->SetRingProgressColor(ringProgressColor);
+        progressModifier_->SetPaintShadow(paintShadow);
+        progressModifier_->SetMaxValue(maxValue_);
+        progressModifier_->SetValue(value_);
     }
 
     void GetThemeDate();
     void CalculateStrokeWidth(const SizeF& contentSize);
+
 private:
+    Gradient GenerateRingProgressColor(PaintWrapper* paintWrapper);
+
     Color color_ = Color::BLUE;
     Color bgColor_ = Color::GRAY;
     Color borderColor_ = Color::GRAY;
@@ -93,9 +105,12 @@ private:
     float maxValue_ = 100.0f;
     float value_ = 0.0f;
     Dimension capsuleBorderWidth_ = Dimension(DEFAULT_BORDER_WIDTH,  DimensionUnit::VP);
+    Color ringProgressEndSideColor_ = Color::BLUE;
+    Color ringProgressBeginSideColor_ = Color::BLUE;
 
     ProgressType progressType_ = ProgressType::LINEAR;
     RefPtr<ProgressModifier> progressModifier_;
+    bool sweepEffect_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(ProgressPaintMethod);
 };

@@ -20,6 +20,8 @@
 #include <regex>
 #include <unistd.h>
 
+#include "dfx_jsnapi.h"
+
 #include "base/utils/utils.h"
 #ifdef WINDOWS_PLATFORM
 #include <algorithm>
@@ -31,7 +33,6 @@
 #include "base/i18n/localization.h"
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
-#include "base/log/exception_handler.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_view.h"
 #include "core/common/card_scope.h"
@@ -1756,6 +1757,21 @@ std::string JsiDeclarativeEngine::GetStacktraceMessage()
     return JsiBaseUtils::TransSourceStack(runningPage, stack);
 }
 
+void JsiDeclarativeEngine::GetStackTrace(std::string& trace)
+{
+    auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+    if (!arkRuntime) {
+        LOGE("ArkJsRuntime is null and can not get current stack trace");
+        return;
+    }
+    auto vm = arkRuntime->GetEcmaVm();
+    if (!vm) {
+        LOGE("VM is null and can not get current stack trace");
+        return;
+    }
+    panda::DFXJSNApi::BuildJsStackTrace(vm, trace);
+}
+
 void JsiDeclarativeEngine::SetLocalStorage(int32_t instanceId, NativeReference* nativeValue)
 {
     LOGI("SetLocalStorage instanceId:%{public}d", instanceId);
@@ -1937,7 +1953,6 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_PreloadAceModuleCard(void* runtime)
 void JsiDeclarativeEngineInstance::PreloadAceModuleCard(void* runtime)
 {
     isUnique_ = true;
-    ExceptionHandler::formRenderServiceFlag_ = true;
     if (isModulePreloaded_ && !IsPlugin() && !isUnique_) {
         LOGE("PreloadAceModule already preloaded");
         return;

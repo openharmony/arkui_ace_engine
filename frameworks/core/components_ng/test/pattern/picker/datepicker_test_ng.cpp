@@ -1448,4 +1448,27 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow010, TestSize.Level1)
     datePickerPattern->SetShowLunar(false);
     columnPattern->HandleChangeCallback(true, true);
 }
+
+/**
+ * @tc.name: DatePickerFireChangeEventTest001
+ * @tc.desc: Test SetSelectedDate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerFireChangeEventTest001, TestSize.Level1)
+{
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModelNG::GetInstance()->CreateDatePicker(theme);
+
+    auto changeEvent = [](const BaseEventInfo* info) {
+        EXPECT_EQ(info->GetType(), "DatePickerChangeEvent");
+    };
+    DatePickerModelNG::GetInstance()->SetChangeEvent(std::move(changeEvent));
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+    datePickerPattern->FireChangeEvent(true);
+}
 } // namespace OHOS::Ace::NG

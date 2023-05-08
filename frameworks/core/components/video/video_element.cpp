@@ -479,7 +479,8 @@ bool VideoElement::GetResourceId(const std::string& path, uint32_t& resId)
 
 void VideoElement::SetMediaSource(std::string& filePath, int32_t& fd)
 {
-    if (StringUtils::StartWith(filePath, "dataability://") || StringUtils::StartWith(filePath, "datashare://")) {
+    if (StringUtils::StartWith(filePath, "dataability://") || StringUtils::StartWith(filePath, "datashare://") ||
+        StringUtils::StartWith(filePath, "file://media")) {
         // dataability:// or datashare://
         auto context = context_.Upgrade();
         CHECK_NULL_VOID(context);

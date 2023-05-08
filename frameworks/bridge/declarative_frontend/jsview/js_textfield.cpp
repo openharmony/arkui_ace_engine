@@ -141,11 +141,21 @@ void InitTextAreaDefaultStyle()
 
 } // namespace
 
+void ParseTextFieldTextObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
+{
+    CHECK_NULL_VOID(changeEventVal->IsFunction());
+
+    JsEventCallback<void(const std::string&)> onChangeEvent(
+        info.GetExecutionContext(), JSRef<JSFunc>::Cast(changeEventVal));
+    TextFieldModel::GetInstance()->SetOnChangeEvent(std::move(onChangeEvent));
+}
+
 void JSTextField::CreateTextInput(const JSCallbackInfo& info)
 {
     std::optional<std::string> placeholderSrc;
     std::optional<std::string> value;
     JSTextInputController* jsController = nullptr;
+    JSRef<JSVal> changeEventVal = JSRef<JSVal>::Make();
     if (info[0]->IsObject()) {
         auto paramObject = JSRef<JSObject>::Cast(info[0]);
         std::string placeholder;
@@ -153,8 +163,17 @@ void JSTextField::CreateTextInput(const JSCallbackInfo& info)
             placeholderSrc = placeholder;
         }
         std::string text;
-        if (ParseJsString(paramObject->GetProperty("text"), text)) {
-            value = text;
+        if (paramObject->GetProperty("text")->IsObject()) {
+            JSRef<JSObject> valueObj = JSRef<JSObject>::Cast(paramObject->GetProperty("text"));
+            changeEventVal = valueObj->GetProperty("changeEvent");
+            auto valueProperty = valueObj->GetProperty("value");
+            if (ParseJsString(valueProperty, text)) {
+                value = text;
+            }
+        } else {
+            if (ParseJsString(paramObject->GetProperty("text"), text)) {
+                value = text;
+            }
         }
         auto controllerObj = paramObject->GetProperty("controller");
         if (!controllerObj->IsUndefined() && !controllerObj->IsNull()) {
@@ -165,6 +184,9 @@ void JSTextField::CreateTextInput(const JSCallbackInfo& info)
     auto controller = TextFieldModel::GetInstance()->CreateTextInput(placeholderSrc, value);
     if (jsController) {
         jsController->SetController(controller);
+    }
+    if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
+        ParseTextFieldTextObject(info, changeEventVal);
     }
 
     if (!Container::IsCurrentUseNewPipeline()) {
@@ -178,6 +200,7 @@ void JSTextField::CreateTextArea(const JSCallbackInfo& info)
     std::optional<std::string> placeholderSrc;
     std::optional<std::string> value;
     JSTextAreaController* jsController = nullptr;
+    JSRef<JSVal> changeEventVal;
     if (info[0]->IsObject()) {
         auto paramObject = JSRef<JSObject>::Cast(info[0]);
         std::string placeholder;
@@ -185,8 +208,17 @@ void JSTextField::CreateTextArea(const JSCallbackInfo& info)
             placeholderSrc = placeholder;
         }
         std::string text;
-        if (ParseJsString(paramObject->GetProperty("text"), text)) {
-            value = text;
+        if (paramObject->GetProperty("text")->IsObject()) {
+            JSRef<JSObject> valueObj = JSRef<JSObject>::Cast(paramObject->GetProperty("text"));
+            changeEventVal = valueObj->GetProperty("changeEvent");
+            auto valueProperty = valueObj->GetProperty("value");
+            if (ParseJsString(valueProperty, text)) {
+                value = text;
+            }
+        } else {
+            if (ParseJsString(paramObject->GetProperty("text"), text)) {
+                value = text;
+            }
         }
         auto controllerObj = paramObject->GetProperty("controller");
         if (!controllerObj->IsUndefined() && !controllerObj->IsNull()) {
@@ -198,6 +230,9 @@ void JSTextField::CreateTextArea(const JSCallbackInfo& info)
         auto controller = TextFieldModel::GetInstance()->CreateTextArea(placeholderSrc, value);
         if (jsController) {
             jsController->SetController(controller);
+        }
+        if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
+            ParseTextFieldTextObject(info, changeEventVal);
         }
         return;
     }
@@ -273,7 +308,7 @@ void JSTextField::SetPlaceholderFont(const JSCallbackInfo& info)
     if (fontSize->IsNull() || fontSize->IsUndefined()) {
         font.fontSize = Dimension(-1);
     } else {
-        Dimension size;
+        CalcDimension size;
         if (fontSize->IsString()) {
             auto result = StringUtils::StringToDimensionWithThemeValue(fontSize->ToString(), true, Dimension(-1));
             font.fontSize = result;
@@ -380,7 +415,7 @@ void JSTextField::SetCaretStyle(const JSCallbackInfo& info)
     if (caretWidth->IsNull() || caretWidth->IsUndefined()) {
         caretStyle.caretWidth = theme->GetCursorWidth();
     } else {
-        Dimension width;
+        CalcDimension width;
         if (!ParseJsDimensionVp(caretWidth, width)) {
             caretStyle.caretWidth = theme->GetCursorWidth();
         }
@@ -466,7 +501,7 @@ void JSTextField::SetFontSize(const JSCallbackInfo& info)
         LOGI("JSTextField::SetFontSize The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension fontSize;
+    CalcDimension fontSize;
     if (!ParseJsDimensionFp(info[0], fontSize)) {
         LOGI("Parse to dimension FP failed!");
         return;
@@ -625,7 +660,7 @@ void JSTextField::JsHeight(const JSCallbackInfo& info)
         LOGI("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         LOGI("Parse to dimension VP failed!");
         return;
@@ -656,7 +691,7 @@ void JSTextField::JsWidth(const JSCallbackInfo& info)
     }
 
     TextFieldModel::GetInstance()->SetWidthAuto(false);
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         LOGW("Parse width fail");
         return;
@@ -684,7 +719,7 @@ void JSTextField::JsPadding(const JSCallbackInfo& info)
         if (info[0]->IsUndefined() || (info[0]->IsString() && CheckIsIllegalString(info[0]->ToString()))) {
             return;
         };
-        Dimension length;
+        CalcDimension length;
         ParseJsDimensionVp(info[0], length);
         if (length.IsNegative()) {
             return;
@@ -698,17 +733,17 @@ void JSTextField::JsPadding(const JSCallbackInfo& info)
     }
     Edge padding;
     if (info[0]->IsNumber() || info[0]->IsString()) {
-        Dimension edgeValue;
+        CalcDimension edgeValue;
         if (ParseJsDimensionVp(info[0], edgeValue)) {
             padding = Edge(edgeValue);
         }
     }
     if (info[0]->IsObject()) {
         JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
-        Dimension left = Dimension(0.0, DimensionUnit::VP);
-        Dimension top = Dimension(0.0, DimensionUnit::VP);
-        Dimension right = Dimension(0.0, DimensionUnit::VP);
-        Dimension bottom = Dimension(0.0, DimensionUnit::VP);
+        CalcDimension left = CalcDimension(0.0, DimensionUnit::VP);
+        CalcDimension top = CalcDimension(0.0, DimensionUnit::VP);
+        CalcDimension right = CalcDimension(0.0, DimensionUnit::VP);
+        CalcDimension bottom = CalcDimension(0.0, DimensionUnit::VP);
         ParseJsDimensionVp(object->GetProperty("left"), left);
         ParseJsDimensionVp(object->GetProperty("top"), top);
         ParseJsDimensionVp(object->GetProperty("right"), right);

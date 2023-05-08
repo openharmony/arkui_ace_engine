@@ -24,6 +24,13 @@ void GridItemPattern::MarkIsSelected(bool isSelected)
         auto eventHub = GetEventHub<GridItemEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->FireOnSelect(isSelected);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        if (isSelected) {
+            host->OnAccessibilityEvent(AccessibilityEventType::SELECTED);
+        } else {
+            host->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
+        }
     }
 }
 } // namespace OHOS::Ace::NG

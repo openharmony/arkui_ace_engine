@@ -19,21 +19,22 @@
 #include "gtest/gtest.h"
 
 #define private public
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/form/form_event_hub.h"
 #include "core/components_ng/pattern/form/form_layout_property.h"
+#include "core/components_ng/pattern/form/form_model_ng.h"
 #include "core/components_ng/pattern/form/form_node.h"
 #include "core/components_ng/pattern/form/form_pattern.h"
-#include "core/components_ng/pattern/form/form_view.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
-FormView formView;
 RequestFormInfo formInfo;
 DirtySwapConfig config;
+FormModelNG formModelNG;
 } // namespace
 
 struct TestProperty {};
@@ -65,10 +66,11 @@ void FormPatternTestNg::TearDown()
 
 RefPtr<FrameNode> FormPatternTestNg::CreateFromParagraph()
 {
-    formView.Create(formInfo);
+    formModelNG.Create(formInfo);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     return frameNode;
 }
+
 /**
  * @tc.name: FormNodeTest001
  * @tc.desc: create form node
@@ -112,5 +114,85 @@ HWTEST_F(FormPatternTestNg, OnDirtyLayoutWrapperSwap, TestSize.Level1)
             EXPECT_EQ(isSwap, false);
         }
     }
+}
+
+/**
+ * @tc.name: FormModelNGTest001
+ * @tc.desc: create form node
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormPatternTestNg, FormModelNGTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init FormModelNG object
+     */
+    FormModelNG formNG;
+    formNG.Create(formInfo);
+
+    /**
+     * @tc.steps: step2. Set call methods
+     * @tc.expected: step2. Check the FormModelNG pattern value
+     */
+    formNG.SetDimension(1);
+    formNG.AllowUpdate(false);
+    formNG.SetVisibility(VisibleType(1));
+    formNG.SetModuleName("test form");
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto property = frameNode->GetLayoutProperty<FormLayoutProperty>();
+    EXPECT_NE(property, nullptr);
+    auto formInfo = property->GetRequestFormInfoValue();
+    EXPECT_EQ(formInfo.dimension, 1);
+    EXPECT_FALSE(formInfo.allowUpdate);
+    EXPECT_EQ(formInfo.moduleName, "test form");
+}
+
+/**
+ * @tc.name: FormModelNGTest002
+ * @tc.desc: create form node
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormPatternTestNg, FormModelNGTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init FormModelNG object
+     */
+    FormModelNG formNG;
+    formNG.Create(formInfo);
+
+    /**
+     * @tc.steps: step2. Set call methods
+     * @tc.expected: step2. Check the FormModelNG pattern value
+     */
+    std::string onAcquiredValue;
+    auto onAcquired = [&onAcquiredValue](const std::string& param) { onAcquiredValue = param; };
+    formNG.SetOnAcquired(std::move(onAcquired));
+    auto frameNodeonAcquired = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNodeonAcquired, nullptr);
+
+    std::string onErrorValue;
+    auto onError = [&onErrorValue](const std::string& param) { onErrorValue = param; };
+    formNG.SetOnError(std::move(onError));
+    auto frameNodeonError = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNodeonError, nullptr);
+
+    std::string onUninstallValue;
+    auto onUninstall = [&onUninstallValue](const std::string& param) { onUninstallValue = param; };
+    formNG.SetOnUninstall(std::move(onUninstall));
+    auto frameNodeonUninstall = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNodeonUninstall, nullptr);
+
+    std::string onRouterValue;
+    auto onRouter = [&onRouterValue](const std::string& param) { onRouterValue = param; };
+    formNG.SetOnRouter(std::move(onRouter));
+    auto frameNodeonRouter = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNodeonRouter, nullptr);
+
+    std::string onLoadValue;
+    auto onLoad = [&onLoadValue](const std::string& param) { onLoadValue = param; };
+    formNG.SetOnLoad(std::move(onLoad));
+    auto frameNodeonLoad = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNodeonLoad, nullptr);
 }
 } // namespace OHOS::Ace::NG

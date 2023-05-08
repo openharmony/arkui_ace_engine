@@ -107,6 +107,33 @@ void NavigationPattern::OnModifyDone()
     auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
     navBarNode->MarkModifyDone();
+    if (!navPathList_.empty()) {
+        navPathList_.clear();
+    }
+
+    auto pathNames = navigationStack_->GetAllPathName();
+    for (size_t i = 0; i < pathNames.size(); ++i) {
+        auto pathName = pathNames[i];
+        RefPtr<UINode> uiNode = navigationStack_->Get(pathName);
+        // get navdestination node under navrouter
+        if (uiNode) {
+            navPathList_.emplace_back(std::make_pair(pathName, uiNode));
+            continue;
+        }
+        if (CheckExistPreStack(pathName)) {
+            uiNode = GetNodeAndRemoveByName(pathName);
+        } else {
+            uiNode = GenerateUINodeByIndex(static_cast<int32_t>(i));
+        }
+
+        navPathList_.emplace_back(std::make_pair(pathName, uiNode));
+    }
+
+    navigationStack_->SetNavPathList(navPathList_);
+
+    auto contentNode = hostNode->GetContentNode();
+    contentNode->Clean();
+    hostNode->AddNavDestinationToNavigation(hostNode);
 
     auto layoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -115,6 +142,7 @@ void NavigationPattern::OnModifyDone()
         navigationMode_ != NavigationMode::AUTO) {
         DoAnimation(currentMode);
     }
+    preNavPathList_ = navPathList_;
 }
 
 bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -196,6 +224,31 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
         }
     }
     return false;
+}
+
+bool NavigationPattern::CheckExistPreStack(const std::string& name)
+{
+    return std::any_of(preNavPathList_.begin(), preNavPathList_.end(),
+        [&](const std::pair<std::string, RefPtr<UINode>>& preNamePair) { return preNamePair.first == name; });
+}
+
+RefPtr<UINode> NavigationPattern::GetNodeAndRemoveByName(const std::string& name)
+{
+    RefPtr<UINode> uiNode;
+    for (auto iter = preNavPathList_.rbegin(); iter != preNavPathList_.rend(); iter++) {
+        if (iter->first == name) {
+            uiNode = iter->second;
+            preNavPathList_.erase(std::next(iter).base());
+            break;
+        }
+    }
+
+    return uiNode;
+}
+
+RefPtr<UINode> NavigationPattern::GenerateUINodeByIndex(int32_t index)
+{
+    return navigationStack_->CreateNodeByIndex(index);
 }
 
 } // namespace OHOS::Ace::NG

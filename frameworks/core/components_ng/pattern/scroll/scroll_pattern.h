@@ -154,8 +154,8 @@ public:
     bool IsAtBottom() const override;
 
     bool UpdateCurrentOffset(float offset, int32_t source) override;
-    void AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool limitDuration = true,
-        const std::function<void()>& onFinish = nullptr);
+    void AnimateTo(
+        float position, float duration, const RefPtr<Curve>& curve, const std::function<void()>& onFinish = nullptr);
     void ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth);
     void ScrollBy(float pixelX, float pixelY, bool smooth, const std::function<void()>& onFinish = nullptr);
     bool ScrollPage(bool reverse, bool smooth, const std::function<void()>& onFinish = nullptr);

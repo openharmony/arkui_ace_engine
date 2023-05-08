@@ -30,6 +30,7 @@ public:
     void SetSecondarySrc(const std::string& value, bool flag = false) override;
     void SetBackgroundSrc(const std::string& value, bool flag = false) override;
     void SetOnChange(ChangeEvent&& onChange) override;
+    void SetOnChangeEvent(ChangeEvent&& onChangeEvent) override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RATING_RATING_MODEL_NG_H

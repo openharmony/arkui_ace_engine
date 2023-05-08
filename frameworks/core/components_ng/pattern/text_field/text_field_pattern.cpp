@@ -1908,6 +1908,15 @@ void TextFieldPattern::InitLongPressEvent()
     };
     longPressEvent_ = MakeRefPtr<LongPressEvent>(std::move(longPressCallback));
     gesture->SetLongPressEvent(longPressEvent_);
+
+    auto onTextSelectorChange = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto frameNode = pattern->GetHost();
+        CHECK_NULL_VOID(frameNode);
+        frameNode->OnAccessibilityEvent(AccessibilityEventType::TEXT_SELECTION_UPDATE);
+    };
+    textSelector_.SetOnAccessibility(std::move(onTextSelectorChange));
 }
 
 void TextFieldPattern::HandleLongPress(GestureEvent& info)
@@ -2499,7 +2508,7 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
         if (!HasConnection()) {
             TextInputConfiguration config;
             config.type = keyboard_;
-            config.action = GetTextInputActionValue();
+            config.action = GetTextInputActionValue(TextInputAction::DONE);
             config.obscureText = textObscured_;
             LOGI("Request keyboard configuration: type=%{private}d action=%{private}d obscureText=%{private}d",
                 keyboard_, action_, textObscured_);
@@ -3029,7 +3038,11 @@ void TextFieldPattern::SetEditingValueToProperty(const std::string& newValueText
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+    auto textCache = layoutProperty->GetValueValue("");
     layoutProperty->UpdateValue(newValueText);
+    if (textCache != newValueText) {
+        host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, newValueText.c_str());
+    }
 }
 
 void TextFieldPattern::ClearEditingValue()

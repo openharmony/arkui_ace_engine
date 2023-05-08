@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,7 +38,6 @@ constexpr int32_t SCROLL_TOUCH_DOWN = 1;
 constexpr int32_t SCROLL_TOUCH_UP = 2;
 constexpr float SCROLL_RATIO = 0.52f;
 constexpr float SCROLL_BY_SPEED = 250.0f; // move 250 pixels per second
-constexpr float SCROLL_MAX_TIME = 300.0f; // Scroll Animate max time 0.3 second
 constexpr float UNIT_CONVERT = 1000.0f;    // 1s convert to 1000ms
 
 float CalculateFriction(float gamma)
@@ -401,8 +400,8 @@ void ScrollPattern::CreateOrStopAnimator()
     animator_->ClearInterpolators();
 }
 
-void ScrollPattern::AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool limitDuration,
-    const std::function<void()>& onFinish)
+void ScrollPattern::AnimateTo(
+    float position, float duration, const RefPtr<Curve>& curve, const std::function<void()>& onFinish)
 {
     LOGD("scroll pattern, from %{public}f to %{public}f", currentOffset_, position);
     if (!IsScrollableStopped()) {
@@ -410,7 +409,9 @@ void ScrollPattern::AnimateTo(float position, float duration, const RefPtr<Curve
         StopScrollable();
     }
     CreateOrStopAnimator();
-    // TODO: no accessibility event
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_START);
     auto animation = AceType::MakeRefPtr<CurveAnimation<float>>(currentOffset_, position, curve);
     animation->AddListener([weakScroll = AceType::WeakClaim(this)](float value) {
         auto scroll = weakScroll.Upgrade();
@@ -418,7 +419,7 @@ void ScrollPattern::AnimateTo(float position, float duration, const RefPtr<Curve
         scroll->DoJump(value);
     });
     animator_->AddInterpolator(animation);
-    animator_->SetDuration(static_cast<int32_t>(limitDuration ? std::min(duration, SCROLL_MAX_TIME) : duration));
+    animator_->SetDuration(static_cast<int32_t>(duration));
     animator_->ClearStopListeners();
     animator_->Play();
     // TODO: expand stop listener
@@ -429,6 +430,7 @@ void ScrollPattern::AnimateTo(float position, float duration, const RefPtr<Curve
         auto host = scroll->GetHost();
         CHECK_NULL_VOID_NOLOG(host);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
         CHECK_NULL_VOID_NOLOG(onFinish);
         onFinish();
     });
@@ -453,10 +455,16 @@ void ScrollPattern::ScrollBy(float pixelX, float pixelY, bool smooth, const std:
     }
     float position = currentOffset_ + distance;
     if (smooth) {
-        AnimateTo(position, fabs(distance) * UNIT_CONVERT / SCROLL_BY_SPEED, Curves::EASE_OUT, true, onFinish);
+        AnimateTo(position, fabs(distance) * UNIT_CONVERT / SCROLL_BY_SPEED, Curves::EASE_OUT, onFinish);
         return;
     }
+    float cachePosition = currentOffset_;
     JumpToPosition(position);
+    if (cachePosition != currentOffset_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+    }
 }
 
 bool ScrollPattern::ScrollPage(bool reverse, bool smooth, const std::function<void()>& onFinish)
@@ -495,7 +503,7 @@ void ScrollPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scroll
     });
     scrollEffect->SetLeadingCallback([weakScroll = AceType::WeakClaim(this)]() -> double {
         auto scroll = weakScroll.Upgrade();
-        if (scroll && !scroll->IsRowReverse() && !scroll->IsColReverse()) {
+        if (scroll && !scroll->IsRowReverse() && !scroll->IsColReverse() && scroll->GetScrollableDistance() > 0) {
             return -scroll->GetScrollableDistance();
         }
         return 0.0;
@@ -509,7 +517,7 @@ void ScrollPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scroll
     });
     scrollEffect->SetInitLeadingCallback([weakScroll = AceType::WeakClaim(this)]() -> double {
         auto scroll = weakScroll.Upgrade();
-        if (scroll && !scroll->IsRowReverse() && !scroll->IsColReverse()) {
+        if (scroll && !scroll->IsRowReverse() && !scroll->IsColReverse() && scroll->GetScrollableDistance() > 0) {
             return -scroll->GetScrollableDistance();
         }
         return 0.0;

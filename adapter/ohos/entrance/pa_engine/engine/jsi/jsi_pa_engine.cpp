@@ -167,6 +167,19 @@ inline std::string ToJSONStringInt(std::string sKey, std::string sValue)
 }
 } // namespace
 
+void JsiPaEngine::RegisterUncaughtExceptionHandler()
+{
+    ACE_SCOPED_TRACE("JsiPaEngine::RegisterUncaughtExceptionHandler");
+    JsEnv::UncaughtExceptionInfo uncaughtExceptionInfo;
+    uncaughtExceptionInfo.uncaughtTask = [] (std::string summary, const JsEnv::ErrorObject errorObj) {
+        std::string packageName = AceApplicationInfo::GetInstance().GetPackageName();
+        EventReport::JsErrReport(packageName, "", summary);
+        ExceptionHandler::HandleJsException(summary);
+    };
+
+    jsAbilityRuntime_->RegisterUncaughtExceptionHandler(uncaughtExceptionInfo);
+}
+
 void JsiPaEngine::RegisterConsoleModule()
 {
     ACE_SCOPED_TRACE("JsiPaEngine::RegisterConsoleModule");
@@ -277,11 +290,7 @@ bool JsiPaEngine::InitJsEnv(bool debuggerMode, const std::unordered_map<std::str
     }
 
     runtime_->SetLogPrint(PrintLog);
-    std::string libraryPath = "";
-    if (debuggerMode) {
-        libraryPath = ARK_DEBUGGER_LIB_PATH;
-        SetDebuggerPostTask();
-    }
+    StartDebugMode(debuggerMode);
 
     auto ecmaVm = GetEcmaVm();
     CHECK_NULL_RETURN(ecmaVm, false);
@@ -311,14 +320,7 @@ bool JsiPaEngine::InitJsEnv(bool debuggerMode, const std::unordered_map<std::str
     auto operatorImpl = std::make_shared<JsiPaSourceMapOperatorImpl>(runtime_);
     jsAbilityRuntime_->InitSourceMap(operatorImpl);
 
-    JsEnv::UncaughtExceptionInfo uncaughtExceptionInfo;
-    uncaughtExceptionInfo.uncaughtTask = [] (std::string summary, const JsEnv::ErrorObject errorObj) {
-        std::string packageName = AceApplicationInfo::GetInstance().GetPackageName();
-        EventReport::JsErrReport(packageName, "", summary);
-        ExceptionHandler::HandleJsException(summary);
-    };
-
-    jsAbilityRuntime_->RegisterUncaughtExceptionHandler(uncaughtExceptionInfo);
+    RegisterUncaughtExceptionHandler();
     LOGI("InitJsEnv success");
     return true;
 }
@@ -340,18 +342,22 @@ inline panda::ecmascript::EcmaVM* JsiPaEngine::GetEcmaVm() const
     return jsAbilityRuntime_->GetEcmaVm();
 }
 
-void JsiPaEngine::SetDebuggerPostTask()
+void JsiPaEngine::StartDebugMode(bool debuggerMode)
 {
-    auto weak = AceType::WeakClaim(AceType::RawPtr(taskExecutor_));
-    auto&& postTask = [weak](std::function<void()>&& task) {
-        auto taskExecutor = weak.Upgrade();
-        if (taskExecutor == nullptr) {
-            LOGE("taskExecutor is nullptr");
-            return;
-        }
-        taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::JS);
-    };
-    std::static_pointer_cast<ArkJSRuntime>(runtime_)->SetDebuggerPostTask(postTask);
+    if (debuggerMode && jsAbilityRuntime_ != nullptr) {
+        auto weak = AceType::WeakClaim(AceType::RawPtr(taskExecutor_));
+        auto&& postTask = [weak](std::function<void()>&& task) {
+            auto taskExecutor = weak.Upgrade();
+            if (taskExecutor == nullptr) {
+                LOGE("taskExecutor is nullptr");
+                return;
+            }
+            taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::JS);
+        };
+#ifdef OHOS_PLATFORM
+        jsAbilityRuntime_->StartDebugger(debuggerMode, postTask);
+#endif
+    }
 }
 
 // -----------------------
@@ -368,6 +374,12 @@ JsiPaEngine::~JsiPaEngine()
     auto nativeEngine = GetNativeEngine();
     if (nativeEngine != nullptr) {
         nativeEngine->CancelCheckUVLoop();
+    }
+#endif
+
+#ifdef OHOS_PLATFORM
+    if (jsAbilityRuntime_ != nullptr) {
+        jsAbilityRuntime_->StopDebugger();
     }
 #endif
 

@@ -68,6 +68,7 @@ public:
 
     void SetShowUnderline(bool showUnderLine) override;
     void SetShowCounter(bool value) override;
+    void SetOnChangeEvent(std::function<void(const std::string&)>&& func) override;
 
 private:
     void AddDragFrameNodeToManager() const;

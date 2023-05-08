@@ -34,6 +34,7 @@ using JSGCMarkCallbackInfo = JsiGCMarkCallbackInfo;
 using JSException = JsiException;
 using JSExecutionContext = JsiExecutionContext;
 using JSObjTemplate = JsiObjTemplate;
+using JSDate = JsiDate;
 
 template<class T>
 inline auto ToJSValue(T&& val)

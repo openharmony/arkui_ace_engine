@@ -62,7 +62,7 @@ void JSDistributed::Set(const JSCallbackInfo& args)
     return;
 #endif
 
-    if (args.Length() < 2) {
+    if (args.Length() < 2 || !args[0]->IsString()) {
         LOGW("fail to set distributed data");
         return;
     }
@@ -101,7 +101,7 @@ void JSDistributed::Get(const JSCallbackInfo& args)
          "emulator or a real device instead.");
     return;
 #endif
-    if (args.Length() < 1) {
+    if (args.Length() < 1 || !args[0]->IsString()) {
         LOGW("fail to Get distributed data");
         return;
     }
@@ -160,7 +160,7 @@ void JSDistributed::Delete(const JSCallbackInfo& args)
          "emulator or a real device instead.");
     return;
 #endif
-    if (args.Length() < 1) {
+    if (args.Length() < 1 || !args[0]->IsString()) {
         LOGW("fail to Delete distributed data");
         return;
     }

@@ -74,12 +74,40 @@ public:
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::NODE, true, FocusStyleType::OUTER_BORDER };
+    }
+
+    void SetTextFromUser(bool value)
+    {
+        isTextFromUser_ = value;
+    }
+
+    bool IsTextFromUser()
+    {
+        return isTextFromUser_;
+    }
+
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnAttachToFrameNode() override;
+    void OnModifyDone() override;
+    void InitTouchEvent();
+    void OnPress(const TouchEventInfo& info);
+    void HandleEnabled();
+    void ToJsonValueForRingStyleOptions(std::unique_ptr<JsonValue>& json) const;
+    static std::string ConvertProgressStatusToString(const ProgressStatus status);
 
     double strokeWidth_ = 2;
     RefPtr<ProgressModifier> progressModifier_;
+    RefPtr<TouchEventImpl> touchListener_;
+    Color backgroundColor_;
+    Color selectColor_;
+    Color borderColor_;
+    Color fontColor_;
+    bool isTextFromUser_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(ProgressPattern);
 };

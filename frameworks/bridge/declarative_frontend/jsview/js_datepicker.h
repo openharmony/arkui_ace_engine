@@ -41,9 +41,9 @@ public:
     static void UseMilitaryTime(bool isUseMilitaryTime);
 
 private:
-    static void CreateDatePicker(const JSRef<JSObject>& paramObj);
+    static void CreateDatePicker(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj);
     // keep compatible, need remove after
-    static void CreateTimePicker(const JSRef<JSObject>& paramObj);
+    static void CreateTimePicker(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj);
     static PickerDate ParseDate(const JSRef<JSVal>& dateVal);
     static void SetDefaultAttributes();
     // keep compatible, need remove after
@@ -74,12 +74,13 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void OnChange(const JSCallbackInfo& info);
     static void UseMilitaryTime(bool isUseMilitaryTime);
+    static void PickerBackgroundColor(const JSCallbackInfo& info);
 
     static void SetDisappearTextStyle(const JSCallbackInfo& info);
     static void SetTextStyle(const JSCallbackInfo& info);
     static void SetSelectedTextStyle(const JSCallbackInfo& info);
 private:
-    static void CreateTimePicker(const JSRef<JSObject>& paramObj);
+    static void CreateTimePicker(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj);
     static void SetDefaultAttributes();
     static PickerTime ParseTime(const JSRef<JSVal>& timeVal);
 };

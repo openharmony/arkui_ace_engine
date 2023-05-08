@@ -408,4 +408,10 @@ void TextFieldModelNG::SetShowCounter(bool value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowCounter, value);
 }
 
+void TextFieldModelNG::SetOnChangeEvent(std::function<void(const std::string&)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnChangeEvent(std::move(func));
+}
 } // namespace OHOS::Ace::NG
