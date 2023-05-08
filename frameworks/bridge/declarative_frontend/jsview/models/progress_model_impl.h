@@ -31,6 +31,17 @@ public:
     void SetScaleCount(int32_t value) override;
     void SetScaleWidth(const Dimension& value) override;
     void SetBorderColor(const Color& value) override {}
+    void SetBorderWidth(const Dimension& value) override {}
+    void SetFontSize(const Dimension& value) override {}
+    void SetFontColor(const Color& value) override {}
+    void SetText(const std::optional<std::string>& value) override {}
+    void SetItalicFontStyle(const Ace::FontStyle& value) override {}
+    void SetFontWeight(const FontWeight& value) override {}
+    void SetFontFamily(const std::vector<std::string>& value) override {}
+    void SetSweepingEffect(bool value) override {}
+    void SetGradientColor(const NG::Gradient& value) override {}
+    void SetPaintShadow(bool paintShadow) override {}
+    void SetProgressStatus(NG::ProgressStatus status) override {}
 };
 
 } // namespace OHOS::Ace::Framework

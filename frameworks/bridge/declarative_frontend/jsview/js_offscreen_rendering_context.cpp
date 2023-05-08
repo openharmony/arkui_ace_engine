@@ -83,7 +83,8 @@ void JSOffscreenRenderingContext::JSBind(BindingTarget globalObj)
     JSClass<JSOffscreenRenderingContext>::CustomMethod("getJsonData", &JSCanvasRenderer::JsGetJsonData);
     JSClass<JSOffscreenRenderingContext>::CustomMethod("getPixelMap", &JSCanvasRenderer::JsGetPixelMap);
     JSClass<JSOffscreenRenderingContext>::CustomMethod("setPixelMap", &JSCanvasRenderer::JsSetPixelMap);
-    JSClass<JSOffscreenRenderingContext>::CustomMethod("filter", &JSCanvasRenderer::JsFilter);
+    JSClass<JSOffscreenRenderingContext>::CustomProperty("filter", &JSCanvasRenderer::JsGetFilter,
+        &JSCanvasRenderer::JsSetFilter);
     JSClass<JSOffscreenRenderingContext>::CustomProperty("direction", &JSCanvasRenderer::JsGetDirection,
         &JSCanvasRenderer::JsSetDirection);
 

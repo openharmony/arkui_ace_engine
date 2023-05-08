@@ -237,6 +237,11 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
     this.write();
   }
 
+  public syncPeerHasChanged(eventSource: ObservedPropertyAbstractPU<any>) {
+    stateMgmtConsole.debug(`PersistentStorage: sync peer ${eventSource.info()} has changed`);
+    this.write();
+  }
+
   // public required by the interface, use the static method instead!
   public aboutToBeDeleted(): void {
     stateMgmtConsole.debug("PersistentStorage: about to be deleted");

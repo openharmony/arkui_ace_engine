@@ -36,6 +36,8 @@ const UndefinedElmtId = -1;
 
 // function type of partial update function
 type UpdateFunc = (elmtId: number, isFirstRender: boolean) => void;
+// function type of recycle node update function
+type RecycleUpdateFunc = (elmtId: number, isFirstRender: boolean, recycleNode: ViewPU) => void;
 
 // Nativeview
 // implemented in C++  for release
@@ -55,6 +57,8 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
   private watchedProps: Map<string, (propName: string) => void>
     = new Map<string, (propName: string) => void>();
+
+  private recycleManager: RecycleManager = undefined;
 
   // @Provide'd variables by this class and its ancestors
   protected providedVars_: ProvidedVarsMapPU;
@@ -137,6 +141,10 @@ abstract class ViewPU extends NativeViewPartialUpdate
     return this.id_;
   }
 
+  updateId(elmtId: number): void {
+    this.id_ = elmtId;
+  }
+
   // inform the subscribed property
   // that the View and thereby all properties
   // are about to be deleted
@@ -217,6 +225,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
   protected abstract purgeVariableDependenciesOnElmtId(removedElmtId: number);
   protected abstract initialRender(): void;
   protected abstract rerender(): void;
+  protected abstract updateRecycleElmtId(oldElmtId: number, newElmtId: number): void;
   protected updateStateVars(params: {}) : void {
     stateMgmtConsole.warn("ViewPU.updateStateVars unimplemented. Pls upgrade to latest eDSL transpiler version.")
   }
@@ -465,6 +474,72 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
     this.updateFuncByElmtId.set(elmtId, compilerAssignedUpdateFunc);
     stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: First render for elmtId ${elmtId} - DONE.`);
+  }
+
+  getOrCreateRecycleManager(): RecycleManager {
+    if (!this.recycleManager) {
+      this.recycleManager = new RecycleManager
+    }
+    return this.recycleManager;
+  }
+
+  getRecycleManager(): RecycleManager {
+    return this.recycleManager;
+  }
+
+  hasRecycleManager(): boolean {
+    return !(this.recycleManager === undefined);
+  }
+
+  initRecycleManager(): void {
+    if (this.recycleManager) {
+      stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: init recycleManager multiple times`);
+      return;
+    }
+    this.recycleManager = new RecycleManager;
+  }
+
+  /**
+   * @function observeRecycleComponentCreation
+   * @description custom node recycle creation
+   * @param name custom node name
+   * @param recycleUpdateFunc custom node recycle update which can be converted to a normal update function
+   * @return void
+   */
+  public observeRecycleComponentCreation(name: string, recycleUpdateFunc: RecycleUpdateFunc): void {
+    // convert recycle update func to update func
+    const compilerAssignedUpdateFunc: UpdateFunc = (element, isFirstRender) => {
+      recycleUpdateFunc(element, isFirstRender, undefined)
+    };
+    let node: ViewPU;
+    // if there is no suitable recycle node, run a normal creation function.
+    if (!this.hasRecycleManager() || !(node = this.getRecycleManager().popRecycleNode(name))) {
+      stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: cannot init node by recycle, crate new node`);
+      this.observeComponentCreation(compilerAssignedUpdateFunc);
+      return;
+    }
+
+    // if there is a suitable recycle node, run a recycle update function.
+    const newElmtId: number = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
+    const oldElmtId: number = node.id__();
+    // store the current id and origin id, used for dirty element sort in {compareNumber}
+    // this.getRecycleManager().setRecycleNodeCurrentElmtId(elmtId, currentElmtId);
+    recycleUpdateFunc(newElmtId, /* is first render */ true, node);
+    this.updateFuncByElmtId.delete(oldElmtId);
+    this.updateFuncByElmtId.set(newElmtId, compilerAssignedUpdateFunc);
+    node.updateId(newElmtId);
+    node.updateRecycleElmtId(oldElmtId, newElmtId);
+    SubscriberManager.UpdateRecycleElmtId(oldElmtId, newElmtId);
+  }
+
+  // add current JS object to it's parent recycle manager
+  public recycleSelf(name: string): void {
+    if (this.parent_) {
+      this.parent_.getOrCreateRecycleManager().pushRecycleNode(name, this);
+    } else {
+      this.resetRecycleCustomNode();
+      stateMgmtConsole.error(`${this.constructor.name}[${this.id__()}]: recycleNode must have a parent`);
+    }
   }
 
   // performs the update on a branch within if() { branch } else if (..) { branch } else { branch }

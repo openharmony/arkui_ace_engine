@@ -23,11 +23,12 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
-#define ACE_UPDATE_SPAN_PROPERTY(name, value)                                                                    \
+#define ACE_UPDATE_SPAN_PROPERTY(name, value, flag)                                                              \
     do {                                                                                                         \
         auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode()); \
         CHECK_NULL_VOID(spanNode);                                                                               \
         spanNode->Update##name(value);                                                                           \
+        spanNode->AddPropertyInfo(flag);                                                                         \
     } while (false)
 
 namespace OHOS::Ace::NG {
@@ -39,63 +40,63 @@ void SpanModelNG::Create(const std::string& content)
     auto spanNode = SpanNode::GetOrCreateSpanNode(nodeId);
     stack->Push(spanNode);
 
-    ACE_UPDATE_SPAN_PROPERTY(Content, content);
+    ACE_UPDATE_SPAN_PROPERTY(Content, content, PropertyInfo::NONE);
 }
 
 void SpanModelNG::SetFontSize(const Dimension& value)
 {
-    ACE_UPDATE_SPAN_PROPERTY(FontSize, value);
+    ACE_UPDATE_SPAN_PROPERTY(FontSize, value, PropertyInfo::FONTSIZE);
 }
 
 void SpanModelNG::SetTextColor(const Color& value)
 {
-    ACE_UPDATE_SPAN_PROPERTY(TextColor, value);
+    ACE_UPDATE_SPAN_PROPERTY(TextColor, value, PropertyInfo::FONTCOLOR);
 }
 
 void SpanModelNG::SetItalicFontStyle(Ace::FontStyle value)
 {
-    ACE_UPDATE_SPAN_PROPERTY(ItalicFontStyle, value);
+    ACE_UPDATE_SPAN_PROPERTY(ItalicFontStyle, value, PropertyInfo::FONTSTYLE);
 }
 
 void SpanModelNG::SetFontWeight(Ace::FontWeight value)
 {
-    ACE_UPDATE_SPAN_PROPERTY(FontWeight, value);
+    ACE_UPDATE_SPAN_PROPERTY(FontWeight, value, PropertyInfo::FONTWEIGHT);
 }
 
 void SpanModelNG::SetFontFamily(const std::vector<std::string>& value)
 {
-    ACE_UPDATE_SPAN_PROPERTY(FontFamily, value);
+    ACE_UPDATE_SPAN_PROPERTY(FontFamily, value, PropertyInfo::FONTFAMILY);
 }
 
 void SpanModelNG::SetTextDecoration(Ace::TextDecoration value)
 {
-    ACE_UPDATE_SPAN_PROPERTY(TextDecoration, value);
+    ACE_UPDATE_SPAN_PROPERTY(TextDecoration, value, PropertyInfo::TEXTDECORATION);
 }
 
 void SpanModelNG::SetTextDecorationColor(const Color& value)
 {
-    ACE_UPDATE_SPAN_PROPERTY(TextDecorationColor, value);
+    ACE_UPDATE_SPAN_PROPERTY(TextDecorationColor, value, PropertyInfo::TEXTDECORATIONCOLOR);
 }
 
 void SpanModelNG::SetTextCase(Ace::TextCase value)
 {
-    ACE_UPDATE_SPAN_PROPERTY(TextCase, value);
+    ACE_UPDATE_SPAN_PROPERTY(TextCase, value, PropertyInfo::TEXTCASE);
 }
 
 void SpanModelNG::SetLetterSpacing(const Dimension& value)
 {
-    ACE_UPDATE_SPAN_PROPERTY(LetterSpacing, value);
+    ACE_UPDATE_SPAN_PROPERTY(LetterSpacing, value, PropertyInfo::LETTERSPACE);
 }
 
 void SpanModelNG::SetLineHeight(const Dimension& value)
 {
-    ACE_UPDATE_SPAN_PROPERTY(LineHeight, value);
+    ACE_UPDATE_SPAN_PROPERTY(LineHeight, value, PropertyInfo::LINEHEIGHT);
 }
 
 void SpanModelNG::SetOnClick(std::function<void(const BaseEventInfo* info)>&& click)
 {
     auto clickFunc = [func = std::move(click)](GestureEvent& info) { func(&info); };
-    ACE_UPDATE_SPAN_PROPERTY(OnClickEvent, std::move(clickFunc));
+    ACE_UPDATE_SPAN_PROPERTY(OnClickEvent, std::move(clickFunc), PropertyInfo::NONE);
 }
 
 } // namespace OHOS::Ace::NG

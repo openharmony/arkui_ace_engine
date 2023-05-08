@@ -1490,13 +1490,32 @@ int32_t FrameNode::GetAllDepthChildrenCount()
     return result;
 }
 
-void FrameNode::OnAccessibilityEvent(AccessibilityEventType eventType) const
+void FrameNode::OnAccessibilityEvent(
+    AccessibilityEventType eventType, WindowsContentChangeTypes windowsContentChangeType) const
+{
+    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
+        AccessibilityEvent event;
+        event.type = eventType;
+        event.windowContentChangeTypes = windowsContentChangeType;
+        event.nodeId = GetAccessibilityId();
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->SendEventToAccessibility(event);
+    }
+}
+
+void FrameNode::OnAccessibilityEvent(
+    AccessibilityEventType eventType, std::string beforeText, std::string latestContent) const
 {
     if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
         AccessibilityEvent event;
         event.type = eventType;
         event.nodeId = GetAccessibilityId();
-        PipelineContext::GetCurrentContext()->SendEventToAccessibility(event);
+        event.beforeText = beforeText;
+        event.latestContent = latestContent;
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->SendEventToAccessibility(event);
     }
 }
 
@@ -1600,20 +1619,6 @@ void FrameNode::UpdateAnimatablePropertyFloat(const std::string& propertyName, f
     auto property = AceType::DynamicCast<NodeAnimatablePropertyFloat>(iter->second);
     CHECK_NULL_VOID(property);
     property->Set(value);
-}
-
-void FrameNode::OnAddDisappearingChild()
-{
-    auto context = GetRenderContext();
-    CHECK_NULL_VOID(context);
-    context->UpdateFreeze(true);
-}
-
-void FrameNode::OnRemoveDisappearingChild()
-{
-    auto context = GetRenderContext();
-    CHECK_NULL_VOID(context);
-    context->UpdateFreeze(false);
 }
 
 std::string FrameNode::ProvideRestoreInfo()

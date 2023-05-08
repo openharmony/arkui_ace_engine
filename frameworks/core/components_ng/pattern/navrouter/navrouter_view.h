@@ -18,13 +18,16 @@
 
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/navigation/navigation_declaration.h"
 
 namespace OHOS::Ace::NG {
 
+using namespace Framework;
 class ACE_EXPORT NavRouterView {
 public:
     static void Create();
     static void SetOnStateChange(std::function<void(bool)>&& onStateChange);
+    static void SetNavRouteMode(NG::NavRouteMode mode);
 };
 
 } // namespace OHOS::Ace::NG

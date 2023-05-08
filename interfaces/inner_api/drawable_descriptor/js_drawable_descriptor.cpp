@@ -82,7 +82,8 @@ napi_value JsDrawableDescriptor::InitLayeredDrawable(napi_env env)
     return cons;
 }
 
-napi_value JsDrawableDescriptor::ToNapi(napi_env env, DrawableDescriptor* drawable, DrawableType type)
+napi_value JsDrawableDescriptor::ToNapi(
+    napi_env env, DrawableDescriptor* drawable, DrawableDescriptor::DrawableType type)
 {
     if (!drawable) {
         return nullptr;
@@ -104,10 +105,10 @@ napi_value JsDrawableDescriptor::ToNapi(napi_env env, DrawableDescriptor* drawab
     napi_value result = nullptr;
     napi_status status;
     switch (type) {
-        case DrawableType::LAYERED:
+        case DrawableDescriptor::DrawableType::LAYERED:
             status = napi_get_reference_value(env, layeredConstructor_, &constructor);
             break;
-        case DrawableType::BASE:
+        case DrawableDescriptor::DrawableType::BASE:
             status = napi_get_reference_value(env, baseConstructor_, &constructor);
             break;
         default:
@@ -155,7 +156,7 @@ napi_value JsDrawableDescriptor::GetForeground(napi_env env, napi_callback_info 
     }
 
     auto foreground = drawable->GetForeground();
-    napi_value result = ToNapi(env, foreground.release(), DrawableType::BASE);
+    napi_value result = ToNapi(env, foreground.release(), DrawableDescriptor::DrawableType::BASE);
     napi_escape_handle(env, scope, result, &result);
     napi_close_escapable_handle_scope(env, scope);
     return result;
@@ -175,7 +176,7 @@ napi_value JsDrawableDescriptor::GetBackground(napi_env env, napi_callback_info 
     }
 
     auto background = drawable->GetBackground();
-    napi_value result = ToNapi(env, background.release(), DrawableType::BASE);
+    napi_value result = ToNapi(env, background.release(), DrawableDescriptor::DrawableType::BASE);
     napi_escape_handle(env, scope, result, &result);
     napi_close_escapable_handle_scope(env, scope);
     return result;
@@ -195,7 +196,7 @@ napi_value JsDrawableDescriptor::GetMask(napi_env env, napi_callback_info info)
     }
 
     auto mask = drawable->GetMask();
-    napi_value result = ToNapi(env, mask.release(), DrawableType::BASE);
+    napi_value result = ToNapi(env, mask.release(), DrawableDescriptor::DrawableType::BASE);
     napi_escape_handle(env, scope, result, &result);
     napi_close_escapable_handle_scope(env, scope);
     return result;

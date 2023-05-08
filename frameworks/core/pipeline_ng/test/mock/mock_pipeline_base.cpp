@@ -114,6 +114,16 @@ SafeAreaEdgeInserts PipelineContext::GetCurrentViewSafeArea() const
 
 void PipelineContext::FlushBuild() {}
 
+void PipelineContext::FlushBuildFinishCallbacks()
+{
+    decltype(buildFinishCallbacks_) buildFinishCallbacks(std::move(buildFinishCallbacks_));
+    for (const auto& func : buildFinishCallbacks) {
+        if (func) {
+            func();
+        }
+    }
+}
+
 void PipelineContext::NotifyMemoryLevel(int32_t level) {}
 
 void PipelineContext::FlushMessages() {}

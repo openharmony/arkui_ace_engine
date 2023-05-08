@@ -145,7 +145,7 @@ void JSAbilityComponent::JsOnAbilityWillRemove(const JSCallbackInfo& info)
 void JSAbilityComponent::Width(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsWidth(info);
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         return;
     }
@@ -155,7 +155,7 @@ void JSAbilityComponent::Width(const JSCallbackInfo& info)
 void JSAbilityComponent::Height(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsHeight(info);
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         return;
     }

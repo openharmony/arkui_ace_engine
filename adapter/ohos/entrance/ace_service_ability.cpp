@@ -82,7 +82,7 @@ void AceServiceAbility::OnStart(const OHOS::AAFwk::Want& want)
     // init service
     BackendType backendType = BackendType::SERVICE;
 
-    Platform::PaContainer::CreateContainer(abilityId_, backendType, this,
+    Platform::PaContainer::CreateContainer(abilityId_, backendType, this, moduleInfo->hapPath,
         std::make_unique<ServicePlatformEventCallback>([this]() { TerminateAbility(); }));
 
     AceEngine::InitJsDumpHeadSignal();
@@ -90,7 +90,7 @@ void AceServiceAbility::OnStart(const OHOS::AAFwk::Want& want)
     if (info != nullptr && !info->srcPath.empty()) {
         LOGI("AceServiceAbility::OnStar assetBasePathStr: %{public}s, parsedUrl: %{public}s",
             info->srcPath.c_str(), parsedUrl.c_str());
-        auto assetBasePathStr = { "assets/js/" + info->srcPath + "/" };
+        auto assetBasePathStr = { "assets/js/" + info->srcPath + "/", std::string("assets/js/") };
         Platform::PaContainer::AddAssetPath(abilityId_, packagePathStr, moduleInfo->hapPath, assetBasePathStr);
     } else {
         LOGI("AceServiceAbility::OnStar parsedUrl: %{public}s", parsedUrl.c_str());

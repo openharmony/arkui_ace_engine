@@ -21,6 +21,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/log/log_wrapper.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -50,6 +51,7 @@ public:
         if (!progressModifier_) {
             progressModifier_ = AceType::MakeRefPtr<ProgressModifier>();
         }
+        progressModifier_->SetVisible(visibilityType_ == VisibleType::VISIBLE);
         return MakeRefPtr<ProgressPaintMethod>(progressType_, strokeWidth_, progressModifier_);
     }
 
@@ -74,12 +76,41 @@ public:
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::NODE, true, FocusStyleType::OUTER_BORDER };
+    }
+
+    void SetTextFromUser(bool value)
+    {
+        isTextFromUser_ = value;
+    }
+
+    bool IsTextFromUser()
+    {
+        return isTextFromUser_;
+    }
+
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnAttachToFrameNode() override;
+    void OnModifyDone() override;
+    void InitTouchEvent();
+    void OnPress(const TouchEventInfo& info);
+    void HandleEnabled();
+    void ToJsonValueForRingStyleOptions(std::unique_ptr<JsonValue>& json) const;
+    static std::string ConvertProgressStatusToString(const ProgressStatus status);
 
     double strokeWidth_ = 2;
     RefPtr<ProgressModifier> progressModifier_;
+    RefPtr<TouchEventImpl> touchListener_;
+    Color backgroundColor_;
+    Color selectColor_;
+    Color borderColor_;
+    Color fontColor_;
+    bool isTextFromUser_ = false;
+    VisibleType visibilityType_ = VisibleType::VISIBLE;
 
     ACE_DISALLOW_COPY_AND_MOVE(ProgressPattern);
 };

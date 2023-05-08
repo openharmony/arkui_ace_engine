@@ -303,6 +303,8 @@ public:
 
     std::string GetStacktraceMessage() override;
 
+    void GetStackTrace(std::string& trace) override;
+
     void SetLocalStorage(int32_t instanceId, NativeReference* storage) override;
 
     void SetContext(int32_t instanceId, NativeReference* context) override;

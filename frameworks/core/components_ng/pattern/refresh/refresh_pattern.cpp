@@ -296,6 +296,9 @@ void RefreshPattern::HandleDragStart()
     CHECK_NULL_VOID(progressPaintProperty);
     progressPaintProperty->UpdateRefreshAnimationState(static_cast<int32_t>(RefreshAnimationState::FOLLOW_HAND));
     progressChild_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_START);
 }
 
 void RefreshPattern::HandleDragUpdate(float delta)
@@ -472,6 +475,9 @@ void RefreshPattern::HandleDragEnd()
     if (scrollOffset_.GetY() >= triggerRefreshDistance) {
         TriggerRefresh();
         TransitionPeriodAnimation();
+        auto frameNode = GetHost();
+        CHECK_NULL_VOID(frameNode);
+        frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
         return;
     }
     LoadingProgressExit();

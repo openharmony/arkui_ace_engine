@@ -60,7 +60,7 @@ void JSPersistent::Set(const JSCallbackInfo& args)
         "emulator or a real device instead.");
     return;
 #endif
-    if (args.Length() < 2) {
+    if (args.Length() < 2 || !args[0]->IsString() || !args[1]->IsString()) {
         LOGW("JSPersistent: Fail to set persistent data, args too few");
         return;
     }
@@ -92,7 +92,7 @@ void JSPersistent::Get(const JSCallbackInfo& args)
         "emulator or a real device instead.");
     return;
 #endif
-    if (args.Length() < 1) {
+    if (args.Length() < 1 || !args[0]->IsString()) {
         LOGW("JSPersistent: Failed to Get persistent data, args too few");
         return;
     }
@@ -104,9 +104,13 @@ void JSPersistent::Get(const JSCallbackInfo& args)
     }
     auto executor = container->GetTaskExecutor();
     std::string value = StorageProxy::GetInstance()->GetStorage(executor)->GetString(key);
-    auto returnValue = JSVal(ToJSValue(value));
-    auto returnPtr = JSRef<JSVal>::Make(returnValue);
-    args.SetReturnValue(returnPtr);
+    if (value.empty()) {
+        args.SetReturnValue(JSVal::Undefined());
+        return;
+    }
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    JSRef<JSVal> ret = obj->ToJsonObject(value.c_str());
+    args.SetReturnValue(ret);
 }
 
 void JSPersistent::Delete(const JSCallbackInfo& args)
@@ -116,7 +120,7 @@ void JSPersistent::Delete(const JSCallbackInfo& args)
         "emulator or a real device instead.");
     return;
 #endif
-    if (args.Length() < 1) {
+    if (args.Length() < 1 || !args[0]->IsString()) {
         LOGW("JSPersistent: Fail to Delete persistent data, args too few");
         return;
     }

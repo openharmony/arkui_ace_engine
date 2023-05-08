@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_DATE_UTIL_H
 
 #include <cstdint>
+#include <ctime>
 
 namespace OHOS::Ace {
 
@@ -29,6 +30,7 @@ struct Date {
     static int32_t DayOfMonth(int32_t year, int32_t month);
     static bool IsLeapYear(int32_t year);
     static int32_t CalculateWeekDay(int32_t year, int32_t month, int32_t day);
+    static int64_t GetMilliSecondsByDateTime(std::tm& dateTime);
 
     uint32_t year = 1900;
     uint32_t month = 0;

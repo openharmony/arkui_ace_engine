@@ -35,7 +35,7 @@
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
-enum class MenuType { MENU, CONTEXT_MENU, NAVIGATION_MENU, MULTI_MENU, SUB_MENU };
+enum class MenuType { MENU, CONTEXT_MENU, NAVIGATION_MENU, MULTI_MENU, SUB_MENU, SELECT_OVERLAY_EXTENSION_MENU };
 
 class MenuPattern : public Pattern {
     DECLARE_ACE_TYPE(MenuPattern, Pattern);
@@ -78,6 +78,11 @@ public:
                                                     : MakeRefPtr<MenuLayoutAlgorithm>(targetId_, targetTag_);
     }
 
+    MenuType GetMenuType() const
+    {
+        return type_;
+    }
+    
     bool IsContextMenu() const
     {
         return type_ == MenuType::CONTEXT_MENU;
@@ -93,9 +98,19 @@ public:
         return type_ == MenuType::MULTI_MENU;
     }
 
+    bool IsMenu() const
+    {
+        return type_ == MenuType::MENU;
+    }
+
     bool IsSubMenu() const
     {
         return type_ == MenuType::SUB_MENU;
+    }
+
+    bool IsSelectOverlayExtensionMenu() const
+    {
+        return type_ == MenuType::SELECT_OVERLAY_EXTENSION_MENU;
     }
 
     void SetParentMenuItem(const RefPtr<FrameNode>& parentMenuItem)
@@ -154,6 +169,16 @@ public:
 
     RefPtr<FrameNode> GetMenuColumn() const;
 
+    void SetShowedSubMenu(const RefPtr<FrameNode>& subMenu)
+    {
+        showedSubMenu_ = subMenu;
+    }
+    const RefPtr<FrameNode>& GetShowedSubMenu() const
+    {
+        return showedSubMenu_;
+    }
+    void HideSubMenu();
+
 private:
     void OnModifyDone() override;
     void RegisterOnTouch();
@@ -176,6 +201,7 @@ private:
     MenuType type_ = MenuType::MENU;
 
     RefPtr<FrameNode> parentMenuItem_;
+    RefPtr<FrameNode> showedSubMenu_;
     std::vector<RefPtr<FrameNode>> options_;
 
     bool isSelectMenu_ = false;

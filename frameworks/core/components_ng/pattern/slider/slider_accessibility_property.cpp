@@ -41,4 +41,15 @@ AccessibilityValue SliderAccessibilityProperty::GetAccessibilityValue() const
     result.current = sliderProperty->GetValue().value_or(0);
     return result;
 }
+
+void SliderAccessibilityProperty::SetSpecificSupportAction()
+{
+    auto value = GetAccessibilityValue();
+    if (value.current < value.max) {
+        AddSupportAction(AceAction::ACTION_SCROLL_FORWARD);
+    }
+    if (value.min < value.current) {
+        AddSupportAction(AceAction::ACTION_SCROLL_BACKWARD);
+    }
+}
 } // namespace OHOS::Ace::NG

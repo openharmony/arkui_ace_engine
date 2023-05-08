@@ -28,6 +28,7 @@
 #include "base/thread/task_executor.h"
 #include "base/utils/macros.h"
 #include "base/utils/utils.h"
+#include "core/accessibility/accessibility_utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/base/modifier.h"
@@ -287,7 +288,13 @@ public:
 
     int32_t GetAllDepthChildrenCount();
 
-    void OnAccessibilityEvent(AccessibilityEventType eventType) const;
+    void OnAccessibilityEvent(
+        AccessibilityEventType eventType, WindowsContentChangeTypes windowsContentChangeType =
+                                              WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID) const;
+
+    void OnAccessibilityEvent(
+        AccessibilityEventType eventType, std::string beforeText, std::string latestContent) const;
+
     void MarkNeedRenderOnly();
 
     void OnDetachFromMainTree(bool recursive) override;
@@ -388,9 +395,6 @@ private:
     void OnGenerateOneDepthVisibleFrameWithTransition(
         std::list<RefPtr<FrameNode>>& visibleList, uint32_t index) override;
     void OnGenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& allList) override;
-
-    void OnAddDisappearingChild() override;
-    void OnRemoveDisappearingChild() override;
 
     bool IsMeasureBoundary();
     bool IsRenderBoundary();

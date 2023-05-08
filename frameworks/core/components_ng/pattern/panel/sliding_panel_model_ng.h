@@ -39,6 +39,7 @@ public:
     void SetBorderWidth(const Dimension& borderWidth) override;
     void SetBorderStyle(const BorderStyle& borderStyle) override;
     void SetBorder(const BorderStyle& borderStyle, const Dimension& borderWidth) override;
+    void SetModeChangeEvent(ChangeEvent&& modeChangeEvent) override;
 
 private:
     static RefPtr<SlidingPanelNode> GetOrCreateSlidingPanelNode(

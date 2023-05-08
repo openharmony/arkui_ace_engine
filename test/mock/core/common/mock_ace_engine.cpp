@@ -16,40 +16,41 @@
 #include "core/common/ace_engine.h"
 
 namespace OHOS::Ace {
+AceEngine::AceEngine() = default;
 
-AceEngine::AceEngine() {}
+AceEngine::~AceEngine() = default;
 
-AceEngine::~AceEngine() {}
 AceEngine& AceEngine::Get()
 {
     static AceEngine engine;
     return engine;
 }
 
-void AceEngine::InitJsDumpHeadSignal() {}
-
-void AceEngine::AddContainer(int32_t instanceId, const RefPtr<Container>& container) {}
-
-void AceEngine::RemoveContainer(int32_t instanceId) {}
+void AceEngine::NotifyContainers(const std::function<void(const RefPtr<Container>&)>& callback)
+{
+    for (const auto& [first, second] : containerMap_) {
+        // first = container ID
+        ContainerScope scope(first);
+        callback(second);
+    }
+}
 
 RefPtr<Container> AceEngine::GetContainer(int32_t instanceId)
 {
+    auto container = containerMap_.find(instanceId);
+    if (container != containerMap_.end()) {
+        return container->second;
+    }
     return nullptr;
 }
 
-void AceEngine::RegisterToWatchDog(int32_t instanceId, const RefPtr<TaskExecutor>& taskExecutor, bool useUIAsJSThread)
-{}
+void AceEngine::AddContainer(int32_t instanceId, const RefPtr<Container>& container)
+{
+    containerMap_.emplace(instanceId, container);
+}
 
-void AceEngine::UnRegisterFromWatchDog(int32_t instanceId) {}
-
-void AceEngine::BuriedBomb(int32_t instanceId, uint64_t bombId) {}
-
-void AceEngine::DefusingBomb(int32_t instanceId) {}
-
-void AceEngine::TriggerGarbageCollection() {}
-
-void AceEngine::NotifyContainers(const std::function<void(const RefPtr<Container>&)>& callback) {}
-
-void AceEngine::DumpJsHeap(bool isPrivate) const {}
-
+void AceEngine::RemoveContainer(int32_t instanceId)
+{
+    containerMap_.erase(instanceId);
+}
 } // namespace OHOS::Ace

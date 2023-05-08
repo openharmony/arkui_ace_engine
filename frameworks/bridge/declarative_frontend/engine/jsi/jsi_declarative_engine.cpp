@@ -20,6 +20,8 @@
 #include <regex>
 #include <unistd.h>
 
+#include "dfx_jsnapi.h"
+
 #include "base/utils/utils.h"
 #ifdef WINDOWS_PLATFORM
 #include <algorithm>
@@ -86,8 +88,6 @@ const std::string FORM_ES_MODULE_CARD_PATH = "ets/widgets.abc";
 const std::string FORM_ES_MODULE_PATH = "ets/modules.abc";
 
 const std::string ASSET_PATH_PREFIX = "/data/storage/el1/bundle/";
-
-constexpr uint32_t PREFIX_LETTER_NUMBER = 4;
 
 // native implementation for js function: perfutil.print()
 shared_ptr<JsValue> JsPerfPrint(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
@@ -1069,7 +1069,7 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
             return false;
         }
         const std::string bundleName = frontEnd->GetBundleName();
-        const std::string moduleName = frontEnd->GetModuleName();
+        std::string moduleName = frontEnd->GetModuleName();
 #ifdef PREVIEW
         const std::string assetPath = delegate->GetAssetPath(FORM_ES_MODULE_CARD_PATH).append(FORM_ES_MODULE_CARD_PATH);
 #else
@@ -1086,7 +1086,9 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
         arkRuntime->SetModuleName(moduleName);
         abcPath = fileName;
         if (fileName.rfind("ets/", 0) == 0) {
-            abcPath = fileName.substr(PREFIX_LETTER_NUMBER);
+            abcPath = moduleName.append("/").append(fileName);
+        } else {
+            abcPath = moduleName.append("/ets/").append(fileName);
         }
         LOGI("JsiDeclarativeEngine::ExecuteCardAbc abcPath = %{public}s", abcPath.c_str());
         {
@@ -1753,6 +1755,21 @@ std::string JsiDeclarativeEngine::GetStacktraceMessage()
 
     auto runningPage = engineInstance_ ? engineInstance_->GetRunningPage() : nullptr;
     return JsiBaseUtils::TransSourceStack(runningPage, stack);
+}
+
+void JsiDeclarativeEngine::GetStackTrace(std::string& trace)
+{
+    auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+    if (!arkRuntime) {
+        LOGE("ArkJsRuntime is null and can not get current stack trace");
+        return;
+    }
+    auto vm = arkRuntime->GetEcmaVm();
+    if (!vm) {
+        LOGE("VM is null and can not get current stack trace");
+        return;
+    }
+    panda::DFXJSNApi::BuildJsStackTrace(vm, trace);
 }
 
 void JsiDeclarativeEngine::SetLocalStorage(int32_t instanceId, NativeReference* nativeValue)

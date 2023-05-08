@@ -16,14 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_HOST_WINDOW_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_HOST_WINDOW_PATTERN_H
 
-#include "pointer_event.h"
 #include "session/host/include/session.h"
 
-#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
-
 class HostWindowPattern : public Pattern {
     DECLARE_ACE_TYPE(HostWindowPattern, Pattern);
 
@@ -32,17 +29,21 @@ public:
     ~HostWindowPattern() override = default;
 
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+
     void DispatchPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent);
+    void DispatchKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent);
 
 protected:
     void OnAttachToFrameNode() override;
 
-    virtual void InitContent();
+    void InitContent();
 
     virtual bool HasStartingPage() = 0;
 
     void RegisterLifecycleListener();
+    void UnregisterLifecycleListener();
 
+    virtual void OnConnect();
     virtual void OnForeground() {}
     virtual void OnBackground() {}
 
@@ -50,17 +51,22 @@ protected:
 
     RefPtr<FrameNode> startingNode_;
     RefPtr<FrameNode> contentNode_;
+    RefPtr<FrameNode> snapshotNode_;
 
     sptr<Rosen::Session> session_;
 
 private:
+    void CreateStartingNode();
+    void CreateSnapshotNode();
+
     void BufferAvailableCallback();
+
+    std::shared_ptr<Rosen::ILifecycleListener> lifecycleListener_;
 
     friend class LifecycleListener;
 
     ACE_DISALLOW_COPY_AND_MOVE(HostWindowPattern);
 };
-
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_HOST_WINDOW_PATTERN_H

@@ -36,6 +36,7 @@ public:
     virtual void SetCheckedBackgroundColor(const Color& color) {}
     virtual void SetUncheckedBorderColor(const Color& color) {}
     virtual void SetIndicatorColor(const Color& color) {}
+    virtual void SetOnChangeEvent(NG::ChangeEvent&& onChangeEvent) {};
 
 private:
     static std::unique_ptr<RadioModel> instance_;

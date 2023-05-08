@@ -22,6 +22,7 @@
 namespace OHOS::Ace::NG {
 
 using SliderOnChangeEvent = std::function<void(float, int32_t)>;
+using SliderOnValueChangeEvent = std::function<void(float)>;
 
 class SliderEventHub : public EventHub {
     DECLARE_ACE_TYPE(SliderEventHub, EventHub)
@@ -35,6 +36,9 @@ public:
 
     void FireChangeEvent(float value, int32_t mode)
     {
+        if (onChangeEvent_) {
+            onChangeEvent_(value);
+        }
         constexpr int32_t BEGIN_MODE = 0;
         CHECK_NULL_VOID(changeEvent_);
         changeEvent_(value, mode);
@@ -53,8 +57,14 @@ public:
         return value_;
     }
 
+    void SetOnChangeEvent(SliderOnValueChangeEvent&& onChangeEvent)
+    {
+        onChangeEvent_ = std::move(onChangeEvent);
+    }
+
 private:
     SliderOnChangeEvent changeEvent_;
+    SliderOnValueChangeEvent onChangeEvent_;
     float value_ = .0f;
     ACE_DISALLOW_COPY_AND_MOVE(SliderEventHub);
 };

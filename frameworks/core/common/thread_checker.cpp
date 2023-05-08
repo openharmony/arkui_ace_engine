@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,14 +26,15 @@ bool CheckThread(TaskExecutor::TaskType threadType)
         auto taskExecutor = Container::CurrentTaskExecutor();
         if (taskExecutor) {
             return taskExecutor->WillRunOnCurrentThread(threadType);
-        } else {
-            LOGI("checkThread: null taskExecutor, check id:%{public}d", Container::CurrentId());
         }
-    } else if (threadType == TaskExecutor::TaskType::PLATFORM) {
-        return Container::CurrentId() == INSTANCE_ID_PLATFORM;
-    } else {
-        LOGE("not support thread check for other thread type");
+        LOGI("checkThread: null taskExecutor, check id:%{public}d", Container::CurrentId());
     }
+
+    if (threadType == TaskExecutor::TaskType::PLATFORM) {
+        return Container::CurrentId() == INSTANCE_ID_PLATFORM;
+    }
+
+    LOGE("not support thread check for other thread type");
     return false;
 }
 

@@ -154,8 +154,9 @@ private:
     void RegisterPaModule();
     void RegisterConsoleModule();
     void RegisterConsoleModule(ArkNativeEngine* engine);
+    void RegisterUncaughtExceptionHandler();
     void EvaluateJsCode();
-    void SetDebuggerPostTask();
+    void StartDebugMode(bool debuggerMode);
     panda::ecmascript::EcmaVM* GetEcmaVm() const;
     void InitJsRuntimeOptions(AbilityRuntime::Runtime::Options& options);
     bool CreateJsRuntime(const AbilityRuntime::Runtime::Options& options);

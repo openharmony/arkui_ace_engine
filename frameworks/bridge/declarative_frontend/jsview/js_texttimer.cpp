@@ -144,7 +144,7 @@ void JSTextTimer::SetFontSize(const JSCallbackInfo& info)
         LOGE("JSTextInput::SetFontSize The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension fontSize;
+    CalcDimension fontSize;
     if (!ParseJsDimensionFp(info[0], fontSize)) {
         return;
     }

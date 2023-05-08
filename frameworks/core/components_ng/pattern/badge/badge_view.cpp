@@ -17,8 +17,8 @@
 
 #include "base/utils/utils.h"
 #include "core/components/badge/badge_theme.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/badge/badge_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -53,45 +53,49 @@ void BadgeView::Create(BadgeParameters& badgeParameters)
     }
 
     if (badgeParameters.badgePosition.has_value()) {
-        auto badgePosition = static_cast<BadgeLayoutProperty::BadgePosition>(badgeParameters.badgePosition.value());
-        layoutProperty->SetBadgePosition(badgePosition);
+        auto badgePosition = static_cast<BadgePosition>(badgeParameters.badgePosition.value());
+        layoutProperty->UpdateBadgePosition(badgePosition);
+    } else {
+        layoutProperty->UpdateBadgePosition(badgeTheme->GetBadgePosition());
     }
+    UpdateBadgeStyle(badgeParameters, frameNode);
+}
 
+void BadgeView::UpdateBadgeStyle(BadgeParameters& badgeParameters, const RefPtr<FrameNode>& frameNode)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
+    auto layoutProperty = frameNode->GetLayoutProperty<BadgeLayoutProperty>();
     if (badgeParameters.badgeColor.has_value()) {
         layoutProperty->UpdateBadgeColor(badgeParameters.badgeColor.value());
     } else {
         layoutProperty->UpdateBadgeColor(badgeTheme->GetBadgeColor());
     }
-
     if (badgeParameters.badgeTextColor.has_value()) {
         layoutProperty->UpdateBadgeTextColor(badgeParameters.badgeTextColor.value());
     } else {
         layoutProperty->UpdateBadgeTextColor(badgeTheme->GetBadgeTextColor());
     }
-
     if (badgeParameters.badgeFontSize.has_value() &&
         GreatOrEqual(badgeParameters.badgeFontSize.value().ConvertToPx(), 0)) {
         layoutProperty->UpdateBadgeFontSize(badgeParameters.badgeFontSize.value());
     } else {
         layoutProperty->UpdateBadgeFontSize(badgeTheme->GetBadgeFontSize());
     }
-
     if (badgeParameters.badgeCircleSize.has_value()) {
         layoutProperty->UpdateBadgeCircleSize(badgeParameters.badgeCircleSize.value());
     }
-
     if (badgeParameters.badgeBorderColor.has_value()) {
         layoutProperty->UpdateBadgeBorderColor(badgeParameters.badgeBorderColor.value());
     } else {
         layoutProperty->UpdateBadgeBorderColor(badgeTheme->GetBadgeBorderColor());
     }
-
     if (badgeParameters.badgeBorderWidth.has_value()) {
         layoutProperty->UpdateBadgeBorderWidth(badgeParameters.badgeBorderWidth.value());
     } else {
         layoutProperty->UpdateBadgeBorderWidth(badgeTheme->GetBadgeBorderWidth());
     }
-
     if (badgeParameters.badgeFontWeight.has_value()) {
         layoutProperty->UpdateBadgeFontWeight(badgeParameters.badgeFontWeight.value());
     } else {

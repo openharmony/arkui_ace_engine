@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -66,8 +66,10 @@ void TextPickerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto width = layoutConstraint->selfIdealSize.Width();
     auto height = layoutConstraint->selfIdealSize.Height();
     float pickerWidth = 0.0f;
+    auto children = pickerNode->GetChildren();
+
     if (width.has_value()) {
-        pickerWidth = width.value();
+        pickerWidth = width.value() / static_cast<float>(children.size());
     } else {
         pickerWidth = static_cast<float>((pickerTheme->GetDividerSpacing() * DIVIDER_SIZE).ConvertToPx());
     }

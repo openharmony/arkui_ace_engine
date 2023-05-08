@@ -27,7 +27,6 @@
 #include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace::NG {
-
 inline constexpr double DEFAULT_MARQUEE_SCROLL_AMOUNT = 6.0;
 inline constexpr int32_t DEFAULT_MARQUEE_LOOP = -1;
 using TimeCallback = std::function<void()>;
@@ -51,9 +50,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        auto marqueeLayoutAlgorithm = MakeRefPtr<MarqueeLayoutAlgorithm>();
-        marqueeLayoutAlgorithm->SetChildOffset(childOffset_);
-        return marqueeLayoutAlgorithm;
+        return MakeRefPtr<MarqueeLayoutAlgorithm>();
     }
 
     RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
@@ -61,48 +58,24 @@ public:
         return MakeRefPtr<MarqueeAccessibilityProperty>();
     }
 
-    float CheckAndAdjustPosition(LayoutWrapper* layoutWrapper);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
-    void OnInActive() override;
-    void OnActive() override;
-
-    void InitAnimatorController();
 
     void FireStartEvent() const;
     void FireBounceEvent() const;
     void FireFinishEvent() const;
 
-    double GetScrollAmount() const;
-    int32_t GetLoop() const;
-    bool GetPlayerStatus() const;
-    MarqueeDirection GetDirection() const;
-    float GetTextChildOffset() const;
-
-    void StartMarquee();
-    void StopMarquee();
-    void OnStartAnimation();
-    void OnStopAnimation();
-    void OnRepeatAnimation();
-    void UpdateAnimation();
-    void UpdateChildOffset(float offset);
-
-    RefPtr<Animator> animatorController_;
-    RefPtr<CurveAnimation<float>> translate_;
-    bool needAnimation_ = true;
-    bool startAfterLayout_ = false;
-    bool startAfterShowed_ = false;
-    bool playStatus_ = false;
-    bool isActive_ = false;
-    bool isNeedMarquee_ = true;
-    double scrollAmount_ = DEFAULT_MARQUEE_SCROLL_AMOUNT;
-    float childOffset_ {};
-    int32_t loop_ = DEFAULT_MARQUEE_LOOP;
-    MarqueeDirection direction_ = MarqueeDirection::LEFT;
-
+    void StartMarqueeAnimation();
+    void StopMarqueeAnimation(bool stopAndStart, bool statusChanged);
+    void SetTextOffset(float offsetX);
+    bool lastStartStatus_ = false;
+    bool statusChanged_ = false;
+    bool forceStropAnimation_ = false;
+    int32_t repeatCount_ = 0;
+    int32_t animationId_ = 0;
     ACE_DISALLOW_COPY_AND_MOVE(MarqueePattern);
 };
 } // namespace OHOS::Ace::NG

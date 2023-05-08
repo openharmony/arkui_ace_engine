@@ -38,9 +38,20 @@ public:
         return std::move(onChange_);
     }
 
+    void SetSelectedChangeEvent(const std::function<void(bool)>& selectedChangeEvent)
+    {
+        selectedChangeEvent_ = selectedChangeEvent;
+    }
+
+    std::function<void(bool)>&& GetSelectedChangeEvent()
+    {
+        return std::move(selectedChangeEvent_);
+    }
+
 private:
     // callback of menuItem
     std::function<void(bool)> onChange_;
+    std::function<void(bool)> selectedChangeEvent_;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuItemEventHub);
 };

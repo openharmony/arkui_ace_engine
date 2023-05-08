@@ -240,4 +240,22 @@ void DatePickerModelNG::SetSelectedTextStyle(const RefPtr<PickerTheme>& theme, c
     ACE_UPDATE_LAYOUT_PROPERTY(
         DataPickerRowLayoutProperty, SelectedWeight, value.fontWeight.value_or(selectedStyle.GetFontWeight()));
 }
+
+void DatePickerModelNG::SetBackgroundColor(const Color& color)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_VOID(datePickerPattern);
+    datePickerPattern->SetBackgroundColor(color);
+}
+
+void DatePickerModelNG::SetChangeEvent(DateChangeEvent&& onChange)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<DatePickerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetChangeEvent(std::move(onChange));
+}
 } // namespace OHOS::Ace::NG

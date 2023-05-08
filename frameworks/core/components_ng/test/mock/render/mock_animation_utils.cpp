@@ -27,8 +27,8 @@ bool AnimationUtils::CloseImplicitAnimation()
     return false;
 }
 
-void AnimationUtils::Animate(
-    const AnimationOption& option, const PropertyCallback& callback, const FinishCallback& finishCallback)
+void AnimationUtils::Animate(const AnimationOption& option, const PropertyCallback& callback,
+    const FinishCallback& finishCallback, const RepeatCallback& repeatCallback)
 {
     if (callback) {
         callback();
@@ -42,8 +42,10 @@ void AnimationUtils::Animate(
     }
 }
 
-void AnimationUtils::AddKeyFrame(float fraction, const RefPtr<Curve>& curve, const PropertyCallback& callback) {}
-
+void AnimationUtils::AddKeyFrame(float fraction, const RefPtr<Curve>& curve, const PropertyCallback& callback)
+{
+    callback();
+}
 void AnimationUtils::AddKeyFrame(float fraction, const PropertyCallback& callback) {}
 
 void AnimationUtils::AnimateWithCurrentOptions(
@@ -51,8 +53,8 @@ void AnimationUtils::AnimateWithCurrentOptions(
 {}
 void AnimationUtils::AnimateWithCurrentCallback(const AnimationOption& option, const PropertyCallback& callback) {}
 
-std::shared_ptr<AnimationUtils::Animation> AnimationUtils::StartAnimation(
-    const AnimationOption& option, const PropertyCallback& callback, const FinishCallback& finishCallback)
+std::shared_ptr<AnimationUtils::Animation> AnimationUtils::StartAnimation(const AnimationOption& option,
+    const PropertyCallback& callback, const FinishCallback& finishCallback, const RepeatCallback& repeatCallback)
 {
     return std::make_shared<AnimationUtils::Animation>();
 }

@@ -212,4 +212,27 @@ HWTEST_F(WebViewTestNg, SetWindowNewEvent004, TestSize.Level1)
     WebView::SetAudioExclusive(true);
 #endif
 }
+
+/**
+ * @tc.name: SetOnLoadIntercept005
+ * @tc.desc: Test web_view.cpp.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebViewTestNg, SetOnLoadIntercept005, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    OnWebSyncFunc onLoadInterceptImpl  =
+        [](const std::shared_ptr<BaseEventInfo>& info) ->bool {return true;};
+    WebView::SetOnLoadIntercept(std::move(onLoadInterceptImpl));
+    WebView::SetHorizontalScrollBarAccessEnabled(true);
+    WebView::SetVerticalScrollBarAccessEnabled(true);
+    OnWebAsyncFunc audioStateChanged = [](const std::shared_ptr<BaseEventInfo>& info) {};
+    WebView::SetAudioStateChangedId(std::move(audioStateChanged));
+    OnWebAsyncFunc firstContentfulPaintId = [](const std::shared_ptr<BaseEventInfo>& info) {};
+    WebView::SetFirstContentfulPaintId(std::move(firstContentfulPaintId));
+    WebView::NotifyPopupWindowResult(0, true);
+    WebView::NotifyPopupWindowResult(-1, true);
+    WebView::NotifyPopupWindowResult(1, true);
+#endif
+}
 } // namespace OHOS::Ace::NG

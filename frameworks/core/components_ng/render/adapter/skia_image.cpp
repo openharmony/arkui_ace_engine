@@ -164,13 +164,11 @@ void SkiaImage::DrawToRSCanvas(
 {
     auto image = GetImage();
     CHECK_NULL_VOID(image || GetCompressData());
-    if (isDrawAnimate_) {
+    if (!DrawWithRecordingCanvas(canvas, srcRect, dstRect, radiusXY)) {
         RSImage rsImage(&image);
         RSSamplingOptions options;
         ClipRRect(canvas, dstRect, radiusXY);
         canvas.DrawImageRect(rsImage, srcRect, dstRect, options);
-    } else {
-        DrawWithRecordingCanvas(canvas, srcRect, dstRect, radiusXY);
     }
 }
 
@@ -210,7 +208,7 @@ bool SkiaImage::DrawWithRecordingCanvas(
     recordingCanvas->DrawImageWithParm(GetImage(), std::move(data), rsImageInfo, paint);
 #else
     // TODO:Haw to set SamplingOptions?
-    recordingCanvas->DrawImageWithParm(GetImage(), std::move(data), rsImageInfo, paint);
+    recordingCanvas->DrawImageWithParm(GetImage(), std::move(data), rsImageInfo, options, paint);
 #endif
     return true;
 #else

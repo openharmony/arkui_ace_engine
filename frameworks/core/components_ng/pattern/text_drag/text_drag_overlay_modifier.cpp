@@ -38,12 +38,21 @@ void TextDragOverlayModifier::onDraw(DrawingContext& context)
     brush.SetColor(ToRSColor(color));
     brush.SetAntiAlias(true);
     canvas.AttachBrush(brush);
+#ifdef NEW_SKIA
+    canvas.ClipPath(*pattern->GetClipPath(), RSClipOp::INTERSECT, true);
+    if (!isAnimating_) {
+        canvas.DrawPath(*pattern->GetBackgroundPath());
+    } else {
+        canvas.DrawPath(*pattern->GenerateBackgroundPath(backgroundOffset_->Get()));
+    }
+#else
     if (!isAnimating_) {
         canvas.DrawPath(*pattern->GetBackgroundPath());
     } else {
         canvas.DrawPath(*pattern->GenerateBackgroundPath(backgroundOffset_->Get()));
     }
     canvas.ClipPath(*pattern->GetClipPath(), RSClipOp::INTERSECT, true);
+#endif
     auto&& paragraph = pattern->GetParagraph();
     if (std::holds_alternative<RefPtr<Paragraph>>(paragraph)) {
         auto paragraphPtr = std::get<RefPtr<Paragraph>>(paragraph);

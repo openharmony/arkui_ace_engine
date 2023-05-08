@@ -39,25 +39,37 @@
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 #include "core/components_ng/render/render_context.h"
+#include "test/mock/base/mock_task_executor.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 struct CreateProperty {
-    std::optional<double> maxValue = std::nullopt;
-    std::optional<double> value = std::nullopt;
-    std::optional<ProgressType> progressType = std::nullopt;
+    std::optional<double> maxValue;
+    std::optional<double> value;
+    std::optional<ProgressType> progressType;
 };
 
 struct TestProperty {
-    std::optional<double> value = std::nullopt;
-    std::optional<Dimension> strokeWidth = std::nullopt;
-    std::optional<Dimension> scaleWidth = std::nullopt;
-    std::optional<int32_t> scaleCount = std::nullopt;
-    std::optional<Color> frontColor = std::nullopt;
-    std::optional<Color> bgColor = std::nullopt;
-    std::optional<Color> borderColor = std::nullopt;
+    std::optional<double> value;
+    std::optional<Dimension> strokeWidth;
+    std::optional<Dimension> scaleWidth;
+    std::optional<int32_t> scaleCount;
+    std::optional<Color> frontColor;
+    std::optional<Color> bgColor;
+    std::optional<Color> borderColor;
+    std::optional<Dimension> borderWidth;
+    std::optional<bool> sweepEffect;
+    std::optional<Color> fontColor;
+    std::optional<Dimension> fontSize;
+    std::optional<std::optional<std::string>> content;
+    std::optional<FontWeight> fontWeight;
+    std::optional<std::vector<std::string>> fontFamily;
+    std::optional<Ace::FontStyle> fontStyle;
+    std::optional<bool> paintShadow;
+    std::optional<ProgressStatus> progressStatus;
+    std::optional<Gradient> gradient;
 };
 
 namespace {
@@ -110,6 +122,11 @@ constexpr Dimension DEFALUT_STROKE_WIDTH = 2.0_vp;
 const Color TEST_COLOR = Color::BLUE;
 const LinearColor TEST_LINEARCOLOR = LinearColor(TEST_COLOR);
 constexpr float VALUE_OF_SET_VALUE = 10.0f;
+constexpr Dimension BORDER_WIDTH = 2.0_vp;
+constexpr Dimension FONT_SIZE = 12.0_vp;
+const std::string FONT_CONTEXT = "start";
+const FontWeight FONT_WEIGHT = FontWeight::BOLDER;
+const std::vector<std::string> FONT_FAMILY = {"serif"};
 
 CreateProperty creatProperty;
 DirtySwapConfig config;
@@ -188,6 +205,52 @@ RefPtr<FrameNode> ProgressTestNg::CreateProgressParagraph(const TestProperty& te
         progressModel.SetBorderColor(testProperty.borderColor.value());
     }
 
+    if (testProperty.borderWidth.has_value()) {
+        progressModel.SetBorderWidth(testProperty.borderWidth.value());
+    }
+
+    if (testProperty.sweepEffect.has_value()) {
+        progressModel.SetSweepingEffect(testProperty.sweepEffect.value());
+    }
+
+    if (testProperty.fontColor.has_value()) {
+        progressModel.SetFontColor(testProperty.fontColor.value());
+    }
+
+    if (testProperty.fontSize.has_value()) {
+        progressModel.SetFontSize(testProperty.fontSize.value());
+    }
+
+    if (testProperty.content.has_value()) {
+        progressModel.SetText(testProperty.content.value());
+    } else {
+        progressModel.SetText(std::nullopt);
+    }
+
+    if (testProperty.fontWeight.has_value()) {
+        progressModel.SetFontWeight(testProperty.fontWeight.value());
+    }
+
+    if (testProperty.fontFamily.has_value()) {
+        progressModel.SetFontFamily(testProperty.fontFamily.value());
+    }
+
+    if (testProperty.fontStyle.has_value()) {
+        progressModel.SetItalicFontStyle(testProperty.fontStyle.value());
+    }
+
+    if (testProperty.paintShadow.has_value()) {
+        progressModel.SetPaintShadow(testProperty.paintShadow.value());
+    }
+
+    if (testProperty.progressStatus.has_value()) {
+        progressModel.SetProgressStatus(testProperty.progressStatus.value());
+    }
+
+    if (testProperty.gradient.has_value()) {
+        progressModel.SetGradientColor(testProperty.gradient.value());
+    }
+
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
 
     return frameNode;
@@ -239,6 +302,34 @@ void ProgressTestNg::CheckValue(const RefPtr<FrameNode>& frameNode, const TestPr
 
     if (testProperty.borderColor.has_value() && progressLayoutProperty->GetType() == PROGRESS_TYPE_CAPSULE) {
         EXPECT_EQ(progresspaintProperty->GetBorderColor(), testProperty.borderColor.value());
+    }
+
+    if (testProperty.sweepEffect.has_value()) {
+        EXPECT_EQ(progresspaintProperty->GetEnableScanEffect(), testProperty.sweepEffect.value());
+    }
+
+    if (testProperty.fontColor.has_value()) {
+        EXPECT_EQ(progresspaintProperty->GetTextColor(), testProperty.fontColor.value());
+    }
+
+    if (testProperty.fontSize.has_value()) {
+        EXPECT_EQ(progresspaintProperty->GetTextSize(), testProperty.fontSize.value());
+    }
+
+    if (testProperty.content.has_value()) {
+        EXPECT_EQ(progresspaintProperty->GetText(), testProperty.content.value());
+    }
+
+    if (testProperty.paintShadow.has_value()) {
+        EXPECT_EQ(progresspaintProperty->GetPaintShadow(), testProperty.paintShadow.value());
+    }
+
+    if (testProperty.progressStatus.has_value()) {
+        EXPECT_EQ(progresspaintProperty->GetProgressStatus(), testProperty.progressStatus.value());
+    }
+
+    if (testProperty.gradient.has_value()) {
+        EXPECT_EQ(progresspaintProperty->GetGradientColor(), testProperty.gradient.value());
     }
 }
 
@@ -815,6 +906,17 @@ HWTEST_F(ProgressTestNg, ProgressModifier001, TestSize.Level1)
      * @tc.steps: step1. Create ProgressModifier and set ProgressModifier property.
      * @tc.expected: step1. Check the ProgressModifier property value.
      */
+
+    Gradient gradient;
+    GradientColor gradientColorEnd;
+    GradientColor gradientColorStart;
+    gradientColorEnd.SetLinearColor(LinearColor(Color::WHITE));
+    gradientColorStart.SetLinearColor(LinearColor(Color::WHITE));
+    gradientColorEnd.SetDimension(Dimension(0.0));
+    gradient.AddColor(gradientColorEnd);
+    gradientColorStart.SetDimension(Dimension(1.0));
+    gradient.AddColor(gradientColorStart);
+
     ProgressModifier progressModifier;
     progressModifier.SetStrokeWidth(PROGRESS_STROKE_WIDTH);
     LinearColor linearColor;
@@ -824,6 +926,8 @@ HWTEST_F(ProgressTestNg, ProgressModifier001, TestSize.Level1)
     EXPECT_EQ(progressModifier.bgColor_->Get(), linearColor);
     progressModifier.SetBorderColor(linearColor);
     EXPECT_EQ(progressModifier.borderColor_->Get(), linearColor);
+    progressModifier.SetRingProgressColor(gradient);
+    progressModifier.SetPaintShadow(true);
     progressModifier.SetMaxValue(PROGRESS_MODIFIER_VALUE);
     EXPECT_EQ(progressModifier.maxValue_->Get(), PROGRESS_MODIFIER_VALUE);
     progressModifier.SetValue(PROGRESS_MODIFIER_VALUE);
@@ -845,9 +949,14 @@ HWTEST_F(ProgressTestNg, ProgressModifier001, TestSize.Level1)
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DrawRoundRect(_)).Times(AtLeast(1));
     EXPECT_CALL(canvas, DrawCircle(_, _)).Times(AtLeast(1));
     EXPECT_CALL(canvas, DrawArc(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Rotate(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Restore()).Times(AtLeast(1));
+
     progressModifier.SetProgressType(PROGRESS_TYPE_LINEAR);
     SizeF ContentSize(CONTEXT_WIDTH, CONTEXT_HEIGHT);
 
@@ -883,6 +992,17 @@ HWTEST_F(ProgressTestNg, ProgressModifier002, TestSize.Level1)
      * @tc.steps: step1. Create ProgressModifier and set ProgressModifier property.
      * @tc.expected: step1. Check the ProgressModifier property value.
      */
+
+    Gradient gradient;
+    GradientColor gradientColorEnd;
+    GradientColor gradientColorStart;
+    gradientColorEnd.SetLinearColor(LinearColor(Color::WHITE));
+    gradientColorStart.SetLinearColor(LinearColor(Color::WHITE));
+    gradientColorEnd.SetDimension(Dimension(0.0));
+    gradient.AddColor(gradientColorEnd);
+    gradientColorStart.SetDimension(Dimension(1.0));
+    gradient.AddColor(gradientColorStart);
+
     ProgressModifier progressModifier;
     progressModifier.SetStrokeWidth(PROGRESS_STROKE_WIDTH);
     LinearColor linearColor;
@@ -892,6 +1012,7 @@ HWTEST_F(ProgressTestNg, ProgressModifier002, TestSize.Level1)
     EXPECT_EQ(progressModifier.bgColor_->Get(), linearColor);
     progressModifier.SetBorderColor(linearColor);
     EXPECT_EQ(progressModifier.borderColor_->Get(), linearColor);
+    progressModifier.SetRingProgressColor(gradient);
     progressModifier.SetMaxValue(PROGRESS_MODIFIER_VALUE);
     EXPECT_EQ(progressModifier.maxValue_->Get(), PROGRESS_MODIFIER_VALUE);
     progressModifier.SetValue(PROGRESS_MODIFIER_VALUE);
@@ -913,9 +1034,13 @@ HWTEST_F(ProgressTestNg, ProgressModifier002, TestSize.Level1)
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DrawCircle(_, _)).Times(AtLeast(1));
     EXPECT_CALL(canvas, DrawArc(_, _, _)).Times(AtLeast(1));
     EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Rotate(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Restore()).Times(AtLeast(1));
     // set ProgressType SCALE
     progressModifier.SetProgressType(PROGRESS_TYPE_SCALE);
     progressModifier.onDraw(context);
@@ -983,6 +1108,9 @@ HWTEST_F(ProgressTestNg, ProgressModifier003, TestSize.Level1)
     EXPECT_CALL(canvas, Restore()).Times(AtLeast(1));
     EXPECT_CALL(canvas, DrawRoundRect(_)).Times(AtLeast(1));
     EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(canvas, ClipPath(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DrawRect(_)).Times(AtLeast(1));
 
     // set ProgressType CAPSULE(Width >= Height)
     progressModifier.SetProgressType(PROGRESS_TYPE_CAPSULE);
@@ -1052,9 +1180,13 @@ HWTEST_F(ProgressTestNg, ProgressModifier004, TestSize.Level1)
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, Restore()).Times(AtLeast(1));
     EXPECT_CALL(canvas, DrawRoundRect(_)).Times(AtLeast(1));
     EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(canvas, ClipPath(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DrawRect(_)).Times(AtLeast(1));
 
     // set ProgressType CAPSULE(Width < Height,progressWidth < radius)
     progressModifier.SetProgressType(PROGRESS_TYPE_CAPSULE);
@@ -1125,6 +1257,8 @@ HWTEST_F(ProgressTestNg, ProgressPaintMethod001, TestSize.Level1)
     // progressType_ = PROGRESS_TYPE_MOON
     progressPaintMethod.progressType_ = PROGRESS_TYPE_MOON;
     progressPaintMethod.UpdateContentModifier(paintWrapper);
+    progressPaintMethod.progressType_ = PROGRESS_TYPE_RING;
+    progressPaintMethod.UpdateContentModifier(paintWrapper);
     auto getModifier = progressPaintMethod.GetContentModifier(paintWrapper);
     ASSERT_NE(getModifier, nullptr);
     auto getProgressModifier = AceType::DynamicCast<ProgressModifier>(getModifier);
@@ -1135,7 +1269,6 @@ HWTEST_F(ProgressTestNg, ProgressPaintMethod001, TestSize.Level1)
     EXPECT_EQ(getProgressModifier->scaleCount_->Get(), SCALE_COUNT);
     EXPECT_EQ(getProgressModifier->maxValue_->Get(), PROGRESS_MODIFIER_MAX_VALUE);
     EXPECT_EQ(getProgressModifier->value_->Get(), PROGRESS_MODIFIER_VALUE);
-    MockPipelineBase::TearDown();
 }
 
 /**
@@ -1231,5 +1364,387 @@ HWTEST_F(ProgressTestNg, ProgressAccessibilityPropertyTestNg002, TestSize.Level1
     auto accessibilityProp = frameNode->GetAccessibilityProperty<ProgressAccessibilityProperty>();
     ASSERT_NE(accessibilityProp, nullptr);
     EXPECT_EQ(accessibilityProp->GetText(), std::to_string(VALUE_OF_PROGRESS));
+}
+
+/**
+ * @tc.name: ProgressModelTest001
+ * @tc.desc: Test set some value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressModelTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create testProperty and set properties of Capsule progress.
+     */
+    creatProperty.progressType = std::make_optional(PROGRESS_TYPE_CAPSULE);
+    TestProperty testProperty;
+    testProperty.borderColor = std::make_optional(Color::BLUE);
+    testProperty.borderWidth = std::make_optional(BORDER_WIDTH);
+    testProperty.sweepEffect = std::make_optional(true);
+    testProperty.fontColor = std::make_optional(Color::BLUE);
+    testProperty.fontSize = std::make_optional(FONT_SIZE);
+    testProperty.content = std::make_optional(FONT_CONTEXT);
+    testProperty.fontWeight = std::make_optional(FONT_WEIGHT);
+    testProperty.fontFamily = std::make_optional(FONT_FAMILY);
+    testProperty.fontStyle = std::make_optional(Ace::FontStyle::ITALIC);
+
+    /**
+     * @tc.steps: step2. create progress frameNode and check the proregss properties with expected value .
+     * @tc.expected: step2. get frameNode success and proregss properties equals expected value.
+     */
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(progressTheme));
+    RefPtr<FrameNode> frameNode = CreateProgressParagraph(testProperty);
+    CheckValue(frameNode, testProperty);
+}
+
+/**
+ * @tc.name: ProgressPattern001
+ * @tc.desc: Test the TouchEvent of progress, TouchType is DOWN.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressPattern001, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.bgColor = std::make_optional(Color::BLUE);
+    creatProperty.progressType = std::make_optional(PROGRESS_TYPE_CAPSULE);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(progressTheme));
+    RefPtr<FrameNode> frameNode = CreateProgressParagraph(testProperty);
+    CheckValue(frameNode, testProperty);
+    auto pattern = frameNode->GetPattern<ProgressPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto progressEvent = frameNode->GetEventHub<EventHub>();
+    ASSERT_NE(progressEvent, nullptr);
+    progressEvent->SetEnabled(false);
+    pattern->OnModifyDone();
+    TouchEventInfo info("touch");
+    TouchLocationInfo touchInfo1(1);
+    touchInfo1.SetTouchType(TouchType::DOWN);
+    info.AddTouchLocationInfo(std::move(touchInfo1));
+    pattern->touchListener_->GetTouchEventCallback()(info);
+    EXPECT_FALSE(progressEvent->IsEnabled());
+}
+
+/**
+ * @tc.name: ProgressPattern002
+ * @tc.desc: Test the TouchEvent of progress, TouchType is UP.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressPattern002, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.bgColor = std::make_optional(Color::BLUE);
+    creatProperty.progressType = std::make_optional(PROGRESS_TYPE_CAPSULE);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(progressTheme));
+    RefPtr<FrameNode> frameNode = CreateProgressParagraph(testProperty);
+    auto pattern = frameNode->GetPattern<ProgressPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto progressEvent = frameNode->GetEventHub<EventHub>();
+    ASSERT_NE(progressEvent, nullptr);
+    pattern->OnModifyDone();
+    TouchEventInfo info("touch");
+    TouchLocationInfo touchInfo1(1);
+    touchInfo1.SetTouchType(TouchType::UP);
+    info.AddTouchLocationInfo(std::move(touchInfo1));
+    pattern->touchListener_->GetTouchEventCallback()(info);
+    EXPECT_TRUE(progressEvent->IsEnabled());
+}
+
+/**
+ * @tc.name: ProgressPattern001
+ * @tc.desc: Test the TouchEvent of progress, TouchType is CANCEL.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressPattern003, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.bgColor = std::make_optional(Color::BLUE);
+    creatProperty.progressType = std::make_optional(PROGRESS_TYPE_CAPSULE);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(progressTheme));
+    RefPtr<FrameNode> frameNode = CreateProgressParagraph(testProperty);
+    auto pattern = frameNode->GetPattern<ProgressPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto progressEvent = frameNode->GetEventHub<EventHub>();
+    ASSERT_NE(progressEvent, nullptr);
+    pattern->OnModifyDone();
+    TouchEventInfo info("touch");
+    TouchLocationInfo touchInfo1(1);
+    touchInfo1.SetTouchType(TouchType::CANCEL);
+    info.AddTouchLocationInfo(std::move(touchInfo1));
+    pattern->touchListener_->GetTouchEventCallback()(info);
+    EXPECT_TRUE(progressEvent->IsEnabled());
+}
+
+/**
+ * @tc.name: CapulseProgressMeasure001
+ * @tc.desc: Test the measure of Capulse type progress.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, CapulseProgressMeasure001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the frameNode.
+     * @tc.expected: step1. Check the frameNode was created successfully.
+     */
+    creatProperty.progressType = std::make_optional(PROGRESS_TYPE_CAPSULE);
+
+    TestProperty testProperty;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(progressTheme));
+    RefPtr<FrameNode> frameNode = CreateProgressParagraph(testProperty);
+    CheckValue(frameNode, testProperty);
+
+    /**
+     * @tc.steps: step2. Create the progressLayoutAlgorithm.
+     * @tc.expected: step2. Check the progressLayoutAlgorithm created successfully.
+     */
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<ProgressLayoutProperty> progressLayoutProperty =
+        AceType::DynamicCast<ProgressLayoutProperty>(layoutProperty);
+    ASSERT_NE(progressLayoutProperty, nullptr);
+    LayoutConstraintF contentConstraint;
+    LayoutWrapper layoutWrapper(frameNode, nullptr, progressLayoutProperty);
+    auto progressLayoutAlgorithm = AceType::MakeRefPtr<ProgressLayoutAlgorithm>();
+    ASSERT_NE(progressLayoutAlgorithm, nullptr);
+
+    /**
+     * @tc.steps: step3. Call the function MeasureContent.
+     * @tc.expected: step3. Check the result of MeasureContent.
+     */
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(0));
+    ASSERT_NE(textNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(SizeF(100, 50));
+    RefPtr<LayoutWrapper> textWrapper = AceType::MakeRefPtr<LayoutWrapper>(textNode,
+        geometryNode, textNode->GetLayoutProperty());
+    ASSERT_NE(textWrapper, nullptr);
+    layoutWrapper.AppendChild(textWrapper);
+    contentConstraint.selfIdealSize.SetWidth(PROGRESS_COMPONENT_WIDTH);
+    auto size = progressLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_EQ(size->Width(), PROGRESS_COMPONENT_WIDTH);
+}
+
+/**
+ * @tc.name: CapulseProgressMeasure002
+ * @tc.desc: Test the measure of Capulse type progress.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, CapulseProgressMeasure002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the frameNode.
+     * @tc.expected: step1. Check the frameNode was created successfully.
+     */
+    creatProperty.progressType = std::make_optional(PROGRESS_TYPE_CAPSULE);
+
+    TestProperty testProperty;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(progressTheme));
+    RefPtr<FrameNode> frameNode = CreateProgressParagraph(testProperty);
+    CheckValue(frameNode, testProperty);
+
+    /**
+     * @tc.steps: step2. Create the progressLayoutAlgorithm.
+     * @tc.expected: step2. Check the progressLayoutAlgorithm created successfully.
+     */
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<ProgressLayoutProperty> progressLayoutProperty =
+        AceType::DynamicCast<ProgressLayoutProperty>(layoutProperty);
+    ASSERT_NE(progressLayoutProperty, nullptr);
+    LayoutConstraintF contentConstraint;
+    LayoutWrapper layoutWrapper(frameNode, nullptr, progressLayoutProperty);
+    auto progressLayoutAlgorithm = AceType::MakeRefPtr<ProgressLayoutAlgorithm>();
+    ASSERT_NE(progressLayoutAlgorithm, nullptr);
+
+    /**
+     * @tc.steps: step3. Call the function MeasureContent.
+     * @tc.expected: step3. Check the result of MeasureContent.
+     */
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(0));
+    ASSERT_NE(textNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(SizeF(500, 100));
+    RefPtr<LayoutWrapper> textWrapper = AceType::MakeRefPtr<LayoutWrapper>(textNode,
+        geometryNode, textNode->GetLayoutProperty());
+    ASSERT_NE(textWrapper, nullptr);
+    layoutWrapper.AppendChild(textWrapper);
+    contentConstraint.selfIdealSize.SetWidth(PROGRESS_COMPONENT_WIDTH);
+    auto size = progressLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_EQ(size->Width(), PROGRESS_COMPONENT_WIDTH);
+}
+
+/**
+ * @tc.name: ProgressPaintMethod002
+ * @tc.desc: Test ProgressPaintMethod.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressPaintMethod002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the frameNode.
+     * @tc.expected: step1. Check the frameNode was created successfully.
+     */
+    ProgressModelNG progressModelNG;
+    progressModelNG.Create(5.0, 0.0, 10.0, 20.0, PROGRESS_TYPE_CAPSULE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Create the GeometryNode and PaintWrapper.Set the progressPaintProperty.
+     * @tc.expected: step2. Check the GeometryNode and PaintWrapper were created successfully.
+     */
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    WeakPtr<RenderContext> renderContext;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto progressPaintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(progressPaintProperty, nullptr);
+    progressPaintProperty->UpdateMaxValue(100.0);
+    progressPaintProperty->UpdateValue(0.0);
+    progressPaintProperty->UpdateBorderWidth(0.0_vp);
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, progressPaintProperty);
+    ASSERT_NE(paintWrapper, nullptr);
+
+    /**
+     * @tc.steps: step3. Create ProgressPaintMethod. Call the function UpdateContentModifier and GetContentModifier.
+     * @tc.expected: step3. Check the properties update before.
+     */
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>();
+    ProgressPaintMethod progressPaintMethod(PROGRESS_TYPE_CAPSULE, PROGRESS_STROKE_WIDTH, progressModifier);
+    progressPaintMethod.progressType_ = PROGRESS_TYPE_CAPSULE;
+    progressPaintMethod.UpdateContentModifier(paintWrapper);
+
+    progressPaintProperty->UpdateValue(10.0);
+    progressPaintProperty->UpdateBorderWidth(300.0_vp);
+    progressPaintProperty->UpdateEnableScanEffect(true);
+    progressPaintProperty->UpdateBorderWidth(2.0_vp);
+    SizeF progressContentSize(300.0f, 50.0f);
+    progressModifier->SetContentSize(progressContentSize);
+    progressPaintMethod.UpdateContentModifier(paintWrapper);
+
+    SizeF progressContentSize1(50.0f, 300.0f);
+    progressModifier->SetContentSize(progressContentSize1);
+    progressPaintMethod.UpdateContentModifier(paintWrapper);
+
+    auto getModifier = progressPaintMethod.GetContentModifier(paintWrapper);
+    ASSERT_NE(getModifier, nullptr);
+    auto getProgressModifier = AceType::DynamicCast<ProgressModifier>(getModifier);
+    ASSERT_NE(getProgressModifier, nullptr);
+}
+
+/**
+ * @tc.name: ProgressModifier005
+ * @tc.desc: Test ProgressModifier.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressModifier005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ProgressModifier and set ProgressModifier property.
+     * @tc.expected: step1. Check the ProgressModifier property value.
+     */
+    ProgressModifier progressModifier;
+    LinearColor linearColor;
+    progressModifier.SetColor(linearColor);
+    EXPECT_EQ(progressModifier.color_->Get(), linearColor);
+    progressModifier.SetBackgroundColor(linearColor);
+    EXPECT_EQ(progressModifier.bgColor_->Get(), linearColor);
+    progressModifier.SetBorderColor(linearColor);
+    EXPECT_EQ(progressModifier.borderColor_->Get(), linearColor);
+
+    Testing::MockCanvas canvas;
+    DrawingContext context { canvas, 100, 100 };
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, Restore()).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DrawRoundRect(_)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(canvas, ClipPath(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DrawRect(_)).Times(AtLeast(1));
+
+    /**
+     * @tc.steps: step2. Set different properties, call function onDraw.
+     * @tc.expected: step2. Set the properties success.
+     */
+    progressModifier.SetProgressType(PROGRESS_TYPE_CAPSULE);
+    progressModifier.SetMaxValue(100.0);
+    progressModifier.SetValue(20.0);
+    SizeF progressContentSize(200.0, 100.0);
+    progressModifier.SetContentSize(progressContentSize);
+    progressModifier.SetBorderWidth(2.0);
+    progressModifier.onDraw(context);
+    EXPECT_EQ(progressModifier.progressType_->Get(), static_cast<int32_t>(PROGRESS_TYPE_CAPSULE));
+    EXPECT_EQ(progressModifier.capsuleBorderWidth_->Get(), 2.0);
+
+    progressModifier.SetProgressType(PROGRESS_TYPE_CAPSULE);
+    progressModifier.SetContentSize(progressContentSize);
+    progressModifier.SetBorderWidth(100.0);
+    progressModifier.onDraw(context);
+    EXPECT_EQ(progressModifier.progressType_->Get(), static_cast<int32_t>(PROGRESS_TYPE_CAPSULE));
+    EXPECT_EQ(progressModifier.capsuleBorderWidth_->Get(), 100.0);
+
+    SizeF progressContentSize2(100.0, 200.0);
+    progressModifier.SetMaxValue(100.0);
+    progressModifier.SetValue(20.0);
+    progressModifier.SetBorderWidth(2.0);
+    progressModifier.SetContentSize(progressContentSize2);
+    progressModifier.onDraw(context);
+    EXPECT_EQ(progressModifier.contentSize_->Get(), progressContentSize2);
+
+    progressModifier.SetContentSize(progressContentSize2);
+    progressModifier.SetMaxValue(100.0);
+    progressModifier.SetValue(20.0);
+    progressModifier.SetBorderWidth(2.0);
+    progressModifier.onDraw(context);
+    EXPECT_EQ(progressModifier.contentSize_->Get(), progressContentSize2);
+}
+
+/**
+ * @tc.name: ProgressModelTest002
+ * @tc.desc: Test set some value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressModelTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create testProperty and set properties of Ring progress.
+     */
+    Gradient gradient;
+    GradientColor gradientColorEnd;
+    GradientColor gradientColorStart;
+    gradientColorEnd.SetLinearColor(LinearColor(Color::WHITE));
+    gradientColorStart.SetLinearColor(LinearColor(Color::WHITE));
+    gradientColorEnd.SetDimension(Dimension(0.0));
+    gradient.AddColor(gradientColorEnd);
+    gradientColorStart.SetDimension(Dimension(1.0));
+    gradient.AddColor(gradientColorStart);
+
+    creatProperty.progressType = std::make_optional(PROGRESS_TYPE_RING);
+    TestProperty testProperty;
+    testProperty.borderColor = std::make_optional(Color::BLUE);
+    testProperty.borderWidth = std::make_optional(BORDER_WIDTH);
+    testProperty.sweepEffect = std::make_optional(true);
+    testProperty.fontColor = std::make_optional(Color::BLUE);
+    testProperty.fontSize = std::make_optional(FONT_SIZE);
+    testProperty.content = std::make_optional(FONT_CONTEXT);
+    testProperty.fontWeight = std::make_optional(FONT_WEIGHT);
+    testProperty.fontFamily = std::make_optional(FONT_FAMILY);
+    testProperty.fontStyle = std::make_optional(Ace::FontStyle::ITALIC);
+    testProperty.paintShadow = std::make_optional(true);
+    testProperty.progressStatus = std::make_optional(ProgressStatus::PROGRESSING);
+    testProperty.gradient = std::make_optional(gradient);
+
+    /**
+     * @tc.steps: step2. create progress frameNode and check the proregss properties with expected value .
+     * @tc.expected: step2. get frameNode success and proregss properties equals expected value.
+     */
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(progressTheme));
+    RefPtr<FrameNode> frameNode = CreateProgressParagraph(testProperty);
+    CheckValue(frameNode, testProperty);
 }
 } // namespace OHOS::Ace::NG

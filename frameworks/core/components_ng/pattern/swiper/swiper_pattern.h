@@ -102,6 +102,11 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
         Pattern::ToJsonValue(json);
+
+        if (indicatorIsBoolean_) {
+            return;
+        }
+
         auto indicatorType = GetIndicatorType();
         if (indicatorType == SwiperIndicatorType::DOT) {
             json->Put("indicator", GetDotIndicatorStyle().c_str());
@@ -229,6 +234,18 @@ public:
         }
     }
 
+    void UpdateOnChangeEvent(ChangeEvent&& event)
+    {
+        if (!onIndexChangeEvent_) {
+            onIndexChangeEvent_ = std::make_shared<ChangeEvent>(event);
+            auto eventHub = GetEventHub<SwiperEventHub>();
+            CHECK_NULL_VOID(eventHub);
+            eventHub->AddOnChangeEvent(onIndexChangeEvent_);
+        } else {
+            (*onIndexChangeEvent_).swap(event);
+        }
+    }
+
     void SetSwiperParameters(const SwiperParameters& swiperParameters)
     {
         swiperParameters_ = std::make_shared<SwiperParameters>(swiperParameters);
@@ -265,6 +282,11 @@ public:
     void SetIsIndicatorCustomSize(bool IsCustomSize)
     {
         IsCustomSize_ = IsCustomSize;
+    }
+
+    void SetIndicatorIsBoolean(bool isBoolean)
+    {
+        indicatorIsBoolean_ = isBoolean;
     }
 
     std::shared_ptr<SwiperParameters> GetSwiperParameters() const;
@@ -380,10 +402,12 @@ private:
     bool hasVisibleChangeRegistered_ = false;
     bool isVisible_ = true;
     bool IsCustomSize_ = false;
+    bool indicatorIsBoolean_ = true;
 
     Axis direction_ = Axis::HORIZONTAL;
 
     ChangeEventPtr changeEvent_;
+    ChangeEventPtr onIndexChangeEvent_;
 
     mutable std::shared_ptr<SwiperParameters> swiperParameters_;
     mutable std::shared_ptr<SwiperDigitalParameters> swiperDigitalParameters_;

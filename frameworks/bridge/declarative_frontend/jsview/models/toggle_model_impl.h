@@ -31,6 +31,7 @@ public:
     void SetBackgroundColor(const Color& color) override;
     void SetPadding(const NG::PaddingPropertyF& args) override;
     bool IsToggle() override;
+    void OnChangeEvent(NG::ChangeEvent&& onChange) override {};
 };
 
 } // namespace OHOS::Ace::Framework

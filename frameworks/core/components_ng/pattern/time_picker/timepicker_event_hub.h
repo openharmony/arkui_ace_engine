@@ -40,6 +40,9 @@ public:
 
     void FireChangeEvent(const BaseEventInfo* info) const
     {
+        if (selectedTimeChangeEvent_) {
+            selectedTimeChangeEvent_(info);
+        }
         if (changeEvent_) {
             changeEvent_(info);
         }
@@ -69,10 +72,16 @@ public:
         }
     }
 
+    void SetChangeEvent(TimeChangeEvent&& changeEvent)
+    {
+        selectedTimeChangeEvent_ = std::move(changeEvent);
+    }
+
 private:
     TimeChangeEvent changeEvent_;
     DialogEvent DialogChangeEvent_;
     DialogEvent DialogAcceptEvent_;
+    TimeChangeEvent selectedTimeChangeEvent_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TimePickerEventHub);
 };

@@ -39,6 +39,9 @@ void CustomNodeBase::Update()
 
 void CustomNodeBase::MarkNeedUpdate()
 {
+    if (recycleRenderFunc_) {
+        return;
+    }
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     if (needRebuild_) {

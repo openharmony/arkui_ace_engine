@@ -31,14 +31,15 @@
 #include "core/components/common/properties/shared_transition_option.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/property/gradient_property.h"
+#include "core/components_ng/property/progress_mask_property.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/event/ace_events.h"
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
 #include "core/gestures/gesture_info.h"
-#include "core/components_ng/property/progress_mask_property.h"
 
 namespace OHOS::Ace {
 
@@ -57,13 +58,13 @@ public:
     virtual ~ViewAbstractModel() = default;
 
     // basic size
-    virtual void SetWidth(const Dimension& width) = 0;
-    virtual void SetHeight(const Dimension& height) = 0;
+    virtual void SetWidth(const CalcDimension& width) = 0;
+    virtual void SetHeight(const CalcDimension& height) = 0;
     virtual void ClearWidthOrHeight(bool isWidth) = 0;
-    virtual void SetMinWidth(const Dimension& minWidth) = 0;
-    virtual void SetMinHeight(const Dimension& minHeight) = 0;
-    virtual void SetMaxWidth(const Dimension& maxWidth) = 0;
-    virtual void SetMaxHeight(const Dimension& maxHeight) = 0;
+    virtual void SetMinWidth(const CalcDimension& minWidth) = 0;
+    virtual void SetMinHeight(const CalcDimension& minHeight) = 0;
+    virtual void SetMaxWidth(const CalcDimension& maxWidth) = 0;
+    virtual void SetMaxHeight(const CalcDimension& maxHeight) = 0;
 
     // box props
     virtual void SetBackgroundColor(const Color& color) = 0;
@@ -76,12 +77,12 @@ public:
     virtual void SetPixelStretchEffect(PixStretchEffectOption& option) {}
     virtual void SetLightUpEffect(double radio) {}
 
-    virtual void SetPadding(const Dimension& value) = 0;
-    virtual void SetPaddings(const std::optional<Dimension>& top, const std::optional<Dimension>& bottom,
-        const std::optional<Dimension>& left, const std::optional<Dimension>& right) = 0;
-    virtual void SetMargin(const Dimension& value) = 0;
-    virtual void SetMargins(const std::optional<Dimension>& top, const std::optional<Dimension>& bottom,
-        const std::optional<Dimension>& left, const std::optional<Dimension>& right) = 0;
+    virtual void SetPadding(const CalcDimension& value) = 0;
+    virtual void SetPaddings(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
+        const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right) = 0;
+    virtual void SetMargin(const CalcDimension& value) = 0;
+    virtual void SetMargins(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
+        const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right) = 0;
     virtual void SetBorderRadius(const Dimension& value) = 0;
     virtual void SetBorderRadius(const std::optional<Dimension>& radiusTopLeft,
         const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
@@ -221,6 +222,8 @@ public:
         ResponseType type, std::function<void()>&& buildFunc, const NG::MenuParam& menuParam) = 0;
     virtual void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<void()>&& buildFunc, int32_t type) = 0;
+    virtual void BindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
+        std::function<void()>&& buildFunc, NG::SheetStyle& sheetStyle) = 0;
 
     // accessibility
     virtual void SetAccessibilityGroup(bool accessible) = 0;

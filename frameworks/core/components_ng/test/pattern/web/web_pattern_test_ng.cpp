@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/web/web_view.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "frameworks/base/utils/system_properties.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -163,6 +164,77 @@ HWTEST_F(WebPatternTestNg, WebPatternTestNg_003, TestSize.Level1)
     webPattern->OnForceDarkAccessUpdate(true);
     webPattern->OnAudioResumeIntervalUpdate(0);
     webPattern->OnAudioExclusiveUpdate(true);
+    webPattern->isEnhanceSurface_ = true;
+    webPattern->delegate_ = nullptr;
+    webPattern->OnModifyDone();
+#endif
+}
+
+/**
+ * @tc.name: OnScrollBarColorUpdate004
+ * @tc.desc: OnScrollBarColorUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, OnScrollBarColorUpdate004, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    EXPECT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    EXPECT_NE(webPattern->delegate_, nullptr);
+    webPattern->OnAreaChangedInner();
+    webPattern->isInWindowDrag_ = true;
+    webPattern->OnAreaChangedInner();
+    const std::string value;
+    webPattern->OnScrollBarColorUpdate(value);
+    SelectOverlayInfo selectInfo;
+    webPattern->RegisterSelectOverlayEvent(selectInfo);
+    TouchEventInfo event("webtest");
+    selectInfo.onTouchMove(event);
+    webPattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::DRAG_START);
+    webPattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::DRAG_END);
+    webPattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::DRAG_END);
+    webPattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::DRAG);
+    webPattern->OnCompleteSwapWithNewSize();
+    webPattern->OnResizeNotWork();
+    webPattern->isInWindowDrag_ = true;
+    webPattern->OnCompleteSwapWithNewSize();
+    webPattern->OnResizeNotWork();
+    webPattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::DRAG);
+    webPattern->isWaiting_ = true;
+    webPattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::DRAG);
+    webPattern->OnCompleteSwapWithNewSize();
+    webPattern->OnResizeNotWork();
+    webPattern->isInWindowDrag_ = false;
+    webPattern->OnCompleteSwapWithNewSize();
+    webPattern->OnResizeNotWork();
+#endif
+}
+
+/**
+ * @tc.name: OnScrollBarColorUpdate005
+ * @tc.desc: OnScrollBarColorUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, OnScrollBarColorUpdate005, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    WebPattern webpattern;
+    webpattern.delegate_ = nullptr;
+    EXPECT_EQ(webpattern.delegate_, nullptr);
+    const std::string value;
+    webpattern.OnScrollBarColorUpdate(value);
+    SystemProperties::SetExtSurfaceEnabled(true);
+    webpattern.InitEnhanceSurfaceFlag();
+    SystemProperties::SetExtSurfaceEnabled(false);
+    webpattern.InitEnhanceSurfaceFlag();
 #endif
 }
 } // namespace OHOS::Ace::NG
