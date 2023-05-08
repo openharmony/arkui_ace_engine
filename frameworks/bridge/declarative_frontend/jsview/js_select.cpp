@@ -73,8 +73,7 @@ void JSSelect::Create(const JSCallbackInfo& info)
                 auto selectValue = indexObject->GetProperty("value");
                 auto selectIcon = indexObject->GetProperty("icon");
                 if (!ParseJsString(selectValue, value)) {
-                    LOGE("selectValue is null");
-                    return;
+                    LOGW("selectValue is null");
                 }
                 if (!ParseJsMedia(selectIcon, icon)) {
                     LOGI("selectIcon is null");
