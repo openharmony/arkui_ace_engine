@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 
 #include "res_config.h"
 #include "resource_manager.h"
+#include "session_info.h"
 
 #include "adapter/ohos/entrance/pa_container.h"
 #include "adapter/ohos/entrance/pa_engine/pa_backend.h"
@@ -61,9 +62,9 @@ const std::string AceServiceAbility::START_PARAMS_KEY = "__startParams";
 const std::string AceServiceAbility::URI = "url";
 
 REGISTER_AA(AceServiceAbility)
-void AceServiceAbility::OnStart(const OHOS::AAFwk::Want& want)
+void AceServiceAbility::OnStart(const OHOS::AAFwk::Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
 {
-    Ability::OnStart(want);
+    Ability::OnStart(want, sessionInfo);
     LOGI("AceServiceAbility::OnStart called");
     // get url
     std::string parsedUrl;
