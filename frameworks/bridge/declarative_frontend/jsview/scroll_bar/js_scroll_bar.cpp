@@ -39,8 +39,8 @@ void NGSetScrollControllerAndProxy(RefPtr<NG::ScrollBarPattern>& pattern, const 
         auto obj = JSRef<JSObject>::Cast(info[0]);
         // Parse scroller.
         auto scrollerValue = obj->GetProperty("scroller");
-        auto jsScroller = JSRef<JSObject>::Cast(scrollerValue)->Unwrap<JSScroller>();
-        if (jsScroller) {
+        if (scrollerValue->IsObject() && JSRef<JSObject>::Cast(scrollerValue)->Unwrap<JSScroller>()) {
+            auto jsScroller = JSRef<JSObject>::Cast(scrollerValue)->Unwrap<JSScroller>();
             auto proxy = AceType::DynamicCast<NG::ScrollBarProxy>(jsScroller->GetScrollBarProxy());
             if (!proxy) {
                 proxy = AceType::MakeRefPtr<NG::ScrollBarProxy>();
@@ -98,8 +98,8 @@ void JSScrollBar::Create(const JSCallbackInfo& info)
         auto obj = JSRef<JSObject>::Cast(info[0]);
         // Parse scroller.
         auto scrollerValue = obj->GetProperty("scroller");
-        auto jsScroller = JSRef<JSObject>::Cast(scrollerValue)->Unwrap<JSScroller>();
-        if (jsScroller) {
+        if (scrollerValue->IsObject() && JSRef<JSObject>::Cast(scrollerValue)->Unwrap<JSScroller>()) {
+            auto jsScroller = JSRef<JSObject>::Cast(scrollerValue)->Unwrap<JSScroller>();
             auto proxy = AceType::DynamicCast<ScrollBarProxy>(jsScroller->GetScrollBarProxy());
             if (!proxy) {
                 proxy = AceType::MakeRefPtr<ScrollBarProxy>();
