@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -267,6 +267,7 @@ void RosenRenderBubble::PaintBottomBubbleInJs(SkCanvas* skCanvas, const SkPaint&
     skCanvas->clipPath(path_, SkClipOp::kIntersect);
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderBubble::PaintTopBubble(SkCanvas* skCanvas, const SkPaint& paint)
 {
     if (skCanvas == nullptr) {
@@ -319,7 +320,65 @@ void RosenRenderBubble::PaintTopBubble(SkCanvas* skCanvas, const SkPaint& paint)
     skCanvas->drawPath(path_, paint);
     skCanvas->clipPath(path_, SkClipOp::kIntersect);
 }
+#else
+void RosenRenderBubble::PaintTopBubble(RSCanvas* canvas, const RSPen& pen)
+{
+    if (canvas == nullptr) {
+        return;
+    }
+    double childHeight = childSize_.Height();
+    double childWidth = childSize_.Width();
+    double childOffsetX = childOffset_.GetX();
+    double childOffsetY = childOffset_.GetY();
+    double arrowPositionX = arrowPosition_.GetX();
+    double arrowPositionY = arrowPosition_.GetY();
+    double arrowOffset = GetArrowOffset(Placement::TOP);
+    path_.Reset();
+    path_.MoveTo(arrowPositionX + arrowOffset, arrowPositionY);
+    path_.QuadTo(arrowPositionX + NormalizeToPx(BEZIER_HORIZON_OFFSET_FIRST) + arrowOffset,
+        arrowPositionY + NormalizeToPx(BEZIER_VERTICAL_OFFSET_FIRST),
+        arrowPositionX + NormalizeToPx(BEZIER_HORIZON_OFFSET_SECOND) + arrowOffset,
+        arrowPositionY - NormalizeToPx(BEZIER_VERTICAL_OFFSET_SECOND));
+    path_.QuadTo(arrowPositionX + NormalizeToPx(BEZIER_HORIZON_OFFSET_THIRD) + arrowOffset,
+        arrowPositionY - NormalizeToPx(BEZIER_VERTICAL_OFFSET_THIRD),
+        arrowPositionX + NormalizeToPx(BEZIER_HORIZON_OFFSET_FOURTH) + arrowOffset,
+        arrowPositionY - NormalizeToPx(BEZIER_VERTICAL_OFFSET_THIRD));
+    path_.LineTo(
+        childOffsetX + childWidth - NormalizeToPx(border_.BottomRightRadius().GetX()), childOffsetY + childHeight);
+    path_.ArcTo(NormalizeToPx(border_.BottomRightRadius().GetX()), NormalizeToPx(border_.BottomRightRadius().GetY()),
+        0.0f, RSPathArcSize::SMALL_ARCSIZE, RSPathDirection::CCW_DIRECTION,
+        childOffsetX + childWidth,
+        childOffsetY + childHeight - NormalizeToPx(border_.BottomRightRadius().GetY()));
+    path_.LineTo(childOffsetX + childWidth, childOffsetY + NormalizeToPx(border_.TopRightRadius().GetY()));
+    path_.ArcTo(NormalizeToPx(border_.TopRightRadius().GetX()), NormalizeToPx(border_.TopRightRadius().GetY()), 0.0f,
+        RSPathArcSize::SMALL_ARCSIZE, RSPathDirection::CCW_DIRECTION,
+        childOffsetX + childWidth - NormalizeToPx(border_.TopRightRadius().GetX()), childOffsetY);
+    path_.LineTo(childOffsetX + NormalizeToPx(border_.TopLeftRadius().GetX()), childOffsetY);
+    path_.ArcTo(NormalizeToPx(border_.TopLeftRadius().GetX()), NormalizeToPx(border_.TopLeftRadius().GetY()), 0.0f,
+        RSPathArcSize::SMALL_ARCSIZE, RSPathDirection::CCW_DIRECTION, childOffsetX,
+        childOffsetY + NormalizeToPx(border_.TopLeftRadius().GetY()));
+    path_.LineTo(childOffsetX, childOffsetY + childHeight - NormalizeToPx(border_.BottomLeftRadius().GetY()));
+    path_.ArcTo(NormalizeToPx(border_.BottomLeftRadius().GetX()), NormalizeToPx(border_.BottomLeftRadius().GetY()),
+        0.0f, RSPathArcSize::SMALL_ARCSIZE, RSPathDirection::CCW_DIRECTION,
+        childOffsetX + NormalizeToPx(border_.BottomLeftRadius().GetX()), childOffsetY + childHeight);
+    path_.LineTo(arrowPositionX - NormalizeToPx(BEZIER_HORIZON_OFFSET_FOURTH) + arrowOffset,
+        arrowPositionY - NormalizeToPx(BEZIER_VERTICAL_OFFSET_THIRD));
+    path_.QuadTo(arrowPositionX - NormalizeToPx(BEZIER_HORIZON_OFFSET_THIRD) + arrowOffset,
+        arrowPositionY - NormalizeToPx(BEZIER_VERTICAL_OFFSET_THIRD),
+        arrowPositionX - NormalizeToPx(BEZIER_HORIZON_OFFSET_SECOND) + arrowOffset,
+        arrowPositionY - NormalizeToPx(BEZIER_VERTICAL_OFFSET_SECOND));
+    path_.QuadTo(arrowPositionX - NormalizeToPx(BEZIER_HORIZON_OFFSET_FIRST) + arrowOffset,
+        arrowPositionY + NormalizeToPx(BEZIER_VERTICAL_OFFSET_FIRST), arrowPositionX + arrowOffset, arrowPositionY);
+    path_.Close();
+    RosenDecorationPainter::PaintShadow(path_, ShadowConfig::DefaultShadowM, canvas);
+    canvas->AttachPen(pen);
+    canvas->DrawPath(path_);
+    canvas->ClipPath(path_, RSClipOp::INTERSECT);
+    canvas->DetachPen();
+}
+#endif
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderBubble::PaintBottomBubble(SkCanvas* skCanvas, const SkPaint& paint)
 {
     if (skCanvas == nullptr) {
@@ -372,7 +431,66 @@ void RosenRenderBubble::PaintBottomBubble(SkCanvas* skCanvas, const SkPaint& pai
     skCanvas->drawPath(path_, paint);
     skCanvas->clipPath(path_, SkClipOp::kIntersect);
 }
+#else
+void RosenRenderBubble::PaintBottomBubble(RSCanvas* canvas, const RSPen& pen)
+{
+    if (canvas == nullptr) {
+        return;
+    }
+    double childHeight = childSize_.Height();
+    double childWidth = childSize_.Width();
+    double childOffsetX = childOffset_.GetX();
+    double childOffsetY = childOffset_.GetY();
+    double arrowPositionX = arrowPosition_.GetX();
+    double arrowPositionY = arrowPosition_.GetY();
+    double arrowOffset = GetArrowOffset(Placement::BOTTOM);
 
+    path_.Reset();
+    path_.MoveTo(arrowPositionX + arrowOffset, arrowPositionY);
+    path_.QuadTo(arrowPositionX + NormalizeToPx(BEZIER_HORIZON_OFFSET_FIRST) + arrowOffset,
+        arrowPositionY - NormalizeToPx(BEZIER_VERTICAL_OFFSET_FIRST),
+        arrowPositionX + NormalizeToPx(BEZIER_HORIZON_OFFSET_SECOND) + arrowOffset,
+        arrowPositionY + NormalizeToPx(BEZIER_VERTICAL_OFFSET_SECOND));
+    path_.QuadTo(arrowPositionX + NormalizeToPx(BEZIER_HORIZON_OFFSET_THIRD) + arrowOffset,
+        arrowPositionY + NormalizeToPx(BEZIER_VERTICAL_OFFSET_THIRD),
+        arrowPositionX + NormalizeToPx(BEZIER_HORIZON_OFFSET_FOURTH) + arrowOffset,
+        arrowPositionY + NormalizeToPx(BEZIER_VERTICAL_OFFSET_THIRD));
+    path_.LineTo(childOffsetX + childWidth - NormalizeToPx(border_.TopRightRadius().GetX()), childOffsetY);
+    path_.ArcTo(NormalizeToPx(border_.TopRightRadius().GetX()), NormalizeToPx(border_.TopRightRadius().GetY()), 0.0f,
+        RSPathArcSize::SMALL_ARCSIZE, RSPathDirection::CW_DIRECTION,
+        childOffsetX + childWidth,
+        childOffsetY + NormalizeToPx(border_.TopRightRadius().GetY()));
+    path_.LineTo(
+        childOffsetX + childWidth, childOffsetY + childHeight - NormalizeToPx(border_.BottomRightRadius().GetY()));
+    path_.ArcTo(NormalizeToPx(border_.BottomRightRadius().GetX()), NormalizeToPx(border_.BottomRightRadius().GetY()),
+        0.0f, RSPathArcSize::SMALL_ARCSIZE, RSPathDirection::CW_DIRECTION,
+        childOffsetX + childWidth - NormalizeToPx(border_.BottomRightRadius().GetX()), childOffsetY + childHeight);
+    path_.LineTo(childOffsetX + NormalizeToPx(border_.BottomLeftRadius().GetX()), childOffsetY + childHeight);
+    path_.ArcTo(NormalizeToPx(border_.BottomLeftRadius().GetX()), NormalizeToPx(border_.BottomLeftRadius().GetY()),
+        0.0f, RSPathArcSize::SMALL_ARCSIZE, RSPathDirection::CW_DIRECTION, childOffsetX,
+        childOffsetY + childHeight - NormalizeToPx(border_.BottomLeftRadius().GetY()));
+    path_.LineTo(childOffsetX, childOffsetY + NormalizeToPx(border_.TopLeftRadius().GetY()));
+    path_.ArcTo(NormalizeToPx(border_.TopLeftRadius().GetX()), NormalizeToPx(border_.TopLeftRadius().GetY()), 0.0f,
+        RSPathArcSize::SMALL_ARCSIZE, RSPathDirection::CW_DIRECTION,
+        childOffsetX + NormalizeToPx(border_.TopLeftRadius().GetX()), childOffsetY);
+    path_.LineTo(arrowPositionX - NormalizeToPx(BEZIER_HORIZON_OFFSET_FOURTH) + arrowOffset,
+        arrowPositionY + NormalizeToPx(BEZIER_VERTICAL_OFFSET_THIRD));
+    path_.QuadTo(arrowPositionX - NormalizeToPx(BEZIER_HORIZON_OFFSET_THIRD) + arrowOffset,
+        arrowPositionY + NormalizeToPx(BEZIER_VERTICAL_OFFSET_THIRD),
+        arrowPositionX - NormalizeToPx(BEZIER_HORIZON_OFFSET_SECOND) + arrowOffset,
+        arrowPositionY + NormalizeToPx(BEZIER_VERTICAL_OFFSET_SECOND));
+    path_.QuadTo(arrowPositionX - NormalizeToPx(BEZIER_HORIZON_OFFSET_FIRST) + arrowOffset,
+        arrowPositionY - NormalizeToPx(BEZIER_VERTICAL_OFFSET_FIRST), arrowPositionX + arrowOffset, arrowPositionY);
+    path_.Close();
+    RosenDecorationPainter::PaintShadow(path_, ShadowConfig::DefaultShadowM, canvas);
+    canvas->AttachPen(pen);
+    canvas->DrawPath(path_);
+    canvas->ClipPath(path_, RSClipOp::INTERSECT);
+    canvas->DetachPen();
+}
+#endif
+
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderBubble::PaintDefaultBubble(SkCanvas* skCanvas, const SkPaint& paint)
 {
     if (skCanvas == nullptr) {
@@ -383,7 +501,25 @@ void RosenRenderBubble::PaintDefaultBubble(SkCanvas* skCanvas, const SkPaint& pa
     skCanvas->drawRRect(rrect_, paint);
     skCanvas->clipRRect(rrect_, SkClipOp::kIntersect, true);
 }
+#else
+void RosenRenderBubble::PaintDefaultBubble(RSCanvas* canvas, const RSPen& pen)
+{
+    if (canvas == nullptr) {
+        return;
+    }
+    rrect_ = MakeRRect();
 
+    RSPath tmpPath;
+    tmpPath.AddRoundRect(rrect_);
+    RosenDecorationPainter::PaintShadow(tmpPath, ShadowConfig::DefaultShadowM, canvas);
+    canvas->AttachPen(pen);
+    canvas->DrawRoundRect(rrect_);
+    canvas->ClipRoundRect(rrect_, RSClipOp::INTERSECT);
+    canvas->DetachPen();
+}
+#endif
+
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderBubble::PaintBorder(RenderContext& context)
 {
     SkCanvas* skCanvas = GetSkCanvas(context);
@@ -430,5 +566,57 @@ void RosenRenderBubble::PaintBorder(RenderContext& context)
     }
     skCanvas->restore();
 }
+#else
+void RosenRenderBubble::PaintBorder(RenderContext& context)
+{
+    RSCanvas* canvas = GetDrawingCanvas(context);
+    if (canvas == nullptr) {
+        return;
+    }
+    BorderEdge edge = border_.Left();
+    if (!border_.IsAllEqual()) {
+        edge = border_.GetValidEdge();
+        border_ = Border(edge);
+    }
+    if (!border_.HasValue()) {
+        return;
+    }
+    double borderWidth = NormalizeToPx(edge.GetWidth());
+    RSPen pen;
+    pen.SetWidth(borderWidth);
+    pen.SetColor(edge.GetColor().GetValue());
+    pen.SetAntiAlias(true);
+    if (edge.GetBorderStyle() == BorderStyle::DOTTED) {
+        RSPath dotPath;
+        dotPath.AddCircle(0.0f, 0.0f, static_cast<RSScalar>(borderWidth / 2.0));
+        pen.SetPathEffect(RSPathEffect::CreatePathDashEffect(
+            dotPath, borderWidth * 2.0, 0.0, RSPathDashStyle::ROTATE));
+    } else if (edge.GetBorderStyle() == BorderStyle::DASHED) {
+        const float intervals[] = { static_cast<RSScalar>(borderWidth),
+            static_cast<RSScalar>(borderWidth) };
+        pen.SetPathEffect(RSPathEffect::CreateDashPathEffect(
+            intervals, sizeof(intervals) / sizeof(RSScalar), 0.0));
+        canvas->AttachPen(pen);
+        canvas->DrawPath(path_);
+        canvas->DetachPen();
+    } else {
+        pen.SetPathEffect(nullptr);
+    }
 
+    canvas->Save();
+    canvas->Translate(
+        childOffset_.GetX() + childSize_.Width() / 2.0, childOffset_.GetY() + childSize_.Height() / 2.0);
+    canvas->Scale(1.0 - (borderWidth / childSize_.Width()), 1.0 - (borderWidth / childSize_.Height()));
+    canvas->Translate(
+        -(childOffset_.GetX() + childSize_.Width() / 2.0), -(childOffset_.GetY() + childSize_.Height() / 2.0));
+    canvas->AttachPen(pen);
+    if ((arrowPlacement_ == Placement::TOP || arrowPlacement_ == Placement::BOTTOM) && !path_.IsEmpty()) {
+        canvas->DrawPath(path_);
+    } else {
+        canvas->DrawRoundRect(rrect_);
+    }
+    canvas->DetachPen();
+    canvas->Restore();
+}
+#endif
 } // namespace OHOS::Ace
