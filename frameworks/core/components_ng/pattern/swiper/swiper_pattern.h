@@ -358,6 +358,7 @@ private:
     float GetTranslateLength() const;
     void OnIndexChange() const;
     bool IsOutOfHotRegion(const PointF& dragPoint) const;
+    bool IsOutOfIndicatorZone(const PointF& dragPoint) const;
     void SaveDotIndicatorProperty(const RefPtr<FrameNode> &indicatorNode);
     void SaveDigitIndicatorProperty(const RefPtr<FrameNode> &indicatorNode);
     void PostTranslateTask(uint32_t delayTime);
