@@ -103,6 +103,7 @@ public:
     void Foreground() override;
     void Background() override;
     void Disconnect() override;
+    void OnNewWant(const AAFwk::Want& want) override;
 
 protected:
     std::shared_ptr<Rosen::RSSurfaceNode> surfaceNode_;
