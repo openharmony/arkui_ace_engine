@@ -267,6 +267,8 @@ std::string PipelineContext::GetRestoreInfo(int32_t restoreId)
 {
     return "";
 }
+
+void PipelineContext::AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode) {}
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace {
