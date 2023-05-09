@@ -1996,9 +1996,13 @@ void TextFieldPattern::ShowSelectOverlay(
         if (!pattern->IsUsingMouse()) {
             if (firstHandle.has_value()) {
                 selectInfo.firstHandle.paintRect = firstHandle.value();
+            } else {
+                selectInfo.firstHandle.isShow = false;
             }
             if (secondHandle.has_value()) {
                 selectInfo.secondHandle.paintRect = secondHandle.value();
+            } else {
+                selectInfo.secondHandle.isShow = false;
             }
         }
         selectInfo.isSingleHandle = !firstHandle.has_value() || !secondHandle.has_value();
