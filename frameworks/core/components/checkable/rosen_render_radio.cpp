@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,8 +37,13 @@ void RosenRenderRadio::Paint(RenderContext& context, const Offset& offset)
         LOGE("Paint canvas is null");
         return;
     }
+#ifndef USE_ROSEN_DRAWING
     SkPaint paint;
     paint.setAntiAlias(true);
+#else
+    RSPen pen;
+    pen.SetAntiAlias(true);
+#endif
     if (!isDeclarative_) {
         if (IsPhone() && onFocus_) {
             RequestFocusBorder(paintOffset, drawSize_, drawSize_.Width() / 2.0);
@@ -57,6 +62,7 @@ void RosenRenderRadio::Paint(RenderContext& context, const Offset& offset)
     double centerX = outCircleRadius_ + paintOffset.GetX();
     double centerY = outCircleRadius_ + paintOffset.GetY();
     auto borderWidth = NormalizeToPx(borderWidth_);
+#ifndef USE_ROSEN_DRAWING
     switch (uiStatus_) {
         case UIStatus::SELECTED:
             // draw stroke border
@@ -105,6 +111,70 @@ void RosenRenderRadio::Paint(RenderContext& context, const Offset& offset)
             LOGE("unknown ui status");
             break;
     }
+#else
+    switch (uiStatus_) {
+        case UIStatus::SELECTED:
+            // draw stroke border
+            pen.SetAntiAlias(true);
+            pen.SetColor(activeColor_);
+            if (disabled_) {
+                pen.SetColor(Color(activeColor_).BlendOpacity(ConfigureOpacity(disabled_)).GetValue());
+            }
+            canvas->AttachPen(pen);
+            canvas->DrawCircle(RSPoint(centerX, centerY), outCircleRadius_ * totalScale_);
+            canvas->DetachPen();
+
+            // draw shadow
+            if (!NearZero(pointScale_) && !NearEqual(pointScale_, 1.0)) {
+                pen.SetColor(shadowColor_);
+                canvas->AttachPen(pen);
+                canvas->DrawCircle(RSPoint(centerX, centerY),
+                    outCircleRadius_ * pointScale_ + NormalizeToPx(shadowWidth_));
+                canvas->DetachPen();
+            }
+
+            // draw inner circle
+            pen.SetColor(pointColor_);
+            canvas->AttachPen(pen);
+            canvas->DrawCircle(RSPoint(centerX, centerY), outCircleRadius_ * pointScale_);
+            canvas->DetachPen();
+            break;
+        case UIStatus::UNSELECTED:
+            // draw inner circle
+            pen.SetColor(inactivePointColor_);
+            canvas->AttachPen(pen);
+            canvas->DrawCircle(RSPoint(centerX, centerY), outCircleRadius_ - borderWidth / 2.0);
+            canvas->DetachPen();
+
+            // draw border with unselected color
+            pen.SetColor(inactiveColor_);
+            if (disabled_) {
+                pen.SetColor(Color(inactiveColor_).BlendOpacity(ConfigureOpacity(disabled_)).GetValue());
+            }
+            SetStrokeWidth(borderWidth, pen);
+            canvas->AttachPen(pen);
+            canvas->DrawCircle(RSPoint(centerX, centerY), outCircleRadius_ - borderWidth / 2.0);
+            canvas->DetachPen();
+            break;
+        case UIStatus::FOCUS: // focus of unselected
+            // draw inner circle
+            pen.SetColor(inactivePointColor_);
+            canvas->AttachPen(pen);
+            canvas->DrawCircle(RSPoint(centerX, centerY), outCircleRadius_ - borderWidth / 2.0);
+            canvas->DetachPen();
+
+            // draw border with focus color
+            SetStrokeWidth(borderWidth, pen);
+            pen.SetColor(focusColor_);
+            canvas->AttachPen(pen);
+            canvas->DrawCircle(RSPoint(centerX, centerY), outCircleRadius_ - borderWidth / 2.0);
+            canvas->DetachPen();
+            break;
+        default:
+            LOGE("unknown ui status");
+            break;
+    }
+#endif
 }
 
 void RosenRenderRadio::DrawFocusBorder(RenderContext& context, const Offset& offset)
@@ -116,6 +186,7 @@ void RosenRenderRadio::DrawFocusBorder(RenderContext& context, const Offset& off
     double focusBorderWidth = drawSize_.Width() + NormalizeToPx(FOCUS_PADDING * 2 + FOCUS_BORDER_WIDTH);
     double focusBorderHeight = drawSize_.Height() + NormalizeToPx(FOCUS_PADDING * 2 + FOCUS_BORDER_WIDTH);
     double focusRadius = focusBorderHeight * HALF;
+#ifndef USE_ROSEN_DRAWING
     SkPaint paint;
     paint.setColor(FOCUS_BORDER_COLOR);
     paint.setStrokeWidth(NormalizeToPx(FOCUS_BORDER_WIDTH));
@@ -126,6 +197,19 @@ void RosenRenderRadio::DrawFocusBorder(RenderContext& context, const Offset& off
     rRect.offset(offset.GetX() - NormalizeToPx(FOCUS_PADDING + FOCUS_BORDER_WIDTH * HALF),
         offset.GetY() - NormalizeToPx(FOCUS_PADDING + FOCUS_BORDER_WIDTH * HALF));
     canvas->drawRRect(rRect, paint);
+#else
+    RSPen pen;
+    pen.SetColor(FOCUS_BORDER_COLOR);
+    pen.SetWidth(NormalizeToPx(FOCUS_BORDER_WIDTH));
+    pen.SetAntiAlias(true);
+    RSRoundRect rRect(
+        RSRect(0, 0, focusBorderWidth, focusBorderHeight), focusRadius, focusRadius);
+    rRect.Offset(offset.GetX() - NormalizeToPx(FOCUS_PADDING + FOCUS_BORDER_WIDTH * HALF),
+        offset.GetY() - NormalizeToPx(FOCUS_PADDING + FOCUS_BORDER_WIDTH * HALF));
+    canvas->AttachPen(pen);
+    canvas->DrawRoundRect(rRect);
+    canvas->DetachPen();
+#endif
 }
 
 void RosenRenderRadio::DrawTouchBoard(const Offset& offset, RenderContext& context)

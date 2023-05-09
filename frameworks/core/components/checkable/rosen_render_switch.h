@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,16 +31,32 @@ public:
     ~RosenRenderSwitch() override = default;
 
     void Paint(RenderContext& context, const Offset& offset) override;
+#ifndef USE_ROSEN_DRAWING
     void SetPaintStyle(
         double& originX, double& originY, uint32_t& trackColor, uint32_t& pointColor, SkPaint& trackPaint);
+#else
+    void SetPaintStyle(
+        double& originX, double& originY, uint32_t& trackColor, uint32_t& pointColor, RSPen& trackPaint);
+#endif
     Size CalculateTextSize(const std::string& text, RefPtr<RenderText>& renderText) override;
 
 private:
+#ifndef USE_ROSEN_DRAWING
     void DrawTrackAnimation(const Offset& paintOffset, SkCanvas* canvas, SkPaint& trackPaint) const;
     void DrawTrackOffAndOn(const Offset& paintOffset, double trackRadius, SkCanvas* canvas, SkPaint& trackPaint) const;
     void PaintCenterPoint(
         SkCanvas* canvas, SkPaint& paint, double pointOriginX, double pointOriginY, uint32_t pointColor) const;
     void PaintTrack(SkCanvas* canvas, SkPaint& trackPaint, double originX, double originY, uint32_t trackColor) const;
+#else
+    void DrawTrackAnimation(
+        const Offset& paintOffset, RSCanvas* canvas, RSPen& trackPaint) const;
+    void DrawTrackOffAndOn(const Offset& paintOffset, double trackRadius,
+        RSCanvas* canvas, RSPen& trackPaint) const;
+    void PaintCenterPoint(RSCanvas* canvas, RSPen& paint,
+        double pointOriginX, double pointOriginY, uint32_t pointColor) const;
+    void PaintTrack(RSCanvas* canvas, RSPen& trackPaint,
+        double originX, double originY, uint32_t trackColor) const;
+#endif
     void PaintFocusBorder(RenderContext& context, const Offset& offset);
     void PaintTouchBoard(const Offset& offset, RenderContext& context);
     void PaintHoverBoard(const Offset& offset, RenderContext& context);
