@@ -237,13 +237,24 @@ void ParseJsRotate(std::unique_ptr<JsonValue>& argsPtrItem, NG::RotateOptions& r
     // if specify centerX
     CalcDimension length;
     if (JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerX"), length)) {
+        if (length.Unit() == DimensionUnit::INVALID) {
+            LOGW("centerX is invalid");
+            length = Dimension(0.5f, DimensionUnit::PERCENT);
+        }
         rotate.centerX = length;
     }
     // if specify centerY
     if (JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerY"), length)) {
+        if (length.Unit() == DimensionUnit::INVALID) {
+            LOGW("centerY is invalid");
+            length = Dimension(0.5f, DimensionUnit::PERCENT);
+        }
         rotate.centerY = length;
     }
     if (JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerZ"), length)) {
+        if (length.Unit() == DimensionUnit::INVALID) {
+            LOGW("centerZ is invalid");
+        }
         rotate.centerZ = length;
     }
     // if specify angle
