@@ -831,9 +831,14 @@ void JSViewPartialUpdate::CreateRecycle(const JSCallbackInfo& info)
     auto nodeName = params[PARAM_NODE_NAME]->ToString();
     auto jsRecycleUpdateFunc =
         AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(params[PARAM_RECYCLE_UPDATE_FUNC]));
-    auto recycleUpdateFunc = [execCtx = info.GetExecutionContext(), func = std::move(jsRecycleUpdateFunc)]() -> void {
+    auto recycleUpdateFunc = [weak = AceType::WeakClaim(view), execCtx = info.GetExecutionContext(),
+                                 func = std::move(jsRecycleUpdateFunc)]() -> void {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto jsView = weak.Upgrade();
+        CHECK_NULL_VOID(jsView);
+        jsView->SetIsRecycleRerender(true);
         func->ExecuteJS();
+        jsView->SetIsRecycleRerender(false);
     };
 
     // update view and node property
@@ -938,6 +943,9 @@ void JSViewPartialUpdate::JsGetDeletedElemtIds(const JSCallbackInfo& info)
         return;
     }
     JSRef<JSArray> jsArr = JSRef<JSArray>::Cast(info[0]);
+    if (isRecycleRerender_) {
+        return;
+    }
     std::unordered_set<int32_t>& removedElements = ElementRegister::GetInstance()->GetRemovedItems();
     size_t index = jsArr->Length();
     for (const auto& rmElmtId : removedElements) {
