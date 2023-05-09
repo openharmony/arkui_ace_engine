@@ -747,6 +747,9 @@ template("ace_core_ng_source_set") {
       "components/theme/theme_constants.cpp",
       "components/theme/theme_manager_impl.cpp",
       "components/theme/theme_utils.cpp",
+      "components/video/resource/ext_surface.cpp",
+      "components/video/resource/player.cpp",
+      "components/video/resource/resource.cpp",
 
       # v2 inspector
       "components_v2/grid/grid_event.cpp",
