@@ -259,6 +259,11 @@ public:
     static void CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
         const std::function<void(float)>& onCallbackEvent);
     static void UpdateAnimatablePropertyFloat(const std::string& propertyName, float value);
+    static void CreateAnimatableArithmeticProperty(const std::string& propertyName,
+        RefPtr<CustomAnimatableArithmetic>& value,
+        std::function<void(const RefPtr<CustomAnimatableArithmetic>&)>& onCallbackEvent);
+    static void UpdateAnimatableArithmeticProperty(const std::string& propertyName,
+        RefPtr<CustomAnimatableArithmetic>& value);
 private:
     static void AddDragFrameNodeToManager();
 };

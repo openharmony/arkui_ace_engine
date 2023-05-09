@@ -191,6 +191,12 @@ public:
     void CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
         const std::function<void(float)>& onCallbackEvent) override {};
     void UpdateAnimatablePropertyFloat(const std::string& propertyName, float value) override {};
+
+    void CreateAnimatableArithmeticProperty(const std::string& propertyName,
+        RefPtr<NG::CustomAnimatableArithmetic>& value,
+        std::function<void(const RefPtr<NG::CustomAnimatableArithmetic>&)>& onCallbackEvent) override {};
+    void UpdateAnimatableArithmeticProperty(const std::string& propertyName,
+        RefPtr<NG::CustomAnimatableArithmetic>& value) override {};
 };
 
 } // namespace OHOS::Ace::Framework
