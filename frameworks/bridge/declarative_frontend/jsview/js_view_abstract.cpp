@@ -4145,6 +4145,9 @@ void JSViewAbstract::JsShadow(const JSCallbackInfo& info)
     if (ParseJsonColor(argsPtrItem->GetValue("color"), color)) {
         shadows.begin()->SetColor(color);
     }
+    auto type = argsPtrItem->GetInt("type", static_cast<int32_t>(ShadowType::COLOR));
+    type = std::clamp(type, static_cast<int32_t>(ShadowType::COLOR), static_cast<int32_t>(ShadowType::BLUR));
+    shadows.begin()->SetShadowType(static_cast<ShadowType>(type));
     ViewAbstractModel::GetInstance()->SetBackShadow(shadows);
 }
 
