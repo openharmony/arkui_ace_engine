@@ -150,6 +150,8 @@ void ButtonView::SetFontColor(const Color& textColor)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontColor, textColor);
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, textColor);
+    ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy);
+    ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true);
 }
 
 void ButtonView::SetBorderRadius(const Dimension& radius)

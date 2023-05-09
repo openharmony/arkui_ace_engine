@@ -79,6 +79,9 @@ void MarqueeModelNG::SetAllowScale(bool allowScale)
 void MarqueeModelNG::SetTextColor(const Color& textColor)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(MarqueeLayoutProperty, FontColor, textColor);
+    ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, textColor);
+    ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy);
+    ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true);
 }
 
 void MarqueeModelNG::SetFontSize(const Dimension& fontSize)

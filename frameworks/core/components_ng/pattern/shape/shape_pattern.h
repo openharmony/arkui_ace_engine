@@ -75,15 +75,29 @@ protected:
     void UpdateForeground(RefPtr<FrameNode> parentFrameNode, RefPtr<FrameNode> childFrameNode)
     {
         auto renderContext = parentFrameNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
         auto childRenderContext = childFrameNode->GetRenderContext();
-        if (childRenderContext) {
-            if (!childRenderContext->HasForegroundColor() && !childRenderContext->HasForegroundColorStrategy()) {
+        CHECK_NULL_VOID(childRenderContext);
+        if (!childRenderContext->HasForegroundColor() && !childRenderContext->HasForegroundColorStrategy()) {
+            if (renderContext->HasForegroundColor()) {
+                childRenderContext->UpdateForegroundColor(renderContext->GetForegroundColorValue());
+                childRenderContext->ResetForegroundColorStrategy();
+                childRenderContext->UpdateForegroundColorFlag(false);
+            } else if (renderContext->HasForegroundColorStrategy()) {
+                childRenderContext->UpdateForegroundColorStrategy(renderContext->GetForegroundColorStrategyValue());
+                childRenderContext->ResetForegroundColor();
+                childRenderContext->UpdateForegroundColorFlag(false);
+            }
+        } else {
+            if (!childRenderContext->GetForegroundColorFlag().value_or(false)) {
                 if (renderContext->HasForegroundColor()) {
                     childRenderContext->UpdateForegroundColor(renderContext->GetForegroundColorValue());
                     childRenderContext->ResetForegroundColorStrategy();
+                    childRenderContext->UpdateForegroundColorFlag(false);
                 } else if (renderContext->HasForegroundColorStrategy()) {
                     childRenderContext->UpdateForegroundColorStrategy(renderContext->GetForegroundColorStrategyValue());
                     childRenderContext->ResetForegroundColor();
+                    childRenderContext->UpdateForegroundColorFlag(false);
                 }
             }
         }

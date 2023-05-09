@@ -1363,6 +1363,7 @@ void ViewAbstract::SetForegroundColor(const Color& color)
     }
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, color);
     ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy);
+    ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true);
 }
 
 void ViewAbstract::SetForegroundColorStrategy(const ForegroundColorStrategy& strategy)
@@ -1373,6 +1374,7 @@ void ViewAbstract::SetForegroundColorStrategy(const ForegroundColorStrategy& str
     }
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColorStrategy, strategy);
     ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColor);
+    ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true);
 }
 
 void ViewAbstract::SetKeyboardShortcut(
