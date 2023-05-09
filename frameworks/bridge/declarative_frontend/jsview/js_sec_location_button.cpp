@@ -422,8 +422,10 @@ void JsSecLocationButtonClickFunction::Execute(GestureEvent& info)
 
     int32_t res = static_cast<int32_t>(SecurityComponentHandleResult::CLICK_GRANT_FAILED);
 #ifdef SECURITY_COMPONENT_ENABLE
-    auto& secEventValue = info.GetSecCompHandleEvent();
-    res = secEventValue.GetInt("handleRes", res);
+    auto secEventValue = info.GetSecCompHandleEvent();
+    if (secEventValue != nullptr) {
+        res = secEventValue->GetInt("handleRes", res);
+    }
 #endif
     JSRef<JSVal> errorParam = JSRef<JSVal>::Make(ToJSValue(res));
     JSRef<JSVal> params[] = { errorParam, clickEventParam };

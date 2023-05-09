@@ -121,7 +121,7 @@ public:
 
     const std::string& GetLocationDescriptions(int32_t index)
     {
-        if (index < 0 || index > static_cast<int32_t>(locationDescriptions_.size())) {
+        if (index < 0 || index >= static_cast<int32_t>(locationDescriptions_.size())) {
             LOGE("deciprtions index %{public}d is invalid", static_cast<int>(index));
             return emptyString_;
         }
