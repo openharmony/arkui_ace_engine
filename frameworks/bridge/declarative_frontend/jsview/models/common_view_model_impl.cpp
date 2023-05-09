@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,16 +13,16 @@
  * limitations under the License.
  */
 
-#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_COMMON_VIEW_H
-#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_COMMON_VIEW_H
+#include "bridge/declarative_frontend/jsview/models/common_view_model_impl.h"
 
-#include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
+#include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components/proxy/proxy_component.h"
 
 namespace OHOS::Ace::Framework {
-class JSCommonView : public JSContainerBase {
-public:
-    static void JSBind(BindingTarget globalObj);
-    static void Create(const JSCallbackInfo& info);
-};
+void CommonViewModelImpl::Create()
+{
+    auto specializedBox = AceType::MakeRefPtr<OHOS::Ace::ProxyComponent>();
+    specializedBox->SetPassMinSize(false);
+    ViewStackProcessor::GetInstance()->Push(specializedBox);
+}
 } // namespace OHOS::Ace::Framework
-#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_DIVIDER_H

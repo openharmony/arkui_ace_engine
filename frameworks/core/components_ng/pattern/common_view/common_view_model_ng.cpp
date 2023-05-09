@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,22 +12,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "core/components_ng/pattern/common_view/common_view_model_ng.h"
 
-#include "core/components_ng/pattern/common_view/common_view.h"
-
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/pattern/common_view/common_view_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
-
-void CommonView::Create()
+void CommonViewModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = stack->ClaimNodeId();
@@ -36,5 +29,4 @@ void CommonView::Create()
     blankNode->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
     stack->Push(blankNode);
 }
-
 } // namespace OHOS::Ace::NG
