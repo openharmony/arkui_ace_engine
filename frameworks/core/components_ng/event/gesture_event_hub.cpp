@@ -393,7 +393,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     }
 #ifdef ENABLE_DRAG_FRAMEWORK
     auto eventRet = event->GetResult();
-    if (eventRet == DragResult::DRAG_FAIL || eventRet == DragResult::DRAG_CANCEL) {
+    if (eventRet == DragRet::DRAG_FAIL || eventRet == DragRet::DRAG_CANCEL) {
         LOGI("HandleOnDragStart: User Set DRAG_FAIL or DRAG_CANCEL");
         return;
     }
