@@ -95,6 +95,10 @@ public:
         SPINNER_DISABLE,
         LOCATION_BUTTON_FILLED_SVG,
         LOCATION_BUTTON_LINE_SVG,
+        IC_PUBLIC_ARROW_LEFT_SVG,
+        IC_PUBLIC_ARROW_RIGHT_SVG,
+        IC_PUBLIC_ARROW_UP_SVG,
+        IC_PUBLIC_ARROW_DOWN_SVG,
         SVG_END = 20000,
 
         // 20001 - 30000 is reserved for i18n resource.
