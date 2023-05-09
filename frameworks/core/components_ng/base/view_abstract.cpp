@@ -953,12 +953,8 @@ void ViewAbstract::BindPopup(
                 popupPattern->StartEnteringAnimation(nullptr);
             }
         } else {
-            if (popupPattern) {
-                popupPattern->StartExitingAnimation([targetId]() {
-                    LOGI("Popup now hide in subwindow.");
-                    SubwindowManager::GetInstance()->HidePopupNG(targetId);
-                });
-            }
+            LOGI("Popup now hide in subwindow.");
+            SubwindowManager::GetInstance()->HidePopupNG(targetId);
         }
         return;
     }
@@ -979,15 +975,8 @@ void ViewAbstract::BindPopup(
             popupPattern->StartEnteringAnimation(nullptr);
         }
     } else {
-        if (popupPattern) {
-            popupPattern->StartExitingAnimation(
-                [targetId, popupInfo, weakOverlayManger = AceType::WeakClaim(AceType::RawPtr(overlayManager))]() {
-                    auto overlay = weakOverlayManger.Upgrade();
-                    CHECK_NULL_VOID(overlay);
-                    LOGI("begin to update popup node.");
-                    overlay->UpdatePopupNode(targetId, popupInfo);
-                });
-        }
+        LOGI("begin to update popup node.");
+        overlayManager->UpdatePopupNode(targetId, popupInfo);
     }
 }
 
