@@ -1646,6 +1646,26 @@ void WebPattern::OnResizeNotWork()
     isWaiting_ = false;
 }
 
+bool WebPattern::OnBackPressed() const
+{
+    if (!isFullScreen_) {
+        LOGI("The web is not full screen when OnBackPressed");
+        return false;
+    }
+
+    CHECK_NULL_RETURN(fullScreenExitHandler_, false);
+    auto webFullScreenExitHandler = fullScreenExitHandler_->GetHandler();
+    CHECK_NULL_RETURN(webFullScreenExitHandler, false);
+    webFullScreenExitHandler->ExitFullScreen();
+    LOGD("Web Exit full screen when OnBackPressed");
+    return true;
+}
+
+void WebPattern::SetFullScreenExitHandler(const std::shared_ptr<FullScreenEnterEvent>& fullScreenExitHandler)
+{
+    fullScreenExitHandler_ = fullScreenExitHandler;
+}
+
 void WebPattern::OnInActive()
 {
     if (!isActive_) {

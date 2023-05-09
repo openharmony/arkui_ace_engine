@@ -22,6 +22,7 @@
 
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "base/web/webview/ohos_nweb/include/nweb_handler.h"
 #include "core/components/web/web_property.h"
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
@@ -34,7 +35,6 @@
 #include "core/components_ng/pattern/web/web_pattern_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/render_surface.h"
-#include "nweb_handler.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -298,7 +298,8 @@ public:
     }
     void OnCompleteSwapWithNewSize();
     void OnResizeNotWork();
-
+    bool OnBackPressed() const;
+    void SetFullScreenExitHandler(const std::shared_ptr<FullScreenEnterEvent>& fullScreenExitHandler);
 private:
     void RegistVirtualKeyBoardListener();
     bool ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard);
@@ -439,6 +440,7 @@ private:
     bool isUrlLoaded_ = false;
     std::queue<MouseClickInfo> doubleClickQueue_;
     bool isFullScreen_ = false;
+    std::shared_ptr<FullScreenEnterEvent> fullScreenExitHandler_ = nullptr;
     bool needOnFocus_ = false;
     Size drawSize_;
     Size drawSizeCache_;
