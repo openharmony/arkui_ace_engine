@@ -18,10 +18,10 @@ ohos_unittest("ace_connect_server_manager_test") {
   module_out_path = "$basic_test_output_path/common"
 
   sources = [
-    "$ace_root/frameworks/core/common/connect_server_manager.cpp",
-    "$ace_root/test/mock/core/common/mock_container.cpp",
-    "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
     "$ace_root/frameworks/core/common/ace_engine.cpp",
+    "$ace_root/frameworks/core/common/connect_server_manager.cpp",
+    "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
+    "$ace_root/test/mock/core/common/mock_container.cpp",
     "connect_server_manager_test.cpp",
   ]
 
