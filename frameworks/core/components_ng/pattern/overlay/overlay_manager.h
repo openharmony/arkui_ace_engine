@@ -208,6 +208,8 @@ public:
     void BindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<RefPtr<UINode>()>&& buildNodeFunc, NG::SheetStyle& sheetStyle, int32_t targetId);
 
+    void DestroySheet(const RefPtr<FrameNode>& sheetNode, int32_t targetId);
+
 private:
     void PopToast(int32_t targetId);
 
@@ -238,7 +240,7 @@ private:
 
     void PlaySheetTransition(RefPtr<FrameNode> sheetNode, bool isTransitionIn, bool isFirstTransition = true);
 
-    float ComputeSheetOffset(NG::SheetStyle& sheetStyle);
+    void ComputeSheetOffset(NG::SheetStyle& sheetStyle);
 
     // Key: target Id, Value: PopupInfo
     std::unordered_map<int32_t, NG::PopupInfo> popupMap_;

@@ -4681,12 +4681,12 @@ void JSViewAbstract::JsBindSheet(const JSCallbackInfo& info)
 void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle)
 {
     auto height = paramObj->GetProperty("height");
-    auto showDragIndicator = paramObj->GetProperty("showDragIndicator");
-    if (showDragIndicator->IsNull() || showDragIndicator->IsUndefined()) {
-        sheetStyle.showDragIndicator = true;
+    auto showDragBar = paramObj->GetProperty("dragBar");
+    if (showDragBar->IsNull() || showDragBar->IsUndefined()) {
+        sheetStyle.showDragBar = true;
     } else {
-        if (showDragIndicator->IsBoolean()) {
-            sheetStyle.showDragIndicator = showDragIndicator->ToBoolean();
+        if (showDragBar->IsBoolean()) {
+            sheetStyle.showDragBar = showDragBar->ToBoolean();
         } else {
             LOGW("show drag indicator failed.");
         }
@@ -4704,9 +4704,11 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
             if (heightStr.compare("medium") == 0) {
                 sheetStyle.sheetMode = NG::SheetMode::MEDIUM;
                 sheetStyle.height.reset();
+                return;
             } else if (heightStr.compare("large") == 0) {
                 sheetStyle.sheetMode = NG::SheetMode::LARGE;
                 sheetStyle.height.reset();
+                return;
             } else {
                 LOGI("sheet height is not default mode.");
             }
