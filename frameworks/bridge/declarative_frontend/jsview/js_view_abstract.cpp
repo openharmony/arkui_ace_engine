@@ -5036,19 +5036,30 @@ bool JSViewAbstract::ParseJsonDouble(const std::unique_ptr<JsonValue>& jsonValue
         result = StringUtils::StringToDouble(jsonValue->GetString());
         return true;
     }
+    // parse json Resource
     auto resVal = JsonUtil::ParseJsonString(jsonValue->ToString());
     auto resId = resVal->GetValue("id");
-    if (!resId || !resId->IsNumber()) {
-        LOGE("invalid resource id");
-        return false;
-    }
+    CHECK_NULL_RETURN(resId && resId->IsNumber(), false);
+    auto id = resId->GetUInt();
+    auto resType = resVal->GetValue("type");
+    CHECK_NULL_RETURN(resType && resType->IsNumber(), false);
+    auto type = resType->GetUInt();
+
     auto themeConstants = GetThemeConstants();
-    if (!themeConstants) {
-        LOGW("themeConstants is nullptr");
-        return false;
+    CHECK_NULL_RETURN(themeConstants, false);
+    if (type == static_cast<uint32_t>(ResourceType::STRING)) {
+        auto numberString = themeConstants->GetString(id);
+        return StringUtils::StringToDouble(numberString, result);
     }
-    result = themeConstants->GetDouble(resId->GetUInt());
-    return true;
+    if (type == static_cast<uint32_t>(ResourceType::INTEGER)) {
+        result = themeConstants->GetInt(id);
+        return true;
+    }
+    if (type == static_cast<uint32_t>(ResourceType::FLOAT)) {
+        result = themeConstants->GetDouble(id);
+        return true;
+    }
+    return false;
 }
 
 bool JSViewAbstract::ParseJsonColor(const std::unique_ptr<JsonValue>& jsonValue, Color& result)
