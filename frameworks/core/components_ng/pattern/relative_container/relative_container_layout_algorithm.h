@@ -57,6 +57,7 @@ private:
     std::map<std::string, uint32_t> incomingDegreeMap_;
     std::map<std::string, std::set<std::string>> reliedOnMap_;
     std::map<std::string, OffsetF> recordOffsetMap_;
+    PaddingPropertyF padding_;
 };
 
 } // namespace OHOS::Ace::NG

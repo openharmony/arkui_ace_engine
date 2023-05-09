@@ -30,13 +30,13 @@ public:
     static void SwapBackBorder(const RefPtr<Decoration>& decoration);
     static OnDragFunc ToDragFunc(NG::OnDragStartFunc&& onDragStart);
 
-    void SetWidth(const Dimension& width) override;
-    void SetHeight(const Dimension& height) override;
+    void SetWidth(const CalcDimension& width) override;
+    void SetHeight(const CalcDimension& height) override;
     void ClearWidthOrHeight(bool isWidth) override {};
-    void SetMinWidth(const Dimension& minWidth) override;
-    void SetMinHeight(const Dimension& minHeight) override;
-    void SetMaxWidth(const Dimension& maxWidth) override;
-    void SetMaxHeight(const Dimension& maxHeight) override;
+    void SetMinWidth(const CalcDimension& minWidth) override;
+    void SetMinHeight(const CalcDimension& minHeight) override;
+    void SetMaxWidth(const CalcDimension& maxWidth) override;
+    void SetMaxHeight(const CalcDimension& maxHeight) override;
 
     void SetBackgroundColor(const Color& color) override;
     void SetBackgroundImage(const std::string& src, RefPtr<ThemeConstants> themeConstant) override;
@@ -44,12 +44,12 @@ public:
     void SetBackgroundImageSize(const BackgroundImageSize& bgImgSize) override;
     void SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition) override;
     void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle) override;
-    void SetPadding(const Dimension& value) override;
-    void SetPaddings(const std::optional<Dimension>& top, const std::optional<Dimension>& bottom,
-        const std::optional<Dimension>& left, const std::optional<Dimension>& right) override;
-    void SetMargin(const Dimension& value) override;
-    void SetMargins(const std::optional<Dimension>& top, const std::optional<Dimension>& bottom,
-        const std::optional<Dimension>& left, const std::optional<Dimension>& right) override;
+    void SetPadding(const CalcDimension& value) override;
+    void SetPaddings(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
+        const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right) override;
+    void SetMargin(const CalcDimension& value) override;
+    void SetMargins(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
+        const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right) override;
     void SetBorderRadius(const Dimension& value) override;
     void SetBorderRadius(const std::optional<Dimension>& radiusTopLeft, const std::optional<Dimension>& radiusTopRight,
         const std::optional<Dimension>& radiusBottomLeft, const std::optional<Dimension>& radiusBottomRight) override;
@@ -124,7 +124,7 @@ public:
     void SetSepia(const Dimension& value) override;
     void SetInvert(const Dimension& value) override;
     void SetHueRotate(float value) override;
-
+    void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue) override {}
     void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc) override;
     void SetOnTouch(TouchEventFunc&& touchEventFunc) override;
     void SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback) override;
@@ -175,6 +175,8 @@ public:
     void BindContextMenu(ResponseType type, std::function<void()>&& buildFunc, const NG::MenuParam& menuParam) override;
     void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<void()>&& buildFunc, int32_t type) override {}
+    void BindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
+        std::function<void()>&& buildFunc, NG::SheetStyle& sheetStyle) override {}
 
     void SetAccessibilityGroup(bool accessible) override;
     void SetAccessibilityText(const std::string& text) override;

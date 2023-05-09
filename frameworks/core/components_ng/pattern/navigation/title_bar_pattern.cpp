@@ -107,7 +107,7 @@ void MountSubTitle(const RefPtr<TitleBarNode>& hostNode)
     subtitleNode->MarkModifyDone();
 }
 
-}
+} // namespace
 
 void TitleBarPattern::OnModifyDone()
 {
@@ -193,7 +193,7 @@ void TitleBarPattern::HandleDragStart(const GestureEvent& info)
     minTitleOffsetY_ = (static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()) - minTitleHeight_) / 2;
     maxTitleOffsetY_ = initialTitleOffsetY_;
     moveRatio_ = (maxTitleOffsetY_ - minTitleOffsetY_) /
-        (maxTitleBarHeight_ - static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
+                 (maxTitleBarHeight_ - static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
     titleMoveDistance_ = (tempTitleBarHeight_ - defaultTitleBarHeight_) * moveRatio_;
     defaultTitleOffsetY_ = GetTitleOffsetY();
     SetTempTitleOffsetY();
@@ -206,13 +206,15 @@ void TitleBarPattern::HandleDragStart(const GestureEvent& info)
     auto titleBarHeightDiff = maxTitleBarHeight_ - static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
     auto titleFontSizeDiff = MAX_TITLE_FONT_SIZE - MIN_TITLE_FONT_SIZE;
     fontSizeRatio_ = titleFontSizeDiff.Value() / titleBarHeightDiff;
-    auto tempFontSize = static_cast<float>((tempTitleBarHeight_ - defaultTitleBarHeight_) * fontSizeRatio_ + defaultTitleFontSize_.Value());
+    auto tempFontSize = static_cast<float>(
+        (tempTitleBarHeight_ - defaultTitleBarHeight_) * fontSizeRatio_ + defaultTitleFontSize_.Value());
     UpdateTitleFontSize(Dimension(tempFontSize, DimensionUnit::VP));
 
     // subTitle Opacity
     SetDefaultSubtitleOpacity();
     opacityRatio_ = 1.0f / titleBarHeightDiff;
-    auto tempOpacity = static_cast<float>((tempTitleBarHeight_ - defaultTitleBarHeight_) * opacityRatio_ + defaultSubtitleOpacity_);
+    auto tempOpacity =
+        static_cast<float>((tempTitleBarHeight_ - defaultTitleBarHeight_) * opacityRatio_ + defaultSubtitleOpacity_);
     UpdateSubTitleOpacity(tempOpacity);
 }
 
@@ -232,15 +234,18 @@ void TitleBarPattern::HandleDragUpdate(const GestureEvent& info)
     titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 
     // title font size
-    auto tempFontSize = static_cast<float>((tempTitleBarHeight_ - defaultTitleBarHeight_) * fontSizeRatio_ + defaultTitleFontSize_.Value());
+    auto tempFontSize = static_cast<float>(
+        (tempTitleBarHeight_ - defaultTitleBarHeight_) * fontSizeRatio_ + defaultTitleFontSize_.Value());
     UpdateTitleFontSize(Dimension(tempFontSize, DimensionUnit::VP));
 
     // subTitle Opacity
-    auto tempOpacity = static_cast<float>((tempTitleBarHeight_ - defaultTitleBarHeight_) * opacityRatio_ + defaultSubtitleOpacity_);
+    auto tempOpacity =
+        static_cast<float>((tempTitleBarHeight_ - defaultTitleBarHeight_) * opacityRatio_ + defaultSubtitleOpacity_);
     UpdateSubTitleOpacity(tempOpacity);
 }
 
-void TitleBarPattern::HandleDragEnd(double dragVelocity) {
+void TitleBarPattern::HandleDragEnd(double dragVelocity)
+{
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
     CHECK_NULL_VOID(titleBarNode);
     auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
@@ -382,7 +387,7 @@ void TitleBarPattern::UpdateTitleFontSize(const Dimension& tempTitleFontSize)
     titleNode->MarkModifyDone();
 }
 
-void TitleBarPattern::UpdateSubTitleOpacity(const double &value)
+void TitleBarPattern::UpdateSubTitleOpacity(const double& value)
 {
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
     CHECK_NULL_VOID(titleBarNode);

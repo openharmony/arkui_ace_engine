@@ -17,12 +17,14 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVROUTER_NAVDESTINATION_EVENT_HUB_H
 
 #include "base/memory/ace_type.h"
+#include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "frameworks/bridge/declarative_frontend/engine/js_types.h"
 
 namespace OHOS::Ace::NG {
 using OnStateChangeEvent = std::function<void(bool)>;
-
+using namespace Framework;
 class NavDestinationEventHub : public EventHub {
     DECLARE_ACE_TYPE(NavDestinationEventHub, EventHub)
 public:
@@ -37,8 +39,54 @@ public:
             onStateChangeEvent_(isActivated);
         }
     }
+
+    void SetOnShown(const std::function<void()>& onShown)
+    {
+        onShownEvent_ = onShown;
+    }
+
+    void FireOnShownEvent() const
+    {
+        if (onShownEvent_) {
+            onShownEvent_();
+        }
+    }
+
+    void SetOnHidden(const std::function<void()>& onHidden)
+    {
+        onHiddenEvent_ = onHidden;
+    }
+
+    void FireOnHiddenEvent() const
+    {
+        if (onHiddenEvent_) {
+            onHiddenEvent_();
+        }
+    }
+
+    void SetOnBackPressed(const std::function<bool()>& onBackPressed)
+    {
+        onBackPressedEvent_ = onBackPressed;
+    }
+
+    std::function<bool()> GetOnBackPressedEvent() const
+    {
+        return onBackPressedEvent_;
+    }
+
+    bool FireOnBackPressedEvent()
+    {
+        if (onBackPressedEvent_) {
+            return onBackPressedEvent_();
+        }
+        return false;
+    }
+
 private:
     OnStateChangeEvent onStateChangeEvent_;
+    std::function<void()> onShownEvent_;
+    std::function<void()> onHiddenEvent_;
+    std::function<bool()> onBackPressedEvent_;
 };
 } // namespace OHOS::Ace::NG
 

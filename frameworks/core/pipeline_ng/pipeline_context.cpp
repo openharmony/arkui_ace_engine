@@ -79,7 +79,7 @@ namespace OHOS::Ace::NG {
 PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
     RefPtr<AssetManager> assetManager, RefPtr<PlatformResRegister> platformResRegister,
     const RefPtr<Frontend>& frontend, int32_t instanceId)
-    : PipelineBase(window, std::move(taskExecutor), std::move(assetManager), frontend, instanceId)
+    : PipelineBase(window, std::move(taskExecutor), std::move(assetManager), frontend, instanceId, platformResRegister)
 {
     window_->OnHide();
 }
@@ -178,6 +178,12 @@ uint32_t PipelineContext::AddScheduleTask(const RefPtr<ScheduleTask>& task)
     scheduleTasks_.try_emplace(++nextScheduleTaskId_, task);
     RequestFrame();
     return nextScheduleTaskId_;
+}
+
+void PipelineContext::RemoveScheduleTask(uint32_t id)
+{
+    CHECK_RUN_ON(UI);
+    scheduleTasks_.erase(id);
 }
 
 void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
@@ -667,7 +673,8 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
             positionY, (rootSize.Height() - keyboardHeight), offsetFix, keyboardHeight);
         if (NearZero(keyboardHeight)) {
             SetRootRect(rootSize.Width(), rootSize.Height(), 0);
-        } else if (LessOrEqual(rootSize.Height() - positionY - height, height)) {
+        } else if (LessOrEqual(rootSize.Height() - positionY - height, height) &&
+                   LessOrEqual(rootSize.Height() - positionY, keyboardHeight)) {
             SetRootRect(rootSize.Width(), rootSize.Height(), -keyboardHeight);
         } else if (positionY + height > (rootSize.Height() - keyboardHeight) && offsetFix > 0.0) {
             SetRootRect(rootSize.Width(), rootSize.Height(), -offsetFix);
@@ -1257,6 +1264,10 @@ void PipelineContext::OnShow()
     window_->OnShow();
     RequestFrame();
     FlushWindowStateChangedCallback(true);
+    AccessibilityEvent event;
+    event.windowChangeTypes = WindowUpdateType::WINDOW_UPDATE_ACTIVE;
+    event.type = AccessibilityEventType::PAGE_CHANGE;
+    SendEventToAccessibility(event);
 }
 
 void PipelineContext::OnHide()
@@ -1267,6 +1278,9 @@ void PipelineContext::OnHide()
     RequestFrame();
     OnVirtualKeyboardAreaChange(Rect());
     FlushWindowStateChangedCallback(false);
+    AccessibilityEvent event;
+    event.type = AccessibilityEventType::PAGE_CHANGE;
+    SendEventToAccessibility(event);
 }
 
 void PipelineContext::WindowFocus(bool isFocus)

@@ -114,6 +114,16 @@ SafeAreaEdgeInserts PipelineContext::GetCurrentViewSafeArea() const
 
 void PipelineContext::FlushBuild() {}
 
+void PipelineContext::FlushBuildFinishCallbacks()
+{
+    decltype(buildFinishCallbacks_) buildFinishCallbacks(std::move(buildFinishCallbacks_));
+    for (const auto& func : buildFinishCallbacks) {
+        if (func) {
+            func();
+        }
+    }
+}
+
 void PipelineContext::NotifyMemoryLevel(int32_t level) {}
 
 void PipelineContext::FlushMessages() {}
@@ -170,6 +180,8 @@ uint32_t PipelineContext::AddScheduleTask(const RefPtr<ScheduleTask>& task)
 {
     return 0;
 }
+
+void PipelineContext::RemoveScheduleTask(uint32_t id) {}
 
 void PipelineContext::AddOnAreaChangeNode(int32_t nodeId) {}
 

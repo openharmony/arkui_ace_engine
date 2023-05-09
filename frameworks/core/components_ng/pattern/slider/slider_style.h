@@ -59,6 +59,7 @@ struct SliderTipStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontSize, Dimension)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextColor, Color)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TipColor, Color)
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(CustomContent, std::string)
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SLIDER_SLIDER_STYLE_H

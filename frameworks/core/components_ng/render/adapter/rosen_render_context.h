@@ -20,16 +20,17 @@
 #include <memory>
 #include <optional>
 
-#include "render_service_client/core/ui/rs_node.h"
 #include "include/core/SkCanvas.h"
 #include "include/core/SkPictureRecorder.h"
 #include "include/core/SkRefCnt.h"
+#include "render_service_client/core/ui/rs_node.h"
 
 #include "base/geometry/dimension_offset.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/utils/noncopyable.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/progress_mask_property.h"
@@ -130,6 +131,7 @@ public:
     void AnimateHoverEffectBoard(bool isHovered) override;
     void UpdateBackBlurRadius(const Dimension& radius) override;
     void UpdateBackBlurStyle(const BlurStyleOption& bgBlurStyle) override;
+    void ResetBackBlurStyle() override;
     void OnSphericalEffectUpdate(double radio) override;
     void OnPixelStretchEffectUpdate(const PixStretchEffectOption& option) override;
     void OnLightUpEffectUpdate(double radio) override;
@@ -151,6 +153,7 @@ public:
     void OnNodeAppear(bool recursive) override;
     void OnNodeDisappear(bool recursive) override;
     void ClipWithRect(const RectF& rectF) override;
+    void ClipWithRRect(const RectF& rectF, const RadiusF& radiusF) override;
 
     bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish) override;
 
@@ -163,7 +166,7 @@ public:
 
     // if translate params use percent dimension, frameSize should be given correctly
     static std::shared_ptr<Rosen::RSTransitionEffect> GetRSTransitionWithoutType(
-        const TransitionOptions& options, const SizeF& frameSize = SizeF());
+        const std::unique_ptr<TransitionOptions>& options, const SizeF& frameSize = SizeF());
 
     static float ConvertDimensionToScaleBySize(const Dimension& dimension, float size);
 
@@ -302,6 +305,10 @@ private:
     void SetBackBlurFilter();
     void GetPaddingOfFirstFrameNodeParent(Dimension& parentPaddingLeft, Dimension& parentPaddingTop);
 
+    void InitEventClickEffect();
+    RefPtr<Curve> UpdatePlayAnimationValue(const ClickEffectLevel& level, float& scaleValue);
+    void ClickEffectPlayAnimation(const TouchType& touchType);
+
     // helper function to check if paint rect is valid
     bool RectIsNull();
 
@@ -330,6 +337,7 @@ private:
     void BdImagePaintTask(RSCanvas& canvas);
 
     void PaintDebugBoundary();
+    bool IsUsingPosition(const RefPtr<FrameNode>& frameNode);
 
     RefPtr<ImageLoadingContext> bgLoadingCtx_;
     RefPtr<CanvasImage> bgImage_;
@@ -342,7 +350,7 @@ private:
     bool isPositionChanged_ = false;
     bool isSynced_ = false;
     bool firstTransitionIn_ = false;
-    bool transitionWithAnimation_ = false;
+    bool isBreakingPoint_ = false;
     bool isBackBlurChanged_ = false;
     bool needDebugBoundary_ = false;
     bool isDisappearing_ = false;
@@ -371,6 +379,9 @@ private:
     std::shared_ptr<InvertModifier> invertModifier_;
     std::shared_ptr<HueRotateModifier> hueRotateModifier_;
     std::shared_ptr<ColorBlendModifier> colorBlendModifier_;
+
+    RefPtr<TouchEventImpl> touchListener_;
+    std::shared_ptr<AnimationUtils::Animation> clickEffectAnimation_;
 
     template<typename Modifier, typename PropertyType>
     friend class PropertyTransitionEffectTemplate;

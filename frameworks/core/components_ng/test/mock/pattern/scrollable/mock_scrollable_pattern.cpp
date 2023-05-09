@@ -39,5 +39,5 @@ bool ScrollablePattern::HandleEdgeEffect(float, int32_t, const SizeF&)
     return false;
 }
 
-void ScrollablePattern::UpdateScrollBarRegion(float offset, float estimatedHeight, Size viewPort) {}
+void ScrollablePattern::UpdateScrollBarRegion(float offset, float estimatedHeight, Size viewPort, Offset viewOffset) {}
 } // namespace OHOS::Ace::NG

@@ -24,6 +24,8 @@ void HostWindowExtension::OnWindowShow() {}
 
 void HostWindowExtension::OnWindowHide() {}
 
+void HostWindowExtension::OnConnect() {}
+
 void HostWindowExtension::RequestExtensionSessionActivation() {}
 
 void HostWindowExtension::RequestExtensionSessionBackground() {}

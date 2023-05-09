@@ -49,20 +49,17 @@ public:
 
     void ChangeToolBar(bool isUseExtensionMenu);
 
-    RefPtr<FrameNode> GetExtensionMenu()
-    {
-        return extensionMenu_;
-    }
+    void MoreOrBackAnimation(bool isMore);
 
 private:
     void CreateToolBar();
     void CreateExtensionToolBar(const std::vector<MenuOptionsParam>& menuOptionItems, int32_t index);
-    void GetDefaultButtonAndMenuWidth(float& defaultOptionWidth, float& maxWidth);
+    void GetDefaultButtonAndMenuWidth(float& defaultOptionWidth, float& fontWidth, float& maxWidth);
 
     static RefPtr<FrameNode> CreateMenuNode(const std::shared_ptr<SelectOverlayInfo>& info);
 
     RefPtr<FrameNode> selectMenu_;
-
+    RefPtr<FrameNode> selectMenuInner_;
     RefPtr<FrameNode> extensionMenu_;
 
     std::string selectInfo_;

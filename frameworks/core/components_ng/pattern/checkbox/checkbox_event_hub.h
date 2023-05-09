@@ -39,6 +39,9 @@ public:
 
     void UpdateChangeEvent(bool select) const
     {
+        if (selectChangeEvent_) {
+            selectChangeEvent_(select);
+        }
         if (changeEvent_) {
             changeEvent_(select);
         }
@@ -64,10 +67,16 @@ public:
         groupname_ = groupname;
     }
 
+    void SetChangeEvent(ChangeEvent&& changeEvent)
+    {
+        selectChangeEvent_ = std::move(changeEvent);
+    }
+
 private:
     ChangeEvent changeEvent_;
     std::string name_;
     std::string groupname_;
+    ChangeEvent selectChangeEvent_;
 
     ACE_DISALLOW_COPY_AND_MOVE(CheckBoxEventHub);
 };

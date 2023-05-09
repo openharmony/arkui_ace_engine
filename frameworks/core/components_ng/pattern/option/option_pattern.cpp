@@ -78,6 +78,7 @@ void OptionPattern::OnSelectProcess()
         LOGI("selecting option %d", index_);
         onSelect(index_);
     }
+    host->OnAccessibilityEvent(AccessibilityEventType::SELECTED);
     // hide menu when option is clicked
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -177,7 +178,7 @@ bool OptionPattern::OnKeyEvent(const KeyEvent& event)
     if (event.action != KeyAction::DOWN) {
         return false;
     }
-    if (event.code == KeyCode::KEY_ENTER || event.code == KeyCode::KEY_SPACE) {
+    if (event.code == KeyCode::KEY_ENTER) {
         OnSelectProcess();
         return true;
     }

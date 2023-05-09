@@ -33,6 +33,12 @@
 
 namespace OHOS::Ace::NG {
 
+namespace {
+
+const static int32_t DEFAULT_DISPLAY_COUNT = 1;
+
+} // namespace
+
 RefPtr<SwiperController> SwiperModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -64,8 +70,7 @@ void SwiperModelNG::SetDisplayMode(SwiperDisplayMode displayMode)
 void SwiperModelNG::SetDisplayCount(int32_t displayCount)
 {
     if (displayCount <= 0) {
-        LOGE("SwiperModelNG::SetDisplayCount displayCount is invalid, return.");
-        return;
+        displayCount = DEFAULT_DISPLAY_COUNT;
     }
 
     ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, DisplayCount, displayCount);
@@ -231,4 +236,33 @@ void SwiperModelNG::SetNextMargin(const Dimension& nextMargin)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, NextMargin, nextMargin);
 }
+
+void SwiperModelNG::SetOnChangeEvent(std::function<void(const BaseEventInfo* info)>&& onChangeEvent)
+{
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+
+    pattern->UpdateOnChangeEvent([event = std::move(onChangeEvent)](int32_t index) {
+        SwiperChangeEvent eventInfo(index);
+        event(&eventInfo);
+    });
+}
+
+void SwiperModelNG::SetIndicatorIsBoolean(bool isBoolean)
+{
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIndicatorIsBoolean(isBoolean);
+}
+
+void SwiperModelNG::SetArrowStyle(const SwiperArrowParameters& swiperArrowParameters) {}
+
+void SwiperModelNG::SetDisplayArrow(bool displayArrow) {}
+
+void SwiperModelNG::SetHoverShow(bool hoverShow) {}
+
 } // namespace OHOS::Ace::NG

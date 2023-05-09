@@ -27,12 +27,7 @@
 
 using namespace testing;
 using namespace testing::ext;
-namespace OHOS::Ace {
-bool OHOS::Ace::SystemProperties::GetDebugEnabled()
-{
-    return false;
-}
-} // namespace OHOS::Ace
+
 namespace OHOS::Ace::NG {
 namespace {
 constexpr uint32_t INPUT_EVENTS_SIZE = 1;

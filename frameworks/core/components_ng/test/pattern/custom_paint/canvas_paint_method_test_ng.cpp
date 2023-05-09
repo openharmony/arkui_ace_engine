@@ -562,6 +562,7 @@ HWTEST_F(CanvasPaintMethodTestNg, CanvasPaintMethodTestNg011, TestSize.Level1)
     EXPECT_DOUBLE_EQ(paint2.getAlphaf(), DEFAULT_DOUBLE1);
 }
 
+#ifndef NEW_SKIA
 /**
  * @tc.name: CanvasPaintMethodTestNg012
  * @tc.desc: Test the function InitImagePaint of CanvasPaintMethod.
@@ -584,7 +585,7 @@ HWTEST_F(CanvasPaintMethodTestNg, CanvasPaintMethodTestNg012, TestSize.Level1)
      */
     paintMethod_->SetSmoothingEnabled(true);
     paintMethod_->smoothingQuality_ = qualityUndefined;
-    paintMethod_->InitImagePaint();
+    paintMethod_->InitImagePaint(paintMethod_->imagePaint_);
     EXPECT_DOUBLE_EQ(paintMethod_->imagePaint_.getFilterQuality(), SkFilterQuality::kNone_SkFilterQuality);
 
     /**
@@ -592,7 +593,7 @@ HWTEST_F(CanvasPaintMethodTestNg, CanvasPaintMethodTestNg012, TestSize.Level1)
      * @tc.expected: The filterQuality of imagePaint_ is equal to kLow_SkFilterQuality.
      */
     paintMethod_->smoothingQuality_ = qualityLow;
-    paintMethod_->InitImagePaint();
+    paintMethod_->InitImagePaint(paintMethod_->imagePaint_);
     EXPECT_DOUBLE_EQ(paintMethod_->imagePaint_.getFilterQuality(), SkFilterQuality::kLow_SkFilterQuality);
 
     /**
@@ -600,7 +601,7 @@ HWTEST_F(CanvasPaintMethodTestNg, CanvasPaintMethodTestNg012, TestSize.Level1)
      * @tc.expected: The filterQuality of imagePaint_ is equal to kMedium_SkFilterQuality.
      */
     paintMethod_->smoothingQuality_ = qualityMedium;
-    paintMethod_->InitImagePaint();
+    paintMethod_->InitImagePaint(paintMethod_->imagePaint_);
     EXPECT_DOUBLE_EQ(paintMethod_->imagePaint_.getFilterQuality(), SkFilterQuality::kMedium_SkFilterQuality);
 
     /**
@@ -608,7 +609,7 @@ HWTEST_F(CanvasPaintMethodTestNg, CanvasPaintMethodTestNg012, TestSize.Level1)
      * @tc.expected: The filterQuality of imagePaint_ is equal to kHigh_SkFilterQuality.
      */
     paintMethod_->smoothingQuality_ = qualityHigh;
-    paintMethod_->InitImagePaint();
+    paintMethod_->InitImagePaint(paintMethod_->imagePaint_);
     EXPECT_DOUBLE_EQ(paintMethod_->imagePaint_.getFilterQuality(), SkFilterQuality::kHigh_SkFilterQuality);
 
     /**
@@ -616,9 +617,10 @@ HWTEST_F(CanvasPaintMethodTestNg, CanvasPaintMethodTestNg012, TestSize.Level1)
      * @tc.expected: The filterQuality of imagePaint_ is equal to kNone_SkFilterQuality.
      */
     paintMethod_->SetSmoothingEnabled(false);
-    paintMethod_->InitImagePaint();
+    paintMethod_->InitImagePaint(paintMethod_->imagePaint_);
     EXPECT_DOUBLE_EQ(paintMethod_->imagePaint_.getFilterQuality(), SkFilterQuality::kNone_SkFilterQuality);
 }
+#endif
 
 /**
  * @tc.name: CanvasPaintMethodTestNg014

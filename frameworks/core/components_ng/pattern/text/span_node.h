@@ -146,7 +146,7 @@ public:
     {
         children.clear();
     }
-    int32_t positon;
+    int32_t position;
     std::string content;
     std::unique_ptr<FontStyle> fontStyle;
     std::unique_ptr<TextLineStyle> textLineStyle;
@@ -171,6 +171,20 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override {};
 
     ACE_DISALLOW_COPY_AND_MOVE(ImageSpanItem);
+};
+
+enum class PropertyInfo {
+    FONTSIZE = 0,
+    FONTCOLOR,
+    FONTSTYLE,
+    FONTWEIGHT,
+    FONTFAMILY,
+    TEXTDECORATION,
+    TEXTDECORATIONCOLOR,
+    TEXTCASE,
+    LETTERSPACE,
+    LINEHEIGHT,
+    NONE,
 };
 
 class ACE_EXPORT SpanNode : public UINode {
@@ -244,8 +258,37 @@ public:
         RequestTextFlushDirty();
     }
 
+    void AddPropertyInfo(PropertyInfo value)
+    {
+        propertyInfo_.insert(value);
+    }
+
+    void CleanPropertyInfo()
+    {
+        propertyInfo_.clear();
+    }
+
+    std::set<PropertyInfo> CaculateInheritPropertyInfo()
+    {
+        std::set<PropertyInfo> inheritPropertyInfo;
+        const std::set<PropertyInfo> propertyInfoContainer = { PropertyInfo::FONTSIZE,
+                                                               PropertyInfo::FONTCOLOR,
+                                                               PropertyInfo::FONTSTYLE,
+                                                               PropertyInfo::FONTWEIGHT,
+                                                               PropertyInfo::FONTFAMILY,
+                                                               PropertyInfo::TEXTDECORATION,
+                                                               PropertyInfo::TEXTDECORATIONCOLOR,
+                                                               PropertyInfo::TEXTCASE,
+                                                               PropertyInfo::LETTERSPACE,
+                                                               PropertyInfo::LINEHEIGHT };
+        set_difference(propertyInfoContainer.begin(), propertyInfoContainer.end(),
+                       propertyInfo_.begin(), propertyInfo_.end(),
+                       inserter(inheritPropertyInfo, inheritPropertyInfo.begin()));
+        return inheritPropertyInfo;
+    }
 private:
     std::list<RefPtr<SpanNode>> spanChildren_;
+    std::set<PropertyInfo> propertyInfo_;
 
     RefPtr<SpanItem> spanItem_ = MakeRefPtr<SpanItem>();
 

@@ -44,14 +44,26 @@ public:
         auto paintParameters = UpdateContentParameters();
         if (!sliderContentModifier_) {
             sliderContentModifier_ =
-                AceType::MakeRefPtr<SliderContentModifier>(paintParameters, [this]() { LayoutImageNode(); });
+                AceType::MakeRefPtr<SliderContentModifier>(paintParameters, [weak = WeakClaim(this)]() {
+                    auto pattern = weak.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    pattern->LayoutImageNode();
+                });
         }
-        SliderPaintMethod::TipParameters tipParameters { bubbleSize_, bubbleOffset_, textOffset_, bubbleFlag_ };
+        SliderPaintMethod::TipParameters tipParameters { bubbleFlag_,
+            GetBubbleVertexPosition(circleCenter_, trackThickness_, blockSize_) };
         if (!sliderTipModifier_ && bubbleFlag_) {
-            sliderTipModifier_ = AceType::MakeRefPtr<SliderTipModifier>();
+            sliderTipModifier_ = AceType::MakeRefPtr<SliderTipModifier>([weak = WeakClaim(this)]() {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_RETURN(pattern, OffsetF());
+                auto blockCenter = pattern->sliderContentModifier_->GetBlockCenter();
+                auto trackThickness = pattern->sliderContentModifier_->GetTrackThickness();
+                auto blockSize = pattern->sliderContentModifier_->GetBlockSize();
+                return pattern->GetBubbleVertexPosition(blockCenter, trackThickness, blockSize);
+            });
         }
-        return MakeRefPtr<SliderPaintMethod>(sliderContentModifier_, paintParameters, sliderLength_, borderBlank_,
-            sliderTipModifier_, paragraph_, tipParameters);
+        return MakeRefPtr<SliderPaintMethod>(
+            sliderContentModifier_, paintParameters, sliderLength_, borderBlank_, sliderTipModifier_, tipParameters);
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -149,6 +161,7 @@ private:
     void GetCirclePosition(SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset);
     void UpdateBlock();
     void LayoutImageNode();
+    OffsetF GetBubbleVertexPosition(const OffsetF& blockCenter, float trackThickness, const SizeF& blockSize);
 
     Axis direction_ = Axis::HORIZONTAL;
     enum SliderChangeMode { Begin = 0, Moving = 1, End = 2, Click = 3 };
@@ -158,6 +171,7 @@ private:
     bool valueChangeFlag_ = false;
     bool mouseHoverFlag_ = false;
     bool mousePressedFlag_ = false;
+    bool focusFlag_ = false;
 
     float stepRatio_ = 1.0f / 100.0f;
     float valueRatio_ = 0.0f;
@@ -180,10 +194,6 @@ private:
 
     // tip Parameters
     bool bubbleFlag_ = false;
-    RefPtr<Paragraph> paragraph_;
-    SizeF bubbleSize_;
-    OffsetF bubbleOffset_;
-    OffsetF textOffset_;
     RefPtr<SliderTipModifier> sliderTipModifier_;
 
     RefPtr<FrameNode> imageFrameNode_;

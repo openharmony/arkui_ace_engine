@@ -19,19 +19,17 @@
 #include "core/components_ng/pattern/window_scene/scene/container/window_pattern.h"
 
 namespace OHOS::Ace::NG {
-
 class WindowExtension : public WindowPattern {
     DECLARE_ACE_TYPE(WindowExtension, WindowPattern);
 
 public:
     WindowExtension(const std::shared_ptr<AbilityRuntime::Context>& context,
-        const sptr<Rosen::ISession>& iSession, const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode);
+        const sptr<Rosen::ISession>& iSession);
     ~WindowExtension() override = default;
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(WindowExtension);
 };
-
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_EXTENSION_H

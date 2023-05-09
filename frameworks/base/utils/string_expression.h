@@ -27,6 +27,10 @@ namespace OHOS::Ace::StringExpression {
 
 void InitMapping(std::map<std::string, int>& mapping);
 
+bool CheckCalcIsValid(const std::string& formula);
+
+void ReplaceSignNumber(const std::string& formula);
+
 std::vector<std::string> ConvertDal2Rpn(std::string formula);
 
 double CalculateExp(const std::string& expression, const std::function<double(const Dimension&)>& calcFunc);

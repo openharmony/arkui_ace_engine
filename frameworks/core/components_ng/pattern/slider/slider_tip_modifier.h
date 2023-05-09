@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SLIDER_SLIDER_TIP_MODIFIER_H
 
 #include "core/components_ng/base/modifier.h"
+#include "core/components_ng/pattern/slider/slider_content_modifier.h"
 #include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace::NG {
@@ -24,22 +25,41 @@ class SliderTipModifier : public OverlayModifier {
     DECLARE_ACE_TYPE(SliderTipModifier, OverlayModifier);
 
 public:
-    SliderTipModifier();
-    ~SliderTipModifier() override = default;
+    explicit SliderTipModifier(std::function<OffsetF()> getBubbleVertexFunc);
+    ~SliderTipModifier() override;
 
     void PaintTip(DrawingContext& context);
     void PaintBubble(DrawingContext& context);
 
-    void onDraw(DrawingContext& context) override
-    {
-        if (tipFlag_->Get()) {
-            PaintTip(context);
-        }
-    }
+    void onDraw(DrawingContext& context) override;
 
     void SetParagraph(const RefPtr<NG::Paragraph>& paragraph)
     {
         paragraph_ = paragraph;
+    }
+
+    void SetBubbleVertex(const OffsetF& bubbleVertex)
+    {
+        if (bubbleVertex_) {
+            bubbleVertex_->Set(bubbleVertex);
+        }
+    }
+
+    void SetTextFont(const Dimension& fontSize)
+    {
+        textFontSize_ = fontSize;
+    }
+
+    void SetContent(const std::string& content)
+    {
+        if (content_) {
+            content_->Set(content);
+        }
+    }
+
+    void SetTextColor(const Color& textColor)
+    {
+        textColor_ = textColor;
     }
 
     void SetDirection(const Axis& axis)
@@ -52,50 +72,69 @@ public:
         tipColor_ = color;
     }
 
-    void SetTipFlag(bool flag)
-    {
-        if (tipFlag_) {
-            tipFlag_->Set(flag);
-        }
-    }
+    void SetTipFlag(bool flag);
 
-    void SetContentOffset(OffsetF contentOffset)
+    void SetContentOffset(const OffsetF& contentOffset)
     {
         if (contentOffset_) {
             contentOffset_->Set(contentOffset);
         }
     }
 
-    void SetBubbleSize(SizeF bubbleSize)
+    void SetContentSize(const SizeF& contentSize)
     {
-        if (bubbleSize_) {
-            bubbleSize_->Set(bubbleSize);
+        if (contentSize_) {
+            contentSize_->Set(contentSize);
         }
     }
 
-    void SetBubbleOffset(OffsetF bubbleOffset)
+    void SetBubbleSize(const SizeF& bubbleSize)
     {
-        if (bubbleOffset_) {
-            bubbleOffset_->Set(bubbleOffset);
-        }
+        bubbleSize_ = bubbleSize;
     }
 
-    void SetTextOffset(OffsetF textOffset)
+    void SetBubbleOffset(const OffsetF& bubbleOffset)
     {
-        if (textOffset_) {
-            textOffset_->Set(textOffset);
-        }
+        bubbleOffset_ = bubbleOffset;
     }
+
+    void SetTextOffset(const OffsetF& textOffset)
+    {
+        textOffset_ = textOffset;
+    }
+
+private:
+    void PaintBezier(bool isLeft, Axis axis, RSPath& path, const OffsetF& arrowCenter, const OffsetF& arrowEdge);
+    void SetBubbleDisplayAnimation();
+    void SetBubbleDisappearAnimation();
+    void BuildParagraph();
+    void CreateParagraphAndLayout(
+        const TextStyle& textStyle, const std::string& content);
+    bool CreateParagraph(const TextStyle& textStyle, std::string content);
+    OffsetF GetBubbleVertex();
+    void UpdateBubbleSize();
+    RectF UpdateOverlayRect();
 
 private:
     RefPtr<PropertyBool> tipFlag_;
     RefPtr<PropertyOffsetF> contentOffset_;
-    RefPtr<PropertySizeF> bubbleSize_;
-    RefPtr<PropertyOffsetF> bubbleOffset_;
-    RefPtr<PropertyOffsetF> textOffset_;
+    RefPtr<PropertySizeF> contentSize_;
     RefPtr<NG::Paragraph> paragraph_;
+
+    RefPtr<AnimatablePropertyFloat> sizeScale_;
+    RefPtr<AnimatablePropertyFloat> opacityScale_;
+    RefPtr<PropertyString> content_;
+    RefPtr<PropertyOffsetF> bubbleVertex_;
+
+    SizeF bubbleSize_;
+    OffsetF bubbleOffset_;
+    OffsetF textOffset_;
     Axis axis_ = Axis::HORIZONTAL;
     Color tipColor_ = Color::BLACK;
+    Color textColor_ = Color::TRANSPARENT;
+    Dimension textFontSize_;
+    std::function<OffsetF()> getBubbleVertexFunc_;
+
     ACE_DISALLOW_COPY_AND_MOVE(SliderTipModifier);
 };
 } // namespace OHOS::Ace::NG

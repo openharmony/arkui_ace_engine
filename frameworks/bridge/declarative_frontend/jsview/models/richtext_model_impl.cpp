@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,12 +20,13 @@
 #include "core/event/ace_event_handler.h"
 
 namespace OHOS::Ace::Framework {
-void RichTextModelImpl::Create(std::string data)
+void RichTextModelImpl::Create(const std::string& data)
 {
-    RefPtr<WebComponent> webComponent;
-    webComponent = AceType::MakeRefPtr<OHOS::Ace::WebComponent>("");
-    webComponent->SetData(data);
-    ViewStackProcessor::GetInstance()->Push(webComponent);
+    auto webComponent = AceType::MakeRefPtr<OHOS::Ace::WebComponent>("");
+    if (webComponent) {
+        webComponent->SetData(data);
+        ViewStackProcessor::GetInstance()->Push(webComponent);
+    }
 }
 
 void RichTextModelImpl::SetOnPageStart(std::function<void(const BaseEventInfo*)>&& onStarted)

@@ -87,6 +87,8 @@ public:
                     pattern->GetAttr<Dimension>("bottom_tab_horizontal_padding", 0.0_vp);
                 theme->bottomTabTextOn_ = pattern->GetAttr<Color>("bottom_tab_text_on", Color::WHITE);
                 theme->bottomTabTextOff_ = pattern->GetAttr<Color>("bottom_tab_text_off", Color::WHITE);
+                theme->bottomTabIconOn_ = pattern->GetAttr<Color>("bottom_tab_icon", Color::WHITE);
+                theme->bottomTabIconOff_ = pattern->GetAttr<Color>("bottom_tab_icon_off", Color::WHITE);
                 theme->bottomTabImageSize_ = pattern->GetAttr<Dimension>("bottom_tab_image_size", 0.0_vp);
                 theme->bottomTabTextSize_ = pattern->GetAttr<Dimension>("bottom_tab_text_size", 0.0_vp);
                 theme->defaultTabBarName_ = pattern->GetAttr<std::string>("default_tab_bar_name", "");
@@ -102,6 +104,8 @@ public:
                 theme->dividerColor_ = pattern->GetAttr<Color>("divider_color", Color::BLACK);
                 theme->tabBarShadowMargin_ = pattern->GetAttr<Dimension>("tab_bar_shadow_margin", 0.0_vp);
                 theme->tabBarGradientWidth_ = pattern->GetAttr<Dimension>("tab_bar_gradient_width", 0.0_vp);
+                theme->colorBottomTabSubBg_ = pattern->GetAttr<Color>("color_bottom_tab_sub_bg", Color::WHITE);
+                theme->colorBottomTabSubBgBlur_ = pattern->GetAttr<Color>("color_bottom_tab_sub_bg_blur", Color::WHITE);
             } else {
                 LOGW("find pattern of tab fail");
             }
@@ -251,6 +255,16 @@ public:
         return bottomTabTextOff_;
     }
 
+    const Color& GetBottomTabIconOn() const
+    {
+        return bottomTabIconOn_;
+    }
+
+    const Color& GetBottomTabIconOff() const
+    {
+        return bottomTabIconOff_;
+    }
+
     const Dimension& GetBottomTabImageSize() const
     {
         return bottomTabImageSize_;
@@ -315,6 +329,16 @@ public:
     {
         return tabBarGradientWidth_;
     }
+
+    const Color& GetColorBottomTabSubBg() const
+    {
+        return colorBottomTabSubBg_;
+    }
+
+    const Color& GetColorBottomTabSubBgBlur() const
+    {
+        return colorBottomTabSubBgBlur_;
+    }
 protected:
     TabTheme() = default;
 
@@ -347,6 +371,8 @@ private:
     Dimension bottomTabHorizontalPadding_;
     Color bottomTabTextOn_;
     Color bottomTabTextOff_;
+    Color bottomTabIconOn_;
+    Color bottomTabIconOff_;
     Dimension bottomTabImageSize_;
     Dimension bottomTabTextSize_;
     std::string defaultTabBarName_;
@@ -360,6 +386,8 @@ private:
     Color dividerColor_;
     Dimension tabBarShadowMargin_;
     Dimension tabBarGradientWidth_;
+    Color colorBottomTabSubBg_;
+    Color colorBottomTabSubBgBlur_;
 };
 
 } // namespace OHOS::Ace

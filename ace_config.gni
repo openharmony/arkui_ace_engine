@@ -204,6 +204,14 @@ if (defined(global_parts_info)) {
   }
 }
 
+if (!defined(global_parts_info) ||
+    defined(global_parts_info.security_security_component)) {
+  security_component_enable = true
+  ace_common_defines += [ "SECURITY_COMPONENT_ENABLE" ]
+} else {
+  security_component_enable = false
+}
+
 ace_platforms = []
 
 _ace_adapter_dir = rebase_path("$ace_root/adapter", root_build_dir)

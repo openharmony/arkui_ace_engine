@@ -20,12 +20,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/richtext_model_impl.h"
-#include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/common/container.h"
-#include "core/components/web/web_component.h"
-#include "core/components/web/web_property.h"
-#include "core/components_ng/pattern/richtext/richtext_model_ng.h"
-#include "core/components_ng/pattern/web/web_view.h"
+#include "core/components_ng/pattern/web/richtext_model_ng.h"
 
 namespace OHOS::Ace {
 std::unique_ptr<RichTextModel> RichTextModel::instance_ = nullptr;
@@ -62,6 +57,8 @@ void JSRichText::Create(const JSCallbackInfo& info)
 
     if (ParseJsString(info[0], data)) {
         RichTextModel::GetInstance()->Create(data);
+    } else {
+        LOGE("richtext component failed to parse data");
     }
 }
 
@@ -80,12 +77,13 @@ void JSRichText::OnStart(const JSCallbackInfo& info)
     if (info.Length() > 0 && info[0]->IsFunction()) {
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
 
-        auto event = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
+        auto onStartEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
+                                const BaseEventInfo* info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             func->Execute();
         };
 
-        RichTextModel::GetInstance()->SetOnPageStart(event);
+        RichTextModel::GetInstance()->SetOnPageStart(onStartEvent);
     }
 }
 
@@ -94,12 +92,13 @@ void JSRichText::OnComplete(const JSCallbackInfo& info)
     if (info.Length() > 0 && info[0]->IsFunction()) {
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
 
-        auto event = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
+        auto onCompleteEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
+                                   const BaseEventInfo* info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             func->Execute();
         };
 
-        RichTextModel::GetInstance()->SetOnPageFinish(event);
+        RichTextModel::GetInstance()->SetOnPageFinish(onCompleteEvent);
     }
 }
 } // namespace OHOS::Ace::Framework

@@ -861,6 +861,19 @@ public:
             response_->SetData(data);
             return;
         }
+        if (args[0]->IsObject()) {
+            std::string resourceUrl;
+            std::string url;
+            if (!JSViewAbstract::ParseJsMedia(args[0], resourceUrl)) {
+                LOGE("intercept failed to parse url object");
+                return;
+            }
+            auto np = resourceUrl.find_first_of("/");
+            url = (np == std::string::npos) ? resourceUrl : resourceUrl.erase(np, 1);
+            response_->SetResourceUrl(url);
+            LOGI("intercept set data url %{public}s", url.c_str());
+            return;
+        }
     }
 
     void SetResponseEncoding(const JSCallbackInfo& args)
@@ -3573,6 +3586,11 @@ void JSWeb::JsOnDragStart(const JSCallbackInfo& info)
         return;
     }
 
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        LOGE("Param is invalid, it is not a function");
+        return;
+    }
+
     RefPtr<JsDragFunction> jsOnDragStartFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onDragStartId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc)](
                              const RefPtr<DragEvent>& info, const std::string& extraParams) -> DragItemInfo {
@@ -3615,6 +3633,11 @@ void JSWeb::JsOnDragEnter(const JSCallbackInfo& info)
         return;
     }
 
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        LOGE("Param is invalid, it is not a function");
+        return;
+    }
+
     RefPtr<JsDragFunction> jsOnDragEnterFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onDragEnterId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc)](
                              const RefPtr<DragEvent>& info, const std::string& extraParams) {
@@ -3632,6 +3655,11 @@ void JSWeb::JsOnDragMove(const JSCallbackInfo& info)
 {
     if (Container::IsCurrentUseNewPipeline()) {
         JSViewAbstract::JsOnDragMove(info);
+        return;
+    }
+
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        LOGE("Param is invalid, it is not a function");
         return;
     }
 
@@ -3655,6 +3683,11 @@ void JSWeb::JsOnDragLeave(const JSCallbackInfo& info)
         return;
     }
 
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        LOGE("Param is invalid, it is not a function");
+        return;
+    }
+
     RefPtr<JsDragFunction> jsOnDragLeaveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onDragLeaveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragLeaveFunc)](
                              const RefPtr<DragEvent>& info, const std::string& extraParams) {
@@ -3672,6 +3705,11 @@ void JSWeb::JsOnDrop(const JSCallbackInfo& info)
 {
     if (Container::IsCurrentUseNewPipeline()) {
         JSViewAbstract::JsOnDrop(info);
+        return;
+    }
+
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        LOGE("Param is invalid, it is not a function");
         return;
     }
 
@@ -3795,6 +3833,7 @@ void JSWeb::OnWindowExit(const JSCallbackInfo& args)
             ContainerScope scope(instanceId);
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto* eventInfo = TypeInfoHelper::DynamicCast<WebWindowExitEvent>(info.get());
+            CHECK_NULL_VOID(func);
             func->Execute(*eventInfo);
         };
         NG::WebView::SetWindowExitEventId(std::move(uiCallback));
@@ -3804,6 +3843,7 @@ void JSWeb::OnWindowExit(const JSCallbackInfo& args)
         EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto eventInfo = TypeInfoHelper::DynamicCast<WebWindowExitEvent>(info);
+            CHECK_NULL_VOID(func);
             func->Execute(*eventInfo);
         });
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());

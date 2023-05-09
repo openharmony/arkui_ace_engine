@@ -33,7 +33,7 @@ void JSMenu::FontSize(const JSCallbackInfo& info)
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension fontSize;
+    CalcDimension fontSize;
     if (!ParseJsDimensionFp(info[0], fontSize)) {
         return;
     }
@@ -49,7 +49,7 @@ void JSMenu::Font(const JSCallbackInfo& info)
         return;
     }
 
-    Dimension fontSize;
+    CalcDimension fontSize;
     std::string weight;
     if (info.Length() < 1 || !info[0]->IsObject()) {
         LOGW("The argv is wrong, it is supposed to have at least 1 object argument");

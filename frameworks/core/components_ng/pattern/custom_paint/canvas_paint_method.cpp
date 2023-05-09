@@ -182,8 +182,16 @@ void CanvasPaintMethod::DrawImage(
 
     auto image = GetImage(canvasImage.src);
     CHECK_NULL_VOID(image);
-    InitImagePaint();
+    InitImagePaint(imagePaint_);
     InitPaintBlend(imagePaint_);
+    const auto skCanvas =
+        globalState_.GetType() == CompositeOperation::SOURCE_OVER ? skCanvas_.get() : cacheCanvas_.get();
+    if (HasImageShadow()) {
+        SkRect skRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
+        SkPath path;
+        path.addRect(skRect);
+        PaintShadow(path, *imageShadow_, skCanvas);
+    }
 
     switch (canvasImage.flag) {
         case 0:
@@ -224,7 +232,7 @@ void CanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::Canva
     sk_sp<SkImage> image =
         SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
     CHECK_NULL_VOID(image);
-    InitImagePaint();
+    InitImagePaint(imagePaint_);
     InitPaintBlend(imagePaint_);
     switch (canvasImage.flag) {
         case 0:
@@ -273,6 +281,16 @@ sk_sp<SkImage> CanvasPaintMethod::GetImage(const std::string& src)
     auto rasterizedImage = image->makeRasterImage();
     imageCache_->CacheImage(src, std::make_shared<Ace::CachedImage>(rasterizedImage));
     return rasterizedImage;
+}
+
+
+void CanvasPaintMethod::CloseImageBitmap(const std::string& src)
+{
+    CHECK_NULL_VOID(imageCache_);
+    auto cacheImage = imageCache_->GetCacheImage(src);
+    if (cacheImage && cacheImage->imagePtr) {
+        imageCache_->ClearCacheImage(src);
+    }
 }
 
 std::unique_ptr<Ace::ImageData> CanvasPaintMethod::GetImageData(
@@ -538,6 +556,7 @@ void CanvasPaintMethod::UpdateTextStyleForeground(
         ConvertTxtStyle(fillState_.GetTextStyle(), context_, txtStyle);
         if (fillState_.GetGradient().IsValid()) {
             SkPaint paint;
+            InitImagePaint(paint);
             paint.setStyle(SkPaint::Style::kFill_Style);
             UpdatePaintShader(offset, paint, fillState_.GetGradient());
             txtStyle.foreground = paint;
@@ -549,6 +568,7 @@ void CanvasPaintMethod::UpdateTextStyleForeground(
                 txtStyle.foreground.setAlphaf(globalState_.GetAlpha()); // set alpha after color
             } else {
                 SkPaint paint;
+                InitImagePaint(paint);
                 paint.setColor(fillState_.GetColor().GetValue());
                 paint.setAlphaf(globalState_.GetAlpha()); // set alpha after color
                 InitPaintBlend(paint);

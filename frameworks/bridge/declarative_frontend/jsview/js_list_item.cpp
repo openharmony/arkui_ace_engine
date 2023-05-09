@@ -188,7 +188,7 @@ void JSListItem::SelectCallback(const JSCallbackInfo& args)
 void JSListItem::JsBorderRadius(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsBorderRadius(info);
-    Dimension borderRadius;
+    CalcDimension borderRadius;
     if (!JSViewAbstract::ParseJsDimensionVp(info[0], borderRadius)) {
         return;
     }

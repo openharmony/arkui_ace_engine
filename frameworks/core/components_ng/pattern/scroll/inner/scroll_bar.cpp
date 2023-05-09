@@ -176,13 +176,22 @@ void ScrollBar::SetRectTrickRegion(
         }
         double normalWidth = NormalizeToPx(normalWidth_);
         if (LessOrEqual(activeSize, normalWidth)) {
-            activeSize = normalWidth;
+            if (!inSpring_) {
+                auto pipelineContext = PipelineContext::GetCurrentContext();
+                CHECK_NULL_VOID(pipelineContext);
+                auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
+                CHECK_NULL_VOID(theme);
+                normalWidth_ = theme->GetNormalWidth();
+                normalWidth = NormalizeToPx(normalWidth_);
+            } else {
+                activeSize = normalWidth;
+            }
         }
         double lastMainOffset =
             std::max(positionMode_ == PositionMode::BOTTOM ? lastOffset.GetX() : lastOffset.GetY(), 0.0);
         offsetScale_ = (barRegionSize_ - activeSize) / (estimatedHeight - mainSize);
         double activeMainOffset = offsetScale_ * lastMainOffset;
-        bool canUseAnimation = !inSpring && !positionModeUpdate_;
+        bool canUseAnimation = !inSpring_ && !positionModeUpdate_;
         activeMainOffset = std::min(activeMainOffset, barRegionSize_ - activeSize);
         double inactiveSize = 0.0;
         double inactiveMainOffset = 0.0;

@@ -1355,4 +1355,25 @@ HWTEST_F(RadioTestNg, RadioPatternTest027, TestSize.Level1)
     paintProperty->UpdateRadioCheck(false);
     frameNode->MarkModifyDone();
 }
+
+/**
+ * @tc.name: RadioEventHubChangeEventTest001
+ * @tc.desc: Set Radio value into RadioEventHub and get it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioTestNg, RadioEventHubChangeEventTest001, TestSize.Level1)
+{
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(std::nullopt, std::nullopt);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto onChange = [](const bool check) {
+        EXPECT_TRUE(check);
+    };
+    radioModelNG.SetOnChangeEvent(onChange);
+    eventHub->SetOnChangeEvent(std::move(onChange));
+    eventHub->UpdateChangeEvent(true);
+}
 } // namespace OHOS::Ace::NG

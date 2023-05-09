@@ -85,6 +85,7 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSTextInput>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSTextInput>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+
     JSClass<JSTextInput>::Inherit<JSViewAbstract>();
     JSClass<JSTextInput>::Bind(globalObj);
 }

@@ -609,7 +609,37 @@ public:
         return pointerId_;
     }
 #endif // ENABLE_DRAG_FRAMEWORK
+#ifdef SECURITY_COMPONENT_ENABLE
+    void SetDisplayX(double displayX)
+    {
+        displayX_ = displayX;
+    }
 
+    double GetDisplayX() const
+    {
+        return displayX_;
+    }
+
+    void SetDisplayY(double displayY)
+    {
+        displayY_ = displayY;
+    }
+
+    double GetDisplayY() const
+    {
+        return displayY_;
+    }
+
+    void SetSecCompHandleEvent(std::shared_ptr<JsonValue>& event)
+    {
+        secCompHandleEvent_ = event;
+    }
+
+    std::shared_ptr<JsonValue> GetSecCompHandleEvent() const
+    {
+        return secCompHandleEvent_;
+    }
+#endif
 private:
     bool repeat_ = false;
     bool pressed_ = false;
@@ -625,6 +655,11 @@ private:
 #ifdef ENABLE_DRAG_FRAMEWORK
     int32_t pointerId_ = 0;
 #endif // ENABLE_DRAG_FRAMEWORK
+#ifdef SECURITY_COMPONENT_ENABLE
+    double displayX_ = 0.0;
+    double displayY_ = 0.0;
+    std::shared_ptr<JsonValue> secCompHandleEvent_;
+#endif
     Point globalPoint_;
     // global position at which the touch point contacts the screen.
     Offset globalLocation_;

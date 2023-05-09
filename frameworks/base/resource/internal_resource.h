@@ -93,6 +93,8 @@ public:
         APP_BAR_FA_SVG,
         MENU_OK_SVG,
         SPINNER_DISABLE,
+        LOCATION_BUTTON_FILLED_SVG,
+        LOCATION_BUTTON_LINE_SVG,
         SVG_END = 20000,
 
         // 20001 - 30000 is reserved for i18n resource.

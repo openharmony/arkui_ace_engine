@@ -36,6 +36,25 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+enum class FilterType {
+    NONE,
+    GRAYSCALE,
+    SEPIA,
+    INVERT,
+    OPACITY,
+    BRIGHTNESS,
+    CONTRAST,
+    BLUR,
+    DROP_SHADOW,
+    SATURATE,
+    HUE_ROTATE
+};
+
+// BT.709
+constexpr float LUMR = 0.2126f;
+constexpr float LUMG = 0.7152f;
+constexpr float LUMB = 0.0722f;
+
 class CustomPaintPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(CustomPaintPaintMethod, NodePaintMethod)
 public:
@@ -74,6 +93,11 @@ public:
     void Transform(const TransformParam& param);
     void Translate(double x, double y);
 
+    void SetFilterParam(const std::string& filterStr)
+    {
+        filterParam_ = filterStr;
+    }
+
     void SetAntiAlias(bool isEnabled)
     {
         antiAlias_ = isEnabled;
@@ -88,6 +112,11 @@ public:
     void SetFillPattern(const Ace::Pattern& pattern)
     {
         fillState_.SetPattern(pattern);
+    }
+
+    void SetFillPatternNG(const std::weak_ptr<Ace::Pattern>& pattern)
+    {
+        fillState_.SetPatternNG(pattern);
     }
 
     void SetFillGradient(const Ace::Gradient& gradient)
@@ -114,6 +143,11 @@ public:
     void SetStrokeColor(const Color& color)
     {
         strokeState_.SetColor(color);
+    }
+
+    void SetStrokePatternNG(const std::weak_ptr<Ace::Pattern>& pattern)
+    {
+        strokeState_.SetPatternNG(pattern);
     }
 
     void SetStrokePattern(const Ace::Pattern& pattern)
@@ -282,10 +316,34 @@ protected:
     void Path2DBezierCurveTo(const OffsetF& offset, const PathArgs& args);
     void Path2DQuadraticCurveTo(const OffsetF& offset, const PathArgs& args);
     void Path2DSetTransform(const OffsetF& offset, const PathArgs& args);
+    SkMatrix GetMatrixFromPattern(const Ace::Pattern& pattern);
 
-    void InitImagePaint();
+    void SetGrayFilter(const std::string& percent, SkPaint& paint);
+    void SetSepiaFilter(const std::string& percent, SkPaint& paint);
+    void SetSaturateFilter(const std::string& percent, SkPaint& paint);
+    void SetHueRotateFilter(const std::string& percent, SkPaint& paint);
+    void SetInvertFilter(const std::string& percent, SkPaint& paint);
+    void SetOpacityFilter(const std::string& percent, SkPaint& paint);
+    void SetBrightnessFilter(const std::string& percent, SkPaint& paint);
+    void SetContrastFilter(const std::string& percent, SkPaint& paint);
+    void SetBlurFilter(const std::string& percent, SkPaint& paint);
+
+    void SetColorFilter(float matrix[20], SkPaint& paint);
+
+    bool GetFilterType(FilterType& filterType, std::string& filterParam);
+    bool IsPercentStr(std::string& percentStr);
+    double PxStrToDouble(const std::string& str);
+    double BlurStrToDouble(const std::string& str);
+
+    void InitImagePaint(SkPaint& paint);
     void InitImageCallbacks();
-    virtual void SetPaintImage() = 0;
+
+    void SetPaintImage(SkPaint& paint);
+    void ClearPaintImage(SkPaint& paint);
+    float PercentStrToFloat(const std::string& percentStr);
+    FilterType FilterStrToFilterType(const std::string& filterStr);
+    bool HasImageShadow() const;
+
     virtual void ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj) = 0;
     virtual void ImageObjFailed() = 0;
     virtual sk_sp<SkImage> GetImage(const std::string& src) = 0;
@@ -331,6 +389,8 @@ protected:
 
     sk_sp<SkSVGDOM> skiaDom_ = nullptr;
     Ace::CanvasImage canvasImage_;
+    std::string filterParam_ = "";
+    std::unique_ptr<Shadow> imageShadow_;
 
     ImageSourceInfo currentSource_;
     ImageSourceInfo loadingSource_;

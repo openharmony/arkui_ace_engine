@@ -36,13 +36,22 @@ public:
 
     void FireChangeEvent(bool isShow)
     {
+        if (isShowChangeEvent_) {
+            isShowChangeEvent_(isShow);
+        }
         if (changeEvent_) {
             changeEvent_(isShow);
         }
     }
 
+    void SetOnChangeEvent(ChangeEvent&& changeEventEvent)
+    {
+        isShowChangeEvent_ = std::move(changeEventEvent);
+    }
+
 private:
     ChangeEvent changeEvent_;
+    ChangeEvent isShowChangeEvent_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SideBarContainerEventHub);
 };

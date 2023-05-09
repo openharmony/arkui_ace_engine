@@ -42,14 +42,22 @@ class ACE_EXPORT ViewAbstractModelNG : public ViewAbstractModel {
 public:
     ~ViewAbstractModelNG() override = default;
 
-    void SetWidth(const Dimension& width) override
+    void SetWidth(const CalcDimension& width) override
     {
-        ViewAbstract::SetWidth(NG::CalcLength(width));
+        if (width.Unit() == DimensionUnit::CALC) {
+            ViewAbstract::SetWidth(NG::CalcLength(width.CalcValue()));
+        } else {
+            ViewAbstract::SetWidth(NG::CalcLength(width));
+        }
     }
 
-    void SetHeight(const Dimension& height) override
+    void SetHeight(const CalcDimension& height) override
     {
-        ViewAbstract::SetHeight(NG::CalcLength(height));
+        if (height.Unit() == DimensionUnit::CALC) {
+            ViewAbstract::SetHeight(NG::CalcLength(height.CalcValue()));
+        } else {
+            ViewAbstract::SetHeight(NG::CalcLength(height));
+        }
     }
 
     void ClearWidthOrHeight(bool isWidth) override
@@ -57,24 +65,40 @@ public:
         ViewAbstract::ClearWidthOrHeight(isWidth);
     }
 
-    void SetMinWidth(const Dimension& minWidth) override
+    void SetMinWidth(const CalcDimension& minWidth) override
     {
-        ViewAbstract::SetMinWidth(NG::CalcLength(minWidth));
+        if (minWidth.Unit() == DimensionUnit::CALC) {
+            ViewAbstract::SetMinWidth(NG::CalcLength(minWidth.CalcValue()));
+        } else {
+            ViewAbstract::SetMinWidth(NG::CalcLength(minWidth));
+        }
     }
 
-    void SetMinHeight(const Dimension& minHeight) override
+    void SetMinHeight(const CalcDimension& minHeight) override
     {
-        ViewAbstract::SetMinHeight(NG::CalcLength(minHeight));
+        if (minHeight.Unit() == DimensionUnit::CALC) {
+            ViewAbstract::SetMinHeight(NG::CalcLength(minHeight.CalcValue()));
+        } else {
+            ViewAbstract::SetMinHeight(NG::CalcLength(minHeight));
+        }
     }
 
-    void SetMaxWidth(const Dimension& maxWidth) override
+    void SetMaxWidth(const CalcDimension& maxWidth) override
     {
-        ViewAbstract::SetMaxWidth(NG::CalcLength(maxWidth));
+        if (maxWidth.Unit() == DimensionUnit::CALC) {
+            ViewAbstract::SetMaxWidth(NG::CalcLength(maxWidth.CalcValue()));
+        } else {
+            ViewAbstract::SetMaxWidth(NG::CalcLength(maxWidth));
+        }
     }
 
-    void SetMaxHeight(const Dimension& maxHeight) override
+    void SetMaxHeight(const CalcDimension& maxHeight) override
     {
-        ViewAbstract::SetMaxHeight(NG::CalcLength(maxHeight));
+        if (maxHeight.Unit() == DimensionUnit::CALC) {
+            ViewAbstract::SetMaxHeight(NG::CalcLength(maxHeight.CalcValue()));
+        } else {
+            ViewAbstract::SetMaxHeight(NG::CalcLength(maxHeight));
+        }
     }
 
     void SetBackgroundColor(const Color& color) override
@@ -120,51 +144,97 @@ public:
         ViewAbstract::SetLightUpEffect(radio);
     }
 
-    void SetPadding(const Dimension& value) override
+    void SetPadding(const CalcDimension& value) override
     {
-        // padding must great or equal zero.
-        ViewAbstract::SetPadding(NG::CalcLength(value.IsNonNegative() ? value : Dimension()));
+        if (value.Unit() == DimensionUnit::CALC) {
+            // padding must great or equal zero.
+            ViewAbstract::SetPadding(
+                NG::CalcLength(value.IsNonNegative() ? value.CalcValue() : CalcDimension().CalcValue()));
+        } else {
+            // padding must great or equal zero.
+            ViewAbstract::SetPadding(NG::CalcLength(value.IsNonNegative() ? value : CalcDimension()));
+        }
     }
 
-    void SetPaddings(const std::optional<Dimension>& top, const std::optional<Dimension>& bottom,
-        const std::optional<Dimension>& left, const std::optional<Dimension>& right) override
+    void SetPaddings(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
+        const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right) override
     {
         NG::PaddingProperty paddings;
         if (top.has_value()) {
-            paddings.top = NG::CalcLength(top.value().IsNonNegative() ? top.value() : Dimension());
+            if (top.value().Unit() == DimensionUnit::CALC) {
+                paddings.top =
+                    NG::CalcLength(top.value().IsNonNegative() ? top.value().CalcValue() : CalcDimension().CalcValue());
+            } else {
+                paddings.top = NG::CalcLength(top.value().IsNonNegative() ? top.value() : CalcDimension());
+            }
         }
         if (bottom.has_value()) {
-            paddings.bottom = NG::CalcLength(bottom.value().IsNonNegative() ? bottom.value() : Dimension());
+            if (bottom.value().Unit() == DimensionUnit::CALC) {
+                paddings.bottom = NG::CalcLength(
+                    bottom.value().IsNonNegative() ? bottom.value().CalcValue() : CalcDimension().CalcValue());
+            } else {
+                paddings.bottom = NG::CalcLength(bottom.value().IsNonNegative() ? bottom.value() : CalcDimension());
+            }
         }
         if (left.has_value()) {
-            paddings.left = NG::CalcLength(left.value().IsNonNegative() ? left.value() : Dimension());
+            if (left.value().Unit() == DimensionUnit::CALC) {
+                paddings.left = NG::CalcLength(
+                    left.value().IsNonNegative() ? left.value().CalcValue() : CalcDimension().CalcValue());
+            } else {
+                paddings.left = NG::CalcLength(left.value().IsNonNegative() ? left.value() : CalcDimension());
+            }
         }
         if (right.has_value()) {
-            paddings.right = NG::CalcLength(right.value().IsNonNegative() ? right.value() : Dimension());
+            if (right.value().Unit() == DimensionUnit::CALC) {
+                paddings.right = NG::CalcLength(
+                    right.value().IsNonNegative() ? right.value().CalcValue() : CalcDimension().CalcValue());
+            } else {
+                paddings.right = NG::CalcLength(right.value().IsNonNegative() ? right.value() : CalcDimension());
+            }
         }
         ViewAbstract::SetPadding(paddings);
     }
 
-    void SetMargin(const Dimension& value) override
+    void SetMargin(const CalcDimension& value) override
     {
-        ViewAbstract::SetMargin(NG::CalcLength(value));
+        if (value.Unit() == DimensionUnit::CALC) {
+            ViewAbstract::SetMargin(NG::CalcLength(value.CalcValue()));
+        } else {
+            ViewAbstract::SetMargin(NG::CalcLength(value));
+        }
     }
 
-    void SetMargins(const std::optional<Dimension>& top, const std::optional<Dimension>& bottom,
-        const std::optional<Dimension>& left, const std::optional<Dimension>& right) override
+    void SetMargins(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
+        const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right) override
     {
         NG::MarginProperty margins;
         if (top.has_value()) {
-            margins.top = NG::CalcLength(top.value());
+            if (top.value().Unit() == DimensionUnit::CALC) {
+                margins.top = NG::CalcLength(top.value().CalcValue());
+            } else {
+                margins.top = NG::CalcLength(top.value());
+            }
         }
         if (bottom.has_value()) {
-            margins.bottom = NG::CalcLength(bottom.value());
+            if (bottom.value().Unit() == DimensionUnit::CALC) {
+                margins.bottom = NG::CalcLength(bottom.value().CalcValue());
+            } else {
+                margins.bottom = NG::CalcLength(bottom.value());
+            }
         }
         if (left.has_value()) {
-            margins.left = NG::CalcLength(left.value());
+            if (left.value().Unit() == DimensionUnit::CALC) {
+                margins.left = NG::CalcLength(left.value().CalcValue());
+            } else {
+                margins.left = NG::CalcLength(left.value());
+            }
         }
         if (right.has_value()) {
-            margins.right = NG::CalcLength(right.value());
+            if (right.value().Unit() == DimensionUnit::CALC) {
+                margins.right = NG::CalcLength(right.value().CalcValue());
+            } else {
+                margins.right = NG::CalcLength(right.value());
+            }
         }
         ViewAbstract::SetMargin(margins);
     }
@@ -509,6 +579,11 @@ public:
         ViewAbstract::SetHueRotate(value);
     }
 
+    void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue) override
+    {
+        ViewAbstract::SetClickEffectLevel(level, scaleValue);
+    }
+
     void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc) override
     {
         ViewAbstract::SetOnClick(std::move(tapEventFunc));
@@ -718,6 +793,9 @@ public:
 
     void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<void()>&& buildFunc, int32_t type) override;
+
+    void BindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
+        std::function<void()>&& buildFunc, NG::SheetStyle& sheetStyle) override;
 
     void SetAccessibilityGroup(bool accessible) override {}
     void SetAccessibilityText(const std::string& text) override {}

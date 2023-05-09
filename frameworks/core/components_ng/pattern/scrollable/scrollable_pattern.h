@@ -159,7 +159,7 @@ protected:
             scrollBar_->SetDriving(Driving);
         }
     }
-    void UpdateScrollBarRegion(float offset, float estimatedHeight, Size viewPort);
+    void UpdateScrollBarRegion(float offset, float estimatedHeight, Size viewPort, Offset viewOffset);
 
 private:
     void RegisterScrollBarEventTask();

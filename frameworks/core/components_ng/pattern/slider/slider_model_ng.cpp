@@ -76,9 +76,14 @@ void SliderModelNG::SetShowSteps(bool value)
 {
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, ShowSteps, value);
 }
-void SliderModelNG::SetShowTips(bool value)
+void SliderModelNG::SetShowTips(bool value, const std::optional<std::string>& content)
 {
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, ShowTips, value);
+    if (content.has_value()) {
+        ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, CustomContent, content.value());
+    } else {
+        ACE_RESET_PAINT_PROPERTY(SliderPaintProperty, CustomContent);
+    }
 }
 void SliderModelNG::SetThickness(const Dimension& value)
 {
@@ -164,5 +169,14 @@ void SliderModelNG::SetOnChange(SliderOnChangeEvent&& eventOnChange)
     auto eventHub = frameNode->GetEventHub<SliderEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(eventOnChange));
+}
+
+void SliderModelNG::SetOnChangeEvent(SliderOnValueChangeEvent&& onChangeEvent)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<SliderEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnChangeEvent(std::move(onChangeEvent));
 }
 } // namespace OHOS::Ace::NG

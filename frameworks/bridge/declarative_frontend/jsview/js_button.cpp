@@ -49,7 +49,7 @@ void JSButton::SetFontSize(const JSCallbackInfo& info)
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension fontSize;
+    CalcDimension fontSize;
     if (!ParseJsDimensionFp(info[0], fontSize)) {
         return;
     }
@@ -214,7 +214,7 @@ void JSButton::GetFontContent(const JSRef<JSVal> font, NG::ButtonView::ButtonPar
 {
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(font);
     JSRef<JSVal> size = obj->GetProperty("size");
-    Dimension fontSize;
+    CalcDimension fontSize;
     if (ParseJsDimensionFp(size, fontSize)) {
         buttonParameters.fontSize = fontSize;
     }
@@ -299,13 +299,13 @@ void JSButton::SetLableStyle(const JSCallbackInfo& info)
     }
 
     JSRef<JSVal> minFontSizeValue = obj->GetProperty("minFontSize");
-    Dimension minFontSize;
+    CalcDimension minFontSize;
     if (ParseJsDimensionFp(minFontSizeValue, minFontSize)) {
         buttonParameters.minFontSize = minFontSize;
     }
 
     JSRef<JSVal> maxFontSizeValue = obj->GetProperty("maxFontSize");
-    Dimension maxFontSize;
+    CalcDimension maxFontSize;
     if (ParseJsDimensionFp(maxFontSizeValue, maxFontSize)) {
         buttonParameters.maxFontSize = maxFontSize;
     }
@@ -538,7 +538,7 @@ void JSButton::JsPadding(const JSCallbackInfo& info)
     }
     Edge padding;
     if (info[0]->IsNumber()) {
-        Dimension edgeValue;
+        CalcDimension edgeValue;
         if (ParseJsDimensionVp(info[0], edgeValue)) {
             padding = Edge(edgeValue);
         }
@@ -549,10 +549,10 @@ void JSButton::JsPadding(const JSCallbackInfo& info)
             LOGE("Js Parse object failed. argsPtr is null.");
             return;
         }
-        Dimension left = Dimension(0.0, DimensionUnit::VP);
-        Dimension top = Dimension(0.0, DimensionUnit::VP);
-        Dimension right = Dimension(0.0, DimensionUnit::VP);
-        Dimension bottom = Dimension(0.0, DimensionUnit::VP);
+        CalcDimension left = CalcDimension(0.0, DimensionUnit::VP);
+        CalcDimension top = CalcDimension(0.0, DimensionUnit::VP);
+        CalcDimension right = CalcDimension(0.0, DimensionUnit::VP);
+        CalcDimension bottom = CalcDimension(0.0, DimensionUnit::VP);
         if (object->Contains("top") || object->Contains("bottom") || object->Contains("left") ||
             object->Contains("right")) {
             ParseJsonDimensionVp(object->GetValue("left"), left);
@@ -688,7 +688,7 @@ void JSButton::JsWidth(const JSCallbackInfo& info)
         return;
     }
     JSViewAbstract::JsWidth(info);
-    Dimension value = GetSizeValue(info);
+    CalcDimension value = GetSizeValue(info);
     if (LessNotEqual(value.Value(), 0.0)) {
         return;
     }
@@ -717,7 +717,7 @@ void JSButton::JsHeight(const JSCallbackInfo& info)
         return;
     }
     JSViewAbstract::JsHeight(info);
-    Dimension value = GetSizeValue(info);
+    CalcDimension value = GetSizeValue(info);
     if (LessNotEqual(value.Value(), 0.0)) {
         return;
     }
@@ -778,11 +778,11 @@ void JSButton::JsSize(const JSCallbackInfo& info)
 
     if (Container::IsCurrentUseNewPipeline()) {
         JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
-        Dimension width;
+        CalcDimension width;
         if (ParseJsDimensionVp(sizeObj->GetProperty("width"), width)) {
             NG::ViewAbstract::SetWidth(NG::CalcLength(width));
         }
-        Dimension height;
+        CalcDimension height;
         if (ParseJsDimensionVp(sizeObj->GetProperty("height"), height)) {
             NG::ViewAbstract::SetHeight(NG::CalcLength(height));
         }
@@ -797,7 +797,7 @@ void JSButton::JsSize(const JSCallbackInfo& info)
     }
     JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> widthValue = sizeObj->GetProperty("width");
-    Dimension width;
+    CalcDimension width;
     if (ParseJsDimensionVp(widthValue, width)) {
         if (!stack->IsVisualStateSet()) {
             buttonComponent->SetWidth(width, stack->GetImplicitAnimationOption());
@@ -812,7 +812,7 @@ void JSButton::JsSize(const JSCallbackInfo& info)
         }
     }
     JSRef<JSVal> heightValue = sizeObj->GetProperty("height");
-    Dimension height;
+    CalcDimension height;
     if (ParseJsDimensionVp(heightValue, height)) {
         buttonComponent->IsNeedResetHeight(false);
         if (!stack->IsVisualStateSet()) {
@@ -836,7 +836,7 @@ void JSButton::JsRadius(const JSCallbackInfo& info)
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension radius;
+    CalcDimension radius;
     if (!ParseJsDimensionVp(info[0], radius)) {
         return;
     }
@@ -872,15 +872,15 @@ void JSButton::JsRadius(const JSCallbackInfo& info)
     }
 }
 
-Dimension JSButton::GetSizeValue(const JSCallbackInfo& info)
+CalcDimension JSButton::GetSizeValue(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
-        return Dimension(-1.0);
+        return CalcDimension(-1.0);
     }
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
-        return Dimension(-1.0);
+        return CalcDimension(-1.0);
     }
     return value;
 }

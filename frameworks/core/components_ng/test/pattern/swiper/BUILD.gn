@@ -17,7 +17,7 @@ import(
     "//foundation/arkui/ace_engine/frameworks/core/components_ng/components.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ohos_unittest("swiper_pattern_test_ng") {
+ohos_unittest("swiper_indicator_pattern_test_ng") {
   platform = "ohos"
   module_out_path = pattern_test_output_path
 
@@ -144,15 +144,11 @@ ohos_unittest("swiper_pattern_test_ng") {
 
   deps = [
     "$ace_root/frameworks/base:ace_memory_monitor_ohos",
+    "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
     "$ace_root/test/unittest:ace_unittest_log",
     "$ace_root/test/unittest:ace_unittest_trace",
     "$cjson_root:cjson",
     "//third_party/googletest:gmock_main",
-  ]
-
-  deps += [
-    "$ace_flutter_engine_root:third_party_flutter_engine_ohos",
-    "$ace_flutter_engine_root/skia:ace_skia_ohos",
   ]
 
   if (platform == "ohos") {

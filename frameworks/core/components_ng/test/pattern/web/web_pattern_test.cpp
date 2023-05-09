@@ -45,6 +45,8 @@ int32_t EF_CAN_CUT = 2;
 int32_t EF_CAN_COPY = 4;
 int32_t EF_CAN_PASTE = 8;
 int32_t EF_CAN_SELECT_ALL = 16;
+int32_t CONTRNT_WIDTH_SIZE = 1024;
+int32_t CONTRNT_HEIGHT_SIZE = 99999;
 
 std::shared_ptr<NWebTouchHandleState> g_insertHandle = nullptr;
 std::shared_ptr<NWebTouchHandleState> g_startSelectionHandle = nullptr;
@@ -184,13 +186,20 @@ HWTEST_F(WebPatternTest, OnModifyDoneTest001, TestSize.Level1)
     int32_t height = 1;
     double keyboard = 0;
     g_webPattern->isFocus_ = false;
-    g_webPattern->ProcessVirtualKeyBoard(width, height, keyboard);
+    bool result = g_webPattern->ProcessVirtualKeyBoard(width, height, keyboard);
+    EXPECT_FALSE(result);
+    g_webPattern->isVirtualKeyBoardShow_ = WebPattern::VkState::VK_SHOW;
+    result = g_webPattern->ProcessVirtualKeyBoard(width, height, keyboard);
+    EXPECT_FALSE(result);
     g_webPattern->isFocus_ = true;
-    g_webPattern->ProcessVirtualKeyBoard(width, height, keyboard);
+    result = g_webPattern->ProcessVirtualKeyBoard(width, height, keyboard);
+    EXPECT_TRUE(result);
     keyboard = 1;
-    g_webPattern->ProcessVirtualKeyBoard(width, height, keyboard);
+    result = g_webPattern->ProcessVirtualKeyBoard(width, height, keyboard);
+    EXPECT_TRUE(result);
     g_webPattern->isVirtualKeyBoardShow_ = WebPattern::VkState::VK_HIDE;
-    g_webPattern->ProcessVirtualKeyBoard(width, height, keyboard);
+    result = g_webPattern->ProcessVirtualKeyBoard(width, height, keyboard);
+    EXPECT_TRUE(result);
     g_webPattern->UpdateWebLayoutSize(width, height);
     TouchEventInfo info("test");
     info.changedTouches_.clear();
@@ -198,27 +207,22 @@ HWTEST_F(WebPatternTest, OnModifyDoneTest001, TestSize.Level1)
     TouchLocationInfo touch(1);
     info.changedTouches_.emplace_back(touch);
     g_webPattern->touchEvent_->callback_(info);
-
     info.SetSourceDevice(SourceType::NONE);
     g_webPattern->touchEvent_->callback_(info);
     info.SetSourceDevice(SourceType::TOUCH);
     g_webPattern->touchEvent_->callback_(info);
-
     touch.SetTouchType(TouchType::DOWN);
     info.changedTouches_.clear();
     info.changedTouches_.emplace_back(touch);
     g_webPattern->touchEvent_->callback_(info);
-
     touch.SetTouchType(TouchType::MOVE);
     info.changedTouches_.clear();
     info.changedTouches_.emplace_back(touch);
     g_webPattern->touchEvent_->callback_(info);
-
     touch.SetTouchType(TouchType::UP);
     info.changedTouches_.clear();
     info.changedTouches_.emplace_back(touch);
     g_webPattern->touchEvent_->callback_(info);
-
     touch.SetTouchType(TouchType::CANCEL);
     info.changedTouches_.clear();
     info.changedTouches_.emplace_back(touch);
@@ -236,20 +240,31 @@ HWTEST_F(WebPatternTest, HandleTouchDownTest002, TestSize.Level1)
 #ifdef OHOS_STANDARD_SYSTEM
     int32_t fingerId = 0;
     g_webPattern->OnModifyDone();
+    int32_t width = 1;
+    int32_t height = 1;
+    double keyboard = 1;
+    g_webPattern->isFocus_ = true;
+    g_webPattern->isVirtualKeyBoardShow_ = WebPattern::VkState::VK_HIDE;
+    auto drawSize = Size(CONTRNT_WIDTH_SIZE, CONTRNT_HEIGHT_SIZE);
+    g_webPattern->drawSizeCache_ = drawSize;
+    bool result = g_webPattern->ProcessVirtualKeyBoard(width, height, keyboard);
+    EXPECT_TRUE(result);
     TouchLocationInfo info("webtest", fingerId);
     TouchEventInfo event("webtest");
-    g_webPattern->HandleTouchDown(event, true);
     g_webPattern->HandleTouchUp(event, true);
+    g_webPattern->HandleTouchDown(event, true);
     g_webPattern->HandleTouchMove(event, true);
     g_webPattern->isDragging_ = true;
     g_webPattern->HandleTouchMove(event, true);
 
     event.AddTouchLocationInfo(std::move(info));
-    g_webPattern->HandleTouchDown(event, true);
     g_webPattern->HandleTouchUp(event, true);
+    g_webPattern->HandleTouchDown(event, true);
     g_webPattern->HandleTouchMove(event, true);
     g_webPattern->HandleTouchCancel(event);
     g_webPattern->RequestFullScreen();
+    g_webPattern->ExitFullScreen();
+    g_webPattern->isFullScreen_ = true;
     g_webPattern->ExitFullScreen();
 #endif
 }
@@ -311,6 +326,13 @@ HWTEST_F(WebPatternTest, GetTouchHandleOverlayTypeTest004, TestSize.Level1)
     g_startSelectionHandle = std::make_shared<NWebTouchHandleStateMock>();
     result = g_webPattern->RunQuickMenu(params, callback);
     EXPECT_FALSE(result);
+
+    int32_t selectOverlayId = 1;
+    g_webPattern->selectOverlayProxy_ = new SelectOverlayProxy(selectOverlayId);
+    result = g_webPattern->RunQuickMenu(params, callback);
+    EXPECT_FALSE(result);
+    g_webPattern->selectOverlayProxy_->Close();
+    g_webPattern->selectOverlayProxy_ = nullptr;
 
     g_insertHandle.reset();
     g_insertHandle = nullptr;
