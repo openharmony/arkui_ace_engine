@@ -15,6 +15,7 @@
 
 #include "bridge/declarative_frontend/jsview/js_progress.h"
 
+#include "base/utils/utils.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_linear_gradient.h"
 #include "bridge/declarative_frontend/jsview/models/progress_model_impl.h"
@@ -144,6 +145,10 @@ void JSProgress::SetValue(double value)
 
 void JSProgress::SetColor(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
     Color colorVal;
     OHOS::Ace::NG::Gradient gradient;
     RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
@@ -194,13 +199,15 @@ void JSProgress::SetCircularStyle(const JSCallbackInfo& info)
 
 void JSProgress::JsSetProgressStyleOptions(const JSCallbackInfo& info)
 {
+    static const char attrsProgressStrokeWidth[] = "strokeWidth";
+    static const char attrsProgressScaleWidth[] = "scaleWidth";
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
+    CHECK_NULL_VOID(theme);
 
     CalcDimension strokeWidthDimension;
-    auto jsStrokeWidth = paramObject->GetProperty("strokeWidth");
-    if (!ParseJsDimensionVp(jsStrokeWidth, strokeWidthDimension)) {
-        LOGI("circular Style error. now use default strokeWidth");
+    auto jsStrokeWidth = paramObject->GetProperty(attrsProgressStrokeWidth);
+    if (!CheckLength(jsStrokeWidth, strokeWidthDimension, V2::PROGRESS_ETS_TAG, attrsProgressStrokeWidth)) {
         strokeWidthDimension = theme->GetTrackThickness();
     }
 
@@ -219,9 +226,8 @@ void JSProgress::JsSetProgressStyleOptions(const JSCallbackInfo& info)
     }
 
     CalcDimension scaleWidthDimension;
-    auto jsScaleWidth = paramObject->GetProperty("scaleWidth");
-    if (!ParseJsDimensionVp(jsScaleWidth, scaleWidthDimension)) {
-        LOGI("circular Style error. now use default scaleWidth");
+    auto jsScaleWidth = paramObject->GetProperty(attrsProgressScaleWidth);
+    if (!CheckLength(jsScaleWidth, scaleWidthDimension, V2::PROGRESS_ETS_TAG, attrsProgressScaleWidth)) {
         scaleWidthDimension = theme->GetScaleWidth();
     }
 
@@ -292,8 +298,9 @@ void JSProgress::JsBackgroundColor(const JSCallbackInfo& info)
     }
 
     Color colorVal;
-    if (!ParseJsColor(info[0], colorVal)) {
+    if (!CheckColor(info[0], colorVal, V2::PROGRESS_ETS_TAG, V2::ATTRS_COMMON_BACKGROUND_COLOR)) {
         RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
+        CHECK_NULL_VOID(theme);
         if (g_progressType == ProgressType::CAPSULE) {
             colorVal = theme->GetCapsuleBgColor();
         } else if (g_progressType == ProgressType::RING) {

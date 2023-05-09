@@ -5587,4 +5587,46 @@ void JSViewAbstract::JsKeyboardShortcut(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetKeyboardShortcut(value, keys, nullptr);
 }
 
+bool JSViewAbstract::CheckColor(
+    const JSRef<JSVal>& jsValue, Color& result, const char* componentName, const char* propName)
+{
+    // Color is undefined or null
+    if (jsValue->IsUndefined() || jsValue->IsNull()) {
+        LOGW("%{public}s-%{public}s is undefined or null, using default color", componentName, propName);
+        return false;
+    }
+    // input type is not in [number, string, Resource]
+    if (!jsValue->IsNumber() && !jsValue->IsString() && !jsValue->IsObject()) {
+        LOGW("%{public}s-%{public}s Color property input type is error, using default color", componentName, propName);
+        return false;
+    }
+    // Correct type, incorrect value parsing
+    if (!ParseJsColor(jsValue, result)) {
+        LOGW("%{public}s-%{public}s Color parses error, using default color", componentName, propName);
+        return false;
+    }
+    return true;
+}
+
+bool JSViewAbstract::CheckLength(
+    const JSRef<JSVal>& jsValue, CalcDimension& result, const char* componentName, const char* propName)
+{
+    // Length is undefined or null
+    if (jsValue->IsUndefined() || jsValue->IsNull()) {
+        LOGW("%{public}s-%{public}s is undefined or null, using default length", componentName, propName);
+        return false;
+    }
+    // input type is not in [number, string, Resource]
+    if (!jsValue->IsNumber() && !jsValue->IsString() && !jsValue->IsObject()) {
+        LOGW(
+            "%{public}s-%{public}s Length property input type is error, using default length", componentName, propName);
+        return false;
+    }
+    // Correct type, incorrect value parsing
+    if (!ParseJsDimensionVp(jsValue, result)) {
+        LOGW("%{public}s-%{public}s Length parses error, using default length", componentName, propName);
+        return false;
+    }
+    return true;
+}
 } // namespace OHOS::Ace::Framework
