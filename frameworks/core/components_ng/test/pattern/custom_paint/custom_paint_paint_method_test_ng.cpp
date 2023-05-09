@@ -425,6 +425,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg008, TestSize
     EXPECT_TRUE(imageData.data.empty());
 }
 
+#ifndef NEW_SKIA
 /**
  * @tc.name: CustomPaintPaintMethodTestNg009
  * @tc.desc: Test the functions GetStrokePaint of CustomPaintPaintMethod.
@@ -445,7 +446,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg009, TestSize
      */
     SkPaint paint;
     paintMethod->globalState_.SetAlpha(DEFAULT_DOUBLE1);
-    paint = paintMethod->GetStrokePaint();
+    paintMethod->GetStrokePaint(paint);
     EXPECT_DOUBLE_EQ(paint.getAlphaf(), DEFAULT_DOUBLE1);
 
     /**
@@ -453,9 +454,10 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg009, TestSize
      * @tc.expected: The value of getFillType is not equal to DEFAULT_DOUBLE1.
      */
     paintMethod->globalState_.SetAlpha(DEFAULT_DOUBLE10);
-    paint = paintMethod->GetStrokePaint();
+    paintMethod->GetStrokePaint(paint);
     EXPECT_NE(paint.getAlphaf(), DEFAULT_DOUBLE1);
 }
+#endif
 
 /**
  * @tc.name: CustomPaintPaintMethodTestNg010
