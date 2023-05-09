@@ -692,25 +692,23 @@ void ListPattern::AnimateTo(float position, float duration, const RefPtr<Curve>&
     }
     if (!animator_) {
         animator_ = AceType::MakeRefPtr<Animator>(PipelineBase::GetCurrentContext());
-    }
-    if (!animator_->IsStopped()) {
+        animator_->AddStopListener([weak = AceType::WeakClaim(this)]() {
+            auto list = weak.Upgrade();
+            CHECK_NULL_VOID_NOLOG(list);
+            list->scrollStop_ = true;
+            list->MarkDirtyNodeSelf();
+            list->isScrollEnd_ = true;
+        });
+    } else if (!animator_->IsStopped()) {
         scrollAbort_ = true;
         animator_->Stop();
     }
     animator_->ClearInterpolators();
-
     auto animation = AceType::MakeRefPtr<CurveAnimation<float>>(GetTotalOffset(), position, curve);
     animation->AddListener([weakScroll = AceType::WeakClaim(this)](float value) {
         auto list = weakScroll.Upgrade();
         CHECK_NULL_VOID_NOLOG(list);
         list->UpdateCurrentOffset(list->GetTotalOffset() - value, SCROLL_FROM_JUMP);
-    });
-    animator_->AddStopListener([weak = AceType::WeakClaim(this)]() {
-        auto list = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(list);
-        list->scrollStop_ = true;
-        list->MarkDirtyNodeSelf();
-        list->isScrollEnd_ = true;
     });
     animator_->AddInterpolator(animation);
     animator_->SetDuration(static_cast<int32_t>(duration));
