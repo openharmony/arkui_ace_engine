@@ -20,13 +20,10 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 namespace OHOS::Ace::Framework {
-
 class JSActionSheet : public JSViewAbstract, public JSInteractableView {
 public:
     static void JSBind(BindingTarget globalObj);
     static void Show(const JSCallbackInfo& args);
 };
-
 } // namespace OHOS::Ace::Framework
-
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_ACTION_SHEET_JS_ACTION_SHEET_H
