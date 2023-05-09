@@ -1016,42 +1016,97 @@ RectF RosenRenderContext::AdjustPaintRect()
     auto anchorHeightReference = rect.Height();
     auto anchorX = ConvertToPx(anchor.GetX(), ScaleProperty::CreateScaleProperty(), anchorWidthReference);
     auto anchorY = ConvertToPx(anchor.GetY(), ScaleProperty::CreateScaleProperty(), anchorHeightReference);
+    Dimension resultX;
+    Dimension resultY;
     Dimension parentPaddingLeft;
     Dimension parentPaddingTop;
+    GetPaddingOfFirstFrameNodeParent(parentPaddingLeft, parentPaddingTop);
     // Position properties take precedence over offset locations.
     if (HasPosition() && IsUsingPosition(frameNode)) {
-        Dimension selfMarginLeft;
-        Dimension selfMarginTop;
-        if (frameNode->GetLayoutProperty() && frameNode->GetLayoutProperty()->GetMarginProperty()) {
-            auto& margin = frameNode->GetLayoutProperty()->GetMarginProperty();
-            if (margin->left.has_value()) {
-                selfMarginLeft = margin->left.value().GetDimension();
-            }
-            if (margin->top.has_value()) {
-                selfMarginTop = margin->top.value().GetDimension();
-            }
-        }
-        GetPaddingOfFirstFrameNodeParent(parentPaddingLeft, parentPaddingTop);
-        auto position = GetPositionValue({}) +
-                        OffsetT<Dimension>(parentPaddingLeft + selfMarginTop, parentPaddingTop + selfMarginTop);
-        auto posX = ConvertToPx(position.GetX(), ScaleProperty::CreateScaleProperty(), widthPercentReference);
-        auto posY = ConvertToPx(position.GetY(), ScaleProperty::CreateScaleProperty(), heightPercentReference);
-        rect.SetLeft(posX.value_or(0) - anchorX.value_or(0));
-        rect.SetTop(posY.value_or(0) - anchorY.value_or(0));
+        CombineMarginAndPosition(
+            resultX, resultY, parentPaddingLeft, parentPaddingTop, widthPercentReference, heightPercentReference);
+        rect.SetLeft(resultX.ConvertToPx() - anchorX.value_or(0));
+        rect.SetTop(resultY.ConvertToPx() - anchorY.value_or(0));
         return rect;
     }
     if (HasOffset()) {
-        GetPaddingOfFirstFrameNodeParent(parentPaddingLeft, parentPaddingTop);
-        auto offset = GetOffsetValue({}) + OffsetT<Dimension>(parentPaddingLeft, parentPaddingTop);
-        auto offsetX = ConvertToPx(offset.GetX(), ScaleProperty::CreateScaleProperty(), widthPercentReference);
-        auto offsetY = ConvertToPx(offset.GetY(), ScaleProperty::CreateScaleProperty(), heightPercentReference);
-        rect.SetLeft(rect.GetX() + offsetX.value_or(0) - anchorX.value_or(0));
-        rect.SetTop(rect.GetY() + offsetY.value_or(0) - anchorY.value_or(0));
+        CombinePaddingAndOffset(
+            resultX, resultY, parentPaddingLeft, parentPaddingTop, widthPercentReference, heightPercentReference);
+        rect.SetLeft(rect.GetX() + resultX.ConvertToPx() - anchorX.value_or(0));
+        rect.SetTop(rect.GetY() + resultY.ConvertToPx() - anchorY.value_or(0));
         return rect;
     }
     rect.SetLeft(rect.GetX() - anchorX.value_or(0));
     rect.SetTop(rect.GetY() - anchorY.value_or(0));
     return rect;
+}
+
+void RosenRenderContext::CombineMarginAndPosition(Dimension& resultX, Dimension& resultY,
+    const Dimension& parentPaddingLeft, const Dimension& parentPaddingTop, float widthPercentReference,
+    float heightPercentReference)
+{
+    Dimension selfMarginLeft;
+    Dimension selfMarginTop;
+    auto frameNode = GetHost();
+    if (frameNode && frameNode->GetLayoutProperty() && frameNode->GetLayoutProperty()->GetMarginProperty()) {
+        auto& margin = frameNode->GetLayoutProperty()->GetMarginProperty();
+        if (margin->left.has_value()) {
+            selfMarginLeft = margin->left.value().GetDimension();
+        }
+        if (margin->top.has_value()) {
+            selfMarginTop = margin->top.value().GetDimension();
+        }
+    }
+    // to distinguish cases ex. margin has percentage unit and padding has vp unit
+    // final rect offset will be affected by parent padding, self margin and position property
+    if (selfMarginLeft.Unit() != GetPositionValue({}).GetX().Unit() ||
+        selfMarginLeft.Unit() != parentPaddingLeft.Unit() ||
+        parentPaddingLeft.Unit() != GetPositionValue({}).GetX().Unit()) {
+        resultX = Dimension(
+            ConvertToPx(parentPaddingLeft, ScaleProperty::CreateScaleProperty(), widthPercentReference).value_or(0) +
+                ConvertToPx(selfMarginLeft, ScaleProperty::CreateScaleProperty(), widthPercentReference).value_or(0) +
+                ConvertToPx(GetPositionValue({}).GetX(), ScaleProperty::CreateScaleProperty(), widthPercentReference)
+                    .value_or(0),
+            DimensionUnit::PX);
+    } else {
+        resultX = selfMarginLeft + GetPositionValue({}).GetX() + parentPaddingLeft;
+    }
+    if (selfMarginTop.Unit() != GetPositionValue({}).GetY().Unit() || selfMarginTop.Unit() != parentPaddingTop.Unit() ||
+        parentPaddingTop.Unit() != GetPositionValue({}).GetY().Unit()) {
+        resultY = Dimension(
+            ConvertToPx(parentPaddingTop, ScaleProperty::CreateScaleProperty(), heightPercentReference).value_or(0) +
+                ConvertToPx(selfMarginTop, ScaleProperty::CreateScaleProperty(), heightPercentReference).value_or(0) +
+                ConvertToPx(GetPositionValue({}).GetY(), ScaleProperty::CreateScaleProperty(), heightPercentReference)
+                    .value_or(0),
+            DimensionUnit::PX);
+    } else {
+        resultY = selfMarginTop + GetPositionValue({}).GetY() + parentPaddingTop;
+    }
+}
+
+void RosenRenderContext::CombinePaddingAndOffset(Dimension& resultX, Dimension& resultY,
+    const Dimension& parentPaddingLeft, const Dimension& parentPaddingTop, float widthPercentReference,
+    float heightPercentReference)
+{
+    // to distinguish cases ex. offset has percentage unit and padding has vp unit
+    if (parentPaddingLeft.Unit() != GetOffsetValue({}).GetX().Unit()) {
+        resultX = Dimension(
+            ConvertToPx(parentPaddingLeft, ScaleProperty::CreateScaleProperty(), widthPercentReference).value_or(0) +
+                ConvertToPx(GetOffsetValue({}).GetX(), ScaleProperty::CreateScaleProperty(), widthPercentReference)
+                    .value_or(0),
+            DimensionUnit::PX);
+    } else {
+        resultX = parentPaddingLeft + GetOffsetValue({}).GetX();
+    }
+    if (parentPaddingTop.Unit() != GetOffsetValue({}).GetY().Unit()) {
+        resultY = Dimension(
+            ConvertToPx(parentPaddingTop, ScaleProperty::CreateScaleProperty(), heightPercentReference).value_or(0) +
+                ConvertToPx(GetOffsetValue({}).GetY(), ScaleProperty::CreateScaleProperty(), heightPercentReference)
+                    .value_or(0),
+            DimensionUnit::PX);
+    } else {
+        resultY = parentPaddingTop + GetOffsetValue({}).GetY();
+    }
 }
 
 bool RosenRenderContext::IsUsingPosition(const RefPtr<FrameNode>& frameNode)
@@ -1810,8 +1865,7 @@ void RosenRenderContext::ClipWithRRect(const RectF& rectF, const RadiusF& radius
     Rosen::Vector4f rect;
     Rosen::Vector4f radius;
     rect.SetValues(rectF.GetX(), rectF.GetY(), rectF.GetX() + rectF.Width(), rectF.GetY() + rectF.Height());
-    radius.SetValues(
-        radiusF.GetCorner(RoundRect::CornerPos::TOP_LEFT_POS).x,
+    radius.SetValues(radiusF.GetCorner(RoundRect::CornerPos::TOP_LEFT_POS).x,
         radiusF.GetCorner(RoundRect::CornerPos::TOP_RIGHT_POS).x,
         radiusF.GetCorner(RoundRect::CornerPos::BOTTOM_LEFT_POS).x,
         radiusF.GetCorner(RoundRect::CornerPos::BOTTOM_RIGHT_POS).x);

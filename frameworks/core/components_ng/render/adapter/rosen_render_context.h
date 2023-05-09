@@ -304,6 +304,10 @@ private:
     void PaintMouseSelectRect(const RectF& rect, const Color& fillColor, const Color& strokeColor);
     void SetBackBlurFilter();
     void GetPaddingOfFirstFrameNodeParent(Dimension& parentPaddingLeft, Dimension& parentPaddingTop);
+    void CombinePaddingAndOffset(Dimension& resultX, Dimension& resultY, const Dimension& parentPaddingLeft,
+        const Dimension& parentPaddingTop, float widthPercentReference, float heightPercentReference);
+    void CombineMarginAndPosition(Dimension& resultX, Dimension& resultY, const Dimension& parentPaddingLeft,
+        const Dimension& parentPaddingTop, float widthPercentReference, float heightPercentReference);
 
     void InitEventClickEffect();
     RefPtr<Curve> UpdatePlayAnimationValue(const ClickEffectLevel& level, float& scaleValue);
