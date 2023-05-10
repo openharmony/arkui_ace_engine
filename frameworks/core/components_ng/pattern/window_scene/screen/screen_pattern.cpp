@@ -47,10 +47,8 @@ MMI::Direction ConvertDegreeToMMIRotation(float degree)
 void ScreenPattern::OnAttachToFrameNode()
 {
     CHECK_NULL_VOID(screenSession_);
-
-    Rosen::RSDisplayNodeConfig config = { .screenId = screenSession_->GetScreenId() };
-
-    auto displayNode = Rosen::RSDisplayNode::Create(config);
+    auto displayNode = screenSession_->GetDisplayNode();
+    CHECK_NULL_VOID(displayNode);
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
