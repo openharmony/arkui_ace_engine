@@ -151,15 +151,12 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressPatternTest002, TestSize.Level1)
     auto layoutProperty = loadingProgressPattern->GetLayoutProperty<LoadingProgressLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
     layoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
-    loadingProgressPattern->OnModifyDone();
-    EXPECT_EQ(loadingProgressPattern->visibilityProp_, VisibleType::INVISIBLE);
     EXPECT_FALSE(loadingProgressPattern->loadingProgressModifier_->isVisible_);
     EXPECT_FALSE(loadingProgressPattern->loadingProgressModifier_->isLoading_);
     layoutProperty->UpdateVisibility(VisibleType::GONE);
-    loadingProgressPattern->OnModifyDone();
-    EXPECT_EQ(loadingProgressPattern->visibilityProp_, VisibleType::GONE);
     EXPECT_FALSE(loadingProgressPattern->loadingProgressModifier_->isVisible_);
-    EXPECT_FALSE(loadingProgressPattern->loadingProgressModifier_->isLoading_);
+    layoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+    EXPECT_TRUE(loadingProgressPattern->loadingProgressModifier_->isVisible_);
 }
 
 /**

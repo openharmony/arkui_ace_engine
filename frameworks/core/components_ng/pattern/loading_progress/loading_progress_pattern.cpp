@@ -41,15 +41,10 @@ void LoadingProgressPattern::OnAttachToFrameNode()
     host->GetRenderContext()->SetClipToFrame(true);
 }
 
-void LoadingProgressPattern::OnModifyDone()
+void LoadingProgressPattern::OnVisibleChange(bool isVisible)
 {
-    auto layoutProperty = GetLayoutProperty<LoadingProgressLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    auto visibilityProp = layoutProperty->GetVisibility().value_or(VisibleType::VISIBLE);
-    CHECK_NULL_VOID(visibilityProp != visibilityProp_);
-    visibilityProp_ = visibilityProp;
     CHECK_NULL_VOID(loadingProgressModifier_);
-    loadingProgressModifier_->SetVisible(visibilityProp_ == VisibleType::VISIBLE);
+    loadingProgressModifier_->SetVisible(isVisible);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
