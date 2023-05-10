@@ -664,7 +664,6 @@ void ProgressModifier::PaintLinear(RSCanvas& canvas, const OffsetF& offset, cons
         double barLength = contentSize.Width() - radius * INT32_TWO;
         CHECK_NULL_VOID(!NearEqual(barLength, 0.0));
         double dateLength = barLength * value_->Get() / maxValue_->Get();
-        CHECK_NULL_VOID(!NearEqual(dateLength, 0.0));
         canvas.AttachBrush(brush);
         auto offsetY = offset.GetY() + (contentSize.Height() - strokeWidth_->Get()) / INT32_TWO;
         canvas.DrawRoundRect(
@@ -672,6 +671,7 @@ void ProgressModifier::PaintLinear(RSCanvas& canvas, const OffsetF& offset, cons
                                    strokeWidth_->Get() + offsetY },
             radius, radius });
         // progress selected part
+        CHECK_NULL_VOID(!NearEqual(dateLength, 0.0));
         brush.SetColor(ToRSColor((color_->Get())));
         canvas.AttachBrush(brush);
         RSPath path;
@@ -687,7 +687,6 @@ void ProgressModifier::PaintLinear(RSCanvas& canvas, const OffsetF& offset, cons
         double barLength = contentSize.Height() - radius * INT32_TWO;
         CHECK_NULL_VOID(!NearEqual(barLength, 0.0));
         double dateLength = barLength * value_->Get() / maxValue_->Get();
-        CHECK_NULL_VOID(!NearEqual(dateLength, 0.0));
         canvas.AttachBrush(brush);
         auto offsetX = offset.GetX() + (contentSize.Width() - strokeWidth_->Get()) / INT32_TWO;
         canvas.DrawRoundRect(
@@ -695,6 +694,7 @@ void ProgressModifier::PaintLinear(RSCanvas& canvas, const OffsetF& offset, cons
                                    contentSize.Height() + offset.GetY() },
             radius, radius });
         // progress selected part
+        CHECK_NULL_VOID(!NearEqual(dateLength, 0.0));
         brush.SetColor(ToRSColor((color_->Get())));
         canvas.AttachBrush(brush);
         RSPath path;
