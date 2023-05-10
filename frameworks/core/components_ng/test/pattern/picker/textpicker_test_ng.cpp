@@ -3617,4 +3617,42 @@ HWTEST_F(TextPickerTestNg, CanLoopTest004, TestSize.Level1)
     uint32_t index = textPickerColumnPattern_->GetCurrentIndex();
     EXPECT_EQ(index, 0);
 }
+
+/**
+ * @tc.name: TextPickerFireChangeEventTest001
+ * @tc.desc: Test SetSelectedDate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerFireChangeEventTest001, TestSize.Level1)
+{
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto onSelectedChange = [](const std::vector<double>& indexs) {
+        for (auto index : indexs) {
+            EXPECT_EQ(index, 1.0);
+        }
+    };
+
+    auto onValueChange = [](const std::vector<std::string>& values) {
+        for (auto value : values) {
+            EXPECT_EQ(value, "currentValue");
+        }
+    };
+    TextPickerModelNG::GetInstance()->SetOnSelectedChangeEvent(std::move(onSelectedChange));
+    TextPickerModelNG::GetInstance()->SetOnValueChangeEvent(std::move(onValueChange));
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    textPickerPattern->OnModifyDone();
+    auto textPickerEventHub = frameNode->GetEventHub<NG::TextPickerEventHub>();
+    ASSERT_NE(textPickerEventHub, nullptr);
+    textPickerEventHub->SetOnSelectedChangeEvent(std::move(onSelectedChange));
+    textPickerEventHub->SetOnValueChangeEvent(std::move(onValueChange));
+    ASSERT_NE(textPickerEventHub->onValueChangeEvent_, nullptr);
+    ASSERT_NE(textPickerEventHub->onSelectedChangeEvent_, nullptr);
+
+    std::vector<std::string> values {"currentValue"};
+    std::vector<double> indexs {1.0};
+    textPickerEventHub->FireChangeEvent(values, indexs);
+}
 } // namespace OHOS::Ace::NG

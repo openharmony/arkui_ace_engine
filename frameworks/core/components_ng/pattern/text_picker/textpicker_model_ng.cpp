@@ -420,4 +420,22 @@ void TextPickerModelNG::SetSelecteds(const std::vector<uint32_t>& values)
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Selecteds, values);
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedIndex, values);
 }
+
+void TextPickerModelNG::SetOnValueChangeEvent(TextCascadeValueChangeEvent&& onValueChangeEvent)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextPickerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnValueChangeEvent(std::move(onValueChangeEvent));
+}
+
+void TextPickerModelNG::SetOnSelectedChangeEvent(TextCascadeSelectedChangeEvent&& onSelectedChangeEvent)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextPickerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnSelectedChangeEvent(std::move(onSelectedChangeEvent));
+}
 } // namespace OHOS::Ace::NG
