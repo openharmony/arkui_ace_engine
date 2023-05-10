@@ -464,7 +464,7 @@ bool JsiPaEngine::Initialize(const RefPtr<TaskExecutor>& taskExecutor, BackendTy
         return false;
     }
 
-    bool result = InitJsEnv(IsDebugVersion(), GetExtraNativeObject());
+    bool result = InitJsEnv(GetDebugMode(), GetExtraNativeObject());
     if (!result) {
         LOGE("Init js env failed");
         return false;
