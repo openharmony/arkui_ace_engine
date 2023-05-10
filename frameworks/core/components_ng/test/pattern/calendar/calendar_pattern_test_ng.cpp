@@ -1406,4 +1406,148 @@ HWTEST_F(CalendarPatternTestNg, CalendarPaintMethodTest004, TestSize.Level1)
     calendarDay.touched = true;
     calendarPaintMethod.PaintDay(rsCanvas, Offset(OFFSET_X, OFFSET_Y), calendarDay, rsTextStyle);
 }
+
+/**
+ * @tc.name: CalendarPaintMethodTest005
+ * @tc.desc: Create calendar, and check today off or work status.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPatternTestNg, CalendarPaintMethodTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Calendar
+     * @tc.expected: step1. Create Calendar successfully.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
+
+    RefPtr<CalendarTheme> theme = MockPipelineBase::GetCurrent()->GetTheme<CalendarTheme>();
+    theme->GetCalendarTheme().workDayMarkColor = Color::RED;
+    theme->GetCalendarTheme().offDayMarkColor = Color::BLUE;
+
+    // Today style.
+    TodayStyle todayStyle;
+    Color focusedDayColor = Color::GREEN;
+    todayStyle.UpdateFocusedDayColor(focusedDayColor);
+    Color focusedLunarColor = Color::WHITE;
+    todayStyle.UpdateFocusedLunarColor(focusedLunarColor);
+    Color focusedAreaBackgroundColor = Color::BLUE;
+    todayStyle.UpdateFocusedAreaBackgroundColor(focusedAreaBackgroundColor);
+    Dimension focusedAreaRadius = Dimension(DEFAULT_FOCUS_RADIUS, DimensionUnit::VP);
+    todayStyle.UpdateFocusedAreaRadius(focusedAreaRadius);
+
+    // Day style of current month.
+    CurrentDayStyle dayStyle;
+    dayStyle.UpdateDayColor(Color::BLACK);
+
+    CalendarData calendarData;
+    auto calendarControllerNg = AceType::MakeRefPtr<CalendarControllerNg>();
+    calendarData.controller = calendarControllerNg;
+    CalendarView::Create(calendarData);
+    CalendarView::SetTodayStyle(todayStyle);
+    CalendarView::SetCurrentDayStyle(dayStyle);
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_ETS_TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    auto calendarPattern = frameNode->GetPattern<CalendarPattern>();
+    auto swiperNode = frameNode->GetChildren().front();
+    auto calendarFrameNode = AceType::DynamicCast<FrameNode>(swiperNode->GetChildren().front());
+    auto calendarPaintProperty = calendarFrameNode->GetPaintProperty<CalendarPaintProperty>();
+
+    ObtainedMonth obtainedMonth;
+    obtainedMonth.year = JUMP_YEAR;
+    obtainedMonth.month = JUMP_MONTH;
+    obtainedMonth.firstDayIndex = FIRST_DAY_INDEX_VALUE;
+
+    // Add 31 days.
+    std::vector<CalendarDay> days;
+    for (int32_t i = 0; i < 31; i++) {
+        CalendarDay day;
+        day.index = i;
+        day.month.year = JUMP_YEAR;
+        day.month.month = JUMP_MONTH;
+        day.day = i + 1;
+        if (i == 0) {
+            day.focused = true;
+        }
+        // Saturday and Sunday set off days. Others set work days.
+        if ((i % 6 == 5) || (i % 6 == 0)) {
+            day.dayMark = "off";
+        } else {
+            day.dayMark = "work";
+        }
+        days.emplace_back(std::move(day));
+    }
+    obtainedMonth.days = days;
+
+    CalendarView::SetCurrentData(obtainedMonth);
+    CalendarView::SetPreData(obtainedMonth);
+    CalendarView::SetNextData(obtainedMonth);
+
+    CalendarDay calendarDay;
+    calendarDay.index = 0;
+    calendarDay.day = 1;
+    calendarDay.today = false;
+    calendarDay.focused = true;
+    calendarDay.touched = true;
+
+    /**
+     * @tc.steps: step2. Set the first day focused, check the first day text style.
+     * @tc.expected: step2. The text color is 0xffffffff.
+     */
+    CalendarMonth calendarMonth;
+    calendarMonth.year = JUMP_YEAR;
+    calendarMonth.month = JUMP_MONTH;
+    calendarDay.month = calendarMonth;
+    CalendarView::SetCalendarDay(calendarDay);
+
+    auto paintMethod = AceType::MakeRefPtr<CalendarPaintMethod>(obtainedMonth, calendarDay);
+    RSCanvas rsCanvas;
+    paintMethod->SetCalendarTheme(calendarPaintProperty);
+
+    RSTextStyle workOffTextStyle;
+    /**
+     * @tc.steps: step3. Set the first day focused, check the offWork color.
+     * @tc.expected: step3. The focused text color is same as text color, expected 0xff00ff00.
+     */
+    paintMethod->SetOffWorkTextStyle(workOffTextStyle, obtainedMonth.days[0]);
+    EXPECT_EQ(workOffTextStyle.color_, RSColor(0xff00ff00));
+
+    /**
+     * @tc.steps: step4. Check the offWork color.
+     * @tc.expected: step4. The text color expected 0xffff0000, it is work.
+     */
+    paintMethod->SetOffWorkTextStyle(workOffTextStyle, obtainedMonth.days[2]);
+    EXPECT_EQ(workOffTextStyle.color_, RSColor(0xffff0000));
+
+    /**
+     * @tc.steps: step5. Check the offWork color.
+     * @tc.expected: step5. The text color expected 0xffff0000, it is off.
+     */
+    paintMethod->SetOffWorkTextStyle(workOffTextStyle, obtainedMonth.days[5]);
+    EXPECT_EQ(workOffTextStyle.color_, RSColor(0xff0000ff));
+
+    /**
+     * @tc.steps: step6. Check the offWork color.
+     * @tc.expected: step6. The text color expected 0xffff0000, it is off.
+     */
+    paintMethod->SetOffWorkTextStyle(workOffTextStyle, obtainedMonth.days[6]);
+    EXPECT_EQ(workOffTextStyle.color_, RSColor(0xff0000ff));
+
+    /**
+     * @tc.steps: step7. Check the offWork color.
+     * @tc.expected: step7. The text color expected 0xffff0000, it is work.
+     */
+    paintMethod->SetOffWorkTextStyle(workOffTextStyle, obtainedMonth.days[7]);
+    EXPECT_EQ(workOffTextStyle.color_, RSColor(0xffff0000));
+
+    /**
+     * @tc.steps: step8. Check the offWork color.
+     * @tc.expected: step8. The text color expected 0xffff0000, it is work.
+     */
+    paintMethod->SetOffWorkTextStyle(workOffTextStyle, obtainedMonth.days[9]);
+    EXPECT_EQ(workOffTextStyle.color_, RSColor(0xffff0000));
+}
 } // namespace OHOS::Ace::NG
