@@ -194,6 +194,9 @@ void SwipeRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 void SwipeRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
 {
     LOGD("swipe recognizer receives axis move event");
+    if (refereeState_ != RefereeState::DETECTING) {
+        return;
+    }
     globalPoint_ = Point(event.x, event.y);
     time_ = event.time;
     axisVerticalTotal_ += fabs(event.verticalAxis);
