@@ -1722,17 +1722,17 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern012, TestSize.Level1)
 }
 
 /**
- * @tc.name: DatePickerFireChangeEventTest001
+ * @tc.name: TimePickerFireChangeEventTest001
  * @tc.desc: Test SetSelectedDate.
  * @tc.type: FUNC
  */
-HWTEST_F(TimePickerPatternTestNg, DatePickerFireChangeEventTest001, TestSize.Level1)
+HWTEST_F(TimePickerPatternTestNg, TimePickerFireChangeEventTest001, TestSize.Level1)
 {
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
 
     auto changeEvent = [](const BaseEventInfo* info) {
-        EXPECT_EQ(info->GetType(), "TimePickerChangeEvent");
+        EXPECT_EQ(info->GetType(), "DatePickerChangeEvent");
     };
     TimePickerModelNG::GetInstance()->SetChangeEvent(std::move(changeEvent));
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
