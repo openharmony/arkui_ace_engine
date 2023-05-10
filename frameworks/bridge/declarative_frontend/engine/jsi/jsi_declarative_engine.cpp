@@ -89,6 +89,10 @@ const std::string FORM_ES_MODULE_PATH = "ets/modules.abc";
 
 const std::string ASSET_PATH_PREFIX = "/data/storage/el1/bundle/";
 
+#ifdef PREVIEW
+constexpr uint32_t PREFIX_LETTER_NUMBER = 4;
+#endif
+
 // native implementation for js function: perfutil.print()
 shared_ptr<JsValue> JsPerfPrint(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
@@ -1084,12 +1088,12 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
         arkRuntime->SetAssetPath(assetPath);
         arkRuntime->SetBundle(false);
         arkRuntime->SetModuleName(moduleName);
-        abcPath = fileName;
-        if (fileName.rfind("ets/", 0) == 0) {
-            abcPath = moduleName.append("/").append(fileName);
-        } else {
-            abcPath = moduleName.append("/ets/").append(fileName);
-        }
+#ifdef PREVIEW
+        // remove the prefix of "ets/"
+        abcPath = fileName.substr(PREFIX_LETTER_NUMBER);
+#else
+        abcPath = moduleName.append("/").append(fileName);
+#endif
         LOGI("JsiDeclarativeEngine::ExecuteCardAbc abcPath = %{public}s", abcPath.c_str());
         {
             if (!arkRuntime->ExecuteModuleBuffer(content.data(), content.size(), abcPath, true)) {
