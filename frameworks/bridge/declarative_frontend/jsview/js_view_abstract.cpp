@@ -40,6 +40,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_key_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_on_area_change_function.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
+#include "bridge/declarative_frontend/jsview/js_animatable_arithmetic.h"
 #include "bridge/declarative_frontend/jsview/js_grid_container.h"
 #include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
@@ -108,6 +109,8 @@ constexpr int32_t MIN_ROTATE_VECTOR_Z = 9;
 constexpr int32_t PARAMETER_LENGTH_FIRST = 1;
 constexpr int32_t PARAMETER_LENGTH_SECOND = 2;
 constexpr int32_t PARAMETER_LENGTH_THIRD = 3;
+constexpr float DEFAULT_SCALE_LIGHT = 0.9f;
+constexpr float DEFAULT_SCALE_MIDDLE_OR_HEAVY = 0.95f;
 
 bool CheckJSCallbackInfo(
     const std::string& callerName, const JSCallbackInfo& info, std::vector<JSCallbackInfoType>& infoTypes)
@@ -2101,6 +2104,20 @@ std::vector<NG::OptionParam> ParseBindOptionParam(const JSCallbackInfo& info)
     return params;
 }
 
+void ParseMenuArrowParam(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+{
+    auto enableArrowValue = menuOptions->GetProperty("enableArrow");
+    if (enableArrowValue->IsBoolean()) {
+        menuParam.enableArrow = enableArrowValue->ToBoolean();
+    }
+
+    auto arrowOffset = menuOptions->GetProperty("arrowOffset");
+    CalcDimension offset;
+    if (JSViewAbstract::ParseJsDimensionVp(arrowOffset, offset)) {
+        menuParam.arrowOffset = offset;
+    }
+}
+
 void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
 {
     auto offsetVal = menuOptions->GetProperty("offset");
@@ -2151,6 +2168,8 @@ void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptio
         };
         menuParam.onDisappear = std::move(onDisappear);
     }
+
+    ParseMenuArrowParam(menuOptions, menuParam);
 }
 
 void ParseBindOptionParam(const JSCallbackInfo& info, NG::MenuParam& menuParam)
@@ -4663,12 +4682,12 @@ void JSViewAbstract::JsBindSheet(const JSCallbackInfo& info)
 void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle)
 {
     auto height = paramObj->GetProperty("height");
-    auto showDragIndicator = paramObj->GetProperty("showDragIndicator");
-    if (showDragIndicator->IsNull() || showDragIndicator->IsUndefined()) {
-        sheetStyle.showDragIndicator = true;
+    auto showDragBar = paramObj->GetProperty("dragBar");
+    if (showDragBar->IsNull() || showDragBar->IsUndefined()) {
+        sheetStyle.showDragBar = true;
     } else {
-        if (showDragIndicator->IsBoolean()) {
-            sheetStyle.showDragIndicator = showDragIndicator->ToBoolean();
+        if (showDragBar->IsBoolean()) {
+            sheetStyle.showDragBar = showDragBar->ToBoolean();
         } else {
             LOGW("show drag indicator failed.");
         }
@@ -4686,9 +4705,11 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
             if (heightStr.compare("medium") == 0) {
                 sheetStyle.sheetMode = NG::SheetMode::MEDIUM;
                 sheetStyle.height.reset();
+                return;
             } else if (heightStr.compare("large") == 0) {
                 sheetStyle.sheetMode = NG::SheetMode::LARGE;
                 sheetStyle.height.reset();
+                return;
             } else {
                 LOGI("sheet height is not default mode.");
             }
@@ -4733,7 +4754,27 @@ void JSViewAbstract::JSCreateAnimatableProperty(const JSCallbackInfo& info)
         };
         ViewAbstractModel::GetInstance()->CreateAnimatablePropertyFloat(propertyName, numValue, onCallbackEvent);
     } else if (info[1]->IsObject()) {
-        LOGD("Object type (AnimatableArithmetic) to be handled.");
+        LOGD("JSCreateAnimatableProperty handle animatable arithmetic");
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[1]);
+        RefPtr<JSAnimatableArithmetic> animatableArithmeticImpl =
+            AceType::MakeRefPtr<JSAnimatableArithmetic>(obj,  info.GetExecutionContext());
+        RefPtr<CustomAnimatableArithmetic> animatableArithmetic =
+            AceType::DynamicCast<CustomAnimatableArithmetic>(animatableArithmeticImpl);
+        std::function<void(const RefPtr<NG::CustomAnimatableArithmetic>&)> onCallbackEvent;
+        RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(callback));
+        onCallbackEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
+                            id = Container::CurrentId()](const RefPtr<NG::CustomAnimatableArithmetic>& value) {
+            ContainerScope scope(id);
+            RefPtr<JSAnimatableArithmetic> impl = AceType::DynamicCast<JSAnimatableArithmetic>(value);
+            if (!impl) {
+                return;
+            }
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto newJSVal = JSRef<JSVal>(impl->GetObject());
+            func->ExecuteJS(1, &newJSVal);
+        };
+        ViewAbstractModel::GetInstance()->CreateAnimatableArithmeticProperty(propertyName,
+            animatableArithmetic, onCallbackEvent);
     } else {
         LOGE("JSCreateAnimatableProperty: The value param type is invalid.");
     }
@@ -4752,7 +4793,13 @@ void JSViewAbstract::JSUpdateAnimatableProperty(const JSCallbackInfo& info)
         numValue = info[1]->ToNumber<float>();
         ViewAbstractModel::GetInstance()->UpdateAnimatablePropertyFloat(propertyName, numValue);
     } else if (info[1]->IsObject()) {
-        LOGD("Object type (RSAnimatableArithmetic) to be handled");
+        LOGD("JSUpdateAnimatableProperty handle animatable arithmetic");
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[1]);
+        RefPtr<JSAnimatableArithmetic> animatableArithmeticImpl =
+            AceType::MakeRefPtr<JSAnimatableArithmetic>(obj,  info.GetExecutionContext());
+        RefPtr<CustomAnimatableArithmetic> animatableArithmetic =
+            AceType::DynamicCast<CustomAnimatableArithmetic>(animatableArithmeticImpl);
+        ViewAbstractModel::GetInstance()->UpdateAnimatableArithmeticProperty(propertyName, animatableArithmetic);
     } else {
         LOGE("JSUpdateAnimatableProperty: The value param type is invalid.");
     }
@@ -4886,6 +4933,7 @@ void JSViewAbstract::JSBind()
     JSClass<JSViewAbstract>::StaticMethod("onMouse", &JSViewAbstract::JsOnMouse);
     JSClass<JSViewAbstract>::StaticMethod("onHover", &JSViewAbstract::JsOnHover);
     JSClass<JSViewAbstract>::StaticMethod("onClick", &JSViewAbstract::JsOnClick);
+    JSClass<JSViewAbstract>::StaticMethod("clickEffect", &JSViewAbstract::JsClickEffect);
 #if defined(PREVIEW)
     JSClass<JSViewAbstract>::StaticMethod("debugLine", &JSViewAbstract::JsDebugLine);
 #endif
@@ -5405,6 +5453,43 @@ void JSViewAbstract::JsOnClick(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetOnClick(std::move(onTap), std::move(onClick));
 }
 
+void JSViewAbstract::JsClickEffect(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGW("clickEffect needs at least 1 parameter.");
+        return;
+    }
+    if (info[0]->IsObject() && !info[0]->IsNull()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+        JSRef<JSVal> clickEffectLevel = obj->GetProperty("level");
+        int32_t clickEffectLevelValue = 0;
+        if (!clickEffectLevel.IsEmpty() && !clickEffectLevel->IsUndefined() && !clickEffectLevel->IsNull()) {
+            clickEffectLevelValue = clickEffectLevel->ToNumber<int32_t>();
+        }
+        JSRef<JSVal> scaleNumber = obj->GetProperty("scale");
+        float scaleNumberValue = DEFAULT_SCALE_LIGHT;
+        if (!scaleNumber.IsEmpty() && !scaleNumber->IsUndefined() && !scaleNumber->IsNull()) {
+            scaleNumberValue = scaleNumber->ToNumber<float>();
+        } else {
+            if ((ClickEffectLevel)clickEffectLevelValue == ClickEffectLevel::MIDDLE ||
+                (ClickEffectLevel)clickEffectLevelValue == ClickEffectLevel::HEAVY) {
+                scaleNumberValue = DEFAULT_SCALE_MIDDLE_OR_HEAVY;
+            }
+        }
+
+        if ((ClickEffectLevel)clickEffectLevelValue == ClickEffectLevel::MIDDLE) {
+            ViewAbstractModel::GetInstance()->SetClickEffectLevel(ClickEffectLevel::MIDDLE, scaleNumberValue);
+        } else if ((ClickEffectLevel)clickEffectLevelValue == ClickEffectLevel::HEAVY) {
+            ViewAbstractModel::GetInstance()->SetClickEffectLevel(ClickEffectLevel::HEAVY, scaleNumberValue);
+        } else {
+            ViewAbstractModel::GetInstance()->SetClickEffectLevel(ClickEffectLevel::LIGHT, scaleNumberValue);
+        }
+    }
+    if (info[0]->IsUndefined() || info[0]->IsNull()) {
+        return;
+    }
+}
+
 void JSViewAbstract::JsOnVisibleAreaChange(const JSCallbackInfo& info)
 {
     if (info.Length() != 2) {
@@ -5529,4 +5614,46 @@ void JSViewAbstract::JsKeyboardShortcut(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetKeyboardShortcut(value, keys, nullptr);
 }
 
+bool JSViewAbstract::CheckColor(
+    const JSRef<JSVal>& jsValue, Color& result, const char* componentName, const char* propName)
+{
+    // Color is undefined or null
+    if (jsValue->IsUndefined() || jsValue->IsNull()) {
+        LOGW("%{public}s-%{public}s is undefined or null, using default color", componentName, propName);
+        return false;
+    }
+    // input type is not in [number, string, Resource]
+    if (!jsValue->IsNumber() && !jsValue->IsString() && !jsValue->IsObject()) {
+        LOGW("%{public}s-%{public}s Color property input type is error, using default color", componentName, propName);
+        return false;
+    }
+    // Correct type, incorrect value parsing
+    if (!ParseJsColor(jsValue, result)) {
+        LOGW("%{public}s-%{public}s Color parses error, using default color", componentName, propName);
+        return false;
+    }
+    return true;
+}
+
+bool JSViewAbstract::CheckLength(
+    const JSRef<JSVal>& jsValue, CalcDimension& result, const char* componentName, const char* propName)
+{
+    // Length is undefined or null
+    if (jsValue->IsUndefined() || jsValue->IsNull()) {
+        LOGW("%{public}s-%{public}s is undefined or null, using default length", componentName, propName);
+        return false;
+    }
+    // input type is not in [number, string, Resource]
+    if (!jsValue->IsNumber() && !jsValue->IsString() && !jsValue->IsObject()) {
+        LOGW(
+            "%{public}s-%{public}s Length property input type is error, using default length", componentName, propName);
+        return false;
+    }
+    // Correct type, incorrect value parsing
+    if (!ParseJsDimensionVp(jsValue, result)) {
+        LOGW("%{public}s-%{public}s Length parses error, using default length", componentName, propName);
+        return false;
+    }
+    return true;
+}
 } // namespace OHOS::Ace::Framework

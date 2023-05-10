@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,8 +29,8 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/badge/badge_layout_algorithm.h"
 #include "core/components_ng/pattern/badge/badge_layout_property.h"
+#include "core/components_ng/pattern/badge/badge_model_ng.h"
 #include "core/components_ng/pattern/badge/badge_pattern.h"
-#include "core/components_ng/pattern/badge/badge_view.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
@@ -122,8 +122,8 @@ std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapper>> BadgePatternTestNg::CreateCh
  */
 HWTEST_F(BadgePatternTestNg, BadgeFrameNodeCreator001, TestSize.Level1)
 {
-    BadgeView badge;
-    NG::BadgeView::BadgeParameters badgeParameters;
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
     badge.Create(badgeParameters);
 
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -140,8 +140,8 @@ HWTEST_F(BadgePatternTestNg, BadgeFrameNodeCreator001, TestSize.Level1)
  */
 HWTEST_F(BadgePatternTestNg, BadgeFrameNodeCreator002, TestSize.Level1)
 {
-    BadgeView badge;
-    NG::BadgeView::BadgeParameters badgeParameters;
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
     badgeParameters.badgeValue = "test";
     badgeParameters.badgeCount = 1;
     badgeParameters.badgeMaxCount = 99;
@@ -171,8 +171,8 @@ HWTEST_F(BadgePatternTestNg, BadgeFrameNodeCreator002, TestSize.Level1)
  */
 HWTEST_F(BadgePatternTestNg, BadgePatternTest001, TestSize.Level1)
 {
-    BadgeView badge;
-    NG::BadgeView::BadgeParameters badgeParameters;
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
     badgeParameters.badgeMaxCount = 99;
     badge.Create(badgeParameters);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -231,8 +231,8 @@ HWTEST_F(BadgePatternTestNg, BadgePatternTest002, TestSize.Level1)
     /**
      * @tc.steps: step1. create badge and get frameNode.
      */
-    BadgeView badge;
-    NG::BadgeView::BadgeParameters badgeParameters;
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
     badge.Create(badgeParameters);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_NE(frameNode, nullptr);
@@ -335,10 +335,10 @@ HWTEST_F(BadgePatternTestNg, BadgePatternTest002, TestSize.Level1)
  */
 HWTEST_F(BadgePatternTestNg, BadgePatternTest003, TestSize.Level1)
 {
-    BadgeView badgeView;
-    NG::BadgeView::BadgeParameters badgeParameters;
+    BadgeModelNG BadgeModelNG;
+    BadgeParameters badgeParameters;
     badgeParameters.badgeFontWeight = FontWeight::W100;
-    badgeView.Create(badgeParameters);
+    BadgeModelNG.Create(badgeParameters);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
 
@@ -378,11 +378,11 @@ HWTEST_F(BadgePatternTestNg, BadgePatternTest003, TestSize.Level1)
  */
 HWTEST_F(BadgePatternTestNg, BadgePatternTest004, TestSize.Level1)
 {
-    BadgeView badgeView;
-    NG::BadgeView::BadgeParameters badgeParameters;
+    BadgeModelNG BadgeModelNG;
+    BadgeParameters badgeParameters;
     badgeParameters.badgeMaxCount = 99;
     badgeParameters.badgeBorderWidth = BADGE_BORDER_WIDTH;
-    badgeView.Create(badgeParameters);
+    BadgeModelNG.Create(badgeParameters);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
 
@@ -421,8 +421,8 @@ HWTEST_F(BadgePatternTestNg, BadgePatternTest004, TestSize.Level1)
  */
 HWTEST_F(BadgePatternTestNg, BadgePatternTest005, TestSize.Level1)
 {
-    BadgeView badge;
-    NG::BadgeView::BadgeParameters badgeParameters;
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
     badgeParameters.badgeMaxCount = 99;
     badgeParameters.badgeBorderColor = Color::BLACK;
     badge.Create(badgeParameters);

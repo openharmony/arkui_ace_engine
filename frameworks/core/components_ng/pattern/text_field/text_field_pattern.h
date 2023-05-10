@@ -190,6 +190,7 @@ public:
     bool ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF& result);
 
     bool ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& result) const;
+    bool IsSelectedAreaRedraw() const;
 
     OffsetF MakeEmptyOffset() const;
 
@@ -946,6 +947,7 @@ private:
     uint32_t twinklingInterval_ = 0;
     int32_t obscureTickCountDown_ = 0;
     bool setSelectionFlag_ = false;
+    bool isSelectedAreaRedraw_ = false;
     bool setSelectAllFlag_ = true;
     int32_t selectionStart_ = 0;
     int32_t selectionEnd_ = 0;

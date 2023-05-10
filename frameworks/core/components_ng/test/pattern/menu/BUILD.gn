@@ -16,7 +16,7 @@ import(
     "//foundation/arkui/ace_engine/frameworks/core/components_ng/components.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ohos_unittest("menu_layout_algorithm_test_ng") {
+ohos_unittest("menu_test_ng") {
   module_out_path = pattern_test_output_path
 
   include_dirs = [
@@ -105,8 +105,10 @@ ohos_unittest("menu_layout_algorithm_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/menu/menu_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/menu_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/menu_view.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/menu/multi_menu_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/navigation_menu_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/wrapper/menu_wrapper_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/menu/wrapper/menu_wrapper_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/property/accessibility_property.cpp",
     "menu_accessibility_property_test_ng.cpp",
@@ -119,6 +121,8 @@ ohos_unittest("menu_layout_algorithm_test_ng") {
     "menu_layout_property_test_ng.cpp",
     "menu_pattern_test_ng.cpp",
     "menu_view_test_ng.cpp",
+    "menu_wrapper_paint_method_test_ng.cpp",
+    "menu_wrapper_paint_property_test_ng.cpp",
   ]
 
   sources += [

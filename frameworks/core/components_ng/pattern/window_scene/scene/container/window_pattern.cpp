@@ -326,7 +326,7 @@ void WindowPattern::Connect()
     RegisterSizeChangeListener(sizeChangeListener);
 
     CHECK_NULL_VOID(sessionStage_);
-    sessionStage_->Connect();
+    sessionStage_->Connect(surfaceNode_);
 }
 
 void WindowPattern::Foreground()
@@ -354,5 +354,12 @@ void WindowPattern::Disconnect()
     }
     CHECK_NULL_VOID(sessionStage_);
     sessionStage_->Disconnect();
+}
+
+void WindowPattern::OnNewWant(const AAFwk::Want& want)
+{
+    if (uiContent_) {
+        uiContent_->OnNewWant(want);
+    }
 }
 } // namespace OHOS::Ace::NG

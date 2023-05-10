@@ -15,12 +15,21 @@
 
 #include "core/components_ng/pattern/window_scene/screen/screen_model.h"
 
+#include "session_manager/include/screen_session_manager.h"
+
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/window_scene/screen/screen_pattren.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-void ScreenModel::Create(const sptr<Rosen::ScreenSession>& screenSession)
+void ScreenModel::Create(uint64_t screenId)
 {
+    auto screenSession = Rosen::ScreenSessionManager::GetInstance().GetScreenSession(screenId);
+    if (screenSession == nullptr) {
+        LOGE("screenSession is nullptr");
+        return;
+    }
+
     auto stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::SCREEN_ETS_TAG, nodeId,

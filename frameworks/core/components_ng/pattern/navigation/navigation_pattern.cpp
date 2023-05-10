@@ -18,6 +18,8 @@
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/navigation_event_hub.h"
+#include "core/components_ng/pattern/navigation/navigation_group_node.h"
+#include "core/components_ng/pattern/navrouter/navdestination_event_hub.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
 #include "core/components_ng/pattern/navrouter/navrouter_group_node.h"
@@ -107,6 +109,7 @@ void NavigationPattern::OnModifyDone()
     auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
     navBarNode->MarkModifyDone();
+    auto preTopNavPath = GetTopNavPath();
     if (!navPathList_.empty()) {
         navPathList_.clear();
     }
@@ -130,10 +133,32 @@ void NavigationPattern::OnModifyDone()
     }
 
     navigationStack_->SetNavPathList(navPathList_);
-
     auto contentNode = hostNode->GetContentNode();
     contentNode->Clean();
     hostNode->AddNavDestinationToNavigation(hostNode);
+
+    auto newTopNavPath = GetTopNavPath();
+    if (preTopNavPath != newTopNavPath) {
+        // fire onHidden event
+        if (preTopNavPath.second != nullptr) {
+            auto preTop = preTopNavPath.second;
+            auto preTopNavDestination =
+                AceType::DynamicCast<NavDestinationGroupNode>(NavigationGroupNode::GetNavDestinationNode(preTop));
+            auto eventHub = preTopNavDestination->GetEventHub<NavDestinationEventHub>();
+            CHECK_NULL_VOID(eventHub);
+            eventHub->FireOnHiddenEvent();
+        }
+
+        // fire onShown event
+        if (newTopNavPath.second != nullptr) {
+            auto newTop = newTopNavPath.second;
+            auto newTopNavDestination =
+                AceType::DynamicCast<NavDestinationGroupNode>(NavigationGroupNode::GetNavDestinationNode(newTop));
+            auto eventHub = newTopNavDestination->GetEventHub<NavDestinationEventHub>();
+            CHECK_NULL_VOID(eventHub);
+            eventHub->FireOnShownEvent();
+        }
+    }
 
     auto layoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);

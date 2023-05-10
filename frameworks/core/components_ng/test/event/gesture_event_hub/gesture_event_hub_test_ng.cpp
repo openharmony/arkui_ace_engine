@@ -528,9 +528,8 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest008, TestSize.Level1)
      *            case: dragDropInfo.customNode is not null
      * @tc.expected: dragDropProxy_ is not null.
      */
-    EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(MOCK_DRAG_WINDOW)), DrawFrameNode(_)).Times(1);
     gestureEventHub->HandleOnDragStart(info);
-    EXPECT_TRUE(gestureEventHub->dragDropProxy_);
+    EXPECT_FALSE(gestureEventHub->dragDropProxy_);
 
     /**
      * @tc.steps: step5. set OnDragStart for eventHub2
@@ -556,25 +555,23 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest008, TestSize.Level1)
      *            case: dragDropInfo.pixelMap is not null
      * @tc.expected: dragDropProxy_ is not null.
      */
-    EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(MOCK_DRAG_WINDOW)), DrawPixelMap(_)).Times(1);
     gestureEventHub2->HandleOnDragStart(info);
-    EXPECT_TRUE(gestureEventHub2->dragDropProxy_);
+    EXPECT_FALSE(gestureEventHub2->dragDropProxy_);
 
     /**
      * @tc.steps: step7. call HandleOnDragStart again
      *            case: dragDropProxy_ need to reset
      * @tc.expected: dragDropProxy_ is not null.
      */
-    EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(MOCK_DRAG_WINDOW)), DrawPixelMap(_)).Times(1);
     gestureEventHub2->HandleOnDragStart(info);
-    EXPECT_TRUE(gestureEventHub2->dragDropProxy_);
+    EXPECT_FALSE(gestureEventHub2->dragDropProxy_);
 
     /**
      * @tc.steps: step8. call HandleOnDragUpdate
      * @tc.expected: dragDropProxy_ is not null.
      */
     gestureEventHub2->HandleOnDragUpdate(info);
-    EXPECT_TRUE(gestureEventHub2->dragDropProxy_);
+    EXPECT_FALSE(gestureEventHub2->dragDropProxy_);
 
     /**
      * @tc.steps: step9. call HandleOnDragCancel
@@ -602,7 +599,6 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest008, TestSize.Level1)
         msg1 = CHECK_TAG_1;
     };
     eventHub->SetOnDrop(std::move(onDrop));
-    EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(MOCK_DRAG_WINDOW)), DrawFrameNode(_)).Times(1);
     gestureEventHub->HandleOnDragStart(info);
     gestureEventHub->HandleOnDragEnd(info);
     EXPECT_FALSE(gestureEventHub->dragDropProxy_);

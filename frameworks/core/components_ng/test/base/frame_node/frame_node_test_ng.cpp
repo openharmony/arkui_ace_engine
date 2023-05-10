@@ -1230,7 +1230,8 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg0058, TestSize.Level1)
      * @tc.expected: step1. expect The function is run ok.
      */
     VisibleCallbackInfo callbackInfo;
-    FRAME_NODE2->OnVisibleAreaChangeCallback(callbackInfo, true, 1.0);
+    bool isHandled = false;
+    FRAME_NODE2->OnVisibleAreaChangeCallback(callbackInfo, true, 1.0, isHandled);
     EXPECT_TRUE(callbackInfo.isCurrentVisible);
 }
 } // namespace OHOS::Ace::NG

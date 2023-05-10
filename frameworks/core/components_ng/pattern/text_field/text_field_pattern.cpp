@@ -326,7 +326,7 @@ bool TextFieldPattern::UpdateCaretPosition()
     } else if (caretUpdateType_ == CaretUpdateType::EVENT || caretUpdateType_ == CaretUpdateType::DEL ||
                caretUpdateType_ == CaretUpdateType::ICON_PRESSED) {
         UpdateCaretOffsetByEvent();
-        if (!NeedShowPasswordIcon() && !needToRefreshSelectOverlay_) {
+        if (!NeedShowPasswordIcon() && !needToRefreshSelectOverlay_ && GetCursorVisible()) {
             StartTwinkling();
         }
     } else if (caretUpdateType_ == CaretUpdateType::NONE) {
@@ -970,7 +970,6 @@ void TextFieldPattern::AdjustTextSelectionRectOffsetX()
         }
     }
     textRect_.SetLeft(textRect_.GetX() + dx);
-    return;
 }
 
 void TextFieldPattern::HandleExtendAction(int32_t action)
@@ -1078,8 +1077,12 @@ void TextFieldPattern::HandleBlurEvent()
     StopTwinkling();
     CloseKeyboard(true);
     auto pos = static_cast<int32_t>(textEditingValue_.GetWideText().length());
-    UpdateSelection(pos);
+    isSelectedAreaRedraw_ = !isSelectedAreaRedraw_;
+    UpdateCaretPositionWithClamp(pos);
+    textEditingValue_.CursorMoveToPosition(pos);
+    textSelector_.Update(pos);
     selectionMode_ = SelectionMode::NONE;
+    caretUpdateType_ = CaretUpdateType::EVENT;
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
     eventHub->FireOnEditChanged(false);
     ResetBackgroundColor();
@@ -1917,10 +1920,12 @@ void TextFieldPattern::ProcessInnerPadding()
     auto themePadding = textFieldTheme->GetPadding();
     auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    utilPadding_.left = layoutProperty->GetPaddingProperty()->left->GetDimension().ConvertToPx();
-    utilPadding_.top = layoutProperty->GetPaddingProperty()->top->GetDimension().ConvertToPx();
-    utilPadding_.bottom = layoutProperty->GetPaddingProperty()->bottom->GetDimension().ConvertToPx();
-    utilPadding_.right = layoutProperty->GetPaddingProperty()->right->GetDimension().ConvertToPx();
+    utilPadding_.left = layoutProperty->GetPaddingProperty()->left.value_or(CalcLength()).GetDimension().ConvertToPx();
+    utilPadding_.top = layoutProperty->GetPaddingProperty()->top.value_or(CalcLength()).GetDimension().ConvertToPx();
+    utilPadding_.bottom =
+        layoutProperty->GetPaddingProperty()->bottom.value_or(CalcLength()).GetDimension().ConvertToPx();
+    utilPadding_.right =
+        layoutProperty->GetPaddingProperty()->right.value_or(CalcLength()).GetDimension().ConvertToPx();
 }
 
 void TextFieldPattern::InitLongPressEvent()
@@ -2068,9 +2073,13 @@ void TextFieldPattern::ShowSelectOverlay(
         if (!pattern->IsUsingMouse()) {
             if (firstHandle.has_value()) {
                 selectInfo.firstHandle.paintRect = firstHandle.value();
+            } else {
+                selectInfo.firstHandle.isShow = false;
             }
             if (secondHandle.has_value()) {
                 selectInfo.secondHandle.paintRect = secondHandle.value();
+            } else {
+                selectInfo.secondHandle.isShow = false;
             }
         }
         selectInfo.isSingleHandle = !firstHandle.has_value() || !secondHandle.has_value();
@@ -3541,6 +3550,8 @@ void TextFieldPattern::SetTextSelection(int32_t selectionStart, int32_t selectio
         client->HandleSetSelection(selectionStart, selectionEnd);
         client->SetInSelectMode(SelectionMode::SELECT);
         client->SetCaretUpdateType(CaretUpdateType::EVENT);
+        client->CloseSelectOverlay();
+        client->isSelectedAreaRedraw_ = !client->isSelectedAreaRedraw_;
         if (client->RequestKeyboard(false, true, true)) {
             auto textFieldFrameNode = client->GetHost();
             CHECK_NULL_VOID(textFieldFrameNode);
@@ -3548,13 +3559,19 @@ void TextFieldPattern::SetTextSelection(int32_t selectionStart, int32_t selectio
             CHECK_NULL_VOID(eventHub);
             eventHub->FireOnEditChanged(true);
         }
+        client->StopTwinkling();
     };
     taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
 }
 
 void TextFieldPattern::SetSelectionFlag(int32_t selectionStart, int32_t selectionEnd)
 {
+    if (!HasFocus()) {
+        return;
+    }
     setSelectionFlag_ = true;
+    cursorVisible_ = false;
+    isSelectedAreaRedraw_ = false;
     selectionStart_ = selectionStart;
     selectionEnd_ = selectionEnd;
     auto host = GetHost();
@@ -4078,4 +4095,8 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("showError", GetErrorTextState() ? GetErrorTextString().c_str() : "undefined");
 }
 
+bool TextFieldPattern::IsSelectedAreaRedraw() const
+{
+    return isSelectedAreaRedraw_;
+}
 } // namespace OHOS::Ace::NG

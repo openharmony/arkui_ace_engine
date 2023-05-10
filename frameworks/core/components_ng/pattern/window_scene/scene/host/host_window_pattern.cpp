@@ -31,7 +31,7 @@ public:
         : hostWindowPattern_(hostWindowPattern) {}
     virtual ~LifecycleListener() = default;
 
-    void OnConnect()
+    void OnConnect() override
     {
         auto hostWindowPattern = hostWindowPattern_.Upgrade();
         CHECK_NULL_VOID(hostWindowPattern);

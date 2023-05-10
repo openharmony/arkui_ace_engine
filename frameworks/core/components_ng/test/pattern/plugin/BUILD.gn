@@ -117,20 +117,18 @@ ohos_unittest("plugin_pattern_test_ng") {
   ]
 
   deps = [
+    "$ability_runtime_inner_api_path/ability_manager:ability_manager",
+    "$ability_runtime_services_path/abilitymgr:abilityms",
     "$ace_root/frameworks/base:ace_memory_monitor_ohos",
     "$ace_root/frameworks/core/components/theme:build_theme_code",
+    "$ace_root/interfaces/inner_api/ui_service_manager:ui_service_mgr",
+    "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
     "$ace_root/test/unittest:ace_unittest_log",
     "$cjson_root:cjson_static",
     "//third_party/googletest:gmock_main",
-  ]
-
-  deps += [
-    "$ability_runtime_inner_api_path/ability_manager:ability_manager",
-    "$ability_runtime_services_path/abilitymgr:abilityms",
-    "$ace_flutter_engine_root:third_party_flutter_engine_ohos",
-    "$ace_root/interfaces/inner_api/ui_service_manager:ui_service_mgr",
     "//third_party/zlib:shared_libz",
   ]
+
   external_deps = [
     "ability_base:extractortool",
     "ability_base:want",
@@ -141,11 +139,11 @@ ohos_unittest("plugin_pattern_test_ng") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
-  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
-  configs += [
-    "$ace_root/../../graphic/graphic_2d/rosen/modules/render_service_base:export_config",
-    "$ace_root/../../graphic/graphic_2d/rosen/modules/render_service_client:render_service_client_config",
-    "$ace_flutter_engine_root/skia:skia_config",
+
+  configs = [
+    "$ace_root/test/unittest:ace_unittest_config",
+    "//foundation/graphic/graphic_2d/rosen/modules/render_service_base:export_config",
+    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:render_service_client_config",
   ]
 
   if (os_account_exists) {

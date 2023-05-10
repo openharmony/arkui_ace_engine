@@ -70,6 +70,7 @@ extern const char THEME_PATTERN_VIDEO[];
 extern const char THEME_PATTERN_INDEXER[];
 extern const char THEME_PATTERN_APP_BAR[];
 extern const char THEME_PATTERN_ADVANCED_PATTERN[];
+extern const char THEME_PATTERN_SECURITY_COMPONENT[];
 
 // pattern general attributes
 extern const char PATTERN_FG_COLOR[];
@@ -93,6 +94,25 @@ extern const char PATTERN_DISABLED_TEXT_COLOR[];
 extern const char PATTERN_TEXT_SIZE[];
 extern const char PATTERN_WIDTH[];
 extern const char PATTERN_HEIGHT[];
+
+// pattern attributes for calendar
+extern const char CALENDAR_WEEK_COLOR[];
+extern const char CALENDAR_DAY_COLOR[];
+extern const char CALENDAR_LUNAR_COLOR[];
+extern const char CALENDAR_WEEKEND_DAY_COLOR[];
+extern const char CALENDAR_WEEKEND_LUNAR_COLOR[];
+extern const char CALENDAR_TODAY_DAY_FOCUS_COLOR[];
+extern const char CALENDAR_TODAY_LUNAR_FOCUS_COLOR[];
+extern const char CALENDAR_TODAY_DAY_UNFOCUS_COLOR[];
+extern const char CALENDAR_TODAY_LUNAR_UNFOCUS_COLOR[];
+extern const char CALENDAR_WORK_MARK_COLOR[];
+extern const char CALENDAR_OFF_MARK_COLOR[];
+extern const char CALENDAR_NONCURRENT_MONTH_WORK_MARK_COLOR[];
+extern const char CALENDAR_NONCURRENT_MONTH_OFF_MARK_COLOR[];
+extern const char CALENDAR_NONCURRENT_MONTH_DAY_COLOR[];
+extern const char CALENDAR_NONCURRENT_MONTH_LUNAR_COLOR[];
+extern const char CALENDAR_FOCUS_AREA_BACKGROUND_COLOR[];
+extern const char CALENDAR_BLUR_AREA_BACKGROUND_COLOR[];
 
 // pattern attributes for checkable
 extern const char RADIO_WIDTH[];

@@ -775,7 +775,7 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg016, TestSize.Level1)
      * @tc.steps2: Test functions about CanvasFillRule.
      * @tc.expected: The task queue of paintMethod is changed to unempty.
      */
-    CanvasFillRule rule;
+    CanvasFillRule rule = CanvasFillRule::NONZERO;
     customPattern->UpdateFillRuleForPath(rule);
     EXPECT_TRUE(paintMethod->HasTask());
 

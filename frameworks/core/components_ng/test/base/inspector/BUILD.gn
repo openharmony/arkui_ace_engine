@@ -86,7 +86,7 @@ ohos_unittest("inspector_test_ng") {
   ]
 
   deps = [
-    "$ace_flutter_engine_root:third_party_flutter_engine_ohos",
+    "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
     "$ace_root/test/unittest:ace_unittest_log",
     "$cjson_root:cjson",
     "//third_party/googletest:gmock_main",

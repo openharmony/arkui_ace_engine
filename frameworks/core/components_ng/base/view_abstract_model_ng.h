@@ -579,6 +579,11 @@ public:
         ViewAbstract::SetHueRotate(value);
     }
 
+    void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue) override
+    {
+        ViewAbstract::SetClickEffectLevel(level, scaleValue);
+    }
+
     void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc) override
     {
         ViewAbstract::SetOnClick(std::move(tapEventFunc));
@@ -814,12 +819,26 @@ private:
     void RegisterContextMenuDisappearCallback(const MenuParam& menuParam);
 
     void CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
-        const std::function<void(float)>& onCallbackEvent) override {
+        const std::function<void(float)>& onCallbackEvent) override
+    {
         ViewAbstract::CreateAnimatablePropertyFloat(propertyName, value, onCallbackEvent);
     }
 
-    void UpdateAnimatablePropertyFloat(const std::string& propertyName, float value) override {
+    void UpdateAnimatablePropertyFloat(const std::string& propertyName, float value) override
+    {
         ViewAbstract::UpdateAnimatablePropertyFloat(propertyName, value);
+    }
+
+    void CreateAnimatableArithmeticProperty(const std::string& propertyName, RefPtr<CustomAnimatableArithmetic>& value,
+        std::function<void(const RefPtr<CustomAnimatableArithmetic>&)>& onCallbackEvent) override
+    {
+        ViewAbstract::CreateAnimatableArithmeticProperty(propertyName, value, onCallbackEvent);
+    }
+
+    void UpdateAnimatableArithmeticProperty(const std::string& propertyName,
+        RefPtr<CustomAnimatableArithmetic>& value) override
+    {
+        ViewAbstract::UpdateAnimatableArithmeticProperty(propertyName, value);
     }
 };
 } // namespace OHOS::Ace::NG

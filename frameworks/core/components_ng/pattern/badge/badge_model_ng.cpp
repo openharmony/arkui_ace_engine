@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/badge/badge_view.h"
+#include "core/components_ng/pattern/badge/badge_model_ng.h"
 
 #include "base/utils/utils.h"
 #include "core/components/badge/badge_theme.h"
@@ -26,8 +26,7 @@
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
-
-void BadgeView::Create(BadgeParameters& badgeParameters)
+void BadgeModelNG::Create(BadgeParameters& badgeParameters)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
@@ -61,7 +60,7 @@ void BadgeView::Create(BadgeParameters& badgeParameters)
     UpdateBadgeStyle(badgeParameters, frameNode);
 }
 
-void BadgeView::UpdateBadgeStyle(BadgeParameters& badgeParameters, const RefPtr<FrameNode>& frameNode)
+void BadgeModelNG::UpdateBadgeStyle(BadgeParameters& badgeParameters, const RefPtr<FrameNode>& frameNode)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -102,5 +101,4 @@ void BadgeView::UpdateBadgeStyle(BadgeParameters& badgeParameters, const RefPtr<
         layoutProperty->UpdateBadgeFontWeight(FontWeight::NORMAL);
     }
 }
-
 } // namespace OHOS::Ace::NG

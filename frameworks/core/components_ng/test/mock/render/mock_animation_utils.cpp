@@ -33,6 +33,9 @@ void AnimationUtils::Animate(const AnimationOption& option, const PropertyCallba
     if (callback) {
         callback();
     }
+    if (repeatCallback) {
+        repeatCallback();
+    }
     if (finishCallback) {
         finishCallback();
     }

@@ -14,6 +14,7 @@
  */
 
 #include "adapter/preview/entrance/ace_ability.h"
+#include "base/utils/utils.h"
 
 #ifdef INIT_ICU_DATA_PATH
 #include "unicode/putil.h"
@@ -291,8 +292,12 @@ void AceAbility::InitEnv()
 void AceAbility::InitEnv()
 {
 #ifdef INIT_ICU_DATA_PATH
+    char realPath[PATH_MAX] = { 0x00 };
     std::string icuPath = ".";
-    u_setDataDirectory(icuPath.c_str());
+    if (!RealPath(icuPath, realPath)) {
+        return;
+    }
+    u_setDataDirectory(realPath);
 #endif
     std::vector<std::string> paths;
     paths.push_back(runArgs_.assetPath);

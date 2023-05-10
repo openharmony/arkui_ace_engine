@@ -51,7 +51,7 @@ public:
         if (!progressModifier_) {
             progressModifier_ = AceType::MakeRefPtr<ProgressModifier>();
         }
-        progressModifier_->SetVisible(visibilityType_ == VisibleType::VISIBLE);
+        progressModifier_->SetVisible(visibilityProp_ == VisibleType::VISIBLE);
         return MakeRefPtr<ProgressPaintMethod>(progressType_, strokeWidth_, progressModifier_);
     }
 
@@ -110,7 +110,7 @@ private:
     Color borderColor_;
     Color fontColor_;
     bool isTextFromUser_ = false;
-    VisibleType visibilityType_ = VisibleType::VISIBLE;
+    VisibleType visibilityProp_ = VisibleType::VISIBLE;
 
     ACE_DISALLOW_COPY_AND_MOVE(ProgressPattern);
 };

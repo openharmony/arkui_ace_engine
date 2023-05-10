@@ -47,7 +47,7 @@ RefPtr<FrameNode> SheetView::CreateSheetPage(int32_t targetId, RefPtr<FrameNode>
     sheetLayoutProperty->UpdateSheetStyle(sheetStyle);
 
     // create drag bar
-    bool isShow = sheetStyle.showDragIndicator.value_or(true);
+    bool isShow = sheetStyle.showDragBar.value_or(true);
     auto dragBarNode = FrameNode::GetOrCreateFrameNode("SheetDragBar", ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<SheetDragBarPattern>(); });
     auto dragBarLayoutProperty = dragBarNode->GetLayoutProperty();

@@ -65,7 +65,7 @@ public:
     AceAbility();
     ~AceAbility() override = default;
 
-    void OnStart(const OHOS::AAFwk::Want& want) override;
+    void OnStart(const OHOS::AAFwk::Want& want, sptr<AAFwk::SessionInfo> sessionInfo = nullptr) override;
     void OnStop() override;
     void OnActive() override;
     void OnInactive() override;

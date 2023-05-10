@@ -25,17 +25,23 @@ class SynchedPropertySimpleOneWayPU<T> extends ObservedPropertySimpleAbstractPU<
   private wrappedValue_: T;
   private source_: ObservedPropertyAbstract<T>;
 
+  // true for @Prop code path, 
+  // false for @(Local)StorageProp
+  private sourceIsOwnObject: boolean;
+
   constructor(source: ObservedPropertyAbstract<T> | T, subscribeMe?: IPropertySubscriber, thisPropertyName?: PropertyInfo) {
     super(subscribeMe, thisPropertyName);
 
     if (source && (typeof (source) === "object") && ("notifyHasChanged" in source) && ("subscribeMe" in source)) {
       // code path for @(Local)StorageProp
       this.source_ = source as ObservedPropertyAbstract<T>;
+      this.sourceIsOwnObject = false;
       // subscribe to receive value chnage updates from LocalStorge source property
       this.source_.subscribeMe(this);
     } else {
       // code path for @Prop
       this.source_ = new ObservedPropertySimplePU<T>(source as T, this, thisPropertyName);
+      this.sourceIsOwnObject = true;
     }
 
     // use own backing store for value to avoid
@@ -50,7 +56,12 @@ class SynchedPropertySimpleOneWayPU<T> extends ObservedPropertySimpleAbstractPU<
   aboutToBeDeleted() {
     if (this.source_) {
       this.source_.unlinkSuscriber(this.id__());
+      if (this.sourceIsOwnObject == true && this.source_.numberOfSubscrbers()==0){
+         stateMgmtConsole.debug(`SynchedPropertySimpleOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: aboutToBeDeleted. owning source_ ObservedPropertySimplePU, calling its aboutToBeDeleted`);
+         this.source_.aboutToBeDeleted();
+      }
       this.source_ = undefined;
+      this.sourceIsOwnObject == false;
     }
     super.aboutToBeDeleted();
   }

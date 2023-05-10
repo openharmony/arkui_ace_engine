@@ -249,6 +249,8 @@ inline float CalculateFriction(float gamma)
     return SCROLL_RATIO * static_cast<float>(std::pow(1.0 - gamma, 2));
 }
 
+bool RealPath(const std::string fileName, char* realPath);
+
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_UTILS_H

@@ -90,6 +90,8 @@ const char STACK_ETS_TAG[] = "Stack";
 const char SWIPER_COMPONENT_TAG[] = "SwiperComponent";
 const char SWIPER_ETS_TAG[] = "Swiper";
 const char SWIPER_INDICATOR_ETS_TAG[] = "SwiperIndicator";
+const char SWIPER_LEFT_ARROW_ETS_TAG[] = "LeftArrow";
+const char SWIPER_RIGHT_ARROW_ETS_TAG[] = "RightArrow";
 
 // tabs
 const char TABS_COMPONENT_TAG[] = "TabsComponent";
@@ -493,5 +495,9 @@ ACE_EXPORT extern const char HOST_WINDOW_SCENE_ETS_TAG[] = "HostWindowScene";
 // ui_extension_component
 const char UI_EXTENSION_COMPONENT_TAG[] = "UIExtensionComponent";
 const char UI_EXTENSION_COMPONENT_ETS_TAG[] = "UIExtensionComponent";
+
+// SecLocationButton
+const char SEC_LOCATION_BUTTON_COMPONENT_TAG[] = "SecLocationButtonComponent";
+const char SEC_LOCATION_BUTTON_ETS_TAG[] = "SecLocationButton";
 
 } // namespace OHOS::Ace::V2

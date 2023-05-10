@@ -96,6 +96,8 @@ ACE_EXPORT extern const char STACK_ETS_TAG[];
 ACE_EXPORT extern const char SWIPER_COMPONENT_TAG[];
 ACE_EXPORT extern const char SWIPER_ETS_TAG[];
 ACE_EXPORT extern const char SWIPER_INDICATOR_ETS_TAG[];
+ACE_EXPORT extern const char SWIPER_LEFT_ARROW_ETS_TAG[];
+ACE_EXPORT extern const char SWIPER_RIGHT_ARROW_ETS_TAG[];
 
 // tabs
 ACE_EXPORT extern const char TABS_COMPONENT_TAG[];
@@ -504,6 +506,10 @@ ACE_EXPORT extern const char HOST_WINDOW_SCENE_ETS_TAG[];
 // ui_extension_component
 ACE_EXPORT extern const char UI_EXTENSION_COMPONENT_TAG[];
 ACE_EXPORT extern const char UI_EXTENSION_COMPONENT_ETS_TAG[];
+
+// LocationButton
+ACE_EXPORT extern const char SEC_LOCATION_BUTTON_COMPONENT_TAG[];
+ACE_EXPORT extern const char SEC_LOCATION_BUTTON_ETS_TAG[];
 
 } // namespace OHOS::Ace::V2
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_INSPECTOR_CONSTANTS_H

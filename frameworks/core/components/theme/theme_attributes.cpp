@@ -67,6 +67,7 @@ const char THEME_PATTERN_VIDEO[] = "video_pattern";
 const char THEME_PATTERN_INDEXER[] = "indexer_pattern";
 const char THEME_PATTERN_APP_BAR[] = "app_bar_pattern";
 const char THEME_PATTERN_ADVANCED_PATTERN[] = "advanced_pattern";
+const char THEME_PATTERN_SECURITY_COMPONENT[] = "security_component_pattern";
 
 // pattern general attributes
 const char PATTERN_FG_COLOR[] = "fg_color";
@@ -99,6 +100,25 @@ const char RADIO_WIDTH[] = "radio_width";
 const char SWITCH_HORIZONTAL_PADDING[] = "switch_horizontal_padding";
 const char SWITCH_VERTICAL_PADDING[] = "switch_vertical_padding";
 const char RADIO_PADDING[] = "radio_padding";
+
+// pattern attributes for calendar
+const char CALENDAR_WEEK_COLOR[] = "week_color";
+const char CALENDAR_DAY_COLOR[] = "day_color";
+const char CALENDAR_LUNAR_COLOR[] = "lunar_color";
+const char CALENDAR_WEEKEND_DAY_COLOR[] = "weekend_day_color";
+const char CALENDAR_WEEKEND_LUNAR_COLOR[] = "weekend_lunar_color";
+const char CALENDAR_TODAY_DAY_FOCUS_COLOR[] = "today_day_focus_color";
+const char CALENDAR_TODAY_LUNAR_FOCUS_COLOR[] = "today_lunar_focus_color";
+const char CALENDAR_TODAY_DAY_UNFOCUS_COLOR[] = "today_day_unfocus_color";
+const char CALENDAR_TODAY_LUNAR_UNFOCUS_COLOR[] = "today_lunar_unfocus_color";
+const char CALENDAR_WORK_MARK_COLOR[] = "work_mark_color";
+const char CALENDAR_OFF_MARK_COLOR[] = "off_mark_color";
+const char CALENDAR_NONCURRENT_MONTH_WORK_MARK_COLOR[] = "non_current_month_work_mark_color";
+const char CALENDAR_NONCURRENT_MONTH_OFF_MARK_COLOR[] = "non_current_month_off_mark_color";
+const char CALENDAR_NONCURRENT_MONTH_DAY_COLOR[] = "non_current_month_day_color";
+const char CALENDAR_NONCURRENT_MONTH_LUNAR_COLOR[] = "non_current_month_lunar_color";
+const char CALENDAR_FOCUS_AREA_BACKGROUND_COLOR[] = "focus_area_background_color";
+const char CALENDAR_BLUR_AREA_BACKGROUND_COLOR[] = "blur_area_background_color";
 
 // data panel attributes
 const char DATA_PANEL_COLOR_1_START[] = "rainbow_fg_color_1_start";

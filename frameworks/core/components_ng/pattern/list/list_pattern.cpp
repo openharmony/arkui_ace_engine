@@ -78,7 +78,7 @@ void ListPattern::OnModifyDone()
     }
     auto listPaintProperty = host->GetPaintProperty<ListPaintProperty>();
     SetScrollBar(listPaintProperty->GetBarDisplayMode().value_or(defaultDisplayMode));
-    SetChainAnimation(edgeEffect == EdgeEffect::SPRING && listLayoutProperty->GetChainAnimation().value_or(false));
+    SetChainAnimation();
     if (multiSelectable_ && !isMouseEventInit_) {
         InitMouseEvent();
     }
@@ -155,9 +155,11 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
 
 RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
 {
-    auto listLayoutProperty = GetHost()->GetLayoutProperty<ListLayoutProperty>();
-    V2::ItemDivider itemDivider;
-    auto divider = listLayoutProperty->GetDivider().value_or(itemDivider);
+    auto listLayoutProperty = GetLayoutProperty<ListLayoutProperty>();
+    V2::ItemDivider divider;
+    if (!chainAnimation_ && listLayoutProperty->HasDivider()) {
+        divider = listLayoutProperty->GetDivider().value();
+    }
     auto axis = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
     auto drawVertical = (axis == Axis::HORIZONTAL);
     auto paint = MakeRefPtr<ListPaintMethod>(divider, drawVertical, lanes_, spaceWidth_);
@@ -692,25 +694,23 @@ void ListPattern::AnimateTo(float position, float duration, const RefPtr<Curve>&
     }
     if (!animator_) {
         animator_ = AceType::MakeRefPtr<Animator>(PipelineBase::GetCurrentContext());
-    }
-    if (!animator_->IsStopped()) {
+        animator_->AddStopListener([weak = AceType::WeakClaim(this)]() {
+            auto list = weak.Upgrade();
+            CHECK_NULL_VOID_NOLOG(list);
+            list->scrollStop_ = true;
+            list->MarkDirtyNodeSelf();
+            list->isScrollEnd_ = true;
+        });
+    } else if (!animator_->IsStopped()) {
         scrollAbort_ = true;
         animator_->Stop();
     }
     animator_->ClearInterpolators();
-
     auto animation = AceType::MakeRefPtr<CurveAnimation<float>>(GetTotalOffset(), position, curve);
     animation->AddListener([weakScroll = AceType::WeakClaim(this)](float value) {
         auto list = weakScroll.Upgrade();
         CHECK_NULL_VOID_NOLOG(list);
         list->UpdateCurrentOffset(list->GetTotalOffset() - value, SCROLL_FROM_JUMP);
-    });
-    animator_->AddStopListener([weak = AceType::WeakClaim(this)]() {
-        auto list = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(list);
-        list->scrollStop_ = true;
-        list->MarkDirtyNodeSelf();
-        list->isScrollEnd_ = true;
     });
     animator_->AddInterpolator(animation);
     animator_->SetDuration(static_cast<int32_t>(duration));
@@ -823,15 +823,20 @@ void ListPattern::UpdateScrollBarOffset()
     UpdateScrollBarRegion(currentOffset, estimatedHeight, size, viewOffset);
 }
 
-void ListPattern::SetChainAnimation(bool enable)
+void ListPattern::SetChainAnimation()
 {
+    auto listLayoutProperty = GetLayoutProperty<ListLayoutProperty>();
+    CHECK_NULL_VOID(listLayoutProperty);
+    auto edgeEffect = listLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::SPRING);
+    int32_t lanes = listLayoutProperty->GetLanes().value_or(1);
+    bool autoLanes = listLayoutProperty->HasLaneMinLength() || listLayoutProperty->HasLaneMaxLength();
+    bool animation = listLayoutProperty->GetChainAnimation().value_or(false);
+    bool enable = edgeEffect == EdgeEffect::SPRING && lanes == 1 && !autoLanes && animation;
     if (!enable) {
         chainAnimation_.Reset();
         return;
     }
     if (!chainAnimation_) {
-        auto listLayoutProperty = GetLayoutProperty<ListLayoutProperty>();
-        CHECK_NULL_VOID(listLayoutProperty);
         auto space = listLayoutProperty->GetSpace().value_or(CHAIN_INTERVAL_DEFAULT).ConvertToPx();
         springProperty_ =
             AceType::MakeRefPtr<SpringProperty>(CHAIN_SPRING_MASS, CHAIN_SPRING_STIFFNESS, CHAIN_SPRING_DAMPING);

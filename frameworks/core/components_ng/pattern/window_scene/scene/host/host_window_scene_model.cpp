@@ -15,13 +15,22 @@
 
 #include "core/components_ng/pattern/window_scene/scene/host/host_window_scene_model.h"
 
+#include "session_manager/include/scene_session_manager.h"
+
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/window_scene/scene/host/host_window_node.h"
+#include "core/components_ng/pattern/window_scene/scene/host/host_window_scene.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-void HostWindowSceneModel::Create(const sptr<Rosen::Session>& session)
+void HostWindowSceneModel::Create(uint64_t persistentId)
 {
+    auto session = Rosen::SceneSessionManager::GetInstance().GetSceneSession(persistentId);
+    if (session == nullptr) {
+        LOGE("scene session is nullptr");
+        return;
+    }
+
     auto stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = HostWindowNode::GetOrCreateHostWindowNode(V2::HOST_WINDOW_SCENE_ETS_TAG, nodeId,
