@@ -540,7 +540,6 @@ bool SliderPattern::OnKeyEvent(const KeyEvent& event)
                 InitializeBubble();
             }
             PaintFocusState();
-            FireChangeEvent(SliderChangeMode::Begin);
         }
         if ((direction_ == Axis::HORIZONTAL && event.code == KeyCode::KEY_DPAD_RIGHT) ||
             (direction_ == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_DOWN)) {
@@ -549,7 +548,6 @@ bool SliderPattern::OnKeyEvent(const KeyEvent& event)
                 InitializeBubble();
             }
             PaintFocusState();
-            FireChangeEvent(SliderChangeMode::Begin);
         }
     } else if (event.action == KeyAction::UP) {
         if (showTips_) {
@@ -557,8 +555,6 @@ bool SliderPattern::OnKeyEvent(const KeyEvent& event)
             InitializeBubble();
         }
         PaintFocusState();
-        FireChangeEvent(SliderChangeMode::Click);
-        FireChangeEvent(SliderChangeMode::End);
     }
     return false;
 }
