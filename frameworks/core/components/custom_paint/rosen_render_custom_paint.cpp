@@ -1730,6 +1730,7 @@ void RosenRenderCustomPaint::PutImageData(const Offset& offset, const ImageData&
     for (uint32_t i = 0; i < imageData.data.size(); ++i) {
         data[i] = imageData.data[i].GetValue();
     }
+#ifndef USE_ROSEN_DRAWING
     SkBitmap skBitmap;
     auto imageInfo = SkImageInfo::Make(imageData.dirtyWidth, imageData.dirtyHeight, SkColorType::kBGRA_8888_SkColorType,
         SkAlphaType::kOpaque_SkAlphaType);
@@ -1739,6 +1740,14 @@ void RosenRenderCustomPaint::PutImageData(const Offset& offset, const ImageData&
     skCanvas_->drawBitmap(skBitmap, imageData.x, imageData.y);
 #else
     skCanvas_->drawImage(skBitmap.asImage(), imageData.x, imageData.y, SkSamplingOptions());
+#endif
+#else
+    RSBitmap bitmap;
+    RSBitmapFormat format { RSColorType::COLORTYPE_BGRA_8888,
+        RSAlphaType::ALPHATYPE_OPAQUE };
+    bitmap.Build(imageData.dirtyWidth, imageData.dirtyHeight, format);
+    bitmap.SetPixels(data);
+    drawingCanvas_->DrawBitmap(bitmap, imageData.x, imageData.y);
 #endif
     delete[] data;
 }
@@ -1751,6 +1760,7 @@ std::unique_ptr<ImageData> RosenRenderCustomPaint::GetImageData(double left, dou
         viewScale = pipeline->GetViewScale();
     }
     // copy the bitmap to tempCanvas
+#ifndef USE_ROSEN_DRAWING
     auto imageInfo =
         SkImageInfo::Make(width, height, SkColorType::kBGRA_8888_SkColorType, SkAlphaType::kOpaque_SkAlphaType);
     SkBitmap tempCache;
@@ -1774,6 +1784,9 @@ std::unique_ptr<ImageData> RosenRenderCustomPaint::GetImageData(double left, dou
 #endif
     }
     pixels = tempCache.pixmap().addr8();
+#else
+    // TODO Drawing : Bitmap::pixmap()
+#endif
     if (pixels == nullptr) {
         return nullptr;
     }
@@ -1806,6 +1819,7 @@ void RosenRenderCustomPaint::WebGLInit(CanvasRenderContextBase* context)
             return;
         }
         double viewScale = pipeline->GetViewScale();
+#ifndef USE_ROSEN_DRAWING
         if (!webglBitmap_.readyToDraw()) {
             auto imageInfo =
                 SkImageInfo::Make(GetLayoutSize().Width() * viewScale, GetLayoutSize().Height() * viewScale,
@@ -1817,12 +1831,22 @@ void RosenRenderCustomPaint::WebGLInit(CanvasRenderContextBase* context)
         }
         webGLContext_->SetBitMapPtr(
             reinterpret_cast<char*>(webglBitmap_.getPixels()), webglBitmap_.width(), webglBitmap_.height());
+#else
+        if (!webglBitmap_.ReadyToDraw()) {
+            RSBitmapFormat format { RSColorType::COLORTYPE_RGBA_8888,
+                RSAlphaType::ALPHATYPE_OPAQUE };
+            webglBitmap_.Build(GetLayoutSize().Width() * viewScale, GetLayoutSize().Height() * viewScale, format);
+        }
+        webGLContext_->SetBitMapPtr(reinterpret_cast<char*>(webglBitmap_.GetPixels()),
+            webglBitmap_.GetWidth(), webglBitmap_.GetHeight());
+#endif
     }
 }
 
 void RosenRenderCustomPaint::WebGLUpdate()
 {
     LOGD("RosenRenderCustomPaint::WebGLUpdate");
+#ifndef USE_ROSEN_DRAWING
     if (skCanvas_ && webglBitmap_.readyToDraw()) {
         skCanvas_->save();
         /* Do mirror flip */
@@ -1836,6 +1860,17 @@ void RosenRenderCustomPaint::WebGLUpdate()
 #endif
         skCanvas_->restore();
     }
+#else
+    if (drawingCanvas_ && webglBitmap_.ReadyToDraw()) {
+        drawingCanvas_->Save();
+        /* Do mirror flip */
+        RSMatrix matrix;
+        matrix.Scale(1.0, -1.0);
+        drawingCanvas_->SetMatrix(matrix);
+        drawingCanvas_->DrawBitmap(webglBitmap_, 0, -webglBitmap_.GetHeight());
+        drawingCanvas_->Restore();
+    }
+#endif
 }
 
 void RosenRenderCustomPaint::DrawBitmapMesh(
@@ -1857,6 +1892,7 @@ void RosenRenderCustomPaint::DrawBitmapMesh(
         for (uint32_t i = 0; i < imageData->data.size(); ++i) {
             data[i] = imageData->data[i].GetValue();
         }
+#ifndef USE_ROSEN_DRAWING
         SkBitmap skBitmap;
         auto imageInfo = SkImageInfo::Make(imageData->dirtyWidth, imageData->dirtyHeight,
             SkColorType::kBGRA_8888_SkColorType, SkAlphaType::kOpaque_SkAlphaType);
@@ -1868,11 +1904,25 @@ void RosenRenderCustomPaint::DrawBitmapMesh(
             verts[i] = mesh[i];
         }
         Mesh(skBitmap, column, row, verts, 0, nullptr);
+#else
+        RSBitmap bitmap;
+        RSBitmapFormat format { RSColorType::COLORTYPE_BGRA_8888,
+            RSAlphaType::ALPHATYPE_OPAQUE };
+        bitmap.Build(imageData->dirtyWidth, imageData->dirtyHeight, format);
+        bitmap.SetPixels(data);
+        uint32_t size = mesh.size();
+        float verts[size];
+        for (uint32_t i = 0; i < size; i++) {
+            verts[i] = mesh[i];
+        }
+        Mesh(bitmap, column, row, verts, 0, nullptr);
+#endif
         delete[] data;
     }
     LOGD("RosenRenderCustomPaint::DrawBitmapMesh");
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderCustomPaint::Mesh(
     SkBitmap& bitmap, int column, int row, const float* vertices, const int* colors, const SkPaint* paint)
 {
@@ -1961,7 +2011,102 @@ void RosenRenderCustomPaint::Mesh(
     tempPaint.setShader(shader);
     skCanvas_->drawVertices(builder.detach(), SkBlendMode::kModulate, tempPaint);
 }
+#else
+void RosenRenderCustomPaint::Mesh(RSBitmap& bitmap, int column, int row,
+    const float* vertices, const int* colors, const RSPen* pen)
+{
+    const int vertCounts = (column + 1) * (row + 1);
+    int32_t size = 6;
+    const int indexCount = column * row * size;
+    uint32_t flags = RSVertices::BuilderFlags::BUILDERFLAGS_TEXCOORDS;
+    if (colors) {
+        flags |= RSVertices::BuilderFlags::BUILDERFLAGS_COLORS;
+    }
+    RSVertices::Builder builder(
+        RSVertexMode::VERTEXMODE_TRIANGLES, vertCounts, indexCount, flags);
+    if (memcpy_s(builder.Positions(), vertCounts * sizeof(RSPoint), vertices,
+        vertCounts * sizeof(RSPoint)) != 0) {
+        return;
+    }
+    if (colors) {
+        if (memcpy_s(builder.Colors(), vertCounts * sizeof(RSColorQuad), colors,
+            vertCounts * sizeof(RSColorQuad)) != 0) {
+            return;
+        }
+    }
+    RSPoint* texsPoint = builder.TexCoords();
+    uint16_t* indices = builder.Indices();
+    const RSScalar height = static_cast<RSScalar>(bitmap.GetHeight());
+    const RSScalar width = static_cast<RSScalar>(bitmap.GetWidth());
+    if (row == 0) {
+        LOGE("row is zero");
+        return;
+    }
+    if (column == 0) {
+        LOGE("column is zero");
+        return;
+    }
+    const RSScalar dy = height / row;
+    const RSScalar dx = width / column;
 
+    RSPoint* texsPit = texsPoint;
+    RSScalar y = 0;
+    for (int i = 0; i <= row; i++) {
+        if (i == row) {
+            y = height; // to ensure numerically we hit h exactly
+        }
+        RSScalar x = 0;
+        for (int j = 0; j < column; j++) {
+            texsPit->Set(x, y);
+            texsPit += 1;
+            x += dx;
+        }
+        texsPit->Set(width, y);
+        texsPit += 1;
+        y += dy;
+    }
+
+    uint16_t* dexs = indices;
+    int index = 0;
+    for (int i = 0; i < row; i++) {
+        for (int j = 0; j < column; j++) {
+            *dexs++ = index;
+            *dexs++ = index + column + 1;
+            *dexs++ = index + column + 2;
+
+            *dexs++ = index;
+            *dexs++ = index + column + 2;
+            *dexs++ = index + 1;
+
+            index += 1;
+        }
+        index += 1;
+    }
+
+    RSPen tempPen;
+    if (pen) {
+        tempPen = *pen;
+    }
+    std::shared_ptr<RSColorFilter> colorFter;
+    std::shared_ptr<RSShaderEffect> shader;
+    std::shared_ptr<RSImage> image;
+    image->BuildFromBitmap(bitmap);
+    RSSamplingOptions sampling =
+        RSSamplingOptions(RSFilterMode::NEAREST, RSMipmapMode::NEAREST);
+    RSMatrix matrix;
+    shader = shader->CreateImageShader(
+        *image, RSTileMode::CLAMP, RSTileMode::CLAMP, sampling, matrix);
+    if (colorFter) {
+        shader = shader->CreateShaderWithColorFilter(*colorFter);
+    }
+    tempPen.SetShaderEffect(shader);
+    drawingCanvas_->AttachPen(tempPen);
+    drawingCanvas_->DrawVertices(builder, RSBlendMode::MODULATE);
+    drawingCanvas_->DetachPen();
+}
+#endif
+
+#ifndef USE_ROSEN_DRAWING
 sk_sp<SkImage> RosenRenderCustomPaint::GetImage(const std::string& src)
 {
     if (!imageCache_) {
@@ -1987,4 +2132,29 @@ sk_sp<SkImage> RosenRenderCustomPaint::GetImage(const std::string& src)
 
     return image;
 }
+#else
+std::shared_ptr<RSImage> RosenRenderCustomPaint::GetImage(const std::string& src)
+{
+    if (!imageCache_) {
+        imageCache_ = ImageCache::Create();
+        imageCache_->SetCapacity(IMAGE_CACHE_COUNT);
+    }
+    auto cacheImage = imageCache_->GetCacheImage(src);
+    if (cacheImage && cacheImage->imagePtr) {
+        std::shared_ptr<RSImage> dImage =
+            std::make_shared<RSImage>(cacheImage->imagePtr->image());
+        return dImage;
+    }
+
+    auto context = GetContext().Upgrade();
+    if (!context) {
+        return nullptr;
+    }
+
+    auto image = ImageProvider::GetDrawingImage(src, context);
+    // TODO Drawing : Image::makeRasterImage()
+
+    return image;
+}
+#endif
 } // namespace OHOS::Ace
