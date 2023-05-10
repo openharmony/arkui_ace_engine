@@ -121,13 +121,6 @@ public:
         }
     }
 
-    void UpdateDisplayCountWithoutMeasure(int32_t displayCount)
-    {
-        if (propDisplayCount_ != displayCount) {
-            propDisplayCount_ = displayCount;
-        }
-    }
-
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Direction, Axis, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Index, int32_t, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ItemSpace, Dimension, PROPERTY_UPDATE_MEASURE);

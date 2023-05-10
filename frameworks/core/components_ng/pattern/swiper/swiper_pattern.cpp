@@ -46,8 +46,6 @@ namespace {
 constexpr Dimension MIN_TURN_PAGE_VELOCITY = 10.0_vp;
 constexpr Dimension MIN_DRAG_DISTANCE = 25.0_vp;
 constexpr Dimension INDICATOR_BORDER_RADIUS = 16.0_vp;
-constexpr int32_t DEFAULT_INDEX = 0;
-constexpr int32_t DEFAULT_DISPLAY_COUNT = 1;
 
 // TODO define as common method
 float CalculateFriction(float gamma)
@@ -108,14 +106,10 @@ void SwiperPattern::OnModifyDone()
 
     auto childrenSize = TotalCount();
     if (layoutProperty->GetIndex().has_value() && CurrentIndex() >= 0) {
-        currentIndex_ = CurrentIndex() > (childrenSize - 1) ? DEFAULT_INDEX : CurrentIndex();
+        currentIndex_ = CurrentIndex();
         layoutProperty->UpdateIndexWithoutMeasure(currentIndex_);
     } else {
         LOGE("index is not valid: %{public}d, items size: %{public}d", CurrentIndex(), childrenSize);
-    }
-
-    if (layoutProperty->GetDisplayCount().has_value() && layoutProperty->GetDisplayCountValue() > childrenSize) {
-        layoutProperty->UpdateDisplayCountWithoutMeasure(DEFAULT_DISPLAY_COUNT);
     }
 
     CalculateCacheRange();
@@ -345,7 +339,7 @@ void SwiperPattern::SwipeToWithoutAnimation(int32_t index)
     LOGD("Swipe to index: %{public}d without animation", index);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    currentIndex_ = (index < 0 || index > (TotalCount() - 1)) ? DEFAULT_INDEX : index;
+    currentIndex_ = index;
     auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateIndexWithoutMeasure(currentIndex_);
@@ -1117,8 +1111,7 @@ int32_t SwiperPattern::GetDisplayCount() const
 {
     auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_RETURN(swiperLayoutProperty, 1);
-    auto displayCount = swiperLayoutProperty->GetDisplayCount().value_or(DEFAULT_DISPLAY_COUNT);
-    return displayCount > TotalCount() ? DEFAULT_DISPLAY_COUNT : displayCount;
+    return swiperLayoutProperty->GetDisplayCount().value_or(1);
 }
 
 bool SwiperPattern::IsAutoPlay() const
