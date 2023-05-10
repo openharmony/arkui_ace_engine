@@ -20,6 +20,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #undef private
 #undef protected
 

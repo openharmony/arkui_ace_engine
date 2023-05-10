@@ -23,6 +23,7 @@
 #include "core/components_ng/render/divider_painter.h"
 #include "core/pipeline/pipeline_base.h"
 
+// @deprecated
 namespace OHOS::Ace::NG {
 
 CanvasDrawFunction MenuPaintMethod::GetOverlayDrawFunction(PaintWrapper* paintWrapper)
