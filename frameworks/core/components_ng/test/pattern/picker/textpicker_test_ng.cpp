@@ -1381,6 +1381,8 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions016, TestSi
     TextPickerModelNG::GetInstance()->SetSelected(SELECTED_INDEX_1);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(true);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     textPickerPattern->OnModifyDone();
     auto child = textPickerPattern->GetColumnNode();
