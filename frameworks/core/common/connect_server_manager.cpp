@@ -29,6 +29,10 @@
 #include "core/common/layout_inspector.h"
 #include "core/event/ace_event_handler.h"
 
+#if defined(IOS_PLATFORM)
+#include "inspector/connect_inspector.h"
+#include <sys/sysctl.h>
+#endif
 
 namespace OHOS::Ace {
 
@@ -41,7 +45,7 @@ using StopServer = void (*)(const std::string& packageName);
 using StoreMessage = void (*)(int32_t instanceId, const std::string& message);
 using StoreInspectorInfo = void (*)(const std::string& jsonTreeStr, const std::string& jsonSnapshotStr);
 using RemoveMessage = void (*)(int32_t instanceId);
-using WaitForDebugger = bool (*)();
+using WaitForConnection = bool (*)();
 using SetSwitchCallBack = void (*)(const std::function<void(bool)>& setStatus,
     const std::function<void(int32_t)>& createLayoutInfo, int32_t instanceId);
 
@@ -51,7 +55,7 @@ RemoveMessage g_removeMessage = nullptr;
 StoreInspectorInfo g_storeInspectorInfo = nullptr;
 StoreMessage g_storeMessage = nullptr;
 SetSwitchCallBack g_setSwitchCallBack = nullptr;
-WaitForDebugger g_waitForDebugger = nullptr;
+WaitForConnection g_waitForConnection = nullptr;
 
 
 } // namespace
@@ -75,6 +79,20 @@ ConnectServerManager::~ConnectServerManager()
     CloseConnectServerSo();
 }
 
+bool ConnectServerManager::CheckDebugVersion()
+{
+#if !defined(IOS_PLATFORM)
+    if (!isDebugVersion_ || handlerConnectServerSo_ == nullptr) {
+        return false;
+    }
+#else
+    if (!isDebugVersion_) {
+        return false;
+    }
+#endif
+    return true;
+}
+
 ConnectServerManager& ConnectServerManager::Get()
 {
     static ConnectServerManager connectServerManager;
@@ -83,19 +101,30 @@ ConnectServerManager& ConnectServerManager::Get()
 
 bool ConnectServerManager::InitFunc()
 {
+#if !defined(IOS_PLATFORM)
     g_sendMessage = reinterpret_cast<SendMessage>(dlsym(handlerConnectServerSo_, "SendMessage"));
     g_storeMessage = reinterpret_cast<StoreMessage>(dlsym(handlerConnectServerSo_, "StoreMessage"));
     g_removeMessage = reinterpret_cast<RemoveMessage>(dlsym(handlerConnectServerSo_, "RemoveMessage"));
     g_setSwitchCallBack = reinterpret_cast<SetSwitchCallBack>(dlsym(handlerConnectServerSo_, "SetSwitchCallBack"));
     g_sendLayoutMessage = reinterpret_cast<SendLayoutMessage>(dlsym(handlerConnectServerSo_, "SendLayoutMessage"));
     g_storeInspectorInfo = reinterpret_cast<StoreInspectorInfo>(dlsym(handlerConnectServerSo_, "StoreInspectorInfo"));
-    g_waitForDebugger = reinterpret_cast<WaitForDebugger>(dlsym(handlerConnectServerSo_, "WaitForDebugger"));
+    g_waitForConnection = reinterpret_cast<WaitForConnection>(dlsym(handlerConnectServerSo_, "WaitForConnection"));
+#else
+    using namespace OHOS::ArkCompiler;
+    g_sendMessage = reinterpret_cast<SendMessage>(&Toolchain::SendMessage);
+    g_storeMessage = reinterpret_cast<StoreMessage>(&Toolchain::StoreMessage);
+    g_removeMessage = reinterpret_cast<RemoveMessage>(&Toolchain::RemoveMessage);
+    g_setSwitchCallBack = reinterpret_cast<SetSwitchCallBack>(&Toolchain::SetSwitchCallBack);
+    g_sendLayoutMessage = reinterpret_cast<SendLayoutMessage>(&Toolchain::SendLayoutMessage);
+    g_storeInspectorInfo = reinterpret_cast<StoreInspectorInfo>(&Toolchain::StoreInspectorInfo);
+    g_waitForConnection = reinterpret_cast<WaitForConnection>(&Toolchain::WaitForConnection);
+#endif
     if (g_sendMessage == nullptr || g_storeMessage == nullptr || g_removeMessage == nullptr) {
         CloseConnectServerSo();
         return false;
     }
 
-    if (g_storeInspectorInfo == nullptr || g_setSwitchCallBack == nullptr || g_waitForDebugger == nullptr ||
+    if (g_storeInspectorInfo == nullptr || g_setSwitchCallBack == nullptr || g_waitForConnection == nullptr ||
         g_sendLayoutMessage == nullptr) {
         CloseConnectServerSo();
         return false;
@@ -105,7 +134,12 @@ bool ConnectServerManager::InitFunc()
 
 void ConnectServerManager::InitConnectServer()
 {
+#if !defined(IOS_PLATFORM)
+#if defined(ANDROID_PLATFORM)
+    const std::string soDir = "libconnectserver_debugger.so";
+#else
     const std::string soDir = "libconnectserver_debugger.z.so";
+#endif // ANDROID_PLATFORM
     handlerConnectServerSo_ = dlopen(soDir.c_str(), RTLD_LAZY);
     if (handlerConnectServerSo_ == nullptr) {
         LOGE("Cannot find %{public}s", soDir.c_str());
@@ -116,24 +150,29 @@ void ConnectServerManager::InitConnectServer()
         LOGE("startServer = NULL, dlerror = %s", dlerror());
         return;
     }
+#else
+    StartServer startServer = reinterpret_cast<StartServer>(&ArkCompiler::Toolchain::StartServer);
+#endif // IOS_PLATFORM
     startServer(packageName_);
 }
 
 void ConnectServerManager::CloseConnectServerSo()
 {
+#if !defined(IOS_PLATFORM)
     CHECK_NULL_VOID_NOLOG(handlerConnectServerSo_);
     dlclose(handlerConnectServerSo_);
     handlerConnectServerSo_ = nullptr;
+#endif
 }
 
 // When use multi-instances project, debug mode should be set to support debug
 void ConnectServerManager::SetDebugMode()
 {
-    if (!isDebugVersion_ || handlerConnectServerSo_ == nullptr) {
+    if (!CheckDebugVersion()) {
         return;
     }
     
-    if (!g_waitForDebugger()) { // waitForDebugger : waitForDebugger means the connection state of the connect server
+    if (!g_waitForConnection()) { // waitForDebugger : waitForDebugger means the connection state of the connect server
         AceApplicationInfo::GetInstance().SetNeedDebugBreakPoint(true);
     }
 }
@@ -141,18 +180,22 @@ void ConnectServerManager::SetDebugMode()
 void ConnectServerManager::StopConnectServer()
 {
     LOGD("Stop connect server");
+#if !defined(IOS_PLATFORM)
     CHECK_NULL_VOID(handlerConnectServerSo_);
     StopServer stopServer = reinterpret_cast<StopServer>(dlsym(handlerConnectServerSo_, "StopServer"));
     if (stopServer == nullptr) {
         LOGE("stopServer = NULL, dlerror = %s", dlerror());
         return;
     }
+#else
+    StopServer stopServer = reinterpret_cast<StopServer>(&ArkCompiler::Toolchain::StopServer);
+#endif
     stopServer(packageName_);
 }
 
 void ConnectServerManager::AddInstance(int32_t instanceId, const std::string& instanceName)
 {
-    if (!isDebugVersion_ || handlerConnectServerSo_ == nullptr) {
+    if (!CheckDebugVersion()) {
         return;
     }
     LOGD("AddInstance %{public}d", instanceId);
@@ -167,7 +210,7 @@ void ConnectServerManager::AddInstance(int32_t instanceId, const std::string& in
     // Get the message including information of new instance, which will be send to IDE.
     std::string message = GetInstanceMapMessage("addInstance", instanceId);
 
-    if (!g_waitForDebugger()) { // g_waitForDebugger : the res means the connection state of the connect server
+    if (!g_waitForConnection()) { // g_waitForConnection : the res means the connection state of the connect server
         g_sendMessage(message); // if connected, message will be sent immediately.
     } else { // if not connected, message will be stored and sent later when "connected" coming.
         g_storeMessage(instanceId, message);
@@ -187,7 +230,7 @@ void ConnectServerManager::SendInspector(const std::string& jsonTreeStr, const s
 
 void ConnectServerManager::RemoveInstance(int32_t instanceId)
 {
-    if (!isDebugVersion_ || handlerConnectServerSo_ == nullptr) {
+    if (!CheckDebugVersion()) {
         return;
     }
     LOGD("RemoveInstance %{public}d", instanceId);
@@ -203,7 +246,7 @@ void ConnectServerManager::RemoveInstance(int32_t instanceId)
         LOGW("Instance name not found with instance id: %{public}d", instanceId);
     }
 
-    if (!g_waitForDebugger()) {
+    if (!g_waitForConnection()) {
         g_sendMessage(message);
     } else {
         g_removeMessage(instanceId);
@@ -217,7 +260,13 @@ std::string ConnectServerManager::GetInstanceMapMessage(const char* messageType,
     message->Put("type", messageType);
     message->Put("instanceId", instanceId);
     message->Put("name", instanceMap_[instanceId].c_str());
+#if !defined(IOS_PLATFORM)
     message->Put("tid", gettid());
+#else
+    uint64_t tid;
+    pthread_threadid_np(0, &tid);
+    message->Put("tid", static_cast<int64_t>(tid));
+#endif
     return message->ToString();
 }
 
