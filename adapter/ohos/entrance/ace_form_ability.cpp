@@ -15,6 +15,7 @@
 
 #include "adapter/ohos/entrance/ace_form_ability.h"
 
+#include "form_provider_client.h"
 #include "res_config.h"
 #include "resource_manager.h"
 #include "session_info.h"
@@ -184,5 +185,22 @@ void AceFormAbility::OnDisconnect(const Want& want)
 {
     LOGI("AceFormAbility::OnDisconnect start");
     Ability::OnDisconnect(want);
+}
+
+sptr<IRemoteObject> AceFormAbility::GetFormRemoteObject()
+{
+    LOGD("Get form remote object start");
+    if (formProviderRemoteObject_ == nullptr) {
+        sptr<FormProviderClient> providerClient = new (std::nothrow) FormProviderClient();
+        std::shared_ptr<Ability> thisAbility = this->shared_from_this();
+        if (thisAbility == nullptr) {
+            LOGE("Get form remote object failed, ability is nullptr");
+            return nullptr;
+        }
+        providerClient->SetOwner(thisAbility);
+        formProviderRemoteObject_ = providerClient->AsObject();
+    }
+    LOGD("Get form remote object end");
+    return formProviderRemoteObject_;
 }
 } // namespace OHOS::Ace
