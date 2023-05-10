@@ -68,6 +68,9 @@ namespace OHOS::Ace::NG {
 constexpr Dimension CURSOR_WIDTH = 1.5_vp;
 constexpr Dimension SCROLL_BAR_MIN_HEIGHT = 4.0_vp;
 constexpr Dimension UNDERLINE_WIDTH = 1.0_px;
+constexpr Dimension ERROR_UNDERLINE_WIDTH = 2.0_px;
+constexpr Dimension ACTIVED_UNDERLINE_WIDTH = 2.0_px;
+constexpr Dimension TYPING_UNDERLINE_WIDTH = 2.0_px;
 
 enum class SelectionMode { SELECT, SELECT_ALL, NONE };
 
@@ -114,6 +117,15 @@ struct UnderLinePattern {
     Color bgColor;
     BorderWidthProperty borderWidth;
     BorderColorProperty borderColor;
+};
+
+struct PasswordModeStyle {
+    Color bgColor;
+    Color textColor;
+    BorderWidthProperty borderwidth;
+    BorderColorProperty borderColor;
+    BorderRadiusProperty radius;
+    PaddingProperty padding;
 };
 
 class TextFieldPattern : public ScrollablePattern,
@@ -242,6 +254,7 @@ public:
     void OnAreaChangedInner() override;
     void OnVisibleChange(bool isVisible) override;
     void ClearEditingValue();
+    void HandleCounterBorder();
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TextInputAction, TextInputAction)
 
@@ -258,6 +271,11 @@ public:
     const std::shared_ptr<RSParagraph>& GetCounterParagraph() const
     {
         return counterParagraph_;
+    }
+
+    const std::shared_ptr<RSParagraph>& GetErrorParagraph() const
+    {
+        return errorParagraph_;
     }
 
     bool GetCursorVisible() const
@@ -674,6 +692,8 @@ public:
     std::string GetInputFilter() const;
     std::string GetCopyOptionString() const;
     std::string GetInputStyleString() const;
+    std::string GetErrorTextString() const;
+    bool GetErrorTextState() const;
     std::string GetShowPasswordIconString() const;
     void SetSelectionFlag(int32_t selectionStart, int32_t selectionEnd);
     void HandleBlurEvent();
@@ -710,6 +730,7 @@ public:
     }
     static int32_t GetGraphemeClusterLength(const std::wstring& text, int32_t extend, bool checkPrev = false);
     void SetUnitNode(const RefPtr<NG::UINode>& unitNode);
+    void SetShowError();
 
     const RefPtr<ImageLoadingContext>& GetShowPasswordIconCtx() const
     {
@@ -744,6 +765,18 @@ public:
     const Color& GetUnderlineColor() const
     {
         return underlineColor_;
+    }
+
+    float GetMarginBottom() const;
+
+    void SetUnderlineColor(Color underlineColor)
+    {
+        underlineColor_ = underlineColor;
+    }
+
+    void SetUnderlineWidth(Dimension underlineWidth)
+    {
+        underlineWidth_ = underlineWidth;
     }
 
 private:
@@ -839,6 +872,7 @@ private:
     void RequestKeyboardOnFocus();
     void SetNeedToRequestKeyboardOnFocus();
     void SaveUnderlineStates();
+    void SavePasswordModeStates();
 
     RectF frameRect_;
     RectF contentRect_;
@@ -846,6 +880,7 @@ private:
     RectF imageRect_;
     std::shared_ptr<RSParagraph> paragraph_;
     std::shared_ptr<RSParagraph> counterParagraph_;
+    std::shared_ptr<RSParagraph> errorParagraph_;
     std::shared_ptr<RSParagraph> dragParagraph_;
     std::shared_ptr<RSParagraph> textLineHeightUtilParagraph_;
     std::shared_ptr<RSParagraph> placeholderLineHeightUtilParagraph_;
@@ -879,6 +914,9 @@ private:
     OffsetF rightClickOffset_;
 
     bool showUnderLine_ = false;
+    bool setBorderFlag_ = true;
+    BorderWidthProperty lastDiffBorderWidth_;
+    BorderColorProperty lastDiffBorderColor_;
 
     bool isSingleHandle_ = false;
     bool isFirstHandle_ = false;
@@ -944,6 +982,7 @@ private:
     std::vector<TextSelector> redoTextSelectorRecords_;
     std::vector<MenuOptionsParam> menuOptionItems_;
     UnderLinePattern underLinePattern_;
+    PasswordModeStyle passwordModeStyle_;
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> textChangeListener_;

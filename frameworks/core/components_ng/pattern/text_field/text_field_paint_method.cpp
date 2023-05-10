@@ -74,6 +74,7 @@ void TextFieldPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(layoutProperty);
     textFieldContentModifier_->SetTextObscured(textFieldPattern->GetTextObscured());
     textFieldContentModifier_->SetShowCounter(layoutProperty->GetShowCounterValue(false));
+    textFieldContentModifier_->SetShowErrorState(layoutProperty->GetShowErrorTextValue(false));
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<TextFieldTheme>();
