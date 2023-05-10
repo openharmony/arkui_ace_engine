@@ -109,7 +109,7 @@ void ImageTestNg::TearDownTestSuite()
 RefPtr<FrameNode> ImageTestNg::CreateImageNode(const std::string& src, const std::string& alt, RefPtr<PixelMap> pixMap)
 {
     ImageModelNG image;
-    image.Create(src, pixMap, pixMap, BUNDLE_NAME, MODULE_NAME);
+    image.Create(src, pixMap, BUNDLE_NAME, MODULE_NAME);
     image.SetAlt(alt);
     auto onError = [](const LoadImageFailEvent& info) {};
     image.SetOnError(std::move(onError));
@@ -123,7 +123,7 @@ RefPtr<FrameNode> ImageTestNg::CreateImageNodeWithDefaultProp(
     const std::string& src, const std::string& alt, RefPtr<PixelMap> pixMap)
 {
     ImageModelNG image;
-    image.Create(src, pixMap, pixMap, BUNDLE_NAME, MODULE_NAME);
+    image.Create(src, pixMap, BUNDLE_NAME, MODULE_NAME);
     image.SetAlt(alt);
     image.SetImageFill(SVG_FILL_COLOR_DEFAULT);
     image.SetImageFit(IMAGE_FIT_DEFAULT);
@@ -144,7 +144,7 @@ RefPtr<FrameNode> ImageTestNg::CreateSyncImageNode()
 {
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
-    image.Create(PNG_IMAGE, true, pixMap, BUNDLE_NAME, MODULE_NAME);
+    image.Create(PNG_IMAGE, pixMap, BUNDLE_NAME, MODULE_NAME);
     image.SetAlt(ALT_SRC_URL);
     image.SetSyncMode(true);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -155,7 +155,7 @@ RefPtr<FrameNode> ImageTestNg::CreateSyncWebImageNode()
 {
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
-    image.Create(WEB_IMAGE, true, pixMap, BUNDLE_NAME, MODULE_NAME);
+    image.Create(WEB_IMAGE, pixMap, BUNDLE_NAME, MODULE_NAME);
     image.SetAlt(ALT_SRC_URL);
     image.SetSyncMode(true);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -681,7 +681,7 @@ HWTEST_F(ImageTestNg, ImageCreator001, TestSize.Level1)
 {
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
-    image.Create("", false, pixMap, BUNDLE_NAME, MODULE_NAME);
+    image.Create("", pixMap, BUNDLE_NAME, MODULE_NAME);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
@@ -696,7 +696,7 @@ HWTEST_F(ImageTestNg, ImageCreator002, TestSize.Level1)
 {
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
-    image.Create("", false, pixMap, BUNDLE_NAME, MODULE_NAME);
+    image.Create("", pixMap, BUNDLE_NAME, MODULE_NAME);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
@@ -722,7 +722,7 @@ HWTEST_F(ImageTestNg, ImageCreator003, TestSize.Level1)
 {
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
-    image.Create(IMAGE_SRC_URL, false, pixMap, BUNDLE_NAME, MODULE_NAME);
+    image.Create(IMAGE_SRC_URL, pixMap, BUNDLE_NAME, MODULE_NAME);
     image.SetImageFit(IMAGE_FIT_DEFAULT);
     image.SetAlt(ALT_SRC_URL);
     image.SetSyncMode(SYNCMODE_DEFAULT);
@@ -773,7 +773,7 @@ HWTEST_F(ImageTestNg, ImageEventTest001, TestSize.Level1)
 {
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
-    image.Create(IMAGE_SRC_URL, false, pixMap, BUNDLE_NAME, MODULE_NAME);
+    image.Create(IMAGE_SRC_URL, pixMap, BUNDLE_NAME, MODULE_NAME);
     LoadImageSuccessEvent curEvent(
         IMAGE_WIDTH_DEFAULT, IMAGE_HEIGHT_DEFAULT, IMAGE_COMPONENTWIDTH_DEFAULT, IMAGE_COMPONENTHEIGHT_DEFAULT, -1);
     auto onComplete = [&curEvent](const LoadImageSuccessEvent& info) { curEvent = info; };
@@ -801,7 +801,7 @@ HWTEST_F(ImageTestNg, ImageEventTest002, TestSize.Level1)
 {
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
-    image.Create(IMAGE_SRC_URL, false, pixMap, BUNDLE_NAME, MODULE_NAME);
+    image.Create(IMAGE_SRC_URL, pixMap, BUNDLE_NAME, MODULE_NAME);
     LoadImageFailEvent curEvent(IMAGE_COMPONENTWIDTH_DEFAULT, IMAGE_COMPONENTHEIGHT_DEFAULT, "");
     auto onError = [&curEvent](const LoadImageFailEvent& info) { curEvent = info; };
     image.SetOnError(std::move(onError));
@@ -826,7 +826,7 @@ HWTEST_F(ImageTestNg, ImageSvgTest001, TestSize.Level1)
 {
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
-    image.Create(IMAGE_SRC_URL, false, pixMap, BUNDLE_NAME, MODULE_NAME);
+    image.Create(IMAGE_SRC_URL, pixMap, BUNDLE_NAME, MODULE_NAME);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
