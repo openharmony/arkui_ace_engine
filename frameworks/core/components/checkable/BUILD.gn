@@ -29,6 +29,13 @@ build_component("checkable") {
     "render_switch.cpp",
     "render_switch_creator.cpp",
   ]
+  if (ace_use_new_skia) {
+    sources -= [
+      "flutter_render_checkbox.cpp",
+      "flutter_render_radio.cpp",
+      "flutter_render_switch.cpp",
+    ]
+  }
   rosen_sources = [
     "rosen_render_checkbox.cpp",
     "rosen_render_radio.cpp",

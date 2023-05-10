@@ -62,6 +62,7 @@ private:
     static void SetSubTabBarStyle(const JSRef<JSObject>& paramObject);
     static void SetLabelStyle(const JSRef<JSVal>& info);
     static void GetFontContent(JSRef<JSVal> font, LabelStyle& labelStyle);
+    static void CompleteParameters(LabelStyle& buttonParameters);
 };
 
 } // namespace OHOS::Ace::Framework

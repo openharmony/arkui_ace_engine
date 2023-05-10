@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_ITEM_MODEL_H
 
 #include <memory>
+#include <mutex>
 
 namespace OHOS::Ace {
 class WaterFlowItemModel {
@@ -28,6 +29,7 @@ public:
 
 private:
     static std::unique_ptr<WaterFlowItemModel> instance_;
+    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_ITEM_MODEL_H

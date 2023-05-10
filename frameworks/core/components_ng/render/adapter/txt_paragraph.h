@@ -16,9 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_TXT_PARAGRAPH_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_TXT_PARAGRAPH_H
 
-#include "flutter/third_party/txt/src/txt/font_collection.h"
-#include "flutter/third_party/txt/src/txt/paragraph_builder.h"
-#include "flutter/third_party/txt/src/txt/paragraph_txt.h"
+#include "txt/font_collection.h"
+#include "txt/paragraph_builder.h"
+#include "txt/paragraph_txt.h"
 
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/render/paragraph.h"

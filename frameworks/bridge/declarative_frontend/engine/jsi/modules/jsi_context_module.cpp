@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,9 @@
 #include "frameworks/bridge/declarative_frontend/engine/bindings.h"
 #include "frameworks/core/common/container.h"
 
+#ifdef PLUGIN_COMPONENT_SUPPORTED
+#include "core/common/plugin_manager.h"
+#endif
 namespace OHOS::Ace::Framework {
 
 thread_local std::unordered_map<int32_t, std::shared_ptr<JsValue>> JsiContextModule::contexts_;
@@ -32,6 +35,11 @@ std::shared_ptr<JsValue> JsiContextModule::GetContext(const std::shared_ptr<JsRu
     const std::shared_ptr<JsValue>& thisObj, const std::vector<std::shared_ptr<JsValue>>& argv, int32_t argc)
 {
     int32_t currentInstance = Container::CurrentId();
+#ifdef PLUGIN_COMPONENT_SUPPORTED
+    if (currentInstance >= MIN_PLUGIN_SUBCONTAINER_ID) {
+        currentInstance = PluginManager::GetInstance().GetPluginParentContainerId(currentInstance);
+    }
+#endif
     LOGD("Current ID is %{public}d", currentInstance);
     auto it = contexts_.find(currentInstance);
     if (it == contexts_.end()) {

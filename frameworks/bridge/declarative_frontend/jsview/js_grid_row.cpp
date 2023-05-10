@@ -71,10 +71,10 @@ void InheritGridRowOption(const RefPtr<V2::GridContainerSize>& gridContainerSize
 }
 
 void InheritGridRowGutterOption(const RefPtr<V2::Gutter>& gutter,
-    std::optional<Dimension> (&gutterSizeArray)[MAX_NUMBER_BREAKPOINT], bool isHorizontal)
+    std::optional<CalcDimension> (&gutterSizeArray)[MAX_NUMBER_BREAKPOINT], bool isHorizontal)
 {
     if (!gutterSizeArray[0].has_value()) {
-        gutterSizeArray[0] = Dimension(0);
+        gutterSizeArray[0] = CalcDimension(0);
     }
     for (size_t i = 1; i < MAX_NUMBER_BREAKPOINT; i++) {
         if (!gutterSizeArray[i].has_value()) {
@@ -100,7 +100,7 @@ void InheritGridRowGutterOption(const RefPtr<V2::Gutter>& gutter,
 
 void ParseGutterObject(const JSRef<JSVal>& gutterObject, RefPtr<V2::Gutter>& gutter, bool isHorizontal)
 {
-    Dimension dim;
+    CalcDimension dim;
     if (JSContainerBase::ParseJsDimensionVp(gutterObject, dim)) {
         isHorizontal ? gutter->SetXGutter(dim) : gutter->SetYGutter(dim);
         return;
@@ -108,35 +108,35 @@ void ParseGutterObject(const JSRef<JSVal>& gutterObject, RefPtr<V2::Gutter>& gut
     if (!gutterObject->IsObject()) {
         return;
     }
-    std::optional<Dimension> gutterOptions[MAX_NUMBER_BREAKPOINT];
+    std::optional<CalcDimension> gutterOptions[MAX_NUMBER_BREAKPOINT];
     auto gutterParam = JSRef<JSObject>::Cast(gutterObject);
     auto xs = gutterParam->GetProperty("xs");
-    Dimension xsDimension;
+    CalcDimension xsDimension;
     if (JSContainerBase::ParseJsDimensionVp(xs, xsDimension)) {
         gutterOptions[0] = xsDimension;
     }
     auto sm = gutterParam->GetProperty("sm");
-    Dimension smDimension;
+    CalcDimension smDimension;
     if (JSContainerBase::ParseJsDimensionVp(sm, smDimension)) {
         gutterOptions[1] = smDimension;
     }
     auto md = gutterParam->GetProperty("md");
-    Dimension mdDimension;
+    CalcDimension mdDimension;
     if (JSContainerBase::ParseJsDimensionVp(md, mdDimension)) {
         gutterOptions[2] = mdDimension;
     }
     auto lg = gutterParam->GetProperty("lg");
-    Dimension lgDimension;
+    CalcDimension lgDimension;
     if (JSContainerBase::ParseJsDimensionVp(lg, lgDimension)) {
         gutterOptions[3] = lgDimension;
     }
     auto xl = gutterParam->GetProperty("xl");
-    Dimension xlDimension;
+    CalcDimension xlDimension;
     if (JSContainerBase::ParseJsDimensionVp(xl, xlDimension)) {
         gutterOptions[4] = xlDimension;
     }
     auto xxl = gutterParam->GetProperty("xxl");
-    Dimension xxlDimension;
+    CalcDimension xxlDimension;
     if (JSContainerBase::ParseJsDimensionVp(xxl, xxlDimension)) {
         gutterOptions[5] = xxlDimension;
     }
@@ -145,7 +145,7 @@ void ParseGutterObject(const JSRef<JSVal>& gutterObject, RefPtr<V2::Gutter>& gut
 
 RefPtr<V2::Gutter> ParserGutter(const JSRef<JSVal>& jsValue)
 {
-    Dimension result;
+    CalcDimension result;
     if (JSContainerBase::ParseJsDimensionVp(jsValue, result)) {
         auto gutter = AceType::MakeRefPtr<V2::Gutter>(result);
         return gutter;
@@ -228,7 +228,7 @@ RefPtr<V2::BreakPoints> ParserBreakpoints(const JSRef<JSVal>& jsValue)
         for (size_t i = 0; i < array->Length(); i++) {
             JSRef<JSVal> threshold = array->GetValueAt(i);
             if (threshold->IsString() || threshold->IsNumber()) {
-                Dimension valueDimension;
+                CalcDimension valueDimension;
                 JSContainerBase::ParseJsDimensionVp(threshold, valueDimension);
                 if (GreatNotEqual(width, valueDimension.Value())) {
                     LOGI("Array data must be sorted in ascending order");

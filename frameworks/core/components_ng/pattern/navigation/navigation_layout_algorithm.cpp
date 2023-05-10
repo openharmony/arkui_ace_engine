@@ -223,8 +223,9 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             navigationMode_ = NavigationMode::STACK;
             navigationLayoutProperty->UpdateNavigationMode(navigationMode_);
         }
+    } else {
+        pattern->SetNavigationMode(navigationMode_);
     }
-    pattern->SetNavigationMode(navigationMode_);
 
     auto navBarSize = size;
     auto contentSize = size;

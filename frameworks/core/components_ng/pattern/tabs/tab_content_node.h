@@ -30,8 +30,8 @@ public:
     {}
     ~TabContentNode() = default;
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
-    void OnAttachToMainTree() override;
-    void OnDetachFromMainTree() override;
+    void OnAttachToMainTree(bool recursive) override;
+    void OnDetachFromMainTree(bool recursive) override;
     static RefPtr<TabContentNode> GetOrCreateTabContentNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
 

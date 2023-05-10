@@ -229,7 +229,7 @@ public:
 
     // Load and initialize a JS bundle into the JS Framework
     void LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bool isMainPage) override;
-    bool LoadJsWithModule(const std::string& urlName,
+    bool LoadJsWithModule(std::string& urlName,
         const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr);
 
     // Load the app.js file of the FA model in NG structure..
@@ -302,6 +302,8 @@ public:
     void DumpHeapSnapshot(bool isPrivate) override;
 
     std::string GetStacktraceMessage() override;
+
+    void GetStackTrace(std::string& trace) override;
 
     void SetLocalStorage(int32_t instanceId, NativeReference* storage) override;
 

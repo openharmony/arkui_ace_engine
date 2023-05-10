@@ -25,19 +25,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<PathModel> PathModel::instance_ = nullptr;
+std::mutex PathModel::mutex_;
 
 PathModel* PathModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::PathModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::PathModelNG());
-        } else {
-            instance_.reset(new Framework::PathModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::PathModelNG());
+            } else {
+                instance_.reset(new Framework::PathModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }

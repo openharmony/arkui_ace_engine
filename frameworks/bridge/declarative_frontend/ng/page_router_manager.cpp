@@ -54,6 +54,9 @@ void ExitToDesktop()
         [] {
             auto pipeline = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(pipeline);
+            AccessibilityEvent event;
+            event.type = AccessibilityEventType::PAGE_CHANGE;
+            pipeline->SendEventToAccessibility(event);
             pipeline->Finish(false);
         },
         TaskExecutor::TaskType::UI);
@@ -83,28 +86,22 @@ void PageRouterManager::RunPage(const std::string& url, const std::string& param
         auto instanceId = container->GetInstanceId();
         auto taskExecutor = container->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
-        auto callback =
-            [weak = AceType::WeakClaim(this), info, params, taskExecutor, instanceId]() {
-                ContainerScope scope(instanceId);
-                auto pageRouterManager = weak.Upgrade();
-                CHECK_NULL_VOID(pageRouterManager);
-                taskExecutor->PostTask(
-                    [pageRouterManager, info, params]() {
-                        pageRouterManager->LoadOhmUrl(info, params);
-                    },
-                    TaskExecutor::TaskType::JS);
-            };
+        auto callback = [weak = AceType::WeakClaim(this), info, params, taskExecutor, instanceId]() {
+            ContainerScope scope(instanceId);
+            auto pageRouterManager = weak.Upgrade();
+            CHECK_NULL_VOID(pageRouterManager);
+            taskExecutor->PostTask([pageRouterManager, info, params]() { pageRouterManager->LoadOhmUrl(info, params); },
+                TaskExecutor::TaskType::JS);
+        };
 
-        auto silentInstallErrorCallBack =
-            [taskExecutor, instanceId](
-                int32_t errorCode, const std::string& errorMsg) {
-                ContainerScope scope(instanceId);
-                taskExecutor->PostTask(
-                    [errorCode, errorMsg]() {
-                        LOGE("Run page error = %{public}d, errorMsg = %{public}s", errorCode, errorMsg.c_str());
-                    },
-                    TaskExecutor::TaskType::JS);
-            };
+        auto silentInstallErrorCallBack = [taskExecutor, instanceId](int32_t errorCode, const std::string& errorMsg) {
+            ContainerScope scope(instanceId);
+            taskExecutor->PostTask(
+                [errorCode, errorMsg]() {
+                    LOGE("Run page error = %{public}d, errorMsg = %{public}s", errorCode, errorMsg.c_str());
+                },
+                TaskExecutor::TaskType::JS);
+        };
 
         pageUrlChecker->LoadPageUrl(url, callback, silentInstallErrorCallBack);
         return;
@@ -436,14 +433,32 @@ RefPtr<Framework::RevSourceMap> PageRouterManager::GetCurrentPageSourceMap(const
     }
     // initialize page map.
     std::string jsSourceMap;
-    if (Framework::GetAssetContentImpl(assetManager, entryPageInfo->GetPagePath() + ".map", jsSourceMap)) {
-        auto pageMap = MakeRefPtr<Framework::RevSourceMap>();
-        pageMap->Init(jsSourceMap);
-        entryPageInfo->SetPageMap(pageMap);
-        return pageMap;
+    // stage mode
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, nullptr);
+    if (container->IsUseStageModel()) {
+        auto pagePath = entryPageInfo->GetPagePath();
+        auto judgePath = "entry/src/main/ets/" + pagePath.substr(0, pagePath.size() - 3) + ".ets";
+        if (Framework::GetAssetContentImpl(assetManager, "sourceMaps.map", jsSourceMap)) {
+            auto jsonPages = JsonUtil::ParseJsonString(jsSourceMap);
+            auto jsonPage = jsonPages->GetValue(judgePath)->ToString();
+            auto pageMap = MakeRefPtr<Framework::RevSourceMap>();
+            pageMap->Init(jsonPage);
+            entryPageInfo->SetPageMap(pageMap);
+            return pageMap;
+        }
+        LOGW("js source map load failed!");
+        return nullptr;
+    } else {
+        if (Framework::GetAssetContentImpl(assetManager, entryPageInfo->GetPagePath() + ".map", jsSourceMap)) {
+            auto pageMap = MakeRefPtr<Framework::RevSourceMap>();
+            pageMap->Init(jsSourceMap);
+            entryPageInfo->SetPageMap(pageMap);
+            return pageMap;
+        }
+        LOGW("js source map load failed!");
+        return nullptr;
     }
-    LOGW("js source map load failed!");
-    return nullptr;
 }
 
 int32_t PageRouterManager::GenerateNextPageId()
@@ -515,28 +530,24 @@ void PageRouterManager::StartPush(const RouterPageInfo& target, const std::strin
         auto instanceId = container->GetInstanceId();
         auto taskExecutor = container->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
-        auto callback =
-            [weak = AceType::WeakClaim(this), target, params, mode, errorCallback, taskExecutor, instanceId]() {
-                ContainerScope scope(instanceId);
-                auto pageRouterManager = weak.Upgrade();
-                CHECK_NULL_VOID(pageRouterManager);
-                taskExecutor->PostTask(
-                    [pageRouterManager, target, params, mode, errorCallback]() {
-                        pageRouterManager->PushOhmUrl(target, params, mode, errorCallback);
-                    },
-                    TaskExecutor::TaskType::JS);
-            };
+        auto callback = [weak = AceType::WeakClaim(this), target, params, mode, errorCallback, taskExecutor,
+                            instanceId]() {
+            ContainerScope scope(instanceId);
+            auto pageRouterManager = weak.Upgrade();
+            CHECK_NULL_VOID(pageRouterManager);
+            taskExecutor->PostTask(
+                [pageRouterManager, target, params, mode, errorCallback]() {
+                    pageRouterManager->PushOhmUrl(target, params, mode, errorCallback);
+                },
+                TaskExecutor::TaskType::JS);
+        };
 
-        auto silentInstallErrorCallBack =
-            [errorCallback, taskExecutor, instanceId](
-                int32_t errorCode, const std::string& errorMsg) {
-                ContainerScope scope(instanceId);
-                taskExecutor->PostTask(
-                    [errorCallback, errorCode, errorMsg]() {
-                        errorCallback(errorMsg, errorCode);
-                    },
-                    TaskExecutor::TaskType::JS);
-            };
+        auto silentInstallErrorCallBack = [errorCallback, taskExecutor, instanceId](
+                                              int32_t errorCode, const std::string& errorMsg) {
+            ContainerScope scope(instanceId);
+            taskExecutor->PostTask([errorCallback, errorCode, errorMsg]() { errorCallback(errorMsg, errorCode); },
+                TaskExecutor::TaskType::JS);
+        };
 
         pageUrlChecker->LoadPageUrl(target.url, callback, silentInstallErrorCallBack);
         return;
@@ -624,28 +635,24 @@ void PageRouterManager::StartReplace(const RouterPageInfo& target, const std::st
         auto instanceId = container->GetInstanceId();
         auto taskExecutor = container->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
-        auto callback =
-            [weak = AceType::WeakClaim(this), target, params, mode, errorCallback, taskExecutor, instanceId]() {
-                ContainerScope scope(instanceId);
-                auto pageRouterManager = weak.Upgrade();
-                CHECK_NULL_VOID(pageRouterManager);
-                taskExecutor->PostTask(
-                    [pageRouterManager, target, params, mode, errorCallback]() {
-                        pageRouterManager->ReplaceOhmUrl(target, params, mode, errorCallback);
-                    },
-                    TaskExecutor::TaskType::JS);
-            };
+        auto callback = [weak = AceType::WeakClaim(this), target, params, mode, errorCallback, taskExecutor,
+                            instanceId]() {
+            ContainerScope scope(instanceId);
+            auto pageRouterManager = weak.Upgrade();
+            CHECK_NULL_VOID(pageRouterManager);
+            taskExecutor->PostTask(
+                [pageRouterManager, target, params, mode, errorCallback]() {
+                    pageRouterManager->ReplaceOhmUrl(target, params, mode, errorCallback);
+                },
+                TaskExecutor::TaskType::JS);
+        };
 
-        auto silentInstallErrorCallBack =
-            [errorCallback, taskExecutor, instanceId](
-                int32_t errorCode, const std::string& errorMsg) {
-                ContainerScope scope(instanceId);
-                taskExecutor->PostTask(
-                    [errorCallback, errorCode, errorMsg]() {
-                        errorCallback(errorMsg, errorCode);
-                    },
-                    TaskExecutor::TaskType::JS);
-            };
+        auto silentInstallErrorCallBack = [errorCallback, taskExecutor, instanceId](
+                                              int32_t errorCode, const std::string& errorMsg) {
+            ContainerScope scope(instanceId);
+            taskExecutor->PostTask([errorCallback, errorCode, errorMsg]() { errorCallback(errorMsg, errorCode); },
+                TaskExecutor::TaskType::JS);
+        };
 
         pageUrlChecker->LoadPageUrl(target.url, callback, silentInstallErrorCallBack);
         return;
@@ -793,6 +800,8 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, c
         pageRouterStack_.pop_back();
         return;
     }
+    AccessibilityEventType type = AccessibilityEventType::CHANGE;
+    pageNode->OnAccessibilityEvent(type);
     LOGI("PageRouterManager LoadPage[%{public}d]: %{public}s. success", pageId, target.url.c_str());
 }
 
@@ -1042,6 +1051,10 @@ void PageRouterManager::CleanPageOverlay()
     CHECK_NULL_VOID(overlayManager);
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID_NOLOG(taskExecutor);
+    auto sharedManager = context->GetSharedOverlayManager();
+    if (sharedManager) {
+        sharedManager->StopSharedTransition();
+    }
 
     if (overlayManager->RemoveOverlay()) {
         LOGI("clean page overlay.");

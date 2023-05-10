@@ -16,10 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TRACK_ROSEN_RENDER_LINEAR_TRACK_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TRACK_ROSEN_RENDER_LINEAR_TRACK_H
 
-#include "third_party/skia/include/core/SkCanvas.h"
-#include "third_party/skia/include/core/SkColor.h"
-#include "third_party/skia/include/core/SkPoint.h"
-#include "third_party/skia/include/core/SkShader.h"
+#include "include/core/SkCanvas.h"
+#include "include/core/SkColor.h"
+#include "include/core/SkPoint.h"
+#include "include/core/SkShader.h"
 
 #include "base/geometry/offset.h"
 #include "core/components/track/render_track.h"

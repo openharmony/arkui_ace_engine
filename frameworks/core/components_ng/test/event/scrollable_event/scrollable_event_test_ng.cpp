@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 
-#include <cstdint>
 #include <clocale>
 #include <cmath>
+#include <cstdint>
 #include <unistd.h>
 
 #include "gtest/gtest.h"
+
 #include "base/memory/ace_type.h"
 #define private public
 #define protected public
@@ -31,12 +32,7 @@
 
 using namespace testing;
 using namespace testing::ext;
-namespace OHOS::Ace {
-bool OHOS::Ace::SystemProperties::GetDebugEnabled()
-{
-    return false;
-}
-} // namespace OHOS::Ace
+
 namespace OHOS::Ace::NG {
 namespace {
 constexpr Axis SCROLLABLE_EVENT_AXIS = Axis::VERTICAL;

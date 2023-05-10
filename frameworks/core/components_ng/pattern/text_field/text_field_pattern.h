@@ -40,6 +40,7 @@
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/text/text_menu_extension.h"
+#include "core/components_ng/pattern/text_drag/text_drag_base.h"
 #include "core/components_ng/pattern/text_field/text_editing_value_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_accessibility_property.h"
 #include "core/components_ng/pattern/text_field/text_field_controller.h"
@@ -66,10 +67,13 @@ namespace OHOS::Ace::NG {
 
 constexpr Dimension CURSOR_WIDTH = 1.5_vp;
 constexpr Dimension SCROLL_BAR_MIN_HEIGHT = 4.0_vp;
+constexpr Dimension UNDERLINE_WIDTH = 1.0_px;
 
 enum class SelectionMode { SELECT, SELECT_ALL, NONE };
 
 enum class MouseStatus { PRESSED, RELEASED, MOVE, NONE };
+
+enum class DragStatus { DRAGGING, ON_DROP, NONE };
 
 enum {
     ACTION_SELECT_ALL, // Smallest code unit.
@@ -105,8 +109,18 @@ struct CaretMetricsF {
     }
 };
 
-class TextFieldPattern : public ScrollablePattern, public ValueChangeObserver {
-    DECLARE_ACE_TYPE(TextFieldPattern, ScrollablePattern, ValueChangeObserver);
+struct UnderLinePattern {
+    BorderRadiusProperty radius;
+    Color bgColor;
+    BorderWidthProperty borderWidth;
+    BorderColorProperty borderColor;
+};
+
+class TextFieldPattern : public ScrollablePattern,
+                         public TextDragBase,
+                         public ValueChangeObserver,
+                         public TextInputClient {
+    DECLARE_ACE_TYPE(TextFieldPattern, ScrollablePattern, TextDragBase, ValueChangeObserver, TextInputClient);
 
 public:
     TextFieldPattern();
@@ -164,6 +178,7 @@ public:
     bool ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF& result);
 
     bool ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& result) const;
+    bool IsSelectedAreaRedraw() const;
 
     OffsetF MakeEmptyOffset() const;
 
@@ -191,6 +206,14 @@ public:
     }
 
     const TextEditingValueNG& GetEditingValue() const;
+
+#if defined(IOS_PLATFORM)
+    const TextEditingValue& GetInputEditingValue() const override {
+        static TextEditingValue value;
+	return value;
+    };
+#endif
+
     void UpdateEditingValue(std::string value, int32_t caretPosition)
     {
         textEditingValue_.text = std::move(value);
@@ -203,7 +226,7 @@ public:
     void UpdateCaretOffsetByEvent();
 
     bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard);
-    bool CloseKeyboard(bool forceClose);
+    bool CloseKeyboard(bool forceClose) override;
 
     FocusPattern GetFocusPattern() const override
     {
@@ -211,7 +234,10 @@ public:
     }
 
     void UpdateConfiguration();
-    void PerformAction(TextInputAction action, bool forceCloseKeyboard = true);
+
+    void PerformAction(TextInputAction action, bool forceCloseKeyboard = true) override;
+    void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
+
     void OnValueChanged(bool needFireChangeEvent = true, bool needFireSelectChangeEvent = true) override;
 
     void OnAreaChangedInner() override;
@@ -228,6 +254,11 @@ public:
     const std::shared_ptr<RSParagraph>& GetParagraph() const
     {
         return paragraph_;
+    }
+
+    const std::shared_ptr<RSParagraph>& GetCounterParagraph() const
+    {
+        return counterParagraph_;
     }
 
     bool GetCursorVisible() const
@@ -326,14 +357,24 @@ public:
         return utilPadding_.top.value_or(0.0f) + utilPadding_.bottom.value_or(0.0f);
     }
 
-    const RectF& GetTextRect()
+    const RectF& GetTextRect() override
     {
         return textRect_;
     }
 
-    const RectF& GetFrameRect()
+    const RectF& GetContentRect() const
+    {
+        return contentRect_;
+    }
+
+    const RectF& GetFrameRect() const
     {
         return frameRect_;
+    }
+
+    float GetCountHeight() const
+    {
+        return countHeight_;
     }
 
     const TextSelector& GetTextSelector()
@@ -361,17 +402,17 @@ public:
         return isUsingMouse_;
     }
 
-    void CursorMoveLeft();
-    void CursorMoveRight();
-    void CursorMoveUp();
-    void CursorMoveDown();
+    bool CursorMoveLeft();
+    bool CursorMoveRight();
+    bool CursorMoveUp();
+    bool CursorMoveDown();
     void SetCaretPosition(int32_t position);
     void SetTextSelection(int32_t selectionStart, int32_t selectionEnd);
     void HandleSetSelection(int32_t start, int32_t end);
     void HandleExtendAction(int32_t action);
     void HandleSelect(int32_t keyCode, int32_t cursorMoveSkip);
 
-    const std::vector<RSTypographyProperties::TextBox>& GetTextBoxes()
+    std::vector<RSTypographyProperties::TextBox> GetTextBoxes() override
     {
         return textBoxes_;
     }
@@ -385,7 +426,7 @@ public:
     }
 
     bool SelectOverlayIsOn();
-    void CloseSelectOverlay();
+    void CloseSelectOverlay() override;
     void SetInputMethodStatus(bool keyboardShown)
     {
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
@@ -397,17 +438,14 @@ public:
     {
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
         return imeAttached_;
+#else
+        return connection_;
 #endif
-        return false;
     }
     float PreferredLineHeight();
     void SetNeedCloseOverlay(bool needClose)
     {
         needCloseOverlay_ = needClose;
-    }
-    const RefPtr<ImageLoadingContext>& GetShowPasswordIconCtx() const
-    {
-        return showPasswordImageLoadingCtx_;
     }
 
     void SearchRequestKeyboard();
@@ -415,11 +453,6 @@ public:
     const RefPtr<CanvasImage>& GetShowPasswordIconCanvasImage() const
     {
         return showPasswordCanvasImage_;
-    }
-
-    const RefPtr<ImageLoadingContext>& GetHidePasswordIconCtx() const
-    {
-        return hidePasswordImageLoadingCtx_;
     }
 
     const RefPtr<CanvasImage>& GetHidePasswordIconCanvasImage() const
@@ -438,8 +471,8 @@ public:
     }
 
     static std::u16string CreateObscuredText(int32_t len);
-    bool IsTextArea() const;
-    const RectF& GetImageRect()
+    bool IsTextArea() const override;
+    const RectF& GetImageRect() const
     {
         return imageRect_;
     }
@@ -462,7 +495,7 @@ public:
         enableTouchAndHoverEffect_ = enable;
     }
 
-    const RectF& GetCaretRect()
+    const RectF& GetCaretRect() const
     {
         return caretRect_;
     }
@@ -522,7 +555,7 @@ public:
 
     void UpdateEditingValueToRecord();
     void UpdateScrollBarOffset() override;
-    
+
     bool UpdateCurrentOffset(float offset, int32_t source) override
     {
         return true;
@@ -560,6 +593,70 @@ public:
 
     double GetScrollBarWidth();
 
+    float GetLineHeight() const override
+    {
+        return caretRect_.Height();
+    }
+
+    OffsetF GetParentGlobalOffset() const override
+    {
+        return parentGlobalOffset_;
+    }
+
+    void SetDragNode(const RefPtr<FrameNode>& dragNode) override
+    {
+        dragNode_ = dragNode;
+    }
+
+    const RectF& GetTextContentRect() const override
+    {
+        return contentRect_;
+    }
+
+    ParagraphT GetDragParagraph() const override
+    {
+        return { dragParagraph_ };
+    }
+
+    const RefPtr<FrameNode>& GetDragNode() const override
+    {
+        return dragNode_;
+    }
+
+    const std::vector<std::string>& GetDragContents() const
+    {
+        return dragContents_;
+    }
+
+    void AddDragFrameNodeToManager(const RefPtr<FrameNode>& frameNode)
+    {
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        auto dragDropManager = context->GetDragDropManager();
+        CHECK_NULL_VOID(dragDropManager);
+        dragDropManager->AddDragFrameNode(AceType::WeakClaim(AceType::RawPtr(frameNode)));
+    }
+
+    void CreateHandles() override;
+
+    bool IsDragging() const
+    {
+        return dragStatus_ == DragStatus::DRAGGING;
+    }
+
+    bool BetweenSelectedPosition(const Offset& globalOffset) override
+    {
+        if (!InSelectMode()) {
+            return false;
+        }
+        Offset offset = globalOffset - Offset(textRect_.GetX(), textRect_.GetY()) -
+                        Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY());
+        auto position = ConvertTouchOffsetToCaretPosition(offset);
+        auto selectStart = std::min(textSelector_.GetStart(), textSelector_.GetEnd());
+        auto selectEnd = std::max(textSelector_.GetStart(), textSelector_.GetEnd());
+        return (position >= selectStart) && (position < selectEnd);
+    }
+
     // xts
     std::string TextInputTypeToString() const;
     std::string TextInputActionToString() const;
@@ -577,8 +674,8 @@ public:
     uint32_t GetMaxLength() const;
     std::string GetInputFilter() const;
     std::string GetCopyOptionString() const;
-    std::string GetShowPasswordIconString() const;
     std::string GetInputStyleString() const;
+    std::string GetShowPasswordIconString() const;
     void SetSelectionFlag(int32_t selectionStart, int32_t selectionEnd);
     void HandleBlurEvent();
     void HandleFocusEvent();
@@ -597,6 +694,7 @@ public:
     void HandleOnCopy();
     void HandleOnPaste();
     void HandleOnCut();
+    void StripNextLine(std::wstring& data);
     bool OnKeyEvent(const KeyEvent& event);
     TextInputType GetKeyboard()
     {
@@ -612,6 +710,42 @@ public:
         needToRequestKeyboardOnFocus_ = needToRequest;
     }
     static int32_t GetGraphemeClusterLength(const std::wstring& text, int32_t extend, bool checkPrev = false);
+    void SetUnitNode(const RefPtr<NG::UINode>& unitNode);
+
+    const RefPtr<ImageLoadingContext>& GetShowPasswordIconCtx() const
+    {
+        return showPasswordImageLoadingCtx_;
+    }
+
+    const RefPtr<ImageLoadingContext>& GetHidePasswordIconCtx() const
+    {
+        return hidePasswordImageLoadingCtx_;
+    }
+
+    void SetShowUnderLine(bool showUnderLine)
+    {
+        showUnderLine_ = showUnderLine;
+    }
+
+    bool GetShowUnderLine() const
+    {
+        return showUnderLine_;
+    }
+
+    float GetUnitWidth() const
+    {
+        return unitWidth_;
+    }
+
+    float GetUnderlineWidth() const
+    {
+        return static_cast<float>(underlineWidth_.Value());
+    }
+
+    const Color& GetUnderlineColor() const
+    {
+        return underlineColor_;
+    }
 
 private:
     bool HasFocus() const;
@@ -623,6 +757,10 @@ private:
     void InitTouchEvent();
     void InitLongPressEvent();
     void InitClickEvent();
+#ifdef ENABLE_DRAG_FRAMEWORK
+    void InitDragDropEvent();
+    std::function<void(Offset)> GetThumbnailCallback();
+#endif
     bool CaretPositionCloseToTouchPosition();
     void CreateSingleHandle();
     int32_t UpdateCaretPositionOnHandleMove(const OffsetF& localOffset);
@@ -653,8 +791,6 @@ private:
     void UpdateCaretByRightClick();
 
     void AfterSelection();
-    
-    void CreateHandles();
 
     void FireEventHubOnChange(const std::string& text);
     void FireOnChangeIfNeeded();
@@ -703,12 +839,15 @@ private:
     bool IsSearchParentNode() const;
     void RequestKeyboardOnFocus();
     void SetNeedToRequestKeyboardOnFocus();
+    void SaveUnderlineStates();
 
     RectF frameRect_;
     RectF contentRect_;
     RectF textRect_;
     RectF imageRect_;
     std::shared_ptr<RSParagraph> paragraph_;
+    std::shared_ptr<RSParagraph> counterParagraph_;
+    std::shared_ptr<RSParagraph> dragParagraph_;
     std::shared_ptr<RSParagraph> textLineHeightUtilParagraph_;
     std::shared_ptr<RSParagraph> placeholderLineHeightUtilParagraph_;
     TextStyle nextLineUtilTextStyle_;
@@ -740,6 +879,8 @@ private:
     PaddingPropertyF utilPadding_;
     OffsetF rightClickOffset_;
 
+    bool showUnderLine_ = false;
+
     bool isSingleHandle_ = false;
     bool isFirstHandle_ = false;
     float baselineOffset_ = 0.0f;
@@ -749,7 +890,11 @@ private:
     bool isMousePressed_ = false;
     MouseStatus mouseStatus_ = MouseStatus::NONE;
     bool needCloseOverlay_ = true;
+#if defined(ENABLE_STANDARD_INPUT)
     bool textObscured_ = true;
+#else
+    bool textObscured_ = false;
+#endif
     bool enableTouchAndHoverEffect_ = true;
     bool isUsingMouse_ = false;
     bool isOnHover_ = false;
@@ -764,11 +909,16 @@ private:
     uint32_t twinklingInterval_ = 0;
     int32_t obscureTickCountDown_ = 0;
     bool setSelectionFlag_ = false;
+    bool isSelectedAreaRedraw_ = false;
     bool setSelectAllFlag_ = true;
     int32_t selectionStart_ = 0;
     int32_t selectionEnd_ = 0;
     bool scrollable_ = true;
     float currentOffset_ = 0.0f;
+    float unitWidth_ = 0.0f;
+    float countHeight_ = 0.0f;
+    Dimension underlineWidth_ = UNDERLINE_WIDTH;
+    Color underlineColor_;
 
     CancelableCallback<void()> cursorTwinklingTask_;
 
@@ -784,15 +934,23 @@ private:
     RefPtr<TextFieldContentModifier> textFieldContentModifier_;
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldPattern);
 
+    int32_t dragTextStart_ = 0;
+    int32_t dragTextEnd_ = 0;
+    RefPtr<FrameNode> dragNode_;
+    DragStatus dragStatus_ = DragStatus::NONE;
+    std::vector<std::string> dragContents_;
     RefPtr<Clipboard> clipboard_;
     std::vector<TextEditingValueNG> operationRecords_;
     std::vector<TextEditingValueNG> redoOperationRecords_;
     std::vector<TextSelector> textSelectorRecords_;
     std::vector<TextSelector> redoTextSelectorRecords_;
     std::vector<MenuOptionsParam> menuOptionItems_;
+    UnderLinePattern underLinePattern_;
+
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> textChangeListener_;
-
+#else
+    RefPtr<TextInputConnection> connection_;
 #endif
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     bool imeAttached_ = false;

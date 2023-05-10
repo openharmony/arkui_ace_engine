@@ -21,7 +21,7 @@
 #include "core/image/image_compressor.h"
 #include "core/image/image_cache.h"
 #include "core/image/image_loader.h"
-#include "third_party/skia/include/core/SkImage.h"
+#include "include/core/SkImage.h"
 
 namespace OHOS::Ace {
 const std::string FILE_JPG = "file:///data/test/resource/imageprovider/images/unbroken.jpg";

@@ -24,19 +24,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<TabsModel> TabsModel::instance_ = nullptr;
+std::mutex TabsModel::mutex_;
 
 TabsModel* TabsModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::TabsModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::TabsModelNG());
-        } else {
-            instance_.reset(new Framework::TabsModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::TabsModelNG());
+            } else {
+                instance_.reset(new Framework::TabsModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -68,7 +72,7 @@ void JSTabs::SetOnChange(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
         const auto* tabsInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
         if (!tabsInfo) {
-            LOGE("HandleChangeEvent tabsInfo == nullptr");
+            LOGE("SetOnChange tabsInfo is nullptr");
             return;
         }
         ACE_SCORING_EVENT("Tabs.onChange");
@@ -77,12 +81,33 @@ void JSTabs::SetOnChange(const JSCallbackInfo& info)
     TabsModel::GetInstance()->SetOnChange(std::move(onChange));
 }
 
+void ParseTabsIndexObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
+{
+    CHECK_NULL_VOID(changeEventVal->IsFunction());
+
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
+    auto onChangeEvent = [executionContext = info.GetExecutionContext(), func = std::move(jsFunc)](
+                             const BaseEventInfo* info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
+        const auto* tabsInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
+        if (!tabsInfo) {
+            LOGE("ParseTabsIndexObject tabsInfo is nullptr");
+            return;
+        }
+        ACE_SCORING_EVENT("Tabs.onChangeEvent");
+        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(tabsInfo->GetIndex()));
+        func->ExecuteJS(1, &newJSVal);
+    };
+    TabsModel::GetInstance()->SetOnChangeEvent(std::move(onChangeEvent));
+}
+
 void JSTabs::Create(const JSCallbackInfo& info)
 {
     BarPosition barPosition = BarPosition::START;
     RefPtr<TabController> tabController;
     RefPtr<SwiperController> swiperController;
     int32_t index = 0;
+    JSRef<JSVal> changeEventVal;
     if (info[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
         JSRef<JSVal> val = obj->GetProperty("barPosition");
@@ -109,10 +134,20 @@ void JSTabs::Create(const JSCallbackInfo& info)
 #ifndef NG_BUILD
             tabController->SetInitialIndex(index);
 #endif
+        } else if (indexVal->IsObject()) {
+            JSRef<JSObject> indexObj = JSRef<JSObject>::Cast(indexVal);
+            auto indexValueProperty = indexObj->GetProperty("value");
+            if (indexValueProperty->IsNumber()) {
+                index = indexValueProperty->ToNumber<int32_t>();
+            }
+            changeEventVal = indexObj->GetProperty("changeEvent");
         }
     }
 
     TabsModel::GetInstance()->Create(barPosition, index, tabController, swiperController);
+    if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
+        ParseTabsIndexObject(info, changeEventVal);
+    }
 }
 
 void JSTabs::Pop()
@@ -163,7 +198,7 @@ void JSTabs::SetBarWidth(const JSCallbackInfo& info)
         return;
     }
 
-    Dimension width = Dimension(-1.0, DimensionUnit::VP);
+    CalcDimension width = Dimension(-1.0, DimensionUnit::VP);
     if (!ParseJsDimensionVp(info[0], width)) {
         LOGE("The arg is wrong, fail to parse dimension");
     }
@@ -177,7 +212,7 @@ void JSTabs::SetBarHeight(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
-    Dimension height = Dimension(-1.0, DimensionUnit::VP);
+    CalcDimension height = Dimension(-1.0, DimensionUnit::VP);
     if (!ParseJsDimensionVp(info[0], height)) {
         LOGE("The arg is wrong, fail to parse dimension");
     }
@@ -216,32 +251,47 @@ void JSTabs::SetFadingEdge(const JSCallbackInfo& info)
     TabsModel::GetInstance()->SetFadingEdge(fadingEdge);
 }
 
+void JSTabs::SetBarOverlap(const JSCallbackInfo& info)
+{
+    bool barOverlap = false;
+    if (info.Length() < 1) {
+        LOGW("The arg is wrong, it is supposed to have at least 1 arguments");
+    }
+    if (!ParseJsBool(info[0], barOverlap)) {
+        LOGW("The arg is wrong, fail to parse bool");
+    }
+    TabsModel::GetInstance()->SetBarOverlap(barOverlap);
+}
+
 void JSTabs::SetDivider(const JSCallbackInfo& info)
 {
     TabsItemDivider divider;
+    RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
+    CHECK_NULL_VOID (tabTheme);
+    
     if (info.Length() < 1) {
         LOGW("Invalid params");
     } else {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
-        if (!info[0]->IsObject() || !ConvertFromJSValue(obj->GetProperty("strokeWidth"), divider.strokeWidth) ||
-            divider.strokeWidth.Value() < 0.0f) {
-            divider.strokeWidth.Reset();
-        }
-        if (!info[0]->IsObject() || !ConvertFromJSValue(obj->GetProperty("color"), divider.color)) {
-            RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
-            if (tabTheme) {
+        if (info[0]->IsNull()) {
+            divider.isNull = true;
+        } else {
+            if (!info[0]->IsObject() || !ConvertFromJSValue(obj->GetProperty("strokeWidth"), divider.strokeWidth) ||
+                divider.strokeWidth.Value() < 0.0f) {
+                divider.strokeWidth.Reset();
+            }
+            if (!info[0]->IsObject() || !ConvertFromJSValue(obj->GetProperty("color"), divider.color)) {
                 divider.color = tabTheme->GetDividerColor();
             }
-        }
-
-        if (!info[0]->IsObject() || !ConvertFromJSValue(obj->GetProperty("startMargin"), divider.startMargin) ||
-            divider.startMargin.Value() < 0.0f) {
-            divider.startMargin.Reset();
-        }
-        
-        if (!info[0]->IsObject() || !ConvertFromJSValue(obj->GetProperty("endMargin"), divider.endMargin) ||
-            divider.endMargin.Value() < 0.0f) {
-            divider.endMargin.Reset();
+            if (!info[0]->IsObject() || !ConvertFromJSValue(obj->GetProperty("startMargin"), divider.startMargin) ||
+                divider.startMargin.Value() < 0.0f) {
+                divider.startMargin.Reset();
+            }
+            
+            if (!info[0]->IsObject() || !ConvertFromJSValue(obj->GetProperty("endMargin"), divider.endMargin) ||
+                divider.endMargin.Value() < 0.0f) {
+                divider.endMargin.Reset();
+            }
         }
     }
     TabsModel::GetInstance()->SetDivider(divider);
@@ -271,6 +321,7 @@ void JSTabs::JSBind(BindingTarget globalObj)
     JSClass<JSTabs>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSTabs>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
     JSClass<JSTabs>::StaticMethod("fadingEdge", &JSTabs::SetFadingEdge);
+    JSClass<JSTabs>::StaticMethod("barOverlap", &JSTabs::SetBarOverlap);
 
     JSClass<JSTabs>::Inherit<JSContainerBase>();
     JSClass<JSTabs>::Bind<>(globalObj);

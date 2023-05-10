@@ -34,6 +34,7 @@ public:
     void SetSecondarySrc(const std::string& value, bool flag = false) override;
     void SetBackgroundSrc(const std::string& value, bool flag = false) override;
     void SetOnChange(ChangeEvent&& onChange) override;
+    void SetOnChangeEvent(ChangeEvent&& onChangeEvent) override {};
 };
 } // namespace OHOS::Ace::Framework
 

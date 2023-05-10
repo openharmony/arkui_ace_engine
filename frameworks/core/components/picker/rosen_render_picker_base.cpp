@@ -16,7 +16,7 @@
 #include "core/components/picker/rosen_render_picker_base.h"
 
 #include "render_service_client/core/ui/rs_node.h"
-#include "third_party/skia/include/effects/SkGradientShader.h"
+#include "include/effects/SkGradientShader.h"
 
 namespace OHOS::Ace {
 namespace {

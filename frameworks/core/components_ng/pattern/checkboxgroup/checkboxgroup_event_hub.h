@@ -38,6 +38,9 @@ public:
 
     void UpdateChangeEvent(const BaseEventInfo* info) const
     {
+        if (selectAllChangeEvent_) {
+            selectAllChangeEvent_(info);
+        }
         if (changeEvent_) {
             changeEvent_(info);
         }
@@ -53,9 +56,15 @@ public:
         groupname_ = groupname;
     }
 
+    void SetChangeEvent(GroupChangeEvent&& changeEvent)
+    {
+        selectAllChangeEvent_ = std::move(changeEvent);
+    }
+
 private:
     GroupChangeEvent changeEvent_;
     std::string groupname_;
+    GroupChangeEvent selectAllChangeEvent_;
 
     ACE_DISALLOW_COPY_AND_MOVE(CheckBoxGroupEventHub);
 };

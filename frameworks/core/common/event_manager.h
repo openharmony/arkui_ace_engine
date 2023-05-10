@@ -168,7 +168,7 @@ public:
 
     bool IsSystemKeyboardShortcut(const std::string& value, uint8_t keys);
 
-    uint8_t GetKeyboardShortcutKeys(const std::vector<CtrlKey>& keys);
+    uint8_t GetKeyboardShortcutKeys(const std::vector<ModifierKey>& keys);
 
 private:
     std::unordered_map<size_t, TouchTestResult> touchTestResults_;

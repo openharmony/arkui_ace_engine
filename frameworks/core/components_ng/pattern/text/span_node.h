@@ -60,6 +60,77 @@ public:                                                                      \
         }                                                                    \
         spanItem_->fontStyle->Update##name(value);                           \
         RequestTextFlushDirty();                                             \
+    }                                                                        \
+    void Reset##name()                                                       \
+    {                                                                        \
+        if (spanItem_->fontStyle) {                                          \
+            return spanItem_->fontStyle->Reset##name();                      \
+        }                                                                    \
+    }                                                                        \
+    void Update##name##WithoutFlushDirty(const type& value)                  \
+    {                                                                        \
+        if (!spanItem_->fontStyle) {                                         \
+            spanItem_->fontStyle = std::make_unique<FontStyle>();            \
+        }                                                                    \
+        if (spanItem_->fontStyle->Check##name(value)) {                      \
+            LOGD("the %{public}s is same, just ignore", #name);              \
+            return;                                                          \
+        }                                                                    \
+        spanItem_->fontStyle->Update##name(value);                           \
+    }                                                                        \
+
+
+#define DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(name, type)                             \
+public:                                                                          \
+    std::optional<type> Get##name() const                                        \
+    {                                                                            \
+        if (spanItem_->textLineStyle) {                                          \
+            return spanItem_->textLineStyle->Get##name();                        \
+        }                                                                        \
+        return std::nullopt;                                                     \
+    }                                                                            \
+    bool Has##name() const                                                       \
+    {                                                                            \
+        if (spanItem_->textLineStyle) {                                          \
+            return spanItem_->textLineStyle->Has##name();                        \
+        }                                                                        \
+        return false;                                                            \
+    }                                                                            \
+    type Get##name##Value(const type& defaultValue) const                        \
+    {                                                                            \
+        if (spanItem_->textLineStyle) {                                          \
+            return spanItem_->textLineStyle->Get##name().value_or(defaultValue); \
+        }                                                                        \
+        return defaultValue;                                                     \
+    }                                                                            \
+    void Update##name(const type& value)                                         \
+    {                                                                            \
+        if (!spanItem_->textLineStyle) {                                         \
+            spanItem_->textLineStyle = std::make_unique<TextLineStyle>();        \
+        }                                                                        \
+        if (spanItem_->textLineStyle->Check##name(value)) {                      \
+            LOGD("the %{public}s is same, just ignore", #name);                  \
+            return;                                                              \
+        }                                                                        \
+        spanItem_->textLineStyle->Update##name(value);                           \
+        RequestTextFlushDirty();                                                 \
+    }                                                                            \
+    void Reset##name()                                                           \
+    {                                                                            \
+        if (spanItem_->textLineStyle) {                                          \
+            return spanItem_->textLineStyle->Reset##name();                      \
+        }                                                                        \
+    }                                                                            \
+    void Update##name##WithoutFlushDirty(const type& value)                      \
+    {                                                                            \
+        if (!spanItem_->textLineStyle) {                                         \
+            spanItem_->textLineStyle = std::make_unique<TextLineStyle>();        \
+        }                                                                        \
+        if (spanItem_->textLineStyle->Check##name(value)) {                      \
+            LOGD("the %{public}s is same, just ignore", #name);                  \
+            return;                                                              \
+        }                                                                        \
+        spanItem_->textLineStyle->Update##name(value);                           \
     }
 
 namespace OHOS::Ace::NG {
@@ -75,9 +146,10 @@ public:
     {
         children.clear();
     }
-    int32_t positon;
+    int32_t position;
     std::string content;
     std::unique_ptr<FontStyle> fontStyle;
+    std::unique_ptr<TextLineStyle> textLineStyle;
     GestureEventFunc onClick;
     std::list<RefPtr<SpanItem>> children;
     int32_t placeHolderIndex = -1;
@@ -99,6 +171,20 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override {};
 
     ACE_DISALLOW_COPY_AND_MOVE(ImageSpanItem);
+};
+
+enum class PropertyInfo {
+    FONTSIZE = 0,
+    FONTCOLOR,
+    FONTSTYLE,
+    FONTWEIGHT,
+    FONTFAMILY,
+    TEXTDECORATION,
+    TEXTDECORATIONCOLOR,
+    TEXTCASE,
+    LETTERSPACE,
+    LINEHEIGHT,
+    NONE,
 };
 
 class ACE_EXPORT SpanNode : public UINode {
@@ -144,6 +230,8 @@ public:
     DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationColor, Color);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextCase, TextCase);
     DEFINE_SPAN_FONT_STYLE_ITEM(LetterSpacing, Dimension);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineHeight, Dimension);
+
 
     // Mount to the previous Span node or Text node.
     void MountToParagraph();
@@ -170,8 +258,37 @@ public:
         RequestTextFlushDirty();
     }
 
+    void AddPropertyInfo(PropertyInfo value)
+    {
+        propertyInfo_.insert(value);
+    }
+
+    void CleanPropertyInfo()
+    {
+        propertyInfo_.clear();
+    }
+
+    std::set<PropertyInfo> CaculateInheritPropertyInfo()
+    {
+        std::set<PropertyInfo> inheritPropertyInfo;
+        const std::set<PropertyInfo> propertyInfoContainer = { PropertyInfo::FONTSIZE,
+                                                               PropertyInfo::FONTCOLOR,
+                                                               PropertyInfo::FONTSTYLE,
+                                                               PropertyInfo::FONTWEIGHT,
+                                                               PropertyInfo::FONTFAMILY,
+                                                               PropertyInfo::TEXTDECORATION,
+                                                               PropertyInfo::TEXTDECORATIONCOLOR,
+                                                               PropertyInfo::TEXTCASE,
+                                                               PropertyInfo::LETTERSPACE,
+                                                               PropertyInfo::LINEHEIGHT };
+        set_difference(propertyInfoContainer.begin(), propertyInfoContainer.end(),
+                       propertyInfo_.begin(), propertyInfo_.end(),
+                       inserter(inheritPropertyInfo, inheritPropertyInfo.begin()));
+        return inheritPropertyInfo;
+    }
 private:
     std::list<RefPtr<SpanNode>> spanChildren_;
+    std::set<PropertyInfo> propertyInfo_;
 
     RefPtr<SpanItem> spanItem_ = MakeRefPtr<SpanItem>();
 

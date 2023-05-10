@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 
+#include "core/common/container.h"
+#include "core/common/container_scope.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 
@@ -162,9 +164,24 @@ void ContainerModalPattern::InitContainerEvent()
             return;
         }
         // step4. Touch other area to hide floating title.
-        AnimationUtils::Animate(option, [context, titlePopupDistance]() {
+        AnimationUtils::Animate(
+            option,
+            [context, titlePopupDistance]() {
                 context->OnTransformTranslateUpdate({ 0.0f, static_cast<float>(-titlePopupDistance), 0.0f });
-            }, [floatingLayoutProperty]() { floatingLayoutProperty->UpdateVisibility(VisibleType::GONE); });
+            },
+            [floatingLayoutProperty, id = Container::CurrentId()]() {
+                ContainerScope scope(id);
+                auto pipeline = PipelineBase::GetCurrentContext();
+                CHECK_NULL_VOID_NOLOG(pipeline);
+                auto taskExecutor = pipeline->GetTaskExecutor();
+                CHECK_NULL_VOID_NOLOG(taskExecutor);
+                taskExecutor->PostTask(
+                    [floatingLayoutProperty, id]() {
+                        ContainerScope scope(id);
+                        floatingLayoutProperty->UpdateVisibility(VisibleType::GONE);
+                    },
+                    TaskExecutor::TaskType::UI);
+            });
     });
 
     // init mouse event
@@ -185,9 +202,24 @@ void ContainerModalPattern::InitContainerEvent()
 
         if (info.GetLocalLocation().GetY() >= titlePopupDistance &&
             floatingLayoutProperty->GetVisibilityValue() == VisibleType::VISIBLE) {
-            AnimationUtils::Animate(option, [context, titlePopupDistance]() {
+            AnimationUtils::Animate(
+                option,
+                [context, titlePopupDistance]() {
                     context->OnTransformTranslateUpdate({ 0.0f, static_cast<float>(-titlePopupDistance), 0.0f });
-                }, [floatingLayoutProperty]() { floatingLayoutProperty->UpdateVisibility(VisibleType::GONE); });
+                },
+                [floatingLayoutProperty, id = Container::CurrentId()]() {
+                    ContainerScope scope(id);
+                    auto pipeline = PipelineBase::GetCurrentContext();
+                    CHECK_NULL_VOID_NOLOG(pipeline);
+                    auto taskExecutor = pipeline->GetTaskExecutor();
+                    CHECK_NULL_VOID_NOLOG(taskExecutor);
+                    taskExecutor->PostTask(
+                        [floatingLayoutProperty, id]() {
+                            ContainerScope scope(id);
+                            floatingLayoutProperty->UpdateVisibility(VisibleType::GONE);
+                        },
+                        TaskExecutor::TaskType::UI);
+                });
         }
     });
 }
@@ -221,14 +253,11 @@ void ContainerModalPattern::WindowFocus(bool isFocus)
     CHECK_NULL_VOID(windowManager);
 
     // update normal title
-    if (windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
-        auto columnNode = AceType::DynamicCast<FrameNode>(containerNode->GetChildren().front());
-        CHECK_NULL_VOID(columnNode);
-        auto titleNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
-        CHECK_NULL_VOID(titleNode);
-        ChangeTitle(titleNode, isFocus);
-        return;
-    }
+    auto columnNode = AceType::DynamicCast<FrameNode>(containerNode->GetChildren().front());
+    CHECK_NULL_VOID(columnNode);
+    auto titleNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
+    CHECK_NULL_VOID(titleNode);
+    ChangeTitle(titleNode, isFocus);
 
     // update floating title
     auto floatingTitleNode = AceType::DynamicCast<FrameNode>(containerNode->GetChildren().back());

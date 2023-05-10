@@ -142,7 +142,15 @@ public:
         return label_;
     }
 
-    void UpdateBackgroundColor(const Color& color);
+    void PlayBgColorAnimation(bool isHoverChange = true);
+    void SetBgBlendColor(const Color& color)
+    {
+        bgBlendColor_ = color;
+    }
+    Color GetBgBlendColor() const
+    {
+        return bgBlendColor_;
+    }
 
     RefPtr<FrameNode> GetMenu();
     void UpdateTextNodes();
@@ -185,6 +193,7 @@ private:
     bool isSubMenuHovered_ = false;
 
     bool isChanged_ = false;
+    bool isHovered_ = false;
 
     std::function<void()> subBuilderFunc_ = nullptr;
 
@@ -195,6 +204,8 @@ private:
     RefPtr<FrameNode> startIcon_ = nullptr;
     RefPtr<FrameNode> endIcon_ = nullptr;
     RefPtr<FrameNode> selectIcon_ = nullptr;
+
+    Color bgBlendColor_ = Color::TRANSPARENT;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuItemPattern);
 };

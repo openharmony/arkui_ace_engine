@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_FIELD_TEXT_FIELD_MODEL_H
 
 #include <functional>
+#include <mutex>
 #include <optional>
 #include <utility>
 #include <vector>
@@ -143,9 +144,15 @@ public:
     virtual void SetForegroundColor(const Color& value) = 0;
 
     virtual void SetMenuOptionItems(std::vector<NG::MenuOptionsParam>&& menuOptionsItems) = 0;
+    virtual void SetShowUnit(std::function<void()>&& unitAction) = 0;
+
+    virtual void SetShowUnderline(bool showUnderLine) {};
+    virtual void SetShowCounter(bool value) {};
+    virtual void SetOnChangeEvent(std::function<void(const std::string&)>&& func) = 0;
 
 private:
     static std::unique_ptr<TextFieldModel> instance_;
+    static std::mutex mutex_;
 };
 
 } // namespace OHOS::Ace

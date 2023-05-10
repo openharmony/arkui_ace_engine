@@ -13,11 +13,12 @@
 
 import("//build/test.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("ability_component_pattern_test_ng") {
-  module_out_path = "$test_output_path/ability_component"
+  module_out_path = pattern_test_output_path
+
   include_dirs = [
-    "//third_party/flutter/skia/src",
     "//third_party/jsoncpp/include",
     "//third_party/bounds_checking_function/include",
     "//base/account/os_account/interfaces/innerkits/domain_account/native/include",
@@ -33,6 +34,7 @@ ohos_unittest("ability_component_pattern_test_ng") {
     "//foundation/ability/ability_runtime/interfaces/inner_api/ability_manager/include",
     "//foundation/barrierfree/accessibility/services/aams/test/mock/include",
   ]
+
   sources = [
     # inner
     "$ace_root/adapter/ohos/capability/window_connection_ng/window_extension_connection_ohos_ng.cpp",
@@ -88,18 +90,19 @@ ohos_unittest("ability_component_pattern_test_ng") {
     "ability_component_pattern_test_ng.cpp",
   ]
 
-  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
-  external_deps += [
+  external_deps = [
     "ability_base:want",
     "ability_runtime:ability_manager",
     "hitrace_native:hitrace_meter",
+    "hiviewdfx_hilog_native:libhilog",
     "input:libmmi-client",
     "ipc:ipc_core",
     "window_manager:libwindow_extension_client",
   ]
+
   deps = [
-    "$ace_flutter_engine_root/skia:ace_skia_ohos",
     "$ace_root/frameworks/base:ace_memory_monitor_ohos",
+    "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
     "$cjson_root:cjson",
     "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
@@ -109,10 +112,7 @@ ohos_unittest("ability_component_pattern_test_ng") {
 
   configs = [
     "$ace_root:ace_test_config",
-
     "$ace_root:ace_config",
-    "$ace_flutter_engine_root:flutter_config",
-    "$ace_flutter_engine_root/skia:skia_config",
     "//commonlibrary/c_utils/base:utils_config",
     "//foundation/graphic/graphic_2d/utils/buffer_handle:buffer_handle_public_config",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_base:export_config",
@@ -123,6 +123,7 @@ ohos_unittest("ability_component_pattern_test_ng") {
     "//foundation/window/window_manager/resources/config/build:coverage_flags",
     "//foundation/barrierfree/accessibility/frameworks/aafwk/test:module_private_config",
   ]
+
   defines = [
     "ENABLE_ROSEN_BACKEND",
     "OS_ACCOUNT_EXISTS",

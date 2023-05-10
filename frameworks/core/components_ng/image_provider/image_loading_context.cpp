@@ -73,7 +73,7 @@ SizeF ImageLoadingContext::CalculateTargetSize(const SizeF& srcSize, const SizeF
 
 void ImageLoadingContext::OnUnloaded()
 {
-    LOGI("ImageLoadingContext: OnUnloaded, reset params");
+    LOGD("ImageLoadingContext: OnUnloaded, reset params");
     imageObj_ = nullptr;
     canvasImage_ = nullptr;
     srcRect_ = RectF();
@@ -148,7 +148,7 @@ void ImageLoadingContext::OnMakeCanvasImage()
         SuccessCallback(image);
         return;
     }
-    LOGI("start MakeCanvasImage: %{public}s", imageObj_->GetSourceInfo().ToString().c_str());
+    LOGD("start MakeCanvasImage: %{public}s", imageObj_->GetSourceInfo().ToString().c_str());
     // step4: [MakeCanvasImage] according to [resizeTarget]
     canvasKey_ = ImageUtils::GenerateImageKey(src_, targetSize);
     imageObj_->MakeCanvasImage(Claim(this), targetSize, forceResize, syncLoad_);
@@ -197,6 +197,7 @@ int32_t ImageLoadingContext::RoundUp(int32_t value)
 {
     CHECK_NULL_RETURN(imageObj_, -1);
     auto res = imageObj_->GetImageSize().Width();
+    CHECK_NULL_RETURN(value > 0 && res > 0, -1);
     while (res / 2 >= value) {
         res /= 2;
     }

@@ -16,11 +16,13 @@ import(
 
 build_component("tip") {
   sources = [
-    "flutter_render_tip.cpp",
     "render_tip.cpp",
     "render_tip_creator.cpp",
     "tip_component.cpp",
     "tip_element.cpp",
   ]
+  if (!ace_use_new_skia) {
+    sources += [ "flutter_render_tip.cpp" ]
+  }
   rosen_sources = [ "rosen_render_tip.cpp" ]
 }

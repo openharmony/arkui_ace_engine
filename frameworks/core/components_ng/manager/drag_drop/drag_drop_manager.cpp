@@ -161,8 +161,13 @@ void DragDropManager::UpdatePixelMapPosition(int32_t globalX, int32_t globalY)
         auto height = geometryNode->GetFrameSize().Height();
         auto imageContext = imageNode->GetRenderContext();
         CHECK_NULL_VOID(imageContext);
-        auto hub = columnNode->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(draggedFrameNode_);
+        auto hub = draggedFrameNode_->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(hub);
+        if (!hub->GetTextDraggable()) {
+            hub = columnNode->GetOrCreateGestureEventHub();
+            CHECK_NULL_VOID(hub);
+        }
         RefPtr<PixelMap> pixelMap = hub->GetPixelMap();
         CHECK_NULL_VOID(pixelMap);
         float scale = pixelMap->GetWidth() / width;
@@ -279,7 +284,7 @@ bool DragDropManager::CheckDragDropProxy(int64_t id) const
 void DragDropManager::UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode)
 {
     const auto& dragFrameNodeAllowDrop = dragFrameNode->GetAllowDrop();
-    if (dragFrameNodeAllowDrop.empty()) {
+    if (dragFrameNodeAllowDrop.empty() || summaryMap_.empty()) {
         InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::DEFAULT);
         return;
     }
@@ -332,10 +337,25 @@ void DragDropManager::OnDragMove(float globalX, float globalY, const std::string
     preTargetFrameNode_ = dragFrameNode;
 }
 
+#ifdef ENABLE_DRAG_FRAMEWORK
+DragResult TranslateDragResult(DragRet dragResult)
+{
+    switch (dragResult) {
+        case DragRet::DRAG_SUCCESS:
+            return DragResult::DRAG_SUCCESS;
+        case DragRet::DRAG_FAIL:
+            return DragResult::DRAG_FAIL;
+        case DragRet::DRAG_CANCEL:
+            return DragResult::DRAG_CANCEL;
+        default:
+            return DragResult::DRAG_SUCCESS;
+    }
+}
+#endif // ENABLE_DRAG_FRAMEWORK
+
 void DragDropManager::OnDragEnd(float globalX, float globalY, const std::string& extraInfo)
 {
     preTargetFrameNode_ = nullptr;
-
     auto frameNodes = FindDragFrameNodeMapByPosition(globalX, globalY, DragType::COMMON);
     for (auto iter = frameNodes.rbegin(); iter != frameNodes.rend(); ++iter) {
         auto dragFrameNode = iter->second;
@@ -343,20 +363,23 @@ void DragDropManager::OnDragEnd(float globalX, float globalY, const std::string&
   
         auto eventHub = dragFrameNode->GetEventHub<EventHub>();
         CHECK_NULL_VOID(eventHub);
-  
+#ifdef ENABLE_DRAG_FRAMEWORK
+        if (!eventHub->HasOnDrop()) {
+#else
         if (!eventHub->HasOnDrop() || dragFrameNode == draggedFrameNode_) {
+#endif // ENABLE_DRAG_FRAMEWORK
             continue;
         }
-
         RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-        auto extraParams = eventHub->GetDragExtraParams(extraInfo, Point(globalX, globalY), DragEventType::DROP);
+        auto extraParams = eventHub->GetDragExtraParams(extraInfo_, Point(globalX, globalY), DragEventType::DROP);
 #ifdef ENABLE_DRAG_FRAMEWORK
         InteractionManager::GetInstance()->SetDragWindowVisible(false);
 #endif // ENABLE_DRAG_FRAMEWORK
         UpdateDragEvent(event, globalX, globalY);
         eventHub->FireOnDrop(event, extraParams);
 #ifdef ENABLE_DRAG_FRAMEWORK
-        InteractionManager::GetInstance()->StopDrag(DragResult::DRAG_SUCCESS, event->IsUseCustomAnimation());
+        InteractionManager::GetInstance()->StopDrag(TranslateDragResult(event->GetResult()),
+            event->IsUseCustomAnimation());
 #endif // ENABLE_DRAG_FRAMEWORK
         break;
     }

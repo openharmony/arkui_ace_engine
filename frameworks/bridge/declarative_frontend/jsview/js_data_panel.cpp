@@ -27,19 +27,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<DataPanelModel> DataPanelModel::instance_ = nullptr;
+std::mutex DataPanelModel::mutex_;
 
 DataPanelModel* DataPanelModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::DataPanelModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::DataPanelModelNG());
-        } else {
-            instance_.reset(new Framework::DataPanelModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::DataPanelModelNG());
+            } else {
+                instance_.reset(new Framework::DataPanelModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -186,7 +190,7 @@ void JSDataPanel::StrokeWidth(const JSCallbackInfo& info)
     }
 
     RefPtr<DataPanelTheme> theme = GetTheme<DataPanelTheme>();
-    Dimension strokeWidthDimension;
+    CalcDimension strokeWidthDimension;
     if (!ParseJsDimensionVp(info[0], strokeWidthDimension)) {
         strokeWidthDimension = theme->GetThickness();
     }

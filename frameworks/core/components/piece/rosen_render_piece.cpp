@@ -16,7 +16,7 @@
 #include "core/components/piece/rosen_render_piece.h"
 
 #include "render_service_client/core/ui/rs_node.h"
-#include "third_party/skia/include/core/SkCanvas.h"
+#include "include/core/SkCanvas.h"
 
 #include "core/components/box/render_box.h"
 #include "core/pipeline/base/rosen_render_context.h"

@@ -105,6 +105,8 @@ struct DragDropInfo {
 #ifdef ENABLE_DRAG_FRAMEWORK
 using DragNotifyMsg = Msdp::DeviceStatus::DragNotifyMsg;
 using OnDragCallback = std::function<void(const DragNotifyMsg&)>;
+constexpr float PIXELMAP_WIDTH_RATE = -0.5f;
+constexpr float PIXELMAP_HEIGHT_RATE = -0.2f;
 #endif
 class EventHub;
 
@@ -341,6 +343,25 @@ public:
         touchable_ = touchable;
     }
 
+#ifdef ENABLE_DRAG_FRAMEWORK
+    void SetThumbnailCallback(std::function<void(Offset)>&& callback)
+    {
+        if (dragEventActuator_) {
+            dragEventActuator_->SetThumbnailCallback(std::move(callback));
+        }
+    }
+
+    bool GetTextDraggable() const
+    {
+        return textDraggable_;
+    }
+
+    void SetTextDraggable(bool draggable)
+    {
+        textDraggable_ = draggable;
+    }
+#endif // ENABLE_DRAG_FRAMEWORK
+
     void SetPixelMap(RefPtr<PixelMap> pixelMap)
     {
         pixelMap_ = pixelMap;
@@ -350,6 +371,7 @@ public:
     {
         return pixelMap_;
     }
+
 #ifdef ENABLE_DRAG_FRAMEWORK
     int32_t SetDragData(std::shared_ptr<UDMF::UnifiedData>& unifiedData, std::string& udKey);
     OnDragCallback GetDragCallback();
@@ -402,6 +424,10 @@ private:
     std::vector<DimensionRect> responseRegion_;
     bool touchable_ = true;
     RefPtr<PixelMap> pixelMap_;
+
+#ifdef ENABLE_DRAG_FRAMEWORK
+    bool textDraggable_ = false;
+#endif
 };
 
 } // namespace OHOS::Ace::NG

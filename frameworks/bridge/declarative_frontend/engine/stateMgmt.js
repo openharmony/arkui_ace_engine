@@ -187,7 +187,7 @@ class LocalStorage extends NativeLocalStorage {
      */
     setOrCreate(propName, newValue) {
         if (newValue == undefined) {
-            stateMgmtConsole.debug(`${this.constructor.name}: setOrCreate('${propName}') with newValue == undefined not allowed.`);
+            stateMgmtConsole.warn(`${this.constructor.name}: setOrCreate('${propName}') with newValue == undefined not allowed.`);
             return false;
         }
         var p = this.storage_.get(propName);
@@ -379,7 +379,7 @@ class LocalStorage extends NativeLocalStorage {
             p.aboutToBeDeleted();
         }
         this.storage_.clear();
-
+        
         return true;
     }
     /**
@@ -848,6 +848,12 @@ class SubscriberManager {
         return SubscriberManager.GetInstance().add(newSubsriber);
     }
     /**
+     * Update recycle custom node element id.
+     */
+    static UpdateRecycleElmtId(oldId, newId) {
+        return SubscriberManager.GetInstance().updateRecycleElmtId(oldId, newId);
+    }
+    /**
     *
     * @returns a globally unique id to be assigned to a IPropertySubscriber objet
     * Use MakeId() to assign a IPropertySubscriber object an id before calling @see add() .
@@ -939,6 +945,15 @@ class SubscriberManager {
             return false;
         }
         this.subscriberById_.set(newSubsriber.id__(), newSubsriber);
+        return true;
+    }
+    updateRecycleElmtId(oldId, newId) {
+        if (!this.has(oldId)) {
+            return false;
+        }
+        const subscriber = this.get(oldId);
+        this.subscriberById_.delete(oldId);
+        this.subscriberById_.set(newId, subscriber);
         return true;
     }
     /**
@@ -1093,6 +1108,11 @@ class SubscribaleAbstract {
         this.owningProperties_.forEach((subscribedId) => {
             var owningProperty = SubscriberManager.Find(subscribedId);
             if (owningProperty) {
+                if ('objectPropertyHasChangedPU' in owningProperty) {
+                    // PU code path
+                    owningProperty.objectPropertyHasChangedPU(this, propName);
+                }
+                // FU code path
                 if ('hasChanged' in owningProperty) {
                     owningProperty.hasChanged(newValue);
                 }
@@ -1339,6 +1359,10 @@ class PersistentStorage {
         });
     }
     propertyHasChanged(info) {
+        
+        this.write();
+    }
+    syncPeerHasChanged(eventSource) {
         
         this.write();
     }
@@ -1688,7 +1712,7 @@ class DistributedStorage {
 }
 ;
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1701,32 +1725,91 @@ class DistributedStorage {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
 /**
-* @Observed Decorator function, use
+* @Observed class decorator
+*
+* usage:
 *    @Observed class ClassA { ... }
-* when defining ClassA
 *
-* Can also be used to create a new Object and wrap it in
-* ObservedObject by calling
-*   obsObj = Observed(ClassA)(params to ClassA constructor)
+* Causes every instance of decorated clss to be automatically wrapped inside an ObservedObject.
 *
-* Note this works only for classes, not for ClassA[]
-* Also does not work for classes with genetics it seems
-* In that case use factory function
-*   obsObj = ObservedObject.createNew<ClassA[]>([])
+* Implemented by extending the decroaetd class by class named 'ObservableObjectClass'.
+*
+* It is permisstable to decorate the base and the extended class like thisNote: I
+*   @Observed class ClassA { ...}
+*   @Observed class ClassB extends ClassA { ... }
+* and use
+*   a = new ClassA();
+*   b = new ClassB();
+* Only one ES6 Proxy is added.
+*
+*
+* Take note the decorator implementation extends the prototype chain.
+*
+* The prototype chain of a in above example is
+*  - ObservableObjectClass prototype
+*  - ClassA prototype
+*  - Object prototype
+*
+* Snd the prototype chain of b is
+*  - ObservableObjectClass prototype
+*  - ClassB prototype
+*  - ObservableObjectClass prototype
+*  - ClassA prototype
+*  - Object prototype
+*
+* The @Observed decorator is public, part of the SDK, starting from API 9.
+*
 */
-function Observed(target) {
-    var original = target;
-    // the new constructor behaviour
-    var f = function (...args) {
-        
-        return ObservedObject.createNew(new original(...args), undefined);
-        //    return new ObservedObject<C>(new original(...args), undefined);
+// define just once to get just one Symbol
+const __IS_OBSERVED_PROXIED = Symbol("_____is_observed_proxied__");
+function Observed(constructor_, _) {
+    
+    let ObservedClass = class extends constructor_ {
+        constructor(...args) {
+            super(...args);
+            
+            let isProxied = Reflect.has(this, __IS_OBSERVED_PROXIED);
+            Object.defineProperty(this, __IS_OBSERVED_PROXIED, {
+                value: true,
+                enumerable: false,
+                configurable: false,
+                writable: false
+            });
+            if (isProxied) {
+                
+                return this;
+            }
+            else {
+                
+                return ObservedObject.createNewInternal(this, undefined);
+            }
+        }
     };
-    Object.setPrototypeOf(f, Object.getPrototypeOf(original));
-    // return new constructor (will override original)
-    return f;
+    return ObservedClass;
 }
+// force tsc to generate the __decorate data structure needed for @Observed
+// tsc will not generate unless the @Observed class decorator is used at least once
+let __IGNORE_FORCE_decode_GENERATION__ = class __IGNORE_FORCE_decode_GENERATION__ {
+};
+__IGNORE_FORCE_decode_GENERATION__ = __decorate([
+    Observed
+], __IGNORE_FORCE_decode_GENERATION__);
+/**
+ * class ObservedObject and supporting Handler classes,
+ * Extends from ES6 Proxy. In adding to 'get' and 'set'
+ * the clasess manage subscribers that receive notification
+ * about proxies object being 'read' or 'changed'.
+ *
+ * These classes are framework internal / non-SDK
+ *
+ */
 class SubscribableHandler {
     constructor(owningProperty) {
         this.owningProperties_ = new Set();
@@ -1754,11 +1837,16 @@ class SubscribableHandler {
         
         this.owningProperties_.delete(subscriberId);
     }
-    notifyPropertyHasChanged(propName, newValue) {
+    notifyObjectPropertyHasChanged(propName, newValue) {
         
         this.owningProperties_.forEach((subscribedId) => {
             var owningProperty = SubscriberManager.Find(subscribedId);
             if (owningProperty) {
+                if ('objectPropertyHasChangedPU' in owningProperty) {
+                    // PU code path
+                    owningProperty.objectPropertyHasChangedPU(this, propName);
+                }
+                // FU code path
                 if ('hasChanged' in owningProperty) {
                     owningProperty.hasChanged(newValue);
                 }
@@ -1767,13 +1855,29 @@ class SubscribableHandler {
                 }
             }
             else {
-                stateMgmtConsole.warn(`SubscribableHandler: notifyHasChanged: unknown subscriber.'${subscribedId}' error!.`);
+                stateMgmtConsole.warn(`SubscribableHandler: notifyObjectPropertyHasChanged: unknown subscriber.'${subscribedId}' error!.`);
             }
         });
     }
-    get(target, property) {
-        return (property === SubscribableHandler.IS_OBSERVED_OBJECT) ? true :
-            (property === SubscribableHandler.RAW_OBJECT) ? target : target[property];
+    notifyObjectPropertyHasBeenRead(propName) {
+        
+        this.owningProperties_.forEach((subscribedId) => {
+            var owningProperty = SubscriberManager.Find(subscribedId);
+            if (owningProperty) {
+                // PU code path
+                if ('objectPropertyHasBeenReadPU' in owningProperty) {
+                    owningProperty.objectPropertyHasBeenReadPU(this, propName);
+                }
+            }
+        });
+    }
+    has(target, property) {
+        
+        return (property === ObservedObject.__IS_OBSERVED_OBJECT) ? true : Reflect.has(target, property);
+    }
+    get(target, property, receiver) {
+        
+        return (property === ObservedObject.__OBSERVED_OBJECT_RAW_OBJECT) ? target : Reflect.get(target, property, receiver);
     }
     set(target, property, newValue) {
         switch (property) {
@@ -1783,16 +1887,17 @@ class SubscribableHandler {
                 return true;
                 break;
             case SubscribableHandler.UNSUBSCRIBE:
-                // assignment obsObj[SubscribableHandler.UN_SUBSCRCRIBE] = subscriber
+                // assignment obsObj[SubscribableHandler.UNSUBSCRCRIBE] = subscriber
                 this.removeOwningProperty(newValue);
                 return true;
                 break;
             default:
-                if (target[property] == newValue) {
+                if (Reflect.get(target, property) == newValue) {
                     return true;
                 }
-                target[property] = newValue;
-                this.notifyPropertyHasChanged(property.toString(), newValue);
+                
+                Reflect.set(target, property, newValue);
+                this.notifyObjectPropertyHasChanged(property.toString(), newValue);
                 return true;
                 break;
         }
@@ -1800,16 +1905,63 @@ class SubscribableHandler {
         return false;
     }
 }
-SubscribableHandler.IS_OBSERVED_OBJECT = Symbol("_____is_observed_object__");
-SubscribableHandler.RAW_OBJECT = Symbol("_____raw_object__");
 SubscribableHandler.SUBSCRIBE = Symbol("_____subscribe__");
 SubscribableHandler.UNSUBSCRIBE = Symbol("_____unsubscribe__");
+class SubscribableDateHandler extends SubscribableHandler {
+    constructor(owningProperty) {
+        super(owningProperty);
+    }
+    /**
+     * Get trap for Date type proxy
+     * Functions that modify Date in-place are intercepted and replaced with a function
+     * that executes the original function and notifies the handler of a change.
+     * @param target Original Date object
+     * @param property
+     * @returns
+     */
+    get(target, property) {
+        const dateSetFunctions = new Set(["setFullYear", "setMonth", "setDate", "setHours", "setMinutes", "setSeconds",
+            "setMilliseconds", "setTime", "setUTCFullYear", "setUTCMonth", "setUTCDate", "setUTCHours", "setUTCMinutes",
+            "setUTCSeconds", "setUTCMilliseconds"]);
+        let ret = super.get(target, property);
+        if (typeof ret === "function" && property.toString() && dateSetFunctions.has(property.toString())) {
+            const self = this;
+            return function () {
+                // execute original function with given arguments
+                let result = ret.apply(this, arguments);
+                self.notifyObjectPropertyHasChanged(property.toString(), this);
+                return result;
+            }.bind(target); // bind "this" to target inside the function
+        }
+        else if (typeof ret === "function") {
+            ret = ret.bind(target);
+        }
+        return ret;
+    }
+}
 class ExtendableProxy {
     constructor(obj, handler) {
         return new Proxy(obj, handler);
     }
 }
 class ObservedObject extends ExtendableProxy {
+    /**
+     * To create a new ObservableObject use CreateNew function
+     *
+     * constructor create a new ObservableObject and subscribe its owner to propertyHasChanged
+     * notifications
+     * @param obj  raw Object, if obj is a ObservableOject throws an error
+     * @param objectOwner
+     */
+    constructor(obj, handler, objectOwningProperty) {
+        super(obj, handler);
+        if (ObservedObject.IsObservedObject(obj)) {
+            stateMgmtConsole.error("ObservableOject constructor: INTERNAL ERROR: after jsObj is observedObject already");
+        }
+        if (objectOwningProperty != undefined) {
+            this[SubscribableHandler.SUBSCRIBE] = objectOwningProperty;
+        }
+    } // end of constructor
     /**
      * Factory function for ObservedObjects /
      *  wrapping of objects for proxying
@@ -1823,15 +1975,64 @@ class ObservedObject extends ExtendableProxy {
     static createNew(rawObject, owningProperty) {
         if (rawObject === null || rawObject === undefined) {
             stateMgmtConsole.error(`ObservedObject.CreateNew, input object must not be null or undefined.`);
-            return null;
+            return rawObject;
         }
         if (ObservedObject.IsObservedObject(rawObject)) {
             ObservedObject.addOwningProperty(rawObject, owningProperty);
             return rawObject;
         }
-        else {
-            return new ObservedObject(rawObject, owningProperty);
-        }
+        return ObservedObject.createNewInternal(rawObject, owningProperty);
+    }
+    static createNewInternal(rawObject, owningProperty) {
+        let proxiedObject = new ObservedObject(rawObject, Array.isArray(rawObject) ? new class extends SubscribableHandler {
+            constructor(owningProperty) {
+                super(owningProperty);
+                // In-place array modification functions
+                // splice is also in-place modifying function, but we need to handle separately
+                this.inPlaceModifications = new Set(["copyWithin", "fill", "reverse", "sort"]);
+            }
+            get(target, property, receiver) {
+                let ret = super.get(target, property, receiver);
+                if (ret && typeof ret === "function") {
+                    const self = this;
+                    const prop = property.toString();
+                    // prop is the function name here
+                    if (prop == "splice") {
+                        // 'splice' self modifies the array, returns deleted array items
+                        // means, alike other self-modifying functions, splice does not return the array itself.
+                        return function () {
+                            const result = ret.apply(target, arguments);
+                            // prop is the function name here
+                            // and result is the function return value
+                            // functinon modifies none or more properties
+                            self.notifyObjectPropertyHasChanged(prop, target);
+                            return result;
+                        }.bind(proxiedObject);
+                    }
+                    if (self.inPlaceModifications.has(prop)) {
+                        // in place modfication function result == target, the raw array modified
+                        
+                        return function () {
+                            const result = ret.apply(target, arguments);
+                            // 'result' is the unproxied object               
+                            // functinon modifies none or more properties
+                            self.notifyObjectPropertyHasChanged(prop, result);
+                            // returning the 'proxiedObject' ensures that when chain calls also 2nd function call
+                            // operates on the proxied object.
+                            return proxiedObject;
+                        }.bind(proxiedObject);
+                    }
+                    // binding the proxiedObject ensures that modifying functions like push() operate on the 
+                    // proxied array and each array change is notified.
+                    return ret.bind(proxiedObject);
+                }
+                return ret;
+            }
+        }(owningProperty) // SubscribableArrayHandlerAnonymous
+            : (rawObject instanceof Date)
+                ? new SubscribableDateHandler(owningProperty)
+                : new SubscribableHandler(owningProperty), owningProperty);
+        return proxiedObject;
     }
     /*
       Return the unproxied object 'inside' the ObservedObject / the ES6 Proxy
@@ -1839,7 +2040,7 @@ class ObservedObject extends ExtendableProxy {
       Use with caution, do not store any references
     */
     static GetRawObject(obj) {
-        return !ObservedObject.IsObservedObject(obj) ? obj : obj[SubscribableHandler.RAW_OBJECT];
+        return !ObservedObject.IsObservedObject(obj) ? obj : obj[ObservedObject.__OBSERVED_OBJECT_RAW_OBJECT];
     }
     /**
      *
@@ -1849,15 +2050,31 @@ class ObservedObject extends ExtendableProxy {
      * this static function instead.
      */
     static IsObservedObject(obj) {
-        return obj ? (obj[SubscribableHandler.IS_OBSERVED_OBJECT] === true) : false;
+        return (obj && (typeof obj === "object") && Reflect.has(obj, ObservedObject.__IS_OBSERVED_OBJECT));
     }
+    /**
+     * add a subscriber to given ObservedObject
+     * due to the proxy nature this static method approach needs to be used instead of a member
+     * function
+     * @param obj
+     * @param subscriber
+     * @returns false if given object is not an ObservedObject
+     */
     static addOwningProperty(obj, subscriber) {
-        if (!ObservedObject.IsObservedObject(obj)) {
+        if (!ObservedObject.IsObservedObject(obj) || subscriber == undefined) {
             return false;
         }
         obj[SubscribableHandler.SUBSCRIBE] = subscriber;
         return true;
     }
+    /**
+     * remove a subscriber to given ObservedObject
+     * due to the proxy nature this static method approach needs to be used instead of a member
+     * function
+     * @param obj
+     * @param subscriber
+     * @returns false if given object is not an ObservedObject
+     */
     static removeOwningProperty(obj, subscriber) {
         if (!ObservedObject.IsObservedObject(obj)) {
             return false;
@@ -1866,22 +2083,53 @@ class ObservedObject extends ExtendableProxy {
         return true;
     }
     /**
-     * Create a new ObservableObject and subscribe its owner to propertyHasChanged
-     * ntifications
-     * @param obj  raw Object, if obj is a ObservableOject throws an error
-     * @param objectOwner
+     * Utility function for debugging the prototype chain of given Object
+     * The given object can be any Object, it is not required to be an ObservedObject
+     * @param object
+     * @returns multi-line string containing info about the prototype chain
+     * on class in class hiararchy per line
      */
-    constructor(obj, objectOwningProperty) {
-        if (ObservedObject.IsObservedObject(obj)) {
-            throw new Error("Invalid constructor argument error: ObservableObject contructor called with an ObservedObject as parameer");
+    static tracePrototypeChainOfObject(object) {
+        let proto = Object.getPrototypeOf(object);
+        let result = "";
+        let sepa = "";
+        while (proto) {
+            result += `${sepa}${ObservedObject.tracePrototype(proto)}`;
+            proto = Object.getPrototypeOf(proto);
+            sepa = ",\n";
         }
-        let handler = new SubscribableHandler(objectOwningProperty);
-        super(obj, handler);
-        if (ObservedObject.IsObservedObject(obj)) {
-            stateMgmtConsole.error("ObservableOject constructor: INTERNAL ERROR: after jsObj is observedObject already");
+        return result;
+    }
+    /**
+     * Utility function for debugging all functions of given Prototype.
+     * @returns string containing containing names of all functions and members of given Prototype
+     */
+    static tracePrototype(proto) {
+        if (!proto) {
+            return "";
         }
-    } // end of constructor
+        let result = `${proto.constructor && proto.constructor.name ? proto.constructor.name : '<no class>'}: `;
+        let sepa = "";
+        for (let name of Object.getOwnPropertyNames(proto)) {
+            result += `${sepa}${name}`;
+            sepa = ", ";
+        }
+        ;
+        return result;
+    }
+    /**
+     * @Observed  decorator extends the decorated class. This function returns the prototype of the decorated class
+     * @param proto
+     * @returns prototype of the @Observed decorated class or 'proto' parameter if not  @Observed decorated
+     */
+    static getPrototypeOfObservedClass(proto) {
+        return (proto.constructor && proto.constructor.name == "ObservedClass")
+            ? Object.getPrototypeOf(proto.constructor.prototype)
+            : proto;
+    }
 }
+ObservedObject.__IS_OBSERVED_OBJECT = Symbol("_____is_observed_object__");
+ObservedObject.__OBSERVED_OBJECT_RAW_OBJECT = Symbol("_____raw_object__");
 /*
  * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -1934,6 +2182,13 @@ class ObservedPropertyAbstract extends SubscribedAbstractProperty {
     getUnmonitored() {
         return this.get();
     }
+    // update the element id for recycle custom component
+    updateElmtId(oldElmtId, newElmtId) {
+        if (this.subscribers_.has(oldElmtId)) {
+            this.subscribers_.delete(oldElmtId);
+            this.subscribers_.add(newElmtId);
+        }
+    }
     subscribeMe(subscriber) {
         
         this.subscribers_.add(subscriber.id__());
@@ -1949,15 +2204,21 @@ class ObservedPropertyAbstract extends SubscribedAbstractProperty {
         this.subscribers_.forEach((subscribedId) => {
             var subscriber = SubscriberManager.Find(subscribedId);
             if (subscriber) {
+                // FU code path
                 if ('hasChanged' in subscriber) {
                     subscriber.hasChanged(newValue);
                 }
                 if ('propertyHasChanged' in subscriber) {
                     subscriber.propertyHasChanged(this.info_);
                 }
+                // PU code path, only used for ObservedPropertySimple/Object stored inside App/LocalStorage
+                // ObservedPropertySimplePU/ObjectPU  used in all other PU cases, has its own notifyPropertyHasChangedPU()
+                if ('syncPeerHasChanged' in subscriber) {
+                    subscriber.syncPeerHasChanged(this);
+                }
             }
             else {
-                stateMgmtConsole.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged: unknown subscriber ID '${subscribedId}' error!`);
+                stateMgmtConsole.warn(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged: unknown subscriber ID '${subscribedId}' error!`);
             }
         });
     }
@@ -2802,6 +3063,20 @@ class View extends NativeViewFullUpdate {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/*
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 /**
  * ObservedPropertyAbstractPU aka ObservedPropertyAbstract for partial update
  *
@@ -2812,29 +3087,38 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
         super(subscribingView, viewName);
         this.dependentElementIds_ = new Set();
     }
-    notifyHasChanged(newValue) {
+    notifyPropertyRead() {
+        stateMgmtConsole.error(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: \
+        notifyPropertyRead, DO NOT USE with PU. Use notifyPropertyHasBeenReadPU`);
+    }
+    notifyPropertyHasBeenReadPU() {
         
         this.subscribers_.forEach((subscribedId) => {
             var subscriber = SubscriberManager.Find(subscribedId);
             if (subscriber) {
-                if ('hasChanged' in subscriber) {
-                    subscriber.hasChanged(newValue);
+                if ('propertyHasBeenReadPU' in subscriber) {
+                    subscriber.propertyHasBeenReadPU(this);
                 }
+            }
+        });
+        this.recordDependentUpdate();
+    }
+    notifyPropertyHasChangedPU() {
+        
+        this.subscribers_.forEach((subscribedId) => {
+            var subscriber = SubscriberManager.Find(subscribedId);
+            if (subscriber) {
                 if ('viewPropertyHasChanged' in subscriber) {
                     subscriber.viewPropertyHasChanged(this.info_, this.dependentElementIds_);
                 }
-                else if ('propertyHasChanged' in subscriber) {
-                    subscriber.propertyHasChanged(this.info_);
+                else if ('syncPeerHasChanged' in subscriber) {
+                    subscriber.syncPeerHasChanged(this);
+                }
+                else {
+                    stateMgmtConsole.warn(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyPropertryHasChangedPU: unknown subscriber ID '${subscribedId}' error!`);
                 }
             }
-            else {
-                stateMgmtConsole.warn(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged: unknown subscriber ID '${subscribedId}' error!`);
-            }
         });
-    }
-    notifyPropertyRead() {
-        super.notifyPropertyRead();
-        this.recordDependentUpdate();
     }
     markDependentElementsDirty(view) {
         // TODO ace-ets2bundle, framework, compilated apps need to update together
@@ -2884,6 +3168,26 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
     }
     createProp(subscribeOwner, linkPropName) {
         throw new Error("Can not create a AppStorage 'Prop' from a @State property. ");
+    }
+    /*
+      Below empty functions required to keep as long as this class derives from FU version
+      ObservedPropertyAbstract. Need to overwrite these functions to do nothing for PU
+      */
+    notifyHasChanged(_) {
+        stateMgmtConsole.error(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: \
+          notifyHasChanged, DO NOT USE with PU. Use syncPeerHasChanged() or objectPropertyHasChangedPU()`);
+    }
+    hasChanged(_) {
+        // unused for PU
+        // need to overwrite impl of base class with empty function.
+    }
+    propertyHasChanged(_) {
+        // unused for PU
+        // need to overwrite impl of base class with empty function.
+    }
+    propertyRead(_) {
+        // unused for PU
+        // need to overwrite impl of base class with empty function.
     }
 }
 /*
@@ -2954,6 +3258,7 @@ class ObservedPropertySimpleAbstractPU extends ObservedPropertyAbstractPU {
  */
 /**
  * ObservedPropertyObjectPU
+ * implementation of @State and @Provide decorated variables of type class object
  *
  * all definitions in this file are framework internal
  *
@@ -2973,15 +3278,26 @@ class ObservedPropertyObjectPU extends ObservedPropertyObjectAbstractPU {
         }
         super.aboutToBeDeleted();
     }
-    // notification from ObservedObject value one of its
-    // props has chnaged. Implies the ObservedProperty has changed
-    // Note: this function gets called when in this case:
-    //       thisProp.aObsObj.aProp = 47  a object prop gets changed
-    // It is NOT called when
-    //    thisProp.aObsObj = new ClassA
-    hasChanged(newValue) {
+    /**
+     * Called by a SynchedPropertyObjectTwoWayPU (@Link, @Consume) that uses this as sync peer when it has changed
+     * @param eventSource
+     */
+    syncPeerHasChanged(eventSource) {
         
-        this.notifyHasChanged(this.wrappedValue_);
+        this.notifyPropertyHasChangedPU();
+    }
+    /**
+     * Wraped ObservedObjectPU has changed
+     * @param souceObject
+     * @param changedPropertyName
+     */
+    objectPropertyHasChangedPU(souceObject, changedPropertyName) {
+        
+        this.notifyPropertyHasChangedPU();
+    }
+    objectPropertyHasBeenReadPU(souceObject, changedPropertyName) {
+        
+        this.notifyPropertyHasBeenReadPU();
     }
     unsubscribeFromOwningProperty() {
         if (this.wrappedValue_) {
@@ -3022,7 +3338,7 @@ class ObservedPropertyObjectPU extends ObservedPropertyObjectAbstractPU {
     }
     get() {
         
-        this.notifyPropertyRead();
+        this.notifyPropertyHasBeenReadPU();
         return this.wrappedValue_;
     }
     getUnmonitored() {
@@ -3037,7 +3353,7 @@ class ObservedPropertyObjectPU extends ObservedPropertyObjectAbstractPU {
         }
         
         this.setValueInternal(newValue);
-        this.notifyHasChanged(newValue);
+        this.notifyPropertyHasChangedPU();
     }
 }
 /*
@@ -3056,8 +3372,9 @@ class ObservedPropertyObjectPU extends ObservedPropertyObjectAbstractPU {
  */
 /**
  * ObservedPropertySimplePU
+ * implementation of @State and @Provide decorated variables of types (T=) boolean | number | string | enum
  *
- * class that holds an actual property value of type T
+ * Holds an actual property value of type T
  * uses its base class to manage subscribers to this
  * property.
  *
@@ -3077,9 +3394,13 @@ class ObservedPropertySimplePU extends ObservedPropertySimpleAbstractPU {
         }
         super.aboutToBeDeleted();
     }
-    hasChanged(newValue) {
+    /**
+   * Called by a @Link - SynchedPropertySimpleTwoWay that uses this as sync peer when it has changed
+   * @param eventSource
+   */
+    syncPeerHasChanged(eventSource) {
         
-        this.notifyHasChanged(this.wrappedValue_);
+        this.notifyPropertyHasChangedPU();
     }
     /*
       actually update this.wrappedValue_
@@ -3097,7 +3418,7 @@ class ObservedPropertySimplePU extends ObservedPropertySimpleAbstractPU {
     }
     get() {
         
-        this.notifyPropertyRead();
+        this.notifyPropertyHasBeenReadPU();
         return this.wrappedValue_;
     }
     set(newValue) {
@@ -3107,7 +3428,7 @@ class ObservedPropertySimplePU extends ObservedPropertySimpleAbstractPU {
         }
         
         this.setValueInternal(newValue);
-        this.notifyHasChanged(newValue);
+        this.notifyPropertyHasChangedPU();
     }
 }
 /*
@@ -3127,9 +3448,10 @@ class ObservedPropertySimplePU extends ObservedPropertySimpleAbstractPU {
 class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
     constructor(source, owningChildView, thisPropertyName) {
         super(owningChildView, thisPropertyName);
-        if (source && (typeof (source) === "object") && ("notifyHasChanged" in source) && ("subscribeMe" in source)) {
-            // code path for @(Local)StorageProp
+        if (source && (typeof (source) === "object") && ("subscribeMe" in source)) {
+            // code path for @(Local)StorageProp, the souce is a ObservedPropertyObject in aLocalStorage)
             this.source_ = source;
+            this.sourceIsOwnObject = false;
             // subscribe to receive value change updates from LocalStorage source property
             this.source_.subscribeMe(this);
         }
@@ -3139,10 +3461,12 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
                 stateMgmtConsole.warn(`@Prop ${this.info()}  Provided source object's class 
            lacks @Observed class decorator. Object property changes will not be observed.`);
             }
+            
             this.source_ = new ObservedPropertyObjectPU(source, this, thisPropertyName);
+            this.sourceIsOwnObject = true;
         }
         // deep copy source Object and wrap it
-        this.setWrapperValue(this.source_.get());
+        this.setWrappedValue(this.source_.get());
         
     }
     /*
@@ -3152,24 +3476,41 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
     aboutToBeDeleted() {
         if (this.source_) {
             this.source_.unlinkSuscriber(this.id__());
+            if (this.sourceIsOwnObject == true && this.source_.numberOfSubscrbers() == 0) {
+                
+                this.source_.aboutToBeDeleted();
+            }
             this.source_ = undefined;
         }
         super.aboutToBeDeleted();
     }
-    // this object is subscriber to this.source_
-    // when source notifies a property change, copy its value to local backing store
-    // the guard for newValue being an Object is needed because also property changes of wrappedValue_ 
-    // are notified via this function. We ignore those, these are handled correctly by propertyHasChanged
-    hasChanged(newValue) {
-        if (typeof newValue == "object") {
+    syncPeerHasChanged(eventSource) {
+        if (eventSource && this.source_ == eventSource) {
+            // defensive programming: should always be the case!
             
-            this.setWrapperValue(newValue);
-            this.notifyHasChanged(ObservedObject.GetRawObject(this.wrappedValue_));
+            const newValue = this.source_.getUnmonitored();
+            if (typeof newValue == "object") {
+                
+                this.setWrappedValue(newValue);
+                this.notifyPropertyHasChangedPU();
+            }
+        }
+        else {
+            stateMgmtConsole.warn(`SynchedPropertyNesedObjectPU[${this.id__()}]: syncPeerHasChanged Unexpected situation. Ignorning event.`);
         }
     }
-    propertyHasChanged(propName) {
+    /**
+     * event emited by wrapped ObservedObject, when one of its property values changes
+     * @param souceObject
+     * @param changedPropertyName
+     */
+    objectPropertyHasChangedPU(souceObject, changedPropertyName) {
         
-        this.notifyHasChanged(ObservedObject.GetRawObject(this.wrappedValue_));
+        this.notifyPropertyHasChangedPU();
+    }
+    objectPropertyHasBeenReadPU(souceObject, changedPropertyName) {
+        
+        this.notifyPropertyHasBeenReadPU();
     }
     getUnmonitored() {
         
@@ -3179,7 +3520,7 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
     // get 'read through` from the ObservedObject
     get() {
         
-        this.notifyPropertyRead();
+        this.notifyPropertyHasBeenReadPU();
         return this.wrappedValue_;
     }
     // assignment to local variable in the form of this.aProp = <object value>
@@ -3194,22 +3535,27 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
             stateMgmtConsole.warn(`@Prop ${this.info()} Set: Provided new object's class 
          lacks @Observed class decorator. Object property changes will not be observed.`);
         }
-        this.setWrapperValue(newValue);
-        this.notifyHasChanged(this.wrappedValue_);
+        this.setWrappedValue(newValue);
+        this.notifyPropertyHasChangedPU();
     }
     reset(sourceChangedValue) {
         
-        // if set causes an actual change, then, ObservedPropertyObject source_ will call hasChanged
+        // if set causes an actual change, then, ObservedPropertyObject source_ will call syncPeerHasChanged
         this.source_.set(sourceChangedValue);
     }
-    setWrapperValue(value) {
+    setWrappedValue(value) {
         let rawValue = ObservedObject.GetRawObject(value);
+        let copy;
+        // FIXME: Proper object deep copy missing here!
         if (rawValue instanceof Array) {
-            this.wrappedValue_ = ObservedObject.createNew([...rawValue], this);
+            copy = ObservedObject.createNew([...rawValue], this);
         }
         else {
-            this.wrappedValue_ = ObservedObject.createNew(Object.assign({}, rawValue), this);
+            copy = ObservedObject.createNew(Object.assign({}, rawValue), this);
         }
+        Object.setPrototypeOf(copy, Object.getPrototypeOf(rawValue));
+        ObservedObject.addOwningProperty(this.wrappedValue_, this);
+        this.wrappedValue_ = copy;
     }
 }
 /*
@@ -3228,6 +3574,7 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
  */
 /**
  * SynchedPropertyObjectTwoWayPU
+ * implementation of @Link and @Consume decorated variables of type class object
  *
  * all definitions in this file are framework internal
  */
@@ -3263,13 +3610,30 @@ class SynchedPropertyObjectTwoWayPU extends ObservedPropertyObjectAbstractPU {
         }
         this.linkedParentProperty_.set(newValue);
     }
-    // this object is subscriber to ObservedObject
-    // will call this cb function when property has changed
-    hasChanged(newValue) {
+    /**
+     * Called when sync peer ObservedPropertyObject or SynchedPropertyObjectTwoWay has chnaged value
+     * that peer can be in either parent or child component if 'this' is used for a @Link
+     * that peer can be in either acestor or descendant component if 'this' is used for a @Consume
+     * @param eventSource
+     */
+    syncPeerHasChanged(eventSource) {
         if (!this.changeNotificationIsOngoing_) {
             
-            this.notifyHasChanged(this.getUnmonitored());
+            this.notifyPropertyHasChangedPU();
         }
+    }
+    /**
+     * called when wrapped ObservedObject has changed poperty
+     * @param souceObject
+     * @param changedPropertyName
+     */
+    objectPropertyHasChangedPU(souceObject, changedPropertyName) {
+        
+        this.notifyPropertyHasChangedPU();
+    }
+    objectPropertyHasBeenReadPU(souceObject, changedPropertyName) {
+        
+        this.notifyPropertyHasBeenReadPU();
     }
     getUnmonitored() {
         
@@ -3279,7 +3643,7 @@ class SynchedPropertyObjectTwoWayPU extends ObservedPropertyObjectAbstractPU {
     // get 'read through` from the ObservedProperty
     get() {
         
-        this.notifyPropertyRead();
+        this.notifyPropertyHasBeenReadPU();
         return this.getUnmonitored();
     }
     // set 'writes through` to the ObservedProperty
@@ -3294,7 +3658,7 @@ class SynchedPropertyObjectTwoWayPU extends ObservedPropertyObjectAbstractPU {
         this.changeNotificationIsOngoing_ = true;
         this.setObject(newValue);
         ObservedObject.addOwningProperty(this.getUnmonitored(), this);
-        this.notifyHasChanged(newValue);
+        this.notifyPropertyHasChangedPU();
         this.changeNotificationIsOngoing_ = false;
     }
 }
@@ -3314,6 +3678,7 @@ class SynchedPropertyObjectTwoWayPU extends ObservedPropertyObjectAbstractPU {
  */
 /**
  * SynchedPropertySimpleOneWayPU
+ * implementation of @Prop decorated variable of types boolean | number | string | enum
  *
  * all definitions in this file are framework internal
  */
@@ -3323,12 +3688,14 @@ class SynchedPropertySimpleOneWayPU extends ObservedPropertySimpleAbstractPU {
         if (source && (typeof (source) === "object") && ("notifyHasChanged" in source) && ("subscribeMe" in source)) {
             // code path for @(Local)StorageProp
             this.source_ = source;
+            this.sourceIsOwnObject = false;
             // subscribe to receive value chnage updates from LocalStorge source property
             this.source_.subscribeMe(this);
         }
         else {
             // code path for @Prop
-            this.source_ = new ObservedPropertySimple(source, this, thisPropertyName);
+            this.source_ = new ObservedPropertySimplePU(source, this, thisPropertyName);
+            this.sourceIsOwnObject = true;
         }
         // use own backing store for value to avoid
         // value changes to be propagated back to source
@@ -3341,17 +3708,26 @@ class SynchedPropertySimpleOneWayPU extends ObservedPropertySimpleAbstractPU {
     aboutToBeDeleted() {
         if (this.source_) {
             this.source_.unlinkSuscriber(this.id__());
+            if (this.sourceIsOwnObject == true && this.source_.numberOfSubscrbers() == 0) {
+                
+                this.source_.aboutToBeDeleted();
+            }
             this.source_ = undefined;
+            this.sourceIsOwnObject == false;
         }
         super.aboutToBeDeleted();
     }
-    // implements  ISinglePropertyChangeSubscriber<T>:
-    // this object is subscriber to this.source_
-    // when source notifies a change, copy its value to local backing store
-    hasChanged(newValue) {
+    syncPeerHasChanged(eventSource) {
+        if (eventSource && (eventSource == this.source_)) {
+            // defensive, should always be the case
+            
+            this.sourceHasChanged(eventSource);
+        }
+    }
+    sourceHasChanged(eventSource) {
         
-        this.wrappedValue_ = newValue;
-        this.notifyHasChanged(newValue);
+        this.wrappedValue_ = eventSource.getUnmonitored();
+        this.notifyPropertyHasChangedPU();
     }
     getUnmonitored() {
         
@@ -3361,7 +3737,7 @@ class SynchedPropertySimpleOneWayPU extends ObservedPropertySimpleAbstractPU {
     // get 'read through` from the ObservedProperty
     get() {
         
-        this.notifyPropertyRead();
+        this.notifyPropertyHasBeenReadPU();
         return this.wrappedValue_;
     }
     set(newValue) {
@@ -3371,7 +3747,7 @@ class SynchedPropertySimpleOneWayPU extends ObservedPropertySimpleAbstractPU {
         }
         
         this.wrappedValue_ = newValue;
-        this.notifyHasChanged(newValue);
+        this.notifyPropertyHasChangedPU();
     }
     reset(sourceChangedValue) {
         
@@ -3395,6 +3771,7 @@ class SynchedPropertySimpleOneWayPU extends ObservedPropertySimpleAbstractPU {
  */
 /**
  * SynchedPropertySimpleTwoWayPU
+ * implementation of @Link and @Consume decorated variables of types boolean | number | string | enum
  *
  * all definitions in this file are framework internal
  */
@@ -3416,13 +3793,16 @@ class SynchedPropertySimpleTwoWayPU extends ObservedPropertySimpleAbstractPU {
         }
         super.aboutToBeDeleted();
     }
-    // this object is subscriber to  SynchedPropertySimpleTwoWayPU
-    // will call this cb function when property has changed
-    // a set (newValue) is not done because get reads through for the source_
-    hasChanged(newValue) {
+    /**
+     * Called when sync peer ObservedPropertySimple or SynchedPropertySimpletTwoWay has chnaged value
+     * that peer can be in either parent or child component if 'this' is used for a @Link
+     * that peer can be in either acestor or descendant component if 'this' is used for a @Consume
+     * @param eventSource
+     */
+    syncPeerHasChanged(eventSource) {
         if (!this.changeNotificationIsOngoing_) {
             
-            this.notifyHasChanged(newValue);
+            this.notifyPropertyHasChangedPU();
         }
     }
     getUnmonitored() {
@@ -3432,7 +3812,7 @@ class SynchedPropertySimpleTwoWayPU extends ObservedPropertySimpleAbstractPU {
     // get 'read through` from the ObservedProperty
     get() {
         
-        this.notifyPropertyRead();
+        this.notifyPropertyHasBeenReadPU();
         return this.getUnmonitored();
     }
     // set 'writes through` to the ObservedProperty
@@ -3450,7 +3830,7 @@ class SynchedPropertySimpleTwoWayPU extends ObservedPropertySimpleAbstractPU {
         this.changeNotificationIsOngoing_ = true;
         // the source_ ObservedProeprty will call: this.hasChanged(newValue);
         this.source_.set(newValue);
-        this.notifyHasChanged(newValue);
+        this.notifyPropertyHasChangedPU();
         this.changeNotificationIsOngoing_ = false;
     }
 }
@@ -3470,6 +3850,7 @@ class SynchedPropertySimpleTwoWayPU extends ObservedPropertySimpleAbstractPU {
  */
 /**
  * SynchedPropertyNesedObjectPU
+ * implementation of @ObjectLink decorated variables
  *
  * all definitions in this file are framework internal
  *
@@ -3499,11 +3880,13 @@ class SynchedPropertyNesedObjectPU extends ObservedPropertyObjectAbstractPU {
         ObservedObject.removeOwningProperty(this.obsObject_, this);
         super.aboutToBeDeleted();
     }
-    // this object is subscriber to ObservedObject
-    // will call this cb function when property has changed
-    hasChanged(newValue) {
+    objectPropertyHasChangedPU(eventSource, changedPropertyName) {
         
-        this.notifyHasChanged(this.obsObject_);
+        this.notifyPropertyHasChangedPU();
+    }
+    objectPropertyHasBeenReadPU(souceObject, changedPropertyName) {
+        
+        this.notifyPropertyHasBeenReadPU();
     }
     getUnmonitored() {
         // 
@@ -3513,7 +3896,8 @@ class SynchedPropertyNesedObjectPU extends ObservedPropertyObjectAbstractPU {
     // get 'read through` from the ObservedProperty
     get() {
         
-        this.notifyPropertyRead();
+        // this.notifyPropertyRead();
+        this.notifyPropertyHasBeenReadPU();
         return this.obsObject_;
     }
     // set 'writes through` to the ObservedProperty
@@ -3529,7 +3913,7 @@ class SynchedPropertyNesedObjectPU extends ObservedPropertyObjectAbstractPU {
         // subscribe to the new value ObservedObject
         ObservedObject.addOwningProperty(this.obsObject_, this);
         // notify value change to subscribing View
-        this.notifyHasChanged(this.obsObject_);
+        this.notifyPropertyHasChangedPU();
     }
 }
 /*
@@ -3576,6 +3960,7 @@ class ViewPU extends NativeViewPartialUpdate {
         this.parent_ = undefined;
         this.childrenWeakrefMap_ = new Map();
         this.watchedProps = new Map();
+        this.recycleManager = undefined;
         // Set of dependent elmtIds that need partial update
         // during next re-render
         this.dirtDescendantElementIds_ = new Set();
@@ -3626,6 +4011,9 @@ class ViewPU extends NativeViewPartialUpdate {
     // globally unique id, this is different from compilerAssignedUniqueChildId!
     id__() {
         return this.id_;
+    }
+    updateId(elmtId) {
+        this.id_ = elmtId;
     }
     // super class will call this function from
     // its aboutToBeDeleted implementation
@@ -3704,9 +4092,10 @@ class ViewPU extends NativeViewPartialUpdate {
         // do not process an Element that has been marked to be deleted
         const updateFunc = this.updateFuncByElmtId.get(elmtId);
         if ((updateFunc == undefined) || (typeof updateFunc !== "function")) {
-            stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: update function of ElementId ${elmtId} not found, internal error!`);
+            stateMgmtConsole.error(`${this.constructor.name}[${this.id__()}]: update function of ElementId ${elmtId} not found, internal error!`);
         }
         else {
+            
             updateFunc(elmtId, /* isFirstRender */ false);
             // continue in native JSView
             // Finish the Update in JSView::JsFinishUpdateFunc
@@ -3907,6 +4296,66 @@ class ViewPU extends NativeViewPartialUpdate {
         this.updateFuncByElmtId.set(elmtId, compilerAssignedUpdateFunc);
         
     }
+    getOrCreateRecycleManager() {
+        if (!this.recycleManager) {
+            this.recycleManager = new RecycleManager;
+        }
+        return this.recycleManager;
+    }
+    getRecycleManager() {
+        return this.recycleManager;
+    }
+    hasRecycleManager() {
+        return !(this.recycleManager === undefined);
+    }
+    initRecycleManager() {
+        if (this.recycleManager) {
+            
+            return;
+        }
+        this.recycleManager = new RecycleManager;
+    }
+    /**
+     * @function observeRecycleComponentCreation
+     * @description custom node recycle creation
+     * @param name custom node name
+     * @param recycleUpdateFunc custom node recycle update which can be converted to a normal update function
+     * @return void
+     */
+    observeRecycleComponentCreation(name, recycleUpdateFunc) {
+        // convert recycle update func to update func
+        const compilerAssignedUpdateFunc = (element, isFirstRender) => {
+            recycleUpdateFunc(element, isFirstRender, undefined);
+        };
+        let node;
+        // if there is no suitable recycle node, run a normal creation function.
+        if (!this.hasRecycleManager() || !(node = this.getRecycleManager().popRecycleNode(name))) {
+            
+            this.observeComponentCreation(compilerAssignedUpdateFunc);
+            return;
+        }
+        // if there is a suitable recycle node, run a recycle update function.
+        const newElmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
+        const oldElmtId = node.id__();
+        // store the current id and origin id, used for dirty element sort in {compareNumber}
+        // this.getRecycleManager().setRecycleNodeCurrentElmtId(elmtId, currentElmtId);
+        recycleUpdateFunc(newElmtId, /* is first render */ true, node);
+        this.updateFuncByElmtId.delete(oldElmtId);
+        this.updateFuncByElmtId.set(newElmtId, compilerAssignedUpdateFunc);
+        node.updateId(newElmtId);
+        node.updateRecycleElmtId(oldElmtId, newElmtId);
+        SubscriberManager.UpdateRecycleElmtId(oldElmtId, newElmtId);
+    }
+    // add current JS object to it's parent recycle manager
+    recycleSelf(name) {
+        if (this.parent_) {
+            this.parent_.getOrCreateRecycleManager().pushRecycleNode(name, this);
+        }
+        else {
+            this.resetRecycleCustomNode();
+            stateMgmtConsole.error(`${this.constructor.name}[${this.id__()}]: recycleNode must have a parent`);
+        }
+    }
     // performs the update on a branch within if() { branch } else if (..) { branch } else { branch }
     ifElseBranchUpdateFunction(branchId, branchfunc) {
         const oldBranchid = If.getBranchId();
@@ -4039,6 +4488,57 @@ class ViewPU extends NativeViewPartialUpdate {
 ViewPU.compareNumber = (a, b) => {
     return (a < b) ? -1 : (a > b) ? 1 : 0;
 };
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ *  * RecycleManager - Recycle cache manager
+ *
+* all definitions in this file are framework internal
+*/
+/**
+ * @class RecycleManager
+ * @description manage the JS object cached of current node
+ */
+class RecycleManager {
+    constructor() {
+        // key: recycle node name
+        // value: recycle node JS object
+        this.cachedRecycleNodes = undefined;
+        this.cachedRecycleNodes = new Map();
+    }
+    pushRecycleNode(name, node) {
+        var _a;
+        if (!this.cachedRecycleNodes.get(name)) {
+            this.cachedRecycleNodes.set(name, new Array());
+        }
+        (_a = this.cachedRecycleNodes.get(name)) === null || _a === void 0 ? void 0 : _a.push(node);
+    }
+    popRecycleNode(name) {
+        var _a;
+        return (_a = this.cachedRecycleNodes.get(name)) === null || _a === void 0 ? void 0 : _a.pop();
+    }
+    // When parent JS View is deleted, release all cached nodes
+    purgeAllCachedRecycleNode(removedElmtIds) {
+        this.cachedRecycleNodes.forEach((nodes, _) => {
+            nodes.forEach((node) => {
+                node.resetRecycleCustomNode();
+                removedElmtIds.push(node.id__());
+            });
+        });
+        this.cachedRecycleNodes.clear();
+    }
+}
 /*
  * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");

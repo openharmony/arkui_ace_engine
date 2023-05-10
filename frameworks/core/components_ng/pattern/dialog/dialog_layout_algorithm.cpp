@@ -18,6 +18,7 @@
 #include "base/geometry/ng/point_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/device_config.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
@@ -25,8 +26,11 @@
 #include "core/components/common/properties/placement.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/dialog/dialog_layout_property.h"
+#include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
@@ -68,6 +72,37 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto child = children.front();
     // childSize_ and childOffset_ is used in Layout.
     child->Measure(childLayoutConstraint);
+
+    RefPtr<LayoutWrapper> scroll;
+    float scrollHeight = 0.0f;
+    float scrollWidth = 0.0f;
+    // scroll for alert
+    for (const auto& children : layoutWrapper->GetAllChildrenWithBuild()) {
+        scrollWidth = children->GetGeometryNode()->GetMarginFrameSize().Width();
+        scrollHeight = children->GetGeometryNode()->GetMarginFrameSize().Height();
+        for (const auto& grandson : children->GetAllChildrenWithBuild()) {
+            if (grandson->GetHostTag() == V2::SCROLL_ETS_TAG) {
+                scroll = grandson;
+            } else {
+                scrollHeight -= grandson->GetGeometryNode()->GetMarginFrameSize().Height();
+            }
+        }
+    }
+    if (scroll != nullptr) {
+        auto childConstraint = CreateScrollConstraint(layoutWrapper, scrollHeight, scrollWidth);
+        scroll->Measure(childConstraint);
+    }
+}
+
+LayoutConstraintF DialogLayoutAlgorithm::CreateScrollConstraint(
+    LayoutWrapper* layoutWrapper, float scrollHeight, float scrollWidth)
+{
+    auto childConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    childConstraint.maxSize.SetHeight(scrollHeight);
+    childConstraint.percentReference.SetHeight(scrollHeight);
+    childConstraint.maxSize.SetWidth(scrollWidth);
+    childConstraint.percentReference.SetWidth(scrollWidth);
+    return childConstraint;
 }
 
 void DialogLayoutAlgorithm::ComputeInnerLayoutParam(LayoutConstraintF& innerLayout)
@@ -170,7 +205,7 @@ void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(dialogProp);
     dialogOffset_ = dialogProp->GetDialogOffset().value_or(DimensionOffset());
     alignment_ = dialogProp->GetDialogAlignment().value_or(DialogAlignment::DEFAULT);
-    auto selfSize = frameNode->GetGeometryNode()->GetFrameSize();
+    auto selfSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     if (children.empty()) {
         return;
@@ -181,6 +216,12 @@ void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     UpdateTouchRegion();
     child->GetGeometryNode()->SetMarginFrameOffset(topLeftPoint_);
     child->Layout();
+    if (dialogProp->GetShowInSubWindowValue(false)) {
+        std::vector<Rect> rects;
+        auto rect = Rect(0.0f, 0.0f, selfSize.Width(), selfSize.Height());
+        rects.emplace_back(rect);
+        SubwindowManager::GetInstance()->SetHotAreas(rects);
+    }
 }
 
 OffsetF DialogLayoutAlgorithm::ComputeChildPosition(

@@ -38,13 +38,22 @@ public:
 
     void FireChangeEvent(const std::string& index) const
     {
+        if (indexChangeEvent_) {
+            indexChangeEvent_(index);
+        }
         if (changeEvent_) {
             changeEvent_(index);
         }
     }
 
+    void SetOnChangeEvent(ChangeEvent&& changeEventEvent)
+    {
+        indexChangeEvent_ = std::move(changeEventEvent);
+    }
+
 private:
     ChangeEvent changeEvent_;
+    ChangeEvent indexChangeEvent_;
 
     ACE_DISALLOW_COPY_AND_MOVE(RatingEventHub);
 };

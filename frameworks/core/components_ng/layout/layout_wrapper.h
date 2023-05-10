@@ -22,6 +22,7 @@
 #include <unordered_map>
 
 #include "base/geometry/offset.h"
+#include "base/log/ace_performance_check.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/thread/cancelable_callback.h"
@@ -38,6 +39,7 @@
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/position_property.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 class FrameNode;
@@ -90,19 +92,11 @@ public:
         return layoutAlgorithm_;
     }
 
-    // Called before layout, perform additional layout constraints or other layout parameters modifications to adjust
-    // the layout as needed.
-    void WillLayout();
-
     // This will call child and self measure process.
     void Measure(const std::optional<LayoutConstraintF>& parentConstraint);
 
     // Called to perform layout children.
     void Layout();
-
-    // Called after layout, perform final portion of additional layout-related tasks, such as final adjustments of
-    // geometry position, clean up temporary changes.
-    void DidLayout(const RefPtr<LayoutWrapper>& root);
 
     const RefPtr<GeometryNode>& GetGeometryNode() const
     {
@@ -221,6 +215,15 @@ public:
         outOfLayout_ = outOfLayout;
     }
 
+    // performance check
+    CheckNodeMap GetChildrenFlexLayouts(const std::unordered_map<int32_t, RefPtr<LayoutWrapper>>& childrenMap);
+    void AddFlexLayouts();
+    bool IsHostFlex();
+    int32_t GetFlexLayouts() const
+    {
+        return flexLayouts_;
+    }
+
     // Check the flag attribute with descendant node
     bool CheckNeedForceMeasureAndLayout();
 
@@ -229,11 +232,6 @@ public:
     void SetCacheCount(int32_t cacheCount = 0);
 
     void BuildLazyItem();
-
-    void RegisterFinishCallback(std::function<void()>&& finishCallback)
-    {
-        finishCallbacks_.emplace_back(finishCallback);
-    }
 
     std::pair<int32_t, int32_t> GetLazyBuildRange();
 
@@ -263,10 +261,11 @@ private:
 
     LazyBuildFunction lazyBuildFunction_;
 
+    // performance check
+    int32_t flexLayouts_ = 0;
+
     // When the location property is set, it departs from the layout flow.
     bool outOfLayout_ = false;
-
-    std::list<std::function<void()>> finishCallbacks_;
 
     ACE_DISALLOW_COPY_AND_MOVE(LayoutWrapper);
 };

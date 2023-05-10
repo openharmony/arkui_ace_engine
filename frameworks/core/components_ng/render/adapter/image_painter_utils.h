@@ -16,8 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_IMAGE_PAINTER_UTILS_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_IMAGE_PAINTER_UTILS_H
 
-#include "third_party/skia/include/core/SkPaint.h"
-#include "third_party/skia/include/core/SkPoint.h"
+#include "include/core/SkPaint.h"
+#include "include/core/SkPoint.h"
+#ifdef NEW_SKIA
+#include "include/core/SkSamplingOptions.h"
+#endif
 
 #include "core/components_ng/render/canvas_image.h"
 
@@ -26,7 +29,11 @@ class ImagePainterUtils {
 public:
     static constexpr uint8_t RADIUS_POINTS_SIZE = 4;
     static std::unique_ptr<SkVector[]> ToSkRadius(const BorderRadiusArray& radiusXY);
+#ifndef NEW_SKIA
     static void AddFilter(SkPaint& paint, const ImagePaintConfig& config);
+#else
+    static void AddFilter(SkPaint& paint, SkSamplingOptions& options, const ImagePaintConfig& config);
+ #endif
 };
 } // namespace OHOS::Ace::NG
 

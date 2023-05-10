@@ -16,7 +16,7 @@
 #include "core/components/picker/flutter_render_picker_base.h"
 
 #include "lib/ui/painting/rrect.h"
-#include "third_party/skia/include/effects/SkGradientShader.h"
+#include "include/effects/SkGradientShader.h"
 
 namespace OHOS::Ace {
 namespace {

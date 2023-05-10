@@ -83,34 +83,10 @@ void OffscreenCanvasPaintMethodTestNg::TearDown()
 
 /**
  * @tc.name: OffscreenCanvasPaintMethodTestNg001
- * @tc.desc: Test the function InitFilterFunc of OffscreenCanvasPaintMethod.
- * @tc.type: FUNC
- */
-HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg001, TestSize.Level1)
-{
-    /**
-     * @tc.steps1: initialize parameters.
-     * @tc.expected: All pointer is non-null.
-     */
-    auto paintMethod = CreateOffscreenCanvasPaintMethod(CANVAS_WIDTH, CANVAS_HEIGHT);
-    ASSERT_NE(paintMethod, nullptr);
-
-    /**
-     * @tc.steps2: Call the function InitFilterFunc.
-     * @tc.expected: Some of the specified functions are added to the map filterFunc_.
-     */
-    paintMethod->InitFilterFunc();
-    for (const auto& item : FUNCTION_NAMES) {
-        EXPECT_NE(paintMethod->filterFunc_.find(item), paintMethod->filterFunc_.end());
-    }
-}
-
-/**
- * @tc.name: OffscreenCanvasPaintMethodTestNg002
  * @tc.desc: Test functions IsPercentStr, PxStrToDouble and BlurStrToDouble of OffscreenCanvasPaintMethod.
  * @tc.type: FUNC
  */
-HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg002, TestSize.Level1)
+HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg001, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -158,8 +134,77 @@ HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg002, 
 }
 
 /**
- * @tc.name: OffscreenCanvasPaintMethodTestNg003
+ * @tc.name: OffscreenCanvasPaintMethodTestNg002
  * @tc.desc: Test the function SetGrayFilter of OffscreenCanvasPaintMethod.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg002, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto paintMethod = CreateOffscreenCanvasPaintMethod(CANVAS_WIDTH, CANVAS_HEIGHT);
+    ASSERT_NE(paintMethod, nullptr);
+    float matrixGet[20] = { 0 };
+
+    /**
+     * @tc.steps2: Call the function SetGrayFilter with percent string.
+     * @tc.expected: The values at the corresponding positions of the matrix1 are calculated correctly.
+     */
+    std::string percentStr("30%");
+    constexpr float value = 1 - 0.3f;
+    constexpr float matrix0 = LUMR + (1 - LUMR) * value;
+    constexpr float matrix5 = LUMR - LUMR * value;
+    constexpr float matrix10 = LUMR - LUMR * value;
+
+    constexpr float matrix1 = LUMG - LUMG * value;
+    constexpr float matrix6 = LUMG + (1 - LUMG) * value;
+    constexpr float matrix11 = LUMG - LUMG * value;
+
+    constexpr float matrix2 = LUMB - LUMB * value;
+    constexpr float matrix7 = LUMB - LUMB * value;
+    constexpr float matrix12 = LUMB + (1 - LUMB) * value;
+    constexpr float matrix18 = 1.0f;
+
+    paintMethod->SetGrayFilter(percentStr, paintMethod->imagePaint_);
+    auto* skColorFilter1 = paintMethod->imagePaint_.getColorFilter();
+    skColorFilter1->asAColorMatrix(matrixGet);
+
+    EXPECT_DOUBLE_EQ(matrixGet[0], matrix0);
+    EXPECT_DOUBLE_EQ(matrixGet[5], matrix5);
+    EXPECT_DOUBLE_EQ(matrixGet[10], matrix10);
+    EXPECT_DOUBLE_EQ(matrixGet[1], matrix1);
+    EXPECT_DOUBLE_EQ(matrixGet[6], matrix6);
+    EXPECT_DOUBLE_EQ(matrixGet[11], matrix11);
+    EXPECT_DOUBLE_EQ(matrixGet[2], matrix2);
+    EXPECT_DOUBLE_EQ(matrixGet[7], matrix7);
+    EXPECT_DOUBLE_EQ(matrixGet[12], matrix12);
+    EXPECT_DOUBLE_EQ(matrixGet[18], matrix18);
+
+    /**
+     * @tc.steps3: Call the function SetGrayFilter with non-percent string.
+     * @tc.expected: The values at the corresponding positions of the matrix1 are calculated correctly.
+     */
+    std::string nonPercentStr("2");
+    paintMethod->SetGrayFilter(nonPercentStr, paintMethod->imagePaint_);
+    auto* skColorFilter2 = paintMethod->imagePaint_.getColorFilter();
+    skColorFilter2->asAColorMatrix(matrixGet);
+    EXPECT_DOUBLE_EQ(matrixGet[0], LUMR);
+    EXPECT_DOUBLE_EQ(matrixGet[5], LUMR);
+    EXPECT_DOUBLE_EQ(matrixGet[10], LUMR);
+    EXPECT_DOUBLE_EQ(matrixGet[1], LUMG);
+    EXPECT_DOUBLE_EQ(matrixGet[6], LUMG);
+    EXPECT_DOUBLE_EQ(matrixGet[11], LUMG);
+    EXPECT_DOUBLE_EQ(matrixGet[2], LUMB);
+    EXPECT_DOUBLE_EQ(matrixGet[7], LUMB);
+    EXPECT_DOUBLE_EQ(matrixGet[12], LUMB);
+    EXPECT_DOUBLE_EQ(matrixGet[18], matrix18);
+}
+
+/**
+ * @tc.name: OffscreenCanvasPaintMethodTestNg003
+ * @tc.desc: Test the function SetSepiaFilter of OffscreenCanvasPaintMethod.
  * @tc.type: FUNC
  */
 HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg003, TestSize.Level1)
@@ -170,91 +215,51 @@ HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg003, 
      */
     auto paintMethod = CreateOffscreenCanvasPaintMethod(CANVAS_WIDTH, CANVAS_HEIGHT);
     ASSERT_NE(paintMethod, nullptr);
-    float matrix1[20] = { 0 };
-
-    /**
-     * @tc.steps2: Call the function SetGrayFilter with percent string.
-     * @tc.expected: The values at the corresponding positions of the matrix1 are calculated correctly.
-     */
-    std::string percentStr("30%");
-    constexpr float matrix10 = 0.8;
-    constexpr float matrix11 = 0.1;
-    constexpr float matrix118 = 1.0;
-    paintMethod->SetGrayFilter(percentStr);
-    auto* skColorFilter1 = paintMethod->imagePaint_.getColorFilter();
-    skColorFilter1->asAColorMatrix(matrix1);
-    EXPECT_DOUBLE_EQ(matrix1[0], matrix10);
-    EXPECT_DOUBLE_EQ(matrix1[1], matrix11);
-    EXPECT_DOUBLE_EQ(matrix1[18], matrix118);
-
-    /**
-     * @tc.steps3: Call the function SetGrayFilter with non-percent string.
-     * @tc.expected: The values at the corresponding positions of the matrix1 are calculated correctly.
-     */
-    std::string nonPercentStr("2");
-    constexpr float matrix21 = 1.0 / 3;
-    constexpr float matrix20 = 1 - 2 * matrix21;
-    constexpr float matrix218 = 1.0;
-    paintMethod->SetGrayFilter(nonPercentStr);
-    auto* skColorFilter2 = paintMethod->imagePaint_.getColorFilter();
-    skColorFilter2->asAColorMatrix(matrix1);
-    EXPECT_DOUBLE_EQ(matrix1[0], matrix20);
-    EXPECT_DOUBLE_EQ(matrix1[1], matrix21);
-    EXPECT_DOUBLE_EQ(matrix1[18], matrix218);
-}
-
-/**
- * @tc.name: OffscreenCanvasPaintMethodTestNg004
- * @tc.desc: Test the function SetSepiaFilter of OffscreenCanvasPaintMethod.
- * @tc.type: FUNC
- */
-HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg004, TestSize.Level1)
-{
-    /**
-     * @tc.steps1: initialize parameters.
-     * @tc.expected: All pointer is non-null.
-     */
-    auto paintMethod = CreateOffscreenCanvasPaintMethod(CANVAS_WIDTH, CANVAS_HEIGHT);
-    ASSERT_NE(paintMethod, nullptr);
-    float matrix1[20] = { 0 };
+    float matrixGet[20] = { 0 };
 
     /**
      * @tc.steps2: Call the function SetSepiaFilter with percent string.
      * @tc.expected: The values at the corresponding positions of the matrix1 are calculated correctly.
      */
     std::string percentStr("50%");
-    constexpr float matrix10 = 1.0f - 0.5 * 0.6412f;
-    constexpr float matrix11 = 0.5 * 0.7044f;
-    constexpr float matrix118 = 1.0;
-    paintMethod->SetSepiaFilter(percentStr);
+    float percentNum = 0.5f;
+    paintMethod->SetSepiaFilter(percentStr, paintMethod->imagePaint_);
     auto* skColorFilter1 = paintMethod->imagePaint_.getColorFilter();
-    skColorFilter1->asAColorMatrix(matrix1);
-    EXPECT_DOUBLE_EQ(matrix1[0], matrix10);
-    EXPECT_DOUBLE_EQ(matrix1[1], matrix11);
-    EXPECT_DOUBLE_EQ(matrix1[18], matrix118);
+    skColorFilter1->asAColorMatrix(matrixGet);
+    EXPECT_DOUBLE_EQ(matrixGet[0], 1.0f - percentNum * 0.607f);
+    EXPECT_DOUBLE_EQ(matrixGet[1], percentNum * 0.769f);
+    EXPECT_DOUBLE_EQ(matrixGet[2], percentNum * 0.189f);
+    EXPECT_DOUBLE_EQ(matrixGet[5], percentNum * 0.349f);
+    EXPECT_DOUBLE_EQ(matrixGet[6], 1.0f - percentNum * 0.314f);
+    EXPECT_DOUBLE_EQ(matrixGet[7], percentNum * 0.168f);
+    EXPECT_DOUBLE_EQ(matrixGet[10], percentNum * 0.272f);
+    EXPECT_DOUBLE_EQ(matrixGet[11], percentNum * 0.534f);
+    EXPECT_DOUBLE_EQ(matrixGet[12], 1.0f - percentNum * 0.869f);
+    EXPECT_DOUBLE_EQ(matrixGet[18], 1.0f);
 
     /**
      * @tc.steps3: Call the function SetSepiaFilter with non-percent string.
      * @tc.expected: The values at the corresponding positions of the matrix1 are calculated correctly.
      */
     std::string nonPercentStr("2");
-    constexpr float matrix20 = 1.0f - 1.0 * 0.6412f;
-    constexpr float matrix21 = 1.0 * 0.7044f;
-    constexpr float matrix218 = 1.0;
-    paintMethod->SetSepiaFilter(nonPercentStr);
+    constexpr float matrix1_100percent = 0.769f;
+    constexpr float matrix5_100percent = 0.349f;
+    constexpr float matrix11_100percent = 0.534f;
+    paintMethod->SetSepiaFilter(nonPercentStr, paintMethod->imagePaint_);
     auto* skColorFilter2 = paintMethod->imagePaint_.getColorFilter();
-    skColorFilter2->asAColorMatrix(matrix1);
-    EXPECT_DOUBLE_EQ(matrix1[0], matrix20);
-    EXPECT_DOUBLE_EQ(matrix1[1], matrix21);
-    EXPECT_DOUBLE_EQ(matrix1[18], matrix218);
+    skColorFilter2->asAColorMatrix(matrixGet);
+    EXPECT_DOUBLE_EQ(matrixGet[1], matrix1_100percent);
+    EXPECT_DOUBLE_EQ(matrixGet[5], matrix5_100percent);
+    EXPECT_DOUBLE_EQ(matrixGet[11], matrix11_100percent);
+    EXPECT_DOUBLE_EQ(matrixGet[18], 1.0f);
 }
 
 /**
- * @tc.name: OffscreenCanvasPaintMethodTestNg005
+ * @tc.name: OffscreenCanvasPaintMethodTestNg004
  * @tc.desc: Test the function SetInvertFilter of OffscreenCanvasPaintMethod.
  * @tc.type: FUNC
  */
-HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg005, TestSize.Level1)
+HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg004, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -272,7 +277,7 @@ HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg005, 
     constexpr float matrix10 = 0.0;
     constexpr float matrix14 = 0.5;
     constexpr float matrix118 = 1.0;
-    paintMethod->SetInvertFilter(percentStr);
+    paintMethod->SetInvertFilter(percentStr, paintMethod->imagePaint_);
     auto* skColorFilter1 = paintMethod->imagePaint_.getColorFilter();
     skColorFilter1->asAColorMatrix(matrix1);
     EXPECT_DOUBLE_EQ(matrix1[0], matrix10);
@@ -284,10 +289,10 @@ HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg005, 
      * @tc.expected: The values at the corresponding positions of the matrix1 are calculated correctly.
      */
     std::string nonPercentStr("2.0");
-    constexpr float matrix20 = 1.0 - 2.0 * 2;
-    constexpr float matrix24 = 2.0;
-    constexpr float matrix218 = 1.0;
-    paintMethod->SetInvertFilter(nonPercentStr);
+    constexpr float matrix20 = -1.0f;
+    constexpr float matrix24 = 1.0f;
+    constexpr float matrix218 = 1.0f;
+    paintMethod->SetInvertFilter(nonPercentStr, paintMethod->imagePaint_);
     auto* skColorFilter2 = paintMethod->imagePaint_.getColorFilter();
     skColorFilter2->asAColorMatrix(matrix1);
     EXPECT_DOUBLE_EQ(matrix1[0], matrix20);
@@ -296,11 +301,11 @@ HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg005, 
 }
 
 /**
- * @tc.name: OffscreenCanvasPaintMethodTestNg006
+ * @tc.name: OffscreenCanvasPaintMethodTestNg005
  * @tc.desc: Test the function SetOpacityFilter of OffscreenCanvasPaintMethod.
  * @tc.type: FUNC
  */
-HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg006, TestSize.Level1)
+HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg005, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -317,7 +322,7 @@ HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg006, 
     std::string percentStr("50%");
     constexpr float matrix10 = 1.0;
     constexpr float matrix118 = 0.5;
-    paintMethod->SetOpacityFilter(percentStr);
+    paintMethod->SetOpacityFilter(percentStr, paintMethod->imagePaint_);
     auto* skColorFilter1 = paintMethod->imagePaint_.getColorFilter();
     skColorFilter1->asAColorMatrix(matrix1);
     EXPECT_DOUBLE_EQ(matrix1[0], matrix10);
@@ -329,8 +334,8 @@ HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg006, 
      */
     std::string nonPercentStr("2.0");
     constexpr float matrix20 = 1.0;
-    constexpr float matrix218 = 2.0;
-    paintMethod->SetOpacityFilter(nonPercentStr);
+    constexpr float matrix218 = 1.0;
+    paintMethod->SetOpacityFilter(nonPercentStr, paintMethod->imagePaint_);
     auto* skColorFilter2 = paintMethod->imagePaint_.getColorFilter();
     skColorFilter2->asAColorMatrix(matrix1);
     EXPECT_DOUBLE_EQ(matrix1[0], matrix20);
@@ -338,11 +343,11 @@ HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg006, 
 }
 
 /**
- * @tc.name: OffscreenCanvasPaintMethodTestNg007
+ * @tc.name: OffscreenCanvasPaintMethodTestNg006
  * @tc.desc: Test the function SetBrightnessFilter of OffscreenCanvasPaintMethod.
  * @tc.type: FUNC
  */
-HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg007, TestSize.Level1)
+HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg006, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -359,7 +364,7 @@ HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg007, 
     std::string percentStr("50%");
     constexpr float matrix10 = 0.5;
     constexpr float matrix118 = 1.0;
-    paintMethod->SetBrightnessFilter(percentStr);
+    paintMethod->SetBrightnessFilter(percentStr, paintMethod->imagePaint_);
     auto* skColorFilter1 = paintMethod->imagePaint_.getColorFilter();
     skColorFilter1->asAColorMatrix(matrix1);
     EXPECT_DOUBLE_EQ(matrix1[0], matrix10);
@@ -370,18 +375,18 @@ HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg007, 
      * @tc.expected: The function does not work.
      */
     std::string nonPercentStr("-2.0");
-    paintMethod->SetBrightnessFilter(nonPercentStr);
+    paintMethod->SetBrightnessFilter(nonPercentStr, paintMethod->imagePaint_);
     auto* skColorFilter2 = paintMethod->imagePaint_.getColorFilter();
     skColorFilter2->asAColorMatrix(matrix1);
     EXPECT_DOUBLE_EQ(matrix1[0], matrix10);
 }
 
 /**
- * @tc.name: OffscreenCanvasPaintMethodTestNg008
+ * @tc.name: OffscreenCanvasPaintMethodTestNg007
  * @tc.desc: Test the function SetContrastFilter of OffscreenCanvasPaintMethod.
  * @tc.type: FUNC
  */
-HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg008, TestSize.Level1)
+HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg007, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -399,7 +404,7 @@ HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg008, 
     constexpr float matrix10 = 0.5;
     constexpr float matrix14 = 0.5 * (1 - 0.5);
     constexpr float matrix118 = 1.0;
-    paintMethod->SetContrastFilter(percentStr);
+    paintMethod->SetContrastFilter(percentStr, paintMethod->imagePaint_);
     auto* skColorFilter1 = paintMethod->imagePaint_.getColorFilter();
     skColorFilter1->asAColorMatrix(matrix1);
     EXPECT_DOUBLE_EQ(matrix1[0], matrix10);
@@ -414,7 +419,7 @@ HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg008, 
     constexpr float matrix20 = 2.0;
     constexpr float matrix24 = 0.5 * (1 - 2.0);
     constexpr float matrix218 = 1.0;
-    paintMethod->SetContrastFilter(nonPercentStr);
+    paintMethod->SetContrastFilter(nonPercentStr, paintMethod->imagePaint_);
     auto* skColorFilter2 = paintMethod->imagePaint_.getColorFilter();
     skColorFilter2->asAColorMatrix(matrix1);
     EXPECT_DOUBLE_EQ(matrix1[0], matrix20);
@@ -423,8 +428,64 @@ HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg008, 
 }
 
 /**
- * @tc.name: OffscreenCanvasPaintMethodTestNg009
+ * @tc.name: OffscreenCanvasPaintMethodTestNg008
  * @tc.desc: Test the function SetSaturateFilter of OffscreenCanvasPaintMethod.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg008, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto paintMethod = CreateOffscreenCanvasPaintMethod(CANVAS_WIDTH, CANVAS_HEIGHT);
+    ASSERT_NE(paintMethod, nullptr);
+    float matrixGet[20] = { 0 };
+
+    /**
+     * @tc.steps2: Call the function SetSaturateFilter with percent string.
+     * @tc.expected: The values at the corresponding positions of the matrix1 are calculated correctly.
+     */
+    std::string percentStr("50%");
+    float percentNum = 0.5f;
+    paintMethod->SetSaturateFilter(percentStr, paintMethod->imagePaint_);
+    auto* skColorFilter1 = paintMethod->imagePaint_.getColorFilter();
+    skColorFilter1->asAColorMatrix(matrixGet);
+    EXPECT_DOUBLE_EQ(matrixGet[0], LUMR + (1 - LUMR) * percentNum);
+    EXPECT_DOUBLE_EQ(matrixGet[5], LUMR - LUMR * percentNum);
+    EXPECT_DOUBLE_EQ(matrixGet[10], LUMR - LUMR * percentNum);
+    EXPECT_DOUBLE_EQ(matrixGet[1], LUMG - LUMG * percentNum);
+    EXPECT_DOUBLE_EQ(matrixGet[6], LUMG + (1 - LUMG) * percentNum);
+    EXPECT_DOUBLE_EQ(matrixGet[11], LUMG - LUMG * percentNum);
+    EXPECT_DOUBLE_EQ(matrixGet[2], LUMB - LUMB * percentNum);
+    EXPECT_DOUBLE_EQ(matrixGet[7], LUMB - LUMB * percentNum);
+    EXPECT_DOUBLE_EQ(matrixGet[12], LUMB + (1 - LUMB) * percentNum);
+    EXPECT_DOUBLE_EQ(matrixGet[18], 1.0f);
+
+    /**
+     * @tc.steps3: Call the function SetSaturateFilter with non-percent string.
+     * @tc.expected: The values at the corresponding positions of the matrix1 are calculated correctly.
+     */
+    std::string nonPercentStr("2.0");
+    percentNum = 2.0f;
+    paintMethod->SetSaturateFilter(nonPercentStr, paintMethod->imagePaint_);
+    auto* skColorFilter2 = paintMethod->imagePaint_.getColorFilter();
+    skColorFilter2->asAColorMatrix(matrixGet);
+    EXPECT_DOUBLE_EQ(matrixGet[0], LUMR + (1 - LUMR) * percentNum);
+    EXPECT_DOUBLE_EQ(matrixGet[5], LUMR - LUMR * percentNum);
+    EXPECT_DOUBLE_EQ(matrixGet[10], LUMR - LUMR * percentNum);
+    EXPECT_DOUBLE_EQ(matrixGet[1], LUMG - LUMG * percentNum);
+    EXPECT_DOUBLE_EQ(matrixGet[6], LUMG + (1 - LUMG) * percentNum);
+    EXPECT_DOUBLE_EQ(matrixGet[11], LUMG - LUMG * percentNum);
+    EXPECT_DOUBLE_EQ(matrixGet[2], LUMB - LUMB * percentNum);
+    EXPECT_DOUBLE_EQ(matrixGet[7], LUMB - LUMB * percentNum);
+    EXPECT_DOUBLE_EQ(matrixGet[12], LUMB + (1 - LUMB) * percentNum);
+    EXPECT_DOUBLE_EQ(matrixGet[18], 1.0f);
+}
+
+/**
+ * @tc.name: OffscreenCanvasPaintMethodTestNg009
+ * @tc.desc: Test the function SetHueRotateFilter of OffscreenCanvasPaintMethod.
  * @tc.type: FUNC
  */
 HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg009, TestSize.Level1)
@@ -435,91 +496,68 @@ HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg009, 
      */
     auto paintMethod = CreateOffscreenCanvasPaintMethod(CANVAS_WIDTH, CANVAS_HEIGHT);
     ASSERT_NE(paintMethod, nullptr);
-    float matrix1[20] = { 0 };
-
-    /**
-     * @tc.steps2: Call the function SetSaturateFilter with percent string.
-     * @tc.expected: The values at the corresponding positions of the matrix1 are calculated correctly.
-     */
-    std::string percentStr("50%");
-    constexpr float matrix10 = 0.3086f * 0.5 + 0.5;
-    constexpr float matrix11 = 0.6094f * 0.5;
-    constexpr float matrix118 = 1.0;
-    paintMethod->SetSaturateFilter(percentStr);
-    auto* skColorFilter1 = paintMethod->imagePaint_.getColorFilter();
-    skColorFilter1->asAColorMatrix(matrix1);
-    EXPECT_DOUBLE_EQ(matrix1[0], matrix10);
-    EXPECT_DOUBLE_EQ(matrix1[1], matrix11);
-    EXPECT_DOUBLE_EQ(matrix1[18], matrix118);
-
-    /**
-     * @tc.steps3: Call the function SetSaturateFilter with non-percent string.
-     * @tc.expected: The values at the corresponding positions of the matrix1 are calculated correctly.
-     */
-    std::string nonPercentStr("2.0");
-    constexpr float matrix20 = 0.3086f * (1 - 2.0) + 2.0;
-    constexpr float matrix21 = 0.6094f * (1 - 2.0);
-    constexpr float matrix218 = 1.0;
-    paintMethod->SetSaturateFilter(nonPercentStr);
-    auto* skColorFilter2 = paintMethod->imagePaint_.getColorFilter();
-    skColorFilter2->asAColorMatrix(matrix1);
-    EXPECT_DOUBLE_EQ(matrix1[0], matrix20);
-    EXPECT_DOUBLE_EQ(matrix1[1], matrix21);
-    EXPECT_DOUBLE_EQ(matrix1[18], matrix218);
-}
-
-/**
- * @tc.name: OffscreenCanvasPaintMethodTestNg010
- * @tc.desc: Test the function SetHueRotateFilter of OffscreenCanvasPaintMethod.
- * @tc.type: FUNC
- */
-HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg010, TestSize.Level1)
-{
-    /**
-     * @tc.steps1: initialize parameters.
-     * @tc.expected: All pointer is non-null.
-     */
-    auto paintMethod = CreateOffscreenCanvasPaintMethod(CANVAS_WIDTH, CANVAS_HEIGHT);
-    ASSERT_NE(paintMethod, nullptr);
-    float matrix1[20] = { 0 };
+    float matrixGet[20] = { 0 };
 
     /**
      * @tc.steps2: Call the function SetHueRotateFilter with "420deg".
      * @tc.expected: The value at the position 0 of the matrix1 is equal to 0.5.
      */
     std::string filterParam1("660deg");
-    constexpr float matrix10 = 0.5;
-    paintMethod->SetHueRotateFilter(filterParam1);
+    float radius = 660 / HALF_CIRCLE_ANGLE * M_PI;
+    float cosValue = std::cos(radius);
+    float sinValue = std::sin(radius);
+    paintMethod->SetHueRotateFilter(filterParam1, paintMethod->imagePaint_);
     auto* skColorFilter1 = paintMethod->imagePaint_.getColorFilter();
-    skColorFilter1->asAColorMatrix(matrix1);
-    EXPECT_DOUBLE_EQ(matrix1[0], matrix10);
+    skColorFilter1->asAColorMatrix(matrixGet);
+    EXPECT_DOUBLE_EQ(matrixGet[0], LUMR + cosValue * (1 - LUMR) + sinValue * (-LUMR));
+    EXPECT_DOUBLE_EQ(matrixGet[5], LUMR + cosValue * (-LUMR) + sinValue * 0.143f);
+    EXPECT_DOUBLE_EQ(matrixGet[10], LUMR + cosValue * (-LUMR) + sinValue * (LUMR - 1));
+    EXPECT_DOUBLE_EQ(matrixGet[1], LUMG + cosValue * (-LUMG) + sinValue * (-LUMG));
+    EXPECT_DOUBLE_EQ(matrixGet[6], LUMG + cosValue * (1 - LUMG) + sinValue * 0.140f);
+    EXPECT_DOUBLE_EQ(matrixGet[11], LUMG + cosValue * (-LUMG) + sinValue * LUMG);
+    EXPECT_DOUBLE_EQ(matrixGet[2], LUMB + cosValue * (-LUMB) + sinValue * (1 - LUMB));
+    EXPECT_DOUBLE_EQ(matrixGet[7], LUMB + cosValue * (-LUMB) + sinValue * (-0.283f));
+    EXPECT_DOUBLE_EQ(matrixGet[12], LUMB + cosValue * (1 - LUMB) + sinValue * LUMB);
+    EXPECT_DOUBLE_EQ(matrixGet[18], 1.0f);
 
     /**
      * @tc.steps3: Call the function SetHueRotateFilter with "3.142rad".
      * @tc.expected: The value at the position 1 of the matrix1 is equal to 0.5.
      */
-    std::string filterParam2("3.142rad");
-    constexpr float matrix11 = 0.5;
-    paintMethod->SetHueRotateFilter(filterParam2);
+    std::string filterParam2("3.14rad");
+    cosValue = std::cos(3.14f);
+    sinValue = std::sin(3.14f);
+    paintMethod->SetHueRotateFilter(filterParam2, paintMethod->imagePaint_);
     auto* skColorFilter2 = paintMethod->imagePaint_.getColorFilter();
-    skColorFilter2->asAColorMatrix(matrix1);
-    EXPECT_DOUBLE_EQ(matrix1[1], matrix11);
+    skColorFilter2->asAColorMatrix(matrixGet);
+    EXPECT_DOUBLE_EQ(matrixGet[0], LUMR + cosValue * (1 - LUMR) + sinValue * (-LUMR));
+    EXPECT_DOUBLE_EQ(matrixGet[5], LUMR + cosValue * (-LUMR) + sinValue * 0.143f);
+    EXPECT_DOUBLE_EQ(matrixGet[10], LUMR + cosValue * (-LUMR) + sinValue * (LUMR - 1));
+    EXPECT_DOUBLE_EQ(matrixGet[6], LUMG + cosValue * (1 - LUMG) + sinValue * 0.140f);
+    EXPECT_DOUBLE_EQ(matrixGet[2], LUMB + cosValue * (-LUMB) + sinValue * (1 - LUMB));
+    EXPECT_DOUBLE_EQ(matrixGet[18], 1.0f);
 
     /**
      * @tc.steps3: Call the function SetHueRotateFilter with "0.2turn".
      * @tc.expected: The value at the position 2 of the matrix1 is equal to 0.6.
      */
-    std::string filterParam3("0.2turn");
-    constexpr float matrix12 = 0.6;
-    paintMethod->SetHueRotateFilter(filterParam3);
+    std::string filterParam3("0.25turn");
+    cosValue = std::cos(0.25f * 2 * M_PI);
+    sinValue = std::sin(0.25f * 2 * M_PI);
+    paintMethod->SetHueRotateFilter(filterParam3, paintMethod->imagePaint_);
     auto* skColorFilter3 = paintMethod->imagePaint_.getColorFilter();
-    skColorFilter3->asAColorMatrix(matrix1);
-    EXPECT_DOUBLE_EQ(matrix1[2], matrix12);
+    skColorFilter3->asAColorMatrix(matrixGet);
+    EXPECT_DOUBLE_EQ(matrixGet[5], LUMR + cosValue * (-LUMR) + sinValue * 0.143f);
+    EXPECT_DOUBLE_EQ(matrixGet[10], LUMR + cosValue * (-LUMR) + sinValue * (LUMR - 1));
+    EXPECT_DOUBLE_EQ(matrixGet[6], LUMG + cosValue * (1 - LUMG) + sinValue * 0.140f);
+    EXPECT_DOUBLE_EQ(matrixGet[2], LUMB + cosValue * (-LUMB) + sinValue * (1 - LUMB));
+    EXPECT_DOUBLE_EQ(matrixGet[7], LUMB + cosValue * (-LUMB) + sinValue * (-0.283f));
+    EXPECT_DOUBLE_EQ(matrixGet[18], 1.0f);
 }
 
 /**
- * @tc.name: OffscreenCanvasPaintMethodTestNg011
- * @tc.desc: Test the function SetDropShadowFilter of OffscreenCanvasPaintMethod.
+ * @tc.name: OffscreenCanvasPaintMethodTestNg010
+ * @tc.desc: Test the function GetFilterType of OffscreenCanvasPaintMethod.
  * @tc.type: FUNC
  */
 HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg011, TestSize.Level1)
@@ -530,62 +568,10 @@ HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg011, 
      */
     auto paintMethod = CreateOffscreenCanvasPaintMethod(CANVAS_WIDTH, CANVAS_HEIGHT);
     ASSERT_NE(paintMethod, nullptr);
-    constexpr double offsetX = 0.1;
-    constexpr double offsetY = 0.2;
-    constexpr double blurRadius = 0.3;
-    const Color white = Color::WHITE;
-
-    /**
-     * @tc.steps2: Call the function SetDropShadowFilter with nullOffsetsStr.
-     * @tc.expected: The attributions of imageShadow_ are not be changed.
-     */
-    std::string nullOffsetsStr;
-    paintMethod->SetDropShadowFilter(nullOffsetsStr);
-    EXPECT_NE(paintMethod->imageShadow_.GetOffset().GetX(), offsetX);
-    EXPECT_NE(paintMethod->imageShadow_.GetOffset().GetY(), offsetY);
-    EXPECT_NE(paintMethod->imageShadow_.GetBlurRadius(), blurRadius);
-    EXPECT_NE(paintMethod->imageShadow_.GetColor(), white);
-
-    /**
-     * @tc.steps3: Call the function SetDropShadowFilter with invalidOffsetsStr.
-     * @tc.expected: The attributions of imageShadow_ are not be changed.
-     */
-    std::string invalidOffsetsStr("0.1px 0.2px");
-    paintMethod->SetDropShadowFilter(invalidOffsetsStr);
-    EXPECT_NE(paintMethod->imageShadow_.GetOffset().GetX(), offsetX);
-    EXPECT_NE(paintMethod->imageShadow_.GetOffset().GetY(), offsetY);
-    EXPECT_NE(paintMethod->imageShadow_.GetBlurRadius(), blurRadius);
-    EXPECT_NE(paintMethod->imageShadow_.GetColor(), white);
-
-    /**
-     * @tc.steps4: Call the function SetDropShadowFilter with validOffsetsStr.
-     * @tc.expected: The attributions of imageShadow_ are be changed to corresponding values.
-     */
-    std::string validOffsetsStr("0.1px 0.2px 0.3px white");
-    paintMethod->SetDropShadowFilter(validOffsetsStr);
-    EXPECT_DOUBLE_EQ(paintMethod->imageShadow_.GetOffset().GetX(), offsetX);
-    EXPECT_DOUBLE_EQ(paintMethod->imageShadow_.GetOffset().GetY(), offsetY);
-    EXPECT_DOUBLE_EQ(paintMethod->imageShadow_.GetBlurRadius(), blurRadius);
-    EXPECT_EQ(paintMethod->imageShadow_.GetColor(), white);
-}
-
-/**
- * @tc.name: OffscreenCanvasPaintMethodTestNg012
- * @tc.desc: Test the function GetFilterType of OffscreenCanvasPaintMethod.
- * @tc.type: FUNC
- */
-HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg012, TestSize.Level1)
-{
-    /**
-     * @tc.steps1: initialize parameters.
-     * @tc.expected: All pointer is non-null.
-     */
-    auto paintMethod = CreateOffscreenCanvasPaintMethod(CANVAS_WIDTH, CANVAS_HEIGHT);
-    ASSERT_NE(paintMethod, nullptr);
     const std::string nullStr;
     const std::string targetType("targetType");
     const std::string targetParam("targetParam");
-    std::string filterType;
+    FilterType filterType;
     std::string filterParam;
 
     /**
@@ -594,34 +580,34 @@ HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg012, 
      */
     paintMethod->filterParam_ = "";
     EXPECT_FALSE(paintMethod->GetFilterType(filterType, filterParam));
-    EXPECT_EQ(filterType, nullStr);
+    EXPECT_EQ(filterType, FilterType::NONE);
     EXPECT_EQ(filterParam, nullStr);
 
     /**
      * @tc.steps3: Call the function GetFilterType with filterParam_ = "targetType(targetParam".
      * @tc.expected: The return value is false and the output string is corrected.
      */
-    paintMethod->filterParam_ = "targetType(targetParam";
+    paintMethod->filterParam_ = "blur(targetParam";
     EXPECT_FALSE(paintMethod->GetFilterType(filterType, filterParam));
-    EXPECT_EQ(filterType, targetType);
+    EXPECT_EQ(filterType, FilterType::BLUR);
     EXPECT_EQ(filterParam, targetParam);
 
     /**
      * @tc.steps4: Call the function GetFilterType with filterParam_ = "targetType(targetParam)".
      * @tc.expected: The return value is true and the output string is corrected.
      */
-    paintMethod->filterParam_ = "targetType(targetParam)";
+    paintMethod->filterParam_ = "blur(targetParam)";
     EXPECT_TRUE(paintMethod->GetFilterType(filterType, filterParam));
-    EXPECT_EQ(filterType, targetType);
+    EXPECT_EQ(filterType, FilterType::BLUR);
     EXPECT_EQ(filterParam, targetParam);
 }
 
 /**
- * @tc.name: OffscreenCanvasPaintMethodTestNg013
+ * @tc.name: OffscreenCanvasPaintMethodTestNg011
  * @tc.desc: Test functions ImageObjReady and ImageObjFailed of OffscreenCanvasPaintMethod.
  * @tc.type: FUNC
  */
-HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg013, TestSize.Level1)
+HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg012, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -663,11 +649,11 @@ HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg013, 
 }
 
 /**
- * @tc.name: OffscreenCanvasPaintMethodTestNg014
+ * @tc.name: OffscreenCanvasPaintMethodTestNg012
  * @tc.desc: Test the function HasImageShadow of OffscreenCanvasPaintMethod.
  * @tc.type: FUNC
  */
-HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg014, TestSize.Level1)
+HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg013, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -683,68 +669,11 @@ HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg014, 
      * @tc.expected: The return value is false.
      */
 
-    paintMethod->SetDropShadowFilter(imageShadowAttr1);
     EXPECT_FALSE(paintMethod->HasImageShadow());
-
-    /**
-     * @tc.steps3: Call the function HasImageShadow with imageShadowAttr2.
-     * @tc.expected: The return value is true.
-     */
-    paintMethod->SetDropShadowFilter(imageShadowAttr2);
-    EXPECT_TRUE(paintMethod->HasImageShadow());
 }
 
 /**
- * @tc.name: OffscreenCanvasPaintMethodTestNg015
- * @tc.desc: Test the function SetPaintImage of OffscreenCanvasPaintMethod.
- * @tc.type: FUNC
- */
-HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg015, TestSize.Level1)
-{
-    /**
-     * @tc.steps1: initialize parameters.
-     * @tc.expected: All pointer is non-null.
-     */
-    auto paintMethod = CreateOffscreenCanvasPaintMethod(CANVAS_WIDTH, CANVAS_HEIGHT);
-    ASSERT_NE(paintMethod, nullptr);
-    float matrix1[20] = { 0 };
-
-    /**
-     * @tc.steps2: Call the function SetPaintImage with paintMethod->filterParam_ = "".
-     * @tc.expected: The value at the position 0 is equal to 1.0f.
-     */
-    paintMethod->filterParam_ = "targetType(targetParam)";
-    constexpr float matrix10 = 1.0f;
-    paintMethod->SetPaintImage();
-    auto* skColorFilter1 = paintMethod->imagePaint_.getColorFilter();
-    skColorFilter1->asAColorMatrix(matrix1);
-    EXPECT_DOUBLE_EQ(matrix1[0], matrix10);
-
-    /**
-     * @tc.steps3: Call the function SetPaintImage with paintMethod->filterParam_ = "targetType(targetParam)".
-     * @tc.expected: The value at the position 0 is equal to 1.0f.
-     */
-    paintMethod->filterParam_ = "targetType(targetParam)";
-    paintMethod->SetPaintImage();
-    auto* skColorFilter2 = paintMethod->imagePaint_.getColorFilter();
-    skColorFilter2->asAColorMatrix(matrix1);
-    EXPECT_DOUBLE_EQ(matrix1[0], matrix10);
-
-    /**
-     * @tc.steps4: Call the function SetPaintImage with paintMethod->filterParam_ = "hue-rotate(60deg)".
-     * @tc.expected: The value at the position 0 is equal to 0.5f.
-     */
-    paintMethod->filterParam_ = "hue-rotate(60deg)";
-    constexpr float matrix11 = 0.5f;
-    paintMethod->InitFilterFunc();
-    paintMethod->SetPaintImage();
-    auto* skColorFilter3 = paintMethod->imagePaint_.getColorFilter();
-    skColorFilter3->asAColorMatrix(matrix1);
-    EXPECT_DOUBLE_EQ(matrix1[0], matrix11);
-}
-
-/**
- * @tc.name: OffscreenCanvasPaintMethodTestNg016
+ * @tc.name: OffscreenCanvasPaintMethodTestNg013
  * @tc.desc: Test the function GetBaselineOffset of OffscreenCanvasPaintMethod.
  * @tc.type: FUNC
  */
@@ -776,7 +705,7 @@ HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg016, 
 }
 
 /**
- * @tc.name: OffscreenCanvasPaintMethodTestNg017
+ * @tc.name: OffscreenCanvasPaintMethodTestNg014
  * @tc.desc: Test the function SetPaintImage of OffscreenCanvasPaintMethod.
  * @tc.type: FUNC
  */

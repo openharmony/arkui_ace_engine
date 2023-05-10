@@ -383,6 +383,8 @@ std::string ConvertInputTypeToString(AceTextCategory type)
             return "INPUT_TYPE_NUMBER";
         case AceTextCategory::INPUT_TYPE_PASSWORD:
             return "INPUT_TYPE_PASSWORD";
+        case AceTextCategory::INPUT_TYPE_PHONENUMBER:
+            return "INPUT_TYPE_PHONENUMBER";
         default:
             return "illegal input type";
     }
@@ -588,8 +590,12 @@ void FillEventInfo(const RefPtr<NG::FrameNode>& node, AccessibilityEventInfo& ev
 {
     eventInfo.SetComponentType(node->GetTag());
     eventInfo.SetPageId(node->GetPageId());
-    eventInfo.AddContent(node->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetText());
-    eventInfo.SetLatestContent(node->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetText());
+    auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    eventInfo.AddContent(accessibilityProperty->GetText());
+    eventInfo.SetItemCounts(accessibilityProperty->GetCollectionItemCounts());
+    eventInfo.SetBeginIndex(accessibilityProperty->GetBeginIndex());
+    eventInfo.SetEndIndex(accessibilityProperty->GetEndIndex());
 }
 
 void FillEventInfo(const RefPtr<AccessibilityNode>& node, AccessibilityEventInfo& eventInfo)
@@ -899,7 +905,7 @@ void ClearAccessibilityFocus(const RefPtr<NG::FrameNode>& root, int32_t focusNod
 {
     auto oldFocusNode = GetInspectorById(root, focusNodeId);
     CHECK_NULL_VOID_NOLOG(oldFocusNode);
-    oldFocusNode->GetRenderContext()->OnAccessibilityFocusUpdate(false);
+    oldFocusNode->GetRenderContext()->UpdateAccessibilityFocus(false);
 }
 
 inline string GetSupportAction(const std::unordered_set<AceAction>& supportAceActions)
@@ -1109,7 +1115,6 @@ static void DumpCommonPropertyNG(const AccessibilityElementInfo& nodeInfo)
     DumpLog::GetInstance().AddDesc("page id: " + std::to_string(nodeInfo.GetPageId()));
     DumpLog::GetInstance().AddDesc("page path: ", nodeInfo.GetPagePath());
     DumpLog::GetInstance().AddDesc("is valid element: ", BoolToString(nodeInfo.IsValidElement()));
-    DumpLog::GetInstance().AddDesc("js component id: ", nodeInfo.GetInspectorKey());
     DumpLog::GetInstance().AddDesc("resource name: ", nodeInfo.GetComponentResourceId());
 
     DumpLog::GetInstance().AddDesc("clickable: ", BoolToString(nodeInfo.IsClickable()));
@@ -1244,6 +1249,12 @@ bool JsAccessibilityManager::SendAccessibilitySyncEvent(
         return false;
     }
 
+    eventInfo.SetTimeStamp(GetMicroTickCount());
+    eventInfo.SetBeforeText(accessibilityEvent.beforeText);
+    eventInfo.SetLatestContent(accessibilityEvent.latestContent);
+    eventInfo.SetWindowChangeTypes(static_cast<Accessibility::WindowUpdateType>(accessibilityEvent.windowChangeTypes));
+    eventInfo.SetWindowContentChangeTypes(
+        static_cast<Accessibility::WindowsContentChangeTypes>(accessibilityEvent.windowContentChangeTypes));
     eventInfo.SetSource(accessibilityEvent.nodeId);
     eventInfo.SetEventType(type);
     eventInfo.SetCurrentIndex(static_cast<int>(accessibilityEvent.currentItemIndex));
@@ -1274,8 +1285,11 @@ void JsAccessibilityManager::SendAccessibilityAsyncEvent(const AccessibilityEven
         CHECK_NULL_VOID_NOLOG(node);
         FillEventInfo(node, eventInfo);
     }
-    eventInfo.SetWindowId(windowId);
-
+    if (accessibilityEvent.type != AccessibilityEventType::PAGE_CHANGE) {
+        eventInfo.SetWindowId(windowId);
+    } else {
+        eventInfo.SetWindowId(accessibilityEvent.windowId);
+    }
     context->GetTaskExecutor()->PostTask(
         [weak = WeakClaim(this), accessibilityEvent, eventInfo] {
             auto jsAccessibilityManager = weak.Upgrade();
@@ -2125,7 +2139,7 @@ bool JsAccessibilityManager::ExecuteActionNG(int32_t elementId, ActionType actio
                 return result;
             }
             Framework::ClearAccessibilityFocus(ngPipeline->GetRootElement(), currentFocusNodeId_);
-            frameNode->GetRenderContext()->OnAccessibilityFocusUpdate(true);
+            frameNode->GetRenderContext()->UpdateAccessibilityFocus(true);
             currentFocusNodeId_ = frameNode->GetAccessibilityId();
             result = true;
             break;
@@ -2134,7 +2148,7 @@ bool JsAccessibilityManager::ExecuteActionNG(int32_t elementId, ActionType actio
             if (elementId != currentFocusNodeId_) {
                 return result;
             }
-            frameNode->GetRenderContext()->OnAccessibilityFocusUpdate(false);
+            frameNode->GetRenderContext()->UpdateAccessibilityFocus(false);
             currentFocusNodeId_ = -1;
             result = true;
             break;
@@ -2221,21 +2235,37 @@ int JsAccessibilityManager::RegisterInteractionOperation(int windowId)
 
     std::shared_ptr<AccessibilitySystemAbilityClient> instance = AccessibilitySystemAbilityClient::GetInstance();
     CHECK_NULL_RETURN_NOLOG(instance, -1);
-    interactionOperation_ = std::make_shared<JsInteractionOperation>(windowId);
-    interactionOperation_->SetHandler(WeakClaim(this));
-    Accessibility::RetError retReg = instance->RegisterElementOperator(windowId, interactionOperation_);
+    auto interactionOperation = std::make_shared<JsInteractionOperation>(windowId);
+    interactionOperation->SetHandler(WeakClaim(this));
+    Accessibility::RetError retReg = instance->RegisterElementOperator(windowId, interactionOperation);
     RefPtr<PipelineBase> context;
     for (auto subContext : GetSubPipelineContexts()) {
         context = subContext.Upgrade();
         CHECK_NULL_RETURN_NOLOG(context, -1);
-        interactionOperation_ = std::make_shared<JsInteractionOperation>(context->GetWindowId());
-        interactionOperation_->SetHandler(WeakClaim(this));
-        retReg = instance->RegisterElementOperator(context->GetWindowId(), interactionOperation_);
+        interactionOperation = std::make_shared<JsInteractionOperation>(context->GetWindowId());
+        interactionOperation->SetHandler(WeakClaim(this));
+        retReg = instance->RegisterElementOperator(context->GetWindowId(), interactionOperation);
     }
     LOGI("RegisterInteractionOperation end windowId:%{public}d, ret:%{public}d", windowId, retReg);
     Register(retReg == RET_OK);
 
     return retReg;
+}
+
+void JsAccessibilityManager::RegisterSubWindowInteractionOperation(int windowId)
+{
+    if (!AceApplicationInfo::GetInstance().IsAccessibilityEnabled() || !IsRegister()) {
+        return;
+    }
+
+    std::shared_ptr<AccessibilitySystemAbilityClient> instance = AccessibilitySystemAbilityClient::GetInstance();
+    CHECK_NULL_VOID_NOLOG(instance);
+    auto interactionOperation = std::make_shared<JsInteractionOperation>(windowId);
+    interactionOperation->SetHandler(WeakClaim(this));
+    Accessibility::RetError retReg = instance->RegisterElementOperator(windowId, interactionOperation);
+    if (!retReg) {
+        LOGE("RegisterInteractionOperation failed, windowId:%{public}d, ret:%{public}d", windowId, retReg);
+    }
 }
 
 void JsAccessibilityManager::DeregisterInteractionOperation()

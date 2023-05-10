@@ -141,8 +141,8 @@ public:
 
     virtual void UpdateTransition(const TransitionOptions& options) {}
     virtual void UpdateChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect) {}
-    virtual void OnNodeDisappear() {}
-    virtual void OnNodeAppear() {}
+    virtual void OnNodeDisappear(bool recursive) {}
+    virtual void OnNodeAppear(bool recursive) {}
     virtual bool HasTransitionOutAnimation() const
     {
         return false;
@@ -167,7 +167,9 @@ public:
 
     virtual void UpdateBackBlurRadius(const Dimension& radius) {}
     virtual void UpdateBackBlurStyle(const BlurStyleOption& blurStyle) {}
+    virtual void ResetBackBlurStyle() {}
     virtual void ClipWithRect(const RectF& rectF) {}
+    virtual void ClipWithRRect(const RectF& rectF, const RadiusF& radiusF) {}
 
     virtual void OpacityAnimation(const AnimationOption& option, double begin, double end) {}
     virtual void ScaleAnimation(const AnimationOption& option, double begin, double end) {}
@@ -251,9 +253,11 @@ public:
     virtual void OnSphericalEffectUpdate(double radio) {}
     virtual void OnPixelStretchEffectUpdate(const PixStretchEffectOption& option) {}
     virtual void OnLightUpEffectUpdate(double radio) {}
+    virtual void OnClickEffectLevelUpdate(const ClickEffectInfo& info) {}
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(SphericalEffect, double);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PixelStretchEffect, PixStretchEffectOption);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(LightUpEffect, double);
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ClickEffectLevel, ClickEffectInfo);
     virtual RefPtr<PixelMap> GetThumbnailPixelMap()
     {
         return nullptr;
@@ -350,6 +354,9 @@ public:
     // accessibility
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AccessibilityFocus, bool);
 
+    // freeze
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Freeze, bool);
+
 protected:
     RenderContext() = default;
     std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;
@@ -387,7 +394,7 @@ protected:
     virtual void OnClipEdgeUpdate(bool isClip) {}
     virtual void OnClipMaskUpdate(const RefPtr<BasicShape>& basicShape) {}
 
-    virtual void OnProgressMaskUpdate(const RefPtr<ProgressMaskProperty>& prgress) {}
+    virtual void OnProgressMaskUpdate(const RefPtr<ProgressMaskProperty>& progress) {}
 
     virtual void OnLinearGradientUpdate(const NG::Gradient& value) {}
     virtual void OnSweepGradientUpdate(const NG::Gradient& value) {}
@@ -406,6 +413,7 @@ protected:
 
     virtual void OnOverlayTextUpdate(const OverlayOptions& overlay) {}
     virtual void OnMotionPathUpdate(const MotionPathOption& motionPath) {}
+    virtual void OnFreezeUpdate(bool isFreezed) {}
 
 private:
     std::function<void()> requestFrame_;

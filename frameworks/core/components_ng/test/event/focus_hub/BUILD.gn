@@ -13,9 +13,10 @@
 
 import("//build/test.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("focus_hub_test_ng") {
-  module_out_path = "$test_output_path/event/focus_hub"
+  module_out_path = event_test_output_path
 
   sources = [
     # inner
@@ -39,9 +40,10 @@ ohos_unittest("focus_hub_test_ng") {
     "$ace_root/frameworks/core/components_v2/inspector/inspector_constants.cpp",
 
     # mock
-
+    "$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
     "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/animation/mock_geometry_transition.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/base/mock_stage_manager.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/gesture/recognizers/mock_exclusive_recognizer.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/gesture/recognizers/mock_gesture_recognizer.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/gesture/recognizers/mock_parallel_recognizer.cpp",

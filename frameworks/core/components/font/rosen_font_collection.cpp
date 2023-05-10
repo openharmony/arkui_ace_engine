@@ -15,10 +15,9 @@
 
 #include "core/components/font/rosen_font_collection.h"
 
-#include "flutter/third_party/txt/src/minikin/FontFamily.h"
-#include "flutter/third_party/txt/src/minikin/FontLanguageListCache.h"
-#include "third_party/skia/include/core/SkTypeface.h"
-
+#include "txt/src/minikin/FontFamily.h"
+#include "txt/src/minikin/FontLanguageListCache.h"
+#include "include/core/SkTypeface.h"
 #include "base/i18n/localization.h"
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"

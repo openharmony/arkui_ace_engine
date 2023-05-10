@@ -19,6 +19,7 @@
 #include <chrono>
 #include <cstdint>
 #include <string>
+#include <optional>
 
 #include "base/geometry/dimension_offset.h"
 #include "base/geometry/dimension_rect.h"

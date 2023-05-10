@@ -167,11 +167,11 @@ void TextLayoutAlgorithm::UpdateParagraph(LayoutWrapper* layoutWrapper)
             auto width = geometryNode->GetMarginFrameSize().Width();
             auto height = geometryNode->GetMarginFrameSize().Height();
             child->placeHolderIndex = child->UpdateParagraph(paragraph_, width, height, verticalAlign);
-            child->positon += 1;
+            child->position += 1;
             iterItems++;
         } else {
             child->UpdateParagraph(paragraph_);
-            child->positon = spanTextLength + StringUtils::ToWstring(child->content).length();
+            child->position = spanTextLength + StringUtils::ToWstring(child->content).length();
             spanTextLength += StringUtils::ToWstring(child->content).length();
         }
     }
@@ -505,7 +505,7 @@ std::optional<SizeF> TextLayoutAlgorithm::BuildTextRaceParagraph(TextStyle& text
 
     // layout the paragraph to the width of text
     paragraph_->Layout(std::numeric_limits<float>::max());
-    float paragraphWidth = paragraph_->GetTextWidth();
+    float paragraphWidth = paragraph_->GetMaxWidth();
     paragraph_->Layout(paragraphWidth);
 
     textStyle_ = textStyle;
@@ -640,7 +640,6 @@ void TextLayoutAlgorithm::ApplyIndents(const TextStyle& textStyle, double width)
     CHECK_NULL_VOID(paragraph_);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    std::vector<float> indents;
     double indent = 0.0;
     if (textStyle.GetTextIndent().Unit() != DimensionUnit::PERCENT) {
         if (!textStyle.GetTextIndent().NormalizeToPx(
@@ -650,10 +649,13 @@ void TextLayoutAlgorithm::ApplyIndents(const TextStyle& textStyle, double width)
     } else {
         indent = width * textStyle.GetTextIndent().Value();
     }
+#ifndef NEW_SKIA
+    std::vector<float> indents;
     if (indent > 0.0) {
         indents.emplace_back(static_cast<float>(indent));
         indents.emplace_back(0.0);
         paragraph_->SetIndents(indents);
     }
+#endif
 }
 } // namespace OHOS::Ace::NG

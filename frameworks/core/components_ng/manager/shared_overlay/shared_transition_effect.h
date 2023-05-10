@@ -90,6 +90,10 @@ public:
     {
         return initialEventEnabled_;
     }
+    bool GetPassengerCurrentFocused() const
+    {
+        return isCurrentFocused_;
+    }
     void SetSharedNode(const WeakPtr<FrameNode>& src, const WeakPtr<FrameNode>& dest)
     {
         dest_ = dest;
@@ -115,6 +119,10 @@ public:
     {
         initialEventEnabled_ = enabled;
     }
+    void SetPassengerCurrentFocused(bool isFocused)
+    {
+        isCurrentFocused_ = isFocused;
+    }
     void PerformFinishCallback();
     bool ApplyAnimation();
     static RefPtr<SharedTransitionEffect> GetSharedTransitionEffect(
@@ -135,6 +143,7 @@ protected:
     std::optional<int32_t> initialZIndex_;
     std::list<std::function<void()>> finishCallbacks_;
     bool initialEventEnabled_ = true;
+    bool isCurrentFocused_ = false;
 };
 
 class SharedTransitionExchange : public SharedTransitionEffect {

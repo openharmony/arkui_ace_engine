@@ -102,9 +102,8 @@ void DatePickerColumnPattern::InitMouseAndPressEvent()
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     auto mouseTask = [weak = WeakClaim(this)](bool isHover) {
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleMouseEvent(isHover);
-        }
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleMouseEvent(isHover);
     };
     mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
     inputHub->AddOnHoverEvent(mouseEvent_);
@@ -178,9 +177,8 @@ void DatePickerColumnPattern::PlayPressAnimation(const Color& pressColor)
     option.SetFillMode(FillMode::FORWARDS);
     AnimationUtils::Animate(option, [weak = AceType::WeakClaim(this), pressColor]() {
         auto picker = weak.Upgrade();
-        if (picker) {
-            picker->SetButtonBackgroundColor(pressColor);
-        }
+        CHECK_NULL_VOID(picker);
+        picker->SetButtonBackgroundColor(pressColor);
     });
 }
 
@@ -192,9 +190,8 @@ void DatePickerColumnPattern::PlayHoverAnimation(const Color& color)
     option.SetFillMode(FillMode::FORWARDS);
     AnimationUtils::Animate(option, [weak = AceType::WeakClaim(this), color]() {
         auto picker = weak.Upgrade();
-        if (picker) {
-            picker->SetButtonBackgroundColor(color);
-        }
+        CHECK_NULL_VOID(picker);
+        picker->SetButtonBackgroundColor(color);
     });
 }
 
@@ -584,6 +581,9 @@ void DatePickerColumnPattern::HandleDragStart(const GestureEvent& event)
     toss->SetStart(yOffset_);
     yLast_ = yOffset_;
     pressed_ = true;
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_START);
 }
 
 void DatePickerColumnPattern::HandleDragMove(const GestureEvent& event)
@@ -610,7 +610,10 @@ void DatePickerColumnPattern::HandleDragEnd()
     CHECK_NULL_VOID_NOLOG(GetHost());
     CHECK_NULL_VOID_NOLOG(GetToss());
     auto toss = GetToss();
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
     if (!NotLoopOptions() && toss->Play()) {
+        frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
         return;
     }
     yOffset_ = 0.0;
@@ -623,6 +626,7 @@ void DatePickerColumnPattern::HandleDragEnd()
     fromController_->ClearInterpolators();
     fromController_->AddInterpolator(curve);
     fromController_->Play();
+    frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
 }
 void DatePickerColumnPattern::CreateAnimation()
 {

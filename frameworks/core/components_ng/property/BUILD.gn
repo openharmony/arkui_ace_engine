@@ -22,5 +22,6 @@ build_component_ng("property_ng") {
     "grid_property.cpp",
     "measure_utils.cpp",
     "property.cpp",
+    "templates_parser.cpp",
   ]
 }

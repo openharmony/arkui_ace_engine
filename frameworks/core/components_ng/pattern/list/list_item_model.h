@@ -18,6 +18,7 @@
 
 #include <functional>
 #include <memory>
+#include <mutex>
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
@@ -47,6 +48,7 @@ public:
 
 private:
     static std::unique_ptr<ListItemModel> instance_;
+    static std::mutex mutex_;
 };
 
 } // namespace OHOS::Ace

@@ -15,15 +15,22 @@
 
 #include "gtest/gtest.h"
 
+#include "core/event/mouse_event.h"
+
 #define private public
 #define protected public
+#include "base/memory/ace_type.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/event/input_event.h"
 #include "core/components_ng/pattern/hyperlink/hyperlink_model_ng.h"
 #include "core/components_ng/pattern/hyperlink/hyperlink_pattern.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
+#undef private
+#undef protected
 
 using namespace testing;
 using namespace testing::ext;
@@ -48,7 +55,7 @@ void HyperlinkTestNg::SetUpTestSuite()
     MockPipelineBase::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<TextTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
 }
 
 void HyperlinkTestNg::TearDownTestSuite()
@@ -88,5 +95,74 @@ HWTEST_F(HyperlinkTestNg, HyperlinkDrag001, TestSize.Level1)
     // check dragInfo
     EXPECT_EQ(dragDropInfo.extraInfo, HYPERLINK_EXTRAINFO);
 }
-} // namespace OHOS::Ace::NG
 
+/**
+ * @tc.name: HyperlinkPatternTest001
+ * @tc.desc: Test HyperlinkPattern InitInputEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest001, TestSize.Level1)
+{
+    auto frameNode = HyperlinkTestNg::CreateHyperlinkNode(HYPERLINK_ADDRESS, HYPERLINK_CONTENT);
+    ASSERT_NE(frameNode, nullptr);
+    auto hyperlinkPattern = frameNode->GetPattern<HyperlinkPattern>();
+    ASSERT_NE(hyperlinkPattern, nullptr);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto inputHub = AceType::MakeRefPtr<InputEventHub>(eventHub);
+
+    hyperlinkPattern->InitInputEvent(inputHub);
+    auto onHoverEvent = hyperlinkPattern->onHoverEvent_->onHoverCallback_;
+    auto onMouseEvent = hyperlinkPattern->onMouseEvent_->onMouseCallback_;
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    onHoverEvent(true);
+    EXPECT_EQ(pipeline->mouseStyleNodeId_, frameNode->GetId());
+
+    onHoverEvent(false);
+    EXPECT_EQ(pipeline->mouseStyleNodeId_, -1);
+
+    MouseInfo mouseInfo;
+    onMouseEvent(mouseInfo);
+    EXPECT_EQ(pipeline->mouseStyleNodeId_, frameNode->GetId());
+}
+
+/**
+ * @tc.name: HyperlinkModelNGTest001
+ * @tc.desc: Test HyperlinkModelNG SetDraggable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(HyperlinkTestNg, HyperlinkModelNGTest001, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto hyperlinkNode = FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG, stack->ClaimNodeId(),
+        []() { return AceType::MakeRefPtr<HyperlinkPattern>(HYPERLINK_ADDRESS); });
+    stack->Push(hyperlinkNode);
+    auto hyperlinkPattern = hyperlinkNode->GetPattern<HyperlinkPattern>();
+
+    HyperlinkModelNG hyperlinkModelNG;
+    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+    hyperlinkPattern->SetDraggable(false);
+    hyperlinkModelNG.SetDraggable(false);
+    EXPECT_FALSE(hyperlinkPattern->IsDraggable());
+    EXPECT_FALSE(hyperlinkNode->IsDraggable());
+    EXPECT_EQ(gestureHub->dragEventActuator_, nullptr);
+
+    hyperlinkPattern->SetDraggable(true);
+    hyperlinkModelNG.SetDraggable(false);
+    EXPECT_FALSE(hyperlinkPattern->IsDraggable());
+    EXPECT_FALSE(hyperlinkNode->IsDraggable());
+    EXPECT_EQ(gestureHub->dragEventActuator_, nullptr);
+
+    hyperlinkPattern->SetDraggable(true);
+    hyperlinkModelNG.SetDraggable(true);
+    EXPECT_TRUE(hyperlinkPattern->IsDraggable());
+    EXPECT_TRUE(hyperlinkNode->IsDraggable());
+    EXPECT_EQ(gestureHub->dragEventActuator_, nullptr);
+
+    hyperlinkPattern->SetDraggable(false);
+    hyperlinkModelNG.SetDraggable(true);
+    EXPECT_TRUE(hyperlinkPattern->IsDraggable());
+    EXPECT_TRUE(hyperlinkNode->IsDraggable());
+    EXPECT_NE(gestureHub->dragEventActuator_, nullptr);
+}
+} // namespace OHOS::Ace::NG

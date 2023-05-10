@@ -14,8 +14,9 @@
  */
 
 #include "render_svg_tspan_creator.h"
-
+#ifndef NEW_SKIA
 #include "flutter_render_svg_tspan.h"
+#endif
 #include "rosen_render_svg_tspan.h"
 
 namespace OHOS::Ace {
@@ -28,7 +29,11 @@ RefPtr<RenderNode> RenderSvgTspanCreator::Create()
         return nullptr;
 #endif
     } else {
+#ifndef NEW_SKIA
         return AceType::MakeRefPtr<FlutterRenderSvgTspan>();
+#else
+        return nullptr;
+#endif
     }
 }
 } // namespace OHOS::Ace

@@ -15,9 +15,9 @@
 
 #include "rosen_render_capsule_track.h"
 
-#include "third_party/skia/include/core/SkCanvas.h"
-#include "third_party/skia/include/core/SkPaint.h"
-#include "third_party/skia/include/core/SkPath.h"
+#include "include/core/SkCanvas.h"
+#include "include/core/SkPaint.h"
+#include "include/core/SkPath.h"
 
 #include "core/pipeline/base/rosen_render_context.h"
 
@@ -66,7 +66,7 @@ void RosenRenderCapsuleTrack::DrawCapsuleProgressAnimation(RenderContext& contex
     Size progressSize = Size(capsuleWidth, capsuleHeight);
 
     double radius = progressSize.Height() / 2.0;
-    
+
     double progressWidth = progressSize.Width()*GetTotalRatio();
 
     SkPath path;

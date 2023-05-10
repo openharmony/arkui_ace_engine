@@ -40,4 +40,31 @@ void TextPattern::BeforeCreateLayoutWrapper() {}
 void TextPattern::OnVisibleChange(bool isVisible) {}
 
 void TextPattern::DumpInfo() {}
+
+float TextPattern::GetLineHeight() const
+{
+    return {};
+}
+
+std::vector<RSTypographyProperties::TextBox> TextPattern::GetTextBoxes()
+{
+    return {};
+}
+OffsetF TextPattern::GetParentGlobalOffset() const
+{
+    return {};
+}
+
+void TextPattern::CloseSelectOverlay()
+{
+}
+void TextPattern::CreateHandles()
+{
+}
+
+bool TextPattern::BetweenSelectedPosition(const Offset& globalOffset)
+{
+    return {};
+}
+
 } // namespace OHOS::Ace::NG

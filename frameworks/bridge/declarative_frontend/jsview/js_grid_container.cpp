@@ -61,7 +61,7 @@ void JSGridContainer::Create(const JSCallbackInfo& info)
             gridContainerInfoBuilder.SetSizeType(static_cast<GridSizeType>(value));
         }
 
-        Dimension dim;
+        CalcDimension dim;
         // gutter?: Length
         if (ParseJsDimensionVp(obj->GetProperty("gutter"), dim)) {
             gridContainerInfoBuilder.SetGutterWidth(dim);

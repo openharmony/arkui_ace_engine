@@ -50,8 +50,9 @@ void RelativeContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     idNodeMap_.clear();
     reliedOnMap_.clear();
     incomingDegreeMap_.clear();
-    auto parentIdealSize = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint()->selfIdealSize.ConvertToSizeT();
-    layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(parentIdealSize.Width(), parentIdealSize.Height()));
+    auto layoutConstraint = relativeContainerLayoutProperty->GetLayoutConstraint();
+    auto idealSize = CreateIdealSize(layoutConstraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT);
+    layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize.ConvertToSizeT());
     CollectNodesById(layoutWrapper);
     GetDependencyRelationship();
     if (!PreTopologicalLoopDetection()) {
@@ -71,10 +72,20 @@ void RelativeContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             continue;
         }
         auto childWrapper = idNodeMap_[nodeName];
+        if (!childWrapper->IsActive()) {
+            continue;
+        }
         if (!childWrapper->GetLayoutProperty()->GetFlexItemProperty()) {
             auto childConstraint = relativeContainerLayoutProperty->CreateChildConstraint();
             childWrapper->Measure(childConstraint);
             continue;
+        }
+        const auto& flexItem = childWrapper->GetLayoutProperty()->GetFlexItemProperty();
+        auto alignRules = flexItem->GetAlignRulesValue();
+        auto frameNode = childWrapper->GetHostNode();
+        if (!alignRules.empty() && frameNode) {
+            // when child has alignRules and position, the position property do not work.
+            frameNode->GetLayoutProperty()->SetUsingPosition(false);
         }
         CalcSizeParam(layoutWrapper, nodeName);
         CalcOffsetParam(layoutWrapper, nodeName);
@@ -86,16 +97,19 @@ void RelativeContainerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto relativeContainerLayoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(relativeContainerLayoutProperty);
     const auto& childrenWrapper = layoutWrapper->GetAllChildrenWithBuild();
+    auto left = padding_.left.value_or(0);
+    auto top = padding_.top.value_or(0);
+    auto paddingOffset = OffsetF(left, top);
     for (const auto& childWrapper : childrenWrapper) {
         if (!childWrapper->GetLayoutProperty()->GetFlexItemProperty()) {
-            childWrapper->GetGeometryNode()->SetMarginFrameOffset(OffsetF(0.0f, 0.0f));
+            childWrapper->GetGeometryNode()->SetMarginFrameOffset(OffsetF(0.0f, 0.0f) + paddingOffset);
             continue;
         }
         if (!childWrapper->GetHostNode()->GetInspectorId().has_value()) {
             continue;
         }
         auto curOffset = recordOffsetMap_[childWrapper->GetHostNode()->GetInspectorIdValue()];
-        childWrapper->GetGeometryNode()->SetMarginFrameOffset(curOffset);
+        childWrapper->GetGeometryNode()->SetMarginFrameOffset(curOffset + paddingOffset);
         childWrapper->Layout();
     }
 }
@@ -104,6 +118,9 @@ void RelativeContainerLayoutAlgorithm::CollectNodesById(LayoutWrapper* layoutWra
 {
     idNodeMap_.clear();
     auto relativeContainerLayoutProperty = layoutWrapper->GetLayoutProperty();
+    auto left = padding_.left.value_or(0);
+    auto top = padding_.top.value_or(0);
+    auto paddingOffset = OffsetF(left, top);
     auto constraint = relativeContainerLayoutProperty->GetLayoutConstraint();
     const auto& childrenWrappers = layoutWrapper->GetAllChildrenWithBuild();
     for (const auto& childWrapper : childrenWrappers) {
@@ -118,7 +135,7 @@ void RelativeContainerLayoutAlgorithm::CollectNodesById(LayoutWrapper* layoutWra
                 childConstraint.maxSize = SizeF(constraint->maxSize);
                 childConstraint.minSize = SizeF(0.0f, 0.0f);
                 childWrapper->Measure(childConstraint);
-                childWrapper->GetGeometryNode()->SetMarginFrameOffset(OffsetF(0.0f, 0.0f));
+                childWrapper->GetGeometryNode()->SetMarginFrameOffset(OffsetF(0.0f, 0.0f) + paddingOffset);
                 idNodeMap_.emplace(childHostNode->GetInspectorIdValue(), childWrapper);
             }
             if (idNodeMap_.find(childHostNode->GetInspectorIdValue()) != idNodeMap_.end()) {
@@ -142,6 +159,13 @@ void RelativeContainerLayoutAlgorithm::GetDependencyRelationship()
             if (IsAnchorContainer(alignRule.second.anchor) ||
                 idNodeMap_.find(alignRule.second.anchor) == idNodeMap_.end()) {
                 continue;
+            }
+            auto anchorChildWrapper = idNodeMap_[alignRule.second.anchor];
+            auto anchorChildLayoutProp = anchorChildWrapper->GetLayoutProperty();
+            auto anchorChildVisibility = anchorChildLayoutProp->GetVisibility();
+            // when anchor component set VisibleType::GONE, the current component is not displayed.
+            if (anchorChildVisibility == VisibleType::GONE) {
+                childWrapper->SetActive(false);
             }
             if (reliedOnMap_.count(alignRule.second.anchor) == 0) {
                 std::set<std::string> reliedList;
@@ -259,7 +283,10 @@ void RelativeContainerLayoutAlgorithm::CalcSizeParam(LayoutWrapper* layoutWrappe
     float itemMaxHeight = 0.0f;
     float itemMinWidth = 0.0f;
     float itemMinHeight = 0.0f;
-    childConstraint.maxSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    padding_ = relativeContainerLayoutProperty->CreatePaddingAndBorder();
+    auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    MinusPaddingToSize(padding_, frameSize);
+    childConstraint.maxSize = frameSize;
     childConstraint.minSize = SizeF(0.0f, 0.0f);
     // set first two boundaries of each direction
     for (const auto& alignRule : alignRules) {
@@ -363,6 +390,7 @@ void RelativeContainerLayoutAlgorithm::CalcOffsetParam(LayoutWrapper* layoutWrap
 {
     auto childWrapper = idNodeMap_[nodeName];
     auto containerSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    MinusPaddingToSize(padding_, containerSize);
     auto alignRules = childWrapper->GetLayoutProperty()->GetFlexItemProperty()->GetAlignRulesValue();
     float offsetX = 0.0f;
     bool offsetXCalculated = false;
@@ -398,6 +426,7 @@ void RelativeContainerLayoutAlgorithm::CalcHorizontalLayoutParam(AlignDirection 
     CHECK_NULL_VOID_NOLOG(childLayoutProperty);
     const auto& childFlexItemProperty = childLayoutProperty->GetFlexItemProperty();
     auto parentSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    MinusPaddingToSize(padding_, parentSize);
     switch (alignRule.horizontal) {
         case HorizontalAlign::START:
             childFlexItemProperty->SetAlignValue(
@@ -431,6 +460,7 @@ void RelativeContainerLayoutAlgorithm::CalcVerticalLayoutParam(AlignDirection al
     CHECK_NULL_VOID_NOLOG(childLayoutProperty);
     const auto& childFlexItemProperty = childLayoutProperty->GetFlexItemProperty();
     auto parentSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    MinusPaddingToSize(padding_, parentSize);
     switch (alignRule.vertical) {
         case VerticalAlign::TOP:
             childFlexItemProperty->SetAlignValue(

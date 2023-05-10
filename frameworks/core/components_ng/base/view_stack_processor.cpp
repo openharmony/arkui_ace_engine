@@ -90,6 +90,9 @@ void ViewStackProcessor::FlushRerenderTask()
 {
     auto node = Finish();
     CHECK_NULL_VOID_NOLOG(node);
+    if (predict_) {
+        return;
+    }
     node->FlushUpdateAndMarkDirty();
 }
 
@@ -106,6 +109,7 @@ void ViewStackProcessor::Pop()
         groupNode->AddChildToGroup(currentNode);
         return;
     }
+
     currentNode->MountToParent(parent, DEFAULT_NODE_SLOT, AceType::InstanceOf<ForEachNode>(parent));
     auto currentFrameNode = AceType::DynamicCast<FrameNode>(currentNode);
     if (currentFrameNode) {

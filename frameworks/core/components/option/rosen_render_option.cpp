@@ -15,9 +15,9 @@
 
 #include "core/components/option/rosen_render_option.h"
 
-#include "third_party/skia/include/core/SkPath.h"
-#include "third_party/skia/include/core/SkRRect.h"
-#include "third_party/skia/include/core/SkRect.h"
+#include "include/core/SkPath.h"
+#include "include/core/SkRRect.h"
+#include "include/core/SkRect.h"
 
 #include "core/pipeline/base/rosen_render_context.h"
 

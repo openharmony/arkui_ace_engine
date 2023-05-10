@@ -17,9 +17,9 @@
 
 #include <cmath>
 
-#include "flutter/third_party/txt/src/txt/paragraph_builder.h"
-#include "flutter/third_party/txt/src/txt/paragraph_txt.h"
-#include "third_party/skia/include/effects/SkGradientShader.h"
+#include "txt/paragraph_builder.h"
+#include "txt/paragraph_txt.h"
+#include "include/effects/SkGradientShader.h"
 #include "unicode/uchar.h"
 
 #include "base/i18n/localization.h"

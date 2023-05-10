@@ -17,8 +17,8 @@
 
 #include <cmath>
 
-#include "flutter/third_party/txt/src/txt/paragraph_builder.h"
-#include "flutter/third_party/txt/src/txt/paragraph_txt.h"
+#include "txt/paragraph_builder.h"
+#include "txt/paragraph_txt.h"
 #include "render_service_client/core/ui/rs_node.h"
 #include "unicode/uchar.h"
 
@@ -442,10 +442,13 @@ void RosenRenderText::ApplyIndents(double width)
         indents.push_back(0.0);
         indents.push_back(-indent);
     }
+#ifndef NEW_SKIA
+    // TODO SetIndents need must
     auto* paragraphTxt = static_cast<txt::ParagraphTxt*>(paragraph_.get());
     if (paragraphTxt != nullptr) {
         paragraphTxt->SetIndents(indents);
     }
+#endif
 }
 
 bool RosenRenderText::UpdateParagraph()
@@ -492,7 +495,9 @@ bool RosenRenderText::UpdateParagraph()
             style.max_lines = 1;
         }
     }
+#ifndef NEW_SKIA
     style.word_break_type = static_cast<minikin::WordBreakType>(textStyle_.GetWordBreak());
+#endif
 
     std::unique_ptr<txt::ParagraphBuilder> builder;
     auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();

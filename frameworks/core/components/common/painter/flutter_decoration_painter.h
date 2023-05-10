@@ -27,7 +27,9 @@
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/image/render_image.h"
+#ifndef NEW_SKIA
 #include "core/pipeline/base/flutter_render_context.h"
+#endif
 #include "core/pipeline/layers/clip_layer.h"
 #include "core/components_ng/render/adapter/skia_decoration_painter.h"
 

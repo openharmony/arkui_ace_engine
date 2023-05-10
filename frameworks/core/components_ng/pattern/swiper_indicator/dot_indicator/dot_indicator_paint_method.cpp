@@ -58,11 +58,13 @@ void DotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(geometryNode);
 
     auto paintProperty = DynamicCast<DotIndicatorPaintProperty>(paintWrapper->GetPaintProperty());
+    IsCustomSizeValue_ = paintProperty->GetIsCustomSizeValue(false);
     dotIndicatorModifier_->SetAxis(axis_);
     dotIndicatorModifier_->SetCurrentIndex(currentIndex_);
     dotIndicatorModifier_->SetUnselectedColor(paintProperty->GetColorValue(swiperTheme->GetColor()));
     dotIndicatorModifier_->SetSelectedColor(paintProperty->GetSelectedColorValue(swiperTheme->GetSelectedColor()));
     dotIndicatorModifier_->SetIndicatorMask(paintProperty->GetIndicatorMaskValue(false));
+    dotIndicatorModifier_->SetIsIndicatorCustomSize(IsCustomSizeValue_);
     dotIndicatorModifier_->SetOffset(geometryNode->GetContentOffset());
     SizeF contentSize = geometryNode->GetFrameSize();
     centerY_ = (axis_ == Axis::HORIZONTAL ? contentSize.Height() : contentSize.Width()) * 0.5;
@@ -79,6 +81,7 @@ void DotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
         dotIndicatorModifier_->SetIsHover(false);
         dotIndicatorModifier_->SetIsPressed(false);
     }
+    UpdateBackground(paintWrapper);
 }
 
 void DotIndicatorPaintMethod::PaintNormalIndicator(const PaintWrapper* paintWrapper)
@@ -218,7 +221,7 @@ void DotIndicatorPaintMethod::CalculateNormalMargin(const LinearVector<float>& i
     auto itemHeight = itemHalfSizes[ITEM_HALF_HEIGHT] * 2;
     auto selectedItemWidth = itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * 2;
     auto selectedItemHeight = itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT] * 2;
-    auto allPointDiameterSum = itemWidth * static_cast<float>(itemCount_) + selectedItemWidth;
+    auto allPointDiameterSum = itemWidth * static_cast<float>(itemCount_ - 1) + selectedItemWidth;
     auto allPointSpaceSum = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx() * (itemCount_ - 1));
     auto indicatorPadding = static_cast<float>(INDICATOR_PADDING_DEFAULT.ConvertToPx());
     auto contentWidth = indicatorPadding + allPointDiameterSum + allPointSpaceSum + indicatorPadding;
@@ -236,12 +239,11 @@ void DotIndicatorPaintMethod::CalculatePointCenterX(
     const LinearVector<float>& itemHalfSizes, float margin, float padding, float space, int32_t index)
 {
     auto itemWidth = itemHalfSizes[ITEM_HALF_WIDTH] * 2;
-    auto selectedItemWidth = itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * 2;
     // Calculate the data required for the current pages
     LinearVector<float> startVectorBlackPointCenterX(itemCount_);
     float startLongPointLeftCenterX = 0.0f;
     float startLongPointRightCenterX = 0.0f;
-    float startCenterX = margin + padding + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
+    float startCenterX = margin + padding + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * 0.5;
     if (index != 0) {
         startCenterX = margin + padding + itemHalfSizes[ITEM_HALF_WIDTH];
     }
@@ -250,7 +252,7 @@ void DotIndicatorPaintMethod::CalculatePointCenterX(
     LinearVector<float> endVectorBlackPointCenterX(itemCount_);
     float endLongPointLeftCenterX = 0.0f;
     float endLongPointRightCenterX = 0.0f;
-    float endCenterX = margin + padding + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
+    float endCenterX = margin + padding + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * 0.5;
     if (index != itemCount_ - 1) {
         endCenterX = margin + padding + itemHalfSizes[ITEM_HALF_WIDTH];
     }
@@ -266,12 +268,12 @@ void DotIndicatorPaintMethod::CalculatePointCenterX(
             startVectorBlackPointCenterX[i] = startCenterX;
             startCenterX += space + itemWidth;
         } else {
-            if (!NearEqual(itemHalfSizes[ITEM_HALF_WIDTH], itemHalfSizes[SELECTED_ITEM_HALF_WIDTH]) ||
-                !NearEqual(itemHalfSizes[ITEM_HALF_HEIGHT], itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT])) {
+            if (IsCustomSizeValue_) {
                 startVectorBlackPointCenterX[i] = startCenterX + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * 0.5;
                 startLongPointLeftCenterX = startCenterX;
                 startLongPointRightCenterX = startCenterX + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
-                startCenterX += space + selectedItemWidth;
+                startCenterX += space + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] +
+                    itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * 0.5 + itemHalfSizes[ITEM_HALF_WIDTH];
             } else {
                 startVectorBlackPointCenterX[i] = startCenterX + itemHalfSizes[ITEM_HALF_WIDTH];
                 startLongPointLeftCenterX = startCenterX;
@@ -283,17 +285,17 @@ void DotIndicatorPaintMethod::CalculatePointCenterX(
             endVectorBlackPointCenterX[i] = endCenterX;
             endCenterX += space + itemWidth;
         } else {
-            if (!NearEqual(itemHalfSizes[ITEM_HALF_WIDTH], itemHalfSizes[SELECTED_ITEM_HALF_WIDTH]) ||
-                !NearEqual(itemHalfSizes[ITEM_HALF_HEIGHT], itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT])) {
-                endVectorBlackPointCenterX[i] = endCenterX + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
+            if (IsCustomSizeValue_) {
+                endVectorBlackPointCenterX[i] = endCenterX + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * 0.5;
                 endLongPointLeftCenterX = endCenterX;
                 endLongPointRightCenterX = endCenterX + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
-                endCenterX += space + selectedItemWidth;
+                endCenterX += space + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * 0.5 +
+                    itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] + itemHalfSizes[ITEM_HALF_WIDTH];
             } else {
-                endVectorBlackPointCenterX[i] = endCenterX + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
+                endVectorBlackPointCenterX[i] = endCenterX + itemHalfSizes[ITEM_HALF_WIDTH];
                 endLongPointLeftCenterX = endCenterX;
-                endLongPointRightCenterX = endCenterX + selectedItemWidth;
-                endCenterX += space + selectedItemWidth * 2;
+                endLongPointRightCenterX = endCenterX + itemWidth;
+                endCenterX += space + itemWidth * 2;
             }
         }
     }
@@ -368,5 +370,45 @@ bool DotIndicatorPaintMethod::isHoverPoint(
     return hoverPoint.GetX() >= (tempLeftCenterX - itemHalfWidth) && (hoverPoint.GetX() <=
                 (tempRightCenterX + itemHalfWidth)) && (hoverPoint.GetY() >= (tempLeftCenterY - itemHalfHeight)) &&
                 (hoverPoint.GetY() <= (tempRightCenterY + itemHalfHeight));
+}
+
+void DotIndicatorPaintMethod::UpdateBackground(const PaintWrapper* paintWrapper)
+{
+    CHECK_NULL_VOID(paintWrapper);
+    auto paintProperty = DynamicCast<DotIndicatorPaintProperty>(paintWrapper->GetPaintProperty());
+    CHECK_NULL_VOID(paintProperty);
+    auto swiperTheme = GetSwiperIndicatorTheme();
+    CHECK_NULL_VOID(swiperTheme);
+
+    // diameter calculation
+    auto itemWidth = static_cast<float>(paintProperty->GetItemWidthValue(swiperTheme->GetSize()).ConvertToPx());
+    auto itemHeight = static_cast<float>(paintProperty->GetItemHeightValue(swiperTheme->GetSize()).ConvertToPx());
+    auto selectedItemWidth =
+        static_cast<float>(paintProperty->GetSelectedItemWidthValue(swiperTheme->GetSize()).ConvertToPx());
+    auto selectedItemHeight =
+        static_cast<float>(paintProperty->GetSelectedItemHeightValue(swiperTheme->GetSize()).ConvertToPx());
+    // use radius calculation
+    LinearVector<float> itemHalfSizes;
+    itemHalfSizes.emplace_back(itemWidth * 0.5f);
+    itemHalfSizes.emplace_back(itemHeight * 0.5f);
+    itemHalfSizes.emplace_back(selectedItemWidth * 0.5f);
+    itemHalfSizes.emplace_back(selectedItemHeight * 0.5f);
+
+    if (isTouchBottom_) {
+        float allPointDiameterSum = itemWidth * static_cast<float>(itemCount_ + 1);
+        if (IsCustomSizeValue_) {
+            allPointDiameterSum = itemWidth * static_cast<float>(itemCount_ - 1) + selectedItemWidth;
+        }
+        float allPointSpaceSum = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()) * (itemCount_ - 1);
+        float padding = static_cast<float>(INDICATOR_PADDING_DEFAULT.ConvertToPx());
+        float rectWidth = padding + allPointDiameterSum + allPointSpaceSum + padding;
+        rectWidth = rectWidth * (1.225f - 0.0125f * itemCount_);
+        float space = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx());
+        if (itemCount_ > 1) {
+            space = (rectWidth - padding * 2 - allPointDiameterSum) / (itemCount_ - 1);
+        }
+        CalculatePointCenterX(itemHalfSizes, 0, padding, space, currentIndex_);
+    }
+    dotIndicatorModifier_->UpdateTouchBottomAnimation(isTouchBottom_, vectorBlackPointCenterX_);
 }
 } // namespace OHOS::Ace::NG

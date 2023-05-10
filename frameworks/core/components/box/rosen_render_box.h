@@ -192,7 +192,6 @@ private:
     OnPostBackgroundTask onPostBackgroundTask_;
 
     RefPtr<ImageObject> imageObj_;
-
     UploadSuccessCallback uploadSuccessCallback_;
     double dipScale_ = 0.0;
 };

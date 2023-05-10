@@ -329,6 +329,7 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
     auto titlePattern = titleBarNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_VOID(titlePattern);
     if (NearZero(titlePattern->GetTempTitleOffsetY())) {
+        initialTitleOffsetY_ = static_cast<float>(menuHeight_.ConvertToPx()) + offsetY;
         OffsetF titleOffset = OffsetF(static_cast<float>(maxPaddingStart_.ConvertToPx()), initialTitleOffsetY_);
         geometryNode->SetMarginFrameOffset(titleOffset);
         titleWrapper->Layout();

@@ -15,7 +15,7 @@ import("//build/test.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("ui_node_test_ng") {
-  module_out_path = "$test_output_path/base"
+  module_out_path = base_test_output_path
 
   sources = [
     "$ace_root/frameworks/base/geometry/dimension.cpp",
@@ -61,6 +61,7 @@ ohos_unittest("ui_node_test_ng") {
 
     # mock
     "$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
+    "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/animation/mock_geometry_transition.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_drawing_convertor.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_context.cpp",

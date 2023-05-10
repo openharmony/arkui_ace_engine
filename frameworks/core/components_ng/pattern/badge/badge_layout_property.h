@@ -18,6 +18,7 @@
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_v2/inspector/utils.h"
@@ -38,7 +39,7 @@ public:
         value->propBadgeValue_ = CloneBadgeValue();
         value->propBadgeCount_ = CloneBadgeCount();
         value->propBadgeMaxCount_ = CloneBadgeMaxCount();
-        value->propBadgePosition_ = propBadgePosition_;
+        value->propBadgePosition_ = CloneBadgePosition();
 
         value->propBadgeColor_ = CloneBadgeColor();
         value->propBadgeTextColor_ = CloneBadgeTextColor();
@@ -56,7 +57,7 @@ public:
         ResetBadgeValue();
         ResetBadgeCount();
         ResetBadgeMaxCount();
-        propBadgePosition_ = BadgePosition::RIGHT_TOP;
+        ResetBadgePosition();
 
         ResetBadgeColor();
         ResetBadgeTextColor();
@@ -65,22 +66,6 @@ public:
         ResetBadgeFontSize();
         ResetBadgeFontWeight();
         ResetBadgeBorderWidth();
-    }
-
-    enum class BadgePosition {
-        RIGHT_TOP = 0,
-        RIGHT,
-        LEFT,
-    };
-
-    const BadgePosition& GetBadgePosition() const
-    {
-        return propBadgePosition_;
-    }
-
-    void SetBadgePosition(const BadgePosition& position)
-    {
-        propBadgePosition_ = position;
     }
 
     double GetBadgeCircleRadius() const
@@ -95,7 +80,7 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
-    static std::string GetBadgePositionString(BadgePosition& position)
+    std::string GetBadgePositionString(BadgePosition position) const
     {
         switch (position) {
             case BadgePosition::RIGHT_TOP:
@@ -113,6 +98,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgeValue, std::string, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgeCount, int, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgeMaxCount, int, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgePosition, BadgePosition, PROPERTY_UPDATE_MEASURE);
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgeColor, Color, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgeTextColor, Color, PROPERTY_UPDATE_MEASURE);
@@ -123,8 +109,6 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgeBorderWidth, Dimension, PROPERTY_UPDATE_MEASURE);
 
 private:
-    BadgePosition propBadgePosition_ = BadgePosition::RIGHT_TOP;
-
     double badgeCircleRadius_;
 };
 

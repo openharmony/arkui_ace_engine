@@ -34,17 +34,14 @@ class ACE_EXPORT SliderPaintMethod : public NodePaintMethod {
 
 public:
     struct TipParameters {
-        SizeF bubbleSize_;
-        OffsetF bubbleOffset_;
-        OffsetF textOffset_;
         bool isDrawTip_ = false;
+        OffsetF bubbleVertex_;
     };
     explicit SliderPaintMethod(const RefPtr<SliderContentModifier>& sliderContentModifier,
         const SliderContentModifier::Parameters& parameters, float sliderLength, float borderBlank,
-        const RefPtr<SliderTipModifier>& sliderTipModifier, RefPtr<NG::Paragraph> paragraph,
-        const TipParameters& tipParameters)
+        const RefPtr<SliderTipModifier>& sliderTipModifier, const TipParameters& tipParameters)
         : sliderContentModifier_(sliderContentModifier), parameters_(parameters), sliderTipModifier_(sliderTipModifier),
-          paragraph_(std::move(paragraph)), tipParameters_(tipParameters)
+          tipParameters_(tipParameters)
     {}
     ~SliderPaintMethod() override = default;
 
@@ -59,58 +56,16 @@ public:
     RefPtr<Modifier> GetOverlayModifier(PaintWrapper* paintWrapper) override
     {
         CHECK_NULL_RETURN(sliderTipModifier_, nullptr);
-        sliderTipModifier_->SetBoundsRect(UpdateOverlayRect(paintWrapper));
         return sliderTipModifier_;
     }
 
-    void UpdateOverlayModifier(PaintWrapper* paintWrapper) override
-    {
-        CHECK_NULL_VOID(sliderTipModifier_);
-        auto paintProperty = DynamicCast<SliderPaintProperty>(paintWrapper->GetPaintProperty());
-        if (paintProperty) {
-            sliderTipModifier_->SetDirection(paintProperty->GetDirectionValue(Axis::HORIZONTAL));
-            sliderTipModifier_->SetTipColor(paintProperty->GetTipColorValue(Color::BLACK));
-        }
-        sliderTipModifier_->SetTipFlag(tipParameters_.isDrawTip_);
-        sliderTipModifier_->SetParagraph(paragraph_);
-        sliderTipModifier_->SetContentOffset(paintWrapper->GetContentOffset());
-        sliderTipModifier_->SetBubbleSize(tipParameters_.bubbleSize_);
-        sliderTipModifier_->SetBubbleOffset(tipParameters_.bubbleOffset_);
-        sliderTipModifier_->SetTextOffset(tipParameters_.textOffset_);
-    }
-
-    RectF UpdateOverlayRect(PaintWrapper* paintWrapper) const
-    {
-        constexpr float HALF = 0.5;
-        auto contentSize = paintWrapper->GetContentSize();
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_RETURN(pipeline, RectF());
-        auto theme = pipeline->GetTheme<SliderTheme>();
-        CHECK_NULL_RETURN(theme, RectF());
-        auto distance = static_cast<float>(theme->GetBubbleToCircleCenterDistance().ConvertToPx());
-        auto axis =
-            DynamicCast<SliderPaintProperty>(paintWrapper->GetPaintProperty())->GetDirectionValue(Axis::HORIZONTAL);
-        RectF rect;
-        if (axis == Axis::HORIZONTAL) {
-            rect.SetOffset(
-                OffsetF(-tipParameters_.bubbleSize_.Width(), -tipParameters_.bubbleSize_.Height() - distance));
-            rect.SetSize(SizeF(contentSize.Width() + tipParameters_.bubbleSize_.Width() / HALF,
-                contentSize.Height() * HALF + tipParameters_.bubbleSize_.Height() + distance));
-        } else {
-            rect.SetOffset(
-                OffsetF(-tipParameters_.bubbleSize_.Width() - distance, -tipParameters_.bubbleSize_.Height()));
-            rect.SetSize(SizeF(contentSize.Width() * HALF + tipParameters_.bubbleSize_.Width() + distance,
-                contentSize.Height() + tipParameters_.bubbleSize_.Height() / HALF));
-        }
-        return rect;
-    }
+    void UpdateOverlayModifier(PaintWrapper* paintWrapper) override;
 
 private:
     RefPtr<SliderContentModifier> sliderContentModifier_;
     SliderContentModifier::Parameters parameters_;
 
     RefPtr<SliderTipModifier> sliderTipModifier_;
-    RefPtr<NG::Paragraph> paragraph_;
     TipParameters tipParameters_;
     ACE_DISALLOW_COPY_AND_MOVE(SliderPaintMethod);
 };

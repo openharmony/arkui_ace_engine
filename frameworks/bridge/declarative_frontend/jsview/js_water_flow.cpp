@@ -24,19 +24,23 @@
 
 namespace OHOS::Ace {
 std::unique_ptr<WaterFlowModel> WaterFlowModel::instance_ = nullptr;
+std::mutex WaterFlowModel::mutex_;
 
 WaterFlowModel* WaterFlowModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::WaterFlowModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::WaterFlowModelNG());
-        } else {
-            instance_.reset(new Framework::WaterFlowModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::WaterFlowModelNG());
+            } else {
+                instance_.reset(new Framework::WaterFlowModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -122,7 +126,7 @@ void JSWaterFlow::SetColumnsGap(const JSCallbackInfo& info)
         LOGW("Arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension colGap;
+    CalcDimension colGap;
     if (!ParseJsDimensionVp(info[0], colGap) || colGap.Value() < 0) {
         colGap.SetValue(0.0);
     }
@@ -135,17 +139,28 @@ void JSWaterFlow::SetRowsGap(const JSCallbackInfo& info)
         LOGW("Arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension rowGap;
+    CalcDimension rowGap;
     if (!ParseJsDimensionVp(info[0], rowGap) || rowGap.Value() < 0) {
         rowGap.SetValue(0.0);
     }
     WaterFlowModel::GetInstance()->SetRowsGap(rowGap);
 }
 
-void JSWaterFlow::SetLayoutDirection(int32_t value)
+void JSWaterFlow::SetLayoutDirection(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
+        return;
+    }
+    auto value = static_cast<int32_t>(FlexDirection::COLUMN);
+    auto jsValue = info[0];
+    if (!jsValue->IsUndefined()) {
+        ParseJsInteger<int32_t>(jsValue, value);
+    }
     if (value >= 0 && value < static_cast<int32_t>(LAYOUT_DIRECTION.size())) {
         WaterFlowModel::GetInstance()->SetLayoutDirection(LAYOUT_DIRECTION[value]);
+    } else {
+        WaterFlowModel::GetInstance()->SetLayoutDirection(FlexDirection::COLUMN);
     }
 }
 
@@ -164,25 +179,25 @@ void JSWaterFlow::SetItemConstraintSize(const JSCallbackInfo& info)
     JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
 
     JSRef<JSVal> minWidthValue = sizeObj->GetProperty("minWidth");
-    Dimension minWidth;
+    CalcDimension minWidth;
     if (ParseJsDimensionVp(minWidthValue, minWidth)) {
         WaterFlowModel::GetInstance()->SetItemMinWidth(minWidth);
     }
 
     JSRef<JSVal> maxWidthValue = sizeObj->GetProperty("maxWidth");
-    Dimension maxWidth;
+    CalcDimension maxWidth;
     if (ParseJsDimensionVp(maxWidthValue, maxWidth)) {
         WaterFlowModel::GetInstance()->SetItemMaxWidth(maxWidth);
     }
 
     JSRef<JSVal> minHeightValue = sizeObj->GetProperty("minHeight");
-    Dimension minHeight;
+    CalcDimension minHeight;
     if (ParseJsDimensionVp(minHeightValue, minHeight)) {
         WaterFlowModel::GetInstance()->SetItemMinHeight(minHeight);
     }
 
     JSRef<JSVal> maxHeightValue = sizeObj->GetProperty("maxHeight");
-    Dimension maxHeight;
+    CalcDimension maxHeight;
     if (ParseJsDimensionVp(maxHeightValue, maxHeight)) {
         WaterFlowModel::GetInstance()->SetItemMaxHeight(maxHeight);
     }

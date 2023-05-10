@@ -15,7 +15,7 @@
 
 #include "core/components/track/flutter_render_circular_track.h"
 
-#include "third_party/skia/include/effects/SkGradientShader.h"
+#include "include/effects/SkGradientShader.h"
 
 #include "core/pipeline/base/flutter_render_context.h"
 #include "core/pipeline/base/scoped_canvas_state.h"

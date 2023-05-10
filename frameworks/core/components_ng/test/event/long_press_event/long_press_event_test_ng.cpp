@@ -28,12 +28,7 @@
 
 using namespace testing;
 using namespace testing::ext;
-namespace OHOS::Ace {
-bool OHOS::Ace::SystemProperties::GetDebugEnabled()
-{
-    return false;
-}
-} // namespace OHOS::Ace
+
 namespace OHOS::Ace::NG {
 namespace {
 constexpr double GESTURE_EVENT_PROPERTY_VALUE = 10.0;

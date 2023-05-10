@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_PROGRESS_FLUTTER_RENDER_LOADING_PROGRESS_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_PROGRESS_FLUTTER_RENDER_LOADING_PROGRESS_H
 
-#include "third_party/skia/include/utils/SkCamera.h"
+#include "include/utils/SkCamera.h"
 
 #include "base/geometry/offset.h"
 #include "core/components/progress/render_loading_progress.h"

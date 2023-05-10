@@ -30,6 +30,7 @@
 #include "core/components/common/properties/popup_param.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/text/text_menu_extension.h"
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/transition_property.h"
@@ -89,6 +90,8 @@ public:
     static void JsBindMenu(const JSCallbackInfo& info);
     static void JsBindContextMenu(const JSCallbackInfo& info);
     static void JsBindContentCover(const JSCallbackInfo& info);
+    static void JsBindSheet(const JSCallbackInfo& info);
+    static void ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle);
     static void JsBorderColor(const JSCallbackInfo& info);
     static void ParseBorderColor(const JSRef<JSVal>& args);
     static void JsPadding(const JSCallbackInfo& info);
@@ -127,6 +130,7 @@ public:
     static void JsOnMouse(const JSCallbackInfo& info);
     static void JsOnHover(const JSCallbackInfo& info);
     static void JsOnClick(const JSCallbackInfo& info);
+    static void JsClickEffect(const JSCallbackInfo& info);
     static void JsRestoreId(int32_t restoreId);
     static void JsOnVisibleAreaChange(const JSCallbackInfo& info);
     static void JsHitTestBehavior(const JSCallbackInfo& info);
@@ -138,10 +142,10 @@ public:
     static bool ParseJsDimensionRect(const JSRef<JSVal>& jsValue, DimensionRect& result);
 
     // for number and string with no unit, use default dimension unit.
-    static bool ParseJsDimension(const JSRef<JSVal>& jsValue, Dimension& result, DimensionUnit defaultUnit);
-    static bool ParseJsDimensionVp(const JSRef<JSVal>& jsValue, Dimension& result);
-    static bool ParseJsDimensionFp(const JSRef<JSVal>& jsValue, Dimension& result);
-    static bool ParseJsDimensionPx(const JSRef<JSVal>& jsValue, Dimension& result);
+    static bool ParseJsDimension(const JSRef<JSVal>& jsValue, CalcDimension& result, DimensionUnit defaultUnit);
+    static bool ParseJsDimensionVp(const JSRef<JSVal>& jsValue, CalcDimension& result);
+    static bool ParseJsDimensionFp(const JSRef<JSVal>& jsValue, CalcDimension& result);
+    static bool ParseJsDimensionPx(const JSRef<JSVal>& jsValue, CalcDimension& result);
     static bool ParseJsDouble(const JSRef<JSVal>& jsValue, double& result);
     static bool ParseJsInt32(const JSRef<JSVal>& jsValue, int32_t& result);
     static bool ParseJsColor(const JSRef<JSVal>& jsValue, Color& result);
@@ -149,8 +153,8 @@ public:
     static bool ParseJsFontFamilies(const JSRef<JSVal>& jsValue, std::vector<std::string>& result);
 
     static bool ParseJsonDimension(
-        const std::unique_ptr<JsonValue>& jsonValue, Dimension& result, DimensionUnit defaultUnit);
-    static bool ParseJsonDimensionVp(const std::unique_ptr<JsonValue>& jsonValue, Dimension& result);
+        const std::unique_ptr<JsonValue>& jsonValue, CalcDimension& result, DimensionUnit defaultUnit);
+    static bool ParseJsonDimensionVp(const std::unique_ptr<JsonValue>& jsonValue, CalcDimension& result);
     static bool ParseJsonDouble(const std::unique_ptr<JsonValue>& jsonValue, double& result);
     static bool ParseJsonColor(const std::unique_ptr<JsonValue>& jsonValue, Color& result);
     static bool ParseJsString(const JSRef<JSVal>& jsValue, std::string& result);
@@ -163,7 +167,7 @@ public:
     static bool ParseJsStrArray(const JSRef<JSVal>& jsValue, std::vector<std::string>& result);
     static bool IsGetResourceByName(const JSRef<JSObject>& jsObj);
 
-    static std::pair<Dimension, Dimension> ParseSize(const JSCallbackInfo& info);
+    static std::pair<CalcDimension, CalcDimension> ParseSize(const JSCallbackInfo& info);
     static void JsUseAlign(const JSCallbackInfo& info);
     static void JsZIndex(const JSCallbackInfo& info);
     static void SetDirection(const std::string& dir);
@@ -216,7 +220,7 @@ public:
     static void JsMask(const JSCallbackInfo& info);
 
     static void JsKey(const std::string& key);
-    static void JsId(const std::string& id);
+    static void JsId(const JSCallbackInfo& info);
 
     static void JsFocusable(const JSCallbackInfo& info);
     static void JsOnFocusMove(const JSCallbackInfo& args);
@@ -239,6 +243,9 @@ public:
     static void JsAccessibilityDescription(const std::string& description);
     static void JsAccessibilityImportance(const std::string& importance);
     static void JsAllowDrop(const JSCallbackInfo& info);
+
+    static void JSCreateAnimatableProperty(const JSCallbackInfo& info);
+    static void JSUpdateAnimatableProperty(const JSCallbackInfo& info);
 
     static void ParseMenuOptions(
         const JSCallbackInfo& info, const JSRef<JSArray>& jsArray, std::vector<NG::MenuOptionsParam>& items);
@@ -284,7 +291,7 @@ public:
     static void SetBorder(const Border& border);
     static void SetBorderStyle(int32_t style);
     static void SetBorderColor(const Color& color, const AnimationOption& option);
-    static void SetBorderWidth(const Dimension& value, const AnimationOption& option);
+    static void SetBorderWidth(const CalcDimension& value, const AnimationOption& option);
     static void SetBlur(float radius);
     static void SetColorBlend(Color color);
     static void SetBackdropBlur(float radius);
@@ -394,6 +401,10 @@ public:
                 break;
         }
     }
+
+    static bool CheckColor(const JSRef<JSVal>& jsValue, Color& result, const char* componentName, const char* propName);
+    static bool CheckLength(
+        const JSRef<JSVal>& jsValue, CalcDimension& result, const char* componentName, const char* propName);
 };
 } // namespace OHOS::Ace::Framework
 #endif // JS_VIEW_ABSTRACT_H

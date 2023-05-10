@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,6 +32,9 @@ constexpr int32_t MAX_FINGERS = 10;
 
 void LongPressRecognizer::OnAccepted()
 {
+    if (onAccessibilityEventFunc_) {
+        onAccessibilityEventFunc_(AccessibilityEventType::LONG_PRESS);
+    }
     refereeState_ = RefereeState::SUCCEED;
     if (onLongPress_ && !touchPoints_.empty()) {
         TouchEvent trackPoint = touchPoints_.begin()->second;
@@ -56,33 +59,23 @@ void LongPressRecognizer::OnRejected()
     refereeState_ = RefereeState::FAIL;
 }
 
-void LongPressRecognizer::SetThumbnailPixelMap()
-{
-    if (refereeState_ == RefereeState::DETECTING) {
-        auto gestureHub = gestureHub_.Upgrade();
-        CHECK_NULL_VOID(gestureHub);
-        auto frameNode = gestureHub->GetFrameNode();
-        CHECK_NULL_VOID(frameNode);
-        auto context = frameNode->GetRenderContext();
-        CHECK_NULL_VOID(context);
-        auto pixelMap = context->GetThumbnailPixelMap();
-        gestureHub->SetPixelMap(pixelMap);
-    } else {
-        LOGW("the state is not detecting for accept long press gesture");
-    }
-}
-
 void LongPressRecognizer::ThumbnailTimer(int32_t time)
 {
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-
-    auto&& callback = [weakPtr = AceType::WeakClaim(this)]() {
+    if (!callback_) {
+        return;
+    }
+    auto&& callback = [weakPtr = AceType::WeakClaim(this), customCallback = callback_]() {
         auto refPtr = weakPtr.Upgrade();
-        if (refPtr) {
-            refPtr->SetThumbnailPixelMap();
-        } else {
+        if (!refPtr) {
             LOGI("fail to get thumbnail pixelMap due to context is nullptr");
+            return;
+        }
+        if (refPtr->refereeState_ == RefereeState::DETECTING) {
+            customCallback(Offset(refPtr->globalPoint_.GetX(), refPtr->globalPoint_.GetY()));
+        } else {
+            LOGW("the state is not detecting for accept long press gesture");
         }
     };
     thumbnailTimer_.Reset(callback);

@@ -659,4 +659,35 @@ HWTEST_F(RatingPatternTestNg, RatingPatternTest011, TestSize.Level1)
     EXPECT_EQ(ratingPattern->ratingModifier_->secondaryUri_, RATING_SECONDARY_URL);
     EXPECT_EQ(ratingPattern->ratingModifier_->backgroundUri_, RESOURCE_URL);
 }
+
+/**
+ * @tc.name: RatingOnChangeEventTest001
+ * @tc.desc: Test setting out-of-bounds ratingScore and starNum values.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingPatternTestNg, RatingOnChangeEventTest001, TestSize.Level1)
+{
+    auto ratingTheme = AceType::MakeRefPtr<RatingTheme>();
+    ratingTheme->starNum_ = DEFAULT_STAR_NUM;
+    ratingTheme->ratingScore_ = DEFAULT_RATING_SCORE;
+    ratingTheme->stepSize_ = DEFAULT_STEP_SIZE;
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(ratingTheme));
+
+    RatingModelNG rating;
+    rating.Create();
+    rating.SetBackgroundSrc(RATING_BACKGROUND_URL, false);
+    rating.SetForegroundSrc("", true);
+    rating.SetSecondarySrc(RATING_SVG_URL, false);
+    auto onChange = [](const std::string& ratingScore) { EXPECT_EQ(ratingScore, "1"); };
+    rating.SetOnChangeEvent(onChange);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
+    auto ratingEventHub = frameNode->GetEventHub<NG::RatingEventHub>();
+    ASSERT_NE(ratingEventHub, nullptr);
+    ratingEventHub->SetOnChangeEvent(onChange);
+    ratingEventHub->FireChangeEvent("1");
+}
 } // namespace OHOS::Ace::NG

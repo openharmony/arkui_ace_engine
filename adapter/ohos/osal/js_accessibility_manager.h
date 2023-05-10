@@ -43,6 +43,7 @@ public:
     void SendAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent) override;
     void SetCardViewParams(const std::string& key, bool focus) override;
     void HandleComponentPostBinding() override;
+    void RegisterSubWindowInteractionOperation(int windowId) override;
 
     void UpdateViewScale();
 
@@ -218,7 +219,6 @@ private:
     bool isReg_ = false;
     std::shared_ptr<JsAccessibilityStateObserver> stateObserver_ = nullptr;
     std::shared_ptr<ToastAccessibilityConfigObserver> toastObserver_ = nullptr;
-    std::shared_ptr<JsInteractionOperation> interactionOperation_ = nullptr;
     float scaleX_ = 1.0f;
     float scaleY_ = 1.0f;
     NodeId currentFocusNodeId_ = -1;

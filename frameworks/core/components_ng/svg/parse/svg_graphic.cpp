@@ -16,8 +16,8 @@
 #include "frameworks/core/components_ng/svg/parse/svg_graphic.h"
 
 #include "include/core/SkScalar.h"
-#include "third_party/flutter/skia/include/effects/SkDashPathEffect.h"
-#include "third_party/flutter/skia/include/effects/SkGradientShader.h"
+#include "include/effects/SkDashPathEffect.h"
+#include "include/effects/SkGradientShader.h"
 
 #include "base/utils/utils.h"
 
@@ -141,6 +141,7 @@ void SvgGraphic::SetGradientStyle(double opacity)
 #endif
     }
 }
+
 bool SvgGraphic::UpdateStrokeStyle(bool antiAlias)
 {
     const auto& strokeState = declaration_->GetStrokeState();

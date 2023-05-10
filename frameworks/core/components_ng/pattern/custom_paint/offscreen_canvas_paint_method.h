@@ -49,30 +49,10 @@ public:
         return height_;
     }
 private:
-    void InitFilterFunc();
-    void SetGrayFilter(const std::string& percent);
-    void SetSepiaFilter(const std::string& percent);
-    void SetInvertFilter(const std::string& percent);
-    void SetOpacityFilter(const std::string& percent);
-    void SetBrightnessFilter(const std::string& percent);
-    void SetContrastFilter(const std::string& percent);
-    void SetBlurFilter(const std::string& percent);
-    void SetDropShadowFilter(const std::string& percent);
-    void SetSaturateFilter(const std::string& percent);
-    void SetHueRotateFilter(const std::string& percent);
-    void SetColorFilter(float matrix[20]);
-
-    bool GetFilterType(std::string& filterType, std::string& filterParam);
-    bool IsPercentStr(std::string& percentStr);
-    double PxStrToDouble(const std::string& str);
-    double BlurStrToDouble(const std::string& str);
-
     void ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj) override;
     void ImageObjFailed() override;
 
     sk_sp<SkImage> GetImage(const std::string& src) override { return sk_sp<SkImage>(); }
-    bool HasImageShadow() const;
-    void SetPaintImage() override;
 
     void PaintText(const std::string& text, double x, double y, bool isStroke, bool hasShadow = false);
     double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph);
@@ -87,9 +67,6 @@ private:
 
     int32_t width_;
     int32_t height_;
-    std::map<std::string, setColorFunc> filterFunc_;
-    Shadow imageShadow_;
-    std::string filterParam_;
 };
 } // namespace OHOS::Ace::NG
 

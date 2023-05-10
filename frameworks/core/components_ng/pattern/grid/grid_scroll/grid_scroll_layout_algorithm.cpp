@@ -244,6 +244,7 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
     float mainSize, float crossSize, LayoutWrapper* layoutWrapper)
 {
     itemsCrossPosition_.clear();
+    UpdateGridLayoutInfo(layoutWrapper, mainSize);
     SkipForwardLines(mainSize, layoutWrapper);
     SkipBackwardLines(mainSize, layoutWrapper);
     if (layoutWrapper->GetHostNode()->GetChildrenUpdated() != -1) {
@@ -460,7 +461,9 @@ void GridScrollLayoutAlgorithm::GetTargetIndexInfoWithBenchMark(
         /* go through a new line */
         while ((crossGridReserve > 0) && (currentIndex <= targetIndex)) {
             auto currentWrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex, false);
+            CHECK_NULL_VOID(currentWrapper);
             auto layoutProperty = DynamicCast<GridItemLayoutProperty>(currentWrapper->GetLayoutProperty());
+            CHECK_NULL_VOID(layoutProperty);
             auto gridSpan = layoutProperty->GetCrossSpan(gridLayoutInfo_.axis_);
             if (crossGridReserve >= gridSpan) {
                 crossGridReserve -= gridSpan;
@@ -546,7 +549,6 @@ void GridScrollLayoutAlgorithm::UpdateGridLayoutInfo(LayoutWrapper* layoutWrappe
 
 float GridScrollLayoutAlgorithm::MeasureRecordedItems(float mainSize, float crossSize, LayoutWrapper* layoutWrapper)
 {
-    UpdateGridLayoutInfo(layoutWrapper, mainSize);
     currentMainLineIndex_ = gridLayoutInfo_.startMainLineIndex_ - 1;
     float mainLength = gridLayoutInfo_.currentOffset_;
     // already at start line, do not use offset for mainLength

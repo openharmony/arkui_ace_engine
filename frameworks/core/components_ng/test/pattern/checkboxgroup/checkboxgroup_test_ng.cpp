@@ -47,6 +47,7 @@ const std::string TAG = "CHECKBOX_TAG";
 const Dimension WIDTH = 50.0_vp;
 const Dimension HEIGHT = 50.0_vp;
 const NG::PaddingPropertyF PADDING = NG::PaddingPropertyF();
+const NG::PaddingProperty newArgs = NG::PaddingProperty();
 const bool SELECTED = true;
 const Color SELECTED_COLOR = Color::BLUE;
 const SizeF CONTENT_SIZE = SizeF(400.0, 500.0);
@@ -71,6 +72,8 @@ const Color SHADOW_COLOR = Color::RED;
 const Color CLICK_EFFECT_COLOR = Color::WHITE;
 const Color HOVER_COLOR = Color::GRAY;
 const Color INACTIVE_POINT_COLOR = Color::TRANSPARENT;
+const Color UNSELECTED_COLOR = Color::RED;
+const Color CHECK_MARK_COLOR = Color::GREEN;
 constexpr Dimension HOVER_RADIUS = Dimension(3.0);
 constexpr Dimension HORIZONTAL_PADDING = Dimension(5.0);
 constexpr Dimension VERTICAL_PADDING = Dimension(4.0);
@@ -88,6 +91,9 @@ public:
 void CheckBoxGroupTestNG::SetUpTestCase()
 {
     MockPipelineBase::SetUp();
+    RefPtr<FrameNode> stageNode = AceType::MakeRefPtr<FrameNode>("STAGE", -1, AceType::MakeRefPtr<Pattern>());
+    auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
+    MockPipelineBase::GetCurrent()->stageManager_ = stageManager;
 }
 void CheckBoxGroupTestNG::TearDownTestCase()
 {
@@ -118,6 +124,8 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintPropertyTest001, TestSize.Level1
     CheckBoxGroupModelNG checkBoxGroupModelNG;
     checkBoxGroupModelNG.Create(std::optional<string>());
 
+    bool flag = false;
+
     /**
      * @tc.steps: step2. Set parameters to CheckBoxGroup property
      */
@@ -125,7 +133,7 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintPropertyTest001, TestSize.Level1
     checkBoxGroupModelNG.SetSelectedColor(SELECTED_COLOR);
     checkBoxGroupModelNG.SetWidth(WIDTH);
     checkBoxGroupModelNG.SetHeight(HEIGHT);
-    checkBoxGroupModelNG.SetPadding(PADDING);
+    checkBoxGroupModelNG.SetPadding(PADDING, newArgs, flag);
 
     /**
      * @tc.steps: step3. Get paint property and get CheckBoxGroup property
@@ -161,6 +169,8 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintPropertyTest002, TestSize.Level1
     CheckBoxGroupModelNG checkBoxGroupModelNG;
     checkBoxGroupModelNG.Create(std::optional<string>());
 
+    bool flag = false;
+
     /**
      * @tc.steps: step2. Set parameters to CheckBoxGroup property
      */
@@ -168,7 +178,7 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintPropertyTest002, TestSize.Level1
     checkBoxGroupModelNG.SetSelectedColor(SELECTED_COLOR);
     checkBoxGroupModelNG.SetWidth(WIDTH);
     checkBoxGroupModelNG.SetHeight(HEIGHT);
-    checkBoxGroupModelNG.SetPadding(PADDING);
+    checkBoxGroupModelNG.SetPadding(PADDING, newArgs, flag);
 
     /**
      * @tc.steps: step3. Get paint property and get CheckBoxGroup property
@@ -391,14 +401,18 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPatternTest007, TestSize.Level1)
      */
     auto checkBoxPaintProperty = frameNode->GetPaintProperty<CheckBoxGroupPaintProperty>();
     ASSERT_NE(checkBoxPaintProperty, nullptr);
+    auto eventHub = frameNode->GetEventHub<CheckBoxGroupEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto group = eventHub->GetGroupName();
+    pattern->SetPreGroup(group);
     checkBoxPaintProperty->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::PART);
     pattern->OnClick();
     auto select1 = checkBoxPaintProperty->GetCheckBoxGroupSelect();
-    EXPECT_TRUE(select1.has_value());
+    EXPECT_FALSE(select1.has_value());
     checkBoxPaintProperty->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::ALL);
     pattern->OnClick();
     auto select2 = checkBoxPaintProperty->GetCheckBoxGroupSelect();
-    EXPECT_TRUE(select2.has_value());
+    EXPECT_FALSE(select2.has_value());
 }
 
 /**
@@ -682,6 +696,74 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPatternTest017, TestSize.Level1)
     EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxGroupUnSelectedColor(), unselected);
     EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxGroupCheckMarkColor(), unselected);
     EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxGroupCheckMarkSize(), CHECK_MARK_SIZE);
+    EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxGroupCheckMarkWidth(), CHECK_MARK_WIDTH);
+}
+
+/**
+ * @tc.name: CheckBoxGroupPatternTest017
+ * @tc.desc: Set unSelectedColor into CheckBoxGroupPaintProperty and get it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPatternTest018, TestSize.Level1)
+{
+    CheckBoxGroupModelNG checkBoxGroupModelNG;
+    checkBoxGroupModelNG.Create(GROUP_NAME);
+    checkBoxGroupModelNG.SetUnSelectedColor(UNSELECTED_COLOR);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto checkBoxPaintProperty = frameNode->GetPaintProperty<CheckBoxGroupPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+    EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxGroupUnSelectedColor(), UNSELECTED_COLOR);
+}
+
+/**
+ * @tc.name: CheckBoxGroupPatternTest018
+ * @tc.desc: Set checkMarkColor into CheckBoxGroupPaintProperty and get it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPatternTest019, TestSize.Level1)
+{
+    CheckBoxGroupModelNG checkBoxGroupModelNG;
+    checkBoxGroupModelNG.Create(GROUP_NAME);
+    checkBoxGroupModelNG.SetCheckMarkColor(CHECK_MARK_COLOR);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto checkBoxPaintProperty = frameNode->GetPaintProperty<CheckBoxGroupPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+    EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxGroupCheckMarkColor(), CHECK_MARK_COLOR);
+}
+
+/**
+ * @tc.name: CheckBoxGroupPatternTest019
+ * @tc.desc: Set checkMarkSize into CheckBoxGroupPaintProperty and get it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPatternTest020, TestSize.Level1)
+{
+    CheckBoxGroupModelNG checkBoxGroupModelNG;
+    checkBoxGroupModelNG.Create(GROUP_NAME);
+    checkBoxGroupModelNG.SetCheckMarkSize(CHECK_MARK_SIZE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto checkBoxPaintProperty = frameNode->GetPaintProperty<CheckBoxGroupPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+    EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxGroupCheckMarkSize(), CHECK_MARK_SIZE);
+}
+
+/**
+ * @tc.name: CheckBoxGroupPatternTest020
+ * @tc.desc: Set checkMarkWidth into CheckBoxGroupPaintProperty and get it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPatternTest021, TestSize.Level1)
+{
+    CheckBoxGroupModelNG checkBoxGroupModelNG;
+    checkBoxGroupModelNG.Create(GROUP_NAME);
+    checkBoxGroupModelNG.SetCheckMarkWidth(CHECK_MARK_WIDTH);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto checkBoxPaintProperty = frameNode->GetPaintProperty<CheckBoxGroupPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
     EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxGroupCheckMarkWidth(), CHECK_MARK_WIDTH);
 }
 
@@ -1100,5 +1182,35 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupAccessibilityPropertyTestNg003, TestS
     auto accessibility = groupFrameNode->GetAccessibilityProperty<CheckBoxGroupAccessibilityProperty>();
     ASSERT_NE(accessibility, nullptr);
     EXPECT_EQ(accessibility->GetCollectionItemCounts(), 0);
+}
+
+/**
+ * @tc.name: CheckBoxUpdateChangeEventTest001
+ * @tc.desc: Test CheckBoxGroup onChange event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxUpdateChangeEventTest001, TestSize.Level1)
+{
+    CheckBoxGroupModelNG checkBoxGroup;
+    checkBoxGroup.Create(GROUP_NAME);
+    std::vector<std::string> vec;
+    int status = 0;
+    CheckboxGroupResult groupResult(
+        std::vector<std::string> { NAME }, int(CheckBoxGroupPaintProperty::SelectStatus::ALL));
+    auto changeEvent = [&vec, &status](const BaseEventInfo* groupResult) {
+        const auto* eventInfo = TypeInfoHelper::DynamicCast<CheckboxGroupResult>(groupResult);
+        vec = eventInfo->GetNameList();
+        status = eventInfo->GetStatus();
+    };
+
+    checkBoxGroup.SetChangeEvent(changeEvent);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxGroupEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->UpdateChangeEvent(&groupResult);
+    EXPECT_FALSE(vec.empty());
+    EXPECT_EQ(vec.front(), NAME);
+    EXPECT_EQ(status, int(CheckBoxGroupPaintProperty::SelectStatus::ALL));
 }
 } // namespace OHOS::Ace::NG

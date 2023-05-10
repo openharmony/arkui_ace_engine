@@ -50,6 +50,7 @@ public:
     bool isHoverPoint(const PointF& hoverPoint, const OffsetF& leftCenter,
         const OffsetF& rightCenter, const LinearVector<float>& itemHalfSizes);
 
+    void UpdateBackground(const PaintWrapper* paintWrapper);
     void SetCurrentIndex(int32_t index)
     {
         currentIndex_ = index;
@@ -95,6 +96,10 @@ public:
         mouseClickIndex_ = mouseClickIndex;
     }
 
+    void SetIsTouchBottom(bool isTouchBottom)
+    {
+        isTouchBottom_ = isTouchBottom;
+    }
 private:
     struct StarAndEndPointCenter {
         float startLongPointLeftCenterX = 0.0f;
@@ -124,12 +129,13 @@ private:
     bool isHover_ = false;
     bool isPressed_ = false;
     bool longPointIsHover_ = false;
+    bool IsCustomSizeValue_ = false;
     // Animatable properties for updating Modifier
     LinearVector<float> vectorBlackPointCenterX_ = {};
     std::pair<float, float> longPointCenterX_ = { 0, 0 };
     OffsetF normalMargin_ = { 0, 0 };
     float centerY_ = 0.0f;
-
+    bool isTouchBottom_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(DotIndicatorPaintMethod);
 };
 } // namespace OHOS::Ace::NG

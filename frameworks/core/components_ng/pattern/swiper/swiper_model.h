@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_SWIPER_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_SWIPER_MODEL_H
 
+#include <mutex>
+
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
 #include "base/memory/referenced.h"
@@ -56,6 +58,15 @@ struct SwiperDigitalParameters {
     std::optional<FontWeight> selectedFontWeight;
 };
 
+struct SwiperArrowParameters {
+    std::optional<bool> isShowBoard;
+    std::optional<bool> isSiderMiddle;
+    std::optional<Dimension> boardSize;
+    std::optional<Color> boardColor;
+    std::optional<Dimension> arrowSize;
+    std::optional<Color> arrowColor;
+};
+
 class ACE_EXPORT SwiperModel {
 public:
     static SwiperModel* GetInstance();
@@ -88,12 +99,19 @@ public:
     virtual void SetMainSwiperSizeHeight();
     virtual void SetIndicatorStyle(const SwiperParameters& swiperParameters);
     virtual void SetIndicatorType(SwiperIndicatorType indicatorType) {}
+    virtual void SetIsIndicatorCustomSize(bool isCustomSize) {}
     virtual void SetDotIndicatorStyle(const SwiperParameters& swiperParameters) {}
     virtual void SetDigitIndicatorStyle(const SwiperDigitalParameters& swiperDigitalParameters) {}
     virtual void SetPreviousMargin(const Dimension& prevMargin) {}
     virtual void SetNextMargin(const Dimension& nextMargin) {}
+    virtual void SetOnChangeEvent(std::function<void(const BaseEventInfo* info)>&& onChangeEvent);
+    virtual void SetIndicatorIsBoolean(bool isBoolean) {}
+    virtual void SetArrowStyle(const SwiperArrowParameters& swiperArrowParameters) {}
+    virtual void SetDisplayArrow(bool displayArrow) {}
+    virtual void SetHoverShow(bool hoverShow) {}
 private:
     static std::unique_ptr<SwiperModel> instance_;
+    static std::mutex mutex_;
 };
 
 } // namespace OHOS::Ace

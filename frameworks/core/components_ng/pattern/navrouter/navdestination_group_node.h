@@ -80,16 +80,6 @@ public:
         return contentNode_;
     }
 
-    void SetPreNode(const RefPtr<UINode>& preNode)
-    {
-        preNode_ = preNode;
-    }
-
-    const RefPtr<UINode>& GetPreNode() const
-    {
-        return preNode_;
-    }
-
     void SetNavDestinationBackButtonEvent(const NavDestinationBackButtonEvent& backButtonEvent)
     {
         backButtonEvent_ = backButtonEvent;
@@ -110,14 +100,13 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(SubtitleNodeOperation, ChildNodeOperation);
     void OnSubtitleNodeOperationUpdate(ChildNodeOperation value) {}
 
-    void OnAttachToMainTree() override;
+    void OnAttachToMainTree(bool recursive) override;
 
 private:
     RefPtr<UINode> title_;
     RefPtr<UINode> subtitle_;
     RefPtr<UINode> titleBarNode_;
     RefPtr<UINode> contentNode_;
-    RefPtr<UINode> preNode_;
     NavDestinationBackButtonEvent backButtonEvent_;
 };
 

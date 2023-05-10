@@ -14,8 +14,8 @@
  */
 #include "image_painter_utils.h"
 
-#include "third_party/skia/include/core/SkColorFilter.h"
-#include "third_party/skia/include/core/SkRRect.h"
+#include "include/core/SkColorFilter.h"
+#include "include/core/SkRRect.h"
 
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing.h"
@@ -47,7 +47,7 @@ std::unique_ptr<SkVector[]> ImagePainterUtils::ToSkRadius(const BorderRadiusArra
     }
     return radii;
 }
-
+#ifndef NEW_SKIA
 void ImagePainterUtils::AddFilter(SkPaint& paint, const ImagePaintConfig& config)
 {
     paint.setFilterQuality(SkFilterQuality(config.imageInterpolation_));
@@ -57,4 +57,30 @@ void ImagePainterUtils::AddFilter(SkPaint& paint, const ImagePaintConfig& config
         paint.setColorFilter(SkColorFilters::Matrix(GRAY_COLOR_MATRIX));
     }
 }
+#else
+void ImagePainterUtils::AddFilter(SkPaint& paint, SkSamplingOptions& options, const ImagePaintConfig& config)
+{
+    switch (config.imageInterpolation_) {
+        case ImageInterpolation::LOW: {
+            options = SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kNone);
+            break;
+        }
+        case ImageInterpolation::MEDIUM: {
+            options = SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kLinear);
+            break;
+        }
+        case ImageInterpolation::HIGH: {
+            options = SkSamplingOptions(SkCubicResampler::Mitchell());
+        }
+        default:
+            options = SkSamplingOptions();
+    }
+
+    if (config.colorFilter_) {
+        paint.setColorFilter(SkColorFilters::Matrix(config.colorFilter_->data()));
+    } else if (ImageRenderMode::TEMPLATE == config.renderMode_) {
+        paint.setColorFilter(SkColorFilters::Matrix(GRAY_COLOR_MATRIX));
+    }
+}
+#endif
 } // namespace OHOS::Ace::NG

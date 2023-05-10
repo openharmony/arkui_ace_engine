@@ -262,10 +262,14 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 
     maxChildSize_ = axis == Axis::HORIZONTAL ? SizeF(mainSize, crossSize) : SizeF(crossSize, mainSize);
-
     if (isSingleCase) {
+        auto itemSpace = SwiperUtils::GetItemSpace(swiperLayoutProperty);
+        auto prevMarginMontage = Positive(prevMargin_) ? prevMargin_ + itemSpace : 0.0f;
+        auto nextMarginMontage = Positive(nextMargin_) ? nextMargin_ + itemSpace : 0.0f;
+        auto previewMarginSize = axis == Axis::HORIZONTAL ? SizeF(prevMarginMontage + nextMarginMontage, 0.0f) :
+                                                            SizeF(0.0f, prevMarginMontage + nextMarginMontage);
         // single case.
-        idealSize.UpdateIllegalSizeWithCheck(maxChildSize_);
+        idealSize.UpdateIllegalSizeWithCheck(maxChildSize_ + previewMarginSize);
     } else {
         // multi case, update cross size.
         if (axis == Axis::HORIZONTAL) {

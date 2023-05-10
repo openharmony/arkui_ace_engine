@@ -68,14 +68,35 @@ void TextFieldContentModifier::onDraw(DrawingContext& context)
     auto contentSize = contentSize_->Get();
     auto contentOffset = contentOffset_->Get();
     auto iconRect = textFieldPattern->GetImageRect();
-    RSRect clipInnerRect = RSRect(offset.GetX(), contentOffset.GetY(), contentSize.Width() + contentOffset.GetX(),
-        contentOffset.GetY() + contentSize.Height());
+    auto counterParagraph = textFieldPattern->GetCounterParagraph();
+    float clipRectHeight = 0.0f;
+    if (showCounter_->Get() && counterParagraph) {
+        clipRectHeight = contentOffset.GetY() + contentSize.Height() - textFieldPattern->GetCountHeight();
+    } else {
+        clipRectHeight = contentOffset.GetY() + contentSize.Height();
+    }
+    RSRect clipInnerRect = RSRect(offset.GetX(), contentOffset.GetY(),
+        contentSize.Width() + contentOffset.GetX() - textFieldPattern->GetUnitWidth(), clipRectHeight);
     canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
     if (paragraph) {
         paragraph->Paint(
             &canvas, textRectX_->Get(), textFieldPattern->IsTextArea() ? textRectY_->Get() : contentOffset.GetY());
     }
     canvas.Restore();
+    if (showCounter_->Get() && counterParagraph) {
+        RSRect clipInnerCounterRect = RSRect(
+            offset.GetX(), contentOffset.GetY() + contentSize.Height() - textFieldPattern->GetCountHeight(),
+            contentSize.Width() + contentOffset.GetX(), contentOffset.GetY() + contentSize.Height());
+        canvas.ClipRect(clipInnerCounterRect, RSClipOp::UNION);
+        counterParagraph->Paint(&canvas, textRectX_->Get(),
+            contentOffset.GetY() + contentSize.Height() - textFieldPattern->GetCountHeight());
+        canvas.Restore();
+    }
+
+    clipInnerRect = RSRect(contentSize.Width() + contentOffset.GetX() - textFieldPattern->GetUnitWidth(),
+        contentOffset.GetY(), contentSize.Width() + contentOffset.GetX(), contentOffset.GetY() + contentSize.Height());
+    canvas.ClipRect(clipInnerRect, RSClipOp::UNION);
+
     if (!textFieldPattern->NeedShowPasswordIcon()) {
         return;
     }
@@ -121,6 +142,7 @@ void TextFieldContentModifier::SetDefaultPropertyValue()
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
 
     textObscured_ = AceType::MakeRefPtr<PropertyBool>(textFieldPattern->GetTextObscured());
+    dragStatus_ = AceType::MakeRefPtr<PropertyBool>(false);
     contentOffset_ = AceType::MakeRefPtr<PropertyOffsetF>(OffsetF());
     contentSize_ = AceType::MakeRefPtr<PropertySizeF>(SizeF());
     textValue_ = AceType::MakeRefPtr<PropertyString>("");
@@ -128,14 +150,17 @@ void TextFieldContentModifier::SetDefaultPropertyValue()
     textRectY_ = AceType::MakeRefPtr<PropertyFloat>(theme->GetPadding().Top().ConvertToPx());
     textRectX_ = AceType::MakeRefPtr<PropertyFloat>(theme->GetPadding().Left().ConvertToPx());
     textAlign_ = AceType::MakeRefPtr<PropertyInt>(static_cast<int32_t>(TextAlign::START));
+    showCounter_ = AceType::MakeRefPtr<PropertyBool>(false);
     AttachProperty(contentOffset_);
     AttachProperty(contentSize_);
     AttachProperty(textValue_);
     AttachProperty(placeholderValue_);
     AttachProperty(textRectY_);
     AttachProperty(textObscured_);
+    AttachProperty(dragStatus_);
     AttachProperty(textRectX_);
     AttachProperty(textAlign_);
+    AttachProperty(showCounter_);
 }
 
 void TextFieldContentModifier::SetDefaultFontSize(const TextStyle& textStyle)
@@ -245,6 +270,11 @@ void TextFieldContentModifier::SetTextObscured(bool value)
     }
 }
 
+void TextFieldContentModifier::ChangeDragStatus()
+{
+    dragStatus_->Set(!dragStatus_->Get());
+}
+
 void TextFieldContentModifier::SetTextRectX(const float value)
 {
     if (textRectX_->Get() != value) {
@@ -256,6 +286,13 @@ void TextFieldContentModifier::SetTextAlign(const TextAlign value)
 {
     if (textAlign_->Get() != static_cast<int32_t>(value)) {
         textAlign_->Set(static_cast<int32_t>(value));
+    }
+}
+
+void TextFieldContentModifier::SetShowCounter(bool value)
+{
+    if (showCounter_) {
+        showCounter_->Set(value);
     }
 }
 

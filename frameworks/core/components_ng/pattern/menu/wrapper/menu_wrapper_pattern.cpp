@@ -87,15 +87,23 @@ void MenuWrapperPattern::OnModifyDone()
         }
         OffsetF position = OffsetF(touch.GetGlobalLocation().GetX(), touch.GetGlobalLocation().GetY());
         position -= GetPageOffset();
-        for (const auto& child : host->GetChildren()) {
+        auto children = host->GetChildren();
+        for (auto child = children.rbegin(); child != children.rend(); ++child) {
             // get menu frame node (child of menu wrapper)
-            auto menuNode = DynamicCast<FrameNode>(child);
+            auto menuNode = DynamicCast<FrameNode>(*child);
             CHECK_NULL_VOID(menuNode);
 
             // get menuNode's touch region
             auto menuZone = menuNode->GetGeometryNode()->GetFrameRect();
+            if (menuZone.IsInRegion(PointF(position.GetX(), position.GetY()))) {
+                return;
+            }
             // if DOWN-touched outside the menu region, then hide menu
-            if (!menuZone.IsInRegion(PointF(position.GetX(), position.GetY()))) {
+            auto menuPattern = menuNode->GetPattern<MenuPattern>();
+            CHECK_NULL_VOID(menuPattern);
+            if (menuPattern->IsSubMenu()) {
+                pattern->HideSubMenu();
+            } else {
                 pattern->HideMenu(menuNode);
             }
         }

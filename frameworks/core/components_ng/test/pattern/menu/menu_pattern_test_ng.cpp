@@ -18,6 +18,7 @@
 #define private public
 #define protected public
 
+#include "core/components/common/properties/shadow_config.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
@@ -26,9 +27,11 @@
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_view.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
+#include "core/components_ng/pattern/menu/multi_menu_layout_algorithm.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
@@ -68,7 +71,7 @@ void MenuPatternTestNg::TearDown() {}
  */
 HWTEST_F(MenuPatternTestNg, MenuPatternTestNg001, TestSize.Level1)
 {
-    RefPtr<MenuPattern> menuPattern = AceType::MakeRefPtr<MenuPattern>(TARGET_ID, TYPE);
+    RefPtr<MenuPattern> menuPattern = AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE);
     std::string type = "1";
     TouchEventInfo info(type);
     menuPattern->RegisterOnTouch();
@@ -82,7 +85,7 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg001, TestSize.Level1)
  */
 HWTEST_F(MenuPatternTestNg, MenuPatternTestNg002, TestSize.Level1)
 {
-    RefPtr<MenuPattern> menuPattern = AceType::MakeRefPtr<MenuPattern>(TARGET_ID, TYPE);
+    RefPtr<MenuPattern> menuPattern = AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE);
     std::string type = "1";
     TouchType touchType = TouchType::UP;
     TouchEventInfo info(type);
@@ -103,7 +106,7 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg002, TestSize.Level1)
  */
 HWTEST_F(MenuPatternTestNg, MenuPatternTestNg003, TestSize.Level1)
 {
-    RefPtr<MenuPattern> menuPattern = AceType::MakeRefPtr<MenuPattern>(TARGET_ID, TYPE);
+    RefPtr<MenuPattern> menuPattern = AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE);
     std::string type = "1";
     TouchType touchType = TouchType::UP;
     TouchEventInfo info(type);
@@ -125,7 +128,7 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg003, TestSize.Level1)
  */
 HWTEST_F(MenuPatternTestNg, MenuPatternTestNg004, TestSize.Level1)
 {
-    RefPtr<MenuPattern> menuPattern = AceType::MakeRefPtr<MenuPattern>(TARGET_ID, TYPE);
+    RefPtr<MenuPattern> menuPattern = AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE);
     std::string type = "1";
     TouchEventInfo info(type);
     TouchLocationInfo locationInfo(TARGET_ID);
@@ -144,7 +147,7 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg004, TestSize.Level1)
  */
 HWTEST_F(MenuPatternTestNg, MenuPatternTestNg005, TestSize.Level1)
 {
-    RefPtr<MenuPattern> menuPattern = AceType::MakeRefPtr<MenuPattern>(TARGET_ID, TYPE);
+    RefPtr<MenuPattern> menuPattern = AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE);
     std::string type = "1";
     TouchEventInfo info(type);
     TouchType touchType = TouchType::UP;
@@ -827,6 +830,40 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg018, TestSize.Level1)
     params.emplace_back("content1", "icon1");
     menuPattern->UpdateSelectParam(params);
     ASSERT_EQ(menuPattern->GetOptions().size(), 0);
+}
+
+/**
+ * @tc.ame: MenuPatternTestNg019
+ * @tc.desc: Test MultiMenu and outer Menu container.
+ */
+HWTEST_F(MenuPatternTestNg, MenuPatternTestNg019, TestSize.Level1)
+{
+    MenuView::Create();
+    auto multiMenu = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto menuWrapper = MenuView::Create(multiMenu, -1);
+    ASSERT_NE(menuWrapper, nullptr);
+    auto outerMenu = AceType::DynamicCast<FrameNode>(menuWrapper->GetFirstChild());
+    ASSERT_NE(outerMenu, nullptr);
+
+    // backgroundColor and shadow should be reset
+    ASSERT_EQ(outerMenu->GetRenderContext()->GetBackgroundColorValue(), Color::TRANSPARENT);
+    ASSERT_EQ(outerMenu->GetRenderContext()->GetBackShadow(), ShadowConfig::NoneShadow);
+
+    // padding should be moved to inner multi menu
+    auto scroll = AceType::DynamicCast<FrameNode>(outerMenu->GetFirstChild());
+    ASSERT_NE(scroll, nullptr);
+    auto&& padding = scroll->GetLayoutProperty()->GetPaddingProperty();
+    // should have empty padding
+    ASSERT_EQ(padding->ToString(), PaddingProperty().ToString());
+
+    // inner multi menu should have backgroundColor, shadow, and padding set up
+    ASSERT_NE(multiMenu->GetLayoutProperty()->GetPaddingProperty()->ToString(), PaddingProperty().ToString());
+    ASSERT_NE(multiMenu->GetRenderContext()->GetBackgroundColor(), std::nullopt);
+    ASSERT_NE(multiMenu->GetRenderContext()->GetBackShadow(), ShadowConfig::NoneShadow);
+
+    // MultiMenu should have its own layout algorithm
+    auto layoutAlgorithm = multiMenu->GetPattern<MenuPattern>()->CreateLayoutAlgorithm();
+    ASSERT_NE(AceType::DynamicCast<MultiMenuLayoutAlgorithm>(layoutAlgorithm), nullptr);
 }
 } // namespace
 } // namespace OHOS::Ace::NG

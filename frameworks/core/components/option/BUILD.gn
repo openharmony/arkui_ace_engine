@@ -22,5 +22,8 @@ build_component("option") {
     "render_option.cpp",
     "render_option_creator.cpp",
   ]
+  if (ace_use_new_skia) {
+    sources -= [ "flutter_render_option.cpp" ]
+  }
   rosen_sources = [ "rosen_render_option.cpp" ]
 }

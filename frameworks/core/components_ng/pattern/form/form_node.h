@@ -39,7 +39,7 @@ public:
 
     void DispatchPointerEvent(const TouchEvent& point) const;
 
-    void OnDetachFromMainTree() override;
+    void OnDetachFromMainTree(bool) override;
 
     OffsetF GetFormOffset() const;
 };

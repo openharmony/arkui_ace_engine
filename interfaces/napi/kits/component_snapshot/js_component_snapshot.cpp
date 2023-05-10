@@ -18,13 +18,14 @@
 #include "interfaces/napi/kits/utils/napi_utils.h"
 #include "js_native_api.h"
 #include "js_native_api_types.h"
+#include "napi/native_common.h"
 #include "node_api_types.h"
-
 #ifdef PIXEL_MAP_SUPPORTED
 #include "pixel_map.h"
 #include "pixel_map_napi.h"
 #endif
 
+#include "node_api.h"
 #include "uv.h"
 
 #include "bridge/common/utils/utils.h"
@@ -58,7 +59,7 @@ void OnComplete(SnapshotAsyncCtx* asyncCtx)
             napi_handle_scope scope = nullptr;
             napi_open_handle_scope(ctx->env, &scope);
 
-            // callback result format: [PixelMap, Error]
+            // callback result format: [Error, PixelMap]
             napi_value result[JsComponentSnapshot::ARGC_MAX] = { nullptr };
             napi_get_undefined(ctx->env, &result[0]);
             napi_get_undefined(ctx->env, &result[1]);
@@ -66,18 +67,17 @@ void OnComplete(SnapshotAsyncCtx* asyncCtx)
             if (ctx->errCode == Framework::ERROR_CODE_NO_ERROR) {
 #ifdef PIXEL_MAP_SUPPORTED
                 // convert pixelMap to napi value
-                result[0] = Media::PixelMapNapi::CreatePixelMap(ctx->env, ctx->pixmap);
+                result[1] = Media::PixelMapNapi::CreatePixelMap(ctx->env, ctx->pixmap);
 #endif
-            } else {
-                napi_create_int32(ctx->env, ctx->errCode, &result[1]);
             }
+            napi_create_int32(ctx->env, ctx->errCode, &result[0]);
 
             if (ctx->deferred) {
                 // promise
                 if (ctx->errCode == Framework::ERROR_CODE_NO_ERROR) {
-                    napi_resolve_deferred(ctx->env, ctx->deferred, result[0]);
+                    napi_resolve_deferred(ctx->env, ctx->deferred, result[1]);
                 } else {
-                    napi_reject_deferred(ctx->env, ctx->deferred, result[1]);
+                    napi_reject_deferred(ctx->env, ctx->deferred, result[0]);
                 }
             } else {
                 // callback
@@ -207,20 +207,23 @@ static napi_value JSSnapshotFromBuilder(napi_env env, napi_callback_info info)
     napi_escapable_handle_scope scope = nullptr;
     napi_open_escapable_handle_scope(env, &scope);
 
-    napi_value result = nullptr;
-
     JsComponentSnapshot helper(env, info);
     if (!helper.CheckArgs(napi_valuetype::napi_function)) {
         napi_close_escapable_handle_scope(env, scope);
-        return result;
+        return nullptr;
     }
 
     auto delegate = EngineHelper::GetCurrentDelegate();
     if (!delegate) {
         NapiThrow(env, "ace engine delegate is null", Framework::ERROR_CODE_INTERNAL_ERROR);
         napi_close_escapable_handle_scope(env, scope);
-        return result;
+        return nullptr;
     }
+
+    // create builder closure
+    auto builder = [build = helper.GetArgv(0), env] { napi_call_function(env, nullptr, build, 0, nullptr, nullptr); };
+    napi_value result = nullptr;
+    delegate->CreateSnapshot(builder, helper.CreateCallback(&result));
 
     napi_escape_handle(env, scope, result, &result);
     napi_close_escapable_handle_scope(env, scope);

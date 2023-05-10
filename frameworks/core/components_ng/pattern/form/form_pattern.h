@@ -66,6 +66,10 @@ public:
         return externalRenderContext_;
     }
 
+    bool GetIsLoaded() const
+    {
+        return isLoaded_;
+    }
 private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;

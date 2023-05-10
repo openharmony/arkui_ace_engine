@@ -20,6 +20,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #undef private
 #undef protected
 
@@ -55,7 +56,7 @@ void MenuAccessibilityPropertyTestNg::TearDown()
 void MenuAccessibilityPropertyTestNg::InitMenuTestNg()
 {
     frameNode_ = FrameNode::GetOrCreateFrameNode(V2::MENU_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
-        []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, TYPE); });
+        []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
     ASSERT_NE(frameNode_, nullptr);
 
     menuAccessibilityProperty_ = frameNode_->GetAccessibilityProperty<MenuAccessibilityProperty>();

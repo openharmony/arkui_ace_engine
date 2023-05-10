@@ -42,6 +42,11 @@ public:
         defaultPickerItemHeight_ = defaultPickerItemHeight;
     }
 
+    void SetBackgroundColor(const Color& color)
+    {
+        backgroundColor_ = color;
+    }
+
     void PaintDisable(RSCanvas& canvas, double X, double Y);
 
     void SetEnabled(bool enabled)
@@ -55,6 +60,7 @@ public:
 private:
     double defaultPickerItemHeight_ = 0.0;
     bool enabled_ = true;
+    Color backgroundColor_ = Color::WHITE;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_PICKER_TEXT_PICKER_PAINT_METHOD_H

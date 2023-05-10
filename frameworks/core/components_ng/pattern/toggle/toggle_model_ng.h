@@ -31,6 +31,7 @@ public:
     void SetBackgroundColor(const Color& color) override;
     bool IsToggle() override;
     void SetPadding(const NG::PaddingPropertyF& args) override;
+    void OnChangeEvent(ChangeEvent&& onChangeEvent) override;
 
 private:
     static void CreateCheckbox(int32_t nodeId);
