@@ -33,6 +33,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/animation/page_transition_common.h"
+#include "core/animation/spring_curve.h"
 #include "core/common/container.h"
 #include "core/common/rosen/rosen_convert_helper.h"
 #include "core/components/common/properties/decoration.h"
@@ -69,6 +70,18 @@ namespace {
 RefPtr<PixelMap> g_pixelMap {};
 std::mutex g_mutex;
 std::condition_variable thumbnailGet;
+constexpr float ANIMATION_CURVE_VELOCITY_LIGHT_OR_MIDDLE = 10.0f;
+constexpr float ANIMATION_CURVE_VELOCITY_HEAVY = 0.0f;
+constexpr float ANIMATION_CURVE_MASS = 1.0f;
+constexpr float ANIMATION_CURVE_STIFFNESS_LIGHT = 410.0f;
+constexpr float ANIMATION_CURVE_STIFFNESS_MIDDLE = 350.0f;
+constexpr float ANIMATION_CURVE_STIFFNESS_HEAVY = 240.0f;
+constexpr float ANIMATION_CURVE_DAMPING_LIGHT = 38.0f;
+constexpr float ANIMATION_CURVE_DAMPING_MIDDLE = 35.0f;
+constexpr float ANIMATION_CURVE_DAMPING_HEAVY = 28.0f;
+constexpr float DEFAULT_SCALE_LIGHT = 0.9f;
+constexpr float DEFAULT_SCALE_MIDDLE_OR_HEAVY = 0.95f;
+constexpr float DEFAULT_MID_TIME_SLOT = 0.5;
 } // namespace
 
 float RosenRenderContext::ConvertDimensionToScaleBySize(const Dimension& dimension, float size)
@@ -112,8 +125,8 @@ void RosenRenderContext::OnNodeAppear(bool recursive)
 
     // pending transition in animation, will start on first layout
     firstTransitionIn_ = true;
-    // only start transition on the break point of render node tree.
-    transitionWithAnimation_ = !recursive;
+    // only start default transition on the break point of render node tree. Not Impl yet.
+    isBreakingPoint_ = !recursive;
 }
 
 void RosenRenderContext::OnNodeDisappear(bool recursive)
@@ -124,10 +137,9 @@ void RosenRenderContext::OnNodeDisappear(bool recursive)
     }
     CHECK_NULL_VOID(rsNode_);
     auto rect = GetPaintRectWithoutTransform();
-    // only start transition on the break point of render node tree.
-    if (recursive == false) {
-        NotifyTransitionInner(rect.GetSize(), false);
-    }
+    // only start default transition on the break point of render node tree. Not Impl yet.
+    isBreakingPoint_ = !recursive;
+    NotifyTransitionInner(rect.GetSize(), false);
 }
 
 void RosenRenderContext::SetPivot(float xPivot, float yPivot)
@@ -205,11 +217,7 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
 
     if (firstTransitionIn_) {
         // need to perform transitionIn early so not influence the following SetPivot
-        if (transitionWithAnimation_) {
-            NotifyTransitionInner(paintRect.GetSize(), true);
-        } else {
-            RSNode::ExecuteWithoutAnimation([this, &paintRect]() { NotifyTransitionInner(paintRect.GetSize(), true); });
-        }
+        NotifyTransitionInner(paintRect.GetSize(), true);
         firstTransitionIn_ = false;
     }
 
@@ -448,6 +456,13 @@ void RosenRenderContext::UpdateBackBlurStyle(const BlurStyleOption& bgBlurStyle)
     isBackBlurChanged_ = true;
 }
 
+void RosenRenderContext::ResetBackBlurStyle()
+{
+    const auto& groupProperty = GetOrCreateBackground();
+    groupProperty->propBlurStyleOption.reset();
+    isBackBlurChanged_ = true;
+}
+
 void RosenRenderContext::OnSphericalEffectUpdate(double radio)
 {
     CHECK_NULL_VOID(rsNode_);
@@ -673,16 +688,14 @@ RectF RosenRenderContext::GetPaintRectWithoutTransform()
 void RosenRenderContext::NotifyTransitionInner(const SizeF& frameSize, bool isTransitionIn)
 {
     CHECK_NULL_VOID(rsNode_);
-    if (transitionEffect_) {
-        NotifyTransition(isTransitionIn);
+    auto& transOptions = isTransitionIn ? propTransitionAppearing_ : propTransitionDisappearing_;
+    if (auto effect = GetRSTransitionWithoutType(transOptions, frameSize)) {
+        SetTransitionPivot(frameSize, isTransitionIn);
+        // notice that we have been in animateTo, so do not need to use Animation closure to notify transition.
+        rsNode_->NotifyTransition(effect, isTransitionIn);
         return;
     }
-    auto& transOptions = isTransitionIn ? propTransitionAppearing_ : propTransitionDisappearing_;
-    CHECK_NULL_VOID_NOLOG(transOptions);
-    SetTransitionPivot(frameSize, isTransitionIn);
-    auto effect = GetRSTransitionWithoutType(*transOptions, frameSize);
-    // notice that we have been in animateTo, so do not need to use Animation closure to notify transition.
-    rsNode_->NotifyTransition(effect, isTransitionIn);
+    NotifyTransition(isTransitionIn);
 }
 
 void RosenRenderContext::OpacityAnimation(const AnimationOption& option, double begin, double end)
@@ -958,6 +971,9 @@ void RosenRenderContext::OnModifyDone()
         SetBackBlurFilter();
         isBackBlurChanged_ = false;
     }
+    if (HasClickEffectLevel()) {
+        InitEventClickEffect();
+    }
     const auto& size = frameNode->GetGeometryNode()->GetFrameSize();
     if (!size.IsPositive()) {
         LOGD("first modify, make change in SyncGeometryProperties");
@@ -1003,9 +1019,21 @@ RectF RosenRenderContext::AdjustPaintRect()
     Dimension parentPaddingLeft;
     Dimension parentPaddingTop;
     // Position properties take precedence over offset locations.
-    if (HasPosition()) {
+    if (HasPosition() && IsUsingPosition(frameNode)) {
+        Dimension selfMarginLeft;
+        Dimension selfMarginTop;
+        if (frameNode->GetLayoutProperty() && frameNode->GetLayoutProperty()->GetMarginProperty()) {
+            auto& margin = frameNode->GetLayoutProperty()->GetMarginProperty();
+            if (margin->left.has_value()) {
+                selfMarginLeft = margin->left.value().GetDimension();
+            }
+            if (margin->top.has_value()) {
+                selfMarginTop = margin->top.value().GetDimension();
+            }
+        }
         GetPaddingOfFirstFrameNodeParent(parentPaddingLeft, parentPaddingTop);
-        auto position = GetPositionValue({}) + OffsetT<Dimension>(parentPaddingLeft, parentPaddingTop);
+        auto position = GetPositionValue({}) +
+                        OffsetT<Dimension>(parentPaddingLeft + selfMarginTop, parentPaddingTop + selfMarginTop);
         auto posX = ConvertToPx(position.GetX(), ScaleProperty::CreateScaleProperty(), widthPercentReference);
         auto posY = ConvertToPx(position.GetY(), ScaleProperty::CreateScaleProperty(), heightPercentReference);
         rect.SetLeft(posX.value_or(0) - anchorX.value_or(0));
@@ -1024,6 +1052,16 @@ RectF RosenRenderContext::AdjustPaintRect()
     rect.SetLeft(rect.GetX() - anchorX.value_or(0));
     rect.SetTop(rect.GetY() - anchorY.value_or(0));
     return rect;
+}
+
+bool RosenRenderContext::IsUsingPosition(const RefPtr<FrameNode>& frameNode)
+{
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    bool isUsingPosition = true;
+    if (layoutProperty) {
+        isUsingPosition = layoutProperty->IsUsingPosition();
+    }
+    return isUsingPosition;
 }
 
 void RosenRenderContext::GetPaddingOfFirstFrameNodeParent(Dimension& parentPaddingLeft, Dimension& parentPaddingTop)
@@ -1640,24 +1678,27 @@ void RosenRenderContext::UpdateTransition(const TransitionOptions& options)
 }
 
 std::shared_ptr<Rosen::RSTransitionEffect> RosenRenderContext::GetRSTransitionWithoutType(
-    const TransitionOptions& options, const SizeF& frameSize)
+    const std::unique_ptr<TransitionOptions>& options, const SizeF& frameSize)
 {
-    std::shared_ptr<Rosen::RSTransitionEffect> effect = Rosen::RSTransitionEffect::Create();
-    if (options.HasOpacity()) {
-        effect = effect->Opacity(options.GetOpacityValue());
+    if (options == nullptr) {
+        return nullptr;
     }
-    if (options.HasTranslate()) {
-        const auto& translate = options.GetTranslateValue();
+    std::shared_ptr<Rosen::RSTransitionEffect> effect = Rosen::RSTransitionEffect::Create();
+    if (options->HasOpacity()) {
+        effect = effect->Opacity(options->GetOpacityValue());
+    }
+    if (options->HasTranslate()) {
+        const auto& translate = options->GetTranslateValue();
         effect = effect->Translate({ static_cast<float>(translate.x.ConvertToPxWithSize(frameSize.Width())),
             static_cast<float>(translate.y.ConvertToPxWithSize(frameSize.Height())),
             static_cast<float>(translate.z.ConvertToPx()) });
     }
-    if (options.HasScale()) {
-        const auto& scale = options.GetScaleValue();
+    if (options->HasScale()) {
+        const auto& scale = options->GetScaleValue();
         effect = effect->Scale({ scale.xScale, scale.yScale, scale.zScale });
     }
-    if (options.HasRotate()) {
-        const auto& rotate = options.GetRotateValue();
+    if (options->HasRotate()) {
+        const auto& rotate = options->GetRotateValue();
         effect = effect->Rotate({ rotate.xDirection, rotate.yDirection, rotate.zDirection, rotate.angle });
     }
     return effect;
@@ -1761,6 +1802,21 @@ void RosenRenderContext::ClipWithRect(const RectF& rectF)
     SkPath skPath;
     skPath.addRect(rectF.GetX(), rectF.GetY(), rectF.GetX() + rectF.Width(), rectF.GetY() + rectF.Height());
     rsNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(skPath));
+}
+
+void RosenRenderContext::ClipWithRRect(const RectF& rectF, const RadiusF& radiusF)
+{
+    CHECK_NULL_VOID(rsNode_);
+    Rosen::Vector4f rect;
+    Rosen::Vector4f radius;
+    rect.SetValues(rectF.GetX(), rectF.GetY(), rectF.GetX() + rectF.Width(), rectF.GetY() + rectF.Height());
+    radius.SetValues(
+        radiusF.GetCorner(RoundRect::CornerPos::TOP_LEFT_POS).x,
+        radiusF.GetCorner(RoundRect::CornerPos::TOP_RIGHT_POS).x,
+        radiusF.GetCorner(RoundRect::CornerPos::BOTTOM_LEFT_POS).x,
+        radiusF.GetCorner(RoundRect::CornerPos::BOTTOM_RIGHT_POS).x);
+    rsNode_->SetClipRRect(rect, radius);
+    RequestNextFrame();
 }
 
 void RosenRenderContext::OnClipShapeUpdate(const RefPtr<BasicShape>& /*basicShape*/)
@@ -2133,7 +2189,7 @@ void RosenRenderContext::UpdateChainedTransition(const RefPtr<NG::ChainedTransit
 
 void RosenRenderContext::NotifyTransition(bool isTransitionIn)
 {
-    CHECK_NULL_VOID(transitionEffect_);
+    CHECK_NULL_VOID_NOLOG(transitionEffect_);
 
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
@@ -2247,5 +2303,111 @@ void RosenRenderContext::AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePrope
         rsNode_->AddModifier(nodeModifierImpl);
         nodeModifierImpl->AddProperty(property->GetProperty());
     }
+}
+
+void RosenRenderContext::InitEventClickEffect()
+{
+    if (touchListener_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gesture = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
+        auto renderContext = weak.Upgrade();
+        CHECK_NULL_VOID(renderContext);
+        if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
+            renderContext->ClickEffectPlayAnimation(info.GetTouches().front().GetTouchType());
+        }
+    };
+    touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
+    gesture->AddTouchEvent(touchListener_);
+}
+
+void RosenRenderContext::ClickEffectPlayAnimation(const TouchType& touchType)
+{
+    if (touchType != TouchType::DOWN) {
+        return;
+    }
+    AnimationUtils::StopAnimation(clickEffectAnimation_);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+
+    auto value = GetClickEffectLevelValue();
+    auto level = value.level;
+    auto scaleValue = value.scaleNumber;
+
+    auto defaultScale = VectorF(1.0f, 1.0f);
+    auto currentScale = GetTransformScaleValue(defaultScale);
+
+    auto xScale = currentScale.x;
+    auto yScale = currentScale.y;
+
+    auto springCurve = UpdatePlayAnimationValue(level, scaleValue);
+    AnimationOption option;
+    option.SetCurve(springCurve);
+    clickEffectAnimation_ = AnimationUtils::StartAnimation(
+        option,
+        [xScale, yScale, scaleValue, springCurve, weakContext = WeakClaim(this)]() {
+            auto renderContext = weakContext.Upgrade();
+            AnimationUtils::AddKeyFrame(0.0f, springCurve, [xScale, yScale, renderContext]() {
+                VectorF valueScale(xScale, yScale);
+                CHECK_NULL_VOID(renderContext);
+                renderContext->UpdateTransformScale(valueScale);
+            });
+            AnimationUtils::AddKeyFrame(DEFAULT_MID_TIME_SLOT, springCurve, [scaleValue, renderContext]() {
+                VectorF valueScale(scaleValue, scaleValue);
+                CHECK_NULL_VOID(renderContext);
+                renderContext->UpdateTransformScale(valueScale);
+            });
+            AnimationUtils::AddKeyFrame(1.0f, springCurve, [xScale, yScale, renderContext]() {
+                VectorF valueScale(xScale, yScale);
+                CHECK_NULL_VOID(renderContext);
+                renderContext->UpdateTransformScale(valueScale);
+            });
+        },
+        nullptr);
+}
+
+RefPtr<Curve> RosenRenderContext::UpdatePlayAnimationValue(const ClickEffectLevel& level, float& scaleValue)
+{
+    float velocity = 0.0f;
+    float mass = 0.0f;
+    float stiffness = 0.0f;
+    float damping = 0.0f;
+    if (level == ClickEffectLevel::LIGHT) {
+        velocity = ANIMATION_CURVE_VELOCITY_LIGHT_OR_MIDDLE;
+        mass = ANIMATION_CURVE_MASS;
+        stiffness = ANIMATION_CURVE_STIFFNESS_LIGHT;
+        damping = ANIMATION_CURVE_DAMPING_LIGHT;
+        if (GreatOrEqual(scaleValue, 0.0) && LessOrEqual(scaleValue, 1.0)) {
+            scaleValue = sqrt(scaleValue);
+        } else {
+            scaleValue = sqrt(DEFAULT_SCALE_LIGHT);
+        }
+    } else if (level == ClickEffectLevel::MIDDLE) {
+        velocity = ANIMATION_CURVE_VELOCITY_LIGHT_OR_MIDDLE;
+        mass = ANIMATION_CURVE_MASS;
+        stiffness = ANIMATION_CURVE_STIFFNESS_MIDDLE;
+        damping = ANIMATION_CURVE_DAMPING_MIDDLE;
+        if (GreatOrEqual(scaleValue, 0.0) && LessOrEqual(scaleValue, 1.0)) {
+            scaleValue = sqrt(scaleValue);
+        } else {
+            scaleValue = sqrt(DEFAULT_SCALE_MIDDLE_OR_HEAVY);
+        }
+    } else if (level == ClickEffectLevel::HEAVY) {
+        velocity = ANIMATION_CURVE_VELOCITY_HEAVY;
+        mass = ANIMATION_CURVE_MASS;
+        stiffness = ANIMATION_CURVE_STIFFNESS_HEAVY;
+        damping = ANIMATION_CURVE_DAMPING_HEAVY;
+        if (GreatOrEqual(scaleValue, 0.0) && LessOrEqual(scaleValue, 1.0)) {
+            scaleValue = sqrt(scaleValue);
+        } else {
+            scaleValue = sqrt(DEFAULT_SCALE_MIDDLE_OR_HEAVY);
+        }
+    }
+    auto springCurve = AceType::MakeRefPtr<InterpolatingSpring>(velocity, mass, stiffness, damping);
+    return springCurve;
 }
 } // namespace OHOS::Ace::NG

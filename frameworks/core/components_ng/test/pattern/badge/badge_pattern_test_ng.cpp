@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,11 +25,12 @@
 #define protected public
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/badge/badge_theme.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/badge/badge_layout_algorithm.h"
 #include "core/components_ng/pattern/badge/badge_layout_property.h"
+#include "core/components_ng/pattern/badge/badge_model_ng.h"
 #include "core/components_ng/pattern/badge/badge_pattern.h"
-#include "core/components_ng/pattern/badge/badge_view.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
@@ -51,23 +52,9 @@ constexpr float FIRST_ITEM_HEIGHT = 50.0f;
 const SizeF CONTAINER_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 const SizeF FIRST_ITEM_SIZE(FIRST_ITEM_WIDTH, FIRST_ITEM_HEIGHT);
 
-const FontWeight FontWeights[] {
-    FontWeight::W100,
-    FontWeight::W200,
-    FontWeight::W300,
-    FontWeight::W400,
-    FontWeight::W500,
-    FontWeight::W600,
-    FontWeight::W700,
-    FontWeight::W800,
-    FontWeight::W900,
-    FontWeight::BOLD,
-    FontWeight::NORMAL,
-    FontWeight::BOLDER,
-    FontWeight::LIGHTER,
-    FontWeight::MEDIUM,
-    FontWeight::REGULAR
-};
+const FontWeight FontWeights[] { FontWeight::W100, FontWeight::W200, FontWeight::W300, FontWeight::W400,
+    FontWeight::W500, FontWeight::W600, FontWeight::W700, FontWeight::W800, FontWeight::W900, FontWeight::BOLD,
+    FontWeight::NORMAL, FontWeight::BOLDER, FontWeight::LIGHTER, FontWeight::MEDIUM, FontWeight::REGULAR };
 
 const Color Colors[] {
     Color::TRANSPARENT,
@@ -78,7 +65,7 @@ const Color Colors[] {
     Color::BLUE,
     Color::GRAY,
 };
-}  // namespace
+} // namespace
 
 class BadgePatternTestNg : public testing::Test {
 public:
@@ -135,8 +122,8 @@ std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapper>> BadgePatternTestNg::CreateCh
  */
 HWTEST_F(BadgePatternTestNg, BadgeFrameNodeCreator001, TestSize.Level1)
 {
-    BadgeView badge;
-    NG::BadgeView::BadgeParameters badgeParameters;
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
     badge.Create(badgeParameters);
 
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -153,8 +140,8 @@ HWTEST_F(BadgePatternTestNg, BadgeFrameNodeCreator001, TestSize.Level1)
  */
 HWTEST_F(BadgePatternTestNg, BadgeFrameNodeCreator002, TestSize.Level1)
 {
-    BadgeView badge;
-    NG::BadgeView::BadgeParameters badgeParameters;
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
     badgeParameters.badgeValue = "test";
     badgeParameters.badgeCount = 1;
     badgeParameters.badgeMaxCount = 99;
@@ -184,8 +171,8 @@ HWTEST_F(BadgePatternTestNg, BadgeFrameNodeCreator002, TestSize.Level1)
  */
 HWTEST_F(BadgePatternTestNg, BadgePatternTest001, TestSize.Level1)
 {
-    BadgeView badge;
-    NG::BadgeView::BadgeParameters badgeParameters;
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
     badgeParameters.badgeMaxCount = 99;
     badge.Create(badgeParameters);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -244,8 +231,8 @@ HWTEST_F(BadgePatternTestNg, BadgePatternTest002, TestSize.Level1)
     /**
      * @tc.steps: step1. create badge and get frameNode.
      */
-    BadgeView badge;
-    NG::BadgeView::BadgeParameters badgeParameters;
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
     badge.Create(badgeParameters);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_NE(frameNode, nullptr);
@@ -318,16 +305,16 @@ HWTEST_F(BadgePatternTestNg, BadgePatternTest002, TestSize.Level1)
     badgeLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
 
     for (int32_t i = 0; i < 3; ++i) {
-        auto badgePosition = static_cast<BadgeLayoutProperty::BadgePosition>(i);
-        badgeLayoutProperty->SetBadgePosition(badgePosition);
+        auto badgePosition = static_cast<BadgePosition>(i);
+        badgeLayoutProperty->UpdateBadgePosition(badgePosition);
         badgeLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
         badgeLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
     }
 
     textLayoutProperty->UpdateContent(" ");
     for (int32_t i = 0; i < 3; ++i) {
-        auto badgePosition = static_cast<BadgeLayoutProperty::BadgePosition>(i);
-        badgeLayoutProperty->SetBadgePosition(badgePosition);
+        auto badgePosition = static_cast<BadgePosition>(i);
+        badgeLayoutProperty->UpdateBadgePosition(badgePosition);
         badgeLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
         badgeLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
     }
@@ -348,10 +335,10 @@ HWTEST_F(BadgePatternTestNg, BadgePatternTest002, TestSize.Level1)
  */
 HWTEST_F(BadgePatternTestNg, BadgePatternTest003, TestSize.Level1)
 {
-    BadgeView badgeView;
-    NG::BadgeView::BadgeParameters badgeParameters;
+    BadgeModelNG BadgeModelNG;
+    BadgeParameters badgeParameters;
     badgeParameters.badgeFontWeight = FontWeight::W100;
-    badgeView.Create(badgeParameters);
+    BadgeModelNG.Create(badgeParameters);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
 
@@ -391,11 +378,11 @@ HWTEST_F(BadgePatternTestNg, BadgePatternTest003, TestSize.Level1)
  */
 HWTEST_F(BadgePatternTestNg, BadgePatternTest004, TestSize.Level1)
 {
-    BadgeView badgeView;
-    NG::BadgeView::BadgeParameters badgeParameters;
+    BadgeModelNG BadgeModelNG;
+    BadgeParameters badgeParameters;
     badgeParameters.badgeMaxCount = 99;
     badgeParameters.badgeBorderWidth = BADGE_BORDER_WIDTH;
-    badgeView.Create(badgeParameters);
+    BadgeModelNG.Create(badgeParameters);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
 
@@ -434,8 +421,8 @@ HWTEST_F(BadgePatternTestNg, BadgePatternTest004, TestSize.Level1)
  */
 HWTEST_F(BadgePatternTestNg, BadgePatternTest005, TestSize.Level1)
 {
-    BadgeView badge;
-    NG::BadgeView::BadgeParameters badgeParameters;
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
     badgeParameters.badgeMaxCount = 99;
     badgeParameters.badgeBorderColor = Color::BLACK;
     badge.Create(badgeParameters);

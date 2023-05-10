@@ -55,6 +55,8 @@ public:
     void SetSpace(const Dimension& value) override;
     void SetArrowPosition(const ArrowPosition value) override;
     void SetMenuAlign(const MenuAlign& menuAlign) override;
+    void SetSelectChangeEvent(NG::SelectChangeEvent&& selectChangeEvent) override;
+    void SetValueChangeEvent(NG::ValueChangeEvent&& valueChangeEvent) override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SELECT_SELECT_MODEL_NG_H

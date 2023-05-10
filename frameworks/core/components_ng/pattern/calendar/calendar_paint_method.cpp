@@ -240,49 +240,57 @@ void CalendarPaintMethod::SetDayTextStyle(
     }
 }
 
+void CalendarPaintMethod::SetOffWorkTextStyle(RSTextStyle& offWorkTextStyle, const CalendarDay& day) const
+{
+    // Paint off or work mark value.
+    offWorkTextStyle.fontWeight_ = static_cast<RSFontWeight>(workStateFontWeight_);
+    offWorkTextStyle.locale_ = Localization::GetInstance()->GetFontLocale();
+    if (day.month.month == currentMonth_.month) {
+        if (day.dayMark == "work") {
+            offWorkTextStyle.fontSize_ = workDayMarkSize_;
+            offWorkTextStyle.color_ = workDayMarkColor_;
+        } else if (day.dayMark == "off") {
+            offWorkTextStyle.fontSize_ = offDayMarkSize_;
+            offWorkTextStyle.color_ = offDayMarkColor_;
+        }
+    } else {
+        if (day.dayMark == "work") {
+            offWorkTextStyle.fontSize_ = workDayMarkSize_;
+            offWorkTextStyle.color_ =
+                RSColor(nonCurrentMonthWorkDayMarkColor_.GetRed(), nonCurrentMonthWorkDayMarkColor_.GetGreen(),
+                    nonCurrentMonthWorkDayMarkColor_.GetBlue(), WEEKEND_TRANSPARENT);
+        } else if (day.dayMark == "off") {
+            offWorkTextStyle.fontSize_ = offDayMarkSize_;
+            offWorkTextStyle.color_ =
+                RSColor(nonCurrentMonthOffDayMarkColor_.GetRed(), nonCurrentMonthOffDayMarkColor_.GetGreen(),
+                    nonCurrentMonthOffDayMarkColor_.GetBlue(), WEEKEND_TRANSPARENT);
+        }
+    }
+
+    // If it is today and it is focused, workState color is same as focused day color.
+    if (IsToday(day) && day.focused) {
+        offWorkTextStyle.color_ = focusedDayColor_;
+    }
+}
+
 void CalendarPaintMethod::PaintDay(
     RSCanvas& canvas, const Offset& offset, const CalendarDay& day, RSTextStyle& textStyle) const
 {
-    // paint day
+    // Paint day value.
     Rect boxRect { offset.GetX(), offset.GetY(), dayWidth_, gregorianDayHeight_ };
     Rect textRect;
-    RSTextStyle workStateStyle;
 
     auto dayStr = std::to_string(day.day);
     dayStr = Localization::GetInstance()->NumberFormat(day.day);
     DrawCalendarText(&canvas, dayStr, textStyle, boxRect, textRect);
 
+    // Paint off and work mark value.
     if (!day.dayMark.empty() && showHoliday_) {
-        workStateStyle.fontWeight_ = static_cast<RSFontWeight>(workStateFontWeight_);
-        workStateStyle.locale_ = Localization::GetInstance()->GetFontLocale();
+        RSTextStyle workStateStyle;
         boxRect = { textRect.GetOffset().GetX() + textRect.Width() - workStateHorizontalMovingDistance_,
             textRect.GetOffset().GetY() + textRect.Height() - workStateVerticalMovingDistance_, workStateWidth_,
             workStateWidth_ };
-        if (day.month.month == currentMonth_.month) {
-            if (day.dayMark == "work") {
-                workStateStyle.fontSize_ = workDayMarkSize_;
-                workStateStyle.color_ = workDayMarkColor_;
-            } else if (day.dayMark == "off") {
-                workStateStyle.fontSize_ = offDayMarkSize_;
-                workStateStyle.color_ = offDayMarkColor_;
-            }
-        } else {
-            if (day.dayMark == "work") {
-                workStateStyle.fontSize_ = workDayMarkSize_;
-                workStateStyle.color_ = RSColor(workDayMarkColor_.GetRed(), workDayMarkColor_.GetGreen(),
-                    workDayMarkColor_.GetBlue(), WEEKEND_TRANSPARENT);
-            } else if (day.dayMark == "off") {
-                workStateStyle.fontSize_ = offDayMarkSize_;
-                workStateStyle.color_ = RSColor(offDayMarkColor_.GetRed(), offDayMarkColor_.GetGreen(),
-                    offDayMarkColor_.GetBlue(), WEEKEND_TRANSPARENT);
-            }
-            if (day.focused) {
-                workStateStyle.color_ = Color::BLACK.GetValue();
-            }
-            if (IsToday(day) && day.touched) {
-                workStateStyle.color_ = focusedDayColor_;
-            }
-        }
+        SetOffWorkTextStyle(workStateStyle, day);
         DrawCalendarText(&canvas, day.dayMarkValue, workStateStyle, boxRect);
     }
 }

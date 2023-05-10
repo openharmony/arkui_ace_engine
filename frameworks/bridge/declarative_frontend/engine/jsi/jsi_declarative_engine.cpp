@@ -33,7 +33,6 @@
 #include "base/i18n/localization.h"
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
-#include "base/log/exception_handler.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_view.h"
 #include "core/common/card_scope.h"
@@ -89,6 +88,10 @@ const std::string FORM_ES_MODULE_CARD_PATH = "ets/widgets.abc";
 const std::string FORM_ES_MODULE_PATH = "ets/modules.abc";
 
 const std::string ASSET_PATH_PREFIX = "/data/storage/el1/bundle/";
+
+#ifdef PREVIEW
+constexpr uint32_t PREFIX_LETTER_NUMBER = 4;
+#endif
 
 // native implementation for js function: perfutil.print()
 shared_ptr<JsValue> JsPerfPrint(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
@@ -1085,12 +1088,12 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
         arkRuntime->SetAssetPath(assetPath);
         arkRuntime->SetBundle(false);
         arkRuntime->SetModuleName(moduleName);
-        abcPath = fileName;
-        if (fileName.rfind("ets/", 0) == 0) {
-            abcPath = moduleName.append("/").append(fileName);
-        } else {
-            abcPath = moduleName.append("/ets/").append(fileName);
-        }
+#ifdef PREVIEW
+        // remove the prefix of "ets/"
+        abcPath = fileName.substr(PREFIX_LETTER_NUMBER);
+#else
+        abcPath = moduleName.append("/").append(fileName);
+#endif
         LOGI("JsiDeclarativeEngine::ExecuteCardAbc abcPath = %{public}s", abcPath.c_str());
         {
             if (!arkRuntime->ExecuteModuleBuffer(content.data(), content.size(), abcPath, true)) {
@@ -1954,7 +1957,6 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_PreloadAceModuleCard(void* runtime)
 void JsiDeclarativeEngineInstance::PreloadAceModuleCard(void* runtime)
 {
     isUnique_ = true;
-    ExceptionHandler::formRenderServiceFlag_ = true;
     if (isModulePreloaded_ && !IsPlugin() && !isUnique_) {
         LOGE("PreloadAceModule already preloaded");
         return;

@@ -33,6 +33,7 @@ constexpr int32_t IF_ELSE_BRANCH_ID = 1;
 constexpr int32_t IF_ELSE_BRANCH_ID_2 = 2;
 constexpr int32_t IF_ELSE_CHILDREN_COUNT = 1;
 constexpr int32_t IF_ELSE_CHILDREN_COUNT_2 = 0;
+constexpr int32_t IF_ELSE_NODE_ID = 1;
 constexpr bool IS_ATOMIC_NODE = false;
 } // namespace
 
@@ -145,5 +146,56 @@ HWTEST_F(IfElseSyntaxTestNg, IfElseSyntaxTest004, TestSize.Level1)
     auto ifElseNodeNode = AceType::DynamicCast<IfElseNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_TRUE(ifElseNodeNode != nullptr && ifElseNodeNode->GetTag() == V2::JS_IF_ELSE_ETS_TAG);
     EXPECT_EQ(ifElseNodeNode->IsAtomicNode(), IS_ATOMIC_NODE);
+}
+
+/**
+ * @tc.name: IfElseSyntaxBranchIDTest005
+ * @tc.desc: Create IfElse and set/get branchId in abnormal condition.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IfElseSyntaxTestNg, IfElseSyntaxBranchIDTest005, TestSize.Level1)
+{
+    IfElseModelNG ifElse;
+    ifElse.Create();
+    ifElse.SetBranchId(IF_ELSE_BRANCH_ID);
+
+    EXPECT_EQ(ifElse.GetBranchId(), IF_ELSE_BRANCH_ID);
+    auto ifElseNodeNode = AceType::DynamicCast<IfElseNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(ifElseNodeNode != nullptr && ifElseNodeNode->GetTag() == V2::JS_IF_ELSE_ETS_TAG);
+    EXPECT_EQ(ifElseNodeNode->GetBranchId(), IF_ELSE_BRANCH_ID);
+
+    /**
+    // corresponding ets code:
+    //     if () {
+    //       Blank()
+    //     }
+    */
+    auto childFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    ifElseNodeNode->AddChild(childFrameNode);
+    EXPECT_EQ(ifElseNodeNode->GetChildren().size(), IF_ELSE_CHILDREN_COUNT);
+    // ifElse node will clean its children when its branch id has changed.
+    ifElseNodeNode->SetBranchId(IF_ELSE_BRANCH_ID_2);
+    ifElseNodeNode->FlushUpdateAndMarkDirty();
+    EXPECT_EQ(ifElseNodeNode->GetChildren().size(), IF_ELSE_CHILDREN_COUNT_2);
+
+    /**
+     * @tc.steps: step1. Set branch id which is same as before.
+     * @tc.expected: OnDirtyLayoutWrapperSwap return the true only when the canvas images all have been initialized.
+     */
+    ifElseNodeNode->SetBranchId(IF_ELSE_BRANCH_ID_2);
+    ifElseNodeNode->FlushUpdateAndMarkDirty();
+    EXPECT_FALSE(ifElseNodeNode->branchIdChanged_);
+}
+
+/**
+ * @tc.name: IfElseSyntaxCreateTest006
+ * @tc.desc: Create IfElse with same id.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IfElseSyntaxTestNg, IfElseSyntaxTest006, TestSize.Level1)
+{
+    auto ifElseNode = IfElseNode::GetOrCreateIfElseNode(IF_ELSE_NODE_ID);
+    auto anotherIfElseNode = IfElseNode::GetOrCreateIfElseNode(IF_ELSE_NODE_ID);
+    EXPECT_TRUE(ifElseNode == anotherIfElseNode);
 }
 } // namespace OHOS::Ace::NG

@@ -217,14 +217,12 @@ public:
 
     // performance check
     CheckNodeMap GetChildrenFlexLayouts(const std::unordered_map<int32_t, RefPtr<LayoutWrapper>>& childrenMap);
+    void AddFlexLayouts();
+    bool IsHostFlex();
     int32_t GetFlexLayouts() const
     {
         return flexLayouts_;
     }
-
-    // performance check
-    bool IsHostParentFlex();
-    bool IsHostFlex();
 
     // Check the flag attribute with descendant node
     bool CheckNeedForceMeasureAndLayout();

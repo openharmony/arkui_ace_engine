@@ -38,7 +38,10 @@ public:
 
     void UpdateChangeEvent(bool isOn) const
     {
-        auto task = [changeEvent = changeEvent_, isOn]() {
+        auto task = [changeEvent = changeEvent_, onChangeEvent = onChangeEvent_, isOn]() {
+            if (onChangeEvent) {
+                onChangeEvent(isOn);
+            }
             if (changeEvent) {
                 changeEvent(isOn);
             }
@@ -48,8 +51,14 @@ public:
         context->PostAsyncEvent(task, TaskExecutor::TaskType::UI);
     }
 
+    void SetOnChangeEvent(ChangeEvent&& onChangeEvent)
+    {
+        onChangeEvent_ = std::move(onChangeEvent);
+    }
+
 private:
     ChangeEvent changeEvent_;
+    ChangeEvent onChangeEvent_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SwitchEventHub);
 };

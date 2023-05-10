@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace {
 using TextChangeEvent = std::function<void(const std::string&, double)>;
-using TextCascadeChangeEvent = std::function<void(const std::vector<std::string>&, std::vector<double>)>;
+using TextCascadeChangeEvent = std::function<void(const std::vector<std::string>&, const std::vector<double>&)>;
 class TextPickerModel {
 public:
     static TextPickerModel* GetInstance();
@@ -35,6 +35,7 @@ public:
     virtual void SetValue(const std::string& value) = 0;
     virtual void SetOnChange(TextChangeEvent&& onChange) = 0;
     virtual void SetDefaultPickerItemHeight(const Dimension& value) = 0;
+    virtual void SetCanLoop(const bool value) = 0;
     virtual void SetDefaultAttributes(const RefPtr<PickerTheme>& pickerTheme) = 0;
     virtual void SetDisappearTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value) = 0;
     virtual void SetNormalTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value) = 0;
@@ -52,6 +53,7 @@ public:
     virtual void SetMaxCount(uint32_t maxCount) = 0;
     virtual bool GetMultiOptions(std::vector<NG::TextCascadePickerOptions>& options) = 0;
     virtual void SetBackgroundColor(const Color& color) = 0;
+    virtual void SetHasSelectAttr(bool value) = 0;
 private:
     static std::unique_ptr<TextPickerModel> textPickerInstance_;
 };

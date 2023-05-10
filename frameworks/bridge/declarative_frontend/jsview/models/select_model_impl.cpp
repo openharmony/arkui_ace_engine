@@ -431,4 +431,8 @@ void SelectModelImpl::SetSpace(const Dimension& value) {}
 void SelectModelImpl::SetArrowPosition(const ArrowPosition value) {}
 
 void SelectModelImpl::SetMenuAlign(const MenuAlign& menuAlign) {}
+
+void SelectModelImpl::SetSelectChangeEvent(NG::SelectChangeEvent&& selectChangeEvent) {}
+
+void SelectModelImpl::SetValueChangeEvent(NG::ValueChangeEvent&& valueChangeEvent) {}
 } // namespace OHOS::Ace::Framework

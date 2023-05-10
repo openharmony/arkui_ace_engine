@@ -244,10 +244,18 @@ void SelectModelNG::SetPaddings(const std::optional<Dimension>& top, const std::
     const std::optional<Dimension>& left, const std::optional<Dimension>& right)
 {
     NG::PaddingProperty paddings;
-    paddings.top = NG::CalcLength(top.value().IsNonNegative() ? top.value() : Dimension());
-    paddings.bottom = NG::CalcLength(bottom.value().IsNonNegative() ? bottom.value() : Dimension());
-    paddings.left = NG::CalcLength(left.value().IsNonNegative() ? left.value() : Dimension());
-    paddings.right = NG::CalcLength(right.value().IsNonNegative() ? right.value() : Dimension());
+    if (top.has_value()) {
+        paddings.top = NG::CalcLength(top.value().IsNonNegative() ? top.value() : Dimension());
+    }
+    if (bottom.has_value()) {
+        paddings.bottom = NG::CalcLength(bottom.value().IsNonNegative() ? bottom.value() : Dimension());
+    }
+    if (left.has_value()) {
+        paddings.left = NG::CalcLength(left.value().IsNonNegative() ? left.value() : Dimension());
+    }
+    if (right.has_value()) {
+        paddings.right = NG::CalcLength(right.value().IsNonNegative() ? right.value() : Dimension());
+    }
     ViewAbstract::SetPadding(paddings);
 }
 
@@ -261,7 +269,9 @@ void SelectModelNG::SetPaddingLeft(const Dimension& leftValue)
     NG::PaddingProperty paddings;
     paddings.top = std::nullopt;
     paddings.bottom = std::nullopt;
-    paddings.left = NG::CalcLength(leftValue.IsNonNegative() ? leftValue : Dimension());
+    if (!NearEqual(leftValue.Value(), 0.0)) {
+        paddings.left = NG::CalcLength(leftValue.IsNonNegative() ? leftValue : Dimension());
+    }
     paddings.right = std::nullopt;
     ViewAbstract::SetPadding(paddings);
 }
@@ -269,7 +279,9 @@ void SelectModelNG::SetPaddingLeft(const Dimension& leftValue)
 void SelectModelNG::SetPaddingTop(const Dimension& topValue)
 {
     NG::PaddingProperty paddings;
-    paddings.top = NG::CalcLength(topValue.IsNonNegative() ? topValue : Dimension());
+    if (!NearEqual(topValue.Value(), 0.0)) {
+        paddings.top = NG::CalcLength(topValue.IsNonNegative() ? topValue : Dimension());
+    }
     paddings.bottom = std::nullopt;
     paddings.left = std::nullopt;
     paddings.right = std::nullopt;
@@ -282,7 +294,9 @@ void SelectModelNG::SetPaddingRight(const Dimension& rightValue)
     paddings.top = std::nullopt;
     paddings.bottom = std::nullopt;
     paddings.left = std::nullopt;
-    paddings.right = NG::CalcLength(rightValue.IsNonNegative() ? rightValue : Dimension());
+    if (!NearEqual(rightValue.Value(), 0.0)) {
+        paddings.right = NG::CalcLength(rightValue.IsNonNegative() ? rightValue : Dimension());
+    }
     ViewAbstract::SetPadding(paddings);
 }
 
@@ -290,7 +304,9 @@ void SelectModelNG::SetPaddingBottom(const Dimension& buttomValue)
 {
     NG::PaddingProperty paddings;
     paddings.top = std::nullopt;
-    paddings.bottom = NG::CalcLength(buttomValue.IsNonNegative() ? buttomValue : Dimension());
+    if (!NearEqual(buttomValue.Value(), 0.0)) {
+        paddings.bottom = NG::CalcLength(buttomValue.IsNonNegative() ? buttomValue : Dimension());
+    }
     paddings.left = std::nullopt;
     paddings.right = std::nullopt;
     ViewAbstract::SetPadding(paddings);
@@ -315,6 +331,20 @@ void SelectModelNG::SetMenuAlign(const MenuAlign& menuAlign)
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetMenuAlign(menuAlign);
+}
+
+void SelectModelNG::SetSelectChangeEvent(NG::SelectChangeEvent&& selectChangeEvent)
+{
+    auto hub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<SelectEventHub>();
+    CHECK_NULL_VOID(hub);
+    hub->SetSelectChangeEvent(std::move(selectChangeEvent));
+}
+
+void SelectModelNG::SetValueChangeEvent(NG::ValueChangeEvent&& valueChangeEvent)
+{
+    auto hub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<SelectEventHub>();
+    CHECK_NULL_VOID(hub);
+    hub->SetValueChangeEvent(std::move(valueChangeEvent));
 }
 } // namespace OHOS::Ace::NG
 

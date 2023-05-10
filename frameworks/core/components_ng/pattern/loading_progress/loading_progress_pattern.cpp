@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,5 +39,14 @@ void LoadingProgressPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToFrame(true);
+}
+
+void LoadingProgressPattern::OnVisibleChange(bool isVisible)
+{
+    CHECK_NULL_VOID(loadingProgressModifier_);
+    loadingProgressModifier_->SetVisible(isVisible);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 } // namespace OHOS::Ace::NG

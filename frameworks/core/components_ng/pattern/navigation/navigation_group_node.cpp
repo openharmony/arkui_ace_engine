@@ -80,7 +80,7 @@ void NavigationGroupNode::AddNavDestinationToNavigation(const RefPtr<UINode>& pa
         const auto& childNode = *iter;
         auto uiNode = childNode.second;
         auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(GetNavDestinationNode(uiNode));
-        navigationContentNode->AddChild(uiNode);
+        navigationContentNode->AddChild(navDestination);
     }
 }
 
@@ -94,6 +94,7 @@ void NavigationGroupNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 
 RefPtr<UINode> NavigationGroupNode::GetNavDestinationNode(RefPtr<UINode> uiNode)
 {
+    // create NavDestinationNode from uiNode stored in NavigationStack
     while (uiNode) {
         if (AceType::DynamicCast<FrameNode>(uiNode) && uiNode->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
             // this is a navDesination node

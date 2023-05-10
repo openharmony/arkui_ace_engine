@@ -218,7 +218,7 @@ public:
         value_.Reset();
     }
 
-    JsiRef<T> Lock()
+    JsiRef<T> Lock() const
     {
         return JsiRef<T>(value_);
     }

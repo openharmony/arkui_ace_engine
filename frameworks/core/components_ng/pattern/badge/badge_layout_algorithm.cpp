@@ -17,6 +17,7 @@
 
 #include "base/utils/utils.h"
 #include "core/components/badge/badge_theme.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/badge/badge_layout_property.h"
@@ -180,20 +181,20 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
     OffsetF textOffset;
     if (textData == " ") {
-        if (badgePosition == BadgeLayoutProperty::BadgePosition::RIGHT_TOP) {
+        if (badgePosition == BadgePosition::RIGHT_TOP) {
             textOffset = OffsetF(offset.GetX() + width - badgeCircleDiameter, offset.GetY());
-        } else if (badgePosition == BadgeLayoutProperty::BadgePosition::RIGHT) {
+        } else if (badgePosition == BadgePosition::RIGHT) {
             textOffset =
                 OffsetF(offset.GetX() + width - badgeCircleDiameter, offset.GetY() + height / 2 - badgeCircleRadius);
         } else {
             textOffset = OffsetF(offset.GetX(), offset.GetY() + height / 2 - badgeCircleRadius);
         }
     } else {
-        if (badgePosition == BadgeLayoutProperty::BadgePosition::RIGHT_TOP) {
+        if (badgePosition == BadgePosition::RIGHT_TOP) {
             textOffset = OffsetF(
                 width - badgeCircleDiameter + Dimension(2.0_vp).ConvertToPx(), 0 - Dimension(2.0_vp).ConvertToPx());
             textOffset = OffsetF(offset.GetX() + textOffset.GetX(), offset.GetY() + textOffset.GetY());
-        } else if (badgePosition == BadgeLayoutProperty::BadgePosition::RIGHT) {
+        } else if (badgePosition == BadgePosition::RIGHT) {
             textOffset = OffsetF(width - badgeCircleDiameter, height / 2 - badgeCircleRadius);
             textOffset = OffsetF(offset.GetX() + textOffset.GetX(), offset.GetY() + textOffset.GetY());
         } else {

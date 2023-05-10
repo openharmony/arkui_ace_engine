@@ -1082,6 +1082,14 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintMethodTest001, TestSize.Level1)
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DrawRoundRect(_)).Times(3);
     checkBoxPaintMethod.checkboxModifier_->PaintCheckBox(canvas, CONTENT_OFFSET, CONTENT_SIZE);
+    /**
+     * @tc.case: case. CheckBoxPaintMethod's PaintCheckBox code when !enabled_->Get()
+    */
+    checkBoxPaintMethod.checkboxModifier_->enabled_->Set(false);
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawRoundRect(_)).Times(3);
+    checkBoxPaintMethod.checkboxModifier_->PaintCheckBox(canvas, CONTENT_OFFSET, CONTENT_SIZE);
 }
 
 /**
@@ -1270,5 +1278,155 @@ HWTEST_F(CheckBoxTestNG, CheckBoxAccessibilityPropertyTestNg003, TestSize.Level1
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<CheckBoxAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(), NAME);
+}
+
+/**
+ * @tc.name: CheckBoxUpdateChangeEventTest001
+ * @tc.desc: Test CheckBox onChange event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxTestNG, CheckBoxUpdateChangeEventTest001, TestSize.Level1)
+{
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    bool isSelected = false;
+    auto changeEvent = [&isSelected](bool select) { isSelected = select; };
+    checkBoxModelNG.SetChangeEvent(changeEvent);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->UpdateChangeEvent(true);
+    EXPECT_EQ(isSelected, true);
+}
+
+/**
+ * @tc.name: CheckBoxPatternTest031
+ * @tc.desc: cover CheckBoxGroupIsTrue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest031, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBox node
+     */
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(1);
+    CheckBoxModelNG checkBoxModelNG1;
+    checkBoxModelNG1.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode1 = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode1, nullptr);
+    auto pattern1 = frameNode1->GetPattern<CheckBoxPattern>();
+    EXPECT_NE(pattern1, nullptr);
+    auto paintProperty = frameNode1->GetPaintProperty<CheckBoxPaintProperty>();
+    EXPECT_NE(paintProperty, nullptr);
+    paintProperty->UpdateCheckBoxSelect(true);
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(2);
+    CheckBoxModelNG checkBoxModelNG2;
+    checkBoxModelNG2.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode2 = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode2, nullptr);
+    auto paintProperty2 = frameNode2->GetPaintProperty<CheckBoxPaintProperty>();
+    EXPECT_NE(paintProperty2, nullptr);
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(3);
+    CheckBoxModelNG checkBoxModelNG3;
+    checkBoxModelNG3.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode3 = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode3, nullptr);
+    auto paintProperty3 = frameNode3->GetPaintProperty<CheckBoxPaintProperty>();
+    EXPECT_NE(paintProperty3, nullptr);
+    /**
+     * @tc.steps: step2. Init CheckBoxGroup node
+     */
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(4);
+    CheckBoxGroupModelNG checkBoxGroupModelNG;
+    checkBoxGroupModelNG.Create(GROUP_NAME);
+    auto groupFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(groupFrameNode, nullptr);
+    auto groupPaintProperty = groupFrameNode->GetPaintProperty<CheckBoxGroupPaintProperty>();
+    EXPECT_NE(groupPaintProperty, nullptr);
+
+    pattern1->CheckBoxGroupIsTrue();
+    /**
+     * cover branch groupPaintProperty->GetIsCheckBoxCallbackDealed()
+    */
+    pattern1->CheckBoxGroupIsTrue();
+    /**
+     * test branch allSelectIsNull and no CheckBoxGroupSelect
+    */
+    paintProperty->ResetCheckBoxSelect();
+    paintProperty2->ResetCheckBoxSelect();
+    paintProperty3->ResetCheckBoxSelect();
+    groupPaintProperty->isCheckBoxCallbackDealed_ = false;
+    pattern1->CheckBoxGroupIsTrue();
+    /**
+     * test branch allSelectIsNull
+    */
+    paintProperty->ResetCheckBoxSelect();
+    paintProperty2->ResetCheckBoxSelect();
+    paintProperty3->ResetCheckBoxSelect();
+    groupPaintProperty->UpdateCheckBoxGroupSelect(true);
+    groupPaintProperty->isCheckBoxCallbackDealed_ = false;
+    pattern1->CheckBoxGroupIsTrue();
+}
+
+/**
+ * @tc.name: CheckBoxPatternTest032
+ * @tc.desc: cover pipelineContext BuildFinishCallBack.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest032, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBox node
+     */
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto paintProperty = frameNode->GetPaintProperty<CheckBoxPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    /**
+     * @tc.steps: step2. use method FlushBuildFinishCallbacks to callback.
+     */
+    MockPipelineBase::GetCurrent()->FlushBuildFinishCallbacks();
+}
+
+/**
+ * @tc.name: CheckBoxPaintMethodTest006
+ * @tc.desc: Test CheckBox PaintMethod DrawCheck.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxTestNG, CheckBoxPaintMethodTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBox node
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(CONTENT_SIZE);
+    geometryNode->SetContentOffset(CONTENT_OFFSET);
+    auto checkBoxPaintProperty = AceType::MakeRefPtr<CheckBoxPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+    PaintWrapper paintWrapper(nullptr, geometryNode, checkBoxPaintProperty);
+    /**
+     * @tc.steps: step2. use DrawCheck to draw checkbox.
+     * @tc.expected: step2. DrawCheck successfully.
+     */
+    auto checkBoxModifier =
+        AceType::MakeRefPtr<CheckBoxModifier>(false, BOARD_COLOR, CHECK_COLOR, BORDER_COLOR, SHADOW_COLOR);
+    CheckBoxPaintMethod checkBoxPaintMethod(checkBoxModifier);
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(1));
+    RSPen pen;
+    RSPen shadowPen = RSPen(pen);
+    checkBoxPaintMethod.checkboxModifier_->checkStroke_ =  AceType::MakeRefPtr<AnimatablePropertyFloat>(2.0f);
+    checkBoxPaintMethod.checkboxModifier_->strokeSize_ =  AceType::MakeRefPtr<AnimatablePropertyFloat>(2.0f);
+    checkBoxPaintMethod.checkboxModifier_->DrawCheck(canvas, CONTENT_OFFSET, pen, shadowPen, CONTENT_SIZE);
 }
 } // namespace OHOS::Ace::NG

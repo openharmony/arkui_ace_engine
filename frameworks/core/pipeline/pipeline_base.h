@@ -36,6 +36,7 @@
 #include "core/common/event_manager.h"
 #include "core/common/platform_bridge.h"
 #include "core/common/platform_res_register.h"
+#include "core/common/thread_checker.h"
 #include "core/common/window_animation_config.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/theme/theme_manager.h"
@@ -82,6 +83,8 @@ public:
     ~PipelineBase() override;
 
     static RefPtr<PipelineBase> GetCurrentContext();
+
+    static RefPtr<ThemeManager> CurrentThemeManager();
 
     virtual void SetupRootElement() = 0;
 
@@ -403,7 +406,7 @@ public:
 
     const RefPtr<SharedImageManager>& GetOrCreateSharedImageManager()
     {
-        std::scoped_lock<std::shared_mutex> lock(imageMutex_);
+        std::scoped_lock<std::shared_mutex> lock(imageMtx_);
         if (!sharedImageManager_) {
             sharedImageManager_ = MakeRefPtr<SharedImageManager>(taskExecutor_);
         }
@@ -449,16 +452,21 @@ public:
 
     RefPtr<ThemeManager> GetThemeManager() const
     {
+        std::shared_lock<std::shared_mutex> lock(themeMtx_);
         return themeManager_;
     }
+
     void SetThemeManager(RefPtr<ThemeManager> theme)
     {
+        CHECK_RUN_ON(UI);
+        std::unique_lock<std::shared_mutex> lock(themeMtx_);
         themeManager_ = std::move(theme);
     }
 
     template<typename T>
     RefPtr<T> GetTheme() const
     {
+        std::shared_lock<std::shared_mutex> lock(themeMtx_);
         if (themeManager_) {
             return themeManager_->GetTheme<T>();
         }
@@ -909,7 +917,8 @@ protected:
     RefPtr<EventManager> eventManager_;
     RefPtr<ImageCache> imageCache_;
     RefPtr<SharedImageManager> sharedImageManager_;
-    mutable std::shared_mutex imageMutex_;
+    mutable std::shared_mutex imageMtx_;
+    mutable std::shared_mutex themeMtx_;
     RefPtr<ThemeManager> themeManager_;
     RefPtr<DataProviderManagerInterface> dataProviderManager_;
     RefPtr<FontManager> fontManager_;

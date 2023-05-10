@@ -68,6 +68,7 @@ public:
     virtual void SetBlockShape(const RefPtr<BasicShape>& value) = 0;
     virtual void SetStepSize(const Dimension& value) = 0;
     virtual void SetOnChange(std::function<void(float, int32_t)>&& eventOnChange) = 0;
+    virtual void SetOnChangeEvent(std::function<void(float)>&& onChangeEvent) = 0;
 
 private:
     static std::unique_ptr<SliderModel> instance_;

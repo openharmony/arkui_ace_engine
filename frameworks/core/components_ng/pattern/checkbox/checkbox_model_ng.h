@@ -33,6 +33,7 @@ public:
     void SetWidth(const Dimension& width) override;
     void SetHeight(const Dimension& height) override;
     void SetPadding(const NG::PaddingPropertyF& args, const NG::PaddingProperty& newArgs, bool flag) override;
+    void SetChangeEvent(ChangeEvent&& changeEvent) override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CHECKBOX_CHECKBOX_MODEL_NG_H

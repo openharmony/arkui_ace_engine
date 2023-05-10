@@ -100,6 +100,7 @@
 #include "bridge/declarative_frontend/jsview/js_qrcode.h"
 #include "bridge/declarative_frontend/jsview/js_radio.h"
 #include "bridge/declarative_frontend/jsview/js_rect.h"
+#include "bridge/declarative_frontend/jsview/js_recycle_view.h"
 #include "bridge/declarative_frontend/jsview/js_refresh.h"
 #include "bridge/declarative_frontend/jsview/js_relative_container.h"
 #include "bridge/declarative_frontend/jsview/js_render_image.h"
@@ -110,6 +111,7 @@
 #include "bridge/declarative_frontend/jsview/js_scroll.h"
 #include "bridge/declarative_frontend/jsview/js_scroller.h"
 #include "bridge/declarative_frontend/jsview/js_search.h"
+#include "bridge/declarative_frontend/jsview/js_sec_location_button.h"
 #include "bridge/declarative_frontend/jsview/js_select.h"
 #include "bridge/declarative_frontend/jsview/js_shape.h"
 #include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
@@ -200,6 +202,12 @@
 
 #ifndef WEARABLE_PRODUCT
 #include "bridge/declarative_frontend/jsview/js_camera.h"
+#endif
+
+#if defined(WINDOW_SCENE_SUPPORTED)
+#include "frameworks/bridge/declarative_frontend/jsview/window_scene/js_host_window_scene.h"
+#include "frameworks/bridge/declarative_frontend/jsview/window_scene/js_root_scene.h"
+#include "frameworks/bridge/declarative_frontend/jsview/window_scene/js_screen.h"
 #endif
 
 namespace OHOS::Ace::Framework {
@@ -506,6 +514,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
 #ifdef WINDOW_SCENE_SUPPORTED
     { "UIExtensionComponent", JSUIExtension::JSBind },
 #endif
+    { "SecLocationButton", JSSecLocationButton::JSBind },
 #ifdef ABILITY_COMPONENT_SUPPORTED
     { "AbilityComponent", JSAbilityComponent::JSBind },
 #endif
@@ -599,6 +608,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "FlowItem", JSWaterFlowItem::JSBind },
     { "RelativeContainer", JSRelativeContainer::JSBind },
     { "__Common__", JSCommonView::JSBind },
+    { "__Recycle__", JSRecycleView::JSBind },
     { "LinearGradient", JSLinearGradient::JSBind },
     { "ImageSpan", JSImageSpan::JSBind },
 #ifdef PREVIEW
@@ -615,6 +625,11 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
 #endif
 #if defined(MODEL_COMPONENT_SUPPORTED)
     { "Model", JSSceneView::JSBind },
+#endif
+#if defined(WINDOW_SCENE_SUPPORTED)
+    { "HostWindowScene", JSHostWindowScene::JSBind },
+    { "RootScene", JSRootScene::JSBind },
+    { "Screen", JSScreen::JSBind },
 #endif
 };
 

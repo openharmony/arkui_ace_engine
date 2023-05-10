@@ -78,9 +78,6 @@ public:
                     childCalcIdealLength = (idealSize.Width().value() - itemSpace * itemSpaceCount) / displayCount;
                 }
                 childSelfIdealSize.SetWidth(childCalcIdealLength);
-            } else {
-                property->UpdatePrevMargin(0.0_px);
-                property->UpdateNextMargin(0.0_px);
             }
         } else if (axis == Axis::VERTICAL) {
             if (idealSize.Height().has_value()) {
@@ -94,9 +91,6 @@ public:
                                             itemSpace * itemSpaceCount) / displayCount;
                 }
                 childSelfIdealSize.SetHeight(childCalcIdealLength);
-            } else {
-                property->UpdatePrevMargin(0.0_px);
-                property->UpdateNextMargin(0.0_px);
             }
         }
 

@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_sliding_panel.h"
 
 #include <algorithm>
+#include <cstdint>
 #include <iterator>
 
 #include "base/log/ace_scoring_log.h"
@@ -320,19 +321,44 @@ void JSSlidingPanel::SetShow(bool isShow)
     SlidingPanelModel::GetInstance()->SetIsShow(isShow);
 }
 
+void ParseModeObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
+{
+    CHECK_NULL_VOID(changeEventVal->IsFunction());
+
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
+    auto onMode = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* baseEventInfo) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("SlidingPanel.ModeChangeEvent");
+        auto eventInfo = TypeInfoHelper::DynamicCast<SlidingPanelSizeChangeEvent>(baseEventInfo);
+        if (!eventInfo) {
+            return;
+        }
+        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(eventInfo->GetMode())));
+        func->ExecuteJS(1, &newJSVal);
+    };
+    SlidingPanelModel::GetInstance()->SetModeChangeEvent(std::move(onMode));
+}
+
 void JSSlidingPanel::SetPanelMode(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The info is wrong, it is supposed to have at least 1 argument");
+    if (info.Length() < 1 || info.Length() > 2) {
+        LOGE("The arg is wrong, it is supposed to have 1 or 2 arguments");
         return;
     }
-    auto mode = static_cast<int32_t>(DEFAULT_PANELMODE);
-    if (info[0]->IsNumber()) {
+
+    int32_t mode = static_cast<int32_t>(DEFAULT_PANELMODE);
+    if (info.Length() > 0 && info[0]->IsNumber()) {
         const auto modeNumber = info[0]->ToNumber<int32_t>();
         if (modeNumber >= 0 && modeNumber < static_cast<int32_t>(PANEL_MODES.size())) {
             mode = modeNumber;
         }
     }
+
+    if (info.Length() > 1 && info[1]->IsObject()) {
+        JSRef<JSVal> modeObj = JSRef<JSObject>::Cast(info[1]);
+        ParseModeObject(info, modeObj);
+    }
+
     SlidingPanelModel::GetInstance()->SetPanelMode(PANEL_MODES[mode]);
 }
 

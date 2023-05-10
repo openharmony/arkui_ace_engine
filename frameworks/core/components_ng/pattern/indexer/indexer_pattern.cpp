@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -463,6 +463,9 @@ void IndexerPattern::ApplyIndexChanged(bool selectChanged, bool fromTouchUp)
             childRenderContext->SetClipToBounds(true);
             childNode->MarkModifyDone();
             index++;
+
+            AccessibilityEventType type = AccessibilityEventType::SELECTED;
+            host->OnAccessibilityEvent(type);
             continue;
         } else {
             if (!fromTouchUp || animateSelected_ == lastSelected_ || index != lastSelected_) {
@@ -1126,6 +1129,14 @@ void IndexerPattern::FireOnSelect(int32_t selectIndex, bool fromPress)
     auto indexerEventHub = host->GetEventHub<IndexerEventHub>();
     CHECK_NULL_VOID(indexerEventHub);
     if (fromPress || lastIndexFromPress_ == fromPress || lastFireSelectIndex_ != selectIndex) {
+        auto onChangeEvent = indexerEventHub->GetChangeEvent();
+        if (onChangeEvent && (selected_ >= 0) && (selected_ < itemCount_)) {
+            onChangeEvent(selected_);
+        }
+        auto onCreatChangeEvent = indexerEventHub->GetCreatChangeEvent();
+        if (onCreatChangeEvent && (selected_ >= 0) && (selected_ < itemCount_)) {
+            onCreatChangeEvent(selected_);
+        }
         auto onSelected = indexerEventHub->GetOnSelected();
         if (onSelected && (selectIndex >= 0) && (selectIndex < itemCount_)) {
             onSelected(selectIndex);

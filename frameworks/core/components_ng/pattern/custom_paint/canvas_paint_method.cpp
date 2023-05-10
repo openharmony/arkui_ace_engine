@@ -182,7 +182,11 @@ void CanvasPaintMethod::DrawImage(
 
     auto image = GetImage(canvasImage.src);
     CHECK_NULL_VOID(image);
-    InitImagePaint();
+#ifndef NEW_SKIA
+    InitImagePaint(imagePaint_);
+#else
+    InitImagePaint(imagePaint_, sampleOptions_);
+#endif
     InitPaintBlend(imagePaint_);
     const auto skCanvas =
         globalState_.GetType() == CompositeOperation::SOURCE_OVER ? skCanvas_.get() : cacheCanvas_.get();
@@ -202,7 +206,7 @@ void CanvasPaintMethod::DrawImage(
 #ifndef NEW_SKIA
             skCanvas_->drawImageRect(image, rect, &imagePaint_);
 #else
-            skCanvas_->drawImageRect(image, rect, options_, &imagePaint_);
+            skCanvas_->drawImageRect(image, rect, sampleOptions_, &imagePaint_);
 #endif
             break;
         }
@@ -213,7 +217,7 @@ void CanvasPaintMethod::DrawImage(
             skCanvas_->drawImageRect(image, srcRect, dstRect, &imagePaint_);
 #else
             skCanvas_->drawImageRect(
-                image, srcRect, dstRect, options_, &imagePaint_, SkCanvas::kStrict_SrcRectConstraint);
+                image, srcRect, dstRect, sampleOptions_, &imagePaint_, SkCanvas::kStrict_SrcRectConstraint);
 #endif
             break;
         }
@@ -232,7 +236,11 @@ void CanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::Canva
     sk_sp<SkImage> image =
         SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
     CHECK_NULL_VOID(image);
-    InitImagePaint();
+#ifndef NEW_SKIA
+    InitImagePaint(imagePaint_);
+#else
+    InitImagePaint(imagePaint_, sampleOptions_);
+#endif
     InitPaintBlend(imagePaint_);
     switch (canvasImage.flag) {
         case 0:
@@ -243,7 +251,7 @@ void CanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::Canva
 #ifndef NEW_SKIA
             skCanvas_->drawImageRect(image, rect, &imagePaint_);
 #else
-            skCanvas_->drawImageRect(image, rect, options_, &imagePaint_);
+            skCanvas_->drawImageRect(image, rect, sampleOptions_, &imagePaint_);
 #endif
             break;
         }
@@ -254,7 +262,7 @@ void CanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::Canva
             skCanvas_->drawImageRect(image, srcRect, dstRect, &imagePaint_);
 #else
             skCanvas_->drawImageRect(
-                image, srcRect, dstRect, options_, &imagePaint_, SkCanvas::kStrict_SrcRectConstraint);
+                image, srcRect, dstRect, sampleOptions_, &imagePaint_, SkCanvas::kStrict_SrcRectConstraint);
 #endif
             break;
         }
@@ -281,6 +289,16 @@ sk_sp<SkImage> CanvasPaintMethod::GetImage(const std::string& src)
     auto rasterizedImage = image->makeRasterImage();
     imageCache_->CacheImage(src, std::make_shared<Ace::CachedImage>(rasterizedImage));
     return rasterizedImage;
+}
+
+
+void CanvasPaintMethod::CloseImageBitmap(const std::string& src)
+{
+    CHECK_NULL_VOID(imageCache_);
+    auto cacheImage = imageCache_->GetCacheImage(src);
+    if (cacheImage && cacheImage->imagePtr) {
+        imageCache_->ClearCacheImage(src);
+    }
 }
 
 std::unique_ptr<Ace::ImageData> CanvasPaintMethod::GetImageData(
@@ -546,6 +564,12 @@ void CanvasPaintMethod::UpdateTextStyleForeground(
         ConvertTxtStyle(fillState_.GetTextStyle(), context_, txtStyle);
         if (fillState_.GetGradient().IsValid()) {
             SkPaint paint;
+#ifndef NEW_SKIA
+            InitImagePaint(paint);
+#else
+            SkSamplingOptions options;
+            InitImagePaint(paint, options);
+#endif
             paint.setStyle(SkPaint::Style::kFill_Style);
             UpdatePaintShader(offset, paint, fillState_.GetGradient());
             txtStyle.foreground = paint;
@@ -557,6 +581,12 @@ void CanvasPaintMethod::UpdateTextStyleForeground(
                 txtStyle.foreground.setAlphaf(globalState_.GetAlpha()); // set alpha after color
             } else {
                 SkPaint paint;
+#ifndef NEW_SKIA
+                InitImagePaint(paint);
+#else
+                SkSamplingOptions options;
+                InitImagePaint(paint, options);
+#endif
                 paint.setColor(fillState_.GetColor().GetValue());
                 paint.setAlphaf(globalState_.GetAlpha()); // set alpha after color
                 InitPaintBlend(paint);
@@ -566,7 +596,13 @@ void CanvasPaintMethod::UpdateTextStyleForeground(
         }
     } else {
         // use foreground to draw stroke
-        SkPaint paint = GetStrokePaint();
+        SkPaint paint;
+#ifndef NEW_SKIA
+        GetStrokePaint(paint);
+#else
+        SkSamplingOptions options;
+        GetStrokePaint(paint, options);
+#endif
         InitPaintBlend(paint);
         ConvertTxtStyle(strokeState_.GetTextStyle(), context_, txtStyle);
         txtStyle.font_size = strokeState_.GetTextStyle().GetFontSize().Value();

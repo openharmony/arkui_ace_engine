@@ -65,6 +65,7 @@ public:
     virtual void SetOnCopy(std::function<void(const std::string&)>&& func);
     virtual void SetOnCut(std::function<void(const std::string&)>&& func);
     virtual void SetOnPaste(std::function<void(const std::string&)>&& func);
+    virtual void SetOnChangeEvent(std::function<void(const std::string&)>&& onChangeEvent);
 
 private:
     static std::unique_ptr<SearchModel> instance_;

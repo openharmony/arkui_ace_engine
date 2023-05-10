@@ -22,6 +22,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/animation_option.h"
+#include "core/components/common/properties/color.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/marquee/marquee_layout_property.h"
@@ -78,10 +79,9 @@ void MarqueePattern::OnModifyDone()
     textLayoutProperty->UpdateFontWeight(layoutProperty->GetFontWeight().value_or(FontWeight::NORMAL));
     textLayoutProperty->UpdateFontFamily(
         layoutProperty->GetFontFamily().value_or(std::vector<std::string>({ "" })));
-    if (CheckMeasureFlag(textLayoutProperty->GetPropertyChangeFlag())) {
-        textChild->MarkModifyDone();
-        textChild->MarkDirtyNode();
-    }
+    textLayoutProperty->UpdateTextColor(layoutProperty->GetFontColor().value_or(Color()));
+    textChild->MarkModifyDone();
+    textChild->MarkDirtyNode();
     if (CheckMeasureFlag(layoutProperty->GetPropertyChangeFlag())) {
         forceStropAnimation_ = true;
         host->MarkDirtyNode();
@@ -106,13 +106,13 @@ void MarqueePattern::StartMarqueeAnimation()
     }
     auto geoNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geoNode);
-    auto marqueeWidth = geoNode->GetFrameSize().Width();
+    auto marqueeSize = geoNode->GetFrameSize();
     auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
     CHECK_NULL_VOID(textNode);
     auto textGeoNode = textNode->GetGeometryNode();
     CHECK_NULL_VOID(textGeoNode);
     auto textWidth = textGeoNode->GetFrameSize().Width();
-    if (GreatOrEqual(marqueeWidth, textWidth)) {
+    if (GreatOrEqual(marqueeSize.Width(), textWidth)) {
         lastStartStatus_ = false;
         return;
     }
@@ -121,7 +121,9 @@ void MarqueePattern::StartMarqueeAnimation()
     auto direction = layoutProperty->GetDirection().value_or(MarqueeDirection::LEFT);
     auto end = -1 * textWidth;
     if (direction == MarqueeDirection::RIGHT) {
-        end = marqueeWidth;
+        const auto& padding = layoutProperty->CreatePaddingAndBorder();
+        MinusPaddingToSize(padding, marqueeSize);
+        end = marqueeSize.Width() >= textWidth ? marqueeSize.Width() : textWidth;
     }
     auto duration = static_cast<int32_t>(std::abs(end) * DEFAULT_MARQUEE_SCROLL_DELAY);
     if (GreatNotEqual(step, 0.0)) {

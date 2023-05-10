@@ -130,6 +130,8 @@ RefPtr<FrameNode> FrameNode::CreateFrameNode(
 void FrameNode::ProcessOffscreenNode(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_VOID(node);
+    node->AttachToMainTree();
+    node->MarkModifyDone();
     node->UpdateLayoutPropertyFlag();
     auto layoutWrapper = node->CreateLayoutWrapper();
     CHECK_NULL_VOID(layoutWrapper);
@@ -563,40 +565,45 @@ double FrameNode::CalculateCurrentVisibleRatio(const RectF& visibleRect, const R
 void FrameNode::ProcessAllVisibleCallback(
     std::unordered_map<double, VisibleCallbackInfo>& visibleAreaCallbacks, double currentVisibleRatio)
 {
+    bool isHandled = false;
     for (auto& nodeCallbackInfo : visibleAreaCallbacks) {
         auto callbackRatio = nodeCallbackInfo.first;
         auto callbackIsVisible = nodeCallbackInfo.second.isCurrentVisible;
         if (GreatNotEqual(currentVisibleRatio, callbackRatio) && !callbackIsVisible) {
-            OnVisibleAreaChangeCallback(nodeCallbackInfo.second, true, currentVisibleRatio);
+            OnVisibleAreaChangeCallback(nodeCallbackInfo.second, true, currentVisibleRatio, isHandled);
+            isHandled = true;
             continue;
         }
 
         if (LessNotEqual(currentVisibleRatio, callbackRatio) && callbackIsVisible) {
-            OnVisibleAreaChangeCallback(nodeCallbackInfo.second, false, currentVisibleRatio);
+            OnVisibleAreaChangeCallback(nodeCallbackInfo.second, false, currentVisibleRatio, isHandled);
+            isHandled = true;
             continue;
         }
 
         if (NearEqual(currentVisibleRatio, callbackRatio) && NearEqual(callbackRatio, VISIBLE_RATIO_MIN)) {
             if (callbackIsVisible) {
-                OnVisibleAreaChangeCallback(nodeCallbackInfo.second, false, VISIBLE_RATIO_MIN);
+                OnVisibleAreaChangeCallback(nodeCallbackInfo.second, false, VISIBLE_RATIO_MIN, isHandled);
             } else {
-                OnVisibleAreaChangeCallback(nodeCallbackInfo.second, true, VISIBLE_RATIO_MIN);
+                OnVisibleAreaChangeCallback(nodeCallbackInfo.second, true, VISIBLE_RATIO_MIN, isHandled);
             }
+            isHandled = true;
         } else if (NearEqual(currentVisibleRatio, callbackRatio) && NearEqual(callbackRatio, VISIBLE_RATIO_MAX)) {
             if (!callbackIsVisible) {
-                OnVisibleAreaChangeCallback(nodeCallbackInfo.second, true, VISIBLE_RATIO_MAX);
+                OnVisibleAreaChangeCallback(nodeCallbackInfo.second, true, VISIBLE_RATIO_MAX, isHandled);
             } else {
-                OnVisibleAreaChangeCallback(nodeCallbackInfo.second, false, VISIBLE_RATIO_MAX);
+                OnVisibleAreaChangeCallback(nodeCallbackInfo.second, false, VISIBLE_RATIO_MAX, isHandled);
             }
+            isHandled = true;
         }
     }
 }
 
 void FrameNode::OnVisibleAreaChangeCallback(
-    VisibleCallbackInfo& callbackInfo, bool visibleType, double currentVisibleRatio)
+    VisibleCallbackInfo& callbackInfo, bool visibleType, double currentVisibleRatio, bool isHandled)
 {
     callbackInfo.isCurrentVisible = visibleType;
-    if (callbackInfo.callback) {
+    if (callbackInfo.callback && !isHandled) {
         callbackInfo.callback(visibleType, currentVisibleRatio);
     }
 }
@@ -1490,13 +1497,32 @@ int32_t FrameNode::GetAllDepthChildrenCount()
     return result;
 }
 
-void FrameNode::OnAccessibilityEvent(AccessibilityEventType eventType) const
+void FrameNode::OnAccessibilityEvent(
+    AccessibilityEventType eventType, WindowsContentChangeTypes windowsContentChangeType) const
+{
+    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
+        AccessibilityEvent event;
+        event.type = eventType;
+        event.windowContentChangeTypes = windowsContentChangeType;
+        event.nodeId = GetAccessibilityId();
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->SendEventToAccessibility(event);
+    }
+}
+
+void FrameNode::OnAccessibilityEvent(
+    AccessibilityEventType eventType, std::string beforeText, std::string latestContent) const
 {
     if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
         AccessibilityEvent event;
         event.type = eventType;
         event.nodeId = GetAccessibilityId();
-        PipelineContext::GetCurrentContext()->SendEventToAccessibility(event);
+        event.beforeText = beforeText;
+        event.latestContent = latestContent;
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->SendEventToAccessibility(event);
     }
 }
 
@@ -1602,18 +1628,33 @@ void FrameNode::UpdateAnimatablePropertyFloat(const std::string& propertyName, f
     property->Set(value);
 }
 
-void FrameNode::OnAddDisappearingChild()
+void FrameNode::CreateAnimatableArithmeticProperty(const std::string& propertyName,
+    RefPtr<CustomAnimatableArithmetic>& value,
+    std::function<void(const RefPtr<CustomAnimatableArithmetic>&)>& onCallbackEvent)
 {
     auto context = GetRenderContext();
     CHECK_NULL_VOID(context);
-    context->UpdateFreeze(true);
+    auto iter = nodeAnimatablePropertyMap_.find(propertyName);
+    if (iter != nodeAnimatablePropertyMap_.end()) {
+        LOGW("AnimatableProperty already exists!");
+        return;
+    }
+    auto property = AceType::MakeRefPtr<NodeAnimatableArithmeticProperty>(value, std::move(onCallbackEvent));
+    context->AttachNodeAnimatableProperty(property);
+    nodeAnimatablePropertyMap_.emplace(propertyName, property);
 }
 
-void FrameNode::OnRemoveDisappearingChild()
+void FrameNode::UpdateAnimatableArithmeticProperty(const std::string& propertyName,
+    RefPtr<CustomAnimatableArithmetic>& value)
 {
-    auto context = GetRenderContext();
-    CHECK_NULL_VOID(context);
-    context->UpdateFreeze(false);
+    auto iter = nodeAnimatablePropertyMap_.find(propertyName);
+    if (iter == nodeAnimatablePropertyMap_.end()) {
+        LOGW("AnimatableProperty not exists!");
+        return;
+    }
+    auto property = AceType::DynamicCast<NodeAnimatableArithmeticProperty>(iter->second);
+    CHECK_NULL_VOID(property);
+    property->Set(value);
 }
 
 std::string FrameNode::ProvideRestoreInfo()

@@ -107,10 +107,37 @@ void JSMenuItem::JSBind(BindingTarget globalObj)
     JSClass<JSMenuItem>::Bind(globalObj);
 }
 
-void JSMenuItem::IsSelected(bool isSelected)
+void ParseIsSelectedObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::MenuItemView::SetSelected(isSelected);
+    CHECK_NULL_VOID(changeEventVal->IsFunction());
+
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
+    auto onSelected = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](bool selected) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("MenuItem.SelectedChangeEvent");
+        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(selected));
+        func->ExecuteJS(1, &newJSVal);
+    };
+    NG::MenuItemView::SetSelectedChangeEvent(std::move(onSelected));
+}
+
+void JSMenuItem::IsSelected(const JSCallbackInfo& info)
+{
+    if (!Container::IsCurrentUseNewPipeline()) {
+        return;
+    }
+    if (info.Length() < 1 || info.Length() > 2) {
+        LOGE("The arg is wrong, it is supposed to have 1 or 2 arguments");
+        return;
+    }
+
+    bool isSelected = false;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        isSelected = info[0]->ToBoolean();
+    }
+    NG::MenuItemView::SetSelected(isSelected);
+    if (info.Length() > 1 && info[1]->IsFunction()) {
+        ParseIsSelectedObject(info, info[1]);
     }
 }
 

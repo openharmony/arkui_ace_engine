@@ -1720,4 +1720,27 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern012, TestSize.Level1)
     EXPECT_FALSE(timePickerRowPattern->OnKeyEvent(keyEvent));
     EXPECT_FALSE(timePickerRowPattern->HandleDirectionKey(KeyCode::KEY_DPAD_CENTER));
 }
+
+/**
+ * @tc.name: TimePickerFireChangeEventTest001
+ * @tc.desc: Test SetSelectedDate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerFireChangeEventTest001, TestSize.Level1)
+{
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+
+    auto changeEvent = [](const BaseEventInfo* info) {
+        EXPECT_EQ(info->GetType(), "DatePickerChangeEvent");
+    };
+    TimePickerModelNG::GetInstance()->SetChangeEvent(std::move(changeEvent));
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    timePickerRowPattern->FireChangeEvent(true);
+}
 } // namespace OHOS::Ace::NG

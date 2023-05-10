@@ -222,6 +222,7 @@ template("declarative_js_engine") {
       "jsview/js_qrcode.cpp",
       "jsview/js_radio.cpp",
       "jsview/js_rect.cpp",
+      "jsview/js_recycle_view.cpp",
       "jsview/js_refresh.cpp",
       "jsview/js_relative_container.cpp",
       "jsview/js_render_image.cpp",
@@ -232,6 +233,7 @@ template("declarative_js_engine") {
       "jsview/js_scroll.cpp",
       "jsview/js_scroller.cpp",
       "jsview/js_search.cpp",
+      "jsview/js_sec_location_button.cpp",
       "jsview/js_select.cpp",
       "jsview/js_shape.cpp",
       "jsview/js_shape_abstract.cpp",
@@ -272,6 +274,7 @@ template("declarative_js_engine") {
 
       # Models implemenations for classic fw
       "jsview/models/animator_model_impl.cpp",
+      "jsview/models/badge_model_impl.cpp",
       "jsview/models/blank_model_impl.cpp",
       "jsview/models/checkbox_model_impl.cpp",
       "jsview/models/checkboxgroup_model_impl.cpp",
@@ -475,6 +478,9 @@ template("declarative_js_engine") {
     if (is_cross_platform_build) {
       configs += [ "$ark_ets_path:ark_jsruntime_public_config" ]
       deps += [ "$ark_ets_path:libark_jsruntime_static" ]
+      if (defined(config.pixel_map_support) && config.pixel_map_support) {
+        configs += [ "//foundation/multimedia/image_framework/interfaces/innerkits:image_external_config" ]
+      }
     } else {
       external_deps += [ "ets_runtime:libark_jsruntime" ]
     }
@@ -498,8 +504,12 @@ template("declarative_js_engine") {
       }
 
       if (defined(config.window_scene_support) && config.window_scene_support) {
-        sources += [ "jsview/js_ui_extension.cpp" ]
-        deps += [ "$window_manager_path/window_scene/session:scene_session" ]
+        sources += [
+          "jsview/js_ui_extension.cpp",
+          "jsview/window_scene/js_host_window_scene.cpp",
+          "jsview/window_scene/js_root_scene.cpp",
+          "jsview/window_scene/js_screen.cpp",
+        ]
       }
     }
   }

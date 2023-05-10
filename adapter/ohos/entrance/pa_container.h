@@ -41,7 +41,7 @@ class PaContainer : public Container, public JsMessageDispatcher {
     DECLARE_ACE_TYPE(PaContainer, Container, JsMessageDispatcher);
 
 public:
-    PaContainer(int32_t instanceId, BackendType type, void* paAbility,
+    PaContainer(int32_t instanceId, BackendType type, void* paAbility, const std::string& hapPath,
         std::unique_ptr<PlatformEventCallback> callback);
     ~PaContainer() override = default;
 
@@ -138,7 +138,7 @@ public:
     }
 
     static bool Register();
-    static void CreateContainer(int32_t instanceId, BackendType type, void* paAbility,
+    static void CreateContainer(int32_t instanceId, BackendType type, void* paAbility, const std::string& hapPath,
         std::unique_ptr<PlatformEventCallback> callback);
     static void DestroyContainer(int32_t instanceId);
     static RefPtr<PaContainer> GetContainer(int32_t instanceId);
@@ -188,6 +188,7 @@ private:
     BackendType type_ = BackendType::SERVICE;
     std::unique_ptr<PlatformEventCallback> platformEventCallback_;
     void* paAbility_ = nullptr;
+    std::string hapPath_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PaContainer);
 };

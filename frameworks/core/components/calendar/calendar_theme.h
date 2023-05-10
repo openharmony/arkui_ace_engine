@@ -31,6 +31,23 @@ constexpr Color DEFAULT_WEEKEND_DAY_COLOR = Color(0x7D181819);
 constexpr Color DEFAULT_WEEKEND_LUNAR_COLOR = Color(0x7D181819);
 constexpr Color DEFAULT_NON_CURRENT_MONTH_LUNAR_COLOR = Color(0x75181819);
 constexpr Color DEFAULT_LUNAR_COLOR = Color(0x96181819);
+constexpr Color DEFAULT_CALENDAR_WEEK_COLOR = Color(0xffa0a1a5);
+constexpr Color DEFAULT_CALENDAR_DAY_COLOR = Color(0xffeaebed);
+constexpr Color DEFAULT_CALENDAR_LUNAR_COLOR = Color(0xffa0a1a5);
+constexpr Color DEFAULT_CALENDAR_WEEKEND_DAY_COLOR = Color(0xff808080);
+constexpr Color DEFAULT_CALENDAR_WEEKEND_LUNAR_COLOR = Color(0xff808080);
+constexpr Color DEFAULT_CALENDAR_TODAY_DAY_FOCUS_COLOR = Color(0xffffffff);
+constexpr Color DEFAULT_CALENDAR_TODAY_LUNAR_FOCUS_COLOR = Color(0xffffffff);
+constexpr Color DEFAULT_CALENDAR_TODAY_DAY_UNFOCUS_COLOR = Color(0xff0a59f7);
+constexpr Color DEFAULT_CALENDAR_TODAY_LUNAR_UNFOCUS_COLOR = Color(0xff0a59f7);
+constexpr Color DEFAULT_CALENDAR_WORK_MARK_COLOR = Color(0xffe84026);
+constexpr Color DEFAULT_CALENDAR_OFF_MARK_COLOR = Color(0xff0a59f7);
+constexpr Color DEFAULT_CALENDAR_NONCURRENT_MONTH_WORK_MARK_COLOR = Color(0x33e84026);
+constexpr Color DEFAULT_CALENDAR_NONCURRENT_MONTH_OFF_MARK_COLOR = Color(0x330a59f7);
+constexpr Color DEFAULT_CALENDAR_NONCURRENT_MONTH_DAY_COLOR = Color(0xff555e6b);
+constexpr Color DEFAULT_CALENDAR_NONCURRENT_MONTH_LUNAR_COLOR = Color(0xff555e6b);
+constexpr Color DEFAULT_CALENDAR_FOCUS_AREA_BACKGROUND_COLOR = Color(0xff5ea1ff);
+constexpr Color DEFAULT_CALENDAR_BLUR_AREA_BACKGROUND_COLOR = Color(0xffffffff);
 
 } // namespace
 
@@ -253,6 +270,7 @@ public:
         void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<CalendarTheme>& theme) const
         {
             if (!themeStyle) {
+                LOGW("Calendar parse pattern failed, themeStyle is invalid.");
                 return;
             }
             auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_CALENDAR, nullptr);
@@ -260,6 +278,7 @@ public:
                 LOGW("find pattern of calendar fail");
                 return;
             }
+            // Card theme
             theme->cardCalendarTheme_.focusedAreaBackgroundColor =
                 pattern->GetAttr<Color>("card_area_bg_color_focused", Color::BLUE);
             theme->cardCalendarTheme_.dayColor =
@@ -286,6 +305,42 @@ public:
                 pattern->GetAttr<Color>("card_title_text_color", Color::BLACK);
             theme->cardCalendarTheme_.clickEffectColor =
                 pattern->GetAttr<Color>("card_switch_button_bg_color_clicked", Color::TRANSPARENT);
+
+            // Normal theme
+            theme->calendarTheme_.dayColor =
+                pattern->GetAttr<Color>(CALENDAR_DAY_COLOR, DEFAULT_CALENDAR_DAY_COLOR);
+            theme->calendarTheme_.weekColor =
+                pattern->GetAttr<Color>(CALENDAR_WEEK_COLOR, DEFAULT_CALENDAR_WEEK_COLOR);
+            theme->calendarTheme_.lunarColor =
+                pattern->GetAttr<Color>(CALENDAR_LUNAR_COLOR, DEFAULT_CALENDAR_LUNAR_COLOR);
+            theme->calendarTheme_.weekendDayColor =
+                pattern->GetAttr<Color>(CALENDAR_WEEKEND_DAY_COLOR, DEFAULT_CALENDAR_WEEKEND_DAY_COLOR);
+            theme->calendarTheme_.weekendLunarColor =
+                pattern->GetAttr<Color>(CALENDAR_WEEKEND_LUNAR_COLOR, DEFAULT_CALENDAR_WEEKEND_LUNAR_COLOR);
+            theme->calendarTheme_.focusedDayColor =
+                pattern->GetAttr<Color>(CALENDAR_TODAY_DAY_FOCUS_COLOR, DEFAULT_CALENDAR_TODAY_DAY_FOCUS_COLOR);
+            theme->calendarTheme_.focusedLunarColor =
+                pattern->GetAttr<Color>(CALENDAR_TODAY_LUNAR_FOCUS_COLOR, DEFAULT_CALENDAR_TODAY_LUNAR_FOCUS_COLOR);
+            theme->calendarTheme_.todayColor =
+                pattern->GetAttr<Color>(CALENDAR_TODAY_DAY_UNFOCUS_COLOR, DEFAULT_CALENDAR_TODAY_DAY_UNFOCUS_COLOR);
+            theme->calendarTheme_.todayLunarColor =
+                pattern->GetAttr<Color>(CALENDAR_TODAY_LUNAR_UNFOCUS_COLOR, DEFAULT_CALENDAR_TODAY_LUNAR_UNFOCUS_COLOR);
+            theme->calendarTheme_.workDayMarkColor =
+                pattern->GetAttr<Color>(CALENDAR_WORK_MARK_COLOR, DEFAULT_CALENDAR_WORK_MARK_COLOR);
+            theme->calendarTheme_.offDayMarkColor =
+                pattern->GetAttr<Color>(CALENDAR_OFF_MARK_COLOR, DEFAULT_CALENDAR_OFF_MARK_COLOR);
+            theme->calendarTheme_.nonCurrentMonthWorkDayMarkColor = pattern->GetAttr<Color>(
+                CALENDAR_NONCURRENT_MONTH_WORK_MARK_COLOR, DEFAULT_CALENDAR_NONCURRENT_MONTH_WORK_MARK_COLOR);
+            theme->calendarTheme_.nonCurrentMonthOffDayMarkColor = pattern->GetAttr<Color>(
+                CALENDAR_NONCURRENT_MONTH_OFF_MARK_COLOR, DEFAULT_CALENDAR_NONCURRENT_MONTH_OFF_MARK_COLOR);
+            theme->calendarTheme_.nonCurrentMonthDayColor = pattern->GetAttr<Color>(
+                CALENDAR_NONCURRENT_MONTH_DAY_COLOR, DEFAULT_CALENDAR_NONCURRENT_MONTH_DAY_COLOR);
+            theme->calendarTheme_.nonCurrentMonthLunarColor = pattern->GetAttr<Color>(
+                CALENDAR_NONCURRENT_MONTH_LUNAR_COLOR, DEFAULT_CALENDAR_NONCURRENT_MONTH_LUNAR_COLOR);
+            theme->calendarTheme_.focusedAreaBackgroundColor = pattern->GetAttr<Color>(
+                CALENDAR_FOCUS_AREA_BACKGROUND_COLOR, DEFAULT_CALENDAR_FOCUS_AREA_BACKGROUND_COLOR);
+            theme->calendarTheme_.blurAreaBackgroundColor = pattern->GetAttr<Color>(
+                CALENDAR_BLUR_AREA_BACKGROUND_COLOR, DEFAULT_CALENDAR_BLUR_AREA_BACKGROUND_COLOR);
         }
     };
 

@@ -83,6 +83,6 @@ void SliderPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     sliderTipModifier_->SetTipFlag(tipParameters_.isDrawTip_);
     sliderTipModifier_->SetContentOffset(paintWrapper->GetContentOffset());
     sliderTipModifier_->SetContentSize(paintWrapper->GetContentSize());
-    sliderTipModifier_->SetCircleCenter(tipParameters_.circleCenter_);
+    sliderTipModifier_->SetBubbleVertex(tipParameters_.bubbleVertex_);
 }
 } // namespace OHOS::Ace::NG

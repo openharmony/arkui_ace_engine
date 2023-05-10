@@ -284,6 +284,15 @@ void ImageCache::ClearCacheFile(const std::vector<std::string>& removeFiles)
     }
 }
 
+void ImageCache::ClearCacheImage(const std::string& key)
+{
+    auto iter = imageCache_.find(key);
+    if (iter != imageCache_.end()) {
+        cacheList_.erase(iter->second);
+        imageCache_.erase(iter);
+    }
+}
+
 void ImageCache::SetCacheFileInfo()
 {
     std::lock_guard<std::mutex> lock(cacheFileInfoMutex_);

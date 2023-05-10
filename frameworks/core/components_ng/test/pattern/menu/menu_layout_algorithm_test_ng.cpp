@@ -21,8 +21,10 @@
 #include "base/geometry/ng/rect_t.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
+#include "core/components_ng/pattern/menu/multi_menu_layout_algorithm.h"
 #include "core/components_ng/syntax/lazy_for_each_model.h"
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
 #include "core/components_ng/test/mock/syntax/mock_lazy_for_each_builder.h"
@@ -44,6 +46,7 @@ constexpr float MENU_SIZE_HEIGHT = 150.0f;
 constexpr double MENU_OFFSET_X = 10.0;
 constexpr double MENU_OFFSET_Y = 10.0;
 const SizeF FULL_SCREEN_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
+} // namespace
 
 class MenuLayoutAlgorithmTestNg : public testing::Test {
 public:
@@ -511,5 +514,41 @@ HWTEST_F(MenuLayoutAlgorithmTestNg, MenuLayoutAlgorithmTestNg015, TestSize.Level
     resultOffset = menuLayoutAlgorithm->MenuLayoutAvoidAlgorithm(property, menuPattern, size);
     EXPECT_EQ(resultOffset, OffsetF(expectOffsetX, expectOffsetY));
 }
-} // namespace
+
+/**
+ * @tc.name: MenuLayoutAlgorithmTestNg016
+ * @tc.desc: Test MultiMenu layout algorithm.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayoutAlgorithmTestNg, MenuLayoutAlgorithmTestNg016, TestSize.Level1)
+{
+    auto menuPattern = AceType::MakeRefPtr<MenuPattern>(-1, "", MenuType::MULTI_MENU);
+    auto multiMenu = AceType::MakeRefPtr<FrameNode>("", -1, menuPattern);
+    auto algorithm = AceType::MakeRefPtr<MultiMenuLayoutAlgorithm>();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT));
+    auto layoutProp = AceType::MakeRefPtr<MenuLayoutProperty>();
+    auto* wrapper = new LayoutWrapper(multiMenu, geometryNode, layoutProp);
+
+    for (int32_t i = 0; i < 3; ++i) {
+        auto itemPattern = AceType::MakeRefPtr<MenuItemPattern>();
+        auto menuItem = AceType::MakeRefPtr<FrameNode>("", -1, itemPattern);
+        auto itemGeoNode = AceType::MakeRefPtr<GeometryNode>();
+        itemGeoNode->SetFrameSize(SizeF(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT / 3));
+        auto childWrapper = AceType::MakeRefPtr<LayoutWrapper>(menuItem, itemGeoNode, layoutProp);
+        wrapper->AppendChild(childWrapper);
+    }
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<SelectTheme>()));
+
+    algorithm->Layout(wrapper);
+    // default padding from theme is zero, so the offset on the first child is zero.
+    OffsetF offset;
+    for (auto&& child : wrapper->GetAllChildrenWithBuild()) {
+        EXPECT_EQ(child->GetGeometryNode()->GetMarginFrameOffset(), offset);
+        offset.AddY(MENU_SIZE_HEIGHT / 3);
+    }
+}
 } // namespace OHOS::Ace::NG

@@ -33,6 +33,9 @@ void AnimationUtils::Animate(const AnimationOption& option, const PropertyCallba
     if (callback) {
         callback();
     }
+    if (repeatCallback) {
+        repeatCallback();
+    }
     if (finishCallback) {
         finishCallback();
     }
@@ -42,8 +45,10 @@ void AnimationUtils::Animate(const AnimationOption& option, const PropertyCallba
     }
 }
 
-void AnimationUtils::AddKeyFrame(float fraction, const RefPtr<Curve>& curve, const PropertyCallback& callback) {}
-
+void AnimationUtils::AddKeyFrame(float fraction, const RefPtr<Curve>& curve, const PropertyCallback& callback)
+{
+    callback();
+}
 void AnimationUtils::AddKeyFrame(float fraction, const PropertyCallback& callback) {}
 
 void AnimationUtils::AnimateWithCurrentOptions(

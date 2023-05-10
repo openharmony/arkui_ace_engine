@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,10 +19,12 @@
 #include <functional>
 
 #include "base/thread/cancelable_callback.h"
+#include "core/accessibility/accessibility_utils.h"
 #include "core/components_ng/gestures/gesture_info.h"
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
 
 namespace OHOS::Ace::NG {
+using OnAccessibilityEventFunc = std::function<void(AccessibilityEventType)>;
 
 class ClickRecognizer : public MultiFingersRecognizer {
     DECLARE_ACE_TYPE(ClickRecognizer, MultiFingersRecognizer);
@@ -49,6 +51,11 @@ public:
     void SetUseCatchMode(bool useCatchMode)
     {
         useCatchMode_ = useCatchMode;
+    }
+
+    void SetOnAccessibility(OnAccessibilityEventFunc onAccessibilityEvent)
+    {
+        onAccessibilityEventFunc_ = std::move(onAccessibilityEvent);
     }
 
 private:
@@ -97,6 +104,8 @@ private:
     CancelableCallback<void()> tapDeadlineTimer_;
 
     int32_t currentTouchPointsNum_ = 0;
+
+    OnAccessibilityEventFunc onAccessibilityEventFunc_ = nullptr;
 };
 
 } // namespace OHOS::Ace::NG

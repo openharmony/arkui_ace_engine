@@ -298,7 +298,6 @@ protected:
     void UpdatePaintShader(const OffsetF& offset, SkPaint& paint, const Ace::Gradient& gradient);
     void UpdatePaintShader(const Ace::Pattern& pattern, SkPaint& paint);
     void InitPaintBlend(SkPaint& paint);
-    SkPaint GetStrokePaint();
     sk_sp<SkShader> MakeConicGradient(SkPaint& paint, const Ace::Gradient& gradient);
 
     void Path2DFill(const OffsetF& offset);
@@ -318,28 +317,33 @@ protected:
     void Path2DSetTransform(const OffsetF& offset, const PathArgs& args);
     SkMatrix GetMatrixFromPattern(const Ace::Pattern& pattern);
 
-    void SetGrayFilter(const std::string& percent);
-    void SetSepiaFilter(const std::string& percent);
-    void SetSaturateFilter(const std::string& percent);
-    void SetHueRotateFilter(const std::string& percent);
-    void SetInvertFilter(const std::string& percent);
-    void SetOpacityFilter(const std::string& percent);
-    void SetBrightnessFilter(const std::string& percent);
-    void SetContrastFilter(const std::string& percent);
-    void SetBlurFilter(const std::string& percent);
+    void SetGrayFilter(const std::string& percent, SkPaint& paint);
+    void SetSepiaFilter(const std::string& percent, SkPaint& paint);
+    void SetSaturateFilter(const std::string& percent, SkPaint& paint);
+    void SetHueRotateFilter(const std::string& percent, SkPaint& paint);
+    void SetInvertFilter(const std::string& percent, SkPaint& paint);
+    void SetOpacityFilter(const std::string& percent, SkPaint& paint);
+    void SetBrightnessFilter(const std::string& percent, SkPaint& paint);
+    void SetContrastFilter(const std::string& percent, SkPaint& paint);
+    void SetBlurFilter(const std::string& percent, SkPaint& paint);
 
-    void SetColorFilter(float matrix[20]);
+    void SetColorFilter(float matrix[20], SkPaint& paint);
 
     bool GetFilterType(FilterType& filterType, std::string& filterParam);
     bool IsPercentStr(std::string& percentStr);
     double PxStrToDouble(const std::string& str);
     double BlurStrToDouble(const std::string& str);
-
-    void InitImagePaint();
+#ifndef NEW_SKIA
+    void InitImagePaint(SkPaint& paint);
+    void GetStrokePaint(SkPaint& paint);
+#else
+    void InitImagePaint(SkPaint& paint, SkSamplingOptions& options);
+    void GetStrokePaint(SkPaint& paint, SkSamplingOptions& options);
+#endif
     void InitImageCallbacks();
 
-    void SetPaintImage();
-    void ClearPaintImage();
+    void SetPaintImage(SkPaint& paint);
+    void ClearPaintImage(SkPaint& paint);
     float PercentStrToFloat(const std::string& percentStr);
     FilterType FilterStrToFilterType(const std::string& filterStr);
     bool HasImageShadow() const;
@@ -379,7 +383,7 @@ protected:
     SkPath skPath2d_;
     SkPaint imagePaint_;
 #ifdef NEW_SKIA
-    SkSamplingOptions options_;
+    SkSamplingOptions sampleOptions_;
 #endif
     SkPaint cachePaint_;
     SkBitmap cacheBitmap_;

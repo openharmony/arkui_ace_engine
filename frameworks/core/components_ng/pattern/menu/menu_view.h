@@ -46,6 +46,9 @@ public:
     static void SetFontSize(const Dimension& fontSize);
     static void SetFontColor(const std::optional<Color>& color);
     static void SetFontWeight(FontWeight weight);
+private:
+    static void UpdateWrapperPaintProperty(const RefPtr<FrameNode>& wrapperNode, const MenuParam& menuParam,
+        const MenuType& isContextMenu);
 };
 } // namespace OHOS::Ace::NG
 

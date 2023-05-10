@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,8 +36,10 @@
 #ifndef _NATIVE_INTERFACE_XCOMPONENT_H_
 #define _NATIVE_INTERFACE_XCOMPONENT_H_
 
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
+
+#include "native_xcomponent_key_event.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -120,6 +122,13 @@ typedef enum {
     OH_NATIVEXCOMPONENT_SOURCE_TYPE_TOUCHPAD,
     /** Indicates that the input source generates a joystick multi-touch event. */
     OH_NATIVEXCOMPONENT_SOURCE_TYPE_JOYSTICK,
+    /**
+     * @brief Indicates that the input source generates a keyboard event.
+     *
+     * @since 10
+     * @version 1.0
+     */
+    OH_NATIVEXCOMPONENT_SOURCE_TYPE_KEYBOARD,
 } OH_NativeXComponent_EventSourceType;
 
 /**
@@ -262,6 +271,15 @@ typedef struct OH_NativeXComponent_MouseEvent_Callback {
     void (*DispatchHoverEvent)(OH_NativeXComponent* component, bool isHover);
 } OH_NativeXComponent_MouseEvent_Callback;
 
+struct OH_NativeXComponent_KeyEvent;
+/**
+ * @brief Provides an encapsulated <b>OH_NativeXComponent_KeyEvent</b> instance.
+ *
+ * @since 10
+ * @version 1.0
+ */
+typedef struct OH_NativeXComponent_KeyEvent OH_NativeXComponent_KeyEvent;
+
 /**
  * @brief Obtains the ID of the ArkUI XComponent.
  *
@@ -328,8 +346,8 @@ int32_t OH_NativeXComponent_GetTouchEvent(
  * @since 9
  * @version 1.0
  */
-int32_t OH_NativeXComponent_GetTouchPointToolType(OH_NativeXComponent* component, uint32_t pointIndex,
-    OH_NativeXComponent_TouchPointToolType* toolType);
+int32_t OH_NativeXComponent_GetTouchPointToolType(
+    OH_NativeXComponent* component, uint32_t pointIndex, OH_NativeXComponent_TouchPointToolType* toolType);
 
 /**
  * @brief Obtains the touch pointer tiltX by the ArkUI XComponent.
@@ -390,6 +408,110 @@ int32_t OH_NativeXComponent_RegisterCallback(OH_NativeXComponent* component, OH_
  */
 int32_t OH_NativeXComponent_RegisterMouseEventCallback(
     OH_NativeXComponent* component, OH_NativeXComponent_MouseEvent_Callback* callback);
+
+/**
+ * @brief Registers a callback for this <b>OH_NativeXComponent</b> instance.
+ *
+ * @param component Indicates the pointer to this <b>OH_NativeXComponent</b> instance.
+ * @param callback Indicates the pointer to a focus event callback.
+ * @return Returns the status code of the execution.
+ * @since 10
+ * @version 1.0
+ */
+int32_t OH_NativeXComponent_RegisterFocusEventCallback(
+    OH_NativeXComponent* component, void (*callback)(OH_NativeXComponent* component, void* window));
+
+/**
+ * @brief Registers a callback for this <b>OH_NativeXComponent</b> instance.
+ *
+ * @param component Indicates the pointer to this <b>OH_NativeXComponent</b> instance.
+ * @param callback Indicates the pointer to a key event callback.
+ * @return Returns the status code of the execution.
+ * @since 10
+ * @version 1.0
+ */
+int32_t OH_NativeXComponent_RegisterKeyEventCallback(
+    OH_NativeXComponent* component, void (*callback)(OH_NativeXComponent* component, void* window));
+
+/**
+ * @brief Registers a callback for this <b>OH_NativeXComponent</b> instance.
+ *
+ * @param component Indicates the pointer to this <b>OH_NativeXComponent</b> instance.
+ * @param callback Indicates the pointer to a blur event callback.
+ * @return Returns the status code of the execution.
+ * @since 10
+ * @version 1.0
+ */
+int32_t OH_NativeXComponent_RegisterBlurEventCallback(
+    OH_NativeXComponent* component, void (*callback)(OH_NativeXComponent* component, void* window));
+
+/**
+ * @brief Obtains the key event dispatched by the ArkUI XComponent.
+ *
+ * @param component Indicates the pointer to this <b>OH_NativeXComponent</b> instance.
+ * @param keyEvent Indicates the pointer to pointer of <b>OH_NativeXComponent_KeyEvent</b> instance.
+ * @return Returns the status code of the execution.
+ * @since 10
+ * @version 1.0
+ */
+int32_t OH_NativeXComponent_GetKeyEvent(OH_NativeXComponent* component, OH_NativeXComponent_KeyEvent** keyEvent);
+
+/**
+ * @brief Obtains the action of the key event.
+ *
+ * @param keyEvent Indicates the pointer to this <b>OH_NativeXComponent_KeyEvent</b> instance.
+ * @param action Indicates the action of the <b>OH_NativeXComponent_KeyEvent</b> instance.
+ * @return Returns the status code of the execution.
+ * @since 10
+ * @version 1.0
+ */
+int32_t OH_NativeXComponent_GetKeyEventAction(
+    OH_NativeXComponent_KeyEvent* keyEvent, OH_NativeXComponent_KeyAction* action);
+
+/**
+ * @brief Obtains the keyCode of the key event.
+ *
+ * @param keyEvent Indicates the pointer to this <b>OH_NativeXComponent_KeyEvent</b> instance.
+ * @param code Indicates the keyCode of the <b>OH_NativeXComponent_KeyEvent</b> instance.
+ * @return Returns the status code of the execution.
+ * @since 10
+ * @version 1.0
+ */
+int32_t OH_NativeXComponent_GetKeyEventCode(OH_NativeXComponent_KeyEvent* keyEvent, OH_NativeXComponent_KeyCode* code);
+
+/**
+ * @brief Obtains the sourceType of the key event.
+ *
+ * @param keyEvent Indicates the pointer to this <b>OH_NativeXComponent_KeyEvent</b> instance.
+ * @param sourceType Indicates the sourceType of the <b>OH_NativeXComponent_KeyEvent</b> instance.
+ * @return Returns the status code of the execution.
+ * @since 10
+ * @version 1.0
+ */
+int32_t OH_NativeXComponent_GetKeyEventSourceType(
+    OH_NativeXComponent_KeyEvent* keyEvent, OH_NativeXComponent_EventSourceType* sourceType);
+
+/**
+ * @brief Obtains the deviceId of the key event.
+ *
+ * @param keyEvent Indicates the pointer to this <b>OH_NativeXComponent_KeyEvent</b> instance.
+ * @param deviceId Indicates the deviceId of the <b>OH_NativeXComponent_KeyEvent</b> instance.
+ * @return Returns the status code of the execution.
+ * @since 10
+ * @version 1.0
+ */
+int32_t OH_NativeXComponent_GetKeyEventDeviceId(OH_NativeXComponent_KeyEvent* keyEvent, int64_t* deviceId);
+
+/**
+ * @brief Obtains the timestamp of the key event.
+ *
+ * @param keyEvent Indicates the pointer to this <b>OH_NativeXComponent_KeyEvent</b> instance.
+ * @param timestamp Indicates the timestamp of the <b>OH_NativeXComponent_KeyEvent</b> instance.
+ * @return Returns the status code of the execution.
+ * @since 10
+ * @version 1.0
+ */
+int32_t OH_NativeXComponent_GetKeyEventTimestamp(OH_NativeXComponent_KeyEvent* keyEvent, int64_t* timestamp);
 
 #ifdef __cplusplus
 };

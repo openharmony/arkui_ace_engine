@@ -233,6 +233,7 @@ bool StageManager::PopPage(bool needShowNext, bool needTransition)
     auto outPageNode = AceType::DynamicCast<FrameNode>(pageNode);
     if (needTransition) {
         StartTransition(outPageNode, inPageNode, RouteType::POP);
+        inPageNode->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
         return true;
     }
     stageNode_->RemoveChild(pageNode);

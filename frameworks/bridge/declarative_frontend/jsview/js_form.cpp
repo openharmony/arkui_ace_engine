@@ -99,6 +99,7 @@ void JSForm::SetSize(const JSCallbackInfo& info)
 
     if (info.Length() == 0 || !info[0]->IsObject()) {
         LOGW("form set size fail due to FormComponent construct param is empty or type is not Object");
+        return;
     }
     Dimension width = 0.0_vp;
     Dimension height = 0.0_vp;

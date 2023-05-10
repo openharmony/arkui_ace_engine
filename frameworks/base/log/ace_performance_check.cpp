@@ -46,6 +46,7 @@ std::unique_ptr<JsonValue> AcePerformanceCheck::performanceInfo_ = nullptr;
 void AcePerformanceCheck::Start()
 {
     if (SystemProperties::IsPerformanceCheckEnabled()) {
+        LOGI("AcePerformanceCheck::Start()");
         performanceInfo_ = JsonUtil::Create(true);
     }
 }
@@ -53,6 +54,7 @@ void AcePerformanceCheck::Start()
 void AcePerformanceCheck::Stop()
 {
     if (performanceInfo_) {
+        LOGI("AcePerformanceCheck::Stop()");
         auto info = performanceInfo_->ToString();
         // output info to json file
         auto filePath = AceApplicationInfo::GetInstance().GetDataFileDirPath() + "/arkui_bestpractice.json";
@@ -135,6 +137,7 @@ CodeInfo AceScopedPerformanceCheck::GetCodeInfo(int32_t row, int32_t col)
     auto sourceMap = frontend->GetCurrentPageSourceMap();
     CHECK_NULL_RETURN(sourceMap, {});
     auto codeInfo = sourceMap->Find(row, col);
+    LOGI("codeInfo=%{public}d, %{public}d, %{public}s", codeInfo.row, codeInfo.col, codeInfo.sources.c_str());
     return { codeInfo.row, codeInfo.col, codeInfo.sources };
 }
 

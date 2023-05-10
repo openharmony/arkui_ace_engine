@@ -553,4 +553,26 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg021, TestSize.Level1)
     pattern->UpdateAnimDir();
     EXPECT_EQ(pattern->animDir_, SideBarAnimationDirection::LTR);
 }
+
+/**
+ * @tc.name: SideBarSetOnChangeEvent001
+ * @tc.desc: Test SideBar Set Func
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarSetOnChangeEvent001, TestSize.Level1)
+{
+    SideBarContainerModelNG sideBarContainerModelInstance;
+    sideBarContainerModelInstance.Create();
+    ChangeEvent eventOnChange = [](const bool isShow) { EXPECT_TRUE(isShow); };
+    sideBarContainerModelInstance.SetOnChangeEvent(std::move(eventOnChange));
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto sideBarContainerEventHub = frameNode->GetEventHub<NG::SideBarContainerEventHub>();
+    ASSERT_NE(sideBarContainerEventHub, nullptr);
+    sideBarContainerEventHub->SetOnChangeEvent(std::move(eventOnChange));
+    sideBarContainerEventHub->FireChangeEvent(true);
+    sideBarContainerEventHub->SetOnChangeEvent(nullptr);
+    ASSERT_EQ(sideBarContainerEventHub->isShowChangeEvent_, nullptr);
+}
 } // namespace OHOS::Ace::NG

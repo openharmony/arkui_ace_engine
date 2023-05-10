@@ -70,10 +70,12 @@ extern const char THEME_PATTERN_VIDEO[];
 extern const char THEME_PATTERN_INDEXER[];
 extern const char THEME_PATTERN_APP_BAR[];
 extern const char THEME_PATTERN_ADVANCED_PATTERN[];
+extern const char THEME_PATTERN_SECURITY_COMPONENT[];
 
 // pattern general attributes
 extern const char PATTERN_FG_COLOR[];
 extern const char PATTERN_BG_COLOR[];
+extern const char PATTERN_BRODER_COLOR[];
 extern const char PATTERN_BG_COLOR_HOVERED[];
 extern const char PATTERN_BG_COLOR_CLICKED[];
 extern const char PATTERN_BG_COLOR_PRESSED[];
@@ -86,9 +88,29 @@ extern const char PATTERN_TEXT_COLOR_ALPHA[];
 extern const char PATTERN_TEXT_COLOR_FOCUSED[];
 extern const char PATTERN_TEXT_COLOR_SELECTED[];
 extern const char PATTERN_TEXT_COLOR_DISABLED[];
+extern const char PATTERN_DISABLED_TEXT_COLOR[];
 extern const char PATTERN_TEXT_SIZE[];
 extern const char PATTERN_WIDTH[];
 extern const char PATTERN_HEIGHT[];
+
+// pattern attributes for calendar
+extern const char CALENDAR_WEEK_COLOR[];
+extern const char CALENDAR_DAY_COLOR[];
+extern const char CALENDAR_LUNAR_COLOR[];
+extern const char CALENDAR_WEEKEND_DAY_COLOR[];
+extern const char CALENDAR_WEEKEND_LUNAR_COLOR[];
+extern const char CALENDAR_TODAY_DAY_FOCUS_COLOR[];
+extern const char CALENDAR_TODAY_LUNAR_FOCUS_COLOR[];
+extern const char CALENDAR_TODAY_DAY_UNFOCUS_COLOR[];
+extern const char CALENDAR_TODAY_LUNAR_UNFOCUS_COLOR[];
+extern const char CALENDAR_WORK_MARK_COLOR[];
+extern const char CALENDAR_OFF_MARK_COLOR[];
+extern const char CALENDAR_NONCURRENT_MONTH_WORK_MARK_COLOR[];
+extern const char CALENDAR_NONCURRENT_MONTH_OFF_MARK_COLOR[];
+extern const char CALENDAR_NONCURRENT_MONTH_DAY_COLOR[];
+extern const char CALENDAR_NONCURRENT_MONTH_LUNAR_COLOR[];
+extern const char CALENDAR_FOCUS_AREA_BACKGROUND_COLOR[];
+extern const char CALENDAR_BLUR_AREA_BACKGROUND_COLOR[];
 
 // pattern attributes for checkable
 extern const char RADIO_WIDTH[];
@@ -151,5 +173,20 @@ extern const char BADGE_BORDER_WIDTH[];
 // swiper attributes
 extern const char INDICATOR_TEXT_FONT_SIZE[];
 extern const char INDICATOR_TEXT_FONT_COLOR[];
+
+// textinput attributes
+extern const char ERROR_TEXT_UNDERLINE_COLOR[];
+extern const char OHOS_ID_COLOR_LIST_SEPARATOR[];
+extern const char OHOS_ID_COLOR_TEXT_HINT[];
+extern const char BORDER_RADIUS_SIZE[];
+// swiper attributes for arrow
+extern const char ARROW_COLOR_BOARDCOLOR_HOVER[];
+extern const char ARROW_COLOR_BOARDCOLOR_CLICK[];
+extern const char ARROW_COLOR_PRIMARY[];
+extern const char ARROW_COLOR_PRIMARY_CONTRARY[];
+extern const char ARROW_DISABLED_ALPHA[];
+extern const char ARROW_HORIZONTAL_MARGIN[];
+extern const char ARROW_VERTICAL_MARGIN[];
+extern const char ARROW_COLOR_COMPONENT_NORMAL[];
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_THEME_ATTRIBUTES_H
