@@ -1018,6 +1018,7 @@ void RosenRenderBox::SetShadow(const Shadow& shadow)
     rsNode->SetShadowColor(shadow.GetColor().GetValue());
     rsNode->SetShadowOffsetX(shadow.GetOffset().GetX());
     rsNode->SetShadowOffsetY(shadow.GetOffset().GetY());
+    rsNode->SetShadowMask(shadow.GetShadowType() == ShadowType::BLUR);
 }
 
 void RosenRenderBox::SetBorderWidth(double width, const BorderEdgeHelper& helper)

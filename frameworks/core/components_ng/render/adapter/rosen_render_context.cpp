@@ -1522,6 +1522,7 @@ void RosenRenderContext::OnBackShadowUpdate(const Shadow& shadow)
     rsNode_->SetShadowColor(shadow.GetColor().GetValue());
     rsNode_->SetShadowOffsetX(shadow.GetOffset().GetX());
     rsNode_->SetShadowOffsetY(shadow.GetOffset().GetY());
+    rsNode_->SetShadowMask(shadow.GetShadowType() == ShadowType::BLUR);
     if (shadow.GetHardwareAcceleration()) {
         rsNode_->SetShadowElevation(shadow.GetElevation());
     } else {

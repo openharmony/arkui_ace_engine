@@ -999,6 +999,12 @@ var ShadowStyle;
   ShadowStyle[ShadowStyle["OUTERFLOATING_MD"] = 5] = "OUTERFLOATING_MD";
 })(ShadowStyle || (ShadowStyle = {}));
 
+var ShadowType;
+(function (ShadowType) {
+  ShadowType[ShadowType["COLOR"] = 0] = "COLOR";
+  ShadowType[ShadowType["BLUR"] = 1] = "BLUR";
+})(ShadowType || (ShadowType = {}));
+
 var BreakpointsReference;
 (function (BreakpointsReference) {
   BreakpointsReference[BreakpointsReference["WindowSize"] = 0] = "WindowSize";
