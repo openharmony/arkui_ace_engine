@@ -21,7 +21,6 @@ ohos_unittest("panel_option_test_ng") {
   module_out_path = pattern_test_output_path
 
   include_dirs = [
-    "//third_party/flutter/skia/src",
     "//third_party/bounds_checking_function/include",
     "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src",
     "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include",
@@ -118,9 +117,8 @@ ohos_unittest("panel_option_test_ng") {
   ]
 
   deps = [
-    "$ace_flutter_engine_root:third_party_flutter_engine_ohos",
-    "$ace_flutter_engine_root/skia:ace_skia_ohos",
     "$ace_root/frameworks/base:ace_memory_monitor_ohos",
+    "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
     "$ace_root/test/unittest:ace_unittest_log",
     "$ace_root/test/unittest:ace_unittest_trace",
     "$cjson_root:cjson",
@@ -132,8 +130,6 @@ ohos_unittest("panel_option_test_ng") {
   configs = [
     "$ace_root:ace_test_config",
     "$ace_root:ace_config",
-    "$ace_flutter_engine_root:flutter_config",
-    "$ace_flutter_engine_root/skia:skia_config",
     "//commonlibrary/c_utils/base:utils_config",
     "//foundation/graphic/graphic_2d/utils/buffer_handle:buffer_handle_public_config",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_base:export_config",

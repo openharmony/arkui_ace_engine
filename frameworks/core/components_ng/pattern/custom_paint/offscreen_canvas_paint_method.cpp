@@ -133,7 +133,11 @@ void OffscreenCanvasPaintMethod::DrawImage(
     InitPaintBlend(cachePaint_);
     const auto skCanvas =
         globalState_.GetType() == CompositeOperation::SOURCE_OVER ? skCanvas_.get() : cacheCanvas_.get();
+#ifndef NEW_SKIA
     InitImagePaint(imagePaint_);
+#else
+    InitImagePaint(imagePaint_, sampleOptions_);
+#endif
     if (HasImageShadow()) {
         SkRect skRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
         SkPath path;
@@ -149,7 +153,7 @@ void OffscreenCanvasPaintMethod::DrawImage(
 #ifndef NEW_SKIA
             skCanvas->drawImageRect(image, rect, &imagePaint_);
 #else
-            skCanvas->drawImageRect(image, rect, SkSamplingOptions(), &imagePaint_);
+            skCanvas->drawImageRect(image, rect, sampleOptions_, &imagePaint_);
 #endif
             break;
         }
@@ -162,7 +166,7 @@ void OffscreenCanvasPaintMethod::DrawImage(
             skCanvas->drawImageRect(image, srcRect, dstRect, &imagePaint_);
 #else
             skCanvas->drawImageRect(
-                image, srcRect, dstRect, SkSamplingOptions(), &imagePaint_, SkCanvas::kFast_SrcRectConstraint);
+                image, srcRect, dstRect, sampleOptions_, &imagePaint_, SkCanvas::kFast_SrcRectConstraint);
 #endif
             break;
         }
@@ -173,7 +177,7 @@ void OffscreenCanvasPaintMethod::DrawImage(
 #ifndef NEW_SKIA
         skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
 #else
-        skCanvas_->drawImage(cacheBitmap_.asImage(), 0, 0, SkSamplingOptions(), &cachePaint_);
+        skCanvas_->drawImage(cacheBitmap_.asImage(), 0, 0, sampleOptions_, &cachePaint_);
 #endif
         cacheBitmap_.eraseColor(0);
     }
@@ -194,7 +198,11 @@ void OffscreenCanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const A
     InitPaintBlend(cachePaint_);
     const auto skCanvas =
         globalState_.GetType() == CompositeOperation::SOURCE_OVER ? skCanvas_.get() : cacheCanvas_.get();
+#ifndef NEW_SKIA
     InitImagePaint(imagePaint_);
+#else
+    InitImagePaint(imagePaint_, sampleOptions_);
+#endif
     switch (canvasImage.flag) {
         case 0:
             skCanvas->drawImage(image, canvasImage.dx, canvasImage.dy);
@@ -204,7 +212,7 @@ void OffscreenCanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const A
 #ifndef NEW_SKIA
             skCanvas->drawImageRect(image, rect, &imagePaint_);
 #else
-            skCanvas->drawImageRect(image, rect, SkSamplingOptions(), &imagePaint_);
+            skCanvas->drawImageRect(image, rect, sampleOptions_, &imagePaint_);
 #endif
             break;
         }
@@ -217,7 +225,7 @@ void OffscreenCanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const A
             skCanvas->drawImageRect(image, srcRect, dstRect, &imagePaint_);
 #else
             skCanvas->drawImageRect(
-                image, srcRect, dstRect, SkSamplingOptions(), &imagePaint_, SkCanvas::kFast_SrcRectConstraint);
+                image, srcRect, dstRect, sampleOptions_, &imagePaint_, SkCanvas::kFast_SrcRectConstraint);
 #endif
             break;
         }
@@ -228,7 +236,7 @@ void OffscreenCanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const A
 #ifndef NEW_SKIA
         skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
 #else
-        skCanvas_->drawImage(cacheBitmap_.asImage(), 0, 0, SkSamplingOptions(), &cachePaint_);
+        skCanvas_->drawImage(cacheBitmap_.asImage(), 0, 0, sampleOptions_, &cachePaint_);
 #endif
         cacheBitmap_.eraseColor(0);
     }
@@ -467,7 +475,12 @@ void OffscreenCanvasPaintMethod::UpdateTextStyleForeground(bool isStroke, txt::T
         ConvertTxtStyle(fillState_.GetTextStyle(), context_, txtStyle);
         if (fillState_.GetGradient().IsValid()) {
             SkPaint paint;
+#ifndef NEW_SKIA
             InitImagePaint(paint);
+#else
+            SkSamplingOptions options;
+            InitImagePaint(paint, options);
+#endif
             paint.setStyle(SkPaint::Style::kFill_Style);
             UpdatePaintShader(OffsetF(0, 0), paint, fillState_.GetGradient());
             txtStyle.foreground = paint;
@@ -479,7 +492,12 @@ void OffscreenCanvasPaintMethod::UpdateTextStyleForeground(bool isStroke, txt::T
                 txtStyle.foreground.setAlphaf(globalState_.GetAlpha()); // set alpha after color
             } else {
                 SkPaint paint;
+#ifndef NEW_SKIA
                 InitImagePaint(paint);
+#else
+                SkSamplingOptions options;
+                InitImagePaint(paint, options);
+#endif
                 paint.setColor(fillState_.GetColor().GetValue());
                 paint.setAlphaf(globalState_.GetAlpha()); // set alpha after color
                 txtStyle.foreground = paint;
@@ -488,7 +506,13 @@ void OffscreenCanvasPaintMethod::UpdateTextStyleForeground(bool isStroke, txt::T
         }
     } else {
         // use foreground to draw stroke
-        SkPaint paint = GetStrokePaint();
+        SkPaint paint;
+#ifndef NEW_SKIA
+        GetStrokePaint(paint);
+#else
+        SkSamplingOptions options;
+        GetStrokePaint(paint, options);
+#endif
         ConvertTxtStyle(strokeState_.GetTextStyle(), context_, txtStyle);
         txtStyle.font_size = strokeState_.GetTextStyle().GetFontSize().Value();
         if (strokeState_.GetGradient().IsValid()) {

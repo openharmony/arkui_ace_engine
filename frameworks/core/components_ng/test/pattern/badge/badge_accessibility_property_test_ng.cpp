@@ -23,7 +23,7 @@
 #undef private
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/badge/badge_pattern.h"
-#include "core/components_ng/pattern/badge/badge_view.h"
+#include "core/components_ng/pattern/badge/badge_model_ng.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
@@ -61,8 +61,8 @@ void BadgeAccessibilityPropertyTestNg::TearDown()
  */
 HWTEST_F(BadgeAccessibilityPropertyTestNg, BadgeAccessibilityPropertyTestNg001, TestSize.Level1)
 {
-    BadgeView badge;
-    NG::BadgeView::BadgeParameters badgeParameters;
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
     badgeParameters.badgeValue = VALUE;
     badge.Create(badgeParameters);
 
@@ -80,8 +80,8 @@ HWTEST_F(BadgeAccessibilityPropertyTestNg, BadgeAccessibilityPropertyTestNg001, 
  */
 HWTEST_F(BadgeAccessibilityPropertyTestNg, BadgeAccessibilityPropertyTestNg002, TestSize.Level1)
 {
-    BadgeView badge;
-    NG::BadgeView::BadgeParameters badgeParameters;
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
     badgeParameters.badgeValue = VALUE;
     badgeParameters.badgeCount = COUNT;
     badge.Create(badgeParameters);
@@ -100,8 +100,8 @@ HWTEST_F(BadgeAccessibilityPropertyTestNg, BadgeAccessibilityPropertyTestNg002, 
  */
 HWTEST_F(BadgeAccessibilityPropertyTestNg, BadgeAccessibilityPropertyTestNg003, TestSize.Level1)
 {
-    BadgeView badge;
-    NG::BadgeView::BadgeParameters badgeParameters;
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
     badge.Create(badgeParameters);
 
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());

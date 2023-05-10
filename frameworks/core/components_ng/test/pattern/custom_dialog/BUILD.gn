@@ -166,10 +166,9 @@ ohos_unittest("custom_dialog_test_ng") {
   ]
 
   deps = [
-    "$ace_flutter_engine_root:third_party_flutter_engine_ohos",
-    "$ace_flutter_engine_root/skia:ace_skia_ohos",
     "$ace_graphic/rosen/modules/2d_graphics:2d_graphics",
     "$ace_graphic/rosen/modules/render_service_client:librender_service_client",
+    "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
     "$cjson_root:cjson",
     "//third_party/googletest:gmock_main",
   ]

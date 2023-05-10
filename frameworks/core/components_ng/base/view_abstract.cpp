@@ -38,7 +38,6 @@
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
-
 namespace {
 
 // common function to bind menu
@@ -96,6 +95,18 @@ void ViewAbstract::SetHeight(const CalcLength& height)
         width = layoutConstraint->selfIdealSize->Width();
     }
     layoutProperty->UpdateUserDefinedIdealSize(CalcSize(width, height));
+}
+
+void ViewAbstract::SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    ClickEffectInfo clickEffectInfo;
+    clickEffectInfo.level = level;
+    clickEffectInfo.scaleNumber = scaleValue;
+    ACE_UPDATE_RENDER_CONTEXT(ClickEffectLevel, clickEffectInfo);
 }
 
 void ViewAbstract::ClearWidthOrHeight(bool isWidth)
@@ -942,12 +953,8 @@ void ViewAbstract::BindPopup(
                 popupPattern->StartEnteringAnimation(nullptr);
             }
         } else {
-            if (popupPattern) {
-                popupPattern->StartExitingAnimation([targetId]() {
-                    LOGI("Popup now hide in subwindow.");
-                    SubwindowManager::GetInstance()->HidePopupNG(targetId);
-                });
-            }
+            LOGI("Popup now hide in subwindow.");
+            SubwindowManager::GetInstance()->HidePopupNG(targetId);
         }
         return;
     }
@@ -968,15 +975,8 @@ void ViewAbstract::BindPopup(
             popupPattern->StartEnteringAnimation(nullptr);
         }
     } else {
-        if (popupPattern) {
-            popupPattern->StartExitingAnimation(
-                [targetId, popupInfo, weakOverlayManger = AceType::WeakClaim(AceType::RawPtr(overlayManager))]() {
-                    auto overlay = weakOverlayManger.Upgrade();
-                    CHECK_NULL_VOID(overlay);
-                    LOGI("begin to update popup node.");
-                    overlay->UpdatePopupNode(targetId, popupInfo);
-                });
-        }
+        LOGI("begin to update popup node.");
+        overlayManager->UpdatePopupNode(targetId, popupInfo);
     }
 }
 
@@ -1417,5 +1417,22 @@ void ViewAbstract::UpdateAnimatablePropertyFloat(const std::string& propertyName
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     frameNode->UpdateAnimatablePropertyFloat(propertyName, value);
+}
+
+void ViewAbstract::CreateAnimatableArithmeticProperty(const std::string& propertyName,
+    RefPtr<CustomAnimatableArithmetic>& value,
+    std::function<void(const RefPtr<CustomAnimatableArithmetic>&)>& onCallbackEvent)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->CreateAnimatableArithmeticProperty(propertyName, value, onCallbackEvent);
+}
+
+void ViewAbstract::UpdateAnimatableArithmeticProperty(const std::string& propertyName,
+    RefPtr<CustomAnimatableArithmetic>& value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->UpdateAnimatableArithmeticProperty(propertyName, value);
 }
 } // namespace OHOS::Ace::NG

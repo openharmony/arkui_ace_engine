@@ -16,7 +16,6 @@
 #include "base/thread/background_task_executor.h"
 
 namespace OHOS::Ace {
-
 BackgroundTaskExecutor& BackgroundTaskExecutor::GetInstance()
 {
     static BackgroundTaskExecutor instance;
@@ -46,5 +45,4 @@ void BackgroundTaskExecutor::StartNewThreads(size_t num) {}
 void BackgroundTaskExecutor::ThreadLoop(uint32_t threadNo) {}
 
 void BackgroundTaskExecutor::TriggerGarbageCollection() {}
-
 } // namespace OHOS::Ace

@@ -259,6 +259,7 @@ ACE_WEAK_SYM void SystemProperties::InitPerformanceParameters()
         LOGI("Performance detection mode is not turned on");
         return;
     }
+    LOGI("SystemProperties::InitPerformanceParameters");
     SystemProperties::performanceProps_ = std::make_unique<PerformanceCheckParameter>();
     SystemProperties::performanceProps_->pageNodes =
         system::GetIntParameter<int>("arkui.performancecheck.9901.pagenodes", PAGE_NODES);

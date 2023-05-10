@@ -19,9 +19,6 @@
 #include <unordered_map>
 
 #include "base/thread/task_executor.h"
-#include "base/utils/utils.h"
-#include "base/log/event_report.h"
-#include "base/log/log.h"
 
 namespace OHOS::Ace {
 class ThreadWatcher;

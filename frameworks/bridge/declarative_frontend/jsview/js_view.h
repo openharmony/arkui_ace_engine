@@ -406,6 +406,16 @@ public:
         recycleCustomNodeName_ = recycleCustomNodeName;
     }
 
+    void SetIsRecycleRerender(bool isRecycleRerender)
+    {
+        isRecycleRerender_ = isRecycleRerender;
+    }
+
+    bool GetIsRecycleRerender()
+    {
+        return isRecycleRerender_;
+    }
+
 private:
     void MarkNeedUpdate() override;
 
@@ -435,6 +445,8 @@ private:
     // Store the recycle nodes name as key
     std::string recycleCustomNodeName_;
     std::string jsViewName_;
+
+    bool isRecycleRerender_ = false;
 };
 
 } // namespace OHOS::Ace::Framework

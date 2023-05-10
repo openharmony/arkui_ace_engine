@@ -15,10 +15,6 @@
 
 #include "bridge/declarative_frontend/jsview/window_scene/js_host_window_scene.h"
 
-#include "session/host/include/scene_session.h"
-#include "session_manager/include/scene_session_manager.h"
-
-#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "core/components_ng/pattern/window_scene/scene/host/host_window_scene_model.h"
 
 namespace OHOS::Ace::Framework {
@@ -50,12 +46,6 @@ void JSHostWindowScene::Create(const JSCallbackInfo& info)
     }
 
     auto persistentId = static_cast<uint64_t>(info[0]->ToNumber<double>());
-    auto sceneSession = Rosen::SceneSessionManager::GetInstance().GetSceneSession(persistentId);
-    if (sceneSession == nullptr) {
-        LOGE("sceneSession is nullptr");
-        return;
-    }
-
-    NG::HostWindowSceneModel::Create(sceneSession);
+    NG::HostWindowSceneModel::Create(persistentId);
 }
 } // namespace OHOS::Ace::Framework

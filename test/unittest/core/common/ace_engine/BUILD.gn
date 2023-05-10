@@ -11,25 +11,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/test.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ohos_unittest("ace_engine_test") {
-  module_out_path = "$basic_test_output_path/common"
-
+ace_unittest("ace_engine_special_test") {
+  type = "basic/common"
   sources = [
     "$ace_root/frameworks/core/common/ace_engine.cpp",
-    "$ace_root/test/mock/core/common/mock_container.cpp",
+    "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/frameworks/core/common/test/mock/mock_watch_dog.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_cache.cpp",
-    "$ace_root/frameworks/base/test/mock/mock_background_task_executor.cpp",
-    "ace_engine_test.cpp",
+    "$ace_root/test/mock/base/mock_background_task_executor.cpp",
+    "$ace_root/test/mock/core/common/mock_container.cpp",
+    "ace_engine_special_test.cpp",
   ]
-  deps = [
-    "$ace_root/frameworks/base:ace_memory_monitor_ohos",
-    "$ace_root/test/unittest:ace_unittest_log",
-    "//third_party/googletest:gmock_main",
-  ]
-
-  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 }

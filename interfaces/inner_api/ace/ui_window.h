@@ -36,14 +36,13 @@ public:
         const sptr<Rosen::ISession>& iSession);
 
     static std::shared_ptr<UIWindow> CreateWindowExtension(const std::shared_ptr<AbilityRuntime::Context>& context,
-        const sptr<Rosen::ISession>& iSession, const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode);
+        const sptr<Rosen::ISession>& iSession);
 
     virtual ~UIWindow() = default;
 
     virtual void LoadContent(const std::string& contentUrl, NativeEngine* engine, NativeValue* storage,
         AbilityRuntime::Context* context = nullptr) = 0;
 
-    // for lifecycle
     virtual void RegisterSessionStageStateListener(
         const std::shared_ptr<Rosen::ISessionStageStateListener>& listener) = 0;
 
@@ -51,6 +50,7 @@ public:
     virtual void Foreground() = 0;
     virtual void Background() = 0;
     virtual void Disconnect() = 0;
+    virtual void OnNewWant(const AAFwk::Want& want) = 0;
 };
 
 } // namespace OHOS::Ace::NG

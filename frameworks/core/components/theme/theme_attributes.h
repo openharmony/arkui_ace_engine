@@ -70,6 +70,7 @@ extern const char THEME_PATTERN_VIDEO[];
 extern const char THEME_PATTERN_INDEXER[];
 extern const char THEME_PATTERN_APP_BAR[];
 extern const char THEME_PATTERN_ADVANCED_PATTERN[];
+extern const char THEME_PATTERN_SECURITY_COMPONENT[];
 
 // pattern general attributes
 extern const char PATTERN_FG_COLOR[];

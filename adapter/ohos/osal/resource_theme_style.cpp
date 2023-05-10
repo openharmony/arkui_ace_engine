@@ -70,8 +70,20 @@ void ResourceThemeStyle::ParseContent()
 {
     static const std::set<std::string> stringAttrs = {
         "attribute_text_font_family_regular",
-        "attribute_text_font_family_medium"
+        "attribute_text_font_family_medium",
+        "description_current_location",
+        "description_add_location",
+        "description_select_location",
+        "description_share_location",
+        "description_send_location",
+        "description_locating",
+        "description_location",
+        "description_send_current_location",
+        "description_relocation",
+        "description_punch_in",
+        "description_current_position"
     };
+
     for (auto& [attrName, attrValue] : rawAttrs_) {
         if (attrName.empty() || attrValue.empty()) {
             LOGD("theme attr name:%{public}s or value:%{public}s is empty", attrName.c_str(), attrValue.c_str());

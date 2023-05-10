@@ -113,6 +113,14 @@ void SlidingPanelPattern::Update()
     auto mode = layoutProperty->GetPanelMode() == PanelMode::AUTO
                     ? PanelMode::FULL
                     : layoutProperty->GetPanelMode().value_or(PanelMode::HALF);
+    if (mode_.value() == mode) {
+        if (mode == PanelMode::HALF && type_ == PanelType::MINI_BAR) {
+            mode = PanelMode::MINI;
+        }
+        if (mode == PanelMode::MINI && type_ == PanelType::TEMP_DISPLAY) {
+            mode = PanelMode::HALF;
+        }
+    }
     auto isShow = layoutProperty->GetIsShowValue(true);
     if (mode_.value() != mode) {
         mode_ = mode;
