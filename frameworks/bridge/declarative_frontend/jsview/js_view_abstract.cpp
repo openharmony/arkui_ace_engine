@@ -1859,7 +1859,7 @@ void JSViewAbstract::JsBackgroundBlurStyle(const JSCallbackInfo& info)
     BlurStyleOption styleOption;
     if (info[0]->IsNumber()) {
         auto blurStyle = info[0]->ToNumber<int32_t>();
-        if (blurStyle >= static_cast<int>(BlurStyle::THIN) &&
+        if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
             blurStyle <= static_cast<int>(BlurStyle::BACKGROUND_ULTRA_THICK)) {
             styleOption.blurStyle = static_cast<BlurStyle>(blurStyle);
         }
@@ -1878,8 +1878,50 @@ void JSViewAbstract::JsBackgroundBlurStyle(const JSCallbackInfo& info)
             adaptiveColor <= static_cast<int32_t>(AdaptiveColor::AVERAGE)) {
             styleOption.adaptiveColor = static_cast<AdaptiveColor>(adaptiveColor);
         }
+        double scale = 1.0;
+        if (jsOption->GetProperty("scale")->IsNumber()) {
+            scale = jsOption->GetProperty("scale")->ToNumber<double>();
+            styleOption.scale = std::clamp(scale, 0.0, 1.0);
+        }
     }
     ViewAbstractModel::GetInstance()->SetBackgroundBlurStyle(styleOption);
+}
+
+void JSViewAbstract::JsForegroundBlurStyle(const JSCallbackInfo& info)
+{
+    if (info.Length() == 0) {
+        LOGW("The arg of foregroundBlurStyle is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    BlurStyleOption styleOption;
+    if (info[0]->IsNumber()) {
+        auto blurStyle = info[0]->ToNumber<int32_t>();
+        if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
+            blurStyle <= static_cast<int>(BlurStyle::BACKGROUND_ULTRA_THICK)) {
+            styleOption.blurStyle = static_cast<BlurStyle>(blurStyle);
+        }
+    }
+    if (info.Length() > 1 && info[1]->IsObject()) {
+        JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(info[1]);
+        auto colorMode = static_cast<int32_t>(ThemeColorMode::SYSTEM);
+        ParseJsInt32(jsOption->GetProperty("colorMode"), colorMode);
+        if (colorMode >= static_cast<int32_t>(ThemeColorMode::SYSTEM) &&
+            colorMode <= static_cast<int32_t>(ThemeColorMode::DARK)) {
+            styleOption.colorMode = static_cast<ThemeColorMode>(colorMode);
+        }
+        auto adaptiveColor = static_cast<int32_t>(AdaptiveColor::DEFAULT);
+        ParseJsInt32(jsOption->GetProperty("adaptiveColor"), adaptiveColor);
+        if (adaptiveColor >= static_cast<int32_t>(AdaptiveColor::DEFAULT) &&
+            adaptiveColor <= static_cast<int32_t>(AdaptiveColor::AVERAGE)) {
+            styleOption.adaptiveColor = static_cast<AdaptiveColor>(adaptiveColor);
+        }
+        double scale = 1.0;
+        if (jsOption->GetProperty("scale")->IsNumber()) {
+            scale = jsOption->GetProperty("scale")->ToNumber<double>();
+            styleOption.scale = std::clamp(scale, 0.0, 1.0);
+        }
+    }
+    ViewAbstractModel::GetInstance()->SetForegroundBlurStyle(styleOption);
 }
 
 void JSViewAbstract::JsSphericalEffect(const JSCallbackInfo& info)
@@ -4842,6 +4884,7 @@ void JSViewAbstract::JSBind()
     JSClass<JSViewAbstract>::StaticMethod("backgroundImageSize", &JSViewAbstract::JsBackgroundImageSize);
     JSClass<JSViewAbstract>::StaticMethod("backgroundImagePosition", &JSViewAbstract::JsBackgroundImagePosition);
     JSClass<JSViewAbstract>::StaticMethod("backgroundBlurStyle", &JSViewAbstract::JsBackgroundBlurStyle);
+    JSClass<JSViewAbstract>::StaticMethod("foregroundBlurStyle", &JSViewAbstract::JsForegroundBlurStyle);
     JSClass<JSViewAbstract>::StaticMethod("lightUpEffect", &JSViewAbstract::JsLightUpEffect);
     JSClass<JSViewAbstract>::StaticMethod("sphericalEffect", &JSViewAbstract::JsSphericalEffect);
     JSClass<JSViewAbstract>::StaticMethod("pixelStretchEffect", &JSViewAbstract::JsPixelStretchEffect);

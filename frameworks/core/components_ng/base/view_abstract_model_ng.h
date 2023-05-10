@@ -131,6 +131,11 @@ public:
         ViewAbstract::SetBackgroundBlurStyle(bgBlurStyle);
     }
 
+    void SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle) override
+    {
+        ViewAbstract::SetForegroundBlurStyle(fgBlurStyle);
+    }
+    
     void SetSphericalEffect(double radio) override
     {
         ViewAbstract::SetSphericalEffect(radio);

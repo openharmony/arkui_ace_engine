@@ -963,6 +963,7 @@ var BlurStyle;
   BlurStyle[BlurStyle["BACKGROUND_REGULAR"] = 5] = "BACKGROUND_REGULAR";
   BlurStyle[BlurStyle["BACKGROUND_THICK"] = 6] = "BACKGROUND_THICK";
   BlurStyle[BlurStyle["BACKGROUND_ULTRA_THICK"] = 7] = "BACKGROUND_ULTRA_THICK";
+  BlurStyle[BlurStyle["NONE"] = 0] = "NONE";
 })(BlurStyle || (BlurStyle = {}));
 
 var ThemeColorMode;

@@ -97,6 +97,7 @@ public:
     static void SetBackgroundImageSize(const BackgroundImageSize& bgImgSize);
     static void SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition);
     static void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle);
+    static void SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle);
     static void SetSphericalEffect(double radio);
     static void SetPixelStretchEffect(PixStretchEffectOption& option);
     static void SetLightUpEffect(double radio);

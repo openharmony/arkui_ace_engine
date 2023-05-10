@@ -111,9 +111,11 @@ struct BlurStyleOption {
     BlurStyle blurStyle = BlurStyle::NO_MATERIAL;
     ThemeColorMode colorMode = ThemeColorMode::SYSTEM;
     AdaptiveColor adaptiveColor = AdaptiveColor::DEFAULT;
+    double scale = 1.0;
     bool operator == (const BlurStyleOption& other) const
     {
-        return blurStyle == other.blurStyle && colorMode == other.colorMode && adaptiveColor == other.adaptiveColor;
+        return blurStyle == other.blurStyle && colorMode == other.colorMode && adaptiveColor == other.adaptiveColor &&
+               NearEqual(scale, other.scale);
     }
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const
     {
@@ -127,6 +129,7 @@ struct BlurStyleOption {
         auto jsonBlurStyleOption = JsonUtil::Create(true);
         jsonBlurStyleOption->Put("colorMode", COLOR_MODE[static_cast<int>(colorMode)]);
         jsonBlurStyleOption->Put("adaptiveColor", ADAPTIVE_COLOR[static_cast<int>(adaptiveColor)]);
+        jsonBlurStyleOption->Put("scale", scale);
         jsonBlurStyle->Put("options", jsonBlurStyleOption);
         json->Put("backgroundBlurStyle", jsonBlurStyle);
     }
