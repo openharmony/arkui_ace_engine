@@ -48,7 +48,7 @@ struct BackgroundProperty {
         if (!propBlurStyleOption.has_value()) {
             return false;
         }
-        return NearEqual(propBlurStyleOption.value(), option);
+        return NearEqual(propBlurStyleOption.value(), option.value());
     }
     bool CheckBlurRadius(const Dimension& radius) const
     {
