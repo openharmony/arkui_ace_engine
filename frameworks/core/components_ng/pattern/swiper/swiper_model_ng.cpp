@@ -34,12 +34,6 @@
 
 namespace OHOS::Ace::NG {
 
-namespace {
-
-const static int32_t DEFAULT_DISPLAY_COUNT = 1;
-
-} // namespace
-
 RefPtr<SwiperController> SwiperModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -71,7 +65,8 @@ void SwiperModelNG::SetDisplayMode(SwiperDisplayMode displayMode)
 void SwiperModelNG::SetDisplayCount(int32_t displayCount)
 {
     if (displayCount <= 0) {
-        displayCount = DEFAULT_DISPLAY_COUNT;
+        LOGE("SwiperModelNG::SetDisplayCount displayCount is invalid, return.");
+        return;
     }
 
     ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, DisplayCount, displayCount);
