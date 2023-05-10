@@ -61,6 +61,8 @@ public:
 
     void SetHasSelectAttr(bool value) override;
     bool GetMultiOptions(std::vector<NG::TextCascadePickerOptions>& options) override;
+    void SetOnValueChangeEvent(TextCascadeValueChangeEvent&& onChange) override;
+    void SetOnSelectedChangeEvent(TextCascadeSelectedChangeEvent&& onChange) override;
 private:
     static RefPtr<FrameNode> CreateStackNode();
     static RefPtr<FrameNode> CreateButtonNode();
