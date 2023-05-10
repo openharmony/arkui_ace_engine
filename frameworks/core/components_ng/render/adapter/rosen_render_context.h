@@ -131,7 +131,7 @@ public:
     void AnimateHoverEffectBoard(bool isHovered) override;
     void UpdateBackBlurRadius(const Dimension& radius) override;
     void UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle) override;
-     void UpdateFrontBlurRadius(const Dimension& radius) override;
+    void UpdateFrontBlurRadius(const Dimension& radius) override;
     void UpdateFrontBlurStyle(const std::optional<BlurStyleOption>& fgBlurStyle) override;
     void ResetBackBlurStyle() override;
     void OnSphericalEffectUpdate(double radio) override;

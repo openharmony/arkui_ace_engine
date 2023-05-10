@@ -73,6 +73,7 @@ public:
     virtual void SetBackgroundImageSize(const BackgroundImageSize& bgImgSize) = 0;
     virtual void SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition) = 0;
     virtual void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle) = 0;
+    virtual void SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle) {}
     virtual void SetSphericalEffect(double radio) {}
     virtual void SetPixelStretchEffect(PixStretchEffectOption& option) {}
     virtual void SetLightUpEffect(double radio) {}
