@@ -93,7 +93,7 @@ void JSMarquee::Create(const JSCallbackInfo& info)
                 loop = -1;
             }
         }
-        MarqueeModel::GetInstance()->SetLoop(loop < 0 ? -1 : loop);
+        MarqueeModel::GetInstance()->SetLoop(loop <= 0 ? -1 : loop);
     }
 
     auto getFromStart = paramObject->GetProperty("fromStart");
