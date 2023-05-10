@@ -37,6 +37,8 @@ public:
           indicatorPadding_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0)),
           indicatorMargin_(AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF(0, 0))),
           itemHalfSizes_(AceType::MakeRefPtr<AnimatablePropertyVectorFloat>(LinearVector<float>(4))),
+          backgroundWidthDilateRatio_(AceType::MakeRefPtr<AnimatablePropertyFloat>(1)),
+          backgroundHeightDilateRatio_(AceType::MakeRefPtr<AnimatablePropertyFloat>(1)),
           unselectedColor_(AceType::MakeRefPtr<PropertyColor>(Color::TRANSPARENT)),
           selectedColor_(AceType::MakeRefPtr<PropertyColor>(Color::TRANSPARENT))
     {
@@ -52,6 +54,8 @@ public:
         AttachProperty(itemHalfSizes_);
         AttachProperty(unselectedColor_);
         AttachProperty(selectedColor_);
+        AttachProperty(backgroundWidthDilateRatio_);
+        AttachProperty(backgroundHeightDilateRatio_);
     }
     ~DotIndicatorModifier() override = default;
 
@@ -112,6 +116,9 @@ public:
 
     void UpdateLongPointLeftCenterX(float longPointLeftCenterX, bool isAnimation);
     void UpdateLongPointRightCenterX(float longPointRightCenterX, bool isAnimation);
+
+    // Touch bottom animation
+    void UpdateTouchBottomAnimation(bool isTouchBottom, const LinearVector<float>& vectorBlackPointCenterX);
 
     void SetAxis(Axis axis)
     {
@@ -247,6 +254,8 @@ private:
     RefPtr<AnimatablePropertyFloat> indicatorPadding_;
     RefPtr<AnimatablePropertyOffsetF> indicatorMargin_;
     RefPtr<AnimatablePropertyVectorFloat> itemHalfSizes_;
+    RefPtr<AnimatablePropertyFloat> backgroundWidthDilateRatio_;
+    RefPtr<AnimatablePropertyFloat> backgroundHeightDilateRatio_;
 
     float centerY_ = 0;
     Axis axis_ = Axis::HORIZONTAL;

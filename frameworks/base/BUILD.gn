@@ -116,6 +116,23 @@ foreach(item, ace_platforms) {
   ohos_source_set("ace_memory_monitor_" + item.name) {
     platform = item.name
 
+    defines = []
+    cflags_cc = []
+    config = {
+    }
+
+    if (defined(item.config)) {
+      config = item.config
+    }
+
+    if (defined(config.defines)) {
+      defines = config.defines
+    }
+
+    if (defined(config.cflags_cc)) {
+      cflags_cc = config.cflags_cc
+    }
+
     configs = [ "$ace_root:ace_config" ]
 
     sources = [

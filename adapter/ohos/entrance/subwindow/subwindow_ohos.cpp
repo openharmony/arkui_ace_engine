@@ -178,6 +178,11 @@ void SubwindowOhos::ResizeWindow()
     LOGI("SubwindowOhos::ResizeWindow");
     auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
     CHECK_NULL_VOID(defaultDisplay);
+    auto ret = window_->Resize(defaultDisplay->GetWidth(), defaultDisplay->GetHeight());
+    if (ret != Rosen::WMError::WM_OK) {
+        LOGE("Resize window by default display failed with errCode: %{public}d", static_cast<int32_t>(ret));
+        return;
+    }
     auto pipeline = GetChildPipelineContext();
     CHECK_NULL_VOID(pipeline);
     SafeAreaEdgeInserts safeArea = pipeline->GetCurrentViewSafeArea();
@@ -335,6 +340,15 @@ void SubwindowOhos::ShowWindow()
     }
     window_->RequestFocus();
     LOGI("Show the subwindow successfully.");
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    CHECK_NULL_VOID(aceContainer);
+    auto context = aceContainer->GetPipelineContext();
+    CHECK_NULL_VOID(context);
+    AccessibilityEvent event;
+    event.type = AccessibilityEventType::PAGE_CHANGE;
+    event.windowId = context->GetWindowId();
+    event.windowChangeTypes = WINDOW_UPDATE_ADDED;
+    context->SendEventToAccessibility(event);
     isShowed_ = true;
     SubwindowManager::GetInstance()->SetCurrentSubwindow(AceType::Claim(this));
 }
@@ -380,6 +394,13 @@ void SubwindowOhos::HideWindow()
     }
     isShowed_ = false;
     LOGI("Hide the subwindow successfully.");
+    auto context = aceContainer->GetPipelineContext();
+    CHECK_NULL_VOID(context);
+    AccessibilityEvent event;
+    event.type = AccessibilityEventType::PAGE_CHANGE;
+    event.windowId = context->GetWindowId();
+    event.windowChangeTypes = WINDOW_UPDATE_REMOVED;
+    context->SendEventToAccessibility(event);
 }
 
 void SubwindowOhos::AddMenu(const RefPtr<Component>& newComponent)
@@ -547,6 +568,7 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNG(
     auto overlay = context->GetOverlayManager();
     CHECK_NULL_RETURN(overlay, nullptr);
     ShowWindow();
+    ResizeWindow();
     ContainerScope scope(childContainerId_);
     return overlay->ShowDialog(dialogProps, customNode);
 }

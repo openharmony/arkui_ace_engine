@@ -46,6 +46,7 @@
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 #undef private
 #undef protected
+#include "core/components_ng/pattern/text/span_model_ng.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -108,6 +109,7 @@ const Color TEXT_DECORATION_COLOR_VALUE = Color::FromRGB(255, 100, 100);
 const Ace::TextCase TEXT_CASE_VALUE = Ace::TextCase::LOWERCASE;
 const Dimension ADAPT_MAX_FONT_SIZE_VALUE = Dimension(200, DimensionUnit::PX);
 const Dimension LETTER_SPACING = Dimension(10, DimensionUnit::PX);
+const Dimension ADAPT_UPDATE_FONTSIZE_VALUE = Dimension(50, DimensionUnit::PX);
 const std::string ROOT_TAG("root");
 constexpr int32_t NODE_ID = 143;
 const Color FOREGROUND_COLOR_VALUE = Color::FOREGROUND;
@@ -123,6 +125,26 @@ DragDropBaseInfo OnDragStartFunction(const RefPtr<OHOS::Ace::DragEvent>&, const 
     return temp;
 };
 void OnDragDropFunction(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&) {};
+
+void TestUpdateScenario(const RefPtr<TextPattern>& pattern)
+{
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateFontSize(ADAPT_UPDATE_FONTSIZE_VALUE);
+    pattern->BeforeCreateLayoutWrapper();
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    for (const auto& child : host->GetChildren()) {
+        auto spanNode = AceType::DynamicCast<SpanNode>(child);
+        ASSERT_NE(spanNode, nullptr);
+        auto inheritPropertyInfo = spanNode->CaculateInheritPropertyInfo();
+        auto iter = inheritPropertyInfo.find(PropertyInfo::FONTSIZE);
+        if (iter != inheritPropertyInfo.end()) {
+            EXPECT_EQ(spanNode->GetFontSize().value(), ADAPT_UPDATE_FONTSIZE_VALUE);
+        }
+    }
+}
 } // namespace
 
 struct TestProperty {
@@ -149,6 +171,7 @@ public:
     void SetUp() override;
     void TearDown() override;
     void InitTextObject();
+    RefPtr<SpanNode> CreateSpanNodeWithSetDefaultProperty(const std::string& content);
 
 protected:
     static RefPtr<FrameNode> CreateTextParagraph(const std::string& createValue, const TestProperty& testProperty);
@@ -170,6 +193,23 @@ void TextTestNg::TearDown()
 }
 
 void TextTestNg::InitTextObject() {}
+
+RefPtr<SpanNode> TextTestNg::CreateSpanNodeWithSetDefaultProperty(const std::string& content)
+{
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(content);
+    spanModelNG.SetFontSize(FONT_SIZE_VALUE);
+    spanModelNG.SetTextColor(TEXT_COLOR_VALUE);
+    spanModelNG.SetItalicFontStyle(ITALIC_FONT_STYLE_VALUE);
+    spanModelNG.SetFontWeight(FONT_WEIGHT_VALUE);
+    spanModelNG.SetFontFamily(FONT_FAMILY_VALUE);
+    spanModelNG.SetTextDecoration(TEXT_DECORATION_VALUE);
+    spanModelNG.SetTextDecorationColor(TEXT_DECORATION_COLOR_VALUE);
+    spanModelNG.SetTextCase(TEXT_CASE_VALUE);
+    spanModelNG.SetLetterSpacing(LETTER_SPACING);
+    spanModelNG.SetLineHeight(LINE_HEIGHT_VALUE);
+    return AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->Finish());
+}
 
 RefPtr<FrameNode> TextTestNg::CreateTextParagraph(const std::string& createValue, const TestProperty& testProperty)
 {
@@ -2752,5 +2792,124 @@ HWTEST_F(TextTestNg, DragBase001, TestSize.Level1)
 
     auto height = pattern->GetLineHeight();
     EXPECT_EQ(height, 20);
+}
+
+/**
+ * @tc.name: UpdateChildProperty001
+ * @tc.desc: test UpdateChildProperty function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, UpdateChildProperty001, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.fontSizeValue = std::make_optional(FONT_SIZE_VALUE);
+    testProperty.textColorValue = std::make_optional(TEXT_COLOR_VALUE);
+    testProperty.italicFontStyleValue = std::make_optional(ITALIC_FONT_STYLE_VALUE);
+    testProperty.fontWeightValue = std::make_optional(FONT_WEIGHT_VALUE);
+    testProperty.textDecorationValue = std::make_optional(TEXT_DECORATION_VALUE);
+    testProperty.textDecorationColorValue = std::make_optional(TEXT_DECORATION_COLOR_VALUE);
+    testProperty.textCaseValue = std::make_optional(TEXT_CASE_VALUE);
+    testProperty.letterSpacing = std::make_optional(LETTER_SPACING);
+    testProperty.lineHeightValue = std::make_optional(LINE_HEIGHT_VALUE);
+    testProperty.fontFamilyValue = std::make_optional(FONT_FAMILY_VALUE);
+    /**
+     * @tc.steps: step1. create text FrameNode and SpanNode, Update parent FrameNode properties
+     * @tc.expected: Successfully created parent Node and child Node
+     */
+    auto host = CreateTextParagraph(CREATE_VALUE, testProperty);
+    ASSERT_NE(host, nullptr);
+    SpanModelNG spanModelNG;
+    spanModelNG.Create("span1");
+    auto firstChild = ViewStackProcessor::GetInstance()->Finish();
+    spanModelNG.Create("span2");
+    auto secondChild = ViewStackProcessor::GetInstance()->Finish();
+
+    /**
+     * @tc.steps: step2. SpanNode mount to parent
+     */
+    host->AddChild(firstChild);
+    host->AddChild(secondChild);
+
+    /**
+     * @tc.steps: step3. called BeforeCreateLayoutWrapper function to UpdateChildProperty
+     * @tc.expected: child count is not empty, Child inherits parent property
+     */
+    auto pattern = host->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->BeforeCreateLayoutWrapper();
+    EXPECT_EQ(host->GetChildren().size(), 2);
+    for (const auto& child : host->GetChildren()) {
+        auto spanNode = AceType::DynamicCast<SpanNode>(child);
+        ASSERT_NE(spanNode, nullptr);
+        EXPECT_EQ(spanNode->GetFontSize().value(), FONT_SIZE_VALUE);
+        EXPECT_EQ(spanNode->GetTextColor().value(), TEXT_COLOR_VALUE);
+        EXPECT_EQ(spanNode->GetItalicFontStyle().value(), ITALIC_FONT_STYLE_VALUE);
+        EXPECT_EQ(spanNode->GetFontWeight().value(), FONT_WEIGHT_VALUE);
+        EXPECT_EQ(spanNode->GetTextDecoration().value(), TEXT_DECORATION_VALUE);
+        EXPECT_EQ(spanNode->GetTextDecorationColor().value(), TEXT_DECORATION_COLOR_VALUE);
+        EXPECT_EQ(spanNode->GetTextCase().value(), TEXT_CASE_VALUE);
+        EXPECT_EQ(spanNode->GetLetterSpacing().value(), LETTER_SPACING);
+        EXPECT_EQ(spanNode->GetLineHeight().value(), LINE_HEIGHT_VALUE);
+        EXPECT_EQ(spanNode->GetFontFamily().value(), FONT_FAMILY_VALUE);
+    }
+
+    /**
+     * @tc.steps: step4. Update parent fontsize property, called BeforeCreateLayoutWrapper again
+     * @tc.expected: Child update fontsize property
+     */
+    TestUpdateScenario(pattern);
+}
+
+/**
+ * @tc.name: UpdateChildProperty002
+ * @tc.desc: test UpdateChildProperty function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, UpdateChildProperty002, TestSize.Level1)
+{
+    TestProperty testProperty;
+    /**
+     * @tc.steps: step1. create text FrameNode and SpanNode, Update child FrameNode properties
+     * @tc.expected: Successfully created parent Node and child Node
+     */
+    auto host = CreateTextParagraph(CREATE_VALUE, testProperty);
+    ASSERT_NE(host, nullptr);
+    auto firstChild = CreateSpanNodeWithSetDefaultProperty("SPANNODE");
+    auto secondChild = CreateSpanNodeWithSetDefaultProperty("spanNode");
+
+    /**
+     * @tc.steps: step2. SpanNode mount to parent
+     */
+    host->AddChild(firstChild);
+    host->AddChild(secondChild);
+
+    /**
+     * @tc.steps: step3. called BeforeCreateLayoutWrapper function to UpdateChildProperty
+     * @tc.expected: child count is not empty, Child use owner property
+     */
+    auto pattern = host->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->BeforeCreateLayoutWrapper();
+    EXPECT_EQ(host->GetChildren().size(), 2);
+    for (const auto& child : host->GetChildren()) {
+        auto spanNode = AceType::DynamicCast<SpanNode>(child);
+        ASSERT_NE(spanNode, nullptr);
+        EXPECT_EQ(spanNode->GetFontSize().value(), FONT_SIZE_VALUE);
+        EXPECT_EQ(spanNode->GetTextColor().value(), TEXT_COLOR_VALUE);
+        EXPECT_EQ(spanNode->GetItalicFontStyle().value(), ITALIC_FONT_STYLE_VALUE);
+        EXPECT_EQ(spanNode->GetFontWeight().value(), FONT_WEIGHT_VALUE);
+        EXPECT_EQ(spanNode->GetTextDecoration().value(), TEXT_DECORATION_VALUE);
+        EXPECT_EQ(spanNode->GetTextDecorationColor().value(), TEXT_DECORATION_COLOR_VALUE);
+        EXPECT_EQ(spanNode->GetTextCase().value(), TEXT_CASE_VALUE);
+        EXPECT_EQ(spanNode->GetLetterSpacing().value(), LETTER_SPACING);
+        EXPECT_EQ(spanNode->GetLineHeight().value(), LINE_HEIGHT_VALUE);
+        EXPECT_EQ(spanNode->GetFontFamily().value(), FONT_FAMILY_VALUE);
+    }
+
+    /**
+     * @tc.steps: step4. Update parent fontsize property, called BeforeCreateLayoutWrapper again
+     * @tc.expected: Child use owner property
+     */
+    TestUpdateScenario(pattern);
 }
 } // namespace OHOS::Ace::NG

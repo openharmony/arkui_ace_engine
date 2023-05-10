@@ -37,12 +37,11 @@ static void KillApplicationByUid()
         return;
     }
 }
-bool ExceptionHandler::formRenderServiceFlag_ = false;
 
 void ExceptionHandler::HandleJsException(const std::string& exceptionMsg)
 {
     auto hasErrorObserver = AppExecFwk::ApplicationDataManager::GetInstance().NotifyUnhandledException(exceptionMsg);
-    if (!hasErrorObserver && !formRenderServiceFlag_) {
+    if (!hasErrorObserver) {
         KillApplicationByUid();
     }
 }

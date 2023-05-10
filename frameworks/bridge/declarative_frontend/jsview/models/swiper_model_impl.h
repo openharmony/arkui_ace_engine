@@ -48,6 +48,7 @@ public:
     void SetMainSwiperSizeWidth() override;
     void SetMainSwiperSizeHeight() override;
     void SetIndicatorStyle(const SwiperParameters& swiperParameters) override;
+    void SetOnChangeEvent(std::function<void(const BaseEventInfo* info)>&& onChangeEvent) override {};
 };
 
 } // namespace OHOS::Ace::Framework

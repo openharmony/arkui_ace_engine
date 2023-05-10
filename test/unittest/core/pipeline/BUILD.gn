@@ -145,6 +145,7 @@ ohos_unittest("pipeline_context_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/menu/menu_view.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/navigation_menu_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/wrapper/menu_wrapper_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/menu/wrapper/menu_wrapper_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/option/option_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/option/option_layout_algorithm.cpp",
@@ -241,10 +242,10 @@ ohos_unittest("pipeline_context_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_property.cpp",
     "$ace_root/frameworks/core/components_ng/test/pattern/text/mock/mock_text_layout_adapter.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_element_register.cpp",
-    "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_window.cpp",
     "$ace_root/test/mock/base/mock_event_report.cpp",
     "$ace_root/test/mock/core/common/mock_container.cpp",
     "$ace_root/test/mock/core/common/mock_font_manager.cpp",
+    "$ace_root/test/mock/core/common/mock_window.cpp",
     "$ace_root/test/mock/core/pattern/container_modal/mock_container_modal_pattern.cpp",
     "$ace_root/test/mock/core/pattern/container_modal/mock_container_modal_view.cpp",
     "$ace_root/test/mock/core/render/mock_font_collection.cpp",
@@ -263,11 +264,10 @@ ohos_unittest("pipeline_context_test_ng") {
   ]
 
   deps = [
-    "$ace_flutter_engine_root:third_party_flutter_engine_ohos",
-    "$ace_flutter_engine_root/skia:ace_skia_ohos",
     "$ace_root/frameworks/base:ace_memory_monitor_ohos",
     "$ace_root/frameworks/core/components/theme:ace_core_components_theme_ohos",
     "$ace_root/frameworks/core/components/theme:build_theme_code",
+    "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
     "$ace_root/test/unittest:ace_unittest_log",
     "$ace_root/test/unittest:ace_unittest_trace",
     "$cjson_root:cjson",

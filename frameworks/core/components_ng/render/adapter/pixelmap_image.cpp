@@ -93,7 +93,7 @@ void PixelMapImage::DrawToRSCanvas(
     recordingCanvas->DrawPixelMapWithParm(pixelMap_->GetPixelMapSharedPtr(), rsImageInfo, paint);
 #else
     // TODO:Haw to set SamplingOptions?
-    recordingCanvas->DrawPixelMapWithParm(pixelMap_->GetPixelMapSharedPtr(), rsImageInfo, paint);
+    recordingCanvas->DrawPixelMapWithParm(pixelMap_->GetPixelMapSharedPtr(), rsImageInfo, options, paint);
 #endif
 #endif
 }

@@ -60,6 +60,7 @@ void JSTextPicker::JSBind(BindingTarget globalObj)
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSTextPicker>::StaticMethod("create", &JSTextPicker::Create, opt);
     JSClass<JSTextPicker>::StaticMethod("defaultPickerItemHeight", &JSTextPicker::SetDefaultPickerItemHeight);
+    JSClass<JSTextPicker>::StaticMethod("canLoop", &JSTextPicker::SetCanLoop);
     JSClass<JSTextPicker>::StaticMethod("disappearTextStyle", &JSTextPicker::SetDisappearTextStyle);
     JSClass<JSTextPicker>::StaticMethod("textStyle", &JSTextPicker::SetTextStyle);
     JSClass<JSTextPicker>::StaticMethod("selectedTextStyle", &JSTextPicker::SetSelectedTextStyle);
@@ -122,13 +123,14 @@ size_t JSTextPicker::ProcessCascadeOptionDepth(const NG::TextCascadePickerOption
 }
 
 void JSTextPicker::CreateMulti(const RefPtr<PickerTheme>& theme, const std::vector<std::string>& values,
-    const std::vector<uint32_t>& selectedValues, bool isCascade,
+    const std::vector<uint32_t>& selectedValues, const NG::TextCascadePickerOptionsAttr& attr,
     const std::vector<NG::TextCascadePickerOptions>& options)
 {
     TextPickerModel::GetInstance()->MultiInit(theme);
     TextPickerModel::GetInstance()->SetValues(values);
     TextPickerModel::GetInstance()->SetSelecteds(selectedValues);
-    TextPickerModel::GetInstance()->SetIsCascade(isCascade);
+    TextPickerModel::GetInstance()->SetIsCascade(attr.isCascade);
+    TextPickerModel::GetInstance()->SetHasSelectAttr(attr.isHasSelectAttr);
     TextPickerModel::GetInstance()->SetColumns(options);
 }
 
@@ -143,7 +145,7 @@ void JSTextPicker::Create(const JSCallbackInfo& info)
         std::vector<std::string> values;
         std::vector<NG::RangeContent> rangeResult;
         std::vector<NG::TextCascadePickerOptions> options;
-        bool isCascade = false;
+        NG::TextCascadePickerOptionsAttr optionsAttr;
         bool isSingleRange = false;
         bool optionsMultiContentCheckErr = false;
         bool optionsCascadeContentCheckErr = false;
@@ -155,7 +157,7 @@ void JSTextPicker::Create(const JSCallbackInfo& info)
             }
             if (optionsMultiContentCheckErr) {
                 optionsCascadeContentCheckErr = !ProcessCascadeOptions(paramObject,
-                    options, selectedValues, values, isCascade);
+                    options, selectedValues, values, optionsAttr);
             }
         }
         if (!isSingleRange && optionsMultiContentCheckErr && optionsCascadeContentCheckErr) {
@@ -175,7 +177,7 @@ void JSTextPicker::Create(const JSCallbackInfo& info)
             TextPickerModel::GetInstance()->SetSelected(selectedValue);
             TextPickerModel::GetInstance()->SetValue(value);
         } else {
-            CreateMulti(theme, values, selectedValues, isCascade, options);
+            CreateMulti(theme, values, selectedValues, optionsAttr, options);
         }
         TextPickerModel::GetInstance()->SetDefaultAttributes(theme);
         JSInteractableView::SetFocusable(false);
@@ -203,7 +205,8 @@ bool JSTextPicker::ProcessSingleRangeValue(const JSRef<JSObject>& paramObjec,
 
 bool JSTextPicker::ProcessCascadeOptions(const JSRef<JSObject>& paramObject,
     std::vector<NG::TextCascadePickerOptions>& options,
-    std::vector<uint32_t>& selectedValues, std::vector<std::string>& values, bool& isCascade)
+    std::vector<uint32_t>& selectedValues, std::vector<std::string>& values,
+    NG::TextCascadePickerOptionsAttr& attr)
 {
     auto getRange = paramObject->GetProperty("range");
     if (getRange->IsNull() || getRange->IsUndefined()) {
@@ -211,7 +214,7 @@ bool JSTextPicker::ProcessCascadeOptions(const JSRef<JSObject>& paramObject,
         LOGE("parse cascade Options error.");
         return false;
     }
-    if (!JSTextPickerParser::ParseCascadeTextArray(paramObject, selectedValues, values)) {
+    if (!JSTextPickerParser::ParseCascadeTextArray(paramObject, selectedValues, values, attr)) {
         LOGE("parse cascade text error.");
         options.clear();
         return false;
@@ -237,7 +240,7 @@ bool JSTextPicker::ProcessCascadeOptions(const JSRef<JSObject>& paramObject,
                 values.emplace_back("");
             }
         }
-        isCascade = true;
+        attr.isCascade = true;
         TextPickerModel::GetInstance()->SetMaxCount(maxCount);
     }
     return true;
@@ -254,7 +257,6 @@ bool JSTextPickerParser::GenerateCascadeOptionsInternal(const JSRef<JSObject>& j
         JSRef<JSArray> arrayChildren = JSRef<JSArray>::Cast(children);
         if (arrayChildren->Length() > 0) {
             if (!GenerateCascadeOptions(arrayChildren, option.children)) {
-                options.clear();
                 return false;
             }
         }
@@ -386,12 +388,16 @@ void JSTextPickerParser::ParseMultiTextArrayValueInternal(const std::vector<NG::
 {
     for (uint32_t i = 0; i < options.size(); i++) {
         if (i > values.size() - 1) {
-            values.emplace_back("");
+            if (options[i].rangeResult.size() > 0) {
+                values.emplace_back(options[i].rangeResult[0]);
+            } else {
+                values.emplace_back("");
+            }
         } else {
             auto valueIterator = std::find(options[i].rangeResult.begin(),
                 options[i].rangeResult.end(), values[i]);
             if (valueIterator == options[i].rangeResult.end()) {
-                values[i] = "";
+                values[i] = options[i].rangeResult.front();
             }
         }
     }
@@ -406,14 +412,14 @@ void JSTextPickerParser::ParseMultiTextArrayValueSingleInternal(
         if (valueIterator != options[0].rangeResult.end()) {
             values.emplace_back(value);
         } else {
-            values.emplace_back("");
+            values.emplace_back(options[0].rangeResult.front());
         }
         for (uint32_t i = 1; i < options.size(); i++) {
-            values.emplace_back("");
+            values.emplace_back(options[i].rangeResult.front());
         }
     } else {
         for (uint32_t i = 0; i < options.size(); i++) {
-            values.emplace_back("");
+            values.emplace_back(options[i].rangeResult.front());
         }
     }
 }
@@ -433,7 +439,7 @@ bool JSTextPickerParser::ParseMultiTextArrayValue(const JsiRef<JsiValue>& jsValu
             ParseMultiTextArrayValueSingleInternal(options, value, values);
         } else {
             for (uint32_t i = 0; i < options.size(); i++) {
-                values.emplace_back("");
+                values.emplace_back(options[i].rangeResult.front());
             }
         }
     }
@@ -465,7 +471,7 @@ bool JSTextPickerParser::ParseMultiTextArray(const JSRef<JSObject>& paramObject,
 }
 
 bool JSTextPickerParser::ParseInternalArray(const JSRef<JSArray>& jsRangeValue, std::vector<uint32_t>& selectedValues,
-    std::vector<std::string>& values, uint32_t index)
+    std::vector<std::string>& values, uint32_t index, bool isHasSelectAttr)
 {
     std::vector<std::string> resultStr;
     for (size_t i = 0; i < jsRangeValue->Length(); i++) {
@@ -481,11 +487,15 @@ bool JSTextPickerParser::ParseInternalArray(const JSRef<JSArray>& jsRangeValue, 
         }
     }
     if (index > values.size() - 1) {
-        values.emplace_back("");
+        if (resultStr.size() > 0) {
+            values.emplace_back(resultStr.front());
+        } else {
+            values.emplace_back("");
+        }
     } else {
         auto valueIterator = std::find(resultStr.begin(), resultStr.end(), values[index]);
         if (valueIterator == resultStr.end()) {
-            values[index] = "";
+            values[index] = resultStr.front();
         }
     }
 
@@ -498,7 +508,7 @@ bool JSTextPickerParser::ParseInternalArray(const JSRef<JSArray>& jsRangeValue, 
         }
     }
 
-    if (selectedValues[index] == 0 && !values[index].empty()) {
+    if (!isHasSelectAttr && selectedValues[index] == 0 && !values[index].empty()) {
         auto valueIterator = std::find(resultStr.begin(), resultStr.end(), values[index]);
         if (valueIterator != resultStr.end()) {
             selectedValues[index] = std::distance(resultStr.begin(), valueIterator);
@@ -507,13 +517,13 @@ bool JSTextPickerParser::ParseInternalArray(const JSRef<JSArray>& jsRangeValue, 
     auto jsObj = JSRef<JSObject>::Cast(jsRangeValue->GetValueAt(selectedValues[index]));
     auto getChildren = jsObj->GetProperty("children");
     if (getChildren->IsArray()) {
-        ParseInternalArray(getChildren, selectedValues, values, index + 1);
+        ParseInternalArray(getChildren, selectedValues, values, index + 1, isHasSelectAttr);
     }
     return true;
 }
 
 bool JSTextPickerParser::ParseCascadeTextArray(const JSRef<JSObject>& paramObject,
-    std::vector<uint32_t>& selectedValues, std::vector<std::string>& values)
+    std::vector<uint32_t>& selectedValues, std::vector<std::string>& values, NG::TextCascadePickerOptionsAttr& attr)
 {
     JSRef<JSArray> getRange = paramObject->GetProperty("range");
     auto getSelected = paramObject->GetProperty("selected");
@@ -537,15 +547,21 @@ bool JSTextPickerParser::ParseCascadeTextArray(const JSRef<JSObject>& paramObjec
     if (getSelected->IsArray()) {
         if (!ParseJsIntegerArray(getSelected, selectedValues)) {
             LOGE("parse selectedValues array error.");
+            attr.isHasSelectAttr = false;
             return false;
+        } else {
+            attr.isHasSelectAttr = true;
         }
     } else {
         if (!ParseJsInteger(getSelected, selectValue)) {
             selectValue = 0;
+            attr.isHasSelectAttr = false;
+        } else {
+            attr.isHasSelectAttr = true;
         }
         selectedValues.emplace_back(selectValue);
     }
-    return ParseInternalArray(getRange, selectedValues, values, 0);
+    return ParseInternalArray(getRange, selectedValues, values, 0, attr.isHasSelectAttr);
 }
 
 bool JSTextPickerParser::ParseTextArray(const JSRef<JSObject>& paramObject,
@@ -683,6 +699,17 @@ void JSTextPicker::SetDefaultPickerItemHeight(const JSCallbackInfo& info)
     }
     TextPickerModel::GetInstance()->SetDefaultPickerItemHeight(height);
 }
+void JSTextPicker::SetCanLoop(const JSCallbackInfo& info)
+{
+    bool value = true;
+    if (info.Length() != 1 || !info[0]->IsBoolean()) {
+        LOGE("parse canLoop error.");
+    } else {
+        value = info[0]->ToBoolean();
+    }
+    
+    TextPickerModel::GetInstance()->SetCanLoop(value);
+}
 
 void JSTextPicker::SetDisappearTextStyle(const JSCallbackInfo& info)
 {
@@ -736,7 +763,6 @@ void JSTextPicker::ProcessCascadeSelected(const std::vector<NG::TextCascadePicke
     uint32_t index, std::vector<uint32_t>& selectedValues)
 {
     std::vector<std::string> rangeResultValue;
-    NG::TextCascadePickerOptions option;
     for (size_t i = 0; i < options.size(); i++) {
         rangeResultValue.emplace_back(options[i].rangeResult[0]);
     }
@@ -744,7 +770,6 @@ void JSTextPicker::ProcessCascadeSelected(const std::vector<NG::TextCascadePicke
     if (index > selectedValues.size() - 1) {
         selectedValues.emplace_back(0);
     }
-
     if (selectedValues[index] < 0 || selectedValues[index] >= rangeResultValue.size()) {
         LOGW("selectedValue is out of range");
         selectedValues[index] = 0;
@@ -754,10 +779,9 @@ void JSTextPicker::ProcessCascadeSelected(const std::vector<NG::TextCascadePicke
     }
 }
 
-void JSTextPicker::SetSelectedInternal(uint32_t count, std::vector<uint32_t>& selectedValues)
+void JSTextPicker::SetSelectedInternal(uint32_t count,
+    std::vector<NG::TextCascadePickerOptions>& options, std::vector<uint32_t>& selectedValues)
 {
-    std::vector<NG::TextCascadePickerOptions> options;
-    TextPickerModel::GetInstance()->GetMultiOptions(options);
     for (uint32_t i = 0; i < count; i++) {
         if (i > selectedValues.size() - 1) {
             selectedValues.emplace_back(0);
@@ -770,13 +794,13 @@ void JSTextPicker::SetSelectedInternal(uint32_t count, std::vector<uint32_t>& se
     }
 }
 
-void JSTextPicker::SetSelectedIndexMultiInternal(uint32_t count, std::vector<uint32_t>& selectedValues)
+void JSTextPicker::SetSelectedIndexMultiInternal(uint32_t count,
+    std::vector<NG::TextCascadePickerOptions>& options, std::vector<uint32_t>& selectedValues)
 {
     if (!TextPickerModel::GetInstance()->IsCascade()) {
-        SetSelectedInternal(count, selectedValues);
+        SetSelectedInternal(count, options, selectedValues);
     } else {
-        std::vector<NG::TextCascadePickerOptions> options;
-        TextPickerModel::GetInstance()->GetMultiOptions(options);
+        TextPickerModel::GetInstance()->SetHasSelectAttr(true);
         ProcessCascadeSelected(options, 0, selectedValues);
         uint32_t maxCount = TextPickerModel::GetInstance()->GetMaxCount();
         if (selectedValues.size() < maxCount) {
@@ -817,18 +841,23 @@ void JSTextPicker::SetSelectedIndexMulti(const JsiRef<JsiValue>& jsSelectedValue
     if (jsSelectedValue->IsArray()) {
         if (!ParseJsIntegerArray(jsSelectedValue, selectedValues)) {
             LOGE("parse selectedValues array error.");
+            selectedValues.clear();
             for (uint32_t i = 0; i < count; i++) {
                 selectedValues.emplace_back(0);
             }
             TextPickerModel::GetInstance()->SetSelecteds(selectedValues);
+            TextPickerModel::GetInstance()->SetHasSelectAttr(false);
             return;
         }
-        SetSelectedIndexMultiInternal(count, selectedValues);
+        SetSelectedIndexMultiInternal(count, options, selectedValues);
     } else {
         uint32_t selectedValue = 0;
         if (ParseJsInteger(jsSelectedValue, selectedValue)) {
+            TextPickerModel::GetInstance()->SetHasSelectAttr(true);
             SetSelectedIndexSingleInternal(options, count, selectedValue, selectedValues);
         } else {
+            selectedValues.clear();
+            TextPickerModel::GetInstance()->SetHasSelectAttr(false);
             for (uint32_t i = 0; i < count; i++) {
                 selectedValues.emplace_back(0);
             }
@@ -1039,7 +1068,7 @@ void JSTextPickerDialog::TextPickerDialogShow(const JSRef<JSObject>& paramObj,
 
 bool JSTextPickerDialog::ParseShowDataOptions(const JSRef<JSObject>& paramObject,
     std::vector<NG::TextCascadePickerOptions>& options, std::vector<uint32_t>& selectedValues,
-    std::vector<std::string>& values, bool& isCascade)
+    std::vector<std::string>& values, NG::TextCascadePickerOptionsAttr& attr)
 {
     bool optionsMultiContentCheckErr = false;
     bool optionsCascadeContentCheckErr = false;
@@ -1050,14 +1079,14 @@ bool JSTextPickerDialog::ParseShowDataOptions(const JSRef<JSObject>& paramObject
     }
 
     if (optionsMultiContentCheckErr) {
-        if (!JSTextPickerParser::ParseCascadeTextArray(paramObject, selectedValues, values)) {
+        if (!JSTextPickerParser::ParseCascadeTextArray(paramObject, selectedValues, values, attr)) {
             LOGI("parse cascade text error.");
             options.clear();
             optionsCascadeContentCheckErr = true;
         } else {
             JSRef<JSArray> getRange = paramObject->GetProperty("range");
             JSTextPickerParser::GenerateCascadeOptions(getRange, options);
-            isCascade = true;
+            attr.isCascade = true;
         }
     }
     if (optionsMultiContentCheckErr && optionsCascadeContentCheckErr) {
@@ -1088,10 +1117,25 @@ bool JSTextPickerDialog::ParseShowDataAttribute(const JSRef<JSObject>& paramObje
     }
     return true;
 }
+bool JSTextPickerDialog::ParseCanLoop(const JSRef<JSObject>& paramObject,
+    bool& canLoop)
+{
+    bool result = false;
+    auto prop = paramObject->GetProperty("canLoop");
+    bool value = false;
+    if (prop->IsBoolean() && JSViewAbstract::ParseJsBool(prop, value)) {
+        canLoop = value;
+        result = true;
+    } else {
+        canLoop = true;
+        result = false;
+    }
+    return result;
+}
 
 void JSTextPickerDialog::ParseShowDataMultiContent(const std::vector<NG::TextCascadePickerOptions>& options,
     const std::vector<uint32_t>& selectedValues, const std::vector<std::string>& values,
-    bool& isCascade, NG::TextPickerSettingData& settingData)
+    NG::TextCascadePickerOptionsAttr& attr, NG::TextPickerSettingData& settingData)
 {
     settingData.columnKind = NG::TEXT;
     for (auto& item : selectedValues) {
@@ -1103,10 +1147,12 @@ void JSTextPickerDialog::ParseShowDataMultiContent(const std::vector<NG::TextCas
     for (auto& item : options) {
         settingData.options.emplace_back(item);
     }
-    settingData.isCascade = isCascade;
+    settingData.attr.isCascade = attr.isCascade;
+    settingData.attr.isHasSelectAttr = attr.isHasSelectAttr;
 }
 
-bool JSTextPickerDialog::ParseShowData(const JSRef<JSObject>& paramObject, NG::TextPickerSettingData& settingData)
+bool JSTextPickerDialog::ParseShowData(
+    const JSRef<JSObject>& paramObject, NG::TextPickerSettingData& settingData)
 {
     std::vector<NG::RangeContent> rangeResult;
     uint32_t selectedValue = 0;
@@ -1116,7 +1162,7 @@ bool JSTextPickerDialog::ParseShowData(const JSRef<JSObject>& paramObject, NG::T
     bool optionsCascadeContentCheckErr = false;
     std::vector<uint32_t> selectedValues;
     std::vector<std::string> values;
-    bool isCascade = false;
+    NG::TextCascadePickerOptionsAttr attr;
     std::vector<NG::TextCascadePickerOptions> options;
     auto getRange = paramObject->GetProperty("range");
     if (getRange->IsNull() || getRange->IsUndefined()) {
@@ -1130,7 +1176,7 @@ bool JSTextPickerDialog::ParseShowData(const JSRef<JSObject>& paramObject, NG::T
         }
     }
     if (rangeContentCheckErr) {
-        optionsCascadeContentCheckErr = !ParseShowDataOptions(paramObject, options, selectedValues, values, isCascade);
+        optionsCascadeContentCheckErr = !ParseShowDataOptions(paramObject, options, selectedValues, values, attr);
     }
     if (rangeContentCheckErr && optionsCascadeContentCheckErr) {
         LOGE("parse option all type error.");
@@ -1143,6 +1189,9 @@ bool JSTextPickerDialog::ParseShowData(const JSRef<JSObject>& paramObject, NG::T
     if (!ParseShowDataAttribute(paramObject, settingData)) {
         return false;
     }
+    if (!ParseCanLoop(paramObject, settingData.canLoop)) {
+        LOGW("don't find property(canLoop), set default true");
+    }
     if (rangeResult.size() > 0) {
         settingData.selected = selectedValue;
         settingData.columnKind = kind;
@@ -1150,7 +1199,7 @@ bool JSTextPickerDialog::ParseShowData(const JSRef<JSObject>& paramObject, NG::T
             settingData.rangeVector.emplace_back(item);
         }
     } else {
-        ParseShowDataMultiContent(options, selectedValues, values, isCascade, settingData);
+        ParseShowDataMultiContent(options, selectedValues, values, attr, settingData);
     }
     return true;
 }
@@ -1278,6 +1327,7 @@ void JSTextPickerDialog::ParseText(RefPtr<PickerTextComponent>& component, const
 {
     auto getSelected = paramObj->GetProperty("selected");
     auto defaultHeight = paramObj->GetProperty("defaultPickerItemHeight");
+    auto canLoop = paramObj->GetProperty("canLoop");
     JSRef<JSArray> getRange = paramObj->GetProperty("range");
     std::vector<std::string> getRangeVector;
     if (!JSViewAbstract::ParseJsStrArray(getRange, getRangeVector)) {

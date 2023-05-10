@@ -38,6 +38,9 @@ public:
     void SetFontWeight(const FontWeight& value) override;
     void SetFontFamily(const std::vector<std::string>& value) override;
     void SetSweepingEffect(bool value) override;
+    void SetGradientColor(const Gradient& value) override;
+    void SetPaintShadow(bool value) override;
+    void SetProgressStatus(ProgressStatus status) override;
 
 private:
     static void SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, double value, double maxValue);

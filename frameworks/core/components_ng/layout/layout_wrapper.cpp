@@ -234,9 +234,8 @@ void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstr
 // Called to perform layout children.
 void LayoutWrapper::Layout()
 {
-    if (IsHostParentFlex()) {
-        flexLayouts_++;
-    }
+    // performace check
+    AddFlexLayouts();
     auto host = GetHostNode();
     CHECK_NULL_VOID(layoutProperty_);
     CHECK_NULL_VOID(geometryNode_);
@@ -272,7 +271,7 @@ void LayoutWrapper::Layout()
         layoutProperty_->UpdateContentConstraint();
     }
     layoutAlgorithm_->Layout(this);
-    if (IsHostFlex() && SystemProperties::IsPerformanceCheckEnabled()) {
+    if (SystemProperties::IsPerformanceCheckEnabled() && IsHostFlex()) {
         PERFORMANCE_CHECK_FLEX_CHILDREN_LAYOUTS(GetChildrenFlexLayouts(childrenMap_));
     }
     LOGD("On Layout Done: type: %{public}s, depth: %{public}d, Offset: %{public}s", host->GetTag().c_str(),
@@ -373,6 +372,7 @@ void LayoutWrapper::BuildLazyItem()
     if (!lazyBuildFunction_) {
         return;
     }
+    ACE_FUNCTION_TRACE();
     lazyBuildFunction_(Claim(this));
     lazyBuildFunction_ = nullptr;
 }
@@ -387,15 +387,24 @@ std::pair<int32_t, int32_t> LayoutWrapper::GetLazyBuildRange()
     return { -1, 0 };
 }
 
-bool LayoutWrapper::IsHostParentFlex()
+void LayoutWrapper::AddFlexLayouts()
 {
-    auto parent = hostNode_.Upgrade()->GetParent();
-    CHECK_NULL_RETURN(parent, false);
-    return parent->GetTag() == V2::FLEX_ETS_TAG;
+    if (!SystemProperties::IsPerformanceCheckEnabled()) {
+        return;
+    }
+    auto host = GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto parent = host->GetParent();
+    CHECK_NULL_VOID(parent);
+    if (parent->GetTag() == V2::FLEX_ETS_TAG) {
+        flexLayouts_++;
+    }
 }
 
 bool LayoutWrapper::IsHostFlex()
 {
-    return hostNode_.Upgrade()->GetTag() == V2::FLEX_ETS_TAG;
+    auto host = GetHostNode();
+    CHECK_NULL_RETURN(host, false);
+    return host->GetTag() == V2::FLEX_ETS_TAG;
 }
 } // namespace OHOS::Ace::NG

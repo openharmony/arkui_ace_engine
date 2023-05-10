@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -78,7 +78,7 @@ void ListPattern::OnModifyDone()
     }
     auto listPaintProperty = host->GetPaintProperty<ListPaintProperty>();
     SetScrollBar(listPaintProperty->GetBarDisplayMode().value_or(defaultDisplayMode));
-    SetChainAnimation(edgeEffect == EdgeEffect::SPRING && listLayoutProperty->GetChainAnimation().value_or(false));
+    SetChainAnimation();
     if (multiSelectable_ && !isMouseEventInit_) {
         InitMouseEvent();
     }
@@ -117,6 +117,12 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     } else {
         currentOffset_ = currentOffset_ - finalOffset;
     }
+    if (isScrollEnd_) {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+        isScrollEnd_ = false;
+    }
     currentDelta_ = 0.0f;
     float prevStartOffset = startMainPos_;
     float prevEndOffset = endMainPos_ - contentMainSize_;
@@ -149,9 +155,11 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
 
 RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
 {
-    auto listLayoutProperty = GetHost()->GetLayoutProperty<ListLayoutProperty>();
-    V2::ItemDivider itemDivider;
-    auto divider = listLayoutProperty->GetDivider().value_or(itemDivider);
+    auto listLayoutProperty = GetLayoutProperty<ListLayoutProperty>();
+    V2::ItemDivider divider;
+    if (!chainAnimation_ && listLayoutProperty->HasDivider()) {
+        divider = listLayoutProperty->GetDivider().value();
+    }
     auto axis = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
     auto drawVertical = (axis == Axis::HORIZONTAL);
     auto paint = MakeRefPtr<ListPaintMethod>(divider, drawVertical, lanes_, spaceWidth_);
@@ -226,6 +234,10 @@ void ListPattern::ProcessEvent(
         }
         scrollStop_ = false;
         scrollAbort_ = false;
+    }
+
+    if (isScrollEnd_) {
+        isScrollEnd_ = false;
     }
 }
 
@@ -700,6 +712,7 @@ void ListPattern::AnimateTo(float position, float duration, const RefPtr<Curve>&
         CHECK_NULL_VOID_NOLOG(list);
         list->scrollStop_ = true;
         list->MarkDirtyNodeSelf();
+        list->isScrollEnd_ = true;
     });
     animator_->AddInterpolator(animation);
     animator_->SetDuration(static_cast<int32_t>(duration));
@@ -722,6 +735,7 @@ void ListPattern::ScrollTo(float position)
     LOGI("ScrollTo:%{public}f", position);
     StopAnimate();
     UpdateCurrentOffset(GetTotalOffset() - position, SCROLL_FROM_JUMP);
+    isScrollEnd_ = true;
 }
 
 void ListPattern::ScrollToIndex(int32_t index, ScrollIndexAlignment align)
@@ -734,6 +748,7 @@ void ListPattern::ScrollToIndex(int32_t index, ScrollIndexAlignment align)
         scrollIndexAlignment_ = align;
         MarkDirtyNodeSelf();
     }
+    isScrollEnd_ = true;
 }
 
 void ListPattern::ScrollToIndex(int32_t index, int32_t indexInGroup, ScrollIndexAlignment align)
@@ -747,6 +762,7 @@ void ListPattern::ScrollToIndex(int32_t index, int32_t indexInGroup, ScrollIndex
         scrollIndexAlignment_ = align;
         MarkDirtyNodeSelf();
     }
+    isScrollEnd_ = true;
 }
 
 void ListPattern::ScrollToEdge(ScrollEdgeType scrollEdgeType)
@@ -765,6 +781,7 @@ bool ListPattern::ScrollPage(bool reverse)
     StopAnimate();
     float distance = reverse ? contentMainSize_ : -contentMainSize_;
     UpdateCurrentOffset(distance, SCROLL_FROM_JUMP);
+    isScrollEnd_ = true;
     return true;
 }
 
@@ -772,6 +789,7 @@ void ListPattern::ScrollBy(float offset)
 {
     StopAnimate();
     UpdateCurrentOffset(-offset, SCROLL_FROM_JUMP);
+    isScrollEnd_ = true;
 }
 
 Offset ListPattern::GetCurrentOffset() const
@@ -807,15 +825,20 @@ void ListPattern::UpdateScrollBarOffset()
     UpdateScrollBarRegion(currentOffset, estimatedHeight, size, viewOffset);
 }
 
-void ListPattern::SetChainAnimation(bool enable)
+void ListPattern::SetChainAnimation()
 {
+    auto listLayoutProperty = GetLayoutProperty<ListLayoutProperty>();
+    CHECK_NULL_VOID(listLayoutProperty);
+    auto edgeEffect = listLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::SPRING);
+    int32_t lanes = listLayoutProperty->GetLanes().value_or(1);
+    bool autoLanes = listLayoutProperty->HasLaneMinLength() || listLayoutProperty->HasLaneMaxLength();
+    bool animation = listLayoutProperty->GetChainAnimation().value_or(false);
+    bool enable = edgeEffect == EdgeEffect::SPRING && lanes == 1 && !autoLanes && animation;
     if (!enable) {
         chainAnimation_.Reset();
         return;
     }
     if (!chainAnimation_) {
-        auto listLayoutProperty = GetLayoutProperty<ListLayoutProperty>();
-        CHECK_NULL_VOID(listLayoutProperty);
         auto space = listLayoutProperty->GetSpace().value_or(CHAIN_INTERVAL_DEFAULT).ConvertToPx();
         springProperty_ =
             AceType::MakeRefPtr<SpringProperty>(CHAIN_SPRING_MASS, CHAIN_SPRING_STIFFNESS, CHAIN_SPRING_DAMPING);

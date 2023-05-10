@@ -1264,6 +1264,10 @@ void PipelineContext::OnShow()
     window_->OnShow();
     RequestFrame();
     FlushWindowStateChangedCallback(true);
+    AccessibilityEvent event;
+    event.windowChangeTypes = WindowUpdateType::WINDOW_UPDATE_ACTIVE;
+    event.type = AccessibilityEventType::PAGE_CHANGE;
+    SendEventToAccessibility(event);
 }
 
 void PipelineContext::OnHide()
@@ -1274,6 +1278,9 @@ void PipelineContext::OnHide()
     RequestFrame();
     OnVirtualKeyboardAreaChange(Rect());
     FlushWindowStateChangedCallback(false);
+    AccessibilityEvent event;
+    event.type = AccessibilityEventType::PAGE_CHANGE;
+    SendEventToAccessibility(event);
 }
 
 void PipelineContext::WindowFocus(bool isFocus)

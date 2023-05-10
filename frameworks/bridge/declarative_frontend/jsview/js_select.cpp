@@ -68,8 +68,12 @@ void JSSelect::Create(const JSCallbackInfo& info)
         for (size_t i = 0; i < size; i++) {
             std::string value;
             std::string icon;
-
-                auto indexObject = JSRef<JSObject>::Cast(paramArray->GetValueAt(i));
+                JSRef<JSVal> indexVal = paramArray->GetValueAt(i);
+                if (!indexVal->IsObject()) {
+                    LOGE("element of paramArray is not an object.");
+                    return;
+                }
+                auto indexObject = JSRef<JSObject>::Cast(indexVal);
                 auto selectValue = indexObject->GetProperty("value");
                 auto selectIcon = indexObject->GetProperty("icon");
                 if (!ParseJsString(selectValue, value)) {
@@ -128,16 +132,70 @@ void JSSelect::JSBind(BindingTarget globalObj)
     JSClass<JSSelect>::Bind(globalObj);
 }
 
-void JSSelect::Selected(int value)
+void ParseSelectedObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
 {
+    CHECK_NULL_VOID(changeEventVal->IsFunction());
+
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
+    auto onSelect = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](int32_t index) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Select.SelectChangeEvent");
+        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(index));
+        func->ExecuteJS(1, &newJSVal);
+    };
+    SelectModel::GetInstance()->SetSelectChangeEvent(onSelect);
+}
+
+void JSSelect::Selected(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || info.Length() > 2) {
+        LOGE("The arg is wrong, it is supposed to have 1 or 2 arguments");
+        return;
+    }
+
+    int32_t value = 0;
+    if (info.Length() > 0 && info[0]->IsNumber()) {
+        value = info[0]->ToNumber<int32_t>();
+    }
+
     if (value <= 0) {
         value = 0;
+    }
+    if (info.Length() > 1 && info[1]->IsFunction()) {
+        ParseSelectedObject(info, info[1]);
     }
     SelectModel::GetInstance()->SetSelected(value);
 }
 
-void JSSelect::Value(const std::string& value)
+void ParseValueObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
 {
+    CHECK_NULL_VOID(changeEventVal->IsFunction());
+
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
+    auto onSelect = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& value) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Select.ValueChangeEvent");
+        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(value));
+        func->ExecuteJS(1, &newJSVal);
+    };
+    SelectModel::GetInstance()->SetValueChangeEvent(onSelect);
+}
+
+void JSSelect::Value(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || info.Length() > 2) {
+        LOGE("The arg is wrong, it is supposed to have 1 or 2 arguments");
+        return;
+    }
+
+    std::string value;
+    if (info.Length() > 0 && info[0]->IsString()) {
+        value = info[0]->ToString();
+    }
+
+    if (info.Length() > 1 && info[1]->IsFunction()) {
+        ParseValueObject(info, info[1]);
+    }
     SelectModel::GetInstance()->SetValue(value);
 }
 
@@ -355,6 +413,10 @@ void JSSelect::OptionFontColor(const JSCallbackInfo& info)
 
 void JSSelect::OnSelected(const JSCallbackInfo& info)
 {
+    if (!info[0]->IsFunction()) {
+        LOGE("info[0] is not a function.");
+        return;
+    }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     auto onSelect = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
                         int32_t index, const std::string& value) {

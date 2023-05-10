@@ -34,6 +34,14 @@ enum class TestingPathFillType {
     INVERSE_EVENTODD,
 };
 
+enum class TestingPathOp {
+    DIFFERENCE,
+    INTERSECT,
+    UNION,
+    XOR,
+    REVERSE_DIFFERENCE,
+};
+
 class TestingPath {
 public:
     TestingPath() = default;
@@ -59,8 +67,15 @@ public:
     virtual void Close() {}
     virtual void QuadTo(float ctrlPtX, float ctrlPtY, float endPtX, float endPtY) {}
     virtual void ArcTo(float rx, float ry, float angle, TestingPathDirection direction, float endX, float endY) {}
+    virtual void ArcTo(float pt1X, float pt1Y, float pt2X, float pt2Y, float startAngle, float sweepAngle) {}
+    virtual void ArcTo(const TestingPoint& pt1, const TestingPoint& pt2, float startAngle, float sweepAngle) {}
+
     virtual void Offset(float dx, float dy) {}
     virtual void AddPoly(const std::vector<TestingPoint>& points, int count, bool close) {}
+    virtual bool Op(const TestingPath& path1, TestingPath& path2, TestingPathOp op)
+    {
+        return true;
+    }
 
     virtual TestingRect GetBounds()
     {

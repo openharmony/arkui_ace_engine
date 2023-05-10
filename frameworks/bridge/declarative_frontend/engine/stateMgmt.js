@@ -848,6 +848,12 @@ class SubscriberManager {
         return SubscriberManager.GetInstance().add(newSubsriber);
     }
     /**
+     * Update recycle custom node element id.
+     */
+    static UpdateRecycleElmtId(oldId, newId) {
+        return SubscriberManager.GetInstance().updateRecycleElmtId(oldId, newId);
+    }
+    /**
     *
     * @returns a globally unique id to be assigned to a IPropertySubscriber objet
     * Use MakeId() to assign a IPropertySubscriber object an id before calling @see add() .
@@ -939,6 +945,15 @@ class SubscriberManager {
             return false;
         }
         this.subscriberById_.set(newSubsriber.id__(), newSubsriber);
+        return true;
+    }
+    updateRecycleElmtId(oldId, newId) {
+        if (!this.has(oldId)) {
+            return false;
+        }
+        const subscriber = this.get(oldId);
+        this.subscriberById_.delete(oldId);
+        this.subscriberById_.set(newId, subscriber);
         return true;
     }
     /**
@@ -2166,6 +2181,13 @@ class ObservedPropertyAbstract extends SubscribedAbstractProperty {
     // Partial Update "*PU" classes will overwrite
     getUnmonitored() {
         return this.get();
+    }
+    // update the element id for recycle custom component
+    updateElmtId(oldElmtId, newElmtId) {
+        if (this.subscribers_.has(oldElmtId)) {
+            this.subscribers_.delete(oldElmtId);
+            this.subscribers_.add(newElmtId);
+        }
     }
     subscribeMe(subscriber) {
         
@@ -3429,6 +3451,7 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
         if (source && (typeof (source) === "object") && ("subscribeMe" in source)) {
             // code path for @(Local)StorageProp, the souce is a ObservedPropertyObject in aLocalStorage)
             this.source_ = source;
+            this.sourceIsOwnObject = false;
             // subscribe to receive value change updates from LocalStorage source property
             this.source_.subscribeMe(this);
         }
@@ -3438,7 +3461,9 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
                 stateMgmtConsole.warn(`@Prop ${this.info()}  Provided source object's class 
            lacks @Observed class decorator. Object property changes will not be observed.`);
             }
+            
             this.source_ = new ObservedPropertyObjectPU(source, this, thisPropertyName);
+            this.sourceIsOwnObject = true;
         }
         // deep copy source Object and wrap it
         this.setWrappedValue(this.source_.get());
@@ -3451,6 +3476,10 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
     aboutToBeDeleted() {
         if (this.source_) {
             this.source_.unlinkSuscriber(this.id__());
+            if (this.sourceIsOwnObject == true && this.source_.numberOfSubscrbers() == 0) {
+                
+                this.source_.aboutToBeDeleted();
+            }
             this.source_ = undefined;
         }
         super.aboutToBeDeleted();
@@ -3659,12 +3688,14 @@ class SynchedPropertySimpleOneWayPU extends ObservedPropertySimpleAbstractPU {
         if (source && (typeof (source) === "object") && ("notifyHasChanged" in source) && ("subscribeMe" in source)) {
             // code path for @(Local)StorageProp
             this.source_ = source;
+            this.sourceIsOwnObject = false;
             // subscribe to receive value chnage updates from LocalStorge source property
             this.source_.subscribeMe(this);
         }
         else {
             // code path for @Prop
             this.source_ = new ObservedPropertySimplePU(source, this, thisPropertyName);
+            this.sourceIsOwnObject = true;
         }
         // use own backing store for value to avoid
         // value changes to be propagated back to source
@@ -3677,7 +3708,12 @@ class SynchedPropertySimpleOneWayPU extends ObservedPropertySimpleAbstractPU {
     aboutToBeDeleted() {
         if (this.source_) {
             this.source_.unlinkSuscriber(this.id__());
+            if (this.sourceIsOwnObject == true && this.source_.numberOfSubscrbers() == 0) {
+                
+                this.source_.aboutToBeDeleted();
+            }
             this.source_ = undefined;
+            this.sourceIsOwnObject == false;
         }
         super.aboutToBeDeleted();
     }
@@ -3924,6 +3960,7 @@ class ViewPU extends NativeViewPartialUpdate {
         this.parent_ = undefined;
         this.childrenWeakrefMap_ = new Map();
         this.watchedProps = new Map();
+        this.recycleManager = undefined;
         // Set of dependent elmtIds that need partial update
         // during next re-render
         this.dirtDescendantElementIds_ = new Set();
@@ -3974,6 +4011,9 @@ class ViewPU extends NativeViewPartialUpdate {
     // globally unique id, this is different from compilerAssignedUniqueChildId!
     id__() {
         return this.id_;
+    }
+    updateId(elmtId) {
+        this.id_ = elmtId;
     }
     // super class will call this function from
     // its aboutToBeDeleted implementation
@@ -4256,6 +4296,66 @@ class ViewPU extends NativeViewPartialUpdate {
         this.updateFuncByElmtId.set(elmtId, compilerAssignedUpdateFunc);
         
     }
+    getOrCreateRecycleManager() {
+        if (!this.recycleManager) {
+            this.recycleManager = new RecycleManager;
+        }
+        return this.recycleManager;
+    }
+    getRecycleManager() {
+        return this.recycleManager;
+    }
+    hasRecycleManager() {
+        return !(this.recycleManager === undefined);
+    }
+    initRecycleManager() {
+        if (this.recycleManager) {
+            
+            return;
+        }
+        this.recycleManager = new RecycleManager;
+    }
+    /**
+     * @function observeRecycleComponentCreation
+     * @description custom node recycle creation
+     * @param name custom node name
+     * @param recycleUpdateFunc custom node recycle update which can be converted to a normal update function
+     * @return void
+     */
+    observeRecycleComponentCreation(name, recycleUpdateFunc) {
+        // convert recycle update func to update func
+        const compilerAssignedUpdateFunc = (element, isFirstRender) => {
+            recycleUpdateFunc(element, isFirstRender, undefined);
+        };
+        let node;
+        // if there is no suitable recycle node, run a normal creation function.
+        if (!this.hasRecycleManager() || !(node = this.getRecycleManager().popRecycleNode(name))) {
+            
+            this.observeComponentCreation(compilerAssignedUpdateFunc);
+            return;
+        }
+        // if there is a suitable recycle node, run a recycle update function.
+        const newElmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
+        const oldElmtId = node.id__();
+        // store the current id and origin id, used for dirty element sort in {compareNumber}
+        // this.getRecycleManager().setRecycleNodeCurrentElmtId(elmtId, currentElmtId);
+        recycleUpdateFunc(newElmtId, /* is first render */ true, node);
+        this.updateFuncByElmtId.delete(oldElmtId);
+        this.updateFuncByElmtId.set(newElmtId, compilerAssignedUpdateFunc);
+        node.updateId(newElmtId);
+        node.updateRecycleElmtId(oldElmtId, newElmtId);
+        SubscriberManager.UpdateRecycleElmtId(oldElmtId, newElmtId);
+    }
+    // add current JS object to it's parent recycle manager
+    recycleSelf(name) {
+        if (this.parent_) {
+            this.parent_.getOrCreateRecycleManager().pushRecycleNode(name, this);
+        }
+        else {
+            this.resetRecycleCustomNode();
+            stateMgmtConsole.error(`${this.constructor.name}[${this.id__()}]: recycleNode must have a parent`);
+        }
+    }
     // performs the update on a branch within if() { branch } else if (..) { branch } else { branch }
     ifElseBranchUpdateFunction(branchId, branchfunc) {
         const oldBranchid = If.getBranchId();
@@ -4388,6 +4488,57 @@ class ViewPU extends NativeViewPartialUpdate {
 ViewPU.compareNumber = (a, b) => {
     return (a < b) ? -1 : (a > b) ? 1 : 0;
 };
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ *  * RecycleManager - Recycle cache manager
+ *
+* all definitions in this file are framework internal
+*/
+/**
+ * @class RecycleManager
+ * @description manage the JS object cached of current node
+ */
+class RecycleManager {
+    constructor() {
+        // key: recycle node name
+        // value: recycle node JS object
+        this.cachedRecycleNodes = undefined;
+        this.cachedRecycleNodes = new Map();
+    }
+    pushRecycleNode(name, node) {
+        var _a;
+        if (!this.cachedRecycleNodes.get(name)) {
+            this.cachedRecycleNodes.set(name, new Array());
+        }
+        (_a = this.cachedRecycleNodes.get(name)) === null || _a === void 0 ? void 0 : _a.push(node);
+    }
+    popRecycleNode(name) {
+        var _a;
+        return (_a = this.cachedRecycleNodes.get(name)) === null || _a === void 0 ? void 0 : _a.pop();
+    }
+    // When parent JS View is deleted, release all cached nodes
+    purgeAllCachedRecycleNode(removedElmtIds) {
+        this.cachedRecycleNodes.forEach((nodes, _) => {
+            nodes.forEach((node) => {
+                node.resetRecycleCustomNode();
+                removedElmtIds.push(node.id__());
+            });
+        });
+        this.cachedRecycleNodes.clear();
+    }
+}
 /*
  * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");

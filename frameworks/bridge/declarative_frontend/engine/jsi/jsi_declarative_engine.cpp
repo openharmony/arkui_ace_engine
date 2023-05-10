@@ -33,7 +33,6 @@
 #include "base/i18n/localization.h"
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
-#include "base/log/exception_handler.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_view.h"
 #include "core/common/card_scope.h"
@@ -1954,7 +1953,6 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_PreloadAceModuleCard(void* runtime)
 void JsiDeclarativeEngineInstance::PreloadAceModuleCard(void* runtime)
 {
     isUnique_ = true;
-    ExceptionHandler::formRenderServiceFlag_ = true;
     if (isModulePreloaded_ && !IsPlugin() && !isUnique_) {
         LOGE("PreloadAceModule already preloaded");
         return;

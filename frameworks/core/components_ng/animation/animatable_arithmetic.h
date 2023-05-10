@@ -18,6 +18,7 @@
 
 #include <memory>
 
+#include "base/memory/ace_type.h"
 namespace OHOS::Ace::NG {
 template<typename T>
 class ACE_EXPORT Arithmetic {
@@ -71,6 +72,31 @@ public:
     T operator*=(const float scale) const
     {
         return Multiply(scale);
+    }
+};
+
+class ACE_EXPORT CustomAnimatableArithmetic : public AceType,
+                                              public AnimatableArithmetic<RefPtr<CustomAnimatableArithmetic>> {
+    DECLARE_ACE_TYPE(CustomAnimatableArithmetic, AceType)
+public:
+    CustomAnimatableArithmetic() = default;
+    ~CustomAnimatableArithmetic() override = default;
+
+    RefPtr<CustomAnimatableArithmetic> Add(const RefPtr<CustomAnimatableArithmetic>& value) const override
+    {
+        return {};
+    };
+    RefPtr<CustomAnimatableArithmetic> Minus(const RefPtr<CustomAnimatableArithmetic>& value) const override
+    {
+        return {};
+    }
+    RefPtr<CustomAnimatableArithmetic> Multiply(const float scale) const override
+    {
+        return {};
+    }
+    bool IsEqual(const RefPtr<CustomAnimatableArithmetic>& value) const override
+    {
+        return true;
     }
 };
 } // namespace OHOS::Ace::NG

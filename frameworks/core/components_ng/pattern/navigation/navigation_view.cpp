@@ -949,8 +949,11 @@ void NavigationView::SetNavigationStack()
     CHECK_NULL_VOID(navigationGroupNode);
     auto pattern = navigationGroupNode->GetPattern<NavigationPattern>();
     CHECK_NULL_VOID(pattern);
-    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
-    pattern->SetNavigationStack(std::move(navigationStack));
+    auto navigationStack = pattern->GetNavigationStack();
+    if (!navigationStack) {
+        auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+        pattern->SetNavigationStack(std::move(navigationStack));
+    }
 }
 
 void NavigationView::SetNavDestination(std::function<void(std::string)>&& builder)

@@ -72,7 +72,6 @@ void ComponentSnapshot::Create(const RefPtr<AceType>& customNode, JsCallback&& c
 {
     auto node = AceType::DynamicCast<FrameNode>(customNode);
     CHECK_NULL_VOID(node);
-    node->MarkModifyDone();
     FrameNode::ProcessOffscreenNode(node);
     LOGD("ProcessOffscreenNode finished, root size = %{public}s",
         node->GetGeometryNode()->GetFrameSize().ToString().c_str());

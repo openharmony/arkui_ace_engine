@@ -84,50 +84,120 @@ void TextPickerColumnPattern::OnModifyDone()
     InitMouseAndPressEvent();
 }
 
-void TextPickerColumnPattern::InitMouseAndPressEvent()
+void TextPickerColumnPattern::OnAroundButtonClick(RefPtr<EventParam> param)
 {
-    if (mouseEvent_ || touchListener_) {
-        return;
+    int32_t step = param->itemIndex - MIDDLE_CHILD_INDEX;
+    if (step != 0) {
+        InnerHandleScroll(step, false);
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    RefPtr<FrameNode> middleChild = nullptr;
-    auto childSize = static_cast<int32_t>(host->GetChildren().size());
-    middleChild = DynamicCast<FrameNode>(host->GetChildAtIndex(childSize / MIDDLE_CHILD_INDEX));
-    CHECK_NULL_VOID(middleChild);
-    auto eventHub = middleChild->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(eventHub);
-    auto inputHub = eventHub->GetOrCreateInputEventHub();
+}
+
+
+void TextPickerColumnPattern::OnMiddleButtonTouchDown(RefPtr<EventParam> param)
+{
+    PlayPressAnimation(pressColor_);
+}
+
+void TextPickerColumnPattern::OnMiddleButtonTouchMove(RefPtr<EventParam> param)
+{
+    PlayPressAnimation(Color::TRANSPARENT);
+}
+
+void TextPickerColumnPattern::OnMiddleButtonTouchUp(RefPtr<EventParam> param)
+{
+    PlayPressAnimation(Color::TRANSPARENT);
+}
+
+RefPtr<TouchEventImpl> TextPickerColumnPattern::CreateItemTouchEventListener(RefPtr<EventParam> param)
+{
+    auto itemCallback = [param, weak = WeakClaim(this)](const TouchEventInfo& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
+            pattern->SetLocalDownDistance(info.GetTouches().front().GetLocalLocation().GetDistance());
+            pattern->OnMiddleButtonTouchDown(param);
+        }
+        if (info.GetTouches().front().GetTouchType() == TouchType::UP) {
+            pattern->OnMiddleButtonTouchUp(param);
+            pattern->SetLocalDownDistance(0.0f);
+        }
+        if (info.GetTouches().front().GetTouchType() == TouchType::MOVE) {
+            if (std::abs(info.GetTouches().front().GetLocalLocation().GetDistance() - pattern->GetLocalDownDistance()) >
+                MOVE_DISTANCE) {
+                pattern->OnMiddleButtonTouchMove(param);
+            }
+        }
+    };
+    auto listener = MakeRefPtr<TouchEventImpl>(std::move(itemCallback));
+    return listener;
+}
+
+RefPtr<ClickEvent> TextPickerColumnPattern::CreateItemClickEventListener(RefPtr<EventParam> param)
+{
+    auto clickEventHandler = [param, weak = WeakClaim(this)](const GestureEvent& /* info */) {
+        auto pattern = weak.Upgrade();
+        pattern->OnAroundButtonClick(param);
+    };
+
+    auto listener = AceType::MakeRefPtr<NG::ClickEvent>(clickEventHandler);
+    return listener;
+}
+
+RefPtr<InputEvent> TextPickerColumnPattern::CreateMouseHoverEventListener(RefPtr<EventParam> param)
+{
     auto mouseTask = [weak = WeakClaim(this)](bool isHover) {
         auto pattern = weak.Upgrade();
         if (pattern) {
             pattern->HandleMouseEvent(isHover);
         }
     };
-    mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
-    inputHub->AddOnHoverEvent(mouseEvent_);
-    auto gesture = middleChild->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gesture);
-    auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
-            pattern->SetLocalDownDistance(info.GetTouches().front().GetLocalLocation().GetDistance());
-            pattern->OnTouchDown();
+    auto hoverEventListener = MakeRefPtr<InputEvent>(std::move(mouseTask));
+    return hoverEventListener;
+}
+
+void TextPickerColumnPattern::InitMouseAndPressEvent()
+{
+    if (touchEventInit) {
+        return;
+    }
+    
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    auto childSize = static_cast<int32_t>(host->GetChildren().size());
+
+    for (int i = 0; i < childSize; i++) {
+        RefPtr<FrameNode> childNode = DynamicCast<FrameNode>(host->GetChildAtIndex(i));
+        RefPtr<EventParam> param = MakeRefPtr<EventParam>();
+        param->instance = childNode;
+        param->itemIndex = i;
+        param->itemTotalCounts = childSize;
+        
+        auto eventHub = childNode->GetEventHub<EventHub>();
+        CHECK_NULL_VOID(eventHub);
+
+        if (i != MIDDLE_CHILD_INDEX) {
+            RefPtr<ClickEvent> clickListener = CreateItemClickEventListener(param);
+            CHECK_NULL_VOID(clickListener);
+            auto gesture = eventHub->GetOrCreateGestureEventHub();
+            CHECK_NULL_VOID(gesture);
+            gesture->AddClickEvent(clickListener);
+        } else {
+            auto inputHub = eventHub->GetOrCreateInputEventHub();
+            CHECK_NULL_VOID(inputHub);
+            RefPtr<InputEvent> hoverEventListener = CreateMouseHoverEventListener(param);
+            CHECK_NULL_VOID(hoverEventListener);
+            inputHub->AddOnHoverEvent(hoverEventListener);
+
+            RefPtr<TouchEventImpl> itemListener = CreateItemTouchEventListener(param);
+            CHECK_NULL_VOID(itemListener);
+            auto gesture = eventHub->GetOrCreateGestureEventHub();
+            CHECK_NULL_VOID(gesture);
+            gesture->AddTouchEvent(itemListener);
         }
-        if (info.GetTouches().front().GetTouchType() == TouchType::UP) {
-            pattern->OnTouchUp();
-            pattern->SetLocalDownDistance(0.0f);
-        }
-        if (info.GetTouches().front().GetTouchType() == TouchType::MOVE) {
-            if (std::abs(info.GetTouches().front().GetLocalLocation().GetDistance() - pattern->GetLocalDownDistance()) >
-                MOVE_DISTANCE) {
-                pattern->OnTouchUp();
-            }
-        }
-    };
-    touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
-    gesture->AddTouchEvent(touchListener_);
+    }
+
+    touchEventInit = true;
 }
 
 void TextPickerColumnPattern::HandleMouseEvent(bool isHover)
@@ -135,18 +205,8 @@ void TextPickerColumnPattern::HandleMouseEvent(bool isHover)
     if (isHover) {
         PlayPressAnimation(hoverColor_);
     } else {
-        OnTouchUp();
+        PlayPressAnimation(Color::TRANSPARENT);
     }
-}
-
-void TextPickerColumnPattern::OnTouchDown()
-{
-    PlayPressAnimation(pressColor_);
-}
-
-void TextPickerColumnPattern::OnTouchUp()
-{
-    PlayPressAnimation(Color::TRANSPARENT);
 }
 
 void TextPickerColumnPattern::SetButtonBackgroundColor(const Color& pressColor)
@@ -697,6 +757,17 @@ void TextPickerColumnPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestur
     gestureHub->AddPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
 }
 
+RefPtr<TextPickerLayoutProperty> TextPickerColumnPattern::GetParentLayout() const
+{
+    auto host = GetHost();
+    auto stackNode = DynamicCast<FrameNode>(host->GetParent());
+    auto parentNode = DynamicCast<FrameNode>(stackNode->GetParent());
+
+    auto property = parentNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    return property;
+}
+
+
 void TextPickerColumnPattern::HandleDragStart(const GestureEvent& event)
 {
     CHECK_NULL_VOID_NOLOG(GetHost());
@@ -706,16 +777,21 @@ void TextPickerColumnPattern::HandleDragStart(const GestureEvent& event)
     toss->SetStart(yOffset_);
     yLast_ = yOffset_;
     pressed_ = true;
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_START);
 }
 
 void TextPickerColumnPattern::HandleDragMove(const GestureEvent& event)
 {
     if (event.GetInputEventType() == InputEventType::AXIS) {
-        InnerHandleScroll(LessNotEqual(event.GetDelta().GetY(), 0.0));
+        int32_t step = LessNotEqual(event.GetDelta().GetY(), 0.0) ? 1 : -1;
+        InnerHandleScroll(step);
+        
         return;
     }
-    CHECK_NULL_VOID_NOLOG(pressed_);
 
+    CHECK_NULL_VOID_NOLOG(pressed_);
     CHECK_NULL_VOID_NOLOG(GetHost());
     CHECK_NULL_VOID_NOLOG(GetToss());
     auto toss = GetToss();
@@ -723,8 +799,9 @@ void TextPickerColumnPattern::HandleDragMove(const GestureEvent& event)
     if (NearEqual(offsetY, yLast_, 1.0)) { // if changing less than 1.0, no need to handle
         return;
     }
+
     toss->SetEnd(offsetY);
-    UpdateColumnChildPosition(offsetY);
+    UpdateColumnChildPosition(offsetY, true);
 }
 
 void TextPickerColumnPattern::HandleDragEnd()
@@ -733,7 +810,10 @@ void TextPickerColumnPattern::HandleDragEnd()
     CHECK_NULL_VOID_NOLOG(GetHost());
     CHECK_NULL_VOID_NOLOG(GetToss());
     auto toss = GetToss();
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
     if (!NotLoopOptions() && toss->Play()) {
+        frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
         return;
     }
     yOffset_ = 0.0;
@@ -746,7 +826,9 @@ void TextPickerColumnPattern::HandleDragEnd()
     fromController_->ClearInterpolators();
     fromController_->AddInterpolator(curve);
     fromController_->Play();
+    frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
 }
+
 void TextPickerColumnPattern::CreateAnimation()
 {
     CHECK_NULL_VOID_NOLOG(!animationCreated_);
@@ -787,7 +869,8 @@ void TextPickerColumnPattern::HandleCurveStopped()
         return;
     }
     ScrollOption(0.0 - scrollDelta_);
-    InnerHandleScroll(GreatNotEqual(scrollDelta_, 0.0));
+    int32_t step = GreatNotEqual(scrollDelta_, 0.0) ? 1 : -1;
+    InnerHandleScroll(step);
     fromController_->ClearInterpolators();
     if (LessNotEqual(scrollDelta_, 0.0)) {
         fromController_->AddInterpolator(fromTopCurve_);
@@ -867,11 +950,13 @@ std::string TextPickerColumnPattern::GetSelectedObject(bool isColumnChange, int3
     }
 }
 
-void TextPickerColumnPattern::UpdateColumnChildPosition(double offsetY)
+void TextPickerColumnPattern::UpdateColumnChildPosition(double offsetY, bool isUpatePropertiesOnly)
 {
     yLast_ = offsetY;
     double dragDelta = yLast_ - yOffset_;
-    CHECK_NULL_VOID_NOLOG(CanMove(LessNotEqual(dragDelta, 0)));
+    if (!CanMove(LessNotEqual(dragDelta, 0))) {
+        return;
+    }
 
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
@@ -883,7 +968,10 @@ void TextPickerColumnPattern::UpdateColumnChildPosition(double offsetY)
         ScrollOption(dragDelta);
         return;
     }
-    InnerHandleScroll(LessNotEqual(dragDelta, 0.0), true);
+
+    int32_t step = LessNotEqual(dragDelta, 0.0) ? 1 : -1;
+    InnerHandleScroll(step, isUpatePropertiesOnly);
+
     double jumpDelta = (LessNotEqual(dragDelta, 0.0) ? jumpInterval_ : 0.0 - jumpInterval_);
     ScrollOption(jumpDelta, true);
     yOffset_ = offsetY - jumpDelta;
@@ -891,7 +979,9 @@ void TextPickerColumnPattern::UpdateColumnChildPosition(double offsetY)
 
 bool TextPickerColumnPattern::CanMove(bool isDown) const
 {
-    CHECK_NULL_RETURN_NOLOG(NotLoopOptions(), true);
+    if (!NotLoopOptions()) {
+        return true;
+    }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     int totalOptionCount = static_cast<int>(GetOptionCount());
@@ -902,14 +992,12 @@ bool TextPickerColumnPattern::CanMove(bool isDown) const
 
 bool TextPickerColumnPattern::NotLoopOptions() const
 {
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto showOptionCount = GetShowOptionCount();
-    uint32_t totalOptionCount = GetOptionCount();
-    return totalOptionCount <= showOptionCount / 2 + 1; // the critical value of loop condition.
+    RefPtr<TextPickerLayoutProperty> layout = GetParentLayout();
+    bool canLoop = layout->GetCanLoop().value();
+    return !canLoop;
 }
 
-bool TextPickerColumnPattern::InnerHandleScroll(bool isDown, bool isUpatePropertiesOnly)
+bool TextPickerColumnPattern::InnerHandleScroll(int32_t step, bool isUpatePropertiesOnly)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -919,15 +1007,31 @@ bool TextPickerColumnPattern::InnerHandleScroll(bool isDown, bool isUpatePropert
     if (totalOptionCount == 0) {
         return false;
     }
-    uint32_t currentIndex = GetCurrentIndex();
-    if (isDown) {
-        currentIndex = (totalOptionCount + currentIndex + 1) % totalOptionCount; // index add one
+
+    int32_t currentIndex = GetCurrentIndex();
+    RefPtr<TextPickerLayoutProperty> layout = GetParentLayout();
+    CHECK_NULL_RETURN(host, false);
+
+    bool canLoop = layout->GetCanLoop().value_or(true);
+    if (!canLoop) {
+        // scroll down
+        if (step > 0) {
+            currentIndex = (currentIndex + step) > (totalOptionCount - 1) ?
+                totalOptionCount - 1 : currentIndex + step;
+             
+        // scroll up
+        } else if (step < 0) {
+            currentIndex = currentIndex + step < 0 ? 0 : currentIndex + step;
+        }
     } else {
-        currentIndex = (totalOptionCount + currentIndex - 1) % totalOptionCount; // index reduce one
+        currentIndex = (totalOptionCount + currentIndex + step) % totalOptionCount;
     }
+
     SetCurrentIndex(currentIndex);
+    bool isDown = step > 0 ? true : false;
     HandleChangeCallback(isDown, true);
     FlushCurrentOptions(isDown, isUpatePropertiesOnly);
+    
     return true;
 }
 

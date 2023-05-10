@@ -540,7 +540,7 @@ void JSText::JsDraggable(const JSCallbackInfo& info)
         LOGI("The info is wrong, it is supposed to be an boolean");
         return;
     }
-    TextModel::GetInstance()->SetDraggable(info[0]->IsBoolean());
+    TextModel::GetInstance()->SetDraggable(info[0]->ToBoolean());
 }
 
 void JSText::JsMenuOptionsExtension(const JSCallbackInfo& info)

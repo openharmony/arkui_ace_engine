@@ -33,6 +33,7 @@ void MarqueeModelNG::Create()
             V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
         auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
         textLayoutProperty->UpdateContent(std::string(""));
+        textLayoutProperty->UpdateMaxLines(1);
         frameNode->AddChild(textNode);
     } else {
         auto textChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
@@ -40,6 +41,7 @@ void MarqueeModelNG::Create()
         auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
         textLayoutProperty->UpdateContent(std::string(""));
+        textLayoutProperty->UpdateMaxLines(1);
     }
     stack->Push(frameNode);
 }

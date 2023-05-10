@@ -18,6 +18,7 @@
 
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "core/components_ng/pattern/progress/progress_model.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -39,6 +40,12 @@ public:
     static void SetCircularStyle(const JSCallbackInfo& info);
     static void JsBackgroundColor(const JSCallbackInfo& info);
     static void JsBorderColor(const JSCallbackInfo& info);
+
+private:
+    static bool ConvertGradientColor(const JsiRef<JsiValue>& param, OHOS::Ace::NG::Gradient& gradient);
+    static NG::ProgressStatus ConvertStrToProgressStatus(const std::string& value);
+    static void JsSetProgressStyleOptions(const JSCallbackInfo& info);
+    static void JsSetRingStyleOptions(const JSCallbackInfo& info);
     static void JsSetCapsuleStyle(const JSCallbackInfo& info);
     static void JsSetFontStyle(const JSCallbackInfo& info);
     static void JsSetFontDefault();

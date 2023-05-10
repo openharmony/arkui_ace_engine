@@ -463,31 +463,48 @@ bool TextPickerPattern::ChangeCurrentOptionValue(NG::TextCascadePickerOptions& o
     return false;
 }
 
+void TextPickerPattern::ProcessCascadeOptionsValues(const std::vector<std::string>& rangeResultValue,
+    uint32_t index)
+{
+    auto valueIterator = std::find(rangeResultValue.begin(), rangeResultValue.end(), values_[index]);
+    if (valueIterator != rangeResultValue.end()) {
+        if (index < selecteds_.size()) {
+            selecteds_[index] = std::distance(rangeResultValue.begin(), valueIterator);
+        } else {
+            selecteds_.emplace_back(std::distance(rangeResultValue.begin(), valueIterator));
+        }
+    } else {
+        if (index < selecteds_.size()) {
+            selecteds_[index] = 0;
+        } else {
+            selecteds_.emplace_back(0);
+        }
+    }
+}
+
 void TextPickerPattern::ProcessCascadeOptions(const std::vector<NG::TextCascadePickerOptions>& options,
     std::vector<NG::TextCascadePickerOptions>& reOptions, uint32_t index)
 {
     std::vector<std::string> rangeResultValue;
     NG::TextCascadePickerOptions option;
     for (size_t i = 0; i < options.size(); i++) {
-        rangeResultValue.emplace_back(options[i].rangeResult[0]);
+        if (!options[i].rangeResult.empty()) {
+            rangeResultValue.emplace_back(options[i].rangeResult[0]);
+        }
     }
     option.rangeResult = rangeResultValue;
-    if (selecteds_[index] < 0 && selecteds_[index] > options.size()) {
-        selecteds_[index] = 0;
-    }
     for (size_t i = 0; i < options.size(); i++) {
-        if (selecteds_[index] != 0) {
+        if (index < selecteds_.size() &&
+            ((selecteds_[index] != 0 && !isHasSelectAttr_) || isHasSelectAttr_)) {
+            if (selecteds_[index] < 0 && selecteds_[index] > options.size()) {
+                selecteds_[index] = 0;
+            }
             option.children = options[selecteds_[index]].children;
             reOptions.emplace_back(option);
             return ProcessCascadeOptions(options[selecteds_[index]].children, reOptions, index + 1);
         }
-        if (values_[index] != "") {
-            auto valueIterator = std::find(rangeResultValue.begin(), rangeResultValue.end(), values_[index]);
-            if (valueIterator != rangeResultValue.end()) {
-                selecteds_[index] = std::distance(rangeResultValue.begin(), valueIterator);
-            } else {
-                selecteds_[index] = 0;
-            }
+        if (index < values_.size() && values_[index] != "") {
+            ProcessCascadeOptionsValues(rangeResultValue, index);
             option.children = options[selecteds_[index]].children;
             reOptions.emplace_back(option);
             return ProcessCascadeOptions(options[selecteds_[index]].children, reOptions, index + 1);

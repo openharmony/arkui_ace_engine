@@ -35,6 +35,11 @@ RefPtr<Container> Container::GetActive()
     return activeContainer;
 }
 
+RefPtr<TaskExecutor> Container::CurrentTaskExecutor()
+{
+    return MockContainer::Current()->GetTaskExecutor();
+}
+
 void Container::UpdateCurrent(int32_t id)
 {
     g_id = id;

@@ -59,19 +59,9 @@ public:
         return childOffset_;
     }
 
-    bool ShowBottomArrow() const
+    bool ShowArrow() const
     {
-        return showBottomArrow_;
-    }
-
-    bool ShowTopArrow() const
-    {
-        return showTopArrow_;
-    }
-
-    bool ShowCustomArrow() const
-    {
-        return showCustomArrow_;
+        return showArrow_;
     }
 
     OffsetF GetArrowPosition() const
@@ -108,7 +98,7 @@ private:
     OffsetF FitToScreen(const OffsetF& fitPosition, const SizeF& childSize);
     ErrorPositionType GetErrorPositionType(const OffsetF& childOffset, const SizeF& childSize);
 
-    void UpdateCustomChildPosition(const RefPtr<BubbleLayoutProperty>& layoutProp);
+    void UpdateChildPosition(const RefPtr<BubbleLayoutProperty>& layoutProp);
     void UpdateTouchRegion();
 
     int32_t targetNodeId_ = -1;
@@ -132,9 +122,7 @@ private:
     Dimension targetSpace_;
     Dimension borderRadius_;
 
-    bool showBottomArrow_ = false;
-    bool showTopArrow_ = false;
-    bool showCustomArrow_ = false;
+    bool showArrow_ = false;
     float scaledBubbleSpacing_ = 0.0f;
     float arrowHeight_ = 0.0f;
 

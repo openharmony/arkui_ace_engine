@@ -46,6 +46,7 @@ public:
     void SetDividerColor(const Color& color) override;
     void SetDividerStartMargin(const Dimension& startMargin) override;
     void SetDividerEndMargin(const Dimension& endMargin) override;
+    void SetOnChangeEvent(std::function<void(const bool)>&& onChange) override {};
 
 private:
     void CreateAndMountControlButton(const RefPtr<NG::FrameNode>& parentNode) override;

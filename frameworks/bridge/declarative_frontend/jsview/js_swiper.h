@@ -28,7 +28,7 @@ public:
 
     static void SetAutoPlay(bool autoPlay);
     static void SetDuration(const JSCallbackInfo& info);
-    static void SetIndex(int32_t index);
+    static void SetIndex(const JSCallbackInfo& info);
     static void SetInterval(const JSCallbackInfo& info);
     static void SetLoop(bool loop);
     static void SetVertical(bool isVertical);
@@ -55,9 +55,11 @@ public:
     static void SetOnClick(const JSCallbackInfo& info);
     static void JsRemoteMessage(const JSCallbackInfo& info);
     static void GetFontContent(const JSRef<JSVal>& font, bool isSelected, SwiperDigitalParameters& digitalParameters);
+    static void SetDisplayArrow(const JSCallbackInfo& info);
     static SwiperParameters GetDotIndicatorInfo(const JSRef<JSObject>& obj);
     static SwiperDigitalParameters GetDigitIndicatorInfo(const JSRef<JSObject>& obj);
     static void SetIsIndicatorCustomSize(const Dimension& dimPosition, bool parseOk);
+    static bool GetArrowInfo(const JSRef<JSObject>& obj, SwiperArrowParameters& swiperArrowParameters);
 };
 
 class JSSwiperController final : public Referenced {
