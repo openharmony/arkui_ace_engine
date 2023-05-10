@@ -19,6 +19,7 @@
 #include <csignal>
 #include <cstdint>
 #include <pthread.h>
+#include <queue>
 #include <shared_mutex>
 
 #include "base/log/event_report.h"
@@ -492,5 +493,4 @@ void WatchDog::DefusingBomb(int32_t instanceId)
         },
         IMMEDIATELY_PERIOD);
 }
-
 } // namespace OHOS::Ace
