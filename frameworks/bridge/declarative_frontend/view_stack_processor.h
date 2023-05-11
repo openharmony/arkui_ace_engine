@@ -266,6 +266,12 @@ public:
     }
     RefPtr<ComposedComponent> CreateInspectorWrapper(const std::string& inspectorTag);
 
+    void GetAndPushFrameNode(const std::string& tag, int32_t elmtId)
+    {
+        LOGW("NON NG ViewStackProcessor GetAndPushFrameNode()");
+        // FrameNode is not available in NON-NG pipeline.
+    }
+
 private:
     ViewStackProcessor();
 
