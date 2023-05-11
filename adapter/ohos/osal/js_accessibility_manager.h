@@ -191,7 +191,8 @@ private:
     void FocusMoveSearchNG(int32_t elementId, int32_t direction, Accessibility::AccessibilityElementInfo& info,
         const RefPtr<PipelineBase>& context);
 
-    bool ExecuteActionNG(int32_t elementId, Accessibility::ActionType action, const RefPtr<PipelineBase>& context);
+    bool ExecuteActionNG(int32_t elementId, const std::map<std::string, std::string> actionArguments,
+        Accessibility::ActionType action, const RefPtr<PipelineBase>& context);
 
     void SetSearchElementInfoByAccessibilityIdResult(Accessibility::AccessibilityElementOperatorCallback& callback,
         const std::list<Accessibility::AccessibilityElementInfo>& infos, const int32_t requestId);
@@ -213,6 +214,8 @@ private:
     RefPtr<NG::PipelineContext> FindPipelineByElementId(const int32_t elementId, RefPtr<NG::FrameNode>& node);
     RefPtr<NG::FrameNode> FindNodeFromPipeline(const WeakPtr<PipelineBase>& context, const int32_t elementId);
     RefPtr<PipelineBase> GetPipelineByWindowId(const int32_t windowId);
+    void ProcessParameters(Accessibility::ActionType op, const std::vector<std::string>& params,
+        std::map<std::string, std::string>& paramsMap);
 
     std::string callbackKey_;
     int windowId_ = 0;
