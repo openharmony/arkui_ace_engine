@@ -17,7 +17,6 @@
 
 #include "base/log/ace_scoring_log.h"
 #include "base/log/log_wrapper.h"
-#include "base/memory/referenced.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_hover_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_key_function.h"
