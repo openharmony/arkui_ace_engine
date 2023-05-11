@@ -25,7 +25,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace {
-static constexpr int32_t HALF = 2;
+constexpr float HALF = 2.0f;
 }
 
 namespace OHOS::Ace::NG {
