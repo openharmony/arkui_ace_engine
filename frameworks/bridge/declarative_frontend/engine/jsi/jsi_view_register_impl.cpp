@@ -411,6 +411,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Badge", JSBadge::JSBind },
     { "Gauge", JSGauge::JSBind },
     { "Marquee", JSMarquee::JSBind },
+    { "Swiper", JSSwiper::JSBind },
     { "SwiperController", JSSwiperController::JSBind },
     { "CalendarController", JSCalendarController::JSBind },
     { "CanvasRenderingContext2D", JSRenderingContext::JSBind },
