@@ -971,6 +971,7 @@ void JSCanvasRenderer::JsCreatePattern(const JSCallbackInfo& info)
         auto canvasPattern = Referenced::Claim(obj->Unwrap<JSCanvasPattern>());
         canvasPattern->SetCanvasRenderer(AceType::WeakClaim(this));
         canvasPattern->SetId(patternCount_);
+        patternCount_++;
         info.SetReturnValue(obj);
     }
 }
