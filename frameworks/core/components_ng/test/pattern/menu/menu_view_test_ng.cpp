@@ -369,6 +369,10 @@ HWTEST_F(MenuViewTestNg, MenuViewTestNgSetFontWeight002, TestSize.Level1)
  */
 HWTEST_F(MenuViewTestNg, MenuViewTestNgSetMenuPlacement001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. create menuWrapperNode with menuItems and set MenuPlacement to Placement::TOP
+     * @tc.expected: step1. Get menuPlacement is Placement::TOP
+     */
     std::vector<OptionParam> optionParams;
     optionParams.emplace_back("MenuItem", "", nullptr);
     MenuParam menuParam;
@@ -394,6 +398,11 @@ HWTEST_F(MenuViewTestNg, MenuViewTestNgSetMenuPlacement001, TestSize.Level1)
  */
 HWTEST_F(MenuViewTestNg, MenuViewTestNgSetMenuPlacement002, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. create menuWrapperNode with custom node from a builder and set MenuPlacement to
+     * Placement::BOTTOM
+     * @tc.expected: step1. Get menuPlacement is Placement::BOTTOM
+     */
     auto textNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textNode, nullptr);
