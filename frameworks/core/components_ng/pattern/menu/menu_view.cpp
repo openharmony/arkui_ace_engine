@@ -257,28 +257,4 @@ void MenuView::Create()
     CHECK_NULL_VOID(menuNode);
     ViewStackProcessor::GetInstance()->Push(menuNode);
 }
-
-void MenuView::SetFontSize(const Dimension& fontSize)
-{
-    if (fontSize.IsValid()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, FontSize, fontSize);
-    } else {
-        LOGW("FontSize value is not valid");
-        ACE_RESET_LAYOUT_PROPERTY(MenuLayoutProperty, FontSize);
-    }
-}
-
-void MenuView::SetFontColor(const std::optional<Color>& color)
-{
-    if (color.has_value()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, FontColor, color.value());
-    } else {
-        ACE_RESET_LAYOUT_PROPERTY(MenuLayoutProperty, FontColor);
-    }
-}
-
-void MenuView::SetFontWeight(Ace::FontWeight weight)
-{
-    ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, FontWeight, weight);
-}
 } // namespace OHOS::Ace::NG
