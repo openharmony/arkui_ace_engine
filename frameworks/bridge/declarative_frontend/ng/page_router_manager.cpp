@@ -42,7 +42,6 @@ namespace OHOS::Ace::NG {
 namespace {
 
 constexpr int32_t MAX_ROUTER_STACK_SIZE = 32;
-constexpr int32_t SUB_STR_LENGTH = 7;
 
 void ExitToDesktop()
 {
@@ -77,8 +76,8 @@ void PageRouterManager::RunPage(const std::string& url, const std::string& param
 {
     CHECK_RUN_ON(JS);
     RouterPageInfo info { url };
-
-    if (info.url.substr(0, SUB_STR_LENGTH) == "@bundle") {
+#if !defined(PREVIEW)
+    if (info.url.substr(0, strlen(BUNDLE_TAG)) == BUNDLE_TAG) {
         auto container = Container::Current();
         CHECK_NULL_VOID(container);
         auto pageUrlChecker = container->GetPageUrlChecker();
@@ -106,9 +105,13 @@ void PageRouterManager::RunPage(const std::string& url, const std::string& param
         pageUrlChecker->LoadPageUrl(url, callback, silentInstallErrorCallBack);
         return;
     }
-
+#endif
     if (!info.url.empty()) {
         info.path = manifestParser_->GetRouter()->GetPagePath(url);
+        if (info.path.empty()) {
+            LOGE("[Engine Log] this uri not support in route push.");
+            return;
+        }
     } else {
         info.path = manifestParser_->GetRouter()->GetEntry();
         info.url = manifestParser_->GetRouter()->GetEntry("");
@@ -521,8 +524,8 @@ void PageRouterManager::StartPush(const RouterPageInfo& target, const std::strin
         LOGE("router.Push uri is empty");
         return;
     }
-
-    if (target.url.substr(0, SUB_STR_LENGTH) == "@bundle") {
+#if !defined(PREVIEW)
+    if (target.url.substr(0, strlen(BUNDLE_TAG)) == BUNDLE_TAG) {
         auto container = Container::Current();
         CHECK_NULL_VOID(container);
         auto pageUrlChecker = container->GetPageUrlChecker();
@@ -552,7 +555,7 @@ void PageRouterManager::StartPush(const RouterPageInfo& target, const std::strin
         pageUrlChecker->LoadPageUrl(target.url, callback, silentInstallErrorCallBack);
         return;
     }
-
+#endif
     if (!manifestParser_) {
         LOGE("the router manifest parser is null.");
         return;
@@ -626,8 +629,8 @@ void PageRouterManager::StartReplace(const RouterPageInfo& target, const std::st
         LOGE("router.Push uri is empty");
         return;
     }
-
-    if (target.url.substr(0, SUB_STR_LENGTH) == "@bundle") {
+#if !defined(PREVIEW)
+    if (target.url.substr(0, strlen(BUNDLE_TAG)) == BUNDLE_TAG) {
         auto container = Container::Current();
         CHECK_NULL_VOID(container);
         auto pageUrlChecker = container->GetPageUrlChecker();
@@ -657,7 +660,7 @@ void PageRouterManager::StartReplace(const RouterPageInfo& target, const std::st
         pageUrlChecker->LoadPageUrl(target.url, callback, silentInstallErrorCallBack);
         return;
     }
-
+#endif
     if (!manifestParser_) {
         LOGE("the router manifest parser is null.");
         return;
@@ -709,8 +712,8 @@ void PageRouterManager::StartBack(const RouterPageInfo& target, const std::strin
         PopPage(params, true, true);
         return;
     }
-
-    if (target.url.substr(0, SUB_STR_LENGTH) == "@bundle") {
+#if !defined(PREVIEW)
+    if (target.url.substr(0, strlen(BUNDLE_TAG)) == BUNDLE_TAG) {
         std::string url = target.url;
         std::string pagePath = target.url + ".js";
         LOGD("router.Push pagePath = %{private}s", pagePath.c_str());
@@ -724,7 +727,7 @@ void PageRouterManager::StartBack(const RouterPageInfo& target, const std::strin
         ExitToDesktop();
         return;
     }
-
+#endif
     if (!manifestParser_) {
         LOGE("the router manifest parser is null.");
         return;
