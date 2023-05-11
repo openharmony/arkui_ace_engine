@@ -66,6 +66,8 @@ void ScreenPattern::OnAttachToFrameNode()
     auto screenBounds = screenSession_->GetScreenProperty().GetBounds();
     auto rect = Rect(screenBounds.rect_.left_, screenBounds.rect_.top_,
         screenBounds.rect_.width_, screenBounds.rect_.height_);
+    float density = screenSession_->GetScreenProperty().GetDensity();
+    window->SetDisplayDensity(density);
     window->UpdateViewportConfig(rect, Rosen::WindowSizeChangeReason::UNDEFINED);
 }
 

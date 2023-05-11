@@ -188,13 +188,17 @@ void WindowPattern::LoadContent(
     RegisterInputEventListener(inputListener);
 }
 
+void WindowPattern::SetDisplayDensity(float density)
+{
+    displayDensity_ = density;
+}
+
 void WindowPattern::UpdateViewportConfig(const Rect& rect, Rosen::WindowSizeChangeReason reason)
 {
     ViewportConfig config;
     config.SetPosition(rect.Left(), rect.Top());
     config.SetSize(rect.Width(), rect.Height());
-    constexpr float density = 1.5; // to get display density
-    config.SetDensity(density);
+    config.SetDensity(displayDensity_);
     CHECK_NULL_VOID(uiContent_);
     uiContent_->UpdateViewportConfig(config, reason);
 }
