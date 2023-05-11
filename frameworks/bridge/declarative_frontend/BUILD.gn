@@ -316,6 +316,7 @@ template("declarative_js_engine") {
       "jsview/models/rect_model_impl.cpp",
       "jsview/models/refresh_model_impl.cpp",
       "jsview/models/row_model_impl.cpp",
+      "jsview/models/scroll_bar_model_impl.cpp",
       "jsview/models/scroll_model_impl.cpp",
       "jsview/models/search_model_impl.cpp",
       "jsview/models/select_model_impl.cpp",
