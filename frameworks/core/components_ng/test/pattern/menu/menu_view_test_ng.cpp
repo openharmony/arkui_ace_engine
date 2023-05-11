@@ -361,5 +361,56 @@ HWTEST_F(MenuViewTestNg, MenuViewTestNgSetFontWeight002, TestSize.Level1)
     MenuView::SetFontWeight(FontWeight::BOLDER);
     ASSERT_FALSE(property->GetFontWeight().has_value());
 }
+
+/**
+ * @tc.name: MenuViewTestNgSetMenuPlacement001
+ * @tc.desc: Verify SetMenuPlacement.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, MenuViewTestNgSetMenuPlacement001, TestSize.Level1)
+{
+    std::vector<OptionParam> optionParams;
+    optionParams.emplace_back("MenuItem", "", nullptr);
+    MenuParam menuParam;
+    menuParam.placement = OHOS::Ace::Placement::TOP;
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), TARGET_ID, "", TYPE, menuParam);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto property = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    EXPECT_TRUE(property->GetMenuPlacement().has_value());
+    EXPECT_EQ(property->GetMenuPlacement().value(), OHOS::Ace::Placement::TOP);
+}
+
+/**
+ * @tc.name: MenuViewTestNgSetMenuPlacement002
+ * @tc.desc: Verify SetMenuPlacement.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, MenuViewTestNgSetMenuPlacement002, TestSize.Level1)
+{
+    auto textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    MenuParam menuParam;
+    menuParam.placement = OHOS::Ace::Placement::BOTTOM;
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    auto menuWrapperNode = MenuView::Create(textNode, TARGET_ID, "", TYPE, menuParam);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto property = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    EXPECT_TRUE(property->GetMenuPlacement().has_value());
+    EXPECT_EQ(property->GetMenuPlacement().value(), OHOS::Ace::Placement::BOTTOM);
+}
 } // namespace
 } // namespace OHOS::Ace::NG
