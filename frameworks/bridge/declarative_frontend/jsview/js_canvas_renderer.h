@@ -52,6 +52,7 @@ public:
     void SetAntiAlias();
 
     void ParseImageData(const JSCallbackInfo& info, ImageData& imageData, std::vector<uint32_t>& array);
+    void ParseImageDataAsStr(const JSCallbackInfo& info, ImageData& imageData);
     void JsCloseImageBitmap(const std::string& src);
 
     void JsFillRect(const JSCallbackInfo& info);
