@@ -30,6 +30,18 @@ public:
     static RefPtr<SvgNode> Create();
 
     SkPath AsPath(const Size& viewPort) const override;
+
+private:
+    // saves the current attributes of the svg node, and restores them when the scope exits.
+    class AttributeScope {
+    public:
+        explicit AttributeScope(const RefPtr<SvgNode>& node);
+        ~AttributeScope();
+
+    private:
+        SvgBaseAttribute attributes_;
+        WeakPtr<SvgNode> node_;
+    };
 };
 
 } // namespace OHOS::Ace::NG
