@@ -38,6 +38,7 @@
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
+
 namespace {
 
 // common function to bind menu
@@ -95,18 +96,6 @@ void ViewAbstract::SetHeight(const CalcLength& height)
         width = layoutConstraint->selfIdealSize->Width();
     }
     layoutProperty->UpdateUserDefinedIdealSize(CalcSize(width, height));
-}
-
-void ViewAbstract::SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue)
-{
-    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
-        return;
-    }
-    ClickEffectInfo clickEffectInfo;
-    clickEffectInfo.level = level;
-    clickEffectInfo.scaleNumber = scaleValue;
-    ACE_UPDATE_RENDER_CONTEXT(ClickEffectLevel, clickEffectInfo);
 }
 
 void ViewAbstract::ClearWidthOrHeight(bool isWidth)

@@ -37,15 +37,14 @@
 #include "core/components/common/properties/placement.h"
 #include "core/components/common/properties/popup_param.h"
 #include "core/components/common/properties/shared_transition_option.h"
-#include "core/components_ng/base/modifier.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/overlay_property.h"
-#include "core/components_ng/property/progress_mask_property.h"
 #include "core/components_ng/property/transition_property.h"
+#include "core/components_ng/property/progress_mask_property.h"
 
 namespace OHOS::Ace::NG {
 struct OptionParam {
@@ -251,9 +250,6 @@ public:
     // foregroundColor
     static void SetForegroundColor(const Color& color);
     static void SetForegroundColorStrategy(const ForegroundColorStrategy& strategy);
-
-    // clickEffect
-    static void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue);
 
     // custom animatable property
     static void CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
