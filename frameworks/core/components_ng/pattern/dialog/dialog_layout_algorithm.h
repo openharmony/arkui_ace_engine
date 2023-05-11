@@ -47,7 +47,9 @@ public:
     }
 
 private:
-    LayoutConstraintF CreateScrollConstraint(LayoutWrapper* layoutWrapper, float scrollHeight, float scrollWidth);
+    LayoutConstraintF CreateDialogChildConstraint(LayoutWrapper* layoutWrapper, float scrollHeight, float scrollWidth);
+    void Distribute(float& scrollHeight, float& listHeight, float restHeight);
+    void AnalysisHeightOfChild(LayoutWrapper* layoutWrapper);
 
     void ComputeInnerLayoutParam(LayoutConstraintF& innerLayout);
     double GetMaxWidthBasedOnGridType(const RefPtr<GridColumnInfo>& info, GridSizeType type, DeviceType deviceType);
