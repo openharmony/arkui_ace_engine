@@ -212,7 +212,7 @@ bool HostWindowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     };
 
     CHECK_NULL_RETURN(session_, false);
-    session_->UpdateRect(rect, Rosen::SizeChangeReason::SHOW);
+    session_->UpdateRect(rect, Rosen::SizeChangeReason::UNDEFINED);
     return false;
 }
 
