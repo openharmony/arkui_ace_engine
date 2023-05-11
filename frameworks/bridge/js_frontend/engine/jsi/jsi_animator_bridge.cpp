@@ -526,7 +526,7 @@ void JsiAnimatorBridge::JsCreateAnimation(const std::string& param)
     }
     auto keyframeAnimation = CreateDoubleAnimation(animationDoubleParams, curve);
     if (!animator_) {
-        animator_ = AceType::MakeRefPtr<Animator>();
+        animator_ = CREATE_ANIMATOR();
     }
     if (!animator_->IsStopped()) {
         animator_->Stop();

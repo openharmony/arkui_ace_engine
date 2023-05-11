@@ -456,7 +456,7 @@ void RenderIndexerCircle::BuildArcAnimation()
         return;
     }
     if (!collapseController_) {
-        collapseController_ = AceType::MakeRefPtr<Animator>(GetContext());
+        collapseController_ = CREATE_ANIMATOR(GetContext());
     } else {
         collapseController_->ClearInterpolators();
         collapseController_->ClearAllListeners();
@@ -524,7 +524,7 @@ void RenderIndexerCircle::HandleArcAnimationStop()
 void RenderIndexerCircle::BeginCollapseScrollAnimation(double originOffset, double targetOffset)
 {
     if (!collapseScrollController_) {
-        collapseScrollController_ = AceType::MakeRefPtr<Animator>(GetContext());
+        collapseScrollController_ = CREATE_ANIMATOR(GetContext());
     }
 
     if (collapseScrollController_->IsRunning()) {
@@ -561,7 +561,7 @@ void RenderIndexerCircle::BeginFocusAnimation(int32_t originIndex, int32_t targe
 
     // stop and reset animator
     if (!focusController_) {
-        focusController_ = AceType::MakeRefPtr<Animator>(GetContext());
+        focusController_ = CREATE_ANIMATOR(GetContext());
     }
 
     if (focusController_->IsRunning()) {

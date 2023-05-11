@@ -81,7 +81,7 @@ void RenderTabBarItem::OnMouseHoverEnterTest()
     ResetController(controllerExit_);
     ResetController(controllerPress_);
     if (!controllerEnter_) {
-        controllerEnter_ = AceType::MakeRefPtr<Animator>(context_);
+        controllerEnter_ = CREATE_ANIMATOR(context_);
     }
     doubleAnimationEnter_ = AceType::MakeRefPtr<KeyframeAnimation<double>>();
     CreateDoubleAnimation(doubleAnimationEnter_, hoverOpacity_, HOVER_OPACITY_RATIO, true);
@@ -94,7 +94,7 @@ void RenderTabBarItem::OnMouseHoverExitTest()
     ResetController(controllerEnter_);
     ResetController(controllerPress_);
     if (!controllerExit_) {
-        controllerExit_ = AceType::MakeRefPtr<Animator>(context_);
+        controllerExit_ = CREATE_ANIMATOR(context_);
     }
     doubleAnimationExit_ = AceType::MakeRefPtr<KeyframeAnimation<double>>();
     CreateDoubleAnimation(doubleAnimationExit_, hoverOpacity_, 0.0, false);
@@ -111,7 +111,7 @@ void RenderTabBarItem::PlayPressAnimation(double endOpacityRatio)
     ResetController(controllerEnter_);
     ResetController(controllerExit_);
     if (!controllerPress_) {
-        controllerPress_ = AceType::MakeRefPtr<Animator>(context_);
+        controllerPress_ = CREATE_ANIMATOR(context_);
     }
     auto doubleAnimationPress = AceType::MakeRefPtr<KeyframeAnimation<double>>();
     CreateDoubleAnimation(doubleAnimationPress, hoverOpacity_, endOpacityRatio, onHover_);

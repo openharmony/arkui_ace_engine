@@ -73,7 +73,7 @@ void AnimatableMatrix4::AnimateTo(const Matrix4& endValue)
     }
     ResetController();
     if (!animationController_) {
-        animationController_ = AceType::MakeRefPtr<Animator>(context_);
+        animationController_ = CREATE_ANIMATOR(context_);
     }
 
     TransformOperation operationInit;

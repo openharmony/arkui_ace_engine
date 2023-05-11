@@ -78,8 +78,7 @@ void MarqueePattern::OnModifyDone()
     auto fontSize = layoutProperty->GetFontSize().value_or(theme->GetTextStyle().GetFontSize());
     textLayoutProperty->UpdateFontSize(fontSize);
     textLayoutProperty->UpdateFontWeight(layoutProperty->GetFontWeight().value_or(FontWeight::NORMAL));
-    textLayoutProperty->UpdateFontFamily(
-        layoutProperty->GetFontFamily().value_or(std::vector<std::string>({ "" })));
+    textLayoutProperty->UpdateFontFamily(layoutProperty->GetFontFamily().value_or(std::vector<std::string>({ "" })));
     textLayoutProperty->UpdateTextColor(layoutProperty->GetFontColor().value_or(Color()));
     textChild->MarkModifyDone();
     textChild->MarkDirtyNode();

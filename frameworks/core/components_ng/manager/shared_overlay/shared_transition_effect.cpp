@@ -29,7 +29,7 @@ SharedTransitionEffect::SharedTransitionEffect(
     : shareId_(shareId), option_(sharedOption)
 {
     std::string animatorName = "SharedTransition(" + shareId + ")";
-    controller_ = AceType::MakeRefPtr<Animator>(animatorName.c_str());
+    controller_ = CREATE_ANIMATOR(animatorName.c_str());
 }
 
 RefPtr<SharedTransitionEffect> SharedTransitionEffect::GetSharedTransitionEffect(

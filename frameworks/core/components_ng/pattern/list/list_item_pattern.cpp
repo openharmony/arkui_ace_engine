@@ -239,7 +239,7 @@ void ListItemPattern::InitSwiperAction(bool axisChanged)
         curOffset_ = 0.0f;
     }
     if (!springController_) {
-        springController_ = AceType::MakeRefPtr<Animator>(PipelineBase::GetCurrentContext());
+        springController_ = CREATE_ANIMATOR(PipelineBase::GetCurrentContext());
     }
 }
 

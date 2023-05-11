@@ -562,7 +562,7 @@ HWTEST_F(TogglePatternTestNg, TogglePatternTest0010, TestSize.Level1)
     switchPattern->HandleDragEnd();
     switchPattern->isOn_ = true;
     switchPattern->HandleDragEnd();
-    switchPattern->controller_ = AccessibilityManager::MakeRefPtr<Animator>();
+    switchPattern->controller_ = CREATE_ANIMATOR();
     switchPattern->controller_->status_ = Animator::Status::RUNNING;
     switchPattern->OnClick();
 }

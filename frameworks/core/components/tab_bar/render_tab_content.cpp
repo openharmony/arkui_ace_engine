@@ -100,7 +100,7 @@ void RenderTabContent::FlushIndex()
 void RenderTabContent::Initialize(const WeakPtr<PipelineContext>& context)
 {
     if (!animator_) {
-        animator_ = AceType::MakeRefPtr<Animator>(context);
+        animator_ = CREATE_ANIMATOR(context);
     }
 
     // if the tab is vertical, use VerticalDragRecognizer

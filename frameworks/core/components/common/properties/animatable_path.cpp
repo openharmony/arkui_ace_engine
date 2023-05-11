@@ -74,7 +74,7 @@ void AnimatablePath::AnimateTo(std::string endValue)
     }
 
     if (!animationController_) {
-        animationController_ = AceType::MakeRefPtr<Animator>(context_);
+        animationController_ = CREATE_ANIMATOR(context_);
     }
     RefPtr<CurveAnimation<double>> animation =
         AceType::MakeRefPtr<CurveAnimation<double>>(0.0, 1.0, animationOption_.GetCurve());

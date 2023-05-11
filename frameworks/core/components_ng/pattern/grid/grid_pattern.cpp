@@ -952,7 +952,7 @@ bool GridPattern::AnimateTo(float position, float duration, const RefPtr<Curve>&
         return false;
     }
     if (!animator_) {
-        animator_ = AceType::MakeRefPtr<Animator>(PipelineBase::GetCurrentContext());
+        animator_ = CREATE_ANIMATOR(PipelineBase::GetCurrentContext());
     }
     if (!animator_->IsStopped()) {
         animator_->Stop();

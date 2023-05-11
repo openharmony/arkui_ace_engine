@@ -1244,7 +1244,7 @@ void RosenRenderBox::AnimateMouseHoverEnter()
     } else if (hoverAnimationType_ == HoverAnimationType::BOARD) {
         ResetController(controllerExit_);
         if (!controllerEnter_) {
-            controllerEnter_ = AceType::MakeRefPtr<Animator>(context_);
+            controllerEnter_ = CREATE_ANIMATOR(context_);
         }
         if (!backDecoration_) {
             backDecoration_ = AceType::MakeRefPtr<Decoration>();
@@ -1287,7 +1287,7 @@ void RosenRenderBox::AnimateMouseHoverExit()
     if (hoverAnimationType_ == HoverAnimationType::BOARD || isHoveredBoard_) {
         ResetController(controllerEnter_);
         if (!controllerExit_) {
-            controllerExit_ = AceType::MakeRefPtr<Animator>(context_);
+            controllerExit_ = CREATE_ANIMATOR(context_);
         }
         if (!backDecoration_) {
             backDecoration_ = AceType::MakeRefPtr<Decoration>();

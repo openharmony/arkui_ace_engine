@@ -96,7 +96,7 @@ private:
         }
         ResetController();
         if (!animationController_) {
-            animationController_ = AceType::MakeRefPtr<Animator>(context_);
+            animationController_ = CREATE_ANIMATOR(context_);
         }
 
         RefPtr<CurveAnimation<Color>> colorAnimation =

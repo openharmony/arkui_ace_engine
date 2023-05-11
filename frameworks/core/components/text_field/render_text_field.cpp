@@ -678,7 +678,7 @@ void RenderTextField::OnTouchTestHit(
 void RenderTextField::StartPressAnimation(bool pressDown)
 {
     if (!pressController_) {
-        pressController_ = AceType::MakeRefPtr<Animator>(context_);
+        pressController_ = CREATE_ANIMATOR(context_);
     }
     if (pressController_->IsRunning()) {
         pressController_->Stop();
@@ -705,7 +705,7 @@ void RenderTextField::StartHoverAnimation(bool isHovered)
         return;
     }
     if (!hoverController_) {
-        hoverController_ = AceType::MakeRefPtr<Animator>(context_);
+        hoverController_ = CREATE_ANIMATOR(context_);
     }
     if (hoverController_->IsRunning()) {
         hoverController_->Stop();
@@ -1021,7 +1021,7 @@ void RenderTextField::InitAnimation()
 
     // Add the animation
     LOGD("Add animation to animator");
-    animator_ = AceType::MakeRefPtr<Animator>(context_);
+    animator_ = CREATE_ANIMATOR(context_);
     animator_->AddInterpolator(diameterAnimation);
     animator_->AddInterpolator(diameterInnerAnimation);
     animator_->SetDuration(SHOW_HANDLE_DURATION);

@@ -3410,7 +3410,7 @@ void PipelineContext::CreateExplicitAnimator(const std::function<void()>& onFini
     if (!onFinishEvent) {
         return;
     }
-    auto animator = AceType::MakeRefPtr<Animator>(AceType::WeakClaim(this));
+    auto animator = CREATE_ANIMATOR(AceType::WeakClaim(this));
     animator->AddStopListener([onFinishEvent, weakContext = AceType::WeakClaim(this), id = animator->GetId()] {
         auto context = weakContext.Upgrade();
         if (!context) {

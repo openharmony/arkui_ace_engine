@@ -391,7 +391,7 @@ bool ScrollPattern::UpdateCurrentOffset(float delta, int32_t source)
 void ScrollPattern::CreateOrStopAnimator()
 {
     if (!animator_) {
-        animator_ = AceType::MakeRefPtr<Animator>(PipelineBase::GetCurrentContext());
+        animator_ = CREATE_ANIMATOR(PipelineBase::GetCurrentContext());
         return;
     }
     if (!animator_->IsStopped()) {
