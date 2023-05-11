@@ -469,7 +469,7 @@ void RosenRenderContext::SetFrontBlurFilter()
     rsNode_->SetFilter(frontFilter);
 }
 
-void RosenRenderContext::UpdateBackBlurStyle(const BlurStyleOption& bgBlurStyle)
+void RosenRenderContext::UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle)
 {
     const auto& groupProperty = GetOrCreateBackground();
     if (groupProperty->CheckBlurStyleOption(bgBlurStyle)) {
