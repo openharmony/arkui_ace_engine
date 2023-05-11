@@ -54,7 +54,7 @@ public:
 
     // Tree operation start.
     void AddChild(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT, bool silently = false);
-    std::list<RefPtr<UINode>>::iterator RemoveChild(const RefPtr<UINode>& child);
+    std::list<RefPtr<UINode>>::iterator RemoveChild(const RefPtr<UINode>& child, bool allowTransition = false);
     int32_t RemoveChildAndReturnIndex(const RefPtr<UINode>& child);
     void ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& newNode);
     void MovePosition(int32_t slot);
@@ -62,7 +62,7 @@ public:
     RefPtr<FrameNode> GetFocusParent() const;
     RefPtr<FocusHub> GetFirstFocusHubChild() const;
     void GetFocusChildren(std::list<RefPtr<FrameNode>>& children) const;
-    void Clean(bool cleanDirectly = false);
+    void Clean(bool cleanDirectly = false, bool allowTransition = false);
     void RemoveChildAtIndex(int32_t index);
     RefPtr<UINode> GetChildAtIndex(int32_t index) const;
     int32_t GetChildIndex(const RefPtr<UINode>& child) const;
@@ -430,7 +430,7 @@ protected:
     bool isRemoving_ = false;
 
     // return value: true if the node can be removed immediately.
-    virtual bool OnRemoveFromParent();
+    virtual bool OnRemoveFromParent(bool allowTransition);
     virtual bool RemoveImmediately() const;
     void ResetParent();
 

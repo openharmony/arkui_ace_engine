@@ -104,27 +104,36 @@ void RosenRenderContext::StopRecordingIfNeeded()
 void RosenRenderContext::OnNodeAppear(bool recursive)
 {
     isDisappearing_ = false;
-    // because when call this function, the size of frameNode is not calculated. We need frameNode size
-    // to calculate the pivot, so just mark need to perform appearing transition.
-    if (!propTransitionAppearing_ && !transitionEffect_) {
+    if (recursive && !propTransitionAppearing_ && !transitionEffect_) {
+        // recursive and has no transition, no need to handle transition.
         return;
     }
 
+    auto rect = GetPaintRectWithoutTransform();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    isBreakingPoint_ = !recursive;
+    if (rect.IsValid() && !CheckNeedRequestMeasureAndLayout(host->GetLayoutProperty()->GetPropertyChangeFlag())) {
+        // has set size before and do not need layout, trigger transition directly.
+        NotifyTransitionInner(rect.GetSize(), true);
+        return;
+    }
     // pending transition in animation, will start on first layout
     firstTransitionIn_ = true;
-    // only start default transition on the break point of render node tree. Not Impl yet.
-    isBreakingPoint_ = !recursive;
 }
 
 void RosenRenderContext::OnNodeDisappear(bool recursive)
 {
     isDisappearing_ = true;
-    if (!propTransitionDisappearing_ && !transitionEffect_) {
+    bool noneOrDefaultTransition =
+        !propTransitionDisappearing_ && (!transitionEffect_ || transitionEffect_->IsDefaultTransition());
+    if (recursive && noneOrDefaultTransition) {
+        // recursive, and has no transition or has default transition, no need to trigger transition.
         return;
     }
     CHECK_NULL_VOID(rsNode_);
     auto rect = GetPaintRectWithoutTransform();
-    // only start default transition on the break point of render node tree. Not Impl yet.
+    // only start default transition on the break point of render node tree.
     isBreakingPoint_ = !recursive;
     NotifyTransitionInner(rect.GetSize(), false);
 }
@@ -737,10 +746,15 @@ void RosenRenderContext::NotifyTransitionInner(const SizeF& frameSize, bool isTr
         return;
     }
     // add default transition effect on the 'breaking point' of render tree, if no user-defined transition effect.
-    if (isBreakingPoint == true && transitionEffect_ == nullptr) {
+    if (isBreakingPoint_ == true && transitionEffect_ == nullptr) {
         // PLANNING: remove this after THIS transition ends.
         transitionEffect_ = RosenTransitionEffect::CreateDefaultRosenTransitionEffect();
+        RSNode::ExecuteWithoutAnimation([this, isTransitionIn]() {
+            // transitionIn effects should be initialized as active if is transitionIn.
+            transitionEffect_->Attach(Claim(this), isTransitionIn);
+        });
     }
+    CHECK_NULL_VOID_NOLOG(transitionEffect_);
     NotifyTransition(isTransitionIn);
 }
 
@@ -2269,6 +2283,7 @@ void RosenRenderContext::UpdateChainedTransition(const RefPtr<NG::ChainedTransit
     }
     transitionEffect_ = RosenTransitionEffect::ConvertToRosenTransitionEffect(effect);
     CHECK_NULL_VOID(transitionEffect_);
+    transitionEffect_->SetIsDefaultTransition(false);
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     bool isOnTheTree = frameNode->IsOnMainTree();
@@ -2352,28 +2367,51 @@ void RosenRenderContext::OnTransitionOutFinish()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    // if the node is not disappearing (reappear?), return.
-    if (!host->IsDisappearing()) {
-        LOGD("RosenTransitionEffect: node is not disappearing, skip");
-        return;
-    }
-    LOGD("RosenTransitionEffect: transition out finish, remove node %{public}d", host->GetId());
-
-    // should get parent before onRemoveFromParent function because it will reset parent
     auto parent = host->GetParent();
-    // clean up related status, now this node has no transition out animation, so RemoveImmediately() will return true,
-    // and OnRemoveFromParent will do the necessary cleanup work.
-    host->OnRemoveFromParent();
-    // try to remove self from parent's disappearing children.
-    if (parent && parent->RemoveDisappearingChild(host)) {
-        // if success, tell parent to rebuild render tree.
+    CHECK_NULL_VOID(parent);
+    if (host->IsVisible() == false) {
+        // trigger transition through visibility
         parent->MarkNeedSyncRenderTree();
         parent->RebuildRenderContextTree();
+        return;
     }
-    if (isModalRootNode_ && parent->GetChildren().empty()) {
-        auto grandParent = parent->GetParent();
+    RefPtr<UINode> breakPointChild = host;
+    RefPtr<UINode> breakPointParent = breakPointChild->GetParent();
+    while (breakPointParent && !breakPointChild->IsDisappearing()) {
+        // recursively looking up the node tree, until we reach the breaking point (IsDisappearing() == true).
+        // Because when trigger transition, only the breakPoint will be marked as disappearing and
+        // moved to disappearingChildren.
+        breakPointChild = breakPointParent;
+        breakPointParent = breakPointParent->GetParent();
+    }
+    // if can not find the breakPoint, means the node is not disappearing (reappear?), return.
+    if (!breakPointParent) {
+        LOGI("RosenTransitionEffect: node is not disappearing, skip, id: %{public}d", host->GetId());
+        return;
+    }
+    if (breakPointChild->RemoveImmediately()) {
+        LOGD("RosenTransitionEffect: transition out finish, node %{public}d, break point %{public}d, break point tag: "
+             "%{public}s",
+            host->GetId(), breakPointChild->GetId(), breakPointChild->GetTag().c_str());
+        // host is the frameNode playing transition. This node needs to execute other necessary cleanup work.
+        host->OnRemoveFromParent(false);
+        // remove breakPoint
+        breakPointParent->RemoveDisappearingChild(breakPointChild);
+        breakPointParent->MarkNeedSyncRenderTree();
+        breakPointParent->RebuildRenderContextTree();
+    } else {
+        LOGD("RosenTransitionEffect: transition out finish, node %{public}d, node tag: %{public}s", host->GetId(),
+            host->GetTag().c_str());
+        // When host's transition is done, RemoveImmediately must return true, so this branch means
+        // host is different from breakPointChild. It will be in the children of its parent.
+        // RemoveChild will call host->OnRemoveFromParent.
+        parent->RemoveChild(host);
+        parent->RebuildRenderContextTree();
+    }
+    if (isModalRootNode_ && breakPointParent->GetChildren().empty()) {
+        auto grandParent = breakPointParent->GetParent();
         CHECK_NULL_VOID(grandParent);
-        grandParent->RemoveChild(parent);
+        grandParent->RemoveChild(breakPointParent);
         grandParent->RebuildRenderContextTree();
     }
 }

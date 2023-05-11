@@ -83,7 +83,7 @@ void IfElseNode::SetBranchId(int32_t value)
         LOGD("%{public}s id %{public}d, branchId changed to %{public}d", AceType::TypeName(this), GetId(), value);
         // TODO check if we need to do anything to properly unregister old children!
         // same issue to check for ForEach CompareAndUpdateChildren
-        Clean();
+        Clean(false, true);
         branchId_ = value;
     }
 }

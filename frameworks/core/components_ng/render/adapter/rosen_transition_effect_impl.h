@@ -48,6 +48,14 @@ public:
 
     void SetIdentityValue(PropertyType identityValue);
     void SetActiveValue(PropertyType activeValue);
+    bool IsDefaultTransition() override
+    {
+        return isDefault_;
+    }
+    void SetIsDefaultTransition(bool isDefault) override
+    {
+        isDefault_ = isDefault;
+    }
 
 protected:
     void OnAttach(const RefPtr<RosenRenderContext>& context, bool activeTransition) override;
@@ -71,6 +79,7 @@ private:
     PropertyType identityValue_ {};
     PropertyType activeValue_ {};
     bool isActive_ = false;
+    bool isDefault_ = false;
 
     DECLARE_ACE_TYPE(PropertyTransitionEffectTemplate, RosenTransitionEffect);
     ACE_DISALLOW_COPY_AND_MOVE(PropertyTransitionEffectTemplate);
@@ -274,6 +283,23 @@ public:
 private:
     DECLARE_ACE_TYPE(RosenScaleTransitionEffect, RosenCompositeTransitionEffect);
     ACE_DISALLOW_COPY_AND_MOVE(RosenScaleTransitionEffect);
+};
+
+class RosenSlideSwitchTransitionEffect final
+    : public RosenCompositeTransitionEffect<InternalTranslateEffect, InternalScaleEffect> {
+public:
+    RosenSlideSwitchTransitionEffect();
+    ~RosenSlideSwitchTransitionEffect() override = default;
+    void OnAppear() override;
+    void OnDisappear(bool activeTransition) override;
+    void OnUpdateTransitionContext(
+        const RefPtr<RosenRenderContext>& context, const RectF& selfRect, const SizeF& viewSize) override;
+    void SetAnimationOption(const std::shared_ptr<AnimationOption>& option) override;
+
+private:
+    float width_ = 0.0f;
+    DECLARE_ACE_TYPE(RosenSlideSwitchTransitionEffect, RosenCompositeTransitionEffect);
+    ACE_DISALLOW_COPY_AND_MOVE(RosenSlideSwitchTransitionEffect);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_ADAPTER_ROSEN_TRANSITION_EFFECT_IMPL_H

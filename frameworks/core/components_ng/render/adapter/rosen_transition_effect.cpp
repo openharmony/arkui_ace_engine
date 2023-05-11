@@ -21,6 +21,14 @@
 #include "core/components_ng/render/animation_utils.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr float SLIDE_SWITCH_FRAME_PERCENT = 0.333f;
+constexpr float SLIDE_SWITCH_SCALE = 0.85f;
+const auto SLIDE_SWITCH_DEFAULT_CURVE = AceType::MakeRefPtr<CubicCurve>(0.24f, 0.0f, 0.50f, 1.0f);
+constexpr int32_t SLIDE_SWITCH_DEFAULT_DURATION = 600;
+std::shared_ptr<AnimationOption> SLIDE_SWITCH_DEFAULT_OPTION;
+} // namespace
+
 void RosenTransitionEffect::Attach(const RefPtr<RosenRenderContext>& context, bool activeTransition)
 {
     OnAttach(context, activeTransition);
@@ -147,6 +155,10 @@ RefPtr<RosenTransitionEffect> RosenTransitionEffect::ConvertToRosenTransitionEff
                     AceType::MakeRefPtr<RosenAsymmetricTransitionEffect>(rsAppearTransition, rsDisappearTransition);
                 break;
             }
+            case ChainedTransitionEffectType::SLIDE_SWITCH: {
+                nowRSEffect = AceType::MakeRefPtr<RosenSlideSwitchTransitionEffect>();
+                break;
+            }
             default: {
                 LOGW("not support effect type: %{public}d", static_cast<int>(nowEffect->GetType()));
                 return res;
@@ -256,6 +268,9 @@ bool RosenTransitionEffect::UpdateRosenTransitionEffect(
                     LOGW("asymmetricEffect update transitionOut failed");
                     return false;
                 }
+                break;
+            }
+            case ChainedTransitionEffectType::SLIDE_SWITCH: {
                 break;
             }
             default: {
@@ -552,6 +567,54 @@ InternalScaleEffect::PropertyTransitionEffectTemplate() : identityValue_(1.0f, 1
 
 RefPtr<RosenTransitionEffect> RosenTransitionEffect::CreateDefaultRosenTransitionEffect()
 {
-    return AceType::MakeRefPtr<RosenOpacityTransitionEffect>();
+    auto effect = AceType::MakeRefPtr<RosenOpacityTransitionEffect>();
+    effect->SetIsDefaultTransition(true);
+    return effect;
+}
+
+RosenSlideSwitchTransitionEffect::RosenSlideSwitchTransitionEffect()
+{
+    std::get<1>(effects_).SetActiveValue({ SLIDE_SWITCH_SCALE, SLIDE_SWITCH_SCALE });
+    if (!SLIDE_SWITCH_DEFAULT_OPTION) {
+        AnimationOption option;
+        option.SetCurve(SLIDE_SWITCH_DEFAULT_CURVE);
+        option.SetDuration(SLIDE_SWITCH_DEFAULT_DURATION);
+        SLIDE_SWITCH_DEFAULT_OPTION = std::make_shared<AnimationOption>(option);
+    }
+    SetAnimationOption(SLIDE_SWITCH_DEFAULT_OPTION);
+}
+
+void RosenSlideSwitchTransitionEffect::SetAnimationOption(const std::shared_ptr<AnimationOption>& option)
+{
+    RosenTransitionEffect::SetAnimationOption(option ? option : SLIDE_SWITCH_DEFAULT_OPTION);
+}
+
+void RosenSlideSwitchTransitionEffect::OnUpdateTransitionContext(
+    const RefPtr<RosenRenderContext>& context, const RectF& selfRect, const SizeF& viewSize)
+{
+    width_ = selfRect.Width();
+    std::get<0>(effects_).SetActiveValue({ width_, 0.0f });
+}
+
+void RosenSlideSwitchTransitionEffect::OnAppear()
+{
+    // translate animation
+    std::get<0>(effects_).Appear();
+    // scale animation
+    AnimationUtils::AddKeyFrame(0.0f, [this]() { std::get<1>(effects_).Appear(); });
+    AnimationUtils::AddKeyFrame(SLIDE_SWITCH_FRAME_PERCENT, [this]() { std::get<1>(effects_).Disappear(true); });
+    AnimationUtils::AddKeyFrame(1.0f, [this]() { std::get<1>(effects_).Appear(); });
+}
+
+void RosenSlideSwitchTransitionEffect::OnDisappear(bool activeTransition)
+{
+    if (!activeTransition) {
+        return;
+    }
+    std::get<0>(effects_).SetActiveValue({ -width_, 0.0f });
+    std::get<0>(effects_).Disappear(activeTransition);
+    AnimationUtils::AddKeyFrame(0.0f, [this]() { std::get<1>(effects_).Appear(); });
+    AnimationUtils::AddKeyFrame(SLIDE_SWITCH_FRAME_PERCENT, [this]() { std::get<1>(effects_).Disappear(true); });
+    AnimationUtils::AddKeyFrame(1.0f, [this]() { std::get<1>(effects_).Appear(); });
 }
 } // namespace OHOS::Ace::NG

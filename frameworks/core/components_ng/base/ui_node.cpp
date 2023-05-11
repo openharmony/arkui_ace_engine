@@ -71,7 +71,7 @@ void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot, bool silently)
     DoAddChild(it, child, silently);
 }
 
-std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& child)
+std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& child, bool allowTransition)
 {
     CHECK_NULL_RETURN(child, children_.end());
 
@@ -83,7 +83,7 @@ std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& ch
     // If the child is undergoing a disappearing transition, rather than simply removing it, we should move it to the
     // disappearing children. This ensures that the child remains alive and the tree hierarchy is preserved until the
     // transition has finished. We can then perform the necessary cleanup after the transition is complete.
-    if ((*iter)->OnRemoveFromParent()) {
+    if ((*iter)->OnRemoveFromParent(allowTransition)) {
         // OnRemoveFromParent returns true means the child can be removed from tree immediately.
         RemoveDisappearingChild(child);
         MarkNeedSyncRenderTree();
@@ -149,7 +149,7 @@ void UINode::ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& n
     DoAddChild(iter, newNode);
 }
 
-void UINode::Clean(bool cleanDirectly)
+void UINode::Clean(bool cleanDirectly, bool allowTransition)
 {
     bool needSyncRenderTree = false;
     int32_t index = 0;
@@ -162,7 +162,7 @@ void UINode::Clean(bool cleanDirectly)
         // the disappearing children. This ensures that the child remains alive and the tree hierarchy is preserved
         // until the transition has finished. We can then perform the necessary cleanup after the transition is
         // complete.
-        if (child->OnRemoveFromParent()) {
+        if (child->OnRemoveFromParent(allowTransition)) {
             // OnRemoveFromParent returns true means the child can be removed from tree immediately.
             RemoveDisappearingChild(child);
             needSyncRenderTree = true;
@@ -190,9 +190,14 @@ void UINode::MountToParent(const RefPtr<UINode>& parent, int32_t slot, bool sile
     }
 }
 
-bool UINode::OnRemoveFromParent()
+bool UINode::OnRemoveFromParent(bool allowTransition)
 {
-    DetachFromMainTree();
+    // The recursive flag will used by RenderContext, if recursive flag is false,
+    // it may trigger transition
+    DetachFromMainTree(!allowTransition);
+    if (allowTransition && !RemoveImmediately()) {
+        return false;
+    }
     ResetParent();
     return true;
 }

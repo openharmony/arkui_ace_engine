@@ -404,7 +404,7 @@ private:
     bool IsMeasureBoundary();
     bool IsRenderBoundary();
 
-    bool OnRemoveFromParent() override;
+    bool OnRemoveFromParent(bool allowTransition) override;
     bool RemoveImmediately() const override;
 
     // dump self info.

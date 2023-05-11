@@ -18,7 +18,7 @@
 namespace OHOS::Ace::NG {
 UINode::~UINode() {}
 void UINode::ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& newNode) {}
-void UINode::Clean(bool cleanDirectly) {}
+void UINode::Clean(bool cleanDirectly, bool allowTransition) {}
 void UINode::GetFocusChildren(std::list<RefPtr<FrameNode>>& children) const {}
 void UINode::AttachToMainTree(bool) {}
 void UINode::DetachFromMainTree(bool) {}
@@ -32,7 +32,7 @@ void UINode::RebuildRenderContextTree() {}
 void UINode::OnDetachFromMainTree(bool) {}
 void UINode::OnAttachToMainTree(bool) {}
 void UINode::OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList, uint32_t index) {}
-bool UINode::OnRemoveFromParent()
+bool UINode::OnRemoveFromParent(bool)
 {
     return true;
 }
@@ -67,7 +67,7 @@ void UINode::MountToParent(const RefPtr<UINode>& parent, int32_t slot, bool sile
     parent->AddChild(AceType::Claim(this), slot, silently);
 }
 
-std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& child)
+std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& child, bool allowTransition)
 {
     CHECK_NULL_RETURN(child, children_.end());
     auto iter = std::find(children_.begin(), children_.end(), child);
