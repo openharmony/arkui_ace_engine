@@ -91,6 +91,8 @@ public:
         onAccessibilityEventFunc_ = std::move(onAccessibilityEvent);
     }
 
+    GestureEventFunc GetLongPressActionFunc();
+
 private:
     void HandleTouchDownEvent(const TouchEvent& event) override;
     void HandleTouchUpEvent(const TouchEvent& event) override;

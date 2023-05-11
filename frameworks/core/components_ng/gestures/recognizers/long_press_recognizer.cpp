@@ -291,4 +291,26 @@ bool LongPressRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recog
 
     return true;
 }
+
+GestureEventFunc LongPressRecognizer::GetLongPressActionFunc()
+{
+    auto callback = [weak = WeakClaim(this)](GestureEvent& info) {
+        auto longPressRecognizer = weak.Upgrade();
+        CHECK_NULL_VOID(longPressRecognizer);
+        if (longPressRecognizer->onActionUpdate_) {
+            (*(longPressRecognizer->onActionUpdate_))(info);
+        }
+        if (longPressRecognizer->onAction_) {
+            (*(longPressRecognizer->onAction_))(info);
+        }
+        if (longPressRecognizer->onActionUpdate_) {
+            (*(longPressRecognizer->onActionUpdate_))(info);
+        }
+        if (longPressRecognizer->onActionEnd_) {
+            (*(longPressRecognizer->onActionEnd_))(info);
+        }
+    };
+    return callback;
+}
+
 } // namespace OHOS::Ace::NG
