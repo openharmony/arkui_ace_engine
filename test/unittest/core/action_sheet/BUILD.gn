@@ -12,15 +12,17 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-group("core_unittest") {
-  testonly = true
+ohos_unittest("action_sheet_test_ng") {
+  module_out_path = action_sheet_test_output_path
+
+  sources = [ "action_sheet_test_ng.cpp" ]
+
   deps = [
-    "action_sheet:action_sheet_test_ng",
-    "common:core_common_unittest",
-    "gestures:gestures_test_ng",
-    "pattern:core_pattern_unittest",
-    "pipeline:pipeline_context_test_ng",
+    "$ace_root/build:ace_ohos_unittest_base",
+    "$ace_root/frameworks/core/components_ng/base:ace_core_components_base_ng_ohos",
   ]
+
+  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 }
