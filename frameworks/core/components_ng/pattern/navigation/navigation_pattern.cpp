@@ -165,6 +165,7 @@ void NavigationPattern::OnModifyDone()
     auto currentMode = layoutProperty->GetUsrNavigationModeValue(NavigationMode::AUTO);
     if (currentMode != NavigationMode::AUTO && navigationMode_ != currentMode &&
         navigationMode_ != NavigationMode::AUTO) {
+        hostNode->SetIsModeChange(true);
         DoAnimation(currentMode);
     }
     preNavPathList_ = navPathList_;
@@ -188,6 +189,7 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
         if (navigationLayoutProperty->GetUsrNavigationModeValue(NavigationMode::AUTO) == NavigationMode::AUTO) {
             auto currentMode = navigationLayoutAlgorithm->GetNavigationMode();
             if (navigationMode_ != NavigationMode::AUTO && navigationMode_ != currentMode) {
+                hostNode->SetIsModeChange(true);
                 DoAnimation(currentMode);
             }
             navigationMode_ = currentMode;

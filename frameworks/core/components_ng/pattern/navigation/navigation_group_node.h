@@ -84,7 +84,16 @@ public:
         isOnAnimation_ = isOnAnimation;
     }
 
-    bool isOnAnimation_ {false};
+    bool GetIsModeChange() const
+    {
+        return isModeChange_;
+    }
+
+    void SetIsModeChange(bool isModeChange)
+    {
+        isModeChange_ = isModeChange;
+    }
+
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
     static RefPtr<UINode> GetNavDestinationNode(RefPtr<UINode> uiNode);
@@ -93,6 +102,8 @@ private:
     RefPtr<UINode> navBarNode_;
     RefPtr<UINode> contentNode_;
     RefPtr<UINode> dividerNode_;
+    bool isOnAnimation_ {false};
+    bool isModeChange_ {false};
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_GROUP_NODE_H
