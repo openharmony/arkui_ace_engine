@@ -570,21 +570,6 @@ enum class ACE_EXPORT BackgroundImageSizeType {
     PERCENT,
 };
 
-enum class ACE_EXPORT ClickEffectLevel {
-    LIGHT = 0,
-    MIDDLE,
-    HEAVY,
-};
-
-struct ClickEffectInfo {
-    ClickEffectLevel level;
-    float scaleNumber;
-    bool operator==(const ClickEffectInfo& other) const
-    {
-        return level == other.level && NearEqual(scaleNumber, other.scaleNumber);
-    }
-};
-
 class ACE_EXPORT BackgroundImageSize final {
 public:
     BackgroundImageSize() = default;

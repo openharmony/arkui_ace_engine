@@ -21,15 +21,39 @@
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
-#include "bridge/declarative_frontend/view_stack_processor.h"
+#include "bridge/declarative_frontend/jsview/models/view_context_model_impl.h"
 #include "core/common/ace_engine.h"
-#include "core/common/container_scope.h"
-#include "core/components/common/properties/animation_option.h"
-#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/view_context/view_context_model_ng.h"
 
 #ifdef USE_ARK_ENGINE
 #include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #endif
+
+namespace OHOS::Ace {
+
+std::unique_ptr<ViewContextModel> ViewContextModel::instance_ = nullptr;
+std::mutex ViewContextModel::mutex_;
+
+ViewContextModel* ViewContextModel::GetInstance()
+{
+    if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
+#ifdef NG_BUILD
+            instance_.reset(new NG::ViewContextModelNG());
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::ViewContextModelNG());
+            } else {
+                instance_.reset(new Framework::ViewContextModelImpl());
+            }
+#endif
+        }
+    }
+    return instance_.get();
+}
+
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -64,10 +88,7 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
         }
         context->PrepareOpenImplicitAnimation();
     });
-    pipelineContext->OpenImplicitAnimation(option, option.GetCurve(), onFinishEvent);
-    if (!Container::IsCurrentUseNewPipeline()) {
-        pipelineContext->SetSyncAnimationOption(option);
-    }
+    ViewContextModel::GetInstance()->openAnimation(option);
     // Execute the function.
     JSRef<JSFunc> jsAnimateToFunc = JSRef<JSFunc>::Cast(info[1]);
     jsAnimateToFunc->Call(info[1]);
@@ -95,27 +116,18 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
         }
         context->PrepareCloseImplicitAnimation();
     });
-    if (!Container::IsCurrentUseNewPipeline()) {
-        pipelineContext->SetSyncAnimationOption(AnimationOption());
-    }
-    pipelineContext->CloseImplicitAnimation();
+    ViewContextModel::GetInstance()->closeAnimation(AnimationOption());
 }
 
 void AnimateToForFaMode(const RefPtr<PipelineBase>& pipelineContext, AnimationOption& option,
     const JSCallbackInfo& info, std::function<void()>& onFinishEvent)
 {
     pipelineContext->FlushBuild();
-    pipelineContext->OpenImplicitAnimation(option, option.GetCurve(), onFinishEvent);
-    if (!Container::IsCurrentUseNewPipeline()) {
-        pipelineContext->SetSyncAnimationOption(option);
-    }
+    ViewContextModel::GetInstance()->openAnimation(option);
+
     JSRef<JSFunc> jsAnimateToFunc = JSRef<JSFunc>::Cast(info[1]);
     jsAnimateToFunc->Call(info[1]);
-    pipelineContext->FlushBuild();
-    if (!Container::IsCurrentUseNewPipeline()) {
-        pipelineContext->SetSyncAnimationOption(AnimationOption());
-    }
-    pipelineContext->CloseImplicitAnimation();
+    ViewContextModel::GetInstance()->closeAnimation(AnimationOption());
 }
 
 } // namespace
@@ -191,19 +203,8 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
         return;
     }
     AnimationOption option = AnimationOption();
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto pipelineContextBase = container->GetPipelineContext();
-    CHECK_NULL_VOID(pipelineContextBase);
     if (info[0]->IsNull() || !info[0]->IsObject()) {
-        if (Container::IsCurrentUseNewPipeline()) {
-            NG::ViewStackProcessor::GetInstance()->SetImplicitAnimationOption(option);
-            NG::ViewStackProcessor::GetInstance()->FlushImplicitAnimation();
-            pipelineContextBase->CloseImplicitAnimation();
-        } else {
-            LOGE("JSAnimation: info[0] is null or not object.");
-            ViewStackProcessor::GetInstance()->SetImplicitAnimationOption(option);
-        }
+        ViewContextModel::GetInstance()->closeAnimation(option);
         return;
     }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
@@ -221,25 +222,21 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
     auto animationArgs = JsonUtil::ParseJsonString(info[0]->ToString());
     if (animationArgs->IsNull()) {
         LOGE("Js Parse failed. animationArgs is null.");
-        if (Container::IsCurrentUseNewPipeline()) {
-            NG::ViewStackProcessor::GetInstance()->SetImplicitAnimationOption(option);
-            pipelineContextBase->CloseImplicitAnimation();
-        } else {
-            ViewStackProcessor::GetInstance()->SetImplicitAnimationOption(option);
-        }
+        ViewContextModel::GetInstance()->closeAnimation(option);
         return;
     }
+
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto pipelineContextBase = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContextBase);
+
     option = CreateAnimation(animationArgs, pipelineContextBase->IsFormRender());
     option.SetOnFinishEvent(onFinishEvent);
     if (SystemProperties::GetRosenBackendEnabled()) {
         option.SetAllowRunningAsynchronously(true);
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewStackProcessor::GetInstance()->SetImplicitAnimationOption(option);
-        pipelineContextBase->OpenImplicitAnimation(option, option.GetCurve(), onFinishEvent);
-    } else {
-        ViewStackProcessor::GetInstance()->SetImplicitAnimationOption(option);
-    }
+    ViewContextModel::GetInstance()->openAnimation(option);
 }
 
 void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)

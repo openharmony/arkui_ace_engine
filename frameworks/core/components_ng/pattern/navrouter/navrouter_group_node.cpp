@@ -318,7 +318,7 @@ void NavRouterGroupNode::AddNavDestinationToNavigation(const RefPtr<UINode>& par
     if (navBarNode && navigationLayoutProperty->GetNavigationModeValue(NavigationMode::AUTO) != NavigationMode::SPLIT) {
         SetBackButtonVisible(navDestination);
     }
-    if (navBarNode) {
+    if (navBarNode && navigationLayoutProperty->GetNavigationModeValue(NavigationMode::AUTO) == NavigationMode::STACK) {
         auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
         auto destinationTitleBarNode = AceType::DynamicCast<TitleBarNode>(navDestination->GetTitleBarNode());
         auto backButtonNode = AceType::DynamicCast<FrameNode>(destinationTitleBarNode->GetBackButton());

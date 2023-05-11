@@ -48,8 +48,6 @@ private:
 };
 } // namespace
 
-using std::string;
-
 std::shared_ptr<Rosen::RSNode> ComponentSnapshot::GetRsNode(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_RETURN(node, nullptr);
@@ -62,6 +60,11 @@ std::shared_ptr<Rosen::RSNode> ComponentSnapshot::GetRsNode(const RefPtr<FrameNo
 void ComponentSnapshot::Get(const std::string& componentId, JsCallback&& callback)
 {
     auto node = Inspector::GetFrameNodeByKey(componentId);
+    if (!node) {
+        LOGW("node not found %{public}s", componentId.c_str());
+        callback(nullptr, Framework::ERROR_CODE_INTERNAL_ERROR);
+        return;
+    }
     auto rsNode = GetRsNode(node);
     auto& rsInterface = Rosen::RSInterfaces::GetInstance();
     LOGI("TakeSurfaceCaptureForUI");
@@ -71,7 +74,12 @@ void ComponentSnapshot::Get(const std::string& componentId, JsCallback&& callbac
 void ComponentSnapshot::Create(const RefPtr<AceType>& customNode, JsCallback&& callback)
 {
     auto node = AceType::DynamicCast<FrameNode>(customNode);
-    CHECK_NULL_VOID(node);
+    if (!node) {
+        LOGW("builder is invalid");
+        callback(nullptr, Framework::ERROR_CODE_INTERNAL_ERROR);
+        return;
+    }
+
     FrameNode::ProcessOffscreenNode(node);
     LOGD("ProcessOffscreenNode finished, root size = %{public}s",
         node->GetGeometryNode()->GetFrameSize().ToString().c_str());

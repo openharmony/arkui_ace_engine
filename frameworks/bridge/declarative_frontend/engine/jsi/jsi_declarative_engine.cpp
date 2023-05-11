@@ -1206,7 +1206,7 @@ void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
 #endif
     }
 }
-
+#if !defined(PREVIEW)
 bool JsiDeclarativeEngine::LoadJsWithModule(std::string& urlName,
     const std::function<void(const std::string&, int32_t)>& errorCallback)
 {
@@ -1217,7 +1217,9 @@ bool JsiDeclarativeEngine::LoadJsWithModule(std::string& urlName,
             container->GetModuleName() + "/" + FORM_ES_MODULE_PATH;
         auto runtime = std::static_pointer_cast<ArkJSRuntime>(engineInstance_->GetJsRuntime());
         runtime->SetAssetPath(assetPath);
-        urlName = container->GetModuleName() + "/ets/" + urlName;
+        if (urlName.substr(0, strlen(BUNDLE_TAG)) != BUNDLE_TAG) {
+            urlName = container->GetModuleName() + "/ets/" + urlName;
+        }
         if (!runtime->ExecuteJsBin(urlName, errorCallback)) {
             LOGE("ExecuteJsBin %{private}s failed.", urlName.c_str());
         }
@@ -1225,7 +1227,7 @@ bool JsiDeclarativeEngine::LoadJsWithModule(std::string& urlName,
     }
     return false;
 }
-
+#endif
 // Load the app.js file of the FA model in NG structure.
 bool JsiDeclarativeEngine::LoadFaAppSource()
 {

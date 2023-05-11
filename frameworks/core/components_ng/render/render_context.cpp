@@ -16,6 +16,7 @@
 #include "core/components_ng/render/render_context.h"
 
 #include "core/components_ng/base/frame_node.h"
+
 namespace OHOS::Ace::NG {
 void RenderContext::SetRequestFrame(const std::function<void()>& requestFrame)
 {
@@ -83,11 +84,5 @@ void RenderContext::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     pixelJsonValue->Put("bottom", pixStretchEffectOption.bottom.ToString().c_str());
     json->Put("pixelStretchEffect", pixelJsonValue);
     json->Put("foregroundColor", propForegroundColor_.value_or(Color::FOREGROUND).ColorToString().c_str());
-    auto clickEffectJsonValue = JsonUtil::Create(true);
-
-    clickEffectJsonValue->Put("level", std::to_string((int)propClickEffectLevel_.value().level).c_str());
-    clickEffectJsonValue->Put("scale", std::to_string((float)propClickEffectLevel_.value().scaleNumber).c_str());
-
-    json->Put("clickEffect", clickEffectJsonValue);
 }
 } // namespace OHOS::Ace::NG
