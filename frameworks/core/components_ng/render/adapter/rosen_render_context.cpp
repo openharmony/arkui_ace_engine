@@ -475,7 +475,7 @@ void RosenRenderContext::UpdateBackBlurStyle(const std::optional<BlurStyleOption
     if (groupProperty->CheckBlurStyleOption(bgBlurStyle)) {
         // Same with previous value.
         // If colorMode is following system and has valid blurStyle, still needs updating
-        if (bgBlurStyle.colorMode != ThemeColorMode::SYSTEM) {
+        if (bgBlurStyle->colorMode != ThemeColorMode::SYSTEM) {
             return;
         }
     } else {
