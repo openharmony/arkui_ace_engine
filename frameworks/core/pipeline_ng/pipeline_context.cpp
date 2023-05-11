@@ -1593,7 +1593,7 @@ void PipelineContext::RestoreNodeInfo(std::unique_ptr<JsonValue> nodeInfo)
         LOGW("restore nodeInfo is invalid");
     }
     auto child = nodeInfo->GetChild();
-    while (child->IsObject()) {
+    while (child->IsValid()) {
         auto key = child->GetKey();
         auto value = child->GetString();
         restoreNodeInfo_.try_emplace(StringUtils::StringToInt(key), value);
@@ -1627,15 +1627,15 @@ void PipelineContext::StoreNode(int32_t restoreId, const WeakPtr<FrameNode>& nod
     }
 }
 
-std::string PipelineContext::GetRestoreInfo(int32_t restoreId)
+bool PipelineContext::GetRestoreInfo(int32_t restoreId, std::string& restoreInfo)
 {
     auto iter = restoreNodeInfo_.find(restoreId);
     if (iter != restoreNodeInfo_.end()) {
-        std::string restoreNodeInfo = iter->second;
+        restoreInfo = iter->second;
         restoreNodeInfo_.erase(iter);
-        return restoreNodeInfo;
+        return true;
     }
-    return "";
+    return false;
 }
 
 } // namespace OHOS::Ace::NG

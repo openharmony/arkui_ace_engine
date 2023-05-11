@@ -885,7 +885,10 @@ void FrameNode::MarkModifyDone()
             // store distribute node
             pipeline->StoreNode(restoreId, AceType::WeakClaim(this));
             // restore distribute node info
-            pattern_->OnRestoreInfo(pipeline->GetRestoreInfo(restoreId));
+            std::string restoreInfo;
+            if (pipeline->GetRestoreInfo(restoreId, restoreInfo)) {
+                pattern_->OnRestoreInfo(restoreInfo);
+            }
         }
     }
     eventHub_->MarkModifyDone();
