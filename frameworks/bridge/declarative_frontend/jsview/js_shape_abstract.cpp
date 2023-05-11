@@ -107,11 +107,10 @@ void JSShapeAbstract::SetFill(const JSCallbackInfo& info)
         ShapeAbstractModel::GetInstance()->SetFill(Color::TRANSPARENT);
     } else {
         Color fillColor = Color::BLACK;
-        if (ParseJsColor(info[0], fillColor)) {
-            ShapeAbstractModel::GetInstance()->SetFill(fillColor);
-        } else {
-            ShapeAbstractModel::GetInstance()->SetFill(fillColor);
-        }
+        static const char shapeComponentName[] = "";
+        static const char attrsShapeAbstractFill[] = "fill";
+        CheckColor(info[0], fillColor, shapeComponentName, attrsShapeAbstractFill);
+        ShapeAbstractModel::GetInstance()->SetFill(fillColor);
     }
 }
 
