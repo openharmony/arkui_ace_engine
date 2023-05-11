@@ -555,7 +555,7 @@ void RenderPickerColumn::CreateAnimation()
 
     toBottomCurve_ = CreateAnimation(0.0, jumpInterval_.Value());
     toTopCurve_ = CreateAnimation(0.0, 0.0 - jumpInterval_.Value());
-    toController_ = AceType::MakeRefPtr<Animator>(context_);
+    toController_ = CREATE_ANIMATOR(context_);
     toController_->SetDuration(200); // 200ms for animation that from zero to outer.
     auto weak = AceType::WeakClaim(this);
     toController_->AddStopListener([weak]() {
@@ -568,7 +568,7 @@ void RenderPickerColumn::CreateAnimation()
     });
     fromBottomCurve_ = CreateAnimation(jumpInterval_.Value(), 0.0);
     fromTopCurve_ = CreateAnimation(0.0 - jumpInterval_.Value(), 0.0);
-    fromController_ = AceType::MakeRefPtr<Animator>(context_);
+    fromController_ = CREATE_ANIMATOR(context_);
     fromController_->SetDuration(150); // 150ms for animation that from outer to zero.
     animationCreated_ = true;
 }

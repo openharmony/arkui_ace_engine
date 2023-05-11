@@ -832,7 +832,7 @@ void TextPickerColumnPattern::HandleDragEnd()
 void TextPickerColumnPattern::CreateAnimation()
 {
     CHECK_NULL_VOID_NOLOG(!animationCreated_);
-    toController_ = AceType::MakeRefPtr<Animator>(PipelineContext::GetCurrentContext());
+    toController_ = CREATE_ANIMATOR(PipelineContext::GetCurrentContext());
     toController_->SetDuration(ANIMATION_ZERO_TO_OUTER); // 200ms for animation that from zero to outer.
     auto weak = AceType::WeakClaim(this);
     toController_->AddStopListener([weak]() {
@@ -845,7 +845,7 @@ void TextPickerColumnPattern::CreateAnimation()
     });
     fromBottomCurve_ = CreateAnimation(jumpInterval_, 0.0);
     fromTopCurve_ = CreateAnimation(0.0 - jumpInterval_, 0.0);
-    fromController_ = AceType::MakeRefPtr<Animator>(PipelineContext::GetCurrentContext());
+    fromController_ = CREATE_ANIMATOR(PipelineContext::GetCurrentContext());
     fromController_->SetDuration(ANIMATION_OUTER_TO_ZERO);
     animationCreated_ = true;
 }

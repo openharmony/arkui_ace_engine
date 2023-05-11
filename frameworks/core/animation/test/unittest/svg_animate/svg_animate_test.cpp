@@ -65,7 +65,7 @@ public:
         originValue_ = originValue;
         currentValue_ = originValue_;
         svgAnimate_ = svgAnimate;
-        animator_ = AceType::MakeRefPtr<Animator>(context);
+        animator_ = CREATE_ANIMATOR(context);
     }
 
     void CreatePropertyAnimate()

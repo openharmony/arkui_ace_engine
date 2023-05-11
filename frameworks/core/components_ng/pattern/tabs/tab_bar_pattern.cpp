@@ -1182,7 +1182,7 @@ void TabBarPattern::PlayTranslateAnimation(float startPos, float endPos, float t
     if (!controller_) {
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
-        controller_ = AceType::MakeRefPtr<Animator>(pipeline);
+        controller_ = CREATE_ANIMATOR(pipeline);
     }
     controller_->ClearStopListeners();
     controller_->ClearInterpolators();
@@ -1248,7 +1248,7 @@ void TabBarPattern::PlayTabBarTranslateAnimation(int32_t targetIndex)
     if (!controller_) {
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
-        controller_ = AceType::MakeRefPtr<Animator>(pipeline);
+        controller_ = CREATE_ANIMATOR(pipeline);
     }
     controller_->ClearStopListeners();
     controller_->ClearInterpolators();

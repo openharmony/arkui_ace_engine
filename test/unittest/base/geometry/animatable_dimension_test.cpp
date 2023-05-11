@@ -137,7 +137,7 @@ HWTEST_F(AnimatableDimensionTest, AnimatableDimensionTest003, TestSize.Level1)
      */
     AnimatableDimension animatableDimensionObj1;
     animatableDimensionObj1.ResetController();
-    animatableDimensionObj1.animationController_ = AceType::MakeRefPtr<Animator>(nullptr);
+    animatableDimensionObj1.animationController_ = CREATE_ANIMATOR(nullptr);
 
     /**
      * @tc.steps2: call the function ResetController.

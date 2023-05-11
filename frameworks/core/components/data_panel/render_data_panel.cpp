@@ -54,10 +54,10 @@ void RenderDataPanel::Update(const RefPtr<Component>& component)
         return;
     }
     if (!animator_) {
-        animator_ = AceType::MakeRefPtr<Animator>(pipelineContext);
+        animator_ = CREATE_ANIMATOR(pipelineContext);
     }
     if (!progressTransitionController_) {
-        progressTransitionController_ = AceType::MakeRefPtr<Animator>(pipelineContext);
+        progressTransitionController_ = CREATE_ANIMATOR(pipelineContext);
     }
 }
 

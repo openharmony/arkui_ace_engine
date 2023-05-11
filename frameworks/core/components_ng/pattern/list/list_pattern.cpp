@@ -693,7 +693,7 @@ void ListPattern::AnimateTo(float position, float duration, const RefPtr<Curve>&
         StopScrollable();
     }
     if (!animator_) {
-        animator_ = AceType::MakeRefPtr<Animator>(PipelineBase::GetCurrentContext());
+        animator_ = CREATE_ANIMATOR(PipelineBase::GetCurrentContext());
         animator_->AddStopListener([weak = AceType::WeakClaim(this)]() {
             auto list = weak.Upgrade();
             CHECK_NULL_VOID_NOLOG(list);

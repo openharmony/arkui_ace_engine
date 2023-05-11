@@ -338,7 +338,7 @@ void RenderButton::OnMouseHoverEnterTest()
     } else {
         ResetController(hoverControllerExit_);
         if (!hoverControllerEnter_) {
-            hoverControllerEnter_ = AceType::MakeRefPtr<Animator>(context_);
+            hoverControllerEnter_ = CREATE_ANIMATOR(context_);
         }
         scaleAnimationEnter_ = AceType::MakeRefPtr<KeyframeAnimation<float>>();
         CreateFloatAnimation(scaleAnimationEnter_, 1.0, 1.05);
@@ -365,7 +365,7 @@ void RenderButton::OnMouseHoverExitTest()
     } else {
         ResetController(hoverControllerEnter_);
         if (!hoverControllerExit_) {
-            hoverControllerExit_ = AceType::MakeRefPtr<Animator>(context_);
+            hoverControllerExit_ = CREATE_ANIMATOR(context_);
         }
         scaleAnimationExit_ = AceType::MakeRefPtr<KeyframeAnimation<float>>();
         auto begin = scale_;
@@ -382,7 +382,7 @@ void RenderButton::OnMouseClickDownAnimation()
     if (!needHoverColor_) {
         ResetController(clickControllerUp_);
         if (!clickControllerDown_) {
-            clickControllerDown_ = AceType::MakeRefPtr<Animator>(context_);
+            clickControllerDown_ = CREATE_ANIMATOR(context_);
         }
         scaleAnimationDown_ = AceType::MakeRefPtr<KeyframeAnimation<float>>();
         auto begin = scale_;
@@ -399,7 +399,7 @@ void RenderButton::OnMouseClickUpAnimation()
     if (!needHoverColor_) {
         ResetController(clickControllerDown_);
         if (!clickControllerUp_) {
-            clickControllerUp_ = AceType::MakeRefPtr<Animator>(context_);
+            clickControllerUp_ = CREATE_ANIMATOR(context_);
         }
         scaleAnimationUp_ = AceType::MakeRefPtr<KeyframeAnimation<float>>();
         auto begin = scale_;
@@ -451,7 +451,7 @@ void RenderButton::Update(const RefPtr<Component>& component)
     }
     buttonComponent_ = button;
     if (!controller_) {
-        controller_ = AceType::MakeRefPtr<Animator>(GetContext());
+        controller_ = CREATE_ANIMATOR(GetContext());
     }
     auto theme = GetTheme<ButtonTheme>();
     if (theme) {
@@ -648,7 +648,7 @@ void RenderButton::UpdateDownloadStyles(const RefPtr<ButtonComponent>& button)
     auto pipelineContext = GetContext().Upgrade();
     if (pipelineContext) {
         if (!progressController_) {
-            progressController_ = AceType::MakeRefPtr<Animator>(pipelineContext);
+            progressController_ = CREATE_ANIMATOR(pipelineContext);
         }
     }
     progressColor_ = button->GetProgressColor();

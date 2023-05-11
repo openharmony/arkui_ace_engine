@@ -607,7 +607,7 @@ void TimePickerColumnPattern::HandleDragEnd()
 void TimePickerColumnPattern::CreateAnimation()
 {
     CHECK_NULL_VOID_NOLOG(!animationCreated_);
-    toController_ = AceType::MakeRefPtr<Animator>(PipelineContext::GetCurrentContext());
+    toController_ = CREATE_ANIMATOR(PipelineContext::GetCurrentContext());
     toController_->SetDuration(ANIMATION_ZERO_TO_OUTER);
     auto weak = AceType::WeakClaim(this);
     toController_->AddStopListener([weak]() {
@@ -617,7 +617,7 @@ void TimePickerColumnPattern::CreateAnimation()
     });
     fromBottomCurve_ = CreateAnimation(jumpInterval_, 0.0);
     fromTopCurve_ = CreateAnimation(0.0 - jumpInterval_, 0.0);
-    fromController_ = AceType::MakeRefPtr<Animator>(PipelineContext::GetCurrentContext());
+    fromController_ = CREATE_ANIMATOR(PipelineContext::GetCurrentContext());
     fromController_->SetDuration(ANIMATION_OUTER_TO_ZERO);
     animationCreated_ = true;
 }

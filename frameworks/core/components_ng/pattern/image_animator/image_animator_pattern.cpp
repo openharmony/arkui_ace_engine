@@ -29,7 +29,7 @@ constexpr uint32_t DEFAULT_DURATION = 1000; // ms
 
 ImageAnimatorPattern::ImageAnimatorPattern()
 {
-    animator_ = AceType::MakeRefPtr<Animator>(PipelineContext::GetCurrentContext());
+    animator_ = CREATE_ANIMATOR(PipelineContext::GetCurrentContext());
     animator_->SetFillMode(FillMode::FORWARDS);
     animator_->SetDuration(DEFAULT_DURATION);
 }

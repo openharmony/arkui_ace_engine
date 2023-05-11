@@ -206,7 +206,7 @@ void RenderScrollBar::InitAnimator()
         return;
     }
 
-    disappearAnimator_ = AceType::MakeRefPtr<Animator>(context_);
+    disappearAnimator_ = CREATE_ANIMATOR(context_);
     auto hiddenStartKeyframe = AceType::MakeRefPtr<Keyframe<int32_t>>(KEYTIME_START, UINT8_MAX);
     auto hiddenMiddleKeyframe = AceType::MakeRefPtr<Keyframe<int32_t>>(KEYTIME_MIDDLE, UINT8_MAX);
     auto hiddenEndKeyframe = AceType::MakeRefPtr<Keyframe<int32_t>>(KEYTIME_END, 0);

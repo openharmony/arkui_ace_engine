@@ -105,7 +105,7 @@ void RenderSlider::Update(const RefPtr<Component>& component)
 
         // animation control
         if (!controller_) {
-            controller_ = AceType::MakeRefPtr<Animator>(GetContext());
+            controller_ = CREATE_ANIMATOR(GetContext());
         }
 
         const auto& rotationController = slider->GetRotationController();
@@ -743,7 +743,7 @@ void RenderSlider::StartMoveAnimation(double from, double to, bool isClick)
         return;
     }
     if (!moveController_) {
-        moveController_ = AceType::MakeRefPtr<Animator>(GetContext());
+        moveController_ = CREATE_ANIMATOR(GetContext());
     } else if (moveController_->IsRunning()) {
         moveController_->Finish();
     }

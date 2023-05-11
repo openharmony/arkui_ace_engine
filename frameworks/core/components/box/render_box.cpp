@@ -889,7 +889,7 @@ void RenderBox::OnMouseHoverEnterAnimation()
     // stop the exit animation being played.
     ResetController(controllerExit_);
     if (!controllerEnter_) {
-        controllerEnter_ = AceType::MakeRefPtr<Animator>(context_);
+        controllerEnter_ = CREATE_ANIMATOR(context_);
     }
     colorAnimationEnter_ = AceType::MakeRefPtr<KeyframeAnimation<Color>>();
     if (hoverAnimationType_ == HoverAnimationType::OPACITY) {
@@ -910,7 +910,7 @@ void RenderBox::OnMouseHoverExitAnimation()
     // stop the enter animation being played.
     ResetController(controllerEnter_);
     if (!controllerExit_) {
-        controllerExit_ = AceType::MakeRefPtr<Animator>(context_);
+        controllerExit_ = CREATE_ANIMATOR(context_);
     }
     colorAnimationExit_ = AceType::MakeRefPtr<KeyframeAnimation<Color>>();
     if (hoverAnimationType_ == HoverAnimationType::OPACITY) {
@@ -987,7 +987,7 @@ void RenderBox::MouseHoverEnterTest()
     LOGD("RenderBox::MouseHoverEnterTest in. hoverAnimationType_ = %{public}d", hoverAnimationType_);
     ResetController(controllerExit_);
     if (!controllerEnter_) {
-        controllerEnter_ = AceType::MakeRefPtr<Animator>(context_);
+        controllerEnter_ = CREATE_ANIMATOR(context_);
     }
     if (hoverAnimationType_ == HoverAnimationType::SCALE) {
         if (!scaleAnimationEnter_) {
@@ -1036,7 +1036,7 @@ void RenderBox::MouseHoverExitTest()
     LOGD("RenderBox::MouseHoverExitTest in. hoverAnimationType_ = %{public}d", hoverAnimationType_);
     ResetController(controllerEnter_);
     if (!controllerExit_) {
-        controllerExit_ = AceType::MakeRefPtr<Animator>(context_);
+        controllerExit_ = CREATE_ANIMATOR(context_);
     }
     if (hoverAnimationType_ == HoverAnimationType::SCALE) {
         scaleAnimationExit_ = AceType::MakeRefPtr<KeyframeAnimation<float>>();

@@ -185,7 +185,7 @@ void RenderPickerOption::UpdateBackgroundDecoration(const Color& color)
 void RenderPickerOption::ResetMouseController()
 {
     if (!mouseAnimationController_) {
-        mouseAnimationController_ = AceType::MakeRefPtr<Animator>(context_);
+        mouseAnimationController_ = CREATE_ANIMATOR(context_);
     }
     if (mouseAnimationController_->IsRunning()) {
         mouseAnimationController_->Stop();
