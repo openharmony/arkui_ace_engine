@@ -22,7 +22,10 @@
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_pattern.h"
 #include "core/components_ng/pattern/radio/radio_pattern.h"
 #include "core/components_ng/pattern/stage/page_event_hub.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
+#include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/pipeline/base/element_register.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 #undef private
 #undef protected
 
@@ -44,7 +47,17 @@ constexpr int32_t CHECK_BOX_ID_THIRD = 6;
 constexpr int32_t CHECK_BOX_ID_FOURTH = 6;
 } // namespace
 
-class StageTestNg : public testing::Test {};
+class StageTestNg : public testing::Test {
+public:
+    static void SetUpTestSuite()
+    {
+        MockPipelineBase::SetUp();
+    }
+    static void TearDownTestSuite()
+    {
+        MockPipelineBase::TearDown();
+    }
+};
 
 /**
  * @tc.name: PageEventHubTest001
@@ -174,5 +187,104 @@ HWTEST_F(StageTestNg, PageEventHubTest002, TestSize.Level1)
     ElementRegister::GetInstance()->AddReferenced(CHECK_BOX_ID_FOURTH, checkBoxGroupNode2);
     pageEventHub.RemoveCheckBoxFromGroup(TEST_GROUP_NAME, CHECK_BOX_ID_FIRST);
     EXPECT_EQ(pageEventHub.GetCheckBoxGroupMap()[TEST_GROUP_NAME].size(), 2);
+}
+
+/**
+ * @tc.name: StageManagerTest001
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(StageTestNg, StageManagerTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create StagePattern and some PagePattern.
+     */
+    auto stageNode = FrameNode::CreateFrameNode(FRAME_NODE_TAG, 0, AceType::MakeRefPtr<StagePattern>());
+    auto firstNode =
+        FrameNode::CreateFrameNode("1", 1, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    auto secondNode =
+        FrameNode::CreateFrameNode("2", 2, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    auto thirdNode =
+        FrameNode::CreateFrameNode("3", 3, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    auto fourthNode =
+        FrameNode::CreateFrameNode("4", 4, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+
+    /**
+     * @tc.steps: step2. Create a StageManager based on stageNode.
+     * @tc.expected: step2. stagePattern_ successfully assigned a value.
+     */
+    StageManager stageManager(stageNode);
+    EXPECT_NE(stageManager.stagePattern_, nullptr);
+
+    /**
+     * @tc.steps: step3. PopPage.
+     * @tc.expected: step3. Expected no child failed.
+     */
+    bool result = stageManager.PopPage();
+    EXPECT_FALSE(result);
+
+    /**
+     * @tc.steps: step4. Push a Page into StageManager.
+     * @tc.expected: step4. Push successfully.
+     */
+    result = stageManager.PushPage(firstNode);
+    EXPECT_TRUE(result);
+
+    /**
+     * @tc.steps: step5. Push another three Page with different parameters into StageManager.
+     * @tc.expected: step5. Push successfully.
+     */
+    stageManager.PushPage(secondNode, false, false);
+    stageManager.PushPage(thirdNode, true, false);
+    stageManager.PushPage(fourthNode, false, true);
+    int size = stageNode->GetChildren().size();
+    EXPECT_EQ(size, 4);
+
+    /**
+     * @tc.steps: step6. Push an exist page.
+     * @tc.expected: step6. StageNode size not changed.
+     */
+    stageManager.PushPage(secondNode);
+    size = stageNode->GetChildren().size();
+    EXPECT_EQ(size, 4);
+
+    /**
+     * @tc.steps: step7. MovePageToFront first Page and GetLastPage.
+     * @tc.expected: step7. always return success , last node is firstNode.
+     */
+    result = stageManager.MovePageToFront(firstNode);
+    EXPECT_TRUE(result);
+    result = stageManager.MovePageToFront(firstNode);
+    EXPECT_TRUE(result);
+    auto node = stageManager.GetLastPage();
+    EXPECT_EQ(node, firstNode);
+    size = stageNode->GetChildren().size();
+    EXPECT_EQ(size, 4);
+    /**
+     * @tc.steps: step8. PopPage to index 0.
+     * @tc.expected: step8. always return success.
+     */
+    stageManager.PopPageToIndex(1);
+    size = stageNode->GetChildren().size();
+    EXPECT_EQ(size, 3);
+
+    /**
+     * @tc.steps: step9. PopPage with different parameters.
+     * @tc.expected: step9. removeChild meets expectations .
+     */
+    stageManager.PopPage(true, false);
+    stageManager.PopPage(false, true);
+    size = stageNode->GetChildren().size();
+    EXPECT_EQ(size, 2);
+
+    /**
+     * @tc.steps: step10. Try clean with different parameters.
+     * @tc.expected: step10. stageManager clear success ,size meets expectations.
+     */
+    stageManager.StopPageTransition();
+    stageManager.ReloadStage();
+    stageManager.CleanPageStack();
+    size = stageNode->GetChildren().size();
+    EXPECT_EQ(size, 1);
 }
 } // namespace OHOS::Ace::NG
