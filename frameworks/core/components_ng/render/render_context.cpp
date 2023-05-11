@@ -47,6 +47,7 @@ void RenderContext::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     ACE_PROPERTY_TO_JSON_VALUE(propOverlay_, OverlayProperty);
     ACE_PROPERTY_TO_JSON_VALUE(propPositionProperty_, RenderPositionProperty);
     ACE_PROPERTY_TO_JSON_VALUE(propBackground_, BackgroundProperty);
+    ACE_PROPERTY_TO_JSON_VALUE(propForeground_, ForegroundProperty);
     ACE_PROPERTY_TO_JSON_VALUE(propGraphics_, GraphicsProperty);
     ACE_PROPERTY_TO_JSON_VALUE(propGradient_, GradientProperty);
     ACE_PROPERTY_TO_JSON_VALUE(propTransform_, TransformProperty);

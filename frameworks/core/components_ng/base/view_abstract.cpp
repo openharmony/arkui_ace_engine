@@ -235,6 +235,23 @@ void ViewAbstract::SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle)
     }
 }
 
+void ViewAbstract::SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        target->UpdateFrontBlurStyle(fgBlurStyle);
+        if (target->GetFrontBlurRadius().has_value()) {
+            target->UpdateFrontBlurRadius(Dimension());
+        }
+    }
+}
+
 void ViewAbstract::SetSphericalEffect(double radio)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -1033,7 +1050,7 @@ void ViewAbstract::SetBackdropBlur(const Dimension& radius)
     if (target) {
         target->UpdateBackBlurRadius(radius);
         if (target->GetBackBlurStyle().has_value()) {
-            target->UpdateBackBlurStyle(BlurStyleOption());
+            target->UpdateBackBlurStyle(std::nullopt);
         }
     }
 }
@@ -1044,7 +1061,15 @@ void ViewAbstract::SetFrontBlur(const Dimension& radius)
         LOGD("current state is not processed, return");
         return;
     }
-    ACE_UPDATE_RENDER_CONTEXT(FrontBlurRadius, radius);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        target->UpdateFrontBlurRadius(radius);
+        if (target->GetFrontBlurStyle().has_value()) {
+            target->UpdateFrontBlurStyle(std::nullopt);
+        }
+    }
 }
 
 void ViewAbstract::SetBackShadow(const Shadow& shadow)

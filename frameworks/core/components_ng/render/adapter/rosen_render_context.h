@@ -129,7 +129,9 @@ public:
     void AnimateHoverEffectScale(bool isHovered) override;
     void AnimateHoverEffectBoard(bool isHovered) override;
     void UpdateBackBlurRadius(const Dimension& radius) override;
-    void UpdateBackBlurStyle(const BlurStyleOption& bgBlurStyle) override;
+    void UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle) override;
+    void UpdateFrontBlurRadius(const Dimension& radius) override;
+    void UpdateFrontBlurStyle(const std::optional<BlurStyleOption>& fgBlurStyle) override;
     void ResetBackBlurStyle() override;
     void OnSphericalEffectUpdate(double radio) override;
     void OnPixelStretchEffectUpdate(const PixStretchEffectOption& option) override;
@@ -267,7 +269,6 @@ private:
     void OnFrontInvertUpdate(const Dimension& invert) override;
     void OnFrontHueRotateUpdate(float hueRotate) override;
     void OnFrontColorBlendUpdate(const Color& colorBlend) override;
-    void OnFrontBlurRadiusUpdate(const Dimension& radius) override;
 
     void OnOverlayTextUpdate(const OverlayOptions& overlay) override;
     void OnMotionPathUpdate(const MotionPathOption& motionPath) override;
@@ -302,6 +303,7 @@ private:
     void PaintBorderImageGradient();
     void PaintMouseSelectRect(const RectF& rect, const Color& fillColor, const Color& strokeColor);
     void SetBackBlurFilter();
+    void SetFrontBlurFilter();
     void GetPaddingOfFirstFrameNodeParent(Dimension& parentPaddingLeft, Dimension& parentPaddingTop);
 
     // helper function to check if paint rect is valid
