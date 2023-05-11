@@ -87,7 +87,7 @@ public:
             paintMethod->SetIsPressed(isPressed_);
             paintMethod->SetHoverPoint(hoverPoint_);
             paintMethod->SetMouseClickIndex(mouseClickIndex_);
-            paintMethod->SetIsTouchBottom(isTouchBottom_);
+            paintMethod->SetIsTouchBottom(touchBottomType_);
             mouseClickIndex_ = std::nullopt;
             return paintMethod;
         } else {
@@ -142,7 +142,7 @@ private:
     void UpdateTextContentSub(
         const RefPtr<SwiperIndicatorLayoutProperty>& layoutProperty,
         const RefPtr<FrameNode>& firstTextNode, const RefPtr<FrameNode>& lastTextNode);
-
+    bool CheckIsTouchBottom(const GestureEvent& info);
     RefPtr<ClickEvent> clickEvent_;
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -152,7 +152,8 @@ private:
     PointF hoverPoint_;
     PointF dragStartPoint_;
     bool isTouchBottomAnimationPlay_ = false;
-    bool isTouchBottom_ = false;
+    TouchBottomType touchBottomType_ = TouchBottomType::NONE;
+    std::optional<PointF> touchBottomStartPosition_ = std::nullopt;
 
     std::optional<int32_t> mouseClickIndex_ = std::nullopt;
     RefPtr<DotIndicatorModifier> dotIndicatorModifier_;

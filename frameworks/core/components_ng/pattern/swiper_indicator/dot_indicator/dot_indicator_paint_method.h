@@ -96,9 +96,9 @@ public:
         mouseClickIndex_ = mouseClickIndex;
     }
 
-    void SetIsTouchBottom(bool isTouchBottom)
+    void SetIsTouchBottom(TouchBottomType touchBottomType)
     {
-        isTouchBottom_ = isTouchBottom;
+        touchBottomType_ = touchBottomType;
     }
 private:
     struct StarAndEndPointCenter {
@@ -135,7 +135,7 @@ private:
     std::pair<float, float> longPointCenterX_ = { 0, 0 };
     OffsetF normalMargin_ = { 0, 0 };
     float centerY_ = 0.0f;
-    bool isTouchBottom_ = false;
+    TouchBottomType touchBottomType_ = TouchBottomType::NONE;
     ACE_DISALLOW_COPY_AND_MOVE(DotIndicatorPaintMethod);
 };
 } // namespace OHOS::Ace::NG
