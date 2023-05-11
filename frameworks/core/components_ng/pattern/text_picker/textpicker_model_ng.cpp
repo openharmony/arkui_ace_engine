@@ -324,8 +324,6 @@ void TextPickerModelNG::SetCascadeColumns(const std::vector<NG::TextCascadePicke
     CHECK_NULL_VOID(frameNode);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_VOID(textPickerPattern);
-    std::vector<std::string> values;
-    std::vector<uint32_t> selectedValues;
     std::vector<NG::TextCascadePickerOptions> reOptions;
     // Caculate max depth
     size_t columnCount = options.empty()? 0 : 1;
