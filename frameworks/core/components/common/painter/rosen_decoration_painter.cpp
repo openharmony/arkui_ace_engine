@@ -1616,8 +1616,13 @@ void RosenDecorationPainter::PaintBorder(const Offset& offset, const Border& bor
     }
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenDecorationPainter::PaintBorderWithLine(
     const Offset& offset, const Border& border, SkCanvas* canvas, SkPaint& paint)
+#else
+void RosenDecorationPainter::PaintBorderWithLine(
+    const Offset& offset, const Border& border, RSCanvas* canvas, RSPen& pen)
+#endif
 {
     double addLen = 0.5;
     if (border.Left().GetBorderStyle() != BorderStyle::DOTTED) {
@@ -1636,10 +1641,21 @@ void RosenDecorationPainter::PaintBorderWithLine(
             LOGI("number of dot is zero");
             return;
         }
+#ifndef USE_ROSEN_DRAWING
         SetBorderStyle(left, paint, false, borderLength / rawNumber, borderLength);
         canvas->drawLine(offset.GetX() + SK_ScalarHalf * NormalizeToPx(left.GetWidth()),
             offset.GetY() + addLen * NormalizeToPx(left.GetWidth()),
             offset.GetX() + SK_ScalarHalf * NormalizeToPx(left.GetWidth()), offset.GetY() + paintSize_.Height(), paint);
+#else
+        SetBorderStyle(left, pen, false, borderLength / rawNumber, borderLength);
+        canvas->AttachPen(pen);
+        canvas->DrawLine(
+            RSPoint(offset.GetX() + RSSCALAR_HALF * NormalizeToPx(left.GetWidth()),
+                offset.GetY() + addLen * NormalizeToPx(left.GetWidth())),
+            RSPoint(offset.GetX() + RSSCALAR_HALF * NormalizeToPx(left.GetWidth()),
+                offset.GetY() + paintSize_.Height()));
+        canvas->DetachPen();
+#endif
     }
 
     // paint bottom border edge.
@@ -1655,11 +1671,22 @@ void RosenDecorationPainter::PaintBorderWithLine(
             LOGI("number of dot is zero");
             return;
         }
+#ifndef USE_ROSEN_DRAWING
         SetBorderStyle(bottom, paint, false, borderLength / rawNumber, borderLength);
         canvas->drawLine(offset.GetX() + addLen * NormalizeToPx(bottom.GetWidth()),
             offset.GetY() + paintSize_.Height() - SK_ScalarHalf * NormalizeToPx(bottom.GetWidth()),
             offset.GetX() + paintSize_.Width(),
             offset.GetY() + paintSize_.Height() - SK_ScalarHalf * NormalizeToPx(bottom.GetWidth()), paint);
+#else
+        SetBorderStyle(bottom, pen, false, borderLength / rawNumber, borderLength);
+        canvas->AttachPen(pen);
+        canvas->DrawLine(
+            RSPoint(offset.GetX() + addLen * NormalizeToPx(bottom.GetWidth()),
+                offset.GetY() + paintSize_.Height() - RSSCALAR_HALF * NormalizeToPx(bottom.GetWidth())),
+            RSPoint(offset.GetX() + paintSize_.Width(),
+                offset.GetY() + paintSize_.Height() - RSSCALAR_HALF * NormalizeToPx(bottom.GetWidth())));
+        canvas->DetachPen();
+#endif
     }
     // paint right border edge.
     BorderEdge right = border.Right();
@@ -1674,10 +1701,23 @@ void RosenDecorationPainter::PaintBorderWithLine(
             LOGI("number of dot is zero");
             return;
         }
+#ifndef USE_ROSEN_DRAWING
         SetBorderStyle(right, paint, false, borderLength / rawNumber, borderLength);
         canvas->drawLine(offset.GetX() + paintSize_.Width() - SK_ScalarHalf * NormalizeToPx(right.GetWidth()),
             offset.GetY() + paintSize_.Height() - addLen * NormalizeToPx(right.GetWidth()),
             offset.GetX() + paintSize_.Width() - SK_ScalarHalf * NormalizeToPx(right.GetWidth()), offset.GetY(), paint);
+#else
+        SetBorderStyle(right, pen, false, borderLength / rawNumber, borderLength);
+        canvas->AttachPen(pen);
+        canvas->DrawLine(
+            RSPoint(
+                offset.GetX() + paintSize_.Width() - RSSCALAR_HALF * NormalizeToPx(right.GetWidth()),
+                offset.GetY() + paintSize_.Height() - addLen * NormalizeToPx(right.GetWidth())),
+            RSPoint(
+                offset.GetX() + paintSize_.Width() - RSSCALAR_HALF * NormalizeToPx(right.GetWidth()),
+                offset.GetY()));
+        canvas->DetachPen();
+#endif
     }
     // paint top border edge.
     BorderEdge top = border.Top();
@@ -1714,20 +1754,33 @@ void RosenDecorationPainter::PaintBoxShadows(
                 LOGW("The current shadow is not drawn if the shadow is invalid.");
                 continue;
             }
+#ifndef USE_ROSEN_DRAWING
             PaintShadow(SkPath(), shadow, rsNode);
+#else
+            PaintShadow(RSPath(), shadow, rsNode);
+#endif
         }
     } else {
         rsNode->SetShadowRadius(0.f);
     }
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenDecorationPainter::PaintShadow(
     const SkPath& path, const Shadow& shadow, const std::shared_ptr<RSNode>& rsNode)
+#else
+void RosenDecorationPainter::PaintShadow(
+    const RSPath& path, const Shadow& shadow, const std::shared_ptr<RSNode>& rsNode)
+#endif
 {
     if (!rsNode || !shadow.IsValid()) {
         return;
     }
+#ifndef USE_ROSEN_DRAWING
     if (!path.isEmpty()) {
+#else
+    if (!path.IsEmpty()) {
+#endif
         rsNode->SetShadowPath(Rosen::RSPath::CreateRSPath(path));
     }
     rsNode->SetShadowColor(shadow.GetColor().GetValue());
@@ -1741,6 +1794,7 @@ void RosenDecorationPainter::PaintShadow(
     }
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenDecorationPainter::PaintShadow(const SkPath& path, const Shadow& shadow, SkCanvas* canvas)
 {
     if (!canvas) {
@@ -1777,6 +1831,51 @@ void RosenDecorationPainter::PaintShadow(const SkPath& path, const Shadow& shado
     }
     canvas->restore();
 }
+#else
+void RosenDecorationPainter::PaintShadow(const RSPath& path,
+    const Shadow& shadow, RSCanvas* canvas)
+{
+    if (!canvas) {
+        LOGE("PaintShadow failed, canvas is null.");
+        return;
+    }
+    if (!shadow.IsValid()) {
+        LOGW("The current shadow is not drawn if the shadow is invalid.");
+        return;
+    }
+    canvas->Save();
+    RSRecordingPath drPath = path;
+    drPath.Offset(shadow.GetOffset().GetX(), shadow.GetOffset().GetY());
+    RSColorQuad spotColor = shadow.GetColor().GetValue();
+    if (shadow.GetHardwareAcceleration()) {
+        // PlaneParams represents the coordinates of the component, and here we only need to focus on the elevation
+        // of the component.
+        RSPoint3 planeParams = RSPoint3(0.0f, 0.0f, shadow.GetElevation());
+
+        // LightPos is the location of a spot light source, which is by default located directly above the center
+        // of the component.
+        RSPoint3 lightPos =
+            RSPoint3(drPath.GetBounds().CenterX(), drPath.GetBounds().CenterY(), shadow.GetLightHeight());
+
+        // Current ambient color is not available.
+        RSColorQuad ambientColor = RSColor::ColorQuadSetARGB(0, 0, 0, 0);
+        canvas->DrawShadow(drPath, planeParams, lightPos, shadow.GetLightRadius(), ambientColor,
+            spotColor, RSShadowFlags::TRANSPARENT_OCCLUDER);
+    } else {
+        RSBrush brush;
+        brush.SetColor(spotColor);
+        brush.SetAntiAlias(true);
+        RSFilter filter;
+        filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(
+            RSBlurType::NORMAL, ConvertRadiusToSigma(shadow.GetBlurRadius())));
+        brush.SetFilter(filter);
+        canvas->AttachBrush(brush);
+        canvas->DrawPath(drPath);
+        canvas->DetachBrush();
+    }
+    canvas->Restore();
+}
+#endif
 
 void RosenDecorationPainter::PaintImage(const Offset& offset, RenderContext& context)
 {
@@ -1788,13 +1887,18 @@ void RosenDecorationPainter::PaintImage(const Offset& offset, RenderContext& con
     }
 }
 
+#ifndef USE_ROSEN_DRAWING
 bool RosenDecorationPainter::GetGradientPaint(SkPaint& paint)
+#else
+bool RosenDecorationPainter::GetGradientPaint(RSBrush& brush)
+#endif
 {
     Gradient gradient = decoration_->GetGradient();
     if (NearZero(paintSize_.Width()) || NearZero(paintSize_.Height()) || !gradient.IsValid()) {
         return false;
     }
 
+#ifndef USE_ROSEN_DRAWING
 #ifndef NEW_SKIA
     SkSize skPaintSize = SkSize::Make(SkDoubleToMScalar(paintSize_.Width()), SkDoubleToMScalar(paintSize_.Height()));
 #else
@@ -1802,6 +1906,12 @@ bool RosenDecorationPainter::GetGradientPaint(SkPaint& paint)
 #endif
     auto shader = CreateGradientShader(gradient, skPaintSize);
     paint.setShader(std::move(shader));
+#else
+    RSSize paintSize = RSSize(static_cast<RSScalar>(paintSize_.Width()),
+        static_cast<RSScalar>(paintSize_.Height()));
+    auto shader = CreateGradientShader(gradient, paintSize);
+    brush.SetShaderEffect(shader);
+#endif
     return true;
 }
 
@@ -1815,7 +1925,11 @@ void RosenDecorationPainter::PaintGradient(RenderContext& context)
         return;
     }
 
+#ifndef USE_ROSEN_DRAWING
     auto size = SkSize::Make(paintSize_.Width(), paintSize_.Width());
+#else
+    auto size = RSSize(paintSize_.Width(), paintSize_.Width());
+#endif
     auto shader = CreateGradientShader(gradient, size, dipScale_);
 #ifdef OHOS_PLATFORM
     auto rsNode = static_cast<RosenRenderContext*>(&context)->GetRSNode();
@@ -1825,13 +1939,23 @@ void RosenDecorationPainter::PaintGradient(RenderContext& context)
 #endif
 }
 
+#ifndef USE_ROSEN_DRAWING
 sk_sp<SkShader> RosenDecorationPainter::CreateGradientShader(const Gradient& gradient, const SkSize& size)
+#else
+std::shared_ptr<RSShaderEffect> RosenDecorationPainter::CreateGradientShader(
+    const Gradient& gradient, const RSSize& size)
+#endif
 {
     return CreateGradientShader(gradient, size, dipScale_);
 }
 
+#ifndef USE_ROSEN_DRAWING
 sk_sp<SkShader> RosenDecorationPainter::CreateGradientShader(
     const Gradient& gradient, const SkSize& size, double dipScale)
+#else
+std::shared_ptr<RSShaderEffect> RosenDecorationPainter::CreateGradientShader(
+    const Gradient& gradient, const RSSize& size, double dipScale)
+#endif
 {
     auto ptr = std::make_unique<GradientShader>(gradient);
     switch (gradient.GetType()) {
@@ -1897,7 +2021,11 @@ double RosenDecorationPainter::SliceNormalizePercentToPx(const Dimension& dimens
     if (dimension.Unit() != DimensionUnit::PERCENT) {
         return NormalizeToPx(dimension);
     }
+#ifndef USE_ROSEN_DRAWING
     auto limit = isVertical ? image_->width() : image_->height();
+#else
+    auto limit = isVertical ? image_->GetWidth() : image_->GetHeight();
+#endif
     return limit * dimension.Value();
 }
 
