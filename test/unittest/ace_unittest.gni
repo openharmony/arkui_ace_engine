@@ -36,6 +36,7 @@ template("ace_unittest") {
   type = "components"
   ace_animation = false
   flutter_skia = false
+  render = false
   ace_unittest_out_path = "ace_engine/$type"
   ace_unittest_name = target_name
   ace_unittest_config = [ "$ace_root/test/unittest:ace_unittest_config" ]
@@ -47,6 +48,10 @@ template("ace_unittest") {
     "$ace_root/test/unittest:ace_unittest_trace",
     "//third_party/googletest:gmock_main",
   ]
+
+  if (defined(invoker.render)) {
+    render = invoker.render
+  }
 
   if (defined(invoker.ace_log)) {
     ace_log = invoker.ace_log
@@ -63,6 +68,10 @@ template("ace_unittest") {
 
   if (ace_animation) {
     ace_unittest_deps += [ "$ace_root/test/unittest:ace_core_animation" ]
+  }
+
+  if (render) {
+    ace_unittest_deps += [ "$graphic_standard_path/rosen/modules/render_service_client:librender_service_client" ]
   }
 
   if (defined(invoker.flutter_skia)) {
