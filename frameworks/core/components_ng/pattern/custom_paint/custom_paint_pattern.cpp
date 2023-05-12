@@ -632,8 +632,6 @@ void CustomPaintPattern::UpdateFillColor(const Color& color)
 {
     auto task = [color](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
         paintMethod.SetFillColor(color);
-        paintMethod.SetFillPattern(Ace::Pattern());
-        paintMethod.SetFillGradient(Ace::Gradient());
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
@@ -645,8 +643,6 @@ void CustomPaintPattern::UpdateFillGradient(const Ace::Gradient& gradient)
 {
     auto task = [gradient](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
         paintMethod.SetFillGradient(gradient);
-        paintMethod.SetFillColor(Color());
-        paintMethod.SetFillPattern(Ace::Pattern());
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
@@ -658,8 +654,6 @@ void CustomPaintPattern::UpdateFillPattern(const std::weak_ptr<Ace::Pattern>& pa
 {
     auto task = [pattern](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
         paintMethod.SetFillPatternNG(pattern);
-        paintMethod.SetFillGradient(Ace::Gradient());
-        paintMethod.SetFillColor(Color());
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();

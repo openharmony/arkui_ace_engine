@@ -491,7 +491,7 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg010, TestSize.Level1)
     customPattern->Stroke();
     EXPECT_TRUE(paintMethod->HasTask());
 
-    std::shared_ptr<Ace::Pattern> pattern;
+    std::shared_ptr<Ace::Pattern> pattern = std::make_shared<Ace::Pattern>();
     paintMethod->tasks_.clear();
     customPattern->UpdateStrokePattern(pattern);
     EXPECT_TRUE(paintMethod->HasTask());
@@ -654,7 +654,7 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg013, TestSize.Level1)
     customPattern->UpdateFillGradient(gradient);
     EXPECT_TRUE(paintMethod->HasTask());
 
-    std::shared_ptr<Ace::Pattern> pattern;
+    std::shared_ptr<Ace::Pattern> pattern = std::make_shared<Ace::Pattern>();
     paintMethod->tasks_.clear();
     customPattern->UpdateFillPattern(pattern);
     EXPECT_TRUE(paintMethod->HasTask());
