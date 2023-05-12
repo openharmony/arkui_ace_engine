@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,54 +16,36 @@
 #include "frameworks/bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
 
 #include "bridge/declarative_frontend/jsview/js_scroller.h"
-#include "core/components/scroll_bar/scroll_bar_component.h"
-#include "core/components_ng/pattern/scroll_bar/scroll_bar_pattern.h"
-#include "core/components_ng/pattern/scroll_bar/scroll_bar_view.h"
-#include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
-#include "frameworks/bridge/common/utils/utils.h"
-#include "frameworks/bridge/declarative_frontend/engine/bindings.h"
-#include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
-#include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+#include "bridge/declarative_frontend/jsview/models/scroll_bar_model_impl.h"
+#include "core/components_ng/pattern/scroll_bar/scroll_bar_model_ng.h"
 
-namespace OHOS::Ace::Framework {
-namespace {
+#define AXIS_SIZE 3
 
-const std::vector<DisplayMode> DISPLAY_MODE = { DisplayMode::OFF, DisplayMode::AUTO, DisplayMode::ON };
-const std::vector<Axis> AXIS = { Axis::VERTICAL, Axis::HORIZONTAL, Axis::NONE };
+namespace OHOS::Ace {
+std::unique_ptr<ScrollBarModel> ScrollBarModel::instance_ = nullptr;
+std::mutex ScrollBarModel::mutex_;
 
-void NGSetScrollControllerAndProxy(RefPtr<NG::ScrollBarPattern>& pattern, const JSCallbackInfo& info)
+ScrollBarModel* ScrollBarModel::GetInstance()
 {
-    CHECK_NULL_VOID(pattern);
-    if (info.Length() > 0 && info[0]->IsObject()) {
-        auto obj = JSRef<JSObject>::Cast(info[0]);
-        // Parse scroller.
-        auto scrollerValue = obj->GetProperty("scroller");
-        if (scrollerValue->IsObject() && JSRef<JSObject>::Cast(scrollerValue)->Unwrap<JSScroller>()) {
-            auto jsScroller = JSRef<JSObject>::Cast(scrollerValue)->Unwrap<JSScroller>();
-            auto proxy = AceType::DynamicCast<NG::ScrollBarProxy>(jsScroller->GetScrollBarProxy());
-            if (!proxy) {
-                proxy = AceType::MakeRefPtr<NG::ScrollBarProxy>();
-                jsScroller->SetScrollBarProxy(proxy);
+    if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
+#ifdef NG_BUILD
+            instance_.reset(new NG::ScrollBarModelNG());
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::ScrollBarModelNG());
+            } else {
+                instance_.reset(new Framework::ScrollBarModelImpl());
             }
-            proxy->RegisterScrollBar(pattern);
-            pattern->SetScrollBarProxy(proxy);
-        }
-        // Parse direction.
-        auto directionValue = obj->GetProperty("direction");
-        if (directionValue->IsNumber()) {
-            NG::ScrollBarView::SetAxis(AXIS[directionValue->ToNumber<int32_t>()]);
-        }
-        // Parse state.
-        auto stateValue = obj->GetProperty("state");
-        if (stateValue->IsNumber()) {
-            NG::ScrollBarView::SetDisplayMode(stateValue->ToNumber<int32_t>());
+#endif
         }
     }
+    return instance_.get();
+}
 }
 
-} // namespace
-
+namespace OHOS::Ace::Framework {
 void JSScrollBar::JSBind(BindingTarget globalObj)
 {
     JSClass<JSScrollBar>::Declare("ScrollBar");
@@ -85,45 +67,36 @@ void JSScrollBar::JSBind(BindingTarget globalObj)
 
 void JSScrollBar::Create(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto frameNode = NG::ScrollBarView::Create();
-        auto pattern = AceType::DynamicCast<NG::ScrollBarPattern>(frameNode->GetPattern());
-        NGSetScrollControllerAndProxy(pattern, info);
-        return;
-    }
-
-    RefPtr<Component> child;
-    auto scrollBarComponent = AceType::MakeRefPtr<OHOS::Ace::ScrollBarComponent>(child);
+    bool proxyFlag = false;
+    RefPtr<ScrollProxy> proxy;
+    int directionNum = -1;
+    int stateNum = -1;
+    bool infoflag = false;
     if (info.Length() > 0 && info[0]->IsObject()) {
+        infoflag = true;
         auto obj = JSRef<JSObject>::Cast(info[0]);
-        // Parse scroller.
         auto scrollerValue = obj->GetProperty("scroller");
         if (scrollerValue->IsObject() && JSRef<JSObject>::Cast(scrollerValue)->Unwrap<JSScroller>()) {
             auto jsScroller = JSRef<JSObject>::Cast(scrollerValue)->Unwrap<JSScroller>();
-            auto proxy = AceType::DynamicCast<ScrollBarProxy>(jsScroller->GetScrollBarProxy());
+            auto scrollBarProxy = jsScroller->GetScrollBarProxy();
+            proxyFlag = true;
+            proxy = ScrollBarModel::GetInstance()->GetScrollBarProxy(scrollBarProxy);
             if (!proxy) {
-                proxy = AceType::MakeRefPtr<ScrollBarProxy>();
                 jsScroller->SetScrollBarProxy(proxy);
             }
-            scrollBarComponent->SetScrollBarProxy(proxy);
         }
 
-        // Parse direction.
         auto directionValue = obj->GetProperty("direction");
-        if (directionValue->IsNumber() && directionValue->ToNumber<uint32_t>() < AXIS.size()) {
-            scrollBarComponent->SetAxis(AXIS[directionValue->ToNumber<int32_t>()]);
+        if (directionValue->IsNumber()) {
+            directionNum = directionValue->ToNumber<int32_t>();
         }
 
-        // Parse state.
         auto stateValue = obj->GetProperty("state");
         if (stateValue->IsNumber()) {
-            scrollBarComponent->SetDisplayMode(DISPLAY_MODE[stateValue->ToNumber<int32_t>()]);
+            stateNum = stateValue->ToNumber<int32_t>();
         }
     }
-    ViewStackProcessor::GetInstance()->ClaimElementId(scrollBarComponent);
-    ViewStackProcessor::GetInstance()->Push(scrollBarComponent);
-    // Push DisplayComponent to enable opacity animation.
-    ViewStackProcessor::GetInstance()->GetDisplayComponent();
-}
 
+    ScrollBarModel::GetInstance()->Create(proxy, infoflag, proxyFlag, directionNum, stateNum);
+}
 } // namespace OHOS::Ace::Framework
