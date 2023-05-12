@@ -21,10 +21,11 @@
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
-#include "core/components_ng/pattern/menu/menu_item/menu_item_view.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_view.h"
+#include "core/components_ng/pattern/menu/menu_model_ng.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/multi_menu_layout_algorithm.h"
@@ -165,14 +166,15 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg005, TestSize.Level1)
  */
 HWTEST_F(MenuPatternTestNg, MenuPatternTestNg006, TestSize.Level1)
 {
+    MenuModelNG MneuModelInstance;
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
 
-    MenuView::Create();
-    MenuView::SetFontSize(Dimension(25.0));
-    MenuView::SetFontColor(Color::RED);
-    MenuView::SetFontWeight(FontWeight::BOLD);
+    MneuModelInstance.Create();
+    MneuModelInstance.SetFontSize(Dimension(25.0));
+    MneuModelInstance.SetFontColor(Color::RED);
+    MneuModelInstance.SetFontWeight(FontWeight::BOLD);
 
     auto menuNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(menuNode, nullptr);
@@ -199,14 +201,16 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg006, TestSize.Level1)
  */
 HWTEST_F(MenuPatternTestNg, MenuPatternTestNg007, TestSize.Level1)
 {
+    MenuModelNG MneuModelInstance;
+    MenuItemModelNG MneuItemModelInstance;
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
 
-    MenuView::Create();
-    MenuView::SetFontSize(Dimension(25.0));
-    MenuView::SetFontColor(Color::RED);
-    MenuView::SetFontWeight(FontWeight::BOLD);
+    MneuModelInstance.Create();
+    MneuModelInstance.SetFontSize(Dimension(25.0));
+    MneuModelInstance.SetFontColor(Color::RED);
+    MneuModelInstance.SetFontWeight(FontWeight::BOLD);
 
     auto menuNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(menuNode, nullptr);
@@ -218,7 +222,7 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg007, TestSize.Level1)
     MenuItemProperties itemOption;
     itemOption.content = "content";
     itemOption.labelInfo = "label";
-    MenuItemView::Create(itemOption);
+    MneuItemModelInstance.Create(itemOption);
     auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(itemNode, nullptr);
     auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
@@ -264,14 +268,16 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg007, TestSize.Level1)
  */
 HWTEST_F(MenuPatternTestNg, MenuPatternTestNg008, TestSize.Level1)
 {
+    MenuModelNG MneuModelInstance;
+    MenuItemModelNG MneuItemModelInstance;
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
 
-    MenuView::Create();
-    MenuView::SetFontSize(Dimension(25.0));
-    MenuView::SetFontColor(Color::RED);
-    MenuView::SetFontWeight(FontWeight::BOLD);
+    MneuModelInstance.Create();
+    MneuModelInstance.SetFontSize(Dimension(25.0));
+    MneuModelInstance.SetFontColor(Color::RED);
+    MneuModelInstance.SetFontWeight(FontWeight::BOLD);
 
     auto menuNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(menuNode, nullptr);
@@ -283,13 +289,13 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg008, TestSize.Level1)
     MenuItemProperties itemOption;
     itemOption.content = "content";
     itemOption.labelInfo = "label";
-    MenuItemView::Create(itemOption);
-    MenuItemView::SetFontSize(Dimension(35.0));
-    MenuItemView::SetFontColor(Color::BLUE);
-    MenuItemView::SetFontWeight(FontWeight::LIGHTER);
-    MenuItemView::SetLabelFontSize(Dimension(40.0));
-    MenuItemView::SetLabelFontColor(Color::GRAY);
-    MenuItemView::SetLabelFontWeight(FontWeight::LIGHTER);
+    MneuItemModelInstance.Create(itemOption);
+    MneuItemModelInstance.SetFontSize(Dimension(35.0));
+    MneuItemModelInstance.SetFontColor(Color::BLUE);
+    MneuItemModelInstance.SetFontWeight(FontWeight::LIGHTER);
+    MneuItemModelInstance.SetLabelFontSize(Dimension(40.0));
+    MneuItemModelInstance.SetLabelFontColor(Color::GRAY);
+    MneuItemModelInstance.SetLabelFontWeight(FontWeight::LIGHTER);
     auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(itemNode, nullptr);
     auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
@@ -335,14 +341,16 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg008, TestSize.Level1)
  */
 HWTEST_F(MenuPatternTestNg, MenuPatternTestNg009, TestSize.Level1)
 {
+    MenuModelNG MneuModelInstance;
+    MenuItemModelNG MneuItemModelInstance;
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
 
-    MenuView::Create();
-    MenuView::SetFontSize(Dimension(25.0));
-    MenuView::SetFontColor(Color::RED);
-    MenuView::SetFontWeight(FontWeight::BOLD);
+    MneuModelInstance.Create();
+    MneuModelInstance.SetFontSize(Dimension(25.0));
+    MneuModelInstance.SetFontColor(Color::RED);
+    MneuModelInstance.SetFontWeight(FontWeight::BOLD);
 
     auto menuNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(menuNode, nullptr);
@@ -361,7 +369,7 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg009, TestSize.Level1)
     MenuItemProperties itemOption;
     itemOption.content = "content";
     itemOption.labelInfo = "label";
-    MenuItemView::Create(itemOption);
+    MneuItemModelInstance.Create(itemOption);
     auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(itemNode, nullptr);
     auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
@@ -412,11 +420,13 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg009, TestSize.Level1)
  */
 HWTEST_F(MenuPatternTestNg, MenuPatternTestNg010, TestSize.Level1)
 {
+    MenuModelNG MneuModelInstance;
+    MenuItemModelNG MneuItemModelInstance;
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
 
-    MenuView::Create();
+    MneuModelInstance.Create();
     auto menuNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(menuNode, nullptr);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
@@ -431,7 +441,7 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg010, TestSize.Level1)
 
     MenuItemProperties itemOption;
     itemOption.content = "content";
-    MenuItemView::Create(itemOption);
+    MneuItemModelInstance.Create(itemOption);
     auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(itemNode, nullptr);
     auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
@@ -474,14 +484,16 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg010, TestSize.Level1)
  */
 HWTEST_F(MenuPatternTestNg, MenuPatternTestNg011, TestSize.Level1)
 {
+    MenuModelNG MneuModelInstance;
+    MenuItemModelNG MneuItemModelInstance;
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
 
-    MenuView::Create();
-    MenuView::SetFontSize(Dimension(25.0));
-    MenuView::SetFontColor(Color::RED);
-    MenuView::SetFontWeight(FontWeight::BOLD);
+    MneuModelInstance.Create();
+    MneuModelInstance.SetFontSize(Dimension(25.0));
+    MneuModelInstance.SetFontColor(Color::RED);
+    MneuModelInstance.SetFontWeight(FontWeight::BOLD);
     auto menuNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(menuNode, nullptr);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
@@ -491,7 +503,7 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg011, TestSize.Level1)
 
     MenuItemProperties itemOption;
     itemOption.content = "content";
-    MenuItemView::Create(itemOption);
+    MneuItemModelInstance.Create(itemOption);
     auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(itemNode, nullptr);
     auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
@@ -815,11 +827,12 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg017, TestSize.Level1)
  */
 HWTEST_F(MenuPatternTestNg, MenuPatternTestNg018, TestSize.Level1)
 {
+    MenuModelNG MneuModelInstance;
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
 
-    MenuView::Create();
+    MneuModelInstance.Create();
     auto menuNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(menuNode, nullptr);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
