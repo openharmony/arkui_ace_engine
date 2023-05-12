@@ -38,6 +38,10 @@ void SelectOverlayPaintMethod::DrawHandles(const std::shared_ptr<SelectOverlayIn
     LOGD("paint handles");
     if (info->isSingleHandle) {
         // Paint one handle.
+        if (info->firstHandle.isShow) {
+            PaintHandle(canvas, info->firstHandle.paintRect, false);
+            return;
+        }
         if (info->secondHandle.isShow) {
             PaintHandle(canvas, info->secondHandle.paintRect, false);
         }
