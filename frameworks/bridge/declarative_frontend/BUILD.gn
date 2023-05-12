@@ -300,6 +300,7 @@ template("declarative_js_engine") {
       "jsview/models/if_else_model_impl.cpp",
       "jsview/models/image_animator_model_impl.cpp",
       "jsview/models/image_model_impl.cpp",
+      "jsview/models/indexer_model_impl.cpp",
       "jsview/models/lazy_for_each_model_impl.cpp",
       "jsview/models/line_model_impl.cpp",
       "jsview/models/linear_split_model_impl.cpp",
