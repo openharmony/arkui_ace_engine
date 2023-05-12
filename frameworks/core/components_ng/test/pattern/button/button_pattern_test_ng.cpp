@@ -78,7 +78,7 @@ const SizeF CONTAINER_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 const SizeF BUTTON_ONLY_HAS_WIDTH_SIZE(BUTTON_ONLY_HAS_WIDTH_VALUE, BUTTON_ONLY_HAS_WIDTH_VALUE);
 const Dimension DEFAULT_HEIGTH = 40.0_vp;
 const uint32_t MAX_LINE_VALUE = 10;
-const float START_OPACITY = 1.0f;
+const float START_OPACITY = 0.0f;
 const float END_OPACITY = 0.1f;
 const int32_t DURATION = 100;
 } // namespace
@@ -1085,20 +1085,21 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest018, TestSize.Level1)
 
 /**
  * @tc.name: ButtonPatternTest019
- * @tc.desc: Test AnimateTouchEffectBoard with ToggleButtonPattern
+ * @tc.desc: Test AnimateTouchAndHover
  * @tc.type: FUNC
  */
 HWTEST_F(ButtonPatternTestNg, ButtonPatternTest019, TestSize.Level1)
 {
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        "toggle", stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<ToggleButtonPattern>(); });
+    TestProperty testProperty;
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
     ASSERT_NE(frameNode, nullptr);
-
-    auto buttonPattern = frameNode->GetPattern<ToggleButtonPattern>();
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
-    buttonPattern->AnimateTouchEffectBoard(START_OPACITY, END_OPACITY, DURATION, Curves::SHARP);
-    EXPECT_TRUE(buttonPattern->isOn_);
+    auto context = frameNode->GetRenderContext();
+    ASSERT_NE(context, nullptr);
+    buttonPattern->AnimateTouchAndHover(context, START_OPACITY, END_OPACITY, DURATION, Curves::FRICTION);
+    buttonPattern->AnimateTouchAndHover(context, END_OPACITY, START_OPACITY, DURATION, Curves::FRICTION);
+    EXPECT_EQ(buttonPattern->isHover_, false);
 }
 
 /**
