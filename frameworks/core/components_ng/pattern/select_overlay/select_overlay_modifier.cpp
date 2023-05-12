@@ -215,7 +215,14 @@ void SelectOverlayModifier::DrawbCircles(DrawingContext& drawingContext)
     canvas.Rotate(rotationAngle_->Get(), menuOptionOffset_->Get().GetX(), menuOptionOffset_->Get().GetY());
     RSBrush brush;
     brush.SetAntiAlias(true);
-    brush.SetColor(Color::WHITE.GetValue());
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
+    Color maskColor = Color::WHITE;
+    if (textOverlayTheme) {
+        maskColor = textOverlayTheme->GetMenuBackgroundColor();
+    }
+    brush.SetColor(maskColor.GetValue());
     canvas.AttachBrush(brush);
     OffsetF offset = OffsetF(menuOptionOffset_->Get().GetX() + MASK_OFFSET_X.ConvertToPx(),
         menuOptionOffset_->Get().GetY() + MASK_HEIGHT.ConvertToPx());

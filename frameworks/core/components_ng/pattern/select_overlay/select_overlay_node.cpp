@@ -295,6 +295,90 @@ RefPtr<FrameNode> SelectOverlayNode::CreateSelectOverlayNode(const std::shared_p
 
 void SelectOverlayNode::MoreOrBackAnimation(bool isMore)
 {
+    CHECK_NULL_VOID(!isDoingAnimation_);
+    if (isMore && !isExtensionMenu_) {
+        MoreAnimation();
+    } else if (!isMore && isExtensionMenu_) {
+        BackAnimation();
+    }
+}
+
+void SelectOverlayNode::MoreAnimation()
+{
+    auto extensionContext = extensionMenu_->GetRenderContext();
+    CHECK_NULL_VOID(extensionContext);
+    auto selectMenuInnerContext = selectMenuInner_->GetRenderContext();
+    CHECK_NULL_VOID(selectMenuInnerContext);
+
+    auto extensionProperty = extensionMenu_->GetLayoutProperty();
+    CHECK_NULL_VOID(extensionProperty);
+    auto selectProperty = selectMenu_->GetLayoutProperty();
+    CHECK_NULL_VOID(selectProperty);
+    auto selectMenuInnerProperty = selectMenuInner_->GetLayoutProperty();
+    CHECK_NULL_VOID(selectMenuInnerProperty);
+
+    auto pattern = GetPattern<SelectOverlayPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto modifier = pattern->GetOverlayModifier();
+    CHECK_NULL_VOID(modifier);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+
+    auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
+    CHECK_NULL_VOID(textOverlayTheme);
+
+    isDoingAnimation_ = true;
+    isExtensionMenu_ = true;
+
+    extensionProperty->UpdateVisibility(VisibleType::VISIBLE);
+    AnimationOption extensionOption;
+    extensionOption.SetDuration(ANIMATION_DURATION2);
+    extensionOption.SetCurve(Curves::FAST_OUT_SLOW_IN);
+    auto toolbarHeight = textOverlayTheme->GetMenuToolbarHeight();
+    auto frameSize = CalcSize(CalcLength(toolbarHeight.ConvertToPx()), CalcLength(toolbarHeight.ConvertToPx()));
+
+    AnimationUtils::Animate(extensionOption, [extensionContext, selectMenuInnerContext]() {
+        extensionContext->UpdateOpacity(1.0);
+        extensionContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
+        selectMenuInnerContext->UpdateOpacity(0.0);
+    });
+    modifier->SetOtherPointRadius(MIN_DIAMETER / 2.0f);
+    modifier->SetHeadPointRadius(MIN_ARROWHEAD_DIAMETER / 2.0f);
+    modifier->SetLineEndOffset(true);
+
+    FinishCallback callback = [selectMenuInnerProperty, extensionProperty, id = Container::CurrentId(),
+                                  weak = WeakClaim(this)]() {
+        ContainerScope scope(id);
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID_NOLOG(pipeline);
+        auto taskExecutor = pipeline->GetTaskExecutor();
+        CHECK_NULL_VOID_NOLOG(taskExecutor);
+        taskExecutor->PostTask(
+            [selectMenuInnerProperty, extensionProperty, id, weak]() {
+                ContainerScope scope(id);
+                selectMenuInnerProperty->UpdateVisibility(VisibleType::GONE);
+                extensionProperty->UpdateVisibility(VisibleType::VISIBLE);
+                auto selectOverlay = weak.Upgrade();
+                CHECK_NULL_VOID(selectOverlay);
+                selectOverlay->SetAnimationStatus(false);
+            },
+            TaskExecutor::TaskType::UI);
+    };
+    AnimationOption selectOption;
+    selectOption.SetDuration(ANIMATION_DURATION1);
+    selectOption.SetCurve(Curves::FRICTION);
+    pipeline->FlushUITasks();
+    AnimationUtils::OpenImplicitAnimation(selectOption, Curves::FRICTION, callback);
+    selectProperty->UpdateUserDefinedIdealSize(frameSize);
+    selectMenuInnerContext->UpdateTransformTranslate({ ANIMATION_TEXT_OFFSET.ConvertToPx(), 0.0f, 0.0f });
+    selectMenu_->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    pipeline->FlushUITasks();
+    AnimationUtils::CloseImplicitAnimation();
+}
+
+void SelectOverlayNode::BackAnimation()
+{
     auto selectContext = selectMenu_->GetRenderContext();
     CHECK_NULL_VOID(selectContext);
     auto extensionContext = extensionMenu_->GetRenderContext();
@@ -320,80 +404,58 @@ void SelectOverlayNode::MoreOrBackAnimation(bool isMore)
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(textOverlayTheme);
 
+    isDoingAnimation_ = true;
+    isExtensionMenu_ = false;
     auto meanuWidth = pattern->GetMenuWidth();
 
-    if (isMore) {
-        extensionProperty->UpdateVisibility(VisibleType::VISIBLE);
-        AnimationOption extensionOption;
-        extensionOption.SetDuration(ANIMATION_DURATION2);
-        extensionOption.SetCurve(Curves::FAST_OUT_SLOW_IN);
-        auto toolbarHeight = textOverlayTheme->GetMenuToolbarHeight();
-        auto frameSize = CalcSize(CalcLength(toolbarHeight.ConvertToPx()), CalcLength(toolbarHeight.ConvertToPx()));
+    selectMenuInnerProperty->UpdateVisibility(VisibleType::VISIBLE);
+    AnimationOption extensionOption;
+    extensionOption.SetDuration(ANIMATION_DURATION2);
+    extensionOption.SetCurve(Curves::FAST_OUT_SLOW_IN);
 
-        FinishCallback callback = [selectMenuInnerProperty, extensionProperty, weak = Claim(this)]() {
-            selectMenuInnerProperty->UpdateVisibility(VisibleType::INVISIBLE);
-            extensionProperty->UpdateVisibility(VisibleType::VISIBLE);
-        };
-        AnimationUtils::Animate(
-            extensionOption,
-            [extensionContext, selectMenuInnerContext]() {
-                extensionContext->UpdateOpacity(1.0);
-                extensionContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
-                selectMenuInnerContext->UpdateOpacity(0.0);
+    AnimationUtils::Animate(extensionOption, [extensionContext, selectMenuInnerContext]() {
+        extensionContext->UpdateOpacity(0.0);
+        extensionContext->UpdateTransformTranslate({ 0.0f, MORE_MENU_TRANSLATE.ConvertToPx(), 0.0f });
+        selectMenuInnerContext->UpdateOpacity(1.0);
+    });
+
+    modifier->SetOtherPointRadius(MAX_DIAMETER / 2.0f);
+    modifier->SetHeadPointRadius(MAX_DIAMETER / 2.0f);
+    modifier->SetLineEndOffset(false);
+
+    auto toolbarHeight = textOverlayTheme->GetMenuToolbarHeight();
+    auto frameSize = CalcSize(CalcLength(meanuWidth), CalcLength(toolbarHeight.ConvertToPx()));
+
+    FinishCallback callback = [selectMenuInnerProperty, extensionProperty, id = Container::CurrentId(),
+                                  weak = WeakClaim(this)]() {
+        ContainerScope scope(id);
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID_NOLOG(pipeline);
+        auto taskExecutor = pipeline->GetTaskExecutor();
+        CHECK_NULL_VOID_NOLOG(taskExecutor);
+        taskExecutor->PostTask(
+            [selectMenuInnerProperty, extensionProperty, id, weak]() {
+                ContainerScope scope(id);
+                selectMenuInnerProperty->UpdateVisibility(VisibleType::VISIBLE);
+                extensionProperty->UpdateVisibility(VisibleType::GONE);
+                auto selectOverlay = weak.Upgrade();
+                CHECK_NULL_VOID(selectOverlay);
+                selectOverlay->SetAnimationStatus(false);
             },
-            callback);
-        modifier->SetOtherPointRadius(MIN_DIAMETER / 2.0f);
-        modifier->SetHeadPointRadius(MIN_ARROWHEAD_DIAMETER / 2.0f);
-        modifier->SetLineEndOffset(true);
+            TaskExecutor::TaskType::UI);
+    };
 
-        AnimationOption selectOption;
-        selectOption.SetDuration(ANIMATION_DURATION1);
-        selectOption.SetCurve(Curves::FRICTION);
-        pipeline->FlushUITasks();
-        AnimationUtils::OpenImplicitAnimation(selectOption, Curves::FRICTION, nullptr);
-        selectProperty->UpdateUserDefinedIdealSize(frameSize);
-        selectMenuInnerContext->UpdateTransformTranslate({ ANIMATION_TEXT_OFFSET.ConvertToPx(), 0.0f, 0.0f });
-        selectMenu_->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-        pipeline->FlushUITasks();
-        AnimationUtils::CloseImplicitAnimation();
-
-    } else {
-        selectMenuInnerProperty->UpdateVisibility(VisibleType::VISIBLE);
-        AnimationOption extensionOption;
-        extensionOption.SetDuration(ANIMATION_DURATION2);
-        extensionOption.SetCurve(Curves::FAST_OUT_SLOW_IN);
-
-        FinishCallback callback = [extensionProperty, selectMenuInnerProperty, weak = Claim(this)]() {
-            selectMenuInnerProperty->UpdateVisibility(VisibleType::VISIBLE);
-            extensionProperty->UpdateVisibility(VisibleType::GONE);
-        };
-        AnimationUtils::Animate(
-            extensionOption,
-            [extensionContext, selectMenuInnerContext]() {
-                extensionContext->UpdateOpacity(0.0);
-                extensionContext->UpdateTransformTranslate({ 0.0f, MORE_MENU_TRANSLATE.ConvertToPx(), 0.0f });
-                selectMenuInnerContext->UpdateOpacity(1.0);
-            },
-            callback);
-        modifier->SetOtherPointRadius(MAX_DIAMETER / 2.0f);
-        modifier->SetHeadPointRadius(MAX_DIAMETER / 2.0f);
-        modifier->SetLineEndOffset(false);
-
-        auto toolbarHeight = textOverlayTheme->GetMenuToolbarHeight();
-        auto frameSize = CalcSize(CalcLength(meanuWidth), CalcLength(toolbarHeight.ConvertToPx()));
-
-        AnimationOption selectOption;
-        selectOption.SetDuration(ANIMATION_DURATION1);
-        selectOption.SetCurve(Curves::FRICTION);
-        pipeline->FlushUITasks();
-        AnimationUtils::OpenImplicitAnimation(selectOption, Curves::FRICTION, nullptr);
-        selectProperty->UpdateUserDefinedIdealSize(frameSize);
-        selectMenuInnerContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
-        selectContext->UpdateOffset(OffsetT<Dimension>(0.0_px, 0.0_px));
-        selectMenu_->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-        pipeline->FlushUITasks();
-        AnimationUtils::CloseImplicitAnimation();
-    }
+    AnimationOption selectOption;
+    selectOption.SetDuration(ANIMATION_DURATION1);
+    selectOption.SetCurve(Curves::FRICTION);
+    pipeline->FlushUITasks();
+    AnimationUtils::OpenImplicitAnimation(selectOption, Curves::FRICTION, callback);
+    selectProperty->UpdateUserDefinedIdealSize(frameSize);
+    selectMenuInnerContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
+    selectContext->UpdateOffset(OffsetT<Dimension>(0.0_px, 0.0_px));
+    selectMenu_->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    pipeline->FlushUITasks();
+    AnimationUtils::CloseImplicitAnimation();
 }
 
 void SelectOverlayNode::CreateExtensionToolBar(const std::vector<MenuOptionsParam>& menuOptionItems, int32_t index)
@@ -447,15 +509,12 @@ void SelectOverlayNode::CreateExtensionToolBar(const std::vector<MenuOptionsPara
     CHECK_NULL_VOID(props);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
+    auto offsetY = 0.0f;
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
-    CHECK_NULL_VOID(textOverlayTheme);
-    auto selectTheme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(selectTheme);
-    auto selectmargin = static_cast<float>(selectTheme->GetOutPadding().ConvertToPx());
-    selectmargin = 0.0f;
-    auto offsetY = textOverlayTheme->GetMenuToolbarHeight().ConvertToPx();
-    props->UpdateMenuOffset(
-        OffsetF(-selectmargin, offsetY + MORE_MENU_INTERVAL.ConvertToPx() - selectmargin) + GetPageOffset());
+    if (textOverlayTheme) {
+        offsetY = textOverlayTheme->GetMenuToolbarHeight().ConvertToPx();
+    }
+    props->UpdateMenuOffset(OffsetF(0.0f, offsetY + MORE_MENU_INTERVAL.ConvertToPx()) + GetPageOffset());
     context->UpdateBackShadow(ShadowConfig::NoneShadow);
     menu->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     ElementRegister::GetInstance()->AddUINode(menu);
