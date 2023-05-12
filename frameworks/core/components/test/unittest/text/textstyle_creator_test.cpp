@@ -55,7 +55,13 @@ constexpr double DIMENSION_ZERO = 0.0;
 constexpr double SHADOW_BLUR_RADIUS = 10.0;
 const std::vector<std::string> FONT_FAMILIES = { "normal", "sans-serif", "serif", "monospace" };
 const std::vector<Dimension> PREFER_FONT_SIZES { Dimension(20), Dimension(10), Dimension(5) };
-const std::unordered_map<std::string, int32_t> FONT_FEATURES { {"liga ", 0}, {"clig ", 0}, {"dlig ", 0}, {"hlig ", 0}, {"dlig ", 0}};
+const std::unordered_map<std::string, int32_t> FONT_FEATURES {
+    {"liga ", 0},
+    {"clig ", 0},
+    {"dlig ", 0},
+    {"hlig ", 0},
+    {"dlig ", 0}
+};
 const std::string JSON_TEXT_STR = "{                                    "
                                   "  \"className\": \"Text\",           "
                                   "  \"textStyle\":                     "
@@ -633,7 +639,38 @@ HWTEST_F(TextStyleCreatorTest, TextStyleCreator013, TestSize.Level1)
                                  "  \"color\": \"#FF00\""
                                  "}"
                                  "}";
+    /**
+     * @tc.steps: step2. Check textColor property matched.
+     * @tc.expected: step2. textColor property are matched.
+     */
+    RefPtr<TextComponent> text1 = CreateComponent(jsonText1);
+    EXPECT_TRUE(text1 != nullptr);
+    const auto& textStyle1 = text1->GetTextStyle();
+    EXPECT_EQ(textStyle1.GetTextColor(), Color::RED);
 
+    // defalut textColor black
+    RefPtr<TextComponent> text2 = CreateComponent(jsonText2);
+    EXPECT_TRUE(text2 != nullptr);
+    const auto& textStyle2 = text2->GetTextStyle();
+    EXPECT_EQ(textStyle2.GetTextColor(), Color::WHITE);
+
+    // #F00 -> #FFFF0000
+    RefPtr<TextComponent> text3 = CreateComponent(jsonText3);
+    EXPECT_TRUE(text3 != nullptr);
+    const auto& textStyle3 = text3->GetTextStyle();
+    EXPECT_EQ(textStyle3.GetTextColor(), Color::RED);
+}
+
+/**
+ * @tc.name: TextStyleCreator014
+ * @tc.desc: Test textStyle textColor property
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextStyleCreatorTest, TextStyleCreator014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the json string with textcolor property.
+     */
     const std::string jsonText4 = "{                               "
                                  "  \"className\": \"Text\",      "
                                  "  \"textStyle\":                "
@@ -664,23 +701,6 @@ HWTEST_F(TextStyleCreatorTest, TextStyleCreator013, TestSize.Level1)
      * @tc.steps: step2. Check textColor property matched.
      * @tc.expected: step2. textColor property are matched.
      */
-    RefPtr<TextComponent> text1 = CreateComponent(jsonText1);
-    EXPECT_TRUE(text1 != nullptr);
-    const auto& textStyle1 = text1->GetTextStyle();
-    EXPECT_EQ(textStyle1.GetTextColor(), Color::RED);
-
-    // defalut textColor black
-    RefPtr<TextComponent> text2 = CreateComponent(jsonText2);
-    EXPECT_TRUE(text2 != nullptr);
-    const auto& textStyle2 = text2->GetTextStyle();
-    EXPECT_EQ(textStyle2.GetTextColor(), Color::WHITE);
-
-    // #F00 -> #FFFF0000
-    RefPtr<TextComponent> text3 = CreateComponent(jsonText3);
-    EXPECT_TRUE(text3 != nullptr);
-    const auto& textStyle3 = text3->GetTextStyle();
-    EXPECT_EQ(textStyle3.GetTextColor(), Color::RED);
-
     // special value
     RefPtr<TextComponent> text4 = CreateComponent(jsonText4);
     EXPECT_TRUE(text4 != nullptr);
@@ -701,11 +721,11 @@ HWTEST_F(TextStyleCreatorTest, TextStyleCreator013, TestSize.Level1)
 }
 
 /**
- * @tc.name: TextStyleCreator014
+ * @tc.name: TextStyleCreator015
  * @tc.desc: Test textStyle fontFamilies property
  * @tc.type: FUNC
  */
-HWTEST_F(TextStyleCreatorTest, TextStyleCreator014, TestSize.Level1)
+HWTEST_F(TextStyleCreatorTest, TextStyleCreator015, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Construct the json string with fontFamilies property.
@@ -882,6 +902,31 @@ HWTEST_F(TextStyleCreatorTest, TextStyleCreator021, TestSize.Level1)
                                  "}"
                                  "}";
 
+    /**
+     * @tc.steps: step2. Check letterspacing properties matched.
+     * @tc.expected: step2. fontStyle property are matched.
+     */
+    RefPtr<TextComponent> text1 = CreateComponent(jsonText1);
+    EXPECT_TRUE(text1 != nullptr);
+    const auto& textStyle1 = text1->GetTextStyle();
+    EXPECT_EQ(textStyle1.GetLetterSpacing(), Dimension(50.0, DimensionUnit::PERCENT));
+
+    RefPtr<TextComponent> text2 = CreateComponent(jsonText2);
+    EXPECT_TRUE(text2 != nullptr);
+    const auto& textStyle2 = text2->GetTextStyle();
+    EXPECT_EQ(textStyle2.GetLetterSpacing(), Dimension(10, DimensionUnit::PX));
+}
+
+/**
+ * @tc.name: TextStyleCreator022
+ * @tc.desc: Test textStyle letterSpacing property initialized by percent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextStyleCreatorTest, TextStyleCreator022, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the json string with letterSpacing property.
+     */
     const std::string jsonText3 = "{                              "
                                  "  \"className\": \"Text\",      "
                                  "  \"textStyle\":                "
@@ -913,16 +958,6 @@ HWTEST_F(TextStyleCreatorTest, TextStyleCreator021, TestSize.Level1)
      * @tc.steps: step2. Check letterspacing properties matched.
      * @tc.expected: step2. fontStyle property are matched.
      */
-    RefPtr<TextComponent> text1 = CreateComponent(jsonText1);
-    EXPECT_TRUE(text1 != nullptr);
-    const auto& textStyle1 = text1->GetTextStyle();
-    EXPECT_EQ(textStyle1.GetLetterSpacing(), Dimension(50.0, DimensionUnit::PERCENT));
-
-    RefPtr<TextComponent> text2 = CreateComponent(jsonText2);
-    EXPECT_TRUE(text2 != nullptr);
-    const auto& textStyle2 = text2->GetTextStyle();
-    EXPECT_EQ(textStyle2.GetLetterSpacing(), Dimension(10, DimensionUnit::PX));
-
     RefPtr<TextComponent> text3 = CreateComponent(jsonText3);
     EXPECT_TRUE(text3 != nullptr);
     const auto& textStyle3 = text3->GetTextStyle();
@@ -937,15 +972,14 @@ HWTEST_F(TextStyleCreatorTest, TextStyleCreator021, TestSize.Level1)
     EXPECT_TRUE(text5 != nullptr);
     const auto& textStyle5 = text5->GetTextStyle();
     EXPECT_EQ(textStyle5.GetLetterSpacing(), Dimension(10, DimensionUnit::LPX));
-
 }
 
 /**
- * @tc.name: TextStyleCreator022
+ * @tc.name: TextStyleCreator023
  * @tc.desc: Test textStyle lineHeight property initialized by normal
  * @tc.type: FUNC
  */
-HWTEST_F(TextStyleCreatorTest, TextStyleCreator022, TestSize.Level1)
+HWTEST_F(TextStyleCreatorTest, TextStyleCreator023, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Construct the json string with lineHeight property.
@@ -1136,7 +1170,36 @@ HWTEST_F(TextStyleCreatorTest, TextStyleCreator027, TestSize.Level1)
                                  "  \"textAlign\": \"center\"      "
                                  "}"
                                  "}";
+    /**
+     * @tc.steps: step2. Check textAlign properties matched.
+     * @tc.expected: step2. textAlign property are matched.
+     */
+    RefPtr<TextComponent> text1 = CreateComponent(jsonText1);
+    EXPECT_TRUE(text1 != nullptr);
+    const auto& textStyle1 = text1->GetTextStyle();
+    EXPECT_EQ(textStyle1.GetTextAlign(), TextAlign::RIGHT);
 
+    RefPtr<TextComponent> text2 = CreateComponent(jsonText2);
+    EXPECT_TRUE(text2 != nullptr);
+    const auto& textStyle2 = text2->GetTextStyle();
+    EXPECT_EQ(textStyle2.GetTextAlign(), TextAlign::LEFT);
+
+    RefPtr<TextComponent> text3 = CreateComponent(jsonText3);
+    EXPECT_TRUE(text3 != nullptr);
+    const auto& textStyle3 = text3->GetTextStyle();
+    EXPECT_EQ(textStyle3.GetTextAlign(), TextAlign::CENTER);
+}
+
+/**
+ * @tc.name: TextStyleCreator028
+ * @tc.desc: Test textStyle textAlign property initialized by normal
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextStyleCreatorTest, TextStyleCreator028, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the json string with textAlign property.
+     */
     const std::string jsonText4 = "{                               "
                                  "  \"className\": \"Text\",      "
                                  "  \"textStyle\":                "
@@ -1158,21 +1221,6 @@ HWTEST_F(TextStyleCreatorTest, TextStyleCreator027, TestSize.Level1)
      * @tc.steps: step2. Check textAlign properties matched.
      * @tc.expected: step2. textAlign property are matched.
      */
-    RefPtr<TextComponent> text1 = CreateComponent(jsonText1);
-    EXPECT_TRUE(text1 != nullptr);
-    const auto& textStyle1 = text1->GetTextStyle();
-    EXPECT_EQ(textStyle1.GetTextAlign(), TextAlign::RIGHT);
-
-    RefPtr<TextComponent> text2 = CreateComponent(jsonText2);
-    EXPECT_TRUE(text2 != nullptr);
-    const auto& textStyle2 = text2->GetTextStyle();
-    EXPECT_EQ(textStyle2.GetTextAlign(), TextAlign::LEFT);
-
-    RefPtr<TextComponent> text3 = CreateComponent(jsonText3);
-    EXPECT_TRUE(text3 != nullptr);
-    const auto& textStyle3 = text3->GetTextStyle();
-    EXPECT_EQ(textStyle3.GetTextAlign(), TextAlign::CENTER);
-
     RefPtr<TextComponent> text4 = CreateComponent(jsonText4);
     EXPECT_TRUE(text4 != nullptr);
     const auto& textStyle4 = text4->GetTextStyle();
@@ -1184,12 +1232,13 @@ HWTEST_F(TextStyleCreatorTest, TextStyleCreator027, TestSize.Level1)
     EXPECT_EQ(textStyle5.GetTextAlign(), TextAlign::END);
 }
 
+
 /**
- * @tc.name: TextStyleCreator028
+ * @tc.name: TextStyleCreator029
  * @tc.desc: Test textStyle textDecoration/textDecorationColor property initialized by overline
  * @tc.type: FUNC
  */
-HWTEST_F(TextStyleCreatorTest, TextStyleCreator028, TestSize.Level1)
+HWTEST_F(TextStyleCreatorTest, TextStyleCreator029, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Construct the json string with textDecoration/textDecorationColor  property.
@@ -1215,11 +1264,11 @@ HWTEST_F(TextStyleCreatorTest, TextStyleCreator028, TestSize.Level1)
 }
 
 /**
- * @tc.name: TextStyleCreator029
+ * @tc.name: TextStyleCreator030
  * @tc.desc: Test textStyle textIndent property
  * @tc.type: FUNC
  */
-HWTEST_F(TextStyleCreatorTest, TextStyleCreator029, TestSize.Level1)
+HWTEST_F(TextStyleCreatorTest, TextStyleCreator030, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Construct the json string with shadow property.
@@ -1258,11 +1307,11 @@ HWTEST_F(TextStyleCreatorTest, TextStyleCreator029, TestSize.Level1)
 }
 
 /**
- * @tc.name: TextStyleCreator030
+ * @tc.name: TextStyleCreator031
  * @tc.desc: Test textStyle textOverflow property
  * @tc.type: FUNC
  */
-HWTEST_F(TextStyleCreatorTest, TextStyleCreator030, TestSize.Level1)
+HWTEST_F(TextStyleCreatorTest, TextStyleCreator031, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Construct the json string with textOverflow property.
@@ -1301,11 +1350,11 @@ HWTEST_F(TextStyleCreatorTest, TextStyleCreator030, TestSize.Level1)
 }
 
 /**
- * @tc.name: TextStyleCreator031
+ * @tc.name: TextStyleCreator032
  * @tc.desc: Test textStyle textValign property
  * @tc.type: FUNC
  */
-HWTEST_F(TextStyleCreatorTest, TextStyleCreator031, TestSize.Level1)
+HWTEST_F(TextStyleCreatorTest, TextStyleCreator032, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Construct the json string with textValign property.
@@ -1344,11 +1393,11 @@ HWTEST_F(TextStyleCreatorTest, TextStyleCreator031, TestSize.Level1)
 }
 
 /**
- * @tc.name: TextStyleCreator032
+ * @tc.name: TextStyleCreator033
  * @tc.desc: Test textStyle whiteSpace property
  * @tc.type: FUNC
  */
-HWTEST_F(TextStyleCreatorTest, TextStyleCreator032, TestSize.Level1)
+HWTEST_F(TextStyleCreatorTest, TextStyleCreator033, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Construct the json string with whiteSpace property.
@@ -1386,11 +1435,11 @@ HWTEST_F(TextStyleCreatorTest, TextStyleCreator032, TestSize.Level1)
 }
 
 /**
- * @tc.name: TextStyleCreator033
+ * @tc.name: TextStyleCreator034
  * @tc.desc: Test textStyle wordBreak property
  * @tc.type: FUNC
  */
-HWTEST_F(TextStyleCreatorTest, TextStyleCreator033, TestSize.Level1)
+HWTEST_F(TextStyleCreatorTest, TextStyleCreator034, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Construct the json string with wordBreak property.
@@ -1429,11 +1478,11 @@ HWTEST_F(TextStyleCreatorTest, TextStyleCreator033, TestSize.Level1)
 }
 
 /**
- * @tc.name: TextStyleCreator034
+ * @tc.name: TextStyleCreator035
  * @tc.desc: Test textStyle wordSpacing property
  * @tc.type: FUNC
  */
-HWTEST_F(TextStyleCreatorTest, TextStyleCreator034, TestSize.Level1)
+HWTEST_F(TextStyleCreatorTest, TextStyleCreator035, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Construct the json string with wordSpacing property.
@@ -1470,11 +1519,11 @@ HWTEST_F(TextStyleCreatorTest, TextStyleCreator034, TestSize.Level1)
 }
 
 /**
- * @tc.name: TextStyleCreator035
+ * @tc.name: TextStyleCreator036
  * @tc.desc: Test textStyle fontSizeStep property
  * @tc.type: FUNC
  */
-HWTEST_F(TextStyleCreatorTest, TextStyleCreator035, TestSize.Level1)
+HWTEST_F(TextStyleCreatorTest, TextStyleCreator036, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Construct the json string with fontSizeStep property.
@@ -1512,11 +1561,11 @@ HWTEST_F(TextStyleCreatorTest, TextStyleCreator035, TestSize.Level1)
 }
 
 /**
- * @tc.name: TextStyleCreator036
+ * @tc.name: TextStyleCreator037
  * @tc.desc: Test textStyle textCase property
  * @tc.type: FUNC
  */
-HWTEST_F(TextStyleCreatorTest, TextStyleCreator036, TestSize.Level1)
+HWTEST_F(TextStyleCreatorTest, TextStyleCreator037, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Construct the json string with fontSizeStep property.

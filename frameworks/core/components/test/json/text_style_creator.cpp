@@ -49,7 +49,13 @@ const char TEXT_WORDBREAK[] = "wordBreak";
 const char TEXT_ADAPT_FONT_SIZE_STEP[] = "fontSizeStep";
 const char TEXT_CASE[] = "textCase";
 const std::vector<Dimension> PREFER_FONT_SIZES { Dimension(5.0), Dimension(10.0), Dimension(20.0) };
-const std::unordered_map<std::string, int32_t> FONT_FEATURES { {"liga ", 0}, {"clig ", 0}, {"dlig ", 0}, {"hlig ", 0}, {"dlig ", 0}};
+const std::unordered_map<std::string, int32_t> FONT_FEATURES {
+    {"liga ", 0},
+    {"clig ", 0},
+    {"dlig ", 0},
+    {"hlig ", 0},
+    {"dlig ", 0}
+};
 
 const std::map<std::string, DimensionUnit> dimensionUnitMap {
     {"px", DimensionUnit::PX},
@@ -137,7 +143,7 @@ TextStyle TextStyleCreator::CreateFromJson(const JsonValue& json)
         auto val =  std::strtof(letterSpacing.c_str(), &pUnit);
         const std::string unit = pUnit;
         auto iter = dimensionUnitMap.find(unit);
-        if ( iter != dimensionUnitMap.end()) {
+        if (iter != dimensionUnitMap.end()) {
             textStyle.SetLetterSpacing(Dimension(val, iter->second));
         }
     }
@@ -180,16 +186,20 @@ TextStyle TextStyleCreator::CreateFromJson(const JsonValue& json)
     }
     if (json.Contains(TEXT_INDENT) && json.GetValue(TEXT_INDENT)->IsString()) {
         TextDeclaration textIndentDeclaration;
-        textStyle.SetTextIndent(textIndentDeclaration.ParseDimension(json.GetValue(TEXT_INDENT)->GetString()));
+        auto textIndent = json.GetValue(TEXT_INDENT)->GetString();
+        textStyle.SetTextIndent(textIndentDeclaration.ParseDimension(textIndent));
     }
     if (json.Contains(TEXT_OVERFLOW) && json.GetValue(TEXT_OVERFLOW)->IsString()) {
-        textStyle.SetTextOverflow(Framework::ConvertStrToTextOverflow(json.GetValue(TEXT_OVERFLOW)->GetString()));
+        auto textOverflow = json.GetValue(TEXT_OVERFLOW)->GetString();
+        textStyle.SetTextOverflow(Framework::ConvertStrToTextOverflow(textOverflow));
     }
     if (json.Contains(TEXT_VALIGN) && json.GetValue(TEXT_VALIGN)->IsString()) {
-        textStyle.SetTextVerticalAlign(Framework::ConvertStrToTextVerticalAlign(json.GetValue(TEXT_VALIGN)->GetString()));
+        auto textAlign = json.GetValue(TEXT_VALIGN)->GetString();
+        textStyle.SetTextVerticalAlign(Framework::ConvertStrToTextVerticalAlign(textAlign));
     }
     if (json.Contains(TEXT_WHITESPACE) && json.GetValue(TEXT_WHITESPACE)->IsString()) {
-        textStyle.SetWhiteSpace(Framework::ConvertStrToWhiteSpace(json.GetValue(TEXT_WHITESPACE)->GetString()));
+        auto whiteSpace = json.GetValue(TEXT_WHITESPACE)->GetString();
+        textStyle.SetWhiteSpace(Framework::ConvertStrToWhiteSpace(whiteSpace));
     }
 
     if (json.Contains(TEXT_WORDBREAK) && json.GetValue(TEXT_WORDBREAK)->IsString()) {
@@ -201,7 +211,8 @@ TextStyle TextStyleCreator::CreateFromJson(const JsonValue& json)
     }
     if (json.Contains(TEXT_ADAPT_FONT_SIZE_STEP) && json.GetValue(TEXT_ADAPT_FONT_SIZE_STEP)->IsString()) {
         TextDeclaration wordspacing;
-        textStyle.SetAdaptFontSizeStep(wordspacing.ParseDimension(json.GetValue(TEXT_ADAPT_FONT_SIZE_STEP)->GetString()));
+        auto fontSizeStep = json.GetValue(TEXT_ADAPT_FONT_SIZE_STEP)->GetString();
+        textStyle.SetAdaptFontSizeStep(wordspacing.ParseDimension(fontSizeStep));
     }
     if (json.Contains(TEXT_CASE) && json.GetValue(TEXT_CASE)->IsNumber()) {
         auto index = json.GetValue(TEXT_CASE)->GetUInt();
