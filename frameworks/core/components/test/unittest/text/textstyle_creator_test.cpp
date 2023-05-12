@@ -1040,7 +1040,7 @@ HWTEST_F(TextStyleCreatorTest, TextStyleCreator025, TestSize.Level1)
                                  "  \"textStyle\":                "
                                  "{                               "
                                  "  \"className\": \"TextStyle\", "
-				                 "  \"adaptMaxFontSize\": \"100px\", "
+                                 "  \"adaptMaxFontSize\": \"100px\", "
                                  "  \"adaptMinFontSize\": \"10px \""
                                  "}"
                                  "}";
@@ -1199,8 +1199,8 @@ HWTEST_F(TextStyleCreatorTest, TextStyleCreator028, TestSize.Level1)
                                  "  \"textStyle\":                "
                                  "{                               "
                                  "  \"className\": \"TextStyle\", "
-				                 "  \"textDecoration\": 2,        "
-				                 "  \"textDecorationColor\": \"#FF0000\" "
+                                 "  \"textDecoration\": 2,        "
+                                 "  \"textDecorationColor\": \"#FF0000\" "
                                  "}"
                                  "}";
     /**
@@ -1229,7 +1229,7 @@ HWTEST_F(TextStyleCreatorTest, TextStyleCreator029, TestSize.Level1)
                                  "  \"textStyle\":                "
                                  "{                               "
                                  "  \"className\": \"TextStyle\", "
-				                 "  \"textIndent\": \"10px\"      "
+                                 "  \"textIndent\": \"10px\"      "
                                  "}"
                                  "}";
 
@@ -1239,7 +1239,7 @@ HWTEST_F(TextStyleCreatorTest, TextStyleCreator029, TestSize.Level1)
                                  "  \"textStyle\":                "
                                  "{                               "
                                  "  \"className\": \"TextStyle\", "
-				                 "  \"textIndent\": \"xpx\"      "
+                                 "  \"textIndent\": \"xpx\"      "
                                  "}"
                                  "}";
     /**
@@ -1272,7 +1272,7 @@ HWTEST_F(TextStyleCreatorTest, TextStyleCreator030, TestSize.Level1)
                                  "  \"textStyle\":                "
                                  "{                               "
                                  "  \"className\": \"TextStyle\", "
-				                 "  \"textOverflow\": \"ellipsis\""
+                                 "  \"textOverflow\": \"ellipsis\""
                                  "}"
                                  "}";
 
@@ -1282,7 +1282,7 @@ HWTEST_F(TextStyleCreatorTest, TextStyleCreator030, TestSize.Level1)
                                  "  \"textStyle\":                "
                                  "{                               "
                                  "  \"className\": \"TextStyle\", "
-				                 "  \"textOverflow\": \"abc\""
+                                 "  \"textOverflow\": \"abc\""
                                  "}"
                                  "}";
     /**
@@ -1315,7 +1315,7 @@ HWTEST_F(TextStyleCreatorTest, TextStyleCreator031, TestSize.Level1)
                                  "  \"textStyle\":                "
                                  "{                               "
                                  "  \"className\": \"TextStyle\", "
-				                 "  \"textValign\": \"bottom\"    "
+                                 "  \"textValign\": \"bottom\"    "
                                  "}"
                                  "}";
 
@@ -1358,7 +1358,7 @@ HWTEST_F(TextStyleCreatorTest, TextStyleCreator032, TestSize.Level1)
                                  "  \"textStyle\":                "
                                  "{                               "
                                  "  \"className\": \"TextStyle\", "
-				                 "  \"whiteSpace\": \"nowrap\"    "
+                                 "  \"whiteSpace\": \"nowrap\"    "
                                  "}"
                                  "}";
     // abnormal whitespace
@@ -1367,7 +1367,7 @@ HWTEST_F(TextStyleCreatorTest, TextStyleCreator032, TestSize.Level1)
                                  "  \"textStyle\":                "
                                  "{                               "
                                  "  \"className\": \"TextStyle\", "
-				                 "  \"whiteSpace\": \"abc\"       "
+                                 "  \"whiteSpace\": \"abc\"       "
                                  "}"
                                  "}";
     /**
@@ -1400,7 +1400,7 @@ HWTEST_F(TextStyleCreatorTest, TextStyleCreator033, TestSize.Level1)
                                  "  \"textStyle\":                "
                                  "{                               "
                                  "  \"className\": \"TextStyle\", "
-				                 "  \"wordBreak\": \"break-all\"  "
+                                 "  \"wordBreak\": \"break-all\"  "
                                  "}"
                                  "}";
 
@@ -1443,7 +1443,7 @@ HWTEST_F(TextStyleCreatorTest, TextStyleCreator034, TestSize.Level1)
                                  "  \"textStyle\":                "
                                  "{                               "
                                  "  \"className\": \"TextStyle\", "
-				                 "  \"wordSpacing\": \"10px\"     "
+                                 "  \"wordSpacing\": \"10px\"     "
                                  "}"
                                  "}";
     const std::string jsonText2 = "{                               "
@@ -1451,7 +1451,7 @@ HWTEST_F(TextStyleCreatorTest, TextStyleCreator034, TestSize.Level1)
                                  "  \"textStyle\":                "
                                  "{                               "
                                  "  \"className\": \"TextStyle\", "
-				                 "  \"wordSpacing\": \"normal\"   "
+                                 "  \"wordSpacing\": \"normal\"   "
                                  "}"
                                  "}";
     /**
@@ -1484,7 +1484,7 @@ HWTEST_F(TextStyleCreatorTest, TextStyleCreator035, TestSize.Level1)
                                  "  \"textStyle\":                "
                                  "{                               "
                                  "  \"className\": \"TextStyle\", "
-				                 "  \"fontSizeStep\": \"10px\"    "
+                                 "  \"fontSizeStep\": \"10px\"    "
                                  "}"
                                  "}";
     // abnomal fontSizeStep
@@ -1493,7 +1493,7 @@ HWTEST_F(TextStyleCreatorTest, TextStyleCreator035, TestSize.Level1)
                                  "  \"textStyle\":                "
                                  "{                               "
                                  "  \"className\": \"TextStyle\", "
-				                 "  \"fontSizeStep\": \"abc\"    "
+                                 "  \"fontSizeStep\": \"abc\"    "
                                  "}"
                                  "}";
     /**
@@ -1526,7 +1526,7 @@ HWTEST_F(TextStyleCreatorTest, TextStyleCreator036, TestSize.Level1)
                                  "  \"textStyle\":                "
                                  "{                               "
                                  "  \"className\": \"TextStyle\", "
-				                 "  \"textCase\": 1              "
+                                 "  \"textCase\": 1              "
                                  "}"
                                  "}";
     // abnomal textcase
@@ -1535,7 +1535,7 @@ HWTEST_F(TextStyleCreatorTest, TextStyleCreator036, TestSize.Level1)
                                  "  \"textStyle\":                "
                                  "{                               "
                                  "  \"className\": \"TextStyle\", "
-				                 "  \"textCase\": 4               "
+                                 "  \"textCase\": 4               "
                                  "}"
                                  "}";
     /**
