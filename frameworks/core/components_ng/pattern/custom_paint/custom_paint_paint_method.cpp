@@ -1645,7 +1645,7 @@ std::optional<double> CustomPaintPaintMethod::CalcTextScale(double maxIntrinsicW
 TransformParam CustomPaintPaintMethod::GetTransform() const
 {
     TransformParam param;
-    if(skCanvas_.get() != nullptr) {
+    if (skCanvas_.get() != nullptr) {
         SkMatrix matrix = skCanvas_->getTotalMatrix();
         param.scaleX = matrix.getScaleX();
         param.scaleY = matrix.getScaleY();
