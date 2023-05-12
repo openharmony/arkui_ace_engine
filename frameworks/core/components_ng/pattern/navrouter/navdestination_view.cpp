@@ -47,7 +47,6 @@ void NavDestinationView::Create()
         V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
     CHECK_NULL_VOID(navDestinationPattern);
-    navDestinationPattern->SetName(std::to_string(nodeId));
     
     // titleBar node
     if (!navDestinationNode->GetTitleBarNode()) {
@@ -119,7 +118,6 @@ void NavDestinationView::Create(std::function<void()>&& deepRenderFunc)
         });
     auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
     CHECK_NULL_VOID(navDestinationPattern);
-    navDestinationPattern->SetName(std::to_string(nodeId));
     // titleBar node
     if (!navDestinationNode->GetTitleBarNode()) {
         int32_t titleBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
