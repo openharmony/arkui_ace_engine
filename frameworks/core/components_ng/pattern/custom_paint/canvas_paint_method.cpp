@@ -641,8 +641,8 @@ void CanvasPaintMethod::SetTransform(const TransformParam& param)
     CHECK_NULL_VOID(context);
     double viewScale = context->GetViewScale();
     SkMatrix skMatrix;
-    skMatrix.setAll(param.scaleX * viewScale, param.skewY * viewScale, param.translateX * viewScale,
-        param.skewX * viewScale, param.scaleY * viewScale, param.translateY * viewScale, 0, 0, 1);
+    skMatrix.setAll(param.scaleX * viewScale, param.skewX * viewScale, param.translateX * viewScale,
+        param.skewY * viewScale, param.scaleY * viewScale, param.translateY * viewScale, 0, 0, 1);
     skCanvas_->setMatrix(skMatrix);
 }
 
