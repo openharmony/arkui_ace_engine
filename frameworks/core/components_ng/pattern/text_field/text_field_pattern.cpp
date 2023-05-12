@@ -971,8 +971,7 @@ void TextFieldPattern::HandleExtendAction(int32_t action)
     LOGI("HandleExtendAction %{public}d", action);
     switch (action) {
         case ACTION_SELECT_ALL: {
-            auto end = GetEditingValue().GetWideText().length();
-            UpdateSelection(0, static_cast<int32_t>(end));
+            HandleOnSelectAll();
             break;
         }
         case ACTION_CUT: {
