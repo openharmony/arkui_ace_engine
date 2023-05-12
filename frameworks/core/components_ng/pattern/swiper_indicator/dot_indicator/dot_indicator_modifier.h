@@ -23,6 +23,11 @@
 #include "core/components_ng/render/drawing_prop_convertor.h"
 
 namespace OHOS::Ace::NG {
+enum class TouchBottomType {
+    NONE = 0,
+    START,
+    END,
+};
 class DotIndicatorModifier : public ContentModifier {
     DECLARE_ACE_TYPE(DotIndicatorModifier, ContentModifier);
 public:
@@ -118,7 +123,8 @@ public:
     void UpdateLongPointRightCenterX(float longPointRightCenterX, bool isAnimation);
 
     // Touch bottom animation
-    void UpdateTouchBottomAnimation(bool isTouchBottom, const LinearVector<float>& vectorBlackPointCenterX);
+    void UpdateTouchBottomAnimation(TouchBottomType touchBottomType, const LinearVector<float>& vectorBlackPointCenterX,
+        const std::pair<float, float>& longPointCenterX);
 
     void SetAxis(Axis axis)
     {
@@ -275,6 +281,7 @@ private:
     float itemHeight_ = 0.0f;
     float selectedItemWidth_ = 0.0f;
     float selectedItemHeight_ = 0.0f;
+    TouchBottomType touchBottomType_ = TouchBottomType::NONE;
     ACE_DISALLOW_COPY_AND_MOVE(DotIndicatorModifier);
 };
 } // namespace OHOS::Ace::NG
