@@ -327,7 +327,11 @@ void OptionPattern::SetFontColor(const Color& color)
     CHECK_NULL_VOID(props);
     text_->MarkModifyDone();
     props->UpdateTextColor(color);
-    text_->GetRenderContext()->UpdateForegroundColor(color);
+    auto context = text_->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    context->UpdateForegroundColor(color);
+    context->UpdateForegroundColorFlag(false);
+    context->ResetForegroundColorStrategy();
 }
 
 std::string OptionPattern::InspectorGetFont()

@@ -882,7 +882,7 @@ bool OverlayManager::RemoveModalInOverlay()
         auto modalTransition = topModalNode->GetPattern<ModalPresentationPattern>()->GetType();
         if (builder->GetRenderContext()->HasTransition()) {
             topModalNode->Clean();
-            topModalNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            topModalNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
         }
         if (modalTransition == ModalTransition::DEFAULT) {
             PlayDefaultModalTransition(topModalNode, false);
@@ -890,7 +890,7 @@ bool OverlayManager::RemoveModalInOverlay()
             PlayAlphaModalTransition(topModalNode, false);
         } else {
             rootNode->RemoveChild(topModalNode);
-            rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
         }
     } else if (topModalNode->GetTag() == "SheetPage") {
         topModalNode->GetPattern<SheetPresentationPattern>()->FireCallback("false");
@@ -898,7 +898,7 @@ bool OverlayManager::RemoveModalInOverlay()
         CHECK_NULL_RETURN(topModalNode, false);
         if (builder->GetRenderContext()->HasTransition()) {
             topModalNode->Clean();
-            topModalNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            topModalNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
         }
         PlaySheetTransition(topModalNode, false);
     }

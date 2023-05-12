@@ -305,6 +305,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Opacity, double);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ForegroundColor, Color);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ForegroundColorStrategy, ForegroundColorStrategy);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ForegroundColorFlag, bool);
 
     // Graphics
     ACE_DEFINE_PROPERTY_GROUP(Graphics, GraphicsProperty);

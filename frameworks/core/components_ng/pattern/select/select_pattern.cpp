@@ -429,7 +429,10 @@ void SelectPattern::SetFontColor(const Color& color)
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
     props->UpdateTextColor(color);
-    text_->GetRenderContext()->UpdateForegroundColor(color);
+    auto context = text_->GetRenderContext();
+    context->UpdateForegroundColor(color);
+    context->UpdateForegroundColorFlag(false);
+    context->ResetForegroundColorStrategy();
 }
 
 void SelectPattern::SetOptionBgColor(const Color& color)
