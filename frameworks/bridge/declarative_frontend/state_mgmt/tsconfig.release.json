@@ -44,6 +44,7 @@
     "src/lib/full_update/fu_view.ts",
 
     // partial_update specifc
+    "src/lib/partial_update/pu_types_events.ts",
     "src/lib/partial_update/pu_viewstack_processor.d.ts",
     "src/lib/partial_update/pu_foreach.d.ts",
     "src/lib/partial_update/pu_view_native.d.ts",
@@ -65,7 +66,7 @@
   ],
   "compilerOptions": {
     "module": "none",
-    "target": "ES6",
+    "target": "ES2016",
     "outDir": "./distRelease/",
     "outFile": "./distRelease/stateMgmt.js",
     "rootDir": "./src/",
@@ -73,7 +74,7 @@
     "noEmitOnError": true,
     "experimentalDecorators": true,
     "lib": [
-      "ES6"
+      "ES2016"
     ],
   }
 }

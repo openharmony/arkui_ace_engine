@@ -49,6 +49,7 @@
     "src/lib/full_update/fu_view.ts",
 
     // partial update specific 
+    "src/lib/partial_update/pu_types_events.ts",
     "src/lib/partial_update/pu_observed_property_abstract.ts",
     "src/lib/partial_update/pu_observed_property_object_abstract.ts",
     "src/lib/partial_update/pu_observed_property_simple_abstract.ts",
@@ -81,13 +82,13 @@
   ],
   "compilerOptions": {
     "module": "none",
-    "target": "ES6",
+    "target": "ES2016",
     "outDir": "./distTest/",
     "outFile": "./distTest/stateMgmt_test.js",
     "rootDir": "./src/",
     "experimentalDecorators": true,
     "lib": [
-      "ES6"
+      "ES2016"
     ],
   }
 }
