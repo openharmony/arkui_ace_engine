@@ -30,7 +30,6 @@
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
-#include "core/components_ng/pattern/button/button_view.h"
 #define private public
 #define protected public
 #include "core/components_ng/pattern/list/list_item_group_layout_algorithm.h"
@@ -191,7 +190,6 @@ void ListTestNg::CreateListItem(int32_t itemCount, Axis Direction, bool focusabl
             SetHeight(FILL_LENGTH);
         }
         if (focusable) {
-            ButtonView::Create("Button");
             ViewStackProcessor::GetInstance()->Pop();
         }
         ViewStackProcessor::GetInstance()->Pop();
