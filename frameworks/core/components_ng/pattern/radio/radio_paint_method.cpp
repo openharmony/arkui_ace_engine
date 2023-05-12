@@ -12,25 +12,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "core/components_ng/pattern/radio/radio_paint_method.h"
+
 #include "base/geometry/ng/offset_t.h"
+#include "base/geometry/ng/point_t.h"
 #include "base/utils/utils.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/theme/theme_manager.h"
 #include "core/components_ng/pattern/radio/radio_modifier.h"
-#include "core/components_ng/render/animation_utils.h"
+#include "core/components_ng/pattern/radio/radio_paint_property.h"
+#include "core/components_ng/pattern/radio/radio_pattern.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
-#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 constexpr uint8_t ENABLED_ALPHA = 255;
 constexpr uint8_t DISABLED_ALPHA = 102;
 constexpr float CALC_RADIUS = 2.0f;
-constexpr float DEFAULT_POINT_SCALE = 0.5f;
-constexpr float DEFAULT_TOTAL_SCALE = 1.0f;
-constexpr float DEFAULT_SHRINK_SCALE = 0.9f;
-constexpr int32_t DEFAULT_RADIO_ANIMATION_DURATION = 300;
 } // namespace
 
 RadioModifier::RadioModifier()
@@ -47,15 +47,14 @@ RadioModifier::RadioModifier()
 
     inactiveColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(radioTheme->GetInactiveColor()));
     AttachProperty(inactiveColor_);
-    isOnAnimationFlag_ = AceType::MakeRefPtr<PropertyBool>(false);
     enabled_ = AceType::MakeRefPtr<PropertyBool>(true);
     isCheck_ = AceType::MakeRefPtr<PropertyBool>(false);
     uiStatus_ = AceType::MakeRefPtr<PropertyInt>(static_cast<int32_t>(UIStatus::UNSELECTED));
     offset_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF());
     size_ = AceType::MakeRefPtr<AnimatablePropertySizeF>(SizeF());
-    totalScale_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(DEFAULT_TOTAL_SCALE);
-    pointScale_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(DEFAULT_POINT_SCALE);
-    ringPointScale_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f);
+    totalScale_ = AceType::MakeRefPtr<PropertyFloat>(1.0f);
+    pointScale_ = AceType::MakeRefPtr<PropertyFloat>(0.5f);
+    ringPointScale_ = AceType::MakeRefPtr<PropertyFloat>(0.0f);
     animateTouchHoverColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::TRANSPARENT));
 
     AttachProperty(enabled_);
@@ -86,76 +85,6 @@ void RadioModifier::InitializeParam()
     hoverDuration_ = radioTheme->GetHoverDuration();
     hoverToTouchDuration_ = radioTheme->GetHoverToTouchDuration();
     touchDuration_ = radioTheme->GetTouchDuration();
-}
-
-void RadioModifier::UpdateAnimatableProperty()
-{
-    switch (touchHoverType_) {
-        case TouchHoverAnimationType::HOVER:
-            SetBoardColor(LinearColor(hoverColor_), hoverDuration_, Curves::FRICTION);
-            break;
-        case TouchHoverAnimationType::PRESS_TO_HOVER:
-            SetBoardColor(LinearColor(hoverColor_), hoverToTouchDuration_, Curves::SHARP);
-            break;
-        case TouchHoverAnimationType::NONE:
-            SetBoardColor(LinearColor(hoverColor_.BlendOpacity(0)), hoverDuration_, Curves::FRICTION);
-            break;
-        case TouchHoverAnimationType::HOVER_TO_PRESS:
-            SetBoardColor(LinearColor(clickEffectColor_), hoverToTouchDuration_, Curves::SHARP);
-            break;
-        case TouchHoverAnimationType::PRESS:
-            SetBoardColor(LinearColor(clickEffectColor_), hoverDuration_, Curves::FRICTION);
-            break;
-        default:
-            break;
-    }
-}
-
-void RadioModifier::UpdateIsOnAnimatableProperty(bool isCheck)
-{
-    AnimationOption delayOption;
-    delayOption.SetDelay(DEFAULT_RADIO_ANIMATION_DURATION / 2);
-    delayOption.SetDuration(DEFAULT_RADIO_ANIMATION_DURATION / 2);
-    delayOption.SetCurve(Curves::FRICTION);
-
-    AnimationOption halfDurationOption;
-    halfDurationOption.SetDuration(DEFAULT_RADIO_ANIMATION_DURATION / 2);
-    halfDurationOption.SetCurve(Curves::FRICTION);
-
-    if (isOnAnimationFlag_->Get()) {
-        pointScale_->Set(0);
-        AnimationUtils::Animate(delayOption, [&]() { pointScale_->Set(DEFAULT_POINT_SCALE); });
-        ringPointScale_->Set(1);
-        AnimationUtils::Animate(halfDurationOption, [&]() { ringPointScale_->Set(0); });
-    } else {
-        pointScale_->Set(DEFAULT_POINT_SCALE);
-        AnimationUtils::Animate(halfDurationOption, [&]() { pointScale_->Set(0); });
-        ringPointScale_->Set(0);
-        AnimationUtils::Animate(delayOption, [&]() { ringPointScale_->Set(1); });
-    }
-
-    totalScale_->Set(DEFAULT_TOTAL_SCALE);
-    AnimationUtils::Animate(halfDurationOption, [&]() { totalScale_->Set(DEFAULT_SHRINK_SCALE); });
-    totalScale_->Set(DEFAULT_SHRINK_SCALE);
-    AnimationUtils::Animate(
-        delayOption, [&]() { totalScale_->Set(1); },
-        [isCheck, this]() {
-            uiStatus_->Set(static_cast<int32_t>(isCheck ? UIStatus::SELECTED : UIStatus::UNSELECTED));
-            auto context = PipelineBase::GetCurrentContext();
-            if (context) {
-                context->RequestFrame();
-            }
-        });
-}
-
-void RadioModifier::SetBoardColor(LinearColor color, int32_t duratuion, const RefPtr<CubicCurve>& curve)
-{
-    if (animateTouchHoverColor_) {
-        AnimationOption option = AnimationOption();
-        option.SetDuration(duratuion);
-        option.SetCurve(curve);
-        AnimationUtils::Animate(option, [&]() { animateTouchHoverColor_->Set(color); });
-    }
 }
 
 void RadioModifier::PaintRadio(

@@ -20,8 +20,15 @@
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
+#include "base/utils/macros.h"
+#include "core/animation/spring_curve.h"
+#include "core/common/container.h"
 #include "core/components_ng/base/modifier.h"
+#include "core/components_ng/property/property.h"
+#include "core/components_ng/render/animation_utils.h"
+#include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing_forward.h"
+#include "core/components_ng/render/paint_wrapper.h"
 
 namespace OHOS::Ace::NG {
 enum class UIStatus {
@@ -58,9 +65,39 @@ public:
         PaintRadio(canvas, isCheck_->Get(), size_->Get(), offset_->Get());
     }
 
-    void UpdateAnimatableProperty();
-    void UpdateIsOnAnimatableProperty(bool isCheck);
-    void SetBoardColor(LinearColor color, int32_t duratuion, const RefPtr<CubicCurve>& curve);
+    void UpdateAnimatableProperty()
+    {
+        switch (touchHoverType_) {
+            case TouchHoverAnimationType::HOVER:
+                SetBoardColor(LinearColor(hoverColor_), hoverDuration_, Curves::FRICTION);
+                break;
+            case TouchHoverAnimationType::PRESS_TO_HOVER:
+                SetBoardColor(LinearColor(hoverColor_), hoverToTouchDuration_, Curves::SHARP);
+                break;
+            case TouchHoverAnimationType::NONE:
+                SetBoardColor(LinearColor(hoverColor_.BlendOpacity(0)), hoverDuration_, Curves::FRICTION);
+                break;
+            case TouchHoverAnimationType::HOVER_TO_PRESS:
+                SetBoardColor(LinearColor(clickEffectColor_), hoverToTouchDuration_, Curves::SHARP);
+                break;
+            case TouchHoverAnimationType::PRESS:
+                SetBoardColor(LinearColor(clickEffectColor_), hoverDuration_, Curves::FRICTION);
+                break;
+            default:
+                break;
+        }
+    }
+
+    void SetBoardColor(LinearColor color, int32_t duratuion, const RefPtr<CubicCurve>& curve)
+    {
+        if (animateTouchHoverColor_) {
+            AnimationOption option = AnimationOption();
+            option.SetDuration(duratuion);
+            option.SetCurve(curve);
+            AnimationUtils::Animate(option, [&]() { animateTouchHoverColor_->Set(color); });
+        }
+    }
+
     void InitializeParam();
     void PaintRadio(RSCanvas& canvas, bool checked, const SizeF& contentSize, const OffsetF& contentOffset) const;
     void DrawTouchAndHoverBoard(RSCanvas& canvas, const SizeF& contentSize, const OffsetF& contentOffset) const;
@@ -101,21 +138,6 @@ public:
         }
     }
 
-    bool GetIsCheck()
-    {
-        if (isCheck_) {
-            return isCheck_->Get();
-        }
-        return false;
-    }
-
-    void SetIsOnAnimationFlag(bool isOnAnimationFlag)
-    {
-        if (isOnAnimationFlag_) {
-            isOnAnimationFlag_->Set(isOnAnimationFlag);
-        }
-    }
-
     void SetTotalScale(const float totalScale)
     {
         if (totalScale_) {
@@ -151,7 +173,7 @@ public:
         }
     }
 
-    void SetUIStatus(const UIStatus& uiStatus)
+    void SetUIStatus(UIStatus& uiStatus)
     {
         if (uiStatus_) {
             uiStatus_->Set(static_cast<int32_t>(uiStatus));
@@ -164,6 +186,9 @@ public:
     }
 
 private:
+    RefPtr<AnimatablePropertyColor> pointColor_;
+    RefPtr<AnimatablePropertyColor> activeColor_;
+    RefPtr<AnimatablePropertyColor> inactiveColor_;
     float shadowWidth_ = 1.5f;
     float borderWidth_ = 1.5f;
     Color inactivePointColor_;
@@ -176,20 +201,17 @@ private:
     float touchDuration_ = 0.0f;
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
-    RefPtr<PropertyBool> isOnAnimationFlag_;
+
     RefPtr<PropertyBool> enabled_;
     RefPtr<PropertyBool> isCheck_;
     RefPtr<PropertyInt> uiStatus_;
 
-    RefPtr<AnimatablePropertyColor> pointColor_;
-    RefPtr<AnimatablePropertyColor> activeColor_;
-    RefPtr<AnimatablePropertyColor> inactiveColor_;
     RefPtr<AnimatablePropertyOffsetF> offset_;
     RefPtr<AnimatablePropertySizeF> size_;
     RefPtr<RadioModifier> radioModifier_;
-    RefPtr<AnimatablePropertyFloat> totalScale_;
-    RefPtr<AnimatablePropertyFloat> pointScale_;
-    RefPtr<AnimatablePropertyFloat> ringPointScale_;
+    RefPtr<PropertyFloat> totalScale_;
+    RefPtr<PropertyFloat> pointScale_;
+    RefPtr<PropertyFloat> ringPointScale_;
     RefPtr<AnimatablePropertyColor> animateTouchHoverColor_;
     TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
 
