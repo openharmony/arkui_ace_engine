@@ -1376,6 +1376,7 @@ bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> p
     if (selectInfo.isSingleHandle) {
         selectInfo.firstHandle.isShow = IsTouchHandleShow(insertTouchHandle);
         selectInfo.firstHandle.paintRect = ComputeTouchHandleRect(insertTouchHandle);
+        selectInfo.secondHandle.isShow = false;
     } else {
         selectInfo.firstHandle.isShow = IsTouchHandleShow(beginTouchHandle);
         selectInfo.firstHandle.paintRect = ComputeTouchHandleRect(beginTouchHandle);
@@ -1421,6 +1422,7 @@ void WebPattern::OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHa
             selectInfo.isSingleHandle = true;
             selectInfo.firstHandle.isShow = IsTouchHandleShow(insertHandle_);
             selectInfo.firstHandle.paintRect = ComputeTouchHandleRect(insertHandle_);
+            selectInfo.secondHandle.isShow = false;
             selectInfo.menuInfo.menuDisable = true;
             selectInfo.menuInfo.menuIsShow = false;
             selectInfo.hitTestMode = HitTestMode::HTMDEFAULT;
