@@ -166,6 +166,7 @@ void SwiperPattern::OnModifyDone()
     } else {
         translateTask_.Cancel();
     }
+    SetAccessibilityAction();
 }
 
 void SwiperPattern::FlushFocus(const RefPtr<FrameNode>& curShowFrame)
@@ -1498,5 +1499,36 @@ void SwiperPattern::SaveArrowProperty(const RefPtr<FrameNode>& arrowNode)
     arrowLayoutProperty->UpdateArrowSize(layoutProperty->GetArrowSizeValue());
     arrowLayoutProperty->UpdateArrowColor(layoutProperty->GetArrowColorValue());
     arrowLayoutProperty->UpdateIsSiderMiddle(layoutProperty->GetIsSiderMiddleValue());
+}
+
+void SwiperPattern::SetAccessibilityAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetActionScrollForward(
+        [weakPtr = WeakClaim(this), accessibility = WeakClaim(RawPtr(accessibilityProperty))]() {
+            const auto& pattern = weakPtr.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            const auto& accessibilityProperty = accessibility.Upgrade();
+            CHECK_NULL_VOID(accessibilityProperty);
+            if (!accessibilityProperty->IsScrollable()) {
+                return;
+            }
+            pattern->ShowNext();
+        });
+
+    accessibilityProperty->SetActionScrollBackward(
+        [weakPtr = WeakClaim(this), accessibility = WeakClaim(RawPtr(accessibilityProperty))]() {
+            const auto& pattern = weakPtr.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            const auto& accessibilityProperty = accessibility.Upgrade();
+            CHECK_NULL_VOID(accessibilityProperty);
+            if (!accessibilityProperty->IsScrollable()) {
+                return;
+            }
+        pattern->ShowPrevious();
+    });
 }
 } // namespace OHOS::Ace::NG

@@ -189,6 +189,7 @@ private:
     void UpdateScrollBarOffset() override;
     void FireOnScrollStart();
     void FireOnScrollStop();
+    void SetAccessibilityAction();
 
     RefPtr<Animator> animator_;
     RefPtr<ScrollPositionController> positionController_;

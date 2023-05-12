@@ -118,7 +118,10 @@ public:
         return isSelected_;
     }
 
+protected:
+    void OnModifyDone() override;
 private:
+    void SetAccessibilityAction();
     RefPtr<ShallowBuilder> shallowBuilder_;
     bool forceRebuild_ = false;
     bool selectable_ = true;
