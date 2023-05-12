@@ -17,7 +17,7 @@ import(
     "//foundation/arkui/ace_engine/frameworks/core/components_ng/components.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ohos_unittest("text_clock_pattern_test_ng") {
+ohos_unittest("text_clock_test_ng") {
   module_out_path = pattern_test_output_path
 
   sources = [
@@ -67,7 +67,7 @@ ohos_unittest("text_clock_pattern_test_ng") {
 
     # self
     "text_clock_accessibility_property_test_ng.cpp",
-    "text_clock_pattern_test_ng.cpp",
+    "text_clock_test_ng.cpp",
   ]
 
   deps = [
@@ -106,5 +106,5 @@ config("config_text_clock_test") {
 
 group("text_clock_pattern_unit_test") {
   testonly = true
-  deps = [ ":text_clock_pattern_test_ng" ]
+  deps = [ ":text_clock_test_ng" ]
 }
