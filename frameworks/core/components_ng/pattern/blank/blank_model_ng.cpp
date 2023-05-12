@@ -36,7 +36,6 @@ void BlankModelNG::Create()
     ACE_UPDATE_LAYOUT_PROPERTY(BlankLayoutProperty, FlexGrow, 1.0f);
     ACE_UPDATE_LAYOUT_PROPERTY(BlankLayoutProperty, FlexShrink, 0.0f);
     ACE_UPDATE_LAYOUT_PROPERTY(BlankLayoutProperty, AlignSelf, FlexAlign::STRETCH);
-    ACE_UPDATE_LAYOUT_PROPERTY(BlankLayoutProperty, Height, Dimension(0.0, DimensionUnit::VP));
 }
 
 void BlankModelNG::SetBlankMin(const Dimension& blankMin)

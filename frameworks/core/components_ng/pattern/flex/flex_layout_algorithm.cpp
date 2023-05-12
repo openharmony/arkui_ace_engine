@@ -509,19 +509,16 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(FlexItemProperties& flexItem
                 }
                 CheckSizeValidity(childLayoutWrapper);
                 CheckBaselineProperties(childLayoutWrapper);
-                if (!isInfiniteLayout_) {
-                    const auto& flexItemProperty = childLayoutWrapper->GetLayoutProperty()->GetFlexItemProperty();
-                    float flexShrink = isLinearLayoutFeature_ ? 0.0f : 1.0f;
-                    float flexGrow = 0.0f;
-                    if (flexItemProperty) {
-                        flexShrink = flexItemProperty->GetFlexShrink().value_or(flexShrink);
-                        flexGrow = flexItemProperty->GetFlexGrow().value_or(flexGrow);
-                    }
-                    flexItemProperties.totalGrow += flexGrow;
-                    flexItemProperties.totalShrink +=
-                        (flexShrink * (GetChildMainAxisSize(childLayoutWrapper) -
-                                          GetMainAxisMargin(childLayoutWrapper, direction_)));
+                const auto& flexItemProperty = childLayoutWrapper->GetLayoutProperty()->GetFlexItemProperty();
+                float flexShrink = isLinearLayoutFeature_ ? 0.0f : 1.0f;
+                float flexGrow = 0.0f;
+                if (flexItemProperty) {
+                    flexShrink = flexItemProperty->GetFlexShrink().value_or(flexShrink);
+                    flexGrow = flexItemProperty->GetFlexGrow().value_or(flexGrow);
                 }
+                flexItemProperties.totalGrow += flexGrow;
+                flexItemProperties.totalShrink += (flexShrink * (GetChildMainAxisSize(childLayoutWrapper) -
+                                                                    GetMainAxisMargin(childLayoutWrapper, direction_)));
                 secondaryMeasureList_.emplace_back(child);
             }
             ++iter;
@@ -601,7 +598,7 @@ void FlexLayoutAlgorithm::SecondaryMeasureByProperty(
             UpdateLayoutConstraintOnCrossAxis(child.layoutConstraint, crossAxisSize);
             needSecondaryLayout = true;
         }
-        if (LessOrEqual(totalFlexWeight_, 0.0f) && !isInfiniteLayout_) {
+        if (LessOrEqual(totalFlexWeight_, 0.0f)) {
             float childMainAxisMargin = GetMainAxisMargin(childLayoutWrapper, direction_);
             float itemFlex = getFlex(child.layoutWrapper);
             float flexSize =
@@ -665,12 +662,15 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     isInfiniteLayout_ = false;
     if (NearEqual(mainAxisSize_, -1.0f)) {
         mainAxisSize_ = direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE
-                            ? layoutConstraint->maxSize.Width()
-                            : layoutConstraint->maxSize.Height();
+                            ? layoutConstraint->percentReference.Width()
+                            : layoutConstraint->percentReference.Height();
         isInfiniteLayout_ = isLinearLayoutFeature_;
     }
     if (!isInfiniteLayout_) {
-        isInfiniteLayout_ = GreaterOrEqualToInfinity(mainAxisSize_);
+        isInfiniteLayout_ =
+            GreaterOrEqualToInfinity(direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE
+                                         ? layoutConstraint->maxSize.Width()
+                                         : layoutConstraint->maxSize.Height());
     }
     if (isInfiniteLayout_) {
         LOGD("The main axis size is not defined or infinity, disallow flex and weight mode");
