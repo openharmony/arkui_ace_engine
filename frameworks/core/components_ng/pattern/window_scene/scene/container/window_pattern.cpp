@@ -188,11 +188,6 @@ void WindowPattern::LoadContent(
     RegisterInputEventListener(inputListener);
 }
 
-void WindowPattern::SetDisplayDensity(float density)
-{
-    displayDensity_ = density;
-}
-
 void WindowPattern::UpdateViewportConfig(const Rect& rect, Rosen::WindowSizeChangeReason reason)
 {
     ViewportConfig config;
