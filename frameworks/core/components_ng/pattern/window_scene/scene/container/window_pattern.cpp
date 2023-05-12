@@ -57,7 +57,7 @@ public:
 
 private:
     const std::map<Rosen::SizeChangeReason, Rosen::WindowSizeChangeReason> SESSION_TO_WINDOW_MAP {
-        { Rosen::SizeChangeReason::SHOW, Rosen::WindowSizeChangeReason::UNDEFINED },
+        { Rosen::SizeChangeReason::UNDEFINED, Rosen::WindowSizeChangeReason::UNDEFINED },
         { Rosen::SizeChangeReason::HIDE, Rosen::WindowSizeChangeReason::HIDE },
         { Rosen::SizeChangeReason::MAXIMIZE, Rosen::WindowSizeChangeReason::MAXIMIZE },
         { Rosen::SizeChangeReason::RECOVER, Rosen::WindowSizeChangeReason::RECOVER },

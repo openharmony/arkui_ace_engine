@@ -26,18 +26,23 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr float DIRECTION0 = 0;
+constexpr float DIRECTION90 = 90;
+constexpr float DIRECTION180 = 180;
+constexpr float DIRECTION270 = 270;
+
 MMI::Direction ConvertDegreeToMMIRotation(float degree)
 {
-    if (NearEqual(degree, 0)) {
+    if (NearEqual(degree, DIRECTION0)) {
         return MMI::DIRECTION0;
     }
-    if (NearEqual(degree, 90)) {
+    if (NearEqual(degree, DIRECTION90)) {
         return MMI::DIRECTION90;
     }
-    if (NearEqual(degree, 180)) {
+    if (NearEqual(degree, DIRECTION180)) {
         return MMI::DIRECTION180;
     }
-    if (NearEqual(degree, 270)) {
+    if (NearEqual(degree, DIRECTION270)) {
         return MMI::DIRECTION270;
     }
     return MMI::DIRECTION0;
