@@ -372,11 +372,40 @@ bool GestureEventHub::IsAllowedDrag(RefPtr<EventHub> eventHub)
     return true;
 }
 
+void GestureEventHub::StartDragTaskForWeb()
+{
+    auto startTime = std::chrono::high_resolution_clock::now();
+    auto timeElapsed = startTime - gestureInfoForWeb_.GetTimeStamp();
+    auto timeElapsedMs = std::chrono::duration_cast<std::chrono::milliseconds>(timeElapsed);
+    // 100 : 100ms
+    if (timeElapsedMs.count() > 100) {
+        LOGW("start drag task for web failed, not received this drag action gesture info");
+        return;
+    }
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto taskScheduler = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(taskScheduler);
+
+    taskScheduler->PostTask(
+        [weak = WeakClaim(this)]() {
+            LOGI("web drag task start");
+            auto gestureHub = weak.Upgrade();
+            CHECK_NULL_VOID_NOLOG(gestureHub);
+            auto dragEventActuator = gestureHub->dragEventActuator_;
+            CHECK_NULL_VOID_NOLOG(dragEventActuator);
+            dragEventActuator->StartDragTaskForWeb(gestureHub->gestureInfoForWeb_);
+        },
+        TaskExecutor::TaskType::UI);
+}
+
 void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
 {
     auto eventHub = eventHub_.Upgrade();
     CHECK_NULL_VOID(eventHub);
     if (!IsAllowedDrag(eventHub)) {
+        gestureInfoForWeb_ = info;
         return;
     }
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -458,6 +487,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
 
 void GestureEventHub::HandleOnDragUpdate(const GestureEvent& info)
 {
+    gestureInfoForWeb_ = info;
     CHECK_NULL_VOID(dragDropProxy_);
     dragDropProxy_->OnDragMove(info);
 }
