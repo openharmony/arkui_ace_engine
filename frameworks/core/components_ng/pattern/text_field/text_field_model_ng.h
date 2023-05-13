@@ -65,6 +65,7 @@ public:
     void ResetMaxLength() override;
     void SetForegroundColor(const Color& value) override;
     void SetShowUnit(std::function<void()>&& unitFunction) override;
+    void SetShowError(const std::string& errorText, bool visible) override;
 
     void SetShowUnderline(bool showUnderLine) override;
     void SetShowCounter(bool value) override;

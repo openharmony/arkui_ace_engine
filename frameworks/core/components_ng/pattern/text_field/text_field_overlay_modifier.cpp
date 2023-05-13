@@ -159,7 +159,7 @@ void TextFieldOverlayModifier::PaintCursor(DrawingContext& context) const
     brush.SetColor(ToRSColor(cursorColor_->Get()));
     canvas.AttachBrush(brush);
     auto paintOffset = contentOffset_->Get() - OffsetF(0.0f, textFieldPattern->GetBaseLineOffset());
-    float clipRectHeight = 0.0;
+    float clipRectHeight = 0.0f;
     if (showCounter_->Get() && textFieldPattern->GetCounterParagraph()) {
         clipRectHeight = paintOffset.GetY() + contentSize_->Get().Height() - textFieldPattern->GetCountHeight();
     } else {

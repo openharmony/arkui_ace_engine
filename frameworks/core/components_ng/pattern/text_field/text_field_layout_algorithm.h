@@ -56,6 +56,7 @@ public:
     const std::shared_ptr<RSParagraph>& GetParagraph();
 
     const std::shared_ptr<RSParagraph>& GetCounterParagraph() const;
+    const std::shared_ptr<RSParagraph>& GetErrorParagraph() const;
 
     const RectF& GetTextRect() const
     {
@@ -105,6 +106,7 @@ private:
     void CreateParagraph(const std::vector<TextStyle>& textStyles, const std::vector<std::string>& contents,
         const std::string& content, bool needObscureText, bool disableTextAlign);
     void CreateCounterParagraph(int32_t textLength, int32_t maxLength, const RefPtr<TextFieldTheme>& theme);
+    void CreateErrorParagraph(const std::string& content, const RefPtr<TextFieldTheme>& theme);
     bool CreateParagraphAndLayout(
         const TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint);
     bool AdaptMinTextSize(TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint,
@@ -120,6 +122,7 @@ private:
 
     std::shared_ptr<RSParagraph> paragraph_;
     std::shared_ptr<RSParagraph> counterParagraph_;
+    std::shared_ptr<RSParagraph> errorParagraph_;
     RectF frameRect_;
     RectF textRect_;
     RectF imageRect_;
