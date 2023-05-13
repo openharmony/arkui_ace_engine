@@ -433,7 +433,10 @@ template("declarative_js_engine") {
     }
 
     if (defined(config.remote_window_support) && config.remote_window_support) {
-      sources += [ "jsview/js_remote_window.cpp" ]
+      sources += [
+        "jsview/js_remote_window.cpp",
+        "jsview/models/remote_window_model_impl.cpp",
+      ]
     }
 
     if (defined(config.plugin_components_support) &&
