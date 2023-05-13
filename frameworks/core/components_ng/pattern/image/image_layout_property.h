@@ -96,10 +96,6 @@ public:
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override
     {
-        std::string src = json->GetString("rawSrc");
-        std::string bundleName = AceApplicationInfo::GetInstance().GetPackageName();
-        std::string moduleName = json->GetString("moduleName");
-        UpdateImageSourceInfo(ImageSourceInfo(src, bundleName, moduleName));
         static const std::unordered_map<std::string, ImageFit> uMap {
             { "ImageFit.Fill", ImageFit::FILL },
             { "ImageFit.Contain", ImageFit::CONTAIN },
@@ -109,6 +105,11 @@ public:
             { "ImageFit.None", ImageFit::NONE },
             { "ImageFit.ScaleDown", ImageFit::SCALE_DOWN },
         };
+
+        std::string src = json->GetString("rawSrc");
+        std::string bundleName = AceApplicationInfo::GetInstance().GetPackageName();
+        std::string moduleName = json->GetString("moduleName");
+        UpdateImageSourceInfo(ImageSourceInfo(src, bundleName, moduleName));
         auto objectFit = json->GetString("objectFit");
         UpdateImageFit(uMap.count(objectFit) ? uMap.at(objectFit) : ImageFit::COVER);
         UpdateAutoResize(json->GetString("autoResize") == "true" ? true : false);

@@ -180,6 +180,7 @@ std::string Dimension::ToString() const
     return StringUtils::DoubleToString(value_).append(units[static_cast<int>(unit_)]);
 }
 
+// for example str = 0.00px
 Dimension Dimension::FromString(const std::string& str)
 {
     static const int32_t percentUnit = 100;
@@ -195,19 +196,16 @@ Dimension Dimension::FromString(const std::string& str)
     LOGD("UITree str=%{public}s", str.c_str());
     double value = 0.0;
     DimensionUnit unit = DimensionUnit::FP;
+
     if (str.empty()) {
         LOGE("UITree |ERROR| empty string");
         return Dimension(value, unit);
     }
 
-    for (auto i = str.length() - 1; i >= 0; --i) {
+    for (int32_t i = str.length() - 1; i >= 0; --i) {
         if (str[i] >= '0' && str[i] <= '9') {
-            value = std::stod(str.substr(0, i + 1));
+            value = StringUtils::StringToDouble(str.substr(0, i + 1));
             auto subStr = str.substr(i + 1);
-            LOGD("UITree [%{public}lf, %{public}s]", value, subStr.c_str());
-            if (!uMap.count(subStr)) {
-                LOGE("UITree |ERROR| found no %{public}s", subStr.c_str());
-            }
             unit = uMap.count(subStr) ? uMap.at(subStr) : unit;
             value = unit == DimensionUnit::PERCENT ? value / percentUnit : value;
             break;

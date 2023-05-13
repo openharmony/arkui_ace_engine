@@ -110,11 +110,6 @@ Alignment Alignment::GetAlignment(TextDirection direction, const std::string& st
             [](TextDirection direction) { return direction == TextDirection::LTR ? BOTTOM_RIGHT : BOTTOM_LEFT; } },
     };
 
-    LOGD("UITree str=%{public}s", str.c_str());
-    if (!uMap.count(str)) {
-        LOGE("UITree |ERROR| found no %{public}s", str.c_str());
-    }
-
     return uMap.count(str) ? uMap.at(str)(direction) : CENTER;
 }
 } // namespace OHOS::Ace

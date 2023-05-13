@@ -23,6 +23,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/point_t.h"
 #include "base/geometry/ng/size_t.h"
+#include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace::NG {
@@ -343,6 +344,38 @@ public:
         return output;
     }
 
+    // for example str = RectT (0.00, 0.00) - [0.00 x 0.00]
+    static RectT FromString(const std::string& str)
+    {
+        static const int32_t valueSize = 4;
+        LOGD("UITree str=%{public}s", str.c_str());
+
+        std::vector<T> vals;
+        std::string val;
+        for (auto& it : str) {
+            if ((it >= '0' && it <= '9') || (it == '.' && !val.empty())) {
+                val += it;
+            } else {
+                if (!val.empty()) {
+                    vals.push_back(StringUtils::StringToFloat(val));
+                    val.clear();
+                }
+            }
+        }
+
+        if (vals.size() != valueSize) {
+            LOGE("UITree |ERROR| invalid str=%{public}s", str.c_str());
+            return RectT();
+        }
+
+        int32_t index = 0;
+        T x = vals[index++];
+        T y = vals[index++];
+        T width = vals[index++];
+        T height = vals[index++];
+        return RectT(x, y, width, height);
+    }
+
     std::string ToBounds() const
     {
         static const int32_t precision = 2;
@@ -367,37 +400,6 @@ public:
     OffsetT<T> Center() const
     {
         return OffsetT<T>(width_ / 2.0 + x_, height_ / 2.0 + y_);
-    }
-
-    static RectT FromString(const std::string& str)
-    {
-        static const int32_t valueSize = 4;
-        LOGD("UITree str=%{public}s", str.c_str());
-
-        std::vector<T> vals;
-        std::string val;
-        for (auto& it : str) {
-            if ((it >= '0' && it <= '9') || (it == '.' && !val.empty())) {
-                val += it;
-            } else {
-                if (!val.empty()) {
-                    vals.push_back(std::stof(val));
-                    val.clear();
-                }
-            }
-        }
-
-        if (vals.size() != valueSize) {
-            LOGE("UITree |ERROR| invalid str=%{public}s", str.c_str());
-            return RectT();
-        }
-
-        int32_t index = 0;
-        T x = vals[index++];
-        T y = vals[index++];
-        T width = vals[index++];
-        T height = vals[index++];
-        return RectT(x, y, width, height);
     }
 
 private:

@@ -52,9 +52,6 @@ VisibleType StringToVisibleType(const std::string& str)
         { "Visibility.None", VisibleType::GONE },
     };
 
-    if (!uMap.count(str)) {
-        LOGE("UITree |ERROR| found no %{public}s", str.c_str());
-    }
     return uMap.count(str) ? uMap.at(str) : VisibleType::VISIBLE;
 }
 
@@ -82,9 +79,6 @@ TextDirection StringToTextDirection(const std::string& str)
         { "Direction.Auto", TextDirection::AUTO },
     };
 
-    if (!uMap.count(str)) {
-        LOGE("UITree |ERROR| found no %{public}s", str.c_str());
-    }
     return uMap.count(str) ? uMap.at(str) : TextDirection::LTR;
 }
 } // namespace

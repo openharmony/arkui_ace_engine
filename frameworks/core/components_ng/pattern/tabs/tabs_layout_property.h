@@ -95,15 +95,13 @@ public:
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override
     {
-        UpdateAxis(json->GetBool("vertical") ? Axis::VERTICAL : Axis::HORIZONTAL);
         static const std::unordered_map<std::string, BarPosition> uMap {
             { "BarPosition.Start", BarPosition::START },
             { "BarPosition.End", BarPosition::END },
         };
+
+        UpdateAxis(json->GetBool("vertical") ? Axis::VERTICAL : Axis::HORIZONTAL);
         auto barPosition = json->GetString("barPosition");
-        if (!uMap.count(barPosition)) {
-            LOGE("UITree |ERROR| found no %{public}s", barPosition.c_str());
-        }
         UpdateTabBarPosition(uMap.count(barPosition) ? uMap.at(barPosition) : BarPosition::START);
         LayoutProperty::FromJson(json);
     }

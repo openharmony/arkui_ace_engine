@@ -346,6 +346,11 @@ struct PaddingPropertyT {
         LOGD("UITree str=%{public}s", str.c_str());
         PaddingPropertyT property;
 
+        if (str.empty()) {
+            LOGE("UITree |ERROR| empty string");
+            return property;
+        }
+
         if (str[0] >= '0' && str[0] <= '9') {
             LOGD("UITree decode number");
             property.top = property.right = property.bottom = property.left = T::FromString(str);

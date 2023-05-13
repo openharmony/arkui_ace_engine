@@ -176,6 +176,7 @@ std::string Color::ColorToString() const
     return colorStr;
 }
 
+// for example str = #FFFFFFFF
 Color Color::ColorFromString(const std::string& str)
 {
     static const int32_t colorStrLen = 9;

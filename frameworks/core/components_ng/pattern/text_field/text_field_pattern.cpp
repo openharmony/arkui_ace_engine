@@ -4109,12 +4109,12 @@ void TextFieldPattern::FromJson(const std::unique_ptr<JsonValue>& json)
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     layoutProperty->UpdatePlaceholder(json->GetString("placeholder"));
-    UpdateEditingValue(json->GetString("text"), std::stoi(json->GetString("caretPosition")));
+    UpdateEditingValue(json->GetString("text"), StringUtils::StringToInt(json->GetString("caretPosition")));
     SetEditingValueToProperty(textEditingValue_.text);
     UpdateSelection(textEditingValue_.caretPosition);
     auto maxLines = json->GetString("maxLines");
     if (!maxLines.empty() && maxLines != "INF") {
-        layoutProperty->UpdateMaxLines(std::stoul(maxLines));
+        layoutProperty->UpdateMaxLines(StringUtils::StringToUint(maxLines));
     }
     static const std::unordered_map<std::string, CopyOptions> uMap = {
         { "CopyOptions.None", CopyOptions::None },

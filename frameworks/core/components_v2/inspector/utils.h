@@ -130,21 +130,16 @@ inline std::string ConvertFlexDirectionToStirng(FlexDirection direction)
         }
     }
 
-static const std::unordered_map<std::string, FlexDirection> g_flexDirectionMapping {
-    { "FlexDirection.Row", FlexDirection::ROW },
-    { "FlexDirection.RowReverse", FlexDirection::ROW_REVERSE },
-    { "FlexDirection.Column", FlexDirection::COLUMN },
-    { "FlexDirection.ColumnReverse", FlexDirection::COLUMN_REVERSE },
-};
-
 inline FlexDirection ConvertStringToFlexDirection(const std::string& str)
 {
-    LOGD("UITree str=%{public}s", str.c_str());
-    if (!g_flexDirectionMapping.count(str)) {
-        LOGE("UITree |ERROR| found no %{public}s", str.c_str());
-    }
+    static const std::unordered_map<std::string, FlexDirection> uMap {
+        { "FlexDirection.Row", FlexDirection::ROW },
+        { "FlexDirection.RowReverse", FlexDirection::ROW_REVERSE },
+        { "FlexDirection.Column", FlexDirection::COLUMN },
+        { "FlexDirection.ColumnReverse", FlexDirection::COLUMN_REVERSE },
+    };
 
-    return g_flexDirectionMapping.count(str) ? g_flexDirectionMapping.at(str) : FlexDirection::ROW;
+    return uMap.count(str) ? uMap.at(str) : FlexDirection::ROW;
 }
 
     inline std::string ConvertWrapDirectionToStirng(WrapDirection direction)
@@ -181,25 +176,20 @@ inline FlexDirection ConvertStringToFlexDirection(const std::string& str)
         }
     }
 
-static const std::unordered_map<std::string, FlexAlign> g_flexAlignMapping {
-    { "FlexAlign.Start", FlexAlign::FLEX_START },
-    { "FlexAlign.Center", FlexAlign::CENTER },
-    { "FlexAlign.End", FlexAlign::FLEX_END },
-    { "FlexAlign.SpaceBetween", FlexAlign::SPACE_BETWEEN },
-    { "FlexAlign.SpaceAround", FlexAlign::SPACE_AROUND },
-    { "FlexAlign.Baseline", FlexAlign::BASELINE },
-    { "FlexAlign.Stretch", FlexAlign::STRETCH },
-    { "FlexAlign.SpaceEvenly", FlexAlign::SPACE_EVENLY },
-};
-
 inline FlexAlign ConvertStringToFlexAlign(const std::string& str)
 {
-    LOGD("UITree str=%{public}s", str.c_str());
-    if (!g_flexAlignMapping.count(str)) {
-        LOGE("UITree |ERROR| found no %{public}s", str.c_str());
-    }
+    static const std::unordered_map<std::string, FlexAlign> uMap {
+        { "FlexAlign.Start", FlexAlign::FLEX_START },
+        { "FlexAlign.Center", FlexAlign::CENTER },
+        { "FlexAlign.End", FlexAlign::FLEX_END },
+        { "FlexAlign.SpaceBetween", FlexAlign::SPACE_BETWEEN },
+        { "FlexAlign.SpaceAround", FlexAlign::SPACE_AROUND },
+        { "FlexAlign.Baseline", FlexAlign::BASELINE },
+        { "FlexAlign.Stretch", FlexAlign::STRETCH },
+        { "FlexAlign.SpaceEvenly", FlexAlign::SPACE_EVENLY },
+    };
 
-    return g_flexAlignMapping.count(str) ? g_flexAlignMapping.at(str) : FlexAlign::FLEX_START;
+    return uMap.count(str) ? uMap.at(str) : FlexAlign::FLEX_START;
 }
 
     inline std::string ConvertItemAlignToStirng(FlexAlign align)
@@ -222,22 +212,17 @@ inline FlexAlign ConvertStringToFlexAlign(const std::string& str)
         return "ItemAlign.Auto";
     }
 
-static const std::unordered_map<std::string, FlexAlign> g_itemAlignMapping {
-    { "ItemAlign.Start", FlexAlign::FLEX_START },
-    { "ItemAlign.Center", FlexAlign::CENTER },
-    { "ItemAlign.End", FlexAlign::FLEX_END },
-    { "ItemAlign.Baseline", FlexAlign::BASELINE },
-    { "ItemAlign.Stretch", FlexAlign::STRETCH },
-};
-
 inline FlexAlign ConvertStringToItemAlign(const std::string& str)
 {
-    LOGD("UITree str=%{public}s", str.c_str());
-    if (!g_itemAlignMapping.count(str)) {
-        LOGE("UITree |ERROR| found no %{public}s", str.c_str());
-    }
+    static const std::unordered_map<std::string, FlexAlign> uMap {
+        { "ItemAlign.Start", FlexAlign::FLEX_START },
+        { "ItemAlign.Center", FlexAlign::CENTER },
+        { "ItemAlign.End", FlexAlign::FLEX_END },
+        { "ItemAlign.Baseline", FlexAlign::BASELINE },
+        { "ItemAlign.Stretch", FlexAlign::STRETCH },
+    };
 
-    return g_itemAlignMapping.count(str) ? g_itemAlignMapping.at(str) : FlexAlign::AUTO;
+    return uMap.count(str) ? uMap.at(str) : FlexAlign::AUTO;
 }
 
     inline std::string ConvertWrapAlignmentToStirng(WrapAlignment align)
@@ -356,23 +341,18 @@ inline FlexAlign ConvertStringToItemAlign(const std::string& str)
         return index < 0 ? "TextAlign.Start" : textAlignTable[index].value;
     }
 
-static const std::unordered_map<std::string, TextAlign> g_textAlignMapping {
-    { "TextAlign.Left", TextAlign::LEFT },
-    { "TextAlign.Right", TextAlign::RIGHT },
-    { "TextAlign.Center", TextAlign::CENTER },
-    { "TextAlign.Justify", TextAlign::JUSTIFY },
-    { "TextAlign.Start", TextAlign::START },
-    { "TextAlign.End", TextAlign::END },
-};
-
 inline TextAlign ConvertWrapStringToTextAlign(const std::string& str)
 {
-    LOGD("UITree str=%{public}s", str.c_str());
-    if (!g_textAlignMapping.count(str)) {
-        LOGE("UITree |ERROR| found no %{public}s", str.c_str());
-    }
+    static const std::unordered_map<std::string, TextAlign> uMap {
+        { "TextAlign.Left", TextAlign::LEFT },
+        { "TextAlign.Right", TextAlign::RIGHT },
+        { "TextAlign.Center", TextAlign::CENTER },
+        { "TextAlign.Justify", TextAlign::JUSTIFY },
+        { "TextAlign.Start", TextAlign::START },
+        { "TextAlign.End", TextAlign::END },
+    };
 
-    return g_textAlignMapping.count(str) ? g_textAlignMapping.at(str) : TextAlign::START;
+    return uMap.count(str) ? uMap.at(str) : TextAlign::START;
 }
 
     inline std::string ConvertWrapTextOverflowToString(TextOverflow textOverflow)
@@ -395,11 +375,6 @@ inline TextOverflow ConvertWrapStringToTextOverflow(const std::string& str)
         { "TextOverflow.Ellipsis", TextOverflow::ELLIPSIS },
         { "TextOverflow.None", TextOverflow::NONE },
     };
-
-    LOGD("UITree str=%{public}s", str.c_str());
-    if (!uMap.count(str)) {
-        LOGE("UITree |ERROR| found no %{public}s", str.c_str());
-    }
 
     return uMap.count(str) ? uMap.at(str) : TextOverflow::CLIP;
 }
@@ -439,32 +414,27 @@ inline TextOverflow ConvertWrapStringToTextOverflow(const std::string& str)
         return index < 0 ? "FontWeight.Normal" : fontWeightTable[index].value;
     }
 
-static const std::unordered_map<std::string, FontWeight> g_fontWeightMapping {
-    { "FontWeight.100", FontWeight::W100 },
-    { "FontWeight.200", FontWeight::W200 },
-    { "FontWeight.300", FontWeight::W300 },
-    { "FontWeight.400", FontWeight::W400 },
-    { "FontWeight.500", FontWeight::W500 },
-    { "FontWeight.600", FontWeight::W600 },
-    { "FontWeight.700", FontWeight::W700 },
-    { "FontWeight.800", FontWeight::W800 },
-    { "FontWeight.900", FontWeight::W900 },
-    { "FontWeight.Bold", FontWeight::BOLD },
-    { "FontWeight.Normal", FontWeight::NORMAL },
-    { "FontWeight.Bolder", FontWeight::BOLDER },
-    { "FontWeight.Lighter", FontWeight::LIGHTER },
-    { "FontWeight.Medium", FontWeight::MEDIUM },
-    { "FontWeight.Regular", FontWeight::REGULAR },
-};
-
 inline FontWeight ConvertWrapStringToFontWeight(const std::string& str)
 {
-    LOGD("UITree str=%{public}s", str.c_str());
-    if (!g_fontWeightMapping.count(str)) {
-        LOGE("UITree |ERROR| found no %{public}s", str.c_str());
-    }
+    static const std::unordered_map<std::string, FontWeight> uMap {
+        { "FontWeight.100", FontWeight::W100 },
+        { "FontWeight.200", FontWeight::W200 },
+        { "FontWeight.300", FontWeight::W300 },
+        { "FontWeight.400", FontWeight::W400 },
+        { "FontWeight.500", FontWeight::W500 },
+        { "FontWeight.600", FontWeight::W600 },
+        { "FontWeight.700", FontWeight::W700 },
+        { "FontWeight.800", FontWeight::W800 },
+        { "FontWeight.900", FontWeight::W900 },
+        { "FontWeight.Bold", FontWeight::BOLD },
+        { "FontWeight.Normal", FontWeight::NORMAL },
+        { "FontWeight.Bolder", FontWeight::BOLDER },
+        { "FontWeight.Lighter", FontWeight::LIGHTER },
+        { "FontWeight.Medium", FontWeight::MEDIUM },
+        { "FontWeight.Regular", FontWeight::REGULAR },
+    };
 
-    return g_fontWeightMapping.count(str) ? g_fontWeightMapping.at(str) : FontWeight::NORMAL;
+    return uMap.count(str) ? uMap.at(str) : FontWeight::NORMAL;
 }
 
     inline std::string ConvertWrapCopyOptionToString(CopyOptions copyOptions)

@@ -19,6 +19,7 @@
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
 #include "base/utils/macros.h"
+#include "base/utils/string_utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/scroll_bar.h"
 #include "core/components/declaration/swiper/swiper_declaration.h"
@@ -116,19 +117,17 @@ public:
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override
     {
-        UpdateIndex(std::stoi(json->GetString("index")));
-        UpdateDirection(json->GetString("vertical") == "true" ? Axis::VERTICAL : Axis::HORIZONTAL);
-        UpdateShowIndicator(json->GetString("indicator") == "true" ? true : false);
-        UpdateItemSpace(Dimension::FromString(json->GetString("itemSpace")));
-        UpdateCachedCount(json->GetInt("cachedCount"));
         static const std::unordered_map<std::string, SwiperDisplayMode> uMap {
             { "SwiperDisplayMode.AutoLinear", SwiperDisplayMode::AUTO_LINEAR },
             { "SwiperDisplayMode.Stretch", SwiperDisplayMode::STRETCH },
         };
+
+        UpdateIndex(StringUtils::StringToInt(json->GetString("index")));
+        UpdateDirection(json->GetString("vertical") == "true" ? Axis::VERTICAL : Axis::HORIZONTAL);
+        UpdateShowIndicator(json->GetString("indicator") == "true" ? true : false);
+        UpdateItemSpace(Dimension::FromString(json->GetString("itemSpace")));
+        UpdateCachedCount(json->GetInt("cachedCount"));
         auto displayMode = json->GetString("displayMode");
-        if (!uMap.count(displayMode)) {
-            LOGE("UITree |ERROR| found no %{public}s", displayMode.c_str());
-        }
         UpdateDisplayMode(uMap.count(displayMode) ? uMap.at(displayMode) : SwiperDisplayMode::STRETCH);
         UpdateDisplayCount(json->GetInt("displayCount"));
         LayoutProperty::FromJson(json);

@@ -16,6 +16,8 @@
 
 #include <unordered_map>
 
+#include "base/utils/string_utils.h"
+
 namespace OHOS::Ace::NG {
 const int32_t SwiperAnimationStyle::DEFAULT_INTERVAL = 3000;
 const int32_t SwiperAnimationStyle::DEFAULT_DURATION = 400;
@@ -39,9 +41,9 @@ void SwiperPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 void SwiperPaintProperty::FromJson(const std::unique_ptr<JsonValue>& json)
 {
     UpdateAutoPlay(json->GetBool("autoPlay"));
-    UpdateAutoPlayInterval(std::stoi(json->GetString("interval")));
+    UpdateAutoPlayInterval(StringUtils::StringToInt(json->GetString("interval")));
     UpdateLoop(json->GetBool("loop"));
-    UpdateDuration(std::stoi(json->GetString("duration")));
+    UpdateDuration(StringUtils::StringToInt(json->GetString("duration")));
     UpdateDisableSwipe(json->GetBool("disableSwipe"));
     static const std::unordered_map<std::string, EdgeEffect> uMap {
         { "EdgeEffect.Spring", EdgeEffect::SPRING },
@@ -49,9 +51,6 @@ void SwiperPaintProperty::FromJson(const std::unique_ptr<JsonValue>& json)
         { "EdgeEffect.None", EdgeEffect::NONE },
     };
     auto effectMode = json->GetString("effectMode");
-    if (!uMap.count(effectMode)) {
-        LOGE("UITree |ERROR| found no %{public}s", effectMode.c_str());
-    }
     UpdateEdgeEffect(uMap.count(effectMode) ? uMap.at(effectMode) : EdgeEffect::SPRING);
     PaintProperty::FromJson(json);
 }

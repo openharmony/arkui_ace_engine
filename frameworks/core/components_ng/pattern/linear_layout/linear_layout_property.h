@@ -101,9 +101,6 @@ public:
         if (pos != std::string::npos) {
             ++pos;
             alignItems = alignItems.substr(pos, alignItems.length() - pos);
-            if (!uMap.count(alignItems)) {
-                LOGE("UITree |ERROR| found no %{public}s", alignItems.c_str());
-            }
             UpdateCrossAxisAlign(uMap.count(alignItems) ? uMap.at(alignItems) : FlexAlign::CENTER);
         } else {
             LOGE("UITree |ERROR| invalid %{public}s", alignItems.c_str());

@@ -14,6 +14,8 @@
  */
 
 #include "core/components_ng/pattern/list/list_layout_property.h"
+
+#include "base/utils/string_utils.h"
 #include "core/components_v2/list/list_properties.h"
 
 namespace OHOS::Ace::NG {
@@ -85,12 +87,11 @@ void ListLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 void ListLayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json)
 {
     UpdateSpace(Dimension::FromString(json->GetString("space")));
-    UpdateInitialIndex(std::stoi(json->GetString("initialIndex")));
+    UpdateInitialIndex(StringUtils::StringToInt(json->GetString("initialIndex")));
     auto dividerJson = json->GetObject("divider");
     if (dividerJson->Contains("strokeWidth")) {
         UpdateDivider(ItemDividerFromJson(dividerJson));
     }
-
     LayoutProperty::FromJson(json);
 }
 }

@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/text/text_layout_property.h"
 
+#include "base/utils/string_utils.h"
+
 namespace OHOS::Ace::NG {
 namespace {
 static const std::array<std::string, 6> TEXT_BASE_LINE_TO_STRING = {
@@ -115,7 +117,7 @@ void TextLayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json)
     UpdateFontWeight(V2::ConvertWrapStringToFontWeight(json->GetString("fontWeight")));
     UpdateTextAlign(V2::ConvertWrapStringToTextAlign(json->GetString("textAlign")));
     UpdateTextOverflow(V2::ConvertWrapStringToTextOverflow(json->GetString("textOverflow")));
-    UpdateMaxLines(std::stoul(json->GetString("maxLines")));
+    UpdateMaxLines(StringUtils::StringToUint(json->GetString("maxLines")));
     LayoutProperty::FromJson(json);
 }
 } // namespace OHOS::Ace::NG
