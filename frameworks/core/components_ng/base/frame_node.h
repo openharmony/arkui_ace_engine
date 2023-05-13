@@ -231,6 +231,8 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
+    void FromJson(const std::unique_ptr<JsonValue>& json) override;
+
     RefPtr<FrameNode> GetAncestorNodeOfFrame() const;
 
     std::string& GetNodeName()

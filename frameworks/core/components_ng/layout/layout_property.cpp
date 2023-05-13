@@ -103,6 +103,10 @@ void LayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("direction", TextDirectionToString(GetLayoutDirection()).c_str());
 }
 
+void LayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json)
+{
+}
+
 RefPtr<LayoutProperty> LayoutProperty::Clone() const
 {
     auto layoutProperty = MakeRefPtr<LayoutProperty>();

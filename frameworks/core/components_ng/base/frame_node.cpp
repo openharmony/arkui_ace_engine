@@ -311,14 +311,14 @@ void FrameNode::GeometryNodeToJsonValue(std::unique_ptr<JsonValue>& json) const
 
 void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
-    if (renderContext_) {
-        renderContext_->ToJsonValue(json);
-    }
     // scrollable in AccessibilityProperty
     ACE_PROPERTY_TO_JSON_VALUE(accessibilityProperty_, AccessibilityProperty);
     ACE_PROPERTY_TO_JSON_VALUE(layoutProperty_, LayoutProperty);
     ACE_PROPERTY_TO_JSON_VALUE(paintProperty_, PaintProperty);
     ACE_PROPERTY_TO_JSON_VALUE(pattern_, Pattern);
+    if (renderContext_) {
+        renderContext_->ToJsonValue(json);
+    }
     if (eventHub_) {
         eventHub_->ToJsonValue(json);
     }
@@ -327,6 +327,26 @@ void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     TouchToJsonValue(json);
     GeometryNodeToJsonValue(json);
     json->Put("id", propInspectorId_.value_or("").c_str());
+}
+
+void FrameNode::FromJson(const std::unique_ptr<JsonValue>& json)
+{
+    LOGD("UITree start decode accessibilityProperty");
+    accessibilityProperty_->FromJson(json);
+    LOGD("UITree start decode layoutProperty");
+    layoutProperty_->FromJson(json);
+    LOGD("UITree start decode paintProperty");
+    paintProperty_->FromJson(json);
+    LOGD("UITree start decode pattern");
+    pattern_->FromJson(json);
+    if (renderContext_) {
+        LOGD("UITree start decode renderContext");
+        renderContext_->FromJson(json);
+    }
+    if (eventHub_) {
+        LOGD("UITree start decode eventHub");
+        eventHub_->FromJson(json);
+    }
 }
 
 void FrameNode::OnAttachToMainTree(bool recursive)

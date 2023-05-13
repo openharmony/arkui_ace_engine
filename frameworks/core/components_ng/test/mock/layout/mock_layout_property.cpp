@@ -18,6 +18,7 @@
 namespace OHOS::Ace::NG {
 void LayoutProperty::Reset() {}
 void LayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
+void LayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json) {}
 
 RefPtr<LayoutProperty> LayoutProperty::Clone() const
 {
