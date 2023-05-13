@@ -24,7 +24,6 @@
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navrouter/navrouter_model_ng.h"
 #include "core/components_ng/pattern/navrouter/navrouter_pattern.h"
-#include "core/components_ng/pattern/navrouter/navrouter_view.h"
 
 namespace OHOS::Ace {
 std::unique_ptr<NavRouterModel> NavRouterModel::instance_ = nullptr;
