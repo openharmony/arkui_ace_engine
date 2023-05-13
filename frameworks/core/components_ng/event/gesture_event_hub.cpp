@@ -411,7 +411,13 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     }
     dragDropManager->SetSummaryMap(summary.summary);
     CHECK_NULL_VOID(pixelMap_);
-    std::shared_ptr<Media::PixelMap> pixelMap = pixelMap_->GetPixelMapSharedPtr();
+    std::shared_ptr<Media::PixelMap> pixelMap;
+    if (dragDropInfo.pixelMap) {
+        pixelMap = dragDropInfo.pixelMap->GetPixelMapSharedPtr();
+    }    
+    if (pixelMap == nullptr) {
+        pixelMap = pixelMap_->GetPixelMapSharedPtr();
+    }
     if (pixelMap->GetWidth() > Msdp::DeviceStatus::MAX_PIXEL_MAP_WIDTH ||
         pixelMap->GetHeight() > Msdp::DeviceStatus::MAX_PIXEL_MAP_HEIGHT) {
             float scaleWidth = static_cast<float>(Msdp::DeviceStatus::MAX_PIXEL_MAP_WIDTH) / pixelMap->GetWidth();
