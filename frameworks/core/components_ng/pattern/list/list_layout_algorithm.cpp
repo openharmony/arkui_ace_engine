@@ -71,6 +71,8 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     paddingBeforeContent_ = axis == Axis::HORIZONTAL ? padding.left.value_or(0) : padding.top.value_or(0);
     paddingAfterContent_ = axis == Axis::HORIZONTAL ? padding.right.value_or(0) : padding.bottom.value_or(0);
     contentMainSize_ = 0.0f;
+    contentStartOffset_ = listLayoutProperty->GetContentStartOffset().value_or(0.0f);
+    contentEndOffset_ = listLayoutProperty->GetContentEndOffset().value_or(0.0f);
     totalItemCount_ = layoutWrapper->GetTotalChildCount();
     if (!GetMainAxisSize(contentIdealSize, axis)) {
         if (totalItemCount_ == 0) {
@@ -208,7 +210,10 @@ void ListLayoutAlgorithm::MeasureList(
             jumpIndex_.value(), currentOffset_, startMainPos_, endMainPos_);
         if (scrollIndexAlignment_ == ScrollIndexAlignment::ALIGN_TOP) {
             jumpIndex_ = GetLanesFloor(layoutWrapper, jumpIndex_.value());
-            LayoutForward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value(), 0);
+            if (jumpIndex_ == 0) {
+                startMainPos_ = contentStartOffset_;
+            }
+            LayoutForward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value(), startMainPos_);
             if (jumpIndex_.value() > 0 && GreatNotEqual(GetStartPosition(), startMainPos_)) {
                 LayoutBackward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value() - 1, GetStartPosition());
             }

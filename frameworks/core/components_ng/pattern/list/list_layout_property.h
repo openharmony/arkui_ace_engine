@@ -51,6 +51,8 @@ public:
         value->propListItemAlign_ = CloneListItemAlign();
         value->propCachedCount_ = CloneCachedCount();
         value->propStickyStyle_ = CloneStickyStyle();
+        value->propContentStartOffset_ = CloneContentStartOffset();
+        value->propContentEndOffset_ = CloneContentEndOffset();
         value->propEditMode_ = CloneEditMode();
         return value;
     }
@@ -69,6 +71,8 @@ public:
         ResetListItemAlign();
         ResetCachedCount();
         ResetStickyStyle();
+        ResetContentStartOffset();
+        ResetContentEndOffset();
         ResetEditMode();
     }
 
@@ -86,6 +90,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CachedCount, int32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StickyStyle, V2::StickyStyle, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ChainAnimation, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ContentStartOffset, float, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ContentEndOffset, float, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EditMode, bool, PROPERTY_UPDATE_MEASURE);
 };
 } // namespace OHOS::Ace::NG

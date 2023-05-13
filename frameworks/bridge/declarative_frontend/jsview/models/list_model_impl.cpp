@@ -134,6 +134,16 @@ void ListModelImpl::SetSticky(V2::StickyStyle stickyStyle)
     JSViewSetProperty(&V2::ListComponent::SetSticky, stickyStyle);
 }
 
+void ListModelImpl::SetContentStartOffset(float startOffset)
+{
+    JSViewSetProperty(&V2::ListComponent::SetContentStartOffset, startOffset);
+}
+
+void ListModelImpl::SetContentEndOffset(float endOffset)
+{
+    JSViewSetProperty(&V2::ListComponent::SetContentEndOffset, endOffset);
+}
+
 void ListModelImpl::SetOnScroll(OnScrollEvent&& onScroll)
 {
     JSViewSetProperty(&V2::ListComponent::SetOnScroll, std::move(onScroll));

@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -128,6 +129,8 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     float prevStartOffset = startMainPos_;
     float prevEndOffset = endMainPos_ - contentMainSize_;
     contentMainSize_ = listLayoutAlgorithm->GetContentMainSize();
+    contentStartOffset_ = listLayoutAlgorithm->GetContentStartOffset();
+    contentEndOffset_ = listLayoutAlgorithm->GetContentEndOffset();
     startMainPos_ = listLayoutAlgorithm->GetStartPosition();
     endMainPos_ = listLayoutAlgorithm->GetEndPosition();
     crossMatchChild_ = listLayoutAlgorithm->IsCrossMatchChild();
@@ -327,6 +330,8 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
     listLayoutAlgorithm->SetCurrentDelta(currentDelta_);
     listLayoutAlgorithm->SetItemsPosition(itemPosition_);
     listLayoutAlgorithm->SetPrevContentMainSize(contentMainSize_);
+    listLayoutAlgorithm->SetContentStartOffset(contentStartOffset_);
+    listLayoutAlgorithm->SetContentEndOffset(contentEndOffset_);
     if (IsOutOfBoundary(false) && scrollState_ != SCROLL_FROM_AXIS) {
         listLayoutAlgorithm->SetOverScrollFeature();
     }
@@ -525,16 +530,22 @@ void ListPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEf
         auto list = weak.Upgrade();
         auto endPos = list->endMainPos_ + list->GetChainDelta(list->endIndex_);
         auto startPos = list->startMainPos_ + list->GetChainDelta(list->startIndex_);
-        return list->contentMainSize_ - (endPos - startPos);
+        return list->contentMainSize_ - (endPos - startPos) - list->contentEndOffset_;
     });
-    scrollEffect->SetTrailingCallback([]() -> double { return 0.0; });
+    scrollEffect->SetTrailingCallback([weak = AceType::WeakClaim(this)]() -> double {
+        auto list = weak.Upgrade();
+        return list->contentStartOffset_;
+    });
     scrollEffect->SetInitLeadingCallback([weak = AceType::WeakClaim(this)]() -> double {
         auto list = weak.Upgrade();
         auto endPos = list->endMainPos_ + list->GetChainDelta(list->endIndex_);
         auto startPos = list->startMainPos_ + list->GetChainDelta(list->startIndex_);
-        return list->contentMainSize_ - (endPos - startPos);
+        return list->contentMainSize_ - (endPos - startPos) - list->contentEndOffset_;
     });
-    scrollEffect->SetInitTrailingCallback([]() -> double { return 0.0; });
+    scrollEffect->SetInitTrailingCallback([weak = AceType::WeakClaim(this)]() -> double {
+        auto list = weak.Upgrade();
+        return list->contentStartOffset_;
+    });
 }
 
 void ListPattern::CheckRestartSpring()

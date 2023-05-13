@@ -53,6 +53,8 @@ public:
     static void SetListItemAlign(int32_t itemAlignment);
     static void SetLanes(const JSCallbackInfo& info);
     static void SetSticky(int32_t sticky);
+    static void SetContentStartOffset(int32_t startOffset);
+    static void SetContentEndOffset(int32_t endOffset);
 
     static void ItemDragStartCallback(const JSCallbackInfo& info);
     static void ItemDragEnterCallback(const JSCallbackInfo& info);

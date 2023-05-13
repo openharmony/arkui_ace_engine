@@ -211,6 +211,16 @@ void JSList::SetSticky(int32_t sticky)
     ListModel::GetInstance()->SetSticky(static_cast<V2::StickyStyle>(sticky));
 }
 
+void JSList::SetContentStartOffset(int32_t startOffset)
+{
+    ListModel::GetInstance()->SetContentStartOffset(startOffset);
+}
+
+void JSList::SetContentEndOffset(int32_t endOffset)
+{
+    ListModel::GetInstance()->SetContentEndOffset(endOffset);
+}
+
 void JSList::SetDivider(const JSCallbackInfo& args)
 {
     if (args.Length() < 1 || !args[0]->IsObject()) {
@@ -542,6 +552,8 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("alignListItem", &JSList::SetListItemAlign);
     JSClass<JSList>::StaticMethod("lanes", &JSList::SetLanes);
     JSClass<JSList>::StaticMethod("sticky", &JSList::SetSticky);
+    JSClass<JSList>::StaticMethod("contentStartOffset", &JSList::SetContentStartOffset);
+    JSClass<JSList>::StaticMethod("contentEndOffset", &JSList::SetContentEndOffset);
 
     JSClass<JSList>::StaticMethod("onScroll", &JSList::ScrollCallback);
     JSClass<JSList>::StaticMethod("onReachStart", &JSList::ReachStartCallback);
