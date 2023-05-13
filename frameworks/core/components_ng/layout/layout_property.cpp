@@ -44,6 +44,20 @@ std::string VisibleTypeToString(VisibleType type)
     return "Visibility.Visible";
 }
 
+VisibleType StringToVisibleType(const std::string& str)
+{
+    static const std::unordered_map<std::string, VisibleType> uMap {
+        { "Visibility.Visible", VisibleType::VISIBLE },
+        { "Visibility.Hidden", VisibleType::INVISIBLE },
+        { "Visibility.None", VisibleType::GONE },
+    };
+
+    if (!uMap.count(str)) {
+        LOGE("UITree |ERROR| found no %{public}s", str.c_str());
+    }
+    return uMap.count(str) ? uMap.at(str) : VisibleType::VISIBLE;
+}
+
 std::string TextDirectionToString(TextDirection type)
 {
     static const LinearEnumMapNode<TextDirection, std::string> toStringMap[] = {
@@ -57,6 +71,21 @@ std::string TextDirectionToString(TextDirection type)
         return toStringMap[idx].value;
     }
     return "Direction.Ltr";
+}
+
+TextDirection StringToTextDirection(const std::string& str)
+{
+    static const std::unordered_map<std::string, TextDirection> uMap {
+        { "Direction.Ltr", TextDirection::LTR },
+        { "Direction.Rtl", TextDirection::RTL },
+        { "Direction.Inherit", TextDirection::INHERIT },
+        { "Direction.Auto", TextDirection::AUTO },
+    };
+
+    if (!uMap.count(str)) {
+        LOGE("UITree |ERROR| found no %{public}s", str.c_str());
+    }
+    return uMap.count(str) ? uMap.at(str) : TextDirection::LTR;
 }
 } // namespace
 
@@ -105,6 +134,19 @@ void LayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 
 void LayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json)
 {
+    UpdateCalcLayoutProperty(MeasureProperty::FromJson(json));
+    UpdateLayoutWeight(json->GetDouble("layoutWeight"));
+    UpdateAlignment(Alignment::GetAlignment(TextDirection::LTR, json->GetString("align")));
+    auto padding = json->GetString("padding");
+    if (padding != "0.0") {
+        UpdatePadding(PaddingProperty::FromJsonString(padding));
+    }
+    auto margin = json->GetString("margin");
+    if (margin != "0.0") {
+        UpdateMargin(MarginProperty::FromJsonString(margin));
+    }
+    UpdateVisibility(StringToVisibleType(json->GetString("visibility")));
+    UpdateLayoutDirection(StringToTextDirection(json->GetString("direction")));
 }
 
 RefPtr<LayoutProperty> LayoutProperty::Clone() const

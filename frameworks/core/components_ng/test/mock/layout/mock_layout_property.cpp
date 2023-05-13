@@ -56,4 +56,9 @@ void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConst
 }
 
 void LayoutProperty::OnVisibilityUpdate(VisibleType visible) {}
+
+RefPtr<FrameNode> LayoutProperty::GetHost() const
+{
+    return nullptr;
+}
 } // namespace OHOS::Ace::NG

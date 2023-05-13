@@ -1085,6 +1085,15 @@ int32_t ListPattern::GetItemIndexByPosition(float xOffset, float yOffset)
 void ListPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     json->Put("multiSelectable", multiSelectable_);
+    json->Put("startIndex", startIndex_);
+    json->Put("startMainPos", startMainPos_);
+}
+
+void ListPattern::FromJson(const std::unique_ptr<JsonValue>& json)
+{
+    ScrollToIndex(json->GetInt("startIndex"));
+    ScrollBy(-json->GetDouble("startMainPos"));
+    ScrollablePattern::FromJson(json);
 }
 
 void ListPattern::SetAccessibilityAction()

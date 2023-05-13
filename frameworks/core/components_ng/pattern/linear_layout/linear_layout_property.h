@@ -60,7 +60,7 @@ public:
         std::string alignItems;
         auto flexAlignItems = GetCrossAxisAlign().value_or(FlexAlign::CENTER);
         if (isVertical_) {
-            alignItems = "HorizontalAlign::Center";
+            alignItems = "HorizontalAlign.Center";
             if (flexAlignItems == FlexAlign::FLEX_START) {
                 alignItems = "HorizontalAlign.Start";
             } else if (flexAlignItems == FlexAlign::CENTER) {
@@ -82,6 +82,35 @@ public:
         json->Put("alignItems", alignItems.c_str());
         auto justifyContent = V2::ConvertFlexAlignToStirng(GetMainAxisAlign().value_or(FlexAlign::FLEX_START));
         json->Put("justifyContent", justifyContent.c_str());
+    }
+
+    void FromJson(const std::unique_ptr<JsonValue>& json) override
+    {
+        static const std::unordered_map<std::string, FlexAlign> uMap {
+            { "Start", FlexAlign::FLEX_START },
+            { "Top", FlexAlign::FLEX_START },
+            { "Center", FlexAlign::CENTER },
+            { "End", FlexAlign::FLEX_END },
+            { "Bottom", FlexAlign::FLEX_END },
+        };
+
+        UpdateSpace(Dimension::FromString(json->GetString("space")));
+        auto alignItems = json->GetString("alignItems");
+        auto pos = alignItems.find('.');
+        LOGD("UITree alignItems=%{public}s", alignItems.c_str());
+        if (pos != std::string::npos) {
+            ++pos;
+            alignItems = alignItems.substr(pos, alignItems.length() - pos);
+            if (!uMap.count(alignItems)) {
+                LOGE("UITree |ERROR| found no %{public}s", alignItems.c_str());
+            }
+            UpdateCrossAxisAlign(uMap.count(alignItems) ? uMap.at(alignItems) : FlexAlign::CENTER);
+        } else {
+            LOGE("UITree |ERROR| invalid %{public}s", alignItems.c_str());
+        }
+        UpdateMainAxisAlign(V2::ConvertStringToFlexAlign(json->GetString("justifyContent")));
+
+        LayoutProperty::FromJson(json);
     }
 
 protected:

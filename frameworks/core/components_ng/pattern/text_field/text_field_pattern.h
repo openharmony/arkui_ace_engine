@@ -436,6 +436,7 @@ public:
     }
     void CaretMoveToLastNewLineChar();
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void FromJson(const std::unique_ptr<JsonValue>& json) override;
     void InitEditingValueText(std::string content);
     void InitCaretPosition(std::string content);
     const TextEditingValueNG& GetTextEditingValue()
@@ -690,6 +691,7 @@ public:
     TextAlign GetTextAlign() const;
     std::string GetPlaceHolder() const;
     uint32_t GetMaxLength() const;
+    uint32_t GetMaxLines() const;
     std::string GetInputFilter() const;
     std::string GetCopyOptionString() const;
     std::string GetInputStyleString() const;

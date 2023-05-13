@@ -369,6 +369,37 @@ public:
         return OffsetT<T>(width_ / 2.0 + x_, height_ / 2.0 + y_);
     }
 
+    static RectT FromString(const std::string& str)
+    {
+        static const int32_t valueSize = 4;
+        LOGD("UITree str=%{public}s", str.c_str());
+
+        std::vector<T> vals;
+        std::string val;
+        for (auto& it : str) {
+            if ((it >= '0' && it <= '9') || (it == '.' && !val.empty())) {
+                val += it;
+            } else {
+                if (!val.empty()) {
+                    vals.push_back(std::stof(val));
+                    val.clear();
+                }
+            }
+        }
+
+        if (vals.size() != valueSize) {
+            LOGE("UITree |ERROR| invalid str=%{public}s", str.c_str());
+            return RectT();
+        }
+
+        int32_t index = 0;
+        T x = vals[index++];
+        T y = vals[index++];
+        T width = vals[index++];
+        T height = vals[index++];
+        return RectT(x, y, width, height);
+    }
+
 private:
     T x_ = 0;
     T y_ = 0;

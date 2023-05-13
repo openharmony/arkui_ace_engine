@@ -86,6 +86,8 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
+    void FromJson(const std::unique_ptr<JsonValue>& json) override;
+
     bool UpdateCurrentOffset(float offset, int32_t source) override;
 
     int32_t GetStartIndex() const

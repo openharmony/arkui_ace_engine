@@ -180,6 +180,42 @@ std::string Dimension::ToString() const
     return StringUtils::DoubleToString(value_).append(units[static_cast<int>(unit_)]);
 }
 
+Dimension Dimension::FromString(const std::string& str)
+{
+    static const int32_t percentUnit = 100;
+    static const std::unordered_map<std::string, DimensionUnit> uMap {
+        { "px", DimensionUnit::PX },
+        { "vp", DimensionUnit::VP },
+        { "fp", DimensionUnit::FP },
+        { "%", DimensionUnit::PERCENT },
+        { "lpx", DimensionUnit::LPX },
+        { "auto", DimensionUnit::AUTO },
+    };
+
+    LOGD("UITree str=%{public}s", str.c_str());
+    double value = 0.0;
+    DimensionUnit unit = DimensionUnit::FP;
+    if (str.empty()) {
+        LOGE("UITree |ERROR| empty string");
+        return Dimension(value, unit);
+    }
+
+    for (auto i = str.length() - 1; i >= 0; --i) {
+        if (str[i] >= '0' && str[i] <= '9') {
+            value = std::stod(str.substr(0, i + 1));
+            auto subStr = str.substr(i + 1);
+            LOGD("UITree [%{public}lf, %{public}s]", value, subStr.c_str());
+            if (!uMap.count(subStr)) {
+                LOGE("UITree |ERROR| found no %{public}s", subStr.c_str());
+            }
+            unit = uMap.count(subStr) ? uMap.at(subStr) : unit;
+            value = unit == DimensionUnit::PERCENT ? value / percentUnit : value;
+            break;
+        }
+    }
+    return Dimension(value, unit);
+}
+
 bool Dimension::NormalizeToPx(
     double vpScale, double fpScale, double lpxScale, double parentLength, double& result) const
 {

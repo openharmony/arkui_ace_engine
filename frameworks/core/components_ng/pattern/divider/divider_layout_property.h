@@ -45,8 +45,14 @@ public:
     {
         LayoutProperty::ToJsonValue(json);
         json->Put("vertical", propVertical_.value_or(true) ? "true" : "false");
-        json->Put(
-            "strokeWidth", std::to_string(propStrokeWidth_.value_or(Dimension(1, DimensionUnit::VP)).Value()).c_str());
+        json->Put("strokeWidth", propStrokeWidth_.value_or(Dimension(1, DimensionUnit::VP)).ToString().c_str());
+    }
+
+    void FromJson(const std::unique_ptr<JsonValue>& json) override
+    {
+        UpdateVertical(json->GetString("vertical") == "true");
+        UpdateStrokeWidth(Dimension::FromString(json->GetString("strokeWidth")));
+        LayoutProperty::FromJson(json);
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Vertical, bool, PROPERTY_UPDATE_MEASURE);

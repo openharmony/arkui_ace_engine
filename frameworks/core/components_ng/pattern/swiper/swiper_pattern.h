@@ -113,6 +113,20 @@ public:
         } else {
             json->Put("indicator", GetDigitIndicatorStyle().c_str());
         }
+        json->Put("currentIndex", GetCurrentIndex());
+        json->Put("currentOffset", currentOffset_);
+    }
+
+    void FromJson(const std::unique_ptr<JsonValue>& json) override
+    {
+        currentIndex_ = json->GetInt("currentIndex");
+        auto currentOffset = json->GetDouble("currentOffset");
+        if (currentOffset != currentOffset_) {
+            auto delta = currentOffset - currentOffset_;
+            LOGD("UITree delta=%{public}f", delta);
+            UpdateCurrentOffset(delta);
+        }
+        Pattern::FromJson(json);
     }
 
     std::string GetDotIndicatorStyle() const

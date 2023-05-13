@@ -107,4 +107,15 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("copyOption", GetCopyOptionString().c_str());
 }
 
+void TextLayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json)
+{
+    UpdateContent(json->GetString("content"));
+    UpdateFontSize(Dimension::FromString(json->GetString("fontSize")));
+    UpdateTextColor(Color::ColorFromString(json->GetString("fontColor")));
+    UpdateFontWeight(V2::ConvertWrapStringToFontWeight(json->GetString("fontWeight")));
+    UpdateTextAlign(V2::ConvertWrapStringToTextAlign(json->GetString("textAlign")));
+    UpdateTextOverflow(V2::ConvertWrapStringToTextOverflow(json->GetString("textOverflow")));
+    UpdateMaxLines(std::stoul(json->GetString("maxLines")));
+    LayoutProperty::FromJson(json);
+}
 } // namespace OHOS::Ace::NG

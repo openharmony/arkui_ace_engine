@@ -3801,6 +3801,14 @@ uint32_t TextFieldPattern::GetMaxLength() const
                                           : Infinity<uint32_t>();
 }
 
+uint32_t TextFieldPattern::GetMaxLines() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, Infinity<uint32_t>());
+    return layoutProperty->HasMaxLines() ? layoutProperty->GetMaxLinesValue(Infinity<uint32_t>())
+                                         : Infinity<uint32_t>();
+}
+
 std::string TextFieldPattern::GetPlaceHolder() const
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
@@ -4093,6 +4101,30 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("copyOption", GetCopyOptionString().c_str());
     json->Put("style", GetInputStyleString().c_str());
     json->Put("showError", GetErrorTextState() ? GetErrorTextString().c_str() : "undefined");
+    auto maxLines = GetMaxLines();
+    json->Put("maxLines", GreatOrEqual(maxLines, Infinity<uint32_t>()) ? "INF" : std::to_string(maxLines).c_str());
+}
+
+void TextFieldPattern::FromJson(const std::unique_ptr<JsonValue>& json)
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    layoutProperty->UpdatePlaceholder(json->GetString("placeholder"));
+    UpdateEditingValue(json->GetString("text"), std::stoi(json->GetString("caretPosition")));
+    SetEditingValueToProperty(textEditingValue_.text);
+    UpdateSelection(textEditingValue_.caretPosition);
+    auto maxLines = json->GetString("maxLines");
+    if (!maxLines.empty() && maxLines != "INF") {
+        layoutProperty->UpdateMaxLines(std::stoul(maxLines));
+    }
+    static const std::unordered_map<std::string, CopyOptions> uMap = {
+        { "CopyOptions.None", CopyOptions::None },
+        { "CopyOptions.InApp", CopyOptions::InApp },
+        { "CopyOptions.Local", CopyOptions::Local },
+        { "CopyOptions.Distributed", CopyOptions::Distributed },
+    };
+    auto copyOption = json->GetString("copyOption");
+    layoutProperty->UpdateCopyOptions(uMap.count(copyOption) ? uMap.at(copyOption) : CopyOptions::None);
+    Pattern::FromJson(json);
 }
 
 bool TextFieldPattern::IsSelectedAreaRedraw() const

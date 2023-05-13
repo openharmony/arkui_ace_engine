@@ -90,4 +90,31 @@ std::string Alignment::GetAlignmentStr(TextDirection direction) const
     return result;
 }
 
+Alignment Alignment::GetAlignment(TextDirection direction, const std::string& str)
+{
+    static const std::unordered_map<std::string, std::function<Alignment(TextDirection)>> uMap {
+        { "Alignment.Top", [](TextDirection direction) { return TOP_CENTER; } },
+        { "Alignment.TopStart",
+            [](TextDirection direction) { return direction == TextDirection::LTR ? TOP_LEFT : TOP_RIGHT; } },
+        { "Alignment.TopEnd",
+            [](TextDirection direction) { return direction == TextDirection::LTR ? TOP_RIGHT : TOP_LEFT; } },
+        { "Alignment.Center", [](TextDirection direction) { return CENTER; } },
+        { "Alignment.Start",
+            [](TextDirection direction) { return direction == TextDirection::LTR ? CENTER_LEFT : CENTER_RIGHT; } },
+        { "Alignment.End",
+            [](TextDirection direction) { return direction == TextDirection::LTR ? CENTER_RIGHT : CENTER_LEFT; } },
+        { "Alignment.Bottom", [](TextDirection direction) { return BOTTOM_CENTER; } },
+        { "Alignment.BottomStart",
+            [](TextDirection direction) { return direction == TextDirection::LTR ? BOTTOM_LEFT : BOTTOM_RIGHT; } },
+        { "Alignment.BottomEnd",
+            [](TextDirection direction) { return direction == TextDirection::LTR ? BOTTOM_RIGHT : BOTTOM_LEFT; } },
+    };
+
+    LOGD("UITree str=%{public}s", str.c_str());
+    if (!uMap.count(str)) {
+        LOGE("UITree |ERROR| found no %{public}s", str.c_str());
+    }
+
+    return uMap.count(str) ? uMap.at(str)(direction) : CENTER;
+}
 } // namespace OHOS::Ace

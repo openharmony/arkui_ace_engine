@@ -238,4 +238,9 @@ bool ImageSourceInfo::SupportObjCache() const
 {
     return false;
 }
+
+const std::string& ImageSourceInfo::GetModuleName() const
+{
+    return moduleName_;
+}
 } // namespace OHOS::Ace
