@@ -36,7 +36,7 @@ AnimatedImage::AnimatedImage(std::unique_ptr<SkCodec> codec, const SizeF& size, 
     int32_t totalDuration = 0;
     auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    animator_ = MakeRefPtr<Animator>(pipelineContext);
+    animator_ = CREATE_ANIMATOR(pipelineContext);
     CHECK_NULL_VOID(animator_);
 
     auto info = codec_->getFrameInfo();

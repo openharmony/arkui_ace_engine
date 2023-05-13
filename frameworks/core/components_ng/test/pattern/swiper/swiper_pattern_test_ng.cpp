@@ -108,9 +108,9 @@ HWTEST_F(SwiperPatternTestNg, SwiperEvent001, TestSize.Level1)
     pattern->HandleTouchEvent(touchEventInfo);
     EXPECT_FALSE(pattern->indicatorDoingAnimation_);
     const char* name = "HandleTouchDown";
-    pattern->controller_ = AceType::MakeRefPtr<Animator>(name);
+    pattern->controller_ = CREATE_ANIMATOR(name);
     pattern->controller_->status_ = Animator::Status::RUNNING;
-    pattern->springController_ = AceType::MakeRefPtr<Animator>(name);
+    pattern->springController_ = CREATE_ANIMATOR(name);
     pattern->springController_->status_ = Animator::Status::RUNNING;
     pattern->HandleTouchEvent(touchEventInfo);
     EXPECT_FALSE(pattern->indicatorDoingAnimation_);

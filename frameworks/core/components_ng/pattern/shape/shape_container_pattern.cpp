@@ -74,6 +74,20 @@ void ShapeContainerPattern::ViewPortTransform()
 
 void ShapeContainerPattern::OnModifyDone()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto paintProperty = host->GetPaintProperty<ShapeContainerPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (paintProperty->HasStrokeMiterLimit()) {
+        auto miterLimit = paintProperty->GetStrokeMiterLimitValue();
+        if (Negative(miterLimit)) {
+            paintProperty->UpdateStrokeMiterLimit(ShapePaintProperty::STROKE_MITERLIMIT_DEFAULT);
+        } else if (NonNegative(miterLimit) &&
+            LessNotEqual(miterLimit, ShapePaintProperty::STROKE_MITERLIMIT_MIN)) {
+            paintProperty->UpdateStrokeMiterLimit(ShapePaintProperty::STROKE_MITERLIMIT_MIN);
+        }
+    }
+
     Pattern::OnModifyDone();
     for (auto childNode : ChildNodes_) {
         auto child = childNode.Upgrade();

@@ -26,7 +26,6 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
-#include "core/components_ng/pattern/button/button_view.h"
 #include "core/components_ng/pattern/grid/grid_item_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
@@ -166,7 +165,6 @@ void GridTestNg::CreateGridItemWithButton(int32_t number)
         gridItemModel.Create();
         SetHeight(Dimension(DEFAULT_ITEM_HEIGHT));
         {
-            ButtonView::Create("Button");
             ViewStackProcessor::GetInstance()->Pop();
         }
         ViewStackProcessor::GetInstance()->Pop();
@@ -180,7 +178,6 @@ void GridTestNg::CreateHorizontalGridItemWithButton(int32_t number)
         gridItemModel.Create();
         SetWidth(Dimension(DEFAULT_ITEM_WIDTH));
         {
-            ButtonView::Create("Button");
             ViewStackProcessor::GetInstance()->Pop();
         }
         ViewStackProcessor::GetInstance()->Pop();

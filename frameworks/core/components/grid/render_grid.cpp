@@ -251,7 +251,7 @@ void RenderGrid::Update(const RefPtr<Component>& component)
     }
 
     if (!animator_) {
-        animator_ = AceType::MakeRefPtr<Animator>(GetContext());
+        animator_ = CREATE_ANIMATOR(GetContext());
     }
     MarkNeedLayout();
 }

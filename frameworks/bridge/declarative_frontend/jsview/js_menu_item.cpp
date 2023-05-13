@@ -16,8 +16,34 @@
 #include "bridge/declarative_frontend/jsview/js_menu_item.h"
 
 #include "base/log/ace_scoring_log.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/menu/menu_item/menu_item_view.h"
+#include "bridge/declarative_frontend/jsview/models/menu_item_model_impl.h"
+#include "core/components_ng/base/view_stack_model.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_model.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
+
+namespace OHOS::Ace {
+std::unique_ptr<MenuItemModel> MenuItemModel::instance_ = nullptr;
+std::mutex MenuItemModel::mutex_;
+
+MenuItemModel* MenuItemModel::GetInstance()
+{
+    if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
+#ifdef NG_BUILD
+            instance_.reset(new NG::MenuItemModelNG());
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::MenuItemModelNG());
+            } else {
+                instance_.reset(new Framework::MenuItemModelImpl());
+            }
+        }
+#endif
+    }
+    return instance_.get();
+}
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 void JSMenuItem::Create(const JSCallbackInfo& info)
@@ -26,67 +52,64 @@ void JSMenuItem::Create(const JSCallbackInfo& info)
         LOGW("JSMenuItem The arg is wrong");
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        // custom menu item
-        if (info[0]->IsFunction()) {
-            auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(info[0]));
-            CHECK_NULL_VOID(builderFunc);
+    // custom menu item
+    if (info[0]->IsFunction()) {
+        auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(info[0]));
+        CHECK_NULL_VOID(builderFunc);
 
-            NG::ScopedViewStackProcessor builderViewStackProcessor;
-            builderFunc->Execute();
-            auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
-            CHECK_NULL_VOID(customNode);
+        ViewStackModel::GetInstance()->NewScope();
+        builderFunc->Execute();
+        auto customNode = ViewStackModel::GetInstance()->Finish();
+        CHECK_NULL_VOID(customNode);
+    } else {
+        auto menuItemObj = JSRef<JSObject>::Cast(info[0]);
+
+        std::string startIconPath;
+        std::string contentStr;
+        std::string endIconPath;
+        std::string labelStr;
+        MenuItemProperties menuItemProps;
+
+        auto startIcon = menuItemObj->GetProperty("startIcon");
+        auto content = menuItemObj->GetProperty("content");
+        auto endIcon = menuItemObj->GetProperty("endIcon");
+        auto label = menuItemObj->GetProperty("labelInfo");
+
+        if (ParseJsMedia(startIcon, startIconPath)) {
+            menuItemProps.startIcon = startIconPath;
         } else {
-            auto menuItemObj = JSRef<JSObject>::Cast(info[0]);
-
-            std::string startIconPath;
-            std::string contentStr;
-            std::string endIconPath;
-            std::string labelStr;
-            NG::MenuItemProperties menuItemProps;
-
-            auto startIcon = menuItemObj->GetProperty("startIcon");
-            auto content = menuItemObj->GetProperty("content");
-            auto endIcon = menuItemObj->GetProperty("endIcon");
-            auto label = menuItemObj->GetProperty("labelInfo");
-
-            if (ParseJsMedia(startIcon, startIconPath)) {
-                menuItemProps.startIcon = startIconPath;
-            } else {
-                LOGI("startIcon is null");
-            }
-
-            if (!ParseJsString(content, contentStr)) {
-                LOGI("content is null");
-            }
-            menuItemProps.content = contentStr;
-
-            if (ParseJsMedia(endIcon, endIconPath)) {
-                menuItemProps.endIcon = endIconPath;
-            } else {
-                LOGI("endIcon is null");
-            }
-
-            if (ParseJsString(label, labelStr)) {
-                menuItemProps.labelInfo = labelStr;
-            } else {
-                LOGI("labelInfo is null");
-            }
-
-            auto builder = menuItemObj->GetProperty("builder");
-            if (!builder.IsEmpty() && builder->IsFunction()) {
-                auto subBuilderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
-                CHECK_NULL_VOID(subBuilderFunc);
-                auto subBuildFunc = [execCtx = info.GetExecutionContext(), func = std::move(subBuilderFunc)]() {
-                    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                    ACE_SCORING_EVENT("MenuItem SubBuilder");
-                    func->ExecuteJS();
-                };
-                menuItemProps.buildFunc = std::move(subBuildFunc);
-            }
-            NG::MenuItemView::Create(menuItemProps);
+            LOGI("startIcon is null");
         }
-        return;
+
+        if (!ParseJsString(content, contentStr)) {
+            LOGI("content is null");
+        }
+        menuItemProps.content = contentStr;
+
+        if (ParseJsMedia(endIcon, endIconPath)) {
+            menuItemProps.endIcon = endIconPath;
+        } else {
+            LOGI("endIcon is null");
+        }
+
+        if (ParseJsString(label, labelStr)) {
+            menuItemProps.labelInfo = labelStr;
+        } else {
+            LOGI("labelInfo is null");
+        }
+
+        auto builder = menuItemObj->GetProperty("builder");
+        if (!builder.IsEmpty() && builder->IsFunction()) {
+            auto subBuilderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+            CHECK_NULL_VOID(subBuilderFunc);
+            auto subBuildFunc = [execCtx = info.GetExecutionContext(), func = std::move(subBuilderFunc)]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                ACE_SCORING_EVENT("MenuItem SubBuilder");
+                func->ExecuteJS();
+            };
+            menuItemProps.buildFunc = std::move(subBuildFunc);
+        }
+        MenuItemModel::GetInstance()->Create(menuItemProps);
     }
 }
 
@@ -118,14 +141,11 @@ void ParseIsSelectedObject(const JSCallbackInfo& info, const JSRef<JSVal>& chang
         auto newJSVal = JSRef<JSVal>::Make(ToJSValue(selected));
         func->ExecuteJS(1, &newJSVal);
     };
-    NG::MenuItemView::SetSelectedChangeEvent(std::move(onSelected));
+    MenuItemModel::GetInstance()->SetSelectedChangeEvent(std::move(onSelected));
 }
 
 void JSMenuItem::IsSelected(const JSCallbackInfo& info)
 {
-    if (!Container::IsCurrentUseNewPipeline()) {
-        return;
-    }
     if (info.Length() < 1 || info.Length() > 2) {
         LOGE("The arg is wrong, it is supposed to have 1 or 2 arguments");
         return;
@@ -135,7 +155,7 @@ void JSMenuItem::IsSelected(const JSCallbackInfo& info)
     if (info.Length() > 0 && info[0]->IsBoolean()) {
         isSelected = info[0]->ToBoolean();
     }
-    NG::MenuItemView::SetSelected(isSelected);
+    MenuItemModel::GetInstance()->SetSelected(isSelected);
     if (info.Length() > 1 && info[1]->IsFunction()) {
         ParseIsSelectedObject(info, info[1]);
     }
@@ -143,9 +163,6 @@ void JSMenuItem::IsSelected(const JSCallbackInfo& info)
 
 void JSMenuItem::SelectIcon(const JSCallbackInfo& info)
 {
-    if (!Container::IsCurrentUseNewPipeline()) {
-        return;
-    }
     bool isShow = false;
     std::string icon;
     if (info.Length() < 1) {
@@ -162,8 +179,8 @@ void JSMenuItem::SelectIcon(const JSCallbackInfo& info)
             LOGW("can not parse select icon.");
         }
     }
-    NG::MenuItemView::SetSelectIcon(isShow);
-    NG::MenuItemView::SetSelectIconSrc(icon);
+    MenuItemModel::GetInstance()->SetSelectIcon(isShow);
+    MenuItemModel::GetInstance()->SetSelectIconSrc(icon);
 }
 
 void JSMenuItem::OnChange(const JSCallbackInfo& info)
@@ -172,26 +189,20 @@ void JSMenuItem::OnChange(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have atleast 1 argument.");
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-        auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](bool selected) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("MenuItem.onChange");
-            JSRef<JSVal> params[1];
-            params[0] = JSRef<JSVal>::Make(ToJSValue(selected));
-            func->ExecuteJS(1, params);
-        };
-        NG::MenuItemView::SetOnChange(std::move(onChange));
-    }
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](bool selected) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("MenuItem.onChange");
+        JSRef<JSVal> params[1];
+        params[0] = JSRef<JSVal>::Make(ToJSValue(selected));
+        func->ExecuteJS(1, params);
+    };
+    MenuItemModel::GetInstance()->SetOnChange(std::move(onChange));
     info.ReturnSelf();
 }
 
 void JSMenuItem::ContentFont(const JSCallbackInfo& info)
 {
-    if (!Container::IsCurrentUseNewPipeline()) {
-        return;
-    }
-
     CalcDimension fontSize;
     std::string weight;
     if (info.Length() < 1 || !info[0]->IsObject()) {
@@ -212,15 +223,12 @@ void JSMenuItem::ContentFont(const JSCallbackInfo& info)
             }
         }
     }
-    NG::MenuItemView::SetFontSize(fontSize);
-    NG::MenuItemView::SetFontWeight(ConvertStrToFontWeight(weight));
+    MenuItemModel::GetInstance()->SetFontSize(fontSize);
+    MenuItemModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(weight));
 }
 
 void JSMenuItem::ContentFontColor(const JSCallbackInfo& info)
 {
-    if (!Container::IsCurrentUseNewPipeline()) {
-        return;
-    }
     std::optional<Color> color = std::nullopt;
     if (info.Length() < 1) {
         LOGW("The argv is wrong, it is supposed to have at least 1 argument");
@@ -230,15 +238,11 @@ void JSMenuItem::ContentFontColor(const JSCallbackInfo& info)
             color = textColor;
         }
     }
-    NG::MenuItemView::SetFontColor(color);
+    MenuItemModel::GetInstance()->SetFontColor(color);
 }
 
 void JSMenuItem::LabelFont(const JSCallbackInfo& info)
 {
-    if (!Container::IsCurrentUseNewPipeline()) {
-        return;
-    }
-
     CalcDimension fontSize;
     std::string weight;
     if (info.Length() < 1 || !info[0]->IsObject()) {
@@ -259,15 +263,12 @@ void JSMenuItem::LabelFont(const JSCallbackInfo& info)
             }
         }
     }
-    NG::MenuItemView::SetLabelFontSize(fontSize);
-    NG::MenuItemView::SetLabelFontWeight(ConvertStrToFontWeight(weight));
+    MenuItemModel::GetInstance()->SetLabelFontSize(fontSize);
+    MenuItemModel::GetInstance()->SetLabelFontWeight(ConvertStrToFontWeight(weight));
 }
 
 void JSMenuItem::LabelFontColor(const JSCallbackInfo& info)
 {
-    if (!Container::IsCurrentUseNewPipeline()) {
-        return;
-    }
     std::optional<Color> color = std::nullopt;
     if (info.Length() < 1) {
         LOGW("The argv is wrong, it is supposed to have at least 1 argument");
@@ -277,6 +278,6 @@ void JSMenuItem::LabelFontColor(const JSCallbackInfo& info)
             color = textColor;
         }
     }
-    NG::MenuItemView::SetLabelFontColor(color);
+    MenuItemModel::GetInstance()->SetLabelFontColor(color);
 }
 } // namespace OHOS::Ace::Framework

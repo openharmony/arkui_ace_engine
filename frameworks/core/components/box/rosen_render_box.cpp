@@ -1018,6 +1018,7 @@ void RosenRenderBox::SetShadow(const Shadow& shadow)
     rsNode->SetShadowColor(shadow.GetColor().GetValue());
     rsNode->SetShadowOffsetX(shadow.GetOffset().GetX());
     rsNode->SetShadowOffsetY(shadow.GetOffset().GetY());
+    rsNode->SetShadowMask(shadow.GetShadowType() == ShadowType::BLUR);
 }
 
 void RosenRenderBox::SetBorderWidth(double width, const BorderEdgeHelper& helper)
@@ -1243,7 +1244,7 @@ void RosenRenderBox::AnimateMouseHoverEnter()
     } else if (hoverAnimationType_ == HoverAnimationType::BOARD) {
         ResetController(controllerExit_);
         if (!controllerEnter_) {
-            controllerEnter_ = AceType::MakeRefPtr<Animator>(context_);
+            controllerEnter_ = CREATE_ANIMATOR(context_);
         }
         if (!backDecoration_) {
             backDecoration_ = AceType::MakeRefPtr<Decoration>();
@@ -1286,7 +1287,7 @@ void RosenRenderBox::AnimateMouseHoverExit()
     if (hoverAnimationType_ == HoverAnimationType::BOARD || isHoveredBoard_) {
         ResetController(controllerEnter_);
         if (!controllerExit_) {
-            controllerExit_ = AceType::MakeRefPtr<Animator>(context_);
+            controllerExit_ = CREATE_ANIMATOR(context_);
         }
         if (!backDecoration_) {
             backDecoration_ = AceType::MakeRefPtr<Decoration>();

@@ -91,7 +91,7 @@ StepperAnimation::StepperAnimation(const WeakPtr<PipelineContext>& context, doub
     context_ = context;
     animation_ = AceType::MakeRefPtr<CurveAnimation<double>>(start_, end_, curve_);
     animation_->AddListener(Animation<double>::ValueCallback(callback_));
-    controller_ = AceType::MakeRefPtr<Animator>(context_);
+    controller_ = CREATE_ANIMATOR(context_);
     controller_->SetDuration(duration_);
     controller_->SetStartDelay(delay_);
 }

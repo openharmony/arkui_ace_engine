@@ -322,7 +322,7 @@ void RenderMultiChildScroll::Update(const RefPtr<Component>& component)
     }
 
     if (!animateController_) {
-        animateController_ = AceType::MakeRefPtr<Animator>(GetContext());
+        animateController_ = CREATE_ANIMATOR(GetContext());
         animateController_->AddStopListener([weakScroll = AceType::WeakClaim(this)]() {
             auto scroll = weakScroll.Upgrade();
             if (scroll) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,18 +13,11 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_COMMON_VIEW_COMMON_VIEW_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_COMMON_VIEW_COMMON_VIEW_H
+#include "bridge/declarative_frontend/jsview/models/menu_model_impl.h"
 
-#include "base/memory/referenced.h"
-
-namespace OHOS::Ace::NG {
-
-class ACE_EXPORT CommonView {
-public:
-    static void Create();
-};
-
-} // namespace OHOS::Ace::NG
-
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_COMMON_VIEW_COMMON_VIEW_H
+namespace OHOS::Ace::Framework {
+void MenuModelImpl::Create() {}
+void MenuModelImpl::SetFontSize(const Dimension& fontSize) {}
+void MenuModelImpl::SetFontWeight(FontWeight weight) {}
+void MenuModelImpl::SetFontColor(const std::optional<Color>& color) {}
+} // namespace OHOS::Ace::Framework

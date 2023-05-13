@@ -363,7 +363,7 @@ void TweenElement::Update()
         }
         if (!controller_) {
             isDelegatedController_ = false;
-            controller_ = AceType::MakeRefPtr<Animator>(context_);
+            controller_ = CREATE_ANIMATOR(context_);
             tweenComponent->SetAnimator(controller_);
             LOGD("set animator to component when update.");
         }

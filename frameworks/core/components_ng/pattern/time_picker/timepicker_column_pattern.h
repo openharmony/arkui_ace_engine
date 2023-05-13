@@ -246,6 +246,7 @@ private:
         uint32_t index, uint32_t showCount, bool isDown, double scale);
     void FlushAnimationTextProperties(bool isDown);
     Dimension LinearFontSize(const Dimension& startFontSize, const Dimension& endFontSize, double percent);
+    void SetAccessibilityAction();
 
     float localDownDistance_ = 0.0f;
     Color pressColor_;

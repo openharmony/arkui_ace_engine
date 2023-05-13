@@ -229,9 +229,10 @@ public:
 
     // Load and initialize a JS bundle into the JS Framework
     void LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bool isMainPage) override;
+#if !defined(PREVIEW)
     bool LoadJsWithModule(std::string& urlName,
         const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr);
-
+#endif
     // Load the app.js file of the FA model in NG structure..
     bool LoadFaAppSource() override;
 

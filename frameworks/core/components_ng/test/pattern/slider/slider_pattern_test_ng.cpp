@@ -89,9 +89,9 @@ constexpr float HALF = 0.5;
 constexpr float CONTAINER_WIDTH = 300.0f;
 constexpr float CONTAINER_HEIGHT = 300.0f;
 const SizeF CONTAINER_SIZE(CONTAINER_WIDTH, CONTAINER_HEIGHT);
-const float BLOCK_SIZE_WIDTH = 300.0f;
-const float BLOCK_SIZE_HEIGHT = 300.0f;
-const SizeF BLOCK_SIZE(BLOCK_SIZE_WIDTH, BLOCK_SIZE_HEIGHT);
+constexpr Dimension BLOCK_SIZE_WIDTH = Dimension(300.0);
+constexpr Dimension BLOCK_SIZE_HEIGHT = Dimension(300.0);
+const SizeT<Dimension> BLOCK_SIZE(BLOCK_SIZE_WIDTH, BLOCK_SIZE_HEIGHT);
 const std::string SLIDER_MODEL_NG_BLOCK_IMAGE = "Default Image";
 const PointF POINTF_START { 10.0f, 10.0f };
 const PointF POINTF_END { 20.0f, 20.0f };
@@ -948,8 +948,7 @@ HWTEST_F(SliderPatternTestNg, SliderModelNgTest001, TestSize.Level1)
     sliderModelNG.SetBlockBorderWidth(SLIDER_MODEL_NG_BLOCK_BORDER_WIDTH);
     sliderModelNG.SetStepColor(TEST_COLOR);
     sliderModelNG.SetTrackBorderRadius(SLIDER_MODEL_NG_TRACK_BORDER_RADIUS);
-    Size silderSize = Size(SLIDER_WIDTH, SLIDER_HEIGHT);
-    sliderModelNG.SetBlockSize(silderSize);
+    sliderModelNG.SetBlockSize(BLOCK_SIZE_WIDTH, BLOCK_SIZE_HEIGHT);
     sliderModelNG.SetBlockType(SliderModel::BlockStyleType::IMAGE);
     sliderModelNG.SetBlockImage(SLIDER_MODEL_NG_BLOCK_IMAGE);
     auto basicShape = AceType::MakeRefPtr<BasicShape>(BasicShapeType::INSET);
@@ -1559,8 +1558,6 @@ HWTEST_F(SliderPatternTestNg, SliderPaintPropertyTest001, TestSize.Level1)
      * @tc.steps: step3. call ToJsonValue.
      */
     std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
-    SizeF defaultBlockSize;
-    sliderPaintProperty->UpdateBlockSize(BLOCK_SIZE);
     sliderPaintProperty->UpdateTrackBorderRadius(SLIDER_MODEL_NG_TRACK_BORDER_RADIUS);
     sliderPaintProperty->ToJsonValue(json);
     ASSERT_NE(json, nullptr);
@@ -1571,7 +1568,6 @@ HWTEST_F(SliderPatternTestNg, SliderPaintPropertyTest001, TestSize.Level1)
     sliderPaintProperty->UpdateStepColor(TEST_COLOR);
     EXPECT_EQ(sliderPaintProperty->GetStepColorValue(Color::TRANSPARENT), TEST_COLOR);
     EXPECT_EQ(sliderPaintProperty->GetTrackBorderRadiusValue(Dimension()), SLIDER_MODEL_NG_TRACK_BORDER_RADIUS);
-    EXPECT_EQ(sliderPaintProperty->GetBlockSizeValue(defaultBlockSize), BLOCK_SIZE);
     sliderPaintProperty->UpdateBlockType(SliderModel::BlockStyleType::IMAGE);
     EXPECT_EQ(sliderPaintProperty->GetBlockTypeValue(SliderModelNG::BlockStyleType::DEFAULT),
         SliderModel::BlockStyleType::IMAGE);
@@ -1605,8 +1601,9 @@ HWTEST_F(SliderPatternTestNg, SliderLayoutPropertyTest001, TestSize.Level1)
      */
     auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
     ASSERT_NE(sliderLayoutProperty, nullptr);
-    SizeF blockSize;
+    SizeT<Dimension> blockSize;
     sliderLayoutProperty->UpdateBlockSize(blockSize);
+    EXPECT_EQ(sliderLayoutProperty->GetBlockSizeValue(SizeF()), SizeF());
 
     /**
      * @tc.steps: step3. call ToJsonValue when SliderMode = OUTSET/INSET
@@ -1615,6 +1612,7 @@ HWTEST_F(SliderPatternTestNg, SliderLayoutPropertyTest001, TestSize.Level1)
     sliderLayoutProperty->ToJsonValue(json);
     ASSERT_NE(json, nullptr);
     sliderLayoutProperty->UpdateSliderMode(SliderModel::SliderMode::INSET);
+    sliderLayoutProperty->ResetBlockSize();
     sliderLayoutProperty->ToJsonValue(json);
     ASSERT_NE(json, nullptr);
 }

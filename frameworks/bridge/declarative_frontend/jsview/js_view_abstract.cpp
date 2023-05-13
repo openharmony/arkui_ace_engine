@@ -109,8 +109,6 @@ constexpr int32_t MIN_ROTATE_VECTOR_Z = 9;
 constexpr int32_t PARAMETER_LENGTH_FIRST = 1;
 constexpr int32_t PARAMETER_LENGTH_SECOND = 2;
 constexpr int32_t PARAMETER_LENGTH_THIRD = 3;
-constexpr float DEFAULT_SCALE_LIGHT = 0.9f;
-constexpr float DEFAULT_SCALE_MIDDLE_OR_HEAVY = 0.95f;
 
 bool CheckJSCallbackInfo(
     const std::string& callerName, const JSCallbackInfo& info, std::vector<JSCallbackInfoType>& infoTypes)
@@ -238,13 +236,24 @@ void ParseJsRotate(std::unique_ptr<JsonValue>& argsPtrItem, NG::RotateOptions& r
     // if specify centerX
     CalcDimension length;
     if (JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerX"), length)) {
+        if (length.Unit() == DimensionUnit::INVALID) {
+            LOGW("centerX is invalid");
+            length = Dimension(0.5f, DimensionUnit::PERCENT);
+        }
         rotate.centerX = length;
     }
     // if specify centerY
     if (JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerY"), length)) {
+        if (length.Unit() == DimensionUnit::INVALID) {
+            LOGW("centerY is invalid");
+            length = Dimension(0.5f, DimensionUnit::PERCENT);
+        }
         rotate.centerY = length;
     }
     if (JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerZ"), length)) {
+        if (length.Unit() == DimensionUnit::INVALID) {
+            LOGW("centerZ is invalid");
+        }
         rotate.centerZ = length;
     }
     // if specify angle
@@ -1859,7 +1868,7 @@ void JSViewAbstract::JsBackgroundBlurStyle(const JSCallbackInfo& info)
     BlurStyleOption styleOption;
     if (info[0]->IsNumber()) {
         auto blurStyle = info[0]->ToNumber<int32_t>();
-        if (blurStyle >= static_cast<int>(BlurStyle::THIN) &&
+        if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
             blurStyle <= static_cast<int>(BlurStyle::BACKGROUND_ULTRA_THICK)) {
             styleOption.blurStyle = static_cast<BlurStyle>(blurStyle);
         }
@@ -1878,8 +1887,50 @@ void JSViewAbstract::JsBackgroundBlurStyle(const JSCallbackInfo& info)
             adaptiveColor <= static_cast<int32_t>(AdaptiveColor::AVERAGE)) {
             styleOption.adaptiveColor = static_cast<AdaptiveColor>(adaptiveColor);
         }
+        double scale = 1.0;
+        if (jsOption->GetProperty("scale")->IsNumber()) {
+            scale = jsOption->GetProperty("scale")->ToNumber<double>();
+            styleOption.scale = std::clamp(scale, 0.0, 1.0);
+        }
     }
     ViewAbstractModel::GetInstance()->SetBackgroundBlurStyle(styleOption);
+}
+
+void JSViewAbstract::JsForegroundBlurStyle(const JSCallbackInfo& info)
+{
+    if (info.Length() == 0) {
+        LOGW("The arg of foregroundBlurStyle is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    BlurStyleOption styleOption;
+    if (info[0]->IsNumber()) {
+        auto blurStyle = info[0]->ToNumber<int32_t>();
+        if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
+            blurStyle <= static_cast<int>(BlurStyle::BACKGROUND_ULTRA_THICK)) {
+            styleOption.blurStyle = static_cast<BlurStyle>(blurStyle);
+        }
+    }
+    if (info.Length() > 1 && info[1]->IsObject()) {
+        JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(info[1]);
+        auto colorMode = static_cast<int32_t>(ThemeColorMode::SYSTEM);
+        ParseJsInt32(jsOption->GetProperty("colorMode"), colorMode);
+        if (colorMode >= static_cast<int32_t>(ThemeColorMode::SYSTEM) &&
+            colorMode <= static_cast<int32_t>(ThemeColorMode::DARK)) {
+            styleOption.colorMode = static_cast<ThemeColorMode>(colorMode);
+        }
+        auto adaptiveColor = static_cast<int32_t>(AdaptiveColor::DEFAULT);
+        ParseJsInt32(jsOption->GetProperty("adaptiveColor"), adaptiveColor);
+        if (adaptiveColor >= static_cast<int32_t>(AdaptiveColor::DEFAULT) &&
+            adaptiveColor <= static_cast<int32_t>(AdaptiveColor::AVERAGE)) {
+            styleOption.adaptiveColor = static_cast<AdaptiveColor>(adaptiveColor);
+        }
+        double scale = 1.0;
+        if (jsOption->GetProperty("scale")->IsNumber()) {
+            scale = jsOption->GetProperty("scale")->ToNumber<double>();
+            styleOption.scale = std::clamp(scale, 0.0, 1.0);
+        }
+    }
+    ViewAbstractModel::GetInstance()->SetForegroundBlurStyle(styleOption);
 }
 
 void JSViewAbstract::JsSphericalEffect(const JSCallbackInfo& info)
@@ -4146,6 +4197,9 @@ void JSViewAbstract::JsShadow(const JSCallbackInfo& info)
     if (ParseJsonColor(argsPtrItem->GetValue("color"), color)) {
         shadows.begin()->SetColor(color);
     }
+    auto type = argsPtrItem->GetInt("type", static_cast<int32_t>(ShadowType::COLOR));
+    type = std::clamp(type, static_cast<int32_t>(ShadowType::COLOR), static_cast<int32_t>(ShadowType::BLUR));
+    shadows.begin()->SetShadowType(static_cast<ShadowType>(type));
     ViewAbstractModel::GetInstance()->SetBackShadow(shadows);
 }
 
@@ -4839,6 +4893,7 @@ void JSViewAbstract::JSBind()
     JSClass<JSViewAbstract>::StaticMethod("backgroundImageSize", &JSViewAbstract::JsBackgroundImageSize);
     JSClass<JSViewAbstract>::StaticMethod("backgroundImagePosition", &JSViewAbstract::JsBackgroundImagePosition);
     JSClass<JSViewAbstract>::StaticMethod("backgroundBlurStyle", &JSViewAbstract::JsBackgroundBlurStyle);
+    JSClass<JSViewAbstract>::StaticMethod("foregroundBlurStyle", &JSViewAbstract::JsForegroundBlurStyle);
     JSClass<JSViewAbstract>::StaticMethod("lightUpEffect", &JSViewAbstract::JsLightUpEffect);
     JSClass<JSViewAbstract>::StaticMethod("sphericalEffect", &JSViewAbstract::JsSphericalEffect);
     JSClass<JSViewAbstract>::StaticMethod("pixelStretchEffect", &JSViewAbstract::JsPixelStretchEffect);
@@ -4933,7 +4988,6 @@ void JSViewAbstract::JSBind()
     JSClass<JSViewAbstract>::StaticMethod("onMouse", &JSViewAbstract::JsOnMouse);
     JSClass<JSViewAbstract>::StaticMethod("onHover", &JSViewAbstract::JsOnHover);
     JSClass<JSViewAbstract>::StaticMethod("onClick", &JSViewAbstract::JsOnClick);
-    JSClass<JSViewAbstract>::StaticMethod("clickEffect", &JSViewAbstract::JsClickEffect);
 #if defined(PREVIEW)
     JSClass<JSViewAbstract>::StaticMethod("debugLine", &JSViewAbstract::JsDebugLine);
 #endif
@@ -5193,19 +5247,30 @@ bool JSViewAbstract::ParseJsonDouble(const std::unique_ptr<JsonValue>& jsonValue
         result = StringUtils::StringToDouble(jsonValue->GetString());
         return true;
     }
+    // parse json Resource
     auto resVal = JsonUtil::ParseJsonString(jsonValue->ToString());
     auto resId = resVal->GetValue("id");
-    if (!resId || !resId->IsNumber()) {
-        LOGE("invalid resource id");
-        return false;
-    }
+    CHECK_NULL_RETURN(resId && resId->IsNumber(), false);
+    auto id = resId->GetUInt();
+    auto resType = resVal->GetValue("type");
+    CHECK_NULL_RETURN(resType && resType->IsNumber(), false);
+    auto type = resType->GetUInt();
+
     auto themeConstants = GetThemeConstants();
-    if (!themeConstants) {
-        LOGW("themeConstants is nullptr");
-        return false;
+    CHECK_NULL_RETURN(themeConstants, false);
+    if (type == static_cast<uint32_t>(ResourceType::STRING)) {
+        auto numberString = themeConstants->GetString(id);
+        return StringUtils::StringToDouble(numberString, result);
     }
-    result = themeConstants->GetDouble(resId->GetUInt());
-    return true;
+    if (type == static_cast<uint32_t>(ResourceType::INTEGER)) {
+        result = themeConstants->GetInt(id);
+        return true;
+    }
+    if (type == static_cast<uint32_t>(ResourceType::FLOAT)) {
+        result = themeConstants->GetDouble(id);
+        return true;
+    }
+    return false;
 }
 
 bool JSViewAbstract::ParseJsonColor(const std::unique_ptr<JsonValue>& jsonValue, Color& result)
@@ -5451,43 +5516,6 @@ void JSViewAbstract::JsOnClick(const JSCallbackInfo& info)
         func->Execute(*info);
     };
     ViewAbstractModel::GetInstance()->SetOnClick(std::move(onTap), std::move(onClick));
-}
-
-void JSViewAbstract::JsClickEffect(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        LOGW("clickEffect needs at least 1 parameter.");
-        return;
-    }
-    if (info[0]->IsObject() && !info[0]->IsNull()) {
-        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
-        JSRef<JSVal> clickEffectLevel = obj->GetProperty("level");
-        int32_t clickEffectLevelValue = 0;
-        if (!clickEffectLevel.IsEmpty() && !clickEffectLevel->IsUndefined() && !clickEffectLevel->IsNull()) {
-            clickEffectLevelValue = clickEffectLevel->ToNumber<int32_t>();
-        }
-        JSRef<JSVal> scaleNumber = obj->GetProperty("scale");
-        float scaleNumberValue = DEFAULT_SCALE_LIGHT;
-        if (!scaleNumber.IsEmpty() && !scaleNumber->IsUndefined() && !scaleNumber->IsNull()) {
-            scaleNumberValue = scaleNumber->ToNumber<float>();
-        } else {
-            if ((ClickEffectLevel)clickEffectLevelValue == ClickEffectLevel::MIDDLE ||
-                (ClickEffectLevel)clickEffectLevelValue == ClickEffectLevel::HEAVY) {
-                scaleNumberValue = DEFAULT_SCALE_MIDDLE_OR_HEAVY;
-            }
-        }
-
-        if ((ClickEffectLevel)clickEffectLevelValue == ClickEffectLevel::MIDDLE) {
-            ViewAbstractModel::GetInstance()->SetClickEffectLevel(ClickEffectLevel::MIDDLE, scaleNumberValue);
-        } else if ((ClickEffectLevel)clickEffectLevelValue == ClickEffectLevel::HEAVY) {
-            ViewAbstractModel::GetInstance()->SetClickEffectLevel(ClickEffectLevel::HEAVY, scaleNumberValue);
-        } else {
-            ViewAbstractModel::GetInstance()->SetClickEffectLevel(ClickEffectLevel::LIGHT, scaleNumberValue);
-        }
-    }
-    if (info[0]->IsUndefined() || info[0]->IsNull()) {
-        return;
-    }
 }
 
 void JSViewAbstract::JsOnVisibleAreaChange(const JSCallbackInfo& info)

@@ -56,6 +56,14 @@ private:
     void CreateExtensionToolBar(const std::vector<MenuOptionsParam>& menuOptionItems, int32_t index);
     void GetDefaultButtonAndMenuWidth(float& defaultOptionWidth, float& fontWidth, float& maxWidth);
 
+    void MoreAnimation();
+    void BackAnimation();
+
+    void SetAnimationStatus(bool toDoAnimation)
+    {
+        isDoingAnimation_ = toDoAnimation;
+    }
+
     static RefPtr<FrameNode> CreateMenuNode(const std::shared_ptr<SelectOverlayInfo>& info);
 
     RefPtr<FrameNode> selectMenu_;
@@ -63,6 +71,13 @@ private:
     RefPtr<FrameNode> extensionMenu_;
 
     std::string selectInfo_;
+
+    // Marks whether it is currently in the animated state.
+    bool isDoingAnimation_ = false;
+
+    // Controls that only default menus can be converted to extended menus, and extended menus can be converted to
+    // default menus.
+    bool isExtensionMenu_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayNode);
 };

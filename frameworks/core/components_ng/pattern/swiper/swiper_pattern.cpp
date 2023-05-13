@@ -166,6 +166,7 @@ void SwiperPattern::OnModifyDone()
     } else {
         translateTask_.Cancel();
     }
+    SetAccessibilityAction();
 }
 
 void SwiperPattern::FlushFocus(const RefPtr<FrameNode>& curShowFrame)
@@ -939,7 +940,7 @@ void SwiperPattern::PlayTranslateAnimation(float startPos, float endPos, int32_t
     }));
 
     if (!controller_) {
-        controller_ = AceType::MakeRefPtr<Animator>(host->GetContext());
+        controller_ = CREATE_ANIMATOR(host->GetContext());
     }
     controller_->ClearStartListeners();
     controller_->ClearStopListeners();
@@ -967,7 +968,7 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (!springController_) {
-        springController_ = AceType::MakeRefPtr<Animator>(host->GetContext());
+        springController_ = CREATE_ANIMATOR(host->GetContext());
     }
     springController_->ClearStartListeners();
     springController_->ClearStopListeners();
@@ -1021,7 +1022,7 @@ void SwiperPattern::PlayFadeAnimation()
 
     LOGD("Play fade animation start");
     if (!fadeController_) {
-        fadeController_ = AceType::MakeRefPtr<Animator>(host->GetContext());
+        fadeController_ = CREATE_ANIMATOR(host->GetContext());
     }
     fadeController_->ClearAllListeners();
 
@@ -1498,5 +1499,36 @@ void SwiperPattern::SaveArrowProperty(const RefPtr<FrameNode>& arrowNode)
     arrowLayoutProperty->UpdateArrowSize(layoutProperty->GetArrowSizeValue());
     arrowLayoutProperty->UpdateArrowColor(layoutProperty->GetArrowColorValue());
     arrowLayoutProperty->UpdateIsSiderMiddle(layoutProperty->GetIsSiderMiddleValue());
+}
+
+void SwiperPattern::SetAccessibilityAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetActionScrollForward(
+        [weakPtr = WeakClaim(this), accessibility = WeakClaim(RawPtr(accessibilityProperty))]() {
+            const auto& pattern = weakPtr.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            const auto& accessibilityProperty = accessibility.Upgrade();
+            CHECK_NULL_VOID(accessibilityProperty);
+            if (!accessibilityProperty->IsScrollable()) {
+                return;
+            }
+            pattern->ShowNext();
+        });
+
+    accessibilityProperty->SetActionScrollBackward(
+        [weakPtr = WeakClaim(this), accessibility = WeakClaim(RawPtr(accessibilityProperty))]() {
+            const auto& pattern = weakPtr.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            const auto& accessibilityProperty = accessibility.Upgrade();
+            CHECK_NULL_VOID(accessibilityProperty);
+            if (!accessibilityProperty->IsScrollable()) {
+                return;
+            }
+        pattern->ShowPrevious();
+    });
 }
 } // namespace OHOS::Ace::NG

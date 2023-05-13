@@ -71,7 +71,7 @@ void RenderRadio::Update(const RefPtr<Component>& component)
     UpdateUIStatus();
     // set check animation engine
     if (!onController_) {
-        onController_ = AceType::MakeRefPtr<Animator>(GetContext());
+        onController_ = CREATE_ANIMATOR(GetContext());
         onController_->AddStartListener(Animator::StatusCallback([weak = AceType::WeakClaim(this)]() {
             auto radio = weak.Upgrade();
             if (radio) {
@@ -81,7 +81,7 @@ void RenderRadio::Update(const RefPtr<Component>& component)
     }
     // set uncheck animation engine
     if (!offController_) {
-        offController_ = AceType::MakeRefPtr<Animator>(GetContext());
+        offController_ = CREATE_ANIMATOR(GetContext());
         offController_->AddStopListener(Animator::StatusCallback([weak = AceType::WeakClaim(this)]() {
             auto radio = weak.Upgrade();
             if (radio) {

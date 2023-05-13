@@ -71,6 +71,12 @@ AceScopedPerformanceCheck::~AceScopedPerformanceCheck() {}
 
 void AceScopedPerformanceCheck::InsertNodeTimeout(int64_t sec, int32_t row, int32_t col, const std::string& tag) {}
 
+void AceScopedPerformanceCheck::RecordPageNodeCountAndDepth(
+    int32_t pageNodeCount, int32_t pageDepth, const CheckNodeMap& nodeMap)
+{}
+
+void AceScopedPerformanceCheck::RecordForEachItemsCount(const CheckNodeMap& itemMap) {}
+
 // =================================================================================
 
 float SystemProperties::GetFontWeightScale()

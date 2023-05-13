@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,13 +16,13 @@
 #ifndef FOUNDATION_ACE_ACE_ENGINE_FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JSVIEW_JS_GESTURE_H
 #define FOUNDATION_ACE_ACE_ENGINE_FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JSVIEW_JS_GESTURE_H
 
+#include "core/components_ng/pattern/gesture/gesture_model.h"
 #include "core/event/ace_event_handler.h"
 #include "core/gestures/gesture_info.h"
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 namespace OHOS::Ace::Framework {
-
 class JSGesture : public virtual AceType {
     DECLARE_ACE_TYPE(JSGesture, AceType);
 
@@ -43,7 +43,7 @@ public:
     static void JsHandlerOnActionUpdate(const JSCallbackInfo& args);
     static void JsHandlerOnActionEnd(const JSCallbackInfo& args);
     static void JsHandlerOnActionCancel(const JSCallbackInfo& args);
-    static void JsHandlerOnGestureEvent(JSGestureEvent action, const JSCallbackInfo& args);
+    static void JsHandlerOnGestureEvent(Ace::GestureEventAction action, const JSCallbackInfo& args);
 }; // JSGesture
 
 class JSTapGesture : public JSGesture {
@@ -156,6 +156,5 @@ public:
     static void JSBind(BindingTarget globalObj);
 };
 } // namespace OHOS::Ace::Framework
-
 #endif // FOUNDATION_ACE_ACE_ENGINE_FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JSVIEW_JS_GESTURE_H
 

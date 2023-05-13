@@ -874,6 +874,9 @@ private:
     void SetNeedToRequestKeyboardOnFocus();
     void SaveUnderlineStates();
     void SavePasswordModeStates();
+    void SetAccessibilityAction();
+    void SetAccessibilityMoveTextAction();
+    void SetAccessibilityScrollAction();
 
     RectF frameRect_;
     RectF contentRect_;

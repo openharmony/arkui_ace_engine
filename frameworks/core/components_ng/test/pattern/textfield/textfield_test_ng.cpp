@@ -2436,7 +2436,6 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldAccessibilityPropertyGetSupportAction0
     expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_COPY);
     expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_PASTE);
     expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_CUT);
-    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SELECT);
     expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SET_SELECTION);
     expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_CLEAR_SELECTION);
     expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SET_TEXT);

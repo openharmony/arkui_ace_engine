@@ -75,7 +75,7 @@ void RenderCheckbox::Update(const RefPtr<Component>& component)
     }
 
     if (!controller_) {
-        controller_ = AceType::MakeRefPtr<Animator>(GetContext());
+        controller_ = CREATE_ANIMATOR(GetContext());
         auto weak = AceType::WeakClaim(this);
         controller_->AddStopListener(Animator::StatusCallback([weak]() {
             auto checkBox = weak.Upgrade();

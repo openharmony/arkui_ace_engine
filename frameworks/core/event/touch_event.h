@@ -25,6 +25,8 @@
 
 namespace OHOS::Ace {
 
+static const int32_t TOUCH_TOOL_BASE_ID = 100;
+
 enum class TouchType : size_t {
     DOWN = 0,
     UP,
@@ -88,6 +90,13 @@ struct TouchEvent final {
     Offset GetScreenOffset() const
     {
         return Offset(screenX, screenY);
+    }
+
+    void CovertId()
+    {
+        if ((sourceType == SourceType::TOUCH) && (sourceTool == SourceTool::PEN)) {
+            id = TOUCH_TOOL_BASE_ID + (int32_t)sourceTool;
+        }
     }
 
     TouchEvent CreateScalePoint(float scale) const

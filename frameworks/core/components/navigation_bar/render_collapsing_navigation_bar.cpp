@@ -224,7 +224,7 @@ void RenderCollapsingNavigationBar::Initialize(const WeakPtr<PipelineContext>& c
             scroll->HandleDragEnd();
         }
     });
-    controller_ = AceType::MakeRefPtr<Animator>(context);
+    controller_ = CREATE_ANIMATOR(context);
     controller_->SetDuration(COLLAPSING_ANIMATION_DURATION);
 
     InitRelatedParent(GetParent());

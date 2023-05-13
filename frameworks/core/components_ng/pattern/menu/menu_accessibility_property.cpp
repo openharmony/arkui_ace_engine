@@ -51,8 +51,5 @@ void MenuAccessibilityProperty::SetSpecificSupportAction()
             }
         }
     }
-
-    AddSupportAction(AceAction::ACTION_SELECT);
-    AddSupportAction(AceAction::ACTION_CLEAR_SELECTION);
 }
 } // namespace OHOS::Ace::NG

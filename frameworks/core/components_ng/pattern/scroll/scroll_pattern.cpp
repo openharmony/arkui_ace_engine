@@ -86,6 +86,7 @@ void ScrollPattern::OnModifyDone()
     }
     SetEdgeEffect(layoutProperty->GetEdgeEffect().value_or(EdgeEffect::NONE));
     SetScrollBar(paintProperty->GetScrollBarProperty());
+    SetAccessibilityAction();
 }
 
 void ScrollPattern::RegisterScrollEventTask()
@@ -391,7 +392,7 @@ bool ScrollPattern::UpdateCurrentOffset(float delta, int32_t source)
 void ScrollPattern::CreateOrStopAnimator()
 {
     if (!animator_) {
-        animator_ = AceType::MakeRefPtr<Animator>(PipelineBase::GetCurrentContext());
+        animator_ = CREATE_ANIMATOR(PipelineBase::GetCurrentContext());
         return;
     }
     if (!animator_->IsStopped()) {
@@ -542,4 +543,26 @@ void ScrollPattern::UpdateScrollBarOffset()
     UpdateScrollBarRegion(-currentOffset_, estimatedHeight, size, Offset(0.0, 0.0));
 }
 
+void ScrollPattern::SetAccessibilityAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetActionScrollForward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (pattern->IsScrollable() && pattern->GetScrollableDistance() > 0.0f) {
+            pattern->ScrollPage(false, true);
+        }
+    });
+
+    accessibilityProperty->SetActionScrollBackward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (pattern->IsScrollable() && pattern->GetScrollableDistance() > 0.0f) {
+            pattern->ScrollPage(true, true);
+        }
+    });
+}
 } // namespace OHOS::Ace::NG

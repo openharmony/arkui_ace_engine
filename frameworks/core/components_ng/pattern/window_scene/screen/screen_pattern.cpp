@@ -26,18 +26,23 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr float DIRECTION0 = 0;
+constexpr float DIRECTION90 = 90;
+constexpr float DIRECTION180 = 180;
+constexpr float DIRECTION270 = 270;
+
 MMI::Direction ConvertDegreeToMMIRotation(float degree)
 {
-    if (NearEqual(degree, 0)) {
+    if (NearEqual(degree, DIRECTION0)) {
         return MMI::DIRECTION0;
     }
-    if (NearEqual(degree, 90)) {
+    if (NearEqual(degree, DIRECTION90)) {
         return MMI::DIRECTION90;
     }
-    if (NearEqual(degree, 180)) {
+    if (NearEqual(degree, DIRECTION180)) {
         return MMI::DIRECTION180;
     }
-    if (NearEqual(degree, 270)) {
+    if (NearEqual(degree, DIRECTION270)) {
         return MMI::DIRECTION270;
     }
     return MMI::DIRECTION0;
@@ -47,10 +52,8 @@ MMI::Direction ConvertDegreeToMMIRotation(float degree)
 void ScreenPattern::OnAttachToFrameNode()
 {
     CHECK_NULL_VOID(screenSession_);
-
-    Rosen::RSDisplayNodeConfig config = { .screenId = screenSession_->GetScreenId() };
-
-    auto displayNode = Rosen::RSDisplayNode::Create(config);
+    auto displayNode = screenSession_->GetDisplayNode();
+    CHECK_NULL_VOID(displayNode);
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -68,6 +71,8 @@ void ScreenPattern::OnAttachToFrameNode()
     auto screenBounds = screenSession_->GetScreenProperty().GetBounds();
     auto rect = Rect(screenBounds.rect_.left_, screenBounds.rect_.top_,
         screenBounds.rect_.width_, screenBounds.rect_.height_);
+    float density = screenSession_->GetScreenProperty().GetDensity();
+    window->SetDisplayDensity(density);
     window->UpdateViewportConfig(rect, Rosen::WindowSizeChangeReason::UNDEFINED);
 }
 

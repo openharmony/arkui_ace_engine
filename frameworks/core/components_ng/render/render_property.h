@@ -40,12 +40,38 @@ struct BackgroundProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundImageRepeat, ImageRepeat);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundImageSize, BackgroundImageSize);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundImagePosition, BackgroundImagePosition);
-    bool CheckBlurStyleOption(const BlurStyleOption& option) const
+    bool CheckBlurStyleOption(const std::optional<BlurStyleOption>& option) const
     {
+        if (!option.has_value()) {
+            return false;
+        }
         if (!propBlurStyleOption.has_value()) {
             return false;
         }
-        return NearEqual(propBlurStyleOption.value(), option);
+        return NearEqual(propBlurStyleOption.value(), option.value());
+    }
+    bool CheckBlurRadius(const Dimension& radius) const
+    {
+        if (!propBlurRadius.has_value()) {
+            return false;
+        }
+        return NearEqual(propBlurRadius.value(), radius);
+    }
+    std::optional<BlurStyleOption> propBlurStyleOption;
+    std::optional<Dimension> propBlurRadius;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
+};
+
+struct ForegroundProperty {
+    bool CheckBlurStyleOption(const std::optional<BlurStyleOption>& option) const
+    {
+        if (!option.has_value()) {
+            return false;
+        }
+        if (!propBlurStyleOption.has_value()) {
+            return false;
+        }
+        return NearEqual(propBlurStyleOption.value(), option.value());
     }
     bool CheckBlurRadius(const Dimension& radius) const
     {

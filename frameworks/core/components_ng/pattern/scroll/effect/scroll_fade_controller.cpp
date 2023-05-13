@@ -65,7 +65,7 @@ void ScrollFadeController::Initialize()
         }
     });
 
-    controller_ = AceType::MakeRefPtr<Animator>(PipelineContext::GetCurrentContext());
+    controller_ = CREATE_ANIMATOR(PipelineContext::GetCurrentContext());
     controller_->AddInterpolator(decele_);
     controller_->AddStopListener([weak]() {
         auto controller = weak.Upgrade();

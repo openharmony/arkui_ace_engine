@@ -285,6 +285,8 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest004, TestSize.Level1)
      */
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     EXPECT_TRUE(eventHub);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
     auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
     EXPECT_TRUE(gestureEventHub);
 
@@ -347,6 +349,8 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest005, TestSize.Level1)
      */
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     EXPECT_TRUE(eventHub);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
     auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
     EXPECT_TRUE(gestureEventHub);
 
@@ -792,7 +796,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest011, TestSize.Level1)
      * @tc.expected: IsAccessibilityLongClickable is true
      */
     EXPECT_FALSE(gestureEventHub->IsAccessibilityLongClickable());
-    auto longPressRecognizer = AceType::MakeRefPtr<LongPressRecognizer>(false, false);
+    auto longPressRecognizer = AceType::MakeRefPtr<LongPressRecognizer>(1, 1, false);
     gestureEventHub->gestureHierarchy_.emplace_back(longPressRecognizer);
     EXPECT_TRUE(gestureEventHub->IsAccessibilityLongClickable());
     gestureEventHub->gestureHierarchy_.clear();

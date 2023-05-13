@@ -85,6 +85,7 @@ void ListPattern::OnModifyDone()
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID_NOLOG(focusHub);
     InitOnKeyEvent(focusHub);
+    SetAccessibilityAction();
 }
 
 bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -693,7 +694,7 @@ void ListPattern::AnimateTo(float position, float duration, const RefPtr<Curve>&
         StopScrollable();
     }
     if (!animator_) {
-        animator_ = AceType::MakeRefPtr<Animator>(PipelineBase::GetCurrentContext());
+        animator_ = CREATE_ANIMATOR(PipelineBase::GetCurrentContext());
         animator_->AddStopListener([weak = AceType::WeakClaim(this)]() {
             auto list = weak.Upgrade();
             CHECK_NULL_VOID_NOLOG(list);
@@ -1084,5 +1085,30 @@ int32_t ListPattern::GetItemIndexByPosition(float xOffset, float yOffset)
 void ListPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     json->Put("multiSelectable", multiSelectable_);
+}
+
+void ListPattern::SetAccessibilityAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetActionScrollForward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (!pattern->IsScrollable()) {
+            return;
+        }
+        pattern->ScrollPage(false);
+    });
+
+    accessibilityProperty->SetActionScrollBackward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (!pattern->IsScrollable()) {
+            return;
+        }
+        pattern->ScrollPage(true);
+    });
 }
 } // namespace OHOS::Ace::NG

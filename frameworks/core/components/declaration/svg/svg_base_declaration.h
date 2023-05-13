@@ -144,6 +144,8 @@ public:
 
     bool SetSpecializedAttr(const std::pair<std::string, std::string>& attr) override;
 
+    void ReplaceAttributes(const SvgBaseAttribute& attr);
+
 protected:
     void InitSpecialized() override;
     bool SetSpecializedStyle(const std::pair<std::string, std::string>& style) override;

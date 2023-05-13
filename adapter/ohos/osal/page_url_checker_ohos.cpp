@@ -28,7 +28,7 @@
 #include "want.h"
 
 namespace OHOS::Ace {
-constexpr int32_t SUB_STR_LENGTH = 7;
+const char BUNDLE_TAG[] = "@bundle:";
 constexpr size_t BUNDLE_START_POS = 8;
 constexpr int32_t SILENT_INSTALL_SUCCESS = 0;
 
@@ -189,7 +189,7 @@ sptr<AppExecFwk::IBundleMgr> PageUrlCheckerOhos::GetBundleManager()
 void PageUrlCheckerOhos::LoadPageUrl(const std::string& url, const std::function<void()>& callback,
     const std::function<void(int32_t, const std::string&)>& silentInstallErrorCallBack)
 {
-    if (url.substr(0, SUB_STR_LENGTH) != "@bundle") {
+    if (url.substr(0, strlen(BUNDLE_TAG)) != BUNDLE_TAG) {
         return;
     }
 

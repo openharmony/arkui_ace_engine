@@ -176,6 +176,7 @@ void TextFieldAccessibilityProperty::SetSpecificSupportAction()
     CHECK_NULL_VOID(textFieldPattern);
     if (textFieldPattern->AllowCopy()) {
         AddSupportAction(AceAction::ACTION_COPY);
+        AddSupportAction(AceAction::ACTION_CUT);
     }
     if (IsScrollable()) {
         if (!textFieldPattern->IsAtTop()) {
@@ -187,8 +188,6 @@ void TextFieldAccessibilityProperty::SetSpecificSupportAction()
     }
 
     AddSupportAction(AceAction::ACTION_PASTE);
-    AddSupportAction(AceAction::ACTION_CUT);
-    AddSupportAction(AceAction::ACTION_SELECT);
     AddSupportAction(AceAction::ACTION_SET_SELECTION);
     AddSupportAction(AceAction::ACTION_CLEAR_SELECTION);
     AddSupportAction(AceAction::ACTION_SET_TEXT);

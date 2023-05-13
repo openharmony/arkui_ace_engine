@@ -405,6 +405,7 @@ void TabBarPattern::OnModifyDone()
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
+    SetAccessibilityAction();
 
     auto removeEventCallback = [weak = WeakClaim(this)]() {
         auto tabBarPattern = weak.Upgrade();
@@ -1182,7 +1183,7 @@ void TabBarPattern::PlayTranslateAnimation(float startPos, float endPos, float t
     if (!controller_) {
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
-        controller_ = AceType::MakeRefPtr<Animator>(pipeline);
+        controller_ = CREATE_ANIMATOR(pipeline);
     }
     controller_->ClearStopListeners();
     controller_->ClearInterpolators();
@@ -1248,7 +1249,7 @@ void TabBarPattern::PlayTabBarTranslateAnimation(int32_t targetIndex)
     if (!controller_) {
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
-        controller_ = AceType::MakeRefPtr<Animator>(pipeline);
+        controller_ = CREATE_ANIMATOR(pipeline);
     }
     controller_->ClearStopListeners();
     controller_->ClearInterpolators();
@@ -1410,5 +1411,44 @@ bool TabBarPattern::IsOutOfBoundary()
         Positive(tabItemOffsets_.front().GetX()) && GreatNotEqual(tabItemOffsets_.back().GetX(), mainSize);
     bool outOfEnd = LessNotEqual(tabItemOffsets_.back().GetX(), mainSize) && Negative(tabItemOffsets_.front().GetX());
     return outOfStart || outOfEnd;
+}
+
+void TabBarPattern::SetAccessibilityAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetActionScrollForward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto tabBarLayoutProperty = pattern->GetLayoutProperty<TabBarLayoutProperty>();
+        CHECK_NULL_VOID(tabBarLayoutProperty);
+        auto frameNode = pattern->GetHost();
+        CHECK_NULL_VOID(frameNode);
+        if (tabBarLayoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE &&
+            frameNode->TotalChildCount() > 1) {
+            auto index = pattern->GetIndicator() + 1;
+            pattern->PlayTabBarTranslateAnimation(index);
+            pattern->FocusIndexChange(index);
+            frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+        }
+    });
+
+    accessibilityProperty->SetActionScrollBackward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto tabBarLayoutProperty = pattern->GetLayoutProperty<TabBarLayoutProperty>();
+        CHECK_NULL_VOID(tabBarLayoutProperty);
+        auto frameNode = pattern->GetHost();
+        CHECK_NULL_VOID(frameNode);
+        if (tabBarLayoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE &&
+           frameNode->TotalChildCount() > 1) {
+            auto index = pattern->GetIndicator() - 1;
+            pattern->PlayTabBarTranslateAnimation(index);
+            pattern->FocusIndexChange(index);
+            frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+        }
+    });
 }
 } // namespace OHOS::Ace::NG

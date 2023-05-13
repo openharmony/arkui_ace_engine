@@ -433,12 +433,12 @@ void RenderSwiper::Initialize(const WeakPtr<PipelineContext>& context, bool catc
         }
     }
     if (!controller_) {
-        controller_ = AceType::MakeRefPtr<Animator>(context);
+        controller_ = CREATE_ANIMATOR(context);
     } else {
         StopSwipeAnimation();
     }
     if (!swipeToController_) {
-        swipeToController_ = AceType::MakeRefPtr<Animator>(context);
+        swipeToController_ = CREATE_ANIMATOR(context);
     }
 
     InitIndicatorAnimation(context);
@@ -3040,30 +3040,30 @@ void RenderSwiper::StopIndicatorAnimation()
 void RenderSwiper::InitIndicatorAnimation(const WeakPtr<PipelineContext>& context)
 {
     if (!springController_) {
-        springController_ = AceType::MakeRefPtr<Animator>(context);
+        springController_ = CREATE_ANIMATOR(context);
     } else {
         StopIndicatorSpringAnimation();
     }
     if (!fadeController_) {
-        fadeController_ = AceType::MakeRefPtr<Animator>(context);
+        fadeController_ = CREATE_ANIMATOR(context);
     }
     if (!zoomInController_) {
-        zoomInController_ = AceType::MakeRefPtr<Animator>(context);
+        zoomInController_ = CREATE_ANIMATOR(context);
     }
     if (!zoomOutController_) {
-        zoomOutController_ = AceType::MakeRefPtr<Animator>(context);
+        zoomOutController_ = CREATE_ANIMATOR(context);
     }
     if (!zoomInDotController_) {
-        zoomInDotController_ = AceType::MakeRefPtr<Animator>(context);
+        zoomInDotController_ = CREATE_ANIMATOR(context);
     }
     if (!zoomOutDotController_) {
-        zoomOutDotController_ = AceType::MakeRefPtr<Animator>(context);
+        zoomOutDotController_ = CREATE_ANIMATOR(context);
     }
     if (!dragRetractionController_) {
-        dragRetractionController_ = AceType::MakeRefPtr<Animator>(context);
+        dragRetractionController_ = CREATE_ANIMATOR(context);
     }
     if (!indicatorController_) {
-        indicatorController_ = AceType::MakeRefPtr<Animator>(context);
+        indicatorController_ = CREATE_ANIMATOR(context);
     } else {
         StopIndicatorAnimation();
         ResetIndicatorPosition();

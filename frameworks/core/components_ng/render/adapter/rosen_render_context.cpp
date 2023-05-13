@@ -33,7 +33,6 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/animation/page_transition_common.h"
-#include "core/animation/spring_curve.h"
 #include "core/common/container.h"
 #include "core/common/rosen/rosen_convert_helper.h"
 #include "core/components/common/properties/decoration.h"
@@ -70,18 +69,6 @@ namespace {
 RefPtr<PixelMap> g_pixelMap {};
 std::mutex g_mutex;
 std::condition_variable thumbnailGet;
-constexpr float ANIMATION_CURVE_VELOCITY_LIGHT_OR_MIDDLE = 10.0f;
-constexpr float ANIMATION_CURVE_VELOCITY_HEAVY = 0.0f;
-constexpr float ANIMATION_CURVE_MASS = 1.0f;
-constexpr float ANIMATION_CURVE_STIFFNESS_LIGHT = 410.0f;
-constexpr float ANIMATION_CURVE_STIFFNESS_MIDDLE = 350.0f;
-constexpr float ANIMATION_CURVE_STIFFNESS_HEAVY = 240.0f;
-constexpr float ANIMATION_CURVE_DAMPING_LIGHT = 38.0f;
-constexpr float ANIMATION_CURVE_DAMPING_MIDDLE = 35.0f;
-constexpr float ANIMATION_CURVE_DAMPING_HEAVY = 28.0f;
-constexpr float DEFAULT_SCALE_LIGHT = 0.9f;
-constexpr float DEFAULT_SCALE_MIDDLE_OR_HEAVY = 0.95f;
-constexpr float DEFAULT_MID_TIME_SLOT = 0.5;
 } // namespace
 
 float RosenRenderContext::ConvertDimensionToScaleBySize(const Dimension& dimension, float size)
@@ -425,42 +412,85 @@ void RosenRenderContext::SetBackBlurFilter()
     const auto& blurStyle = background->propBlurStyleOption;
     std::shared_ptr<Rosen::RSFilter> backFilter;
     auto dipScale_ = context->GetDipScale();
-    auto rosenBlurStyleValue =
-        blurStyle.has_value() ? GetRosenBlurStyleValue(blurStyle.value()) : MATERIAL_BLUR_STYLE::NO_MATERIAL;
-    if (rosenBlurStyleValue != MATERIAL_BLUR_STYLE::NO_MATERIAL) {
-        backFilter = Rosen::RSFilter::CreateMaterialFilter(static_cast<int>(rosenBlurStyleValue),
-            static_cast<float>(dipScale_), static_cast<Rosen::BLUR_COLOR_MODE>(blurStyle->adaptiveColor));
-    } else {
+    if (!blurStyle.has_value()) {
         const auto& radius = background->propBlurRadius;
         if (radius.has_value() && radius->IsValid()) {
             float radiusPx = context->NormalizeToPx(radius.value());
             float backblurRadius = SkiaDecorationPainter::ConvertRadiusToSigma(radiusPx);
             backFilter = Rosen::RSFilter::CreateBlurFilter(backblurRadius, backblurRadius);
         }
+    } else if (GetRosenBlurStyleValue(blurStyle.value()) == MATERIAL_BLUR_STYLE::NO_MATERIAL) {
+        backFilter = nullptr;
+    } else {
+        backFilter = Rosen::RSFilter::CreateMaterialFilter(static_cast<int>(GetRosenBlurStyleValue(blurStyle.value())),
+            static_cast<float>(dipScale_), static_cast<Rosen::BLUR_COLOR_MODE>(blurStyle->adaptiveColor),
+            static_cast<float>(blurStyle->scale));
     }
     rsNode_->SetBackgroundFilter(backFilter);
 }
 
-void RosenRenderContext::UpdateBackBlurStyle(const BlurStyleOption& bgBlurStyle)
+void RosenRenderContext::SetFrontBlurFilter()
+{
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    const auto& foreground = GetForeground();
+    CHECK_NULL_VOID(foreground);
+    const auto& blurStyle = foreground->propBlurStyleOption;
+    std::shared_ptr<Rosen::RSFilter> frontFilter;
+    auto dipScale_ = context->GetDipScale();
+    if (!blurStyle.has_value()) {
+        const auto& radius = foreground->propBlurRadius;
+        if (radius.has_value() && radius->IsValid()) {
+            float radiusPx = context->NormalizeToPx(radius.value());
+            float backblurRadius = SkiaDecorationPainter::ConvertRadiusToSigma(radiusPx);
+            frontFilter = Rosen::RSFilter::CreateBlurFilter(backblurRadius, backblurRadius);
+        }
+    } else if (GetRosenBlurStyleValue(blurStyle.value()) == MATERIAL_BLUR_STYLE::NO_MATERIAL) {
+        frontFilter = nullptr;
+    } else {
+        frontFilter = Rosen::RSFilter::CreateMaterialFilter(static_cast<int>(GetRosenBlurStyleValue(blurStyle.value())),
+            static_cast<float>(dipScale_), static_cast<Rosen::BLUR_COLOR_MODE>(blurStyle->adaptiveColor),
+            static_cast<float>(blurStyle->scale));
+    }
+
+    rsNode_->SetFilter(frontFilter);
+}
+
+void RosenRenderContext::UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle)
 {
     const auto& groupProperty = GetOrCreateBackground();
     if (groupProperty->CheckBlurStyleOption(bgBlurStyle)) {
         // Same with previous value.
         // If colorMode is following system and has valid blurStyle, still needs updating
-        if (bgBlurStyle.blurStyle == BlurStyle::NO_MATERIAL || bgBlurStyle.colorMode != ThemeColorMode::SYSTEM) {
+        if (bgBlurStyle->colorMode != ThemeColorMode::SYSTEM) {
             return;
         }
     } else {
         groupProperty->propBlurStyleOption = bgBlurStyle;
     }
-    isBackBlurChanged_ = true;
+    SetBackBlurFilter();
+}
+
+void RosenRenderContext::UpdateFrontBlurStyle(const std::optional<BlurStyleOption>& fgBlurStyle)
+{
+    const auto& groupProperty = GetOrCreateForeground();
+    if (groupProperty->CheckBlurStyleOption(fgBlurStyle)) {
+        // Same with previous value.
+        // If colorMode is following system and has valid blurStyle, still needs updating
+        if (fgBlurStyle->colorMode != ThemeColorMode::SYSTEM) {
+            return;
+        }
+    } else {
+        groupProperty->propBlurStyleOption = fgBlurStyle;
+    }
+    SetFrontBlurFilter();
 }
 
 void RosenRenderContext::ResetBackBlurStyle()
 {
     const auto& groupProperty = GetOrCreateBackground();
     groupProperty->propBlurStyleOption.reset();
-    isBackBlurChanged_ = true;
+    SetBackBlurFilter();
 }
 
 void RosenRenderContext::OnSphericalEffectUpdate(double radio)
@@ -967,13 +997,6 @@ void RosenRenderContext::OnModifyDone()
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(rsNode_);
-    if (isBackBlurChanged_) {
-        SetBackBlurFilter();
-        isBackBlurChanged_ = false;
-    }
-    if (HasClickEffectLevel()) {
-        InitEventClickEffect();
-    }
     const auto& size = frameNode->GetGeometryNode()->GetFrameSize();
     if (!size.IsPositive()) {
         LOGD("first modify, make change in SyncGeometryProperties");
@@ -1491,20 +1514,18 @@ void RosenRenderContext::UpdateBackBlurRadius(const Dimension& radius)
         return;
     }
     groupProperty->propBlurRadius = radius;
-    isBackBlurChanged_ = true;
+    SetBackBlurFilter();
 }
 
-void RosenRenderContext::OnFrontBlurRadiusUpdate(const Dimension& radius)
+void RosenRenderContext::UpdateFrontBlurRadius(const Dimension& radius)
 {
-    std::shared_ptr<Rosen::RSFilter> frontFilter = nullptr;
-    if (radius.IsValid()) {
-        float radiusPx = radius.ConvertToPx();
-        float frontBlurRadius = SkiaDecorationPainter::ConvertRadiusToSigma(radiusPx);
-        frontFilter = Rosen::RSFilter::CreateBlurFilter(frontBlurRadius, frontBlurRadius);
+    const auto& groupProperty = GetOrCreateForeground();
+    if (groupProperty->CheckBlurRadius(radius)) {
+        // Same with previous value
+        return;
     }
-    CHECK_NULL_VOID(rsNode_);
-    rsNode_->SetFilter(frontFilter);
-    RequestNextFrame();
+    groupProperty->propBlurRadius = radius;
+    SetFrontBlurFilter();
 }
 
 void RosenRenderContext::OnBackShadowUpdate(const Shadow& shadow)
@@ -1522,6 +1543,7 @@ void RosenRenderContext::OnBackShadowUpdate(const Shadow& shadow)
     rsNode_->SetShadowColor(shadow.GetColor().GetValue());
     rsNode_->SetShadowOffsetX(shadow.GetOffset().GetX());
     rsNode_->SetShadowOffsetY(shadow.GetOffset().GetY());
+    rsNode_->SetShadowMask(shadow.GetShadowType() == ShadowType::BLUR);
     if (shadow.GetHardwareAcceleration()) {
         rsNode_->SetShadowElevation(shadow.GetElevation());
     } else {
@@ -2303,111 +2325,5 @@ void RosenRenderContext::AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePrope
         rsNode_->AddModifier(nodeModifierImpl);
         nodeModifierImpl->AddProperty(property->GetProperty());
     }
-}
-
-void RosenRenderContext::InitEventClickEffect()
-{
-    if (touchListener_) {
-        return;
-    }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto gesture = host->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gesture);
-    auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
-        auto renderContext = weak.Upgrade();
-        CHECK_NULL_VOID(renderContext);
-        if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
-            renderContext->ClickEffectPlayAnimation(info.GetTouches().front().GetTouchType());
-        }
-    };
-    touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
-    gesture->AddTouchEvent(touchListener_);
-}
-
-void RosenRenderContext::ClickEffectPlayAnimation(const TouchType& touchType)
-{
-    if (touchType != TouchType::DOWN) {
-        return;
-    }
-    AnimationUtils::StopAnimation(clickEffectAnimation_);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-
-    auto value = GetClickEffectLevelValue();
-    auto level = value.level;
-    auto scaleValue = value.scaleNumber;
-
-    auto defaultScale = VectorF(1.0f, 1.0f);
-    auto currentScale = GetTransformScaleValue(defaultScale);
-
-    auto xScale = currentScale.x;
-    auto yScale = currentScale.y;
-
-    auto springCurve = UpdatePlayAnimationValue(level, scaleValue);
-    AnimationOption option;
-    option.SetCurve(springCurve);
-    clickEffectAnimation_ = AnimationUtils::StartAnimation(
-        option,
-        [xScale, yScale, scaleValue, springCurve, weakContext = WeakClaim(this)]() {
-            auto renderContext = weakContext.Upgrade();
-            AnimationUtils::AddKeyFrame(0.0f, springCurve, [xScale, yScale, renderContext]() {
-                VectorF valueScale(xScale, yScale);
-                CHECK_NULL_VOID(renderContext);
-                renderContext->UpdateTransformScale(valueScale);
-            });
-            AnimationUtils::AddKeyFrame(DEFAULT_MID_TIME_SLOT, springCurve, [scaleValue, renderContext]() {
-                VectorF valueScale(scaleValue, scaleValue);
-                CHECK_NULL_VOID(renderContext);
-                renderContext->UpdateTransformScale(valueScale);
-            });
-            AnimationUtils::AddKeyFrame(1.0f, springCurve, [xScale, yScale, renderContext]() {
-                VectorF valueScale(xScale, yScale);
-                CHECK_NULL_VOID(renderContext);
-                renderContext->UpdateTransformScale(valueScale);
-            });
-        },
-        nullptr);
-}
-
-RefPtr<Curve> RosenRenderContext::UpdatePlayAnimationValue(const ClickEffectLevel& level, float& scaleValue)
-{
-    float velocity = 0.0f;
-    float mass = 0.0f;
-    float stiffness = 0.0f;
-    float damping = 0.0f;
-    if (level == ClickEffectLevel::LIGHT) {
-        velocity = ANIMATION_CURVE_VELOCITY_LIGHT_OR_MIDDLE;
-        mass = ANIMATION_CURVE_MASS;
-        stiffness = ANIMATION_CURVE_STIFFNESS_LIGHT;
-        damping = ANIMATION_CURVE_DAMPING_LIGHT;
-        if (GreatOrEqual(scaleValue, 0.0) && LessOrEqual(scaleValue, 1.0)) {
-            scaleValue = sqrt(scaleValue);
-        } else {
-            scaleValue = sqrt(DEFAULT_SCALE_LIGHT);
-        }
-    } else if (level == ClickEffectLevel::MIDDLE) {
-        velocity = ANIMATION_CURVE_VELOCITY_LIGHT_OR_MIDDLE;
-        mass = ANIMATION_CURVE_MASS;
-        stiffness = ANIMATION_CURVE_STIFFNESS_MIDDLE;
-        damping = ANIMATION_CURVE_DAMPING_MIDDLE;
-        if (GreatOrEqual(scaleValue, 0.0) && LessOrEqual(scaleValue, 1.0)) {
-            scaleValue = sqrt(scaleValue);
-        } else {
-            scaleValue = sqrt(DEFAULT_SCALE_MIDDLE_OR_HEAVY);
-        }
-    } else if (level == ClickEffectLevel::HEAVY) {
-        velocity = ANIMATION_CURVE_VELOCITY_HEAVY;
-        mass = ANIMATION_CURVE_MASS;
-        stiffness = ANIMATION_CURVE_STIFFNESS_HEAVY;
-        damping = ANIMATION_CURVE_DAMPING_HEAVY;
-        if (GreatOrEqual(scaleValue, 0.0) && LessOrEqual(scaleValue, 1.0)) {
-            scaleValue = sqrt(scaleValue);
-        } else {
-            scaleValue = sqrt(DEFAULT_SCALE_MIDDLE_OR_HEAVY);
-        }
-    }
-    auto springCurve = AceType::MakeRefPtr<InterpolatingSpring>(velocity, mass, stiffness, damping);
-    return springCurve;
 }
 } // namespace OHOS::Ace::NG

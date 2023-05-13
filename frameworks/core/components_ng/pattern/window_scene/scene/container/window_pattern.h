@@ -104,6 +104,7 @@ public:
     void Background() override;
     void Disconnect() override;
     void OnNewWant(const AAFwk::Want& want) override;
+    void SetDisplayDensity(float density);
 
 protected:
     std::shared_ptr<Rosen::RSSurfaceNode> surfaceNode_;
@@ -122,7 +123,7 @@ private:
     int32_t instanceId_ = -1;
     std::shared_ptr<Rosen::RSUIDirector> rsUIDirector_;
     std::shared_ptr<Rosen::VsyncCallback> vsyncCallback_;
-
+    float displayDensity_ = 1.5f;
     ACE_DISALLOW_COPY_AND_MOVE(WindowPattern);
 };
 } // namespace OHOS::Ace::NG

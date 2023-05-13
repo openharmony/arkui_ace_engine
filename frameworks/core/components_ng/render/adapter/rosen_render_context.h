@@ -30,7 +30,6 @@
 #include "base/geometry/ng/rect_t.h"
 #include "base/utils/noncopyable.h"
 #include "core/components/common/properties/color.h"
-#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/progress_mask_property.h"
@@ -130,7 +129,9 @@ public:
     void AnimateHoverEffectScale(bool isHovered) override;
     void AnimateHoverEffectBoard(bool isHovered) override;
     void UpdateBackBlurRadius(const Dimension& radius) override;
-    void UpdateBackBlurStyle(const BlurStyleOption& bgBlurStyle) override;
+    void UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle) override;
+    void UpdateFrontBlurRadius(const Dimension& radius) override;
+    void UpdateFrontBlurStyle(const std::optional<BlurStyleOption>& fgBlurStyle) override;
     void ResetBackBlurStyle() override;
     void OnSphericalEffectUpdate(double radio) override;
     void OnPixelStretchEffectUpdate(const PixStretchEffectOption& option) override;
@@ -268,7 +269,6 @@ private:
     void OnFrontInvertUpdate(const Dimension& invert) override;
     void OnFrontHueRotateUpdate(float hueRotate) override;
     void OnFrontColorBlendUpdate(const Color& colorBlend) override;
-    void OnFrontBlurRadiusUpdate(const Dimension& radius) override;
 
     void OnOverlayTextUpdate(const OverlayOptions& overlay) override;
     void OnMotionPathUpdate(const MotionPathOption& motionPath) override;
@@ -303,11 +303,8 @@ private:
     void PaintBorderImageGradient();
     void PaintMouseSelectRect(const RectF& rect, const Color& fillColor, const Color& strokeColor);
     void SetBackBlurFilter();
+    void SetFrontBlurFilter();
     void GetPaddingOfFirstFrameNodeParent(Dimension& parentPaddingLeft, Dimension& parentPaddingTop);
-
-    void InitEventClickEffect();
-    RefPtr<Curve> UpdatePlayAnimationValue(const ClickEffectLevel& level, float& scaleValue);
-    void ClickEffectPlayAnimation(const TouchType& touchType);
 
     // helper function to check if paint rect is valid
     bool RectIsNull();
@@ -379,9 +376,6 @@ private:
     std::shared_ptr<InvertModifier> invertModifier_;
     std::shared_ptr<HueRotateModifier> hueRotateModifier_;
     std::shared_ptr<ColorBlendModifier> colorBlendModifier_;
-
-    RefPtr<TouchEventImpl> touchListener_;
-    std::shared_ptr<AnimationUtils::Animation> clickEffectAnimation_;
 
     template<typename Modifier, typename PropertyType>
     friend class PropertyTransitionEffectTemplate;

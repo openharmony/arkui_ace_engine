@@ -128,6 +128,7 @@ private:
     void ScrollableNodeResetAnimation();
     void OnAppearAnimationFinish();
     void UpdateLoadingMarginTop(float top);
+    void SetAccessibilityAction();
     RefreshStatus refreshStatus_ = RefreshStatus::INACTIVE;
     RefPtr<PanEvent> panEvent_;
     OffsetF scrollOffset_;
