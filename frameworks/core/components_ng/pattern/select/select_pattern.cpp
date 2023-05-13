@@ -28,7 +28,6 @@
 #include "core/components/select/select_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/button/button_view.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"

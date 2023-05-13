@@ -194,6 +194,7 @@ private:
     void DisableTabInMenu();
 
     RefPtr<FrameNode> GetMenuWrapper() const;
+    void SetAccessibilityAction();
 
     RefPtr<ClickEvent> onClick_;
     RefPtr<TouchEventImpl> onTouch_;

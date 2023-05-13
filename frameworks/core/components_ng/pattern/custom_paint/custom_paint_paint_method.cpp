@@ -1390,21 +1390,21 @@ void CustomPaintPaintMethod::SetHueRotateFilter(const std::string& filterParam, 
     float rad = 0.0f;
     if (percent.find("deg") != std::string::npos) {
         size_t index = percent.find("deg");
-        percent = percent.substr(0, index);
+        percent.resize(index);
         std::istringstream iss(percent);
         iss >> rad;
         rad = rad / HALF_CIRCLE_ANGLE * M_PI;
     }
     if (percent.find("turn") != std::string::npos) {
         size_t index = percent.find("turn");
-        percent = percent.substr(0, index);
+        percent.resize(index);
         std::istringstream iss(percent);
         iss >> rad;
         rad = rad * 2 * M_PI;
     }
     if (percent.find("rad") != std::string::npos) {
         size_t index = percent.find("rad");
-        percent = percent.substr(0, index);
+        percent.resize(index);
         std::istringstream iss(percent);
         iss >> rad;
     }

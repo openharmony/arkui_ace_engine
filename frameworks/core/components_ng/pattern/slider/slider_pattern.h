@@ -162,6 +162,7 @@ private:
     void UpdateBlock();
     void LayoutImageNode();
     OffsetF GetBubbleVertexPosition(const OffsetF& blockCenter, float trackThickness, const SizeF& blockSize);
+    void SetAccessibilityAction();
 
     Axis direction_ = Axis::HORIZONTAL;
     enum SliderChangeMode { Begin = 0, Moving = 1, End = 2, Click = 3 };

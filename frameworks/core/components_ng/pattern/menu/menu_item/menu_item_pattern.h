@@ -183,6 +183,7 @@ private:
     OffsetF GetSubMenuPostion(const RefPtr<FrameNode>& targetNode);
 
     void AddSelfHoverRegion(const RefPtr<FrameNode>& targetNode);
+    void SetAccessibilityAction();
 
     std::list<TouchRegion> hoverRegions_;
 

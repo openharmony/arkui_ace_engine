@@ -834,6 +834,7 @@ void FrontendDelegateDeclarative::Replace(const std::string& uri, const std::str
     if (Container::IsCurrentUseNewPipeline()) {
         CHECK_NULL_VOID(pageRouterManager_);
         pageRouterManager_->Replace({ uri }, params);
+        OnMediaQueryUpdate();
         return;
     }
     Replace(PageTarget(uri), params);
@@ -845,6 +846,7 @@ void FrontendDelegateDeclarative::ReplaceWithMode(
     if (Container::IsCurrentUseNewPipeline()) {
         CHECK_NULL_VOID(pageRouterManager_);
         pageRouterManager_->Replace({ uri }, params, static_cast<NG::RouterMode>(routerMode));
+        OnMediaQueryUpdate();
         return;
     }
     Replace(PageTarget(uri, static_cast<RouterMode>(routerMode)), params);
@@ -857,6 +859,7 @@ void FrontendDelegateDeclarative::ReplaceWithCallback(const std::string& uri, co
         CHECK_NULL_VOID(pageRouterManager_);
         pageRouterManager_->ReplaceWithCallback(
             { uri }, params, errorCallback, static_cast<NG::RouterMode>(routerMode));
+        OnMediaQueryUpdate();
         return;
     }
     Replace(PageTarget(uri, static_cast<RouterMode>(routerMode)), params, errorCallback);

@@ -57,6 +57,9 @@ public:
         ResetNeedFireOnChangeWhenCreate();
         ResetWidthAuto();
         ResetCaretPosition();
+        ResetErrorText();
+        ResetShowErrorText();
+        ResetShowCounter();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -68,6 +71,9 @@ public:
         CHECK_NULL_VOID(textFieldTheme);
         json->Put("caretPosition", std::to_string(propCaretPosition_.value_or(0)).c_str());
         json->Put("showPasswordIcon", propShowPasswordIcon_.value_or(true));
+        json->Put("errorText", propErrorText_.value_or("").c_str());
+        json->Put("showErrorText", propShowErrorText_.value_or(false));
+        json->Put("showCounter", propShowCounter_.value_or(false));
     }
 
     ACE_DEFINE_PROPERTY_GROUP(FontStyle, FontStyle);
@@ -105,6 +111,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
         PlaceholderTextLineStyle, MaxLines, PlaceholderMaxLines, uint32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Placeholder, std::string, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ErrorText, std::string, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowErrorText, bool, PROPERTY_UPDATE_MEASURE);
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TextInputType, TextInputType, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(InputFilter, std::string, PROPERTY_UPDATE_MEASURE);
@@ -142,6 +150,9 @@ protected:
         value->propLastValue_ = CloneLastValue();
         value->propNeedFireOnChangeWhenCreate_ = CloneNeedFireOnChangeWhenCreate();
         value->propWidthAuto_ = CloneWidthAuto();
+        value->propErrorText_ = CloneErrorText();
+        value->propShowErrorText_ = CloneShowErrorText();
+        value->propShowCounter_ = CloneShowCounter();
     }
 
 private:

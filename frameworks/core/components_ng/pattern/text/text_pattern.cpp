@@ -694,7 +694,18 @@ void TextPattern::OnModifyDone()
         }
         InitClickEvent(gestureEventHub);
         InitMouseEvent();
+        SetAccessibilityAction();
     }
+}
+
+void TextPattern::ActSetSelection(int32_t start, int32_t end)
+{
+    textSelector_.Update(start, end);
+    CalculateHandleOffsetAndShowOverlay();
+    ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -908,5 +919,43 @@ void TextPattern::UpdateChildProperty(const RefPtr<SpanNode>& child) const
                 break;
         }
     }
+}
+
+void TextPattern::SetAccessibilityAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textAccessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(textAccessibilityProperty);
+    textAccessibilityProperty->SetActionSetSelection([weakPtr = WeakClaim(this)](int32_t start, int32_t end) {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto textLayoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        if (textLayoutProperty->GetCopyOptionValue(CopyOptions::None) != CopyOptions::None) {
+            pattern->ActSetSelection(start, end);
+        }
+    });
+
+    textAccessibilityProperty->SetActionClearSelection([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto textLayoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        if (textLayoutProperty->GetCopyOptionValue(CopyOptions::None) != CopyOptions::None) {
+            pattern->CloseSelectOverlay();
+        }
+    });
+
+    textAccessibilityProperty->SetActionCopy([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto textLayoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        if (textLayoutProperty->GetCopyOptionValue(CopyOptions::None) != CopyOptions::None) {
+            pattern->HandleOnCopy();
+            pattern->CloseSelectOverlay();
+        }
+    });
 }
 } // namespace OHOS::Ace::NG

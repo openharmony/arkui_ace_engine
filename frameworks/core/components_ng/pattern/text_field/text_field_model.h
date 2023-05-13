@@ -154,7 +154,8 @@ public:
 
     virtual void SetMenuOptionItems(std::vector<NG::MenuOptionsParam>&& menuOptionsItems) = 0;
     virtual void SetPasswordIcon(const PasswordIcon& passwordIcon) {};
-    virtual void SetShowUnit(std::function<void()>&& unitAction) = 0;
+    virtual void SetShowUnit(std::function<void()>&& unitAction) {};
+    virtual void SetShowError(const std::string& errorText, bool visible) {};
 
     virtual void SetShowUnderline(bool showUnderLine) {};
     virtual void SetShowCounter(bool value) {};

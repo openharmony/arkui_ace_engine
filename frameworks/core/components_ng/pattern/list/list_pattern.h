@@ -224,6 +224,7 @@ private:
     void MultiSelectWithoutKeyboard(const RectF& selectedZone);
 
     void DrivenRender(const RefPtr<LayoutWrapper>& layoutWrapper);
+    void SetAccessibilityAction();
 
     RefPtr<ListContentModifier> listContentModifier_;
 

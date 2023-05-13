@@ -74,6 +74,8 @@ public:
     static void SetPasswordIcon(const JSCallbackInfo& info);
     static void SetShowUnit(const JSCallbackInfo& info);
     static void SetShowCounter(const JSCallbackInfo& info);
+    static void SetShowError(const JSCallbackInfo& info);
+
     static void SetShowUnderline(const JSCallbackInfo& info);
 };
 

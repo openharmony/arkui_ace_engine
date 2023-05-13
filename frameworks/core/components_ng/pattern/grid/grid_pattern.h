@@ -196,6 +196,7 @@ private:
     void MultiSelectWithoutKeyboard(const RectF& selectedZone);
     void UpdateScrollBarOffset() override;
     void UpdateRectOfDraggedInItem(int32_t insertIndex);
+    void SetAccessibilityAction();
 
     GridLayoutInfo gridLayoutInfo_;
     RefPtr<GridPositionController> positionController_;

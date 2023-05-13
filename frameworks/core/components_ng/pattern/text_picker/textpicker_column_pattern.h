@@ -300,6 +300,7 @@ private:
     bool touchEventInit = false;
     RefPtr<InputEvent> CreateMouseHoverEventListener(RefPtr<EventParam> param);
     RefPtr<ClickEvent> CreateItemClickEventListener(RefPtr<EventParam> param);
+    void SetAccessibilityAction();
 
     float localDownDistance_ = 0.0f;
     Color pressColor_;

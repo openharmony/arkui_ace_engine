@@ -1090,10 +1090,23 @@ void JSTextField::SetShowUnit(const JSCallbackInfo& info)
     }
 }
 
+void JSTextField::SetShowError(const JSCallbackInfo& info)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (!info[0]->IsUndefined() && !info[0]->IsString()) {
+            LOGI("args need a string or undefined");
+            return;
+        }
+        TextFieldModel::GetInstance()->SetShowError(
+            info[0]->IsString() ? info[0]->ToString() : "", info[0]->IsUndefined() ? false : true);
+    }
+}
+
 void JSTextField::SetShowCounter(const JSCallbackInfo& info)
 {
     if (!info[0]->IsBoolean()) {
         LOGI("The info is wrong, it is supposed to be an boolean");
+        TextFieldModel::GetInstance()->SetShowCounter(false);
         return;
     }
 

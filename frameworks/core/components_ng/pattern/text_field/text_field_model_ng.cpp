@@ -418,6 +418,12 @@ void TextFieldModelNG::SetShowUnit(std::function<void()>&& unitFunction)
     }
 }
 
+void TextFieldModelNG::SetShowError(const std::string& errorText, bool visible)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ErrorText, errorText);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowErrorText, visible);
+}
+
 void TextFieldModelNG::SetShowCounter(bool value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowCounter, value);
