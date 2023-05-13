@@ -1793,6 +1793,7 @@ void TextFieldPattern::OnModifyDone()
     InitFocusEvent();
     InitMouseEvent();
     InitTouchEvent();
+    SetAccessibilityAction();
 #ifdef ENABLE_DRAG_FRAMEWORK
     if (layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) != TextInputType::VISIBLE_PASSWORD) {
         InitDragDropEvent();
@@ -3870,5 +3871,133 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 bool TextFieldPattern::IsSelectedAreaRedraw() const
 {
     return isSelectedAreaRedraw_;
+}
+
+void TextFieldPattern::SetAccessibilityAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetActionSetText([weakPtr = WeakClaim(this)](const std::string& value) {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->InsertValue(value);
+    });
+
+    accessibilityProperty->SetActionSetSelection([weakPtr = WeakClaim(this)](int32_t start, int32_t end) {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetSelectionFlag(start, end);
+    });
+
+    accessibilityProperty->SetActionCopy([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (pattern->AllowCopy()) {
+            pattern->HandleOnCopy();
+            pattern->CloseSelectOverlay();
+        }
+    });
+
+    accessibilityProperty->SetActionCut([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (pattern->AllowCopy()) {
+            pattern->HandleOnCut();
+            pattern->CloseSelectOverlay();
+        }
+    });
+
+    accessibilityProperty->SetActionPaste([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleOnPaste();
+        pattern->CloseSelectOverlay();
+    });
+
+    accessibilityProperty->SetActionClearSelection([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto current = pattern->GetTextSelector().GetEnd();
+        pattern->SetInSelectMode(SelectionMode::NONE);
+        pattern->UpdateSelection(current);
+        pattern->SetSelectionFlag(current, current);
+        pattern->CloseSelectOverlay();
+        pattern->StartTwinkling();
+    });
+    SetAccessibilityScrollAction();
+    SetAccessibilityMoveTextAction();
+}
+
+void TextFieldPattern::SetAccessibilityMoveTextAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetActionMoveText([weakPtr = WeakClaim(this)](int32_t moveUnit, bool forward) {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        if (pattern->GetEditingValue().GetWideText().empty()) {
+            return;
+        }
+        int range = 0;
+        if (moveUnit == 1) {
+            range = 1;
+        }
+        auto caretPosition = forward ? pattern->textEditingValue_.caretPosition + range
+                                     : pattern->textEditingValue_.caretPosition - range;
+        auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+        layoutProperty->UpdateCaretPosition(caretPosition);
+        pattern->SetCaretPosition(caretPosition);
+        pattern->UpdateCaretPositionByTextEdit();
+    });
+}
+
+void TextFieldPattern::SetAccessibilityScrollAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetActionScrollForward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (pattern->IsScrollable()) {
+            auto frameNode = pattern->GetHost();
+            CHECK_NULL_VOID(frameNode);
+            auto offset = pattern->GetTextContentRect().Height();
+            float scrollDistance =
+                pattern->GetTextRect().Height() - (std::abs((pattern->GetTextRect().GetY() - offset)));
+            if (offset > scrollDistance) {
+                pattern->OnTextAreaScroll(-scrollDistance);
+                frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+                return;
+            }
+            pattern->OnTextAreaScroll(-offset);
+            frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+        }
+    });
+
+    accessibilityProperty->SetActionScrollBackward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (pattern->IsScrollable()) {
+            auto frameNode = pattern->GetHost();
+            CHECK_NULL_VOID(frameNode);
+            auto offset = pattern->GetTextContentRect().Height();
+            float scrollDistance = std::abs(pattern->GetTextRect().GetY() - pattern->GetTextContentRect().GetY());
+            if (offset > scrollDistance) {
+                pattern->OnTextAreaScroll(scrollDistance);
+                frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+                return;
+            }
+            pattern->OnTextAreaScroll(offset);
+            frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+        }
+    });
 }
 } // namespace OHOS::Ace::NG

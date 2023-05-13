@@ -840,6 +840,9 @@ private:
     void RequestKeyboardOnFocus();
     void SetNeedToRequestKeyboardOnFocus();
     void SaveUnderlineStates();
+    void SetAccessibilityAction();
+    void SetAccessibilityMoveTextAction();
+    void SetAccessibilityScrollAction();
 
     RectF frameRect_;
     RectF contentRect_;

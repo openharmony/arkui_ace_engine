@@ -140,6 +140,7 @@ private:
     void ItemSelectedInAnimation(RefPtr<FrameNode>& itemNode);
     void ItemSelectedOutAnimation(RefPtr<FrameNode>& itemNode);
     void FireOnSelect(int32_t selectIndex, bool fromPress);
+    void SetAccessibilityAction();
     
     RefPtr<FrameNode> popupNode_;
     RefPtr<TouchEventImpl> touchListener_;

@@ -115,6 +115,7 @@ private:
     void ButtonOnTouch(RefPtr<FrameNode> buttonNode, TouchType touchType);
     void ButtonTouchDownAnimation(RefPtr<FrameNode> buttonNode);
     void ButtonTouchUpAnimation(RefPtr<FrameNode> buttonNode);
+    void SetAccessibilityAction();
 
     int32_t index_ = 0;
     int32_t maxIndex_ = 0;
