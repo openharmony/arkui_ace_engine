@@ -71,6 +71,7 @@ void SliderPattern::OnModifyDone()
     CHECK_NULL_VOID_NOLOG(focusHub);
     InitOnKeyEvent(focusHub);
     InitializeBubble();
+    SetAccessibilityAction();
 }
 
 void SliderPattern::CancelExceptionValue(float& min, float& max, float& step)
@@ -834,5 +835,36 @@ OffsetF SliderPattern::GetBubbleVertexPosition(const OffsetF& blockCenter, float
         }
     }
     return bubbleVertex;
+}
+
+void SliderPattern::SetAccessibilityAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetActionScrollForward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->MoveStep(1);
+
+        if (pattern->showTips_) {
+            pattern->bubbleFlag_ = true;
+            pattern->InitializeBubble();
+        }
+        pattern->PaintFocusState();
+    });
+
+    accessibilityProperty->SetActionScrollBackward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->MoveStep(-1);
+
+        if (pattern->showTips_) {
+            pattern->bubbleFlag_ = true;
+            pattern->InitializeBubble();
+        }
+        pattern->PaintFocusState();
+    });
 }
 } // namespace OHOS::Ace::NG

@@ -99,6 +99,7 @@ void IndexerPattern::OnModifyDone()
         gesture->AddTouchEvent(touchListener_);
     }
     InitOnKeyEvent();
+    SetAccessibilityAction();
 }
 
 bool IndexerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -1144,5 +1145,60 @@ void IndexerPattern::FireOnSelect(int32_t selectIndex, bool fromPress)
     }
     lastFireSelectIndex_ = selectIndex;
     lastIndexFromPress_ = fromPress;
+}
+
+void IndexerPattern::SetAccessibilityAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto childrenNode = host->GetChildren();
+    for (auto& iter : childrenNode) {
+        auto textNode = DynamicCast<NG::FrameNode>(iter);
+        CHECK_NULL_VOID(textNode);
+        auto accessibilityProperty = textNode->GetAccessibilityProperty<AccessibilityProperty>();
+        CHECK_NULL_VOID(accessibilityProperty);
+        accessibilityProperty->SetActionSelect(
+            [weakPtr = WeakClaim(this), node = WeakClaim(RawPtr(textNode)), childrenNode]() {
+                const auto& indexerPattern = weakPtr.Upgrade();
+                CHECK_NULL_VOID(indexerPattern);
+                const auto& frameNode = node.Upgrade();
+                CHECK_NULL_VOID(frameNode);
+                auto index = 0;
+                auto nodeId = frameNode->GetAccessibilityId();
+                for (auto& child : childrenNode) {
+                    if (child->GetAccessibilityId() == nodeId) {
+                        break;
+                    }
+                    index++;
+                }
+                indexerPattern->selected_ = index;
+                indexerPattern->ResetStatus();
+                indexerPattern->ApplyIndexChanged(true, true);
+                indexerPattern->OnSelect(true);
+            });
+
+        accessibilityProperty->SetActionClearSelection(
+            [weakPtr = WeakClaim(this), node = WeakClaim(RawPtr(textNode)), childrenNode] {
+                const auto& indexerPattern = weakPtr.Upgrade();
+                CHECK_NULL_VOID(indexerPattern);
+                const auto& frameNode = node.Upgrade();
+                CHECK_NULL_VOID(frameNode);
+                auto index = 0;
+                auto nodeId = frameNode->GetAccessibilityId();
+                for (auto& child : childrenNode) {
+                    if (child->GetAccessibilityId() == nodeId) {
+                        break;
+                    }
+                    index++;
+                }
+                if (indexerPattern->selected_ != index) {
+                    return;
+                }
+                indexerPattern->selected_ = 0;
+                indexerPattern->ResetStatus();
+                indexerPattern->ApplyIndexChanged(false);
+                indexerPattern->OnSelect(false);
+            });
+    }
 }
 } // namespace OHOS::Ace::NG
