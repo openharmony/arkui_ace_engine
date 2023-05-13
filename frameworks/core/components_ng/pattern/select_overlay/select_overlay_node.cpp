@@ -50,6 +50,9 @@ constexpr char BUTTON_COPY_ALL[] = "textoverlay.select_all";
 constexpr char BUTTON_CUT[] = "textoverlay.cut";
 constexpr char BUTTON_COPY[] = "textoverlay.copy";
 constexpr char BUTTON_PASTE[] = "textoverlay.paste";
+constexpr char BUTTON_SHARE[] = "textoverlay.share";
+constexpr char BUTTON_TRANSLATE[] = "textoverlay.translate";
+constexpr char BUTTON_SEARCH[] = "textoverlay.search";
 
 constexpr int32_t OPTION_INDEX_CUT = 0;
 constexpr int32_t OPTION_INDEX_COPY = 1;
@@ -57,6 +60,10 @@ constexpr int32_t OPTION_INDEX_PASTE = 2;
 constexpr int32_t OPTION_INDEX_COPY_ALL = 3;
 constexpr int32_t ANIMATION_DURATION1 = 350;
 constexpr int32_t ANIMATION_DURATION2 = 150;
+
+constexpr int32_t DEFAULT_EXTENSION_INDEX_SHARE = 0;
+constexpr int32_t DEFAULT_EXTENSION_INDEX_TRANSLATE = 1;
+constexpr int32_t DEFAULT_EXTENSION_INDEX_SEARCH = 2;
 
 constexpr Dimension MORE_MENU_TRANSLATE = -7.5_vp;
 constexpr Dimension MORE_MENU_INTERVAL = 8.0_vp;
@@ -82,8 +89,13 @@ RefPtr<FrameNode> BuildButton(const std::string& data, const std::function<void(
     CHECK_NULL_RETURN(textOverlayTheme, button);
     auto textStyle = textOverlayTheme->GetMenuButtonTextStyle();
     textLayoutProperty->UpdateFontSize(textStyle.GetFontSize());
-    textLayoutProperty->UpdateTextColor(textStyle.GetTextColor());
     textLayoutProperty->UpdateFontWeight(textStyle.GetFontWeight());
+    if (callback) {
+        textLayoutProperty->UpdateTextColor(textStyle.GetTextColor());
+    } else {
+        textLayoutProperty->UpdateTextColor(
+            textStyle.GetTextColor().BlendOpacity(textOverlayTheme->GetAlphaDisabled()));
+    }
     text->MarkModifyDone();
 
     auto buttonLayoutProperty = button->GetLayoutProperty<ButtonLayoutProperty>();
@@ -100,19 +112,26 @@ RefPtr<FrameNode> BuildButton(const std::string& data, const std::function<void(
     buttonLayoutProperty->UpdateFlexShrink(0);
     button->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
 
-    button->GetOrCreateGestureEventHub()->SetUserOnClick([callback, overlayId, isSelectAll](GestureEvent& /*info*/) {
-        if (callback) {
-            callback();
-        }
-        // close text overlay.
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto overlayManager = pipeline->GetSelectOverlayManager();
-        CHECK_NULL_VOID(overlayManager);
-        if (!isSelectAll) {
-            overlayManager->DestroySelectOverlay(overlayId);
-        }
-    });
+    if (callback) {
+        button->GetOrCreateGestureEventHub()->SetUserOnClick(
+            [callback, overlayId, isSelectAll](GestureEvent& /*info*/) {
+                if (callback) {
+                    callback();
+                }
+                // close text overlay.
+                auto pipeline = PipelineContext::GetCurrentContext();
+                CHECK_NULL_VOID(pipeline);
+                auto overlayManager = pipeline->GetSelectOverlayManager();
+                CHECK_NULL_VOID(overlayManager);
+                if (!isSelectAll) {
+                    overlayManager->DestroySelectOverlay(overlayId);
+                }
+            });
+    } else {
+        auto buttonEventHub = button->GetEventHub<OptionEventHub>();
+        CHECK_NULL_RETURN(buttonEventHub, button);
+        buttonEventHub->SetEnabled(false);
+    }
     button->MarkModifyDone();
     return button;
 }
@@ -254,6 +273,7 @@ void SetOptionDisable(const RefPtr<FrameNode>& option)
     auto optionEventHub = option->GetEventHub<OptionEventHub>();
     CHECK_NULL_VOID(optionEventHub);
     optionEventHub->SetEnabled(false);
+    option->MarkModifyDone();
 }
 
 void SetOptionsAction(const std::shared_ptr<SelectOverlayInfo>& info, const std::vector<RefPtr<FrameNode>>& options)
@@ -272,6 +292,13 @@ void SetOptionsAction(const std::shared_ptr<SelectOverlayInfo>& info, const std:
     }
     if (!info->menuInfo.showCopyAll) {
         SetOptionDisable(options[OPTION_INDEX_COPY_ALL]);
+    }
+}
+
+void SetOptionsAction(const std::vector<RefPtr<FrameNode>>& options)
+{
+    for (const auto& option : options) {
+        SetOptionDisable(option);
     }
 }
 } // namespace
@@ -458,7 +485,7 @@ void SelectOverlayNode::BackAnimation()
     AnimationUtils::CloseImplicitAnimation();
 }
 
-void SelectOverlayNode::CreateExtensionToolBar(const std::vector<MenuOptionsParam>& menuOptionItems, int32_t index)
+void SelectOverlayNode::CreateExtensionToolBar()
 {
     extensionMenu_ = FrameNode::GetOrCreateFrameNode("SelectMoreMenu", ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
@@ -467,15 +494,49 @@ void SelectOverlayNode::CreateExtensionToolBar(const std::vector<MenuOptionsPara
     auto weak = Claim(this);
     extensionMenu_->MountToParent(weak);
     extensionMenu_->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
-
-    auto extensionMenuContext = extensionMenu_->GetRenderContext();
     auto id = GetId();
-
     auto button = BuildMoreOrBackButton(id, false);
     button->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     button->MountToParent(extensionMenu_);
+}
 
+void SelectOverlayNode::AddExtensionMenuOptions(const std::vector<MenuOptionsParam>& menuOptionItems, int32_t index)
+{
+    CHECK_NULL_VOID(extensionMenu_);
     std::vector<OptionParam> params;
+    isShowInExtension_[DEFAULT_EXTENSION_INDEX_SEARCH] = isShowInExtension_[DEFAULT_EXTENSION_INDEX_SEARCH] |
+                                                         isShowInExtension_[DEFAULT_EXTENSION_INDEX_TRANSLATE] |
+                                                         isShowInExtension_[DEFAULT_EXTENSION_INDEX_SHARE];
+    isShowInExtension_[DEFAULT_EXTENSION_INDEX_TRANSLATE] =
+        isShowInExtension_[DEFAULT_EXTENSION_INDEX_TRANSLATE] | isShowInExtension_[DEFAULT_EXTENSION_INDEX_SHARE];
+    auto extensionMenuContext = extensionMenu_->GetRenderContext();
+    auto id = GetId();
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto iconTheme = pipeline->GetTheme<IconTheme>();
+    auto defaultOptionCallback = [overlayId = id]() {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto overlayManager = pipeline->GetSelectOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+        overlayManager->DestroySelectOverlay(overlayId);
+    };
+    if (isShowInExtension_[DEFAULT_EXTENSION_INDEX_SHARE]) {
+        auto iconPath = iconTheme ? iconTheme->GetIconPath(InternalResource::ResourceId::IC_SHARE_SVG) : "";
+        params.emplace_back(
+            Localization::GetInstance()->GetEntryLetters(BUTTON_SHARE), iconPath, defaultOptionCallback);
+    }
+    if (isShowInExtension_[DEFAULT_EXTENSION_INDEX_TRANSLATE]) {
+        auto iconPath = iconTheme ? iconTheme->GetIconPath(InternalResource::ResourceId::IC_TRANSLATE_SVG) : "";
+        params.emplace_back(
+            Localization::GetInstance()->GetEntryLetters(BUTTON_TRANSLATE), iconPath, defaultOptionCallback);
+    }
+    if (isShowInExtension_[DEFAULT_EXTENSION_INDEX_SEARCH]) {
+        auto iconPath = iconTheme ? iconTheme->GetIconPath(InternalResource::ResourceId::IC_SEARCH_SVG) : "";
+        params.emplace_back(
+            Localization::GetInstance()->GetEntryLetters(BUTTON_SEARCH), iconPath, defaultOptionCallback);
+    }
     int32_t itemNum = 0;
     for (auto item : menuOptionItems) {
         if (itemNum >= index) {
@@ -507,8 +568,6 @@ void SelectOverlayNode::CreateExtensionToolBar(const std::vector<MenuOptionsPara
     auto props = menu->GetLayoutProperty<MenuLayoutProperty>();
     auto context = menu->GetRenderContext();
     CHECK_NULL_VOID(props);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
     auto offsetY = 0.0f;
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
     if (textOverlayTheme) {
@@ -516,6 +575,10 @@ void SelectOverlayNode::CreateExtensionToolBar(const std::vector<MenuOptionsPara
     }
     props->UpdateMenuOffset(OffsetF(0.0f, offsetY + MORE_MENU_INTERVAL.ConvertToPx()) + GetPageOffset());
     context->UpdateBackShadow(ShadowConfig::NoneShadow);
+    auto menuPattern = menu->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    auto options = menuPattern->GetOptions();
+    SetOptionsAction(options);
     menu->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     ElementRegister::GetInstance()->AddUINode(menu);
     menu->MountToParent(extensionMenu_);
@@ -612,6 +675,40 @@ void SelectOverlayNode::GetDefaultButtonAndMenuWidth(float& defaultOptionWidth, 
     defaultOptionWidth = fontWidth + buttonPadding.Left().ConvertToPx() + buttonPadding.Right().ConvertToPx();
 }
 
+bool SelectOverlayNode::AddSystemDefaultOptions(
+    float defaultOptionWidth, float fontWidth, float maxWidth, float& allocatedSize)
+{
+    if (maxWidth - allocatedSize >= defaultOptionWidth) {
+        auto buttonTranslase =
+            BuildButton(Localization::GetInstance()->GetEntryLetters(BUTTON_SHARE), nullptr, GetId(), fontWidth, false);
+        buttonTranslase->MountToParent(selectMenuInner_);
+        allocatedSize += defaultOptionWidth;
+    } else {
+        isShowInExtension_[DEFAULT_EXTENSION_INDEX_SHARE] = true;
+        return true;
+    }
+    if (maxWidth - allocatedSize >= defaultOptionWidth) {
+        auto buttonShare = BuildButton(
+            Localization::GetInstance()->GetEntryLetters(BUTTON_TRANSLATE), nullptr, GetId(), fontWidth, false);
+        buttonShare->MountToParent(selectMenuInner_);
+        allocatedSize += defaultOptionWidth;
+    } else {
+        isShowInExtension_[DEFAULT_EXTENSION_INDEX_TRANSLATE] = true;
+        return true;
+    }
+
+    if (maxWidth - allocatedSize >= defaultOptionWidth) {
+        auto buttonShare = BuildButton(
+            Localization::GetInstance()->GetEntryLetters(BUTTON_SEARCH), nullptr, GetId(), fontWidth, false);
+        buttonShare->MountToParent(selectMenuInner_);
+        allocatedSize += defaultOptionWidth;
+    } else {
+        isShowInExtension_[DEFAULT_EXTENSION_INDEX_SEARCH] = true;
+        return true;
+    }
+    return false;
+}
+
 void SelectOverlayNode::UpdateToolBar(bool menuItemChanged)
 {
     auto info = GetPattern<SelectOverlayPattern>()->GetSelectOverlayInfo();
@@ -649,6 +746,11 @@ void SelectOverlayNode::UpdateToolBar(bool menuItemChanged)
             button->MountToParent(selectMenuInner_);
             allocatedSize += defaultOptionWidth;
         }
+
+        bool isDefaultOverMaxWidth = false;
+        if (info->menuInfo.showCopy) {
+            isDefaultOverMaxWidth = AddSystemDefaultOptions(defaultOptionWidth, fontWidth, maxWidth, allocatedSize);
+        }
         auto itemNum = -1;
         auto extensionOptionStartIndex = -1;
         if (!info->menuOptionItems.empty()) {
@@ -665,11 +767,12 @@ void SelectOverlayNode::UpdateToolBar(bool menuItemChanged)
                 button->MountToParent(selectMenuInner_);
             }
         }
-        if (extensionOptionStartIndex != -1) {
+        if (extensionOptionStartIndex != -1 || isDefaultOverMaxWidth) {
             auto backButton = BuildMoreOrBackButton(GetId(), true);
             backButton->MountToParent(selectMenuInner_);
-            CreateExtensionToolBar(info->menuOptionItems, extensionOptionStartIndex);
+            CreateExtensionToolBar();
         }
+        AddExtensionMenuOptions(info->menuOptionItems, extensionOptionStartIndex);
     }
     if (info->menuInfo.menuDisable) {
         selectMenu_->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
