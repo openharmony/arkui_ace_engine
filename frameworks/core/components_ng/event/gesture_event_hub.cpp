@@ -414,7 +414,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     std::shared_ptr<Media::PixelMap> pixelMap;
     if (dragDropInfo.pixelMap) {
         pixelMap = dragDropInfo.pixelMap->GetPixelMapSharedPtr();
-    }    
+    }
     if (pixelMap == nullptr) {
         pixelMap = pixelMap_->GetPixelMapSharedPtr();
     }
