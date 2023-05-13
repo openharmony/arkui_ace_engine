@@ -1141,4 +1141,25 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg021, TestSize
     paintMethod->UpdatePaintShader(offset, paint, gradient);
     EXPECT_NE(paint.getShader(), nullptr);
 }
+
+/**
+ * @tc.name: CustomPaintPaintMethodTestNg021
+ * @tc.desc: Test the functions GetMatrixFromPattern of CustomPaintPaintMethod.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg022, TestSize.Level1)
+{
+    auto paintMethod = CreateCanvasPaintMethod();
+    ASSERT_NE(paintMethod, nullptr);
+    Ace::Pattern pattern;
+    pattern.SetScaleX(1.0f);
+    pattern.SetScaleY(1.0f);
+    SkMatrix matrix = paintMethod->GetMatrixFromPattern(pattern);
+    EXPECT_EQ(matrix.getScaleX(), pattern.GetScaleX());
+    EXPECT_EQ(matrix.getScaleY(), pattern.GetScaleY());
+    EXPECT_EQ(matrix.getSkewX(), pattern.GetSkewX());
+    EXPECT_EQ(matrix.getSkewY(), pattern.GetSkewY());
+    EXPECT_EQ(matrix.getTranslateX(), pattern.GetTranslateX());
+    EXPECT_EQ(matrix.getTranslateY(), pattern.GetTranslateY());
+}
 } // namespace OHOS::Ace::NG
