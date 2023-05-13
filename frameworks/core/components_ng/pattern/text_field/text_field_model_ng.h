@@ -64,6 +64,7 @@ public:
     void ProcessDefaultPadding(PaddingProperty& paddings);
     void ResetMaxLength() override;
     void SetForegroundColor(const Color& value) override;
+    void SetPasswordIcon(const PasswordIcon& passwordIcon) override;
     void SetShowUnit(std::function<void()>&& unitFunction) override;
 
     void SetShowUnderline(bool showUnderLine) override;
