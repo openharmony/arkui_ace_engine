@@ -486,10 +486,7 @@ sk_sp<SkImage> ImageProvider::ApplySizeToSkImage(
         const double RESIZE_MAX_PROPORTION = ImageCompressor::GetInstance()->CanCompress() ? 1.0 : 0.25;
         bool needCacheResizedImageFile =
             (1.0 * dstWidth * dstHeight) / (rawImage->width() * rawImage->height()) < RESIZE_MAX_PROPORTION;
-        auto context = PipelineBase::GetCurrentContext();
-        CHECK_NULL_RETURN(context, scaledImage);
-        // card doesn't encode and cache image file.
-        if (needCacheResizedImageFile && !srcKey.empty() && !context->IsFormRender()) {
+        if (needCacheResizedImageFile && !srcKey.empty()) {
             BackgroundTaskExecutor::GetInstance().PostTask(
                 [srcKey, scaledImage]() {
                     LOGI("write png cache file: %{private}s", srcKey.c_str());
