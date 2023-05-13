@@ -121,6 +121,7 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
     }
     auto displayWindowOffset = GetDisplayWindowRectOffset();
     popupProp->UpdateDisplayWindowOffset(displayWindowOffset);
+    popupPaintProp->UpdateEnableArrow(param->EnableArrow());
     if (param->GetArrowOffset().has_value()) {
         popupPaintProp->UpdateArrowOffset(param->GetArrowOffset().value());
     }
@@ -237,6 +238,7 @@ void BubbleView::UpdatePopupParam(int32_t popupId, const RefPtr<PopupParam>& par
     // Update paint props
     popupPaintProp->UpdatePlacement(param->GetPlacement());
     popupPaintProp->UpdateUseCustom(param->IsUseCustom());
+    popupPaintProp->UpdateEnableArrow(param->EnableArrow());
 }
 
 void BubbleView::UpdateCustomPopupParam(int32_t popupId, const RefPtr<PopupParam>& param)
