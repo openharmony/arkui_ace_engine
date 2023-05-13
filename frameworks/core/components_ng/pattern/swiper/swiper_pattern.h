@@ -436,6 +436,7 @@ private:
     bool IsShowArrow() const;
     void SaveArrowProperty(const RefPtr<FrameNode>& arrowNode);
     int32_t ComputeLoadCount(int32_t cacheCount);
+    void SetAccessibilityAction();
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;

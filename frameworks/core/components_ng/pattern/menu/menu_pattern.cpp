@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/option/option_pattern.h"
 #include "core/components_ng/pattern/option/option_view.h"
+#include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/touch_event.h"
@@ -121,6 +122,7 @@ void MenuPattern::OnModifyDone()
         padding.SetEdges(CalcLength(theme->GetOutPadding()));
         host->GetLayoutProperty()->UpdatePadding(padding);
     }
+    SetAccessibilityAction();
 }
 
 // close menu on touch up
@@ -451,5 +453,38 @@ void MenuPattern::InitTheme(const RefPtr<FrameNode>& host)
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(theme->GetMenuBorderRadius());
     renderContext->UpdateBorderRadius(borderRadius);
+}
+
+void MenuPattern::SetAccessibilityAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetActionScrollForward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto firstChild = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
+        CHECK_NULL_VOID(firstChild);
+        if (firstChild && firstChild->GetTag() == V2::SCROLL_ETS_TAG) {
+            auto scrollPattern = firstChild->GetPattern<ScrollPattern>();
+            CHECK_NULL_VOID(scrollPattern);
+            scrollPattern->ScrollPage(false, true);
+        }
+    });
+
+    accessibilityProperty->SetActionScrollBackward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto firstChild = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
+        CHECK_NULL_VOID(firstChild);
+        if (firstChild && firstChild->GetTag() == V2::SCROLL_ETS_TAG) {
+            auto scrollPattern = firstChild->GetPattern<ScrollPattern>();
+            CHECK_NULL_VOID(scrollPattern);
+            scrollPattern->ScrollPage(true, true);
+        }
+    });
 }
 } // namespace OHOS::Ace::NG

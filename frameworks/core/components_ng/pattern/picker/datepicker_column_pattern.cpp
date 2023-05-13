@@ -81,6 +81,7 @@ void DatePickerColumnPattern::OnModifyDone()
     pressColor_ = theme->GetPressColor();
     hoverColor_ = theme->GetHoverColor();
     InitMouseAndPressEvent();
+    SetAccessibilityAction();
 }
 
 void DatePickerColumnPattern::InitMouseAndPressEvent()
@@ -753,5 +754,44 @@ bool DatePickerColumnPattern::CanMove(bool isDown) const
     int currentIndex = static_cast<int>(datePickerColumnPattern->GetCurrentIndex());
     int nextVirtualIndex = isDown ? currentIndex + 1 : currentIndex - 1;
     return nextVirtualIndex >= 0 && nextVirtualIndex < totalOptionCount;
+}
+
+void DatePickerColumnPattern::SetAccessibilityAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetActionScrollForward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (!pattern->CanMove(true)) {
+            return;
+        }
+        CHECK_NULL_VOID(pattern->animationCreated_);
+        pattern->InnerHandleScroll(true);
+        pattern->fromController_->ClearInterpolators();
+        pattern->fromController_->AddInterpolator(pattern->fromTopCurve_);
+        pattern->fromController_->Play();
+        auto frameNode = pattern->GetHost();
+        CHECK_NULL_VOID(frameNode);
+        frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+    });
+
+    accessibilityProperty->SetActionScrollBackward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (!pattern->CanMove(false)) {
+            return;
+        }
+        CHECK_NULL_VOID(pattern->animationCreated_);
+        pattern->InnerHandleScroll(false);
+        pattern->fromController_->ClearInterpolators();
+        pattern->fromController_->AddInterpolator(pattern->fromBottomCurve_);
+        pattern->fromController_->Play();
+        auto frameNode = pattern->GetHost();
+        CHECK_NULL_VOID(frameNode);
+        frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+    });
 }
 } // namespace OHOS::Ace::NG

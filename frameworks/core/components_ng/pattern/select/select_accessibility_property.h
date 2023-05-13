@@ -41,13 +41,6 @@ public:
 
     int32_t GetCollectionItemCounts() const override;
 
-protected:
-    void SetSpecificSupportAction() override
-    {
-        AddSupportAction(AceAction::ACTION_SELECT);
-        AddSupportAction(AceAction::ACTION_CLEAR_SELECTION);
-    }
-
 private:
     ACE_DISALLOW_COPY_AND_MOVE(SelectAccessibilityProperty);
 };
