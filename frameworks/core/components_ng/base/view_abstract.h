@@ -252,6 +252,9 @@ public:
     static void SetForegroundColor(const Color& color);
     static void SetForegroundColorStrategy(const ForegroundColorStrategy& strategy);
 
+    // clickEffect
+    static void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue);
+
     // custom animatable property
     static void CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
         const std::function<void(float)>& onCallbackEvent);

@@ -84,5 +84,11 @@ void RenderContext::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     pixelJsonValue->Put("bottom", pixStretchEffectOption.bottom.ToString().c_str());
     json->Put("pixelStretchEffect", pixelJsonValue);
     json->Put("foregroundColor", propForegroundColor_.value_or(Color::FOREGROUND).ColorToString().c_str());
+    if (propClickEffectLevel_.has_value()) {
+        auto clickEffectJsonValue = JsonUtil::Create(true);
+        clickEffectJsonValue->Put("level", std::to_string((int)propClickEffectLevel_.value().level).c_str());
+        clickEffectJsonValue->Put("scale", std::to_string((float)propClickEffectLevel_.value().scaleNumber).c_str());
+        json->Put("clickEffect", clickEffectJsonValue);
+    }
 }
 } // namespace OHOS::Ace::NG
