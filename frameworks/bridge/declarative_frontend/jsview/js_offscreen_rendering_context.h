@@ -47,6 +47,13 @@ public:
         return offscreenCanvasPatternMap_[id];
     }
 
+    static void AddOffscreenCanvasPattern(const RefPtr<NG::OffscreenCanvasPattern>& pattern)
+    {
+        CHECK_NULL_VOID(pattern);
+        std::lock_guard<std::mutex> lock(mutex_);
+        offscreenCanvasPatternMap_[offscreenCanvasPatternCount_++] = pattern;
+    }
+
     uint32_t GetId()
     {
         return id;

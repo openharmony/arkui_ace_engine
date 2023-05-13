@@ -24,6 +24,12 @@ OffscreenCanvasPattern::OffscreenCanvasPattern(int32_t width, int32_t height)
 {
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
+    if (Negative(width)) {
+        width = 0;
+    }
+    if (Negative(height)) {
+        height = 0;
+    }
     offscreenPaintMethod_ = MakeRefPtr<OffscreenCanvasPaintMethod>(context, width, height);
 }
 
