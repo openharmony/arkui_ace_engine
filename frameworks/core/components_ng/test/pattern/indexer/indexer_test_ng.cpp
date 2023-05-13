@@ -30,7 +30,6 @@
 #include "core/components_ng/pattern/indexer/indexer_model_ng.h"
 #include "core/components_ng/pattern/indexer/indexer_pattern.h"
 #include "core/components_ng/pattern/indexer/indexer_theme.h"
-#include "core/components_ng/pattern/indexer/indexer_view.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
