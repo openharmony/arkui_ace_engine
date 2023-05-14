@@ -357,6 +357,9 @@ void DragDropManager::OnDragEnd(float globalX, float globalY, const std::string&
 {
     preTargetFrameNode_ = nullptr;
     auto frameNodes = FindDragFrameNodeMapByPosition(globalX, globalY, DragType::COMMON);
+#ifdef ENABLE_DRAG_FRAMEWORK
+    bool isUseDefaultDrop = false;
+#endif // ENABLE_DRAG_FRAMEWORK
     for (auto iter = frameNodes.rbegin(); iter != frameNodes.rend(); ++iter) {
         auto dragFrameNode = iter->second;
         CHECK_NULL_VOID_NOLOG(dragFrameNode);
@@ -373,6 +376,7 @@ void DragDropManager::OnDragEnd(float globalX, float globalY, const std::string&
         RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
         auto extraParams = eventHub->GetDragExtraParams(extraInfo_, Point(globalX, globalY), DragEventType::DROP);
 #ifdef ENABLE_DRAG_FRAMEWORK
+        isUseDefaultDrop = true;
         InteractionManager::GetInstance()->SetDragWindowVisible(false);
 #endif // ENABLE_DRAG_FRAMEWORK
         UpdateDragEvent(event, globalX, globalY);
@@ -384,6 +388,10 @@ void DragDropManager::OnDragEnd(float globalX, float globalY, const std::string&
         break;
     }
 #ifdef ENABLE_DRAG_FRAMEWORK
+    if (!isUseDefaultDrop) {
+        LOGI("DragDropManager Not Use DefaultDrop")
+        InteractionManager::GetInstance()->StopDrag(DragResult::DRAG_FAIL, false);
+    }
     summaryMap_.clear();
 #endif // ENABLE_DRAG_FRAMEWORK
 }
@@ -737,7 +745,12 @@ void DragDropManager::DestroyDragWindow()
     CHECK_NULL_VOID(dragWindow_);
     dragWindow_->Destroy();
     dragWindow_ = nullptr;
-#endif
+#elif defined(ENABLE_DRAG_FRAMEWORK)
+    if (dragWindow_ != nullptr) {
+        dragWindow_->Destroy();
+        dragWindow_ = nullptr;
+    }
+#endif // ENABLE_DRAG_FRAMEWORK
     if (dragWindowRootNode_) {
         dragWindowRootNode_ = nullptr;
     }
