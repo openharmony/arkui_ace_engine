@@ -35,8 +35,7 @@ public:
     virtual ~MenuItemModel() = default;
 
     // createMenuItem with custom
-    virtual void Create(const RefPtr<NG::UINode>& customNode) {};
-
+    virtual void Create(const RefPtr<NG::UINode>& customNode);
     virtual void Create(const MenuItemProperties& props);
     virtual void SetSelected(bool isSelected = false);
     virtual void SetSelectIcon(bool isShow = false);
