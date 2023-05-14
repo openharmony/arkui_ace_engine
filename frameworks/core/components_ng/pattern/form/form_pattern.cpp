@@ -305,7 +305,6 @@ void FormPattern::CreateCardContainer()
     subContainer_->SetNodeId(host->GetId());
     auto info = layoutProperty->GetRequestFormInfo().value_or(RequestFormInfo());
     auto key = info.ToString();
-    FormManager::GetInstance().AddNonmatchedContainer(key, subContainer_);
 
     subContainer_->AddFormAcquireCallback([weak = WeakClaim(this)](size_t id) {
         auto pattern = weak.Upgrade();
