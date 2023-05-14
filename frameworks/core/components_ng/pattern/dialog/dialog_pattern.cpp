@@ -121,6 +121,10 @@ void DialogPattern::PopDialog(int32_t buttonIdx = -1)
     CHECK_NULL_VOID(overlayManager);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    if (host->IsRemoving()) {
+        LOGI("Dialog already in close animation, no need to fire event again.");
+        return;
+    }
 
     auto hub = host->GetEventHub<DialogEventHub>();
     if (buttonIdx != -1) {
