@@ -126,7 +126,7 @@ void RosenRenderContext::OnNodeDisappear(bool recursive)
 {
     isDisappearing_ = true;
     bool noneOrDefaultTransition =
-        !propTransitionDisappearing_ && (!transitionEffect_ || transitionEffect_->IsDefaultTransition());
+        !propTransitionDisappearing_ && (!transitionEffect_ || hasDefaultTransition_ == true);
     if (recursive && noneOrDefaultTransition) {
         // recursive, and has no transition or has default transition, no need to trigger transition.
         return;
@@ -746,8 +746,10 @@ void RosenRenderContext::NotifyTransitionInner(const SizeF& frameSize, bool isTr
         return;
     }
     // add default transition effect on the 'breaking point' of render tree, if no user-defined transition effect.
+    // Note: this default transition effect will be removed after all transitions finished, implemented in
+    // OnTransitionInFinish. and OnTransitionOutFinish.
     if (isBreakingPoint_ == true && transitionEffect_ == nullptr) {
-        // PLANNING: remove this after THIS transition ends.
+        hasDefaultTransition_ = true;
         transitionEffect_ = RosenTransitionEffect::CreateDefaultRosenTransitionEffect();
         RSNode::ExecuteWithoutAnimation([this, isTransitionIn]() {
             // transitionIn effects should be initialized as active if is transitionIn.
@@ -2282,8 +2284,8 @@ void RosenRenderContext::UpdateChainedTransition(const RefPtr<NG::ChainedTransit
         transitionEffect_->Detach(Claim(this));
     }
     transitionEffect_ = RosenTransitionEffect::ConvertToRosenTransitionEffect(effect);
+    hasDefaultTransition_ = false;
     CHECK_NULL_VOID(transitionEffect_);
-    transitionEffect_->SetIsDefaultTransition(false);
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     bool isOnTheTree = frameNode->IsOnMainTree();
@@ -2317,8 +2319,14 @@ void RosenRenderContext::NotifyTransition(bool isTransitionIn)
 
     if (isTransitionIn) {
         // Isolate the animation callback function, to avoid changing the callback timing of current implicit animation.
-        AnimationUtils::AnimateWithCurrentOptions([this]() { transitionEffect_->Appear(); },
-            [nodeId = frameNode->GetId()]() {
+        AnimationUtils::AnimateWithCurrentOptions(
+            [this]() {
+                transitionEffect_->Appear();
+                ++appearingTransitionCount_;
+            },
+            [weakThis = WeakClaim(this), nodeId = frameNode->GetId()]() {
+                auto context = weakThis.Upgrade();
+                CHECK_NULL_VOID(context);
                 LOGD("RosenTransitionEffect::NotifyTransition transition END, node %{public}d, isTransitionIn: IN",
                     nodeId);
             },
@@ -2351,6 +2359,26 @@ void RosenRenderContext::NotifyTransition(bool isTransitionIn)
     }
 }
 
+void RosenRenderContext::OnTransitionInFinish()
+{
+    --appearingTransitionCount_;
+    if (appearingTransitionCount_ < 0) {
+        LOGE("RosenTransitionEffect: appearingTransitionCount_ should not be less than 0");
+        appearingTransitionCount_ = 0;
+    }
+    // make sure we are the last transition out animation, if not, return.
+    if (appearingTransitionCount_ > 0) {
+        LOGD("RosenTransitionEffect: appearingTransitionCount_ is %{public}d, not the last transition out animation",
+            appearingTransitionCount_);
+        return;
+    }
+    // when all transition in/out animations are finished, we should remove the default transition effect.
+    if (disappearingTransitionCount_ && hasDefaultTransition_) {
+        transitionEffect_ = nullptr;
+        hasDefaultTransition_ = false;
+    }
+}
+
 void RosenRenderContext::OnTransitionOutFinish()
 {
     // update transition out count
@@ -2364,6 +2392,11 @@ void RosenRenderContext::OnTransitionOutFinish()
         LOGD("RosenTransitionEffect: disappearingTransitionCount_ is %{public}d, not the last transition out animation",
             disappearingTransitionCount_);
         return;
+    }
+    // when all transition in/out animations are finished, we should remove the default transition effect.
+    if (appearingTransitionCount_ && hasDefaultTransition_) {
+        transitionEffect_ = nullptr;
+        hasDefaultTransition_ = false;
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);

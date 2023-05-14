@@ -288,6 +288,7 @@ private:
     {
         return transitionEffect_ != nullptr;
     }
+    void OnTransitionInFinish();
     void OnTransitionOutFinish();
     void SetTransitionPivot(const SizeF& frameSize, bool transitionIn);
     void SetPivot(float xPivot, float yPivot);
@@ -356,6 +357,8 @@ private:
     bool isBackBlurChanged_ = false;
     bool needDebugBoundary_ = false;
     bool isDisappearing_ = false;
+    bool hasDefaultTransition_ = false;
+    int appearingTransitionCount_ = 0;
     int disappearingTransitionCount_ = 0;
     Color blendColor_ = Color::TRANSPARENT;
     Color hoveredColor_ = Color::TRANSPARENT;
