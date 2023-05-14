@@ -41,22 +41,22 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-    constexpr double HALF = 0.5;
-    constexpr double PARENT_PAGE_OFFSET = 0.2;
-    constexpr double PARENT_TITLE_OFFSET = 0.02;
-    constexpr int32_t MASK_DURATION = 350;
-    constexpr int32_t OPACITY_TITLE_OUT_DELAY = 17;
-    constexpr int32_t OPACITY_TITLE_IN_DELAY = 33;
-    constexpr int32_t OPACITY_TITLE_DURATION = 150;
-    constexpr int32_t OPACITY_BACKBUTTON_IN_DELAY = 150;
-    constexpr int32_t OPACITY_BACKBUTTON_IN_DURATION = 200;
-    constexpr int32_t OPACITY_BACKBUTTON_OUT_DURATION = 67;
-    constexpr int32_t DEFAULT_ANIMATION_DURATION = 400;
-    const Color MASK_COLOR = Color::FromARGB(25, 0, 0, 0);
-    const Color DEFAULT_MASK_COLOR = Color::FromARGB(0, 0, 0, 0);
-    const RefPtr<InterpolatingSpring> interpolatingSpringCurve =
-            AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 342.0f, 37.0f);
-}
+constexpr double HALF = 0.5;
+constexpr double PARENT_PAGE_OFFSET = 0.2;
+constexpr double PARENT_TITLE_OFFSET = 0.02;
+constexpr int32_t MASK_DURATION = 350;
+constexpr int32_t OPACITY_TITLE_OUT_DELAY = 17;
+constexpr int32_t OPACITY_TITLE_IN_DELAY = 33;
+constexpr int32_t OPACITY_TITLE_DURATION = 150;
+constexpr int32_t OPACITY_BACKBUTTON_IN_DELAY = 150;
+constexpr int32_t OPACITY_BACKBUTTON_IN_DURATION = 200;
+constexpr int32_t OPACITY_BACKBUTTON_OUT_DURATION = 67;
+constexpr int32_t DEFAULT_ANIMATION_DURATION = 400;
+const Color MASK_COLOR = Color::FromARGB(25, 0, 0, 0);
+const Color DEFAULT_MASK_COLOR = Color::FromARGB(0, 0, 0, 0);
+const RefPtr<InterpolatingSpring> interpolatingSpringCurve =
+    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 342.0f, 37.0f);
+} // namespace
 RefPtr<NavRouterGroupNode> NavRouterGroupNode::GetOrCreateGroupNode(
     const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
 {
@@ -326,7 +326,7 @@ void NavRouterGroupNode::AddNavDestinationToNavigation(const RefPtr<UINode>& par
             TitleTransitionInAnimation(navigationNode, titleBarNode, destinationTitleBarNode);
         }
         if (backButtonNode) {
-            backButtonAnimation(backButtonNode, true);
+            BackButtonAnimation(backButtonNode, true);
         }
         NavTransitionInAnimation(navigationNode, navBarNode, navigationContentNode);
     }
@@ -401,7 +401,7 @@ void NavRouterGroupNode::BackToNavBar(const RefPtr<UINode>& parent)
         TitleTransitionOutAnimation(navigationNode, titleBarNode, destinationTitleBarNode);
     }
     if (backButtonNode) {
-        backButtonAnimation(backButtonNode, false);
+        BackButtonAnimation(backButtonNode, false);
     }
     NavTransitionOutAnimation(navigationNode, navBarNode, navigationContentNode);
 }
@@ -479,28 +479,77 @@ void NavRouterGroupNode::NavTransitionInAnimation(const RefPtr<FrameNode>& navig
     option.SetDuration(DEFAULT_ANIMATION_DURATION);
 
     auto transitionOutNodeContext = transitionOutNode->GetRenderContext();
-    CHECK_NULL_VOID(transitionOutNodeContext);
     auto transitionInNodeContext = transitionInNode->GetRenderContext();
-    CHECK_NULL_VOID(transitionInNodeContext);
+    CHECK_NULL_VOID(transitionOutNodeContext && transitionInNodeContext);
     auto size = navigationNode->GetGeometryNode()->GetFrameSize();
     auto nodeWidth = size.Width();
     auto nodeHeight = size.Height();
-
-    transitionOutNodeContext->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
-    transitionInNodeContext->ClipWithRRect(RectF(nodeWidth * HALF, 0.0f, nodeWidth, nodeHeight), RadiusF(EdgeF(0.0f, 0.0f)));
-    transitionInNodeContext->OnTransformTranslateUpdate({ nodeWidth * HALF, 0.0f, 0.0f });
-    AnimationUtils::Animate(option, [transitionOutNodeContext, transitionInNodeContext, nodeWidth, nodeHeight]() {
-        transitionOutNodeContext->OnTransformTranslateUpdate({ -nodeWidth * PARENT_PAGE_OFFSET, 0.0f, 0.0f });
-        transitionInNodeContext->ClipWithRRect(RectF(0.0f, 0.0f, nodeWidth, nodeHeight), RadiusF(EdgeF(0.0f, 0.0f)));
-        transitionInNodeContext->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
+    option.SetOnFinishEvent([transitionOutNodeContextWK = WeakClaim(RawPtr(transitionOutNodeContext)),
+                                transitionInNodeContextWK = WeakClaim(RawPtr(transitionInNodeContext)),
+                                id = Container::CurrentId(), nodeHeight] {
+        ContainerScope scope(id);
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID_NOLOG(context);
+        auto taskExecutor = context->GetTaskExecutor();
+        CHECK_NULL_VOID_NOLOG(taskExecutor);
+        taskExecutor->PostTask(
+            [transitionOutNodeContextWK, transitionInNodeContextWK, id, nodeHeight]() {
+                auto transitionOutNodeContext = transitionOutNodeContextWK.Upgrade();
+                auto transitionInNodeContext = transitionInNodeContextWK.Upgrade();
+                ContainerScope scope(id);
+                if (transitionOutNodeContext) {
+                    transitionOutNodeContext->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
+                }
+                if (transitionInNodeContext) {
+                    transitionInNodeContext->ClipWithRRect(
+                        RectF(0.0f, 0.0f, Infinity<float>(), nodeHeight), RadiusF(EdgeF(0.0f, 0.0f)));
+                }
+            },
+            TaskExecutor::TaskType::UI);
     });
 
+    transitionOutNodeContext->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
+    transitionInNodeContext->ClipWithRRect(
+        RectF(nodeWidth * HALF, 0.0f, nodeWidth, nodeHeight), RadiusF(EdgeF(0.0f, 0.0f)));
+    transitionInNodeContext->OnTransformTranslateUpdate({ nodeWidth * HALF, 0.0f, 0.0f });
+    AnimationUtils::Animate(
+        option,
+        [transitionOutNodeContext, transitionInNodeContext, nodeWidth, nodeHeight]() {
+            transitionOutNodeContext->OnTransformTranslateUpdate({ -nodeWidth * PARENT_PAGE_OFFSET, 0.0f, 0.0f });
+            transitionInNodeContext->ClipWithRRect(
+                RectF(0.0f, 0.0f, nodeWidth, nodeHeight), RadiusF(EdgeF(0.0f, 0.0f)));
+            transitionInNodeContext->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
+        },
+        option.GetOnFinishEvent());
+    MaskAnimation(transitionOutNodeContext);
+}
+
+void NavRouterGroupNode::MaskAnimation(const RefPtr<RenderContext>& transitionOutNodeContext)
+{
     AnimationOption maskOption;
     maskOption.SetCurve(Curves::FRICTION);
     maskOption.SetDuration(MASK_DURATION);
     maskOption.SetFillMode(FillMode::FORWARDS);
+    maskOption.SetOnFinishEvent(
+        [transitionOutNodeContextWK = WeakClaim(RawPtr(transitionOutNodeContext)), id = Container::CurrentId()] {
+            ContainerScope scope(id);
+            auto context = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID_NOLOG(context);
+            auto taskExecutor = context->GetTaskExecutor();
+            CHECK_NULL_VOID_NOLOG(taskExecutor);
+            taskExecutor->PostTask(
+                [transitionOutNodeContextWK, id]() {
+                    auto transitionOutNodeContext = transitionOutNodeContextWK.Upgrade();
+                    ContainerScope scope(id);
+                    if (transitionOutNodeContext) {
+                        transitionOutNodeContext->SetActualForegroundColor(DEFAULT_MASK_COLOR);
+                    }
+                },
+                TaskExecutor::TaskType::UI);
+        });
     AnimationUtils::Animate(
-        maskOption, [transitionOutNodeContext]() { transitionOutNodeContext->SetActualForegroundColor(MASK_COLOR); });
+        maskOption, [transitionOutNodeContext]() { transitionOutNodeContext->SetActualForegroundColor(MASK_COLOR); },
+        maskOption.GetOnFinishEvent());
 }
 
 void NavRouterGroupNode::TitleTransitionInAnimation(const RefPtr<FrameNode>& navigationNode,
@@ -518,12 +567,33 @@ void NavRouterGroupNode::TitleTransitionInAnimation(const RefPtr<FrameNode>& nav
     auto size = navigationNode->GetGeometryNode()->GetFrameSize();
     auto nodeWidth = size.Width();
 
+    option.SetOnFinishEvent(
+        [transitionOutNodeContextWK = WeakClaim(RawPtr(transitionOutNodeContext)), id = Container::CurrentId()] {
+            ContainerScope scope(id);
+            auto context = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID_NOLOG(context);
+            auto taskExecutor = context->GetTaskExecutor();
+            CHECK_NULL_VOID_NOLOG(taskExecutor);
+            // animation finish event should be posted to UI thread.
+            taskExecutor->PostTask(
+                [transitionOutNodeContextWK, id]() {
+                    auto transitionOutNodeContext = transitionOutNodeContextWK.Upgrade();
+                    CHECK_NULL_VOID(transitionOutNodeContext);
+                    ContainerScope scope(id);
+                    transitionOutNodeContext->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
+                },
+                TaskExecutor::TaskType::UI);
+        });
+
     transitionOutNodeContext->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
     transitionInNodeContext->OnTransformTranslateUpdate({ nodeWidth * HALF, 0.0f, 0.0f });
-    AnimationUtils::Animate(option, [transitionOutNodeContext, transitionInNodeContext, nodeWidth]() {
-        transitionOutNodeContext->OnTransformTranslateUpdate({ nodeWidth * PARENT_TITLE_OFFSET, 0.0f, 0.0f });
-        transitionInNodeContext->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
-    });
+    AnimationUtils::Animate(
+        option,
+        [transitionOutNodeContext, transitionInNodeContext, nodeWidth]() {
+            transitionOutNodeContext->OnTransformTranslateUpdate({ nodeWidth * PARENT_TITLE_OFFSET, 0.0f, 0.0f });
+            transitionInNodeContext->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
+        },
+        option.GetOnFinishEvent());
 
     AnimationOption opacityOption;
     opacityOption.SetCurve(Curves::SHARP);
@@ -556,24 +626,30 @@ void NavRouterGroupNode::NavTransitionOutAnimation(const RefPtr<UINode>& navigat
     auto nodeWidth = size.Width();
     auto nodeHeight = size.Height();
 
-    option.SetOnFinishEvent([navigationContentWK = WeakClaim(RawPtr(navigationContentNode)),
-                                id = Container::CurrentId(), navigationNodeWK = WeakClaim(RawPtr(navigationNode))] {
-        ContainerScope scope(id);
-        auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID_NOLOG(context);
-        auto taskExecutor = context->GetTaskExecutor();
-        CHECK_NULL_VOID_NOLOG(taskExecutor);
-        // animation finish event should be posted to UI thread.
-        taskExecutor->PostTask([navigationContentWK, navigationNodeWK, id]() {
-            auto navigationContentNode = navigationContentWK.Upgrade();
-            auto navigationNode = navigationNodeWK.Upgrade();
-            CHECK_NULL_VOID(navigationNode && navigationContentNode);
+    option.SetOnFinishEvent(
+        [navigationContentWK = WeakClaim(RawPtr(navigationContentNode)),
+            navigationNodeWK = WeakClaim(RawPtr(navigationNode)), id = Container::CurrentId(), nodeHeight] {
             ContainerScope scope(id);
-            navigationContentNode->Clean();
-            navigationContentNode->MarkModifyDone();
-            navigationContentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-            navigationNode->SetIsOnAnimation(false);
-            }, TaskExecutor::TaskType::UI);
+            auto context = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID_NOLOG(context);
+            auto taskExecutor = context->GetTaskExecutor();
+            CHECK_NULL_VOID_NOLOG(taskExecutor);
+            // animation finish event should be posted to UI thread.
+            taskExecutor->PostTask(
+                [navigationContentWK, navigationNodeWK, id, nodeHeight]() {
+                    auto navigationContentNode = navigationContentWK.Upgrade();
+                    auto navigationNode = navigationNodeWK.Upgrade();
+                    CHECK_NULL_VOID(navigationNode && navigationContentNode);
+                    navigationContentNode->GetRenderContext()->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
+                    navigationContentNode->GetRenderContext()->ClipWithRRect(
+                        RectF(0.0f, 0.0f, Infinity<float>(), nodeHeight), RadiusF(EdgeF(0.0f, 0.0f)));
+                    ContainerScope scope(id);
+                    navigationContentNode->Clean();
+                    navigationContentNode->MarkModifyDone();
+                    navigationContentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+                    navigationNode->SetIsOnAnimation(false);
+                },
+                TaskExecutor::TaskType::UI);
         });
 
     navDestinationContext->ClipWithRRect(RectF(0.0f, 0.0f, nodeWidth, nodeHeight), RadiusF(EdgeF(0.0f, 0.0f)));
@@ -584,7 +660,8 @@ void NavRouterGroupNode::NavTransitionOutAnimation(const RefPtr<UINode>& navigat
         [navDestinationContext, navigationContext, nodeWidth, nodeHeight, navigationNode]() {
             navigationNode->SetIsOnAnimation(true);
             if (navDestinationContext) {
-                navDestinationContext->ClipWithRRect(RectF(nodeWidth * HALF, 0.0f, nodeWidth, nodeHeight), RadiusF(EdgeF(0.0f, 0.0f)));
+                navDestinationContext->ClipWithRRect(
+                    RectF(nodeWidth * HALF, 0.0f, nodeWidth, nodeHeight), RadiusF(EdgeF(0.0f, 0.0f)));
                 navDestinationContext->OnTransformTranslateUpdate({ nodeWidth * HALF, 0.0f, 0.0f });
             }
             if (navigationContext) {
@@ -597,8 +674,9 @@ void NavRouterGroupNode::NavTransitionOutAnimation(const RefPtr<UINode>& navigat
     maskOption.SetCurve(Curves::FRICTION);
     maskOption.SetDuration(MASK_DURATION);
     maskOption.SetFillMode(FillMode::FORWARDS);
-    AnimationUtils::Animate(maskOption,
-        [navigationContext]() { navigationContext->SetActualForegroundColor(DEFAULT_MASK_COLOR); });
+    navigationContext->SetActualForegroundColor(MASK_COLOR);
+    AnimationUtils::Animate(
+        maskOption, [navigationContext]() { navigationContext->SetActualForegroundColor(DEFAULT_MASK_COLOR); });
 }
 
 void NavRouterGroupNode::TitleTransitionOutAnimation(const RefPtr<FrameNode>& navigationNode,
@@ -613,29 +691,67 @@ void NavRouterGroupNode::TitleTransitionOutAnimation(const RefPtr<FrameNode>& na
     CHECK_NULL_VOID(transitionOutNodeContext);
     auto transitionInNodeContext = titleBarNode->GetRenderContext();
     CHECK_NULL_VOID(transitionInNodeContext);
-
     auto size = navigationNode->GetGeometryNode()->GetFrameSize();
     auto nodeWidth = size.Width();
+
+    option.SetOnFinishEvent(
+        [transitionOutNodeContextWK = WeakClaim(RawPtr(transitionOutNodeContext)), id = Container::CurrentId()] {
+            ContainerScope scope(id);
+            auto context = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID_NOLOG(context);
+            auto taskExecutor = context->GetTaskExecutor();
+            CHECK_NULL_VOID_NOLOG(taskExecutor);
+            // animation finish event should be posted to UI thread.
+            taskExecutor->PostTask(
+                [transitionOutNodeContextWK, id]() {
+                    auto transitionOutNodeContext = transitionOutNodeContextWK.Upgrade();
+                    CHECK_NULL_VOID(transitionOutNodeContext);
+                    ContainerScope scope(id);
+                    transitionOutNodeContext->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
+                },
+                TaskExecutor::TaskType::UI);
+        });
+
     transitionOutNodeContext->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
     transitionInNodeContext->OnTransformTranslateUpdate({ nodeWidth * PARENT_TITLE_OFFSET, 0.0f, 0.0f });
-    AnimationUtils::Animate(option, [transitionOutNodeContext, transitionInNodeContext, nodeWidth]() {
-        if (transitionOutNodeContext) {
+    AnimationUtils::Animate(
+        option,
+        [transitionOutNodeContext, transitionInNodeContext, nodeWidth]() {
             transitionOutNodeContext->OnTransformTranslateUpdate({ nodeWidth * HALF, 0.0f, 0.0f });
-        }
-        if (transitionInNodeContext) {
             transitionInNodeContext->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
-        }
-    });
+        },
+        option.GetOnFinishEvent());
+    TitleOpacityAnimation(transitionOutNodeContext);
+}
 
+void NavRouterGroupNode::TitleOpacityAnimation(const RefPtr<RenderContext>& transitionOutNodeContext)
+{
     AnimationOption opacityOption;
     opacityOption.SetCurve(Curves::SHARP);
     opacityOption.SetDelay(OPACITY_TITLE_OUT_DELAY);
     opacityOption.SetDuration(OPACITY_TITLE_DURATION);
     opacityOption.SetFillMode(FillMode::FORWARDS);
-    transitionOutNodeContext->OpacityAnimation(opacityOption, 1.0f, 0.0f);
+    opacityOption.SetOnFinishEvent(
+        [transitionOutNodeContextWK = WeakClaim(RawPtr(transitionOutNodeContext)), id = Container::CurrentId()] {
+            ContainerScope scope(id);
+            auto context = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID_NOLOG(context);
+            auto taskExecutor = context->GetTaskExecutor();
+            CHECK_NULL_VOID_NOLOG(taskExecutor);
+            // animation finish event should be posted to UI thread.
+            taskExecutor->PostTask(
+                [transitionOutNodeContextWK, id]() {
+                    auto transitionOutNodeContext = transitionOutNodeContextWK.Upgrade();
+                    CHECK_NULL_VOID(transitionOutNodeContext);
+                    ContainerScope scope(id);
+                    transitionOutNodeContext->UpdateOpacity(1.0);
+                },
+                TaskExecutor::TaskType::UI);
+        });
+    transitionOutNodeContext->OpacityAnimation(opacityOption, 1.0, 0.0);
 }
 
-void NavRouterGroupNode::backButtonAnimation(const RefPtr<FrameNode>& backButtonNode, bool isTransitionIn)
+void NavRouterGroupNode::BackButtonAnimation(const RefPtr<FrameNode>& backButtonNode, bool isTransitionIn)
 {
     AnimationOption transitionOption;
     transitionOption.SetCurve(Curves::SHARP);
@@ -645,10 +761,27 @@ void NavRouterGroupNode::backButtonAnimation(const RefPtr<FrameNode>& backButton
     if (isTransitionIn) {
         transitionOption.SetDelay(OPACITY_BACKBUTTON_IN_DELAY);
         transitionOption.SetDuration(OPACITY_BACKBUTTON_IN_DURATION);
-        backButtonNodeContext->OpacityAnimation(transitionOption, 0, 1);
+        backButtonNodeContext->OpacityAnimation(transitionOption, 0.0, 1.0);
     } else {
         transitionOption.SetDuration(OPACITY_BACKBUTTON_OUT_DURATION);
-        backButtonNodeContext->OpacityAnimation(transitionOption, 1, 0);
+        transitionOption.SetOnFinishEvent(
+            [backButtonNodeContextWK = WeakClaim(RawPtr(backButtonNodeContext)), id = Container::CurrentId()] {
+                ContainerScope scope(id);
+                auto context = PipelineContext::GetCurrentContext();
+                CHECK_NULL_VOID_NOLOG(context);
+                auto taskExecutor = context->GetTaskExecutor();
+                CHECK_NULL_VOID_NOLOG(taskExecutor);
+                // animation finish event should be posted to UI thread.
+                taskExecutor->PostTask(
+                    [backButtonNodeContextWK, id]() {
+                        auto backButtonNodeContext = backButtonNodeContextWK.Upgrade();
+                        CHECK_NULL_VOID(backButtonNodeContext);
+                        ContainerScope scope(id);
+                        backButtonNodeContext->UpdateOpacity(1.0);
+                    },
+                    TaskExecutor::TaskType::UI);
+            });
+        backButtonNodeContext->OpacityAnimation(transitionOption, 1.0, 0.0);
     }
 }
 
