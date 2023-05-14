@@ -24,6 +24,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper_builder.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -214,7 +215,8 @@ void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstr
         layoutAlgorithm_->Measure(this);
 
         // check aspect radio.
-        if (hasAspectRatio) {
+        auto pattern = host->GetPattern();
+        if (pattern && pattern->IsNeedAdjustByAspectRatio()) {
             auto aspectRatio = magicItemProperty->GetAspectRatioValue();
             // Adjust by aspect ratio, firstly pick height based on width. It means that when width, height and
             // aspectRatio are all set, the height is not used.

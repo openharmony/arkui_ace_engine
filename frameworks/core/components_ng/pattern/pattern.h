@@ -337,6 +337,15 @@ public:
 
     virtual void OnRestoreInfo(const std::string& restoreInfo) {}
 
+    virtual bool IsNeedAdjustByAspectRatio()
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        auto layoutProperty = host->GetLayoutProperty();
+        CHECK_NULL_RETURN(host, false);
+        return layoutProperty->HasAspectRatio();
+    }
+
 protected:
     virtual void OnAttachToFrameNode() {}
     virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}
