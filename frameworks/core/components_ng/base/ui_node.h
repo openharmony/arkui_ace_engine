@@ -71,9 +71,24 @@ public:
 
     int32_t TotalChildCount() const;
 
-    // performance check get child count and depth
-    void GetAllChildCount(int32_t& count, CheckNodeMap& nodeMap, CheckNodeMap& itemMap);
-    void GetChildMaxDepth(int32_t& maxDepth);
+    // performance check get child count, depth, flex layout times and layout time
+    void GetPerformanceCheckData(PerformanceCheckNodeMap& nodeMap);
+    void AddFlexLayouts()
+    {
+        flexLayouts_++;
+    }
+    void SetLayoutTime(int64_t time)
+    {
+        layoutTime_ = time;
+    }
+    int64_t GetLayoutTime()
+    {
+        return layoutTime_;
+    }
+    int32_t GetFlexLayouts()
+    {
+        return flexLayouts_;
+    }
 
     // Returns index in the flatten tree structure
     // of the node with given id and type
@@ -417,9 +432,6 @@ protected:
 private:
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false);
 
-    // performance check
-    void GetSyntaxItemTag(const RefPtr<UINode>& sytaxItem, CheckNodeMap& itemMap);
-
     std::list<RefPtr<UINode>> children_;
     std::list<std::pair<RefPtr<UINode>, uint32_t>> disappearingChildren_;
     WeakPtr<UINode> parent_;
@@ -432,6 +444,8 @@ private:
     int32_t nodeId_ = 0;
     int32_t accessibilityId_ = -1;
     int32_t layoutPriority_ = 0;
+    int32_t flexLayouts_ = 0;
+    int64_t layoutTime_ = 0;
     bool isRoot_ = false;
     bool onMainTree_ = false;
     bool removeSilently_ = true;

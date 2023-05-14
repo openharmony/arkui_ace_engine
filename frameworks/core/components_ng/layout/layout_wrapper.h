@@ -216,13 +216,8 @@ public:
     }
 
     // performance check
-    CheckNodeMap GetChildrenFlexLayouts(const std::unordered_map<int32_t, RefPtr<LayoutWrapper>>& childrenMap);
-    void AddFlexLayouts();
-    bool IsHostFlex();
-    int32_t GetFlexLayouts() const
-    {
-        return flexLayouts_;
-    }
+    void AddNodeFlexLayouts();
+    void AddNodeLayoutTime(int64_t time);
 
     // Check the flag attribute with descendant node
     bool CheckNeedForceMeasureAndLayout();
@@ -260,9 +255,6 @@ private:
     std::optional<bool> needForceMeasureAndLayout_;
 
     LazyBuildFunction lazyBuildFunction_;
-
-    // performance check
-    int32_t flexLayouts_ = 0;
 
     // When the location property is set, it departs from the layout flow.
     bool outOfLayout_ = false;
