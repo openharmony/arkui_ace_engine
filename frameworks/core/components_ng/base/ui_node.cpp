@@ -494,52 +494,38 @@ int32_t UINode::TotalChildCount() const
     return count;
 }
 
-void UINode::GetAllChildCount(int32_t& count, CheckNodeMap& nodeMap, CheckNodeMap& itemMap)
+void UINode::GetPerformanceCheckData(PerformanceCheckNodeMap& nodeMap)
 {
-    count++;
     // record current node
-    CheckNodeInfo node;
-    node.col = col_;
-    node.row = row_;
-    node.tag = tag_;
-    nodeMap.insert(std::make_pair(node, children_.size()));
-    if (tag_ == V2::JS_FOR_EACH_ETS_TAG) {
+    auto parent = GetParent();
+    if (parent && parent->GetTag() == V2::JS_FOR_EACH_ETS_TAG) {
+        // At this point, all of the children_ belong to the child nodes of syntaxItem
         for (const auto& child : children_) {
-            // get syntax item's children
-            GetSyntaxItemTag(child, itemMap);
+            PerformanceCheckNode node;
+            node.pageDepth = child->GetDepth();
+            node.childrenSize = child->GetChildren().size();
+            node.codeCol = child->GetCol();
+            node.codeRow = child->GetRow();
+            node.layoutTime = child->GetLayoutTime();
+            node.flexLayouts = child->GetFlexLayouts();
+            node.nodeTag = child->GetTag();
+            node.isForEachItem = true;
+            nodeMap.insert({ child->GetId(), node });
         }
+    } else {
+        PerformanceCheckNode node;
+        node.pageDepth = depth_;
+        node.childrenSize = children_.size();
+        node.codeCol = col_;
+        node.codeRow = row_;
+        node.nodeTag = tag_;
+        node.layoutTime = layoutTime_;
+        node.flexLayouts = flexLayouts_;
+        nodeMap.insert({ nodeId_, node });
     }
     for (const auto& child : children_) {
         // recursion children
-        child->GetAllChildCount(count, nodeMap, itemMap);
-    }
-}
-
-void UINode::GetSyntaxItemTag(const RefPtr<UINode>& sytaxItem, CheckNodeMap& itemMap)
-{
-    auto itemChildren = sytaxItem->GetChildren();
-    for (const auto& child : itemChildren) {
-        auto iter = itemMap.find({ child->GetRow(), child->GetCol(), child->GetTag() });
-        if (iter != itemMap.end()) {
-            iter->second++;
-        } else {
-            CheckNodeInfo node;
-            node.col = child->GetCol();
-            node.row = child->GetRow();
-            node.tag = child->GetTag();
-            itemMap.insert(std::make_pair(node, 1));
-        }
-    }
-}
-
-void UINode::GetChildMaxDepth(int32_t& maxDepth)
-{
-    for (const auto& child : children_) {
-        auto depth = child->GetDepth();
-        if (depth > maxDepth) {
-            maxDepth = depth;
-        }
-        child->GetChildMaxDepth(maxDepth);
+        child->GetPerformanceCheckData(nodeMap);
     }
 }
 

@@ -56,7 +56,6 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
 {
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACE();
-    AceScopedPerformanceCheck scoped;
     auto dirtyLayoutNodes = std::move(dirtyLayoutNodes_);
     std::vector<RefPtr<FrameNode>> orderedNodes;
     bool hasNormalNode = false;
@@ -97,7 +96,6 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
             if (forceUseMainThread || (task->GetTaskThreadType() == MAIN_TASK)) {
                 (*task)();
                 time = GetSysTimestamp() - time;
-                scoped.InsertNodeTimeout(time, node->GetRow(), node->GetCol(), node->GetTag());
                 if (frameInfo_ != nullptr) {
                     frameInfo_->AddTaskInfo(node->GetTag(), node->GetId(), time, FrameInfo::TaskType::LAYOUT);
                 }

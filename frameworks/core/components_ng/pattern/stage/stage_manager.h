@@ -53,7 +53,7 @@ public:
     void ReloadStage();
 
 private:
-    void CheckNodeCountAndDepth(const RefPtr<FrameNode>& pageNode);
+    void PerformanceCheck(const RefPtr<FrameNode>& pageNode, int64_t vsyncTimeout);
     void StopPageTransition();
 
     RefPtr<FrameNode> stageNode_;

@@ -22,6 +22,7 @@ ohos_unittest("textfield_test_ng") {
     "$ace_root/frameworks/base/geometry/least_square_impl.cpp",
     "$ace_root/frameworks/base/geometry/matrix3.cpp",
     "$ace_root/frameworks/base/geometry/matrix4.cpp",
+    "$ace_root/frameworks/base/utils/time_util.cpp",
     "$ace_root/frameworks/core/animation/anticipate_curve.cpp",
     "$ace_root/frameworks/core/animation/cubic_curve.cpp",
     "$ace_root/frameworks/core/animation/curves.cpp",
