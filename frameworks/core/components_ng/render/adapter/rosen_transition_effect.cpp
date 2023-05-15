@@ -110,71 +110,71 @@ RefPtr<RosenTransitionEffect> RosenTransitionEffect::ConvertToRosenTransitionEff
     const RefPtr<NG::ChainedTransitionEffect>& effect)
 {
     RefPtr<RosenTransitionEffect> res;
-    RefPtr<RosenTransitionEffect> tailEffect;
-    RefPtr<ChainedTransitionEffect> nowEffect = effect;
-    while (nowEffect) {
-        RefPtr<RosenTransitionEffect> nowRSEffect;
-        switch (nowEffect->GetType()) {
+    RefPtr<RosenTransitionEffect> tailRSEffect;
+    RefPtr<ChainedTransitionEffect> currentEffect = effect;
+    while (currentEffect) {
+        RefPtr<RosenTransitionEffect> currentRSEffect;
+        switch (currentEffect->GetType()) {
             case ChainedTransitionEffectType::IDENTITY: {
-                nowRSEffect = AceType::MakeRefPtr<RosenIdentityTransitionEffect>();
+                currentRSEffect = AceType::MakeRefPtr<RosenIdentityTransitionEffect>();
                 break;
             }
             case ChainedTransitionEffectType::OPACITY: {
-                auto opacityEffect = AceType::DynamicCast<ChainedOpacityEffect>(nowEffect);
+                auto opacityEffect = AceType::DynamicCast<ChainedOpacityEffect>(currentEffect);
                 auto opacity = opacityEffect->GetEffect();
-                nowRSEffect = AceType::MakeRefPtr<RosenOpacityTransitionEffect>(1.0f, opacity);
+                currentRSEffect = AceType::MakeRefPtr<RosenOpacityTransitionEffect>(1.0f, opacity);
                 break;
             }
             case ChainedTransitionEffectType::MOVE: {
-                auto moveEffect = AceType::DynamicCast<ChainedMoveEffect>(nowEffect);
+                auto moveEffect = AceType::DynamicCast<ChainedMoveEffect>(currentEffect);
                 const auto& edge = moveEffect->GetEffect();
-                nowRSEffect = AceType::MakeRefPtr<RosenMoveTransitionEffect>(edge);
+                currentRSEffect = AceType::MakeRefPtr<RosenMoveTransitionEffect>(edge);
                 break;
             }
             case ChainedTransitionEffectType::ROTATE: {
-                auto rotateEffect = AceType::DynamicCast<ChainedRotateEffect>(nowEffect);
+                auto rotateEffect = AceType::DynamicCast<ChainedRotateEffect>(currentEffect);
                 const auto& rotateOption = rotateEffect->GetEffect();
-                nowRSEffect = AceType::MakeRefPtr<RosenRotation3DTransitionEffect>(rotateOption);
+                currentRSEffect = AceType::MakeRefPtr<RosenRotation3DTransitionEffect>(rotateOption);
                 break;
             }
             case ChainedTransitionEffectType::SCALE: {
-                auto scaleEffect = AceType::DynamicCast<ChainedScaleEffect>(nowEffect);
+                auto scaleEffect = AceType::DynamicCast<ChainedScaleEffect>(currentEffect);
                 const auto& scaleOption = scaleEffect->GetEffect();
                 // Scale z is not considered
-                nowRSEffect = AceType::MakeRefPtr<RosenScaleTransitionEffect>(scaleOption);
+                currentRSEffect = AceType::MakeRefPtr<RosenScaleTransitionEffect>(scaleOption);
                 break;
             }
             case ChainedTransitionEffectType::TRANSLATE: {
-                auto translateEffect = AceType::DynamicCast<ChainedTranslateEffect>(nowEffect);
+                auto translateEffect = AceType::DynamicCast<ChainedTranslateEffect>(currentEffect);
                 const auto& translateOption = translateEffect->GetEffect();
-                nowRSEffect = AceType::MakeRefPtr<RosenTranslateTransitionEffect>(translateOption);
+                currentRSEffect = AceType::MakeRefPtr<RosenTranslateTransitionEffect>(translateOption);
                 break;
             }
             case ChainedTransitionEffectType::ASYMMETRIC: {
-                auto asymmetricEffect = AceType::DynamicCast<ChainedAsymmetricEffect>(nowEffect);
+                auto asymmetricEffect = AceType::DynamicCast<ChainedAsymmetricEffect>(currentEffect);
                 auto rsAppearTransition = ConvertToRosenTransitionEffect(asymmetricEffect->GetAppearEffect());
                 auto rsDisappearTransition = ConvertToRosenTransitionEffect(asymmetricEffect->GetDisappearEffect());
-                nowRSEffect =
+                currentRSEffect =
                     AceType::MakeRefPtr<RosenAsymmetricTransitionEffect>(rsAppearTransition, rsDisappearTransition);
                 break;
             }
             case ChainedTransitionEffectType::SLIDE_SWITCH: {
-                nowRSEffect = AceType::MakeRefPtr<RosenSlideSwitchTransitionEffect>();
+                currentRSEffect = AceType::MakeRefPtr<RosenSlideSwitchTransitionEffect>();
                 break;
             }
             default: {
-                LOGW("not support effect type: %{public}d", static_cast<int>(nowEffect->GetType()));
+                LOGW("not support effect type: %{public}d", static_cast<int>(currentEffect->GetType()));
                 return res;
             }
         }
-        nowRSEffect->SetAnimationOption(nowEffect->GetAnimationOption());
-        if (tailEffect) {
-            tailEffect->CombineWith(nowRSEffect);
+        currentRSEffect->SetAnimationOption(currentEffect->GetAnimationOption());
+        if (tailRSEffect) {
+            tailRSEffect->CombineWith(currentRSEffect);
         } else {
-            res = nowRSEffect;
+            res = currentRSEffect;
         }
-        tailEffect = nowRSEffect;
-        nowEffect = nowEffect->GetNext();
+        tailRSEffect = currentRSEffect;
+        currentEffect = currentEffect->GetNext();
     }
     return res;
 }
@@ -574,8 +574,7 @@ InternalScaleEffect::PropertyTransitionEffectTemplate() : identityValue_(1.0f, 1
 
 RefPtr<RosenTransitionEffect> RosenTransitionEffect::CreateDefaultRosenTransitionEffect()
 {
-    auto effect = AceType::MakeRefPtr<RosenOpacityTransitionEffect>();
-    return effect;
+    return AceType::MakeRefPtr<RosenOpacityTransitionEffect>();
 }
 
 RosenSlideSwitchTransitionEffect::RosenSlideSwitchTransitionEffect()

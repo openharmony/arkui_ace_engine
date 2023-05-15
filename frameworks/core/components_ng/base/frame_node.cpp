@@ -1616,10 +1616,9 @@ bool FrameNode::OnRemoveFromParent(bool allowTransition)
         }
         ResetParent();
         return true;
-    } else {
-        // delayed remove, will move self into disappearing children
-        return false;
     }
+    // delayed remove, will move self into disappearing children
+    return false;
 }
 
 RefPtr<FrameNode> FrameNode::FindChildByPosition(float x, float y)

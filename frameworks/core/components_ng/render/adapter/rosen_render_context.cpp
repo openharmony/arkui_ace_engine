@@ -125,8 +125,7 @@ void RosenRenderContext::OnNodeAppear(bool recursive)
 void RosenRenderContext::OnNodeDisappear(bool recursive)
 {
     isDisappearing_ = true;
-    bool noneOrDefaultTransition =
-        !propTransitionDisappearing_ && (!transitionEffect_ || hasDefaultTransition_ == true);
+    bool noneOrDefaultTransition = !propTransitionDisappearing_ && (!transitionEffect_ || hasDefaultTransition_);
     if (recursive && noneOrDefaultTransition) {
         // recursive, and has no transition or has default transition, no need to trigger transition.
         return;
@@ -738,17 +737,23 @@ RectF RosenRenderContext::GetPaintRectWithoutTransform()
 void RosenRenderContext::NotifyTransitionInner(const SizeF& frameSize, bool isTransitionIn)
 {
     CHECK_NULL_VOID(rsNode_);
-    auto& transOptions = isTransitionIn ? propTransitionAppearing_ : propTransitionDisappearing_;
-    if (auto effect = GetRSTransitionWithoutType(transOptions, frameSize)) {
+    if (propTransitionAppearing_ || propTransitionDisappearing_) {
+        // old transition
+        auto& transOptions = isTransitionIn ? propTransitionAppearing_ : propTransitionDisappearing_;
+        auto effect = GetRSTransitionWithoutType(transOptions, frameSize);
+        CHECK_NULL_VOID_NOLOG(effect);
         SetTransitionPivot(frameSize, isTransitionIn);
         // notice that we have been in animateTo, so do not need to use Animation closure to notify transition.
         rsNode_->NotifyTransition(effect, isTransitionIn);
         return;
     }
-    // add default transition effect on the 'breaking point' of render tree, if no user-defined transition effect.
+    // add default transition effect on the 'breaking point' of render tree, if no user-defined transition effect
+    // and triggered in AnimateTo closure.
     // Note: this default transition effect will be removed after all transitions finished, implemented in
     // OnTransitionInFinish. and OnTransitionOutFinish.
-    if (isBreakingPoint_ == true && transitionEffect_ == nullptr) {
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    if (isBreakingPoint_ && !transitionEffect_ && pipeline->GetSyncAnimationOption().IsValid()) {
         hasDefaultTransition_ = true;
         transitionEffect_ = RosenTransitionEffect::CreateDefaultRosenTransitionEffect();
         RSNode::ExecuteWithoutAnimation([this, isTransitionIn]() {
@@ -756,7 +761,6 @@ void RosenRenderContext::NotifyTransitionInner(const SizeF& frameSize, bool isTr
             transitionEffect_->Attach(Claim(this), isTransitionIn);
         });
     }
-    CHECK_NULL_VOID_NOLOG(transitionEffect_);
     NotifyTransition(isTransitionIn);
 }
 
@@ -2324,9 +2328,10 @@ void RosenRenderContext::NotifyTransition(bool isTransitionIn)
                 transitionEffect_->Appear();
                 ++appearingTransitionCount_;
             },
-            [weakThis = WeakClaim(this), nodeId = frameNode->GetId()]() {
+            [weakThis = WeakClaim(this), nodeId = frameNode->GetId(), id = Container::CurrentId()]() {
                 auto context = weakThis.Upgrade();
                 CHECK_NULL_VOID(context);
+                ContainerScope scope(id);
                 LOGD("RosenTransitionEffect::NotifyTransition transition END, node %{public}d, isTransitionIn: IN",
                     nodeId);
                 context->OnTransitionInFinish();
@@ -2348,9 +2353,10 @@ void RosenRenderContext::NotifyTransition(bool isTransitionIn)
                 // update transition out count
                 ++disappearingTransitionCount_;
             },
-            [weakThis = WeakClaim(this), nodeId = frameNode->GetId()]() {
+            [weakThis = WeakClaim(this), nodeId = frameNode->GetId(), id = Container::CurrentId()]() {
                 auto context = weakThis.Upgrade();
                 CHECK_NULL_VOID(context);
+                ContainerScope scope(id);
                 LOGD("RosenTransitionEffect::NotifyTransition transition END, node %{public}d, isTransitionIn: OUT",
                     nodeId);
                 // update transition out count
@@ -2373,15 +2379,15 @@ void RosenRenderContext::RemoveDefaultTransition()
 void RosenRenderContext::OnTransitionInFinish()
 {
     --appearingTransitionCount_;
-    if (appearingTransitionCount_ < 0) {
-        LOGE("RosenTransitionEffect: appearingTransitionCount_ should not be less than 0");
-        appearingTransitionCount_ = 0;
-    }
     // make sure we are the last transition out animation, if not, return.
     if (appearingTransitionCount_ > 0) {
         LOGD("RosenTransitionEffect: appearingTransitionCount_ is %{public}d, not the last transition out animation",
             appearingTransitionCount_);
         return;
+    }
+    if (appearingTransitionCount_ < 0) {
+        LOGW("RosenTransitionEffect: appearingTransitionCount_ should not be less than 0");
+        appearingTransitionCount_ = 0;
     }
     // when all transition in/out animations are finished, we should remove the default transition effect.
     RemoveDefaultTransition();
@@ -2391,15 +2397,15 @@ void RosenRenderContext::OnTransitionOutFinish()
 {
     // update transition out count
     --disappearingTransitionCount_;
-    if (disappearingTransitionCount_ < 0) {
-        LOGE("RosenTransitionEffect: disappearingTransitionCount_ should not be less than 0");
-        disappearingTransitionCount_ = 0;
-    }
     // make sure we are the last transition out animation, if not, return.
     if (disappearingTransitionCount_ > 0) {
         LOGD("RosenTransitionEffect: disappearingTransitionCount_ is %{public}d, not the last transition out animation",
             disappearingTransitionCount_);
         return;
+    }
+    if (disappearingTransitionCount_ < 0) {
+        LOGW("RosenTransitionEffect: disappearingTransitionCount_ should not be less than 0");
+        disappearingTransitionCount_ = 0;
     }
     // when all transition in/out animations are finished, we should remove the default transition effect.
     RemoveDefaultTransition();
@@ -2407,7 +2413,7 @@ void RosenRenderContext::OnTransitionOutFinish()
     CHECK_NULL_VOID(host);
     auto parent = host->GetParent();
     CHECK_NULL_VOID(parent);
-    if (host->IsVisible() == false) {
+    if (!host->IsVisible()) {
         // trigger transition through visibility
         parent->MarkNeedSyncRenderTree();
         parent->RebuildRenderContextTree();

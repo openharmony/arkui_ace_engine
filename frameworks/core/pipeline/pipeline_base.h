@@ -756,7 +756,7 @@ public:
 
     virtual void FlushPipelineImmediately() = 0;
 
-    // for sync animation only
+    // get animateTo closure option
     AnimationOption GetSyncAnimationOption()
     {
         return animationOption_;

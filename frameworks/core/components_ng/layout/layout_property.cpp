@@ -505,7 +505,7 @@ RefPtr<FrameNode> LayoutProperty::GetHost() const
     return host_.Upgrade();
 }
 
-void LayoutProperty::OnVisibilityUpdate(VisibleType visible)
+void LayoutProperty::OnVisibilityUpdate(VisibleType visible, bool allowTransition)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -515,11 +515,13 @@ void LayoutProperty::OnVisibilityUpdate(VisibleType visible)
     // update visibility value.
     propVisibility_ = visible;
     host->OnVisibleChange(visible == VisibleType::VISIBLE);
-    if (preVisible == VisibleType::VISIBLE && visible == VisibleType::INVISIBLE) {
-        // only trigger transition when visibility changes between visible and invisible.
-        host->GetRenderContext()->OnNodeDisappear(false);
-    } else if (preVisible == VisibleType::INVISIBLE && visible == VisibleType::VISIBLE) {
-        host->GetRenderContext()->OnNodeAppear(false);
+    if (allowTransition) {
+        if (preVisible == VisibleType::VISIBLE && visible == VisibleType::INVISIBLE) {
+            // only trigger transition when visibility changes between visible and invisible.
+            host->GetRenderContext()->OnNodeDisappear(false);
+        } else if (preVisible == VisibleType::INVISIBLE && visible == VisibleType::VISIBLE) {
+            host->GetRenderContext()->OnNodeAppear(false);
+        }
     }
 
     auto parent = host->GetAncestorNodeOfFrame();
