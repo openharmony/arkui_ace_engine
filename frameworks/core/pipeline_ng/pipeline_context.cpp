@@ -695,6 +695,22 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
 #endif
 }
 
+void PipelineContext::OnAvoidAreaChanged()
+{
+    auto stageManager = GetStageManager();
+    CHECK_NULL_VOID_NOLOG(stageManager);
+    auto pageNode = stageManager->GetLastPage();
+    CHECK_NULL_VOID_NOLOG(pageNode);
+    auto layoutProperty = pageNode->GetLayoutProperty();
+    const static int32_t PLATFORM_VERSION_TEN = 10;
+    if (GetMinPlatformVersion() >= PLATFORM_VERSION_TEN && !GetIgnoreViewSafeArea() && layoutProperty) {
+        layoutProperty->SetSafeArea(GetCurrentViewSafeArea());
+        LOGI("OnAvoidAreaChanged viewSafeArea:%{public}s",
+            layoutProperty->GetSafeArea().ToString().c_str());
+        pageNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
+}
+
 bool PipelineContext::OnBackPressed()
 {
     LOGD("OnBackPressed");

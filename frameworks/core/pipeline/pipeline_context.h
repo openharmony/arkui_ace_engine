@@ -301,6 +301,8 @@ public:
 
     SafeAreaEdgeInserts GetCurrentViewSafeArea() const override { return SafeAreaEdgeInserts(); };
 
+    void OnAvoidAreaChanged() override {};
+
     bool IsSurfaceReady() const
     {
         return isSurfaceReady_;
