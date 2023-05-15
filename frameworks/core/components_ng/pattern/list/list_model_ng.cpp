@@ -121,12 +121,20 @@ void ListModelNG::SetLaneConstrain(const Dimension& laneMinLength, const Dimensi
 
 void ListModelNG::SetLaneMinLength(const Dimension& laneMinLength)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, LaneMinLength, laneMinLength);
+    if (laneMinLength.IsValid()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, LaneMinLength, laneMinLength);
+    } else {
+        ACE_RESET_LAYOUT_PROPERTY(ListLayoutProperty, LaneMinLength);
+    }
 }
 
 void ListModelNG::SetLaneMaxLength(const Dimension& laneMaxLength)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, LaneMaxLength, laneMaxLength);
+    if (laneMaxLength.IsValid()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, LaneMaxLength, laneMaxLength);
+    } else {
+        ACE_RESET_LAYOUT_PROPERTY(ListLayoutProperty, LaneMaxLength);
+    }
 }
 
 void ListModelNG::SetListItemAlign(V2::ListItemAlign listItemAlign)
