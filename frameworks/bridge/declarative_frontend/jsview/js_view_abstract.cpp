@@ -1700,14 +1700,14 @@ void JSViewAbstract::JsFlexShrink(const JSCallbackInfo& info)
     if (!ParseJsDouble(info[0], value)) {
         if (info[0]->IsNull() || info[0]->IsUndefined()) {
             // undefined use default value.
-            value = 1.0;
+            ViewAbstractModel::GetInstance()->ResetFlexShrink();
         } else {
             return;
         }
     }
     // negative use default value.
     if (value < 0.0) {
-        value = 1.0;
+        ViewAbstractModel::GetInstance()->ResetFlexShrink();
     }
     ViewAbstractModel::GetInstance()->SetFlexShrink(static_cast<float>(value));
 }
