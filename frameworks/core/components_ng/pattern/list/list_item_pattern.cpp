@@ -332,7 +332,6 @@ void ListItemPattern::ChangeDeleteAreaStage()
                     enterEndDeleteArea();
                 }
             }
-
         } else {
             if (inEndDeleteArea_) {
                 inEndDeleteArea_ = false;
