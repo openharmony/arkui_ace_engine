@@ -16,10 +16,12 @@
 #ifndef FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_UI_CONTENT_H
 #define FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_UI_CONTENT_H
 
+#include <functional>
 #include <map>
 #include <memory>
 #include <string>
 
+#include "serializeable_object.h"
 #include "viewport_config.h"
 #include "foundation/multimedia/image_framework/interfaces/innerkits/include/pixel_map.h"
 
@@ -137,6 +139,25 @@ public:
 
     virtual void SetActionEventHandler(std::function<void(const std::string&)>&& actionCallback) = 0;
     virtual void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& errorCallback) = 0;
+
+    // for distribute UI source
+    virtual SerializeableObjectArray DumpUITree()
+    {
+        return SerializeableObjectArray();
+    };
+    virtual void SubscribeUpdate(const std::function<void(int32_t, SerializeableObjectArray&)>& onUpdate) {}
+    virtual void UnSubscribeUpdate() {}
+    virtual void ProcessSerializeableInputEvent(const SerializeableObjectArray& array) {}
+    // for distribute UI sink
+    virtual void RestoreUITree(const SerializeableObjectArray& array) {}
+    virtual void UpdateUITree(const SerializeableObjectArray& array) {}
+    virtual void SubscribeInputEventProcess(const std::function<void(SerializeableObjectArray&)>& onEvent) {}
+    virtual void UnSubscribeInputEventProcess() {}
+
+    virtual void GetResourcePaths(std::vector<std::string>& resourcesPaths, std::string& assetRootPath,
+        std::vector<std::string>& assetBasePaths, std::string& resFolderName) {};
+    virtual void SetResourcePaths(const std::vector<std::string>& resourcesPaths, const std::string& assetRootPath,
+        const std::vector<std::string>& assetBasePaths) {};
 };
 
 } // namespace OHOS::Ace

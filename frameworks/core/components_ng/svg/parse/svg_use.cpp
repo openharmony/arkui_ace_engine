@@ -38,12 +38,29 @@ SkPath SvgUse::AsPath(const Size& viewPort) const
     CHECK_NULL_RETURN(svgContext, SkPath());
     if (declaration_->GetHref().empty()) {
         LOGE("href is empty");
-        return SkPath();
+        return {};
     }
     auto refSvgNode = svgContext->GetSvgNodeById(declaration_->GetHref());
     CHECK_NULL_RETURN(refSvgNode, SkPath());
+
+    AttributeScope scope(refSvgNode);
     refSvgNode->Inherit(declaration_);
     return refSvgNode->AsPath(viewPort);
 }
 
+SvgUse::AttributeScope::AttributeScope(const RefPtr<SvgNode>& node) : node_(node)
+{
+    auto declaration = node->GetDeclaration();
+    CHECK_NULL_VOID(declaration);
+    attributes_ = static_cast<SvgBaseAttribute&>(declaration->GetAttribute(AttributeTag::SPECIALIZED_ATTR));
+}
+
+SvgUse::AttributeScope::~AttributeScope()
+{
+    auto node = node_.Upgrade();
+    CHECK_NULL_VOID(node);
+    auto declaration = node->GetDeclaration();
+    CHECK_NULL_VOID(declaration);
+    declaration->ReplaceAttributes(attributes_);
+}
 } // namespace OHOS::Ace::NG

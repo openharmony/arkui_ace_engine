@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MARQUEE_PATTERN_H
 
 #include "base/geometry/ng/offset_t.h"
+#include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/pattern/marquee/marquee_accessibility_property.h"
 #include "core/components_ng/pattern/marquee/marquee_event_hub.h"
@@ -27,8 +28,6 @@
 #include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace::NG {
-inline constexpr double DEFAULT_MARQUEE_SCROLL_AMOUNT = 6.0;
-inline constexpr int32_t DEFAULT_MARQUEE_LOOP = -1;
 using TimeCallback = std::function<void()>;
 
 class MarqueePattern : public Pattern {
@@ -71,11 +70,15 @@ private:
     void StartMarqueeAnimation();
     void StopMarqueeAnimation(bool stopAndStart, bool statusChanged);
     void SetTextOffset(float offsetX);
+    void RegistVisibleAreaChangeCallback();
+    void OnVisibleAreaChange(bool visible);
     bool lastStartStatus_ = false;
     bool statusChanged_ = false;
     bool forceStropAnimation_ = false;
     int32_t repeatCount_ = 0;
     int32_t animationId_ = 0;
+    RefPtr<FrameNode> textNode_;
+    bool isRegistedAreaCallback_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(MarqueePattern);
 };
 } // namespace OHOS::Ace::NG

@@ -352,9 +352,8 @@ void JSSlidingPanel::SetPanelMode(const JSCallbackInfo& info)
         }
     }
 
-    if (info.Length() > 1 && info[1]->IsObject()) {
-        JSRef<JSVal> modeObj = JSRef<JSObject>::Cast(info[1]);
-        ParseModeObject(info, modeObj);
+    if (info.Length() > 1 && info[1]->IsFunction()) {
+        ParseModeObject(info, info[1]);
     }
 
     SlidingPanelModel::GetInstance()->SetPanelMode(PANEL_MODES[mode]);

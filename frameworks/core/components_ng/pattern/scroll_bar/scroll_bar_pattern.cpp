@@ -96,6 +96,7 @@ void ScrollBarPattern::OnModifyDone()
     scrollableEvent_->SetScrollPositionCallback(std::move(offsetTask));
     scrollableEvent_->SetScrollEndCallback(std::move(scrollEndTask));
     gestureHub->AddScrollableEvent(scrollableEvent_);
+    SetAccessibilityAction();
 }
 
 bool ScrollBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -161,7 +162,7 @@ void ScrollBarPattern::StartAnimator()
         return;
     }
 
-    scrollEndAnimator_ = AceType::MakeRefPtr<Animator>(PipelineContext::GetCurrentContext());
+    scrollEndAnimator_ = CREATE_ANIMATOR(PipelineContext::GetCurrentContext());
     auto hiddenStartKeyframe = AceType::MakeRefPtr<Keyframe<int32_t>>(KEY_TIME_START, UINT8_MAX);
     auto hiddenMiddleKeyframe = AceType::MakeRefPtr<Keyframe<int32_t>>(KEY_TIME_MIDDLE, UINT8_MAX);
     auto hiddenEndKeyframe = AceType::MakeRefPtr<Keyframe<int32_t>>(KEY_TIME_END, 0);
@@ -200,4 +201,36 @@ void ScrollBarPattern::SetOpacity(uint8_t value)
     host->MarkNeedRenderOnly();
 }
 
+void ScrollBarPattern::SetAccessibilityAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetActionScrollForward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (pattern->GetAxis() == Axis::NONE || pattern->GetScrollableDistance() == 0.0f) {
+            return;
+        }
+        auto source = pattern->GetCurrentPosition();
+        pattern->UpdateCurrentOffset(pattern->GetChildOffset(), source);
+        auto frameNode = pattern->GetHost();
+        CHECK_NULL_VOID(frameNode);
+        frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+    });
+
+    accessibilityProperty->SetActionScrollBackward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (pattern->GetAxis() == Axis::NONE || pattern->GetScrollableDistance() == 0.0f) {
+            return;
+        }
+        auto source = pattern->GetCurrentPosition();
+        pattern->UpdateCurrentOffset(-pattern->GetChildOffset(), source);
+        auto frameNode = pattern->GetHost();
+        CHECK_NULL_VOID(frameNode);
+        frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+    });
+}
 } // namespace OHOS::Ace::NG

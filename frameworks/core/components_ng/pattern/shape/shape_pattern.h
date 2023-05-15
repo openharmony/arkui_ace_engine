@@ -48,6 +48,23 @@ public:
         return MakeRefPtr<ShapePaintProperty>();
     }
 
+    void OnModifyDone() override
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto paintProperty = host->GetPaintProperty<ShapePaintProperty>();
+        CHECK_NULL_VOID(paintProperty);
+        if (paintProperty->HasStrokeMiterLimit()) {
+            auto miterLimit = paintProperty->GetStrokeMiterLimitValue();
+            if (Negative(miterLimit)) {
+                paintProperty->UpdateStrokeMiterLimit(ShapePaintProperty::STROKE_MITERLIMIT_DEFAULT);
+            } else if (NonNegative(miterLimit) &&
+                LessNotEqual(miterLimit, ShapePaintProperty::STROKE_MITERLIMIT_MIN)) {
+                paintProperty->UpdateStrokeMiterLimit(ShapePaintProperty::STROKE_MITERLIMIT_MIN);
+            }
+        }
+    }
+
 protected:
     RefPtr<ShapePaintProperty> GetAncestorPaintProperty()
     {
@@ -75,15 +92,29 @@ protected:
     void UpdateForeground(RefPtr<FrameNode> parentFrameNode, RefPtr<FrameNode> childFrameNode)
     {
         auto renderContext = parentFrameNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
         auto childRenderContext = childFrameNode->GetRenderContext();
-        if (childRenderContext) {
-            if (!childRenderContext->HasForegroundColor() && !childRenderContext->HasForegroundColorStrategy()) {
+        CHECK_NULL_VOID(childRenderContext);
+        if (!childRenderContext->HasForegroundColor() && !childRenderContext->HasForegroundColorStrategy()) {
+            if (renderContext->HasForegroundColor()) {
+                childRenderContext->UpdateForegroundColor(renderContext->GetForegroundColorValue());
+                childRenderContext->ResetForegroundColorStrategy();
+                childRenderContext->UpdateForegroundColorFlag(false);
+            } else if (renderContext->HasForegroundColorStrategy()) {
+                childRenderContext->UpdateForegroundColorStrategy(renderContext->GetForegroundColorStrategyValue());
+                childRenderContext->ResetForegroundColor();
+                childRenderContext->UpdateForegroundColorFlag(false);
+            }
+        } else {
+            if (!childRenderContext->GetForegroundColorFlag().value_or(false)) {
                 if (renderContext->HasForegroundColor()) {
                     childRenderContext->UpdateForegroundColor(renderContext->GetForegroundColorValue());
                     childRenderContext->ResetForegroundColorStrategy();
+                    childRenderContext->UpdateForegroundColorFlag(false);
                 } else if (renderContext->HasForegroundColorStrategy()) {
                     childRenderContext->UpdateForegroundColorStrategy(renderContext->GetForegroundColorStrategyValue());
                     childRenderContext->ResetForegroundColor();
+                    childRenderContext->UpdateForegroundColorFlag(false);
                 }
             }
         }

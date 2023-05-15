@@ -228,6 +228,8 @@ private:
     std::string GetSelectedText(int32_t start, int32_t end) const;
     std::wstring GetWideText() const;
     void UpdateChildProperty(const RefPtr<SpanNode>& child) const;
+    void ActSetSelection(int32_t start, int32_t end);
+    void SetAccessibilityAction();
 
     std::list<RefPtr<SpanItem>> spanItemChildren_;
     std::string textForDisplay_;

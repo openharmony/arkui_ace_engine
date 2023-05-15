@@ -198,7 +198,7 @@ void SideBarContainerPattern::CreateAnimation()
     CHECK_NULL_VOID(host);
 
     if (!controller_) {
-        controller_ = AceType::MakeRefPtr<Animator>(host->GetContext());
+        controller_ = CREATE_ANIMATOR(host->GetContext());
     }
 
     auto weak = AceType::WeakClaim(this);

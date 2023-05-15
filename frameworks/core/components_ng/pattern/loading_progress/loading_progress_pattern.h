@@ -62,12 +62,11 @@ public:
         return MakeRefPtr<LoadingProgressPaintProperty>();
     }
 
-    void OnModifyDone() override;
+    void OnVisibleChange(bool isVisible) override;
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
     void OnAttachToFrameNode() override;
 
-    VisibleType visibilityProp_ = VisibleType::VISIBLE;
     RefPtr<LoadingProgressModifier> loadingProgressModifier_;
     ACE_DISALLOW_COPY_AND_MOVE(LoadingProgressPattern);
 };

@@ -206,7 +206,7 @@ void ContainerModalElement::PerformBuild()
 {
     SoleChildElement::PerformBuild();
     if (!controller_) {
-        controller_ = AceType::MakeRefPtr<Animator>(context_);
+        controller_ = CREATE_ANIMATOR(context_);
         controller_->SetDuration(TITLE_POPUP_TIME);
         controller_->SetFillMode(FillMode::FORWARDS);
         auto translateY = AceType::MakeRefPtr<CurveAnimation<DimensionOffset>>(

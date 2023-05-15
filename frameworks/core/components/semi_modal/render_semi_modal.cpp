@@ -72,7 +72,7 @@ void RenderSemiModal::Update(const RefPtr<Component>& component)
         boxForBlank_ = RenderBox::Create();
         AddChild(boxForBlank_, 0);
         boxForBlank_->Attach(GetContext());
-        animator_ = AceType::MakeRefPtr<Animator>(GetContext());
+        animator_ = CREATE_ANIMATOR(GetContext());
     }
     MarkNeedLayout();
 }

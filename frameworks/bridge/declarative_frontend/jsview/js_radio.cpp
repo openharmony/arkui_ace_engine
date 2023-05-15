@@ -137,9 +137,8 @@ void JSRadio::Checked(const JSCallbackInfo& info)
         RadioModel::GetInstance()->SetChecked(false);
     }
 
-    if (info.Length() > 1 && info[1]->IsObject()) {
-        JSRef<JSVal> checkedObj = JSRef<JSObject>::Cast(info[1]);
-        ParseCheckedObject(info, checkedObj);
+    if (info.Length() > 1 && info[1]->IsFunction()) {
+        ParseCheckedObject(info, info[1]);
     }
 }
 

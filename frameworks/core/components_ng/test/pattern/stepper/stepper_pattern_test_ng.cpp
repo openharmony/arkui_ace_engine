@@ -533,7 +533,7 @@ HWTEST_F(StepperPatternTestNg, StepperPatternHandleClickEvent001, TestSize.Level
         hostNode->GetSwiperId(), []() { return AceType::MakeRefPtr<SwiperPattern>(); });
     hostNode->AddChild(swiperNode);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-    swiperPattern->controller_ = AceType::MakeRefPtr<Animator>(hostNode->GetContext());
+    swiperPattern->controller_ = CREATE_ANIMATOR(hostNode->GetContext());
     auto swiperAnimationController = swiperPattern->GetController();
     ASSERT_NE(swiperAnimationController, nullptr);
     stepperPattern->HandlingLeftButtonClickEvent();

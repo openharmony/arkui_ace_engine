@@ -16,12 +16,14 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCREEN_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCREEN_MODEL_H
 
-#include "core/components_ng/pattern/window_scene/screen/screen_pattren.h"
+#include <typeinfo>
+
+#include "base/utils/macros.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ScreenModel {
 public:
-    static void Create(const sptr<Rosen::ScreenSession>& screenSession);
+    static void Create(uint64_t screenId);
 };
 } // namespace OHOS::Ace::NG
 

@@ -320,6 +320,7 @@ private:
     void SetEdgeEffect(const RefPtr<GestureEventHub>& gestureHub);
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect);
     bool IsOutOfBoundary();
+    void SetAccessibilityAction();
 
     RefPtr<ClickEvent> clickEvent_;
     RefPtr<TouchEventImpl> touchEvent_;

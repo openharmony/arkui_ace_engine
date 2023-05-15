@@ -57,6 +57,7 @@ bool JsBackendAssetManager::ParseWorkerUri(const std::string& fileUri, std::stri
     if (!assetManager_ || fileUri.empty() || (fileUri.length() > PATH_MAX)) {
         return false;
     }
+    LOGD("ParseWorkerUri fileUri : %{public}s", fileUri.c_str());
 
     std::string fileName;
     std::string filePath;
@@ -64,9 +65,10 @@ bool JsBackendAssetManager::ParseWorkerUri(const std::string& fileUri, std::stri
     if (Framework::StartWith(filePath, SUPDIRECTORY)) {
         filePath = filePath.substr(3); // 3 : offset of filePath
     }
+    LOGD("ParseWorkerUri filePath : %{public}s", filePath.c_str());
     std::vector<std::string> files;
     assetManager_->GetAssetList(filePath, files);
-    
+
     bool fileExist = false;
     for (const auto& file : files) {
         size_t filePos = file.find_last_of(SLASH);
@@ -114,6 +116,7 @@ bool JsBackendAssetManager::GetResourceData(const std::string& fileUri, std::vec
         return false;
     }
     ami = assetManager_->GetAssetPath(targetFilePath, true) + targetFilePath;
+    LOGD("GetResourceData ami : %{public}s", ami.c_str());
     if (!Framework::GetAssetContentAllowEmpty(assetManager_, targetFilePath, content)) {
         LOGE("GetResourceData GetAssetContent failed.");
         return false;

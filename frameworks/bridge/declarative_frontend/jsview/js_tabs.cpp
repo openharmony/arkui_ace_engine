@@ -243,10 +243,9 @@ void JSTabs::SetFadingEdge(const JSCallbackInfo& info)
 {
     bool fadingEdge = true;
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
-    }
-    if (!ParseJsBool(info[0], fadingEdge)) {
-        LOGE("The arg is wrong, fail to parse bool");
+        LOGW("The arg is wrong, it is supposed to have at least 1 arguments");
+    } else if (!ParseJsBool(info[0], fadingEdge)) {
+        LOGW("The arg is wrong, fail to parse bool");
     }
     TabsModel::GetInstance()->SetFadingEdge(fadingEdge);
 }
@@ -256,8 +255,7 @@ void JSTabs::SetBarOverlap(const JSCallbackInfo& info)
     bool barOverlap = false;
     if (info.Length() < 1) {
         LOGW("The arg is wrong, it is supposed to have at least 1 arguments");
-    }
-    if (!ParseJsBool(info[0], barOverlap)) {
+    } else if (!ParseJsBool(info[0], barOverlap)) {
         LOGW("The arg is wrong, fail to parse bool");
     }
     TabsModel::GetInstance()->SetBarOverlap(barOverlap);

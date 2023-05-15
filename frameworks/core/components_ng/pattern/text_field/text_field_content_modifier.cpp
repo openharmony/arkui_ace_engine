@@ -42,6 +42,9 @@ const FontWeight FONT_WEIGHT_CONVERT_MAP[] = {
     FontWeight::W500,
     FontWeight::W400,
 };
+constexpr Dimension ERROR_TEXT_UNDERLINE_MARGIN = 4.0_vp;
+constexpr Dimension ERROR_TEXT_CAPSULE_MARGIN = 8.0_vp;
+constexpr Dimension COUNTER_TEXT_AREA_MARGIN = 8.0_vp;
 
 inline FontWeight ConvertFontWeight(FontWeight fontWeight)
 {
@@ -66,14 +69,28 @@ void TextFieldContentModifier::onDraw(DrawingContext& context)
     auto paragraph = textFieldPattern->GetParagraph();
     CHECK_NULL_VOID(paragraph);
     auto contentSize = contentSize_->Get();
+    auto textFrameRect = textFieldPattern->GetFrameRect();
     auto contentOffset = contentOffset_->Get();
     auto iconRect = textFieldPattern->GetImageRect();
     auto counterParagraph = textFieldPattern->GetCounterParagraph();
-    float clipRectHeight = 0.0f;
+    auto errorParagraph = textFieldPattern->GetErrorParagraph();
+    auto clipRectHeight = 0.0f;
+    auto errorMargin = 0.0f;
+    auto errorViewHeight = 0.0f;
+    if (textFieldPattern->GetShowUnderLine() && showErrorState_->Get()) {
+        errorMargin = ERROR_TEXT_UNDERLINE_MARGIN.ConvertToPx();
+    } else if (textFieldPattern->NeedShowPasswordIcon() && showErrorState_->Get()) {
+        errorMargin = ERROR_TEXT_CAPSULE_MARGIN.ConvertToPx();
+    } else {
+        errorMargin = 0;
+    }
+    if (errorParagraph) {
+        errorViewHeight = textFrameRect.Bottom() - textFrameRect.Top() + errorMargin;
+    }
     if (showCounter_->Get() && counterParagraph) {
         clipRectHeight = contentOffset.GetY() + contentSize.Height() - textFieldPattern->GetCountHeight();
     } else {
-        clipRectHeight = contentOffset.GetY() + contentSize.Height();
+        clipRectHeight = contentOffset.GetY() + contentSize.Height() + errorViewHeight;
     }
     RSRect clipInnerRect = RSRect(offset.GetX(), contentOffset.GetY(),
         contentSize.Width() + contentOffset.GetX() - textFieldPattern->GetUnitWidth(), clipRectHeight);
@@ -84,13 +101,16 @@ void TextFieldContentModifier::onDraw(DrawingContext& context)
     }
     canvas.Restore();
     if (showCounter_->Get() && counterParagraph) {
-        RSRect clipInnerCounterRect = RSRect(
-            offset.GetX(), contentOffset.GetY() + contentSize.Height() - textFieldPattern->GetCountHeight(),
-            contentSize.Width() + contentOffset.GetX(), contentOffset.GetY() + contentSize.Height());
+        RSRect clipInnerCounterRect = RSRect(offset.GetX(), textFrameRect.Bottom() - textFrameRect.Top()
+            - COUNTER_TEXT_AREA_MARGIN.ConvertToPx() - textFieldPattern->GetCountHeight(),
+            contentSize.Width() + contentOffset.GetX(), textFrameRect.Bottom() - textFrameRect.Top());
         canvas.ClipRect(clipInnerCounterRect, RSClipOp::UNION);
-        counterParagraph->Paint(&canvas, textRectX_->Get(),
-            contentOffset.GetY() + contentSize.Height() - textFieldPattern->GetCountHeight());
+        counterParagraph->Paint(&canvas, textRectX_->Get(), textFrameRect.Bottom() - textFrameRect.Top()
+            - COUNTER_TEXT_AREA_MARGIN.ConvertToPx() - textFieldPattern->GetCountHeight());
         canvas.Restore();
+    }
+    if (showErrorState_->Get() && errorParagraph) {
+        errorParagraph->Paint(&canvas, offset.GetX(), textFrameRect.Bottom() - textFrameRect.Top() + errorMargin);
     }
 
     clipInnerRect = RSRect(contentSize.Width() + contentOffset.GetX() - textFieldPattern->GetUnitWidth(),
@@ -104,8 +124,25 @@ void TextFieldContentModifier::onDraw(DrawingContext& context)
     clipInnerRect = RSRect(
         offset.GetX(), 0.0f, textFieldPattern->GetFrameRect().Width(), textFieldPattern->GetFrameRect().Height());
     canvas.ClipRect(clipInnerRect, RSClipOp::UNION);
+    UpdatePaintConfig(passwordIconCanvasImage, context, iconRect);
     const ImagePainter passwordIconImagePainter(passwordIconCanvasImage);
     passwordIconImagePainter.DrawImage(canvas, iconRect.GetOffset(), iconRect.GetSize());
+}
+
+void TextFieldContentModifier::UpdatePaintConfig(
+    RefPtr<CanvasImage> &passwordIconCanvasImage, DrawingContext context, RectF iconRect) const
+{
+    CHECK_NULL_VOID(passwordIconCanvasImage);
+    auto &&config = passwordIconCanvasImage->GetPaintConfig();
+    config.renderMode_ = ImageRenderMode::ORIGINAL;
+    config.imageInterpolation_ = ImageInterpolation::NONE;
+    config.imageRepeat_ = ImageRepeat::NO_REPEAT;
+    config.imageFit_ = ImageFit::FILL;
+    if (context.height == 0 || context.width == 0) {
+        return;
+    }
+    config.scaleX_ = iconRect.GetSize().Width() / context.width;
+    config.scaleY_ = iconRect.GetSize().Height() / context.height;
 }
 
 void TextFieldContentModifier::SetDefaultAnimatablePropertyValue()
@@ -151,6 +188,7 @@ void TextFieldContentModifier::SetDefaultPropertyValue()
     textRectX_ = AceType::MakeRefPtr<PropertyFloat>(theme->GetPadding().Left().ConvertToPx());
     textAlign_ = AceType::MakeRefPtr<PropertyInt>(static_cast<int32_t>(TextAlign::START));
     showCounter_ = AceType::MakeRefPtr<PropertyBool>(false);
+    showErrorState_ = AceType::MakeRefPtr<PropertyBool>(false);
     AttachProperty(contentOffset_);
     AttachProperty(contentSize_);
     AttachProperty(textValue_);
@@ -161,6 +199,7 @@ void TextFieldContentModifier::SetDefaultPropertyValue()
     AttachProperty(textRectX_);
     AttachProperty(textAlign_);
     AttachProperty(showCounter_);
+    AttachProperty(showErrorState_);
 }
 
 void TextFieldContentModifier::SetDefaultFontSize(const TextStyle& textStyle)
@@ -293,6 +332,13 @@ void TextFieldContentModifier::SetShowCounter(bool value)
 {
     if (showCounter_) {
         showCounter_->Set(value);
+    }
+}
+
+void TextFieldContentModifier::SetShowErrorState(bool value)
+{
+    if (showErrorState_) {
+        showErrorState_->Set(value);
     }
 }
 

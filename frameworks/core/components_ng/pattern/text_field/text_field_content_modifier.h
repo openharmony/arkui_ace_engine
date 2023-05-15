@@ -51,12 +51,14 @@ public:
     void SetTextAlign(const TextAlign value);
     void SetShowCounter(bool value);
     bool NeedMeasureUpdate(PropertyChangeFlag& flag);
+    void SetShowErrorState(bool value);
 
 private:
     void SetDefaultFontSize(const TextStyle& textStyle);
     void SetDefaultFontWeight(const TextStyle& textStyle);
     void SetDefaultTextColor(const TextStyle& textStyle);
     void SetDefaultPropertyValue();
+    void UpdatePaintConfig(RefPtr<CanvasImage>& passwordIconCanvasImage, DrawingContext context, RectF iconRect) const;
 
     WeakPtr<Pattern> pattern_;
     std::optional<Dimension> fontSize_;
@@ -78,6 +80,7 @@ private:
     RefPtr<PropertyBool> dragStatus_;
     RefPtr<PropertyInt> textAlign_;
     RefPtr<PropertyBool> showCounter_;
+    RefPtr<PropertyBool> showErrorState_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldContentModifier);
 };

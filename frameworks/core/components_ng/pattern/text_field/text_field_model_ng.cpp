@@ -33,7 +33,7 @@ namespace {
 constexpr const double UNDERLINE_NORMAL_HEIGHT = 48.0;
 constexpr const double UNDERLINE_NORMAL_PADDING = 12.0;
 constexpr const double UNDERLINE_NORMAL_FONTSIZE = 16.0;
-}
+} // namespace
 void TextFieldModelNG::CreateNode(
     const std::optional<std::string>& placeholder, const std::optional<std::string>& value, bool isTextArea)
 {
@@ -285,6 +285,8 @@ void TextFieldModelNG::SetTextColor(const Color& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextColor, value);
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, value);
+    ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy);
+    ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true);
 }
 void TextFieldModelNG::SetFontStyle(Ace::FontStyle value)
 {
@@ -386,6 +388,19 @@ void TextFieldModelNG::SetForegroundColor(const Color& value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextColor, value);
 }
 
+void TextFieldModelNG::SetPasswordIcon(const PasswordIcon& passwordIcon)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetShowResultImageInfo(
+        ImageSourceInfo(passwordIcon.showResult, passwordIcon.showBundleName, passwordIcon.showModuleName));
+    pattern->SetHideResultImageInfo(
+        ImageSourceInfo(passwordIcon.hideResult, passwordIcon.hideBundleName, passwordIcon.hideModuleName));
+    pattern->SetShowUserDefinedIcon();
+}
+
 void TextFieldModelNG::SetShowUnit(std::function<void()>&& unitFunction)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -401,6 +416,12 @@ void TextFieldModelNG::SetShowUnit(std::function<void()>&& unitFunction)
     if (unitNode) {
         pattern->SetUnitNode(unitNode);
     }
+}
+
+void TextFieldModelNG::SetShowError(const std::string& errorText, bool visible)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ErrorText, errorText);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowErrorText, visible);
 }
 
 void TextFieldModelNG::SetShowCounter(bool value)

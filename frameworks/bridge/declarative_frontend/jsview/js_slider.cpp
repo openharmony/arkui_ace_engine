@@ -416,7 +416,7 @@ void JSSlider::SetBlockSize(const JSCallbackInfo& info)
         height.SetValue(0.0);
     }
 
-    SliderModel::GetInstance()->SetBlockSize(Size(width.ConvertToPx(), height.ConvertToPx()));
+    SliderModel::GetInstance()->SetBlockSize(width, height);
 }
 
 void JSSlider::SetBlockStyle(const JSCallbackInfo& info)

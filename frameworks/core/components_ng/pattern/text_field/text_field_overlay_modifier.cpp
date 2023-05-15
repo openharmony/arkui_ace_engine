@@ -39,6 +39,7 @@ TextFieldOverlayModifier::TextFieldOverlayModifier(const WeakPtr<OHOS::Ace::NG::
     cursorOffsetX_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(textFieldPattern->GetCaretOffsetX());
     frameSize_ = AceType::MakeRefPtr<PropertySizeF>(SizeF());
     currentOffset_ = AceType::MakeRefPtr<PropertyFloat>(0.0f);
+    isSelectedAreaRedraw_ = AceType::MakeRefPtr<PropertyBool>(false);
     underlineWidth_ = AceType::MakeRefPtr<PropertyFloat>(0.0f);
     underlineColor_ = AceType::MakeRefPtr<PropertyColor>(Color());
     showCounter_ = AceType::MakeRefPtr<PropertyBool>(false);
@@ -52,6 +53,7 @@ TextFieldOverlayModifier::TextFieldOverlayModifier(const WeakPtr<OHOS::Ace::NG::
     AttachProperty(cursorOffsetX_);
     AttachProperty(frameSize_);
     AttachProperty(currentOffset_);
+    AttachProperty(isSelectedAreaRedraw_);
     AttachProperty(underlineWidth_);
     AttachProperty(underlineColor_);
     AttachProperty(showCounter_);
@@ -157,7 +159,7 @@ void TextFieldOverlayModifier::PaintCursor(DrawingContext& context) const
     brush.SetColor(ToRSColor(cursorColor_->Get()));
     canvas.AttachBrush(brush);
     auto paintOffset = contentOffset_->Get() - OffsetF(0.0f, textFieldPattern->GetBaseLineOffset());
-    float clipRectHeight = 0.0;
+    float clipRectHeight = 0.0f;
     if (showCounter_->Get() && textFieldPattern->GetCounterParagraph()) {
         clipRectHeight = paintOffset.GetY() + contentSize_->Get().Height() - textFieldPattern->GetCountHeight();
     } else {
@@ -242,6 +244,11 @@ void TextFieldOverlayModifier::SetFrameSize(const SizeF& value)
 void TextFieldOverlayModifier::SetCurrentOffset(float value)
 {
     currentOffset_->Set(value);
+}
+
+void TextFieldOverlayModifier::SetSelectedAreaRedraw(bool value)
+{
+    isSelectedAreaRedraw_->Set(value);
 }
 
 void TextFieldOverlayModifier::SetUnderlineWidth(float value)

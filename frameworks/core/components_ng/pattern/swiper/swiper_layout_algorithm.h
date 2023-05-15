@@ -94,6 +94,10 @@ public:
         displayCount_ = displayCount;
     }
 
+    void SetHoverRatio(float hoverRatio)
+    {
+        hoverRatio_ = hoverRatio;
+    }
 private:
     void InitItemRange(LayoutWrapper* layoutWrapper);
     void AddToItemRange(int32_t index);
@@ -111,7 +115,10 @@ private:
     void SortItems(std::list<int32_t>& preItems, std::list<int32_t>& nextItems, int32_t displayCount);
     void LayoutItems(
         LayoutWrapper* layoutWrapper, const std::list<int32_t>& preItems, const std::list<int32_t>& nextItems);
-
+    RefPtr<LayoutWrapper> GetNodeLayoutWrapperByIndex(LayoutWrapper* layoutWrapper, int32_t index) const;
+    void MeasureArrow(const RefPtr<LayoutWrapper>& arrowWrapper, const RefPtr<LayoutProperty>& layoutProperty) const;
+    void ArrowLayout(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& arrowWrapper,
+        const RefPtr<LayoutProperty>& layoutProperty, Axis axis) const;
     bool isLoop_ = true;
     int32_t currentIndex_ = 0;
     int32_t startIndex_;
@@ -126,6 +133,8 @@ private:
     std::set<int32_t> preItemRange_;
     std::vector<int32_t> inActiveItems_;
     SizeF maxChildSize_;
+    // Arrow default hover ratio
+    float hoverRatio_ = 1.0f;
 };
 
 } // namespace OHOS::Ace::NG

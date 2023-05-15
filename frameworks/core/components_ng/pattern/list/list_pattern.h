@@ -174,7 +174,7 @@ public:
 
     void UpdateScrollBarOffset() override;
     // chain animation
-    void SetChainAnimation(bool enable);
+    void SetChainAnimation();
     void SetChainAnimationOptions(const ChainAnimationOptions& options);
     float FlushChainAnimation(float dragOffset);
     void ProcessDragStart(float startPosition);
@@ -224,6 +224,7 @@ private:
     void MultiSelectWithoutKeyboard(const RectF& selectedZone);
 
     void DrivenRender(const RefPtr<LayoutWrapper>& layoutWrapper);
+    void SetAccessibilityAction();
 
     RefPtr<ListContentModifier> listContentModifier_;
 

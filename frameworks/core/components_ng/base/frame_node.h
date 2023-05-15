@@ -374,6 +374,9 @@ public:
     void CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
         const std::function<void(float)>& onCallbackEvent);
     void UpdateAnimatablePropertyFloat(const std::string& propertyName, float value);
+    void CreateAnimatableArithmeticProperty(const std::string& propertyName, RefPtr<CustomAnimatableArithmetic>& value,
+        std::function<void(const RefPtr<CustomAnimatableArithmetic>&)>& onCallbackEvent);
+    void UpdateAnimatableArithmeticProperty(const std::string& propertyName, RefPtr<CustomAnimatableArithmetic>& value);
 
     std::string ProvideRestoreInfo();
 
@@ -414,7 +417,8 @@ private:
 
     void ProcessAllVisibleCallback(
         std::unordered_map<double, VisibleCallbackInfo>& visibleAreaCallbacks, double currentVisibleRatio);
-    void OnVisibleAreaChangeCallback(VisibleCallbackInfo& callbackInfo, bool visibleType, double currentVisibleRatio);
+    void OnVisibleAreaChangeCallback(
+        VisibleCallbackInfo& callbackInfo, bool visibleType, double currentVisibleRatio, bool isHandled);
     double CalculateCurrentVisibleRatio(const RectF& visibleRect, const RectF& renderRect);
 
     struct ZIndexComparator {

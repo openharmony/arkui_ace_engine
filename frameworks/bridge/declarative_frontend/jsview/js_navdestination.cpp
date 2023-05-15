@@ -165,26 +165,13 @@ void JSNavDestination::SetOnShown(const JSCallbackInfo& info)
     if (!info[0]->IsFunction()) {
         return;
     }
-    if (dataSourceObj_->IsEmpty()) {
-        return;
-    }
-    auto sizeFunc = JSRef<JSFunc>::Cast(dataSourceObj_->GetProperty("size"));
-    if (!sizeFunc->IsEmpty()) {
-        return;
-    }
-    auto index = sizeFunc->Call(JSRef<JSObject>());
-    auto getFunc = JSRef<JSFunc>::Cast(dataSourceObj_->GetProperty("getParamByIndex"));
-    if (!getFunc->IsEmpty()) {
-        return;
-    }
-    JSRef<JSVal> params[1];
-    params[0] = index;
-    auto param = getFunc->Call(JSRef<JSObject>(), 1, params);
-    params[0] = param;
+
     auto onShownCallback = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto onShown = [execCtx = info.GetExecutionContext(), func = std::move(onShownCallback), params = params]() {
+    auto onShown = [execCtx = info.GetExecutionContext(), func = std::move(onShownCallback)]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("NavDestination.onShown");
+        JSRef<JSVal> params[1];
+        params[0] = JSRef<JSVal>::Make(ToJSValue("undefined"));
         func->ExecuteJS(1, params);
     };
     NG::NavDestinationView::SetOnShown(std::move(onShown));
@@ -241,9 +228,10 @@ void JSNavDestination::JSBind(BindingTarget globalObj)
     JSClass<JSNavDestination>::StaticMethod("create", &JSNavDestination::Create);
     JSClass<JSNavDestination>::StaticMethod("title", &JSNavDestination::SetTitle);
     JSClass<JSNavDestination>::StaticMethod("hideTitleBar", &JSNavDestination::SetHideTitleBar);
-    JSClass<JSNavDestination>::CustomMethod("onShown", &JSNavDestination::SetOnShown);
+    JSClass<JSNavDestination>::StaticMethod("onShown", &JSNavDestination::SetOnShown);
     JSClass<JSNavDestination>::StaticMethod("onHidden", &JSNavDestination::SetOnHidden);
     JSClass<JSNavDestination>::StaticMethod("onBackPressed", &JSNavDestination::SetOnBackPressed);
+    JSClass<JSNavDestination>::StaticMethod("id", &JSViewAbstract::JsId);
     JSClass<JSNavDestination>::InheritAndBind<JSContainerBase>(globalObj);
 }
 

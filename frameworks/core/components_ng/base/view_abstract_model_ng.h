@@ -131,6 +131,11 @@ public:
         ViewAbstract::SetBackgroundBlurStyle(bgBlurStyle);
     }
 
+    void SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle) override
+    {
+        ViewAbstract::SetForegroundBlurStyle(fgBlurStyle);
+    }
+    
     void SetSphericalEffect(double radio) override
     {
         ViewAbstract::SetSphericalEffect(radio);
@@ -814,12 +819,26 @@ private:
     void RegisterContextMenuDisappearCallback(const MenuParam& menuParam);
 
     void CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
-        const std::function<void(float)>& onCallbackEvent) override {
+        const std::function<void(float)>& onCallbackEvent) override
+    {
         ViewAbstract::CreateAnimatablePropertyFloat(propertyName, value, onCallbackEvent);
     }
 
-    void UpdateAnimatablePropertyFloat(const std::string& propertyName, float value) override {
+    void UpdateAnimatablePropertyFloat(const std::string& propertyName, float value) override
+    {
         ViewAbstract::UpdateAnimatablePropertyFloat(propertyName, value);
+    }
+
+    void CreateAnimatableArithmeticProperty(const std::string& propertyName, RefPtr<CustomAnimatableArithmetic>& value,
+        std::function<void(const RefPtr<CustomAnimatableArithmetic>&)>& onCallbackEvent) override
+    {
+        ViewAbstract::CreateAnimatableArithmeticProperty(propertyName, value, onCallbackEvent);
+    }
+
+    void UpdateAnimatableArithmeticProperty(const std::string& propertyName,
+        RefPtr<CustomAnimatableArithmetic>& value) override
+    {
+        ViewAbstract::UpdateAnimatableArithmeticProperty(propertyName, value);
     }
 };
 } // namespace OHOS::Ace::NG

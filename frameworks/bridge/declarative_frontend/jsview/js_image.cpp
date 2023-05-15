@@ -197,8 +197,8 @@ void JSImage::Create(const JSCallbackInfo& info)
     }
     GetJsMediaBundleInfo(info[0], bundleName, moduleName);
     RefPtr<PixelMap> pixmap = nullptr;
-#if defined(PIXEL_MAP_SUPPORTED)
     if (!noPixmap) {
+#if defined(PIXEL_MAP_SUPPORTED)
         if (context->IsFormRender()) {
             LOGE("Not supported pixmap when form render");
         } else {
@@ -208,8 +208,10 @@ void JSImage::Create(const JSCallbackInfo& info)
                 pixmap = CreatePixelMapFromNapiValue(info[0]);
             }
         }
-    }
+#else
+        LOGW("Pixmap not supported under this environment.");
 #endif
+    }
     ImageModel::GetInstance()->Create(src, noPixmap, pixmap, bundleName, moduleName);
 }
 

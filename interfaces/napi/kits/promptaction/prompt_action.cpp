@@ -339,6 +339,7 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
                 if (!asyncContext->valid) {
                     LOGE("%{public}s, module exported object is invalid.", __func__);
                     delete asyncContext;
+                    asyncContext = nullptr;
                     delete work;
                     work = nullptr;
                     return;
@@ -349,6 +350,7 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
                 if (scope == nullptr) {
                     LOGE("%{public}s, open handle scope failed.", __func__);
                     delete asyncContext;
+                    asyncContext = nullptr;
                     delete work;
                     work = nullptr;
                     return;
@@ -392,6 +394,7 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
                 napi_delete_async_work(asyncContext->env, asyncContext->work);
                 napi_close_handle_scope(asyncContext->env, scope);
                 delete asyncContext;
+                asyncContext = nullptr;
                 delete work;
                 work = nullptr;
             });
@@ -665,6 +668,7 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
                 if (!asyncContext->valid) {
                     LOGE("%{public}s, module exported object is invalid.", __func__);
                     delete asyncContext;
+                    asyncContext = nullptr;
                     delete work;
                     work = nullptr;
                     return;
@@ -675,6 +679,7 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
                 if (scope == nullptr) {
                     LOGE("%{public}s, open handle scope failed.", __func__);
                     delete asyncContext;
+                    asyncContext = nullptr;
                     delete work;
                     work = nullptr;
                     return;
@@ -718,6 +723,7 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
                 napi_delete_async_work(asyncContext->env, asyncContext->work);
                 napi_close_handle_scope(asyncContext->env, scope);
                 delete asyncContext;
+                asyncContext = nullptr;
                 delete work;
                 work = nullptr;
             });

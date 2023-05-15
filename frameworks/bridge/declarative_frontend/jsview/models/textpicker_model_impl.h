@@ -64,6 +64,8 @@ public:
         return false;
     }
     void SetHasSelectAttr(bool value) override {};
+    void SetOnValueChangeEvent(TextCascadeValueChangeEvent&& onChange) override {};
+    void SetOnSelectedChangeEvent(TextCascadeSelectedChangeEvent&& onChange) override {};
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_TEXTPICKER_MODEL_IMPL_H

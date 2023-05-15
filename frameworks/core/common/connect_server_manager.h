@@ -43,6 +43,7 @@ private:
     void InitConnectServer();
     void CloseConnectServerSo();
     void StopConnectServer();
+    bool CheckDebugVersion();
     std::string GetInstanceMapMessage(const char* messageType, int32_t instanceId);
 
     mutable std::mutex mutex_;

@@ -18,6 +18,7 @@
 #include "txt/paragraph_builder.h"
 #include "txt/paragraph_style.h"
 #include "include/core/SkMaskFilter.h"
+#include "core/components/common/properties/paint_state.h"
 #ifndef NEW_SKIA
 #include "include/effects/SkBlurImageFilter.h"
 #else
@@ -133,7 +134,11 @@ void OffscreenCanvasPaintMethod::DrawImage(
     InitPaintBlend(cachePaint_);
     const auto skCanvas =
         globalState_.GetType() == CompositeOperation::SOURCE_OVER ? skCanvas_.get() : cacheCanvas_.get();
+#ifndef NEW_SKIA
     InitImagePaint(imagePaint_);
+#else
+    InitImagePaint(imagePaint_, sampleOptions_);
+#endif
     if (HasImageShadow()) {
         SkRect skRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
         SkPath path;
@@ -149,7 +154,7 @@ void OffscreenCanvasPaintMethod::DrawImage(
 #ifndef NEW_SKIA
             skCanvas->drawImageRect(image, rect, &imagePaint_);
 #else
-            skCanvas->drawImageRect(image, rect, SkSamplingOptions(), &imagePaint_);
+            skCanvas->drawImageRect(image, rect, sampleOptions_, &imagePaint_);
 #endif
             break;
         }
@@ -162,7 +167,7 @@ void OffscreenCanvasPaintMethod::DrawImage(
             skCanvas->drawImageRect(image, srcRect, dstRect, &imagePaint_);
 #else
             skCanvas->drawImageRect(
-                image, srcRect, dstRect, SkSamplingOptions(), &imagePaint_, SkCanvas::kFast_SrcRectConstraint);
+                image, srcRect, dstRect, sampleOptions_, &imagePaint_, SkCanvas::kFast_SrcRectConstraint);
 #endif
             break;
         }
@@ -173,7 +178,7 @@ void OffscreenCanvasPaintMethod::DrawImage(
 #ifndef NEW_SKIA
         skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
 #else
-        skCanvas_->drawImage(cacheBitmap_.asImage(), 0, 0, SkSamplingOptions(), &cachePaint_);
+        skCanvas_->drawImage(cacheBitmap_.asImage(), 0, 0, sampleOptions_, &cachePaint_);
 #endif
         cacheBitmap_.eraseColor(0);
     }
@@ -194,7 +199,11 @@ void OffscreenCanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const A
     InitPaintBlend(cachePaint_);
     const auto skCanvas =
         globalState_.GetType() == CompositeOperation::SOURCE_OVER ? skCanvas_.get() : cacheCanvas_.get();
+#ifndef NEW_SKIA
     InitImagePaint(imagePaint_);
+#else
+    InitImagePaint(imagePaint_, sampleOptions_);
+#endif
     switch (canvasImage.flag) {
         case 0:
             skCanvas->drawImage(image, canvasImage.dx, canvasImage.dy);
@@ -204,7 +213,7 @@ void OffscreenCanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const A
 #ifndef NEW_SKIA
             skCanvas->drawImageRect(image, rect, &imagePaint_);
 #else
-            skCanvas->drawImageRect(image, rect, SkSamplingOptions(), &imagePaint_);
+            skCanvas->drawImageRect(image, rect, sampleOptions_, &imagePaint_);
 #endif
             break;
         }
@@ -217,7 +226,7 @@ void OffscreenCanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const A
             skCanvas->drawImageRect(image, srcRect, dstRect, &imagePaint_);
 #else
             skCanvas->drawImageRect(
-                image, srcRect, dstRect, SkSamplingOptions(), &imagePaint_, SkCanvas::kFast_SrcRectConstraint);
+                image, srcRect, dstRect, sampleOptions_, &imagePaint_, SkCanvas::kFast_SrcRectConstraint);
 #endif
             break;
         }
@@ -228,7 +237,7 @@ void OffscreenCanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const A
 #ifndef NEW_SKIA
         skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
 #else
-        skCanvas_->drawImage(cacheBitmap_.asImage(), 0, 0, SkSamplingOptions(), &cachePaint_);
+        skCanvas_->drawImage(cacheBitmap_.asImage(), 0, 0, sampleOptions_, &cachePaint_);
 #endif
         cacheBitmap_.eraseColor(0);
     }
@@ -278,27 +287,29 @@ std::unique_ptr<Ace::ImageData> OffscreenCanvasPaintMethod::GetImageData(
     return imageData;
 }
 
-void OffscreenCanvasPaintMethod::FillText(const std::string& text, double x, double y, const PaintState& state)
+void OffscreenCanvasPaintMethod::FillText(
+    const std::string& text, double x, double y, std::optional<double> maxWidth, const PaintState& state)
 {
     if (!UpdateOffParagraph(text, false, state, HasShadow())) {
         return;
     }
-    PaintText(text, x, y, false, HasShadow());
+    PaintText(text, x, y, maxWidth, false, HasShadow());
 }
 
-void OffscreenCanvasPaintMethod::StrokeText(const std::string& text, double x, double y, const PaintState& state)
+void OffscreenCanvasPaintMethod::StrokeText(
+    const std::string& text, double x, double y, std::optional<double> maxWidth, const PaintState& state)
 {
     if (HasShadow()) {
         if (!UpdateOffParagraph(text, true, state, true)) {
             return;
         }
-        PaintText(text, x, y, true, true);
+        PaintText(text, x, y, maxWidth, true, true);
     }
 
     if (!UpdateOffParagraph(text, true, state)) {
         return;
     }
-    PaintText(text, x, y, true);
+    PaintText(text, x, y, maxWidth, true);
 }
 
 double OffscreenCanvasPaintMethod::MeasureText(const std::string& text, const PaintState& state)
@@ -369,27 +380,33 @@ TextMetrics OffscreenCanvasPaintMethod::MeasureTextMetrics(const std::string& te
 }
 
 void OffscreenCanvasPaintMethod::PaintText(
-    const std::string& text, double x, double y, bool isStroke, bool hasShadow)
+    const std::string& text, double x, double y, std::optional<double> maxWidth, bool isStroke, bool hasShadow)
 {
-    paragraph_->Layout(width_);
-    if (width_ > paragraph_->GetMaxIntrinsicWidth()) {
-        paragraph_->Layout(std::ceil(paragraph_->GetMaxIntrinsicWidth()));
-    }
+    paragraph_->Layout(DBL_MAX);
     auto align = isStroke ? strokeState_.GetTextAlign() : fillState_.GetTextAlign();
     double dx = x + GetAlignOffset(align, paragraph_);
     auto baseline =
         isStroke ? strokeState_.GetTextStyle().GetTextBaseline() : fillState_.GetTextStyle().GetTextBaseline();
     double dy = y + GetBaselineOffset(baseline, paragraph_);
 
+    std::optional<double> scale = CalcTextScale(paragraph_->GetMaxIntrinsicWidth(), maxWidth);
     if (hasShadow) {
         skCanvas_->save();
         auto shadowOffsetX = shadow_.GetOffset().GetX();
         auto shadowOffsetY = shadow_.GetOffset().GetY();
+        if (scale.has_value()) {
+            skCanvas_->scale(scale.value(), 1);
+        }
         paragraph_->Paint(skCanvas_.get(), dx + shadowOffsetX, dy + shadowOffsetY);
         skCanvas_->restore();
         return;
     }
+    skCanvas_->save();
+    if (scale.has_value()) {
+        skCanvas_->scale(scale.value(), 1);
+    }
     paragraph_->Paint(skCanvas_.get(), dx, dy);
+    skCanvas_->restore();
 }
 
 double OffscreenCanvasPaintMethod::GetBaselineOffset(TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph)
@@ -465,9 +482,14 @@ void OffscreenCanvasPaintMethod::UpdateTextStyleForeground(bool isStroke, txt::T
         txtStyle.color = ConvertSkColor(fillState_.GetColor());
         txtStyle.font_size = fillState_.GetTextStyle().GetFontSize().Value();
         ConvertTxtStyle(fillState_.GetTextStyle(), context_, txtStyle);
-        if (fillState_.GetGradient().IsValid()) {
+        if (fillState_.GetGradient().IsValid() && fillState_.GetPaintStyle() == PaintStyle::Gradient) {
             SkPaint paint;
+#ifndef NEW_SKIA
             InitImagePaint(paint);
+#else
+            SkSamplingOptions options;
+            InitImagePaint(paint, options);
+#endif
             paint.setStyle(SkPaint::Style::kFill_Style);
             UpdatePaintShader(OffsetF(0, 0), paint, fillState_.GetGradient());
             txtStyle.foreground = paint;
@@ -479,7 +501,12 @@ void OffscreenCanvasPaintMethod::UpdateTextStyleForeground(bool isStroke, txt::T
                 txtStyle.foreground.setAlphaf(globalState_.GetAlpha()); // set alpha after color
             } else {
                 SkPaint paint;
+#ifndef NEW_SKIA
                 InitImagePaint(paint);
+#else
+                SkSamplingOptions options;
+                InitImagePaint(paint, options);
+#endif
                 paint.setColor(fillState_.GetColor().GetValue());
                 paint.setAlphaf(globalState_.GetAlpha()); // set alpha after color
                 txtStyle.foreground = paint;
@@ -488,10 +515,16 @@ void OffscreenCanvasPaintMethod::UpdateTextStyleForeground(bool isStroke, txt::T
         }
     } else {
         // use foreground to draw stroke
-        SkPaint paint = GetStrokePaint();
+        SkPaint paint;
+#ifndef NEW_SKIA
+        GetStrokePaint(paint);
+#else
+        SkSamplingOptions options;
+        GetStrokePaint(paint, options);
+#endif
         ConvertTxtStyle(strokeState_.GetTextStyle(), context_, txtStyle);
         txtStyle.font_size = strokeState_.GetTextStyle().GetFontSize().Value();
-        if (strokeState_.GetGradient().IsValid()) {
+        if (strokeState_.GetGradient().IsValid() && strokeState_.GetPaintStyle() == PaintStyle::Gradient) {
             UpdatePaintShader(OffsetF(0, 0), paint, strokeState_.GetGradient());
         }
         if (hasShadow) {
@@ -524,7 +557,7 @@ void OffscreenCanvasPaintMethod::SetTransform(const TransformParam& param)
     CHECK_NULL_VOID(context);
     double viewScale = context->GetViewScale();
     SkMatrix skMatrix;
-    skMatrix.setAll(param.scaleX * viewScale, param.skewY * viewScale, param.translateX, param.skewX * viewScale,
+    skMatrix.setAll(param.scaleX * viewScale, param.skewX * viewScale, param.translateX, param.skewY * viewScale,
         param.scaleY * viewScale, param.translateY, 0, 0, 1);
     skCanvas_->setMatrix(skMatrix);
 }

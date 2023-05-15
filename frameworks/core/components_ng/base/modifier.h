@@ -224,6 +224,7 @@ DECLARE_PROP_TYPED_CLASS(AnimatablePropertyVectorFloat, AnimatableProperty, Line
 DECLARE_PROP_TYPED_CLASS(AnimatablePropertyVectorColor, AnimatableProperty, GradientArithmetic);
 DECLARE_PROP_TYPED_CLASS(AnimatablePropertyOffsetF, AnimatableProperty, OffsetF);
 DECLARE_PROP_TYPED_CLASS(AnimatablePropertySizeF, AnimatableProperty, SizeF);
+DECLARE_PROP_TYPED_CLASS(AnimatableArithmeticProperty, AnimatableProperty, RefPtr<CustomAnimatableArithmetic>);
 
 class ModifierImpl {
 };
@@ -296,6 +297,8 @@ private:
 };
 
 using NodeAnimatablePropertyFloat = NodeAnimatableProperty<float, AnimatablePropertyFloat>;
+using NodeAnimatableArithmeticProperty =
+    NodeAnimatableProperty<RefPtr<CustomAnimatableArithmetic>, AnimatableArithmeticProperty>;
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MODIFIER_H

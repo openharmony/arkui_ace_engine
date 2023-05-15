@@ -81,6 +81,7 @@ void DatePickerColumnPattern::OnModifyDone()
     pressColor_ = theme->GetPressColor();
     hoverColor_ = theme->GetHoverColor();
     InitMouseAndPressEvent();
+    SetAccessibilityAction();
 }
 
 void DatePickerColumnPattern::InitMouseAndPressEvent()
@@ -102,9 +103,8 @@ void DatePickerColumnPattern::InitMouseAndPressEvent()
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     auto mouseTask = [weak = WeakClaim(this)](bool isHover) {
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleMouseEvent(isHover);
-        }
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleMouseEvent(isHover);
     };
     mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
     inputHub->AddOnHoverEvent(mouseEvent_);
@@ -178,9 +178,8 @@ void DatePickerColumnPattern::PlayPressAnimation(const Color& pressColor)
     option.SetFillMode(FillMode::FORWARDS);
     AnimationUtils::Animate(option, [weak = AceType::WeakClaim(this), pressColor]() {
         auto picker = weak.Upgrade();
-        if (picker) {
-            picker->SetButtonBackgroundColor(pressColor);
-        }
+        CHECK_NULL_VOID(picker);
+        picker->SetButtonBackgroundColor(pressColor);
     });
 }
 
@@ -192,9 +191,8 @@ void DatePickerColumnPattern::PlayHoverAnimation(const Color& color)
     option.SetFillMode(FillMode::FORWARDS);
     AnimationUtils::Animate(option, [weak = AceType::WeakClaim(this), color]() {
         auto picker = weak.Upgrade();
-        if (picker) {
-            picker->SetButtonBackgroundColor(color);
-        }
+        CHECK_NULL_VOID(picker);
+        picker->SetButtonBackgroundColor(color);
     });
 }
 
@@ -634,7 +632,7 @@ void DatePickerColumnPattern::HandleDragEnd()
 void DatePickerColumnPattern::CreateAnimation()
 {
     CHECK_NULL_VOID_NOLOG(!animationCreated_);
-    toController_ = AceType::MakeRefPtr<Animator>(PipelineContext::GetCurrentContext());
+    toController_ = CREATE_ANIMATOR(PipelineContext::GetCurrentContext());
     toController_->SetDuration(ANIMATION_ZERO_TO_OUTER); // 200ms for animation that from zero to outer.
     auto weak = AceType::WeakClaim(this);
     toController_->AddStopListener([weak]() {
@@ -644,7 +642,7 @@ void DatePickerColumnPattern::CreateAnimation()
     });
     fromBottomCurve_ = CreateAnimation(jumpInterval_, 0.0);
     fromTopCurve_ = CreateAnimation(0.0 - jumpInterval_, 0.0);
-    fromController_ = AceType::MakeRefPtr<Animator>(PipelineContext::GetCurrentContext());
+    fromController_ = CREATE_ANIMATOR(PipelineContext::GetCurrentContext());
     fromController_->SetDuration(ANIMATION_OUTER_TO_ZERO); // 150ms for animation that from outer to zero.
     animationCreated_ = true;
 }
@@ -756,5 +754,44 @@ bool DatePickerColumnPattern::CanMove(bool isDown) const
     int currentIndex = static_cast<int>(datePickerColumnPattern->GetCurrentIndex());
     int nextVirtualIndex = isDown ? currentIndex + 1 : currentIndex - 1;
     return nextVirtualIndex >= 0 && nextVirtualIndex < totalOptionCount;
+}
+
+void DatePickerColumnPattern::SetAccessibilityAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetActionScrollForward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (!pattern->CanMove(true)) {
+            return;
+        }
+        CHECK_NULL_VOID(pattern->animationCreated_);
+        pattern->InnerHandleScroll(true);
+        pattern->fromController_->ClearInterpolators();
+        pattern->fromController_->AddInterpolator(pattern->fromTopCurve_);
+        pattern->fromController_->Play();
+        auto frameNode = pattern->GetHost();
+        CHECK_NULL_VOID(frameNode);
+        frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+    });
+
+    accessibilityProperty->SetActionScrollBackward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (!pattern->CanMove(false)) {
+            return;
+        }
+        CHECK_NULL_VOID(pattern->animationCreated_);
+        pattern->InnerHandleScroll(false);
+        pattern->fromController_->ClearInterpolators();
+        pattern->fromController_->AddInterpolator(pattern->fromBottomCurve_);
+        pattern->fromController_->Play();
+        auto frameNode = pattern->GetHost();
+        CHECK_NULL_VOID(frameNode);
+        frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+    });
 }
 } // namespace OHOS::Ace::NG

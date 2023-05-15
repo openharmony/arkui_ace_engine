@@ -71,6 +71,7 @@ void SliderPattern::OnModifyDone()
     CHECK_NULL_VOID_NOLOG(focusHub);
     InitOnKeyEvent(focusHub);
     InitializeBubble();
+    SetAccessibilityAction();
 }
 
 void SliderPattern::CancelExceptionValue(float& min, float& max, float& step)
@@ -540,7 +541,6 @@ bool SliderPattern::OnKeyEvent(const KeyEvent& event)
                 InitializeBubble();
             }
             PaintFocusState();
-            FireChangeEvent(SliderChangeMode::Begin);
         }
         if ((direction_ == Axis::HORIZONTAL && event.code == KeyCode::KEY_DPAD_RIGHT) ||
             (direction_ == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_DOWN)) {
@@ -549,7 +549,6 @@ bool SliderPattern::OnKeyEvent(const KeyEvent& event)
                 InitializeBubble();
             }
             PaintFocusState();
-            FireChangeEvent(SliderChangeMode::Begin);
         }
     } else if (event.action == KeyAction::UP) {
         if (showTips_) {
@@ -557,8 +556,6 @@ bool SliderPattern::OnKeyEvent(const KeyEvent& event)
             InitializeBubble();
         }
         PaintFocusState();
-        FireChangeEvent(SliderChangeMode::Click);
-        FireChangeEvent(SliderChangeMode::End);
     }
     return false;
 }
@@ -838,5 +835,36 @@ OffsetF SliderPattern::GetBubbleVertexPosition(const OffsetF& blockCenter, float
         }
     }
     return bubbleVertex;
+}
+
+void SliderPattern::SetAccessibilityAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetActionScrollForward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->MoveStep(1);
+
+        if (pattern->showTips_) {
+            pattern->bubbleFlag_ = true;
+            pattern->InitializeBubble();
+        }
+        pattern->PaintFocusState();
+    });
+
+    accessibilityProperty->SetActionScrollBackward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->MoveStep(-1);
+
+        if (pattern->showTips_) {
+            pattern->bubbleFlag_ = true;
+            pattern->InitializeBubble();
+        }
+        pattern->PaintFocusState();
+    });
 }
 } // namespace OHOS::Ace::NG

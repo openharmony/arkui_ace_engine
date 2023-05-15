@@ -47,6 +47,8 @@ void ProgressModelNG::Create(double min, double value, double cachedValue, doubl
         ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, Color, theme->GetCapsuleSelectColor());
         ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, BorderColor, theme->GetBorderColor());
         ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, BackgroundColor, theme->GetCapsuleBgColor());
+    } else if (type == ProgressType::RING) {
+        ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, BackgroundColor, theme->GetRingProgressBgColor());
     } else {
         ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, BackgroundColor, theme->GetTrackBgColor());
         ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, Color, theme->GetTrackSelectedColor());

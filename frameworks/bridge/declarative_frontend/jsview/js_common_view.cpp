@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,20 +15,37 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_common_view.h"
 
-#include "core/components/proxy/proxy_component.h"
-#include "core/components_ng/pattern/common_view/common_view.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+#include "bridge/declarative_frontend/jsview/models/common_view_model_impl.h"
+#include "core/components_ng/pattern/common_view/common_view_model_ng.h"
+
+namespace OHOS::Ace {
+std::unique_ptr<CommonViewModel> CommonViewModel::instance_ = nullptr;
+std::mutex CommonViewModel::mutex_;
+
+CommonViewModel* CommonViewModel::GetInstance()
+{
+    if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
+#ifdef NG_BUILD
+            instance_.reset(new NG::CommonViewModelNG());
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::CommonViewModelNG());
+            } else {
+                instance_.reset(new Framework::CommonViewModelImpl());
+            }
+#endif
+        }
+    }
+    return instance_.get();
+}
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 void JSCommonView::Create(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::CommonView::Create();
-        return;
-    }
-    auto specializedBox = AceType::MakeRefPtr<OHOS::Ace::ProxyComponent>();
-    specializedBox->SetPassMinSize(false);
-    ViewStackProcessor::GetInstance()->Push(specializedBox);
+    CommonViewModel::GetInstance()->Create();
 }
 
 void JSCommonView::JSBind(BindingTarget globalObj)

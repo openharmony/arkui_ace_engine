@@ -56,7 +56,7 @@ bool SkPainter::SetPen(SkPaint& skPaint, const ShapePaintProperty& shapePaintPro
         }
         skPaint.setStrokeWidth(static_cast<SkScalar>(shapePaintProperty.GetStrokeWidthValue().ConvertToPx()));
     } else {
-        skPaint.setStrokeWidth(static_cast<SkScalar>(shapePaintProperty.STOKE_WIDTH_DEFAULT.ConvertToPx()));
+        skPaint.setStrokeWidth(static_cast<SkScalar>(shapePaintProperty.STROKE_WIDTH_DEFAULT.ConvertToPx()));
     }
     skPaint.setStyle(SkPaint::Style::kStroke_Style);
     if (shapePaintProperty.HasAntiAlias()) {
@@ -95,7 +95,7 @@ bool SkPainter::SetPen(SkPaint& skPaint, const ShapePaintProperty& shapePaintPro
     if (shapePaintProperty.HasStroke()) {
         strokeColor = shapePaintProperty.GetStrokeValue();
     }
-    double curOpacity = shapePaintProperty.STOKE_OPACITY_DEFAULT;
+    double curOpacity = shapePaintProperty.STROKE_OPACITY_DEFAULT;
     if (shapePaintProperty.HasStrokeOpacity()) {
         curOpacity = shapePaintProperty.GetStrokeOpacityValue();
     }

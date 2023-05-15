@@ -49,6 +49,7 @@ public:
 
     const RefPtr<UINode>& GetNavDestinationNode() const
     {
+        // get the NavDestinationNode which is the child of the NavRouter
         return navDestinationNode_;
     }
 
@@ -59,8 +60,8 @@ private:
     void AddNavDestinationToNavigation(const RefPtr<UINode>& parent);
     void SetDestinationChangeEvent(const RefPtr<UINode>& parent);
     void SetBackButtonEvent(const RefPtr<UINode>& parent);
-    void SetOnStateChangeFalse(
-        const RefPtr<UINode>& preNavDestination, const RefPtr<UINode>& navigation, bool isBackButton = false);
+    void SetOnStateChangeFalse(const RefPtr<UINode>& preNavDestination, const RefPtr<UINode>& navDestination,
+        const RefPtr<UINode>& navigation, bool isBackButton = false);
     void BackToNavBar(const RefPtr<UINode>& parent);
     void BackToPreNavDestination(const RefPtr<UINode>& preNavDestination, const RefPtr<UINode>& navigation);
     void AddBackButtonIconToNavDestination(const RefPtr<UINode>& parent);
@@ -76,7 +77,9 @@ private:
         const RefPtr<FrameNode>& titleBarNode, const RefPtr<FrameNode>& destinationTitleBarNode);
     void TitleTransitionOutAnimation(const RefPtr<FrameNode>& navigationNode,
         const RefPtr<FrameNode>& titleBarNode, const RefPtr<FrameNode>& destinationTitleBarNode);
-    void backButtonAnimation(const RefPtr<FrameNode>& backButtonNode, bool isTransitionIn);
+    void BackButtonAnimation(const RefPtr<FrameNode>& backButtonNode, bool isTransitionIn);
+    void MaskAnimation(const RefPtr<RenderContext>& transitionOutNodeContext);
+    void TitleOpacityAnimation(const RefPtr<RenderContext>& transitionOutNodeContext);
     RefPtr<UINode> navDestinationNode_;
 };
 

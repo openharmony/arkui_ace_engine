@@ -84,6 +84,7 @@ public:
     static void JsBackgroundImageSize(const JSCallbackInfo& info);
     static void JsBackgroundImagePosition(const JSCallbackInfo& info);
     static void JsBackgroundBlurStyle(const JSCallbackInfo& info);
+    static void JsForegroundBlurStyle(const JSCallbackInfo& info);
     static void JsSphericalEffect(const JSCallbackInfo& info);
     static void JsPixelStretchEffect(const JSCallbackInfo& info);
     static void JsLightUpEffect(const JSCallbackInfo& info);
@@ -400,6 +401,10 @@ public:
                 break;
         }
     }
+
+    static bool CheckColor(const JSRef<JSVal>& jsValue, Color& result, const char* componentName, const char* propName);
+    static bool CheckLength(
+        const JSRef<JSVal>& jsValue, CalcDimension& result, const char* componentName, const char* propName);
 };
 } // namespace OHOS::Ace::Framework
 #endif // JS_VIEW_ABSTRACT_H

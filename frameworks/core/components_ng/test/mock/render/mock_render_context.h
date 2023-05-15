@@ -26,7 +26,7 @@ class MockRenderContext : public RenderContext {
 public:
     ~MockRenderContext() override = default;
     MOCK_METHOD4(SetBounds, void(float, float, float, float));
-    MOCK_METHOD(RectF, GetPaintRectWithTransform, (), (override));
+    MOCK_METHOD0(GetPaintRectWithTransform, RectF());
     MOCK_METHOD1(GetPointWithTransform, void(PointF&));
 };
 } // namespace OHOS::Ace::NG

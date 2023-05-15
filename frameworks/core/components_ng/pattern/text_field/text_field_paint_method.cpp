@@ -74,6 +74,7 @@ void TextFieldPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(layoutProperty);
     textFieldContentModifier_->SetTextObscured(textFieldPattern->GetTextObscured());
     textFieldContentModifier_->SetShowCounter(layoutProperty->GetShowCounterValue(false));
+    textFieldContentModifier_->SetShowErrorState(layoutProperty->GetShowErrorTextValue(false));
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<TextFieldTheme>();
@@ -121,6 +122,7 @@ void TextFieldPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     textFieldOverlayModifier_->SetCursorColor(cursorColor);
     auto selectedColor = paintProperty->GetSelectedBackgroundColorValue(theme->GetSelectedColor());
     textFieldOverlayModifier_->SetSelectedBackGroundColor(selectedColor);
+    textFieldOverlayModifier_->SetSelectedAreaRedraw(textFieldPattern->IsSelectedAreaRedraw());
     if (paintProperty->GetCursorWidth().has_value()) {
         float cursorWidth = static_cast<float>(paintProperty->GetCursorWidthValue().ConvertToPx());
         textFieldOverlayModifier_->SetCursorWidth(cursorWidth);

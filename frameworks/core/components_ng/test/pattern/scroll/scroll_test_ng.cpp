@@ -753,7 +753,7 @@ HWTEST_F(ScrollTestNg, ScrollTest007, TestSize.Level1)
     EXPECT_EQ(pattern->animator_, nullptr);
     int32_t temp = 0;
     auto func = [&temp]() { temp = 1.0; };
-    pattern->AnimateTo(0.0f, 0.0f, Curves::LINEAR, func);
+    pattern->AnimateTo(0.0f, 0.0f, Curves::LINEAR, false, func);
     pattern->animator_->NotifyStopListener();
     EXPECT_EQ(temp, 1.0);
     positionController->ScrollPage(false, false);
@@ -1347,8 +1347,8 @@ HWTEST_F(ScrollTestNg, ScrollTest0013, TestSize.Level1)
     scrollEdgeEffect->ProcessScrollOver(0.0);
     auto scrollable = AceType::MakeRefPtr<Scrollable>();
     EXPECT_NE(scrollable, nullptr);
-    scrollable->controller_ = AceType::MakeRefPtr<Animator>();
-    scrollable->springController_ = AceType::MakeRefPtr<Animator>();
+    scrollable->controller_ = CREATE_ANIMATOR();
+    scrollable->springController_ = CREATE_ANIMATOR();
     scrollEdgeEffect->SetScrollable(scrollable);
     auto scrollSpringEffect = AceType::DynamicCast<ScrollSpringEffect>(scrollEdgeEffect);
     EXPECT_NE(scrollSpringEffect, nullptr);
@@ -1512,8 +1512,8 @@ HWTEST_F(ScrollTestNg, ScrollTest0015, TestSize.Level1)
     EXPECT_NE(scrollEdgeEffect, nullptr);
     auto scrollable = AceType::MakeRefPtr<Scrollable>();
     EXPECT_NE(scrollable, nullptr);
-    scrollable->controller_ = AceType::MakeRefPtr<Animator>();
-    scrollable->springController_ = AceType::MakeRefPtr<Animator>();
+    scrollable->controller_ = CREATE_ANIMATOR();
+    scrollable->springController_ = CREATE_ANIMATOR();
     scrollEdgeEffect->SetScrollable(scrollable);
     auto scrollFadeEffect = AceType::DynamicCast<ScrollFadeEffect>(scrollEdgeEffect);
     scrollEdgeEffect->InitialEdgeEffect();

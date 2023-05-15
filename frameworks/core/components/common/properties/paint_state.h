@@ -152,7 +152,7 @@ enum class CompositeOperation {
     XOR,
 };
 
-enum class PatternStyle {
+enum class PaintStyle {
     NONE = 0,
     Color,
     Gradient,
@@ -168,7 +168,7 @@ public:
 
     void SetColor(const Color& color)
     {
-        patternStyle_ = PatternStyle::Color;
+        paintStyle_ = PaintStyle::Color;
         color_ = color;
     }
 
@@ -179,7 +179,7 @@ public:
 
     void SetGradient(const Gradient& gradient)
     {
-        patternStyle_ = PatternStyle::Gradient;
+        paintStyle_ = PaintStyle::Gradient;
         gradient_ = gradient;
     }
 
@@ -250,6 +250,7 @@ public:
 
     void SetPattern(const Pattern& pattern)
     {
+        paintStyle_ = PaintStyle::ImagePattern;
         pattern_ = pattern;
     }
 
@@ -272,7 +273,7 @@ public:
 
     void SetPatternNG(const std::weak_ptr<Ace::Pattern>& pattern)
     {
-        patternStyle_ = PatternStyle::ImagePattern;
+        paintStyle_ = PaintStyle::ImagePattern;
         patternNG_ = pattern;
     }
 
@@ -286,9 +287,9 @@ public:
         id_ = id;
     }
 
-    PatternStyle GetPatternStyle() const
+    PaintStyle GetPaintStyle() const
     {
-        return patternStyle_;
+        return paintStyle_;
     }
 
 protected:
@@ -298,7 +299,7 @@ protected:
     TextAlign textAlign_ = TextAlign::LEFT;
     TextDirection textDirection_ = TextDirection::LTR;
     int32_t id_ = 0;
-    PatternStyle patternStyle_ = PatternStyle::NONE;
+    PaintStyle paintStyle_ = PaintStyle::Color;
     Pattern pattern_;
     std::weak_ptr<Ace::Pattern> patternNG_;
 };

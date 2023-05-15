@@ -1733,6 +1733,7 @@ void RosenDecorationPainter::PaintShadow(
     rsNode->SetShadowColor(shadow.GetColor().GetValue());
     rsNode->SetShadowOffsetX(shadow.GetOffset().GetX());
     rsNode->SetShadowOffsetY(shadow.GetOffset().GetY());
+    rsNode->SetShadowMask(shadow.GetShadowType() == ShadowType::BLUR);
     if (shadow.GetHardwareAcceleration()) {
         rsNode->SetShadowElevation(shadow.GetElevation());
     } else {

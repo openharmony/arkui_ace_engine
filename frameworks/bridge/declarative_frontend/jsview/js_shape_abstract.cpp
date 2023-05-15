@@ -52,6 +52,7 @@ namespace OHOS::Ace::Framework {
 namespace {
 constexpr double DEFAULT_OPACITY = 1.0;
 constexpr double MIN_OPACITY = 0.0;
+constexpr double STROKE_MITERLIMIT_DEFAULT = 4.0f;
 } // namespace
 
 void JSShapeAbstract::SetStrokeDashArray(const JSCallbackInfo& info)
@@ -107,11 +108,10 @@ void JSShapeAbstract::SetFill(const JSCallbackInfo& info)
         ShapeAbstractModel::GetInstance()->SetFill(Color::TRANSPARENT);
     } else {
         Color fillColor = Color::BLACK;
-        if (ParseJsColor(info[0], fillColor)) {
-            ShapeAbstractModel::GetInstance()->SetFill(fillColor);
-        } else {
-            ShapeAbstractModel::GetInstance()->SetFill(fillColor);
-        }
+        static const char shapeComponentName[] = "";
+        static const char attrsShapeAbstractFill[] = "fill";
+        CheckColor(info[0], fillColor, shapeComponentName, attrsShapeAbstractFill);
+        ShapeAbstractModel::GetInstance()->SetFill(fillColor);
     }
 }
 
@@ -144,13 +144,11 @@ void JSShapeAbstract::SetStrokeMiterLimit(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    double miterLimit;
+    double miterLimit = STROKE_MITERLIMIT_DEFAULT;
     if (!ParseJsDouble(info[0], miterLimit)) {
-        return;
+        LOGI("strokeMiterLimit error. now use default value");
     }
-    if (GreatOrEqual(miterLimit, 1.0)) {
-        ShapeAbstractModel::GetInstance()->SetStrokeMiterLimit(miterLimit);
-    }
+    ShapeAbstractModel::GetInstance()->SetStrokeMiterLimit(miterLimit);
 }
 
 void JSShapeAbstract::SetStrokeOpacity(const JSCallbackInfo& info)

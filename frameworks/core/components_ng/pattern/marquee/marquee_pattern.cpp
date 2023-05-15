@@ -14,7 +14,9 @@
  */
 
 #include "core/components_ng/pattern/marquee/marquee_pattern.h"
+#include <string>
 
+#include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/offset.h"
 #include "base/utils/utils.h"
@@ -27,6 +29,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/marquee/marquee_layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/property/transition_property.h"
@@ -36,6 +39,8 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr double DEFAULT_MARQUEE_SCROLL_DELAY = 85.0; // Delay time between each jump.
+constexpr Dimension DEFAULT_MARQUEE_SCROLL_AMOUNT = 6.0_vp;
+inline constexpr int32_t DEFAULT_MARQUEE_LOOP = -1;
 } // namespace
 
 void MarqueePattern::OnAttachToFrameNode()
@@ -68,7 +73,7 @@ void MarqueePattern::OnModifyDone()
     CHECK_NULL_VOID(textChild);
     auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    auto src = layoutProperty->GetSrc().value_or("");
+    auto src = layoutProperty->GetSrc().value_or(" ");
     textLayoutProperty->UpdateContent(src);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID_NOLOG(pipelineContext);
@@ -77,9 +82,13 @@ void MarqueePattern::OnModifyDone()
     auto fontSize = layoutProperty->GetFontSize().value_or(theme->GetTextStyle().GetFontSize());
     textLayoutProperty->UpdateFontSize(fontSize);
     textLayoutProperty->UpdateFontWeight(layoutProperty->GetFontWeight().value_or(FontWeight::NORMAL));
-    textLayoutProperty->UpdateFontFamily(
-        layoutProperty->GetFontFamily().value_or(std::vector<std::string>({ "" })));
-    textLayoutProperty->UpdateTextColor(layoutProperty->GetFontColor().value_or(Color()));
+    if (layoutProperty->GetFontFamily().has_value()) {
+        textLayoutProperty->UpdateFontFamily(
+            layoutProperty->GetFontFamily().value());
+    } else {
+        textLayoutProperty->ResetFontFamily();
+    }
+    textLayoutProperty->UpdateTextColor(layoutProperty->GetFontColor().value_or(theme->GetTextStyle().GetTextColor()));
     textChild->MarkModifyDone();
     textChild->MarkDirtyNode();
     if (CheckMeasureFlag(layoutProperty->GetPropertyChangeFlag())) {
@@ -91,6 +100,7 @@ void MarqueePattern::OnModifyDone()
         lastStartStatus_ = startPlay;
         statusChanged_ = true;
     }
+    RegistVisibleAreaChangeCallback();
 }
 
 void MarqueePattern::StartMarqueeAnimation()
@@ -117,7 +127,7 @@ void MarqueePattern::StartMarqueeAnimation()
         return;
     }
     FireStartEvent();
-    auto step = layoutProperty->GetScrollAmount().value_or(DEFAULT_MARQUEE_SCROLL_AMOUNT);
+    auto step = layoutProperty->GetScrollAmount().value_or(DEFAULT_MARQUEE_SCROLL_AMOUNT.ConvertToPx());
     auto direction = layoutProperty->GetDirection().value_or(MarqueeDirection::LEFT);
     auto end = -1 * textWidth;
     if (direction == MarqueeDirection::RIGHT) {
@@ -215,5 +225,53 @@ void MarqueePattern::SetTextOffset(float offsetX)
     auto renderContext = textNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateTransformTranslate({ offsetX, 0.0f, 0.0f });
+}
+
+void MarqueePattern::RegistVisibleAreaChangeCallback()
+{
+    if (isRegistedAreaCallback_) {
+        return;
+    }
+    isRegistedAreaCallback_ = true;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnVisibleAreaChange(visible);
+    };
+    pipeline->AddVisibleAreaChangeNode(host, 0.0f, callback, false);
+}
+
+void MarqueePattern::OnVisibleAreaChange(bool visible)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (visible) {
+        CHECK_NULL_VOID(textNode_);
+        auto childNode = DynamicCast<FrameNode>(host->GetFirstChild());
+        if (!childNode) {
+            host->AddChild(textNode_);
+            host->RebuildRenderContextTree();
+        }
+    } else {
+        auto layoutProperty = host->GetLayoutProperty<MarqueeLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        auto repeatCount = layoutProperty->GetLoop().value_or(DEFAULT_MARQUEE_LOOP);
+        if (repeatCount >= 0) {
+            return;
+        }
+        auto childNode = DynamicCast<FrameNode>(host->GetFirstChild());
+        CHECK_NULL_VOID(childNode);
+        bool isTextNode = AceType::InstanceOf<TextPattern>(childNode->GetPattern());
+        if (!isTextNode) {
+            return;
+        }
+        textNode_ = childNode;
+        host->RemoveChild(childNode);
+        host->RebuildRenderContextTree();
+    }
 }
 } // namespace OHOS::Ace::NG

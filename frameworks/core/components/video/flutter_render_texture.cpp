@@ -117,7 +117,7 @@ void FlutterRenderTexture::SetIsAddGaussianFuzzy(bool isAddGaussianFuzzy)
     RenderTexture::SetIsAddGaussianFuzzy(isAddGaussianFuzzy);
     if (isAddGaussianFuzzy) {
         if (!controller_) {
-            controller_ = AceType::MakeRefPtr<Animator>(GetContext());
+            controller_ = CREATE_ANIMATOR(GetContext());
         } else if (controller_->IsRunning()) {
             controller_->Finish();
         }

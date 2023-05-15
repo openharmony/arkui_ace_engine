@@ -111,6 +111,7 @@
 #include "bridge/declarative_frontend/jsview/js_scroll.h"
 #include "bridge/declarative_frontend/jsview/js_scroller.h"
 #include "bridge/declarative_frontend/jsview/js_search.h"
+#include "bridge/declarative_frontend/jsview/js_sec_location_button.h"
 #include "bridge/declarative_frontend/jsview/js_select.h"
 #include "bridge/declarative_frontend/jsview/js_shape.h"
 #include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
@@ -418,6 +419,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Badge", JSBadge::JSBind },
     { "Gauge", JSGauge::JSBind },
     { "Marquee", JSMarquee::JSBind },
+    { "Swiper", JSSwiper::JSBind },
     { "SwiperController", JSSwiperController::JSBind },
     { "CalendarController", JSCalendarController::JSBind },
     { "CanvasRenderingContext2D", JSRenderingContext::JSBind },
@@ -513,6 +515,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
 #ifdef WINDOW_SCENE_SUPPORTED
     { "UIExtensionComponent", JSUIExtension::JSBind },
 #endif
+    { "SecLocationButton", JSSecLocationButton::JSBind },
 #ifdef ABILITY_COMPONENT_SUPPORTED
     { "AbilityComponent", JSAbilityComponent::JSBind },
 #endif

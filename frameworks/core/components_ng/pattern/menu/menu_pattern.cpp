@@ -18,12 +18,13 @@
 #include "base/utils/utils.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/select/select_theme.h"
-#include "core/components_ng/event/click_event.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
+#include "core/components_ng/pattern/menu/multi_menu_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/option/option_pattern.h"
 #include "core/components_ng/pattern/option/option_view.h"
+#include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/touch_event.h"
@@ -86,9 +87,8 @@ void UpdateMenuItemTextNode(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<Men
 }
 } // namespace
 
-void MenuPattern::OnModifyDone()
+void MenuPattern::OnAttachToFrameNode()
 {
-    Pattern::OnModifyDone();
     RegisterOnTouch();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -96,30 +96,33 @@ void MenuPattern::OnModifyDone()
     CHECK_NULL_VOID(focusHub);
     RegisterOnKeyEvent(focusHub);
     DisableTabInMenu();
+
+    InitTheme(host);
+}
+
+void MenuPattern::OnModifyDone()
+{
+    Pattern::OnModifyDone();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     UpdateMenuItemChildren(host);
-
-    if (IsMultiMenu()) {
-        return;
-    }
-
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
 
     // get theme from SelectThemeManager
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
 
-    // set background color
-    auto bgColor = theme->GetBackgroundColor();
-    renderContext->UpdateBackgroundColor(bgColor);
+    if (HasInnerMenu()) {
+        ResetTheme(host);
+    }
 
-    // make menu round rect
-    BorderRadiusProperty borderRadius;
-    borderRadius.SetRadius(theme->GetMenuBorderRadius());
-    renderContext->UpdateBorderRadius(borderRadius);
-    renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowM);
-    renderContext->SetClipToBounds(true);
+    if (type_ == MenuType::MULTI_MENU) {
+        // move padding from scroll to inner menu
+        PaddingProperty padding;
+        padding.SetEdges(CalcLength(theme->GetOutPadding()));
+        host->GetLayoutProperty()->UpdatePadding(padding);
+    }
+    SetAccessibilityAction();
 }
 
 // close menu on touch up
@@ -141,7 +144,7 @@ void MenuPattern::RegisterOnTouch()
 
 void MenuPattern::OnTouchEvent(const TouchEventInfo& info)
 {
-    if (IsMultiMenuOutside() || IsMultiMenu()) {
+    if (HasInnerMenu() || IsMultiMenu()) {
         // not click hide menu for multi menu
         return;
     }
@@ -207,7 +210,8 @@ void MenuPattern::RemoveParentHoverStyle()
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
-    menuItemPattern->UpdateBackgroundColor(theme->GetBackgroundColor());
+    menuItemPattern->SetBgBlendColor(Color::TRANSPARENT);
+    menuItemPattern->PlayBgColorAnimation();
 }
 
 void MenuPattern::UpdateMenuItemChildren(RefPtr<FrameNode>& host)
@@ -292,6 +296,30 @@ void MenuPattern::HideMenu() const
     LOGI("MenuPattern closing menu %{public}d", targetId_);
 }
 
+void MenuPattern::HideSubMenu()
+{
+    if (!showedSubMenu_) {
+        return;
+    }
+    auto subMenuPattern = showedSubMenu_->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(subMenuPattern);
+    subMenuPattern->RemoveParentHoverStyle();
+
+    auto menuItem = subMenuPattern->GetParentMenuItem();
+    CHECK_NULL_VOID(menuItem);
+    auto menuItemPattern = menuItem->GetPattern<MenuItemPattern>();
+    CHECK_NULL_VOID(menuItemPattern);
+    menuItemPattern->SetIsSubMenuShowed(false);
+    menuItemPattern->ClearHoverRegions();
+    menuItemPattern->ResetWrapperMouseEvent();
+
+    auto wrapper = GetMenuWrapper();
+    CHECK_NULL_VOID(wrapper);
+    wrapper->RemoveChild(showedSubMenu_);
+    wrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    showedSubMenu_.Reset();
+}
+
 RefPtr<FrameNode> MenuPattern::GetMenuWrapper() const
 {
     auto host = GetHost();
@@ -307,15 +335,19 @@ RefPtr<FrameNode> MenuPattern::GetMenuWrapper() const
 }
 
 // judge children has component menu
-bool MenuPattern::IsMultiMenuOutside() const
+bool MenuPattern::HasInnerMenu() const
 {
+    if (type_ == MenuType::MULTI_MENU) {
+        return false;
+    }
+
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto child = host->GetChildAtIndex(0);
     while (child) {
         // is component menu
         if (child->GetTag() == V2::MENU_ETS_TAG) {
-            return AceType::DynamicCast<FrameNode>(child);
+            return true;
         }
         child = child->GetChildAtIndex(0);
     }
@@ -374,5 +406,85 @@ void MenuPattern::DisableTabInMenu()
         return event.code == KeyCode::KEY_TAB;
     };
     columnFocusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
+}
+
+RefPtr<LayoutAlgorithm> MenuPattern::CreateLayoutAlgorithm()
+{
+    switch (type_) {
+        case MenuType::NAVIGATION_MENU:
+            return MakeRefPtr<NavigationMenuLayoutAlgorithm>();
+        case MenuType::MULTI_MENU:
+            return MakeRefPtr<MultiMenuLayoutAlgorithm>();
+        default:
+            return MakeRefPtr<MenuLayoutAlgorithm>(targetId_, targetTag_);
+    }
+}
+
+void MenuPattern::ResetTheme(const RefPtr<FrameNode>& host)
+{
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    renderContext->UpdateBackShadow(ShadowConfig::NoneShadow);
+    renderContext->SetClipToBounds(false);
+
+    auto scroll = DynamicCast<FrameNode>(host->GetFirstChild());
+    CHECK_NULL_VOID(scroll);
+    scroll->GetRenderContext()->SetClipToBounds(false);
+    // move padding from scroll to inner menu
+    auto scrollProp = scroll->GetLayoutProperty();
+    scrollProp->UpdatePadding(PaddingProperty());
+}
+
+void MenuPattern::InitTheme(const RefPtr<FrameNode>& host)
+{
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+
+    auto bgColor = theme->GetBackgroundColor();
+    renderContext->UpdateBackgroundColor(bgColor);
+    renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowM);
+    renderContext->SetClipToBounds(true);
+    // make menu round rect
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(theme->GetMenuBorderRadius());
+    renderContext->UpdateBorderRadius(borderRadius);
+}
+
+void MenuPattern::SetAccessibilityAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetActionScrollForward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto firstChild = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
+        CHECK_NULL_VOID(firstChild);
+        if (firstChild && firstChild->GetTag() == V2::SCROLL_ETS_TAG) {
+            auto scrollPattern = firstChild->GetPattern<ScrollPattern>();
+            CHECK_NULL_VOID(scrollPattern);
+            scrollPattern->ScrollPage(false, true);
+        }
+    });
+
+    accessibilityProperty->SetActionScrollBackward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto firstChild = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
+        CHECK_NULL_VOID(firstChild);
+        if (firstChild && firstChild->GetTag() == V2::SCROLL_ETS_TAG) {
+            auto scrollPattern = firstChild->GetPattern<ScrollPattern>();
+            CHECK_NULL_VOID(scrollPattern);
+            scrollPattern->ScrollPage(true, true);
+        }
+    });
 }
 } // namespace OHOS::Ace::NG

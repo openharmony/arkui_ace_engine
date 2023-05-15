@@ -89,6 +89,7 @@ public:
     void Scale(double x, double y);
     void Rotate(double angle);
     virtual void SetTransform(const TransformParam& param) = 0;
+    virtual TransformParam GetTransform() const;
     void ResetTransform();
     void Transform(const TransformParam& param);
     void Translate(double x, double y);
@@ -293,12 +294,12 @@ public:
     }
 
 protected:
+    std::optional<double> CalcTextScale(double maxIntrinsicWidth, std::optional<double> maxWidth);
     bool HasShadow() const;
     void UpdateLineDash(SkPaint& paint);
     void UpdatePaintShader(const OffsetF& offset, SkPaint& paint, const Ace::Gradient& gradient);
     void UpdatePaintShader(const Ace::Pattern& pattern, SkPaint& paint);
     void InitPaintBlend(SkPaint& paint);
-    SkPaint GetStrokePaint();
     sk_sp<SkShader> MakeConicGradient(SkPaint& paint, const Ace::Gradient& gradient);
 
     void Path2DFill(const OffsetF& offset);
@@ -334,8 +335,13 @@ protected:
     bool IsPercentStr(std::string& percentStr);
     double PxStrToDouble(const std::string& str);
     double BlurStrToDouble(const std::string& str);
-
+#ifndef NEW_SKIA
     void InitImagePaint(SkPaint& paint);
+    void GetStrokePaint(SkPaint& paint);
+#else
+    void InitImagePaint(SkPaint& paint, SkSamplingOptions& options);
+    void GetStrokePaint(SkPaint& paint, SkSamplingOptions& options);
+#endif
     void InitImageCallbacks();
 
     void SetPaintImage(SkPaint& paint);
@@ -379,7 +385,7 @@ protected:
     SkPath skPath2d_;
     SkPaint imagePaint_;
 #ifdef NEW_SKIA
-    SkSamplingOptions options_;
+    SkSamplingOptions sampleOptions_;
 #endif
     SkPaint cachePaint_;
     SkBitmap cacheBitmap_;

@@ -287,7 +287,7 @@ void GridLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
     auto padding = layoutProperty->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, frameSize);
-
+    layoutWrapper->RemoveAllChildInRenderTree();
     for (int32_t index = 0; index < mainCount_ * crossCount_; ++index) {
         auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
         if (!childWrapper) {
@@ -297,11 +297,8 @@ void GridLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         auto childPosition = itemsPosition_.find(index);
         if (childPosition != itemsPosition_.end()) {
             childOffset = itemsPosition_.at(index);
-            // TODO: add center position when grid item is less than ceil.
             childWrapper->GetGeometryNode()->SetMarginFrameOffset(padding.Offset() + childOffset);
             childWrapper->Layout();
-        } else {
-            LayoutWrapper::RemoveChildInRenderTree(childWrapper);
         }
     }
 

@@ -125,7 +125,7 @@ private:
         }
         ResetController();
         if (!animationController_) {
-            animationController_ = AceType::MakeRefPtr<Animator>(context_);
+            animationController_ = CREATE_ANIMATOR(context_);
         }
         RefPtr<CurveAnimation<double>> animation =
             AceType::MakeRefPtr<CurveAnimation<double>>(value_, endValue, animationOption_.GetCurve());

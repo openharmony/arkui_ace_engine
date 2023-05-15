@@ -52,6 +52,14 @@ public:
         value->propBottom_ = CloneBottom();
         value->propPrevMargin_ = ClonePrevMargin();
         value->propNextMargin_ = CloneNextMargin();
+        value->propDisplayArrow_ = CloneDisplayArrow();
+        value->propHoverShow_ = CloneHoverShow();
+        value->propIsShowBoard_ = CloneIsShowBoard();
+        value->propIsSiderMiddle_ = CloneIsSiderMiddle();
+        value->propBoardSize_ = CloneBoardSize();
+        value->propBoardColor_ = CloneBoardColor();
+        value->propArrowSize_ = CloneArrowSize();
+        value->propArrowColor_ = CloneArrowColor();
         return value;
     }
 
@@ -72,6 +80,14 @@ public:
         ResetBottom();
         ResetPrevMargin();
         ResetNextMargin();
+        ResetDisplayArrow();
+        ResetHoverShow();
+        ResetIsShowBoard();
+        ResetIsSiderMiddle();
+        ResetBoardSize();
+        ResetBoardColor();
+        ResetArrowSize();
+        ResetArrowColor();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -88,6 +104,14 @@ public:
         json->Put("displayCount", propDisplayCount_.value_or(1));
         json->Put("prevMargin", propPrevMargin_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
         json->Put("nextMargin", propNextMargin_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
+        json->Put("displayArrow", propDisplayArrow_.value_or(false) ? "true" : "false");
+        json->Put("hoverShow", propHoverShow_.value_or(false) ? "true" : "false");
+        json->Put("isShowBoard", propIsShowBoard_.value_or(false) ? "true" : "false");
+        json->Put("isSiderMiddle", propIsSiderMiddle_.value_or(false) ? "true" : "false");
+        json->Put("boardSize", propBoardSize_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
+        json->Put("arrowSize", propArrowSize_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
+        json->Put("boardColor", propBoardColor_.value_or(Color::TRANSPARENT).ColorToString().c_str());
+        json->Put("arrowColor", propArrowColor_.value_or(Color::TRANSPARENT).ColorToString().c_str());
     }
 
     void UpdateIndexWithoutMeasure(int32_t index)
@@ -111,6 +135,14 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Bottom, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PrevMargin, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NextMargin, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DisplayArrow, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HoverShow, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsShowBoard, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsSiderMiddle, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BoardSize, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BoardColor, Color, PROPERTY_UPDATE_NORMAL);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ArrowSize, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ArrowColor, Color, PROPERTY_UPDATE_NORMAL);
 };
 } // namespace OHOS::Ace::NG
 

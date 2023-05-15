@@ -101,7 +101,10 @@ int32_t FormRendererDelegateStub::HandleOnSurfaceReuse(MessageParcel &data, Mess
     std::shared_ptr<Rosen::RSSurfaceNode> surfaceNode;
     {
         std::lock_guard<std::mutex> lock(g_surfaceNodeMutex_);
-        surfaceNode = g_surfaceNodeMap_[id];
+        auto iter = g_surfaceNodeMap_.find(id);
+        if (iter != g_surfaceNodeMap_.end()) {
+            surfaceNode = iter->second;
+        }
     }
     if (surfaceNode == nullptr) {
         HILOG_ERROR("surfaceNode:%{public}s is nullptr", std::to_string(id).c_str());

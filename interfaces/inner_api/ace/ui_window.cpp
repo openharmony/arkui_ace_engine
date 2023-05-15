@@ -18,65 +18,12 @@
 #include <dlfcn.h>
 
 namespace OHOS::Ace::NG {
-
-using CreateRootSceneFunc = std::shared_ptr<UIWindow>* (*)();
-using CreateWindowSceneFunc = std::shared_ptr<UIWindow>* (*)(const std::shared_ptr<AbilityRuntime::Context>&,
-    const sptr<Rosen::ISession>&);
 using CreateWindowExtensionFunc = std::shared_ptr<UIWindow>* (*)(const std::shared_ptr<AbilityRuntime::Context>&,
     const sptr<Rosen::ISession>&);
-constexpr char CREATE_ROOT_SCENE_FUNC[] = "OHOS_ACE_CreateRootScene";
-constexpr char CREATE_WINDOW_SCENE_FUNC[] = "OHOS_ACE_CreateWindowScene";
 constexpr char CREATE_WINDOW_EXTENSION_FUNC[] = "OHOS_ACE_CreateWindowExtension";
 
-std::shared_ptr<UIWindow> UIWindow::CreateRootScene()
-{
-    void* handle = dlopen("libace.z.so", RTLD_LAZY);
-    if (handle == nullptr) {
-        return nullptr;
-    }
-
-    auto entry = reinterpret_cast<CreateRootSceneFunc>(dlsym(handle, CREATE_ROOT_SCENE_FUNC));
-    dlclose(handle);
-    if (entry == nullptr) {
-        return nullptr;
-    }
-
-    auto uiWindowPtr = entry();
-    if (uiWindowPtr == nullptr) {
-        return nullptr;
-    }
-    std::shared_ptr<UIWindow> uiWindow = *uiWindowPtr;
-    delete uiWindowPtr;
-
-    return uiWindow;
-}
-
-std::shared_ptr<UIWindow> UIWindow::CreateWindowScene(const std::shared_ptr<AbilityRuntime::Context>& context,
-    const sptr<Rosen::ISession>& iSession)
-{
-    void* handle = dlopen("libace.z.so", RTLD_LAZY);
-    if (handle == nullptr) {
-        return nullptr;
-    }
-
-    auto entry = reinterpret_cast<CreateWindowSceneFunc>(dlsym(handle, CREATE_WINDOW_SCENE_FUNC));
-    dlclose(handle);
-    if (entry == nullptr) {
-        return nullptr;
-    }
-
-    auto uiWindowPtr = entry(context, iSession);
-    if (uiWindowPtr == nullptr) {
-        return nullptr;
-    }
-    std::shared_ptr<UIWindow> uiWindow = *uiWindowPtr;
-    delete uiWindowPtr;
-
-    return uiWindow;
-}
-
 std::shared_ptr<UIWindow> UIWindow::CreateWindowExtension(const std::shared_ptr<AbilityRuntime::Context>& context,
-    const sptr<Rosen::ISession>& iSession, const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode)
+    const sptr<Rosen::ISession>& iSession)
 {
     void* handle = dlopen("libace.z.so", RTLD_LAZY);
     if (handle == nullptr) {
@@ -98,5 +45,4 @@ std::shared_ptr<UIWindow> UIWindow::CreateWindowExtension(const std::shared_ptr<
 
     return uiWindow;
 }
-
 } // namespace OHOS::Ace::NG

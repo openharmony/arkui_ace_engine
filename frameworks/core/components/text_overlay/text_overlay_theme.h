@@ -93,6 +93,8 @@ public:
             }
             auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>("text_overlay_pattern", nullptr);
             if (pattern) {
+                const double defaultTertiaryColorAlpha = 0.4;
+
                 theme->iconColor_ = pattern->GetAttr<Color>("icon_color", Color());
                 theme->menuIconColor_ = pattern->GetAttr<Color>("memu_icon_color", Color());
                 theme->handleColor_ = pattern->GetAttr<Color>("handle_outer_color", Color());
@@ -106,7 +108,9 @@ public:
                 theme->handleDiameter_ = pattern->GetAttr<Dimension>("handle_outer_diameter", 0.0_vp);
                 theme->handleDiameterInner_ = pattern->GetAttr<Dimension>("handle_inner_diameter", 0.0_vp);
                 theme->moreButtonHeight_ = pattern->GetAttr<Dimension>("more_button_height", 24.0_vp);
-                theme->selectOverlayMaxWidth_ = pattern->GetAttr<Dimension>("select_verlay_max_width", 280.0_vp);
+                theme->selectOverlayMaxWidth_ = pattern->GetAttr<Dimension>("select_overlay_max_width", 280.0_vp);
+                theme->alphaDisabled_ =
+                    pattern->GetAttr<double>(PATTERN_BG_COLOR_DISABLED_ALPHA, defaultTertiaryColorAlpha);
             } else {
                 LOGW("find pattern of textoverlay fail");
             }
@@ -240,6 +244,11 @@ public:
         return moreResourceId_;
     }
 
+    double GetAlphaDisabled() const
+    {
+        return alphaDisabled_;
+    }
+
 protected:
     TextOverlayTheme() = default;
 
@@ -263,6 +272,7 @@ private:
     Dimension moreButtonHeight_;
     Dimension selectOverlayMaxWidth_;
     TextStyle menuButtonTextStyle_;
+    double alphaDisabled_ = 0.0;
 
     InternalResource::ResourceId backResourceId_ = InternalResource::ResourceId::NO_ID;
     InternalResource::ResourceId moreResourceId_ = InternalResource::ResourceId::NO_ID;

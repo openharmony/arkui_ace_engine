@@ -15,6 +15,7 @@ import("//build/ohos.gni")
 import("//build/test.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
+action_sheet_test_output_path = "ace_engine/action_sheet"
 pattern_test_output_path = "ace_engine/components"
 gestures_test_output_path = "ace_engine/gestures"
 event_test_output_path = "ace_engine/evnets"
@@ -35,16 +36,22 @@ template("ace_unittest") {
   type = "components"
   ace_animation = false
   flutter_skia = false
+  render = false
   ace_unittest_out_path = "ace_engine/$type"
   ace_unittest_name = target_name
   ace_unittest_config = [ "$ace_root/test/unittest:ace_unittest_config" ]
   flutter_sources = []
+  flutter_external_deps = []
   ace_unittest_deps = [
     "$ace_root/frameworks/base:ace_memory_monitor_ohos",
     "$ace_root/test/unittest:ace_unittest_log",
     "$ace_root/test/unittest:ace_unittest_trace",
     "//third_party/googletest:gmock_main",
   ]
+
+  if (defined(invoker.render)) {
+    render = invoker.render
+  }
 
   if (defined(invoker.ace_log)) {
     ace_log = invoker.ace_log
@@ -63,24 +70,25 @@ template("ace_unittest") {
     ace_unittest_deps += [ "$ace_root/test/unittest:ace_core_animation" ]
   }
 
+  if (render) {
+    ace_unittest_deps += [ "$graphic_standard_path/rosen/modules/render_service_client:librender_service_client" ]
+  }
+
   if (defined(invoker.flutter_skia)) {
     flutter_skia = invoker.flutter_skia
   }
 
   if (flutter_skia) {
     if (ace_use_new_skia) {
-      flutter_sources += [
-        "$flutter_root/engine/flutter/runtime/window_manager.cc",
-        "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner.cc",
-        "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner_adapter.cc",
-      ]
+      flutter_sources +=
+          [ "$ace_root/test/mock/core/common/mock_flutter_window.cpp" ]
       ace_unittest_deps += [
         "$ace_flutter_engine_root:flutter_engine_common_ohos",
-        "$ace_flutter_engine_root:flutter_engine_fml_ohos",
         "$ace_flutter_engine_root/libtxt:thirdparty_lib_txt_ohos",
         "$skia_root_new:skia_ohos",
       ]
       ace_unittest_config += [ "$ace_flutter_engine_root:flutter_config" ]
+      flutter_external_deps = [ "eventhandler:libeventhandler" ]
     } else {
       ace_unittest_deps += [
         "$ace_flutter_engine_root:third_party_flutter_engine_ohos",
@@ -140,9 +148,8 @@ template("ace_unittest") {
       if (defined(invoker.configs)) {
         configs += invoker.configs
       }
-
+      external_deps = flutter_external_deps
       if (defined(invoker.external_deps)) {
-        external_deps = []
         external_deps += invoker.external_deps
       }
     }
@@ -159,7 +166,7 @@ template("ace_unittest") {
       if (defined(invoker.configs)) {
         configs += invoker.configs
       }
-
+      external_deps = flutter_external_deps
       if (defined(invoker.external_deps)) {
         external_deps = []
         external_deps += invoker.external_deps

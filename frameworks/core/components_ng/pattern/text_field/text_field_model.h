@@ -46,6 +46,15 @@ struct CaretStyle {
     std::optional<Dimension> caretWidth;
 };
 
+struct PasswordIcon {
+    std::string showResult;
+    std::string hideResult;
+    std::string showBundleName;
+    std::string hideBundleName;
+    std::string showModuleName;
+    std::string hideModuleName;
+};
+
 enum class InputStyle {
     DEFAULT,
     INLINE,
@@ -144,7 +153,9 @@ public:
     virtual void SetForegroundColor(const Color& value) = 0;
 
     virtual void SetMenuOptionItems(std::vector<NG::MenuOptionsParam>&& menuOptionsItems) = 0;
-    virtual void SetShowUnit(std::function<void()>&& unitAction) = 0;
+    virtual void SetPasswordIcon(const PasswordIcon& passwordIcon) {};
+    virtual void SetShowUnit(std::function<void()>&& unitAction) {};
+    virtual void SetShowError(const std::string& errorText, bool visible) {};
 
     virtual void SetShowUnderline(bool showUnderLine) {};
     virtual void SetShowCounter(bool value) {};

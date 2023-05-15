@@ -376,8 +376,8 @@ void RenderLoadingProgress::PerformLayout()
         layoutSize.Height() / ringRadius_ / CENTER_POINT);
     auto pipelineContext = GetContext().Upgrade();
     if (pipelineContext && loadingMode_ != MODE_DRAG && !ringController_ && !cometController_) {
-        ringController_ = AceType::MakeRefPtr<Animator>(pipelineContext);
-        cometController_ = AceType::MakeRefPtr<Animator>(pipelineContext);
+        ringController_ = CREATE_ANIMATOR(pipelineContext);
+        cometController_ = CREATE_ANIMATOR(pipelineContext);
         UpdateRingAnimation();
         UpdateCometAnimation();
         AnimationChanged();

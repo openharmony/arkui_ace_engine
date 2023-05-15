@@ -38,6 +38,7 @@ constexpr int32_t SCROLL_TOUCH_DOWN = 1;
 constexpr int32_t SCROLL_TOUCH_UP = 2;
 constexpr float SCROLL_RATIO = 0.52f;
 constexpr float SCROLL_BY_SPEED = 250.0f; // move 250 pixels per second
+constexpr float SCROLL_MAX_TIME = 300.0f; // Scroll Animate max time 0.3 second
 constexpr float UNIT_CONVERT = 1000.0f;    // 1s convert to 1000ms
 
 float CalculateFriction(float gamma)
@@ -85,6 +86,7 @@ void ScrollPattern::OnModifyDone()
     }
     SetEdgeEffect(layoutProperty->GetEdgeEffect().value_or(EdgeEffect::NONE));
     SetScrollBar(paintProperty->GetScrollBarProperty());
+    SetAccessibilityAction();
 }
 
 void ScrollPattern::RegisterScrollEventTask()
@@ -390,7 +392,7 @@ bool ScrollPattern::UpdateCurrentOffset(float delta, int32_t source)
 void ScrollPattern::CreateOrStopAnimator()
 {
     if (!animator_) {
-        animator_ = AceType::MakeRefPtr<Animator>(PipelineBase::GetCurrentContext());
+        animator_ = CREATE_ANIMATOR(PipelineBase::GetCurrentContext());
         return;
     }
     if (!animator_->IsStopped()) {
@@ -400,8 +402,8 @@ void ScrollPattern::CreateOrStopAnimator()
     animator_->ClearInterpolators();
 }
 
-void ScrollPattern::AnimateTo(
-    float position, float duration, const RefPtr<Curve>& curve, const std::function<void()>& onFinish)
+void ScrollPattern::AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool limitDuration,
+    const std::function<void()>& onFinish)
 {
     LOGD("scroll pattern, from %{public}f to %{public}f", currentOffset_, position);
     if (!IsScrollableStopped()) {
@@ -419,7 +421,7 @@ void ScrollPattern::AnimateTo(
         scroll->DoJump(value);
     });
     animator_->AddInterpolator(animation);
-    animator_->SetDuration(static_cast<int32_t>(duration));
+    animator_->SetDuration(static_cast<int32_t>(limitDuration ? std::min(duration, SCROLL_MAX_TIME) : duration));
     animator_->ClearStopListeners();
     animator_->Play();
     // TODO: expand stop listener
@@ -455,7 +457,7 @@ void ScrollPattern::ScrollBy(float pixelX, float pixelY, bool smooth, const std:
     }
     float position = currentOffset_ + distance;
     if (smooth) {
-        AnimateTo(position, fabs(distance) * UNIT_CONVERT / SCROLL_BY_SPEED, Curves::EASE_OUT, onFinish);
+        AnimateTo(position, fabs(distance) * UNIT_CONVERT / SCROLL_BY_SPEED, Curves::EASE_OUT, true, onFinish);
         return;
     }
     float cachePosition = currentOffset_;
@@ -541,4 +543,26 @@ void ScrollPattern::UpdateScrollBarOffset()
     UpdateScrollBarRegion(-currentOffset_, estimatedHeight, size, Offset(0.0, 0.0));
 }
 
+void ScrollPattern::SetAccessibilityAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetActionScrollForward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (pattern->IsScrollable() && pattern->GetScrollableDistance() > 0.0f) {
+            pattern->ScrollPage(false, true);
+        }
+    });
+
+    accessibilityProperty->SetActionScrollBackward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (pattern->IsScrollable() && pattern->GetScrollableDistance() > 0.0f) {
+            pattern->ScrollPage(true, true);
+        }
+    });
+}
 } // namespace OHOS::Ace::NG

@@ -82,6 +82,7 @@ void TextPickerColumnPattern::OnModifyDone()
     pressColor_ = theme->GetPressColor();
     hoverColor_ = theme->GetHoverColor();
     InitMouseAndPressEvent();
+    SetAccessibilityAction();
 }
 
 void TextPickerColumnPattern::OnAroundButtonClick(RefPtr<EventParam> param)
@@ -832,7 +833,7 @@ void TextPickerColumnPattern::HandleDragEnd()
 void TextPickerColumnPattern::CreateAnimation()
 {
     CHECK_NULL_VOID_NOLOG(!animationCreated_);
-    toController_ = AceType::MakeRefPtr<Animator>(PipelineContext::GetCurrentContext());
+    toController_ = CREATE_ANIMATOR(PipelineContext::GetCurrentContext());
     toController_->SetDuration(ANIMATION_ZERO_TO_OUTER); // 200ms for animation that from zero to outer.
     auto weak = AceType::WeakClaim(this);
     toController_->AddStopListener([weak]() {
@@ -845,7 +846,7 @@ void TextPickerColumnPattern::CreateAnimation()
     });
     fromBottomCurve_ = CreateAnimation(jumpInterval_, 0.0);
     fromTopCurve_ = CreateAnimation(0.0 - jumpInterval_, 0.0);
-    fromController_ = AceType::MakeRefPtr<Animator>(PipelineContext::GetCurrentContext());
+    fromController_ = CREATE_ANIMATOR(PipelineContext::GetCurrentContext());
     fromController_->SetDuration(ANIMATION_OUTER_TO_ZERO);
     animationCreated_ = true;
 }
@@ -1070,5 +1071,45 @@ bool TextPickerColumnPattern::HandleDirectionKey(KeyCode code)
         return true;
     }
     return false;
+}
+void TextPickerColumnPattern::SetAccessibilityAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetActionScrollForward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID(pattern->animationCreated_);
+        if (!pattern->CanMove(true)) {
+            return;
+        }
+        pattern->InnerHandleScroll(1);
+        CHECK_NULL_VOID(pattern->fromController_);
+        pattern->fromController_->ClearInterpolators();
+        pattern->fromController_->AddInterpolator(pattern->fromTopCurve_);
+        pattern->fromController_->Play();
+        auto frameNode = pattern->GetHost();
+        CHECK_NULL_VOID(frameNode);
+        frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+    });
+
+    accessibilityProperty->SetActionScrollBackward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID(pattern->animationCreated_);
+        if (!pattern->CanMove(false)) {
+            return;
+        }
+        pattern->InnerHandleScroll(-1);
+        CHECK_NULL_VOID(pattern->fromController_);
+        pattern->fromController_->ClearInterpolators();
+        pattern->fromController_->AddInterpolator(pattern->fromBottomCurve_);
+        pattern->fromController_->Play();
+        auto frameNode = pattern->GetHost();
+        CHECK_NULL_VOID(frameNode);
+        frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+    });
 }
 } // namespace OHOS::Ace::NG

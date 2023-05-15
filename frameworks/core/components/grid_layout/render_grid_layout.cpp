@@ -2274,10 +2274,10 @@ bool RenderGridLayout::CalTheFirstEmptyCell(int32_t& rowIndex, int32_t& columInd
 void RenderGridLayout::InitAnimationController(const WeakPtr<PipelineContext>& context)
 {
     if (!animationController_) {
-        animationController_ = AceType::MakeRefPtr<Animator>(context);
+        animationController_ = CREATE_ANIMATOR(context);
     }
     if (!flexController_) {
-        flexController_ = AceType::MakeRefPtr<Animator>(context);
+        flexController_ = CREATE_ANIMATOR(context);
     }
 }
 
@@ -2840,7 +2840,7 @@ void RenderGridLayout::MoveRelativeDistance(double& dx, double& dy)
 void RenderGridLayout::CreateSpringController()
 {
     if (!springController_) {
-        springController_ = AceType::MakeRefPtr<Animator>(GetContext());
+        springController_ = CREATE_ANIMATOR(GetContext());
     }
 }
 

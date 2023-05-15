@@ -89,6 +89,10 @@ const std::string FORM_ES_MODULE_PATH = "ets/modules.abc";
 
 const std::string ASSET_PATH_PREFIX = "/data/storage/el1/bundle/";
 
+#ifdef PREVIEW
+constexpr uint32_t PREFIX_LETTER_NUMBER = 4;
+#endif
+
 // native implementation for js function: perfutil.print()
 shared_ptr<JsValue> JsPerfPrint(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
@@ -1084,12 +1088,12 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
         arkRuntime->SetAssetPath(assetPath);
         arkRuntime->SetBundle(false);
         arkRuntime->SetModuleName(moduleName);
-        abcPath = fileName;
-        if (fileName.rfind("ets/", 0) == 0) {
-            abcPath = moduleName.append("/").append(fileName);
-        } else {
-            abcPath = moduleName.append("/ets/").append(fileName);
-        }
+#ifdef PREVIEW
+        // remove the prefix of "ets/"
+        abcPath = fileName.substr(PREFIX_LETTER_NUMBER);
+#else
+        abcPath = moduleName.append("/").append(fileName);
+#endif
         LOGI("JsiDeclarativeEngine::ExecuteCardAbc abcPath = %{public}s", abcPath.c_str());
         {
             if (!arkRuntime->ExecuteModuleBuffer(content.data(), content.size(), abcPath, true)) {
@@ -1202,7 +1206,7 @@ void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
 #endif
     }
 }
-
+#if !defined(PREVIEW)
 bool JsiDeclarativeEngine::LoadJsWithModule(std::string& urlName,
     const std::function<void(const std::string&, int32_t)>& errorCallback)
 {
@@ -1213,7 +1217,9 @@ bool JsiDeclarativeEngine::LoadJsWithModule(std::string& urlName,
             container->GetModuleName() + "/" + FORM_ES_MODULE_PATH;
         auto runtime = std::static_pointer_cast<ArkJSRuntime>(engineInstance_->GetJsRuntime());
         runtime->SetAssetPath(assetPath);
-        urlName = container->GetModuleName() + "/ets/" + urlName;
+        if (urlName.substr(0, strlen(BUNDLE_TAG)) != BUNDLE_TAG) {
+            urlName = container->GetModuleName() + "/ets/" + urlName;
+        }
         if (!runtime->ExecuteJsBin(urlName, errorCallback)) {
             LOGE("ExecuteJsBin %{private}s failed.", urlName.c_str());
         }
@@ -1221,7 +1227,7 @@ bool JsiDeclarativeEngine::LoadJsWithModule(std::string& urlName,
     }
     return false;
 }
-
+#endif
 // Load the app.js file of the FA model in NG structure.
 bool JsiDeclarativeEngine::LoadFaAppSource()
 {

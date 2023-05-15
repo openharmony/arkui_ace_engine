@@ -73,6 +73,7 @@ public:
     virtual void SetBackgroundImageSize(const BackgroundImageSize& bgImgSize) = 0;
     virtual void SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition) = 0;
     virtual void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle) = 0;
+    virtual void SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle) {}
     virtual void SetSphericalEffect(double radio) {}
     virtual void SetPixelStretchEffect(PixStretchEffectOption& option) {}
     virtual void SetLightUpEffect(double radio) {}
@@ -241,6 +242,12 @@ public:
     virtual void CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
         const std::function<void(float)>& onCallbackEvent) = 0;
     virtual void UpdateAnimatablePropertyFloat(const std::string& propertyName, float value) = 0;
+
+    virtual void CreateAnimatableArithmeticProperty(const std::string& propertyName,
+        RefPtr<NG::CustomAnimatableArithmetic>& value,
+        std::function<void(const RefPtr<NG::CustomAnimatableArithmetic>&)>& onCallbackEvent) = 0;
+    virtual void UpdateAnimatableArithmeticProperty(const std::string& propertyName,
+        RefPtr<NG::CustomAnimatableArithmetic>& value) = 0;
 private:
     static std::unique_ptr<ViewAbstractModel> instance_;
     static std::mutex mutex_;
