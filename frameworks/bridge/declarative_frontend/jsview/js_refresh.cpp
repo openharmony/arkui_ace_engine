@@ -145,7 +145,8 @@ void JSRefresh::Pop()
 
 void JSRefresh::OnStateChange(const JSCallbackInfo& args)
 {
-    if (!args[0]->IsFunction()) {
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        LOGI("refresh onStateChange error, param is non-valid");
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
@@ -160,7 +161,8 @@ void JSRefresh::OnStateChange(const JSCallbackInfo& args)
 
 void JSRefresh::OnRefreshing(const JSCallbackInfo& args)
 {
-    if (!args[0]->IsFunction()) {
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        LOGI("refresh onRefreshing error, param is non-valid");
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
