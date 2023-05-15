@@ -205,7 +205,10 @@ void FrontendDelegateImpl::GetConfigurationCommon(const std::string& filePath, s
     std::vector<std::string> fileNameList;
     for (const auto& file : files) {
         if (EndWith(file, FILE_TYPE_JSON) && !StartWith(file, STYLES_FOLDER)) {
-            fileNameList.emplace_back(file.substr(0, file.size() - (sizeof(FILE_TYPE_JSON) - 1)));
+            std::string tmp = file.substr(0, file.size() - (sizeof(FILE_TYPE_JSON) - 1));
+            size_t pos = tmp.find_last_of("/");
+            pos = (pos == std::string::npos) ? 0 : (pos + 1);
+            fileNameList.emplace_back(tmp.substr(pos, tmp.size() - pos));
         }
     }
 
