@@ -502,6 +502,10 @@ bool JSSwiper::GetArrowInfo(const JSRef<JSObject>& obj, SwiperArrowParameters& s
 
 void JSSwiper::SetDisplayArrow(const JSCallbackInfo& info)
 {
+    if (info[0]->IsEmpty() || info[0]->IsUndefined()) {
+        SwiperModel::GetInstance()->SetDisplayArrow(false);
+        return;
+    }
     if (info.Length() > 0 && info[0]->IsObject()) {
         auto obj = JSRef<JSObject>::Cast(info[0]);
         SwiperArrowParameters swiperArrowParameters;
@@ -530,9 +534,6 @@ void JSSwiper::SetDisplayArrow(const JSCallbackInfo& info)
             SwiperModel::GetInstance()->SetDisplayArrow(false);
             return;
         }
-    } else if (info[0]->IsEmpty() || info[0]->IsUndefined()) {
-        SwiperModel::GetInstance()->SetDisplayArrow(false);
-        return;
     } else {
         SwiperModel::GetInstance()->SetDisplayArrow(false);
         return;
