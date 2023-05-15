@@ -107,6 +107,11 @@ common_bin = [
     part_name = "flutter"
   },
   {
+    label = "//third_party/skia:new_skia"
+    subsystem_name = "thirdparty"
+    part_name = "third_party_skia"
+  },
+  {
     label = "//foundation/arkui/napi:ace_napi_ark"
     subsystem_name = "arkui"
     part_name = "napi"
