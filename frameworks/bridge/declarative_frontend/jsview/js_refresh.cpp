@@ -146,6 +146,10 @@ void JSRefresh::Create(const JSCallbackInfo& info)
 
 void JSRefresh::ParseCustomBuilder(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        LOGE("Invalid params");
+        return;
+    }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto builder = paramObject->GetProperty("builder");
     if (builder->IsFunction()) {
