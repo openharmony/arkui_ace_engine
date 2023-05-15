@@ -1644,7 +1644,7 @@ void JSViewAbstract::JsFlexBasis(const JSCallbackInfo& info)
     }
     CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
-        return;
+        value.SetUnit(DimensionUnit::AUTO);
     }
     // flexbasis don't support percent case.
     if (value.Unit() == DimensionUnit::PERCENT) {
