@@ -24,7 +24,6 @@
 #include "core/components_ng/pattern/navrouter/navrouter_event_hub.h"
 #include "core/components_ng/pattern/navrouter/navrouter_group_node.h"
 #include "core/components_ng/pattern/navrouter/navrouter_pattern.h"
-#include "core/components_ng/pattern/navrouter/navrouter_view.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -45,8 +44,13 @@ void NavRouterModelNG::SetOnStateChange(std::function<void(bool isActivated)>&& 
     navRouterEventHub->SetOnStateChange(std::move(onStateChange));
 }
 
-void NavRouterModelNG::SetNavRouteMode(int32_t value)
+void NavRouterModelNG::SetNavRouteMode(int32_t mode)
 {
-    NG::NavRouterView::SetNavRouteMode(static_cast<NG::NavRouteMode>(value));
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navRouterGroupNode = AceType::DynamicCast<NavRouterGroupNode>(frameNode);
+    CHECK_NULL_VOID(navRouterGroupNode);
+    auto navRouterPattern = navRouterGroupNode->GetPattern<NavRouterPattern>();
+    CHECK_NULL_VOID(navRouterPattern);
+    navRouterPattern->SetNavRouteMode(static_cast<NG::NavRouteMode>(mode));
 }
 } // namespace OHOS::Ace::NG
