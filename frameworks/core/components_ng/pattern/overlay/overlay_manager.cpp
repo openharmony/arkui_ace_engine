@@ -652,7 +652,7 @@ void OverlayManager::ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPt
     } else {
         menu->MountToParent(rootNode);
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-
+        menu->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         ShowMenuAnimation(menu);
         menu->MarkModifyDone();
         LOGI("menuNode mounted");
