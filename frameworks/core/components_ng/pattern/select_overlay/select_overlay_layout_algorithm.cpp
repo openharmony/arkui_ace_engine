@@ -65,14 +65,18 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
     auto menuWidth = menuItem->GetGeometryNode()->GetMarginFrameSize().Width();
     auto menuHeight = menuItem->GetGeometryNode()->GetMarginFrameSize().Height();
     OffsetF menuPosition;
+    const auto& firstHandleRect = info_->firstHandle.paintRect;
     const auto& secondHandleRect = info_->secondHandle.paintRect;
+    auto singleHandle = firstHandleRect;
+    if (!info_->firstHandle.isShow) {
+        singleHandle = secondHandleRect;
+    }
     if (info_->isSingleHandle) {
-        double menuSpacing = menuSpacingBetweenText;
-        menuPosition = OffsetF((secondHandleRect.Left() + secondHandleRect.Right() - menuWidth) / 2.0f,
-            static_cast<float>(secondHandleRect.Top() - menuSpacing - menuHeight));
+        auto menuSpacing = static_cast<float>(menuSpacingBetweenText);
+        menuPosition = OffsetF((singleHandle.Left() + singleHandle.Right() - menuWidth) / 2.0f,
+            static_cast<float>(singleHandle.Top() - menuSpacing - menuHeight));
     } else {
         double menuSpacing = menuSpacingBetweenText + menuSpacingBetweenHandle;
-        const auto& firstHandleRect = info_->firstHandle.paintRect;
         menuPosition = OffsetF((firstHandleRect.Left() + secondHandleRect.Left() - menuWidth) / 2.0f,
             static_cast<float>(firstHandleRect.Top() - menuSpacing - menuHeight));
     }
@@ -87,7 +91,7 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
     }
     if (LessNotEqual(menuPosition.GetY(), menuHeight)) {
         menuPosition.SetY(
-            static_cast<float>(secondHandleRect.Bottom() + menuSpacingBetweenText + menuSpacingBetweenHandle));
+            static_cast<float>(singleHandle.Bottom() + menuSpacingBetweenText + menuSpacingBetweenHandle));
     }
     return menuPosition;
 }
