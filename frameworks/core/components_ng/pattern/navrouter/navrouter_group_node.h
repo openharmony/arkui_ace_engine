@@ -77,7 +77,9 @@ private:
         const RefPtr<FrameNode>& titleBarNode, const RefPtr<FrameNode>& destinationTitleBarNode);
     void TitleTransitionOutAnimation(const RefPtr<FrameNode>& navigationNode,
         const RefPtr<FrameNode>& titleBarNode, const RefPtr<FrameNode>& destinationTitleBarNode);
-    void backButtonAnimation(const RefPtr<FrameNode>& backButtonNode, bool isTransitionIn);
+    void BackButtonAnimation(const RefPtr<FrameNode>& backButtonNode, bool isTransitionIn);
+    void MaskAnimation(const RefPtr<RenderContext>& transitionOutNodeContext);
+    void TitleOpacityAnimation(const RefPtr<RenderContext>& transitionOutNodeContext);
     RefPtr<UINode> navDestinationNode_;
 };
 

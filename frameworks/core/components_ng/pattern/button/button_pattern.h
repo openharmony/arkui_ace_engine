@@ -169,11 +169,14 @@ protected:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     void InitTouchEvent();
+    void InitHoverEvent();
     void OnTouchDown();
     void OnTouchUp();
+    void HandleHoverEvent(bool isHover);
     void HandleEnabled();
     void InitButtonLabel();
-    void AnimateTouchEffectBoard(float startOpacity, float endOpacity, int32_t duration, const RefPtr<Curve>& curve);
+    void AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, float startOpacity, float endOpacity,
+        int32_t duration, const RefPtr<Curve>& curve);
     Color clickedColor_;
 
 private:
@@ -186,7 +189,8 @@ private:
     ComponentButtonType buttonType_ = ComponentButtonType::BUTTON;
 
     RefPtr<TouchEventImpl> touchListener_;
-    RefPtr<InputEvent> mouseEvent_;
+    RefPtr<InputEvent> hoverListener_;
+    bool isHover_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(ButtonPattern);
 };

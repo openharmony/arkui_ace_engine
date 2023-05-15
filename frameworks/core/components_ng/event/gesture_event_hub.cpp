@@ -583,6 +583,7 @@ bool GestureEventHub::ActClick()
         if (clickRecognizer && clickRecognizer->GetFingers() == 1 && clickRecognizer->GetCount() == 1) {
             click = clickRecognizer->GetTapActionFunc();
             click(info);
+            host->OnAccessibilityEvent(AccessibilityEventType::CLICK);
             return true;
         }
     }
@@ -624,6 +625,7 @@ bool GestureEventHub::ActLongClick()
         if (longPressRecognizer && longPressRecognizer->GetFingers() == 1) {
             click = longPressRecognizer->GetLongPressActionFunc();
             click(info);
+            host->OnAccessibilityEvent(AccessibilityEventType::LONG_PRESS);
             return true;
         }
     }

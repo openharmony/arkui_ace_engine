@@ -25,7 +25,6 @@
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
-#include "core/components_ng/pattern/button/button_view.h"
 
 using namespace testing;
 using namespace testing::ext;

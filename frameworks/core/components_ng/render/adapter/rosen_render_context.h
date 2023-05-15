@@ -305,6 +305,10 @@ private:
     void SetBackBlurFilter();
     void SetFrontBlurFilter();
     void GetPaddingOfFirstFrameNodeParent(Dimension& parentPaddingLeft, Dimension& parentPaddingTop);
+    void CombinePaddingAndOffset(Dimension& resultX, Dimension& resultY, const Dimension& parentPaddingLeft,
+        const Dimension& parentPaddingTop, float widthPercentReference, float heightPercentReference);
+    void CombineMarginAndPosition(Dimension& resultX, Dimension& resultY, const Dimension& parentPaddingLeft,
+        const Dimension& parentPaddingTop, float widthPercentReference, float heightPercentReference);
 
     // helper function to check if paint rect is valid
     bool RectIsNull();

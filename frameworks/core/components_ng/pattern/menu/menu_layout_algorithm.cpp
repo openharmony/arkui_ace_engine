@@ -287,7 +287,7 @@ bool MenuLayoutAlgorithm::GetIfNeedArrow(const LayoutWrapper* layoutWrapper, con
     menuRadius_ = selectThemePtr->GetMenuBorderRadius().ConvertToPx();
     arrowMinLimit_ = menuRadius_ + ARROW_WIDTH.ConvertToPx() / 2.0;
     arrowWidth_ = ARROW_WIDTH.ConvertToPx();
-    auto targetSpaceReal = TARGET_SPACE.ConvertToPx() +  ARROW_HIGHT.ConvertToPx();
+    auto targetSpaceReal = TARGET_SPACE.ConvertToPx() + ARROW_HIGHT.ConvertToPx();
 
     if (setHorizontal_.find(placement_) != setHorizontal_.end()) {
         if (menuSize.Height() >= menuRadius_ * 2 + arrowWidth_) {
@@ -347,7 +347,7 @@ void MenuLayoutAlgorithm::UpdatePropArrowOffset()
 void MenuLayoutAlgorithm::UpdateArrowOffsetWithMenuLimit(const SizeF& menuSize)
 {
     UpdatePropArrowOffset();
-   
+
     if (setHorizontal_.find(arrowPlacement_) != setHorizontal_.end()) {
         if (menuSize.Height() >= menuRadius_ * 2 + arrowWidth_) {
             float range = menuSize.Height() - menuRadius_ * 2  - arrowWidth_;
@@ -451,7 +451,7 @@ void MenuLayoutAlgorithm::UpdateConstraintWidth(LayoutWrapper* layoutWrapper, La
     // set min width
     RefPtr<GridColumnInfo> columnInfo;
     columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
-    columnInfo->GetParent()->BuildColumnWidth();
+    columnInfo->GetParent()->BuildColumnWidth(wrapperSize_.Width());
     float minWidth = static_cast<float>(columnInfo->GetWidth(MIN_GRID_COUNTS));
     auto menuPattern = layoutWrapper->GetHostNode()->GetPattern<MenuPattern>();
     if (menuPattern->IsSelectOverlayExtensionMenu() && minWidth > constraint.maxSize.Width()) {
@@ -691,7 +691,7 @@ OffsetF MenuLayoutAlgorithm::GetPositionWithPlacement(
             LOGE("Invalid Placement of menu layout.");
         }
     } else {
-            LOGE("Invalid Placement of menu layout.");
+        LOGE("Invalid Placement of menu layout.");
     }
 
     return childPosition;

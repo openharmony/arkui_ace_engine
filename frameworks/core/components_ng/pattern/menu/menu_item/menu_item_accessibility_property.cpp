@@ -40,6 +40,5 @@ bool MenuItemAccessibilityProperty::IsSelected() const
 void MenuItemAccessibilityProperty::SetSpecificSupportAction()
 {
     AddSupportAction(AceAction::ACTION_SELECT);
-    AddSupportAction(AceAction::ACTION_CLEAR_SELECTION);
 }
 } // namespace OHOS::Ace::NG

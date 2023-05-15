@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_REMOTE_WINDOW_VIEW_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_REMOTE_WINDOW_VIEW_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_REMOTE_WINDOW_MODEL_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_REMOTE_WINDOW_MODEL_H
 
 #include <memory>
 #include <string>
@@ -24,12 +24,17 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/remote_window/remote_window_pattern.h"
 
-namespace OHOS::Ace::NG {
-
-class ACE_EXPORT RemoteWindowView {
+namespace OHOS::Ace {
+class RemoteWindowModel {
 public:
-    static void Create(const std::shared_ptr<OHOS::Rosen::RSNode>& rsNode);
-};
-} // namespace OHOS::Ace::NG
+    static RemoteWindowModel* GetInstance();
+    virtual ~RemoteWindowModel() = default;
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_REMOTE_WINDOW_VIEW_H
+    virtual void Create(const std::shared_ptr<OHOS::Rosen::RSNode>& rsNode);
+    
+private:
+    static std::unique_ptr<RemoteWindowModel> instance_;
+    static std::mutex mutex_;
+};
+} // namespace OHOS::Ace
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_REMOTE_WINDOW_MODEL_H

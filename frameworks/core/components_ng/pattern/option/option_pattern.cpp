@@ -60,6 +60,7 @@ void OptionPattern::OnModifyDone()
         text_->GetRenderContext()->UpdateForegroundColor(selectTheme_->GetDisabledMenuFontColor());
         text_->MarkModifyDone();
     }
+    SetAccessibilityAction();
 }
 
 void OptionPattern::OnSelectProcess()
@@ -446,5 +447,18 @@ void OptionPattern::UpdateIcon(const std::string& src)
     props->UpdateImageSourceInfo(imageSrcInfo.value());
     icon_->MarkModifyDone();
     icon_->MarkDirtyNode();
+}
+
+void OptionPattern::SetAccessibilityAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetActionSelect([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnSelectProcess();
+    });
 }
 } // namespace OHOS::Ace::NG

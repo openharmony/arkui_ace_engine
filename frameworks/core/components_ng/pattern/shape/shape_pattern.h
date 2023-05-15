@@ -48,6 +48,23 @@ public:
         return MakeRefPtr<ShapePaintProperty>();
     }
 
+    void OnModifyDone() override
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto paintProperty = host->GetPaintProperty<ShapePaintProperty>();
+        CHECK_NULL_VOID(paintProperty);
+        if (paintProperty->HasStrokeMiterLimit()) {
+            auto miterLimit = paintProperty->GetStrokeMiterLimitValue();
+            if (Negative(miterLimit)) {
+                paintProperty->UpdateStrokeMiterLimit(ShapePaintProperty::STROKE_MITERLIMIT_DEFAULT);
+            } else if (NonNegative(miterLimit) &&
+                LessNotEqual(miterLimit, ShapePaintProperty::STROKE_MITERLIMIT_MIN)) {
+                paintProperty->UpdateStrokeMiterLimit(ShapePaintProperty::STROKE_MITERLIMIT_MIN);
+            }
+        }
+    }
+
 protected:
     RefPtr<ShapePaintProperty> GetAncestorPaintProperty()
     {

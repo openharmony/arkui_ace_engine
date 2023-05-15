@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/menu/menu_item/menu_item_view.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
 
 #include "base/geometry/dimension.h"
 #include "base/utils/utils.h"
@@ -28,9 +28,7 @@
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
-void MenuItemView::Create(const RefPtr<UINode>& customNode) {}
-
-void MenuItemView::Create(const MenuItemProperties& menuItemProps)
+void MenuItemModelNG::Create(const MenuItemProperties& menuItemProps)
 {
     LOGI("MenuItemView::Create");
     auto* stack = ViewStackProcessor::GetInstance();
@@ -86,31 +84,31 @@ void MenuItemView::Create(const MenuItemProperties& menuItemProps)
     menuProperty->UpdateLabel(menuItemProps.labelInfo.value_or(""));
 }
 
-void MenuItemView::SetSelected(bool isSelected)
+void MenuItemModelNG::SetSelected(bool isSelected)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<MenuItemPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSelected(isSelected);
 }
 
-void MenuItemView::SetSelectIcon(bool isShow)
+void MenuItemModelNG::SetSelectIcon(bool isShow)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, SelectIcon, isShow);
 }
 
-void MenuItemView::SetSelectIconSrc(const std::string& src)
+void MenuItemModelNG::SetSelectIconSrc(const std::string& src)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, SelectIconSrc, src);
 }
 
-void MenuItemView::SetOnChange(std::function<void(bool)>&& onChange)
+void MenuItemModelNG::SetOnChange(std::function<void(bool)>&& onChange)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<MenuItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(onChange);
 }
 
-void MenuItemView::SetFontSize(const Dimension& fontSize)
+void MenuItemModelNG::SetFontSize(const Dimension& fontSize)
 {
     if (fontSize.IsValid()) {
         ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, FontSize, fontSize);
@@ -120,7 +118,12 @@ void MenuItemView::SetFontSize(const Dimension& fontSize)
     }
 }
 
-void MenuItemView::SetFontColor(const std::optional<Color>& color)
+void MenuItemModelNG::SetFontWeight(FontWeight weight)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, FontWeight, weight);
+}
+
+void MenuItemModelNG::SetFontColor(const std::optional<Color>& color)
 {
     if (color.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, FontColor, color.value());
@@ -129,12 +132,7 @@ void MenuItemView::SetFontColor(const std::optional<Color>& color)
     }
 }
 
-void MenuItemView::SetFontWeight(Ace::FontWeight weight)
-{
-    ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, FontWeight, weight);
-}
-
-void MenuItemView::SetLabelFontSize(const Dimension& fontSize)
+void MenuItemModelNG::SetLabelFontSize(const Dimension& fontSize)
 {
     if (fontSize.IsValid()) {
         ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontSize, fontSize);
@@ -144,7 +142,12 @@ void MenuItemView::SetLabelFontSize(const Dimension& fontSize)
     }
 }
 
-void MenuItemView::SetLabelFontColor(const std::optional<Color>& color)
+void MenuItemModelNG::SetLabelFontWeight(FontWeight weight)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontWeight, weight);
+}
+
+void MenuItemModelNG::SetLabelFontColor(const std::optional<Color>& color)
 {
     if (color.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontColor, color.value());
@@ -153,12 +156,7 @@ void MenuItemView::SetLabelFontColor(const std::optional<Color>& color)
     }
 }
 
-void MenuItemView::SetLabelFontWeight(Ace::FontWeight weight)
-{
-    ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontWeight, weight);
-}
-
-void MenuItemView::SetSelectedChangeEvent(std::function<void(bool)>&& selectedChangeEvent)
+void MenuItemModelNG::SetSelectedChangeEvent(std::function<void(bool)>&& selectedChangeEvent)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<MenuItemEventHub>();
     CHECK_NULL_VOID(eventHub);

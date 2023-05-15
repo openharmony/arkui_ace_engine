@@ -684,6 +684,11 @@ void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj
         SetPlacementOnTopVal(popupObj, popupParam);
     }
 
+    auto enableArrowValue = popupObj->GetProperty("enableArrow");
+    if (enableArrowValue->IsBoolean()) {
+        popupParam->SetEnableArrow(enableArrowValue->ToBoolean());
+    }
+
     JSRef<JSVal> maskValue = popupObj->GetProperty("mask");
     if (maskValue->IsBoolean()) {
         if (popupParam) {
@@ -4683,7 +4688,13 @@ void JSViewAbstract::JsBindContentCover(const JSCallbackInfo& info)
     };
 
     // parse ModalTransition
-    auto type = (info.Length() == 3 && info[2]->IsNumber()) ? info[2]->ToNumber<int32_t>() : 0;
+    int32_t type = 0;
+    if (info.Length() == 3 && info[info.Length() - 1]->IsNumber()) { // 3: include modal transition
+        auto modalTransition = info[info.Length() - 1]->ToNumber<int32_t>();
+        if (modalTransition >= 0 && modalTransition <= 2) { // 2: transition number
+            type = modalTransition;
+        }
+    }
     ViewAbstractModel::GetInstance()->BindContentCover(isShow, std::move(callback), std::move(buildFunc), type);
 }
 

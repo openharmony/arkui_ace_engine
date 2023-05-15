@@ -73,6 +73,7 @@ public:
     static void SetForegroundColor(const JSCallbackInfo& info);
     static void SetShowUnit(const JSCallbackInfo& info);
     static void SetShowCounter(const JSCallbackInfo& info);
+    static void SetShowError(const JSCallbackInfo& info);
 
     static void SetShowUnderline(const JSCallbackInfo& info);
 };

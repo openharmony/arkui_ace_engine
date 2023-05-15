@@ -353,7 +353,8 @@ void CanvasPaintMethod::TransferFromImageBitmap(PaintWrapper* paintWrapper,
     PutImageData(paintWrapper, *imageData);
 }
 
-void CanvasPaintMethod::FillText(PaintWrapper* paintWrapper, const std::string& text, double x, double y)
+void CanvasPaintMethod::FillText(
+    PaintWrapper* paintWrapper, const std::string& text, double x, double y, std::optional<double> maxWidth)
 {
     CHECK_NULL_VOID(paintWrapper);
     auto offset = paintWrapper->GetContentOffset();
@@ -361,10 +362,11 @@ void CanvasPaintMethod::FillText(PaintWrapper* paintWrapper, const std::string& 
 
     auto success = UpdateParagraph(offset, text, false, HasShadow());
     CHECK_NULL_VOID(success);
-    PaintText(offset, frameSize, x, y, false, HasShadow());
+    PaintText(offset, frameSize, x, y, maxWidth, false, HasShadow());
 }
 
-void CanvasPaintMethod::StrokeText(PaintWrapper* paintWrapper, const std::string& text, double x, double y)
+void CanvasPaintMethod::StrokeText(
+    PaintWrapper* paintWrapper, const std::string& text, double x, double y, std::optional<double> maxWidth)
 {
     CHECK_NULL_VOID(paintWrapper);
     auto offset = paintWrapper->GetContentOffset();
@@ -373,12 +375,12 @@ void CanvasPaintMethod::StrokeText(PaintWrapper* paintWrapper, const std::string
     if (HasShadow()) {
         auto success = UpdateParagraph(offset, text, true, true);
         CHECK_NULL_VOID(success);
-        PaintText(offset, frameSize, x, y, true, true);
+        PaintText(offset, frameSize, x, y, maxWidth, true, true);
     }
 
     auto success = UpdateParagraph(offset, text, true);
     CHECK_NULL_VOID(success);
-    PaintText(offset, frameSize, x, y, true);
+    PaintText(offset, frameSize, x, y, maxWidth, true);
 }
 
 double CanvasPaintMethod::MeasureText(const std::string& text, const PaintState& state)
@@ -458,30 +460,34 @@ TextMetrics CanvasPaintMethod::MeasureTextMetrics(const std::string& text, const
     return textMetrics;
 }
 
-void CanvasPaintMethod::PaintText(
-    const OffsetF& offset, const SizeF& frameSize, double x, double y, bool isStroke, bool hasShadow)
+void CanvasPaintMethod::PaintText(const OffsetF& offset, const SizeF& frameSize, double x, double y,
+    std::optional<double> maxWidth, bool isStroke, bool hasShadow)
 {
-    paragraph_->Layout(frameSize.Width());
-    auto width = paragraph_->GetMaxIntrinsicWidth();
-    if (frameSize.Width() > width) {
-        paragraph_->Layout(std::ceil(width));
-    }
+    paragraph_->Layout(DBL_MAX);
     auto align = isStroke ? strokeState_.GetTextAlign() : fillState_.GetTextAlign();
     double dx = offset.GetX() + x + GetAlignOffset(align, paragraph_);
     auto baseline =
         isStroke ? strokeState_.GetTextStyle().GetTextBaseline() : fillState_.GetTextStyle().GetTextBaseline();
     double dy = offset.GetY() + y + GetBaselineOffset(baseline, paragraph_);
 
+    std::optional<double> scale = CalcTextScale(paragraph_->GetMaxIntrinsicWidth(), maxWidth);
     if (hasShadow) {
         skCanvas_->save();
         auto shadowOffsetX = shadow_.GetOffset().GetX();
         auto shadowOffsetY = shadow_.GetOffset().GetY();
+        if (scale.has_value()) {
+            skCanvas_->scale(scale.value(), 1);
+        }
         paragraph_->Paint(skCanvas_.get(), dx + shadowOffsetX, dy + shadowOffsetY);
         skCanvas_->restore();
         return;
     }
-
+    skCanvas_->save();
+    if (scale.has_value()) {
+        skCanvas_->scale(scale.value(), 1);
+    }
     paragraph_->Paint(skCanvas_.get(), dx, dy);
+    skCanvas_->restore();
 }
 
 double CanvasPaintMethod::GetBaselineOffset(TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph)
@@ -562,7 +568,7 @@ void CanvasPaintMethod::UpdateTextStyleForeground(
         txtStyle.color = ConvertSkColor(fillState_.GetColor());
         txtStyle.font_size = fillState_.GetTextStyle().GetFontSize().Value();
         ConvertTxtStyle(fillState_.GetTextStyle(), context_, txtStyle);
-        if (fillState_.GetGradient().IsValid()) {
+        if (fillState_.GetGradient().IsValid() && fillState_.GetPaintStyle() == PaintStyle::Gradient) {
             SkPaint paint;
 #ifndef NEW_SKIA
             InitImagePaint(paint);
@@ -606,7 +612,7 @@ void CanvasPaintMethod::UpdateTextStyleForeground(
         InitPaintBlend(paint);
         ConvertTxtStyle(strokeState_.GetTextStyle(), context_, txtStyle);
         txtStyle.font_size = strokeState_.GetTextStyle().GetFontSize().Value();
-        if (strokeState_.GetGradient().IsValid()) {
+        if (strokeState_.GetGradient().IsValid() && strokeState_.GetPaintStyle() == PaintStyle::Gradient) {
             UpdatePaintShader(offset, paint, strokeState_.GetGradient());
         }
         if (hasShadow) {
@@ -641,8 +647,8 @@ void CanvasPaintMethod::SetTransform(const TransformParam& param)
     CHECK_NULL_VOID(context);
     double viewScale = context->GetViewScale();
     SkMatrix skMatrix;
-    skMatrix.setAll(param.scaleX * viewScale, param.skewY * viewScale, param.translateX * viewScale,
-        param.skewX * viewScale, param.scaleY * viewScale, param.translateY * viewScale, 0, 0, 1);
+    skMatrix.setAll(param.scaleX * viewScale, param.skewX * viewScale, param.translateX * viewScale,
+        param.skewY * viewScale, param.scaleY * viewScale, param.translateY * viewScale, 0, 0, 1);
     skCanvas_->setMatrix(skMatrix);
 }
 

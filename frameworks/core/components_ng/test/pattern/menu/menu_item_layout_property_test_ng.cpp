@@ -20,8 +20,8 @@
 
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
-#include "core/components_ng/pattern/menu/menu_item/menu_item_view.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
@@ -379,12 +379,13 @@ HWTEST_F(MenuItemLayoutPropertyTestNg, MenuItemLayoutPropertyTestNg017, TestSize
  */
 HWTEST_F(MenuItemLayoutPropertyTestNg, MenuItemLayoutPropertyTestNg018, TestSize.Level1)
 {
+    MenuItemModelNG MneuItemModelInstance;
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
     MenuItemProperties itemOption;
-    MenuItemView::Create(itemOption);
-    MenuItemView::SetSelectIcon(true);
+    MneuItemModelInstance.Create(itemOption);
+    MneuItemModelInstance.SetSelectIcon(true);
     auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(itemNode, nullptr);
     auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();

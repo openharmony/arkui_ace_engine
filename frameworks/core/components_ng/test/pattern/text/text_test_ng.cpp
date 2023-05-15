@@ -2461,11 +2461,8 @@ HWTEST_F(TextTestNg, TextAccessibilityPropertyGetSupportAction001, TestSize.Leve
     std::unordered_set<AceAction> supportAceActions = textAccessibilityProperty->GetSupportAction();
     uint64_t actions = 0, expectActions = 0;
     expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_COPY);
-    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SELECT);
     expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SET_SELECTION);
     expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_CLEAR_SELECTION);
-    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_NEXT_AT_MOVEMENT_GRANULARITY);
-    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY);
     for (auto action : supportAceActions) {
         actions |= 1UL << static_cast<uint32_t>(action);
     }

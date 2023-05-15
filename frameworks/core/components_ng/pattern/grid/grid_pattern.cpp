@@ -126,6 +126,7 @@ void GridPattern::OnModifyDone()
     if (focusHub) {
         InitOnKeyEvent(focusHub);
     }
+    SetAccessibilityAction();
 }
 
 void GridPattern::UninitMouseEvent()
@@ -1125,4 +1126,28 @@ bool GridPattern::OutBoundaryCallback()
     return IsOutOfBoundary();
 }
 
+void GridPattern::SetAccessibilityAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetActionScrollForward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (!pattern->IsScrollable()) {
+            return;
+        }
+        pattern->ScrollPage(false);
+    });
+
+    accessibilityProperty->SetActionScrollBackward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (!pattern->IsScrollable()) {
+            return;
+        }
+        pattern->ScrollPage(true);
+    });
+}
 } // namespace OHOS::Ace::NG

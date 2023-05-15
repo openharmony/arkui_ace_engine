@@ -145,6 +145,7 @@ void MenuItemPattern::OnModifyDone()
     CHECK_NULL_VOID(rightRow);
     UpdateText(rightRow, menuProperty, true);
     UpdateIcon(rightRow, false);
+    SetAccessibilityAction();
 }
 
 RefPtr<FrameNode> MenuItemPattern::GetMenuWrapper()
@@ -247,12 +248,15 @@ void MenuItemPattern::RegisterOnClick()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<MenuItemEventHub>();
-
-    auto event = [onChange = hub->GetOnChange(), selectedChangeEvent = hub->GetSelectedChangeEvent(),
-                     weak = WeakClaim(this)](GestureEvent& /* info */) {
+    auto event = [weak = WeakClaim(this)](GestureEvent& /* info */) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto hub = host->GetEventHub<MenuItemEventHub>();
+        CHECK_NULL_VOID(hub);
+        auto onChange = hub->GetOnChange();
+        auto selectedChangeEvent = hub->GetSelectedChangeEvent();
         pattern->SetChange();
         if (selectedChangeEvent) {
             LOGI("trigger onChangeEvent");
@@ -262,8 +266,6 @@ void MenuItemPattern::RegisterOnClick()
             LOGI("trigger onChange");
             onChange(pattern->IsSelected());
         }
-        auto host = pattern->GetHost();
-        CHECK_NULL_VOID(host);
         host->OnAccessibilityEvent(AccessibilityEventType::SELECTED);
 
         if (pattern->GetSubBuilder() != nullptr) {
@@ -591,5 +593,37 @@ void MenuItemPattern::UpdateTextNodes()
         host->GetChildAtIndex(1) ? AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1)) : nullptr;
     CHECK_NULL_VOID(rightRow);
     UpdateText(rightRow, menuProperty, true);
+}
+
+void MenuItemPattern::SetAccessibilityAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetActionSelect([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto hub = host->GetEventHub<MenuItemEventHub>();
+        CHECK_NULL_VOID(hub);
+        auto onChange = hub->GetOnChange();
+        auto selectedChangeEvent = hub->GetSelectedChangeEvent();
+        pattern->SetChange();
+        if (selectedChangeEvent) {
+            selectedChangeEvent(pattern->IsSelected());
+        }
+        if (onChange) {
+            onChange(pattern->IsSelected());
+        }
+
+        if (pattern->GetSubBuilder() != nullptr) {
+            pattern->ShowSubMenu();
+            return;
+        }
+
+        pattern->CloseMenu();
+    });
 }
 } // namespace OHOS::Ace::NG
