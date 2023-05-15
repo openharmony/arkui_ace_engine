@@ -103,6 +103,7 @@ public:
     void SetFlexShrink(float value) override;
     void SetFlexGrow(float value) override;
     void SetDisplayIndex(int32_t value) override;
+    void ResetFlexShrink() override {};
 
     void SetLinearGradient(const NG::Gradient& gradient) override;
     void SetSweepGradient(const NG::Gradient& gradient) override;

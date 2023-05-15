@@ -318,6 +318,15 @@ void ViewAbstract::SetFlexShrink(float value)
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, FlexShrink, value);
 }
 
+void ViewAbstract::ResetFlexShrink()
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    ACE_RESET_LAYOUT_PROPERTY(LayoutProperty, FlexShrink);
+}
+
 void ViewAbstract::SetFlexGrow(float value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {

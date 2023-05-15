@@ -291,6 +291,17 @@ public:
         }
     }
 
+    void ResetFlexShrink()
+    {
+        if (!flexItemProperty_) {
+            return;
+        }
+        if (flexItemProperty_->HasFlexShrink()) {
+            propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+        }
+        flexItemProperty_->ResetFlexShrink();
+    }
+
     void UpdateFlexBasis(const Dimension& flexBasis)
     {
         if (!flexItemProperty_) {
