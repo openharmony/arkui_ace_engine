@@ -51,9 +51,8 @@ public:
     void BezierCurveTo(const BezierCurveParam& param);
     void QuadraticCurveTo(const QuadraticCurveParam& param);
 
-    void FillText(const std::string& text, double x, double y, std::optional<double> maxWidth, const PaintState& state);
-    void StrokeText(
-        const std::string& text, double x, double y, std::optional<double> maxWidth, const PaintState& state);
+    void FillText(const std::string& text, double x, double y, const PaintState& state);
+    void StrokeText(const std::string& text, double x, double y, const PaintState& state);
     double MeasureText(const std::string& text, const PaintState& state);
     double MeasureTextHeight(const std::string& text, const PaintState& state);
     TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state);
@@ -108,7 +107,6 @@ public:
     void ResetTransform();
     void Transform(const TransformParam& param);
     void Translate(double x, double y);
-    TransformParam GetTransform() const;
     std::string ToDataURL(const std::string& type, const double quality);
 
 private:

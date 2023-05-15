@@ -37,8 +37,7 @@ void PreviewMockModelNG::Create(const std::string& content)
     auto pattern = frameNode->GetPattern<CustomPaintPattern>();
     pattern->SetAntiAlias(true);
     pattern->UpdateFontSize(DEFAULT_FONT_SIZE);
-    std::optional<double> maxWidth;
-    pattern->FillText(presentationText, 0, DEFAULT_OFFSET, maxWidth);
+    pattern->FillText(presentationText, 0, DEFAULT_OFFSET);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(DEFAULT_HEIGHT)));

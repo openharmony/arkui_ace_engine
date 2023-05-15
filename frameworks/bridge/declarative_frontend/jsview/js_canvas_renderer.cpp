@@ -286,20 +286,14 @@ void JSCanvasRenderer::JsFillText(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsDouble(info[2], y);
         x = SystemProperties::Vp2Px(x);
         y = SystemProperties::Vp2Px(y);
-        std::optional<double> maxWidth;
-        if (info.Length() >= 4 && info[3]->IsNumber()) {
-            double width = 0;
-            JSViewAbstract::ParseJsDouble(info[3], width);
-            width = SystemProperties::Vp2Px(width);
-            maxWidth = width;
-        }
+
         if (Container::IsCurrentUseNewPipeline()) {
             if (isOffscreen_ && offscreenCanvasPattern_) {
-                offscreenCanvasPattern_->FillText(text, x, y, maxWidth, paintState_);
+                offscreenCanvasPattern_->FillText(text, x, y, paintState_);
                 return;
             }
             if (!isOffscreen_ && customPaintPattern_) {
-                customPaintPattern_->FillText(text, x, y, maxWidth);
+                customPaintPattern_->FillText(text, x, y);
             }
             return;
         }
@@ -329,20 +323,14 @@ void JSCanvasRenderer::JsStrokeText(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsDouble(info[2], y);
         x = SystemProperties::Vp2Px(x);
         y = SystemProperties::Vp2Px(y);
-        std::optional<double> maxWidth;
-        if (info.Length() >= 4 && info[3]->IsNumber()) {
-            double width = 0;
-            JSViewAbstract::ParseJsDouble(info[3], width);
-            width = SystemProperties::Vp2Px(width);
-            maxWidth = width;
-        }
+
         if (Container::IsCurrentUseNewPipeline()) {
             if (isOffscreen_ && offscreenCanvasPattern_) {
-                offscreenCanvasPattern_->StrokeText(text, x, y, maxWidth, paintState_);
+                offscreenCanvasPattern_->StrokeText(text, x, y, paintState_);
                 return;
             }
             if (!isOffscreen_ && customPaintPattern_) {
-                customPaintPattern_->StrokeText(text, x, y, maxWidth);
+                customPaintPattern_->StrokeText(text, x, y);
             }
             return;
         }
@@ -2580,20 +2568,7 @@ void JSCanvasRenderer::JsScale(const JSCallbackInfo& info)
 
 void JSCanvasRenderer::JsGetTransform(const JSCallbackInfo& info)
 {
-    JSRef<JSObject> obj = JSClass<JSMatrix2d>::NewInstance();
-    obj->SetProperty("__type", "Matrix2D");
-    if (Container::IsCurrentUseNewPipeline()) {
-        TransformParam param;
-        if (isOffscreen_ && offscreenCanvasPattern_) {
-            param = offscreenCanvasPattern_->GetTransform();
-        } else if (!isOffscreen_ && customPaintPattern_) {
-            param = customPaintPattern_->GetTransform();
-        }
-        auto matrix = Referenced::Claim(obj->Unwrap<JSMatrix2d>());
-        CHECK_NULL_VOID(matrix);
-        matrix->SetTransform(param);
-    }
-    info.SetReturnValue(obj);
+    return;
 }
 
 void JSCanvasRenderer::JsSetTransform(const JSCallbackInfo& info)
