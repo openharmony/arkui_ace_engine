@@ -157,8 +157,8 @@ void JSSelect::Selected(const JSCallbackInfo& info)
         value = info[0]->ToNumber<int32_t>();
     }
 
-    if (value <= 0) {
-        value = 0;
+    if (value <= -1) {
+        value = -1;
     }
     if (info.Length() > 1 && info[1]->IsFunction()) {
         ParseSelectedObject(info, info[1]);
