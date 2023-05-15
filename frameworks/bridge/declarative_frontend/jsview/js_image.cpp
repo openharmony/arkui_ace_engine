@@ -91,6 +91,10 @@ void JSImage::SetAlt(const JSCallbackInfo& args)
     if (!ParseJsMedia(args[0], src)) {
         return;
     }
+    if (ImageSourceInfo::ResolveURIType(src) == SrcType::NETWORK) {
+        LOGW("Alt doesn't support network image %{public}s", src.c_str());
+        return;
+    }
     ImageModel::GetInstance()->SetAlt(src);
 }
 
