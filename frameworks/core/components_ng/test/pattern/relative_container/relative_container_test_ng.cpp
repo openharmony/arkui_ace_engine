@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,30 +17,25 @@
 
 #include "gtest/gtest.h"
 
-#include "base/geometry/ng/offset_t.h"
-#include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/position_param.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
-#include "core/components_ng/pattern/relative_container/relative_container_layout_algorithm.h"
 #include "core/components_ng/pattern/relative_container/relative_container_layout_property.h"
 #include "core/components_ng/pattern/relative_container/relative_container_pattern.h"
 #include "core/components_ng/pattern/relative_container/relative_container_view.h"
 #include "core/components_ng/test/pattern/relative_container/relative_container_common_ng.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
-
 namespace {
-
 const float CONTAINER_WIDTH = 300.0f;
 const float CONTAINER_HEIGHT = 300.0f;
 const float ZERO = 0.0f;
@@ -72,23 +67,63 @@ const std::string SECOND_ITEM_ID = "bt2";
 const std::string THIRD_ITEM_ID = "bt3";
 const std::string FOURTH_ITEM_ID = "bt4";
 const std::string FIFTH_ITEM_ID = "bt5";
-
 const std::string CONTAINER_ID = "__container__";
-
 } // namespace
 
-class RelativeContainerLayoutTestNg : public testing::Test {
+class RelativeContainerTestNg : public testing::Test {
 public:
-    static void SetUpTestCase() {};
-    static void TearDownTestCase() {};
+    static void SetUpTestCase()
+    {
+        MockPipelineBase::SetUp();
+    }
+
+    static void TearDownTestCase()
+    {
+        MockPipelineBase::TearDown();
+    }
 };
+
+/**
+ * @tc.name: RelativeContainerPropertyTest001
+ * @tc.desc: Add first item--Bottom1 with alignrules value into RelativeContainer and get it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RelativeContainerTestNg, RelativeContainerPatternTest001, TestSize.Level1)
+{
+    RelativeContainerView::Create();
+    auto relativeContainerFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(relativeContainerFrameNode == nullptr);
+    auto relativeContainerLayoutProperty = relativeContainerFrameNode->GetLayoutProperty();
+    EXPECT_FALSE(relativeContainerLayoutProperty == nullptr);
+    auto relativeContainerLayoutWrapper = relativeContainerFrameNode->CreateLayoutWrapper();
+    EXPECT_FALSE(relativeContainerLayoutWrapper == nullptr);
+
+    /**
+    corresponding ets code:
+       RelativeContainer() {
+            Button("Button 1")
+              .alignRules({
+                left: { anchor: "__container__", align: HorizontalAlign.Start }
+              }).id("bt1").borderWidth(1).borderColor(Color.Black)
+            }.width(200).height(200).backgroundColor(Color.Orange)
+    */
+    auto firstItem = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, 1, []() { return AceType::MakeRefPtr<OHOS::Ace::NG::ButtonPattern>(); });
+    const auto& firstItemFlexProperty = firstItem->GetLayoutProperty()->GetFlexItemProperty();
+    std::map<AlignDirection, AlignRule> firstItemAlignRules;
+    RelativeContainerTestUtilsNG::AddAlignRule(
+        CONTAINER_ID, AlignDirection::LEFT, HorizontalAlign::START, firstItemAlignRules);
+    firstItem->GetLayoutProperty()->UpdateAlignRules(firstItemAlignRules);
+    relativeContainerFrameNode->AddChild(firstItem);
+    EXPECT_EQ(firstItemFlexProperty->GetAlignRulesValue(), firstItemAlignRules);
+}
 
 /**
  * @tc.name: RelativeContainerLayoutTest001
  * @tc.desc: Set an item with align rules with RelativeContainer and check it.
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest001, TestSize.Level1)
+HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest001, TestSize.Level1)
 {
     auto relativeContainerFrameNode = FrameNode::GetOrCreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG, 0,
         []() { return AceType::MakeRefPtr<OHOS::Ace::NG::RelativeContainerPattern>(); });
@@ -168,7 +203,7 @@ HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest001, TestSize
  * @tc.desc: Set two item with align rules with RelativeContainer and check it.
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest002, TestSize.Level1)
+HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest002, TestSize.Level1)
 {
     auto relativeContainerFrameNode = FrameNode::GetOrCreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG, 0,
         []() { return AceType::MakeRefPtr<OHOS::Ace::NG::RelativeContainerPattern>(); });
@@ -285,7 +320,7 @@ HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest002, TestSize
  * @tc.desc: Set five items with different align rules value into RelativeContainer and check .
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest003, TestSize.Level1)
+HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest003, TestSize.Level1)
 {
     int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto relativeContainerFrameNode = FrameNode::GetOrCreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG, nodeId,
@@ -520,7 +555,7 @@ HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest003, TestSize
  * @tc.desc: Set no child in RelativeContainer.
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest004, TestSize.Level1)
+HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest004, TestSize.Level1)
 {
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG, 0,
         []() { return AceType::MakeRefPtr<OHOS::Ace::NG::RelativeContainerPattern>(); });
@@ -560,7 +595,7 @@ HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest004, TestSize
  * @tc.desc: Set one child with no flexItemProperty another depend on itself in RelativeContainer.
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest005, TestSize.Level1)
+HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest005, TestSize.Level1)
 {
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG, 0,
         []() { return AceType::MakeRefPtr<OHOS::Ace::NG::RelativeContainerPattern>(); });
@@ -649,7 +684,7 @@ HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest005, TestSize
  * @tc.desc: Set two child with no flexItemProperty.
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest006, TestSize.Level1)
+HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest006, TestSize.Level1)
 {
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG, 0,
         []() { return AceType::MakeRefPtr<OHOS::Ace::NG::RelativeContainerPattern>(); });
@@ -727,7 +762,7 @@ HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest006, TestSize
  * @tc.desc: Set two children with wrong alignRules which makes calc length < 0.
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest007, TestSize.Level1)
+HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest007, TestSize.Level1)
 {
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG, 0,
         []() { return AceType::MakeRefPtr<OHOS::Ace::NG::RelativeContainerPattern>(); });
@@ -822,7 +857,7 @@ HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest007, TestSize
  * @tc.desc: Set two children with remain alignRules.
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest008, TestSize.Level1)
+HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest008, TestSize.Level1)
 {
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG, 0,
         []() { return AceType::MakeRefPtr<OHOS::Ace::NG::RelativeContainerPattern>(); });
@@ -929,7 +964,7 @@ HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest008, TestSize
  * @tc.desc: Set two children with remain alignRules to check offset.
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest009, TestSize.Level1)
+HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest009, TestSize.Level1)
 {
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG, 0,
         []() { return AceType::MakeRefPtr<OHOS::Ace::NG::RelativeContainerPattern>(); });
@@ -1019,5 +1054,4 @@ HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest009, TestSize
     EXPECT_EQ(firstItemLayoutWrapper->GetGeometryNode()->GetFrameOffset(), OffsetF(CONTAINER_WIDTH, CONTAINER_HEIGHT));
     EXPECT_EQ(secondItemLayoutWrapper->GetGeometryNode()->GetFrameOffset(), OffsetF());
 }
-
 } // namespace OHOS::Ace::NG
