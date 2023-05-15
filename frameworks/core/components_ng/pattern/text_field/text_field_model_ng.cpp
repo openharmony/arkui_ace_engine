@@ -33,7 +33,7 @@ namespace {
 constexpr const double UNDERLINE_NORMAL_HEIGHT = 48.0;
 constexpr const double UNDERLINE_NORMAL_PADDING = 12.0;
 constexpr const double UNDERLINE_NORMAL_FONTSIZE = 16.0;
-}
+} // namespace
 void TextFieldModelNG::CreateNode(
     const std::optional<std::string>& placeholder, const std::optional<std::string>& value, bool isTextArea)
 {
@@ -386,6 +386,19 @@ void TextFieldModelNG::AddDragFrameNodeToManager() const
 void TextFieldModelNG::SetForegroundColor(const Color& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextColor, value);
+}
+
+void TextFieldModelNG::SetPasswordIcon(const PasswordIcon& passwordIcon)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetShowResultImageInfo(
+        ImageSourceInfo(passwordIcon.showResult, passwordIcon.showBundleName, passwordIcon.showModuleName));
+    pattern->SetHideResultImageInfo(
+        ImageSourceInfo(passwordIcon.hideResult, passwordIcon.hideBundleName, passwordIcon.hideModuleName));
+    pattern->SetShowUserDefinedIcon();
 }
 
 void TextFieldModelNG::SetShowUnit(std::function<void()>&& unitFunction)

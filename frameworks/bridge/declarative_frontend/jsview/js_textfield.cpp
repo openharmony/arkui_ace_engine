@@ -992,6 +992,52 @@ void JSTextField::SetShowUnderline(const JSCallbackInfo& info)
     }
 }
 
+void JSTextField::SetPasswordIcon(const JSCallbackInfo& info)
+{
+    if (!Container::IsCurrentUseNewPipeline()) {
+        return;
+    }
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> showVal = jsObj->GetProperty("onIconSrc");
+    JSRef<JSVal> hideVal = jsObj->GetProperty("offIconSrc");
+    PasswordIcon passwordicon;
+    if (showVal->IsString()) {
+        passwordicon.showResult = showVal->ToString();
+    }
+    if (hideVal->IsString()) {
+        passwordicon.hideResult = hideVal->ToString();
+    }
+    if (showVal->IsObject()) {
+        JSRef<JSVal> bundleName = JSRef<JSObject>::Cast(showVal)->GetProperty("bundleName");
+        JSRef<JSVal> moduleName = JSRef<JSObject>::Cast(showVal)->GetProperty("moduleName");
+        if (bundleName->IsString()) {
+            passwordicon.showBundleName = bundleName->ToString();
+        }
+        if (moduleName->IsString()) {
+            passwordicon.showModuleName = moduleName->ToString();
+        }
+        ParseJsMedia(JSRef<JSObject>::Cast(showVal), passwordicon.showResult);
+    }
+    if (hideVal->IsObject()) {
+        JSRef<JSVal> bundleName = JSRef<JSObject>::Cast(hideVal)->GetProperty("bundleName");
+        JSRef<JSVal> moduleName = JSRef<JSObject>::Cast(hideVal)->GetProperty("moduleName");
+        if (bundleName->IsString()) {
+            passwordicon.hideBundleName = bundleName->ToString();
+        }
+        if (moduleName->IsString()) {
+            passwordicon.hideModuleName = moduleName->ToString();
+        }
+        ParseJsMedia(JSRef<JSObject>::Cast(hideVal), passwordicon.hideResult);
+    }
+    if (passwordicon.showResult.empty() && passwordicon.hideResult.empty()) {
+        return;
+    }
+    TextFieldModel::GetInstance()->SetPasswordIcon(passwordicon);
+}
+
 void JSTextField::UpdateDecoration(const RefPtr<BoxComponent>& boxComponent,
     const RefPtr<TextFieldComponent>& component, const Border& boxBorder,
     const OHOS::Ace::RefPtr<OHOS::Ace::TextFieldTheme>& textFieldTheme)

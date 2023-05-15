@@ -124,8 +124,25 @@ void TextFieldContentModifier::onDraw(DrawingContext& context)
     clipInnerRect = RSRect(
         offset.GetX(), 0.0f, textFieldPattern->GetFrameRect().Width(), textFieldPattern->GetFrameRect().Height());
     canvas.ClipRect(clipInnerRect, RSClipOp::UNION);
+    UpdatePaintConfig(passwordIconCanvasImage, context, iconRect);
     const ImagePainter passwordIconImagePainter(passwordIconCanvasImage);
     passwordIconImagePainter.DrawImage(canvas, iconRect.GetOffset(), iconRect.GetSize());
+}
+
+void TextFieldContentModifier::UpdatePaintConfig(
+    RefPtr<CanvasImage> &passwordIconCanvasImage, DrawingContext context, RectF iconRect) const
+{
+    CHECK_NULL_VOID(passwordIconCanvasImage);
+    auto &&config = passwordIconCanvasImage->GetPaintConfig();
+    config.renderMode_ = ImageRenderMode::ORIGINAL;
+    config.imageInterpolation_ = ImageInterpolation::NONE;
+    config.imageRepeat_ = ImageRepeat::NO_REPEAT;
+    config.imageFit_ = ImageFit::FILL;
+    if (context.height == 0 || context.width == 0) {
+        return;
+    }
+    config.scaleX_ = iconRect.GetSize().Width() / context.width;
+    config.scaleY_ = iconRect.GetSize().Height() / context.height;
 }
 
 void TextFieldContentModifier::SetDefaultAnimatablePropertyValue()

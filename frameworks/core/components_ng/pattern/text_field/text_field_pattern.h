@@ -465,6 +465,10 @@ public:
     {
         needCloseOverlay_ = needClose;
     }
+    const RefPtr<ImageLoadingContext>& GetShowPasswordIconCtx() const
+    {
+        return showPasswordImageLoadingCtx_;
+    }
 
     void SearchRequestKeyboard();
 
@@ -473,9 +477,24 @@ public:
         return showPasswordCanvasImage_;
     }
 
+    const RefPtr<ImageLoadingContext>& GetHidePasswordIconCtx() const
+    {
+        return hidePasswordImageLoadingCtx_;
+    }
+
     const RefPtr<CanvasImage>& GetHidePasswordIconCanvasImage() const
     {
         return hidePasswordCanvasImage_;
+    }
+
+    void SetShowResultImageInfo(ImageSourceInfo showResultImageInfo)
+    {
+        showResultImageInfo_ = showResultImageInfo;
+    }
+
+    void SetHideResultImageInfo(ImageSourceInfo hideResultImageInfo)
+    {
+        hideResultImageInfo_ = hideResultImageInfo;
     }
 
     bool GetTextObscured() const
@@ -506,6 +525,11 @@ public:
         CHECK_NULL_RETURN_NOLOG(layoutProperty, false);
         return layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::VISIBLE_PASSWORD &&
                layoutProperty->GetShowPasswordIconValue(true);
+    }
+
+    void SetShowUserDefinedIcon()
+    {
+        showUserDefinedIcon_ = true;
     }
 
     void SetEnableTouchAndHoverEffect(bool enable)
@@ -733,16 +757,6 @@ public:
     void SetUnitNode(const RefPtr<NG::UINode>& unitNode);
     void SetShowError();
 
-    const RefPtr<ImageLoadingContext>& GetShowPasswordIconCtx() const
-    {
-        return showPasswordImageLoadingCtx_;
-    }
-
-    const RefPtr<ImageLoadingContext>& GetHidePasswordIconCtx() const
-    {
-        return hidePasswordImageLoadingCtx_;
-    }
-
     void SetShowUnderLine(bool showUnderLine)
     {
         showUnderLine_ = showUnderLine;
@@ -860,6 +874,7 @@ private:
     void AnimatePressAndHover(RefPtr<RenderContext>& renderContext, float endOpacity, bool isHoverChange = false);
 
     void ProcessPasswordIcon();
+    void UpdateUserDefineResource(ImageSourceInfo& sourceInfo);
     void UpdateInternalResource(ImageSourceInfo& sourceInfo);
     ImageSourceInfo GetImageSourceInfoFromTheme(bool checkHidePasswordIcon);
     LoadSuccessNotifyTask CreateLoadSuccessCallback(bool checkHidePasswordIcon);
@@ -918,10 +933,13 @@ private:
     OffsetF rightClickOffset_;
 
     bool showUnderLine_ = false;
+    ImageSourceInfo showResultImageInfo_;
+    ImageSourceInfo hideResultImageInfo_;
     bool setBorderFlag_ = true;
     BorderWidthProperty lastDiffBorderWidth_;
     BorderColorProperty lastDiffBorderColor_;
 
+    bool showUserDefinedIcon_ = false;
     bool isSingleHandle_ = false;
     bool isFirstHandle_ = false;
     float baselineOffset_ = 0.0f;
