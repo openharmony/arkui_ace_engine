@@ -22,9 +22,12 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/geometry/offset.h"
 #include "base/utils/utils.h"
+#define protected public
 #define private public
+#include "core/components/button/button_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
+#include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/grid/grid_item_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
@@ -32,10 +35,9 @@
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/test/mock/render/mock_render_context.h"
 #include "core/components_ng/test/mock/rosen/mock_canvas.h"
+#include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/pipeline/base/constants.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
-
-#define protected public
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_layout_algorithm.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
@@ -96,6 +98,11 @@ public:
 void GridTestNg::SetUpTestSuite()
 {
     MockPipelineBase::SetUp();
+    // set buttonTheme to themeManager before using themeManager to get buttonTheme
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
 }
 
 void GridTestNg::TearDownTestSuite()
@@ -165,6 +172,8 @@ void GridTestNg::CreateGridItemWithButton(int32_t number)
         gridItemModel.Create();
         SetHeight(Dimension(DEFAULT_ITEM_HEIGHT));
         {
+            ButtonModelNG buttonModelNG;
+            buttonModelNG.CreateWithLabel("label");
             ViewStackProcessor::GetInstance()->Pop();
         }
         ViewStackProcessor::GetInstance()->Pop();
@@ -178,6 +187,8 @@ void GridTestNg::CreateHorizontalGridItemWithButton(int32_t number)
         gridItemModel.Create();
         SetWidth(Dimension(DEFAULT_ITEM_WIDTH));
         {
+            ButtonModelNG buttonModelNG;
+            buttonModelNG.CreateWithLabel("label");
             ViewStackProcessor::GetInstance()->Pop();
         }
         ViewStackProcessor::GetInstance()->Pop();
