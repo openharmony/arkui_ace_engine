@@ -466,7 +466,11 @@ void DragDropManager::FireOnDragEvent(
 
 #ifdef ENABLE_DRAG_FRAMEWORK
     if (event->GetResult() == DragRet::ENABLE_DROP) {
-        InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::COPY);
+        if (event->IsCopy()) {
+            InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::COPY);
+        } else {
+            InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::MOVE);
+        }
     } else if (event->GetResult() == DragRet::DISABLE_DROP) {
         InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::FORBIDDEN);
     } else {
