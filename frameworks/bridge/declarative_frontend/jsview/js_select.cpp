@@ -641,7 +641,7 @@ void JSSelect::SetSpace(const JSCallbackInfo& info)
         LOGI("JSSelect set space value is mull");
         value = selectTheme->GetContentSpinnerPadding();
     }
-    if (LessNotEqual(value.Value(), 0.0)) {
+    if (LessNotEqual(value.Value(), 0.0) || value.Unit() == DimensionUnit::PERCENT) {
         LOGI("JSSelect set space value is to small");
         value = selectTheme->GetContentSpinnerPadding();
     }
