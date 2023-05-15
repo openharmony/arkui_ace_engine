@@ -17,6 +17,7 @@
 
 #include "drawing/engine_adapter/skia_adapter/skia_canvas.h"
 
+#include "core/common/ace_application_info.h"
 #include "core/components_ng/pattern/custom_paint/offscreen_canvas_paint_method.h"
 
 namespace OHOS::Ace::NG {
@@ -210,6 +211,9 @@ void OffscreenCanvasPattern::SetLineDash(const std::vector<double>& segments)
 
 void OffscreenCanvasPattern::SetTextDirection(TextDirection direction)
 {
+    if (direction == TextDirection::INHERIT) {
+        direction = AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR;
+    }
     offscreenPaintMethod_->SetTextDirection(direction);
 }
 

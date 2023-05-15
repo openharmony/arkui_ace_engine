@@ -18,6 +18,7 @@
 #include "drawing/engine_adapter/skia_adapter/skia_canvas.h"
 
 #include "base/utils/utils.h"
+#include "core/common/ace_application_info.h"
 #include "core/components_ng/pattern/custom_paint/canvas_paint_method.h"
 #include "core/components_ng/pattern/custom_paint/offscreen_canvas_pattern.h"
 
@@ -820,12 +821,20 @@ double CustomPaintPattern::GetHeight()
 
 void CustomPaintPattern::SetTextDirection(TextDirection direction)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<LayoutProperty>();
+    auto directionCommon = layoutProperty->GetLayoutDirection();
+    if (directionCommon == TextDirection::AUTO) {
+        directionCommon = AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR;
+    }
+    if (direction == TextDirection::INHERIT) {
+        direction = directionCommon;
+    }
     auto task = [direction](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
         paintMethod.SetTextDirection(direction);
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
