@@ -99,6 +99,13 @@ public:
         IC_PUBLIC_ARROW_RIGHT_SVG,
         IC_PUBLIC_ARROW_UP_SVG,
         IC_PUBLIC_ARROW_DOWN_SVG,
+        IC_CUT_SVG,
+        IC_COPY_SVG,
+        IC_PASTE_SVG,
+        IC_SELECT_ALL_SVG,
+        IC_SHARE_SVG,
+        IC_TRANSLATE_SVG,
+        IC_SEARCH_SVG,
         SVG_END = 20000,
 
         // 20001 - 30000 is reserved for i18n resource.
