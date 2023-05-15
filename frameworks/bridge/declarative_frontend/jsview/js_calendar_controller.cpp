@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,29 +16,46 @@
 #include "bridge/declarative_frontend/jsview/js_calendar_controller.h"
 
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "bridge/declarative_frontend/jsview/models/calendar_controller_model_impl.h"
+#include "core/components_ng/pattern/calendar/calendar_controller_model_ng.h"
+
+namespace OHOS::Ace {
+
+std::unique_ptr<CalendarControllerModel> CalendarControllerModel::instance_ = nullptr;
+
+CalendarControllerModel* CalendarControllerModel::GetInstance()
+{
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance_.reset(new NG::CalendarControllerModelNG());
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::CalendarControllerModelNG());
+        } else {
+            instance_.reset(new Framework::CalendarControllerModelImpl());
+        }
+#endif
+    }
+    return instance_.get();
+}
+
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
-
 void JSCalendarController::JSBind(BindingTarget globalObj)
 {
     JSClass<JSCalendarController>::Declare("CalendarController");
     JSClass<JSCalendarController>::CustomMethod("backToToday", &JSCalendarController::BackToToday);
     JSClass<JSCalendarController>::CustomMethod("goTo", &JSCalendarController::GoTo);
-    JSClass<JSCalendarController>::Bind(globalObj, JSCalendarController::Constructor, JSCalendarController::Destructor);
+    JSClass<JSCalendarController>::Bind(globalObj,
+        JSCalendarController::Constructor, JSCalendarController::Destructor);
 }
 
 void JSCalendarController::Constructor(const JSCallbackInfo& args)
 {
     auto jsCalendarController = Referenced::MakeRefPtr<JSCalendarController>();
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto controllerNg = Referenced::MakeRefPtr<NG::CalendarControllerNg>();
-        jsCalendarController->SetControllerNg(controllerNg);
-        jsCalendarController->IncRefCount();
-        args.SetReturnValue(Referenced::RawPtr(jsCalendarController));
-        return;
-    }
-    auto controllerV2 = Referenced::MakeRefPtr<CalendarControllerV2>();
-    jsCalendarController->SetController(controllerV2);
+    auto controller = CalendarControllerModel::GetInstance()->GetController();
+    jsCalendarController->SetController(controller);
     jsCalendarController->IncRefCount();
     args.SetReturnValue(Referenced::RawPtr(jsCalendarController));
 }
@@ -52,15 +69,7 @@ void JSCalendarController::Destructor(JSCalendarController* controller)
 
 void JSCalendarController::BackToToday(const JSCallbackInfo& args)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        if (controllerNg_ != nullptr) {
-            controllerNg_->BackToToday();
-        }
-        return;
-    }
-    if (controller_ != nullptr) {
-        controller_->BackToToday();
-    }
+    CalendarControllerModel::GetInstance()->BackToToday(controller_);
 }
 
 void JSCalendarController::GoTo(const JSCallbackInfo& info)
@@ -75,15 +84,6 @@ void JSCalendarController::GoTo(const JSCallbackInfo& info)
     ConvertFromJSValue(obj->GetProperty("year"), year);
     ConvertFromJSValue(obj->GetProperty("month"), month);
     ConvertFromJSValue(obj->GetProperty("day"), day);
-    if (Container::IsCurrentUseNewPipeline()) {
-        if (controllerNg_ != nullptr) {
-            controllerNg_->GoTo(year, month, day);
-        }
-        return;
-    }
-    if (controller_ != nullptr) {
-        controller_->GoTo(year, month, day);
-    }
+    CalendarControllerModel::GetInstance()->GoTo(year, month, day, controller_);
 }
-
 } // namespace OHOS::Ace::Framework

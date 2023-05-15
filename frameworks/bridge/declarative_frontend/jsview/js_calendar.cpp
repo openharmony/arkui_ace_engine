@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,20 +26,36 @@
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
 #include "core/components/common/properties/color.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/calendar/calendar_controller_ng.h"
-#include "core/components_ng/pattern/calendar/calendar_month_view.h"
-#include "core/components_ng/pattern/calendar/calendar_paint_property.h"
-#include "core/components_ng/pattern/calendar/calendar_view.h"
+#include "core/components_ng/pattern/calendar/calendar_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar_controller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+#include "frameworks/bridge/declarative_frontend/jsview/models/calendar_model_impl.h"
+
+namespace OHOS::Ace {
+
+std::unique_ptr<CalendarModel> CalendarModel::instance_ = nullptr;
+
+CalendarModel* CalendarModel::GetInstance()
+{
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance_.reset(new NG::CalendarModelNG());
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::CalendarModelNG());
+        } else {
+            instance_.reset(new Framework::CalendarModelImpl());
+        }
+#endif
+    }
+    return instance_.get();
+}
+
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 namespace {
-
 constexpr int32_t CALENDAR_INVALID = -1;
-
 } // namespace
 
 void JSCalendar::JSBind(BindingTarget globalObj)
@@ -75,52 +91,31 @@ void JSCalendar::Create(const JSCallbackInfo& info)
     auto preData = JSRef<JSObject>::Cast(obj->GetProperty("preData"));
     auto nextData = JSRef<JSObject>::Cast(obj->GetProperty("nextData"));
     auto controllerObj = obj->GetProperty("controller");
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto yearValue = date->GetProperty("year");
-        auto monthValue = date->GetProperty("month");
-        auto dayValue = date->GetProperty("day");
-        if (!yearValue->IsNumber() || !monthValue->IsNumber() || !dayValue->IsNumber()) {
-            return;
-        }
-        CalendarDay day;
-        day.month.year = yearValue->ToNumber<int32_t>();
-        day.month.month = monthValue->ToNumber<int32_t>();
-        day.day = dayValue->ToNumber<int32_t>();
-        NG::CalendarData calendarData;
-        calendarData.date = day;
-        ObtainedMonth currentMonthData = GetCurrentData(currentData);
-        ObtainedMonth preMonthData = GetPreData(preData);
-        ObtainedMonth nextMonthData = GetNextData(nextData);
-        calendarData.currentData = currentMonthData;
-        calendarData.preData = preMonthData;
-        calendarData.nextData = nextMonthData;
-        if (controllerObj->IsObject()) {
-            auto jsCalendarController = JSRef<JSObject>::Cast(controllerObj).Unwrap<JSCalendarController>();
-            if (jsCalendarController) {
-                auto controller = jsCalendarController->GetControllerNg();
-                calendarData.controller = controller;
-            }
-        }
-        NG::CalendarView::Create(calendarData);
+    auto yearValue = date->GetProperty("year");
+    auto monthValue = date->GetProperty("month");
+    auto dayValue = date->GetProperty("day");
+    if (!yearValue->IsNumber() || !monthValue->IsNumber() || !dayValue->IsNumber()) {
         return;
     }
-
-    auto calendarComponent = AceType::MakeRefPtr<OHOS::Ace::CalendarComponentV2>("", "calendar");
-    SetDate(date, calendarComponent);
-    SetCurrentData(currentData, calendarComponent);
-    SetPreData(preData, calendarComponent);
-    SetNextData(nextData, calendarComponent);
+    CalendarDay day;
+    day.month.year = yearValue->ToNumber<int32_t>();
+    day.month.month = monthValue->ToNumber<int32_t>();
+    day.day = dayValue->ToNumber<int32_t>();
+    CalendarModelData calendarData;
+    calendarData.date = day;
+    ObtainedMonth currentMonthData = GetCurrentData(currentData);
+    ObtainedMonth preMonthData = GetPreData(preData);
+    ObtainedMonth nextMonthData = GetNextData(nextData);
+    calendarData.currentData = currentMonthData;
+    calendarData.preData = preMonthData;
+    calendarData.nextData = nextMonthData;
     if (controllerObj->IsObject()) {
         auto jsCalendarController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSCalendarController>();
         if (jsCalendarController) {
-            auto controllerV2 = jsCalendarController->GetController();
-            calendarComponent->SetControllerV2(controllerV2);
+            calendarData.controller = jsCalendarController->GetController();
         }
     }
-    auto theme = GetTheme<CalendarTheme>();
-    calendarComponent->SetCalendarTheme(theme);
-    calendarComponent->SetV2Component(true);
-    ViewStackProcessor::GetInstance()->Push(calendarComponent);
+    CalendarModel::GetInstance()->Create(calendarData);
 }
 
 void JSCalendar::SetCalendarData(
@@ -259,14 +254,8 @@ void JSCalendar::SetOffDays(int32_t offDays)
         }
         bit <<= 1;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::CalendarView::SetOffDays(result);
-        return;
-    }
-    auto component = GetComponent();
-    CHECK_NULL_VOID(component);
 
-    component->SetOffDays(result);
+    CalendarModel::GetInstance()->SetOffDays(result);
 }
 
 void JSCalendar::SetShowHoliday(const JSCallbackInfo& info)
@@ -279,13 +268,7 @@ void JSCalendar::SetShowHoliday(const JSCallbackInfo& info)
     if (info[0]->IsBoolean()) {
         showHoliday = info[0]->ToBoolean();
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::CalendarView::SetShowHoliday(showHoliday);
-        return;
-    }
-    auto component = GetComponent();
-    CHECK_NULL_VOID(component);
-    component->SetShowHoliday(showHoliday);
+    CalendarModel::GetInstance()->SetShowHoliday(showHoliday);
 }
 
 void JSCalendar::SetShowLunar(const JSCallbackInfo& info)
@@ -298,14 +281,7 @@ void JSCalendar::SetShowLunar(const JSCallbackInfo& info)
     if (info[0]->IsBoolean()) {
         showLunar = info[0]->ToBoolean();
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::CalendarView::SetShowLunar(showLunar);
-        return;
-    }
-    auto component = GetComponent();
-    CHECK_NULL_VOID(component);
-
-    component->SetShowLunar(showLunar);
+    CalendarModel::GetInstance()->SetShowLunar(showLunar);
 }
 
 void JSCalendar::SetStartOfWeek(const JSCallbackInfo& info)
@@ -316,16 +292,7 @@ void JSCalendar::SetStartOfWeek(const JSCallbackInfo& info)
     }
     if (info[0]->IsNumber()) {
         auto startOfWeek = info[0]->ToNumber<int32_t>();
-        if (Container::IsCurrentUseNewPipeline()) {
-            NG::CalendarView::SetStartOfWeek(NG::Week(startOfWeek));
-            return;
-        }
-        auto component = GetComponent();
-        CHECK_NULL_VOID(component);
-
-        if (0 <= startOfWeek && startOfWeek < 7) {
-            component->SetStartDayOfWeek(startOfWeek);
-        }
+        CalendarModel::GetInstance()->SetStartOfWeek(startOfWeek);
     }
 }
 
@@ -339,13 +306,7 @@ void JSCalendar::SetNeedSlide(const JSCallbackInfo& info)
     if (info[0]->IsBoolean()) {
         needSlide = info[0]->ToBoolean();
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::CalendarView::SetNeedSlide(needSlide);
-        return;
-    }
-    auto component = GetComponent();
-    CHECK_NULL_VOID(component);
-    component->SetNeedSlide(needSlide);
+    CalendarModel::GetInstance()->SetNeedSlide(needSlide);
 }
 
 void JSCalendar::SetWorkDays(const std::string& workDays)
@@ -375,29 +336,17 @@ void JSCalendar::JsOnSelectedChange(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have atleast 1 argument.");
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
+
+    if (info[0]->IsFunction()) {
         auto selectedChangeFuc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
         auto selectedChange = [execCtx = info.GetExecutionContext(), func = std::move(selectedChangeFuc)](
-                                  const std::string& info) {
+                                    const std::string& info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             std::vector<std::string> keys = { "year", "month", "day" };
             ACE_SCORING_EVENT("Calendar.onSelectedChange");
             func->Execute(keys, info);
         };
-        NG::CalendarView::SetSelectedChangeEvent(selectedChange);
-        return;
-    }
-    auto component = GetComponent();
-    if (info[0]->IsFunction() && component) {
-        auto selectedChangeFuc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-        EventMarker onSelectedChangeId(
-            [execCtx = info.GetExecutionContext(), func = std::move(selectedChangeFuc)](const std::string& info) {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                std::vector<std::string> keys = { "year", "month", "day" };
-                ACE_SCORING_EVENT("Calendar.onSelectedChange");
-                func->Execute(keys, info);
-            });
-        component->SetSelectedChangeEvent(onSelectedChangeId);
+        CalendarModel::GetInstance()->SetSelectedChangeEvent(std::move(selectedChange));
     }
 }
 
@@ -407,30 +356,15 @@ void JSCalendar::JsOnRequestData(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have atleast 1 argument.");
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto requestDataFuc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-        auto requestData = [execCtx = info.GetExecutionContext(), func = std::move(requestDataFuc)](
-                               const std::string& info) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("Calendar.onRequestData");
-            std::vector<std::string> keys = { "year", "month", "currentMonth", "currentYear", "monthState" };
-            func->Execute(keys, info);
-        };
-        NG::CalendarView::SetOnRequestDataEvent(std::move(requestData));
-        return;
-    }
-    auto component = GetComponent();
-    if (info[0]->IsFunction() && component) {
-        auto requestDataFuc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-        EventMarker onRequestDataId(
-            [execCtx = info.GetExecutionContext(), func = std::move(requestDataFuc)](const std::string& info) {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                std::vector<std::string> keys = { "year", "month", "currentMonth", "currentYear", "monthState" };
-                ACE_SCORING_EVENT("Calendar.onRequestData");
-                func->Execute(keys, info);
-            });
-        component->SetRequestDataEvent(onRequestDataId);
-    }
+    auto requestDataFuc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto requestData = [execCtx = info.GetExecutionContext(), func = std::move(requestDataFuc)](
+                            const std::string& info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Calendar.onRequestData");
+        std::vector<std::string> keys = { "year", "month", "currentMonth", "currentYear", "monthState" };
+        func->Execute(keys, info);
+    };
+    CalendarModel::GetInstance()->SetOnRequestDataEvent(std::move(requestData));
 }
 
 void JSCalendar::SetCurrentData(const JSRef<JSObject>& obj, const RefPtr<CalendarComponentV2>& component)
@@ -471,17 +405,7 @@ void JSCalendar::SetDirection(const JSCallbackInfo& info)
     }
     if (info[0]->IsNumber()) {
         auto dir = info[0]->ToNumber<int32_t>();
-        if (Container::IsCurrentUseNewPipeline()) {
-            NG::CalendarView::SetDirection(Axis(dir));
-            return;
-        }
-        auto component = GetComponent();
-        CHECK_NULL_VOID(component);
-        if (dir == 0) {
-            component->SetAxis(Axis::VERTICAL);
-        } else if (dir == 1) {
-            component->SetAxis(Axis::HORIZONTAL);
-        }
+        CalendarModel::GetInstance()->SetDirection(dir);
     }
 }
 
@@ -492,139 +416,135 @@ void JSCalendar::SetCurrentDayStyle(const JSCallbackInfo& info)
         return;
     }
     auto obj = JSRef<JSObject>::Cast(info[0]);
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::CurrentDayStyle currentDayStyle;
-        Color dayColor;
-        if (ConvertFromJSValue(obj->GetProperty("dayColor"), dayColor)) {
-            currentDayStyle.UpdateDayColor(dayColor);
-        }
-        Color lunarColor;
-        if (ConvertFromJSValue(obj->GetProperty("lunarColor"), lunarColor)) {
-            currentDayStyle.UpdateLunarColor(lunarColor);
-        }
-        Color markLunarColor;
-        if (ConvertFromJSValue(obj->GetProperty("markLunarColor"), markLunarColor)) {
-            currentDayStyle.UpdateMarkLunarColor(markLunarColor);
-        }
-        CalcDimension dayFontSize;
-        if (ParseJsDimensionFp(obj->GetProperty("dayFontSize"), dayFontSize)) {
-            currentDayStyle.UpdateDayFontSize(dayFontSize);
-        }
-        CalcDimension lunarDayFontSize;
-        if (ParseJsDimensionFp(obj->GetProperty("lunarDayFontSize"), lunarDayFontSize)) {
-            currentDayStyle.UpdateLunarDayFontSize(lunarDayFontSize);
-        }
-        CalcDimension dayHeight;
-        if (ParseJsDimensionFp(obj->GetProperty("dayHeight"), dayHeight)) {
-            currentDayStyle.UpdateDayHeight(dayHeight);
-        }
-        CalcDimension dayWidth;
-        if (ParseJsDimensionFp(obj->GetProperty("dayWidth"), dayWidth)) {
-            currentDayStyle.UpdateDayWidth(dayWidth);
-        }
-        CalcDimension gregorianCalendarHeight;
-        if (ParseJsDimensionFp(obj->GetProperty("gregorianCalendarHeight"), gregorianCalendarHeight)) {
-            currentDayStyle.UpdateGregorianCalendarHeight(gregorianCalendarHeight);
-        }
-        CalcDimension lunarHeight;
-        if (ParseJsDimensionFp(obj->GetProperty("lunarHeight"), lunarHeight)) {
-            currentDayStyle.UpdateLunarHeight(lunarHeight);
-        }
-        CalcDimension dayYAxisOffset;
-        if (ParseJsDimensionFp(obj->GetProperty("dayYAxisOffset"), dayYAxisOffset)) {
-            currentDayStyle.UpdateDayYAxisOffset(dayYAxisOffset);
-        }
-        CalcDimension lunarDayYAxisOffset;
-        if (ParseJsDimensionFp(obj->GetProperty("lunarDayYAxisOffset"), lunarDayYAxisOffset)) {
-            currentDayStyle.UpdateLunarDayYAxisOffset(lunarDayYAxisOffset);
-        }
-        CalcDimension underscoreXAxisOffset;
-        if (ParseJsDimensionFp(obj->GetProperty("underscoreXAxisOffset"), underscoreXAxisOffset)) {
-            currentDayStyle.UpdateUnderscoreXAxisOffset(underscoreXAxisOffset);
-        }
-        CalcDimension underscoreYAxisOffset;
-        if (ParseJsDimensionFp(obj->GetProperty("underscoreYAxisOffset"), underscoreYAxisOffset)) {
-            currentDayStyle.UpdateUnderscoreYAxisOffset(underscoreYAxisOffset);
-        }
-        CalcDimension scheduleMarkerXAxisOffset;
-        if (ParseJsDimensionFp(obj->GetProperty("scheduleMarkerXAxisOffset"), scheduleMarkerXAxisOffset)) {
-            currentDayStyle.UpdateScheduleMarkerXAxisOffset(scheduleMarkerXAxisOffset);
-        }
-        CalcDimension scheduleMarkerYAxisOffset;
-        if (ParseJsDimensionFp(obj->GetProperty("scheduleMarkerYAxisOffset"), scheduleMarkerYAxisOffset)) {
-            currentDayStyle.UpdateScheduleMarkerYAxisOffset(scheduleMarkerYAxisOffset);
-        }
-        CalcDimension colSpace;
-        if (ParseJsDimensionFp(obj->GetProperty("colSpace"), colSpace)) {
-            currentDayStyle.UpdateColSpace(colSpace);
-        }
-        CalcDimension dailyFiveRowSpace;
-        if (ParseJsDimensionFp(obj->GetProperty("dailyFiveRowSpace"), dailyFiveRowSpace)) {
-            currentDayStyle.UpdateDailyFiveRowSpace(dailyFiveRowSpace);
-        }
-        CalcDimension dailySixRowSpace;
-        if (ParseJsDimensionFp(obj->GetProperty("dailySixRowSpace"), dailySixRowSpace)) {
-            currentDayStyle.UpdateDailySixRowSpace(dailySixRowSpace);
-        }
-        CalcDimension underscoreWidth;
-        if (ParseJsDimensionFp(obj->GetProperty("underscoreWidth"), underscoreWidth)) {
-            currentDayStyle.UpdateUnderscoreWidth(underscoreWidth);
-        }
-        CalcDimension underscoreLength;
-        if (ParseJsDimensionFp(obj->GetProperty("underscoreLength"), underscoreLength)) {
-            currentDayStyle.UpdateUnderscoreLength(underscoreLength);
-        }
-        CalcDimension scheduleMarkerRadius;
-        if (ParseJsDimensionFp(obj->GetProperty("scheduleMarkerRadius"), scheduleMarkerRadius)) {
-            currentDayStyle.UpdateScheduleMarkerRadius(scheduleMarkerRadius);
-        }
-        CalcDimension boundaryRowOffset;
-        if (ParseJsDimensionFp(obj->GetProperty("boundaryRowOffset"), boundaryRowOffset)) {
-            currentDayStyle.UpdateBoundaryRowOffset(boundaryRowOffset);
-        }
-        CalcDimension boundaryColOffset;
-        if (ParseJsDimensionFp(obj->GetProperty("boundaryColOffset"), boundaryColOffset)) {
-            currentDayStyle.UpdateBoundaryColOffset(boundaryColOffset);
-        }
-        NG::CalendarView::SetCurrentDayStyle(currentDayStyle);
-        return;
+    CurrentDayStyleData currentDayStyleData;
+    Color dayColor;
+    if (ConvertFromJSValue(obj->GetProperty("dayColor"), dayColor)) {
+        currentDayStyleData.dayColor = dayColor;
     }
-    auto component = GetComponent();
-    CHECK_NULL_VOID(component);
-
-    auto& themePtr = component->GetCalendarTheme();
-    CHECK_NULL_VOID(themePtr);
-    auto& theme = themePtr->GetCalendarTheme();
-    ConvertFromJSValue(obj->GetProperty("dayColor"), theme.dayColor);
-    ConvertFromJSValue(obj->GetProperty("lunarColor"), theme.lunarColor);
-    ConvertFromJSValue(obj->GetProperty("markLunarColor"), theme.markLunarColor);
+    Color lunarColor;
+    if (ConvertFromJSValue(obj->GetProperty("lunarColor"), lunarColor)) {
+        currentDayStyleData.lunarColor = lunarColor;
+    }
+    Color markLunarColor;
+    if (ConvertFromJSValue(obj->GetProperty("markLunarColor"), markLunarColor)) {
+        currentDayStyleData.markLunarColor = markLunarColor;
+    }
     CalcDimension dayFontSize;
     if (ParseJsDimensionFp(obj->GetProperty("dayFontSize"), dayFontSize)) {
-        theme.dayFontSize = dayFontSize;
+        currentDayStyleData.dayFontSize = dayFontSize;
     }
     CalcDimension lunarDayFontSize;
     if (ParseJsDimensionFp(obj->GetProperty("lunarDayFontSize"), lunarDayFontSize)) {
-        theme.lunarDayFontSize = lunarDayFontSize;
+        currentDayStyleData.lunarDayFontSize = lunarDayFontSize;
     }
-    ConvertFromJSValue(obj->GetProperty("dayHeight"), theme.dayHeight);
-    ConvertFromJSValue(obj->GetProperty("dayWidth"), theme.dayWidth);
-    ConvertFromJSValue(obj->GetProperty("gregorianCalendarHeight"), theme.gregorianCalendarHeight);
-    ConvertFromJSValue(obj->GetProperty("lunarHeight"), theme.lunarHeight);
-    ConvertFromJSValue(obj->GetProperty("dayYAxisOffset"), theme.dayYAxisOffset);
-    ConvertFromJSValue(obj->GetProperty("lunarDayYAxisOffset"), theme.lunarDayYAxisOffset);
-    ConvertFromJSValue(obj->GetProperty("underscoreXAxisOffset"), theme.underscoreXAxisOffset);
-    ConvertFromJSValue(obj->GetProperty("underscoreYAxisOffset"), theme.underscoreYAxisOffset);
-    ConvertFromJSValue(obj->GetProperty("scheduleMarkerXAxisOffset"), theme.scheduleMarkerXAxisOffset);
-    ConvertFromJSValue(obj->GetProperty("scheduleMarkerYAxisOffset"), theme.scheduleMarkerYAxisOffset);
-    ConvertFromJSValue(obj->GetProperty("colSpace"), theme.colSpace);
-    ConvertFromJSValue(obj->GetProperty("dailyFiveRowSpace"), theme.dailyFiveRowSpace);
-    ConvertFromJSValue(obj->GetProperty("dailySixRowSpace"), theme.dailySixRowSpace);
-    ConvertFromJSValue(obj->GetProperty("underscoreWidth"), theme.underscoreWidth);
-    ConvertFromJSValue(obj->GetProperty("underscoreLength"), theme.underscoreLength);
-    ConvertFromJSValue(obj->GetProperty("scheduleMarkerRadius"), theme.scheduleMarkerRadius);
-    ConvertFromJSValue(obj->GetProperty("boundaryRowOffset"), theme.boundaryRowOffset);
-    ConvertFromJSValue(obj->GetProperty("boundaryColOffset"), theme.boundaryColOffset);
-    ConvertFromJSValue(obj->GetProperty("touchCircleStrokeWidth"), theme.touchCircleStrokeWidth);
+    CalcDimension dayHeight;
+    if (ParseJsDimensionFp(obj->GetProperty("dayHeight"), dayHeight)) {
+        currentDayStyleData.dayHeight = dayHeight;
+    }
+    CalcDimension dayWidth;
+    if (ParseJsDimensionFp(obj->GetProperty("dayWidth"), dayWidth)) {
+        currentDayStyleData.dayWidth = dayWidth;
+    }
+    CalcDimension gregorianCalendarHeight;
+    if (ParseJsDimensionFp(obj->GetProperty("gregorianCalendarHeight"), gregorianCalendarHeight)) {
+        currentDayStyleData.gregorianCalendarHeight = gregorianCalendarHeight;
+    }
+    CalcDimension lunarHeight;
+    if (ParseJsDimensionFp(obj->GetProperty("lunarHeight"), lunarHeight)) {
+        currentDayStyleData.lunarHeight = lunarHeight;
+    }
+    CalcDimension dayYAxisOffset;
+    if (ParseJsDimensionFp(obj->GetProperty("dayYAxisOffset"), dayYAxisOffset)) {
+        currentDayStyleData.dayYAxisOffset = dayYAxisOffset;
+    }
+    CalcDimension lunarDayYAxisOffset;
+    if (ParseJsDimensionFp(obj->GetProperty("lunarDayYAxisOffset"), lunarDayYAxisOffset)) {
+        currentDayStyleData.lunarDayYAxisOffset = lunarDayYAxisOffset;
+    }
+    CalcDimension underscoreXAxisOffset;
+    if (ParseJsDimensionFp(obj->GetProperty("underscoreXAxisOffset"), underscoreXAxisOffset)) {
+        currentDayStyleData.underscoreXAxisOffset = underscoreXAxisOffset;
+    }
+    CalcDimension underscoreYAxisOffset;
+    if (ParseJsDimensionFp(obj->GetProperty("underscoreYAxisOffset"), underscoreYAxisOffset)) {
+        currentDayStyleData.underscoreYAxisOffset = underscoreYAxisOffset;
+    }
+    CalcDimension scheduleMarkerXAxisOffset;
+    if (ParseJsDimensionFp(obj->GetProperty("scheduleMarkerXAxisOffset"), scheduleMarkerXAxisOffset)) {
+        currentDayStyleData.scheduleMarkerXAxisOffset = scheduleMarkerXAxisOffset;
+    }
+    CalcDimension scheduleMarkerYAxisOffset;
+    if (ParseJsDimensionFp(obj->GetProperty("scheduleMarkerYAxisOffset"), scheduleMarkerYAxisOffset)) {
+        currentDayStyleData.scheduleMarkerYAxisOffset = scheduleMarkerYAxisOffset;
+    }
+    CalcDimension colSpace;
+    if (ParseJsDimensionFp(obj->GetProperty("colSpace"), colSpace)) {
+        currentDayStyleData.colSpace = colSpace;
+    }
+    CalcDimension dailyFiveRowSpace;
+    if (ParseJsDimensionFp(obj->GetProperty("dailyFiveRowSpace"), dailyFiveRowSpace)) {
+        currentDayStyleData.dailyFiveRowSpace = dailyFiveRowSpace;
+    }
+    CalcDimension dailySixRowSpace;
+    if (ParseJsDimensionFp(obj->GetProperty("dailySixRowSpace"), dailySixRowSpace)) {
+        currentDayStyleData.dailySixRowSpace = dailySixRowSpace;
+    }
+    CalcDimension underscoreWidth;
+    if (ParseJsDimensionFp(obj->GetProperty("underscoreWidth"), underscoreWidth)) {
+        currentDayStyleData.underscoreWidth = underscoreWidth;
+    }
+    CalcDimension underscoreLength;
+    if (ParseJsDimensionFp(obj->GetProperty("underscoreLength"), underscoreLength)) {
+        currentDayStyleData.underscoreLength = underscoreLength;
+    }
+    CalcDimension scheduleMarkerRadius;
+    if (ParseJsDimensionFp(obj->GetProperty("scheduleMarkerRadius"), scheduleMarkerRadius)) {
+        currentDayStyleData.scheduleMarkerRadius = scheduleMarkerRadius;
+    }
+    CalcDimension boundaryRowOffset;
+    if (ParseJsDimensionFp(obj->GetProperty("boundaryRowOffset"), boundaryRowOffset)) {
+        currentDayStyleData.boundaryRowOffset = boundaryRowOffset;
+    }
+    CalcDimension boundaryColOffset;
+    if (ParseJsDimensionFp(obj->GetProperty("boundaryColOffset"), boundaryColOffset)) {
+        currentDayStyleData.boundaryColOffset = boundaryColOffset;
+    }
+
+    CurrentDayStyleData CurrentDayStyleDataImpl;
+    ConvertFromJSValue(obj->GetProperty("dayColor"), CurrentDayStyleDataImpl.dayColor);
+    ConvertFromJSValue(obj->GetProperty("lunarColor"), CurrentDayStyleDataImpl.lunarColor);
+    ConvertFromJSValue(obj->GetProperty("markLunarColor"), CurrentDayStyleDataImpl.markLunarColor);
+    CalcDimension dayFontSize_impl;
+    if (ParseJsDimensionFp(obj->GetProperty("dayFontSize"), dayFontSize_impl)) {
+        CurrentDayStyleDataImpl.dayFontSize = dayFontSize_impl;
+    }
+    CalcDimension lunarDayFontSize_impl;
+    if (ParseJsDimensionFp(obj->GetProperty("lunarDayFontSize"), lunarDayFontSize_impl)) {
+        CurrentDayStyleDataImpl.lunarDayFontSize = lunarDayFontSize_impl;
+    }
+    ConvertFromJSValue(obj->GetProperty("dayHeight"), CurrentDayStyleDataImpl.dayHeight);
+    ConvertFromJSValue(obj->GetProperty("dayWidth"), CurrentDayStyleDataImpl.dayWidth);
+    ConvertFromJSValue(obj->GetProperty("gregorianCalendarHeight"), CurrentDayStyleDataImpl.gregorianCalendarHeight);
+    ConvertFromJSValue(obj->GetProperty("lunarHeight"), CurrentDayStyleDataImpl.lunarHeight);
+    ConvertFromJSValue(obj->GetProperty("dayYAxisOffset"), CurrentDayStyleDataImpl.dayYAxisOffset);
+    ConvertFromJSValue(obj->GetProperty("lunarDayYAxisOffset"), CurrentDayStyleDataImpl.lunarDayYAxisOffset);
+    ConvertFromJSValue(obj->GetProperty("underscoreXAxisOffset"), CurrentDayStyleDataImpl.underscoreXAxisOffset);
+    ConvertFromJSValue(obj->GetProperty("underscoreYAxisOffset"), CurrentDayStyleDataImpl.underscoreYAxisOffset);
+    ConvertFromJSValue(obj->GetProperty("scheduleMarkerXAxisOffset"),
+        CurrentDayStyleDataImpl.scheduleMarkerXAxisOffset);
+    ConvertFromJSValue(obj->GetProperty("scheduleMarkerYAxisOffset"),
+        CurrentDayStyleDataImpl.scheduleMarkerYAxisOffset);
+    ConvertFromJSValue(obj->GetProperty("colSpace"), CurrentDayStyleDataImpl.colSpace);
+    ConvertFromJSValue(obj->GetProperty("dailyFiveRowSpace"), CurrentDayStyleDataImpl.dailyFiveRowSpace);
+    ConvertFromJSValue(obj->GetProperty("dailySixRowSpace"), CurrentDayStyleDataImpl.dailySixRowSpace);
+    ConvertFromJSValue(obj->GetProperty("underscoreWidth"), CurrentDayStyleDataImpl.underscoreWidth);
+    ConvertFromJSValue(obj->GetProperty("underscoreLength"), CurrentDayStyleDataImpl.underscoreLength);
+    ConvertFromJSValue(obj->GetProperty("scheduleMarkerRadius"), CurrentDayStyleDataImpl.scheduleMarkerRadius);
+    ConvertFromJSValue(obj->GetProperty("boundaryRowOffset"), CurrentDayStyleDataImpl.boundaryRowOffset);
+    ConvertFromJSValue(obj->GetProperty("boundaryColOffset"), CurrentDayStyleDataImpl.boundaryColOffset);
+    ConvertFromJSValue(obj->GetProperty("touchCircleStrokeWidth"), CurrentDayStyleDataImpl.touchCircleStrokeWidth);
+
+    CalendarModel::GetInstance()->SetCurrentDayStyle(currentDayStyleData, CurrentDayStyleDataImpl);
 }
 
 void JSCalendar::SetNonCurrentDayStyle(const JSCallbackInfo& info)
@@ -634,41 +554,24 @@ void JSCalendar::SetNonCurrentDayStyle(const JSCallbackInfo& info)
         return;
     }
     auto obj = JSRef<JSObject>::Cast(info[0]);
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::NonCurrentDayStyle nonCurrentDayStyle;
-        Color nonCurrentMonthDayColor;
-        if (ConvertFromJSValue(obj->GetProperty("nonCurrentMonthDayColor"), nonCurrentMonthDayColor)) {
-            nonCurrentDayStyle.UpdateNonCurrentMonthDayColor(nonCurrentMonthDayColor);
-        }
-        Color nonCurrentMonthLunarColor;
-        if (ConvertFromJSValue(obj->GetProperty("nonCurrentMonthLunarColor"), nonCurrentMonthLunarColor)) {
-            nonCurrentDayStyle.UpdateNonCurrentMonthLunarColor(nonCurrentMonthLunarColor);
-        }
-        Color nonCurrentMonthWorkDayMarkColor;
-        if (ConvertFromJSValue(obj->GetProperty("nonCurrentMonthWorkDayMarkColor"), nonCurrentMonthWorkDayMarkColor)) {
-            nonCurrentDayStyle.UpdateNonCurrentMonthWorkDayMarkColor(nonCurrentMonthWorkDayMarkColor);
-        }
-        Color nonCurrentMonthOffDayMarkColor;
-        if (ConvertFromJSValue(obj->GetProperty("nonCurrentMonthOffDayMarkColor"), nonCurrentMonthOffDayMarkColor)) {
-            nonCurrentDayStyle.UpdateNonCurrentMonthOffDayMarkColor(nonCurrentMonthOffDayMarkColor);
-        }
-        NG::CalendarView::SetNonCurrentDayStyle(nonCurrentDayStyle);
-        return;
+    NonCurrentDayStyleData nonCurrentDayStyleData;
+    Color nonCurrentMonthDayColor;
+    if (ConvertFromJSValue(obj->GetProperty("nonCurrentMonthDayColor"), nonCurrentMonthDayColor)) {
+        nonCurrentDayStyleData.nonCurrentMonthDayColor = nonCurrentMonthDayColor;
     }
-
-    auto component = GetComponent();
-    if (!component) {
-        return;
+    Color nonCurrentMonthLunarColor;
+    if (ConvertFromJSValue(obj->GetProperty("nonCurrentMonthLunarColor"), nonCurrentMonthLunarColor)) {
+        nonCurrentDayStyleData.nonCurrentMonthLunarColor = nonCurrentMonthLunarColor;
     }
-    auto& themePtr = component->GetCalendarTheme();
-    if (!themePtr) {
-        return;
+    Color nonCurrentMonthWorkDayMarkColor;
+    if (ConvertFromJSValue(obj->GetProperty("nonCurrentMonthWorkDayMarkColor"), nonCurrentMonthWorkDayMarkColor)) {
+        nonCurrentDayStyleData.nonCurrentMonthWorkDayMarkColor = nonCurrentMonthWorkDayMarkColor;
     }
-    auto& theme = themePtr->GetCalendarTheme();
-    ConvertFromJSValue(obj->GetProperty("nonCurrentMonthDayColor"), theme.nonCurrentMonthDayColor);
-    ConvertFromJSValue(obj->GetProperty("nonCurrentMonthLunarColor"), theme.nonCurrentMonthLunarColor);
-    ConvertFromJSValue(obj->GetProperty("nonCurrentMonthWorkDayMarkColor"), theme.nonCurrentMonthWorkDayMarkColor);
-    ConvertFromJSValue(obj->GetProperty("nonCurrentMonthOffDayMarkColor"), theme.nonCurrentMonthOffDayMarkColor);
+    Color nonCurrentMonthOffDayMarkColor;
+    if (ConvertFromJSValue(obj->GetProperty("nonCurrentMonthOffDayMarkColor"), nonCurrentMonthOffDayMarkColor)) {
+        nonCurrentDayStyleData.nonCurrentMonthOffDayMarkColor = nonCurrentMonthOffDayMarkColor;
+    }
+    CalendarModel::GetInstance()->SetNonCurrentDayStyle(nonCurrentDayStyleData);
 }
 
 void JSCalendar::SetTodayStyle(const JSCallbackInfo& info)
@@ -678,41 +581,24 @@ void JSCalendar::SetTodayStyle(const JSCallbackInfo& info)
         return;
     }
     auto obj = JSRef<JSObject>::Cast(info[0]);
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::TodayStyle todayStyle;
-        Color focusedDayColor;
-        if (ConvertFromJSValue(obj->GetProperty("focusedDayColor"), focusedDayColor)) {
-            todayStyle.UpdateFocusedDayColor(focusedDayColor);
-        }
-        Color focusedLunarColor;
-        if (ConvertFromJSValue(obj->GetProperty("focusedLunarColor"), focusedLunarColor)) {
-            todayStyle.UpdateFocusedLunarColor(focusedLunarColor);
-        }
-        Color focusedAreaBackgroundColor;
-        if (ConvertFromJSValue(obj->GetProperty("focusedAreaBackgroundColor"), focusedAreaBackgroundColor)) {
-            todayStyle.UpdateFocusedAreaBackgroundColor(focusedAreaBackgroundColor);
-        }
-        CalcDimension focusedAreaRadius;
-        if (ConvertFromJSValue(obj->GetProperty("focusedAreaRadius"), focusedAreaRadius)) {
-            todayStyle.UpdateFocusedAreaRadius(focusedAreaRadius);
-        }
-        NG::CalendarView::SetTodayStyle(todayStyle);
-        return;
+    TodayStyleData todayStyle;
+    Color focusedDayColor;
+    if (ConvertFromJSValue(obj->GetProperty("focusedDayColor"), focusedDayColor)) {
+        todayStyle.focusedDayColor = focusedDayColor;
     }
-    auto component = GetComponent();
-    if (!component) {
-        return;
+    Color focusedLunarColor;
+    if (ConvertFromJSValue(obj->GetProperty("focusedLunarColor"), focusedLunarColor)) {
+        todayStyle.focusedLunarColor = focusedLunarColor;
     }
-
-    auto& themePtr = component->GetCalendarTheme();
-    if (!themePtr) {
-        return;
+    Color focusedAreaBackgroundColor;
+    if (ConvertFromJSValue(obj->GetProperty("focusedAreaBackgroundColor"), focusedAreaBackgroundColor)) {
+        todayStyle.focusedAreaBackgroundColor = focusedAreaBackgroundColor;
     }
-    auto& theme = themePtr->GetCalendarTheme();
-    ConvertFromJSValue(obj->GetProperty("focusedDayColor"), theme.focusedDayColor);
-    ConvertFromJSValue(obj->GetProperty("focusedLunarColor"), theme.focusedLunarColor);
-    ConvertFromJSValue(obj->GetProperty("focusedAreaBackgroundColor"), theme.focusedAreaBackgroundColor);
-    ConvertFromJSValue(obj->GetProperty("focusedAreaRadius"), theme.focusedAreaRadius);
+    CalcDimension focusedAreaRadius;
+    if (ConvertFromJSValue(obj->GetProperty("focusedAreaRadius"), focusedAreaRadius)) {
+        todayStyle.focusedAreaRadius = focusedAreaRadius;
+    }
+    CalendarModel::GetInstance()->SetTodayStyle(todayStyle);
 }
 
 void JSCalendar::SetWeekStyle(const JSCallbackInfo& info)
@@ -722,59 +608,36 @@ void JSCalendar::SetWeekStyle(const JSCallbackInfo& info)
         return;
     }
     auto obj = JSRef<JSObject>::Cast(info[0]);
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::WeekStyle weekStyle;
-        Color weekColor;
-        if (ConvertFromJSValue(obj->GetProperty("weekColor"), weekColor)) {
-            weekStyle.UpdateWeekColor(weekColor);
-        }
-        Color weekendDayColor;
-        if (ConvertFromJSValue(obj->GetProperty("weekendDayColor"), weekendDayColor)) {
-            weekStyle.UpdateWeekendDayColor(weekendDayColor);
-        }
-        Color weekendLunarColor;
-        if (ConvertFromJSValue(obj->GetProperty("weekendLunarColor"), weekendLunarColor)) {
-            weekStyle.UpdateWeekendLunarColor(weekendLunarColor);
-        }
-        CalcDimension weekFontSize;
-        if (ParseJsDimensionFp(obj->GetProperty("weekFontSize"), weekFontSize)) {
-            weekStyle.UpdateWeekFontSize(weekFontSize);
-        }
-        CalcDimension weekHeight;
-        if (ConvertFromJSValue(obj->GetProperty("weekHeight"), weekHeight)) {
-            weekStyle.UpdateWeekHeight(weekHeight);
-        }
-        CalcDimension weekWidth;
-        if (ConvertFromJSValue(obj->GetProperty("weekWidth"), weekWidth)) {
-            weekStyle.UpdateWeekWidth(weekWidth);
-        }
-        CalcDimension weekAndDayRowSpace;
-        if (ConvertFromJSValue(obj->GetProperty("weekAndDayRowSpace"), weekAndDayRowSpace)) {
-            weekStyle.UpdateWeekAndDayRowSpace(weekAndDayRowSpace);
-        }
-        NG::CalendarView::SetWeekStyle(weekStyle);
-        return;
+    WeekStyleData weekStyle;
+    Color weekColor;
+    if (ConvertFromJSValue(obj->GetProperty("weekColor"), weekColor)) {
+        weekStyle.weekColor = weekColor;
     }
-    auto component = GetComponent();
-    if (!component) {
-        return;
+    Color weekendDayColor;
+    if (ConvertFromJSValue(obj->GetProperty("weekendDayColor"), weekendDayColor)) {
+        weekStyle.weekendDayColor = weekendDayColor;
     }
-
-    auto& themePtr = component->GetCalendarTheme();
-    if (!themePtr) {
-        return;
+    Color weekendLunarColor;
+    if (ConvertFromJSValue(obj->GetProperty("weekendLunarColor"), weekendLunarColor)) {
+        weekStyle.weekendLunarColor = weekendLunarColor;
     }
-    auto& theme = themePtr->GetCalendarTheme();
-    ConvertFromJSValue(obj->GetProperty("weekColor"), theme.weekColor);
-    ConvertFromJSValue(obj->GetProperty("weekendDayColor"), theme.weekendDayColor);
-    ConvertFromJSValue(obj->GetProperty("weekendLunarColor"), theme.weekendLunarColor);
     CalcDimension weekFontSize;
     if (ParseJsDimensionFp(obj->GetProperty("weekFontSize"), weekFontSize)) {
-        theme.weekFontSize = weekFontSize;
+        weekStyle.weekFontSize = weekFontSize;
     }
-    ConvertFromJSValue(obj->GetProperty("weekHeight"), theme.weekHeight);
-    ConvertFromJSValue(obj->GetProperty("weekWidth"), theme.weekWidth);
-    ConvertFromJSValue(obj->GetProperty("weekAndDayRowSpace"), theme.weekAndDayRowSpace);
+    CalcDimension weekHeight;
+    if (ConvertFromJSValue(obj->GetProperty("weekHeight"), weekHeight)) {
+        weekStyle.weekHeight = weekHeight;
+    }
+    CalcDimension weekWidth;
+    if (ConvertFromJSValue(obj->GetProperty("weekWidth"), weekWidth)) {
+        weekStyle.weekWidth = weekWidth;
+    }
+    CalcDimension weekAndDayRowSpace;
+    if (ConvertFromJSValue(obj->GetProperty("weekAndDayRowSpace"), weekAndDayRowSpace)) {
+        weekStyle.weekAndDayRowSpace = weekAndDayRowSpace;
+    }
+    CalendarModel::GetInstance()->SetWeekStyle(weekStyle);
 }
 
 void JSCalendar::SetWorkStateStyle(const JSCallbackInfo& info)
@@ -784,53 +647,36 @@ void JSCalendar::SetWorkStateStyle(const JSCallbackInfo& info)
         return;
     }
     auto obj = JSRef<JSObject>::Cast(info[0]);
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::WorkStateStyle workStateStyle;
-        Color workDayMarkColor;
-        if (ConvertFromJSValue(obj->GetProperty("workDayMarkColor"), workDayMarkColor)) {
-            workStateStyle.UpdateWorkDayMarkColor(workDayMarkColor);
-        }
-        Color offDayMarkColor;
-        if (ConvertFromJSValue(obj->GetProperty("offDayMarkColor"), offDayMarkColor)) {
-            workStateStyle.UpdateOffDayMarkColor(offDayMarkColor);
-        }
-        CalcDimension workDayMarkSize;
-        if (ConvertFromJSValue(obj->GetProperty("workDayMarkSize"), workDayMarkSize)) {
-            workStateStyle.UpdateWorkDayMarkSize(workDayMarkSize);
-        }
-        CalcDimension offDayMarkSize;
-        if (ConvertFromJSValue(obj->GetProperty("offDayMarkSize"), offDayMarkSize)) {
-            workStateStyle.UpdateOffDayMarkSize(offDayMarkSize);
-        }
-        CalcDimension workStateWidth;
-        if (ConvertFromJSValue(obj->GetProperty("workStateWidth"), workStateWidth)) {
-            workStateStyle.UpdateWorkStateWidth(workStateWidth);
-        }
-        CalcDimension workStateHorizontalMovingDistance;
-        if (ConvertFromJSValue(
-                obj->GetProperty("workStateHorizontalMovingDistance"), workStateHorizontalMovingDistance)) {
-            workStateStyle.UpdateWorkStateHorizontalMovingDistance(workStateHorizontalMovingDistance);
-        }
-        CalcDimension workStateVerticalMovingDistance;
-        if (ConvertFromJSValue(obj->GetProperty("workStateVerticalMovingDistance"), workStateVerticalMovingDistance)) {
-            workStateStyle.UpdateWorkStateVerticalMovingDistance(workStateVerticalMovingDistance);
-        }
-        NG::CalendarView::SetWorkStateStyle(workStateStyle);
-        return;
+    WorkStateStyleData workStateStyle;
+    Color workDayMarkColor;
+    if (ConvertFromJSValue(obj->GetProperty("workDayMarkColor"), workDayMarkColor)) {
+        workStateStyle.workDayMarkColor = workDayMarkColor;
     }
-    auto component = GetComponent();
-    CHECK_NULL_VOID(component);
-
-    auto& themePtr = component->GetCalendarTheme();
-    CHECK_NULL_VOID(themePtr);
-    auto& theme = themePtr->GetCalendarTheme();
-    ConvertFromJSValue(obj->GetProperty("workDayMarkColor"), theme.workDayMarkColor);
-    ConvertFromJSValue(obj->GetProperty("offDayMarkColor"), theme.offDayMarkColor);
-    ConvertFromJSValue(obj->GetProperty("workDayMarkSize"), theme.workDayMarkSize);
-    ConvertFromJSValue(obj->GetProperty("offDayMarkSize"), theme.offDayMarkSize);
-    ConvertFromJSValue(obj->GetProperty("workStateWidth"), theme.workStateWidth);
-    ConvertFromJSValue(obj->GetProperty("workStateHorizontalMovingDistance"), theme.workStateHorizontalMovingDistance);
-    ConvertFromJSValue(obj->GetProperty("workStateVerticalMovingDistance"), theme.workStateVerticalMovingDistance);
+    Color offDayMarkColor;
+    if (ConvertFromJSValue(obj->GetProperty("offDayMarkColor"), offDayMarkColor)) {
+        workStateStyle.offDayMarkColor = offDayMarkColor;
+    }
+    CalcDimension workDayMarkSize;
+    if (ConvertFromJSValue(obj->GetProperty("workDayMarkSize"), workDayMarkSize)) {
+        workStateStyle.workDayMarkSize = workDayMarkSize;
+    }
+    CalcDimension offDayMarkSize;
+    if (ConvertFromJSValue(obj->GetProperty("offDayMarkSize"), offDayMarkSize)) {
+        workStateStyle.offDayMarkSize = offDayMarkSize;
+    }
+    CalcDimension workStateWidth;
+    if (ConvertFromJSValue(obj->GetProperty("workStateWidth"), workStateWidth)) {
+        workStateStyle.workStateWidth = workStateWidth;
+    }
+    CalcDimension workStateHorizontalMovingDistance;
+    if (ConvertFromJSValue(
+            obj->GetProperty("workStateHorizontalMovingDistance"), workStateHorizontalMovingDistance)) {
+        workStateStyle.workStateHorizontalMovingDistance = workStateHorizontalMovingDistance;
+    }
+    CalcDimension workStateVerticalMovingDistance;
+    if (ConvertFromJSValue(obj->GetProperty("workStateVerticalMovingDistance"), workStateVerticalMovingDistance)) {
+        workStateStyle.workStateVerticalMovingDistance = workStateVerticalMovingDistance;
+    }
+    CalendarModel::GetInstance()->SetWorkStateStyle(workStateStyle);
 }
-
 } // namespace OHOS::Ace::Framework
