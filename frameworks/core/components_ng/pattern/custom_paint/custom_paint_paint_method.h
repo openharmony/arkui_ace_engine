@@ -89,7 +89,6 @@ public:
     void Scale(double x, double y);
     void Rotate(double angle);
     virtual void SetTransform(const TransformParam& param) = 0;
-    virtual TransformParam GetTransform() const;
     void ResetTransform();
     void Transform(const TransformParam& param);
     void Translate(double x, double y);
@@ -294,7 +293,6 @@ public:
     }
 
 protected:
-    std::optional<double> CalcTextScale(double maxIntrinsicWidth, std::optional<double> maxWidth);
     bool HasShadow() const;
     void UpdateLineDash(SkPaint& paint);
     void UpdatePaintShader(const OffsetF& offset, SkPaint& paint, const Ace::Gradient& gradient);

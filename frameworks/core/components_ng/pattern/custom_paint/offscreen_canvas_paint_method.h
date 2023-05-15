@@ -33,9 +33,8 @@ public:
     std::unique_ptr<Ace::ImageData> GetImageData(double left, double top, double width, double height);
     std::string ToDataURL(const std::string& type, const double quality);
 
-    void FillText(const std::string& text, double x, double y, std::optional<double> maxWidth, const PaintState& state);
-    void StrokeText(
-        const std::string& text, double x, double y, std::optional<double> maxWidth, const PaintState& state);
+    void FillText(const std::string& text, double x, double y, const PaintState& state);
+    void StrokeText(const std::string& text, double x, double y, const PaintState& state);
     double MeasureText(const std::string& text, const PaintState& state);
     double MeasureTextHeight(const std::string& text, const PaintState& state);
     TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state);
@@ -55,8 +54,7 @@ private:
 
     sk_sp<SkImage> GetImage(const std::string& src) override { return sk_sp<SkImage>(); }
 
-    void PaintText(const std::string& text, double x, double y, std::optional<double> maxWidth, bool isStroke,
-        bool hasShadow = false);
+    void PaintText(const std::string& text, double x, double y, bool isStroke, bool hasShadow = false);
     double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph);
     bool UpdateOffParagraph(const std::string& text, bool isStroke, const PaintState& state, bool hasShadow = false);
     void UpdateTextStyleForeground(bool isStroke, txt::TextStyle& txtStyle, bool hasShadow);

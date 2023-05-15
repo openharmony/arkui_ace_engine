@@ -280,10 +280,10 @@ void CustomPaintPattern::QuadraticCurveTo(const QuadraticCurveParam& param)
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-void CustomPaintPattern::FillText(const std::string& text, double x, double y, std::optional<double> maxWidth)
+void CustomPaintPattern::FillText(const std::string& text, double x, double y)
 {
-    auto task = [text, x, y, maxWidth](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
-        paintMethod.FillText(paintWrapper, text, x, y, maxWidth);
+    auto task = [text, x, y](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.FillText(paintWrapper, text, x, y);
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
@@ -291,10 +291,10 @@ void CustomPaintPattern::FillText(const std::string& text, double x, double y, s
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-void CustomPaintPattern::StrokeText(const std::string& text, double x, double y, std::optional<double> maxWidth)
+void CustomPaintPattern::StrokeText(const std::string& text, double x, double y)
 {
-    auto task = [text, x, y, maxWidth](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
-        paintMethod.StrokeText(paintWrapper, text, x, y, maxWidth);
+    auto task = [text, x, y](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.StrokeText(paintWrapper, text, x, y);
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
@@ -832,10 +832,5 @@ void CustomPaintPattern::SetFilterParam(const std::string& filterStr)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-}
-
-TransformParam CustomPaintPattern::GetTransform() const
-{
-    return paintMethod_->GetTransform();
 }
 } // namespace OHOS::Ace::NG

@@ -353,8 +353,7 @@ void CanvasPaintMethod::TransferFromImageBitmap(PaintWrapper* paintWrapper,
     PutImageData(paintWrapper, *imageData);
 }
 
-void CanvasPaintMethod::FillText(
-    PaintWrapper* paintWrapper, const std::string& text, double x, double y, std::optional<double> maxWidth)
+void CanvasPaintMethod::FillText(PaintWrapper* paintWrapper, const std::string& text, double x, double y)
 {
     CHECK_NULL_VOID(paintWrapper);
     auto offset = paintWrapper->GetContentOffset();
@@ -362,11 +361,10 @@ void CanvasPaintMethod::FillText(
 
     auto success = UpdateParagraph(offset, text, false, HasShadow());
     CHECK_NULL_VOID(success);
-    PaintText(offset, frameSize, x, y, maxWidth, false, HasShadow());
+    PaintText(offset, frameSize, x, y, false, HasShadow());
 }
 
-void CanvasPaintMethod::StrokeText(
-    PaintWrapper* paintWrapper, const std::string& text, double x, double y, std::optional<double> maxWidth)
+void CanvasPaintMethod::StrokeText(PaintWrapper* paintWrapper, const std::string& text, double x, double y)
 {
     CHECK_NULL_VOID(paintWrapper);
     auto offset = paintWrapper->GetContentOffset();
@@ -375,12 +373,12 @@ void CanvasPaintMethod::StrokeText(
     if (HasShadow()) {
         auto success = UpdateParagraph(offset, text, true, true);
         CHECK_NULL_VOID(success);
-        PaintText(offset, frameSize, x, y, maxWidth, true, true);
+        PaintText(offset, frameSize, x, y, true, true);
     }
 
     auto success = UpdateParagraph(offset, text, true);
     CHECK_NULL_VOID(success);
-    PaintText(offset, frameSize, x, y, maxWidth, true);
+    PaintText(offset, frameSize, x, y, true);
 }
 
 double CanvasPaintMethod::MeasureText(const std::string& text, const PaintState& state)
@@ -460,34 +458,30 @@ TextMetrics CanvasPaintMethod::MeasureTextMetrics(const std::string& text, const
     return textMetrics;
 }
 
-void CanvasPaintMethod::PaintText(const OffsetF& offset, const SizeF& frameSize, double x, double y,
-    std::optional<double> maxWidth, bool isStroke, bool hasShadow)
+void CanvasPaintMethod::PaintText(
+    const OffsetF& offset, const SizeF& frameSize, double x, double y, bool isStroke, bool hasShadow)
 {
-    paragraph_->Layout(DBL_MAX);
+    paragraph_->Layout(frameSize.Width());
+    auto width = paragraph_->GetMaxIntrinsicWidth();
+    if (frameSize.Width() > width) {
+        paragraph_->Layout(std::ceil(width));
+    }
     auto align = isStroke ? strokeState_.GetTextAlign() : fillState_.GetTextAlign();
     double dx = offset.GetX() + x + GetAlignOffset(align, paragraph_);
     auto baseline =
         isStroke ? strokeState_.GetTextStyle().GetTextBaseline() : fillState_.GetTextStyle().GetTextBaseline();
     double dy = offset.GetY() + y + GetBaselineOffset(baseline, paragraph_);
 
-    std::optional<double> scale = CalcTextScale(paragraph_->GetMaxIntrinsicWidth(), maxWidth);
     if (hasShadow) {
         skCanvas_->save();
         auto shadowOffsetX = shadow_.GetOffset().GetX();
         auto shadowOffsetY = shadow_.GetOffset().GetY();
-        if (scale.has_value()) {
-            skCanvas_->scale(scale.value(), 1);
-        }
         paragraph_->Paint(skCanvas_.get(), dx + shadowOffsetX, dy + shadowOffsetY);
         skCanvas_->restore();
         return;
     }
-    skCanvas_->save();
-    if (scale.has_value()) {
-        skCanvas_->scale(scale.value(), 1);
-    }
+
     paragraph_->Paint(skCanvas_.get(), dx, dy);
-    skCanvas_->restore();
 }
 
 double CanvasPaintMethod::GetBaselineOffset(TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph)
