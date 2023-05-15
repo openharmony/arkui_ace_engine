@@ -26,6 +26,7 @@
 #include "core/animation/page_transition_common.h"
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/distribute_ui.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
@@ -415,6 +416,9 @@ void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType t
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID_NOLOG(context);
     context->SetIsNeedShowFocus(false);
+#ifdef UICAST_COMPONENT_SUPPORTED
+    NG::DistributeUI::OnPageChanged(node->GetPageId());
+#endif
 }
 
 RefPtr<FrameNode> StageManager::GetLastPage()
@@ -426,6 +430,19 @@ RefPtr<FrameNode> StageManager::GetLastPage()
         return nullptr;
     }
     return DynamicCast<FrameNode>(children.back());
+}
+
+RefPtr<FrameNode> StageManager::GetPageById(int32_t pageId)
+{
+    CHECK_NULL_RETURN(stageNode_, nullptr);
+    const auto& children = stageNode_->GetChildren();
+    for (const auto& child : children) {
+        if (child->GetPageId() == pageId) {
+            return DynamicCast<FrameNode>(child);
+        }
+    }
+    LOGD("UITree page not found. %{public}d", pageId);
+    return nullptr;
 }
 
 void StageManager::ReloadStage()

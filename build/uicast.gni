@@ -18,23 +18,15 @@ check_file_script = "//build/ohos/file_exists.py"
 check_uicast_file_args = [
   "--filename",
   rebase_path(
-      "../../../../vendor/${product_company}/foundation/HMconnect/CastEngine/Tongtu/uicast/config.gni"),
+      "../../../../vendor/${product_company}/foundation/HMconnect/CastEngine/Tongtu/uicast/BUILD.gn"),
 ]
 
 uicast_configs = {
+  import("../uicast_interface/config.gni")
 }
 
 if (exec_script(check_file_script, check_uicast_file_args, "string") ==
     "True") {
-  uicast_configs = {
-    import(
-        "../../../../vendor/${product_company}/foundation/HMconnect/CastEngine/Tongtu/uicast/config.gni")
-
-    uicast_enable = true
-  }
-} else {
-  uicast_configs = {
-    import("../uicast_interface/config.gni")
-    uicast_enable = false
-  }
+  uicast_configs.uicast_defines = [ "UICAST_COMPONENT_SUPPORTED" ]
+  uicast_configs.uicast_enable = true
 }

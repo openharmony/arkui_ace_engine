@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/tabs/tab_content_node.h"
 
+#include "core/components_ng/base/distribute_ui.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
 #include "core/components_ng/pattern/tabs/tab_content_pattern.h"
@@ -31,7 +32,13 @@ void TabContentNode::OnAttachToMainTree(bool recursive)
     auto swiper = tabs->GetTabs();
     CHECK_NULL_VOID(swiper);
     auto myIndex = swiper->GetChildFlatIndex(GetId()).second;
-    TabContentModelNG::AddTabBarItem(Referenced::Claim(this), myIndex);
+    bool update = false;
+#ifdef UICAST_COMPONENT_SUPPORTED
+    if (Inspector::IsSinkMode()) {
+        update = true;
+    }
+#endif
+    TabContentModelNG::AddTabBarItem(Referenced::Claim(this), myIndex, update);
 }
 
 void TabContentNode::OnDetachFromMainTree(bool recursive)

@@ -16,6 +16,7 @@ import(
 
 build_component_ng("base_ng") {
   sources = [
+    "distribute_ui.cpp",
     "frame_node.cpp",
     "geometry_node.cpp",
     "inspector.cpp",
