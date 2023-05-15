@@ -614,7 +614,7 @@ bool GestureEventHub::ActLongClick()
     Offset globalOffset(offset.GetX(), offset.GetY());
     info.SetGlobalLocation(globalOffset);
     if (longPressEventActuator_) {
-        auto click = longPressEventActuator_->GetGestureEventFunc();
+        click = longPressEventActuator_->GetGestureEventFunc();
         CHECK_NULL_RETURN_NOLOG(click, true);
         click(info);
         return true;

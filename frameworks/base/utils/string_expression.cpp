@@ -227,8 +227,7 @@ bool CalculateFourOperationsExp(const std::string& exp, const Dimension& num1, c
         if (NearZero(calcFunc(num1))) {
             return false;
         }
-        if ((num1.Unit() != DimensionUnit::NONE) ||
-            (num1.Unit() != DimensionUnit::NONE && num2.Unit() != DimensionUnit::NONE)) {
+        if ((num1.Unit() != DimensionUnit::NONE)) {
             return false;
         }
         opRes = calcFunc(num2) / calcFunc(num1);
