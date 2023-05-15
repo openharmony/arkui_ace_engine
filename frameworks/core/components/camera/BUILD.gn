@@ -50,7 +50,7 @@ build_component("camera") {
       "c_utils:utils",
       "ipc:ipc_core",
       "multimedia_camera_framework:camera_framework",
-      "multimedia_player_framework:media_client",
+      "player_framework:media_client",
     ]
   } else {
     sources += [ "large_system/camera.cpp" ]
