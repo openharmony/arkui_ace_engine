@@ -484,6 +484,10 @@ RosenAsyncMoveTransitionEffect ::RosenAsyncMoveTransitionEffect(TransitionEdge i
           MakeRefPtr<RosenMoveTransitionEffect>(inEdge), MakeRefPtr<RosenMoveTransitionEffect>(outEdge))
 {}
 
+RosenSlideTransitionEffect::RosenSlideTransitionEffect()
+    : RosenSlideTransitionEffect(TransitionEdge::END, TransitionEdge::START)
+{}
+
 RosenSlideTransitionEffect::RosenSlideTransitionEffect(TransitionEdge inEdge, TransitionEdge outEdge)
     : RosenAsymmetricTransitionEffect(MakeRefPtr<InternalTranslateEffect>(), MakeRefPtr<InternalTranslateEffect>()),
       inEdge_(inEdge), outEdge_(outEdge)

@@ -64,7 +64,7 @@ protected:
         if (keyframes_.empty()) {
             property_->Set(identityValue_);
             return;
-        } 
+        }
         for (auto it = keyframes_.begin(); it != keyframes_.end(); ++it) {
             AnimationUtils::AddKeyFrame(it->first, [this, &it]() { property_->Set(it->second); });
         }
@@ -207,7 +207,7 @@ private:
 // Move in and out to different direction, by node size.
 class RosenSlideTransitionEffect final : public RosenAsymmetricTransitionEffect {
 public:
-    RosenSlideTransitionEffect() = default;
+    RosenSlideTransitionEffect();
     RosenSlideTransitionEffect(TransitionEdge inEdge, TransitionEdge outEdge);
     ~RosenSlideTransitionEffect() override = default;
 
@@ -215,8 +215,8 @@ private:
     void OnUpdateTransitionContext(
         const RefPtr<RosenRenderContext>& context, const RectF& selfRect, const SizeF& viewSize) override;
     static Rosen::Vector2f GetTranslateValue(TransitionEdge edge, const RectF& rect);
-    TransitionEdge inEdge_ = TransitionEdge ::START;
-    TransitionEdge outEdge_ = TransitionEdge ::END;
+    TransitionEdge inEdge_;
+    TransitionEdge outEdge_;
     DECLARE_ACE_TYPE(RosenSlideTransitionEffect, RosenAsymmetricTransitionEffect);
     ACE_DISALLOW_COPY_AND_MOVE(RosenSlideTransitionEffect);
 };

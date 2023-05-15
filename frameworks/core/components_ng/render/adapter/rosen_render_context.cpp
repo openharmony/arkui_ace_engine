@@ -2329,6 +2329,7 @@ void RosenRenderContext::NotifyTransition(bool isTransitionIn)
                 CHECK_NULL_VOID(context);
                 LOGD("RosenTransitionEffect::NotifyTransition transition END, node %{public}d, isTransitionIn: IN",
                     nodeId);
+                context->OnTransitionInFinish();
             },
             false);
     } else {
@@ -2359,6 +2360,16 @@ void RosenRenderContext::NotifyTransition(bool isTransitionIn)
     }
 }
 
+void RosenRenderContext::RemoveDefaultTransition()
+{
+    if (hasDefaultTransition_ && transitionEffect_ && disappearingTransitionCount_ == 0 &&
+        appearingTransitionCount_ == 0) {
+        transitionEffect_->Detach(Claim(this));
+        transitionEffect_ = nullptr;
+        hasDefaultTransition_ = false;
+    }
+}
+
 void RosenRenderContext::OnTransitionInFinish()
 {
     --appearingTransitionCount_;
@@ -2373,10 +2384,7 @@ void RosenRenderContext::OnTransitionInFinish()
         return;
     }
     // when all transition in/out animations are finished, we should remove the default transition effect.
-    if (disappearingTransitionCount_ && hasDefaultTransition_) {
-        transitionEffect_ = nullptr;
-        hasDefaultTransition_ = false;
-    }
+    RemoveDefaultTransition();
 }
 
 void RosenRenderContext::OnTransitionOutFinish()
@@ -2394,10 +2402,7 @@ void RosenRenderContext::OnTransitionOutFinish()
         return;
     }
     // when all transition in/out animations are finished, we should remove the default transition effect.
-    if (appearingTransitionCount_ && hasDefaultTransition_) {
-        transitionEffect_ = nullptr;
-        hasDefaultTransition_ = false;
-    }
+    RemoveDefaultTransition();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto parent = host->GetParent();

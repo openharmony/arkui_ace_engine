@@ -290,6 +290,7 @@ private:
     }
     void OnTransitionInFinish();
     void OnTransitionOutFinish();
+    void RemoveDefaultTransition();
     void SetTransitionPivot(const SizeF& frameSize, bool transitionIn);
     void SetPivot(float xPivot, float yPivot);
 
