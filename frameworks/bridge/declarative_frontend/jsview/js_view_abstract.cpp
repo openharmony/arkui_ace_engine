@@ -1798,6 +1798,7 @@ void JSViewAbstract::JsAlignSelf(const JSCallbackInfo& info)
 {
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER };
     if (!CheckJSCallbackInfo("JsAlignSelf", info, checkList)) {
+        ViewAbstractModel::GetInstance()->SetAlignSelf(FlexAlign::AUTO);
         return;
     }
     auto alignVal = info[0]->ToNumber<int32_t>();
