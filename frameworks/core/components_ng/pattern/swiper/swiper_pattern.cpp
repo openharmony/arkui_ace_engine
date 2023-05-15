@@ -184,6 +184,12 @@ void SwiperPattern::FlushFocus(const RefPtr<FrameNode>& curShowFrame)
     if (IsShowIndicator()) {
         ++iter;
     }
+    if (HasLeftButtonNode()) {
+        ++iter;
+    }
+    if (HasRightButtonNode()) {
+        ++iter;
+    }
     while (iter != focusChildren.rend()) {
         auto child = *iter;
         if (!child) {
@@ -200,7 +206,7 @@ void SwiperPattern::FlushFocus(const RefPtr<FrameNode>& curShowFrame)
 
     RefPtr<FocusHub> needFocusNode = showChildFocusHub;
     if (IsShowIndicator() && isLastIndicatorFocused_) {
-        needFocusNode = focusChildren.back();
+        needFocusNode = GetFocusHubChild(V2::SWIPER_INDICATOR_ETS_TAG);
     }
     CHECK_NULL_VOID(needFocusNode);
     lastWeakShowNode_ = AceType::WeakClaim(AceType::RawPtr(curShowFrame));
@@ -209,6 +215,22 @@ void SwiperPattern::FlushFocus(const RefPtr<FrameNode>& curShowFrame)
     } else {
         swiperFocusHub->SetLastWeakFocusNode(AceType::WeakClaim(AceType::RawPtr(needFocusNode)));
     }
+}
+RefPtr<FocusHub> SwiperPattern::GetFocusHubChild(std::string childFrameName)
+{
+    auto swiperHost = GetHost();
+    CHECK_NULL_RETURN(swiperHost, nullptr);
+    auto swiperFocusHub = swiperHost->GetFocusHub();
+    CHECK_NULL_RETURN(swiperFocusHub, nullptr);
+    auto focusChildren = swiperFocusHub->GetChildren();
+    CHECK_NULL_RETURN(!focusChildren.empty(), nullptr);
+    for (const auto& child : focusChildren) {
+        CHECK_NULL_RETURN(child, nullptr);
+        if (child->GetFrameName() == childFrameName) {
+            return child;
+        }
+    }
+    return nullptr;
 }
 
 WeakPtr<FocusHub> SwiperPattern::GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode)
@@ -219,27 +241,116 @@ WeakPtr<FocusHub> SwiperPattern::GetNextFocusNode(FocusStep step, const WeakPtr<
     CHECK_NULL_RETURN(swiperFocusHub, nullptr);
     auto focusChildren = swiperFocusHub->GetChildren();
     CHECK_NULL_RETURN_NOLOG(!focusChildren.empty(), nullptr);
-    CHECK_NULL_RETURN_NOLOG(IsShowIndicator(), nullptr);
-    auto indicatorNode = focusChildren.back();
-    CHECK_NULL_RETURN(indicatorNode, nullptr);
     auto lastShowNode = lastWeakShowNode_.Upgrade();
     CHECK_NULL_RETURN(lastShowNode, nullptr);
     auto lastShowFocusHub = lastShowNode->GetFocusHub();
     CHECK_NULL_RETURN(lastShowFocusHub, nullptr);
-
     auto curFocusNode = currentFocusNode.Upgrade();
     CHECK_NULL_RETURN(curFocusNode, nullptr);
+    if ((direction_ == Axis::HORIZONTAL && step == FocusStep::UP) ||
+        (direction_ == Axis::VERTICAL && step == FocusStep::LEFT)) {
+        return PreviousFocus(curFocusNode);
+    } else if ((direction_ == Axis::HORIZONTAL && step == FocusStep::DOWN) ||
+               (direction_ == Axis::VERTICAL && step == FocusStep::RIGHT)) {
+        return NextFocus(curFocusNode);
+    }
+    return nullptr;
+}
 
-    if ((curFocusNode == indicatorNode) && ((direction_ == Axis::HORIZONTAL && step == FocusStep::UP) ||
-                                               (direction_ == Axis::VERTICAL && step == FocusStep::LEFT))) {
+WeakPtr<FocusHub> SwiperPattern::PreviousFocus(const RefPtr<FocusHub>& curFocusNode)
+{
+    CHECK_NULL_RETURN(curFocusNode, nullptr);
+    RefPtr<FocusHub> indicatorNode;
+    RefPtr<FocusHub> leftArrowNode;
+    auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, nullptr);
+    if (HasLeftButtonNode()) {
+        leftArrowNode = GetFocusHubChild(V2::SWIPER_LEFT_ARROW_ETS_TAG);
+        CHECK_NULL_RETURN(leftArrowNode, nullptr);
+    }
+    if (HasIndicatorNode()) {
+        indicatorNode = GetFocusHubChild(V2::SWIPER_INDICATOR_ETS_TAG);
+        CHECK_NULL_RETURN(indicatorNode, nullptr);
+    }
+    if (curFocusNode->GetFrameName() == V2::SWIPER_LEFT_ARROW_ETS_TAG) {
         isLastIndicatorFocused_ = false;
-        return lastShowFocusHub;
+        curFocusNode->SetParentFocusable(true);
+        return nullptr;
     }
-    if ((curFocusNode != indicatorNode) && ((direction_ == Axis::HORIZONTAL && step == FocusStep::DOWN) ||
-                                               (direction_ == Axis::VERTICAL && step == FocusStep::RIGHT))) {
+    if (curFocusNode->GetFrameName() == V2::SWIPER_INDICATOR_ETS_TAG) {
+        if (!HasLeftButtonNode() || (!IsLoop() && currentIndex_ == 0) || layoutProperty->GetHoverShowValue(false)) {
+            isLastIndicatorFocused_ = true;
+            curFocusNode->SetParentFocusable(true);
+            return nullptr;
+        }
+        isLastIndicatorFocused_ = false;
+        leftArrowNode->SetParentFocusable(true);
+        return AceType::WeakClaim(AceType::RawPtr(leftArrowNode));
+    }
+    if (curFocusNode->GetFrameName() == V2::SWIPER_RIGHT_ARROW_ETS_TAG) {
+        if (HasIndicatorNode()) {
+            isLastIndicatorFocused_ = true;
+            indicatorNode->SetParentFocusable(true);
+            return AceType::WeakClaim(AceType::RawPtr(indicatorNode));
+        }
+        if (!IsLoop() && currentIndex_ == 0) {
+            curFocusNode->SetParentFocusable(true);
+            return nullptr;
+        }
         isLastIndicatorFocused_ = true;
-        return AceType::WeakClaim(AceType::RawPtr(indicatorNode));
+        leftArrowNode->SetParentFocusable(true);
+        return AceType::WeakClaim(AceType::RawPtr(leftArrowNode));
     }
+    curFocusNode->SetParentFocusable(true);
+    return nullptr;
+}
+
+WeakPtr<FocusHub> SwiperPattern::NextFocus(const RefPtr<FocusHub>& curFocusNode)
+{
+    CHECK_NULL_RETURN(curFocusNode, nullptr);
+    RefPtr<FocusHub> indicatorNode;
+    RefPtr<FocusHub> rightArrowNode;
+    auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, nullptr);
+    if (HasIndicatorNode()) {
+        indicatorNode = GetFocusHubChild(V2::SWIPER_INDICATOR_ETS_TAG);
+        CHECK_NULL_RETURN(indicatorNode, nullptr);
+    }
+    if (HasRightButtonNode()) {
+        rightArrowNode = GetFocusHubChild(V2::SWIPER_RIGHT_ARROW_ETS_TAG);
+        CHECK_NULL_RETURN(rightArrowNode, nullptr);
+    }
+    if (curFocusNode->GetFrameName() == V2::SWIPER_LEFT_ARROW_ETS_TAG) {
+        if (HasIndicatorNode()) {
+            isLastIndicatorFocused_ = true;
+            indicatorNode->SetParentFocusable(true);
+            return AceType::WeakClaim(AceType::RawPtr(indicatorNode));
+        }
+        if (!IsLoop() && currentIndex_ == TotalCount() - 1) {
+            curFocusNode->SetParentFocusable(true);
+            return nullptr;
+        }
+        isLastIndicatorFocused_ = true;
+        rightArrowNode->SetParentFocusable(true);
+        return AceType::WeakClaim(AceType::RawPtr(rightArrowNode));
+    }
+    if (curFocusNode->GetFrameName() == V2::SWIPER_INDICATOR_ETS_TAG) {
+        if (!HasRightButtonNode() || (!IsLoop() && currentIndex_ == TotalCount() - 1) ||
+            layoutProperty->GetHoverShowValue(false)) {
+            isLastIndicatorFocused_ = true;
+            curFocusNode->SetParentFocusable(true);
+            return nullptr;
+        }
+        isLastIndicatorFocused_ = false;
+        rightArrowNode->SetParentFocusable(true);
+        return AceType::WeakClaim(AceType::RawPtr(rightArrowNode));
+    }
+    if (curFocusNode->GetFrameName() == V2::SWIPER_RIGHT_ARROW_ETS_TAG) {
+        isLastIndicatorFocused_ = false;
+        curFocusNode->SetParentFocusable(true);
+        return nullptr;
+    }
+    curFocusNode->SetParentFocusable(true);
     return nullptr;
 }
 
@@ -512,7 +623,14 @@ void SwiperPattern::InitIndicator()
             RemoveIndicatorNode();
             return;
         }
+        if (GetIndicatorType() == SwiperIndicatorType::DIGIT && lastSwiperIndicatorType_ == SwiperIndicatorType::DOT) {
+            RemoveIndicatorNode();
+            indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG, GetIndicatorId(),
+                []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+            swiperNode->AddChild(indicatorNode);
+        }
     }
+    lastSwiperIndicatorType_ = GetIndicatorType();
     CHECK_NULL_VOID(indicatorNode);
     auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -1480,6 +1598,40 @@ int32_t SwiperPattern::ComputeLoadCount(int32_t cacheCount)
     return preCount + nextCount + displayCount;
 }
 
+void SwiperPattern::ArrowHover(bool hoverFlag)
+{
+    if (HasLeftButtonNode() && HasRightButtonNode()) {
+        auto swiperNode = GetHost();
+        CHECK_NULL_VOID(swiperNode);
+        auto leftArrowNode =
+            DynamicCast<FrameNode>(swiperNode->GetChildAtIndex(swiperNode->GetChildIndexById(GetLeftButtonId())));
+        CHECK_NULL_VOID(leftArrowNode);
+        auto leftArrowPattern = leftArrowNode->GetPattern<SwiperArrowPattern>();
+        CHECK_NULL_VOID(leftArrowPattern);
+        leftArrowPattern->SetButtonVisible(hoverFlag);
+        auto rightArrowNode =
+            DynamicCast<FrameNode>(swiperNode->GetChildAtIndex(swiperNode->GetChildIndexById(GetRightButtonId())));
+        CHECK_NULL_VOID(rightArrowNode);
+        auto rightArrowPattern = rightArrowNode->GetPattern<SwiperArrowPattern>();
+        CHECK_NULL_VOID(rightArrowPattern);
+        rightArrowPattern->SetButtonVisible(hoverFlag);
+    }
+}
+
+void SwiperPattern::IndicatorHover(bool hoverFlag)
+{
+    if (HasLeftButtonNode() && HasRightButtonNode()) {
+        auto swiperNode = GetHost();
+        CHECK_NULL_VOID(swiperNode);
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+        CHECK_NULL_VOID(swiperIndicatorTheme);
+        hoverRatio_ = hoverFlag ? swiperIndicatorTheme->GetArrowZoomOutScale() : 1.0f;
+        swiperNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+    }
+}
+
 void SwiperPattern::SaveArrowProperty(const RefPtr<FrameNode>& arrowNode)
 {
     auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
@@ -1491,6 +1643,7 @@ void SwiperPattern::SaveArrowProperty(const RefPtr<FrameNode>& arrowNode)
     arrowLayoutProperty->UpdateDirection(layoutProperty->GetDirection().value_or(Axis::HORIZONTAL));
     arrowLayoutProperty->UpdateIndex(layoutProperty->GetIndex().value_or(0));
     arrowLayoutProperty->UpdateLoop(swiperPaintProperty->GetLoop().value_or(true));
+    arrowLayoutProperty->UpdateEnabled(swiperPaintProperty->GetEnabled().value_or(true));
     arrowLayoutProperty->UpdateDisplayArrow(layoutProperty->GetDisplayArrowValue());
     arrowLayoutProperty->UpdateHoverShow(layoutProperty->GetHoverShowValue());
     arrowLayoutProperty->UpdateIsShowBoard(layoutProperty->GetIsShowBoardValue());

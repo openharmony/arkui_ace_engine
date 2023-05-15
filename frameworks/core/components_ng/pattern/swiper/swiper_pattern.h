@@ -78,6 +78,7 @@ public:
         layoutAlgorithm->SetIsLoop(IsLoop());
         layoutAlgorithm->SetMaxChildSize(maxChildSize_);
         layoutAlgorithm->SetDisplayCount(GetDisplayCount());
+        layoutAlgorithm->SetHoverRatio(hoverRatio_);
         return layoutAlgorithm;
     }
 
@@ -358,6 +359,8 @@ public:
     std::shared_ptr<SwiperParameters> GetSwiperParameters() const;
     std::shared_ptr<SwiperDigitalParameters> GetSwiperDigitalParameters() const;
 
+    void ArrowHover(bool hoverFlag);
+    void IndicatorHover(bool hoverFlag);
     bool IsLoop() const;
     bool IsEnabled() const;
     void OnWindowShow() override;
@@ -435,6 +438,9 @@ private:
     void OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay);
     bool IsShowArrow() const;
     void SaveArrowProperty(const RefPtr<FrameNode>& arrowNode);
+    RefPtr<FocusHub> GetFocusHubChild(std::string childFrameName);
+    WeakPtr<FocusHub> PreviousFocus(const RefPtr<FocusHub>& curFocusNode);
+    WeakPtr<FocusHub> NextFocus(const RefPtr<FocusHub>& curFocusNode);
     int32_t ComputeLoadCount(int32_t cacheCount);
     void SetAccessibilityAction();
 
@@ -488,9 +494,12 @@ private:
     WeakPtr<FrameNode> lastWeakShowNode_;
 
     CancelableCallback<void()> translateTask_;
+    // Arrow default hover ratio
+    float hoverRatio_ = 1.0f;
     std::optional<int32_t> indicatorId_;
     std::optional<int32_t> leftButtonId_;
     std::optional<int32_t> rightButtonId_;
+    std::optional<SwiperIndicatorType> lastSwiperIndicatorType_;
 };
 } // namespace OHOS::Ace::NG
 
