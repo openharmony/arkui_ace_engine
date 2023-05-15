@@ -161,6 +161,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg002, TestSize
     EXPECT_NE(paint.getPathEffect(), nullptr);
 }
 
+#ifndef NEW_SKIA
 /**
  * @tc.name: CustomPaintPaintMethodTestNg003
  * @tc.desc: Test the functions InitImagePaint of CustomPaintPaintMethod.
@@ -191,7 +192,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg003, TestSize
      */
     paintMethod->SetSmoothingEnabled(true);
     paintMethod->smoothingQuality_ = qualityUndefined;
-    paintMethod->InitImagePaint();
+    paintMethod->InitImagePaint(paintMethod->imagePaint_);
     EXPECT_DOUBLE_EQ(paintMethod->imagePaint_.getFilterQuality(), SkFilterQuality::kNone_SkFilterQuality);
 
     /**
@@ -199,7 +200,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg003, TestSize
      * @tc.expected: The filterQuality of imagePaint_ is equal to kLow_SkFilterQuality.
      */
     paintMethod->smoothingQuality_ = qualityLow;
-    paintMethod->InitImagePaint();
+    paintMethod->InitImagePaint(paintMethod->imagePaint_);
     EXPECT_DOUBLE_EQ(paintMethod->imagePaint_.getFilterQuality(), SkFilterQuality::kLow_SkFilterQuality);
 
     /**
@@ -207,7 +208,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg003, TestSize
      * @tc.expected: The filterQuality of imagePaint_ is equal to kMedium_SkFilterQuality.
      */
     paintMethod->smoothingQuality_ = qualityMedium;
-    paintMethod->InitImagePaint();
+    paintMethod->InitImagePaint(paintMethod->imagePaint_);
     EXPECT_DOUBLE_EQ(paintMethod->imagePaint_.getFilterQuality(), SkFilterQuality::kMedium_SkFilterQuality);
 
     /**
@@ -215,7 +216,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg003, TestSize
      * @tc.expected: The filterQuality of imagePaint_ is equal to kHigh_SkFilterQuality.
      */
     paintMethod->smoothingQuality_ = qualityHigh;
-    paintMethod->InitImagePaint();
+    paintMethod->InitImagePaint(paintMethod->imagePaint_);
     EXPECT_DOUBLE_EQ(paintMethod->imagePaint_.getFilterQuality(), SkFilterQuality::kHigh_SkFilterQuality);
 
     /**
@@ -223,9 +224,10 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg003, TestSize
      * @tc.expected: The filterQuality of imagePaint_ is equal to kNone_SkFilterQuality.
      */
     paintMethod->SetSmoothingEnabled(false);
-    paintMethod->InitImagePaint();
+    paintMethod->InitImagePaint(paintMethod->imagePaint_);
     EXPECT_DOUBLE_EQ(paintMethod->imagePaint_.getFilterQuality(), SkFilterQuality::kNone_SkFilterQuality);
 }
+#endif
 
 /**
  * @tc.name: CustomPaintPaintMethodTestNg004
@@ -249,15 +251,22 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg004, TestSize
      */
     CanvasFillRule rule = CanvasFillRule::NONZERO;
     paintMethod->SetFillRuleForPath(rule);
+#ifndef NEW_SKIA
     EXPECT_EQ(paintMethod->skPath_.getFillType(), SkPath::FillType::kWinding_FillType);
-
+#else
+    EXPECT_EQ(paintMethod->skPath_.getFillType(), SkPathFillType::kWinding);
+#endif
     /**
      * @tc.steps2: Test the function SetFillRuleForPath with rule = CanvasFillRule::EVENODD.
      * @tc.expected: The value of getFillType is SkPath::FillType::kEvenOdd_FillType.
      */
     rule = CanvasFillRule::EVENODD;
     paintMethod->SetFillRuleForPath(rule);
+#ifndef NEW_SKIA
     EXPECT_EQ(paintMethod->skPath_.getFillType(), SkPath::FillType::kEvenOdd_FillType);
+#else
+    EXPECT_EQ(paintMethod->skPath_.getFillType(), SkPathFillType::kEvenOdd);
+#endif
 }
 
 /**
@@ -282,7 +291,11 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg005, TestSize
      */
     CanvasFillRule rule = CanvasFillRule::NONZERO;
     paintMethod->SetFillRuleForPath2D(rule);
+#ifndef NEW_SKIA
     EXPECT_EQ(paintMethod->skPath2d_.getFillType(), SkPath::FillType::kWinding_FillType);
+#else
+    EXPECT_EQ(paintMethod->skPath2d_.getFillType(), SkPathFillType::kWinding);
+#endif
 
     /**
      * @tc.steps2: Test the function SetFillRuleForPath2D with rule = CanvasFillRule::EVENODD.
@@ -290,7 +303,11 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg005, TestSize
      */
     rule = CanvasFillRule::EVENODD;
     paintMethod->SetFillRuleForPath2D(rule);
+#ifndef NEW_SKIA
     EXPECT_EQ(paintMethod->skPath2d_.getFillType(), SkPath::FillType::kEvenOdd_FillType);
+#else
+    EXPECT_EQ(paintMethod->skPath2d_.getFillType(), SkPathFillType::kEvenOdd);
+#endif
 }
 
 /**
@@ -356,7 +373,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg007, TestSize
      * @tc.steps2: Test the function DrawSvgImage with flag = DEFAULT_INSTANCE_ID.
      * @tc.expected: The value of canvasImage.flag is DEFAULT_INSTANCE_ID.
      */
-    PaintWrapper* paintWrapper;
+    PaintWrapper* paintWrapper = nullptr;
     Ace::CanvasImage canvasImage;
     canvasImage.src = "loading";
     canvasImage.flag = DEFAULT_INSTANCE_ID;
@@ -401,13 +418,14 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg008, TestSize
      * @tc.steps2: Test the function PutImageData with  imageData.data is null.
      * @tc.expected: The value of imageData.data is null.
      */
-    PaintWrapper* paintWrapper;
+    PaintWrapper* paintWrapper = nullptr;
     Ace::ImageData imageData;
     imageData.data = {};
     paintMethod->PutImageData(paintWrapper, imageData);
     EXPECT_TRUE(imageData.data.empty());
 }
 
+#ifndef NEW_SKIA
 /**
  * @tc.name: CustomPaintPaintMethodTestNg009
  * @tc.desc: Test the functions GetStrokePaint of CustomPaintPaintMethod.
@@ -428,7 +446,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg009, TestSize
      */
     SkPaint paint;
     paintMethod->globalState_.SetAlpha(DEFAULT_DOUBLE1);
-    paint = paintMethod->GetStrokePaint();
+    paintMethod->GetStrokePaint(paint);
     EXPECT_DOUBLE_EQ(paint.getAlphaf(), DEFAULT_DOUBLE1);
 
     /**
@@ -436,9 +454,10 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg009, TestSize
      * @tc.expected: The value of getFillType is not equal to DEFAULT_DOUBLE1.
      */
     paintMethod->globalState_.SetAlpha(DEFAULT_DOUBLE10);
-    paint = paintMethod->GetStrokePaint();
+    paintMethod->GetStrokePaint(paint);
     EXPECT_NE(paint.getAlphaf(), DEFAULT_DOUBLE1);
 }
+#endif
 
 /**
  * @tc.name: CustomPaintPaintMethodTestNg010
@@ -460,7 +479,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg010, TestSize
      * @tc.steps2: Test the function FillRect with Alpha = DEFAULT_DOUBLE10.
      * @tc.expected: The value of HasGlobalAlpha is true.
      */
-    PaintWrapper* paintWrapper;
+    PaintWrapper* paintWrapper = nullptr;
     Rect rect;
     paintMethod->globalState_.SetAlpha(DEFAULT_DOUBLE10);
     paintMethod->FillRect(paintWrapper, rect);
@@ -475,7 +494,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg010, TestSize
     paintMethod->shadow_.SetOffsetY(DEFAULT_DOUBLE1);
     paintMethod->FillRect(paintWrapper, rect);
     EXPECT_TRUE(paintMethod->HasShadow());
-
+#ifndef NEW_SKIA
     /**
      * @tc.steps4: Test the function FillRect with SetType.
      * @tc.expected: The value of GetType is CompositeOperation::SOURCE_OVER.
@@ -491,6 +510,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg010, TestSize
     paintMethod->globalState_.SetType(CompositeOperation::SOURCE_IN);
     paintMethod->FillRect(paintWrapper, rect);
     EXPECT_EQ(static_cast<int>(paintMethod->cachePaint_.getBlendMode()), BLENDMODE_VALUE_END);
+#endif
 }
 
 /**
@@ -513,14 +533,14 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg011, TestSize
      * @tc.steps2: Test the function StrokeRect with shadow_.
      * @tc.expected: The value of HasShadow is true.
      */
-    PaintWrapper* paintWrapper;
+    PaintWrapper* paintWrapper = nullptr;
     Rect rect;
     paintMethod->shadow_.SetBlurRadius(DEFAULT_DOUBLE1);
     paintMethod->shadow_.SetOffsetX(DEFAULT_DOUBLE1);
     paintMethod->shadow_.SetOffsetY(DEFAULT_DOUBLE1);
     paintMethod->StrokeRect(paintWrapper, rect);
     EXPECT_TRUE(paintMethod->HasShadow());
-
+#ifndef NEW_SKIA
     /**
      * @tc.steps3: Test the function StrokeRect with SetType.
      * @tc.expected: The value of GetType is CompositeOperation::SOURCE_OVER.
@@ -536,6 +556,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg011, TestSize
     paintMethod->globalState_.SetType(CompositeOperation::SOURCE_IN);
     paintMethod->StrokeRect(paintWrapper, rect);
     EXPECT_EQ(static_cast<int>(paintMethod->cachePaint_.getBlendMode()), BLENDMODE_VALUE_END);
+#endif
 }
 
 /**
@@ -559,8 +580,8 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg012, TestSize
      * @tc.expected: The value of HasGlobalAlpha is true.
      */
 
-    PaintWrapper* paintWrapper;
-  
+    PaintWrapper* paintWrapper = nullptr;
+
     paintMethod->globalState_.SetAlpha(DEFAULT_DOUBLE10);
     paintMethod->Fill(paintWrapper);
     EXPECT_TRUE(paintMethod->globalState_.HasGlobalAlpha());
@@ -574,7 +595,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg012, TestSize
     paintMethod->shadow_.SetOffsetY(DEFAULT_DOUBLE1);
     paintMethod->Fill(paintWrapper);
     EXPECT_TRUE(paintMethod->HasShadow());
-
+#ifndef NEW_SKIA
     /**
      * @tc.steps4: Test the function Fill with SetType.
      * @tc.expected: The value of GetType is CompositeOperation::SOURCE_OVER.
@@ -590,6 +611,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg012, TestSize
     paintMethod->globalState_.SetType(CompositeOperation::SOURCE_IN);
     paintMethod->Fill(paintWrapper);
     EXPECT_EQ(static_cast<int>(paintMethod->cachePaint_.getBlendMode()), BLENDMODE_VALUE_END);
+#endif
 }
 
 /**
@@ -627,7 +649,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg013, TestSize
     paintMethod->shadow_.SetOffsetY(DEFAULT_DOUBLE1);
     paintMethod->Path2DFill(offset);
     EXPECT_TRUE(paintMethod->HasShadow());
-
+#ifndef NEW_SKIA
     /**
      * @tc.steps4: Test the function Path2DFill with SetType.
      * @tc.expected: The value of GetType is CompositeOperation::SOURCE_OVER.
@@ -643,6 +665,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg013, TestSize
     paintMethod->globalState_.SetType(CompositeOperation::SOURCE_IN);
     paintMethod->Path2DFill(offset);
     EXPECT_EQ(static_cast<int>(paintMethod->cachePaint_.getBlendMode()), BLENDMODE_VALUE_END);
+#endif
 }
 
 /**
@@ -665,13 +688,13 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg014, TestSize
      * @tc.steps2: Test the function Stroke with shadow_.
      * @tc.expected: The value of HasShadow is true.
      */
-    PaintWrapper* paintWrapper;
+    PaintWrapper* paintWrapper = nullptr;
     paintMethod->shadow_.SetBlurRadius(DEFAULT_DOUBLE1);
     paintMethod->shadow_.SetOffsetX(DEFAULT_DOUBLE1);
     paintMethod->shadow_.SetOffsetY(DEFAULT_DOUBLE1);
     paintMethod->Stroke(paintWrapper);
     EXPECT_TRUE(paintMethod->HasShadow());
-
+#ifndef NEW_SKIA
     /**
      * @tc.steps3: Test the function Stroke with SetType.
      * @tc.expected: The value of GetType is CompositeOperation::SOURCE_OVER.
@@ -687,6 +710,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg014, TestSize
     paintMethod->globalState_.SetType(CompositeOperation::SOURCE_IN);
     paintMethod->Stroke(paintWrapper);
     EXPECT_EQ(static_cast<int>(paintMethod->cachePaint_.getBlendMode()), BLENDMODE_VALUE_END);
+#endif
 }
 
 /**
@@ -715,7 +739,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg015, TestSize
     paintMethod->shadow_.SetOffsetY(DEFAULT_DOUBLE1);
     paintMethod->Path2DStroke(offset);
     EXPECT_TRUE(paintMethod->HasShadow());
-
+#ifndef NEW_SKIA
     /**
      * @tc.steps3: Test the function Path2DStroke with SetType.
      * @tc.expected: The value of GetType is CompositeOperation::SOURCE_OVER.
@@ -731,6 +755,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg015, TestSize
     paintMethod->globalState_.SetType(CompositeOperation::SOURCE_IN);
     paintMethod->Path2DStroke(offset);
     EXPECT_EQ(static_cast<int>(paintMethod->cachePaint_.getBlendMode()), BLENDMODE_VALUE_END);
+#endif
 }
 
 /**
@@ -753,7 +778,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg016, TestSize
      * @tc.steps2: Test the function Arc with angle.
      * @tc.expected: The value of angle is true.
      */
-    PaintWrapper* paintWrapper;
+    PaintWrapper* paintWrapper = nullptr;
     ArcParam param;
     param.startAngle = 1.5 * M_PI;    // start angle of the circle
     param.endAngle = 3.5 * M_PI;
@@ -903,7 +928,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg018, TestSize
      * @tc.steps2: Test the function Ellipse with angle.
      * @tc.expected: The value of angle is true.
      */
-    PaintWrapper* paintWrapper;
+    PaintWrapper* paintWrapper = nullptr;
     EllipseParam param;
     param.startAngle = 1.5 * M_PI;    // start angle of the Ellipse
     param.endAngle = 3.5 * M_PI;
@@ -1115,5 +1140,26 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg021, TestSize
     gradient.AddColor(gradientColor2);
     paintMethod->UpdatePaintShader(offset, paint, gradient);
     EXPECT_NE(paint.getShader(), nullptr);
+}
+
+/**
+ * @tc.name: CustomPaintPaintMethodTestNg021
+ * @tc.desc: Test the functions GetMatrixFromPattern of CustomPaintPaintMethod.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg022, TestSize.Level1)
+{
+    auto paintMethod = CreateCanvasPaintMethod();
+    ASSERT_NE(paintMethod, nullptr);
+    Ace::Pattern pattern;
+    pattern.SetScaleX(1.0f);
+    pattern.SetScaleY(1.0f);
+    SkMatrix matrix = paintMethod->GetMatrixFromPattern(pattern);
+    EXPECT_EQ(matrix.getScaleX(), pattern.GetScaleX());
+    EXPECT_EQ(matrix.getScaleY(), pattern.GetScaleY());
+    EXPECT_EQ(matrix.getSkewX(), pattern.GetSkewX());
+    EXPECT_EQ(matrix.getSkewY(), pattern.GetSkewY());
+    EXPECT_EQ(matrix.getTranslateX(), pattern.GetTranslateX());
+    EXPECT_EQ(matrix.getTranslateY(), pattern.GetTranslateY());
 }
 } // namespace OHOS::Ace::NG

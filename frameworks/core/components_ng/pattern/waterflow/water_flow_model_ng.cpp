@@ -67,11 +67,21 @@ void WaterFlowModelNG::SetScroller(RefPtr<ScrollControllerBase> scroller, RefPtr
 
 void WaterFlowModelNG::SetColumnsTemplate(const std::string& value)
 {
+    if (value.empty()) {
+        LOGE("Columns Template [%{public}s] is not valid.", value.c_str());
+        ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ColumnsTemplate, "1fr");
+        return;
+    }
     ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ColumnsTemplate, value);
 }
 
 void WaterFlowModelNG::SetRowsTemplate(const std::string& value)
 {
+    if (value.empty()) {
+        LOGE("Rows Template [%{public}s] is not valid.", value.c_str());
+        ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, RowsTemplate, "1fr");
+        return;
+    }
     ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, RowsTemplate, value);
 }
 

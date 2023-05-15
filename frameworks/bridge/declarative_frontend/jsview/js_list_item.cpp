@@ -32,19 +32,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<ListItemModel> ListItemModel::instance_ = nullptr;
+std::mutex ListItemModel::mutex_;
 
 ListItemModel* ListItemModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::ListItemModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::ListItemModelNG());
-        } else {
-            instance_.reset(new Framework::ListItemModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::ListItemModelNG());
+            } else {
+                instance_.reset(new Framework::ListItemModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -184,7 +188,7 @@ void JSListItem::SelectCallback(const JSCallbackInfo& args)
 void JSListItem::JsBorderRadius(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsBorderRadius(info);
-    Dimension borderRadius;
+    CalcDimension borderRadius;
     if (!JSViewAbstract::ParseJsDimensionVp(info[0], borderRadius)) {
         return;
     }

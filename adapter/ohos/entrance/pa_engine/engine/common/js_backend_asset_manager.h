@@ -34,7 +34,8 @@ public:
 
 private:
     bool ParseFileUri(const std::string& fileUri, std::string& assetsFilePath);
-
+    bool ParseWorkerUri(const std::string& fileUri, std::string& assetsFilePath);
+    void GetFileInfo(const std::string& fileUri, std::string& fileName, std::string& filePath);
     RefPtr<AssetManager> assetManager_ = nullptr;
 };
 } // namespace OHOS::Ace

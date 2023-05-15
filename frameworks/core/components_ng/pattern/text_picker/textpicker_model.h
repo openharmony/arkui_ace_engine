@@ -23,6 +23,9 @@
 
 namespace OHOS::Ace {
 using TextChangeEvent = std::function<void(const std::string&, double)>;
+using TextCascadeChangeEvent = std::function<void(const std::vector<std::string>&, const std::vector<double>&)>;
+using TextCascadeValueChangeEvent = std::function<void(const std::vector<std::string>&)>;
+using TextCascadeSelectedChangeEvent = std::function<void(const std::vector<double>&)>;
 class TextPickerModel {
 public:
     static TextPickerModel* GetInstance();
@@ -34,10 +37,27 @@ public:
     virtual void SetValue(const std::string& value) = 0;
     virtual void SetOnChange(TextChangeEvent&& onChange) = 0;
     virtual void SetDefaultPickerItemHeight(const Dimension& value) = 0;
+    virtual void SetCanLoop(const bool value) = 0;
     virtual void SetDefaultAttributes(const RefPtr<PickerTheme>& pickerTheme) = 0;
     virtual void SetDisappearTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value) = 0;
     virtual void SetNormalTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value) = 0;
     virtual void SetSelectedTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value) = 0;
+    virtual void MultiInit(const RefPtr<PickerTheme> pickerTheme) = 0;
+    virtual void SetColumns(const std::vector<NG::TextCascadePickerOptions>& options) = 0;
+    virtual void SetIsCascade(bool isCascade) = 0;
+    virtual void SetOnCascadeChange(TextCascadeChangeEvent&& onChange) = 0;
+    virtual void SetValues(const std::vector<std::string>& values) = 0;
+    virtual void SetSelecteds(const std::vector<uint32_t>& values) = 0;
+    virtual bool IsSingle() = 0;
+    virtual bool GetSingleRange(std::vector<NG::RangeContent>& rangeValue) = 0;
+    virtual bool IsCascade() = 0;
+    virtual uint32_t GetMaxCount() = 0;
+    virtual void SetMaxCount(uint32_t maxCount) = 0;
+    virtual bool GetMultiOptions(std::vector<NG::TextCascadePickerOptions>& options) = 0;
+    virtual void SetBackgroundColor(const Color& color) = 0;
+    virtual void SetHasSelectAttr(bool value) = 0;
+    virtual void SetOnValueChangeEvent(TextCascadeValueChangeEvent&& onChange) = 0;
+    virtual void SetOnSelectedChangeEvent(TextCascadeSelectedChangeEvent&& onChange) = 0;
 private:
     static std::unique_ptr<TextPickerModel> textPickerInstance_;
 };

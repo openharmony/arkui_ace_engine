@@ -43,12 +43,18 @@ template("napi_componentsnapshot_static") {
       deps += [ "//foundation/arkui/napi/:ace_napi" ]
     }
 
-    external_deps = []
-    if (defined(config.pixel_map_support)) {
-      external_deps += [
-        "multimedia_image_framework:image",
-        "multimedia_image_framework:image_native",
-      ]
+    if (is_cross_platform_build) {
+      if (defined(config.pixel_map_support) && config.pixel_map_support) {
+        configs = [ "//foundation/multimedia/image_framework/interfaces/innerkits:image_external_config" ]
+      }
+    } else {
+      external_deps = []
+      if (defined(config.pixel_map_support)) {
+        external_deps += [
+          "multimedia_image_framework:image",
+          "multimedia_image_framework:image_native",
+        ]
+      }
     }
 
     subsystem_name = ace_engine_subsystem

@@ -163,6 +163,7 @@ private:
     void InitSwiperAction(bool axisChanged);
     float GetFriction();
     void StartSpringMotion(float start, float end, float velocity);
+    void SetAccessibilityAction();
 
     RefPtr<ShallowBuilder> shallowBuilder_;
 

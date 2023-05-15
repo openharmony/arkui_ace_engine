@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,8 +18,11 @@
 
 #include <cstdint>
 #include <list>
+#include <string>
+#include <unordered_map>
 
 #include "base/geometry/ng/point_t.h"
+#include "base/log/ace_performance_check.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
@@ -38,9 +41,7 @@ class ACE_EXPORT UINode : public virtual AceType {
     DECLARE_ACE_TYPE(UINode, AceType);
 
 public:
-    UINode(const std::string& tag, int32_t nodeId, bool isRoot = false)
-        : tag_(tag), nodeId_(nodeId), accessibilityId_(currentAccessibilityId_++), isRoot_(isRoot)
-    {}
+    UINode(const std::string& tag, int32_t nodeId, bool isRoot = false);
     ~UINode() override;
 
     // atomic node is like button, image, custom node and so on.
@@ -69,6 +70,10 @@ public:
     void DetachFromMainTree(bool recursive = false);
 
     int32_t TotalChildCount() const;
+
+    // performance check get child count and depth
+    void GetAllChildCount(int32_t& count, CheckNodeMap& nodeMap, CheckNodeMap& itemMap);
+    void GetChildMaxDepth(int32_t& maxDepth);
 
     // Returns index in the flatten tree structure
     // of the node with given id and type
@@ -217,6 +222,16 @@ public:
         return isInDestroying_;
     }
 
+    int32_t GetRow() const
+    {
+        return row_;
+    }
+
+    int32_t GetCol() const
+    {
+        return col_;
+    }
+
     void SetChildrenInDestroying();
 
     virtual HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
@@ -349,6 +364,21 @@ public:
     }
 #endif
 
+    void SetRestoreId(int32_t restoreId)
+    {
+        restoreId_ = restoreId;
+    }
+
+    int32_t GetRestoreId()
+    {
+        return restoreId_;
+    }
+
+    void UpdateRecycleElmtId(int32_t newElmtId)
+    {
+        nodeId_ = newElmtId;
+    }
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -372,9 +402,6 @@ protected:
         }
     }
 
-    virtual void OnAddDisappearingChild() {}
-    virtual void OnRemoveDisappearingChild() {}
-
     virtual void OnContextAttached() {}
     // dump self info.
     virtual void DumpInfo() {}
@@ -390,10 +417,15 @@ protected:
 private:
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false);
 
+    // performance check
+    void GetSyntaxItemTag(const RefPtr<UINode>& sytaxItem, CheckNodeMap& itemMap);
+
     std::list<RefPtr<UINode>> children_;
     std::list<std::pair<RefPtr<UINode>, uint32_t>> disappearingChildren_;
     WeakPtr<UINode> parent_;
     std::string tag_ = "UINode";
+    int32_t row_ = -1;
+    int32_t col_ = -1;
     int32_t depth_ = 0;
     int32_t hostRootId_ = 0;
     int32_t hostPageId_ = 0;
@@ -408,6 +440,7 @@ private:
 
     int32_t childrenUpdatedFrom_ = -1;
     static thread_local int32_t currentAccessibilityId_;
+    int32_t restoreId_ = -1;
 
 #ifdef PREVIEW
     std::string debugLine_;

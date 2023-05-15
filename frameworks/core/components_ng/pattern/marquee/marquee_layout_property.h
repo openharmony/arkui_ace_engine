@@ -18,6 +18,7 @@
 
 #include <string>
 
+#include "base/geometry/dimension.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -41,6 +42,11 @@ public:
         value->propDirection_ = CloneDirection();
         value->propLoop_ = CloneLoop();
         value->propAllowScale_ = CloneAllowScale();
+        value->propSrc_ = CloneSrc();
+        value->propFontSize_ = CloneFontSize();
+        value->propFontWeight_ = CloneFontWeight();
+        value->propFontColor_ = CloneFontColor();
+        value->propFontFamily_ = CloneFontFamily();
         return value;
     }
 
@@ -52,6 +58,11 @@ public:
         ResetDirection();
         ResetLoop();
         ResetAllowScale();
+        ResetSrc();
+        ResetFontSize();
+        ResetFontWeight();
+        ResetFontColor();
+        ResetFontFamily();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -71,13 +82,13 @@ public:
         json->Put(
             "fromStart", propDirection_.value_or(MarqueeDirection::RIGHT) == MarqueeDirection::LEFT ? "true" : "false");
         json->Put("allowScale", propAllowScale_.value_or(false) ? "true" : "false");
-        json->Put("fontSize", textLayoutProperty->GetFontSize().value_or(10.0_vp).ToString().c_str());
-        json->Put("fontColor", textLayoutProperty->GetForegroundColor()
-            .value_or(textLayoutProperty->GetTextColor().value_or(Color::BLACK)).ColorToString().c_str());
-        json->Put("fontWeight", V2::ConvertWrapFontWeightToStirng(textLayoutProperty->GetFontWeight()
-            .value_or(FontWeight::NORMAL)).c_str());
+        json->Put("fontSize", propFontSize_.value_or(10.0_vp).ToString().c_str());
+        json->Put("fontColor",
+            propFontColor_.value_or(textLayoutProperty->GetTextColor().value_or(Color::BLACK)).ColorToString().c_str());
+        json->Put(
+            "fontWeight", V2::ConvertWrapFontWeightToStirng(propFontWeight_.value_or(FontWeight::NORMAL)).c_str());
         std::vector<std::string> fontFamilyVector =
-            textLayoutProperty->GetFontFamily().value_or<std::vector<std::string>>({ "HarmonyOS Sans" });
+            propFontFamily_.value_or<std::vector<std::string>>({ "HarmonyOS Sans" });
         if (fontFamilyVector.empty()) {
             fontFamilyVector = std::vector<std::string>({ "HarmonyOS Sans" });
         }
@@ -93,6 +104,11 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Loop, int32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Direction, MarqueeDirection, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(AllowScale, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Src, std::string, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontSize, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontWeight, FontWeight, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontColor, Color, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontFamily, std::vector<std::string>, PROPERTY_UPDATE_MEASURE);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(MarqueeLayoutProperty);

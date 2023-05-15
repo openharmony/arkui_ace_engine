@@ -27,8 +27,6 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/resource/ace_res_config.h"
-#include "base/subwindow/subwindow_manager.h"
-#include "base/thread/background_task_executor.h"
 #include "base/utils/measure_util.h"
 #include "base/utils/utils.h"
 #include "bridge/common/manifest/manifest_parser.h"
@@ -43,6 +41,7 @@
 #include "core/components/dialog/dialog_component.h"
 #include "core/components/toast/toast_component.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/render/adapter/component_snapshot.h"
@@ -835,6 +834,7 @@ void FrontendDelegateDeclarative::Replace(const std::string& uri, const std::str
     if (Container::IsCurrentUseNewPipeline()) {
         CHECK_NULL_VOID(pageRouterManager_);
         pageRouterManager_->Replace({ uri }, params);
+        OnMediaQueryUpdate();
         return;
     }
     Replace(PageTarget(uri), params);
@@ -846,6 +846,7 @@ void FrontendDelegateDeclarative::ReplaceWithMode(
     if (Container::IsCurrentUseNewPipeline()) {
         CHECK_NULL_VOID(pageRouterManager_);
         pageRouterManager_->Replace({ uri }, params, static_cast<NG::RouterMode>(routerMode));
+        OnMediaQueryUpdate();
         return;
     }
     Replace(PageTarget(uri, static_cast<RouterMode>(routerMode)), params);
@@ -858,6 +859,7 @@ void FrontendDelegateDeclarative::ReplaceWithCallback(const std::string& uri, co
         CHECK_NULL_VOID(pageRouterManager_);
         pageRouterManager_->ReplaceWithCallback(
             { uri }, params, errorCallback, static_cast<NG::RouterMode>(routerMode));
+        OnMediaQueryUpdate();
         return;
     }
     Replace(PageTarget(uri, static_cast<RouterMode>(routerMode)), params, errorCallback);
@@ -2689,9 +2691,12 @@ std::string FrontendDelegateDeclarative::RestoreRouterStack(const std::string& c
     }
     // restore node info
     auto jsonNodeInfo = jsonContentInfo->GetValue("nodeInfo");
-    auto pipelineContext = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
+    auto pipelineContext = pipelineContextHolder_.Get();
     CHECK_NULL_RETURN(pipelineContext, "");
     pipelineContext->RestoreNodeInfo(std::move(jsonNodeInfo));
+    if (Container::IsCurrentUseNewPipeline()) {
+        return "";
+    }
     // restore stack info
     std::lock_guard<std::mutex> lock(mutex_);
     auto routerStack = jsonContentInfo->GetValue("stackInfo");
@@ -2718,7 +2723,7 @@ std::string FrontendDelegateDeclarative::GetContentInfo()
 {
     auto jsonContentInfo = JsonUtil::Create(true);
 
-    {
+    if (!Container::IsCurrentUseNewPipeline()) {
         std::lock_guard<std::mutex> lock(mutex_);
         auto jsonRouterStack = JsonUtil::CreateArray(false);
         for (size_t index = 0; index < pageRouteStack_.size(); ++index) {
@@ -2727,7 +2732,7 @@ std::string FrontendDelegateDeclarative::GetContentInfo()
         jsonContentInfo->Put("stackInfo", jsonRouterStack);
     }
 
-    auto pipelineContext = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
+    auto pipelineContext = pipelineContextHolder_.Get();
     CHECK_NULL_RETURN(pipelineContext, jsonContentInfo->ToString());
     jsonContentInfo->Put("nodeInfo", pipelineContext->GetStoredNodeInfo());
 
@@ -2738,9 +2743,20 @@ void FrontendDelegateDeclarative::GetSnapshot(
     const std::string& componentId, NG::ComponentSnapshot::JsCallback&& callback)
 {
 #ifdef ENABLE_ROSEN_BACKEND
-    NG::ComponentSnapshot snapshot(componentId);
-    snapshot.Get(std::move(callback));
+    NG::ComponentSnapshot::Get(componentId, std::move(callback));
 #endif
 }
 
+void FrontendDelegateDeclarative::CreateSnapshot(
+    std::function<void()>&& customBuilder, NG::ComponentSnapshot::JsCallback&& callback)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    ViewStackModel::GetInstance()->NewScope();
+    CHECK_NULL_VOID(customBuilder);
+    customBuilder();
+    auto customNode = ViewStackModel::GetInstance()->Finish();
+
+    NG::ComponentSnapshot::Create(customNode, std::move(callback));
+#endif
+}
 } // namespace OHOS::Ace::Framework

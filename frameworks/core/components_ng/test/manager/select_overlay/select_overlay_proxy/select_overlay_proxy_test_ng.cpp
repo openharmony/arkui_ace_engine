@@ -31,7 +31,7 @@
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
-using namespace testing::ext;
+using namespace testing::ext; 
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t NODE_ID = 143;

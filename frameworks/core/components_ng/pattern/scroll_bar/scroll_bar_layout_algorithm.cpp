@@ -110,6 +110,7 @@ void ScrollBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto scrollBarPattern = AceType::DynamicCast<ScrollBarPattern>(layoutWrapper->GetHostNode()->GetPattern());
     auto controlDistance = scrollBarPattern->GetControlDistance();
     auto scrollOffset = scrollBarPattern->GetScrollOffset();
+    scrollBarPattern->SetChildOffset(GetMainAxisSize(childSize, axis));
     float currentOffset = 0.0f;
     if (!NearZero(controlDistance)) {
         currentOffset = scrollOffset * scrollableDistance_ / controlDistance;

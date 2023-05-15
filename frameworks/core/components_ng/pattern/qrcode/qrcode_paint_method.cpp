@@ -23,12 +23,9 @@
 #include "core/components_ng/pattern/qrcode/qrcode_paint_property.h"
 
 namespace OHOS::Ace::NG {
-
 namespace {
-
 constexpr uint32_t QRCODE_START_INDEX = 0;
 constexpr uint32_t QRCODE_VALUE_MAX_LENGTH = 256;
-
 }
 
 CanvasDrawFunction QRCodePaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
@@ -65,6 +62,7 @@ void QRCodePaintMethod::Paint(RSCanvas& canvas, PaintWrapper* paintWrapper) cons
 
     // For the long string, just show the length as 256.
     if (value.size() > QRCODE_VALUE_MAX_LENGTH) {
+        LOGW("Qrcode value size is more than 256, just show the previous 256.");
         value = value.substr(QRCODE_START_INDEX, QRCODE_VALUE_MAX_LENGTH);
     }
     auto qrCode = qrcodegen::QrCode::encodeText(value.c_str(), qrcodegen::QrCode::Ecc::LOW);

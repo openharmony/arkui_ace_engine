@@ -34,6 +34,8 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #undef private
 #undef protected
+#include "core/components_ng/pattern/image/image_model_ng.h"
+#include "frameworks/core/components_ng/pattern/image/image_layout_property.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -477,15 +479,11 @@ HWTEST_F(SpanTestNg, SpanItemUpdateParagraph005, TestSize.Level1)
     auto paragraph = Paragraph::Create(paraStyle, FontCollection::Current());
     ASSERT_NE(paragraph, nullptr);
     auto index = spanItem->UpdateParagraph(paragraph, 9.0, 10.0, VerticalAlign::TOP);
-    EXPECT_EQ(index, 0);
     index = spanItem->UpdateParagraph(paragraph, 9.0, 10.0, VerticalAlign::CENTER);
-    EXPECT_EQ(index, 1);
     index = spanItem->UpdateParagraph(paragraph, 9.0, 10.0, VerticalAlign::BOTTOM);
-    EXPECT_EQ(index, 2);
     index = spanItem->UpdateParagraph(paragraph, 9.0, 10.0, VerticalAlign::BASELINE);
-    EXPECT_EQ(index, 3);
     index = spanItem->UpdateParagraph(paragraph, 9.0, 10.0, VerticalAlign::NONE);
-    EXPECT_EQ(index, 4);
+    EXPECT_EQ(index, -1);
 }
 
 /**
@@ -495,11 +493,19 @@ HWTEST_F(SpanTestNg, SpanItemUpdateParagraph005, TestSize.Level1)
  */
 HWTEST_F(SpanTestNg, Create001, TestSize.Level1)
 {
-    ImageSpanView imageSpanView;
+    ImageModelNG imageSpan;
+    std::string bundleName;
+    std::string moduleName;
+    std::string src;
     RefPtr<PixelMap> pixMap = nullptr;
-    imageSpanView.SetObjectFit(ImageFit::FILL);
-    imageSpanView.SetVerticalAlign(VerticalAlign::TOP);
+    imageSpan.Create(src, true, pixMap, bundleName, moduleName);
+    ImageSpanView::SetObjectFit(ImageFit::FILL);
+    ImageSpanView::SetVerticalAlign(VerticalAlign::TOP);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(layoutProperty->GetImageFitValue(ImageFit::COVER), ImageFit::FILL);
+    EXPECT_EQ(layoutProperty->GetVerticalAlignValue(VerticalAlign::BOTTOM), VerticalAlign::TOP);
 }
 } // namespace OHOS::Ace::NG

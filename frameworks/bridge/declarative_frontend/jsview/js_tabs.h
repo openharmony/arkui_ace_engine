@@ -38,6 +38,7 @@ public:
     static void SetAnimationDuration(float value);
     static void SetFadingEdge(const JSCallbackInfo& info);
     static void SetDivider(const JSCallbackInfo& info);
+    static void SetBarOverlap(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

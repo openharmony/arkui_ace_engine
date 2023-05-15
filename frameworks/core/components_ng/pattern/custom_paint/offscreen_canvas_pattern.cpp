@@ -24,6 +24,12 @@ OffscreenCanvasPattern::OffscreenCanvasPattern(int32_t width, int32_t height)
 {
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
+    if (Negative(width)) {
+        width = 0;
+    }
+    if (Negative(height)) {
+        height = 0;
+    }
     offscreenPaintMethod_ = MakeRefPtr<OffscreenCanvasPaintMethod>(context, width, height);
 }
 
@@ -122,14 +128,16 @@ void OffscreenCanvasPattern::QuadraticCurveTo(const QuadraticCurveParam& param)
     offscreenPaintMethod_->QuadraticCurveTo(nullptr, param);
 }
 
-void OffscreenCanvasPattern::FillText(const std::string& text, double x, double y, const PaintState& state)
+void OffscreenCanvasPattern::FillText(
+    const std::string& text, double x, double y, std::optional<double> maxWidth, const PaintState& state)
 {
-    offscreenPaintMethod_->FillText(text, x, y, state);
+    offscreenPaintMethod_->FillText(text, x, y, maxWidth, state);
 }
 
-void OffscreenCanvasPattern::StrokeText(const std::string& text, double x, double y, const PaintState& state)
+void OffscreenCanvasPattern::StrokeText(
+    const std::string& text, double x, double y, std::optional<double> maxWidth, const PaintState& state)
 {
-    offscreenPaintMethod_->StrokeText(text, x, y, state);
+    offscreenPaintMethod_->StrokeText(text, x, y, maxWidth, state);
 }
 
 double OffscreenCanvasPattern::MeasureText(const std::string& text, const PaintState& state)
@@ -213,6 +221,11 @@ void OffscreenCanvasPattern::SetTextDirection(TextDirection direction)
     offscreenPaintMethod_->SetTextDirection(direction);
 }
 
+void OffscreenCanvasPattern::SetFilterParam(const std::string& filterStr)
+{
+    offscreenPaintMethod_->SetFilterParam(filterStr);
+}
+
 void OffscreenCanvasPattern::Save()
 {
     offscreenPaintMethod_->Save();
@@ -253,9 +266,9 @@ void OffscreenCanvasPattern::Translate(double x, double y)
     offscreenPaintMethod_->Translate(x, y);
 }
 
-void OffscreenCanvasPattern::SetFillPattern(const Ace::Pattern& pattern)
+void OffscreenCanvasPattern::SetFillPattern(const std::weak_ptr<Ace::Pattern>& pattern)
 {
-    offscreenPaintMethod_->SetFillPattern(pattern);
+    offscreenPaintMethod_->SetFillPatternNG(pattern);
 }
 
 void OffscreenCanvasPattern::SetFillGradient(const Ace::Gradient& gradient)
@@ -338,9 +351,9 @@ void OffscreenCanvasPattern::SetShadowColor(const Color& color)
     offscreenPaintMethod_->SetShadowColor(color);
 }
 
-void OffscreenCanvasPattern::SetStrokePattern(const Ace::Pattern& pattern)
+void OffscreenCanvasPattern::SetStrokePattern(const std::weak_ptr<Ace::Pattern>& pattern)
 {
-    offscreenPaintMethod_->SetStrokePattern(pattern);
+    offscreenPaintMethod_->SetStrokePatternNG(pattern);
 }
 
 void OffscreenCanvasPattern::SetStrokeGradient(const Ace::Gradient& gradient)
@@ -376,5 +389,10 @@ void OffscreenCanvasPattern::SetFontSize(const Dimension& size)
 std::string OffscreenCanvasPattern::ToDataURL(const std::string& type, const double quality)
 {
     return offscreenPaintMethod_->ToDataURL(type, quality);
+}
+
+TransformParam OffscreenCanvasPattern::GetTransform() const
+{
+    return offscreenPaintMethod_->GetTransform();
 }
 } // namespace OHOS::Ace::NG

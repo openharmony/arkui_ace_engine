@@ -33,18 +33,19 @@ public:
     void SetMinLabel(float value) override;
     void SetMaxLabel(float value) override;
     void SetShowSteps(bool value) override;
-    void SetShowTips(bool value) override;
+    void SetShowTips(bool value, const std::optional<std::string>& content) override;
     void SetThickness(const Dimension& value) override;
     void SetBlockBorderColor(const Color& value) override;
     void SetBlockBorderWidth(const Dimension& value) override;
     void SetStepColor(const Color& value) override;
     void SetTrackBorderRadius(const Dimension& value) override;
-    void SetBlockSize(const Size& value) override;
+    void SetBlockSize(const Dimension& width, const Dimension& height) override;
     void SetBlockType(BlockStyleType value) override;
     void SetBlockImage(const std::string& value) override;
     void SetBlockShape(const RefPtr<BasicShape>& value) override;
     void SetStepSize(const Dimension& value) override;
     void SetOnChange(SliderOnChangeEvent&& eventOnChange) override;
+    void SetOnChangeEvent(SliderOnValueChangeEvent&& onChangeEvent) override;
 };
 
 } // namespace OHOS::Ace::NG

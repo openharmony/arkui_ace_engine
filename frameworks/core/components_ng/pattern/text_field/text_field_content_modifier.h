@@ -49,7 +49,9 @@ public:
     void ChangeDragStatus();
     void SetTextRectX(const float value);
     void SetTextAlign(const TextAlign value);
+    void SetShowCounter(bool value);
     bool NeedMeasureUpdate(PropertyChangeFlag& flag);
+    void SetShowErrorState(bool value);
 
 private:
     void SetDefaultFontSize(const TextStyle& textStyle);
@@ -76,6 +78,8 @@ private:
     RefPtr<PropertyBool> textObscured_;
     RefPtr<PropertyBool> dragStatus_;
     RefPtr<PropertyInt> textAlign_;
+    RefPtr<PropertyBool> showCounter_;
+    RefPtr<PropertyBool> showErrorState_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldContentModifier);
 };

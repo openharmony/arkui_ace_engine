@@ -46,7 +46,7 @@ void TransitionElement::Update()
     auto pipelineContext = context_.Upgrade();
     if (pipelineContext) {
         if (!controller_) {
-            controller_ = AceType::MakeRefPtr<Animator>(context_);
+            controller_ = CREATE_ANIMATOR(context_);
             LOGD("set simulation controller to transition component when update.");
         } else {
             controller_->Stop();

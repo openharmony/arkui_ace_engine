@@ -51,7 +51,7 @@
 #include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
 #include "core/components_ng/pattern/navrouter/navrouter_group_node.h"
 #include "core/components_ng/pattern/option/option_view.h"
-#include "core/components_ng/pattern/select/select_view.h"
+#include "core/components_ng/pattern/select/select_model.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -381,12 +381,14 @@ void NavigationView::SetTitle(const std::string& title, bool hasSubTitle)
             break;
         }
         auto titleProperty = titleNode->GetLayoutProperty<TextLayoutProperty>();
-        // if no subtitle, title's maxLine = 1. if has subtitle, title's maxLine = 2.
-        if (!hasSubTitle && navBarNode->GetSubtitle()) {
-            navBarNode->SetSubtitle(nullptr);
-            titleProperty->UpdateMaxLines(1);
-        } else {
+        // if no subtitle, title's maxLine = 2. if has subtitle, title's maxLine = 1.
+        if (!hasSubTitle) {
+            if (navBarNode->GetSubtitle()) {
+                navBarNode->SetSubtitle(nullptr);
+            }
             titleProperty->UpdateMaxLines(2);
+        } else {
+            titleProperty->UpdateMaxLines(1);
         }
         // previous title is not a text node and might be custom, we remove it and create a new node
         if (!titleProperty) {
@@ -422,9 +424,9 @@ void NavigationView::SetTitle(const std::string& title, bool hasSubTitle)
     textLayoutProperty->UpdateTextColor(theme->GetTitleColor());
     textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
     if (!hasSubTitle) {
-        textLayoutProperty->UpdateMaxLines(1);
-    } else {
         textLayoutProperty->UpdateMaxLines(2);
+    } else {
+        textLayoutProperty->UpdateMaxLines(1);
     }
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     navBarNode->SetTitle(titleNode);
@@ -902,6 +904,7 @@ void NavigationView::SetBackButtonIcon(const std::string& src, bool noPixMap, Re
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     CHECK_NULL_VOID(navigationGroupNode);
+
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
     auto navBarContentNode = navBarNode->GetNavBarContentNode();
@@ -915,9 +918,11 @@ void NavigationView::SetBackButtonIcon(const std::string& src, bool noPixMap, Re
         if (navBarContentChildFrameNode->GetTag() != V2::NAVROUTER_VIEW_ETS_TAG) {
             return;
         }
-        auto navRouterNode = AceType::DynamicCast<NavRouterGroupNode>(navBarContentChildFrameNode);
-        CHECK_NULL_VOID(navRouterNode);
-        auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(navRouterNode->GetNavDestinationNode());
+
+        auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+        CHECK_NULL_VOID(navigationPattern);
+        auto navDestinationNode =
+            AceType::DynamicCast<NavDestinationGroupNode>(navigationPattern->GetNavDestinationNode());
         CHECK_NULL_VOID(navDestinationNode);
         auto navDestinationLayoutProperty = navDestinationNode->GetLayoutProperty<NavDestinationLayoutProperty>();
         navDestinationLayoutProperty->UpdateImageSource(imageSourceInfo);
@@ -927,4 +932,47 @@ void NavigationView::SetBackButtonIcon(const std::string& src, bool noPixMap, Re
     }
 }
 
+void NavigationView::SetNavigationStack(RefPtr<NavigationStack>&& navigationStack)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto pattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetNavigationStack(std::move(navigationStack));
+}
+
+void NavigationView::SetNavigationStack()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto pattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto navigationStack = pattern->GetNavigationStack();
+    if (!navigationStack) {
+        auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+        pattern->SetNavigationStack(std::move(navigationStack));
+    }
+}
+
+void NavigationView::SetNavDestination(std::function<void(std::string)>&& builder)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto pattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetNavDestination(std::move(builder));
+}
+
+RefPtr<NavigationStack> NavigationView::GetNavigationStack()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_RETURN(navigationGroupNode, nullptr);
+    auto pattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    return pattern->GetNavigationStack();
+}
 } // namespace OHOS::Ace::NG

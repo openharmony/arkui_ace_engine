@@ -32,6 +32,8 @@
 #include "core/components_ng/pattern/navigation/navigation_view.h"
 #include "core/components_ng/pattern/navigator/navigator_event_hub.h"
 #include "core/components_ng/pattern/navigator/navigator_pattern.h"
+#include "core/components_ng/pattern/stack/stack_layout_algorithm.h"
+#include "core/components_ng/pattern/stack/stack_layout_property.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
@@ -54,6 +56,7 @@ class NavigationTestNg : public testing::Test {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
+    void MockPipelineContextGetTheme();
     static void RunMeasureAndLayout(RefPtr<LayoutWrapper>& layoutWrapper, float width = DEFAULT_ROOT_WIDTH);
 };
 
@@ -79,6 +82,13 @@ void NavigationTestNg::RunMeasureAndLayout(RefPtr<LayoutWrapper>& layoutWrapper,
     layoutWrapper->Measure(LayoutConstraint);
     layoutWrapper->Layout();
     layoutWrapper->MountToHostOnMainThread();
+}
+
+void NavigationTestNg::MockPipelineContextGetTheme()
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<NavigationBarTheme>()));
 }
 
 struct TestProperty {
@@ -369,6 +379,33 @@ HWTEST_F(NavigationTestNg, NavigationViewTest003, TestSize.Level1)
     EXPECT_NE(navBarLayoutProperty, nullptr);
     navigationView.SetHideToolBar(false);
     EXPECT_EQ(navBarLayoutProperty->GetHideToolBar().value_or(false), false);
+}
+
+/**
+ * @tc.name: NavigationViewTest004
+ * @tc.desc: Test NavigationView SetTitle & SetSubTitle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationViewTest004, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationView navigationView;
+    navigationView.Create();
+    navigationView.SetTitle("navigationView", true);
+    navigationView.SetSubtitle("subtitle");
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+    auto titleNode = navBarNode->GetTitle();
+    ASSERT_NE(titleNode, nullptr);
+    auto subTitleNode = navBarNode->GetSubtitle();
+    ASSERT_NE(subTitleNode, nullptr);
+    navigationView.SetTitle("navigationView", false);
+    auto newSubTitleNode = navBarNode->GetSubtitle();
+    ASSERT_EQ(newSubTitleNode, nullptr);
 }
 
 /**

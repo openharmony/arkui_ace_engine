@@ -26,6 +26,7 @@
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/picker/picker_data.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/pattern/picker/datepicker_event_hub.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
@@ -107,6 +108,7 @@ public:
      *   @return    true if popup was removed, false if no overlay exists
      */
     bool RemoveOverlay();
+    bool RemoveModalInOverlay();
     bool RemoveOverlayInSubwindow();
 
     void RegisterOnHideMenu(std::function<void()> callback)
@@ -203,6 +205,11 @@ public:
     void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<RefPtr<UINode>()>&& buildNodeFunc, int32_t type, int32_t targetId);
 
+    void BindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
+        std::function<RefPtr<UINode>()>&& buildNodeFunc, NG::SheetStyle& sheetStyle, int32_t targetId);
+
+    void DestroySheet(const RefPtr<FrameNode>& sheetNode, int32_t targetId);
+
 private:
     void PopToast(int32_t targetId);
 
@@ -231,6 +238,10 @@ private:
     void DefaultModalTransition(bool isTransitionIn);
     void PlayAlphaModalTransition(const RefPtr<FrameNode>& modalNode, bool isTransitionIn);
 
+    void PlaySheetTransition(RefPtr<FrameNode> sheetNode, bool isTransitionIn, bool isFirstTransition = true);
+
+    void ComputeSheetOffset(NG::SheetStyle& sheetStyle);
+
     // Key: target Id, Value: PopupInfo
     std::unordered_map<int32_t, NG::PopupInfo> popupMap_;
     // K: target frameNode ID, V: menuNode
@@ -238,6 +249,7 @@ private:
     std::unordered_map<int32_t, RefPtr<FrameNode>> customPopupMap_;
     std::stack<WeakPtr<FrameNode>> modalStack_;
     WeakPtr<FrameNode> lastModalNode_;
+    float sheetHeight_ {0.0};
     WeakPtr<UINode> rootNodeWeak_;
 #ifdef ENABLE_DRAG_FRAMEWORK
     bool hasPixelMap_ {false};

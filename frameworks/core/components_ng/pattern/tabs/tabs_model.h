@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TABS_TABS_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TABS_TABS_MODEL_H
 
+#include <mutex>
+
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
 #include "base/image/pixel_map.h"
@@ -35,6 +37,7 @@ struct TabsItemDivider final {
     Dimension startMargin = 0.0_vp;
     Dimension endMargin = 0.0_vp;
     Color color = Color::BLACK;
+    bool isNull = false;
     TabsItemDivider()
     {
         auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -50,7 +53,7 @@ struct TabsItemDivider final {
     bool operator==(const TabsItemDivider& itemDivider) const
     {
         return (strokeWidth == itemDivider.strokeWidth) && (startMargin == itemDivider.startMargin) &&
-               (endMargin == itemDivider.endMargin) && (color == itemDivider.color);
+               (endMargin == itemDivider.endMargin) && (color == itemDivider.color) && (isNull == itemDivider.isNull);
     }
 };
 
@@ -73,9 +76,12 @@ public:
     virtual void SetOnChange(std::function<void(const BaseEventInfo*)>&& onChange) = 0;
     virtual void SetDivider(const TabsItemDivider& divider) = 0;
     virtual void SetFadingEdge(bool fadingEdge) = 0;
+    virtual void SetBarOverlap(bool barOverlap) = 0;
+    virtual void SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& onChangeEvent) = 0;
 
 private:
     static std::unique_ptr<TabsModel> instance_;
+    static std::mutex mutex_;
 };
 
 } // namespace OHOS::Ace

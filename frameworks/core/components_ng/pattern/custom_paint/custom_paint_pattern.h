@@ -73,8 +73,8 @@ public:
     void BezierCurveTo(const BezierCurveParam& param);
     void QuadraticCurveTo(const QuadraticCurveParam& param);
 
-    void FillText(const std::string& text, double x, double y);
-    void StrokeText(const std::string& text, double x, double y);
+    void FillText(const std::string& text, double x, double y, std::optional<double> maxWidth);
+    void StrokeText(const std::string& text, double x, double y, std::optional<double> maxWidth);
     double MeasureText(const std::string& text, const PaintState& state);
     double MeasureTextHeight(const std::string& text, const PaintState& state);
     TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state);
@@ -84,6 +84,7 @@ public:
     std::unique_ptr<Ace::ImageData> GetImageData(double left, double top, double width, double height);
     void PutImageData(const Ace::ImageData& imageData);
     void TransferFromImageBitmap(const RefPtr<OffscreenCanvasPattern>& offscreenCanvasPattern);
+    void CloseImageBitmap(const std::string& src);
 
     void UpdateFillColor(const Color& color);
     void UpdateFillRuleForPath(const CanvasFillRule rule);
@@ -118,7 +119,7 @@ public:
     void UpdateShadowOffsetY(double offsetY);
     void UpdateTextAlign(TextAlign align);
     void UpdateTextBaseline(TextBaseline baseline);
-    void UpdateStrokePattern(const Ace::Pattern& pattern);
+    void UpdateStrokePattern(const std::weak_ptr<Ace::Pattern>& pattern);
     void UpdateStrokeColor(const Color& color);
     void UpdateFontWeight(FontWeight weight);
     void UpdateFontStyle(FontStyle style);
@@ -126,11 +127,13 @@ public:
     void UpdateFontSize(const Dimension& size);
     void UpdateLineJoin(LineJoinStyle join);
     void UpdateFillGradient(const Ace::Gradient& gradient);
-    void UpdateFillPattern(const Ace::Pattern& pattern);
+    void UpdateFillPattern(const std::weak_ptr<Ace::Pattern>& pattern);
     void UpdateShadowColor(const Color& color);
     void UpdateStrokeGradient(const Ace::Gradient& grad);
 
     void SetTextDirection(TextDirection direction);
+    void SetFilterParam(const std::string& filterStr);
+    TransformParam GetTransform() const;
     
 private:
     void OnAttachToFrameNode() override;

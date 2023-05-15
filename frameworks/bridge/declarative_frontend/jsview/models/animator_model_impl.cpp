@@ -42,7 +42,7 @@ void AnimatorModelImpl::Create(const std::string& animatorId)
     auto animatorInfo = page->GetAnimatorInfo(animatorId);
     if (!animatorInfo) {
         animatorInfo = AceType::MakeRefPtr<AnimatorInfo>();
-        auto animator = AceType::MakeRefPtr<Animator>();
+        auto animator = CREATE_ANIMATOR();
         animatorInfo->SetAnimator(animator);
         page->AddAnimatorInfo(animatorId, animatorInfo);
     }

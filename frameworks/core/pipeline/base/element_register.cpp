@@ -26,11 +26,15 @@
 
 namespace OHOS::Ace {
 thread_local ElementRegister* ElementRegister::instance_ = nullptr;
+std::mutex ElementRegister::mutex_;
 
 ElementRegister* ElementRegister::GetInstance()
 {
     if (ElementRegister::instance_ == nullptr) {
-        ElementRegister::instance_ = new ElementRegister();
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!ElementRegister::instance_) {
+            ElementRegister::instance_ = new ElementRegister();
+        }
     }
     return (ElementRegister::instance_);
 }
@@ -64,6 +68,18 @@ bool ElementRegister::Exists(ElementIdType elementId)
     LOGD("ElementRegister::Exists(%{public}d) returns %{public}s", elementId,
         (itemMap_.find(elementId) != itemMap_.end()) ? "true" : "false");
     return (itemMap_.find(elementId) != itemMap_.end());
+}
+
+void ElementRegister::UpdateRecycleElmtId(int32_t oldElmtId, int32_t newElmtId)
+{
+    if (!Exists(oldElmtId)) {
+        return;
+    }
+    auto node = GetNodeById(oldElmtId);
+    if (node) {
+        itemMap_.erase(oldElmtId);
+        AddReferenced(newElmtId, node);
+    }
 }
 
 bool ElementRegister::AddReferenced(ElementIdType elmtId, const WeakPtr<AceType>& referenced)

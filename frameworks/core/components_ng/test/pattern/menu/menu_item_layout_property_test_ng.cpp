@@ -20,8 +20,8 @@
 
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
-#include "core/components_ng/pattern/menu/menu_item/menu_item_view.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
@@ -326,17 +326,19 @@ HWTEST_F(MenuItemLayoutPropertyTestNg, MenuItemLayoutPropertyTestNg015, TestSize
 
     auto json = JsonUtil::Create(true);
     property.ToJsonValue(json);
+    auto labelFontJson = json->GetObject("labelFont");
+    auto contentFontJson = json->GetObject("contentFont");
     EXPECT_EQ(json->GetString("startIcon"), "start.png");
     EXPECT_EQ(json->GetString("content"), "content");
     EXPECT_EQ(json->GetString("endIcon"), "end.png");
     EXPECT_EQ(json->GetString("labelInfo"), "label");
     EXPECT_EQ(json->GetString("selectIcon"), "select.png");
-    EXPECT_EQ(json->GetString("fontSize"), Dimension(25.0f).ToString());
-    EXPECT_EQ(json->GetString("fontColor"), Color::RED.ColorToString());
-    EXPECT_EQ(json->GetString("fontWeight"), V2::ConvertWrapFontWeightToStirng(FontWeight::BOLD));
-    EXPECT_EQ(json->GetString("labelFontSize"), Dimension(35.0f).ToString());
+    EXPECT_EQ(contentFontJson->GetString("size"), Dimension(25.0f).ToString());
+    EXPECT_EQ(json->GetString("contentFontColor"), Color::RED.ColorToString());
+    EXPECT_EQ(contentFontJson->GetString("weight"), V2::ConvertWrapFontWeightToStirng(FontWeight::BOLD));
+    EXPECT_EQ(labelFontJson->GetString("size"), Dimension(35.0f).ToString());
     EXPECT_EQ(json->GetString("labelFontColor"), Color::BLUE.ColorToString());
-    EXPECT_EQ(json->GetString("labelFontWeight"), V2::ConvertWrapFontWeightToStirng(FontWeight::LIGHTER));
+    EXPECT_EQ(labelFontJson->GetString("weight"), V2::ConvertWrapFontWeightToStirng(FontWeight::LIGHTER));
 }
 
 /**
@@ -377,12 +379,13 @@ HWTEST_F(MenuItemLayoutPropertyTestNg, MenuItemLayoutPropertyTestNg017, TestSize
  */
 HWTEST_F(MenuItemLayoutPropertyTestNg, MenuItemLayoutPropertyTestNg018, TestSize.Level1)
 {
+    MenuItemModelNG MneuItemModelInstance;
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
     MenuItemProperties itemOption;
-    MenuItemView::Create(itemOption);
-    MenuItemView::SetSelectIcon(true);
+    MneuItemModelInstance.Create(itemOption);
+    MneuItemModelInstance.SetSelectIcon(true);
     auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(itemNode, nullptr);
     auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();

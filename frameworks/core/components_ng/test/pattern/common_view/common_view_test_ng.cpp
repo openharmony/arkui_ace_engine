@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,8 +15,8 @@
 
 #include "gtest/gtest.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/common_view/common_view_model_ng.h"
 #include "core/components_ng/pattern/common_view/common_view_pattern.h"
-#include "core/components_ng/pattern/common_view/common_view.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 using namespace testing;
@@ -38,7 +38,7 @@ public:
  */
 HWTEST_F(CommonViewTestNg, CommonViewTest001, TestSize.Level1)
 {
-    CommonView view;
+    CommonViewModelNG view;
     view.Create();
     auto blankNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_FALSE(blankNode == nullptr);

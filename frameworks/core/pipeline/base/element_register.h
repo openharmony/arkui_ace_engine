@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_ELEMENT_REGISTER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_ELEMENT_REGISTER_H
 
+#include <mutex>
 #include <unordered_map>
 #include <unordered_set>
 #include <list>
@@ -64,6 +65,12 @@ public:
     bool AddUINode(const RefPtr<NG::UINode>& node);
 
     bool Exists(ElementIdType elementId);
+
+    /**
+     * When a custom node is created from recycle, update its element id.
+     */
+    void UpdateRecycleElmtId(int32_t oldElmtId, int32_t newElmtId);
+
     /**
      * remove Element with given elmtId from the Map
      * means GetElementById on this elmtId no longer returns an Element
@@ -113,6 +120,7 @@ private:
 
     //  Singleton instance
     static thread_local ElementRegister* instance_;
+    static std::mutex mutex_;
 
     // ElementID assigned during initial render
     // first to Component, then synced to Element

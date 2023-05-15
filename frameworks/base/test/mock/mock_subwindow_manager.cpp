@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,10 @@
 
 #include "base/subwindow/subwindow_manager.h"
 namespace OHOS::Ace {
+namespace {
+static RefPtr<Subwindow> g_currentWindow;
+}
+
 std::shared_ptr<SubwindowManager> SubwindowManager::instance_;
 
 std::shared_ptr<SubwindowManager> SubwindowManager::GetInstance()
@@ -40,6 +44,6 @@ void SubwindowManager::SetHotAreas(const std::vector<Rect>& rects) {}
 
 const RefPtr<Subwindow>& SubwindowManager::GetCurrentWindow()
 {
-    return nullptr;
+    return g_currentWindow;
 }
 } // namespace OHOS::Ace

@@ -57,6 +57,7 @@ template("ace_base_source_set") {
       "utils/string_expression.cpp",
       "utils/string_utils.cpp",
       "utils/time_util.cpp",
+      "utils/utils.cpp",
     ]
 
     if (platform != "windows") {
@@ -67,6 +68,9 @@ template("ace_base_source_set") {
       } else {
         deps += [ "//third_party/bounds_checking_function:libsec_shared" ]
       }
+    } else {
+      defines -= [ "UNICODE" ]
+      libs = [ "//prebuilts/mingw-w64/ohos/linux-x86_64/clang-mingw/x86_64-w64-mingw32/lib/libshlwapi.a" ]
     }
 
     # curl download manager
@@ -115,6 +119,23 @@ foreach(item, ace_platforms) {
 
   ohos_source_set("ace_memory_monitor_" + item.name) {
     platform = item.name
+
+    defines = []
+    cflags_cc = []
+    config = {
+    }
+
+    if (defined(item.config)) {
+      config = item.config
+    }
+
+    if (defined(config.defines)) {
+      defines = config.defines
+    }
+
+    if (defined(config.cflags_cc)) {
+      cflags_cc = config.cflags_cc
+    }
 
     configs = [ "$ace_root:ace_config" ]
 

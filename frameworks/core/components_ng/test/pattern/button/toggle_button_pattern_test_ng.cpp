@@ -50,6 +50,8 @@ const char TOGGLE_ETS_TAG[] = "Toggle";
 const Alignment ALIGNMENT = Alignment::BOTTOM_RIGHT;
 const double dimensionValue = 1.0;
 const double childDimensionValue = 5.0;
+constexpr float HOVER_OPACITY = 0.05f;
+constexpr int32_t TOUCH_DURATION = 250;
 } // namespace
 
 struct TestProperty {
@@ -382,5 +384,25 @@ HWTEST_F(ToggleButtonPatternTestNg, ToggleButtonPatternTest008, TestSize.Level1)
     ToggleButtonModelNG::SetBackgroundColor(BACKGROUND_COLOR);
     auto context = frameNode->GetRenderContext();
     EXPECT_EQ(context->GetBackgroundColorValue(), BACKGROUND_COLOR);
+}
+
+/**
+ * @tc.name: ToggleButtonPatternTest009
+ * @tc.desc: test button pattern AnimateTouchAndHover.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleButtonPatternTestNg, ToggleButtonPatternTest009, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.isOn = std::make_optional(IS_ON);
+    RefPtr<FrameNode> frameNode = CreateToggleButtonFrameNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto buttonPattern = frameNode->GetPattern<ToggleButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    auto context = frameNode->GetRenderContext();
+    ASSERT_NE(context, nullptr);
+    buttonPattern->AnimateTouchAndHover(context, 0.0f, HOVER_OPACITY, TOUCH_DURATION, Curves::FRICTION);
+    buttonPattern->AnimateTouchAndHover(context, HOVER_OPACITY, 0.0f, TOUCH_DURATION, Curves::FRICTION);
+    EXPECT_EQ(buttonPattern->isOn_, false);
 }
 } // namespace OHOS::Ace::NG

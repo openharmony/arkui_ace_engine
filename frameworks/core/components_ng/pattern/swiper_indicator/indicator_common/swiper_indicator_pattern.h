@@ -87,6 +87,7 @@ public:
             paintMethod->SetIsPressed(isPressed_);
             paintMethod->SetHoverPoint(hoverPoint_);
             paintMethod->SetMouseClickIndex(mouseClickIndex_);
+            paintMethod->SetIsTouchBottom(touchBottomType_);
             mouseClickIndex_ = std::nullopt;
             return paintMethod;
         } else {
@@ -124,6 +125,7 @@ private:
     void HandleTouchClick(const GestureEvent& info);
     void InitHoverMouseEvent();
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleMouseEvent(const MouseInfo& info);
     void HandleHoverEvent(bool isHover);
     void HoverInAnimation(const Color& hoverColor);
@@ -131,19 +133,27 @@ private:
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleTouchDown();
     void HandleTouchUp();
+    void HandleDragStart(const GestureEvent& info);
+    void HandleDragUpdate(const GestureEvent& info);
+    void HandleDragEnd(double dragVelocity);
     void GetMouseClickIndex();
     void UpdateTextContent(const RefPtr<SwiperIndicatorLayoutProperty>& layoutProperty,
         const RefPtr<FrameNode>& firstTextNode, const RefPtr<FrameNode>& lastTextNode);
     void UpdateTextContentSub(
         const RefPtr<SwiperIndicatorLayoutProperty>& layoutProperty,
         const RefPtr<FrameNode>& firstTextNode, const RefPtr<FrameNode>& lastTextNode);
-
+    bool CheckIsTouchBottom(const GestureEvent& info);
     RefPtr<ClickEvent> clickEvent_;
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
+    RefPtr<PanEvent> panEvent_;
     bool isHover_ = false;
     bool isPressed_ = false;
     PointF hoverPoint_;
+    PointF dragStartPoint_;
+    bool isTouchBottomAnimationPlay_ = false;
+    TouchBottomType touchBottomType_ = TouchBottomType::NONE;
+    std::optional<PointF> touchBottomStartPosition_ = std::nullopt;
 
     std::optional<int32_t> mouseClickIndex_ = std::nullopt;
     RefPtr<DotIndicatorModifier> dotIndicatorModifier_;

@@ -46,6 +46,7 @@ const char PLAYER_METHOD_ENABLE_LOOPING[] = "enablelooping";
 const char PLAYER_METHOD_SETSPEED[] = "setspeed";
 const char PLAYER_METHOD_SETDIRECTION[] = "setdirection";
 const char PLAYER_METHOD_SETLANDSCAPE[] = "setlandscape";
+const char PLAYER_METHOD_SETSURFACE[] = "setsurface";
 
 const char PLAYER_EVENT_PREPARED[] = "prepared";
 const char PLAYER_EVENT_COMPLETION[] = "completion";
@@ -161,6 +162,15 @@ void Player::InitPlay()
             }
         }
     });
+}
+
+void Player::SetSurfaceId(int64_t id)
+{
+    textureId_ = id;
+    std::stringstream paramStream;
+    paramStream << PARAM_VALUE << PARAM_EQUALS << textureId_;
+    std::string param = paramStream.str();
+    CallResRegisterMethod(MakeMethodHash(PLAYER_METHOD_SETSURFACE), param);
 }
 
 void Player::OnPrepared(const std::string& param)

@@ -127,6 +127,10 @@ public:
         isDebugMode_ = isDebugMode;
     }
 
+    bool GetDebugMode()
+    {
+        return isDebugMode_;
+    }
 private:
     void SetPostTask(NativeEngine* nativeEngine);
     void LoadLibrary();
@@ -154,8 +158,9 @@ private:
     void RegisterPaModule();
     void RegisterConsoleModule();
     void RegisterConsoleModule(ArkNativeEngine* engine);
+    void RegisterUncaughtExceptionHandler();
     void EvaluateJsCode();
-    void SetDebuggerPostTask();
+    void StartDebugMode(bool debuggerMode);
     panda::ecmascript::EcmaVM* GetEcmaVm() const;
     void InitJsRuntimeOptions(AbilityRuntime::Runtime::Options& options);
     bool CreateJsRuntime(const AbilityRuntime::Runtime::Options& options);

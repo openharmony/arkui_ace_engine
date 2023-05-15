@@ -111,7 +111,7 @@ private:
         animateToEndValue_ = endValue;
         ResetController();
         if (!animationController_) {
-            animationController_ = AceType::MakeRefPtr<Animator>(context_);
+            animationController_ = CREATE_ANIMATOR(context_);
         }
         RefPtr<CurveAnimation<float>> animation = AceType::MakeRefPtr<CurveAnimation<float>>(
             GetValue(), endValue, animationOption_.GetCurve());

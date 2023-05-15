@@ -167,7 +167,7 @@ void RenderPatternLock::Update(const RefPtr<Component>& component)
     UpdateAttr(component);
     // animator
     if (!animator_) {
-        animator_ = AceType::MakeRefPtr<Animator>(GetContext());
+        animator_ = CREATE_ANIMATOR(GetContext());
         auto touchAnimation = AceType::MakeRefPtr<CurveAnimation<double>>(0.0, 1.0, Curves::SHARP);
         touchAnimation->AddListener([weak = AceType::WeakClaim(this)](double value) {
             auto patternLock = weak.Upgrade();

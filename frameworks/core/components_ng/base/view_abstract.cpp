@@ -27,6 +27,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/bubble/bubble_view.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/option/option_paint_property.h"
@@ -230,6 +231,23 @@ void ViewAbstract::SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle)
         target->UpdateBackBlurStyle(bgBlurStyle);
         if (target->GetBackBlurRadius().has_value()) {
             target->UpdateBackBlurRadius(Dimension());
+        }
+    }
+}
+
+void ViewAbstract::SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        target->UpdateFrontBlurStyle(fgBlurStyle);
+        if (target->GetFrontBlurRadius().has_value()) {
+            target->UpdateFrontBlurRadius(Dimension());
         }
     }
 }
@@ -871,13 +889,34 @@ void ViewAbstract::BindPopup(
         }
     }
 
-    if (popupInfo.isCurrentOnShow == isShow) {
-        LOGI("No need to change popup show flag, current show %{public}d", isShow);
-        return;
-    }
-    popupInfo.markNeedUpdate = true;
     auto popupId = popupInfo.popupId;
     auto popupNode = popupInfo.popupNode;
+    RefPtr<BubblePattern> popupPattern;
+    if (popupNode) {
+        popupPattern = popupNode->GetPattern<BubblePattern>();
+    }
+
+    if (popupInfo.isCurrentOnShow) {
+        // Entering / Normal / Exiting
+        bool popupShowing = popupPattern ? popupPattern->IsOnShow() : false;
+        if (popupShowing == isShow) {
+            LOGI("No need to change popup show flag, current show %{public}d", isShow);
+            return;
+        }
+        if (!popupShowing && isShow) {
+            popupInfo.markNeedUpdate = false;
+        } else {
+            popupInfo.markNeedUpdate = true;
+        }
+    } else {
+        // Invisable
+        if (!isShow) {
+            LOGI("No need to change popup show flag, current show %{public}d", isShow);
+            return;
+        }
+        popupInfo.markNeedUpdate = true;
+    }
+
     // Create new popup.
     if (popupInfo.popupId == -1 || !popupNode) {
         if (!isUseCustom) {
@@ -907,6 +946,7 @@ void ViewAbstract::BindPopup(
     popupInfo.isBlockEvent = param->IsBlockEvent();
     if (popupNode) {
         popupNode->MarkModifyDone();
+        popupPattern = popupNode->GetPattern<BubblePattern>();
     }
     popupInfo.target = AceType::WeakClaim(AceType::RawPtr(targetNode));
     popupInfo.targetSize = SizeF(param->GetTargetSize().Width(), param->GetTargetSize().Height());
@@ -915,9 +955,16 @@ void ViewAbstract::BindPopup(
         if (isShow) {
             LOGI("Popup now show in subwindow.");
             SubwindowManager::GetInstance()->ShowPopupNG(targetId, popupInfo);
+            if (popupPattern) {
+                popupPattern->StartEnteringAnimation(nullptr);
+            }
         } else {
-            LOGI("Popup now hide in subwindow.");
-            SubwindowManager::GetInstance()->HidePopupNG(targetId);
+            if (popupPattern) {
+                popupPattern->StartExitingAnimation([targetId]() {
+                    LOGI("Popup now hide in subwindow.");
+                    SubwindowManager::GetInstance()->HidePopupNG(targetId);
+                });
+            }
         }
         return;
     }
@@ -926,9 +973,28 @@ void ViewAbstract::BindPopup(
         CHECK_NULL_VOID(overlay);
         overlay->ErasePopup(targetId);
     };
-    LOGI("begin to update Popup node.");
     targetNode->PushDestroyCallback(destroyCallback);
-    overlayManager->UpdatePopupNode(targetId, popupInfo);
+    if (!popupInfo.isCurrentOnShow) {
+        targetNode->OnAccessibilityEvent(
+            AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+    }
+    if (isShow) {
+        LOGI("begin to update popup node.");
+        overlayManager->UpdatePopupNode(targetId, popupInfo);
+        if (popupPattern) {
+            popupPattern->StartEnteringAnimation(nullptr);
+        }
+    } else {
+        if (popupPattern) {
+            popupPattern->StartExitingAnimation(
+                [targetId, popupInfo, weakOverlayManger = AceType::WeakClaim(AceType::RawPtr(overlayManager))]() {
+                    auto overlay = weakOverlayManger.Upgrade();
+                    CHECK_NULL_VOID(overlay);
+                    LOGI("begin to update popup node.");
+                    overlay->UpdatePopupNode(targetId, popupInfo);
+                });
+        }
+    }
 }
 
 void ViewAbstract::BindMenuWithItems(std::vector<OptionParam>&& params,
@@ -995,7 +1061,7 @@ void ViewAbstract::SetBackdropBlur(const Dimension& radius)
     if (target) {
         target->UpdateBackBlurRadius(radius);
         if (target->GetBackBlurStyle().has_value()) {
-            target->UpdateBackBlurStyle(BlurStyleOption());
+            target->UpdateBackBlurStyle(std::nullopt);
         }
     }
 }
@@ -1006,7 +1072,15 @@ void ViewAbstract::SetFrontBlur(const Dimension& radius)
         LOGD("current state is not processed, return");
         return;
     }
-    ACE_UPDATE_RENDER_CONTEXT(FrontBlurRadius, radius);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        target->UpdateFrontBlurRadius(radius);
+        if (target->GetFrontBlurStyle().has_value()) {
+            target->UpdateFrontBlurStyle(std::nullopt);
+        }
+    }
 }
 
 void ViewAbstract::SetBackShadow(const Shadow& shadow)
@@ -1050,6 +1124,14 @@ void ViewAbstract::SetInspectorId(const std::string& inspectorId)
     auto uiNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
     if (uiNode) {
         uiNode->UpdateInspectorId(inspectorId);
+    }
+}
+
+void ViewAbstract::SetRestoreId(int32_t restoreId)
+{
+    auto uiNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    if (uiNode) {
+        uiNode->SetRestoreId(restoreId);
     }
 }
 
@@ -1306,6 +1388,7 @@ void ViewAbstract::SetForegroundColor(const Color& color)
     }
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, color);
     ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy);
+    ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true);
 }
 
 void ViewAbstract::SetForegroundColorStrategy(const ForegroundColorStrategy& strategy)
@@ -1316,10 +1399,11 @@ void ViewAbstract::SetForegroundColorStrategy(const ForegroundColorStrategy& str
     }
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColorStrategy, strategy);
     ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColor);
+    ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true);
 }
 
 void ViewAbstract::SetKeyboardShortcut(
-    const std::string& value, const std::vector<CtrlKey>& keys, std::function<void()>&& onKeyboardShortcutAction)
+    const std::string& value, const std::vector<ModifierKey>& keys, std::function<void()>&& onKeyboardShortcutAction)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -1360,5 +1444,22 @@ void ViewAbstract::UpdateAnimatablePropertyFloat(const std::string& propertyName
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     frameNode->UpdateAnimatablePropertyFloat(propertyName, value);
+}
+
+void ViewAbstract::CreateAnimatableArithmeticProperty(const std::string& propertyName,
+    RefPtr<CustomAnimatableArithmetic>& value,
+    std::function<void(const RefPtr<CustomAnimatableArithmetic>&)>& onCallbackEvent)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->CreateAnimatableArithmeticProperty(propertyName, value, onCallbackEvent);
+}
+
+void ViewAbstract::UpdateAnimatableArithmeticProperty(const std::string& propertyName,
+    RefPtr<CustomAnimatableArithmetic>& value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->UpdateAnimatableArithmeticProperty(propertyName, value);
 }
 } // namespace OHOS::Ace::NG

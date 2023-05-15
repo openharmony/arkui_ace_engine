@@ -31,9 +31,19 @@ struct XComponentTouchPoint {
         OH_NativeXComponent_TouchPointToolType::OH_NATIVEXCOMPONENT_TOOL_TYPE_UNKNOWN;
 };
 
+struct OH_NativeXComponent_KeyEvent {
+    OH_NativeXComponent_KeyAction action = OH_NativeXComponent_KeyAction::OH_NATIVEXCOMPONENT_KEY_ACTION_UNKNOWN;
+    OH_NativeXComponent_KeyCode code = OH_NativeXComponent_KeyCode::KEY_UNKNOWN;
+    OH_NativeXComponent_EventSourceType sourceType =
+        OH_NativeXComponent_EventSourceType::OH_NATIVEXCOMPONENT_SOURCE_TYPE_UNKNOWN;
+    int64_t deviceId {};
+    int64_t timestamp {};
+};
+
 namespace OHOS::Ace {
 class NativeXComponentImpl : public virtual AceType {
     DECLARE_ACE_TYPE(NativeXComponentImpl, AceType);
+    using NativeXComponent_Callback = void (*)(OH_NativeXComponent*, void*);
 
 public:
     NativeXComponentImpl() {}
@@ -130,6 +140,11 @@ public:
         touchPoints_ = xComponentTouchPoints;
     }
 
+    void SetKeyEvent(const OH_NativeXComponent_KeyEvent keyEvent)
+    {
+        keyEvent_ = keyEvent;
+    }
+
     void SetMouseEvent(const OH_NativeXComponent_MouseEvent mouseEvent)
     {
         mouseEvent_ = mouseEvent;
@@ -177,6 +192,41 @@ public:
         return touchPoints_[pointIndex].tiltY;
     }
 
+    OH_NativeXComponent_KeyEvent* GetKeyEvent()
+    {
+        return &keyEvent_;
+    }
+
+    NativeXComponent_Callback GetFocusEventCallback() const
+    {
+        return focusEventCallback_;
+    }
+
+    NativeXComponent_Callback GetKeyEventCallback() const
+    {
+        return keyEventCallback_;
+    }
+
+    NativeXComponent_Callback GetBlurEventCallback() const
+    {
+        return blurEventCallback_;
+    }
+
+    void SetFocusEventCallback(NativeXComponent_Callback callback)
+    {
+        focusEventCallback_ = callback;
+    }
+
+    void SetKeyEventCallback(NativeXComponent_Callback callback)
+    {
+        keyEventCallback_ = callback;
+    }
+
+    void SetBlurEventCallback(NativeXComponent_Callback callback)
+    {
+        blurEventCallback_ = callback;
+    }
+
 private:
     std::string xcomponentId_;
     void* window_ = nullptr;
@@ -186,8 +236,12 @@ private:
     double y_ = 0.0;
     OH_NativeXComponent_TouchEvent touchEvent_;
     OH_NativeXComponent_MouseEvent mouseEvent_;
+    OH_NativeXComponent_KeyEvent keyEvent_;
     OH_NativeXComponent_Callback* callback_ = nullptr;
     OH_NativeXComponent_MouseEvent_Callback* mouseEventCallback_ = nullptr;
+    NativeXComponent_Callback focusEventCallback_ = nullptr;
+    NativeXComponent_Callback keyEventCallback_ = nullptr;
+    NativeXComponent_Callback blurEventCallback_ = nullptr;
     std::vector<XComponentTouchPoint> touchPoints_;
 };
 } // namespace OHOS::Ace
@@ -206,6 +260,10 @@ struct OH_NativeXComponent {
     int32_t GetToolType(size_t pointIndex, OH_NativeXComponent_TouchPointToolType* toolType);
     int32_t GetTiltX(size_t pointIndex, float* tiltX);
     int32_t GetTiltY(size_t pointIndex, float* tiltY);
+    int32_t RegisterFocusEventCallback(void (*callback)(OH_NativeXComponent* component, void* window));
+    int32_t RegisterKeyEventCallback(void (*callback)(OH_NativeXComponent* component, void* window));
+    int32_t RegisterBlurEventCallback(void (*callback)(OH_NativeXComponent* component, void* window));
+    int32_t GetKeyEvent(OH_NativeXComponent_KeyEvent** keyEvent);
 
 private:
     OHOS::Ace::NativeXComponentImpl* xcomponentImpl_ = nullptr;

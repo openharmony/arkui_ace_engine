@@ -51,4 +51,6 @@ CanvasDrawFunction SelectOverlayPaintMethod::GetContentDrawFunction(PaintWrapper
 {
     return nullptr;
 };
+
+void SelectOverlayPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper) {}
 } // namespace OHOS::Ace::NG

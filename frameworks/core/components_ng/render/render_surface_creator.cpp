@@ -13,9 +13,10 @@
  * limitations under the License.
  */
 
-#ifdef ENABLE_ROSEN_BACKEND
+#if defined(ENABLE_ROSEN_BACKEND) && defined(OHOS_PLATFORM)
 #include "core/components_ng/render/adapter/rosen_render_surface.h"
 #endif
+#include "core/components_ng/render/adapter/render_surface_impl.h"
 #include "core/components_ng/render/render_surface.h"
 
 namespace OHOS::Ace::NG {
@@ -25,7 +26,7 @@ RefPtr<RenderSurface> RenderSurface::Create()
 #if defined(OHOS_PLATFORM) && defined(ENABLE_ROSEN_BACKEND)
         return MakeRefPtr<RosenRenderSurface>();
 #else
-        return MakeRefPtr<RenderSurface>();
+        return MakeRefPtr<RenderSurfaceImpl>();
 #endif
     }
     return MakeRefPtr<RenderSurface>();

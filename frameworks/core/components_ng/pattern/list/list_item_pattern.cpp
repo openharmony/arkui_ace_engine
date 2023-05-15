@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -174,6 +174,7 @@ void ListItemPattern::OnModifyDone()
     }
     panEvent_.Reset();
     springController_.Reset();
+    SetAccessibilityAction();
 }
 
 V2::SwipeEdgeEffect ListItemPattern::GetEdgeEffect()
@@ -239,7 +240,7 @@ void ListItemPattern::InitSwiperAction(bool axisChanged)
         curOffset_ = 0.0f;
     }
     if (!springController_) {
-        springController_ = AceType::MakeRefPtr<Animator>(PipelineBase::GetCurrentContext());
+        springController_ = CREATE_ANIMATOR(PipelineBase::GetCurrentContext());
     }
 }
 
@@ -407,11 +408,43 @@ void ListItemPattern::MarkIsSelected(bool isSelected)
         if (onSelect) {
             onSelect(isSelected);
         }
+        auto host = GetHost();
+        CHECK_NULL_VOID_NOLOG(host);
+        if (isSelected) {
+            host->OnAccessibilityEvent(AccessibilityEventType::SELECTED);
+        } else {
+            host->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
+        }
     }
 }
 
 void ListItemPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     json->Put("selectable", selectable_);
+}
+
+void ListItemPattern::SetAccessibilityAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto listItemAccessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(listItemAccessibilityProperty);
+    listItemAccessibilityProperty->SetActionSelect([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (!pattern->Selectable()) {
+            return;
+        }
+        pattern->MarkIsSelected(true);
+    });
+
+    listItemAccessibilityProperty->SetActionClearSelection([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (!pattern->Selectable()) {
+            return;
+        }
+        pattern->MarkIsSelected(false);
+    });
 }
 } // namespace OHOS::Ace::NG

@@ -43,27 +43,30 @@ ohos_source_set("preview_entrance_source") {
       "ace_application_info.cpp",
       "ace_container.cpp",
       "ace_resource_register.cpp",
+      "ace_view_preview.cpp",
       "clipboard/clipboard_impl.cpp",
       "clipboard/clipboard_proxy_impl.cpp",
       "editing/text_input_client_mgr.cpp",
       "editing/text_input_connection_impl.cpp",
       "editing/text_input_impl.cpp",
       "event_dispatcher.cpp",
-      "flutter_ace_view.cpp",
       "subwindow_preview.cpp",
     ]
 
     deps = [
-      "$ace_flutter_engine_root/glfw:flutter_glfw_preview_$platform",
-      "$ace_flutter_engine_root/skia:ace_skia_$platform",
       "$ace_napi:ace_napi",
       "$ace_root/frameworks/core/components/theme:build_theme_code",
     ]
 
+    include_dirs = [ "$flutter_root/engine" ]
+
     if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {
-      sources -= [ "flutter_ace_view.cpp" ]
-      sources += [ "rs_ace_view.cpp" ]
       deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
+    } else {
+      deps += [
+        "$ace_flutter_engine_root/glfw:flutter_glfw_preview_$platform",
+        "$ace_flutter_engine_root/skia:ace_skia_$platform",
+      ]
     }
 
     if (!is_cross_platform_build) {
@@ -71,7 +74,6 @@ ohos_source_set("preview_entrance_source") {
         defines -= [ "UNICODE" ]
         deps += [ "//base/global/resource_management/frameworks/resmgr:global_resmgr_win" ]
         cflags_cc += [ "-DNONLS" ]
-        libs = [ "//prebuilts/mingw-w64/ohos/linux-x86_64/clang-mingw/x86_64-w64-mingw32/lib/libshlwapi.a" ]
       }
 
       if (platform == "mac") {

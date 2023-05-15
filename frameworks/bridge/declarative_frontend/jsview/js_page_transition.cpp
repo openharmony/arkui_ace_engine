@@ -22,19 +22,23 @@
 
 namespace OHOS::Ace {
 std::unique_ptr<PageTransitionModel> PageTransitionModel::instance_ = nullptr;
+std::mutex PageTransitionModel::mutex_;
 
 PageTransitionModel* PageTransitionModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::PageTransitionModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::PageTransitionModelNG());
-        } else {
-            instance_.reset(new Framework::PageTransitionModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::PageTransitionModelNG());
+            } else {
+                instance_.reset(new Framework::PageTransitionModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -95,7 +99,7 @@ void JSPageTransition::Translate(const JSCallbackInfo& info)
 
         NG::TranslateOptions option;
 
-        Dimension length;
+        CalcDimension length;
         if (JSViewAbstract::ParseJsonDimensionVp(args->GetValue("x"), length)) {
             option.x = length;
         }
@@ -127,11 +131,11 @@ void JSPageTransition::Scale(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsonDouble(args->GetValue("y"), scaleY);
         JSViewAbstract::ParseJsonDouble(args->GetValue("z"), scaleZ);
         // default centerX, centerY 50% 50%;
-        Dimension centerX = 0.5_pct;
-        Dimension centerY = 0.5_pct;
+        CalcDimension centerX = 0.5_pct;
+        CalcDimension centerY = 0.5_pct;
 
         // if specify centerX
-        Dimension length;
+        CalcDimension length;
         if (JSViewAbstract::ParseJsonDimensionVp(args->GetValue("centerX"), length)) {
             centerX = length;
         }

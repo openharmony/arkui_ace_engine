@@ -177,7 +177,7 @@ void DialogModalElement::PerformBuild()
 {
     SoleChildElement::PerformBuild();
     if (!controller_) {
-        controller_ = AceType::MakeRefPtr<Animator>(GetContext());
+        controller_ = CREATE_ANIMATOR(GetContext());
         controller_->SetDuration(APP_TRANSITION_DURATION);
         controller_->SetFillMode(FillMode::FORWARDS);
         auto scale = MakeRefPtr<CurveAnimation<float>>(SCALE_BEGIN, SCALE_END, Curves::FRICTION);

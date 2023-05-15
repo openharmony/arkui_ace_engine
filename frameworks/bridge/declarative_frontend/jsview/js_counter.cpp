@@ -27,19 +27,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<CounterModel> CounterModel::instance_ = nullptr;
+std::mutex CounterModel::mutex_;
 
 CounterModel* CounterModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::CounterModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::CounterModelNG());
-        } else {
-            instance_.reset(new Framework::CounterModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::CounterModelNG());
+            } else {
+                instance_.reset(new Framework::CounterModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }

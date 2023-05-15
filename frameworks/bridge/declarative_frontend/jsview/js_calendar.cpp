@@ -487,12 +487,11 @@ void JSCalendar::SetDirection(const JSCallbackInfo& info)
 
 void JSCalendar::SetCurrentDayStyle(const JSCallbackInfo& info)
 {
-    auto obj = JSRef<JSObject>::Cast(info[0]);
-
     if (info.Length() < 1 || !info[0]->IsObject()) {
         LOGW("Invalid params");
         return;
     }
+    auto obj = JSRef<JSObject>::Cast(info[0]);
     if (Container::IsCurrentUseNewPipeline()) {
         NG::CurrentDayStyle currentDayStyle;
         Color dayColor;
@@ -507,83 +506,83 @@ void JSCalendar::SetCurrentDayStyle(const JSCallbackInfo& info)
         if (ConvertFromJSValue(obj->GetProperty("markLunarColor"), markLunarColor)) {
             currentDayStyle.UpdateMarkLunarColor(markLunarColor);
         }
-        Dimension dayFontSize;
+        CalcDimension dayFontSize;
         if (ParseJsDimensionFp(obj->GetProperty("dayFontSize"), dayFontSize)) {
             currentDayStyle.UpdateDayFontSize(dayFontSize);
         }
-        Dimension lunarDayFontSize;
+        CalcDimension lunarDayFontSize;
         if (ParseJsDimensionFp(obj->GetProperty("lunarDayFontSize"), lunarDayFontSize)) {
             currentDayStyle.UpdateLunarDayFontSize(lunarDayFontSize);
         }
-        Dimension dayHeight;
+        CalcDimension dayHeight;
         if (ParseJsDimensionFp(obj->GetProperty("dayHeight"), dayHeight)) {
             currentDayStyle.UpdateDayHeight(dayHeight);
         }
-        Dimension dayWidth;
+        CalcDimension dayWidth;
         if (ParseJsDimensionFp(obj->GetProperty("dayWidth"), dayWidth)) {
             currentDayStyle.UpdateDayWidth(dayWidth);
         }
-        Dimension gregorianCalendarHeight;
+        CalcDimension gregorianCalendarHeight;
         if (ParseJsDimensionFp(obj->GetProperty("gregorianCalendarHeight"), gregorianCalendarHeight)) {
             currentDayStyle.UpdateGregorianCalendarHeight(gregorianCalendarHeight);
         }
-        Dimension lunarHeight;
+        CalcDimension lunarHeight;
         if (ParseJsDimensionFp(obj->GetProperty("lunarHeight"), lunarHeight)) {
             currentDayStyle.UpdateLunarHeight(lunarHeight);
         }
-        Dimension dayYAxisOffset;
+        CalcDimension dayYAxisOffset;
         if (ParseJsDimensionFp(obj->GetProperty("dayYAxisOffset"), dayYAxisOffset)) {
             currentDayStyle.UpdateDayYAxisOffset(dayYAxisOffset);
         }
-        Dimension lunarDayYAxisOffset;
+        CalcDimension lunarDayYAxisOffset;
         if (ParseJsDimensionFp(obj->GetProperty("lunarDayYAxisOffset"), lunarDayYAxisOffset)) {
             currentDayStyle.UpdateLunarDayYAxisOffset(lunarDayYAxisOffset);
         }
-        Dimension underscoreXAxisOffset;
+        CalcDimension underscoreXAxisOffset;
         if (ParseJsDimensionFp(obj->GetProperty("underscoreXAxisOffset"), underscoreXAxisOffset)) {
             currentDayStyle.UpdateUnderscoreXAxisOffset(underscoreXAxisOffset);
         }
-        Dimension underscoreYAxisOffset;
+        CalcDimension underscoreYAxisOffset;
         if (ParseJsDimensionFp(obj->GetProperty("underscoreYAxisOffset"), underscoreYAxisOffset)) {
             currentDayStyle.UpdateUnderscoreYAxisOffset(underscoreYAxisOffset);
         }
-        Dimension scheduleMarkerXAxisOffset;
+        CalcDimension scheduleMarkerXAxisOffset;
         if (ParseJsDimensionFp(obj->GetProperty("scheduleMarkerXAxisOffset"), scheduleMarkerXAxisOffset)) {
             currentDayStyle.UpdateScheduleMarkerXAxisOffset(scheduleMarkerXAxisOffset);
         }
-        Dimension scheduleMarkerYAxisOffset;
+        CalcDimension scheduleMarkerYAxisOffset;
         if (ParseJsDimensionFp(obj->GetProperty("scheduleMarkerYAxisOffset"), scheduleMarkerYAxisOffset)) {
             currentDayStyle.UpdateScheduleMarkerYAxisOffset(scheduleMarkerYAxisOffset);
         }
-        Dimension colSpace;
+        CalcDimension colSpace;
         if (ParseJsDimensionFp(obj->GetProperty("colSpace"), colSpace)) {
             currentDayStyle.UpdateColSpace(colSpace);
         }
-        Dimension dailyFiveRowSpace;
+        CalcDimension dailyFiveRowSpace;
         if (ParseJsDimensionFp(obj->GetProperty("dailyFiveRowSpace"), dailyFiveRowSpace)) {
             currentDayStyle.UpdateDailyFiveRowSpace(dailyFiveRowSpace);
         }
-        Dimension dailySixRowSpace;
+        CalcDimension dailySixRowSpace;
         if (ParseJsDimensionFp(obj->GetProperty("dailySixRowSpace"), dailySixRowSpace)) {
             currentDayStyle.UpdateDailySixRowSpace(dailySixRowSpace);
         }
-        Dimension underscoreWidth;
+        CalcDimension underscoreWidth;
         if (ParseJsDimensionFp(obj->GetProperty("underscoreWidth"), underscoreWidth)) {
             currentDayStyle.UpdateUnderscoreWidth(underscoreWidth);
         }
-        Dimension underscoreLength;
+        CalcDimension underscoreLength;
         if (ParseJsDimensionFp(obj->GetProperty("underscoreLength"), underscoreLength)) {
             currentDayStyle.UpdateUnderscoreLength(underscoreLength);
         }
-        Dimension scheduleMarkerRadius;
+        CalcDimension scheduleMarkerRadius;
         if (ParseJsDimensionFp(obj->GetProperty("scheduleMarkerRadius"), scheduleMarkerRadius)) {
             currentDayStyle.UpdateScheduleMarkerRadius(scheduleMarkerRadius);
         }
-        Dimension boundaryRowOffset;
+        CalcDimension boundaryRowOffset;
         if (ParseJsDimensionFp(obj->GetProperty("boundaryRowOffset"), boundaryRowOffset)) {
             currentDayStyle.UpdateBoundaryRowOffset(boundaryRowOffset);
         }
-        Dimension boundaryColOffset;
+        CalcDimension boundaryColOffset;
         if (ParseJsDimensionFp(obj->GetProperty("boundaryColOffset"), boundaryColOffset)) {
             currentDayStyle.UpdateBoundaryColOffset(boundaryColOffset);
         }
@@ -599,11 +598,11 @@ void JSCalendar::SetCurrentDayStyle(const JSCallbackInfo& info)
     ConvertFromJSValue(obj->GetProperty("dayColor"), theme.dayColor);
     ConvertFromJSValue(obj->GetProperty("lunarColor"), theme.lunarColor);
     ConvertFromJSValue(obj->GetProperty("markLunarColor"), theme.markLunarColor);
-    Dimension dayFontSize;
+    CalcDimension dayFontSize;
     if (ParseJsDimensionFp(obj->GetProperty("dayFontSize"), dayFontSize)) {
         theme.dayFontSize = dayFontSize;
     }
-    Dimension lunarDayFontSize;
+    CalcDimension lunarDayFontSize;
     if (ParseJsDimensionFp(obj->GetProperty("lunarDayFontSize"), lunarDayFontSize)) {
         theme.lunarDayFontSize = lunarDayFontSize;
     }
@@ -693,7 +692,7 @@ void JSCalendar::SetTodayStyle(const JSCallbackInfo& info)
         if (ConvertFromJSValue(obj->GetProperty("focusedAreaBackgroundColor"), focusedAreaBackgroundColor)) {
             todayStyle.UpdateFocusedAreaBackgroundColor(focusedAreaBackgroundColor);
         }
-        Dimension focusedAreaRadius;
+        CalcDimension focusedAreaRadius;
         if (ConvertFromJSValue(obj->GetProperty("focusedAreaRadius"), focusedAreaRadius)) {
             todayStyle.UpdateFocusedAreaRadius(focusedAreaRadius);
         }
@@ -737,19 +736,19 @@ void JSCalendar::SetWeekStyle(const JSCallbackInfo& info)
         if (ConvertFromJSValue(obj->GetProperty("weekendLunarColor"), weekendLunarColor)) {
             weekStyle.UpdateWeekendLunarColor(weekendLunarColor);
         }
-        Dimension weekFontSize;
+        CalcDimension weekFontSize;
         if (ParseJsDimensionFp(obj->GetProperty("weekFontSize"), weekFontSize)) {
             weekStyle.UpdateWeekFontSize(weekFontSize);
         }
-        Dimension weekHeight;
+        CalcDimension weekHeight;
         if (ConvertFromJSValue(obj->GetProperty("weekHeight"), weekHeight)) {
             weekStyle.UpdateWeekHeight(weekHeight);
         }
-        Dimension weekWidth;
+        CalcDimension weekWidth;
         if (ConvertFromJSValue(obj->GetProperty("weekWidth"), weekWidth)) {
             weekStyle.UpdateWeekWidth(weekWidth);
         }
-        Dimension weekAndDayRowSpace;
+        CalcDimension weekAndDayRowSpace;
         if (ConvertFromJSValue(obj->GetProperty("weekAndDayRowSpace"), weekAndDayRowSpace)) {
             weekStyle.UpdateWeekAndDayRowSpace(weekAndDayRowSpace);
         }
@@ -769,7 +768,7 @@ void JSCalendar::SetWeekStyle(const JSCallbackInfo& info)
     ConvertFromJSValue(obj->GetProperty("weekColor"), theme.weekColor);
     ConvertFromJSValue(obj->GetProperty("weekendDayColor"), theme.weekendDayColor);
     ConvertFromJSValue(obj->GetProperty("weekendLunarColor"), theme.weekendLunarColor);
-    Dimension weekFontSize;
+    CalcDimension weekFontSize;
     if (ParseJsDimensionFp(obj->GetProperty("weekFontSize"), weekFontSize)) {
         theme.weekFontSize = weekFontSize;
     }
@@ -795,24 +794,24 @@ void JSCalendar::SetWorkStateStyle(const JSCallbackInfo& info)
         if (ConvertFromJSValue(obj->GetProperty("offDayMarkColor"), offDayMarkColor)) {
             workStateStyle.UpdateOffDayMarkColor(offDayMarkColor);
         }
-        Dimension workDayMarkSize;
+        CalcDimension workDayMarkSize;
         if (ConvertFromJSValue(obj->GetProperty("workDayMarkSize"), workDayMarkSize)) {
             workStateStyle.UpdateWorkDayMarkSize(workDayMarkSize);
         }
-        Dimension offDayMarkSize;
+        CalcDimension offDayMarkSize;
         if (ConvertFromJSValue(obj->GetProperty("offDayMarkSize"), offDayMarkSize)) {
             workStateStyle.UpdateOffDayMarkSize(offDayMarkSize);
         }
-        Dimension workStateWidth;
+        CalcDimension workStateWidth;
         if (ConvertFromJSValue(obj->GetProperty("workStateWidth"), workStateWidth)) {
             workStateStyle.UpdateWorkStateWidth(workStateWidth);
         }
-        Dimension workStateHorizontalMovingDistance;
+        CalcDimension workStateHorizontalMovingDistance;
         if (ConvertFromJSValue(
                 obj->GetProperty("workStateHorizontalMovingDistance"), workStateHorizontalMovingDistance)) {
             workStateStyle.UpdateWorkStateHorizontalMovingDistance(workStateHorizontalMovingDistance);
         }
-        Dimension workStateVerticalMovingDistance;
+        CalcDimension workStateVerticalMovingDistance;
         if (ConvertFromJSValue(obj->GetProperty("workStateVerticalMovingDistance"), workStateVerticalMovingDistance)) {
             workStateStyle.UpdateWorkStateVerticalMovingDistance(workStateVerticalMovingDistance);
         }

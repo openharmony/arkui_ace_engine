@@ -18,6 +18,7 @@
 
 #include <functional>
 #include <memory>
+#include <mutex>
 
 #include "base/utils/macros.h"
 
@@ -27,6 +28,7 @@ class ACE_EXPORT StepperModel {
 public:
     using RoutineCallbackEvent = std::function<void()>;
     using IndexCallbackEvent = std::function<void(int32_t, int32_t)>;
+    using IndexChangeEvent = std::function<void(int32_t)>;
 
     static StepperModel* GetInstance();
     virtual ~StepperModel() = default;
@@ -37,9 +39,11 @@ public:
     virtual void SetOnChange(IndexCallbackEvent&& eventOnChange) = 0;
     virtual void SetOnNext(IndexCallbackEvent&& eventOnNext) = 0;
     virtual void SetOnPrevious(IndexCallbackEvent&& eventOnPrevious) = 0;
+    virtual void SetOnChangeEvent(IndexChangeEvent&& onChangeEvent) = 0;
 
 private:
     static std::unique_ptr<StepperModel> instance_;
+    static std::mutex mutex_;
 };
 
 } // namespace OHOS::Ace

@@ -152,6 +152,7 @@ HWTEST_F(WebPatternEventTest, WebPatternTestNg_003, TestSize.Level1)
     EXPECT_TRUE(g_webPattern->needOnFocus_);
     g_webPattern->HandleFocusEvent();
     BlurReason blurReason = BlurReason::FOCUS_SWITCH;
+    g_webPattern->selectPopupMenuShowing_ = true;
     g_webPattern->HandleBlurEvent(blurReason);
 
     KeyEvent keyEvent;

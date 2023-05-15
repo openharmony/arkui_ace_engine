@@ -59,6 +59,10 @@ ohos_unittest("view_abstract_model_test_ng") {
     "$ace_root/frameworks/core/components_ng/property/property.cpp",
     "$ace_root/frameworks/core/components_ng/syntax/for_each_node.cpp",
 
+    # mock
+    "$ace_root/frameworks/base/test/mock/mock_mouse_style.cpp",
+    "$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
+
     # self
     "$ace_root/adapter/ohos/osal/ace_engine_ext.cpp",
     "$ace_root/adapter/ohos/osal/frame_trace_adapter_fake_impl.cpp",
@@ -131,12 +135,12 @@ ohos_unittest("view_abstract_model_test_ng") {
   ]
 
   deps = [
-    "$ace_flutter_engine_root:third_party_flutter_engine_ohos",
     "$ace_flutter_engine_root/skia:ace_skia_ohos",
     "$ace_graphic/rosen/modules/render_service_client:librender_service_client",
     "$ace_root/frameworks/base:ace_memory_monitor_ohos",
     "$ace_root/frameworks/core/components_ng/pattern:ace_core_components_pattern_ng_ohos",
     "$ace_root/frameworks/core/components_ng/render:ace_core_components_render_ng_ohos",
+    "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
     "$ace_root/test/unittest:ace_unittest_log",
     "$ace_root/test/unittest:ace_unittest_trace",
     "$cjson_root:cjson",

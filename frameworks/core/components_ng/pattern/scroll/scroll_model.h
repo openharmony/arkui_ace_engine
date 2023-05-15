@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLL_SCROLL_MODEL_H
 
 #include <memory>
+#include <mutex>
 
 #include "core/components/common/layout/constants.h"
 #include "core/components/scroll_bar/scroll_proxy.h"
@@ -55,6 +56,7 @@ public:
 
 private:
     static std::unique_ptr<ScrollModel> instance_;
+    static std::mutex mutex_;
 };
 
 } // namespace OHOS::Ace

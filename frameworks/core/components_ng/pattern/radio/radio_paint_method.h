@@ -17,11 +17,9 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_RADIO_RADIO_PAINT_METHOD_H
 
 #include "base/memory/ace_type.h"
-#include "base/utils/macros.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/pattern/radio/radio_modifier.h"
 #include "core/components_ng/pattern/radio/radio_paint_property.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/node_paint_method.h"
 
 namespace OHOS::Ace::NG {
@@ -34,7 +32,7 @@ public:
 
     ~RadioPaintMethod() override = default;
 
-    RefPtr<Modifier> GetContentModifier(PaintWrapper* paintWrapper) override
+    RefPtr<Modifier> GetContentModifier(PaintWrapper* /* paintWrapper */) override
     {
         CHECK_NULL_RETURN(radioModifier_, nullptr);
         return radioModifier_;
@@ -66,14 +64,28 @@ public:
         radioModifier_->SetinactiveColor(inactiveColor_);
         radioModifier_->SetSize(size);
         radioModifier_->SetOffset(offset);
+        radioModifier_->SetIsOnAnimationFlag(isOnAnimationFlag_);
         radioModifier_->SetEnabled(enabled_);
         radioModifier_->SetTotalScale(totalScale_);
         radioModifier_->SetPointScale(pointScale_);
         radioModifier_->SetRingPointScale(ringPointScale_);
+        if (checked != radioModifier_->GetIsCheck()) {
+            radioModifier_->SetUIStatus(UIStatus::SELECTED);
+            if (!isFirstCreated_) {
+                radioModifier_->UpdateIsOnAnimatableProperty(checked);
+            }
+        }
         radioModifier_->SetIsCheck(checked);
-        radioModifier_->SetUIStatus(uiStatus_);
         radioModifier_->SetTouchHoverAnimationType(touchHoverType_);
         radioModifier_->UpdateAnimatableProperty();
+        auto horizontalPadding = radioTheme->GetHotZoneHorizontalPadding().ConvertToPx();
+        auto verticalPadding = radioTheme->GetHotZoneVerticalPadding().ConvertToPx();
+        float boundsRectOriginX = offset.GetX() - horizontalPadding;
+        float boundsRectOriginY = offset.GetY() - verticalPadding;
+        float boundsRectWidth = size.Width() + 2 * horizontalPadding;
+        float boundsRectHeight = size.Height() + 2 * verticalPadding;
+        RectF boundsRect(boundsRectOriginX, boundsRectOriginY, boundsRectWidth, boundsRectHeight);
+        radioModifier_->SetBoundsRect(boundsRect);
     }
 
     void SetHotZoneOffset(const OffsetF& hotZoneOffset)
@@ -89,6 +101,16 @@ public:
     void SetEnabled(const bool enabled)
     {
         enabled_ = enabled;
+    }
+
+    void SetIsOnAnimationFlag(const bool isOnAnimationFlag)
+    {
+        isOnAnimationFlag_ = isOnAnimationFlag;
+    }
+
+    void SetIsFirstCreated(const bool isFirstCreated)
+    {
+        isFirstCreated_ = isFirstCreated;
     }
 
     void SetTotalScale(const float totalScale)
@@ -121,6 +143,8 @@ private:
     Color activeColor_;
     Color inactiveColor_;
     bool enabled_ = true;
+    bool isOnAnimationFlag_ = false;
+    bool isFirstCreated_ = true;
     float totalScale_ = 1.0f;
     float pointScale_ = 0.5f;
     float ringPointScale_ = 0.0f;

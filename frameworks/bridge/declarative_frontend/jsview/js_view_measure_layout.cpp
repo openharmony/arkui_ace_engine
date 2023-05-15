@@ -49,13 +49,13 @@ panda::Local<panda::JSValueRef> ViewMeasureLayout::JSMeasure(panda::JsiRuntimeCa
     auto jsObject = JsiObject(info->GetCallArgRef(0)->ToObject(vm));
     JSRef<JSObject> sizeObj = JSRef<JSObject>::Make(jsObject);
     JSRef<JSVal> minWidthValue = sizeObj->GetProperty("minWidth");
-    Dimension minWidth;
+    CalcDimension minWidth;
     JSRef<JSVal> maxWidthValue = sizeObj->GetProperty("maxWidth");
-    Dimension maxWidth;
+    CalcDimension maxWidth;
     JSRef<JSVal> minHeightValue = sizeObj->GetProperty("minHeight");
-    Dimension minHeight;
+    CalcDimension minHeight;
     JSRef<JSVal> maxHeightValue = sizeObj->GetProperty("maxHeight");
-    Dimension maxHeight;
+    CalcDimension maxHeight;
 
     if (JSViewAbstract::ParseJsDimensionVp(minWidthValue, minWidth)) {
         (*iterMeasureChildren_)
@@ -105,8 +105,8 @@ panda::Local<panda::JSValueRef> ViewMeasureLayout::JSLayout(panda::JsiRuntimeCal
     JSRef<JSObject> sizeObj = layoutInfo->GetProperty("position");
     JSRef<JSVal> xVal = sizeObj->GetProperty("x");
     JSRef<JSVal> yVal = sizeObj->GetProperty("y");
-    Dimension dimenX;
-    Dimension dimenY;
+    CalcDimension dimenX;
+    CalcDimension dimenY;
     auto xResult = JSViewAbstract::ParseJsDimensionVp(xVal, dimenX);
     auto yResult = JSViewAbstract::ParseJsDimensionVp(yVal, dimenY);
     if (!(xResult || yResult)) {

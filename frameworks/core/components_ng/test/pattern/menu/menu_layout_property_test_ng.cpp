@@ -21,6 +21,7 @@
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/pattern/menu/menu_model_ng.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
@@ -32,6 +33,8 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t TARGET_ID = 3;
 constexpr MenuType TYPE = MenuType::MENU;
+constexpr double MENU_OFFSET_X = 10.0;
+constexpr double MENU_OFFSET_Y = 10.0;
 class MenuLayoutPropertyTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -151,12 +154,16 @@ HWTEST_F(MenuLayoutPropertyTestNg, MenuLayoutPropertyTestNg007, TestSize.Level1)
     property.UpdateFontSize(Dimension(25.0f));
     property.UpdateFontColor(Color::RED);
     property.UpdateFontWeight(FontWeight::BOLD);
+    property.UpdateAlignType(MenuAlignType::START);
+    property.UpdateOffset(DimensionOffset(Dimension(0, DimensionUnit::VP), Dimension(0, DimensionUnit::VP)));
     EXPECT_TRUE(property.GetMenuOffset().has_value());
     EXPECT_TRUE(property.GetPositionOffset().has_value());
     EXPECT_TRUE(property.GetTitle().has_value());
     EXPECT_TRUE(property.GetFontSize().has_value());
     EXPECT_TRUE(property.GetFontColor().has_value());
     EXPECT_TRUE(property.GetFontWeight().has_value());
+    EXPECT_TRUE(property.GetAlignType().has_value());
+    EXPECT_TRUE(property.GetOffset().has_value());
     property.Reset();
     EXPECT_FALSE(property.GetMenuOffset().has_value());
     EXPECT_FALSE(property.GetPositionOffset().has_value());
@@ -164,6 +171,8 @@ HWTEST_F(MenuLayoutPropertyTestNg, MenuLayoutPropertyTestNg007, TestSize.Level1)
     EXPECT_FALSE(property.GetFontSize().has_value());
     EXPECT_FALSE(property.GetFontColor().has_value());
     EXPECT_FALSE(property.GetFontWeight().has_value());
+    EXPECT_FALSE(property.GetAlignType().has_value());
+    EXPECT_FALSE(property.GetOffset().has_value());
 }
 
 /**
@@ -180,6 +189,8 @@ HWTEST_F(MenuLayoutPropertyTestNg, MenuLayoutPropertyTestNg008, TestSize.Level1)
     property.UpdateFontSize(Dimension(25.0f));
     property.UpdateFontColor(Color::RED);
     property.UpdateFontWeight(FontWeight::BOLD);
+    property.UpdateAlignType(MenuAlignType::START);
+    property.UpdateOffset(DimensionOffset(Dimension(10.0, DimensionUnit::VP), Dimension(10.0, DimensionUnit::VP)));
 
     auto cloneProperty = AceType::DynamicCast<MenuLayoutProperty>(property.Clone());
     ASSERT_NE(cloneProperty, nullptr);
@@ -189,6 +200,8 @@ HWTEST_F(MenuLayoutPropertyTestNg, MenuLayoutPropertyTestNg008, TestSize.Level1)
     EXPECT_EQ(property.GetFontSize().value(), cloneProperty->GetFontSize().value());
     EXPECT_EQ(property.GetFontColor().value(), cloneProperty->GetFontColor().value());
     EXPECT_EQ(property.GetFontWeight().value(), cloneProperty->GetFontWeight().value());
+    EXPECT_EQ(property.GetAlignType().value(), cloneProperty->GetAlignType().value());
+    EXPECT_EQ(property.GetOffset().value(), cloneProperty->GetOffset().value());
 }
 
 /**
@@ -208,11 +221,12 @@ HWTEST_F(MenuLayoutPropertyTestNg, MenuLayoutPropertyTestNg009, TestSize.Level1)
 
     auto json = JsonUtil::Create(true);
     property.ToJsonValue(json);
+    auto fontJsonObject = json->GetObject("font");
     EXPECT_EQ(json->GetString("title"), "title");
     EXPECT_EQ(json->GetString("offset"), OffsetF(25.0f, 30.0f).ToString());
     EXPECT_EQ(json->GetString("fontSize"), Dimension(25.0f).ToString());
     EXPECT_EQ(json->GetString("fontColor"), Color::RED.ColorToString());
-    EXPECT_EQ(json->GetString("fontWeight"), V2::ConvertWrapFontWeightToStirng(FontWeight::BOLD));
+    EXPECT_EQ(fontJsonObject->GetString("weight"), V2::ConvertWrapFontWeightToStirng(FontWeight::BOLD));
 }
 
 /**
@@ -247,6 +261,41 @@ HWTEST_F(MenuLayoutPropertyTestNg, MenuLayoutPropertyTestNg010, TestSize.Level1)
     auto item2 = itemArray->GetArrayItem(1);
     EXPECT_EQ(item2->GetString("value"), "MenuItem2");
     EXPECT_EQ(item2->GetString("icon"), "");
+}
+
+/**
+ * @tc.name: MenuLayoutPropertyTestNg011
+ * @tc.desc: Verify SelectMenuAlignOption AlignType.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayoutPropertyTestNg, MenuLayoutPropertyTestNg011, TestSize.Level1)
+{
+    MenuLayoutProperty property;
+    EXPECT_FALSE(property.GetAlignType().has_value());
+    /**
+     * @tc.cases: case1. verify the alignType property.
+     */
+    property.UpdateAlignType(MenuAlignType::CENTER);
+    ASSERT_TRUE(property.GetAlignType().has_value());
+    EXPECT_EQ(property.GetAlignType().value(), MenuAlignType::CENTER);
+}
+
+/**
+ * @tc.name: MenuLayoutPropertyTestNg012
+ * @tc.desc: Verify SelectMenuAlignOption Offset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayoutPropertyTestNg, MenuLayoutPropertyTestNg012, TestSize.Level1)
+{
+    MenuLayoutProperty property;
+    EXPECT_FALSE(property.GetOffset().has_value());
+    DimensionOffset offset(Dimension(MENU_OFFSET_X, DimensionUnit::VP), Dimension(MENU_OFFSET_Y, DimensionUnit::VP));
+    /**
+     * @tc.cases: case1. verify the offset property.
+     */
+    property.UpdateOffset(offset);
+    ASSERT_TRUE(property.GetOffset().has_value());
+    EXPECT_EQ(property.GetOffset().value(), offset);
 }
 } // namespace
 } // namespace OHOS::Ace::NG

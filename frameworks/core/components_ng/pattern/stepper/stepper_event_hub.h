@@ -22,6 +22,7 @@ namespace OHOS::Ace::NG {
 
 using RoutineCallbackEvent = std::function<void()>;
 using IndexCallbackEvent = std::function<void(int32_t, int32_t)>;
+using IndexChangeEvent = std::function<void(int32_t)>;
 
 class StepperEventHub : public EventHub {
     DECLARE_ACE_TYPE(StepperEventHub, EventHub)
@@ -65,6 +66,9 @@ public:
     }
     void FireChangeEvent(int32_t prevIndex, int32_t index) const
     {
+        if (onChangeEvent_) {
+            onChangeEvent_(index);
+        }
         if (changeEvent_) {
             changeEvent_(prevIndex, index);
         }
@@ -81,6 +85,10 @@ public:
             previousEvent_(index, pendingIndex);
         }
     }
+    void SetOnChangeEvent(IndexChangeEvent&& onChangeEvent)
+    {
+        onChangeEvent_ = onChangeEvent;
+    }
 
 private:
     RoutineCallbackEvent finishEvent_;
@@ -88,6 +96,7 @@ private:
     IndexCallbackEvent changeEvent_;
     IndexCallbackEvent nextEvent_;
     IndexCallbackEvent previousEvent_;
+    IndexChangeEvent onChangeEvent_;
 
     ACE_DISALLOW_COPY_AND_MOVE(StepperEventHub);
 };

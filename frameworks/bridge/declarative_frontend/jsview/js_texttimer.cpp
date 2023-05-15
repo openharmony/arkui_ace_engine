@@ -28,19 +28,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<TextTimerModel> TextTimerModel::instance_ = nullptr;
+std::mutex TextTimerModel::mutex_;
 
 TextTimerModel* TextTimerModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::TextTimerModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::TextTimerModelNG());
-        } else {
-            instance_.reset(new Framework::TextTimerModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::TextTimerModelNG());
+            } else {
+                instance_.reset(new Framework::TextTimerModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -140,7 +144,7 @@ void JSTextTimer::SetFontSize(const JSCallbackInfo& info)
         LOGE("JSTextInput::SetFontSize The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension fontSize;
+    CalcDimension fontSize;
     if (!ParseJsDimensionFp(info[0], fontSize)) {
         return;
     }

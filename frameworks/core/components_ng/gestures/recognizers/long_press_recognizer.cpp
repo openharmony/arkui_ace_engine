@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,6 +32,9 @@ constexpr int32_t MAX_FINGERS = 10;
 
 void LongPressRecognizer::OnAccepted()
 {
+    if (onAccessibilityEventFunc_) {
+        onAccessibilityEventFunc_(AccessibilityEventType::LONG_PRESS);
+    }
     refereeState_ = RefereeState::SUCCEED;
     if (onLongPress_ && !touchPoints_.empty()) {
         TouchEvent trackPoint = touchPoints_.begin()->second;
@@ -288,4 +291,26 @@ bool LongPressRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recog
 
     return true;
 }
+
+GestureEventFunc LongPressRecognizer::GetLongPressActionFunc()
+{
+    auto callback = [weak = WeakClaim(this)](GestureEvent& info) {
+        auto longPressRecognizer = weak.Upgrade();
+        CHECK_NULL_VOID(longPressRecognizer);
+        if (longPressRecognizer->onActionUpdate_) {
+            (*(longPressRecognizer->onActionUpdate_))(info);
+        }
+        if (longPressRecognizer->onAction_) {
+            (*(longPressRecognizer->onAction_))(info);
+        }
+        if (longPressRecognizer->onActionUpdate_) {
+            (*(longPressRecognizer->onActionUpdate_))(info);
+        }
+        if (longPressRecognizer->onActionEnd_) {
+            (*(longPressRecognizer->onActionEnd_))(info);
+        }
+    };
+    return callback;
+}
+
 } // namespace OHOS::Ace::NG

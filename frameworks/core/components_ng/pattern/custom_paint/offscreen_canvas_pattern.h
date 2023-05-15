@@ -51,8 +51,9 @@ public:
     void BezierCurveTo(const BezierCurveParam& param);
     void QuadraticCurveTo(const QuadraticCurveParam& param);
 
-    void FillText(const std::string& text, double x, double y, const PaintState& state);
-    void StrokeText(const std::string& text, double x, double y, const PaintState& state);
+    void FillText(const std::string& text, double x, double y, std::optional<double> maxWidth, const PaintState& state);
+    void StrokeText(
+        const std::string& text, double x, double y, std::optional<double> maxWidth, const PaintState& state);
     double MeasureText(const std::string& text, const PaintState& state);
     double MeasureTextHeight(const std::string& text, const PaintState& state);
     TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state);
@@ -65,7 +66,7 @@ public:
     void SetAntiAlias(bool isEnabled);
     void SetFillRuleForPath(const CanvasFillRule rule);
     void SetFillRuleForPath2D(const CanvasFillRule rule);
-    void SetFillPattern(const Ace::Pattern& pattern);
+    void SetFillPattern(const std::weak_ptr<Ace::Pattern>& pattern);
     void SetFillGradient(const Ace::Gradient& gradient);
     void SetAlpha(double alpha);
     void SetCompositeType(CompositeOperation operation);
@@ -82,7 +83,7 @@ public:
     void SetSmoothingQuality(const std::string& quality);
     void SetLineDashOffset(double offset);
     void SetShadowColor(const Color& color);
-    void SetStrokePattern(const Ace::Pattern& pattern);
+    void SetStrokePattern(const std::weak_ptr<Ace::Pattern>& pattern);
     void SetStrokeGradient(const Ace::Gradient& gradient);
     void SetStrokeColor(const Color& color);
     void SetFontWeight(FontWeight weight);
@@ -97,6 +98,7 @@ public:
     void SetLineDash(const std::vector<double>& segments);
 
     void SetTextDirection(TextDirection direction);
+    void SetFilterParam(const std::string& filterStr);
 
     void Save();
     void Restore();
@@ -106,6 +108,7 @@ public:
     void ResetTransform();
     void Transform(const TransformParam& param);
     void Translate(double x, double y);
+    TransformParam GetTransform() const;
     std::string ToDataURL(const std::string& type, const double quality);
 
 private:

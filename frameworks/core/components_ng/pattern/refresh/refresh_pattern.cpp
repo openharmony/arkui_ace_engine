@@ -101,6 +101,7 @@ void RefreshPattern::OnModifyDone()
             LoadingProgressExit();
         }
     }
+    SetAccessibilityAction();
 }
 
 void RefreshPattern::CheckCoordinationEvent()
@@ -296,6 +297,9 @@ void RefreshPattern::HandleDragStart()
     CHECK_NULL_VOID(progressPaintProperty);
     progressPaintProperty->UpdateRefreshAnimationState(static_cast<int32_t>(RefreshAnimationState::FOLLOW_HAND));
     progressChild_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_START);
 }
 
 void RefreshPattern::HandleDragUpdate(float delta)
@@ -472,6 +476,9 @@ void RefreshPattern::HandleDragEnd()
     if (scrollOffset_.GetY() >= triggerRefreshDistance) {
         TriggerRefresh();
         TransitionPeriodAnimation();
+        auto frameNode = GetHost();
+        CHECK_NULL_VOID(frameNode);
+        frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
         return;
     }
     LoadingProgressExit();
@@ -795,5 +802,26 @@ void RefreshPattern::UpdateLoadingMarginTop(float top)
     }
     marginProperty.top = CalcLength(top);
     progressLayoutProperty->UpdateMargin(marginProperty);
+}
+
+void RefreshPattern::SetAccessibilityAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetActionScrollForward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (pattern->IsRefreshing()) {
+            return;
+        }
+        pattern->HandleDragStart();
+        for (float delta = 0.0f; delta < MAX_SCROLL_DISTANCE.ConvertToPx();
+                delta += TRIGGER_LOADING_DISTANCE.ConvertToPx()) {
+                pattern->HandleDragUpdate(delta);
+        }
+        pattern->HandleDragEnd();
+    });
 }
 } // namespace OHOS::Ace::NG

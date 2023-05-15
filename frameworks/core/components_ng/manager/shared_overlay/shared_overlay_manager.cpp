@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -244,6 +244,12 @@ void SharedOverlayManager::PassengerAboard(
     effect->SetPassengerInitPos(initialPosition);
     effect->SetPassengerInitFrameOffset(initialFrameOffset);
     effect->SetPassengerInitEventEnabled(initialEventEnabled);
+    bool isPassengerCurrentFocused = false;
+    auto passengerFocusHub = passenger->GetFocusHub();
+    if (passengerFocusHub) {
+        isPassengerCurrentFocused = passengerFocusHub->IsCurrentFocus();
+    }
+    effect->SetPassengerCurrentFocused(isPassengerCurrentFocused);
     auto passengerHolder = CreateBlankFrameNode(passenger);
     passengerHolder->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
     ReplaceFrameNode(passenger, passengerHolder);
@@ -286,7 +292,7 @@ bool SharedOverlayManager::AboardShuttle(const RefPtr<SharedTransitionEffect>& e
 void SharedOverlayManager::GetOffShuttle(const RefPtr<SharedTransitionEffect>& effect)
 {
     CHECK_NULL_VOID(effect);
-    LOGD("get off shuttle. id: %{public}s", effect->GetShareId().c_str());
+    LOGI("get off shuttle. id: %{public}s", effect->GetShareId().c_str());
     auto passenger = effect->GetPassengerNode().Upgrade();
     CHECK_NULL_VOID(passenger);
     sharedManager_->RemoveChild(passenger);
@@ -312,6 +318,13 @@ void SharedOverlayManager::GetOffShuttle(const RefPtr<SharedTransitionEffect>& e
         passenger->GetGeometryNode()->SetFrameOffset(effect->GetPassengerInitFrameOffset());
         passenger->GetEventHub<EventHub>()->SetEnabled(effect->GetPassengerInitEventEnabled());
         ReplaceFrameNode(passengerHolder, passenger);
+        auto isPassengerCurrentFocused = effect->GetPassengerCurrentFocused();
+        if (isPassengerCurrentFocused) {
+            auto passengerFocusHub = passenger->GetFocusHub();
+            if (passengerFocusHub) {
+                passengerFocusHub->RequestFocusImmediately();
+            }
+        }
         // The callback is to restore the parameters used by passenger in the animation
         effect->PerformFinishCallback();
         passenger->GetRenderContext()->OnModifyDone();
@@ -334,6 +347,18 @@ bool SharedOverlayManager::OnBackPressed()
         }
     }
     return inSharedTransition;
+}
+
+void SharedOverlayManager::StopSharedTransition()
+{
+    for (const auto& effect : effects_) {
+        auto controller = effect->GetController();
+        if (controller->IsRunning()) {
+            // When two new pages switch, let controller finishes, so passenger can go back to the original page.
+            controller->Finish();
+        }
+    }
+    effects_.clear();
 }
 
 } // namespace OHOS::Ace::NG

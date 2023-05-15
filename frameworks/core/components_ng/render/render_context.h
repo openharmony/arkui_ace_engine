@@ -166,8 +166,12 @@ public:
     virtual void SetBounds(float positionX, float positionY, float width, float height) {}
 
     virtual void UpdateBackBlurRadius(const Dimension& radius) {}
-    virtual void UpdateBackBlurStyle(const BlurStyleOption& blurStyle) {}
+    virtual void UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle) {}
+    virtual void UpdateFrontBlurStyle(const std::optional<BlurStyleOption>& fgBlurStyle) {}
+    virtual void UpdateFrontBlurRadius(const Dimension& radius) {}
+    virtual void ResetBackBlurStyle() {}
     virtual void ClipWithRect(const RectF& rectF) {}
+    virtual void ClipWithRRect(const RectF& rectF, const RadiusF& radiusF) {}
 
     virtual void OpacityAnimation(const AnimationOption& option, double begin, double end) {}
     virtual void ScaleAnimation(const AnimationOption& option, double begin, double end) {}
@@ -232,6 +236,14 @@ public:
     {
         return GetBackground() ? GetBackground()->propBlurRadius : std::nullopt;
     }
+    std::optional<BlurStyleOption> GetFrontBlurStyle() const
+    {
+        return GetForeground() ? GetForeground()->propBlurStyleOption : std::nullopt;
+    }
+    std::optional<Dimension> GetFrontBlurRadius() const
+    {
+        return GetForeground() ? GetForeground()->propBlurRadius : std::nullopt;
+    }
 
     virtual void AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePropertyBase> modifier) {};
 
@@ -269,6 +281,9 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Transform, TransformTranslate, TranslateOptions);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Transform, TransformRotate, Vector4F);
 
+    // Foreground
+    ACE_DEFINE_PROPERTY_GROUP(Foreground, ForegroundProperty);
+
     // Background
     ACE_DEFINE_PROPERTY_GROUP(Background, BackgroundProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundImage, ImageSourceInfo);
@@ -290,6 +305,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Opacity, double);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ForegroundColor, Color);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ForegroundColorStrategy, ForegroundColorStrategy);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ForegroundColorFlag, bool);
 
     // Graphics
     ACE_DEFINE_PROPERTY_GROUP(Graphics, GraphicsProperty);
@@ -301,7 +317,6 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontInvert, Dimension);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontHueRotate, float);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontColorBlend, Color);
-    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontBlurRadius, Dimension);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, BackShadow, Shadow);
 
     // BorderRadius.
@@ -404,7 +419,6 @@ protected:
     virtual void OnFrontInvertUpdate(const Dimension& value) {}
     virtual void OnFrontHueRotateUpdate(float value) {}
     virtual void OnFrontColorBlendUpdate(const Color& value) {}
-    virtual void OnFrontBlurRadiusUpdate(const Dimension& value) {}
     virtual void OnBackShadowUpdate(const Shadow& shadow) {}
 
     virtual void OnOverlayTextUpdate(const OverlayOptions& overlay) {}

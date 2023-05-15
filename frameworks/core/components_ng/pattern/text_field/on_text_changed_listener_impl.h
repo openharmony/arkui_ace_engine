@@ -32,7 +32,8 @@ public:
     void DeleteForward(int32_t length) override;
     void SetKeyboardStatus(bool status) override;
     void SendKeyEventFromInputMethod(const MiscServices::KeyEvent& event) override;
-    void SendKeyboardInfo(const MiscServices::KeyboardInfo& info) override;
+    void SendKeyboardStatus(const MiscServices::KeyboardStatus& keyboardStatus) override;
+    void SendFunctionKey(const MiscServices::FunctionKey& functionKey) override;
     void MoveCursor(MiscServices::Direction direction) override;
     void HandleSetSelection(int32_t start, int32_t end) override;
     void HandleExtendAction(int32_t action) override;

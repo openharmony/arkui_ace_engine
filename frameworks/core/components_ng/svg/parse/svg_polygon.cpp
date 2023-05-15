@@ -16,7 +16,11 @@
 #include "frameworks/core/components_ng/svg/parse/svg_polygon.h"
 
 #include "base/utils/utils.h"
+#ifndef NEW_SKIA
 #include "frameworks/core/components/common/painter/flutter_svg_painter.h"
+#else
+#include "frameworks/core/components/common/painter/rosen_svg_painter.h"
+#endif
 #include "frameworks/core/components/declaration/svg/svg_polygon_declaration.h"
 
 namespace OHOS::Ace::NG {
@@ -47,13 +51,21 @@ SkPath SvgPolygon::AsPath(const Size& viewPort) const
         return path;
     }
     std::vector<SkPoint> skPoints;
+#ifndef NEW_SKIA
     FlutterSvgPainter::StringToPoints(declaration->GetPoints().c_str(), skPoints);
+#else
+    RosenSvgPainter::StringToPoints(declaration->GetPoints().c_str(), skPoints);
+#endif
     if (skPoints.empty()) {
         return SkPath();
     }
     path.addPoly(&skPoints[0], skPoints.size(), isClose_);
     if (declaration->GetClipState().IsEvenodd()) {
+#ifndef NEW_SKIA
         path.setFillType(SkPath::FillType::kEvenOdd_FillType);
+#else
+        path.setFillType(SkPathFillType::kEvenOdd);
+#endif
     }
     return path;
 }

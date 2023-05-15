@@ -69,6 +69,7 @@ public:
     {
         auto paintMethod = MakeRefPtr<DatePickerPaintMethod>();
         paintMethod->SetEnabled(enabled_);
+        paintMethod->SetBackgroundColor(backgroundColor_);
         return paintMethod;
     }
 
@@ -468,6 +469,11 @@ public:
         return DividerId_.value();
     }
 
+    void SetBackgroundColor(const Color& color)
+    {
+        backgroundColor_ = color;
+    }
+
     static const std::string& GetYear(uint32_t year);
 
     static const std::string& GetSolarMonth(uint32_t month);
@@ -523,6 +529,7 @@ private:
     std::vector<RefPtr<FrameNode>> datePickerColumns_;
     bool lunar_ = false;
     bool showMonthDays_ = false;
+    Color backgroundColor_ = Color::WHITE;
     std::optional<int32_t> yearId_;
     std::optional<int32_t> monthId_;
     std::optional<int32_t> dayId_;

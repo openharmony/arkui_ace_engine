@@ -18,6 +18,7 @@
 #include "drawing/engine_adapter/skia_adapter/skia_canvas.h"
 #include "txt/paragraph_builder.h"
 #include "txt/paragraph_style.h"
+#include "include/core/SkImage.h"
 #include "include/core/SkMaskFilter.h"
 #include "include/encode/SkJpegEncoder.h"
 #include "include/encode/SkPngEncoder.h"
@@ -29,7 +30,9 @@
 #include "base/utils/utils.h"
 #include "core/components/common/painter/rosen_decoration_painter.h"
 #include "core/components/font/constants_converter.h"
+#ifndef NEW_SKIA
 #include "core/components/font/flutter_font_collection.h"
+#endif
 #include "core/components/font/rosen_font_collection.h"
 #include "core/components_ng/image_provider/image_object.h"
 #include "core/components_ng/render/drawing.h"
@@ -121,8 +124,11 @@ void CanvasPaintMethod::PaintCustomPaint(RSCanvas& canvas, PaintWrapper* paintWr
 
     skCanvas->save();
     skCanvas->scale(1.0 / viewScale, 1.0 / viewScale);
+#ifndef NEW_SKIA
     skCanvas->drawBitmap(canvasCache_, 0.0f, 0.0f);
-
+#else
+    skCanvas->drawImage(canvasCache_.asImage(), 0.0f, 0.0f);
+#endif
     skCanvas->restore();
 }
 
@@ -176,8 +182,20 @@ void CanvasPaintMethod::DrawImage(
 
     auto image = GetImage(canvasImage.src);
     CHECK_NULL_VOID(image);
-    InitImagePaint();
+#ifndef NEW_SKIA
+    InitImagePaint(imagePaint_);
+#else
+    InitImagePaint(imagePaint_, sampleOptions_);
+#endif
     InitPaintBlend(imagePaint_);
+    const auto skCanvas =
+        globalState_.GetType() == CompositeOperation::SOURCE_OVER ? skCanvas_.get() : cacheCanvas_.get();
+    if (HasImageShadow()) {
+        SkRect skRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
+        SkPath path;
+        path.addRect(skRect);
+        PaintShadow(path, *imageShadow_, skCanvas);
+    }
 
     switch (canvasImage.flag) {
         case 0:
@@ -185,13 +203,22 @@ void CanvasPaintMethod::DrawImage(
             break;
         case 1: {
             SkRect rect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
+#ifndef NEW_SKIA
             skCanvas_->drawImageRect(image, rect, &imagePaint_);
+#else
+            skCanvas_->drawImageRect(image, rect, sampleOptions_, &imagePaint_);
+#endif
             break;
         }
         case 2: {
             SkRect dstRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
             SkRect srcRect = SkRect::MakeXYWH(canvasImage.sx, canvasImage.sy, canvasImage.sWidth, canvasImage.sHeight);
+#ifndef NEW_SKIA
             skCanvas_->drawImageRect(image, srcRect, dstRect, &imagePaint_);
+#else
+            skCanvas_->drawImageRect(
+                image, srcRect, dstRect, sampleOptions_, &imagePaint_, SkCanvas::kStrict_SrcRectConstraint);
+#endif
             break;
         }
         default:
@@ -206,9 +233,14 @@ void CanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::Canva
     SkPixmap imagePixmap(imageInfo, reinterpret_cast<const void*>(pixelMap->GetPixels()), pixelMap->GetRowBytes());
 
     // Step2: Create SkImage and draw it, using gpu or cpu
-    sk_sp<SkImage> image = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
+    sk_sp<SkImage> image =
+        SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
     CHECK_NULL_VOID(image);
-    InitImagePaint();
+#ifndef NEW_SKIA
+    InitImagePaint(imagePaint_);
+#else
+    InitImagePaint(imagePaint_, sampleOptions_);
+#endif
     InitPaintBlend(imagePaint_);
     switch (canvasImage.flag) {
         case 0:
@@ -216,13 +248,22 @@ void CanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::Canva
             break;
         case 1: {
             SkRect rect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
+#ifndef NEW_SKIA
             skCanvas_->drawImageRect(image, rect, &imagePaint_);
+#else
+            skCanvas_->drawImageRect(image, rect, sampleOptions_, &imagePaint_);
+#endif
             break;
         }
         case 2: {
             SkRect dstRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
             SkRect srcRect = SkRect::MakeXYWH(canvasImage.sx, canvasImage.sy, canvasImage.sWidth, canvasImage.sHeight);
+#ifndef NEW_SKIA
             skCanvas_->drawImageRect(image, srcRect, dstRect, &imagePaint_);
+#else
+            skCanvas_->drawImageRect(
+                image, srcRect, dstRect, sampleOptions_, &imagePaint_, SkCanvas::kStrict_SrcRectConstraint);
+#endif
             break;
         }
         default:
@@ -250,6 +291,16 @@ sk_sp<SkImage> CanvasPaintMethod::GetImage(const std::string& src)
     return rasterizedImage;
 }
 
+
+void CanvasPaintMethod::CloseImageBitmap(const std::string& src)
+{
+    CHECK_NULL_VOID(imageCache_);
+    auto cacheImage = imageCache_->GetCacheImage(src);
+    if (cacheImage && cacheImage->imagePtr) {
+        imageCache_->ClearCacheImage(src);
+    }
+}
+
 std::unique_ptr<Ace::ImageData> CanvasPaintMethod::GetImageData(
     double left, double top, double width, double height)
 {
@@ -271,7 +322,12 @@ std::unique_ptr<Ace::ImageData> CanvasPaintMethod::GetImageData(
     SkCanvas tempCanvas(tempCache);
     auto srcRect = SkRect::MakeXYWH(scaledLeft, scaledTop, width * viewScale, height * viewScale);
     auto dstRect = SkRect::MakeXYWH(0.0, 0.0, dirtyWidth, dirtyHeight);
+#ifndef NEW_SKIA
     tempCanvas.drawBitmapRect(canvasCache_, srcRect, dstRect, nullptr);
+#else
+    tempCanvas.drawImageRect(
+        canvasCache_.asImage(), srcRect, dstRect, SkSamplingOptions(), nullptr, SkCanvas::kStrict_SrcRectConstraint);
+#endif
     pixels = tempCache.pixmap().addr8();
     CHECK_NULL_RETURN(pixels, nullptr);
     std::unique_ptr<Ace::ImageData> imageData = std::make_unique<Ace::ImageData>();
@@ -297,7 +353,8 @@ void CanvasPaintMethod::TransferFromImageBitmap(PaintWrapper* paintWrapper,
     PutImageData(paintWrapper, *imageData);
 }
 
-void CanvasPaintMethod::FillText(PaintWrapper* paintWrapper, const std::string& text, double x, double y)
+void CanvasPaintMethod::FillText(
+    PaintWrapper* paintWrapper, const std::string& text, double x, double y, std::optional<double> maxWidth)
 {
     CHECK_NULL_VOID(paintWrapper);
     auto offset = paintWrapper->GetContentOffset();
@@ -305,10 +362,11 @@ void CanvasPaintMethod::FillText(PaintWrapper* paintWrapper, const std::string& 
 
     auto success = UpdateParagraph(offset, text, false, HasShadow());
     CHECK_NULL_VOID(success);
-    PaintText(offset, frameSize, x, y, false, HasShadow());
+    PaintText(offset, frameSize, x, y, maxWidth, false, HasShadow());
 }
 
-void CanvasPaintMethod::StrokeText(PaintWrapper* paintWrapper, const std::string& text, double x, double y)
+void CanvasPaintMethod::StrokeText(
+    PaintWrapper* paintWrapper, const std::string& text, double x, double y, std::optional<double> maxWidth)
 {
     CHECK_NULL_VOID(paintWrapper);
     auto offset = paintWrapper->GetContentOffset();
@@ -317,12 +375,12 @@ void CanvasPaintMethod::StrokeText(PaintWrapper* paintWrapper, const std::string
     if (HasShadow()) {
         auto success = UpdateParagraph(offset, text, true, true);
         CHECK_NULL_VOID(success);
-        PaintText(offset, frameSize, x, y, true, true);
+        PaintText(offset, frameSize, x, y, maxWidth, true, true);
     }
 
     auto success = UpdateParagraph(offset, text, true);
     CHECK_NULL_VOID(success);
-    PaintText(offset, frameSize, x, y, true);
+    PaintText(offset, frameSize, x, y, maxWidth, true);
 }
 
 double CanvasPaintMethod::MeasureText(const std::string& text, const PaintState& state)
@@ -330,7 +388,11 @@ double CanvasPaintMethod::MeasureText(const std::string& text, const PaintState&
     using namespace Constants;
     txt::ParagraphStyle style;
     style.text_align = ConvertTxtTextAlign(state.GetTextAlign());
+#ifndef NEW_SKIA
     auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
+#else
+    auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
+#endif
     CHECK_NULL_RETURN(fontCollection, 0.0);
     std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
     txt::TextStyle txtStyle;
@@ -348,7 +410,11 @@ double CanvasPaintMethod::MeasureTextHeight(const std::string& text, const Paint
     using namespace Constants;
     txt::ParagraphStyle style;
     style.text_align = ConvertTxtTextAlign(state.GetTextAlign());
+#ifndef NEW_SKIA
     auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
+#else
+    auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
+#endif
     CHECK_NULL_RETURN(fontCollection, 0.0);
     std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
     txt::TextStyle txtStyle;
@@ -367,7 +433,11 @@ TextMetrics CanvasPaintMethod::MeasureTextMetrics(const std::string& text, const
     TextMetrics textMetrics = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
     txt::ParagraphStyle style;
     style.text_align = ConvertTxtTextAlign(state.GetTextAlign());
+#ifndef NEW_SKIA
     auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
+#else
+    auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
+#endif
     CHECK_NULL_RETURN(fontCollection, textMetrics);
     std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
     txt::TextStyle txtStyle;
@@ -390,30 +460,34 @@ TextMetrics CanvasPaintMethod::MeasureTextMetrics(const std::string& text, const
     return textMetrics;
 }
 
-void CanvasPaintMethod::PaintText(
-    const OffsetF& offset, const SizeF& frameSize, double x, double y, bool isStroke, bool hasShadow)
+void CanvasPaintMethod::PaintText(const OffsetF& offset, const SizeF& frameSize, double x, double y,
+    std::optional<double> maxWidth, bool isStroke, bool hasShadow)
 {
-    paragraph_->Layout(frameSize.Width());
-    auto width = paragraph_->GetMaxIntrinsicWidth();
-    if (frameSize.Width() > width) {
-        paragraph_->Layout(std::ceil(width));
-    }
+    paragraph_->Layout(DBL_MAX);
     auto align = isStroke ? strokeState_.GetTextAlign() : fillState_.GetTextAlign();
     double dx = offset.GetX() + x + GetAlignOffset(align, paragraph_);
     auto baseline =
         isStroke ? strokeState_.GetTextStyle().GetTextBaseline() : fillState_.GetTextStyle().GetTextBaseline();
     double dy = offset.GetY() + y + GetBaselineOffset(baseline, paragraph_);
 
+    std::optional<double> scale = CalcTextScale(paragraph_->GetMaxIntrinsicWidth(), maxWidth);
     if (hasShadow) {
         skCanvas_->save();
         auto shadowOffsetX = shadow_.GetOffset().GetX();
         auto shadowOffsetY = shadow_.GetOffset().GetY();
+        if (scale.has_value()) {
+            skCanvas_->scale(scale.value(), 1);
+        }
         paragraph_->Paint(skCanvas_.get(), dx + shadowOffsetX, dy + shadowOffsetY);
         skCanvas_->restore();
         return;
     }
-
+    skCanvas_->save();
+    if (scale.has_value()) {
+        skCanvas_->scale(scale.value(), 1);
+    }
     paragraph_->Paint(skCanvas_.get(), dx, dy);
+    skCanvas_->restore();
 }
 
 double CanvasPaintMethod::GetBaselineOffset(TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph)
@@ -458,7 +532,11 @@ bool CanvasPaintMethod::UpdateParagraph(const OffsetF& offset, const std::string
         style.text_direction = txt::TextDirection::rtl;
     }
     style.text_align = GetEffectiveAlign(style.text_align, style.text_direction);
+#ifndef NEW_SKIA
     auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
+#else
+    auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
+#endif
     CHECK_NULL_RETURN(fontCollection, false);
     std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
     txt::TextStyle txtStyle;
@@ -467,7 +545,11 @@ bool CanvasPaintMethod::UpdateParagraph(const OffsetF& offset, const std::string
         txtShadow.color = shadow_.GetColor().GetValue();
         txtShadow.offset.fX = shadow_.GetOffset().GetX();
         txtShadow.offset.fY = shadow_.GetOffset().GetY();
+#ifndef NEW_SKIA
         txtShadow.blur_radius = shadow_.GetBlurRadius();
+#else
+        txtShadow.blur_sigma = shadow_.GetBlurRadius();
+#endif
         txtStyle.text_shadows.emplace_back(txtShadow);
     }
     txtStyle.locale = Localization::GetInstance()->GetFontLocale();
@@ -486,8 +568,14 @@ void CanvasPaintMethod::UpdateTextStyleForeground(
         txtStyle.color = ConvertSkColor(fillState_.GetColor());
         txtStyle.font_size = fillState_.GetTextStyle().GetFontSize().Value();
         ConvertTxtStyle(fillState_.GetTextStyle(), context_, txtStyle);
-        if (fillState_.GetGradient().IsValid()) {
+        if (fillState_.GetGradient().IsValid() && fillState_.GetPaintStyle() == PaintStyle::Gradient) {
             SkPaint paint;
+#ifndef NEW_SKIA
+            InitImagePaint(paint);
+#else
+            SkSamplingOptions options;
+            InitImagePaint(paint, options);
+#endif
             paint.setStyle(SkPaint::Style::kFill_Style);
             UpdatePaintShader(offset, paint, fillState_.GetGradient());
             txtStyle.foreground = paint;
@@ -499,6 +587,12 @@ void CanvasPaintMethod::UpdateTextStyleForeground(
                 txtStyle.foreground.setAlphaf(globalState_.GetAlpha()); // set alpha after color
             } else {
                 SkPaint paint;
+#ifndef NEW_SKIA
+                InitImagePaint(paint);
+#else
+                SkSamplingOptions options;
+                InitImagePaint(paint, options);
+#endif
                 paint.setColor(fillState_.GetColor().GetValue());
                 paint.setAlphaf(globalState_.GetAlpha()); // set alpha after color
                 InitPaintBlend(paint);
@@ -508,11 +602,17 @@ void CanvasPaintMethod::UpdateTextStyleForeground(
         }
     } else {
         // use foreground to draw stroke
-        SkPaint paint = GetStrokePaint();
+        SkPaint paint;
+#ifndef NEW_SKIA
+        GetStrokePaint(paint);
+#else
+        SkSamplingOptions options;
+        GetStrokePaint(paint, options);
+#endif
         InitPaintBlend(paint);
         ConvertTxtStyle(strokeState_.GetTextStyle(), context_, txtStyle);
         txtStyle.font_size = strokeState_.GetTextStyle().GetFontSize().Value();
-        if (strokeState_.GetGradient().IsValid()) {
+        if (strokeState_.GetGradient().IsValid() && strokeState_.GetPaintStyle() == PaintStyle::Gradient) {
             UpdatePaintShader(offset, paint, strokeState_.GetGradient());
         }
         if (hasShadow) {
@@ -547,8 +647,8 @@ void CanvasPaintMethod::SetTransform(const TransformParam& param)
     CHECK_NULL_VOID(context);
     double viewScale = context->GetViewScale();
     SkMatrix skMatrix;
-    skMatrix.setAll(param.scaleX * viewScale, param.skewY * viewScale, param.translateX * viewScale,
-        param.skewX * viewScale, param.scaleY * viewScale, param.translateY * viewScale, 0, 0, 1);
+    skMatrix.setAll(param.scaleX * viewScale, param.skewX * viewScale, param.translateX * viewScale,
+        param.skewY * viewScale, param.scaleY * viewScale, param.translateY * viewScale, 0, 0, 1);
     skCanvas_->setMatrix(skMatrix);
 }
 
@@ -566,8 +666,12 @@ std::string CanvasPaintMethod::ToDataURL(const std::string& args)
         LOGE("Bitmap is empty");
         return UNSUPPORTED;
     }
-
+#ifndef NEW_SKIA
     success = canvasCache_.pixmap().scalePixels(tempCache.pixmap(), SkFilterQuality::kHigh_SkFilterQuality);
+#else
+    success = canvasCache_.pixmap().scalePixels(
+        tempCache.pixmap(), SkSamplingOptions(SkCubicResampler { 1 / 3.0f, 1 / 3.0f }));
+#endif
     CHECK_NULL_RETURN(success, UNSUPPORTED);
     SkPixmap src = tempCache.pixmap();
     SkDynamicMemoryWStream dst;

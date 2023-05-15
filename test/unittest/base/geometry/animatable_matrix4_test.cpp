@@ -107,7 +107,7 @@ HWTEST_F(AnimatableMatrix4Test, AnimatableMatrix4Test003, TestSize.Level1)
 {
     AnimatableMatrix4 animatableMatrix4Obj1;
     animatableMatrix4Obj1.ResetController();
-    animatableMatrix4Obj1.animationController_ = AceType::MakeRefPtr<Animator>(nullptr);
+    animatableMatrix4Obj1.animationController_ = CREATE_ANIMATOR(nullptr);
     EXPECT_NE(animatableMatrix4Obj1.animationController_, nullptr);
     animatableMatrix4Obj1.ResetController();
     EXPECT_EQ(animatableMatrix4Obj1.animationController_, nullptr);

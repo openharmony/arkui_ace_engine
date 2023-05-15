@@ -15,8 +15,12 @@
 #ifndef FOUNDATION_ACE_INTERFACE_INNERKITS_IMAGE_CONVERTER_H
 #define FOUNDATION_ACE_INTERFACE_INNERKITS_IMAGE_CONVERTER_H
 
-#include "SkBitmap.h"
-#include "SkImageInfo.h"
+#include "include/core/SkBitmap.h"
+#include "include/core/SkImageInfo.h"
+#ifdef NEW_SKIA
+#include "include/core/SkSamplingOptions.h"
+#endif
+
 #include "pixel_map.h"
 #include "image_source.h"
 

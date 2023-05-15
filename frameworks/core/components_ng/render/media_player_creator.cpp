@@ -16,6 +16,7 @@
 #if defined(ENABLE_ROSEN_BACKEND) && defined(OHOS_PLATFORM)
 #include "core/components_ng/render/adapter/rosen_media_player.h"
 #endif
+#include "core/components_ng/render/adapter/media_player_impl.h"
 #include "core/components_ng/render/media_player.h"
 
 namespace OHOS::Ace::NG {
@@ -26,7 +27,7 @@ RefPtr<MediaPlayer> MediaPlayer::Create()
 #if defined(OHOS_PLATFORM)
         return MakeRefPtr<RosenMediaPlayer>();
 #else
-        return MakeRefPtr<MediaPlayer>();
+        return MakeRefPtr<MediaPlayerImpl>();
 #endif
 #endif
     }

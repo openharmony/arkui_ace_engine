@@ -22,7 +22,7 @@
 #include "core/common/container_scope.h"
 #include "adapter/preview/entrance/ace_container.h"
 #include "adapter/preview/entrance/editing/text_input_client_mgr.h"
-#include "adapter/preview/entrance/flutter_ace_view.h"
+#include "adapter/preview/entrance/ace_view_preview.h"
 
 namespace OHOS::Ace::Platform {
 namespace {
@@ -73,11 +73,6 @@ EventDispatcher::EventDispatcher()
 {}
 
 EventDispatcher::~EventDispatcher() = default;
-
-void EventDispatcher::SetGlfwWindowController(const FlutterDesktopWindowControllerRef& controller)
-{
-    controller_ = controller;
-}
 
 void EventDispatcher::Initialize()
 {

@@ -16,10 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CHECKBOX_CHECKBOX_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CHECKBOX_CHECKBOX_MODEL_H
 
+#include <mutex>
+
 #include "core/components_ng/pattern/checkbox/checkbox_event_hub.h"
 
 namespace OHOS::Ace {
-
 class CheckBoxModel {
 public:
     static CheckBoxModel* GetInstance();
@@ -36,12 +37,12 @@ public:
     virtual void SetOnChange(NG::ChangeEvent&& onChange);
     virtual void SetWidth(const Dimension& width);
     virtual void SetHeight(const Dimension& height);
-    virtual void SetPadding(const NG::PaddingPropertyF& args);
+    virtual void SetPadding(const NG::PaddingPropertyF& args, const NG::PaddingProperty& newArgs, bool flag);
+    virtual void SetChangeEvent(std::function<void(bool)>&& changeEvent) = 0;
 
 private:
     static std::unique_ptr<CheckBoxModel> instance_;
+    static std::mutex mutex_;
 };
-
 } // namespace OHOS::Ace
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CHECKBOX_CHECKBOX_MODEL_H

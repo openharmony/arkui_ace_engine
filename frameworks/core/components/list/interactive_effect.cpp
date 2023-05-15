@@ -31,7 +31,7 @@ InteractiveEffect::InteractiveEffect(const WeakPtr<PipelineContext>& context)
     auto pipelineContext = context.Upgrade();
     if (pipelineContext) {
         context_ = pipelineContext;
-        controller_ = AceType::MakeRefPtr<Animator>(pipelineContext);
+        controller_ = CREATE_ANIMATOR(pipelineContext);
     } else {
         LOGE("context is null.");
     }
@@ -42,7 +42,7 @@ void InteractiveEffect::UpdateContext(const WeakPtr<PipelineContext>& context)
     auto pipelineContext = context.Upgrade();
     if (pipelineContext) {
         context_ = pipelineContext;
-        controller_ = AceType::MakeRefPtr<Animator>(pipelineContext);
+        controller_ = CREATE_ANIMATOR(pipelineContext);
     }
 }
 
