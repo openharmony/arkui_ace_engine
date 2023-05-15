@@ -379,7 +379,7 @@ void SelectPattern::BuildChild()
     auto renderContext = select->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateBackgroundColor(theme->GetBackgroundColor());
-
+    renderContext->SetClipToFrame(true);
     BorderRadiusProperty border;
     border.SetRadius(theme->GetSelectBorderRadius());
     renderContext->UpdateBorderRadius(border);
