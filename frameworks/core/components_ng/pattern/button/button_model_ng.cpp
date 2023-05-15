@@ -21,7 +21,6 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/button/button_accessibility_property.h"
 #include "core/components_ng/pattern/button/button_event_hub.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
@@ -133,7 +132,7 @@ void ButtonModelNG::CreateWithLabel(const std::string& label)
         SetTextDefaultStyle(textNode, label);
         buttonNode->AddChild(textNode);
     }
-    auto buttonAccessibilityProperty = buttonNode->GetAccessibilityProperty<ButtonAccessibilityProperty>();
+    auto buttonAccessibilityProperty = buttonNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(buttonAccessibilityProperty);
     buttonAccessibilityProperty->SetText(label);
     stack->Push(buttonNode);
