@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,10 +15,12 @@
 
 #include "core/components/chart/rosen_render_chart.h"
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkColor.h"
 #include "include/core/SkPaint.h"
 #include "include/effects/Sk1DPathEffect.h"
 #include "include/effects/SkGradientShader.h"
+#endif
 #include "txt/paragraph_builder.h"
 #include "txt/paragraph_txt.h"
 
@@ -106,6 +108,7 @@ void RosenRenderChart::Paint(RenderContext& context, const Offset& offset)
     PaintDatas(context, dataRegion);
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderChart::PaintStylePoints(SkCanvas* canvas, const Rect& paintRegion, const MainChart& chartData)
 {
     SkPaint paint;
@@ -130,8 +133,41 @@ void RosenRenderChart::PaintStylePoints(SkCanvas* canvas, const Rect& paintRegio
         PaintPoint(canvas, ConvertDataToPosition(paintRegion, bottomPoint), paint, bottomPoint);
     }
 }
+#else
+void RosenRenderChart::PaintStylePoints(
+    RSCanvas* canvas, const Rect& paintRegion, const MainChart& chartData)
+{
+    RSPen pen;
+    RSBrush brush;
+    pen.SetAntiAlias(true);
+    brush.SetAntiAlias(true);
 
+    for (const auto& points : chartData.GetData()) {
+        const PointInfo& point = points.GetPointInfo();
+        if (point.GetDisplay()) {
+            PaintPoint(canvas, ConvertDataToPosition(paintRegion, point), pen, brush, point);
+        }
+    }
+    PointInfo headPoint = chartData.GetHeadPoint();
+    if (headPoint.GetDisplay()) {
+        PaintPoint(canvas, ConvertDataToPosition(paintRegion, headPoint), pen, brush, headPoint);
+    }
+    PointInfo topPoint = chartData.GetTopPoint();
+    if (topPoint.GetDisplay()) {
+        PaintPoint(canvas, ConvertDataToPosition(paintRegion, topPoint), pen, brush, topPoint);
+    }
+    PointInfo bottomPoint = chartData.GetBottomPoint();
+    if (bottomPoint.GetDisplay()) {
+        PaintPoint(canvas, ConvertDataToPosition(paintRegion, bottomPoint), pen, brush, bottomPoint);
+    }
+}
+#endif
+
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderChart::PaintText(SkCanvas* canvas, const Rect& paintRegion, const MainChart& chartData)
+#else
+void RosenRenderChart::PaintText(RSCanvas* canvas, const Rect& paintRegion, const MainChart& chartData)
+#endif
 {
     if (chartData.GetData().empty()) {
         return;
@@ -164,22 +200,41 @@ void RosenRenderChart::PaintText(SkCanvas* canvas, const Rect& paintRegion, cons
         auto paragraph = builder->Build();
         paragraph->Layout(paragraphSize);
         Size textSize = Size(paragraph->GetMinIntrinsicWidth(), paragraph->GetHeight());
+#ifndef USE_ROSEN_DRAWING
         if (text.GetPlacement() == Placement::TOP) {
             paragraph->Paint(canvas, pointPosition.GetX() - textSize.Width() / 2,
                 pointPosition.GetY() - textSize.Height() - TEXT_PADDING);
         } else if (text.GetPlacement() == Placement::BOTTOM) {
             paragraph->Paint(canvas, pointPosition.GetX() - textSize.Width() / 2, pointPosition.GetY() + TEXT_PADDING);
         }
+#else
+        if (text.GetPlacement() == Placement::TOP) {
+            paragraph->Paint(canvas->GetCanvasData()->ExportSkCanvas(), pointPosition.GetX() - textSize.Width() / 2,
+                pointPosition.GetY() - textSize.Height() - TEXT_PADDING);
+        } else if (text.GetPlacement() == Placement::BOTTOM) {
+            paragraph->Paint(canvas->GetCanvasData()->ExportSkCanvas(),
+                pointPosition.GetX() - textSize.Width() / 2, pointPosition.GetY() + TEXT_PADDING);
+        }
+#endif
     }
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderChart::SetEdgeStyle(const PointInfo& point, SkPaint& paint) const
 {
     paint.setStyle(SkPaint::Style::kStroke_Style);
     paint.setStrokeWidth(NormalizeToPx(point.GetPointStrokeWidth()));
     paint.setColor(point.GetStrokeColor().GetValue());
 }
+#else
+void RosenRenderChart::SetEdgeStyle(const PointInfo& point, RSPen& pen) const
+{
+    pen.SetWidth(NormalizeToPx(point.GetPointStrokeWidth()));
+    pen.SetColor(point.GetStrokeColor().GetValue());
+}
+#endif
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderChart::PaintPoint(SkCanvas* canvas, const Offset& offset, SkPaint paint, const PointInfo& point)
 {
     paint.setColor(point.GetFillColor().GetValue());
@@ -229,6 +284,73 @@ void RosenRenderChart::PaintPoint(SkCanvas* canvas, const Offset& offset, SkPain
         }
     }
 }
+#else
+void RosenRenderChart::PaintPoint(RSCanvas* canvas, const Offset& offset, RSPen pen,
+    RSBrush brush, const PointInfo& point)
+{
+    pen.SetColor(point.GetFillColor().GetValue());
+    brush.SetColor(point.GetFillColor().GetValue());
+
+    double pointSize = NormalizeToPx(point.GetPointSize());
+    double halfThickness = NormalizeToPx(point.GetPointStrokeWidth()) / 2;
+    double innerRadius = pointSize / 2 - halfThickness;
+    // first fill point color, then draw edge of point.
+    switch (point.GetPointShape()) {
+        case PointShape::CIRCLE: {
+            canvas->AttachBrush(brush);
+            canvas->DrawCircle(RSPoint(offset.GetX(), offset.GetY()), innerRadius);
+            canvas->DetachBrush();
+            SetEdgeStyle(point, pen);
+            canvas->AttachPen(pen);
+            canvas->DrawCircle(RSPoint(offset.GetX(), offset.GetY()), pointSize / 2);
+            canvas->DetachPen();
+            break;
+        }
+        case PointShape::SQUARE: {
+            canvas->AttachBrush(brush);
+            canvas->DrawRect(RSRect(offset.GetX() - innerRadius, offset.GetY() - innerRadius,
+                offset.GetX() + innerRadius, offset.GetY() + innerRadius));
+            canvas->DetachBrush();
+            SetEdgeStyle(point, pen);
+            canvas->AttachPen(pen);
+            canvas->DrawRect(RSRect(offset.GetX() - pointSize / 2, offset.GetY() - pointSize / 2,
+                offset.GetX() + pointSize / 2, offset.GetY() + pointSize / 2));
+            canvas->DetachPen();
+            break;
+        }
+        case PointShape::TRIANGLE: {
+            RSRecordingPath path;
+            path.MoveTo(offset.GetX(), offset.GetY() - innerRadius);
+            path.LineTo(offset.GetX() - RATIO_CONSTANT * innerRadius / 2, offset.GetY() + innerRadius / 2);
+            path.LineTo(offset.GetX() + RATIO_CONSTANT * innerRadius / 2, offset.GetY() + innerRadius / 2);
+            path.Close();
+            canvas->AttachBrush(brush);
+            canvas->DrawPath(path);
+            canvas->DetachBrush();
+            path.Reset();
+            path.MoveTo(offset.GetX(), offset.GetY() - pointSize / 2);
+            path.LineTo(offset.GetX() - RATIO_CONSTANT * pointSize / 4, offset.GetY() + pointSize / 4);
+            path.LineTo(offset.GetX() + RATIO_CONSTANT * pointSize / 4, offset.GetY() + pointSize / 4);
+            path.Close();
+            SetEdgeStyle(point, pen);
+            canvas->AttachPen(pen);
+            canvas->DrawPath(path);
+            canvas->DetachPen();
+            break;
+        }
+        default: {
+            canvas->AttachBrush(brush);
+            canvas->DrawCircle(RSPoint(offset.GetX(), offset.GetY()), innerRadius);
+            canvas->DetachBrush();
+            SetEdgeStyle(point, pen);
+            canvas->AttachPen(pen);
+            canvas->DrawCircle(RSPoint(offset.GetX(), offset.GetY()), pointSize / 2);
+            canvas->DetachPen();
+            break;
+        }
+    }
+}
+#endif
 
 void RosenRenderChart::PaintDatas(RenderContext& context, const Rect& paintRect)
 {
@@ -244,16 +366,29 @@ void RosenRenderChart::PaintDatas(RenderContext& context, const Rect& paintRect)
     if (type_ == ChartType::LINE) {
         PaintLinearGraph(canvas, paintRect);
     } else {
+#ifndef USE_ROSEN_DRAWING
         SkPaint paint;
         paint.setAntiAlias(true);
         paint.setStyle(SkPaint::Style::kStrokeAndFill_Style);
+#else
+        RSPen pen;
+        RSBrush brush;
+        pen.SetAntiAlias(true);
+        brush.SetAntiAlias(true);
+#endif
 
         const int32_t barGroupNumber = static_cast<int32_t>(mainCharts_.size());
         auto barsAreaNumber = horizontal_.tickNumber;
         for (int32_t barGroupIndex = 0; barGroupIndex < barGroupNumber; ++barGroupIndex) {
             auto barGroup = mainCharts_[barGroupIndex];
+#ifndef USE_ROSEN_DRAWING
             paint.setColor(barGroup.GetFillColor().GetValue());
             PaintBar(canvas, paint, barGroup.GetData(), paintRect, barGroupNumber, barsAreaNumber, barGroupIndex);
+#else
+            pen.SetColor(barGroup.GetFillColor().GetValue());
+            brush.SetColor(barGroup.GetFillColor().GetValue());
+            PaintBar(canvas, pen, brush, barGroup.GetData(), paintRect, barGroupNumber, barsAreaNumber, barGroupIndex);
+#endif
         }
     }
 }
@@ -279,7 +414,11 @@ void RosenRenderChart::UpdateLineGradientPoint(
     }
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderChart::PaintLinearGraph(SkCanvas* canvas, const Rect& paintRect)
+#else
+void RosenRenderChart::PaintLinearGraph(RSCanvas* canvas, const Rect& paintRect)
+#endif
 {
     for (const auto& line : mainCharts_) {
         const auto& pointInfo = line.GetData();
@@ -291,11 +430,19 @@ void RosenRenderChart::PaintLinearGraph(SkCanvas* canvas, const Rect& paintRect)
         auto previousPoint = pointInfo[0].GetPointInfo();
         Offset previousPosition = ConvertDataToPosition(paintRect, previousPoint);
         startOffset_ = previousPosition;
+#ifndef USE_ROSEN_DRAWING
         SkPath edgePath;
         SkPath gradientPath;
         edgePath.moveTo(previousPosition.GetX(), previousPosition.GetY());
         gradientPath.moveTo(previousPosition.GetX(), paintRect.Bottom());
         gradientPath.lineTo(previousPosition.GetX(), previousPosition.GetY());
+#else
+        RSRecordingPath edgePath;
+        RSRecordingPath gradientPath;
+        edgePath.MoveTo(previousPosition.GetX(), previousPosition.GetY());
+        gradientPath.MoveTo(previousPosition.GetX(), paintRect.Bottom());
+        gradientPath.LineTo(previousPosition.GetX(), previousPosition.GetY());
+#endif
 
         UpdateLineGradientPoint(pointInfo, line, paintRect);
 
@@ -307,8 +454,13 @@ void RosenRenderChart::PaintLinearGraph(SkCanvas* canvas, const Rect& paintRect)
                 AddCubicPath(gradientPath, paintRect, line.GetData(), index, isEnd);
                 AddCubicPath(edgePath, paintRect, line.GetData(), index, isEnd);
             } else {
+#ifndef USE_ROSEN_DRAWING
                 gradientPath.lineTo(currentPosition.GetX(), currentPosition.GetY());
                 edgePath.lineTo(currentPosition.GetX(), currentPosition.GetY());
+#else
+                gradientPath.LineTo(currentPosition.GetX(), currentPosition.GetY());
+                edgePath.LineTo(currentPosition.GetX(), currentPosition.GetY());
+#endif
             }
             wholeLineGradient_ = line.GetWholeLineGradient();
             if (wholeLineGradient_) {
@@ -317,6 +469,7 @@ void RosenRenderChart::PaintLinearGraph(SkCanvas* canvas, const Rect& paintRect)
             int32_t i = static_cast<int32_t>(index);
             if ((line.GetHeadPointIndex() > 0) && (i > line.GetHeadPointIndex()) &&
                 (i <= line.GetHeadPointIndex() + line.GetErasePointNumber())) {
+#ifndef USE_ROSEN_DRAWING
                 gradientPath.reset();
                 if (i < line.GetHeadPointIndex() + line.GetErasePointNumber()) {
                     edgePath.reset();
@@ -327,6 +480,18 @@ void RosenRenderChart::PaintLinearGraph(SkCanvas* canvas, const Rect& paintRect)
                     gradientPath.lineTo(currentPosition.GetX(), currentPosition.GetY());
                     gradientOfLine_ = true;
                 }
+#else
+                gradientPath.Reset();
+                if (i < line.GetHeadPointIndex() + line.GetErasePointNumber()) {
+                    edgePath.Reset();
+                    edgePath.MoveTo(currentPosition.GetX(), currentPosition.GetY());
+                } else {
+                    edgePath.LineTo(currentPosition.GetX(), currentPosition.GetY());
+                    gradientPath.MoveTo(currentPosition.GetX(), paintRect.Bottom());
+                    gradientPath.LineTo(currentPosition.GetX(), currentPosition.GetY());
+                    gradientOfLine_ = true;
+                }
+#endif
                 previousSegment = pointInfo[index].GetSegmentInfo();
                 previousPoint = currentPoint;
                 previousPosition = currentPosition;
@@ -334,6 +499,7 @@ void RosenRenderChart::PaintLinearGraph(SkCanvas* canvas, const Rect& paintRect)
             }
             if (previousSegment != pointInfo[index].GetSegmentInfo() ||
                 (line.GetHeadPointIndex() > 0 && line.GetHeadPointIndex() == i)) {
+#ifndef USE_ROSEN_DRAWING
                 gradientPath.lineTo(currentPosition.GetX(), paintRect.Bottom());
                 gradientPath.close();
                 if (line.GetGradient()) {
@@ -349,14 +515,36 @@ void RosenRenderChart::PaintLinearGraph(SkCanvas* canvas, const Rect& paintRect)
                 edgePath.moveTo(previousPosition.GetX(), previousPosition.GetY());
                 gradientPath.moveTo(previousPosition.GetX(), paintRect.Bottom());
                 gradientPath.lineTo(previousPosition.GetX(), previousPosition.GetY());
+#else
+                gradientPath.LineTo(currentPosition.GetX(), paintRect.Bottom());
+                gradientPath.Close();
+                if (line.GetGradient()) {
+                    PaintLineGradient(canvas, gradientPath, paintRect, line.GetFillColor(), line.GetTopPoint());
+                }
+                PaintLineEdge(canvas, edgePath, previousSegment, line.GetLineWidth(), false);
+                // print gradient
+                gradientPath.Reset();
+                edgePath.Reset();
+                previousSegment = pointInfo[index].GetSegmentInfo();
+                previousPoint = currentPoint;
+                previousPosition = currentPosition;
+                edgePath.MoveTo(previousPosition.GetX(), previousPosition.GetY());
+                gradientPath.MoveTo(previousPosition.GetX(), paintRect.Bottom());
+                gradientPath.LineTo(previousPosition.GetX(), previousPosition.GetY());
+#endif
             } else {
                 previousSegment = pointInfo[index].GetSegmentInfo();
                 previousPoint = currentPoint;
                 previousPosition = currentPosition;
             }
         }
+#ifndef USE_ROSEN_DRAWING
         gradientPath.lineTo(previousPosition.GetX(), paintRect.Bottom());
         gradientPath.close();
+#else
+        gradientPath.LineTo(previousPosition.GetX(), paintRect.Bottom());
+        gradientPath.Close();
+#endif
         if (line.GetGradient()) {
             PaintLineGradient(canvas, gradientPath, paintRect, line.GetFillColor(), line.GetTopPoint());
         }
