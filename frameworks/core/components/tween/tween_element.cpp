@@ -369,7 +369,10 @@ void TweenElement::Update()
         }
 
         LOGD("add request to pipeline context.");
-        if (operation_ != AnimationOperation::NONE || operationCustom_ != AnimationOperation::NONE) {
+        // If transform component exists, it also plays animation. RenderTransform can get correct value from component
+        // when Update(component).
+        if ((operation_ != AnimationOperation::NONE || operationCustom_ != AnimationOperation::NONE) &&
+            !transform_.Upgrade()) {
             pipelineContext->AddPostAnimationFlushListener(AceType::Claim(this));
         }
         pipelineContext->AddPostFlushListener(AceType::Claim(this));
