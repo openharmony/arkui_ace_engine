@@ -20,17 +20,37 @@
 #include <memory>
 #include <string>
 
+#ifndef ACE_EXPORT
+#define ACE_EXPORT __attribute__((visibility("default")))
+#endif
+
 namespace OHOS::Ace {
-class SerializeableObject {
+class ACE_EXPORT SerializeableObject {
 public:
+    SerializeableObject() = default;
     virtual ~SerializeableObject() = default;
 
-    virtual std::string ToString()
-    {
-        return "";
-    }
+    virtual bool Contains(const std::string& key) const = 0;
+
+    virtual bool GetBool(const std::string& key, bool defaultValue = false) const = 0;
+    virtual int32_t GetInt(const std::string& key, int32_t defaultVal = 0) const = 0;
+    virtual uint32_t GetUInt(const std::string& key, uint32_t defaultVal = 0) const = 0;
+    virtual int64_t GetInt64(const std::string& key, int64_t defaultVal = 0) const = 0;
+    virtual double GetDouble(const std::string& key, double defaultVal = 0.0) const = 0;
+    virtual std::string GetString(const std::string& key, const std::string& defaultVal = "") const = 0;
+
+    virtual bool Put(const char* key, const char* value) = 0;
+    virtual bool Put(const char* key, size_t value) = 0;
+    virtual bool Put(const char* key, int32_t value) = 0;
+    virtual bool Put(const char* key, int64_t value) = 0;
+    virtual bool Put(const char* key, double value) = 0;
+    virtual bool Put(const char* key, bool value) = 0;
+
+    virtual std::string ToString() = 0;
 
     virtual void FromString(const std::string& str) {}
+
+    static std::unique_ptr<SerializeableObject> CreateNodeObject();
 };
 
 using SerializeableObjectArray = std::list<std::unique_ptr<SerializeableObject>>;
