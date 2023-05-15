@@ -28,10 +28,12 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
-#include "core/components_ng/pattern/button/button_pattern.h"
 #define private public
 #define protected public
+#include "core/components_ng/pattern/button/button_layout_property.h"
+#include "core/components_ng/pattern/button/button_model_ng.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components/button/button_theme.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_property.h"
 #include "core/components_ng/pattern/list/list_item_group_model_ng.h"
@@ -46,6 +48,7 @@
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/list/list_position_controller.h"
+#include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/list/list_properties.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
@@ -123,6 +126,11 @@ protected:
 void ListTestNg::SetUpTestSuite()
 {
     MockPipelineBase::SetUp();
+    // set buttonTheme to themeManager before using themeManager to get buttonTheme
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
 }
 
 void ListTestNg::TearDownTestSuite()
@@ -199,6 +207,8 @@ void ListTestNg::CreateListItem(int32_t itemCount, Axis Direction, bool focusabl
             SetHeight(FILL_LENGTH);
         }
         if (focusable) {
+            ButtonModelNG buttonModelNG;
+            buttonModelNG.CreateWithLabel("label");
             ViewStackProcessor::GetInstance()->Pop();
         }
         ViewStackProcessor::GetInstance()->Pop();
@@ -2072,7 +2082,8 @@ HWTEST_F(ListTestNg, ListItemGroupHeaderFooterTest003, TestSize.Level1)
      * @tc.steps: step4. Has no head and foot.
      * @tc.expected: Children count is ListItem count.
      */
-    EXPECT_EQ(frameNode_->GetChildren().size(), 1);
+    size_t expectCount = 1;
+    EXPECT_EQ(frameNode_->GetChildren().size(), expectCount);
 }
 
 /**
@@ -3221,6 +3232,7 @@ HWTEST_F(ListTestNg, PaintMethod001, TestSize.Level1)
 {
     ListModelNG listModelNG;
     listModelNG.Create();
+    listModelNG.SetChainAnimation(true);
     RefPtr<ScrollControllerBase> scrollController = listModelNG.CreateScrollController();
     listModelNG.SetScroller(scrollController, nullptr);
     GetInstance();
@@ -3471,6 +3483,15 @@ HWTEST_F(ListTestNg, Pattern005, TestSize.Level1)
     GetInstance();
     RunMeasureAndLayout();
 
+    ChainAnimationOptions options = {
+        .minSpace = Dimension(minSpace),
+        .maxSpace = Dimension(maxSpace),
+        .conductivity = conductivity,
+        .intensity = intensity,
+        .edgeEffect = 0,
+    };
+    pattern_->SetChainAnimationOptions(options);
+
     /**
      * @tc.steps: step1. When minSpace > maxSpace.
      * @tc.expected: minSpace and maxSpace would be space.
@@ -3515,6 +3536,15 @@ HWTEST_F(ListTestNg, Pattern006, TestSize.Level1)
     GetInstance();
     RunMeasureAndLayout();
 
+    ChainAnimationOptions options = {
+        .minSpace = Dimension(minSpace),
+        .maxSpace = Dimension(maxSpace),
+        .conductivity = conductivity,
+        .intensity = intensity,
+        .edgeEffect = 0,
+    };
+    pattern_->SetChainAnimationOptions(options);
+
     /**
      * @tc.steps: step1. When minSpace < maxSpace.
      * @tc.expected: minSpace and maxSpace would be itself.
@@ -3558,6 +3588,15 @@ HWTEST_F(ListTestNg, Pattern007, TestSize.Level1)
     CreateListItem();
     GetInstance();
     RunMeasureAndLayout();
+
+    ChainAnimationOptions options = {
+        .minSpace = Dimension(minSpace),
+        .maxSpace = Dimension(maxSpace),
+        .conductivity = conductivity,
+        .intensity = intensity,
+        .edgeEffect = 0,
+    };
+    pattern_->SetChainAnimationOptions(options);
 
     /**
      * @tc.steps: step1. When conductivity == 0.
@@ -3615,7 +3654,7 @@ HWTEST_F(ListTestNg, Pattern019, TestSize.Level1)
 
 /**
  * @tc.name: Pattern010
- * @tc.desc: Test ScrollToIndex about ScrollIndexAlignment
+ * @tc.desc: Test ScrollToIndex
  * @tc.type: FUNC
  */
 HWTEST_F(ListTestNg, Pattern010, TestSize.Level1)
@@ -3627,11 +3666,21 @@ HWTEST_F(ListTestNg, Pattern010, TestSize.Level1)
     RunMeasureAndLayout();
 
     /**
-     * @tc.steps: step1. Test ScrollToIndex about ScrollIndexAlignment.
-     * @tc.expected: scrollIndexAlignment_ would be set.
+     * @tc.steps: step1. Test ScrollToIndex.
      */
     pattern_->ScrollToIndex(1, 0, ScrollIndexAlignment::ALIGN_BOTTOM);
     EXPECT_EQ(pattern_->scrollIndexAlignment_, ScrollIndexAlignment::ALIGN_BOTTOM);
+    EXPECT_EQ(pattern_->currentDelta_, 0);
+    EXPECT_EQ(pattern_->jumpIndex_, 1);
+
+    pattern_->ScrollToIndex(-1, 0, ScrollIndexAlignment::ALIGN_BOTTOM);
+    EXPECT_EQ(pattern_->jumpIndex_, -1);
+
+    pattern_->ScrollToIndex(-2, 0, ScrollIndexAlignment::ALIGN_BOTTOM);
+    EXPECT_EQ(pattern_->jumpIndex_, -1);
+
+    pattern_->ScrollToIndex(-2, ScrollIndexAlignment::ALIGN_BOTTOM);
+    EXPECT_EQ(pattern_->jumpIndex_, -1);
 }
 
 /**
@@ -3643,6 +3692,7 @@ HWTEST_F(ListTestNg, Pattern011, TestSize.Level1)
 {
     auto startFunc = GetDefaultSwiperBuilder(80.f, false);
     ListModelNG listModelNG;
+    listModelNG.SetChainAnimation(true);
     listModelNG.Create();
     RefPtr<ScrollControllerBase> scrollController = listModelNG.CreateScrollController();
     RefPtr<ScrollProxy> proxy = AceType::MakeRefPtr<NG::ScrollBarProxy>();
@@ -3660,24 +3710,36 @@ HWTEST_F(ListTestNg, Pattern011, TestSize.Level1)
      * @tc.steps: step1. When has animator_ and not stop, call OnScrollCallback.
      * @tc.expected: Would stop.
      */
-    pattern_->animator_->Pause();
     pattern_->AnimateTo(0, 0, nullptr);
+    pattern_->animator_->Resume();
+    EXPECT_TRUE(pattern_->animator_->IsRunning());
     pattern_->OnScrollCallback(100.f, SCROLL_FROM_START);
     EXPECT_TRUE(pattern_->scrollAbort_);
     const Offset expectOffset1 = Offset(0, 0);
     IsEqualCurrentOffset(expectOffset1);
+    EXPECT_TRUE(pattern_->animator_->IsStopped());
 
     /**
      * @tc.steps: step2. When has animator_ and stop, call OnScrollCallback.
-     * @tc.expected: Would stop.
+     * @tc.expected:
      */
+    ASSERT_NE(pattern_->GetScrollBar(), nullptr);
     pattern_->GetScrollBar()->SetDriving(true);
     pattern_->OnScrollCallback(100.f, SCROLL_FROM_UPDATE);
     const Offset expectOffset2 = Offset(0, 100.f);
     IsEqualCurrentOffset(expectOffset2);
 
     /**
-     * @tc.steps: step3. When has animator_ and stop, call StopAnimate.
+     * @tc.steps: step3. Offset is 0, ProcessDragUpdate do nothing.
+     * @tc.expected: CurrentOffset unchange.
+     */
+    pattern_->GetScrollBar()->SetDriving(false);
+    pattern_->OnScrollCallback(0, SCROLL_FROM_UPDATE);
+    const Offset expectOffset3 = Offset(0, 100.f);
+    IsEqualCurrentOffset(expectOffset3);
+
+    /**
+     * @tc.steps: step4. When has animator_ and stop, call StopAnimate.
      * @tc.expected: Nothing.
      */
     pattern_->StopAnimate();
@@ -3748,5 +3810,52 @@ HWTEST_F(ListTestNg, Pattern014, TestSize.Level1)
     const Point point = Point(0, 1000.f);
     int32_t itemIndex = pattern_->GetItemIndexByPosition(point.GetX(), point.GetY());
     EXPECT_EQ(itemIndex, 0);
+}
+
+/**
+ * @tc.name: Pattern015
+ * @tc.desc: Test UpdateCurrentOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, Pattern015, TestSize.Level1)
+{
+    constexpr int32_t itemCount = 5;
+
+    ListModelNG listModelNG;
+    listModelNG.Create();
+    CreateListItem(itemCount);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step1. UpdateCurrentOffset -100
+     * @tc.expected: The list is unscrollable, offset is 0
+     */
+    constexpr float offset = -100.f;
+    pattern_->UpdateCurrentOffset(offset, SCROLL_FROM_UPDATE);
+    const Offset expectOffset = Offset(0, 0);
+    EXPECT_TRUE(IsEqualCurrentOffset(expectOffset));
+}
+/**
+ * @tc.name: Pattern016
+ * @tc.desc: Test UpdateCurrentOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, Pattern016, TestSize.Level1)
+{
+    ListModelNG listModelNG;
+    listModelNG.Create();
+    CreateListItem(DEFAULT_LISTITEM_TOTAL_COUNT);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step1. UpdateCurrentOffset -100 with SCROLL_FROM_START
+     * @tc.expected: The offset was not effected by friction
+     */
+    constexpr float offset = -100.f;
+    pattern_->UpdateCurrentOffset(offset, SCROLL_FROM_START);
+    constexpr float expectDelta = 100.f;
+    EXPECT_EQ(pattern_->currentDelta_, expectDelta);
 }
 } // namespace OHOS::Ace::NG
