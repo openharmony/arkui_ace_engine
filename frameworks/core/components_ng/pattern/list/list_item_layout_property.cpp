@@ -51,5 +51,9 @@ void ListItemLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         auto swipeAction = JsonUtil::Create(true);
         json->Put("swipeAction", swipeAction);
     }
+    json->Put("startDeleteAreaDistance",
+        propStartDeleteAreaDistance_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
+    json->Put("endDeleteAreaDistance",
+        propEndDeleteAreaDistance_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
 }
 }
