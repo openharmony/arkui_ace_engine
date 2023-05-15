@@ -28,11 +28,6 @@ class ISessionStageStateListener;
 namespace OHOS::Ace::NG {
 class ACE_EXPORT UIWindow {
 public:
-    static std::shared_ptr<UIWindow> CreateRootScene();
-
-    static std::shared_ptr<UIWindow> CreateWindowScene(const std::shared_ptr<AbilityRuntime::Context>& context,
-        const sptr<Rosen::ISession>& iSession);
-
     static std::shared_ptr<UIWindow> CreateWindowExtension(const std::shared_ptr<AbilityRuntime::Context>& context,
         const sptr<Rosen::ISession>& iSession);
 
