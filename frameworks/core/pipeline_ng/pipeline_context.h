@@ -191,6 +191,8 @@ public:
 
     SafeAreaEdgeInserts GetCurrentViewSafeArea() const override;
 
+    void OnAvoidAreaChanged() override;
+
     const RefPtr<FullScreenManager>& GetFullScreenManager();
 
     const RefPtr<StageManager>& GetStageManager();

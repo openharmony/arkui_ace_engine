@@ -849,6 +849,8 @@ public:
         return nullptr;
     }
 
+    virtual void OnAvoidAreaChanged() {}
+
 protected:
     void TryCallNextFrameLayoutCallback()
     {

@@ -279,6 +279,8 @@ std::string PipelineContext::GetRestoreInfo(int32_t restoreId)
 }
 
 void PipelineContext::AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode) {}
+
+void PipelineContext::OnAvoidAreaChanged() {}
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace {
