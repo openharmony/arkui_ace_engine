@@ -482,6 +482,10 @@ void JSImage::JsSetDraggable(bool draggable)
 
 void JSImage::JsOnDragStart(const JSCallbackInfo& info)
 {
+    if (info.Length() != 1 || !info[0]->IsFunction()) {
+        LOGW("argument is invalid");
+        return;
+    }
     RefPtr<JsDragFunction> jsOnDragStartFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onDragStartId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc)](
                              const RefPtr<DragEvent>& info, const std::string& extraParams) -> NG::DragDropBaseInfo {
@@ -512,7 +516,11 @@ void JSImage::JsOnDragStart(const JSCallbackInfo& info)
 
 void JSImage::JsOnDragEnter(const JSCallbackInfo& info)
 {
-    RefPtr<JsDragFunction> jsOnDragEnterFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    if (info.Length() != 1 || !info[0]->IsFunction()) {
+        LOGW("argument is invalid");
+        return;
+    }
+    auto jsOnDragEnterFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onDragEnterId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc)](
                              const RefPtr<DragEvent>& info, const std::string& extraParams) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -524,7 +532,11 @@ void JSImage::JsOnDragEnter(const JSCallbackInfo& info)
 
 void JSImage::JsOnDragMove(const JSCallbackInfo& info)
 {
-    RefPtr<JsDragFunction> jsOnDragMoveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    if (info.Length() != 1 || !info[0]->IsFunction()) {
+        LOGW("argument is invalid");
+        return;
+    }
+    auto jsOnDragMoveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onDragMoveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragMoveFunc)](
                             const RefPtr<DragEvent>& info, const std::string& extraParams) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -536,7 +548,11 @@ void JSImage::JsOnDragMove(const JSCallbackInfo& info)
 
 void JSImage::JsOnDragLeave(const JSCallbackInfo& info)
 {
-    RefPtr<JsDragFunction> jsOnDragLeaveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    if (info.Length() != 1 || !info[0]->IsFunction()) {
+        LOGW("argument is invalid");
+        return;
+    }
+    auto jsOnDragLeaveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onDragLeaveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragLeaveFunc)](
                              const RefPtr<DragEvent>& info, const std::string& extraParams) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -548,7 +564,11 @@ void JSImage::JsOnDragLeave(const JSCallbackInfo& info)
 
 void JSImage::JsOnDrop(const JSCallbackInfo& info)
 {
-    RefPtr<JsDragFunction> jsOnDropFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    if (info.Length() != 1 || !info[0]->IsFunction()) {
+        LOGW("argument is invalid");
+        return;
+    }
+    auto jsOnDropFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onDropId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDropFunc)](
                         const RefPtr<DragEvent>& info, const std::string& extraParams) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
