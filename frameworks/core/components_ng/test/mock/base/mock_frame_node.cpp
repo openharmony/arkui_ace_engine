@@ -36,6 +36,7 @@ void FrameNode::FocusToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 void FrameNode::MouseToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 void FrameNode::TouchToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
+void FrameNode::FromJson(const std::unique_ptr<JsonValue>& json) {}
 void FrameNode::OnAttachToMainTree(bool) {}
 void FrameNode::OnDetachFromMainTree(bool) {}
 bool FrameNode::OnRemoveFromParent()

@@ -67,6 +67,8 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
+    void FromJson(const std::unique_ptr<JsonValue>& json) override;
+
     ACE_DEFINE_PROPERTY_GROUP(SwiperAnimationStyle, SwiperAnimationStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SwiperAnimationStyle, AutoPlay, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SwiperAnimationStyle, AutoPlayInterval, int32_t, PROPERTY_UPDATE_RENDER);

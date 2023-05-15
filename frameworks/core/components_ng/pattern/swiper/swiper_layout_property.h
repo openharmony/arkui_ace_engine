@@ -19,6 +19,7 @@
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
 #include "base/utils/macros.h"
+#include "base/utils/string_utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/scroll_bar.h"
 #include "core/components/declaration/swiper/swiper_declaration.h"
@@ -112,6 +113,24 @@ public:
         json->Put("arrowSize", propArrowSize_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
         json->Put("boardColor", propBoardColor_.value_or(Color::TRANSPARENT).ColorToString().c_str());
         json->Put("arrowColor", propArrowColor_.value_or(Color::TRANSPARENT).ColorToString().c_str());
+    }
+
+    void FromJson(const std::unique_ptr<JsonValue>& json) override
+    {
+        static const std::unordered_map<std::string, SwiperDisplayMode> uMap {
+            { "SwiperDisplayMode.AutoLinear", SwiperDisplayMode::AUTO_LINEAR },
+            { "SwiperDisplayMode.Stretch", SwiperDisplayMode::STRETCH },
+        };
+
+        UpdateIndex(StringUtils::StringToInt(json->GetString("index")));
+        UpdateDirection(json->GetString("vertical") == "true" ? Axis::VERTICAL : Axis::HORIZONTAL);
+        UpdateShowIndicator(json->GetString("indicator") == "true" ? true : false);
+        UpdateItemSpace(Dimension::FromString(json->GetString("itemSpace")));
+        UpdateCachedCount(json->GetInt("cachedCount"));
+        auto displayMode = json->GetString("displayMode");
+        UpdateDisplayMode(uMap.count(displayMode) ? uMap.at(displayMode) : SwiperDisplayMode::STRETCH);
+        UpdateDisplayCount(json->GetInt("displayCount"));
+        LayoutProperty::FromJson(json);
     }
 
     void UpdateIndexWithoutMeasure(int32_t index)

@@ -85,4 +85,8 @@ void RenderContext::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("pixelStretchEffect", pixelJsonValue);
     json->Put("foregroundColor", propForegroundColor_.value_or(Color::FOREGROUND).ColorToString().c_str());
 }
+
+void RenderContext::FromJson(const std::unique_ptr<JsonValue>& json)
+{
+}
 } // namespace OHOS::Ace::NG
