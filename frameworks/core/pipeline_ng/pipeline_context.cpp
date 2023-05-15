@@ -48,7 +48,6 @@
 #include "core/common/thread_checker.h"
 #include "core/common/window.h"
 #include "core/components/common/layout/screen_system_manager.h"
-#include "core/components_ng/base/distribute_ui.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/app_bar/app_bar_view.h"
@@ -129,7 +128,11 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
     taskScheduler_.AddDirtyLayoutNode(dirty);
     ForceLayoutForImplicitAnimation();
 #ifdef UICAST_COMPONENT_SUPPORTED
-    DistributeUI::AddDirtyLayoutNode(dirty->GetId());
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto distributedUI = container->GetDistributedUI();
+    CHECK_NULL_VOID(distributedUI);
+    distributedUI->AddDirtyLayoutNode(dirty->GetId());
 #endif
     hasIdleTasks_ = true;
     RequestFrame();
@@ -142,7 +145,11 @@ void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
     taskScheduler_.AddDirtyRenderNode(dirty);
     ForceRenderForImplicitAnimation();
 #ifdef UICAST_COMPONENT_SUPPORTED
-    DistributeUI::AddDirtyRenderNode(dirty->GetId());
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto distributedUI = container->GetDistributedUI();
+    CHECK_NULL_VOID(distributedUI);
+    distributedUI->AddDirtyRenderNode(dirty->GetId());
 #endif
     hasIdleTasks_ = true;
     RequestFrame();
@@ -204,8 +211,12 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     window_->RecordFrameTime(nanoTimestamp, abilityName);
 
 #ifdef UICAST_COMPONENT_SUPPORTED
-    NG::DistributeUI::ApplyOneUpdate();
-    NG::DistributeUI::OnTreeUpdate();
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto distributedUI = container->GetDistributedUI();
+    CHECK_NULL_VOID(distributedUI);
+    distributedUI->ApplyOneUpdate();
+    distributedUI->OnTreeUpdate();
 #endif
 
     FlushAnimation(GetTimeFromExternalTimer());
@@ -849,8 +860,12 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
     CHECK_RUN_ON(UI);
 
 #ifdef UICAST_COMPONENT_SUPPORTED
-    if (DistributeUI::IsSinkMode()) {
-        DistributeUI::BypassEvent(point, isSubPipe);
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto distributedUI = container->GetDistributedUI();
+    CHECK_NULL_VOID(distributedUI);
+    if (distributedUI->IsSinkMode()) {
+        distributedUI->BypassEvent(point, isSubPipe);
         return;
     }
 #endif

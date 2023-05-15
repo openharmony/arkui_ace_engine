@@ -23,7 +23,7 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
-#include "core/components_ng/base/distribute_ui.h"
+#include "core/common/container.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -41,15 +41,15 @@ UINode::UINode(const std::string& tag, int32_t nodeId, bool isRoot)
         col_ = pos.second;
     }
 #ifdef UICAST_COMPONENT_SUPPORTED
-    DistributeUI::AddNewNode(nodeId_);
+    Container::Current()->GetDistributedUI()->AddNewNode(nodeId_);
 #endif
 }
 
 UINode::~UINode()
 {
 #ifdef UICAST_COMPONENT_SUPPORTED
-    if (hostPageId_ == DistributeUI::GetCurrentPageId()) {
-        DistributeUI::AddDeletedNode(nodeId_);
+    if (hostPageId_ == Container::Current()->GetDistributedUI()->GetCurrentPageId()) {
+        Container::Current()->GetDistributedUI()->AddDeletedNode(nodeId_);
     }
 #endif
 

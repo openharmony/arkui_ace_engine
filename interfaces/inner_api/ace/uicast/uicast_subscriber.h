@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef UICAST_SUBSCRIBER_H
-#define UICAST_SUBSCRIBER_H
+#ifndef FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_UICAST_UICAST_SUBSCRIBER_H
+#define FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_UICAST_UICAST_SUBSCRIBER_H
 
 #include <string>
 
@@ -31,10 +31,6 @@ using OHOS::EventFwk::CommonEventSubscribeInfo;
 using OHOS::EventFwk::CommonEventSubscriber;
 using OHOS::EventFwk::MatchingSkills;
 
-const std::string COMMON_EVENT_UICAST_START = "uicast.start";
-const std::string COMMON_EVENT_UICAST_STOP = "uicast.stop";
-const std::string COMMON_EVENT_UICAST_CAST_SESSION_KEY = "uicast.castSessionIdKey";
-
 constexpr OHOS::HiviewDFX::HiLogLabel LOG_LABEL = { LOG_CORE, 0xD003900, "ACE_UI_CONTENT" };
 
 #define HIVIEW_PRINTF(func, fmt, ...) func(LOG_LABEL, "<%{public}d>" fmt, __LINE__, ##__VA_ARGS__)
@@ -49,7 +45,6 @@ constexpr OHOS::HiviewDFX::HiLogLabel LOG_LABEL = { LOG_CORE, 0xD003900, "ACE_UI
 #define LOGW(fmt, ...) WLOGW("%{public}s: " fmt, __func__, ##__VA_ARGS__)
 #define LOGE(fmt, ...) WLOGE("%{public}s: " fmt, __func__, ##__VA_ARGS__)
 
-// 订阅者
 class UICastEventSubscriber : public CommonEventSubscriber {
 public:
     explicit UICastEventSubscriber(const CommonEventSubscribeInfo& info, UIContent* context)
@@ -62,20 +57,7 @@ public:
     void UICastProxyStop();
     void UICastProxyUpdateContext(UIContent* context);
 
-    void OnReceiveEvent(const CommonEventData& data) override
-    {
-        LOGI("In");
-        auto want = data.GetWant();
-        std::string action = want.GetAction();
-        if (action == COMMON_EVENT_UICAST_START) {
-            int castSessionId = want.GetIntParam(COMMON_EVENT_UICAST_CAST_SESSION_KEY, -1);
-            LOGI("castSessionId: %{public}d", castSessionId);
-            UICastProxyStart(castSessionId, context_);
-        } else if (action == COMMON_EVENT_UICAST_STOP) {
-            LOGI("COMMON_EVENT_UICAST_STOP");
-            UICastProxyStop();
-        }
-    }
+    void OnReceiveEvent(const CommonEventData& data) override;
 
 private:
     UIContent* context_;
@@ -92,9 +74,9 @@ public:
     void UnSubscribeStartEvent(void);
 
 private:
-    std::shared_ptr<CommonEventSubscriber> eventReceiver_ { nullptr };
-    std::shared_ptr<UICastEventSubscriber> uicastEventReceiver_ { nullptr };
+    std::shared_ptr<CommonEventSubscriber> eventReceiver_;
+    std::shared_ptr<UICastEventSubscriber> uicastEventReceiver_;
 };
 } // namespace OHOS::Ace
 
-#endif
+#endif // FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_UICAST_UICAST_SUBSCRIBER_H

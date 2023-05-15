@@ -20,13 +20,22 @@
 #include <unistd.h>
 
 namespace OHOS::Ace {
+const std::string COMMON_EVENT_UICAST_START = "uicast.start";
+const std::string COMMON_EVENT_UICAST_STOP = "uicast.stop";
+const std::string COMMON_EVENT_UICAST_CAST_SESSION_KEY = "uicast.castSessionIdKey";
+
 constexpr char UICAST_PROXY_START_FUNC[] = "OHOS_ACE_UICastProxyStart";
 constexpr char UICAST_PROXY_UPDATE_CONTEXT_FUNC[] = "OHOS_ACE_UICastProxyUpdateContext";
 
 using UICastProxyStartFunc = void (*)(int, UIContent*);
 using UICastProxyUpdateContextFunc = void (*)(UIContent*);
 
-// 创建订阅
+#ifdef __aarch64__
+const char* DISTRIBUTED_UI_PROXY_SO_PATH = "/system/lib64/libace_uicast_proxy.z.so";
+#else
+const char* DISTRIBUTED_UI_PROXY_SO_PATH = "/system/lib/libace_uicast_proxy.z.so";
+#endif
+
 void UICastEventSubscribeProxy::SubscribeStartEvent(UIContent* context)
 {
     if (context == nullptr) {
@@ -35,7 +44,7 @@ void UICastEventSubscribeProxy::SubscribeStartEvent(UIContent* context)
     }
 
     if (uicastEventReceiver_ == nullptr) {
-        if (access("/system/lib64/libace_uicast_proxy.z.so", 0) == -1) {
+        if (access(DISTRIBUTED_UI_PROXY_SO_PATH, 0) == -1) {
             LOGI("SubscribeStartEvent libace_uicast_proxy so no exist!");
             return;
         }
@@ -62,7 +71,6 @@ void UICastEventSubscribeProxy::SubscribeStartEvent(UIContent* context)
     }
 }
 
-// 删除订阅
 void UICastEventSubscribeProxy::UnSubscribeStartEvent(void)
 {
     LOGE("UnSubscribeStartEvent");
@@ -120,5 +128,19 @@ void UICastEventSubscriber::UICastProxyUpdateContext(UIContent* context)
 
     entry(context);
     return;
+}
+
+void UICastEventSubscriber::OnReceiveEvent(const CommonEventData& data)
+{
+    auto want = data.GetWant();
+    std::string action = want.GetAction();
+    if (action == COMMON_EVENT_UICAST_START) {
+        int castSessionId = want.GetIntParam(COMMON_EVENT_UICAST_CAST_SESSION_KEY, -1);
+        LOGI("castSessionId: %{public}d", castSessionId);
+        UICastProxyStart(castSessionId, context_);
+    } else if (action == COMMON_EVENT_UICAST_STOP) {
+        LOGI("COMMON_EVENT_UICAST_STOP");
+        UICastProxyStop();
+    }
 }
 } // namespace OHOS::Ace
