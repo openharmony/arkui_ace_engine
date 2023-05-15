@@ -1394,15 +1394,19 @@ bool SwiperPattern::IsOutOfHotRegion(const PointF& dragPoint) const
     return !hotRegion.IsInRegion(dragPoint + OffsetF(hotRegion.GetX(), hotRegion.GetY()));
 }
 
-bool SwiperPattern::IsOutOfIndicatorZone(const PointF& dragPoint) const
+bool SwiperPattern::IsOutOfIndicatorZone(const PointF& dragPoint)
 {
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, true);
-    auto lastChild = host->GetLastChild();
-    CHECK_NULL_RETURN(lastChild, true);
-    auto indicatorNode = AceType::DynamicCast<FrameNode>(lastChild);
+    if (!HasIndicatorNode() || !IsShowIndicator() || (GetIndicatorType() != SwiperIndicatorType::DOT)) {
+        return true;
+    }
+
+    auto swiperNode = GetHost();
+    CHECK_NULL_RETURN(swiperNode, true);
+    auto indicatorNode = swiperNode->GetChildAtIndex(swiperNode->GetChildIndexById(GetIndicatorId()));
     CHECK_NULL_RETURN(indicatorNode, true);
-    auto geometryNode = indicatorNode->GetGeometryNode();
+    auto indicatorFrameNode = AceType::DynamicCast<FrameNode>(indicatorNode);
+    CHECK_NULL_RETURN(indicatorFrameNode, true);
+    auto geometryNode = indicatorFrameNode->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, true);
 
     auto hotRegion = geometryNode->GetFrameRect();
