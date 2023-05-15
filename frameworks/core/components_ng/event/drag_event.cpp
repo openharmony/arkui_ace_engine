@@ -255,7 +255,8 @@ void DragEventActuator::SetFilter(const RefPtr<DragEventActuator>& actuator)
         CHECK_NULL_VOID(rsNode);
         std::shared_ptr<Rosen::RSFilter> backFilter = Rosen::RSFilter::CreateBlurFilter(FILTER_RADIUS, FILTER_RADIUS);
         std::shared_ptr<Rosen::RSFilter> filter = Rosen::RSFilter::CreateBlurFilter(FILTER_RADIUS, FILTER_RADIUS);
-        if (isBindOverlayValue) {
+        if (isBindOverlayValue && SystemProperties::GetDeviceType() == DeviceType::PHONE) {
+            LOGI("User Device use default Filter");
             rsNode->SetBackgroundFilter(backFilter);
             rsNode->SetFilter(filter);
         }
