@@ -20,8 +20,12 @@
 #include <memory>
 #include <string>
 
+#ifndef ACE_EXPORT
+#define ACE_EXPORT __attribute__((visibility("default")))
+#endif
+
 namespace OHOS::Ace {
-class SerializeableObject {
+class ACE_EXPORT SerializeableObject {
 public:
     SerializeableObject() = default;
     virtual ~SerializeableObject() = default;

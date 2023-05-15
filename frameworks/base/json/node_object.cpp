@@ -57,13 +57,13 @@ NodeObject::NodeObject() : uobject_(std::make_shared<UObject>()) {}
 
 bool NodeObject::Contains(const std::string& key) const
 {
-    CHECK_NULL_RETURN(uobject_, false);
+    CHECK_NULL_RETURN_NOLOG(uobject_, false);
     return uobject_->Contains(key);
 }
 
 bool NodeObject::GetBool(const std::string& key, bool defaultValue) const
 {
-    CHECK_NULL_RETURN(uobject_, false);
+    CHECK_NULL_RETURN_NOLOG(uobject_, false);
     if (Contains(key)) {
         return uobject_->GetBool(key);
     }
@@ -72,7 +72,7 @@ bool NodeObject::GetBool(const std::string& key, bool defaultValue) const
 
 int32_t NodeObject::GetInt(const std::string& key, int32_t defaultVal) const
 {
-    CHECK_NULL_RETURN(uobject_, 0);
+    CHECK_NULL_RETURN_NOLOG(uobject_, 0);
     if (Contains(key)) {
         return uobject_->GetInt32(key);
     }
@@ -81,7 +81,7 @@ int32_t NodeObject::GetInt(const std::string& key, int32_t defaultVal) const
 
 uint32_t NodeObject::GetUInt(const std::string& key, uint32_t defaultVal) const
 {
-    CHECK_NULL_RETURN(uobject_, 0);
+    CHECK_NULL_RETURN_NOLOG(uobject_, 0);
     if (Contains(key)) {
         return uobject_->GetInt32(key);
     }
@@ -90,7 +90,7 @@ uint32_t NodeObject::GetUInt(const std::string& key, uint32_t defaultVal) const
 
 int64_t NodeObject::GetInt64(const std::string& key, int64_t defaultVal) const
 {
-    CHECK_NULL_RETURN(uobject_, 0);
+    CHECK_NULL_RETURN_NOLOG(uobject_, 0);
     if (Contains(key)) {
         return uobject_->GetInt64(key);
     }
@@ -99,7 +99,7 @@ int64_t NodeObject::GetInt64(const std::string& key, int64_t defaultVal) const
 
 double NodeObject::GetDouble(const std::string& key, double defaultVal) const
 {
-    CHECK_NULL_RETURN(uobject_, 0);
+    CHECK_NULL_RETURN_NOLOG(uobject_, 0);
     if (Contains(key)) {
         return uobject_->GetDouble(key);
     }
@@ -108,7 +108,7 @@ double NodeObject::GetDouble(const std::string& key, double defaultVal) const
 
 std::string NodeObject::GetString(const std::string& key, const std::string& defaultVal) const
 {
-    CHECK_NULL_RETURN(uobject_, "");
+    CHECK_NULL_RETURN_NOLOG(uobject_, "");
     if (Contains(key)) {
         return uobject_->GetString(key);
     }
@@ -117,7 +117,7 @@ std::string NodeObject::GetString(const std::string& key, const std::string& def
 
 std::unique_ptr<JsonValue> NodeObject::GetValue(const std::string& key) const
 {
-    CHECK_NULL_RETURN(uobject_, nullptr);
+    CHECK_NULL_RETURN_NOLOG(uobject_, nullptr);
     if (Contains(key)) {
         auto object = std::make_unique<NodeObject>();
         object->uobject_ = uobject_->GetObject(key);
@@ -133,7 +133,7 @@ std::unique_ptr<JsonValue> NodeObject::GetObject(const std::string& key) const
 
 bool NodeObject::Put(const char* key, const char* value)
 {
-    CHECK_NULL_RETURN(uobject_, false);
+    CHECK_NULL_RETURN_NOLOG(uobject_, false);
     if (!value || !key) {
         return false;
     }
@@ -144,7 +144,7 @@ bool NodeObject::Put(const char* key, const char* value)
 
 bool NodeObject::Put(const char* key, size_t value)
 {
-    CHECK_NULL_RETURN(uobject_, false);
+    CHECK_NULL_RETURN_NOLOG(uobject_, false);
     if (!key) {
         return false;
     }
@@ -155,7 +155,7 @@ bool NodeObject::Put(const char* key, size_t value)
 
 bool NodeObject::Put(const char* key, int32_t value)
 {
-    CHECK_NULL_RETURN(uobject_, false);
+    CHECK_NULL_RETURN_NOLOG(uobject_, false);
     if (!key) {
         return false;
     }
@@ -166,7 +166,7 @@ bool NodeObject::Put(const char* key, int32_t value)
 
 bool NodeObject::Put(const char* key, int64_t value)
 {
-    CHECK_NULL_RETURN(uobject_, false);
+    CHECK_NULL_RETURN_NOLOG(uobject_, false);
     if (!key) {
         return false;
     }
@@ -177,7 +177,7 @@ bool NodeObject::Put(const char* key, int64_t value)
 
 bool NodeObject::Put(const char* key, double value)
 {
-    CHECK_NULL_RETURN(uobject_, false);
+    CHECK_NULL_RETURN_NOLOG(uobject_, false);
     if (!key) {
         return false;
     }
@@ -188,7 +188,7 @@ bool NodeObject::Put(const char* key, double value)
 
 bool NodeObject::Put(const char* key, bool value)
 {
-    CHECK_NULL_RETURN(uobject_, false);
+    CHECK_NULL_RETURN_NOLOG(uobject_, false);
     if (!key) {
         return false;
     }
@@ -199,7 +199,7 @@ bool NodeObject::Put(const char* key, bool value)
 
 bool NodeObject::Put(const char* key, const std::unique_ptr<JsonValue>& value)
 {
-    CHECK_NULL_RETURN(uobject_, false);
+    CHECK_NULL_RETURN_NOLOG(uobject_, false);
     if (!value || !key) {
         return false;
     }
@@ -210,7 +210,7 @@ bool NodeObject::Put(const char* key, const std::unique_ptr<JsonValue>& value)
 
 bool NodeObject::Put(const char* key, const std::unique_ptr<NodeObject>& value)
 {
-    CHECK_NULL_RETURN(uobject_, false);
+    CHECK_NULL_RETURN_NOLOG(uobject_, false);
     if (!value || !key) {
         return false;
     }
@@ -221,7 +221,7 @@ bool NodeObject::Put(const char* key, const std::unique_ptr<NodeObject>& value)
 
 std::string NodeObject::ToString()
 {
-    CHECK_NULL_RETURN(uobject_, "");
+    CHECK_NULL_RETURN_NOLOG(uobject_, "");
     int32_t objectSize = uobject_->EstimateBufferSize();
     std::string buffer("", objectSize);
     uobject_->Serialize(buffer.data(), objectSize);
@@ -230,24 +230,29 @@ std::string NodeObject::ToString()
 
 void NodeObject::FromString(const std::string& buffer)
 {
-    CHECK_NULL_VOID(uobject_);
+    CHECK_NULL_VOID_NOLOG(uobject_);
     uobject_->Deserialize((char*)buffer.data(), buffer.size());
 }
 
 size_t NodeObject::Hash()
 {
-    CHECK_NULL_RETURN(uobject_, 0);
+    CHECK_NULL_RETURN_NOLOG(uobject_, 0);
     return uobject_->Hash();
 }
 
 int32_t NodeObject::EstimateBufferSize()
 {
-    CHECK_NULL_RETURN(uobject_, 0);
+    CHECK_NULL_RETURN_NOLOG(uobject_, 0);
     return uobject_->EstimateBufferSize();
 }
 
 std::unique_ptr<NodeObject> NodeObject::Create()
 {
     return std::make_unique<NodeObject>();
+}
+
+extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_CreateNodeObject()
+{
+    return new NodeObject();
 }
 } // namespace OHOS::Ace

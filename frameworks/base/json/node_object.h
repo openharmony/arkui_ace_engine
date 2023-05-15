@@ -56,11 +56,6 @@ public:
 private:
     std::shared_ptr<UObject> uobject_;
 };
-
-extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_CreateNodeObject()
-{
-    return new NodeObject();
-}
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_JSON_NODE_OBJECT_H

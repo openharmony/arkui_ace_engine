@@ -89,8 +89,8 @@ private:
     std::string ReadKey();
     void ReadKV();
 
-    char* buffer_;
-    int32_t bufferLen_;
+    char* buffer_ = nullptr;
+    int32_t bufferLen_ = 0;
     int32_t offset_ = 0;
     size_t hashValue_ = 0;
     std::unordered_map<std::string, std::string> stringItems_;
