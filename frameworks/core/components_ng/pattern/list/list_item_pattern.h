@@ -131,6 +131,16 @@ public:
         selectable_ = selectable;
     }
 
+    void SetUseStartDefaultDeleteAnimation(bool useStartDefaultDeleteAnimation)
+    {
+        useStartDefaultDeleteAnimation_ = useStartDefaultDeleteAnimation;
+    }
+
+    void SetUseEndDefaultDeleteAnimation(bool useEndDefaultDeleteAnimation)
+    {
+        useEndDefaultDeleteAnimation_ = useEndDefaultDeleteAnimation;
+    }
+
     int32_t GetIndexInList() const
     {
         return indexInList_;
@@ -162,8 +172,10 @@ protected:
 private:
     void InitSwiperAction(bool axisChanged);
     float GetFriction();
+    void ChangeDeleteAreaStage();
     void StartSpringMotion(float start, float end, float velocity);
     void SetAccessibilityAction();
+    void DoDeleteAnimation(const GestureEvent& info, const OnDeleteEvent& onDelete, bool isRightDelete);
 
     RefPtr<ShallowBuilder> shallowBuilder_;
 
@@ -180,6 +192,14 @@ private:
     float endNodeSize_ = 0.0f;
     Axis axis_ = Axis::NONE;
     ListItemSwipeIndex swiperIndex_ = ListItemSwipeIndex::ITEM_CHILD;
+    float startDeleteAreaDistance_ = 0.0f;
+    float endDeleteAreaDistance_ = 0.0f;
+    bool hasStartDeleteArea_ = false;
+    bool hasEndDeleteArea_ = false;
+    bool inStartDeleteArea_ = false;
+    bool inEndDeleteArea_ = false;
+    bool useStartDefaultDeleteAnimation_ = false;
+    bool useEndDefaultDeleteAnimation_ = false;
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<Animator> springController_;
