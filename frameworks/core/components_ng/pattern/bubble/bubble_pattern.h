@@ -25,7 +25,6 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/pattern/bubble//bubble_event_hub.h"
-#include "core/components_ng/pattern/bubble/bubble_accessibility_property.h"
 #include "core/components_ng/pattern/bubble/bubble_layout_algorithm.h"
 #include "core/components_ng/pattern/bubble/bubble_layout_property.h"
 #include "core/components_ng/pattern/bubble/bubble_paint_method.h"
@@ -86,11 +85,6 @@ public:
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::SCOPE, true };
-    }
-
-    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
-    {
-        return MakeRefPtr<BubbleAccessibilityProperty>();
     }
 
     void StartEnteringAnimation(std::function<void()> finish);

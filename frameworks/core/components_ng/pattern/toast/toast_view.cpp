@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -64,6 +64,9 @@ RefPtr<FrameNode> ToastView::CreateToastNode(const std::string& message, const s
     CHECK_NULL_RETURN(toastProperty, nullptr);
     auto toastContext = toastNode->GetRenderContext();
     CHECK_NULL_RETURN(toastContext, nullptr);
+    auto toastAccessibilityProperty = toastNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_RETURN(toastAccessibilityProperty, nullptr);
+    toastAccessibilityProperty->SetText(message);
 
     auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, textId, AceType::MakeRefPtr<TextPattern>());
     CHECK_NULL_RETURN(textNode, nullptr);

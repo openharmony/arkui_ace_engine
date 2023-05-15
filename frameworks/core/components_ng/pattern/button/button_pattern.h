@@ -21,7 +21,6 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/focus_hub.h"
-#include "core/components_ng/pattern/button/button_accessibility_property.h"
 #include "core/components_ng/pattern/button/button_event_hub.h"
 #include "core/components_ng/pattern/button/button_layout_algorithm.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
@@ -55,11 +54,6 @@ public:
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<ButtonLayoutProperty>();
-    }
-
-    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
-    {
-        return MakeRefPtr<ButtonAccessibilityProperty>();
     }
 
     FocusPattern GetFocusPattern() const override

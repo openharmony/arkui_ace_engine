@@ -134,7 +134,7 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
     popupPaintProp->UpdateAutoCancel(!param->HasAction());
     popupPaintProp->UpdatePlacement(param->GetPlacement());
 
-    auto bubbleAccessibilityProperty = popupNode->GetAccessibilityProperty<BubbleAccessibilityProperty>();
+    auto bubbleAccessibilityProperty = popupNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_RETURN(bubbleAccessibilityProperty, nullptr);
     bubbleAccessibilityProperty->SetText(message);
 
