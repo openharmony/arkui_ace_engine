@@ -141,6 +141,11 @@ public:
         }
     }
 
+    void RemoveNavDestination()
+    {
+        navigationStack_->Remove();
+    }
+
 private:
     RefPtr<RenderContext> GetTitleBarRenderContext();
     void DoAnimation(NavigationMode currentMode);
