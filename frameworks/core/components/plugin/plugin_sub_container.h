@@ -122,6 +122,20 @@ public:
             frontend_->SetDeclarativeOnUpdateWithValueParamsCallback(std::move(callback));
         }
     }
+    
+    void SetPluginBundleName(const std::string& pluginBundleName)
+    {
+        if (frontend_) {
+            frontend_->SetPluginBundleName(pluginBundleName);
+        }
+    }
+
+    void SetPluginModuleName(const std::string& pluginModuleName)
+    {
+        if (frontend_) {
+            frontend_->SetPluginModuleName(pluginModuleName);
+        }
+    }
 
     void SetPluginWindowId(const int32_t pluginWindowId)
     {
