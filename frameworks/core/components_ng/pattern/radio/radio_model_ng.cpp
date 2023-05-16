@@ -16,10 +16,8 @@
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/radio/radio_pattern.h"
-#include "core/components_ng/pattern/stage/page_event_hub.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -39,6 +37,20 @@ void RadioModelNG::Create(const std::optional<std::string>& value, const std::op
     if (group.has_value()) {
         eventHub->SetGroup(group.value());
     }
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto radioTheme = pipeline->GetTheme<RadioTheme>();
+    CHECK_NULL_VOID(radioTheme);
+    auto width = radioTheme->GetWidth();
+    auto height = radioTheme->GetHeight();
+    auto padding = radioTheme->GetDefaultPadding();
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(width), CalcLength(height)));
+    PaddingProperty defaultPadding(
+        { CalcLength(padding), CalcLength(padding), CalcLength(padding), CalcLength(padding) });
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Padding, defaultPadding);
 }
 
 void RadioModelNG::SetChecked(bool isChecked)

@@ -15,10 +15,10 @@
 
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
 
+#include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 
@@ -38,6 +38,20 @@ void CheckBoxModelNG::Create(
     if (groupName.has_value()) {
         eventHub->SetGroupName(groupName.value());
     }
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
+    CHECK_NULL_VOID(checkBoxTheme);
+    auto width = checkBoxTheme->GetWidth();
+    auto height = checkBoxTheme->GetHeight();
+    auto padding = checkBoxTheme->GetDefaultPadding();
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(width), CalcLength(height)));
+    PaddingProperty defaultPadding(
+        { CalcLength(padding), CalcLength(padding), CalcLength(padding), CalcLength(padding) });
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Padding, defaultPadding);
 }
 
 void CheckBoxModelNG::SetSelect(bool isSelected)

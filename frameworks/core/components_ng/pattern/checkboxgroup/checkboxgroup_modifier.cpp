@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_modifier.h"
 
-#include "base/utils/utils.h"
-#include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_property.h"
 #include "core/components_ng/render/drawing.h"
@@ -62,6 +60,7 @@ CheckBoxGroupModifier::CheckBoxGroupModifier(const Parameters& parameters)
     hoverRadius_ = parameters.hoverRadius;
     hotZoneHorizontalPadding_ = parameters.hotZoneHorizontalPadding;
     hotZoneVerticalPadding_ = parameters.hotZoneVerticalPadding;
+    defaultPadding_ = parameters.defaultPadding;
     shadowWidth_ = parameters.shadowWidth;
     hoverDuration_ = parameters.hoverDuration;
     hoverToTouchDuration_ = parameters.hoverToTouchDuration;
@@ -238,10 +237,13 @@ void CheckBoxGroupModifier::DrawTouchAndHoverBoard(RSCanvas& canvas, const SizeF
     RSBrush brush;
     brush.SetColor(ToRSColor(animateTouchHoverColor_->Get()));
     brush.SetAntiAlias(true);
-    float originX = offset.GetX() - hotZoneHorizontalPadding_.ConvertToPx();
-    float originY = offset.GetY() - hotZoneVerticalPadding_.ConvertToPx();
-    float endX = size.Width() + originX + CHECKBOX_GROUP_DOUBLE_RATIO * hotZoneHorizontalPadding_.ConvertToPx();
-    float endY = size.Height() + originY + CHECKBOX_GROUP_DOUBLE_RATIO * hotZoneVerticalPadding_.ConvertToPx();
+    float originX = offset.GetX() - defaultPadding_.ConvertToPx() - hotZoneHorizontalPadding_.ConvertToPx();
+    float originY = offset.GetY() - defaultPadding_.ConvertToPx() - hotZoneVerticalPadding_.ConvertToPx();
+    float endX =
+        size.Width() + originX +
+        CHECKBOX_GROUP_DOUBLE_RATIO * (defaultPadding_.ConvertToPx() + hotZoneHorizontalPadding_.ConvertToPx());
+    float endY = size.Height() + originY +
+                 CHECKBOX_GROUP_DOUBLE_RATIO * (defaultPadding_.ConvertToPx() + hotZoneVerticalPadding_.ConvertToPx());
     auto rrect = RSRoundRect({ originX, originY, endX, endY }, hoverRadius_.ConvertToPx(), hoverRadius_.ConvertToPx());
     canvas.AttachBrush(brush);
     canvas.DrawRoundRect(rrect);
