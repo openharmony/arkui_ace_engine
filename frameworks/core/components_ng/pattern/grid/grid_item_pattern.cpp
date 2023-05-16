@@ -17,6 +17,9 @@
 
 #include "base/utils/utils.h"
 namespace OHOS::Ace::NG {
+namespace {
+const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
+} // namespace
 void GridItemPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -52,7 +55,13 @@ void GridItemPattern::SetAccessibilityAction()
         if (!pattern->Selectable()) {
             return;
         }
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto context = host->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        context->OnMouseSelectUpdate(false, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
         pattern->MarkIsSelected(true);
+        context->OnMouseSelectUpdate(true, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
     });
 
     accessibilityProperty->SetActionClearSelection([weakPtr = WeakClaim(this)]() {
@@ -61,7 +70,12 @@ void GridItemPattern::SetAccessibilityAction()
         if (!pattern->Selectable()) {
             return;
         }
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto context = host->GetRenderContext();
+        CHECK_NULL_VOID(context);
         pattern->MarkIsSelected(false);
+        context->OnMouseSelectUpdate(false, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
     });
 }
 } // namespace OHOS::Ace::NG
