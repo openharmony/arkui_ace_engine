@@ -178,6 +178,17 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<std::strin
     }
 }
 
+void RosenRenderContext::SetSandBox(const std::optional<OffsetF>& parentPosition)
+{
+    CHECK_NULL_VOID(rsNode_);
+    if (parentPosition == std::nullopt) {
+        rsNode_->SetSandBox(std::nullopt);
+        return;
+    }
+    Rosen::Vector2f value = { parentPosition.value().GetX(), parentPosition.value().GetY() };
+    rsNode_->SetSandBox(value);
+}
+
 void RosenRenderContext::SyncGeometryProperties(GeometryNode* /*geometryNode*/)
 {
     CHECK_NULL_VOID(rsNode_);

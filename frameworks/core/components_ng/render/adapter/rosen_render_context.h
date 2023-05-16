@@ -58,6 +58,8 @@ public:
 
     void SyncGeometryProperties(const RectF& paintRect) override;
 
+    void SetSandBox(const std::optional<OffsetF>& parentPosition) override;
+
     void RebuildFrame(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) override;
 
     void AddFrameChildren(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) override;
@@ -349,7 +351,6 @@ private:
     bool isHoveredScale_ = false;
     bool isHoveredBoard_ = false;
     bool isPositionChanged_ = false;
-    bool isSynced_ = false;
     bool firstTransitionIn_ = false;
     bool isBreakingPoint_ = false;
     bool isBackBlurChanged_ = false;
