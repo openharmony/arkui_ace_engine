@@ -21,13 +21,12 @@
 namespace OHOS::Ace::NG {
 namespace {
 
-const char UNIT_RATIO[] = "fr";
+const std::string UNIT_AUTO = "auto";
 
 } // namespace
 
 std::string GridUtils::ParseArgs(const std::string& args)
 {
-    const std::string UNIT_AUTO = "auto";
     if (args.empty() || args.find(UNIT_AUTO) == std::string::npos) {
         return args;
     }
@@ -38,7 +37,7 @@ std::string GridUtils::ParseArgs(const std::string& args)
     size_t rowArgSize = strs.size();
     for (size_t i = 0; i < rowArgSize; ++i) {
         current = strs[i];
-        //"auto" means 1fr in grid
+        // "auto" means 1fr in grid
         if (strs[i] == std::string(UNIT_AUTO)) {
             current = "1fr";
         }

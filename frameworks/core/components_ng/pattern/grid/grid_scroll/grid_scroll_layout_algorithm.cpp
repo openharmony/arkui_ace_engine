@@ -197,13 +197,8 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
                 LOGE("Layout item wrapper of index: %{public}d is null, please check.", itemIdex);
                 continue;
             }
-            auto frSizeM = itemsCrossSize_.find(iter->first);
-            float frSize;
-            SizeF blockSize;
-            if (frSizeM != itemsCrossSize_.end()) {
-                frSize = frSizeM->second;
-            }
-            blockSize = gridLayoutProperty->IsVertical() ? SizeF(frSize, lineHeight) : SizeF(lineHeight, frSize);
+            auto frSize = itemsCrossSize_.at(iter->first);
+            SizeF blockSize = gridLayoutProperty->IsVertical() ? SizeF(frSize, lineHeight) : SizeF(lineHeight, frSize);
             auto translate = Alignment::GetAlignPosition(
                 blockSize, wrapper->GetGeometryNode()->GetMarginFrameSize(), Alignment::CENTER);
             wrapper->GetGeometryNode()->SetMarginFrameOffset(offset + translate);
@@ -1108,7 +1103,7 @@ float GridScrollLayoutAlgorithm::ComputeItemCrossPosition(LayoutWrapper* layoutW
             position += itemsCrossSize_.at(index);
         }
     }
-    position += crossStart * crossGap_;
+    position += crossStart * crossGap_ + crossPaddingOffset_;
     return position;
 }
 
