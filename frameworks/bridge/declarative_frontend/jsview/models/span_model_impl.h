@@ -36,7 +36,7 @@ public:
     void SetTextDecorationColor(const Color& value) override;
     void SetTextCase(TextCase value) override;
     void SetLetterSpacing(const Dimension& value) override;
-
+    void SetLineHeight(const Dimension& value) override;
     void SetOnClick(std::function<void(const BaseEventInfo*)>&& click) override;
 
 private:

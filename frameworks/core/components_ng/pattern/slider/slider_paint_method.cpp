@@ -51,7 +51,7 @@ void SliderPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     auto stepColor = paintProperty->GetStepColorValue(sliderTheme->GetMarkerColor());
     sliderContentModifier_->SetStepColor(stepColor);
     sliderContentModifier_->SetShowSteps(paintProperty->GetShowStepsValue(false));
-    auto blockSize = paintProperty->GetBlockSizeValue(parameters_.blockSize);
+    auto blockSize = parameters_.blockSize;
     if (paintProperty->GetSliderModeValue(SliderModelNG::SliderMode::OUTSET) != SliderModelNG::SliderMode::OUTSET) {
         blockSize = SizeF(std::min(blockSize.Width(), parameters_.trackThickness),
             std::min(blockSize.Height(), parameters_.trackThickness));
@@ -62,5 +62,27 @@ void SliderPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     sliderContentModifier_->SetBlockType(paintProperty->GetBlockTypeValue(SliderModelNG::BlockStyleType::DEFAULT));
     sliderContentModifier_->SetBlockShape(paintProperty->GetBlockShapeValue(MakeRefPtr<BasicShape>()));
     sliderContentModifier_->SetDirection(paintProperty->GetDirectionValue(Axis::HORIZONTAL));
+}
+
+void SliderPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
+{
+    CHECK_NULL_VOID(sliderTipModifier_);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SliderTheme>();
+    CHECK_NULL_VOID(theme);
+
+    auto paintProperty = DynamicCast<SliderPaintProperty>(paintWrapper->GetPaintProperty());
+    if (paintProperty) {
+        sliderTipModifier_->SetDirection(paintProperty->GetDirectionValue(Axis::HORIZONTAL));
+        sliderTipModifier_->SetTipColor(paintProperty->GetTipColorValue(theme->GetTipColor()));
+        sliderTipModifier_->SetTextFont(paintProperty->GetFontSizeValue(theme->GetTipFontSize()));
+        sliderTipModifier_->SetTextColor(paintProperty->GetTextColorValue(theme->GetTipTextColor()));
+        sliderTipModifier_->SetContent(paintProperty->GetCustomContent().value_or(paintProperty->GetContentValue("")));
+    }
+    sliderTipModifier_->SetTipFlag(tipParameters_.isDrawTip_);
+    sliderTipModifier_->SetContentOffset(paintWrapper->GetContentOffset());
+    sliderTipModifier_->SetContentSize(paintWrapper->GetContentSize());
+    sliderTipModifier_->SetBubbleVertex(tipParameters_.bubbleVertex_);
 }
 } // namespace OHOS::Ace::NG

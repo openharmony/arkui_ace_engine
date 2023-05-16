@@ -19,9 +19,6 @@
 
 #include "base/log/dump_log.h"
 #include "base/utils/utils.h"
-#if !defined(ACE_UNITTEST)
-#include "core/common/ace_engine_ext.h"
-#endif
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
@@ -36,13 +33,15 @@
 #include "system_defined_pixelmap.h"
 #include "unified_data.h"
 #include "unified_record.h"
+
+#include "core/common/ace_engine_ext.h"
 #endif
 
 namespace OHOS::Ace::NG {
 
 DataReadyNotifyTask ImagePattern::CreateDataReadyCallback()
 {
-    auto task = [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
+    return [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto imageLayoutProperty = pattern->GetLayoutProperty<ImageLayoutProperty>();
@@ -56,12 +55,11 @@ DataReadyNotifyTask ImagePattern::CreateDataReadyCallback()
         LOGD("Image Data Ready %{private}s", sourceInfo.ToString().c_str());
         pattern->OnImageDataReady();
     };
-    return task;
 }
 
 LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallback()
 {
-    auto task = [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
+    return [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto imageLayoutProperty = pattern->GetLayoutProperty<ImageLayoutProperty>();
@@ -72,15 +70,14 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallback()
                 currentSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
-        LOGD("Image Load Success %{private}s", sourceInfo.ToString().c_str());
+        LOGI("Image Load Success %{private}s", sourceInfo.ToString().c_str());
         pattern->OnImageLoadSuccess();
     };
-    return task;
 }
 
 LoadFailNotifyTask ImagePattern::CreateLoadFailCallback()
 {
-    auto task = [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
+    return [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto imageLayoutProperty = pattern->GetLayoutProperty<ImageLayoutProperty>();
@@ -93,7 +90,6 @@ LoadFailNotifyTask ImagePattern::CreateLoadFailCallback()
         }
         pattern->OnImageLoadFail();
     };
-    return task;
 }
 
 void ImagePattern::PrepareAnimation()
@@ -152,7 +148,7 @@ void ImagePattern::OnImageLoadSuccess()
 
     SetImagePaintConfig(image_, srcRect_, dstRect_, loadingCtx_->GetSourceInfo().IsSvg());
     PrepareAnimation();
-    if (draggable_) {
+    if (host->IsDraggable()) {
         EnableDrag();
     }
     // clear alt data
@@ -219,10 +215,10 @@ void ImagePattern::SetImagePaintConfig(
 RefPtr<NodePaintMethod> ImagePattern::CreateNodePaintMethod()
 {
     if (image_) {
-        return MakeRefPtr<ImagePaintMethod>(image_);
+        return MakeRefPtr<ImagePaintMethod>(image_, selectOverlay_);
     }
     if (altImage_ && altDstRect_ && altSrcRect_) {
-        return MakeRefPtr<ImagePaintMethod>(altImage_);
+        return MakeRefPtr<ImagePaintMethod>(altImage_, selectOverlay_);
     }
     return nullptr;
 }
@@ -253,7 +249,7 @@ void ImagePattern::LoadImageDataIfNeed()
         LoadNotifier loadNotifier(CreateDataReadyCallback(), CreateLoadSuccessCallback(), CreateLoadFailCallback());
 
         loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(src, std::move(loadNotifier), syncLoad_);
-        LOGD("start loading image %{public}s", src.ToString().c_str());
+        LOGI("start loading image %{public}s", src.ToString().c_str());
         loadingCtx_->LoadImageData();
     }
     if (loadingCtx_->NeedAlt() && imageLayoutProperty->GetAlt()) {
@@ -300,7 +296,7 @@ void ImagePattern::OnModifyDone()
 
 DataReadyNotifyTask ImagePattern::CreateDataReadyCallbackForAlt()
 {
-    auto task = [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
+    return [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto imageLayoutProperty = pattern->GetLayoutProperty<ImageLayoutProperty>();
@@ -328,12 +324,11 @@ DataReadyNotifyTask ImagePattern::CreateDataReadyCallbackForAlt()
         pattern->altLoadingCtx_->MakeCanvasImageIfNeed(
             geometryNode->GetContentSize(), true, imageLayoutProperty->GetImageFit().value_or(ImageFit::COVER));
     };
-    return task;
 }
 
 LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallbackForAlt()
 {
-    auto task = [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
+    return [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         CHECK_NULL_VOID(pattern->altLoadingCtx_);
@@ -354,7 +349,6 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallbackForAlt()
         pattern->SetImagePaintConfig(pattern->altImage_, *pattern->altSrcRect_, *pattern->altDstRect_,
             pattern->altLoadingCtx_->GetSourceInfo().IsSvg());
     };
-    return task;
 }
 
 void ImagePattern::UpdateInternalResource(ImageSourceInfo& sourceInfo)
@@ -385,27 +379,14 @@ void ImagePattern::OnNotifyMemoryLevel(int32_t level)
     if (isShow_) {
         return;
     }
-    // TODO: clean cache data when cache mechanism is ready
-    // Step1: drive stateMachine to reset loading procedure
-    if (altLoadingCtx_) {
-        altLoadingCtx_->ResetLoading();
-    }
-    if (loadingCtx_) {
-        loadingCtx_->ResetLoading();
-    }
 
-    // Step2: clean data and reset params
-    // clear src data
+    // clean image data
+    loadingCtx_ = nullptr;
     image_ = nullptr;
-    srcRect_ = RectF();
-    dstRect_ = RectF();
-    // clear alt data
     altLoadingCtx_ = nullptr;
     altImage_ = nullptr;
-    altDstRect_.reset();
-    altSrcRect_.reset();
 
-    // Step3: clean rs node to release the sk_sp<SkImage> held by it
+    // clean rs node to release the sk_sp<SkImage> held by it
     // TODO: release PixelMap resource when use PixelMap resource to draw image
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
@@ -430,6 +411,7 @@ void ImagePattern::OnWindowShow()
 
 void ImagePattern::OnVisibleChange(bool visible)
 {
+    CloseSelectOverlay();
     CHECK_NULL_VOID_NOLOG(image_);
     // control svg / gif animation
     image_->ControlAnimation(visible);
@@ -468,7 +450,7 @@ void ImagePattern::EnableDrag()
         auto imagePattern = weak.Upgrade();
         CHECK_NULL_RETURN(imagePattern && imagePattern->loadingCtx_, info);
 
-#if !defined(ACE_UNITTEST)
+#ifdef ENABLE_DRAG_FRAMEWORK
         AceEngineExt::GetInstance().DragStartExt();
 #endif
         imagePattern->UpdateDragEvent(event);
@@ -542,6 +524,7 @@ void ImagePattern::OpenSelectOverlay()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleCopy();
+        pattern->CloseSelectOverlay();
     };
 
     CloseSelectOverlay();
@@ -549,14 +532,22 @@ void ImagePattern::OpenSelectOverlay()
     CHECK_NULL_VOID(pipeline);
     LOGI("Opening select overlay");
     selectOverlay_ = pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(info);
+
+    // paint selected mask effect
+    host->MarkNeedRenderOnly();
 }
 
 void ImagePattern::CloseSelectOverlay()
 {
-    LOGI("closing select overlay");
     if (selectOverlay_ && !selectOverlay_->IsClosed()) {
+        LOGI("closing select overlay");
         selectOverlay_->Close();
         selectOverlay_ = nullptr;
+
+        // remove selected mask effect
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkNeedRenderOnly();
     }
 }
 
@@ -580,13 +571,14 @@ void ImagePattern::HandleCopy()
 
 void ImagePattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
-    json->Put("draggable", draggable_ ? "true" : "false");
-
     static const char* COPY_OPTIONS[] = { "CopyOptions.None", "CopyOptions.InApp", "CopyOptions.Local",
         "CopyOptions.Distributed" };
     json->Put("copyOption", COPY_OPTIONS[static_cast<int32_t>(copyOption_)]);
 
     json->Put("syncLoad", syncLoad_ ? "true" : "false");
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    json->Put("draggable", host->IsDraggable() ? "true" : "false");
 }
 
 void ImagePattern::UpdateFillColorIfForegroundColor()

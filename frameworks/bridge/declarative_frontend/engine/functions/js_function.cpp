@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -71,20 +71,34 @@ void JsFunctionBase::Execute(const std::vector<std::string>& keys, const std::st
             LOGI("key[%{public}s] is not exist.", key.c_str());
             continue;
         }
-
-        if (value->IsString()) {
-            eventInfo->SetProperty<std::string>(key.c_str(), value->GetString().c_str());
-        } else if (value->IsNumber()) {
-            eventInfo->SetProperty<double>(key.c_str(), value->GetDouble());
-        } else if (value->IsBool()) {
-            eventInfo->SetProperty<bool>(key.c_str(), value->GetBool());
-        } else if (value->IsObject()) {
-            eventInfo->SetPropertyJsonObject(key.c_str(), value->ToString().c_str());
-        }
+        ExecuteInternal(value, key, eventInfo);
     }
 
     JSRef<JSVal> paramObj = JSRef<JSVal>::Cast(eventInfo);
     ExecuteJS(1, &paramObj);
+}
+
+void JsFunctionBase::ExecuteInternal(const std::unique_ptr<JsonValue>& value, const std::string& key,
+    const JSRef<JSObject>& eventInfo)
+{
+    if (value->IsString()) {
+        eventInfo->SetProperty<std::string>(key.c_str(), value->GetString().c_str());
+    } else if (value->IsNumber()) {
+        eventInfo->SetProperty<double>(key.c_str(), value->GetDouble());
+    } else if (value->IsBool()) {
+        eventInfo->SetProperty<bool>(key.c_str(), value->GetBool());
+    } else if (value->IsObject()) {
+        eventInfo->SetPropertyJsonObject(key.c_str(), value->ToString().c_str());
+    } else if (value->IsArray()) {
+        JSRef<JSArray> valueArray = JSRef<JSArray>::New();
+        for (auto index = 0; index < value->GetArraySize(); index++) {
+            auto item = value->GetArrayItem(index);
+            if (item && item->IsString()) {
+                valueArray->SetValueAt(index, JSRef<JSVal>::Make(ToJSValue(item->GetString())));
+            }
+        }
+        eventInfo->SetPropertyObject(key.c_str(), valueArray);
+    }
 }
 
 void JsFunctionBase::ExecuteNew(const std::vector<std::string>& keys, const std::string& param)

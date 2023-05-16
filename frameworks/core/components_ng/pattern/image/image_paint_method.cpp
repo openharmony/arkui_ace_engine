@@ -15,6 +15,10 @@
 
 #include "core/components_ng/pattern/image/image_paint_method.h"
 
+#include "core/components/text/text_theme.h"
+#include "core/components_ng/render/image_painter.h"
+#include "core/pipeline_ng/pipeline_context.h"
+
 namespace {
 constexpr unsigned int TOP_LEFT = 0;
 constexpr unsigned int TOP_RIGHT = 1;
@@ -101,5 +105,31 @@ CanvasDrawFunction ImagePaintMethod::GetContentDrawFunction(PaintWrapper* paintW
     ImagePainter imagePainter(canvasImage_);
     return
         [imagePainter, offset, contentSize](RSCanvas& canvas) { imagePainter.DrawImage(canvas, offset, contentSize); };
+}
+
+CanvasDrawFunction ImagePaintMethod::GetOverlayDrawFunction(PaintWrapper* paintWrapper)
+{
+    // draw selected mask effect
+    CHECK_NULL_RETURN_NOLOG(selected_, {});
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, {});
+    auto theme = pipeline->GetTheme<TextTheme>();
+    CHECK_NULL_RETURN(theme, {});
+    auto selectedColor = theme->GetSelectedColor();
+    return [selectedColor, size = paintWrapper->GetContentSize(), offset = paintWrapper->GetContentOffset()](
+               RSCanvas& canvas) {
+        canvas.Save();
+        RSBrush brush;
+        brush.SetAntiAlias(true);
+        brush.SetColor(selectedColor.GetValue());
+        canvas.AttachBrush(brush);
+
+        canvas.DrawRect(
+            RSRect(offset.GetX(), offset.GetY(), offset.GetX() + size.Width(), offset.GetY() + size.Height()));
+
+        canvas.DetachBrush();
+        canvas.Restore();
+    };
 }
 } // namespace OHOS::Ace::NG

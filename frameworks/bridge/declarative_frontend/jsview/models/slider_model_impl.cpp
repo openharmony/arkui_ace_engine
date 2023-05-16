@@ -108,7 +108,7 @@ void SliderModelImpl::SetShowSteps(bool value)
     CHECK_NULL_VOID(slider);
     slider->SetShowSteps(value);
 }
-void SliderModelImpl::SetShowTips(bool value)
+void SliderModelImpl::SetShowTips(bool value, const std::optional<std::string>& content)
 {
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto slider = AceType::DynamicCast<SliderComponent>(component);
@@ -126,7 +126,7 @@ void SliderModelImpl::SetBlockBorderColor(const Color& value) {}
 void SliderModelImpl::SetBlockBorderWidth(const Dimension& value) {}
 void SliderModelImpl::SetStepColor(const Color& value) {}
 void SliderModelImpl::SetTrackBorderRadius(const Dimension& value) {}
-void SliderModelImpl::SetBlockSize(const Size& value) {}
+void SliderModelImpl::SetBlockSize(const Dimension& width, const Dimension& height) {}
 void SliderModelImpl::SetBlockType(BlockStyleType value) {}
 void SliderModelImpl::SetBlockImage(const std::string& value) {}
 void SliderModelImpl::SetBlockShape(const RefPtr<BasicShape>& value) {}

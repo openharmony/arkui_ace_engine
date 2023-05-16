@@ -77,6 +77,13 @@ abstract class ObservedPropertyAbstract<T> extends SubscribedAbstractProperty<T>
 
   public abstract set(newValue: T): void;
 
+  // update the element id for recycle custom component
+  public updateElmtId(oldElmtId: number, newElmtId: number): void {
+    if (this.subscribers_.has(oldElmtId)) {
+      this.subscribers_.delete(oldElmtId);
+      this.subscribers_.add(newElmtId);
+    }
+  }
 
   public subscribeMe(subscriber: ISinglePropertyChangeSubscriber<T>): void {
     stateMgmtConsole.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: subscribeMe: Property new subscriber '${subscriber.id__()}'`);
@@ -95,11 +102,18 @@ abstract class ObservedPropertyAbstract<T> extends SubscribedAbstractProperty<T>
     this.subscribers_.forEach((subscribedId) => {
       var subscriber: IPropertySubscriber = SubscriberManager.Find(subscribedId)
       if (subscriber) {
+        // FU code path
         if ('hasChanged' in subscriber) {
           (subscriber as ISinglePropertyChangeSubscriber<T>).hasChanged(newValue);
         }
         if ('propertyHasChanged' in subscriber) {
           (subscriber as IMultiPropertiesChangeSubscriber).propertyHasChanged(this.info_);
+        }
+
+        // PU code path, only used for ObservedPropertySimple/Object stored inside App/LocalStorage
+        // ObservedPropertySimplePU/ObjectPU  used in all other PU cases, has its own notifyPropertyHasChangedPU()
+        if ('syncPeerHasChanged' in subscriber) {
+          (subscriber as unknown as PeerChangeEventReceiverPU<T>).syncPeerHasChanged(this as unknown as ObservedPropertyAbstractPU<T>);
         }
       } else {
         stateMgmtConsole.warn(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged: unknown subscriber ID '${subscribedId}' error!`);

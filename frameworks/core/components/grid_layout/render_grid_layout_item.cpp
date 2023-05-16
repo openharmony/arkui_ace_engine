@@ -134,7 +134,7 @@ void RenderGridLayoutItem::SetOnItemLongPressed(const OnItemLongPressed& func)
 void RenderGridLayoutItem::InitAnimationController(const WeakPtr<PipelineContext>& context)
 {
     if (!animationController_) {
-        animationController_ = AceType::MakeRefPtr<Animator>(context);
+        animationController_ = CREATE_ANIMATOR(context);
         animationController_->SetDuration(ITEM_ANIMATION_DURATION);
     }
 }

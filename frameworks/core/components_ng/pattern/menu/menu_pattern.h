@@ -18,24 +18,30 @@
 
 #include <optional>
 
-#include "base/geometry/ng/offset_t.h"
 #include "base/memory/referenced.h"
-#include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
-#include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/menu/menu_accessibility_property.h"
 #include "core/components_ng/pattern/menu/menu_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_paint_method.h"
 #include "core/components_ng/pattern/menu/navigation_menu_layout_algorithm.h"
-#include "core/components_ng/pattern/option/option_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/select/select_view.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
+#include "core/components_ng/pattern/select/select_model.h"
 
 namespace OHOS::Ace::NG {
-enum class MenuType { MENU, CONTEXT_MENU, NAVIGATION_MENU, MULTI_MENU, SUB_MENU };
+enum class MenuType {
+    // ----- Menu Containers ------
+    MENU,         // corresponds to .bindMenu attribute
+    CONTEXT_MENU, // corresponds to .bindContextMenu attribute, lives in a SubWindow
+    SUB_MENU,     // secondary menu container in a multi-level menu
+
+    // ----- <Menu> Node ------
+    MULTI_MENU, // corresponds to the <Menu> tag in a Menu CustomBuilder
+
+    // ----- special menu used in other components ------
+    NAVIGATION_MENU,               // menu used in a Navigation component
+    SELECT_OVERLAY_EXTENSION_MENU, // menu used in SelectOverlay Extension of text component
+};
 
 class MenuPattern : public Pattern {
     DECLARE_ACE_TYPE(MenuPattern, Pattern);
@@ -56,11 +62,6 @@ public:
         return { FocusType::SCOPE, true };
     }
 
-    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
-    {
-        return MakeRefPtr<MenuPaintMethod>();
-    }
-
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<MenuLayoutProperty>();
@@ -71,11 +72,11 @@ public:
         return MakeRefPtr<MenuAccessibilityProperty>();
     }
 
-    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
+
+    MenuType GetMenuType() const
     {
-        RefPtr<MenuLayoutAlgorithm> navigationMenu = MakeRefPtr<NavigationMenuLayoutAlgorithm>();
-        return (type_ == MenuType::NAVIGATION_MENU) ? navigationMenu
-                                                    : MakeRefPtr<MenuLayoutAlgorithm>(targetId_, targetTag_);
+        return type_;
     }
 
     bool IsContextMenu() const
@@ -93,9 +94,19 @@ public:
         return type_ == MenuType::MULTI_MENU;
     }
 
+    bool IsMenu() const
+    {
+        return type_ == MenuType::MENU;
+    }
+
     bool IsSubMenu() const
     {
         return type_ == MenuType::SUB_MENU;
+    }
+
+    bool IsSelectOverlayExtensionMenu() const
+    {
+        return type_ == MenuType::SELECT_OVERLAY_EXTENSION_MENU;
     }
 
     void SetParentMenuItem(const RefPtr<FrameNode>& parentMenuItem)
@@ -154,11 +165,27 @@ public:
 
     RefPtr<FrameNode> GetMenuColumn() const;
 
+    void SetShowedSubMenu(const RefPtr<FrameNode>& subMenu)
+    {
+        showedSubMenu_ = subMenu;
+    }
+    const RefPtr<FrameNode>& GetShowedSubMenu() const
+    {
+        return showedSubMenu_;
+    }
+    void HideSubMenu();
+
 private:
+    void OnAttachToFrameNode() override;
     void OnModifyDone() override;
     void RegisterOnTouch();
     void OnTouchEvent(const TouchEventInfo& info);
-    bool IsMultiMenuOutside() const;
+
+    void InitTheme(const RefPtr<FrameNode>& host);
+    bool HasInnerMenu() const;
+    // If CustomBuilder is declared with <Menu> and <MenuItem>,
+    // reset outer menu container and only apply theme on the inner <Menu> node.
+    void ResetTheme(const RefPtr<FrameNode>& host);
 
     void RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event) const;
@@ -167,15 +194,17 @@ private:
     void DisableTabInMenu();
 
     RefPtr<FrameNode> GetMenuWrapper() const;
+    void SetAccessibilityAction();
 
     RefPtr<ClickEvent> onClick_;
     RefPtr<TouchEventImpl> onTouch_;
     std::optional<Offset> lastTouchOffset_;
     int32_t targetId_ = -1;
-    std::string targetTag_ = "";
+    std::string targetTag_;
     MenuType type_ = MenuType::MENU;
 
     RefPtr<FrameNode> parentMenuItem_;
+    RefPtr<FrameNode> showedSubMenu_;
     std::vector<RefPtr<FrameNode>> options_;
 
     bool isSelectMenu_ = false;

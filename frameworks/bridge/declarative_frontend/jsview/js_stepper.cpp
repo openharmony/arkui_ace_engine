@@ -22,19 +22,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<StepperModel> StepperModel::instance_ = nullptr;
+std::mutex StepperModel::mutex_;
 
 StepperModel* StepperModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::StepperModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::StepperModelNG());
-        } else {
-            instance_.reset(new Framework::StepperModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::StepperModelNG());
+            } else {
+                instance_.reset(new Framework::StepperModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -43,19 +47,39 @@ StepperModel* StepperModel::GetInstance()
 
 namespace OHOS::Ace::Framework {
 
+void ParseStepperIndexObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
+{
+    CHECK_NULL_VOID(changeEventVal->IsFunction());
+
+    StepperModel::GetInstance()->SetOnChangeEvent(
+        JsEventCallback<void(int32_t)>(info.GetExecutionContext(), JSRef<JSFunc>::Cast(changeEventVal)));
+}
+
 void JSStepper::Create(const JSCallbackInfo& info)
 {
     uint32_t index = 0;
+    JSRef<JSVal> changeEventVal;
     if (info.Length() < 1 || !info[0]->IsObject()) {
         index = 0;
     } else {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
         JSRef<JSVal> stepperValue = obj->GetProperty("index");
         if (stepperValue->IsNumber()) {
-            index = stepperValue->ToNumber<uint32_t>();
+            auto indexValue = stepperValue->ToNumber<int32_t>();
+            index = indexValue <= 0 ? 0 : static_cast<uint32_t>(indexValue);
+        } else if (stepperValue->IsObject()) {
+            JSRef<JSObject> stepperObj = JSRef<JSObject>::Cast(stepperValue);
+            auto stepperValueProperty = stepperObj->GetProperty("value");
+            if (stepperValueProperty->IsNumber()) {
+                index = stepperValueProperty->ToNumber<int32_t>();
+            }
+            changeEventVal = stepperObj->GetProperty("changeEvent");
         }
     }
     StepperModel::GetInstance()->Create(index);
+    if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
+        ParseStepperIndexObject(info, changeEventVal);
+    }
 }
 
 void JSStepper::JSBind(BindingTarget globalObj)

@@ -191,6 +191,10 @@ if (!defined(global_parts_info) ||
   os_account_exists = false
 }
 
+if (is_emulator) {
+  ace_common_defines += [ "IS_EMULATOR" ]
+}
+
 if (defined(global_parts_info)) {
   if (defined(global_parts_info.resourceschedule_frame_aware_sched) || defined(
           global_parts_info.hmosresourceschedule_resourceschedule_frame_aware_sched_override)) {
@@ -198,6 +202,14 @@ if (defined(global_parts_info)) {
   } else {
     frame_trace_support = false
   }
+}
+
+if (!defined(global_parts_info) ||
+    defined(global_parts_info.security_security_component)) {
+  security_component_enable = true
+  ace_common_defines += [ "SECURITY_COMPONENT_ENABLE" ]
+} else {
+  security_component_enable = false
 }
 
 ace_platforms = []

@@ -72,6 +72,8 @@ struct MenuParam {
     std::optional<Placement> placement;
     std::function<void()> onAppear;
     std::function<void()> onDisappear;
+    std::optional<bool> enableArrow;
+    std::optional<Dimension> arrowOffset;
 };
 
 class ACE_EXPORT ViewAbstract {
@@ -94,6 +96,7 @@ public:
     static void SetBackgroundImageSize(const BackgroundImageSize& bgImgSize);
     static void SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition);
     static void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle);
+    static void SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle);
     static void SetSphericalEffect(double radio);
     static void SetPixelStretchEffect(PixStretchEffectOption& option);
     static void SetLightUpEffect(double radio);
@@ -205,11 +208,12 @@ public:
     // flex properties
     static void SetAlignSelf(FlexAlign value);
     static void SetFlexShrink(float value);
+    static void ResetFlexShrink();
     static void SetFlexGrow(float value);
     static void SetFlexBasis(const Dimension& value);
     static void SetDisplayIndex(int32_t value);
-    static void SetKeyboardShortcut(
-        const std::string& value, const std::vector<CtrlKey>& keys, std::function<void()>&& onKeyboardShortcutAction);
+    static void SetKeyboardShortcut(const std::string& value, const std::vector<ModifierKey>& keys,
+        std::function<void()>&& onKeyboardShortcutAction);
 
     // Bind properties
     static void BindPopup(
@@ -221,6 +225,8 @@ public:
     static void ShowMenu(int32_t targetId, const NG::OffsetF& offset, bool isContextMenu = false);
     // inspector
     static void SetInspectorId(const std::string& inspectorId);
+    // restore
+    static void SetRestoreId(int32_t restoreId);
     // inspector debugLine
     static void SetDebugLine(const std::string& line);
     // transition
@@ -251,6 +257,11 @@ public:
     static void CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
         const std::function<void(float)>& onCallbackEvent);
     static void UpdateAnimatablePropertyFloat(const std::string& propertyName, float value);
+    static void CreateAnimatableArithmeticProperty(const std::string& propertyName,
+        RefPtr<CustomAnimatableArithmetic>& value,
+        std::function<void(const RefPtr<CustomAnimatableArithmetic>&)>& onCallbackEvent);
+    static void UpdateAnimatableArithmeticProperty(const std::string& propertyName,
+        RefPtr<CustomAnimatableArithmetic>& value);
 private:
     static void AddDragFrameNodeToManager();
 };

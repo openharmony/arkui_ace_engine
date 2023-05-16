@@ -32,12 +32,7 @@
 
 using namespace testing;
 using namespace testing::ext;
-namespace OHOS::Ace {
-bool OHOS::Ace::SystemProperties::GetDebugEnabled()
-{
-    return false;
-}
-} // namespace OHOS::Ace
+
 namespace OHOS::Ace::NG {
 namespace {
 const std::string ROOT_TAG = "root";
@@ -207,7 +202,7 @@ HWTEST_F(SharedOverlayManagerTestNg, SharedOverlayManagerTest002, TestSize.Level
      */
     auto controller = effect->GetController();
     ASSERT_TRUE(controller != nullptr);
-    controller->NotifyStopListener();
+    controller->Stop();
     EXPECT_EQ(manager_->sharedManager_->GetChildren().size(), 0);
     ASSERT_EQ(srcPage_->GetChildren().size(), 1);
     EXPECT_EQ(AceType::DynamicCast<FrameNode>(srcPage_->GetFirstChild()), srcNodeShareId1);
@@ -258,7 +253,7 @@ HWTEST_F(SharedOverlayManagerTestNg, SharedOverlayManagerTest003, TestSize.Level
      */
     auto controller = effect->GetController();
     ASSERT_TRUE(controller != nullptr);
-    controller->NotifyStopListener();
+    controller->Stop();
     EXPECT_EQ(manager_->sharedManager_->GetChildren().size(), 0);
     ASSERT_EQ(srcPage_->GetChildren().size(), 1);
     EXPECT_EQ(AceType::DynamicCast<FrameNode>(srcPage_->GetFirstChild()), srcNodeShareId1);
@@ -303,12 +298,10 @@ HWTEST_F(SharedOverlayManagerTestNg, SharedOverlayManagerTest004, TestSize.Level
     EXPECT_NE(destPage_->GetFirstChild(), destNodeShareId1);
 
     /**
-     * @tc.steps: step3. Notify the controller of effect to stop so the sharedTransition can finish
+     * @tc.steps: step3. Call StopSharedTransition to test it
      * @tc.expected: The node mounted to sharedManager has been removed and is mounted to the original parent
      */
-    auto controller = effect->GetController();
-    ASSERT_TRUE(controller != nullptr);
-    controller->NotifyStopListener();
+    manager_->StopSharedTransition();
     EXPECT_EQ(manager_->sharedManager_->GetChildren().size(), 0);
     ASSERT_EQ(destPage_->GetChildren().size(), 1);
     EXPECT_EQ(destPage_->GetFirstChild(), destNodeShareId1);

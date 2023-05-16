@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text_picker/textpicker_accessibility_property.h"
 #include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
 #include "core/components_ng/pattern/text_picker/textpicker_layout_algorithm.h"
 #include "core/components_ng/pattern/text_picker/textpicker_layout_property.h"
@@ -31,6 +32,7 @@
 
 namespace OHOS::Ace::NG {
 using EventCallback = std::function<void(bool)>;
+using ColumnChangeCallback = std::function<void(const RefPtr<FrameNode>&, bool, uint32_t, bool)>;
 
 struct TextProperties {
     Dimension upFontSize;
@@ -39,6 +41,15 @@ struct TextProperties {
     Color upColor;
     Color currentColor;
     Color downColor;
+};
+    
+class EventParam : public virtual AceType {
+    DECLARE_ACE_TYPE(EventParam, AceType)
+
+public:
+    RefPtr<FrameNode> instance;
+    int32_t itemIndex;
+    int32_t itemTotalCounts;
 };
 
 class TextPickerColumnPattern : public LinearLayoutPattern {
@@ -67,19 +78,20 @@ public:
         return MakeRefPtr<LinearLayoutProperty>(true);
     }
 
-    void FlushCurrentOptions(bool isDown = false, bool isUpateTextContentOnly = false);
+    void FlushCurrentOptions(bool isDown = false,
+        bool isUpateTextContentOnly = false, bool isDirectlyClear = false);
 
     void InitilaScorllEvent();
 
     void UpdateCurrentOffset(float offset);
 
-    void UpdateColumnChildPosition(double offsetY);
+    void UpdateColumnChildPosition(double offsetY, bool isUpatePropertiesOnly = true);
 
     bool CanMove(bool isDown) const;
 
     bool NotLoopOptions() const;
 
-    bool InnerHandleScroll(bool isDown, bool isUpatePropertiesOnly = false);
+    bool InnerHandleScroll(int32_t step, bool isUpatePropertiesOnly = false);
 
     void SetDefaultPickerItemHeight(double defaultPickerItemHeight)
     {
@@ -152,6 +164,11 @@ public:
         }
     }
 
+    void ClearOptions()
+    {
+        options_.clear();
+    }
+
     void SetColumnKind(int32_t kind)
     {
         columnkind_ = kind;
@@ -207,6 +224,25 @@ public:
 
     void UpdateScrollDelta(double delta);
 
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        return MakeRefPtr<TextPickerAccessibilityProperty>();
+    }
+
+    void SetChangeCallback(ColumnChangeCallback&& value)
+    {
+        changeCallback_ = value;
+    }
+
+    void HandleChangeCallback(bool isAdd, bool needNotify)
+    {
+        if (changeCallback_) {
+            changeCallback_(GetHost(), isAdd, GetCurrentIndex(), needNotify);
+        } else {
+            LOGE("change callback is null.");
+        }
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -230,7 +266,7 @@ private:
     void SetButtonBackgroundColor(const Color& pressColor);
     void PlayPressAnimation(const Color& pressColor);
     void FlushCurrentTextOptions(const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty,
-        bool isUpateTextContentOnly);
+        bool isUpateTextContentOnly, bool isDirectlyClear);
     void FlushCurrentImageOptions();
     void FlushCurrentMixtureOptions(const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty,
         bool isUpateTextContentOnly);
@@ -252,6 +288,19 @@ private:
         uint32_t index, uint32_t showCount, bool isDown, double scale);
     void FlushAnimationTextProperties(bool isDown);
     Dimension LinearFontSize(const Dimension& startFontSize, const Dimension& endFontSize, double percent);
+    void ClearCurrentTextOptions(const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty,
+        bool isUpateTextContentOnly, bool isDirectlyClear);
+
+    RefPtr<TextPickerLayoutProperty> GetParentLayout() const;
+    RefPtr<TouchEventImpl> CreateItemTouchEventListener(RefPtr<EventParam> param);
+    void OnAroundButtonClick(RefPtr<EventParam> param);
+    void OnMiddleButtonTouchDown(RefPtr<EventParam> param);
+    void OnMiddleButtonTouchMove(RefPtr<EventParam> param);
+    void OnMiddleButtonTouchUp(RefPtr<EventParam> param);
+    bool touchEventInit = false;
+    RefPtr<InputEvent> CreateMouseHoverEventListener(RefPtr<EventParam> param);
+    RefPtr<ClickEvent> CreateItemClickEventListener(RefPtr<EventParam> param);
+    void SetAccessibilityAction();
 
     float localDownDistance_ = 0.0f;
     Color pressColor_;
@@ -292,6 +341,8 @@ private:
         AceType::MakeRefPtr<TextPickerTossAnimationController>();
     std::vector<TextProperties> animationProperties_;
     bool isJump_ = false;
+
+    ColumnChangeCallback changeCallback_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextPickerColumnPattern);
 };

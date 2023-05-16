@@ -49,6 +49,11 @@ public:
     void SetInputStyle(InputStyle& value);
     void SetFrameSize(const SizeF& value);
     void SetCurrentOffset(float value);
+    void PaintUnderline(RSCanvas& canvas) const;
+    void SetUnderlineColor(const Color& value);
+    void SetUnderlineWidth(float underlineWidth);
+    void SetShowCounter(bool value);
+    void SetSelectedAreaRedraw(bool value);
 
 private:
     void PaintSelection(DrawingContext& context) const;
@@ -67,8 +72,12 @@ private:
     RefPtr<PropertySizeF> contentSize_;
     RefPtr<PropertyOffsetF> contentOffset_;
     RefPtr<PropertyFloat> currentOffset_;
+    RefPtr<PropertyBool> isSelectedAreaRedraw_;
+    RefPtr<PropertyFloat> underlineWidth_;
+    RefPtr<PropertyColor> underlineColor_;
     InputStyle inputStyle_ = InputStyle::DEFAULT;
     RefPtr<PropertySizeF> frameSize_;
+    RefPtr<PropertyBool> showCounter_;
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldOverlayModifier);
 };
 } // namespace OHOS::Ace::NG

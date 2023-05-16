@@ -98,27 +98,6 @@ HWTEST_F(RegisterTest, CastToRegisterTest003, TestSize.Level1)
     EXPECT_EQ(g_connectManagement->GetPkgName(), "test_pkt_name");
 }
 
-/**g_threadRunning
- * @tc.name: CastToRegisterTest004
- * @tc.desc: Test cast to HdcJdwpSimulator.
- * @tc.type: FUNC
- */
-HWTEST_F(RegisterTest, CastToRegisterTest004, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. new a HdcJdwpSimulator.
-     * @tc.steps: step2. Call DisConnect before connect
-     # @tc.steps: step3. delete the HdcJdwpSimulator
-     * @tc.expected: step2. not effect, not crash
-     * @tc.expected: step3. not effect, not crash
-     */
-    HdcJdwpSimulator* hdcJdwpSimulator = new HdcJdwpSimulator("test_pkt_name");
-    hdcJdwpSimulator->Disconnect();
-    delete hdcJdwpSimulator;
-    hdcJdwpSimulator = nullptr;
-    EXPECT_EQ(1, 1);
-}
-
 HdcJdwpSimulator* g_hdcJdwpSimulator = nullptr;
 bool g_threadRunning = false;
 void* HdcConnectRun_Test(void* pkgContent)

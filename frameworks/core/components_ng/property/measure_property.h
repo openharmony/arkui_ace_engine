@@ -229,6 +229,21 @@ struct MeasureProperty {
         jsonSize->Put("width", width.c_str());
         jsonSize->Put("height", height.c_str());
         json->Put("size", jsonSize);
+#else
+        auto jsonSize = JsonUtil::Create(true);
+        if (selfIdealSize.has_value()) {
+            if (selfIdealSize.value().Width().has_value()) {
+                auto widthStr = selfIdealSize.value().Width().value().ToString();
+                json->Put("width", widthStr.c_str());
+                jsonSize->Put("width", widthStr.c_str());
+            }
+            if (selfIdealSize.value().Height().has_value()) {
+                auto heightStr = selfIdealSize.value().Height().value().ToString();
+                json->Put("height", heightStr.c_str());
+                jsonSize->Put("height", heightStr.c_str());
+            }
+        }
+        json->Put("size", jsonSize);
 #endif
 
         auto jsonConstraintSize = JsonUtil::Create(true);
@@ -247,6 +262,20 @@ struct MeasureProperty {
                                                  .ToString()
                                                  .c_str());
         json->Put("constraintSize", jsonConstraintSize->ToString().c_str());
+    }
+
+    static MeasureProperty FromJson(const std::unique_ptr<JsonValue>& json)
+    {
+        MeasureProperty ans;
+        auto width = json->GetString("width");
+        auto height = json->GetString("height");
+        LOGD("UITree width=%{public}s height=%{public}s", width.c_str(), height.c_str());
+        if (width != "-" || height != "-") {
+            ans.selfIdealSize =
+                CalcSize(width != "-" ? std::optional<CalcLength>(Dimension::FromString(width)) : std::nullopt,
+                    height != "-" ? std::optional<CalcLength>(Dimension::FromString(height)) : std::nullopt);
+        }
+        return ans;
     }
 };
 
@@ -310,6 +339,37 @@ struct PaddingPropertyT {
         jsonValue->Put("bottom", bottom->ToString().c_str());
         jsonValue->Put("left", left->ToString().c_str());
         return jsonValue->ToString();
+    }
+
+    static PaddingPropertyT FromJsonString(const std::string& str)
+    {
+        LOGD("UITree str=%{public}s", str.c_str());
+        PaddingPropertyT property;
+
+        if (str.empty()) {
+            LOGE("UITree |ERROR| empty string");
+            return property;
+        }
+
+        if (str[0] >= '0' && str[0] <= '9') {
+            LOGD("UITree decode number");
+            property.top = property.right = property.bottom = property.left = T::FromString(str);
+        } else if (str[0] == '{') {
+            LOGD("UITree decode json");
+            auto json = JsonUtil::ParseJsonString(str);
+            if (!json->IsValid()) {
+                LOGD("UITree invalid json [%{public}s]", json->ToString().c_str());
+                return property;
+            }
+            property.top = T::FromString(json->GetString("top"));
+            property.right = T::FromString(json->GetString("right"));
+            property.bottom = T::FromString(json->GetString("bottom"));
+            property.left = T::FromString(json->GetString("left"));
+        } else {
+            LOGE("UITree |ERROR| invalid str=%{public}s", str.c_str());
+        }
+
+        return property;
     }
 };
 

@@ -19,10 +19,14 @@
 #include "core/components/common/properties/edge.h"
 #include "core/pipeline/base/rosen_render_context.h"
 
+#ifndef NEW_SKIA
+#define SkPathkCCWDirection SkPath::Direction::kCCW_Direction
+#else
+#define SkPathkCCWDirection SkPathDirection::kCCW
+#endif
+
 namespace OHOS::Ace {
-
 namespace {
-
 constexpr double HALF = 0.5;
 constexpr Dimension BEZIER_HORIZON_OFFSET_FIRST = 1.3_vp;
 constexpr Dimension BEZIER_HORIZON_OFFSET_SECOND = 3.2_vp;
@@ -95,24 +99,24 @@ void RosenRenderTip::PaintTopTip(SkCanvas* skCanvas, SkPaint paint, const Offset
     path_.lineTo(globalArrowPosition.GetX() + (childHalfWidth - NormalizeToPx(border_.BottomRightRadius().GetX())),
         globalArrowPosition.GetY() - bubbleSpacing);
     path_.arcTo(NormalizeToPx(border_.BottomRightRadius().GetX()), NormalizeToPx(border_.BottomRightRadius().GetY()),
-        0.0f, SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCCW_Direction,
+        0.0f, SkPath::ArcSize::kSmall_ArcSize, SkPathkCCWDirection,
         globalArrowPosition.GetX() + childHalfWidth,
         globalArrowPosition.GetY() - bubbleSpacing - NormalizeToPx(border_.BottomRightRadius().GetY()));
     path_.lineTo(globalArrowPosition.GetX() + childHalfWidth,
         globalArrowPosition.GetY() - bubbleSpacing - (childHeight - NormalizeToPx(border_.TopRightRadius().GetY())));
     path_.arcTo(NormalizeToPx(border_.TopRightRadius().GetX()), NormalizeToPx(border_.TopRightRadius().GetY()), 0.0f,
-        SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCCW_Direction,
+        SkPath::ArcSize::kSmall_ArcSize, SkPathkCCWDirection,
         globalArrowPosition.GetX() + childHalfWidth - NormalizeToPx(border_.TopRightRadius().GetX()),
         globalArrowPosition.GetY() - bubbleSpacing - childHeight);
     path_.lineTo(globalArrowPosition.GetX() - (childHalfWidth - NormalizeToPx(border_.TopLeftRadius().GetX())),
         globalArrowPosition.GetY() - bubbleSpacing - childHeight);
     path_.arcTo(NormalizeToPx(border_.TopLeftRadius().GetX()), NormalizeToPx(border_.TopLeftRadius().GetY()), 0.0f,
-        SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCCW_Direction, globalArrowPosition.GetX() - childHalfWidth,
+        SkPath::ArcSize::kSmall_ArcSize, SkPathkCCWDirection, globalArrowPosition.GetX() - childHalfWidth,
         globalArrowPosition.GetY() - bubbleSpacing - (childHeight - NormalizeToPx(border_.TopLeftRadius().GetY())));
     path_.lineTo(globalArrowPosition.GetX() - childHalfWidth,
         globalArrowPosition.GetY() - bubbleSpacing - NormalizeToPx(border_.BottomLeftRadius().GetY()));
     path_.arcTo(NormalizeToPx(border_.BottomLeftRadius().GetX()), NormalizeToPx(border_.BottomLeftRadius().GetY()),
-        0.0f, SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCCW_Direction,
+        0.0f, SkPath::ArcSize::kSmall_ArcSize, SkPathkCCWDirection,
         globalArrowPosition.GetX() - (childHalfWidth - NormalizeToPx(border_.BottomLeftRadius().GetX())),
         globalArrowPosition.GetY() - bubbleSpacing);
     path_.lineTo(globalArrowPosition.GetX() - NormalizeToPx(BEZIER_HORIZON_OFFSET_FOURTH) + arrowOffset,
@@ -154,26 +158,26 @@ void RosenRenderTip::PaintLeftTip(SkCanvas* skCanvas, SkPaint paint, const Offse
     path_.lineTo(globalArrowPosition.GetX() - bubbleSpacing,
         globalArrowPosition.GetY() - (childHalfHeight - NormalizeToPx(border_.TopRightRadius().GetY())));
     path_.arcTo(NormalizeToPx(border_.TopRightRadius().GetX()), NormalizeToPx(border_.TopRightRadius().GetY()), 0.0f,
-        SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCCW_Direction,
+        SkPath::ArcSize::kSmall_ArcSize, SkPathkCCWDirection,
         globalArrowPosition.GetX() - bubbleSpacing - NormalizeToPx(border_.TopRightRadius().GetX()),
         globalArrowPosition.GetY() - childHalfHeight);
     path_.lineTo(
         globalArrowPosition.GetX() - bubbleSpacing - (childWidth - NormalizeToPx(border_.TopLeftRadius().GetX())),
         globalArrowPosition.GetY() - childHalfHeight);
     path_.arcTo(NormalizeToPx(border_.TopLeftRadius().GetX()), NormalizeToPx(border_.TopLeftRadius().GetY()), 0.0f,
-        SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCCW_Direction,
+        SkPath::ArcSize::kSmall_ArcSize, SkPathkCCWDirection,
         globalArrowPosition.GetX() - bubbleSpacing - childWidth,
         globalArrowPosition.GetY() - childHalfHeight + NormalizeToPx(border_.TopLeftRadius().GetY()));
     path_.lineTo(globalArrowPosition.GetX() - bubbleSpacing - childWidth,
         globalArrowPosition.GetY() + (childHalfHeight - NormalizeToPx(border_.BottomLeftRadius().GetY())));
     path_.arcTo(NormalizeToPx(border_.BottomLeftRadius().GetX()), NormalizeToPx(border_.BottomLeftRadius().GetY()),
-        0.0f, SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCCW_Direction,
+        0.0f, SkPath::ArcSize::kSmall_ArcSize, SkPathkCCWDirection,
         globalArrowPosition.GetX() - bubbleSpacing - (childWidth - NormalizeToPx(border_.BottomLeftRadius().GetX())),
         globalArrowPosition.GetY() + childHalfHeight);
     path_.lineTo(globalArrowPosition.GetX() - bubbleSpacing - NormalizeToPx(border_.BottomRightRadius().GetX()),
         globalArrowPosition.GetY() + childHalfHeight);
     path_.arcTo(NormalizeToPx(border_.BottomRightRadius().GetX()), NormalizeToPx(border_.BottomRightRadius().GetY()),
-        0.0f, SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCCW_Direction,
+        0.0f, SkPath::ArcSize::kSmall_ArcSize, SkPathkCCWDirection,
         globalArrowPosition.GetX() - bubbleSpacing,
         globalArrowPosition.GetY() + (childHalfHeight - NormalizeToPx(border_.BottomRightRadius().GetY())));
     path_.lineTo(globalArrowPosition.GetX() - NormalizeToPx(8.0_vp),

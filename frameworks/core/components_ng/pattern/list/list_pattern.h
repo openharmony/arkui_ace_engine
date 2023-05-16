@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -85,6 +85,8 @@ public:
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+
+    void FromJson(const std::unique_ptr<JsonValue>& json) override;
 
     bool UpdateCurrentOffset(float offset, int32_t source) override;
 
@@ -174,7 +176,7 @@ public:
 
     void UpdateScrollBarOffset() override;
     // chain animation
-    void SetChainAnimation(bool enable);
+    void SetChainAnimation();
     void SetChainAnimationOptions(const ChainAnimationOptions& options);
     float FlushChainAnimation(float dragOffset);
     void ProcessDragStart(float startPosition);
@@ -224,6 +226,7 @@ private:
     void MultiSelectWithoutKeyboard(const RectF& selectedZone);
 
     void DrivenRender(const RefPtr<LayoutWrapper>& layoutWrapper);
+    void SetAccessibilityAction();
 
     RefPtr<ListContentModifier> listContentModifier_;
 
@@ -273,6 +276,8 @@ private:
 
     // ListItem swiperAction
     WeakPtr<ListItemPattern> swiperItem_;
+
+    bool isScrollEnd_ = false;
 };
 } // namespace OHOS::Ace::NG
 

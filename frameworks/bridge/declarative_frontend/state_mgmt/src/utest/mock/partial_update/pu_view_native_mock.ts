@@ -29,6 +29,11 @@ abstract class NativeViewPartialUpdate {
 
   abstract id__(): void;
 
+  isFirstRender(): boolean {
+    console.warn(`${this.id__()}:${this.constructor.name}: isFirstRender Always returns true!`);
+    return true;
+  }
+
   protected markNeedUpdate(): void {
     console.log(`${this.id__()}:${this.constructor.name}: markNeedUpdate`);
   }
@@ -68,5 +73,9 @@ abstract class NativeViewPartialUpdate {
   getCardId(): number {
     console.warn("NativeViewPU(Mock).getCardId() -  unimplemented!");
     return -1;
+  }
+
+  resetRecycleCustomNode(): void {
+    console.warn("NativeViewPU(Mock).resetRecycleCustomNode() -  unimplemented!");
   }
 }

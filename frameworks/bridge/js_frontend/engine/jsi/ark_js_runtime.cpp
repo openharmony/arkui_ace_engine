@@ -64,7 +64,7 @@ bool ArkJSRuntime::Initialize(const std::string& libraryPath, bool isDebugMode, 
 #endif
     const int64_t poolSize = 0x10000000; // 256M
     option.SetGcPoolSize(poolSize);
-    option.SetLogLevel(RuntimeOption::LOG_LEVEL::INFO);
+    option.SetLogLevel(RuntimeOption::LOG_LEVEL::FOLLOW);
     option.SetLogBufPrint(print_);
     option.SetDebuggerLibraryPath(libraryPath);
     libPath_ = libraryPath;
@@ -115,6 +115,9 @@ bool ArkJSRuntime::StartDebugger()
         ret = JSNApi::StartDebugger(libPath_.c_str(), vm_, isDebugMode_, instanceId_, debuggerPostTask_);
 #endif
     }
+#if defined(IOS_PLATFORM)
+    ret = JSNApi::StartDebugger(nullptr, vm_, isDebugMode_, instanceId_, debuggerPostTask_);
+#endif
 #endif
     return ret;
 }

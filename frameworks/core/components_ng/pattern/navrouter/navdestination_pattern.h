@@ -19,6 +19,7 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/navigation/navigation_event_hub.h"
+#include "core/components_ng/pattern/navigation/navigation_stack.h"
 #include "core/components_ng/pattern/navrouter/navdestination_event_hub.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_layout_algorithm.h"
@@ -32,9 +33,7 @@ class NavDestinationPattern : public Pattern {
     DECLARE_ACE_TYPE(NavDestinationPattern, Pattern);
 
 public:
-    explicit NavDestinationPattern(const RefPtr<ShallowBuilder>& shallowBuilder)
-        : shallowBuilder_(shallowBuilder)
-    {}
+    explicit NavDestinationPattern(const RefPtr<ShallowBuilder>& shallowBuilder) : shallowBuilder_(shallowBuilder) {}
     NavDestinationPattern() = default;
     ~NavDestinationPattern() override = default;
 
@@ -65,8 +64,30 @@ public:
         return shallowBuilder_;
     }
 
+    void SetName(const std::string& name)
+    {
+        name_ = name;
+    }
+
+    const std::string& GetName()
+    {
+        return name_;
+    }
+
+    void SetRouteInfo(const RefPtr<RouteInfo>& routeInfo)
+    {
+        routeInfo_ = routeInfo;
+    }
+
+    const RefPtr<RouteInfo>& GetRouteInfo()
+    {
+        return routeInfo_;
+    }
+
 private:
     RefPtr<ShallowBuilder> shallowBuilder_;
+    std::string name_;
+    RefPtr<RouteInfo> routeInfo_;
 };
 
 } // namespace OHOS::Ace::NG

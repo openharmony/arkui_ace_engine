@@ -24,7 +24,6 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-
 HostWindowExtension::HostWindowExtension(const std::string& bundleName, const std::string& abilityName)
 {
     sptr<OHOS::IRemoteObject> callerToken = nullptr;
@@ -48,7 +47,18 @@ HostWindowExtension::HostWindowExtension(const std::string& bundleName, const st
 
 HostWindowExtension::~HostWindowExtension()
 {
+    UnregisterLifecycleListener();
     RequestExtensionSessionDestruction();
+}
+
+void HostWindowExtension::OnConnect()
+{
+    HostWindowPattern::OnConnect();
+
+    CHECK_NULL_VOID(session_);
+    auto surfaceNode = session_->GetSurfaceNode();
+    CHECK_NULL_VOID(surfaceNode);
+    surfaceNode->CreateNodeInRenderThread();
 }
 
 void HostWindowExtension::OnWindowShow()
@@ -81,5 +91,4 @@ void HostWindowExtension::RequestExtensionSessionDestruction()
     sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
     Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionDestruction(extensionSession);
 }
-
 } // namespace OHOS::Ace::NG

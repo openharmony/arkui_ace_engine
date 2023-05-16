@@ -64,6 +64,13 @@ public:
     void ProcessDefaultPadding(PaddingProperty& paddings);
     void ResetMaxLength() override;
     void SetForegroundColor(const Color& value) override;
+    void SetPasswordIcon(const PasswordIcon& passwordIcon) override;
+    void SetShowUnit(std::function<void()>&& unitFunction) override;
+    void SetShowError(const std::string& errorText, bool visible) override;
+
+    void SetShowUnderline(bool showUnderLine) override;
+    void SetShowCounter(bool value) override;
+    void SetOnChangeEvent(std::function<void(const std::string&)>&& func) override;
 
 private:
     void AddDragFrameNodeToManager() const;

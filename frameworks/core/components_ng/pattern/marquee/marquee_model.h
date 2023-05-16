@@ -16,6 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MARQUEE_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MARQUEE_MODEL_H
 
+#include <mutex>
+#include <optional>
+
 #include "base/geometry/dimension.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
@@ -28,22 +31,23 @@ public:
     virtual ~MarqueeModel() = default;
 
     virtual void Create() = 0;
-    virtual void SetValue(const std::string& value) = 0;
-    virtual void SetPlayerStatus(bool playerStatus) = 0;
-    virtual void SetScrollAmount(double scrollAmount) = 0;
-    virtual void SetLoop(int32_t loop) = 0;
-    virtual void SetDirection(MarqueeDirection direction) = 0;
-    virtual void SetTextColor(const Color& textColor) = 0;
-    virtual void SetFontSize(const Dimension& fontSize) = 0;
-    virtual void SetFontWeight(const FontWeight& fontWeight) = 0;
-    virtual void SetFontFamily(const std::vector<std::string>& fontFamilies) = 0;
-    virtual void SetAllowScale(bool allowScale) = 0;
+    virtual void SetValue(const std::optional<std::string>& value) = 0;
+    virtual void SetPlayerStatus(const std::optional<bool>& playerStatus) = 0;
+    virtual void SetScrollAmount(const std::optional<double>& scrollAmount) = 0;
+    virtual void SetLoop(const std::optional<int32_t>& loop) = 0;
+    virtual void SetDirection(const std::optional<MarqueeDirection>& direction) = 0;
+    virtual void SetTextColor(const std::optional<Color>& textColor) = 0;
+    virtual void SetFontSize(const std::optional<Dimension>& fontSize) = 0;
+    virtual void SetFontWeight(const std::optional<FontWeight>& fontWeight) = 0;
+    virtual void SetFontFamily(const std::optional<std::vector<std::string>>& fontFamilies) = 0;
+    virtual void SetAllowScale(const std::optional<bool>& allowScale) = 0;
     virtual void SetOnStart(std::function<void()>&& onChange) = 0;
     virtual void SetOnBounce(std::function<void()>&& onChange) = 0;
     virtual void SetOnFinish(std::function<void()>&& onChange) = 0;
 
 private:
     static std::unique_ptr<MarqueeModel> instance_;
+    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
 

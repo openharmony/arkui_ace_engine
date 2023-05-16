@@ -204,14 +204,12 @@ void SliderContentModifier::DrawSelect(DrawingContext& context)
         auto trackBorderRadius = trackBorderRadius_->Get();
         auto direction = static_cast<Axis>(directionAxis_->Get());
         auto blockCenter = PointF(blockCenterX_->Get(), blockCenterY_->Get());
-        auto blockSize = blockSize_->Get();
         auto trackThickness = trackThickness_->Get();
         auto sliderMode = static_cast<SliderModelNG::SliderMode>(sliderMode_->Get());
         auto rect = GetTrackRect();
         auto insetOffset = .0f;
         if (sliderMode == SliderModelNG::SliderMode::INSET) {
-            insetOffset = direction == Axis::HORIZONTAL ? blockSize.Width() * HALF : blockSize.Height() * HALF;
-            insetOffset = std::min(insetOffset + hotCircleShadowWidth_, trackThickness * HALF);
+            insetOffset = trackThickness * HALF;
         }
         if (!reverse_) {
             if (direction == Axis::HORIZONTAL) {

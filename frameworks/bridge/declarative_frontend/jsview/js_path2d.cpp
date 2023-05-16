@@ -18,7 +18,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 
 namespace OHOS::Ace::Framework {
-
+constexpr int JS_PATH2D_PARAMETER_COUNTS = 2;
 JSPath2D::JSPath2D()
 {
 }
@@ -55,15 +55,30 @@ void JSPath2D::JSBind(BindingTarget globalObj)
     JSClass<JSPath2D>::Bind(globalObj, JSPath2D::Constructor, JSPath2D::Destructor);
 }
 
-void JSPath2D::JsPath2DAddPath(const JSCallbackInfo& info)
+void JSPath2D::JsPath2DAddPath(const JSCallbackInfo& args)
 {
-    JSPath2D* jsPath2d = JSRef<JSObject>::Cast(info[0])->Unwrap<JSPath2D>();
+    if (args.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have JSPath2D argument");
+        return;
+    }
+    if (!args[0]->IsObject()) {
+        LOGE("args[0] is not an object");
+        return;
+    }
+    auto* jsPath2d = JSRef<JSObject>::Cast(args[0])->Unwrap<JSPath2D>();
     if (jsPath2d == nullptr) {
         LOGE("The arg is wrong, it is supposed to have JSPath2D argument");
         return;
     }
-    auto toBeAdd = jsPath2d->GetCanvasPath2d();
-    path2d_->AddPath(toBeAdd);
+    auto canvasPath2D = jsPath2d->GetCanvasPath2d();
+    path2d_->AddPath(canvasPath2D);
+    if (args.Length() == JS_PATH2D_PARAMETER_COUNTS) {
+        auto* jsMatrix2d = JSRef<JSObject>::Cast(args[1])->Unwrap<JSMatrix2d>();
+        if (jsMatrix2d != nullptr) {
+            path2d_->SetTransform(jsMatrix2d->JsGetScaleX(), jsMatrix2d->JsGetRotateX(), jsMatrix2d->JsGetRotateY(),
+                jsMatrix2d->JsGetScaleY(), jsMatrix2d->JsGetTranslateX(), jsMatrix2d->JsGetTranslateY());
+        }
+    }
 }
 
 } // namespace OHOS::Ace::Framework

@@ -31,6 +31,7 @@ public:
     void SetCheckedBackgroundColor(const Color& color) override;
     void SetUncheckedBorderColor(const Color& color) override;
     void SetIndicatorColor(const Color& color) override;
+    void SetOnChangeEvent(ChangeEvent&& onChangeEvent) override;
 };
 } // namespace OHOS::Ace::NG
 

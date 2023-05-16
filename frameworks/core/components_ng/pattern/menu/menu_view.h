@@ -22,7 +22,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
-#include "core/components_ng/pattern/select/select_view.h"
+#include "core/components_ng/pattern/select/select_model.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 
 namespace OHOS::Ace::NG {
@@ -43,9 +43,9 @@ public:
     // create menu with menuItem and menuItemGroup
     static void Create();
 
-    static void SetFontSize(const Dimension& fontSize);
-    static void SetFontColor(const std::optional<Color>& color);
-    static void SetFontWeight(FontWeight weight);
+private:
+    static void UpdateWrapperPaintProperty(const RefPtr<FrameNode>& wrapperNode, const MenuParam& menuParam,
+        const MenuType& isContextMenu);
 };
 } // namespace OHOS::Ace::NG
 

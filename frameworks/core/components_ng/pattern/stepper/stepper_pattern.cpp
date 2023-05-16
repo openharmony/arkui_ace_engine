@@ -70,6 +70,7 @@ void StepperPattern::OnModifyDone()
     UpdateOrCreateLeftButtonNode(index_);
     UpdateOrCreateRightButtonNode(index_);
     InitButtonClickEvent();
+    SetAccessibilityAction();
 }
 
 void StepperPattern::OnAttachToFrameNode()
@@ -596,4 +597,22 @@ int32_t StepperPattern::TotalCount() const
     return swiperNode->TotalChildCount() - 1;
 }
 
+void StepperPattern::SetAccessibilityAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetActionScrollForward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandlingRightButtonClickEvent();
+    });
+
+    accessibilityProperty->SetActionScrollBackward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandlingLeftButtonClickEvent();
+    });
+}
 } // namespace OHOS::Ace::NG

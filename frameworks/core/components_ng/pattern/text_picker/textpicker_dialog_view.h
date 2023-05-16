@@ -29,7 +29,17 @@ public:
     static RefPtr<FrameNode> Show(const DialogProperties& dialogProperties, const TextPickerSettingData& settingData,
         std::map<std::string, NG::DialogTextEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
+    static RefPtr<FrameNode> RangeShow(const DialogProperties& dialogProperties,
+        const TextPickerSettingData& settingData, std::map<std::string, NG::DialogTextEvent>& dialogEvent,
+        std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent);
+    static RefPtr<FrameNode> OptionsShow(const DialogProperties& dialogProperties,
+        const TextPickerSettingData& settingData, std::map<std::string, NG::DialogTextEvent>& dialogEvent,
+        std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent);
     static void SetSelected(const RefPtr<TextPickerPattern>& textPickerPattern, uint32_t value = 0);
+    static void SetSelectedValues(const RefPtr<TextPickerPattern>& textPickerPattern,
+        const std::vector<uint32_t>& values);
+    static void SetValues(const RefPtr<TextPickerPattern>& textPickerPattern,
+        const std::vector<std::string>& values);
     static void SetRange(const RefPtr<TextPickerPattern>& textPickerPattern,
         const std::vector<NG::RangeContent>& value);
     static void SetDialogChange(const RefPtr<FrameNode>& frameNode, DialogTextEvent&& onChange);
@@ -37,7 +47,8 @@ public:
     static void SetDialogAcceptEvent(const RefPtr<FrameNode>& frameNode, DialogTextEvent&& onChange);
     static RefPtr<FrameNode> CreateButtonNode(const RefPtr<FrameNode>& frameNode,
         std::map<std::string, NG::DialogTextEvent> dialogEvent,
-        std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
+        std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent,
+        GestureEventFunc callback);
     static RefPtr<FrameNode> CreateDividerNode(const RefPtr<FrameNode>& dateNode);
     static RefPtr<FrameNode> CreateConfirmNode(const RefPtr<FrameNode>& dateNode, DialogEvent& acceptEvent);
     static RefPtr<FrameNode> CreateCancelNode(NG::DialogGestureEvent& cancelEvent);
@@ -45,9 +56,19 @@ public:
 private:
     static RefPtr<FrameNode> CreateStackNode();
     static RefPtr<FrameNode> CreateButtonNode();
-    static RefPtr<FrameNode> CreateColumnNode(uint32_t columnKind, uint32_t showCount);
+    static RefPtr<FrameNode> CreateColumnNode(uint32_t columnKind,
+        uint32_t showCount, RefPtr<PickerTheme> pickerTheme);
+    static RefPtr<FrameNode> CreateIconItemNode(RefPtr<PickerTheme> pickerTheme);
+    static RefPtr<FrameNode> CreateTextItemNode(RefPtr<PickerTheme> pickerTheme);
+    static RefPtr<FrameNode> CreateMixtureItemNode(RefPtr<PickerTheme> pickerTheme);
     static void SetTextProperties(const RefPtr<PickerTheme>& pickerTheme,
         const PickerTextProperties& properties);
+    static void OptionsCreateNode(const RefPtr<TextPickerPattern>& textPickerPattern,
+        const TextPickerSettingData& settingData, const RefPtr<FrameNode>& textPickerNode,
+        uint32_t showCount, uint32_t columnCount, RefPtr<PickerTheme> pickerTheme);
+    static void OptionsShowInternal(const RefPtr<TextPickerPattern>& textPickerPattern,
+        const TextPickerSettingData& settingData, const RefPtr<FrameNode>& textPickerNode,
+        uint32_t showCount, RefPtr<PickerTheme> pickerTheme);
 };
 } // namespace OHOS::Ace::NG
 

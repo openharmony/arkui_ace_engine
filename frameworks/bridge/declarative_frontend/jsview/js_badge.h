@@ -17,20 +17,20 @@
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_BADGE_H
 
 #include "bridge/declarative_frontend/jsview/js_container_base.h"
+#include "core/components/badge/badge_component.h"
+#include "core/components_ng/pattern/badge/badge_data.h"
 
 namespace OHOS::Ace::Framework {
-
 class JSBadge : public JSContainerBase {
 public:
     static void Create(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
 
 private:
+    static BadgeParameters CreateBadgeParameters(const JSCallbackInfo& info);
     static void SetDefaultTheme(OHOS::Ace::RefPtr<OHOS::Ace::BadgeComponent>& badge);
     static void SetCustomizedTheme(const JSRef<JSObject>& obj, OHOS::Ace::RefPtr<OHOS::Ace::BadgeComponent>& badge);
-    static void CreateNG(const JSCallbackInfo& info);
 };
-
 } // namespace OHOS::Ace::Framework
 
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_BADGE_H

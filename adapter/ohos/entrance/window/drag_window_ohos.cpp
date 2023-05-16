@@ -17,6 +17,11 @@
 
 #include "txt/paragraph_txt.h"
 
+#ifdef NEW_SKIA
+#include "include/core/SkCanvas.h"
+#include "include/core/SkSamplingOptions.h"
+#endif
+
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/offset.h"
 #include "base/image/pixel_map.h"
@@ -107,7 +112,7 @@ void DrawSkImage(SkCanvas* canvas, const sk_sp<SkImage>& skImage, int32_t width,
 #endif
 }
 
-void DrawSkImage(SkCanvas* canvas, const RefPtr<PixelMap>& pixmap, int32_t width, int32_t height)
+void DrawPixelMapInner(SkCanvas* canvas, const RefPtr<PixelMap>& pixmap, int32_t width, int32_t height)
 {
     // Step1: Create SkPixmap
     auto imageInfo = MakeSkImageInfoFromPixelMap(pixmap);
@@ -256,7 +261,7 @@ void DragWindowOhos::DrawPixelMap(const RefPtr<PixelMap>& pixelmap)
     rsUiDirector_->SetRoot(rootNode_->GetId());
     auto canvasNode = std::static_pointer_cast<Rosen::RSCanvasNode>(rootNode_);
     auto skia = canvasNode->BeginRecording(width_, height_);
-    DrawSkImage(skia, pixelmap, width_, height_);
+    DrawPixelMapInner(skia, pixelmap, width_, height_);
     canvasNode->FinishRecording();
     rsUiDirector_->SendMessages();
 #endif

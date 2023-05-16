@@ -75,11 +75,14 @@ public:
 
     void OnModifyDone() override;
 
+    void SetOnIndexChangeEvent(std::function<void(const BaseEventInfo*)>&& event);
+
 private:
     void OnAttachToFrameNode() override;
     void OnUpdateShowDivider();
 
     ChangeEventPtr onChangeEvent_;
+    ChangeEventPtr onIndexChangeEvent_;
 };
 
 } // namespace OHOS::Ace::NG

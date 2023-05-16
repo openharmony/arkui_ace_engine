@@ -17,15 +17,16 @@
 
 #define private public
 #define protected public
+
+#include "core/components/text/text_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/image_provider/image_state_manager.h"
+#include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/components_ng/pattern/image/image_paint_method.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/test/mock/render/mock_canvas_image.h"
-#include "core/components_ng/test/mock/render/mock_render_context.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
@@ -220,15 +221,16 @@ HWTEST_F(ImageTestNg, ImagePatternModifyDone001, TestSize.Level1)
  */
 HWTEST_F(ImageTestNg, UpdateInternalResource001, TestSize.Level1)
 {
-    // create mock theme manager
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<IconTheme>()));
     auto frameNode = ImageTestNg::CreateImageNode("", ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
     ASSERT_NE(imagePattern, nullptr);
+
+    // create mock theme manager
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<IconTheme>()));
     /**
     //     case1 : imageSource is not internal resource, and it can not load correct resource Icon.
     */
@@ -249,6 +251,8 @@ HWTEST_F(ImageTestNg, UpdateInternalResource001, TestSize.Level1)
     sourceInfo.SetResourceId(InternalResource::ResourceId::PLAY_SVG);
     imagePattern->UpdateInternalResource(sourceInfo);
     EXPECT_EQ(imageLayoutProperty->GetImageSourceInfo()->GetSrc(), RESOURCE_URL);
+
+    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -435,8 +439,13 @@ HWTEST_F(ImageTestNg, ImagePatternOnNotifyMemoryLevelFunction001, TestSize.Level
     ASSERT_NE(frameNode, nullptr);
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
     ASSERT_NE(imagePattern, nullptr);
-    imagePattern->loadingCtx_ = nullptr;
-    imagePattern->altLoadingCtx_ = nullptr;
+    imagePattern->loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
+        ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT),
+        LoadNotifier(nullptr, nullptr, nullptr));
+    imagePattern->altLoadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
+        ImageSourceInfo(ALT_SRC_URL, ALT_SOURCEINFO_WIDTH, ALT_SOURCEINFO_HEIGHT),
+        LoadNotifier(nullptr, nullptr, nullptr));
+    imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
     /**
      * @tc.cases: case1. Before Image load and ImagePattern windowHide, Image doesn't need resetLoading.
      */
@@ -456,12 +465,11 @@ HWTEST_F(ImageTestNg, ImagePatternOnNotifyMemoryLevelFunction001, TestSize.Level
     /**
      * @tc.cases: case3. After Image load and ImagePattern windowHide, pattern will clean data and reset params.
      */
+    imagePattern->altImage_ = AceType::MakeRefPtr<MockCanvasImage>();
     imagePattern->OnWindowHide();
     imagePattern->OnNotifyMemoryLevel(0);
     EXPECT_FALSE(imagePattern->isShow_);
     EXPECT_EQ(imagePattern->image_, nullptr);
-    EXPECT_EQ(imagePattern->srcRect_, RectF());
-    EXPECT_EQ(imagePattern->dstRect_, RectF());
     EXPECT_EQ(imagePattern->altLoadingCtx_, nullptr);
     EXPECT_EQ(imagePattern->altImage_, nullptr);
     EXPECT_EQ(imagePattern->altSrcRect_, nullptr);
@@ -528,7 +536,7 @@ HWTEST_F(ImageTestNg, ImagePaintMethod001, TestSize.Level1)
     ASSERT_NE(imagePattern, nullptr);
     imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
     imagePattern->image_->SetPaintConfig(ImagePaintConfig());
-    ImagePaintMethod imagePaintMethod(imagePattern->image_);
+    ImagePaintMethod imagePaintMethod(imagePattern->image_, true);
     /**
      * @tc.steps: step3. ImagePaintMethod GetContentDrawFunction.
      */
@@ -550,6 +558,21 @@ HWTEST_F(ImageTestNg, ImagePaintMethod001, TestSize.Level1)
     EXPECT_EQ(config->imageRepeat_, IMAGE_REPEAT_DEFAULT);
     EXPECT_EQ(config->needFlipCanvasHorizontally_, MATCHTEXTDIRECTION_DEFAULT);
     EXPECT_EQ(*config->colorFilter_, COLOR_FILTER_DEFAULT);
+
+    /**
+     * @tc.steps: step4. ImagePaintMethod GetOverlayDrawFunction
+     */
+
+    // create mock theme manager
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<TextTheme>()));
+
+    auto overlayPaintMethod = imagePaintMethod.GetOverlayDrawFunction(&paintWrapper);
+    EXPECT_TRUE(overlayPaintMethod);
+    EXPECT_TRUE(imagePaintMethod.selected_);
+
+    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -1310,9 +1333,9 @@ HWTEST_F(ImageTestNg, Drag001, TestSize.Level1)
     auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    frameNode->SetDraggable(true);
     frameNode->MarkModifyDone();
     auto pattern = frameNode->GetPattern<ImagePattern>();
-    pattern->SetDraggable(true);
     pattern->loadingCtx_->SuccessCallback(nullptr);
 
     // emulate drag event
@@ -1322,15 +1345,8 @@ HWTEST_F(ImageTestNg, Drag001, TestSize.Level1)
         eventHub->GetDragExtraParams(std::string(), Point(RADIUS_DEFAULT, RADIUS_DEFAULT), DragEventType::START);
     auto dragDropInfo = (eventHub->GetOnDragStart())(nullptr, extraParams);
 
-    // check dragInfo customNode
-    ASSERT_NE(dragDropInfo.customNode, nullptr);
-    EXPECT_EQ(dragDropInfo.customNode->tag_, V2::IMAGE_ETS_TAG);
-
-    auto dragNode = AceType::DynamicCast<FrameNode>(dragDropInfo.customNode);
-    ASSERT_NE(dragNode, nullptr);
-    auto dragPattern = dragNode->GetPattern<ImagePattern>();
-    ASSERT_NE(dragPattern->image_, nullptr);
-    EXPECT_EQ(dragPattern->loadingCtx_->src_.GetSrc(), IMAGE_SRC_URL);
+    // check dragInfo
+    EXPECT_EQ(dragDropInfo.extraInfo, IMAGE_SRC_URL);
 
     // change src
     frameNode->GetLayoutProperty<ImageLayoutProperty>()->UpdateImageSourceInfo(ImageSourceInfo(ALT_SRC_URL));
@@ -1338,10 +1354,7 @@ HWTEST_F(ImageTestNg, Drag001, TestSize.Level1)
     pattern->loadingCtx_->SuccessCallback(nullptr);
 
     auto newDragDropInfo = (eventHub->GetOnDragStart())(nullptr, extraParams);
-    dragNode = AceType::DynamicCast<FrameNode>(newDragDropInfo.customNode);
-    dragPattern = dragNode->GetPattern<ImagePattern>();
-    ASSERT_NE(dragPattern->image_, nullptr);
-    EXPECT_EQ(dragPattern->loadingCtx_->src_.GetSrc(), ALT_SRC_URL);
+    EXPECT_EQ(newDragDropInfo.extraInfo, ALT_SRC_URL);
 }
 
 /**

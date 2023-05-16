@@ -29,7 +29,7 @@
 #include "adapter/android/entrance/java/jni/virtual_rs_window.h"
 #endif
 #else
-#include "window_prviewer.h"
+#include "adapter/preview/external/window/window_preview.h"
 #endif
 
 #include "base/thread/task_executor.h"
@@ -58,6 +58,11 @@ public:
         return rsUIDirector_;
     }
 
+    sptr<Rosen::Window> GetRSWindow() const
+    {
+        return rsWindow_;
+    }
+
     void RecordFrameTime(uint64_t timeStamp, const std::string& name) override;
 
     void FlushTasks() override;
@@ -75,6 +80,8 @@ public:
     void SetDrawTextAsBitmap(bool useBitmap) override;
 
     float GetRefreshRate() const override;
+
+    void SetKeepScreenOn(bool keepScreenOn) override;
 
 private:
     OHOS::sptr<OHOS::Rosen::Window> rsWindow_;

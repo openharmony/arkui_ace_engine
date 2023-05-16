@@ -62,7 +62,7 @@ void RenderWaterFlow::Update(const RefPtr<Component>& component)
         controller->SetScrollNode(WeakClaim(this));
     }
     if (!animator_) {
-        animator_ = AceType::MakeRefPtr<Animator>(GetContext());
+        animator_ = CREATE_ANIMATOR(GetContext());
     }
 
     updateFlag_ = true;

@@ -28,7 +28,6 @@
 #include "core/components/select/select_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/button/button_view.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
@@ -220,6 +219,17 @@ void SelectPattern::CreateSelectedCallback()
 
         auto hub = host->GetEventHub<SelectEventHub>();
         CHECK_NULL_VOID(hub);
+        // execute change event callback
+        auto selectChangeEvent = hub->GetSelectChangeEvent();
+        if (selectChangeEvent) {
+            selectChangeEvent(index);
+        }
+        auto valueChangeEvent = hub->GetValueChangeEvent();
+        if (valueChangeEvent) {
+            auto newSelected = pattern->options_[index]->GetPattern<OptionPattern>();
+            CHECK_NULL_VOID(newSelected);
+            valueChangeEvent(newSelected->GetText());
+        }
         auto onSelect = hub->GetSelectEvent();
         // execute onSelect callback
         if (onSelect) {
@@ -251,8 +261,12 @@ bool SelectPattern::OnKeyEvent(const KeyEvent& event)
     if (event.action != KeyAction::DOWN) {
         return false;
     }
-    if (event.code == KeyCode::KEY_ENTER || event.code == KeyCode::KEY_SPACE) {
-        ShowSelectMenu();
+    if (event.code == KeyCode::KEY_ENTER) {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        auto focusHub = host->GetOrCreateFocusHub();
+        CHECK_NULL_RETURN(focusHub, false);
+        focusHub->OnClick(event);
         return true;
     }
     return false;
@@ -369,7 +383,7 @@ void SelectPattern::BuildChild()
     auto renderContext = select->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateBackgroundColor(theme->GetBackgroundColor());
-
+    renderContext->SetClipToFrame(true);
     BorderRadiusProperty border;
     border.SetRadius(theme->GetSelectBorderRadius());
     renderContext->UpdateBorderRadius(border);
@@ -418,7 +432,10 @@ void SelectPattern::SetFontColor(const Color& color)
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
     props->UpdateTextColor(color);
-    text_->GetRenderContext()->UpdateForegroundColor(color);
+    auto context = text_->GetRenderContext();
+    context->UpdateForegroundColor(color);
+    context->UpdateForegroundColorFlag(false);
+    context->ResetForegroundColorStrategy();
 }
 
 void SelectPattern::SetOptionBgColor(const Color& color)
@@ -732,6 +749,28 @@ void SelectPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         json->Put("optionFont", optionPattern->InspectorGetFont().c_str());
         json->Put("optionFontColor", optionPattern->GetFontColor().ColorToString().c_str());
     }
+    ToJsonOptionAlign(json);
+}
+
+void SelectPattern::ToJsonOptionAlign(std::unique_ptr<JsonValue>& json) const
+{
+    auto optionAlignJson = JsonUtil::Create(true);
+    std::string alignTypeString = "MenuAlignType.Start";
+    if (menuAlign_.alignType == MenuAlignType::START) {
+        alignTypeString = "MenuAlignType.Start";
+    } else if (menuAlign_.alignType == MenuAlignType::CENTER) {
+        alignTypeString = "MenuAlignType.Center";
+    } else if (menuAlign_.alignType == MenuAlignType::END) {
+        alignTypeString = "MenuAlignType.End";
+    }
+    optionAlignJson->Put("alignType", alignTypeString.c_str());
+
+    auto offsetValueJson = JsonUtil::Create(true);
+    offsetValueJson->Put("dX", menuAlign_.offset.GetX().Value());
+    offsetValueJson->Put("dY", menuAlign_.offset.GetY().Value());
+    optionAlignJson->Put("offset", offsetValueJson);
+
+    json->Put("menuAlign", optionAlignJson);
 }
 
 std::string SelectPattern::InspectorGetOptions() const
@@ -813,5 +852,16 @@ std::string SelectPattern::GetValue()
     auto textProps = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textProps, "");
     return textProps->GetContentValue("");
+}
+
+void SelectPattern::SetMenuAlign(const MenuAlign& menuAlign)
+{
+    menuAlign_ = menuAlign;
+    auto menu = GetMenuNode();
+    CHECK_NULL_VOID(menu);
+    auto menuLayoutProps = menu->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(menuLayoutProps);
+    menuLayoutProps->UpdateAlignType(menuAlign.alignType);
+    menuLayoutProps->UpdateOffset(menuAlign.offset);
 }
 } // namespace OHOS::Ace::NG

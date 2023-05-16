@@ -35,6 +35,7 @@ public:
     {}
     ~NavigationGroupNode() override = default;
     void AddChildToGroup(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT) override;
+    void AddNavDestinationToNavigation(const RefPtr<UINode>& parent);
     static RefPtr<NavigationGroupNode> GetOrCreateGroupNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
 
@@ -73,12 +74,36 @@ public:
         return dividerNode_;
     }
 
+    bool GetIsOnAnimation() const
+    {
+        return isOnAnimation_;
+    }
+
+    void SetIsOnAnimation(bool isOnAnimation)
+    {
+        isOnAnimation_ = isOnAnimation;
+    }
+
+    bool GetIsModeChange() const
+    {
+        return isModeChange_;
+    }
+
+    void SetIsModeChange(bool isModeChange)
+    {
+        isModeChange_ = isModeChange;
+    }
+
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+
+    static RefPtr<UINode> GetNavDestinationNode(RefPtr<UINode> uiNode);
+
 private:
     RefPtr<UINode> navBarNode_;
     RefPtr<UINode> contentNode_;
     RefPtr<UINode> dividerNode_;
+    bool isOnAnimation_ {false};
+    bool isModeChange_ {false};
 };
-
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_GROUP_NODE_H

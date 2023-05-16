@@ -18,6 +18,7 @@
 
 #include <functional>
 #include <memory>
+#include <mutex>
 #include <string>
 
 #include "base/geometry/dimension.h"
@@ -42,11 +43,12 @@ public:
     virtual void SetTextDecorationColor(const Color& value) = 0;
     virtual void SetTextCase(TextCase value) = 0;
     virtual void SetLetterSpacing(const Dimension& value) = 0;
-
+    virtual void SetLineHeight(const Dimension& value) = 0;
     virtual void SetOnClick(std::function<void(const BaseEventInfo* info)>&& click) = 0;
 
 private:
     static std::unique_ptr<SpanModel> instance_;
+    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
 

@@ -21,7 +21,17 @@
 #include "core/components/theme/theme_constants_defines.h"
 
 namespace OHOS::Ace {
-
+namespace {
+constexpr double SWIPER_ARROW_ALPHA_DISABLED = 0.4;
+constexpr Dimension SWIPER_ARROW_SCALE = 24.0_vp;
+constexpr Dimension SWIPER_ARROW_SMALL_ARROW_BOARD_SIZE = 24.0_vp;
+constexpr Dimension SWIPER_ARROW_SMALL_ARROW_SIZE = 18.0_vp;
+constexpr Dimension SWIPER_ARROW_BIG_ARROW_BOARD_SIZE = 32.0_vp;
+constexpr Dimension SWIPER_ARROW_BIG_ARROW_SIZE = 24.0_vp;
+constexpr Dimension SWIPER_ARROW_HORIZONTAL_MARGIN_DEFAULT = 8.0_vp;
+constexpr Dimension SWIPER_ARROW_VERTICAL_MARGIN_DEFAULT = 8.0_vp;
+constexpr float SWIPER_ARROW_ZOOM_OUT_SCALE = 1.33f;
+} // namespace
 class SwiperIndicatorTheme : public virtual Theme {
     DECLARE_ACE_TYPE(SwiperIndicatorTheme, Theme);
 
@@ -59,14 +69,19 @@ public:
             theme->isIndicatorDisabled_ = themeConstants->GetInt(THEME_SWIPER_INDICATOR_DISABLED);
             theme->animationCurve_ = AnimationCurve(themeConstants->GetInt(THEME_SWIPER_ANIMATION_CURVE));
             theme->animationOpacity_ = themeConstants->GetInt(THEME_SWIPER_ANIMATION_OPACITY);
-            auto themeStyle = themeConstants->GetThemeStyle();
+            ParsePattern(themeConstants->GetThemeStyle(), theme);
+            return theme;
+        }
+
+        void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<SwiperIndicatorTheme>& theme) const
+        {
             if (!themeStyle) {
-                return theme;
+                return;
             }
             auto swiperPattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_SWIPER, nullptr);
             if (!swiperPattern) {
                 LOGW("find pattern of swiper fail");
-                return theme;
+                return;
             }
             theme->color_ = swiperPattern->GetAttr<Color>("indicator_color", Color::TRANSPARENT);
             theme->hotZoneColor_ = swiperPattern->GetAttr<Color>("indicator_hotzone_color", Color::TRANSPARENT);
@@ -80,7 +95,30 @@ public:
             theme->hoverColor_ = swiperPattern->GetAttr<Color>("indicator_color_hover", Color::TRANSPARENT);
             theme->pressedColor_ = swiperPattern->GetAttr<Color>("indicator_color_pressed", Color::TRANSPARENT);
             theme->focusedColor_ = swiperPattern->GetAttr<Color>("indicator_color_focused", Color::TRANSPARENT);
-            return theme;
+            theme->arrowBoardColorHover_ =
+                swiperPattern->GetAttr<Color>(ARROW_COLOR_BOARDCOLOR_HOVER, Color::TRANSPARENT);
+            theme->arrowBoardColorClick_ =
+                swiperPattern->GetAttr<Color>(ARROW_COLOR_BOARDCOLOR_CLICK, Color::TRANSPARENT);
+            theme->arrowColorPrimary_ = swiperPattern->GetAttr<Color>(ARROW_COLOR_PRIMARY, Color::TRANSPARENT);
+            theme->arrowColorPrimaryContrary_ =
+                swiperPattern->GetAttr<Color>(ARROW_COLOR_PRIMARY_CONTRARY, Color::TRANSPARENT);
+            theme->arrowDisabledAlpha_ =
+                swiperPattern->GetAttr<double>(ARROW_DISABLED_ALPHA, SWIPER_ARROW_ALPHA_DISABLED);
+            theme->arrowScale_ = SWIPER_ARROW_SCALE;
+            theme->arrowHorizontalMargin_ =
+                swiperPattern->GetAttr<Dimension>(ARROW_HORIZONTAL_MARGIN, SWIPER_ARROW_HORIZONTAL_MARGIN_DEFAULT);
+            theme->arrowVerticalMargin_ =
+                swiperPattern->GetAttr<Dimension>(ARROW_VERTICAL_MARGIN, SWIPER_ARROW_VERTICAL_MARGIN_DEFAULT);
+            theme->smallArrowBoardSize_ = SWIPER_ARROW_SMALL_ARROW_BOARD_SIZE;
+            theme->smallArrowSize_ = SWIPER_ARROW_SMALL_ARROW_SIZE;
+            theme->smallArrowBoardColor_ = Color::TRANSPARENT;
+            theme->smallArrowColor_ = swiperPattern->GetAttr<Color>(ARROW_COLOR_PRIMARY, Color::TRANSPARENT);
+            theme->bigArrowBoardSize_ = SWIPER_ARROW_BIG_ARROW_BOARD_SIZE;
+            theme->bigArrowSize_ = SWIPER_ARROW_BIG_ARROW_SIZE;
+            theme->bigArrowBoardColor_ =
+                swiperPattern->GetAttr<Color>(ARROW_COLOR_COMPONENT_NORMAL, Color::TRANSPARENT);
+            theme->bigArrowColor_ = swiperPattern->GetAttr<Color>(ARROW_COLOR_PRIMARY, Color::TRANSPARENT);
+            theme->arrowZoomOutScale_ = SWIPER_ARROW_ZOOM_OUT_SCALE;
         }
     };
 
@@ -191,6 +229,98 @@ public:
         return animationOpacity_;
     }
 
+    const Color& GetArrowBoardColorHover() const
+    {
+        return arrowBoardColorHover_;
+    }
+
+    const Color& GetArrowBoardColorClick() const
+    {
+        return arrowBoardColorClick_;
+    }
+
+    const Color& GetArrowColorPrimary() const
+    {
+        return arrowColorPrimary_;
+    }
+
+    const Color& GetArrowColorPrimaryContrary() const
+    {
+        return arrowColorPrimaryContrary_;
+    }
+
+    bool GetIsShowArrowBoard() const
+    {
+        return isShowArrowBoard_;
+    }
+
+    bool GetIsSiderMiddle() const
+    {
+        return isSiderMiddle_;
+    }
+
+    const Dimension& GetSmallArrowBoardSize() const
+    {
+        return smallArrowBoardSize_;
+    }
+
+    const Dimension& GetSmallArrowSize() const
+    {
+        return smallArrowSize_;
+    }
+    const Color& GetSmallArrowBoardColor() const
+    {
+        return smallArrowBoardColor_;
+    }
+
+    const Color& GetSmallArrowColor() const
+    {
+        return smallArrowColor_;
+    }
+    const Dimension& GetBigArrowBoardSize() const
+    {
+        return bigArrowBoardSize_;
+    }
+
+    const Dimension& GetBigArrowSize() const
+    {
+        return bigArrowSize_;
+    }
+    const Color& GetBigArrowBoardColor() const
+    {
+        return bigArrowBoardColor_;
+    }
+
+    const Color& GetBigArrowColor() const
+    {
+        return bigArrowColor_;
+    }
+
+    double GetArrowDisabledAlpha() const
+    {
+        return arrowDisabledAlpha_;
+    }
+
+    const Dimension& GetArrowScale() const
+    {
+        return arrowScale_;
+    }
+
+    const Dimension& GetArrowHorizontalMargin() const
+    {
+        return arrowHorizontalMargin_;
+    }
+
+    const Dimension& GetArrowVerticalMargin() const
+    {
+        return arrowVerticalMargin_;
+    }
+
+    float GetArrowZoomOutScale() const
+    {
+        return arrowZoomOutScale_;
+    }
+
 protected:
     SwiperIndicatorTheme() = default;
 
@@ -216,6 +346,25 @@ private:
     bool isIndicatorDisabled_ = false;
     AnimationCurve animationCurve_ = { AnimationCurve::FRICTION };
     bool animationOpacity_ = true;
+    Color arrowBoardColorHover_;
+    Color arrowBoardColorClick_;
+    Color arrowColorPrimary_;
+    Color arrowColorPrimaryContrary_;
+    bool isShowArrowBoard_ = false;
+    bool isSiderMiddle_ = false;
+    Dimension smallArrowBoardSize_;
+    Dimension smallArrowSize_;
+    Color smallArrowBoardColor_;
+    Color smallArrowColor_;
+    Dimension bigArrowBoardSize_;
+    Dimension bigArrowSize_;
+    Color bigArrowBoardColor_;
+    Color bigArrowColor_;
+    double arrowDisabledAlpha_ = 0.4;
+    Dimension arrowScale_;
+    Dimension arrowHorizontalMargin_;
+    Dimension arrowVerticalMargin_;
+    float arrowZoomOutScale_ = 1.33f;
 };
 
 } // namespace OHOS::Ace

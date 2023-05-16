@@ -390,6 +390,11 @@ public:
     void ShowWebView();
     void HideWebView();
     void Resize(const double& width, const double& height);
+    int32_t GetRosenWindowId()
+    {
+        return rosenWindowId_;
+    }
+    void SetKeepScreenOn(bool key);
     void UpdateUserAgent(const std::string& userAgent);
     void UpdateBackgroundColor(const int backgroundColor);
     void UpdateInitialScale(float scale);
@@ -704,6 +709,7 @@ private:
     int32_t parentNWebId_ = -1;
     bool needResizeAtFirst_ = false;
     int32_t backgroundColor_ = 0xffffffff;
+    int32_t rosenWindowId_ = -1;
 #endif
 };
 

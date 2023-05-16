@@ -54,7 +54,7 @@ void RenderFocusAnimation::Update(const RefPtr<Component>& component)
     layoutSize_.SetWidth(pipelineContext->GetRootWidth());
     layoutSize_.SetHeight(pipelineContext->GetRootHeight());
     if (SystemProperties::GetDeviceType() == DeviceType::TV) {
-        animator_ = AceType::MakeRefPtr<Animator>(pipelineContext);
+        animator_ = CREATE_ANIMATOR(pipelineContext);
         focusAnimation_ = AceType::MakeRefPtr<CurveAnimation<float>>(0.0f, SEMICIRCLE, Curves::LINEAR);
         focusAnimation_->AddListener([weak = AceType::WeakClaim(this)](const float& value) {
             auto client = weak.Upgrade();

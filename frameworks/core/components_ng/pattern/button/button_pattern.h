@@ -21,13 +21,11 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/focus_hub.h"
-#include "core/components_ng/pattern/button/button_accessibility_property.h"
 #include "core/components_ng/pattern/button/button_event_hub.h"
 #include "core/components_ng/pattern/button/button_layout_algorithm.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
-
 namespace OHOS::Ace::NG {
 enum class ComponentButtonType { POPUP, BUTTON };
 class ButtonPattern : public Pattern {
@@ -56,11 +54,6 @@ public:
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<ButtonLayoutProperty>();
-    }
-
-    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
-    {
-        return MakeRefPtr<ButtonAccessibilityProperty>();
     }
 
     FocusPattern GetFocusPattern() const override
@@ -96,7 +89,10 @@ public:
         CHECK_NULL_VOID(host);
         auto layoutProperty = host->GetLayoutProperty<ButtonLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
-        json->Put("type", ConvertButtonTypeToString(layoutProperty->GetType().value_or(ButtonType::CAPSULE)).c_str());
+        json->Put(
+            "type", host->GetTag() == "Toggle"
+                        ? "ToggleType.Button"
+                        : ConvertButtonTypeToString(layoutProperty->GetType().value_or(ButtonType::CAPSULE)).c_str());
         json->Put("fontSize", layoutProperty->GetFontSizeValue(Dimension(0)).ToString().c_str());
         json->Put("fontWeight",
             V2::ConvertWrapFontWeightToStirng(layoutProperty->GetFontWeight().value_or(FontWeight::NORMAL)).c_str());
@@ -125,17 +121,21 @@ public:
         fontJsValue->Put("weight",
             V2::ConvertWrapFontWeightToStirng(layoutProperty->GetFontWeight().value_or(FontWeight::NORMAL)).c_str());
         fontJsValue->Put("family", fontFamily.c_str());
-        fontJsValue->Put("style", layoutProperty->GetFontStyle().value_or(
-            Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL ? "FontStyle.Normal" : "FontStyle.Italic");
+        fontJsValue->Put(
+            "style", layoutProperty->GetFontStyle().value_or(Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL
+                         ? "FontStyle.Normal"
+                         : "FontStyle.Italic");
         auto labelJsValue = JsonUtil::Create(true);
-        labelJsValue->Put("overflow", V2::ConvertWrapTextOverflowToString(
-            layoutProperty->GetTextOverflow().value_or(TextOverflow::CLIP)).c_str());
-        labelJsValue->Put("maxLines", std::to_string(layoutProperty->GetMaxLines().value_or(
-            DEFAULT_MAXLINES)).c_str());
+        labelJsValue->Put("overflow",
+            V2::ConvertWrapTextOverflowToString(layoutProperty->GetTextOverflow().value_or(TextOverflow::CLIP))
+                .c_str());
+        labelJsValue->Put("maxLines", std::to_string(layoutProperty->GetMaxLines().value_or(DEFAULT_MAXLINES)).c_str());
         labelJsValue->Put("minFontSize", layoutProperty->GetMinFontSizeValue(Dimension(0)).ToString().c_str());
         labelJsValue->Put("maxFontSize", layoutProperty->GetMaxFontSizeValue(Dimension(0)).ToString().c_str());
-        labelJsValue->Put("heightAdaptivePolicy", V2::ConvertWrapTextHeightAdaptivePolicyToString(
-            layoutProperty->GetHeightAdaptivePolicy().value_or(TextHeightAdaptivePolicy::MAX_LINES_FIRST)).c_str());
+        labelJsValue->Put("heightAdaptivePolicy",
+            V2::ConvertWrapTextHeightAdaptivePolicyToString(
+                layoutProperty->GetHeightAdaptivePolicy().value_or(TextHeightAdaptivePolicy::MAX_LINES_FIRST))
+                .c_str());
         labelJsValue->Put("font", fontJsValue->ToString().c_str());
         json->Put("labelStyle", labelJsValue->ToString().c_str());
     }
@@ -163,24 +163,28 @@ protected:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     void InitTouchEvent();
+    void InitHoverEvent();
     void OnTouchDown();
     void OnTouchUp();
+    void HandleHoverEvent(bool isHover);
     void HandleEnabled();
     void InitButtonLabel();
-    void AnimateTouchEffectBoard(float startOpacity, float endOpacity, int32_t duration, const RefPtr<Curve>& curve);
+    void AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, float startOpacity, float endOpacity,
+        int32_t duration, const RefPtr<Curve>& curve);
     Color clickedColor_;
 
 private:
     static void SetDefaultAttributes(const RefPtr<FrameNode>& buttonNode, const RefPtr<PipelineBase>& pipeline);
-    static void UpdateTextLayoutProperty(RefPtr<ButtonLayoutProperty> layoutProperty,
-        RefPtr<TextLayoutProperty> textLayoutProperty);
+    static void UpdateTextLayoutProperty(
+        RefPtr<ButtonLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty);
     Color backgroundColor_;
     Color FocusBorderColor_;
     bool isSetClickedColor_ = false;
     ComponentButtonType buttonType_ = ComponentButtonType::BUTTON;
 
     RefPtr<TouchEventImpl> touchListener_;
-    RefPtr<InputEvent> mouseEvent_;
+    RefPtr<InputEvent> hoverListener_;
+    bool isHover_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(ButtonPattern);
 };

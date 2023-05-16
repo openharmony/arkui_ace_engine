@@ -37,7 +37,7 @@ const static std::unordered_map<ClickSpringEffectType, SpringEffectProperty> CLI
 
 ClickSpringEffect::ClickSpringEffect(const WeakPtr<PipelineContext>& context)
 {
-    controller_ = AceType::MakeRefPtr<Animator>(context);
+    controller_ = CREATE_ANIMATOR(context);
 }
 
 void ClickSpringEffect::FinishPreviousAnimation()

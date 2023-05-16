@@ -23,6 +23,11 @@
 #include "core/components_ng/render/drawing_prop_convertor.h"
 
 namespace OHOS::Ace::NG {
+enum class TouchBottomType {
+    NONE = 0,
+    START,
+    END,
+};
 class DotIndicatorModifier : public ContentModifier {
     DECLARE_ACE_TYPE(DotIndicatorModifier, ContentModifier);
 public:
@@ -37,6 +42,8 @@ public:
           indicatorPadding_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0)),
           indicatorMargin_(AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF(0, 0))),
           itemHalfSizes_(AceType::MakeRefPtr<AnimatablePropertyVectorFloat>(LinearVector<float>(4))),
+          backgroundWidthDilateRatio_(AceType::MakeRefPtr<AnimatablePropertyFloat>(1)),
+          backgroundHeightDilateRatio_(AceType::MakeRefPtr<AnimatablePropertyFloat>(1)),
           unselectedColor_(AceType::MakeRefPtr<PropertyColor>(Color::TRANSPARENT)),
           selectedColor_(AceType::MakeRefPtr<PropertyColor>(Color::TRANSPARENT))
     {
@@ -52,6 +59,8 @@ public:
         AttachProperty(itemHalfSizes_);
         AttachProperty(unselectedColor_);
         AttachProperty(selectedColor_);
+        AttachProperty(backgroundWidthDilateRatio_);
+        AttachProperty(backgroundHeightDilateRatio_);
     }
     ~DotIndicatorModifier() override = default;
 
@@ -71,8 +80,9 @@ public:
     void onDraw(DrawingContext& context) override;
     // paint
     void PaintContent(DrawingContext& context, ContentProperty& contentProperty);
-    void PaintUnselectedIndicator(RSCanvas& canvas, const OffsetF& center, const LinearVector<float>& itemHalfSizes);
-    void PaintSelectedIndicator(RSCanvas& canvas, const OffsetF& leftCenter,
+    void PaintUnselectedIndicator(
+        RSCanvas& canvas, const OffsetF& center, const LinearVector<float>& itemHalfSizes, bool currentIndexFlag);
+    void PaintSelectedIndicator(RSCanvas& canvas, const OffsetF& center, const OffsetF& leftCenter,
         const OffsetF& rightCenter, const LinearVector<float>& itemHalfSizes);
     void PaintMask(DrawingContext& context);
     void PaintBackground(DrawingContext& context, const ContentProperty& contentProperty);
@@ -111,6 +121,10 @@ public:
 
     void UpdateLongPointLeftCenterX(float longPointLeftCenterX, bool isAnimation);
     void UpdateLongPointRightCenterX(float longPointRightCenterX, bool isAnimation);
+
+    // Touch bottom animation
+    void UpdateTouchBottomAnimation(TouchBottomType touchBottomType, const LinearVector<float>& vectorBlackPointCenterX,
+        const std::pair<float, float>& longPointCenterX);
 
     void SetAxis(Axis axis)
     {
@@ -221,6 +235,11 @@ public:
         selectedItemHeight_ = selectedItemHeight;
     }
 
+    void SetIsIndicatorCustomSize(bool isCustomSize)
+    {
+        isCustomSize_ = isCustomSize;
+    }
+
 private:
     static RefPtr<OHOS::Ace::SwiperIndicatorTheme> GetSwiperIndicatorTheme()
     {
@@ -241,6 +260,8 @@ private:
     RefPtr<AnimatablePropertyFloat> indicatorPadding_;
     RefPtr<AnimatablePropertyOffsetF> indicatorMargin_;
     RefPtr<AnimatablePropertyVectorFloat> itemHalfSizes_;
+    RefPtr<AnimatablePropertyFloat> backgroundWidthDilateRatio_;
+    RefPtr<AnimatablePropertyFloat> backgroundHeightDilateRatio_;
 
     float centerY_ = 0;
     Axis axis_ = Axis::HORIZONTAL;
@@ -253,12 +274,14 @@ private:
     bool isPressed_ = false;
 
     bool indicatorMask_ = false;
+    bool isCustomSize_ = false;
     int32_t currentIndex_ = 0;
     OffsetF offset_;
     float itemWidth_ = 0.0f;
     float itemHeight_ = 0.0f;
     float selectedItemWidth_ = 0.0f;
     float selectedItemHeight_ = 0.0f;
+    TouchBottomType touchBottomType_ = TouchBottomType::NONE;
     ACE_DISALLOW_COPY_AND_MOVE(DotIndicatorModifier);
 };
 } // namespace OHOS::Ace::NG

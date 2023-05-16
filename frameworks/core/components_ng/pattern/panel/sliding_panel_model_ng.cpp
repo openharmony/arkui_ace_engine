@@ -239,4 +239,13 @@ void SlidingPanelModelNG::SetBorderStyle(const BorderStyle& borderStyle)
 }
 
 void SlidingPanelModelNG::SetBorder(const BorderStyle& borderStyle, const Dimension& borderWidth) {}
+
+void SlidingPanelModelNG::SetModeChangeEvent(ChangeEvent&& modeChangeEvent)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<SlidingPanelEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetModeChangeEvent(std::move(modeChangeEvent));
+}
 } // namespace OHOS::Ace::NG

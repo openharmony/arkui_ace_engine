@@ -127,19 +127,67 @@ public:
             theme->disappearOptionStyle_.SetTextColor(theme->normalOptionStyle_.GetTextColor());
             theme->titleStyle_.SetTextColor(theme->normalOptionStyle_.GetTextColor());
             theme->dividerColor_ = pattern->GetAttr<Color>("divider_color", theme->dividerColor_);
+            theme->dividerThickness_ = pattern->GetAttr<Dimension>("divider_thickness", 2.0_px);
+            theme->paddingHorizontal_ = pattern->GetAttr<Dimension>("padding_horizontal", 24.0_vp);
+            theme->contentMarginVertical_ = pattern->GetAttr<Dimension>("content_margin_vertical", 8.0_vp);
         }
 
     private:
-        void InitializeTextStyles(const RefPtr<PickerTheme>& theme, const RefPtr<ThemeConstants>& themeConstants) const
+        void InitializeButtonTextStyles(const RefPtr<PickerTheme>& theme,
+            const RefPtr<ThemeConstants>& themeConstants) const
         {
-            theme->selectedOptionStyle_.SetFontSize(themeConstants->GetDimension(THEME_PICKER_SELECT_OPTION_FONT_SIZE));
-            theme->selectedOptionStyle_.SetTextColor(themeConstants->GetColor(THEME_PICKER_SELECT_OPTION_TEXT_COLOR));
-            theme->selectedOptionStyle_.SetFontWeight(
-                FontWeight(themeConstants->GetInt(THEME_PICKER_SELECT_OPTION_WEIGHT)));
-            theme->selectedOptionStyle_.SetAdaptTextSize(theme->selectedOptionStyle_.GetFontSize(),
-                themeConstants->GetDimension(THEME_PICKER_SELECT_OPTION_MIN_FONT_SIZE));
-            theme->selectedOptionStyle_.SetMaxLines(1);
-            theme->selectedOptionStyle_.SetTextOverflow(TextOverflow::ELLIPSIS);
+            theme->buttonStyle_.SetFontSize(themeConstants->GetDimension(THEME_PICKER_BUTTON_FONT_SIZE));
+            theme->buttonStyle_.SetTextColor(themeConstants->GetColor(THEME_PICKER_BUTTON_TEXT_COLOR));
+        }
+
+        void InitializeTitleTextStyles(const RefPtr<PickerTheme>& theme,
+            const RefPtr<ThemeConstants>& themeConstants) const
+        {
+            theme->titleStyle_.SetFontSize(themeConstants->GetDimension(THEME_PICKER_TITLE_FONT_SIZE));
+            theme->titleStyle_.SetTextColor(themeConstants->GetColor(THEME_PICKER_TITLE_TEXT_COLOR));
+            theme->titleStyle_.SetFontWeight(FontWeight::W500);
+            theme->titleStyle_.SetMaxLines(1);
+            theme->titleStyle_.SetTextOverflow(TextOverflow::ELLIPSIS);
+        }
+
+        void InitializeItemTextStyles(const RefPtr<PickerTheme>& theme,
+            const RefPtr<ThemeConstants>& themeConstants) const
+        {
+            auto themeStyle = themeConstants->GetThemeStyle();
+            if (themeStyle) {
+                auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>("picker_pattern", nullptr);
+                if (pattern) {
+                    theme->selectedOptionStyle_.SetTextColor(
+                        pattern->GetAttr<Color>("selected_text_color", Color(0x007DFF)));
+                    theme->selectedOptionStyle_.SetFontSize(
+                        pattern->GetAttr<Dimension>("selected_text_size", 20.0_vp));
+                    theme->selectedOptionStyle_.SetFontWeight(FontWeight::MEDIUM);
+                    theme->selectedOptionStyle_.SetAdaptTextSize(theme->selectedOptionStyle_.GetFontSize(),
+                        themeConstants->GetDimension(THEME_PICKER_SELECT_OPTION_MIN_FONT_SIZE));
+                    theme->selectedOptionStyle_.SetMaxLines(1);
+                    theme->selectedOptionStyle_.SetTextOverflow(TextOverflow::ELLIPSIS);
+
+                    theme->normalOptionStyle_.SetTextColor(
+                        pattern->GetAttr<Color>("text_color", Color(0xff182431)));
+                    theme->normalOptionStyle_.SetFontSize(
+                        pattern->GetAttr<Dimension>("text_size", 16.0_fp));
+                    theme->normalOptionStyle_.SetFontWeight(FontWeight::REGULAR);
+                    theme->normalOptionStyle_.SetAdaptTextSize(theme->normalOptionStyle_.GetFontSize(),
+                        themeConstants->GetDimension(THEME_PICKER_NORMAL_OPTION_MIN_FONT_SIZE));
+                    theme->normalOptionStyle_.SetMaxLines(1);
+                    theme->normalOptionStyle_.SetTextOverflow(TextOverflow::ELLIPSIS);
+
+                    theme->disappearOptionStyle_.SetTextColor(
+                        pattern->GetAttr<Color>("disappear_text_color", Color(0xff182431)));
+                    theme->disappearOptionStyle_.SetFontSize(
+                        pattern->GetAttr<Dimension>("disappear_text_size", 14.0_fp));
+                    theme->disappearOptionStyle_.SetFontWeight(FontWeight::REGULAR);
+                    theme->disappearOptionStyle_.SetAdaptTextSize(theme->disappearOptionStyle_.GetFontSize(),
+                        themeConstants->GetDimension(THEME_PICKER_NORMAL_OPTION_MIN_FONT_SIZE));
+                    theme->disappearOptionStyle_.SetMaxLines(1);
+                    theme->disappearOptionStyle_.SetTextOverflow(TextOverflow::ELLIPSIS);
+                }
+            }
             theme->focusOptionStyle_.SetFontSize(themeConstants->GetDimension(THEME_PICKER_FOCUS_OPTION_FONT_SIZE));
             theme->focusOptionStyle_.SetTextColor(themeConstants->GetColor(THEME_PICKER_FOCUS_OPTION_TEXT_COLOR));
             theme->focusOptionStyle_.SetFontWeight(
@@ -148,35 +196,18 @@ public:
                 themeConstants->GetDimension(THEME_PICKER_SELECT_OPTION_MIN_FONT_SIZE));
             theme->focusOptionStyle_.SetMaxLines(1);
             theme->focusOptionStyle_.SetTextOverflow(TextOverflow::ELLIPSIS);
-            theme->normalOptionStyle_.SetFontSize(themeConstants->GetDimension(THEME_PICKER_NORMAL_OPTION_FONT_SIZE));
-            theme->normalOptionStyle_.SetTextColor(themeConstants->GetColor(THEME_PICKER_NORMAL_OPTION_FONT_COLOR));
-            theme->normalOptionStyle_.SetFontWeight(
-                FontWeight(themeConstants->GetInt(THEME_PICKER_NORMAL_OPTION_WEIGHT)));
-            theme->normalOptionStyle_.SetAdaptTextSize(theme->normalOptionStyle_.GetFontSize(),
-                themeConstants->GetDimension(THEME_PICKER_NORMAL_OPTION_MIN_FONT_SIZE));
-            theme->normalOptionStyle_.SetMaxLines(1);
-            theme->normalOptionStyle_.SetTextOverflow(TextOverflow::ELLIPSIS);
-            theme->normalOptionStyle_.SetFontWeight(
-                FontWeight(themeConstants->GetInt(THEME_PICKER_NORMAL_OPTION_WEIGHT)));
-            theme->disappearOptionStyle_.SetFontSize(
-                themeConstants->GetDimension(THEME_PICKER_DISAPPEAR_OPTION_FONT_SIZE));
-            theme->disappearOptionStyle_.SetTextColor(themeConstants->GetColor(THEME_PICKER_NORMAL_OPTION_FONT_COLOR));
-            theme->normalOptionStyle_.SetFontWeight(
-                FontWeight(themeConstants->GetInt(THEME_PICKER_NORMAL_OPTION_WEIGHT)));
-            theme->disappearOptionStyle_.SetAdaptTextSize(theme->disappearOptionStyle_.GetFontSize(),
-                themeConstants->GetDimension(THEME_PICKER_NORMAL_OPTION_MIN_FONT_SIZE));
-            theme->disappearOptionStyle_.SetMaxLines(1);
-            theme->disappearOptionStyle_.SetTextOverflow(TextOverflow::ELLIPSIS);
-            theme->buttonStyle_.SetFontSize(themeConstants->GetDimension(THEME_PICKER_BUTTON_FONT_SIZE));
-            theme->buttonStyle_.SetTextColor(themeConstants->GetColor(THEME_PICKER_BUTTON_TEXT_COLOR));
-            theme->titleStyle_.SetFontSize(themeConstants->GetDimension(THEME_PICKER_TITLE_FONT_SIZE));
-            theme->titleStyle_.SetTextColor(themeConstants->GetColor(THEME_PICKER_TITLE_TEXT_COLOR));
-            theme->titleStyle_.SetFontWeight(FontWeight::W500);
-            theme->titleStyle_.SetMaxLines(1);
-            theme->titleStyle_.SetTextOverflow(TextOverflow::ELLIPSIS);
+
             if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
                 theme->focusOptionStyle_ = theme->selectedOptionStyle_; // focus style the same with selected on phone
             }
+        }
+
+        void InitializeTextStyles(const RefPtr<PickerTheme>& theme,
+            const RefPtr<ThemeConstants>& themeConstants) const
+        {
+            InitializeItemTextStyles(theme, themeConstants);
+            InitializeTitleTextStyles(theme, themeConstants);
+            InitializeButtonTextStyles(theme, themeConstants);
         }
     };
 
@@ -433,6 +464,16 @@ public:
     {
         return hoverColor_;
     }
+    
+    const Dimension& GetPaddingHorizontal() const
+    {
+        return paddingHorizontal_;
+    }
+
+    const Dimension& GetContentMarginVertical() const
+    {
+        return contentMarginVertical_;
+    }
 
 private:
     PickerTheme() = default;
@@ -489,6 +530,9 @@ private:
     Color dividerColor_;
     Dimension gradientHeight_;
     Dimension columnFixedWidth_;
+
+    Dimension paddingHorizontal_;
+    Dimension contentMarginVertical_;
 };
 
 } // namespace OHOS::Ace

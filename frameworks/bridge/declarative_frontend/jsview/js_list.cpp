@@ -30,19 +30,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<ListModel> ListModel::instance_ = nullptr;
+std::mutex ListModel::mutex_;
 
 ListModel* ListModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::ListModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::ListModelNG());
-        } else {
-            instance_.reset(new Framework::ListModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::ListModelNG());
+            } else {
+                instance_.reset(new Framework::ListModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -106,7 +110,7 @@ void JSList::Create(const JSCallbackInfo& args)
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
         JSRef<JSVal> spaceValue = obj->GetProperty("space");
         if (!spaceValue->IsNull()) {
-            Dimension space;
+            CalcDimension space;
             ConvertFromJSValue(spaceValue, space);
             ListModel::GetInstance()->SetSpace(space);
         }
@@ -139,9 +143,9 @@ void JSList::SetChainAnimationOptions(const JSCallbackInfo& info)
 
     if (info[0]->IsObject()) {
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
-        Dimension minSpace = 10.0_vp;
+        CalcDimension minSpace = 10.0_vp;
         ParseJsDimensionVp(jsObj->GetProperty("minSpace"), minSpace);
-        Dimension maxSpace = 40.0_vp;
+        CalcDimension maxSpace = 40.0_vp;
         ParseJsDimensionVp(jsObj->GetProperty("maxSpace"), maxSpace);
         double conductivity = 0.7f;
         JSViewAbstract::ParseJsDouble(jsObj->GetProperty("conductivity"), conductivity);
@@ -181,6 +185,7 @@ void JSList::SetLanes(const JSCallbackInfo& info)
     if (ParseJsInteger<int32_t>(info[0], laneNum)) {
         // when [lanes] is set, [laneConstrain_] of list component will be reset to std::nullopt
         ListModel::GetInstance()->SetLanes(laneNum);
+        ListModel::GetInstance()->SetLaneConstrain(-1.0_vp, -1.0_vp);
         return;
     }
     if (info[0]->IsObject()) {
@@ -191,11 +196,13 @@ void JSList::SetLanes(const JSCallbackInfo& info)
             LOGW("minLength and maxLength are not both set");
             return;
         }
-        Dimension minLengthValue;
-        Dimension maxLengthValue;
+        CalcDimension minLengthValue;
+        CalcDimension maxLengthValue;
         if (!ParseJsDimensionVp(minLengthParam, minLengthValue)
             || !ParseJsDimensionVp(maxLengthParam, maxLengthValue)) {
             LOGW("minLength param or maxLength param is invalid");
+            ListModel::GetInstance()->SetLanes(1);
+            ListModel::GetInstance()->SetLaneConstrain(-1.0_vp, -1.0_vp);
             return;
         }
         ListModel::GetInstance()->SetLaneConstrain(minLengthValue, maxLengthValue);
@@ -238,7 +245,7 @@ void JSList::ScrollCallback(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
         auto onScroll = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
-                            const Dimension& scrollOffset, const ScrollState& scrollState) {
+                            const CalcDimension& scrollOffset, const ScrollState& scrollState) {
             auto params = ConvertToJSValues(scrollOffset, scrollState);
             func->Call(JSRef<JSObject>(), params.size(), params.data());
             return;
@@ -459,7 +466,7 @@ void JSList::ScrollBeginCallback(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
         auto onScrollBegin = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
-                                 const Dimension& dx, const Dimension& dy) -> ScrollInfo {
+                                 const CalcDimension& dx, const CalcDimension& dy) -> ScrollInfo {
             ScrollInfo scrollInfo { .dx = dx, .dy = dy };
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, scrollInfo);
             auto params = ConvertToJSValues(dx, dy);
@@ -477,11 +484,11 @@ void JSList::ScrollBeginCallback(const JSCallbackInfo& args)
             auto resObj = JSRef<JSObject>::Cast(result);
             auto dxRemainValue = resObj->GetProperty("dxRemain");
             if (dxRemainValue->IsNumber()) {
-                scrollInfo.dx = Dimension(dxRemainValue->ToNumber<float>(), DimensionUnit::VP);
+                scrollInfo.dx = CalcDimension(dxRemainValue->ToNumber<float>(), DimensionUnit::VP);
             }
             auto dyRemainValue = resObj->GetProperty("dyRemain");
             if (dyRemainValue->IsNumber()) {
-                scrollInfo.dy = Dimension(dyRemainValue->ToNumber<float>(), DimensionUnit::VP);
+                scrollInfo.dy = CalcDimension(dyRemainValue->ToNumber<float>(), DimensionUnit::VP);
             }
             return scrollInfo;
         };

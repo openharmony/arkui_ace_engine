@@ -23,19 +23,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<EllipseModel> EllipseModel::instance_ = nullptr;
+std::mutex EllipseModel::mutex_;
 
 EllipseModel* EllipseModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::EllipseModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::EllipseModelNG());
-        } else {
-            instance_.reset(new Framework::EllipseModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::EllipseModelNG());
+            } else {
+                instance_.reset(new Framework::EllipseModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -63,12 +67,12 @@ void JSEllipse::ConstructorCallback(const JSCallbackInfo& info)
     auto ellipse = AceType::MakeRefPtr<Ellipse>();
     JSRef<JSObject> params = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> width = params->GetProperty("width");
-    Dimension dimWidth;
+    CalcDimension dimWidth;
     if (ParseJsDimensionVp(width, dimWidth)) {
         ellipse->SetWidth(dimWidth);
     }
     JSRef<JSVal> height = params->GetProperty("height");
-    Dimension dimHeight;
+    CalcDimension dimHeight;
     if (ParseJsDimensionVp(height, dimHeight)) {
         ellipse->SetHeight(dimHeight);
     }

@@ -19,6 +19,8 @@
 
 #include "base/log/ace_trace.h"
 #include "base/memory/ace_type.h"
+#include "base/utils/system_properties.h"
+#include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
@@ -233,6 +235,7 @@ void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstr
 // Called to perform layout children.
 void LayoutWrapper::Layout()
 {
+    int64_t time = GetSysTimestamp();
     auto host = GetHostNode();
     CHECK_NULL_VOID(layoutProperty_);
     CHECK_NULL_VOID(geometryNode_);
@@ -268,6 +271,9 @@ void LayoutWrapper::Layout()
         layoutProperty_->UpdateContentConstraint();
     }
     layoutAlgorithm_->Layout(this);
+    time = GetSysTimestamp() - time;
+    AddNodeFlexLayouts();
+    AddNodeLayoutTime(time);
     LOGD("On Layout Done: type: %{public}s, depth: %{public}d, Offset: %{public}s", host->GetTag().c_str(),
         host->GetDepth(), geometryNode_->GetFrameOffset().ToString().c_str());
 }
@@ -348,6 +354,7 @@ void LayoutWrapper::BuildLazyItem()
     if (!lazyBuildFunction_) {
         return;
     }
+    ACE_FUNCTION_TRACE();
     lazyBuildFunction_(Claim(this));
     lazyBuildFunction_ = nullptr;
 }
@@ -360,5 +367,29 @@ std::pair<int32_t, int32_t> LayoutWrapper::GetLazyBuildRange()
         return { start, end };
     }
     return { -1, 0 };
+}
+
+void LayoutWrapper::AddNodeFlexLayouts()
+{
+    if (!SystemProperties::IsPerformanceCheckEnabled()) {
+        return;
+    }
+    auto host = GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto parent = host->GetParent();
+    CHECK_NULL_VOID(parent);
+    if (parent->GetTag() == V2::FLEX_ETS_TAG) {
+        host->AddFlexLayouts();
+    }
+}
+
+void LayoutWrapper::AddNodeLayoutTime(int64_t time)
+{
+    if (!SystemProperties::IsPerformanceCheckEnabled()) {
+        return;
+    }
+    auto host = GetHostNode();
+    CHECK_NULL_VOID(host);
+    host->SetLayoutTime(time);
 }
 } // namespace OHOS::Ace::NG

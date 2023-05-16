@@ -36,7 +36,9 @@ void ViewAbstractModelNG::BindMenu(
 #ifdef ENABLE_DRAG_FRAMEWORK
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true);
 #endif // ENABLE_DRAG_FRAMEWORK
-    auto overlayManager = NG::PipelineContext::GetCurrentContext()->GetOverlayManager();
+    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto overlayManager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     RegisterMenuAppearCallback(params, std::move(buildFunc), menuParam);
 
@@ -73,8 +75,7 @@ void ViewAbstractModelNG::BindMenu(
 
     RegisterMenuDisappearCallback(std::move(buildFunc), menuParam);
 
-    // delete menu when target node is removed from render tree
-    auto eventHub = targetNode->GetEventHub<NG::EventHub>();
+    // delete menu when target node destroy
     auto destructor = [id = targetNode->GetId()]() {
         auto pipeline = NG::PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
@@ -82,7 +83,7 @@ void ViewAbstractModelNG::BindMenu(
         CHECK_NULL_VOID(overlayManager);
         overlayManager->DeleteMenu(id);
     };
-    eventHub->SetOnDisappear(destructor);
+    targetNode->PushDestroyCallback(destructor);
 }
 
 void ViewAbstractModelNG::BindContextMenu(
@@ -183,7 +184,9 @@ void ViewAbstractModelNG::BindContentCover(
 void ViewAbstractModelNG::RegisterMenuAppearCallback(
     std::vector<NG::OptionParam>& params, std::function<void()>&& buildFunc, const MenuParam& menuParam)
 {
-    auto overlayManager = NG::PipelineContext::GetCurrentContext()->GetOverlayManager();
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     if (!params.empty() || buildFunc) {
         overlayManager->RegisterOnShowMenu([menuParam]() {
@@ -196,14 +199,15 @@ void ViewAbstractModelNG::RegisterMenuAppearCallback(
 
 void ViewAbstractModelNG::RegisterMenuDisappearCallback(std::function<void()>&& buildFunc, const MenuParam& menuParam)
 {
-    auto overlayManager = NG::PipelineContext::GetCurrentContext()->GetOverlayManager();
-    if (overlayManager) {
-        overlayManager->RegisterOnHideMenu([menuParam]() {
-            if (menuParam.onDisappear) {
-                menuParam.onDisappear();
-            }
-        });
-    }
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->RegisterOnHideMenu([menuParam]() {
+        if (menuParam.onDisappear) {
+            menuParam.onDisappear();
+        }
+    });
 }
 
 void ViewAbstractModelNG::RegisterContextMenuAppearCallback(ResponseType type, const MenuParam& menuParam)
@@ -224,5 +228,24 @@ void ViewAbstractModelNG::RegisterContextMenuDisappearCallback(const MenuParam& 
             menuParam.onDisappear();
         }
     });
+}
+
+void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
+    std::function<void()>&& buildFunc, NG::SheetStyle& sheetStyle)
+{
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(targetNode);
+    auto buildNodeFunc = [buildFunc]() -> RefPtr<UINode> {
+        NG::ScopedViewStackProcessor builderViewStackProcess;
+        buildFunc();
+        auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
+        return customNode;
+    };
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+
+    overlayManager->BindSheet(isShow, std::move(callback), std::move(buildNodeFunc), sheetStyle, targetNode->GetId());
 }
 } // namespace OHOS::Ace::NG

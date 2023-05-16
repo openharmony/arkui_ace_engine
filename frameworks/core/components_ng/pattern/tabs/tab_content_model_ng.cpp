@@ -174,7 +174,12 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
             columnNode->Clean();
         }
         builderNode->MountToParent(columnNode);
-        tabBarNode->ReplaceChild(tabsNode->GetBuilderByContentId(tabContentId, columnNode), columnNode);
+        auto oldColumnNode = tabsNode->GetBuilderByContentId(tabContentId, columnNode);
+        if (!oldColumnNode)  {
+            columnNode->MountToParent(tabBarNode, myIndex);
+        } else {
+            tabBarNode->ReplaceChild(oldColumnNode, columnNode);
+        }
         tabBarPattern->AddTabBarItemType(tabContentId, true);
         return;
     }
@@ -263,9 +268,18 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     auto labelStyle = tabContentPattern->GetLabelStyle();
     UpdateLabelStyle(labelStyle, textLayoutProperty);
     ImageSourceInfo imageSourceInfo(tabBarParam.GetIcon());
+    if (imageSourceInfo.IsSvg()) {
+        if (myIndex == indicator) {
+            imageSourceInfo.SetFillColor(tabTheme->GetBottomTabIconOn());
+        } else {
+            imageSourceInfo.SetFillColor(tabTheme->GetBottomTabIconOff());
+        }
+    }
+    
     imageProperty->UpdateImageSourceInfo(imageSourceInfo);
     columnNode->MarkModifyDone();
     textNode->MarkModifyDone();
+    textNode->MarkDirtyNode();
     imageNode->MarkModifyDone();
     tabBarFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     tabBarPattern->AddTabBarItemType(tabContentId, false);

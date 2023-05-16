@@ -39,6 +39,11 @@ public:
         return touchPoints_.find(touchId) != touchPoints_.end();
     }
 
+    int GetFingers()
+    {
+        return fingers_;
+    }
+
 protected:
     void OnBeginGestureReferee(int32_t touchId, bool needUpdateChild = false) override
     {

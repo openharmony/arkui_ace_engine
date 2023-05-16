@@ -24,6 +24,12 @@ OffscreenCanvasPattern::OffscreenCanvasPattern(int32_t width, int32_t height)
 {
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
+    if (Negative(width)) {
+        width = 0;
+    }
+    if (Negative(height)) {
+        height = 0;
+    }
     offscreenPaintMethod_ = MakeRefPtr<OffscreenCanvasPaintMethod>(context, width, height);
 }
 
@@ -213,6 +219,11 @@ void OffscreenCanvasPattern::SetTextDirection(TextDirection direction)
     offscreenPaintMethod_->SetTextDirection(direction);
 }
 
+void OffscreenCanvasPattern::SetFilterParam(const std::string& filterStr)
+{
+    offscreenPaintMethod_->SetFilterParam(filterStr);
+}
+
 void OffscreenCanvasPattern::Save()
 {
     offscreenPaintMethod_->Save();
@@ -253,9 +264,9 @@ void OffscreenCanvasPattern::Translate(double x, double y)
     offscreenPaintMethod_->Translate(x, y);
 }
 
-void OffscreenCanvasPattern::SetFillPattern(const Ace::Pattern& pattern)
+void OffscreenCanvasPattern::SetFillPattern(const std::weak_ptr<Ace::Pattern>& pattern)
 {
-    offscreenPaintMethod_->SetFillPattern(pattern);
+    offscreenPaintMethod_->SetFillPatternNG(pattern);
 }
 
 void OffscreenCanvasPattern::SetFillGradient(const Ace::Gradient& gradient)
@@ -338,9 +349,9 @@ void OffscreenCanvasPattern::SetShadowColor(const Color& color)
     offscreenPaintMethod_->SetShadowColor(color);
 }
 
-void OffscreenCanvasPattern::SetStrokePattern(const Ace::Pattern& pattern)
+void OffscreenCanvasPattern::SetStrokePattern(const std::weak_ptr<Ace::Pattern>& pattern)
 {
-    offscreenPaintMethod_->SetStrokePattern(pattern);
+    offscreenPaintMethod_->SetStrokePatternNG(pattern);
 }
 
 void OffscreenCanvasPattern::SetStrokeGradient(const Ace::Gradient& gradient)

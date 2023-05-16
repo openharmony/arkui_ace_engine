@@ -36,7 +36,7 @@ void IndexerLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("usingPopup", propUsingPopup_.value_or(false) ? "true" : "false");
     json->Put("itemSize", propItemSize_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
     json->Put("alignStyle",
-        propAlignStyle_.value_or(AlignStyle::LEFT) == AlignStyle::LEFT ? "AlignStyle::LEFT" : "AlignStyle::RIGHT");
+        propAlignStyle_.value_or(AlignStyle::LEFT) == AlignStyle::LEFT ? "IndexerAlign.Left" : "IndexerAlign.Right");
     auto PopupPositionJsonObject = JsonUtil::Create(true);
     PopupPositionJsonObject->Put("popupPositionX", propPopupPositionX_.value_or(Dimension()).ToString().c_str());
     PopupPositionJsonObject->Put("popupPositionY", propPopupPositionY_.value_or(Dimension()).ToString().c_str());

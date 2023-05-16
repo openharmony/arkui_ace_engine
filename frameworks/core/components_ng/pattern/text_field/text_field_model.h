@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_FIELD_TEXT_FIELD_MODEL_H
 
 #include <functional>
+#include <mutex>
 #include <optional>
 #include <utility>
 #include <vector>
@@ -43,6 +44,15 @@ struct Font {
 
 struct CaretStyle {
     std::optional<Dimension> caretWidth;
+};
+
+struct PasswordIcon {
+    std::string showResult;
+    std::string hideResult;
+    std::string showBundleName;
+    std::string hideBundleName;
+    std::string showModuleName;
+    std::string hideModuleName;
 };
 
 enum class InputStyle {
@@ -143,9 +153,17 @@ public:
     virtual void SetForegroundColor(const Color& value) = 0;
 
     virtual void SetMenuOptionItems(std::vector<NG::MenuOptionsParam>&& menuOptionsItems) = 0;
+    virtual void SetPasswordIcon(const PasswordIcon& passwordIcon) {};
+    virtual void SetShowUnit(std::function<void()>&& unitAction) {};
+    virtual void SetShowError(const std::string& errorText, bool visible) {};
+
+    virtual void SetShowUnderline(bool showUnderLine) {};
+    virtual void SetShowCounter(bool value) {};
+    virtual void SetOnChangeEvent(std::function<void(const std::string&)>&& func) = 0;
 
 private:
     static std::unique_ptr<TextFieldModel> instance_;
+    static std::mutex mutex_;
 };
 
 } // namespace OHOS::Ace

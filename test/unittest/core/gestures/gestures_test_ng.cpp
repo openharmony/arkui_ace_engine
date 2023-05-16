@@ -40,6 +40,7 @@
 #include "core/components_ng/gestures/swipe_gesture.h"
 #include "core/components_ng/gestures/tap_gesture.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/pattern/gesture/gesture_model_ng.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -62,6 +63,10 @@ constexpr double SPECIAL_VALUE_RANGE_CASE2 = -181.0;
 constexpr double SWIPE_SPEED = 10.0;
 constexpr double VERTICAL_ANGLE = 90.0;
 constexpr double HORIZONTAL_ANGLE = 180.0;
+constexpr int32_t DEFAULT_PAN_FINGER = 1;
+constexpr double DEFAULT_PAN_DISTANCE = 5.0;
+constexpr int32_t DEFAULT_SLIDE_FINGER = DEFAULT_PAN_FINGER;
+constexpr double DEFAULT_SLIDE_SPEED = 100.0;
 } // namespace
 
 class GesturesTestNg : public testing::Test {};
@@ -4621,6 +4626,14 @@ HWTEST_F(GesturesTestNg, GestureGroupTest001, TestSize.Level1)
     /**
      * @tc.steps: step1. create GestureGroup.
      */
+    GestureGroupModelNG gestureGroupModelNG;
+    gestureGroupModelNG.Create(0);
+
+    RefPtr<GestureProcessor> gestureProcessor;
+    gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
+    auto gestureGroupNG = AceType::DynamicCast<NG::GestureGroup>(gestureProcessor->TopGestureNG());
+    EXPECT_EQ(gestureGroupNG->mode_, GestureMode::Sequence);
+
     GestureGroup gestureGroup = GestureGroup(GestureMode::Sequence);
 
     /**
@@ -5339,6 +5352,14 @@ HWTEST_F(GesturesTestNg, LongPressGestureTest001, TestSize.Level1)
     /**
      * @tc.steps: step1. create LongPressGesture.
      */
+    LongPressGestureModelNG longPressGestureModelNG;
+    longPressGestureModelNG.Create(FINGER_NUMBER, false, LONG_PRESS_DURATION);
+
+    RefPtr<GestureProcessor> gestureProcessor;
+    gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
+    auto longPressGestureNG = AceType::DynamicCast<NG::LongPressGesture>(gestureProcessor->TopGestureNG());
+    EXPECT_EQ(longPressGestureNG->duration_, LONG_PRESS_DURATION);
+
     LongPressGesture longPressGesture = LongPressGesture(FINGER_NUMBER, false, LONG_PRESS_DURATION, false, false);
     EXPECT_EQ(longPressGesture.repeat_, false);
     EXPECT_EQ(longPressGesture.duration_, LONG_PRESS_DURATION);
@@ -5383,8 +5404,13 @@ HWTEST_F(GesturesTestNg, PinchGestureTest001, TestSize.Level1)
     /**
      * @tc.steps: step1. create PinchGestureGesture.
      */
-    PinchGesture pinchGesture = PinchGesture(FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
-    EXPECT_EQ(pinchGesture.distance_, PINCH_GESTURE_DISTANCE);
+    PinchGestureModelNG pinchGestureModelNG;
+    pinchGestureModelNG.Create(FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
+
+    RefPtr<GestureProcessor> gestureProcessor;
+    gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
+    auto pinchGesture = AceType::DynamicCast<NG::PinchGesture>(gestureProcessor->TopGestureNG());
+    EXPECT_EQ(pinchGesture->distance_, PINCH_GESTURE_DISTANCE);
 }
 
 /**
@@ -5396,6 +5422,14 @@ HWTEST_F(GesturesTestNg, RotationGestureTest001, TestSize.Level1)
     /**
      * @tc.steps: step1. create RotationGestureGesture.
      */
+    RotationGestureModelNG rotationGestureModelNG;
+    rotationGestureModelNG.Create(FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
+
+    RefPtr<GestureProcessor> gestureProcessor;
+    gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
+    auto rotationGestureNG = AceType::DynamicCast<NG::RotationGesture>(gestureProcessor->TopGestureNG());
+    EXPECT_EQ(rotationGestureNG->angle_, ROTATION_GESTURE_ANGLE);
+
     RotationGesture rotationGesture = RotationGesture(FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
     EXPECT_EQ(rotationGesture.angle_, ROTATION_GESTURE_ANGLE);
 
@@ -5436,9 +5470,16 @@ HWTEST_F(GesturesTestNg, TapGestureTest001, TestSize.Level1)
     /**
      * @tc.steps: step1. create TapGestureGesture.
      */
+    TapGestureModelNG tapGestureModelNG;
+    tapGestureModelNG.Create(COUNT, FINGER_NUMBER);
+
+    RefPtr<GestureProcessor> gestureProcessor;
+    gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
+    auto tapGestureNG = AceType::DynamicCast<NG::TapGesture>(gestureProcessor->TopGestureNG());
+    EXPECT_EQ(tapGestureNG->count_, COUNT);
+
     TapGesture tapGesture = TapGesture(COUNT, FINGER_NUMBER);
     EXPECT_EQ(tapGesture.count_, COUNT);
-
     /**
      * @tc.steps: step2. call CreateRecognizer function and compare result
      * @tc.steps: case1: not have onActionId
@@ -5459,5 +5500,44 @@ HWTEST_F(GesturesTestNg, TapGestureTest001, TestSize.Level1)
     tapRecognizer = AceType::DynamicCast<ClickRecognizer>(tapGesture.CreateRecognizer());
     EXPECT_EQ(tapRecognizer->GetPriority(), GesturePriority::Low);
     EXPECT_EQ(tapRecognizer->GetPriorityMask(), GestureMask::Normal);
+}
+
+/**
+ * @tc.name: GestureTest001
+ * @tc.desc: Test TapGesture CreateRecognizer function
+ */
+HWTEST_F(GesturesTestNg, GestureTest001, TestSize.Level1)
+{
+    GestureModelNG gestureModelNG;
+    gestureModelNG.Create(0, 0);
+    gestureModelNG.Finish();
+    gestureModelNG.Pop();
+
+    RefPtr<GestureProcessor> gestureProcessor;
+    gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
+    EXPECT_EQ(gestureProcessor->priority_, GesturePriority::Low);
+    EXPECT_EQ(gestureProcessor->gestureMask_, GestureMask::Normal);
+
+    PanGestureModelNG panGestureModelNG;
+    int32_t fingersNum = DEFAULT_PAN_FINGER;
+    double distanceNum = DEFAULT_PAN_DISTANCE;
+    PanDirection panDirection;
+    panGestureModelNG.Create(fingersNum, panDirection, distanceNum);
+    auto panGestureNG = AceType::DynamicCast<NG::PanGesture>(gestureProcessor->TopGestureNG());
+    EXPECT_EQ(panGestureNG->distance_, distanceNum);
+
+    RefPtr<PanGestureOption> refPanGestureOption = AceType::MakeRefPtr<PanGestureOption>();
+    panGestureModelNG.SetPanGestureOption(refPanGestureOption);
+
+    TimeoutGestureModelNG timeoutGestureModelNG;
+    timeoutGestureModelNG.GetGestureProcessor();
+
+    SwipeGestureModelNG swipeGestureModelNG;
+    fingersNum = DEFAULT_SLIDE_FINGER;
+    double speedNum = DEFAULT_SLIDE_SPEED;
+    SwipeDirection slideDirection;
+    swipeGestureModelNG.Create(fingersNum, slideDirection, speedNum);
+    auto swipeGestureNG = AceType::DynamicCast<NG::SwipeGesture>(gestureProcessor->TopGestureNG());
+    EXPECT_EQ(swipeGestureNG->speed_, speedNum);
 }
 } // namespace OHOS::Ace::NG

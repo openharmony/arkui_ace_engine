@@ -31,13 +31,14 @@ class ACE_EXPORT ShapePaintProperty : public PaintProperty {
     DECLARE_ACE_TYPE(ShapePaintProperty, PaintProperty);
 
 public:
-    const double FILL_OPACITY_DEFAULT = 1.0f;
-    const double STOKE_MITERLIMIT_DEFAULT = 4.0f;
-    const double STOKE_OPACITY_DEFAULT = 1.0f;
-    const Dimension STOKE_WIDTH_DEFAULT = 1.0_vp;
-    const bool ANTIALIAS_DEFAULT = true;
-    const int SQUARE_CAP = 2;
-    const int DEFAULT_LINE_JOIN=0;
+    static constexpr double FILL_OPACITY_DEFAULT = 1.0f;
+    static constexpr double STROKE_MITERLIMIT_DEFAULT = 4.0f;
+    static constexpr double STROKE_MITERLIMIT_MIN = 1.0f;
+    static constexpr double STROKE_OPACITY_DEFAULT = 1.0f;
+    static constexpr Dimension STROKE_WIDTH_DEFAULT = 1.0_vp;
+    static constexpr bool ANTIALIAS_DEFAULT = true;
+    static constexpr int SQUARE_CAP = 2;
+    static constexpr int DEFAULT_LINE_JOIN=0;
 
     ShapePaintProperty() = default;
     ~ShapePaintProperty() override = default;
@@ -80,7 +81,7 @@ public:
         PaintProperty::ToJsonValue(json);
         json->Put("stroke", propStroke_.value_or(Color::BLACK).ColorToString().c_str());
         json->Put("strokeWidth", propStrokeWidth_.value_or(Dimension()).ConvertToPx());
-        json->Put("strokeOpacity", std::to_string(propStrokeOpacity_.value_or(STOKE_OPACITY_DEFAULT)).c_str());
+        json->Put("strokeOpacity", std::to_string(propStrokeOpacity_.value_or(STROKE_OPACITY_DEFAULT)).c_str());
         json->Put("strokeDashOffset", propStrokeDashOffset_.value_or(Dimension()).ToString().c_str());
 
         auto jsonDashArray = JsonUtil::CreateArray(true);
@@ -96,7 +97,8 @@ public:
         json->Put("strokeLineCap", lineCap.at(propStrokeLineCap_.value_or(0) % 3).c_str());
         std::array<std::string, 3> lineJoin = { "LineJoinStyle.Miter", "LineJoinStyle.Round", "LineJoinStyle.Bevel" };
         json->Put("strokeLineJoin", lineJoin.at(propStrokeLineJoin_.value_or(0) % 3).c_str());
-        json->Put("strokeMiterLimit", std::to_string(propStrokeMiterLimit_.value_or(STOKE_MITERLIMIT_DEFAULT)).c_str());
+        json->Put("strokeMiterLimit",
+            std::to_string(propStrokeMiterLimit_.value_or(STROKE_MITERLIMIT_DEFAULT)).c_str());
         json->Put("fill", propFill_.value_or(Color::BLACK).ColorToString().c_str());
         json->Put("fillOpacity", std::to_string(propFillOpacity_.value_or(FILL_OPACITY_DEFAULT)).c_str());
         json->Put("antiAlias", propAntiAlias_.value_or(ANTIALIAS_DEFAULT) ? "true" : "false");

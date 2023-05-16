@@ -61,6 +61,8 @@ public:
 
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
 
+    virtual void FromJson(const std::unique_ptr<JsonValue>& json);
+
     const std::optional<LayoutConstraintF>& GetLayoutConstraint() const
     {
         return layoutConstraint_;
@@ -291,6 +293,17 @@ public:
         }
     }
 
+    void ResetFlexShrink()
+    {
+        if (!flexItemProperty_) {
+            return;
+        }
+        if (flexItemProperty_->HasFlexShrink()) {
+            propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+        }
+        flexItemProperty_->ResetFlexShrink();
+    }
+
     void UpdateFlexBasis(const Dimension& flexBasis)
     {
         if (!flexItemProperty_) {
@@ -394,6 +407,16 @@ public:
         safeArea_ = safeArea;
     }
 
+    bool IsUsingPosition() const
+    {
+        return usingPosition_;
+    }
+
+    void SetUsingPosition(bool usingPosition)
+    {
+        usingPosition_ = usingPosition;
+    }
+
 protected:
     void UpdateLayoutProperty(const LayoutProperty* layoutProperty);
 
@@ -426,6 +449,7 @@ private:
     WeakPtr<FrameNode> host_;
 
     SafeAreaEdgeInserts safeArea_;
+    bool usingPosition_ = true;
     ACE_DISALLOW_COPY_AND_MOVE(LayoutProperty);
 };
 } // namespace OHOS::Ace::NG

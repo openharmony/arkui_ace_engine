@@ -16,10 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CUSTOM_PAINT_ROSEN_RENDER_OFFSCREEN_CANVAS_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CUSTOM_PAINT_ROSEN_RENDER_OFFSCREEN_CANVAS_H
 
-#ifndef NEW_SKIA
-#include "experimental/svg/model/SkSVGDOM.h"
-#else
+#ifdef NEW_SKIA
 #include "modules/svg/include/SkSVGDOM.h"
+#else
+#include "experimental/svg/model/SkSVGDOM.h"
 #endif
 #include "txt/paragraph.h"
 #include "include/core/SkCanvas.h"

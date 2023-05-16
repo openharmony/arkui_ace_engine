@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,10 +15,9 @@
 
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
+#include "base/log/ace_performance_check.h"
 #include "base/log/frame_report.h"
 #include "base/memory/referenced.h"
-#include "base/thread/background_task_executor.h"
-#include "base/thread/cancelable_callback.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/common/thread_checker.h"
@@ -70,7 +69,7 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
     std::sort(orderedNodes.begin(), orderedNodes.end(), Cmp);
 
     // Priority task creation
-    uint64_t time = 0;
+    int64_t time = 0;
     for (auto& node : orderedNodes) {
         // need to check the node is destroying or not before CreateLayoutTask
         if (!node || node->IsInDestroying()) {
@@ -101,7 +100,7 @@ void UITaskScheduler::FlushRenderTask(bool forceUseMainThread)
     }
     auto dirtyRenderNodes = std::move(dirtyRenderNodes_);
     // Priority task creation
-    uint64_t time = 0;
+    int64_t time = 0;
     for (auto&& pageNodes : dirtyRenderNodes) {
         for (auto&& node : pageNodes.second) {
             if (!node) {
@@ -183,10 +182,7 @@ void UITaskScheduler::CleanUp()
 
 bool UITaskScheduler::isEmpty()
 {
-    if (dirtyLayoutNodes_.empty() && dirtyRenderNodes_.empty()) {
-        return true;
-    }
-    return false;
+    return dirtyLayoutNodes_.empty() && dirtyRenderNodes_.empty();
 }
 
 void UITaskScheduler::AddAfterLayoutTask(std::function<void()>&& task)

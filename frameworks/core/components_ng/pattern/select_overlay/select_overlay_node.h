@@ -49,23 +49,40 @@ public:
 
     void ChangeToolBar(bool isUseExtensionMenu);
 
-    RefPtr<FrameNode> GetExtensionMenu()
-    {
-        return extensionMenu_;
-    }
+    void MoreOrBackAnimation(bool isMore);
 
 private:
     void CreateToolBar();
-    void CreateExtensionToolBar(const std::vector<MenuOptionsParam>& menuOptionItems, int32_t index);
-    void GetDefaultButtonAndMenuWidth(float& defaultOptionWidth, float& maxWidth);
+    void CreateExtensionToolBar();
+    bool AddSystemDefaultOptions(float defaultOptionWidth, float fontWidth, float maxWidth, float& allocatedSize);
+    void AddExtensionMenuOptions(const std::vector<MenuOptionsParam>& menuOptionItems, int32_t index);
+    void GetDefaultButtonAndMenuWidth(float& defaultOptionWidth, float& fontWidth, float& maxWidth);
+
+    void MoreAnimation();
+    void BackAnimation();
+
+    void SetAnimationStatus(bool toDoAnimation)
+    {
+        isDoingAnimation_ = toDoAnimation;
+    }
 
     static RefPtr<FrameNode> CreateMenuNode(const std::shared_ptr<SelectOverlayInfo>& info);
 
     RefPtr<FrameNode> selectMenu_;
-
+    RefPtr<FrameNode> selectMenuInner_;
     RefPtr<FrameNode> extensionMenu_;
 
     std::string selectInfo_;
+
+    // Marks whether it is currently in the animated state.
+    bool isDoingAnimation_ = false;
+
+    // Controls that only default menus can be converted to extended menus, and extended menus can be converted to
+    // default menus.
+    bool isExtensionMenu_ = false;
+
+    // Label whether the menu default button needs to appear within the extended menu.
+    bool isShowInExtension_[3] = { false };
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayNode);
 };

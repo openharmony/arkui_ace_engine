@@ -11,13 +11,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/test.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ohos_unittest("ui_extension_pattern_test_ng") {
-  module_out_path = "$pattern_test_output_path/ui_extension"
-
+ace_unittest("ui_extension_pattern_test_ng") {
+  render = true
+  ace_animation = true
   sources = [
+    "$ace_root/frameworks/core/components_ng/pattern/grid_container/grid_container_layout_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_node.cpp",
@@ -27,22 +27,8 @@ ohos_unittest("ui_extension_pattern_test_ng") {
     "$ace_root/test/mock/core/pattern/window_scene/mock_host_window_pattern.cpp",
     "$ace_root/test/unittest/core/pattern/ui_extension/ui_extension_pattern_test_ng.cpp",
   ]
-
-  sources += test_pattern_sources
-  deps = [
-    "$ace_root/frameworks/base:ace_memory_monitor_ohos",
-    "$ace_root/frameworks/core/components/theme:build_theme_code",
-    "$ace_root/test/unittest:ace_unittest_log",
-    "$cjson_root:cjson_static",
-    "//third_party/googletest:gmock_main",
-  ]
-
-  deps += [ "$graphic_standard_path/rosen/modules/render_service_client:librender_service_client" ]
-
   external_deps = [
     "input:libmmi-client",
     "window_manager:scene_session",
   ]
-
-  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 }

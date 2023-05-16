@@ -28,6 +28,7 @@
 #include "base/thread/task_executor.h"
 #include "base/utils/macros.h"
 #include "base/utils/utils.h"
+#include "core/accessibility/accessibility_utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/base/modifier.h"
@@ -230,6 +231,8 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
+    void FromJson(const std::unique_ptr<JsonValue>& json) override;
+
     RefPtr<FrameNode> GetAncestorNodeOfFrame() const;
 
     std::string& GetNodeName()
@@ -289,7 +292,13 @@ public:
 
     int32_t GetAllDepthChildrenCount();
 
-    void OnAccessibilityEvent(AccessibilityEventType eventType) const;
+    void OnAccessibilityEvent(
+        AccessibilityEventType eventType, WindowsContentChangeTypes windowsContentChangeType =
+                                              WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID) const;
+
+    void OnAccessibilityEvent(
+        AccessibilityEventType eventType, std::string beforeText, std::string latestContent) const;
+
     void MarkNeedRenderOnly();
 
     void OnDetachFromMainTree(bool recursive) override;
@@ -366,9 +375,14 @@ public:
 
     RefPtr<FrameNode> FindChildByPosition(float x, float y);
 
-    void CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
-        const std::function<void(float)>& onCallbackEvent);
+    void CreateAnimatablePropertyFloat(
+        const std::string& propertyName, float value, const std::function<void(float)>& onCallbackEvent);
     void UpdateAnimatablePropertyFloat(const std::string& propertyName, float value);
+    void CreateAnimatableArithmeticProperty(const std::string& propertyName, RefPtr<CustomAnimatableArithmetic>& value,
+        std::function<void(const RefPtr<CustomAnimatableArithmetic>&)>& onCallbackEvent);
+    void UpdateAnimatableArithmeticProperty(const std::string& propertyName, RefPtr<CustomAnimatableArithmetic>& value);
+
+    std::string ProvideRestoreInfo();
 
 private:
     void MarkNeedRender(bool isRenderBoundary);
@@ -389,9 +403,6 @@ private:
         std::list<RefPtr<FrameNode>>& visibleList, uint32_t index) override;
     void OnGenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& allList) override;
 
-    void OnAddDisappearingChild() override;
-    void OnRemoveDisappearingChild() override;
-
     bool IsMeasureBoundary();
     bool IsRenderBoundary();
 
@@ -401,6 +412,7 @@ private:
     void FocusToJsonValue(std::unique_ptr<JsonValue>& json) const;
     void MouseToJsonValue(std::unique_ptr<JsonValue>& json) const;
     void TouchToJsonValue(std::unique_ptr<JsonValue>& json) const;
+    void GeometryNodeToJsonValue(std::unique_ptr<JsonValue>& json) const;
 
     HitTestMode GetHitTestMode() const override;
     bool GetTouchable() const;
@@ -409,7 +421,8 @@ private:
 
     void ProcessAllVisibleCallback(
         std::unordered_map<double, VisibleCallbackInfo>& visibleAreaCallbacks, double currentVisibleRatio);
-    void OnVisibleAreaChangeCallback(VisibleCallbackInfo& callbackInfo, bool visibleType, double currentVisibleRatio);
+    void OnVisibleAreaChangeCallback(
+        VisibleCallbackInfo& callbackInfo, bool visibleType, double currentVisibleRatio, bool isHandled);
     double CalculateCurrentVisibleRatio(const RectF& visibleRect, const RectF& renderRect);
 
     struct ZIndexComparator {
@@ -464,6 +477,8 @@ private:
     bool userSet_ = false;
 
     std::map<std::string, RefPtr<NodeAnimatablePropertyBase>> nodeAnimatablePropertyMap_;
+
+    bool isRestoreInfoUsed_ = false;
 
     friend class RosenRenderContext;
     friend class RenderContext;
