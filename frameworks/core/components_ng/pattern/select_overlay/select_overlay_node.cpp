@@ -223,7 +223,6 @@ RefPtr<FrameNode> BuildMoreOrBackButton(int32_t overlayId, bool isMoreButton)
     buttonLayoutProperty->UpdateUserDefinedIdealSize({ sideWidth, sideWidth });
 
     if (!isMoreButton) {
-        const auto& padding = textOverlayTheme->GetMenuPadding();
         auto left = CalcLength(padding.Left().ConvertToPx());
         auto right = CalcLength(padding.Right().ConvertToPx());
         auto top = CalcLength(padding.Top().ConvertToPx());
