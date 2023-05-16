@@ -389,7 +389,7 @@ void DragDropManager::OnDragEnd(float globalX, float globalY, const std::string&
     }
 #ifdef ENABLE_DRAG_FRAMEWORK
     if (!isUseDefaultDrop) {
-        LOGI("DragDropManager Not Use DefaultDrop")
+        LOGD("DragDropManager Not Use DefaultDrop");
         InteractionManager::GetInstance()->StopDrag(DragResult::DRAG_FAIL, false);
     }
     summaryMap_.clear();
