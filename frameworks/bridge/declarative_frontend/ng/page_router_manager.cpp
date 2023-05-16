@@ -441,7 +441,8 @@ RefPtr<Framework::RevSourceMap> PageRouterManager::GetCurrentPageSourceMap(const
     CHECK_NULL_RETURN(container, nullptr);
     if (container->IsUseStageModel()) {
         auto pagePath = entryPageInfo->GetPagePath();
-        auto judgePath = "entry/src/main/ets/" + pagePath.substr(0, pagePath.size() - 3) + ".ets";
+        auto moduleName = container->GetModuleName();
+        auto judgePath = moduleName + "/src/main/ets/" + pagePath.substr(0, pagePath.size() - 3) + ".ets";
         if (Framework::GetAssetContentImpl(assetManager, "sourceMaps.map", jsSourceMap)) {
             auto jsonPages = JsonUtil::ParseJsonString(jsSourceMap);
             auto jsonPage = jsonPages->GetValue(judgePath)->ToString();
