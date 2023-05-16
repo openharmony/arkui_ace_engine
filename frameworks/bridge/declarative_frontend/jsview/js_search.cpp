@@ -95,8 +95,7 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("onPaste", &JSSearch::SetOnPaste);
     JSClass<JSSearch>::StaticMethod("copyOption", &JSSearch::SetCopyOption);
     JSClass<JSSearch>::StaticMethod("textMenuOptions", &JSSearch::JsMenuOptionsExtension);
-    JSClass<JSSearch>::Inherit<JSViewAbstract>();
-    JSClass<JSSearch>::Bind(globalObj);
+    JSClass<JSSearch>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void ParseSearchValueObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)

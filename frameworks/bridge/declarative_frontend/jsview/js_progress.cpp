@@ -125,8 +125,7 @@ void JSProgress::JSBind(BindingTarget globalObj)
     JSClass<JSProgress>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSProgress>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSProgress>::StaticMethod("borderColor", &JSProgress::JsBorderColor, opt);
-    JSClass<JSProgress>::Inherit<JSViewAbstract>();
-    JSClass<JSProgress>::Bind(globalObj);
+    JSClass<JSProgress>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSProgress::SetValue(double value)

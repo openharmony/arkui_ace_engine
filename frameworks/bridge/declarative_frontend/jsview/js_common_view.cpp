@@ -62,7 +62,6 @@ void JSCommonView::JSBind(BindingTarget globalObj)
     JSClass<JSCommonView>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSCommonView>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
 
-    JSClass<JSCommonView>::Inherit<JSContainerBase>();
-    JSClass<JSCommonView>::Bind<>(globalObj);
+    JSClass<JSCommonView>::InheritAndBind<JSContainerBase>(globalObj);
 }
 } // namespace OHOS::Ace::Framework

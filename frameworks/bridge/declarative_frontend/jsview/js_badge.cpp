@@ -166,10 +166,7 @@ void JSBadge::JSBind(BindingTarget globalObj)
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSBadge>::StaticMethod("create", &JSBadge::Create, opt);
 
-    JSClass<JSBadge>::Inherit<JSContainerBase>();
-    JSClass<JSBadge>::Inherit<JSViewAbstract>();
-
-    JSClass<JSBadge>::Bind(globalObj);
+    JSClass<JSBadge>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 void JSBadge::SetDefaultTheme(OHOS::Ace::RefPtr<OHOS::Ace::BadgeComponent>& badge)

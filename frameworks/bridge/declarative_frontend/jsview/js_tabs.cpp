@@ -321,8 +321,7 @@ void JSTabs::JSBind(BindingTarget globalObj)
     JSClass<JSTabs>::StaticMethod("fadingEdge", &JSTabs::SetFadingEdge);
     JSClass<JSTabs>::StaticMethod("barOverlap", &JSTabs::SetBarOverlap);
 
-    JSClass<JSTabs>::Inherit<JSContainerBase>();
-    JSClass<JSTabs>::Bind<>(globalObj);
+    JSClass<JSTabs>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

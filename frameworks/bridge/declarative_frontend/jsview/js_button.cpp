@@ -296,9 +296,7 @@ void JSButton::JSBind(BindingTarget globalObj)
 
     JSClass<JSButton>::StaticMethod("createWithLabel", &JSButton::CreateWithLabel, MethodOptions::NONE);
     JSClass<JSButton>::StaticMethod("createWithChild", &JSButton::CreateWithChild, MethodOptions::NONE);
-    JSClass<JSButton>::Inherit<JSContainerBase>();
-    JSClass<JSButton>::Inherit<JSViewAbstract>();
-    JSClass<JSButton>::Bind<>(globalObj);
+    JSClass<JSButton>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 void JSButton::CreateWithLabel(const JSCallbackInfo& info)

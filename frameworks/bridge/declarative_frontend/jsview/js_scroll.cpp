@@ -247,9 +247,7 @@ void JSScroll::JSBind(BindingTarget globalObj)
     JSClass<JSScroll>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
     JSClass<JSScroll>::StaticMethod("width", &JSScroll::JsWidth);
     JSClass<JSScroll>::StaticMethod("height", &JSScroll::JsHeight);
-    JSClass<JSScroll>::Inherit<JSContainerBase>();
-    JSClass<JSScroll>::Inherit<JSViewAbstract>();
-    JSClass<JSScroll>::Bind<>(globalObj);
+    JSClass<JSScroll>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 void JSScroll::SetScrollBar(const JSCallbackInfo& args)

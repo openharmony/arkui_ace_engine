@@ -78,8 +78,7 @@ void JSSlider::JSBind(BindingTarget globalObj)
     JSClass<JSSlider>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSSlider>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSSlider>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
-    JSClass<JSSlider>::Inherit<JSViewAbstract>();
-    JSClass<JSSlider>::Bind(globalObj);
+    JSClass<JSSlider>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 double GetStep(double step, double max, double min)

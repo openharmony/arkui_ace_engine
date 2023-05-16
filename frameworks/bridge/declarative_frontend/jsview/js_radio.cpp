@@ -95,8 +95,7 @@ void JSRadio::JSBind(BindingTarget globalObj)
     JSClass<JSRadio>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSRadio>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSRadio>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
-    JSClass<JSRadio>::Inherit<JSViewAbstract>();
-    JSClass<JSRadio>::Bind<>(globalObj);
+    JSClass<JSRadio>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSRadio::Checked(bool checked)

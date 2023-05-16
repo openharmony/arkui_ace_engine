@@ -126,8 +126,7 @@ void JSMenuItem::JSBind(BindingTarget globalObj)
     JSClass<JSMenuItem>::StaticMethod("contentFontColor", &JSMenuItem::ContentFontColor, opt);
     JSClass<JSMenuItem>::StaticMethod("labelFont", &JSMenuItem::LabelFont, opt);
     JSClass<JSMenuItem>::StaticMethod("labelFontColor", &JSMenuItem::LabelFontColor, opt);
-    JSClass<JSMenuItem>::Inherit<JSViewAbstract>();
-    JSClass<JSMenuItem>::Bind(globalObj);
+    JSClass<JSMenuItem>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void ParseIsSelectedObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)

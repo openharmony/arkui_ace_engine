@@ -81,8 +81,7 @@ void JSCamera::JSBind(BindingTarget globalObj)
     JSClass<JSCamera>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSCamera>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
 
-    JSClass<JSCamera>::Inherit<JSViewAbstract>();
-    JSClass<JSCamera>::Bind<>(globalObj);
+    JSClass<JSCamera>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

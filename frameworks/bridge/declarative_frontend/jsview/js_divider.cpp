@@ -120,7 +120,6 @@ void JSDivider::JSBind(BindingTarget globalObj)
     JSClass<JSDivider>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSDivider>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
 
-    JSClass<JSDivider>::Inherit<JSViewAbstract>();
-    JSClass<JSDivider>::Bind<>(globalObj);
+    JSClass<JSDivider>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 } // namespace OHOS::Ace::Framework

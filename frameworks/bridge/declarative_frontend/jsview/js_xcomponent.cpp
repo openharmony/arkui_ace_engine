@@ -66,8 +66,7 @@ void JSXComponent::JSBind(BindingTarget globalObj)
     JSClass<JSXComponent>::StaticMethod("onHover", &JSXComponent::OmitEvent);
     JSClass<JSXComponent>::StaticMethod("onFocus", &JSXComponent::OmitEvent);
     JSClass<JSXComponent>::StaticMethod("onBlur", &JSXComponent::OmitEvent);
-    JSClass<JSXComponent>::Inherit<JSViewAbstract>();
-    JSClass<JSXComponent>::Bind(globalObj);
+    JSClass<JSXComponent>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSXComponent::Create(const JSCallbackInfo& info)

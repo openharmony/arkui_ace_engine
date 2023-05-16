@@ -64,8 +64,7 @@ void JSAbilityComponent::JSBind(BindingTarget globalObj)
     JSClass<JSAbilityComponent>::StaticMethod("onDisconnect", &JSAbilityComponent::JsOnDisconnect, opt);
     JSClass<JSAbilityComponent>::StaticMethod("width", &JSAbilityComponent::Width, opt);
     JSClass<JSAbilityComponent>::StaticMethod("height", &JSAbilityComponent::Height, opt);
-    JSClass<JSAbilityComponent>::Inherit<JSViewAbstract>();
-    JSClass<JSAbilityComponent>::Bind<>(globalObj);
+    JSClass<JSAbilityComponent>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSAbilityComponent::Create(const JSCallbackInfo& info)

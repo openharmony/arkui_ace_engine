@@ -199,9 +199,7 @@ void JSNavigation::JSBind(BindingTarget globalObj)
     JSClass<JSNavigation>::StaticMethod("backButtonIcon", &JSNavigation::SetBackButtonIcon);
     JSClass<JSNavigation>::StaticMethod("onNavBarStateChange", &JSNavigation::SetOnNavBarStateChange);
     JSClass<JSNavigation>::StaticMethod("navDestination", &JSNavigation::SetNavDestination);
-    JSClass<JSNavigation>::Inherit<JSContainerBase>();
-    JSClass<JSNavigation>::Inherit<JSViewAbstract>();
-    JSClass<JSNavigation>::Bind(globalObj);
+    JSClass<JSNavigation>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 void JSNavigation::SetTitle(const JSCallbackInfo& info)

@@ -127,8 +127,7 @@ void JSSelect::JSBind(BindingTarget globalObj)
     JSClass<JSSelect>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSSelect>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSSelect>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
-    JSClass<JSSelect>::Inherit<JSViewAbstract>();
-    JSClass<JSSelect>::Bind(globalObj);
+    JSClass<JSSelect>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void ParseSelectedObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
