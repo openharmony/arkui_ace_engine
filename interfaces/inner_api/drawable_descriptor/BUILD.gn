@@ -60,5 +60,6 @@ ohos_shared_library("drawable_descriptor") {
   ]
 
   subsystem_name = ace_engine_subsystem
+  innerapi_tags = [ "platformsdk" ]
   part_name = ace_engine_part
 }

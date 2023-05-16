@@ -37,5 +37,6 @@ ohos_shared_library("ace_uicontent") {
   external_deps = [ "multimedia_image_framework:image" ]
 
   subsystem_name = ace_engine_subsystem
+  innerapi_tags = [ "platformsdk_indirect" ]
   part_name = ace_engine_part
 }
