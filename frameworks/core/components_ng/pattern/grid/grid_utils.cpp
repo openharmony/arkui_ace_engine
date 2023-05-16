@@ -25,31 +25,26 @@ const char UNIT_RATIO[] = "fr";
 
 } // namespace
 
-std::vector<float> GridUtils::ParseArgs(const std::string& args, float size, float gap)
+std::string GridUtils::ParseArgs(const std::string& args)
 {
-    std::vector<float> lens;
-    if (args.empty()) {
-        return lens;
+    const std::string UNIT_AUTO = "auto";
+    if (args.empty() || args.find(UNIT_AUTO) == std::string::npos) {
+        return args;
     }
-    float frSum = 0.0f;
+    std::string rowsArgs;
     std::vector<std::string> strs;
     StringUtils::StringSplitter(args, ' ', strs);
-    for (const auto& str : strs) {
-        if (str.find(UNIT_RATIO) != std::string::npos) {
-            frSum += StringUtils::StringToFloat(str);
+    std::string current;
+    size_t rowArgSize = strs.size();
+    for (size_t i = 0; i < rowArgSize; ++i) {
+        current = strs[i];
+        //"auto" means 1fr in grid
+        if (strs[i] == std::string(UNIT_AUTO)) {
+            current = "1fr";
         }
+        rowsArgs += " " + current;
     }
-
-    float sizeLeft = size - (strs.size() - 1) * gap;
-    for (const auto& str : strs) {
-        float num = StringUtils::StringToFloat(str);
-        if (str.find(UNIT_RATIO) != std::string::npos) {
-            lens.push_back(NearZero(frSum) ? 0.0 : sizeLeft / frSum * num);
-        } else {
-            lens.push_back(0.0);
-        }
-    }
-    return lens;
+    return rowsArgs;
 }
 
 float GridUtils::GetMainGap(const RefPtr<GridLayoutProperty>& gridLayoutProperty, const SizeF& frameSize, Axis axis)
