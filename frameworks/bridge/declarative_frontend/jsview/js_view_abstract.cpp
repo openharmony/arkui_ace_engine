@@ -1242,11 +1242,6 @@ bool JSViewAbstract::JsWidth(const JSRef<JSVal>& jsValue)
         return false;
     }
 
-    if (value.Illegal()) {
-        ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
-        return true;
-    }
-
     if (LessNotEqual(value.Value(), 0.0)) {
         value.SetValue(0.0);
     }
@@ -1274,10 +1269,6 @@ bool JSViewAbstract::JsHeight(const JSRef<JSVal>& jsValue)
     }
     if (!ParseJsDimensionVp(jsValue, value)) {
         return false;
-    }
-    if (value.Illegal()) {
-        ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
-        return true;
     }
 
     if (LessNotEqual(value.Value(), 0.0)) {
