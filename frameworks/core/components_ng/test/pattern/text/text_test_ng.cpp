@@ -2770,12 +2770,15 @@ HWTEST_F(TextTestNg, DragBase001, TestSize.Level1)
 {
     auto [frameNode, pattern] = Init();
 
-    // test CloseSelectOverlay should reset textSelector
+    // test ResetSelection should reset textSelector
     pattern->CreateHandles();
     pattern->textSelector_.Update(0, 20);
     EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
     EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 20);
     pattern->CloseSelectOverlay();
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 20);
+    pattern->ResetSelection();
     EXPECT_EQ(pattern->textSelector_.GetTextStart(), -1);
     EXPECT_EQ(pattern->textSelector_.GetTextEnd(), -1);
 
