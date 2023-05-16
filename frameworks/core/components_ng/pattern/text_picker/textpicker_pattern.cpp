@@ -638,12 +638,14 @@ std::string TextPickerPattern::GetSelectedObject(bool isColumnChange, int32_t st
         CHECK_NULL_RETURN(currentNode, "");
         auto textPickerColumnPattern = currentNode->GetPattern<TextPickerColumnPattern>();
         CHECK_NULL_RETURN(textPickerColumnPattern, "");
+        auto value = textPickerColumnPattern->GetOption(textPickerColumnPattern->GetSelected());
+        auto index = textPickerColumnPattern->GetSelected();
         if (isColumnChange) {
-            auto value = textPickerColumnPattern->GetCurrentText();
-            auto index = textPickerColumnPattern->GetCurrentIndex();
-            values.emplace_back(value);
-            indexs.emplace_back(index);
+            value = textPickerColumnPattern->GetCurrentText();
+            index = textPickerColumnPattern->GetCurrentIndex();
         }
+        values.emplace_back(value);
+        indexs.emplace_back(index);
     }
 
     auto context = host->GetContext();
