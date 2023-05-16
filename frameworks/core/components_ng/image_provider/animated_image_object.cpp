@@ -19,9 +19,9 @@
 
 namespace OHOS::Ace::NG {
 void AnimatedImageObject::MakeCanvasImage(
-    const RefPtr<ImageLoadingContext>& ctx, const SizeF& resizeTarget, bool /*forceResize*/, bool /*syncLoad*/)
+    const RefPtr<ImageLoadingContext>& ctx, const SizeF& /* resizeTarget */, bool /*forceResize*/, bool /*syncLoad*/)
 {
-    auto image = AnimatedImage::Create(data_, resizeTarget, src_.GetSrc());
+    auto image = AnimatedImage::Create(data_, src_.GetSrc());
     if (!image) {
         ctx->FailCallback("failed to create animated image");
     }
