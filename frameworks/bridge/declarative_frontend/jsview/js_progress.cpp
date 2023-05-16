@@ -108,7 +108,6 @@ void JSProgress::Create(const JSCallbackInfo& info)
 
 void JSProgress::JSBind(BindingTarget globalObj)
 {
-    LOGE("djc---JSBind----");
     JSClass<JSProgress>::Declare("Progress");
     MethodOptions opt = MethodOptions::NONE;
 
