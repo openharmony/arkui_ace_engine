@@ -91,7 +91,6 @@ public:
     {
         value_ = 0.0;
         unit_ = DimensionUnit::PX;
-        illegal_ = false;
     }
 
     void ResetInvalidValue()
@@ -109,16 +108,6 @@ public:
     void SetValue(double value)
     {
         value_ = value;
-    }
-
-    constexpr bool Illegal() const
-    {
-        return illegal_;
-    }
-
-    void SetIllegal(bool illegal)
-    {
-        illegal_ = illegal;
     }
 
     constexpr DimensionUnit Unit() const
@@ -266,7 +255,6 @@ public:
 private:
     double value_ = 0.0;
     DimensionUnit unit_ = DimensionUnit::PX;
-    bool illegal_ = false;
 };
 
 // literal operators for dimension
