@@ -221,7 +221,10 @@ const RefPtr<StageManager>& PipelineContext::GetStageManager()
     return stageManager_;
 }
 
-void PipelineContext::AddBuildFinishCallBack(std::function<void()>&& callback) {}
+void PipelineContext::AddBuildFinishCallBack(std::function<void()>&& callback)
+{
+    buildFinishCallbacks_.emplace_back(std::move(callback));
+}
 
 const RefPtr<FullScreenManager>& PipelineContext::GetFullScreenManager()
 {
