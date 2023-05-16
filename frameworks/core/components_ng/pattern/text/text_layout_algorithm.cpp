@@ -656,6 +656,13 @@ void TextLayoutAlgorithm::ApplyIndents(const TextStyle& textStyle, double width)
         indents.emplace_back(0.0);
         paragraph_->SetIndents(indents);
     }
+#else
+    std::vector<float> indents;
+    if (indent > 0.0) {
+        indents.emplace_back(static_cast<float>(indent));
+        indents.emplace_back(0.0);
+        paragraph_->SetIndents(indents);
+    }
 #endif
 }
 } // namespace OHOS::Ace::NG
