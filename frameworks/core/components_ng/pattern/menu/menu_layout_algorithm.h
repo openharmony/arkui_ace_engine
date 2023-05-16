@@ -44,11 +44,13 @@ public:
 protected:
     float VerticalLayout(const SizeF& size, float clickPosition);
     float HorizontalLayout(const SizeF& size, float clickPosition, bool IsSelectMenu = false);
-    
+
     RefPtr<MenuWrapperPaintProperty> GetWrapperPaintProperty(const LayoutWrapper* layoutWrapper);
 
     OffsetF position_;
     OffsetF positionOffset_;
+    SizeF wrapperSize_;
+    OffsetF pageOffset_;
 
 private:
     enum class ErrorPositionType {
@@ -69,10 +71,6 @@ private:
         const RefPtr<MenuLayoutProperty>& menuProp, const RefPtr<GeometryNode>& geometryNode);
     OffsetF MenuLayoutAvoidAlgorithm(
         const RefPtr<MenuLayoutProperty>& menuProp, const RefPtr<MenuPattern>& menuPattern, const SizeF& size);
-
-    void LayoutSubMenu(LayoutWrapper* layoutWrapper);
-    float VerticalLayoutSubMenu(const SizeF& size, float position, const SizeF& menuItemSize);
-    float HorizontalLayoutSubMenu(const SizeF& size, float position, const SizeF& menuItemSize);
 
     float GetChildrenMaxWidth(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint);
 
@@ -109,10 +107,8 @@ private:
     Placement placement_ = Placement::BOTTOM;
     int32_t targetNodeId_ = -1;
     std::string targetTag_;
-    SizeF wrapperSize_;
 
     // current page offset relative to window.
-    OffsetF pageOffset_;
     float topSpace_ = 0.0f;
     float bottomSpace_ = 0.0f;
     float leftSpace_ = 0.0f;
