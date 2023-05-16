@@ -16,14 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_PAINT_METHOD_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_PAINT_METHOD_H
 
-#include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
-#include "base/utils/utils.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
-#include "core/components_ng/render/image_painter.h"
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/render/paint_wrapper.h"
 
@@ -31,15 +28,19 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT ImagePaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(ImagePaintMethod, NodePaintMethod)
 public:
-    explicit ImagePaintMethod(const RefPtr<CanvasImage>& canvasImage) : canvasImage_(canvasImage) {}
+    explicit ImagePaintMethod(const RefPtr<CanvasImage>& canvasImage, bool selected)
+        : canvasImage_(canvasImage), selected_(selected)
+    {}
     ~ImagePaintMethod() override = default;
 
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
+    CanvasDrawFunction GetOverlayDrawFunction(PaintWrapper* paintWrapper) override;
 
 private:
     void UpdatePaintConfig(const RefPtr<ImageRenderProperty>& renderProps, PaintWrapper* paintWrapper);
     void UpdateBorderRadius(PaintWrapper* paintWrapper);
     RefPtr<CanvasImage> canvasImage_;
+    bool selected_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(ImagePaintMethod);
 };

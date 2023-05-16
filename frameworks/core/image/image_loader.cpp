@@ -21,8 +21,8 @@
 #include <regex>
 #include <string_view>
 
-#include "third_party/skia/include/codec/SkCodec.h"
-#include "third_party/skia/include/utils/SkBase64.h"
+#include "include/codec/SkCodec.h"
+#include "include/utils/SkBase64.h"
 
 #include "base/image/image_source.h"
 #include "base/log/ace_trace.h"
@@ -406,7 +406,7 @@ sk_sp<SkData> Base64ImageLoader::LoadImageData(
         return nullptr;
     }
 
-#ifdef FLUTTER_2_5
+#if defined(FLUTTER_2_5) || defined(NEW_SKIA)
     size_t outputLen;
     SkBase64::Error error = SkBase64::Decode(base64Code.data(), base64Code.size(), nullptr, &outputLen);
     if (error != SkBase64::Error::kNoError) {
@@ -496,14 +496,12 @@ sk_sp<SkData> ResourceImageLoader::LoadImageData(
     const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context)
 {
     auto uri = imageSourceInfo.GetSrc();
-    auto pipelineContext = context.Upgrade();
-    CHECK_NULL_RETURN(pipelineContext, nullptr);
-    auto themeManager = pipelineContext->GetThemeManager();
+
+    auto themeManager = PipelineBase::CurrentThemeManager();
     CHECK_NULL_RETURN(themeManager, nullptr);
     auto themeConstants =
         themeManager->GetThemeConstants(imageSourceInfo.GetBundleName(), imageSourceInfo.GetModuleName());
     CHECK_NULL_RETURN(themeConstants, nullptr);
-
     std::unique_ptr<uint8_t[]> data;
     size_t dataLen = 0;
     std::string rawFile;
@@ -614,8 +612,7 @@ sk_sp<SkData> SharedMemoryImageLoader::LoadImageData(
     CHECK_RUN_ON(BG);
     auto pipeline = pipelineWk.Upgrade();
     CHECK_NULL_RETURN(pipeline, nullptr);
-    auto manager = pipeline->GetSharedImageManager();
-    CHECK_NULL_RETURN(manager, nullptr);
+    auto manager = pipeline->GetOrCreateSharedImageManager();
     auto id = RemovePathHead(src.GetSrc());
     bool found = manager->FindImageInSharedImageMap(id, AceType::WeakClaim(this));
     // image data not ready yet, wait for data
@@ -625,6 +622,7 @@ sk_sp<SkData> SharedMemoryImageLoader::LoadImageData(
         std::unique_lock<std::mutex> lock(mtx_);
         auto status = cv_.wait_for(lock, TIMEOUT_DURATION);
         if (status == std::cv_status::timeout) {
+            LOGW("load SharedMemoryImage timeout! %{public}s", src.ToString().c_str());
             return nullptr;
         }
     }

@@ -63,14 +63,14 @@ enum class PerformanceParameterType {
 };
 
 struct PerformanceCheckParameter {
-    uint32_t pageNodes;
-    uint32_t pageDepth;
-    uint32_t nodeChildren;
-    uint32_t functionTimeout;
-    uint32_t vsyncTimeout;
-    uint32_t nodeTimeout;
-    uint32_t foreachItems;
-    uint32_t flexLayouts;
+    int32_t pageNodes;
+    int32_t pageDepth;
+    int32_t nodeChildren;
+    int32_t functionTimeout;
+    int32_t vsyncTimeout;
+    int32_t nodeTimeout;
+    int32_t foreachItems;
+    int32_t flexLayouts;
 };
 
 using PerformancePtr = std::unique_ptr<PerformanceCheckParameter>;
@@ -372,7 +372,7 @@ public:
 
     static bool IsPerformanceCheckEnabled();
 
-    static uint32_t GetPerformanceParameterWithType(PerformanceParameterType type);
+    static int32_t GetPerformanceParameterWithType(PerformanceParameterType type);
     
     static bool IsFormAnimationLimited();
 

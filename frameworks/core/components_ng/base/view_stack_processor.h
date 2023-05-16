@@ -69,6 +69,18 @@
         cast##target->Reset##name();                                            \
     } while (false)
 
+#define ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(target, name, changeFlag)           \
+    do {                                                                        \
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode(); \
+        CHECK_NULL_VOID(frameNode);                                             \
+        auto cast##target = frameNode->GetLayoutProperty<target>();             \
+        CHECK_NULL_VOID(cast##target);                                          \
+        if (cast##target->Has##name()) {                                        \
+            cast##target->Reset##name();                                        \
+            cast##target->UpdatePropertyChangeFlag(changeFlag);                 \
+        }                                                                       \
+    } while (false)
+
 #define ACE_RESET_PAINT_PROPERTY(target, name)                                  \
     do {                                                                        \
         auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode(); \
@@ -181,6 +193,12 @@ public:
 
     // Clear the key pushed to the stack
     void PopKey();
+
+    // Prevent predict mark dirty when creating predict node
+    void SetPredict(bool predict)
+    {
+        predict_ = predict;
+    };
 
     // Check whether the current node is in the corresponding polymorphic style state.
     // When the polymorphic style is not set on the front end, it returns true regardless of the current node state;
@@ -314,6 +332,8 @@ private:
 
     std::string viewKey_;
     std::stack<size_t> keyStack_;
+
+    bool predict_ = false;
 
     std::stack<int32_t> parentIdStack_;
 

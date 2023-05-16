@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TOGGLE_TOGGLE_MODEL_H
 
 #include <memory>
+#include <mutex>
 
 #include "base/geometry/dimension.h"
 #include "core/components/common/properties/color.h"
@@ -49,9 +50,11 @@ public:
     virtual void SetBackgroundColor(const Color& color) = 0;
     virtual bool IsToggle() = 0;
     virtual void SetPadding(const NG::PaddingPropertyF& args) = 0;
+    virtual void OnChangeEvent(NG::ChangeEvent&& onChangeEvent) = 0;
 
 private:
     static std::unique_ptr<ToggleModel> instance_;
+    static std::mutex mutex_;
 };
 
 } // namespace OHOS::Ace

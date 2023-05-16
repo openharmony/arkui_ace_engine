@@ -201,7 +201,7 @@ private:
     UncaughtExceptionCallback uncaughtErrorHandler_ { nullptr };
     std::string libPath_ {};
     bool usingExistVM_ = false;
-    bool isDebugMode_ = true;
+    bool isDebugMode_ = false;
     DebuggerPostTask debuggerPostTask_;
     ErrorEventHandler errorCallback_;
 #if defined(PREVIEW)

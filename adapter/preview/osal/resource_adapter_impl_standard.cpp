@@ -86,6 +86,7 @@ const char* PATTERN_MAP[] = {
     THEME_PATTERN_ICON,
     THEME_PATTERN_INDEXER,
     THEME_PATTERN_APP_BAR,
+    THEME_PATTERN_SECURITY_COMPONENT,
 };
 } // namespace
 
@@ -118,7 +119,7 @@ void ResourceAdapterImpl::Init(const ResourceInfo& resourceInfo)
 
     std::string appResIndexPath = appResPath + DELIMITER + "resources.index";
     auto appResRet = newResMgr->AddResource(appResIndexPath.c_str());
-    std::string sysResIndexPath = sysResPath + DELIMITER + "entry/resources.index";
+    std::string sysResIndexPath = sysResPath + DELIMITER + "resources.index";
     auto sysResRet = newResMgr->AddResource(sysResIndexPath.c_str());
 
     auto configRet = newResMgr->UpdateResConfig(*resConfig);

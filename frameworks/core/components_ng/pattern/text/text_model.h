@@ -18,6 +18,7 @@
 
 #include <functional>
 #include <memory>
+#include <mutex>
 #include <string>
 
 #include "base/geometry/dimension.h"
@@ -72,6 +73,7 @@ public:
 
 private:
     static std::unique_ptr<TextModel> instance_;
+    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
 

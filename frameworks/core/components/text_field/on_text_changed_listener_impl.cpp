@@ -129,10 +129,14 @@ void OnTextChangedListenerImpl::SetKeyboardStatus(bool status)
 
 void OnTextChangedListenerImpl::SendKeyEventFromInputMethod(const MiscServices::KeyEvent& event) {}
 
-void OnTextChangedListenerImpl::SendKeyboardInfo(const MiscServices::KeyboardInfo& info)
+void OnTextChangedListenerImpl::SendKeyboardStatus(const MiscServices::KeyboardStatus& keyboardStatus)
 {
-    HandleKeyboardStatus(info.GetKeyboardStatus());
-    HandleFunctionKey(info.GetFunctionKey());
+    HandleKeyboardStatus(keyboardStatus);
+}
+
+void OnTextChangedListenerImpl::SendFunctionKey(const MiscServices::FunctionKey& functionKey)
+{
+    HandleFunctionKey(functionKey);
 }
 
 void OnTextChangedListenerImpl::HandleKeyboardStatus(MiscServices::KeyboardStatus status)
@@ -153,7 +157,7 @@ void OnTextChangedListenerImpl::HandleFunctionKey(MiscServices::FunctionKey func
             return;
         }
         ContainerScope scope(client->instanceId_);
-        TextInputAction action_ = static_cast<TextInputAction>(functionKey);
+        TextInputAction action_ = static_cast<TextInputAction>(functionKey.GetEnterKeyType());
         switch (action_) {
             case TextInputAction::DONE:
             case TextInputAction::NEXT:

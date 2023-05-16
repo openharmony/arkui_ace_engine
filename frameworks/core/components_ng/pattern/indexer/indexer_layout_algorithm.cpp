@@ -48,14 +48,6 @@ void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     } else {
         itemSize_ = 0.0f;
     }
-    if (itemCount_ <= 0) {
-        LOGE("AlphabetIndexer arrayValue size is less than 0");
-        return;
-    }
-    if (NearZero(itemSize_)) {
-        LOGE("AlphabetIndexer itemSize is near zero");
-        return;
-    }
     auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     auto verticalPadding = (padding.top.value_or(0) + padding.bottom.value_or(0));
     auto horizontalPadding = padding.left.value_or(0.0f) + padding.right.value_or(0.0f);

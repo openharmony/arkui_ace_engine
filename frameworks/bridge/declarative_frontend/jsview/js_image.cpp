@@ -35,19 +35,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<ImageModel> ImageModel::instance_ = nullptr;
+std::mutex ImageModel::mutex_;
 
 ImageModel* ImageModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::ImageModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::ImageModelNG());
-        } else {
-            instance_.reset(new Framework::ImageModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::ImageModelNG());
+            } else {
+                instance_.reset(new Framework::ImageModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -193,8 +197,8 @@ void JSImage::Create(const JSCallbackInfo& info)
     }
     GetJsMediaBundleInfo(info[0], bundleName, moduleName);
     RefPtr<PixelMap> pixmap = nullptr;
-#if defined(PIXEL_MAP_SUPPORTED)
     if (!noPixmap) {
+#if defined(PIXEL_MAP_SUPPORTED)
         if (context->IsFormRender()) {
             LOGE("Not supported pixmap when form render");
         } else {
@@ -204,8 +208,10 @@ void JSImage::Create(const JSCallbackInfo& info)
                 pixmap = CreatePixelMapFromNapiValue(info[0]);
             }
         }
-    }
+#else
+        LOGW("Pixmap not supported under this environment.");
 #endif
+    }
     ImageModel::GetInstance()->Create(src, noPixmap, pixmap, bundleName, moduleName);
 }
 
@@ -344,6 +350,10 @@ void JSImage::SetAutoResize(bool autoResize)
 
 void JSImage::SetSyncLoad(const JSCallbackInfo& info)
 {
+    if (!info[0]->IsBoolean()) {
+        LOGE("info[0] is not a Boolean.");
+        return;
+    }
     ImageModel::GetInstance()->SetSyncMode(info[0]->ToBoolean());
 }
 

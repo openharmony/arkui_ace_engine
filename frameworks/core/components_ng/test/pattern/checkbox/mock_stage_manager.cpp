@@ -30,8 +30,7 @@ StageManager::StageManager(const RefPtr<FrameNode>& stage) : stageNode_(stage)
 RefPtr<FrameNode> StageManager::GetLastPage()
 {
     auto entryPageInfo = AceType::MakeRefPtr<EntryPageInfo>(0, "", "", "");
-    auto* stack = ViewStackProcessor::GetInstance();
-    int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
+    int32_t nodeId = 0;
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::PAGE_ETS_TAG, nodeId, [entryPageInfo]() { return AceType::MakeRefPtr<PagePattern>(entryPageInfo); });
     stageNode_ = frameNode;

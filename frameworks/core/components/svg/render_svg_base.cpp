@@ -479,7 +479,7 @@ bool RenderSvgBase::CreatePropertyAnimation(
             animators_.erase(animatorIter);
         }
     } else {
-        auto animator = AceType::MakeRefPtr<Animator>(context_);
+        auto animator = CREATE_ANIMATOR(context_);
         if (svgAnimate->CreatePropertyAnimate(std::move(callback), originalValue, animator)) {
             animators_.emplace(svgAnimate->GetAttributeName(), animator);
         }
@@ -516,7 +516,7 @@ bool RenderSvgBase::PrepareAnimateMotion(const RefPtr<SvgAnimate>& svgAnimate)
             animators_.erase(animatorIter);
         }
     } else {
-        auto animator = AceType::MakeRefPtr<Animator>(context_);
+        auto animator = CREATE_ANIMATOR(context_);
         if (svgAnimate->CreateMotionAnimate(std::move(callback), animator)) {
             animators_.emplace(ANIMATOR_TYPE_MOTION, animator);
         }

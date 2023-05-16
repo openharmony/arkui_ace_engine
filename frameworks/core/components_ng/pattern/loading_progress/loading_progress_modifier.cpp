@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -194,45 +194,57 @@ void LoadingProgressModifier::DrawOrbit(
 
 void LoadingProgressModifier::StartRecycleRingAnimation()
 {
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
     auto previousStageCurve = AceType::MakeRefPtr<CubicCurve>(0.0f, 0.0f, 0.67f, 1.0f);
     AnimationOption option;
-    option.SetDuration(LOADING_DURATION);
+    option.SetDuration(isVisible_ ? LOADING_DURATION : 0);
     option.SetCurve(previousStageCurve);
-    option.SetIteration(-1);
+    if (context->IsFormRender()) {
+        LOGI("LoadingProgress is restricted at runtime when form render");
+        option.SetIteration(1);
+    } else {
+        option.SetIteration(-1);
+    }
     AnimationUtils::OpenImplicitAnimation(option, previousStageCurve, nullptr);
     auto middleStageCurve = AceType::MakeRefPtr<CubicCurve>(0.33f, 0.0f, 0.67f, 1.0f);
     AnimationUtils::AddKeyFrame(
         STAGE1, middleStageCurve, [weakCenterDeviation = AceType::WeakClaim(AceType::RawPtr(centerDeviation_))]() {
             auto centerDeviation = weakCenterDeviation.Upgrade();
-            if (centerDeviation) {
-                centerDeviation->Set(-1 * MOVE_STEP);
-            }
+            CHECK_NULL_VOID(centerDeviation);
+            centerDeviation->Set(-1 * MOVE_STEP);
         });
     auto latterStageCurve = AceType::MakeRefPtr<CubicCurve>(0.33f, 0.0f, 1.0f, 1.0f);
     AnimationUtils::AddKeyFrame(
         STAGE3, latterStageCurve, [weakCenterDeviation = AceType::WeakClaim(AceType::RawPtr(centerDeviation_))]() {
             auto centerDeviation = weakCenterDeviation.Upgrade();
-            if (centerDeviation) {
-                centerDeviation->Set(MOVE_STEP);
-            }
+            CHECK_NULL_VOID(centerDeviation);
+            centerDeviation->Set(MOVE_STEP);
         });
     AnimationUtils::AddKeyFrame(
         STAGE5, latterStageCurve, [weakCenterDeviation = AceType::WeakClaim(AceType::RawPtr(centerDeviation_))]() {
             auto centerDeviation = weakCenterDeviation.Upgrade();
-            if (centerDeviation) {
-                centerDeviation->Set(0.0f);
-            }
+            CHECK_NULL_VOID(centerDeviation);
+            centerDeviation->Set(0.0f);
         });
     AnimationUtils::CloseImplicitAnimation();
 }
 
 void LoadingProgressModifier::StartRecycleCometAnimation()
 {
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
     auto curve = AceType::MakeRefPtr<LinearCurve>();
     AnimationOption option;
-    option.SetDuration(LOADING_DURATION);
+    option.SetDuration(isVisible_ ? LOADING_DURATION : 0);
     option.SetCurve(curve);
-    option.SetIteration(-1);
+    if (context->IsFormRender()) {
+        LOGI("LoadingProgress is restricted at runtime when form render");
+        option.SetIteration(1);
+    } else {
+        option.SetIteration(-1);
+    }
+
     cometOpacity_->Set(OPACITY2);
     AnimationUtils::OpenImplicitAnimation(option, curve, nullptr);
     AnimationUtils::AddKeyFrame(STAGE1, curve,
@@ -307,9 +319,8 @@ void LoadingProgressModifier::StartCometTailAnimation()
     option.SetCurve(curve);
     AnimationUtils::Animate(option, [weakCometTailLen = AceType::WeakClaim(AceType::RawPtr(cometTailLen_))]() {
         auto cometTailLen = weakCometTailLen.Upgrade();
-        if (cometTailLen) {
-            cometTailLen->Set(TOTAL_TAIL_LENGTH);
-        }
+        CHECK_NULL_VOID(cometTailLen);
+        cometTailLen->Set(TOTAL_TAIL_LENGTH);
     });
 }
 
@@ -331,6 +342,8 @@ uint32_t LoadingProgressModifier::GetCometNumber()
 
 void LoadingProgressModifier::StartRecycle()
 {
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
     if (isLoading_) {
         return;
     }
@@ -340,20 +353,26 @@ void LoadingProgressModifier::StartRecycle()
         date_->Set(0.0f);
         AnimationOption option = AnimationOption();
         RefPtr<Curve> curve = AceType::MakeRefPtr<LinearCurve>();
-        option.SetDuration(LOADING_DURATION);
+        option.SetDuration(isVisible_ ? LOADING_DURATION : 0);
         option.SetDelay(0);
         option.SetCurve(curve);
-        option.SetIteration(-1);
+        if (context->IsFormRender()) {
+            LOGI("LoadingProgress is restricted at runtime when form render");
+            option.SetIteration(1);
+        } else {
+            option.SetIteration(-1);
+        }
         AnimationUtils::Animate(option, [weakDate = AceType::WeakClaim(AceType::RawPtr(date_))]() {
             auto date = weakDate.Upgrade();
-            if (date) {
-                date->Set(FULL_COUNT);
-            }
+            CHECK_NULL_VOID(date);
+            date->Set(FULL_COUNT);
         });
     }
     cometOpacity_->Set(INITIAL_OPACITY_SCALE);
     cometSizeScale_->Set(INITIAL_SIZE_SCALE);
+    // ring up and down shift animation
     StartRecycleRingAnimation();
+    // comet's circle Color transparency and sizeScale animation
     StartRecycleCometAnimation();
 }
 
@@ -384,9 +403,8 @@ void LoadingProgressModifier::StartTransToRecycleAnimation()
         },
         [weak = AceType::WeakClaim(this)]() {
             auto modify = weak.Upgrade();
-            if (modify) {
-                modify->StartRecycle();
-            }
+            CHECK_NULL_VOID(modify);
+            modify->StartRecycle();
         });
     StartCometTailAnimation();
 }

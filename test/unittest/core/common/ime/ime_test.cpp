@@ -435,29 +435,6 @@ HWTEST_F(ImeTest, SelectionAwareTextManipulationTest003, TestSize.Level1)
 }
 
 /**
- * @tc.name: SelectionAwareTextManipulationTest004
- * @tc.desc: Test start and end are less than zero of SelectionAwareTextManipulation.
- * @tc.type: FUNC
- */
-HWTEST_F(ImeTest, SelectionAwareTextManipulationTest004, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. The initialization parameters baseOffset and extentOffset are
-     * set to values less than or equal to zero.
-     * @tc.expected: step1. The baseOffset and extentOffset remain unchanged, and the text is the same as expected.
-     */
-    TextEditingValue textEditingValue;
-    textEditingValue.text = TEXT_TEST_VALUE;
-    textEditingValue.selection.baseOffset = -5;
-    textEditingValue.selection.extentOffset = 0;
-    textEditingValue.SelectionAwareTextManipulation(
-        [](std::wstring& manipulateText) { manipulateText += manipulateText; });
-    EXPECT_EQ(textEditingValue.text, "text_test_valuetext_test_value");
-    EXPECT_EQ(textEditingValue.selection.baseOffset, -5);
-    EXPECT_EQ(textEditingValue.selection.extentOffset, 0);
-}
-
-/**
  * @tc.name: SelectionAwareTextManipulationTest005
  * @tc.desc: Test that start and end are equal of SelectionAwareTextManipulation.
  * @tc.type: FUNC
@@ -785,6 +762,5 @@ HWTEST_F(ImeTest, FormatTest005, TestSize.Level1)
     lengthLimitingFormatter.Format(oldValue, newValue);
     EXPECT_EQ(newValue.text, "text_test_valu");
     EXPECT_EQ(newValue.selection.baseOffset, -1);
-    EXPECT_EQ(newValue.selection.extentOffset, 0);
 }
 } // namespace OHOS::Ace

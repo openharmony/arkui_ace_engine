@@ -414,7 +414,6 @@ private:
 };
 
 struct SafeAreaEdgeInserts {
-    
     SafeAreaEdgeInserts() = default;
     void SetRect(Rect leftRect, Rect topRect, Rect rightRect, Rect bottomRect)
     {
@@ -428,6 +427,12 @@ struct SafeAreaEdgeInserts {
     Rect topRect_;
     Rect rightRect_;
     Rect bottomRect_;
+
+    std::string ToString() const
+    {
+        return "SafeAreaEdgeInserts leftRect_: " + leftRect_.ToString() + ", topRect_: " + topRect_.ToString() +
+               ", rightRect_: " + rightRect_.ToString() + ", bottomRect_: " + bottomRect_.ToString();
+    }
 };
 
 } // namespace OHOS::Ace

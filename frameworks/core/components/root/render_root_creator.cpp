@@ -12,8 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#ifndef NEW_SKIA
 #include "flutter_render_root.h"
+#endif
 #include "rosen_render_root.h"
 
 namespace OHOS::Ace {
@@ -26,7 +27,11 @@ RefPtr<RenderNode> RenderRoot::Create()
         return nullptr;
 #endif
     } else {
+#ifndef NEW_SKIA
         return AceType::MakeRefPtr<FlutterRenderRoot>();
+#else
+        return nullptr;
+#endif
     }
 }
 } // namespace OHOS::Ace

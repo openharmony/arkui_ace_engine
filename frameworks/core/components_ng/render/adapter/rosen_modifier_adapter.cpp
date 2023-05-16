@@ -18,6 +18,7 @@
 #include <unordered_map>
 
 #include "base/utils/utils.h"
+#include "core/components_ng/animation/animatable_arithmetic_proxy.h"
 #include "core/components_ng/render/modifier_adapter.h"
 
 namespace OHOS::Ace::NG {
@@ -103,6 +104,24 @@ inline std::shared_ptr<RSPropertyBase> ConvertToRSProperty(const RefPtr<Property
     CONVERT_ANIMATABLE_PROP(property, AnimatablePropertyVectorColor, GradientArithmetic);
     CONVERT_ANIMATABLE_PROP(property, AnimatablePropertyVectorFloat, LinearVector<float>);
     CONVERT_ANIMATABLE_PROP(property, AnimatablePropertySizeF, SizeF);
+
+    if (AceType::InstanceOf<AnimatableArithmeticProperty>(property)) {
+        auto castProp = AceType::DynamicCast<AnimatableArithmeticProperty>(property);
+        AnimatableArithmeticProxy proxy(castProp->Get());
+        auto rsProp = std::make_shared<RSAnimatableProperty<AnimatableArithmeticProxy>>(proxy);
+        auto getter = [rsProp]() -> RefPtr<CustomAnimatableArithmetic> {
+            return rsProp->Get().GetObject();
+        };
+        auto setter = [rsProp](const RefPtr<CustomAnimatableArithmetic>& value) {
+            rsProp->Set(AnimatableArithmeticProxy(value));
+        };
+        castProp->SetUpCallbacks(getter, setter);
+        rsProp->SetUpdateCallback([cb = castProp->GetUpdateCallback()](const AnimatableArithmeticProxy& value) {
+            cb(value.GetObject());
+        });
+        return rsProp;
+    }
+
     LOGE("ConvertToRSProperty failed!");
     return nullptr;
 }

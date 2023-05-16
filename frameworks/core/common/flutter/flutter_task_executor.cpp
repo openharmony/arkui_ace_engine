@@ -33,6 +33,8 @@
 #include "flutter/fml/message_loop.h"
 #if defined(OHOS_STANDARD_SYSTEM) || defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
 #include "flutter/shell/platform/ohos/platform_task_runner.h"
+#elif defined(PREVIEW)
+#include "adapter/preview/external/flutter/platform_task_runner.h"
 #endif
 
 #include "base/log/log.h"
@@ -134,7 +136,7 @@ FlutterTaskExecutor::~FlutterTaskExecutor()
 
 void FlutterTaskExecutor::InitPlatformThread(bool useCurrentEventRunner, bool isStageModel)
 {
-#ifdef OHOS_STANDARD_SYSTEM
+#if defined(OHOS_STANDARD_SYSTEM) || defined(PREVIEW)
     platformRunner_ = flutter::PlatformTaskRunner::CurrentTaskRunner(useCurrentEventRunner);
 #else
 #if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)

@@ -408,7 +408,7 @@ void WebPattern::HandleDragStart(const GestureEvent& info)
     int32_t globalX = static_cast<int32_t>(info.GetGlobalPoint().GetX());
     int32_t globalY = static_cast<int32_t>(info.GetGlobalPoint().GetY());
     auto viewScale = pipelineContext->GetViewScale();
-    auto offset = GetHostFrameGlobalOffset();
+    auto offset = GetCoordinatePoint();
     int32_t localX = static_cast<int32_t>(globalX - offset.value_or(OffsetF()).GetX());
     int32_t localY = static_cast<int32_t>(globalY - offset.value_or(OffsetF()).GetY());
     delegate_->HandleDragEvent(localX * viewScale, localY * viewScale, DragAction::DRAG_ENTER);
@@ -430,7 +430,7 @@ void WebPattern::HandleDragUpdate(const GestureEvent& info)
     int32_t globalY = static_cast<int32_t>(info.GetGlobalPoint().GetY());
     LOGD("web drag position update, x = %{public}d, y = %{public}d", globalX, globalY);
     auto viewScale = pipelineContext->GetViewScale();
-    auto offset = GetHostFrameGlobalOffset();
+    auto offset = GetCoordinatePoint();
     int32_t localX = static_cast<int32_t>(globalX - offset.value_or(OffsetF()).GetX());
     int32_t localY = static_cast<int32_t>(globalY - offset.value_or(OffsetF()).GetY());
     delegate_->HandleDragEvent(localX * viewScale, localY * viewScale, DragAction::DRAG_OVER);
@@ -451,7 +451,7 @@ void WebPattern::HandleDragEnd(const GestureEvent& info)
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto viewScale = pipelineContext->GetViewScale();
-    auto offset = GetHostFrameGlobalOffset();
+    auto offset = GetCoordinatePoint();
     int32_t localX = static_cast<int32_t>(info.GetGlobalPoint().GetX() - offset.value_or(OffsetF()).GetX());
     int32_t localY = static_cast<int32_t>(info.GetGlobalPoint().GetY() - offset.value_or(OffsetF()).GetY());
     delegate_->HandleDragEvent(localX * viewScale, localY * viewScale, DragAction::DRAG_DROP);
@@ -567,8 +567,24 @@ void WebPattern::WebRequestFocus()
     focusHub->RequestFocusImmediately();
 }
 
+void WebPattern::UpdateContentOffset(const RefPtr<LayoutWrapper>& dirty)
+{
+    CHECK_NULL_VOID(dirty);
+    auto geometryNode = dirty->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto paddingOffset = geometryNode->GetPaddingOffset();
+    auto webContentSize = geometryNode->GetContentSize();
+    renderContext->SetBounds(paddingOffset.GetX(), paddingOffset.GetY(),
+        webContentSize.Width(), webContentSize.Height());
+}
+
 bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
+    UpdateContentOffset(dirty);
     if (!config.contentSizeChange || isInWindowDrag_) {
         return false;
     }
@@ -942,11 +958,15 @@ void WebPattern::OnModifyDone()
         delegate_->SetEnhanceSurfaceFlag(isEnhanceSurface_);
         delegate_->SetPopup(isPopup_);
         delegate_->SetParentNWebId(parentNWebId_);
+        delegate_->SetBackgroundColor(GetBackgroundColorValue(
+            static_cast<int32_t>(renderContext->GetBackgroundColor().value_or(Color::WHITE).GetValue())));
         if (isEnhanceSurface_) {
             auto drawSize = Size(1, 1);
             delegate_->SetDrawSize(drawSize);
             delegate_->InitOHOSWeb(PipelineContext::GetCurrentContext());
         } else {
+            auto drawSize = Size(1, 1);
+            delegate_->SetDrawSize(drawSize);
             renderSurface_->SetRenderContext(host->GetRenderContext());
             renderSurface_->InitSurface();
             delegate_->InitOHOSWeb(PipelineContext::GetCurrentContext(), renderSurface_);
@@ -1356,6 +1376,7 @@ bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> p
     if (selectInfo.isSingleHandle) {
         selectInfo.firstHandle.isShow = IsTouchHandleShow(insertTouchHandle);
         selectInfo.firstHandle.paintRect = ComputeTouchHandleRect(insertTouchHandle);
+        selectInfo.secondHandle.isShow = false;
     } else {
         selectInfo.firstHandle.isShow = IsTouchHandleShow(beginTouchHandle);
         selectInfo.firstHandle.paintRect = ComputeTouchHandleRect(beginTouchHandle);
@@ -1401,6 +1422,7 @@ void WebPattern::OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHa
             selectInfo.isSingleHandle = true;
             selectInfo.firstHandle.isShow = IsTouchHandleShow(insertHandle_);
             selectInfo.firstHandle.paintRect = ComputeTouchHandleRect(insertHandle_);
+            selectInfo.secondHandle.isShow = false;
             selectInfo.menuInfo.menuDisable = true;
             selectInfo.menuInfo.menuIsShow = false;
             selectInfo.hitTestMode = HitTestMode::HTMDEFAULT;
@@ -1624,6 +1646,26 @@ void WebPattern::OnResizeNotWork()
 
     ACE_SCOPED_TRACE("WebPattern::OnResizeNotWork");
     isWaiting_ = false;
+}
+
+bool WebPattern::OnBackPressed() const
+{
+    if (!isFullScreen_) {
+        LOGI("The web is not full screen when OnBackPressed");
+        return false;
+    }
+
+    CHECK_NULL_RETURN(fullScreenExitHandler_, false);
+    auto webFullScreenExitHandler = fullScreenExitHandler_->GetHandler();
+    CHECK_NULL_RETURN(webFullScreenExitHandler, false);
+    webFullScreenExitHandler->ExitFullScreen();
+    LOGD("Web Exit full screen when OnBackPressed");
+    return true;
+}
+
+void WebPattern::SetFullScreenExitHandler(const std::shared_ptr<FullScreenEnterEvent>& fullScreenExitHandler)
+{
+    fullScreenExitHandler_ = fullScreenExitHandler;
 }
 
 void WebPattern::OnInActive()

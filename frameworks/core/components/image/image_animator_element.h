@@ -32,7 +32,7 @@ class ImageAnimatorElement : public ComposedElement {
 public:
     explicit ImageAnimatorElement(const ComposeId& id) : ComposedElement(id)
     {
-        animator_ = AceType::MakeRefPtr<Animator>();
+        animator_ = CREATE_ANIMATOR();
     }
     ~ImageAnimatorElement() override;
 

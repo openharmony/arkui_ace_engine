@@ -20,10 +20,10 @@
 #include <memory>
 #include <optional>
 
+#include "include/core/SkCanvas.h"
+#include "include/core/SkPictureRecorder.h"
+#include "include/core/SkRefCnt.h"
 #include "render_service_client/core/ui/rs_node.h"
-#include "third_party/skia/include/core/SkCanvas.h"
-#include "third_party/skia/include/core/SkPictureRecorder.h"
-#include "third_party/skia/include/core/SkRefCnt.h"
 
 #include "base/geometry/dimension_offset.h"
 #include "base/geometry/ng/offset_t.h"
@@ -129,7 +129,10 @@ public:
     void AnimateHoverEffectScale(bool isHovered) override;
     void AnimateHoverEffectBoard(bool isHovered) override;
     void UpdateBackBlurRadius(const Dimension& radius) override;
-    void UpdateBackBlurStyle(const BlurStyleOption& bgBlurStyle) override;
+    void UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle) override;
+    void UpdateFrontBlurRadius(const Dimension& radius) override;
+    void UpdateFrontBlurStyle(const std::optional<BlurStyleOption>& fgBlurStyle) override;
+    void ResetBackBlurStyle() override;
     void OnSphericalEffectUpdate(double radio) override;
     void OnPixelStretchEffectUpdate(const PixStretchEffectOption& option) override;
     void OnLightUpEffectUpdate(double radio) override;
@@ -148,9 +151,10 @@ public:
     {
         return propTransitionDisappearing_ != nullptr;
     }
-    void OnNodeAppear() override;
-    void OnNodeDisappear() override;
+    void OnNodeAppear(bool recursive) override;
+    void OnNodeDisappear(bool recursive) override;
     void ClipWithRect(const RectF& rectF) override;
+    void ClipWithRRect(const RectF& rectF, const RadiusF& radiusF) override;
 
     bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish) override;
 
@@ -163,7 +167,9 @@ public:
 
     // if translate params use percent dimension, frameSize should be given correctly
     static std::shared_ptr<Rosen::RSTransitionEffect> GetRSTransitionWithoutType(
-        const TransitionOptions& options, const SizeF& frameSize = SizeF());
+        const std::unique_ptr<TransitionOptions>& options, const SizeF& frameSize = SizeF());
+
+    static float ConvertDimensionToScaleBySize(const Dimension& dimension, float size);
 
     void FlushContentModifier(const RefPtr<Modifier>& modifier) override;
     void FlushOverlayModifier(const RefPtr<Modifier>& modifier) override;
@@ -185,7 +191,7 @@ public:
 
     void PaintAccessibilityFocus() override;
 
-    virtual void ClearAccessibilityFocus() override;
+    void ClearAccessibilityFocus() override;
 
     void OnAccessibilityFocusUpdate(bool isAccessibilityFocus) override;
 
@@ -249,7 +255,7 @@ private:
     void OnClipEdgeUpdate(bool isClip) override;
     void OnClipMaskUpdate(const RefPtr<BasicShape>& basicShape) override;
 
-    void OnProgressMaskUpdate(const RefPtr<ProgressMaskProperty>& prgress) override;
+    void OnProgressMaskUpdate(const RefPtr<ProgressMaskProperty>& progress) override;
 
     void OnLinearGradientUpdate(const NG::Gradient& value) override;
     void OnSweepGradientUpdate(const NG::Gradient& value) override;
@@ -263,11 +269,11 @@ private:
     void OnFrontInvertUpdate(const Dimension& invert) override;
     void OnFrontHueRotateUpdate(float hueRotate) override;
     void OnFrontColorBlendUpdate(const Color& colorBlend) override;
-    void OnFrontBlurRadiusUpdate(const Dimension& radius) override;
 
     void OnOverlayTextUpdate(const OverlayOptions& overlay) override;
     void OnMotionPathUpdate(const MotionPathOption& motionPath) override;
 
+    void OnFreezeUpdate(bool isFreezed) override;
     void ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
 
     void NotifyTransitionInner(const SizeF& frameSize, bool isTransitionIn);
@@ -297,7 +303,12 @@ private:
     void PaintBorderImageGradient();
     void PaintMouseSelectRect(const RectF& rect, const Color& fillColor, const Color& strokeColor);
     void SetBackBlurFilter();
+    void SetFrontBlurFilter();
     void GetPaddingOfFirstFrameNodeParent(Dimension& parentPaddingLeft, Dimension& parentPaddingTop);
+    void CombinePaddingAndOffset(Dimension& resultX, Dimension& resultY, const Dimension& parentPaddingLeft,
+        const Dimension& parentPaddingTop, float widthPercentReference, float heightPercentReference);
+    void CombineMarginAndPosition(Dimension& resultX, Dimension& resultY, const Dimension& parentPaddingLeft,
+        const Dimension& parentPaddingTop, float widthPercentReference, float heightPercentReference);
 
     // helper function to check if paint rect is valid
     bool RectIsNull();
@@ -327,6 +338,7 @@ private:
     void BdImagePaintTask(RSCanvas& canvas);
 
     void PaintDebugBoundary();
+    bool IsUsingPosition(const RefPtr<FrameNode>& frameNode);
 
     RefPtr<ImageLoadingContext> bgLoadingCtx_;
     RefPtr<CanvasImage> bgImage_;
@@ -339,6 +351,7 @@ private:
     bool isPositionChanged_ = false;
     bool isSynced_ = false;
     bool firstTransitionIn_ = false;
+    bool isBreakingPoint_ = false;
     bool isBackBlurChanged_ = false;
     bool needDebugBoundary_ = false;
     bool isDisappearing_ = false;
@@ -369,7 +382,8 @@ private:
     std::shared_ptr<ColorBlendModifier> colorBlendModifier_;
 
     template<typename Modifier, typename PropertyType>
-    friend class PropertyTransitionEffectImpl;
+    friend class PropertyTransitionEffectTemplate;
+    friend class RosenPivotTransitionEffect;
 
     ACE_DISALLOW_COPY_AND_MOVE(RosenRenderContext);
 };

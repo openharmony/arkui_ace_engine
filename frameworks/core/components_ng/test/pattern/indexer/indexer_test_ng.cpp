@@ -27,9 +27,10 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/indexer/indexer_layout_property.h"
 #include "core/components_ng/pattern/indexer/indexer_paint_property.h"
+#include "core/components_ng/pattern/indexer/indexer_model_ng.h"
 #include "core/components_ng/pattern/indexer/indexer_pattern.h"
 #include "core/components_ng/pattern/indexer/indexer_theme.h"
-#include "core/components_ng/pattern/indexer/indexer_view.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -42,12 +43,16 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr float DEFAULT_ROOT_WIDTH = 720.f;
 constexpr float DEFAULT_ROOT_HEIGHT = 1136.f;
-const std::vector<std::string> CREATE_ARRAY_VALUE = {
+std::vector<std::string> CREATE_ARRAY = {
     "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
     "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"};
 std::vector<std::string> GetPopupData(int32_t)
 {
     return { "白", "别" };
+}
+std::vector<std::string> GetMorePopupData(int32_t)
+{
+    return { "白", "别", "吧", "不", "被" };
 }
 } // namespace
 
@@ -59,19 +64,21 @@ public:
     void TearDown() override;
     void GetInstance();
     void RunMeasureAndLayout();
-    RefPtr<FrameNode> GetChildFrameNode(int32_t index);
 
     RefPtr<FrameNode> frameNode_;
     RefPtr<IndexerPattern> pattern_;
     RefPtr<IndexerEventHub> eventHub_;
     RefPtr<IndexerLayoutProperty> layoutProperty_;
     RefPtr<IndexerPaintProperty> paintProperty_;
-    RefPtr<IndexerAccessibilityProperty> accessibility_;
+    RefPtr<IndexerAccessibilityProperty> accessibilityProperty_;
 };
 
 void IndexerTestNg::SetUpTestSuite()
 {
     MockPipelineBase::SetUp();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    PipelineContext::GetCurrentContext()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<IndexerTheme>()));
 }
 
 void IndexerTestNg::TearDownTestSuite()
@@ -88,7 +95,7 @@ void IndexerTestNg::TearDown()
     eventHub_ = nullptr;
     layoutProperty_ = nullptr;
     paintProperty_ = nullptr;
-    accessibility_ = nullptr;
+    accessibilityProperty_ = nullptr;
 }
 
 void IndexerTestNg::GetInstance()
@@ -99,7 +106,7 @@ void IndexerTestNg::GetInstance()
     eventHub_ = frameNode_->GetEventHub<IndexerEventHub>();
     layoutProperty_ = frameNode_->GetLayoutProperty<IndexerLayoutProperty>();
     paintProperty_ = frameNode_->GetPaintProperty<IndexerPaintProperty>();
-    accessibility_ = frameNode_->GetAccessibilityProperty<IndexerAccessibilityProperty>();
+    accessibilityProperty_ = frameNode_->GetAccessibilityProperty<IndexerAccessibilityProperty>();
 }
 
 void IndexerTestNg::RunMeasureAndLayout()
@@ -109,17 +116,396 @@ void IndexerTestNg::RunMeasureAndLayout()
     LayoutConstraintF LayoutConstraint;
     LayoutConstraint.parentIdealSize = { DEFAULT_ROOT_WIDTH, DEFAULT_ROOT_HEIGHT };
     LayoutConstraint.percentReference = { DEFAULT_ROOT_WIDTH, DEFAULT_ROOT_HEIGHT };
-    LayoutConstraint.selfIdealSize = { DEFAULT_ROOT_WIDTH, DEFAULT_ROOT_HEIGHT };
     LayoutConstraint.maxSize = { DEFAULT_ROOT_WIDTH, DEFAULT_ROOT_HEIGHT };
     layoutWrapper->Measure(LayoutConstraint);
     layoutWrapper->Layout();
     layoutWrapper->MountToHostOnMainThread();
 }
 
-RefPtr<FrameNode> IndexerTestNg::GetChildFrameNode(int32_t index)
+/**
+ * @tc.name: IndexerMoveIndex001
+ * @tc.desc: Test panEvent_ MoveIndexByStep func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerTestNg, IndexerMoveIndex001, TestSize.Level1)
 {
-    auto item = frameNode_->GetChildAtIndex(index);
-    return AceType::DynamicCast<FrameNode>(item);
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 0);
+    GetInstance();
+    RunMeasureAndLayout();
+    ASSERT_NE(pattern_->panEvent_, nullptr);
+
+    /**
+     * @tc.steps: step1. Delta is 0.
+     * @tc.expected: Selected unchanged.
+     */
+    auto start = pattern_->panEvent_->GetActionStartEventFunc();
+    auto update = pattern_->panEvent_->GetActionUpdateEventFunc();
+    GestureEvent gestureEvent;
+    gestureEvent.SetInputEventType(InputEventType::AXIS);
+
+    gestureEvent.SetMainDelta(0.f);
+    start(gestureEvent);
+    update(gestureEvent);
+    EXPECT_EQ(pattern_->GetSelected(), 0);
+
+    /**
+     * @tc.steps: step2. Delta is 1.
+     * @tc.expected: Selected unchanged.
+     */
+    gestureEvent.SetMainDelta(1.f);
+    start(gestureEvent);
+    update(gestureEvent);
+    EXPECT_EQ(pattern_->GetSelected(), 0);
+
+    /**
+     * @tc.steps: step3. Delta is -1.
+     * @tc.expected: Selected += 1.
+     */
+    gestureEvent.SetMainDelta(-1.f);
+    start(gestureEvent);
+    update(gestureEvent);
+    EXPECT_EQ(pattern_->GetSelected(), 1);
+
+    /**
+     * @tc.steps: step4. Delta is 1, selected_ is itemCount-1.
+     * @tc.expected: Selected unchanged.
+     */
+    pattern_->selected_ = pattern_->itemCount_ - 1;
+    gestureEvent.SetMainDelta(-1.f);
+    start(gestureEvent);
+    update(gestureEvent);
+    EXPECT_EQ(pattern_->GetSelected(), pattern_->itemCount_ - 1);
+}
+
+/**
+ * @tc.name: IndexerMoveIndex002
+ * @tc.desc: Test panEvent_ MoveIndexByOffset func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerTestNg, IndexerMoveIndex002, TestSize.Level1)
+{
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 0);
+    GetInstance();
+    RunMeasureAndLayout();
+    ASSERT_NE(pattern_->panEvent_, nullptr);
+
+    /**
+     * @tc.steps: step1. Location is (0, 50).
+     * @tc.expected: Selected change to correct index.
+     */
+    auto start = pattern_->panEvent_->GetActionStartEventFunc();
+    auto update = pattern_->panEvent_->GetActionUpdateEventFunc();
+    GestureEvent gestureEvent;
+    gestureEvent.SetInputEventType(InputEventType::KEYBOARD);
+
+    gestureEvent.SetLocalLocation(Offset(0.f, 50.f));
+    start(gestureEvent);
+    update(gestureEvent);
+    EXPECT_EQ(pattern_->GetSelected(), static_cast<int32_t>(50.f / pattern_->itemSizeRender_));
+
+    /**
+     * @tc.steps: step2. Location is (0, 50).
+     * @tc.expected: Selected unchanged.
+     */
+    gestureEvent.SetLocalLocation(Offset(0.f, 50.f));
+    start(gestureEvent);
+    update(gestureEvent);
+    EXPECT_EQ(pattern_->GetSelected(), static_cast<int32_t>(50.f / pattern_->itemSizeRender_));
+}
+
+/**
+ * @tc.name: IndexerMoveIndex003
+ * @tc.desc: Test panEvent_ MoveIndexByOffset func with empty array.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerTestNg, IndexerMoveIndex003, TestSize.Level1)
+{
+    std::vector<std::string> arrayValue;
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(arrayValue, 0); // empty array
+    GetInstance();
+    RunMeasureAndLayout();
+    ASSERT_NE(pattern_->panEvent_, nullptr);
+
+    /**
+     * @tc.steps: step1. itemSizeRender_ is 0.
+     * @tc.expected: Selected unchanged.
+     */
+    auto start = pattern_->panEvent_->GetActionStartEventFunc();
+    auto update = pattern_->panEvent_->GetActionUpdateEventFunc();
+    GestureEvent gestureEvent;
+    gestureEvent.SetInputEventType(InputEventType::KEYBOARD);
+    gestureEvent.SetLocalLocation(Offset(0.f, 0.f));
+    start(gestureEvent);
+    update(gestureEvent);
+    EXPECT_EQ(pattern_->GetSelected(), 0);
+}
+
+/**
+ * @tc.name: IndexerTouch001
+ * @tc.desc: Test touchListener_ func with hover.
+ * @tc.desc: and touchDown touchUp in differrnt location.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerTestNg, IndexerTouch001, TestSize.Level1)
+{
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 0);
+    GetInstance();
+    RunMeasureAndLayout();
+    ASSERT_NE(pattern_->touchListener_, nullptr);
+
+    /**
+     * @tc.steps: step1. OnTouchDown.
+     * @tc.expected: Selected index is correct.
+     */
+    pattern_->OnHover(true);
+    TouchLocationInfo touchLocationInfo1(1);
+    touchLocationInfo1.SetTouchType(TouchType::DOWN);
+    touchLocationInfo1.SetLocalLocation(Offset(0.f, 50.f));
+    TouchEventInfo touchEventInfo1("onTouchDown");
+    touchEventInfo1.AddTouchLocationInfo(std::move(touchLocationInfo1));
+    auto touch = pattern_->touchListener_->GetTouchEventCallback();
+    touch(touchEventInfo1);
+    EXPECT_EQ(pattern_->GetSelected(), static_cast<int32_t>(50.f / pattern_->itemSizeRender_));
+
+    /**
+     * @tc.steps: step2. OnTouchUp, differrnt location.
+     * @tc.expected: Selected index is correct.
+     */
+    TouchLocationInfo touchLocationInfo2(1);
+    touchLocationInfo2.SetTouchType(TouchType::UP);
+    touchLocationInfo2.SetLocalLocation(Offset(0.f, 20.f));
+    TouchEventInfo touchEventInfo2("onTouchUp");
+    touchEventInfo2.AddTouchLocationInfo(std::move(touchLocationInfo2));
+    touch(touchEventInfo2);
+    EXPECT_EQ(pattern_->GetSelected(), static_cast<int32_t>(20.f / pattern_->itemSizeRender_));
+}
+
+/**
+ * @tc.name: IndexerTouch002
+ * @tc.desc: Test touchListener_ func with no hover,
+ * @tc.desc: and touchDown touchUp in same location.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerTestNg, IndexerTouch002, TestSize.Level1)
+{
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 0);
+    GetInstance();
+    RunMeasureAndLayout();
+    ASSERT_NE(pattern_->touchListener_, nullptr);
+
+    /**
+     * @tc.steps: step1. OnTouchDown.
+     * @tc.expected: Selected index is correct.
+     */
+    pattern_->OnHover(false);
+    TouchLocationInfo touchLocationInfo1(1);
+    touchLocationInfo1.SetTouchType(TouchType::DOWN);
+    touchLocationInfo1.SetLocalLocation(Offset(0.f, 50.f));
+    TouchEventInfo touchEventInfo1("onTouchDown");
+    touchEventInfo1.AddTouchLocationInfo(std::move(touchLocationInfo1));
+    auto touch = pattern_->touchListener_->GetTouchEventCallback();
+    touch(touchEventInfo1);
+    EXPECT_EQ(pattern_->GetSelected(), static_cast<int32_t>(50.f / pattern_->itemSizeRender_));
+
+    /**
+     * @tc.steps: step2. OnTouchUp, same location.
+     * @tc.expected: Selected index is correct.
+     */
+    TouchLocationInfo touchLocationInfo2(1);
+    touchLocationInfo2.SetTouchType(TouchType::UP);
+    touchLocationInfo2.SetLocalLocation(Offset(0.f, 50.f));
+    TouchEventInfo touchEventInfo2("onTouchUp");
+    touchEventInfo2.AddTouchLocationInfo(std::move(touchLocationInfo2));
+    touch(touchEventInfo2);
+    EXPECT_EQ(pattern_->GetSelected(), static_cast<int32_t>(50.f / pattern_->itemSizeRender_));
+}
+
+/**
+ * @tc.name: IndexerTouch003
+ * @tc.desc: Test touchListener_ func with other TouchType.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerTestNg, IndexerTouch003, TestSize.Level1)
+{
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 0);
+    GetInstance();
+    RunMeasureAndLayout();
+    ASSERT_NE(pattern_->touchListener_, nullptr);
+
+    /**
+     * @tc.steps: step1. TouchType::MOVE.
+     * @tc.expected: Selected unchanged.
+     */
+    TouchLocationInfo touchLocationInfo(1);
+    touchLocationInfo.SetTouchType(TouchType::MOVE);
+    touchLocationInfo.SetLocalLocation(Offset(0.f, 20.f));
+    TouchEventInfo touchEventInfo("touch");
+    touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+    auto touch = pattern_->touchListener_->GetTouchEventCallback();
+    touch(touchEventInfo);
+    EXPECT_EQ(pattern_->GetSelected(), 0);
+}
+
+/**
+ * @tc.name: IndexerKeyEvent001
+ * @tc.desc: Test OnKeyEvent func about KeyIndexByStep.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerTestNg, IndexerKeyEvent001, TestSize.Level1)
+{
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 0);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step1. UNKNOWN keyEvent.
+     * @tc.expected: Selected unchanged.
+     */
+    KeyEvent keyEvent = KeyEvent();
+    pattern_->OnKeyEvent(keyEvent);
+    EXPECT_EQ(pattern_->GetSelected(), 0);
+
+    /**
+     * @tc.steps: step2. KEY_UNKNOWN from 0.
+     * @tc.expected: Selected unchanged.
+     */
+    keyEvent.action = KeyAction::DOWN;
+    keyEvent.code = KeyCode::KEY_UNKNOWN;
+    pattern_->OnKeyEvent(keyEvent);
+    EXPECT_EQ(pattern_->GetSelected(), 0);
+
+    /**
+     * @tc.steps: step3. KEY_DPAD_UP from 0.
+     * @tc.expected: Selected unchanged.
+     */
+    keyEvent.code = KeyCode::KEY_DPAD_UP;
+    pattern_->OnKeyEvent(keyEvent);
+    EXPECT_EQ(pattern_->GetSelected(), 0);
+
+    /**
+     * @tc.steps: step4. KEY_DPAD_DOWN from 0.
+     * @tc.expected: Selected += 1.
+     */
+    keyEvent.code = KeyCode::KEY_DPAD_DOWN;
+    pattern_->OnKeyEvent(keyEvent);
+    EXPECT_EQ(pattern_->GetSelected(), 1);
+
+    /**
+     * @tc.steps: step5. KEY_DPAD_DOWN from itemCount_-1.
+     * @tc.expected: Selected unchanged.
+     */
+    pattern_->selected_ = pattern_->itemCount_ - 1;
+    keyEvent.code = KeyCode::KEY_DPAD_DOWN;
+    pattern_->OnKeyEvent(keyEvent);
+    EXPECT_EQ(pattern_->GetSelected(), pattern_->itemCount_ - 1);
+}
+
+/**
+ * @tc.name: IndexerKeyEvent002
+ * @tc.desc: Test OnKeyEvent func about MoveIndexBySearch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerTestNg, IndexerKeyEvent002, TestSize.Level1)
+{
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 0);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step1. IsCombinationKey && KEY_UNKNOWN.
+     * @tc.expected: Selected unchanged.
+     */
+    KeyEvent keyEvent = KeyEvent();
+    keyEvent.action = KeyAction::DOWN;
+    keyEvent.code = KeyCode::KEY_UNKNOWN;
+    keyEvent.pressedCodes = { KeyCode::KEY_A, KeyCode::KEY_B };
+    pattern_->OnKeyEvent(keyEvent);
+    EXPECT_EQ(pattern_->GetSelected(), 0);
+
+    /**
+     * @tc.steps: step2. IsCombinationKey && IsLetterKey.
+     * @tc.expected: Selected unchanged.
+     */
+    keyEvent.code = KeyCode::KEY_B;
+    keyEvent.pressedCodes = { KeyCode::KEY_A, KeyCode::KEY_B };
+    pattern_->OnKeyEvent(keyEvent);
+    EXPECT_EQ(pattern_->GetSelected(), 0);
+
+    /**
+     * @tc.steps: step3. !IsCombinationKey && IsLetterKey.
+     * @tc.expected: Selected changed.
+     */
+    keyEvent.code = KeyCode::KEY_B;
+    keyEvent.pressedCodes = {};
+    pattern_->OnKeyEvent(keyEvent);
+    EXPECT_EQ(pattern_->GetSelected(), 1);
+
+    /**
+     * @tc.steps: step4. Move to KEY_B again.
+     * @tc.expected: Selected unchanged.
+     */
+    pattern_->OnKeyEvent(keyEvent);
+    EXPECT_EQ(pattern_->GetSelected(), 1);
+
+    /**
+     * @tc.steps: step5. Move to front Index.
+     * @tc.expected: Selected changed.
+     */
+    keyEvent.code = KeyCode::KEY_A;
+    pattern_->OnKeyEvent(keyEvent);
+    EXPECT_EQ(pattern_->GetSelected(), 0);
+
+    /**
+     * @tc.steps: step6. Move to back Index.
+     * @tc.expected: Selected changed.
+     */
+    keyEvent.code = KeyCode::KEY_C;
+    pattern_->OnKeyEvent(keyEvent);
+    EXPECT_EQ(pattern_->GetSelected(), 2);
+
+    /**
+     * @tc.steps: step7. !IsCombinationKey && IsNumberKey.
+     * @tc.expected: Selected unchanged.
+     */
+    keyEvent.code = KeyCode::KEY_5;
+    pattern_->OnKeyEvent(keyEvent);
+    EXPECT_EQ(pattern_->GetSelected(), 2);
+}
+
+/**
+ * @tc.name: IndexerHover001
+ * @tc.desc: Test Hover
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerTestNg, IndexerHover001, TestSize.Level1)
+{
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 0);
+    IndexerModelNG.SetUsingPopup(true);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    pattern_->OnChildHover(1, true);
+    EXPECT_EQ(pattern_->childHoverIndex_, 1);
+    pattern_->OnChildHover(1, false);
+    EXPECT_EQ(pattern_->childHoverIndex_, -1);
+    pattern_->OnChildHover(CREATE_ARRAY.size(), true);
+    EXPECT_EQ(pattern_->childHoverIndex_, CREATE_ARRAY.size());
+
+    pattern_->OnHover(false);
+    EXPECT_FALSE(pattern_->isHover_);
+    pattern_->OnHover(true);
+    EXPECT_TRUE(pattern_->isHover_);
+    pattern_->OnHover(false);
+    EXPECT_FALSE(pattern_->isHover_);
 }
 
 /**
@@ -129,8 +515,8 @@ RefPtr<FrameNode> IndexerTestNg::GetChildFrameNode(int32_t index)
  */
 HWTEST_F(IndexerTestNg, IndexerPattern001, TestSize.Level1)
 {
-    IndexerView indexerView;
-    indexerView.Create(CREATE_ARRAY_VALUE, 0);
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 0);
     GetInstance();
 
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -164,510 +550,21 @@ HWTEST_F(IndexerTestNg, IndexerPattern001, TestSize.Level1)
 
 /**
  * @tc.name: IndexerPattern002
- * @tc.desc: Test indexer pattern InitPanEvent function.
+ * @tc.desc: Test indexer pattern InitBubbleList function.
  * @tc.type: FUNC
  */
 HWTEST_F(IndexerTestNg, IndexerPattern002, TestSize.Level1)
 {
-    /**
-     * @tc.steps: step1. create indexer frameNode, get pattern_ and indexerWrapper.
-     * @tc.steps: case1: no panEvent
-     * @tc.expected: step1. get pattern_ success.
-     */
-    IndexerView indexerView;
-    indexerView.Create(CREATE_ARRAY_VALUE, 0);
-    GetInstance();
-    RunMeasureAndLayout();
-    ASSERT_NE(pattern_->panEvent_, nullptr);
-    /**
-     * @tc.steps: step2. carry actions.
-     * @tc.steps: case1: AXIS, mainDelta is 0
-     * @tc.expected: step2. get pattern_ success.
-     */
-    GestureEvent gestureEvent1;
-    gestureEvent1.inputEventType_ = InputEventType::AXIS;
-    gestureEvent1.mainDelta_ = 0;
-    pattern_->panEvent_->actionStart_(gestureEvent1);
-    pattern_->panEvent_->actionUpdate_(gestureEvent1);
-    ASSERT_NE(pattern_->panEvent_, nullptr);
-
-    /**
-     * @tc.steps: step2. carry actions.
-     * @tc.steps: case2: AXIS, mainDelta is 1
-     * @tc.expected: step2. get pattern_ success.
-     */
-    gestureEvent1.inputEventType_ = InputEventType::AXIS;
-    gestureEvent1.mainDelta_ = 1;
-    pattern_->panEvent_->actionStart_(gestureEvent1);
-    pattern_->panEvent_->actionUpdate_(gestureEvent1);
-    ASSERT_NE(pattern_->panEvent_, nullptr);
-
-    /**
-     * @tc.steps: step2. carry actions.
-     * @tc.steps: case3: AXIS, mainDelta is -1
-     * @tc.expected: step2. get pattern_ success.
-     */
-    gestureEvent1.inputEventType_ = InputEventType::AXIS;
-    gestureEvent1.mainDelta_ = -1;
-    pattern_->panEvent_->actionStart_(gestureEvent1);
-    pattern_->panEvent_->actionUpdate_(gestureEvent1);
-    ASSERT_NE(pattern_->panEvent_, nullptr);
-
-    /**
-     * @tc.steps: step2. carry actions.
-     * @tc.steps: case4: KEYBOARD
-     * @tc.expected: step2. get pattern_ success.
-     */
-    gestureEvent1.inputEventType_ = InputEventType::KEYBOARD;
-    pattern_->panEvent_->actionStart_(gestureEvent1);
-    pattern_->panEvent_->actionUpdate_(gestureEvent1);
-    ASSERT_NE(pattern_->panEvent_, nullptr);
-}
-
-/**
- * @tc.name: IndexerPattern003
- * @tc.desc: Test indexer pattern OnChildHover function.
- * @tc.type: FUNC
- */
-HWTEST_F(IndexerTestNg, IndexerPattern003, TestSize.Level1)
-{
-    IndexerView indexerView;
-    indexerView.Create(CREATE_ARRAY_VALUE, 0);
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 2);
+    IndexerModelNG.SetUsingPopup(true);
+    IndexerModelNG.SetAlignStyle(0);
+    IndexerModelNG.SetPopupUnselectedColor(Color(0x00000000));
+    IndexerModelNG.SetOnRequestPopupData(GetPopupData);
     GetInstance();
     RunMeasureAndLayout();
 
-    /**
-     * @tc.steps: step1. create indexer frameNode, get pattern_ and indexerWrapper.
-     * @tc.steps: case1: isHover
-     * @tc.expected: step1. get pattern_ success.
-     */
-    pattern_->OnChildHover(1, true);
-    EXPECT_EQ(pattern_->childHoverIndex_, 1);
-
-    /**
-     * @tc.steps: step1. create indexer frameNode, get pattern_ and indexerWrapper.
-     * @tc.steps: case2: !isHover
-     * @tc.expected: step1. get pattern_ success.
-     */
-    pattern_->OnChildHover(1, false);
-    EXPECT_EQ(pattern_->childHoverIndex_, -1);
-}
-
-/**
- * @tc.name: IndexerPattern004
- * @tc.desc: Test indexer pattern InitInputEvent function.
- * @tc.type: FUNC
- */
-HWTEST_F(IndexerTestNg, IndexerPattern004, TestSize.Level1)
-{
-    IndexerView indexerView;
-    indexerView.Create(CREATE_ARRAY_VALUE, 0);
-    GetInstance();
-    RunMeasureAndLayout();
-
-    /**
-     * @tc.steps: step1. create indexer frameNode, get pattern_ and indexerWrapper.
-     * @tc.steps: case1: isInputEventRegisted_ = false
-     * @tc.expected: step1. get pattern_ success.
-     */
-    pattern_->isInputEventRegisted_ = false;
-    pattern_->InitInputEvent();
-    EXPECT_EQ(pattern_->isInputEventRegisted_, true);
-
-    /**
-     * @tc.steps: step1. create indexer frameNode, get pattern_ and indexerWrapper.
-     * @tc.steps: case2: isInputEventRegisted_ = true
-     * @tc.expected: step1. get pattern_ success.
-     */
-    pattern_->InitInputEvent();
-    EXPECT_EQ(pattern_->isInputEventRegisted_, true);
-}
-
-/**
- * @tc.name: IndexerPattern005
- * @tc.desc: Test indexer pattern InitChildInputEvent function.
- * @tc.type: FUNC
- */
-HWTEST_F(IndexerTestNg, IndexerPattern005, TestSize.Level1)
-{
-    IndexerView indexerView;
-    indexerView.Create(CREATE_ARRAY_VALUE, 0);
-    GetInstance();
-    RunMeasureAndLayout();
-
-    /**
-     * @tc.steps: step1. create indexer frameNode, get pattern_ and indexerWrapper.
-     * @tc.steps: case1: isInputEventRegisted_ = false
-     * @tc.expected: step1. get pattern_ success.
-     */
-    pattern_->itemCount_ = CREATE_ARRAY_VALUE.size();
-    pattern_->InitChildInputEvent();
-    EXPECT_EQ(pattern_->itemCount_, CREATE_ARRAY_VALUE.size());
-}
-
-/**
- * @tc.name: IndexerPattern006
- * @tc.desc: Test indexer pattern MoveIndexByOffset function.
- * @tc.type: FUNC
- */
-HWTEST_F(IndexerTestNg, IndexerPattern006, TestSize.Level1)
-{
-    IndexerView indexerView;
-    indexerView.Create(CREATE_ARRAY_VALUE, 0);
-    GetInstance();
-    RunMeasureAndLayout();
-
-    /**
-     * @tc.steps: step1. call pattern_ MoveIndexByOffset function, compare result.
-     * @tc.steps: case1: itemSizeRender is 0, return
-     * @tc.expected: step1. MoveIndexByOffset success and result correct.
-     */
-    pattern_->itemSizeRender_ = 0;
-    pattern_->MoveIndexByOffset(Offset(0, 50.f));
-    EXPECT_EQ(pattern_->childPressIndex_, -1);
-
-    /**
-     * @tc.steps: step1. call pattern_ MoveIndexByOffset function, compare result.
-     * @tc.steps: case2: itemSizeRender is 1, itemCount is 0, return
-     * @tc.expected: step1. MoveIndexByOffset success and result correct.
-     */
-    pattern_->itemSizeRender_ = 1;
-    pattern_->itemCount_ = 0;
-    pattern_->MoveIndexByOffset(Offset(0, 50.f));
-    EXPECT_EQ(pattern_->childPressIndex_, -1);
-
-    /**
-     * @tc.steps: step1. call pattern_ MoveIndexByOffset function, compare result.
-     * @tc.steps: case3: itemSizeRender > 0, itemCount > 0, isRepeatCalled true, next != child
-     * @tc.expected: step1. MoveIndexByOffset success and result correct.
-     */
-    pattern_->itemSizeRender_ = 24.f;
-    pattern_->itemCount_ = CREATE_ARRAY_VALUE.size();
-    pattern_->MoveIndexByOffset(Offset(0, 50.f));
-    int32_t expectedIndex = static_cast<int32_t>(50.f / 24.f);
-    EXPECT_EQ(expectedIndex, pattern_->childPressIndex_);
-
-    /**
-     * @tc.steps: step1. call pattern_ MoveIndexByOffset function, compare result.
-     * @tc.steps: case4: itemSizeRender > 0, itemCount > 0, isRepeatCalled true, next == child
-     * @tc.expected: step1. MoveIndexByOffset success and result correct.
-     */
-    pattern_->MoveIndexByOffset(Offset(0, 0));
-    EXPECT_EQ(pattern_->childPressIndex_, 0);
-
-    /**
-     * @tc.steps: step1. call pattern_ MoveIndexByOffset function, compare result.
-     * @tc.steps: case5: itemSizeRender > 0, itemCount > 0, isRepeatCalled false, next == child
-     * @tc.expected: step1. MoveIndexByOffset success and result correct.
-     */
-    pattern_->MoveIndexByOffset(Offset(0, 0));
-    EXPECT_EQ(pattern_->childPressIndex_, 0);
-
-    /**
-     * @tc.steps: step1. call pattern_ MoveIndexByOffset function, compare result.
-     * @tc.steps: case5: itemSizeRender > 0, itemCount > 0, isRepeatCalled false, next != child
-     * @tc.expected: step1. MoveIndexByOffset success and result correct.
-     */
-    pattern_->MoveIndexByOffset(Offset(0, 50.f));
-    EXPECT_EQ(expectedIndex, pattern_->childPressIndex_);
-}
-
-/**
- * @tc.name: IndexerPattern007
- * @tc.desc: Test indexer pattern KeyIndexByStep function.
- * @tc.type: FUNC
- */
-HWTEST_F(IndexerTestNg, IndexerPattern007, TestSize.Level1)
-{
-    IndexerView indexerView;
-    indexerView.Create(CREATE_ARRAY_VALUE, 0);
-    GetInstance();
-    RunMeasureAndLayout();
-
-    /**
-     * @tc.steps: step1. create indexer frameNode, get pattern_ and indexerWrapper.
-     * @tc.expected: step1. get pattern_ success.
-     */
-    pattern_->selected_ = 1;
-
-    /**
-     * @tc.steps: step2. call pattern_ KeyIndexByStep function, compare result.
-     * @tc.expected: step2. KeyIndexByStep success and result correct.
-     */
-    bool result = false;
-    pattern_->itemCount_ = 0;
-    result = pattern_->KeyIndexByStep(1);
-    EXPECT_EQ(result, false);
-
-    pattern_->itemCount_ = CREATE_ARRAY_VALUE.size();
-    pattern_->selected_ = 1;
-    result = pattern_->KeyIndexByStep(1);
-    EXPECT_EQ(pattern_->selected_, 1 + 1);
-    EXPECT_EQ(result, true);
-}
-
-/**
- * @tc.name: IndexerPattern008
- * @tc.desc: Test indexer pattern GetSkipChildIndex function.
- * @tc.type: FUNC
- */
-HWTEST_F(IndexerTestNg, IndexerPattern008, TestSize.Level1)
-{
-    IndexerView indexerView;
-    indexerView.Create(CREATE_ARRAY_VALUE, 0);
-    GetInstance();
-    RunMeasureAndLayout();
-
-    /**
-     * @tc.steps: step1. call pattern_ GetSkipChildIndex function, compare result.
-     * @tc.steps: case1: nextSelected < 0
-     * @tc.expected: step1. GetSkipChildIndex success and result correct.
-     */
-    pattern_->selected_ = 0;
-    auto result = pattern_->GetSkipChildIndex(-1);
-    EXPECT_EQ(result, -1);
-
-    /**
-     * @tc.steps: step1. call pattern_ GetSkipChildIndex function, compare result.
-     * @tc.steps: case1: nextSelected > 0, nextSelected < itemCount
-     * @tc.expected: step1. GetSkipChildIndex success and result correct.
-     */
-    pattern_->selected_ = 0;
-    pattern_->itemCount_ = CREATE_ARRAY_VALUE.size();
-    result = pattern_->GetSkipChildIndex(1);
-    EXPECT_EQ(result, 1);
-
-    /**
-     * @tc.steps: step1. call pattern_ GetSkipChildIndex function, compare result.
-     * @tc.steps: case1: nextSelected > itemCount
-     * @tc.expected: step1. GetSkipChildIndex success and result correct.
-     */
-    pattern_->selected_ = 0;
-    pattern_->itemCount_ = CREATE_ARRAY_VALUE.size();
-    result = pattern_->GetSkipChildIndex(pattern_->itemCount_ + 1);
-    EXPECT_EQ(result, -1);
-}
-
-/**
- * @tc.name: IndexerPattern009
- * @tc.desc: Test indexer pattern MoveIndexByStep function. include special case.
- * @tc.type: FUNC
- */
-HWTEST_F(IndexerTestNg, IndexerPattern009, TestSize.Level1)
-{
-    IndexerView indexerView;
-    indexerView.Create(CREATE_ARRAY_VALUE, 0);
-    GetInstance();
-    RunMeasureAndLayout();
-
-    /**
-     * @tc.steps: step1. create indexer frameNode, get pattern_ and indexerWrapper.
-     * @tc.expected: step1. get pattern_ success.
-     */
-    pattern_->selected_ = 1;
-
-    /**
-     * @tc.steps: step2. call pattern_ MoveIndexByStep function, compare result.
-     * @tc.expected: step2. MoveIndexByStep success and result correct.
-     */
-    bool result = false;
-    pattern_->itemCount_ = 0;
-    result = pattern_->MoveIndexByStep(1);
-    EXPECT_EQ(result, false);
-
-    pattern_->itemCount_ = CREATE_ARRAY_VALUE.size();
-    pattern_->selected_ = 1;
-    result = pattern_->MoveIndexByStep(1);
-    EXPECT_EQ(pattern_->selected_, 1 + 1);
-    EXPECT_EQ(result, true);
-}
-
-/**
- * @tc.name: IndexerPattern010
- * @tc.desc: Test indexer pattern MoveIndexBySearch function.
- * @tc.type: FUNC
- */
-HWTEST_F(IndexerTestNg, IndexerPattern010, TestSize.Level1)
-{
-    IndexerView indexerView;
-    indexerView.Create(CREATE_ARRAY_VALUE, 0);
-    GetInstance();
-    RunMeasureAndLayout();
-
-    /**
-     * @tc.steps: step1. create indexer frameNode, get pattern_ and indexerWrapper.
-     * @tc.expected: step1. get pattern_ success.
-     */
-    pattern_->selected_ = 1;
-    pattern_->OnModifyDone();
-
-    /**
-     * @tc.steps: step2. call pattern_ MoveIndexBySearch function, compare result.
-     * @tc.steps: case1: search Move_index_search
-     * @tc.expected: step2. MoveIndexBySearch success and result correct.
-     */
-    pattern_->MoveIndexBySearch(CREATE_ARRAY_VALUE[1]);
-    EXPECT_EQ(pattern_->selected_, 1);
-
-    /**
-     * @tc.steps: step2. call pattern_ MoveIndexBySearch function, compare result.
-     * @tc.steps: case2: search Move_index_search + 1
-     * @tc.expected: step2. MoveIndexBySearch success and result correct.
-     */
-    pattern_->MoveIndexBySearch(CREATE_ARRAY_VALUE[2]);
-    EXPECT_EQ(pattern_->selected_, 1 + 1);
-
-    /**
-     * @tc.steps: step2. call pattern_ MoveIndexBySearch function, compare result.
-     * @tc.steps: case2: search Move_index_search - 1
-     * @tc.expected: step2. MoveIndexBySearch success and result correct.
-     */
-    pattern_->MoveIndexBySearch(CREATE_ARRAY_VALUE[0]);
-    EXPECT_EQ(pattern_->selected_, 0);
-}
-
-/**
- * @tc.name: IndexerPattern011
- * @tc.desc: Test indexer pattern InitOnKeyEvent function.
- * @tc.type: FUNC
- */
-HWTEST_F(IndexerTestNg, IndexerPattern011, TestSize.Level1)
-{
-    IndexerView indexerView;
-    indexerView.Create(CREATE_ARRAY_VALUE, 0);
-    GetInstance();
-    RunMeasureAndLayout();
-
-    /**
-     * @tc.steps: step1. call pattern_ InitOnKeyEvent function, compare result.
-     * @tc.expected: step1. InitOnKeyEvent success and result correct.
-     */
-    RefPtr<FocusHub> focusHub = frameNode_->GetFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-    pattern_->InitOnKeyEvent();
-    ASSERT_NE(focusHub->onKeyEventInternal_, nullptr);
-}
-
-/**
- * @tc.name: IndexerPattern012
- * @tc.desc: Test indexer pattern OnKeyEvent function.
- * @tc.type: FUNC
- */
-HWTEST_F(IndexerTestNg, IndexerPattern012, TestSize.Level1)
-{
-    IndexerView indexerView;
-    indexerView.Create(CREATE_ARRAY_VALUE, 0);
-    GetInstance();
-    RunMeasureAndLayout();
-
-    /**
-     * @tc.steps: step1. create indexer frameNode, get pattern_ and indexerWrapper.
-     * @tc.expected: step1. get pattern_ success.
-     */
-    pattern_->selected_ = 1;
-
-    /**
-     * @tc.steps: step2. call pattern_ OnKeyEvent function, compare result.
-     * @tc.expected: step2. OnKeyEvent success and result correct.
-     */
-    KeyEvent keyEvent = KeyEvent(KeyCode::KEY_DPAD_UP, KeyAction::DOWN);
-    EXPECT_EQ(pattern_->OnKeyEvent(keyEvent), true);
-
-    keyEvent = KeyEvent(KeyCode::KEY_DPAD_DOWN, KeyAction::DOWN);
-    EXPECT_EQ(pattern_->OnKeyEvent(keyEvent), true);
-
-    keyEvent = KeyEvent(KeyCode::KEY_UNKNOWN, KeyAction::DOWN);
-    EXPECT_EQ(pattern_->OnKeyEvent(keyEvent), false);
-
-    keyEvent = KeyEvent(KeyCode::KEY_UNKNOWN, KeyAction::UNKNOWN);
-    EXPECT_EQ(pattern_->OnKeyEvent(keyEvent), false);
-
-    keyEvent = KeyEvent(KeyCode::KEY_1, KeyAction::DOWN);
-    EXPECT_EQ(pattern_->OnKeyEvent(keyEvent), false);
-
-    keyEvent = KeyEvent(KeyCode::KEY_B, KeyAction::DOWN);
-    EXPECT_EQ(pattern_->OnKeyEvent(keyEvent), false);
-
-    keyEvent = KeyEvent(KeyCode::KEY_B, KeyAction::DOWN);
-    keyEvent.pressedCodes = { KeyCode::KEY_A, KeyCode::KEY_B };
-    EXPECT_EQ(pattern_->OnKeyEvent(keyEvent), false);
-
-    keyEvent = KeyEvent(KeyCode::KEY_UNKNOWN, KeyAction::DOWN);
-    keyEvent.pressedCodes = { KeyCode::KEY_A, KeyCode::KEY_B };
-    EXPECT_EQ(pattern_->OnKeyEvent(keyEvent), false);
-}
-
-/**
- * @tc.name: IndexerPattern013
- * @tc.desc: Test indexer pattern ApplyIndexChange function.
- * @tc.type: FUNC
- */
-HWTEST_F(IndexerTestNg, IndexerPattern013, TestSize.Level1)
-{
-    IndexerView indexerView;
-    indexerView.Create(CREATE_ARRAY_VALUE, 0);
-    GetInstance();
-    RunMeasureAndLayout();
-
-    /**
-     * @tc.steps: step1. call pattern_ ApplyIndexChange function, compare result.
-     * @tc.steps: case1: have onSelected, onRequestPopupData, onPopupSelected, selected < 0
-     * @tc.expected: step1. OnKeyEvent success and result correct.
-     */
-    eventHub_->SetOnSelected([](int32_t) {});
-    eventHub_->SetOnRequestPopupData([](int32_t) { return std::vector<std::string>(); });
-    eventHub_->SetOnPopupSelected([](int32_t) {});
-    pattern_->selected_ = -1;
-    pattern_->itemCount_ = CREATE_ARRAY_VALUE.size();
-    pattern_->ApplyIndexChanged();
-    EXPECT_EQ(pattern_->selected_, -1);
-
-    /**
-     * @tc.steps: step1. call pattern_ ApplyIndexChange function, compare result.
-     * @tc.steps: case2: have onSelected, onRequestPopupData, onPopupSelected, selected = 1
-     * @tc.expected: step1. OnKeyEvent success and result correct.
-     */
-    pattern_->selected_ = 1;
-    pattern_->itemCount_ = CREATE_ARRAY_VALUE.size();
-    pattern_->ApplyIndexChanged();
-    EXPECT_EQ(pattern_->selected_, 1);
-
-    /**
-     * @tc.steps: step1. call pattern_ ApplyIndexChange function, compare result.
-     * @tc.steps: case3: have onSelected, onRequestPopupData, onPopupSelected, selected > size
-     * @tc.expected: step1. OnKeyEvent success and result correct.
-     */
-    pattern_->selected_ = CREATE_ARRAY_VALUE.size() + 1;
-    pattern_->itemCount_ = CREATE_ARRAY_VALUE.size();
-    pattern_->ApplyIndexChanged();
-    EXPECT_NE(pattern_->selected_, 1);
-}
-
-/**
- * @tc.name: IndexerPattern014
- * @tc.desc: Test indexer pattern InitBubbleList function.
- * @tc.type: FUNC
- */
-HWTEST_F(IndexerTestNg, IndexerPattern014, TestSize.Level1)
-{
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    PipelineContext::GetCurrentContext()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<IndexerTheme>()));
-
-    IndexerView indexerView;
-    indexerView.Create(CREATE_ARRAY_VALUE, 0);
-    indexerView.SetUsingPopup(true);
-    indexerView.SetAlignStyle(AlignStyle::LEFT);
-    indexerView.SetPopupUnselectedColor(Color(0x00000000));
-    GetInstance();
-    RunMeasureAndLayout();
-
-    eventHub_->SetOnRequestPopupData(GetPopupData);
-    pattern_->selected_ = 2;
-    pattern_->OnModifyDone();
-    pattern_->ApplyIndexChanged(true);
-    pattern_->UpdateBubbleView();
-
+    pattern_->MoveIndexByStep(1);
     ASSERT_NE(pattern_->popupNode_, nullptr);
     auto listNode = pattern_->popupNode_->GetLastChild();
     auto listItemNode = AceType::DynamicCast<FrameNode>(listNode->GetFirstChild());
@@ -679,48 +576,37 @@ HWTEST_F(IndexerTestNg, IndexerPattern014, TestSize.Level1)
 }
 
 /**
- * @tc.name: IndexerPattern015
+ * @tc.name: IndexerPattern003
  * @tc.desc: Test indexer pattern SetPositionOfPopupNode function.
  * @tc.type: FUNC
  */
-HWTEST_F(IndexerTestNg, IndexerPattern015, TestSize.Level1)
+HWTEST_F(IndexerTestNg, IndexerPattern003, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    ASSERT_NE(themeManager, nullptr);
-    PipelineContext::GetCurrentContext()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<IndexerTheme>()));
-
-    IndexerView indexerView1;
-    indexerView1.Create(CREATE_ARRAY_VALUE, 0);
-    indexerView1.SetUsingPopup(true);
-    indexerView1.SetPopupHorizontalSpace(Dimension(50));
+    IndexerModelNG IndexerModelNG1;
+    IndexerModelNG1.Create(CREATE_ARRAY, 2);
+    IndexerModelNG1.SetUsingPopup(true);
+    IndexerModelNG1.SetPopupHorizontalSpace(Dimension(50));
+    IndexerModelNG1.SetOnRequestPopupData(GetPopupData);
     GetInstance();
     RunMeasureAndLayout();
 
-    eventHub_->SetOnRequestPopupData(GetPopupData);
-    pattern_->selected_ = 2;
-    pattern_->OnModifyDone();
-    pattern_->ApplyIndexChanged(true);
-    pattern_->UpdateBubbleView();
+    pattern_->MoveIndexByStep(1);
 
     ASSERT_NE(pattern_->popupNode_, nullptr);
     auto renderContext = pattern_->popupNode_->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
     auto rightValue = renderContext->GetPosition().value();
 
-    IndexerView indexerView2;
-    indexerView2.Create(CREATE_ARRAY_VALUE, 0);
-    indexerView2.SetUsingPopup(true);
-    indexerView2.SetAlignStyle(AlignStyle::LEFT);
-    indexerView2.SetPopupHorizontalSpace(Dimension(50));
+    IndexerModelNG IndexerModelNG2;
+    IndexerModelNG2.Create(CREATE_ARRAY, 2);
+    IndexerModelNG2.SetUsingPopup(true);
+    IndexerModelNG2.SetAlignStyle(0);
+    IndexerModelNG2.SetPopupHorizontalSpace(Dimension(50));
+    IndexerModelNG2.SetOnRequestPopupData(GetPopupData);
     GetInstance();
     RunMeasureAndLayout();
 
-    eventHub_->SetOnRequestPopupData(GetPopupData);
-    pattern_->selected_ = 2;
-    pattern_->OnModifyDone();
-    pattern_->ApplyIndexChanged(true);
-    pattern_->UpdateBubbleView();
+    pattern_->MoveIndexByStep(1);
 
     ASSERT_NE(pattern_->popupNode_, nullptr);
     auto renderContext2 = pattern_->popupNode_->GetRenderContext();
@@ -730,32 +616,24 @@ HWTEST_F(IndexerTestNg, IndexerPattern015, TestSize.Level1)
 }
 
 /**
- * @tc.name: IndexerPattern016
+ * @tc.name: IndexerPattern004
  * @tc.desc: Test indexer pattern ChangeListItemsSelectedStyle function.
  * @tc.type: FUNC
  */
-HWTEST_F(IndexerTestNg, IndexerPattern016, TestSize.Level1)
+HWTEST_F(IndexerTestNg, IndexerPattern004, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    ASSERT_NE(themeManager, nullptr);
-    PipelineContext::GetCurrentContext()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<IndexerTheme>()));
-
-    IndexerView indexerView;
-    indexerView.Create(CREATE_ARRAY_VALUE, 0);
-    indexerView.SetUsingPopup(true);
-    indexerView.SetPopupSelectedColor(Color(0x00000000));
-    indexerView.SetPopupUnselectedColor(Color(0x00000000));
-    indexerView.SetPopupItemBackground(Color(0x00000000));
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 2);
+    IndexerModelNG.SetUsingPopup(true);
+    IndexerModelNG.SetPopupSelectedColor(Color(0x00000000));
+    IndexerModelNG.SetPopupUnselectedColor(Color(0x00000000));
+    IndexerModelNG.SetPopupItemBackground(Color(0x00000000));
+    IndexerModelNG.SetOnRequestPopupData(GetPopupData);
     GetInstance();
     RunMeasureAndLayout();
 
-    eventHub_->SetOnRequestPopupData(GetPopupData);
-    pattern_->selected_ = 2;
-    pattern_->OnModifyDone();
-    pattern_->ApplyIndexChanged(true);
-    pattern_->UpdateBubbleView();
-    pattern_->ChangeListItemsSelectedStyle(0);
+    pattern_->MoveIndexByStep(1);
+    pattern_->OnListItemClick(0);
 
     ASSERT_NE(pattern_->popupNode_, nullptr);
     auto listNode = pattern_->popupNode_->GetLastChild();
@@ -768,32 +646,205 @@ HWTEST_F(IndexerTestNg, IndexerPattern016, TestSize.Level1)
 }
 
 /**
- * @tc.name: IndexerViewTest001
- * @tc.desc: Test all the properties of indexer.
+ * @tc.name: IndexerUpdateBubble001
+ * @tc.desc: Test UpdateBubbleSize function.
  * @tc.type: FUNC
  */
-HWTEST_F(IndexerTestNg, IndexerViewTest001, TestSize.Level1)
+HWTEST_F(IndexerTestNg, IndexerUpdateBubble001, TestSize.Level1)
 {
-    IndexerView indexerView;
-    indexerView.Create(CREATE_ARRAY_VALUE, 0);
-    indexerView.SetColor(Color(0x00000000));
-    indexerView.SetSelectedColor(Color(0x00000000));
-    indexerView.SetPopupColor(Color(0x00000000));
-    indexerView.SetSelectedBackgroundColor(Color(0x00000000));
-    indexerView.SetPopupBackground(Color(0x00000000));
-    indexerView.SetUsingPopup(true);
-    indexerView.SetSelectedFont(TextStyle());
-    indexerView.SetPopupFont(TextStyle());
-    indexerView.SetFont(TextStyle());
-    indexerView.SetItemSize(Dimension(24));
-    indexerView.SetAlignStyle(AlignStyle::LEFT);
-    indexerView.SetSelected(0);
-    indexerView.SetPopupPositionX(Dimension(-96.f, DimensionUnit::VP));
-    indexerView.SetPopupPositionY(Dimension(48.f, DimensionUnit::VP));
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 0);
+    IndexerModelNG.SetUsingPopup(true);
+    IndexerModelNG.SetOnRequestPopupData(GetPopupData);
     GetInstance();
     RunMeasureAndLayout();
 
-    EXPECT_EQ(layoutProperty_->GetArrayValueValue(), CREATE_ARRAY_VALUE);
+    /**
+     * @tc.steps: step1. has popListData.
+     * @tc.expected: verify size.
+     */
+    pattern_->MoveIndexBySearch("C");
+    pattern_->UpdateBubbleSize();
+    ASSERT_NE(pattern_->popupNode_, nullptr);
+    auto columnLayoutProperty = pattern_->popupNode_->GetLayoutProperty<LinearLayoutProperty>();
+    ASSERT_NE(columnLayoutProperty, nullptr);
+    ASSERT_NE(columnLayoutProperty->calcLayoutConstraint_, nullptr);
+    auto bubbleSize = Dimension(BUBBLE_BOX_SIZE, DimensionUnit::VP).ConvertToPx();
+    auto columnCalcSize = CalcSize(CalcLength(bubbleSize), CalcLength(bubbleSize * 3));
+    EXPECT_EQ(columnLayoutProperty->calcLayoutConstraint_->selfIdealSize, columnCalcSize);
+}
+
+/**
+ * @tc.name: IndexerUpdateBubble002
+ * @tc.desc: Test UpdateBubbleSize function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerTestNg, IndexerUpdateBubble002, TestSize.Level1)
+{
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 0);
+    IndexerModelNG.SetUsingPopup(true);
+    IndexerModelNG.SetOnRequestPopupData(GetPopupData);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step1. childPressIndex_ less than 0.
+     * @tc.expected: verify size.
+     */
+    pattern_->MoveIndexByStep(1);
+    pattern_->UpdateBubbleSize();
+    ASSERT_NE(pattern_->popupNode_, nullptr);
+    auto columnLayoutProperty = pattern_->popupNode_->GetLayoutProperty<LinearLayoutProperty>();
+    ASSERT_NE(columnLayoutProperty, nullptr);
+    ASSERT_NE(columnLayoutProperty->calcLayoutConstraint_, nullptr);
+    auto bubbleSize = Dimension(BUBBLE_BOX_SIZE, DimensionUnit::VP).ConvertToPx();
+    auto columnCalcSize = CalcSize(CalcLength(bubbleSize), CalcLength(bubbleSize * 3));
+    EXPECT_EQ(columnLayoutProperty->calcLayoutConstraint_->selfIdealSize, columnCalcSize);
+}
+
+/**
+ * @tc.name: IndexerUpdateBubble003
+ * @tc.desc: Test UpdateBubbleSize function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerTestNg, IndexerUpdateBubble003, TestSize.Level1)
+{
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 0);
+    IndexerModelNG.SetUsingPopup(true);
+    IndexerModelNG.SetOnRequestPopupData(GetMorePopupData); // GetMorePopupData.
+    GetInstance();
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step1. has popListData and popListData size equal INDEXER_BUBBLE_MAXSIZE.
+     * @tc.expected: verify size.
+     */
+    pattern_->MoveIndexBySearch("C");
+    pattern_->UpdateBubbleSize();
+    ASSERT_NE(pattern_->popupNode_, nullptr);
+    auto columnLayoutProperty = pattern_->popupNode_->GetLayoutProperty<LinearLayoutProperty>();
+    ASSERT_NE(columnLayoutProperty, nullptr);
+    ASSERT_NE(columnLayoutProperty->calcLayoutConstraint_, nullptr);
+    auto bubbleSize = Dimension(BUBBLE_BOX_SIZE, DimensionUnit::VP).ConvertToPx();
+    auto columnCalcSize = CalcSize(CalcLength(bubbleSize), CalcLength(bubbleSize * 6));
+    EXPECT_EQ(columnLayoutProperty->calcLayoutConstraint_->selfIdealSize, columnCalcSize);
+}
+
+/**
+ * @tc.name: IndexerPopupTouchDown001
+ * @tc.desc: Test OnPopupTouchDown.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerTestNg, IndexerPopupTouchDown001, TestSize.Level1)
+{
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 0);
+    IndexerModelNG.SetUsingPopup(true); // NeedShowPopupView is true.
+    GetInstance();
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step1. NeedShowPopupView is true.
+     * @tc.expected: verify VisibleType.
+     */
+    pattern_->MoveIndexByStep(1);
+    TouchEventInfo touchEventInfo("onTouchDown");
+    pattern_->OnPopupTouchDown(touchEventInfo);
+    ASSERT_NE(pattern_->popupNode_, nullptr);
+    auto columnLayoutProperty = pattern_->popupNode_->GetLayoutProperty<LinearLayoutProperty>();
+    // If Visibility never changed, the value is default value.
+    EXPECT_EQ(columnLayoutProperty->GetVisibility(), std::nullopt);
+}
+
+/**
+ * @tc.name: IndexerCallback001
+ * @tc.desc: Test Callback SetOnPopupSelected.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerTestNg, IndexerCallback001, TestSize.Level1)
+{
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 2);
+    IndexerModelNG.SetUsingPopup(true);
+    IndexerModelNG.SetOnRequestPopupData(GetPopupData);
+    bool isOnPopupSelectedCalled = false;
+    OnPopupSelectedEvent event = [&isOnPopupSelectedCalled](int32_t) { isOnPopupSelectedCalled = true; };
+    IndexerModelNG.SetOnPopupSelected(std::move(event));
+    GetInstance();
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step1. Trigger OnPopupSelected callback.
+     * @tc.expected: OnPopupSelected is called.
+     */
+    pattern_->MoveIndexByStep(1);
+    pattern_->OnListItemClick(0);
+    EXPECT_TRUE(isOnPopupSelectedCalled);
+}
+
+/**
+ * @tc.name: IndexerCallback002
+ * @tc.desc: Test Callback SetOnSelected.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerTestNg, IndexerCallback002, TestSize.Level1)
+{
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 0);
+    bool isOnSelectedCalled = false;
+    OnSelectedEvent event = [&isOnSelectedCalled](int32_t) { isOnSelectedCalled = true; };
+    IndexerModelNG.SetOnSelected(std::move(event));
+    GetInstance();
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step1. Trigger OnSelected callback.
+     * @tc.expected: OnSelected is called.
+     */
+    TouchLocationInfo touchLocationInfo(1);
+    touchLocationInfo.SetTouchType(TouchType::UP);
+    touchLocationInfo.SetLocalLocation(Offset(0.f, 20.f));
+    TouchEventInfo touchEventInfo("onTouchUp");
+    touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+    pattern_->OnTouchUp(touchEventInfo);
+    EXPECT_TRUE(isOnSelectedCalled);
+}
+
+/**
+ * @tc.name: IndexerModelNGTest001
+ * @tc.desc: Test all the properties of indexer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerTestNg, IndexerModelNGTest001, TestSize.Level1)
+{
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 0);
+    IndexerModelNG.SetColor(Color(0x00000000));
+    IndexerModelNG.SetSelectedColor(Color(0x00000000));
+    IndexerModelNG.SetPopupColor(Color(0x00000000));
+    IndexerModelNG.SetSelectedBackgroundColor(Color(0x00000000));
+    IndexerModelNG.SetPopupBackground(Color(0x00000000));
+    IndexerModelNG.SetUsingPopup(true);
+    TextStyle textStyle;
+    textStyle.SetFontFamilies({ "font1", "font2" });
+    IndexerModelNG.SetSelectedFont(textStyle);
+    IndexerModelNG.SetPopupFont(TextStyle());
+    IndexerModelNG.SetFont(TextStyle());
+    IndexerModelNG.SetItemSize(Dimension(24));
+    IndexerModelNG.SetAlignStyle(0);
+    IndexerModelNG.SetSelected(0);
+    IndexerModelNG.SetPopupPositionX(Dimension(-96.f, DimensionUnit::VP));
+    IndexerModelNG.SetPopupPositionY(Dimension(48.f, DimensionUnit::VP));
+    GetInstance();
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step1. Get properties.
+     * @tc.expected: Properties are correct.
+     */
+    EXPECT_EQ(layoutProperty_->GetArrayValueValue(), CREATE_ARRAY);
     EXPECT_EQ(layoutProperty_->GetSelectedValue(), 0);
     EXPECT_EQ(layoutProperty_->GetColorValue(), Color(0x00000000));
     EXPECT_EQ(layoutProperty_->GetSelectedColorValue(), Color(0x00000000));
@@ -801,7 +852,7 @@ HWTEST_F(IndexerTestNg, IndexerViewTest001, TestSize.Level1)
     EXPECT_EQ(paintProperty_->GetSelectedBackgroundColorValue(), Color(0x00000000));
     EXPECT_EQ(paintProperty_->GetPopupBackgroundValue(), Color(0x00000000));
     EXPECT_EQ(layoutProperty_->GetUsingPopupValue(), true);
-    EXPECT_EQ(layoutProperty_->GetSelectedFontValue(), TextStyle());
+    EXPECT_EQ(layoutProperty_->GetSelectedFontValue(), textStyle);
     EXPECT_EQ(layoutProperty_->GetPopupFontValue(), TextStyle());
     EXPECT_EQ(layoutProperty_->GetFontValue(), TextStyle());
     EXPECT_EQ(layoutProperty_->GetItemSizeValue(), Dimension(24));
@@ -815,41 +866,49 @@ HWTEST_F(IndexerTestNg, IndexerViewTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: IndexerViewTest002
+ * @tc.name: IndexerModelNGTest002
  * @tc.desc: Test special value properties of indexer.
  * @tc.type: FUNC
  */
-HWTEST_F(IndexerTestNg, IndexerViewTest002, TestSize.Level1)
+HWTEST_F(IndexerTestNg, IndexerModelNGTest002, TestSize.Level1)
 {
-    IndexerView indexerView;
-    indexerView.Create(CREATE_ARRAY_VALUE, 0);
-    indexerView.SetSelected(-1);
-    indexerView.SetItemSize(Dimension(-1));
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 0);
+    IndexerModelNG.SetSelected(-1);
+    IndexerModelNG.SetItemSize(Dimension(-1));
     GetInstance();
     RunMeasureAndLayout();
 
+    /**
+     * @tc.steps: step1. Get properties.
+     * @tc.expected: Properties are correct.
+     */
     EXPECT_EQ(layoutProperty_->GetSelectedValue(), 0);
     EXPECT_EQ(layoutProperty_->GetItemSizeValue(), Dimension(INDEXER_ITEM_SIZE, DimensionUnit::VP));
 }
 
 /**
- * @tc.name: IndexerViewTest003
+ * @tc.name: IndexerModelNGTest003
  * @tc.desc: Test newly added properties of indexer.
  * @tc.type: FUNC
  */
-HWTEST_F(IndexerTestNg, IndexerViewTest003, TestSize.Level1)
+HWTEST_F(IndexerTestNg, IndexerModelNGTest003, TestSize.Level1)
 {
-    IndexerView indexerView;
-    indexerView.Create(CREATE_ARRAY_VALUE, 0);
-    indexerView.SetPopupSelectedColor(Color(0x00000000));
-    indexerView.SetPopupUnselectedColor(Color(0x00000000));
-    indexerView.SetPopupItemBackground(Color(0x00000000));
-    indexerView.SetPopupHorizontalSpace(Dimension(50));
-    indexerView.SetFontSize(Dimension(24));
-    indexerView.SetFontWeight(FontWeight::MEDIUM);
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 0);
+    IndexerModelNG.SetPopupSelectedColor(Color(0x00000000));
+    IndexerModelNG.SetPopupUnselectedColor(Color(0x00000000));
+    IndexerModelNG.SetPopupItemBackground(Color(0x00000000));
+    IndexerModelNG.SetPopupHorizontalSpace(Dimension(50));
+    IndexerModelNG.SetFontSize(Dimension(24));
+    IndexerModelNG.SetFontWeight(FontWeight::MEDIUM);
     GetInstance();
     RunMeasureAndLayout();
 
+    /**
+     * @tc.steps: step1. Get properties.
+     * @tc.expected: Properties are correct.
+     */
     EXPECT_EQ(paintProperty_->GetPopupSelectedColorValue(), Color(0x00000000));
     EXPECT_EQ(paintProperty_->GetPopupUnselectedColorValue(), Color(0x00000000));
     EXPECT_EQ(paintProperty_->GetPopupItemBackgroundValue(), Color(0x00000000));
@@ -859,27 +918,70 @@ HWTEST_F(IndexerTestNg, IndexerViewTest003, TestSize.Level1)
 }
 
 /**
- * @tc.name: IndexerViewTest004
+ * @tc.name: IndexerModelNGTest004
  * @tc.desc: Test newly added properties of indexer.
  * @tc.type: FUNC
  */
-HWTEST_F(IndexerTestNg, IndexerViewTest004, TestSize.Level1)
+HWTEST_F(IndexerTestNg, IndexerModelNGTest004, TestSize.Level1)
 {
-    IndexerView indexerView;
-    indexerView.Create(CREATE_ARRAY_VALUE, 0);
-    indexerView.SetPopupSelectedColor(std::nullopt);
-    indexerView.SetPopupUnselectedColor(std::nullopt);
-    indexerView.SetPopupItemBackground(std::nullopt);
-    indexerView.SetPopupHorizontalSpace(Dimension(-1));
-    indexerView.SetFontSize(Dimension());
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 0);
+    IndexerModelNG.SetPopupSelectedColor(std::nullopt);
+    IndexerModelNG.SetPopupUnselectedColor(std::nullopt);
+    IndexerModelNG.SetPopupItemBackground(std::nullopt);
+    IndexerModelNG.SetPopupHorizontalSpace(Dimension(-1));
+    IndexerModelNG.SetFontSize(Dimension());
     GetInstance();
     RunMeasureAndLayout();
 
+    /**
+     * @tc.steps: step1. Get properties.
+     * @tc.expected: Properties are correct.
+     */
     EXPECT_FALSE(paintProperty_->GetPopupSelectedColor().has_value());
     EXPECT_FALSE(paintProperty_->GetPopupUnselectedColor().has_value());
     EXPECT_FALSE(paintProperty_->GetPopupItemBackground().has_value());
     EXPECT_FALSE(paintProperty_->GetPopupHorizontalSpace().has_value());
     EXPECT_FALSE(layoutProperty_->GetFontSize().has_value());
+}
+
+/**
+ * @tc.name: IndexerModelNGTest005
+ * @tc.desc: Test Create func with special arg
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerTestNg, IndexerModelNGTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create with normal arg.
+     * @tc.expected: LayoutProperty is correct.
+     */
+    IndexerModelNG IndexerModelNG1;
+    IndexerModelNG1.Create(CREATE_ARRAY, 5);
+    GetInstance();
+    EXPECT_EQ(layoutProperty_->GetArrayValueValue(), CREATE_ARRAY);
+    EXPECT_EQ(layoutProperty_->GetSelectedValue(), 5);
+
+    /**
+     * @tc.steps: step2. Create with special arg.
+     * @tc.expected: LayoutProperty is correct.
+     */
+    std::vector<std::string> arrayValue;
+    IndexerModelNG IndexerModelNG2;
+    IndexerModelNG2.Create(arrayValue, -1);
+    GetInstance();
+    EXPECT_TRUE(layoutProperty_->GetArrayValueValue().empty());
+    EXPECT_EQ(layoutProperty_->GetSelectedValue(), 0);
+
+    /**
+     * @tc.steps: step3. Create with special arg.
+     * @tc.expected: LayoutProperty is correct.
+     */
+    IndexerModelNG IndexerModelNG3;
+    IndexerModelNG3.Create(arrayValue, CREATE_ARRAY.size() + 1);
+    GetInstance();
+    EXPECT_TRUE(layoutProperty_->GetArrayValueValue().empty());
+    EXPECT_EQ(layoutProperty_->GetSelectedValue(), 0);
 }
 
 /**
@@ -889,12 +991,161 @@ HWTEST_F(IndexerTestNg, IndexerViewTest004, TestSize.Level1)
  */
 HWTEST_F(IndexerTestNg, IndexerAccessibilityTest001, TestSize.Level1)
 {
-    IndexerView indexerView;
-    indexerView.Create(CREATE_ARRAY_VALUE, 0);
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 0);
     GetInstance();
     RunMeasureAndLayout();
 
-    EXPECT_EQ(accessibility_->GetEndIndex(), CREATE_ARRAY_VALUE.size() - 1);
-    EXPECT_EQ(accessibility_->GetText(), CREATE_ARRAY_VALUE.at(0));
+    /**
+     * @tc.steps: step1. Test GetEndIndex, GetText func.
+     * @tc.expected: The return_value is correct.
+     */
+    EXPECT_EQ(accessibilityProperty_->GetEndIndex(), CREATE_ARRAY.size() - 1);
+    EXPECT_EQ(accessibilityProperty_->GetText(), CREATE_ARRAY.at(0));
+}
+
+/**
+ * @tc.name: IndexerAlgorithmTest001
+ * @tc.desc: Test Algorithm func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerTestNg, IndexerAlgorithmTest001, TestSize.Level1)
+{
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 0);
+    GetInstance();
+
+    /**
+     * @tc.steps: step1. selfIdealSize is (0, 0).
+     * @tc.expected: The layoutAlgorithm value is correct.
+     */
+    RefPtr<LayoutWrapper> layoutWrapper = frameNode_->CreateLayoutWrapper(false, false);
+    layoutWrapper->SetActive();
+    LayoutConstraintF LayoutConstraint;
+    LayoutConstraint.parentIdealSize = { DEFAULT_ROOT_WIDTH, DEFAULT_ROOT_HEIGHT };
+    LayoutConstraint.percentReference = { DEFAULT_ROOT_WIDTH, DEFAULT_ROOT_HEIGHT };
+    LayoutConstraint.selfIdealSize = { 0, 0 };
+    LayoutConstraint.maxSize = { DEFAULT_ROOT_WIDTH, DEFAULT_ROOT_HEIGHT };
+    layoutWrapper->Measure(LayoutConstraint);
+    layoutWrapper->Layout();
+    layoutWrapper->MountToHostOnMainThread();
+
+    auto layoutAlgorithm = AceType::MakeRefPtr<IndexerLayoutAlgorithm>(layoutWrapper->GetLayoutAlgorithm());
+    EXPECT_EQ(layoutAlgorithm->itemWidth_, 0.f);
+    EXPECT_EQ(layoutAlgorithm->itemSizeRender_, 0.f);
+}
+
+/**
+ * @tc.name: IndexerPatternCoverage001
+ * @tc.desc: For Coverage Rate, branches that are not normally covered.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerTestNg, IndexerPatternCoverage001, TestSize.Level1)
+{
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 0);
+    IndexerModelNG.SetUsingPopup(true);
+    GetInstance();
+    RunMeasureAndLayout();
+    pattern_->OnModifyDone();
+
+    /**
+     * @tc.steps: step1. Supplement MoveIndexByOffset branch,
+     * the itemCount_ would not be 0 when itemSizeRender_ was not 0.
+     */
+    pattern_->itemCount_ = 0;
+    pattern_->MoveIndexByOffset(Offset(0, 0));
+    pattern_->itemCount_ = CREATE_ARRAY.size();
+
+    /**
+     * @tc.steps: step2. Supplement MoveIndexByStep branch,
+     * has no condition that step is 0 when call panEvent_.
+     */
+    EXPECT_FALSE(pattern_->MoveIndexByStep(0));
+
+    /**
+     * @tc.steps: step3. Supplement GetFocusChildIndex branch,
+     * has no condition that searchStr is ABC when MoveIndexBySearch.
+     */
+    pattern_->selected_  = 5;
+    EXPECT_EQ(pattern_->GetFocusChildIndex("ABC"), -1);
+
+    /**
+     * @tc.steps: step4. Supplement OnSelect branch.
+     * has no condition that selected_ more than itemCount_-1 when OnTouchUp.
+     */
+    pattern_->selected_ = CREATE_ARRAY.size();
+    pattern_->OnSelect(true);
+
+    /**
+     * @tc.steps: step5. Supplement OnSelect branch.
+     * has no condition that selected_ less than 0 when OnTouchUp.
+     */
+    pattern_->selected_ = -1;
+    pattern_->OnSelect(true);
+
+    /**
+     * @tc.steps: step6. Supplement UpdateBubbleSize branch,
+     * has no condition that has no popListData when showPopup.
+     */
+    pattern_->MoveIndexBySearch("C");
+    pattern_->UpdateBubbleSize();
+
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: IndexerPatternCoverage002
+ * @tc.desc: For Coverage Rate, branches that are not normally covered.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerTestNg, IndexerPatternCoverage002, TestSize.Level1)
+{
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 0);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step1. Supplement OnPopupTouchDown branch,
+     * has no condition that NeedShowPopupView is false when showPopup.
+     */
+    TouchEventInfo touchEventInfo("onTouchDown");
+    pattern_->OnPopupTouchDown(touchEventInfo);
+
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: IndexerAlgorithmCoverage001
+ * @tc.desc: For Coverage Rate, branches that are not normally covered.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerTestNg, IndexerAlgorithmCoverage001, TestSize.Level1)
+{
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 0);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step1. Supplement Measure branch,
+     * has no condition that itemSize_ is 0.
+     */
+    layoutProperty_->UpdateItemSize(Dimension(0));
+    RefPtr<LayoutWrapper> layoutWrapper = frameNode_->CreateLayoutWrapper(false, false);
+    layoutWrapper->SetActive();
+    LayoutConstraintF LayoutConstraint;
+    LayoutConstraint.parentIdealSize = { DEFAULT_ROOT_WIDTH, DEFAULT_ROOT_HEIGHT };
+    LayoutConstraint.percentReference = { DEFAULT_ROOT_WIDTH, DEFAULT_ROOT_HEIGHT };
+    LayoutConstraint.maxSize = { DEFAULT_ROOT_WIDTH, DEFAULT_ROOT_HEIGHT };
+    layoutWrapper->Measure(LayoutConstraint);
+    layoutWrapper->Layout();
+    layoutWrapper->MountToHostOnMainThread();
+
+    auto layoutAlgorithm = AceType::MakeRefPtr<IndexerLayoutAlgorithm>(layoutWrapper->GetLayoutAlgorithm());
+    EXPECT_EQ(layoutAlgorithm->itemSize_, 0.f);
+
+    EXPECT_TRUE(true);
 }
 } // namespace OHOS::Ace::NG

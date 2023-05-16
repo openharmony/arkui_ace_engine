@@ -18,7 +18,7 @@
 #include <utility>
 
 #include "image_painter_utils.h"
-#include "third_party/skia/include/core/SkColorFilter.h"
+#include "include/core/SkColorFilter.h"
 
 #include "base/image/pixel_map.h"
 #include "core/components_ng/render/drawing.h"
@@ -185,8 +185,12 @@ bool SkiaImage::DrawWithRecordingCanvas(
 
     SkPaint paint;
     auto config = GetPaintConfig();
+#ifndef NEW_SKIA
     ImagePainterUtils::AddFilter(paint, config);
-
+#else
+    SkSamplingOptions options;
+    ImagePainterUtils::AddFilter(paint, options, config);
+#endif
     auto radii = ImagePainterUtils::ToSkRadius(radiusXY);
     recordingCanvas->ClipAdaptiveRRect(radii.get());
     if (config.imageFit_ == ImageFit::TOP_LEFT) {
@@ -200,9 +204,14 @@ bool SkiaImage::DrawWithRecordingCanvas(
     Rosen::RsImageInfo rsImageInfo((int)(config.imageFit_), (int)(config.imageRepeat_), radii.get(), 1.0, GetUniqueID(),
         GetCompressWidth(), GetCompressHeight());
     auto data = GetCompressData();
+#ifndef NEW_SKIA
     recordingCanvas->DrawImageWithParm(GetImage(), std::move(data), rsImageInfo, paint);
-    return true;
 #else
+    // TODO:Haw to set SamplingOptions?
+    recordingCanvas->DrawImageWithParm(GetImage(), std::move(data), rsImageInfo, options, paint);
+#endif
+    return true;
+#else // !ENABLE_ROSEN_BACKEND
     return false;
 #endif
 }

@@ -93,6 +93,7 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto size = geometryNode->GetFrameSize();
 
     auto padding = layoutProperty->CreatePaddingAndBorder();
+    viewPort_ = size;
     MinusPaddingToSize(padding, size);
     auto childSize = childGeometryNode->GetMarginFrameSize();
     scrollableDistance_ = GetMainAxisSize(childSize, axis) - GetMainAxisSize(size, axis);
@@ -104,7 +105,6 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             currentOffset_ = std::clamp(currentOffset_, 0.0f, -scrollableDistance_);
         }
     }
-    viewPort_ = size;
     viewPortExtent_ = childSize;
     viewPortLength_ = GetMainAxisSize(size, axis);
     auto currentOffset = axis == Axis::VERTICAL ? OffsetF(0.0f, currentOffset_) : OffsetF(currentOffset_, 0.0f);
@@ -112,7 +112,7 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (layoutProperty->GetPositionProperty() && layoutProperty->GetPositionProperty()->HasAlignment()) {
         scrollAlignment = layoutProperty->GetPositionProperty()->GetAlignment().value();
     }
-    auto alignmentPosition = Alignment::GetAlignPosition(viewPort_, viewPortExtent_, scrollAlignment);
+    auto alignmentPosition = Alignment::GetAlignPosition(size, viewPortExtent_, scrollAlignment);
     childGeometryNode->SetMarginFrameOffset(padding.Offset() + currentOffset + alignmentPosition);
     childWrapper->Layout();
 }

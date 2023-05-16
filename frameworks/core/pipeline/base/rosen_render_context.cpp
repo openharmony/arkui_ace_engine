@@ -18,8 +18,8 @@
 #include "core/components/plugin/render_plugin.h"
 #include "core/pipeline/base/render_sub_container.h"
 #include "render_service_client/core/ui/rs_canvas_node.h"
-#include "third_party/skia/include/core/SkImage.h"
-#include "third_party/skia/include/core/SkPictureRecorder.h"
+#include "include/core/SkImage.h"
+#include "include/core/SkPictureRecorder.h"
 
 namespace OHOS::Ace {
 namespace {

@@ -14,12 +14,13 @@
  */
 
 #include "adapter/preview/entrance/ace_ability.h"
+#include "base/utils/utils.h"
 
 #ifdef INIT_ICU_DATA_PATH
 #include "unicode/putil.h"
 #endif
 
-#include "third_party/skia/include/core/SkFontMgr.h"
+#include "include/core/SkFontMgr.h"
 
 #include "adapter/preview/entrance/ace_application_info.h"
 #include "adapter/preview/entrance/ace_container.h"
@@ -30,6 +31,8 @@
 
 #ifndef ENABLE_ROSEN_BACKEND
 #include "frameworks/core/components/common/painter/flutter_svg_painter.h"
+#else
+#include "adapter/preview/external/flutter/main_event_loop.h"
 #endif
 
 namespace OHOS::Ace::Platform {
@@ -217,27 +220,21 @@ std::unique_ptr<AceAbility> AceAbility::CreateInstance(AceRunArgs& runArgs)
 {
     DumpAceRunArgs(runArgs);
     LOGI("Start create AceAbility instance");
-    bool initSucceeded = FlutterDesktopInit();
-    if (!initSucceeded) {
+    const auto& ctx = OHOS::Rosen::GlfwRenderContext::GetGlobal();
+    if (!ctx->Init()) {
         LOGE("Could not create window; AceDesktopInit failed.");
         return nullptr;
     }
+#ifdef USE_GLFW_WINDOW
+    ctx->CreateWindow(runArgs.deviceWidth, runArgs.deviceHeight, true);
+#else
+    ctx->CreateWindow(runArgs.deviceWidth, runArgs.deviceHeight, false);
+#endif
     AceApplicationInfo::GetInstance().SetLocale(runArgs.language, runArgs.region, runArgs.script, "");
-
     SetFontMgrConfig(runArgs.containerSdkPath);
-
-    auto controller = FlutterDesktopCreateWindow(
-        runArgs.deviceWidth, runArgs.deviceHeight, runArgs.windowTitle.c_str(), runArgs.onRender);
-
-    const auto& ctx = OHOS::Rosen::GlfwRenderContext::GetGlobal();
-    if (ctx != nullptr) {
-        ctx->InitFrom(FlutterDesktopGetWindow(controller));
-    }
-
     EventDispatcher::GetInstance().Initialize();
     auto aceAbility = std::make_unique<AceAbility>(runArgs);
     aceAbility->SetGlfwWindowController(ctx);
-    aceAbility->SetFlutterWindowControllerRef(controller);
     return aceAbility;
 }
 #endif
@@ -274,7 +271,7 @@ void AceAbility::InitEnv()
     AceContainer::SetResourcesPathAndThemeStyle(ACE_INSTANCE_ID, runArgs_.systemResourcesPath,
         runArgs_.appResourcesPath, runArgs_.themeId, runArgs_.deviceConfig.colorMode);
 
-    auto view = new FlutterAceView(ACE_INSTANCE_ID);
+    auto view = new AceViewPreview(ACE_INSTANCE_ID, nullptr);
     if (runArgs_.aceVersion == AceVersion::ACE_2_0) {
         AceContainer::SetView(view, runArgs_.deviceConfig.density, runArgs_.deviceWidth, runArgs_.deviceHeight);
         AceContainer::RunPage(ACE_INSTANCE_ID, UNUSED_PAGE_ID, runArgs_.url, "");
@@ -295,8 +292,12 @@ void AceAbility::InitEnv()
 void AceAbility::InitEnv()
 {
 #ifdef INIT_ICU_DATA_PATH
+    char realPath[PATH_MAX] = { 0x00 };
     std::string icuPath = ".";
-    u_setDataDirectory(icuPath.c_str());
+    if (!RealPath(icuPath, realPath)) {
+        return;
+    }
+    u_setDataDirectory(realPath);
 #endif
     std::vector<std::string> paths;
     paths.push_back(runArgs_.assetPath);
@@ -314,6 +315,9 @@ void AceAbility::InitEnv()
     } else {
         paths.push_back(GetCustomAssetPath(runArgs_.assetPath) + ASSET_PATH_SHARE);
     }
+    if (!runArgs_.containerSdkPath.empty()) {
+        paths.push_back(runArgs_.containerSdkPath);
+    }
     AceContainer::AddAssetPath(ACE_INSTANCE_ID, "", paths);
     auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
     CHECK_NULL_VOID(container);
@@ -324,16 +328,18 @@ void AceAbility::InitEnv()
             container->SetPageProfile((runArgs_.pageProfile.empty() ? "" : runArgs_.pageProfile + ".json"));
         }
     }
-    AceContainer::SetResourcesPathAndThemeStyle(ACE_INSTANCE_ID, runArgs_.systemResourcesPath,
+    AceContainer::SetResourcesPathAndThemeStyle(ACE_INSTANCE_ID, runArgs_.systemResourcesPath + "/entry",
         runArgs_.appResourcesPath, runArgs_.themeId, runArgs_.deviceConfig.colorMode);
 
-    auto view = new RSAceView(ACE_INSTANCE_ID);
+    auto view = AceViewPreview::CreateView(ACE_INSTANCE_ID);
     if (runArgs_.aceVersion == AceVersion::ACE_2_0) {
-        AceContainer::SetView(view, runArgs_.deviceConfig.density, runArgs_.deviceWidth, runArgs_.deviceHeight, runArgs_.onRender);
+        AceContainer::SetView(
+            view, runArgs_.deviceConfig.density, runArgs_.deviceWidth, runArgs_.deviceHeight, runArgs_.onRender);
         AceContainer::RunPage(ACE_INSTANCE_ID, UNUSED_PAGE_ID, runArgs_.url, "");
     } else {
         AceContainer::RunPage(ACE_INSTANCE_ID, UNUSED_PAGE_ID, runArgs_.url, "");
-        AceContainer::SetView(view, runArgs_.deviceConfig.density, runArgs_.deviceWidth, runArgs_.deviceHeight, runArgs_.onRender);
+        AceContainer::SetView(
+            view, runArgs_.deviceConfig.density, runArgs_.deviceWidth, runArgs_.deviceHeight, runArgs_.onRender);
     }
     if (runArgs_.projectModel == ProjectModel::STAGE) {
         container->InitializeStageAppConfig(runArgs_.assetPath, runArgs_.formsEnabled);
@@ -409,10 +415,8 @@ void AceAbility::RunEventLoop()
 void AceAbility::RunEventLoop()
 {
     while (controller_ != nullptr && !controller_->WindowShouldClose() && loopRunning_) {
-        if (windowControllerRef_) {
-            FlutterDesktopWaitForEvents(windowControllerRef_);
-        }
-        controller_->PollEvents();
+        // Execute all tasks in the platform thread
+        flutter::MainEventLoop::GetInstance().Run();
 
 #ifdef USE_GLFW_WINDOW
         int32_t width;
@@ -424,11 +428,14 @@ void AceAbility::RunEventLoop()
         }
 #endif
 
+        // Drive the native engine.
         auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
         if (container) {
             container->RunNativeEngineLoop();
         }
 
+        // Process the event of glfw
+        controller_->PollEvents();
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
     loopRunning_ = true;
@@ -599,9 +606,9 @@ std::string AceAbility::GetJSONTree()
     CHECK_NULL_RETURN(container, "");
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, "");
-    taskExecutor->PostSyncTask([&jsonTreeStr] {
-            OHOS::Ace::Framework::InspectorClient::GetInstance().AssembleJSONTreeStr(jsonTreeStr);
-        }, TaskExecutor::TaskType::UI);
+    taskExecutor->PostSyncTask(
+        [&jsonTreeStr] { OHOS::Ace::Framework::InspectorClient::GetInstance().AssembleJSONTreeStr(jsonTreeStr); },
+        TaskExecutor::TaskType::UI);
     return jsonTreeStr;
 }
 
@@ -612,9 +619,11 @@ std::string AceAbility::GetDefaultJSONTree()
     CHECK_NULL_RETURN(container, "");
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, "");
-    taskExecutor->PostSyncTask([&defaultJsonTreeStr] {
+    taskExecutor->PostSyncTask(
+        [&defaultJsonTreeStr] {
             OHOS::Ace::Framework::InspectorClient::GetInstance().AssembleDefaultJSONTreeStr(defaultJsonTreeStr);
-        }, TaskExecutor::TaskType::UI);
+        },
+        TaskExecutor::TaskType::UI);
     return defaultJsonTreeStr;
 }
 

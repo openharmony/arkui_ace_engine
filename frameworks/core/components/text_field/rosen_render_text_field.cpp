@@ -17,10 +17,10 @@
 
 #include <cmath>
 
-#include "flutter/third_party/txt/src/txt/paragraph_builder.h"
-#include "flutter/third_party/txt/src/txt/paragraph_txt.h"
+#include "txt/paragraph_builder.h"
+#include "txt/paragraph_txt.h"
 #include "render_service_client/core/ui/rs_node.h"
-#include "third_party/skia/include/effects/SkGradientShader.h"
+#include "include/effects/SkGradientShader.h"
 #include "unicode/uchar.h"
 
 #include "base/i18n/localization.h"
@@ -854,7 +854,9 @@ std::unique_ptr<txt::ParagraphStyle> RosenRenderTextField::CreateParagraphStyle(
     }
     UpdateDirectionStatus();
     if (keyboard_ != TextInputType::MULTILINE) {
+#ifndef NEW_SKIA
         style->word_break_type = minikin::WordBreakType::kWordBreakType_BreakAll;
+#endif
     }
     return style;
 }
@@ -1094,7 +1096,11 @@ int32_t RosenRenderTextField::GetCursorPositionForMoveUp()
     }
     double verticalOffset = -textOffsetForShowCaret_.GetY() - PreferredLineHeight();
     return static_cast<int32_t>(paragraph_
+#ifndef NEW_SKIA
                                     ->GetGlyphPositionAtCoordinateWithCluster(
+#else
+                                    ->GetGlyphPositionAtCoordinate(
+#endif
                                         caretRect_.Left() - innerRect_.Left(), caretRect_.Top() + verticalOffset)
                                     .position);
 }
@@ -1106,7 +1112,11 @@ int32_t RosenRenderTextField::GetCursorPositionForMoveDown()
     }
     double verticalOffset = -textOffsetForShowCaret_.GetY() + PreferredLineHeight();
     return static_cast<int32_t>(paragraph_
+#ifndef NEW_SKIA
                                     ->GetGlyphPositionAtCoordinateWithCluster(
+#else
+                                    ->GetGlyphPositionAtCoordinate(
+#endif
                                         caretRect_.Left() - innerRect_.Left(), caretRect_.Top() + verticalOffset)
                                     .position);
 }
@@ -1124,7 +1134,11 @@ int32_t RosenRenderTextField::GetCursorPositionForClick(const Offset& offset)
         return 0;
     }
     return static_cast<int32_t>(
+#ifndef NEW_SKIA
         paragraph_->GetGlyphPositionAtCoordinateWithCluster(clickOffset_.GetX(), clickOffset_.GetY()).position);
+#else
+        paragraph_->GetGlyphPositionAtCoordinate(clickOffset_.GetX(), clickOffset_.GetY()).position);
+#endif
 }
 
 int32_t RosenRenderTextField::AdjustCursorAndSelection(int32_t currentCursorPosition)

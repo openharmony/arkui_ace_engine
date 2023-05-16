@@ -14,7 +14,7 @@
  */
 
 #include "core/components/texttimer/rosen_render_texttimer.h"
-#include "third_party/skia/include/effects/SkGradientShader.h"
+#include "include/effects/SkGradientShader.h"
 
 namespace OHOS::Ace {
 void RosenRenderTextTimer::Paint(RenderContext& context, const Offset& offset)

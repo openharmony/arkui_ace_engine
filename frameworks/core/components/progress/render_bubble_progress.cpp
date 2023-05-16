@@ -59,7 +59,7 @@ void RenderBubbleProgress::Update(const RefPtr<Component>& component)
 {
     if (!animatorController_) {
         auto context = GetContext();
-        animatorController_ = AceType::MakeRefPtr<Animator>(context);
+        animatorController_ = CREATE_ANIMATOR(context);
         auto pipelineContext = context.Upgrade();
         if (!pipelineContext) {
             LOGE("context is nullptr");

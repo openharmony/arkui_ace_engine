@@ -21,8 +21,8 @@
 #include "core/components/font/constants_converter.h"
 #include "core/components/stack/stack_element.h"
 #include "core/components/text_overlay/text_overlay_component.h"
-#include "flutter/third_party/txt/src/txt/paragraph_txt.h"
-#include "third_party/skia/include/core/SkCanvas.h"
+#include "txt/paragraph_txt.h"
+#include "include/core/SkCanvas.h"
 
 namespace OHOS::Ace {
 
@@ -280,9 +280,15 @@ int32_t TextOverlayBase::GetCursorPositionForClick(const Offset& offset, const O
     // Solve can't select right boundary of RTL language.
     double rightBoundary = GetBoundaryOfParagraph(false);
     if (GreatOrEqual(clickOffset_.GetX(), rightBoundary)) {
+#ifndef NEW_SKIA
         int32_t rightBoundaryPosition =
             static_cast<int32_t>(paragraph_->GetGlyphPositionAtCoordinateWithCluster(
                 rightBoundary - cursorWidth_, clickOffset_.GetY()).position);
+#else
+        int32_t rightBoundaryPosition =
+            static_cast<int32_t>(paragraph_->GetGlyphPositionAtCoordinate(
+                rightBoundary - cursorWidth_, clickOffset_.GetY()).position);
+#endif
         return realTextDirection_ == TextDirection::RTL ? 0 : rightBoundaryPosition;
     }
 
@@ -345,7 +351,7 @@ void TextOverlayBase::InitAnimation(const WeakPtr<PipelineContext>& pipelineCont
 
     // Add the animation
     LOGD("Add animation to animator");
-    animator_ = AceType::MakeRefPtr<Animator>(context);
+    animator_ = CREATE_ANIMATOR(context);
     animator_->AddInterpolator(diameterAnimation);
     animator_->AddInterpolator(diameterInnerAnimation);
     animator_->SetDuration(SHOW_HANDLE_DURATION);
@@ -395,7 +401,7 @@ void TextOverlayBase::PaintSelection(SkCanvas* canvas, const Offset& globalOffse
 void TextOverlayBase::InitSelection(const Offset& pos, const Offset& globalOffset)
 {
     int32_t extend = GetCursorPositionForClick(pos, globalOffset);
-    int32_t extendEnd = extend + GetGraphemeClusterLength(extend, false); 
+    int32_t extendEnd = extend + GetGraphemeClusterLength(extend, false);
     textValue_.UpdateSelection(extend, extendEnd);
 }
 

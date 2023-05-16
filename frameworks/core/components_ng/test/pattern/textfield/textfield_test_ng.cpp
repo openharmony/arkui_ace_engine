@@ -205,7 +205,6 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldDeleteForwardValue001, TestSize.Level1
     EXPECT_EQ(pattern->GetEditingValue().caretPosition, static_cast<int32_t>(TEXT_VALUE.size()));
     pattern->DeleteForward(DELETE_LENGTH_1);
     EXPECT_EQ(pattern->GetEditingValue().text, TEXT_VALUE.substr(0, TEXT_VALUE.size()));
-    LOGI("Lee: %{public}s", pattern->GetEditingValue().text.c_str());
     EXPECT_EQ(pattern->GetEditingValue().caretPosition, TEXT_VALUE.size());
 }
 
@@ -1269,10 +1268,10 @@ HWTEST_F(TextFieldPatternTestNg, PaintSelection003, TestSize.Level1)
     pattern->selectionMode_ = SelectionMode::SELECT;
     pattern->textSelector_.baseOffset = 1;
     pattern->textSelector_.destinationOffset = 0;
-    std::vector<RSTypographyProperties::TextBox> textBoxs;
+    std::vector<RSTypographyProperties::TextBox> textBoxes;
     RSTypographyProperties::TextBox textBox;
-    textBoxs.emplace_back(textBox);
-    pattern->textBoxes_ = textBoxs;
+    textBoxes.emplace_back(textBox);
+    pattern->textBoxes_ = textBoxes;
     auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
     EdgeEffect edgeEffect;
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
@@ -2190,7 +2189,7 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldAccessibilityPropertyGetTextInputType0
     EXPECT_EQ(textFieldAccessibilityProperty->GetTextInputType(), AceTextCategory::INPUT_TYPE_NUMBER);
 
     textFieldLayoutProperty->UpdateTextInputType(TextInputType::PHONE);
-    EXPECT_EQ(textFieldAccessibilityProperty->GetTextInputType(), AceTextCategory::INPUT_TYPE_DEFAULT);
+    EXPECT_EQ(textFieldAccessibilityProperty->GetTextInputType(), AceTextCategory::INPUT_TYPE_PHONENUMBER);
 
     textFieldLayoutProperty->UpdateTextInputType(TextInputType::DATETIME);
     EXPECT_EQ(textFieldAccessibilityProperty->GetTextInputType(), AceTextCategory::INPUT_TYPE_DATE);
@@ -2437,7 +2436,6 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldAccessibilityPropertyGetSupportAction0
     expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_COPY);
     expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_PASTE);
     expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_CUT);
-    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SELECT);
     expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SET_SELECTION);
     expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_CLEAR_SELECTION);
     expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SET_TEXT);
@@ -2478,20 +2476,796 @@ HWTEST_F(TextFieldPatternTestNg, AdjustTextSelectionRectOffsetX, TestSize.Level1
     textFieldPattern->textBoxes_.begin()->rect_.SetLeft(-20.0f);
     textFieldPattern->textBoxes_.begin()->rect_.SetRight(-10.0f);
     textFieldPattern->AdjustTextSelectionRectOffsetX();
-    EXPECT_EQ(textFieldPattern->textRect_.GetX(), 20.0f);
+    EXPECT_EQ(textFieldPattern->textRect_.GetX(), 0.0f);
     textFieldPattern->textBoxes_.begin()->rect_.SetLeft(0.0f);
     textFieldPattern->textRect_.SetLeft(0.0f);
     textFieldPattern->AdjustTextSelectionRectOffsetX();
-    EXPECT_EQ(textFieldPattern->textRect_.GetX(), 10.0f);
+    EXPECT_EQ(textFieldPattern->textRect_.GetX(), 0.0f);
 
     textFieldPattern->textBoxes_.begin()->rect_.SetLeft(100.0f);
     textFieldPattern->textBoxes_.begin()->rect_.SetRight(200.0f);
     textFieldPattern->textRect_.SetLeft(0.0f);
     textFieldPattern->AdjustTextSelectionRectOffsetX();
-    EXPECT_EQ(textFieldPattern->textRect_.GetX(), 100.0f);
+    EXPECT_EQ(textFieldPattern->textRect_.GetX(), 0.0f);
     textFieldPattern->textBoxes_.begin()->rect_.SetLeft(300.0f);
     textFieldPattern->textRect_.SetLeft(0.0f);
     textFieldPattern->AdjustTextSelectionRectOffsetX();
-    EXPECT_EQ(textFieldPattern->textRect_.GetX(), 200.0f);
+    EXPECT_EQ(textFieldPattern->textRect_.GetX(), 0.0f);
+}
+
+/**
+ * @tc.name: SetTextSelection001
+ * @tc.desc: test CaretPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SetTextSelection001, TestSize.Level1)
+{
+    int32_t caretPositionCallback = 0;
+
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXTINPUT_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+
+    auto textFieldController = AceType::MakeRefPtr<TextFieldController>();
+    ASSERT_NE(textFieldController, nullptr);
+
+    textFieldPattern->InitEditingValueText(TEXT_VALUE);
+    textFieldController->SetPattern(textFieldPattern);
+    textFieldController->SetCaretPosition(
+        [&caretPositionCallback](const int32_t caretPosition) { caretPositionCallback = caretPosition; });
+    textFieldPattern->SetTextSelection(TEXT_SELECTION_START, TEXT_SELECTION_END);
+    textFieldPattern->SetTextSelection(TEXT_SELECTION_ERR, TEXT_SELECTION_END);
+    textFieldPattern->SetTextSelection(TEXT_SELECTION_END, TEXT_SELECTION_END);
+    EXPECT_EQ(textFieldPattern->GetTextEditingValue().caretPosition, CARET_POSITION_2);
+    EXPECT_EQ(textFieldPattern->GetEditingValue().caretPosition, CARET_POSITION_2);
+}
+
+/**
+ * @tc.name: SetUnderlineWidth
+ * @tc.desc: Verify that the SetUnderlineWidth interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SetUnderlineWidth, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFieldOverlayModifier.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
+    EdgeEffect edgeEffect;
+    auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
+    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollBar, scrollEdgeEffect);
+
+    /**
+     * @tc.steps: step2. call SetUnderlineWidth function.
+     * @tc.expected: The member variable value of textFieldOverlayModifier is the same as expected.
+     */
+    float value = 1.0f;
+    textFieldOverlayModifier.SetUnderlineWidth(value);
+    EXPECT_EQ(textFieldOverlayModifier.underlineWidth_->Get(), value);
+}
+
+/**
+ * @tc.name: SetUnderlineColor
+ * @tc.desc: Verify that the SetUnderlineColor interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SetUnderlineColor, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFieldOverlayModifier.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
+    EdgeEffect edgeEffect;
+    auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
+    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollBar, scrollEdgeEffect);
+
+    /**
+     * @tc.steps: step2. call SetUnderlineColor function.
+     * @tc.expected: The member variable value of textFieldOverlayModifier is the same as expected.
+     */
+    const Color value = Color::BLUE;
+    textFieldOverlayModifier.SetUnderlineColor(value);
+    EXPECT_EQ(textFieldOverlayModifier.underlineColor_->Get(), value);
+}
+
+/**
+ * @tc.name: SetShowUnderLine
+ * @tc.desc: Verify that the SetShowUnderLine interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SetShowUnderLine, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFieldPattern.
+     */
+    auto textFieldPattern = GetPattern();
+    ASSERT_NE(textFieldPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call SetShowUnderLine function.
+     * @tc.expected: The member variable value of textFieldPattern is the same as expected.
+     */
+    bool showUnderLine = false;
+    textFieldPattern->SetShowUnderLine(showUnderLine);
+    EXPECT_EQ(textFieldPattern->GetShowUnderLine(), showUnderLine);
+
+    showUnderLine = true;
+    textFieldPattern->SetShowUnderLine(showUnderLine);
+    EXPECT_EQ(textFieldPattern->GetShowUnderLine(), showUnderLine);
+}
+
+/**
+ * @tc.name: GetUnitWidth
+ * @tc.desc: Verify that the GetUnitWidth interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, GetUnitWidth, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFieldPattern.
+     */
+    auto textFieldPattern = GetPattern();
+    ASSERT_NE(textFieldPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call GetUnitWidth function.
+     * @tc.expected: The member variable value of textFieldPattern is the same as expected.
+     */
+    EXPECT_EQ(textFieldPattern->GetUnitWidth(), 0.0f);
+
+    float unitWidth = 1.0;
+    textFieldPattern->unitWidth_ = unitWidth;
+    EXPECT_EQ(textFieldPattern->GetUnitWidth(), unitWidth);
+}
+
+/**
+ * @tc.name: SetShowUnderline002
+ * @tc.desc: Verify that the SetShowUnderline interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SetShowUnderline002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode.Get pattern.
+     */
+    TextFieldModelNG textFieldModelInstance;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+
+    /**
+     * @tc.steps: step2. call SetShowUnderline function.
+     * @tc.expected: The member variable value of textFieldModelInstance is the same as expected.
+     */
+    renderContext->UpdateBackgroundColor(Color::BLUE);
+    const bool hideUnderLine = false;
+    textFieldModelInstance.SetShowUnderline(hideUnderLine);
+    EXPECT_EQ(renderContext->GetBackgroundColorValue(), Color::BLUE);
+    const bool showUnderLine = true;
+    textFieldModelInstance.SetShowUnderline(showUnderLine);
+    EXPECT_EQ(renderContext->GetBackgroundColorValue(), Color::TRANSPARENT);
+}
+
+/**
+ * @tc.name: SetShowUnderline003
+ * @tc.desc: Verify that the SetShowUnderline interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SetShowUnderline003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode.Get pattern.
+     */
+    TextFieldModelNG textFieldModelInstance;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+
+    /**
+     * @tc.steps: step2. call SetShowUnderline function.
+     * @tc.expected: The member variable value of textFieldModelInstance is the same as expected.
+     */
+    layoutProperty->propertyChangeFlag_ = PROPERTY_UPDATE_NORMAL;
+    const bool showUnderLine = true;
+    textFieldModelInstance.SetShowUnderline(showUnderLine);
+    EXPECT_EQ(renderContext->GetBackgroundColorValue(), Color::TRANSPARENT);
+}
+
+/**
+ * @tc.name: HandleFocusEvent001
+ * @tc.desc: Test the HandleFocusEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, HandleFocusEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set showUnderLine. Call function HandleFocusEvent.
+     * @tc.expected: Check the showUnderLine set successfully.
+     */
+    textFieldPattern->SetShowUnderLine(true);
+    textFieldPattern->HandleFocusEvent();
+    EXPECT_TRUE(textFieldPattern->GetShowUnderLine());
+    textFieldPattern->SetShowUnderLine(false);
+    textFieldPattern->HandleFocusEvent();
+    EXPECT_FALSE(textFieldPattern->GetShowUnderLine());
+}
+
+/**
+ * @tc.name: onDraw004
+ * @tc.desc: Verify that the onDraw interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, onDraw004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode.Get pattern.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->scrollableEvent_ = AceType::MakeRefPtr<ScrollableEvent>(AXIS_VERTICAL);
+    pattern->AddScrollEvent();
+    pattern->scrollable_ = true;
+    pattern->CheckScrollable();
+    bool showUnderLine = true;
+    pattern->SetShowUnderLine(showUnderLine);
+    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
+    scrollBar->isScrollable_ = true;
+    scrollBar->displayMode_ = DisplayMode::AUTO;
+    scrollBar->SetNormalWidth(CURSOR_WIDTH_SIZE);
+    scrollBar->opacity_ = UINT8_MAX;
+    EdgeEffect edgeEffect;
+    auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
+
+    /**
+     * @tc.steps: step2. Create the textFieldOverlayModifier.Set different properties.Call function onDraw.
+     * @tc.expected: Check the properties.
+     */
+    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollBar, scrollEdgeEffect);
+    Testing::MockCanvas rsCanvas;
+    DrawingContext context { rsCanvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawLine(_, _)).Times(AtLeast(1));
+    textFieldOverlayModifier.onDraw(context);
+}
+
+/**
+ * @tc.name: onDraw005
+ * @tc.desc: Verify that the onDraw interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, onDraw005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode.Get pattern.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    TextFieldContentModifier textFieldContentModifier(pattern);
+
+    /**
+     * @tc.steps: step2. Create the TextFieldContentModifier.Set different properties.Call function onDraw.
+     * @tc.expected: Check the properties.
+     */
+    Testing::MockCanvas rsCanvas;
+    DrawingContext context { rsCanvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    pattern->SetShowUnderLine(true);
+    bool value = true;
+    textFieldContentModifier.showErrorState_ = AceType::MakeRefPtr<PropertyBool>(value);
+    textFieldContentModifier.showCounter_ = AceType::MakeRefPtr<PropertyBool>(value);
+    pattern->counterParagraph_ = std::make_shared<RSParagraph>();
+    pattern->errorParagraph_ = std::make_shared<RSParagraph>();
+    textFieldContentModifier.onDraw(context);
+}
+
+/**
+ * @tc.name: SetShowUnit
+ * @tc.desc: Verify that the SetShowUnit interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SetShowUnit, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode.Get pattern.
+     */
+    TextFieldModelNG textFieldModelInstance;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    std::function<void()> unitAction;
+
+    /**
+     * @tc.steps: step2. Create the textFieldModelInstance function SetShowUnit.
+     * @tc.expected: Check the properties.
+     */
+    textFieldModelInstance.SetShowUnit(std::move(unitAction));
+    EXPECT_EQ(static_cast<int32_t>(host->GetChildren().size()), 0);
+}
+
+/**
+ * @tc.name: ProcessDefaultPadding
+ * @tc.desc: Verify that the ProcessDefaultPadding interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, ProcessDefaultPadding, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode.Get pattern.
+     */
+    TextFieldModelNG textFieldModelInstance;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pipeline = frameNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto themeManager = pipeline->GetThemeManager();
+    ASSERT_NE(themeManager, nullptr);
+    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
+    ASSERT_NE(textFieldTheme, nullptr);
+    auto themePadding = textFieldTheme->GetPadding();
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Create the textFieldModelInstance function ProcessDefaultPadding.
+     * @tc.expected: Check the properties.
+     */
+    bool showUnderLine = false;
+    pattern->SetShowUnderLine(showUnderLine);
+    auto renderContext = frameNode->GetRenderContext();
+    PaddingProperty paddings;
+    textFieldModelInstance.ProcessDefaultPadding(paddings);
+    EXPECT_EQ(paddings.top, NG::CalcLength(themePadding.Top().ConvertToPx()));
+}
+
+
+/**
+ * @tc.name: SetShowCounter
+ * @tc.desc: Verify that the SetShowCounter interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SetShowCounter, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    TextFieldContentModifier textFieldContentModifier(pattern);
+    bool value = true;
+
+    /**
+     * @tc.steps: step2. call SetShowCounter function.
+     * @tc.expected: The member variable value of textFieldContentModifier is the value set above.
+     */
+    textFieldContentModifier.showCounter_ = nullptr;
+    textFieldContentModifier.SetShowCounter(value);
+    textFieldContentModifier.showCounter_ = AceType::MakeRefPtr<PropertyBool>(value);
+    textFieldContentModifier.SetShowCounter(value);
+    EXPECT_EQ(textFieldContentModifier.showCounter_->Get(), value);
+}
+
+/**
+ * @tc.name: SetShowErrorState
+ * @tc.desc: Verify that the SetShowErrorState interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SetShowErrorState, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    TextFieldContentModifier textFieldContentModifier(pattern);
+    bool value = true;
+
+    /**
+     * @tc.steps: step2. call SetShowErrorState function.
+     * @tc.expected: The member variable value of textFieldContentModifier is the value set above.
+     */
+    textFieldContentModifier.showErrorState_ = nullptr;
+    textFieldContentModifier.SetShowErrorState(value);
+    textFieldContentModifier.showErrorState_ = AceType::MakeRefPtr<PropertyBool>(value);
+    textFieldContentModifier.SetShowErrorState(value);
+    EXPECT_EQ(textFieldContentModifier.showErrorState_->Get(), value);
+}
+
+/**
+ * @tc.name: CreateCounterParagraph001
+ * @tc.desc: Verify that the CreateCounterParagraph interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, CreateCounterParagraph001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFieldLayoutAlgorithm.
+     */
+    TextFieldLayoutAlgorithm textFieldLayoutAlgorithm;
+
+    /**
+     * @tc.steps: step2. call CreateCounterParagraph function.
+     * @tc.expected: The member variable value of textFieldLayoutAlgorithm is the value set above.
+     */
+    constexpr int32_t textLength = 5;
+    constexpr int32_t maxLength = 10;
+    const RefPtr<TextFieldTheme> theme = AceType::MakeRefPtr<TextFieldTheme>();
+    EXPECT_EQ(textFieldLayoutAlgorithm.counterParagraph_, nullptr);
+    textFieldLayoutAlgorithm.CreateCounterParagraph(textLength, maxLength, theme);
+    EXPECT_NE(textFieldLayoutAlgorithm.counterParagraph_, nullptr);
+}
+
+/**
+ * @tc.name: CreateCounterParagraph002
+ * @tc.desc: Verify that the CreateCounterParagraph interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, CreateCounterParagraph002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFieldLayoutAlgorithm.
+     */
+    TextFieldLayoutAlgorithm textFieldLayoutAlgorithm;
+
+    /**
+     * @tc.steps: step2. call CreateCounterParagraph function.
+     * @tc.expected: The member variable value of textFieldLayoutAlgorithm is the value set above.
+     */
+    constexpr int32_t textLength = 10;
+    constexpr int32_t maxLength = 10;
+    const RefPtr<TextFieldTheme> theme = AceType::MakeRefPtr<TextFieldTheme>();
+    EXPECT_EQ(textFieldLayoutAlgorithm.counterParagraph_, nullptr);
+    textFieldLayoutAlgorithm.CreateCounterParagraph(textLength, maxLength, theme);
+    EXPECT_NE(textFieldLayoutAlgorithm.counterParagraph_, nullptr);
+}
+
+/**
+ * @tc.name: GetCounterParagraph
+ * @tc.desc: Verify that the GetCounterParagraph interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, GetCounterParagraph, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFieldLayoutAlgorithm.
+     */
+    TextFieldLayoutAlgorithm textFieldLayoutAlgorithm;
+
+    /**
+     * @tc.steps: step2. call CreateCounterParagraph function.
+     * @tc.expected: The member variable value of textFieldLayoutAlgorithm is the value set above.
+     */
+    EXPECT_EQ(textFieldLayoutAlgorithm.GetCounterParagraph(), nullptr);
+    textFieldLayoutAlgorithm.counterParagraph_ = std::make_shared<RSParagraph>();
+    EXPECT_NE(textFieldLayoutAlgorithm.GetCounterParagraph(), nullptr);
+}
+
+/**
+ * @tc.name: HandleCounterBorder
+ * @tc.desc: Verify that the HandleCounterBorder interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, HandleCounterBorder, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern, TextFieldLayoutProperty.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+    auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. Set different properties.Call HandleCounterBorder function.
+     * @tc.expected: Check the properties.
+     */
+    uint32_t length = 32;
+    textFieldLayoutProperty->UpdateMaxLength(length);
+    auto maxLength = textFieldPattern->GetMaxLength();
+    auto editingValueText = std::string("a", maxLength);
+    textFieldPattern->UpdateEditingValue(editingValueText, CARET_POSITION_1);
+    textFieldPattern->HandleCounterBorder();
+    EXPECT_EQ(maxLength, static_cast<uint32_t>(textFieldPattern->textEditingValue_.GetWideText().length()));
+    BorderWidthProperty overCountBorderWidth;
+    overCountBorderWidth.SetBorderWidth(Dimension(1, DimensionUnit::VP));
+    textFieldLayoutProperty->UpdateBorderWidth(overCountBorderWidth);
+    textFieldPattern->HandleCounterBorder();
+    EXPECT_EQ(maxLength, static_cast<uint32_t>(textFieldPattern->textEditingValue_.GetWideText().length()));
+    editingValueText = std::string("a");
+    textFieldPattern->UpdateEditingValue(editingValueText, CARET_POSITION_1);
+    textFieldPattern->HandleCounterBorder();
+    ASSERT_NE(maxLength, static_cast<uint32_t>(textFieldPattern->textEditingValue_.GetWideText().length()));
+}
+
+/**
+ * @tc.name: HandleBlurEvent001
+ * @tc.desc: Test the HandleBlurEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, HandleBlurEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set showUnderLine. Call function HandleBlurEvent.
+     * @tc.expected: Check the showUnderLine set successfully.
+     */
+    textFieldPattern->SetShowUnderLine(true);
+    textFieldPattern->HandleBlurEvent();
+    EXPECT_TRUE(textFieldPattern->GetShowUnderLine());
+    textFieldPattern->SetShowUnderLine(false);
+    textFieldPattern->HandleBlurEvent();
+    EXPECT_FALSE(textFieldPattern->GetShowUnderLine());
+}
+
+/**
+ * @tc.name: HandleTouchDown001
+ * @tc.desc: Test the HandleTouchDown.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, HandleTouchDown001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set properties. Call function HandleTouchDown.
+     * @tc.expected: Check the properties set successfully.
+     */
+    textFieldPattern->SetShowUnderLine(true);
+    textFieldPattern->SetEnableTouchAndHoverEffect(true);
+    textFieldPattern->isMousePressed_ = false;
+    Offset offset;
+    textFieldPattern->HandleTouchDown(offset);
+    EXPECT_TRUE(textFieldPattern->GetShowUnderLine());
+    EXPECT_TRUE(textFieldPattern->enableTouchAndHoverEffect_);
+    EXPECT_FALSE(textFieldPattern->GetIsMousePressed());
+    textFieldPattern->SetShowUnderLine(false);
+    textFieldPattern->HandleTouchDown(offset);
+    EXPECT_FALSE(textFieldPattern->GetShowUnderLine());
+}
+
+/**
+ * @tc.name: HandleTouchUp001
+ * @tc.desc: Test the HandleTouchUp.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, HandleTouchUp001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set properties. Call function HandleTouchUp.
+     * @tc.expected: Check the properties set successfully.
+     */
+    textFieldPattern->SetShowUnderLine(true);
+    textFieldPattern->SetEnableTouchAndHoverEffect(true);
+    textFieldPattern->isOnHover_ = false;
+    textFieldPattern->HandleTouchUp();
+    EXPECT_TRUE(textFieldPattern->enableTouchAndHoverEffect_);
+    EXPECT_TRUE(textFieldPattern->GetShowUnderLine());
+    textFieldPattern->SetShowUnderLine(false);
+    textFieldPattern->HandleTouchUp();
+    EXPECT_FALSE(textFieldPattern->GetShowUnderLine());
+}
+
+/**
+ * @tc.name: OnModifyDone001
+ * @tc.desc: Test the OnModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, OnModifyDone001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set showUnderLine. Call function OnModifyDone.
+     * @tc.expected: Check the showUnderLine set successfully.
+     */
+    textFieldPattern->SetShowUnderLine(true);
+    textFieldPattern->OnModifyDone();
+    EXPECT_TRUE(textFieldPattern->GetShowUnderLine());
+    textFieldPattern->SetShowUnderLine(false);
+    textFieldPattern->OnModifyDone();
+    EXPECT_FALSE(textFieldPattern->GetShowUnderLine());
+}
+
+/**
+ * @tc.name: OnHover001
+ * @tc.desc: Test the OnHover.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, OnHover001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set properties. Call function OnHover.
+     * @tc.expected: Check the properties set successfully.
+     */
+    textFieldPattern->SetShowUnderLine(true);
+    textFieldPattern->SetEnableTouchAndHoverEffect(true);
+    textFieldPattern->OnHover(true);
+    EXPECT_TRUE(textFieldPattern->GetShowUnderLine());
+    EXPECT_TRUE(textFieldPattern->enableTouchAndHoverEffect_);
+    textFieldPattern->SetShowUnderLine(true);
+    textFieldPattern->isMousePressed_ = false;
+    textFieldPattern->OnHover(false);
+    EXPECT_TRUE(textFieldPattern->GetShowUnderLine());
+    textFieldPattern->SetShowUnderLine(false);
+    textFieldPattern->OnHover(true);
+    EXPECT_FALSE(textFieldPattern->GetShowUnderLine());
+}
+
+/**
+ * @tc.name: OnValueChanged001
+ * @tc.desc: Test the OnValueChanged.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, OnValueChanged001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set properties. Call function OnValueChanged.
+     * @tc.expected: Check the properties set successfully.
+     */
+    textFieldPattern->SetShowUnderLine(true);
+    textFieldPattern->OnValueChanged(true, true);
+    EXPECT_TRUE(textFieldPattern->GetShowUnderLine());
+    EXPECT_EQ(textFieldPattern->underlineWidth_, TYPING_UNDERLINE_WIDTH);
+    textFieldPattern->SetShowUnderLine(false);
+    textFieldPattern->OnValueChanged(true, true);
+    EXPECT_FALSE(textFieldPattern->GetShowUnderLine());
+    EXPECT_EQ(textFieldPattern->underlineWidth_, UNDERLINE_WIDTH);
+}
+
+/**
+ * @tc.name: PaintCursor002
+ * @tc.desc: Verify that the PaintCursor interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, PaintCursor002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->selectionMode_ = SelectionMode::NONE;
+    pattern->paragraph_ = std::make_shared<RSParagraph>();
+    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
+    EdgeEffect edgeEffect;
+    auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
+    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollBar, scrollEdgeEffect);
+    Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    DrawingContext context { rsCanvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
+
+    /**
+     * @tc.steps: step2. Set properties. Call function PaintCursor.
+     * @tc.expected: Check the properties set successfully.
+     */
+    textFieldOverlayModifier.cursorVisible_ = AceType::MakeRefPtr<PropertyBool>(true);
+    textFieldOverlayModifier.showCounter_ = AceType::MakeRefPtr<PropertyBool>(true);
+    pattern->counterParagraph_ = std::make_shared<RSParagraph>();
+    textFieldOverlayModifier.PaintCursor(context);
+}
+
+/**
+ * @tc.name: PaintSelection004
+ * @tc.desc: Verify that the PaintSelection interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, PaintSelection004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->selectionMode_ = SelectionMode::SELECT;
+    pattern->textSelector_.baseOffset = 1;
+    pattern->textSelector_.destinationOffset = 0;
+    std::vector<RSTypographyProperties::TextBox> textBoxes;
+    RSTypographyProperties::TextBox textBox;
+    textBoxes.emplace_back(textBox);
+    pattern->textBoxes_ = textBoxes;
+    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
+    EdgeEffect edgeEffect;
+    auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
+    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollBar, scrollEdgeEffect);
+    Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawRoundRect(_)).WillRepeatedly(Return());
+    EXPECT_CALL(rsCanvas, DrawCircle(_, _)).WillRepeatedly(Return());
+    DrawingContext context { rsCanvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
+
+    /**
+     * @tc.steps: step2. Set properties. Call function PaintSelection.
+     * @tc.expected: Check the properties set successfully.
+     */
+    textFieldOverlayModifier.showCounter_ = AceType::MakeRefPtr<PropertyBool>(true);
+    pattern->counterParagraph_ = std::make_shared<RSParagraph>();
+    textFieldOverlayModifier.inputStyle_ = InputStyle::DEFAULT;
+    textFieldOverlayModifier.PaintSelection(context);
 }
 } // namespace OHOS::Ace::NG

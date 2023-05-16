@@ -16,9 +16,9 @@ import(
 
 build_component("video") {
   sources = [
-    "flutter_render_texture.cpp",
     "render_texture.cpp",
     "render_texture_creator.cpp",
+    "resource/ext_surface.cpp",
     "resource/player.cpp",
     "resource/resource.cpp",
     "resource/texture.cpp",
@@ -28,7 +28,9 @@ build_component("video") {
     "video_element.cpp",
     "video_element_v2.cpp",
   ]
-
+  if (!ace_use_new_skia) {
+    sources += [ "flutter_render_texture.cpp" ]
+  }
   rosen_sources = [ "rosen_render_texture.cpp" ]
 
   include_dirs = [

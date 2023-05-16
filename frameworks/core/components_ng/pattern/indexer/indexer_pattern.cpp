@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -64,6 +64,8 @@ void IndexerPattern::OnModifyDone()
     if (layoutProperty->GetArrayValue().has_value()) {
         arrayValue_ = layoutProperty->GetArrayValue().value();
         itemCount_ = static_cast<int32_t>(arrayValue_.size());
+    } else {
+        itemCount_ = 0;
     }
     auto propSelect = layoutProperty->GetSelected().value();
     propSelect = (propSelect >= 0 && propSelect < itemCount_) ? propSelect : 0;
@@ -97,6 +99,7 @@ void IndexerPattern::OnModifyDone()
         gesture->AddTouchEvent(touchListener_);
     }
     InitOnKeyEvent();
+    SetAccessibilityAction();
 }
 
 bool IndexerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -154,6 +157,10 @@ void IndexerPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 
 void IndexerPattern::OnHover(bool isHover)
 {
+    if (itemCount_ <= 0) {
+        LOGE("AlphabetIndexer arrayValue size is less than 0");
+        return;
+    }
     if (isHover_ == isHover) {
         return;
     }
@@ -217,11 +224,19 @@ void IndexerPattern::InitChildInputEvent()
 
 void IndexerPattern::OnTouchDown(const TouchEventInfo& info)
 {
+    if (itemCount_ <= 0) {
+        LOGE("AlphabetIndexer arrayValue size is less than 0");
+        return;
+    }
     MoveIndexByOffset(info.GetTouches().front().GetLocalLocation());
 }
 
 void IndexerPattern::OnTouchUp(const TouchEventInfo& info)
 {
+    if (itemCount_ <= 0) {
+        LOGE("AlphabetIndexer arrayValue size is less than 0");
+        return;
+    }
     childPressIndex_ = -1;
     if (isHover_) {
         IndexerPressOutAnimation();
@@ -251,6 +266,7 @@ void IndexerPattern::MoveIndexByOffset(const Offset& offset)
     childPressIndex_ = nextSelectIndex;
     selected_ = nextSelectIndex;
     lastSelected_ = nextSelectIndex;
+    FireOnSelect(selected_, true);
     if (isHover_ && childPressIndex_ >= 0) {
         IndexerPressInAnimation();
     }
@@ -372,12 +388,7 @@ void IndexerPattern::OnSelect(bool changed)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto indexerEventHub = host->GetEventHub<IndexerEventHub>();
-    CHECK_NULL_VOID(indexerEventHub);
-    auto onSelected = indexerEventHub->GetOnSelected();
-    if (onSelected && (selected_ >= 0) && (selected_ < itemCount_)) {
-        onSelected(selected_);
-    }
+    FireOnSelect(selected_, false);
     animateSelected_ = selected_;
     if (animateSelected_ >= 0) {
         auto selectedFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(animateSelected_));
@@ -453,6 +464,9 @@ void IndexerPattern::ApplyIndexChanged(bool selectChanged, bool fromTouchUp)
             childRenderContext->SetClipToBounds(true);
             childNode->MarkModifyDone();
             index++;
+
+            AccessibilityEventType type = AccessibilityEventType::SELECTED;
+            host->OnAccessibilityEvent(type);
             continue;
         } else {
             if (!fromTouchUp || animateSelected_ == lastSelected_ || index != lastSelected_) {
@@ -494,8 +508,8 @@ void IndexerPattern::ShowBubble()
         popupNode_ = CreatePopupNode();
         AddPopupTouchListener(popupNode_);
         UpdatePopupOpacity(0.0f);
-        overlayManager->ShowIndexerPopup(host->GetId(), popupNode_);
     }
+    overlayManager->ShowIndexerPopup(host->GetId(), popupNode_);
     UpdateBubbleView();
     StartBubbleAppearAnimation();
 }
@@ -1107,5 +1121,84 @@ bool IndexerPattern::NeedShowPopupView()
 int32_t IndexerPattern::GenerateAnimationId()
 {
     return (++animationId_) % TOTAL_NUMBER;
+}
+
+void IndexerPattern::FireOnSelect(int32_t selectIndex, bool fromPress)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto indexerEventHub = host->GetEventHub<IndexerEventHub>();
+    CHECK_NULL_VOID(indexerEventHub);
+    if (fromPress || lastIndexFromPress_ == fromPress || lastFireSelectIndex_ != selectIndex) {
+        auto onChangeEvent = indexerEventHub->GetChangeEvent();
+        if (onChangeEvent && (selected_ >= 0) && (selected_ < itemCount_)) {
+            onChangeEvent(selected_);
+        }
+        auto onCreatChangeEvent = indexerEventHub->GetCreatChangeEvent();
+        if (onCreatChangeEvent && (selected_ >= 0) && (selected_ < itemCount_)) {
+            onCreatChangeEvent(selected_);
+        }
+        auto onSelected = indexerEventHub->GetOnSelected();
+        if (onSelected && (selectIndex >= 0) && (selectIndex < itemCount_)) {
+            onSelected(selectIndex);
+        }
+    }
+    lastFireSelectIndex_ = selectIndex;
+    lastIndexFromPress_ = fromPress;
+}
+
+void IndexerPattern::SetAccessibilityAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto childrenNode = host->GetChildren();
+    for (auto& iter : childrenNode) {
+        auto textNode = DynamicCast<NG::FrameNode>(iter);
+        CHECK_NULL_VOID(textNode);
+        auto accessibilityProperty = textNode->GetAccessibilityProperty<AccessibilityProperty>();
+        CHECK_NULL_VOID(accessibilityProperty);
+        accessibilityProperty->SetActionSelect(
+            [weakPtr = WeakClaim(this), node = WeakClaim(RawPtr(textNode)), childrenNode]() {
+                const auto& indexerPattern = weakPtr.Upgrade();
+                CHECK_NULL_VOID(indexerPattern);
+                const auto& frameNode = node.Upgrade();
+                CHECK_NULL_VOID(frameNode);
+                auto index = 0;
+                auto nodeId = frameNode->GetAccessibilityId();
+                for (auto& child : childrenNode) {
+                    if (child->GetAccessibilityId() == nodeId) {
+                        break;
+                    }
+                    index++;
+                }
+                indexerPattern->selected_ = index;
+                indexerPattern->ResetStatus();
+                indexerPattern->ApplyIndexChanged(true, true);
+                indexerPattern->OnSelect(true);
+            });
+
+        accessibilityProperty->SetActionClearSelection(
+            [weakPtr = WeakClaim(this), node = WeakClaim(RawPtr(textNode)), childrenNode] {
+                const auto& indexerPattern = weakPtr.Upgrade();
+                CHECK_NULL_VOID(indexerPattern);
+                const auto& frameNode = node.Upgrade();
+                CHECK_NULL_VOID(frameNode);
+                auto index = 0;
+                auto nodeId = frameNode->GetAccessibilityId();
+                for (auto& child : childrenNode) {
+                    if (child->GetAccessibilityId() == nodeId) {
+                        break;
+                    }
+                    index++;
+                }
+                if (indexerPattern->selected_ != index) {
+                    return;
+                }
+                indexerPattern->selected_ = 0;
+                indexerPattern->ResetStatus();
+                indexerPattern->ApplyIndexChanged(false);
+                indexerPattern->OnSelect(false);
+            });
+    }
 }
 } // namespace OHOS::Ace::NG

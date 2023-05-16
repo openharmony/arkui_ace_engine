@@ -139,7 +139,9 @@ private:
     int32_t GenerateAnimationId();
     void ItemSelectedInAnimation(RefPtr<FrameNode>& itemNode);
     void ItemSelectedOutAnimation(RefPtr<FrameNode>& itemNode);
-
+    void FireOnSelect(int32_t selectIndex, bool fromPress);
+    void SetAccessibilityAction();
+    
     RefPtr<FrameNode> popupNode_;
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<PanEvent> panEvent_;
@@ -164,6 +166,8 @@ private:
     float itemSizeRender_ = 0.0f;
     int32_t lastSelectProp_ = -1;
     int32_t popupClickedIndex_ = -1;
+    int32_t lastFireSelectIndex_ = -1;
+    bool lastIndexFromPress_ = false;
 };
 } // namespace OHOS::Ace::NG
 

@@ -15,7 +15,7 @@
 
 #include "core/components/swiper/flutter_render_swiper.h"
 
-#include "third_party/skia/include/effects/SkGradientShader.h"
+#include "include/effects/SkGradientShader.h"
 
 #include "base/utils/system_properties.h"
 #include "core/components/align/render_align.h"

@@ -16,7 +16,11 @@
 #include "core/components_ng/image_provider/adapter/skia_image_data.h"
 
 namespace OHOS::Ace::NG {
-SkiaImageData::SkiaImageData(const void* data, size_t length) {}
+static int32_t frameCount { 0 };
+SkiaImageData::SkiaImageData(const void* data, size_t length)
+{
+    frameCount = length;
+}
 
 RefPtr<ImageData> ImageData::MakeFromDataWithCopy(const void* data, size_t length)
 {
@@ -53,6 +57,6 @@ RefPtr<SvgDomBase> SkiaImageData::MakeSvgDom(const std::optional<Color>& svgFill
 
 std::pair<SizeF, int32_t> SkiaImageData::Parse() const
 {
-    return {};
+    return { SizeF(1, 1), frameCount };
 }
 } // namespace OHOS::Ace::NG

@@ -177,7 +177,7 @@ OnDragFunc ViewAbstractModelImpl::ToDragFunc(NG::OnDragStartFunc&& onDragStart)
     return dragStart;
 }
 
-void ViewAbstractModelImpl::SetWidth(const Dimension& width)
+void ViewAbstractModelImpl::SetWidth(const CalcDimension& width)
 {
     bool isPercentSize = (width.Unit() == DimensionUnit::PERCENT);
     if (isPercentSize) {
@@ -203,7 +203,7 @@ void ViewAbstractModelImpl::SetWidth(const Dimension& width)
     }
 }
 
-void ViewAbstractModelImpl::SetHeight(const Dimension& height)
+void ViewAbstractModelImpl::SetHeight(const CalcDimension& height)
 {
     bool isPercentSize = (height.Unit() == DimensionUnit::PERCENT);
     if (isPercentSize) {
@@ -229,7 +229,7 @@ void ViewAbstractModelImpl::SetHeight(const Dimension& height)
     }
 }
 
-void ViewAbstractModelImpl::SetMinWidth(const Dimension& minWidth)
+void ViewAbstractModelImpl::SetMinWidth(const CalcDimension& minWidth)
 {
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
     auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
@@ -237,7 +237,7 @@ void ViewAbstractModelImpl::SetMinWidth(const Dimension& minWidth)
     flexItem->SetMinWidth(minWidth);
 }
 
-void ViewAbstractModelImpl::SetMinHeight(const Dimension& minHeight)
+void ViewAbstractModelImpl::SetMinHeight(const CalcDimension& minHeight)
 {
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
     auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
@@ -245,7 +245,7 @@ void ViewAbstractModelImpl::SetMinHeight(const Dimension& minHeight)
     flexItem->SetMinHeight(minHeight);
 }
 
-void ViewAbstractModelImpl::SetMaxWidth(const Dimension& maxWidth)
+void ViewAbstractModelImpl::SetMaxWidth(const CalcDimension& maxWidth)
 {
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
     auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
@@ -253,7 +253,7 @@ void ViewAbstractModelImpl::SetMaxWidth(const Dimension& maxWidth)
     flexItem->SetMaxWidth(maxWidth);
 }
 
-void ViewAbstractModelImpl::SetMaxHeight(const Dimension& maxHeight)
+void ViewAbstractModelImpl::SetMaxHeight(const CalcDimension& maxHeight)
 {
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
     auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
@@ -337,14 +337,15 @@ void ViewAbstractModelImpl::SetBackgroundBlurStyle(const BlurStyleOption& bgBlur
     decoration->SetBlurRadius(ToAnimatableDimension(dimensionRadius));
 }
 
-void ViewAbstractModelImpl::SetPadding(const Dimension& value)
+void ViewAbstractModelImpl::SetPadding(const CalcDimension& value)
 {
     AnimatableDimension animValue = ToAnimatableDimension(value);
     SetPaddings(animValue, animValue, animValue, animValue);
 }
 
-void ViewAbstractModelImpl::SetPaddings(const std::optional<Dimension>& top, const std::optional<Dimension>& bottom,
-    const std::optional<Dimension>& left, const std::optional<Dimension>& right)
+void ViewAbstractModelImpl::SetPaddings(const std::optional<CalcDimension>& top,
+    const std::optional<CalcDimension>& bottom, const std::optional<CalcDimension>& left,
+    const std::optional<CalcDimension>& right)
 {
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
     Edge padding = box->GetPadding();
@@ -363,14 +364,15 @@ void ViewAbstractModelImpl::SetPaddings(const std::optional<Dimension>& top, con
     box->SetPadding(padding);
 }
 
-void ViewAbstractModelImpl::SetMargin(const Dimension& value)
+void ViewAbstractModelImpl::SetMargin(const CalcDimension& value)
 {
     AnimatableDimension animValue = ToAnimatableDimension(value);
     SetMargins(animValue, animValue, animValue, animValue);
 }
 
-void ViewAbstractModelImpl::SetMargins(const std::optional<Dimension>& top, const std::optional<Dimension>& bottom,
-    const std::optional<Dimension>& left, const std::optional<Dimension>& right)
+void ViewAbstractModelImpl::SetMargins(const std::optional<CalcDimension>& top,
+    const std::optional<CalcDimension>& bottom, const std::optional<CalcDimension>& left,
+    const std::optional<CalcDimension>& right)
 {
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
     Edge margin = box->GetMargin();
@@ -464,10 +466,13 @@ void ViewAbstractModelImpl::SetBorderWidth(const std::optional<Dimension>& left,
     const std::optional<Dimension>& top, const std::optional<Dimension>& bottom)
 {
     auto decoration = GetBackDecoration();
-    Dimension leftDimen = left.has_value() ? left.value() : BoxComponentHelper::GetBorderLeftWidth(decoration);
-    Dimension rightDimen = right.has_value() ? right.value() : BoxComponentHelper::GetBorderRightWidth(decoration);
-    Dimension topDimen = top.has_value() ? top.value() : BoxComponentHelper::GetBorderTopWidth(decoration);
-    Dimension bottomDimen = bottom.has_value() ? bottom.value() : BoxComponentHelper::GetBorderBottomWidth(decoration);
+    Dimension leftDimen =
+        left.has_value() ? left.value() : Dimension(BoxComponentHelper::GetBorderLeftWidth(decoration));
+    Dimension rightDimen =
+        right.has_value() ? right.value() : Dimension(BoxComponentHelper::GetBorderRightWidth(decoration));
+    Dimension topDimen = top.has_value() ? top.value() : Dimension(BoxComponentHelper::GetBorderTopWidth(decoration));
+    Dimension bottomDimen =
+        bottom.has_value() ? bottom.value() : Dimension(BoxComponentHelper::GetBorderBottomWidth(decoration));
     auto* stack = ViewStackProcessor::GetInstance();
     AnimationOption option = stack->GetImplicitAnimationOption();
     if (!stack->IsVisualStateSet()) {
@@ -1495,8 +1500,8 @@ GestureEventFunc CreateMenuEventWithBuilder(
     };
 }
 
-void ViewAbstractModelImpl::BindMenu(std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc,
-    const NG::MenuParam&)
+void ViewAbstractModelImpl::BindMenu(
+    std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const NG::MenuParam&)
 {
     ViewStackProcessor::GetInstance()->GetCoverageComponent();
     auto menuComponent = ViewStackProcessor::GetInstance()->GetMenuComponent(true);
@@ -1517,7 +1522,7 @@ void ViewAbstractModelImpl::BindMenu(std::vector<NG::OptionParam>&& params, std:
     click->SetOnClick(tapGesture);
 }
 
-void ViewAbstractModelImpl::BindContextMenu(ResponseType type, std::function<void()>&& buildFunc)
+void ViewAbstractModelImpl::BindContextMenu(ResponseType type, std::function<void()>&& buildFunc, const NG::MenuParam&)
 {
     ViewStackProcessor::GetInstance()->GetCoverageComponent();
     auto menuComponent = ViewStackProcessor::GetInstance()->GetMenuComponent(true);

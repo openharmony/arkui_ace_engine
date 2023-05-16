@@ -16,11 +16,11 @@
 #include "core/components/image/flutter_render_image.h"
 
 #include "flutter/common/task_runners.h"
-#include "third_party/skia/include/core/SkClipOp.h"
-#include "third_party/skia/include/core/SkColorFilter.h"
-#include "third_party/skia/include/core/SkRect.h"
-#include "third_party/skia/include/core/SkShader.h"
-#include "third_party/skia/include/effects/SkImageFilters.h"
+#include "include/core/SkClipOp.h"
+#include "include/core/SkColorFilter.h"
+#include "include/core/SkRect.h"
+#include "include/core/SkShader.h"
+#include "include/effects/SkImageFilters.h"
 
 #include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
@@ -342,7 +342,7 @@ void FlutterRenderImage::FetchImageObject()
 
 void FlutterRenderImage::UpdateSharedMemoryImage(const RefPtr<PipelineContext>& context)
 {
-    auto sharedImageManager = context->GetSharedImageManager();
+    auto sharedImageManager = context->GetOrCreateSharedImageManager();
     if (!sharedImageManager) {
         LOGE("sharedImageManager is null when image try loading memory image, sourceInfo_: %{private}s",
             sourceInfo_.ToString().c_str());

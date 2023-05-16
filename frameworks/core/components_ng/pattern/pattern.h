@@ -124,9 +124,6 @@ public:
     virtual void OnModifyDone()
     {
         auto frameNode = frameNode_.Upgrade();
-        if (frameNode->IsAtomicNode()) {
-            return;
-        }
         auto children = frameNode->GetChildren();
         if (children.empty()) {
             return;
@@ -143,7 +140,7 @@ public:
             parentNode = queue.front();
             queue.pop();
             auto childs = parentNode->GetChildren();
-            if (children.empty()) {
+            if (childs.empty()) {
                 continue;
             }
             for (auto child : childs) {
@@ -151,6 +148,10 @@ public:
                     continue;
                 }
                 auto childFrameNode = AceType::DynamicCast<FrameNode>(child);
+                auto childRenderContext = childFrameNode->GetRenderContext();
+                if (childRenderContext->HasForegroundColorFlag() && childRenderContext->GetForegroundColorFlagValue()) {
+                    continue;
+                }
                 queue.emplace(childFrameNode);
                 childrenList.emplace_back(childFrameNode);
             }
@@ -161,8 +162,28 @@ public:
             if (!childRenderContext->HasForegroundColor() && !childRenderContext->HasForegroundColorStrategy()) {
                 if (isForegroundColor) {
                     childRenderContext->UpdateForegroundColor(renderContext->GetForegroundColorValue());
+                    childRenderContext->ResetForegroundColorStrategy();
+                    childRenderContext->UpdateForegroundColorFlag(false);
                 } else {
                     childRenderContext->UpdateForegroundColorStrategy(renderContext->GetForegroundColorStrategyValue());
+                    childRenderContext->ResetForegroundColor();
+                    childRenderContext->UpdateForegroundColorFlag(false);
+                }
+            } else {
+                if (!childRenderContext->HasForegroundColorFlag()) {
+                    continue;
+                }
+                if (childRenderContext->GetForegroundColorFlagValue()) {
+                    continue;
+                }
+                if (isForegroundColor) {
+                    childRenderContext->UpdateForegroundColor(renderContext->GetForegroundColorValue());
+                    childRenderContext->ResetForegroundColorStrategy();
+                    childRenderContext->UpdateForegroundColorFlag(false);
+                } else {
+                    childRenderContext->UpdateForegroundColorStrategy(renderContext->GetForegroundColorStrategyValue());
+                    childRenderContext->ResetForegroundColor();
+                    childRenderContext->UpdateForegroundColorFlag(false);
                 }
             }
         }
@@ -307,8 +328,16 @@ public:
     // get XTS inspector value
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 
+    virtual void FromJson(const std::unique_ptr<JsonValue>& json) {}
+
     virtual void OnAreaChangedInner() {}
     virtual void OnVisibleChange(bool isVisible) {}
+    virtual std::string ProvideRestoreInfo()
+    {
+        return "";
+    }
+
+    virtual void OnRestoreInfo(const std::string& restoreInfo) {}
 
 protected:
     virtual void OnAttachToFrameNode() {}

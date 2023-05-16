@@ -15,7 +15,7 @@
 
 #include "core/components/qrcode/flutter_render_qrcode.h"
 
-#include "third_party/skia/include/core/SkCanvas.h"
+#include "include/core/SkCanvas.h"
 
 #include "core/pipeline/base/flutter_render_context.h"
 #include "core/pipeline/base/scoped_canvas_state.h"

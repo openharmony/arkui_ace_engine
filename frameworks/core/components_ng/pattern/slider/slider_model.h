@@ -18,9 +18,10 @@
 
 #include <functional>
 #include <memory>
+#include <mutex>
+#include <optional>
 
 #include "base/geometry/axis.h"
-#include "base/geometry/size.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "core/components/common/properties/clip_path.h"
@@ -54,21 +55,23 @@ public:
     virtual void SetMinLabel(float value) = 0;
     virtual void SetMaxLabel(float value) = 0;
     virtual void SetShowSteps(bool value) = 0;
-    virtual void SetShowTips(bool value) = 0;
+    virtual void SetShowTips(bool value, const std::optional<std::string>& content) = 0;
     virtual void SetThickness(const Dimension& value) = 0;
     virtual void SetBlockBorderColor(const Color& value) = 0;
     virtual void SetBlockBorderWidth(const Dimension& value) = 0;
     virtual void SetStepColor(const Color& value) = 0;
     virtual void SetTrackBorderRadius(const Dimension& value) = 0;
-    virtual void SetBlockSize(const Size& value) = 0;
+    virtual void SetBlockSize(const Dimension& width, const Dimension& height) = 0;
     virtual void SetBlockType(BlockStyleType value) = 0;
     virtual void SetBlockImage(const std::string& value) = 0;
     virtual void SetBlockShape(const RefPtr<BasicShape>& value) = 0;
     virtual void SetStepSize(const Dimension& value) = 0;
     virtual void SetOnChange(std::function<void(float, int32_t)>&& eventOnChange) = 0;
+    virtual void SetOnChangeEvent(std::function<void(float)>&& onChangeEvent) = 0;
 
 private:
     static std::unique_ptr<SliderModel> instance_;
+    static std::mutex mutex_;
 };
 
 } // namespace OHOS::Ace

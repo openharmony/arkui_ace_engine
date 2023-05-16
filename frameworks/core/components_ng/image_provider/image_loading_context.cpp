@@ -73,7 +73,7 @@ SizeF ImageLoadingContext::CalculateTargetSize(const SizeF& srcSize, const SizeF
 
 void ImageLoadingContext::OnUnloaded()
 {
-    LOGI("ImageLoadingContext: OnUnloaded, reset params");
+    LOGD("ImageLoadingContext: OnUnloaded, reset params");
     imageObj_ = nullptr;
     canvasImage_ = nullptr;
     srcRect_ = RectF();
@@ -86,22 +86,22 @@ void ImageLoadingContext::OnLoadSuccess()
     if (DynamicCast<StaticImageObject>(imageObj_)) {
         imageObj_->ClearData();
     }
-    if (notifiers_.loadSuccessNotifyTask_) {
-        notifiers_.loadSuccessNotifyTask_(src_);
+    if (notifiers_.onLoadSuccess_) {
+        notifiers_.onLoadSuccess_(src_);
     }
 }
 
 void ImageLoadingContext::OnLoadFail()
 {
-    if (notifiers_.loadFailNotifyTask_) {
-        notifiers_.loadFailNotifyTask_(src_);
+    if (notifiers_.onLoadFail_) {
+        notifiers_.onLoadFail_(src_);
     }
 }
 
 void ImageLoadingContext::OnDataReady()
 {
-    if (notifiers_.dataReadyNotifyTask_) {
-        notifiers_.dataReadyNotifyTask_(src_);
+    if (notifiers_.onDataReady_) {
+        notifiers_.onDataReady_(src_);
     }
 }
 
@@ -148,7 +148,7 @@ void ImageLoadingContext::OnMakeCanvasImage()
         SuccessCallback(image);
         return;
     }
-    LOGI("start MakeCanvasImage: %{public}s", imageObj_->GetSourceInfo().ToString().c_str());
+    LOGD("start MakeCanvasImage: %{public}s", imageObj_->GetSourceInfo().ToString().c_str());
     // step4: [MakeCanvasImage] according to [resizeTarget]
     canvasKey_ = ImageUtils::GenerateImageKey(src_, targetSize);
     imageObj_->MakeCanvasImage(Claim(this), targetSize, forceResize, syncLoad_);
@@ -197,6 +197,7 @@ int32_t ImageLoadingContext::RoundUp(int32_t value)
 {
     CHECK_NULL_RETURN(imageObj_, -1);
     auto res = imageObj_->GetImageSize().Width();
+    CHECK_NULL_RETURN(value > 0 && res > 0, -1);
     while (res / 2 >= value) {
         res /= 2;
     }

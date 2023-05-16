@@ -18,14 +18,16 @@
 
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/ui_node.h"
-#include "core/components_ng/pattern/image/image_model.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
-
+#include "core/components_ng/pattern/navigation/navigation_stack.h"
 namespace OHOS::Ace::NG {
 
+using namespace Framework;
 class ACE_EXPORT NavigationView {
 public:
     static void Create();
+    static void SetNavigationStack();
+    static void SetNavigationStack(RefPtr<NavigationStack>&& navigationStack);
     // title bar
     static void SetTitle(const std::string& title, bool hasSubTitle = false);
     static void SetCustomTitle(const RefPtr<UINode>& customTitle);
@@ -49,6 +51,8 @@ public:
     static void SetHideNavBar(bool hideNavBar);
     static void SetOnTitleModeChange(std::function<void(NavigationTitleMode)>&& onTitleModeChange);
     static void SetOnNavBarStateChange(std::function<void(bool)>&& onNavBarStateChange);
+    static void SetNavDestination(std::function<void(std::string)>&& builder);
+    static RefPtr<NavigationStack> GetNavigationStack();
 };
 
 } // namespace OHOS::Ace::NG

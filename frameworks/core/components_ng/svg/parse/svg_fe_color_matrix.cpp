@@ -16,8 +16,12 @@
 #include "frameworks/core/components_ng/svg/parse/svg_fe_color_matrix.h"
 
 #include "securec.h"
-#include "third_party/skia/include/effects/SkColorFilterImageFilter.h"
-
+#ifndef NEW_SKIA
+#include "include/effects/SkColorFilterImageFilter.h"
+#else
+#include "include/core/SkColorFilter.h"
+#include "third_party/skia/include/effects/SkImageFilters.h"
+#endif
 #include "base/utils/utils.h"
 #include "frameworks/core/components/declaration/svg/svg_fe_colormatrix_declaration.h"
 
@@ -71,8 +75,12 @@ void SvgFeColorMatrix::OnAsImageFilter(sk_sp<SkImageFilter>& imageFilter, const 
 #else
     auto colorFilter = SkColorFilters::Matrix(matrix_);
 #endif
-    imageFilter = SkColorFilterImageFilter::Make(colorFilter, imageFilter);
 
+#ifndef NEW_SKIA
+    imageFilter = SkColorFilterImageFilter::Make(colorFilter, imageFilter);
+#else
+    imageFilter = SkImageFilters::ColorFilter(colorFilter, imageFilter);
+#endif
     ConverImageFilterColor(imageFilter, srcColor, currentColor);
 }
 

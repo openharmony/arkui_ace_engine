@@ -36,6 +36,8 @@ const UndefinedElmtId = -1;
 
 // function type of partial update function
 type UpdateFunc = (elmtId: number, isFirstRender: boolean) => void;
+// function type of recycle node update function
+type RecycleUpdateFunc = (elmtId: number, isFirstRender: boolean, recycleNode: ViewPU) => void;
 
 // Nativeview
 // implemented in C++  for release
@@ -53,8 +55,13 @@ abstract class ViewPU extends NativeViewPartialUpdate
   private parent_: ViewPU = undefined;
   private childrenWeakrefMap_ = new Map<number, WeakRef<ViewPU>>();
 
+  // flag for initgial rendering or re-render on-going.
+  private isRenderInProgress: boolean = false;
+
   private watchedProps: Map<string, (propName: string) => void>
     = new Map<string, (propName: string) => void>();
+
+  private recycleManager: RecycleManager = undefined;
 
   // @Provide'd variables by this class and its ancestors
   protected providedVars_: ProvidedVarsMapPU;
@@ -137,6 +144,10 @@ abstract class ViewPU extends NativeViewPartialUpdate
     return this.id_;
   }
 
+  updateId(elmtId: number): void {
+    this.id_ = elmtId;
+  }
+
   // inform the subscribed property
   // that the View and thereby all properties
   // are about to be deleted
@@ -217,26 +228,36 @@ abstract class ViewPU extends NativeViewPartialUpdate
   protected abstract purgeVariableDependenciesOnElmtId(removedElmtId: number);
   protected abstract initialRender(): void;
   protected abstract rerender(): void;
+  protected abstract updateRecycleElmtId(oldElmtId: number, newElmtId: number): void;
   protected updateStateVars(params: {}) : void {
     stateMgmtConsole.warn("ViewPU.updateStateVars unimplemented. Pls upgrade to latest eDSL transpiler version.")
   }
 
   protected initialRenderView(): void {
+    this.isRenderInProgress = true;
     this.initialRender();
+    this.isRenderInProgress = false;
   }
 
   private UpdateElement(elmtId: number): void {
+    if (elmtId == this.id__()) {
+      // do not attempt to update itself.
+      // a @Prop can add a dependency of the ViewPU onto itself. Ignore it.
+      return;
+    }
     // do not process an Element that has been marked to be deleted
     const updateFunc: UpdateFunc = this.updateFuncByElmtId.get(elmtId);
     if ((updateFunc == undefined) || (typeof updateFunc !== "function")) {
       stateMgmtConsole.error(`${this.constructor.name}[${this.id__()}]: update function of ElementId ${elmtId} not found, internal error!`);
     } else {
       stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: updateDirtyElements: update function on elmtId ${elmtId} start ...`);
+      this.isRenderInProgress = true;
       updateFunc(elmtId, /* isFirstRender */ false);
       // continue in native JSView
       // Finish the Update in JSView::JsFinishUpdateFunc
       // this function appends no longer used elmtIds (as recrded by VSP) to the given allRmElmtIds array
       this.finishUpdateFunc(elmtId);
+      this.isRenderInProgress = false;
       stateMgmtConsole.debug(`View ${this.constructor.name} elmtId ${this.id__()}: ViewPU.updateDirtyElements: update function on ElementId ${elmtId} done`);
     }
   }
@@ -313,6 +334,10 @@ abstract class ViewPU extends NativeViewPartialUpdate
   // implements IMultiPropertiesChangeSubscriber
   viewPropertyHasChanged(varName: PropertyInfo, dependentElmtIds: Set<number>): void {
     stateMgmtTrace.scopedTrace(() => {
+      if (this.isRenderInProgress) {
+        stateMgmtConsole.error(`@Component '${this.constructor.name}' (id: ${this.id__()}) State variable '${varName}' has changed during render! It's illegal to change @Component state while build (initial render or re-render) is on-going. Application error!`);
+      }
+      
       stateMgmtConsole.debug(`${this.constructor.name}: viewPropertyHasChanged property '${varName}'. View needs ${dependentElmtIds.size ? 'update' : 'no update'}.`);
       this.syncInstanceId();
 
@@ -323,8 +348,9 @@ abstract class ViewPU extends NativeViewPartialUpdate
           this.markNeedUpdate();
         }
         stateMgmtConsole.debug(`${this.constructor.name}: viewPropertyHasChanged property '${varName}': elmtIds affected by value change [${Array.from(dependentElmtIds).toString()}].`)
-        const union: Set<number> = new Set<number>([...this.dirtDescendantElementIds_, ...dependentElmtIds]);
-        this.dirtDescendantElementIds_ = union;
+        for (const elmtId of dependentElmtIds) {
+          this.dirtDescendantElementIds_.add(elmtId);
+        }
         stateMgmtConsole.debug(`${this.constructor.name}: viewPropertyHasChanged property '${varName}': all elmtIds need update [${Array.from(this.dirtDescendantElementIds_).toString()}].`)
       }
 
@@ -426,6 +452,11 @@ abstract class ViewPU extends NativeViewPartialUpdate
             this.UpdateElement(elmtId);
             this.dirtDescendantElementIds_.delete(elmtId);
         });
+
+        if (this.dirtDescendantElementIds_.size) {
+          stateMgmtConsole.error(`@Component '${this.constructor.name}' (id: ${this.id__()}): New UINode objects added to update queue while re-render! \
+            Likely caused by @Component state change during build phase, not allowed. Application error!`);
+        }
     } while(this.dirtDescendantElementIds_.size);
   }
 
@@ -465,6 +496,72 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
     this.updateFuncByElmtId.set(elmtId, compilerAssignedUpdateFunc);
     stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: First render for elmtId ${elmtId} - DONE.`);
+  }
+
+  getOrCreateRecycleManager(): RecycleManager {
+    if (!this.recycleManager) {
+      this.recycleManager = new RecycleManager
+    }
+    return this.recycleManager;
+  }
+
+  getRecycleManager(): RecycleManager {
+    return this.recycleManager;
+  }
+
+  hasRecycleManager(): boolean {
+    return !(this.recycleManager === undefined);
+  }
+
+  initRecycleManager(): void {
+    if (this.recycleManager) {
+      stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: init recycleManager multiple times`);
+      return;
+    }
+    this.recycleManager = new RecycleManager;
+  }
+
+  /**
+   * @function observeRecycleComponentCreation
+   * @description custom node recycle creation
+   * @param name custom node name
+   * @param recycleUpdateFunc custom node recycle update which can be converted to a normal update function
+   * @return void
+   */
+  public observeRecycleComponentCreation(name: string, recycleUpdateFunc: RecycleUpdateFunc): void {
+    // convert recycle update func to update func
+    const compilerAssignedUpdateFunc: UpdateFunc = (element, isFirstRender) => {
+      recycleUpdateFunc(element, isFirstRender, undefined)
+    };
+    let node: ViewPU;
+    // if there is no suitable recycle node, run a normal creation function.
+    if (!this.hasRecycleManager() || !(node = this.getRecycleManager().popRecycleNode(name))) {
+      stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: cannot init node by recycle, crate new node`);
+      this.observeComponentCreation(compilerAssignedUpdateFunc);
+      return;
+    }
+
+    // if there is a suitable recycle node, run a recycle update function.
+    const newElmtId: number = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
+    const oldElmtId: number = node.id__();
+    // store the current id and origin id, used for dirty element sort in {compareNumber}
+    // this.getRecycleManager().setRecycleNodeCurrentElmtId(elmtId, currentElmtId);
+    recycleUpdateFunc(newElmtId, /* is first render */ true, node);
+    this.updateFuncByElmtId.delete(oldElmtId);
+    this.updateFuncByElmtId.set(newElmtId, compilerAssignedUpdateFunc);
+    node.updateId(newElmtId);
+    node.updateRecycleElmtId(oldElmtId, newElmtId);
+    SubscriberManager.UpdateRecycleElmtId(oldElmtId, newElmtId);
+  }
+
+  // add current JS object to it's parent recycle manager
+  public recycleSelf(name: string): void {
+    if (this.parent_) {
+      this.parent_.getOrCreateRecycleManager().pushRecycleNode(name, this);
+    } else {
+      this.resetRecycleCustomNode();
+      stateMgmtConsole.error(`${this.constructor.name}[${this.id__()}]: recycleNode must have a parent`);
+    }
   }
 
   // performs the update on a branch within if() { branch } else if (..) { branch } else { branch }

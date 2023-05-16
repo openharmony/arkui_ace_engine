@@ -32,6 +32,10 @@
 #include "core/components_ng/render/animation_utils.h"
 #include "core/image/image_provider.h"
 
+#ifdef PLUGIN_COMPONENT_SUPPORTED
+#include "core/common/plugin_manager.h"
+#endif
+
 namespace OHOS::Ace {
 
 constexpr int32_t DEFAULT_VIEW_SCALE = 1;
@@ -97,6 +101,20 @@ RefPtr<PipelineBase> PipelineBase::GetCurrentContext()
     return currentContainer->GetPipelineContext();
 }
 
+RefPtr<ThemeManager> PipelineBase::CurrentThemeManager()
+{
+    auto pipelineContext = OHOS::Ace::PipelineBase::GetCurrentContext();
+#ifdef PLUGIN_COMPONENT_SUPPORTED
+    if (Container::CurrentId() >= MIN_PLUGIN_SUBCONTAINER_ID) {
+        auto pluginContainer = PluginManager::GetInstance().GetPluginSubContainer(Container::CurrentId());
+        CHECK_NULL_RETURN(pluginContainer, nullptr);
+        pipelineContext = pluginContainer->GetPipelineContext();
+    }
+#endif
+    CHECK_NULL_RETURN(pipelineContext, nullptr);
+    return pipelineContext->GetThemeManager();
+}
+
 uint64_t PipelineBase::GetTimeFromExternalTimer()
 {
     static const int64_t secToNanosec = 1000000000;
@@ -124,7 +142,7 @@ void PipelineBase::ClearImageCache()
 
 void PipelineBase::SetImageCache(const RefPtr<ImageCache>& imageChache)
 {
-    std::lock_guard<std::shared_mutex> lock(imageCacheMutex_);
+    std::lock_guard<std::shared_mutex> lock(imageMtx_);
     if (imageChache) {
         imageCache_ = imageChache;
     }
@@ -132,7 +150,7 @@ void PipelineBase::SetImageCache(const RefPtr<ImageCache>& imageChache)
 
 RefPtr<ImageCache> PipelineBase::GetImageCache() const
 {
-    std::shared_lock<std::shared_mutex> lock(imageCacheMutex_);
+    std::shared_lock<std::shared_mutex> lock(imageMtx_);
     return imageCache_;
 }
 
@@ -586,7 +604,7 @@ RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const
 void PipelineBase::SendEventToAccessibility(const AccessibilityEvent& accessibilityEvent)
 {
     auto accessibilityManager = GetAccessibilityManager();
-    if (!accessibilityManager) {
+    if (!accessibilityManager || !AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
         return;
     }
     accessibilityManager->SendAccessibilityAsyncEvent(accessibilityEvent);
@@ -652,11 +670,14 @@ void PipelineBase::Destroy()
     drawDelegate_.reset();
     eventManager_->ClearResults();
     {
-        std::unique_lock<std::shared_mutex> lock(imageCacheMutex_);
+        std::unique_lock<std::shared_mutex> lock(imageMtx_);
         imageCache_.Reset();
     }
+    {
+        std::unique_lock<std::shared_mutex> lock(themeMtx_);
+        themeManager_.Reset();
+    }
     fontManager_.Reset();
-    themeManager_.Reset();
     window_->Destroy();
     touchPluginPipelineContext_.clear();
     virtualKeyBoardCallback_.clear();

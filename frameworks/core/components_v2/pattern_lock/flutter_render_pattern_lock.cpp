@@ -16,7 +16,7 @@
 #include "core/components_v2/pattern_lock/flutter_render_pattern_lock.h"
 
 #include "flutter/lib/ui/painting/path.h"
-#include "third_party/skia/include/effects/SkGradientShader.h"
+#include "include/effects/SkGradientShader.h"
 
 #include "core/components/common/properties/alignment.h"
 #include "core/pipeline/base/flutter_render_context.h"

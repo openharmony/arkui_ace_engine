@@ -53,7 +53,7 @@ void JSLinearGradient::Constructor(const JSCallbackInfo& args)
             return;
         }
         JSRef<JSVal> jsOffset = itemObject->GetProperty("offset");
-        Dimension offset;
+        CalcDimension offset;
         if (!JSViewAbstract::ParseJsDimensionVp(jsOffset, offset)) {
             return;
         }

@@ -466,6 +466,11 @@ void SearchModelNG::SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOptio
     textFieldPattern->SetMenuOptionItems(std::move(menuOptionsItems));
 }
 
+void SearchModelNG::SetHeight(const Dimension& height)
+{
+    NG::ViewAbstract::SetHeight(NG::CalcLength(height));
+}
+
 void SearchModelNG::SetOnSubmit(std::function<void(const std::string&)>&& onSubmit)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -539,7 +544,6 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode,
     auto textFieldPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
     textFieldPaintProperty->UpdateCursorColor(textFieldTheme->GetCursorColor());
     textFieldPaintProperty->UpdateCursorWidth(textFieldTheme->GetCursorWidth());
-
     PaddingProperty padding;
     padding.left = CalcLength(0.0);
     padding.right = CalcLength(0.0);
@@ -723,4 +727,12 @@ RefPtr<SearchNode> SearchModelNG::GetOrCreateSearchNode(
     return searchNode;
 }
 
+void SearchModelNG::SetOnChangeEvent(std::function<void(const std::string&)>&& onChangeEvent)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<SearchEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnChangeEvent(std::move(onChangeEvent));
+}
 } // namespace OHOS::Ace::NG

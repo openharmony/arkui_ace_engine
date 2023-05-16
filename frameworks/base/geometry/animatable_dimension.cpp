@@ -15,6 +15,7 @@
 
 #include "base/geometry/animatable_dimension.h"
 
+#include "core/animation/animator.h"
 #include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
@@ -78,7 +79,7 @@ void AnimatableDimension::AnimateTo(double endValue)
     }
     ResetController();
     if (!animationController_) {
-        animationController_ = AceType::MakeRefPtr<Animator>(context_);
+        animationController_ = CREATE_ANIMATOR(context_);
     }
     RefPtr<CurveAnimation<double>> animation =
         AceType::MakeRefPtr<CurveAnimation<double>>(Value(), endValue, animationOption_.GetCurve());

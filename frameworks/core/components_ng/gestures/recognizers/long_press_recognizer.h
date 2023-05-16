@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,10 +16,14 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_GESTURES_RECOGNIZERS_LONG_PRESS_RECOGNIZER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_GESTURES_RECOGNIZERS_LONG_PRESS_RECOGNIZER_H
 
+#include <functional>
+
 #include "base/thread/cancelable_callback.h"
+#include "core/accessibility/accessibility_utils.h"
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
 
 namespace OHOS::Ace::NG {
+using OnAccessibilityEventFunc = std::function<void(AccessibilityEventType)>;
 
 class GestureEventHub;
 class LongPressInfo : public TouchLocationInfo {
@@ -72,6 +76,23 @@ public:
         gestureHub_ = gestureHub;
     }
 
+    void SetThumbnailCallback(std::function<void(Offset)>&& callback)
+    {
+        callback_ = std::move(callback);
+    }
+
+    bool HasThumbnailCallback()
+    {
+        return static_cast<bool>(callback_);
+    }
+
+    void SetOnAccessibility(OnAccessibilityEventFunc onAccessibilityEvent)
+    {
+        onAccessibilityEventFunc_ = std::move(onAccessibilityEvent);
+    }
+
+    GestureEventFunc GetLongPressActionFunc();
+
 private:
     void HandleTouchDownEvent(const TouchEvent& event) override;
     void HandleTouchUpEvent(const TouchEvent& event) override;
@@ -86,7 +107,6 @@ private:
     void OnResetStatus() override;
     double ConvertPxToVp(double offset) const;
     void ThumbnailTimer(int32_t time);
-    void SetThumbnailPixelMap();
 
     WeakPtr<GestureEventHub> gestureHub_;
     CancelableCallback<void()> thumbnailTimer_;
@@ -94,6 +114,7 @@ private:
     OnLongPress onLongPress_;
     CancelableCallback<void()> deadlineTimer_;
     CancelableCallback<void()> timer_;
+    std::function<void(Offset)> callback_;
     int32_t duration_ = 500;
     bool repeat_ = false;
     TimeStamp time_;
@@ -101,6 +122,7 @@ private:
     bool isForDrag_ = false;
     bool isDisableMouseLeft_ = false;
     Point globalPoint_;
+    OnAccessibilityEventFunc onAccessibilityEventFunc_ = nullptr;
 };
 
 } // namespace OHOS::Ace::NG

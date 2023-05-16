@@ -23,19 +23,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<ColumnModel> ColumnModel::instance_ = nullptr;
+std::mutex ColumnModel::mutex_;
 
 ColumnModel* ColumnModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::ColumnModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::ColumnModelNG());
-        } else {
-            instance_.reset(new Framework::ColumnModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::ColumnModelNG());
+            } else {
+                instance_.reset(new Framework::ColumnModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -47,11 +51,11 @@ std::string JSColumn::inspectorTag_ = "";
 
 void JSColumn::Create(const JSCallbackInfo& info)
 {
-    std::optional<Dimension> space;
+    std::optional<CalcDimension> space;
     if (info.Length() > 0 && info[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
         JSRef<JSVal> spaceVal = obj->GetProperty("space");
-        Dimension value;
+        CalcDimension value;
         if (ParseJsDimensionVp(spaceVal, value)) {
             space = value.IsValid() ? value : Dimension();
         }

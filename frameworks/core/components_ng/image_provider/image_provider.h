@@ -20,9 +20,7 @@
 #include <set>
 #include <unordered_map>
 
-#include "base/geometry/ng/rect_t.h"
 #include "base/thread/cancelable_callback.h"
-#include "base/utils/noncopyable.h"
 #include "core/components_ng/image_provider/image_data.h"
 #include "core/components_ng/image_provider/image_state_manager.h"
 #include "core/components_ng/render/canvas_image.h"
@@ -37,35 +35,38 @@ using LoadFailNotifyTask = std::function<void(const ImageSourceInfo& src)>;
 struct LoadNotifier {
     LoadNotifier(DataReadyNotifyTask&& dataReadyNotifyTask, LoadSuccessNotifyTask&& loadSuccessNotifyTask,
         LoadFailNotifyTask&& loadFailNotifyTask)
-        : dataReadyNotifyTask_(std::move(dataReadyNotifyTask)),
-          loadSuccessNotifyTask_(std::move(loadSuccessNotifyTask)), loadFailNotifyTask_(std::move(loadFailNotifyTask))
+        : onDataReady_(std::move(dataReadyNotifyTask)),
+          onLoadSuccess_(std::move(loadSuccessNotifyTask)), onLoadFail_(std::move(loadFailNotifyTask))
     {}
 
-    DataReadyNotifyTask dataReadyNotifyTask_;
-    LoadSuccessNotifyTask loadSuccessNotifyTask_;
-    LoadFailNotifyTask loadFailNotifyTask_;
+    DataReadyNotifyTask onDataReady_;
+    LoadSuccessNotifyTask onLoadSuccess_;
+    LoadFailNotifyTask onLoadFail_;
 };
 
 class ImageObject;
 
-struct RenderTaskHolder : public virtual AceType {
-    DECLARE_ACE_TYPE(RenderTaskHolder, AceType);
-
-public:
-    RenderTaskHolder() = default;
-    ~RenderTaskHolder() override = default;
-
-    ACE_DISALLOW_COPY_AND_MOVE(RenderTaskHolder);
-};
-
-// load & paint images on background threads
-// cache loaded/painted image data in memory
+// load & decode images
 class ImageProvider : public virtual AceType {
     DECLARE_ACE_TYPE(ImageProvider, AceType);
 
 public:
+    /** Fetch image data and create ImageObject from ImageSourceInfo.
+     *
+     *    @param src                  image source info
+     *    @param ctxWp                ImageLoadingContext that initiates the task, to be stored in the map
+     *    @param sync                 if true, run task synchronously
+     */
     static void CreateImageObject(const ImageSourceInfo& src, const WeakPtr<ImageLoadingContext>& ctxWp, bool sync);
 
+    /** Decode image data and make CanvasImage from ImageObject.
+     *
+     *    @param imageObjWp           weakPtr of imageObj, contains image data
+     *    @param targetSize           target size of canvasImage
+     *    @param forceResize          force resize image to target size
+     *    @param sync                 if true, run task synchronously
+     *    @return                     true if MakeCanvasImage was successful
+     */
     static void MakeCanvasImage(const WeakPtr<ImageObject>& objWp, const WeakPtr<ImageLoadingContext>& ctxWp,
         const SizeF& targetSize, bool forceResize = false, bool sync = false);
 
@@ -94,7 +95,7 @@ private:
     // mark a task as finished, erase from map and retrieve corresponding ctxs
     static std::set<WeakPtr<ImageLoadingContext>> EndTask(const std::string& key);
 
-    /** Check if data is present in imageObj, if not, load image data.
+    /** Check if data is present in imageObj, if not, reload image data.
      *
      *    @param imageObj         contains image source and image data
      *    @return                 true if image data is prepared
@@ -109,18 +110,9 @@ private:
     // helper function to create image object from ImageSourceInfo
     static void CreateImageObjHelper(const ImageSourceInfo& src, bool sync = false);
 
-    /** Helper function to create canvasImage and upload it to GPU for rendering.
-     *
-     *    @param imageObjWp           weakPtr of imageObj, contains image data
-     *    @param renderTaskHolder     passed in to create SkiaGPUObject
-     *    @return                     true if MakeCanvasImage was successful
-     */
+    // return true if MakeCanvasImage was successful.
     static bool MakeCanvasImageHelper(
         const WeakPtr<ImageObject>& imageObjWp, const SizeF& targetSize, bool forceResize, bool sync = false);
-
-    // upload image texture to GPU and compress
-    static bool TryCompress(const RefPtr<CanvasImage>& canvasImage, const std::string& key, const SizeF& resizeTarget,
-        const RefPtr<ImageData>& data, bool syncLoad);
 
     // helper functions to end task and callback to LoadingContexts
     static void SuccessCallback(const RefPtr<CanvasImage>& canvasImage, const std::string& key, bool sync = false);

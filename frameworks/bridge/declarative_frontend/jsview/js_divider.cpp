@@ -22,19 +22,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<DividerModel> DividerModel::instance_ = nullptr;
+std::mutex DividerModel::mutex_;
 
 DividerModel* DividerModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::DividerModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::DividerModelNG());
-        } else {
-            instance_.reset(new Framework::DividerModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::DividerModelNG());
+            } else {
+                instance_.reset(new Framework::DividerModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -91,7 +95,7 @@ void JSDivider::SetStrokeWidth(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Dimension strokeWidth;
+    CalcDimension strokeWidth;
     if (!ParseJsDimensionVp(info[0], strokeWidth)) {
         return;
     }

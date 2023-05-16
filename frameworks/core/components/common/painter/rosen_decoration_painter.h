@@ -28,7 +28,7 @@
 #include "core/components/common/properties/edge.h"
 #include "core/components/image/render_image.h"
 #include "core/components_ng/render/adapter/skia_decoration_painter.h"
-#include "third_party/skia/include/core/SkRefCnt.h"
+#include "include/core/SkRefCnt.h"
 
 class SkPath;
 class SkPaint;

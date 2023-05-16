@@ -289,8 +289,7 @@ void FrontendDelegateDeclarativeNG::GetSnapshot(
     const std::string& componentId, NG::ComponentSnapshot::JsCallback&& callback)
 {
 #ifdef ENABLE_ROSEN_BACKEND
-    NG::ComponentSnapshot snapshot(componentId);
-    snapshot.Get(std::move(callback));
+    NG::ComponentSnapshot::Get(componentId, std::move(callback));
 #endif
 }
 

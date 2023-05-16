@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,51 +15,61 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_blank.h"
 
-#include "core/components/box/box_component.h"
-#include "core/components_ng/pattern/blank/blank_view.h"
+#include "core/components_ng/pattern/blank/blank_model_ng.h"
+#include "frameworks/bridge/declarative_frontend/jsview/models/blank_model_impl.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+
+namespace OHOS::Ace {
+std::unique_ptr<BlankModel> BlankModel::instance_ = nullptr;
+std::mutex BlankModel::mutex_;
+
+BlankModel* BlankModel::GetInstance()
+{
+    if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
+#ifdef NG_BUILD
+            instance_.reset(new NG::BlankModelNG());
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::BlankModelNG());
+            } else {
+                instance_.reset(new Framework::BlankModelImpl());
+            }
+#endif
+        }
+    }
+    return instance_.get();
+}
+} // namespace OHOS::Ace
+
 namespace OHOS::Ace::Framework {
 void JSBlank::Create(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        Dimension blankMin;
-        NG::BlankView::Create();
-        if (info.Length() >= 1 && ParseJsDimensionVp(info[0], blankMin)) {
-            NG::BlankView::SetBlankMin(blankMin.IsValid() ? blankMin : Dimension());
-        }
+    CalcDimension blankMin;
+    BlankModel::GetInstance()->Create();
+    if (info.Length() < 1) {
+        LOGD("Blank min needs at least 1 param");
         return;
     }
-    auto specializedBox = AceType::MakeRefPtr<OHOS::Ace::BoxComponent>();
-    // specialized component should be firstly pushed.
-    ViewStackProcessor::GetInstance()->ClaimElementId(specializedBox);
-    ViewStackProcessor::GetInstance()->Push(specializedBox);
-    // Blank fill the remain space.
-    auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
-    flexItem->SetFlexGrow(1);
-    flexItem->SetFlexShrink(0);
-    flexItem->SetMustStretch(true);
-
-    Dimension flexBasis;
-    if (info.Length() >= 1 && ParseJsDimensionVp(info[0], flexBasis)) {
-        flexItem->SetFlexBasis(flexBasis.IsValid() ? flexBasis : Dimension());
+    if (info[0]->IsUndefined()) {
+        BlankModel::GetInstance()->SetBlankMin(blankMin);
+        return;
+    }
+    if (ParseJsDimensionVp(info[0], blankMin)) {
+        BlankModel::GetInstance()->SetBlankMin(blankMin);
     }
 }
 
 void JSBlank::Height(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsHeight(info);
-    Dimension value;
+    CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::BlankView::SetHeight(value);
-        return;
-    }
-    auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
-    if (value > flexItem->GetFlexBasis()) {
-        flexItem->SetFlexBasis(value);
-    }
+
+    BlankModel::GetInstance()->SetHeight(value);
 }
 
 void JSBlank::JSBind(BindingTarget globalObj)

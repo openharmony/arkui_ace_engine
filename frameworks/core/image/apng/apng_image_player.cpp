@@ -20,8 +20,8 @@
 #include "base/log/log.h"
 #include "core/components/image/flutter_render_image.h"
 #include "core/image/image_provider.h"
-#include "third_party/skia/include/codec/SkCodecAnimation.h"
-#include "third_party/skia/include/core/SkPixelRef.h"
+#include "include/codec/SkCodecAnimation.h"
+#include "include/core/SkPixelRef.h"
 
 namespace OHOS::Ace {
 APngImagePlayer::APngImagePlayer(

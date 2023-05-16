@@ -23,5 +23,8 @@ build_component("refresh") {
     "render_refresh_creator.cpp",
     "render_refresh_target.cpp",
   ]
+  if (ace_use_new_skia) {
+    sources -= [ "flutter_render_refresh.cpp" ]
+  }
   rosen_sources = [ "rosen_render_refresh.cpp" ]
 }

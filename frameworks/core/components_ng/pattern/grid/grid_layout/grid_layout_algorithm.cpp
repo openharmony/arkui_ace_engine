@@ -64,7 +64,7 @@ LayoutConstraintF GridLayoutAlgorithm::CreateChildConstraint(const SizeF& idealS
 
     layoutConstraint.maxSize = SizeF(colLen, rowLen);
     layoutConstraint.percentReference = SizeF(colLen, rowLen);
-    if (!childLayoutProperty->GetCalcLayoutConstraint()) {
+    if (!childLayoutProperty || !childLayoutProperty->GetCalcLayoutConstraint()) {
         layoutConstraint.selfIdealSize.UpdateIllegalSizeWithCheck(layoutConstraint.maxSize);
     }
     return layoutConstraint;
@@ -197,9 +197,11 @@ OffsetF GridLayoutAlgorithm::ComputeItemPosition(LayoutWrapper* layoutWrapper, i
     }
     colLen += (colSpan - 1) * columnsGap_;
 
-    auto layoutConstraint = childLayoutProperty->GetLayoutConstraint();
-    if (layoutConstraint.has_value()) {
-        OffsetByAlign(layoutConstraint.value(), rowLen, colLen, positionX, positionY);
+    if (childLayoutProperty) {
+        auto layoutConstraint = childLayoutProperty->GetLayoutConstraint();
+        if (layoutConstraint.has_value()) {
+            OffsetByAlign(layoutConstraint.value(), rowLen, colLen, positionX, positionY);
+        }
     }
 
     // If RTL, place the item from right.
@@ -285,7 +287,7 @@ void GridLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
     auto padding = layoutProperty->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, frameSize);
-
+    layoutWrapper->RemoveAllChildInRenderTree();
     for (int32_t index = 0; index < mainCount_ * crossCount_; ++index) {
         auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
         if (!childWrapper) {
@@ -295,11 +297,8 @@ void GridLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         auto childPosition = itemsPosition_.find(index);
         if (childPosition != itemsPosition_.end()) {
             childOffset = itemsPosition_.at(index);
-            // TODO: add center position when grid item is less than ceil.
             childWrapper->GetGeometryNode()->SetMarginFrameOffset(padding.Offset() + childOffset);
             childWrapper->Layout();
-        } else {
-            LayoutWrapper::RemoveChildInRenderTree(childWrapper);
         }
     }
 

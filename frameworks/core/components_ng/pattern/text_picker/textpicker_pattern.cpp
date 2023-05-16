@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/text_picker/textpicker_pattern.h"
 
 #include <cstdint>
+#include <securec.h>
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
@@ -88,6 +89,14 @@ void TextPickerPattern::OnModifyDone()
     OnColumnsBuilding();
     FlushOptions();
     CalculateHeight();
+    if (cascadeOptions_.size() > 0) {
+        SetChangeCallback([weak = WeakClaim(this)](const RefPtr<FrameNode>& tag,
+            bool add, uint32_t index, bool notify) {
+            auto refPtr = weak.Upgrade();
+            CHECK_NULL_VOID_NOLOG(refPtr);
+            refPtr->HandleColumnChange(tag, add, index, notify);
+        });
+    }
     SetEventCallback([weak = WeakClaim(this)](bool refresh) {
         auto refPtr = weak.Upgrade();
         CHECK_NULL_VOID_NOLOG(refPtr);
@@ -119,17 +128,23 @@ void TextPickerPattern::SetEventCallback(EventCallback&& value)
 
 void TextPickerPattern::FireChangeEvent(bool refresh)
 {
-    auto columnNode = GetColumnNode();
-    CHECK_NULL_VOID(columnNode);
-    auto textPickerColumnPattern = columnNode->GetPattern<TextPickerColumnPattern>();
-    if (refresh) {
-        auto textPickerEventHub = GetEventHub<TextPickerEventHub>();
-        CHECK_NULL_VOID(textPickerEventHub);
-        auto currentIndex = textPickerColumnPattern->GetCurrentIndex();
-        auto currentValue = textPickerColumnPattern->GetOption(currentIndex);
-        textPickerEventHub->FireChangeEvent(currentValue, currentIndex);
-        textPickerEventHub->FireDialogChangeEvent(GetSelectedObject(true, 1));
+    auto frameNodes = GetColumnNodes();
+    std::vector<std::string> value;
+    std::vector<double> index;
+    for (auto it : frameNodes) {
+        CHECK_NULL_VOID(it.second);
+        auto textPickerColumnPattern = it.second->GetPattern<TextPickerColumnPattern>();
+        if (refresh) {
+            auto currentIndex = textPickerColumnPattern->GetCurrentIndex();
+            index.emplace_back(currentIndex);
+            auto currentValue = textPickerColumnPattern->GetOption(currentIndex);
+            value.emplace_back(currentValue);
+        }
     }
+    auto textPickerEventHub = GetEventHub<TextPickerEventHub>();
+    CHECK_NULL_VOID(textPickerEventHub);
+    textPickerEventHub->FireChangeEvent(value, index);
+    textPickerEventHub->FireDialogChangeEvent(GetSelectedObject(true, 1));
 }
 
 void TextPickerPattern::InitDisabled()
@@ -154,31 +169,125 @@ RefPtr<FrameNode> TextPickerPattern::GetColumnNode()
     return DynamicCast<FrameNode>(column);
 }
 
+std::map<uint32_t, RefPtr<FrameNode>> TextPickerPattern::GetColumnNodes()
+{
+    std::map<uint32_t, RefPtr<FrameNode>> allChildNode;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, allChildNode);
+    auto children = host->GetChildren();
+    uint32_t index = 0;
+    for (auto iter = children.begin(); iter != children.end(); iter++) {
+        CHECK_NULL_RETURN(*iter, allChildNode);
+        auto stackNode = DynamicCast<FrameNode>(*iter);
+        auto currentNode = DynamicCast<FrameNode>(stackNode->GetLastChild());
+        allChildNode[index] = currentNode;
+        index++;
+    }
+    return allChildNode;
+}
+
+void TextPickerPattern::OnColumnsBuildingCascade()
+{
+    auto frameNodes = GetColumnNodes();
+    auto count = frameNodes.size();
+    for (size_t index = 0; index < count; index++) {
+        CHECK_NULL_VOID(frameNodes[index]);
+        auto textPickerColumnPattern = frameNodes[index]->GetPattern<TextPickerColumnPattern>();
+        CHECK_NULL_VOID(textPickerColumnPattern);
+        if (cascadeOptions_.size() > 0) {
+            selectedIndex_ = cascadeOptions_[index].rangeResult.empty() ? 0 :
+                selecteds_[index] % cascadeOptions_[index].rangeResult.size();
+            textPickerColumnPattern->SetCurrentIndex(selectedIndex_);
+            std::vector<NG::RangeContent> rangeContents;
+            for (uint32_t i = 0; i < cascadeOptions_[index].rangeResult.size(); i++) {
+                NG::RangeContent rangeContent;
+                rangeContent.text_ = cascadeOptions_[index].rangeResult[i];
+                rangeContents.emplace_back(rangeContent);
+            }
+            textPickerColumnPattern->SetOptions(rangeContents);
+            textPickerColumnPattern->SetColumnKind(NG::TEXT);
+            optionsWithNode_[frameNodes[index]] = rangeContents;
+            frameNodes[index]->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    }
+}
+
+void TextPickerPattern::OnColumnsBuildingUnCascade()
+{
+    auto frameNodes = GetColumnNodes();
+    for (auto it : frameNodes) {
+        CHECK_NULL_VOID(it.second);
+        auto textPickerColumnPattern = it.second->GetPattern<TextPickerColumnPattern>();
+        CHECK_NULL_VOID(textPickerColumnPattern);
+        if (cascadeOptions_.size() > 0) {
+            selectedIndex_ = cascadeOptions_[it.first].rangeResult.empty() ? 0 :
+                selecteds_[it.first] % cascadeOptions_[it.first].rangeResult.size();
+            textPickerColumnPattern->SetCurrentIndex(selectedIndex_);
+            std::vector<NG::RangeContent> rangeContents;
+            for (uint32_t i = 0; i < cascadeOptions_[it.first].rangeResult.size(); i++) {
+                NG::RangeContent rangeContent;
+                rangeContent.text_ = cascadeOptions_[it.first].rangeResult[i];
+                rangeContents.emplace_back(rangeContent);
+            }
+            textPickerColumnPattern->SetOptions(rangeContents);
+            textPickerColumnPattern->SetColumnKind(NG::TEXT);
+            optionsWithNode_[it.second] = rangeContents;
+            it.second->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        } else {
+            ClearOption();
+            for (const auto& item : range_) {
+                AppendOption(item);
+            }
+            selectedIndex_ = range_.empty() ? 0 : GetSelected() % range_.size();
+            textPickerColumnPattern->SetCurrentIndex(selectedIndex_);
+            textPickerColumnPattern->SetOptions(options_);
+            textPickerColumnPattern->SetColumnKind(columnsKind_);
+            it.second->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    }
+}
+
 void TextPickerPattern::OnColumnsBuilding()
 {
-    auto frameNode = GetColumnNode();
-    CHECK_NULL_VOID(frameNode);
-    auto textPickerColumnPattern = frameNode->GetPattern<TextPickerColumnPattern>();
-    CHECK_NULL_VOID(textPickerColumnPattern);
-    ClearOption();
-    for (const auto& item : range_) {
-        AppendOption(item);
+    if (!isCascade_) {
+        OnColumnsBuildingUnCascade();
+    } else {
+        OnColumnsBuildingCascade();
     }
-    selectedIndex_ = range_.empty() ? 0 : GetSelected() % range_.size();
-    textPickerColumnPattern->SetCurrentIndex(selectedIndex_);
-    textPickerColumnPattern->SetOptions(options_);
-    textPickerColumnPattern->SetColumnKind(columnsKind_);
-    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void TextPickerPattern::SetSelecteds(const std::vector<uint32_t>& values)
+{
+    selecteds_.clear();
+    for (auto& value : values) {
+        selecteds_.emplace_back(value);
+    }
+    if (isCascade_) {
+        auto columnCount = cascadeOptions_.size();
+        cascadeOptions_.clear();
+        ProcessCascadeOptions(cascadeOriginptions_, cascadeOptions_, 0);
+        if (cascadeOptions_.size() < columnCount) {
+            auto differ = columnCount - cascadeOptions_.size();
+            for (uint32_t i = 0; i < differ; i++) {
+                NG::TextCascadePickerOptions differOption;
+                memset_s(&differOption, sizeof(differOption), 0, sizeof(differOption));
+                cascadeOptions_.emplace_back(differOption);
+            }
+        }
+    }
 }
 
 void TextPickerPattern::FlushOptions()
 {
-    auto frameNode = GetColumnNode();
-    CHECK_NULL_VOID(frameNode);
-    auto columnPattern = frameNode->GetPattern<TextPickerColumnPattern>();
-    columnPattern->FlushCurrentOptions();
-    frameNode->MarkModifyDone();
-    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    auto frameNodes = GetColumnNodes();
+    for (auto it : frameNodes) {
+        CHECK_NULL_VOID(it.second);
+        auto columnPattern = it.second->GetPattern<TextPickerColumnPattern>();
+        CHECK_NULL_VOID(columnPattern);
+        columnPattern->FlushCurrentOptions();
+        it.second->MarkModifyDone();
+        it.second->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
 }
 
 double TextPickerPattern::CalculateHeight()
@@ -211,11 +320,13 @@ double TextPickerPattern::CalculateHeight()
         PaintFocusState();
         SetButtonIdeaSize();
     }
-    auto frameNode = GetColumnNode();
-    CHECK_NULL_RETURN(frameNode, height);
-    auto textPickerColumnPattern = frameNode->GetPattern<TextPickerColumnPattern>();
-    CHECK_NULL_RETURN(textPickerColumnPattern, height);
-    textPickerColumnPattern->SetDefaultPickerItemHeight(height);
+    auto frameNodes = GetColumnNodes();
+    for (auto it : frameNodes) {
+        CHECK_NULL_RETURN(it.second, height);
+        auto textPickerColumnPattern = it.second->GetPattern<TextPickerColumnPattern>();
+        CHECK_NULL_RETURN(textPickerColumnPattern, height);
+        textPickerColumnPattern->SetDefaultPickerItemHeight(height);
+    }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     return height;
 }
@@ -297,6 +408,167 @@ bool TextPickerPattern::OnKeyEvent(const KeyEvent& event)
     return false;
 }
 
+void TextPickerPattern::SetChangeCallback(ColumnChangeCallback&& value)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto children = host->GetChildren();
+    for (const auto& child : children) {
+        auto stackNode = DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(stackNode);
+        auto childNode = DynamicCast<FrameNode>(stackNode->GetLastChild());
+        CHECK_NULL_VOID(childNode);
+        auto textPickerColumnPattern = childNode->GetPattern<TextPickerColumnPattern>();
+        CHECK_NULL_VOID(textPickerColumnPattern);
+        textPickerColumnPattern->SetChangeCallback(std::move(value));
+    }
+}
+
+size_t TextPickerPattern::ProcessCascadeOptionDepth(const NG::TextCascadePickerOptions& option)
+{
+    size_t depth = 1;
+    if (option.children.empty()) {
+        return depth;
+    }
+
+    for (auto& pos : option.children) {
+        size_t tmpDep = 1;
+        tmpDep += ProcessCascadeOptionDepth(pos);
+        if (tmpDep > depth) {
+            depth = tmpDep;
+        }
+    }
+    return depth;
+}
+
+bool TextPickerPattern::ChangeCurrentOptionValue(NG::TextCascadePickerOptions& option,
+    uint32_t value, uint32_t curColumn, uint32_t replaceColumn)
+{
+    if (curColumn >= replaceColumn) {
+        selecteds_[curColumn] = value;
+        values_[curColumn] = "";
+    }
+
+    for (uint32_t valueIndex = 0; valueIndex < option.children.size(); valueIndex++) {
+        if (curColumn >= replaceColumn) {
+            if (ChangeCurrentOptionValue(option.children[valueIndex], 0, curColumn + 1, replaceColumn)) {
+                return true;
+            }
+        } else {
+            if (ChangeCurrentOptionValue(option.children[valueIndex], value, curColumn + 1, replaceColumn)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+void TextPickerPattern::ProcessCascadeOptionsValues(const std::vector<std::string>& rangeResultValue,
+    uint32_t index)
+{
+    auto valueIterator = std::find(rangeResultValue.begin(), rangeResultValue.end(), values_[index]);
+    if (valueIterator != rangeResultValue.end()) {
+        if (index < selecteds_.size()) {
+            selecteds_[index] = std::distance(rangeResultValue.begin(), valueIterator);
+        } else {
+            selecteds_.emplace_back(std::distance(rangeResultValue.begin(), valueIterator));
+        }
+    } else {
+        if (index < selecteds_.size()) {
+            selecteds_[index] = 0;
+        } else {
+            selecteds_.emplace_back(0);
+        }
+    }
+}
+
+void TextPickerPattern::ProcessCascadeOptions(const std::vector<NG::TextCascadePickerOptions>& options,
+    std::vector<NG::TextCascadePickerOptions>& reOptions, uint32_t index)
+{
+    std::vector<std::string> rangeResultValue;
+    NG::TextCascadePickerOptions option;
+    for (size_t i = 0; i < options.size(); i++) {
+        if (!options[i].rangeResult.empty()) {
+            rangeResultValue.emplace_back(options[i].rangeResult[0]);
+        }
+    }
+    option.rangeResult = rangeResultValue;
+    for (size_t i = 0; i < options.size(); i++) {
+        if (index < selecteds_.size() &&
+            ((selecteds_[index] != 0 && !isHasSelectAttr_) || isHasSelectAttr_)) {
+            if (selecteds_[index] < 0 && selecteds_[index] > options.size()) {
+                selecteds_[index] = 0;
+            }
+            option.children = options[selecteds_[index]].children;
+            reOptions.emplace_back(option);
+            return ProcessCascadeOptions(options[selecteds_[index]].children, reOptions, index + 1);
+        }
+        if (index < values_.size() && values_[index] != "") {
+            ProcessCascadeOptionsValues(rangeResultValue, index);
+            option.children = options[selecteds_[index]].children;
+            reOptions.emplace_back(option);
+            return ProcessCascadeOptions(options[selecteds_[index]].children, reOptions, index + 1);
+        }
+        if (i == options.size() - 1) {
+            option.children = options[0].children;
+            reOptions.emplace_back(option);
+            return ProcessCascadeOptions(options[0].children, reOptions, index + 1);
+        }
+    }
+}
+
+void TextPickerPattern::SupplementOption(const std::vector<NG::TextCascadePickerOptions>& reOptions,
+    std::vector<NG::RangeContent>& rangeContents, uint32_t patterIndex)
+{
+    for (uint32_t i = 0; i < reOptions[patterIndex].rangeResult.size(); i++) {
+        NG::RangeContent rangeContent;
+        rangeContent.text_ = reOptions[patterIndex].rangeResult[i];
+        rangeContents.emplace_back(rangeContent);
+    }
+}
+
+void TextPickerPattern::HandleColumnChange(const RefPtr<FrameNode>& tag, bool isAdd,
+    uint32_t index, bool needNotify)
+{
+    if (isCascade_) {
+        auto frameNodes = GetColumnNodes();
+        auto columnIndex = 0;
+        for (auto iter = frameNodes.begin(); iter != frameNodes.end(); iter++) {
+            if (iter->second->GetId() == tag->GetId()) {
+                break;
+            }
+            columnIndex++;
+        }
+        for (uint32_t valueIndex = 0; valueIndex < cascadeOriginptions_.size(); valueIndex++) {
+            ChangeCurrentOptionValue(cascadeOriginptions_[valueIndex], index, 0, columnIndex);
+        }
+
+        std::vector<NG::TextCascadePickerOptions> reOptions;
+        ProcessCascadeOptions(cascadeOriginptions_, reOptions, 0);
+        // Next Column Update Value
+        columnIndex = columnIndex + 1;
+        for (uint32_t patterIndex = columnIndex; patterIndex < frameNodes.size(); patterIndex++) {
+            auto patternNode = frameNodes[patterIndex];
+            CHECK_NULL_VOID(patternNode);
+            auto textPickerColumnPattern = patternNode->GetPattern<TextPickerColumnPattern>();
+            CHECK_NULL_VOID(textPickerColumnPattern);
+            if (patterIndex < reOptions.size()) {
+                auto currentSelectedIndex = reOptions[patterIndex].rangeResult.empty() ? 0 :
+                             selecteds_[patterIndex] % reOptions[patterIndex].rangeResult.size();
+                std::vector<NG::RangeContent> rangeContents;
+                SupplementOption(reOptions, rangeContents, patterIndex);
+                textPickerColumnPattern->SetCurrentIndex(currentSelectedIndex);
+                textPickerColumnPattern->SetOptions(rangeContents);
+                textPickerColumnPattern->FlushCurrentOptions();
+            } else {
+                textPickerColumnPattern->ClearOptions();
+                textPickerColumnPattern->SetCurrentIndex(0);
+                textPickerColumnPattern->FlushCurrentOptions(false, false, true);
+            }
+        }
+    }
+}
+
 bool TextPickerPattern::HandleDirectionKey(KeyCode code)
 {
     auto host = GetHost();
@@ -325,37 +597,84 @@ bool TextPickerPattern::HandleDirectionKey(KeyCode code)
     return false;
 }
 
+std::string TextPickerPattern::GetSelectedObjectMulti(const std::vector<std::string>& values,
+    const std::vector<uint32_t>& indexs, int32_t status) const
+{
+    std::string result = "";
+    result = std::string("{\"value\":") + "[";
+    for (uint32_t i = 0; i < values.size(); i++) {
+        result += "\"" + values[i];
+        if (i != values.size() - 1) {
+            result += "\",";
+        } else {
+            result += "\"]";
+        }
+    }
+    result += std::string(",\"index\":") + "[";
+    for (uint32_t i = 0; i < indexs.size(); i++) {
+        result += "\"" + std::to_string(indexs[i]);
+        if (i != indexs.size() - 1) {
+            result += "\",";
+        } else {
+            result += "\"]";
+        }
+    }
+    result += ",\"status\":" + std::to_string(status) + "}";
+    return result;
+}
+
 std::string TextPickerPattern::GetSelectedObject(bool isColumnChange, int32_t status) const
 {
+    std::vector<std::string> values;
+    std::vector<uint32_t> indexs;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, "");
-    auto stackNode = host->GetFirstChild();
-    CHECK_NULL_RETURN(stackNode, "");
-    auto column = stackNode->GetLastChild();
-    CHECK_NULL_RETURN(column, "");
-    auto textPickerColumnPattern = DynamicCast<FrameNode>(column)->GetPattern<TextPickerColumnPattern>();
-    auto value = GetOption(textPickerColumnPattern->GetSelected());
-    auto index = textPickerColumnPattern->GetSelected();
-    if (isColumnChange) {
-        value = textPickerColumnPattern->GetCurrentText();
-        index = textPickerColumnPattern->GetCurrentIndex();
+    auto children = host->GetChildren();
+    for (const auto& child : children) {
+        CHECK_NULL_RETURN(child, "");
+        auto stackNode = DynamicCast<FrameNode>(child);
+        CHECK_NULL_RETURN(stackNode, "");
+        auto currentNode = DynamicCast<FrameNode>(stackNode->GetLastChild());
+        CHECK_NULL_RETURN(currentNode, "");
+        auto textPickerColumnPattern = currentNode->GetPattern<TextPickerColumnPattern>();
+        CHECK_NULL_RETURN(textPickerColumnPattern, "");
+        if (isColumnChange) {
+            auto value = textPickerColumnPattern->GetCurrentText();
+            auto index = textPickerColumnPattern->GetCurrentIndex();
+            values.emplace_back(value);
+            indexs.emplace_back(index);
+        }
     }
 
     auto context = host->GetContext();
     CHECK_NULL_RETURN(context, "");
-
     if (context->GetIsDeclarative()) {
-        return std::string("{\"value\":") + "\"" + value + "\"" + ",\"index\":" + std::to_string(index) +
+        if (values.size() == 1) {
+            return std::string("{\"value\":") + "\"" + values[0] + "\"" + ",\"index\":" + std::to_string(indexs[0]) +
                ",\"status\":" + std::to_string(status) + "}";
+        } else {
+            return GetSelectedObjectMulti(values, indexs, status);
+        }
     } else {
-        return std::string("{\"newValue\":") + "\"" + value + "\"" + ",\"newSelected\":" + std::to_string(index) +
+        return std::string("{\"newValue\":") + "\"" +
+                values[0] + "\"" + ",\"newSelected\":" + std::to_string(indexs[0]) +
                ",\"status\":" + std::to_string(status) + "}";
     }
 }
 
 void TextPickerPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
-    json->Put("range", GetRangeStr().c_str());
+    if (!range_.empty()) {
+        json->Put("range", GetRangeStr().c_str());
+    } else {
+        if (!cascadeOriginptions_.empty()) {
+            if (!isCascade_) {
+                json->Put("range", GetOptionsMultiStr().c_str());
+            } else {
+                json->Put("range", GetOptionsCascadeStr(cascadeOriginptions_).c_str());
+            }
+        }
+    }
 }
 
 std::string TextPickerPattern::GetRangeStr() const
@@ -377,5 +696,57 @@ std::string TextPickerPattern::GetRangeStr() const
         return result;
     }
     return "";
+}
+
+std::string TextPickerPattern::GetOptionsCascadeStr(
+    const std::vector<NG::TextCascadePickerOptions>& options) const
+{
+    std::string result = "[";
+    for (uint32_t i = 0; i < options.size(); i++) {
+        result += std::string("{\"text\":\"");
+        result += options[i].rangeResult[0];
+        result += "\"";
+        if (options[i].children.size() > 0) {
+            result += std::string(", \"children\":");
+            result += GetOptionsCascadeStr(options[i].children);
+        }
+        if (i != options.size() - 1) {
+            result += "},";
+        } else {
+            result += "}]";
+        }
+    }
+    return result;
+}
+
+std::string TextPickerPattern::GetOptionsMultiStrInternal() const
+{
+    std::string result = "[";
+    for (uint32_t i = 0; i < cascadeOptions_.size(); i++) {
+        result += "[";
+        for (uint32_t j = 0; j < cascadeOptions_[i].rangeResult.size(); j++) {
+            result += "\"" + cascadeOptions_[i].rangeResult[j];
+            if (j != cascadeOptions_[i].rangeResult.size() - 1) {
+                result += "\",";
+            } else {
+                result += "\"]";
+            }
+        }
+        if (i != cascadeOptions_.size() - 1) {
+            result += ",";
+        } else {
+            result += "]";
+        }
+    }
+    return result;
+}
+
+std::string TextPickerPattern::GetOptionsMultiStr() const
+{
+    std::string result = "";
+    if (!cascadeOptions_.empty()) {
+        result = GetOptionsMultiStrInternal();
+    }
+    return result;
 }
 } // namespace OHOS::Ace::NG

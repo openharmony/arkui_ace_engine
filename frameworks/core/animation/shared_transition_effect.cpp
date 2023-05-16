@@ -32,7 +32,7 @@ namespace OHOS::Ace {
 SharedTransitionEffect::SharedTransitionEffect(const ShareId& shareId, SharedTransitionEffectType type)
     : shareId_(shareId), type_(type)
 {
-    controller_ = AceType::MakeRefPtr<Animator>();
+    controller_ = CREATE_ANIMATOR();
 }
 
 bool SharedTransitionEffect::CheckIn(

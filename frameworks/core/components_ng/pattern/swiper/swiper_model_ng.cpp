@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
+#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_arrow_layout_property.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_utils.h"
 #include "core/components_ng/property/calc_length.h"
@@ -95,6 +96,15 @@ void SwiperModelNG::SetCachedCount(int32_t cachedCount)
     }
 
     ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, CachedCount, cachedCount);
+}
+
+void SwiperModelNG::SetIsIndicatorCustomSize(bool isCustomSize)
+{
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIsIndicatorCustomSize(isCustomSize);
 }
 
 void SwiperModelNG::SetAutoPlay(bool autoPlay)
@@ -222,4 +232,60 @@ void SwiperModelNG::SetNextMargin(const Dimension& nextMargin)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, NextMargin, nextMargin);
 }
+
+void SwiperModelNG::SetOnChangeEvent(std::function<void(const BaseEventInfo* info)>&& onChangeEvent)
+{
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+
+    pattern->UpdateOnChangeEvent([event = std::move(onChangeEvent)](int32_t index) {
+        SwiperChangeEvent eventInfo(index);
+        event(&eventInfo);
+    });
+}
+
+void SwiperModelNG::SetIndicatorIsBoolean(bool isBoolean)
+{
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIndicatorIsBoolean(isBoolean);
+}
+
+void SwiperModelNG::SetArrowStyle(const SwiperArrowParameters& swiperArrowParameters)
+{
+    if (swiperArrowParameters.isShowBoard.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, IsShowBoard, swiperArrowParameters.isShowBoard.value());
+    }
+    if (swiperArrowParameters.boardSize.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, BoardSize, swiperArrowParameters.boardSize.value());
+    }
+    if (swiperArrowParameters.boardColor.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, BoardColor, swiperArrowParameters.boardColor.value());
+    }
+    if (swiperArrowParameters.arrowSize.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, ArrowSize, swiperArrowParameters.arrowSize.value());
+    }
+    if (swiperArrowParameters.arrowColor.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, ArrowColor, swiperArrowParameters.arrowColor.value());
+    }
+    if (swiperArrowParameters.isSiderMiddle.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(
+            SwiperLayoutProperty, IsSiderMiddle, swiperArrowParameters.isSiderMiddle.value());
+    }
+}
+
+void SwiperModelNG::SetDisplayArrow(bool displayArrow)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, DisplayArrow, displayArrow);
+}
+
+void SwiperModelNG::SetHoverShow(bool hoverShow)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, HoverShow, hoverShow);
+}
+
 } // namespace OHOS::Ace::NG

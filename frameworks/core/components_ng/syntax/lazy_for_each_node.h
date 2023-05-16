@@ -69,19 +69,19 @@ public:
     void PostIdleTask(std::list<int32_t>&& items);
 
 private:
-    void OnAttachToMainTree() override
+    void OnAttachToMainTree(bool recursive) override
     {
         CHECK_NULL_VOID(builder_);
         builder_->RegisterDataChangeListener(Claim(this));
     }
 
-    void OnDetachFromMainTree() override
+    void OnDetachFromMainTree(bool recursive) override
     {
         CHECK_NULL_VOID(builder_);
         builder_->UnregisterDataChangeListener(Claim(this));
     }
 
-    void NotifyDataCountChanged(size_t index);
+    void NotifyDataCountChanged(int32_t index);
 
     // The index values of the start and end of the current children nodes and the corresponding keys.
     int32_t startIndex_ = -1;

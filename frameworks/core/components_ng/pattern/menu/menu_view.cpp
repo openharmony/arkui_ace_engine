@@ -19,7 +19,9 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/components/common/properties/placement.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
@@ -45,15 +47,16 @@ namespace OHOS::Ace::NG {
 
 namespace {
 // create menuWrapper and menu node, update menu props
-std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(int32_t targetId, MenuType type = MenuType::MENU)
+std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(
+    int32_t targetId, const std::string& targetTag = "", MenuType type = MenuType::MENU)
 {
     // use wrapper to detect click events outside menu
     auto wrapperNode = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(targetId));
 
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto menuNode =
-        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, nodeId, AceType::MakeRefPtr<MenuPattern>(targetId, type));
+    auto menuNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, nodeId, AceType::MakeRefPtr<MenuPattern>(targetId, targetTag, type));
 
     auto menuFrameNode = menuNode->GetPattern<MenuPattern>();
     menuNode->MountToParent(wrapperNode);
@@ -129,10 +132,10 @@ void OptionKeepMenu(RefPtr<FrameNode>& option, WeakPtr<FrameNode>& menuWeak)
 } // namespace
 
 // create menu with menuItems
-RefPtr<FrameNode> MenuView::Create(
-    std::vector<OptionParam>&& params, int32_t targetId, MenuType type, const MenuParam& menuParam)
+RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t targetId, const std::string& targetTag,
+    MenuType type, const MenuParam& menuParam)
 {
-    auto [wrapperNode, menuNode] = CreateMenu(targetId, type);
+    auto [wrapperNode, menuNode] = CreateMenu(targetId, targetTag, type);
     auto column = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     if (!menuParam.title.empty()) {
@@ -158,7 +161,11 @@ RefPtr<FrameNode> MenuView::Create(
     if (menuProperty) {
         menuProperty->UpdateTitle(menuParam.title);
         menuProperty->UpdatePositionOffset(menuParam.positionOffset);
+        if (menuParam.placement.has_value()) {
+            menuProperty->UpdateMenuPlacement(menuParam.placement.value_or(OHOS::Ace::Placement::BOTTOM));
+        }
     }
+    UpdateWrapperPaintProperty(wrapperNode, menuParam, type);
     auto scroll = CreateMenuScroll(column);
     CHECK_NULL_RETURN(scroll, nullptr);
     scroll->MountToParent(menuNode);
@@ -168,10 +175,10 @@ RefPtr<FrameNode> MenuView::Create(
 }
 
 // create menu with custom node from a builder
-RefPtr<FrameNode> MenuView::Create(
-    const RefPtr<UINode>& customNode, int32_t targetId, MenuType type, const MenuParam& menuParam)
+RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t targetId, const std::string& targetTag,
+    MenuType type, const MenuParam& menuParam)
 {
-    auto [wrapperNode, menuNode] = CreateMenu(targetId, type);
+    auto [wrapperNode, menuNode] = CreateMenu(targetId, targetTag, type);
     // put custom node in a scroll to limit its height
     auto scroll = CreateMenuScroll(customNode);
     CHECK_NULL_RETURN(scroll, nullptr);
@@ -184,14 +191,29 @@ RefPtr<FrameNode> MenuView::Create(
     if (menuProperty) {
         menuProperty->UpdateTitle(menuParam.title);
         menuProperty->UpdatePositionOffset(menuParam.positionOffset);
+        if (menuParam.placement.has_value()) {
+            menuProperty->UpdateMenuPlacement(menuParam.placement.value());
+        }
     }
-
+    UpdateWrapperPaintProperty(wrapperNode, menuParam, type);
     if (type == MenuType::SUB_MENU) {
         wrapperNode->RemoveChild(menuNode);
         wrapperNode.Reset();
         return menuNode;
     }
     return wrapperNode;
+}
+
+void MenuView::UpdateWrapperPaintProperty(const RefPtr<FrameNode>& wrapperNode, const MenuParam& menuParam,
+    const MenuType& type)
+{
+    if (!(type == MenuType::CONTEXT_MENU)) {
+        return;
+    }
+    auto paintProperty = wrapperNode->GetPaintProperty<MenuWrapperPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    paintProperty->UpdateEnableArrow(menuParam.enableArrow.value_or(false));
+    paintProperty->UpdateArrowOffset(menuParam.arrowOffset.value_or(Dimension(0)));
 }
 
 RefPtr<FrameNode> MenuView::Create(const std::vector<SelectParam>& params, int32_t targetId)
@@ -230,33 +252,9 @@ void MenuView::Create()
     LOGI("MenuView::Create");
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
-    auto menuNode = FrameNode::GetOrCreateFrameNode(
-        V2::MENU_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<MenuPattern>(-1, MenuType::MULTI_MENU); });
+    auto menuNode = FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, nodeId,
+        []() { return AceType::MakeRefPtr<MenuPattern>(-1, V2::MENU_ETS_TAG, MenuType::MULTI_MENU); });
     CHECK_NULL_VOID(menuNode);
     ViewStackProcessor::GetInstance()->Push(menuNode);
-}
-
-void MenuView::SetFontSize(const Dimension& fontSize)
-{
-    if (fontSize.IsValid()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, FontSize, fontSize);
-    } else {
-        LOGW("FontSize value is not valid");
-        ACE_RESET_LAYOUT_PROPERTY(MenuLayoutProperty, FontSize);
-    }
-}
-
-void MenuView::SetFontColor(const std::optional<Color>& color)
-{
-    if (color.has_value()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, FontColor, color.value());
-    } else {
-        ACE_RESET_LAYOUT_PROPERTY(MenuLayoutProperty, FontColor);
-    }
-}
-
-void MenuView::SetFontWeight(Ace::FontWeight weight)
-{
-    ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, FontWeight, weight);
 }
 } // namespace OHOS::Ace::NG

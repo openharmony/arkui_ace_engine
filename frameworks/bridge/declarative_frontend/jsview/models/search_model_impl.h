@@ -48,11 +48,16 @@ public:
     void SetTextAlign(const TextAlign& textAlign) override;
     void SetCopyOption(const CopyOptions& copyOptions) override;
     void SetMenuOptionItems(std::vector<NG::MenuOptionsParam>&& menuOptionsItems) override;
+    void SetFocusable(bool focusable) override;
+    void SetFocusNode(bool isFocusNode) override;
+    void SetHeight(const Dimension& value) override;
+    void SetBackBorder() override;
     void SetOnSubmit(std::function<void(const std::string&)>&& onSubmit) override;
     void SetOnChange(std::function<void(const std::string&)>&& onChange) override;
     void SetOnCopy(std::function<void(const std::string&)>&& func) override;
     void SetOnCut(std::function<void(const std::string&)>&& func) override;
     void SetOnPaste(std::function<void(const std::string&)>&& func) override;
+    void SetOnChangeEvent(std::function<void(const std::string&)>&& onChangeEvent) override {};
 
 private:
     void InitializeDefaultValue(const RefPtr<BoxComponent>& boxComponent, const RefPtr<TextFieldComponent>& component,

@@ -17,6 +17,12 @@
 
 #include "base/utils/utils.h"
 namespace OHOS::Ace::NG {
+void GridItemPattern::OnModifyDone()
+{
+    Pattern::OnModifyDone();
+    SetAccessibilityAction();
+}
+
 void GridItemPattern::MarkIsSelected(bool isSelected)
 {
     if (isSelected_ != isSelected) {
@@ -24,6 +30,38 @@ void GridItemPattern::MarkIsSelected(bool isSelected)
         auto eventHub = GetEventHub<GridItemEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->FireOnSelect(isSelected);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        if (isSelected) {
+            host->OnAccessibilityEvent(AccessibilityEventType::SELECTED);
+        } else {
+            host->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
+        }
     }
+}
+
+void GridItemPattern::SetAccessibilityAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetActionSelect([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (!pattern->Selectable()) {
+            return;
+        }
+        pattern->MarkIsSelected(true);
+    });
+
+    accessibilityProperty->SetActionClearSelection([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (!pattern->Selectable()) {
+            return;
+        }
+        pattern->MarkIsSelected(false);
+    });
 }
 } // namespace OHOS::Ace::NG

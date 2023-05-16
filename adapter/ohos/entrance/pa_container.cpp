@@ -45,7 +45,7 @@ const char* GetPaEngineSharedLibrary()
 
 } // namespace
 
-PaContainer::PaContainer(int32_t instanceId, BackendType type, void* paAbility,
+PaContainer::PaContainer(int32_t instanceId, BackendType type, void* paAbility, const std::string& hapPath,
     std::unique_ptr<PlatformEventCallback> callback)
     : instanceId_(instanceId), type_(type), paAbility_(paAbility)
 {
@@ -54,6 +54,7 @@ PaContainer::PaContainer(int32_t instanceId, BackendType type, void* paAbility,
     flutterTaskExecutor->InitPlatformThread();
     flutterTaskExecutor->InitJsThread();
     taskExecutor_ = flutterTaskExecutor;
+    hapPath_ = hapPath;
 
     InitializeBackend();
 
@@ -73,6 +74,7 @@ void PaContainer::InitializeBackend()
     jsEngine->AddExtraNativeObject("ability", paAbility_);
     jsEngine->SetNeedDebugBreakPoint(AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint());
     jsEngine->SetDebugVersion(AceApplicationInfo::GetInstance().IsDebugVersion());
+    jsEngine->SetHapPath(hapPath_);
     paBackend->SetJsEngine(jsEngine);
 
     ACE_DCHECK(backend_);
@@ -85,10 +87,10 @@ RefPtr<PaContainer> PaContainer::GetContainer(int32_t instanceId)
     return AceType::DynamicCast<PaContainer>(container);
 }
 
-void PaContainer::CreateContainer(int32_t instanceId, BackendType type, void* paAbility,
+void PaContainer::CreateContainer(int32_t instanceId, BackendType type, void* paAbility, const std::string& hapPath,
     std::unique_ptr<PlatformEventCallback> callback)
 {
-    auto aceContainer = AceType::MakeRefPtr<PaContainer>(instanceId, type, paAbility, std::move(callback));
+    auto aceContainer = AceType::MakeRefPtr<PaContainer>(instanceId, type, paAbility, hapPath, std::move(callback));
     AceEngine::Get().AddContainer(instanceId, aceContainer);
 
     auto back = aceContainer->GetBackend();

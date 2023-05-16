@@ -28,19 +28,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<ViewStackModel> ViewStackModel::instance_ = nullptr;
+std::mutex ViewStackModel::mutex_;
 
 ViewStackModel* ViewStackModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::ViewStackModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::ViewStackModelNG());
-        } else {
-            instance_.reset(new Framework::ViewStackModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::ViewStackModelNG());
+            } else {
+                instance_.reset(new Framework::ViewStackModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -95,7 +99,7 @@ VisualState JSViewStackProcessor::StringToVisualState(const std::string& stateSt
     if (stateString == "focused") {
         return VisualState::FOCUSED;
     }
-    if (stateString == "pressed") {
+    if (stateString == "pressed" || stateString == "clicked") {
         return VisualState::PRESSED;
     }
     if (stateString == "disabled") {

@@ -15,10 +15,18 @@
 
 #include "bridge/declarative_frontend/jsview/models/marquee_model_impl.h"
 
+#include <optional>
+
+#include "base/geometry/dimension.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components/common/properties/text_style.h"
+#include "core/components/text/text_theme.h"
 
 namespace OHOS::Ace::Framework {
+namespace {
+constexpr Dimension DEFAULT_STEP = 6.0_vp;
+}
 void MarqueeModelImpl::Create()
 {
     auto marqueeComponent = AceType::MakeRefPtr<MarqueeComponent>();
@@ -27,83 +35,93 @@ void MarqueeModelImpl::Create()
     ViewStackProcessor::GetInstance()->Push(marqueeComponent);
 }
 
-void MarqueeModelImpl::SetValue(const std::string& value)
+void MarqueeModelImpl::SetValue(const std::optional<std::string>& srcValue)
 {
     auto component = GetComponent();
     CHECK_NULL_VOID(component);
-    component->SetValue(value);
+    component->SetValue(srcValue.value_or(""));
 }
 
-void MarqueeModelImpl::SetPlayerStatus(bool playerStatus)
+void MarqueeModelImpl::SetPlayerStatus(const std::optional<bool>& playerStatus)
 {
     auto component = GetComponent();
     CHECK_NULL_VOID(component);
-    component->SetPlayerStatus(playerStatus);
+    component->SetPlayerStatus(playerStatus.value_or(false));
 }
 
-void MarqueeModelImpl::SetScrollAmount(double scrollAmount)
+void MarqueeModelImpl::SetScrollAmount(const std::optional<double>& scrollAmount)
 {
     auto component = GetComponent();
     CHECK_NULL_VOID(component);
-    component->SetScrollAmount(scrollAmount);
+    component->SetScrollAmount(scrollAmount.value_or(DEFAULT_STEP.ConvertToPx()));
 }
 
-void MarqueeModelImpl::SetLoop(int32_t loop)
+void MarqueeModelImpl::SetLoop(const std::optional<int32_t>& loop)
 {
     auto component = GetComponent();
     CHECK_NULL_VOID(component);
-    component->SetLoop(loop);
+    component->SetLoop(loop.value_or(-1));
 }
 
-void MarqueeModelImpl::SetDirection(MarqueeDirection direction)
+void MarqueeModelImpl::SetDirection(const std::optional<MarqueeDirection>& direction)
 {
     auto component = GetComponent();
     CHECK_NULL_VOID(component);
-    component->SetDirection(direction);
+    component->SetDirection(direction.value_or(MarqueeDirection::LEFT));
 }
 
-void MarqueeModelImpl::SetTextColor(const Color& textColor)
+void MarqueeModelImpl::SetTextColor(const std::optional<Color>& textColor)
 {
     auto component = GetComponent();
     CHECK_NULL_VOID(component);
     auto textStyle = component->GetTextStyle();
-    textStyle.SetTextColor(textColor);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID_NOLOG(pipelineContext);
+    auto theme = pipelineContext->GetTheme<TextTheme>();
+    CHECK_NULL_VOID_NOLOG(theme);
+    textStyle.SetTextColor(textColor.value_or(theme->GetTextStyle().GetTextColor()));
     component->SetTextStyle(textStyle);
 }
 
-void MarqueeModelImpl::SetFontSize(const Dimension& fontSize)
+void MarqueeModelImpl::SetFontSize(const std::optional<Dimension>& fontSize)
 {
     auto component = GetComponent();
     CHECK_NULL_VOID(component);
     auto textStyle = component->GetTextStyle();
-    textStyle.SetFontSize(fontSize);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID_NOLOG(pipelineContext);
+    auto theme = pipelineContext->GetTheme<TextTheme>();
+    CHECK_NULL_VOID_NOLOG(theme);
+    textStyle.SetFontSize(fontSize.value_or(theme->GetTextStyle().GetFontSize()));
     component->SetTextStyle(textStyle);
 }
 
-void MarqueeModelImpl::SetFontWeight(const FontWeight& fontWeight)
+void MarqueeModelImpl::SetFontWeight(const std::optional<FontWeight>& fontWeight)
 {
     auto component = GetComponent();
     CHECK_NULL_VOID(component);
     auto textStyle = component->GetTextStyle();
-    textStyle.SetFontWeight(fontWeight);
+    textStyle.SetFontWeight(fontWeight.value_or(FontWeight::NORMAL));
     component->SetTextStyle(textStyle);
 }
 
-void MarqueeModelImpl::SetFontFamily(const std::vector<std::string>& fontFamilies)
+void MarqueeModelImpl::SetFontFamily(const std::optional<std::vector<std::string>>& fontFamilies)
 {
     auto component = GetComponent();
     CHECK_NULL_VOID(component);
     auto textStyle = component->GetTextStyle();
-    textStyle.SetFontFamilies(fontFamilies);
+    if (fontFamilies.has_value()) {
+        textStyle.SetFontFamilies(fontFamilies.value());
+    }
     component->SetTextStyle(textStyle);
 }
 
-void MarqueeModelImpl::SetAllowScale(bool allowScale)
+void MarqueeModelImpl::SetAllowScale(const std::optional<bool>& allowScale)
 {
     auto component = GetComponent();
     CHECK_NULL_VOID(component);
     auto textStyle = component->GetTextStyle();
-    textStyle.SetAllowScale(allowScale);
+    textStyle.SetAllowScale(allowScale.value_or(false));
     component->SetTextStyle(textStyle);
 }
 

@@ -291,6 +291,8 @@ void PinchRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
     if (callback && *callback) {
         GestureEvent info;
         info.SetTimeStamp(time_);
+        UpdateFingerListInfo(coordinateOffset_);
+        info.SetFingerList(fingerList_);
         info.SetScale(scale_);
         info.SetPinchCenter(pinchCenter_);
         info.SetDeviceId(deviceId_);

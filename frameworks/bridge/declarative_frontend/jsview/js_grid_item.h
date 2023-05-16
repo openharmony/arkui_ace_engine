@@ -38,9 +38,9 @@ public:
 #define ACE_DEFINE_SET_COMPONENT_SIZE(name)                                                                       \
     static void SetComponent##name(const JSCallbackInfo& info)                                                    \
     {                                                                                                             \
-        Dimension item##name;                                                                                     \
+        CalcDimension item##name;                                                                                     \
         if (!ParseJsDimensionVp(info[0], item##name)) {                                                           \
-            LOGE("Fail to parse %{public}s of grid item in Dimension unit", #name);                               \
+            LOGE("Fail to parse %{public}s of grid item in CalcDimension unit", #name);                               \
             return;                                                                                               \
         }                                                                                                         \
         auto gridItem =                                                                                           \

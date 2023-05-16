@@ -48,6 +48,24 @@ public:
         return key_;
     }
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        UINode::ToJsonValue(json);
+        json->Put("key", key_.c_str());
+    }
+
+    void FromJson(const std::unique_ptr<JsonValue>& json) override
+    {
+        UINode::FromJson(json);
+    }
+
+    static RefPtr<SyntaxItem> CreateSyntaxItemNode(const std::string& key)
+    {
+        auto node = AceType::MakeRefPtr<SyntaxItem>(key);
+        ElementRegister::GetInstance()->AddUINode(node);
+        return node;
+    }
+
 private:
     std::string key_;
 

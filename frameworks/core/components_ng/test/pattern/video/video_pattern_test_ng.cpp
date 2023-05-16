@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -563,22 +563,22 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest008, TestSize.Level1)
     /**
      * @tc.steps: step3. Call UpdateMediaPlayer
      *            case: IsMediaPlayerValid is always true & has not set VideoSource
-     * @tc.expected: step3. IsMediaPlayerValid will be called once
+     * @tc.expected: step3. IsMediaPlayerValid will be called 4 times.
      */
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
-        .Times(1)
-        .WillOnce(Return(true));
+        .Times(4)
+        .WillRepeatedly(Return(true));
     pattern->UpdateMediaPlayer();
 
     /**
      * @tc.steps: step4. Call UpdateMediaPlayer
      *            case: IsMediaPlayerValid is always true & has set VideoSource
-     * @tc.expected: step4. IsMediaPlayerValid will be called two times and SetSource will be called once
+     * @tc.expected: step4. IsMediaPlayerValid will be called 5 times and SetSource will be called once
      */
     auto videoLayoutProperty = pattern->GetLayoutProperty<VideoLayoutProperty>();
     videoLayoutProperty->UpdateVideoSource(VIDEO_SRC);
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
-        .Times(2)
+        .Times(5)
         .WillRepeatedly(Return(true));
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), SetSource(_))
         .Times(1)
@@ -588,24 +588,27 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest008, TestSize.Level1)
     /**
      * @tc.steps: step5. Call UpdateMediaPlayer
      *            case: IsMediaPlayerValid is always true & has set VideoSource & has set src_
-     * @tc.expected: step5. IsMediaPlayerValid will be called once
+     * @tc.expected: step5. IsMediaPlayerValid will be called 4 times.
      */
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
-        .Times(1)
-        .WillOnce(Return(true));
+        .Times(4)
+        .WillRepeatedly(Return(true));
     pattern->UpdateMediaPlayer();
 
     /**
      * @tc.steps: step6. Call UpdateMediaPlayer
      *            case: first prepare and UpdateMediaPlayer successfully
-     * @tc.expected: step6. IsMediaPlayerValid will be called three times
+     * @tc.expected: step6. IsMediaPlayerValid will be called 6 times
      *                      other function will be called once and return right value when preparing MediaPlayer
      *                      firstly
      */
     pattern->src_.clear();
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
-        .Times(3)
+        .Times(6)
         .WillOnce(Return(false))
+        .WillOnce(Return(true))
+        .WillOnce(Return(true))
+        .WillOnce(Return(true))
         .WillOnce(Return(true))
         .WillOnce(Return(true));
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), SetSource(_))
@@ -625,17 +628,29 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest008, TestSize.Level1)
     /**
      * @tc.steps: step7. Call UpdateMediaPlayer several times
      *            cases: first prepare and UpdateMediaPlayer fail
-     * @tc.expected: step7. IsMediaPlayerValid will be called three times per case
+     * @tc.expected: step7. IsMediaPlayerValid will be called 5 + 5 + 6 times totally.
      */
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
-        .Times(9)
+        .Times(16)
+        // 1st time.
+        .WillOnce(Return(true))
+        .WillOnce(Return(true))
+        .WillOnce(Return(true))
+        .WillOnce(Return(true))
+        .WillOnce(Return(true))
+        
+        // 2nd time.
+        .WillOnce(Return(true))
+        .WillOnce(Return(true))
+        .WillOnce(Return(true))
+        .WillOnce(Return(true))
+        .WillOnce(Return(true))
+         
+         // 3rd time.
         .WillOnce(Return(false))
         .WillOnce(Return(true))
         .WillOnce(Return(true))
-        .WillOnce(Return(false))
         .WillOnce(Return(true))
-        .WillOnce(Return(true))
-        .WillOnce(Return(false))
         .WillOnce(Return(true))
         .WillOnce(Return(true));
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), SetSource(_))
@@ -662,9 +677,12 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest008, TestSize.Level1)
 
     // CreateMediaPlayer success but PrepareMediaPlayer fail for mediaPlayer is invalid
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
-        .Times(3)
+        .Times(6)
         .WillOnce(Return(false))
         .WillOnce(Return(true))
+        .WillOnce(Return(false))
+        .WillOnce(Return(false))
+        .WillOnce(Return(false))
         .WillOnce(Return(false));
     pattern->src_.clear();
     pattern->UpdateMediaPlayer();
@@ -688,15 +706,15 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest009, TestSize.Level1)
     ASSERT_TRUE(pattern);
 
     /**
-     * @tc.steps: step2. Call SetSpeed
+     * @tc.steps: step2. Call UpdateSpeed
      *            cases: MediaPlayer is valid and MediaPlayer is invalid
      */
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
         .Times(2)
         .WillOnce(Return(false))
         .WillOnce(Return(true));
-    pattern->SetSpeed();
-    pattern->SetSpeed();
+    pattern->UpdateSpeed();
+    pattern->UpdateSpeed();
 
     /**
      * @tc.steps: step3. Call UpdateLooping
@@ -1151,11 +1169,11 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest013, TestSize.Level1)
 }
 
 /**
- * @tc.name: VideoPatternTest015
+ * @tc.name: VideoPatternTest014
  * @tc.desc: Test OnResolutionChange & OnHiddenChange
  * @tc.type: FUNC
  */
-HWTEST_F(VideoPropertyTestNg, VideoPatternTest015, TestSize.Level1)
+HWTEST_F(VideoPropertyTestNg, VideoPatternTest014, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create Video
@@ -1219,11 +1237,11 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest015, TestSize.Level1)
 }
 
 /**
- * @tc.name: VideoFullScreenTest016
+ * @tc.name: VideoFullScreenTest015
  * @tc.desc: Create Video, and invoke its MeasureContent function to calculate the content size when it is fullscreen.
  * @tc.type: FUNC
  */
-HWTEST_F(VideoPropertyTestNg, VideoFullScreenTest016, TestSize.Level1)
+HWTEST_F(VideoPropertyTestNg, VideoFullScreenTest015, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create Video
@@ -1297,5 +1315,68 @@ HWTEST_F(VideoPropertyTestNg, VideoFullScreenTest016, TestSize.Level1)
 
     videoSize = videoLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper).value_or(SizeF(0.0f, 0.0f));
     EXPECT_EQ(videoSize, SizeF(VIDEO_WIDTH, VIDEO_HEIGHT));
+}
+
+/**
+ * @tc.name: VideoPropertyTest016
+ * @tc.desc: Create Vdeo, and check the pixelmap.
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoPropertyTestNg, VideoPropertyTest016, TestSize.Level1)
+{
+    VideoModelNG video;
+    auto videoController = AceType::MakeRefPtr<VideoControllerV2>();
+    video.Create(videoController);
+
+    /**
+     * @tc.steps: step1. Create a video.
+     * @tc.expected: step1. Create successfully.
+     */
+    auto frameNodeTemp = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNodeTemp);
+    auto videoPatternTemp = AceType::DynamicCast<VideoPattern>(frameNodeTemp->GetPattern());
+    CHECK_NULL_VOID(videoPatternTemp);
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPatternTemp->mediaPlayer_)), IsMediaPlayerValid())
+        .WillRepeatedly(Return(false));
+
+    /**
+     * @tc.steps: step3. Set the preview by pixelmap.
+     * @tc.expected: step2. Set the pixelmap successfully.
+     */
+    void* voidPtr = static_cast<void*>(new char[0]);
+    void* secondVoidPtr = static_cast<void*>(new char[0]);
+    RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
+    RefPtr<PixelMap> secondPixelMap = PixelMap::CreatePixelMap(secondVoidPtr);
+
+    // Default image and pixelmap image and url image.
+    ImageSourceInfo defaultImage = ImageSourceInfo("");
+    ImageSourceInfo pixelMapImage = ImageSourceInfo(pixelMap);
+    ImageSourceInfo secondPixelMapImage = ImageSourceInfo(secondPixelMap);
+    ImageSourceInfo urlImage = ImageSourceInfo(VIDEO_POSTER_URL);
+
+    video.SetSrc(VIDEO_SRC);
+    video.SetProgressRate(VIDEO_PROGRESS_RATE);
+    video.SetPosterSourceByPixelMap(pixelMap);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::VIDEO_ETS_TAG);
+    auto videoLayoutProperty = frameNode->GetLayoutProperty<VideoLayoutProperty>();
+    EXPECT_FALSE(videoLayoutProperty == nullptr);
+
+    EXPECT_EQ(videoLayoutProperty->GetVideoSource().value_or(""), VIDEO_SRC);
+    EXPECT_EQ(videoLayoutProperty->GetPosterImageInfoValue(defaultImage), pixelMapImage);
+
+    /**
+     * @tc.steps: step3. Reset preview by another pixelmap.
+     * @tc.expected: step2. Reset the pixelmap successfully.
+     */
+    video.SetPosterSourceByPixelMap(secondPixelMap);
+    EXPECT_EQ(videoLayoutProperty->GetPosterImageInfoValue(defaultImage), secondPixelMapImage);
+
+    video.SetPosterSourceInfo(VIDEO_POSTER_URL);
+    EXPECT_EQ(videoLayoutProperty->GetPosterImageInfoValue(defaultImage), urlImage);
+
+    video.SetPosterSourceByPixelMap(pixelMap);
+    EXPECT_EQ(videoLayoutProperty->GetPosterImageInfoValue(defaultImage), pixelMapImage);
 }
 } // namespace OHOS::Ace::NG

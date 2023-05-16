@@ -35,11 +35,20 @@ void ProgressPaintMethod::GetThemeDate()
     auto progressTheme = pipeline->GetTheme<ProgressTheme>();
     CHECK_NULL_VOID(progressTheme);
     color_ = progressTheme->GetTrackSelectedColor();
-    bgColor_ = progressTheme->GetTrackBgColor();
+    if (progressType_ == ProgressType::CAPSULE) {
+        color_ = progressTheme->GetCapsuleSelectColor();
+        bgColor_ = progressTheme->GetCapsuleBgColor();
+    } else if (progressType_ == ProgressType::RING) {
+        bgColor_ = progressTheme->GetRingProgressBgColor();
+    } else {
+        bgColor_ = progressTheme->GetTrackBgColor();
+    }
     scaleWidth_ = progressTheme->GetScaleWidth().ConvertToPx();
     scaleCount_ = progressTheme->GetScaleNumber();
     borderColor_ = progressTheme->GetBorderColor();
     capsuleBorderWidth_ = progressTheme->GetBorderWidth();
+    ringProgressEndSideColor_ = progressTheme->GetRingProgressEndSideColor();
+    ringProgressBeginSideColor_ = progressTheme->GetRingProgressBeginSideColor();
 }
 
 void ProgressPaintMethod::CalculateStrokeWidth(const SizeF& contentSize)
@@ -48,11 +57,8 @@ void ProgressPaintMethod::CalculateStrokeWidth(const SizeF& contentSize)
     constexpr float HALF = 0.5;
     switch (progressType_) {
         case ProgressType::LINEAR:
-        case ProgressType::CAPSULE:
             strokeWidth_ = std::min(strokeWidth_, length);
-            strokeWidth_ = std::max(strokeWidth_, static_cast<float>(capsuleBorderWidth_.ConvertToPx()) / HALF);
             break;
-        case ProgressType::MOON:
         case ProgressType::RING:
         case ProgressType::SCALE:
             if (strokeWidth_ >= length * HALF) {
@@ -60,8 +66,36 @@ void ProgressPaintMethod::CalculateStrokeWidth(const SizeF& contentSize)
                 strokeWidth_ = length * HALF * HALF;
             }
             break;
+        case ProgressType::MOON:
+        case ProgressType::CAPSULE:
         default:
             break;
     }
 }
+
+Gradient ProgressPaintMethod::GenerateRingProgressColor(PaintWrapper* paintWrapper)
+{
+    auto paintProperty = DynamicCast<ProgressPaintProperty>(paintWrapper->GetPaintProperty());
+    if (paintProperty->HasGradientColor()) {
+        return paintProperty->GetGradientColorValue();
+    }
+
+    Gradient gradient;
+    GradientColor gradientColorEnd;
+    GradientColor gradientColorStart;
+    if (paintProperty->HasColor()) {
+        Color color = paintProperty->GetColorValue();
+        gradientColorEnd.SetLinearColor(LinearColor(color));
+        gradientColorStart.SetLinearColor(LinearColor(color));
+    } else {
+        gradientColorEnd.SetLinearColor(LinearColor(ringProgressEndSideColor_));
+        gradientColorStart.SetLinearColor(LinearColor(ringProgressBeginSideColor_));
+    }
+    gradientColorEnd.SetDimension(Dimension(0.0));
+    gradient.AddColor(gradientColorEnd);
+    gradientColorStart.SetDimension(Dimension(1.0));
+    gradient.AddColor(gradientColorStart);
+    return gradient;
+}
+
 } // namespace OHOS::Ace::NG

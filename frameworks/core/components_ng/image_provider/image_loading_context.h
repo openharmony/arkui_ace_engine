@@ -72,16 +72,16 @@ public:
     void FailCallback(const std::string& errorMsg);
 
 private:
-#define DEFINE_SET_NOTIFY_TASK(loadResult, loadResultNotifierName)                                      \
-    void Set##loadResult##NotifyTask(loadResult##NotifyTask&& loadResultNotifierName##NotifyTask)       \
-    {                                                                                                   \
-        notifiers_.loadResultNotifierName##NotifyTask_ = std::move(loadResultNotifierName##NotifyTask); \
+#define DEFINE_SET_NOTIFY_TASK(loadResult)                                            \
+    void Set##loadResult##NotifyTask(loadResult##NotifyTask&& loadResult##NotifyTask) \
+    {                                                                                 \
+        notifiers_.on##loadResult##_ = std::move(loadResult##NotifyTask);             \
     }
 
     // classes that use [ImageLoadingContext] can register three notify tasks to do things
-    DEFINE_SET_NOTIFY_TASK(DataReady, dataReady);
-    DEFINE_SET_NOTIFY_TASK(LoadSuccess, loadSuccess);
-    DEFINE_SET_NOTIFY_TASK(LoadFail, loadFail);
+    DEFINE_SET_NOTIFY_TASK(DataReady);
+    DEFINE_SET_NOTIFY_TASK(LoadSuccess);
+    DEFINE_SET_NOTIFY_TASK(LoadFail);
 
     // tasks that run when entering a new state
     void OnUnloaded();
@@ -92,6 +92,7 @@ private:
     void OnLoadFail();
 
     // round up int to the nearest 2-fold proportion of image width
+    // REQUIRE: value > 0, image width > 0
     int32_t RoundUp(int32_t value);
     static SizeF CalculateTargetSize(const SizeF& srcSize, const SizeF& dstSize, const SizeF& rawImageSize);
 

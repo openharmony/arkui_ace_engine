@@ -93,6 +93,11 @@ public:
     template<typename T>
     T ToNumber() const;
 
+    static JsiRef<JsiValue> Undefined();
+    static JsiRef<JsiValue> Null();
+    static JsiRef<JsiValue> True();
+    static JsiRef<JsiValue> False();
+
     FAKE_PTR_FOR_FUNCTION_ACCESS(JsiValue)
 };
 
@@ -239,6 +244,17 @@ public:
     template<typename T>
     void Mark(const JsiRef<T>& val) const
     {}
+};
+
+class JsiDate : public JsiType<panda::DateRef> {
+public:
+    JsiDate() = default;
+    explicit JsiDate(panda::Local<panda::DateRef> val);
+    explicit JsiDate(const panda::CopyableGlobal<panda::DateRef>& val);
+    ~JsiDate() override = default;
+
+    static JsiRef<JsiValue> New(double value);
+    FAKE_PTR_FOR_FUNCTION_ACCESS(JsiDate)
 };
 
 class JsiException {

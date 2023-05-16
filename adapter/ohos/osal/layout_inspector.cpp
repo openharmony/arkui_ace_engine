@@ -17,10 +17,11 @@
 
 #include <string>
 
-#include "third_party/skia/include/core/SkImage.h"
-#include "third_party/skia/include/core/SkString.h"
-#include "third_party/skia/include/utils/SkBase64.h"
-#include "SkColorSpace.h"
+#include "include/core/SkImage.h"
+#include "include/core/SkString.h"
+#include "include/core/SkColorSpace.h"
+#include "include/utils/SkBase64.h"
+
 #include "wm/window.h"
 
 #include "adapter/ohos/osal/pixel_map_ohos.h"
@@ -32,6 +33,7 @@
 #include "core/common/container_scope.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_v2/inspector/inspector.h"
+#include "dm/display_manager.h"
 #include "foundation/ability/ability_runtime/frameworks/native/runtime/connect_server_manager.h"
 
 namespace OHOS::Ace {
@@ -197,13 +199,22 @@ void LayoutInspector::GetSnapshotJson(int32_t containerId, std::unique_ptr<JsonV
     CHECK_NULL_VOID(image);
     auto data = image->encodeToData(SkEncodedImageFormat::kPNG, 100);
     CHECK_NULL_VOID(data);
-    auto height = (*pixelMap).GetHeight();
+    auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+    CHECK_NULL_VOID(defaultDisplay);
+    auto deviceDpi = defaultDisplay->GetDpi();
+    auto deviceWidth = defaultDisplay->GetWidth();
+    auto deviceHeight = defaultDisplay->GetHeight();
+    LOGI("GetSnapshotJson: deviceWidth: %{public}d, deviceHeight: %{public}d, dpi: %{public}d", deviceWidth,
+        deviceHeight, deviceDpi);
     message->Put("type", "snapShot");
     message->Put("format", PNG_TAG);
     message->Put("width", (*pixelMap).GetWidth());
-    message->Put("height", height);
+    message->Put("height", (*pixelMap).GetHeight());
     message->Put("posX", container->GetViewPosX());
     message->Put("posY", container->GetViewPosY());
+    message->Put("deviceWidth", deviceWidth);
+    message->Put("deviceHeight", deviceHeight);
+    message->Put("deviceDpi", deviceDpi);
     int32_t encodeLength = SkBase64::Encode(data->data(), data->size(), nullptr);
     message->Put("size", data->size());
     SkString info(encodeLength);

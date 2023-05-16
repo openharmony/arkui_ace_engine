@@ -55,6 +55,9 @@ AceTextCategory TextFieldAccessibilityProperty::GetTextInputType() const
         case TextInputType::NUMBER:
             ret = AceTextCategory::INPUT_TYPE_NUMBER;
             break;
+        case TextInputType::PHONE:
+            ret = AceTextCategory::INPUT_TYPE_PHONENUMBER;
+            break;
         case TextInputType::DATETIME:
             ret = AceTextCategory::INPUT_TYPE_DATE;
             break;
@@ -173,6 +176,7 @@ void TextFieldAccessibilityProperty::SetSpecificSupportAction()
     CHECK_NULL_VOID(textFieldPattern);
     if (textFieldPattern->AllowCopy()) {
         AddSupportAction(AceAction::ACTION_COPY);
+        AddSupportAction(AceAction::ACTION_CUT);
     }
     if (IsScrollable()) {
         if (!textFieldPattern->IsAtTop()) {
@@ -184,8 +188,6 @@ void TextFieldAccessibilityProperty::SetSpecificSupportAction()
     }
 
     AddSupportAction(AceAction::ACTION_PASTE);
-    AddSupportAction(AceAction::ACTION_CUT);
-    AddSupportAction(AceAction::ACTION_SELECT);
     AddSupportAction(AceAction::ACTION_SET_SELECTION);
     AddSupportAction(AceAction::ACTION_CLEAR_SELECTION);
     AddSupportAction(AceAction::ACTION_SET_TEXT);

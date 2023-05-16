@@ -168,15 +168,15 @@ void CalendarPaintMethod::DrawCalendar(
 
     if (showLunar_ && !day.lunarDay.empty()) {
         // paint day
-        Offset dateNumberOffset = offset + Offset(x, y);
+        Offset dateNumberOffset = offset + Offset(x, y + gregorianDayYAxisOffset_);
         PaintDay(canvas, dateNumberOffset, day, dateTextStyle);
 
         // paint lunar day
-        Offset lunarDayOffset = offset + Offset(x, y + gregorianCalendarHeight_);
+        Offset lunarDayOffset = offset + Offset(x, y + lunarDayYAxisOffset_);
         PaintLunarDay(canvas, lunarDayOffset, day, lunarTextStyle);
     } else {
         // when there is no lunar calendar, the date is displayed in the center
-        Offset dateNumberOffset = offset + Offset(x, y + (focusedAreaRadius_ - gregorianCalendarHeight_ / 2));
+        Offset dateNumberOffset = offset + Offset(x, y + (focusedAreaRadius_ - gregorianDayHeight_ / 2));
         PaintDay(canvas, dateNumberOffset, day, dateTextStyle);
     }
 }
@@ -240,49 +240,57 @@ void CalendarPaintMethod::SetDayTextStyle(
     }
 }
 
+void CalendarPaintMethod::SetOffWorkTextStyle(RSTextStyle& offWorkTextStyle, const CalendarDay& day) const
+{
+    // Paint off or work mark value.
+    offWorkTextStyle.fontWeight_ = static_cast<RSFontWeight>(workStateFontWeight_);
+    offWorkTextStyle.locale_ = Localization::GetInstance()->GetFontLocale();
+    if (day.month.month == currentMonth_.month) {
+        if (day.dayMark == "work") {
+            offWorkTextStyle.fontSize_ = workDayMarkSize_;
+            offWorkTextStyle.color_ = workDayMarkColor_;
+        } else if (day.dayMark == "off") {
+            offWorkTextStyle.fontSize_ = offDayMarkSize_;
+            offWorkTextStyle.color_ = offDayMarkColor_;
+        }
+    } else {
+        if (day.dayMark == "work") {
+            offWorkTextStyle.fontSize_ = workDayMarkSize_;
+            offWorkTextStyle.color_ =
+                RSColor(nonCurrentMonthWorkDayMarkColor_.GetRed(), nonCurrentMonthWorkDayMarkColor_.GetGreen(),
+                    nonCurrentMonthWorkDayMarkColor_.GetBlue(), WEEKEND_TRANSPARENT);
+        } else if (day.dayMark == "off") {
+            offWorkTextStyle.fontSize_ = offDayMarkSize_;
+            offWorkTextStyle.color_ =
+                RSColor(nonCurrentMonthOffDayMarkColor_.GetRed(), nonCurrentMonthOffDayMarkColor_.GetGreen(),
+                    nonCurrentMonthOffDayMarkColor_.GetBlue(), WEEKEND_TRANSPARENT);
+        }
+    }
+
+    // If it is today and it is focused, workState color is same as focused day color.
+    if (IsToday(day) && day.focused) {
+        offWorkTextStyle.color_ = focusedDayColor_;
+    }
+}
+
 void CalendarPaintMethod::PaintDay(
     RSCanvas& canvas, const Offset& offset, const CalendarDay& day, RSTextStyle& textStyle) const
 {
-    // paint day
-    Rect boxRect { offset.GetX(), offset.GetY(), dayWidth_, gregorianCalendarHeight_ };
+    // Paint day value.
+    Rect boxRect { offset.GetX(), offset.GetY(), dayWidth_, gregorianDayHeight_ };
     Rect textRect;
-    RSTextStyle workStateStyle;
 
     auto dayStr = std::to_string(day.day);
     dayStr = Localization::GetInstance()->NumberFormat(day.day);
     DrawCalendarText(&canvas, dayStr, textStyle, boxRect, textRect);
 
+    // Paint off and work mark value.
     if (!day.dayMark.empty() && showHoliday_) {
-        workStateStyle.fontWeight_ = static_cast<RSFontWeight>(workStateFontWeight_);
-        workStateStyle.locale_ = Localization::GetInstance()->GetFontLocale();
+        RSTextStyle workStateStyle;
         boxRect = { textRect.GetOffset().GetX() + textRect.Width() - workStateHorizontalMovingDistance_,
             textRect.GetOffset().GetY() + textRect.Height() - workStateVerticalMovingDistance_, workStateWidth_,
             workStateWidth_ };
-        if (day.month.month == currentMonth_.month) {
-            if (day.dayMark == "work") {
-                workStateStyle.fontSize_ = workDayMarkSize_;
-                workStateStyle.color_ = workDayMarkColor_;
-            } else if (day.dayMark == "off") {
-                workStateStyle.fontSize_ = offDayMarkSize_;
-                workStateStyle.color_ = offDayMarkColor_;
-            }
-        } else {
-            if (day.dayMark == "work") {
-                workStateStyle.fontSize_ = workDayMarkSize_;
-                workStateStyle.color_ = RSColor(workDayMarkColor_.GetRed(), workDayMarkColor_.GetGreen(),
-                    workDayMarkColor_.GetBlue(), WEEKEND_TRANSPARENT);
-            } else if (day.dayMark == "off") {
-                workStateStyle.fontSize_ = offDayMarkSize_;
-                workStateStyle.color_ = RSColor(offDayMarkColor_.GetRed(), offDayMarkColor_.GetGreen(),
-                    offDayMarkColor_.GetBlue(), WEEKEND_TRANSPARENT);
-            }
-            if (day.focused) {
-                workStateStyle.color_ = Color::BLACK.GetValue();
-            }
-            if (IsToday(day) && day.touched) {
-                workStateStyle.color_ = focusedDayColor_;
-            }
-        }
+        SetOffWorkTextStyle(workStateStyle, day);
         DrawCalendarText(&canvas, day.dayMarkValue, workStateStyle, boxRect);
     }
 }
@@ -290,7 +298,7 @@ void CalendarPaintMethod::PaintDay(
 void CalendarPaintMethod::PaintLunarDay(
     RSCanvas& canvas, const Offset& offset, const CalendarDay& day, const RSTextStyle& textStyle) const
 {
-    Rect boxRect = { offset.GetX(), offset.GetY(), dayWidth_, lunarHeight_ };
+    Rect boxRect = { offset.GetX(), offset.GetY(), dayWidth_, lunarDayHeight_ };
     DrawCalendarText(&canvas, day.lunarDay, textStyle, boxRect);
 }
 
@@ -388,7 +396,7 @@ void CalendarPaintMethod::SetCalendarTheme(const RefPtr<CalendarPaintProperty>& 
                     : paintProperty->GetDayWidthValue({}).ConvertToPx();
     weekAndDayRowSpace_ =
         paintProperty->GetWeekAndDayRowSpace().value_or(theme->GetCalendarTheme().weekAndDayRowSpace).ConvertToPx();
-    lunarHeight_ = paintProperty->GetLunarHeight().value_or(theme->GetCalendarTheme().lunarHeight).ConvertToPx();
+    
     touchCircleStrokeWidth_ = theme->GetCalendarTheme().touchCircleStrokeWidth.ConvertToPx();
 
     colSpace_ = paintProperty->GetColSpaceValue({}).ConvertToPx() <= 0
@@ -403,9 +411,17 @@ void CalendarPaintMethod::SetCalendarTheme(const RefPtr<CalendarPaintProperty>& 
                             ? theme->GetCalendarTheme().dailySixRowSpace.ConvertToPx()
                             : paintProperty->GetDailySixRowSpaceValue({}).ConvertToPx();
 
-    gregorianCalendarHeight_ = paintProperty->GetGregorianCalendarHeightValue({}).ConvertToPx() <= 0
+    gregorianDayHeight_ = paintProperty->GetGregorianCalendarHeightValue({}).ConvertToPx() <= 0
                                    ? theme->GetCalendarTheme().gregorianCalendarHeight.ConvertToPx()
                                    : paintProperty->GetGregorianCalendarHeightValue({}).ConvertToPx();
+
+    lunarDayHeight_ = paintProperty->GetLunarHeight().value_or(theme->GetCalendarTheme().lunarHeight).ConvertToPx();
+
+    gregorianDayYAxisOffset_ =
+        paintProperty->GetDayYAxisOffset().value_or(theme->GetCalendarTheme().dayYAxisOffset).ConvertToPx();
+    lunarDayYAxisOffset_ =
+        paintProperty->GetLunarDayYAxisOffset().value_or(theme->GetCalendarTheme().lunarDayYAxisOffset).ConvertToPx();
+
     workStateWidth_ = paintProperty->GetWorkStateWidthValue({}).ConvertToPx() <= 0
                           ? theme->GetCalendarTheme().workStateWidth.ConvertToPx()
                           : paintProperty->GetWorkStateWidthValue({}).ConvertToPx();

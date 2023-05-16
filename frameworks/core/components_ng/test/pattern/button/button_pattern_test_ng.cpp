@@ -32,10 +32,9 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/layout/layout_property.h"
-#include "core/components_ng/pattern/button/button_accessibility_property.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
-#include "core/components_ng/pattern/button/button_view.h"
+#include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/button/toggle_button_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -73,7 +72,6 @@ const Ace::FontStyle BUTTON_ITALIC_FONT_STYLE_VALUE = Ace::FontStyle::ITALIC;
 const Color BUTTON_TEXT_COLOR_VALUE = Color::RED;
 const Color FONT_COLOR = Color(0XFFFF0000);
 const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
-const char BUTTON_ETS_TAG[] = "Button";
 const SizeF CONTAINER_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 const SizeF BUTTON_ONLY_HAS_WIDTH_SIZE(BUTTON_ONLY_HAS_WIDTH_VALUE, BUTTON_ONLY_HAS_WIDTH_VALUE);
 const Dimension DEFAULT_HEIGTH = 40.0_vp;
@@ -81,6 +79,17 @@ const uint32_t MAX_LINE_VALUE = 10;
 const float START_OPACITY = 0.0f;
 const float END_OPACITY = 0.1f;
 const int32_t DURATION = 100;
+
+struct CreateWithPara createWithPara = {
+    std::make_optional(true),
+    std::make_optional(true),
+    std::make_optional(true),
+    std::make_optional(true),
+    std::make_optional(true),
+    std::make_optional(ButtonType::CAPSULE),
+    std::make_optional(ButtonType::CAPSULE),
+    std::make_optional(CREATE_VALUE),
+};
 } // namespace
 
 struct TestProperty {
@@ -115,6 +124,7 @@ public:
 
 protected:
     RefPtr<FrameNode> CreateLabelButtonParagraph(const std::string& createValue, const TestProperty& testProperty);
+    RefPtr<FrameNode> CreateChildButtonParagraph(const std::string& createValue, const TestProperty& testProperty);
     RefPtr<FrameNode> CreateLabelButtonParagraphForLableStyle(
         const std::string& createValue, const LableStyleProperty& lableStyleProperty);
 };
@@ -212,30 +222,68 @@ PaddingProperty CreatePadding(float left, float top, float right, float bottom)
 RefPtr<FrameNode> ButtonPatternTestNg::CreateLabelButtonParagraph(
     const std::string& createValue, const TestProperty& testProperty)
 {
-    ButtonView::CreateWithLabel(createValue);
+    ButtonModelNG buttonModelNG;
+    std::list<RefPtr<Component>> buttonChildren;
+    createWithPara.parseSuccess = true;
+    createWithPara.label = createValue;
+    buttonModelNG.CreateWithLabel(createWithPara, buttonChildren);
     if (testProperty.typeValue.has_value()) {
-        ButtonView::SetType(testProperty.typeValue.value());
+        buttonModelNG.SetType(static_cast<int32_t>(testProperty.typeValue.value()));
     }
     if (testProperty.stateEffectValue.has_value()) {
-        ButtonView::SetStateEffect(testProperty.stateEffectValue.value());
+        buttonModelNG.SetStateEffect(testProperty.stateEffectValue.value());
     }
     if (testProperty.fontSizeValue.has_value()) {
-        ButtonView::SetFontSize(testProperty.fontSizeValue.value());
+        buttonModelNG.SetFontSize(testProperty.fontSizeValue.value());
     }
     if (testProperty.fontWeightValue.has_value()) {
-        ButtonView::SetFontWeight(testProperty.fontWeightValue.value());
+        buttonModelNG.SetFontWeight(testProperty.fontWeightValue.value());
     }
     if (testProperty.textColorValue.has_value()) {
-        ButtonView::SetFontColor(testProperty.textColorValue.value());
+        buttonModelNG.SetFontColor(testProperty.textColorValue.value());
     }
     if (testProperty.fontStyleValue.has_value()) {
-        ButtonView::SetFontStyle(testProperty.fontStyleValue.value());
+        buttonModelNG.SetFontStyle(testProperty.fontStyleValue.value());
     }
     if (testProperty.fontFamilyValue.has_value()) {
-        ButtonView::SetFontFamily(testProperty.fontFamilyValue.value());
+        buttonModelNG.SetFontFamily(testProperty.fontFamilyValue.value());
     }
     if (testProperty.borderRadius.has_value()) {
-        ButtonView::SetBorderRadius(testProperty.borderRadius.value());
+        buttonModelNG.SetBorderRadius(testProperty.borderRadius.value());
+    }
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    return AceType::DynamicCast<FrameNode>(element);
+}
+
+RefPtr<FrameNode> ButtonPatternTestNg::CreateChildButtonParagraph(
+    const std::string& createValue, const TestProperty& testProperty)
+{
+    ButtonModelNG buttonModelNG;
+    buttonModelNG.CreateWithChild(createWithPara);
+    if (testProperty.typeValue.has_value()) {
+        buttonModelNG.SetType(static_cast<int32_t>(testProperty.typeValue.value()));
+    }
+    if (testProperty.stateEffectValue.has_value()) {
+        buttonModelNG.SetStateEffect(testProperty.stateEffectValue.value());
+    }
+    if (testProperty.fontSizeValue.has_value()) {
+        buttonModelNG.SetFontSize(testProperty.fontSizeValue.value());
+    }
+    if (testProperty.fontWeightValue.has_value()) {
+        buttonModelNG.SetFontWeight(testProperty.fontWeightValue.value());
+    }
+    if (testProperty.textColorValue.has_value()) {
+        buttonModelNG.SetFontColor(testProperty.textColorValue.value());
+    }
+    if (testProperty.fontStyleValue.has_value()) {
+        buttonModelNG.SetFontStyle(testProperty.fontStyleValue.value());
+    }
+    if (testProperty.fontFamilyValue.has_value()) {
+        buttonModelNG.SetFontFamily(testProperty.fontFamilyValue.value());
+    }
+    if (testProperty.borderRadius.has_value()) {
+        buttonModelNG.SetBorderRadius(testProperty.borderRadius.value());
     }
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
@@ -245,8 +293,10 @@ RefPtr<FrameNode> ButtonPatternTestNg::CreateLabelButtonParagraph(
 RefPtr<FrameNode> ButtonPatternTestNg::CreateLabelButtonParagraphForLableStyle(
     const std::string& createValue, const LableStyleProperty& lableStyleProperty)
 {
-    ButtonView::ButtonParameters buttonParameters;
-    ButtonView::CreateWithLabel(createValue);
+    ButtonParameters buttonParameters;
+    ButtonModelNG buttonModelNG;
+    std::list<RefPtr<Component>> buttonChildren;
+    buttonModelNG.CreateWithLabel(createWithPara, buttonChildren);
     if (lableStyleProperty.textOverflow.has_value()) {
         buttonParameters.textOverflow = lableStyleProperty.textOverflow;
     }
@@ -271,7 +321,7 @@ RefPtr<FrameNode> ButtonPatternTestNg::CreateLabelButtonParagraphForLableStyle(
     if (lableStyleProperty.fontStyle.has_value()) {
         buttonParameters.fontStyle = lableStyleProperty.fontStyle;
     }
-    ButtonView::SetLableStyle(buttonParameters);
+    buttonModelNG.SetLableStyle(buttonParameters);
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     return AceType::DynamicCast<FrameNode>(element);
@@ -281,14 +331,28 @@ RefPtr<FrameNode> ButtonPatternTestNg::CreateLabelButtonParagraphForLableStyle(
  * @tc.name: ButtonPatternTest001
  * @tc.desc: Test all the properties of button.
  * @tc.type: FUNC
- * @tc.author: zhangxiao
  */
 HWTEST_F(ButtonPatternTestNg, ButtonPatternTest001, TestSize.Level1)
 {
     TestProperty testProperty;
     testProperty.typeValue = std::make_optional(BUTTON_TYPE_CAPSULE_VALUE);
-
     RefPtr<FrameNode> frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(layoutProperty->GetTypeValue(), BUTTON_TYPE_CAPSULE_VALUE);
+}
+
+/**
+ * @tc.name: ButtonModelTest001
+ * @tc.desc: Test all the properties of button.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonPatternTestNg, ButtonModelTest001, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.typeValue = std::make_optional(BUTTON_TYPE_CAPSULE_VALUE);
+    RefPtr<FrameNode> frameNode = CreateChildButtonParagraph(CREATE_VALUE, testProperty);
     ASSERT_NE(frameNode, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
@@ -299,17 +363,18 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest001, TestSize.Level1)
  * @tc.name: ButtonPatternTest002
  * @tc.desc: Test all the properties of button.
  * @tc.type: FUNC
- * @tc.author: shanshurong
  */
 HWTEST_F(ButtonPatternTestNg, ButtonPatternTest002, TestSize.Level1)
 {
     TestProperty testProperty;
     testProperty.typeValue = std::make_optional(BUTTON_TYPE_CUSTOM_VALUE);
     // create button without label
-    ButtonView::Create(BUTTON_ETS_TAG);
-    ButtonView::SetType(testProperty.typeValue.value());
-    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
-    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ButtonModelNG buttonModelNG;
+    std::list<RefPtr<Component>> buttonChildren;
+    createWithPara.parseSuccess = false;
+    buttonModelNG.Create(createWithPara, buttonChildren);
+    buttonModelNG.SetType(static_cast<int32_t>(testProperty.typeValue.value()));
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
@@ -325,7 +390,6 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest002, TestSize.Level1)
  * @tc.name: ButtonPatternTest003
  * @tc.desc: Test all the properties of button.
  * @tc.type: FUNC
- * @tc.author: shanshurong
  */
 HWTEST_F(ButtonPatternTestNg, ButtonPatternTest003, TestSize.Level1)
 {
@@ -349,7 +413,6 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest003, TestSize.Level1)
  * @tc.name: ButtonPatternTest004
  * @tc.desc: Test all the properties of button.
  * @tc.type: FUNC
- * @tc.author: shanshurong
  */
 HWTEST_F(ButtonPatternTestNg, ButtonPatternTest004, TestSize.Level1)
 {
@@ -978,8 +1041,10 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest016, TestSize.Level1)
     /**
      * @tc.steps: step1. create button and set button view's value.
      */
-    ButtonView::CreateWithLabel(CREATE_VALUE);
-    ButtonView::ButtonParameters buttonParameters;
+    ButtonModelNG buttonModelNG;
+    std::list<RefPtr<Component>> buttonChildren;
+    buttonModelNG.CreateWithLabel(createWithPara, buttonChildren);
+    ButtonParameters buttonParameters;
     buttonParameters.textOverflow = std::make_optional(TextOverflow::NONE);
     buttonParameters.maxLines = std::make_optional(MAX_LINE_VALUE);
     buttonParameters.minFontSize = std::make_optional(BUTTON_FONT_SIZE_VALUE);
@@ -991,10 +1056,10 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest016, TestSize.Level1)
     buttonParameters.fontStyle = std::make_optional(Ace::FontStyle::NORMAL);
 
     /**
-     * @tc.steps: step3. ButtonView setLabelStyle.
+     * @tc.steps: step3. ButtonModelNG setLabelStyle.
      * @tc.expected: step3. Button properties are set successfully.
      */
-    ButtonView::SetLableStyle(buttonParameters);
+    buttonModelNG.SetLableStyle(buttonParameters);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
@@ -1112,7 +1177,9 @@ HWTEST_F(ButtonPatternTestNg, ButtonAccessibilityPropertyTest001, TestSize.Level
     /**
      * @tc.steps: step1. create button and get frameNode.
      */
-    ButtonView::CreateWithLabel(CREATE_VALUE);
+    ButtonModelNG buttonModelNG;
+    std::list<RefPtr<Component>> buttonChildren;
+    buttonModelNG.CreateWithLabel(createWithPara, buttonChildren);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
 

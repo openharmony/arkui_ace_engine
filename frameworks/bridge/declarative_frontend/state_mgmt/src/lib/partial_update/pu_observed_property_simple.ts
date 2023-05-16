@@ -15,24 +15,28 @@
 
 /**
  * ObservedPropertySimplePU
- * 
- * class that holds an actual property value of type T
+ * implementation of @State and @Provide decorated variables of types (T=) boolean | number | string | enum
+ *
+ * Holds an actual property value of type T
  * uses its base class to manage subscribers to this
  * property.
  * 
  * all definitions in this file are framework internal
 */
 class ObservedPropertySimplePU<T> extends ObservedPropertySimpleAbstractPU<T>
-  implements ISinglePropertyChangeSubscriber<T> {
+  implements ISinglePropertyChangeSubscriber<T>, PeerChangeEventReceiverPU<T> {
 
   private wrappedValue_: T;
 
-  constructor(value: T, owningView: IPropertySubscriber, propertyName: PropertyInfo) {
+  constructor(localInitValue: T, owningView: IPropertySubscriber, propertyName: PropertyInfo) {
     super(owningView, propertyName);
-    if (typeof value === "object") {
-      throw new SyntaxError("ObservedPropertySimple value must not be an object")!
+
+    // TODO undefined and null support remove this if statement
+    if (typeof localInitValue === "object") {
+      throw new SyntaxError("ObservedPropertySimple constructor: @State/@Provide value must not be an object")!
     }
-    this.setValueInternal(value);
+
+    this.setValueInternal(localInitValue);
   }
 
   aboutToBeDeleted(unsubscribeMe?: IPropertySubscriber) {
@@ -42,9 +46,13 @@ class ObservedPropertySimplePU<T> extends ObservedPropertySimpleAbstractPU<T>
     super.aboutToBeDeleted();
   }
 
-  hasChanged(newValue: T): void {
-    stateMgmtConsole.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}']: hasChanged`);
-    this.notifyHasChanged(this.wrappedValue_);
+  /**
+ * Called by a @Link - SynchedPropertySimpleTwoWay that uses this as sync peer when it has changed
+ * @param eventSource 
+ */
+  syncPeerHasChanged(eventSource: ObservedPropertyAbstractPU<T>) {
+    stateMgmtConsole.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}']: syncPeerHasChanged peer '${eventSource.info()}'.`);
+    this.notifyPropertyHasChangedPU();
   }
 
   /*
@@ -52,20 +60,24 @@ class ObservedPropertySimplePU<T> extends ObservedPropertySimpleAbstractPU<T>
     called needs to do value change check
     and also notify with this.aboutToChange();
   */
-  private setValueInternal(newValue: T): void {
-    stateMgmtConsole.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}'] new value is of simple type`);
-    this.wrappedValue_ = newValue;
+  private setValueInternal(newValue: T): boolean {
+    stateMgmtConsole.debug(`ObservedPropertySimplePU[${this.id__()}, '${this.info() || "unknown"}'] set new value`);
+    if (this.wrappedValue_ != newValue) {
+      this.wrappedValue_ = newValue;
+      return true;
+    }
+    return false;
   }
 
   public getUnmonitored(): T {
-    stateMgmtConsole.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}']: getUnmonitored returns '${JSON.stringify(this.wrappedValue_)}' .`);
-    // unmonitored get access , no call to otifyPropertyRead !
+    stateMgmtConsole.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}']: getUnmonitored.`);
+    // unmonitored get access , no call to notifyPropertyRead !
     return this.wrappedValue_;
   }
 
   public get(): T {
-    stateMgmtConsole.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}']: get returns '${JSON.stringify(this.wrappedValue_)}' .`);
-    this.notifyPropertyRead();
+    stateMgmtConsole.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}']: get.`);
+    this.notifyPropertyHasBeenReadPU()
     return this.wrappedValue_;
   }
 
@@ -74,8 +86,9 @@ class ObservedPropertySimplePU<T> extends ObservedPropertySimpleAbstractPU<T>
       stateMgmtConsole.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}']: set with unchanged value - ignoring.`);
       return;
     }
-    stateMgmtConsole.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}']: set, changed from '${JSON.stringify(this.wrappedValue_)}' to '${JSON.stringify(newValue)}.`);
-    this.setValueInternal(newValue);
-    this.notifyHasChanged(newValue);
+    stateMgmtConsole.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}']: set changed value.`);
+    if (this.setValueInternal(newValue)) {
+      this.notifyPropertyHasChangedPU();
+    }
   }
 }

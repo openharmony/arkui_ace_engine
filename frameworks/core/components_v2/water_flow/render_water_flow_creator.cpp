@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
+#ifndef NEW_SKIA
 #include "flutter_render_water_flow.h"
+#endif
 #include "rosen_render_water_flow.h"
 
 namespace OHOS::Ace::V2 {
@@ -26,7 +28,11 @@ RefPtr<RenderNode> RenderWaterFlow::Create()
         return nullptr;
 #endif
     } else {
+#ifndef NEW_SKIA
         return AceType::MakeRefPtr<FlutterRenderWaterFlow>();
+#else
+        return nullptr;
+#endif
     }
 }
 } // namespace OHOS::Ace::V2

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_video.h"
 
 #include "base/log/ace_scoring_log.h"
+#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_video_controller.h"
 #include "bridge/declarative_frontend/jsview/models/video_model_impl.h"
 #include "core/components_ng/pattern/video/video_model_ng.h"
@@ -26,19 +27,23 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<VideoModel> VideoModel::instance_ = nullptr;
+std::mutex VideoModel::mutex_;
 
 VideoModel* VideoModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::VideoModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::VideoModelNG());
-        } else {
-            instance_.reset(new Framework::VideoModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::VideoModelNG());
+            } else {
+                instance_.reset(new Framework::VideoModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -95,7 +100,12 @@ void JSVideo::Create(const JSCallbackInfo& info)
         VideoModel::GetInstance()->SetPosterSourceInfo(previewUri);
     } else {
         // Src is a pixelmap.
+#if defined(PIXEL_MAP_SUPPORTED)
+        RefPtr<PixelMap> pixMap = CreatePixelMapFromNapiValue(previewUriValue);
+        VideoModel::GetInstance()->SetPosterSourceByPixelMap(pixMap);
+#else
         LOGE("can not support pixel map");
+#endif
     }
 }
 
@@ -175,6 +185,10 @@ void JSVideo::JsOnStart(const JSCallbackInfo& args)
 
 void JSVideo::JsOnPause(const JSCallbackInfo& args)
 {
+    if (!args[0]->IsFunction()) {
+        LOGE("OnPause args need a function.");
+        return;
+    }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
     auto onPause = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -187,6 +201,10 @@ void JSVideo::JsOnPause(const JSCallbackInfo& args)
 
 void JSVideo::JsOnFinish(const JSCallbackInfo& args)
 {
+    if (!args[0]->IsFunction()) {
+        LOGE("OnFinish args need a function.");
+        return;
+    }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
     auto onFinish = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -199,6 +217,10 @@ void JSVideo::JsOnFinish(const JSCallbackInfo& args)
 
 void JSVideo::JsOnFullscreenChange(const JSCallbackInfo& args)
 {
+    if (!args[0]->IsFunction()) {
+        LOGE("OnFullscreenChange args need a function.");
+        return;
+    }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
     auto OnFullScreenChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](
                                   const std::string& param) {
@@ -212,6 +234,10 @@ void JSVideo::JsOnFullscreenChange(const JSCallbackInfo& args)
 
 void JSVideo::JsOnPrepared(const JSCallbackInfo& args)
 {
+    if (!args[0]->IsFunction()) {
+        LOGE("OnPrepared args need a function.");
+        return;
+    }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
     auto onPrepared = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -224,6 +250,10 @@ void JSVideo::JsOnPrepared(const JSCallbackInfo& args)
 
 void JSVideo::JsOnSeeking(const JSCallbackInfo& args)
 {
+    if (!args[0]->IsFunction()) {
+        LOGE("OnSeeking args need a function.");
+        return;
+    }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
     auto onSeeking = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -236,6 +266,10 @@ void JSVideo::JsOnSeeking(const JSCallbackInfo& args)
 
 void JSVideo::JsOnSeeked(const JSCallbackInfo& args)
 {
+    if (!args[0]->IsFunction()) {
+        LOGE("OnSeeked args need a function.");
+        return;
+    }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
     auto onSeeked = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -248,6 +282,10 @@ void JSVideo::JsOnSeeked(const JSCallbackInfo& args)
 
 void JSVideo::JsOnUpdate(const JSCallbackInfo& args)
 {
+    if (!args[0]->IsFunction()) {
+        LOGE("OnUpdate args need a function.");
+        return;
+    }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
     auto onUpdate = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -260,6 +298,10 @@ void JSVideo::JsOnUpdate(const JSCallbackInfo& args)
 
 void JSVideo::JsOnError(const JSCallbackInfo& args)
 {
+    if (!args[0]->IsFunction()) {
+        LOGE("OnError args need a function.");
+        return;
+    }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
     auto onError = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);

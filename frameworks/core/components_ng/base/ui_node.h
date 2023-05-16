@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,8 +18,11 @@
 
 #include <cstdint>
 #include <list>
+#include <string>
+#include <unordered_map>
 
 #include "base/geometry/ng/point_t.h"
+#include "base/log/ace_performance_check.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
@@ -38,9 +41,7 @@ class ACE_EXPORT UINode : public virtual AceType {
     DECLARE_ACE_TYPE(UINode, AceType);
 
 public:
-    UINode(const std::string& tag, int32_t nodeId, bool isRoot = false)
-        : tag_(tag), nodeId_(nodeId), accessibilityId_(currentAccessibilityId_++), isRoot_(isRoot)
-    {}
+    UINode(const std::string& tag, int32_t nodeId, bool isRoot = false);
     ~UINode() override;
 
     // atomic node is like button, image, custom node and so on.
@@ -65,15 +66,34 @@ public:
     void RemoveChildAtIndex(int32_t index);
     RefPtr<UINode> GetChildAtIndex(int32_t index) const;
     int32_t GetChildIndex(const RefPtr<UINode>& child) const;
-    void AttachToMainTree();
-    void DetachFromMainTree();
+    void AttachToMainTree(bool recursive = false);
+    void DetachFromMainTree(bool recursive = false);
 
     int32_t TotalChildCount() const;
 
-    // Returns index in the flattern tree structure
+    // performance check get child count, depth, flex layout times and layout time
+    void GetPerformanceCheckData(PerformanceCheckNodeMap& nodeMap);
+    void AddFlexLayouts()
+    {
+        flexLayouts_++;
+    }
+    void SetLayoutTime(int64_t time)
+    {
+        layoutTime_ = time;
+    }
+    int64_t GetLayoutTime()
+    {
+        return layoutTime_;
+    }
+    int32_t GetFlexLayouts()
+    {
+        return flexLayouts_;
+    }
+
+    // Returns index in the flatten tree structure
     // of the node with given id and type
     // Returns std::pair with
-    // boolean first - inidication of node is found
+    // boolean first - indication of node is found
     // int32_t second - index of the node
     std::pair<bool, int32_t> GetChildFlatIndex(int32_t id);
 
@@ -217,6 +237,16 @@ public:
         return isInDestroying_;
     }
 
+    int32_t GetRow() const
+    {
+        return row_;
+    }
+
+    int32_t GetCol() const
+    {
+        return col_;
+    }
+
     void SetChildrenInDestroying();
 
     virtual HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
@@ -279,6 +309,8 @@ public:
 
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 
+    virtual void FromJson(const std::unique_ptr<JsonValue>& json) {}
+
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(InspectorId, std::string);
     void OnInspectorIdUpdate(const std::string& /*unused*/) {}
 
@@ -308,7 +340,15 @@ public:
         return childrenUpdatedFrom_;
     }
 
+    // utility function for adding child to disappearingChildren_
+    void AddDisappearingChild(const RefPtr<UINode>& child, uint32_t index = UINT32_MAX);
+    // utility function for removing child from disappearingChildren_, return true if child is removed
     bool RemoveDisappearingChild(const RefPtr<UINode>& child);
+    // return if we are in parent's disappearing children
+    bool IsDisappearing() const
+    {
+        return isDisappearing_;
+    }
 
     // These two interfaces are only used for fast preview.
     // FastPreviewUpdateChild: Replace the old child at the specified slot with the new created node.
@@ -341,6 +381,21 @@ public:
     }
 #endif
 
+    void SetRestoreId(int32_t restoreId)
+    {
+        restoreId_ = restoreId;
+    }
+
+    int32_t GetRestoreId()
+    {
+        return restoreId_;
+    }
+
+    void UpdateRecycleElmtId(int32_t newElmtId)
+    {
+        nodeId_ = newElmtId;
+    }
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -355,18 +410,7 @@ protected:
     }
 
     virtual void OnGenerateOneDepthVisibleFrameWithTransition(
-        std::list<RefPtr<FrameNode>>& visibleList, uint32_t index = UINT_MAX)
-    {
-        for (const auto& child : children_) {
-            child->OnGenerateOneDepthVisibleFrameWithTransition(visibleList);
-        }
-        // disappearing children
-        for (const auto& pair : disappearingChildren_) {
-            auto& child = pair.first;
-            auto index = pair.second;
-            child->OnGenerateOneDepthVisibleFrameWithTransition(visibleList, index);
-        }
-    }
+        std::list<RefPtr<FrameNode>>& visibleList, uint32_t index = UINT_MAX);
 
     virtual void OnGenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& allList)
     {
@@ -380,8 +424,8 @@ protected:
     virtual void DumpInfo() {}
 
     // Mount to the main tree to display.
-    virtual void OnAttachToMainTree();
-    virtual void OnDetachFromMainTree();
+    virtual void OnAttachToMainTree(bool recursive = false);
+    virtual void OnDetachFromMainTree(bool recursive = false);
 
     bool isRemoving_ = false;
     // return value: return true if node has disappearing transition
@@ -394,19 +438,25 @@ private:
     std::list<std::pair<RefPtr<UINode>, uint32_t>> disappearingChildren_;
     WeakPtr<UINode> parent_;
     std::string tag_ = "UINode";
+    int32_t row_ = -1;
+    int32_t col_ = -1;
     int32_t depth_ = 0;
     int32_t hostRootId_ = 0;
     int32_t hostPageId_ = 0;
     int32_t nodeId_ = 0;
     int32_t accessibilityId_ = -1;
     int32_t layoutPriority_ = 0;
+    int32_t flexLayouts_ = 0;
+    int64_t layoutTime_ = 0;
     bool isRoot_ = false;
     bool onMainTree_ = false;
     bool removeSilently_ = true;
     bool isInDestroying_ = false;
+    bool isDisappearing_ = false;
 
     int32_t childrenUpdatedFrom_ = -1;
     static thread_local int32_t currentAccessibilityId_;
+    int32_t restoreId_ = -1;
 
 #ifdef PREVIEW
     std::string debugLine_;

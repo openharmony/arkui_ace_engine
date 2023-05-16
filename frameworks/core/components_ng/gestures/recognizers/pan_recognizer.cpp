@@ -375,6 +375,8 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
     if (callback && *callback) {
         GestureEvent info;
         info.SetTimeStamp(time_);
+        UpdateFingerListInfo(coordinateOffset_);
+        info.SetFingerList(fingerList_);
         info.SetOffsetX(averageDistance_.GetX());
         info.SetOffsetY(averageDistance_.GetY());
         TouchEvent touchPoint = {};

@@ -46,6 +46,9 @@ public:
       size_t end,
       RectHeightStyle rect_height_style,
       RectWidthStyle rect_width_style));
+#ifdef NEW_SKIA
+    MOCK_METHOD0(GetLineMetrics, std::vector<txt::LineMetrics>&());
+#endif
 };
 
 } // namespace OHOS::Ace::NG

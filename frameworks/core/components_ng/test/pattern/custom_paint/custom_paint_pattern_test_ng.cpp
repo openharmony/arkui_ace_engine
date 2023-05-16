@@ -491,7 +491,7 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg010, TestSize.Level1)
     customPattern->Stroke();
     EXPECT_TRUE(paintMethod->HasTask());
 
-    Ace::Pattern pattern;
+    std::shared_ptr<Ace::Pattern> pattern = std::make_shared<Ace::Pattern>();
     paintMethod->tasks_.clear();
     customPattern->UpdateStrokePattern(pattern);
     EXPECT_TRUE(paintMethod->HasTask());
@@ -654,7 +654,7 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg013, TestSize.Level1)
     customPattern->UpdateFillGradient(gradient);
     EXPECT_TRUE(paintMethod->HasTask());
 
-    Ace::Pattern pattern;
+    std::shared_ptr<Ace::Pattern> pattern = std::make_shared<Ace::Pattern>();
     paintMethod->tasks_.clear();
     customPattern->UpdateFillPattern(pattern);
     EXPECT_TRUE(paintMethod->HasTask());
@@ -775,7 +775,7 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg016, TestSize.Level1)
      * @tc.steps2: Test functions about CanvasFillRule.
      * @tc.expected: The task queue of paintMethod is changed to unempty.
      */
-    CanvasFillRule rule;
+    CanvasFillRule rule = CanvasFillRule::NONZERO;
     customPattern->UpdateFillRuleForPath(rule);
     EXPECT_TRUE(paintMethod->HasTask());
 

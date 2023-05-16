@@ -13,9 +13,10 @@
 
 import("//build/test.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("refresh_pattern_test_ng") {
-  module_out_path = "$test_output_path/refresh"
+  module_out_path = pattern_test_output_path
 
   include_dirs = [
     "//commonlibrary/c_utils/base/include",
@@ -29,13 +30,6 @@ ohos_unittest("refresh_pattern_test_ng") {
     "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text",
     "//foundation/arkui/ace_engine/frameworks/base/memory",
     "//third_party/bounds_checking_function/include",
-    "//third_party/flutter/engine",
-    "//third_party/flutter/engine/flutter/third_party/txt/src/txt",
-    "//third_party/flutter/engine/flutter/third_party/txt/src",
-    "//third_party/flutter/engine/flutter/third_party/txt/src/minikin",
-    "//third_party/flutter/skia/third_party",
-    "//third_party/flutter/skia/third_party/externals/icu/source/common",
-    "//third_party/flutter/skia/third_party/externals/harfbuzz/src",
     "//foundation/arkui/ace_engine/frameworks",
     "//base/hiviewdfx/hitrace/interfaces/native/innerkits/include/hitrace_meter",
     "//foundation/arkui/ace_engine/frameworks/base/window",
@@ -53,6 +47,7 @@ ohos_unittest("refresh_pattern_test_ng") {
     "$ace_root/frameworks/base/utils/base_id.cpp",
     "$ace_root/frameworks/base/utils/string_expression.cpp",
     "$ace_root/frameworks/base/utils/string_utils.cpp",
+    "$ace_root/frameworks/base/utils/time_util.cpp",
     "$ace_root/frameworks/core/animation/anticipate_curve.cpp",
     "$ace_root/frameworks/core/animation/cubic_curve.cpp",
     "$ace_root/frameworks/core/animation/curves.cpp",
@@ -103,6 +98,7 @@ ohos_unittest("refresh_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/loading_progress/loading_progress_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/loading_progress/loading_progress_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_property.cpp",
@@ -176,12 +172,12 @@ ohos_unittest("refresh_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/refresh/refresh_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/refresh/refresh_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/refresh/refresh_pattern.cpp",
-    "refresh_accessibility_property_test_ng.cpp",
     "refresh_pattern_test_ng.cpp",
   ]
 
   deps = [
     "$ace_root/frameworks/base:ace_memory_monitor_ohos",
+    "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
     "$ace_root/test/unittest:ace_unittest_log",
     "$ace_root/test/unittest:ace_unittest_trace",
     "$cjson_root:cjson",

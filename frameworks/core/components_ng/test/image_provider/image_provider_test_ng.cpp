@@ -19,6 +19,8 @@
 
 #include "test/mock/base/mock_pixel_map.h"
 
+#include "core/components_ng/image_provider/adapter/skia_image_data.h"
+#include "core/components_ng/image_provider/animated_image_object.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/image_provider/image_provider.h"
 #include "core/components_ng/image_provider/image_state_manager.h"
@@ -187,5 +189,97 @@ HWTEST_F(ImageProviderTestNg, ImageProviderTestNg005, TestSize.Level1)
     res = ctx->MakeCanvasImageIfNeed(SizeF(LENGTH_63, LENGTH_63), true, ImageFit::COVER);
     EXPECT_FALSE(res);
     EXPECT_EQ(ctx->sizeLevel_, LENGTH_64);
+}
+
+/**
+ * @tc.name: ImageProviderTestNg006
+ * @tc.desc: Test BuildImageObject and frame count check
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, ImageProviderTestNg006, TestSize.Level1)
+{
+    auto src = ImageSourceInfo(SRC_JPG);
+    EXPECT_FALSE(ImageProvider::BuildImageObject(src, nullptr));
+
+    auto data = AceType::MakeRefPtr<SkiaImageData>(nullptr, 0);
+    auto imageObject = ImageProvider::BuildImageObject(src, data);
+    EXPECT_TRUE(AceType::DynamicCast<StaticImageObject>(imageObject));
+
+    data = AceType::MakeRefPtr<SkiaImageData>(nullptr, 2);
+    imageObject = ImageProvider::BuildImageObject(src, data);
+    EXPECT_TRUE(AceType::DynamicCast<AnimatedImageObject>(imageObject));
+
+    // thumbnail src with mismatched data
+    src = ImageSourceInfo(SRC_THUMBNAIL);
+    EXPECT_FALSE(ImageProvider::BuildImageObject(src, data));
+}
+
+/**
+ * @tc.name: ImageProviderTestNg007
+ * @tc.desc: Test Cancel task
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, ImageProviderTestNg007, TestSize.Level1)
+{
+    EXPECT_CALL(*g_loader, LoadImageData).Times(1);
+    auto src = ImageSourceInfo(SRC_JPG);
+    // create 2 repeated tasks
+    std::vector<RefPtr<ImageLoadingContext>> contexts(2);
+    for (auto& ctx : contexts) {
+        ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr));
+        ctx->LoadImageData();
+    }
+    {
+        std::scoped_lock<std::mutex> lock(ImageProvider::taskMtx_);
+        EXPECT_EQ(ImageProvider::tasks_.size(), (size_t)1);
+        auto it = ImageProvider::tasks_.find(src.GetKey());
+        EXPECT_NE(it, ImageProvider::tasks_.end());
+        // set impl_ to false to force successful cancellation
+        it->second.bgTask_.impl_ = nullptr;
+    }
+
+    for (auto& ctx : contexts) {
+        // nullify ctx to trigger task cancel
+        ctx = nullptr;
+    }
+    // check task is successfully canceled
+    {
+        std::scoped_lock<std::mutex> lock(ImageProvider::taskMtx_);
+        EXPECT_EQ(ImageProvider::tasks_.size(), (size_t)0);
+    }
+    WaitForAsyncTasks();
+    {
+        std::scoped_lock<std::mutex> lock(ImageProvider::taskMtx_);
+        EXPECT_EQ(ImageProvider::tasks_.size(), (size_t)0);
+    }
+}
+
+/**
+ * @tc.name: RoundUp001
+ * @tc.desc: Test RoundUp with invalid input (infinite loop)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, RoundUp001, TestSize.Level1)
+{
+    auto ctx =
+        AceType::MakeRefPtr<ImageLoadingContext>(ImageSourceInfo(), LoadNotifier(nullptr, nullptr, nullptr), true);
+    ctx->imageObj_ = AceType::MakeRefPtr<NG::StaticImageObject>(ImageSourceInfo(SRC_JPG), SizeF(-1, -1), nullptr);
+    EXPECT_EQ(ctx->RoundUp(-1), -1);
+
+    ctx->imageObj_ = AceType::MakeRefPtr<NG::StaticImageObject>(ImageSourceInfo(SRC_JPG), SizeF(0, 0), nullptr);
+    EXPECT_EQ(ctx->RoundUp(0), -1);
+
+    ctx->imageObj_ = AceType::MakeRefPtr<NG::StaticImageObject>(ImageSourceInfo(SRC_JPG), SizeF(-1, -1), nullptr);
+    EXPECT_EQ(ctx->RoundUp(0), -1);
+
+    ctx->imageObj_ = AceType::MakeRefPtr<NG::StaticImageObject>(ImageSourceInfo(SRC_JPG), SizeF(0, 0), nullptr);
+    EXPECT_EQ(ctx->RoundUp(-1), -1);
+
+    ctx->imageObj_ =
+        AceType::MakeRefPtr<NG::StaticImageObject>(ImageSourceInfo(SRC_JPG), SizeF(LENGTH_128, LENGTH_128), nullptr);
+    EXPECT_EQ(ctx->RoundUp(0), -1);
+
+    ctx->imageObj_ = AceType::MakeRefPtr<NG::StaticImageObject>(ImageSourceInfo(SRC_JPG), SizeF(0, 0), nullptr);
+    EXPECT_EQ(ctx->RoundUp(LENGTH_128), -1);
 }
 } // namespace OHOS::Ace::NG

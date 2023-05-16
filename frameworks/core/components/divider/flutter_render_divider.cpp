@@ -15,7 +15,7 @@
 
 #include "core/components/divider/flutter_render_divider.h"
 
-#include "third_party/skia/include/core/SkPaint.h"
+#include "include/core/SkPaint.h"
 
 #include "core/components/divider/render_divider.h"
 #include "core/pipeline/base/render_node.h"

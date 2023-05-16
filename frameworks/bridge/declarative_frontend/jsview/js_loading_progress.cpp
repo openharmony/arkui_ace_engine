@@ -23,19 +23,23 @@
 
 namespace OHOS::Ace {
 std::unique_ptr<LoadingProgressModel> LoadingProgressModel::instance_ = nullptr;
+std::mutex LoadingProgressModel::mutex_;
 
 LoadingProgressModel* LoadingProgressModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::LoadingProgressModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::LoadingProgressModelNG());
-        } else {
-            instance_.reset(new Framework::LoadingProgressModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::LoadingProgressModelNG());
+            } else {
+                instance_.reset(new Framework::LoadingProgressModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }

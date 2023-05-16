@@ -46,7 +46,6 @@ RefPtr<FrameNode> Create(int32_t index)
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
-    renderContext->UpdateBackgroundColor(theme->GetBackgroundColor());
     BorderRadiusProperty border;
     border.SetRadius(theme->GetInnerBorderRadius());
     renderContext->UpdateBorderRadius(border);
@@ -96,7 +95,6 @@ RefPtr<FrameNode> OptionView::CreateIcon(const std::string& icon, const RefPtr<F
     CHECK_NULL_RETURN(iconNode, nullptr);
     auto props = iconNode->GetLayoutProperty<ImageLayoutProperty>();
     props->UpdateImageSourceInfo(ImageSourceInfo(icon));
-    props->UpdateImageFit(ImageFit::SCALE_DOWN);
 
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);

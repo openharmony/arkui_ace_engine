@@ -13,9 +13,10 @@
 
 import("//build/test.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("counter_pattern_test_ng") {
-  module_out_path = "$test_output_path/counter"
+  module_out_path = pattern_test_output_path
 
   include_dirs = [
     "//commonlibrary/c_utils/base/include",
@@ -31,6 +32,7 @@ ohos_unittest("counter_pattern_test_ng") {
     "$ace_root/frameworks/base/utils/base_id.cpp",
     "$ace_root/frameworks/base/utils/string_expression.cpp",
     "$ace_root/frameworks/base/utils/string_utils.cpp",
+    "$ace_root/frameworks/base/utils/time_util.cpp",
     "$ace_root/frameworks/core/animation/anticipate_curve.cpp",
     "$ace_root/frameworks/core/animation/cubic_curve.cpp",
     "$ace_root/frameworks/core/animation/curves.cpp",
@@ -95,7 +97,6 @@ ohos_unittest("counter_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/gesture/recognizers/mock_sequenced_recognizer.cpp",
 
     # mock
-
     "$ace_root/frameworks/base/test/mock/mock_animatable_dimension.cpp",
     "$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
     "$ace_root/frameworks/core/animation/test/mock/mock_animator.cpp",

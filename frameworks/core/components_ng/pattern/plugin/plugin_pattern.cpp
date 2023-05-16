@@ -232,6 +232,10 @@ void PluginPattern::CreatePluginSubContainer()
             pluginPattern->FireOnErrorEvent("1", "package path is empty.");
             return;
         }
+        if (!info.bundleName.empty() && !info.moduleName.empty()) {
+            pluginSubContainer_->SetPluginBundleName(info.bundleName);
+            pluginSubContainer_->SetPluginModuleName(info.moduleName);
+        }
         if (packagePathStr.rfind(".hap") != std::string::npos) {
             std::string sub = packagePathStr.substr(1, packagePathStr.size() - 5) + "/";
             ReplaceAll(info.source, sub, "");
@@ -271,7 +275,7 @@ std::unique_ptr<DrawDelegate> PluginPattern::GetDrawDelegate()
                 node->SetBackgroundColor(Color::TRANSPARENT.GetValue());
             }
             rsNode->AddChild(node, -1);
-            host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         });
 #endif
     return drawDelegate;
@@ -513,6 +517,7 @@ std::string PluginPattern::GerPackagePathByBms(const WeakPtr<PluginPattern>& wea
     }
     if (info.moduleName.empty() || info.moduleName == "default") {
         info.moduleResPath = bundleInfo.hapModuleInfos[0].resourcePath;
+        info.moduleName = bundleInfo.hapModuleInfos[0].name;
         packagePathStr = bundleInfo.hapModuleInfos[0].hapPath;
         return packagePathStr;
     }

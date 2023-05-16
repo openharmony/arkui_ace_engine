@@ -19,13 +19,14 @@
 #include <list>
 
 #include "base/memory/ace_type.h"
+#include "base/utils/time_util.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
 #include "core/components_ng/gestures/recognizers/exclusive_recognizer.h"
-#include "core/components_ng/gestures/recognizers/parallel_recognizer.h"
 #include "core/components_ng/gestures/recognizers/long_press_recognizer.h"
+#include "core/components_ng/gestures/recognizers/parallel_recognizer.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 #ifdef ENABLE_DRAG_FRAMEWORK
@@ -38,8 +39,6 @@ namespace OHOS::Ace::NG {
 #ifdef ENABLE_DRAG_FRAMEWORK
 using namespace Msdp::DeviceStatus;
 constexpr float PIXELMAP_DRAG_SCALE = 1.0f;
-constexpr float PIXELMAP_WIDTH_RATE = -0.5f;
-constexpr float PIXELMAP_HEIGHT_RATE = -0.2f;
 #endif // ENABLE_DRAG_FRAMEWORK
 constexpr const char* HIT_TEST_MODE[] = {
     "HitTestMode.Default",
@@ -261,6 +260,17 @@ void GestureEventHub::UpdateGestureHierarchy()
             continue;
         }
         auto recognizer = gesture->CreateRecognizer();
+
+        auto clickRecognizer = AceType::DynamicCast<ClickRecognizer>(recognizer);
+        if (clickRecognizer) {
+            clickRecognizer->SetOnAccessibility(GetOnAccessibilityEventFunc());
+        }
+
+        auto longPressRecognizer = AceType::DynamicCast<LongPressRecognizer>(recognizer);
+        if (longPressRecognizer) {
+            longPressRecognizer->SetOnAccessibility(GetOnAccessibilityEventFunc());
+        }
+
         if (!recognizer) {
             continue;
         }
@@ -383,6 +393,11 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
         dragDropProxy_ = nullptr;
     }
 #ifdef ENABLE_DRAG_FRAMEWORK
+    auto eventRet = event->GetResult();
+    if (eventRet == DragRet::DRAG_FAIL || eventRet == DragRet::DRAG_CANCEL) {
+        LOGI("HandleOnDragStart: User Set DRAG_FAIL or DRAG_CANCEL");
+        return;
+    }
     std::string udKey;
     auto unifiedData = event->GetData();
     SetDragData(unifiedData, udKey);
@@ -395,14 +410,21 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
         LOGW("HandleOnDragStart: UDMF GetSummary failed, ret %{public}d", ret);
     }
     dragDropManager->SetSummaryMap(summary.summary);
-    std::shared_ptr<Media::PixelMap> pixelMap = pixelMap_->GetPixelMapSharedPtr();
+    CHECK_NULL_VOID(pixelMap_);
+    std::shared_ptr<Media::PixelMap> pixelMap;
+    if (dragDropInfo.pixelMap) {
+        pixelMap = dragDropInfo.pixelMap->GetPixelMapSharedPtr();
+    }
+    if (pixelMap == nullptr) {
+        pixelMap = pixelMap_->GetPixelMapSharedPtr();
+    }
     if (pixelMap->GetWidth() > Msdp::DeviceStatus::MAX_PIXEL_MAP_WIDTH ||
         pixelMap->GetHeight() > Msdp::DeviceStatus::MAX_PIXEL_MAP_HEIGHT) {
             float scaleWidth = static_cast<float>(Msdp::DeviceStatus::MAX_PIXEL_MAP_WIDTH) / pixelMap->GetWidth();
             float scaleHeight = static_cast<float>(Msdp::DeviceStatus::MAX_PIXEL_MAP_HEIGHT) / pixelMap->GetHeight();
             float scale = std::min(scaleWidth, scaleHeight);
             pixelMap->scale(scale, scale);
-    } else {
+    } else if (!GetTextDraggable()) {
         pixelMap->scale(PIXELMAP_DRAG_SCALE, PIXELMAP_DRAG_SCALE);
     }
     uint32_t width = pixelMap->GetWidth();
@@ -534,22 +556,86 @@ OnAccessibilityEventFunc GestureEventHub::GetOnAccessibilityEventFunc()
 
 bool GestureEventHub::ActClick()
 {
-    CHECK_NULL_RETURN_NOLOG(clickEventActuator_, false);
-    auto click = clickEventActuator_->GetClickEvent();
-    CHECK_NULL_RETURN_NOLOG(click, true);
+    auto host = GetFrameNode();
+    CHECK_NULL_RETURN(host, false);
+    GestureEventFunc click;
     GestureEvent info;
-    click(info);
-    return true;
+    std::chrono::microseconds microseconds(GetMicroTickCount());
+    TimeStamp time(microseconds);
+    info.SetTimeStamp(time);
+    EventTarget clickEventTarget;
+    clickEventTarget.id = host->GetId();
+    clickEventTarget.type = host->GetTag();
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
+    auto offset = geometryNode->GetFrameOffset();
+    auto size = geometryNode->GetFrameSize();
+    clickEventTarget.area.SetOffset(DimensionOffset(offset));
+    clickEventTarget.area.SetHeight(Dimension(size.Height()));
+    clickEventTarget.area.SetWidth(Dimension(size.Width()));
+    clickEventTarget.origin = DimensionOffset(host->GetOffsetRelativeToWindow() - offset);
+    info.SetTarget(clickEventTarget);
+    Offset globalOffset(offset.GetX(), offset.GetY());
+    info.SetGlobalLocation(globalOffset);
+    if (clickEventActuator_) {
+        click = clickEventActuator_->GetClickEvent();
+        CHECK_NULL_RETURN_NOLOG(click, true);
+        click(info);
+        return true;
+    }
+    RefPtr<ClickRecognizer> clickRecognizer;
+    for (auto gestureRecognizer : gestureHierarchy_) {
+        clickRecognizer = AceType::DynamicCast<ClickRecognizer>(gestureRecognizer);
+        if (clickRecognizer && clickRecognizer->GetFingers() == 1 && clickRecognizer->GetCount() == 1) {
+            click = clickRecognizer->GetTapActionFunc();
+            click(info);
+            host->OnAccessibilityEvent(AccessibilityEventType::CLICK);
+            return true;
+        }
+    }
+    return false;
 }
 
 bool GestureEventHub::ActLongClick()
 {
-    CHECK_NULL_RETURN_NOLOG(longPressEventActuator_, false);
-    auto click = longPressEventActuator_->GetGestureEventFunc();
-    CHECK_NULL_RETURN_NOLOG(click, true);
+    auto host = GetFrameNode();
+    CHECK_NULL_RETURN(host, false);
+    GestureEventFunc click;
     GestureEvent info;
-    click(info);
-    return true;
+    std::chrono::microseconds microseconds(GetMicroTickCount());
+    TimeStamp time(microseconds);
+    info.SetTimeStamp(time);
+    EventTarget longPressTarget;
+    longPressTarget.id = host->GetId();
+    longPressTarget.type = host->GetTag();
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
+    auto offset = geometryNode->GetFrameOffset();
+    auto size = geometryNode->GetFrameSize();
+    longPressTarget.area.SetOffset(DimensionOffset(offset));
+    longPressTarget.area.SetHeight(Dimension(size.Height()));
+    longPressTarget.area.SetWidth(Dimension(size.Width()));
+    longPressTarget.origin = DimensionOffset(host->GetOffsetRelativeToWindow() - offset);
+    info.SetTarget(longPressTarget);
+    Offset globalOffset(offset.GetX(), offset.GetY());
+    info.SetGlobalLocation(globalOffset);
+    if (longPressEventActuator_) {
+        click = longPressEventActuator_->GetGestureEventFunc();
+        CHECK_NULL_RETURN_NOLOG(click, true);
+        click(info);
+        return true;
+    }
+    RefPtr<LongPressRecognizer> longPressRecognizer;
+    for (auto gestureRecognizer : gestureHierarchy_) {
+        longPressRecognizer = AceType::DynamicCast<LongPressRecognizer>(gestureRecognizer);
+        if (longPressRecognizer && longPressRecognizer->GetFingers() == 1) {
+            click = longPressRecognizer->GetLongPressActionFunc();
+            click(info);
+            host->OnAccessibilityEvent(AccessibilityEventType::LONG_PRESS);
+            return true;
+        }
+    }
+    return false;
 }
 
 std::string GestureEventHub::GetHitTestModeStr() const
@@ -641,8 +727,10 @@ OnDragCallback GestureEventHub::GetDragCallback()
 bool GestureEventHub::IsAccessibilityClickable()
 {
     bool ret = IsClickable();
+    RefPtr<ClickRecognizer> clickRecognizer;
     for (auto gestureRecognizer : gestureHierarchy_) {
-        if (AceType::DynamicCast<ClickRecognizer>(gestureRecognizer)) {
+        clickRecognizer = AceType::DynamicCast<ClickRecognizer>(gestureRecognizer);
+        if (clickRecognizer && clickRecognizer->GetFingers() == 1 && clickRecognizer->GetCount() == 1) {
             return true;
         }
     }
@@ -652,8 +740,10 @@ bool GestureEventHub::IsAccessibilityClickable()
 bool GestureEventHub::IsAccessibilityLongClickable()
 {
     bool ret = IsLongClickable();
+    RefPtr<LongPressRecognizer> longPressRecognizer;
     for (auto gestureRecognizer : gestureHierarchy_) {
-        if (AceType::DynamicCast<LongPressRecognizer>(gestureRecognizer)) {
+        longPressRecognizer = AceType::DynamicCast<LongPressRecognizer>(gestureRecognizer);
+        if (longPressRecognizer && longPressRecognizer->GetFingers() == 1) {
             return true;
         }
     }

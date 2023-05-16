@@ -15,7 +15,6 @@
 
 #include "frameworks/core/components_ng/pattern/stack/stack_layout_algorithm.h"
 
-
 #include "core/common/ace_application_info.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/stack/stack_layout_property.h"
@@ -49,16 +48,16 @@ void StackLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
     auto align = Alignment::CENTER;
     auto layoutProperty = DynamicCast<StackLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    if (layoutProperty->HasAlignment()) {
-        align = layoutProperty->GetAlignment().value_or(Alignment::CENTER);
-    }
     if (layoutProperty->HasAlignmentContent()) {
         align = layoutProperty->GetAlignmentContent().value_or(Alignment::CENTER);
+    }
+    if (layoutProperty->HasAlignment()) {
+        align = layoutProperty->GetAlignment().value_or(Alignment::CENTER);
     }
     // Update child position.
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         auto translate =
-            Alignment::GetAlignPosition(size, child->GetGeometryNode()->GetMarginFrameSize(), align) + paddingOffset;
+            CalculateStackAlignment(size, child->GetGeometryNode()->GetMarginFrameSize(), align) + paddingOffset;
         if (layoutDirection == TextDirection::RTL) {
             translate.SetX(size.Width() - translate.GetX() - child->GetGeometryNode()->GetMarginFrameSize().Width());
         }
@@ -67,11 +66,20 @@ void StackLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
     // Update content position.
     const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
     if (content) {
-        auto translate = Alignment::GetAlignPosition(size, content->GetRect().GetSize(), align) + paddingOffset;
+        auto translate = CalculateStackAlignment(size, content->GetRect().GetSize(), align) + paddingOffset;
         if (layoutDirection == TextDirection::RTL) {
             translate.SetX(size.Width() - translate.GetX() - content->GetRect().GetSize().Width());
         }
         content->SetOffset(translate);
     }
+}
+
+NG::OffsetF StackLayoutAlgorithm::CalculateStackAlignment(
+    const NG::SizeF& parentSize, const NG::SizeF& childSize, const Alignment& alignment)
+{
+    NG::OffsetF offset;
+    offset.SetX((1.0 + alignment.GetHorizontal()) * (parentSize.Width() - childSize.Width()) / 2.0);
+    offset.SetY((1.0 + alignment.GetVertical()) * (parentSize.Height() - childSize.Height()) / 2.0);
+    return offset;
 }
 } // namespace OHOS::Ace::NG

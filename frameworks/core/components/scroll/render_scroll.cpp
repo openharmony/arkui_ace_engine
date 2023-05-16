@@ -745,7 +745,7 @@ void RenderScroll::AnimateTo(double position, float duration, const RefPtr<Curve
     LOGD("animate from position %{public}lf to %{public}lf, duration: %{public}f", GetCurrentPosition(), position,
         duration);
     if (!animator_) {
-        animator_ = AceType::MakeRefPtr<Animator>(GetContext());
+        animator_ = CREATE_ANIMATOR(GetContext());
         CHECK_NULL_VOID(animator_);
     }
     if (!animator_->IsStopped()) {
@@ -858,7 +858,7 @@ void RenderScroll::Update(const RefPtr<Component>& component)
     hasHeight_ = scroll->GetHasHeight();
     hasWidth_ = scroll->GetHasWidth();
     if (!animator_) {
-        animator_ = AceType::MakeRefPtr<Animator>(GetContext());
+        animator_ = CREATE_ANIMATOR(GetContext());
     }
     // ApplyRestoreInfo maybe change currentOffset_
     ApplyRestoreInfo();

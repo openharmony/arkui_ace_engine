@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -86,6 +86,7 @@ void ScrollPattern::OnModifyDone()
     }
     SetEdgeEffect(layoutProperty->GetEdgeEffect().value_or(EdgeEffect::NONE));
     SetScrollBar(paintProperty->GetScrollBarProperty());
+    SetAccessibilityAction();
 }
 
 void ScrollPattern::RegisterScrollEventTask()
@@ -391,7 +392,7 @@ bool ScrollPattern::UpdateCurrentOffset(float delta, int32_t source)
 void ScrollPattern::CreateOrStopAnimator()
 {
     if (!animator_) {
-        animator_ = AceType::MakeRefPtr<Animator>(PipelineBase::GetCurrentContext());
+        animator_ = CREATE_ANIMATOR(PipelineBase::GetCurrentContext());
         return;
     }
     if (!animator_->IsStopped()) {
@@ -410,7 +411,9 @@ void ScrollPattern::AnimateTo(float position, float duration, const RefPtr<Curve
         StopScrollable();
     }
     CreateOrStopAnimator();
-    // TODO: no accessibility event
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_START);
     auto animation = AceType::MakeRefPtr<CurveAnimation<float>>(currentOffset_, position, curve);
     animation->AddListener([weakScroll = AceType::WeakClaim(this)](float value) {
         auto scroll = weakScroll.Upgrade();
@@ -429,6 +432,7 @@ void ScrollPattern::AnimateTo(float position, float duration, const RefPtr<Curve
         auto host = scroll->GetHost();
         CHECK_NULL_VOID_NOLOG(host);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
         CHECK_NULL_VOID_NOLOG(onFinish);
         onFinish();
     });
@@ -456,7 +460,13 @@ void ScrollPattern::ScrollBy(float pixelX, float pixelY, bool smooth, const std:
         AnimateTo(position, fabs(distance) * UNIT_CONVERT / SCROLL_BY_SPEED, Curves::EASE_OUT, true, onFinish);
         return;
     }
+    float cachePosition = currentOffset_;
     JumpToPosition(position);
+    if (cachePosition != currentOffset_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+    }
 }
 
 bool ScrollPattern::ScrollPage(bool reverse, bool smooth, const std::function<void()>& onFinish)
@@ -495,7 +505,7 @@ void ScrollPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scroll
     });
     scrollEffect->SetLeadingCallback([weakScroll = AceType::WeakClaim(this)]() -> double {
         auto scroll = weakScroll.Upgrade();
-        if (scroll && !scroll->IsRowReverse() && !scroll->IsColReverse()) {
+        if (scroll && !scroll->IsRowReverse() && !scroll->IsColReverse() && scroll->GetScrollableDistance() > 0) {
             return -scroll->GetScrollableDistance();
         }
         return 0.0;
@@ -509,7 +519,7 @@ void ScrollPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scroll
     });
     scrollEffect->SetInitLeadingCallback([weakScroll = AceType::WeakClaim(this)]() -> double {
         auto scroll = weakScroll.Upgrade();
-        if (scroll && !scroll->IsRowReverse() && !scroll->IsColReverse()) {
+        if (scroll && !scroll->IsRowReverse() && !scroll->IsColReverse() && scroll->GetScrollableDistance() > 0) {
             return -scroll->GetScrollableDistance();
         }
         return 0.0;
@@ -530,7 +540,29 @@ void ScrollPattern::UpdateScrollBarOffset()
     }
     Size size(viewPort_.Width(), viewPort_.Height());
     auto estimatedHeight = (GetAxis() == Axis::HORIZONTAL) ? viewPortExtent_.Width() : viewPortExtent_.Height();
-    UpdateScrollBarRegion(-currentOffset_, estimatedHeight, size);
+    UpdateScrollBarRegion(-currentOffset_, estimatedHeight, size, Offset(0.0, 0.0));
 }
 
+void ScrollPattern::SetAccessibilityAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetActionScrollForward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (pattern->IsScrollable() && pattern->GetScrollableDistance() > 0.0f) {
+            pattern->ScrollPage(false, true);
+        }
+    });
+
+    accessibilityProperty->SetActionScrollBackward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (pattern->IsScrollable() && pattern->GetScrollableDistance() > 0.0f) {
+            pattern->ScrollPage(true, true);
+        }
+    });
+}
 } // namespace OHOS::Ace::NG

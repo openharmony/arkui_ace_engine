@@ -28,17 +28,15 @@
 
 using namespace testing;
 using namespace testing::ext;
-namespace OHOS::Ace {
-bool OHOS::Ace::SystemProperties::GetDebugEnabled()
-{
-    return false;
-}
-} // namespace OHOS::Ace
+
 namespace OHOS::Ace::NG {
 namespace {
 const std::string ROOT_TAG("root");
 constexpr int32_t NODE_ID = 143;
 constexpr int32_t NODE_ID_2 = 601;
+constexpr int32_t NODE_ID_3 = 707;
+const OffsetF RIGHT_CLICK_OFFSET = OffsetF(10.0f, 10.0f);
+const bool IS_USING_MOUSE = true;
 } // namespace
 
 class SelectOverlayManagerTestNg : public testing::Test {
@@ -61,7 +59,6 @@ void SelectOverlayManagerTestNg::TearDownTestCase()
  * @tc.name: SelectOverlayManagerTest001
  * @tc.desc: test first CreateAndShowSelectOverlay
  * @tc.type: FUNC
- * @tc.author:
  */
 HWTEST_F(SelectOverlayManagerTestNg, SelectOverlayManagerTest001, TestSize.Level1)
 {
@@ -75,14 +72,14 @@ HWTEST_F(SelectOverlayManagerTestNg, SelectOverlayManagerTest001, TestSize.Level
 
     /**
      * @tc.steps: step2. call CreateAndShowSelectOverlay
-     * @tc.expected: step2. return the proxy which has the right SelectOverlayId
+     * @tc.expected: return the proxy which has the right SelectOverlayId
      */
     auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo);
     auto id = proxy->GetSelectOverlayId();
     EXPECT_EQ(id, NODE_ID);
 
     /**
-     * @tc.expected: step2. root's children_list contains the selectOverlayNode we created
+     * @tc.expected: root's children_list contains the selectOverlayNode we created
      */
     auto selectOverlayNode = root->GetChildren().back();
     ASSERT_TRUE(selectOverlayNode);
@@ -94,7 +91,6 @@ HWTEST_F(SelectOverlayManagerTestNg, SelectOverlayManagerTest001, TestSize.Level
  * @tc.name: SelectOverlayManagerTest002
  * @tc.desc: test DestroySelectOverlay(proxy) successfully
  * @tc.type: FUNC
- * @tc.author:
  */
 HWTEST_F(SelectOverlayManagerTestNg, SelectOverlayManagerTest002, TestSize.Level1)
 {
@@ -108,7 +104,7 @@ HWTEST_F(SelectOverlayManagerTestNg, SelectOverlayManagerTest002, TestSize.Level
     auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo);
 
     /**
-     * @tc.expected: step1. root's children_list contains the selectOverlayNode we created
+     * @tc.expected: root's children_list contains the selectOverlayNode we created
      */
     auto selectOverlayNode = root->GetChildren().back();
     ASSERT_TRUE(selectOverlayNode);
@@ -117,7 +113,7 @@ HWTEST_F(SelectOverlayManagerTestNg, SelectOverlayManagerTest002, TestSize.Level
 
     /**
      * @tc.steps: step2. call DestroySelectOverlay
-     * @tc.expected: step2. root's children_list has removed the selectOverlayNode we created
+     * @tc.expected: root's children_list has removed the selectOverlayNode we created
      */
     selectOverlayManager->DestroySelectOverlay(proxy);
     auto children = root->GetChildren();
@@ -128,13 +124,12 @@ HWTEST_F(SelectOverlayManagerTestNg, SelectOverlayManagerTest002, TestSize.Level
  * @tc.name: SelectOverlayManagerTest003
  * @tc.desc: test CreateAndShowSelectOverlay while the selectOverlayItem_ has existed
  * @tc.type: FUNC
- * @tc.author:
  */
 HWTEST_F(SelectOverlayManagerTestNg, SelectOverlayManagerTest003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. construct a SelectOverlayManager and call CreateAndShowSelectOverlay
-     * @tc.expected: step1. return the proxy which has the right SelectOverlayId
+     * @tc.expected: return the proxy which has the right SelectOverlayId
      */
     SelectOverlayInfo selectOverlayInfo;
     selectOverlayInfo.singleLineHeight = NODE_ID;
@@ -146,26 +141,36 @@ HWTEST_F(SelectOverlayManagerTestNg, SelectOverlayManagerTest003, TestSize.Level
 
     /**
      * @tc.steps: step2. call CreateAndShowSelectOverlay again and change the param
-     * @tc.expected: step2. return the proxy which has the right SelectOverlayId
+     * @tc.expected: return the proxy which has the right SelectOverlayId
      */
     SelectOverlayInfo selectOverlayInfo2;
     selectOverlayInfo2.singleLineHeight = NODE_ID_2;
     auto proxy2 = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo2);
     auto id2 = proxy2->GetSelectOverlayId();
     EXPECT_EQ(id2, NODE_ID_2);
+
+    /**
+     * @tc.steps: step3. call CreateAndShowSelectOverlay again and change the param
+     * @tc.expected: return the proxy which has the right SelectOverlayId
+     */
+    SelectOverlayInfo selectOverlayInfo3;
+    selectOverlayInfo3.isUsingMouse = IS_USING_MOUSE;
+    selectOverlayInfo3.singleLineHeight = NODE_ID_3;
+    auto proxy3 = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo3);
+    auto id3 = proxy3->GetSelectOverlayId();
+    EXPECT_EQ(id3, NODE_ID_3);
 }
 
 /**
  * @tc.name: SelectOverlayManagerTest004
  * @tc.desc: test DestroySelectOverlay fail
  * @tc.type: FUNC
- * @tc.author:
  */
 HWTEST_F(SelectOverlayManagerTestNg, SelectOverlayManagerTest004, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. construct a SelectOverlayManager and call CreateAndShowSelectOverlay
-     * @tc.expected: step1. return the proxy which has the right SelectOverlayId
+     * @tc.expected: return the proxy which has the right SelectOverlayId
      */
     SelectOverlayInfo selectOverlayInfo;
     selectOverlayInfo.singleLineHeight = NODE_ID;
@@ -177,7 +182,7 @@ HWTEST_F(SelectOverlayManagerTestNg, SelectOverlayManagerTest004, TestSize.Level
 
     /**
      * @tc.steps: step2. call DestroySelectOverlay with wrong param
-     * @tc.expected: step2. destroySelectOverlay fail and the proxy still has the original SelectOverlayId
+     * @tc.expected: destroySelectOverlay fail and the proxy still has the original SelectOverlayId
      */
     selectOverlayManager->DestroySelectOverlay(NODE_ID_2);
     auto children = root->GetChildren();
@@ -190,13 +195,12 @@ HWTEST_F(SelectOverlayManagerTestNg, SelectOverlayManagerTest004, TestSize.Level
  * @tc.name: SelectOverlayManagerTest005
  * @tc.desc: test HasSelectOverlay
  * @tc.type: FUNC
- * @tc.author:
  */
 HWTEST_F(SelectOverlayManagerTestNg, SelectOverlayManagerTest005, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. construct a SelectOverlayManager and call CreateAndShowSelectOverlay
-     * @tc.expected: step1. return the proxy which has the right SelectOverlayId
+     * @tc.expected: return the proxy which has the right SelectOverlayId
      */
     SelectOverlayInfo selectOverlayInfo;
     selectOverlayInfo.singleLineHeight = NODE_ID;
@@ -206,14 +210,14 @@ HWTEST_F(SelectOverlayManagerTestNg, SelectOverlayManagerTest005, TestSize.Level
 
     /**
      * @tc.steps: step2. call HasSelectOverlay with the param of existed SelectOverlayId
-     * @tc.expected: step2. return true
+     * @tc.expected: return true
      */
     auto flag1 = selectOverlayManager->HasSelectOverlay(NODE_ID);
     EXPECT_TRUE(flag1);
 
     /**
      * @tc.steps: step3. call HasSelectOverlay with the param of existed SelectOverlayId
-     * @tc.expected: step3. return false
+     * @tc.expected: return false
      */
     auto flag2 = selectOverlayManager->HasSelectOverlay(NODE_ID_2);
     EXPECT_FALSE(flag2);
@@ -223,7 +227,6 @@ HWTEST_F(SelectOverlayManagerTestNg, SelectOverlayManagerTest005, TestSize.Level
  * @tc.name: SelectOverlayManagerTest006
  * @tc.desc: test GetSelectOverlayNode
  * @tc.type: FUNC
- * @tc.author:
  */
 HWTEST_F(SelectOverlayManagerTestNg, SelectOverlayManagerTest006, TestSize.Level1)
 {
@@ -237,7 +240,7 @@ HWTEST_F(SelectOverlayManagerTestNg, SelectOverlayManagerTest006, TestSize.Level
 
     /**
      * @tc.steps: step2. call GetSelectOverlayNode without calling CreateAndShowSelectOverlay
-     * @tc.expected: step2. return nullptr
+     * @tc.expected: return nullptr
      */
     auto node1 = selectOverlayManager->GetSelectOverlayNode(NODE_ID);
     EXPECT_FALSE(node1);
@@ -249,7 +252,7 @@ HWTEST_F(SelectOverlayManagerTestNg, SelectOverlayManagerTest006, TestSize.Level
 
     /**
      * @tc.steps: step4. call GetSelectOverlayNode with right overlayId
-     * @tc.expected: step4. return the selectOverlayNode with right nodeId
+     * @tc.expected: return the selectOverlayNode with right nodeId
      */
     auto node2 = selectOverlayManager->GetSelectOverlayNode(NODE_ID);
     auto node2_id = node2->GetId();
@@ -257,9 +260,61 @@ HWTEST_F(SelectOverlayManagerTestNg, SelectOverlayManagerTest006, TestSize.Level
 
     /**
      * @tc.steps: step5. call GetSelectOverlayNode with wrong overlayId
-     * @tc.expected: step5. return nullptr
+     * @tc.expected: return nullptr
      */
     auto node3 = selectOverlayManager->GetSelectOverlayNode(NODE_ID_2);
     EXPECT_FALSE(node3);
+}
+
+/**
+ * @tc.name: SelectOverlayManagerTest007
+ * @tc.desc: test IsSameSelectOverlayInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, SelectOverlayManagerTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a SelectOverlayManager
+     */
+    SelectOverlayInfo selectOverlayInfo;
+    selectOverlayInfo.singleLineHeight = NODE_ID;
+    auto root = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto selectOverlayManager = AceType::MakeRefPtr<SelectOverlayManager>(root);
+
+    /**
+     * @tc.steps: step2. change menuInfo and call IsSameSelectOverlayInfo with different selectOverlayInfo
+     * @tc.expected: return false
+     */
+    SelectOverlayInfo selectOverlayInfo2;
+    SelectMenuInfo selectMenuInfo2;
+    selectMenuInfo2.showCopy = false;
+    selectOverlayInfo2.menuInfo = selectMenuInfo2;
+    auto flag1 = selectOverlayManager->IsSameSelectOverlayInfo(selectOverlayInfo2);
+    EXPECT_FALSE(flag1);
+
+    /**
+     * @tc.steps: step3. change isUsingMouse and call IsSameSelectOverlayInfo with different selectOverlayInfo
+     * @tc.expected: return false
+     */
+    SelectOverlayInfo selectOverlayInfo3;
+    selectOverlayInfo3.isUsingMouse = IS_USING_MOUSE;
+    auto flag2 = selectOverlayManager->IsSameSelectOverlayInfo(selectOverlayInfo3);
+    EXPECT_FALSE(flag2);
+
+    /**
+     * @tc.steps: step4. change rightClickOffset and call IsSameSelectOverlayInfo with different selectOverlayInfo
+     * @tc.expected: return false
+     */
+    SelectOverlayInfo selectOverlayInfo4;
+    selectOverlayInfo4.rightClickOffset = RIGHT_CLICK_OFFSET;
+    auto flag3 = selectOverlayManager->IsSameSelectOverlayInfo(selectOverlayInfo4);
+    EXPECT_FALSE(flag3);
+
+    /**
+     * @tc.steps: step5. call IsSameSelectOverlayInfo with right selectOverlayInfo
+     * @tc.expected: return true
+     */
+    auto flag = selectOverlayManager->IsSameSelectOverlayInfo(selectOverlayInfo);
+    EXPECT_TRUE(flag);
 }
 } // namespace OHOS::Ace::NG

@@ -36,6 +36,11 @@ enum class ShadowStyle {
     None,
 };
 
+enum class ShadowType {
+    COLOR,
+    BLUR,
+};
+
 // A style class indicates the way to render shadow effect
 class Shadow final {
 public:
@@ -181,6 +186,16 @@ public:
         return style_;
     }
 
+    void SetShadowType(ShadowType type)
+    {
+        type_ = type;
+    }
+
+    ShadowType GetShadowType() const
+    {
+        return type_;
+    }
+
     bool IsValid() const
     {
         if (isHardwareAcceleration_) {
@@ -199,6 +214,7 @@ private:
     Color color_ = Color::BLACK;
     bool isHardwareAcceleration_ = false;
     ShadowStyle style_ = ShadowStyle::None;
+    ShadowType type_ = ShadowType::COLOR;
 };
 
 } // namespace OHOS::Ace

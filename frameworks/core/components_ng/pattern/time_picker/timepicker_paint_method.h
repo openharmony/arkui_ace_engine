@@ -41,8 +41,14 @@ public:
         enabled_ = enabled;
     }
 
+    void SetBackgroundColor(const Color& color)
+    {
+        backgroundColor_ = color;
+    }
+
 private:
     bool enabled_ = true;
+    Color backgroundColor_ = Color::WHITE;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TIME_PICKER_TIME_PICKER_PAINT_METHOD_H

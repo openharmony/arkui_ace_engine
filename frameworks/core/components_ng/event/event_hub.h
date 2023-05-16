@@ -266,6 +266,8 @@ public:
     // get XTS inspector value
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 
+    virtual void FromJson(const std::unique_ptr<JsonValue>& json) {}
+
     void MarkModifyDone();
 
     void UpdateCurrentUIState(UIState state)

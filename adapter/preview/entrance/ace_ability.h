@@ -17,10 +17,12 @@
 #define FOUNDATION_ACE_ADAPTER_PREVIEW_ACE_ABILITY_H
 
 #include <atomic>
+#include <thread>
 
-#include "flutter/shell/platform/glfw/public/flutter_glfw.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "glfw_render_context.h"
+#else
+#include "flutter/shell/platform/glfw/public/flutter_glfw.h"
 #endif
 
 #include "adapter/preview/entrance/ace_run_args.h"
@@ -91,18 +93,8 @@ private:
         controller_ = controller;
     }
 
-#ifdef ENABLE_ROSEN_BACKEND
-    void SetFlutterWindowControllerRef(const FlutterDesktopWindowControllerRef &controller)
-    {
-        windowControllerRef_ = controller;
-    }
-
-    FlutterDesktopWindowControllerRef windowControllerRef_ = nullptr;
-#endif
-
     // flag indicating if the glfw message loop should be running.
     static std::atomic<bool> loopRunning_;
-
     AceRunArgs runArgs_;
     ConfigChanges configChanges_;
     GlfwController controller_ = nullptr;

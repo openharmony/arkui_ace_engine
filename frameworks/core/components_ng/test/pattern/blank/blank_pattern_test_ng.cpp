@@ -22,8 +22,8 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/blank/blank_layout_property.h"
+#include "core/components_ng/pattern/blank/blank_model_ng.h"
 #include "core/components_ng/pattern/blank/blank_pattern.h"
-#include "core/components_ng/pattern/blank/blank_view.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -44,7 +44,6 @@ constexpr float SMALL_ITEM_HEIGHT = 60.0f;
 constexpr Dimension BLANK_MIN(10.0f);
 constexpr Dimension SMALL_BLANK_HEIGHT(5.0f);
 constexpr Dimension LARGE_BLANK_HEIGHT(20.0f);
-constexpr Dimension MIN(0.0f);
 
 const OffsetF ORIGIN_POINT(ZERO, ZERO);
 const SizeF SMALL_ITEM_SIZE(SMALL_ITEM_WIDTH, SMALL_ITEM_HEIGHT);
@@ -209,7 +208,7 @@ PaddingProperty BlankPatternTestNg::CreatePadding(float left, float top, float r
  */
 HWTEST_F(BlankPatternTestNg, BlankFrameNodeCreator001, TestSize.Level1)
 {
-    BlankView blank;
+    BlankModelNG blank;
     blank.Create();
     blank.SetBlankMin(BLANK_MIN);
 
@@ -217,7 +216,7 @@ HWTEST_F(BlankPatternTestNg, BlankFrameNodeCreator001, TestSize.Level1)
     EXPECT_NE(frameNode, nullptr);
     auto blankLayoutProperty = frameNode->GetLayoutProperty<BlankLayoutProperty>();
     EXPECT_NE(blankLayoutProperty, nullptr);
-    EXPECT_EQ(blankLayoutProperty->GetMinSize().value_or(Dimension()), MIN);
+    EXPECT_EQ(blankLayoutProperty->GetMinSize().value_or(Dimension()), BLANK_MIN);
 }
 
 /**
@@ -228,7 +227,7 @@ HWTEST_F(BlankPatternTestNg, BlankFrameNodeCreator001, TestSize.Level1)
  */
 HWTEST_F(BlankPatternTestNg, BlankFrameNodeCreator002, TestSize.Level1)
 {
-    BlankView blank;
+    BlankModelNG blank;
     blank.Create();
     blank.SetHeight(SMALL_BLANK_HEIGHT);
 
@@ -262,7 +261,7 @@ HWTEST_F(BlankPatternTestNg, BlankPatternTest001, TestSize.Level1)
     childLayoutConstraint.minSize = SizeF(ZERO, ZERO);
 
     // create child
-    BlankView blank;
+    BlankModelNG blank;
     blank.Create();
     blank.SetBlankMin(BLANK_MIN);
     blank.SetHeight(SMALL_BLANK_HEIGHT);
@@ -323,7 +322,7 @@ HWTEST_F(BlankPatternTestNg, BlankPatternTest002, TestSize.Level1)
     childLayoutConstraint.maxSize = CONTAINER_SIZE;
     childLayoutConstraint.minSize = SizeF(ZERO, ZERO);
 
-    BlankView blank;
+    BlankModelNG blank;
     blank.Create();
     blank.SetBlankMin(BLANK_MIN);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -382,7 +381,7 @@ HWTEST_F(BlankPatternTestNg, BlankPatternTest003, TestSize.Level1)
     childLayoutConstraint.maxSize = CONTAINER_SIZE;
     childLayoutConstraint.minSize = SizeF(ZERO, ZERO);
 
-    BlankView blank;
+    BlankModelNG blank;
     blank.Create();
     blank.SetBlankMin(BLANK_MIN);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -441,7 +440,7 @@ HWTEST_F(BlankPatternTestNg, BlankPatternTest004, TestSize.Level1)
     childLayoutConstraint.maxSize = CONTAINER_SIZE;
     childLayoutConstraint.minSize = SizeF(ZERO, ZERO);
 
-    BlankView blank;
+    BlankModelNG blank;
     blank.Create();
     blank.SetBlankMin(BLANK_MIN);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -492,7 +491,7 @@ HWTEST_F(BlankPatternTestNg, BlankPatternTest004, TestSize.Level1)
  */
 HWTEST_F(BlankPatternTestNg, BlankPatternTest005, TestSize.Level1)
 {
-    BlankView blank;
+    BlankModelNG blank;
     Dimension blankMin;
 
     auto rowFrameNode =
@@ -558,7 +557,7 @@ HWTEST_F(BlankPatternTestNg, BlankPatternTest005, TestSize.Level1)
  */
 HWTEST_F(BlankPatternTestNg, BlankPatternTest006, TestSize.Level1)
 {
-    BlankView blank;
+    BlankModelNG blank;
     Dimension blankMin;
 
     auto rowFrameNode =
@@ -624,7 +623,7 @@ HWTEST_F(BlankPatternTestNg, BlankPatternTest006, TestSize.Level1)
  */
 HWTEST_F(BlankPatternTestNg, BlankPatternTest007, TestSize.Level1)
 {
-    BlankView blank;
+    BlankModelNG blank;
     blank.Create();
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_NE(frameNode, nullptr);
@@ -642,7 +641,7 @@ HWTEST_F(BlankPatternTestNg, BlankPatternTest007, TestSize.Level1)
  */
 HWTEST_F(BlankPatternTestNg, ToJsonValue001, TestSize.Level1)
 {
-    BlankView blank;
+    BlankModelNG blank;
     blank.Create();
     blank.SetBlankMin(BLANK_MIN);
 

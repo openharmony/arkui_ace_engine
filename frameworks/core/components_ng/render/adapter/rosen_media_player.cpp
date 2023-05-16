@@ -116,11 +116,6 @@ void RosenMediaPlayer::SetVolume(float leftVolume, float rightVolume)
 bool RosenMediaPlayer::SetSource(const std::string& src)
 {
     auto videoSrc = src;
-    // Remove file:// prefix for get fd.
-    if (StringUtils::StartWith(videoSrc, "file://")) {
-        videoSrc = src.substr(FILE_PREFIX_LENGTH);
-    }
-
     int32_t fd = -1;
     bool useFd = false;
     if (!SetMediaSource(videoSrc, fd, useFd)) {
@@ -263,7 +258,8 @@ bool RosenMediaPlayer::GetResourceId(const std::string& path, uint32_t& resId)
 
 bool RosenMediaPlayer::SetMediaSource(std::string& filePath, int32_t& fd, bool& useFd)
 {
-    if (StringUtils::StartWith(filePath, "dataability://") || StringUtils::StartWith(filePath, "datashare://")) {
+    if (StringUtils::StartWith(filePath, "dataability://") || StringUtils::StartWith(filePath, "datashare://") ||
+        StringUtils::StartWith(filePath, "file://media")) {
         // dataability:// or datashare://
         auto pipeline = PipelineBase::GetCurrentContext();
         auto dataProvider = AceType::DynamicCast<DataProviderManagerStandard>(pipeline->GetDataProviderManager());

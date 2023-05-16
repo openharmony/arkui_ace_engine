@@ -15,7 +15,7 @@
 
 #include "core/components/slider/flutter_render_circle_block.h"
 
-#include "third_party/skia/include/core/SkMaskFilter.h"
+#include "include/core/SkMaskFilter.h"
 
 #include "base/utils/system_properties.h"
 #include "core/pipeline/base/scoped_canvas_state.h"

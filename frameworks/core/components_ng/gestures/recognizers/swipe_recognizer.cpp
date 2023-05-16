@@ -194,6 +194,9 @@ void SwipeRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 void SwipeRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
 {
     LOGD("swipe recognizer receives axis move event");
+    if (refereeState_ != RefereeState::DETECTING) {
+        return;
+    }
     globalPoint_ = Point(event.x, event.y);
     time_ = event.time;
     axisVerticalTotal_ += fabs(event.verticalAxis);
@@ -265,6 +268,8 @@ void SwipeRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
     if (callback && *callback) {
         GestureEvent info;
         info.SetTimeStamp(time_);
+        UpdateFingerListInfo(coordinateOffset_);
+        info.SetFingerList(fingerList_);
         info.SetGlobalPoint(globalPoint_);
         if (deviceType_ == SourceType::MOUSE) {
             info.SetSpeed(0.0);

@@ -13,15 +13,13 @@
  * limitations under the License.
  */
 
-#include "frameworks/core/components/svg/flutter_render_svg_fe_gaussianblur.h"
+#include "core/components/svg/flutter_render_svg_fe_gaussianblur.h"
 
-#include "third_party/skia/include/effects/SkBlurImageFilter.h"
+#include "include/effects/SkBlurImageFilter.h"
 
 namespace OHOS::Ace {
-
 void FlutterRenderSvgFeGaussianBlur::OnAsImageFilter(sk_sp<SkImageFilter>& imageFilter) const
 {
     imageFilter = SkBlurImageFilter::Make(deviationX_, deviationY_, imageFilter, nullptr);
 }
-
 } // namespace OHOS::Ace

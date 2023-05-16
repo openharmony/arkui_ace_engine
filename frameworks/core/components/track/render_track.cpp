@@ -92,10 +92,10 @@ void RenderTrack::Update(const RefPtr<Component>& component)
         return;
     }
     if (!progressTransitionController_) {
-        progressTransitionController_ = AceType::MakeRefPtr<Animator>(pipelineContext);
+        progressTransitionController_ = CREATE_ANIMATOR(pipelineContext);
     }
     if (!scanHaloController_ && !pipelineContext->IsJsCard()) {
-        scanHaloController_ = AceType::MakeRefPtr<Animator>(pipelineContext);
+        scanHaloController_ = CREATE_ANIMATOR(pipelineContext);
     }
     MarkNeedLayout();
 }

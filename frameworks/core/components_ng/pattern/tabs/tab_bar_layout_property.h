@@ -45,6 +45,8 @@ public:
         value->propTabBarProperty_ = CloneTabBarProperty();
         value->propAxis_ = CloneAxis();
         value->propIndicator_ = CloneIndicator();
+        value->propSelectedMask_ = CloneSelectedMask();
+        value->propUnselectedMask_ = CloneUnselectedMask();
         return value;
     }
 
@@ -54,9 +56,25 @@ public:
         ResetTabBarProperty();
         ResetAxis();
         ResetIndicator();
+        ResetSelectedMask();
+        ResetUnselectedMask();
     }
 
     RectF GetIndicatorRect(int32_t index);
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        LayoutProperty::ToJsonValue(json);
+        json->Put("barHeight", GetTabBarHeight().value_or(0.0_vp).ToString().c_str());
+        json->Put("currentIndex", propIndicator_.value_or(0));
+    }
+
+    void FromJson(const std::unique_ptr<JsonValue>& json) override
+    {
+        UpdateTabBarHeight(Dimension::FromString(json->GetString("barHeight")));
+        UpdateIndicator(json->GetInt("currentIndex"));
+        LayoutProperty::FromJson(json);
+    }
 
     ACE_DEFINE_PROPERTY_GROUP(TabBarProperty, TabBarProperty);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TabBarProperty, TabBarMode, TabBarMode, PROPERTY_UPDATE_MEASURE);
@@ -65,6 +83,9 @@ public:
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Axis, Axis, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Indicator, int32_t, PROPERTY_UPDATE_NORMAL);
+
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectedMask, int32_t, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(UnselectedMask, int32_t, PROPERTY_UPDATE_MEASURE);
 };
 
 } // namespace OHOS::Ace::NG

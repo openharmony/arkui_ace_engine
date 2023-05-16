@@ -15,7 +15,12 @@
 
 #include "drag_window_ohos.h"
 
-#include "flutter/third_party/txt/src/txt/paragraph_txt.h"
+#include "txt/paragraph_txt.h"
+
+#ifdef NEW_SKIA
+#include "include/core/SkCanvas.h"
+#include "include/core/SkSamplingOptions.h"
+#endif
 
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/offset.h"
@@ -87,28 +92,6 @@ SkImageInfo MakeSkImageInfoFromPixelMap(const RefPtr<PixelMap>& pixmap)
     return SkImageInfo::Make(pixmap->GetWidth(), pixmap->GetHeight(), colorType, alphaType, colorSpace);
 }
 
-void DrawSkImage(SkCanvas* canvas, const RefPtr<PixelMap>& pixmap, int32_t width, int32_t height)
-{
-    // Step1: Create SkPixmap
-    auto imageInfo = MakeSkImageInfoFromPixelMap(pixmap);
-    SkPixmap imagePixmap(imageInfo, reinterpret_cast<const void*>(pixmap->GetPixels()), pixmap->GetRowBytes());
-
-    // Step2: Create SkImage and draw it
-    sk_sp<SkImage> skImage =
-        SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixmap));
-    CHECK_NULL_VOID(skImage);
-    SkPaint paint;
-    sk_sp<SkColorSpace> colorSpace = skImage->refColorSpace();
-#ifdef USE_SYSTEM_SKIA
-    paint.setColor4f(paint.getColor4f(), colorSpace.get());
-#else
-    paint.setColor(paint.getColor4f(), colorSpace.get());
-#endif
-    auto skSrcRect = SkRect::MakeXYWH(0, 0, pixmap->GetWidth(), pixmap->GetHeight());
-    auto skDstRect = SkRect::MakeXYWH(0, 0, width, height);
-    canvas->drawImageRect(skImage, skSrcRect, skDstRect, &paint);
-}
-
 void DrawSkImage(SkCanvas* canvas, const sk_sp<SkImage>& skImage, int32_t width, int32_t height)
 {
     CHECK_NULL_VOID(skImage);
@@ -121,7 +104,24 @@ void DrawSkImage(SkCanvas* canvas, const sk_sp<SkImage>& skImage, int32_t width,
 #endif
     auto skSrcRect = SkRect::MakeXYWH(0, 0, skImage->width(), skImage->height());
     auto skDstRect = SkRect::MakeXYWH(0, 0, width, height);
+#ifndef NEW_SKIA
     canvas->drawImageRect(skImage, skSrcRect, skDstRect, &paint);
+#else
+    canvas->drawImageRect(
+        skImage, skSrcRect, skDstRect, SkSamplingOptions(), &paint, SkCanvas::kFast_SrcRectConstraint);
+#endif
+}
+
+void DrawPixelMapInner(SkCanvas* canvas, const RefPtr<PixelMap>& pixmap, int32_t width, int32_t height)
+{
+    // Step1: Create SkPixmap
+    auto imageInfo = MakeSkImageInfoFromPixelMap(pixmap);
+    SkPixmap imagePixmap(imageInfo, reinterpret_cast<const void*>(pixmap->GetPixels()), pixmap->GetRowBytes());
+
+    // Step2: Create SkImage and draw it
+    sk_sp<SkImage> skImage =
+        SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixmap));
+    DrawSkImage(canvas, skImage, width, height);
 }
 } // namespace
 #endif
@@ -261,7 +261,7 @@ void DragWindowOhos::DrawPixelMap(const RefPtr<PixelMap>& pixelmap)
     rsUiDirector_->SetRoot(rootNode_->GetId());
     auto canvasNode = std::static_pointer_cast<Rosen::RSCanvasNode>(rootNode_);
     auto skia = canvasNode->BeginRecording(width_, height_);
-    DrawSkImage(skia, pixelmap, width_, height_);
+    DrawPixelMapInner(skia, pixelmap, width_, height_);
     canvasNode->FinishRecording();
     rsUiDirector_->SendMessages();
 #endif

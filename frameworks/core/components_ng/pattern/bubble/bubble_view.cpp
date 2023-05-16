@@ -115,11 +115,13 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
     popupProp->UpdateEnableArrow(param->EnableArrow());
     popupProp->UpdatePlacement(param->GetPlacement());
     popupProp->UpdateShowInSubWindow(param->IsShowInSubWindow());
+    popupProp->UpdateBlockEvent(param->IsBlockEvent());
     if (param->GetTargetSpace().has_value()) {
         popupProp->UpdateTargetSpace(param->GetTargetSpace().value());
     }
     auto displayWindowOffset = GetDisplayWindowRectOffset();
     popupProp->UpdateDisplayWindowOffset(displayWindowOffset);
+    popupPaintProp->UpdateEnableArrow(param->EnableArrow());
     if (param->GetArrowOffset().has_value()) {
         popupPaintProp->UpdateArrowOffset(param->GetArrowOffset().value());
     }
@@ -132,7 +134,7 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
     popupPaintProp->UpdateAutoCancel(!param->HasAction());
     popupPaintProp->UpdatePlacement(param->GetPlacement());
 
-    auto bubbleAccessibilityProperty = popupNode->GetAccessibilityProperty<BubbleAccessibilityProperty>();
+    auto bubbleAccessibilityProperty = popupNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_RETURN(bubbleAccessibilityProperty, nullptr);
     bubbleAccessibilityProperty->SetText(message);
 
@@ -186,6 +188,7 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
     layoutProps->UpdateEnableArrow(param->EnableArrow());
     layoutProps->UpdatePlacement(param->GetPlacement());
     layoutProps->UpdateShowInSubWindow(param->IsShowInSubWindow());
+    layoutProps->UpdateBlockEvent(param->IsBlockEvent());
     auto displayWindowOffset = GetDisplayWindowRectOffset();
     layoutProps->UpdateDisplayWindowOffset(displayWindowOffset);
     if (param->GetTargetSpace().has_value()) {
@@ -235,6 +238,7 @@ void BubbleView::UpdatePopupParam(int32_t popupId, const RefPtr<PopupParam>& par
     // Update paint props
     popupPaintProp->UpdatePlacement(param->GetPlacement());
     popupPaintProp->UpdateUseCustom(param->IsUseCustom());
+    popupPaintProp->UpdateEnableArrow(param->EnableArrow());
 }
 
 void BubbleView::UpdateCustomPopupParam(int32_t popupId, const RefPtr<PopupParam>& param)
@@ -271,6 +275,7 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
         popupPaintProp->UpdateArrowOffset(param->GetArrowOffset().value());
     }
     popupLayoutProp->UpdateShowInSubWindow(param->IsShowInSubWindow());
+    popupLayoutProp->UpdateBlockEvent(param->IsBlockEvent());
     if (param->IsMaskColorSetted()) {
         popupPaintProp->UpdateMaskColor(param->GetMaskColor());
     }

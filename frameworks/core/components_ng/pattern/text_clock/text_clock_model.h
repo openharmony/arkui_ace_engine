@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_CLOCK_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_CLOCK_MODEL_H
 
+#include <mutex>
+
 #include "core/components/text_clock/text_clock_controller.h"
 
 namespace OHOS::Ace {
@@ -31,6 +33,7 @@ public:
 
 private:
     static std::unique_ptr<TextClockModel> instance_;
+    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
 

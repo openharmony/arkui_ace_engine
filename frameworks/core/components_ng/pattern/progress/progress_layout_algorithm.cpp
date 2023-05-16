@@ -25,11 +25,15 @@
 #include "core/components/progress/progress_theme.h"
 #include "core/components_ng/pattern/progress/progress_date.h"
 #include "core/components_ng/pattern/progress/progress_layout_property.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/property/measure_property.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 const Dimension DEFALT_RING_DIAMETER = 72.0_vp;
+const Dimension DEFALT_CAPSULE_WIDTH = 28.0_vp;
 } // namespace
 ProgressLayoutAlgorithm::ProgressLayoutAlgorithm() = default;
 
@@ -68,12 +72,16 @@ std::optional<SizeF> ProgressLayoutAlgorithm::MeasureContent(
         }
     }
     if (type_ == ProgressType::CAPSULE) {
-        if (!contentConstraint.selfIdealSize.Height()) {
-            height_ = diameter;
+        if (contentConstraint.selfIdealSize.Width() && !contentConstraint.selfIdealSize.Height()) {
+            height_ = GetChildHeight(layoutWrapper, width_);
         }
-        if (!contentConstraint.selfIdealSize.Width()) {
-            width_ = diameter;
+        if (!contentConstraint.selfIdealSize.Width() && contentConstraint.selfIdealSize.Height()) {
+            width_ = DEFALT_CAPSULE_WIDTH.ConvertToPx();
         }
+        if (!contentConstraint.selfIdealSize.Width() && !contentConstraint.selfIdealSize.Height()) {
+            height_ = GetChildHeight(layoutWrapper, width_);
+        }
+        SetRadius(layoutWrapper, width_, height_);
     }
     height_ = std::min(height_, static_cast<float>(contentConstraint.maxSize.Height()));
     width_ = std::min(width_, static_cast<float>(contentConstraint.maxSize.Width()));
@@ -92,4 +100,49 @@ float ProgressLayoutAlgorithm::GetStrokeWidth() const
     return strokeWidth_;
 }
 
+float ProgressLayoutAlgorithm::GetChildHeight(LayoutWrapper* layoutWrapper, float width) const
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, DEFALT_CAPSULE_WIDTH.ConvertToPx());
+    auto progressTheme = pipeline->GetTheme<ProgressTheme>();
+    Dimension margin = progressTheme->GetTextMargin();
+    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    CHECK_NULL_RETURN(childWrapper, DEFALT_CAPSULE_WIDTH.ConvertToPx());
+    auto layoutProperty = AceType::DynamicCast<ProgressLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(layoutProperty, DEFALT_CAPSULE_WIDTH.ConvertToPx());
+
+    auto childLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(childWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(childLayoutProperty, DEFALT_CAPSULE_WIDTH.ConvertToPx());
+    auto childConstraint = layoutProperty->CreateChildConstraint();
+    childConstraint.maxSize.SetWidth(width);
+    childWrapper->Measure(childConstraint);
+    auto childSize = childWrapper->GetGeometryNode()->GetContentSize();
+    if (childSize.Width() > (width - 2 * margin.ConvertToPx())) {
+        CalcSize defaultCalcSize((CalcLength(width - 2 * margin.ConvertToPx())), std::nullopt);
+        childLayoutProperty->UpdateUserDefinedIdealSize(defaultCalcSize);
+    } else {
+        CalcSize defaultCalcSize((CalcLength(childSize.Width())), std::nullopt);
+        childLayoutProperty->UpdateUserDefinedIdealSize(defaultCalcSize);
+    }
+    float childHeight = childSize.Height() + 2 * margin.ConvertToPx();
+    return childHeight;
+}
+
+void ProgressLayoutAlgorithm::SetRadius(LayoutWrapper* layoutWrapper, float width, float height) const
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    Dimension radius;
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto& borderWidthProperty = layoutProperty->GetBorderWidthProperty();
+    float borderWidth = 0;
+    if (borderWidthProperty) {
+        borderWidth = borderWidthProperty->leftDimen->ConvertToPx();
+    }
+    auto minSize = std::min(height, width);
+    radius.SetValue((minSize + 2 * borderWidth) / 2);
+    BorderRadiusProperty borderRadius { radius, radius, radius, radius };
+    host->GetRenderContext()->UpdateBorderRadius(borderRadius);
+}
 } // namespace OHOS::Ace::NG

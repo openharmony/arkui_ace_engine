@@ -111,9 +111,11 @@ struct BlurStyleOption {
     BlurStyle blurStyle = BlurStyle::NO_MATERIAL;
     ThemeColorMode colorMode = ThemeColorMode::SYSTEM;
     AdaptiveColor adaptiveColor = AdaptiveColor::DEFAULT;
+    double scale = 1.0;
     bool operator == (const BlurStyleOption& other) const
     {
-        return blurStyle == other.blurStyle && colorMode == other.colorMode && adaptiveColor == other.adaptiveColor;
+        return blurStyle == other.blurStyle && colorMode == other.colorMode && adaptiveColor == other.adaptiveColor &&
+               NearEqual(scale, other.scale);
     }
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const
     {
@@ -127,6 +129,7 @@ struct BlurStyleOption {
         auto jsonBlurStyleOption = JsonUtil::Create(true);
         jsonBlurStyleOption->Put("colorMode", COLOR_MODE[static_cast<int>(colorMode)]);
         jsonBlurStyleOption->Put("adaptiveColor", ADAPTIVE_COLOR[static_cast<int>(adaptiveColor)]);
+        jsonBlurStyleOption->Put("scale", scale);
         jsonBlurStyle->Put("options", jsonBlurStyleOption);
         json->Put("backgroundBlurStyle", jsonBlurStyle);
     }
@@ -1280,7 +1283,7 @@ private:
     BlurStyleOption blurStyle_;
 };
 
-class Pattern final {
+class Pattern final : std::enable_shared_from_this<Pattern> {
 public:
     bool IsValid() const
     {
@@ -1327,9 +1330,87 @@ public:
         imageHeight_ = imageHeight;
     }
 
+    double GetScaleX() const
+    {
+        return scaleX_;
+    }
+
+    void SetScaleX(double scaleX)
+    {
+        transformable_ = true;
+        scaleX_ = scaleX;
+    }
+
+    double GetScaleY() const
+    {
+        return scaleY_;
+    }
+
+    void SetScaleY(double scaleY)
+    {
+        transformable_ = true;
+        scaleY_ = scaleY;
+    }
+
+    double GetSkewX() const
+    {
+        return skewX_;
+    }
+
+    void SetSkewX(double skewX)
+    {
+        transformable_ = true;
+        skewX_ = skewX;
+    }
+
+    double GetSkewY() const
+    {
+        return skewY_;
+    }
+
+    void SetSkewY(double skewY)
+    {
+        transformable_ = true;
+        skewY_ = skewY;
+    }
+
+    double GetTranslateX() const
+    {
+        return translateX_;
+    }
+
+    void SetTranslateX(double translateX)
+    {
+        transformable_ = true;
+        translateX_ = translateX;
+    }
+
+    double GetTranslateY() const
+    {
+        return translateY_;
+    }
+
+    void SetTranslateY(double translateY)
+    {
+        transformable_ = true;
+        translateY_ = translateY;
+    }
+
+    bool IsTransformable() const
+    {
+        return transformable_;
+    }
+
 private:
     double imageWidth_ = 0.0;
     double imageHeight_ = 0.0;
+    double scaleX_ = 0.0;
+    double skewX_ = 0.0;
+    double skewY_ = 0.0;
+    double scaleY_ = 0.0;
+    double translateX_ = 0.0;
+    double translateY_ = 0.0;
+    bool transformable_ = false;
     std::string imgSrc_;
     std::string repetition_;
 };

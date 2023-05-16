@@ -15,9 +15,6 @@
 
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 
-#include <memory>
-#include <string>
-
 #include "include/utils/SkParsePath.h"
 #include "render_service_base/include/property/rs_properties_def.h"
 #include "render_service_client/core/modifier/rs_property_modifier.h"
@@ -72,7 +69,9 @@ namespace {
 RefPtr<PixelMap> g_pixelMap {};
 std::mutex g_mutex;
 std::condition_variable thumbnailGet;
-float ConvertDimensionToScaleBySize(const Dimension& dimension, float size)
+} // namespace
+
+float RosenRenderContext::ConvertDimensionToScaleBySize(const Dimension& dimension, float size)
 {
     if (dimension.Unit() == DimensionUnit::PERCENT) {
         return static_cast<float>(dimension.Value());
@@ -80,7 +79,6 @@ float ConvertDimensionToScaleBySize(const Dimension& dimension, float size)
     const float defaultPivot = 0.5f;
     return size > 0.0f ? static_cast<float>(dimension.ConvertToPx() / size) : defaultPivot;
 }
-} // namespace
 
 RosenRenderContext::~RosenRenderContext()
 {
@@ -103,7 +101,7 @@ void RosenRenderContext::StopRecordingIfNeeded()
     }
 }
 
-void RosenRenderContext::OnNodeAppear()
+void RosenRenderContext::OnNodeAppear(bool recursive)
 {
     isDisappearing_ = false;
     // because when call this function, the size of frameNode is not calculated. We need frameNode size
@@ -111,10 +109,14 @@ void RosenRenderContext::OnNodeAppear()
     if (!propTransitionAppearing_ && !transitionEffect_) {
         return;
     }
+
+    // pending transition in animation, will start on first layout
     firstTransitionIn_ = true;
+    // only start default transition on the break point of render node tree. Not Impl yet.
+    isBreakingPoint_ = !recursive;
 }
 
-void RosenRenderContext::OnNodeDisappear()
+void RosenRenderContext::OnNodeDisappear(bool recursive)
 {
     isDisappearing_ = true;
     if (!propTransitionDisappearing_ && !transitionEffect_) {
@@ -122,6 +124,8 @@ void RosenRenderContext::OnNodeDisappear()
     }
     CHECK_NULL_VOID(rsNode_);
     auto rect = GetPaintRectWithoutTransform();
+    // only start default transition on the break point of render node tree. Not Impl yet.
+    isBreakingPoint_ = !recursive;
     NotifyTransitionInner(rect.GetSize(), false);
 }
 
@@ -408,35 +412,85 @@ void RosenRenderContext::SetBackBlurFilter()
     const auto& blurStyle = background->propBlurStyleOption;
     std::shared_ptr<Rosen::RSFilter> backFilter;
     auto dipScale_ = context->GetDipScale();
-    auto rosenBlurStyleValue =
-        blurStyle.has_value() ? GetRosenBlurStyleValue(blurStyle.value()) : MATERIAL_BLUR_STYLE::NO_MATERIAL;
-    if (rosenBlurStyleValue != MATERIAL_BLUR_STYLE::NO_MATERIAL) {
-        backFilter = Rosen::RSFilter::CreateMaterialFilter(static_cast<int>(rosenBlurStyleValue),
-            static_cast<float>(dipScale_), static_cast<Rosen::BLUR_COLOR_MODE>(blurStyle->adaptiveColor));
-    } else {
+    if (!blurStyle.has_value()) {
         const auto& radius = background->propBlurRadius;
         if (radius.has_value() && radius->IsValid()) {
             float radiusPx = context->NormalizeToPx(radius.value());
             float backblurRadius = SkiaDecorationPainter::ConvertRadiusToSigma(radiusPx);
             backFilter = Rosen::RSFilter::CreateBlurFilter(backblurRadius, backblurRadius);
         }
+    } else if (GetRosenBlurStyleValue(blurStyle.value()) == MATERIAL_BLUR_STYLE::NO_MATERIAL) {
+        backFilter = nullptr;
+    } else {
+        backFilter = Rosen::RSFilter::CreateMaterialFilter(static_cast<int>(GetRosenBlurStyleValue(blurStyle.value())),
+            static_cast<float>(dipScale_), static_cast<Rosen::BLUR_COLOR_MODE>(blurStyle->adaptiveColor),
+            static_cast<float>(blurStyle->scale));
     }
     rsNode_->SetBackgroundFilter(backFilter);
 }
 
-void RosenRenderContext::UpdateBackBlurStyle(const BlurStyleOption& bgBlurStyle)
+void RosenRenderContext::SetFrontBlurFilter()
+{
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    const auto& foreground = GetForeground();
+    CHECK_NULL_VOID(foreground);
+    const auto& blurStyle = foreground->propBlurStyleOption;
+    std::shared_ptr<Rosen::RSFilter> frontFilter;
+    auto dipScale_ = context->GetDipScale();
+    if (!blurStyle.has_value()) {
+        const auto& radius = foreground->propBlurRadius;
+        if (radius.has_value() && radius->IsValid()) {
+            float radiusPx = context->NormalizeToPx(radius.value());
+            float backblurRadius = SkiaDecorationPainter::ConvertRadiusToSigma(radiusPx);
+            frontFilter = Rosen::RSFilter::CreateBlurFilter(backblurRadius, backblurRadius);
+        }
+    } else if (GetRosenBlurStyleValue(blurStyle.value()) == MATERIAL_BLUR_STYLE::NO_MATERIAL) {
+        frontFilter = nullptr;
+    } else {
+        frontFilter = Rosen::RSFilter::CreateMaterialFilter(static_cast<int>(GetRosenBlurStyleValue(blurStyle.value())),
+            static_cast<float>(dipScale_), static_cast<Rosen::BLUR_COLOR_MODE>(blurStyle->adaptiveColor),
+            static_cast<float>(blurStyle->scale));
+    }
+
+    rsNode_->SetFilter(frontFilter);
+}
+
+void RosenRenderContext::UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle)
 {
     const auto& groupProperty = GetOrCreateBackground();
     if (groupProperty->CheckBlurStyleOption(bgBlurStyle)) {
         // Same with previous value.
         // If colorMode is following system and has valid blurStyle, still needs updating
-        if (bgBlurStyle.blurStyle == BlurStyle::NO_MATERIAL || bgBlurStyle.colorMode != ThemeColorMode::SYSTEM) {
+        if (bgBlurStyle->colorMode != ThemeColorMode::SYSTEM) {
             return;
         }
     } else {
         groupProperty->propBlurStyleOption = bgBlurStyle;
     }
-    isBackBlurChanged_ = true;
+    SetBackBlurFilter();
+}
+
+void RosenRenderContext::UpdateFrontBlurStyle(const std::optional<BlurStyleOption>& fgBlurStyle)
+{
+    const auto& groupProperty = GetOrCreateForeground();
+    if (groupProperty->CheckBlurStyleOption(fgBlurStyle)) {
+        // Same with previous value.
+        // If colorMode is following system and has valid blurStyle, still needs updating
+        if (fgBlurStyle->colorMode != ThemeColorMode::SYSTEM) {
+            return;
+        }
+    } else {
+        groupProperty->propBlurStyleOption = fgBlurStyle;
+    }
+    SetFrontBlurFilter();
+}
+
+void RosenRenderContext::ResetBackBlurStyle()
+{
+    const auto& groupProperty = GetOrCreateBackground();
+    groupProperty->propBlurStyleOption.reset();
+    SetBackBlurFilter();
 }
 
 void RosenRenderContext::OnSphericalEffectUpdate(double radio)
@@ -664,16 +718,14 @@ RectF RosenRenderContext::GetPaintRectWithoutTransform()
 void RosenRenderContext::NotifyTransitionInner(const SizeF& frameSize, bool isTransitionIn)
 {
     CHECK_NULL_VOID(rsNode_);
-    if (transitionEffect_) {
-        NotifyTransition(isTransitionIn);
+    auto& transOptions = isTransitionIn ? propTransitionAppearing_ : propTransitionDisappearing_;
+    if (auto effect = GetRSTransitionWithoutType(transOptions, frameSize)) {
+        SetTransitionPivot(frameSize, isTransitionIn);
+        // notice that we have been in animateTo, so do not need to use Animation closure to notify transition.
+        rsNode_->NotifyTransition(effect, isTransitionIn);
         return;
     }
-    auto& transOptions = isTransitionIn ? propTransitionAppearing_ : propTransitionDisappearing_;
-    CHECK_NULL_VOID_NOLOG(transOptions);
-    SetTransitionPivot(frameSize, isTransitionIn);
-    auto effect = GetRSTransitionWithoutType(*transOptions, frameSize);
-    // notice that we have been in animateTo, so do not need to use Animation closure to notify transition.
-    rsNode_->NotifyTransition(effect, isTransitionIn);
+    NotifyTransition(isTransitionIn);
 }
 
 void RosenRenderContext::OpacityAnimation(const AnimationOption& option, double begin, double end)
@@ -757,6 +809,12 @@ void RosenRenderContext::OnAccessibilityFocusUpdate(bool isAccessibilityFocus)
     }
     uiNode->OnAccessibilityEvent(isAccessibilityFocus ? AccessibilityEventType::ACCESSIBILITY_FOCUSED
                                                       : AccessibilityEventType::ACCESSIBILITY_FOCUS_CLEARED);
+}
+
+void RosenRenderContext::OnFreezeUpdate(bool isFreezed)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetFreeze(isFreezed);
 }
 
 void RosenRenderContext::PaintAccessibilityFocus()
@@ -939,10 +997,6 @@ void RosenRenderContext::OnModifyDone()
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(rsNode_);
-    if (isBackBlurChanged_) {
-        SetBackBlurFilter();
-        isBackBlurChanged_ = false;
-    }
     const auto& size = frameNode->GetGeometryNode()->GetFrameSize();
     if (!size.IsPositive()) {
         LOGD("first modify, make change in SyncGeometryProperties");
@@ -985,30 +1039,107 @@ RectF RosenRenderContext::AdjustPaintRect()
     auto anchorHeightReference = rect.Height();
     auto anchorX = ConvertToPx(anchor.GetX(), ScaleProperty::CreateScaleProperty(), anchorWidthReference);
     auto anchorY = ConvertToPx(anchor.GetY(), ScaleProperty::CreateScaleProperty(), anchorHeightReference);
+    Dimension resultX;
+    Dimension resultY;
     Dimension parentPaddingLeft;
     Dimension parentPaddingTop;
+    GetPaddingOfFirstFrameNodeParent(parentPaddingLeft, parentPaddingTop);
     // Position properties take precedence over offset locations.
-    if (HasPosition()) {
-        GetPaddingOfFirstFrameNodeParent(parentPaddingLeft, parentPaddingTop);
-        auto position = GetPositionValue({}) + OffsetT<Dimension>(parentPaddingLeft, parentPaddingTop);
-        auto posX = ConvertToPx(position.GetX(), ScaleProperty::CreateScaleProperty(), widthPercentReference);
-        auto posY = ConvertToPx(position.GetY(), ScaleProperty::CreateScaleProperty(), heightPercentReference);
-        rect.SetLeft(posX.value_or(0) - anchorX.value_or(0));
-        rect.SetTop(posY.value_or(0) - anchorY.value_or(0));
+    if (HasPosition() && IsUsingPosition(frameNode)) {
+        CombineMarginAndPosition(
+            resultX, resultY, parentPaddingLeft, parentPaddingTop, widthPercentReference, heightPercentReference);
+        rect.SetLeft(resultX.ConvertToPx() - anchorX.value_or(0));
+        rect.SetTop(resultY.ConvertToPx() - anchorY.value_or(0));
         return rect;
     }
     if (HasOffset()) {
-        GetPaddingOfFirstFrameNodeParent(parentPaddingLeft, parentPaddingTop);
-        auto offset = GetOffsetValue({}) + OffsetT<Dimension>(parentPaddingLeft, parentPaddingTop);
-        auto offsetX = ConvertToPx(offset.GetX(), ScaleProperty::CreateScaleProperty(), widthPercentReference);
-        auto offsetY = ConvertToPx(offset.GetY(), ScaleProperty::CreateScaleProperty(), heightPercentReference);
-        rect.SetLeft(rect.GetX() + offsetX.value_or(0) - anchorX.value_or(0));
-        rect.SetTop(rect.GetY() + offsetY.value_or(0) - anchorY.value_or(0));
+        CombinePaddingAndOffset(
+            resultX, resultY, parentPaddingLeft, parentPaddingTop, widthPercentReference, heightPercentReference);
+        rect.SetLeft(rect.GetX() + resultX.ConvertToPx() - anchorX.value_or(0));
+        rect.SetTop(rect.GetY() + resultY.ConvertToPx() - anchorY.value_or(0));
         return rect;
     }
     rect.SetLeft(rect.GetX() - anchorX.value_or(0));
     rect.SetTop(rect.GetY() - anchorY.value_or(0));
     return rect;
+}
+
+void RosenRenderContext::CombineMarginAndPosition(Dimension& resultX, Dimension& resultY,
+    const Dimension& parentPaddingLeft, const Dimension& parentPaddingTop, float widthPercentReference,
+    float heightPercentReference)
+{
+    Dimension selfMarginLeft;
+    Dimension selfMarginTop;
+    auto frameNode = GetHost();
+    if (frameNode && frameNode->GetLayoutProperty() && frameNode->GetLayoutProperty()->GetMarginProperty()) {
+        auto& margin = frameNode->GetLayoutProperty()->GetMarginProperty();
+        if (margin->left.has_value()) {
+            selfMarginLeft = margin->left.value().GetDimension();
+        }
+        if (margin->top.has_value()) {
+            selfMarginTop = margin->top.value().GetDimension();
+        }
+    }
+    // to distinguish cases ex. margin has percentage unit and padding has vp unit
+    // final rect offset will be affected by parent padding, self margin and position property
+    if (selfMarginLeft.Unit() != GetPositionValue({}).GetX().Unit() ||
+        selfMarginLeft.Unit() != parentPaddingLeft.Unit() ||
+        parentPaddingLeft.Unit() != GetPositionValue({}).GetX().Unit()) {
+        resultX = Dimension(
+            ConvertToPx(parentPaddingLeft, ScaleProperty::CreateScaleProperty(), widthPercentReference).value_or(0) +
+                ConvertToPx(selfMarginLeft, ScaleProperty::CreateScaleProperty(), widthPercentReference).value_or(0) +
+                ConvertToPx(GetPositionValue({}).GetX(), ScaleProperty::CreateScaleProperty(), widthPercentReference)
+                    .value_or(0),
+            DimensionUnit::PX);
+    } else {
+        resultX = selfMarginLeft + GetPositionValue({}).GetX() + parentPaddingLeft;
+    }
+    if (selfMarginTop.Unit() != GetPositionValue({}).GetY().Unit() || selfMarginTop.Unit() != parentPaddingTop.Unit() ||
+        parentPaddingTop.Unit() != GetPositionValue({}).GetY().Unit()) {
+        resultY = Dimension(
+            ConvertToPx(parentPaddingTop, ScaleProperty::CreateScaleProperty(), heightPercentReference).value_or(0) +
+                ConvertToPx(selfMarginTop, ScaleProperty::CreateScaleProperty(), heightPercentReference).value_or(0) +
+                ConvertToPx(GetPositionValue({}).GetY(), ScaleProperty::CreateScaleProperty(), heightPercentReference)
+                    .value_or(0),
+            DimensionUnit::PX);
+    } else {
+        resultY = selfMarginTop + GetPositionValue({}).GetY() + parentPaddingTop;
+    }
+}
+
+void RosenRenderContext::CombinePaddingAndOffset(Dimension& resultX, Dimension& resultY,
+    const Dimension& parentPaddingLeft, const Dimension& parentPaddingTop, float widthPercentReference,
+    float heightPercentReference)
+{
+    // to distinguish cases ex. offset has percentage unit and padding has vp unit
+    if (parentPaddingLeft.Unit() != GetOffsetValue({}).GetX().Unit()) {
+        resultX = Dimension(
+            ConvertToPx(parentPaddingLeft, ScaleProperty::CreateScaleProperty(), widthPercentReference).value_or(0) +
+                ConvertToPx(GetOffsetValue({}).GetX(), ScaleProperty::CreateScaleProperty(), widthPercentReference)
+                    .value_or(0),
+            DimensionUnit::PX);
+    } else {
+        resultX = parentPaddingLeft + GetOffsetValue({}).GetX();
+    }
+    if (parentPaddingTop.Unit() != GetOffsetValue({}).GetY().Unit()) {
+        resultY = Dimension(
+            ConvertToPx(parentPaddingTop, ScaleProperty::CreateScaleProperty(), heightPercentReference).value_or(0) +
+                ConvertToPx(GetOffsetValue({}).GetY(), ScaleProperty::CreateScaleProperty(), heightPercentReference)
+                    .value_or(0),
+            DimensionUnit::PX);
+    } else {
+        resultY = parentPaddingTop + GetOffsetValue({}).GetY();
+    }
+}
+
+bool RosenRenderContext::IsUsingPosition(const RefPtr<FrameNode>& frameNode)
+{
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    bool isUsingPosition = true;
+    if (layoutProperty) {
+        isUsingPosition = layoutProperty->IsUsingPosition();
+    }
+    return isUsingPosition;
 }
 
 void RosenRenderContext::GetPaddingOfFirstFrameNodeParent(Dimension& parentPaddingLeft, Dimension& parentPaddingTop)
@@ -1438,20 +1569,18 @@ void RosenRenderContext::UpdateBackBlurRadius(const Dimension& radius)
         return;
     }
     groupProperty->propBlurRadius = radius;
-    isBackBlurChanged_ = true;
+    SetBackBlurFilter();
 }
 
-void RosenRenderContext::OnFrontBlurRadiusUpdate(const Dimension& radius)
+void RosenRenderContext::UpdateFrontBlurRadius(const Dimension& radius)
 {
-    std::shared_ptr<Rosen::RSFilter> frontFilter = nullptr;
-    if (radius.IsValid()) {
-        float radiusPx = radius.ConvertToPx();
-        float frontBlurRadius = SkiaDecorationPainter::ConvertRadiusToSigma(radiusPx);
-        frontFilter = Rosen::RSFilter::CreateBlurFilter(frontBlurRadius, frontBlurRadius);
+    const auto& groupProperty = GetOrCreateForeground();
+    if (groupProperty->CheckBlurRadius(radius)) {
+        // Same with previous value
+        return;
     }
-    CHECK_NULL_VOID(rsNode_);
-    rsNode_->SetFilter(frontFilter);
-    RequestNextFrame();
+    groupProperty->propBlurRadius = radius;
+    SetFrontBlurFilter();
 }
 
 void RosenRenderContext::OnBackShadowUpdate(const Shadow& shadow)
@@ -1469,6 +1598,7 @@ void RosenRenderContext::OnBackShadowUpdate(const Shadow& shadow)
     rsNode_->SetShadowColor(shadow.GetColor().GetValue());
     rsNode_->SetShadowOffsetX(shadow.GetOffset().GetX());
     rsNode_->SetShadowOffsetY(shadow.GetOffset().GetY());
+    rsNode_->SetShadowMask(shadow.GetShadowType() == ShadowType::BLUR);
     if (shadow.GetHardwareAcceleration()) {
         rsNode_->SetShadowElevation(shadow.GetElevation());
     } else {
@@ -1625,24 +1755,27 @@ void RosenRenderContext::UpdateTransition(const TransitionOptions& options)
 }
 
 std::shared_ptr<Rosen::RSTransitionEffect> RosenRenderContext::GetRSTransitionWithoutType(
-    const TransitionOptions& options, const SizeF& frameSize)
+    const std::unique_ptr<TransitionOptions>& options, const SizeF& frameSize)
 {
-    std::shared_ptr<Rosen::RSTransitionEffect> effect = Rosen::RSTransitionEffect::Create();
-    if (options.HasOpacity()) {
-        effect = effect->Opacity(options.GetOpacityValue());
+    if (options == nullptr) {
+        return nullptr;
     }
-    if (options.HasTranslate()) {
-        const auto& translate = options.GetTranslateValue();
+    std::shared_ptr<Rosen::RSTransitionEffect> effect = Rosen::RSTransitionEffect::Create();
+    if (options->HasOpacity()) {
+        effect = effect->Opacity(options->GetOpacityValue());
+    }
+    if (options->HasTranslate()) {
+        const auto& translate = options->GetTranslateValue();
         effect = effect->Translate({ static_cast<float>(translate.x.ConvertToPxWithSize(frameSize.Width())),
             static_cast<float>(translate.y.ConvertToPxWithSize(frameSize.Height())),
             static_cast<float>(translate.z.ConvertToPx()) });
     }
-    if (options.HasScale()) {
-        const auto& scale = options.GetScaleValue();
+    if (options->HasScale()) {
+        const auto& scale = options->GetScaleValue();
         effect = effect->Scale({ scale.xScale, scale.yScale, scale.zScale });
     }
-    if (options.HasRotate()) {
-        const auto& rotate = options.GetRotateValue();
+    if (options->HasRotate()) {
+        const auto& rotate = options->GetRotateValue();
         effect = effect->Rotate({ rotate.xDirection, rotate.yDirection, rotate.zDirection, rotate.angle });
     }
     return effect;
@@ -1722,14 +1855,14 @@ void RosenRenderContext::PaintProgressMask()
         moonProgressModifier_ = std::make_shared<MoonProgressModifier>();
         rsNode_->AddModifier(moonProgressModifier_);
     }
-    auto prgress = GetProgressMaskValue();
+    auto progress = GetProgressMaskValue();
     moonProgressModifier_->InitRatio();
-    moonProgressModifier_->SetMaskColor(LinearColor(prgress->GetColor()));
-    moonProgressModifier_->SetMaxValue(prgress->GetMaxValue());
-    if (prgress->GetValue() > moonProgressModifier_->GetMaxValue()) {
-        prgress->SetValue(moonProgressModifier_->GetMaxValue());
+    moonProgressModifier_->SetMaskColor(LinearColor(progress->GetColor()));
+    moonProgressModifier_->SetMaxValue(progress->GetMaxValue());
+    if (progress->GetValue() > moonProgressModifier_->GetMaxValue()) {
+        progress->SetValue(moonProgressModifier_->GetMaxValue());
     }
-    moonProgressModifier_->SetValue(prgress->GetValue());
+    moonProgressModifier_->SetValue(progress->GetValue());
 }
 
 void RosenRenderContext::SetClipBoundsWithCommands(const std::string& commands)
@@ -1746,6 +1879,20 @@ void RosenRenderContext::ClipWithRect(const RectF& rectF)
     SkPath skPath;
     skPath.addRect(rectF.GetX(), rectF.GetY(), rectF.GetX() + rectF.Width(), rectF.GetY() + rectF.Height());
     rsNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(skPath));
+}
+
+void RosenRenderContext::ClipWithRRect(const RectF& rectF, const RadiusF& radiusF)
+{
+    CHECK_NULL_VOID(rsNode_);
+    Rosen::Vector4f rect;
+    Rosen::Vector4f radius;
+    rect.SetValues(rectF.GetX(), rectF.GetY(), rectF.GetX() + rectF.Width(), rectF.GetY() + rectF.Height());
+    radius.SetValues(radiusF.GetCorner(RoundRect::CornerPos::TOP_LEFT_POS).x,
+        radiusF.GetCorner(RoundRect::CornerPos::TOP_RIGHT_POS).x,
+        radiusF.GetCorner(RoundRect::CornerPos::BOTTOM_LEFT_POS).x,
+        radiusF.GetCorner(RoundRect::CornerPos::BOTTOM_RIGHT_POS).x);
+    rsNode_->SetClipRRect(rect, radius);
+    RequestNextFrame();
 }
 
 void RosenRenderContext::OnClipShapeUpdate(const RefPtr<BasicShape>& /*basicShape*/)
@@ -1781,7 +1928,7 @@ void RosenRenderContext::OnClipMaskUpdate(const RefPtr<BasicShape>& /*basicShape
     RequestNextFrame();
 }
 
-void RosenRenderContext::OnProgressMaskUpdate(const RefPtr<ProgressMaskProperty>& prgress)
+void RosenRenderContext::OnProgressMaskUpdate(const RefPtr<ProgressMaskProperty>&)
 {
     PaintProgressMask();
     CHECK_NULL_VOID(rsNode_);
@@ -2097,48 +2244,79 @@ void RosenRenderContext::MarkDrivenRenderFramePaintState(bool flag)
 void RosenRenderContext::UpdateChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect)
 {
     if (transitionEffect_) {
-        transitionEffect_->OnDetach(Claim(this));
+        // use effect to update rosenTransitionEffect activeValue
+        if (RosenTransitionEffect::UpdateRosenTransitionEffect(transitionEffect_, effect)) {
+            return;
+        }
+        LOGW("transition effect struct changed");
+        transitionEffect_->Detach(Claim(this));
     }
-    // [[PLANNING]]: if the struct of effect not changed, we can change the params in effect directly
     transitionEffect_ = RosenTransitionEffect::ConvertToRosenTransitionEffect(effect);
     CHECK_NULL_VOID(transitionEffect_);
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     bool isOnTheTree = frameNode->IsOnMainTree();
     // transition effects should be initialized without animation.
-    RSNode::ExecuteWithoutAnimation([this, isOnTheTree]() {
+    RSNode::ExecuteWithoutAnimation([this, isOnTheTree, &frameNode]() {
         // transitionIn effects should be initialized as active if currently not on the tree.
-        transitionEffect_->OnAttach(Claim(this), !isOnTheTree);
+        transitionEffect_->Attach(Claim(this), !isOnTheTree);
     });
 }
 
 void RosenRenderContext::NotifyTransition(bool isTransitionIn)
 {
-    CHECK_NULL_VOID(transitionEffect_);
+    CHECK_NULL_VOID_NOLOG(transitionEffect_);
 
-    LOGI("notifyTransition, transition:%{public}s", isTransitionIn ? "in" : "out");
-    RSNode::ExecuteWithoutAnimation([this]() {
-        auto frameNode = GetHost();
-        CHECK_NULL_VOID(frameNode);
-        const auto& size = frameNode->GetGeometryNode()->GetFrameSize();
-        transitionEffect_->UpdateFrameSize(size);
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    LOGD("RosenTransitionEffect::NotifyTransition transition BEGIN, node %{public}d, isTransitionIn: %{public}d",
+        frameNode->GetId(), isTransitionIn);
+
+    RSNode::ExecuteWithoutAnimation([this, &frameNode]() {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        SizeF rootSize(pipeline->GetRootWidth(), pipeline->GetRootHeight());
+        auto parentOffset = frameNode->GetPaintRectOffset(true);
+        auto rect = GetPaintRectWithoutTransform();
+        // Do not consider the position after its own transform, as the transition modifier also affects the transform
+        rect.SetOffset(parentOffset + rect.GetOffset());
+
+        transitionEffect_->UpdateTransitionContext(Claim(this), rect, rootSize);
     });
 
     if (isTransitionIn) {
-        transitionEffect_->Appear();
-        return;
+        // Isolate the animation callback function, to avoid changing the callback timing of current implicit animation.
+        AnimationUtils::AnimateWithCurrentOptions([this]() { transitionEffect_->Appear(); },
+            [nodeId = frameNode->GetId()]() {
+                LOGD("RosenTransitionEffect::NotifyTransition transition END, node %{public}d, isTransitionIn: IN",
+                    nodeId);
+            },
+            false);
     } else {
-        // copy current implicit animation params and replace the finish callback function.
-        RSNode::Animate(
-            [isTransitionIn, this]() {
+        // Re-use current implicit animation timing params, only replace the finish callback function.
+        // The finish callback function will perform all the necessary cleanup work.
+        // Important Note on timing:
+        // 1. If any transition animations are created, the finish callback function will only be called when ALL
+        //    animations have finished. This is accomplished by sharing the same shared_ptr<AnimationFinishCallback>
+        //    among all animations.
+        // 2. If no transition animations are created, the finish callback function will be called IMMEDIATELY. This
+        //    is accomplished by setting the last param (timing sensitive) to false, which avoids creating an empty
+        //    'timer' animation.
+        AnimationUtils::AnimateWithCurrentOptions(
+            [this]() {
                 transitionEffect_->Disappear();
+                // update transition out count
                 ++disappearingTransitionCount_;
             },
-            [weakThis = WeakClaim(this)]() {
+            [weakThis = WeakClaim(this), nodeId = frameNode->GetId()]() {
                 auto context = weakThis.Upgrade();
                 CHECK_NULL_VOID(context);
+                LOGD("RosenTransitionEffect::NotifyTransition transition END, node %{public}d, isTransitionIn: OUT",
+                    nodeId);
+                // update transition out count
                 context->OnTransitionOutFinish();
-            });
+            },
+            false);
     }
 }
 
@@ -2147,28 +2325,39 @@ void RosenRenderContext::OnTransitionOutFinish()
     // update transition out count
     --disappearingTransitionCount_;
     if (disappearingTransitionCount_ < 0) {
-        LOGE("disappearingTransitionCount_ should not be less than 0");
+        LOGE("RosenTransitionEffect: disappearingTransitionCount_ should not be less than 0");
         disappearingTransitionCount_ = 0;
     }
-    // if all transition out effects are finished, do clean up.
-    if (disappearingTransitionCount_ <= 0) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto parent = host->GetParent();
-        // clean up related status.
-        host->UINode::OnRemoveFromParent();
-        // try to remove self from disappearing nodes of parent.
-        if (parent && parent->RemoveDisappearingChild(host)) {
-            // if success, tell parent to rebuild render tree.
-            parent->MarkNeedSyncRenderTree();
-            parent->RebuildRenderContextTree();
-        }
-        if (isModalRootNode_ && parent->GetChildren().empty()) {
-            auto grandParent = parent->GetParent();
-            CHECK_NULL_VOID(grandParent);
-            grandParent->RemoveChild(parent);
-            grandParent->RebuildRenderContextTree();
-        }
+    // make sure we are the last transition out animation, if not, return.
+    if (disappearingTransitionCount_ > 0) {
+        LOGD("RosenTransitionEffect: disappearingTransitionCount_ is %{public}d, not the last transition out animation",
+            disappearingTransitionCount_);
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    // if the node is not disappearing (reappear?), return.
+    if (!host->IsDisappearing()) {
+        LOGD("RosenTransitionEffect: node is not disappearing, skip");
+        return;
+    }
+    LOGD("RosenTransitionEffect: transition out finish, remove node %{public}d", host->GetId());
+
+    // should get parent before onRemoveFromParent function because it will reset parent
+    auto parent = host->GetParent();
+    // clean up related status.
+    host->UINode::OnRemoveFromParent();
+    // try to remove self from parent's disappearing children.
+    if (parent && parent->RemoveDisappearingChild(host)) {
+        // if success, tell parent to rebuild render tree.
+        parent->MarkNeedSyncRenderTree();
+        parent->RebuildRenderContextTree();
+    }
+    if (isModalRootNode_ && parent->GetChildren().empty()) {
+        auto grandParent = parent->GetParent();
+        CHECK_NULL_VOID(grandParent);
+        grandParent->RemoveChild(parent);
+        grandParent->RebuildRenderContextTree();
     }
 }
 

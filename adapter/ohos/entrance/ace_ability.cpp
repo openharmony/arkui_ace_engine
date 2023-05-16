@@ -26,6 +26,7 @@
 #include "ipc_skeleton.h"
 #include "res_config.h"
 #include "resource_manager.h"
+#include "session_info.h"
 #include "string_wrapper.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/ui/rs_ui_director.h"
@@ -201,9 +202,9 @@ bool AceWindowListener::OnInputEvent(const std::shared_ptr<MMI::AxisEvent>& axis
 
 AceAbility::AceAbility() = default;
 
-void AceAbility::OnStart(const Want& want)
+void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
 {
-    Ability::OnStart(want);
+    Ability::OnStart(want, sessionInfo);
     LOGI("AceAbility::OnStart called");
     abilityId_ = g_instanceId++;
     static std::once_flag onceFlag;

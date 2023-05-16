@@ -36,6 +36,12 @@ public:
 
     AccessibilityValue GetAccessibilityValue() const override;
 
+    bool IsScrollable() const override
+    {
+        return true;
+    }
+
+    void SetSpecificSupportAction() override;
 private:
     ACE_DISALLOW_COPY_AND_MOVE(SliderAccessibilityProperty);
 };
