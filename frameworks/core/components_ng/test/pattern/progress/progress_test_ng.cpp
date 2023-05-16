@@ -24,6 +24,8 @@
 #define private public
 #define protected public
 
+#include "test/mock/base/mock_task_executor.h"
+
 #include "base/memory/ace_type.h"
 #include "core/components/progress/progress_theme.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -35,11 +37,10 @@
 #include "core/components_ng/pattern/progress/progress_paint_property.h"
 #include "core/components_ng/pattern/progress/progress_pattern.h"
 #include "core/components_ng/property/progress_mask_property.h"
+#include "core/components_ng/render/render_context.h"
 #include "core/components_ng/test/mock/rosen/mock_canvas.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
-#include "core/components_ng/render/render_context.h"
-#include "test/mock/base/mock_task_executor.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -126,7 +127,7 @@ constexpr Dimension BORDER_WIDTH = 2.0_vp;
 constexpr Dimension FONT_SIZE = 12.0_vp;
 const std::string FONT_CONTEXT = "start";
 const FontWeight FONT_WEIGHT = FontWeight::BOLDER;
-const std::vector<std::string> FONT_FAMILY = {"serif"};
+const std::vector<std::string> FONT_FAMILY = { "serif" };
 
 CreateProperty creatProperty;
 DirtySwapConfig config;
@@ -900,9 +901,8 @@ HWTEST_F(ProgressTestNg, GetContentDrawFunction, TestSize.Level1)
         RefPtr<PaintWrapper> paintWrapper =
             AceType::MakeRefPtr<PaintWrapper>(RenderContext::Create(), geometryNode, progressPaintProperty);
         auto progressModifier = AceType::MakeRefPtr<ProgressModifier>();
-        auto progressPaintMethod =
-            AceType::MakeRefPtr<ProgressPaintMethod>(progressType[i], LARG_STORKE_WIDTH.ConvertToPx(),
-            progressModifier);
+        auto progressPaintMethod = AceType::MakeRefPtr<ProgressPaintMethod>(
+            progressType[i], LARG_STORKE_WIDTH.ConvertToPx(), progressModifier);
         EXPECT_NE(progressPaintMethod, nullptr);
         EXPECT_NE(progressPaintMethod->progressModifier_, nullptr);
     }
@@ -1578,8 +1578,8 @@ HWTEST_F(ProgressTestNg, CapulseProgressMeasure001, TestSize.Level1)
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
     geometryNode->SetContentSize(SizeF(100, 50));
-    RefPtr<LayoutWrapper> textWrapper = AceType::MakeRefPtr<LayoutWrapper>(textNode,
-        geometryNode, textNode->GetLayoutProperty());
+    RefPtr<LayoutWrapper> textWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(textNode, geometryNode, textNode->GetLayoutProperty());
     ASSERT_NE(textWrapper, nullptr);
     layoutWrapper.AppendChild(textWrapper);
     contentConstraint.selfIdealSize.SetWidth(PROGRESS_COMPONENT_WIDTH);
@@ -1628,8 +1628,8 @@ HWTEST_F(ProgressTestNg, CapulseProgressMeasure002, TestSize.Level1)
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
     geometryNode->SetContentSize(SizeF(500, 100));
-    RefPtr<LayoutWrapper> textWrapper = AceType::MakeRefPtr<LayoutWrapper>(textNode,
-        geometryNode, textNode->GetLayoutProperty());
+    RefPtr<LayoutWrapper> textWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(textNode, geometryNode, textNode->GetLayoutProperty());
     ASSERT_NE(textWrapper, nullptr);
     layoutWrapper.AppendChild(textWrapper);
     contentConstraint.selfIdealSize.SetWidth(PROGRESS_COMPONENT_WIDTH);
@@ -2159,7 +2159,6 @@ HWTEST_F(ProgressTestNg, LinearProgressModifier001, TestSize.Level1)
     progressModifier.onDraw(context);
     EXPECT_EQ(progressModifier.progressType_->Get(), static_cast<int32_t>(PROGRESS_TYPE_LINEAR));
     EXPECT_EQ(progressModifier.sweepingDateUpdated_, true);
-
 
     /**
      * @tc.steps: step4. Set invisible.

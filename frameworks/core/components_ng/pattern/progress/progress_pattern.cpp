@@ -126,7 +126,7 @@ void ProgressPattern::OnPress(const TouchEventInfo& info)
     CHECK_NULL_VOID(textHost);
     auto textLayoutProperty = textHost->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    
+
     if (touchType == TouchType::DOWN) {
         backgroundColor_ = paintProperty->GetBackgroundColor().value_or(theme->GetCapsuleBgColor());
         selectColor_ = paintProperty->GetColor().value_or(theme->GetCapsuleSelectColor());

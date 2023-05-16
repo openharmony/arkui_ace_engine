@@ -24,15 +24,15 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/progress/progress_accessibility_property.h"
 #include "core/components_ng/pattern/progress/progress_layout_algorithm.h"
 #include "core/components_ng/pattern/progress/progress_layout_property.h"
+#include "core/components_ng/pattern/progress/progress_modifier.h"
 #include "core/components_ng/pattern/progress/progress_paint_method.h"
 #include "core/components_ng/pattern/progress/progress_paint_property.h"
 #include "core/components_ng/property/property.h"
-#include "core/components_ng/pattern/progress/progress_modifier.h"
-#include "core/components_ng/base/geometry_node.h"
 
 namespace OHOS::Ace::NG {
 // ProgressPattern is the base class for progress render node to perform paint progress.
