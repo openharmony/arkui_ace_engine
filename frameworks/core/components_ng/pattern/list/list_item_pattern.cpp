@@ -35,7 +35,6 @@ constexpr float SWIPE_SPRING_MASS = 1.f;
 constexpr float SWIPE_SPRING_STIFFNESS = 228.f;
 constexpr float SWIPE_SPRING_DAMPING = 30.f;
 constexpr int32_t DELETE_ANIMATION_DURATION = 400;
-constexpr int32_t OPACITY_ANIMATION_DURATION = 100;
 } // namespace
 
 RefPtr<LayoutAlgorithm> ListItemPattern::CreateLayoutAlgorithm()
@@ -273,7 +272,7 @@ float ListItemPattern::GetFriction()
         if (hasStartDeleteArea_) {
             if (width + startDeleteAreaDistance_ < curOffset_) {
                 return CalculateFriction(
-                    (curOffset_ - width - startDeleteAreaDistance_) / (itemWidth - width - startDeleteAreaDistance_));
+                    (curOffset_ - width - startDeleteAreaDistance_) / (itemWidth - width));
             }
             return 1.0f;
         }
@@ -286,7 +285,7 @@ float ListItemPattern::GetFriction()
         if (hasEndDeleteArea_) {
             if (width + endDeleteAreaDistance_ < -curOffset_) {
                 return CalculateFriction(
-                    (-curOffset_ - width - endDeleteAreaDistance_) / (itemWidth - width - endDeleteAreaDistance_));
+                    (-curOffset_ - width - endDeleteAreaDistance_) / (itemWidth - width));
             }
             return 1.0f;
         }
@@ -452,23 +451,17 @@ void ListItemPattern::DoDeleteAnimation(const GestureEvent& info, const OnDelete
     float itemWidth = GetContentSize().CrossSize(axis_);
     float friction = GetFriction();
 
-    AnimationOption optionAlpha = AnimationOption();
-    optionAlpha.SetCurve(Curves::FRICTION);
-    optionAlpha.SetFillMode(FillMode::FORWARDS);
-    optionAlpha.SetDuration(OPACITY_ANIMATION_DURATION);
-
     AnimationOption option = AnimationOption();
     option.SetDuration(DELETE_ANIMATION_DURATION);
     option.SetCurve(Curves::FRICTION);
     option.SetFillMode(FillMode::FORWARDS);
     context->OpenImplicitAnimation(option, option.GetCurve(),
         [weak = AceType::WeakClaim(this), onDelete = onDelete, info = info, friction = friction,
-            renderContext = renderContext, optionAlpha = optionAlpha, isRightDelete = isRightDelete]() {
+            renderContext = renderContext, isRightDelete = isRightDelete]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             onDelete();
             float end = 0.0f;
-            renderContext->OpacityAnimation(optionAlpha, 0, 1);
             if (isRightDelete) {
                 pattern->swiperIndex_ = ListItemSwipeIndex::SWIPER_START;
                 end = pattern->startNodeSize_ * static_cast<int32_t>(pattern->swiperIndex_);
@@ -481,7 +474,6 @@ void ListItemPattern::DoDeleteAnimation(const GestureEvent& info, const OnDelete
     curOffset_ = isRightDelete ? itemWidth : -itemWidth;
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     context->FlushUITasks();
-    renderContext->OpacityAnimation(optionAlpha, 1, 0);
     context->CloseImplicitAnimation();
 }
 
@@ -502,8 +494,7 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
 
     if (GreatNotEqual(curOffset_, 0.0) && HasStartNode()) {
         float width = startNodeSize_;
-        if (hasStartDeleteArea_ && startOnDelete &&
-            (reachRightSpeed || GreatOrEqual(curOffset_, width + startDeleteAreaDistance_))) {
+        if (hasStartDeleteArea_ && startOnDelete && GreatOrEqual(curOffset_, width + startDeleteAreaDistance_)) {
             if (!useStartDefaultDeleteAnimation_) {
                 startOnDelete();
             } else {
@@ -522,8 +513,7 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
         end = width * static_cast<int32_t>(swiperIndex_);
     } else if (LessNotEqual(curOffset_, 0.0) && HasEndNode()) {
         float width = endNodeSize_;
-        if (hasEndDeleteArea_ && endOnDelete &&
-            (reachLeftSpeed || GreatOrEqual(-curOffset_, width + endDeleteAreaDistance_))) {
+        if (hasEndDeleteArea_ && endOnDelete && GreatOrEqual(-curOffset_, width + endDeleteAreaDistance_)) {
             if (!useEndDefaultDeleteAnimation_) {
                 endOnDelete();
             } else {
