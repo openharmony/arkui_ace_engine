@@ -75,9 +75,10 @@ void DatePickerColumnPattern::OnAttachToFrameNode()
 
 void DatePickerColumnPattern::OnModifyDone()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
     pressColor_ = theme->GetPressColor();
     hoverColor_ = theme->GetHoverColor();
     InitMouseAndPressEvent();
@@ -276,7 +277,7 @@ void DatePickerColumnPattern::UpdatePickerTextProperties(
     uint32_t index, uint32_t showOptionCount, const RefPtr<TextLayoutProperty>& textLayoutProperty,
     const RefPtr<DataPickerRowLayoutProperty>& dataPickerRowLayoutProperty)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
@@ -359,8 +360,10 @@ void DatePickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTh
 
 void DatePickerColumnPattern::SetDividerHeight(uint32_t showOptionCount)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
     if (showOptionCount != OPTION_COUNT_PHONE_LANDSCAPE) {
         gradientHeight_ = static_cast<float>(pickerTheme->GetGradientHeight().Value() * TEXT_HEIGHT_NUMBER);
     } else {
@@ -735,6 +738,7 @@ void DatePickerColumnPattern::UpdateColumnChildPosition(double offsetY)
         ScrollOption(dragDelta);
         return;
     }
+    // update selected option
     InnerHandleScroll(LessNotEqual(dragDelta, 0.0), true, true);
     double jumpDelta = (LessNotEqual(dragDelta, 0.0) ? jumpInterval_ : 0.0 - jumpInterval_);
     ScrollOption(jumpDelta, true);
