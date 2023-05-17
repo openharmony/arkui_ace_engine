@@ -159,7 +159,7 @@ public:
 
     float GetTotalOffset() const
     {
-        return estimateOffset_ - currentOffset_;
+        return currentOffset_;
     }
 
     // scroller
@@ -236,7 +236,6 @@ private:
     float startMainPos_;
     float endMainPos_;
     bool isInitialized_ = false;
-    float estimateOffset_ = 0.0f;
     float currentOffset_ = 0.0f;
     float spaceWidth_ = 0.0f;
     float contentMainSize_ = 0.0f;
