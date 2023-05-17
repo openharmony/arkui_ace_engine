@@ -232,6 +232,8 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
         runtime_->GetGlobal()->SetProperty(runtime_, key, nativeValue);
     }
 
+    auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime_);
+    arkRuntime->SetLanguage("ets");
     runtime_->StartDebugger();
 #endif
 
@@ -953,7 +955,7 @@ void JsiDeclarativeEngine::RegisterInitWorkerFunc()
             return;
         }
 #ifdef OHOS_PLATFORM
-        ConnectServerManager::Get().AddInstance(gettid());
+        ConnectServerManager::Get().AddInstance(gettid(), "ets");
         auto vm = const_cast<EcmaVM*>(arkNativeEngine->GetEcmaVm());
         auto workerPostTask = [nativeEngine](std::function<void()>&& callback) {
             nativeEngine->CallDebuggerPostTaskFunc(std::move(callback));

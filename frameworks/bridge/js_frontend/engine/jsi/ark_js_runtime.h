@@ -145,6 +145,11 @@ public:
         instanceId_ = instanceId;
     }
 
+    void SetLanguage(const std::string& language)
+    {
+        language_ = language;
+    }
+
 #if defined(PREVIEW)
     void SetPreviewFlag(bool flag)
     {
@@ -197,6 +202,7 @@ public:
 private:
     EcmaVM* vm_ = nullptr;
     int32_t instanceId_ = 0;
+    std::string language_;
     LOG_PRINT print_ { nullptr };
     UncaughtExceptionCallback uncaughtErrorHandler_ { nullptr };
     std::string libPath_ {};
