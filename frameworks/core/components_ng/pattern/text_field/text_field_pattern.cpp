@@ -904,6 +904,9 @@ void TextFieldPattern::HandleFocusEvent()
         setSelectAllFlag_ = false;
         HandleOnSelectAll();
     }
+    auto eventHub = host->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->FireOnEditChanged(true);
     CloseSelectOverlay();
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
