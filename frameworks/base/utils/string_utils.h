@@ -229,9 +229,7 @@ static Dimension StringToDimensionWithUnit(const std::string& value, DimensionUn
     char* pEnd = nullptr;
     double result = std::strtod(value.c_str(), &pEnd);
     if (pEnd == value.c_str() || errno == ERANGE) {
-        Dimension resultOfDimension = Dimension(defaultValue, defaultUnit);
-        resultOfDimension.SetIllegal(true);
-        return resultOfDimension;
+        return Dimension(defaultValue, defaultUnit);
     }
     if (pEnd != nullptr) {
         if (std::strcmp(pEnd, "%") == 0) {
@@ -263,9 +261,7 @@ static Dimension StringToDimensionWithUnit(const std::string& value, DimensionUn
             return Dimension(result, DimensionUnit::INVALID);
         }
     }
-    Dimension resultOfDimension = Dimension(result, defaultUnit);
-    resultOfDimension.SetIllegal(true);
-    return resultOfDimension;
+    return Dimension(result, defaultUnit);
 }
 
 inline CalcDimension StringToCalcDimension(
