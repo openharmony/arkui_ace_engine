@@ -880,13 +880,8 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
         scalePoint.type);
     eventManager_->SetInstanceId(GetInstanceId());
     if (scalePoint.type == TouchType::DOWN) {
-        isNeedShowFocus_ = false;
-        CHECK_NULL_VOID_NOLOG(rootNode_);
-        auto rootFocusHub = rootNode_->GetFocusHub();
-        if (rootFocusHub) {
-            rootFocusHub->ClearAllFocusState();
-        }
-
+        // Set focus state inactive while touch down event received。
+        SetIsFocusActive(false);
         LOGD("receive touch down event, first use touch test to collect touch event target");
         TouchRestrict touchRestrict { TouchRestrict::NONE };
         touchRestrict.sourceType = point.sourceType;
@@ -1071,6 +1066,11 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
 {
     CHECK_RUN_ON(UI);
 
+    if (event.button == MouseButton::RIGHT_BUTTON && event.action == MouseAction::PRESS) {
+        // Mouse right button press event set focus inactive here.
+        // Mouse left button press event will set focus inactive in touch process.
+        SetIsFocusActive(false);
+    }
     if ((event.action == MouseAction::RELEASE || event.action == MouseAction::PRESS ||
             event.action == MouseAction::MOVE) &&
         (event.button == MouseButton::LEFT_BUTTON || event.pressedButtons == MOUSE_PRESS_LEFT)) {
@@ -1115,15 +1115,15 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
     if (event.action == KeyAction::DOWN) {
         eventManager_->DispatchKeyboardShortcut(event);
     }
-    // Need update while key tab pressed
-    if (!isNeedShowFocus_ && event.action == KeyAction::DOWN &&
-        (event.IsKey({ KeyCode::KEY_TAB }) || event.IsDirectionalKey())) {
-        isNeedShowFocus_ = true;
-        auto rootFocusHub = rootNode_->GetFocusHub();
-        if (rootFocusHub) {
-            rootFocusHub->PaintAllFocusState();
-        }
+    // TAB key set focus state from inactive to active.
+    if (event.action == KeyAction::DOWN && event.IsKey({ KeyCode::KEY_TAB }) && SetIsFocusActive(true)) {
+        // if current focus node show focus state. The key event won't trigger onKeyEvent.
         return true;
+    }
+    if (!isFocusActive_) {
+        LOGD("KeyEvent: {%{public}d, %{public}d} won't be dispatched because current focus state is inactive.",
+            event.code, event.action);
+        return false;
     }
     auto lastPage = stageManager_->GetLastPage();
     auto mainNode = lastPage ? lastPage : rootNode_;
