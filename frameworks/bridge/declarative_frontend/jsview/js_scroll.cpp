@@ -275,7 +275,8 @@ void JSScroll::SetScrollBarWidth(const JSCallbackInfo& args)
         return;
     }
     if (!ParseJsDimensionVp(args[0], scrollBarWidth) || args[0]->IsNull() || args[0]->IsUndefined() ||
-        (args[0]->IsString() && args[0]->ToString().empty()) || LessNotEqual(scrollBarWidth.Value(), 0.0)) {
+        (args[0]->IsString() && args[0]->ToString().empty()) || LessNotEqual(scrollBarWidth.Value(), 0.0) ||
+        scrollBarWidth.Unit() == DimensionUnit::PERCENT) {
         scrollBarWidth = theme->GetNormalWidth();
     }
     ScrollModel::GetInstance()->SetScrollBarWidth(scrollBarWidth);
