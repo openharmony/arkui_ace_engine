@@ -25,14 +25,10 @@
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components/container_modal/container_modal_constants.h"
-#include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
-#include "core/components_ng/pattern/menu/menu_theme.h"
-#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -200,10 +196,7 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-    if (menuPattern->IsSubMenu()) {
-        LayoutSubMenu(layoutWrapper);
-        return;
-    }
+
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto size = geometryNode->GetMarginFrameSize();
@@ -551,37 +544,6 @@ void MenuLayoutAlgorithm::UpdateConstraintBaseOnMenuItems(LayoutWrapper* layoutW
     constraint.minSize.SetWidth(maxChildrenWidth);
 }
 
-void MenuLayoutAlgorithm::LayoutSubMenu(LayoutWrapper* layoutWrapper)
-{
-    auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
-    auto menuLayoutProperty = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(menuLayoutProperty);
-    auto menuNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(menuNode);
-    auto menuPattern = menuNode->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
-    auto parentMenuItem = menuPattern->GetParentMenuItem();
-    CHECK_NULL_VOID(parentMenuItem);
-    auto menuItemSize = parentMenuItem->GetGeometryNode()->GetFrameSize();
-
-    float x = HorizontalLayoutSubMenu(size, position_.GetX(), menuItemSize) - pageOffset_.GetX();
-    float y = VerticalLayoutSubMenu(size, position_.GetY(), menuItemSize) - pageOffset_.GetY();
-
-    const auto& geometryNode = layoutWrapper->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    geometryNode->SetMarginFrameOffset(NG::OffsetF(x, y));
-
-    if (parentMenuItem) {
-        auto parentPattern = parentMenuItem->GetPattern<MenuItemPattern>();
-        auto topLeftPoint = OffsetF(x, y);
-        auto bottomRightPoint = OffsetF(x + size.Width(), y + size.Height());
-        parentPattern->AddHoverRegions(topLeftPoint, bottomRightPoint);
-    }
-
-    auto child = layoutWrapper->GetOrCreateChildByIndex(0);
-    child->Layout();
-}
-
 // return vertical offset
 float MenuLayoutAlgorithm::VerticalLayout(const SizeF& size, float position)
 {
@@ -623,45 +585,6 @@ float MenuLayoutAlgorithm::HorizontalLayout(const SizeF& size, float position, b
         return wrapperWidth - size.Width();
     }
 
-    // can't fit in screen, line up with left side of the screen
-    return 0.0f;
-}
-
-// return vertical offset
-float MenuLayoutAlgorithm::VerticalLayoutSubMenu(const SizeF& size, float position, const SizeF& menuItemSize)
-{
-    float wrapperHeight = wrapperSize_.Height();
-    float bottomSpace = wrapperHeight - position;
-    // line up top of subMenu with top of the menuItem
-    if (bottomSpace >= size.Height()) {
-        return position;
-    }
-    // line up bottom of menu with bottom of the screen
-    if (size.Height() < wrapperHeight) {
-        return wrapperHeight - size.Height();
-    }
-    // can't fit in screen, line up with top of the screen
-    return 0.0f;
-}
-
-// returns submenu horizontal offset
-float MenuLayoutAlgorithm::HorizontalLayoutSubMenu(const SizeF& size, float position, const SizeF& menuItemSize)
-{
-    float wrapperWidth = wrapperSize_.Width();
-    float rightSpace = wrapperWidth - position;
-    float leftSpace = position - pageOffset_.GetX() - menuItemSize.Width();
-    // can fit subMenu on the right side of menuItem
-    if (rightSpace >= size.Width()) {
-        return position;
-    }
-    // fit subMenu on the left side of menuItem
-    if (leftSpace >= size.Width()) {
-        return position - size.Width() - menuItemSize.Width();
-    }
-    // line up right side of menu with right boundary of the screen
-    if (size.Width() < wrapperWidth) {
-        return wrapperWidth - size.Width();
-    }
     // can't fit in screen, line up with left side of the screen
     return 0.0f;
 }
