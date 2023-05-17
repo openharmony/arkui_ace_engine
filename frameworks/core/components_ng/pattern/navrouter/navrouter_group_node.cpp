@@ -815,6 +815,7 @@ void NavRouterGroupNode::NavTransitionBackToPreAnimation(const RefPtr<UINode>& n
     maskOption.SetCurve(Curves::FRICTION);
     maskOption.SetDuration(MASK_DURATION);
     maskOption.SetFillMode(FillMode::FORWARDS);
+    preDestinationContext->SetActualForegroundColor(MASK_COLOR);
     AnimationUtils::Animate(
         maskOption, [preDestinationContext]() { preDestinationContext->SetActualForegroundColor(DEFAULT_MASK_COLOR); });
 }
