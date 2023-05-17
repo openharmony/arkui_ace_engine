@@ -16,6 +16,7 @@
 #include <string>
 
 #include "gtest/gtest.h"
+#include "core/components_ng/render/canvas_image.h"
 
 #define private public
 #define protected public
@@ -78,5 +79,13 @@ HWTEST_F(ParsePatternTestNg, ParseTest001, TestSize.Level1)
     svgDom->DrawImage(rSCanvas, ImageFit::COVER, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::RED);
     EXPECT_EQ(svgDom->svgSize_.IsValid(), false);
     EXPECT_EQ(svgDom->viewBox_.IsValid(), true);
+
+    BorderRadiusArray radius;
+    for (auto&& corner: radius) {
+        corner = {0.0f, 0.0f};
+    }
+    svgDom->SetRadius(radius);
+    svgDom->DrawImage(rSCanvas, ImageFit::COVER, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::RED);
+    EXPECT_EQ(*svgDom->radius_, radius);
 }
 } // namespace OHOS::Ace::NG
