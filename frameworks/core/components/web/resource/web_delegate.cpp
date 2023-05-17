@@ -82,6 +82,8 @@ const std::string RESOURCE_VIDEO_CAPTURE = "TYPE_VIDEO_CAPTURE";
 const std::string RESOURCE_AUDIO_CAPTURE = "TYPE_AUDIO_CAPTURE";
 const std::string RESOURCE_PROTECTED_MEDIA_ID = "TYPE_PROTECTED_MEDIA_ID";
 const std::string RESOURCE_MIDI_SYSEX = "TYPE_MIDI_SYSEX";
+
+constexpr uint32_t DESTRUCT_DELAY_MILLISECONDS = 1000;
 } // namespace
 
 #define EGLCONFIG_VERSION 3
@@ -555,6 +557,29 @@ int FaviconReceivedOhos::GetColorType()
 int FaviconReceivedOhos::GetAlphaType()
 {
     return static_cast<int>(alphaType_);
+}
+
+WebDelegateObserver::~WebDelegateObserver()
+{
+    LOGD("WebDelegateObserver::~WebDelegateObserver");
+}
+
+void WebDelegateObserver::NotifyDestory()
+{
+    LOGD("WebDelegateObserver::NotifyDestory");
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto taskExecutor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostDelayedTask(
+        [weak = WeakClaim(this)]() {
+            auto observer = weak.Upgrade();
+            CHECK_NULL_VOID(observer);
+            if (observer->delegate_) {
+                observer->delegate_.Reset();
+            }
+        },
+        TaskExecutor::TaskType::UI, DESTRUCT_DELAY_MILLISECONDS);
 }
 
 WebDelegate::~WebDelegate()

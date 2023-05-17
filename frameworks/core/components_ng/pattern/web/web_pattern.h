@@ -23,6 +23,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components/web/web_property.h"
+#include "core/components/web/resource/web_delegate.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_proxy.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -73,7 +74,7 @@ public:
     WebPattern(std::string webSrc, const RefPtr<WebController>& webController);
     WebPattern(std::string webSrc, const SetWebIdCallback& setWebIdCallback);
 
-    ~WebPattern() override = default;
+    ~WebPattern() override;
 
     enum class VkState {
         VK_NONE,
@@ -394,7 +395,6 @@ private:
     RefPtr<WebController> webController_;
     SetWebIdCallback setWebIdCallback_ = nullptr;
     JsProxyCallback jsProxyCallback_ = nullptr;
-    RefPtr<WebDelegate> delegate_;
     RefPtr<RenderSurface> renderSurface_ = RenderSurface::Create();
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
@@ -426,6 +426,8 @@ private:
     bool selectPopupMenuShowing_ = false;
     bool isPopup_ = false;
     int32_t parentNWebId_ = -1;
+    RefPtr<WebDelegate> delegate_;
+    RefPtr<WebDelegateObserver> observer_;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
 };
 } // namespace OHOS::Ace::NG
