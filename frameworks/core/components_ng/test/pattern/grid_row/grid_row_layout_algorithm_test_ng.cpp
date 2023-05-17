@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/grid_col/grid_col_model_ng.h"
 #include "core/components_ng/pattern/grid_row/grid_row_layout_pattern.h"
 #include "core/components_ng/pattern/grid_row/grid_row_model_ng.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -51,7 +52,9 @@ public:
 
     static RefPtr<LayoutWrapper> CreateLayoutWrapperAndLayout(bool needLayout);
     static void TestGridColWidth(uint8_t span, uint8_t expectWidth);
-    static void TestGridColGeometry(uint8_t span, uint8_t offset, uint8_t expectLines, uint8_t expectOffset);
+    static testing::AssertionResult TestGridColGeometry(
+        uint8_t offset, uint8_t span, uint8_t expectOffsetX, uint8_t expectLines);
+    static OffsetF GetColOffset(RefPtr<LayoutWrapper>& layoutWrapper, int32_t index);
 
     static RefPtr<FrameNode> rowNode_;
     static std::vector<RefPtr<FrameNode>> colNodes_;
@@ -72,12 +75,14 @@ void GridRowColPatternTestNg::SetUpTestSuite()
     }
     rowNode_ = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     ViewStackProcessor::GetInstance()->PopContainer();
+    MockPipelineBase::SetUp();
 }
 
 void GridRowColPatternTestNg::TearDownTestSuite()
 {
     rowNode_->Clean();
     colNodes_.clear();
+    MockPipelineBase::TearDown();
 }
 
 void GridRowColPatternTestNg::SetUp()
@@ -145,28 +150,28 @@ void GridRowColPatternTestNg::TestGridColWidth(uint8_t span, uint8_t expectWidth
 }
 
 /* Examine the last grid-col position according to span/offset */
-void GridRowColPatternTestNg::TestGridColGeometry(
-    uint8_t span, uint8_t offset, uint8_t expectLines, uint8_t expectOffset)
+testing::AssertionResult GridRowColPatternTestNg::TestGridColGeometry(
+    uint8_t offset, uint8_t span, uint8_t expectOffsetX, uint8_t expectLines)
 {
-    // first grid-col occupies the first line to constrain the line-height of that line
-    auto colNode = colNodes_.back();
-    auto layoutProperty = colNode->GetLayoutProperty<GridColLayoutProperty>();
-    layoutProperty->UpdateSpan(V2::GridContainerSize(span));
-    layoutProperty->UpdateOffset(V2::GridContainerSize(offset));
+    auto firstColNode = colNodes_.front();
+    auto firstColLayoutProperty = firstColNode->GetLayoutProperty<GridColLayoutProperty>();
+    firstColLayoutProperty->UpdateSpan(V2::GridContainerSize(span));
+    firstColLayoutProperty->UpdateOffset(V2::GridContainerSize(offset));
 
     auto layoutWrapper = CreateLayoutWrapperAndLayout(true);
+    auto secondColOffset = GetColOffset(layoutWrapper, 1);
+    const OffsetF expectOffset = OffsetF(DEFAULT_SPAN_WIDTH * expectOffsetX, DEFAULT_HEIGHT * expectLines);
+    if (secondColOffset == expectOffset) {
+        return testing::AssertionSuccess();
+    }
+    return testing::AssertionFailure() <<
+        "secondColOffset: " << secondColOffset.ToString() <<
+        " But expect offset: " << expectOffset.ToString();
+}
 
-    // Check geometry Size
-    auto firstGridColFrameRect = layoutWrapper->GetOrCreateChildByIndex(0)->GetGeometryNode()->GetFrameRect();
-    auto frameRect = layoutWrapper->GetOrCreateChildByIndex(1)->GetGeometryNode()->GetFrameRect();
-    float columnWidth = firstGridColFrameRect.Width();
-    float lineHeight = firstGridColFrameRect.Height();
-
-    EXPECT_EQ(columnWidth, DEFAULT_SPAN_WIDTH);
-    EXPECT_EQ(frameRect.GetX(),
-        firstGridColFrameRect.GetX() + columnWidth * (expectOffset - DEFAULT_OFFSET)); // examine offset
-    EXPECT_EQ(frameRect.GetY() - firstGridColFrameRect.GetY(),
-        lineHeight * expectLines); // examine lines
+OffsetF GridRowColPatternTestNg::GetColOffset(RefPtr<LayoutWrapper>& layoutWrapper, int32_t index)
+{
+    return layoutWrapper->GetOrCreateChildByIndex(index)->GetGeometryNode()->GetFrameOffset();
 }
 
 /**
@@ -188,18 +193,18 @@ HWTEST_F(GridRowColPatternTestNg, Algorithm001, TestSize.Level1)
  */
 HWTEST_F(GridRowColPatternTestNg, Algorithm002, TestSize.Level1)
 {
-    // span + offset <= columns
-    constexpr uint8_t span = 6;
-    TestGridColGeometry(span, DEFAULT_COLUMNS - span, 1, DEFAULT_COLUMNS - span);
+    // Set the first col: span + offset == columns
+    // Test second col position
+    EXPECT_TRUE(TestGridColGeometry(2, 6, 0, 1));
 
-    // offset <= columns, span + offset > columns
-    TestGridColGeometry(DEFAULT_COLUMNS - 1, 2, 2, 0);
+    // span + offset > columns, offset <= columns
+    EXPECT_TRUE(TestGridColGeometry(2, 7, 7, 0));
 
-    // offset > columns, span <= columns
-    TestGridColGeometry(2, DEFAULT_COLUMNS + 1, 2, 1);
+    // span < columns, offset > columns
+    EXPECT_TRUE(TestGridColGeometry(9, 2, 3, 0));
 
     // span > columns
-    TestGridColGeometry(DEFAULT_COLUMNS + 1, 1, 2, 0);
+    EXPECT_TRUE(TestGridColGeometry(1, 9, 0, 1));
 }
 
 /**
@@ -221,8 +226,8 @@ HWTEST_F(GridRowColPatternTestNg, Algorithm003, TestSize.Level1)
     float columnWidth = frameRect.Width();
 
     // the first grid-col's offset occupies a whole line
-    EXPECT_EQ(columnWidth, DEFAULT_GRID_ROW_WIDTH / testColumns);
-    EXPECT_EQ(frameRect.GetX(), 0);
+    EXPECT_EQ(columnWidth, DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(frameRect.GetX(), testColumns * DEFAULT_SPAN_WIDTH);
 }
 
 /**
@@ -240,9 +245,9 @@ HWTEST_F(GridRowColPatternTestNg, Algorithm004, TestSize.Level1)
     float columnWidth = frameRect.Width();
 
     // the first grid-col's offset occupies a whole line
-    float expectcolumnWidth = (DEFAULT_GRID_ROW_WIDTH + gutterVal) / DEFAULT_COLUMNS - gutterVal;
-    EXPECT_EQ(columnWidth, expectcolumnWidth);
-    EXPECT_EQ(frameRect.GetX(), DEFAULT_GRID_ROW_WIDTH - expectcolumnWidth);
+    const float expectColWidth = (DEFAULT_GRID_ROW_WIDTH - (DEFAULT_COLUMNS - 1) * gutterVal) / DEFAULT_COLUMNS;
+    EXPECT_EQ(columnWidth, expectColWidth);
+    EXPECT_EQ(frameRect.GetX(), DEFAULT_GRID_ROW_WIDTH - expectColWidth);
 }
 
 /**
@@ -277,7 +282,7 @@ HWTEST_F(GridRowColPatternTestNg, Algorithm006, TestSize.Level1)
     auto frameRect = layoutWrapper->GetOrCreateChildByIndex(0)->GetGeometryNode()->GetFrameRect();
 
     EXPECT_EQ(frameRect.GetX(), 0);
-    EXPECT_EQ(frameRect.GetY(), DEFAULT_HEIGHT);
+    EXPECT_EQ(frameRect.GetY(), DEFAULT_HEIGHT); // because of DEFAULT_OFFSET, the col is at second row
 }
 
 /**
