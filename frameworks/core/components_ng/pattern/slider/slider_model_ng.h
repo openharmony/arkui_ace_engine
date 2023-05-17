@@ -46,6 +46,8 @@ public:
     void SetStepSize(const Dimension& value) override;
     void SetOnChange(SliderOnChangeEvent&& eventOnChange) override;
     void SetOnChangeEvent(SliderOnValueChangeEvent&& onChangeEvent) override;
+private:
+    void SetSliderValue(float value);
 };
 
 } // namespace OHOS::Ace::NG
