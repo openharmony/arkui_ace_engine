@@ -50,7 +50,6 @@ class ACE_EXPORT LayoutProperty : public Property {
     DECLARE_ACE_TYPE(LayoutProperty, Property);
 
 public:
-
     LayoutProperty() = default;
 
     ~LayoutProperty() override = default;
@@ -207,6 +206,14 @@ public:
         if (magicItemProperty_->UpdateAspectRatio(ratio)) {
             propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
         }
+    }
+
+    bool HasAspectRatio()
+    {
+        if (!magicItemProperty_) {
+            return false;
+        }
+        return magicItemProperty_->HasAspectRatio();
     }
 
     void UpdateMeasureType(MeasureType measureType)
