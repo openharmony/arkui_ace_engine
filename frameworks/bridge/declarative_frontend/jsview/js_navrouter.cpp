@@ -91,7 +91,9 @@ void JSNavRouter::SetOnStateChange(const JSCallbackInfo& info)
             func->ExecuteJS(1, &param);
         };
         NavRouterModel::GetInstance()->SetOnStateChange(std::move(onStateChange));
+        return;
     }
+    info.ReturnSelf();
 }
 
 void JSNavRouter::SetNavRouteMode(const JSCallbackInfo& info)
