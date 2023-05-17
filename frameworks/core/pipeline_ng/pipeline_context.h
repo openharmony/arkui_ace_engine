@@ -329,7 +329,7 @@ public:
     void RestoreNodeInfo(std::unique_ptr<JsonValue> nodeInfo) override;
     std::unique_ptr<JsonValue> GetStoredNodeInfo() override;
     void StoreNode(int32_t restoreId, const WeakPtr<FrameNode>& node);
-    std::string GetRestoreInfo(int32_t restoreId);
+    bool GetRestoreInfo(int32_t restoreId, std::string& restoreInfo);
     void RemoveStoredNode(int32_t restoreId)
     {
         storeNode_.erase(restoreId);
