@@ -52,6 +52,7 @@ constexpr int32_t CHECK_BOX_ID_SECOND = 5;
 constexpr int32_t CHECK_BOX_ID_THIRD = 6;
 constexpr int32_t CHECK_BOX_ID_FOURTH = 6;
 constexpr int32_t TEST_CONTAINER_ID = 100;
+constexpr int32_t AT_LEAST_TIME = 3;
 using OnPageShow = void (*)();
 using OnPageHide = void (*)();
 } // namespace
@@ -61,6 +62,11 @@ public:
     static void SetUpTestSuite()
     {
         MockPipelineBase::SetUp();
+        auto pipeline = AceType::DynamicCast<NG::MockPipelineBase>(PipelineBase::GetCurrentContext());
+        auto stageNode = FrameNode::CreateFrameNode(
+            V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+        pipeline->sharedTransitionManager_ = AceType::MakeRefPtr<SharedOverlayManager>(stageNode);
+        EXPECT_CALL(*pipeline, FlushPipelineImmediately()).Times(testing::AtLeast(AT_LEAST_TIME));
         MockContainer::SetUp();
         ContainerScope::UpdateCurrent(TEST_CONTAINER_ID);
         AceEngine::Get().AddContainer(TEST_CONTAINER_ID, MockContainer::Current());
@@ -203,7 +209,7 @@ HWTEST_F(StageTestNg, PageEventHubTest002, TestSize.Level1)
 
 /**
  * @tc.name: StageManagerTest001
- * @tc.desc: Testing Functions of StageManager work correctly.
+ * @tc.desc: Testing PushPage and PopPage Function of StageManager work correctly.
  * @tc.type: FUNC
  */
 HWTEST_F(StageTestNg, StageManagerTest001, TestSize.Level1)
@@ -223,10 +229,8 @@ HWTEST_F(StageTestNg, StageManagerTest001, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Create a StageManager based on stageNode.
-     * @tc.expected: stagePattern_ successfully assigned a value.
      */
     StageManager stageManager(stageNode);
-    EXPECT_NE(stageManager.stagePattern_, nullptr);
 
     /**
      * @tc.steps: step3. PopPage.
@@ -246,6 +250,7 @@ HWTEST_F(StageTestNg, StageManagerTest001, TestSize.Level1)
      */
     stageManager.PushPage(secondNode, false, false);
     stageManager.PushPage(thirdNode, true, false);
+    stageManager.stageNode_->GetGeometryNode()->SetFrameSize(SizeF(1.0f, 1.0f));
     stageManager.PushPage(fourthNode, false, true);
     EXPECT_EQ(stageNode->GetChildren().size(), 4);
 
@@ -257,38 +262,208 @@ HWTEST_F(StageTestNg, StageManagerTest001, TestSize.Level1)
     EXPECT_EQ(stageNode->GetChildren().size(), 4);
 
     /**
-     * @tc.steps: step7. MovePageToFront first Page and GetLastPage.
-     * @tc.expected: always return success , last node is firstNode.
-     */
-    EXPECT_TRUE(stageManager.MovePageToFront(firstNode));
-    EXPECT_TRUE(stageManager.MovePageToFront(firstNode));
-    EXPECT_EQ(stageManager.GetLastPage(), firstNode);
-    EXPECT_EQ(stageNode->GetChildren().size(), 4);
-    /**
-     * @tc.steps: step8. PopPage to index 0.
-     * @tc.expected: always return success.
-     */
-    stageManager.PopPageToIndex(1);
-    EXPECT_EQ(stageNode->GetChildren().size(), 3);
-
-    /**
-     * @tc.steps: step9. PopPage with different parameters.
+     * @tc.steps: step7. PopPage with different parameters.
      * @tc.expected: removeChild meets expectations .
      */
     stageManager.PopPage(true, false);
     stageManager.PopPage(false, true);
+    EXPECT_EQ(stageNode->GetChildren().size(), 3);
+
+    /**
+     * @tc.steps: step8. Call StopPageTransition.
+     * @tc.expected: stop transition and remove in transition page,size meets expectations.
+     */
+    stageManager.StopPageTransition();
+    EXPECT_EQ(stageNode->GetChildren().size(), 2);
+}
+
+/**
+ * @tc.name: StageManagerTest002
+ * @tc.desc: Testing PopPageToIndex function of StageManager work correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StageTestNg, StageManagerTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create StagePattern and some PagePattern.
+     */
+    auto stageNode = FrameNode::CreateFrameNode(FRAME_NODE_TAG, 0, AceType::MakeRefPtr<StagePattern>());
+    auto firstNode =
+        FrameNode::CreateFrameNode("1", 1, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    auto secondNode =
+        FrameNode::CreateFrameNode("2", 2, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    auto thirdNode =
+        FrameNode::CreateFrameNode("3", 3, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    auto fourthNode =
+        FrameNode::CreateFrameNode("4", 4, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    StageManager stageManager(stageNode);
+
+    /**
+     * @tc.steps: step2. Calling PopPageToIndex function.
+     * @tc.expected: Children are empty and return false
+     */
+    EXPECT_FALSE(stageManager.PopPageToIndex(1));
+
+    /**
+     * @tc.steps: step3. Add first child node and recall PopPageToIndex.
+     * @tc.expected: Children length is less than the current index and return false
+     */
+    stageManager.PushPage(firstNode);
+    EXPECT_FALSE(stageManager.PopPageToIndex(1));
+
+    /**
+     * @tc.steps: step4. Add second child node and recall PopPageToIndex.
+     * @tc.expected: Children length is equal to the current index and return true
+     */
+    stageManager.PushPage(secondNode);
+    EXPECT_TRUE(stageManager.PopPageToIndex(1));
+
+    /**
+     * @tc.steps: step5. Add third child node and recall PopPageToIndex.
+     * @tc.expected: stageManager child size meets expectations.
+     */
+    stageManager.PushPage(thirdNode);
+    stageManager.PushPage(fourthNode);
+    stageManager.PopPageToIndex(1);
+    EXPECT_EQ(stageNode->GetChildren().size(), 3);
+    stageManager.PopPageToIndex(0);
     EXPECT_EQ(stageNode->GetChildren().size(), 2);
 
     /**
-     * @tc.steps: step10. Try clean with different parameters.
-     * @tc.expected: stageManager clear success ,size meets expectations.
+     * @tc.steps: step6. Add third child node and recall PopPageToIndex.
+     * @tc.expected: return true
      */
-    stageManager.StopPageTransition();
-    stageManager.ReloadStage();
-    stageManager.CleanPageStack();
-    EXPECT_EQ(stageNode->GetChildren().size(), 1);
+    stageManager.PushPage(thirdNode);
+    stageManager.PushPage(fourthNode);
+    EXPECT_TRUE(stageManager.PopPageToIndex(1, false, false));
 }
 
+/**
+ * @tc.name: StageManagerTest003
+ * @tc.desc: Testing CleanPageStack Function of StageManager work correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StageTestNg, StageManagerTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create StagePattern and PagePattern.
+     */
+    auto stageNode = FrameNode::CreateFrameNode(FRAME_NODE_TAG, 0, AceType::MakeRefPtr<StagePattern>());
+    auto firstNode =
+        FrameNode::CreateFrameNode("1", 1, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    auto secondNode =
+        FrameNode::CreateFrameNode("2", 2, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    StageManager stageManager(stageNode);
+
+    /**
+     * @tc.steps: step2. Call PushPage and PerformanceCheck function.
+     */
+
+    stageManager.PushPage(firstNode);
+    stageManager.PerformanceCheck(firstNode, 1);
+
+    /**
+     * @tc.steps: step3. Call CleanPageStack function.
+     * @tc.expected:Children just one and return false
+     */
+    EXPECT_FALSE(stageManager.CleanPageStack());
+
+    /**
+     * @tc.steps: step4. Add second child node and recall CleanPageStack.
+     * @tc.expected: return true
+     */
+    stageManager.PushPage(secondNode);
+    EXPECT_TRUE(stageManager.CleanPageStack());
+}
+
+/**
+ * @tc.name: StageManagerTest004
+ * @tc.desc: Testing GetLastPage and MovePageToFront Function of StageManager work correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StageTestNg, StageManagerTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create StagePattern and some PagePattern.
+     */
+    auto stageNode = FrameNode::CreateFrameNode(FRAME_NODE_TAG, 0, AceType::MakeRefPtr<StagePattern>());
+    auto firstNode =
+        FrameNode::CreateFrameNode("1", 1, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    auto secondNode =
+        FrameNode::CreateFrameNode("2", 2, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+
+    /**
+     * @tc.steps: step2. Create a StageManager based on stageNode.
+     */
+    StageManager stageManager(stageNode);
+
+    /**
+     * @tc.steps: step3. Calling the GetLastPage function.
+     * @tc.expected: The manager GetLastPage return null.
+     */
+    EXPECT_EQ(stageManager.GetLastPage(), nullptr);
+
+    /**
+     * @tc.steps: step4. Calling the MovePageToFront function.
+     * @tc.expected: return false.
+     */
+    EXPECT_FALSE(stageManager.MovePageToFront(firstNode));
+
+    /**
+     * @tc.steps: step5. StateManager put a page and recall MovePageToFront.
+     * @tc.expected: return true.
+     */
+    stageManager.PushPage(firstNode);
+    EXPECT_TRUE(stageManager.MovePageToFront(firstNode));
+
+    /**
+     * @tc.steps: step6. StateManager another page and recall MovePageToFront with different params.
+     * @tc.expected: always return true.
+     */
+    stageManager.PushPage(secondNode);
+    EXPECT_TRUE(stageManager.MovePageToFront(firstNode, false, true));
+    EXPECT_TRUE(stageManager.MovePageToFront(secondNode, true, false));
+
+    /**
+     * @tc.steps: step7. Calling the GetLastPage function.
+     * @tc.expected: The secondNode is last page.
+     */
+    EXPECT_EQ(stageManager.GetLastPage(), secondNode);
+}
+/**
+ * @tc.name: StageManagerTest005
+ * @tc.desc: Testing ReloadStage Function of StageManager work correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StageTestNg, StageManagerTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a StageManager.
+     */
+    auto stageNode = FrameNode::CreateFrameNode(FRAME_NODE_TAG, 0, AceType::MakeRefPtr<StagePattern>());
+    StageManager stageManager(stageNode);
+
+    /**
+     * @tc.steps: step2. call ReloadStage.
+     */
+    stageManager.ReloadStage();
+
+    /**
+     * @tc.steps: step3. Create FrameNode and fake CustomNode.
+     */
+    auto firstNode =
+        FrameNode::CreateFrameNode("1", 1, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    stageManager.PushPage(firstNode);
+    auto secondNode = AceType::MakeRefPtr<CustomNode>(2, "2");
+    secondNode->MountToParent(stageNode);
+
+    /**
+     * @tc.steps: step4. call ReloadStage.
+     * @tc.expected: stageNode children size not changed
+     */
+    stageManager.ReloadStage();
+    EXPECT_EQ(stageNode->GetChildren().size(), 2);
+}
 /**
  * @tc.name: PagePatternTest001
  * @tc.desc: Testing OnDirtyLayoutWrapperSwap of PagePattern work correctly.
