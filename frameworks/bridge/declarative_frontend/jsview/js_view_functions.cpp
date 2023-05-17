@@ -259,7 +259,7 @@ void ViewFunctions::InitViewFunctions(
         }
 
         JSRef<JSVal> jsForceRerenderNodeFunc = jsObject->GetProperty("forceRerenderNode");
-        if (jsReloadFunc->IsFunction()) {
+        if (jsForceRerenderNodeFunc->IsFunction()) {
             jsForceRerenderNodeFunc_ = JSRef<JSFunc>::Cast(jsForceRerenderNodeFunc);
         } else {
             LOGE("View lacks mandatory 'forceRerenderNode()' function, fatal internal error.");
