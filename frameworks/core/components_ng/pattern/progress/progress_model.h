@@ -25,7 +25,6 @@
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/property/gradient_property.h"
 
-
 namespace OHOS::Ace {
 
 class ProgressModel {
@@ -52,6 +51,7 @@ public:
     virtual void SetGradientColor(const NG::Gradient& value) = 0;
     virtual void SetPaintShadow(bool value) = 0;
     virtual void SetProgressStatus(NG::ProgressStatus value) = 0;
+
 private:
     static std::unique_ptr<ProgressModel> instance_;
     static std::mutex mutex_;

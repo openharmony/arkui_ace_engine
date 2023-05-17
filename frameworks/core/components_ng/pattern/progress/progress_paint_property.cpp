@@ -49,8 +49,7 @@ void ProgressPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     } else {
         defaultBackgroundColor = progressTheme->GetTrackBgColor();
     }
-    json->Put("backgroundColor",
-        (GetBackgroundColor().value_or(defaultBackgroundColor)).ColorToString().c_str());
+    json->Put("backgroundColor", (GetBackgroundColor().value_or(defaultBackgroundColor)).ColorToString().c_str());
     json->Put(
         "capsuleBorderColor", (GetBorderColor().value_or(progressTheme->GetBorderColor())).ColorToString().c_str());
     ToJsonValueForCapsule(json);
@@ -76,22 +75,18 @@ void ProgressPaintProperty::ToJsonValueForCapsule(std::unique_ptr<JsonValue>& js
     auto capsuleStyle = JsonUtil::Create(false);
     auto fontStyle = JsonUtil::Create(false);
     auto font = JsonUtil::Create(false);
-    capsuleStyle->Put(
-        "borderWidth", (GetBorderWidth().value_or(progressTheme->GetBorderWidth())).ToString().c_str());
+    capsuleStyle->Put("borderWidth", (GetBorderWidth().value_or(progressTheme->GetBorderWidth())).ToString().c_str());
     capsuleStyle->Put(
         "borderColor", (GetBorderColor().value_or(progressTheme->GetBorderColor())).ColorToString().c_str());
-    capsuleStyle->Put(
-        "fontColor", (GetTextColor().value_or(progressTheme->GetTextColor())).ColorToString().c_str());
-    capsuleStyle->Put(
-        "content", (GetText().value_or("")).c_str());
-    capsuleStyle->Put(
-        "enableScanEffect", (GetEnableScanEffect().value_or(false)) ? "true" : "false");
-    font->Put(
-        "size", (GetTextSize().value_or(progressTheme->GetTextSize())).ToString().c_str());
+    capsuleStyle->Put("fontColor", (GetTextColor().value_or(progressTheme->GetTextColor())).ColorToString().c_str());
+    capsuleStyle->Put("content", (GetText().value_or("")).c_str());
+    capsuleStyle->Put("enableScanEffect", (GetEnableScanEffect().value_or(false)) ? "true" : "false");
+    font->Put("size", (GetTextSize().value_or(progressTheme->GetTextSize())).ToString().c_str());
     font->Put("style", GetItalicFontStyle().value_or(Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL
-        ? "FontStyle.Normal" : "FontStyle.Italic");
+                           ? "FontStyle.Normal"
+                           : "FontStyle.Italic");
     font->Put("weight", V2::ConvertWrapFontWeightToStirng(GetFontWeight().value_or(FontWeight::NORMAL)).c_str());
-    std::vector<std::string>  defaultFamily = { "Sans" };
+    std::vector<std::string> defaultFamily = { "Sans" };
     std::vector<std::string> fontFamilyVector = GetFontFamily().value_or(defaultFamily);
     if (fontFamilyVector.empty()) {
         fontFamilyVector = defaultFamily;

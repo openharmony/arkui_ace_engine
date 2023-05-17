@@ -26,11 +26,11 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/progress/progress_theme.h"
 #include "core/components_ng/pattern/progress/progress_date.h"
+#include "core/components_ng/pattern/progress/progress_modifier.h"
 #include "core/components_ng/pattern/progress/progress_paint_property.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/node_paint_method.h"
-#include "core/components_ng/pattern/progress/progress_modifier.h"
 
 namespace OHOS::Ace::NG {
 constexpr float DEFAULT_BORDER_WIDTH = 1.0f;
@@ -38,10 +38,9 @@ constexpr float DEFAULT_BORDER_WIDTH = 1.0f;
 class ACE_EXPORT ProgressPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(ProgressPaintMethod, NodePaintMethod)
 public:
-    explicit ProgressPaintMethod(ProgressType progressType, float strokeWidth,
-        const RefPtr<ProgressModifier>& progressModifier)
-        : strokeWidth_(strokeWidth), progressType_(progressType),
-          progressModifier_(progressModifier)
+    explicit ProgressPaintMethod(
+        ProgressType progressType, float strokeWidth, const RefPtr<ProgressModifier>& progressModifier)
+        : strokeWidth_(strokeWidth), progressType_(progressType), progressModifier_(progressModifier)
     {
         progressModifier_->SetProgressType(progressType_);
     }
@@ -104,7 +103,7 @@ private:
     int32_t scaleCount_ = 0;
     float maxValue_ = 100.0f;
     float value_ = 0.0f;
-    Dimension capsuleBorderWidth_ = Dimension(DEFAULT_BORDER_WIDTH,  DimensionUnit::VP);
+    Dimension capsuleBorderWidth_ = Dimension(DEFAULT_BORDER_WIDTH, DimensionUnit::VP);
     Color ringProgressEndSideColor_ = Color::BLUE;
     Color ringProgressBeginSideColor_ = Color::BLUE;
 
