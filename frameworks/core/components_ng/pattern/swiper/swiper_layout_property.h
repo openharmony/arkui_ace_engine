@@ -55,10 +55,10 @@ public:
         value->propNextMargin_ = CloneNextMargin();
         value->propDisplayArrow_ = CloneDisplayArrow();
         value->propHoverShow_ = CloneHoverShow();
-        value->propIsShowBoard_ = CloneIsShowBoard();
-        value->propIsSiderMiddle_ = CloneIsSiderMiddle();
-        value->propBoardSize_ = CloneBoardSize();
-        value->propBoardColor_ = CloneBoardColor();
+        value->propIsShowBackground_ = CloneIsShowBackground();
+        value->propIsSideBarMiddle_ = CloneIsSideBarMiddle();
+        value->propBackgroundSize_ = CloneBackgroundSize();
+        value->propBackgroundColor_ = CloneBackgroundColor();
         value->propArrowSize_ = CloneArrowSize();
         value->propArrowColor_ = CloneArrowColor();
         return value;
@@ -83,10 +83,10 @@ public:
         ResetNextMargin();
         ResetDisplayArrow();
         ResetHoverShow();
-        ResetIsShowBoard();
-        ResetIsSiderMiddle();
-        ResetBoardSize();
-        ResetBoardColor();
+        ResetIsShowBackground();
+        ResetIsSideBarMiddle();
+        ResetBackgroundSize();
+        ResetBackgroundColor();
         ResetArrowSize();
         ResetArrowColor();
     }
@@ -107,11 +107,11 @@ public:
         json->Put("nextMargin", propNextMargin_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
         json->Put("displayArrow", propDisplayArrow_.value_or(false) ? "true" : "false");
         json->Put("hoverShow", propHoverShow_.value_or(false) ? "true" : "false");
-        json->Put("isShowBoard", propIsShowBoard_.value_or(false) ? "true" : "false");
-        json->Put("isSiderMiddle", propIsSiderMiddle_.value_or(false) ? "true" : "false");
-        json->Put("boardSize", propBoardSize_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
+        json->Put("isShowBackground", propIsShowBackground_.value_or(false) ? "true" : "false");
+        json->Put("isSideBarMiddle", propIsSideBarMiddle_.value_or(false) ? "true" : "false");
+        json->Put("BackgroundSize", propBackgroundSize_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
         json->Put("arrowSize", propArrowSize_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
-        json->Put("boardColor", propBoardColor_.value_or(Color::TRANSPARENT).ColorToString().c_str());
+        json->Put("BackgroundColor", propBackgroundColor_.value_or(Color::TRANSPARENT).ColorToString().c_str());
         json->Put("arrowColor", propArrowColor_.value_or(Color::TRANSPARENT).ColorToString().c_str());
     }
 
@@ -156,10 +156,10 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NextMargin, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DisplayArrow, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HoverShow, bool, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsShowBoard, bool, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsSiderMiddle, bool, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BoardSize, Dimension, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BoardColor, Color, PROPERTY_UPDATE_NORMAL);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsShowBackground, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsSideBarMiddle, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BackgroundSize, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BackgroundColor, Color, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ArrowSize, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ArrowColor, Color, PROPERTY_UPDATE_NORMAL);
 };

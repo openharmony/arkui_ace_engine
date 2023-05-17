@@ -59,7 +59,7 @@ public:
         CHECK_NULL_RETURN(swiperTheme, FocusPattern());
         FocusPaintParam paintParam;
         paintParam.SetPaintColor(swiperTheme->GetFocusedColor());
-        paintParam.SetPaintWidth(Dimension(2.0_vp));
+        paintParam.SetPaintWidth(swiperTheme->GetFocusedBorderWidth());
         return { FocusType::NODE, true, FocusStyleType::INNER_BORDER, paintParam };
     }
 
@@ -94,7 +94,7 @@ private:
     bool isFirstCreate_ = true;
     Color clickColor_ = Color::TRANSPARENT;
     Color hoverBeginColor_ = Color::TRANSPARENT;
-    Color boardColor_ = Color::TRANSPARENT;
+    Color backgroundColor_ = Color::TRANSPARENT;
     bool isTouch_ = false;
     bool isHover_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(SwiperArrowPattern);

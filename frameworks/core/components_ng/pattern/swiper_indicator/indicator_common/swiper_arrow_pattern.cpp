@@ -133,15 +133,14 @@ void SwiperArrowPattern::InitNavigationArrow()
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     auto swiperArrowLayoutProperty = GetSwiperArrowLayoutProperty();
     CHECK_NULL_VOID(swiperArrowLayoutProperty);
-    RefPtr<FrameNode> imageNode;
-    imageNode = FrameNode::CreateFrameNode(
+    auto imageNode = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     BorderRadiusProperty radius;
-    radius.SetRadius(swiperArrowLayoutProperty->GetBoardSizeValue());
+    radius.SetRadius(swiperArrowLayoutProperty->GetBackgroundSizeValue());
     renderContext->UpdateBorderRadius(radius);
     host->AddChild(buttonNode);
     buttonNode->AddChild(imageNode);
@@ -169,17 +168,17 @@ void SwiperArrowPattern::ButtonTouchEvent(RefPtr<FrameNode> buttonNode, TouchTyp
         clickColor_ = renderContext->GetBackgroundColorValue();
         isTouch_ = true;
         if (isHover_) {
-            backgroundColor = swiperIndicatorTheme->GetArrowBoardColorHover().BlendColor(
-                swiperIndicatorTheme->GetArrowBoardColorClick());
+            backgroundColor = swiperIndicatorTheme->GetHoverArrowBackgroundColor().BlendColor(
+                swiperIndicatorTheme->GetClickArrowBackgroundColor());
         } else {
-            backgroundColor = swiperIndicatorTheme->GetArrowBoardColorClick();
+            backgroundColor = swiperIndicatorTheme->GetClickArrowBackgroundColor();
         }
         renderContext->ResetBlendBgColor();
         renderContext->BlendBgColor(backgroundColor);
     } else if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
         isTouch_ = false;
         if (isHover_) {
-            backgroundColor = swiperIndicatorTheme->GetArrowBoardColorHover();
+            backgroundColor = swiperIndicatorTheme->GetHoverArrowBackgroundColor();
             renderContext->ResetBlendBgColor();
             renderContext->BlendBgColor(backgroundColor);
         } else {
@@ -201,16 +200,16 @@ void SwiperArrowPattern::ButtonOnHover(RefPtr<FrameNode> buttonNode, bool isHove
     SetButtonVisible(isHovered);
     if (isHovered) {
         if (isTouch_) {
-            backgroundColor = swiperIndicatorTheme->GetArrowBoardColorHover().BlendColor(
-                swiperIndicatorTheme->GetArrowBoardColorClick());
+            backgroundColor = swiperIndicatorTheme->GetHoverArrowBackgroundColor().BlendColor(
+                swiperIndicatorTheme->GetClickArrowBackgroundColor());
         } else {
-            backgroundColor = swiperIndicatorTheme->GetArrowBoardColorHover();
+            backgroundColor = swiperIndicatorTheme->GetHoverArrowBackgroundColor();
         }
         renderContext->ResetBlendBgColor();
         renderContext->BlendBgColor(backgroundColor);
     } else {
         if (isTouch_) {
-            backgroundColor = swiperIndicatorTheme->GetArrowBoardColorClick();
+            backgroundColor = swiperIndicatorTheme->GetClickArrowBackgroundColor();
             renderContext->ResetBlendBgColor();
             renderContext->BlendBgColor(backgroundColor);
         } else {
@@ -250,18 +249,22 @@ void SwiperArrowPattern::UpdateArrowContent()
     auto buttonNode = DynamicCast<FrameNode>(host->GetFirstChild());
     CHECK_NULL_VOID(buttonNode);
     buttonNode->GetRenderContext()->UpdateBackgroundColor(
-        swiperArrowLayoutProperty->GetIsShowBoardValue(false)
-            ? swiperArrowLayoutProperty->GetBoardColorValue(boardColor_)
+        swiperArrowLayoutProperty->GetIsShowBackgroundValue(false)
+            ? swiperArrowLayoutProperty->GetBackgroundColorValue(backgroundColor_)
             : Color::TRANSPARENT);
-    boardColor_ = buttonNode->GetRenderContext()->GetBackgroundColorValue(Color::TRANSPARENT);
+    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(buttonLayoutProperty);
+    buttonLayoutProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(swiperArrowLayoutProperty->GetBackgroundSizeValue()),
+            CalcLength(swiperArrowLayoutProperty->GetBackgroundSizeValue())));
+    backgroundColor_ = buttonNode->GetRenderContext()->GetBackgroundColorValue(Color::TRANSPARENT);
     RefPtr<FrameNode> imageNode = DynamicCast<FrameNode>(buttonNode->GetFirstChild());
     CHECK_NULL_VOID(imageNode);
-    imageNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(swiperArrowLayoutProperty->GetBoardSizeValue()),
-            CalcLength(swiperArrowLayoutProperty->GetBoardSizeValue())));
     auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
-    imageLayoutProperty->UpdateImageFit(ImageFit::SCALE_DOWN);
+    imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(swiperArrowLayoutProperty->GetArrowSizeValue()),
+        CalcLength(swiperArrowLayoutProperty->GetArrowSizeValue())));
+    imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
     ImageSourceInfo imageSourceInfo;
     auto swiperLayoutProperty = GetSwiperArrowLayoutProperty();
     CHECK_NULL_VOID(swiperLayoutProperty);
@@ -285,14 +288,11 @@ void SwiperArrowPattern::UpdateArrowContent()
         auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
         CHECK_NULL_VOID_NOLOG(swiperIndicatorTheme);
         buttonNode->GetRenderContext()->UpdateBackgroundColor(
-            boardColor_.BlendOpacity(swiperIndicatorTheme->GetArrowDisabledAlpha()));
+            backgroundColor_.BlendOpacity(swiperIndicatorTheme->GetArrowDisabledAlpha()));
         imageSourceInfo.SetFillColor(swiperArrowLayoutProperty->GetArrowColorValue().BlendOpacity(
             swiperIndicatorTheme->GetArrowDisabledAlpha()));
     }
     imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
-    SizeF sourceSize(static_cast<float>(swiperArrowLayoutProperty->GetArrowSizeValue().ConvertToPx()),
-        static_cast<float>(swiperArrowLayoutProperty->GetArrowSizeValue().ConvertToPx()));
-    imageLayoutProperty->UpdateSourceSize(sourceSize);
     imageNode->MarkModifyDone();
 }
 } // namespace OHOS::Ace::NG
