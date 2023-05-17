@@ -340,6 +340,7 @@ void ScrollBar::SetGestureEvent()
                     scrollBar->PlayShrinkAnimation();
                 }
                 scrollBar->SetPressed(false);
+                scrollBar->OnScrollEnd();
                 scrollBar->MarkNeedRender();
             }
         });
@@ -370,13 +371,13 @@ void ScrollBar::SetMouseEvent()
             scrollBar->MarkNeedRender();
         }
         if (scrollBar->IsHover() && !inRegion) {
+            scrollBar->SetHover(false);
             if (!scrollBar->IsPressed()) {
                 scrollBar->PlayShrinkAnimation();
                 if (scrollBar->GetDisplayMode() == DisplayMode::AUTO) {
                     scrollBar->PlayBarEndAnimation();
                 }
             }
-            scrollBar->SetHover(false);
             scrollBar->MarkNeedRender();
         }
     });
@@ -476,10 +477,13 @@ void ScrollBar::PlayShrinkAnimation()
 
 void ScrollBar::PlayBarEndAnimation()
 {
-    if (scrollEndAnimator_ && !scrollEndAnimator_->IsStopped()) {
-        scrollEndAnimator_->Stop();
-    }
     if (scrollEndAnimator_) {
+        if (!scrollEndAnimator_->IsStopped()) {
+            scrollEndAnimator_->Stop();
+        }
+        if (IsHover() || IsPressed()) {
+            return ;
+        }
         scrollEndAnimator_->Play();
         return;
     }
