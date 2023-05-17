@@ -18,6 +18,18 @@
 #include "base/memory/ace_type.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t DEFAULT_MAX_FINGERS = 10;
+} // namespace
+
+MultiFingersRecognizer::MultiFingersRecognizer(int32_t fingers)
+{
+    if (fingers > DEFAULT_MAX_FINGERS || fingers <= 0) {
+        fingers_ = 1;
+    } else {
+        fingers_ = fingers;
+    }
+}
 
 void MultiFingersRecognizer::UpdateFingerListInfo(const Offset& coordinateOffset)
 {
