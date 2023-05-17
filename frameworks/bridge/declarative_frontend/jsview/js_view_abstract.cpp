@@ -1517,12 +1517,13 @@ void JSViewAbstract::JsEnabled(const JSCallbackInfo& info)
         return;
     }
 
+    bool enabled;
     if (!info[0]->IsBoolean()) {
         LOGE("arg is not bool.");
-        return;
+        enabled = true;
+    } else {
+        enabled = info[0]->ToBoolean();
     }
-
-    bool enabled = info[0]->ToBoolean();
 
     ViewAbstractModel::GetInstance()->SetEnabled(enabled);
 }
