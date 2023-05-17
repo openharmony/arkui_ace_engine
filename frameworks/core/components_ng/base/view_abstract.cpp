@@ -768,7 +768,12 @@ void ViewAbstract::SetVisibility(VisibleType visible)
         LOGD("current state is not processed, return");
         return;
     }
-    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Visibility, visible);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    if (layoutProperty) {
+        layoutProperty->UpdateVisibility(visible, true);
+    }
 }
 
 void ViewAbstract::SetGeometryTransition(const std::string& id)

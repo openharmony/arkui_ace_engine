@@ -65,9 +65,7 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
         context->PrepareOpenImplicitAnimation();
     });
     pipelineContext->OpenImplicitAnimation(option, option.GetCurve(), onFinishEvent);
-    if (!Container::IsCurrentUseNewPipeline()) {
-        pipelineContext->SetSyncAnimationOption(option);
-    }
+    pipelineContext->SetSyncAnimationOption(option);
     // Execute the function.
     JSRef<JSFunc> jsAnimateToFunc = JSRef<JSFunc>::Cast(info[1]);
     jsAnimateToFunc->Call(info[1]);
@@ -95,9 +93,7 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
         }
         context->PrepareCloseImplicitAnimation();
     });
-    if (!Container::IsCurrentUseNewPipeline()) {
-        pipelineContext->SetSyncAnimationOption(AnimationOption());
-    }
+    pipelineContext->SetSyncAnimationOption(AnimationOption());
     pipelineContext->CloseImplicitAnimation();
 }
 

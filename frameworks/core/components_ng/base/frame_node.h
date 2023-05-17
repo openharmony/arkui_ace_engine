@@ -329,8 +329,6 @@ public:
         return renderContext_->HasPosition() || renderContext_->HasOffset() || renderContext_->HasAnchor();
     }
 
-    bool OnRemoveFromParent() override;
-
     // The function is only used for fast preview.
     void FastPreviewUpdateChildDone() override
     {
@@ -405,6 +403,9 @@ private:
 
     bool IsMeasureBoundary();
     bool IsRenderBoundary();
+
+    bool OnRemoveFromParent(bool allowTransition) override;
+    bool RemoveImmediately() const override;
 
     // dump self info.
     void DumpInfo() override;
