@@ -407,6 +407,7 @@ void TabBarPattern::OnModifyDone()
     InitOnKeyEvent(focusHub);
     SetAccessibilityAction();
 
+    CHECK_NULL_VOID(swiperController_);
     auto removeEventCallback = [weak = WeakClaim(this)]() {
         auto tabBarPattern = weak.Upgrade();
         CHECK_NULL_VOID(tabBarPattern);

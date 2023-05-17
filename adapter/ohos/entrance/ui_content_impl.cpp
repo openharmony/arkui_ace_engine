@@ -346,7 +346,9 @@ void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& u
     Platform::AceContainer::RunPage(
         instanceId_, Platform::AceContainer::GetContainer(instanceId_)->GeneratePageId(), startUrl_, "");
     LOGD("Initialize UIContentImpl done.");
-    uiManager_ = std::make_unique<DistributeUIManager>(instanceId_);
+    auto distributedUI = std::make_shared<NG::DistributedUI>();
+    uiManager_ = std::make_unique<DistributedUIManager>(instanceId_, distributedUI);
+    Platform::AceContainer::GetContainer(instanceId_)->SetDistributedUI(distributedUI);
 }
 
 void UIContentImpl::Initialize(const std::shared_ptr<Window>& aceWindow, const std::string& url, NativeValue* storage)
@@ -362,7 +364,9 @@ void UIContentImpl::Initialize(const std::shared_ptr<Window>& aceWindow, const s
     Platform::AceContainer::RunPage(
         instanceId_, Platform::AceContainer::GetContainer(instanceId_)->GeneratePageId(), startUrl_, "");
     LOGI("Initialize UIContentImpl done");
-    uiManager_ = std::make_unique<DistributeUIManager>(instanceId_);
+    auto distributedUI = std::make_shared<NG::DistributedUI>();
+    uiManager_ = std::make_unique<DistributedUIManager>(instanceId_, distributedUI);
+    Platform::AceContainer::GetContainer(instanceId_)->SetDistributedUI(distributedUI);
 }
 
 void UIContentImpl::Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage)
