@@ -17,6 +17,7 @@
 
 #include "gtest/gtest.h"
 
+#include "include/core/SkCanvas.h"
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
