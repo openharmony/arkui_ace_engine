@@ -225,13 +225,11 @@ void NavRouterGroupNode::SetBackButtonEvent(const RefPtr<UINode>& parent)
                 navRouter->BackToPreNavDestination(preNavDestination, navigation, navRouterPattern);
                 navRouter->SetOnStateChangeFalse(navDestination, navDestination, navigation, true);
                 layoutProperty->UpdateDestinationChange(true);
-                navigation->MarkModifyDone();
                 return;
             }
             navRouter->BackToNavBar(navigation);
             navRouter->SetOnStateChangeFalse(navDestination, navDestination, navigation, true);
             layoutProperty->UpdateDestinationChange(false);
-            navigation->MarkModifyDone();
             return;
         }
 
@@ -240,7 +238,6 @@ void NavRouterGroupNode::SetBackButtonEvent(const RefPtr<UINode>& parent)
                 navRouter->BackToPreNavDestination(preNavDestination, navigation, navRouterPattern);
                 navRouter->SetOnStateChangeFalse(navDestination, navDestination, navigation, true);
                 layoutProperty->UpdateDestinationChange(false);
-                navigation->MarkModifyDone();
                 return;
             }
         }
@@ -711,6 +708,7 @@ void NavRouterGroupNode::NavTransitionOutAnimation(const RefPtr<UINode>& navigat
                         RectF(0.0f, 0.0f, Infinity<float>(), nodeHeight), RadiusF(EdgeF(0.0f, 0.0f)));
                     ContainerScope scope(id);
                     navigationContentNode->MarkModifyDone();
+                    navigationNode->MarkModifyDone();
                     navigationContentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
                     navigationNode->SetIsOnAnimation(false);
                 },
@@ -788,6 +786,7 @@ void NavRouterGroupNode::NavTransitionBackToPreAnimation(const RefPtr<UINode>& n
                     RectF(0.0f, 0.0f, Infinity<float>(), nodeHeight), RadiusF(EdgeF(0.0f, 0.0f)));
                 ContainerScope scope(id);
                 navigationContentNode->MarkModifyDone();
+                navigationNode->MarkModifyDone();
                 navigationContentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
                 navigationNode->SetIsOnAnimation(false);
             },
