@@ -2163,6 +2163,15 @@ void RosenRenderContext::AddChild(const RefPtr<RenderContext>& renderContext, in
     rsNode_->AddChild(child, index);
 }
 
+void RosenRenderContext::RemoveChild(const RefPtr<RenderContext>& renderContext)
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto rosenRenderContext = AceType::DynamicCast<RosenRenderContext>(renderContext);
+    CHECK_NULL_VOID(rosenRenderContext);
+    auto child = rosenRenderContext->GetRSNode();
+    rsNode_->RemoveChild(child);
+}
+
 void RosenRenderContext::SetBounds(float positionX, float positionY, float width, float height)
 {
     CHECK_NULL_VOID(rsNode_);

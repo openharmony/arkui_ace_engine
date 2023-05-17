@@ -47,6 +47,7 @@ constexpr char NTC_PARAM_RICH_TEXT[] = "formAdaptor";
 constexpr char FORM_RENDERER_PROCESS_ON_ADD_SURFACE[] = "ohos.extra.param.key.process_on_add_surface";
 constexpr char FORM_RENDERER_DISPATCHER[] = "ohos.extra.param.key.process_on_form_renderer_dispatcher";
 constexpr int32_t RENDER_DEAD_CODE = 16501006;
+constexpr int32_t FORM_NOT_TRUST_CODE = 16501007;
 constexpr char ALLOW_UPDATE[] = "allowUpdate";
 } // namespace
 
@@ -395,6 +396,15 @@ void FormManagerDelegate::OnActionEventHandle(const std::string& action)
     }
 }
 
+void FormManagerDelegate::AddUntrustFormCallback(const UntrustFormCallback& callback)
+{
+    if (!callback || state_ == State::RELEASED) {
+        LOGE("callback is null or has released");
+        return;
+    }
+    untrustFormCallback_ = callback;
+}
+
 bool FormManagerDelegate::ParseAction(const std::string &action, const std::string& type, AAFwk::Want &want)
 {
     auto eventAction = JsonUtil::ParseJsonString(action);
@@ -631,25 +641,42 @@ void FormManagerDelegate::OnFormError(const std::string& code, const std::string
     int32_t externalErrorCode = 0;
     std::string errorMsg;
     OHOS::AppExecFwk::FormMgr::GetInstance().GetExternalError(std::stoi(code), externalErrorCode, errorMsg);
-    if (externalErrorCode != RENDER_DEAD_CODE) {
-        LOGE("OnFormError, not RENDER_DEAD condition, just callback, code:%{public}s   msg:%{public}s",
-            code.c_str(), msg.c_str());
-        if (onFormErrorCallback_) {
-            onFormErrorCallback_(code, msg);
-        }
-        return;
+    LOGI("OnFormError, code:%{public}s, msg:%{public}s, externalErrorCode:%{public}d, errorMsg: %{public}s, %{public}p",
+        code.c_str(), msg.c_str(), externalErrorCode, errorMsg.c_str(), this);
+    switch (externalErrorCode) {
+        case RENDER_DEAD_CODE:
+            ReAddForm();
+            break;
+        case FORM_NOT_TRUST_CODE:
+            HandleUntrustFormCallback();
+            break;
+        default:
+            LOGE("OnFormError, not RENDER_DEAD condition");
+            if (onFormErrorCallback_) {
+                onFormErrorCallback_(code, msg);
+            }
     }
-    LOGE("OnFormError, render dead, add form again, code:%{public}s   msg:%{public}s", code.c_str(), msg.c_str());
+}
+
+void FormManagerDelegate::HandleUntrustFormCallback()
+{
+    LOGI("%{public}s.", __func__);
+    if (untrustFormCallback_) {
+        untrustFormCallback_();
+    }
+}
+
+void FormManagerDelegate::ReAddForm()
+{
+    LOGI("%{public}s.", __func__);
     formRendererDispatcher_ = nullptr;  // formRendererDispatcher_ need reset, otherwise PointerEvent will disable
     auto clientInstance = OHOS::AppExecFwk::FormHostClient::GetInstance();
     auto ret = OHOS::AppExecFwk::FormMgr::GetInstance().AddForm(
         formJsInfo_.formId, wantCache_, clientInstance, formJsInfo_);
     if (ret != 0) {
-        OHOS::AppExecFwk::FormMgr::GetInstance().GetExternalError(ret, externalErrorCode, errorMsg);
+        auto errorMsg = OHOS::AppExecFwk::FormMgr::GetInstance().GetErrorMessage(ret);
         LOGE("Add form failed, ret:%{public}d detail:%{public}s", ret, errorMsg.c_str());
-        if (onFormErrorCallback_) {
-            onFormErrorCallback_(std::to_string(externalErrorCode), errorMsg);
-        }
+        OnFormError(std::to_string(ret), errorMsg);
         return;
     }
 }

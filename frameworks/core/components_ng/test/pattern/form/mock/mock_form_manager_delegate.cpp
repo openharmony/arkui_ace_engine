@@ -42,6 +42,8 @@ void FormManagerDelegate::AddFormErrorCallback(const OnFormErrorCallback& callba
 
 void FormManagerDelegate::AddFormUninstallCallback(const OnFormUninstallCallback& callback) {}
 
+void FormManagerDelegate::AddUntrustFormCallback(const UntrustFormCallback& callback) {}
+
 void FormManagerDelegate::OnActionEvent(const std::string& action) {}
 
 void FormManagerDelegate::SetFormUtils(const std::shared_ptr<FormUtils>& formUtils) {}
