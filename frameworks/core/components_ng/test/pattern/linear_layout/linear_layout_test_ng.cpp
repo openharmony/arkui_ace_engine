@@ -35,6 +35,7 @@
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/constants.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -62,8 +63,8 @@ const std::string EMPTY_STRING;
 } // namespace
 class LinearLayoutTestNg : public testing::Test {
 public:
-    void SetUp() override;
-    void TearDown() override;
+    static void SetUpTestCase();
+    static void TearDownTestCase();
 
 protected:
     std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapper>> CreateRow();
@@ -76,9 +77,15 @@ protected:
     PaddingProperty CreatePadding(float left, float top, float right, float bottom);
 };
 
-void LinearLayoutTestNg::SetUp() {}
+void LinearLayoutTestNg::SetUpTestCase()
+{
+    MockPipelineBase::SetUp();
+}
 
-void LinearLayoutTestNg::TearDown() {}
+void LinearLayoutTestNg::TearDownTestCase()
+{
+    MockPipelineBase::TearDown();
+}
 
 std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapper>> LinearLayoutTestNg::CreateRow()
 {
