@@ -74,6 +74,7 @@ private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnRebuildFrame() override;
+    void OnVisibleChange(bool isVisible) override;
 
     void InitFormManagerDelegate();
     void CreateCardContainer();
@@ -95,6 +96,7 @@ private:
 
     RequestFormInfo cardInfo_;
     bool isLoaded_ = false;
+    bool isVisible_ = true;
 };
 
 } // namespace NG
