@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_CHECKBOX_CHECKBOX_PAINT_METHOD_H
 
 #include "base/memory/ace_type.h"
-#include "base/utils/macros.h"
 #include "core/components_ng/pattern/checkbox/checkbox_modifier.h"
 #include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
 #include "core/components_ng/render/node_paint_method.h"
@@ -87,10 +86,11 @@ public:
         auto checkboxTheme = pipeline->GetTheme<CheckboxTheme>();
         auto horizontalPadding = checkboxTheme->GetHotZoneHorizontalPadding().ConvertToPx();
         auto verticalPadding = checkboxTheme->GetHotZoneVerticalPadding().ConvertToPx();
-        float boundsRectOriginX = offset.GetX() - horizontalPadding;
-        float boundsRectOriginY = offset.GetY() - verticalPadding;
-        float boundsRectWidth = size.Width() + 2 * horizontalPadding;
-        float boundsRectHeight = size.Height() + 2 * verticalPadding;
+        auto defaultPadding = checkboxTheme->GetDefaultPadding().ConvertToPx();
+        float boundsRectOriginX = offset.GetX() - defaultPadding - horizontalPadding;
+        float boundsRectOriginY = offset.GetY() - defaultPadding - verticalPadding;
+        float boundsRectWidth = size.Width() + 2 * (defaultPadding + horizontalPadding);
+        float boundsRectHeight = size.Height() + 2 * (defaultPadding + verticalPadding);
         RectF boundsRect(boundsRectOriginX, boundsRectOriginY, boundsRectWidth, boundsRectHeight);
         checkboxModifier_->SetBoundsRect(boundsRect);
     }
