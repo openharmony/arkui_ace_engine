@@ -72,7 +72,6 @@ const char THEME_PATTERN_SECURITY_COMPONENT[] = "security_component_pattern";
 // pattern general attributes
 const char PATTERN_FG_COLOR[] = "fg_color";
 const char PATTERN_BG_COLOR[] = "bg_color";
-const char PATTERN_BRODER_COLOR[] = "focus_broder_color";
 const char PATTERN_UNDERLINE_ACTIVED_COLOR[] = "underline_actived_color";
 const char PATTERN_UNDERLINE_TYPING_COLOR[] = "underline_typing_color";
 const char PATTERN_BG_COLOR_HOVERED[] = "bg_color_hovered";

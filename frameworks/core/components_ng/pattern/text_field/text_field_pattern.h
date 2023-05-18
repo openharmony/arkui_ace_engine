@@ -115,8 +115,6 @@ struct CaretMetricsF {
 struct UnderLinePattern {
     BorderRadiusProperty radius;
     Color bgColor;
-    BorderWidthProperty borderWidth;
-    BorderColorProperty borderColor;
 };
 
 struct PasswordModeStyle {
@@ -743,16 +741,6 @@ public:
         return hidePasswordImageLoadingCtx_;
     }
 
-    void SetShowUnderLine(bool showUnderLine)
-    {
-        showUnderLine_ = showUnderLine;
-    }
-
-    bool GetShowUnderLine() const
-    {
-        return showUnderLine_;
-    }
-
     float GetUnitWidth() const
     {
         return unitWidth_;
@@ -917,7 +905,6 @@ private:
     PaddingPropertyF utilPadding_;
     OffsetF rightClickOffset_;
 
-    bool showUnderLine_ = false;
     bool setBorderFlag_ = true;
     BorderWidthProperty lastDiffBorderWidth_;
     BorderColorProperty lastDiffBorderColor_;

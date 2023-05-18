@@ -89,8 +89,8 @@ void TextFieldModelNG::SetShowUnderline(bool showUnderLine)
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     auto rendercontext = frameNode->GetRenderContext();
     auto pipeline = frameNode->GetContext();
-    pattern->SetShowUnderLine(showUnderLine);
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    textFieldLayoutProperty->UpdateShowUnderline(showUnderLine);
     auto themeManager = pipeline->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
     auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
@@ -113,6 +113,7 @@ void TextFieldModelNG::SetShowUnderline(bool showUnderLine)
         Radius radius;
         rendercontext->UpdateBorderRadius({ radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() });
     }
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowUnderline, showUnderLine);
 }
 
 void TextFieldModelNG::ProcessDefaultPadding(PaddingProperty& paddings)
@@ -130,7 +131,7 @@ void TextFieldModelNG::ProcessDefaultPadding(PaddingProperty& paddings)
     CHECK_NULL_VOID(layoutProperty);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
-    if (pattern->GetShowUnderLine()) {
+    if (layoutProperty->GetShowUnderlineValue(false)) {
         paddings.top = NG::CalcLength(UNDERLINE_NORMAL_PADDING);
         paddings.bottom = NG::CalcLength(UNDERLINE_NORMAL_PADDING);
         paddings.left = NG::CalcLength(0);

@@ -77,7 +77,13 @@ void TextFieldContentModifier::onDraw(DrawingContext& context)
     auto clipRectHeight = 0.0f;
     auto errorMargin = 0.0f;
     auto errorViewHeight = 0.0f;
-    if (textFieldPattern->GetShowUnderLine() && showErrorState_->Get()) {
+    auto textPartten = pattern_.Upgrade();
+    CHECK_NULL_VOID(textPartten);
+    auto frameNode = textPartten->GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->GetShowPasswordIconValue(false) && showErrorState_->Get()) {
         errorMargin = ERROR_TEXT_UNDERLINE_MARGIN.ConvertToPx();
     } else if (textFieldPattern->NeedShowPasswordIcon() && showErrorState_->Get()) {
         errorMargin = ERROR_TEXT_CAPSULE_MARGIN.ConvertToPx();
@@ -166,6 +172,7 @@ void TextFieldContentModifier::SetDefaultPropertyValue()
     contentOffset_ = AceType::MakeRefPtr<PropertyOffsetF>(OffsetF());
     contentSize_ = AceType::MakeRefPtr<PropertySizeF>(SizeF());
     textValue_ = AceType::MakeRefPtr<PropertyString>("");
+    errorTextValue_ = AceType::MakeRefPtr<PropertyString>("");
     placeholderValue_ = AceType::MakeRefPtr<PropertyString>("");
     textRectY_ = AceType::MakeRefPtr<PropertyFloat>(theme->GetPadding().Top().ConvertToPx());
     textRectX_ = AceType::MakeRefPtr<PropertyFloat>(theme->GetPadding().Left().ConvertToPx());
@@ -175,6 +182,7 @@ void TextFieldContentModifier::SetDefaultPropertyValue()
     AttachProperty(contentOffset_);
     AttachProperty(contentSize_);
     AttachProperty(textValue_);
+    AttachProperty(errorTextValue_);
     AttachProperty(placeholderValue_);
     AttachProperty(textRectY_);
     AttachProperty(textObscured_);
@@ -183,6 +191,7 @@ void TextFieldContentModifier::SetDefaultPropertyValue()
     AttachProperty(textAlign_);
     AttachProperty(showCounter_);
     AttachProperty(showErrorState_);
+    AttachProperty(showUnderline_);
 }
 
 void TextFieldContentModifier::SetDefaultFontSize(const TextStyle& textStyle)
@@ -271,6 +280,13 @@ void TextFieldContentModifier::SetTextValue(std::string& value)
     }
 }
 
+void TextFieldContentModifier::SetErrorTextValue(const std::string& value)
+{
+    if (errorTextValue_->Get() != value) {
+        errorTextValue_->Set(value);
+    }
+}
+
 void TextFieldContentModifier::SetPlaceholderValue(std::string&& value)
 {
     if (placeholderValue_->Get() != value) {
@@ -322,6 +338,13 @@ void TextFieldContentModifier::SetShowErrorState(bool value)
 {
     if (showErrorState_) {
         showErrorState_->Set(value);
+    }
+}
+
+void TextFieldContentModifier::SetShowUnderlineState(bool value)
+{
+    if (showUnderline_) {
+        showUnderline_->Set(value);
     }
 }
 

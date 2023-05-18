@@ -2579,32 +2579,6 @@ HWTEST_F(TextFieldPatternTestNg, SetUnderlineColor, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetShowUnderLine
- * @tc.desc: Verify that the SetShowUnderLine interface calls normally and exits without exception.
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternTestNg, SetShowUnderLine, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create textFieldPattern.
-     */
-    auto textFieldPattern = GetPattern();
-    ASSERT_NE(textFieldPattern, nullptr);
-
-    /**
-     * @tc.steps: step2. call SetShowUnderLine function.
-     * @tc.expected: The member variable value of textFieldPattern is the same as expected.
-     */
-    bool showUnderLine = false;
-    textFieldPattern->SetShowUnderLine(showUnderLine);
-    EXPECT_EQ(textFieldPattern->GetShowUnderLine(), showUnderLine);
-
-    showUnderLine = true;
-    textFieldPattern->SetShowUnderLine(showUnderLine);
-    EXPECT_EQ(textFieldPattern->GetShowUnderLine(), showUnderLine);
-}
-
-/**
  * @tc.name: GetUnitWidth
  * @tc.desc: Verify that the GetUnitWidth interface calls normally and exits without exception.
  * @tc.type: FUNC
@@ -2629,11 +2603,11 @@ HWTEST_F(TextFieldPatternTestNg, GetUnitWidth, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetShowUnderline002
+ * @tc.name: SetShowUnderline001
  * @tc.desc: Verify that the SetShowUnderline interface calls normally and exits without exception.
  * @tc.type: FUNC
  */
-HWTEST_F(TextFieldPatternTestNg, SetShowUnderline002, TestSize.Level1)
+HWTEST_F(TextFieldPatternTestNg, SetShowUnderline001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create frameNode.Get pattern.
@@ -2657,11 +2631,11 @@ HWTEST_F(TextFieldPatternTestNg, SetShowUnderline002, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetShowUnderline003
+ * @tc.name: SetShowUnderline002
  * @tc.desc: Verify that the SetShowUnderline interface calls normally and exits without exception.
  * @tc.type: FUNC
  */
-HWTEST_F(TextFieldPatternTestNg, SetShowUnderline003, TestSize.Level1)
+HWTEST_F(TextFieldPatternTestNg, SetShowUnderline002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create frameNode.Get pattern.
@@ -2698,17 +2672,19 @@ HWTEST_F(TextFieldPatternTestNg, HandleFocusEvent001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(textFieldPattern, nullptr);
+    auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
 
     /**
      * @tc.steps: step2. Set showUnderLine. Call function HandleFocusEvent.
      * @tc.expected: Check the showUnderLine set successfully.
      */
-    textFieldPattern->SetShowUnderLine(true);
+    layoutProperty->UpdateShowUnderline(true);
     textFieldPattern->HandleFocusEvent();
-    EXPECT_TRUE(textFieldPattern->GetShowUnderLine());
-    textFieldPattern->SetShowUnderLine(false);
+    EXPECT_TRUE(layoutProperty->GetShowUnderlineValue(false));
+    layoutProperty->UpdateShowUnderline(false);
     textFieldPattern->HandleFocusEvent();
-    EXPECT_FALSE(textFieldPattern->GetShowUnderLine());
+    EXPECT_FALSE(layoutProperty->GetShowUnderlineValue(false));
 }
 
 /**
@@ -2725,12 +2701,14 @@ HWTEST_F(TextFieldPatternTestNg, onDraw004, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
     pattern->scrollableEvent_ = AceType::MakeRefPtr<ScrollableEvent>(AXIS_VERTICAL);
     pattern->AddScrollEvent();
     pattern->scrollable_ = true;
     pattern->CheckScrollable();
     bool showUnderLine = true;
-    pattern->SetShowUnderLine(showUnderLine);
+    layoutProperty->UpdateShowUnderline(showUnderLine);
     auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
     scrollBar->isScrollable_ = true;
     scrollBar->displayMode_ = DisplayMode::AUTO;
@@ -2769,6 +2747,8 @@ HWTEST_F(TextFieldPatternTestNg, onDraw005, TestSize.Level1)
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
     TextFieldContentModifier textFieldContentModifier(pattern);
+    auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
 
     /**
      * @tc.steps: step2. Create the TextFieldContentModifier.Set different properties.Call function onDraw.
@@ -2777,7 +2757,7 @@ HWTEST_F(TextFieldPatternTestNg, onDraw005, TestSize.Level1)
     Testing::MockCanvas rsCanvas;
     DrawingContext context { rsCanvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    pattern->SetShowUnderLine(true);
+    layoutProperty->UpdateShowUnderline(true);
     bool value = true;
     textFieldContentModifier.showErrorState_ = AceType::MakeRefPtr<PropertyBool>(value);
     textFieldContentModifier.showCounter_ = AceType::MakeRefPtr<PropertyBool>(value);
@@ -2835,13 +2815,15 @@ HWTEST_F(TextFieldPatternTestNg, ProcessDefaultPadding, TestSize.Level1)
     auto themePadding = textFieldTheme->GetPadding();
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
 
     /**
      * @tc.steps: step2. Create the textFieldModelInstance function ProcessDefaultPadding.
      * @tc.expected: Check the properties.
      */
     bool showUnderLine = false;
-    pattern->SetShowUnderLine(showUnderLine);
+    layoutProperty->UpdateShowUnderline(showUnderLine);
     auto renderContext = frameNode->GetRenderContext();
     PaddingProperty paddings;
     textFieldModelInstance.ProcessDefaultPadding(paddings);
@@ -3027,17 +3009,19 @@ HWTEST_F(TextFieldPatternTestNg, HandleBlurEvent001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(textFieldPattern, nullptr);
+    auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
 
     /**
      * @tc.steps: step2. Set showUnderLine. Call function HandleBlurEvent.
      * @tc.expected: Check the showUnderLine set successfully.
      */
-    textFieldPattern->SetShowUnderLine(true);
+    layoutProperty->UpdateShowUnderline(true);
     textFieldPattern->HandleBlurEvent();
-    EXPECT_TRUE(textFieldPattern->GetShowUnderLine());
-    textFieldPattern->SetShowUnderLine(false);
+    EXPECT_TRUE(layoutProperty->GetShowUnderlineValue(false));
+    layoutProperty->UpdateShowUnderline(false);
     textFieldPattern->HandleBlurEvent();
-    EXPECT_FALSE(textFieldPattern->GetShowUnderLine());
+    EXPECT_FALSE(layoutProperty->GetShowUnderlineValue(false));
 }
 
 /**
@@ -3054,22 +3038,24 @@ HWTEST_F(TextFieldPatternTestNg, HandleTouchDown001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(textFieldPattern, nullptr);
+    auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
 
     /**
      * @tc.steps: step2. Set properties. Call function HandleTouchDown.
      * @tc.expected: Check the properties set successfully.
      */
-    textFieldPattern->SetShowUnderLine(true);
+    layoutProperty->UpdateShowUnderline(true);
     textFieldPattern->SetEnableTouchAndHoverEffect(true);
     textFieldPattern->isMousePressed_ = false;
     Offset offset;
     textFieldPattern->HandleTouchDown(offset);
-    EXPECT_TRUE(textFieldPattern->GetShowUnderLine());
+    EXPECT_TRUE(layoutProperty->GetShowUnderlineValue(false));
     EXPECT_TRUE(textFieldPattern->enableTouchAndHoverEffect_);
     EXPECT_FALSE(textFieldPattern->GetIsMousePressed());
-    textFieldPattern->SetShowUnderLine(false);
+    layoutProperty->UpdateShowUnderline(false);
     textFieldPattern->HandleTouchDown(offset);
-    EXPECT_FALSE(textFieldPattern->GetShowUnderLine());
+    EXPECT_FALSE(layoutProperty->GetShowUnderlineValue(false));
 }
 
 /**
@@ -3086,20 +3072,22 @@ HWTEST_F(TextFieldPatternTestNg, HandleTouchUp001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(textFieldPattern, nullptr);
+    auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
 
     /**
      * @tc.steps: step2. Set properties. Call function HandleTouchUp.
      * @tc.expected: Check the properties set successfully.
      */
-    textFieldPattern->SetShowUnderLine(true);
+    layoutProperty->UpdateShowUnderline(true);
     textFieldPattern->SetEnableTouchAndHoverEffect(true);
     textFieldPattern->isOnHover_ = false;
     textFieldPattern->HandleTouchUp();
     EXPECT_TRUE(textFieldPattern->enableTouchAndHoverEffect_);
-    EXPECT_TRUE(textFieldPattern->GetShowUnderLine());
-    textFieldPattern->SetShowUnderLine(false);
+    EXPECT_TRUE(layoutProperty->GetShowUnderlineValue(false));
+    layoutProperty->UpdateShowUnderline(false);
     textFieldPattern->HandleTouchUp();
-    EXPECT_FALSE(textFieldPattern->GetShowUnderLine());
+    EXPECT_FALSE(layoutProperty->GetShowUnderlineValue(false));
 }
 
 /**
@@ -3116,17 +3104,19 @@ HWTEST_F(TextFieldPatternTestNg, OnModifyDone001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(textFieldPattern, nullptr);
+    auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
 
     /**
      * @tc.steps: step2. Set showUnderLine. Call function OnModifyDone.
      * @tc.expected: Check the showUnderLine set successfully.
      */
-    textFieldPattern->SetShowUnderLine(true);
+    layoutProperty->UpdateShowUnderline(true);
     textFieldPattern->OnModifyDone();
-    EXPECT_TRUE(textFieldPattern->GetShowUnderLine());
-    textFieldPattern->SetShowUnderLine(false);
+    EXPECT_TRUE(layoutProperty->GetShowUnderlineValue(false));
+    layoutProperty->UpdateShowUnderline(false);
     textFieldPattern->OnModifyDone();
-    EXPECT_FALSE(textFieldPattern->GetShowUnderLine());
+    EXPECT_FALSE(layoutProperty->GetShowUnderlineValue(false));
 }
 
 /**
@@ -3143,52 +3133,25 @@ HWTEST_F(TextFieldPatternTestNg, OnHover001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(textFieldPattern, nullptr);
+    auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
 
     /**
      * @tc.steps: step2. Set properties. Call function OnHover.
      * @tc.expected: Check the properties set successfully.
      */
-    textFieldPattern->SetShowUnderLine(true);
+    layoutProperty->UpdateShowUnderline(true);
     textFieldPattern->SetEnableTouchAndHoverEffect(true);
     textFieldPattern->OnHover(true);
-    EXPECT_TRUE(textFieldPattern->GetShowUnderLine());
+    EXPECT_TRUE(layoutProperty->GetShowUnderlineValue(false));
     EXPECT_TRUE(textFieldPattern->enableTouchAndHoverEffect_);
-    textFieldPattern->SetShowUnderLine(true);
+    layoutProperty->UpdateShowUnderline(true);
     textFieldPattern->isMousePressed_ = false;
     textFieldPattern->OnHover(false);
-    EXPECT_TRUE(textFieldPattern->GetShowUnderLine());
-    textFieldPattern->SetShowUnderLine(false);
+    EXPECT_TRUE(layoutProperty->GetShowUnderlineValue(false));
+    layoutProperty->UpdateShowUnderline(false);
     textFieldPattern->OnHover(true);
-    EXPECT_FALSE(textFieldPattern->GetShowUnderLine());
-}
-
-/**
- * @tc.name: OnValueChanged001
- * @tc.desc: Test the OnValueChanged.
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternTestNg, OnValueChanged001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create TextFieldPattern.
-     */
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
-    ASSERT_NE(textFieldPattern, nullptr);
-
-    /**
-     * @tc.steps: step2. Set properties. Call function OnValueChanged.
-     * @tc.expected: Check the properties set successfully.
-     */
-    textFieldPattern->SetShowUnderLine(true);
-    textFieldPattern->OnValueChanged(true, true);
-    EXPECT_TRUE(textFieldPattern->GetShowUnderLine());
-    EXPECT_EQ(textFieldPattern->underlineWidth_, TYPING_UNDERLINE_WIDTH);
-    textFieldPattern->SetShowUnderLine(false);
-    textFieldPattern->OnValueChanged(true, true);
-    EXPECT_FALSE(textFieldPattern->GetShowUnderLine());
-    EXPECT_EQ(textFieldPattern->underlineWidth_, UNDERLINE_WIDTH);
+    EXPECT_FALSE(layoutProperty->GetShowUnderlineValue(false));
 }
 
 /**
