@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/menu/menu_item/menu_item_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/multi_menu_layout_algorithm.h"
+#include "core/components_ng/pattern/menu/sub_menu_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/option/option_pattern.h"
 #include "core/components_ng/pattern/option/option_view.h"
@@ -415,6 +416,8 @@ RefPtr<LayoutAlgorithm> MenuPattern::CreateLayoutAlgorithm()
             return MakeRefPtr<NavigationMenuLayoutAlgorithm>();
         case MenuType::MULTI_MENU:
             return MakeRefPtr<MultiMenuLayoutAlgorithm>();
+        case MenuType::SUB_MENU:
+            return MakeRefPtr<SubMenuLayoutAlgorithm>();
         default:
             return MakeRefPtr<MenuLayoutAlgorithm>(targetId_, targetTag_);
     }

@@ -54,7 +54,10 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // Step2: Measure children that can be displayed in viewport of Grid
     float mainSize = GetMainAxisSize(idealSize, axis);
     float crossSize = GetCrossAxisSize(idealSize, axis);
-    UpdateOffsetOnVirtualKeyboardHeightChange(layoutWrapper, mainSize);
+    if (!NearEqual(mainSize, gridLayoutInfo_.lastMainSize_)) {
+        gridLayoutInfo_.ResetPositionFlags();
+        UpdateOffsetOnVirtualKeyboardHeightChange(layoutWrapper, mainSize);
+    }
     FillGridViewportAndMeasureChildren(mainSize, crossSize, layoutWrapper);
 
     // update cache info.
@@ -614,10 +617,10 @@ bool GridScrollLayoutAlgorithm::UseCurrentLines(
     // Case 2. if this while-loop stops due to false result of [LessNotEqual(mainLength, mainSize)], the
     // [currentMainLineIndex_] is exactly the real main line index. Update [endMainLineIndex_] when the recorded items
     // are done measured.
-    auto oldEnd = gridLayoutInfo_.endMainLineIndex_;
     gridLayoutInfo_.endMainLineIndex_ = runOutOfRecord ? --currentMainLineIndex_ : currentMainLineIndex_;
     // reset reachEnd_ if any line at bottom is out of viewport
-    gridLayoutInfo_.reachEnd_ = oldEnd > gridLayoutInfo_.endMainLineIndex_;
+    // last line make LessNotEqual(mainLength, mainSize) and continue is reach end too
+    gridLayoutInfo_.reachEnd_ = gridLayoutInfo_.endIndex_ == layoutWrapper->GetTotalChildCount() - 1;
     return runOutOfRecord;
 }
 

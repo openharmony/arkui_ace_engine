@@ -305,8 +305,7 @@ void JSViewFullUpdate::JSBind(BindingTarget object)
     JSClass<JSViewFullUpdate>::CustomMethod("getCardId", &JSViewFullUpdate::JsGetCardId);
     JSClass<JSViewFullUpdate>::CustomMethod("findChildById", &JSViewFullUpdate::FindChildById);
     JSClass<JSViewFullUpdate>::CustomMethod("findChildByIdForPreview", &JSViewFullUpdate::FindChildByIdForPreview);
-    JSClass<JSViewFullUpdate>::Inherit<JSViewAbstract>();
-    JSClass<JSViewFullUpdate>::Bind(object, ConstructorCallback, DestructorCallback);
+    JSClass<JSViewFullUpdate>::InheritAndBind<JSViewAbstract>(object, ConstructorCallback, DestructorCallback);
 }
 
 void JSViewFullUpdate::FindChildById(const JSCallbackInfo& info)
@@ -323,11 +322,11 @@ void JSViewFullUpdate::FindChildById(const JSCallbackInfo& info)
 
 void JSViewFullUpdate::FindChildByIdForPreview(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsString()) {
-        LOGE("info[0] is not a string.");
+    if (!info[0]->IsNumber()) {
+        LOGE("info[0] is not a number");
         return;
     }
-    std::string viewId = info[0]->ToString();
+    std::string viewId = std::to_string(info[0]->ToNumber<int32_t>());
     if (viewId_ == viewId) {
         info.SetReturnValue(jsViewObject_);
         return;
@@ -882,8 +881,7 @@ void JSViewPartialUpdate::JSBind(BindingTarget object)
         "findChildByIdForPreview", &JSViewPartialUpdate::FindChildByIdForPreview);
     JSClass<JSViewPartialUpdate>::CustomMethod(
         "resetRecycleCustomNode", &JSViewPartialUpdate::JSResetRecycleCustomNode);
-    JSClass<JSViewPartialUpdate>::Inherit<JSViewAbstract>();
-    JSClass<JSViewPartialUpdate>::Bind(object, ConstructorCallback, DestructorCallback);
+    JSClass<JSViewPartialUpdate>::InheritAndBind<JSViewAbstract>(object, ConstructorCallback, DestructorCallback);
 }
 
 void JSViewPartialUpdate::ConstructorCallback(const JSCallbackInfo& info)
@@ -1003,11 +1001,11 @@ void JSViewPartialUpdate::IsFirstRender(const JSCallbackInfo& info)
 void JSViewPartialUpdate::FindChildByIdForPreview(const JSCallbackInfo& info)
 {
     LOGD("JSViewPartialUpdate::FindChildByIdForPreview");
-    if (!info[0]->IsString()) {
-        LOGE("info[0] is not a string.");
+    if (!info[0]->IsNumber()) {
+        LOGE("info[0] is not a number");
         return;
     }
-    std::string viewId = info[0]->ToString();
+    std::string viewId = std::to_string(info[0]->ToNumber<int32_t>());
     JSRef<JSObject> targetView = Framework::JSViewStackProcessor::GetViewById(viewId);
     info.SetReturnValue(targetView);
     return;

@@ -331,6 +331,65 @@ void JsiClass<C>::Inherit()
 }
 
 template<typename C>
+template<typename Base>
+void JsiClass<C>::InheritAndBind(
+    BindingTarget t, JSFunctionCallback ctor, JSDestructorCallback<C> dtor, JSGCMarkCallback<C> gcMark)
+{
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+    auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
+    LocalScope scope(vm);
+    panda::Local<panda::JSValueRef> hasExistRef = t->Get(vm,
+        panda::Local<panda::JSValueRef>(panda::StringRef::NewFromUtf8(vm, ThisJSClass::JSName())));
+    if (hasExistRef.IsEmpty()) {
+        LOGI("InheritAndBind JSClass(%{public}s) has existed", ThisJSClass::JSName());
+        return;
+    }
+
+    jsConstructor_ = ctor;
+    jsDestructor_ = dtor;
+    jsGcMark_ = gcMark;
+    classFunction_ = panda::Global<panda::FunctionRef>(
+        vm, panda::FunctionRef::NewClassFunction(vm, JSConstructorInterceptor, nullptr, nullptr));
+    classFunction_->SetName(vm, StringRef::NewFromUtf8(vm, className_.c_str()));
+
+    panda::Local<panda::JSValueRef> getResult = t->Get(vm,
+        panda::Local<panda::JSValueRef>(panda::StringRef::NewFromUtf8(vm, JSClassImpl<Base, JsiClass>::JSName())));
+    if (getResult.IsEmpty()) {
+        LOGE("InheritAndBind: Base class(%{public}s) not exist %{public}s",
+            JSClassImpl<Base, JsiClass>::JSName(), ThisJSClass::JSName());
+        return;
+    }
+
+    panda::Local<panda::FunctionRef> baseClassFunction(getResult);
+    classFunction_->SetPrototype(vm, baseClassFunction);
+    auto prototype = panda::Local<panda::ObjectRef>(classFunction_->GetFunctionPrototype(vm));
+    auto baseClassPrototype = panda::Local<panda::ObjectRef>(baseClassFunction->GetFunctionPrototype(vm));
+    prototype->SetPrototype(vm, baseClassPrototype);
+    prototype->Set(vm, panda::StringRef::NewFromUtf8(vm, "constructor"),
+        panda::Local<panda::JSValueRef>(classFunction_.ToLocal()));
+
+    for (const auto& [name, val] : staticFunctions_) {
+        classFunction_->Set(vm, panda::StringRef::NewFromUtf8(vm, name.c_str()), val.ToLocal());
+    }
+
+    for (const auto& [name, val] : customFunctions_) {
+        prototype->Set(vm, panda::StringRef::NewFromUtf8(vm, name.c_str()), val.ToLocal());
+    }
+
+    for (const auto& [nameGet, valGet] : customGetFunctions_) {
+        for (const auto& [nameSet, valSet] : customSetFunctions_) {
+            if (nameGet == nameSet) {
+                prototype->SetAccessorProperty(vm, panda::StringRef::NewFromUtf8(vm, nameGet.c_str()),
+                    valGet.ToLocal(), valSet.ToLocal());
+            }
+        }
+    }
+
+    t->Set(vm, panda::Local<panda::JSValueRef>(panda::StringRef::NewFromUtf8(vm, ThisJSClass::JSName())),
+        panda::Local<panda::JSValueRef>(classFunction_.ToLocal()));
+}
+
+template<typename C>
 std::unordered_map<std::string, panda::Global<panda::FunctionRef>>& JsiClass<C>::GetStaticFunctions()
 {
     return staticFunctions_;

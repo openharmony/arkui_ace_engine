@@ -76,7 +76,7 @@ void NavigationGroupNode::AddNavDestinationToNavigation(const RefPtr<UINode>& pa
     auto navigationContentNode = AceType::DynamicCast<FrameNode>(navigationNode->GetContentNode());
     CHECK_NULL_VOID(navigationContentNode);
     auto navigationStack = pattern->GetNavigationStack();
-    for (auto iter = navDestinationNodes.rbegin(); iter != navDestinationNodes.rend(); ++iter) {
+    for (auto iter = navDestinationNodes.begin(); iter != navDestinationNodes.end(); ++iter) {
         const auto& childNode = *iter;
         auto uiNode = childNode.second;
         auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(GetNavDestinationNode(uiNode));

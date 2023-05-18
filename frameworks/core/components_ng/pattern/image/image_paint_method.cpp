@@ -27,6 +27,21 @@ constexpr unsigned int BOTTOM_RIGHT = 3;
 } // namespace
 
 namespace OHOS::Ace::NG {
+namespace {
+void NormalizeRadius(BorderRadiusArray& radius, const SizeF& size)
+{
+    // radius shouldn't be larger than half of image size
+    for (auto&& corner : radius) {
+        if (corner.GetX() > size.Width() / 2) {
+            corner.SetX(size.Width() / 2);
+        }
+        if (corner.GetY() > size.Height() / 2) {
+            corner.SetY(size.Height() / 2);
+        }
+    }
+}
+} // namespace
+
 void ImagePaintMethod::UpdateBorderRadius(PaintWrapper* paintWrapper)
 {
     auto renderCtx = paintWrapper->GetRenderContext();
@@ -64,8 +79,10 @@ void ImagePaintMethod::UpdateBorderRadius(PaintWrapper* paintWrapper)
             radiusXY[BOTTOM_RIGHT].SetY(radiusXY[BOTTOM_RIGHT].GetY() - diff);
         }
     }
+
+    NormalizeRadius(radiusXY, paintWrapper->GetContentSize());
     auto&& config = canvasImage_->GetPaintConfig();
-    config.borderRadiusXY_ = std::make_shared<BorderRadiusArray>(std::move(radiusXY));
+    config.borderRadiusXY_ = std::make_shared<BorderRadiusArray>(radiusXY);
 }
 
 void ImagePaintMethod::UpdatePaintConfig(const RefPtr<ImageRenderProperty>& renderProps, PaintWrapper* paintWrapper)

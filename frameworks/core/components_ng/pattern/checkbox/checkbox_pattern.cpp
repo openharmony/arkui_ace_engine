@@ -17,7 +17,6 @@
 
 #include "core/components/checkable/checkable_component.h"
 #include "core/components/checkable/checkable_theme.h"
-#include "core/components_ng/pattern/checkbox/checkbox_layout_algorithm.h"
 #include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_property.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_pattern.h"
@@ -26,7 +25,6 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/touch_event.h"
-#include "core/pipeline/base/constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -55,7 +53,7 @@ void CheckBoxPattern::OnModifyDone()
     margin.right = CalcLength(checkBoxTheme->GetHotZoneHorizontalPadding().Value());
     margin.top = CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().Value());
     margin.bottom = CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().Value());
-    auto& setMargin = layoutProperty->GetMarginProperty();
+    const auto& setMargin = layoutProperty->GetMarginProperty();
     if (setMargin) {
         if (setMargin->left.has_value()) {
             margin.left = setMargin->left;
@@ -73,6 +71,7 @@ void CheckBoxPattern::OnModifyDone()
     layoutProperty->UpdateMargin(margin);
     hotZoneHorizontalPadding_ = checkBoxTheme->GetHotZoneHorizontalPadding();
     hotZoneVerticalPadding_ = checkBoxTheme->GetHotZoneVerticalPadding();
+    defaultPadding_ = checkBoxTheme->GetDefaultPadding();
     InitClickEvent();
     InitTouchEvent();
     InitMouseEvent();
@@ -542,10 +541,12 @@ FocusPattern CheckBoxPattern::GetFocusPattern() const
 // Set the default hot zone for the component.
 void CheckBoxPattern::AddHotZoneRect()
 {
-    hotZoneOffset_.SetX(offset_.GetX() - hotZoneHorizontalPadding_.ConvertToPx());
-    hotZoneOffset_.SetY(offset_.GetY() - hotZoneVerticalPadding_.ConvertToPx());
-    hotZoneSize_.SetWidth(size_.Width() + 2 * hotZoneHorizontalPadding_.ConvertToPx());
-    hotZoneSize_.SetHeight(size_.Height() + 2 * hotZoneVerticalPadding_.ConvertToPx());
+    hotZoneOffset_.SetX(offset_.GetX() - defaultPadding_.ConvertToPx() - hotZoneHorizontalPadding_.ConvertToPx());
+    hotZoneOffset_.SetY(offset_.GetY() - defaultPadding_.ConvertToPx() - hotZoneVerticalPadding_.ConvertToPx());
+    hotZoneSize_.SetWidth(
+        size_.Width() + 2 * (defaultPadding_.ConvertToPx() + hotZoneHorizontalPadding_.ConvertToPx()));
+    hotZoneSize_.SetHeight(
+        size_.Height() + 2 * (defaultPadding_.ConvertToPx() + hotZoneVerticalPadding_.ConvertToPx()));
     DimensionRect hotZoneRegion;
     hotZoneRegion.SetSize(DimensionSize(Dimension(hotZoneSize_.Width()), Dimension(hotZoneSize_.Height())));
     hotZoneRegion.SetOffset(DimensionOffset(Dimension(hotZoneOffset_.GetX()), Dimension(hotZoneOffset_.GetY())));

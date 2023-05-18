@@ -756,7 +756,7 @@ public:
 
     virtual void FlushPipelineImmediately() = 0;
 
-    // for sync animation only
+    // get animateTo closure option
     AnimationOption GetSyncAnimationOption()
     {
         return animationOption_;
@@ -848,6 +848,8 @@ public:
     {
         return nullptr;
     }
+
+    virtual void OnAvoidAreaChanged() {}
 
 protected:
     void TryCallNextFrameLayoutCallback()

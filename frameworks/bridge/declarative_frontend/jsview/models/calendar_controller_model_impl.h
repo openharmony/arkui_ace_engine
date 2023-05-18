@@ -13,16 +13,18 @@
  * limitations under the License.
  */
 
-#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_VIEW_CONTEXT_MODEL_IMPL_H
-#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_VIEW_CONTEXT_MODEL_IMPL_H
+#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_CALENDAR_CONTROLLER_MODEL_IMPL_H
+#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_CALENDAR_CONTROLLER_MODEL_IMPL_H
 
-#include "core/components_ng/pattern/view_context/view_context_model.h"
+#include "core/components_ng/pattern/calendar/calendar_controller_model.h"
 
 namespace OHOS::Ace::Framework {
-class ViewContextModelImpl : public OHOS::Ace::ViewContextModel {
+class CalendarControllerModelImpl : public OHOS::Ace::CalendarControllerModel {
 public:
-    void openAnimation(const AnimationOption& option) override;
-    void closeAnimation(const AnimationOption& option) override;
+    RefPtr<AceType> GetController() override;
+    void BackToToday(RefPtr<AceType>& controller) override;
+    void GoTo(const int32_t& year, const int32_t& month, const int32_t& day,
+    RefPtr<AceType>& controller) override;
 };
 } // namespace OHOS::Ace::Framework
-#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_VIEW_CONTEXT_MODEL_IMPL_H
+#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_CALENDAR_CONTROLLER_MODEL_IMPL_H

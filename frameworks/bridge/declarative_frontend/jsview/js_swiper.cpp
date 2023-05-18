@@ -133,9 +133,7 @@ void JSSwiper::JSBind(BindingTarget globalObj)
     JSClass<JSSwiper>::StaticMethod("width", &JSSwiper::SetWidth);
     JSClass<JSSwiper>::StaticMethod("size", &JSSwiper::SetSize);
     JSClass<JSSwiper>::StaticMethod("displayArrow", &JSSwiper::SetDisplayArrow);
-    JSClass<JSSwiper>::Inherit<JSContainerBase>();
-    JSClass<JSSwiper>::Inherit<JSViewAbstract>();
-    JSClass<JSSwiper>::Bind<>(globalObj);
+    JSClass<JSSwiper>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 void JSSwiper::SetAutoPlay(bool autoPlay)
@@ -502,6 +500,10 @@ bool JSSwiper::GetArrowInfo(const JSRef<JSObject>& obj, SwiperArrowParameters& s
 
 void JSSwiper::SetDisplayArrow(const JSCallbackInfo& info)
 {
+    if (info[0]->IsEmpty() || info[0]->IsUndefined()) {
+        SwiperModel::GetInstance()->SetDisplayArrow(false);
+        return;
+    }
     if (info.Length() > 0 && info[0]->IsObject()) {
         auto obj = JSRef<JSObject>::Cast(info[0]);
         SwiperArrowParameters swiperArrowParameters;
@@ -530,9 +532,6 @@ void JSSwiper::SetDisplayArrow(const JSCallbackInfo& info)
             SwiperModel::GetInstance()->SetDisplayArrow(false);
             return;
         }
-    } else if (info[0]->IsEmpty() || info[0]->IsUndefined()) {
-        SwiperModel::GetInstance()->SetDisplayArrow(false);
-        return;
     } else {
         SwiperModel::GetInstance()->SetDisplayArrow(false);
         return;

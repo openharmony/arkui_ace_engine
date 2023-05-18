@@ -32,7 +32,6 @@ void MarqueeModelNG::Create()
         auto textNode = FrameNode::CreateFrameNode(
             V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
         auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-        textLayoutProperty->UpdateContent(std::string(""));
         textLayoutProperty->UpdateMaxLines(1);
         frameNode->AddChild(textNode);
     } else {
@@ -40,63 +39,102 @@ void MarqueeModelNG::Create()
         CHECK_NULL_VOID(textChild);
         auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
-        textLayoutProperty->UpdateContent(std::string(""));
         textLayoutProperty->UpdateMaxLines(1);
     }
     stack->Push(frameNode);
 }
 
-void MarqueeModelNG::SetValue(const std::string& value)
+void MarqueeModelNG::SetValue(const std::optional<std::string>& srcValue)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(MarqueeLayoutProperty, Src, value);
+    if (srcValue.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(MarqueeLayoutProperty, Src, srcValue.value());
+    } else {
+        ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(MarqueeLayoutProperty, Src, PROPERTY_UPDATE_MEASURE);
+    }
 }
 
-void MarqueeModelNG::SetPlayerStatus(bool playerStatus)
+void MarqueeModelNG::SetPlayerStatus(const std::optional<bool>& playerStatus)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(MarqueeLayoutProperty, PlayerStatus, playerStatus);
+    if (playerStatus.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(MarqueeLayoutProperty, PlayerStatus, playerStatus.value());
+    } else {
+        ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(MarqueeLayoutProperty, PlayerStatus, PROPERTY_UPDATE_MEASURE);
+    }
 }
 
-void MarqueeModelNG::SetScrollAmount(double scrollAmount)
+void MarqueeModelNG::SetScrollAmount(const std::optional<double>& scrollAmount)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(MarqueeLayoutProperty, ScrollAmount, scrollAmount);
+    if (scrollAmount.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(MarqueeLayoutProperty, ScrollAmount, scrollAmount.value());
+    } else {
+        ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(MarqueeLayoutProperty, ScrollAmount, PROPERTY_UPDATE_MEASURE);
+    }
 }
 
-void MarqueeModelNG::SetLoop(int32_t loop)
+void MarqueeModelNG::SetLoop(const std::optional<int32_t>& loop)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(MarqueeLayoutProperty, Loop, loop);
+    if (loop.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(MarqueeLayoutProperty, Loop, loop.value());
+    } else {
+        ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(MarqueeLayoutProperty, Loop, PROPERTY_UPDATE_MEASURE);
+    }
 }
 
-void MarqueeModelNG::SetDirection(MarqueeDirection direction)
+void MarqueeModelNG::SetDirection(const std::optional<MarqueeDirection>& direction)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(MarqueeLayoutProperty, Direction, direction);
+    if (direction.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(MarqueeLayoutProperty, Direction, direction.value());
+    } else {
+        ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(MarqueeLayoutProperty, Direction, PROPERTY_UPDATE_MEASURE);
+    }
 }
 
-void MarqueeModelNG::SetAllowScale(bool allowScale)
+void MarqueeModelNG::SetAllowScale(const std::optional<bool>& allowScale)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(MarqueeLayoutProperty, AllowScale, allowScale);
+    if (allowScale.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(MarqueeLayoutProperty, AllowScale, allowScale.value());
+    } else {
+        ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(MarqueeLayoutProperty, AllowScale, PROPERTY_UPDATE_MEASURE);
+    }
 }
 
-void MarqueeModelNG::SetTextColor(const Color& textColor)
+void MarqueeModelNG::SetTextColor(const std::optional<Color>& textColor)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(MarqueeLayoutProperty, FontColor, textColor);
-    ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, textColor);
+    ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, textColor.value_or(Color()));
     ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy);
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true);
+    if (textColor.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(MarqueeLayoutProperty, FontColor, textColor.value());
+    } else {
+        ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(MarqueeLayoutProperty, FontColor, PROPERTY_UPDATE_MEASURE);
+    }
 }
 
-void MarqueeModelNG::SetFontSize(const Dimension& fontSize)
+void MarqueeModelNG::SetFontSize(const std::optional<Dimension>& fontSize)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(MarqueeLayoutProperty, FontSize, fontSize);
+    if (fontSize.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(MarqueeLayoutProperty, FontSize, fontSize.value());
+    } else {
+        ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(MarqueeLayoutProperty, FontSize, PROPERTY_UPDATE_MEASURE);
+    }
 }
 
-void MarqueeModelNG::SetFontWeight(const FontWeight& fontWeight)
+void MarqueeModelNG::SetFontWeight(const std::optional<FontWeight>& fontWeight)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(MarqueeLayoutProperty, FontWeight, fontWeight);
+    if (fontWeight.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(MarqueeLayoutProperty, FontWeight, fontWeight.value());
+    } else {
+        ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(MarqueeLayoutProperty, FontWeight, PROPERTY_UPDATE_MEASURE);
+    }
 }
 
-void MarqueeModelNG::SetFontFamily(const std::vector<std::string>& fontFamilies)
+void MarqueeModelNG::SetFontFamily(const std::optional<std::vector<std::string>>& fontFamilies)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(MarqueeLayoutProperty, FontFamily, fontFamilies);
+    if (fontFamilies.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(MarqueeLayoutProperty, FontFamily, fontFamilies.value());
+    } else {
+        ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(MarqueeLayoutProperty, FontFamily, PROPERTY_UPDATE_MEASURE);
+    }
 }
 
 void MarqueeModelNG::SetOnStart(std::function<void()>&& onChange)

@@ -228,9 +228,7 @@ void JSGrid::JSBind(BindingTarget globalObj)
     JSClass<JSGrid>::StaticMethod("height", &JSGrid::JsGridHeight);
     JSClass<JSGrid>::StaticMethod("onItemDrop", &JSGrid::JsOnGridDrop);
     JSClass<JSGrid>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
-    JSClass<JSGrid>::Inherit<JSContainerBase>();
-    JSClass<JSGrid>::Inherit<JSViewAbstract>();
-    JSClass<JSGrid>::Bind<>(globalObj);
+    JSClass<JSGrid>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 void JSGrid::SetScrollBar(int32_t displayMode)

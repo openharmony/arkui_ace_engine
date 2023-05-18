@@ -42,6 +42,8 @@ constexpr bool SHOW_CONTROL_BUTTON = true;
 constexpr Dimension SIDE_BAR_WIDTH = 50.0_vp;
 constexpr Dimension MIN_SIDE_BAR_WIDTH = 50.0_vp;
 constexpr Dimension MAX_SIDE_BAR_WIDTH = 50.0_vp;
+constexpr Dimension DEFAULT_MIN_SIDE_BAR_WIDTH = 200.0_vp;
+constexpr Dimension DEFAULT_MAX_SIDE_BAR_WIDTH = 280.0_vp;
 constexpr bool AUTO_HIDE = true;
 constexpr SideBarPosition SIDE_BAR_POSITION = SideBarPosition::START;
 constexpr Dimension WIDTH = 150.0_vp;
@@ -51,6 +53,7 @@ constexpr Dimension TOP = 50.0_vp;
 constexpr float UPDATE_SIDE_BAR_POSITION_VALUE = 1.0f;
 constexpr float REAL_SIDE_BAR_WIDTH_VALUE = 1.0f;
 constexpr float CURRENT_OFFSET_VALUE = 1.0f;
+constexpr float FLOAT_240 = 240.0f;
 const std::string SHOW_ICON_STR = "123";
 const std::string HIDDEN_ICON_STR = "123";
 const std::string SWITCHING_ICON_STR = "123";
@@ -574,5 +577,296 @@ HWTEST_F(SideBarPatternTestNg, SideBarSetOnChangeEvent001, TestSize.Level1)
     sideBarContainerEventHub->FireChangeEvent(true);
     sideBarContainerEventHub->SetOnChangeEvent(nullptr);
     ASSERT_EQ(sideBarContainerEventHub->isShowChangeEvent_, nullptr);
+}
+
+/**
+ * @tc.name: SideBarPatternTestNg022
+ * @tc.desc: Test SideBar OnDirtyLayoutWrapperSwap
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg022, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sideBar ,then get pattern, frameNode, sideBarLayoutProperty
+        layoutWrapper .
+     * @tc.expected: check whether the pattern->needInitRealSideBarWidth_ is correct.
+     */
+    SideBarContainerModelNG sideBarContainerModelInstance;
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto sideBarLayoutProperty = frameNode->GetLayoutProperty<SideBarContainerLayoutProperty>();
+    ASSERT_NE(sideBarLayoutProperty, nullptr);
+    
+    WeakPtr<FrameNode> hostNode = frameNode;
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(hostNode, geometryNode, layoutProperty);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(
+        AceType::MakeRefPtr<SideBarContainerLayoutAlgorithm>());
+    ASSERT_NE(layoutAlgorithmWrapper, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
+
+    auto algorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(layoutWrapper->GetLayoutAlgorithm());
+    ASSERT_NE(algorithmWrapper, nullptr);
+    auto algorithm = AceType::DynamicCast<SideBarContainerLayoutAlgorithm>(algorithmWrapper->GetLayoutAlgorithm());
+    ASSERT_NE(algorithm, nullptr);
+
+    DirtySwapConfig config;
+    EXPECT_TRUE(pattern->needInitRealSideBarWidth_);
+    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_FALSE(pattern->needInitRealSideBarWidth_);
+}
+
+/**
+ * @tc.name: SideBarPatternTestNg023
+ * @tc.desc: Test SideBar HandleDragStart
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg023, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sideBar ,then get pattern.
+     * @tc.expected: check whether the pattern->sideBarStatus_ is correct.
+     */
+    SideBarContainerModelNG sideBarContainerModelInstance;
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->HandleDragStart();
+    EXPECT_EQ(pattern->sideBarStatus_, SideBarStatus::SHOW);
+}
+
+/**
+ * @tc.name: SideBarPatternTestNg024
+ * @tc.desc: Test SideBar HandleDragStart
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg024, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sideBar ,then get pattern.
+     * @tc.expected: check whether the pattern->sideBarStatus_ is correct.
+     */
+    SideBarContainerModelNG sideBarContainerModelInstance;
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_EQ(pattern->sideBarStatus_, SideBarStatus::SHOW);
+    /**
+     * @tc.steps: step2. change pattern->sideBarStatus_.
+     * @tc.expected: step2. check whether the pattern->sideBarStatus_ is correct.
+     */
+    pattern->sideBarStatus_ = SideBarStatus::HIDDEN;
+    pattern->HandleDragStart();
+    EXPECT_NE(pattern->sideBarStatus_, SideBarStatus::SHOW);
+}
+
+/**
+ * @tc.name: SideBarPatternTestNg025
+ * @tc.desc: Test SideBar HandleDragUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg025, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sideBar ,then get pattern and frameNode.
+     * @tc.expected: check whether the pattern->sideBarStatus_ is correct.
+     */
+    SideBarContainerModelNG sideBarContainerModelInstance;
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    pattern->frameNode_ = frameNode;
+    
+    pattern->sideBarStatus_ = SideBarStatus::SHOW;
+    EXPECT_EQ(pattern->sideBarStatus_, SideBarStatus::SHOW);
+    pattern->HandleDragUpdate(FLOAT_240);
+    EXPECT_EQ(pattern->sideBarStatus_, SideBarStatus::CHANGING);
+    /**
+     * @tc.steps: step2. change pattern->sideBarStatus_.
+     * @tc.expected: check whether the pattern->sideBarStatus_ is correct.
+     */
+    pattern->sideBarStatus_ = SideBarStatus::HIDDEN;
+    pattern->HandleDragUpdate(FLOAT_240);
+    EXPECT_NE(pattern->sideBarStatus_, SideBarStatus::SHOW);
+}
+
+/**
+ * @tc.name: SideBarPatternTestNg026
+ * @tc.desc: Test SideBar HandleDragEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg026, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sideBar ,then get pattern.
+     * @tc.expected: check whether the pattern->sideBarStatus_ is correct.
+     */
+    SideBarContainerModelNG sideBarContainerModelInstance;
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    pattern->HandleDragEnd();
+    EXPECT_EQ(pattern->sideBarStatus_, SideBarStatus::SHOW);
+    /**
+     * @tc.steps: step2. change pattern->sideBarStatus_.
+     * @tc.expected: check whether the sideBarContainerEventHub is correct.
+     */
+    pattern->sideBarStatus_ = SideBarStatus::HIDDEN;
+    pattern->HandleDragEnd();
+    EXPECT_NE(pattern->sideBarStatus_, SideBarStatus::SHOW);
+}
+
+/**
+ * @tc.name: SideBarPatternTestNg027
+ * @tc.desc: Test SideBar FireChangeEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg027, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sideBar ,then get pattern frameNode.
+     * @tc.expected: check whether the sideBarContainerEventHub is correct.
+     */
+    SideBarContainerModelNG sideBarContainerModelInstance;
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    pattern->frameNode_ = frameNode;
+    auto sideBarContainerEventHub = pattern->GetEventHub<SideBarContainerEventHub>();
+    pattern->FireChangeEvent(false);
+    EXPECT_NE(sideBarContainerEventHub, nullptr);
+}
+
+/**
+ * @tc.name: SideBarPatternTestNg028
+ * @tc.desc: Test SideBar HandleDragUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg028, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sideBar ,then get pattern frameNode layoutProperty.
+     * @tc.expected: check whether the showSideBar_ is correct.
+     */
+    SideBarContainerModelNG sideBarContainerModelInstance;
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    pattern->frameNode_ = frameNode;
+
+    auto layoutProperty = pattern->GetLayoutProperty<SideBarContainerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    /**
+     * @tc.steps: step2. get minSideBarWidth, host, geometryNode .
+     * @tc.expected: check whether objects is correct.
+     */
+    auto minSideBarWidth = layoutProperty->GetMinSideBarWidth().value_or(DEFAULT_MIN_SIDE_BAR_WIDTH);
+    auto maxSideBarWidth = layoutProperty->GetMaxSideBarWidth().value_or(DEFAULT_MAX_SIDE_BAR_WIDTH);
+    EXPECT_EQ(DEFAULT_MIN_SIDE_BAR_WIDTH.unit_, DimensionUnit::VP);
+
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto geometryNode = host->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+
+    auto frameSize = geometryNode->GetFrameSize();
+    auto parentWidth = frameSize.Width();
+    auto constraint = layoutProperty->GetLayoutConstraint();
+    auto scaleProperty = constraint->scaleProperty;
+    scaleProperty.vpScale = 1.0;
+    auto minSideBarWidthPx = ConvertToPx(minSideBarWidth, scaleProperty, parentWidth).value_or(0);
+    auto maxSideBarWidthPx = ConvertToPx(maxSideBarWidth, scaleProperty, parentWidth).value_or(0);
+
+    auto sideBarPosition = layoutProperty->GetSideBarPosition().value_or(SideBarPosition::START);
+    bool isSideBarStart = sideBarPosition == SideBarPosition::START;
+    EXPECT_TRUE(isSideBarStart);
+
+    auto sideBarLine = pattern->preSidebarWidth_ + (isSideBarStart ? FLOAT_240 : -FLOAT_240);
+    EXPECT_EQ(sideBarLine, FLOAT_240);
+    EXPECT_EQ(200, minSideBarWidthPx);
+    EXPECT_EQ(280, maxSideBarWidthPx);
+
+    pattern->HandleDragUpdate(FLOAT_240);
+    /**
+     * @tc.steps: step3. change pattern->dragRect_.width_ and param.
+     * @tc.expected: check whether halfDragRegionWidth is correct.
+     */
+    pattern->dragRect_.width_ = 100.0f;
+    pattern->HandleDragUpdate(-20.0f);
+    auto halfDragRegionWidth = pattern->dragRect_.Width() / 2;
+    EXPECT_EQ(halfDragRegionWidth, 50.0);
+    /**
+     * @tc.steps: step4. change param.
+     * @tc.expected: check whether autoHide_ is correct.
+     */
+    auto autoHide_ = layoutProperty->GetAutoHide().value_or(true);
+    pattern->HandleDragUpdate(-60.0f);
+    EXPECT_TRUE(autoHide_);
+}
+
+/**
+ * @tc.name: SideBarPatternTestNg029
+ * @tc.desc: Test SideBar OnUpdateShowSideBar
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg029, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sideBar ,then get pattern frameNode layoutProperty and newShowSideBar,
+     *  modify showSideBar_.
+     * @tc.expected: check whether the showSideBar_ is correct.
+     */
+    SideBarContainerModelNG sideBarContainerModelInstance;
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    pattern->frameNode_ = frameNode;
+
+    auto layoutProperty = pattern->GetLayoutProperty<SideBarContainerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto newShowSideBar = layoutProperty->GetShowSideBar().value_or(true);
+    EXPECT_TRUE(newShowSideBar);
+
+    EXPECT_TRUE(pattern->showSideBar_);
+    pattern->showSideBar_ = false;
+    EXPECT_FALSE(pattern->showSideBar_);
+    pattern->OnUpdateShowSideBar(layoutProperty);
+    EXPECT_TRUE(pattern->showSideBar_);
+}
+
+/**
+ * @tc.name: SideBarPatternTestNg030
+ * @tc.desc: Test SideBar DoSideBarAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg030, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get pattern and frameNode, modify sideBarStatus_.
+     * @tc.expected: check whether the showSideBar_ is correct.
+     */
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    pattern->CreateAnimation();
+    pattern->sideBarStatus_ = SideBarStatus::HIDDEN;
+    pattern->DoSideBarAnimation();
+    EXPECT_EQ(pattern->showSideBar_, true);
 }
 } // namespace OHOS::Ace::NG

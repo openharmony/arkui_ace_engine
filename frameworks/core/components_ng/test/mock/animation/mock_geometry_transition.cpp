@@ -18,7 +18,13 @@
 namespace OHOS::Ace::NG {
     void GeometryTransition::Build(const WeakPtr<FrameNode>& frameNode, bool isNodeIn) {}
     void GeometryTransition::WillLayout(const RefPtr<LayoutWrapper>& layoutWrapper) {}
-    void GeometryTransition::DidLayout(const WeakPtr<FrameNode>& frameNode) {}
+    void GeometryTransition::DidLayout(const RefPtr<LayoutWrapper>& layoutWrapper) {}
+    void GeometryTransition::OnReSync() {}
+
+    bool GeometryTransition::OnAdditionalLayout(const WeakPtr<FrameNode>& frameNode)
+    {
+        return false;
+    }
 
     bool GeometryTransition::Update(const WeakPtr<FrameNode>& which, const WeakPtr<FrameNode>& value)
     {
@@ -26,6 +32,11 @@ namespace OHOS::Ace::NG {
     }
 
     bool GeometryTransition::IsNodeInAndActive(const WeakPtr<FrameNode>& frameNode) const
+    {
+        return false;
+    }
+
+    bool GeometryTransition::IsNodeOutAndActive(const WeakPtr<FrameNode>& frameNode) const
     {
         return false;
     }
@@ -38,6 +49,11 @@ namespace OHOS::Ace::NG {
     bool GeometryTransition::IsInAndOutEmpty() const
     {
         return true;
+    }
+
+    bool GeometryTransition::IsInAndOutValid() const
+    {
+        return false;
     }
 
     std::string GeometryTransition::ToString() const

@@ -27,9 +27,7 @@ public:
     static void SetOnConnect(const JSCallbackInfo& info);
     static void SetOnDisconnect(const JSCallbackInfo& info);
     static void SetOnError(const JSCallbackInfo& info);
-    static void SetOnCall(const JSCallbackInfo& info);
     static void SetOnResult(const JSCallbackInfo& info);
 };
 } // namespace OHOS::Ace::Framework
-
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_UI_EXTENSION_H

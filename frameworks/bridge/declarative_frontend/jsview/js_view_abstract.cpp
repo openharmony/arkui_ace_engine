@@ -1659,7 +1659,7 @@ void JSViewAbstract::JsFlexBasis(const JSCallbackInfo& info)
     }
     CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
-        return;
+        value.SetUnit(DimensionUnit::AUTO);
     }
     // flexbasis don't support percent case.
     if (value.Unit() == DimensionUnit::PERCENT) {
@@ -1700,14 +1700,14 @@ void JSViewAbstract::JsFlexShrink(const JSCallbackInfo& info)
     if (!ParseJsDouble(info[0], value)) {
         if (info[0]->IsNull() || info[0]->IsUndefined()) {
             // undefined use default value.
-            value = 1.0;
+            ViewAbstractModel::GetInstance()->ResetFlexShrink();
         } else {
             return;
         }
     }
     // negative use default value.
     if (value < 0.0) {
-        value = 1.0;
+        ViewAbstractModel::GetInstance()->ResetFlexShrink();
     }
     ViewAbstractModel::GetInstance()->SetFlexShrink(static_cast<float>(value));
 }
@@ -1813,6 +1813,7 @@ void JSViewAbstract::JsAlignSelf(const JSCallbackInfo& info)
 {
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER };
     if (!CheckJSCallbackInfo("JsAlignSelf", info, checkList)) {
+        ViewAbstractModel::GetInstance()->SetAlignSelf(FlexAlign::AUTO);
         return;
     }
     auto alignVal = info[0]->ToNumber<int32_t>();
@@ -4870,7 +4871,7 @@ void JSViewAbstract::JSUpdateAnimatableProperty(const JSCallbackInfo& info)
     }
 }
 
-void JSViewAbstract::JSBind()
+void JSViewAbstract::JSBind(BindingTarget globalObj)
 {
     JSClass<JSViewAbstract>::Declare("JSViewAbstract");
 
@@ -5019,6 +5020,8 @@ void JSViewAbstract::JSBind()
 
     JSClass<JSViewAbstract>::StaticMethod("createAnimatableProperty", &JSViewAbstract::JSCreateAnimatableProperty);
     JSClass<JSViewAbstract>::StaticMethod("updateAnimatableProperty", &JSViewAbstract::JSUpdateAnimatableProperty);
+
+    JSClass<JSViewAbstract>::Bind(globalObj);
 }
 void JSViewAbstract::JsAllowDrop(const JSCallbackInfo& info)
 {

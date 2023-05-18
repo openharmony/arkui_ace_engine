@@ -79,6 +79,7 @@ ohos_unittest("overlay_manager_test_ng") {
     "$ace_root/frameworks/base/utils/base_id.cpp",
     "$ace_root/frameworks/base/utils/string_expression.cpp",
     "$ace_root/frameworks/base/utils/string_utils.cpp",
+    "$ace_root/frameworks/base/utils/time_util.cpp",
 
     # components
     "$ace_root/frameworks/core/components/common/layout/grid_column_info.cpp",

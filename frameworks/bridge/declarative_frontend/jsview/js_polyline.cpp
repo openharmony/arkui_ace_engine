@@ -42,8 +42,7 @@ void JSPolyline::JSBind(BindingTarget globalObj)
     JSClass<JSPolyline>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSPolyline>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
 
-    JSClass<JSPolyline>::Inherit<JSShapeAbstract>();
-    JSClass<JSPolyline>::Bind<>(globalObj);
+    JSClass<JSPolyline>::InheritAndBind<JSShapeAbstract>(globalObj);
 }
 
 void JSPolyline::JSPoints(const JSCallbackInfo& info)

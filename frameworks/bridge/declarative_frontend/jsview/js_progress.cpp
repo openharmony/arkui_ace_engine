@@ -125,8 +125,7 @@ void JSProgress::JSBind(BindingTarget globalObj)
     JSClass<JSProgress>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSProgress>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSProgress>::StaticMethod("borderColor", &JSProgress::JsBorderColor, opt);
-    JSClass<JSProgress>::Inherit<JSViewAbstract>();
-    JSClass<JSProgress>::Bind(globalObj);
+    JSClass<JSProgress>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSProgress::SetValue(double value)
@@ -241,7 +240,6 @@ void JSProgress::JsSetProgressStyleOptions(const JSCallbackInfo& info)
 
 NG::ProgressStatus JSProgress::ConvertStrToProgressStatus(const std::string& value)
 {
-    
     if (value.compare("LOADING") == 0) {
         return NG::ProgressStatus::LOADING;
     } else {
@@ -380,7 +378,7 @@ void JSProgress::JsSetFontStyle(const JSCallbackInfo& info)
     if (!ParseJsColor(jsFontColor, fontColorVal)) {
         fontColorVal = theme->GetTextColor();
     }
-    
+
     ProgressModel::GetInstance()->SetFontColor(fontColorVal);
 
     auto textStyle = paramObject->GetProperty("font");
@@ -421,9 +419,9 @@ void JSProgress::JsSetFont(const JSRef<JSObject>& textObject)
     }
     ProgressModel::GetInstance()->SetFontSize(fontSize);
 
-    std::string weight;
     auto fontWeight = textObject->GetProperty("weight");
     if (!fontWeight->IsNull()) {
+        std::string weight;
         if (fontWeight->IsNumber()) {
             weight = std::to_string(fontWeight->ToNumber<int32_t>());
         } else {

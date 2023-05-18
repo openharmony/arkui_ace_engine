@@ -315,14 +315,14 @@ void FrameNode::GeometryNodeToJsonValue(std::unique_ptr<JsonValue>& json) const
 
 void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
-    if (renderContext_) {
-        renderContext_->ToJsonValue(json);
-    }
     // scrollable in AccessibilityProperty
     ACE_PROPERTY_TO_JSON_VALUE(accessibilityProperty_, AccessibilityProperty);
     ACE_PROPERTY_TO_JSON_VALUE(layoutProperty_, LayoutProperty);
     ACE_PROPERTY_TO_JSON_VALUE(paintProperty_, PaintProperty);
     ACE_PROPERTY_TO_JSON_VALUE(pattern_, Pattern);
+    if (renderContext_) {
+        renderContext_->ToJsonValue(json);
+    }
     if (eventHub_) {
         eventHub_->ToJsonValue(json);
     }
@@ -331,6 +331,26 @@ void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     TouchToJsonValue(json);
     GeometryNodeToJsonValue(json);
     json->Put("id", propInspectorId_.value_or("").c_str());
+}
+
+void FrameNode::FromJson(const std::unique_ptr<JsonValue>& json)
+{
+    LOGD("UITree start decode accessibilityProperty");
+    accessibilityProperty_->FromJson(json);
+    LOGD("UITree start decode layoutProperty");
+    layoutProperty_->FromJson(json);
+    LOGD("UITree start decode paintProperty");
+    paintProperty_->FromJson(json);
+    LOGD("UITree start decode pattern");
+    pattern_->FromJson(json);
+    if (renderContext_) {
+        LOGD("UITree start decode renderContext");
+        renderContext_->FromJson(json);
+    }
+    if (eventHub_) {
+        LOGD("UITree start decode eventHub");
+        eventHub_->FromJson(json);
+    }
 }
 
 void FrameNode::OnAttachToMainTree(bool recursive)
@@ -359,7 +379,6 @@ void FrameNode::OnAttachToMainTree(bool recursive)
 
 void FrameNode::OnVisibleChange(bool isVisible)
 {
-    // notify transition
     pattern_->OnVisibleChange(isVisible);
     for (const auto& child : GetChildren()) {
         child->OnVisibleChange(isVisible);
@@ -398,7 +417,7 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
 
     const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
     if (geometryTransition != nullptr && geometryTransition->IsRunning()) {
-        geometryTransition->DidLayout(WeakClaim(this));
+        geometryTransition->DidLayout(dirty);
     } else if (frameSizeChange || frameOffsetChange || HasPositionProp() ||
                (pattern_->GetSurfaceNodeName().has_value() && contentSizeChange)) {
         if (pattern_->NeedOverridePaintRect()) {
@@ -448,8 +467,8 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     // update focus state
     auto focusHub = GetFocusHub();
     if (focusHub && focusHub->IsCurrentFocus()) {
-        focusHub->ClearFocusState();
-        focusHub->PaintFocusState();
+        focusHub->ClearFocusState(false);
+        focusHub->PaintFocusState(false);
     }
 
     // rebuild child render node.
@@ -821,6 +840,11 @@ void FrameNode::UpdateChildrenLayoutWrapper(const RefPtr<LayoutWrapper>& self, b
 void FrameNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool forceMeasure, bool forceLayout)
 {
     ACE_DCHECK(parent);
+    CHECK_NULL_VOID(layoutProperty_);
+    const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
+    if (geometryTransition != nullptr && geometryTransition->IsNodeOutAndActive(WeakClaim(this))) {
+        return;
+    }
     auto layoutWrapper = CreateLayoutWrapper(forceMeasure, forceLayout);
     parent->AppendChild(layoutWrapper);
 }
@@ -885,7 +909,10 @@ void FrameNode::MarkModifyDone()
             // store distribute node
             pipeline->StoreNode(restoreId, AceType::WeakClaim(this));
             // restore distribute node info
-            pattern_->OnRestoreInfo(pipeline->GetRestoreInfo(restoreId));
+            std::string restoreInfo;
+            if (pipeline->GetRestoreInfo(restoreId, restoreInfo)) {
+                pattern_->OnRestoreInfo(restoreInfo);
+            }
         }
     }
     eventHub_->MarkModifyDone();
@@ -1465,6 +1492,21 @@ OffsetF FrameNode::GetPaintRectOffset(bool excludeSelf) const
     return offset;
 }
 
+OffsetF FrameNode::GetPaintRectOffsetWithoutTransform(bool excludeSelf) const
+{
+    auto context = GetRenderContext();
+    CHECK_NULL_RETURN(context, OffsetF());
+    OffsetF offset = excludeSelf ? OffsetF() : context->GetPaintRectWithoutTransform().GetOffset();
+    auto parent = GetAncestorNodeOfFrame();
+    while (parent) {
+        auto renderContext = parent->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, OffsetF());
+        offset += renderContext->GetPaintRectWithoutTransform().GetOffset();
+        parent = parent->GetAncestorNodeOfFrame();
+    }
+    return offset;
+}
+
 OffsetF FrameNode::GetPaintRectOffsetToPage() const
 {
     auto context = GetRenderContext();
@@ -1564,19 +1606,22 @@ void FrameNode::RemoveLastHotZoneRect() const
     gestureHub->RemoveLastResponseRect();
 }
 
-bool FrameNode::OnRemoveFromParent()
+bool FrameNode::OnRemoveFromParent(bool allowTransition)
 {
     // kick out transition animation if needed, wont re-entry if already detached.
-    DetachFromMainTree();
+    DetachFromMainTree(!allowTransition);
     auto context = GetRenderContext();
     CHECK_NULL_RETURN(context, false);
-    if (context->HasTransitionOutAnimation()) {
-        // pending remove, move self into disappearing children
+    if (!allowTransition || RemoveImmediately()) {
+        // directly remove, reset focusHub, parent and depth
+        if (auto focusHub = GetFocusHub()) {
+            focusHub->RemoveSelf();
+        }
+        ResetParent();
         return true;
-    } else {
-        // directly remove, reset parent and depth
-        return UINode::OnRemoveFromParent();
     }
+    // delayed remove, will move self into disappearing children
+    return false;
 }
 
 RefPtr<FrameNode> FrameNode::FindChildByPosition(float x, float y)
@@ -1664,5 +1709,13 @@ void FrameNode::UpdateAnimatableArithmeticProperty(const std::string& propertyNa
 std::string FrameNode::ProvideRestoreInfo()
 {
     return pattern_->ProvideRestoreInfo();
+}
+
+bool FrameNode::RemoveImmediately() const
+{
+    auto context = GetRenderContext();
+    CHECK_NULL_RETURN(context, true);
+    // has transition out animation, need to wait for animation end
+    return !context->HasTransitionOutAnimation();
 }
 } // namespace OHOS::Ace::NG

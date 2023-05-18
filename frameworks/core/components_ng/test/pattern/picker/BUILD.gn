@@ -186,6 +186,7 @@ ohos_unittest("picker_test_ng") {
     # self
     "datepicker_test_ng.cpp",
     "textpicker_test_ng.cpp",
+    "textpicker_toss_animation_controller_test_ng.cpp",
     "timepicker_test_ng.cpp",
     "toss_animation_controller_test_ng.cpp",
   ]

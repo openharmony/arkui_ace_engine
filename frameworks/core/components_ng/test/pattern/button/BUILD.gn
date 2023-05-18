@@ -20,6 +20,7 @@ ohos_unittest("button_pattern_test_ng") {
   sources = [
     "$ace_root/frameworks/base/geometry/matrix4.cpp",
     "$ace_root/frameworks/base/test/mock/mock_animatable_dimension.cpp",
+    "$ace_root/frameworks/base/utils/time_util.cpp",
     "$ace_root/frameworks/core/animation/anticipate_curve.cpp",
     "$ace_root/frameworks/core/animation/cubic_curve.cpp",
     "$ace_root/frameworks/core/animation/curves.cpp",

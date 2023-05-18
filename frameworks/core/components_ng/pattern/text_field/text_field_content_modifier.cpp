@@ -98,6 +98,7 @@ void TextFieldContentModifier::onDraw(DrawingContext& context)
     } else {
         clipRectHeight = contentOffset.GetY() + contentSize.Height() + errorViewHeight;
     }
+    canvas.Save();
     RSRect clipInnerRect = RSRect(offset.GetX(), contentOffset.GetY(),
         contentSize.Width() + contentOffset.GetX() - textFieldPattern->GetUnitWidth(), clipRectHeight);
     canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
@@ -107,6 +108,7 @@ void TextFieldContentModifier::onDraw(DrawingContext& context)
     }
     canvas.Restore();
     if (showCounter_->Get() && counterParagraph) {
+        canvas.Save();
         RSRect clipInnerCounterRect = RSRect(offset.GetX(), textFrameRect.Bottom() - textFrameRect.Top()
             - COUNTER_TEXT_AREA_MARGIN.ConvertToPx() - textFieldPattern->GetCountHeight(),
             contentSize.Width() + contentOffset.GetX(), textFrameRect.Bottom() - textFrameRect.Top());
@@ -115,6 +117,7 @@ void TextFieldContentModifier::onDraw(DrawingContext& context)
             - COUNTER_TEXT_AREA_MARGIN.ConvertToPx() - textFieldPattern->GetCountHeight());
         canvas.Restore();
     }
+    canvas.Save();
     if (showErrorState_->Get() && errorParagraph) {
         errorParagraph->Paint(&canvas, offset.GetX(), textFrameRect.Bottom() - textFrameRect.Top() + errorMargin);
     }
@@ -122,16 +125,31 @@ void TextFieldContentModifier::onDraw(DrawingContext& context)
     clipInnerRect = RSRect(contentSize.Width() + contentOffset.GetX() - textFieldPattern->GetUnitWidth(),
         contentOffset.GetY(), contentSize.Width() + contentOffset.GetX(), contentOffset.GetY() + contentSize.Height());
     canvas.ClipRect(clipInnerRect, RSClipOp::UNION);
+    canvas.Restore();
 
     if (!textFieldPattern->NeedShowPasswordIcon()) {
         return;
     }
     CHECK_NULL_VOID_NOLOG(passwordIconCanvasImage);
-    clipInnerRect = RSRect(
-        offset.GetX(), 0.0f, textFieldPattern->GetFrameRect().Width(), textFieldPattern->GetFrameRect().Height());
-    canvas.ClipRect(clipInnerRect, RSClipOp::UNION);
+    UpdatePaintConfig(passwordIconCanvasImage, context, iconRect);
     const ImagePainter passwordIconImagePainter(passwordIconCanvasImage);
     passwordIconImagePainter.DrawImage(canvas, iconRect.GetOffset(), iconRect.GetSize());
+}
+
+void TextFieldContentModifier::UpdatePaintConfig(
+    RefPtr<CanvasImage> &passwordIconCanvasImage, DrawingContext context, RectF iconRect) const
+{
+    CHECK_NULL_VOID(passwordIconCanvasImage);
+    auto &&config = passwordIconCanvasImage->GetPaintConfig();
+    config.renderMode_ = ImageRenderMode::ORIGINAL;
+    config.imageInterpolation_ = ImageInterpolation::NONE;
+    config.imageRepeat_ = ImageRepeat::NO_REPEAT;
+    config.imageFit_ = ImageFit::FILL;
+    if (context.height == 0 || context.width == 0) {
+        return;
+    }
+    config.scaleX_ = iconRect.GetSize().Width() / context.width;
+    config.scaleY_ = iconRect.GetSize().Height() / context.height;
 }
 
 void TextFieldContentModifier::SetDefaultAnimatablePropertyValue()

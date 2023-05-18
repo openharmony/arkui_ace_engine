@@ -20,6 +20,7 @@
 #include "modifier/rs_property_modifier.h"
 
 #include "core/components_ng/render/adapter/rosen_transition_effect.h"
+#include "core/components_ng/render/animation_utils.h"
 
 namespace OHOS::Ace::NG {
 // Identity transition effect, do nothing and execute immediately.
@@ -49,20 +50,41 @@ public:
     void SetIdentityValue(PropertyType identityValue);
     void SetActiveValue(PropertyType activeValue);
 
+    void SetKeyframes(const std::vector<std::pair<float, PropertyType>>& keyframes)
+    {
+        keyframes_ = keyframes;
+    }
+
 protected:
     void OnAttach(const RefPtr<RosenRenderContext>& context, bool activeTransition) override;
     void OnDetach(const RefPtr<RosenRenderContext>& context) override;
     void OnAppear() override
     {
-        property_->Set(identityValue_);
         isActive_ = false;
+        if (keyframes_.empty()) {
+            property_->Set(identityValue_);
+            return;
+        }
+        for (auto it = keyframes_.begin(); it != keyframes_.end(); ++it) {
+            AnimationUtils::AddKeyFrame(it->first, [this, &it]() { property_->Set(it->second); });
+        }
+        AnimationUtils::AddKeyFrame(1.0f, [this]() { property_->Set(identityValue_); });
     }
     void OnDisappear(bool activeTransition) override
     {
-        if (activeTransition) {
-            property_->Set(activeValue_);
-            isActive_ = true;
+        if (!activeTransition) {
+            return;
         }
+        isActive_ = true;
+        if (keyframes_.empty()) {
+            property_->Set(activeValue_);
+            return;
+        }
+        // PLANNING: maybe we need to reverse the keyframes in disappearing animation.
+        for (auto it = keyframes_.begin(); it != keyframes_.end(); ++it) {
+            AnimationUtils::AddKeyFrame(it->first, [this, &it]() { property_->Set(it->second); });
+        }
+        AnimationUtils::AddKeyFrame(1.0f, [this]() { property_->Set(activeValue_); });
     }
 
 private:
@@ -70,6 +92,7 @@ private:
     std::shared_ptr<Rosen::RSAnimatableProperty<PropertyType>> property_;
     PropertyType identityValue_ {};
     PropertyType activeValue_ {};
+    std::vector<std::pair<float, PropertyType>> keyframes_;
     bool isActive_ = false;
 
     DECLARE_ACE_TYPE(PropertyTransitionEffectTemplate, RosenTransitionEffect);
@@ -184,6 +207,7 @@ private:
 // Move in and out to different direction, by node size.
 class RosenSlideTransitionEffect final : public RosenAsymmetricTransitionEffect {
 public:
+    RosenSlideTransitionEffect();
     RosenSlideTransitionEffect(TransitionEdge inEdge, TransitionEdge outEdge);
     ~RosenSlideTransitionEffect() override = default;
 
@@ -274,6 +298,18 @@ public:
 private:
     DECLARE_ACE_TYPE(RosenScaleTransitionEffect, RosenCompositeTransitionEffect);
     ACE_DISALLOW_COPY_AND_MOVE(RosenScaleTransitionEffect);
+};
+
+class RosenSlideSwitchTransitionEffect final
+    : public RosenCompositeTransitionEffect<RosenSlideTransitionEffect, InternalScaleEffect> {
+public:
+    RosenSlideSwitchTransitionEffect();
+    ~RosenSlideSwitchTransitionEffect() override = default;
+    void SetAnimationOption(const std::shared_ptr<AnimationOption>& option) override;
+
+private:
+    DECLARE_ACE_TYPE(RosenSlideSwitchTransitionEffect, RosenCompositeTransitionEffect);
+    ACE_DISALLOW_COPY_AND_MOVE(RosenSlideSwitchTransitionEffect);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_ADAPTER_ROSEN_TRANSITION_EFFECT_IMPL_H

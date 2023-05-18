@@ -250,6 +250,8 @@ public:
 
     std::string ToString() const;
 
+    static Dimension FromString(const std::string& str);
+
 private:
     double value_ = 0.0;
     DimensionUnit unit_ = DimensionUnit::PX;

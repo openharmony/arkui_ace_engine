@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -53,8 +54,15 @@ const SizeF CONTAINER_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 
 class BlankPatternTestNg : public testing::Test {
 public:
-    static void SetUpTestSuite() {};
-    static void TearDownTestSuite() {};
+    static void SetUpTestCase()
+    {
+        MockPipelineBase::SetUp();
+    }
+
+    static void TearDownTestCase()
+    {
+        MockPipelineBase::TearDown();
+    }
 
 protected:
     std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapper>> CreateRow();

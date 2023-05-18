@@ -480,6 +480,11 @@ public:
         ViewAbstract::SetFlexShrink(value);
     }
 
+    void ResetFlexShrink() override
+    {
+        ViewAbstract::ResetFlexShrink();
+    }
+
     void SetFlexGrow(float value) override
     {
         ViewAbstract::SetFlexGrow(value);

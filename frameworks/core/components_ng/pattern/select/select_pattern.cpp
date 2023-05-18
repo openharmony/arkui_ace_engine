@@ -261,8 +261,12 @@ bool SelectPattern::OnKeyEvent(const KeyEvent& event)
     if (event.action != KeyAction::DOWN) {
         return false;
     }
-    if (event.code == KeyCode::KEY_ENTER || event.code == KeyCode::KEY_SPACE) {
-        ShowSelectMenu();
+    if (event.code == KeyCode::KEY_ENTER) {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        auto focusHub = host->GetOrCreateFocusHub();
+        CHECK_NULL_RETURN(focusHub, false);
+        focusHub->OnClick(event);
         return true;
     }
     return false;
@@ -379,7 +383,7 @@ void SelectPattern::BuildChild()
     auto renderContext = select->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateBackgroundColor(theme->GetBackgroundColor());
-
+    renderContext->SetClipToFrame(true);
     BorderRadiusProperty border;
     border.SetRadius(theme->GetSelectBorderRadius());
     renderContext->UpdateBorderRadius(border);

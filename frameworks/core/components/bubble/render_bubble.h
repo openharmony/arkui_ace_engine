@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkPath.h"
+#endif
 
 #include "base/geometry/dimension.h"
 #include "base/subwindow/subwindow_manager.h"
@@ -76,12 +78,21 @@ protected:
     ErrorPositionType GetErrorPositionType(const Offset& childOffset, const Size& childSize);
     void UpdateAccessibilityInfo(Size size, Offset offset);
     void InitAccessibilityEventListener();
+#ifndef USE_ROSEN_DRAWING
     void BuildCornerPath(SkPath& path, Placement placement, double radius);
     void BuildTopLinePath(SkPath& path, double arrowOffset, double radius);
     void BuildRightLinePath(SkPath& path, double arrowOffset, double radius);
     void BuildBottomLinePath(SkPath& path, double arrowOffset, double radius);
     void BuildLeftLinePath(SkPath& path, double arrowOffset, double radius);
     void BuildCompletePath(SkPath& path);
+#else
+    void BuildCornerPath(RSPath& path, Placement placement, double radius);
+    void BuildTopLinePath(RSPath& path, double arrowOffset, double radius);
+    void BuildRightLinePath(RSPath& path, double arrowOffset, double radius);
+    void BuildBottomLinePath(RSPath& path, double arrowOffset, double radius);
+    void BuildLeftLinePath(RSPath& path, double arrowOffset, double radius);
+    void BuildCompletePath(RSPath& path);
+#endif
 
     static const Dimension BUBBLE_SPACING;
 

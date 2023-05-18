@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/security_component/security_component_handler.h"
+
 #include "base/log/ace_scoring_log.h"
 #include "base/utils/system_properties.h"
 #include "core/common/container.h"
@@ -47,7 +48,7 @@ static bool GetDisplayOffset(RefPtr<FrameNode>& node, double& offsetX, double& o
 static bool CheckOpacity(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext)
 {
     if (renderContext->GetOpacity().has_value() &&
-        !NearEqual(renderContext->GetOpacity().value(), 1.0F)) {
+        !NearEqual(renderContext->GetOpacity().value(), 1.0f)) {
         LOGW("Parent %{public}s opacity is set, security component is invalid", node->GetTag().c_str());
         return true;
     }
@@ -57,7 +58,7 @@ static bool CheckOpacity(const RefPtr<FrameNode>& node, const RefPtr<RenderConte
 static bool CheckBrightness(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext)
 {
     if (renderContext->GetFrontBrightness().has_value() &&
-        !NearEqual(renderContext->GetFrontBrightness().value().ConvertToVp(), 1.0F)) {
+        !NearEqual(renderContext->GetFrontBrightness().value().ConvertToVp(), 1.0f)) {
         LOGW("Parent %{public}s brightness is set, security component is invalid", node->GetTag().c_str());
         return true;
     }
@@ -77,7 +78,7 @@ static bool CheckVisibility(const RefPtr<FrameNode>& node, RefPtr<LayoutProperty
 static bool CheckBlur(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext)
 {
     if (renderContext->GetFrontBlurRadius().has_value() &&
-        GreatNotEqual(renderContext->GetFrontBlurRadius().value().ConvertToPx(), 0.0F)) {
+        GreatNotEqual(renderContext->GetFrontBlurRadius().value().ConvertToPx(), 0.0f)) {
         LOGW("Parent %{public}s is blur, security component is invalid", node->GetTag().c_str());
         return true;
     }
@@ -87,7 +88,7 @@ static bool CheckBlur(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>
 static bool CheckGrayScale(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext)
 {
     if (renderContext->GetFrontGrayScale().has_value() &&
-        GreatNotEqual(renderContext->GetFrontGrayScale().value().ConvertToVp(), 0.0F)) {
+        GreatNotEqual(renderContext->GetFrontGrayScale().value().ConvertToVp(), 0.0f)) {
         LOGW("Parent %{public}s set gray scale, security component is invalid", node->GetTag().c_str());
         return true;
     }
@@ -97,7 +98,7 @@ static bool CheckGrayScale(const RefPtr<FrameNode>& node, const RefPtr<RenderCon
 static bool CheckSaturate(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext)
 {
     if (renderContext->GetFrontSaturate().has_value() &&
-        !NearEqual(renderContext->GetFrontSaturate().value().ConvertToVp(), 1.0F)) {
+        !NearEqual(renderContext->GetFrontSaturate().value().ConvertToVp(), 1.0f)) {
         LOGW("Parent %{public}s set saturate, security component is invalid", node->GetTag().c_str());
         return true;
     }
@@ -107,7 +108,7 @@ static bool CheckSaturate(const RefPtr<FrameNode>& node, const RefPtr<RenderCont
 static bool CheckContrast(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext)
 {
     if (renderContext->GetFrontContrast().has_value() &&
-        !NearEqual(renderContext->GetFrontContrast().value().ConvertToVp(), 1.0F)) {
+        !NearEqual(renderContext->GetFrontContrast().value().ConvertToVp(), 1.0f)) {
         LOGW("Parent %{public}s set contrast, security component is invalid", node->GetTag().c_str());
         return true;
     }
@@ -117,7 +118,7 @@ static bool CheckContrast(const RefPtr<FrameNode>& node, const RefPtr<RenderCont
 static bool CheckInvert(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext)
 {
     if (renderContext->GetFrontInvert().has_value() &&
-        !NearEqual(renderContext->GetFrontInvert().value().ConvertToVp(), 0.0F)) {
+        !NearEqual(renderContext->GetFrontInvert().value().ConvertToVp(), 0.0f)) {
         LOGW("Parent %{public}s set Invert, security component is invalid", node->GetTag().c_str());
         return true;
     }
@@ -127,7 +128,7 @@ static bool CheckInvert(const RefPtr<FrameNode>& node, const RefPtr<RenderContex
 static bool CheckSepia(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext)
 {
     if (renderContext->GetFrontSepia().has_value() &&
-        !NearEqual(renderContext->GetFrontSepia().value().ConvertToVp(), 0.0F)) {
+        !NearEqual(renderContext->GetFrontSepia().value().ConvertToVp(), 0.0f)) {
         LOGW("Parent %{public}s set sepia, security component is invalid", node->GetTag().c_str());
         return true;
     }
@@ -137,8 +138,8 @@ static bool CheckSepia(const RefPtr<FrameNode>& node, const RefPtr<RenderContext
 static bool CheckHueRotate(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext)
 {
     if (renderContext->GetFrontHueRotate().has_value() &&
-        !NearEqual(renderContext->GetFrontHueRotate().value(), 0.0F) &&
-        !NearEqual(renderContext->GetFrontHueRotate().value(), 360.0F)) {
+        !NearEqual(renderContext->GetFrontHueRotate().value(), 0.0f) &&
+        !NearEqual(renderContext->GetFrontHueRotate().value(), 360.0f)) {
         LOGW("Parent %{public}s set HueRotate, security component is invalid", node->GetTag().c_str());
         return true;
     }
@@ -186,7 +187,7 @@ static bool CheckForegroundColor(const RefPtr<FrameNode>& node, const RefPtr<Ren
 static bool CheckSphericalEffect(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext)
 {
     if (renderContext->GetSphericalEffect().has_value() &&
-        !NearEqual(renderContext->GetSphericalEffect().value(), 0.0F)) {
+        !NearEqual(renderContext->GetSphericalEffect().value(), 0.0f)) {
         LOGW("Parent %{public}s set SphericalEffect, security component is invalid", node->GetTag().c_str());
         return true;
     }

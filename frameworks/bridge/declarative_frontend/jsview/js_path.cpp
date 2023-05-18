@@ -120,8 +120,8 @@ void JSPath::JSBind(BindingTarget globalObj)
     JSClass<JSPath>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSPath>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
 
-    JSClass<JSPath>::Inherit<JSShapeAbstract>();
-    JSClass<JSPath>::Bind(globalObj, JSPath::ConstructorCallback, JSPath::DestructorCallback);
+    JSClass<JSPath>::InheritAndBind<JSShapeAbstract>(
+        globalObj, JSPath::ConstructorCallback, JSPath::DestructorCallback);
 }
 
 } // namespace OHOS::Ace::Framework

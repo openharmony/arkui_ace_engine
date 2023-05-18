@@ -257,7 +257,7 @@ public:
     /**
      * Binds the native methods to the the js object
      */
-    static void JSBind();
+    static void JSBind(BindingTarget globalObj);
 
     static RefPtr<PipelineBase> GetPipelineContext()
     {

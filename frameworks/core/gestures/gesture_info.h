@@ -630,7 +630,7 @@ public:
         return displayY_;
     }
 
-    void SetSecCompHandleEvent(std::shared_ptr<JsonValue>& event)
+    void SetSecCompHandleEvent(const std::shared_ptr<JsonValue>& event)
     {
         secCompHandleEvent_ = event;
     }

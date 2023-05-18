@@ -127,8 +127,7 @@ void JSSelect::JSBind(BindingTarget globalObj)
     JSClass<JSSelect>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSSelect>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSSelect>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
-    JSClass<JSSelect>::Inherit<JSViewAbstract>();
-    JSClass<JSSelect>::Bind(globalObj);
+    JSClass<JSSelect>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void ParseSelectedObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
@@ -157,8 +156,8 @@ void JSSelect::Selected(const JSCallbackInfo& info)
         value = info[0]->ToNumber<int32_t>();
     }
 
-    if (value <= 0) {
-        value = 0;
+    if (value < -1) {
+        value = -1;
     }
     if (info.Length() > 1 && info[1]->IsFunction()) {
         ParseSelectedObject(info, info[1]);

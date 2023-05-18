@@ -24,7 +24,7 @@
 #include "native_engine/native_value.h"
 #include "wm/window.h"
 
-#include "adapter/ohos/entrance/distribute_ui_manager.h"
+#include "adapter/ohos/entrance/distributed_ui_manager.h"
 #include "core/common/flutter/flutter_asset_manager.h"
 
 namespace OHOS::Ace {
@@ -163,7 +163,8 @@ private:
     int32_t instanceId_ = -1;
     OHOS::sptr<OHOS::Rosen::IWindowDragListener> dragWindowListener_ = nullptr;
     OHOS::sptr<OHOS::Rosen::IOccupiedAreaChangeListener> occupiedAreaChangeListener_ = nullptr;
-
+    OHOS::sptr<OHOS::Rosen::IAvoidAreaChangedListener> avoidAreaChangedListener_ = nullptr;
+    
     // ITouchOutsideListener is used for touching out of hot areas of window.
     OHOS::sptr<OHOS::Rosen::ITouchOutsideListener> touchOutsideListener_ = nullptr;
 
@@ -178,7 +179,7 @@ private:
     float formHeight_ = 0.0;
     std::string formData_;
     std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>> formImageDataMap_;
-    std::unique_ptr<DistributeUIManager> uiManager_;
+    std::unique_ptr<DistributedUIManager> uiManager_;
 };
 
 } // namespace OHOS::Ace

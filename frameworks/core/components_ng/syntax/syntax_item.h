@@ -34,7 +34,7 @@ class ACE_EXPORT SyntaxItem : public UINode {
 
 public:
     explicit SyntaxItem(const std::string& key)
-        : UINode(V2::JS_SYNTAX_ITEM_ETS_TAG, ElementRegister::UndefinedElementId), key_(key)
+        : UINode(V2::JS_SYNTAX_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId()), key_(key)
     {}
     ~SyntaxItem() override = default;
 
@@ -46,6 +46,24 @@ public:
     const std::string& GetKey() const
     {
         return key_;
+    }
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        UINode::ToJsonValue(json);
+        json->Put("key", key_.c_str());
+    }
+
+    void FromJson(const std::unique_ptr<JsonValue>& json) override
+    {
+        UINode::FromJson(json);
+    }
+
+    static RefPtr<SyntaxItem> CreateSyntaxItemNode(const std::string& key)
+    {
+        auto node = AceType::MakeRefPtr<SyntaxItem>(key);
+        ElementRegister::GetInstance()->AddUINode(node);
+        return node;
     }
 
 private:

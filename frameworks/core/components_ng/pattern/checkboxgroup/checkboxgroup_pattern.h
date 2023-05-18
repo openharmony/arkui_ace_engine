@@ -173,6 +173,7 @@ private:
     UIStatus uiStatus_ = UIStatus::UNSELECTED;
     Dimension hotZoneHorizontalPadding_;
     Dimension hotZoneVerticalPadding_;
+    Dimension defaultPadding_;
     OffsetF offset_;
     SizeF size_;
     OffsetF hotZoneOffset_;

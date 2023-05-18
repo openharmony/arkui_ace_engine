@@ -45,6 +45,9 @@ public:
         std::function<void()>&& startAction, std::function<void()>&& endAction, V2::SwipeEdgeEffect edgeEffect) = 0;
     virtual void SetSelectCallback(OnSelectFunc&& selectCallback) = 0;
     virtual void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) = 0;
+    virtual void SetDeleteArea(std::function<void()>&& builderAction, bool useDefaultDeleteAnimation,
+        OnDeleteEvent&& onDelete, OnEnterDeleteAreaEvent&& onEnterDeleteArea, OnExitDeleteAreaEvent&& onExitDeleteArea,
+        const Dimension& length, bool isStartArea) = 0;
 
 private:
     static std::unique_ptr<ListItemModel> instance_;

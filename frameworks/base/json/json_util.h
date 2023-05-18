@@ -20,6 +20,7 @@
 #include <string>
 
 #include "base/utils/macros.h"
+#include "interfaces/inner_api/ace/serializeable_object.h"
 
 struct cJSON;
 
@@ -27,12 +28,12 @@ namespace OHOS::Ace {
 
 using JsonObject = cJSON;
 
-class ACE_FORCE_EXPORT_WITH_PREVIEW JsonValue final {
+class ACE_FORCE_EXPORT_WITH_PREVIEW JsonValue : public SerializeableObject {
 public:
     JsonValue() = default;
     explicit JsonValue(JsonObject* object);
     JsonValue(JsonObject* object, bool isRoot);
-    ~JsonValue();
+    ~JsonValue() override;
 
     // check functions
     bool IsBool() const;
@@ -42,37 +43,39 @@ public:
     bool IsObject() const;
     bool IsValid() const;
     bool IsNull() const;
-    bool Contains(const std::string& key) const;
+    bool Contains(const std::string& key) const override;
 
     // get functions
     bool GetBool() const;
-    bool GetBool(const std::string& key, bool defaultValue = false) const;
+    bool GetBool(const std::string& key, bool defaultValue = false) const override;
     int32_t GetInt() const;
-    int32_t GetInt(const std::string& key, int32_t defaultVal = 0) const;
+    int32_t GetInt(const std::string& key, int32_t defaultVal = 0) const override;
     uint32_t GetUInt() const;
-    uint32_t GetUInt(const std::string& key, uint32_t defaultVal = 0) const;
+    uint32_t GetUInt(const std::string& key, uint32_t defaultVal = 0) const override;
+    int64_t GetInt64() const;
+    int64_t GetInt64(const std::string& key, int64_t defaultVal = 0) const override;
     double GetDouble() const;
-    double GetDouble(const std::string& key, double defaultVal = 0.0) const;
+    double GetDouble(const std::string& key, double defaultVal = 0.0) const override;
     std::string GetString() const;
-    std::string GetString(const std::string& key, const std::string& defaultVal = "") const;
+    std::string GetString(const std::string& key, const std::string& defaultVal = "") const override;
 
     std::unique_ptr<JsonValue> GetNext() const;
     std::unique_ptr<JsonValue> GetChild() const;
     std::string GetKey() const;
-    std::unique_ptr<JsonValue> GetValue(const std::string& key) const;
-    std::unique_ptr<JsonValue> GetObject(const std::string& key) const;
+    virtual std::unique_ptr<JsonValue> GetValue(const std::string& key) const;
+    virtual std::unique_ptr<JsonValue> GetObject(const std::string& key) const;
     int32_t GetArraySize() const;
     std::unique_ptr<JsonValue> GetArrayItem(int32_t index) const;
     const JsonObject* GetJsonObject() const;
 
     // put functions
-    bool Put(const char* key, const char* value);
-    bool Put(const char* key, size_t value);
-    bool Put(const char* key, int32_t value);
-    bool Put(const char* key, int64_t value);
-    bool Put(const char* key, double value);
-    bool Put(const char* key, bool value);
-    bool Put(const char* key, const std::unique_ptr<JsonValue>& value);
+    bool Put(const char* key, const char* value) override;
+    bool Put(const char* key, size_t value) override;
+    bool Put(const char* key, int32_t value) override;
+    bool Put(const char* key, int64_t value) override;
+    bool Put(const char* key, double value) override;
+    bool Put(const char* key, bool value) override;
+    virtual bool Put(const char* key, const std::unique_ptr<JsonValue>& value);
     bool Put(const std::unique_ptr<JsonValue>& value);
 
     // replace functions
@@ -86,7 +89,7 @@ public:
     bool Delete(const char* key);
 
     // serialize
-    std::string ToString();
+    std::string ToString() override;
 
 private:
     JsonObject* object_ = nullptr;

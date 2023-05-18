@@ -400,6 +400,8 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     }
     std::string udKey;
     auto unifiedData = event->GetData();
+    auto records = unifiedData->GetRecords();
+    int32_t recordsSize = std:min(records.size(), 1);
     SetDragData(unifiedData, udKey);
     auto udmfClient = UDMF::UdmfClient::GetInstance();
     UDMF::Summary summary;
@@ -411,7 +413,13 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     }
     dragDropManager->SetSummaryMap(summary.summary);
     CHECK_NULL_VOID(pixelMap_);
-    std::shared_ptr<Media::PixelMap> pixelMap = pixelMap_->GetPixelMapSharedPtr();
+    std::shared_ptr<Media::PixelMap> pixelMap;
+    if (dragDropInfo.pixelMap) {
+        pixelMap = dragDropInfo.pixelMap->GetPixelMapSharedPtr();
+    }
+    if (pixelMap == nullptr) {
+        pixelMap = pixelMap_->GetPixelMapSharedPtr();
+    }
     if (pixelMap->GetWidth() > Msdp::DeviceStatus::MAX_PIXEL_MAP_WIDTH ||
         pixelMap->GetHeight() > Msdp::DeviceStatus::MAX_PIXEL_MAP_HEIGHT) {
             float scaleWidth = static_cast<float>(Msdp::DeviceStatus::MAX_PIXEL_MAP_WIDTH) / pixelMap->GetWidth();
@@ -424,8 +432,8 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     uint32_t width = pixelMap->GetWidth();
     uint32_t height = pixelMap->GetHeight();
     DragData dragData {{pixelMap, width * PIXELMAP_WIDTH_RATE, height * PIXELMAP_HEIGHT_RATE}, {}, udKey,
-        static_cast<int32_t>(info.GetSourceDevice()), 1, info.GetPointerId(), info.GetScreenLocation().GetX(),
-        info.GetScreenLocation().GetY(), info.GetDeviceId(), true};
+        static_cast<int32_t>(info.GetSourceDevice()), recordsSize, info.GetPointerId(),
+        info.GetScreenLocation().GetX(), info.GetScreenLocation().GetY(), info.GetDeviceId(), true};
     ret = Msdp::DeviceStatus::InteractionManager::GetInstance()->StartDrag(dragData, GetDragCallback());
     if (ret != 0) {
         LOGE("InteractionManager: drag start error");
@@ -614,7 +622,7 @@ bool GestureEventHub::ActLongClick()
     Offset globalOffset(offset.GetX(), offset.GetY());
     info.SetGlobalLocation(globalOffset);
     if (longPressEventActuator_) {
-        auto click = longPressEventActuator_->GetGestureEventFunc();
+        click = longPressEventActuator_->GetGestureEventFunc();
         CHECK_NULL_RETURN_NOLOG(click, true);
         click(info);
         return true;

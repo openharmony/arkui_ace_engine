@@ -58,6 +58,11 @@ public:
         return rsUIDirector_;
     }
 
+    sptr<Rosen::Window> GetRSWindow() const
+    {
+        return rsWindow_;
+    }
+
     void RecordFrameTime(uint64_t timeStamp, const std::string& name) override;
 
     void FlushTasks() override;

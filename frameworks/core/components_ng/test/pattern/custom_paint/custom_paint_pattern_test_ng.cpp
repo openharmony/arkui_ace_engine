@@ -300,11 +300,11 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg006, TestSize.Level1)
      * @tc.steps2: Test functions about text.
      * @tc.expected: The task queue of paintMethod is changed to unempty.
      */
-    customPattern->FillText(DEFAULT_STR, DEFAULT_DOUBLE0, DEFAULT_DOUBLE0, std::optional<double>(0));
+    customPattern->FillText(DEFAULT_STR, DEFAULT_DOUBLE0, DEFAULT_DOUBLE0);
     EXPECT_TRUE(paintMethod->HasTask());
 
     paintMethod->tasks_.clear();
-    customPattern->StrokeText(DEFAULT_STR, DEFAULT_DOUBLE0, DEFAULT_DOUBLE0, std::optional<double>(0));
+    customPattern->StrokeText(DEFAULT_STR, DEFAULT_DOUBLE0, DEFAULT_DOUBLE0);
     EXPECT_TRUE(paintMethod->HasTask());
 
     TextAlign textAlign = TextAlign::CENTER;

@@ -17,23 +17,16 @@
 
 #include <algorithm>
 
-#include "base/geometry/axis.h"
-#include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
-#include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
 #include "core/components/checkable/checkable_theme.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/property/layout_constraint.h"
-#include "core/components_ng/property/measure_property.h"
-#include "core/components_ng/property/measure_utils.h"
-#include "core/pipeline_ng/pipeline_context.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 
 std::optional<SizeF> CheckBoxLayoutAlgorithm::MeasureContent(
-    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+    const LayoutConstraintF& contentConstraint, LayoutWrapper* /*layoutWrapper*/)
 {
     InitializeParam();
     // Case 1: Width and height are set in the front end.
@@ -57,17 +50,7 @@ std::optional<SizeF> CheckBoxLayoutAlgorithm::MeasureContent(
         auto height = contentConstraint.selfIdealSize.Height().value();
         return SizeF(height, height);
     }
-    // Case 3: Width and height are not set in the front end, so return from the theme
-    auto width = defaultWidth_ - 2 * horizontalPadding_;
-    auto height = defaultHeight_ - 2 * verticalPadding_;
-    auto size = SizeF(width, height);
-    size.Constrain(contentConstraint.minSize, contentConstraint.maxSize);
-    if (!NearEqual(size.Width(), size.Height())) {
-        auto length = std::min(size.Width(), size.Height());
-        size.SetWidth(length);
-        size.SetHeight(length);
-    }
-    return size;
+    return SizeF();
 }
 
 void CheckBoxLayoutAlgorithm::InitializeParam()

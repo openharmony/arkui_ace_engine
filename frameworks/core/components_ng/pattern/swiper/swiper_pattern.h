@@ -78,6 +78,7 @@ public:
         layoutAlgorithm->SetIsLoop(IsLoop());
         layoutAlgorithm->SetMaxChildSize(maxChildSize_);
         layoutAlgorithm->SetDisplayCount(GetDisplayCount());
+        layoutAlgorithm->SetHoverRatio(hoverRatio_);
         return layoutAlgorithm;
     }
 
@@ -113,6 +114,20 @@ public:
         } else {
             json->Put("indicator", GetDigitIndicatorStyle().c_str());
         }
+        json->Put("currentIndex", GetCurrentIndex());
+        json->Put("currentOffset", currentOffset_);
+    }
+
+    void FromJson(const std::unique_ptr<JsonValue>& json) override
+    {
+        currentIndex_ = json->GetInt("currentIndex");
+        auto currentOffset = json->GetDouble("currentOffset");
+        if (currentOffset != currentOffset_) {
+            auto delta = currentOffset - currentOffset_;
+            LOGD("UITree delta=%{public}f", delta);
+            UpdateCurrentOffset(delta);
+        }
+        Pattern::FromJson(json);
     }
 
     std::string GetDotIndicatorStyle() const
@@ -358,6 +373,8 @@ public:
     std::shared_ptr<SwiperParameters> GetSwiperParameters() const;
     std::shared_ptr<SwiperDigitalParameters> GetSwiperDigitalParameters() const;
 
+    void ArrowHover(bool hoverFlag);
+    void IndicatorHover(bool hoverFlag);
     bool IsLoop() const;
     bool IsEnabled() const;
     void OnWindowShow() override;
@@ -426,7 +443,7 @@ private:
     float GetTranslateLength() const;
     void OnIndexChange() const;
     bool IsOutOfHotRegion(const PointF& dragPoint) const;
-    bool IsOutOfIndicatorZone(const PointF& dragPoint) const;
+    bool IsOutOfIndicatorZone(const PointF& dragPoint);
     void SaveDotIndicatorProperty(const RefPtr<FrameNode> &indicatorNode);
     void SaveDigitIndicatorProperty(const RefPtr<FrameNode> &indicatorNode);
     void PostTranslateTask(uint32_t delayTime);
@@ -435,6 +452,9 @@ private:
     void OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay);
     bool IsShowArrow() const;
     void SaveArrowProperty(const RefPtr<FrameNode>& arrowNode);
+    RefPtr<FocusHub> GetFocusHubChild(std::string childFrameName);
+    WeakPtr<FocusHub> PreviousFocus(const RefPtr<FocusHub>& curFocusNode);
+    WeakPtr<FocusHub> NextFocus(const RefPtr<FocusHub>& curFocusNode);
     int32_t ComputeLoadCount(int32_t cacheCount);
     void SetAccessibilityAction();
 
@@ -488,9 +508,12 @@ private:
     WeakPtr<FrameNode> lastWeakShowNode_;
 
     CancelableCallback<void()> translateTask_;
+    // Arrow default hover ratio
+    float hoverRatio_ = 1.0f;
     std::optional<int32_t> indicatorId_;
     std::optional<int32_t> leftButtonId_;
     std::optional<int32_t> rightButtonId_;
+    std::optional<SwiperIndicatorType> lastSwiperIndicatorType_;
 };
 } // namespace OHOS::Ace::NG
 

@@ -621,9 +621,9 @@ void RefreshPattern::CustomBuilderExit()
 
 void RefreshPattern::CheckCustomBuilderDragUpdateStage()
 {
+    CHECK_NULL_VOID(customBuilder_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    CHECK_NULL_VOID(customBuilder_);
     auto hostLayoutProperty = host->GetLayoutProperty<RefreshLayoutProperty>();
     CHECK_NULL_VOID(hostLayoutProperty);
     auto customBuilderSize = customBuilder_->GetGeometryNode()->GetMarginFrameSize();

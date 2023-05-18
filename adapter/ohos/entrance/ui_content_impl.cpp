@@ -165,6 +165,33 @@ private:
     int32_t instanceId_ = -1;
 };
 
+class AvoidAreaChangedListener : public OHOS::Rosen::IAvoidAreaChangedListener {
+public:
+    explicit AvoidAreaChangedListener(int32_t instanceId) : instanceId_(instanceId) {}
+    ~AvoidAreaChangedListener() = default;
+
+    void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type)
+    {
+        if (type == Rosen::AvoidAreaType::TYPE_SYSTEM || type == Rosen::AvoidAreaType::TYPE_CUTOUT) {
+            auto container = Platform::AceContainer::GetContainer(instanceId_);
+            CHECK_NULL_VOID(container);
+            auto taskExecutor = container->GetTaskExecutor();
+            CHECK_NULL_VOID(taskExecutor);
+            taskExecutor->PostTask(
+                [container, instanceId = instanceId_] {
+                    ContainerScope scope(instanceId);
+                    auto context = container->GetPipelineContext();
+                    CHECK_NULL_VOID_NOLOG(context);
+                    context->OnAvoidAreaChanged();
+                },
+                TaskExecutor::TaskType::UI);
+        }
+    }
+
+private:
+    int32_t instanceId_ = -1;
+};
+
 class DragWindowListener : public OHOS::Rosen::IWindowDragListener {
 public:
     explicit DragWindowListener(int32_t instanceId) : instanceId_(instanceId) {}
@@ -319,7 +346,9 @@ void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& u
     Platform::AceContainer::RunPage(
         instanceId_, Platform::AceContainer::GetContainer(instanceId_)->GeneratePageId(), startUrl_, "");
     LOGD("Initialize UIContentImpl done.");
-    uiManager_ = std::make_unique<DistributeUIManager>(instanceId_);
+    auto distributedUI = std::make_shared<NG::DistributedUI>();
+    uiManager_ = std::make_unique<DistributedUIManager>(instanceId_, distributedUI);
+    Platform::AceContainer::GetContainer(instanceId_)->SetDistributedUI(distributedUI);
 }
 
 void UIContentImpl::Initialize(const std::shared_ptr<Window>& aceWindow, const std::string& url, NativeValue* storage)
@@ -335,7 +364,9 @@ void UIContentImpl::Initialize(const std::shared_ptr<Window>& aceWindow, const s
     Platform::AceContainer::RunPage(
         instanceId_, Platform::AceContainer::GetContainer(instanceId_)->GeneratePageId(), startUrl_, "");
     LOGI("Initialize UIContentImpl done");
-    uiManager_ = std::make_unique<DistributeUIManager>(instanceId_);
+    auto distributedUI = std::make_shared<NG::DistributedUI>();
+    uiManager_ = std::make_unique<DistributedUIManager>(instanceId_, distributedUI);
+    Platform::AceContainer::GetContainer(instanceId_)->SetDistributedUI(distributedUI);
 }
 
 void UIContentImpl::Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage)
@@ -1215,6 +1246,8 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         window_->RegisterDragListener(dragWindowListener_);
         occupiedAreaChangeListener_ = new OccupiedAreaChangeListener(instanceId_);
         window_->RegisterOccupiedAreaChangeListener(occupiedAreaChangeListener_);
+        avoidAreaChangedListener_ = new AvoidAreaChangedListener(instanceId_);
+        window_->RegisterAvoidAreaChangeListener(avoidAreaChangedListener_);
     }
 
     // create ace_view

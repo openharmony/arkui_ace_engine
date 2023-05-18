@@ -43,9 +43,7 @@ void JSRowSplit::JSBind(BindingTarget globalObj)
     JSClass<JSRowSplit>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSRowSplit>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSRowSplit>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
-    JSClass<JSRowSplit>::Inherit<JSContainerBase>();
-    JSClass<JSRowSplit>::Inherit<JSViewAbstract>();
-    JSClass<JSRowSplit>::Bind<>(globalObj);
+    JSClass<JSRowSplit>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

@@ -20,6 +20,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/matrix4.h"
+#include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/vector.h"
 #include "base/memory/ace_type.h"
@@ -89,6 +90,10 @@ public:
 
     virtual void SyncGeometryProperties(const RectF& rectF) {}
 
+    // draw self and children in sandbox origin at parent's absolute position in root, drawing in sandbox
+    // will be unaffected by parent's transition.
+    virtual void SetSandBox(const std::optional<OffsetF>& parentPosition) {};
+
     virtual void OnModifyDone() {}
 
     virtual void InitContext(bool isRoot, const std::optional<std::string>& surfaceName, bool useExternalNode = false)
@@ -153,6 +158,11 @@ public:
         return false;
     }
 
+    virtual bool IsSynced() const
+    {
+        return isSynced_;
+    }
+
     virtual bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish)
     {
         return false;
@@ -194,6 +204,8 @@ public:
     }
 
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
+
+    virtual void FromJson(const std::unique_ptr<JsonValue>& json);
 
     virtual void ClearDrawCommands() {}
 
@@ -373,6 +385,7 @@ protected:
     std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;
     ShareId shareId_;
     bool isModalRootNode_ = false;
+    bool isSynced_ = false;
 
     virtual void OnBackgroundImageUpdate(const ImageSourceInfo& imageSourceInfo) {}
     virtual void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) {}

@@ -52,6 +52,12 @@ public:
                                  : (propLineCap_.value_or(LineCap::SQUARE) == LineCap::ROUND ? "ROUND" : "SQUARE"));
     }
 
+    void FromJson(const std::unique_ptr<JsonValue>& json) override
+    {
+        UpdateDividerColor(Color::ColorFromString(json->GetString("color")));
+        PaintProperty::FromJson(json);
+    }
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DividerColor, Color, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(LineCap, LineCap, PROPERTY_UPDATE_RENDER);
     ACE_DISALLOW_COPY_AND_MOVE(DividerRenderProperty);

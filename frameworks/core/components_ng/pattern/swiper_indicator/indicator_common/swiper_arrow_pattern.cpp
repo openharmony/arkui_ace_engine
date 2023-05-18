@@ -249,18 +249,19 @@ void SwiperArrowPattern::UpdateArrowContent()
     CHECK_NULL_VOID(host);
     auto buttonNode = DynamicCast<FrameNode>(host->GetFirstChild());
     CHECK_NULL_VOID(buttonNode);
-    if (swiperArrowLayoutProperty->GetIsShowBoardValue(false)) {
-        boardColor_ = swiperArrowLayoutProperty->GetBoardColorValue(boardColor_);
-        buttonNode->GetRenderContext()->UpdateBackgroundColor(boardColor_);
-    } else {
-        buttonNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
-    }
+    buttonNode->GetRenderContext()->UpdateBackgroundColor(
+        swiperArrowLayoutProperty->GetIsShowBoardValue(false)
+            ? swiperArrowLayoutProperty->GetBoardColorValue(boardColor_)
+            : Color::TRANSPARENT);
+    boardColor_ = buttonNode->GetRenderContext()->GetBackgroundColorValue(Color::TRANSPARENT);
     RefPtr<FrameNode> imageNode = DynamicCast<FrameNode>(buttonNode->GetFirstChild());
     CHECK_NULL_VOID(imageNode);
     imageNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(swiperArrowLayoutProperty->GetBoardSizeValue()),
             CalcLength(swiperArrowLayoutProperty->GetBoardSizeValue())));
-    imageNode->GetLayoutProperty<ImageLayoutProperty>()->UpdateImageFit(ImageFit::SCALE_DOWN);
+    auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
+    imageLayoutProperty->UpdateImageFit(ImageFit::SCALE_DOWN);
     ImageSourceInfo imageSourceInfo;
     auto swiperLayoutProperty = GetSwiperArrowLayoutProperty();
     CHECK_NULL_VOID(swiperLayoutProperty);
@@ -288,10 +289,10 @@ void SwiperArrowPattern::UpdateArrowContent()
         imageSourceInfo.SetFillColor(swiperArrowLayoutProperty->GetArrowColorValue().BlendOpacity(
             swiperIndicatorTheme->GetArrowDisabledAlpha()));
     }
-    imageNode->GetLayoutProperty<ImageLayoutProperty>()->UpdateImageSourceInfo(imageSourceInfo);
+    imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
     SizeF sourceSize(static_cast<float>(swiperArrowLayoutProperty->GetArrowSizeValue().ConvertToPx()),
         static_cast<float>(swiperArrowLayoutProperty->GetArrowSizeValue().ConvertToPx()));
-    imageNode->GetLayoutProperty<ImageLayoutProperty>()->UpdateSourceSize(sourceSize);
+    imageLayoutProperty->UpdateSourceSize(sourceSize);
     imageNode->MarkModifyDone();
 }
 } // namespace OHOS::Ace::NG

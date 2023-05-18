@@ -61,8 +61,7 @@ void JSContextMenu::JSBind(BindingTarget globalObj)
     JSClass<JSContextMenu>::Declare("ContextMenu");
     JSClass<JSContextMenu>::StaticMethod("close", &JSContextMenu::Close);
 
-    JSClass<JSContextMenu>::Inherit<JSViewAbstract>();
-    JSClass<JSContextMenu>::Bind<>(globalObj);
+    JSClass<JSContextMenu>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

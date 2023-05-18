@@ -21,7 +21,6 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/focus_hub.h"
-#include "core/components_ng/pattern/button/button_accessibility_property.h"
 #include "core/components_ng/pattern/button/button_event_hub.h"
 #include "core/components_ng/pattern/button/button_layout_algorithm.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
@@ -57,11 +56,6 @@ public:
         return MakeRefPtr<ButtonLayoutProperty>();
     }
 
-    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
-    {
-        return MakeRefPtr<ButtonAccessibilityProperty>();
-    }
-
     FocusPattern GetFocusPattern() const override
     {
         if (buttonType_ == ComponentButtonType::POPUP) {
@@ -70,6 +64,16 @@ public:
             return { FocusType::NODE, true, FocusStyleType::INNER_BORDER, focusPaintParam };
         }
         return { FocusType::NODE, true, FocusStyleType::OUTER_BORDER };
+    }
+
+    bool IsNeedAdjustByAspectRatio() override
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        auto layoutProperty = host->GetLayoutProperty<ButtonLayoutProperty>();
+        CHECK_NULL_RETURN(host, false);
+        return layoutProperty->HasAspectRatio() &&
+               layoutProperty->GetType().value_or(ButtonType::CAPSULE) != ButtonType::CIRCLE;
     }
 
     void SetClickedColor(const Color& color)

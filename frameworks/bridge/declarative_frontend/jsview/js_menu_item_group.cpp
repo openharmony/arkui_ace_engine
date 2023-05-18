@@ -83,7 +83,6 @@ void JSMenuItemGroup::JSBind(BindingTarget globalObj)
     JSClass<JSMenuItemGroup>::Declare("MenuItemGroup");
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSMenuItemGroup>::StaticMethod("create", &JSMenuItemGroup::Create, opt);
-    JSClass<JSMenuItemGroup>::Inherit<JSViewAbstract>();
-    JSClass<JSMenuItemGroup>::Bind(globalObj);
+    JSClass<JSMenuItemGroup>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 } // namespace OHOS::Ace::Framework

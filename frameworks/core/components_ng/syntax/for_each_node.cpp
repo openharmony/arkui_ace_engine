@@ -115,7 +115,7 @@ void ForEachNode::CompareAndUpdateChildren()
             // position in the tab tab for the tab.
             AddChild(iter->second, DEFAULT_NODE_SLOT, true);
             // Remove and trigger all Detach callback.
-            RemoveChild(iter->second);
+            RemoveChild(iter->second, true);
         }
     }
 

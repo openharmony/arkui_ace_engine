@@ -112,7 +112,6 @@ void JSMenu::JSBind(BindingTarget globalObj)
     JSClass<JSMenu>::StaticMethod("fontSize", &JSMenu::FontSize, opt);
     JSClass<JSMenu>::StaticMethod("font", &JSMenu::Font, opt);
     JSClass<JSMenu>::StaticMethod("fontColor", &JSMenu::FontColor, opt);
-    JSClass<JSMenu>::Inherit<JSViewAbstract>();
-    JSClass<JSMenu>::Bind(globalObj);
+    JSClass<JSMenu>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 } // namespace OHOS::Ace::Framework

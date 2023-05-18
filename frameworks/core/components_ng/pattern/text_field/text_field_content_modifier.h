@@ -60,6 +60,7 @@ private:
     void SetDefaultFontWeight(const TextStyle& textStyle);
     void SetDefaultTextColor(const TextStyle& textStyle);
     void SetDefaultPropertyValue();
+    void UpdatePaintConfig(RefPtr<CanvasImage>& passwordIconCanvasImage, DrawingContext context, RectF iconRect) const;
 
     WeakPtr<Pattern> pattern_;
     std::optional<Dimension> fontSize_;

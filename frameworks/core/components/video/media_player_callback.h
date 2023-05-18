@@ -76,16 +76,6 @@ public:
 
     ~MediaPlayerCallback() = default;
 
-    // Below api9
-    void OnError(Media::PlayerErrorType errorType, int32_t errorCode) override
-    {
-        LOGE("OnError callback, errorType: %{public}d, errorCode: %{public}d", errorType, errorCode);
-        ContainerScope scope(instanceId_);
-        if (errorEvent_) {
-            errorEvent_();
-        }
-    }
-
     // Above api9
     void OnError(int32_t errorCode, const std::string &errorMsg) override
     {

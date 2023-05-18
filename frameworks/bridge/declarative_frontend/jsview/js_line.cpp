@@ -64,8 +64,7 @@ void JSLine::JSBind(BindingTarget globalObj)
     JSClass<JSLine>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSLine>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
 
-    JSClass<JSLine>::Inherit<JSShapeAbstract>();
-    JSClass<JSLine>::Bind<>(globalObj);
+    JSClass<JSLine>::InheritAndBind<JSShapeAbstract>(globalObj);
 }
 
 void JSLine::Create(const JSCallbackInfo& info)

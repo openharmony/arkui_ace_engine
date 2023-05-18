@@ -66,8 +66,7 @@ void JSGauge::JSBind(BindingTarget globalObj)
     JSClass<JSGauge>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSGauge>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
 
-    JSClass<JSGauge>::Inherit<JSViewAbstract>();
-    JSClass<JSGauge>::Bind(globalObj);
+    JSClass<JSGauge>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSGauge::Create(const JSCallbackInfo& info)

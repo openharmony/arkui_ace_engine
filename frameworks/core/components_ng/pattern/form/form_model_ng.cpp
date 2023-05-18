@@ -81,10 +81,12 @@ void FormModelNG::SetVisibility(VisibleType visible)
     auto formPattern = frameNode->GetPattern<FormPattern>();
     CHECK_NULL_VOID(formPattern);
     auto isLoaded = formPattern->GetIsLoaded();
+    auto layoutProperty = frameNode->GetLayoutProperty<FormLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
     if (isLoaded || visible != VisibleType::VISIBLE) {
-        ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Visibility, visible);
+        layoutProperty->UpdateVisibility(visible, true);
     } else {
-        ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Visibility, VisibleType::INVISIBLE);
+        layoutProperty->UpdateVisibility(VisibleType::INVISIBLE, true);
     }
 
     ACE_UPDATE_LAYOUT_PROPERTY(FormLayoutProperty, VisibleType, visible);

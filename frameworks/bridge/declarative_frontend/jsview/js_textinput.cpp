@@ -87,10 +87,10 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSTextInput>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSTextInput>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSTextInput>::StaticMethod("passwordIcon", &JSTextField::SetPasswordIcon);
     JSClass<JSTextInput>::StaticMethod("showUnderline", &JSTextField::SetShowUnderline);
 
-    JSClass<JSTextInput>::Inherit<JSViewAbstract>();
-    JSClass<JSTextInput>::Bind(globalObj);
+    JSClass<JSTextInput>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSTextInput::Create(const JSCallbackInfo& info)

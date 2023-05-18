@@ -153,7 +153,10 @@ class SubscribableHandler {
     });
   }
 
-
+  // notify a property has been 'read'
+  // this functionality is in preparation for observed computed variables
+  // enable calling from 'get' trap handler functions to this function once
+  // adding support for observed computed variables
   protected notifyObjectPropertyHasBeenRead(propName: string) {
     stateMgmtConsole.debug(`SubscribableHandler: notifyObjectPropertyHasBeenRead '${propName}'.`)
     this.owningProperties_.forEach((subscribedId) => {
