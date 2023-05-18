@@ -297,8 +297,17 @@ void JSScroll::SetScrollBarColor(const std::string& scrollBarColor)
     ScrollModel::GetInstance()->SetScrollBarColor(color);
 }
 
-void JSScroll::SetEdgeEffect(int edgeEffect)
+void JSScroll::SetEdgeEffect(const JSCallbackInfo& args)
 {
+    if (args.Length() < 1) {
+        LOGE("args is invalid");
+        return;
+    }
+    int32_t edgeEffect;
+    if (args[0]->IsNull() || args[0]->IsUndefined() || !ParseJsInt32(args[0], edgeEffect) ||
+        edgeEffect < static_cast<int32_t>(EdgeEffect::SPRING) || edgeEffect > static_cast<int32_t>(EdgeEffect::NONE)) {
+        edgeEffect = static_cast<int32_t>(EdgeEffect::NONE);
+    }
     ScrollModel::GetInstance()->SetEdgeEffect(static_cast<EdgeEffect>(edgeEffect));
 }
 
