@@ -1173,6 +1173,10 @@ void WebPattern::ExitFullScreen()
     CHECK_NULL_VOID(fullScreenManager);
     fullScreenManager->ExitFullScreen(host);
     isFullScreen_ = false;
+
+    auto rootWidth = PipelineContext::GetCurrentRootWidth();
+    auto rootHeight = PipelineContext::GetCurrentRootHeight();
+    UpdateWebLayoutSize(rootWidth, rootHeight);
 }
 
 bool WebPattern::IsTouchHandleValid(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> handle)
