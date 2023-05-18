@@ -41,7 +41,6 @@ void MarqueeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     textLayoutConstraint.UpdateMaxSizeWithCheck(SizeF(Infinity<float>(), maxSize.Height()));
     textLayoutConstraint.UpdateMinSizeWithCheck(minSize);
     child->Measure(textLayoutConstraint);
-
     // measure self.
     OptionalSizeF frameSize;
     do {
@@ -50,7 +49,6 @@ void MarqueeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         if (frameSize.IsValid()) {
             break;
         }
-
         if (measureType == MeasureType::MATCH_PARENT) {
             frameSize.UpdateIllegalSizeWithCheck(layoutConstraint->parentIdealSize);
             if (frameSize.IsValid()) {

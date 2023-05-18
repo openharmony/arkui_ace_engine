@@ -23,8 +23,10 @@
 #include "core/components_ng/pattern/marquee/marquee_event_hub.h"
 #include "core/components_ng/pattern/marquee/marquee_layout_algorithm.h"
 #include "core/components_ng/pattern/marquee/marquee_layout_property.h"
+#include "core/components_ng/pattern/marquee/marquee_paint_property.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_ng/render/paint_property.h"
 #include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace::NG {
@@ -40,6 +42,11 @@ public:
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<MarqueeLayoutProperty>();
+    }
+
+    RefPtr<PaintProperty> CreatePaintProperty() override
+    {
+        return MakeRefPtr<MarqueePaintProperty>();
     }
 
     RefPtr<EventHub> CreateEventHub() override
@@ -68,17 +75,21 @@ private:
     void FireFinishEvent() const;
 
     void StartMarqueeAnimation();
-    void StopMarqueeAnimation(bool stopAndStart, bool statusChanged);
+    void StopMarqueeAnimation(bool stopAndStart);
     void SetTextOffset(float offsetX);
     void RegistVisibleAreaChangeCallback();
     void OnVisibleAreaChange(bool visible);
-    bool lastStartStatus_ = false;
-    bool statusChanged_ = false;
-    bool forceStropAnimation_ = false;
-    int32_t repeatCount_ = 0;
+    bool OnlyPlayStatusChange();
+    void ChangeAnimationPlayStatus();
+    void StoreProperties();
+    bool measureChanged_ = false;
     int32_t animationId_ = 0;
-    RefPtr<FrameNode> textNode_;
     bool isRegistedAreaCallback_ = false;
+    std::shared_ptr<AnimationUtils::Animation> animation_;
+    bool playStatus_ = false;
+    double scrollAmount_ = DEFAULT_MARQUEE_SCROLL_AMOUNT.ConvertToPx();
+    int32_t loop_ = -1;
+    MarqueeDirection direction_ = MarqueeDirection::LEFT;
     ACE_DISALLOW_COPY_AND_MOVE(MarqueePattern);
 };
 } // namespace OHOS::Ace::NG

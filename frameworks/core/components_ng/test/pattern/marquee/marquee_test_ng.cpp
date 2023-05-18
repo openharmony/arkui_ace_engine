@@ -834,35 +834,4 @@ HWTEST_F(MarqueeTestNg, MarqueeTest0011, TestSize.Level1)
     EXPECT_TRUE(CheckMeasureFlag(marqueeLayoutProperty->GetPropertyChangeFlag()));
     EXPECT_TRUE(CheckMeasureFlag(textLayoutProperty->GetPropertyChangeFlag()));
 }
-
-/**
- * @tc.name: MarqueeTest012
- * @tc.desc: Test Stop Animation.
- * @tc.type: FUNC
- */
-HWTEST_F(MarqueeTestNg, MarqueeTest0012, TestSize.Level1)
-{
-    MarqueeModelNG marqueeModel;
-    marqueeModel.Create();
-    marqueeModel.SetValue(MARQUEE_SRC);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<MarqueePattern>();
-    ASSERT_NE(pattern, nullptr);
-    pattern->lastStartStatus_ = false;
-    pattern->StopMarqueeAnimation(false, true);
-    EXPECT_TRUE(!pattern->lastStartStatus_);
-
-    pattern->lastStartStatus_ = true;
-    pattern->StopMarqueeAnimation(false, false);
-    EXPECT_TRUE(pattern->lastStartStatus_);
-
-    pattern->lastStartStatus_ = true;
-    pattern->StopMarqueeAnimation(true, false);
-    EXPECT_TRUE(pattern->lastStartStatus_);
-
-    pattern->lastStartStatus_ = true;
-    pattern->StopMarqueeAnimation(true, true);
-    EXPECT_TRUE(pattern->lastStartStatus_);
-}
 } // namespace OHOS::Ace::NG
