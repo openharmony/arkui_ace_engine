@@ -1479,13 +1479,7 @@ void OverlayManager::RemoveFilter()
     CHECK_NULL_VOID(rootNode);
     auto children = columnNode->GetChildren();
     rootNode->RemoveChild(columnNode);
-    int32_t slot = 0;
-    for (auto& child : children) {
-        columnNode->RemoveChild(child);
-        child->MountToParent(rootNode, slot);
-        slot++;
-    }
-    rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    rootNode->RebuildRenderContextTree();
     hasFilter_ = false;
 }
 
