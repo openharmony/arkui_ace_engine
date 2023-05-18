@@ -225,11 +225,9 @@ void SecurityComponentLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 
     UpdateFrameMeasure(layoutWrapper, securityComponentLayoutProperty);
-    if (buttonType_ != SecurityComponentBackgroundType::BACKGROUND_NULL) {
-        MeasureButton(layoutWrapper, securityComponentLayoutProperty);
-        componentWidth_ = buttonSizeF_.Width();
-        componentHeight_ = buttonSizeF_.Height();
-    }
+    MeasureButton(layoutWrapper, securityComponentLayoutProperty);
+    componentWidth_ = buttonSizeF_.Width();
+    componentHeight_ = buttonSizeF_.Height();
 
     LOGD("security components size %{public}f %{public}f icon %{public}f %{public}f text %{public}f %{public}f",
         componentWidth_, componentHeight_, iconSizeF_.Width(),

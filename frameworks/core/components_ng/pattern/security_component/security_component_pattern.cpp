@@ -68,12 +68,8 @@ void SecurityComponentPattern::InitSecurityComponentOnClick(RefPtr<FrameNode>& s
 
     clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
     secCompGesture->AddClickEvent(clickListener_);
-    if (button != nullptr) {
-        SetNodeHitTestMode(icon, HitTestMode::HTMTRANSPARENT);
-        SetNodeHitTestMode(text, HitTestMode::HTMTRANSPARENT);
-    } else {
-        secCompGesture->SetHitTestMode(HitTestMode::HTMBLOCK);
-    }
+    SetNodeHitTestMode(icon, HitTestMode::HTMTRANSPARENT);
+    SetNodeHitTestMode(text, HitTestMode::HTMTRANSPARENT);
 }
 
 void SecurityComponentPattern::OnModifyDone()
