@@ -2687,4 +2687,98 @@ HWTEST_F(GridTestNg, PositionControllerCoverage001, TestSize.Level1)
 
     EXPECT_TRUE(true);
 }
+
+/**
+ * @tc.name: PerformActionTest001
+ * @tc.desc: GirdItem Accessibility PerformAction test Select and ClearSelection.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, PerformActionTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create girdItem and initialize related properties.
+     */
+    GridItemModelNG gridItemModelNG;
+    gridItemModelNG.Create();
+
+    /**
+     * @tc.steps: step2. Get girdItem frameNode and pattern, set callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto gridItemPattern = frameNode->GetPattern<GridItemPattern>();
+    ASSERT_NE(gridItemPattern, nullptr);
+    gridItemPattern->selectable_ = false;
+    gridItemPattern->SetAccessibilityAction();
+
+    /**
+     * @tc.steps: step3. Get girdItem accessibilityProperty to call callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto gridItemAccessibilityProperty = frameNode->GetAccessibilityProperty<GridItemAccessibilityProperty>();
+    ASSERT_NE(gridItemAccessibilityProperty, nullptr);
+
+    /**
+     * @tc.steps: step4. When girdItem is not Selectable, call the callback function in gridItemAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    EXPECT_TRUE(gridItemAccessibilityProperty->ActActionSelect());
+    EXPECT_TRUE(gridItemAccessibilityProperty->ActActionClearSelection());
+
+    /**
+     * @tc.steps: step5. When girdItem is Selectable, call the callback function in gridItemAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    gridItemPattern->selectable_ = true;
+    EXPECT_TRUE(gridItemAccessibilityProperty->ActActionSelect());
+    EXPECT_TRUE(gridItemAccessibilityProperty->ActActionClearSelection());
+}
+
+/**
+ * @tc.name: PerformActionTest002
+ * @tc.desc: Gird Accessibility PerformAction test ScrollForward and ScrollBackward.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, PerformActionTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create gird and initialize related properties.
+     */
+    GridModelNG gridModelNG;
+    gridModelNG.Create(nullptr, nullptr);
+
+    /**
+     * @tc.steps: step2. Get gird frameNode and pattern, set callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto gridPattern = frameNode->GetPattern<GridPattern>();
+    ASSERT_NE(gridPattern, nullptr);
+    gridPattern->isConfigScrollable_ = false;
+    gridPattern->SetAccessibilityAction();
+
+    /**
+     * @tc.steps: step3. Get gird accessibilityProperty to call callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto gridAccessibilityProperty = frameNode->GetAccessibilityProperty<GridAccessibilityProperty>();
+    ASSERT_NE(gridAccessibilityProperty, nullptr);
+
+    /**
+     * @tc.steps: step4. When gird is not Scrollable, call the callback function in gridAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    EXPECT_TRUE(gridAccessibilityProperty->ActActionScrollForward());
+    EXPECT_TRUE(gridAccessibilityProperty->ActActionScrollBackward());
+
+    /**
+     * @tc.steps: step5. When gird is Scrollable, call the callback function in gridAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    gridPattern->isConfigScrollable_ = true;
+    EXPECT_TRUE(gridAccessibilityProperty->ActActionScrollForward());
+    EXPECT_TRUE(gridAccessibilityProperty->ActActionScrollBackward());
+}
 } // namespace OHOS::Ace::NG
