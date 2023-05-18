@@ -41,15 +41,23 @@ UINode::UINode(const std::string& tag, int32_t nodeId, bool isRoot)
         col_ = pos.second;
     }
 #ifdef UICAST_COMPONENT_SUPPORTED
-    Container::Current()->GetDistributedUI()->AddNewNode(nodeId_);
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto distributedUI = container->GetDistributedUI();
+    CHECK_NULL_VOID(distributedUI);
+    distributedUI->AddNewNode(nodeId_);
 #endif
 }
 
 UINode::~UINode()
 {
 #ifdef UICAST_COMPONENT_SUPPORTED
-    if (hostPageId_ == Container::Current()->GetDistributedUI()->GetCurrentPageId()) {
-        Container::Current()->GetDistributedUI()->AddDeletedNode(nodeId_);
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto distributedUI = container->GetDistributedUI();
+    CHECK_NULL_VOID(distributedUI);
+    if (hostPageId_ == distributedUI->GetCurrentPageId()) {
+        distributedUI->AddDeletedNode(nodeId_);
     }
 #endif
 

@@ -103,6 +103,8 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
         Pattern::ToJsonValue(json);
+        json->Put("currentIndex", GetCurrentIndex());
+        json->Put("currentOffset", currentOffset_);
 
         if (indicatorIsBoolean_) {
             return;
@@ -114,8 +116,6 @@ public:
         } else {
             json->Put("indicator", GetDigitIndicatorStyle().c_str());
         }
-        json->Put("currentIndex", GetCurrentIndex());
-        json->Put("currentOffset", currentOffset_);
     }
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override
