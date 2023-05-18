@@ -288,21 +288,42 @@ void TextPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secon
         CHECK_NULL_VOID(pattern);
         pattern->HandleOnSelectAll();
     };
+    selectInfo.onClose = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleOnOverlayClose();
+    };
 
     if (!menuOptionItems_.empty()) {
         selectInfo.menuOptionItems = GetMenuOptionItems();
     }
 
     if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
-        selectOverlayProxy_->Close();
+        SelectHandleInfo firstHandleInfo;
+        SelectHandleInfo secondHandleInfo;
+        firstHandleInfo.paintRect = textSelector_.firstHandle;
+        secondHandleInfo.paintRect = textSelector_.secondHandle;
+        auto start = textSelector_.GetTextStart();
+        auto end = textSelector_.GetTextEnd();
+        selectOverlayProxy_->SetSelectInfo(GetSelectedText(start, end));
+        selectOverlayProxy_->UpdateFirstAndSecondHandleInfo(firstHandleInfo, secondHandleInfo);
+    } else {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        selectOverlayProxy_ = pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo);
+        CHECK_NULL_VOID_NOLOG(selectOverlayProxy_);
+        auto start = textSelector_.GetTextStart();
+        auto end = textSelector_.GetTextEnd();
+        selectOverlayProxy_->SetSelectInfo(GetSelectedText(start, end));
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    selectOverlayProxy_ = pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo);
-    CHECK_NULL_VOID_NOLOG(selectOverlayProxy_);
-    auto start = textSelector_.GetTextStart();
-    auto end = textSelector_.GetTextEnd();
-    selectOverlayProxy_->SetSelectInfo(GetSelectedText(start, end));
+}
+
+void TextPattern::HandleOnOverlayClose()
+{
+    textSelector_.Update(-1, -1);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void TextPattern::HandleOnSelectAll()
@@ -310,7 +331,7 @@ void TextPattern::HandleOnSelectAll()
     auto textSize = GetWideText().length();
     textSelector_.Update(0, textSize);
     CalculateHandleOffsetAndShowOverlay();
-    if (selectOverlayProxy_) {
+    if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
         SelectHandleInfo firstHandleInfo;
         SelectHandleInfo secondHandleInfo;
         firstHandleInfo.paintRect = textSelector_.firstHandle;
