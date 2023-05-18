@@ -919,6 +919,10 @@ public:
         }
         JSRef<JSArray> array = JSRef<JSArray>::Cast(args[0]);
         for (size_t i = 0; i < array->Length(); i++) {
+            if (!(array->GetValueAt(i)->IsObject())) {
+                LOGE("Param is invalid");
+                return;
+            }
             auto obj = JSRef<JSObject>::Cast(array->GetValueAt(i));
             auto headerKey = obj->GetProperty("headerKey");
             auto headerValue = obj->GetProperty("headerValue");
