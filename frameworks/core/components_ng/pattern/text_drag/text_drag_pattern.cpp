@@ -15,11 +15,14 @@
 
 #include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
 
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
-#include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+
+namespace {
+// uncertainty range when comparing selectedTextBox to contentRect
+constexpr float BOX_EPSILON = 0.2f;
+} // namespace
 
 namespace OHOS::Ace::NG {
 bool TextDragPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -79,7 +82,7 @@ TextDragData TextDragPattern::CalculateTextDragData(
             rightHandleX = contentRect.Right();
         }
     } else {
-        if (leftHandleY < contentRect.Top()) {
+        if (leftHandleY < contentRect.Top() - BOX_EPSILON) {
             leftHandleX = contentRect.Left();
             leftHandleY = contentRect.Top();
         }
