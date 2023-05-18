@@ -479,13 +479,7 @@ LayoutConstraintF MenuLayoutAlgorithm::CreateChildConstraint(LayoutWrapper* layo
     auto childConstraint = menuLayoutProperty->CreateChildConstraint();
     UpdateConstraintWidth(layoutWrapper, childConstraint);
     UpdateConstraintHeight(layoutWrapper, childConstraint);
-    auto menuPattern = layoutWrapper->GetHostNode()->GetPattern<MenuPattern>();
-    CHECK_NULL_RETURN(menuLayoutProperty, childConstraint);
-    if (!menuPattern->IsMultiMenu()) {
-        UpdateConstraintBaseOnOptions(layoutWrapper, childConstraint);
-    } else {
-        UpdateConstraintBaseOnMenuItems(layoutWrapper, childConstraint);
-    }
+    UpdateConstraintBaseOnOptions(layoutWrapper, childConstraint);
     return childConstraint;
 }
 
@@ -537,13 +531,6 @@ void MenuLayoutAlgorithm::UpdateOptionConstraint(std::list<RefPtr<LayoutWrapper>
     }
 }
 
-void MenuLayoutAlgorithm::UpdateConstraintBaseOnMenuItems(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint)
-{
-    // multiMenu children are menuItem or menuItemGroup, constrain width is same as the menu
-    auto maxChildrenWidth = GetChildrenMaxWidth(layoutWrapper, constraint);
-    constraint.minSize.SetWidth(maxChildrenWidth);
-}
-
 // return vertical offset
 float MenuLayoutAlgorithm::VerticalLayout(const SizeF& size, float position)
 {
@@ -587,17 +574,6 @@ float MenuLayoutAlgorithm::HorizontalLayout(const SizeF& size, float position, b
 
     // can't fit in screen, line up with left side of the screen
     return 0.0f;
-}
-
-float MenuLayoutAlgorithm::GetChildrenMaxWidth(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint)
-{
-    float maxWidth = layoutConstraint.minSize.Width();
-    for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
-        child->Measure(layoutConstraint);
-        auto childSize = child->GetGeometryNode()->GetFrameSize();
-        maxWidth = std::max(maxWidth, childSize.Width());
-    }
-    return maxWidth;
 }
 
 OffsetF MenuLayoutAlgorithm::GetPositionWithPlacement(
