@@ -82,6 +82,7 @@ bool SheetPresentationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapp
     auto sheetLayoutProperty = sheetDragBar->GetLayoutProperty();
     CHECK_NULL_RETURN(sheetDragBar, false);
     sheetLayoutProperty->UpdateVisibility(showDragIndicator ? VisibleType::VISIBLE : VisibleType::GONE);
+    sheetDragBar->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     return true;
 }
 
