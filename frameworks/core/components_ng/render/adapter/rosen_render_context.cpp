@@ -813,6 +813,7 @@ void RosenRenderContext::OnAccessibilityFocusUpdate(bool isAccessibilityFocus)
 {
     auto uiNode = GetHost();
     CHECK_NULL_VOID(uiNode);
+    UpdateAccessibilityFocus(isAccessibilityFocus);
     if (isAccessibilityFocus) {
         PaintAccessibilityFocus();
     } else {
