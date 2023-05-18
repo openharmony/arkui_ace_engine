@@ -567,4 +567,53 @@ HWTEST_F(SwiperPatternTestNg, SwiperFunc004, TestSize.Level1)
     swiperPaintProperty->propEdgeEffect_ = EdgeEffect::NONE;
     pattern->panEvent_->actionUpdate_(gestureEvent);
 }
+
+/**
+ * @tc.name: PerformActionTest001
+ * @tc.desc: Swiper Accessibility PerformAction test ScrollForward and ScrollBackward.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, PerformActionTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swiper and initialize related properties.
+     */
+    SwiperModelNG swiperModelNG;
+    swiperModelNG.Create();
+
+    /**
+     * @tc.steps: step2. Get swiper frameNode and pattern, set callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto swiperPattern = frameNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto swiperPaintProperty = frameNode->GetPaintProperty<SwiperPaintProperty>();
+    ASSERT_NE(swiperPaintProperty, nullptr);
+    swiperPaintProperty->UpdateLoop(false);
+    swiperPattern->SetAccessibilityAction();
+
+    /**
+     * @tc.steps: step3. Get swiper accessibilityProperty to call callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto swiperAccessibilityProperty = frameNode->GetAccessibilityProperty<SwiperAccessibilityProperty>();
+    ASSERT_NE(swiperAccessibilityProperty, nullptr);
+
+    /**
+     * @tc.steps: step4. When swiper is not scrollable, call the callback function in swiperAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    EXPECT_TRUE(swiperAccessibilityProperty->ActActionScrollForward());
+    EXPECT_TRUE(swiperAccessibilityProperty->ActActionScrollBackward());
+
+    /**
+     * @tc.steps: step5. When swiper is scrollable, call the callback function in swiperAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    swiperPaintProperty->UpdateLoop(true);
+    EXPECT_TRUE(swiperAccessibilityProperty->ActActionScrollForward());
+    EXPECT_TRUE(swiperAccessibilityProperty->ActActionScrollBackward());
+}
 } // namespace OHOS::Ace::NG

@@ -2910,4 +2910,81 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmLayoutMask002, TestSize.Level1)
     EXPECT_EQ(tabBarLayoutProperty->GetSelectedMask().value_or(-1), -1);
     EXPECT_EQ(tabBarLayoutProperty->GetUnselectedMask().value_or(-1), -1);
 }
+
+/**
+ * @tc.name: PerformActionTest001
+ * @tc.desc: TabBar Accessibility PerformAction test ScrollForward and ScrollBackward.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, PerformActionTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create tabBar frameNode and pattern, set callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto controller = AceType::MakeRefPtr<SwiperController>();
+    ASSERT_NE(controller, nullptr);
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::TAB_BAR_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            [controller]() { return AceType::MakeRefPtr<TabBarPattern>(controller); });
+    ASSERT_NE(frameNode, nullptr);
+    auto tabBarPattern = frameNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+    auto tabBarLayoutProperty = tabBarPattern->GetLayoutProperty<TabBarLayoutProperty>();
+    CHECK_NULL_VOID(tabBarLayoutProperty);
+    tabBarLayoutProperty->UpdateTabBarMode(TabBarMode::FIXED);
+    tabBarPattern->SetAccessibilityAction();
+
+    /**
+     * @tc.steps: step2. Get tabBar accessibilityProperty to call callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto tabBarAccessibilityProperty = frameNode->GetAccessibilityProperty<TabBarAccessibilityProperty>();
+    ASSERT_NE(tabBarAccessibilityProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. When tabBar TabBarMode is FIXED and child is null, call the callback function in
+     *                   tabBarAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    EXPECT_TRUE(tabBarAccessibilityProperty->ActActionScrollForward());
+    EXPECT_TRUE(tabBarAccessibilityProperty->ActActionScrollBackward());
+
+    /**
+     * @tc.steps: step4. When tabBar TabBarMode is SCROLLABLE and child is null, call the callback function in
+     *                   tabBarAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    tabBarLayoutProperty->UpdateTabBarMode(TabBarMode::SCROLLABLE);
+    EXPECT_TRUE(tabBarAccessibilityProperty->ActActionScrollForward());
+    EXPECT_TRUE(tabBarAccessibilityProperty->ActActionScrollBackward());
+
+    /**
+     * @tc.steps: step5. When tabBar TabBarMode is SCROLLABLE and child is not null, call the callback function in
+     *                   tabBarAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    auto columnNode1 =
+        FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ASSERT_NE(columnNode1, nullptr);
+    columnNode1->MountToParent(frameNode);
+
+    auto columnNode2 =
+        FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ASSERT_NE(columnNode2, nullptr);
+    columnNode2->MountToParent(frameNode);
+    EXPECT_TRUE(tabBarAccessibilityProperty->ActActionScrollForward());
+    EXPECT_TRUE(tabBarAccessibilityProperty->ActActionScrollBackward());
+
+    /**
+     * @tc.steps: step6. When tabBar TabBarMode is FIXED and child is not null, call the callback function in
+     *                   tabBarAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    tabBarLayoutProperty->UpdateTabBarMode(TabBarMode::FIXED);
+    EXPECT_TRUE(tabBarAccessibilityProperty->ActActionScrollForward());
+    EXPECT_TRUE(tabBarAccessibilityProperty->ActActionScrollBackward());
+}
 } // namespace OHOS::Ace::NG
