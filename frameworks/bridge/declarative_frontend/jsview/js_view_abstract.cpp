@@ -1693,6 +1693,7 @@ void JSViewAbstract::JsFlexShrink(const JSCallbackInfo& info)
     // negative use default value.
     if (value < 0.0) {
         ViewAbstractModel::GetInstance()->ResetFlexShrink();
+        return;
     }
     ViewAbstractModel::GetInstance()->SetFlexShrink(static_cast<float>(value));
 }
