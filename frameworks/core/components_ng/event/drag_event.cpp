@@ -232,17 +232,8 @@ void DragEventActuator::SetFilter(const RefPtr<DragEventActuator>& actuator)
         // insert columnNode to rootNode
         auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             AceType::MakeRefPtr<LinearLayoutPattern>(true));
-        auto children = parent->GetChildren();
-        int32_t slot = 0;
-        for (auto& child : children) {
-            if (child->GetTag() == "Popup") {
-                continue;
-            }
-            parent->RemoveChild(child);
-            child->MountToParent(columnNode, slot);
-            slot++;
-        }
-        columnNode->MountToParent(parent, 0);
+        columnNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
+        columnNode->MountToParent(parent);
         columnNode->OnMountToParentDone();
         manager->SetHasFilter(true);
         manager->SetFilterColumnNode(columnNode);
@@ -253,12 +244,10 @@ void DragEventActuator::SetFilter(const RefPtr<DragEventActuator>& actuator)
         CHECK_NULL_VOID(context);
         auto rsNode = context->GetRSNode();
         CHECK_NULL_VOID(rsNode);
-        std::shared_ptr<Rosen::RSFilter> backFilter = Rosen::RSFilter::CreateBlurFilter(FILTER_RADIUS, FILTER_RADIUS);
-        std::shared_ptr<Rosen::RSFilter> filter = Rosen::RSFilter::CreateBlurFilter(FILTER_RADIUS, FILTER_RADIUS);
         if (isBindOverlayValue && SystemProperties::GetDeviceType() == DeviceType::PHONE) {
             LOGI("User Device use default Filter");
+            auto backFilter = Rosen::RSFilter::CreateBlurFilter(FILTER_RADIUS, FILTER_RADIUS);
             rsNode->SetBackgroundFilter(backFilter);
-            rsNode->SetFilter(filter);
         }
     }
 }
