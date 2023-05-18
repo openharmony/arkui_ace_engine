@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_content_node.h"
@@ -56,6 +57,15 @@ const char DISTRIBUTE_UI_DEPTH[] = "$depth";
 const char DISTRIBUTE_UI_OPERATION[] = "$op";
 
 const int32_t HANDLE_UPDATE_PER_VSYNC = 1;
+
+void RestorePageNode(const RefPtr<NG::FrameNode>& pageNode)
+{
+    auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+    CHECK_NULL_VOID(pagePattern);
+    pagePattern->SetOnBackPressed([]() { return true; });
+    std::function<void()> emptyFunc;
+    pagePattern->SetPageTransitionFunc(std::move(emptyFunc));
+}
 } // namespace
 
 SerializeableObjectArray DistributedUI::DumpUITree()
@@ -705,6 +715,7 @@ void DistributedUI::RestoreUITreeInner(const SerializeableObjectArray& nodeArray
     CHECK_NULL_VOID_NOLOG(context);
     auto pageRootNode = context->GetStageManager()->GetLastPage();
     CHECK_NULL_VOID_NOLOG(pageRootNode);
+    RestorePageNode(pageRootNode);
     auto children = pageRootNode->GetChildren();
     for (const auto& child : children) {
         pageRootNode->RemoveChild(child);
