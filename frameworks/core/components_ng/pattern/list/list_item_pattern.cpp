@@ -379,20 +379,20 @@ void ListItemPattern::HandleDragUpdate(const GestureEvent& info)
     hasStartDeleteArea_ = false;
     hasEndDeleteArea_ = false;
     float itemWidth = GetContentSize().CrossSize(axis_);
-    float movableDistance = 0.0f;
+    float maxDeleteArea = 0.0f;
 
     if (GreatNotEqual(curOffset_, 0.0) && HasStartNode()) {
-        movableDistance = itemWidth - startNodeSize_;
+        maxDeleteArea = itemWidth - startNodeSize_;
         startDeleteAreaDistance_ = static_cast<float>(
             layoutProperty->GetStartDeleteAreaDistance().value_or(Dimension(0, DimensionUnit::VP)).ConvertToPx());
-        if (GreatNotEqual(startDeleteAreaDistance_, 0.0) && LessNotEqual(startDeleteAreaDistance_, movableDistance)) {
+        if (GreatNotEqual(startDeleteAreaDistance_, 0.0) && LessNotEqual(startDeleteAreaDistance_, maxDeleteArea)) {
             hasStartDeleteArea_ = true;
         }
     } else if (LessNotEqual(curOffset_, 0.0) && HasEndNode()) {
-        movableDistance = itemWidth - endNodeSize_;
+        maxDeleteArea = itemWidth - endNodeSize_;
         endDeleteAreaDistance_ = static_cast<float>(
             layoutProperty->GetEndDeleteAreaDistance().value_or(Dimension(0, DimensionUnit::VP)).ConvertToPx());
-        if (GreatNotEqual(endDeleteAreaDistance_, 0.0) && LessNotEqual(endDeleteAreaDistance_, movableDistance)) {
+        if (GreatNotEqual(endDeleteAreaDistance_, 0.0) && LessNotEqual(endDeleteAreaDistance_, maxDeleteArea)) {
             hasEndDeleteArea_ = true;
         }
     }
