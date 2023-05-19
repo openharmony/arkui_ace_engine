@@ -1640,8 +1640,7 @@ HWTEST_F(ListTestNg, ListItemAttrSwiperTest010, TestSize.Level1)
 
     auto childNode = GetChildGeometryNode(itemPattern->GetHost(), 1);
     auto childRect = childNode->GetFrameRect();
-    auto factor = ListItemPattern::CalculateFriction(
-        MOVE_DELTA3 / (DEFAULT_ROOT_WIDTH - START_NODE_SIZE - static_cast<float>(DELETE_AREA_DISTANCE.ConvertToPx())));
+    auto factor = ListItemPattern::CalculateFriction(MOVE_DELTA3 / (DEFAULT_ROOT_WIDTH - START_NODE_SIZE));
     float expOffset = factor * MOVE_DELTA3 + MOVE_DELTA2 + static_cast<float>(DELETE_AREA_DISTANCE.ConvertToPx());
     EXPECT_FLOAT_EQ(childRect.GetX(), expOffset);
     auto startNode = GetChildGeometryNode(itemPattern->GetHost(), 0);
@@ -1680,8 +1679,7 @@ HWTEST_F(ListTestNg, ListItemAttrSwiperTest011, TestSize.Level1)
 
     auto childNode = GetChildGeometryNode(itemPattern->GetHost(), 1);
     auto childRect = childNode->GetFrameRect();
-    auto factor = ListItemPattern::CalculateFriction(
-        MOVE_DELTA3 / (DEFAULT_ROOT_WIDTH - END_NODE_SIZE - static_cast<float>(DELETE_AREA_DISTANCE.ConvertToPx())));
+    auto factor = ListItemPattern::CalculateFriction(MOVE_DELTA3 / (DEFAULT_ROOT_WIDTH - END_NODE_SIZE));
     float expOffset =
         factor * -MOVE_DELTA3 - MOVE_DELTA2 - MOVE_DELTA3 - static_cast<float>(DELETE_AREA_DISTANCE.ConvertToPx());
     EXPECT_FLOAT_EQ(childRect.GetX(), expOffset);

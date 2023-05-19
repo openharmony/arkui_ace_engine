@@ -440,7 +440,7 @@ void ListItemPattern::StartSpringMotion(float start, float end, float velocity)
     });
 }
 
-void ListItemPattern::DoDeleteAnimation(const GestureEvent& info, const OnDeleteEvent& onDelete, bool isRightDelete)
+void ListItemPattern::DoDeleteAnimation(const OnDeleteEvent& onDelete, bool isRightDelete)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -449,29 +449,15 @@ void ListItemPattern::DoDeleteAnimation(const GestureEvent& info, const OnDelete
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     float itemWidth = GetContentSize().CrossSize(axis_);
-    float friction = GetFriction();
 
     AnimationOption option = AnimationOption();
     option.SetDuration(DELETE_ANIMATION_DURATION);
     option.SetCurve(Curves::FRICTION);
     option.SetFillMode(FillMode::FORWARDS);
-    context->OpenImplicitAnimation(option, option.GetCurve(),
-        [weak = AceType::WeakClaim(this), onDelete = onDelete, info = info, friction = friction,
-            renderContext = renderContext, isRightDelete = isRightDelete]() {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            onDelete();
-            float end = 0.0f;
-            if (isRightDelete) {
-                pattern->swiperIndex_ = ListItemSwipeIndex::SWIPER_START;
-                end = pattern->startNodeSize_ * static_cast<int32_t>(pattern->swiperIndex_);
-            } else {
-                pattern->swiperIndex_ = ListItemSwipeIndex::SWIPER_END;
-                end = pattern->endNodeSize_ * static_cast<int32_t>(pattern->swiperIndex_);
-            }
-            pattern->StartSpringMotion(pattern->curOffset_, end, info.GetMainVelocity() * friction);
-        });
+    context->OpenImplicitAnimation(option, option.GetCurve(), nullptr);
+    swiperIndex_ = isRightDelete ? ListItemSwipeIndex::SWIPER_START : ListItemSwipeIndex::SWIPER_END;
     curOffset_ = isRightDelete ? itemWidth : -itemWidth;
+    onDelete();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     context->FlushUITasks();
     context->CloseImplicitAnimation();
@@ -498,7 +484,7 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
             if (!useStartDefaultDeleteAnimation_) {
                 startOnDelete();
             } else {
-                DoDeleteAnimation(info, startOnDelete, true);
+                DoDeleteAnimation(startOnDelete, true);
                 return;
             }
         }
@@ -517,7 +503,7 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
             if (!useEndDefaultDeleteAnimation_) {
                 endOnDelete();
             } else {
-                DoDeleteAnimation(info, endOnDelete, false);
+                DoDeleteAnimation(endOnDelete, false);
                 return;
             }
         }
