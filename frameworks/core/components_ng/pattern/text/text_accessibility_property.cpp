@@ -40,12 +40,7 @@ std::string TextAccessibilityProperty::GetText() const
 
 bool TextAccessibilityProperty::IsSelected() const
 {
-    auto frameNode = host_.Upgrade();
-    CHECK_NULL_RETURN(frameNode, false);
-    auto textPattern = frameNode->GetPattern<TextPattern>();
-    CHECK_NULL_RETURN(textPattern, false);
-    const auto& textSelector = textPattern->GetTextSelector();
-    return textSelector.IsValid();
+    return isSelected_;
 }
 
 int32_t TextAccessibilityProperty::GetTextSelectionStart() const
