@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,8 +23,10 @@
 #include "base/geometry/ng/rect_t.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components_ng/base/geometry_node.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/option/option_layout_algorithm.h"
+#include "core/components_ng/pattern/option/option_pattern.h"
 #include "core/components_ng/property/geometry_property.h"
 #include "core/components_ng/property/measure_property.h"
 
@@ -62,5 +64,37 @@ HWTEST_F(PanelOptionTestNg, PanelOptionTestNg001, TestSize.Level1)
     rosenRefPtr->margin_ = nullptr;
     OHOS::Ace::NG::LayoutWrapper* rosenLayoutWrapper = new LayoutWrapper(nullptr, rosenRefPtr, rosenMakeRefPtr);
     rosenOptionLayoutAlgorithm.Layout(rosenLayoutWrapper);
+}
+
+/**
+ * @tc.name: PerformActionTest001
+ * @tc.desc: Option Accessibility PerformAction test Select and ClearSelection.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanelOptionTestNg, PerformActionTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create option frameNode and pattern, set callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG,
+        ViewStackProcessor::GetInstance()->ClaimNodeId(), []() { return AceType::MakeRefPtr<OptionPattern>(0); });
+    ASSERT_NE(frameNode, nullptr);
+    auto optionPattern = frameNode->GetPattern<OptionPattern>();
+    ASSERT_NE(optionPattern, nullptr);
+    optionPattern->SetAccessibilityAction();
+
+    /**
+     * @tc.steps: step2. Get option accessibilityProperty to call callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto optionAccessibilityProperty = frameNode->GetAccessibilityProperty<OptionAccessibilityProperty>();
+    ASSERT_NE(optionAccessibilityProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. Call the callback function in optionAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    EXPECT_TRUE(optionAccessibilityProperty->ActActionSelect());
 }
 } // namespace OHOS::Ace::NG

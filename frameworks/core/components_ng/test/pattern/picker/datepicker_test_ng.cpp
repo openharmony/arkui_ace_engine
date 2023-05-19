@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2239,5 +2239,75 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest016, TestSize.Level1)
     dataPickerRowLayoutProperty->UpdateStartDate(startDate);
     dataPickerRowLayoutProperty->UpdateEndDate(endDate);
     pickerPattern->AdjustLunarStartEndDate();
+}
+
+/**
+ * @tc.name: PerformActionTest001
+ * @tc.desc: DatePicker Accessibility PerformAction test ScrollForward and ScrollBackward.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, PerformActionTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create datePicker and initialize related properties.
+     */
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    DatePickerModelNG::GetInstance()->CreateDatePicker(theme);
+    auto pickerFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(pickerFrameNode, nullptr);
+    pickerFrameNode->MarkModifyDone();
+
+    /**
+     * @tc.steps: step2. Get datePickerColumn frameNode and pattern, set callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto firstChild = AceType::DynamicCast<FrameNode>(pickerFrameNode->GetFirstChild());
+    ASSERT_NE(firstChild, nullptr);
+    auto columnNode = AceType::DynamicCast<FrameNode>(firstChild->GetChildAtIndex(1));
+    ASSERT_NE(columnNode, nullptr);
+    auto columnPattern = columnNode->GetPattern<DatePickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+    auto options = columnPattern->GetOptions();
+    options[columnNode].clear();
+    columnPattern->SetOptions(options);
+    columnPattern->SetAccessibilityAction();
+
+    /**
+     * @tc.steps: step3. Get datePickerColumn accessibilityProperty to call callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto accessibilityProperty = columnNode->GetAccessibilityProperty<DatePickerColumnAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+
+    /**
+     * @tc.steps: step4. When datePickerColumn can not move, call the callback function in datePickerColumn
+     *                   accessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    EXPECT_TRUE(accessibilityProperty->ActActionScrollForward());
+    EXPECT_TRUE(accessibilityProperty->ActActionScrollBackward());
+
+    /**
+     * @tc.steps: step5. When datePickerColumn can move, call the callback function in datePickerColumn
+     *                   accessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    options = columnPattern->GetOptions();
+    options[columnNode].clear();
+    for (auto& Value : DEFAULT_VALUE) {
+        options[columnNode].emplace_back(std::to_string(Value));
+    }
+    columnPattern->SetOptions(options);
+    columnPattern->SetCurrentIndex(1);
+    EXPECT_TRUE(accessibilityProperty->ActActionScrollForward());
+    options = columnPattern->GetOptions();
+    options[columnNode].clear();
+    for (auto& Value : DEFAULT_VALUE) {
+        options[columnNode].emplace_back(std::to_string(Value));
+    }
+    columnPattern->SetOptions(options);
+    columnPattern->SetCurrentIndex(1);
+    EXPECT_TRUE(accessibilityProperty->ActActionScrollBackward());
 }
 } // namespace OHOS::Ace::NG
