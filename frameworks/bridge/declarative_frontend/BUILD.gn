@@ -274,6 +274,7 @@ template("declarative_js_engine") {
 
       # Models implemenations for classic fw
       "jsview/models/action_sheet_model_impl.cpp",
+      "jsview/models/alert_dialog_model_impl.cpp",
       "jsview/models/animator_model_impl.cpp",
       "jsview/models/badge_model_impl.cpp",
       "jsview/models/blank_model_impl.cpp",
