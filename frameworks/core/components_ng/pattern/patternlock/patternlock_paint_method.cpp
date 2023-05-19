@@ -29,8 +29,9 @@ void PatternLockPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(patternlockModifier_);
     GetThemeProp();
     auto paintProperty = DynamicCast<PatternLockPaintProperty>(paintWrapper->GetPaintProperty());
+
     CHECK_NULL_VOID(paintProperty);
-    sideLength_ = paintProperty->GetSideLength().value_or(sideLength_);
+    sideLength_ = paintWrapper->GetContentSize().Width();
     circleRadius_ = paintProperty->GetCircleRadius().value_or(circleRadius_);
     regularColor_ = paintProperty->GetRegularColor().value_or(regularColor_);
     selectedColor_ = paintProperty->GetSelectedColor().value_or(selectedColor_);
@@ -38,7 +39,7 @@ void PatternLockPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     pathColor_ = paintProperty->GetPathColor().value_or(pathColor_);
     pathStrokeWidth_ = paintProperty->GetPathStrokeWidth().value_or(pathStrokeWidth_);
 
-    patternlockModifier_->SetSideLength(sideLength_.ConvertToPx());
+    patternlockModifier_->SetSideLength(sideLength_);
     patternlockModifier_->SetCircleRadius(circleRadius_.ConvertToPx());
     patternlockModifier_->SetRegularColor(LinearColor(regularColor_));
     patternlockModifier_->SetSelectColor(LinearColor(selectedColor_));
@@ -61,5 +62,7 @@ void PatternLockPaintMethod::GetThemeProp()
     selectedColor_ = patternLockTheme->GetSelectedColor();
     activeColor_ = patternLockTheme->GetActiveColor();
     pathColor_ = patternLockTheme->GetPathColor();
+    circleRadius_ = patternLockTheme->GetCircleRadius();
+    pathStrokeWidth_ = patternLockTheme->GetPathStrokeWidth();
 }
 } // namespace OHOS::Ace::NG
