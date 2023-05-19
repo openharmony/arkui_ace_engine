@@ -182,7 +182,7 @@ public:
                     ContainerScope scope(instanceId);
                     auto context = container->GetPipelineContext();
                     CHECK_NULL_VOID_NOLOG(context);
-                    context->OnAvoidAreaChanged();
+                    context->ResetViewSafeArea();
                 },
                 TaskExecutor::TaskType::UI);
         }
@@ -1550,6 +1550,7 @@ void UIContentImpl::SetIgnoreViewSafeArea(bool ignoreViewSafeArea)
             auto pipelineContext = container->GetPipelineContext();
             CHECK_NULL_VOID(pipelineContext);
             pipelineContext->SetIgnoreViewSafeArea(ignoreSafeArea);
+            pipelineContext->ResetViewSafeArea();
         },
         TaskExecutor::TaskType::UI);
 }
