@@ -1264,8 +1264,13 @@ void OverlayManager::PlaySheetTransition(RefPtr<FrameNode> sheetNode, bool isTra
     CHECK_NULL_VOID(context);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto pageNode = pipeline->GetStageManager()->GetLastPage();
-    auto pageHeight = pageNode->GetGeometryNode()->GetFrameSize().Height();
+    auto stageManager = pipeline->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    auto pageNode = stageManager->GetLastPage();
+    CHECK_NULL_VOID(pageNode);
+    auto geometryNode = pageNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto pageHeight = geometryNode->GetFrameSize().Height();
     if (isTransitionIn) {
         auto offset = pageHeight - sheetHeight_;
         if (isFirstTransition) {
@@ -1310,8 +1315,13 @@ void OverlayManager::ComputeSheetOffset(NG::SheetStyle& sheetStyle)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto pageNode = pipeline->GetStageManager()->GetLastPage();
-    auto pageHeight = pageNode->GetGeometryNode()->GetFrameSize().Height();
+    auto stageManager = pipeline->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    auto pageNode = stageManager->GetLastPage();
+    CHECK_NULL_VOID(pageNode);
+    auto geometryNode = pageNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto pageHeight = geometryNode->GetFrameSize().Height();
     auto largeHeight = pageHeight - SHEET_BLANK_MINI_HEIGHT.ConvertToPx();
     if (sheetStyle.sheetMode.has_value()) {
         if (sheetStyle.sheetMode == SheetMode::MEDIUM) {
