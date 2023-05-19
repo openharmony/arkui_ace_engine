@@ -1177,8 +1177,16 @@ LunarDate DatePickerPattern::GetCurrentLunarDateByMonthDaysColumn(uint32_t lunar
     return lunarResult;
 }
 
-void DatePickerPattern::AdjustLunarDate(LunarDate& date) const
+void DatePickerPattern::AdjustLunarDate(LunarDate& date)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    auto dataPickerRowLayoutProperty = host->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    CHECK_NULL_VOID(dataPickerRowLayoutProperty);
+    startDateLunar_ = dataPickerRowLayoutProperty->GetStartDate().value_or(SolarToLunar(startDateSolar_));
+    endDateLunar_ = dataPickerRowLayoutProperty->GetEndDate().value_or(SolarToLunar(endDateSolar_));
+
     if (LunarDateCompare(date, startDateLunar_) < 0) {
         date = startDateLunar_;
         return;
