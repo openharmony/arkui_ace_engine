@@ -22,6 +22,7 @@
 #include "base/utils/utils.h"
 #include "core/components/custom_paint/rosen_render_custom_paint.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_layout_property.h"
 #include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
@@ -179,6 +180,13 @@ float TitleBarLayoutAlgorithm::MeasureMenu(LayoutWrapper* layoutWrapper, const R
     auto menuWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_RETURN(menuWrapper, 0.0f);
     auto constraint = titleBarLayoutProperty->CreateChildConstraint();
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(titleBarNode->GetParent());
+    CHECK_NULL_RETURN(navBarNode, 0.0f);
+    auto isCustomMenu = navBarNode->GetPrevMenuIsCustomValue(false);
+    if (isCustomMenu) {
+        menuWrapper->Measure(constraint);
+        return menuWrapper->GetGeometryNode()->GetFrameSize().Width();
+    }
     auto menuItemNum = static_cast<int32_t>(menuNode->GetChildren().size());
     float menuWidth = 0.0f;
     if (menuItemNum >= MAX_MENU_ITEMS_NUM) {
