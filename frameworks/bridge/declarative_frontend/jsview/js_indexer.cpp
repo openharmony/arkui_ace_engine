@@ -85,6 +85,11 @@ void JSIndexer::Create(const JSCallbackInfo& args)
                 length = static_cast<uint32_t>(arrayVal->GetArraySize());
             }
         }
+        if (length <= 0) {
+            LOGE("info is invalid");
+            return;
+        }
+
         std::vector<std::string> indexerArray;
         for (size_t i = 0; i < length; i++) {
             auto value = arrayVal->GetArrayItem(i);
@@ -114,12 +119,7 @@ void JSIndexer::Create(const JSCallbackInfo& args)
             }
             return;
         }
-        if (length <= 0) {
-            LOGE("info is invalid");
-            return;
-        }
-        IndexerModel::GetInstance()->SetFocusable(true);
-        IndexerModel::GetInstance()->SetFocusNode(true);
+
         args.ReturnSelf();
     }
 }
@@ -202,27 +202,24 @@ void JSIndexer::SetUsingPopup(bool state)
 void JSIndexer::SetSelectedFont(const JSCallbackInfo& args)
 {
     if (args.Length() >= 1 && args[0]->IsObject()) {
-        TextStyle textStyle;
-        GetFontContent(args, textStyle);
-        IndexerModel::GetInstance()->SetSelectedFont(textStyle);
+        auto getTextStyleFunc = [&args](TextStyle& textStyle) { GetFontContent(args, textStyle); };
+        IndexerModel::GetInstance()->SetSelectedFont(getTextStyleFunc);
     }
 }
 
 void JSIndexer::SetPopupFont(const JSCallbackInfo& args)
 {
     if (args.Length() >= 1 && args[0]->IsObject()) {
-        TextStyle textStyle;
-        GetFontContent(args, textStyle);
-        IndexerModel::GetInstance()->SetPopupFont(textStyle);
+        auto getTextStyleFunc = [&args](TextStyle& textStyle) { GetFontContent(args, textStyle); };
+        IndexerModel::GetInstance()->SetPopupFont(getTextStyleFunc);
     }
 }
 
 void JSIndexer::SetFont(const JSCallbackInfo& args)
 {
     if (args.Length() >= 1 && args[0]->IsObject()) {
-        TextStyle textStyle;
-        GetFontContent(args, textStyle);
-        IndexerModel::GetInstance()->SetFont(textStyle);
+        auto getTextStyleFunc = [&args](TextStyle& textStyle) { GetFontContent(args, textStyle); };
+        IndexerModel::GetInstance()->SetFont(getTextStyleFunc);
     }
 }
 
