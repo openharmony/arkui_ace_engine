@@ -185,6 +185,7 @@ RefPtr<AceType> JSViewFullUpdate::CreateViewNode()
     auto appearFunc = [weak = AceType::WeakClaim(this)] {
         auto jsView = weak.Upgrade();
         CHECK_NULL_VOID(jsView);
+        ContainerScope scope(jsView->GetInstanceId());
         ACE_SCORING_EVENT("Component[" + jsView->viewId_ + "].Appear");
         if (jsView->viewNode_.Invalid() && jsView->jsViewFunction_) {
             jsView->jsViewFunction_->ExecuteAppear();
@@ -193,7 +194,9 @@ RefPtr<AceType> JSViewFullUpdate::CreateViewNode()
 
     auto renderFunction = [weak = AceType::WeakClaim(this)]() -> RefPtr<AceType> {
         auto jsView = weak.Upgrade();
-        return jsView ? jsView->InternalRender() : nullptr;
+        CHECK_NULL_RETURN(jsView, nullptr);
+        ContainerScope scope(jsView->GetInstanceId());
+        return jsView->InternalRender();
     };
 
     auto pageTransitionFunction = [weak = AceType::WeakClaim(this)]() {
@@ -202,6 +205,7 @@ RefPtr<AceType> JSViewFullUpdate::CreateViewNode()
             return;
         }
         {
+            ContainerScope scope(jsView->GetInstanceId());
             ACE_SCORING_EVENT("Component[" + jsView->viewId_ + "].Transition");
             jsView->jsViewFunction_->ExecuteTransition();
         }
@@ -217,6 +221,7 @@ RefPtr<AceType> JSViewFullUpdate::CreateViewNode()
     auto removeFunction = [weak = AceType::WeakClaim(this)]() -> void {
         auto jsView = weak.Upgrade();
         if (jsView && jsView->jsViewFunction_) {
+            ContainerScope scope(jsView->GetInstanceId());
             jsView->jsViewFunction_->ExecuteDisappear();
         }
     };
