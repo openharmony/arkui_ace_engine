@@ -93,7 +93,7 @@ bool TextFieldAccessibilityProperty::IsSelected() const
     CHECK_NULL_RETURN(frameNode, false);
     auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(textFieldPattern, false);
-    return textFieldPattern->GetTextSelector().IsValid();
+    return textFieldPattern->IsSelected();
 }
 
 int32_t TextFieldAccessibilityProperty::GetTextSelectionStart() const

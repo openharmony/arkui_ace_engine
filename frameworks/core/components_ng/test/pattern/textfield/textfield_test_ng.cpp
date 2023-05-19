@@ -2266,12 +2266,10 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldAccessibilityPropertyGetTextSelection0
     auto textFieldAccessibilityProperty = frameNode->GetAccessibilityProperty<TextFieldAccessibilityProperty>();
     ASSERT_NE(textFieldAccessibilityProperty, nullptr);
 
-    EXPECT_FALSE(textFieldAccessibilityProperty->IsSelected());
     EXPECT_EQ(textFieldAccessibilityProperty->GetTextSelectionStart(), TEXT_SELECTION_ERR);
     EXPECT_EQ(textFieldAccessibilityProperty->GetTextSelectionEnd(), TEXT_SELECTION_ERR);
 
     textFieldPattern->textSelector_.Update(TEXT_SELECTION_START, TEXT_SELECTION_END);
-    EXPECT_TRUE(textFieldAccessibilityProperty->IsSelected());
     EXPECT_EQ(textFieldAccessibilityProperty->GetTextSelectionStart(), TEXT_SELECTION_START);
     EXPECT_EQ(textFieldAccessibilityProperty->GetTextSelectionEnd(), TEXT_SELECTION_END);
 }
@@ -3415,5 +3413,32 @@ HWTEST_F(TextFieldPatternTestNg, PerformActionTest003, TestSize.Level1)
     EXPECT_TRUE(textFieldAccessibilityProperty->ActActionMoveText(0, false));
     EXPECT_TRUE(textFieldAccessibilityProperty->ActActionMoveText(0, true));
     EXPECT_TRUE(textFieldAccessibilityProperty->ActActionMoveText(1, true));
+}
+
+/**
+ * @tc.name: TextFieldAccessibilityPropertyIsSelected001
+ * @tc.desc: Test text is selected.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextFieldAccessibilityPropertyIsSelected001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode and get accessibilityProperty
+     * @tc.expected: FrameNode and accessibilityProperty is not null
+     */
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXTINPUT_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+
+    auto textFieldAccessibilityProperty = frameNode->GetAccessibilityProperty<TextFieldAccessibilityProperty>();
+    ASSERT_NE(textFieldAccessibilityProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. Frame request focus
+     * @tc.expected: Default isSelected is false, after reauesting focus, isSelected is true
+     */
+    EXPECT_FALSE(textFieldAccessibilityProperty->IsSelected());
+    frameNode->GetOrCreateFocusHub()->currentFocus_ = true;
+    EXPECT_TRUE(textFieldAccessibilityProperty->IsSelected());
 }
 } // namespace OHOS::Ace::NG

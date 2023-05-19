@@ -2395,12 +2395,10 @@ HWTEST_F(TextTestNg, TextAccessibilityPropertyIsSelected001, TestSize.Level1)
     TextModelNG textModel;
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-    auto textPattern = frameNode->GetPattern<TextPattern>();
-    ASSERT_NE(textPattern, nullptr);
     auto textAccessibilityProperty = frameNode->GetAccessibilityProperty<TextAccessibilityProperty>();
     ASSERT_NE(textAccessibilityProperty, nullptr);
     EXPECT_FALSE(textAccessibilityProperty->IsSelected());
-    textPattern->textSelector_.Update(0, TEXT_SIZE_INT);
+    textAccessibilityProperty->SetSelected(true);
     EXPECT_TRUE(textAccessibilityProperty->IsSelected());
 }
 
