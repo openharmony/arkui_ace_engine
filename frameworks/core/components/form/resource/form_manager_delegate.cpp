@@ -396,13 +396,13 @@ void FormManagerDelegate::OnActionEventHandle(const std::string& action)
     }
 }
 
-void FormManagerDelegate::AddUntrustFormCallback(const UntrustFormCallback& callback)
+void FormManagerDelegate::AddUnTrustFormCallback(const UnTrustFormCallback& callback)
 {
     if (!callback || state_ == State::RELEASED) {
         LOGE("callback is null or has released");
         return;
     }
-    untrustFormCallback_ = callback;
+    unTrustFormCallback_ = callback;
 }
 
 bool FormManagerDelegate::ParseAction(const std::string &action, const std::string& type, AAFwk::Want &want)
@@ -648,7 +648,7 @@ void FormManagerDelegate::OnFormError(const std::string& code, const std::string
             ReAddForm();
             break;
         case FORM_NOT_TRUST_CODE:
-            HandleUntrustFormCallback();
+            HandleUnTrustFormCallback();
             break;
         default:
             LOGE("OnFormError, not RENDER_DEAD condition");
@@ -658,11 +658,11 @@ void FormManagerDelegate::OnFormError(const std::string& code, const std::string
     }
 }
 
-void FormManagerDelegate::HandleUntrustFormCallback()
+void FormManagerDelegate::HandleUnTrustFormCallback()
 {
-    LOGI("HandleUntrustFormCallback.");
-    if (untrustFormCallback_) {
-        untrustFormCallback_();
+    LOGI("HandleUnTrustFormCallback.");
+    if (unTrustFormCallback_) {
+        unTrustFormCallback_();
     }
 }
 

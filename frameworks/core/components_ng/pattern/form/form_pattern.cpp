@@ -95,20 +95,20 @@ void FormPattern::OnAttachToFrameNode()
     });
 }
 
-void FormPattern::HandleUntrustForm()
+void FormPattern::HandleUnTrustForm()
 {
-    LOGI("HandleUntrustForm start.");
+    LOGI("HandleUnTrustForm start.");
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (externalRenderContext_) {
         auto renderContext = DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
         CHECK_NULL_VOID(renderContext);
-        LOGI("HandleUntrustForm removeChild.");
+        LOGI("HandleUnTrustForm removeChild.");
         renderContext->RemoveChild(externalRenderContext_);
     }
 
     isUnTrust_ = true;
-    UpdateBackgroundColorWhenUntrustForm();
+    UpdateBackgroundColorWhenUnTrustForm();
     auto layoutProperty = host->GetLayoutProperty<FormLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto visible = layoutProperty->GetVisibleType().value_or(VisibleType::VISIBLE);
@@ -121,10 +121,10 @@ void FormPattern::HandleUntrustForm()
     parent->MarkNeedSyncRenderTree();
     parent->RebuildRenderContextTree();
     host->GetRenderContext()->RequestNextFrame();
-    LOGI("HandleUntrustForm end.");
+    LOGI("HandleUnTrustForm end.");
 }
 
-void FormPattern::UpdateBackgroundColorWhenUntrustForm()
+void FormPattern::UpdateBackgroundColorWhenUnTrustForm()
 {
     if (!isUnTrust_) {
         return;
@@ -136,10 +136,10 @@ void FormPattern::UpdateBackgroundColorWhenUntrustForm()
     CHECK_NULL_VOID(pipelineContext);
     auto formTheme = pipelineContext->GetTheme<FormTheme>();
     CHECK_NULL_VOID(formTheme);
-    Color untrustBackgroundColor = formTheme->GetUntrustBackgroundColor();
+    Color unTrustBackgroundColor = formTheme->GetUnTrustBackgroundColor();
     LOGI("UpdateBackgroundColor: %{public}s when isUnTrust.",
-        untrustBackgroundColor.ColorToString().c_str());
-    host->GetRenderContext()->UpdateBackgroundColor(untrustBackgroundColor);
+        unTrustBackgroundColor.ColorToString().c_str());
+    host->GetRenderContext()->UpdateBackgroundColor(unTrustBackgroundColor);
 }
 
 void FormPattern::OnRebuildFrame()
@@ -157,7 +157,7 @@ bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         return false;
     }
 
-    UpdateBackgroundColorWhenUntrustForm();
+    UpdateBackgroundColorWhenUnTrustForm();
     auto size = dirty->GetGeometryNode()->GetFrameSize();
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -382,13 +382,13 @@ void FormPattern::InitFormManagerDelegate()
             formPattern->OnActionEvent(action);
     });
 
-    formManagerBridge_->AddUntrustFormCallback(
+    formManagerBridge_->AddUnTrustFormCallback(
         [weak = WeakClaim(this), instanceID]() {
             ContainerScope scope(instanceID);
-            LOGI("HandleUntrustForm");
+            LOGI("HandleUnTrustForm");
             auto formPattern = weak.Upgrade();
             CHECK_NULL_VOID(formPattern);
-            formPattern->HandleUntrustForm();
+            formPattern->HandleUnTrustForm();
     });
 }
 

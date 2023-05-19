@@ -54,7 +54,7 @@ public:
     using OnFormSurfaceNodeCallback = std::function<void(const std::shared_ptr<Rosen::RSSurfaceNode>&)>;
     using OnFormSurfaceChangeCallback = std::function<void(float width, float height)>;
     using ActionEventHandle = std::function<void(const std::string&)>;
-    using UntrustFormCallback = std::function<void()>;
+    using UnTrustFormCallback = std::function<void()>;
 
     enum class State : char {
         WAITINGFORSIZE,
@@ -80,7 +80,7 @@ public:
     void AddFormSurfaceNodeCallback(const OnFormSurfaceNodeCallback& callback);
     void AddFormSurfaceChangeCallback(OnFormSurfaceChangeCallback&& callback);
     void AddActionEventHandle(const ActionEventHandle& callback);
-    void AddUntrustFormCallback(const UntrustFormCallback& callback);
+    void AddUnTrustFormCallback(const UnTrustFormCallback& callback);
     void OnActionEventHandle(const std::string& action);
     void SetAllowUpdate(bool allowUpdate);
     void OnActionEvent(const std::string& action);
@@ -113,7 +113,7 @@ private:
     void OnFormUpdate(const std::string& param);
     void OnFormError(const std::string& param);
     void ReAddForm();
-    void HandleUntrustFormCallback();
+    void HandleUnTrustFormCallback();
     bool ParseAction(const std::string& action, const std::string& type, AAFwk::Want& want);
 
     onFormAcquiredCallbackForJava onFormAcquiredCallbackForJava_;
@@ -125,7 +125,7 @@ private:
     OnFormSurfaceNodeCallback onFormSurfaceNodeCallback_;
     OnFormSurfaceChangeCallback onFormSurfaceChangeCallback_;
     ActionEventHandle actionEventHandle_;
-    UntrustFormCallback untrustFormCallback_;
+    UnTrustFormCallback unTrustFormCallback_;
 
     State state_ { State::WAITINGFORSIZE };
 #ifdef OHOS_STANDARD_SYSTEM

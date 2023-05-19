@@ -44,7 +44,7 @@ public:
 
     void OnLoadEvent();
 
-    void HandleUntrustForm();
+    void HandleUnTrustForm();
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
@@ -91,7 +91,7 @@ private:
     void FireOnLoadEvent() const;
     void FireOnErrorEvent(const std::string& code, const std::string& msg) const;
     void FireOnUninstallEvent(int64_t id) const;
-    void UpdateBackgroundColorWhenUntrustForm();
+    void UpdateBackgroundColorWhenUnTrustForm();
 
     bool ISAllowUpdate() const;
     void EnableDrag();

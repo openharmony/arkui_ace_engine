@@ -42,7 +42,7 @@ void FormManagerDelegate::AddFormErrorCallback(const OnFormErrorCallback& callba
 
 void FormManagerDelegate::AddFormUninstallCallback(const OnFormUninstallCallback& callback) {}
 
-void FormManagerDelegate::AddUntrustFormCallback(const UntrustFormCallback& callback) {}
+void FormManagerDelegate::AddUnTrustFormCallback(const UnTrustFormCallback& callback) {}
 
 void FormManagerDelegate::OnActionEvent(const std::string& action) {}
 

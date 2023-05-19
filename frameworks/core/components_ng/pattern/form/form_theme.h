@@ -61,22 +61,22 @@ public:
                 return;
             }
 
-            theme->untrustBackgroundColor_ = formPattern->GetAttr<Color>("form_untrust_background_color", Color::RED);
+            theme->unTrustBackgroundColor_ = formPattern->GetAttr<Color>("form_untrust_background_color", Color::RED);
         }
     };
 
     ~FormTheme() override = default;
 
-    const Color& GetUntrustBackgroundColor() const
+    const Color& GetUnTrustBackgroundColor() const
     {
-        return untrustBackgroundColor_;
+        return unTrustBackgroundColor_;
     }
 
 protected:
     FormTheme() = default;
 
 private:
-    Color untrustBackgroundColor_ = Color::BLUE;
+    Color unTrustBackgroundColor_ = Color::BLUE;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FORM_FORM_THEME_H
