@@ -15,28 +15,40 @@
 
 #include "interfaces/inner_api/ace/ui_window.h"
 
-#include <dlfcn.h>
+#include "utils.h"
 
 namespace OHOS::Ace::NG {
+
+#if defined(WINDOWS_PLATFORM)
+constexpr char ACE_LIB_NAME[] = "libace.dll";
+#elif defined(MAC_PLATFORM)
+constexpr char ACE_LIB_NAME[] = "libace.dylib";
+#elif defined(LINUX_PLATFORM)
+constexpr char ACE_LIB_NAME[] = "libace.so";
+#else
+constexpr char ACE_LIB_NAME[] = "libace.z.so";
+#endif
+
 using CreateWindowExtensionFunc = std::shared_ptr<UIWindow>* (*)(const std::shared_ptr<AbilityRuntime::Context>&,
     const sptr<Rosen::ISession>&);
 constexpr char CREATE_WINDOW_EXTENSION_FUNC[] = "OHOS_ACE_CreateWindowExtension";
 
-std::shared_ptr<UIWindow> UIWindow::CreateWindowExtension(const std::shared_ptr<AbilityRuntime::Context>& context,
-    const sptr<Rosen::ISession>& iSession)
+std::shared_ptr<UIWindow> UIWindow::CreateWindowExtension(
+    const std::shared_ptr<AbilityRuntime::Context>& context, const sptr<Rosen::ISession>& iSession)
 {
-    void* handle = dlopen("libace.z.so", RTLD_LAZY);
+    LIBHANDLE handle = LOADLIB(ACE_LIB_NAME);
     if (handle == nullptr) {
         return nullptr;
     }
 
-    auto entry = reinterpret_cast<CreateWindowExtensionFunc>(dlsym(handle, CREATE_WINDOW_EXTENSION_FUNC));
-    dlclose(handle);
+    auto entry = reinterpret_cast<CreateWindowExtensionFunc>(LOADSYM(handle, CREATE_WINDOW_EXTENSION_FUNC));
     if (entry == nullptr) {
+        FREELIB(handle);
         return nullptr;
     }
 
     auto uiWindowPtr = entry(context, iSession);
+    FREELIB(handle);
     if (uiWindowPtr == nullptr) {
         return nullptr;
     }

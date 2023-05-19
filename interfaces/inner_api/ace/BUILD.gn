@@ -21,8 +21,26 @@ config("uicontent_config") {
     "${ace_root}/interfaces/frameworks",
     "${ace_root}/interfaces/inner_api/ace",
     "//base/notification/common_event_service/interfaces/inner_api",
+    "//foundation/graphic/graphic_2d/rosen/modules/platform/utils",
   ]
-  defines = uicast_configs.uicast_defines
+  if (use_mingw_win) {
+    defines = [
+      "PREVIEW",
+      "WINDOWS_PLATFORM",
+    ]
+  } else if (use_mac) {
+    defines = [
+      "PREVIEW",
+      "MAC_PLATFORM",
+    ]
+  } else if (use_linux) {
+    defines = [
+      "PREVIEW",
+      "LINUX_PLATFORM",
+    ]
+  } else {
+    defines = uicast_configs.uicast_defines
+  }
 }
 
 ohos_shared_library("ace_uicontent") {
@@ -38,17 +56,16 @@ ohos_shared_library("ace_uicontent") {
     "${ace_root}/interfaces/inner_api/ace/ui_window.cpp",
   ]
 
-  if (defined(uicast_configs.uicast_enable)) {
+  if (!use_mingw_win && !use_mac && !use_linux &&
+      defined(uicast_configs.uicast_enable)) {
     sources +=
         [ "${ace_root}/interfaces/inner_api/ace/uicast/uicast_subscriber.cpp" ]
+    external_deps = [
+      "ability_base:want",
+      "common_event_service:cesfwk_innerkits",
+      "hilog_native:libhilog",
+    ]
   }
-
-  external_deps = [
-    "ability_base:want",
-    "common_event_service:cesfwk_innerkits",
-    "hilog_native:libhilog",
-    "multimedia_image_framework:image",
-  ]
 
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
