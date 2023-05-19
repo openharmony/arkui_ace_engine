@@ -118,10 +118,11 @@ void JSCheckbox::SetSelect(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have 1 or 2 arguments");
         return;
     }
-
+    bool select  = false;
     if (info.Length() > 0 && info[0]->IsBoolean()) {
-        CheckBoxModel::GetInstance()->SetSelect(info[0]->ToBoolean());
+        select = info[0]->ToBoolean();
     }
+    CheckBoxModel::GetInstance()->SetSelect(select);
     if (info.Length() > 1 && info[1]->IsFunction()) {
         ParseSelectObject(info, info[1]);
     }
@@ -275,24 +276,23 @@ void JSCheckbox::JsPadding(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
-    if (!info[0]->IsString() && !info[0]->IsNumber() && !info[0]->IsObject()) {
-        LOGE("arg is not a string, number or object.");
-        return;
-    }
-
-    NG::PaddingPropertyF oldPadding;
-    bool flag = GetOldPadding(info, oldPadding);
+    NG::PaddingPropertyF oldPadding = GetOldPadding(info);
     NG::PaddingProperty newPadding = GetNewPadding(info);
-    CheckBoxModel::GetInstance()->SetPadding(oldPadding, newPadding, flag);
+    CheckBoxModel::GetInstance()->SetPadding(oldPadding, newPadding);
 }
 
-bool JSCheckbox::GetOldPadding(const JSCallbackInfo& info, NG::PaddingPropertyF& padding)
+NG::PaddingPropertyF JSCheckbox::GetOldPadding(const JSCallbackInfo& info)
 {
+    NG::PaddingPropertyF padding;
+    padding.left = 0.0f;
+    padding.top = 0.0f;
+    padding.right = 0.0f;
+    padding.bottom = 0.0f;
     if (info[0]->IsObject()) {
         auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
         if (!argsPtrItem || argsPtrItem->IsNull()) {
             LOGE("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
-            return false;
+            return padding;
         }
         if (argsPtrItem->Contains("top") || argsPtrItem->Contains("bottom") || argsPtrItem->Contains("left") ||
             argsPtrItem->Contains("right")) {
@@ -318,25 +318,34 @@ bool JSCheckbox::GetOldPadding(const JSCallbackInfo& info, NG::PaddingPropertyF&
             padding.right = rightDimen.ConvertToPx();
             padding.top = topDimen.ConvertToPx();
             padding.bottom = bottomDimen.ConvertToPx();
-            return true;
+            return padding;
         }
     }
 
     CalcDimension length;
     if (!ParseJsDimensionVp(info[0], length)) {
-        return false;
+        return padding;
     }
 
     padding.left = length.ConvertToPx();
     padding.right = length.ConvertToPx();
     padding.top = length.ConvertToPx();
     padding.bottom = length.ConvertToPx();
-    return true;
+    return padding;
 }
 
 NG::PaddingProperty JSCheckbox::GetNewPadding(const JSCallbackInfo& info)
 {
     NG::PaddingProperty padding;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, padding);
+    auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
+    CHECK_NULL_RETURN(checkBoxTheme, padding);
+    auto defaultPadding = checkBoxTheme->GetDefaultPadding();
+    padding.left = NG::CalcLength(defaultPadding);
+    padding.top = NG::CalcLength(defaultPadding);
+    padding.right = NG::CalcLength(defaultPadding);
+    padding.bottom = NG::CalcLength(defaultPadding);
     if (info[0]->IsObject()) {
         std::optional<CalcDimension> left;
         std::optional<CalcDimension> right;
@@ -348,28 +357,28 @@ NG::PaddingProperty JSCheckbox::GetNewPadding(const JSCallbackInfo& info)
         if (ParseJsDimensionVp(paddingObj->GetProperty("left"), leftDimen)) {
             left = leftDimen;
             if (left.has_value()) {
-                padding.left = NG::CalcLength(left.value().IsNonNegative() ? left.value() : Dimension());
+                padding.left = NG::CalcLength(left.value().IsNonNegative() ? left.value() : defaultPadding);
             }
         }
         CalcDimension rightDimen;
         if (ParseJsDimensionVp(paddingObj->GetProperty("right"), rightDimen)) {
             right = rightDimen;
             if (right.has_value()) {
-                padding.right = NG::CalcLength(right.value().IsNonNegative() ? right.value() : Dimension());
+                padding.right = NG::CalcLength(right.value().IsNonNegative() ? right.value() : defaultPadding);
             }
         }
         CalcDimension topDimen;
         if (ParseJsDimensionVp(paddingObj->GetProperty("top"), topDimen)) {
             top = topDimen;
             if (top.has_value()) {
-                padding.top = NG::CalcLength(top.value().IsNonNegative() ? top.value() : Dimension());
+                padding.top = NG::CalcLength(top.value().IsNonNegative() ? top.value() : defaultPadding);
             }
         }
         CalcDimension bottomDimen;
         if (ParseJsDimensionVp(paddingObj->GetProperty("bottom"), bottomDimen)) {
             bottom = bottomDimen;
             if (bottom.has_value()) {
-                padding.bottom = NG::CalcLength(bottom.value().IsNonNegative() ? bottom.value() : Dimension());
+                padding.bottom = NG::CalcLength(bottom.value().IsNonNegative() ? bottom.value() : defaultPadding);
             }
         }
 
@@ -378,10 +387,10 @@ NG::PaddingProperty JSCheckbox::GetNewPadding(const JSCallbackInfo& info)
 
     CalcDimension length;
     if (!ParseJsDimensionVp(info[0], length)) {
-        length.Reset();
+        length = defaultPadding;
     }
 
-    padding.SetEdges(NG::CalcLength(length.IsNonNegative() ? length : Dimension()));
+    padding.SetEdges(NG::CalcLength(length.IsNonNegative() ? length : defaultPadding));
     return padding;
 }
 } // namespace OHOS::Ace::Framework

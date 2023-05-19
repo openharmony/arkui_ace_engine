@@ -35,7 +35,7 @@ public:
     static void SelectedColor(const JSCallbackInfo& info);
     static void UnSelectedColor(const JSCallbackInfo& info);
     static void Mark(const JSCallbackInfo& info);
-    static bool GetOldPadding(const JSCallbackInfo& info, NG::PaddingPropertyF& padding);
+    static NG::PaddingPropertyF GetOldPadding(const JSCallbackInfo& info);
     static NG::PaddingProperty GetNewPadding(const JSCallbackInfo& info);
 };
 } // namespace OHOS::Ace::Framework
