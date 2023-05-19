@@ -1148,4 +1148,63 @@ HWTEST_F(IndexerTestNg, IndexerAlgorithmCoverage001, TestSize.Level1)
 
     EXPECT_TRUE(true);
 }
+
+/**
+ * @tc.name: PerformActionTest001
+ * @tc.desc: Indexer Accessibility PerformAction test Select and ClearSelection.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerTestNg, PerformActionTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create indexer and initialize related properties.
+     */
+    IndexerModelNG IndexerModelNG;
+    IndexerModelNG.Create(CREATE_ARRAY, 0);
+
+    /**
+     * @tc.steps: step2. Get indexer frameNode and child pattern, set callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto indexerPattern = frameNode->GetPattern<IndexerPattern>();
+    ASSERT_NE(indexerPattern, nullptr);
+    auto firstTextNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    ASSERT_NE(firstTextNode, nullptr);
+    auto lastTextNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild());
+    ASSERT_NE(lastTextNode, nullptr);
+    indexerPattern->SetAccessibilityAction();
+
+    /**
+     * @tc.steps: step3. Get text accessibilityProperty to call callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto firstTextaccessibilityProperty = firstTextNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(firstTextaccessibilityProperty, nullptr);
+    auto lastTextaccessibilityProperty = lastTextNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(lastTextaccessibilityProperty, nullptr);
+
+    /**
+     * @tc.steps: step4. The first child call the callback function in textAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    EXPECT_TRUE(firstTextaccessibilityProperty->ActActionSelect());
+    EXPECT_TRUE(firstTextaccessibilityProperty->ActActionClearSelection());
+
+    /**
+     * @tc.steps: step5. The last child call the callback function in textAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    EXPECT_TRUE(lastTextaccessibilityProperty->ActActionSelect());
+    EXPECT_TRUE(lastTextaccessibilityProperty->ActActionClearSelection());
+
+    /**
+     * @tc.steps: step6. The last child is not selected, call the ClearSelection callback function in
+     *                   textAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    indexerPattern->selected_ = 0;
+    EXPECT_TRUE(lastTextaccessibilityProperty->ActActionClearSelection());
+}
 } // namespace OHOS::Ace::NG
