@@ -444,7 +444,7 @@ HWTEST_F(ProgressTestNg, ProgressLayoutAlgorithm001, TestSize.Level1)
     ASSERT_NE(size, std::nullopt);
     EXPECT_EQ(progressLayoutAlgorithm->GetType(), PROGRESS_TYPE_LINEAR);
     EXPECT_EQ(progressLayoutAlgorithm->GetStrokeWidth(), DEFALUT_STROKE_WIDTH.ConvertToPx());
-    EXPECT_EQ(size->Height(), PROGRESS_COMPONENT_WIDTH);
+    EXPECT_EQ(size->Height(), DEFALUT_STROKE_WIDTH.ConvertToPx());
     EXPECT_EQ(size->Width(), PROGRESS_COMPONENT_HEIGHT);
 }
 
@@ -546,7 +546,7 @@ HWTEST_F(ProgressTestNg, LinearProgressCreator001, TestSize.Level1)
     size = progressLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
     ASSERT_NE(size, std::nullopt);
     EXPECT_EQ(progressLayoutAlgorithm->GetStrokeWidth(), STORKE_WIDTH.ConvertToPx());
-    EXPECT_EQ(size->Height(), PROGRESS_COMPONENT_HEIGHT);
+    EXPECT_EQ(size->Height(), STORKE_WIDTH.ConvertToPx());
     EXPECT_EQ(size->Width(), PROGRESS_COMPONENT_WIDTH);
 
     contentConstraint.selfIdealSize.SetWidth(LARG_PROGRESS_COMPONENT_WIDTH);
@@ -555,7 +555,7 @@ HWTEST_F(ProgressTestNg, LinearProgressCreator001, TestSize.Level1)
     ASSERT_NE(size, std::nullopt);
     EXPECT_EQ(progressLayoutAlgorithm->GetStrokeWidth(), STORKE_WIDTH.ConvertToPx());
     EXPECT_EQ(size->Height(), PROGRESS_COMPONENT_MAXSIZE_HEIGHT);
-    EXPECT_EQ(size->Width(), PROGRESS_COMPONENT_MAXSIZE_WIDTH);
+    EXPECT_EQ(size->Width(), STORKE_WIDTH.ConvertToPx());
 }
 
 /**
