@@ -111,12 +111,12 @@ void BubblePattern::HandleTouchEvent(const TouchEventInfo& info)
     }
     auto touchType = info.GetTouches().front().GetTouchType();
     auto clickPos = info.GetTouches().front().GetLocalLocation();
-    if (touchType == TouchType::UP) {
-        HandleTouchUp(clickPos);
+    if (touchType == TouchType::DOWN) {
+        HandleTouchDown(clickPos);
     }
 }
 
-void BubblePattern::HandleTouchUp(const Offset& clickPosition)
+void BubblePattern::HandleTouchDown(const Offset& clickPosition)
 {
     // TODO: need to check click position
     auto host = GetHost();
