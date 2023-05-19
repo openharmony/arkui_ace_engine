@@ -421,7 +421,7 @@ void ListItemGroupLayoutAlgorithm::LayoutListItem(LayoutWrapper* layoutWrapper,
             offset = offset + OffsetF(0, pos.second.first) + OffsetF(laneCrossOffset, 0) +
                 OffsetF(crossSize / lanes_ * laneIndex, 0);
         } else {
-            offset = offset + OffsetF(pos.second.first, 0) + OffsetF(laneCrossOffset, 0) +
+            offset = offset + OffsetF(pos.second.first, 0) + OffsetF(0, laneCrossOffset) +
                 OffsetF(0, crossSize / lanes_ * laneIndex);
         }
         SetListItemIndex(layoutWrapper, wrapper, pos.first);
