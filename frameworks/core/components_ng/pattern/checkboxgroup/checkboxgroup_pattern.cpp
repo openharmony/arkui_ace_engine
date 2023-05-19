@@ -72,6 +72,7 @@ void CheckBoxGroupPattern::OnModifyDone()
     }
     hotZoneHorizontalPadding_ = checkBoxTheme->GetHotZoneHorizontalPadding();
     hotZoneVerticalPadding_ = checkBoxTheme->GetHotZoneVerticalPadding();
+    defaultPadding_ = checkBoxTheme->GetDefaultPadding();
     InitClickEvent();
     InitTouchEvent();
     InitMouseEvent();
@@ -465,10 +466,12 @@ FocusPattern CheckBoxGroupPattern::GetFocusPattern() const
 // Set the default hot zone for the component.
 void CheckBoxGroupPattern::AddHotZoneRect()
 {
-    hotZoneOffset_.SetX(offset_.GetX() - hotZoneHorizontalPadding_.ConvertToPx());
-    hotZoneOffset_.SetY(offset_.GetY() - hotZoneVerticalPadding_.ConvertToPx());
-    hotZoneSize_.SetWidth(size_.Width() + 2 * hotZoneHorizontalPadding_.ConvertToPx());
-    hotZoneSize_.SetHeight(size_.Height() + 2 * hotZoneVerticalPadding_.ConvertToPx());
+    hotZoneOffset_.SetX(offset_.GetX() - defaultPadding_.ConvertToPx() - hotZoneHorizontalPadding_.ConvertToPx());
+    hotZoneOffset_.SetY(offset_.GetY() - defaultPadding_.ConvertToPx() - hotZoneVerticalPadding_.ConvertToPx());
+    hotZoneSize_.SetWidth(
+        size_.Width() + 2 * (defaultPadding_.ConvertToPx() + hotZoneHorizontalPadding_.ConvertToPx()));
+    hotZoneSize_.SetHeight(
+        size_.Height() + 2 * (defaultPadding_.ConvertToPx() + hotZoneVerticalPadding_.ConvertToPx()));
     DimensionRect hotZoneRegion;
     hotZoneRegion.SetSize(DimensionSize(Dimension(hotZoneSize_.Width()), Dimension(hotZoneSize_.Height())));
     hotZoneRegion.SetOffset(DimensionOffset(Dimension(hotZoneOffset_.GetX()), Dimension(hotZoneOffset_.GetY())));
@@ -503,6 +506,7 @@ void CheckBoxGroupPattern::InitializeModifierParam(CheckBoxGroupModifier::Parame
     paintParameters.hoverRadius = checkBoxTheme->GetHoverRadius();
     paintParameters.hotZoneHorizontalPadding = checkBoxTheme->GetHotZoneHorizontalPadding();
     paintParameters.hotZoneVerticalPadding = checkBoxTheme->GetHotZoneVerticalPadding();
+    paintParameters.defaultPadding = checkBoxTheme->GetDefaultPadding();
     paintParameters.shadowWidth = checkBoxTheme->GetShadowWidth();
     paintParameters.checkMarkPaintSize = checkBoxTheme->GetDefaultWidth().ConvertToPx();
     paintParameters.hoverDuration = checkBoxTheme->GetHoverDuration();

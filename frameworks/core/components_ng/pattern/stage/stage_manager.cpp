@@ -56,7 +56,7 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
                 CHECK_NULL_VOID(page);
                 auto context = PipelineContext::GetCurrentContext();
                 CHECK_NULL_VOID(context);
-                context->SetIsNeedShowFocus(false);
+                context->SetIsFocusActive(false);
                 auto pageFocusHub = page->GetFocusHub();
                 CHECK_NULL_VOID(pageFocusHub);
                 pageFocusHub->SetParentFocusable(false);
@@ -93,7 +93,7 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
             pageFocusHub->RequestFocus();
             auto context = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(context);
-            context->SetIsNeedShowFocus(false);
+            context->SetIsFocusActive(false);
         });
 }
 } // namespace
@@ -386,7 +386,7 @@ void StageManager::FirePageHide(const RefPtr<UINode>& node, PageTransitionType t
 
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID_NOLOG(context);
-    context->SetIsNeedShowFocus(false);
+    context->SetIsFocusActive(false);
 }
 
 void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType transitionType)
@@ -414,7 +414,14 @@ void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType t
 
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID_NOLOG(context);
-    context->SetIsNeedShowFocus(false);
+    context->SetIsFocusActive(false);
+#ifdef UICAST_COMPONENT_SUPPORTED
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto distributedUI = container->GetDistributedUI();
+    CHECK_NULL_VOID(distributedUI);
+    distributedUI->OnPageChanged(node->GetPageId());
+#endif
 }
 
 RefPtr<FrameNode> StageManager::GetLastPage()
@@ -426,6 +433,19 @@ RefPtr<FrameNode> StageManager::GetLastPage()
         return nullptr;
     }
     return DynamicCast<FrameNode>(children.back());
+}
+
+RefPtr<FrameNode> StageManager::GetPageById(int32_t pageId)
+{
+    CHECK_NULL_RETURN(stageNode_, nullptr);
+    const auto& children = stageNode_->GetChildren();
+    for (const auto& child : children) {
+        if (child->GetPageId() == pageId) {
+            return DynamicCast<FrameNode>(child);
+        }
+    }
+    LOGD("UITree page not found. %{public}d", pageId);
+    return nullptr;
 }
 
 void StageManager::ReloadStage()

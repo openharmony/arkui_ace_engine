@@ -66,6 +66,8 @@ enum class FocusStyleType : int32_t {
     OUTER_BORDER = 1,
     CUSTOM_BORDER = 2,
     CUSTOM_REGION = 3,
+    MATCH_ACTIVE = 4,
+    MATCH_ACTIVE_CUSTOM_REGION = 5,
 };
 
 class ACE_EXPORT FocusPaintParam : public virtual AceType {
@@ -712,11 +714,11 @@ public:
 
     std::optional<std::string> GetInspectorKey() const;
 
-    void PaintFocusState();
-    void PaintAllFocusState();
-    void ClearFocusState();
+    bool PaintFocusState(bool isNeedStateStyles = true);
+    bool PaintAllFocusState();
+    bool PaintInnerFocusState(const RoundRect& paintRect);
+    void ClearFocusState(bool isNeedStateStyles = true);
     void ClearAllFocusState();
-    void PaintInnerFocusState(const RoundRect& paintRect);
 
     void SetInnerFocusPaintRectCallback(const std::function<void(RoundRect&)>& callback)
     {
@@ -768,6 +770,8 @@ private:
     void SetScopeFocusAlgorithm();
 
     void CheckFocusStateStyle(bool onFocus);
+
+    bool IsNeedPaintFocusState();
 
     OnFocusFunc onFocusInternal_;
     OnBlurFunc onBlurInternal_;

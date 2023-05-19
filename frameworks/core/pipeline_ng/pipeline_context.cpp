@@ -127,6 +127,13 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
     CHECK_NULL_VOID(dirty);
     taskScheduler_.AddDirtyLayoutNode(dirty);
     ForceLayoutForImplicitAnimation();
+#ifdef UICAST_COMPONENT_SUPPORTED
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto distributedUI = container->GetDistributedUI();
+    CHECK_NULL_VOID(distributedUI);
+    distributedUI->AddDirtyLayoutNode(dirty->GetId());
+#endif
     hasIdleTasks_ = true;
     RequestFrame();
 }
@@ -137,6 +144,13 @@ void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
     CHECK_NULL_VOID(dirty);
     taskScheduler_.AddDirtyRenderNode(dirty);
     ForceRenderForImplicitAnimation();
+#ifdef UICAST_COMPONENT_SUPPORTED
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto distributedUI = container->GetDistributedUI();
+    CHECK_NULL_VOID(distributedUI);
+    distributedUI->AddDirtyRenderNode(dirty->GetId());
+#endif
     hasIdleTasks_ = true;
     RequestFrame();
 }
@@ -195,6 +209,16 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
                                                ? AceApplicationInfo::GetInstance().GetPackageName()
                                                : AceApplicationInfo::GetInstance().GetProcessName();
     window_->RecordFrameTime(nanoTimestamp, abilityName);
+
+#ifdef UICAST_COMPONENT_SUPPORTED
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto distributedUI = container->GetDistributedUI();
+    CHECK_NULL_VOID(distributedUI);
+    distributedUI->ApplyOneUpdate();
+    distributedUI->OnTreeUpdate();
+#endif
+
     FlushAnimation(GetTimeFromExternalTimer());
     FlushTouchEvents();
     FlushBuild();
@@ -834,6 +858,18 @@ RefPtr<FrameNode> PipelineContext::GetNavDestinationBackButtonNode()
 void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
 {
     CHECK_RUN_ON(UI);
+
+#ifdef UICAST_COMPONENT_SUPPORTED
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto distributedUI = container->GetDistributedUI();
+    CHECK_NULL_VOID(distributedUI);
+    if (distributedUI->IsSinkMode()) {
+        distributedUI->BypassEvent(point, isSubPipe);
+        return;
+    }
+#endif
+
     HandleEtsCardTouchEvent(point);
     if (uiExtensionCallback_) {
         uiExtensionCallback_(point);
@@ -844,13 +880,8 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
         scalePoint.type);
     eventManager_->SetInstanceId(GetInstanceId());
     if (scalePoint.type == TouchType::DOWN) {
-        isNeedShowFocus_ = false;
-        CHECK_NULL_VOID_NOLOG(rootNode_);
-        auto rootFocusHub = rootNode_->GetFocusHub();
-        if (rootFocusHub) {
-            rootFocusHub->ClearAllFocusState();
-        }
-
+        // Set focus state inactive while touch down event received。
+        SetIsFocusActive(false);
         LOGD("receive touch down event, first use touch test to collect touch event target");
         TouchRestrict touchRestrict { TouchRestrict::NONE };
         touchRestrict.sourceType = point.sourceType;
@@ -1035,6 +1066,11 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
 {
     CHECK_RUN_ON(UI);
 
+    if (event.button == MouseButton::RIGHT_BUTTON && event.action == MouseAction::PRESS) {
+        // Mouse right button press event set focus inactive here.
+        // Mouse left button press event will set focus inactive in touch process.
+        SetIsFocusActive(false);
+    }
     if ((event.action == MouseAction::RELEASE || event.action == MouseAction::PRESS ||
             event.action == MouseAction::MOVE) &&
         (event.button == MouseButton::LEFT_BUTTON || event.pressedButtons == MOUSE_PRESS_LEFT)) {
@@ -1079,15 +1115,15 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
     if (event.action == KeyAction::DOWN) {
         eventManager_->DispatchKeyboardShortcut(event);
     }
-    // Need update while key tab pressed
-    if (!isNeedShowFocus_ && event.action == KeyAction::DOWN &&
-        (event.IsKey({ KeyCode::KEY_TAB }) || event.IsDirectionalKey())) {
-        isNeedShowFocus_ = true;
-        auto rootFocusHub = rootNode_->GetFocusHub();
-        if (rootFocusHub) {
-            rootFocusHub->PaintAllFocusState();
-        }
+    // TAB key set focus state from inactive to active.
+    if (event.action == KeyAction::DOWN && event.IsKey({ KeyCode::KEY_TAB }) && SetIsFocusActive(true)) {
+        // if current focus node show focus state. The key event won't trigger onKeyEvent.
         return true;
+    }
+    if (!isFocusActive_) {
+        LOGD("KeyEvent: {%{public}d, %{public}d} won't be dispatched because current focus state is inactive.",
+            event.code, event.action);
+        return false;
     }
     auto lastPage = stageManager_->GetLastPage();
     auto mainNode = lastPage ? lastPage : rootNode_;

@@ -399,18 +399,7 @@ void SearchPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     float radiusBottomRight = 0.0f;
     float focusOffset = FOCUS_OFFSET.ConvertToPx();
     if (focusChoice_ == FocusChoice::SEARCH) {
-        originX = searchOffset_.GetX() + focusOffset;
-        originY = searchOffset_.GetY() + focusOffset;
-        endX = searchSize_.Width() + originX - DOUBLE * focusOffset;
-        endY = searchSize_.Height() + originY - DOUBLE * focusOffset;
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto renderContext = host->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        radiusTopLeft = renderContext->GetBorderRadius()->radiusTopLeft->ConvertToPx() - focusOffset;
-        radiusTopRight = renderContext->GetBorderRadius()->radiusTopRight->ConvertToPx() - focusOffset;
-        radiusBottomLeft = renderContext->GetBorderRadius()->radiusBottomLeft->ConvertToPx() - focusOffset;
-        radiusBottomRight = renderContext->GetBorderRadius()->radiusBottomRight->ConvertToPx() - focusOffset;
+        return;
     }
     if (focusChoice_ == FocusChoice::CANCEL_BUTTON) {
         originX = cancelButtonOffset_.GetX() + focusOffset;
@@ -442,7 +431,7 @@ void SearchPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 
 FocusPattern SearchPattern::GetFocusPattern() const
 {
-    return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION };
+    return { FocusType::NODE, true, FocusStyleType::MATCH_ACTIVE_CUSTOM_REGION };
 }
 
 void SearchPattern::RequestKeyboard()

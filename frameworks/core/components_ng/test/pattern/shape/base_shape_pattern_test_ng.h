@@ -17,6 +17,7 @@
 
 #include "gtest/gtest.h"
 
+#include "include/core/SkCanvas.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
 

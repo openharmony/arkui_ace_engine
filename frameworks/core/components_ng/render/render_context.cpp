@@ -88,5 +88,19 @@ void RenderContext::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 
 void RenderContext::FromJson(const std::unique_ptr<JsonValue>& json)
 {
+    auto borderRadius = json->GetValue("borderRadius");
+    BorderRadiusProperty brp;
+    brp.radiusTopLeft = Dimension::FromString(borderRadius->GetString("topLeft"));
+    brp.radiusTopRight = Dimension::FromString(borderRadius->GetString("topRight"));
+    brp.radiusBottomLeft = Dimension::FromString(borderRadius->GetString("bottomLeft"));
+    brp.radiusBottomRight = Dimension::FromString(borderRadius->GetString("bottomRight"));
+    UpdateBorderRadius(brp);
+    UpdateBackgroundColor(Color::ColorFromString(json->GetString("backgroundColor")));
+    auto clip = json->GetString("clip");
+    if (clip == "true" || clip == "false") {
+        UpdateClipEdge(clip == "true" ? true : false);
+    } else {
+        LOGE("UITree |ERROR| invalid clip=%{public}s", clip.c_str());
+    }
 }
 } // namespace OHOS::Ace::NG

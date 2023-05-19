@@ -16,11 +16,9 @@
 #include <string>
 
 #include "gtest/gtest.h"
-#include "core/components_ng/test/mock/render/mock_render_context.h"
 
 #define private public
 #define protected public
-
 #include "test/mock/core/common/mock_container.h"
 
 #include "base/geometry/ng/point_t.h"
@@ -30,9 +28,10 @@
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_node.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_paint_property.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
+#include "core/components_ng/test/mock/render/mock_render_context.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
-
 using namespace testing;
 using namespace testing::ext;
 
@@ -150,7 +149,7 @@ HWTEST_F(UIExtensionPatternTestNg, UIExtensionCreator003, TestSize.Level1)
 }
 
 /**
- * @tc.name: UIExtensionCreator003
+ * @tc.name: UIExtensionCreator004
  * @tc.desc: create UIExtension and run TouchTest success
  * @tc.type: FUNC
  * @tc.author:
@@ -174,7 +173,6 @@ HWTEST_F(UIExtensionPatternTestNg, UIExtensionCreator004, TestSize.Level1)
 
     auto uiExtensionNode =
         AceType::DynamicCast<UIExtensionNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
-
     TouchRestrict touchRestrict;
     TouchTestResult testResult;
 

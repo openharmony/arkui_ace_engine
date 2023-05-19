@@ -60,6 +60,8 @@ constexpr int32_t TEXT_SELECTION_END = 10;
 const Dimension CURSOR_WIDTH_SIZE = 10.0_vp;
 const Dimension DEFAULT_FONT_SIZE { 14, DimensionUnit::PX };
 const SizeF CONTENT_SIZE = SizeF(400.0, 500.0);
+const SizeF CONTENT_SIZE_FOR_SCROLL = SizeF(400.0, 20.0);
+const SizeF TEXT_SIZE_FOR_SCROLL = SizeF(400.0, 40.0);
 const OffsetF CONTENT_OFFSET = OffsetF(50.0, 60.0);
 const Axis AXIS_VERTICAL = Axis::VERTICAL;
 constexpr float CONTEXT_WIDTH_VALUE = 10.0f;
@@ -3267,5 +3269,151 @@ HWTEST_F(TextFieldPatternTestNg, PaintSelection004, TestSize.Level1)
     pattern->counterParagraph_ = std::make_shared<RSParagraph>();
     textFieldOverlayModifier.inputStyle_ = InputStyle::DEFAULT;
     textFieldOverlayModifier.PaintSelection(context);
+}
+
+/**
+ * @tc.name: PerformActionTest001
+ * @tc.desc: TextField Accessibility PerformAction test SetText, SetSelection, ClearSelection, Copy, Cut and Paste.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, PerformActionTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create textField, get textField frameNode and pattern, set callback function.
+     * @tc.expected: FrameNode and pattern is not null, related function is called.
+     */
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextInput(PLACEHOLDER, EMPTY_TEXT_VALUE);
+    auto frameNode = CreatTextFieldNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+    auto textFieldLayoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+    textFieldLayoutProperty->UpdateCopyOptions(CopyOptions::None);
+    auto textFieldAccessibilityProperty = frameNode->GetAccessibilityProperty<TextFieldAccessibilityProperty>();
+    ASSERT_NE(textFieldAccessibilityProperty, nullptr);
+    textFieldPattern->SetAccessibilityAction();
+
+    /**
+     * @tc.steps: step2. When textField is not AllowCopy, call the callback function in textFieldAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    EXPECT_TRUE(textFieldAccessibilityProperty->ActActionSetText(TEXT_CONTENT));
+    EXPECT_TRUE(textFieldAccessibilityProperty->ActActionSetSelection(TEXT_SELECTION_START, TEXT_SELECTION_END));
+    EXPECT_TRUE(textFieldAccessibilityProperty->ActActionClearSelection());
+    EXPECT_TRUE(textFieldAccessibilityProperty->ActActionCopy());
+    EXPECT_TRUE(textFieldAccessibilityProperty->ActActionCut());
+    EXPECT_TRUE(textFieldAccessibilityProperty->ActActionPaste());
+
+    /**
+     * @tc.steps: step3. When textField is AllowCopy, call the callback function in textFieldAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    textFieldLayoutProperty->UpdateCopyOptions(CopyOptions::InApp);
+    EXPECT_TRUE(textFieldAccessibilityProperty->ActActionSetText(TEXT_CONTENT));
+    EXPECT_TRUE(textFieldAccessibilityProperty->ActActionSetSelection(TEXT_SELECTION_START, TEXT_SELECTION_END));
+    EXPECT_TRUE(textFieldAccessibilityProperty->ActActionClearSelection());
+    EXPECT_TRUE(textFieldAccessibilityProperty->ActActionCopy());
+    EXPECT_TRUE(textFieldAccessibilityProperty->ActActionCut());
+    EXPECT_TRUE(textFieldAccessibilityProperty->ActActionPaste());
+}
+
+/**
+ * @tc.name: PerformActionTest002
+ * @tc.desc: TextField Accessibility PerformAction test Scroll Forward and Backward.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, PerformActionTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create textField, get textField frameNode and pattern, set callback function.
+     * @tc.expected: FrameNode and pattern is not null, related function is called.
+     */
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextInput(PLACEHOLDER, EMPTY_TEXT_VALUE);
+    auto frameNode = CreatTextFieldNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+    auto textFieldLayoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+    auto textFieldAccessibilityProperty = frameNode->GetAccessibilityProperty<TextFieldAccessibilityProperty>();
+    ASSERT_NE(textFieldAccessibilityProperty, nullptr);
+    textFieldPattern->SetAccessibilityAction();
+
+    /**
+     * @tc.steps: step2. When textField is not scrollable, call the callback function in textFieldAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    textFieldPattern->scrollable_ = false;
+    EXPECT_TRUE(textFieldAccessibilityProperty->ActActionScrollForward());
+    EXPECT_TRUE(textFieldAccessibilityProperty->ActActionScrollBackward());
+
+    /**
+     * @tc.steps: step3. When textField is scrollable and scroll distance more than scrollable distance, call the
+     *                   callback function in textFieldAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    textFieldPattern->scrollable_ = true;
+    textFieldPattern->contentRect_.SetSize(CONTENT_SIZE_FOR_SCROLL);
+    textFieldPattern->textRect_.SetSize(TEXT_SIZE_FOR_SCROLL);
+    textFieldPattern->textRect_.SetTop(CONTENT_RECT_Y_LARGE);
+    EXPECT_TRUE(textFieldAccessibilityProperty->ActActionScrollForward());
+    textFieldPattern->contentRect_.SetSize(CONTENT_SIZE_FOR_SCROLL);
+    textFieldPattern->textRect_.SetSize(TEXT_SIZE_FOR_SCROLL);
+    textFieldPattern->textRect_.SetTop(CONTENT_RECT_Y_LARGE);
+    EXPECT_TRUE(textFieldAccessibilityProperty->ActActionScrollBackward());
+
+    /**
+     * @tc.steps: step4. When textField is scrollable and scroll distance less than scrollable distance, call the
+     *                   callback function in textFieldAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    textFieldPattern->scrollable_ = true;
+    textFieldPattern->contentRect_.SetSize(CONTENT_SIZE_FOR_SCROLL);
+    textFieldPattern->textRect_.SetSize(TEXT_SIZE_FOR_SCROLL);
+    textFieldPattern->textRect_.SetTop(CONTENT_RECT_Y);
+    EXPECT_TRUE(textFieldAccessibilityProperty->ActActionScrollForward());
+    EXPECT_TRUE(textFieldAccessibilityProperty->ActActionScrollBackward());
+}
+
+/**
+ * @tc.name: PerformActionTest003
+ * @tc.desc: TextField Accessibility PerformAction test Move Text.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, PerformActionTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create textField, get textField frameNode and pattern, set callback function.
+     * @tc.expected: FrameNode and pattern is not null, related function is called.
+     */
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextInput(PLACEHOLDER, EMPTY_TEXT_VALUE);
+    auto frameNode = CreatTextFieldNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+    auto textFieldLayoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+    auto textFieldAccessibilityProperty = frameNode->GetAccessibilityProperty<TextFieldAccessibilityProperty>();
+    ASSERT_NE(textFieldAccessibilityProperty, nullptr);
+    textFieldPattern->SetAccessibilityAction();
+
+    /**
+     * @tc.steps: step2. When editingValue is null, call the callback function in textFieldAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    EXPECT_TRUE(textFieldAccessibilityProperty->ActActionMoveText(0, false));
+
+    /**
+     * @tc.steps: step3. When editingValue is not null, call the callback function in textFieldAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    textFieldPattern->UpdateEditingValue(TEXT_VALUE, static_cast<int32_t>(TEXT_VALUE.size()));
+    EXPECT_TRUE(textFieldAccessibilityProperty->ActActionMoveText(0, false));
+    EXPECT_TRUE(textFieldAccessibilityProperty->ActActionMoveText(0, true));
+    EXPECT_TRUE(textFieldAccessibilityProperty->ActActionMoveText(1, true));
 }
 } // namespace OHOS::Ace::NG

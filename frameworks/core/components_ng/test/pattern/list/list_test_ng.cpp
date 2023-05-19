@@ -3858,4 +3858,98 @@ HWTEST_F(ListTestNg, Pattern016, TestSize.Level1)
     constexpr float expectDelta = 100.f;
     EXPECT_EQ(pattern_->currentDelta_, expectDelta);
 }
+
+/**
+ * @tc.name: PerformActionTest001
+ * @tc.desc: ListItem Accessibility PerformAction test Select and ClearSelection.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, PerformActionTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create listItem and initialize related properties.
+     */
+    ListItemModelNG listItemModel;
+    listItemModel.Create();
+
+    /**
+     * @tc.steps: step2. Get listItem frameNode and pattern, set callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto listItemPattern = frameNode->GetPattern<ListItemPattern>();
+    ASSERT_NE(listItemPattern, nullptr);
+    listItemPattern->SetSelectable(false);
+    listItemPattern->SetAccessibilityAction();
+
+    /**
+     * @tc.steps: step3. Get listItem accessibilityProperty to call callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto listItemAccessibilityProperty = frameNode->GetAccessibilityProperty<ListItemAccessibilityProperty>();
+    ASSERT_NE(listItemAccessibilityProperty, nullptr);
+
+    /**
+     * @tc.steps: step4. When listItem is not Selectable, call the callback function in listItemAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    EXPECT_TRUE(listItemAccessibilityProperty->ActActionSelect());
+    EXPECT_TRUE(listItemAccessibilityProperty->ActActionClearSelection());
+
+    /**
+     * @tc.steps: step5. When listItem is Selectable, call the callback function in listItemAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    listItemPattern->SetSelectable(true);
+    EXPECT_TRUE(listItemAccessibilityProperty->ActActionSelect());
+    EXPECT_TRUE(listItemAccessibilityProperty->ActActionClearSelection());
+}
+
+/**
+ * @tc.name: PerformActionTest002
+ * @tc.desc: List Accessibility PerformAction test ScrollForward and ScrollBackward.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, PerformActionTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create list and initialize related properties.
+     */
+    ListModelNG listModelNG;
+    listModelNG.Create();
+
+    /**
+     * @tc.steps: step2. Get list frameNode and pattern, set callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto listPattern = frameNode->GetPattern<ListPattern>();
+    ASSERT_NE(listPattern, nullptr);
+    listPattern->scrollable_ = false;
+    listPattern->SetAccessibilityAction();
+
+    /**
+     * @tc.steps: step3. Get list accessibilityProperty to call callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto listAccessibilityProperty = frameNode->GetAccessibilityProperty<ListAccessibilityProperty>();
+    ASSERT_NE(listAccessibilityProperty, nullptr);
+
+    /**
+     * @tc.steps: step4. When list is not Scrollable, call the callback function in listAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    EXPECT_TRUE(listAccessibilityProperty->ActActionScrollForward());
+    EXPECT_TRUE(listAccessibilityProperty->ActActionScrollBackward());
+
+    /**
+     * @tc.steps: step5. When list is Scrollable, call the callback function in listAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    listPattern->scrollable_ = true;
+    EXPECT_TRUE(listAccessibilityProperty->ActActionScrollForward());
+    EXPECT_TRUE(listAccessibilityProperty->ActActionScrollBackward());
+}
 } // namespace OHOS::Ace::NG

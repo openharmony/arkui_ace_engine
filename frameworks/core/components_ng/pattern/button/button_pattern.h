@@ -66,6 +66,16 @@ public:
         return { FocusType::NODE, true, FocusStyleType::OUTER_BORDER };
     }
 
+    bool IsNeedAdjustByAspectRatio() override
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        auto layoutProperty = host->GetLayoutProperty<ButtonLayoutProperty>();
+        CHECK_NULL_RETURN(host, false);
+        return layoutProperty->HasAspectRatio() &&
+               layoutProperty->GetType().value_or(ButtonType::CAPSULE) != ButtonType::CIRCLE;
+    }
+
     void SetClickedColor(const Color& color)
     {
         clickedColor_ = color;

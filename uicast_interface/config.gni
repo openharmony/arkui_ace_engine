@@ -27,3 +27,5 @@ uicast_frontend_sources = [
 uicast_core_sources = [ "$ace_uicast/impl/uicast_context_impl.cpp" ]
 
 uicast_jsi_sources = [ "$ace_uicast/impl/uicast_jsi_impl.cpp" ]
+
+uicast_enable = false

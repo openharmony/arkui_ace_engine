@@ -2656,4 +2656,51 @@ HWTEST_F(SliderPatternTestNg, SliderPatternChangeEventTestNg001, TestSize.Level1
     sliderEventHub->SetOnChangeEvent(nullptr);
     ASSERT_EQ(sliderEventHub->onChangeEvent_, nullptr);
 }
+
+/**
+ * @tc.name: PerformActionTest001
+ * @tc.desc: Slider Accessibility PerformAction test ScrollForward and ScrollBackward.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, PerformActionTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create slider and initialize related properties.
+     */
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(VALUE, STEP, MIN, MAX);
+
+    /**
+     * @tc.steps: step2. Get slider frameNode and pattern, set callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto sliderPattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    sliderPattern->showTips_ = false;
+    sliderPattern->SetAccessibilityAction();
+
+    /**
+     * @tc.steps: step3. Get slider accessibilityProperty to call callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto sliderAccessibilityProperty = frameNode->GetAccessibilityProperty<SliderAccessibilityProperty>();
+    ASSERT_NE(sliderAccessibilityProperty, nullptr);
+
+    /**
+     * @tc.steps: step4. When slider is not showTips, call the callback function in sliderAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    EXPECT_TRUE(sliderAccessibilityProperty->ActActionScrollForward());
+    EXPECT_TRUE(sliderAccessibilityProperty->ActActionScrollBackward());
+
+    /**
+     * @tc.steps: step5. When slider is showTips, call the callback function in sliderAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    sliderPattern->showTips_ = true;
+    EXPECT_TRUE(sliderAccessibilityProperty->ActActionScrollForward());
+    EXPECT_TRUE(sliderAccessibilityProperty->ActActionScrollBackward());
+}
 } // namespace OHOS::Ace::NG

@@ -16,10 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CHECKBOX_CHECKBOX_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CHECKBOX_CHECKBOX_PATTERN_H
 
-#include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
 #include "core/components/checkable/checkable_theme.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/checkbox/checkbox_accessibility_property.h"
 #include "core/components_ng/pattern/checkbox/checkbox_event_hub.h"
@@ -27,7 +25,6 @@
 #include "core/components_ng/pattern/checkbox/checkbox_paint_method.h"
 #include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -182,6 +179,7 @@ private:
     UIStatus uiStatus_ = UIStatus::UNSELECTED;
     Dimension hotZoneHorizontalPadding_;
     Dimension hotZoneVerticalPadding_;
+    Dimension defaultPadding_;
     OffsetF offset_;
     SizeF size_;
     OffsetF hotZoneOffset_;

@@ -30,6 +30,7 @@
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/multi_menu_layout_algorithm.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/measure_property.h"
@@ -877,6 +878,110 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg019, TestSize.Level1)
     // MultiMenu should have its own layout algorithm
     auto layoutAlgorithm = multiMenu->GetPattern<MenuPattern>()->CreateLayoutAlgorithm();
     ASSERT_NE(AceType::DynamicCast<MultiMenuLayoutAlgorithm>(layoutAlgorithm), nullptr);
+}
+
+/**
+ * @tc.name: PerformActionTest001
+ * @tc.desc: MenuItem Accessibility PerformAction test Select and ClearSelection.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTestNg, PerformActionTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create menu, get menu frameNode and pattern, set callback function.
+     * @tc.expected: FrameNode and pattern is not null, related function is called.
+     */
+    MenuItemProperties itemOption;
+    itemOption.content = "content";
+    MenuItemModelNG MneuItemModelInstance;
+    MneuItemModelInstance.Create(itemOption);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto menuItemPattern = frameNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    auto menuItemEventHub = frameNode->GetEventHub<MenuItemEventHub>();
+    ASSERT_NE(menuItemEventHub, nullptr);
+    auto menuItemAccessibilityProperty = frameNode->GetAccessibilityProperty<MenuItemAccessibilityProperty>();
+    ASSERT_NE(menuItemAccessibilityProperty, nullptr);
+    menuItemPattern->SetAccessibilityAction();
+
+    /**
+     * @tc.steps: step2. When selectedChangeEvent onChange and subBuilder is null, call the callback function in
+     *                   menuItemAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    EXPECT_TRUE(menuItemAccessibilityProperty->ActActionSelect());
+
+    /**
+     * @tc.steps: step3. When selectedChangeEvent onChange and subBuilder is not null, call the callback function in
+     *                   menuItemAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    bool isSelected = false;
+    auto changeEvent = [&isSelected](bool select) { isSelected = select; };
+    menuItemEventHub->SetSelectedChangeEvent(changeEvent);
+    menuItemEventHub->SetOnChange(changeEvent);
+    auto subBuilder = []() {};
+    menuItemPattern->SetSubBuilder(subBuilder);
+    EXPECT_TRUE(menuItemAccessibilityProperty->ActActionSelect());
+}
+
+/**
+ * @tc.name: PerformActionTest002
+ * @tc.desc: Menu Accessibility PerformAction test ScrollForward and ScrollBackward.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTestNg, PerformActionTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create menu, get menu frameNode and pattern, set callback function.
+     * @tc.expected: FrameNode and pattern is not null, related function is called.
+     */
+    MenuView::Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto menuPattern = frameNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto menuAccessibilityProperty = frameNode->GetAccessibilityProperty<MenuAccessibilityProperty>();
+    ASSERT_NE(menuAccessibilityProperty, nullptr);
+    menuPattern->SetAccessibilityAction();
+
+    /**
+     * @tc.steps: step2. When firstChild is null, call the callback function in menuAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    EXPECT_TRUE(menuAccessibilityProperty->ActActionScrollForward());
+    EXPECT_TRUE(menuAccessibilityProperty->ActActionScrollBackward());
+
+    /**
+     * @tc.steps: step3. When firstChild is not null and firstChild tag is SCROLL_ETS_TAG, call the callback function in
+     *                   menuAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    scrollPattern->SetAxis(Axis::VERTICAL);
+    scrollPattern->scrollableDistance_ = 1.0f;
+    auto scroll =
+        FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), scrollPattern);
+    ASSERT_NE(scroll, nullptr);
+    scroll->MountToParent(frameNode, 0);
+    scroll->MarkModifyDone();
+    EXPECT_TRUE(menuAccessibilityProperty->ActActionScrollForward());
+    EXPECT_TRUE(menuAccessibilityProperty->ActActionScrollBackward());
+
+    /**
+     * @tc.steps: step4. When firstChild is not null and firstChild tag is not SCROLL_ETS_TAG, call the callback
+     *                   function in menuAccessibilityProperty.
+     * @tc.expected: Related function is called.
+     */
+    auto textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    textNode->MountToParent(frameNode, 0);
+    textNode->MarkModifyDone();
+    EXPECT_TRUE(menuAccessibilityProperty->ActActionScrollForward());
+    EXPECT_TRUE(menuAccessibilityProperty->ActActionScrollBackward());
 }
 } // namespace
 } // namespace OHOS::Ace::NG

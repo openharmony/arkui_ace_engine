@@ -1374,6 +1374,5 @@ HWTEST_F(FocusHubTestNg, PaintFocusState001, TestSize.Level1)
 
     focusHub->SetFocusType(FocusType::SCOPE);
     EXPECT_EQ(focusHub->focusStyleType_, FocusStyleType::NONE);
-    EXPECT_FALSE(context->GetIsNeedShowFocus());
 }
 } // namespace OHOS::Ace::NG

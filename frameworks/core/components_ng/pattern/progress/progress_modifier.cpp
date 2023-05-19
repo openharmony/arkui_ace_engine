@@ -589,8 +589,13 @@ void ProgressModifier::SetValue(float value)
 
     CHECK_NULL_VOID(value_);
     AnimationOption option = AnimationOption();
-    auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(SPRING_MOTION_RESPONSE, SPRING_MOTION_DAMPING_FRACTION);
-    option.SetCurve(motion);
+    if (isVisible_) {
+        auto motion =
+            AceType::MakeRefPtr<ResponsiveSpringMotion>(SPRING_MOTION_RESPONSE, SPRING_MOTION_DAMPING_FRACTION);
+        option.SetCurve(motion);
+    } else {
+        option.SetDuration(0);
+    }
     AnimationUtils::Animate(option, [&]() { value_->Set(value); });
 
     ProcessSweepingAnimation(ProgressType(progressType_->Get()), value);
