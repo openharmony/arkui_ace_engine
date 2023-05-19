@@ -1051,7 +1051,7 @@ HWTEST_F(DatePickerTestNg, DatePickerAccessibilityPropertyTestNg006, TestSize.Le
                                                     std::to_string(pickerDate.GetDay()));
 
     datePickerPattern->SetShowLunar(true);
-    auto lunarDate = datePickerPattern->SolarToLunar(pickerDate);
+    auto lunarDate = datePickerPattern->SolarToLunar(datePickerPattern->GetCurrentDate());
     EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(lunarDate.year) + CONNECTER +
                                                     std::to_string(lunarDate.month) + CONNECTER +
                                                     std::to_string(lunarDate.day));

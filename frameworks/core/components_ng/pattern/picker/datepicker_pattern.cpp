@@ -223,7 +223,7 @@ void DatePickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
     auto frameWidth = host->GetGeometryNode()->GetFrameSize().Width();
-    auto dividerSpacing = pipeline->NormalizeToPx(pickerTheme->GetDividerSpacing());
+    auto dividerSpacing = pickerTheme->GetDividerSpacing().ConvertToPx();
     auto pickerThemeWidth = dividerSpacing * 2;
 
     auto centerX = (frameWidth / childSize - pickerThemeWidth) / 2 +
@@ -1289,6 +1289,9 @@ void DatePickerPattern::LunarColumnsBuilding(const LunarDate& current)
     uint32_t lunarLeapMonth = 0;
     bool hasLeapMonth = GetLunarLeapMonth(current.year, lunarLeapMonth);
     options_[monthColumn].clear();
+    if (startYear == endYear) {
+        options_[monthColumn].resize(startMonth - 1, "");
+    }
     // lunar's month start form startMonth to endMonth
     for (uint32_t index = startMonth; index <= endMonth; ++index) {
         if (!current.isLeapMonth && current.month == index) {
@@ -1311,6 +1314,9 @@ void DatePickerPattern::LunarColumnsBuilding(const LunarDate& current)
     }
 
     options_[dayColumn].clear();
+    if (startYear == endYear && startMonth == endMonth) {
+        options_[dayColumn].resize(startDay - 1, "");
+    }
     // lunar's day start from startDay
     for (uint32_t index = startDay; index <= endDay; ++index) {
         if (current.day == index) {
@@ -1392,11 +1398,15 @@ void DatePickerPattern::SolarColumnsBuilding(const PickerDate& current)
     }
 
     options_[monthColumn].clear();
+    if (startYear == endYear) {
+        options_[monthColumn].resize(startMonth - 1, "");
+    }
     // solar's month start form 1 to 12
     for (uint32_t month = startMonth; month <= endMonth; month++) {
         if (month == current.GetMonth()) {
             auto datePickerColumnPattern = monthColumn->GetPattern<DatePickerColumnPattern>();
             CHECK_NULL_VOID(datePickerColumnPattern);
+            // back index = size - 1
             datePickerColumnPattern->SetCurrentIndex(options_[monthColumn].size());
         }
 
@@ -1405,6 +1415,9 @@ void DatePickerPattern::SolarColumnsBuilding(const PickerDate& current)
     }
 
     options_[dayColumn].clear();
+    if (startYear == endYear && startMonth == endMonth) {
+        options_[dayColumn].resize(startDay - 1, "");
+    }
     // solar's day start from 1
     for (uint32_t day = startDay; day <= endDay; day++) {
         if (day == current.GetDay()) {
