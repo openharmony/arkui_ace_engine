@@ -66,6 +66,14 @@ DragEventActuator::DragEventActuator(
     longPressRecognizer_ = AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, fingers_, false, false);
 }
 
+void DragEventActuator::StartDragTaskForWeb(const GestureEvent& info)
+{
+    auto gestureInfo = const_cast<GestureEvent&>(info);
+    if (actionStart_) {
+        actionStart_(gestureInfo);
+    }
+}
+
 void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
     const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result)
 {
@@ -98,6 +106,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             customActionStart(info);
         }
     };
+    actionStart_ = actionStart;
     panRecognizer_->SetOnActionStart(actionStart);
 
     auto actionUpdate = [weak = WeakClaim(this)](GestureEvent& info) {
