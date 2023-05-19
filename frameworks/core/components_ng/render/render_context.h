@@ -94,6 +94,9 @@ public:
     // will be unaffected by parent's transition.
     virtual void SetSandBox(const std::optional<OffsetF>& parentPosition) {};
 
+    virtual void RegisterSharedTransition(const RefPtr<RenderContext>& other) {}
+    virtual void UnregisterSharedTransition(const RefPtr<RenderContext>& other) {}
+
     virtual void OnModifyDone() {}
 
     virtual void InitContext(bool isRoot, const std::optional<std::string>& surfaceName, bool useExternalNode = false)
@@ -192,6 +195,11 @@ public:
     virtual void OnOffsetUpdate(const OffsetT<Dimension>& value) {}
 
     virtual RectF GetPaintRectWithTransform()
+    {
+        return {};
+    }
+
+    virtual RectF GetPaintRectWithTranslate()
     {
         return {};
     }
