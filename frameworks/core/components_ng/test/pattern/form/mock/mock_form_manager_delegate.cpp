@@ -44,7 +44,12 @@ void FormManagerDelegate::AddFormUninstallCallback(const OnFormUninstallCallback
 
 void FormManagerDelegate::OnActionEvent(const std::string& action) {}
 
-void FormManagerDelegate::SetFormUtils(const std::shared_ptr<FormUtils>& formUtils) {}
+void FormManagerDelegate::SetFormUtils(const std::shared_ptr<FormUtils>& formUtils)
+{
+    if (formUtils) {
+        formUtils_ = formUtils;
+    }
+}
 
 void FormManagerDelegate::AddRenderDelegate() {}
 
