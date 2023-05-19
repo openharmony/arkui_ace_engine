@@ -396,7 +396,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Progress", JSProgress::JSBind },
     { "Column", JSColumn::JSBind },
     { "Row", JSRow::JSBind },
-    { "GridContainer", JSGridContainer::JSBind },
     { "Slider", JSSlider::JSBind },
     { "Stack", JSStack::JSBind },
     { "ForEach", JSForEach::JSBind },
@@ -698,6 +697,31 @@ void RegisterAllFormModule(BindingTarget globalObj)
     RegisterExtraViews(globalObj);
 }
 
+void RegisterFormModuleByName(BindingTarget globalObj, const std::string& module)
+{
+    auto func = bindFuncs.find(module);
+    if (func == bindFuncs.end()) {
+        LOGI("JS module not exist, try to find in extra, name: %{public}s", module.c_str());
+        RegisterExtraViewByName(globalObj, module);
+        return;
+    }
+    if ((*func).first == "Swiper") {
+        JSSwiperController::JSBind(globalObj);
+    } else if ((*func).first == "Calendar") {
+        JSCalendarController::JSBind(globalObj);
+    } else if ((*func).first == "TextTimer") {
+        JSTextTimerController::JSBind(globalObj);
+    } else if ((*func).first == "Canvas") {
+        JSCanvasPattern::JSBind(globalObj);
+        JSCanvasGradient::JSBind(globalObj);
+        JSCanvasImageData::JSBind(globalObj);
+        JSMatrix2d::JSBind(globalObj);
+        JSRenderImage::JSBind(globalObj);
+    }
+
+    (*func).second(globalObj);
+}
+
 void RegisterModuleByName(BindingTarget globalObj, std::string moduleName)
 {
     auto func = bindFuncs.find(moduleName);
@@ -757,31 +781,36 @@ void JsRegisterModules(BindingTarget globalObj, std::string modules)
     JSRenderingContextSettings::JSBind(globalObj);
 }
 
-void JsBindFormViews(BindingTarget globalObj)
+void JsBindFormViews(
+    BindingTarget globalObj, const std::unordered_set<std::string>& formModuleList, bool isReload)
 {
-    JSViewAbstract::JSBind(globalObj);
-    JSContainerBase::JSBind(globalObj);
-    JSShapeAbstract::JSBind(globalObj);
-    JSView::JSBind(globalObj);
-    JSLocalStorage::JSBind(globalObj);
+    if (!isReload) {
+        JSViewAbstract::JSBind(globalObj);
+        JSContainerBase::JSBind(globalObj);
+        JSShapeAbstract::JSBind(globalObj);
+        JSView::JSBind(globalObj);
+        JSLocalStorage::JSBind(globalObj);
 
-    JSEnvironment::JSBind(globalObj);
-    JSViewContext::JSBind(globalObj);
-    JSViewStackProcessor::JSBind(globalObj);
-    JSTouchHandler::JSBind(globalObj);
-    JSPersistent::JSBind(globalObj);
-    JSDistributed::JSBind(globalObj);
-    JSScroller::JSBind(globalObj);
+        JSEnvironment::JSBind(globalObj);
+        JSViewContext::JSBind(globalObj);
+        JSViewStackProcessor::JSBind(globalObj);
+        JSTouchHandler::JSBind(globalObj);
+        JSPersistent::JSBind(globalObj);
+        JSDistributed::JSBind(globalObj);
+        JSScroller::JSBind(globalObj);
 
-    JSProfiler::JSBind(globalObj);
+        JSProfiler::JSBind(globalObj);
+        JSCommonView::JSBind(globalObj);
+    }
 
-    auto delegate = JsGetFrontendDelegate();
-    std::string jsModules;
-    if (delegate && delegate->GetAssetContent("component_collection.txt", jsModules)) {
-        LOGI("JsRegisterViews register collection modules");
-        JsRegisterModules(globalObj, jsModules);
+    if (!formModuleList.empty()) {
+        LOGI("Register modules on demand.");
+        for (const std::string& module : formModuleList) {
+            LOGD("Register module: %{public}s", module.c_str());
+            RegisterFormModuleByName(globalObj, module);
+        }
     } else {
-        LOGI("JsRegisterViews register all modules");
+        LOGI("Register all modules");
         RegisterAllFormModule(globalObj);
     }
 }

@@ -50,6 +50,9 @@ template("ace_ohos_standard_source_set") {
 
       # drag window
       "$ace_root/adapter/ohos/entrance/window/drag_window_ohos.cpp",
+
+      # ArkTs Card
+      "$ace_root/adapter/ohos/entrance/form_module_preloader.cpp",
     ]
 
     if (target_cpu == "arm64") {
@@ -119,6 +122,7 @@ template("ace_ohos_standard_source_set") {
       "ace_engine:ace_uicontent",
       "common_event_service:cesfwk_innerkits",
       "data_share:datashare_consumer",
+      "ets_runtime:libark_jsruntime",
       "eventhandler:libeventhandler",
       "form_fwk:fmskit_native",
       "form_fwk:form_manager",

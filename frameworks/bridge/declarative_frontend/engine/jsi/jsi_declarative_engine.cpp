@@ -1982,12 +1982,8 @@ bool JsiDeclarativeEngine::OnRestoreData(const std::string& data)
 
 // ArkTsCard start
 #ifdef FORM_SUPPORTED
-extern "C" ACE_FORCE_EXPORT void OHOS_ACE_PreloadAceModuleCard(void* runtime)
-{
-    JsiDeclarativeEngineInstance::PreloadAceModuleCard(runtime);
-}
-
-void JsiDeclarativeEngineInstance::PreloadAceModuleCard(void* runtime)
+void JsiDeclarativeEngineInstance::PreloadAceModuleCard(
+    void* runtime, const std::unordered_set<std::string>& formModuleList)
 {
     isUnique_ = true;
     if (isModulePreloaded_ && !IsPlugin() && !isUnique_) {
@@ -2015,7 +2011,7 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(void* runtime)
     LocalScope scope(vm);
     globalRuntime_ = arkRuntime;
     // preload js views
-    JsRegisterFormViews(JSNApi::GetGlobalObject(vm));
+    JsRegisterFormViews(JSNApi::GetGlobalObject(vm), formModuleList);
     // preload aceConsole
     shared_ptr<JsValue> global = arkRuntime->GetGlobal();
     shared_ptr<JsValue> aceConsoleObj = arkRuntime->NewObject();
@@ -2058,6 +2054,28 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(void* runtime)
 
     globalRuntime_ = nullptr;
     cardRuntime_ = runtime;
+    JSNApi::TriggerGC(vm, JSNApi::TRIGGER_GC_TYPE::FULL_GC);
+}
+
+void JsiDeclarativeEngineInstance::ReloadAceModuleCard(
+    void* runtime, const std::unordered_set<std::string>& formModuleList)
+{
+    auto sharedRuntime = reinterpret_cast<NativeEngine*>(runtime);
+
+    if (!sharedRuntime) {
+        LOGE("ReloadAceModuleCard null runtime");
+        return;
+    }
+    std::shared_ptr<ArkJSRuntime> arkRuntime = std::make_shared<ArkJSRuntime>();
+    auto nativeArkEngine = static_cast<ArkNativeEngine*>(sharedRuntime);
+    EcmaVM* vm = const_cast<EcmaVM*>(nativeArkEngine->GetEcmaVm());
+    if (vm == nullptr) {
+        LOGE("ReloadAceModuleCard NativeDeclarativeEngine Initialize, vm is null");
+        return;
+    }
+    LocalScope scope(vm);
+    // reload js views
+    JsRegisterFormViews(JSNApi::GetGlobalObject(vm), formModuleList, true);
     JSNApi::TriggerGC(vm, JSNApi::TRIGGER_GC_TYPE::FULL_GC);
 }
 #endif
