@@ -146,6 +146,16 @@ RefPtr<FrameNode> TextFieldPatternTestNg::GetFrameNode()
     return frameNode;
 }
 
+PaddingProperty CreatePadding(float left, float top, float right, float bottom)
+{
+    PaddingProperty padding;
+    padding.left = CalcLength(left);
+    padding.right = CalcLength(right);
+    padding.top = CalcLength(top);
+    padding.bottom = CalcLength(bottom);
+    return padding;
+}
+
 /**
  * @tc.name: TextFieldInsertValue001
  * @tc.desc: Test inserting value of textfield.
@@ -3440,5 +3450,119 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldAccessibilityPropertyIsSelected001, Te
     EXPECT_FALSE(textFieldAccessibilityProperty->IsSelected());
     frameNode->GetOrCreateFocusHub()->currentFocus_ = true;
     EXPECT_TRUE(textFieldAccessibilityProperty->IsSelected());
+}
+
+/**
+ * @tc.name: TextFieldModel001
+ * @tc.desc: Test textfield model
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextFieldModel001, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelInstance;
+    auto layoutProperty = GetLayoutProperty();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    ASSERT_NE(layoutProperty, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+
+    textFieldModelInstance.SetWidthAuto(true);
+    textFieldModelInstance.RequestKeyboardOnFocus(true);
+    textFieldModelInstance.SetCaretColor(Color::BLACK);
+    textFieldModelInstance.SetTextAlign(TextAlign::CENTER);
+    textFieldModelInstance.SetMaxLength(10);
+    textFieldModelInstance.ResetMaxLength();
+    textFieldModelInstance.SetMaxLines(10);
+    textFieldModelInstance.SetFontSize(Dimension(10));
+    textFieldModelInstance.SetFontWeight(FontWeight::LIGHTER);
+    textFieldModelInstance.SetTextColor(Color::BLACK);
+    textFieldModelInstance.SetInputStyle(InputStyle::DEFAULT);
+    textFieldModelInstance.SetShowPasswordIcon(true);
+    EXPECT_EQ(paintProperty->GetCursorColor(), Color::BLACK);
+    EXPECT_EQ(layoutProperty->GetTextAlign(), TextAlign::CENTER);
+    EXPECT_EQ(layoutProperty->GetFontWeight(), FontWeight::LIGHTER);
+    EXPECT_EQ(layoutProperty->GetTextColor(), Color::BLACK);
+    EXPECT_EQ(paintProperty->GetInputStyle(), InputStyle::DEFAULT);
+    EXPECT_TRUE(layoutProperty->GetShowPasswordIcon());
+}
+
+/**
+ * @tc.name: TextFieldModel002
+ * @tc.desc: Test textfield model
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextFieldModel002, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelInstance;
+    auto layoutProperty = GetLayoutProperty();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    ASSERT_NE(layoutProperty, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+
+    Font font;
+    textFieldModelInstance.SetPlaceholderFont(font);
+    std::vector<std::string> fontFamilies {"Georgia", "Serif"};
+    Font otherFont {
+        FontWeight::W200,
+        Dimension(12),
+        OHOS::Ace::FontStyle::ITALIC,
+        fontFamilies
+    };
+    PaddingProperty noPadding = CreatePadding(0.0f, 0.0f, 0.0f, 0.0f);
+    PaddingProperty Padding = CreatePadding(10.0f, 10.0f, 10.0f, 10.0f);
+    Edge edgePadding = Edge(10.0f, 10.0f, 10.0f, 10.0f);
+    textFieldModelInstance.SetFontFamily(fontFamilies);
+    textFieldModelInstance.SetPlaceholderFont(otherFont);
+    textFieldModelInstance.SetFontStyle(Ace::FontStyle::ITALIC);
+    textFieldModelInstance.ProcessDefaultPadding(Padding);
+    textFieldModelInstance.SetPadding(noPadding, edgePadding, true);
+    textFieldModelInstance.SetPadding(Padding, edgePadding, true);
+    EXPECT_EQ(layoutProperty->GetItalicFontStyle(), Ace::FontStyle::ITALIC);
+}
+
+/**
+ * @tc.name: TextFieldModel003
+ * @tc.desc: Test textfield model
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextFieldModel003, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelInstance;
+    auto layoutProperty = GetLayoutProperty();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    ASSERT_NE(layoutProperty, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
+    EXPECT_TRUE(eventHub);
+    std::string EventValue;
+    auto Event = [&EventValue](const std::string& param) { EventValue = param; };
+    textFieldModelInstance.SetOnChange(Event);
+    textFieldModelInstance.SetOnCopy(Event);
+    textFieldModelInstance.SetOnCut(Event);
+    textFieldModelInstance.SetOnPaste(Event);
+    eventHub->SetOnChange(std::move(Event));
+    eventHub->SetOnCopy(std::move(Event));
+    eventHub->SetOnCut(std::move(Event));
+    eventHub->SetOnPaste(std::move(Event));
+
+    std::vector<MenuOptionsParam> menuOptionsParam;
+    textFieldModelInstance.SetCopyOption(CopyOptions::Local);
+    textFieldModelInstance.SetForegroundColor(Color::BLACK);
+    textFieldModelInstance.SetMenuOptionItems(std::move(menuOptionsParam));
+    textFieldModelInstance.AddDragFrameNodeToManager();
+    textFieldModelInstance.SetBackgroundColor(Color::BLACK, true);
+    textFieldModelInstance.SetBackgroundColor(Color::BLACK, false);
+    textFieldModelInstance.SetHeight(Dimension(10));
+    textFieldModelInstance.SetHoverEffect(HoverEffectType::AUTO);
+    EXPECT_EQ(layoutProperty->GetTextColor(), Color::BLACK);
+    EXPECT_EQ(layoutProperty->GetCopyOptions(), CopyOptions::Local);
 }
 } // namespace OHOS::Ace::NG
