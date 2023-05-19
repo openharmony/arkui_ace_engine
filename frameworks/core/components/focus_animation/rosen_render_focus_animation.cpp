@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 
 #include <cmath>
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
 #include "include/core/SkColor.h"
 #include "include/core/SkMaskFilter.h"
@@ -24,6 +25,7 @@
 #include "include/core/SkPoint.h"
 #include "include/effects/SkDashPathEffect.h"
 #include "include/effects/SkGradientShader.h"
+#endif
 
 #include "base/utils/system_properties.h"
 #include "core/pipeline/base/rosen_render_context.h"
@@ -82,6 +84,7 @@ void RosenRenderFocusAnimation::Paint(RenderContext& context, const Offset& offs
     }
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderFocusAnimation::PaintGlow(SkCanvas* skCanvas, SkPaint& paint, int32_t padding) const
 {
     int32_t maxHeight = sqrt(pow(width_ + MULTIPLE_FACTOR * padding, MULTIPLE_FACTOR) +
@@ -135,7 +138,63 @@ void RosenRenderFocusAnimation::PaintGlow(SkCanvas* skCanvas, SkPaint& paint, in
             maxHeight + MULTIPLE_FACTOR * padding, maxHeight + MULTIPLE_FACTOR * padding),
         paint);
 }
+#else
+void RosenRenderFocusAnimation::PaintGlow(
+    RSCanvas* canvas, RSBrush& brush, int32_t padding) const
+{
+    int32_t maxHeight = sqrt(pow(width_ + MULTIPLE_FACTOR * padding, MULTIPLE_FACTOR) +
+                             pow(height_ + MULTIPLE_FACTOR * padding, MULTIPLE_FACTOR));
 
+    brush.SetBlendMode(RSBlendMode::SRC_IN);
+
+    RSPoint points[2] = { RSPoint(0 - width_ / MULTIPLE_FACTOR, 0.0f),
+        RSPoint(width_ / MULTIPLE_FACTOR, 0.0f) };
+    canvas->Translate(width_ / MULTIPLE_FACTOR, height_ / MULTIPLE_FACTOR);
+
+    // Calculate the angle that each frame moves based on the total number of frames
+    canvas->Rotate(progress_);
+
+    std::vector<RSscalar> pos = { LEFTEDGE_START_PERCENT, LEFTGLOWEDGE_START_PERCENT,
+        MIDGLOWEDGE_START_PERCENT, RIGHTGLOWEDGE_START_PERCENT, RIGHTEDGE_START_PERCENT, RIGHTEDGE_END_PERCENT };
+
+    if (!NearZero(height_)) {
+        if (width_ / height_ > DOUBLE_FACTOR) {
+            pos.at(1) = LEFTGLOWEDGE_START_PERCENT_FORLARGEASPECT;
+            pos.at(2) = MIDGLOWEDGE_START_PERCENT_FORLARGEASPECT;
+            pos.at(3) = RIGHTGLOWEDGE_START_PERCENT_FORLARGEASPECT;
+            pos.at(4) = RIGHTEDGE_START_PERCENT_FORLARGEASPECT;
+        }
+    }
+
+    // Computing transparency
+    uint8_t red = pathColor_.GetRed() & 0xFF;
+    uint8_t green = pathColor_.GetGreen() & 0xFF;
+    uint8_t blue = pathColor_.GetBlue() & 0xFF;
+    uint8_t mAlpha = 0;
+    if (progress_ > RIGHT_ANGLE) {
+        mAlpha = static_cast<uint8_t>(
+            MAX_TRANSPARENCY - (progress_ - RIGHT_ANGLE) * ((MAX_TRANSPARENCY - MIN_TRANSPARENCY) / RIGHT_ANGLE));
+    } else {
+        mAlpha =
+            static_cast<uint8_t>(MIN_TRANSPARENCY + progress_ * ((MAX_TRANSPARENCY - MIN_TRANSPARENCY) / RIGHT_ANGLE));
+    }
+    RSColorQuad boundaryColor = RSColor::ColorQuadSetARGB(red, green, blue, mAlpha);
+    RSColorQuad glowColor = RSColor::ColorQuadSetARGB(red, green, blue, MAX_ALPHA);
+    std::vector<RSColorQuad> colors = { boundaryColor, boundaryColor,
+        glowColor, glowColor, boundaryColor, boundaryColor };
+
+    brush.SetShaderEffect(RSShaderEffect::CreateLinearGradient(
+        points[0], points[1], colors, pos, RSTileMode::CLAMP));
+    canvas->AttachBrush(brush);
+    canvas->DrawRect(
+        RSRect(0 - (maxHeight / MULTIPLE_FACTOR + padding), 0 - (maxHeight / MULTIPLE_FACTOR + padding),
+            (maxHeight + MULTIPLE_FACTOR * padding) - (maxHeight / MULTIPLE_FACTOR + padding),
+            (maxHeight + MULTIPLE_FACTOR * padding) - (maxHeight / MULTIPLE_FACTOR + padding)));
+    canvas->DetachBrush();
+}
+#endif
+
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderFocusAnimation::PaintClipRect(SkCanvas* skCanvas, double offset) const
 {
     offset += (NormalizeToPx(blurMaskRadius_) * DOUBLE_FACTOR);
@@ -144,8 +203,25 @@ void RosenRenderFocusAnimation::PaintClipRect(SkCanvas* skCanvas, double offset)
         clipRect_.Height() + offset));
     skCanvas->clipRRect(skRRect, true);
 }
+#else
+void RosenRenderFocusAnimation::PaintClipRect(RSCanvas* canvas, double offset) const
+{
+    offset += (NormalizeToPx(blurMaskRadius_) * DOUBLE_FACTOR);
+    RSRoundRect rrect;
+    rrect.SetRect(RSRect(
+        clipRect_.GetOffset().GetX() - offset / DOUBLE_FACTOR,
+        clipRect_.GetOffset().GetY() - offset / DOUBLE_FACTOR,
+        clipRect_.Width() + offset + clipRect_.GetOffset().GetX() - offset / DOUBLE_FACTOR,
+        clipRect_.Height() + offset + clipRect_.GetOffset().GetY() - offset / DOUBLE_FACTOR));
+    canvas->ClipRoundRect(rrect, RSClipOp::INTERSECT, true);
+}
+#endif
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderFocusAnimation::PaintTVFocus(SkCanvas* skCanvas)
+#else
+void RosenRenderFocusAnimation::PaintTVFocus(RSCanvas* canvas)
+#endif
 {
     double offsetValue = NormalizeToPx(Dimension(FOCUS_ANIMATION_OFFSET, DimensionUnit::VP)) * MULTIPLE_FACTOR;
     double radiusX = NormalizeToPx(rrect_.GetCorner().bottomLeftRadius.GetX());
@@ -156,6 +232,7 @@ void RosenRenderFocusAnimation::PaintTVFocus(SkCanvas* skCanvas)
     height_ = rrect_.Height() + offsetValue;
     int32_t padding = NormalizeToPx(blurMaskRadius_);
 
+#ifndef USE_ROSEN_DRAWING
     if (isNeedClip_) {
         PaintClipRect(skCanvas, offsetValue);
     }
@@ -182,8 +259,55 @@ void RosenRenderFocusAnimation::PaintTVFocus(SkCanvas* skCanvas)
     skCanvas->drawPath(skPath, paint);
     PaintGlow(skCanvas, paint, padding);
     skCanvas->restoreToCount(depthOfSavedStack);
+#else
+    if (isNeedClip_) {
+        PaintClipRect(canvas, offsetValue);
+    }
+
+    std::unique_ptr<RSRect> rect = std::make_unique<RSRect>(
+		RSRect(0 - padding, 0 - padding,
+			width_ + MULTIPLE_FACTOR * padding - padding,
+            height_ + MULTIPLE_FACTOR * padding - padding));
+    canvas->Translate(offset_.GetX() - offsetValue / MULTIPLE_FACTOR, offset_.GetY() - offsetValue / MULTIPLE_FACTOR);
+    int32_t depthOfSavedStack = canvas->SaveLayerAlpha(*rect, MAX_ALPHA);
+
+    RSRecordingPath path;
+    path.AddRoundRect(RSRect(0, 0, width_, height_), radiusX, radiusY);
+
+    RSPen pen;
+    RSBrush brush;
+    pen.SetJoinStyle(RSPen::JoinStyle::ROUND_JOIN);
+    pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
+    pen.SetWidth(NormalizeToPx(Dimension(BOUNDARY_WIDTH, DimensionUnit::VP)));
+
+    RSFilter filter;
+    filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(
+        RSBlurType::SOLID, NormalizeToPx(blurMaskRadius_) * BLUR_SIGMA_FACTOR));
+    pen.SetFilter(filter);
+
+    pen.SetColor(
+        RSColor(pathColor_.GetRed(), pathColor_.GetGreen(), pathColor_.GetBlue(), pathColor_.GetAlpha())
+    );
+    pen.SetAlpha(MAX_ALPHA);
+    pen.SetAntiAlias(true);
+
+    brush.SetFilter(filter);
+    brush.SetColor(RSColor(pathColor_.GetRed(),
+        pathColor_.GetGreen(), pathColor_.GetBlue(), pathColor_.GetAlpha()));
+    brush.SetAlpha(MAX_ALPHA);
+    brush.SetAntiAlias(true);
+
+    canvas->AttachPen(pen);
+    canvas->DrawPath(path);
+    canvas->DetachPen();
+
+    PaintGlow(canvas, brush, padding);
+
+    canvas->RestoreToCount(depthOfSavedStack);
+#endif
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderFocusAnimation::PaintPhoneFocus(SkCanvas* skCanvas)
 {
     double radiusX = 0.0;
@@ -224,5 +348,48 @@ void RosenRenderFocusAnimation::PaintPhoneFocus(SkCanvas* skCanvas)
     paint.setAntiAlias(true);
     skCanvas->drawPath(skPath, paint);
 }
+#else
+void RosenRenderFocusAnimation::PaintPhoneFocus(RSCanvas* canvas)
+{
+    double radiusX = 0.0;
+    double radiusY = 0.0;
+    if (!isIndented_) {
+        double offsetValue = NormalizeToPx(Dimension(PHONE_FOCUS_OFFSET, DimensionUnit::VP)) * MULTIPLE_FACTOR;
+        radiusX = NormalizeToPx(rrect_.GetCorner().bottomLeftRadius.GetX());
+        radiusY = NormalizeToPx(rrect_.GetCorner().bottomLeftRadius.GetY());
+        radiusX = NearZero(radiusX) ? 0.0 : radiusX + NormalizeToPx(Dimension(PHONE_FOCUS_OFFSET, DimensionUnit::VP));
+        radiusY = NearZero(radiusX) ? 0.0 : radiusY + NormalizeToPx(Dimension(PHONE_FOCUS_OFFSET, DimensionUnit::VP));
+        width_ = rrect_.Width() + offsetValue;
+        height_ = rrect_.Height() + offsetValue;
+        canvas->Translate(
+            offset_.GetX() - offsetValue / MULTIPLE_FACTOR, offset_.GetY() - offsetValue / MULTIPLE_FACTOR);
+    } else {
+        double offsetValue = NormalizeToPx(Dimension(PHONE_INDENTED_FOCUS_OFFSET, DimensionUnit::VP)) * MULTIPLE_FACTOR;
+        radiusX = NormalizeToPx(rrect_.GetCorner().bottomLeftRadius.GetX());
+        radiusY = NormalizeToPx(rrect_.GetCorner().bottomLeftRadius.GetY());
+        radiusX = NearZero(radiusX)
+            ? 0.0
+            : radiusX - NormalizeToPx(Dimension(PHONE_INDENTED_FOCUS_OFFSET, DimensionUnit::VP));
+        radiusY = NearZero(radiusX)
+            ? 0.0
+            : radiusY - NormalizeToPx(Dimension(PHONE_INDENTED_FOCUS_OFFSET, DimensionUnit::VP));
+        width_ = rrect_.Width() - offsetValue;
+        height_ = rrect_.Height() - offsetValue;
+        canvas->Translate(
+            offset_.GetX() + offsetValue / MULTIPLE_FACTOR, offset_.GetY() + offsetValue / MULTIPLE_FACTOR);
+    }
+    RSRecordingPath path;
+    path.AddRoundRect(RSRect(0, 0, width_, height_), radiusX, radiusY);
+    RSPen pen;
+    pen.SetJoinStyle(RSPen::JoinStyle::ROUND_JOIN);
+    pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
+    pen.SetWidth(NormalizeToPx(Dimension(PHONE_BOUNDARY_WIDTH, DimensionUnit::VP)));
+    pen.SetColor(RSColor(pathColor_.GetRed(), pathColor_.GetGreen(), pathColor_.GetBlue(), 255));
+    pen.SetAntiAlias(true);
+    canvas->AttachPen(pen);
+    canvas->DrawPath(path);
+    canvas->DetachPen();
+}
+#endif
 
 } // namespace OHOS::Ace
