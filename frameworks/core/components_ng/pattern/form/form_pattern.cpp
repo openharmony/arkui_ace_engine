@@ -97,13 +97,13 @@ void FormPattern::OnAttachToFrameNode()
 
 void FormPattern::HandleUntrustForm()
 {
-    LOGI("%{public}s start.", __func__);
+    LOGI("HandleUntrustForm start.");
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (externalRenderContext_) {
         auto renderContext = DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
         CHECK_NULL_VOID(renderContext);
-        LOGI("%{public}s RemoveChild.", __func__);
+        LOGI("HandleUntrustForm removeChild.");
         renderContext->RemoveChild(externalRenderContext_);
     }
 
@@ -121,7 +121,7 @@ void FormPattern::HandleUntrustForm()
     parent->MarkNeedSyncRenderTree();
     parent->RebuildRenderContextTree();
     host->GetRenderContext()->RequestNextFrame();
-    LOGI("%{public}s end.", __func__);
+    LOGI("HandleUntrustForm end.");
 }
 
 void FormPattern::UpdateBackgroundColorWhenUntrustForm()
@@ -137,8 +137,8 @@ void FormPattern::UpdateBackgroundColorWhenUntrustForm()
     auto formTheme = pipelineContext->GetTheme<FormTheme>();
     CHECK_NULL_VOID(formTheme);
     Color untrustBackgroundColor = formTheme->GetUntrustBackgroundColor();
-    LOGI("%{public}s UpdateBackgroundColor: %{public}s when isUnTrust.",
-        __func__, untrustBackgroundColor.ColorToString().c_str());
+    LOGI("UpdateBackgroundColor: %{public}s when isUnTrust.",
+        untrustBackgroundColor.ColorToString().c_str());
     host->GetRenderContext()->UpdateBackgroundColor(untrustBackgroundColor);
 }
 

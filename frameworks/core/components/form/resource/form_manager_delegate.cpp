@@ -641,8 +641,8 @@ void FormManagerDelegate::OnFormError(const std::string& code, const std::string
     int32_t externalErrorCode = 0;
     std::string errorMsg;
     OHOS::AppExecFwk::FormMgr::GetInstance().GetExternalError(std::stoi(code), externalErrorCode, errorMsg);
-    LOGI("OnFormError, code:%{public}s, msg:%{public}s, externalErrorCode:%{public}d, errorMsg: %{public}s, %{public}p",
-        code.c_str(), msg.c_str(), externalErrorCode, errorMsg.c_str(), this);
+    LOGI("OnFormError, code:%{public}s, msg:%{public}s, externalErrorCode:%{public}d, errorMsg: %{public}s",
+        code.c_str(), msg.c_str(), externalErrorCode, errorMsg.c_str());
     switch (externalErrorCode) {
         case RENDER_DEAD_CODE:
             ReAddForm();
@@ -660,7 +660,7 @@ void FormManagerDelegate::OnFormError(const std::string& code, const std::string
 
 void FormManagerDelegate::HandleUntrustFormCallback()
 {
-    LOGI("%{public}s.", __func__);
+    LOGI("HandleUntrustFormCallback.");
     if (untrustFormCallback_) {
         untrustFormCallback_();
     }
@@ -668,7 +668,7 @@ void FormManagerDelegate::HandleUntrustFormCallback()
 
 void FormManagerDelegate::ReAddForm()
 {
-    LOGI("%{public}s.", __func__);
+    LOGI("ReAddForm.");
     formRendererDispatcher_ = nullptr;  // formRendererDispatcher_ need reset, otherwise PointerEvent will disable
     auto clientInstance = OHOS::AppExecFwk::FormHostClient::GetInstance();
     auto ret = OHOS::AppExecFwk::FormMgr::GetInstance().AddForm(
