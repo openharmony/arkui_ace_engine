@@ -67,7 +67,7 @@ constexpr double FIFTY_PERCENT = 0.5;
 constexpr Dimension OFFSET_FOCUS = 4.0_vp;
 constexpr Dimension DEFLATE_RADIUS_FOCUS = 3.0_vp;
 
-const std::string DIGIT_BLACK_LIST = "[^\\d.\\-e]+";
+const std::string DIGIT_BLACK_LIST = "[^\\d]+";
 const std::string PHONE_BLACK_LIST = "[^\\d\\-\\+\\*\\#]+";
 const std::string DIGIT_WHITE_LIST = "^[0-9]*$";
 const std::string PHONE_WHITE_LIST = "[\\d\\-\\+\\*\\#]+";
