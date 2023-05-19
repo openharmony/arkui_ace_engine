@@ -65,8 +65,7 @@ void SwiperModelNG::SetDisplayMode(SwiperDisplayMode displayMode)
 void SwiperModelNG::SetDisplayCount(int32_t displayCount)
 {
     if (displayCount <= 0) {
-        LOGE("SwiperModelNG::SetDisplayCount displayCount is invalid, return.");
-        return;
+        displayCount = 1;
     }
 
     ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, DisplayCount, displayCount);
