@@ -271,12 +271,16 @@ bool DatePickerPattern::HandleDirectionKey(KeyCode code)
     if (code == KeyCode::KEY_DPAD_UP && totalOptionCount != 0) {
         pattern->SetCurrentIndex((totalOptionCount + currernIndex - 1) % totalOptionCount);
         pattern->FlushCurrentOptions();
+        pattern->HandleChangeCallback(false, true);
+        pattern->HandleEventCallback(true);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return true;
     }
     if (code == KeyCode::KEY_DPAD_DOWN && totalOptionCount != 0) {
         pattern->SetCurrentIndex((totalOptionCount + currernIndex + 1) % totalOptionCount);
         pattern->FlushCurrentOptions();
+        pattern->HandleChangeCallback(true, true);
+        pattern->HandleEventCallback(true);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return true;
     }
