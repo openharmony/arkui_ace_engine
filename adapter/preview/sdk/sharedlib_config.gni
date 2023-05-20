@@ -145,6 +145,16 @@ common_bin = [
   },
 ]
 
+if (defined(use_new_skia) && use_new_skia) {
+  common_bin += [
+    {
+      label = "//third_party/skia:new_skia"
+      subsystem_name = "thirdparty"
+      part_name = "third_party_skia"
+    },
+  ]
+}
+
 napi_modules = [
   {
     prefix = ""
