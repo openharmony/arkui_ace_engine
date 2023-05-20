@@ -28,6 +28,7 @@ const int32_t TEXT_PICKER_CHILD_SIZE = 5;
 const float PICKER_HEIGHT_HALF = 2.5f;
 const float ITEM_HEIGHT_HALF = 2.0f;
 const int32_t TEXT_PICKER_GRADIENT_CHILD_SIZE = 4;
+const int32_t MAX_HALF_DISPLAY_COUNT = 2;
 } // namespace
 void TextPickerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
@@ -141,10 +142,20 @@ void TextPickerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (isDefaultPickerItemHeight_) {
         childStartCoordinate +=
             static_cast<float>(size.Height() / ITEM_HEIGHT_HALF - defaultPickerItemHeight_ * PICKER_HEIGHT_HALF);
+        halfDisplayCounts_ =
+            std::clamp(static_cast<int32_t>(
+                           std::ceil((size.Height() / ITEM_HEIGHT_HALF - defaultPickerItemHeight_ / ITEM_HEIGHT_HALF) /
+                                     defaultPickerItemHeight_)),
+                0, MAX_HALF_DISPLAY_COUNT);
     } else {
         childStartCoordinate += static_cast<float>(pickerItemHeight_ / ITEM_HEIGHT_HALF -
                                                    pickerTheme->GetGradientHeight().ConvertToPx() * ITEM_HEIGHT_HALF -
                                                    pickerTheme->GetDividerSpacing().ConvertToPx() / ITEM_HEIGHT_HALF);
+        halfDisplayCounts_ = std::clamp(
+            static_cast<int32_t>(std::ceil((pickerItemHeight_ / ITEM_HEIGHT_HALF -
+                                               pickerTheme->GetDividerSpacing().ConvertToPx() / ITEM_HEIGHT_HALF) /
+                                           pickerTheme->GetGradientHeight().ConvertToPx())),
+            0, MAX_HALF_DISPLAY_COUNT);
     }
 
     for (const auto& child : children) {
