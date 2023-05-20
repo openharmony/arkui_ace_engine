@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/waterflow/water_flow_layout_info.h"
 
+#include <algorithm>
+
 namespace OHOS::Ace::NG {
 int32_t WaterFlowLayoutInfo::GetCrossIndex(int32_t itemIndex)
 {
@@ -155,5 +157,26 @@ void WaterFlowLayoutInfo::Reset()
     startIndex_ = 0;
     endIndex_ = 0;
     waterFlowItems_.clear();
+}
+
+int32_t WaterFlowLayoutInfo::GetCrossCount() const
+{
+    return static_cast<int32_t>(waterFlowItems_.size());
+}
+
+int32_t WaterFlowLayoutInfo::GetMainCount() const
+{
+    int32_t maxMainCount = 0;
+    for (const auto& crossItems : waterFlowItems_) {
+        if (crossItems.second.empty()) {
+            continue;
+        }
+        auto mainCount = static_cast<int32_t>(std::count_if(crossItems.second.begin(), crossItems.second.end(),
+            [start = startIndex_, end = endIndex_](const std::pair<const int, std::pair<float, float>>& crossItem) {
+                return crossItem.first >= start && crossItem.first <= end;
+            }));
+        maxMainCount = std::max(maxMainCount, mainCount);
+    }
+    return maxMainCount;
 }
 } // namespace OHOS::Ace::NG
