@@ -57,6 +57,9 @@ void JSBlank::Create(const JSCallbackInfo& info)
         return;
     }
     if (ParseJsDimensionVp(info[0], blankMin)) {
+        if (blankMin.IsNegative()) {
+            blankMin.SetValue(0.0);
+        }
         BlankModel::GetInstance()->SetBlankMin(blankMin);
     }
 }

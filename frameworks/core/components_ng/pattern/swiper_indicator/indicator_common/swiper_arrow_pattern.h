@@ -92,7 +92,6 @@ private:
 
     int32_t index_ = 0;
     bool isFirstCreate_ = true;
-    Color clickColor_ = Color::TRANSPARENT;
     Color hoverBeginColor_ = Color::TRANSPARENT;
     Color backgroundColor_ = Color::TRANSPARENT;
     bool isTouch_ = false;

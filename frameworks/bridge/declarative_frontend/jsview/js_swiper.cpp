@@ -444,7 +444,7 @@ SwiperDigitalParameters JSSwiper::GetDigitIndicatorInfo(const JSRef<JSObject>& o
 bool JSSwiper::GetArrowInfo(const JSRef<JSObject>& obj, SwiperArrowParameters& swiperArrowParameters)
 {
     auto isShowBackgroundValue = obj->GetProperty("isShowBackground");
-    auto isSideBarMiddleValue = obj->GetProperty("isSideBarMiddle");
+    auto isSidebarMiddleValue = obj->GetProperty("isSidebarMiddle");
     auto backgroundSizeValue = obj->GetProperty("backgroundSize");
     auto backgroundColorValue = obj->GetProperty("backgroundColor");
     auto arrowSizeValue = obj->GetProperty("arrowSize");
@@ -456,13 +456,13 @@ bool JSSwiper::GetArrowInfo(const JSRef<JSObject>& obj, SwiperArrowParameters& s
     swiperArrowParameters.isShowBackground = isShowBackgroundValue->IsBoolean()
                                                  ? isShowBackgroundValue->ToBoolean()
                                                  : swiperIndicatorTheme->GetIsShowArrowBackground();
-    swiperArrowParameters.isSideBarMiddle = isSideBarMiddleValue->IsBoolean()
-                                                ? isSideBarMiddleValue->ToBoolean()
-                                                : swiperIndicatorTheme->GetIsSideBarMiddle();
+    swiperArrowParameters.isSidebarMiddle = isSidebarMiddleValue->IsBoolean()
+                                                ? isSidebarMiddleValue->ToBoolean()
+                                                : swiperIndicatorTheme->GetIsSidebarMiddle();
     bool parseOk = false;
     CalcDimension dimension;
     Color color;
-    if (swiperArrowParameters.isSideBarMiddle.value()) {
+    if (swiperArrowParameters.isSidebarMiddle.value()) {
         parseOk = ParseJsDimensionPx(backgroundSizeValue, dimension);
         swiperArrowParameters.backgroundSize = parseOk && GreatOrEqual(dimension.ConvertToVp(), 0.0)
                                                    ? dimension
@@ -523,7 +523,7 @@ void JSSwiper::SetDisplayArrow(const JSCallbackInfo& info)
             CHECK_NULL_VOID(swiperIndicatorTheme);
             SwiperArrowParameters swiperArrowParameters;
             swiperArrowParameters.isShowBackground = swiperIndicatorTheme->GetIsShowArrowBackground();
-            swiperArrowParameters.isSideBarMiddle = swiperIndicatorTheme->GetIsSideBarMiddle();
+            swiperArrowParameters.isSidebarMiddle = swiperIndicatorTheme->GetIsSidebarMiddle();
             swiperArrowParameters.backgroundSize = swiperIndicatorTheme->GetSmallArrowBackgroundSize();
             swiperArrowParameters.backgroundColor = swiperIndicatorTheme->GetSmallArrowBackgroundColor();
             swiperArrowParameters.arrowSize = swiperIndicatorTheme->GetSmallArrowSize();

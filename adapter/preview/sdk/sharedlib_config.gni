@@ -122,6 +122,16 @@ common_bin = [
     part_name = "ets_runtime"
   },
   {
+    label = "//arkcompiler/toolchain/tooling:libark_ecma_debugger"
+    subsystem_name = "arkcompiler"
+    part_name = "toolchain"
+  },
+  {
+    label = "//arkcompiler/toolchain/inspector:ark_debugger"
+    subsystem_name = "arkcompiler"
+    part_name = "toolchain"
+  },
+  {
     label = "//third_party/openssl:libssl_shared"
     subsystem_name = "developtools"
     part_name = "profiler"

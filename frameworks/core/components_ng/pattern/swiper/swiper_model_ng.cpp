@@ -65,8 +65,7 @@ void SwiperModelNG::SetDisplayMode(SwiperDisplayMode displayMode)
 void SwiperModelNG::SetDisplayCount(int32_t displayCount)
 {
     if (displayCount <= 0) {
-        LOGE("SwiperModelNG::SetDisplayCount displayCount is invalid, return.");
-        return;
+        displayCount = 1;
     }
 
     ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, DisplayCount, displayCount);
@@ -274,9 +273,9 @@ void SwiperModelNG::SetArrowStyle(const SwiperArrowParameters& swiperArrowParame
     if (swiperArrowParameters.arrowColor.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, ArrowColor, swiperArrowParameters.arrowColor.value());
     }
-    if (swiperArrowParameters.isSideBarMiddle.has_value()) {
+    if (swiperArrowParameters.isSidebarMiddle.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(
-            SwiperLayoutProperty, IsSideBarMiddle, swiperArrowParameters.isSideBarMiddle.value());
+            SwiperLayoutProperty, IsSidebarMiddle, swiperArrowParameters.isSidebarMiddle.value());
     }
 }
 

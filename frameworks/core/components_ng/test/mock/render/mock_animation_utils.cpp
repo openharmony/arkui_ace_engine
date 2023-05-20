@@ -63,4 +63,9 @@ std::shared_ptr<AnimationUtils::Animation> AnimationUtils::StartAnimation(const 
 }
 
 void AnimationUtils::StopAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation) {}
+
+bool AnimationUtils::IsRunning(const std::shared_ptr<AnimationUtils::Animation>& animation)
+{
+    return false;
+}
 } // namespace OHOS::Ace

@@ -33,8 +33,8 @@ bool KeyEventHandler::HandleKeyEvent(const KeyEvent& keyEvent)
         } else if (HandleShiftPressedEvent(keyEvent)) {
             return true;
         } else if (keyEvent.IsDirectionalKey()) {
-            auto handleDirectionalKey = HandleDirectionalKey(keyEvent);
-            return handleDirectionalKey;
+            HandleDirectionalKey(keyEvent);
+            return true;
         } else if (keyEvent.IsNumberKey()) {
             appendElement = keyEvent.ConvertCodeToString();
         } else if (keyEvent.IsLetterKey()) {

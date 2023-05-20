@@ -1874,9 +1874,6 @@ void RosenRenderContext::PaintClip(const SizeF& frameSize)
     if (clip->HasClipShape()) {
         auto basicShape = clip->GetClipShapeValue();
         auto skPath = SkiaDecorationPainter::SkiaCreateSkPath(basicShape, frameSize);
-        if (skPath.isEmpty()) {
-            return;
-        }
         rsNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(skPath));
     }
 
@@ -2163,6 +2160,15 @@ void RosenRenderContext::AddChild(const RefPtr<RenderContext>& renderContext, in
     CHECK_NULL_VOID(rosenRenderContext);
     auto child = rosenRenderContext->GetRSNode();
     rsNode_->AddChild(child, index);
+}
+
+void RosenRenderContext::RemoveChild(const RefPtr<RenderContext>& renderContext)
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto rosenRenderContext = AceType::DynamicCast<RosenRenderContext>(renderContext);
+    CHECK_NULL_VOID(rosenRenderContext);
+    auto child = rosenRenderContext->GetRSNode();
+    rsNode_->RemoveChild(child);
 }
 
 void RosenRenderContext::SetBounds(float positionX, float positionY, float width, float height)

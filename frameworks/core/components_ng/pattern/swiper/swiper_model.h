@@ -60,7 +60,7 @@ struct SwiperDigitalParameters {
 
 struct SwiperArrowParameters {
     std::optional<bool> isShowBackground;
-    std::optional<bool> isSideBarMiddle;
+    std::optional<bool> isSidebarMiddle;
     std::optional<Dimension> backgroundSize;
     std::optional<Color> backgroundColor;
     std::optional<Dimension> arrowSize;

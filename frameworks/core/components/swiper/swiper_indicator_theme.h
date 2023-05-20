@@ -31,6 +31,8 @@ constexpr Dimension SWIPER_ARROW_BIG_ARROW_SIZE = 24.0_vp;
 constexpr Dimension SWIPER_ARROW_HORIZONTAL_MARGIN_DEFAULT = 8.0_vp;
 constexpr Dimension SWIPER_ARROW_VERTICAL_MARGIN_DEFAULT = 8.0_vp;
 constexpr Dimension SWIPER_FOCUSED_BORDER_WIDTH = 2.0_vp;
+constexpr Dimension SWIPER_INDICATOR_DIGIT_PADDING_DEFAULT = 8.0_vp;
+constexpr Dimension SWIPER_INDICATOR_DOT_PADDING_DEFAULT = 21.0_vp;
 constexpr float SWIPER_ARROW_ZOOM_OUT_SCALE = 1.33f;
 } // namespace
 class SwiperIndicatorTheme : public virtual Theme {
@@ -121,6 +123,8 @@ public:
                 swiperPattern->GetAttr<Color>(ARROW_COLOR_COMPONENT_NORMAL, Color::TRANSPARENT);
             theme->bigArrowColor_ = swiperPattern->GetAttr<Color>(ARROW_COLOR_PRIMARY, Color::TRANSPARENT);
             theme->arrowZoomOutScale_ = SWIPER_ARROW_ZOOM_OUT_SCALE;
+            theme->indicatorDigitPadding_ = SWIPER_INDICATOR_DIGIT_PADDING_DEFAULT;
+            theme->indicatorDotPadding_ = SWIPER_INDICATOR_DOT_PADDING_DEFAULT;
         }
     };
 
@@ -261,9 +265,9 @@ public:
         return isShowArrowBackground_;
     }
 
-    bool GetIsSideBarMiddle() const
+    bool GetIsSidebarMiddle() const
     {
-        return isSideBarMiddle_;
+        return isSidebarMiddle_;
     }
 
     const Dimension& GetSmallArrowBackgroundSize() const
@@ -328,6 +332,16 @@ public:
         return arrowZoomOutScale_;
     }
 
+    const Dimension& GetIndicatorDigitPadding() const
+    {
+        return indicatorDigitPadding_;
+    }
+
+    const Dimension& GetIndicatorDotPadding() const
+    {
+        return indicatorDotPadding_;
+    }
+
 protected:
     SwiperIndicatorTheme() = default;
 
@@ -359,7 +373,7 @@ private:
     Color arrowColorPrimary_;
     Color arrowColorPrimaryContrary_;
     bool isShowArrowBackground_ = false;
-    bool isSideBarMiddle_ = false;
+    bool isSidebarMiddle_ = false;
     Dimension smallArrowBackgroundSize_;
     Dimension smallArrowSize_;
     Color smallArrowBackgroundColor_;
@@ -373,6 +387,8 @@ private:
     Dimension arrowHorizontalMargin_;
     Dimension arrowVerticalMargin_;
     float arrowZoomOutScale_ = 1.33f;
+    Dimension indicatorDigitPadding_;
+    Dimension indicatorDotPadding_;
 };
 
 } // namespace OHOS::Ace

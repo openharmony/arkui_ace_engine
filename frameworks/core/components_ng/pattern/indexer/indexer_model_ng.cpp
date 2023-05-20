@@ -79,19 +79,25 @@ void IndexerModelNG::SetUsingPopup(bool usingPopup)
     ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, UsingPopup, usingPopup);
 }
 
-void IndexerModelNG::SetSelectedFont(const TextStyle& selectedFont)
+void IndexerModelNG::SetSelectedFont(std::function<void(TextStyle& textStyle)>&& getTextStyleFunc)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, SelectedFont, selectedFont);
+    TextStyle textStyle;
+    getTextStyleFunc(textStyle);
+    ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, SelectedFont, textStyle);
 }
 
-void IndexerModelNG::SetPopupFont(const TextStyle& popupFont)
+void IndexerModelNG::SetPopupFont(std::function<void(TextStyle& textStyle)>&& getTextStyleFunc)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, PopupFont, popupFont);
+    TextStyle textStyle;
+    getTextStyleFunc(textStyle);
+    ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, PopupFont, textStyle);
 }
 
-void IndexerModelNG::SetFont(const TextStyle& font)
+void IndexerModelNG::SetFont(std::function<void(TextStyle& textStyle)>&& getTextStyleFunc)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, Font, font);
+    TextStyle textStyle;
+    getTextStyleFunc(textStyle);
+    ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, Font, textStyle);
 }
 
 void IndexerModelNG::SetItemSize(const Dimension& itemSize)

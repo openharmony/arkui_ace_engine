@@ -40,7 +40,7 @@ public:
         value->propDisplayArrow_ = CloneDisplayArrow();
         value->propHoverShow_ = CloneHoverShow();
         value->propIsShowBackground_ = CloneIsShowBackground();
-        value->propIsSideBarMiddle_ = CloneIsSideBarMiddle();
+        value->propIsSidebarMiddle_ = CloneIsSidebarMiddle();
         value->propBackgroundSize_ = CloneBackgroundSize();
         value->propBackgroundColor_ = CloneBackgroundColor();
         value->propArrowSize_ = CloneArrowSize();
@@ -58,7 +58,7 @@ public:
         ResetDisplayArrow();
         ResetHoverShow();
         ResetIsShowBackground();
-        ResetIsSideBarMiddle();
+        ResetIsSidebarMiddle();
         ResetBackgroundSize();
         ResetBackgroundColor();
         ResetArrowSize();
@@ -72,7 +72,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DisplayArrow, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HoverShow, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsShowBackground, bool, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsSideBarMiddle, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsSidebarMiddle, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BackgroundSize, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BackgroundColor, Color, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ArrowSize, Dimension, PROPERTY_UPDATE_MEASURE);

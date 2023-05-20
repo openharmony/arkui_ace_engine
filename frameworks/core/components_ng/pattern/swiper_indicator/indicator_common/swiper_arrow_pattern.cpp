@@ -159,13 +159,13 @@ int32_t SwiperArrowPattern::TotalCount() const
 void SwiperArrowPattern::ButtonTouchEvent(RefPtr<FrameNode> buttonNode, TouchType touchType)
 {
     const auto& renderContext = buttonNode->GetRenderContext();
+    CHECK_NULL_VOID_NOLOG(renderContext);
     auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID_NOLOG(pipelineContext);
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_VOID_NOLOG(swiperIndicatorTheme);
     Color backgroundColor;
     if (touchType == TouchType::DOWN) {
-        clickColor_ = renderContext->GetBackgroundColorValue();
         isTouch_ = true;
         if (isHover_) {
             backgroundColor = swiperIndicatorTheme->GetHoverArrowBackgroundColor().BlendColor(
@@ -197,7 +197,17 @@ void SwiperArrowPattern::ButtonOnHover(RefPtr<FrameNode> buttonNode, bool isHove
     CHECK_NULL_VOID_NOLOG(swiperIndicatorTheme);
     Color backgroundColor;
     isHover_ = isHovered;
-    SetButtonVisible(isHovered);
+
+    auto swiperNode = GetSwiperNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_VOID(swiperLayoutProperty);
+    if (swiperLayoutProperty->GetHoverShowValue(false)) {
+        swiperPattern->ArrowHover(isHover_);
+    }
+
     if (isHovered) {
         if (isTouch_) {
             backgroundColor = swiperIndicatorTheme->GetHoverArrowBackgroundColor().BlendColor(
@@ -233,6 +243,10 @@ void SwiperArrowPattern::SetButtonVisible(bool visible)
         (host->GetTag() == V2::SWIPER_RIGHT_ARROW_ETS_TAG && index_ == TotalCount())) {
         if (!swiperArrowLayoutProperty->GetLoopValue(true)) {
             renderContext->SetVisible(false);
+            auto hostFocusHub = host->GetFocusHub();
+            CHECK_NULL_VOID(hostFocusHub);
+            hostFocusHub->SetParentFocusable(false);
+            hostFocusHub->LostSelfFocus();
             return;
         }
     }
