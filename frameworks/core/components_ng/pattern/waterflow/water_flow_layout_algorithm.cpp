@@ -114,6 +114,8 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         layoutWrapper->GetHostNode()->ChildrenUpdatedFrom(-1);
     }
 
+    layoutInfo_.childrenCount_ = layoutWrapper->GetTotalChildCount();
+
     InitialItemsCrossSize(layoutProperty, idealSize, layoutWrapper->GetTotalChildCount());
     mainSize_ = GetMainAxisSize(idealSize, axis);
 
