@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -173,6 +173,7 @@ public:
     virtual void ResetPageTransitionEffect() {}
 
     virtual void AddChild(const RefPtr<RenderContext>& renderContext, int index) {}
+    virtual void RemoveChild(const RefPtr<RenderContext>& renderContext) {}
     virtual void SetBounds(float positionX, float positionY, float width, float height) {}
 
     virtual void UpdateBackBlurRadius(const Dimension& radius) {}
