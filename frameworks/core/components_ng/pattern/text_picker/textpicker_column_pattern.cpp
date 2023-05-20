@@ -71,6 +71,11 @@ bool TextPickerColumnPattern::OnDirtyLayoutWrapperSwap(
 {
     CHECK_NULL_RETURN_NOLOG(config.frameSizeChange, false);
     CHECK_NULL_RETURN(dirty, false);
+    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
+    CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
+    auto layoutAlgorithm = DynamicCast<TextPickerLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_RETURN(layoutAlgorithm, false);
+    halfDisplayCounts_ = layoutAlgorithm->GetHalfDisplayCounts();
     return true;
 }
 
