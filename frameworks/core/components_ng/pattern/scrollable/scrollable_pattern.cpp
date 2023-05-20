@@ -202,7 +202,8 @@ void ScrollablePattern::SetEdgeEffect(EdgeEffect edgeEffect)
 bool ScrollablePattern::HandleEdgeEffect(float offset, int32_t source, const SizeF& size)
 {
     // check edgeEffect is not springEffect
-    if (scrollEffect_ && scrollEffect_->IsFadeEffect() && source != SCROLL_FROM_BAR) {    // handle edge effect
+    if (scrollEffect_ && scrollEffect_->IsFadeEffect() && source != SCROLL_FROM_BAR &&
+        source != SCROLL_FROM_AXIS) {    // handle edge effect
         if ((IsAtTop() && Positive(offset)) || (IsAtBottom() && Negative(offset))) {
             scrollEffect_->HandleOverScroll(GetAxis(), -offset, size);
         }
