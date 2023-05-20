@@ -1874,9 +1874,6 @@ void RosenRenderContext::PaintClip(const SizeF& frameSize)
     if (clip->HasClipShape()) {
         auto basicShape = clip->GetClipShapeValue();
         auto skPath = SkiaDecorationPainter::SkiaCreateSkPath(basicShape, frameSize);
-        if (skPath.isEmpty()) {
-            return;
-        }
         rsNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(skPath));
     }
 
